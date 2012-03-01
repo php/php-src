@@ -1,33 +1,41 @@
 $Id$
 
-UPGRADE NOTES - PHP 5.4
+PHP 5.4 UPGRADE NOTES
 
-1. Changes made to default configuration
-2. Reserved words and classes
-3. Changes made to engine behaviour
-4. Changes made to existing functions
-5. Changes made to existing methods
-6. Changes made to existing classes
-7. Deprecated
-8. Removed
-9. Extensions:
-     a. with changed behaviour
-     b. no longer possible to disable
+===========
+0. Contents
+===========
+
+1. Changes to INI directives
+2. Changes to reserved words and classes
+3. Changes to engine behavior
+4. Changes to existing functions
+5. Changes to existing classes
+6. Changes to existing methods
+7. Deprecated Functionality
+8. Removed Functionality
+     a. Removed features
+     b. Removed functions
+     c. Removed syntax
+     d. Removed hash algorithms
+9. Extension Changes:
+     a. Extensions no longer maintained
+     b. Extensions with changed behavior
 10. Changes in SAPI support
-11. Changes in INI directives
-12. Syntax additions
-13. Windows support
-14. New in PHP 5.4:
-     a. New functions
-     b. New global constants
-     c. New classes
-     d. New methods
-     e. New class constants
-     f. New hash algorithms
+11. Windows support
+12. New in PHP 5.4:
+     a. New features
+     b. Syntax additions
+     c. New functions
+     d. New global constants
+     e. New classes
+     f. New methods
+     g. New class constants
+     h. New hash algorithms
 
-========================================
-1. Changes made to default configuration
-========================================
+=============================
+1. Changes to INI directives
+=============================
 
 - The php.ini default_charset directive now defaults to UTF-8.  If you
   were relying on the previous default of ISO-88590-1, you will need
@@ -35,7 +43,7 @@ UPGRADE NOTES - PHP 5.4
 
     default_charset = iso-8859-1
 
-  to your php.ini to preserve pre-5.4 behavior.
+  to your php.ini to preserve pre-PHP 5.4 behavior.
 
 - PHP 5.4 now checks at compile time if /dev/urandom or /dev/arandom
   are present.  If either is available, session.entropy_file now
@@ -46,7 +54,7 @@ UPGRADE NOTES - PHP 5.4
     session.entropy_file=
     session.entropy_length=0
 
-  to your php.ini to preserve pre-PHP5.4 behavior.
+  to your php.ini to preserve pre-PHP 5.4 behavior.
 
 - Deprecated php.ini directives will now throw an E_CORE_WARNING's
   instead of the previous E_WARNING's.
@@ -69,21 +77,65 @@ UPGRADE NOTES - PHP 5.4
   - safe_mode_exec_dir
   - safe_mode_allowed_env_vars
   - safe_mode_protected_env_vars
+  - session.bug_compat42
+  - session.bug_compat_warn
+  - y2k_compliance
   - zend.ze1_compatibility_mode
 
 - the following new php.ini directives were added:
   - max_input_vars - specifies how many GET/POST/COOKIE input
     variables may be accepted. The default value is 1000.
 
-=============================
-2. Reserved words and classes
-=============================
+- E_ALL now includes E_STRICT.
+
+- The recommended production value for error_reporting changed to E_ALL &
+  ~E_DEPRECATED & ~E_STRICT.
+
+- Added new session support directives:
+    session.upload_progress.enabled
+    session.upload_progress.cleanup
+    session.upload_progress.prefix
+    session.upload_progress.name
+    session.upload_progress.freq
+    session.upload_progress.min_freq
+
+- Added a zend.multibyte directive as a replacement of the PHP compile time
+  configuration option --enable-zend-multibyte.  Now the Zend Engine always
+  contains code for multibyte support, which can be enabled or disabled at
+  runtime.  Note: It doesn't make a lot of sense to enable this option if
+  ext/mbstring is not enabled, because most functionality is implemented by
+  mbstrings callbacks.
+
+- Added zend.script_encoding. This value will be used unless a
+  "declare(encoding=...)" directive appears at the top of the script.
+
+- Added enable_post_data_reading, which is enabled by default. When it's
+  disabled, the POST data is not read (or processed); the behavior is similar
+  to that of other request methods with body, like PUT. This allows reading
+  the raw POST data in multipart requests and reading/processing the POST data
+  in a stream fashion (through php://input) without having it copied in memory
+  multiple times.
+
+- Added windows_show_crt_warning.  This directive shows the CRT warnings when
+  enabled. These warnings were displayed by default until now. It is disabled
+  by default.
+
+- Added cli.pager to set a pager for CLI interactive shell output.
+
+- Added cli.prompt to configure the CLI interactive shell prompt.
+
+- Added cli_server.color to enable the CLI web server to use ANSI color coding
+  in terminal outout.
+
+========================================
+2. Changes to reserved words and classes
+========================================
 
 - "callable", "insteadof" and "trait" are now reserved words.
 
-===================================
-3. Changes made to engine behaviour
-===================================
+=============================
+3. Changes to engine behavior
+=============================
 
 - The __construct arguments of an extended abstract constructor must
   now match:
@@ -117,11 +169,6 @@ UPGRADE NOTES - PHP 5.4
 
 - Converting an array to a string now will cause an E_NOTICE warning.
 
-- Chained string array offsets now work.
-
-  $a = "abc";
-  echo $a[0][0];
-
 - Non-numeric string offsets, e.g. $a['foo'] where $a is a string, now
   return false on isset() and true on empty(), and produce warning if
   trying to use them.  Offsets of types double, bool and null produce
@@ -129,15 +176,10 @@ UPGRADE NOTES - PHP 5.4
 
   Note that offsets like '12.3' and '5 and a half' are considered
   non-numeric and produce warning, but are converted to 12 and 5
-  respectively for BC reasons.
-
-- Changed E_ALL to include E_STRICT.
+  respectively for backwards compatibility reasons.
 
 - Closures now support scopes and $this and can be rebound to
   objects using Closure::bind() and Closure::bindTo().
-
-- Added multibyte support by default. Now it can be enabled or
-  disabled through the zend.multibyte directive in php.ini.
 
 - <?= is now always available regardless of the short_open_tag
   setting.
@@ -145,587 +187,602 @@ UPGRADE NOTES - PHP 5.4
 - Parse error messages are changed to contain more information about
   the error.
 
-=====================================
-4. Changes made to existing functions
-=====================================
+================================
+4. Changes to existing functions
+================================
 
 - array_combine now returns array() instead of FALSE when two empty arrays are
   provided as parameters.
-- Added an extra parameter to dns_get_record(), which allows requesting DNS
-  records by numeric type and makes the result include only the raw data of
-  the response.
-- call_user_func_array no longer allows call-time pass by reference.
-- htmlentities/htmlspecialchars are stricter in the code units they accept for
-  the asian encodings. For Big5-HKSCS, the octets 0x80 and 0xFF are rejected.
-  For GB2312/EUC-CN, the octets 0x8E, 0x8F, 0xA0 and 0xFF are rejected. For
-  SJIS, the octets 0x80, 0xA0, 0xFD, 0xFE and 0xFF are rejected, except maybe
-  after a valid starting byte. For EUC-JP, the octets 0xA0 and 0xFF are
-  rejected.
-- htmlentities now emits an E_STRICT warning when used with asian characters,
+
+- dns_get_record() has an extra parameter which allows requesting DNS records
+  by numeric type and makes the result include only the raw data of the
+  response.
+
+- call_user_func_array() no longer allows call-time pass by reference.
+
+- htmlentities() and htmlspecialchars() are stricter in the code units they
+  accept for the asian encodings. For Big5-HKSCS, the octets 0x80 and 0xFF are
+  rejected.  For GB2312/EUC-CN, the octets 0x8E, 0x8F, 0xA0 and 0xFF are
+  rejected. For SJIS, the octets 0x80, 0xA0, 0xFD, 0xFE and 0xFF are rejected,
+  except maybe after a valid starting byte. For EUC-JP, the octets 0xA0 and
+  0xFF are rejected.
+
+- htmlentities() now emits an E_STRICT warning when used with asian characters,
   as in that case htmlentities has (and already had before this version) the
   same functionality as htmlspecialchars.
-- htmlentities no longer numerically encodes high characters for single-byte
+
+- htmlentities() no longer numerically encodes high characters for single-byte
   encodings (except when there's actually a corresponding named entity). This
   behavior was not documented and was inconsistent with that for "UTF-8".
-- html_entity_decode/htmlspecialchars_decode behave more consistently, now
-  decoding entities in malformed strings such as "&&amp;" or "&#&amp;".
-- htmlentities/htmlspecialchars/html_entity_decode/htmlspecialchars_decode:
-  Added the flags ENT_HTML401, ENT_XML1, ENT_XHTML, and ENT_HTML5. The
-  behavior of these functions including, but not limited to, the characters
-  that are encoded and the entities that are decoded depend on the document
-  type that is specified by those flags.
-- htmlentities/htmlspecialchars with !$double_encode do more strict checks on
-  the validity of the entities. Numerical entities are checked for a valid
-  range (0 to 0x10FFFF); if the flag ENT_DISALLOWED is given, the validity of
-  such numerical entity in the target document type is also checked.  Named
-  entities are checked for necessary existence in the target document type
-  instead of only checking whether they were constituted by alphanumeric
-  characters.
+
+- html_entity_decode() and htmlspecialchars_decode() behave more consistently,
+  now decoding entities in malformed strings such as "&&amp;" or "&#&amp;".
+
+- htmlentities(), htmlspecialchars(), html_entity_decode(), and
+  htmlspecialchars_decode: Added the flags ENT_HTML401, ENT_XML1, ENT_XHTML,
+  and ENT_HTML5. The behavior of these functions including, but not limited to,
+  the characters that are encoded and the entities that are decoded depend on
+  the document type that is specified by those flags.
+
+- htmlentities() and htmlspecialchars() with !$double_encode do more strict
+  checks on the validity of the entities. Numerical entities are checked for a
+  valid range (0 to 0x10FFFF); if the flag ENT_DISALLOWED is given, the
+  validity of such numerical entity in the target document type is also
+  checked.  Named entities are checked for necessary existence in the target
+  document type instead of only checking whether they were constituted by
+  alphanumeric characters.
+
 - The flag ENT_DISALLOWED was added. In addition to the behavior described in
-  the item before, it also makes htmlentities/htmlspecialchars substitute
-  characters that appear literally in the argument string and which are not
-  allowed in the target document type with U+FFFD (UTF-8) or &#xFFFD;.
+  the item before, it also makes htmlentities() and htmlspecialchars()
+  substitute characters that appear literally in the argument string and which
+  are not allowed in the target document type with U+FFFD (UTF-8) or &#xFFFD;.
+
 - The flag ENT_SUBSTITUTE was added. This flag makes invalid multibyte
-  sequences be replaced by U+FFFD (UTF-8) or &#FFFD; by htmlspecialchars and
-  htmlentities. It is an alternative to the default behavior, which just
+  sequences be replaced by U+FFFD (UTF-8) or &#FFFD; by htmlspecialchars() and
+  htmlentities(). It is an alternative to the default behavior, which just
   returns an empty string and to ENT_IGNORE, which is a security risk. The
   behavior follows the recommendations of Unicode Technical Report #36.
-- htmlspecialchars_decode/html_entity_decode now decode &apos; if the document
-  type is ENT_XML1, ENT_XHTML, or ENT_HTML5.
+
+- htmlspecialchars_decode() and html_entity_decode() now decode &apos; if the
+  document type is ENT_XML1, ENT_XHTML, or ENT_HTML5.
+
 - Charset detection with $charset == '' no longer turns to mbstring's
   internal encoding defined through mb_internal_encoding(). Only the encoding
   defined through the php.ini setting mbstring.internal_encoding is considered.
+
 - number_format() no longer truncates multibyte decimal points and thousand
   separators to the first byte.
+
 - The third parameter ($matches) to preg_match_all() is now optional. If
   omitted, the function will simply return the number of times the pattern was
   matched in the subject and will have no other side effects.
+
 - The second argument of scandir() now accepts SCANDIR_SORT_NONE (2) as a
   possible value. This value results in scandir() performing no sorting: on
   local filesystems, this allows files to be returned in native filesystem
   order.
+
 - stream_select() now preserves the keys of the passed array, be they numeric or
   strings. This breaks code that iterated the resulting stream array using a
   numeric index, but makes easier to identify which of the passed streams are
   present in the result.
+
 - stream_set_write_buffer() no longer disables the read buffer of a plain
   stream when 0 is given as the second argument.
+
 - stream_set_write_buffer() no longer changes the chunk size in socket streams.
+
 - fclose() closes streams with resource refcount > 1; it doesn't merely
   decrement the resource refcount.
+
 - socket_set_options() and socket_get_options() now support multicast options.
-- The raw data parameter in openssl_encrypt()/openssl_decrypt() is now an options
-  integer rather than a boolean. A value of true produces the same behaviour.
+
+- The raw data parameter in openssl_encrypt() and openssl_decrypt() is now an
+  options integer rather than a boolean. A value of true produces the same
+  behavior.
+
 - Write operations within XSLT (for example with the extension sax:output) are
   disabled by default. You can define what is forbidden with the method
   XsltProcess::setSecurityPrefs($options).
+
 - Added AES support to OpenSSL.
+
 - openssl_csr_new() expects the textual data to be in UTF-8.
-- Added no padding option to openssl_encrypt()/openssl_decrypt().
+
+- Added no-padding option to openssl_encrypt() and openssl_decrypt().
+
 - Added a "no_ticket" SSL context option to disable the SessionTicket TLS
   extension.
+
 - Added new json_encode() options: JSON_PRETTY_PRINT, JSON_UNESCAPED_SLASHES,
   JSON_NUMERIC_CHECK, JSON_BIGINT_AS_STRING, JSON_UNESCAPED_UNICODE.
+
 - Added Tokyo Cabinet and Berkley DB 5 support to DBA extension.
+
 - Added support for CURLOPT_MAX_SEND_SPEED_LARGE and CURLOPT_MAX_RECV_SPEED_LARGE
   to cURL.
+
 - Added optional argument to debug_backtrace() and debug_print_backtrace()
   to limit the amount of stack frames returned.
+
 - Fixed crypt_blowfish handling of 8-bit characters. crypt() in Blowfish mode
   now supports hashes marked $2a$, $2x$, $2y$ and $2z$.
+
 - mbstring now supports following encodings: Shift_JIS/UTF-8 Emoji,
   JIS X0213:2004 (Shift_JIS-2004, EUC-JP-2004, ISO-2022-JP-2004),
   MacJapanese (Shift_JIS), gb18030.
-- Added encode/decode in hex format to mb_[en|de]code_numericentity().
-- Added support for SORT_NATURAL and SORT_FLAG_CASE in array sort functions
-  (sort, rsort, ksort, krsort, asort, arsort and array_multisort).
+
+- Added encode and decode in hex format to mb_encode_numericentity() and
+  mb_decode_numericentity().
+
+- Added support for SORT_NATURAL and SORT_FLAG_CASE in array sort functions:
+  sort(), rsort(), ksort(), krsort(), asort(), arsort() and array_multisort().
+
 - is_a() and is_subclass_of() now have third boolean parameter, which specifies
   if the first argument can be a string class name. Default if false for is_a
   and true for is_subclass_of() for BC reasons.
+
 - ob_start() will now treat a chunk size of 1 as meaning 1 byte, rather than
-  the previous special case behaviour of treating it as 4096 bytes.
+  the previous special case behavior of treating it as 4096 bytes.
+
 - idn_to_ascii() and idn_to_utf8() now take two extra parameters, one indicating
   the variant (IDNA 2003 or UTS #46) and another, passed by reference, to return
   details about the operation in case UTS #46 is chosen.
+
 - gzencode() used with FORCE_DEFLATE now generates RFC1950 compliant data.
-- ob_start() refuses to start multiple output buffers at once passed as
+
+- ob_start() no longer starts multiple output buffers when passed
   array("callback1", "callback2", "callback3", ...).
 
-===================================
-5. Changes made to existing methods
-===================================
-
-- DateTime::parseFromFormat() now has + modifier to allow trailing text in
-  the string to parse without throwing an error.
-- Added the ability to pass options to DOMDocument::loadHTML().
-- FilesystemIterator, GlobIterator and (Recursive)DirectoryIterator now use
-  the default stream context.
-
-===================================
-6. Changes made to existing classes
-===================================
+==============================
+5. Changes to existing classes
+==============================
 
 - Classes that implement stream wrappers can define a method called
   stream_truncate that will respond to truncation, e.g. through ftruncate.
   Strictly speaking, this is an addition to the user-space stream wrapper
   template, not a change to an actual class.
-- Classes that implement stream wrappers can define a method called stream_metadata that
-  will be called on touch(), chmod(), chgrp(), chown().
+
+- Classes that implement stream wrappers can define a method called
+  stream_metadata that will be called on touch(), chmod(), chgrp(), chown().
+
 - Arrays cast from SimpleXMLElement now always contain all nodes instead of
   just the first matching node.
+
 - All SimpleXMLElement children are now always printed when using var_dump(),
   var_export(), and print_r().
+
 - Added iterator support in MySQLi. mysqli_result implements Traversable.
 
-=============
-7. Deprecated
-=============
+==============================
+6. Changes to existing methods
+==============================
+
+- DateTime::parseFromFormat() now has a "+" modifier to allow trailing text in
+  the string to parse without throwing an error.
+
+- Added the ability to pass options to DOMDocument::loadHTML().
+
+- FilesystemIterator, GlobIterator and (Recursive)DirectoryIterator now use
+  the default stream context.
+
+===========================
+7. Deprecated Functionality
+===========================
 
 - The following functions are deprecated in PHP 5.4:
-  - get_magic_quotes_gpc()
-  - get_magic_quotes_runtime()
-  - mcrypt_generic_end()
+  - get_magic_quotes_gpc():     now always returns false
+  - get_magic_quotes_runtime(): now always returns false
+  - mcrypt_generic_end():       use mcrypt_generic_deinit() instead
   - mysql_list_dbs()
 
-==========
-8. Removed
-==========
+========================
+8. Removed Functionality
+========================
 
-    a. removed features
+a. Removed features
 
-       - magic quotes
-         . remove magic_quotes_gpc, magic_quotes_runtime,
-           magic_quotes_sybase (calling ini_set('magic_....')
-           returns 0|false
-         . get_magic_quotes_gpc, get_magic_quotes_runtime are kept but
-           always return false
-         . set_magic_quotes_runtime raises an E_CORE_ERROR
+   The following features have been removed from PHP 5.4:
 
-       - register_globals
-       - register_long_arrays
-       - Safe mode
-       - Session extension bug compatibility mode
-       - y2k_compliance mode
+   - Magic quotes
+   - Register globals
+   - Safe mode
+   - Session extension bug compatibility mode
+   - Y2K compliance mode
 
-    b. removed php.ini directives
+b. Removed functions
 
-       - define_syslog_variables
-       - register_globals
-       - register_long_arrays
-       - safe_mode
-       - safe_mode_gid
-       - safe_mode_include_dir
-       - safe_mode_exec_dir
-       - safe_mode_allowed_env_vars
-       - safe_mode_protected_env_vars
-       - session.bug_compat42
-       - session.bug_compat_warn
-       - y2k_compliance
+   The following functions are no longer available in PHP 5.4:
 
-    c. removed functions
+   - define_syslog_variables()
+   - import_request_variables()
+   - session_is_registered()
+   - session_register()
+   - session_unregister()
+   - set_magic_quotes_runtime()
+   - mysqli_bind_param() (alias of mysqli_stmt_bind_param())
+   - mysqli_bind_result() (alias of mysqli_stmt_bind_result())
+   - mysqli_client_encoding() (alias of mysqli_character_set_name())
+   - mysqli_fetch() (alias of mysqli_stmt_fetch())
+   - mysqli_param_count() (alias of mysqli_stmt_param_count())
+   - mysqli_get_metadata() (alias of mysqli_stmt_result_metadata())
+   - mysqli_send_long_data() (alias of mysqli_stmt_send_long_data())
+   - mysqli::client_encoding() (alias of mysqli::character_set_name)
+   - mysqli_stmt::stmt() (never worked/always throws, undocumented)
 
-       - define_syslog_variables()
-       - import_request_variables()
-       - session_is_registered()
-       - session_register()
-       - session_unregister()
-       - mysqli_bind_param() (alias of mysqli_stmt_bind_param())
-       - mysqli_bind_result() (alias of mysqli_stmt_bind_result())
-       - mysqli_client_encoding() (alias of mysqli_character_set_name())
-       - mysqli_fetch() (alias of mysqli_stmt_fetch())
-       - mysqli_param_count() (alias of mysqli_stmt_param_count())
-       - mysqli_get_metadata() (alias of mysqli_stmt_result_metadata())
-       - mysqli_send_long_data() (alias of mysqli_stmt_send_long_data())
-       - mysqli::client_encoding() (alias of mysqli::character_set_name)
-       - mysqli_stmt::stmt() (never worked/always throws, undocumented)
+c. Removed syntax
 
-    d. removed syntax
+   - break $var;
+   - continue $var;
 
-       - break $var;
-       - continue $var;
+d. Removed hash algorithms
 
-    e. removed hash algorithms
-    
-       - Salsa10 and Salsa20, which are actually stream ciphers
+   - Salsa10 and Salsa20, which are actually stream ciphers
 
-=============
-9. Extensions
-=============
+====================
+9. Extension Changes
+====================
 
-     a. no longer maintained
+a. Extensions no longer maintained
 
-        - ext/sqlite
+   - ext/sqlite is no longer part of the base distribution.
+     Use sqlite3 or PDO_SQLITE instead.
 
-     b. with changed behaviour
+b. Extensions with changed behavior
 
-        - The MySQL extensions (ext/mysql, mysqli and PDO_mysql) use mysqlnd
-          as the default library now. It is still possible to use libmysql by
-          specifying a path to the configure options.
-        - PDO_mysql: Support for linking with MySQL client libraries older
-          than 4.1 is removed.
-        - The session extension now can hook into the file upload feature
-          in order to provide upload progress information through session
-          variables.
-        - SNMP extension
-             - Functions in SNMP extension now returns FALSE on every error
-               condition including SNMP-related (no such instance, end of MIB,
-               etc). Thus, in patricular, breaks previous behaviour of get/walk
-               functions returning an empty string on SNMP-related errors.
-             - Multi OID get/getnext/set queries are now supported.
-             - New constants added for use in snmp_set_oid_output_format()
-               function.
-             - Function snmp_set_valueretrieval() changed it's behaviour:
-                    SNMP_VALUE_OBJECT can be combined with one of
-                    SNMP_VALUE_PLAIN or SNMP_VALUE_LIBRARY resulting OID value
-                    changes. When no SNMP_VALUE_PLAIN or SNMP_VALUE_LIBRARY
-                    is supplied with SNMP_VALUE_OBJECT, SNMP_VALUE_LIBRARY is used.
-                    Prior to 5.4.0 when no SNMP_VALUE_PLAIN or SNMP_VALUE_LIBRARY
-                    was supplied with SNMP_VALUE_OBJECT, SNMP_VALUE_PLAIN was used.
-             - Added feature-rich OO API (SNMP class)
-             - Dropped UCD-SNMP compatibility code. Consider upgrading to
-               net-snmp v5.3+. Net-SNMP v5.4+ is required for Windows version.
-             - In sake of adding support for IPv6 DNS name resolution of
-               remote SNMP agent (peer) is done by extension now, not by Net-SNMP
-               library anymore.
+   - The MySQL extensions (ext/mysql, mysqli and PDO_MYSQL) use mysqlnd
+     as the default library now. It is still possible to use libmysql by
+     specifying a path to the configure options.
 
-        - Date extension
-          - Setting the timezone with the TZ environment variable is no longer
-            supported, instead date.timezone and/or date_default_timezone_set()
-            have to be used.
-          - The extension will no longer guess the default timezone if none
-            is set with date.timezone and/or date_default_timezone_set().
-            Instead it will always fall back to "UTC".
+   - PDO_MYSQL: Support for linking with MySQL client libraries older
+     than 4.1 is removed.
+
+   - The session extension now can hook into the file upload feature
+     in order to provide upload progress information through session
+     variables.
+
+   - SNMP extension
+     - Functions in SNMP extension now returns FALSE on every error
+       condition including SNMP-related (no such instance, end of MIB,
+       etc). Thus, in patricular, breaks previous behavior of get/walk
+       functions returning an empty string on SNMP-related errors.
+     - Multi OID get/getnext/set queries are now supported.
+     - New constants added for use in snmp_set_oid_output_format()
+       function.
+     - Function snmp_set_valueretrieval() changed it's behavior:
+	    SNMP_VALUE_OBJECT can be combined with one of
+	    SNMP_VALUE_PLAIN or SNMP_VALUE_LIBRARY resulting OID value
+	    changes. When no SNMP_VALUE_PLAIN or SNMP_VALUE_LIBRARY
+	    is supplied with SNMP_VALUE_OBJECT, SNMP_VALUE_LIBRARY is used.
+	    Prior to 5.4.0 when no SNMP_VALUE_PLAIN or SNMP_VALUE_LIBRARY
+	    was supplied with SNMP_VALUE_OBJECT, SNMP_VALUE_PLAIN was used.
+     - Added feature-rich OO API (SNMP class)
+     - Dropped UCD-SNMP compatibility code. Consider upgrading to
+       net-snmp v5.3+. Net-SNMP v5.4+ is required for Windows version.
+     - In sake of adding support for IPv6 DNS name resolution of
+       remote SNMP agent (peer) is done by extension now, not by Net-SNMP
+       library anymore.
+
+   - Date extension
+     - Setting the timezone with the TZ environment variable is no longer
+       supported, instead date.timezone and/or date_default_timezone_set()
+       have to be used.
+     - The extension will no longer guess the default timezone if none
+       is set with date.timezone and/or date_default_timezone_set().
+       Instead it will always fall back to "UTC".
 
 ===========================
 10. Changes in SAPI support
 ===========================
 
-- Added built-in CLI web server that is intended for testing purposes.
-- The REQUEST_TIME value inside server now returns a floating point number
-  indicating the time with microsecond precision. All SAPIs providing this
-  value should be returning float and not time_t.
+- A REQUEST_TIME_FLOAT value returns a floating point number indicating the
+  time with microsecond precision.  All SAPIs providing this value should be
+  returning float and not time_t.
+
 - apache_child_terminate(), getallheaders(), apache_request_headers()
-  and apache_response_headers() now supported on FastCGI.
-- Added shortcut #inisetting=value to change php.ini settings at run-time.
-- Changed shell not to terminate on fatal errors.
-- Interactive shell works with shared readline extension.
-- Added command line option --rz <name> which shows information of the
+  and apache_response_headers() are now supported on FastCGI.
+
+- The interactive shell allows a shortcut #inisetting=value to change php.ini
+  settings at run-time.
+
+- The interactive shell now works with the shared readline extension.
+
+- The interactive shell no longer terminates on fatal errors.
+
+- A new PHP CLI command line option --rz <name> shows information about the
   named Zend extension.
-- PHP-FPM now supports syslog value for error_log.
-
-=============================
-11. Changes in INI directives
-=============================
-
-- Recommended production value for error_reporting changed to
-  E_ALL & ~E_DEPRECATED & ~E_STRICT.
-- Added session.upload_progress.enabled, session.upload_progress.cleanup,
-  session.upload_progress.prefix, session.upload_progress.name,
-  session.upload_progress.freq, session.upload_progress.min_freq.
-- Added zend.multibyte directive as a replacement of PHP compile time
-  configuration option --enable-zend-multibyte. Now ZE always contains code for
-  multibyte support, but may enable or disable it by zend.multibyte. It doesn't
-  make a lot of sense to enable this option without ext/mbstring, because the
-  most functionality is implemented by mbstrings callbacks.
-- Added enable_post_data_reading, which is enabled by default. When it's
-  disabled, the POST data is not read (and processed); the behavior is similar
-  to that of other request methods with body, like PUT. This allows reading the
-  raw POST data in multipart requests and read/process the POST data in a
-  stream fashion (through php://input), without having it copied in memory two/
-  three times.
-- A new directive, called windows_show_crt_warning, has been introduced.
-  This directive shows the CRT warnings when enabled. These warnings were
-  displayed by default until now. It is disabled by default.
-- Added cli.pager php.ini setting to set a pager for CLI output.
-- Added cli.prompt php.ini setting to configure the CLI shell prompt.
-- Added process.max to control the number of process FPM can fork.
-
-====================
-12. Syntax additions
-====================
-- Traits:
-    trait HelloWorld {
-        public function sayHello() {
-            echo 'Hello World!';
-        }
-    }
-
-    class CanIGetHello {
-        use HelloWorld;
-    }
-
-    $hello = new CanIGetHello();
-    $hello->sayHello();
-
-- Function call result array access:
-  e.g.
-    foo()[0]
-    $foo->bar()[0]
-
-- Callable typehint, argument must be callable (i.e. pass is_callable($arg, false))
-  example:
-  function foo(callable $do) {
-  }
-  foo("strcmp");
-  foo(function() {});
-  $o = new ArrayObject();
-  foo(array($o, "count"));
-
-- Short array syntax:
-    $a = [1, 2, 3, 4];
-    $a = ['one' => 1, 'two' => 2, 'three' => 3, 'four' => 4];
-    $a = ['one' => 1, 2, 'three' => 3, 4];
-
-- Binary number format:
-    0b00100 0b010101
-
-- $str[1][0] where $str is a string is now a legal construct.
-
-- Anonymous functions now support using $this and class scope.
-  Anonymous function can be declared as "static" to ignore the scope.
-
-- Class::{expr}() syntax is now supported:
-    class A {
-        static function foo() {
-            echo "Hello world!\n";
-        }
-    }
-    $x = "f";
-    $y = "o";
-    A::{$x.$y.$y}();
-
-- Class member access on instantiation:
-  (new foo)->method()
-  (new foo)->property
-  (new foo)[0]
 
 ===================
-13. Windows support
+11. Windows support
 ===================
 
 - is_link now works properly for symbolic links on Windows Vista
   or later. Earlier systems do not support symbolic links.
 
-===================
-14. New in PHP 5.4:
-===================
+==================
+12. New in PHP 5.4
+==================
 
-     a. New functions
+a. New Features
 
-       - Core:
-         - get_declared_traits()
-         - getimagesizefromstring()
-         - hex2bin()
-         - header_register_callback()
-         - http_response_code()
-         - stream_set_chunk_size()
-         - socket_import_stream()
-         - trait_exists()
+  - A built-in CLI web server for testing purposes is now available:
+     $ php -S 127.0.0.1:8888
 
-       - Intl:
-         - transliterator_create()
-         - transliterator_create_from_rules()
-         - transliterator_create_inverse()
-         - transliterator_get_error_code()
-         - transliterator_get_error_message()
-         - transliterator_list_ids()
-         - transliterator_transliterate()
+b. Syntax additions
 
-       - LDAP:
-         - ldap_control_paged_results()
-         - ldap_control_paged_results_response()
+  - Traits:
+      trait HelloWorld {
+	  public function sayHello() {
+	      echo 'Hello World!';
+	  }
+      }
 
-       - libxml:
-         - libxml_set_external_entity_loader()
+      class CanIGetHello {
+	  use HelloWorld;
+      }
 
-       - mysqli:
-         - mysqli_error_list()
-         - mysqli_stmt_error_list()
+      $hello = new CanIGetHello();
+      $hello->sayHello();
 
-       - Session:
-         - session_register_shutdown()
-         - session_status()
+  - Function call result array access, e.g.:
+      foo()[0]
+      $foo->bar()[0]
 
-       - SPL
-         - class_uses()
+  - Callable typehint indicating argument must be callable:
+      function foo(callable $do) {
+      }
+      foo("strcmp");
+      foo(function() {});
+      $o = new ArrayObject();
+      foo(array($o, "count"));
 
-     b. New global constants
+  - Short array syntax:
+      $a = [1, 2, 3, 4];
+      $a = ['one' => 1, 'two' => 2, 'three' => 3, 'four' => 4];
+      $a = ['one' => 1, 2, 'three' => 3, 4];
 
-       - CURLOPT_MAX_RECV_SPEED_LARGE
-       - CURLOPT_MAX_SEND_SPEED_LARGE
-       - ENT_DISALLOWED
-       - ENT_HTML401
-       - ENT_HTML5
-       - ENT_SUBSTITUTE
-       - ENT_XHTML
-       - ENT_XML1
-       - IPPROTO_IP
-       - IPPROTO_IPV6
-       - IPV6_MULTICAST_HOPS
-       - IPV6_MULTICAST_IF
-       - IPV6_MULTICAST_LOOP
-       - IP_MULTICAST_IF
-       - IP_MULTICAST_LOOP
-       - IP_MULTICAST_TTL
-       - JSON_BIGINT_AS_STRING
-       - JSON_OBJECT_AS_ARRAY
-       - JSON_PRETTY_PRINT
-       - JSON_UNESCAPED_SLASHES
-       - JSON_UNESCAPED_UNICODE
-       - LIBXML_HTML_NODEFDTD
-       - LIBXML_HTML_NOIMPLIED
-       - LIBXML_PEDANTIC
-       - MCAST_JOIN_GROUP
-       - MCAST_LEAVE_GROUP
-       - MCAST_BLOCK_SOURCE
-       - MCAST_UNBLOCK_SOURCE
-       - MCAST_JOIN_SOURCE_GROUP
-       - MCAST_LEAVE_SOURCE_GROUP
-       - OPENSSL_CIPHER_AES_128_CBC
-       - OPENSSL_CIPHER_AES_192_CBC
-       - OPENSSL_CIPHER_AES_256_CBC
-       - OPENSSL_RAW_DATA
-       - OPENSSL_ZERO_PADDING
-       - PHP_OUTPUT_HANDLER_CLEAN
-       - PHP_OUTPUT_HANDLER_CLEANABLE
-       - PHP_OUTPUT_HANDLER_DISABLED
-       - PHP_OUTPUT_HANDLER_FINAL
-       - PHP_OUTPUT_HANDLER_FLUSH
-       - PHP_OUTPUT_HANDLER_FLUSHABLE
-       - PHP_OUTPUT_HANDLER_REMOVABLE
-       - PHP_OUTPUT_HANDLER_STARTED
-       - PHP_OUTPUT_HANDLER_STDFLAGS
-       - PHP_OUTPUT_HANDLER_WRITE
-       - PHP_QUERY_RFC1738
-       - PHP_QUERY_RFC3986
-       - PHP_SESSION_ACTIVE
-       - PHP_SESSION_DISABLED
-       - PHP_SESSION_NONE
-       - SCANDIR_SORT_ASCENDING
-       - SCANDIR_SORT_DESCENDING
-       - SCANDIR_SORT_NONE
-       - SORT_FLAG_CASE
-       - SORT_NATURAL
-       - STREAM_META_ACCESS
-       - STREAM_META_GROUP
-       - STREAM_META_GROUP_NAME
-       - STREAM_META_OWNER
-       - STREAM_META_OWNER_NAME
-       - STREAM_META_TOUCH
-       - T_CALLABLE
-       - T_INSTEADOF
-       - T_TRAIT
-       - T_TRAIT_C
-       - ZLIB_ENCODING_DEFLATE
-       - ZLIB_ENCODING_GZIP
-       - ZLIB_ENCODING_RAW
-       - U_IDNA_DOMAIN_NAME_TOO_LONG_ERROR
-       - IDNA_CHECK_BIDI
-       - IDNA_CHECK_CONTEXTJ
-       - IDNA_NONTRANSITIONAL_TO_ASCII
-       - IDNA_NONTRANSITIONAL_TO_UNICODE
-       - INTL_IDNA_VARIANT_2003
-       - INTL_IDNA_VARIANT_UTS46
-       - IDNA_ERROR_EMPTY_LABEL
-       - IDNA_ERROR_LABEL_TOO_LONG
-       - IDNA_ERROR_DOMAIN_NAME_TOO_LONG
-       - IDNA_ERROR_LEADING_HYPHEN
-       - IDNA_ERROR_TRAILING_HYPHEN
-       - IDNA_ERROR_HYPHEN_3_4
-       - IDNA_ERROR_LEADING_COMBINING_MARK
-       - IDNA_ERROR_DISALLOWED
-       - IDNA_ERROR_PUNYCODE
-       - IDNA_ERROR_LABEL_HAS_DOT
-       - IDNA_ERROR_INVALID_ACE_LABEL
-       - IDNA_ERROR_BIDI
-       - IDNA_ERROR_CONTEXTJ
+  - Binary number format:
+      0b00100 0b010101
 
-     c. New classes
+  - Chained string array offsets now work.
+      $a = "abc";
+      echo $a[0][0];
 
-       - Reflection:
-         - ReflectionZendExtension
+  - Anonymous functions now support using $this and class scope.
+    Anonymous function can be declared as "static" to ignore the scope.
 
-       - Intl:
-         - Transliterator
-         - Spoofchecker
+  - Class::{expr}() syntax is now supported:
+      class A {
+	  static function foo() {
+	      echo "Hello world!\n";
+	  }
+      }
+      $x = "f";
+      $y = "o";
+      A::{$x.$y.$y}();
 
-       - JSON:
-         - JsonSerializable
+  - Class member access on instantiation:
+      (new foo)->method()
+      (new foo)->property
+      (new foo)[0]
 
-       - Session:
-         - SessionHandler
 
-       - SNMP:
-         - SNMP
+c. New functions
 
-       - SPL:
-         - CallbackFilterIterator
-         - RecursiveCallbackFilterIterator
+  - Core:
+    - get_declared_traits()
+    - getimagesizefromstring()
+    - hex2bin()
+    - header_register_callback()
+    - http_response_code()
+    - stream_set_chunk_size()
+    - socket_import_stream()
+    - trait_exists()
 
-     d. New methods
+  - Intl:
+    - transliterator_create()
+    - transliterator_create_from_rules()
+    - transliterator_create_inverse()
+    - transliterator_get_error_code()
+    - transliterator_get_error_message()
+    - transliterator_list_ids()
+    - transliterator_transliterate()
 
-       - Closure:
-         - Closure::bind()
-         - Closure::bindTo()
+  - LDAP:
+    - ldap_control_paged_results()
+    - ldap_control_paged_results_response()
 
-       - Reflection:
-         - ReflectionClass::getTraitAliases()
-         - ReflectionClass::getTraitNames()
-         - ReflectionClass::getTraits()
-         - ReflectionClass::isCloneable()
-         - ReflectionClass::isTrait()
-         - ReflectionClass::newInstanceWithoutConstructor()
-         - ReflectionExtension::isPersistent()
-         - ReflectionExtension::isTemporary()
-         - ReflectionFunction::getClosure()
-         - ReflectionFunction::getClosureScopeClass()
-         - ReflectionFunction::getClosureThis()
-         - ReflectionFunctionAbstract::getClosureScopeClass()
-         - ReflectionFunctionAbstract::getClosureThis()
-         - ReflectionMethod::getClosure()
-         - ReflectionMethod::getClosureScopeClass()
-         - ReflectionMethod::getClosureThis()
-         - ReflectionObject::getTraitAliases()
-         - ReflectionObject::getTraitNames()
-         - ReflectionObject::getTraits()
-         - ReflectionObject::isCloneable()
-         - ReflectionObject::isTrait()
-         - ReflectionObject::newInstanceWithoutConstructor()
-         - ReflectionParameter::canBePassedByValue()
-         - ReflectionParameter::isCallable()
+  - libxml:
+    - libxml_set_external_entity_loader()
 
-       - PDO_dblib:
-         - PDO::newRowset()
+  - mysqli:
+    - mysqli_error_list()
+    - mysqli_stmt_error_list()
 
-       - SPL:
-         - DirectoryIterator::getExtension()
-         - RegexIterator::getRegex()
-         - SplDoublyLinkedList::serialize()
-         - SplDoublyLinkedList::unserialize()
-         - SplFileInfo::getExtension()
-         - SplFileObject::fputcsv()
-         - SplObjectStorage::getHash()
-         - SplQueue::serialize
-         - SplQueue::unserialize
-         - SplStack::serialize
-         - SplStack::unserialize
-         - SplTempFileObject::fputcsv
+  - Session:
+    - session_register_shutdown()
+    - session_status()
 
-       - XSLT:
-         - XsltProcessor::setSecurityPrefs()
-         - XsltProcessor::getSecurityPrefs()
+  - SPL
+    - class_uses()
 
-     e. New class constants
+d. New global constants
 
-       - PDO:
-         - PDO::MYSQL_ATTR_SSL_CA
-         - PDO::MYSQL_ATTR_SSL_CAPATH
-         - PDO::MYSQL_ATTR_SSL_CERT
-         - PDO::MYSQL_ATTR_SSL_CIPHER
-         - PDO::MYSQL_ATTR_SSL_KEY
+  - CURLOPT_MAX_RECV_SPEED_LARGE
+  - CURLOPT_MAX_SEND_SPEED_LARGE
+  - ENT_DISALLOWED
+  - ENT_HTML401
+  - ENT_HTML5
+  - ENT_SUBSTITUTE
+  - ENT_XHTML
+  - ENT_XML1
+  - IPPROTO_IP
+  - IPPROTO_IPV6
+  - IPV6_MULTICAST_HOPS
+  - IPV6_MULTICAST_IF
+  - IPV6_MULTICAST_LOOP
+  - IP_MULTICAST_IF
+  - IP_MULTICAST_LOOP
+  - IP_MULTICAST_TTL
+  - JSON_BIGINT_AS_STRING
+  - JSON_OBJECT_AS_ARRAY
+  - JSON_PRETTY_PRINT
+  - JSON_UNESCAPED_SLASHES
+  - JSON_UNESCAPED_UNICODE
+  - LIBXML_HTML_NODEFDTD
+  - LIBXML_HTML_NOIMPLIED
+  - LIBXML_PEDANTIC
+  - MCAST_JOIN_GROUP
+  - MCAST_LEAVE_GROUP
+  - MCAST_BLOCK_SOURCE
+  - MCAST_UNBLOCK_SOURCE
+  - MCAST_JOIN_SOURCE_GROUP
+  - MCAST_LEAVE_SOURCE_GROUP
+  - OPENSSL_CIPHER_AES_128_CBC
+  - OPENSSL_CIPHER_AES_192_CBC
+  - OPENSSL_CIPHER_AES_256_CBC
+  - OPENSSL_RAW_DATA
+  - OPENSSL_ZERO_PADDING
+  - PHP_OUTPUT_HANDLER_CLEAN
+  - PHP_OUTPUT_HANDLER_CLEANABLE
+  - PHP_OUTPUT_HANDLER_DISABLED
+  - PHP_OUTPUT_HANDLER_FINAL
+  - PHP_OUTPUT_HANDLER_FLUSH
+  - PHP_OUTPUT_HANDLER_FLUSHABLE
+  - PHP_OUTPUT_HANDLER_REMOVABLE
+  - PHP_OUTPUT_HANDLER_STARTED
+  - PHP_OUTPUT_HANDLER_STDFLAGS
+  - PHP_OUTPUT_HANDLER_WRITE
+  - PHP_QUERY_RFC1738
+  - PHP_QUERY_RFC3986
+  - PHP_SESSION_ACTIVE
+  - PHP_SESSION_DISABLED
+  - PHP_SESSION_NONE
+  - SCANDIR_SORT_ASCENDING
+  - SCANDIR_SORT_DESCENDING
+  - SCANDIR_SORT_NONE
+  - SORT_FLAG_CASE
+  - SORT_NATURAL
+  - STREAM_META_ACCESS
+  - STREAM_META_GROUP
+  - STREAM_META_GROUP_NAME
+  - STREAM_META_OWNER
+  - STREAM_META_OWNER_NAME
+  - STREAM_META_TOUCH
+  - T_CALLABLE
+  - T_INSTEADOF
+  - T_TRAIT
+  - T_TRAIT_C
+  - ZLIB_ENCODING_DEFLATE
+  - ZLIB_ENCODING_GZIP
+  - ZLIB_ENCODING_RAW
+  - U_IDNA_DOMAIN_NAME_TOO_LONG_ERROR
+  - IDNA_CHECK_BIDI
+  - IDNA_CHECK_CONTEXTJ
+  - IDNA_NONTRANSITIONAL_TO_ASCII
+  - IDNA_NONTRANSITIONAL_TO_UNICODE
+  - INTL_IDNA_VARIANT_2003
+  - INTL_IDNA_VARIANT_UTS46
+  - IDNA_ERROR_EMPTY_LABEL
+  - IDNA_ERROR_LABEL_TOO_LONG
+  - IDNA_ERROR_DOMAIN_NAME_TOO_LONG
+  - IDNA_ERROR_LEADING_HYPHEN
+  - IDNA_ERROR_TRAILING_HYPHEN
+  - IDNA_ERROR_HYPHEN_3_4
+  - IDNA_ERROR_LEADING_COMBINING_MARK
+  - IDNA_ERROR_DISALLOWED
+  - IDNA_ERROR_PUNYCODE
+  - IDNA_ERROR_LABEL_HAS_DOT
+  - IDNA_ERROR_INVALID_ACE_LABEL
+  - IDNA_ERROR_BIDI
+  - IDNA_ERROR_CONTEXTJ
 
-     f. New Hash algorithms
+e. New classes
 
-       - fnv132
-       - fnv164
-       - joaat
+  - Reflection:
+    - ReflectionZendExtension
+
+  - Intl:
+    - Transliterator
+    - Spoofchecker
+
+  - JSON:
+    - JsonSerializable
+
+  - Session:
+    - SessionHandler
+
+  - SNMP:
+    - SNMP
+
+  - SPL:
+    - CallbackFilterIterator
+    - RecursiveCallbackFilterIterator
+
+f. New methods
+
+  - Closure:
+    - Closure::bind()
+    - Closure::bindTo()
+
+  - Reflection:
+    - ReflectionClass::getTraitAliases()
+    - ReflectionClass::getTraitNames()
+    - ReflectionClass::getTraits()
+    - ReflectionClass::isCloneable()
+    - ReflectionClass::isTrait()
+    - ReflectionClass::newInstanceWithoutConstructor()
+    - ReflectionExtension::isPersistent()
+    - ReflectionExtension::isTemporary()
+    - ReflectionFunction::getClosure()
+    - ReflectionFunction::getClosureScopeClass()
+    - ReflectionFunction::getClosureThis()
+    - ReflectionFunctionAbstract::getClosureScopeClass()
+    - ReflectionFunctionAbstract::getClosureThis()
+    - ReflectionMethod::getClosure()
+    - ReflectionMethod::getClosureScopeClass()
+    - ReflectionMethod::getClosureThis()
+    - ReflectionObject::getTraitAliases()
+    - ReflectionObject::getTraitNames()
+    - ReflectionObject::getTraits()
+    - ReflectionObject::isCloneable()
+    - ReflectionObject::isTrait()
+    - ReflectionObject::newInstanceWithoutConstructor()
+    - ReflectionParameter::canBePassedByValue()
+    - ReflectionParameter::isCallable()
+
+  - PDO_DBLIB:
+    - PDO::newRowset()
+
+  - SPL:
+    - DirectoryIterator::getExtension()
+    - RegexIterator::getRegex()
+    - SplDoublyLinkedList::serialize()
+    - SplDoublyLinkedList::unserialize()
+    - SplFileInfo::getExtension()
+    - SplFileObject::fputcsv()
+    - SplObjectStorage::getHash()
+    - SplQueue::serialize
+    - SplQueue::unserialize
+    - SplStack::serialize
+    - SplStack::unserialize
+    - SplTempFileObject::fputcsv
+
+  - XSLT:
+    - XsltProcessor::setSecurityPrefs()
+    - XsltProcessor::getSecurityPrefs()
+
+g. New class constants
+
+  - PDO:
+    - PDO::MYSQL_ATTR_SSL_CA
+    - PDO::MYSQL_ATTR_SSL_CAPATH
+    - PDO::MYSQL_ATTR_SSL_CERT
+    - PDO::MYSQL_ATTR_SSL_CIPHER
+    - PDO::MYSQL_ATTR_SSL_KEY
+
+h. New Hash algorithms
+
+  - fnv132
+  - fnv164
+  - joaat
