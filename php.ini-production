@@ -484,7 +484,7 @@ memory_limit = 128M
 ; development and early testing.
 ;
 ; Error Level Constants:
-; E_ALL             - All errors and warnings (includes E_STRICT as of PHP 6.0.0)
+; E_ALL             - All errors and warnings (includes E_STRICT as of PHP 5.4.0)
 ; E_ERROR           - fatal run-time errors
 ; E_RECOVERABLE_ERROR  - almost fatal run-time errors
 ; E_WARNING         - run-time warnings (non-fatal errors)
@@ -748,7 +748,7 @@ post_max_size = 8M
 ; enable the feature. We strongly recommend you use the escaping mechanisms
 ; designed specifically for the database your using instead of relying on this
 ; feature. Also note, this feature has been deprecated as of PHP 5.3.0 and is
-; scheduled for removal in PHP 6.
+; scheduled removed in PHP 5.4.
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
@@ -1497,7 +1497,7 @@ session.use_cookies = 1
 ;session.cookie_secure =
 
 ; This option forces PHP to fetch and use a cookie for storing and maintaining
-; the session id. We encourage this operation as it's very helpful in combatting
+; the session id. We encourage this operation as it's very helpful in combating
 ; session hijacking when not specifying and managing your own session id. It is
 ; not the end all be all of session hijacking defense, but it's a good start.
 ; http://php.net/session.use-only-cookies
@@ -1627,7 +1627,7 @@ session.cache_expire = 180
 ; - User may send URL contains active session ID
 ;   to other person via. email/irc/etc.
 ; - URL that contains active session ID may be stored
-;   in publically accessible computer.
+;   in publicly accessible computer.
 ; - User may access your site with the same session ID
 ;   always using URL stored in browser's history or bookmarks.
 ; http://php.net/session.use-trans-sid
