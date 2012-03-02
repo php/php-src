@@ -6,8 +6,6 @@ PHP                                                                        NEWS
   . World domination
 
 - Core:
-  . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
-    vars). (Laruence)
   . Fixed bug #60978 (exit code incorrect). (Laruence)
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
