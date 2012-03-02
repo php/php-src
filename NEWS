@@ -6,7 +6,6 @@ PHP                                                                        NEWS
   . World domination
 
 - Core:
-  . Fixed bug #60978 (exit code incorrect). (Laruence)
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
 
