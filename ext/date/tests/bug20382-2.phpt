@@ -75,7 +75,7 @@ result = Monday 1983-04-18 01:00:00 CEST
 wanted = Monday            00:00:00
 
 Asia/Yerevan
-ts     = Monday 2037-10-19 17:17:17 AMST
+ts     = Monday 2037-10-19 17:17:17 AMT
 result = Monday 2037-10-26 00:00:00 AMT
 wanted = Monday            00:00:00
 
