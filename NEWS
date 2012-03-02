@@ -30,6 +30,10 @@ PHP                                                                        NEWS
   . Fixed bug #60968 (Late static binding doesn't work with 
     ReflectionMethod::invokeArgs()). (Laruence)
 
+- Array:
+  . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
+    (Laruence)
+
 01 Mar 2012, PHP 5.4.0 
 
 - Installation:
