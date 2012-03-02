@@ -494,9 +494,6 @@ static void sapi_send_headers_free(TSRMLS_D)
 SAPI_API void sapi_deactivate(TSRMLS_D)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
-	if (SG(callback_func)) {
-		zval_ptr_dtor(&SG(callback_func));
-	}
 	if (SG(request_info).post_data) {
 		efree(SG(request_info).post_data);
 	}  else 	if (SG(server_context)) {
