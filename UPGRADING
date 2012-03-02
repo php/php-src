@@ -588,8 +588,8 @@ c. New functions
     - transliterator_transliterate()
 
   - LDAP:
-    - ldap_control_paged_results()
-    - ldap_control_paged_results_response()
+    - ldap_control_paged_result()
+    - ldap_control_paged_result_response()
 
   - libxml:
     - libxml_set_external_entity_loader()
