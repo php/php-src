@@ -31,8 +31,4 @@ PHP                                                                        NEWS
 - pgsql
   . Added pg_escape_literal() and pg_escape_identifier() (Yasuo)
 
-- Array:
-  . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
-    (Laruence)
-
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
