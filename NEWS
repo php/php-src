@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
   . Fixed bug #61072 (Memory leak when restoring an exception handler).
     (Nikic, Laruence)
+  . Fixed bug #61011 (Crash when an exception is thrown by __autoload
+    accessing a static property). (Laruence)
 
 - Standard:
   . Fixed memory leak in substr_replace. (Pierrick)
