@@ -133,7 +133,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 
 				if (track_vars_array) {
 					ht = Z_ARRVAL_P(track_vars_array);
-					zend_hash_del(ht, var, var_len + 1);
+					zend_symtable_del(ht, var, var_len + 1);
 				}
 
 				zval_dtor(val);
