@@ -4,6 +4,7 @@ htmlentities() test 14 (default_charset / Shift_JIS)
 output_handler=
 mbstring.internal_encoding=pass
 default_charset=Shift_JIS
+filter.default=unsafe_raw
 --FILE--
 <?php
 	print ini_get('default_charset')."\n";
