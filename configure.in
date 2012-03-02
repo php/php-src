@@ -1587,6 +1587,21 @@ cat <<X
 X
   fi
 
+    if test "$PHP_SAPI" = "apache2handler" || test "$PHP_SAPI" = "apache2filter"; then
+      if test "$APACHE_VERSION" -ge 2004001; then
+        if test -z "$APACHE_THREADED_MPM"; then
+cat <<X
++--------------------------------------------------------------------+
+|                        *** WARNING ***                             |
+|                                                                    |
+| You have built PHP for Apache's current non-threaded MPM.          |
+| If you change Apache to use a threaded MPM you must reconfigure    |
+| PHP with --enable-maintainer-zts                                   |
+X
+        fi
+      fi
+    fi
+
   # Warn about linking Apache with libpthread if oci8 extension is enabled on linux.
   if test "$PHP_OCI8" != "no"; then
     if test "$PHP_SAPI" = "apache"; then
