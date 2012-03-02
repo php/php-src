@@ -58,16 +58,14 @@ PHP 5.4 UPGRADE NOTES
 - Deprecated php.ini directives will now throw an E_CORE_WARNING's
   instead of the previous E_WARNING's.
 
-- The following php.ini directives are marked as deprecated:
-  - magic_quotes_gpc
-  - magic_quotes_runtime
-  - magic_quotes_sybase
-
 - The following php.ini directives are no longer available in PHP 5.4
   and will now throw an E_CORE_ERROR upon startup:
   - allow_call_time_pass_reference
   - define_syslog_variables
   - highlight.bg
+  - magic_quotes_gpc
+  - magic_quotes_runtime
+  - magic_quotes_sybase
   - register_globals
   - register_long_arrays
   - safe_mode
