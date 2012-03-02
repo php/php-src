@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #61225 (Incorect lexing of 0b00*+<NUM>). (Pierrick)
+  . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
 
 - Standard:
   . Fixed memory leak in substr_replace. (Pierrick)
