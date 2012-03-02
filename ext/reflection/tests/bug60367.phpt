@@ -20,7 +20,9 @@ class B extends A {
 
 $method = new ReflectionMethod("b::call");
 $method->invoke(null);
+$method->invokeArgs(null, array());
 $method = new ReflectionMethod("A::call");
 $method->invoke(null);
+$method->invokeArgs(null, array());
 --EXPECTF--
-BA
+BBAA

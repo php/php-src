@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - Installation
   . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
 
+- Reflection:
+  . Fixed bug #60968 (Late static binding doesn't work with 
+    ReflectionMethod::invokeArgs()). (Laruence)
+
 01 Mar 2012, PHP 5.4.0 
 
 - Installation:
