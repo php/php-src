@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #61225 (Incorect lexing of 0b00*+<NUM>). (Pierrick)
   . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
+  . Fixed bug #61087 (Memory leak in parse_ini_file when specifying
+    invalid scanner mode). (Nikic, Laruence)
   . Fixed bug #61072 (Memory leak when restoring an exception handler).
     (Nikic, Laruence)
   . Fixed bug #61011 (Crash when an exception is thrown by __autoload
