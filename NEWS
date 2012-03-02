@@ -46,6 +46,9 @@ PHP                                                                        NEWS
 - Zlib:
   . Fixed bug #61139 (gzopen leaks when specifying invalid mode). (Nikita Popov)
 
+- mbstring:
+  . MFH mb_ereg_replace_callback() for security enhancements. (Rui)
+
 01 Mar 2012, PHP 5.4.0 
 
 - Installation:
