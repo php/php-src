@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     accessing a static property). (Laruence)
   . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
     vars). (Laruence)
+  . Fixed bug #60978 (exit code incorrect). (Laruence)
 
 - Standard:
   . Fixed memory leak in substr_replace. (Pierrick)
