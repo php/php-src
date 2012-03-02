@@ -2,52 +2,53 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.1 RC1
 
+- Array:
+  . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
+    (Laruence)
+
 - CLI Server:
   . "Connection: close" instead of "Connection: closed" (Gustavo)
 
 - Core:
-  . Fixed bug #61225 (Incorect lexing of 0b00*+<NUM>). (Pierrick)
-  . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
-  . Fixed bug #61087 (Memory leak in parse_ini_file when specifying
-    invalid scanner mode). (Nikic, Laruence)
-  . Fixed bug #61072 (Memory leak when restoring an exception handler).
-    (Nikic, Laruence)
-  . Fixed bug #61011 (Crash when an exception is thrown by __autoload
-    accessing a static property). (Laruence)
-  . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
-    vars). (Laruence)
-  . Fixed bug #60978 (exit code incorrect). (Laruence)
-  . Fixed bug #60801 (strpbrk() mishandles NUL byte). (Adam)
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
+  . Fixed bug #60801 (strpbrk() mishandles NUL byte). (Adam)
+  . Fixed bug #60978 (exit code incorrect). (Laruence)
+  . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
+    vars). (Laruence)
+  . Fixed bug #61011 (Crash when an exception is thrown by __autoload
+    accessing a static property). (Laruence)
+  . Fixed bug #61072 (Memory leak when restoring an exception handler).
+    (Nikic, Laruence)
+  . Fixed bug #61087 (Memory leak in parse_ini_file when specifying
+    invalid scanner mode). (Nikic, Laruence)
   . Fixed bug #61106 (Segfault when using header_register_callback). (Nikita Popov)
-
-- Standard:
-  . Fixed memory leak in substr_replace. (Pierrick)
-  . make max_file_uploads ini directive settable outside of php.ini (Rasmus)
+  . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
+  . Fixed bug #61225 (Incorect lexing of 0b00*+<NUM>). (Pierrick)
 
 - Installation
   . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
 
+- mbstring:
+  . MFH mb_ereg_replace_callback() for security enhancements. (Rui)
+
 - Phar
-  . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL bytes). (Nikita Popov)
+  . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
+    bytes). (Nikita Popov)
 
 - Reflection:
   . Fixed bug #60968 (Late static binding doesn't work with 
     ReflectionMethod::invokeArgs()). (Laruence)
 
-- Array:
-  . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
-    (Laruence)
+- Standard:
+  . Fixed memory leak in substr_replace. (Pierrick)
+  . Make max_file_uploads ini directive settable outside of php.ini (Rasmus)
 
 - XMLRPC:
   . Fixed bug #61097 (Memory leak in xmlrpc functions copying zvals). (Nikita Popov)
 
 - Zlib:
   . Fixed bug #61139 (gzopen leaks when specifying invalid mode). (Nikita Popov)
-
-- mbstring:
-  . MFH mb_ereg_replace_callback() for security enhancements. (Rui)
 
 01 Mar 2012, PHP 5.4.0 
 
