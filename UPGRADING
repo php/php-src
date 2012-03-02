@@ -368,8 +368,6 @@ PHP 5.4 UPGRADE NOTES
 ===========================
 
 - The following functions are deprecated in PHP 5.4:
-  - get_magic_quotes_gpc():     now always returns false
-  - get_magic_quotes_runtime(): now always returns false
   - mcrypt_generic_end():       use mcrypt_generic_deinit() instead
   - mysql_list_dbs()
 
