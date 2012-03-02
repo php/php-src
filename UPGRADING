@@ -507,6 +507,8 @@ a. New Features
   - A built-in CLI web server for testing purposes is now available:
      $ php -S 127.0.0.1:8888
 
+  - File Upload Progress support is implemented in the Session extension.
+
 b. Syntax additions
 
   - Traits:
