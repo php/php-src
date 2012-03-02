@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed memory leak in substr_replace. (Pierrick)
   . make max_file_uploads ini directive settable outside of php.ini (Rasmus)
 
+- Installation
+  . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
+
 01 Mar 2012, PHP 5.4.0 
 
 - Installation:
