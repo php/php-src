@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.1 RC1
 
 - Array:
+  . Fixed bug #52719 (array_walk_recursive crashes if third param of the
+    function is by reference). (Nikita Popov)
   . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
     (Laruence)
 
