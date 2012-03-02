@@ -2958,30 +2958,57 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			/* Only one has a type hint and the other one doesn't */
 			return 0;
 		}
-		if (fe->common.arg_info[i].class_name
-			&& strcasecmp(fe->common.arg_info[i].class_name, proto->common.arg_info[i].class_name)!=0) {
-			const char *colon;
 
-			if (fe->common.type != ZEND_USER_FUNCTION) {
-				return 0;
-			} else if (strchr(proto->common.arg_info[i].class_name, '\\') != NULL ||
-			    (colon = zend_memrchr(fe->common.arg_info[i].class_name, '\\', fe->common.arg_info[i].class_name_len)) == NULL ||
-			    strcasecmp(colon+1, proto->common.arg_info[i].class_name) != 0) {
-				zend_class_entry **fe_ce, **proto_ce;
-				int found, found2;
-				
-				found = zend_lookup_class(fe->common.arg_info[i].class_name, fe->common.arg_info[i].class_name_len, &fe_ce TSRMLS_CC);
-				found2 = zend_lookup_class(proto->common.arg_info[i].class_name, proto->common.arg_info[i].class_name_len, &proto_ce TSRMLS_CC);
-				
-				/* Check for class alias */
-				if (found != SUCCESS || found2 != SUCCESS ||
-					(*fe_ce)->type == ZEND_INTERNAL_CLASS ||
-					(*proto_ce)->type == ZEND_INTERNAL_CLASS ||
-					*fe_ce != *proto_ce) {
-					return 0;
-				}
+		if (fe->common.arg_info[i].class_name) {
+			const char *fe_class_name, *proto_class_name;
+			zend_uint fe_class_name_len, proto_class_name_len;
+
+			if (!strcasecmp(fe->common.arg_info[i].class_name, "parent") && proto->common.scope) {
+				fe_class_name = proto->common.scope->name;
+				fe_class_name_len = proto->common.scope->name_length;
+			} else if (!strcasecmp(fe->common.arg_info[i].class_name, "self") && fe->common.scope) {
+				fe_class_name = fe->common.scope->name;
+				fe_class_name_len = fe->common.scope->name_length;
+			} else {
+				fe_class_name = fe->common.arg_info[i].class_name;
+				fe_class_name_len = fe->common.arg_info[i].class_name_len;
 			}
-		}
+
+			if (!strcasecmp(proto->common.arg_info[i].class_name, "parent") && proto->common.scope && proto->common.scope->parent) {
+				proto_class_name = proto->common.scope->parent->name;
+				proto_class_name_len = proto->common.scope->parent->name_length;
+			} else if (!strcasecmp(proto->common.arg_info[i].class_name, "self") && proto->common.scope) {
+				proto_class_name = proto->common.scope->name;
+				proto_class_name_len = proto->common.scope->name_length;
+			} else {
+				proto_class_name = proto->common.arg_info[i].class_name;
+				proto_class_name_len = proto->common.arg_info[i].class_name_len;
+			}
+
+			if (strcasecmp(fe_class_name, proto_class_name)!=0) {
+				const char *colon;
+
+				if (fe->common.type != ZEND_USER_FUNCTION) {
+					return 0;
+			    } else if (strchr(proto_class_name, '\\') != NULL ||
+						(colon = zend_memrchr(fe_class_name, '\\', fe_class_name_len)) == NULL ||
+						strcasecmp(colon+1, proto_class_name) != 0) {
+					zend_class_entry **fe_ce, **proto_ce;
+					int found, found2;
+
+					found = zend_lookup_class(fe_class_name, fe_class_name_len, &fe_ce TSRMLS_CC);
+					found2 = zend_lookup_class(proto_class_name, proto_class_name_len, &proto_ce TSRMLS_CC);
+
+					/* Check for class alias */
+					if (found != SUCCESS || found2 != SUCCESS ||
+							(*fe_ce)->type == ZEND_INTERNAL_CLASS ||
+							(*proto_ce)->type == ZEND_INTERNAL_CLASS ||
+							*fe_ce != *proto_ce) {
+						return 0;
+					}
+				}
+			} 
+		} 
 		if (fe->common.arg_info[i].type_hint != proto->common.arg_info[i].type_hint) {
 			/* Incompatible type hint */
 			return 0;
@@ -3043,9 +3070,21 @@ static char * zend_get_function_declaration(zend_function *fptr TSRMLS_DC) /* {{
 		required = fptr->common.required_num_args;
 		for (i = 0; i < fptr->common.num_args;) {
 			if (arg_info->class_name) {
-				REALLOC_BUF_IF_EXCEED(buf, offset, length, arg_info->class_name_len);
-				memcpy(offset, arg_info->class_name, arg_info->class_name_len);
-				offset += arg_info->class_name_len;
+				const char *class_name;
+				zend_uint class_name_len;
+				if (!strcasecmp(arg_info->class_name, "self") && fptr->common.scope ) {
+					class_name = fptr->common.scope->name;
+					class_name_len = fptr->common.scope->name_length;
+				} else if (!strcasecmp(arg_info->class_name, "parent") && fptr->common.scope->parent) {
+					class_name = fptr->common.scope->parent->name;
+					class_name_len = fptr->common.scope->parent->name_length;
+				} else {
+					class_name = arg_info->class_name;
+					class_name_len = arg_info->class_name_len;
+				}
+				REALLOC_BUF_IF_EXCEED(buf, offset, length, class_name_len);
+				memcpy(offset, class_name, class_name_len);
+				offset += class_name_len;
 				*(offset++) = ' ';
 			} else if (arg_info->type_hint) {
 				zend_uint type_name_len;
