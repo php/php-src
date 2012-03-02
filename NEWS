@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.1 RC1
 
 - CLI Server:
-  . "Connection: close" instead of "Connection: closed" (Rasmus)
+  . "Connection: close" instead of "Connection: closed" (Gustavo)
 
 - Core:
   . Fixed bug #61225 (Incorect lexing of 0b00*+<NUM>). (Pierrick)
