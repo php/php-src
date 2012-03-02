@@ -43,6 +43,9 @@ PHP                                                                        NEWS
 - XMLRPC:
   . Fixed bug #61097 (Memory leak in xmlrpc functions copying zvals). (Nikita Popov)
 
+- Zlib:
+  . Fixed bug #61139 (gzopen leaks when specifying invalid mode). (Nikita Popov)
+
 01 Mar 2012, PHP 5.4.0 
 
 - Installation:
