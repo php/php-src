@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     functions). (Pierre)
   . Fixed bug #60825 (Segfault when running symfony 2 tests).
     (Dmitry, Laruence)
+  . Fixed bug #60801 (strpbrk() mishandles NUL byte). (Adam)
   . Fixed bug #60227 (header() cannot detect the multi-line header with CR).
     (rui, Gustavo)
   . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
