@@ -20,6 +20,7 @@ PHP                                                                        NEWS
   . Fixed bug #60801 (strpbrk() mishandles NUL byte). (Adam)
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
+  . Fixed bug #61106 (Segfault when using header_register_callback). (Nikita Popov)
 
 - Standard:
   . Fixed memory leak in substr_replace. (Pierrick)
