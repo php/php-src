@@ -30,8 +30,7 @@ PHP 5.4 UPGRADE NOTES
      d. New global constants
      e. New classes
      f. New methods
-     g. New class constants
-     h. New hash algorithms
+     g. New hash algorithms
 
 =============================
 1. Changes to INI directives
@@ -772,16 +771,11 @@ f. New methods
     - XsltProcessor::setSecurityPrefs()
     - XsltProcessor::getSecurityPrefs()
 
-g. New class constants
+  - Zlib:
+    - zlib_decode()
+    - zlib_encode()
 
-  - PDO:
-    - PDO::MYSQL_ATTR_SSL_CA
-    - PDO::MYSQL_ATTR_SSL_CAPATH
-    - PDO::MYSQL_ATTR_SSL_CERT
-    - PDO::MYSQL_ATTR_SSL_CIPHER
-    - PDO::MYSQL_ATTR_SSL_KEY
-
-h. New Hash algorithms
+g. New Hash algorithms
 
   - fnv132
   - fnv164
