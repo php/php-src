@@ -6,8 +6,6 @@ PHP                                                                        NEWS
   . World domination
 
 - Core:
-  . Fixed bug #61011 (Crash when an exception is thrown by __autoload
-    accessing a static property). (Laruence)
   . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
     vars). (Laruence)
   . Fixed bug #60978 (exit code incorrect). (Laruence)
