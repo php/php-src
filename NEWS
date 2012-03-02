@@ -22,6 +22,9 @@ PHP                                                                        NEWS
     (rui, Gustavo)
   . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
 
+- Installation
+  . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
+
 - Fileinfo
   . Fixed bug #61173 (Unable to detect error from finfo constructor). (Gustavo)
 
