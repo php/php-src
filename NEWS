@@ -28,6 +28,9 @@ PHP                                                                        NEWS
 - Installation
   . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
 
+- Phar
+  . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL bytes). (Nikita Popov)
+
 - Reflection:
   . Fixed bug #60968 (Late static binding doesn't work with 
     ReflectionMethod::invokeArgs()). (Laruence)
