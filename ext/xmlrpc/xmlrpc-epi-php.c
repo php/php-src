@@ -1240,8 +1240,7 @@ PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 			retval = XMLRPC_to_PHP(xVal);
 
 			if (retval) {
-				*return_value = *retval;
-				zval_copy_ctor(return_value);
+				RETVAL_ZVAL(retval, 1, 1);
 			}
 			/* dust, sweep, and mop */
 			XMLRPC_CleanupValue(xVal);
