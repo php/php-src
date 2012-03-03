@@ -514,6 +514,7 @@ static inline int parse_unix_address(php_stream_xport_param *xparam, struct sock
 		 * BUT, to get into this branch of code, the name is too long,
 		 * so we don't care. */
 		xparam->inputs.namelen = sizeof(unix_addr->sun_path) - 1;
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "socket path exceeded the maximum allowed length of %ld bytes and was truncated", sizeof(unix_addr->sun_path));
 	}
 
 	memcpy(unix_addr->sun_path, xparam->inputs.name, xparam->inputs.namelen);
