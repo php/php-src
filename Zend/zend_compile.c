@@ -3984,13 +3984,28 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 			
 				/** With the other traits, we are more permissive.
 					We do not give errors for those. This allows to be more
-					defensive in such definitions. */
+					defensive in such definitions.
+					However, we want to make sure that the insteadof declartion
+					is consistent in itself.
+				 */
 				j = 0;
 				while (cur_precedence->exclude_from_classes[j]) {
 					char* class_name = (char*)cur_precedence->exclude_from_classes[j];
 					zend_uint name_length = strlen(class_name);
 
 					cur_precedence->exclude_from_classes[j] = zend_fetch_class(class_name, name_length, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
+					
+					/* make sure that the trait method is not from a class mentioned in
+					 exclude_from_classes, for consistency */
+					if (cur_precedence->trait_method->ce == cur_precedence->exclude_from_classes[i]) {
+						zend_error(E_COMPILE_ERROR,
+								   "Inconsistent insteadof definition. " 
+								   "The method %s is to be used from %s, but %s is also on the exclude list",
+								   cur_method_ref->method_name,
+								   cur_precedence->trait_method->ce->name,
+								   cur_precedence->trait_method->ce->name);
+					}
+					
 					efree(class_name);
 					j++;
 				}

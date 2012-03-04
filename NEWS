@@ -23,6 +23,7 @@ PHP                                                                        NEWS
     vars). (Laruence)
   . Fixed bug #61011 (Crash when an exception is thrown by __autoload
     accessing a static property). (Laruence)
+  . Fixed bug #61052 (Missing error check in trait 'insteadof' clause). (Stefan)
   . Fixed bug #61072 (Memory leak when restoring an exception handler).
     (Nikic, Laruence)
   . Fixed bug #61087 (Memory leak in parse_ini_file when specifying
