@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.5.0
 
 - General improvements:
+  . Drop Windows XP and 2003 support. (Pierre)
   . World domination
 
 - cURL:

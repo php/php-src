@@ -137,7 +137,7 @@ UPGRADE NOTES - PHP X.Y
 13. Windows support
 ===================
 
-- 
+- Drop Windows XP and 2003 support. (Pierre)
 
 ===================
 14. New in PHP X.Y:
