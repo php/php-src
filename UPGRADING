@@ -72,7 +72,8 @@ UPGRADE NOTES - PHP X.Y
 7. Deprecated
 =============
 
-- 
+- The preg_replace /e modifier is now deprecated.
+  You should use preg_replace_callback instead.
 
 ==========
 8. Removed
