@@ -3623,6 +3623,18 @@ ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *tr
 }
 /* }}} */
 
+static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_function *other_fn TSRMLS_DC) /* {{{ */
+{
+	zend_uint    fn_flags = fn->common.scope->ce_flags;
+	zend_uint other_flags = other_fn->common.scope->ce_flags;
+	
+	return zend_do_perform_implementation_check(fn, other_fn TSRMLS_CC)
+		&& zend_do_perform_implementation_check(other_fn, fn TSRMLS_CC)
+		&& ((fn_flags & ZEND_ACC_FINAL) == (other_flags & ZEND_ACC_FINAL))   /* equal final qualifier */
+		&& ((fn_flags & ZEND_ACC_STATIC)== (other_flags & ZEND_ACC_STATIC)); /* equal static qualifier */
+}
+/* }}} */
+
 static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	size_t current;
@@ -3645,22 +3657,16 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 		if (i == current) {
 			continue; /* just skip this, cause its the table this function is applied on */
 		}
-
+		
 		if (zend_hash_quick_find(function_tables[i], hash_key->arKey, hash_key->nKeyLength, hash_key->h, (void **)&other_trait_fn) == SUCCESS) {
 			/* if it is an abstract method, there is no collision */
 			if (other_trait_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 				/* Make sure they are compatible */
-				if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-					/* In case both are abstract, just check prototype, but need to do that in both directions */
-					if (   !zend_do_perform_implementation_check(fn, other_trait_fn TSRMLS_CC)
-						|| !zend_do_perform_implementation_check(other_trait_fn, fn TSRMLS_CC)) {
-						zend_error(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s", //ZEND_FN_SCOPE_NAME(fn), fn->common.function_name, //::%s()
-													zend_get_function_declaration(fn TSRMLS_CC),
-													zend_get_function_declaration(other_trait_fn TSRMLS_CC));
-					}
-				} else {
-					/* otherwise, do the full check */
-					do_inheritance_check_on_method(fn, other_trait_fn TSRMLS_CC);
+				/* In case both are abstract, just check prototype, but need to do that in both directions */
+				if (!zend_traits_method_compatibility_check(fn, other_trait_fn TSRMLS_CC)) {
+					zend_error(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
+												zend_get_function_declaration(fn TSRMLS_CC),
+												zend_get_function_declaration(other_trait_fn TSRMLS_CC));
 				}
 				
 				/* we can savely free and remove it from other table */
@@ -3672,7 +3678,11 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 				if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 					/* Make sure they are compatible.
 					   Here, we already know other_trait_fn cannot be abstract, full check ok. */
-					do_inheritance_check_on_method(other_trait_fn, fn TSRMLS_CC);
+					if (!zend_traits_method_compatibility_check(fn, other_trait_fn TSRMLS_CC)) {
+						zend_error(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
+													zend_get_function_declaration(fn TSRMLS_CC),
+													zend_get_function_declaration(other_trait_fn TSRMLS_CC));
+					}
 					
 					/* just mark as solved, will be added if its own trait is processed */
 					abstract_solved = 1;

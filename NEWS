@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
+  . Fixed bug #60717 (Order of traits in use statement can cause a fatal
+    error). (Stefan)
   . Fixed bug #60801 (strpbrk() mishandles NUL byte). (Adam)
   . Fixed bug #60978 (exit code incorrect). (Laruence)
   . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
