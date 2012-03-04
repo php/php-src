@@ -4995,7 +4995,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	if (doing_inheritance) {
        /* Make sure a trait does not try to extend a class */
        if ((new_class_entry->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-           zend_error(E_COMPILE_ERROR, "A trait (%s) cannot extend a class", new_class_entry->name);
+           zend_error(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error", new_class_entry->name);
        }
     
 		opline->extended_value = parent_class_name->u.op.var;
