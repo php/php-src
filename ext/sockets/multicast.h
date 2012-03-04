@@ -18,8 +18,7 @@
 
 /* $Id$ */
 
-#if defined(MCAST_JOIN_GROUP) && \
-	(!defined(PHP_WIN32) || (_WIN32_WINNT >= 0x600 && SOCKETS_ENABLE_VISTA_API))
+#if defined(MCAST_JOIN_GROUP)
 #define RFC3678_API 1
 /* has block/unblock and source membership, in this case for both IPv4 and IPv6 */
 #define HAS_MCAST_EXT 1
