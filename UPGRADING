@@ -1,192 +1,82 @@
 $Id$
 
-UPGRADE NOTES - PHP X.Y
+PHP X.Y UPGRADE NOTES
 
-1. Changes made to default configuration
-2. Reserved words and classes
-3. Changes made to engine behaviour
-4. Changes made to existing functions
-5. Changes made to existing methods
-6. Changes made to existing classes
-7. Deprecated
-8. Removed
-9. Extensions:
-     a. moved out to PECL and actively maintained there
-     b. no longer maintained
-     c. with changed behaviour
-     d. no longer possible to disable
-10. Changes in SAPI support
-11. Changes in INI directives
-12. Syntax additions
-13. Windows support
-14. New in PHP X.Y:
-     a. New libraries
-     b. New extensions
-     c. New stream wrappers
-     d. New stream filters
-     e. New functions
-     f. New global constants
-     g. New classes
-     h. New methods
-     i. New class constants
-     j. New hash algorithms
-     k. New Syntax
+1. Backward Incompatible Changes
+2. New Features
+2. Changes in SAPI modules
+3. Deprecated Functionality
+4. Changed Functions
+5. New Functions
+6. New Classes and Interfaces
+7. Removed Extensions
+8. Other Changes to Extensions
+9. New Global Constants
+10. Changes to INI File Handling
+11. Other Changes
+
 
 ========================================
-1. Changes made to default configuration
+1. Backward Incompatible Changes
 ========================================
-
-- 
-
-=============================
-2. Reserved words and classes
-=============================
-
-- 
-
-=============================
-3. Changes made to engine behaviour
-=============================
-
-- 
-
-=====================================
-4. Changes made to existing functions
-=====================================
-
-- 
-
-===================================
-5. Changes made to existing methods
-===================================
-
-- 
-
-===================================
-6. Changes made to existing classes
-===================================
-
-- 
-
-=============
-7. Deprecated
-=============
-
-- The preg_replace /e modifier is now deprecated.
-  You should use preg_replace_callback instead.
-
-==========
-8. Removed
-==========
-
-    a. removed features
-
-       - 
-
-    b. removed ini directives
-
-       - 
-
-    c. removed functions
-
-	   - 
-
-    d. removed syntax
-
-       - 
-
-=============
-9. Extensions
-=============
-
-     a. moved out to PECL and actively maintained there
-
-        - 
-
-     b. no longer maintained
-
-        - 
-
-     c. with changed behaviour
-
-        -  
-
-     d. no longer possible to disable
-
-        - 
-
-==========================
-10. Changes in SAPI support
-==========================
-
-- 
-
-=============================
-11. Changes in INI directives
-=============================
-
-- 
-
-====================
-12. Syntax additions
-====================
-
-- 
-
-===================
-13. Windows support
-===================
 
 - Drop Windows XP and 2003 support. (Pierre)
 
-===================
-14. New in PHP X.Y:
-===================
+========================================
+2. New Features
+========================================
 
-     a. New libraries
 
-       - 
+========================================
+2. Changes in SAPI modules
+========================================
 
-     b. New extensions
 
-       - 
+========================================
+3. Deprecated Functionality
+========================================
 
-     c. New stream wrappers
+- The preg_replace /e modifier is now deprecated.  Use
+  preg_replace_callback instead.
+  (https://wiki.php.net/rfc/remove_preg_replace_eval_modifier)
 
-       - 
+========================================
+4. Changed Functions
+========================================
 
-     d. New stream filters
 
-       - 
+========================================
+5. New Functions
+========================================
 
-     e. New functions
 
-       - Extension:
-         - function()
+========================================
+6. New Classes and Interfaces
+========================================
 
-     f. New global constants
+- SPL:
+  - SplFixedArray::__wakeup()
 
-       - 
+========================================
+7. Removed Extensions
+========================================
 
-     g. New classes
 
-       - Extension:
-         - ClassName
-       
-     h. New methods
+========================================
+8. Other Changes to Extensions
+========================================
 
-        - Spl:
-         - SplFixedArray::__wakeup()
 
-     i. New class constants
+========================================
+9. New Global Constants
+========================================
 
-       - Extension:
-         - ClassName::CONSTANT
 
-     j. New Hash algorithms
+========================================
+10. Changes to INI File Handling
+========================================
 
-       - 
 
-     k. New Syntax
-
-       - 
+========================================
+11. Other Changes
+========================================
