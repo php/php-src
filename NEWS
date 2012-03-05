@@ -61,6 +61,7 @@ PHP                                                                        NEWS
 
 - Zlib:
   . Fixed bug #61139 (gzopen leaks when specifying invalid mode). (Nikita Popov)
+  . Fixed bug #61287 (A particular string fails to decompress). (Mike)
 
 01 Mar 2012, PHP 5.4.0 
 
