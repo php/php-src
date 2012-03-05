@@ -33,7 +33,6 @@
 #endif
 
 /* these variables are true statics/globals, and have to be mutex'ed on every access */
-static int module_count=0;
 ZEND_API HashTable module_registry;
 
 /* this function doesn't check for too many parameters */
@@ -2184,7 +2183,7 @@ int module_registry_unload_temp(const zend_module_entry *module TSRMLS_DC) /* {{
 /* return the next free module number */
 int zend_next_free_module(void) /* {{{ */
 {
-	return ++module_count;
+	return zend_hash_num_elements(&module_registry) + 1;
 }
 /* }}} */
 
