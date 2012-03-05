@@ -33,7 +33,6 @@
 #endif
 
 /* these variables are true statics/globals, and have to be mutex'ed on every access */
-static int module_count=0;
 ZEND_API HashTable module_registry;
 
 static zend_module_entry **module_request_startup_handlers;
@@ -2381,7 +2380,7 @@ void zend_post_deactivate_modules(TSRMLS_D) /* {{{ */
 /* return the next free module number */
 int zend_next_free_module(void) /* {{{ */
 {
-	return ++module_count;
+	return zend_hash_num_elements(&module_registry) + 1;
 }
 /* }}} */
 
