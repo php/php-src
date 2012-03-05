@@ -38,9 +38,19 @@ PHP                                                                        NEWS
 - mbstring:
   . MFH mb_ereg_replace_callback() for security enhancements. (Rui)
 
+- mysqlnd
+  . Fixed bug #60948 (mysqlnd FTBFS when -Wformat-security is enabled).
+    (Johannes)
+
 - SOAP
   . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
     User-Agent header). (carloschilazo at gmail dot com)
+
+- PDO_mysql
+  . Fixed bug #61207 (PDO::nextRowset() after a multi-statement query doesn't
+    always work). (Johannes)
+  . Fixed bug #61194 (PDO should export compression flag with myslqnd).
+    (Johannes)
 
 - Phar
   . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
