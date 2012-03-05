@@ -38,6 +38,10 @@ PHP                                                                        NEWS
 - mbstring:
   . MFH mb_ereg_replace_callback() for security enhancements. (Rui)
 
+- SOAP
+  . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
+    User-Agent header). (carloschilazo at gmail dot com)
+
 - Phar
   . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
     bytes). (Nikita Popov)
