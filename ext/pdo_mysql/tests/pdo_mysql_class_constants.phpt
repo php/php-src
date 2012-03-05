@@ -20,13 +20,13 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 		"MYSQL_ATTR_SSL_CA"							=> true,
 		"MYSQL_ATTR_SSL_CAPATH"						=> true,
 		"MYSQL_ATTR_SSL_CIPHER"						=> true,
+		"MYSQL_ATTR_COMPRESS"						=> true,
 	);
 
 	if (!MySQLPDOTest::isPDOMySQLnd()) {
 		$expected['MYSQL_ATTR_MAX_BUFFER_SIZE']			= true;
 		$expected['MYSQL_ATTR_READ_DEFAULT_FILE']		= true;
 		$expected['MYSQL_ATTR_READ_DEFAULT_GROUP']		= true;
-		$expected['MYSQL_ATTR_COMPRESS']				= true;
 	}
 
 	/*

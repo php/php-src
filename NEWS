@@ -36,6 +36,12 @@ PHP                                                                        NEWS
 - Firebird Database extension (ibase):
   . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
 
+- PDO_mysql
+  . Fixed bug #61207 (PDO::nextRowset() after a multi-statement query doesn't
+    always work). (Johannes)
+  . Fixed bug #61194 (PDO should export compression flag with myslqnd).
+    (Johannes)
+
 - Phar:
   . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL bytes). (Nikic)
 
