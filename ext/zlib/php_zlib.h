@@ -65,6 +65,7 @@ extern zend_module_entry php_zlib_module_entry;
 #define phpext_zlib_ptr zlib_module_ptr
 
 #ifdef ZTS
+# include "TSRM.h"
 # define ZLIBG(v) TSRMG(zlib_globals_id, zend_zlib_globals *, v)
 #else
 # define ZLIBG(v) (zlib_globals.v)

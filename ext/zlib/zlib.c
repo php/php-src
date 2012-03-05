@@ -400,7 +400,7 @@ retry_raw_inflate:
 		status = inflateInit2(&Z, encoding);
 		if (Z_OK == status) {
 			Z.next_in = (Bytef *) in_buf;
-			Z.avail_in = in_len;
+			Z.avail_in = in_len + 1; /* NOTE: data must be zero terminated */
 
 			switch (status = php_zlib_inflate_rounds(&Z, max_len, out_buf, out_len)) {
 				case Z_STREAM_END:
