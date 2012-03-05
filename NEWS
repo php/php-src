@@ -41,7 +41,11 @@ PHP                                                                        NEWS
 
 - PHP-FPM SAPI:
   . Fixed bug #60811 (php-fpm compilation problem). (rasmus)
- 
+
+- SOAP
+  . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
+    User-Agent header). (carloschilazo at gmail dot com)
+    
 - SQLite3 extension:
   . Add createCollation() method. (Brad Dewar)
 
