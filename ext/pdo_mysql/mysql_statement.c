@@ -131,6 +131,39 @@ static void pdo_mysql_stmt_set_row_count(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+{
+	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
+	pdo_mysql_db_handle *H = S->H;
+	my_ulonglong row_count;
+	PDO_DBG_ENTER("pdo_mysql_fill_stmt_from_result");
+
+	row_count = mysql_affected_rows(H->server);
+	if (row_count == (my_ulonglong)-1) {
+		/* we either have a query that returned a result set or an error occured
+		   lets see if we have access to a result set */
+		if (!H->buffered) {
+			S->result = mysql_use_result(H->server);
+		} else {
+			S->result = mysql_store_result(H->server);
+		}
+		if (NULL == S->result) {
+			pdo_mysql_error_stmt(stmt);
+			PDO_DBG_RETURN(0);
+		}
+
+		stmt->row_count = (long) mysql_num_rows(S->result);
+		stmt->column_count = (int) mysql_num_fields(S->result);
+		S->fields = mysql_fetch_fields(S->result);
+	} else {
+		/* this was a DML or DDL query (INSERT, UPDATE, DELETE, ... */
+		stmt->row_count = (long) row_count;
+	}
+
+	PDO_DBG_RETURN(1);
+}
+/* }}} */
+
 #ifdef HAVE_MYSQL_STMT_PREPARE
 static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
@@ -310,30 +343,7 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		PDO_DBG_RETURN(0);
 	}
 
-	row_count = mysql_affected_rows(H->server);
-	if (row_count == (my_ulonglong)-1) {
-		/* we either have a query that returned a result set or an error occured
-		   lets see if we have access to a result set */
-		if (!H->buffered) {
-			S->result = mysql_use_result(H->server);
-		} else {
-			S->result = mysql_store_result(H->server);
-		}
-		if (NULL == S->result) {
-			pdo_mysql_error_stmt(stmt);
-			PDO_DBG_RETURN(0);
-		}
-
-		stmt->row_count = (long) mysql_num_rows(S->result);
-		stmt->column_count = (int) mysql_num_fields(S->result);
-		S->fields = mysql_fetch_fields(S->result);
-
-	} else {
-		/* this was a DML or DDL query (INSERT, UPDATE, DELETE, ... */
-		stmt->row_count = (long) row_count;
-	}
-
-	PDO_DBG_RETURN(1);
+	PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt TSRMLS_CC));
 }
 /* }}} */
 
@@ -421,25 +431,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		/* No more results */
 		PDO_DBG_RETURN(0);
 	} else {
-		if (!H->buffered) {
-			S->result = mysql_use_result(H->server);
-			row_count = 0;
-		} else {
-			S->result = mysql_store_result(H->server);
-			if ((long)-1 == (row_count = (long) mysql_affected_rows(H->server))) {
-				pdo_mysql_error_stmt(stmt);
-				PDO_DBG_RETURN(0);
-			}
-		}
-
-		if (NULL == S->result) {
-			PDO_DBG_RETURN(0);
-		}
-
-		stmt->row_count = row_count;
-		stmt->column_count = (int) mysql_num_fields(S->result);
-		S->fields = mysql_fetch_fields(S->result);
-		PDO_DBG_RETURN(1);
+		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt TSRMLS_CC));
 	}
 #else
 	strcpy(stmt->error_code, "HYC00");
