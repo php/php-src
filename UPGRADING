@@ -36,9 +36,10 @@ PHP 5.4 UPGRADE NOTES
 1. Changes to INI directives
 =============================
 
-- The php.ini default_charset directive now defaults to UTF-8.  If you
-  were relying on the previous default of ISO-88590-1, you will need
-  to add:
+- The default character set is now UTF-8 when the default_charset
+  php.ini directive is not explicitly set. This applies to functions
+  such as htmlentities() and htmlspecialchars(). If you were relying
+  on the previous default of ISO-8859-1 you will need to add:
 
     default_charset = iso-8859-1
 
