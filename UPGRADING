@@ -122,7 +122,7 @@ PHP 5.4 UPGRADE NOTES
 - Added cli.prompt to configure the CLI interactive shell prompt.
 
 - Added cli_server.color to enable the CLI web server to use ANSI color coding
-  in terminal outout.
+  in terminal output.
 
 ========================================
 2. Changes to reserved words and classes
