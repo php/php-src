@@ -49,6 +49,10 @@ PHP                                                                        NEWS
   . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
     User-Agent header). (carloschilazo at gmail dot com)
 
+- PDO
+  . Fixed bug #61292 (Segfault while calling a method on an overloaded PDO 
+    object). (Laruence)
+
 - PDO_mysql
   . Fixed bug #61207 (PDO::nextRowset() after a multi-statement query doesn't
     always work). (Johannes)
