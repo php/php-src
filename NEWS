@@ -36,6 +36,9 @@ PHP                                                                        NEWS
 - Firebird Database extension (ibase):
   . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
 
+- mysqli
+  . Fixed bug #61003 (mysql_stat() require a valid connection). (Johannes).
+
 - PDO_mysql
   . Fixed bug #61207 (PDO::nextRowset() after a multi-statement query doesn't
     always work). (Johannes)
