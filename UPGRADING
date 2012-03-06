@@ -74,7 +74,7 @@ PHP 5.4 UPGRADE NOTES
   - safe_mode_exec_dir
   - safe_mode_allowed_env_vars
   - safe_mode_protected_env_vars
-  - session.bug_compat42
+  - session.bug_compat_42
   - session.bug_compat_warn
   - y2k_compliance
   - zend.ze1_compatibility_mode
@@ -105,6 +105,8 @@ PHP 5.4 UPGRADE NOTES
 
 - Added zend.script_encoding. This value will be used unless a
   "declare(encoding=...)" directive appears at the top of the script.
+
+- Added zend.signal_check to check for replaced signal handlers on shutdown
 
 - Added enable_post_data_reading, which is enabled by default. When it's
   disabled, the POST data is not read (or processed); the behavior is similar
