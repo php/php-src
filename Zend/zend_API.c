@@ -2137,7 +2137,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 
 #if HAVE_LIBDL
 #if !(defined(NETWARE) && defined(APACHE_1_BUILD))
-	if (module->handle) {
+	if (module->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
 		DL_UNLOAD(module->handle);
 	}
 #endif

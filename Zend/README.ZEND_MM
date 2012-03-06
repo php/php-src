@@ -24,6 +24,14 @@ Zend MM disabled:
 
     $ USE_ZEND_ALLOC=0 valgrind --leak-check=full sapi/cli/php -r 'leak();'
 
+Shared extensions:
+------------------
+
+Since PHP 5.4 it is possible to prevent shared extensions from unloading so
+that valgrind can correctly track the memory leaks in shared extensions. For
+this there is the ZEND_DONT_UNLOAD_MODULES environment variable. If set, then
+DL_UNLOAD() is skipped during the shutdown of shared extensions.
+
 Tweaking:
 ---------
 
