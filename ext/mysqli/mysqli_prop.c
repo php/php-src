@@ -260,7 +260,11 @@ static int link_stat_read(mysqli_object *obj, zval **retval TSRMLS_DC)\
 	MAKE_STD_ZVAL(*retval);
 	ZVAL_NULL(*retval);
 
+#if defined(MYSQLI_USE_MYSQLND)
 	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
+#else
+	CHECK_STATUS(MYSQLI_STATUS_VALID);
+#endif
 
  	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 

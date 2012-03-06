@@ -38,6 +38,9 @@ PHP                                                                        NEWS
 - mbstring:
   . MFH mb_ereg_replace_callback() for security enhancements. (Rui)
 
+- mysqli
+  . Fixed bug #61003 (mysql_stat() require a valid connection). (Johannes).
+
 - mysqlnd
   . Fixed bug #60948 (mysqlnd FTBFS when -Wformat-security is enabled).
     (Johannes)
