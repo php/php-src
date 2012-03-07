@@ -2,35 +2,34 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.1 RC1
 
-- Array:
-  . Fixed bug #52719 (array_walk_recursive crashes if third param of the
-    function is by reference). (Nikita Popov)
-  . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
-    (Laruence)
-
 - CLI Server:
   . "Connection: close" instead of "Connection: closed" (Gustavo)
 
 - Core:
-  . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
-    (Laruence)
-  . Fixed bug #60717 (Order of traits in use statement can cause a fatal
-    error). (Stefan)
-  . Fixed bug #60801 (strpbrk() mishandles NUL byte). (Adam)
-  . Fixed bug #60911 (Confusing error message when extending traits). (Stefan)
-  . Fixed bug #60978 (exit code incorrect). (Laruence)
-  . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
-    vars). (Laruence)
-  . Fixed bug #61011 (Crash when an exception is thrown by __autoload
-    accessing a static property). (Laruence)
-  . Fixed bug #61052 (Missing error check in trait 'insteadof' clause). (Stefan)
-  . Fixed bug #61072 (Memory leak when restoring an exception handler).
-    (Nikic, Laruence)
+  . Fixed bug #61225 (Incorect lexing of 0b00*+<NUM>). (Pierrick)
+  . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
+  . Fixed bug #61106 (Segfault when using header_register_callback). (Nikita
+    Popov)
   . Fixed bug #61087 (Memory leak in parse_ini_file when specifying
     invalid scanner mode). (Nikic, Laruence)
-  . Fixed bug #61106 (Segfault when using header_register_callback). (Nikita Popov)
-  . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
-  . Fixed bug #61225 (Incorect lexing of 0b00*+<NUM>). (Pierrick)
+  . Fixed bug #61072 (Memory leak when restoring an exception handler).
+    (Nikic, Laruence)
+  . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
+    (Laruence)
+  . Fixed bug #61052 (Missing error check in trait 'insteadof' clause). (Stefan)
+  . Fixed bug #61011 (Crash when an exception is thrown by __autoload
+    accessing a static property). (Laruence)
+  . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical 
+    vars). (Laruence)
+  . Fixed bug #60978 (exit code incorrect). (Laruence)
+  . Fixed bug #60911 (Confusing error message when extending traits). (Stefan)
+  . Fixed bug #60801 (strpbrk() mishandles NUL byte). (Adam)
+  . Fixed bug #60717 (Order of traits in use statement can cause a fatal
+    error). (Stefan)
+  . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
+    (Laruence)
+  . Fixed bug #52719 (array_walk_recursive crashes if third param of the
+    function is by reference). (Nikita Popov)
 
 - Installation
   . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
@@ -70,15 +69,19 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed memory leak in substr_replace. (Pierrick)
   . Make max_file_uploads ini directive settable outside of php.ini (Rasmus)
-  . Fixed bug #60106 (stream_socket_server silently truncates long unix socket paths). (Ilia)
+  . Fixed bug #60106 (stream_socket_server silently truncates long unix socket
+    paths). (Ilia)
 
 - XMLRPC:
-  . Fixed bug #61097 (Memory leak in xmlrpc functions copying zvals). (Nikita Popov)
-  . Fixed bug #61264 (xmlrpc_parse_method_descriptions leaks temporary variable). (Nikita Popov)
+  . Fixed bug #61264 (xmlrpc_parse_method_descriptions leaks temporary
+    variable). (Nikita Popov)
+  . Fixed bug #61097 (Memory leak in xmlrpc functions copying zvals). (Nikita
+    Popov)
 
 - Zlib:
-  . Fixed bug #61139 (gzopen leaks when specifying invalid mode). (Nikita Popov)
+  . Fixed bug #61306 (initialization of global inappropriate for ZTS). (Gustavo)
   . Fixed bug #61287 (A particular string fails to decompress). (Mike)
+  . Fixed bug #61139 (gzopen leaks when specifying invalid mode). (Nikita Popov)
 
 01 Mar 2012, PHP 5.4.0 
 
