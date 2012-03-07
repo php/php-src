@@ -938,7 +938,6 @@ static PHP_MINIT_FUNCTION(zlib)
 	REGISTER_LONG_CONSTANT("ZLIB_ENCODING_GZIP", PHP_ZLIB_ENCODING_GZIP, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ZLIB_ENCODING_DEFLATE", PHP_ZLIB_ENCODING_DEFLATE, CONST_CS|CONST_PERSISTENT);
 	REGISTER_INI_ENTRIES();
-	ZLIBG(ob_gzhandler) = NULL;
 	return SUCCESS;
 }
 /* }}} */
@@ -990,6 +989,13 @@ static PHP_MINFO_FUNCTION(zlib)
 }
 /* }}} */
 
+/* {{{ ZEND_MODULE_GLOBALS_CTOR */
+static ZEND_MODULE_GLOBALS_CTOR_D(zlib)
+{
+	zlib_globals->ob_gzhandler = NULL;
+}
+/* }}} */
+
 /* {{{ php_zlib_module_entry */
 zend_module_entry php_zlib_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -1002,7 +1008,7 @@ zend_module_entry php_zlib_module_entry = {
 	PHP_MINFO(zlib),
 	"2.0",
 	PHP_MODULE_GLOBALS(zlib),
-	NULL,
+	ZEND_MODULE_GLOBALS_CTOR_N(zlib),
 	NULL,
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
