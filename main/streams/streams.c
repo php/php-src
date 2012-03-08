@@ -157,20 +157,35 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 
 /* }}} */
 
+static zend_llist *php_get_wrapper_errors_list(php_stream_wrapper *wrapper TSRMLS_DC)
+{
+    zend_llist *list = NULL;
+    if (!FG(wrapper_errors)) {
+        return NULL;
+    } else {
+        zend_hash_find(FG(wrapper_errors), (const char*)&wrapper,
+            sizeof wrapper, (void**)&list);
+        return list;
+    }
+}
+
 /* {{{ wrapper error reporting */
 void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption TSRMLS_DC)
 {
 	char *tmp = estrdup(path);
 	char *msg;
 	int free_msg = 0;
-	php_stream_wrapper orig_wrapper;
 
 	if (wrapper) {
-		if (wrapper->err_count > 0) {
-			int i;
-			size_t l;
+		zend_llist *err_list = php_get_wrapper_errors_list(wrapper TSRMLS_CC);
+		if (err_list) {
+			size_t l = 0;
 			int brlen;
-			char *br;
+			int i;
+			int count = zend_llist_count(err_list);
+			const char *br;
+			const char **err_buf_p;
+			zend_llist_position pos;
 
 			if (PG(html_errors)) {
 				brlen = 7;
@@ -180,25 +195,29 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 				br = "\n";
 			}
 
-			for (i = 0, l = 0; i < wrapper->err_count; i++) {
-				l += strlen(wrapper->err_stack[i]);
-				if (i < wrapper->err_count - 1) {
+			for (err_buf_p = zend_llist_get_first_ex(err_list, &pos), i = 0;
+					err_buf_p;
+					err_buf_p = zend_llist_get_next_ex(err_list, &pos), i++) {
+				l += strlen(*err_buf_p);
+				if (i < count - 1) {
 					l += brlen;
 				}
 			}
 			msg = emalloc(l + 1);
 			msg[0] = '\0';
-			for (i = 0; i < wrapper->err_count; i++) {
-				strcat(msg, wrapper->err_stack[i]);
-				if (i < wrapper->err_count - 1) {
-					strcat(msg, br);
+			for (err_buf_p = zend_llist_get_first_ex(err_list, &pos), i = 0;
+					err_buf_p;
+					err_buf_p = zend_llist_get_next_ex(err_list, &pos), i++) {
+				strcat(msg, *err_buf_p);
+				if (i < count - 1) {
+					l += brlen;
 				}
 			}
 
 			free_msg = 1;
 		} else {
 			if (wrapper == &php_plain_files_wrapper) {
-				msg = strerror(errno);
+				msg = strerror(errno); /* TODO: not ts on linux */
 			} else {
 				msg = "operation failed";
 			}
@@ -208,16 +227,7 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 	}
 
 	php_strip_url_passwd(tmp);
-	if (wrapper) {
-		/* see bug #52935 */
-		orig_wrapper = *wrapper;
-		wrapper->err_stack = NULL;
-		wrapper->err_count = 0;
-	}
 	php_error_docref1(NULL TSRMLS_CC, tmp, E_WARNING, "%s: %s", caption, msg);
-	if (wrapper) {
-		*wrapper = orig_wrapper;
-	}
 	efree(tmp);
 	if (free_msg) {
 		efree(msg);
@@ -226,19 +236,14 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 
 void php_stream_tidy_wrapper_error_log(php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	if (wrapper) {
-		/* tidy up the error stack */
-		int i;
-
-		for (i = 0; i < wrapper->err_count; i++) {
-			efree(wrapper->err_stack[i]);
-		}
-		if (wrapper->err_stack) {
-			efree(wrapper->err_stack);
-		}
-		wrapper->err_stack = NULL;
-		wrapper->err_count = 0;
+	if (wrapper && FG(wrapper_errors)) {
+		zend_hash_del(FG(wrapper_errors), (const char*)&wrapper, sizeof wrapper);
 	}
+}
+
+static void wrapper_error_dtor(void *error)
+{
+	efree(*(char**)error);
 }
 
 PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options TSRMLS_DC, const char *fmt, ...)
@@ -254,11 +259,25 @@ PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int option
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", buffer);
 		efree(buffer);
 	} else {
-		/* append to stack */
-		wrapper->err_stack = erealloc(wrapper->err_stack, (wrapper->err_count + 1) * sizeof(char *));
-		if (wrapper->err_stack) {
-			wrapper->err_stack[wrapper->err_count++] = buffer;
+		zend_llist *list = NULL;
+		if (!FG(wrapper_errors)) {
+			ALLOC_HASHTABLE(FG(wrapper_errors));
+			zend_hash_init(FG(wrapper_errors), 8, NULL,
+					(dtor_func_t)zend_llist_destroy, 0);
+		} else {
+			zend_hash_find(FG(wrapper_errors), (const char*)&wrapper,
+				sizeof wrapper, (void**)&list);
 		}
+
+		if (!list) {
+			zend_llist new_list;
+			zend_llist_init(&new_list, sizeof buffer, wrapper_error_dtor, 0);
+			zend_hash_update(FG(wrapper_errors), (const char*)&wrapper,
+				sizeof wrapper, &new_list, sizeof new_list, (void**)&list);
+		}
+
+		/* append to linked list */
+		zend_llist_add_element(list, &buffer);
 	}
 }
 
@@ -1563,6 +1582,12 @@ void php_shutdown_stream_hashes(TSRMLS_D)
 		efree(FG(stream_filters));
 		FG(stream_filters) = NULL;
 	}
+    
+    if (FG(wrapper_errors)) {
+		zend_hash_destroy(FG(wrapper_errors));
+		efree(FG(wrapper_errors));
+		FG(wrapper_errors) = NULL;
+    }
 }
 
 int php_init_stream_wrappers(int module_number TSRMLS_DC)
