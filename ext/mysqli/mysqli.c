@@ -502,7 +502,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 					(void **) &intern->prop_handler);
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
+	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t)  zval_property_ctor,
 					(void *) &tmp, sizeof(zval *));
 
 	/* link object */
