@@ -1311,15 +1311,15 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 	}
 
 	if (header_chunked) {
-		char ch, done, chunk_size[10], headerbuf[8192];
+		char ch, done, headerbuf[8192];
 
 		done = FALSE;
 
 		while (!done) {
 			int buf_size = 0;
 
-			php_stream_gets(stream, chunk_size, sizeof(chunk_size));
-			if (sscanf(chunk_size, "%x", &buf_size) > 0 ) {
+			php_stream_gets(stream, headerbuf, sizeof(headerbuf));
+			if (sscanf(headerbuf, "%x", &buf_size) > 0 ) {
 				if (buf_size > 0) {
 					int len_size = 0;
 

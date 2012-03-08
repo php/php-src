@@ -56,6 +56,8 @@ PHP                                                                        NEWS
 
 - SOAP
   . Fixed basic HTTP authentication for WSDL sub requests. (Dmitry)
+  . Fixed bug #60842, #51775 (Chunked response parsing error when 
+    chunksize length line is > 10 bytes). (Ilia)
   . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
     User-Agent header). (carloschilazo at gmail dot com)
     
