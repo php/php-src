@@ -125,6 +125,7 @@ typedef struct {
 	php_stream_context *default_context;
 	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
+	HashTable *wrapper_errors;			/* key: wrapper address; value: linked list of char* */
 } php_file_globals;
 
 #ifdef ZTS
