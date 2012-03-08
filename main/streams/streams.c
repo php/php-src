@@ -210,7 +210,7 @@ void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *
 					err_buf_p = zend_llist_get_next_ex(err_list, &pos), i++) {
 				strcat(msg, *err_buf_p);
 				if (i < count - 1) {
-					l += brlen;
+					strcat(msg, br);
 				}
 			}
 
