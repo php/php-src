@@ -52,6 +52,7 @@ PHP                                                                        NEWS
   . Fixed bug #60811 (php-fpm compilation problem). (rasmus)
 
 - SOAP
+  . Fixed basic HTTP authentication for WSDL sub requests. (Dmitry)
   . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
     User-Agent header). (carloschilazo at gmail dot com)
     
@@ -61,9 +62,6 @@ PHP                                                                        NEWS
 - PDO_Sqlite extension:
   . Add createCollation support. (Damien)
 
-- SOAP:
-  . Fixed basic HTTP authentication for WSDL sub requests. (Dmitry)
-
 - Reflection:
   . Fixed bug #60968 (Late static binding doesn't work with 
     ReflectionMethod::invokeArgs()). (Laruence)
@@ -71,6 +69,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #60860 (session.save_handler=user without defined function core
     dumps). (Felipe)
+  . Fixed bug #60634 (Segmentation fault when trying to die() in
+    SessionHandler::write()). (Ilia)
 
 - Streams:
   . Fixed bug #61115 (stream related segfault on fatal error in

@@ -1512,9 +1512,7 @@ static void php_session_flush(TSRMLS_D) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
 		PS(session_status) = php_session_none;
-		zend_try {
-			php_session_save_current_state(TSRMLS_C);
-		} zend_end_try();
+		php_session_save_current_state(TSRMLS_C);
 	}
 }
 /* }}} */
@@ -2167,7 +2165,9 @@ static PHP_RSHUTDOWN_FUNCTION(session) /* {{{ */
 {
 	int i;
 
-	php_session_flush(TSRMLS_C);
+	zend_try {
+		php_session_flush(TSRMLS_C);
+	} zend_end_try();
 	php_rshutdown_session_globals(TSRMLS_C);
 
 	/* this should NOT be done in php_rshutdown_session_globals() */
