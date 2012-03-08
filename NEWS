@@ -2,10 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.11
 
-- Array:
-  . Fixed bug #52719 (array_walk_recursive crashes if third param of the
-    function is by reference). (Nikita Popov)
-
 - Core:
   . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
   . Improved max_input_vars directive to check nested variables (Dmitry).
@@ -25,6 +21,8 @@ PHP                                                                        NEWS
   . Fixed bug #60801 (strpbrk() mishandles NUL byte). (Adam)
   . Fixed bug #60227 (header() cannot detect the multi-line header with CR).
     (rui, Gustavo)
+  . Fixed bug #52719 (array_walk_recursive crashes if third param of the
+    function is by reference). (Nikita Popov)
   . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
 
 - Installation
@@ -45,8 +43,13 @@ PHP                                                                        NEWS
   . Fixed bug #61194 (PDO should export compression flag with myslqnd).
     (Johannes)
 
+- PDO_pgsql
+  . Fixed bug #61267 (pdo_pgsql's PDO::exec() returns the number of SELECTed
+    rows on postgresql >= 9). (ben dot pineau at gmail dot com)
+
 - Phar:
-  . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL bytes). (Nikic)
+  . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
+    bytes). (Nikic)
 
 - PHP-FPM SAPI:
   . Fixed bug #60811 (php-fpm compilation problem). (rasmus)
