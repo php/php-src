@@ -76,6 +76,8 @@ PHP                                                                        NEWS
     SessionHandler::write()). (Ilia)
 
 - Streams:
+  . Fixed bug #61253 (Wrappers opened with errors concurrency problem on ZTS).
+    (Gustavo)
   . Fixed bug #61115 (stream related segfault on fatal error in
     php_stream_context_link). (Gustavo)
   . Fixed bug #60106 (stream_socket_server silently truncates long unix
