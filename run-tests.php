@@ -1357,6 +1357,9 @@ TEST $file
 			} else if (file_exists("./sapi/cgi/php-cgi")) {
 				$old_php = $php;
 				$php = realpath("./sapi/cgi/php-cgi") . ' -C ';
+			} else if (file_exists(dirname($php) . "/php-cgi")) {
+				$old_php = $php;
+				$php = realpath(dirname($php) . "/php-cgi") . ' -C ';
 			} else {
 				show_result('SKIP', $tested, $tested_file, "reason: CGI not available");
 				if ($JUNIT) {
