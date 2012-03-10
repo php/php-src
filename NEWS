@@ -47,6 +47,9 @@ PHP                                                                        NEWS
   . Fixed bug #61267 (pdo_pgsql's PDO::exec() returns the number of SELECTed
     rows on postgresql >= 9). (ben dot pineau at gmail dot com)
 
+- PDO_Sqlite extension:
+  . Add createCollation support. (Damien)
+
 - Phar:
   . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
     bytes). (Nikic)
@@ -60,12 +63,12 @@ PHP                                                                        NEWS
     chunksize length line is > 10 bytes). (Ilia)
   . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
     User-Agent header). (carloschilazo at gmail dot com)
-    
+
+- SPL
+  . Fixed bug #61326 (ArrayObject comparison). (Gustavo)
+
 - SQLite3 extension:
   . Add createCollation() method. (Brad Dewar)
-
-- PDO_Sqlite extension:
-  . Add createCollation support. (Damien)
 
 - Reflection:
   . Fixed bug #60968 (Late static binding doesn't work with 
