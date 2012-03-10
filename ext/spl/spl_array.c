@@ -862,6 +862,30 @@ static void spl_array_unset_property(zval *object, zval *member, const zend_lite
 	std_object_handlers.unset_property(object, member, key TSRMLS_CC);
 } /* }}} */
 
+static int spl_array_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
+{
+	HashTable			*ht1,
+						*ht2;
+	spl_array_object	*intern1,
+						*intern2;
+	int					result	= 0;
+	zval				temp_zv;
+
+	intern1	= (spl_array_object*)zend_object_store_get_object(o1 TSRMLS_CC);
+	intern2	= (spl_array_object*)zend_object_store_get_object(o2 TSRMLS_CC);
+	ht1		= spl_array_get_hash_table(intern1, 0 TSRMLS_CC);
+	ht2		= spl_array_get_hash_table(intern2, 0 TSRMLS_CC);
+
+	zend_compare_symbol_tables(&temp_zv, ht1, ht2 TSRMLS_CC);
+	result = (int)Z_LVAL(temp_zv);
+	/* if we just compared std.properties, don't do it again */
+	if (result == 0 &&
+			!(ht1 == intern1->std.properties && ht2 == intern2->std.properties)) {
+		result = std_object_handlers.compare_objects(o1, o2 TSRMLS_CC);
+	}
+	return result;
+} /* }}} */
+
 static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht TSRMLS_DC) /* {{{ */
 {
 	char *string_key;
@@ -1938,6 +1962,8 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.get_property_ptr_ptr = spl_array_get_property_ptr_ptr;
 	spl_handler_ArrayObject.has_property = spl_array_has_property;
 	spl_handler_ArrayObject.unset_property = spl_array_unset_property;
+
+	spl_handler_ArrayObject.compare_objects = spl_array_compare_objects;
 
 	REGISTER_SPL_STD_CLASS_EX(ArrayIterator, spl_array_object_new, spl_funcs_ArrayIterator);
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Iterator);
