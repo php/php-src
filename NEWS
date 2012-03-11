@@ -32,6 +32,7 @@ PHP                                                                        NEWS
     error). (Stefan)
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
+  . Fixed bug #60569 (Nullbyte truncates Exception $message). (Ilia)
   . Fixed bug #52719 (array_walk_recursive crashes if third param of the
     function is by reference). (Nikita Popov)
 
