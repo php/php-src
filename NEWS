@@ -72,6 +72,9 @@ PHP                                                                        NEWS
   . Fixed bug #60968 (Late static binding doesn't work with 
     ReflectionMethod::invokeArgs()). (Laruence)
 
+- SPL:
+  . Fixed bug #61347 (inconsist isset behavior of Arrayobject). (Laruence)
+
 - Standard:
   . Fixed memory leak in substr_replace. (Pierrick)
   . Make max_file_uploads ini directive settable outside of php.ini (Rasmus)
