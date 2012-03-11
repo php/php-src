@@ -3,9 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.1 RC1
 
 - CLI Server:
-  . "Connection: close" instead of "Connection: closed" (Gustavo)
   . Implemented FR #60850 (Built in web server does not set 
     $_SERVER['SCRIPT_FILENAME'] when using router). (Laruence)
+  . "Connection: close" instead of "Connection: closed" (Gustavo)
 
 - Core:
   . Fixed bug #61225 (Incorect lexing of 0b00*+<NUM>). (Pierrick)
@@ -51,20 +51,20 @@ PHP                                                                        NEWS
     SessionHandler::write()). (Ilia)
 
 - SOAP
-  . Fixed bug #60842, #51775 (Chunked response parsing error when 
-    chunksize length line is > 10 bytes). (Ilia)
   . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
     User-Agent header). (carloschilazo at gmail dot com)
+  . Fixed bug #60842, #51775 (Chunked response parsing error when 
+    chunksize length line is > 10 bytes). (Ilia)
 
 - PDO
   . Fixed bug #61292 (Segfault while calling a method on an overloaded PDO 
     object). (Laruence)
 
 - PDO_mysql
-  . Fixed bug #61207 (PDO::nextRowset() after a multi-statement query doesn't
-    always work). (Johannes)
   . Fixed bug #61194 (PDO should export compression flag with myslqnd).
     (Johannes)
+  . Fixed bug #61207 (PDO::nextRowset() after a multi-statement query doesn't
+    always work). (Johannes)
 
 - Phar
   . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
