@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.3.11
 
 - Core:
+  . Fixed bug #61273 (call_user_func_array with more than 16333 arguments
+    leaks / crashes). (Laruence)
   . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
   . Improved max_input_vars directive to check nested variables (Dmitry).
   . Fixed bug #61095 (Incorect lexing of 0x00*+<NUM>). (Etienne)
