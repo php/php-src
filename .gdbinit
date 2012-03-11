@@ -1,8 +1,8 @@
 define ____executor_globals
 	if basic_functions_module.zts
 		set $tsrm_ls = ts_resource_ex(0, 0)
-		set $eg = ((zend_executor_globals) (*((void ***) $tsrm_ls))[executor_globals_id-1])
-		set $cg = ((zend_compiler_globals) (*((void ***) $tsrm_ls))[compiler_globals_id-1])
+		set $eg = ((zend_executor_globals*) (*((void ***) $tsrm_ls))[executor_globals_id-1])
+		set $cg = ((zend_compiler_globals*) (*((void ***) $tsrm_ls))[compiler_globals_id-1])
 	else
 		set $eg = executor_globals
 		set $cg = compiler_globals
