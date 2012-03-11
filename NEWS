@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - CLI Server:
   . "Connection: close" instead of "Connection: closed" (Gustavo)
+  . Implemented FR #60850 (Built in web server does not set 
+    $_SERVER['SCRIPT_FILENAME'] when using router). (Laruence)
 
 - Core:
   . Fixed bug #61225 (Incorect lexing of 0b00*+<NUM>). (Pierrick)
