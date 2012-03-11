@@ -73,7 +73,7 @@ PHP                                                                        NEWS
     ReflectionMethod::invokeArgs()). (Laruence)
 
 - SPL:
-  . Fixed bug #61347 (inconsist isset behavior of Arrayobject). (Laruence)
+  . Fixed bug #61347 (inconsistent isset behavior of Arrayobject). (Laruence)
 
 - Standard:
   . Fixed memory leak in substr_replace. (Pierrick)
