@@ -16,4 +16,6 @@ $test['a'] = $test['b'];
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
+Deprecated: Call-time pass-by-reference has been deprecated in %sbug60082.php on line %d
+
 Fatal error: main(): Nesting level too deep - recursive dependency? in %sbug60082.php on line %d
