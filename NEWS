@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Fixed bug #60825 (Segfault when running symfony 2 tests).
     (Dmitry, Laruence)
   . Fixed bug #60801 (strpbrk() mishandles NUL byte). (Adam)
+  . Fixed bug #60569 (Nullbyte truncates Exception $message). (Ilia)
   . Fixed bug #60227 (header() cannot detect the multi-line header with CR).
     (rui, Gustavo)
   . Fixed bug #52719 (array_walk_recursive crashes if third param of the
