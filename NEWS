@@ -71,6 +71,7 @@ PHP                                                                        NEWS
     chunksize length line is > 10 bytes). (Ilia)
 
 - SPL
+  . Fixed memory leak when calling SplFileInfo's constructor twice. (Felipe)
   . Fixed bug #61347 (inconsistent isset behavior of Arrayobject). (Laruence)
   . Fixed bug #61326 (ArrayObject comparison). (Gustavo)
 

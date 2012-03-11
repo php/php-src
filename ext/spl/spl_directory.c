@@ -366,6 +366,10 @@ static zend_object_value spl_filesystem_object_clone(zval *zobject TSRMLS_DC)
 void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path, int len, int use_copy TSRMLS_DC) /* {{{ */
 {
 	char *p1, *p2;
+	
+	if (intern->file_name) {
+		efree(intern->file_name);
+	}
 
 	intern->file_name = use_copy ? estrndup(path, len) : path;
 	intern->file_name_len = len;
@@ -386,7 +390,10 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	} else {
 		intern->_path_len = 0;
 	}
-
+	
+	if (intern->_path) {
+		efree(intern->_path);
+	}
 	intern->_path = estrndup(path, intern->_path_len);
 } /* }}} */
 
