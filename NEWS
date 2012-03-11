@@ -38,10 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug #61003 (mysql_stat() require a valid connection). (Johannes).
 
 - PDO_mysql
-  . Fixed bug #61207 (PDO::nextRowset() after a multi-statement query doesn't
-    always work). (Johannes)
   . Fixed bug #61194 (PDO should export compression flag with myslqnd).
     (Johannes)
+  . Fixed bug #61207 (PDO::nextRowset() after a multi-statement query doesn't
+    always work). (Johannes)
 
 - PDO_pgsql
   . Fixed bug #61267 (pdo_pgsql's PDO::exec() returns the number of SELECTed
@@ -59,14 +59,14 @@ PHP                                                                        NEWS
 
 - SOAP
   . Fixed basic HTTP authentication for WSDL sub requests. (Dmitry)
-  . Fixed bug #60842, #51775 (Chunked response parsing error when 
-    chunksize length line is > 10 bytes). (Ilia)
   . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
     User-Agent header). (carloschilazo at gmail dot com)
+  . Fixed bug #60842, #51775 (Chunked response parsing error when 
+    chunksize length line is > 10 bytes). (Ilia)
 
 - SPL
-  . Fixed bug #61326 (ArrayObject comparison). (Gustavo)
   . Fixed bug #61347 (inconsistent isset behavior of Arrayobject). (Laruence)
+  . Fixed bug #61326 (ArrayObject comparison). (Gustavo)
 
 - SQLite3 extension:
   . Add createCollation() method. (Brad Dewar)
@@ -86,20 +86,20 @@ PHP                                                                        NEWS
     (Gustavo)
   . Fixed bug #61115 (stream related segfault on fatal error in
     php_stream_context_link). (Gustavo)
-  . Fixed bug #60106 (stream_socket_server silently truncates long unix
-    socket paths). (Ilia)
-  . Further fix for bug #60455 (stream_get_line misbehaves if EOF is not
-    detected together with the last read). (Gustavo)
   . Fixed bug #60817 (stream_get_line() reads from stream even when there is
     already sufficient data buffered). stream_get_line() now behaves more like
     fgets(), as is documented. (Gustavo)
+  . Further fix for bug #60455 (stream_get_line misbehaves if EOF is not
+    detected together with the last read). (Gustavo)
+  . Fixed bug #60106 (stream_socket_server silently truncates long unix
+    socket paths). (Ilia)
 
 - Tidy:
   . Fixed bug #54682 (tidy null pointer dereference). (Tony, David Soria Parra)
 
 - XMLRPC:
-  . Fixed bug #61097 (Memory leak in xmlrpc functions copying zvals). (Nikic)
   . Fixed bug #61264 (xmlrpc_parse_method_descriptions leaks temporary variable). (Nikita Popov)
+  . Fixed bug #61097 (Memory leak in xmlrpc functions copying zvals). (Nikic)
 
 - Zlib:
   . Fixed bug #61139 (gzopen leaks when specifying invalid mode). (Nikic)
