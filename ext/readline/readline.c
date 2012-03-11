@@ -576,9 +576,8 @@ PHP_FUNCTION(readline_callback_handler_install)
 		FREE_ZVAL(_prepped_callback);
 	}
 
-	MAKE_STD_ZVAL(_prepped_callback);
-	*_prepped_callback = *callback;
-	zval_copy_ctor(_prepped_callback);
+	ALLOC_ZVAL(_prepped_callback);
+	MAKE_COPY_ZVAL(&callback, _prepped_callback);
 
 	rl_callback_handler_install(prompt, php_rl_callback_handler);
 
