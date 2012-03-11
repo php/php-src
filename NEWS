@@ -38,10 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug #61003 (mysql_stat() require a valid connection). (Johannes).
 
 - PDO_mysql
-  . Fixed bug #61194 (PDO should export compression flag with myslqnd).
-    (Johannes)
   . Fixed bug #61207 (PDO::nextRowset() after a multi-statement query doesn't
     always work). (Johannes)
+  . Fixed bug #61194 (PDO should export compression flag with myslqnd).
+    (Johannes)
 
 - PDO_pgsql
   . Fixed bug #61267 (pdo_pgsql's PDO::exec() returns the number of SELECTed
