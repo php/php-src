@@ -57,6 +57,10 @@ PHP                                                                        NEWS
 - PHP-FPM SAPI:
   . Fixed bug #60811 (php-fpm compilation problem). (rasmus)
 
+- Readline:
+  . Fixed bug #61088 (Memory leak in readline_callback_handler_install).
+    (Nikic, Laruence)
+
 - SOAP
   . Fixed basic HTTP authentication for WSDL sub requests. (Dmitry)
   . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
