@@ -599,6 +599,11 @@ static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC)
 	sapi_cli_server_register_variable(track_vars_array, "SCRIPT_NAME", client->request.vpath TSRMLS_CC);
 	if (SG(request_info).path_translated) {
 		sapi_cli_server_register_variable(track_vars_array, "SCRIPT_FILENAME", SG(request_info).path_translated TSRMLS_CC);
+	} else if (client->server->router) {
+		char *temp;
+		spprintf(&temp, 0, "%s/%s", client->server->document_root, client->server->router);
+		sapi_cli_server_register_variable(track_vars_array, "SCRIPT_FILENAME", temp TSRMLS_CC);
+		efree(temp);
 	}
 	if (client->request.path_info) {
 		sapi_cli_server_register_variable(track_vars_array, "PATH_INFO", client->request.path_info TSRMLS_CC);
