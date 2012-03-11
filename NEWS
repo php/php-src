@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Fixed bug #60948 (mysqlnd FTBFS when -Wformat-security is enabled).
     (Johannes)
 
+- Readline:
+  . Fixed bug #61088 (Memory leak in readline_callback_handler_install).
+    (Nikic, Laruence)
+
 - Session
   . Fixed bug #60634 (Segmentation fault when trying to die() in 
     SessionHandler::write()). (Ilia)
