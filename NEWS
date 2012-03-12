@@ -168,8 +168,8 @@ PHP                                                                        NEWS
   . Changed error handlers to only generate docref links when the docref_root 
     php.ini setting is not empty. (Derick)
   . Changed silent conversion of array to string to produce a notice. (Patrick)
-  . Changed default value of "default_charset" php.ini option from ISO-8859-1 to
-    UTF-8. (Rasmus)
+  . Changed default encoding from ISO-8859-1 to UTF-8 when not specified in
+    htmlspecialchars and htmlentities. (Rasmus)
   . Changed casting of null/''/false into an Object when adding a property
     from E_STRICT into a warning. (Scott)
   . Changed E_ALL to include E_STRICT. (Stas)
