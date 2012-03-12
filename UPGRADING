@@ -36,15 +36,6 @@ PHP 5.4 UPGRADE NOTES
 1. Changes to INI directives
 =============================
 
-- The default character set is now UTF-8 when the default_charset
-  php.ini directive is not explicitly set. This applies to functions
-  such as htmlentities() and htmlspecialchars(). If you were relying
-  on the previous default of ISO-8859-1 you will need to add:
-
-    default_charset = iso-8859-1
-
-  to your php.ini to preserve pre-PHP 5.4 behavior.
-
 - PHP 5.4 now checks at compile time if /dev/urandom or /dev/arandom
   are present.  If either is available, session.entropy_file now
   defaults to that file and session.entropy_length defaults to 32.
@@ -199,6 +190,13 @@ PHP 5.4 UPGRADE NOTES
   response.
 
 - call_user_func_array() no longer allows call-time pass by reference.
+
+- the default character set for htmlspecialchars() and htmlentities() is
+  now UTF-8. In previous versions it was ISO-8859-1. Note that changing
+  your output charset via the php.ini default_charset directive does not
+  affect htmlspecialchars/htmlentities unless you are passing "" (an 
+  empty string) as the encoding parameter to your htmlspecialchars/htmlentities
+  calls. 
 
 - htmlentities() and htmlspecialchars() are stricter in the code units they
   accept for the asian encodings. For Big5-HKSCS, the octets 0x80 and 0xFF are
