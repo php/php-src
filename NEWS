@@ -24,6 +24,7 @@ PHP                                                                        NEWS
   . Fixed bug #60569 (Nullbyte truncates Exception $message). (Ilia)
   . Fixed bug #60227 (header() cannot detect the multi-line header with CR).
     (rui, Gustavo)
+  . Fixed bug #60222 (time_nanosleep() does validate input params). (Ilia)
   . Fixed bug #52719 (array_walk_recursive crashes if third param of the
     function is by reference). (Nikita Popov)
   . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
