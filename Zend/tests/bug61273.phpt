@@ -7,7 +7,7 @@ Bug #61273 (call_user_func_array with more than 16333 arguments leaks / crashes)
  * for 5.4 #define ZEND_VM_STACK_PAGE_SIZE ((16 * 1024) - 16)
  * we should trick EG(argument_stack) into growing
  */
-$args = array_fill(0, 64 * 1024 - 64, "*");
+$args = array_fill(0, 64 * 1024 - 64, 0);
 call_user_func_array(function(&$a) {}, $args);
 echo strval("okey");
 --EXPECTF--
