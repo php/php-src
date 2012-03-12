@@ -3,11 +3,14 @@ DRCP: privileged connect
 --SKIPIF--
 <?php
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
-if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 require(dirname(__FILE__)."/details.inc");
+if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
+ob_start();
+phpinfo(INFO_MODULES);
+$phpinfo = ob_get_clean();
 if (preg_match('/Compile-time ORACLE_HOME/', $phpinfo) !== 1) {
     // Assume building PHP with an ORACLE_HOME means the tested DB is on the same machine as PHP
-    die("skip this test is unlikely to work with remote Oracle - unless an Oracle password file has been created");
+    die("skip this test is unlikely to work with a remote database - unless an Oracle password file has been created");
 }
 ?>
 --INI--
