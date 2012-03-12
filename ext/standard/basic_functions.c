@@ -4467,6 +4467,15 @@ PHP_FUNCTION(time_nanosleep)
 		return;
 	}
 
+	if (tv_sec < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The seconds value must be greater than 0");
+		RETURN_FALSE;
+	}
+	if (tv_nsec < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The nanoseconds value must be greater than 0");
+		RETURN_FALSE;
+	}
+
 	php_req.tv_sec = (time_t) tv_sec;
 	php_req.tv_nsec = tv_nsec;
 	if (!nanosleep(&php_req, &php_rem)) {
