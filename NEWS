@@ -317,9 +317,9 @@ PHP                                                                        NEWS
     been added. (Scott)
   . Added http_response_code() function. FR #52555. (Paul Dragoonis, Kalle)
   . Fixed bug #55500 (Corrupted $_FILES indices lead to security concern).
-    (Stas)
+    (CVE-2012-1172). (Stas)
   . Fixed bug #54374 (Insufficient validating of upload name leading to 
-    corrupted $_FILES indices). (Stas, lekensteyn at gmail dot com)
+    corrupted $_FILES indices). (CVE-2012-1172). (Stas, lekensteyn at gmail dot com)
 
 - Improved CLI SAPI:
   . Added built-in web server that is intended for testing purpose. 
