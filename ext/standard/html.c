@@ -1004,8 +1004,9 @@ static void traverse_for_entities(
 				/* && code2 == '\0' always true for current maps */)
 			goto invalid_code;
 
-		/* deal with encodings other than utf-8/iso-8859-1 */
-		if (!CHARSET_UNICODE_COMPAT(charset)) {
+		/* UTF-8 doesn't need mapping (ISO-8859-1 doesn't either, but
+		 * the call is needed to ensure the codepoint <= U+00FF)  */
+		if (charset != cs_utf_8) {
 			/* replace unicode code point */
 			if (map_from_unicode(code, charset, &code) == FAILURE || code2 != 0)
 				goto invalid_code; /* not representable in target charset */
