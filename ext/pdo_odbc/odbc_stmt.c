@@ -637,12 +637,14 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned l
 
 			if (C->fetched_len != SQL_NO_TOTAL) {
 				/* use size suggested by the driver, if it knows it */
-				alloced = C->fetched_len + 1;
+				buf = emalloc(C->fetched_len + 1);
+				memcpy(buf, C->data, C->fetched_len);
+				buf[C->fetched_len] = 0;
+				used = C->fetched_len;
+			} else {
+				buf = estrndup(C->data, 256);
+				used = 255; /* not 256; the driver NUL terminated the buffer */
 			}
-			
-			buf = emalloc(alloced);
-			memcpy(buf, C->data, 256);
-			used = 255; /* not 256; the driver NUL terminated the buffer */
 
 			do {
 				C->fetched_len = 0;
