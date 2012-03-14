@@ -194,37 +194,39 @@ require_once('skipifconnectfailure.inc');
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[017] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-	// this might cause a warning - no index used
-	if (!$res = @mysqli_query($link, "SHOW VARIABLES LIKE 'log_slow_queries'"))
-		printf("[018] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-	if (!$row = mysqli_fetch_assoc($res))
-		printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-	$log_slow_query = ('ON' == $row['Value']);
-
-	if (mysqli_get_server_version($link) >= 51011) {
+	if (mysqli_get_server_version($link) <= 50600) {
 		// this might cause a warning - no index used
-		if (!$res = @mysqli_query($link, "SHOW VARIABLES LIKE 'log_queries_not_using_indexes'"))
-			printf("[020] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+		if (!$res = @mysqli_query($link, "SHOW VARIABLES LIKE 'log_slow_queries'"))
+			printf("[018] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 		if (!$row = mysqli_fetch_assoc($res))
-			printf("[021] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+			printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-		$log_queries_not_using_indexes = ('ON' == $row['Value']);
+		$log_slow_query = ('ON' == $row['Value']);
 
-		if ($log_slow_queries && $log_queries_not_using_indexes) {
-
-			for ($i = 100; $i < 20000; $i++) {
-				if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES ($i, 'z')"))
-					printf("[022 - %d] [%d] %s\n", $i - 99, mysqli_errno($link), mysqli_error($link));
-			}
-
+		if (mysqli_get_server_version($link) >= 50111) {
 			// this might cause a warning - no index used
-			if (!$res = @mysqli_query($link, "SELECT id, label FROM test WHERE id = 1323"))
-				printf("[023] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+			if (!$res = @mysqli_query($link, "SHOW VARIABLES LIKE 'log_queries_not_using_indexes'"))
+				printf("[020] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-			mysqli_free_result($res);
+			if (!$row = mysqli_fetch_assoc($res))
+				printf("[021] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+			$log_queries_not_using_indexes = ('ON' == $row['Value']);
+
+			if ($log_slow_queries && $log_queries_not_using_indexes) {
+
+				for ($i = 100; $i < 20000; $i++) {
+					if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES ($i, 'z')"))
+						printf("[022 - %d] [%d] %s\n", $i - 99, mysqli_errno($link), mysqli_error($link));
+				}
+
+				// this might cause a warning - no index used
+				if (!$res = @mysqli_query($link, "SELECT id, label FROM test WHERE id = 1323"))
+					printf("[023] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+
+				mysqli_free_result($res);
+			}
 		}
 	}
 
