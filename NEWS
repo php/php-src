@@ -75,6 +75,9 @@ PHP                                                                        NEWS
   . Fixed bug #61194 (PDO should export compression flag with myslqnd).
     (Johannes)
 
+- PDO_odbc
+  . Fixed bug #61212 (PDO ODBC Segfaults on SQL_SUCESS_WITH_INFO). (Ilia)
+
 - Phar
   . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
     bytes). (Nikita Popov)
