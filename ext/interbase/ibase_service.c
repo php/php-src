@@ -321,6 +321,7 @@ query_loop:
 					heap_p = heap_buf + res_size;
 				}
 				result += 2;
+				*(result+line_len) = 0;
 				snprintf(heap_p, heap_buf_size - (heap_buf - heap_p), "%s\n", result);
 				heap_p += line_len +2;
 				goto query_loop; /* repeat until result is exhausted */
