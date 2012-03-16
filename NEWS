@@ -96,6 +96,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed memory leak in substr_replace. (Pierrick)
   . Make max_file_uploads ini directive settable outside of php.ini (Rasmus)
+  . Fixed bug #61409 (Bad formatting on phpinfo()). (Jakub Vrana)
   . Fixed bug #60222 (time_nanosleep() does validate input params). (Ilia)
   . Fixed bug #60106 (stream_socket_server silently truncates long unix socket
     paths). (Ilia)
