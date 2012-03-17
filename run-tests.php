@@ -1342,8 +1342,8 @@ TEST $file
 
 	$tested = trim($section_text['TEST']);
 
-	/* For GET/POST tests, check if cgi sapi is available and if it is, use it. */
-	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
+	/* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
+	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
 		if (isset($php_cgi)) {
 			$old_php = $php;
 			$php = $php_cgi . ' -C ';
@@ -1703,6 +1703,46 @@ TEST $file
 
 		$env['CONTENT_LENGTH'] = strlen($request);
 		$env['REQUEST_METHOD'] = 'POST';
+
+		if (empty($request)) {
+			if ($JUNIT) {
+				$JUNIT['test_total']++;
+				$JUNIT['test_error']++;
+				$JUNIT['result_xml'] .= '<testcase classname="'.$shortname.'" name="'.htmlspecialchars($tested, ENT_QUOTES).'" time="'.$test_execution_time.'">'."\n";
+				$JUNIT['result_xml'] .= '<error type="BORKED" message="empty $request" />'."\n";
+				$JUNIT['result_xml'] .= '</testcase>'."\n";
+			}
+			return 'BORKED';
+		}
+
+		save_text($tmp_post, $request);
+		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+
+	} elseif (array_key_exists('PUT', $section_text) && !empty($section_text['PUT'])) {
+
+		$post = trim($section_text['PUT']);
+		$raw_lines = explode("\n", $post);
+
+		$request = '';
+		$started = false;
+
+		foreach ($raw_lines as $line) {
+
+			if (empty($env['CONTENT_TYPE']) && preg_match('/^Content-Type:(.*)/i', $line, $res)) {
+				$env['CONTENT_TYPE'] = trim(str_replace("\r", '', $res[1]));
+				continue;
+			}
+
+			if ($started) {
+				$request .= "\n";
+			}
+
+			$started = true;
+			$request .= $line;
+		}
+
+		$env['CONTENT_LENGTH'] = strlen($request);
+		$env['REQUEST_METHOD'] = 'PUT';
 
 		if (empty($request)) {
 			if ($JUNIT) {
