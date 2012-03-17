@@ -12,7 +12,7 @@ PHP                                                                        NEWS
     exist in ISO-8859-1). (Gustavo)
   . Fixed bug #61273 (call_user_func_array with more than 16333 arguments 
     leaks / crashes). (Laruence)
-  . Fixed bug #61225 (Incorect lexing of 0b00*+<NUM>). (Pierrick)
+  . Fixed bug #61225 (Incorrect lexing of 0b00*+<NUM>). (Pierrick)
   . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
   . Fixed bug #61106 (Segfault when using header_register_callback). (Nikita
     Popov)
