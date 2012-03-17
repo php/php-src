@@ -898,7 +898,6 @@ default_socket_timeout = 60
 
 ;extension=php_soap.dll
 ;extension=php_sockets.dll
-;extension=php_sqlite.dll
 ;extension=php_sqlite3.dll
 ;extension=php_sybase_ct.dll
 ;extension=php_tidy.dll
