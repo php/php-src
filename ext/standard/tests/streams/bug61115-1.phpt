@@ -1,0 +1,11 @@
+--TEST--
+Bug #61115: Stream related segfault on fatal error in php_stream_context_del_link - variation 1
+--FILE--
+<?php
+
+$fileResourceTemp = fopen('php://temp', 'wr');
+stream_context_get_options($fileResourceTemp);
+ftruncate($fileResourceTemp, PHP_INT_MAX);
+?>
+--EXPECTF--
+Fatal error: Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes) in %s on line %d

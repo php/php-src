@@ -344,7 +344,7 @@ PHPAPI int _php_stream_free(php_stream *stream, int close_options TSRMLS_DC) /* 
 	/* on an resource list destruction, the context, another resource, may have
 	 * already been freed (if it was created after the stream resource), so
 	 * don't reference it */
-	if (!(close_options & PHP_STREAM_FREE_RSRC_DTOR)) {
+	if (EG(active)) {
 		context = stream->context;
 	}
 
