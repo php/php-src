@@ -72,6 +72,13 @@ PHP                                                                        NEWS
   . Fixed bug #61088 (Memory leak in readline_callback_handler_install).
     (Nikic, Laruence)
 
+- Reflection:
+  . Fixed bug #61388 (ReflectionObject:getProperties() issues invalid reads
+    when get_properties returns a hash table with (inaccessible) dynamic
+    numeric properties). (Gustavo)
+  . Fixed bug #60968 (Late static binding doesn't work with 
+    ReflectionMethod::invokeArgs()). (Laruence)
+
 - SOAP
   . Fixed basic HTTP authentication for WSDL sub requests. (Dmitry)
   . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
@@ -89,10 +96,6 @@ PHP                                                                        NEWS
 
 - SQLite3 extension:
   . Add createCollation() method. (Brad Dewar)
-
-- Reflection:
-  . Fixed bug #60968 (Late static binding doesn't work with 
-    ReflectionMethod::invokeArgs()). (Laruence)
 
 - Session:
   . Fixed bug #60860 (session.save_handler=user without defined function core
