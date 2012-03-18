@@ -3832,6 +3832,13 @@ static int _adddynproperty(zval **pptr TSRMLS_DC, int num_args, va_list args, ze
 	zend_class_entry *ce = *va_arg(args, zend_class_entry**);
 	zval *retval = va_arg(args, zval*), member;
 
+	/* under some circumstances, the properties hash table may contain numeric
+	 * properties (e.g. when casting from array). This is a WONT FIX bug, at
+	 * least for the moment. Ignore these */
+	if (hash_key->nKeyLength == 0) {
+		return 0;
+	}
+
 	if (hash_key->arKey[0] == '\0') {
 		return 0; /* non public cannot be dynamic */
 	}
