@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug #52719 (array_walk_recursive crashes if third param of the
     function is by reference). (Nikita Popov)
 
+- FPM
+  . Fixed bug #61430 (Transposed memset() params in sapi/fpm/fpm/fpm_shm.c).
+    (michaelhood at gmail dot com, Ilia)
+
 - Ibase
   . Fixed bug #60947 (Segmentation fault while executing ibase_db_info).
     (Ilia)
