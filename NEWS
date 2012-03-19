@@ -29,6 +29,10 @@ PHP                                                                        NEWS
     function is by reference). (Nikita Popov)
   . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
 
+- FPM
+  . Fixed bug #61430 (Transposed memset() params in sapi/fpm/fpm/fpm_shm.c).
+    (michaelhood at gmail dot com, Ilia)
+
 - Ibase
   . Fixed bug #60947 (Segmentation fault while executing ibase_db_info).
     (Ilia)

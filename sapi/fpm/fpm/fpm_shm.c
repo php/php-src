@@ -35,7 +35,7 @@ void *fpm_shm_alloc(size_t size) /* {{{ */
 		return NULL;
 	}
 
-	memset(mem, size, 0);
+	memset(mem, 0, size);
 	fpm_shm_size += size;
 	return mem;
 }
