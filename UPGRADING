@@ -467,6 +467,10 @@ b. Extensions with changed behavior
        is set with date.timezone and/or date_default_timezone_set().
        Instead it will always fall back to "UTC".
 
+   - Hash extension
+     - the output of the tiger hash family has been corrected, see
+       https://bugs.php.net/61307
+
 ===========================
 10. Changes in SAPI support
 ===========================
