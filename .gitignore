@@ -94,6 +94,19 @@ want_dependencies
 x64
 stamp-h.in
 scan_makefile_in.awk
+TSRM/tsrm_config.h
+Zend/zend_config.h
+Zend/zend_ini_parser.c
+Zend/zend_ini_parser.h
+Zend/zend_ini_parser.output
+Zend/zend_language_parser.c
+Zend/zend_language_parser.h
+Zend/zend_language_parser.output
+ext/date/lib/timelib_config.h
+ext/iconv/php_iconv_aliased_libiconv.h
+ext/phar/phar.php
+main/php_config.h
+main/php_config.h.in
 
 # Test specific Ignores
 */tests/*.diff
