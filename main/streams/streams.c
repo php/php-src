@@ -996,77 +996,111 @@ PHPAPI char *_php_stream_get_line(php_stream *stream, char *buf, size_t maxlen,
 	return bufstart;
 }
 
+#define STREAM_BUFFERED_AMOUNT(stream) \
+	((size_t)(((stream)->writepos) - (stream)->readpos))
+
+static char *_php_stream_search_delim(php_stream *stream,
+									  size_t maxlen,
+									  size_t skiplen,
+									  char *delim, /* non-empty! */
+									  size_t delim_len TSRMLS_DC)
+{
+	size_t	seek_len;
+
+	/* set the maximum number of bytes we're allowed to read from buffer */
+	seek_len = MIN(STREAM_BUFFERED_AMOUNT(stream), maxlen);
+	if (seek_len <= skiplen) {
+		return NULL;
+	}
+
+	if (delim_len == 1) {
+		return memchr(&stream->readbuf[stream->readpos + skiplen],
+			delim[0], seek_len - skiplen);
+	} else {
+		return php_memnstr((char*)&stream->readbuf[stream->readpos + skiplen],
+				delim, delim_len,
+				(char*)&stream->readbuf[stream->readpos + seek_len]);
+	}
+}
+
 PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *returned_len, char *delim, size_t delim_len TSRMLS_DC)
 {
-	char *e, *buf;
-	size_t toread, len;
-	int skip = 0;
+	char	*ret_buf,				/* returned buffer */
+			*found_delim = NULL;
+	size_t	buffered_len,
+			tent_ret_len;			/* tentative returned length*/
+	int		has_delim	 = delim_len > 0 && delim[0] != '\0';
 
-	len = stream->writepos - stream->readpos;
+	if (maxlen == 0) {
+		return NULL;
+	}
 
-	/* make sure the stream read buffer has maxlen bytes */
-	while (len < maxlen) {
+	if (has_delim) {
+		found_delim = _php_stream_search_delim(
+			stream, maxlen, 0, delim, delim_len TSRMLS_CC);
+	}
 
-		size_t just_read;
-		toread = MIN(maxlen - len, stream->chunk_size);
+	buffered_len = STREAM_BUFFERED_AMOUNT(stream);
+	/* try to read up to maxlen length bytes while we don't find the delim */
+	while (!found_delim && buffered_len < maxlen) {
+		size_t	just_read,
+				to_read_now;
 
-		php_stream_fill_read_buffer(stream, len + toread TSRMLS_CC);
+		to_read_now = MIN(maxlen - buffered_len, stream->chunk_size);
 
-		just_read = (stream->writepos - stream->readpos) - len;
-		len += just_read;
+		php_stream_fill_read_buffer(stream, buffered_len + to_read_now TSRMLS_CC);
+
+		just_read = STREAM_BUFFERED_AMOUNT(stream) - buffered_len;
 
 		/* Assume the stream is temporarily or permanently out of data */
 		if (just_read == 0) {
 			break;
 		}
-	}
 
-	if (delim_len == 0 || !delim) {
-		toread = maxlen;
-	} else {
-		size_t seek_len;
-
-		/* set the maximum number of bytes we're allowed to read from buffer */
-		seek_len = stream->writepos - stream->readpos;
-		if (seek_len > maxlen) {
-			seek_len = maxlen;
-		}
-
-		if (delim_len == 1) {
-			e = memchr(stream->readbuf + stream->readpos, *delim, seek_len);
-		} else {
-			e = php_memnstr(stream->readbuf + stream->readpos, delim, delim_len, (stream->readbuf + stream->readpos + seek_len));
-		}
-
-		if (!e) {
-			/* return with error if the delimiter string was not found, we
-			 * could not completely fill the read buffer with maxlen bytes
-			 * and we don't know we've reached end of file. Added with
-			 * non-blocking streams in mind, where this situation is frequent */
-			if (seek_len < maxlen && !stream->eof) {
-				return NULL;
+		if (has_delim) {
+			/* search for delimiter, but skip buffered_len (the number of bytes
+			 * buffered before this loop iteration), as they have already been
+			 * searched for the delimiter */
+			found_delim = _php_stream_search_delim(
+				stream, maxlen, buffered_len, delim, delim_len TSRMLS_CC);
+			if (found_delim) {
+				break;
 			}
-			toread = maxlen;
+		}
+		buffered_len += just_read;
+	}
+
+	if (has_delim && found_delim) {
+		tent_ret_len = found_delim - (char*)&stream->readbuf[stream->readpos];
+	} else if (!has_delim && STREAM_BUFFERED_AMOUNT(stream) >= maxlen) {
+		tent_ret_len = maxlen;
+	} else {
+		/* return with error if the delimiter string (if any) was not found, we
+		 * could not completely fill the read buffer with maxlen bytes and we
+		 * don't know we've reached end of file. Added with non-blocking streams
+		 * in mind, where this situation is frequent */
+		if (STREAM_BUFFERED_AMOUNT(stream) < maxlen && !stream->eof) {
+			return NULL;
+		} else if (STREAM_BUFFERED_AMOUNT(stream) == 0 && stream->eof) {
+			/* refuse to return an empty string just because by accident
+			 * we knew of EOF in a read that returned no data */
+			return NULL;
 		} else {
-			toread = e - (char *) stream->readbuf - stream->readpos;
-			/* we found the delimiter, so advance the read pointer past it */
-			skip = 1;
+			tent_ret_len = MIN(STREAM_BUFFERED_AMOUNT(stream), maxlen);
 		}
 	}
 
-	if (toread > maxlen && maxlen > 0) {
-		toread = maxlen;
-	}
+	ret_buf = emalloc(tent_ret_len + 1);
+	/* php_stream_read will not call ops->read here because the necessary
+	 * data is guaranteedly buffered */
+	*returned_len = php_stream_read(stream, ret_buf, tent_ret_len);
 
-	buf = emalloc(toread + 1);
-	*returned_len = php_stream_read(stream, buf, toread);
-
-	if (skip) {
+	if (found_delim) {
 		stream->readpos += delim_len;
 		stream->position += delim_len;
 	}
-	buf[*returned_len] = '\0';
-	return buf;
+	ret_buf[*returned_len] = '\0';
+	return ret_buf;
 }
 
 /* Writes a buffer directly to a stream, using multiple of the chunk size */
