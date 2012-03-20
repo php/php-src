@@ -1,0 +1,196 @@
+= RAKE -- Ruby Make 
+
+Supporting Rake version: 0.8.6
+
+This package contains Rake, a simple ruby build program with
+capabilities similar to make.
+
+Rake has the following features:
+
+* Rakefiles (rake's version of Makefiles) are completely defined in
+  standard Ruby syntax.  No XML files to edit.  No quirky Makefile
+  syntax to worry about (is that a tab or a space?)
+
+* Users can specify tasks with prerequisites.
+
+* Rake supports rule patterns to synthesize implicit tasks.
+
+* Flexible FileLists that act like arrays but know about manipulating
+  file names and paths.
+
+* A library of prepackaged tasks to make building rakefiles easier. For example,
+  tasks for building tarballs, gems and RDoc output are provided.
+
+* Supports parallel execution of tasks.
+
+
+== Installation
+
+=== Gem Installation
+
+Download and install  rake with the following.
+
+   gem install rake
+
+=== Normal Installation
+
+You can download the source tarball of the latest version of Rake from
+
+* http://rubyforge.org/project/showfiles.php?group_id=50
+
+Extract the tarball and run
+
+  % ruby install.rb
+
+from its distribution directory.
+
+== Usage
+
+=== Simple Example
+
+First, you must write a "Rakefile" file which contains the build rules. Here's
+a simple example:
+
+  task :default => [:test]
+  
+  task :test do
+    ruby "test/unittest.rb"
+  end
+
+This Rakefile has two tasks:
+
+* A task named "test", which - upon invocation - will run a unit test file in
+  Ruby.
+* A task named "default". This task does nothing by itself, but it has exactly
+  one dependency, namely the "test" task. Invoking the "default" task will
+  cause Rake to invoke the "test" task as well.
+
+Running the "rake" command without any options will cause it to run the
+"default" task in the Rakefile:
+
+  % ls
+  Rakefile     test/
+  % rake
+  (in /home/some_user/Projects/rake)
+  ruby test/unittest.rb
+  ....unit test output here...
+
+Type "rake --help" for all available options.
+
+
+=== More Information
+
+* For details on Rake's command-line invocation, read
+  doc/command_line_usage.rdoc[http://rake.rubyforge.org/files/doc/command_line_usage_rdoc.html]
+* For details on writing Rakefiles, see
+  doc/rakefile.rdoc[http://rake.rubyforge.org/files/doc/rakefile_rdoc.html].
+* For the original announcement of Rake, see
+  doc/rational.rdoc[http://rake.rubyforge.org/files/doc/rational_rdoc.html].
+* For a glossary of terms, see
+  doc/glossary.rdoc[http://rake.rubyforge.org/files/doc/glossary_rdoc.html].
+
+
+== Development
+
+=== Source Repository
+
+Rake is currently hosted at github. The github web page is
+http://github.com/jimweirich/rake. The public git clone URL is
+
+* git://github.com/jimweirich/rake.git
+
+=== Running the Rake Test Suite
+
+If you wish to run the unit and functional tests that come with Rake:
+
+* Install the 'session' gem in order to run the functional tests.
+* CD into the top project directory of rake.
+* Type one of the following:
+
+     rake                  # If you have a version of rake installed
+     ruby -Ilib bin/rake   # If you do not have a version of rake installed.
+
+=== Issues and Bug Reports
+
+Bugs, features requests and other issues can be logged at
+
+* http://onestepback.org/redmine/projects/show/rake
+
+You will need an account to before you can post issues.  Register at
+http://onestepback.org/redmine/account/register.  Or you can send me
+an email (at jim dot weirich at gmail dot com)
+
+
+== Online Resources
+
+=== Rake References
+
+* Rake Documentation Home: http://docs.rubyrake.org
+* Rake Project Page: http://rubyforge.org/projects/rake
+* Rake API Documents: http://rake.rubyforge.org
+* Rake Source Code Repo:  http://github.com/jimweirich/rake
+* Rake Git Repo Clone URL: git://github.com/jimweirich/rake.git
+
+=== Presentations and Articles about Rake
+
+* Jim Weirich's 2003 RubyConf presentation: http://onestepback.org/articles/buildingwithrake/
+* Martin Fowler's article on Rake: http://martinfowler.com/articles/rake.html
+
+== Other Make Reinvisionings ...
+
+Rake is a late entry in the make replacement field.  Here are links to
+other projects with similar (and not so similar) goals.
+
+* http://directory.fsf.org/bras.html -- Bras, one of earliest
+  implementations of "make in a scripting language".
+* http://www.a-a-p.org -- Make in Python
+* http://www.aromatic.com/tools/jam.txt -- JAM, Java Automated Make
+* http://ant.apache.org -- The Ant project
+* http://ppt.perl.org/commands/make/index.html -- Make from the Perl
+  Power Tools implementation.
+* http://search.cpan.org/search?query=PerlBuildSystem -- The Perl Build System
+* http://make.rubyforge.org -- Rant, another Ruby make tool.
+
+== Credits
+
+[<b>Ryan Dlugosz</b>] For the initial conversation that sparked Rake.
+
+[<b>nobu.nokada@softhome.net</b>] For the initial patch for rule support.
+
+[<b>Tilman Sauerbeck <tilman@code-monkey.de></b>] For the recursive rule patch.
+
+== License
+
+Rake is available under an MIT-style license.
+
+:include: MIT-LICENSE
+
+== Support
+
+The Rake homepage is http://rake.rubyforge.org.  You can find the Rake
+RubyForge page at http://rubyforge.org/projects/rake.
+
+Feel free to submit commits or feature requests.  If you send a patch,
+remember to update the corresponding unit tests.  If fact, I prefer
+new feature to be submitted in the form of new unit tests.
+
+For other information, feel free to ask on the ruby-talk mailing list
+(which is mirrored to comp.lang.ruby) or contact
+jim dot weirich at gmail.com.
+
+---
+
+= Other stuff
+
+Author::   Jim Weirich <jim.weirich@gmail.com>
+Requires:: Ruby 1.8.0 or later
+License::  Copyright 2003-2008 by Jim Weirich.
+           Released under an MIT-style license.  See the LICENSE file
+           included in the distribution.
+
+== Warranty
+
+This software is provided "as is" and without any express or
+implied warranties, including, without limitation, the implied
+warranties of merchantibility and fitness for a particular
+purpose.

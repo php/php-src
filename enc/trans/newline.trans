@@ -1,0 +1,135 @@
+#include "transcode_data.h"
+
+<%
+  map_normalize = {}
+  map_normalize["{00-ff}"] = :func_so
+
+  transcode_generate_node(ActionMap.parse(map_normalize), "universal_newline")
+
+  map_crlf = {}
+  map_crlf["{00-09,0b-ff}"] = :nomap
+  map_crlf["0a"] = "0d0a"
+
+  transcode_generate_node(ActionMap.parse(map_crlf), "crlf_newline")
+
+  map_cr = {}
+  map_cr["{00-09,0b-ff}"] = :nomap
+  map_cr["0a"] = "0d"
+
+  transcode_generate_node(ActionMap.parse(map_cr), "cr_newline")
+%>
+
+<%= transcode_generated_code %>
+
+#define STATE (sp[0])
+#define NORMAL 0
+#define JUST_AFTER_CR 1
+
+/* no way to access this information, yet. */
+#define NEWLINES_MET (sp[1])
+#define MET_LF          0x01
+#define MET_CRLF        0x02
+#define MET_CR          0x04
+
+static int
+universal_newline_init(void *statep)
+{
+    unsigned char *sp = statep;
+    STATE = NORMAL;
+    NEWLINES_MET = 0;
+    return 0;
+}
+
+static ssize_t
+fun_so_universal_newline(void *statep, const unsigned char *s, size_t l, unsigned char *o, size_t osize)
+{
+    unsigned char *sp = statep;
+    int len;
+    if (s[0] == '\n') {
+        if (STATE == NORMAL) {
+            NEWLINES_MET |= MET_LF;
+        }
+        else { /* JUST_AFTER_CR */
+            NEWLINES_MET |= MET_CRLF;
+        }
+        o[0] = '\n';
+        len = 1;
+        STATE = NORMAL;
+    }
+    else {
+        len = 0;
+        if (STATE == JUST_AFTER_CR) {
+            o[0] = '\n';
+            len = 1;
+            NEWLINES_MET |= MET_CR;
+        }
+        if (s[0] == '\r') {
+            STATE = JUST_AFTER_CR;
+        }
+        else {
+            o[len++] = s[0];
+            STATE = NORMAL;
+        }
+    }
+
+    return len;
+}
+
+static ssize_t
+universal_newline_finish(void *statep, unsigned char *o, size_t osize)
+{
+    unsigned char *sp = statep;
+    int len = 0;
+    if (STATE == JUST_AFTER_CR) {
+        o[0] = '\n';
+        len = 1;
+        NEWLINES_MET |= MET_CR;
+    }
+    STATE = NORMAL;
+    return len;
+}
+
+static const rb_transcoder
+rb_universal_newline = {
+    "", "universal_newline", universal_newline,
+    TRANSCODE_TABLE_INFO,
+    1, /* input_unit_length */
+    1, /* max_input */
+    2, /* max_output */
+    asciicompat_converter, /* asciicompat_type */
+    2, universal_newline_init, universal_newline_init, /* state_size, state_init, state_fini */
+    NULL, NULL, NULL, fun_so_universal_newline,
+    universal_newline_finish
+};
+
+static const rb_transcoder
+rb_crlf_newline = {
+    "", "crlf_newline", crlf_newline,
+    TRANSCODE_TABLE_INFO,
+    1, /* input_unit_length */
+    1, /* max_input */
+    2, /* max_output */
+    asciicompat_converter, /* asciicompat_type */
+    0, NULL, NULL, /* state_size, state_init, state_fini */
+    NULL, NULL, NULL, NULL
+};
+
+static const rb_transcoder
+rb_cr_newline = {
+    "", "cr_newline", cr_newline,
+    TRANSCODE_TABLE_INFO,
+    1, /* input_unit_length */
+    1, /* max_input */
+    1, /* max_output */
+    asciicompat_converter, /* asciicompat_type */
+    0, NULL, NULL, /* state_size, state_init, state_fini */
+    NULL, NULL, NULL, NULL
+};
+
+void
+Init_newline(void)
+{
+    rb_register_transcoder(&rb_universal_newline);
+    rb_register_transcoder(&rb_crlf_newline);
+    rb_register_transcoder(&rb_cr_newline);
+}

@@ -1,0 +1,152 @@
+To compile 'tcltklib', you must have Tcl/Tk libraries on your environment.
+Although 'extconf.rb' script searches Tcl/Tk libraries and header files
+(as default, searches tclConfig.sh/tkConfig.sh and use the defintions on
+those; ActiveTcl has high priority on searching unless --without-ActiveTcl),
+sometimes fails to find them. And then, 'tcltklib' cannot be compiled. If
+Tcl/Tk libraries or header files are installed but are not found, you can
+give the information by arguments of the 'configure' script. Please give
+some or all of the following options.
+
+ --with-tk-old-extconf         use old "extconf.rb" (default: false).
+                               If current extconf.rb doesn't work properly
+                               (or your install process is based on old
+                               documant about Ruby/Tk install), please try
+			       this option.
+
+ --with-ActiveTcl / --without-ActiveTcl
+ --with-ActiveTcl=<dir>        search ActiveTcl libraries (default: true).
+                               When true, try to find installed ActiveTcl.
+                               When <dir> is given, use it as the ActiveTcl's
+			       top directory (use <dir>/lib, and so on).
+                               Old "extconf.rb" doesn't support this option.
+
+ --with-tk-shlib-search-path=<paths>
+                               teach the paths for loading shared-libraries
+                               to linker.
+                               <paths> is a path list with the same format
+                               as PATH environment variable.
+                               This option may be experimental.
+                               Old "extconf.rb" doesn't support this option.
+
+ --with-tcltkversion=<version>
+ --with-tcltkversion=<tclversion>,<tkversion>
+      force version of Tcl/Tk libaray
+      (e.g. libtcl8.4g.so & libtk8.4g.so ==> --with-tcltkversion=8.4g
+            libtcl8.4.so  & libtk8.4g.so ==> --with-tcltkversion=8.4,8.4g)
+
+ --enable-tcl-h-ver-check/--disable-tcl-h-ver-check
+ --enable-tk-h-ver-check/--disable-tk-h-ver-check
+                               enable or disable for checking MAJOR_VERSION and
+                               MINOR_VERSION on tcl.h/tk.h whether match with
+                               Tcl/Tk libraries' version or not.
+
+ --with-tcl-build-dir=<dir>
+ --with-tk-build-dir=<dir>     If you want to compile with libraries on Tcl/Tk
+                               build dir (still NOT installed), you must use
+                               these options.
+                               (e.g. --with-tcl-build-dir=./build/tcl8.5.9/unix)
+                               When use these options, --with-tclConfig-dir and
+                               --with-tkConfig-dir options are ignored (however,
+                               --with-tclConfig-file and --with-tkConfig-file
+                               options are still available).
+
+ --with-tclConfig-file=<file>/--without-tclConfig-file
+ --with-tkConfig-file=<file>/--without-tkConfig-file
+                               file path of tclConfig.sh/tkConfig.sh, or don't 
+                               refer those.
+                               If you want use non-standard filenames of config
+                               files (e.g. tclConfig-static.sh), you must use
+                               these options.
+
+ --with-tclConfig-dir=<dir>
+ --with-tkConfig-dir=<dir>     the directory contains 'tclConfig.sh' and
+                               'tkConfig.sh'.
+			       Current "extconf.rb" uses the information
+                               on tclConfig.sh/tkConfig.rb, if possible.
+                               Old "extconf.rb" doesn't support this option.
+
+ --with-tcllib=<libname>       (e.g. libtcl8.4.so ==> --with-tcllib=tcl8.4)
+ --with-tklib=<libname>        (e.g. libtk8.4.so  ==> --with-tklib=tk8.4)
+
+ --enable-tcltk-stubs          (if you force to enable stubs)
+                               On old "extconf.rb", default is false.
+                               On current "extconf.rb", default is true when
+                               tclConfig.sh/tkConfig.sh have TCL_STUB_LIB_SPEC
+                               /TK_STUB_LIB_SPEC, else default is false.
+
+ --with-tcl-dir=<path>
+      equal to "--with-tcl-include=<path>/include --with-tcl-lib=<path>/lib"
+
+ --with-tk-dir=<path>
+      equal to "--with-tk-include=<path>/include --with-tk-lib=<path>/lib"
+
+ --with-tcl-include=<dir>      the directry contains 'tcl.h'
+ --with-tk-include=<dir>       the directry contains 'tk.h'
+
+ --with-tcl-lib=<dir>          the directry contains 'libtcl<version>.so'
+ --with-tk-lib=<dir>           the directry contains 'libtk<version>.so'
+
+ --enable-mac-tcltk-framework  (MacOS X) use Tcl/Tk framework
+                               (Obsolete. Please use '--enable-tcltk-framework'.)
+
+ --enable-tcltk-framework      use Tcl/Tk framework
+
+ --with-tcltk-framework=<dir>  the directory contains Tcl/Tk framework;
+                               "<dir>/Tcl.framework" and "<dir>/Tk.framework".
+                               When this option is given, it is assumed that
+                               --enable-tcltk-framework option is given also.
+
+ --with-tcl-framework-dir=<dir>
+      Tcl framework directory (e.g. "/Library/Frameworks/Tcl.framework")
+
+ --with-tk-framework-dir=<dir>
+      Tk framework directory (e.g. "/Library/Frameworks/Tk.framework")
+
+ --with-tcl-framework-header=<dir>
+      Tcl framework headers directory
+      (e.g. "/Library/Frameworks/Tcl.framework/Headers")
+
+ --with-tk-framework-header=<dir>
+      Tk framework headers directory
+      (e.g. "/Library/Frameworks/Tk.framework/Headers")
+
+
+ --with-X11 / --without-X11    use / not use the X Window System
+
+ --with-X11-dir=<path>
+      equal to "--with-X11-include=<path>/include --with-X11-lib=<path>/lib"
+
+ --with-X11-include=<dir>      the directry contais X11 header files
+ --with-X11-lib=<dir>          the directry contais X11 libraries
+
+
+If you forgot to give the options when do 'configure' on toplevel
+directry of Ruby sources, please try something like as the followings.
+
+ $ cd ext/tcltklib
+ $ rm Makefile
+ $ CONFIGURE_ARGS='--with-tcl-include=/usr/local/include/tcl8.4/ --with-tcllib=tcl8.4 --with-tklib=tk8.4' ruby extconf.rb
+
+
+ *** ATTENTION ***
+When your Tcl/Tk libraries are compiled with "pthread support",
+Ruby/Tk may cause "Hang-up" or "Segmentation Fault" frequently.
+If you have such a trouble, please try to use the '--enable-pthread'
+option of the 'configure' command and re-compile Ruby sources.
+It may help you to avoid this trouble. The following configure
+options may be useful.
+
+  --enable-tcl-thread/--disable-tcl-thread
+  --with-tclConfig-file=<path of 'tclConfig.sh'>
+  --with-tkConfig-file=<path of 'tkConfig.sh'>
+
+It is not need that 'tclConfig.sh' is a normal Tcl/Tk's tclConfig.sh.
+But the file is expected to include the line "TCL_THREADS=0" or "...=1".
+When no "TCL_THREADS=?" line, if Tcl version is 7.x or 8.0 which is
+given by "TCL_MAJOR_VERSION=?" line and "TCL_MINOR_VERSION=?" line,
+then --disable-tcl-thread is expected. Else, ignore the 'tclConfig.sh'.
+If --enable-tcl-thread or --disable-tcl-thread option is given, then
+--with-tclConfig-file option is ignored.
+
+==========================================================
+                Hidetoshi NAGAI (nagai@ai.kyutech.ac.jp)

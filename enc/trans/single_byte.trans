@@ -1,0 +1,92 @@
+#include "transcode_data.h"
+
+<%
+  us_ascii_map = [["{00-7f}", :nomap]]
+
+  transcode_tblgen "US-ASCII", "UTF-8", us_ascii_map
+  transcode_tblgen "UTF-8", "US-ASCII", us_ascii_map
+  transcode_tblgen "ASCII-8BIT", "UTF-8", us_ascii_map
+  transcode_tblgen "UTF-8", "ASCII-8BIT", us_ascii_map
+
+  CONTROL1_TO_UCS_TBL = (0x80..0x9f).map {|c| ["%02X" % c, c] }
+
+  # Generate transcoding tables for single byte encoding from
+  # encoding name using table file.
+  #
+  # Conventions:
+  #   name: encoding name as string, UPPER case, hyphens (e.g. 'ISO-8859-3')
+  #   file name: lower case, hyphens, -tbl.rb suffix (e.g. iso-8859-3-tbl.rb)
+  #   variable name: UPPER case, underscores, _TO_UCS_TBL suffix (e.g. ISO_8859_3_TO_UCS_TBL)
+  # If the name starts with "ISO-8859", the C1 control code area is added automatically.
+  def transcode_tblgen_singlebyte (name)
+    require(name.downcase + "-tbl")
+    control1_if_needed = (name =~ /^ISO-8859/) ? CONTROL1_TO_UCS_TBL : []
+    tbl_to_ucs = control1_if_needed + eval(name.gsub(/-/, '_') + "_TO_UCS_TBL")
+    code = ''
+    code << transcode_tblgen(name, "UTF-8", [["{00-7f}", :nomap], *tbl_to_ucs.reject {|a, b| a.length != 2 }], '{00-ff}')
+    code << "\n"
+    code << transcode_tblgen("UTF-8", name, [["{00-7f}", :nomap], *tbl_to_ucs.map {|a,b| [b,a] }])
+    code
+  end
+
+  transcode_tblgen_singlebyte "ISO-8859-1"
+  transcode_tblgen_singlebyte "ISO-8859-2"
+  transcode_tblgen_singlebyte "ISO-8859-3"
+  transcode_tblgen_singlebyte "ISO-8859-4"
+  transcode_tblgen_singlebyte "ISO-8859-5"
+  transcode_tblgen_singlebyte "ISO-8859-6"
+  transcode_tblgen_singlebyte "ISO-8859-7"
+  transcode_tblgen_singlebyte "ISO-8859-8"
+  transcode_tblgen_singlebyte "ISO-8859-9"
+  transcode_tblgen_singlebyte "ISO-8859-10"
+  transcode_tblgen_singlebyte "ISO-8859-11"
+  transcode_tblgen_singlebyte "ISO-8859-13"
+  transcode_tblgen_singlebyte "ISO-8859-14"
+  transcode_tblgen_singlebyte "ISO-8859-15"
+  transcode_tblgen_singlebyte "ISO-8859-16"
+  transcode_tblgen_singlebyte "WINDOWS-874"
+  transcode_tblgen_singlebyte "WINDOWS-1250"
+  transcode_tblgen_singlebyte "WINDOWS-1251"
+  transcode_tblgen_singlebyte "WINDOWS-1252"
+  transcode_tblgen_singlebyte "WINDOWS-1253"
+  transcode_tblgen_singlebyte "WINDOWS-1254"
+  transcode_tblgen_singlebyte "WINDOWS-1255"
+  transcode_tblgen_singlebyte "WINDOWS-1256"
+  transcode_tblgen_singlebyte "WINDOWS-1257"
+  transcode_tblgen_singlebyte "IBM437"
+  transcode_tblgen_singlebyte "IBM775"
+  transcode_tblgen_singlebyte "IBM737"
+  transcode_tblgen_singlebyte "IBM852"
+  transcode_tblgen_singlebyte "IBM855"
+  transcode_tblgen_singlebyte "IBM857"
+  transcode_tblgen_singlebyte "IBM860"
+  transcode_tblgen_singlebyte "IBM861"
+  transcode_tblgen_singlebyte "IBM862"
+  transcode_tblgen_singlebyte "IBM863"
+  transcode_tblgen_singlebyte "IBM865"
+  transcode_tblgen_singlebyte "IBM866"
+  transcode_tblgen_singlebyte "IBM869"
+  transcode_tblgen_singlebyte "MACCROATIAN"
+  transcode_tblgen_singlebyte "MACCYRILLIC"
+  transcode_tblgen_singlebyte "MACGREEK"
+  transcode_tblgen_singlebyte "MACICELAND"
+  transcode_tblgen_singlebyte "MACROMAN"
+  transcode_tblgen_singlebyte "MACROMANIA"
+  transcode_tblgen_singlebyte "MACTURKISH"
+  transcode_tblgen_singlebyte "MACUKRAINE"
+  transcode_tblgen_singlebyte "KOI8-U"
+  transcode_tblgen_singlebyte "KOI8-R"
+  transcode_tblgen_singlebyte "TIS-620"
+  transcode_tblgen_singlebyte "CP850"
+  transcode_tblgen_singlebyte "CP852"
+  transcode_tblgen_singlebyte "CP855"
+%>
+
+<%= transcode_generated_code %>
+
+void
+Init_single_byte(void)
+{
+<%= transcode_register_code %>
+}
+

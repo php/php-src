@@ -1,0 +1,141 @@
+=begin
+
+= How to build ruby using Visual C++
+
+== Requirement
+
+(1) Windows 2000 or later (NT based kernel).
+
+(2) Visual C++ 6.0 or later.
+
+    Note: if you want to build x64 or ia64 version, use native compiler for
+          x64/ia64.
+
+(3) Please set environment variable (({INCLUDE})), (({LIB})), (({PATH}))
+    to run required commands properly from the command line.
+
+    Note: building ruby requires following commands.
+     * nmake
+     * cl
+     * lib
+     * dumpbin
+
+(4) If you want to build from SVN source, following commands are required.
+     * bison
+     * sed
+     * ruby 1.8
+
+(5) Enable Command Extension of your command line.  It's the default behavior
+    of cmd.exe.  If you want to enable it explicitly, run cmd.exe with /E:ON
+    option.
+
+(6) If you want built binaries to run on Windows 95 series (including
+    98 and Me), you need unicows.lib at compile time, and unicows.dll
+    at run time.
+
+== How to compile and install
+
+(1) Execute win32\configure.bat on your build directory.
+    You can specify the target platform as an argument.
+    For example, run `((%configure --target=i686-mswin32%))'
+    You can also specify the install directory.
+    For example, run `((%configure --prefix=<install_directory>%))'
+    Default of the install directory is /usr .
+    The default ((|<PLATFORM>|)) is `(({i386-mswin32}))'.
+
+(2) Change ((|RUBY_INSTALL_NAME|)) and ((|RUBY_SO_NAME|)) in (({Makefile}))
+    if you want to change the name of the executable files. 
+    And add ((|RUBYW_INSTALL_NAME|)) to change the name of the
+    executable without console window if also you want.
+
+(3) Run `((%nmake%))'
+
+(4) Run `((%nmake test%))'
+
+(5) Run `((%nmake install%))'
+
+== Icons
+
+Any icon files(*.ico) in the build directory, directories specified with
+((|icondirs|)) make variable and (({win32})) directory under the ruby
+source directory will be included in DLL or executable files, according
+to their base names.
+    $(RUBY_INSTALL_NAME).ico or ruby.ico   --> $(RUBY_INSTALL_NAME).exe
+    $(RUBYW_INSTALL_NAME).ico or rubyw.ico --> $(RUBYW_INSTALL_NAME).exe
+    the others                             --> $(RUBY_SO_NAME).dll
+
+Although no icons are distributed with the ruby source or in the official 
+site, you can use anything you like. For example, followings are written 
+in Japanese, but you can download at least.
+
+* ((<URL:http://homepage1.nifty.com/a_nakata/ruby/>)) or
+  ((<icon itself|URL:http://homepage1.nifty.com/a_nakata/ruby/RubyIcon.ico>))
+
+== Build examples
+
+* Build on the ruby source directory.
+
+  ex.)
+    ruby source directory:  C:\ruby
+    build directory:        C:\ruby
+    install directory:      C:\usr\local
+
+    C:
+    cd \ruby
+    win32\configure --prefix=/usr/local
+    nmake
+    nmake test
+    nmake install
+
+* Build on the relative directory from the ruby source directory.
+
+  ex.)
+    ruby source directory:  C:\ruby
+    build directory:        C:\ruby\mswin32
+    install directory:      C:\usr\local
+
+    C:
+    cd \ruby
+    mkdir mswin32
+    cd mswin32
+    ..\win32\configure --prefix=/usr/local
+    nmake
+    nmake test
+    nmake install
+
+* Build on the different drive.
+
+  ex.)
+    ruby source directory:  C:\src\ruby
+    build directory:        D:\build\ruby
+    install directory:      C:\usr\local
+
+    D:
+    cd D:\build\ruby
+    C:\src\ruby\win32\configure --prefix=/usr/local
+    nmake
+    nmake test
+    nmake install DESTDIR=C:
+
+* Build x64 version (requires native x64 VC++ compiler)
+
+  ex.)
+    ruby source directory:  C:\ruby
+    build directory:        C:\ruby
+    install directory:      C:\usr\local
+
+    C:
+    cd \ruby
+    win32\configure --prefix=/usr/local --target=x64-mswin64
+    nmake
+    nmake test
+    nmake install
+
+== Bugs
+
+You can ((*NOT*)) use a path name contains any white space characters as
+the ruby source directory, this restriction comes from the behavior of
+(({!INCLUDE})) directives of (({NMAKE})).
+((- you may call it a bug. -))
+
+=end

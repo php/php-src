@@ -1,0 +1,18 @@
+There are Ruby/Tk demo scripts.
+
+Files with '.rb' extension are sub-scripts which are launched 'widget'
+script. Those files don't work independently. Please call them from
+'widget' script.
+
+If you want start some sub-scripts at same time when the launcher
+script tarts, please give the sub-script names as arguments.
+(e.g. /usr/local/bin/ruby widget button.rb entry1.rb text.rb )
+You can ommit '.rb' of the sub-scripts
+(e.g. /usr/local/bin/ruby widget button entry1 text )
+
+If you don't need launcher's main window, give -n option.
+(e.g. /usr/local/bin/ruby widget -n button.rb entry1.rb text.rb )
+
+Others (browse1, hello, and so on) are standalone scripts.
+
+          2004/04/14  Hidetoshi NAGAI (nagai@ai.kyutech.ac.jp)

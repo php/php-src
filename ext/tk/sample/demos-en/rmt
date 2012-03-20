@@ -1,0 +1,268 @@
+#!/usr/bin/env ruby
+
+# rmt --
+# This script implements a simple remote-control mechanism for
+# Tk applications.  It allows you to select an application and
+# then type commands to that application.
+
+require 'tk'
+
+class Rmt
+  def initialize(parent=nil)
+    win = self
+
+    unless parent
+      parent = TkRoot.new
+    end
+    root = TkWinfo.toplevel(parent)
+    root.minsize(1,1)
+
+    # The instance variable below keeps track of the remote application
+    # that we're sending to.  If it's an empty string then we execute
+    # the commands locally.
+    @app = 'local'
+    @mode = 'Ruby'
+
+    # The instance variable below keeps track of whether we're in the
+    # middle of executing a command entered via the text.
+    @executing = 0
+
+    # The instance variable below keeps track of the last command executed,
+    # so it can be re-executed in response to !! commands.
+    @lastCommand = ""
+
+    # Create menu bar.  Arrange to recreate all the information in the
+    # applications sub-menu whenever it is cascaded to.
+
+    TkFrame.new(root, 'relief'=>'raised', 'bd'=>2) {|f|
+      pack('side'=>'top', 'fill'=>'x')
+      TkMenubutton.new(f, 'text'=>'File', 'underline'=>0) {|mb|
+	TkMenu.new(mb) {|mf|
+	  mb.menu(mf)
+	  TkMenu.new(mf) {|ma|
+	    postcommand proc{win.fillAppsMenu ma}
+	    mf.add('cascade', 'label'=>'Select Application',
+		   'menu'=>ma, 'underline'=>0)
+	  }
+	  add('command', 'label'=>'Quit',
+	      'command'=>proc{root.destroy}, 'underline'=>0)
+	}
+	pack('side'=>'left')
+      }
+    }
+
+    # Create text window and scrollbar.
+
+    @txt = TkText.new(root, 'relief'=>'sunken', 'bd'=>2, 'setgrid'=>true) {
+      yscrollbar(TkScrollbar.new(root){pack('side'=>'right', 'fill'=>'y')})
+      pack('side'=>'left')
+    }
+
+    @promptEnd = TkTextMark.new(@txt, 'insert')
+
+    # Create a binding to forward commands to the target application,
+    # plus modify many of the built-in bindings so that only information
+    # in the current command can be deleted (can still set the cursor
+    # earlier in the text and select and insert;  just can't delete).
+
+    @txt.bindtags([@txt, TkText, root, 'all'])
+    @txt.bind('Return', proc{
+		@txt.set_insert('end - 1c')
+		@txt.insert('insert', "\n")
+		win.invoke
+		Tk.callback_break
+	      })
+    @txt.bind('Delete', proc{
+		begin
+		  @txt.tag_remove('sel', 'sel.first', @promptEnd)
+		rescue
+		end
+		if @txt.tag_nextrange('sel', '1.0', 'end') == []
+		  if @txt.compare('insert', '<', @promptEnd)
+		    Tk.callback_break
+		  end
+		end
+	      })
+    @txt.bind('BackSpace', proc{
+		begin
+		  @txt.tag_remove('sel', 'sel.first', @promptEnd)
+		rescue
+		end
+		if @txt.tag_nextrange('sel', '1.0', 'end') == []
+		  if @txt.compare('insert', '<', @promptEnd)
+		    Tk.callback_break
+		  end
+		end
+	      })
+    @txt.bind('Control-d', proc{
+		if @txt.compare('insert', '<', @promptEnd)
+		  Tk.callback_break
+		end
+	      })
+    @txt.bind('Control-k', proc{
+		if @txt.compare('insert', '<', @promptEnd)
+		  @txt.set_insert(@promptEnd)
+		end
+	      })
+    @txt.bind('Control-t', proc{
+		if @txt.compare('insert', '<', @promptEnd)
+		  Tk.callback_break
+		end
+	      })
+    @txt.bind('Meta-d', proc{
+		if @txt.compare('insert', '<', @promptEnd)
+		  Tk.callback_break
+		end
+	      })
+    @txt.bind('Meta-BackSpace', proc{
+		if @txt.compare('insert', '<=', @promptEnd)
+		  Tk.callback_break
+		end
+	      })
+    @txt.bind('Control-h', proc{
+		if @txt.compare('insert', '<=', @promptEnd)
+		  Tk.callback_break
+		end
+	      })
+
+    @txt.tag_configure('bold', 'font'=>['Courier', 12, 'bold'])
+
+    @app = Tk.appname('rmt')
+    if (@app =~ /^rmt(.*)$/)
+      root.title("Tk Remote Controller#{$1}")
+      root.iconname("Tk Remote#{$1}")
+    end
+    prompt
+    @txt.focus
+    #@app = TkWinfo.appname(TkRoot.new)
+  end
+
+  def tkTextInsert(w,s)
+    return if s == ""
+    begin
+      if w.compare('sel.first','<=','insert') \
+	&& w.compare('sel.last','>=','insert')
+	w.tag_remove('sel', 'sel.first', @promptEnd)
+	w.delete('sel.first', 'sel.last')
+      end
+    rescue
+    end
+    w.insert('insert', s)
+    w.see('insert')
+  end
+
+  # The method below is used to print out a prompt at the
+  # insertion point (which should be at the beginning of a line
+  # right now).
+
+  def prompt
+    @txt.insert('insert', "#{@app}: ")
+    @promptEnd.set('insert')
+    @promptEnd.gravity = 'left'
+    @txt.tag_add('bold', "#{@promptEnd.path} linestart", @promptEnd)
+  end
+
+  # The method below executes a command (it takes everything on the
+  # current line after the prompt and either sends it to the remote
+  # application or executes it locally, depending on "app".
+
+  def invoke
+    cmd = @txt.get(@promptEnd, 'insert')
+    @executing += 1
+    case (@mode)
+    when 'Tcl'
+      if Tk.info('complete', cmd)
+	if (cmd == "!!\n")
+	  cmd = @lastCommand
+	else
+	  @lastCommand = cmd
+	end
+	begin
+	  msg = Tk.appsend(@app, false, cmd)
+	rescue
+	  msg = "Error: #{$!}"
+	end
+	@txt.insert('insert', msg + "\n") if msg != ""
+	prompt
+	@promptEnd.set('insert')
+      end
+
+    when 'Ruby'
+      if (cmd == "!!\n")
+	cmd = @lastCommand
+      end
+      complete = true
+      begin
+	eval("proc{#{cmd}}")
+      rescue
+	complete = false
+      end
+      if complete
+	@lastCommand = cmd
+	begin
+#	  msg = Tk.appsend(@app, false,
+#			   'ruby',
+#			   '"(' + cmd.gsub(/[][$"]/, '\\\\\&') + ').to_s"')
+	  msg = Tk.rb_appsend(@app, false, cmd)
+	rescue
+	  msg = "Error: #{$!}"
+	end
+	@txt.insert('insert', msg + "\n") if msg != ""
+	prompt
+	@promptEnd.set('insert')
+      end
+    end
+
+    @executing -= 1
+    @txt.yview_pickplace('insert')
+  end
+
+  # The following method is invoked to change the application that
+  # we're talking to.  It also updates the prompt for the current
+  # command, unless we're in the middle of executing a command from
+  # the text item (in which case a new prompt is about to be output
+  # so there's no need to change the old one).
+
+  def newApp(appName, mode)
+    @app = appName
+    @mode = mode
+    if @executing == 0
+      @promptEnd.gravity = 'right'
+      @txt.delete("#{@promptEnd.path} linestart", @promptEnd)
+      @txt.insert(@promptEnd, "#{appName}: ")
+      @txt.tag_add('bold', "#{@promptEnd.path} linestart", @promptEnd)
+      @promptEnd.gravity = 'left'
+    end
+  end
+
+  # The method below will fill in the applications sub-menu with a list
+  # of all the applications that currently exist.
+
+  def fillAppsMenu(menu)
+    win = self
+    begin
+      menu.delete(0,'last')
+    rescue
+    end
+    TkWinfo.interps.sort.each{|ip|
+      begin
+	if Tk.appsend(ip, false, 'info commands ruby') == ""
+	  mode = 'Tcl'
+	else
+	  mode = 'Ruby'
+	end
+	menu.add('command', 'label'=>format("%s    (#{mode}/Tk)", ip),
+		 'command'=>proc{win.newApp ip, mode})
+      rescue
+	menu.add('command', 'label'=>format("%s (unknown Tk)", ip),
+		 'command'=>proc{win.newApp ip, mode}, 'state'=>'disabled')
+      end
+    }
+    menu.add('command', 'label'=>format("local    (Ruby/Tk)"),
+	     'command'=>proc{win.newApp 'local', 'Ruby'})
+  end
+end
+
+Rmt.new
+
+Tk.mainloop

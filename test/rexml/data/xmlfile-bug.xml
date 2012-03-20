@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<intranet>
+<position><aktuell datum="01-10-11">Technik</aktuell></position>
+<hauptspalte>
+<headline>Technik</headline>
+Die Technik ist das Rückgrat der meisten Geschäftsprozesse bei Home of the Brave. Deshalb sollen hier alle relevanten technischen Abläufe, Daten und Einrichtungen beschrieben werden, damit jeder im Bedarfsfall die nötigen Informationen, Anweisungen und Verhaltensempfehlungen nachlesen und/oder abrufen kann.
+</hauptspalte>
+<nebenspalte>
+  <link ziel="Flash/">Flash</link><umbruch/>
+  Nützliches von Flashern für Flasher.<umbruch/>
+  <link neu="ja" ziel="Cvs/">CVS-FAQ</link><umbruch/>
+  FAQ zur Benutzung von CVS bei HOB
+</nebenspalte>
+</intranet>
+

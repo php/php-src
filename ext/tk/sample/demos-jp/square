@@ -1,0 +1,81 @@
+#!/usr/bin/env ruby
+
+# square --
+# This script generates a demo application containing only
+# a "square" widget.  It's only usable if Tk has been compiled
+# with tkSquare.c and with the -DSQUARE_DEMO compiler switch.
+# This demo arranges the following bindings for the widget:
+#
+# Button-1 press/drag:          moves square to mouse
+# "a":                          toggle size animation on/off
+#
+
+require 'tk'
+require 'tkafter'
+
+class TkSquare<TkWindow
+  def create_self
+    begin
+      tk_call 'square', path
+    rescue
+      STDERR.print "\nSorry. Your Tk interpreter does not contain " +
+	'a "square" demonstration widget.' +
+	"\n ( See documents included the Tcl/Tk source archive. )\n\n"
+      exit
+    end
+  end
+  def size(amount=nil)
+    if amount
+      tk_send 'size', amount
+    else
+      number(tk_send('size'))
+    end
+  end
+  def position(x,y)
+    tk_send 'position', x, y
+  end
+end
+
+$s = TkSquare.new{
+  pack('expand'=>'yes', 'fill'=>'both')
+  bind('1', proc{|x,y| center(x,y)}, '%s %y')
+  bind('B1-Motion', proc{|x,y| center(x,y)}, '%s %y')
+  bind('a', proc{animate})
+  focus
+}
+TkRoot.new.minsize(1,1)
+
+# The procedure below centers the square on a given position.
+
+def center(x,y)
+  a = $s.size
+  $s.position(x-(a/2), y-(a/2))
+end
+
+# The procedures below provide a simple form of animation where
+# the box changes size in a pulsing pattern: larger, smaller, larger,
+# and so on.
+
+$inc = 0
+
+def timer_proc
+  a = $s.size
+  return if $inc == 0
+  $inc = -3 if a >= 40
+  $inc =  3 if a <= 10
+  $s.size(a+$inc)
+end
+
+$timer = TkAfter.new(30, -1, proc{timer_proc})
+
+def animate
+  if $inc == 0
+    $inc = 3
+    $timer.start
+  else
+    $inc = 0
+    $timer.stop
+  end
+end
+
+Tk.mainloop

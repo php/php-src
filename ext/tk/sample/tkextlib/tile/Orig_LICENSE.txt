@@ -1,0 +1,30 @@
+
+  ######################################################################
+  ###  The following text is the original 'license.terms' of tile    ###
+  ###  extension.                                                    ###
+  ######################################################################
+
+
+LICENSE ("MIT-style")
+
+This software is Copyright (C) 2003 Joe English and other parties.
+
+The following terms apply to all files associated with this software
+unless explicitly disclaimed in individual files.  
+
+The author(s) hereby grant permission to use, copy, modify, distribute,
+and license this software and its documentation for any purpose, provided
+that existing copyright notices are retained in all copies and that this
+notice is included in any distributions. No written agreement,
+license, or royalty fee is required for any of the authorized uses.
+Modifications to this software may be copyrighted by their authors
+and need not follow the licensing terms described here, provided that
+the new terms are clearly indicated on the first page of each file where
+they apply.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS for a PARTICULAR PURPOSE.  IN NO EVENT
+shall the AUTHORS of THIS SOFTWARE be LIABLE to ANY PARTY for
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, or CONSEQUENTIAL DAMAGES
+arising out of the USE of THIS SOFTWARE and its DOCUMENTATION.

@@ -1,0 +1,1 @@
+pty.o: pty.c $(hdrdir)/ruby.h $(topdir)/config.h $(hdrdir)/defines.h $(hdrdir)/io.h

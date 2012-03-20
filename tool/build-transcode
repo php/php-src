@@ -1,0 +1,16 @@
+#!/bin/sh
+
+[ "$1" -a -d "$1" ] && { cd "$1" || exit $?; } && shift
+[ "$#" = 0 ] && set enc/trans/*.trans
+for src; do
+    case "$src" in
+    *.trans)
+        c="`dirname $src`/`basename $src .trans`.c"
+	${BASERUBY-ruby} tool/transcode-tblgen.rb -vo "$c" "$src"
+	;;
+    *)
+	echo "$0: don't know how to deal with $src"
+	continue
+	;;
+    esac
+done

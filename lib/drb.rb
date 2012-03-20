@@ -1,0 +1,2 @@
+require 'drb/drb'
+

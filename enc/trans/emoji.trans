@@ -1,0 +1,37 @@
+#include "transcode_data.h"
+
+<%
+  require 'emoji-exchange-tbl'
+
+  nomap_table = [
+    ["{00-7f}", :nomap],
+    ["{c2-df}{80-bf}", :nomap0],
+    ["e0{a0-bf}{80-bf}", :nomap0],
+    ["{e1-ec}{80-bf}{80-bf}", :nomap0],
+    ["ed{80-9f}{80-bf}", :nomap0],
+    ["{ee-ef}{80-bf}{80-bf}", :nomap0],
+    ["f0{90-bf}{80-bf}{80-bf}", :nomap0],
+    ["{f1-f3}{80-bf}{80-bf}{80-bf}", :nomap0],
+    ["f4{80-8f}{80-bf}{80-bf}", :nomap0],
+  ]
+
+  companies = %w(DoCoMo KDDI SoftBank Unicode)
+  companies.each do |from_company|
+    companies.each do |to_company|
+      next if from_company == to_company
+      from_encoding = (from_company == "Unicode") ? "UTF-8" : "UTF8-"+from_company
+      to_encoding   = (to_company   == "Unicode") ? "UTF-8" : "UTF8-"+to_company
+
+      strict_mapping = EMOJI_EXCHANGE_TBL[from_encoding][to_encoding]
+      transcode_tblgen(from_encoding, to_encoding, strict_mapping + nomap_table, nil)
+    end
+  end
+%>
+
+<%= transcode_generated_code %>
+
+void
+Init_emoji(void)
+{
+<%= transcode_register_code %>
+}

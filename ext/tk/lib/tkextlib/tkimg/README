@@ -1,0 +1,26 @@
+
+ [ Tcl/Tk Image formats (TkImg) support ]
+
+TkImg contains a collection of format handlers for the Tk photo
+image type, and a new image type, pixmaps.
+
+Supported formats of TkImg version 1.3 are
+-------------------------------------------------------
+   bmp    : Windows Bitmap Format
+   gif    : Graphics Interchange Format
+   ico    : Windows Icon Format
+   jpeg   : Joint Picture Expert Group format
+   pcx    : Paintbrush Format
+   pixmap : Pixmap Image type
+   png    : Portable Network Graphics format
+   ppm    : Portable Pixmap format
+   ps     : Adobe PostScript Format
+   sgi    : SGI Native Format
+   sun    : Sun Raster Format
+   tga    : Truevision Targa Format
+   tiff   : Tagged Image File Format
+   window : Tk Windows
+   xbm    : X Window Bitmap Format
+   xpm    : X Window Pixmap Format
+-------------------------------------------------------
+

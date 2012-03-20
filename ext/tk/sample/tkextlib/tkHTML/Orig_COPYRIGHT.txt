@@ -1,0 +1,12 @@
+
+The following text is the original 'COPYRIGHT' file of tkHTML. 
+
+-----------------------------------------------------------------------
+Most of the source code for the Tk Html widget has been place in the
+public domain.  You can do with it whatever you want.  However, some
+files have been copied from other sources and contain copyrights.
+A copyright notice appears separately at the top of each source file.
+-----------------------------------------------------------------------
+
+In this sample, HTML documents are quoted in the 'tests' directory of
+tkHTML source tree. There were no copyright notice in the directory. 

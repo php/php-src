@@ -1,0 +1,412 @@
+irb -- interactive ruby
+				$Release Version: 0.9.5 $
+			   	$Revision$
+			   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
+=begin
+= irbとは?
+
+irbはinteractive rubyの略です. rubyの式を標準入力から簡単に入力/実行する
+ためのツールです.
+
+= 起動
+
+  % irb
+
+で行ないます. 
+
+= 使い方
+
+irbの使い方は, Rubyさえ知っていればいたって簡単です. 基本的には irb と
+いうコマンドを実行するだけです. irbを実行すると, 以下のようなプロンプ
+トが表れてきます. 後は, rubyの式を入れて下さい. 式が完結した時点で実行
+されます.
+
+  dim% irb
+  irb(main):001:0> 1+2
+  3
+  irb(main):002:0> class Foo
+  irb(main):003:1>  def foo
+  irb(main):004:2>    print 1
+  irb(main):005:2>  end
+  irb(main):006:1> end
+  nil
+  irb(main):007:0> 
+
+また, irbはReadlineモジュールにも対応しています. Readlineモジュールが
+インストールされている時には, それを使うのが標準の動作になります.
+
+= コマンドオプション
+
+  irb.rb [options] file_name opts
+  options:
+  -f		    ~/.irbrc を読み込まない.
+  -m		    bcモード(分数, 行列の計算ができる)
+  -d                $DEBUG をtrueにする(ruby -d と同じ)
+  -Kc		    ruby -Kcと同じ
+  -r load-module    ruby -r と同じ.
+  --verbose	    これから実行する行を表示する(デフォルト)
+  --noverbose	    これから実行する行を表示しない
+  --echo	    実行結果を表示する(デフォルト)
+  --noecho	    実行結果を表示しない
+  --inspect	    結果出力にinspectを用いる(bcモード以外はデフォルト). 
+  --noinspect	    結果出力にinspectを用いない.
+  --readline	    readlineライブラリを利用する.
+  --noreadline	    readlineライブラリを利用しない. デフォルトの動作は,
+		    inf-ruby-mode以外でreadlineライブラリを利用しよう
+		    とする. 
+  --prompt prompt-mode
+  --prompt-mode prompt-mode
+		    プロンプトモードを切替えます. 現在定義されているプ
+		    ロンプトモードは, default, simple, xmp, inf-rubyが
+		    用意されています. デフォルトはdefaultプロンプトモー
+		    ドになっています.
+			    
+  --inf-ruby-mode   emacsのinf-ruby-mode用のプロンプト表示を行なう. 特
+		    に指定がない限り, readlineライブラリは使わなくなる.
+  --simple-prompt
+		    非常にシンプルなプロンプトを用いるモードです.
+  --noprompt	    プロンプト表示を行なわない.
+  --tracer	    コマンド実行時にトレースを行なう.
+  --back-trace-limit n
+		    バックトレース表示をバックトレースの頭から n, 後ろ
+		    からnだけ行なう. デフォルトは16 
+  --irb_debug n	    irbのデバッグデバッグレベルをnに設定する(利用しな
+		    い方が無難でしょう).
+  -v, --version	    irbのバージョンを表示する
+
+= コンフィギュレーション
+
+irb起動時に``~/.irbrc''を読み込みます. もし存在しない場合は,
+``.irbrc'', ``irb.rc'', ``_irbrc'', ``$irbrc''の順にloadを試みます.
+
+オプションを設定する代わりに, 以下のコマンドでもデフォルトの動作を設定
+できます.
+
+  IRB.conf[:IRB_NAME]="irb"
+  IRB.conf[:MATH_MODE]=false
+  IRB.conf[:USE_TRACER]=false
+  IRB.conf[:USE_LOADER]=false
+  IRB.conf[:IGNORE_SIGINT]=true
+  IRB.conf[:IGNORE_EOF]=false
+  IRB.conf[:INSPECT_MODE]=nil
+  IRB.conf[:IRB_RC] = nil
+  IRB.conf[:BACK_TRACE_LIMIT]=16
+  IRB.conf[:USE_LOADER] = false
+  IRB.conf[:USE_READLINE] = nil
+  IRB.conf[:USE_TRACER] = false
+  IRB.conf[:IGNORE_SIGINT] = true
+  IRB.conf[:IGNORE_EOF] = false
+  IRB.conf[:PROMPT_MODE] = :DEFALUT
+  IRB.conf[:PROMPT] = {...}
+  IRB.conf[:DEBUG_LEVEL]=0
+  IRB.conf[:VERBOSE]=true
+
+== プロンプトの設定
+
+プロンプトをカスタマイズしたい時には, 
+
+   IRB.conf[:PROMPT]
+
+を用います. 例えば, .irbrcの中で下のような式を記述します:
+
+   IRB.conf[:PROMPT][:MY_PROMPT] = { # プロンプトモードの名前
+     :PROMPT_I => nil,		  # 通常のプロンプト
+     :PROMPT_N => nil,		  # 継続行のプロンプト
+     :PROMPT_S => nil,		  # 文字列などの継続行のプロンプト
+     :PROMPT_C => nil,		  # 式が継続している時のプロンプト
+     :RETURN => "    ==>%s\n"	  # リターン時のプロンプト
+   }
+
+プロンプトモードを指定したい時には,
+
+  irb --prompt my-prompt
+
+でそのプロンプトモードで起動されます. または, .irbrcに下式を記述しても
+OKです.
+
+  IRB.conf[:PROMPT_MODE] = :MY_PROMPT
+
+PROMPT_I, PROMPT_N, PROMPT_S, PROMPT_Cは, フォーマットを指定します.
+
+  %N	起動しているコマンド名が出力される.
+  %m	mainオブジェクト(self)がto_sで出力される.
+  %M	mainオブジェクト(self)がinspectされて出力される.
+  %l	文字列中のタイプを表す(", ', /, ], `]'は%wの中の時)
+  %NNi	インデントのレベルを表す. NNは数字が入りprintfの%NNdと同じ. 省
+	略可能
+  %NNn	行番号を表します.
+  %%    %
+
+例えば, デフォルトのプロンプトモードは:
+
+  IRB.conf[:PROMPT_MODE][:DEFAULT] = {
+      :PROMPT_I => "%N(%m):%03n:%i> ",
+      :PROMPT_N => "%N(%m):%03n:%i> ",
+      :PROMPT_S => "%N(%m):%03n:%i%l ",
+      :PROMPT_C => "%N(%m):%03n:%i* ",
+      :RETURN => "%s\n"
+  } 
+
+となっています.
+
+RETURNは, 現在のところprintf形式です. 将来仕様が変わるかも知れません.
+
+== サブirbの設定
+
+コマンドラインオプションおよびIRB.confは(サブ)irb起動時のデフォルトの
+設定を決めるもので, `5. コマンド'にあるconfで個別の(サブ)irbの設定がで
+きるようになっています.
+
+IRB.conf[:IRB_RC]にprocが設定されていると, サブirbを起動する時にその
+procをirbのコンテキストを引数として呼び出します. これによって個別のサ
+ブirbごとに設定を変えることができるようになります.
+
+
+= コマンド
+
+irb拡張コマンドは, 簡単な名前と頭に`irb_'をつけた名前と両方定義されて
+います. これは, 簡単な名前がoverrideされた時のためです.
+
+--- exit, quit, irb_exit	
+    終了する. 
+    サブirbの場合, そのサブirbを終了する.
+
+--- conf, irb_context
+    irbの現在の設定を表示する. 設定の変更は, confにメッセージを送るこ
+    とによって行なえる. 
+
+--- conf.eval_history = N
+    実行結果のヒストリ機能の設定.
+    nnは整数かnilで nn>0 であればその数だけヒストリにためる。nn==0の時は
+    無制限に記憶する、nilだとヒストリ機能はやめる(デフォルト). 
+
+--- Conf.back_trace_limit
+    バックトレース表示をバックトレースの頭からn, 後ろからnだけ行なう.
+    デフォルトは16
+    
+--- conf.debug_level = N
+    irb用のデバッグレベルの設定
+
+--- conf.ignore_eof = true/false
+    ^Dが入力された時の動作を設定する. trueの時は^Dを無視する, falseの
+    時はirbを終了する. 
+
+--- conf.ignore_sigint= true/false
+    ^Cが入力された時の動作を設定する. false時は, irbを終了する. trueの
+    時の動作は以下のようになる:
+      入力中: これまで入力したものをキャンセルしトップレベルに戻る. 
+      実行中: 実行を中止する.
+
+--- conf.inf_ruby_mode = true/false
+    inf-ruby-mode用のプロンプト表示を行なう. デフォルトはfalse.
+
+--- conf.inspect_mode = true/false/nil
+    インスペクトモードを設定する.
+    true: インスペクトして表示する.
+    false: 通常のprintで表示する.
+    nil: 通常モードであれば, inspect modeとなり, mathモードの時は, non
+	 inspect modeとなる.   
+
+--- conf.math_mode
+    参照のみ. bcモード(分数, 行列の計算ができます)かどうか?
+
+--- conf.use_loader = true/false
+    load/require時にirbのfile読み込み機能を用いるモードのスイッチ(デフォ
+    ルトは用いない). このモードはIRB全体に反映される.
+
+--- conf.prompt_c
+    ifの直後など, 行が継続している時のプロンプト.
+
+--- conf.prompt_i
+    通常のプロンプト.
+
+--- conf.prompt_s
+    文字列中などを表すプロンプト.
+
+--- conf.rc
+    ~/.irbrcを読み込んだかどうか?
+
+--- conf.use_prompt = true/false
+    プロンプト表示するかどうか? デフォルトではプロンプトを表示する.
+
+--- conf.use_readline = true/false/nil
+    readlineを使うかどうか?
+    true: readlineを使う.
+    false: readlineを使わない.
+    nil: (デフォルト)inf-ruby-mode以外でreadlineライブラリを利用しよ
+         うとする.  
+#
+#--- conf.verbose=T/F
+#    irbからいろいろなメッセージを出力するか?
+
+--- cws, chws, irb_cws, irb_chws, irb_change_workspace [obj]
+    objをselfとする. objが省略されたときは, home workspace, すなわち
+    irbを起動したときのmain objectをselfとする.
+
+--- pushws, irb_pushws, irb_push_workspace [obj]
+    UNIXシェルコマンドのpushdと同様.
+
+--- popws, irb_popws, irb_pop_workspace
+    UNIXシェルコマンドのpopdと同様.
+
+--- irb [obj]
+    サブirbを立ちあげる. objが指定された時は, そのobjをselfとする.
+
+--- jobs, irb_jobs
+    サブirbのリスト
+
+--- fg n, irb_fg n
+    指定したサブirbにスイッチする. nは, 次のものを指定する.
+
+      irb番号
+      スレッド
+      irbオブジェクト
+      self(irb objで起動した時のobj)
+
+--- kill n, irb_kill n
+      サブirbをkillする. nはfgと同じ.
+
+--- source, irb_source  path
+    UNIXシェルコマンドのsourceと似ている. 現在の環境上でpath内のスクリ
+    プトを評価する.
+
+--- irb_load path, prev
+
+    Rubyのloadのirb版.
+
+= システム変数
+
+--- _  
+    前の計算の実行結果を覚えている(ローカル変数).
+--- __ 
+    実行結果の履歴を覚えている.
+    __[line_no]で、その行で実行した結果を得ることができる. line_noが負の
+    時には、最新の結果から-line_no前の結果を得ることができる.
+
+=  使用例
+
+以下のような感じです.
+
+  dim% ruby irb.rb
+  irb(main):001:0> irb                        # サブirbの立ちあげ
+  irb#1(main):001:0> jobs                     # サブirbのリスト
+  #0->irb on main (#<Thread:0x400fb7e4> : stop)
+  #1->irb#1 on main (#<Thread:0x40125d64> : running)
+  nil
+  irb#1(main):002:0> fg 0                     # jobのスイッチ
+  nil
+  irb(main):002:0> class Foo;end
+  nil
+  irb(main):003:0> irb Foo                    # Fooをコンテキストしてirb
+					      # 立ちあげ
+  irb#2(Foo):001:0> def foo                   # Foo#fooの定義
+  irb#2(Foo):002:1>   print 1
+  irb#2(Foo):003:1> end
+  nil
+  irb#2(Foo):004:0> fg 0                      # jobをスイッチ
+  nil
+  irb(main):004:0> jobs                       # jobのリスト
+  #0->irb on main (#<Thread:0x400fb7e4> : running)
+  #1->irb#1 on main (#<Thread:0x40125d64> : stop)
+  #2->irb#2 on Foo (#<Thread:0x4011d54c> : stop)
+  nil
+  irb(main):005:0> Foo.instance_methods       # Foo#fooがちゃんと定義さ
+					      # れている
+  ["foo"]
+  irb(main):006:0> fg 2                       # jobをスイッチ
+  nil
+  irb#2(Foo):005:0> def bar                   # Foo#barを定義
+  irb#2(Foo):006:1>  print "bar"
+  irb#2(Foo):007:1> end
+  nil
+  irb#2(Foo):010:0>  Foo.instance_methods
+  ["bar", "foo"]
+  irb#2(Foo):011:0> fg 0                      
+  nil
+  irb(main):007:0> f = Foo.new
+  #<Foo:0x4010af3c>
+  irb(main):008:0> irb f                      # Fooのインスタンスでirbを
+					      # 立ちあげる.
+  irb#3(#<Foo:0x4010af3c>):001:0> jobs
+  #0->irb on main (#<Thread:0x400fb7e4> : stop)
+  #1->irb#1 on main (#<Thread:0x40125d64> : stop)
+  #2->irb#2 on Foo (#<Thread:0x4011d54c> : stop)
+  #3->irb#3 on #<Foo:0x4010af3c> (#<Thread:0x4010a1e0> : running)
+  nil
+  irb#3(#<Foo:0x4010af3c>):002:0> foo         # f.fooの実行
+  nil
+  irb#3(#<Foo:0x4010af3c>):003:0> bar         # f.barの実行
+  barnil
+  irb#3(#<Foo:0x4010af3c>):004:0> kill 1, 2, 3# jobのkill
+  nil
+  irb(main):009:0> jobs
+  #0->irb on main (#<Thread:0x400fb7e4> : running)
+  nil
+  irb(main):010:0> exit                       # 終了
+  dim% 
+
+= 使用上の制限
+
+irbは, 評価できる時点(式が閉じた時点)での逐次実行を行ないます. したがっ
+て, rubyを直接使った時と, 若干異なる動作を行なう場合があります.
+
+現在明らかになっている問題点を説明します.
+
+== ローカル変数の宣言
+
+rubyでは, 以下のプログラムはエラーになります.
+
+  eval "foo = 0"
+  foo
+  --
+  -:2: undefined local variable or method `foo' for #<Object:0x40283118> (NameError)
+  ---
+  NameError
+
+ところが, irbを用いると
+
+  >> eval "foo = 0"
+  => 0
+  >> foo
+  => 0
+
+となり, エラーを起こしません. これは, rubyが最初にスクリプト全体をコン
+パイルしてローカル変数を決定するからです. それに対し, irbは実行可能に
+なる(式が閉じる)と自動的に評価しているからです. 上記の例では, 
+
+  evel "foo = 0" 
+
+を行なった時点で評価を行ない, その時点で変数が定義されるため, 次式で 
+変数fooは定義されているからです.
+
+このようなrubyとirbの動作の違いを解決したい場合は, begin...endで括って
+バッチ的に実行して下さい:
+
+  >> begin
+  ?>   eval "foo = 0"
+  >>   foo
+  >> end
+  NameError: undefined local variable or method `foo' for #<Object:0x4013d0f0>
+  (irb):3
+  (irb_local_binding):1:in `eval'
+
+== ヒアドキュメント
+
+現在のところヒアドキュメントの実装は不完全です. 
+
+== シンボル
+
+シンボルであるかどうかの判断を間違えることがあります. 具体的には式が完了
+しているのに継続行と見なすことがあります.
+
+=end
+
+% Begin Emacs Environment
+% Local Variables:
+% mode: text
+% comment-column: 0
+% comment-start: "%"
+% comment-end: "\n"
+% End:
+%
+

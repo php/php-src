@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=<%= @options.charset %>" http-equiv="Content-Type" />
+
+  <title>File: <%= file.base_name %> [<%= @options.title %>]</title>
+
+  <link type="text/css" media="screen" href="<%= rel_prefix %>/rdoc.css" rel="stylesheet" />
+
+  <script src="<%= rel_prefix %>/js/jquery.js" type="text/javascript"
+    charset="utf-8"></script>
+  <script src="<%= rel_prefix %>/js/thickbox-compressed.js" type="text/javascript"
+    charset="utf-8"></script>
+  <script src="<%= rel_prefix %>/js/quicksearch.js" type="text/javascript"
+    charset="utf-8"></script>
+  <script src="<%= rel_prefix %>/js/darkfish.js" type="text/javascript"
+    charset="utf-8"></script>
+</head>
+
+<% if file.parser == RDoc::Parser::Simple %>
+<body class="file">
+  <div id="metadata">
+    <div id="home-metadata">
+      <div id="home-section" class="section">
+        <h3 class="section-header">
+          <a href="<%= rel_prefix %>/index.html">Home</a>
+          <a href="<%= rel_prefix %>/index.html#classes">Classes</a>
+          <a href="<%= rel_prefix %>/index.html#methods">Methods</a>
+        </h3>
+      </div>
+    </div>
+
+    <div id="project-metadata">
+      <% simple_files = @files.select { |f| f.parser == RDoc::Parser::Simple } %>
+      <% unless simple_files.empty? then %>
+      <div id="fileindex-section" class="section project-section">
+        <h3 class="section-header">Files</h3>
+        <ul>
+        <% simple_files.each do |f| %>
+          <li class="file"><a href="<%= rel_prefix %>/<%= f.path %>"><%= h f.base_name %></a></li>
+        <% end %>
+        </ul>
+      </div>
+      <% end %>
+
+      <div id="classindex-section" class="section project-section">
+        <h3 class="section-header">Class Index
+          <span class="search-toggle"><img src="<%= rel_prefix %>/images/find.png"
+            height="16" width="16" alt="[+]"
+            title="show/hide quicksearch" /></span></h3>
+        <form action="#" method="get" accept-charset="utf-8" class="initially-hidden">
+        <fieldset>
+          <legend>Quicksearch</legend>
+          <input type="text" name="quicksearch" value=""
+            class="quicksearch-field" />
+        </fieldset>
+        </form>
+
+        <ul class="link-list">
+        <% @modsort.each do |index_klass| %>
+          <li><a href="<%= rel_prefix %>/<%= index_klass.path %>"><%= index_klass.full_name %></a></li>
+        <% end %>
+        </ul>
+        <div id="no-class-search-results" style="display: none;">No matching classes.</div>
+      </div>
+
+      <% if $DEBUG_RDOC %>
+      <div id="debugging-toggle"><img src="<%= rel_prefix %>/images/bug.png"
+        alt="toggle debugging" height="16" width="16" /></div>
+      <% end %>
+    </div>
+  </div>
+
+  <div id="documentation">
+    <%= file.description %>
+  </div>
+
+  <div id="validator-badges">
+    <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+    <p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+      Rdoc Generator</a> <%= RDoc::Generator::Darkfish::VERSION %></small>.</p>
+  </div>
+</body>
+<% else %>
+<body class="file file-popup">
+  <div id="metadata">
+    <dl>
+      <dt class="modified-date">Last Modified</dt>
+      <dd class="modified-date"><%= file.last_modified %></dd>
+
+      <% if file.requires %>
+      <dt class="requires">Requires</dt>
+      <dd class="requires">
+        <ul>
+        <% file.requires.each do |require| %>
+          <li><%= require.name %></li>
+        <% end %>
+        </ul>
+      </dd>
+      <% end %>
+
+      <% if @options.webcvs %>
+      <dt class="scs-url">Trac URL</dt>
+      <dd class="scs-url"><a target="_top"
+        href="<%= file.cvs_url %>"><%= file.cvs_url %></a></dd>
+      <% end %>
+    </dl>
+  </div>
+
+  <div id="documentation">
+    <% if file.comment %>
+    <div class="description">
+      <h2>Description</h2>
+      <%= file.description %>
+    </div>
+    <% end %>
+  </div>
+</body>
+<% end %>
+</html>
+

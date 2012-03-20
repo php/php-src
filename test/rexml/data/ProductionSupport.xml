@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<ProductionSupport version="1.1" >
+  <Errors>
+      <CommonErrors>
+          <CommonError>
+            <Key><![CDATA[RoyUpdatePolicyBusReq(Object)>>#error:]]></Key>
+            <Patterns>
+                <Pattern><![CDATA[The error code is '9997']]></Pattern>
+            </Patterns>
+            <Message>
+                <String>Update Policy request 9997: Please check CICS log</String>
+            </Message>
+            <BackendSupport/>
+          </CommonError>
+          <CommonError>
+            <Key>MotorInsuranceContract(Object)>>#error:</Key>
+            <Patterns>
+                <Pattern>Have not got a complete</Pattern>
+            </Patterns>
+            <Message>
+                <String>Have not got a complete and consistent set of price matrices for policy period - ask back-end prod supp to sort out</String>
+            </Message>
+            <BackendSupport/>
+          </CommonError>
+</CommonErrors>
+</Errors>
+</ProductionSupport>

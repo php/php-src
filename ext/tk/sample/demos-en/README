@@ -1,0 +1,138 @@
+Current Maintainer:
+	Jonathan Conway
+	rise@knavery.net
+
+	Please direct all bug reports/requests/suggestions to the above
+	address.
+
+
+Notes:
+
+* 	The files hello and widget have been changed to test Tk::TCL_VERSION
+	and Tk::JAPANIZED_TK before requiring tkencoding.rb to prevent an
+	infinite loop.  This test was taken from a message in
+	[ruby-talk:18559] by Guy Decoux.
+
+*	The .bmp files in the images directory are X bitmaps (i.e. XBM to many
+	graphics packages), not Windows bitmaps (.bmp).  You will not be
+	able to use images exported by a graphics program as Windows
+	bitmaps with this demo collection nor will you be able to edit the
+	included images without setting the file type correctly.
+
+-- Jonathan Conway, 2001-07-26
+
+
+#------------------------------------------------------------------------------
+# ==== Introduction. ====
+#
+# To create this version of the Ruby/Tk widget demo, I took the
+# ruby-tk81-demos and removed all the Kanji strings and comments.  I
+# have tried to restore the original English strings and comments
+# using the Tcl/Tk8.2.2 version of the widget demo.
+#
+# When I tried running the Kanji version, all I got was a mostly blank
+# panel with a non-functional "File" button. I disovered that if all
+# non-ASCII characters were replaced with blanks, then I could get the
+# gutted stuff running.
+#
+# Since English Ruby/Tk documentation is lacking and I needed this
+# code to see how it worked and to use as the basis of my try-it
+# prototype (The Ruby Yielding Interactive Toolkit), plus the fact
+# that no help was forthcoming for making the Kanji version work (plus
+# the fact that I can't read Kanji anyway), I decided to embark on
+# this English restoration project.
+#
+# Thanks to everyone who worked on the original Ruby/Tk widget demo
+# (and the preceding Tcl/Tk version for that matter).  The
+# comparatively simple task of changing text strings and comments has
+# made me appreciate the great amount of original work that went into
+# this.
+#
+# -- Conrad Schneiker, 2000-07-23.
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# ==== Known bugs. ====
+#
+# ^C-ing the demo gives Ruby interrupt and stack message; clean exit needed.
+# Font settings don't work correctly.
+# Dismissing the embedded windows demo (tkwind.rb) kills the widget demo.
+# Rerunning the canvas item demo from the code widow get errors.
+# The "press me" button in the canvas item demo doesn't time out.
+# The simple 2 d plot starts up extremely slow compared to the Tcl version.
+# The first item message on the icon menu on the menu and cascades demo doesn't work.
+#------------------------------------------------------------------------------
+
+
+###################### Original README ########################################
+
+  Ruby/Tk81 widget-demo			1999/08/13
+
+					北陸先端大情報科学研究科
+					立石 <ttate@jaist.ac.jp>
+
+Tcl/Tk8.1ではunicode(UTF8)が採用され、unicodeに変換された日本語であれば
+Widgetに表示させることが可能です。本アーカイブには以前に永井さんが中心と
+なられて作成されたRuby/Tkのサンプルに修正を加え、以下の環境においてで動作
+を確認したものです。
+
+* ruby-1.3.7,ruby-1.4.0
+* tcl8.1, tk8.1
+* linux-2.2
+
+Windows(Cygwin)において、サンプルを動かすにはrubyを-Keというオプションを付
+けて起動させると良いそうです。
+					情報提供：渡辺さん
+					<eban@os.rim.or.jp>
+
+----------------------------------------------------------------------------
+  Ruby/Tk widget-demo
+                              version 1.1 ( 1998/07/24 )
+                              永井＠知能．九工大 (nagai@ai.kyutech.ac.jp)
+
+標準配布の Tcl/Tk 拡張パッケージを取り込んだ Ruby (以下 Ruby/Tk と呼びます)
+では，Tk widget を用いた GUI の作成を行うことができます．実際に GUI を作成
+していく場合には様々な実例がサンプルとして存在すると便利なのですが，Ruby/Tk
+にはそのような適当なサンプルスクリプト集合は存在しませんでした．それに対し，
+拡張パッケージの元である Tcl/Tk には，Tk widget を用いてどのようなことがで
+きるかを示すものとして widget-demo が存在しおり，Tcl/Tk を用いた GUI の作成
+を習得する際の代表的サンプルとなっています．本アーカイブは，Ruby/Tk の習得の
+ための代表的なサンプルスクリプトとすべく，Tcl/Tk の widget-demo を移植したも
+のです．
+
+本アーカイブに含まれるスクリプトを実行するためには，ruby-1.1c2 以上であるこ
+とが必要です．1.1c1 の場合は，本アーカイブに含まれる patck_1.1c1 を Ruby の
+ライブラリにあててください．組み込む Tk のバージョンは，4.2 でも 8.0 でも修
+正なく動かせるはずです．ただし，日本語版での移植となっているため，日本語化さ
+れた Tk をご利用ください．スクリプトのテストは，Tk4.2jp と Tk8.0jp の上で行
+いました (完璧にではないですが)．
+
+本アーカイブに含まれるスクリプトの多くは，元となっている Tcl/Tk 版に比較的近
+いスクリプト記述となるようにしています．そのため，Ruby/Tk のサンプルと言うに
+は，あまり Ruby らしくないとも言えるでしょう．にもかかわらず，そのような記述
+を取っている理由は，Ruby/Tk のドキュメント不足にあります．
+
+Tcl/Tk には適当な参考書が何冊か存在していますから，Ruby/Tk スクリプトを作成
+する際は，そのような Tcl/Tk の参考書で情報を補いながら作成することになると思
+います．各 widget の使用例として，Tcl/Tk の widget-demo を参照することもある
+でしょう．Ruby/Tk 版の記述を widget-demo を Tcl/Tk 版の記述に近いものにして
+おけば，その対比によって，Ruby/Tk の理解を早めることができると考えられます．
+一旦 Ruby/Tk での 各 widget の使用方法を習得してしまえば，Ruby らしいスクリ
+プトを作成することは難しくないでしょう．本アーカイブのスクリプトは，Ruby/Tk
+を最初に習得するまでの踏台として利用していただければ幸いです．
+
+widget-demo の移植にあたっては，次の方にも移植したスクリプトを提供していただ
+きました．ここに感謝の意を表します．
+
+    立石＠JAIST (ttate@jaist.ac.jp) さん
+    平松祥史 (hiramatu@cdrom.co.jp) さん
+
+平松さんによる Ruby/Tk 入門の Web page (http://www.cdrom.co.jp/~hiramatu/)
+も Ruby/Tk の習得に有用と思えますので，ぜひご参照ください．
+
+また，前橋 (maebashi@iij.ad.jp) さんをはじめとして，widget-demo の移植に際し
+て必要となった Ruby の Tk 関連ライブラリ修正について，問題点，バグの指摘をし
+ていただいた方々にも感謝致します．
+
+そして最後に最大の感謝を Ruby 設計者の まつもと ゆきひろ (matz@netlab.co.jp)
+さんに捧げたいと思います．

@@ -1,0 +1,184 @@
+#include "transcode_data.h"
+
+<%
+  require "gb18030-tbl"
+  
+  def linear(code)
+    bytes = [code].pack('H8').unpack 'C4' 
+    ((bytes[0]*10+bytes[1])*126+bytes[2])*10+bytes[3]
+  end
+
+  def calculate_differences_gb_utf(table)
+    table.collect do |code|
+      code = code.dup
+      if code[0].length == 4
+        if code[1] < 0x800 # GB-18030: 2 bytes, UTF-8: 2 bytes
+          # do nothing
+        else # GB-18030: 2 bytes, UTF-8: 3 bytes
+          gb_linear2b = code[0].to_i(16)
+          diff2b = gb_linear2b - code[1] + 24055
+          code[1] = "funsio(#{diff2b})"
+        end
+      else
+        if code[1] < 0x800 # GB-18030: 4 bytes, UTF-8: 2 bytes
+          # do nothing
+        else # GB-18030: 4 bytes, UTF-8: 3 bytes
+          gb_linear4b = linear(code[0])
+          diff4b = gb_linear4b - code[1] - 0x170000
+          code[1] = "funsio(#{diff4b})"
+        end
+      end
+      code
+    end
+  end
+  
+  def calculate_differences_utf_gb(table)
+    table_rev = table.map{|a,b| [b,a]}
+    table_rev.collect do |code|
+      code = code.dup
+      if code[0] >= 0x800
+        if code[1].length == 4 #GB18030 2byte UTF-8 3byte
+          gb_linear2b = code[1].to_i(16)
+          diff2b = gb_linear2b - code[0] + 24055
+          code[1] = "funsio(#{diff2b})"
+        else # GB-18030: 4 bytes, UTF-8: 3 bytes
+          gb_linear4b = linear(code[1])
+          diff4b = gb_linear4b - code[0] - 0x170000
+          code[1] = "funsio(#{diff4b})"
+        end
+      end
+      code
+    end
+  end
+
+  transcode_tbl_only "GB18030", "UTF-8", [["{00-7f}", :nomap]] +
+                                         calculate_differences_gb_utf(GB18030_TO_UCS_TBL) + [
+                                        ["{90-e2}{30-39}{81-fe}{30-39}", :func_so],
+                                        ["e3{30-31}{81-fe}{30-39}", :func_so],
+                                        ["e332{81-99}{30-39}", :func_so],
+                                        ["e3329a{30-35}", :func_so],   #  "E3329A35" is U+10FFFF
+                                       ]
+  transcode_tbl_only "UTF-8", "GB18030", [["{00-7f}", :nomap]] +
+                                        calculate_differences_utf_gb(GB18030_TO_UCS_TBL) + [
+                                        ["f0{90-bf}{80-bf}{80-bf}", :func_so],
+                                        ["{f1-f3}{80-bf}{80-bf}{80-bf}", :func_so],
+                                        ["f4{80-8f}{80-bf}{80-bf}", :func_so]
+                                       ]
+%>
+
+<%= transcode_generated_code %>
+
+/* GB18030 4byte, UTF-8 4byte*/
+static ssize_t
+fun_so_from_gb18030(void *statep, const unsigned char *s, size_t l, unsigned char *o, size_t osize)
+{
+    /* outside BMP only */
+    /* u: Unicode Scalar Value */
+    unsigned int u = (s[0]-0x90)*10*126*10 + (s[1]-0x30)*126*10 + (s[2]-0x81)*10 + (s[3]-0x30) + 0x10000;
+    o[0] = 0xF0 | (u>>18);
+    o[1] = 0x80 | ((u>>12)&0x3F);
+    o[2] = 0x80 | ((u>>6)&0x3F);
+    o[3] = 0x80 | (u&0x3F);
+    return 4;
+}
+
+/* GB18030 4byte, UTF-8 4byte*/
+static ssize_t
+fun_so_to_gb18030(void *statep, const unsigned char *s, size_t l, unsigned char *o, size_t osize)
+{
+    /* outside BMP only */
+    /* u: Unicode Scalar Value */
+    unsigned int u = ((s[0]&0x07)<<18) | ((s[1]&0x3F)<<12) | ((s[2]&0x3F)<<6) | (s[3]&0x3F);
+    u -= 0x10000;
+    o[3] = 0x30 + u%10;
+    u /= 10;
+    o[2] = 0x81 + u%126;
+    u /= 126;
+    o[1] = 0x30 + u%10;
+    o[0] = 0x90 + u/10;
+    return 4;
+}
+
+/* GB18030 2byte, UTF-8 3byte and GB18030 4byte, UTF-8 3byte*/
+static ssize_t
+fun_sio_from_gb18030(void *statep, const unsigned char *s, size_t l, VALUE info, unsigned char *o, size_t osize)
+{
+    unsigned int diff = (unsigned int)(info >> 8);
+    unsigned int u;    /* Unicode Scalar Value */
+    if (diff & 0x20000) { /* GB18030 4 bytes */
+        u = ((s[0]*10+s[1])*126+s[2])*10+s[3] - diff - 0x170000;
+    }
+    else { /* GB18030 2 bytes */
+        u = s[0]*256 + s[1] + 24055 - diff;
+    }
+    o[0] = 0xE0 | (u>>12);
+    o[1] = 0x80 | ((u>>6)&0x3F);
+    o[2] = 0x80 | (u&0x3F);
+    return 3;
+}
+
+/* GB18030 2byte, UTF-8 3byte and GB18030 4byte, UTF-8 3byte*/
+static ssize_t
+fun_sio_to_gb18030(void *statep, const unsigned char *s, size_t l, VALUE info, unsigned char *o, size_t osize)
+{
+    unsigned int diff = (unsigned int)(info >> 8);
+    unsigned int u;    /* Unicode Scalar Value */
+    
+    u = ((s[0]&0x0F)<<12) | ((s[1]&0x3F)<<6) | (s[2]&0x3F);
+
+    if (diff & 0x20000) { /* GB18030 4 bytes */
+        u += (diff + 0x170000);
+	u -= 1688980;
+	u += 0x2;
+        o[3] = 0x30 + u%10;
+        u /= 10;
+        u += 0x32;
+        o[2] = 0x81 + u%126;
+        u /= 126;
+        u += 0x1;
+        o[1] = 0x30 + u%10;
+        u /= 10;
+        o[0] = 0x81 + u;
+	return 4;
+    }
+    else { /* GB18030 2 bytes */
+        u += (diff - 24055);
+	o[1] = u%256;
+	o[0] = u/256;
+	return 2;
+    }
+}
+
+
+static const rb_transcoder
+rb_from_GB18030 = {
+    "GB18030", "UTF-8", from_GB18030,
+    TRANSCODE_TABLE_INFO,
+    1, /* input_unit_length */
+    4, /* max_input */
+    4, /* max_output */
+    asciicompat_converter, /* asciicompat_type */
+    0, NULL, NULL, /* state_size, state_init, state_fini */
+    NULL, NULL, NULL, fun_so_from_gb18030,
+    NULL, NULL, NULL, fun_sio_from_gb18030
+};
+static const rb_transcoder
+rb_to_GB18030 = {
+    "UTF-8", "GB18030", to_GB18030,
+    TRANSCODE_TABLE_INFO,
+    1, /* input_unit_length */
+    4, /* max_input */
+    4, /* max_output */
+    asciicompat_converter, /* asciicompat_type */
+    0, NULL, NULL, /* state_size, state_init, state_fini */
+    NULL, NULL, NULL, fun_so_to_gb18030,
+    NULL, NULL, NULL, fun_sio_to_gb18030
+};
+
+
+void
+Init_gb18030(void)
+{
+    rb_register_transcoder(&rb_from_GB18030);
+    rb_register_transcoder(&rb_to_GB18030);
+}

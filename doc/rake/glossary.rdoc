@@ -1,0 +1,51 @@
+= Glossary
+
+[<b>action</b>]
+	Code to be executed in order to perform a task.  Actions in a
+	rakefile are specified in a code block (usually delimited by
+	+do+/+end+ pairs.
+
+[<b>execute</b>]
+	When a task is executed, all of its actions are performed, in
+	the order they were defined.  Note that unlike
+	<tt>invoke</tt>, <tt>execute</tt> always executes the actions
+	(without invoking or executing the prerequisites).
+
+[<b>file task</b> (FileTask)]
+	 A file task is a task whose purpose is to create a file
+	 (which has the same name as the task).  When invoked, a file
+	 task will only execute if one or more of the following
+	 conditions are true.
+
+         1. The associated file does not exist.
+	 2. A prerequisite has a later time stamp than the existing file.
+
+	 Because normal Tasks always have the current time as
+	 timestamp, a FileTask that has a normal Task prerequisite
+	 will always execute.
+
+[<b>invoke</b>]
+	When a task is invoked, first we check to see if it has been
+	invoked before.  if it has been, then nothing else is done.
+	If this is the first time its been invoked, then we invoke
+	each of its prerequisites.  Finally, we check to see if we
+	need to execute the actions of this task by calling
+	<tt>needed?</tt>.  Finally, if the task is needed, we execute
+	its actions.
+
+	NOTE: Currently prerequisites are invoked even if the task is
+	not needed.  This may change in the future.
+
+[<b>prerequisites</b>]
+	Every task has a set (possiblity empty) of prerequisites.  A
+	prerequisite P to Task T is itself a task that must be invoked
+	before Task T.  
+
+[<b>rule</b>]
+	A rule is a recipe for synthesizing a task when no task is
+	explicitly defined.  Rules generally synthesize file tasks.
+
+[<b>task</b> (Task)]
+	Basic unit of work in a rakefile.  A task has a name, a set of
+	prerequisites and a list of actions to be performed.
+

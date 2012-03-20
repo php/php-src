@@ -1,0 +1,33 @@
+#include "transcode_data.h"
+
+<%
+  require "big5-hkscs-tbl"
+  require "big5-uao-tbl"
+
+  tbls = import_ucm("glibc-BIG5-2.3.3.ucm")
+  transcode_tblgen "Big5", "UTF-8", [["{00-7f}", :nomap]] + tbls[0]
+  transcode_tblgen "UTF-8", "Big5", [["{00-7f}", :nomap]] + tbls[1]
+
+  tbls = import_ucm("windows-950-2000.ucm")
+  transcode_tblgen "CP950", "UTF-8", [["{00-7f}", :nomap]] + tbls[0], ValidEncoding('Big5')
+  transcode_tblgen "UTF-8", "CP950", [["{00-7f}", :nomap]] + tbls[1]
+
+  transcode_tblgen "Big5-HKSCS", "UTF-8", [["{00-7f}", :nomap], *BIG5_HKSCS_TO_UCS_TBL], ValidEncoding('Big5')
+  transcode_tblgen "UTF-8", "Big5-HKSCS", [["{00-7f}", :nomap], *UCS_TO_BIG5_HKSCS_TBL]
+
+  tbls = import_ucm("windows-950_hkscs-2001.ucm")
+  transcode_tblgen "CP951", "UTF-8", [["{00-7f}", :nomap]] + tbls[0], ValidEncoding('Big5')
+  transcode_tblgen "UTF-8", "CP951", [["{00-7f}", :nomap]] + tbls[1]
+
+  transcode_tblgen "Big5-UAO", "UTF-8", [["{00-7f}", :nomap], *BIG5_UAO_TO_UCS_TBL], ValidEncoding('Big5')
+  transcode_tblgen "UTF-8", "Big5-UAO", [["{00-7f}", :nomap], *BIG5_UAO_TO_UCS_TBL.map {|a,b| [b,a] }]
+
+%>
+
+<%= transcode_generated_code %>
+
+void
+Init_big5(void)
+{
+<%= transcode_register_code %>
+}

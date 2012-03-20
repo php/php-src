@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<message>
+  <header>
+    <service>lookupformservice</service>
+    <connectionid>9</connectionid>
+    <appid>stammdaten</appid>
+    <action>new</action>
+  </header>
+  <body>
+    <data>
+      <items>
+        <item>
+          <name>iteminfo</name>
+          <value>ELE</value>
+        </item>
+        <item>
+          <name>parentinfo</name>
+          <value>Pruefgebiete</value>
+        </item>
+        <item>
+          <name>id</name>
+          <value>1</value>
+        </item>
+      </items>
+    </data>
+  </body>
+</message>

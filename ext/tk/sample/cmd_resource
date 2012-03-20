@@ -1,0 +1,5 @@
+*BtnFrame.hello.text: HELLO
+*BtnFrame.hello.command: ruby {puts "Hello World!!"}
+*BTN_CMD.show_msg: {|arg| print "Hello, #{arg}!!\n"}
+*hello.show_msg: {|arg| print "Hello, Hello, #{arg}!!\n"}
+*hello.ZZZ.show_msg: {|arg| print "Hello, Hello, ZZZ:#{arg}!!\n"}

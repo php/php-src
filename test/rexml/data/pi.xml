@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<foo>
+	<?cheese is tasty?>
+	<bar>
+		<baz/>
+		<cheese/>
+		<baz/>
+		<?toast is tasty?>
+		<cheese/>
+		<baz/>
+	</bar>
+	<?cheese is gooey?>
+</foo>

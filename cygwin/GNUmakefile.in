@@ -1,0 +1,107 @@
+include Makefile
+-include uncommon.mk
+
+ENABLE_SHARED=@ENABLE_SHARED@
+DLLWRAP = @DLLWRAP@ --target=@target_os@ --driver-name="$(CC)"
+WINDRES = @WINDRES@ --preprocessor="$(CPP) -xc" -DRC_INVOKED
+
+ifeq (@target_os@,cygwin)
+  DLL_BASE_NAME := $(LIBRUBY_SO:.dll=)
+else
+  DLL_BASE_NAME := $(RUBY_SO_NAME)
+  DLLWRAP += -mno-cygwin
+  VPATH := $(VPATH):$(srcdir)/win32
+  STUBPROGRAM = rubystub$(EXEEXT)
+  IGNOREDPATTERNS = %~ .% %.orig %.rej \#%\#
+  SCRIPTPROGRAMS = $(addsuffix $(EXEEXT),$(filter-out $(IGNOREDPATTERNS),$(notdir $(wildcard $(srcdir)/bin/*))))
+endif
+
+ifneq ($(ENABLE_SHARED),yes)
+  RUBY_EXP = $(RUBY_INSTALL_NAME).exp
+  EXTOBJS = $(RUBY_EXP)
+  LIBRUBYARG = $(LIBRUBY_A)
+  LIBRUBY_SO =
+endif
+
+ifeq ($(RUBY_INSTALL_NAME),ruby)
+  RUBYW_INSTALL_NAME = $(RUBY_INSTALL_NAME)w
+else
+  RUBYW_INSTALL_NAME = $(subst ruby,rubyw,$(RUBY_INSTALL_NAME))
+endif
+
+WPROGRAM = $(RUBYW_INSTALL_NAME)$(EXEEXT)
+SOLIBS := $(DLL_BASE_NAME).res.@OBJEXT@ $(SOLIBS)
+EXTOBJS += $(if $(filter-out $(RUBYW_INSTALL_NAME),$(@:$(EXEEXT)=)),$(RUBY_INSTALL_NAME),$(@:$(EXEEXT)=)).res.$(OBJEXT)
+RCFILES = $(RUBY_INSTALL_NAME).rc $(RUBYW_INSTALL_NAME).rc $(DLL_BASE_NAME).rc
+RUBYDEF = $(DLL_BASE_NAME).def
+
+ruby: $(PROGRAM)
+rubyw: $(WPROGRAM)
+stub: $(STUBPROGRAM)
+scriptbin: $(SCRIPTPROGRAMS)
+
+%$(EXEEXT): bin/% $(STUBPROGRAM)
+	$(ECHO) generating $@
+	$(Q) { cat $(STUBPROGRAM); echo; sed -e '1{' -e '/^#!.*ruby/!i\' -e '#!/bin/ruby' -e '}' $<; } > $@
+	$(Q) chmod +x $@
+
+$(LIBRUBY): $(RUBY_EXP) $(LIBRUBY_SO)
+$(RUBY_EXP) $(LIBRUBY_SO): $(DLL_BASE_NAME).res.@OBJEXT@
+
+%.res.@OBJEXT@: %.rc
+	$(ECHO) compiling $@
+	$(Q) $(WINDRES) --include-dir . --include-dir $(<D) --include-dir $(srcdir)/win32 $< $@
+
+$(RCFILES): $(RBCONFIG) $(srcdir)/revision.h $(srcdir)/win32/resource.rb
+	$(ECHO) generating $@
+	$(Q) $(MINIRUBY) $(srcdir)/win32/resource.rb \
+	  -ruby_name=$(RUBY_INSTALL_NAME) -rubyw_name=$(RUBYW_INSTALL_NAME) \
+	  -so_name=$(DLL_BASE_NAME) \
+	  . $(icondirs) $(srcdir)/win32
+
+$(PROGRAM): $(RUBY_INSTALL_NAME).res.@OBJEXT@
+$(WPROGRAM): $(RUBYW_INSTALL_NAME).res.@OBJEXT@
+	@rm -f $@
+	$(ECHO) linking $@
+	$(Q) $(PURIFY) $(CC) -mwindows -e $(SYMBOL_PREFIX)mainCRTStartup $(LDFLAGS) $(XLDFLAGS) \
+	  $(MAINOBJ) $(EXTOBJS) $(LIBRUBYARG) $(LIBS) -o $@
+$(STUBPROGRAM): $(RUBY_INSTALL_NAME).res.@OBJEXT@ stub.@OBJEXT@
+	@rm -f $@
+	$(ECHO) linking $@
+	$(Q) $(PURIFY) $(CC) $(LDFLAGS) $(XLDFLAGS) \
+	  stub.@OBJEXT@ $(EXTOBJS) $(LIBRUBYARG) $(LIBS) -o $@
+
+$(RUBY_EXP): $(LIBRUBY_A)
+	$(ECHO) creating $@
+	$(Q) $(DLLWRAP) \
+	  --output-exp=$(RUBY_EXP) \
+	  --export-all $(LIBRUBY_A) $(LIBS) -o $(PROGRAM)
+	$(Q) $(LDSHARED) $(DLDFLAGS) $(OBJS) dmyext.o $(SOLIBS) -o $(PROGRAM)
+	@rm -f $(PROGRAM)
+
+GNUmakefile:	$(srcdir)/cygwin/GNUmakefile.in
+
+ifeq (@target_os@,mingw32)
+$(OBJS) $(MAINOBJ): win32.h
+
+dir.$(OBJEXT) win32.$(OBJEXT): win32/dir.h
+endif
+
+$(LIBRUBY_SO): $(RUBYDEF)
+
+$(RUBYDEF): $(LIBRUBY_A) $(PREP) $(RBCONFIG)
+	$(ECHO) generating $@
+	$(Q) $(MINIRUBY) $(srcdir)/win32/mkexports.rb -output=$@ $(LIBRUBY_A)
+
+clean-local::
+	@$(RM) $(RUBYDEF)
+
+ifeq (@target_os@,cygwin)
+cygwin-$(RUBY_INSTALL_NAME)$(MAJOR)$(MINOR)$(TEENY).dll: $(LIBRUBY_A) $(RUBYDEF)
+	$(ECHO) generating $@
+	$(Q) @DLLWRAP@ -s --def=$(RUBYDEF) -o $@
+endif
+
+clean-local::
+	@$(RM) $(RUBY_EXP) $(RCFILES:.rc=.res.@OBJEXT@)
+	@$(RM) $(RCFILES)

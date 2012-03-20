@@ -1,0 +1,67 @@
+
+  *** for MacOS X Aqua (Tcl/Tk Aqua) users ***
+
+First of all, please read README.tcltklib to use Tcl/Tk Aqua Framework.
+
+With Tcl/Tk Aqua libraries, current tcltklib somtimes freezes when
+using Aqua specific dialogs (e.g. Tk.messageBox).
+This is a known bug of Ruby-1.8.4 release.
+
+When you meet the trouble on your GUI, you'll be able to avoid the trouble
+by Tcl/Tk's traditional dialogs.
+If you want to do that, please call some of the following bits of script
+after "reqruie 'tk'".
+
+=================================================================
+# use a traditional dialog for Tk.chooseColor()
+Tk.ip_eval(<<'EOS')
+    proc ::tk_chooseColor {args} {
+        return [eval tk::dialog::color:: $args]
+    }
+EOS
+
+# use a traditional dialog for Tk.getOpenFile() and Tk.getMultipleOpenFile()
+Tk.ip_eval(<<'EOS')
+    proc ::tk_getOpenFile {args} {
+        if {$::tk_strictMotif} {
+            return [eval tk::MotifFDialog open $args]
+        } else {
+            return [eval ::tk::dialog::file:: open $args]
+        }
+    }
+EOS
+
+# use a traditional dialog for Tk.getSaveFile() and Tk.getMultipleSaveFile()
+Tk.ip_eval(<<'EOS')
+    proc ::tk_getSaveFile {args} {
+        if {$::tk_strictMotif} {
+            return [eval tk::MotifFDialog save $args]
+        } else {
+            return [eval ::tk::dialog::file:: save $args]
+        }
+    }
+EOS
+
+# use a traditional dialog for Tk.messageBox()
+Tk.ip_eval(<<'EOS')
+    proc ::tk_messageBox {args} {
+        return [eval tk::MessageBox $args]
+    }
+EOS
+
+# use a traditional dialog for Tk.chooseDirectory()
+Tk.ip_eval(<<'EOS')
+    proc ::tk_chooseDirectory {args} {
+        return [eval ::tk::dialog::file::chooseDir:: $args]
+    }
+EOS
+=================================================================
+
+Each of them replaces the platform specific dialog command to the
+traditional one.
+
+If you use some MultiTkIp objects, probably, you'll have to call the
+bits of script for each MultiTkIp object.
+
+--
+Hidetoshi NAGAI (nagai@ai.kyutech.ac.jp)

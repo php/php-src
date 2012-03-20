@@ -1,0 +1,2 @@
+digest.o: digest.c digest.h $(hdrdir)/ruby.h $(topdir)/config.h \
+  $(hdrdir)/defines.h $(hdrdir)/intern.h

@@ -1,0 +1,2167 @@
+/** ##skip -*- mode:c; style:ruby; coding: utf-8 -*-
+  insns.def - YARV instruction definitions
+
+  $Author: $
+  created at: 04/01/01 01:17:55 JST
+
+  Copyright (C) 2004-2007 Koichi Sasada
+*/
+
+/** ##skip
+  instruction comment
+  @c: category
+  @e: english description
+  @j: japanese description
+
+  instruction form:
+    DEFINE_INSN
+    instruction_name
+    (instruction_operands, ..)
+    (pop_values, ..)
+    (return value)
+    {
+       .. // insn body
+    }
+
+ */
+
+
+/**
+  @c nop
+  @e nop
+  @j nop
+ */
+DEFINE_INSN
+nop
+()
+()
+()
+{
+    /* none */
+}
+
+/**********************************************************/
+/* deal with variables                                    */
+/**********************************************************/
+
+/**
+  @c variable
+  @e Get value of local variable (pointed to by idx).
+  @j idx で指定されたローカル変数をスタックに置く。
+ */
+DEFINE_INSN
+getlocal
+(lindex_t idx)
+()
+(VALUE val)
+{
+    val = *(GET_LFP() - idx);
+}
+
+/**
+  @c variable
+  @e Set value of local variable (pointed to by idx) to val.
+  @j idx で指定されたローカル変数を val に設定する。
+ */
+DEFINE_INSN
+setlocal
+(lindex_t idx)
+(VALUE val)
+()
+{
+    (*(GET_LFP() - idx)) = val;
+}
+
+/**
+  @c variable
+  @e Get value of special local variable ($~, $_, ..).
+  @j 特殊なローカル変数（$~, $_, ...）の値を得る。
+ */
+DEFINE_INSN
+getspecial
+(VALUE key, rb_num_t type)
+()
+(VALUE val)
+{
+    val = vm_getspecial(th, GET_LFP(), key, type);
+}
+
+/**
+  @c variable
+  @e Set value of special local variable ($~, $_, ...) to obj.
+  @j 特別なローカル変数（$~, $_, ...）の値を設定する。
+ */
+DEFINE_INSN
+setspecial
+(VALUE key)
+(VALUE obj)
+()
+{
+    lfp_svar_set(th, GET_LFP(), key, obj);
+}
+
+/**
+  @c variable
+  @e Get value of block local variable (pointed to by idx and level).
+     'level' indicates the nesting depth from the current block.
+  @j level, idx で指定されたブロックローカル変数の値をスタックに置く。
+     level はブロックのネストレベルで、何段上かを示す。
+ */
+DEFINE_INSN
+getdynamic
+(dindex_t idx, rb_num_t level)
+()
+(VALUE val)
+{
+    rb_num_t i;
+    VALUE *dfp2 = GET_DFP();
+    for (i = 0; i < level; i++) {
+	dfp2 = GET_PREV_DFP(dfp2);
+    }
+    val = *(dfp2 - idx);
+}
+
+/**
+  @c variable
+  @e Set block local variable (pointed to by 'idx') as val.
+     'level' indicates the nesting depth from the current block.
+  @j level, idx で指定されたブロックローカル変数の値を val にする。
+     level はブロックのネストレベルで、何段上かを示す。
+ */
+DEFINE_INSN
+setdynamic
+(dindex_t idx, rb_num_t level)
+(VALUE val)
+()
+{
+    rb_num_t i;
+    VALUE *dfp2 = GET_DFP();
+    for (i = 0; i < level; i++) {
+	dfp2 = GET_PREV_DFP(dfp2);
+    }
+    *(dfp2 - idx) = val;
+}
+
+/**
+  @c variable
+  @e Get value of instance variable id of self.
+     If is_local is not 0, get value of class local variable.
+  @j self のインスタンス変数 id の値を得る。
+ */
+DEFINE_INSN
+getinstancevariable
+(ID id, IC ic)
+()
+(VALUE val)
+{
+    val = vm_getivar(GET_SELF(), id, ic);
+}
+
+/**
+  @c variable
+  @e Set value of instance variable id of self to val.
+     If is_local is not 0, set value of class local variable.
+  @j self のインスタンス変数 id を val にする。
+ */
+DEFINE_INSN
+setinstancevariable
+(ID id, IC ic)
+(VALUE val)
+()
+{
+    vm_setivar(GET_SELF(), id, val, ic);
+}
+
+/**
+  @c variable
+  @e Get value of class variable id of klass as val.
+  @j 現在のスコープのクラス変数 id の値を得る。
+ */
+DEFINE_INSN
+getclassvariable
+(ID id)
+()
+(VALUE val)
+{
+    NODE * const cref = vm_get_cref(GET_ISEQ(), GET_LFP(), GET_DFP());
+    val = rb_cvar_get(vm_get_cvar_base(cref), id);
+}
+
+/**
+  @c variable
+  @e Set value of class variable id of klass as val.
+  @j klass のクラス変数 id を val にする。
+ */
+DEFINE_INSN
+setclassvariable
+(ID id)
+(VALUE val)
+()
+{
+    NODE * const cref = vm_get_cref(GET_ISEQ(), GET_LFP(), GET_DFP());
+    rb_cvar_set(vm_get_cvar_base(cref), id, val);
+}
+
+/**
+  @c variable
+  @e
+   Get constant variable id. If klass is Qnil, constants
+   are searched in the current scope. If klass is Qfalse, constants
+   are searched as top level constants. Otherwise, get constant under klass
+   class or module.
+  @j 定数 id の値を得る。
+   klass が Qnil なら、そのスコープで得られる定数の値を得る。
+   Qfalse なら、トップレベルスコープを得る。
+   それ以外なら、klass クラスの下の定数を得る。
+ */
+DEFINE_INSN
+getconstant
+(ID id)
+(VALUE klass)
+(VALUE val)
+{
+    val = vm_get_ev_const(th, GET_ISEQ(), klass, id, 0);
+}
+
+/**
+  @c variable
+  @e
+   Set constant variable id. If klass is Qfalse, constant
+   is able to access in this scope. if klass is Qnil, set
+   top level constant. otherwise, set constant under klass
+   class or module.
+
+  @j 定数 id の値を val にする。
+   klass が Qfalse なら、そのスコープで得られる定数 id の値を設定する。
+   Qnil なら、トップレベルスコープの値を設定する。
+   それ以外なら、klass クラスの下の定数を設定する。
+ */
+DEFINE_INSN
+setconstant
+(ID id)
+(VALUE val, VALUE cbase)
+()
+{
+    vm_check_if_namespace(cbase);
+    rb_const_set(cbase, id, val);
+    INC_VM_STATE_VERSION();
+}
+
+/**
+  @c variable
+  @e get global variable id.
+  @j グローバル変数 id の値を得る。
+ */
+DEFINE_INSN
+getglobal
+(GENTRY entry)
+()
+(VALUE val)
+{
+    val = GET_GLOBAL((VALUE)entry);
+}
+
+/**
+  @c variable
+  @e set global variable id as val.
+  @j グローバル変数 id の値を設定する。
+ */
+DEFINE_INSN
+setglobal
+(GENTRY entry)
+(VALUE val)
+()
+{
+    SET_GLOBAL((VALUE)entry, val);
+}
+
+
+/**********************************************************/
+/* deal with values                                       */
+/**********************************************************/
+
+/**
+  @c put
+  @e put nil to stack.
+  @j スタックに nil をプッシュする。
+ */
+DEFINE_INSN
+putnil
+()
+()
+(VALUE val)
+{
+    val = Qnil;
+}
+
+/**
+  @c put
+  @e put self.
+  @j スタックに self をプッシュする。
+ */
+DEFINE_INSN
+putself
+()
+()
+(VALUE val)
+{
+    val = GET_SELF();
+}
+
+/**
+  @c put
+  @e put some object.
+     i.e. Fixnum, true, false, nil, and so on.
+  @j オブジェクト val をスタックにプッシュする。
+     i.e. Fixnum, true, false, nil, and so on.
+ */
+DEFINE_INSN
+putobject
+(VALUE val)
+()
+(VALUE val)
+{
+    /* */
+}
+
+/**
+  @c put
+  @e put special object.  "value_type" is for expansion.
+  @j 特別なオブジェクト val をスタックにプッシュする。
+     オブジェクトの種類は value_type による．
+ */
+DEFINE_INSN
+putspecialobject
+(rb_num_t value_type)
+()
+(VALUE val)
+{
+    enum vm_special_object_type type = (enum vm_special_object_type)value_type;
+
+    switch (type) {
+      case VM_SPECIAL_OBJECT_VMCORE:
+	val = rb_mRubyVMFrozenCore;
+	break;
+      case VM_SPECIAL_OBJECT_CBASE:
+	val = vm_get_cbase(GET_ISEQ(), GET_LFP(), GET_DFP());
+	break;
+      case VM_SPECIAL_OBJECT_CONST_BASE:
+	val = vm_get_const_base(GET_ISEQ(), GET_LFP(), GET_DFP());
+	break;
+      default:
+	rb_bug("putspecialobject insn: unknown value_type");
+    }
+}
+
+/**
+  @c put
+  @e put iseq value.
+  @j put iseq value.
+ */
+DEFINE_INSN
+putiseq
+(ISEQ iseq)
+()
+(VALUE ret)
+{
+    ret = iseq->self;
+}
+
+/**
+  @c put
+  @e put string val. string will be copied.
+  @j 文字列をコピーしてスタックにプッシュする。
+ */
+DEFINE_INSN
+putstring
+(VALUE str)
+()
+(VALUE val)
+{
+    val = rb_str_resurrect(str);
+}
+
+/**
+  @c put
+  @e put concatenate strings
+  @j スタックトップの文字列を n 個連結し，結果をスタックにプッシュする。
+ */
+DEFINE_INSN
+concatstrings
+(rb_num_t num)
+(...)
+(VALUE val) // inc += 1 - num;
+{
+    rb_num_t i = num - 1;
+
+    val = rb_str_resurrect(TOPN(i));
+    while (i-- > 0) {
+	const VALUE v = TOPN(i);
+	rb_str_append(val, v);
+    }
+    POPN(num);
+}
+
+/**
+  @c put
+  @e to_str
+  @j to_str の結果をスタックにプッシュする。
+ */
+DEFINE_INSN
+tostring
+()
+(VALUE val)
+(VALUE val)
+{
+    val = rb_obj_as_string(val);
+}
+
+/**
+  @c put
+  @e to Regexp
+  @j 文字列 str を正規表現にコンパイルしてスタックにプッシュする。
+     コンパイル時，opt を正規表現のオプションとする。
+ */
+DEFINE_INSN
+toregexp
+(rb_num_t opt, rb_num_t cnt)
+(...)
+(VALUE val) // inc += 1 - cnt;
+{
+    VALUE rb_reg_new_ary(VALUE ary, int options);
+    rb_num_t i;
+    const VALUE ary = rb_ary_tmp_new(cnt);
+    for (i = 0; i < cnt; i++) {
+        rb_ary_store(ary, cnt-i-1, TOPN(i));
+    }
+    POPN(cnt);
+    val = rb_reg_new_ary(ary, (int)opt);
+    rb_ary_clear(ary);
+}
+
+/**
+  @c put
+  @e put new array.
+  @j 新しい配列をスタック上の num 個の値で初期化して生成しプッシュする。
+ */
+DEFINE_INSN
+newarray
+(rb_num_t num)
+(...)
+(VALUE val) // inc += 1 - num;
+{
+    val = rb_ary_new4((long)num, STACK_ADDR_FROM_TOP(num));
+    POPN(num);
+}
+
+/**
+  @c put
+  @e dup array
+  @j 配列 ary を dup してスタックにプッシュする。
+ */
+DEFINE_INSN
+duparray
+(VALUE ary)
+()
+(VALUE val)
+{
+    val = rb_ary_resurrect(ary);
+}
+
+/**
+  @c put
+  @e expand array to num objects.
+  @j スタックトップのオブジェクトが配列であれば、それを展開する。
+     配列オブジェクトの要素数が num以下ならば、代わりに nil を積む。num以上なら、
+     num以上の要素は切り捨てる。
+     配列オブジェクトでなければ、num - 1 個の nil を積む。
+     もし flag が真なら、残り要素の配列を積む
+     flag: 0x01 - 最後を配列に
+     flag: 0x02 - postarg 用
+     flag: 0x04 - reverse?
+ */
+DEFINE_INSN
+expandarray
+(rb_num_t num, rb_num_t flag)
+(..., VALUE ary)
+(...) // inc += num - 1 + (flag & 1 ? 1 : 0);
+{
+    vm_expandarray(GET_CFP(), ary, num, (int)flag);
+}
+
+/**
+  @c put
+  @e concat two arrays
+  @j 二つの配列 ary1, ary2 を連結しスタックへプッシュする。
+ */
+DEFINE_INSN
+concatarray
+()
+(VALUE ary1, VALUE ary2st)
+(VALUE ary)
+{
+    const VALUE ary2 = ary2st;
+    VALUE tmp1 = rb_check_convert_type(ary1, T_ARRAY, "Array", "to_a");
+    VALUE tmp2 = rb_check_convert_type(ary2, T_ARRAY, "Array", "to_a");
+
+    if (NIL_P(tmp1)) {
+	tmp1 = rb_ary_new3(1, ary1);
+    }
+
+    if (NIL_P(tmp2)) {
+	tmp2 = rb_ary_new3(1, ary2);
+    }
+
+    if (tmp1 == ary1) {
+	tmp1 = rb_ary_dup(ary1);
+    }
+    ary = rb_ary_concat(tmp1, tmp2);
+}
+
+/**
+  @c put
+  @e splat array
+  @j 配列 ary に対して to_a を呼び出す。
+ */
+DEFINE_INSN
+splatarray
+(VALUE flag)
+(VALUE ary)
+(VALUE obj)
+{
+    VALUE tmp = rb_check_convert_type(ary, T_ARRAY, "Array", "to_a");
+    if (NIL_P(tmp)) {
+	tmp = rb_ary_new3(1, ary);
+    }
+    else if (RTEST(flag)) {
+	tmp = rb_ary_dup(tmp);
+    }
+    obj = tmp;
+}
+
+/**
+  @c put
+  @e check value is included in ary
+  @j 配列 ary に要素 obj が入っているかどうかチェック。case/when で利用する。
+ */
+DEFINE_INSN
+checkincludearray
+(VALUE flag)
+(VALUE obj, VALUE ary)
+(VALUE obj, VALUE result)
+{
+    int i;
+    result = Qfalse;
+
+    if (TYPE(ary) != T_ARRAY) {
+	ary = rb_Array(ary);
+    }
+
+    if (flag == Qtrue) {
+	/* NODE_CASE */
+	for (i = 0; i < RARRAY_LEN(ary); i++) {
+	    /* TODO: fix me (use another method dispatch) */
+	    if (RTEST(rb_funcall2(RARRAY_PTR(ary)[i], idEqq, 1, &obj))) {
+		result = Qtrue;
+		break;
+	    }
+	}
+    }
+    else {
+	obj = Qfalse;
+	/* NODE_WHEN */
+	for (i = 0; i < RARRAY_LEN(ary); i++) {
+	    if (RTEST(RARRAY_PTR(ary)[i])) {
+		obj = result = Qtrue;
+		break;
+	    }
+	}
+    }
+}
+
+/**
+  @c put
+  @e put new Hash.
+  @j 新しいハッシュをスタックトップの n 個を初期値として生成する。
+     n はキーと値のペアなので 2 の倍数でなければならない。
+ */
+DEFINE_INSN
+newhash
+(rb_num_t num)
+(...)
+(VALUE val) // inc += 1 - num;
+{
+    rb_num_t i;
+    val = rb_hash_new();
+
+    for (i = num; i > 0; i -= 2) {
+	const VALUE v = TOPN(i - 2);
+	const VALUE k = TOPN(i - 1);
+	rb_hash_aset(val, k, v);
+    }
+    POPN(num);
+}
+
+/**
+  @c put
+  @e put new Range object.(Range.new(low, high, flag))
+  @j Range.new(low, high, flag) のようなオブジェクトを生成しスタックにプッシュする。
+ */
+DEFINE_INSN
+newrange
+(rb_num_t flag)
+(VALUE low, VALUE high)
+(VALUE val)
+{
+    val = rb_range_new(low, high, (int)flag);
+}
+
+/**********************************************************/
+/* deal with stack operation                              */
+/**********************************************************/
+
+/**
+  @c stack
+  @e pop from stack.
+  @j スタックから一つポップする。
+ */
+DEFINE_INSN
+pop
+()
+(VALUE val)
+()
+{
+    (void)val;
+    /* none */
+}
+
+/**
+  @c stack
+  @e duplicate stack top.
+  @j スタックトップをコピーしてスタックにプッシュする。
+ */
+DEFINE_INSN
+dup
+()
+(VALUE val)
+(VALUE val1, VALUE val2)
+{
+    val1 = val2 = val;
+}
+
+/**
+  @c stack
+  @e duplicate stack top n elements
+  @j スタックトップの n 個をコピーしてスタックにプッシュする。
+ */
+DEFINE_INSN
+dupn
+(rb_num_t n)
+(...)
+(...) // inc += n;
+{
+    rb_num_t i;
+    VALUE *sp = STACK_ADDR_FROM_TOP(n);
+    for (i = 0; i < n; i++) {
+	GET_SP()[i] = sp[i];
+    }
+    INC_SP(n);
+}
+
+
+/**
+  @c stack
+  @e swap top 2 vals
+  @j スタックトップの 2 つの値を交換する。
+ */
+DEFINE_INSN
+swap
+()
+(VALUE val, VALUE obj)
+(VALUE obj, VALUE val)
+{
+    /* none */
+}
+
+/**
+  @c stack
+  @e for stack caching.
+  @j スタックキャッシングの状態を調整するために必要な命令。
+ */
+DEFINE_INSN
+reput
+()
+(..., VALUE val)
+(VALUE val) // inc += 0;
+{
+    /* none */
+}
+
+/**
+  @c stack
+  @e get nth stack value from stack top
+  @j スタックトップから n 個目をスタックにプッシュする。
+ */
+DEFINE_INSN
+topn
+(rb_num_t n)
+(...)
+(VALUE val) // inc += 1;
+{
+    val = TOPN(n);
+}
+
+/**
+  @c stack
+  @e set Nth stack entry to stack top
+  @j スタックトップの値を n 個目のスタックにコピー
+ */
+DEFINE_INSN
+setn
+(rb_num_t n)
+(..., VALUE val)
+(VALUE val) // inc += 0
+{
+    TOPN(n-1) = val;
+}
+
+/**
+  @c stack
+  @e empt current stack
+  @j current stack を空にする。
+ */
+DEFINE_INSN
+adjuststack
+(rb_num_t n)
+(...)
+(...) // inc -= n
+{
+    DEC_SP(n);
+}
+
+
+/**********************************************************/
+/* deal with setting                                      */
+/**********************************************************/
+
+/**
+  @c setting
+  @e defined?
+  @j defined? を行う。
+ */
+DEFINE_INSN
+defined
+(rb_num_t op_type, VALUE obj, VALUE needstr)
+(VALUE v)
+(VALUE val)
+{
+    VALUE klass;
+    const char *expr_type = 0;
+    enum defined_type type = (enum defined_type)op_type;
+
+    val = Qnil;
+
+    switch (type) {
+      case DEFINED_IVAR:
+	if (rb_ivar_defined(GET_SELF(), SYM2ID(obj))) {
+	    expr_type = "instance-variable";
+	}
+	break;
+      case DEFINED_IVAR2:
+	klass = vm_get_cbase(GET_ISEQ(), GET_LFP(), GET_DFP());
+	break;
+      case DEFINED_GVAR:
+	if (rb_gvar_defined(rb_global_entry(SYM2ID(obj)))) {
+	    expr_type = "global-variable";
+	}
+	break;
+      case DEFINED_CVAR:
+	{
+	NODE *cref = vm_get_cref(GET_ISEQ(), GET_LFP(), GET_DFP());
+	klass = vm_get_cvar_base(cref);
+	if (rb_cvar_defined(klass, SYM2ID(obj))) {
+	    expr_type = "class variable";
+	}
+	break;
+	}
+      case DEFINED_CONST:
+	klass = v;
+	if (vm_get_ev_const(th, GET_ISEQ(), klass, SYM2ID(obj), 1)) {
+	    expr_type = "constant";
+	}
+	break;
+      case DEFINED_FUNC:
+	klass = CLASS_OF(v);
+	if (rb_method_boundp(klass, SYM2ID(obj), 0)) {
+	    expr_type = "method";
+	}
+	break;
+      case DEFINED_METHOD:{
+	VALUE klass = CLASS_OF(v);
+	const rb_method_entry_t *me = rb_method_entry(klass, SYM2ID(obj));
+
+	if (me) {
+	    if (!(me->flag & NOEX_PRIVATE)) {
+		if (!((me->flag & NOEX_PROTECTED) &&
+		      !rb_obj_is_kind_of(GET_SELF(),
+					 rb_class_real(klass)))) {
+		    expr_type = "method";
+		}
+	    }
+	}
+	{
+	    VALUE args[2];
+	    VALUE r;
+
+	    args[0] = obj; args[1] = Qfalse;
+	    r = rb_check_funcall(v, rb_intern("respond_to_missing?"), 2, args);
+	    if (r != Qundef && RTEST(r)) 
+		expr_type = "method";
+	}
+	break;
+      }
+      case DEFINED_YIELD:
+	if (GET_BLOCK_PTR()) {
+	    expr_type = "yield";
+	}
+	break;
+      case DEFINED_ZSUPER:{
+	rb_iseq_t *iseq = GET_ISEQ();
+	while (iseq) {
+	    if (iseq->defined_method_id) {
+		break;
+	    }
+	    iseq = iseq->parent_iseq;
+	}
+	if (iseq) {
+	    VALUE klass = vm_search_normal_superclass(iseq->klass, GET_SELF());
+	    if (rb_method_boundp(klass, iseq->defined_method_id, 0)) {
+		expr_type = "super";
+	    }
+	}
+	break;
+      }
+      case DEFINED_REF:{
+	val = vm_getspecial(th, GET_LFP(), Qfalse, FIX2INT(obj));
+	if (val != Qnil) {
+	    expr_type = "global-variable";
+	}
+	break;
+      }
+      default:
+	rb_bug("unimplemented defined? type (VM)");
+	break;
+    }
+    if (expr_type != 0) {
+	if (needstr != Qfalse) {
+	    val = rb_str_new2(expr_type);
+	}
+	else {
+	    val = Qtrue;
+	}
+    }
+}
+
+/**
+  @c setting
+  @e trace
+  @j trace 用の命令。
+ */
+DEFINE_INSN
+trace
+(rb_num_t nf)
+()
+()
+{
+    rb_event_flag_t flag = (rb_event_flag_t)nf;
+
+    EXEC_EVENT_HOOK(th, flag, GET_SELF(), 0, 0 /* TODO: id, klass */);
+}
+
+/**********************************************************/
+/* deal with control flow 1: class/module                 */
+/**********************************************************/
+
+/**
+  @c class/module
+  @e
+   enter class definition scope. if super is Qfalse, and clsas
+   "klass" is defined, it's redefine. otherwise, define "klass" class.
+  @j クラス定義スコープへ移行する。
+   もし super が Qfalse で klassクラスが定義されていれば再定義である。
+   そうでなければ、klass クラスを定義する。
+ */
+DEFINE_INSN
+defineclass
+(ID id, ISEQ class_iseq, rb_num_t define_type)
+(VALUE cbase, VALUE super)
+(VALUE val)
+{
+    VALUE klass;
+
+    switch ((int)define_type) {
+      case 0: /* scoped:   class Foo::Bar */
+      case 3: /* no scope: class Bar */
+	/* val is dummy.  classdef returns class scope value */
+
+	if (super == Qnil) {
+	    super = rb_cObject;
+	}
+
+	vm_check_if_namespace(cbase);
+
+	/* find klass */
+	rb_autoload_load(cbase, id);
+	if ((klass = vm_search_const_defined_class(cbase, id)) != 0) {
+	    /* already exist */
+	    klass = define_type == 0 ? rb_public_const_get_at(klass, id) : rb_const_get_at(klass, id);
+	    if (TYPE(klass) != T_CLASS) {
+		rb_raise(rb_eTypeError, "%s is not a class", rb_id2name(id));
+	    }
+
+	    if (super != rb_cObject) {
+		VALUE tmp;
+		tmp = rb_class_real(RCLASS_SUPER(klass));
+
+		if (tmp != super) {
+		    rb_raise(rb_eTypeError, "superclass mismatch for class %s",
+			     rb_id2name(id));
+		}
+	    }
+	}
+	else {
+	    /* new class declaration */
+	    klass = rb_define_class_id(id, super);
+	    rb_set_class_path_string(klass, cbase, rb_id2str(id));
+	    rb_const_set(cbase, id, klass);
+	    rb_class_inherited(super, klass);
+	}
+	break;
+      case 1:
+	/* val is dummy.  classdef returns class scope value */
+	/* super is dummy */
+	klass = rb_singleton_class(cbase);
+	break;
+      case 2: /* scoped:   module Foo::Bar  or  module ::Bar */
+      case 5: /* no scope: module Bar */
+	/* val is dummy.  classdef returns class scope value */
+	/* super is dummy */
+
+	vm_check_if_namespace(cbase);
+
+	/* find klass */
+	if ((klass = vm_search_const_defined_class(cbase, id)) != 0) {
+	    klass = define_type == 2 ? rb_public_const_get_at(klass, id) : rb_const_get_at(klass, id);
+	    /* already exist */
+	    if (TYPE(klass) != T_MODULE) {
+		rb_raise(rb_eTypeError, "%s is not a module", rb_id2name(id));
+	    }
+	}
+	else {
+	    /* new module declaration */
+	    klass = rb_define_module_id(id);
+	    rb_set_class_path_string(klass, cbase, rb_id2str(id));
+	    rb_const_set(cbase, id, klass);
+	}
+	break;
+      default:
+	rb_bug("unknown defineclass type: %d", (int)define_type);
+    }
+
+    COPY_CREF(class_iseq->cref_stack, vm_cref_push(th, klass, NOEX_PUBLIC, NULL));
+
+    /* enter scope */
+    vm_push_frame(th, class_iseq,
+		  VM_FRAME_MAGIC_CLASS, klass, (VALUE) GET_BLOCK_PTR(),
+		  class_iseq->iseq_encoded, GET_SP(), 0,
+		  class_iseq->local_size);
+    RESTORE_REGS();
+
+    INC_VM_STATE_VERSION();
+    NEXT_INSN();
+}
+
+
+/**********************************************************/
+/* deal with control flow 2: method/iterator              */
+/**********************************************************/
+
+/**
+  @c method/iterator
+  @e obj.send(id, args..) # args.size => num
+  @j メソッド呼び出しを行う。
+  obj.send(id, args..) # args.size => num
+    flag & VM_CALL_ARGS_SPLAT_BIT    != 0 -> splat last arg
+    flag & VM_CALL_ARGS_BLOCKARG_BIT != 0 -> Proc as Block
+    flag & VM_CALL_FCALL_BIT         != 0 -> FCALL ( func() )
+    flag & VM_CALL_VCALL_BIT         != 0 -> VCALL ( func   )
+    ...
+ */
+DEFINE_INSN
+send
+(ID op_id, rb_num_t op_argc, ISEQ blockiseq, rb_num_t op_flag, IC ic)
+(...)
+(VALUE val) // inc += - (int)(op_argc + ((op_flag & VM_CALL_ARGS_BLOCKARG_BIT) ? 1 : 0));
+{
+    const rb_method_entry_t *me;
+    VALUE recv, klass;
+    rb_block_t *blockptr = 0;
+    VALUE flag = op_flag;
+    int num = caller_setup_args(th, GET_CFP(), flag, (int)op_argc,
+				(rb_iseq_t *)blockiseq, &blockptr);
+    ID id = op_id;
+
+    /* get receiver */
+    recv = TOPN(num);
+    klass = CLASS_OF(recv);
+    me = vm_method_search(id, klass, ic);
+    CALL_METHOD(num, blockptr, flag, id, me, recv);
+}
+
+/**
+  @c method/iterator
+  @e super(args) # args.size => num
+  @j super を実行する。
+     super(args) # args.size => num
+     flag 等オペランドの意味は send と同じ。
+ */
+DEFINE_INSN
+invokesuper
+(rb_num_t op_argc, ISEQ blockiseq, rb_num_t op_flag)
+(...)
+(VALUE val) // inc += - (int)(op_argc + ((op_flag & VM_CALL_ARGS_BLOCKARG_BIT) ? 1 : 0));
+{
+    rb_block_t *blockptr = !(op_flag & VM_CALL_ARGS_BLOCKARG_BIT) ? GET_BLOCK_PTR() : 0;
+    VALUE flag = op_flag;
+    int num = caller_setup_args(th, GET_CFP(), flag,
+				(int)op_argc, blockiseq, &blockptr);
+    VALUE recv, klass;
+    ID id;
+    const rb_method_entry_t *me;
+
+    flag = VM_CALL_SUPER_BIT | VM_CALL_FCALL_BIT;
+
+    recv = GET_SELF();
+    vm_search_superclass(GET_CFP(), GET_ISEQ(), recv, TOPN(num), &id, &klass);
+
+    /* temporary measure for [Bug #2402] [Bug #2502] [Bug #3136] */
+    if (!rb_obj_is_kind_of(recv, klass)) {
+	rb_raise(rb_eNotImpError, "super from singleton method that is defined to multiple classes is not supported; this will be fixed in 1.9.3 or later");
+    }
+
+    me = rb_method_entry(klass, id);
+
+    CALL_METHOD(num, blockptr, flag, id, me, recv);
+}
+
+/**
+  @c method/iterator
+  @e yield(args) # args.size => num, flag shows expand argument or not
+  @j yield を実行する。
+     yield(args) # args.size => num
+ */
+DEFINE_INSN
+invokeblock
+(rb_num_t num, rb_num_t flag)
+(...)
+(VALUE val)  // inc += 1 - num;
+{
+    val = vm_invoke_block(th, GET_CFP(), num, flag);
+    if (val == Qundef) {
+	RESTORE_REGS();
+	NEXT_INSN();
+    }
+}
+
+/**
+  @c method/iterator
+  @e return from this scope.
+  @j このスコープから抜ける。
+ */
+DEFINE_INSN
+leave
+()
+(VALUE val)
+(VALUE val)
+{
+    if (OPT_CHECKED_RUN) {
+	if (reg_cfp->sp != reg_cfp->bp) {
+	    rb_bug("Stack consistency error (sp: %"PRIdPTRDIFF", bp: %"PRIdPTRDIFF")",
+		   VM_SP_CNT(th, reg_cfp->sp), VM_SP_CNT(th, reg_cfp->bp));
+	}
+    }
+
+    RUBY_VM_CHECK_INTS();
+    vm_pop_frame(th);
+    RESTORE_REGS();
+}
+
+/**
+  @c method/iterator
+  @e return from this vm loop
+  @j VM loop から抜ける。
+ */
+DEFINE_INSN
+finish
+()
+(VALUE val)
+(VALUE val)
+{
+#if OPT_CALL_THREADED_CODE
+    rb_bug("unused instruction on OPT_CALL_THREADED_CODE");
+#else
+    th->cfp++;
+    return val;
+#endif
+}
+
+/**********************************************************/
+/* deal with control flow 3: exception                    */
+/**********************************************************/
+
+/**
+  @c exception
+  @e longjump
+  @j 大域ジャンプを行う。
+ */
+DEFINE_INSN
+throw
+(rb_num_t throw_state)
+(VALUE throwobj)
+(VALUE val)
+{
+    RUBY_VM_CHECK_INTS();
+    val = vm_throw(th, GET_CFP(), throw_state, throwobj);
+    THROW_EXCEPTION(val);
+    /* unreachable */
+}
+
+/**********************************************************/
+/* deal with control flow 4: local jump                   */
+/**********************************************************/
+
+/**
+  @c jump
+  @e set PC to (PC + dst).
+  @j PC を (PC + dst) にする。
+ */
+DEFINE_INSN
+jump
+(OFFSET dst)
+()
+()
+{
+    RUBY_VM_CHECK_INTS();
+    JUMP(dst);
+}
+
+/**
+  @c jump
+  @e if val is not false or nil, set PC to (PC + dst).
+  @j もし val が false か nil でなければ、PC を (PC + dst) にする。
+ */
+DEFINE_INSN
+branchif
+(OFFSET dst)
+(VALUE val)
+()
+{
+    if (RTEST(val)) {
+	RUBY_VM_CHECK_INTS();
+	JUMP(dst);
+    }
+}
+
+/**
+  @c jump
+  @e if val is false or nil, set PC to (PC + dst).
+  @j もし val が false か nil ならば、PC を (PC + dst) にする。
+ */
+DEFINE_INSN
+branchunless
+(OFFSET dst)
+(VALUE val)
+()
+{
+    if (!RTEST(val)) {
+	RUBY_VM_CHECK_INTS();
+	JUMP(dst);
+    }
+}
+
+
+/**********************************************************/
+/* for optimize                                           */
+/**********************************************************/
+
+/**
+  @c optimize
+  @e inline cache
+  @j インラインキャッシュが有効なら、値をスタックにプッシュして dst へジャンプする。
+ */
+DEFINE_INSN
+getinlinecache
+(OFFSET dst, IC ic)
+()
+(VALUE val)
+{
+    if (ic->ic_vmstat == GET_VM_STATE_VERSION()) {
+	val = ic->ic_value.value;
+	JUMP(dst);
+    }
+    else {
+	/* none */
+	val = Qnil;
+    }
+}
+
+/**
+  @c optimize
+  @e inline cache (once)
+  @j once を実現する。
+ */
+DEFINE_INSN
+onceinlinecache
+(OFFSET dst, IC ic)
+()
+(VALUE val)
+{
+  retry:
+    if (ic->ic_vmstat) {
+	val = ic->ic_value.value;
+	JUMP(dst);
+    }
+    else if (ic->ic_value.value == Qundef)
+    {
+    	RUBY_VM_CHECK_INTS();
+    	rb_thread_schedule();
+	goto retry;
+    }
+    else {
+	/* none */
+	ic->ic_value.value = Qundef;
+	val = Qnil;
+    }
+}
+
+/**
+  @c optimize
+  @e set inline cache
+  @j インラインキャッシュの値を設定する。
+ */
+DEFINE_INSN
+setinlinecache
+(IC ic)
+(VALUE val)
+(VALUE val)
+{
+    if (ic->ic_value.value == Qundef) {
+	rb_ary_push(GET_ISEQ()->mark_ary, val);
+    }
+    ic->ic_value.value = val;
+    ic->ic_vmstat = GET_VM_STATE_VERSION() - ruby_vm_const_missing_count;
+    ruby_vm_const_missing_count = 0;
+}
+
+/**
+  @c optimize
+  @e case dispatcher
+  @j case 文で、可能なら表引きでジャンプする。
+ */
+DEFINE_INSN
+opt_case_dispatch
+(CDHASH hash, OFFSET else_offset)
+(..., VALUE key)
+() // inc += -1;
+{
+    switch(TYPE(key)) {
+      case T_FLOAT: {
+	double ival;
+	if (modf(RFLOAT_VALUE(key), &ival) == 0.0) {
+	    key = FIXABLE(ival) ? LONG2FIX((long)ival) : rb_dbl2big(ival);
+	}
+      }
+      case T_SYMBOL: /* fall through */
+      case T_FIXNUM:
+      case T_BIGNUM:
+      case T_STRING:
+	if (BASIC_OP_UNREDEFINED_P(BOP_EQQ,
+				   SYMBOL_REDEFINED_OP_FLAG |
+				   FIXNUM_REDEFINED_OP_FLAG |
+				   BIGNUM_REDEFINED_OP_FLAG |
+				   STRING_REDEFINED_OP_FLAG)) {
+	    st_data_t val;
+	    if (st_lookup(RHASH_TBL(hash), key, &val)) {
+		JUMP(FIX2INT((VALUE)val));
+	    }
+	    else {
+		JUMP(else_offset);
+	    }
+	    break;
+	}
+      default:
+	break;
+    }
+}
+
+/**
+  @c optimize
+  @e check environment
+  @j 将来の拡張用。
+ */
+DEFINE_INSN
+opt_checkenv
+()
+()
+()
+{
+    if (GET_CFP()->bp != GET_DFP() + 1) {
+	VALUE *new_dfp = GET_CFP()->bp - 1;
+	/* TODO: copy env and clean stack at creating env? */
+	*new_dfp = *GET_DFP();
+	SET_DFP(new_dfp);
+    }
+}
+
+
+/** simple functions */
+
+/**
+  @c optimize
+  @e optimized X+Y.
+  @j 最適化された X+Y。
+ */
+DEFINE_INSN
+opt_plus
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    if (0) {
+
+    }
+#if 1
+    else if (FIXNUM_2_P(recv, obj) &&
+	     BASIC_OP_UNREDEFINED_P(BOP_PLUS,FIXNUM_REDEFINED_OP_FLAG)) {
+	/* fixnum + fixnum */
+#ifndef LONG_LONG_VALUE
+	val = (recv + (obj & (~1)));
+	if ((~(recv ^ obj) & (recv ^ val)) &
+	    ((VALUE)0x01 << ((sizeof(VALUE) * CHAR_BIT) - 1))) {
+	    val = rb_big_plus(rb_int2big(FIX2LONG(recv)),
+			      rb_int2big(FIX2LONG(obj)));
+	}
+#else
+	long a, b, c;
+	a = FIX2LONG(recv);
+	b = FIX2LONG(obj);
+	c = a + b;
+	if (FIXABLE(c)) {
+	    val = LONG2FIX(c);
+	}
+	else {
+	    val = rb_big_plus(rb_int2big(a), rb_int2big(b));
+	}
+#endif
+    }
+#endif
+
+    else if (!SPECIAL_CONST_P(recv) && !SPECIAL_CONST_P(obj)) {
+	if (0) {
+	}
+#if 1
+	else if (HEAP_CLASS_OF(recv) == rb_cFloat &&
+		 HEAP_CLASS_OF(obj) == rb_cFloat &&
+		 BASIC_OP_UNREDEFINED_P(BOP_PLUS, FLOAT_REDEFINED_OP_FLAG)) {
+	    val = DBL2NUM(RFLOAT_VALUE(recv) + RFLOAT_VALUE(obj));
+	}
+#endif
+
+#if 1
+	else if (HEAP_CLASS_OF(recv) == rb_cString &&
+		 HEAP_CLASS_OF(obj) == rb_cString &&
+		 BASIC_OP_UNREDEFINED_P(BOP_PLUS, STRING_REDEFINED_OP_FLAG)) {
+	    val = rb_str_plus(recv, obj);
+	}
+#endif
+#if 1
+	else if (HEAP_CLASS_OF(recv) == rb_cArray &&
+		 BASIC_OP_UNREDEFINED_P(BOP_PLUS, ARRAY_REDEFINED_OP_FLAG)) {
+	    val = rb_ary_plus(recv, obj);
+	}
+#endif
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idPLUS, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized X-Y.
+  @j 最適化された X-Y。
+ */
+DEFINE_INSN
+opt_minus
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    if (FIXNUM_2_P(recv, obj) &&
+	BASIC_OP_UNREDEFINED_P(BOP_MINUS, FIXNUM_REDEFINED_OP_FLAG)) {
+	long a, b, c;
+
+	a = FIX2LONG(recv);
+	b = FIX2LONG(obj);
+	c = a - b;
+
+	if (FIXABLE(c)) {
+	    val = LONG2FIX(c);
+	}
+	else {
+	    val = rb_big_minus(rb_int2big(a), rb_int2big(b));
+	}
+    }
+    else if (!SPECIAL_CONST_P(recv) && !SPECIAL_CONST_P(obj)) {
+	if (0) {
+	}
+#if 1
+	else if (HEAP_CLASS_OF(recv) == rb_cFloat &&
+		 HEAP_CLASS_OF(obj) == rb_cFloat  &&
+		 BASIC_OP_UNREDEFINED_P(BOP_MINUS, FLOAT_REDEFINED_OP_FLAG)) {
+	    val = DBL2NUM(RFLOAT_VALUE(recv) - RFLOAT_VALUE(obj));
+	}
+#endif
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+	/* other */
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idMINUS, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized X*Y.
+  @j 最適化された X*Y。
+ */
+DEFINE_INSN
+opt_mult
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    if (FIXNUM_2_P(recv, obj) &&
+	BASIC_OP_UNREDEFINED_P(BOP_MULT, FIXNUM_REDEFINED_OP_FLAG)) {
+	long a, b;
+
+	a = FIX2LONG(recv);
+	if (a == 0) {
+	    val = recv;
+	}
+	else {
+	    volatile long c;
+	    b = FIX2LONG(obj);
+	    c = a * b;
+
+	    if (FIXABLE(c) && c / a == b) {
+		val = LONG2FIX(c);
+	    }
+	    else {
+		val = rb_big_mul(rb_int2big(a), rb_int2big(b));
+	    }
+	}
+    }
+    else if (!SPECIAL_CONST_P(recv) && !SPECIAL_CONST_P(obj)) {
+	if (0) {
+	}
+#if 1
+	else if (HEAP_CLASS_OF(recv) == rb_cFloat &&
+		 HEAP_CLASS_OF(obj) == rb_cFloat  &&
+		 BASIC_OP_UNREDEFINED_P(BOP_MULT, FLOAT_REDEFINED_OP_FLAG)) {
+	    val = DBL2NUM(RFLOAT_VALUE(recv) * RFLOAT_VALUE(obj));
+	}
+#endif
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idMULT, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized X/Y.
+  @j 最適化された X/Y。
+ */
+DEFINE_INSN
+opt_div
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    if (FIXNUM_2_P(recv, obj) &&
+	BASIC_OP_UNREDEFINED_P(BOP_DIV, FIXNUM_REDEFINED_OP_FLAG)) {
+	long x, y, div;
+
+	x = FIX2LONG(recv);
+	y = FIX2LONG(obj);
+	{
+	    /* copied from numeric.c#fixdivmod */
+	    long mod;
+	    if (y == 0)
+		goto INSN_LABEL(normal_dispatch);
+	    if (y < 0) {
+		if (x < 0)
+		    div = -x / -y;
+		else
+		    div = -(x / -y);
+	    }
+	    else {
+		if (x < 0)
+		    div = -(-x / y);
+		else
+		    div = x / y;
+	    }
+	    mod = x - div * y;
+	    if ((mod < 0 && y > 0) || (mod > 0 && y < 0)) {
+		mod += y;
+		div -= 1;
+	    }
+	}
+	val = LONG2NUM(div);
+    }
+    else if (!SPECIAL_CONST_P(recv) && !SPECIAL_CONST_P(obj)) {
+	if (0) {
+	}
+#if 1
+	else if (HEAP_CLASS_OF(recv) == rb_cFloat &&
+		 HEAP_CLASS_OF(obj) == rb_cFloat  &&
+		 BASIC_OP_UNREDEFINED_P(BOP_DIV, FLOAT_REDEFINED_OP_FLAG)) {
+	    val = DBL2NUM(RFLOAT_VALUE(recv) / RFLOAT_VALUE(obj));
+	}
+#endif
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idDIV, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized X%Y.
+  @j 最適化された X%Y。
+ */
+DEFINE_INSN
+opt_mod
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    if (FIXNUM_2_P(recv, obj) &&
+	BASIC_OP_UNREDEFINED_P(BOP_MOD, FIXNUM_REDEFINED_OP_FLAG )) {
+	long x, y, mod;
+
+	x = FIX2LONG(recv);
+	y = FIX2LONG(obj);
+	{
+	    /* copied from numeric.c#fixdivmod */
+	    long div;
+
+	    if (y == 0)
+		rb_num_zerodiv();
+	    if (y < 0) {
+		if (x < 0)
+		    div = -x / -y;
+		else
+		    div = -(x / -y);
+	    }
+	    else {
+		if (x < 0)
+		    div = -(-x / y);
+		else
+		    div = x / y;
+	    }
+	    mod = x - div * y;
+	    if ((mod < 0 && y > 0) || (mod > 0 && y < 0)) {
+		mod += y;
+		div -= 1;
+	    }
+	}
+	val = LONG2FIX(mod);
+    }
+    else if (!SPECIAL_CONST_P(recv) && !SPECIAL_CONST_P(obj)) {
+	if (0) {
+	}
+	else if (HEAP_CLASS_OF(recv) == rb_cFloat &&
+		 HEAP_CLASS_OF(obj) == rb_cFloat &&
+		 BASIC_OP_UNREDEFINED_P(BOP_MOD, FLOAT_REDEFINED_OP_FLAG)) {
+	    val = DBL2NUM(ruby_float_mod(RFLOAT_VALUE(recv), RFLOAT_VALUE(obj)));
+	}
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idMOD, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized X==Y.
+  @j 最適化された X==Y。
+ */
+DEFINE_INSN
+opt_eq
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    val = opt_eq_func(recv, obj, ic);
+
+    if (val == Qundef) {
+	/* other */
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idEq, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized X!=Y.
+  @j 最適化された X!=Y。
+ */
+DEFINE_INSN
+opt_neq
+(IC ic, IC ic_eq)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    extern VALUE rb_obj_not_equal(VALUE obj1, VALUE obj2);
+    const rb_method_entry_t *me = vm_method_search(idNeq, CLASS_OF(recv), ic);
+    val = Qundef;
+
+    if (check_cfunc(me, rb_obj_not_equal)) {
+	val = opt_eq_func(recv, obj, ic_eq);
+
+	if (val != Qundef) {
+	    val = RTEST(val) ? Qfalse : Qtrue;
+	}
+    }
+
+    if (val == Qundef) {
+	/* other */
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idNeq, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized X<Y.
+  @j 最適化された X<Y。
+ */
+DEFINE_INSN
+opt_lt
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    if (FIXNUM_2_P(recv, obj) &&
+	BASIC_OP_UNREDEFINED_P(BOP_LT, FIXNUM_REDEFINED_OP_FLAG)) {
+	SIGNED_VALUE a = recv, b = obj;
+
+	if (a < b) {
+	    val = Qtrue;
+	}
+	else {
+	    val = Qfalse;
+	}
+    }
+    else if (!SPECIAL_CONST_P(recv) && !SPECIAL_CONST_P(obj)) {
+	if (0) {
+	}
+#if 1
+	else if (HEAP_CLASS_OF(recv) == rb_cFloat &&
+		 HEAP_CLASS_OF(obj) == rb_cFloat  &&
+		 BASIC_OP_UNREDEFINED_P(BOP_LT, FLOAT_REDEFINED_OP_FLAG)) {
+	    double a = RFLOAT_VALUE(recv);
+	    double b = RFLOAT_VALUE(obj);
+#if defined(_MSC_VER) && _MSC_VER < 1300
+	    if (isnan(a) || isnan(b)) val = Qfalse;
+	    else
+#endif
+	    val = a < b ? Qtrue : Qfalse;
+	}
+#endif
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idLT, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized X<=Y.
+  @j 最適化された X<=Y。
+ */
+DEFINE_INSN
+opt_le
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    if (FIXNUM_2_P(recv, obj) &&
+	BASIC_OP_UNREDEFINED_P(BOP_LE, FIXNUM_REDEFINED_OP_FLAG)) {
+	SIGNED_VALUE a = recv, b = obj;
+
+	if (a <= b) {
+	    val = Qtrue;
+	}
+	else {
+	    val = Qfalse;
+	}
+    }
+    else {
+	/* other */
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idLE, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized X>Y.
+  @j 最適化された X>Y。
+ */
+DEFINE_INSN
+opt_gt
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    if (FIXNUM_2_P(recv, obj) &&
+	BASIC_OP_UNREDEFINED_P(BOP_GT, FIXNUM_REDEFINED_OP_FLAG)) {
+	SIGNED_VALUE a = recv, b = obj;
+
+	if (a > b) {
+	    val = Qtrue;
+	}
+	else {
+	    val = Qfalse;
+	}
+    }
+    else if (!SPECIAL_CONST_P(recv) && !SPECIAL_CONST_P(obj)) {
+	if (0) {
+	}
+#if 1
+	else if (HEAP_CLASS_OF(recv) == rb_cFloat &&
+		 HEAP_CLASS_OF(obj) == rb_cFloat  &&
+		 BASIC_OP_UNREDEFINED_P(BOP_GT, FLOAT_REDEFINED_OP_FLAG)) {
+	    double a = RFLOAT_VALUE(recv);
+	    double b = RFLOAT_VALUE(obj);
+#if defined(_MSC_VER) && _MSC_VER < 1300
+	    if (isnan(a) || isnan(b)) val = Qfalse;
+	    else
+#endif
+	    val = a > b ? Qtrue : Qfalse;
+	}
+#endif
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idGT, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized X>=Y.
+  @j 最適化された X>=Y。
+ */
+DEFINE_INSN
+opt_ge
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    if (FIXNUM_2_P(recv, obj) &&
+	BASIC_OP_UNREDEFINED_P(BOP_GE, FIXNUM_REDEFINED_OP_FLAG)) {
+	SIGNED_VALUE a = recv, b = obj;
+
+	if (a >= b) {
+	    val = Qtrue;
+	}
+	else {
+	    val = Qfalse;
+	}
+    }
+    else {
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idGE, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e <<
+  @j 最適化された X<<Y。
+ */
+DEFINE_INSN
+opt_ltlt
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    if (!SPECIAL_CONST_P(recv)) {
+	if (0) {
+	}
+	else if (HEAP_CLASS_OF(recv) == rb_cString &&
+		 BASIC_OP_UNREDEFINED_P(BOP_LTLT, STRING_REDEFINED_OP_FLAG)) {
+	    val = rb_str_concat(recv, obj);
+	}
+	else if (HEAP_CLASS_OF(recv) == rb_cArray &&
+		 BASIC_OP_UNREDEFINED_P(BOP_LTLT, ARRAY_REDEFINED_OP_FLAG)) {
+	    val = rb_ary_push(recv, obj);
+	}
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idLTLT, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e []
+  @j 最適化された recv[obj]。
+ */
+DEFINE_INSN
+opt_aref
+(IC ic)
+(VALUE recv, VALUE obj)
+(VALUE val)
+{
+    if (!SPECIAL_CONST_P(recv)) {
+	if (HEAP_CLASS_OF(recv) == rb_cArray && BASIC_OP_UNREDEFINED_P(BOP_AREF, ARRAY_REDEFINED_OP_FLAG) && FIXNUM_P(obj)) {
+	    val = rb_ary_entry(recv, FIX2LONG(obj));
+	}
+	else if (HEAP_CLASS_OF(recv) == rb_cHash && BASIC_OP_UNREDEFINED_P(BOP_AREF, HASH_REDEFINED_OP_FLAG)) {
+	    val = rb_hash_aref(recv, obj);
+	}
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	PUSH(obj);
+	CALL_SIMPLE_METHOD(1, idAREF, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e recv[obj] = set
+  @j 最適化された recv[obj] = set。
+ */
+DEFINE_INSN
+opt_aset
+(IC ic)
+(VALUE recv, VALUE obj, VALUE set)
+(VALUE val)
+{
+    if (!SPECIAL_CONST_P(recv)) {
+	if (HEAP_CLASS_OF(recv) == rb_cArray && BASIC_OP_UNREDEFINED_P(BOP_ASET, ARRAY_REDEFINED_OP_FLAG) && FIXNUM_P(obj)) {
+	    rb_ary_store(recv, FIX2LONG(obj), set);
+	    val = set;
+	}
+	else if (HEAP_CLASS_OF(recv) == rb_cHash && BASIC_OP_UNREDEFINED_P(BOP_ASET, HASH_REDEFINED_OP_FLAG)) {
+	    rb_hash_aset(recv, obj, set);
+	    val = set;
+	}
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	PUSH(obj);
+	PUSH(set);
+	CALL_SIMPLE_METHOD(2, idASET, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized length
+  @j 最適化された recv.length()。
+ */
+DEFINE_INSN
+opt_length
+(IC ic)
+(VALUE recv)
+(VALUE val)
+{
+    if (!SPECIAL_CONST_P(recv)) {
+	if (HEAP_CLASS_OF(recv) == rb_cString &&
+	    BASIC_OP_UNREDEFINED_P(BOP_LENGTH, STRING_REDEFINED_OP_FLAG)) {
+	    val = rb_str_length(recv);
+	}
+	else if (HEAP_CLASS_OF(recv) == rb_cArray &&
+		 BASIC_OP_UNREDEFINED_P(BOP_LENGTH, ARRAY_REDEFINED_OP_FLAG)) {
+	    val = LONG2NUM(RARRAY_LEN(recv));
+	}
+	else if (HEAP_CLASS_OF(recv) == rb_cHash &&
+		 BASIC_OP_UNREDEFINED_P(BOP_LENGTH, HASH_REDEFINED_OP_FLAG)) {
+	    val = INT2FIX(RHASH_SIZE(recv));
+	}
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	CALL_SIMPLE_METHOD(0, idLength, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized size
+  @j 最適化された recv.size()。
+ */
+DEFINE_INSN
+opt_size
+(IC ic)
+(VALUE recv)
+(VALUE val)
+{
+    if (!SPECIAL_CONST_P(recv)) {
+	if (HEAP_CLASS_OF(recv) == rb_cString &&
+	    BASIC_OP_UNREDEFINED_P(BOP_SIZE, STRING_REDEFINED_OP_FLAG)) {
+	    val = rb_str_length(recv);
+	}
+	else if (HEAP_CLASS_OF(recv) == rb_cArray &&
+		 BASIC_OP_UNREDEFINED_P(BOP_SIZE, ARRAY_REDEFINED_OP_FLAG)) {
+	    val = LONG2NUM(RARRAY_LEN(recv));
+	}
+	else if (HEAP_CLASS_OF(recv) == rb_cHash &&
+		 BASIC_OP_UNREDEFINED_P(BOP_SIZE, HASH_REDEFINED_OP_FLAG)) {
+	    val = INT2FIX(RHASH_SIZE(recv));
+	}
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	CALL_SIMPLE_METHOD(0, idSize, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized succ
+  @j 最適化された recv.succ()。
+ */
+DEFINE_INSN
+opt_succ
+(IC ic)
+(VALUE recv)
+(VALUE val)
+{
+    if (SPECIAL_CONST_P(recv)) {
+	if (FIXNUM_P(recv) &&
+	    BASIC_OP_UNREDEFINED_P(BOP_SUCC, FIXNUM_REDEFINED_OP_FLAG)) {
+	    const VALUE obj = INT2FIX(1);
+	    /* fixnum + INT2FIX(1) */
+	    val = (recv + (obj & (~1)));
+	    if ((~(recv ^ obj) & (recv ^ val)) & ((unsigned long)LONG_MAX + 1)) {
+		val = rb_big_plus(rb_int2big(FIX2LONG(recv)),
+				  rb_int2big(FIX2LONG(obj)));
+	    }
+	}
+	else {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    else {
+	if (HEAP_CLASS_OF(recv) == rb_cString &&
+	    BASIC_OP_UNREDEFINED_P(BOP_SUCC, STRING_REDEFINED_OP_FLAG)) {
+	    val = rb_str_succ(recv);
+	}
+	else if (HEAP_CLASS_OF(recv) == rb_cTime &&
+		 BASIC_OP_UNREDEFINED_P(BOP_SUCC, TIME_REDEFINED_OP_FLAG)) {
+	    val = rb_time_succ(recv);
+	}
+	else
+	  {
+	    goto INSN_LABEL(normal_dispatch);
+	}
+    }
+    if (0) {
+      INSN_LABEL(normal_dispatch):
+	PUSH(recv);
+	CALL_SIMPLE_METHOD(0, idSucc, recv);
+    }
+}
+
+/**
+  @c optimize
+  @e optimized not
+  @j 最適化された recv.!()。
+ */
+DEFINE_INSN
+opt_not
+(IC ic)
+(VALUE recv)
+(VALUE val)
+{
+    extern VALUE rb_obj_not(VALUE obj);
+    const rb_method_entry_t *me = vm_method_search(idNot, CLASS_OF(recv), ic);
+
+    if (check_cfunc(me, rb_obj_not)) {
+	val = RTEST(recv) ? Qfalse : Qtrue;
+    }
+    else {
+	PUSH(recv);
+	CALL_SIMPLE_METHOD(0, idNot, recv);
+    }
+}
+
+
+/**
+  @c optimize
+  @e optimized regexp match
+  @j 最適化された正規表現マッチ。
+ */
+DEFINE_INSN
+opt_regexpmatch1
+(VALUE r)
+(VALUE obj)
+(VALUE val)
+{
+    val = rb_reg_match(r, obj);
+}
+
+/**
+  @c optimize
+  @e optimized regexp match 2
+  @j 最適化された正規表現マッチ 2
+ */
+DEFINE_INSN
+opt_regexpmatch2
+()
+(VALUE obj2, VALUE obj1)
+(VALUE val)
+{
+    if (TYPE(obj2) == T_STRING) {
+	val = rb_reg_match(obj1, obj2);
+    }
+    else {
+	val = rb_funcall(obj2, idEqTilde, 1, obj1);
+    }
+}
+
+/**
+  @c optimize
+  @e call native compiled method
+  @j ネイティブコンパイルしたメソッドを起動。
+ */
+DEFINE_INSN
+opt_call_c_function
+(rb_insn_func_t funcptr)
+()
+()
+{
+    reg_cfp = (funcptr)(th, reg_cfp);
+
+    if (reg_cfp == 0) {
+	VALUE err = th->errinfo;
+	th->errinfo = Qnil;
+	THROW_EXCEPTION(err);
+    }
+
+    RESTORE_REGS();
+    NEXT_INSN();
+}
+
+/**
+  @c joke
+  @e BLT
+  @j BLT
+ */
+DEFINE_INSN
+bitblt
+()
+()
+(VALUE ret)
+{
+    ret = rb_str_new2("a bit of bacon, lettuce and tomato");
+}
+
+/**
+  @c joke
+  @e The Answer to Life, the Universe, and Everything
+  @j 人生、宇宙、すべての答え。
+ */
+DEFINE_INSN
+answer
+()
+()
+(VALUE ret)
+{
+    ret = INT2FIX(42);
+}
+

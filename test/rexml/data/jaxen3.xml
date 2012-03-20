@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <hostname>
+        <val>2</val>
+        <attrlist>
+            <hostname>CE-A</hostname>
+        </attrlist>
+    </hostname>
+    <hostname>
+        <val>1</val>
+        <attrlist>
+            <hostname>CE-B</hostname>
+        </attrlist>
+    </hostname>
+</Configuration>

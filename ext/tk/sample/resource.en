@@ -1,0 +1,13 @@
+!
+!  see Tcl/Tk's "options" manual for "Database Name" and "Database Class"
+!
+*BtnFrame.borderWidth: 5
+*BtnFrame.relief: ridge
+*BtnFrame.Button.background: wheat
+*BtnFrame.Button.foreground: red
+*hello.text: HELLO
+*quit.text: QUIT
+*BTN_CMD.show_msg: {|arg| print "($SAFE=#{$SAFE}) ";\
+                          print "Hello!! This is a sample of #{arg}.";\
+                          print "(<<< $SAFE=#{$SAFE})\n"}
+*BTN_CMD.bye_msg:  {print "($SAFE=#{$SAFE} >>>) Good-bye¡¥(<<< $SAFE=#{$SAFE})\n"}

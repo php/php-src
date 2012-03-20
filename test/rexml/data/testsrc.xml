@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN"
+              "http://my.netscape.com/publish/formats/rss-0.91.dtd">
+<rss version="0.91">
+   <channel>
+   <title>xmlhack</title>
+   <link>http://www.xmlhack.com</link>
+   <description>Developer news from the XML community</description>
+   <language>en-us</language>
+   <copyright>Copyright 1999-2001, xmlhack team.</copyright>
+   <managingEditor>editor@xmlhack.com</managingEditor>
+   <webMaster>webmaster@xmlhack.com</webMaster>
+      <image>
+        <title>xmlhack</title>
+        <url>http://www.xmlhack.com/images/mynetscape88.gif</url>
+        <link>http://www.xmlhack.com</link>
+        <width>88</width>
+        <height>31</height>
+        <description>News, opinions, tips and issues concerning XML development</description>
+      </image>
+<item x='0'>
+<title>Experimental non-XML syntax for RELAX NG</title>
+<link>http://www.xmlhack.com/read.php?item=1343</link>
+<description>
+    James Clark has announced the release of an experimental non-XML syntax for RELAX
+    NG and a Java translator implementation that converts
+    instances of the syntax into RELAX NG's XML syntax.
+</description>
+<category>Schemas</category>
+</item>
+<item x='1'>
+<title>Long-awaited entity-resolver Java classes finally released</title>
+<link>http://www.xmlhack.com/read.php?item=1342</link>
+<description>Norman Walsh has
+  announced the release of SAX entityResolver() and JAXP
+  URIResolver() Java
+  classes he wrote to implement the OASIS XML Catalogs
+  Committee Specification (in addition to the TR9401 and
+  Apache XCatalogs specifications).
+</description>
+<category>SGML/XML</category>
+<category>Java</category>
+</item>
+<item x='3'>
+
+<title>Beepcore-C framework released</title>
+<link>http://www.xmlhack.com/read.php?item=1341</link>
+<description>Invisible Worlds have announced the publication of Beepcore-C, an implementation of the BEEP framework written in C.</description>
+<category>Protocols</category>
+<category>C++</category>
+</item>
+<item>
+<title>SVG and XSL-FO by example</title>
+<link>http://www.xmlhack.com/read.php?item=1340</link>
+<description>Jirka Jirat has announced the 
+addition of an XSL-FO and SVG examples repository to the Zvon developer 
+reference site.</description>
+<category>SVG</category>
+<category>XSL-FO</category>
+</item>
+
+
+</channel>
+</rss>

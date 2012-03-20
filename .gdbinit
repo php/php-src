@@ -1,615 +1,757 @@
-define ____executor_globals
-	if basic_functions_module.zts
-		set $tsrm_ls = ts_resource_ex(0, 0)
-		set $eg = ((zend_executor_globals*) (*((void ***) $tsrm_ls))[executor_globals_id-1])
-		set $cg = ((zend_compiler_globals*) (*((void ***) $tsrm_ls))[compiler_globals_id-1])
-	else
-		set $eg = executor_globals
-		set $cg = compiler_globals
-	end
+define rp
+  if ruby_dummy_gdb_enums.special_consts
+  end
+  if (VALUE)($arg0) & RUBY_FIXNUM_FLAG
+    printf "FIXNUM: %ld\n", (long)($arg0) >> 1
+  else
+  if ((VALUE)($arg0) & ~(~(VALUE)0<<RUBY_SPECIAL_SHIFT)) == RUBY_SYMBOL_FLAG
+    set $id = (($arg0) >> RUBY_SPECIAL_SHIFT)
+    if $id == '!' || $id == '+' || $id == '-' || $id == '*' || $id == '/' || $id == '%' || $id == '<' || $id == '>' || $id == '`'
+      printf "SYMBOL(:%c)\n", $id
+    else
+    if $id == idDot2
+      echo SYMBOL(:..)\n
+    else
+    if $id == idDot3
+      echo SYMBOL(:...)\n
+    else
+    if $id == idUPlus
+      echo SYMBOL(:+@)\n
+    else
+    if $id == idUMinus
+      echo SYMBOL(:-@)\n
+    else
+    if $id == idPow
+      echo SYMBOL(:**)\n
+    else
+    if $id == idCmp
+      echo SYMBOL(:<=>)\n
+    else
+    if $id == idLTLT
+      echo SYMBOL(:<<)\n
+    else
+    if $id == idLE
+      echo SYMBOL(:<=)\n
+    else
+    if $id == idGE
+      echo SYMBOL(:>=)\n
+    else
+    if $id == idEq
+      echo SYMBOL(:==)\n
+    else
+    if $id == idEqq
+      echo SYMBOL(:===)\n
+    else
+    if $id == idNeq
+      echo SYMBOL(:!=)\n
+    else
+    if $id == idEqTilde
+      echo SYMBOL(:=~)\n
+    else
+    if $id == idNeqTilde
+      echo SYMBOL(:!~)\n
+    else
+    if $id == idAREF
+      echo SYMBOL(:[])\n
+    else
+    if $id == idASET
+      echo SYMBOL(:[]=)\n
+    else
+      printf "SYMBOL(%ld)\n", $id
+    end
+    end
+    end
+    end
+    end
+    end
+    end
+    end
+    end
+    end
+    end
+    end
+    end
+    end
+    end
+    end
+    end
+  else
+  if ($arg0) == RUBY_Qfalse
+    echo false\n
+  else
+  if ($arg0) == RUBY_Qtrue
+    echo true\n
+  else
+  if ($arg0) == RUBY_Qnil
+    echo nil\n
+  else
+  if ($arg0) == RUBY_Qundef
+    echo undef\n
+  else
+  if (VALUE)($arg0) & RUBY_IMMEDIATE_MASK
+    echo immediate\n
+  else
+  set $flags = ((struct RBasic*)($arg0))->flags
+  if ($flags & RUBY_T_MASK) == RUBY_T_NONE
+    printf "T_NONE: "
+    print (struct RBasic *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_NIL
+    printf "T_NIL: "
+    print (struct RBasic *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_OBJECT
+    printf "T_OBJECT: "
+    print (struct RObject *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_CLASS
+    printf "T_CLASS%s: ", ($flags & RUBY_FL_SINGLETON) ? "*" : ""
+    print (struct RClass *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_ICLASS
+    printf "T_ICLASS: "
+    print (struct RClass *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_MODULE
+    printf "T_MODULE: "
+    print (struct RClass *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_FLOAT
+    printf "T_FLOAT: %.16g ", (((struct RFloat*)($arg0))->float_value)
+    print (struct RFloat *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_STRING
+    printf "T_STRING: "
+    set print address off
+    output (char *)(($flags & RUBY_FL_USER1) ? \
+	    ((struct RString*)($arg0))->as.heap.ptr : \
+	    ((struct RString*)($arg0))->as.ary)
+    set print address on
+    printf " bytesize:%ld ", ($flags & RUBY_FL_USER1) ? \
+            ((struct RString*)($arg0))->as.heap.len : \
+            (($flags & (RUBY_FL_USER2|RUBY_FL_USER3|RUBY_FL_USER4|RUBY_FL_USER5|RUBY_FL_USER6)) >> RUBY_FL_USHIFT+2)
+    if !($flags & RUBY_FL_USER1)
+      printf "(embed) "
+    else
+      if ($flags & RUBY_FL_USER2)
+        printf "(shared) "
+      end
+      if ($flags & RUBY_FL_USER3)
+        printf "(assoc) "
+      end
+    end
+    printf "encoding:%d ", ($flags & RUBY_ENCODING_MASK) >> RUBY_ENCODING_SHIFT
+    if ($flags & RUBY_ENC_CODERANGE_MASK) == 0
+      printf "coderange:unknown "
+    else
+    if ($flags & RUBY_ENC_CODERANGE_MASK) == RUBY_ENC_CODERANGE_7BIT
+      printf "coderange:7bit "
+    else
+    if ($flags & RUBY_ENC_CODERANGE_MASK) == RUBY_ENC_CODERANGE_VALID
+      printf "coderange:valid "
+    else
+      printf "coderange:broken "
+    end
+    end
+    end
+    print (struct RString *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_REGEXP
+    set $regsrc = ((struct RRegexp*)($arg0))->src
+    set $rsflags = ((struct RBasic*)$regsrc)->flags
+    printf "T_REGEXP: "
+    set print address off
+    output (char *)(($rsflags & RUBY_FL_USER1) ? \
+	    ((struct RString*)$regsrc)->as.heap.ptr : \
+	    ((struct RString*)$regsrc)->as.ary)
+    set print address on
+    printf " len:%ld ", ($rsflags & RUBY_FL_USER1) ? \
+            ((struct RString*)$regsrc)->as.heap.len : \
+            (($rsflags & (RUBY_FL_USER2|RUBY_FL_USER3|RUBY_FL_USER4|RUBY_FL_USER5|RUBY_FL_USER6)) >> RUBY_FL_USHIFT+2)
+    if $flags & RUBY_FL_USER6
+      printf "(none) "
+    end
+    if $flags & RUBY_FL_USER5
+      printf "(literal) "
+    end
+    if $flags & RUBY_FL_USER4
+      printf "(fixed) "
+    end
+    printf "encoding:%d ", ($flags & RUBY_ENCODING_MASK) >> RUBY_ENCODING_SHIFT
+    print (struct RRegexp *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_ARRAY
+    if ($flags & RUBY_FL_USER1)
+      set $len = (($flags & (RUBY_FL_USER3|RUBY_FL_USER4)) >> (RUBY_FL_USHIFT+3))
+      printf "T_ARRAY: len=%ld ", $len
+      printf "(embed) "
+      if ($len == 0)
+	printf "{(empty)} "
+      else
+	output/x *((VALUE*)((struct RArray*)($arg0))->as.ary) @ $len
+	printf " "
+      end
+    else
+      set $len = ((struct RArray*)($arg0))->as.heap.len
+      printf "T_ARRAY: len=%ld ", $len
+      if ($flags & RUBY_FL_USER2)
+	printf "(shared) shared="
+	output/x ((struct RArray*)($arg0))->as.heap.aux.shared
+	printf " "
+      else
+	printf "(ownership) capa=%ld ", ((struct RArray*)($arg0))->as.heap.aux.capa
+      end
+      if ($len == 0)
+	printf "{(empty)} "
+      else
+	output/x *((VALUE*)((struct RArray*)($arg0))->as.heap.ptr) @ $len
+	printf " "
+      end
+    end
+    print (struct RArray *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_FIXNUM
+    printf "T_FIXNUM: "
+    print (struct RBasic *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_HASH
+    printf "T_HASH: ",
+    if ((struct RHash *)($arg0))->ntbl
+      printf "len=%ld ", ((struct RHash *)($arg0))->ntbl->num_entries
+    end
+    print (struct RHash *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_STRUCT
+    printf "T_STRUCT: len=%ld ", \
+      (($flags & (RUBY_FL_USER1|RUBY_FL_USER2)) ? \
+       ($flags & (RUBY_FL_USER1|RUBY_FL_USER2)) >> (RUBY_FL_USHIFT+1) : \
+       ((struct RStruct *)($arg0))->as.heap.len)
+    print (struct RStruct *)($arg0)
+    x/xw (($flags & (RUBY_FL_USER1|RUBY_FL_USER2)) ? \
+          ((struct RStruct *)($arg0))->as.ary : \
+          ((struct RStruct *)($arg0))->as.heap.ptr)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_BIGNUM
+    printf "T_BIGNUM: sign=%d len=%ld ", \
+      (($flags & RUBY_FL_USER1) != 0), \
+      (($flags & RUBY_FL_USER2) ? \
+       ($flags & (RUBY_FL_USER5|RUBY_FL_USER4|RUBY_FL_USER3)) >> (RUBY_FL_USHIFT+3) : \
+       ((struct RBignum*)($arg0))->as.heap.len)
+    if $flags & RUBY_FL_USER2
+      printf "(embed) "
+    end
+    print (struct RBignum *)($arg0)
+    x/xw (($flags & RUBY_FL_USER2) ? \
+          ((struct RBignum*)($arg0))->as.ary : \
+          ((struct RBignum*)($arg0))->as.heap.digits)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_RATIONAL
+    printf "T_RATIONAL: "
+    print (struct RRational *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_COMPLEX
+    printf "T_COMPLEX: "
+    print (struct RComplex *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_FILE
+    printf "T_FILE: "
+    print (struct RFile *)($arg0)
+    output *((struct RFile *)($arg0))->fptr
+    printf "\n"
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_TRUE
+    printf "T_TRUE: "
+    print (struct RBasic *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_FALSE
+    printf "T_FALSE: "
+    print (struct RBasic *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_DATA
+    if ((struct RTypedData *)($arg0))->typed_flag == 1
+      printf "T_DATA(%s): ", ((struct RTypedData *)($arg0))->type->wrap_struct_name
+      print (struct RTypedData *)($arg0)
+    else
+      printf "T_DATA: "
+      print (struct RData *)($arg0)
+    end
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_MATCH
+    printf "T_MATCH: "
+    print (struct RMatch *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_SYMBOL
+    printf "T_SYMBOL: "
+    print (struct RBasic *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_UNDEF
+    printf "T_UNDEF: "
+    print (struct RBasic *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_NODE
+    printf "T_NODE("
+    output (enum node_type)(($flags&RUBY_NODE_TYPEMASK)>>RUBY_NODE_TYPESHIFT)
+    printf "): "
+    print *(NODE *)($arg0)
+  else
+  if ($flags & RUBY_T_MASK) == RUBY_T_ZOMBIE
+    printf "T_ZOMBIE: "
+    print (struct RData *)($arg0)
+  else
+    printf "unknown: "
+    print (struct RBasic *)($arg0)
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+  end
+end
+document rp
+  Print a Ruby's VALUE.
 end
 
-document ____executor_globals
-	portable way of accessing executor_globals, set $eg
-	this also sets compiler_globals to $cg
-	ZTS detection is automatically based on ext/standard module struct
+define nd_type
+  print (enum node_type)((((NODE*)($arg0))->flags&RUBY_NODE_TYPEMASK)>>RUBY_NODE_TYPESHIFT)
+end
+document nd_type
+  Print a Ruby' node type.
 end
 
-define print_cvs
-	____executor_globals
-	set $p = $eg.current_execute_data.CVs
-	set $c = $eg.current_execute_data.op_array.last_var
-	set $v = $eg.current_execute_data.op_array.vars
-	set $i = 0
-
-	printf "Compiled variables count: %d\n", $c
-	while $i < $c
-		printf "%d = %s\n", $i, $v[$i].name
-		if $p[$i] != 0
-			printzv *$p[$i]
-		else
-			printf "*uninitialized*\n"
-		end
-		set $i = $i + 1
-	end
+define nd_file
+  print ((NODE*)($arg0))->nd_file
+end
+document nd_file
+  Print the source file name of a node.
 end
 
-define dump_bt
-	set $t = $arg0
-	while $t
-		printf "[%p] ", $t
-		if $t->function_state.function->common.function_name
-			if $t->function_state.arguments
-				set $count = (int)*($t->function_state.arguments)
-				printf "%s(", $t->function_state.function->common.function_name
-				while $count > 0
-					set $zvalue = *(zval **)($t->function_state.arguments - $count)
-					set $type = $zvalue->type
-					if $type == 0
-						printf "NULL"
-					end
-					if $type == 1
-						printf "%ld", $zvalue->value.lval
-					end
-					if $type == 2
-						printf "%lf", $zvalue->value.dval
-					end
-					if $type == 3
-						if $zvalue->value.lval
-							printf "true"
-						else
-							printf "false"
-						end
-					end
-					if $type == 4
-						printf "array(%d)[%p]", $zvalue->value.ht->nNumOfElements, $zvalue
-					end
-					if $type == 5
-						printf "object[%p]", $zvalue
-					end
-					if $type == 6
-						____print_str $zvalue->value.str.val $zvalue->value.str.len
-					end
-					if $type == 7
-						printf "resource(#%d)", $zvalue->value.lval
-					end
-					if $type == 8 
-						printf "constant"
-					end
-					if $type == 9
-						printf "const_array"
-					end
-					if $type > 9
-						printf "unknown type %d", $type
-					end
-					set $count = $count -1
-					if $count > 0
-						printf ", "
-					end
-				end
-				printf ") "
-			else
-				printf "%s() ", $t->function_state.function->common.function_name
-			end
-		else
-			printf "??? "
-		end
-		if $t->op_array != 0
-			printf "%s:%d ", $t->op_array->filename, $t->opline->lineno
-		end
-		set $t = $t->prev_execute_data
-		printf "\n"
-	end
+define nd_line
+  print ((unsigned int)((((NODE*)($arg0))->flags>>RUBY_NODE_LSHIFT)&RUBY_NODE_LMASK))
+end
+document nd_line
+  Print the source line number of a node.
 end
 
-document dump_bt
-	dumps the current execution stack. usage: dump_bt executor_globals.current_execute_data
+# Print members of ruby node.
+
+define nd_head
+  printf "u1.node: "
+  rp ($arg0).u1.node
 end
 
-define printzv
-	set $ind = 1
-	____printzv $arg0 0 
+define nd_alen
+  printf "u2.argc: "
+  p ($arg0).u2.argc
 end
 
-document printzv
-	prints zval contents
+define nd_next
+  printf "u3.node: "
+  rp ($arg0).u3.node
 end
 
-define ____printzv_contents
-	set $zvalue = $arg0
-	set $type = $zvalue->type
 
-	printf "(refcount=%d", $zvalue->refcount__gc
-	if $zvalue->is_ref__gc
-		printf ",is_ref"
-	end
-	printf ") "
-	if $type == 0
-		printf "NULL"
-	end
-	if $type == 1
-		printf "long: %ld", $zvalue->value.lval
-	end
-	if $type == 2
-		printf "double: %lf", $zvalue->value.dval
-	end
-	if $type == 3
-		printf "bool: "
-		if $zvalue->value.lval
-			printf "true"
-		else
-			printf "false"
-		end
-	end
-	if $type == 4
-		printf "array(%d): ", $zvalue->value.ht->nNumOfElements
-		if ! $arg1
-			printf "{\n"
-			set $ind = $ind + 1
-			____print_ht $zvalue->value.ht 1
-			set $ind = $ind - 1
-			set $i = $ind
-			while $i > 0
-				printf "  "
-				set $i = $i - 1
-			end
-			printf "}"
-		end
-		set $type = 0
-	end
-	if $type == 5
-		printf "object"
-		____executor_globals
-		set $handle = $zvalue->value.obj.handle
-		set $handlers = $zvalue->value.obj.handlers
-		if basic_functions_module.zts
-			set $zobj = zend_objects_get_address($zvalue, $tsrm_ls)
-		else
-			set $zobj = zend_objects_get_address($zvalue)
-		end
-		if $handlers->get_class_entry == &zend_std_object_get_class
-			set $cname = $zobj->ce.name
-		else
-			set $cname = "Unknown"
-		end
-		printf "(%s) #%d", $cname, $handle
-		if ! $arg1
-			if $handlers->get_properties == &zend_std_get_properties
-				set $ht = $zobj->properties
-				if $ht
-					printf "(%d): ", $ht->nNumOfElements
-					printf "{\n"
-					set $ind = $ind + 1
-					____print_ht $ht 1
-					set $ind = $ind - 1
-					set $i = $ind
-					while $i > 0
-						printf "  "
-						set $i = $i - 1
-					end
-					printf "}"
-				else
-					echo "no properties found"
-				end
-			end
-		end
-		set $type = 0
-	end
-	if $type == 6
-		printf "string(%d): ", $zvalue->value.str.len
-		____print_str $zvalue->value.str.val $zvalue->value.str.len
-	end
-	if $type == 7
-		printf "resource: #%d", $zvalue->value.lval
-	end
-	if $type == 8 
-		printf "constant"
-	end
-	if $type == 9
-		printf "const_array"
-	end
-	if $type > 9
-		printf "unknown type %d", $type
-	end
-	printf "\n"
+define nd_cond
+  printf "u1.node: "
+  rp ($arg0).u1.node
 end
 
-define ____printzv
-	____executor_globals
-	set $zvalue = $arg0
-
-	printf "[%p] ", $zvalue
-
-	if $zvalue == $eg.uninitialized_zval_ptr
-		printf "*uninitialized* "
-	end
-
-	set $zcontents = (zval*) $zvalue
-	if $arg1
-		____printzv_contents $zcontents $arg1
-	else
-		____printzv_contents $zcontents 0 
-	end
+define nd_body
+  printf "u2.node: "
+  rp ($arg0).u2.node
 end
 
-define ____print_const_table
-	set $ht = $arg0
-	set $p = $ht->pListHead
-
-	while $p != 0
-		set $const = (zend_constant *) $p->pData
-
-		set $i = $ind
-		while $i > 0
-			printf "  "
-			set $i = $i - 1
-		end
-
-		if $p->nKeyLength > 0
-			____print_str $p->arKey $p->nKeyLength
-			printf " => "
-		else
-			printf "%d => ", $p->h
-		end
-
-		____printzv_contents &$const->value 0
-		set $p = $p->pListNext
-	end
+define nd_else
+  printf "u3.node: "
+  rp ($arg0).u3.node
 end
 
-define print_const_table
-	set $ind = 1
-	printf "[%p] {\n", $arg0
-	____print_const_table $arg0
-	printf "}\n"
+
+define nd_orig
+  printf "u3.value: "
+  rp ($arg0).u3.value
 end
 
-define ____print_ht
-	set $ht = (HashTable*)$arg0
-	set $p = $ht->pListHead
 
-	while $p != 0
-		set $i = $ind
-		while $i > 0
-			printf "  "
-			set $i = $i - 1
-		end
-
-		if $p->nKeyLength > 0
-			____print_str $p->arKey $p->nKeyLength
-			printf " => "
-		else
-			printf "%d => ", $p->h
-		end
-		
-		if $arg1 == 0
-			printf "%p\n", (void*)$p->pData
-		end
-		if $arg1 == 1
-			set $zval = *(zval **)$p->pData
-			____printzv $zval 1
-		end
-		if $arg1 == 2
-			printf "%s\n", (char*)$p->pData
-		end
-
-		set $p = $p->pListNext
-	end
+define nd_resq
+  printf "u2.node: "
+  rp ($arg0).u2.node
 end
 
-define print_ht
-	set $ind = 1
-	printf "[%p] {\n", $arg0
-	____print_ht $arg0 1
-	printf "}\n"
+define nd_ensr
+  printf "u3.node: "
+  rp ($arg0).u3.node
 end
 
-document print_ht
-	dumps elements of HashTable made of zval
+
+define nd_1st
+  printf "u1.node: "
+  rp ($arg0).u1.node
 end
 
-define print_htptr
-	set $ind = 1
-	printf "[%p] {\n", $arg0
-	____print_ht $arg0 0
-	printf "}\n"
+define nd_2nd
+  printf "u2.node: "
+  rp ($arg0).u2.node
 end
 
-document print_htptr
-	dumps elements of HashTable made of pointers
+
+define nd_stts
+  printf "u1.node: "
+  rp ($arg0).u1.node
 end
 
-define print_htstr
-	set $ind = 1
-	printf "[%p] {\n", $arg0
-	____print_ht $arg0 2
-	printf "}\n"
+
+define nd_entry
+  printf "u3.entry: "
+  p ($arg0).u3.entry
 end
 
-document print_htstr
-	dumps elements of HashTable made of strings
+define nd_vid
+  printf "u1.id: "
+  p ($arg0).u1.id
 end
 
-define ____print_ft
-	set $ht = $arg0
-	set $p = $ht->pListHead
-
-	while $p != 0
-		set $func = (zend_function*)$p->pData
-
-		set $i = $ind
-		while $i > 0
-			printf "  "
-			set $i = $i - 1
-		end
-
-		if $p->nKeyLength > 0
-			____print_str $p->arKey $p->nKeyLength
-			printf " => "
-		else
-			printf "%d => ", $p->h
-		end
-
-		printf "\"%s\"\n", $func->common.function_name
-		set $p = $p->pListNext
-	end
+define nd_cflag
+  printf "u2.id: "
+  p ($arg0).u2.id
 end
 
-define print_ft
-	set $ind = 1
-	printf "[%p] {\n", $arg0
-	____print_ft $arg0
-	printf "}\n"
+define nd_cval
+  printf "u3.value: "
+  rp ($arg0).u3.value
 end
 
-document print_ft
-	dumps a function table (HashTable)
+
+define nd_cnt
+  printf "u3.cnt: "
+  p ($arg0).u3.cnt
 end
 
-define ____print_inh_class
-	set $ce = $arg0
-	if $ce->ce_flags & 0x10 || $ce->ce_flags & 0x20
-		printf "abstract "
-	else
-		if $ce->ce_flags & 0x40
-			printf "final "
-		end
-	end
-	printf "class %s", $ce->name
-	if $ce->parent != 0
-		printf " extends %s", $ce->parent->name
-	end
-	if $ce->num_interfaces != 0
-		printf " implements"
-		set $tmp = 0
-		while $tmp < $ce->num_interfaces
-			printf " %s", $ce->interfaces[$tmp]->name
-			set $tmp = $tmp + 1
-			if $tmp < $ce->num_interfaces
-				printf ","
-			end
-		end
-	end
-	set $ce = $ce->parent
+define nd_tbl
+  printf "u1.tbl: "
+  p ($arg0).u1.tbl
 end
 
-define ____print_inh_iface
-	set $ce = $arg0
-	printf "interface %s", $ce->name
-	if $ce->num_interfaces != 0
-		set $ce = $ce->interfaces[0]
-		printf " extends %s", $ce->name
-	else
-		set $ce = 0
-	end
+
+define nd_var
+  printf "u1.node: "
+  rp ($arg0).u1.node
 end
 
-define print_inh
-	set $ce = $arg0
-	set $depth = 0
-	while $ce != 0
-		set $tmp = $depth
-		while $tmp != 0
-			printf " "
-			set $tmp = $tmp - 1
-		end
-		set $depth = $depth + 1
-		if $ce->ce_flags & 0x80
-			____print_inh_iface $ce
-		else
-			____print_inh_class $ce
-		end
-		printf " {\n"
-	end
-	while $depth != 0
-		set $tmp = $depth
-		while $tmp != 1
-			printf " "
-			set $tmp = $tmp - 1
-		end
-		printf "}\n"
-		set $depth = $depth - 1
-	end
+define nd_ibdy
+  printf "u2.node: "
+  rp ($arg0).u2.node
 end
 
-define print_pi
-	set $pi = $arg0
-	printf "[%p] {\n", $pi
-	printf "    h     = %lu\n", $pi->h
-	printf "    flags = %d (", $pi->flags
-	if $pi->flags & 0x100
-		printf "ZEND_ACC_PUBLIC"
-	else
-		if $pi->flags & 0x200
-			printf "ZEND_ACC_PROTECTED"
-		else
-			if $pi->flags & 0x400
-				printf "ZEND_ACC_PRIVATE"
-			else
-				if $pi->flags & 0x800
-					printf "ZEND_ACC_CHANGED"
-				end
-			end
-		end
-	end
-	printf ")\n"
-	printf "    name  = "
-	____print_str $pi->name $pi->name_length
-	printf "\n}\n"
+define nd_iter
+  printf "u3.node: "
+  rp ($arg0).u3.node
 end
 
-define ____print_str
-	set $tmp = 0
-	set $str = $arg0
-	printf "\""
-	while $tmp < $arg1
-		if $str[$tmp] > 32 && $str[$tmp] < 127
-			printf "%c", $str[$tmp]
-		else
-			printf "\\%o", $str[$tmp]
-		end
-		set $tmp = $tmp + 1
-	end
-	printf "\""
+
+define nd_value
+  printf "u2.node: "
+  rp ($arg0).u2.node
 end
 
-define printzn
-	____executor_globals
-	set $ind = 0
-	set $znode = $arg0
-	if $znode->op_type == 1
-		set $optype = "IS_CONST"
-	end
-	if $znode->op_type == 2 
-		set $optype = "IS_TMP_VAR"
-	end
-	if $znode->op_type == 4 
-		set $optype = "IS_VAR"
-	end
-	if $znode->op_type == 8
-		set $optype = "IS_UNUSED"
-	end
-
-	printf "[%p] %s", $znode, $optype
-
-	if $znode->op_type == 1
-		printf ": "
-		____printzv &$znode->u.constant 0
-	end
-	if $znode->op_type == 2
-		printf ": "
-		set $tvar = (union _temp_variable *)((char *)$eg.current_execute_data->Ts + $znode->u.var)
-		____printzv ((union _temp_variable *)$tvar)->tmp_var 0
-	end
-	if $znode->op_type == 4
-		printf ": "
-		set $tvar = (union _temp_variable *)((char *)$eg.current_execute_data->Ts + $znode->u.var)
-		____printzv *$tvar->var.ptr_ptr 0
-	end
-	if $znode->op_type == 8
-		printf "\n"
-	end
+define nd_aid
+  printf "u3.id: "
+  p ($arg0).u3.id
 end
 
-document printzn
-	print type and content of znode.
-	usage: printzn &opline->op1 
+
+define nd_lit
+  printf "u1.value: "
+  rp ($arg0).u1.value
 end
 
-define printzops
-	printf "op1 => " 
-	printzn &execute_data->opline.op1
-	printf "op2 => "
-	printzn &execute_data->opline.op2
-	printf "result => "
-	printzn &execute_data->opline.result
+
+define nd_frml
+  printf "u1.node: "
+  rp ($arg0).u1.node
 end
 
-document printzops
-	dump operands of the current opline
+define nd_rest
+  printf "u2.argc: "
+  p ($arg0).u2.argc
 end
 
-define zbacktrace
-	____executor_globals
-	dump_bt $eg.current_execute_data
+define nd_opt
+  printf "u1.node: "
+  rp ($arg0).u1.node
 end
 
-document zbacktrace
-	prints backtrace.
-	This command is almost a short cut for
-	> (gdb) ____executor_globals
-	> (gdb) dump_bt $eg.current_execute_data
+
+define nd_recv
+  printf "u1.node: "
+  rp ($arg0).u1.node
 end
 
-define zmemcheck
-	set $p = alloc_globals.head
-	set $stat = "?"
-	set $total_size = 0
-	if $arg0 != 0
-		set $not_found = 1
-	else
-		set $not_found = 0
-	end
-	printf " block      size      status file:line\n"
-	printf "-------------------------------------------------------------------------------\n"
-	while $p
-		set $aptr = $p + sizeof(struct _zend_mem_header) + sizeof(align_test)
-		if $arg0 == 0 || (void *)$aptr == (void *)$arg0
-			if $p->magic == 0x7312f8dc 
-				set $stat = "OK"
-			end
-			if $p->magic == 0x99954317
-				set $stat = "FREED"
-			end
-			if $p->magic == 0xfb8277dc
-				set $stat = "CACHED"
-			end
-			set $filename = strrchr($p->filename, '/')
-			if !$filename
-				set $filename = $p->filename
-			else
-				set $filename = $filename + 1
-			end
-			printf " %p ", $aptr
-			if $p->size == sizeof(struct _zval_struct) && ((struct _zval_struct *)$aptr)->type >= 0 && ((struct _zval_struct *)$aptr)->type < 10
-				printf "ZVAL?(%-2d) ", $p->size
-			else
-				printf "%-9d ", $p->size
-			end
-			set $total_size = $total_size + $p->size
-			printf "%-06s %s:%d", $stat, $filename, $p->lineno
-			if $p->orig_filename
-				set $orig_filename = strrchr($p->orig_filename, '/')
-				if !$orig_filename
-					set $orig_filename = $p->orig_filename
-				else
-					set $orig_filename = $orig_filename + 1
-				end
-				printf " <= %s:%d\n", $orig_filename, $p->orig_lineno
-			else
-				printf "\n"
-			end
-			if $arg0 != 0
-				set $p = 0
-				set $not_found = 0
-			else
-				set $p = $p->pNext
-			end
-		else
-			set $p = $p->pNext
-		end
-	end
-	if $not_found
-		printf "no such block that begins at %p.\n", $aptr 
-	end
-	if $arg0 == 0
-		printf "-------------------------------------------------------------------------------\n"
-		printf "     total: %d bytes\n", $total_size
-	end
+define nd_mid
+  printf "u2.id: "
+  p ($arg0).u2.id
 end
 
-document zmemcheck
-	show status of a memory block.
-	usage: zmemcheck [ptr].
-	if ptr is 0, all blocks will be listed.
+define nd_args
+  printf "u3.node: "
+  rp ($arg0).u3.node
+end
+
+
+define nd_noex
+  printf "u1.id: "
+  p ($arg0).u1.id
+end
+
+define nd_defn
+  printf "u3.node: "
+  rp ($arg0).u3.node
+end
+
+
+define nd_old
+  printf "u1.id: "
+  p ($arg0).u1.id
+end
+
+define nd_new
+  printf "u2.id: "
+  p ($arg0).u2.id
+end
+
+
+define nd_cfnc
+  printf "u1.cfunc: "
+  p ($arg0).u1.cfunc
+end
+
+define nd_argc
+  printf "u2.argc: "
+  p ($arg0).u2.argc
+end
+
+
+define nd_cname
+  printf "u1.id: "
+  p ($arg0).u1.id
+end
+
+define nd_super
+  printf "u3.node: "
+  rp ($arg0).u3.node
+end
+
+
+define nd_modl
+  printf "u1.id: "
+  p ($arg0).u1.id
+end
+
+define nd_clss
+  printf "u1.value: "
+  rp ($arg0).u1.value
+end
+
+
+define nd_beg
+  printf "u1.node: "
+  rp ($arg0).u1.node
+end
+
+define nd_end
+  printf "u2.node: "
+  rp ($arg0).u2.node
+end
+
+define nd_state
+  printf "u3.state: "
+  p ($arg0).u3.state
+end
+
+define nd_rval
+  printf "u2.value: "
+  rp ($arg0).u2.value
+end
+
+
+define nd_nth
+  printf "u2.argc: "
+  p ($arg0).u2.argc
+end
+
+
+define nd_tag
+  printf "u1.id: "
+  p ($arg0).u1.id
+end
+
+define nd_tval
+  printf "u2.value: "
+  rp ($arg0).u2.value
+end
+
+define rb_p
+  call rb_p($arg0)
+end
+
+define rb_numtable_entry
+  set $rb_numtable_tbl = $arg0
+  set $rb_numtable_id = (st_data_t)$arg1
+  set $rb_numtable_key = 0
+  set $rb_numtable_rec = 0
+  if $rb_numtable_tbl->entries_packed
+    set $rb_numtable_p = $rb_numtable_tbl->as.packed.bins
+    while $rb_numtable_p && $rb_numtable_p < $rb_numtable_tbl->as.packed.bins+$rb_numtable_tbl->num_entries
+      if $rb_numtable_p.k == $rb_numtable_id
+	set $rb_numtable_key = $rb_numtable_p.k
+	set $rb_numtable_rec = $rb_numtable_p.v
+	set $rb_numtable_p = 0
+      else
+	set $rb_numtable_p = $rb_numtable_p + 1
+      end
+    end
+  else
+    set $rb_numtable_p = $rb_numtable_tbl->as.big.bins[$rb_numtable_id % $rb_numtable_tbl->num_bins]
+    while $rb_numtable_p
+      if $rb_numtable_p->key == $rb_numtable_id
+	set $rb_numtable_key = $rb_numtable_p->key
+	set $rb_numtable_rec = $rb_numtable_p->record
+	set $rb_numtable_p = 0
+      else
+	set $rb_numtable_p = $rb_numtable_p->next
+      end
+    end
+  end
+end
+
+define rb_id2name
+  rb_numtable_entry global_symbols.id_str (ID)$arg0
+  if $rb_numtable_rec
+    rp $rb_numtable_rec
+  else
+    echo undef\n
+  end
+end
+document rb_id2name
+  Print the name of id
+end
+
+define rb_method_entry
+  set $rb_method_entry_klass = (struct RClass *)$arg0
+  set $rb_method_entry_id = (ID)$arg1
+  set $rb_method_entry_me = (rb_method_entry_t *)0
+  while !$rb_method_entry_me && $rb_method_entry_klass
+    rb_numtable_entry $rb_method_entry_klass->m_tbl $rb_method_entry_id
+    set $rb_method_entry_me = (rb_method_entry_t *)$rb_numtable_rec
+    if !$rb_method_entry_me
+      set $rb_method_entry_klass = (struct RClass *)$rb_method_entry_klass->ptr->super
+    end
+  end
+  if $rb_method_entry_me
+    print *$rb_method_entry_klass
+    print *$rb_method_entry_me
+  else
+    echo method not found\n
+  end
+end
+document rb_method_entry
+  Search method entry by class and id
+end
+
+define rb_classname
+  call classname($arg0)
+  rb_p $
+  print *(struct RClass*)($arg0)
+end
+
+define rb_backtrace
+  call rb_backtrace()
+end
+
+define iseq
+  if dummy_gdb_enums.special_consts
+  end
+  if ($arg0)->type == ISEQ_ELEMENT_NONE
+    echo [none]\n
+  end
+  if ($arg0)->type == ISEQ_ELEMENT_LABEL
+    print *(LABEL*)($arg0)
+  end
+  if ($arg0)->type == ISEQ_ELEMENT_INSN
+    print *(INSN*)($arg0)
+    if ((INSN*)($arg0))->insn_id != YARVINSN_jump
+      set $i = 0
+      set $operand_size = ((INSN*)($arg0))->operand_size
+      set $operands = ((INSN*)($arg0))->operands
+      while $i < $operand_size
+	rp $operands[$i++]
+      end
+    end
+  end
+  if ($arg0)->type == ISEQ_ELEMENT_ADJUST
+    print *(ADJUST*)($arg0)
+  end
+end
+
+define rb_ps
+  rb_ps_vm ruby_current_vm
+end
+document rb_ps
+Dump all threads and their callstacks
+end
+
+define rb_ps_vm
+  print $ps_vm = (rb_vm_t*)$arg0
+  set $ps_threads = (st_table*)$ps_vm->living_threads
+  if $ps_threads->entries_packed
+    set $ps_threads_i = 0
+    while $ps_threads_i < $ps_threads->num_entries
+      set $ps_threads_key = (st_data_t)$ps_threads->bins[$ps_threads_i * 2]
+      set $ps_threads_val = (st_data_t)$ps_threads->bins[$ps_threads_i * 2 + 1]
+      rb_ps_thread $ps_threads_key $ps_threads_val
+      set $ps_threads_i = $ps_threads_i + 1
+    end
+  else
+    set $ps_threads_ptr = (st_table_entry*)$ps_threads->head
+    while $ps_threads_ptr
+      set $ps_threads_key = (st_data_t)$ps_threads_ptr->key
+      set $ps_threads_val = (st_data_t)$ps_threads_ptr->record
+      rb_ps_thread $ps_threads_key $ps_threads_val
+      set $ps_threads_ptr = (st_table_entry*)$ps_threads_ptr->fore
+    end
+  end
+end
+document rb_ps_vm
+Dump all threads in a (rb_vm_t*) and their callstacks
+end
+
+define rb_ps_thread
+  set $ps_thread = (struct RTypedData*)$arg0
+  set $ps_thread_id = $arg1
+  print $ps_thread_th = (rb_thread_t*)$ps_thread->data
 end

@@ -1,0 +1,369 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+#
+# ixset --
+# A nice interface to "xset" to change X server settings
+#
+
+require 'tk'
+
+class Xsettings
+  #
+  # Button actions
+  #
+  def quit
+    @root.destroy
+  end
+
+  def ok
+    writesettings
+    quit
+  end
+
+  def cancel
+    readsettings
+    dispsettings
+    @btn_APPLY.state(:disabled)
+    @btn_CANCEL.state(:disabled)
+  end
+
+  # apply is just "writesettings"
+  def apply
+    writesettings
+    @btn_APPLY.state(:disabled)
+    @btn_CANCEL.state(:disabled)
+  end
+
+  #
+  # Read current settings
+  #
+  def readsettings
+    xfd = open("|xset q", 'r')
+    xfd.readlines.each{|line|
+      fields = line.chomp.strip.split(/\s+/)
+      case fields[0]
+      when "auto"
+	if fields[1] == 'repeat:'
+	  @kbdrep = fields[2]
+	  @w_kbdrep.set(@kbdrep)
+	  @kbdcli = fields[6]
+	end
+
+      when "bell"
+	@bellvol = fields[2]
+	@bellpit = fields[5]
+	@belldur = fields[8]
+
+      when "acceleration:"
+	@mouseacc = fields[1]
+	@mousethr = fields[3]
+
+      when "prefer"
+	if fields[2] == 'yes'
+	  @screenbla = 'blank'
+	else
+	  @screenbla = 'noblank'
+	end
+	@w_screenbla.set(@screenbla)
+
+      when "timeout:"
+	@screentim = fields[1]
+	@screencyc = fields[3]
+
+      end
+    }
+
+    xfd.close
+  end
+
+  #
+  # Write settings into the X server
+  #
+  def writesettings
+    @bellvol = @w_bellvol.get
+    @bellpit = @w_bellpit.get
+    @belldur = @w_belldur.get
+
+    @kbdrep = @w_kbdrep.get
+    if @kbdrep == 'on'
+      @kbdcli = @w_kbdcli.get
+    else
+      @kbdcli = 'off'
+    end
+
+    @mouseacc = @w_mouseacc.get
+    @mousethr = @w_mousethr.get
+
+    @screentim = @w_screentim.get
+    @screencyc = @w_screencyc.get
+    @screenbla = @w_screenbla.get
+
+    system("xset \
+            b #{@bellvol} #{@bellpit} #{@belldur} \
+            c #{@kbdcli} \
+            r #{@kbdrep} \
+            m #{@mouseacc} #{@mousethr} \
+            s #{@screentim} #{@screencyc} \
+            s #{@screenbla}")
+  end
+
+  #
+  # Sends all settings to the window
+  #
+  def dispsettings
+    @w_bellvol.set(@bellvol)
+    @w_bellpit.set(@bellpit)
+    @w_belldur.set(@belldur)
+
+    @w_kbdonoff.set(@w_kbdrep.get)
+    @w_kbdcli.set(@kbdcli)
+
+    @w_mouseacc.set(@mouseacc)
+    @w_mousethr.set(@mousethr)
+
+    @w_screenblank.set(@w_screenbla.get)
+    @w_screenpat.set(@w_screenbla.get)
+
+    @w_screentim.set(@screentim)
+    @w_screencyc.set(@screencyc)
+  end
+
+  #
+  # Create all windows, and pack them
+  #
+  class LabelEntry
+    def initialize(parent, text, length, range=[])
+      @frame = TkFrame.new(parent)
+      TkLabel.new(@frame, 'text'=>text).pack('side'=>'left')
+      if range.size > 0
+	@entry = TkSpinbox.new(@frame, 'width'=>length, 'relief'=>'sunken',
+			       'from'=>range[0], 'to'=>range[1])
+      else
+	@entry = TkEntry.new(@frame, 'width'=>length, 'relief'=>'sunken')
+      end
+      @entry.pack('side'=>'right','expand'=>'y', 'fill'=>'x')
+    end
+    def epath
+      @frame
+    end
+    def pack(keys)
+      @frame.pack(keys)
+    end
+    def get
+      @entry.value
+    end
+    def set(value)
+      @entry.delete(0,'end')
+      @entry.insert(0, value)
+    end
+  end
+
+  def createwindows
+    win = self
+
+    #
+    # Buttons
+    #
+    btn_frame = TkFrame.new(@root)
+    buttons = [
+      @btn_OK = TkButton.new(btn_frame, 'command'=>proc{win.ok},
+			     'default'=>'active', 'text'=>'了解'),
+      @btn_APPLY = TkButton.new(btn_frame, 'command'=>proc{win.writesettings},
+				'default'=>'normal', 'text'=>'適用',
+				'state'=>'disabled'),
+      @btn_CANCEL = TkButton.new(btn_frame, 'command'=>proc{win.cancel},
+				 'default'=>'normal', 'text'=>'取消',
+				'state'=>'disabled'),
+      @btn_QUIT = TkButton.new(btn_frame, 'command'=>proc{win.quit},
+			       'default'=>'normal', 'text'=>'中止')
+    ]
+    buttons.each{|b| b.pack('side'=>'left', 'expand'=>'yes', 'pady'=>5) }
+
+    @root.bind('Return', proc{@btn_OK.flash; @btn_OK.invoke})
+    @root.bind('Escape', proc{@btn_QUIT.flash; @btn_QUIT.invoke})
+    @root.bind('1', proc{|w|
+		 unless buttons.index(w)
+		   @btn_APPLY.state(:normal)
+		   @btn_CANCEL.state(:normal)
+		 end
+	       }, '%W')
+    @root.bind('Key', proc{|w, k|
+		 unless buttons.index(w)
+		   case k
+		   when 'Return', 'Escape', 'Tab', /.*Shift.*/
+		     # do nothing
+		   else
+		     @btn_APPLY.state(:normal)
+		     @btn_CANCEL.state(:normal)
+		   end
+		 end
+	       }, '%W %K')
+
+    #
+    # Bell settings
+    #
+    bell = TkLabelframe.new(@root, 'text'=>'ベル設定',
+			    'padx'=>'1.5m', 'pady'=>'1.5m')
+    @w_bellvol = TkScale.new(bell, 'from'=>0, 'to'=>100, 'length'=>200,
+			     'tickinterval'=>20, 'orient'=>'horizontal',
+			     'label'=>"音量 (%)")
+
+    f = TkFrame.new(bell)
+    @w_bellpit = LabelEntry.new(f, "音程 (Hz)", 6, [25, 20000])
+    @w_bellpit.pack('side'=>'left', 'padx'=>5)
+    @w_belldur = LabelEntry.new(f, "持続時間 (ms)", 6, [1, 10000])
+    @w_belldur.pack('side'=>'right', 'padx'=>5)
+
+    @w_bellvol.pack('side'=>'top', 'expand'=>'yes')
+    f.pack('side'=>'top', 'expand'=>'yes')
+
+    #
+    # Keyboard settings
+    #
+    kbdonoff = nil
+    kbdcli = nil
+    kbd = TkLabelframe.new(@root, 'text'=>'キーボードリピート設定',
+			   'padx'=>'1.5m', 'pady'=>'1.5m')
+    f = TkFrame.new(kbd)
+    @w_kbdonoff = TkCheckButton.new(f, 'text'=>'クリック音あり',
+				    'relief'=>'flat',
+				    'onvalue'=>'on', 'offvalue'=>'off',
+				    'variable'=>@w_kbdrep ) {
+      def self.set(value)
+	if value == 'on'
+	  self.select
+	else
+	  self.deselect
+	end
+      end
+      pack('side'=>'left', 'expand'=>'yes', 'fill'=>'x', 'padx'=>[0, '1m'])
+    }
+    @w_kbdcli = TkScale.new(f, 'from'=>0, 'to'=>100, 'length'=>200,
+			 'tickinterval'=>20, 'orient'=>'horizontal',
+			 'label'=>'クリック音量 (%)')
+    @w_kbdcli.pack('side'=>'left', 'expand'=>'yes',
+		   'fill'=>'x', 'padx'=>['1m', 0])
+    f.pack('side'=>'top', 'expand'=>'yes', 'pady'=>2, 'fill'=>'x')
+
+    #
+    # Mouse settings
+    #
+    mouse = TkLabelframe.new(@root, 'text'=>'マウス設定',
+			     'padx'=>'1.5m', 'pady'=>'1.5m')
+    f = TkFrame.new(mouse)
+    @w_mouseacc = LabelEntry.new(f, '加速量', 5)
+    @w_mouseacc.pack('side'=>'left', 'padx'=>[0, '1m'])
+    @w_mousethr = LabelEntry.new(f, '閾値 (pixels)', 3, [1, 2000])
+    @w_mousethr.pack('side'=>'right', 'padx'=>['1m', 0])
+    f.pack('side'=>'top', 'expand'=>'yes')
+
+    #
+    # Screen Saver settings
+    #
+    screen = TkLabelframe.new(@root, 'text'=>'スクリーンセーバ設定',
+			     'padx'=>'1.5m', 'pady'=>'1.5m')
+    @w_screenblank = TkRadioButton.new(screen, 'text'=>'ブランク表示',
+				       'relief'=>'flat', 'anchor'=>'w',
+				       'variable'=>@w_screenbla,
+				       'value'=>'blank') {
+      def self.set(value)
+	if value == 'blank'
+	  self.select
+	else
+	  self.deselect
+	end
+      end
+    }
+
+    @w_screenpat = TkRadioButton.new(screen, 'text'=>'パターン表示',
+				     'relief'=>'flat', 'anchor'=>'w',
+				     'variable'=>@w_screenbla,
+				     'value'=>'noblank') {
+      def self.set(value)
+	if value != 'blank'
+	  self.select
+	else
+	  self.deselect
+	end
+      end
+    }
+
+    @w_screentim = LabelEntry.new(screen, 'タイムアウト (s)', 5, [1, 100000])
+    @w_screencyc = LabelEntry.new(screen, '周期 (s)', 5, [1, 100000])
+
+    Tk.grid(@w_screenblank, @w_screentim, 'sticky'=>'e')
+    Tk.grid(@w_screenpat, @w_screencyc, 'sticky'=>'e')
+    TkGrid.configure(@w_screenblank, @w_screenpat, 'sticky'=>'ew')
+
+    #
+    # Main window
+    #
+    param = {
+      'side'=>'top', 'fill'=>'both', 'expand'=>'yes',
+      'padx'=>'1m', 'pady'=>'1m'
+    }
+    btn_frame.pack('side'=>'top', 'fill'=>'both')
+    bell.pack(param)
+    kbd.pack(param)
+    mouse.pack(param)
+    screen.pack(param)
+
+    #
+    # Let the user resize our window
+    #
+    @root.minsize(10,10)
+  end
+
+  def initialize(title)
+    @root = TkRoot.new('title'=>title)
+
+    @kbdrep = 'on'
+    @w_kbdrep = TkVariable.new(@kbdrep)
+    def @w_kbdrep.get
+      self.value
+    end
+    def @w_kbdrep.set(val)
+      self.value=val
+    end
+
+    @kbdcli = 0
+
+    @bellvol = 100
+    @bellpit = 440
+    @belldur = 100
+
+    @mouseacc = "3/1"
+    @mousethr = 4
+
+    @screenbla = "blank"
+    @w_screenbla = TkVariable.new(@screenbla)
+    def @w_screenbla.get
+      self.value
+    end
+    def @w_screenbla.set(val)
+      self.value=val
+    end
+
+    @screentim = 600
+    @screencyc = 600
+
+    #
+    # Listen what "xset" tells us...
+    #
+    readsettings
+
+    #
+    # Create all windows
+    #
+    createwindows
+
+    #
+    # Write xset parameters
+    #
+    dispsettings
+  end
+end
+
+Xsettings.new(File.basename($0,'.rb'))
+
+Tk.mainloop

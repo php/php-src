@@ -1,0 +1,75 @@
+# etc.rd.ja -  -*- mode: rd; coding: euc-jp; -*- created at: Fri Jul 14 00:47:15 JST 1995
+=begin
+
+= Etc(モジュール)
+
+実行しているOSからの情報を得るためのモジュール．クラスにインクルード
+して使うこともできる．
+
+== Module Function
+
+--- getlogin
+
+	自分のlogin名を返す．これが失敗した場合はgetpwuid()を用いると
+	良い．
+
+--- getpwnam(name)
+
+	/etc/passwdファイル(あるいはDBMファイルやNISデータベース)を検
+	索し，nameの名前を持つpasswdエントリを返す．戻り値はpasswd構造
+	体で以下のメンバを持つ．
+
+	  struct passwd
+	    name 	# ユーザ名(文字列)
+	    passwd	# パスワード(文字列)
+	    uid		# ユーザID(整数)
+	    gid		# グループID(整数)
+	    gecos	# gecosフィールド(文字列)
+	    dir		# ホームディレクトリ(文字列)
+	    shell	# ログインシェル(文字列)
+	    # 以降のメンバはシステムによっては提供されない．
+	    change	# パスワード変更時間(整数)
+	    quota	# クォータ(整数)
+	    age		# エージ(整数)
+	    class	# ユーザアクセスクラス(文字列)
+	    comment	# コメント(文字列)
+	    expire	# アカウント有効期限(整数)	    
+	  end
+
+	詳細はgetpwnam(3)を参照のこと．
+
+--- getpwuid([uid])
+
+	uidをユーザIDとするpasswdエントリを返す．戻り値はgetpwnam()と
+	同様である．引数を省略した場合にはgetuid()の値を用いる．詳細は
+	getpwuid(3)を参照のこと．
+
+--- getgrgid(gid)
+
+	/etc/groupファイル(あるいは…getpwnam参照)を検索し，gidをグルー
+	プIDとするグループエントリを返す．戻り値はgroup構造体で以下の
+	メンバを持つ．
+
+	  struct group
+	    name 	# グループ名(文字列)
+	    passwd	# グループのパスワード(文字列)
+	    gid		# グループID(整数)
+	    mem		# グループメンバ名の配列
+	  end
+
+	詳細はgetgrgid(3)を参照のこと．
+
+--- getgrnam(name)
+
+	nameという名前のグループエントリを返す．戻り値はgetgrgid()と同
+	様である．詳細はgetgrnam(3)を参照．
+
+--- group
+
+	全てのグループエントリを順にアクセスするためのイテレータ．
+
+--- passwd
+
+	全てのpasswdエントリを順にアクセスするためのイテレータ．
+
+=end

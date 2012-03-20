@@ -1,0 +1,2 @@
+date_core.o: date_tmx.h
+date_strftime.o: date_tmx.h

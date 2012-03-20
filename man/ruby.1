@@ -1,0 +1,511 @@
+.\"Ruby is copyrighted by Yukihiro Matsumoto <matz@netlab.jp>.
+.Dd October 25, 2008
+.Dt RUBY(1) "" "Ruby Programmers Reference Guide"
+.\".Dt RUBY 1
+.Os UNIX
+.Sh NAME
+.Nm ruby
+.Nd Interpreted object-oriented scripting language
+.Sh SYNOPSIS
+.Nm
+.Op Fl -copyright
+.Op Fl -version
+.Op Fl SUacdlnpswvy
+.Op Fl 0 Ns Op Ar octal
+.Op Fl C Ar directory
+.Op Fl E Ar external Ns Op : Ns Ar internal
+.Op Fl F Ar pattern
+.Op Fl I Ar directory
+.Op Fl K Ar c
+.Op Fl T Ns Op Ar level
+.Op Fl W Ns Op Ar level
+.Op Fl e Ar command
+.Op Fl i Ns Op Ar extension
+.Op Fl r Ar library
+.Op Fl x Ns Op Ar directory
+.Op - Ns Bro Cm enable Ns | Ns Cm disable Brc Ns - Ns Ar FEATURE
+.Op Fl -dump Ns = Ns Ar target
+.Op Fl -verbose
+.Op Fl -
+.Op Ar program_file
+.Op Ar argument ...
+.Sh DESCRIPTION
+Ruby is an interpreted scripting language for quick and easy
+object-oriented programming.  It has many features to process text
+files and to do system management tasks (as in Perl).  It is simple,
+straight-forward, and extensible.
+.Pp
+If you want a language for easy object-oriented programming, or you
+don't like the Perl ugliness, or you do like the concept of LISP, but
+don't like too many parentheses, Ruby might be your language of
+choice.
+.Sh FEATURES
+Ruby's features are as follows:
+.Bl -tag -width 6n
+.It Sy "Interpretive"
+Ruby is an interpreted language, so you don't have to recompile
+programs written in Ruby to execute them.
+.Pp
+.It Sy "Variables have no type (dynamic typing)"
+Variables in Ruby can contain data of any type.  You don't have to
+worry about variable typing.  Consequently, it has a weaker compile
+time check.
+.Pp
+.It Sy "No declaration needed"
+You can use variables in your Ruby programs without any declarations.
+Variable names denote their scope - global, class, instance, or local.
+.Pp
+.It Sy "Simple syntax"
+Ruby has a simple syntax influenced slightly from Eiffel.
+.Pp
+.It Sy "No user-level memory management"
+Ruby has automatic memory management.  Objects no longer referenced
+from anywhere are automatically collected by the garbage collector
+built into the interpreter.
+.Pp
+.It Sy "Everything is an object"
+Ruby is a purely object-oriented language, and was so since its
+creation.  Even such basic data as integers are seen as objects.
+.Pp
+.It Sy "Class, inheritance, and methods"
+Being an object-oriented language, Ruby naturally has basic
+features like classes, inheritance, and methods.
+.Pp
+.It Sy "Singleton methods"
+Ruby has the ability to define methods for certain objects.  For
+example, you can define a press-button action for certain widget by
+defining a singleton method for the button.  Or, you can make up your
+own prototype based object system using singleton methods, if you want
+to.
+.Pp
+.It Sy "Mix-in by modules"
+Ruby intentionally does not have the multiple inheritance as it is a
+source of confusion.  Instead, Ruby has the ability to share
+implementations across the inheritance tree.  This is often called a
+.Sq Mix-in .
+.Pp
+.It Sy "Iterators"
+Ruby has iterators for loop abstraction.
+.Pp
+.It Sy "Closures"
+In Ruby, you can objectify the procedure.
+.Pp
+.It Sy "Text processing and regular expressions"
+Ruby has a bunch of text processing features like in Perl.
+.Pp
+.It Sy "M17N, character set independent"
+Ruby supports multilingualized programming. Easy to process texts
+written in many different natural languages and encoded in many
+different character encodings, without dependence on Unicode.
+.Pp
+.It Sy "Bignums"
+With built-in bignums, you can for example calculate factorial(400).
+.Pp
+.It Sy "Reflection and domain specific languages"
+Class is also an instance of the Class class. Definition of classes and methods
+is an expression just as 1+1 is. So your programs can even write and modify programs.
+Thus you can write your application in your own programming language on top of Ruby.
+.Pp
+.It Sy "Exception handling"
+As in Java(tm).
+.Pp
+.It Sy "Direct access to the OS"
+Ruby can use most
+.Ux
+system calls, often used in system programming.
+.Pp
+.It Sy "Dynamic loading"
+On most
+.Ux
+systems, you can load object files into the Ruby interpreter
+on-the-fly.
+.It Sy "Rich libraries"
+Libraries called "builtin libraries" and "standard libraries" are bundled with Ruby.
+And you can obtain more libraries via the package management system called `RubyGems'.
+.Pp
+Moreover there are thousands of Ruby projects in Rubyforge
+.Pf ( "http://www.rubyforge.org" ) and RAA
+.Pf ( "http://raa.ruby-lang.org" ) Ns .
+.El
+.Pp
+.Sh OPTIONS
+Ruby interpreter accepts following command-line options (switches).
+They are quite similar to those of
+.Xr perl 1 .
+.Bl -tag -width "1234567890123" -compact
+.Pp
+.It Fl -copyright
+Prints the copyright notice.
+.Pp
+.It Fl -version
+Prints the version of Ruby interpreter.
+.Pp
+.It Fl 0 Ns Op Ar octal
+(The digit
+.Dq zero . )
+Specifies the input record separator
+.Pf ( Li "$/" )
+as an octal number. If no digit is given, the null character is taken
+as the separator.  Other switches may follow the digits.
+.Fl 00
+turns Ruby into paragraph mode.
+.Fl 0777
+makes Ruby read whole file at once as a single string since there is
+no legal character with that value.
+.Pp
+.It Fl C Ar directory
+.It Fl X Ar directory
+Causes Ruby to switch to the directory.
+.Pp
+.It Fl E Ar external Ns Op : Ns Ar internal
+.It Fl -encoding Ar external Ns Op : Ns Ar internal
+Specifies the default value(s) for external encodings and internal encoding. Values should be separated with colon (:).
+.Pp
+You can omit the one for internal encodings, then the value
+.Pf ( Li "Encoding.default_internal" ) will be nil.
+.Pp
+.It Fl F Ar pattern
+Specifies input field separator
+.Pf ( Li "$;" ) .
+.Pp
+.It Fl I Ar directory
+Used to tell Ruby where to load the library scripts.  Directory path
+will be added to the load-path variable
+.Pf ( Li "$:" ) .
+.Pp
+.It Fl K Ar kcode
+Specifies KANJI (Japanese) encoding. The default value for script encodings
+.Pf ( Li "__ENCODING__" ) and external encodings ( Li "Encoding.default_external" ) will be the specified one.
+.Ar kcode
+can be one of
+.Bl -hang -offset indent
+.It Sy e
+EUC-JP
+.Pp
+.It Sy s
+Windows-31J (CP932)
+.Pp
+.It Sy u
+UTF-8
+.Pp
+.It Sy n
+ASCII-8BIT (BINARY)
+.El
+.Pp
+.It Fl S
+Makes Ruby use the
+.Ev PATH
+environment variable to search for script, unless if its name begins
+with a slash.  This is used to emulate
+.Li #!
+on machines that don't support it, in the following manner:
+.Bd -literal -offset indent
+#! /usr/local/bin/ruby
+# This line makes the next one a comment in Ruby \e
+  exec /usr/local/bin/ruby -S $0 $*
+.Ed
+.Pp
+.It Fl T Ns Op Ar level=1
+Turns on taint checks at the specified level (default 1).
+.Pp
+.It Fl U
+Sets the default value for internal encodings
+.Pf ( Li "Encoding.default_internal" ) to UTF-8.
+.Pp
+.It Fl W Ns Op Ar level=2
+Turns on verbose mode at the specified level, without printing version
+message at the beginning. The level can be;
+.Bl -hang -offset indent
+.It Sy 0
+Verbose mode is "silence". It sets the
+.Li "$VERBOSE"
+to nil.
+.Pp
+.It Sy 1
+Verbose mode is "medium". It sets the
+.Li "$VERBOSE"
+to false.
+.Pp
+.It Sy 2 (default)
+Verbose mode is "verbose". It sets the
+.Li "$VERBOSE"
+to true.
+.Fl W Ns
+2 is same as
+.Fl w
+.
+.El
+.Pp
+.It Fl a
+Turns on auto-split mode when used with
+.Fl n
+or
+.Fl p .
+In auto-split mode, Ruby executes
+.Dl $F = $_.split
+at beginning of each loop.
+.Pp
+.It Fl c
+Causes Ruby to check the syntax of the script and exit without
+executing. If there are no syntax errors, Ruby will print
+.Dq Syntax OK
+to the standard output.
+.Pp
+.It Fl d
+.It Fl -debug
+Turns on debug mode.
+.Li "$DEBUG"
+will be set to true.
+.Pp
+.It Fl e Ar command
+Specifies script from command-line while telling Ruby not to search
+the rest of the arguments for a script file name.
+.Pp
+.It Fl h
+.It Fl -help
+Prints a summary of the options.
+.Pp
+.It Fl i Ar extension
+Specifies in-place-edit mode.  The extension, if specified, is added
+to old file name to make a backup copy.  For example:
+.Bd -literal -offset indent
+% echo matz > /tmp/junk
+% cat /tmp/junk
+matz
+% ruby -p -i.bak -e '$_.upcase!' /tmp/junk
+% cat /tmp/junk
+MATZ
+% cat /tmp/junk.bak
+matz
+.Ed
+.Pp
+.It Fl l
+(The lowercase letter
+.Dq ell . )
+Enables automatic line-ending processing, which means to firstly set
+.Li "$\e"
+to the value of
+.Li "$/" ,
+and secondly chops every line read using
+.Li chop! .
+.Pp
+.It Fl n
+Causes Ruby to assume the following loop around your script, which
+makes it iterate over file name arguments somewhat like
+.Nm sed
+.Fl n
+or
+.Nm awk .
+.Bd -literal -offset indent
+while gets
+  ...
+end
+.Ed
+.Pp
+.It Fl p
+Acts mostly same as -n switch, but print the value of variable
+.Li "$_"
+at the each end of the loop.  For example:
+.Bd -literal -offset indent
+% echo matz | ruby -p -e '$_.tr! "a-z", "A-Z"'
+MATZ
+.Ed
+.Pp
+.It Fl r Ar library
+Causes Ruby to load the library using require.  It is useful when using
+.Fl n
+or
+.Fl p .
+.Pp
+.It Fl s
+Enables some switch parsing for switches after script name but before
+any file name arguments (or before a
+.Fl - ) .
+Any switches found there are removed from
+.Li ARGV
+and set the corresponding variable in the script.  For example:
+.Bd -literal -offset indent
+#! /usr/local/bin/ruby -s
+# prints "true" if invoked with `-xyz' switch.
+print "true\en" if $xyz
+.Ed
+.Pp
+On some systems
+.Li "$0"
+does not always contain the full pathname, so you need the
+.Fl S
+switch to tell Ruby to search for the script if necessary.  To handle
+embedded spaces or such.  A better construct than
+.Li "$*"
+would be
+.Li ${1+"$@"} ,
+but it does not work if the script is being interpreted by
+.Xr csh 1 .
+.Pp
+.It Fl v
+Enables verbose mode.  Ruby will print its version at the beginning,
+and set the variable
+.Li "$VERBOSE"
+to true.  Some methods print extra messages if this variable is true.
+If this switch is given, and no other switches are present, Ruby quits
+after printing its version.
+.Pp
+.It Fl w
+Enables verbose mode without printing version message at the
+beginning.  It sets the
+.Li "$VERBOSE"
+variable to true.
+.Pp
+.It Fl x Ns Op Ar directory
+Tells Ruby that the script is embedded in a message.  Leading garbage
+will be discarded until the first that starts with
+.Dq #!
+and contains the string,
+.Dq ruby .
+Any meaningful switches on that line will applied.  The end of script
+must be specified with either
+.Li EOF ,
+.Li "^D" ( Li "control-D" ) ,
+.Li "^Z" ( Li "control-Z" ) ,
+or the reserved word
+.Li __END__ .
+If the directory name is specified, Ruby will switch to that directory
+before executing script.
+.Pp
+.It Fl y
+.It Fl -yydebug
+DO NOT USE.
+.Pp
+Turns on compiler debug mode.  Ruby will print a bunch of internal
+state messages during compiling scripts.  You don't have to specify
+this switch, unless you are going to debug the Ruby interpreter.
+.Pp
+.It Fl -disable- Ns Ar FEATURE
+.It Fl -enable- Ns Ar FEATURE
+Disables (or enables) the specified
+.Ar FEATURE Ns
+\&.
+.Bl -tag -width "--disable-rubyopt" -compact
+.It Fl -disable-gems
+.It Fl -enable-gems
+Disables (or enables) RubyGems libraries.  By default, Ruby will load the latest
+version of each installed gem. The
+.Li Gem
+constant is true if RubyGems is enabled, false if otherwise.
+.Pp
+.It Fl -disable-rubyopt
+.It Fl -enable-rubyopt
+Ignores (or considers) the
+.Ev RUBYOPT
+environment variable. By default, Ruby considers the variable.
+.Pp
+.It Fl -disable-all
+.It Fl -enable-all
+Disables (or enables) all features.
+.Pp
+.El
+.Pp
+.It Fl -dump Ns = Ns Ar target
+DO NOT USE.
+.Pp
+Prints the specified target.
+.Ar target
+can be one of;
+.Bl -hang -offset indent
+.It Sy insns
+disassembled instructions
+.Pp
+.El
+.Pp
+You don't have to specify this switch, unless you are going to debug the Ruby interpreter.
+.Pp
+.It Fl -verbose
+Enables verbose mode without printing version message at the
+beginning.  It sets the
+.Li "$VERBOSE"
+variable to true.
+If this switch is given, and no other switches are present, Ruby quits
+after printing its version.
+.El
+.Pp
+.Sh ENVIRONMENT
+.Bl -tag -width "RUBYLIB_PREFIX" -compact
+.It Ev RUBYLIB
+A colon-separated list of directories that are added to Ruby's
+library load path
+.Pf ( Li "$:" ) . Directories from this environment variable are searched
+before the standard load path is searched.
+.Pp
+e.g.:
+.Dl RUBYLIB="$HOME/lib/ruby:$HOME/lib/rubyext"
+.Pp
+.It Ev RUBYOPT
+Additional Ruby options.
+.Pp
+e.g.
+.Dl RUBYOPT="-w -Ke"
+.Pp
+Note that RUBYOPT can contain only
+.Fl d , Fl E , Fl I , Fl K , Fl r , Fl T , Fl U , Fl v , Fl w , Fl W, Fl -debug ,
+.Fl -disable- Ns Ar FEATURE
+and
+.Fl -enable- Ns Ar FEATURE .
+.Pp
+.It Ev RUBYPATH
+A colon-separated list of directories that Ruby searches for
+Ruby programs when the
+.Fl S
+flag is specified.  This variable precedes the
+.Ev PATH
+environment variable.
+.Pp
+.It Ev RUBYSHELL
+The path to the system shell command.  This environment variable is
+enabled for only mswin32, mingw32, and OS/2 platforms.  If this
+variable is not defined, Ruby refers to
+.Ev COMSPEC .
+.Pp
+.It Ev PATH
+Ruby refers to the
+.Ev PATH
+environment variable on calling Kernel#system.
+.Pp
+.It Ev RUBYLIB_PREFIX
+This variable is obsolete.
+.El
+.Pp
+And Ruby depends on some RubyGems related environment variables unless RubyGems is disabled.
+See the help of
+.Xr gem 1
+as bellow.
+.Bd -literal -offset indent
+% gem help
+.Ed
+.Pp
+.Sh SEE ALSO
+.Bl -hang -compact -width "http://www.ruby-lang.org/123"
+.It http://www.ruby-lang.org
+The official web site.
+.It http://www.rubyforge.org
+hosting many open source ruby projects.
+.It http://raa.ruby-lang.org
+Ruby Application Archive.
+.El
+.Pp
+.Sh REPORTING BUGS
+.Bl -bullet
+.Li Security vulnerabilities should be reported via an email to
+.Aq security@ruby-lang.org Ns
+.Li .
+Reported problems will be published after they've been fixed.
+.Pp
+.Li And you can report other bugs and feature requests via the
+Ruby Issue Tracking System (http://bugs.ruby-lang.org).
+Do not report security vulnerabilities
+via the system because it publishes the vulnerabilities immediately.
+.El
+.Sh AUTHORS
+Ruby is designed and implemented by
+.An Yukihiro Matsumoto Aq matz@netlab.jp .
+.Pp
+See <\fBhttp://bugs.ruby-lang.org/wiki/ruby/Contributors\fR> for contributors to Ruby.

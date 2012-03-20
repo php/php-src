@@ -1,0 +1,22 @@
+<Template> 
+  <Application1 xmlns:xplt="http://www.xxxx.com/"
+                xmlns:xpl="http://www.xxxx.com/"
+                version="3.0"
+                randomAttribute="foo"
+  >
+    <xpl:insertText/> 
+    <xplt:anyElement> 
+      <Name/> 
+    </xplt:anyElement> 
+  </Application1> 
+
+  <Application2 xmlns:xplt="http://www.xxxx.com/"
+                xmlns:xpl="http://www.xxxx.com/"
+                version="3.0"
+  > 
+    <xpl:insertText/> 
+    <xplt:anyElement> 
+      <Name/> 
+    </xplt:anyElement> 
+  </Application2> 
+</Template>

@@ -1,0 +1,94 @@
+#include "transcode_data.h"
+
+<%
+  def hexstr(str)
+    str.unpack("H*")[0]
+  end
+
+  transcode_tblgen("", "amp_escape", [
+    ["{00-25,27-FF}", :nomap], 
+    ["26", hexstr("&amp;")]
+  ], nil)
+
+  transcode_tblgen("", "xml_text_escape", [
+    ["{00-25,27-3B,3D,3F-FF}", :nomap], 
+    ["26", hexstr("&amp;")],
+    ["3C", hexstr("&lt;")],
+    ["3E", hexstr("&gt;")]
+  ], nil)
+
+  transcode_tblgen("", "xml_attr_content_escape", [
+    ["{00-21,23-25,27-3B,3D,3F-FF}", :nomap], 
+    ["22", hexstr("&quot;")],
+    ["26", hexstr("&amp;")],
+    ["3C", hexstr("&lt;")],
+    ["3E", hexstr("&gt;")]
+  ], nil)
+
+  map_xml_attr_quote = {}
+  map_xml_attr_quote["{00-FF}"] = :func_so
+  transcode_generate_node(ActionMap.parse(map_xml_attr_quote), "escape_xml_attr_quote")
+%>
+
+<%= transcode_generated_code %>
+
+#define END 0
+#define NORMAL  1
+
+static int
+escape_xml_attr_quote_init(void *statep)
+{
+    unsigned char *sp = statep;
+    *sp = END;
+    return 0;
+}
+
+static ssize_t
+fun_so_escape_xml_attr_quote(void *statep, const unsigned char *s, size_t l, unsigned char *o, size_t osize)
+{
+    unsigned char *sp = statep;
+    int n = 0;
+    if (*sp == END) {
+        *sp = NORMAL;
+        o[n++] = '"';
+    }
+    o[n++] = s[0];
+    return n;
+}
+
+static ssize_t
+escape_xml_attr_quote_finish(void *statep, unsigned char *o, size_t osize)
+{
+    unsigned char *sp = statep;
+    int n = 0;
+
+    if (*sp == END) {
+        o[n++] = '"';
+    }
+
+    o[n++] = '"';
+    *sp = END;
+
+    return n;
+}
+
+static const rb_transcoder
+rb_escape_xml_attr_quote = {
+    "", "xml_attr_quote", escape_xml_attr_quote,
+    TRANSCODE_TABLE_INFO,
+    1, /* input_unit_length */
+    1, /* max_input */
+    7, /* max_output */
+    asciicompat_encoder, /* asciicompat_type */
+    1, escape_xml_attr_quote_init, escape_xml_attr_quote_init,
+    NULL, NULL, NULL, fun_so_escape_xml_attr_quote,
+    escape_xml_attr_quote_finish
+};
+
+void
+Init_escape(void)
+{
+<%= transcode_register_code %>
+    rb_register_transcoder(&rb_escape_xml_attr_quote);
+}
+

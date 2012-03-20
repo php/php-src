@@ -1,0 +1,1 @@
+nkf.o : nkf.c $(hdrdir)/ruby.h $(topdir)/config.h $(hdrdir)/defines.h $(srcdir)/nkf-utf8/nkf.c $(srcdir)/nkf-utf8/utf8tbl.c $(srcdir)/nkf-utf8/config.h

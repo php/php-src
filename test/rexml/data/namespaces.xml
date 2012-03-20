@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<foo:a xmlns:foo="http://fooNamespace/">
+  <b>
+    <c>Hello</c>
+  </b>
+
+  <foo:d>
+    <foo:e>Hey</foo:e>
+  </foo:d>
+
+  <bar:f xmlns:bar="http://barNamespace/">
+    <bar:g>Hey2</bar:g>
+  </bar:f>
+
+  <alias:x xmlns:alias="http://fooNamespace/">
+    <alias:y>Hey3</alias:y>
+  </alias:x>
+</foo:a>

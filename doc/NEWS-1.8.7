@@ -1,0 +1,648 @@
+= NEWS
+
+This document is a list of user visible feature changes made between
+releases except for bug fixes.
+
+Note that each entry is kept so brief that no reason behind or
+reference information is supplied with.  For a full list of changes
+with all sufficient information, see the ChangeLog file.
+
+== Changes since the 1.8.6 release
+
+=== Configuration changes
+
+* default C flags
+
+  Some C compiler flags may be added by default depending on your
+  environment.  Specify optflags=.. and warnflags=.. as necessary to
+  override them.
+
+* vendor_ruby directory
+
+  A new library directory named `vendor_ruby' is introduced in
+  addition to `site_ruby'.  The idea is to separate libraries
+  installed by the package system (`vendor') from manually (`site')
+  installed libraries preventing the former from getting overwritten
+  by the latter, while preserving the user option to override vendor
+  libraries with site libraries. (`site_ruby' takes precedence over
+  `vendor_ruby')
+
+  If you are a package maintainer, make each library package configure
+  the library passing the `--vendor' option to `extconf.rb' so that
+  the library files will get installed under `vendor_ruby'.
+
+  You can change the directory locations using configure options such
+  as `--with-sitedir=DIR' and `--with-vendordir=DIR'.
+
+=== Global constants
+
+* new constants
+
+  * RUBY_COPYRIGHT
+  * RUBY_DESCRIPTION
+
+=== Library updates (outstanding ones only)
+
+* new library
+
+  * securerandom
+
+* builtin classes
+
+  * Array#flatten
+  * Array#flatten!
+
+    Take an optional argument that determines the level of recursion
+    to flatten.
+
+  * Array#eql?
+  * Array#hash
+  * Array#==
+  * Array#<=>
+
+    Handle recursive data properly.
+
+  * Array#index
+  * Array#rindex
+
+    Use a given block if no argument is given.
+
+  * Array#collect!
+  * Array#map!
+  * Array#each
+  * Array#each_index
+  * Array#reverse_each
+  * Array#reject
+  * Array#reject!
+  * Array#delete_if
+
+    Return an enumerator if no block is given.
+
+    Note that #map and #collect still return an array unlike Ruby 1.9
+    to keep compatibility.
+
+  * Array#pop
+  * Array#shift
+
+    Take an optional argument specifying the number of elements to
+    remove.
+
+  * Array#choice
+  * Array#combination
+  * Array#cycle
+  * Array#drop
+  * Array#drop_while
+  * Array#permutation
+  * Array#product
+  * Array#shuffle
+  * Array#shuffle!
+  * Array#take,
+  * Array#take_while
+
+    New methods.
+
+  * Binding#eval
+
+    New method.
+
+  * Dir#each
+  * Dir#foreach
+
+    Return an enumerator if no block is given.
+
+  * Enumerable::Enumerator
+
+    New class for various enumeration defined by the enumerator library.
+
+  * Enumerable#each_slice
+  * Enumerable#each_cons
+  * Object#to_enum
+  * Object#enum_for
+
+    New methods for various enumeration defined by the enumerator library.
+
+  * Enumerable#count
+  * Enumerable#cycle
+  * Enumerable#drop
+  * Enumerable#drop_while
+  * Enumerable#find_index
+  * Enumerable#first
+  * Enumerable#group_by
+  * Enumerable#max_by
+  * Enumerable#min_by
+  * Enumerable#minmax
+  * Enumerable#minmax_by
+  * Enumerable#none?
+  * Enumerable#one?
+  * Enumerable#take
+  * Enumerable#take_while
+
+    New methods.
+
+  * Enumerable#find
+  * Enumerable#find_all
+  * Enumerable#partition
+  * Enumerable#reject
+  * Enumerable#select
+  * Enumerable#sort_by
+
+    Return an enumerator if no block is given.
+
+    Note that #map and #collect still return an array unlike Ruby 1.9
+    to keep compatibility.
+
+  * Enumerable#inject
+
+    Accepts a binary operator instead of a block.
+
+  * Enumerable#reduce
+
+    New alias to #inject.
+
+  * Hash#eql?
+  * Hash#hash
+  * Hash#==
+
+    Handle recursive data properly.
+
+  * Hash#delete_if
+  * Hash#each
+  * Hash#each_key
+  * Hash#each_pair
+  * Hash#each_value
+  * Hash#reject!
+  * Hash#select
+  * ENV.delete_if
+  * ENV.each
+  * ENV.each_key
+  * ENV.each_pair
+  * ENV.each_value
+  * ENV.reject!
+  * ENV.select
+
+    Return an enumerator if no block is given.
+
+  * GC.stress
+  * GC.stress=
+
+    New methods.
+
+  * Integer#ord
+  * Integer#odd?
+  * Integer#even?
+  * Integer#pred
+
+    New methods.
+
+  * Integer#downto
+  * Integer#times
+  * Integer#upto
+
+    Return an enumerator if no block is given.
+
+  * IO#each
+  * IO#each_line
+  * IO#each_byte
+  * IO.foreach
+  * ARGF.each
+  * ARGF.each_line
+  * ARGF.each_byte
+
+    Return an enumerator if no block is given.
+
+  * IO#bytes
+  * IO#chars
+  * IO#each_char
+  * IO#getbyte
+  * IO#lines
+  * IO#readbyte
+  * ARGF.bytes
+  * ARGF.chars
+  * ARGF.each_char
+  * ARGF.getbyte
+  * ARGF.lines
+  * ARGF.readbyte
+
+    New methods. 
+
+  * Method#name
+  * Method#owner
+  * Method#receiver
+  * UnboundMethod#name
+  * UnboundMethod#owner
+
+    New methods.
+
+  * Module#class_exec
+  * Module#module_exec
+
+    New methods.
+
+  * Numeric#step
+
+    Return an enumerator if no block is given.
+
+  * Object#instance_exec
+  * Object#tap
+
+    New methods.
+
+  * ObjectSpace.each_object
+
+    Return an enumerator if no block is given.
+
+  * Process.exec implemented.
+
+  * Range#each
+  * Range#step
+
+    Return an enumerator if no block is given.
+
+  * Regexp.union accepts an array of patterns.
+
+  * String#bytesize
+
+    New method, returning the size in bytes. (alias length and size)
+
+  * String#chars
+  * String#each_char
+  * String#partition
+  * String#rpartition
+  * String#start_with?
+  * String#end_with?
+
+    New methods.  These are $KCODE aware unlike #index, #rindex and
+    #include?.
+
+  * String#each_byte
+  * String#each
+  * String#each_line
+  * String#gsub(pattern)
+
+    Return an enumerator if no block is given.
+
+  * String#upto
+
+    An optional second argument is added to specify if the last value
+    should be included.
+
+  * StopIteration
+
+    New exception class that causes Kernel#loop to stop iteration when
+    raised.
+
+  * Struct#each
+  * Struct#each_pair
+
+    Return an enumerator if no block is given.
+
+  * Symbol#to_proc
+
+    New method.
+
+  * __method__
+
+    New global function that returns the name of the current method as
+    a Symbol.
+
+* enumerator
+
+  * Enumerator is now a built-in module.  The #next and #rewind
+    methods are implemented using the "generator" library.  Use with
+    care and be aware of the performance loss.
+
+* ipaddr
+
+  * New methods
+    * IPAddr#<=>
+    * IPAddr#succ
+
+      IPAddr objects are now comparable and enumerable having these
+      methods.  This also means that it is possible to have a Range
+      object between two IPAddr objects.
+
+    * IPAddr#to_range
+
+      A new method to create a Range object for the (network) address.
+
+  * Type coercion support
+    * IPAddr#&
+    * IPAddr#|
+    * IPAddr#==
+    * IPAddr#include?
+
+      These methods now accept a string or an integer instead of an
+      IPAddr object as the argument.
+
+* net/smtp
+
+  * Support SSL/TLS.
+
+* openssl
+
+  * New classes
+    * OpenSSL::PKey::EC
+    * OpenSSL::PKey::EC::Group
+    * OpenSSL::PKey::EC::Point
+    * OpenSSL::PKey::PKCS5
+    * OpenSSL::SSL::Session
+
+  * Documentation!
+
+  * Various new methods (see documentation).
+
+  * Remove redundant module namespace in Cipher, Digest, PKCS7, PKCS12.
+    Compatibility classes are provided which will be removed in Ruby 1.9.
+
+* shellwords
+
+  * Add methods for escaping shell-unsafe characters:
+    * Shellwords.join
+    * Shellwords.escape
+    * Array#shelljoin
+    * String#shellescape
+
+  * Add shorthand methods:
+    * Shellwords.split (alias shellwords)
+    * String#shellsplit
+
+* stringio
+
+  * StringIO#getbyte
+  * StringIO#readbyte
+
+    New methods. (aliases for compatibility with 1.9)
+
+  * StringIO#each_char
+  * StringIO#chars
+
+    New methods.
+
+  * StringIO#each
+  * StringIO#each_line
+  * StringIO#each_byte
+
+    Return an enumerator if no block is given.
+
+* tempfile
+
+  * Tempfile.open and Tempfile.new now accept a suffix for the
+    temporary file to be created.  To specify a suffix, pass an array
+    of [basename, suffix] as the first argument.
+
+      Tempfile.open(['image', 'jpg']) { |tempfile| ... }
+
+* tmpdir
+
+  * New method:
+
+    * Dir.mktmpdir
+
+* uri
+
+  * added LDAPS scheme.
+  * Change for RFC3986:
+    * FTP
+      * URI('ftp://example.com/foo').path #=> 'foo'
+      * URI('ftp://example.com/%2Ffoo').path #=> '/foo'
+      * URI::FTP.build([nil, 'example.com', nil, '/foo', 'i').to_s #=> 'ftp://example.com/%2Ffoo;type=i'
+    * URI merge
+      * URI('http://a/b/c/d;p?q').merge('?y') == URI('http://a/b/c/d;p?y')
+      * URI('http://a/b/c/d;p?q').merge('/./g') == URI('http://a/g')
+      * URI('http://a/b/c/d;p?q').merge('/../g') == URI('http://a/g')
+      * URI('http://a/b/c/d;p?q').merge('../../../g') == URI('http://a/g')
+      * URI('http://a/b/c/d;p?q').merge('../../../../g') == URI('http://a/g')
+
+* rss
+
+  * 0.1.6 -> 0.2.4
+
+  * Fix image module URI
+
+  * Atom support
+
+  * ITunes module support
+
+  * Slash module support
+
+  * content:encoded with RSS 2.0 support
+
+=== Interpreter Implementation
+
+* passing a block to a Proc [experimental]
+
+  This implementation in current shape is known to be buggy/broken,
+  especially with nested block invocation.  Take this as an
+  experimental feature.
+
+* stack trace
+
+  On non-SystemStackError exception, full stack trace is shown.
+
+=== Compatibility issues (excluding feature bug fixes)
+
+* String#slice! had some unintentional bugs and they have been fixed
+  because either they disagreed with documentation or their respective
+  behavior of #slice.  Unfortunately, this causes some
+  incompatibilities in the following (somewhat rare) cases.
+
+  * #slice! no longer expands the array when an out-of-boundary value
+    is given.
+
+      # Ruby 1.8.6
+      a = [1,2]
+      a.slice!(4,0)   #=> nil
+      a               #=> [1,2,nil,nil]
+
+      # Ruby 1.8.7
+      a = [1,2]
+      a.slice!(4,0)   #=> nil
+      a               #=> [1,2]
+
+  * #slice! no longer raises an exception but returns nil when a
+    negative length or out-of-boundary negative position is given.
+
+      # Ruby 1.8.6
+      a = [1,2]
+      a.slice!(1,-1)  #=> (raises IndexError)
+      a.slice!(-5,1)  #=> (raises IndexError)
+
+      # Ruby 1.8.7
+      a = [1,2]
+      a.slice!(1,-1)  #=> nil
+      a.slice!(-5,1)  #=> nil
+
+* String#to_i, String#hex and String#oct no longer accept a sequence
+  of underscores (`__') as part of a number.
+
+    # Ruby 1.8.6
+    '1__0'.to_i     #=> 10
+    '1__0'.to_i(2)  #=> 2  # 0b10
+    '1__0'.oct      #=> 8  # 010
+    '1__0'.hex      #=> 16 # 0x10
+
+    # Ruby 1.8.7
+    '1__0'.to_i     #=> 1
+    '1__0'.to_i(2)  #=> 1
+    '1__0'.oct      #=> 1
+    '1__0'.hex      #=> 1
+
+  The old behavior was inconsistent with Ruby syntax and considered as
+  a bug.
+
+* date
+
+  * Date.parse
+
+    '##.##.##' (where each '#' is a digit) is now taken as 'YY.MM.DD'
+    instead of 'MM.DD.YY'.  While the change may confuse you, you can
+    always use Date.strptime() when you know what you are dealing
+    with.
+
+* stringio
+
+  * StringIO#each_byte
+
+    The return value changed from nil to self.  This is what the
+    document says and the same as each_line() does.
+
+* tempfile
+
+  * The file name format has changed.  No dots are included by default
+    in temporary file names any more.  See above for how to specify a
+    suffix.
+
+* uri
+
+  * See above for details.
+
+== Changes since the 1.8.5 release
+
+=== New platforms/build tools support
+
+* IA64 HP-UX
+
+* Visual C++ 8 SP1
+
+* autoconf 2.6x
+
+=== Global constants
+
+* RUBY_PATCHLEVEL
+
+  New constant since 1.8.5-p1.
+
+=== Library updates (outstanding ones only)
+
+* builtin classes
+
+  * New method: Kernel#instance_variable_defined?
+
+  * New method: Module#class_variable_defined?
+
+  * New feature: Dir::glob() can now take an array of glob patterns.
+
+* date
+
+  * Updated based on date2 4.0.3.
+
+* digest
+
+  * New internal APIs for C and Ruby.
+
+  * Support for autoloading.
+
+      require 'digest'
+
+      # autoloads digest/md5
+      md = Digest::MD5.digest("string")
+
+  * New digest class methods: file
+
+  * New digest instance methods: clone, reset, new, inspect,
+    digest_length (alias size or length), block_length()
+
+  * New library: digest/bubblebabble
+
+  * New function: Digest(name)
+
+* fileutils
+
+  * New option for FileUtils.cp_r(): :remove_destination
+
+* nkf
+
+  * Updated based on nkf as of 2007-01-28.
+
+* thread
+
+  * Replaced with much faster mutex implementation in C.  The former
+    implementation, which is slow but considered to be stable, is
+    available with a configure option `--disable-fastthread'.
+
+* tk
+
+  * Updated Tile extension support based on Tile 0.7.8.
+
+  * Support --without-X11 configure option for non-X11 versions of
+    Tcl/Tk (e.g. Tcl/Tk Aqua).
+
+  * New sample script: irbtkw.rbw -- IRB on Ruby/Tk. It has no trouble
+    about STDIN blocking on Windows.
+
+* webrick
+
+  * New method: WEBrick::Cookie.parse_set_cookies()
+
+=== Compatibility issues (excluding feature bug fixes)
+
+* builtin classes
+
+  * String#intern now raises SecurityError when $SAFE level is greater
+    than zero.
+
+* date
+
+  * Time#to_date and Time#to_datetime are added as private methods.
+    They cause name conflict error in ActiveSupport 1.4.1 and prior,
+    which comes with Rails 1.2.2 and prior.  Updating ActiveSupport
+    and/or Rails to the latest versions fixes the problem.
+
+* digest
+
+  * The constructor does no longer take an initial string to feed.
+    The following examples show how to migrate:
+
+      # Before
+      md = Digest::MD5.new("string")
+      # After (works with any version)
+      md = Digest::MD5.new.update("string")
+        
+      # Before
+      hd = Digest::MD5.new("string").hexdigest
+      # After (works with any version)
+      hd = Digest::MD5.hexdigest("string")
+
+  * Digest::Base#==
+
+    * self == string
+
+      Automatic detection between binary digest values and hexadecimal
+      digest values has been dropped.  It is always assumed that a
+      hexadecimal digest value is given for comparison.
+
+    * self == md
+
+      Digest objects are compared by the resulting digest values, not
+      by the exact vector states.
+
+* fileutils
+
+  * A minor implementation change breaks Rake <=0.7.1.
+    Updating Rake to 0.7.2 or higher fixes the problem.
+
+* tk
+
+  * Tk::X_Scrollable (Y_Scrollable) is renamed to Tk::XScrollable
+    (YScrollable). Tk::X_Scrollable (Y_Scrollable) is still available,
+    but it is an alias name.

@@ -1,1664 +1,3107 @@
-## $Id$ -*- autoconf -*-
-dnl ## Process this file with autoconf to produce a configure script.
+dnl Process this file with autoconf to produce a configure script.
+dnl {
+AC_INIT()
+AC_CONFIG_AUX_DIR(tool)
 
-dnl include Zend specific macro definitions first
-dnl -------------------------------------------------------------------------
-sinclude(Zend/acinclude.m4)
+AC_PREREQ(2.60)
 
-dnl Basic autoconf + automake initialization, generation of config.nice.
-dnl -------------------------------------------------------------------------
+AC_DEFUN([RUBY_PREREQ_AC],
+	[m4_if(m4_version_compare(m4_defn([m4_PACKAGE_VERSION]), [$1]), [-1],
+		AC_MSG_ERROR([Autoconf version ]$1[ or higher is required]$2))])
 
-AC_PREREQ(2.59)
-AC_INIT(README.SVN-RULES)
-ifdef([AC_PRESERVE_HELP_ORDER], [AC_PRESERVE_HELP_ORDER], [])
+dnl environment section {
 
-PHP_CONFIG_NICE(config.nice)
+AC_ARG_WITH(baseruby,
+	AS_HELP_STRING([--with-baseruby=RUBY], [use RUBY as baseruby; RUBY is the pathname of ruby]),
+	[
+		AS_CASE(["$withval"],[*ruby*],[BASERUBY=$withval],[AC_MSG_ERROR(need ruby)])
+	],
+	[
+		BASERUBY="ruby"
+	])
+test "`RUBYOPT=- $BASERUBY -e 'p 42' 2>/dev/null`" = 42 ||
+    BASERUBY="echo executable host ruby is required.  use --with-baseruby option.; false"
+AC_SUBST(BASERUBY)
 
-PHP_CANONICAL_HOST_TARGET
-
-AC_CONFIG_HEADER(main/php_config.h)
-AH_TOP([
-#if defined(__GNUC__) && __GNUC__ >= 4
-# define ZEND_API __attribute__ ((visibility("default")))
-# define ZEND_DLEXPORT __attribute__ ((visibility("default")))
-#else
-# define ZEND_API
-# define ZEND_DLEXPORT
+AC_DEFUN([RUBY_MINGW32],
+[AS_CASE(["$host_os"],
+[cygwin*], [
+AC_CACHE_CHECK(for mingw32 environment, rb_cv_mingw32,
+[AC_TRY_CPP([
+#ifndef __MINGW32__
+# error
 #endif
-
-#define ZEND_DLIMPORT
-
-#undef uint
-#undef ulong
-
-/* Define if you want to enable memory limit support */
-#define MEMORY_LIMIT 0
+], rb_cv_mingw32=yes,rb_cv_mingw32=no)
+rm -f conftest*])
+if test "$rb_cv_mingw32" = yes; then
+    target_os="mingw32"
+    : ${ac_tool_prefix:="`expr "$CC" : ['\(.*-\)g\?cc[^/]*$']`"}
+fi
 ])
-AH_BOTTOM([
-#ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
-
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-
-#ifdef HAVE_IEEEFP_H
-# include <ieeefp.h>
-#endif
-
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# include <strings.h>
-#endif
-
-#if ZEND_BROKEN_SPRINTF
-int zend_sprintf(char *buffer, const char *format, ...);
-#else
-# define zend_sprintf sprintf
-#endif
-
-#include <math.h>
-
-/* To enable the is_nan, is_infinite and is_finite PHP functions */
-#ifdef NETWARE
-	#define HAVE_ISNAN 1
-	#define HAVE_ISINF 1
-	#define HAVE_ISFINITE 1
-#endif
-
-#ifndef zend_isnan
-#ifdef HAVE_ISNAN
-#define zend_isnan(a) isnan(a)
-#elif defined(HAVE_FPCLASS)
-#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
-#else
-#define zend_isnan(a) 0
-#endif
-#endif
-
-#ifdef HAVE_ISINF
-#define zend_isinf(a) isinf(a)
-#elif defined(INFINITY)
-/* Might not work, but is required by ISO C99 */
-#define zend_isinf(a) (((a)==INFINITY)?1:0)
-#elif defined(HAVE_FPCLASS)
-#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
-#else
-#define zend_isinf(a) 0
-#endif
-
-#ifdef HAVE_FINITE
-#define zend_finite(a) finite(a)
-#elif defined(HAVE_ISFINITE) || defined(isfinite)
-#define zend_finite(a) isfinite(a)
-#elif defined(fpclassify)
-#define zend_finite(a) ((fpclassify((a))!=FP_INFINITE&&fpclassify((a))!=FP_NAN)?1:0)
-#else
-#define zend_finite(a) (zend_isnan(a) ? 0 : zend_isinf(a) ? 0 : 1)
-#endif
-
-#endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
-
-#ifdef NETWARE
-#ifdef USE_WINSOCK
-#/*This detection against winsock is of no use*/ undef HAVE_SOCKLEN_T
-#/*This detection against winsock is of no use*/ undef HAVE_SYS_SOCKET_H
-#endif
-#endif
-
-#undef PTHREADS
+AS_CASE(["$target_os"], [mingw*msvc], [
+target_os="`echo ${target_os} | sed 's/msvc$//'`"
+])
+AS_CASE(["$target_cpu-$target_os"], [x86_64-mingw*], [
+target_cpu=x64
+])
 ])
 
-PHP_MAJOR_VERSION=5
-PHP_MINOR_VERSION=5
-PHP_RELEASE_VERSION=0
-PHP_EXTRA_VERSION="-dev"
-PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
-PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
+AC_DEFUN([RUBY_CPPOUTFILE],
+[AC_CACHE_CHECK(whether ${CPP} accepts -o, rb_cv_cppoutfile,
+[cppflags=$CPPFLAGS
+CPPFLAGS='-o conftest.i'
+AC_TRY_CPP([], rb_cv_cppoutfile=yes, rb_cv_cppoutfile=no)
+CPPFLAGS=$cppflags
+rm -f conftest*])
+if test "$rb_cv_cppoutfile" = yes; then
+  CPPOUTFILE='-o conftest.i'
+elif test "$rb_cv_cppoutfile" = no; then
+  CPPOUTFILE='> conftest.i'
+elif test -n "$rb_cv_cppoutfile"; then
+  CPPOUTFILE="$rb_cv_cppoutfile"
+fi
+AC_SUBST(CPPOUTFILE)])
 
-dnl Allow version values to be used in Makefile
-PHP_SUBST(PHP_MAJOR_VERSION)
-PHP_SUBST(PHP_MINOR_VERSION)
-PHP_SUBST(PHP_RELEASE_VERSION)
-PHP_SUBST(PHP_EXTRA_VERSION)
-
-dnl Define where extension directories are located in the configure context
-AC_DEFUN([PHP_EXT_BUILDDIR],[ext/$1])dnl
-AC_DEFUN([PHP_EXT_DIR],[ext/$1])dnl
-AC_DEFUN([PHP_EXT_SRCDIR],[$abs_srcdir/ext/$1])dnl
-AC_DEFUN([PHP_ALWAYS_SHARED],[])dnl
-
-dnl Setting up the PHP version based on the information above.
-dnl -------------------------------------------------------------------------
-
-echo "/* automatically generated by configure */" > php_version.h.new
-echo "/* edit configure.in to change version number */" >> php_version.h.new
-echo "#define PHP_MAJOR_VERSION $PHP_MAJOR_VERSION" >> php_version.h.new
-echo "#define PHP_MINOR_VERSION $PHP_MINOR_VERSION" >> php_version.h.new
-echo "#define PHP_RELEASE_VERSION $PHP_RELEASE_VERSION" >> php_version.h.new
-echo "#define PHP_EXTRA_VERSION \"$PHP_EXTRA_VERSION\"" >> php_version.h.new
-echo "#define PHP_VERSION \"$PHP_VERSION\"" >> php_version.h.new
-echo "#define PHP_VERSION_ID $PHP_VERSION_ID" >> php_version.h.new
-cmp php_version.h.new $srcdir/main/php_version.h >/dev/null 2>&1
-if test $? -ne 0 ; then
-  rm -f $srcdir/main/php_version.h && mv php_version.h.new $srcdir/main/php_version.h && \
-  echo 'Updated main/php_version.h'
+AC_DEFUN([RUBY_PROG_GNU_LD],
+[AC_CACHE_CHECK(whether the linker is GNU ld, rb_cv_prog_gnu_ld,
+[if `$CC $CFLAGS $CPPFLAGS $LDFLAGS --print-prog-name=ld 2>&1` -v 2>&1 | grep "GNU ld" > /dev/null; then
+  rb_cv_prog_gnu_ld=yes
 else
-  rm -f php_version.h.new
+  rb_cv_prog_gnu_ld=no
 fi
+])
+GNU_LD=$rb_cv_prog_gnu_ld
+AC_SUBST(GNU_LD)])
 
-
-dnl Catch common errors here to save a few seconds of our users' time
-dnl -------------------------------------------------------------------------
-
-if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
-  AC_MSG_ERROR([--with-shared-apache is not supported. Please refer to the documentation for using APXS])
+eval `sed -n 's/^#define RUBY_API_VERSION_\([A-Z][A-Z_0-9]*\) \([0-9][0-9]*\)/\1=\2/p' $srcdir/include/ruby/version.h`
+for v in MAJOR MINOR TEENY; do
+    if eval "test \"\$$v\" = ''"; then
+	AC_MSG_ERROR(could not determine $v number from version.h)
+    fi
+done
+AC_SUBST(MAJOR)
+AC_SUBST(MINOR)
+AC_SUBST(TEENY)
+RUBY_PROGRAM_VERSION=`sed -n 's/^#define RUBY_VERSION "\(.*\)"/\1/p' $srcdir/version.h`
+AC_SUBST(RUBY_PROGRAM_VERSION)
+RUBY_RELEASE_DATE=`sed -n 's/^#define RUBY_RELEASE_DATE "\(.*\)"/\1/p' $srcdir/version.h`
+AC_SUBST(RUBY_RELEASE_DATE)
+AC_DEFINE(CANONICALIZATION_FOR_MATHN)
+dnl checks for alternative programs
+AC_CANONICAL_BUILD
+AC_ARG_WITH(gcc,
+	AS_HELP_STRING([--without-gcc], [never use gcc]),
+	[
+	AS_CASE([$withval],
+	    [no],  [: ${CC=cc}],
+	    [yes], [: ${CC=gcc}],
+	           [CC=$withval])])
+dnl If the user switches compilers, we can't believe the cache
+if test ! -z "$ac_cv_prog_CC" -a ! -z "$CC" -a "$CC" != "$ac_cv_prog_CC"
+then
+  AC_MSG_ERROR(cached CC is different -- throw away $cache_file
+(it is also a good idea to do 'make clean' before compiling))
 fi
+AS_CASE(["$build_os"],
+  [darwin11.*], [
+    AS_CASE(["x$CC"],
+      [xgcc-4.2|x/usr/bin/gcc-4.2], [: ${CXX=g++-4.2}],
+      [xgcc|x/usr/bin/gcc],         [: ${CXX=g++}],
+      [xcc|x/usr/bin/cc],           [: ${CXX=c++}],
+      [xclang|x/usr/bin/clang],     [: ${CXX=clang++}])
+  ])
+test -z "$CC" || ac_cv_prog_CC="$CC"
 
-if test -n "$with_apache" && test -n "$with_apxs"; then
-  AC_MSG_ERROR([--with-apache and --with-apxs cannot be used together])
+if test "$program_prefix" = NONE; then
+  program_prefix=
 fi
+RUBY_BASE_NAME=`echo ruby | sed "$program_transform_name"`
+RUBYW_BASE_NAME=`echo rubyw | sed "$program_transform_name"`
+AC_SUBST(RUBY_BASE_NAME)
+AC_SUBST(RUBYW_BASE_NAME)
 
-if test -n "$with_apxs2filter" && test -n "$with_apxs2"; then
-  AC_MSG_ERROR([--with-apxs2filter and --with-apxs2 cannot be used together])
+AC_CANONICAL_TARGET
+target_os=`echo $target_os | sed 's/linux-gnu$/linux/;s/linux-gnu/linux-/'`
+ac_install_sh='' # unusable for extension libraries.
+
+AC_DEFUN([RUBY_APPEND_OPTION],
+	[# RUBY_APPEND_OPTION($1, $2)
+	AS_CASE([" [$]{$1-} "],
+	[*' $2 '*], [], ['  '], [ $1="$2"], [ $1="[$]$1 $2"])])
+AC_DEFUN([RUBY_APPEND_OPTIONS],
+	[{ for rb_opt in $2; do # RUBY_APPEND_OPTIONS($1, $2)
+	AS_CASE([" [$]{$1-} "],
+	[*" [$]{rb_opt} "*], [], ['  '], [ $1="[$]{rb_opt}"], [ $1="[$]$1 [$]{rb_opt}"])
+	done; }])
+AC_DEFUN([RUBY_PREPEND_OPTION],
+	[# RUBY_PREPEND_OPTION($1, $2)
+	AS_CASE([" [$]{$1-} "],
+	[*' $2 '*], [], ['  '], [ $1="$2"], [ $1="$2 [$]$1"])])
+AC_DEFUN([RUBY_PREPEND_OPTIONS],
+	[{ unset rb_opts; for rb_opt in $2; do # RUBY_PREPEND_OPTIONS($1, $2)
+	AS_CASE([" [$]{rb_opts} [$]{$1-} "],
+	[*" [$]{rb_opt} "*], [], ['  '], [ $1="[$]{rb_opt}"], [ rb_opts="[$]{rb_opts}[$]{rb_opt} "])
+	done
+	$1="[$]{rb_opts}[$]$1"; }])
+
+AC_ARG_WITH(arch,
+	AS_HELP_STRING([--with-arch=ARCHS],
+		       [build an Apple/NeXT Multi Architecture Binary (MAB);
+                          ARCHS is a comma-delimited list of architectures for
+                          which to build; if this option is disabled or omitted
+			  entirely, then the package will be built only for the
+			  target platform]),
+       [target_archs="$withval"], [unset target_archs])
+
+AC_DEFUN([RUBY_DEFAULT_ARCH], [
+AC_MSG_CHECKING([arch option])
+AS_CASE([$1],
+	[*64],        [ARCH_FLAG=-m64],
+	[[i[3-6]86]], [ARCH_FLAG=-m32],
+	[AC_MSG_ERROR(unknown target architecture: $target_archs)]
+	)
+AC_MSG_RESULT([$ARCH_FLAG])
+])
+
+AC_DEFUN([RUBY_UNIVERSAL_ARCH], [
+# RUBY_UNIVERSAL_ARCH begin
+ARCH_FLAG=`expr " $CFLAGS " : ['.* \(-m[0-9][0-9]*\) ']`
+test ${CFLAGS+set} && CFLAGS=`echo "$CFLAGS" | sed -e 's/ *-arch  *[^ ]*//g' -e 's/ *-m32//g' -e 's/ *-m64//g'`
+test ${LDFLAGS+set} && LDFLAGS=`echo "$LDFLAGS" | sed -e 's/ *-arch  *[^ ]*//g' -e 's/ *-m32//g' -e 's/ *-m64//g'`
+unset universal_binary universal_archnames
+if test ${target_archs+set}; then
+    AC_MSG_CHECKING([target architectures])
+    target_archs=`echo $target_archs | tr , ' '`
+    # /usr/lib/arch_tool -archify_list $TARGET_ARCHS
+    for archs in $target_archs
+    do
+	AS_CASE([",$universal_binary,"],[*",$archs,"*], [],[
+	    cpu=`$SHELL "$ac_aux_dir/config.sub" "${archs}-${target_os}" 2>&1` || {
+	        AC_MSG_RESULT([failed])
+		AC_MSG_ERROR([$cpu])
+	    }
+	    cpu=`echo $cpu | sed 's/-.*-.*//'`
+	    universal_binary="${universal_binary+$universal_binary,}$cpu"
+	    universal_archnames="${universal_archnames} ${archs}=${cpu}"
+	    ARCH_FLAG="${ARCH_FLAG+$ARCH_FLAG }-arch $archs"
+	    ])
+    done
+    target_archs="$universal_binary"
+    unset universal_binary
+    AS_CASE(["$target_archs"],
+      [*,*], [universal_binary=yes],
+             [unset universal_archnames])
+    AC_MSG_RESULT([$target_archs])
+
+    target=`echo $target | sed "s/^$target_cpu-/-/"`
+    target_alias=`echo $target_alias | sed "s/^$target_cpu-/-/"`
+    if test "${universal_binary-no}" = yes; then
+	RUBY_PREREQ_AC(2.63, [ to compile universal binary])
+	AC_SUBST(try_header,try_compile)
+	target_cpu=universal
+	real_cross_compiling=$cross_compiling
+    else
+	if test x"$target_cpu" != x"${target_archs}"; then
+	    echo 'int main(){return 0;}' > conftest.c
+	    if $CC $CFLAGS $ARCH_FLAG -o conftest conftest.c > /dev/null 2>&1; then
+		rm -fr conftest.*
+	    else
+		RUBY_DEFAULT_ARCH("$target_archs")
+	    fi
+	fi
+	target_cpu=${target_archs}
+    fi
+    AS_CASE(["$target"], [-*], [ target="$target_cpu${target}"])
+    AS_CASE(["$target_alias"], [-*], [ target_alias="$target_cpu${target_alias}"])
+else
+    if test x"$target_alias" = x; then
+	AS_CASE(["$target_os"],
+	  [darwin*], [
+	    AC_MSG_CHECKING([for real target cpu])
+	    target=`echo $target | sed "s/^$target_cpu-/-/"`
+	    target_cpu=`$CC -E - 2>/dev/null <<EOF |
+#ifdef __x86_64__
+"processor-name=x86_64"
+#endif
+#ifdef __i386__
+"processor-name=i386"
+#endif
+#ifdef __ppc__
+"processor-name=powerpc"
+#endif
+#ifdef __ppc64__
+"processor-name=powerpc64"
+#endif
+EOF
+	    sed -n 's/^"processor-name=\(.*\)"/\1/p'`
+	    target="$target_cpu${target}"
+	    AC_MSG_RESULT([$target_cpu])
+	    ])
+    fi
+    target_archs="$target_cpu"
 fi
+if test "${target_archs}" != "${rb_cv_target_archs-${target_archs}}"; then
+    AC_MSG_ERROR([target arch(s) has changed from ${rb_cv_target_archs-nothing} to ${target_archs}])
+else
+    rb_cv_target_archs=${target_archs}
+fi
+if test "x${ARCH_FLAG}" != x; then
+    CFLAGS="$CFLAGS ${ARCH_FLAG}"
+    LDFLAGS="${LDFLAGS+$LDFLAGS }${ARCH_FLAG}"
+fi
+# RUBY_UNIVERSAL_ARCH end
+])
 
-  
-dnl Settings we want to make before the checks.
-dnl -------------------------------------------------------------------------
+AC_ARG_ENABLE(load-relative,
+       AS_HELP_STRING([--enable-load-relative], [resolve load paths at run time]),
+       [load_relative=$enableval])
 
-cwd=`pwd`
-
-php_shtool=$srcdir/build/shtool
-T_MD=`$php_shtool echo -n -e %B`
-T_ME=`$php_shtool echo -n -e %b`
-
-PHP_INIT_BUILD_SYSTEM
-
-dnl We want this one before the checks, so the checks can modify CFLAGS.
-test -z "$CFLAGS" && auto_cflags=1
-
-abs_srcdir=`(cd $srcdir; pwd)`
-abs_builddir=`pwd`
-
-php_abs_top_srcdir=$abs_srcdir
-php_abs_top_builddir=$abs_builddir
-
-dnl Because ``make install'' is often performed by the superuser,
-dnl we create the libs subdirectory as the user who configures PHP.
-dnl Otherwise, the current user will not be able to delete libs
-dnl or the contents of libs.
-
-$php_shtool mkdir -p libs
-rm -f libs/*
+AC_ARG_PROGRAM
 
 dnl Checks for programs.
-dnl -------------------------------------------------------------------------
 
-AC_PROG_CC([cc gcc])
-PHP_DETECT_ICC
-PHP_DETECT_SUNCC
-AC_PROG_CC_C_O
-dnl Change to AC_PROG_CC_STDC when we start requiring a post-2.13 autoconf
-dnl AC_PROG_CC_STDC
-AC_PROG_CPP
-AC_AIX
-AC_PROG_LN_S
-
-dnl Support systems with system libraries in e.g. /usr/lib64
-PHP_ARG_WITH(libdir, for system library directory,
-[  --with-libdir=NAME      Look for libraries in .../NAME rather than .../lib],lib,no)
-
-PHP_ARG_ENABLE(rpath, whether to enable runpaths,
-[  --disable-rpath         Disable passing additional runtime library
-                          search paths], yes, no)
-
-dnl check for -R, etc. switch
-PHP_RUNPATH_SWITCH
-
-dnl Checks for some support/generator progs
-PHP_PROG_AWK
-PHP_PROG_BISON
-PHP_PROG_RE2C
-
-dnl Check if bison generated files exist when bison does not..
-case $php_cv_bison_version in
-  ""|invalid[)]
-    if ! test -f "$abs_srcdir/Zend/zend_language_parser.h" || ! test -f "$abs_srcdir/Zend/zend_language_parser.c" ; then
-      AC_MSG_ERROR([bison is required to build PHP/Zend when building a SVN checkout!])
-    fi
-    ;;
-esac
-
-PHP_ARG_ENABLE(re2c-cgoto, whether to enable computed goto gcc extension with re2c,
-[  --enable-re2c-cgoto     Enable -g flag to re2c to use computed goto gcc extension], no, no)
-
-if test "$PHP_RE2C_CGOTO" = "no"; then
-  RE2C_FLAGS=""
-else
-  AC_MSG_CHECKING([whether re2c -g works])
-  AC_TRY_COMPILE([],[
-int main(int argc, const char **argv)
-{
-  argc = argc;
-  argv = argv;
-label1:
-label2:
-  static void *adr[] = { &&label1, &&label2};
-  goto *adr[0];
-  return 0;
-}
-  ],[
-    RE2C_FLAGS=""
-    AC_MSG_RESULT([no])
-  ],[
-    RE2C_FLAGS="-g"
-    AC_MSG_RESULT([yes])
-  ])
+cflagspat=
+test -z "$optflags" ||
+    cflagspat="$cflagspat;s|"`eval echo '"'"${optflags}"'"' | sed 's/[[][|.*]]/\\&/g;s/^ */ /;s/ *$/ /'`'| |g'
+test -z "$debugflags" ||
+    cflagspat="$cflagspat;s|"`eval echo '"'"${debugflags}"'"' | sed 's/[[][|.*]]/\\&/g;s/^ */ /;s/ *$/ /'`'| |g'
+test -z "warnflags" ||
+    cflagspat="$cflagspat;s|"`eval echo '"'"${warnflags}"'"' | sed 's/[[][|.*]]/\\&/g;s/^ */ /;s/ *$/ /'`'| |g'
+if test -z "${CFLAGS+set}"; then
+    cflags=`echo " $cflags " | sed "$cflagspat;s/^ *//;s/ *$//"`
+    orig_cflags="$cflags"
+    cflags="$cflags "'${optflags} ${debugflags} ${warnflags}'
 fi
-PHP_SUBST(RE2C_FLAGS)
+if test -z "${CXXFLAGS+set}"; then
+    cxxflags=`echo " $cxxflags " | sed "$cflagspat;s/^ *//;s/ *$//"`
+    orig_cxxflags="$cxxflags"
+    cxxflags="$cxxflags "'${optflags} ${debugflags} ${warnflags}'
+fi
 
-dnl Platform-specific compile settings.
-dnl -------------------------------------------------------------------------
+if test x"${build}" != x"${host}"; then
+  AC_CHECK_TOOL(CC, gcc)
+fi
+RUBY_MINGW32
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_GCC_TRADITIONAL
+AC_SUBST(GCC)
+if test "$GCC" = yes; then
+    linker_flag=-Wl,
+    : ${optflags=-O3}
+    RUBY_APPEND_OPTIONS(XCFLAGS, ["-include ruby/config.h" "-include ruby/missing.h"])
+else
+    linker_flag=
+fi
 
-dnl See bug #28605
-case $host_cpu in
-  alpha*)
-    if test "$GCC" = "yes"; then
-      CFLAGS="$CFLAGS -mieee"
-    else
-      CFLAGS="$CFLAGS -ieee"
-    fi
-    ;;
-  sparc*)
-    if test "$SUNCC" = "yes"; then
-      CFLAGS="$CFLAGS -xmemalign=8s"
-    fi
-    ;;
-esac
+RUBY_PROG_GNU_LD
+RUBY_CPPOUTFILE
 
-dnl activate some gcc specific optimizations for gcc >= 4
-if test "$GCC" = "yes"; then
-  case $host_alias in
-  *darwin*)
-    GCC_MAJOR_VERSION=`$CC -dumpversion | /usr/bin/sed -nE '1s/([[0-9]]+)\.[[0-9]]+\..*/\1/;1p'`
-    ;;
-  *)
-    GCC_MAJOR_VERSION=`$CC --version | $SED -n '1s/[[^0-9]]*//;1s/\..*//;1p'`
-    ;;
-  esac
-  if test $GCC_MAJOR_VERSION -ge 4; then
-    CFLAGS="$CFLAGS -fvisibility=hidden"
+: ${OUTFLAG='-o '}
+: ${COUTFLAG=${OUTFLAG}}
+AC_SUBST(OUTFLAG)
+AC_SUBST(COUTFLAG)
+
+RUBY_UNIVERSAL_ARCH
+if test "$target_cpu" != "$host_cpu" -a "$GCC" = yes -a "$cross_compiling" = no -a "$universal_binary" = no; then
+    RUBY_DEFAULT_ARCH("$target_cpu")
+fi
+
+AC_CHECK_TOOL(RANLIB, ranlib, :)
+AC_CHECK_TOOL(AR, ar)
+if test -z "$AR"; then
+  AC_CHECK_PROGS(AR, aal, ar)
+fi
+
+AC_CHECK_TOOL(AS, as)
+ASFLAGS=$ASFLAGS
+AC_SUBST(ASFLAGS)
+
+AS_CASE(["$target_os"],[cygwin*|mingw*], [ac_cv_prog_ac_ct_OBJCOPY=":"])
+
+# BSD's ports and MacPorts prefix GNU binutils with 'g'
+AC_CHECK_TOOLS(OBJDUMP, [objdump gobjdump])
+AC_CHECK_TOOLS(OBJCOPY, [objcopy gobjcopy])
+
+AS_CASE(["$target_os"],
+[cygwin*|mingw*], [
+    AC_CHECK_TOOL(WINDRES, windres)
+    AC_CHECK_TOOL(DLLWRAP, dllwrap)
+    target=`echo $target | sed "s/^$target_cpu-/-/"`
+    target_alias=`echo $target_alias | sed "s/^$target_cpu-/-/"`
+    target_cpu=`echo $target_cpu | sed s/i.86/i386/`
+    AS_CASE(["$target"], [-*], [ target="$target_cpu${target}"])
+    AS_CASE(["$target_alias"], [-*], [ target_alias="$target_cpu${target_alias}"])
+    AS_CASE(["$target_os"],
+    [mingw*], [
+	test "$rb_cv_msvcrt" = "" && unset rb_cv_msvcrt
+	AC_CACHE_CHECK(for mingw32 runtime DLL, rb_cv_msvcrt, [
+	AC_TRY_LINK([@%:@include <stdio.h>],
+		    [FILE* volatile f = stdin; return 0;],
+		    [rb_cv_msvcrt=`$OBJDUMP -p conftest$ac_exeext |
+				   tr A-Z a-z |
+				   sed -n '/^[[ 	]]*dll name: \(msvc.*\)\.dll$/{s//\1/p;q;}'`],
+		    [rb_cv_msvcrt=msvcrt])
+	test "$rb_cv_msvcrt" = "" && rb_cv_msvcrt=msvcrt])
+    ])
+    : ${enable_shared=yes}
+    ],
+[aix*],     [AC_CHECK_TOOL(NM, nm, /usr/ccs/bin/nm, /usr/ccs/bin:$PATH)],
+[hiuxmpp*], [AC_DEFINE(__HIUX_MPP__)])    # by TOYODA Eizi <toyoda@npd.kishou.go.jp>
+AC_CHECK_TOOL(NM, nm)
+
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+AC_PROG_MKDIR_P
+if test "x$MKDIR_P" = "x -d"; then
+  if test x"$as_mkdir_p" != xfalse; then
+    MKDIR_P='mkdir -p'
+    echo "use 'mkdir -p' as MKDIR_P"
+  else
+    AC_MSG_ERROR([mkdir -p is required])
   fi
 fi
+MAKEDIRS="$MKDIR_P"
+AC_SUBST(MAKEDIRS)
 
-case $host_alias in
-  *solaris*)
-    CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
-    if test "${enable_libgcc+set}" != "set" && test "$GCC" = "yes"; then
-      enable_libgcc=yes
-    fi
-    ;;
-  *dgux*)
-    CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR"
-    ;;
-  *darwin*|*rhapsody*)
-    if test -n "$GCC"; then
-      PHP_CHECK_GCC_ARG(-no-cpp-precomp, gcc_no_cpp_precomp=yes)
-      if test "$gcc_no_cpp_precomp" = "yes"; then
-        CPPFLAGS="$CPPFLAGS -no-cpp-precomp"
-      fi
-    fi
-    php_multiple_shlib_versions_ok=yes
-    ;;
-  *beos*)
-    beos_threads=1
-    LIBS="$LIBS -lbe -lroot"
-    ;;
-  *mips*)
-    CPPFLAGS="$CPPFLAGS -D_XPG_IV"
-    ;;
-  *hpux*)
-    if test "$GCC" = "yes"; then
-      CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
-    fi
-    ;;
-  *netware*)
-    PHP_BUILD_PROGRAM
-    PHP_ADD_SOURCES(/main, internal_functions.c,,PHP_GLOBAL_OBJS)
-    PHP_ADD_SOURCES(win32, sendmail.c, -I$CFLAGS, PHP_GLOBAL_OBJS)
-    PHP5LIB_SHARED_LIBADD=\$\(EXTRA_LIBS\)
-    EXTENSION_DIR=sys:/php$PHP_MAJOR_VERSION/ext
-    PHP_SUBST(PHP5LIB_SHARED_LIBADD)
-    PHP_SHARED_MODULE(php5lib, PHP_GLOBAL_OBJS, netware)
-    ;;
-esac
+AC_CHECK_PROG(DOT, dot)
+AC_CHECK_PROG(DOXYGEN, doxygen)
 
-# Disable PIC mode by default where it is known to be safe to do so,
-# to avoid the performance hit from the lost register
-AC_MSG_CHECKING([whether to force non-PIC code in shared modules])
-case $host_alias in
-  i?86-*-linux*|i?86-*-freebsd*)
-    if test "${with_pic+set}" != "set" || test "$with_pic" = "no"; then
-      with_pic=no
-      AC_MSG_RESULT(yes)
-    else
-      AC_MSG_RESULT(no)
-    fi
-    ;;
-  *)
-    AC_MSG_RESULT(no)
-    ;;
-esac
+AC_CHECK_PROG(PKG_CONFIG, pkg-config, [], [], [],
+    [`$as_dir/$ac_word$ac_exec_ext --print-errors --version > /dev/null 2>&1 || continue`])
 
+# checks for UNIX variants that set C preprocessor variables
+AC_USE_SYSTEM_EXTENSIONS
 
-dnl Include Zend and TSRM configurations.
-dnl -------------------------------------------------------------------------
+AC_SUBST(RM, ['rm -f'])
+AC_SUBST(CP, ['cp'])
+RMDIRS='$(top_srcdir)/tool/rmdirs'
+RMDIR=rmdir
+mkdir "rmdirs_$$_test" "rmdirs_$$_test/a"
+rmdir --ignore-fail-on-non-empty "rmdirs_$$_test" 2>/dev/null &&
+RMDIR='rmdir --ignore-fail-on-non-empty'
+$RMDIR -p "rmdirs_$$_test/a" 2>/dev/null &&
+{ test -d "rmdirs_$$_test" || RMDIRS="$RMDIR -p"; }
+rmdir "rmdirs_$$_test/a" "rmdirs_$$_test" 2>/dev/null
+AC_SUBST(RMDIR)
+AC_SUBST(RMDIRS)
+AC_SUBST(RMALL, ['rm -fr'])
 
-sinclude(Zend/Zend.m4)
-sinclude(TSRM/threads.m4)
-sinclude(TSRM/tsrm.m4)
-
-dnl .
-dnl -------------------------------------------------------------------------
-
-PTHREADS_CHECK
-PHP_HELP_SEPARATOR([SAPI modules:])
-PHP_SHLIB_SUFFIX_NAMES
-PHP_BUILD_PROGRAM
-PHP_SAPI=none
-
-
-dnl SAPI configuration.
-dnl -------------------------------------------------------------------------
-
-dnl paths to the targets are relative to the build directory
-SAPI_SHARED=libs/libphp[]$PHP_MAJOR_VERSION[.]$SHLIB_DL_SUFFIX_NAME
-SAPI_STATIC=libs/libphp[]$PHP_MAJOR_VERSION[.a]
-SAPI_LIBTOOL=libphp[]$PHP_MAJOR_VERSION[.la]
-
-PHP_CONFIGURE_PART(Configuring SAPI modules)
-
-esyscmd(./build/config-stubs sapi)
-
-dnl Show which main SAPI was selected
-AC_MSG_CHECKING([for chosen SAPI module])
-AC_MSG_RESULT([$PHP_SAPI])
-
-dnl Show which binaries were selected
-AC_MSG_CHECKING([for executable SAPI binaries])
-if test "$PHP_BINARIES"; then
-  AC_MSG_RESULT([$PHP_BINARIES])
+AC_MSG_CHECKING([for cd using physical directory])
+rm -fr conf$$.dir
+mkdir conf$$.dir &&
+(cd conf$$.dir && mkdir src build && cd src &&
+$as_ln_s ../build . > /dev/null 2>&1 && cd build &&
+for chdir in 'cd -P' 'PWD= cd'; do
+    /bin/sh -c "$chdir ../src && echo '$chdir' > cdcmd" 2> /dev/null && break
+done)
+if test -f conf$$.dir/src/cdcmd; then
+    read CHDIR < conf$$.dir/src/cdcmd 2> /dev/null
 else
-  AC_MSG_RESULT([none])
+    CHDIR=cd
+fi
+rm -fr conf$$.dir
+AC_MSG_RESULT([$CHDIR])
+AC_SUBST(CHDIR)
+
+dnl }
+dnl compiler section {
+
+AC_DEFUN([RUBY_WERROR_FLAG], [dnl
+save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $rb_cv_warnflags"
+if test "${ac_c_werror_flag+set}"; then
+  rb_c_werror_flag="$ac_c_werror_flag"
+else
+  unset rb_c_werror_flag
+fi
+ac_c_werror_flag=yes
+$1
+CFLAGS="$save_CFLAGS"
+save_CFLAGS=
+if test "${rb_c_werror_flag+set}"; then
+  ac_c_werror_flag="$rb_c_werror_flag"
+else
+  unset ac_c_werror_flag
+fi])
+
+AC_DEFUN(RUBY_TRY_CFLAGS, [
+    AC_MSG_CHECKING([whether ]$1[ is accepted as CFLAGS])
+    RUBY_WERROR_FLAG([
+    CFLAGS="[$]CFLAGS $1"
+    AC_TRY_COMPILE([$4], [$5],
+	[$2
+	AC_MSG_RESULT(yes)],
+	[$3
+	AC_MSG_RESULT(no)])
+    ])
+])
+
+AC_DEFUN(RUBY_TRY_LDFLAGS, [
+    save_LDFLAGS="$LDFLAGS"
+    LDFLAGS="[$]LDFLAGS $1"
+    AC_MSG_CHECKING([whether $1 is accepted as LDFLAGS])
+    RUBY_WERROR_FLAG([
+    AC_TRY_LINK([$4], [$5],
+	[$2
+	AC_MSG_RESULT(yes)],
+	[$3
+	AC_MSG_RESULT(no)])
+    ])
+    LDFLAGS="$save_LDFLAGS"
+    save_LDFLAGS=
+])
+
+rb_cv_warnflags="$warnflags"
+if test "$GCC:${warnflags+set}:no" = yes::no; then
+    particular_werror_flags=yes
+    for wflag in -Wno-unused-parameter -Wno-parentheses -Wno-long-long \
+		 -Wno-missing-field-initializers \
+		 -Wunused-variable \
+		 -Werror=pointer-arith \
+		 -Werror=write-strings \
+		 -Werror=declaration-after-statement \
+		 -Werror=shorten-64-to-32 \
+		 -Werror-implicit-function-declaration \
+		 ; do
+	if test "$particular_werror_flags" = yes; then
+	    wflag=`echo x$wflag | sed 's/^x-Werror-/-Werror=/;s/^x//'`
+	else
+	    wflag=`echo x$wflag | sed 's/^x-Werror=/-W/;s/^x//'`
+	fi
+	ok=no
+	RUBY_TRY_CFLAGS($wflag, [warnflags="${warnflags+$warnflags }$wflag" ok=yes])
+	AS_CASE([$ok:$wflag], [no:-Werror=*], [
+	    wflag=`echo x$wflag | sed 's/^x-Werror=/-W/'`
+	    RUBY_TRY_CFLAGS($wflag, [
+		warnflags="${warnflags+$warnflags }$wflag"
+		particular_werror_flags=no
+	    ])
+	])
+    done
+    AS_CASE([" $warnflags "],[*" -Wno-missing-field-initializers "*], [wflag="-Wall -Wextra"],
+                             [wflag=-Wall])
+    RUBY_TRY_CFLAGS($wflag, [warnflags="$wflag${warnflags+ $warnflags}"])
+    # Disable warnflags while conftest. -Werror=* flags might make bad OS capability guess.
+    rb_cv_warnflags="$warnflags"
+    warnflags=
+fi
+if test "$GCC" = yes; then
+    test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-ggdb, [debugflags=-ggdb])}
+    test "${debugflags+set}" || {RUBY_TRY_CFLAGS(-g3, [debugflags=-g3])}
+
+    # -D_FORTIFY_SOURCE
+    RUBY_TRY_CFLAGS(-D_FORTIFY_SOURCE=2, [RUBY_APPEND_OPTION(XCFLAGS, -D_FORTIFY_SOURCE=2)])
+
+    # -fstack-protector
+    AS_CASE(["$target_os"],
+    [mingw*], [
+	stack_protector=no
+    ],
+    [
+	RUBY_TRY_CFLAGS(-fstack-protector, [stack_protector=yes], [stack_protector=no])
+	if test "x$stack_protector" = xyes; then
+	    RUBY_TRY_LDFLAGS(-fstack-protector, [], [stack_protector=broken])
+	fi
+    ])
+    if test "x$stack_protector" = xyes; then
+	RUBY_APPEND_OPTION(XCFLAGS, -fstack-protector)
+	RUBY_APPEND_OPTION(XLDFLAGS, -fstack-protector)
+	RUBY_APPEND_OPTION(LDFLAGS, -fstack-protector)
+    fi
+
+    # suppress annoying -Wstrict-overflow warnings
+    RUBY_TRY_CFLAGS(-fno-strict-overflow, [RUBY_APPEND_OPTION(XCFLAGS, -fno-strict-overflow)])
+fi
+test $ac_cv_prog_cc_g = yes && : ${debugflags=-g}
+
+if test "$GCC" = ""; then
+    AS_CASE(["$target_os"],[aix*],[warnflags="-qinfo=por"])
+fi
+if test "$GCC" = yes; then
+    RUBY_TRY_CFLAGS(-fvisibility=hidden, [RUBY_APPEND_OPTION(XCFLAGS, -fvisibility=hidden)])
+    AC_SUBST(WERRORFLAG, "-Werror")
+    if test "$visibility_option" = yes; then
+	RUBY_APPEND_OPTION(XCFLAGS, -fvisibility=hidden)
+    else
+	RUBY_TRY_LDFLAGS([-Wl,-unexported_symbol,_Init_*], [visibility_option=ld], [visibility_option=no])
+    fi
+    test "$visibility_option" = no || OBJCOPY=:
 fi
 
-dnl Exit early
-if test -z "$PHP_INSTALLED_SAPIS"; then
-  AC_MSG_ERROR([Nothing to build.])
+if test "$GCC" = yes; then
+    AS_CASE(["$target_os"], [mingw*], [
+	RUBY_TRY_CFLAGS(-fno-omit-frame-pointer, [optflags="${optflags+$optflags }-fno-omit-frame-pointer"])
+    ])
 fi
 
-dnl force ZTS
-if test "$enable_maintainer_zts" = "yes"; then
-  PTHREADS_ASSIGN_VARS
-  PTHREADS_FLAGS
+test -z "${ac_env_CFLAGS_set}" -a -n "${cflags+set}" && eval CFLAGS="\"$cflags $ARCH_FLAG\""
+test -z "${ac_env_CXXFLAGS_set}" -a -n "${cxxflags+set}" && eval CXXFLAGS="\"$cxxflags $ARCH_FLAG\""
+
+dnl check for large file stuff
+mv confdefs.h confdefs1.h
+: > confdefs.h
+AC_SYS_LARGEFILE
+mv confdefs.h largefile.h
+mv confdefs1.h confdefs.h
+cat largefile.h >> confdefs.h
+
+AS_CASE(["$target_os"],[mingw*], [ac_cv_type_off_t=yes;ac_cv_sizeof_off_t=8])
+
+AC_C_BIGENDIAN
+AC_C_CONST
+AC_C_CHAR_UNSIGNED
+AC_C_INLINE
+AC_C_VOLATILE
+
+AS_CASE(":$ac_cv_c_const:$ac_cv_c_volatile:",
+    [*:no:*], [AC_MSG_ERROR(ANSI C-conforming const and volatile are mandatory)])
+
+AC_CHECK_TYPES([long long, off_t])
+
+AC_CACHE_CHECK([char bit], [rb_cv_char_bit],
+    [test "$universal_binary" = yes && cross_compiling=yes
+    AC_COMPUTE_INT([rb_cv_char_bit], [CHAR_BIT],
+	[AC_INCLUDES_DEFAULT([@%:@include <limits.h>])], [rb_cv_char_bit=8])
+    test "$universal_binary" = yes && cross_compiling=$real_cross_compiling])
+
+dnl RUBY_CHECK_SIZEOF [typename], [maybe same size types], [macros], [include]
+AC_DEFUN([RUBY_CHECK_SIZEOF],
+[m4_bmatch([$1], [\.], [], [if test "$universal_binary" = yes; then])
+AC_CACHE_CHECK([size of $1], [AS_TR_SH([ac_cv_sizeof_$1])], [
+    unset AS_TR_SH(ac_cv_sizeof_$1)
+    rbcv_var="
+typedef m4_bpatsubst([$1], [\..*]) ac__type_sizeof_;
+static ac__type_sizeof_ *rbcv_ptr;
+@%:@define AS_TR_CPP(SIZEOF_$1) sizeof((*rbcv_ptr)[]m4_bmatch([$1], [\.], .m4_bpatsubst([$1], [^[^.]*\.])))
+"
+    m4_ifval([$2], [test -z "${AS_TR_SH(ac_cv_sizeof_$1)+set}" && {
+    for t in $2; do
+	AC_COMPILE_IFELSE(
+	    [AC_LANG_BOOL_COMPILE_TRY(AC_INCLUDES_DEFAULT([$4]
+		[$rbcv_var]),
+		[AS_TR_CPP(SIZEOF_$1) == sizeof($t)])], [
+		AS_TR_SH(ac_cv_sizeof_$1)=AS_TR_CPP([SIZEOF_]$t)
+		break])
+    done
+    }])
+    unset cond
+    m4_ifval([$3], [test -z "${AS_TR_SH(ac_cv_sizeof_$1)+set}" && {
+    for s in 32 64 128; do
+	for t in $3; do
+	    cond="${cond}
+@%:@${cond+el}if defined(__${t}${s}__) || defined(__${t}${s}) || defined(_${t}${s}) || defined(${t}${s})"
+	    hdr="AC_INCLUDES_DEFAULT([$4
+@%:@if defined(__${t}${s}__) || defined(__${t}${s}) || defined(_${t}${s}) || defined(${t}${s})
+@%:@ define AS_TR_CPP(HAVE_$1) 1
+@%:@else
+@%:@ define AS_TR_CPP(HAVE_$1) 0
+@%:@endif])"
+	    AC_COMPILE_IFELSE([AC_LANG_BOOL_COMPILE_TRY([$hdr], [!AS_TR_CPP(HAVE_$1)])], [continue])
+	    AC_COMPILE_IFELSE([AC_LANG_BOOL_COMPILE_TRY([$hdr]
+				[$rbcv_var],
+				[AS_TR_CPP(HAVE_$1) == (AS_TR_CPP(SIZEOF_$1) == ([$[s / rb_cv_char_bit]]))])],
+		[AS_TR_SH(ac_cv_sizeof_$1)="${AS_TR_SH(ac_cv_sizeof_$1)+${AS_TR_SH(ac_cv_sizeof_$1)-} }${t}${s}"])
+	done
+    done
+    }])
+    m4_ifval([$2][$3], [case "${AS_TR_SH(ac_cv_sizeof_$1)}" in
+    #(
+    [SIZEOF_*]);;
+    #(
+    *)])
+    test "$universal_binary" = yes && cross_compiling=yes
+    AC_COMPUTE_INT([t], AS_TR_CPP(SIZEOF_$1), [AC_INCLUDES_DEFAULT([$4])]
+[${cond+$cond
+@%:@else}
+$rbcv_var
+${cond+@%:@endif}
+@%:@ifndef AS_TR_CPP(SIZEOF_$1)
+@%:@define AS_TR_CPP(SIZEOF_$1) 0
+@%:@endif], [t=0])
+    test "$universal_binary" = yes && cross_compiling=$real_cross_compiling
+    if test ${t-0} != 0; then
+	AS_TR_SH(ac_cv_sizeof_$1)="${AS_TR_SH(ac_cv_sizeof_$1)+${AS_TR_SH(ac_cv_sizeof_$1)-} }${t}"
+    fi
+    m4_ifval([$2][$3], [;; esac])
+    : ${AS_TR_SH(ac_cv_sizeof_$1)=0}
+])
+{
+    unset cond
+    for t in ${AS_TR_SH(ac_cv_sizeof_$1)-}; do
+	AS_CASE(["$t"],
+	[[[0-9]*|SIZEOF_*]], [
+	    ${cond+echo "@%:@else"}
+	    echo "[@%:@define ]AS_TR_CPP(SIZEOF_$1) [$t]"
+	    break
+	    ],
+	[
+	    s=`expr $t : ['.*[^0-9]\([0-9][0-9]*\)$']`
+	    echo "@%:@${cond+el}if defined(__${t}__) || defined(__${t}) || defined(_${t}) || defined($t)"
+	    echo "@%:@define AS_TR_CPP(SIZEOF_$1) [$[s / rb_cv_char_bit]]"
+	    cond=1
+	    ])
+    done
+    ${cond+echo "@%:@endif"}
+} >> confdefs.h
+m4_bmatch([$1], [\.], [], [else
+AC_CHECK_SIZEOF([$1], 0, [$4])
+fi])
+])
+
+RUBY_CHECK_SIZEOF(int, [], [ILP])
+RUBY_CHECK_SIZEOF(short)
+RUBY_CHECK_SIZEOF(long, [int], [ILP LP])
+RUBY_CHECK_SIZEOF(long long)
+RUBY_CHECK_SIZEOF(__int64)
+RUBY_CHECK_SIZEOF(off_t)
+RUBY_CHECK_SIZEOF(void*, [int long "long long"], [ILP LP LLP])
+RUBY_CHECK_SIZEOF(float)
+RUBY_CHECK_SIZEOF(double)
+RUBY_CHECK_SIZEOF(time_t, [long "long long"], [], [@%:@include <time.h>])
+
+AC_DEFUN([RUBY_CHECK_PRINTF_PREFIX], [
+AC_CACHE_CHECK([for printf prefix for $1], [rb_cv_pri_prefix_]AS_TR_SH($1),[
+    [rb_cv_pri_prefix_]AS_TR_SH($1)=[NONE]
+    RUBY_WERROR_FLAG(for pri in $2; do
+        AC_TRY_COMPILE(
+            [@%:@include <stdio.h>
+	    @%:@include <stddef.h>
+            @%:@ifdef __GNUC__
+            @%:@define PRINTF_ARGS(decl, string_index, first_to_check) \
+              decl __attribute__((format(printf, string_index, first_to_check)))
+            @%:@else
+            @%:@define PRINTF_ARGS(decl, string_index, first_to_check) decl
+            @%:@endif
+	    PRINTF_ARGS(void test_sprintf(const char*, ...), 1, 2);],
+            [printf("%]${pri}[d", (]$1[)42);
+            test_sprintf("%]${pri}[d", (]$1[)42);],
+            [rb_cv_pri_prefix_]AS_TR_SH($1)[=[$pri]; break])
+    done)])
+if test "[$rb_cv_pri_prefix_]AS_TR_SH($1)" != NONE; then
+    AC_DEFINE_UNQUOTED([PRI_]m4_ifval($3,$3,AS_TR_CPP(m4_bpatsubst([$1],[_t$])))[_PREFIX],
+        "[$rb_cv_pri_prefix_]AS_TR_SH($1)")
+fi
+])
+
+if test "x$ac_cv_type_long_long" = xyes; then
+    RUBY_CHECK_PRINTF_PREFIX(long long, ll I64, LL)
+elif test "x$ac_cv_type___int64" = xyes; then
+    RUBY_CHECK_PRINTF_PREFIX(__int64, ll I64, LL)
 fi
 
-dnl Starting system checks.
-dnl -------------------------------------------------------------------------
+dnl RUBY_REPLACE_TYPE [typename] [default type] [macro type] [included]
+AC_DEFUN([RUBY_REPLACE_TYPE], [dnl
+    AC_CHECK_TYPE([$1],
+		  [n="patsubst([$1],["],[\\"])"],
+		  [n="patsubst([$2],["],[\\"])"],
+		  [$4])
+    AC_CACHE_CHECK([for convertible type of [$1]], rb_cv_[$1]_convertible, [
+	u= t=
+	AS_CASE(["$n "],
+	  [*" signed "*], [ ],
+	  [*" unsigned "*], [
+	    u=U],
+	  [
+	    AC_COMPILE_IFELSE(
+		[AC_LANG_BOOL_COMPILE_TRY([AC_INCLUDES_DEFAULT([$4])], [($n)-1 > 0])],
+		[u=U])])
+	if test x"$t" = x; then
+	    for t in "long long" long int short; do
+		test -n "$u" && t="unsigned $t"
+		AC_COMPILE_IFELSE(
+		    [AC_LANG_BOOL_COMPILE_TRY([AC_INCLUDES_DEFAULT([$4])]
+			[typedef $n rbcv_conftest_target_type;
+			typedef $t rbcv_conftest_replace_type;
+			extern rbcv_conftest_target_type rbcv_conftest_var;
+			extern rbcv_conftest_replace_type rbcv_conftest_var;
+			extern rbcv_conftest_target_type rbcv_conftest_func(void);
+			extern rbcv_conftest_replace_type rbcv_conftest_func(void);
+			], [sizeof(rbcv_conftest_target_type) == sizeof(rbcv_conftest_replace_type)])],
+		    [n="$t"; break])
+	    done
+	fi
+	AS_CASE([" $n "],
+	  [*" long long "*], [
+	    t=LL],
+	  [*" long "*], [
+	    t=LONG],
+	  [
+	    t=INT])
+	rb_cv_[$1]_convertible=${u}${t}])
+    test "${AS_TR_SH(ac_cv_type_[$1])}" = "yes" && n="$1"
+    AC_DEFINE_UNQUOTED(rb_[$1], $n)
+    AC_DEFINE_UNQUOTED([$3]2NUM[(v)], [${rb_cv_[$1]_convertible}2NUM(v)])
+    AC_DEFINE_UNQUOTED(NUM2[$3][(v)], [NUM2${rb_cv_[$1]_convertible}(v)])
+    AC_DEFINE_UNQUOTED(PRI_[$3]_PREFIX,
+	[PRI_`echo ${rb_cv_[$1]_convertible} | sed ['s/^U//']`_PREFIX])
+])
+RUBY_REPLACE_TYPE(pid_t, int, PIDT)
+RUBY_REPLACE_TYPE(uid_t, int, UIDT)
+RUBY_REPLACE_TYPE(gid_t, int, GIDT)
+RUBY_REPLACE_TYPE(time_t, [], TIMET, [@%:@include <time.h>])
+RUBY_REPLACE_TYPE(dev_t, [int long "long long"], DEVT)
+RUBY_REPLACE_TYPE(mode_t, ["unsigned int" long], MODET, [@%:@include <sys/stat.h>])
+RUBY_REPLACE_TYPE(rlim_t, [int long "long long"], RLIM, [@%:@include <sys/resource.h>])
 
-PHP_CONFIGURE_PART(Running system checks)
-
-dnl Find sendmail binary
-PHP_PROG_SENDMAIL
-
-dnl Check whether the system uses EBCDIC (not ASCII) as its native codeset
-PHP_EBCDIC
-
-dnl Check whether the system byte ordering is bigendian
-PHP_C_BIGENDIAN
-
-dnl Check whether writing to stdout works
-PHP_TEST_WRITE_STDOUT
-
-dnl Check for /usr/pkg/{lib,include} which is where NetBSD puts binary
-dnl and source packages.  This should be harmless on other OSs.
-if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
-   CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
-   LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
+AC_CACHE_CHECK(for prototypes, rb_cv_have_prototypes,
+  [AC_TRY_COMPILE([int foo(int x) { return 0; }], [return foo(10);],
+	rb_cv_have_prototypes=yes,
+	rb_cv_have_prototypes=no)])
+if test "$rb_cv_have_prototypes" = yes; then
+  AC_DEFINE(HAVE_PROTOTYPES)
 fi
-test -d /usr/ucblib && PHP_ADD_LIBPATH(/usr/ucblib)
 
-
-dnl First, library checks.
-dnl -------------------------------------------------------------------------
-
-dnl Some systems (OpenServer 5) dislike -lsocket -lnsl, so we try
-dnl to avoid -lnsl checks, if we already have the functions which
-dnl are usually in libnsl
-dnl Also, uClibc will bark at linking with glibc's libnsl.
-
-PHP_CHECK_FUNC(socket, socket)
-PHP_CHECK_FUNC(socketpair, socket)
-PHP_CHECK_FUNC(htonl, socket)
-PHP_CHECK_FUNC(gethostname, nsl)
-PHP_CHECK_FUNC(gethostbyaddr, nsl)
-PHP_CHECK_FUNC(yp_get_default_domain, nsl)
-
-PHP_CHECK_FUNC(dlopen, dl)
-if test "$ac_cv_func_dlopen" = "yes"; then
-  AC_DEFINE(HAVE_LIBDL, 1, [ ])
+AC_CACHE_CHECK(token paste string, rb_cv_tokenpaste,
+  [AC_TRY_COMPILE([#define paste(a,b) a##b],
+		  [int xy = 1; return paste(x,y);],
+		  rb_cv_tokenpaste=ansi,
+		  rb_cv_tokenpaste=knr)])
+if test "$rb_cv_tokenpaste" = ansi; then
+  AC_DEFINE(TOKEN_PASTE(x,y),[x##y])
+else
+  AC_DEFINE(TOKEN_PASTE(x,y),[x/**/y])
 fi
-AC_CHECK_LIB(m, sin)
 
-dnl Check for inet_aton
-dnl in -lc, -lbind and -lresolv
-PHP_CHECK_FUNC(inet_aton, resolv, bind)
+AC_CACHE_CHECK(stringization, rb_cv_stringization, [
+  rb_cv_stringization=no
+  for string in "#expr" '"expr"'; do
+    AC_COMPILE_IFELSE([
+      AC_LANG_BOOL_COMPILE_TRY([
+#define STRINGIZE0(expr) $string
+#define STRINGIZE(expr) STRINGIZE0(expr)
+#undef real_test_for_stringization
+#define test_for_stringization -.real_test_for_stringization.-
+const char stringized[[]] = STRINGIZE(test_for_stringization);
+], [sizeof(stringized) == 32])],
+      [rb_cv_stringization="$string"; break],
+      [rb_cv_stringization=no])
+  done]
+)
+AC_DEFINE(STRINGIZE(expr),STRINGIZE0(expr))
+if test x"$rb_cv_stringization" != xno -a "$rb_cv_stringization" != "#expr"; then
+  AC_DEFINE_UNQUOTED(STRINGIZE0(expr),$rb_cv_stringization)
+  AC_DEFINE(OLD_FASHIONED_STRINGIZATION,1)
+fi
 
-dnl Then headers.
-dnl -------------------------------------------------------------------------
+AC_CACHE_CHECK([string literal concatenation],
+  rb_cv_string_literal_concatenation, [
+  AC_COMPILE_IFELSE([
+    AC_LANG_BOOL_COMPILE_TRY([
+const char concatenated_literal[[]] = "literals" "to"
+  "be" "concatenated.";
+], [sizeof(concatenated_literal) == 26])],
+    [rb_cv_string_literal_concatenation=yes],
+    [rb_cv_string_literal_concatenation=no])]
+)
+if test "$rb_cv_string_literal_concatenation" = no; then
+  AC_DEFINE(NO_STRING_LITERAL_CONCATENATION,1)
+fi
+
+AC_CACHE_CHECK(for variable length prototypes and stdarg.h, rb_cv_stdarg,
+  [AC_TRY_COMPILE([
+#include <stdarg.h>
+int foo(int x, ...) {
+	va_list va;
+	va_start(va, x);
+	va_arg(va, int);
+	va_arg(va, char *);
+	va_arg(va, double);
+	return 0;
+}
+], [return foo(10, "", 3.14);],
+	rb_cv_stdarg=yes,
+	rb_cv_stdarg=no)])
+if test "$rb_cv_stdarg" = yes; then
+  AC_DEFINE(HAVE_STDARG_PROTOTYPES)
+fi
+
+AC_CACHE_CHECK(for variable length macro, rb_cv_va_args_macro,
+  [AC_TRY_COMPILE([
+int foo(int x, ...);
+@%:@define FOO(a, ...) foo(a, @%:@@%:@__VA_ARGS__)
+], [FOO(1);FOO(1,2);FOO(1,2,3);],
+  rb_cv_va_args_macro=yes,
+  rb_cv_va_args_macro=no)])
+if test "$rb_cv_va_args_macro" = yes; then
+  AC_DEFINE(HAVE_VA_ARGS_MACRO)
+fi
+
+AC_DEFUN([RUBY_DEFINE_IF], [dnl
+    m4_ifval([$1], [AS_LITERAL_IF([$1], [], [test "X$1" = X || ])cat <<EOH >> confdefs.h
+@%:@if $1
+EOH
+])dnl
+AC_DEFINE_UNQUOTED($2, $3)dnl
+    m4_ifval([$1], [AS_LITERAL_IF([$1], [], [test "X$1" = X || ])cat <<EOH >> confdefs.h
+@%:@endif /* $1 */
+EOH
+])dnl
+])dnl
+
+dnl RUBY_FUNC_ATTRIBUTE(attrib, macroname, cachevar, condition)
+AC_DEFUN([RUBY_FUNC_ATTRIBUTE], [dnl
+m4_ifval([$2], dnl
+  [AS_VAR_PUSHDEF([attrib],[$2])], dnl
+  [AS_VAR_PUSHDEF([attrib],[FUNC_]AS_TR_CPP($1))] dnl
+)dnl
+m4_ifval([$3], dnl
+  [AS_VAR_PUSHDEF([rbcv],[$3])], dnl
+  [AS_VAR_PUSHDEF([rbcv],[rb_cv_func_][$1])]dnl
+)dnl
+m4_ifval([$4], [rbcv_cond=["$4"]; test "$rbcv_cond" || unset rbcv_cond])
+AC_CACHE_CHECK(for [$1] function attribute, rbcv,
+[rbcv=x
+RUBY_WERROR_FLAG([
+for mac in "__attribute__ (($1)) x" "x __attribute__ (($1))" "__declspec($1) x" x; do
+  m4_ifval([$4],mac="$mac"${rbcv_cond+" /* only if $rbcv_cond */"})
+  AC_TRY_COMPILE(
+    m4_ifval([$4],${rbcv_cond+[@%:@if ]$rbcv_cond})
+[@%:@define ]attrib[(x) $mac]
+m4_ifval([$4],${rbcv_cond+[@%:@else]}
+${rbcv_cond+[@%:@define ]attrib[(x) x]}
+${rbcv_cond+[@%:@endif]})
+    attrib[(void conftest_attribute_check(void));], [],
+    [rbcv="$mac"; break])
+done
+])])
+if test "$rbcv" != x; then
+    RUBY_DEFINE_IF(m4_ifval([$4],[${rbcv_cond}]), attrib[(x)], $rbcv)
+fi
+m4_ifval([$4], [unset rbcv_cond])dnl
+AS_VAR_POPDEF([attrib])dnl
+AS_VAR_POPDEF([rbcv])dnl
+])
+
+RUBY_FUNC_ATTRIBUTE(noreturn, NORETURN)
+RUBY_FUNC_ATTRIBUTE(deprecated, DEPRECATED)
+RUBY_FUNC_ATTRIBUTE(noinline, NOINLINE)
+
+if_i386=${universal_binary+[defined __i386__]}
+RUBY_FUNC_ATTRIBUTE(stdcall,  [], [], ${if_i386})
+RUBY_FUNC_ATTRIBUTE(cdecl,    [], [], ${if_i386})
+RUBY_FUNC_ATTRIBUTE(fastcall, [], [], ${if_i386})
+
+if test "$GCC" = yes; then
+    AC_CACHE_CHECK([for function alias], [rb_cv_gcc_function_alias],
+	[rb_cv_gcc_function_alias=no
+	for a in alias weak,alias; do
+	    AC_TRY_LINK([void foo(void) {}
+		void bar(void) __attribute__(($a("foo")));], [bar()],
+		[rb_cv_gcc_function_alias=$a; break])
+	done])
+    if test "$rb_cv_gcc_function_alias" != no; then
+	AC_DEFINE_UNQUOTED([RUBY_ALIAS_FUNCTION_TYPE(type, prot, name, args)],
+			   [type prot __attribute__(($rb_cv_gcc_function_alias(@%:@name)));])
+	AC_DEFINE_UNQUOTED([RUBY_ALIAS_FUNCTION_VOID(prot, name, args)],
+			   [RUBY_ALIAS_FUNCTION_TYPE(void, prot, name, args)])
+    fi
+    AC_CACHE_CHECK([for atomic builtins], [rb_cv_gcc_atomic_builtins], [
+	AC_TRY_LINK([unsigned char atomic_var;],
+		    [
+			__sync_lock_test_and_set(&atomic_var, 0);
+			__sync_lock_test_and_set(&atomic_var, 1);
+			__sync_fetch_and_add(&atomic_var, 1);
+			__sync_fetch_and_sub(&atomic_var, 1);
+		    ],
+		    [rb_cv_gcc_atomic_builtins=yes],
+		    [rb_cv_gcc_atomic_builtins=no])])
+    if test "$rb_cv_gcc_atomic_builtins" = yes; then
+	AC_DEFINE(HAVE_GCC_ATOMIC_BUILTINS)
+    fi
+
+    AC_CACHE_CHECK(for __builtin_unreachable, rb_cv_func___builtin_unreachable,
+    [AC_TRY_LINK([@%:@include <stdlib.h>],
+	[exit(0); __builtin_unreachable();],
+	[rb_cv_func___builtin_unreachable=yes],
+	[rb_cv_func___builtin_unreachable=no])
+    ])
+    if test "$rb_cv_func___builtin_unreachable" = yes; then
+	AC_DEFINE_UNQUOTED(UNREACHABLE, [__builtin_unreachable()])
+    fi
+fi
+
+AC_CACHE_CHECK(for exported function attribute, rb_cv_func_exported, [
+rb_cv_func_exported=no
+RUBY_WERROR_FLAG([
+for mac in '__attribute__ ((visibility("default")))' '__declspec(dllexport)'; do
+  AC_TRY_COMPILE([@%:@define RUBY_FUNC_EXPORTED $mac extern
+    RUBY_FUNC_EXPORTED void conftest_attribute_check(void);], [],
+    [rb_cv_func_exported="$mac"; break])
+done
+])])
+if test "$rb_cv_func_exported" != no; then
+    AC_DEFINE_UNQUOTED(RUBY_FUNC_EXPORTED, [$rb_cv_func_exported extern])
+fi
+
+RUBY_APPEND_OPTION(XCFLAGS, -DRUBY_EXPORT)
+
+dnl }
+dnl header and library section {
+
+dnl Check whether we need to define sys_nerr locally
+AC_CHECK_DECLS([sys_nerr], [], [], [$ac_includes_default
+#include <errno.h>])
+
+AC_ARG_ENABLE(win95,
+	AS_HELP_STRING([--enable-win95], [enable Windows 95 series support]),
+  [AS_CASE(["$enableval"],[yes|no],[enable_win95=$enableval],[unset enable_win95])])
+
+AC_ARG_WITH(winnt-ver,
+  AS_HELP_STRING([--with-winnt-ver=0xXXXX], [target Windows NT version (default to 0x0501)]),
+  [with_winnt_ver="$withval"], [with_winnt_ver="0x0501"])
+AS_CASE(["$target_os"],
+[mingw*], [
+  RUBY_APPEND_OPTION(CPPFLAGS, -D_WIN32_WINNT=$with_winnt_ver)
+])
+
+AS_CASE(["$target_os"],
+[freebsd*], [
+  AC_CACHE_CHECK([whether pthread should be enabled by default],
+    rb_cv_enable_pthread_default,
+    [AC_TRY_CPP([
+#include <osreldate.h>
+#if __FreeBSD_version < 502102
+#error pthread should be disabled on this platform
+#endif
+      ],
+      rb_cv_enable_pthread_default=yes,
+      rb_cv_enable_pthread_default=no)])
+  enable_pthread=$rb_cv_enable_pthread_default
+  ],
+[mingw*], [
+  enable_pthread=no
+  ],
+[
+  enable_pthread=yes
+  ])
+
+AC_ARG_ENABLE(pthread,
+       AS_HELP_STRING([--enable-pthread], [obsolete, and ignored]))
+
+dnl Checks for libraries.
+AS_CASE(["$target_os"],[*bsd*|dragonfly*],[],[ac_cv_func_daemon=no])
+
+AS_CASE(["$target_os"],
+[nextstep*], [	],
+[openstep*], [	],
+[rhapsody*], [	],
+[darwin*], [	RUBY_PREPEND_OPTION(LIBS, -lobjc)
+		RUBY_APPEND_OPTIONS(CPPFLAGS, -D_XOPEN_SOURCE -D_DARWIN_C_SOURCE -D_DARWIN_UNLIMITED_SELECT)
+		AC_MSG_CHECKING(whether Mac OS X 10.5 or later)
+		AC_TRY_CPP([#include <AvailabilityMacros.h>
+		    #if MAC_OS_X_VERSION_MAX_ALLOWED <= 1040
+		    #error pre OS X 10.4
+		    [!<===== pre OS X 10.4 =====>]
+		    #endif
+		    ],
+		    [macosx_10_5=yes], [macosx_10_5=no])
+		AC_MSG_RESULT($macosx_10_5)
+		if test $macosx_10_5 = yes; then
+		    ac_cv_header_ucontext_h=no
+		else
+		    AC_DEFINE(BROKEN_SETREUID, 1)
+		    AC_DEFINE(BROKEN_SETREGID, 1)
+		fi
+		ac_cv_type_getgroups=gid_t # getgroups() on Rosetta fills garbage
+		ac_cv_lib_crypt_crypt=no
+		ac_cv_func_fdatasync=no # Mac OS X wrongly reports it has fdatasync()
+                AC_CACHE_CHECK(for broken crypt with 8bit chars, rb_cv_broken_crypt,
+                    [AC_TRY_RUN([
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+
+int
+main()
+{
+    int i;
+    for (i = 0; i < 128*128; i++) {
+	char salt[2], buf[256], *s;
+	salt[0] = 0x80 | (i & 0x7f);
+	salt[1] = 0x80 | (i >> 7);
+	strcpy(buf, crypt("", salt));
+	if (strcmp(buf, s = crypt("", salt))) {
+#if 0
+	    printf("%.2x%.2x: %s -> %s\n", (unsigned char)salt[0], (unsigned char)salt[1],
+		   buf+2, s+2);
+#endif
+	    return 1;
+	}
+    }
+    return 0;
+}
+],
+	            rb_cv_broken_crypt=no,
+	            rb_cv_broken_crypt=yes,
+	            rb_cv_broken_crypt=yes)])
+                if test "$rb_cv_broken_crypt" = yes; then
+                  AC_DEFINE(BROKEN_CRYPT, 1)
+                fi
+		],
+[hpux*], [	LIBS="-lm $LIBS"
+		ac_cv_c_inline=no],
+[beos*|haiku*], [
+		ac_cv_func_link=no
+		ac_cv_func_sched_yield=no
+		ac_cv_func_pthread_attr_setinheritsched=no
+		AS_CASE(["$target_os"],
+		[beos*], [ ac_cv_header_net_socket_h=yes],
+		[haiku*], [ ac_cv_func_shutdown=no])
+		LIBS="$LIBS" # m lib is include in root under BeOS/Haiku
+		],
+[cygwin*], [	ac_cv_header_langinfo_h=yes
+		AC_CHECK_FUNCS(cygwin_conv_path)
+		AC_LIBOBJ([langinfo])
+		],
+[mingw*], [	LIBS="-lshell32 -lws2_32 -limagehlp $LIBS"
+		ac_cv_header_a_out_h=no
+		ac_cv_header_pwd_h=no
+		ac_cv_header_utime_h=no
+		ac_cv_header_sys_ioctl_h=no
+		ac_cv_header_sys_param_h=no
+		ac_cv_header_sys_resource_h=no
+		ac_cv_header_sys_select_h=no
+		ac_cv_header_sys_time_h=no
+		ac_cv_header_sys_times_h=no
+		ac_cv_header_sys_socket_h=no
+		ac_cv_func_times=yes
+		ac_cv_func_waitpid=yes
+		ac_cv_func_fsync=yes
+		ac_cv_func_seekdir=yes
+		ac_cv_func_telldir=yes
+		ac_cv_func_isinf=yes
+		ac_cv_func_isnan=yes
+		ac_cv_func_finite=yes
+		ac_cv_func_link=yes
+		ac_cv_func_fseeko=yes
+		ac_cv_lib_crypt_crypt=no
+		ac_cv_func_getpgrp_void=no
+		ac_cv_func_memcmp_working=yes
+		ac_cv_lib_dl_dlopen=no
+		rb_cv_binary_elf=no
+		rb_cv_negative_time_t=no
+		ac_cv_func_fcntl=yes
+		ac_cv_func_flock=yes
+		rb_cv_large_fd_select=yes
+		AC_LIBOBJ([langinfo])
+		: ${enable_win95=maybe}
+		],
+[os2-emx*], [	LIBS="-lm $LIBS"
+		ac_cv_lib_dir_opendir=no],
+[bsdi*], [	LIBS="-lm $LIBS"
+		AC_DEFINE(BROKEN_SETREUID, 1)
+		AC_DEFINE(BROKEN_SETREGID, 1)
+                ac_cv_sizeof_rlim_t=8],
+[freebsd*], [	LIBS="-lm $LIBS"
+		ac_cv_func_getpeername=no
+		ac_cv_func_getsockname=no
+		ac_cv_func_shutdown=no
+		ac_cv_func_close=no
+		],
+[dragonfly*], [	LIBS="-lm $LIBS"
+		],
+[bow], [	ac_cv_func_setitimer=no
+		],
+[superux*], [	ac_cv_func_setitimer=no
+		],
+[	LIBS="-lm $LIBS"])
+AC_CHECK_LIB(crypt, crypt)
+AC_CHECK_LIB(dl, dlopen)	# Dynamic linking for SunOS/Solaris and SYSV
+AC_CHECK_LIB(dld, shl_load)	# Dynamic linking for HP-UX
+AC_CHECK_LIB(socket, socketpair)	# SunOS/Solaris
+AC_CHECK_LIB(rt, clock_gettime)	# GNU/Linux
+if test "${enable_win95}" = maybe; then
+    AC_HAVE_LIBRARY(unicows, [enable_win95=yes], [enable_win95=no])
+fi
+if test "${enable_win95}" = yes; then
+    AC_DEFINE(WIN95)
+    LIBS="-lunicows $LIBS"
+fi
+
+AS_CASE(["$target_cpu"],
+[alpha*|sh4|sh4el|sh4eb], [AS_CASE(["$target_os"::"$GCC"],
+		[*::yes],  # gcc
+			[CFLAGS="-mieee $CFLAGS"],
+		[osf*],    # ccc
+			[CFLAGS="-ieee $CFLAGS"],
+		)],
+[sparc*], [AC_LIBOBJ([sparc])])
+
+ac_cv_header_net_socket_h=${ac_cv_header_net_socket_h=no}
+if test "$ac_cv_header_net_socket_h" = yes; then
+    ac_cv_header_sys_socket_h=${ac_cv_header_sys_socket_h=no}
+else
+    ac_cv_header_sys_socket_h=${ac_cv_header_sys_socket_h=yes}
+fi
 
 dnl Checks for header files.
-AC_HEADER_STDC
 AC_HEADER_DIRENT
+dnl AC_HEADER_STDC has been checked in AC_USE_SYSTEM_EXTENSIONS
+AC_HEADER_STDBOOL
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS(limits.h sys/file.h sys/ioctl.h sys/syscall.h\
+		 fcntl.h sys/fcntl.h sys/select.h sys/time.h sys/times.h sys/param.h\
+		 syscall.h pwd.h grp.h a.out.h utime.h direct.h sys/resource.h \
+		 sys/mkdev.h sys/utime.h xti.h netinet/in_systm.h float.h ieeefp.h \
+		 ucontext.h intrinsics.h langinfo.h locale.h sys/sendfile.h time.h \
+		 net/socket.h sys/socket.h process.h sys/prctl.h)
 
-dnl QNX requires unix.h to allow functions in libunix to work properly
-AC_CHECK_HEADERS([ \
-inttypes.h \
-stdint.h \
-dirent.h \
-ApplicationServices/ApplicationServices.h \
-sys/param.h \
-sys/types.h \
-sys/time.h \
-netinet/in.h \
-alloca.h \
-arpa/inet.h \
-arpa/nameser.h \
-assert.h \
-crypt.h \
-dns.h \
-fcntl.h \
-grp.h \
-ieeefp.h \
-langinfo.h \
-limits.h \
-locale.h \
-monetary.h \
-netdb.h \
-pwd.h \
-resolv.h \
-signal.h \
-stdarg.h \
-stdlib.h \
-string.h \
-syslog.h \
-sysexits.h \
-sys/ioctl.h \
-sys/file.h \
-sys/mman.h \
-sys/mount.h \
-sys/poll.h \
-sys/resource.h \
-sys/select.h \
-sys/socket.h \
-sys/stat.h \
-sys/statfs.h \
-sys/statvfs.h \
-sys/vfs.h \
-sys/sysexits.h \
-sys/varargs.h \
-sys/wait.h \
-sys/loadavg.h \
-termios.h \
-unistd.h \
-unix.h \
-utime.h \
-sys/utsname.h \
-sys/ipc.h \
-dlfcn.h \
-assert.h
-],[],[],[
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_ARPA_NAMESER_H
-#include <arpa/nameser.h>
-#endif
+AC_TYPE_SIZE_T
+RUBY_CHECK_SIZEOF(size_t, [int long void*], [], [@%:@include <sys/types.h>])
+RUBY_CHECK_SIZEOF(ptrdiff_t, size_t, [], [@%:@include <stddef.h>])
+RUBY_CHECK_PRINTF_PREFIX(size_t, z)
+RUBY_CHECK_PRINTF_PREFIX(ptrdiff_t, t)
+AC_STRUCT_ST_BLKSIZE
+AC_STRUCT_ST_BLOCKS
+AC_STRUCT_ST_RDEV
+RUBY_CHECK_SIZEOF([struct stat.st_size], [int long "long long"], [], [@%:@include <sys/stat.h>])
+if test "$ac_cv_member_struct_stat_st_blocks" = yes; then
+    RUBY_CHECK_SIZEOF([struct stat.st_blocks], [int long "long long"], [], [@%:@include <sys/stat.h>])
+fi
+AC_CHECK_MEMBERS([struct stat.st_atim])
+AC_CHECK_MEMBERS([struct stat.st_atimespec])
+AC_CHECK_MEMBERS([struct stat.st_atimensec])
+AC_CHECK_MEMBERS([struct stat.st_mtim])
+AC_CHECK_MEMBERS([struct stat.st_mtimespec])
+AC_CHECK_MEMBERS([struct stat.st_mtimensec])
+AC_CHECK_MEMBERS([struct stat.st_ctim])
+AC_CHECK_MEMBERS([struct stat.st_ctimespec])
+AC_CHECK_MEMBERS([struct stat.st_ctimensec])
+
+AC_CHECK_TYPES([struct timespec], [], [], [@%:@ifdef HAVE_TIME_H
+@%:@include <time.h>
+@%:@endif])
+
+AC_CHECK_TYPES([struct timezone], [], [], [@%:@ifdef HAVE_TIME_H
+@%:@ include <time.h>
+@%:@endif
+@%:@ifdef HAVE_SYS_TIME_H
+@%:@ include <sys/time.h>
+@%:@endif])
+
+AC_CHECK_TYPES([clockid_t], [], [], [@%:@ifdef HAVE_TIME_H
+@%:@ include <time.h>
+@%:@endif
+@%:@ifdef HAVE_SYS_TIME_H
+@%:@ include <sys/time.h>
+@%:@endif])
+
+AC_CACHE_VAL([rb_cv_large_fd_select],
+    [AC_CHECK_TYPE(fd_mask, [rb_cv_large_fd_select=yes], [rb_cv_large_fd_select=no])])
+if test "$rb_cv_large_fd_select" = yes; then
+    AC_DEFINE(HAVE_RB_FD_INIT, 1)
+fi
+
+dnl RUBY_DEFINT TYPENAME, SIZE, [SIGNED-OR-UNSIGNED], [INCLUDES = DEFAULT-INCLUDES]
+AC_DEFUN([RUBY_DEFINT], [dnl
+AC_CACHE_CHECK([for $1], [rb_cv_type_$1],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT([$4])
+typedef $1 t; int s = sizeof(t) == 42;])],
+   [rb_cv_type_$1=yes],
+   [AS_CASE([m4_bmatch([$2], [^[1-9][0-9]*$], $2, [$ac_cv_sizeof_]AS_TR_SH($2))],
+    ["1"], [ rb_cv_type_$1="m4_if([$3], [], [signed ], [$3 ])char"],
+    ["$ac_cv_sizeof_short"], [ rb_cv_type_$1="m4_if([$3], [], [], [$3 ])short"],
+    ["$ac_cv_sizeof_int"], [ rb_cv_type_$1="m4_if([$3], [], [], [$3 ])int"],
+    ["$ac_cv_sizeof_long"], [ rb_cv_type_$1="m4_if([$3], [], [], [$3 ])long"],
+    ["$ac_cv_sizeof_long_long"], [ rb_cv_type_$1="m4_if([$3], [], [], [$3 ])long long"],
+    ["$ac_cv_sizeof___int64"], [ rb_cv_type_$1="m4_if([$3], [], [], [$3 ])__int64"],
+    [ rb_cv_type_$1=no])])])
+if test "${rb_cv_type_$1}" != no; then
+    AC_DEFINE([HAVE_]AS_TR_CPP($1), 1)
+    if test "${rb_cv_type_$1}" = yes; then
+	m4_bmatch([$2], [^[1-9][0-9]*$], [AC_CHECK_SIZEOF([$1], 0, [AC_INCLUDES_DEFAULT([$4])])],
+			[RUBY_CHECK_SIZEOF([$1], [$2], [], [AC_INCLUDES_DEFAULT([$4])])])
+    else
+	AC_DEFINE_UNQUOTED($1, [$rb_cv_type_$1])
+	AC_DEFINE_UNQUOTED([SIZEOF_]AS_TR_CPP($1), [SIZEOF_]AS_TR_CPP([$rb_cv_type_$1]))
+    fi
+fi
 ])
 
-PHP_FOPENCOOKIE
-PHP_BROKEN_GETCWD
-PHP_BROKEN_GLIBC_FOPEN_APPEND
+RUBY_DEFINT(int8_t, 1)
+RUBY_DEFINT(uint8_t, 1, unsigned)
+RUBY_DEFINT(int16_t, 2)
+RUBY_DEFINT(uint16_t, 2, unsigned)
+RUBY_DEFINT(int32_t, 4)
+RUBY_DEFINT(uint32_t, 4, unsigned)
+RUBY_DEFINT(int64_t, 8)
+RUBY_DEFINT(uint64_t, 8, unsigned)
+RUBY_DEFINT(int128_t, 16)
+RUBY_DEFINT(uint128_t, 16, unsigned)
+RUBY_DEFINT(intptr_t, void*)
+RUBY_DEFINT(uintptr_t, void*, unsigned)
+RUBY_DEFINT(ssize_t, size_t, [], [@%:@include <sys/types.h>])	dnl may differ from int, so not use AC_TYPE_SSIZE_T.
 
-dnl Checks for typedefs, structures, and compiler characteristics.
-dnl -------------------------------------------------------------------------
-
-AC_STRUCT_TM
-AC_STRUCT_TIMEZONE
-
-PHP_MISSING_TIME_R_DECL
-PHP_MISSING_FCLOSE_DECL
-
-PHP_TM_GMTOFF
-PHP_STRUCT_FLOCK
-PHP_SOCKLEN_T
-
-AC_CHECK_SIZEOF(size_t, 8)
-AC_CHECK_SIZEOF(long long, 8)
-AC_CHECK_SIZEOF(long long int, 8)
-AC_CHECK_SIZEOF(long, 8)
-AC_CHECK_SIZEOF(int, 4)
-
-dnl These are defined elsewhere than stdio.h
-PHP_CHECK_SIZEOF(intmax_t, 0)
-PHP_CHECK_SIZEOF(ssize_t, 8)
-PHP_CHECK_SIZEOF(ptrdiff_t, 8)
-
-dnl Check for members of the stat structure
-AC_STRUCT_ST_BLKSIZE
-dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exists
-dnl The WARNING_LEVEL required because cc in QNX hates -w option without an argument
-if test "`uname -s 2>/dev/null`" != "QNX"; then
-  AC_STRUCT_ST_BLOCKS
-else
-  AC_MSG_WARN([warnings level for cc set to 0])
-  WARNING_LEVEL=0
+AC_CACHE_CHECK(for stack end address, rb_cv_stack_end_address,
+[rb_cv_stack_end_address=no
+for addr in __libc_stack_end _SEND; do
+  AC_TRY_LINK(
+    [extern void *$addr;],
+    [if (!$addr) return 1;],
+    [rb_cv_stack_end_address="$addr"; break])
+done])
+if test $rb_cv_stack_end_address != no; then
+  AC_DEFINE_UNQUOTED(STACK_END_ADDRESS, $rb_cv_stack_end_address)
 fi
-AC_STRUCT_ST_RDEV
 
-dnl Checks for types
-AC_TYPE_SIZE_T
-AC_TYPE_UID_T
+AC_CACHE_CHECK(for gc_mark and gc_children stack frame approximate size(word), rb_cv_gc_mark_stackframe_word,
+[save_CFLAGS="$CFLAGS"
+CFLAGS="-O0"
+AC_TRY_RUN([
+int word;
+char *stack_start;
 
-dnl Checks for sockaddr_storage and sockaddr.sa_len
-PHP_SOCKADDR_CHECKS
+void
+set_stackframe_word()
+{
+    int dumy = 42;
+    int diff;
 
-dnl Check for IPv6 support
-AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
-[AC_TRY_LINK([ #include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>], [struct sockaddr_in6 s; struct in6_addr t=in6addr_any; int i=AF_INET6; s; t.s6_addr[0] = 0;],
-  [ac_cv_ipv6_support=yes], [ac_cv_ipv6_support=no])])
+    if (stack_start < (char *)&dumy) {
+        diff = (int)((char *)&dumy - stack_start);
+    }
+    else {
+        diff = (int)(stack_start - (char *)&dumy);
+    }
+    word = (diff/sizeof(void *));
+    if ((diff % sizeof(void *)) != 0) {
+        word++;
+    }
+}
+
+void
+gc_mark_children(void *p1, void *p2, int lev)
+{
+    void *obj = p2;
+
+    set_stackframe_word(p1,p2,lev);
+}
+
+void
+gc_mark(void *p1, void *p2, int lev)
+{
+    void *obj = p2;
+
+    gc_mark_children(p1,p2,lev++);
+}
+
+int
+main() {
+  int dumy = 42;
+
+  stack_start = (char *)&dumy;
+  gc_mark(0, 0, 255);
+  return word;
+}
+],
+  [rb_cv_gc_mark_stackframe_word="$?"],
+  [rb_cv_gc_mark_stackframe_word="$?"],
+  [rb_cv_gc_mark_stackframe_word="30"])
+CFLAGS="$save_CFLAGS"])
+AC_DEFINE_UNQUOTED(GC_MARK_STACKFRAME_WORD, $rb_cv_gc_mark_stackframe_word)
+
+AS_CASE(["$target_os"],
+[openbsd*], [
+  AC_CACHE_CHECK(for heap align log on openbsd, rb_cv_page_size_log,
+    [rb_cv_page_size_log=no
+     for page_log in 12 13; do
+       AC_TRY_RUN([
+#include <math.h>
+#include <unistd.h>
+
+int
+main() {
+  if ((int)log2((double)sysconf(_SC_PAGESIZE)) != $page_log) return 1;
+  return 0;
+}
+       ],
+       rb_cv_page_size_log="$page_log"; break)
+     done])
+  if test $rb_cv_page_size_log != no; then
+    AC_DEFINE_UNQUOTED(HEAP_ALIGN_LOG, $rb_cv_page_size_log)
+  else
+    AC_DEFINE_UNQUOTED(HEAP_ALIGN_LOG, 12)
+  fi
+])
 
 dnl Checks for library functions.
-dnl -------------------------------------------------------------------------
+AC_TYPE_GETGROUPS
+AC_TYPE_SIGNAL
+AS_CASE(["${target_cpu}-${target_os}:${target_archs}"],
+[powerpc-darwin*], [
+  AC_LIBSOURCES(alloca.c)
+  AC_SUBST([ALLOCA], [\${LIBOBJDIR}alloca.${ac_objext}])
+  AC_DEFINE(C_ALLOCA)
+  AC_DEFINE_UNQUOTED(alloca, alloca)
+  ],
+[universal-darwin*:*ppc*], [
+  AC_LIBSOURCES(alloca.c)
+  AC_SUBST([ALLOCA], [\${LIBOBJDIR}alloca.${ac_objext}])
+  RUBY_DEFINE_IF([defined __powerpc__], C_ALLOCA, 1)
+  RUBY_DEFINE_IF([defined __powerpc__], alloca, alloca)
+  ],
+[
+  AC_FUNC_ALLOCA
+  ])
+if test "x$ALLOCA" = "x"; then
+    AC_CACHE_CHECK([for dynamic size alloca], rb_cv_dynamic_alloca, [
+    for chk in ok __chkstk; do
+	AC_TRY_LINK([
+	    @%:@ifdef HAVE_ALLOCA_H
+	    @%:@include <alloca.h>
+	    @%:@endif
+	    void $chk() {}
+	    int dynamic_alloca_test;
+	    int dynamic_alloca_result;],
+	    [dynamic_alloca_result = alloca(dynamic_alloca_test) != 0;],
+	    [rb_cv_dynamic_alloca=$chk; break])
+    done])
+    if test "x$rb_cv_dynamic_alloca" = "x__chkstk"; then
+	AC_DEFINE_UNQUOTED(RUBY_ALLOCA_CHKSTK, _$rb_cv_dynamic_alloca)
+	AS_CASE("$target_cpu",
+	[x64|x86_64], [
+	    AC_SUBST([ALLOCA], [\${LIBOBJDIR}x86_64-chkstk.${ac_objext}])
+	],)
+    fi
+fi
+AC_FUNC_MEMCMP
 
-AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(
-alphasort \
-asctime_r \
-chroot \
-ctime_r \
-cuserid \
-crypt \
-flock \
-ftok \
-funopen \
-gai_strerror \
-gcvt \
-getloadavg \
-getlogin \
-getprotobyname \
-getprotobynumber \
-getservbyname \
-getservbyport \
-gethostname \
-getrusage \
-gettimeofday \
-gmtime_r \
-getpwnam_r \
-getgrnam_r \
-getpwuid_r \
-grantpt \
-inet_ntoa \
-inet_ntop \
-inet_pton \
-isascii \
-link \
-localtime_r \
-lockf \
-lchown \
-lrand48 \
-memcpy \
-memmove \
-mkstemp \
-mmap \
-nl_langinfo \
-perror \
-poll \
-ptsname \
-putenv \
-realpath \
-random \
-rand_r \
-scandir \
-setitimer \
-setlocale \
-localeconv \
-setenv \
-setpgid \
-setsockopt \
-setvbuf \
-shutdown \
-sin \
-snprintf \
-srand48 \
-srandom \
-statfs \
-statvfs \
-std_syslog \
-strcasecmp \
-strcoll \
-strdup \
-strerror \
-strftime \
-strnlen \
-strptime \
-strstr \
-strtok_r \
-symlink \
-tempnam \
-tzset \
-unlockpt \
-unsetenv \
-usleep \
-utime \
-vsnprintf \
-vasprintf \
-asprintf \
-nanosleep \
-)
-
-dnl Some systems (like OpenSolaris) do not have nanosleep in libc
-PHP_CHECK_FUNC_LIB(nanosleep, rt)
-
-dnl Check for getaddrinfo, should be a better way, but...
-dnl Also check for working getaddrinfo
-AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
-[AC_TRY_LINK([#include <netdb.h>],
-                [struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);], 
-  AC_TRY_RUN([
-#include <netdb.h>
-#include <sys/types.h>
-#ifndef AF_INET
-# include <sys/socket.h>
-#endif
-int main(void) {
-  struct addrinfo *ai, *pai, hints;
-
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_flags = AI_NUMERICHOST;
-
-  if (getaddrinfo("127.0.0.1", 0, &hints, &ai) < 0) {
-    exit(1);
-  }
-
-  if (ai == 0) {
-    exit(1);
-  }
-
-  pai = ai;
-  
-  while (pai) {
-    if (pai->ai_family != AF_INET) {
-      /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
-      exit(1);
-    }
-    if (pai->ai_addr->sa_family != AF_INET) {
-      /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
-      exit(1);
-    }
-    pai = pai->ai_next;
-  }
-  freeaddrinfo(ai);
-  exit(0);
+# http://sources.redhat.com/ml/libc-hacker/2005-08/msg00008.html
+# Debian GNU/Linux Etch's libc6.1 2.3.6.ds1-13etch5 has this problem.
+# Debian GNU/Linux Lenny's libc6.1 2.7-10 has no problem.
+AC_CACHE_CHECK(for broken erfc of glibc-2.3.6 on IA64, rb_cv_broken_glibc_ia64_erfc,
+  [AC_TRY_RUN([
+#include <math.h>
+int
+main()
+{
+   erfc(10000.0);
+   return 0;
 }
-  ],ac_cv_func_getaddrinfo=yes, ac_cv_func_getaddrinfo=no, ac_cv_func_getaddrinfo=no),
-ac_cv_func_getaddrinfo=no)])
-if test "$ac_cv_func_getaddrinfo" = yes; then
-  AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
-fi
+],
+	rb_cv_broken_glibc_ia64_erfc=no,
+	rb_cv_broken_glibc_ia64_erfc=yes,
+	rb_cv_broken_glibc_ia64_erfc=no)])
+AS_CASE([$rb_cv_broken_glibc_ia64_erfc],[yes],[ac_cv_func_erf=no])
 
-dnl Check for the __sync_fetch_and_add builtin
-AC_CACHE_CHECK([for __sync_fetch_and_add], ac_cv_func_sync_fetch_and_add,
-[AC_TRY_LINK([],[int x;__sync_fetch_and_add(&x,1);],ac_cv_func_sync_fetch_and_add=yes,ac_cv_func_sync_fetch_and_add=no)])
-if test "$ac_cv_func_sync_fetch_and_add" = yes; then
-  AC_DEFINE(HAVE_SYNC_FETCH_AND_ADD,1,[Define if you have the __sync_fetch_and_add function])
-fi
+AS_CASE(["$target_os"],[freebsd*],[
+	 AC_DEFINE(BROKEN_CLOSE)
+	 AC_REPLACE_FUNCS(close)
+	 ])
+AC_REPLACE_FUNCS(dup2 memmove strerror\
+		 strchr strstr crypt flock\
+		 isnan finite isinf hypot acosh erf tgamma lgamma_r cbrt \
+                 strlcpy strlcat ffs setproctitle)
 
-AC_REPLACE_FUNCS(strlcat strlcpy getopt)
-AC_FUNC_UTIME_NULL
-AC_FUNC_ALLOCA
-dnl PHP_AC_BROKEN_SPRINTF
-dnl PHP_AC_BROKEN_SNPRINTF
-PHP_DECLARED_TIMEZONE
-PHP_TIME_R_TYPE
-PHP_READDIR_R_TYPE
-PHP_CHECK_IN_ADDR_T
+# for missing/setproctitle.c
+AS_CASE(["$target_os"],
+[aix* | k*bsd*-gnu | kopensolaris*-gnu | linux* | darwin*], [AC_DEFINE(SPT_TYPE,SPT_REUSEARGV)],
+[hpux*], [AC_DEFINE(SPT_TYPE,SPT_PSTAT) ],
+[])
 
-AC_CHECK_FUNCS(crypt_r, [ php_crypt_r="1" ], [ php_crypt_r="0" ])
-if test "x$php_crypt_r" = "x1"; then
-  PHP_CRYPT_R_STYLE
-fi
 
-dnl General settings.
-dnl -------------------------------------------------------------------------
-PHP_CONFIGURE_PART(General settings)
-
-PHP_HELP_SEPARATOR([General settings:])
-
-PHP_ARG_ENABLE(gcov,  whether to include gcov symbols,
-[  --enable-gcov           Enable GCOV code coverage (requires LTP) - FOR DEVELOPERS ONLY!!], no, no)
-
-if test "$PHP_GCOV" = "yes"; then
-
-  if test "$GCC" != "yes"; then
-    AC_MSG_ERROR([GCC is required for --enable-gcov])
-  fi
-  
-  dnl Check if ccache is being used
-  case `$php_shtool path $CC` in
-    *ccache*[)] gcc_ccache=yes;;
-    *[)] gcc_ccache=no;;
-  esac
-
-  if test "$gcc_ccache" = "yes" && (test -z "$CCACHE_DISABLE" || test "$CCACHE_DISABLE" != "1"); then
-    AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
-  fi
-  
-  ltp_version_list="1.5 1.6 1.7 1.9"
-
-  AC_CHECK_PROG(LTP, lcov, lcov)
-  AC_CHECK_PROG(LTP_GENHTML, genhtml, genhtml)
-  PHP_SUBST(LTP)
-  PHP_SUBST(LTP_GENHTML)
-
-  if test "$LTP"; then
-    AC_CACHE_CHECK([for ltp version], php_cv_ltp_version, [
-      php_cv_ltp_version=invalid
-      ltp_version=`$LTP -v 2>/dev/null | $SED -e 's/^.* //'`
-      for ltp_check_version in $ltp_version_list; do
-        if test "$ltp_version" = "$ltp_check_version"; then
-          php_cv_ltp_version="$ltp_check_version (ok)"
-        fi
-      done
-    ])
-  else
-    ltp_msg="To enable code coverage reporting you must have one of the following LTP versions installed: $ltp_version_list"      
-    AC_MSG_ERROR([$ltp_msg])
-  fi
-
-  case $php_cv_ltp_version in
-    ""|invalid[)]
-      ltp_msg="You must have one of the following versions of LTP: $ltp_version_list (found: $ltp_version)."
-      AC_MSG_ERROR([$ltp_msg])
-      LTP="exit 0;"
-      ;;
-  esac
-
-  if test -z "$LTP_GENHTML"; then
-    AC_MSG_ERROR([Could not find genhtml from the LTP package])
-  fi
-
-  AC_DEFINE(HAVE_GCOV, 1, [Whether you have gcov])
-  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Makefile.gcov, $abs_srcdir)
-
-  dnl Remove all optimization flags from CFLAGS
-  changequote({,})
-  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9s]*//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9s]*//g'`
-  changequote([,])
-
-  dnl Add the special gcc flags
-  CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
-  CXXFLAGS="$CXXFLAGS -O0 -fprofile-arcs -ftest-coverage"
-fi
-
-PHP_ARG_ENABLE(debug, whether to include debugging symbols,
-[  --enable-debug          Compile with debugging symbols], no, no)
-
-if test "$PHP_DEBUG" = "yes"; then
-  PHP_DEBUG=1
-  ZEND_DEBUG=yes
-  changequote({,})
-  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9s]*//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9s]*//g'`
-  changequote([,])
-  dnl add -O0 only if GCC or ICC is used
-  if test "$GCC" = "yes" || test "$ICC" = "yes"; then
-    CFLAGS="$CFLAGS -O0"
-    CXXFLAGS="$CXXFLAGS -g -O0"
-  fi
-  if test "$SUNCC" = "yes"; then
-    if test -n "$auto_cflags"; then
-      CFLAGS="-g"
-      CXXFLAGS="-g"
-    else
-      CFLAGS="$CFLAGS -g"
-      CXXFLAGS="$CFLAGS -g"
-    fi
-  fi
+AC_CACHE_CHECK(for signbit, rb_cv_have_signbit,
+  [AC_TRY_LINK([
+#include <math.h>
+], [int v = signbit(-0.0);],
+	rb_cv_have_signbit=yes,
+	rb_cv_have_signbit=no)])
+if test "$rb_cv_have_signbit" = yes; then
+  AC_DEFINE(HAVE_SIGNBIT)
 else
-  PHP_DEBUG=0
-  ZEND_DEBUG=no
+  AC_LIBOBJ([signbit])
+fi
+AC_CHECK_FUNCS(fmod killpg wait4 waitpid fork spawnv syscall __syscall chroot getcwd eaccess\
+	      truncate ftruncate ftello chsize times utimes utimensat fcntl lockf lstat\
+	      truncate64 ftruncate64 ftello64 fseeko fseeko64 \
+	      link symlink readlink readdir_r fsync fdatasync fchown posix_fadvise\
+	      setitimer setruid seteuid setreuid setresuid socketpair\
+	      setrgid setegid setregid setresgid issetugid pause lchown lchmod\
+	      getpgrp setpgrp getpgid setpgid initgroups getgroups setgroups\
+	      getpriority getrlimit setrlimit sysconf close getgrnam_r\
+	      dlopen sigprocmask sigaction sigsetjmp _setjmp _longjmp\
+	      setsid telldir seekdir fchmod cosh sinh tanh log2 round\
+	      setuid setgid daemon select_large_fdset setenv unsetenv\
+              mktime timegm gmtime_r clock_gettime gettimeofday poll ppoll\
+              pread sendfile shutdown sigaltstack dl_iterate_phdr\
+              dup3 pipe2 posix_memalign memalign)
+
+AC_CACHE_CHECK(for unsetenv returns a value, rb_cv_unsetenv_return_value,
+  [AC_TRY_COMPILE([
+#include <stdlib.h>
+], [int v = unsetenv("foo");],
+	rb_cv_unsetenv_return_value=yes,
+	rb_cv_unsetenv_return_value=no)])
+if test "$rb_cv_unsetenv_return_value" = no; then
+  AC_DEFINE(VOID_UNSETENV)
 fi
 
-PHP_ARG_WITH(layout, layout of installed files,
-[  --with-layout=TYPE      Set how installed files will be laid out.  Type can
-                          be either PHP or GNU @<:@PHP@:>@], PHP, no)
-
-case $PHP_LAYOUT in
-  GNU)
-    oldstyleextdir=no
-    ;;
-  *)
-    oldstyleextdir=yes
-    ;;
-esac
-
-PHP_ARG_WITH(config-file-path, path to configuration file,
-[  --with-config-file-path=PATH
-                          Set the path in which to look for php.ini @<:@PREFIX/lib@:>@], DEFAULT, no)
-
-if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
-  case $PHP_LAYOUT in
-    GNU)
-      PHP_CONFIG_FILE_PATH=$sysconfdir
-      ;;
-    *)
-      PHP_CONFIG_FILE_PATH=$libdir
-      ;;
-  esac
-fi
-
-AC_MSG_CHECKING([where to scan for configuration files])
-PHP_ARG_WITH(config-file-scan-dir,,
-[  --with-config-file-scan-dir=PATH
-                          Set the path where to scan for configuration files], DEFAULT, no) 
-if test "$PHP_CONFIG_FILE_SCAN_DIR" = "DEFAULT"; then
-  PHP_CONFIG_FILE_SCAN_DIR=
-fi
-AC_MSG_RESULT([$PHP_CONFIG_FILE_SCAN_DIR])
-
-test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
-
-PHP_ARG_ENABLE(sigchild, whether to enable PHP's own SIGCHLD handler,
-[  --enable-sigchild       Enable PHP's own SIGCHLD handler], no, no)
-
-if test "$PHP_SIGCHILD" = "yes"; then
-  AC_DEFINE(PHP_SIGCHILD, 1, [ ])
-else
-  AC_DEFINE(PHP_SIGCHILD, 0, [ ])
-fi
-
-PHP_ARG_ENABLE(libgcc, whether to explicitly link against libgcc,
-[  --enable-libgcc         Enable explicitly linking against libgcc], no, no)
-
-if test "$PHP_LIBGCC" = "yes"; then
-  PHP_LIBGCC_LIBPATH(gcc)
-  if test -z "$libgcc_libpath"; then
-    AC_MSG_ERROR([Cannot locate libgcc. Make sure that gcc is in your path])
-  fi
-  PHP_ADD_LIBPATH($libgcc_libpath)
-  PHP_ADD_LIBRARY(gcc, yes)
-fi
-
-PHP_ARG_ENABLE(short-tags, whether to enable short tags by default,
-[  --disable-short-tags    Disable the short-form <? start tag by default], yes, no)
-
-if test "$PHP_SHORT_TAGS" = "yes"; then
-  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG, "1", [ ])
-else
-  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG, "0", [ ])
-fi
-
-PHP_ARG_ENABLE(dmalloc, whether to enable dmalloc,
-[  --enable-dmalloc        Enable dmalloc], no, no)
-
-if test "$PHP_DMALLOC" = "yes"; then
-  AC_CHECK_LIB(dmalloc, dmalloc_error, [
-    PHP_ADD_LIBRARY(dmalloc)
-    AC_DEFINE(HAVE_DMALLOC,1,[Whether you have dmalloc])
-    CPPFLAGS="$CPPFLAGS -DDMALLOC_FUNC_CHECK"
-  ], [
-    AC_MSG_ERROR([Problem with enabling dmalloc. Please check config.log for details.])
-  ])
-fi
-
-PHP_ARG_ENABLE(ipv6, whether to enable IPv6 support,
-[  --disable-ipv6          Disable IPv6 support], yes, no)
-
-if test "$PHP_IPV6" != "no" && test "$ac_cv_ipv6_support" = yes; then
-  AC_DEFINE(HAVE_IPV6, 1, [Whether to enable IPv6 support])
-fi
-
-dnl ##
-dnl ## DTRACE CHECKS
-dnl ## Note: this has to be done after SAPI configuration!
-dnl ##
-PHP_ARG_ENABLE(dtrace, whether to enable DTrace support,
-[  --enable-dtrace         Enable DTrace support], no, no)
-
-if test "$PHP_DTRACE" = "yes"; then
-  AC_CHECK_HEADERS([sys/sdt.h], [
-    PHP_INIT_DTRACE([Zend/zend_dtrace.d],[Zend/zend_dtrace_gen.h],[main/main.c Zend/zend_API.c \
-      Zend/zend_execute.c Zend/zend_exceptions.c \
-      Zend/zend_dtrace.c Zend/zend.c])
-    AC_DEFINE(HAVE_DTRACE, 1, [Whether to enable DTrace support])
-    PHP_SUBST(PHP_DTRACE_OBJS)
-  ], [
-    AC_MSG_ERROR([Cannot find sys/sdt.h which is required for DTrace support])
-  ])
-fi
-
-AC_MSG_CHECKING([how big to make fd sets])
-PHP_ARG_ENABLE(fd-setsize,,
-[  --enable-fd-setsize     Set size of descriptor sets], no, no)
-
-if test "$PHP_FD_SETSIZE" != "no"; then
-  if test "0$PHP_FD_SETSIZE" -gt 0 2>/dev/null; then
-    CPPFLAGS="$CPPFLAGS -DFD_SETSIZE=$PHP_FD_SETSIZE"
-    AC_MSG_RESULT([using $PHP_FD_SETSIZE])
-  else
-    AC_MSG_ERROR([Invalid value passed to --enable-fd-setsize!])
-  fi
-else
-  AC_MSG_RESULT([using system default])
-fi
-
-dnl Extension configuration.
-dnl -------------------------------------------------------------------------
-
-PHP_HELP_SEPARATOR([Extensions:
-
-  --with-EXTENSION=[shared[,PATH]]
-  
-    NOTE: Not all extensions can be build as 'shared'.
-
-    Example: --with-foobar=shared,/usr/local/foobar/
-
-      o Builds the foobar extension as shared extension.
-      o foobar package install prefix is /usr/local/foobar/
+AC_CACHE_CHECK(for __builtin_setjmp, ac_cv_func___builtin_setjmp,
+[AC_TRY_LINK([@%:@include <setjmp.h>
+    jmp_buf jb; void t(v) int v; {__builtin_longjmp(jb, v);}],
+    [__builtin_setjmp(jb);],
+    [ac_cv_func___builtin_setjmp=yes],
+    [ac_cv_func___builtin_setjmp=no])
 ])
 
-PHP_CONFIGURE_PART(Configuring extensions)
+test x$ac_cv_func__longjmp = xno && ac_cv_func__setjmp=no
 
-dnl
-dnl Check if all enabled by default extensions should be disabled
-dnl
-
-AC_ARG_ENABLE(all,
-[ --disable-all   Disable all extensions which are enabled by default
-], [
-  PHP_ENABLE_ALL=$enableval
-])
-
-# reading config stubs
-esyscmd(./build/config-stubs ext)
-
-dnl Extensions post-config
-dnl -------------------------------------------------------------------------
-
-enable_shared=yes
-enable_static=yes
-
-case $php_sapi_module in
-  shared[)]
-    enable_static=no
-    case $with_pic in
-      yes)
-        standard_libtool_flag='-prefer-pic'
-        ;;
-      no)
-        standard_libtool_flag='-prefer-non-pic'
-        ;;
-    esac
-    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version -module"
-    ;;
-  *[)]
-    standard_libtool_flag='-prefer-non-pic -static'
-    if test -z "$PHP_MODULES" && test -z "$PHP_ZEND_EX"; then
-      enable_shared=no
+AC_MSG_CHECKING(for setjmp type)
+AC_ARG_WITH(setjmp-type,
+	AS_HELP_STRING([--with-setjmp-type], [select setjmp type]),
+	[
+	AS_CASE([$withval],
+	[__builtin_setjmp], [ setjmp_prefix=__builtin_],
+	[_setjmp], [ setjmp_prefix=_],
+	[sigsetjmp], [ setjmp_prefix=sig],
+	[setjmp], [ setjmp_prefix=],
+	[''], [ unset setjmp_prefix],
+	[   AC_MSG_ERROR(invalid setjmp type: $withval)])], [unset setjmp_prefix])
+if test ${setjmp_prefix+set}; then
+    if test "${setjmp_prefix}" && eval test '$ac_cv_func_'${setjmp_prefix}setjmp = no; then
+	AC_MSG_ERROR(${setjmp_prefix}setjmp is not available)
     fi
-    ;;
-esac
-
-EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
-
-dnl this has to be here to prevent the openssl crypt() from
-dnl overriding the system provided crypt().
-if test "$ac_cv_lib_crypt_crypt" = "yes"; then
-  EXTRA_LIBS="-lcrypt $EXTRA_LIBS -lcrypt"
-fi
-
-unset LIBS LDFLAGS
-
-dnl PEAR
-dnl -------------------------------------------------------------------------
-
-PHP_HELP_SEPARATOR([PEAR:])
-PHP_CONFIGURE_PART(Configuring PEAR)
-
-# compatibility
-if test -z "$with_pear" && test "$enable_pear" = "no"; then
-  with_pear=no
-fi
-
-# If CLI is disabled -> disable PEAR
-if test "$PHP_CLI" = "no"; then
-  with_pear=no
-fi
-
-PHP_ARG_WITH(pear, [whether to install PEAR],
-[  --with-pear=DIR         Install PEAR in DIR @<:@PREFIX/lib/php@:>@
-  --without-pear          Do not install PEAR], DEFAULT, yes)
-
-if test "$PHP_PEAR" != "no"; then
-
-  dnl
-  dnl PEAR dependancies
-  dnl
-  if test "$PHP_XML" = "no"; then
-    pear_error_msg="$pear_error_msg 
-                    PEAR requires XML to be enabled.     Add --enable-xml to the configure line. (or --without-pear)"
-  fi
-
-dnl
-dnl  if test "$PHP_XMLRPC" = "no"; then
-dnl    pear_error_msg="$pear_error_msg 
-dnl                    PEAR requires XML-RPC to be enabled. Add --with-xmlrpc to the configure line. (or --without-pear)"
-dnl  fi
-dnl
-
-  if test "$pear_error_msg"; then
-    AC_MSG_ERROR([$pear_error_msg])
-  fi
-
-  install_pear="install-pear"
-  PEAR_INSTALLDIR=$PHP_PEAR
-
-  if test "$PHP_PEAR" = "DEFAULT" || test "$PHP_PEAR" = "yes"; then
-    case $PHP_LAYOUT in
-      GNU) PEAR_INSTALLDIR=$datadir/pear;;
-      *)   PEAR_INSTALLDIR=$libdir/php;;
-    esac
-  fi
-
-  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/pear/Makefile.frag,$abs_srcdir/pear,pear)
-fi
-
-
-dnl Configuring Zend and TSRM.
-dnl -------------------------------------------------------------------------
-
-PHP_HELP_SEPARATOR([Zend:])
-PHP_CONFIGURE_PART(Configuring Zend)
-
-LIBZEND_BASIC_CHECKS
-LIBZEND_DLSYM_CHECK
-LIBZEND_OTHER_CHECKS
-
-if test "$ZEND_MAINTAINER_ZTS" = "yes"; then
-  AC_DEFINE(ZTS,1,[ ])
-  PHP_THREAD_SAFETY=yes
+elif test "$ac_cv_func___builtin_setjmp" = yes; then
+    setjmp_prefix=__builtin_
+elif test "$ac_cv_func__setjmp" = yes; then
+    setjmp_prefix=_
+elif test "$ac_cv_func_sigsetjmp" = yes; then
+    AS_CASE([$target_os],[solaris*|cygwin*],[setjmp_prefix=],[setjmp_prefix=sig])
 else
-  PHP_THREAD_SAFETY=no
+    setjmp_prefix=
 fi
-
-INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
-INCLUDES="$INCLUDES -I\$(top_builddir)/Zend"
-
-if test "$abs_srcdir" != "$abs_builddir"; then
-  INCLUDES="$INCLUDES -I\$(top_srcdir)/main -I\$(top_srcdir)/Zend"
-  INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM -I\$(top_builddir)/"
-fi
-
-ZEND_EXTRA_LIBS="$LIBS"
-unset LIBS LDFLAGS
-
-PHP_HELP_SEPARATOR([TSRM:])
-PHP_CONFIGURE_PART(Configuring TSRM)
-TSRM_BASIC_CHECKS
-if test "$PHP_THREAD_SAFETY" = "yes"; then
-  TSRM_THREADS_CHECKS
-fi
-
-EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
-EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $LDFLAGS"
-EXTRA_LIBS="$EXTRA_LIBS $LIBS"
-unset LIBS LDFLAGS
-
-test "$prefix" = "NONE" && prefix=/usr/local
-test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
-test "$program_prefix" = "NONE" && program_prefix=
-test "$program_suffix" = "NONE" && program_suffix=
-
-case $libdir in
-  '${exec_prefix}/lib')
-    libdir=$libdir/php
-    ;;
-esac
-case $datadir in
-  '${prefix}/share')
-    datadir=$datadir/php
-    ;;
-esac
-
-phplibdir=`pwd`/modules
-$php_shtool mkdir -p $phplibdir
-phptempdir=`pwd`/libs
-
-old_exec_prefix=$exec_prefix
-old_libdir=$libdir
-old_datadir=$datadir
-exec_prefix=`eval echo $exec_prefix`
-libdir=`eval echo $libdir`
-datadir=`eval echo $datadir`
-
-dnl Build extension directory path
-
-ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|$SED 's/#define ZEND_MODULE_API_NO //'`
-
-if test -z "$EXTENSION_DIR"; then
-  extbasedir=$ZEND_MODULE_API_NO
-  if test "$oldstyleextdir" = "yes"; then
-    if test "$PHP_DEBUG" = "1"; then
-      part1=debug
-    else
-      part1=no-debug
-    fi
-    if test "$enable_maintainer_zts" = "yes"; then
-      part2=zts
-    else
-      part2=non-zts
-    fi
-    extbasedir=$part1-$part2-$extbasedir
-    EXTENSION_DIR=$libdir/extensions/$extbasedir
-  else
-    if test "$enable_maintainer_zts" = "yes"; then
-      extbasedir=$extbasedir-zts
-    fi
-    
-    if test "$PHP_DEBUG" = "1"; then
-      extbasedir=$extbasedir-debug
-    fi
-    EXTENSION_DIR=$libdir/$extbasedir
-  fi
-fi
-
-case $PHP_LAYOUT in
-  GNU)
-    datarootdir=$prefix/share
-    ;;
-  *)
-    datarootdir=$prefix/php
-    ;;
-esac
-
-dnl Expand all directory names for use in macros/constants
-EXPANDED_PEAR_INSTALLDIR=`eval echo $PEAR_INSTALLDIR`
-EXPANDED_EXTENSION_DIR=`eval echo $EXTENSION_DIR`
-EXPANDED_LOCALSTATEDIR=`eval echo $localstatedir`
-EXPANDED_BINDIR=`eval echo $bindir`
-EXPANDED_SBINDIR=`eval echo $sbindir`
-EXPANDED_MANDIR=`eval echo $mandir`
-EXPANDED_LIBDIR=$libdir
-EXPANDED_SYSCONFDIR=`eval echo $sysconfdir`
-EXPANDED_DATADIR=$datadir
-EXPANDED_PHP_CONFIG_FILE_PATH=`eval echo "$PHP_CONFIG_FILE_PATH"`
-EXPANDED_PHP_CONFIG_FILE_SCAN_DIR=`eval echo "$PHP_CONFIG_FILE_SCAN_DIR"`
-INCLUDE_PATH=.:$EXPANDED_PEAR_INSTALLDIR
-
-exec_prefix=$old_exec_prefix
-libdir=$old_libdir
-datadir=$old_datadir
-
-AC_SUBST(INCLUDE_PATH)
-AC_SUBST(EXPANDED_PEAR_INSTALLDIR)
-AC_SUBST(EXPANDED_EXTENSION_DIR)
-AC_SUBST(EXPANDED_BINDIR)
-AC_SUBST(EXPANDED_SBINDIR)
-AC_SUBST(EXPANDED_MANDIR)
-AC_SUBST(EXPANDED_LIBDIR)
-AC_SUBST(EXPANDED_DATADIR)
-AC_SUBST(EXPANDED_SYSCONFDIR)
-AC_SUBST(EXPANDED_LOCALSTATEDIR)
-AC_SUBST(EXPANDED_PHP_CONFIG_FILE_PATH)
-AC_SUBST(EXPANDED_PHP_CONFIG_FILE_SCAN_DIR)
-
-if test -n "$php_ldflags_add_usr_lib"; then
-  PHP_RPATHS="$PHP_RPATHS /usr/lib"
-fi
-
-PHP_UTILIZE_RPATHS
-
-if test -z "$php_ldflags_add_usr_lib"; then
-  PHP_REMOVE_USR_LIB(PHP_LDFLAGS)
-  PHP_REMOVE_USR_LIB(LDFLAGS)
-fi
-
-EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
-EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
-
-PHP_BUILD_DATE=`date '+%Y-%m-%d'`
-AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
-
-case $host_alias in
-*netware*)
-  PHP_OS="NetWare"
-  PHP_UNAME="NetWare"
-  AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[hardcode for each of the cross compiler host])
-  AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[hardcode for each of the cross compiler host])
-  ;;
-*)
-  PHP_UNAME=`uname -a | xargs`
-  AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
-  PHP_OS=`uname | xargs`
-  AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
-  ;;
-esac
-
-PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)
-
-PHP_SUBST(PHP_EXECUTABLE)
-
-PHP_SUBST(PHP_SAPI_OBJS)
-PHP_SUBST(PHP_BINARY_OBJS)
-PHP_SUBST(PHP_GLOBAL_OBJS)
-
-PHP_SUBST(PHP_BINARIES)
-PHP_SUBST(PHP_MODULES)
-PHP_SUBST(PHP_ZEND_EX)
-
-PHP_SUBST(EXT_LIBS)
-
-PHP_SUBST_OLD(abs_builddir)
-PHP_SUBST_OLD(abs_srcdir)
-PHP_SUBST_OLD(php_abs_top_builddir)
-PHP_SUBST_OLD(php_abs_top_srcdir)
-
-PHP_SUBST(bindir)
-PHP_SUBST(sbindir)
-PHP_SUBST(exec_prefix)
-PHP_SUBST_OLD(program_prefix)
-PHP_SUBST_OLD(program_suffix)
-PHP_SUBST(includedir)
-PHP_SUBST(libdir)
-PHP_SUBST(mandir)
-PHP_SUBST(phplibdir)
-PHP_SUBST(phptempdir)
-PHP_SUBST(prefix)
-PHP_SUBST(localstatedir)
-PHP_SUBST(datadir)
-PHP_SUBST(datarootdir)
-PHP_SUBST(sysconfdir)
-
-PHP_SUBST(EXEEXT)
-PHP_SUBST(CC)
-PHP_SUBST(CFLAGS)
-PHP_SUBST(CFLAGS_CLEAN)
-PHP_SUBST(CPP)
-PHP_SUBST(CPPFLAGS)
-PHP_SUBST(CXX)
-PHP_SUBST(CXXFLAGS)
-PHP_SUBST(CXXFLAGS_CLEAN)
-PHP_SUBST_OLD(DEBUG_CFLAGS)
-PHP_SUBST_OLD(EXTENSION_DIR)
-PHP_SUBST_OLD(EXTRA_LDFLAGS)
-PHP_SUBST_OLD(EXTRA_LDFLAGS_PROGRAM)
-PHP_SUBST_OLD(EXTRA_LIBS)
-PHP_SUBST_OLD(ZEND_EXTRA_LIBS)
-PHP_SUBST_OLD(INCLUDES)
-PHP_SUBST_OLD(EXTRA_INCLUDES)
-PHP_SUBST_OLD(INCLUDE_PATH)
-PHP_SUBST_OLD(INSTALL_IT)
-PHP_SUBST(LFLAGS)
-PHP_SUBST(LIBTOOL)
-PHP_SUBST(LN_S)
-PHP_SUBST_OLD(NATIVE_RPATHS)
-PHP_SUBST_OLD(PEAR_INSTALLDIR)
-PHP_SUBST(PHP_BUILD_DATE)
-PHP_SUBST_OLD(PHP_LDFLAGS)
-PHP_SUBST_OLD(PHP_LIBS)
-PHP_SUBST(OVERALL_TARGET)
-PHP_SUBST(PHP_RPATHS)
-PHP_SUBST(PHP_SAPI)
-PHP_SUBST_OLD(PHP_VERSION)
-PHP_SUBST_OLD(PHP_VERSION_ID)
-PHP_SUBST(SHELL)
-PHP_SUBST(SHARED_LIBTOOL)
-PHP_SUBST(WARNING_LEVEL)
-PHP_SUBST(PHP_FRAMEWORKS)
-PHP_SUBST(PHP_FRAMEWORKPATH)
-PHP_SUBST(INSTALL_HEADERS)
-
-old_CC=$CC
-
-if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
-  CXXFLAGS="$CXXFLAGS $ac_cv_pthreads_cflags"
-  INLINE_CFLAGS="$INLINE_CFLAGS $ac_cv_pthreads_cflags"
-  cat >meta_ccld<<EOF
-#! /bin/sh
-exec $CC $ac_cv_pthreads_cflags \$@
-EOF
-  CC="$abs_builddir/meta_ccld"
-  chmod +x meta_ccld
-fi
-
-dnl This will go away, if we have a facility to run per-extension code
-dnl after the thread_safety decision was done
-if test "$PHP_THREAD_SAFETY" = "yes" && test "$PHP_MYSQL" = "yes"; then
-  CPPFLAGS="$CPPFLAGS -DTHREAD=1"
-fi
-
-ZEND_EXT_TYPE="zend_extension"
-PHP_SUBST(ZEND_EXT_TYPE)
-
-dnl
-dnl Libtool creation
-dnl
-
-PHP_HELP_SEPARATOR([Libtool:])
-PHP_CONFIGURE_PART(Configuring libtool)
-
-LDFLAGS="$LDFLAGS $PHP_AIX_LDFLAGS"
-
-dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5 and 10.6.
-dnl This hack works around it. Ugly.
-case $host_alias in
-*darwin9*|*darwin10*)
-  ac_cv_exeext=
-  ;;
-esac
-
-dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by PHP_REQUIRE_CXX).
-dnl Otherwise AC_PROG_LIBTOOL fails if there is no working C++ compiler.
-AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
-  undefine([AC_PROG_CXX])
-  AC_DEFUN([AC_PROG_CXX], [])
-  undefine([AC_PROG_CXXCPP])
-  AC_DEFUN([AC_PROG_CXXCPP], [php_prog_cxxcpp=disabled])
-])
-AC_PROG_LIBTOOL
-
-if test "$enable_debug" != "yes"; then
-  PHP_SET_LIBTOOL_VARIABLE([--silent])
-fi
-
-dnl libtool 1.4.3 needs this.
-PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])
-
-test -z "$PHP_COMPILE" && PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
-test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_COMPILE) -c $<'
-SHARED_LIBTOOL='$(LIBTOOL)'
-
-CC=$old_CC
-
-PHP_CONFIGURE_PART(Generating files)
-
-CXXFLAGS_CLEAN=$CXXFLAGS
-CFLAGS_CLEAN=$CFLAGS
-CFLAGS="\$(CFLAGS_CLEAN) $standard_libtool_flag"
-INLINE_CFLAGS="$INLINE_CFLAGS $standard_libtool_flag"
-CXXFLAGS="$CXXFLAGS $standard_libtool_flag"
-
-if test "$PHP_PHAR" != "no" && test "$PHP_CLI" != "no"; then
-  pharcmd=pharcmd
-  pharcmd_install=install-pharcmd
+if test x$setjmp_prefix = xsig; then
+    setjmp_sigmask=yes
 else
-  pharcmd=
-  pharcmd_install=
-fi;
-
-all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
-install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
-
-PHP_SUBST(all_targets)
-PHP_SUBST(install_targets)
-PHP_SUBST(install_binary_targets)
-
-PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
-
-PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c)
-
-PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
-       fopen_wrappers.c alloca.c  php_scandir.c \
-       php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
-       strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
-       network.c php_open_temporary_file.c php_logos.c \
-       output.c getopt.c)
-
-PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
-       plain_wrapper.c userspace.c transports.c xp_socket.c mmap.c \
-       glob_wrapper.c)
-
-PHP_ADD_SOURCES(/main, internal_functions.c,, sapi)
-
-case $host_alias in
-  *netware*)
-    PHP_ADD_BUILD_DIR(win32)
-    PHP_ADD_BUILD_DIR(netware)
-    ;;
-  *)
-    PHP_ADD_SOURCES_X(/main, internal_functions_cli.c,, PHP_BINARY_OBJS)
-    ;;
-esac
-
-PHP_ADD_SOURCES(Zend, \
-    zend_language_parser.c zend_language_scanner.c \
-    zend_ini_parser.c zend_ini_scanner.c \
-    zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c zend_dtrace.c \
-    zend_execute_API.c zend_highlight.c zend_llist.c \
-    zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
-    zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
-    zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c \
-    zend_ini.c zend_qsort.c zend_multibyte.c zend_ts_hash.c zend_stream.c \
-    zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
-    zend_closures.c zend_float.c zend_string.c zend_signal.c)
-
-if test -r "$abs_srcdir/Zend/zend_objects.c"; then
-  PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c zend_default_classes.c)
+    unset setjmp_sigmask
 fi
+AC_MSG_RESULT(${setjmp_prefix}setjmp)
+AC_DEFINE_UNQUOTED([RUBY_SETJMP(env)], [${setjmp_prefix}setjmp(env${setjmp_sigmask+,0})])
+AC_DEFINE_UNQUOTED([RUBY_LONGJMP(env,val)], [${setjmp_prefix}longjmp(env,val)])
+AC_DEFINE_UNQUOTED(RUBY_JMP_BUF, ${setjmp_sigmask+${setjmp_prefix}}jmp_buf)
 
-dnl Selectively disable optimization due to high RAM usage during
-dnl compiling the executor.
-if test -n "$GCC" && test "$ZEND_INLINE_OPTIMIZATION" != "yes"; then
-  flag=-O0
-else
-  flag=
+AC_ARG_ENABLE(setreuid,
+       AS_HELP_STRING([--enable-setreuid], [use setreuid()/setregid() according to need even if obsolete]),
+       [use_setreuid=$enableval])
+if test "$use_setreuid" = yes; then
+    AC_DEFINE(USE_SETREUID)
+    AC_DEFINE(USE_SETREGID)
 fi
-
-PHP_ADD_SOURCES_X(Zend, zend_execute.c,,PHP_GLOBAL_OBJS,,$flag)
-
-PHP_ADD_BUILD_DIR(main main/streams)
-PHP_ADD_BUILD_DIR(TSRM)
-PHP_ADD_BUILD_DIR(Zend)
-
-PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
-PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Makefile.frag,$abs_srcdir/Zend,Zend)
-PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)
-
-PHP_GEN_BUILD_DIRS
-PHP_GEN_GLOBAL_MAKEFILE
-
-AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
-
-$php_shtool mkdir -p pear/scripts
-$php_shtool mkdir -p scripts
-$php_shtool mkdir -p scripts/man1
-
-ALL_OUTPUT_FILES="php5.spec main/build-defs.h \
-scripts/phpize scripts/man1/phpize.1 \
-scripts/php-config scripts/man1/php-config.1 \
-$PHP_OUTPUT_FILES"
-
-dnl
-dnl Check for unknown configure options
-dnl
-PHP_CHECK_CONFIGURE_OPTIONS
-
-dnl
-dnl Generate build files
-dnl
-AC_OUTPUT($ALL_OUTPUT_FILES, [], [
-
-if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test "\$CONFIG_FILES" = " $ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
-  REDO_ALL=yes
+AC_STRUCT_TIMEZONE
+AC_CACHE_CHECK(for struct tm.tm_gmtoff, rb_cv_member_struct_tm_tm_gmtoff,
+  [AC_TRY_COMPILE([#include <time.h>],
+    [struct tm t; t.tm_gmtoff = 3600;],
+  [rb_cv_member_struct_tm_tm_gmtoff=yes],
+  [rb_cv_member_struct_tm_tm_gmtoff=no])])
+if test "$rb_cv_member_struct_tm_tm_gmtoff" = yes; then
+  AC_DEFINE(HAVE_STRUCT_TM_TM_GMTOFF)
 fi
-
-################################################################
-# Create configuration headers
-#
-
-test -d TSRM || $php_shtool mkdir TSRM
-echo '#include <../main/php_config.h>' > TSRM/tsrm_config.h
-
-test -d Zend || $php_shtool mkdir Zend
-
-cat >Zend/zend_config.h <<FEO
-#include <../main/php_config.h>
-#if defined(APACHE) && defined(PHP_API_VERSION)
-#undef HAVE_DLFCN_H
+AC_CACHE_CHECK(for external int daylight, rb_cv_have_daylight,
+  [AC_TRY_LINK([#include <time.h>
+  int i;],
+	[i = daylight;],
+	rb_cv_have_daylight=yes,
+	rb_cv_have_daylight=no)])
+if test "$rb_cv_have_daylight" = yes; then
+  AC_DEFINE(HAVE_DAYLIGHT)
+fi
+AC_DEFUN([RUBY_CHECK_VARTYPE], [dnl
+AC_CACHE_CHECK([for external $1], AS_TR_SH(rb_cv_var_$1),
+  [AS_TR_SH(rb_cv_var_$1)=no
+  AC_TRY_COMPILE([
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 1
 #endif
-FEO
-
-# run this only when generating all the files?
-if test -n "\$REDO_ALL"; then
-  # Hacking while airborne considered harmful.
-  #
-  echo "creating main/internal_functions.c"
-  extensions="$EXT_STATIC"
-dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
-  sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$extensions > main/internal_functions.c
-
-  echo "creating main/internal_functions_cli.c"
-  cli_extensions="$EXT_CLI_STATIC"
-  sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$cli_extensions > main/internal_functions_cli.c
-
-  if test "$UNAME" = "FreeBSD" && test "$PHP_SAPI" = "apache2filter" && test "$TSRM_PTH" != "pth-config" ; then
-    echo "+--------------------------------------------------------------------+"
-    echo "|                        *** WARNING ***                             |"
-    echo "|                                                                    |"
-    echo "| In order to build PHP as a Apache2 module on FreeBSD, you have to  |"
-    echo "| add  --with-tsrm-pth to your ./configure line. Therefore you need  |"
-    echo "| to install gnu-pth from /usr/ports/devel/pth.                      |"
+$2
+;
+const volatile void *volatile t;],
+    [t = &(&$1)[0];],
+    [for t in $3; do
+      AC_TRY_COMPILE([
+#ifndef _XOPEN_SOURCE
+#define _XOPEN_SOURCE 1
+#endif
+$2
+;
+extern $t $1;
+const volatile void *volatile t;],
+        [t = &(&$1)[0];],
+        [AS_TR_SH(rb_cv_var_$1)=$t; break])
+    done])])
+if test "${AS_TR_SH(rb_cv_var_$1)}" != no; then
+  AC_DEFINE(AS_TR_CPP(HAVE_VAR_$1))
+  AC_DEFINE_UNQUOTED(AS_TR_CPP(TYPEOF_VAR_$1), ${AS_TR_SH(rb_cv_var_$1)})
+fi])
+RUBY_CHECK_VARTYPE(timezone, [@%:@include <time.h>], [long int])
+RUBY_CHECK_VARTYPE(altzone, [@%:@include <time.h>], [long int])
+AC_CHECK_FUNCS(timezone)
+if test "$ac_cv_func_timezone" = yes; then
+  AC_CACHE_CHECK([whether timezone requires zero arguments], rb_cv_func_timezone_void,
+    [AC_TRY_COMPILE([@%:@include <time.h>],
+      [(void)timezone(0, 0);],
+      [rb_cv_func_timezone_void=no],
+      [rb_cv_func_timezone_void=yes])]
+  )
+  if test $rb_cv_func_timezone_void = yes; then
+    AC_DEFINE(TIMEZONE_VOID)
   fi
-
-  if test -n "$PHP_APXS_BROKEN"; then
-    echo "+--------------------------------------------------------------------+"
-    echo "| WARNING: Your $APXS script is most likely broken."
-    echo "|                                                                    |"
-    echo "| Please go read http://www.php.net/faq.build#faq.build.apxs         |"
-    echo "| and make the changes described there and try again.                |"
-  fi
-
-  if test -n "$DEBUG_LOG"; then
-    rm -f config.cache
-cat <<X
-+--------------------------------------------------------------------+
-|                       *** ATTENTION ***                            |
-|                                                                    |
-| Something is likely to be messed up here, because the configure    |
-| script was not able to detect a simple feature on your platform.   |
-| This is often caused by incorrect configuration parameters. Please |
-| see the file debug.log for error messages.                         |
-|                                                                    |
-| If you are unable to fix this, send the file debug.log to the      |
-| php-install@lists.php.net mailing list and include appropiate      |
-| information about your setup.                                      |
-X
-  fi
-
-    if test "$PHP_SAPI" = "apache2handler" || test "$PHP_SAPI" = "apache2filter"; then
-      if test "$APACHE_VERSION" -ge 2004001; then
-        if test -z "$APACHE_THREADED_MPM"; then
-cat <<X
-+--------------------------------------------------------------------+
-|                        *** WARNING ***                             |
-|                                                                    |
-| You have built PHP for Apache's current non-threaded MPM.          |
-| If you change Apache to use a threaded MPM you must reconfigure    |
-| PHP with --enable-maintainer-zts                                   |
-X
-        fi
-      fi
-    fi
-
-  # Warn about linking Apache with libpthread if oci8 extension is enabled on linux.
-  if test "$PHP_OCI8" != "no"; then
-    if test "$PHP_SAPI" = "apache"; then
-      if test `uname` = "Linux"; then
-cat <<X
-+--------------------------------------------------------------------+
-|                        *** WARNING ***                             |
-|                                                                    |
-| Please check that your Apache (httpd) is linked with libpthread.   |
-| If not, you have to recompile Apache with pthread. For more        |
-| details, see this page: http://www.php.net/manual/ref.oci8.php     |
-X
-      fi
-    fi
-
-    if test "$PHP_SIGCHILD" != "yes"; then
-      if test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
-cat <<X
-+--------------------------------------------------------------------+
-| Notice:                                                            |
-| If you encounter <defunc> processes when using a local Oracle      |
-| database, set the value BEQUEATH_DETACH=YES in Oracle Net's        |
-| sqlnet.ora file on the PHP host, or set the environment variable   |
-| BEQUEATH_DETACH to YES before starting Apache.  If the problem     |
-| still occurs, then recompile PHP and specify --enable-sigchild     |
-| when configuring.                                                  |
-X
-      fi
-    fi
-  fi
-
-cat <<X
-+--------------------------------------------------------------------+
-| License:                                                           |
-| This software is subject to the PHP License, available in this     |
-| distribution in the file LICENSE.  By continuing this installation |
-| process, you are bound by the terms of this license agreement.     |
-| If you do not agree with the terms of this license, you must abort |
-| the installation process at this point.                            |
-+--------------------------------------------------------------------+
-
-Thank you for using PHP.
-
-X
-
-  # Output unknown configure options
-  if test "$PHP_UNKNOWN_CONFIGURE_OPTIONS"; then
-    echo "Notice: Following unknown configure options were used:
-$PHP_UNKNOWN_CONFIGURE_OPTIONS
-
-Check '[$]0 --help' for available options
-"
-  fi
-
 fi
-])
 
-dnl ## Local Variables:
-dnl ## tab-width: 4
-dnl ## End:
+AC_CACHE_CHECK(for negative time_t for gmtime(3), rb_cv_negative_time_t,
+  [AC_TRY_RUN([
+#include <stdlib.h>
+#include <time.h>
+
+void
+check(tm, y, m, d, h, s)
+    struct tm *tm;
+    int y, m, d, h, s;
+{
+    if (!tm ||
+	tm->tm_year != y ||
+	tm->tm_mon  != m-1 ||
+	tm->tm_mday != d ||
+	tm->tm_hour != h ||
+	tm->tm_sec  != s) {
+	exit(1);
+    }
+}
+
+int
+main()
+{
+   time_t t = -1;
+   struct tm *tm;
+
+   check(gmtime(&t), 69, 12, 31, 23, 59);
+   t = ~(time_t)0 << 31;
+   check(gmtime(&t), 1, 12, 13, 20, 52);
+   return 0;
+}
+],
+	rb_cv_negative_time_t=yes,
+	rb_cv_negative_time_t=no,
+	rb_cv_negative_time_t=yes)])
+if test "$rb_cv_negative_time_t" = yes; then
+  AC_DEFINE(NEGATIVE_TIME_T)
+fi
+
+# [ruby-dev:40910] overflow of time on FreeBSD
+# http://www.freebsd.org/cgi/query-pr.cgi?pr=145341
+AC_CACHE_CHECK(for localtime(3) overflow correctly, rb_cv_localtime_overflow,
+  [AC_TRY_RUN([
+#include <stdlib.h>
+#include <time.h>
+
+void
+check(time_t t1)
+{
+    struct tm *tm;
+    time_t t2;
+    tm = localtime(&t1);
+    if (!tm)
+	return; /* overflow detected.  ok. */
+    t2 = mktime(tm);
+    if (t1 == t2)
+        return; /* round-trip.  ok. */
+    exit(1);
+}
+
+int
+main()
+{
+    time_t t;
+    if (~(time_t)0 <= 0) {
+        t = (((time_t)1) << (sizeof(time_t) * 8 - 2));
+        t |= t - 1;
+    }
+    else {
+        t = ~(time_t)0;
+    }
+    check(t);
+    return 0;
+}
+],
+	rb_cv_localtime_overflow=yes,
+	rb_cv_localtime_overflow=no,
+	rb_cv_localtime_overflow=yes)])
+if test "$rb_cv_localtime_overflow" = no; then
+  AC_DEFINE(LOCALTIME_OVERFLOW_PROBLEM)
+fi
+
+if test "$ac_cv_func_sigprocmask" = yes && test "$ac_cv_func_sigaction" = yes; then
+   AC_DEFINE(POSIX_SIGNAL)
+else
+  AC_CHECK_FUNCS(sigsetmask)
+  AC_CACHE_CHECK(for BSD signal semantics, rb_cv_bsd_signal,
+    [AC_TRY_RUN([
+#include <stdio.h>
+#include <signal.h>
+
+void
+sig_handler(dummy)
+     int dummy;
+{
+}
+
+int
+main()
+{
+  signal(SIGINT, sig_handler);
+  kill(getpid(), SIGINT);
+  kill(getpid(), SIGINT);
+  return 0;
+}
+],
+	rb_cv_bsd_signal=yes,
+	rb_cv_bsd_signal=no,
+	rb_cv_bsd_signal=$ac_cv_func_sigsetmask)])
+  if test "$rb_cv_bsd_signal" = yes; then
+    AC_DEFINE(BSD_SIGNAL)
+  fi
+fi
+
+if test "$ac_cv_func_getpgid" = no; then
+AC_FUNC_GETPGRP
+fi
+if test "$ac_cv_func_setpgid:$ac_cv_func_setpgrp" = no:yes; then
+AC_FUNC_SETPGRP
+fi
+
+if test x"$target_cpu" = xia64; then
+    AC_LIBOBJ([ia64])
+    AC_CACHE_CHECK(for __libc_ia64_register_backing_store_base,
+                   rb_cv___libc_ia64_register_backing_store_base,
+    [rb_cv___libc_ia64_register_backing_store_base=no
+    AC_TRY_LINK(
+      [extern unsigned long __libc_ia64_register_backing_store_base;],
+      [unsigned long p = __libc_ia64_register_backing_store_base;
+       printf("%ld\n", p);],
+      [rb_cv___libc_ia64_register_backing_store_base=yes])])
+    if test $rb_cv___libc_ia64_register_backing_store_base = yes; then
+      AC_DEFINE(HAVE___LIBC_IA64_REGISTER_BACKING_STORE_BASE)
+    fi
+fi
+
+AC_CACHE_CHECK(whether right shift preserve sign bit, rb_cv_rshift_sign,
+    [AC_COMPILE_IFELSE([AC_LANG_BOOL_COMPILE_TRY([], [(-1==(-1>>1))])],
+	rb_cv_rshift_sign=yes,
+	rb_cv_rshift_sign=no)])
+if test "$rb_cv_rshift_sign" = yes; then
+  AC_DEFINE(RSHIFT(x,y), ((x)>>(int)(y)))
+else
+  AC_DEFINE(RSHIFT(x,y), (((x)<0) ? ~((~(x))>>(int)(y)) : (x)>>(int)(y)))
+fi
+
+# win32.c still use this. Don't remove it.
+test "$rb_cv_fcnt" = "not found" && rb_cv_fcnt="not found (OK if using GNU libc)"
+AC_CACHE_CHECK([read count field in FILE structures], rb_cv_fcnt,
+[rb_cv_fcnt="not found (OK if using GNU libc)"
+for fcnt in	dnl
+     _cnt	dnl
+     __cnt	dnl
+     _r		dnl
+     readCount	dnl
+     _rcount	dnl for emx0.9c
+; do
+    AC_TRY_COMPILE([#include <stdio.h>
+],
+	[FILE *f = stdin; f->$fcnt = 0;],
+	[rb_cv_fcnt="$fcnt"; break])
+done])
+AS_CASE("$rb_cv_fcnt",
+	["not found"*], [rb_cv_fcnt="not found"],
+	[AC_DEFINE_UNQUOTED(FILE_COUNT, $rb_cv_fcnt)])
+
+# win32.c still use this. Don't remove it.
+AC_CACHE_CHECK([read buffer ptr field in FILE structures], rb_cv_frptr,
+[for frptr in	dnl
+     _IO_read_ptr dnl
+     _ptr	dnl
+     __ptr	dnl
+     bufpos	dnl
+     _p	dnl
+     __bufpos	dnl
+; do
+    AC_TRY_COMPILE([#include <stdio.h>
+],
+	[FILE *f = stdin; char buf[256]; f->$frptr = buf;],
+	rb_cv_frptr="$frptr"; break,
+	rb_cv_frptr="not found")
+done])
+if test "$rb_cv_frptr" != "not found"; then
+  AC_DEFINE_UNQUOTED(FILE_READPTR, $rb_cv_frptr)
+
+  if test "$rb_cv_fcnt" = "not found"; then
+    AC_CACHE_CHECK([read buffer end field in FILE structures], rb_cv_frend,
+    [for frend in	dnl
+         _IO_read_end	dnl
+         bufread 	dnl
+         __bufread 	dnl
+    ; do
+        AC_TRY_COMPILE([#include <stdio.h>
+    ],
+	[FILE *f = stdin; char buf[256]; f->$frend = buf;],
+	rb_cv_frend="$frend"; break,
+	rb_cv_frend="not found")
+    done])
+    if test "$rb_cv_frend" != "not found"; then
+      AC_DEFINE_UNQUOTED(FILE_READEND, $rb_cv_frend)
+    fi
+  fi
+fi
+
+RUBY_CHECK_SIZEOF([struct stat.st_ino], [long "long long"], [], [@%:@include <sys/stat.h>])
+
+AC_CACHE_CHECK([whether struct dirent.d_name is too small], rb_cv_sizeof_struct_dirent_too_small,
+  [AC_COMPILE_IFELSE(
+    [AC_LANG_BOOL_COMPILE_TRY([AC_INCLUDES_DEFAULT([
+@%:@if defined _WIN32
+@%:@ error <<<struct direct in win32/dir.h has variable length d_name>>>
+@%:@elif defined HAVE_DIRENT_H
+@%:@ include <dirent.h>
+@%:@elif defined HAVE_DIRECT_H
+@%:@ include <direct.h>
+@%:@else
+@%:@ define dirent direct
+@%:@ if HAVE_SYS_NDIR_H
+@%:@  include <sys/ndir.h>
+@%:@ endif
+@%:@ if HAVE_SYS_DIR_H
+@%:@  include <sys/dir.h>
+@%:@ endif
+@%:@ if HAVE_NDIR_H
+@%:@  include <ndir.h>
+@%:@ endif
+@%:@endif
+@%:@include <stddef.h>
+@%:@define numberof(array) [(int)(sizeof(array) / sizeof((array)[0]))]
+struct dirent d;
+])],
+      [offsetof(struct dirent, [d_name[numberof(d.d_name)]]) - offsetof(struct dirent, d_name) < 256])],
+    [rb_cv_sizeof_struct_dirent_too_small=yes],
+    [rb_cv_sizeof_struct_dirent_too_small=no])])
+if test "$rb_cv_sizeof_struct_dirent_too_small" = yes; then
+  AC_DEFINE(SIZEOF_STRUCT_DIRENT_TOO_SMALL, 1)
+fi
+
+if test "$ac_cv_func_sysconf" = yes; then
+  AC_DEFUN([RUBY_CHECK_SYSCONF], [dnl
+  AC_CACHE_CHECK([whether _SC_$1 is supported], rb_cv_have_sc_[]m4_tolower($1),
+    [AC_TRY_COMPILE([#include <unistd.h>
+      ],
+      [_SC_$1 >= 0],
+      rb_cv_have_sc_[]m4_tolower($1)=yes,
+      rb_cv_have_sc_[]m4_tolower($1)=no)
+    ])
+  if test "$rb_cv_have_sc_[]m4_tolower($1)" = yes; then
+    AC_DEFINE(HAVE__SC_$1)
+  fi
+  ])
+  RUBY_CHECK_SYSCONF(CLK_TCK)
+fi
+
+AC_DEFUN(RUBY_STACK_GROW_DIRECTION, [
+    AS_VAR_PUSHDEF([stack_grow_dir], [rb_cv_stack_grow_dir_$1])
+    AC_CACHE_CHECK(stack growing direction on $1, stack_grow_dir, [
+AS_CASE(["$1"],
+[m68*|x86*|x64|i?86|ia64|ppc*|sparc*|alpha*], [ $2=-1],
+[hppa*], [ $2=+1],
+[
+  AC_TRY_RUN([
+/* recurse to get rid of inlining */
+static int
+stack_growup_p(addr, n)
+    volatile int *addr, n;
+{
+    volatile int end;
+    if (n > 0)
+	return *addr = stack_growup_p(addr, n - 1);
+    else
+	return (&end > addr);
+}
+int main()
+{
+    int x;
+    return stack_growup_p(&x, 10);
+}
+], $2=-1, $2=+1, $2=0)
+  ])
+eval stack_grow_dir=\$$2])
+eval $2=\$stack_grow_dir
+AS_VAR_POPDEF([stack_grow_dir])])
+if test "${universal_binary-no}" = yes ; then
+    archflagpat=`eval echo '"'"${ARCH_FLAG}"'"' | sed 's/[[][|.*]]/\\&/g'`
+    save_CFLAGS="$CFLAGS" new_cflags=`echo "$CFLAGS" | sed "s|$archflagpat"'||'`
+    save_LDFLAGS="$LDFLAGS" new_ldflags=`echo "$LDFLAGS" | sed "s|$archflagpat"'||'`
+    stack_dir=
+    for archs in ${universal_archnames}; do
+	archs=`echo $archs | sed 's/=.*//'`
+	CFLAGS="$new_cflags -arch $archs"
+	LDFLAGS="$new_ldflags -arch $archs"
+	RUBY_STACK_GROW_DIRECTION($archs, dir)
+	if test x$stack_dir = x; then
+	    stack_dir=$dir
+	elif test x$stack_dir != x$dir; then
+	    stack_dir=no
+	fi
+    done
+    CFLAGS="$save_CFLAGS" LDFLAGS="$save_LDFLAGS"
+    if test x$stack_dir = xno; then
+	for archs in ${universal_archnames}; do
+	    archs=`echo $archs | sed 's/=.*//'`
+	    eval dir=\$[rb_cv_stack_grow_dir_]AS_TR_SH([$archs])
+	    RUBY_DEFINE_IF([defined __${archs}__], STACK_GROW_DIRECTION, $dir)
+	done
+    else
+	AC_DEFINE_UNQUOTED(STACK_GROW_DIRECTION, $stack_dir)
+    fi
+else
+    RUBY_STACK_GROW_DIRECTION($target_cpu, dir)
+    AC_DEFINE_UNQUOTED(STACK_GROW_DIRECTION, $dir)
+fi
+
+if test x"$enable_pthread" = xyes; then
+    for pthread_lib in thr pthread pthreads c c_r root; do
+	AC_CHECK_LIB($pthread_lib, pthread_kill,
+		     rb_with_pthread=yes, rb_with_pthread=no)
+	if test "$rb_with_pthread" = "yes"; then break; fi
+    done
+    if test x"$rb_with_pthread" = xyes; then
+	AC_DEFINE(_REENTRANT)
+	AC_DEFINE(_THREAD_SAFE)
+	AC_DEFINE(HAVE_LIBPTHREAD)
+	AC_CHECK_HEADERS(pthread_np.h, [], [], [@%:@include <pthread.h>])
+	AS_CASE([$pthread_lib],
+	[c],    [],
+	[root], [],
+	[c_r],  [MAINLIBS="-pthread $MAINLIBS"],
+	        [AS_CASE(["$target_os"],
+		    [openbsd*], [LIBS="-pthread $LIBS"],
+		    [LIBS="-l$pthread_lib $LIBS"])])
+    else
+	AC_MSG_WARN("Don't know how to find pthread library on your system -- thread support disabled")
+    fi
+    AC_CHECK_FUNCS(sched_yield pthread_attr_setinheritsched \
+	pthread_getattr_np pthread_attr_get_np pthread_attr_getstack\
+	pthread_get_stackaddr_np pthread_get_stacksize_np \
+	thr_stksegment pthread_stackseg_np pthread_getthrds_np \
+	pthread_condattr_setclock pthread_sigmask)
+fi
+if test x"$ac_cv_header_ucontext_h" = xyes; then
+    if test x"$rb_with_pthread" = xyes; then
+	AC_CHECK_FUNCS(getcontext setcontext)
+    fi
+fi
+
+if test "$ac_cv_func_fork" = "yes" -a "$rb_with_pthread" = "yes"; then
+    AC_CACHE_CHECK([if fork works with pthread], rb_cv_fork_with_pthread,
+	[AC_TRY_RUN([
+#include <stdlib.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+
+void *
+thread_func(void *dmy)
+{
+    return dmy;
+}
+
+int
+use_threads(void)
+{
+    pthread_t tid;
+    if (pthread_create(&tid, 0, thread_func, 0) != 0) {
+	return -1;
+    }
+    if (pthread_join(tid, 0) != 0) {
+	return -1;
+    }
+    return 0;
+}
+
+int
+main(int argc, char *argv[])
+{
+    pid_t pid;
+    if (use_threads()) return EXIT_FAILURE;
+    pid = fork();
+
+    if (pid) {
+	int loc;
+	sleep(1);
+	if (waitpid(pid, &loc, WNOHANG) == 0) {
+	    kill(pid, SIGKILL);
+	    return EXIT_FAILURE;
+	}
+        if (!WIFEXITED(loc) || WEXITSTATUS(loc) != EXIT_SUCCESS)
+           return EXIT_FAILURE;
+    }
+    else {
+	if (use_threads()) return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}],
+	rb_cv_fork_with_pthread=yes,
+	rb_cv_fork_with_pthread=no,
+	rb_cv_fork_with_pthread=yes)])
+    test x$rb_cv_fork_with_pthread = xyes || AC_DEFINE(CANNOT_FORK_WITH_PTHREAD)
+fi
+
+AS_CASE(["$target_os"],
+[freebsd*], [
+    AC_CHECK_HEADERS([/usr/local/include/execinfo.h])
+    if test "x$ac_cv_header__usr_local_include_execinfo_h" = xyes; then :
+	RUBY_APPEND_OPTION(CPPFLAGS, -I/usr/local/include)
+	LDFLAGS="${LDFLAGS:+$LDFLAGS }-L/usr/local/lib"
+	DLDFLAGS="${DLDFLAGS:+$DLDFLAGS }-L/usr/local/lib"
+	AC_CHECK_LIB([execinfo], [backtrace])
+    fi])
+AC_CHECK_FUNCS(backtrace)
+
+AC_ARG_WITH(valgrind,
+        AS_HELP_STRING([--without-valgrind],[disable valgrind memcheck support]),
+        [], with_valgrind=yes)
+AS_IF([test x$with_valgrind != xno],
+        [AC_CHECK_HEADERS(valgrind/memcheck.h)])
+
+dnl }
+dnl runtime section {
+
+dnl wheather use dln_a_out or not
+AC_ARG_WITH(dln-a-out,
+	AS_HELP_STRING([--with-dln-a-out], [use dln_a_out if possible]),
+	[
+	AS_CASE([$withval],
+	[yes], [
+	    if test "$enable_shared" = yes; then
+		AC_MSG_ERROR(dln_a_out can not make shared library)
+	    fi
+	    with_dln_a_out=yes],
+	[
+	    with_dln_a_out=no])], [with_dln_a_out=no])
+
+AC_CACHE_CHECK(whether ELF binaries are produced, rb_cv_binary_elf,
+[AC_TRY_LINK([],[], [
+AS_CASE(["`head -1 conftest$EXEEXT | cat -e`"],
+['^?ELF'*], [rb_cv_binary_elf=yes], [rb_cv_binary_elf=no])],
+rb_cv_binary_elf=no)])
+
+if test "$rb_cv_binary_elf" = yes; then
+  AC_DEFINE(USE_ELF)
+  if test "$with_dln_a_out" = yes; then
+    AC_MSG_ERROR(dln_a_out does not work with ELF)
+  fi
+  AC_LIBOBJ([addr2line])
+fi
+
+AS_CASE(["$target_os"],
+[linux* | gnu* | k*bsd*-gnu | bsdi* | kopensolaris*-gnu], [
+    if test "$rb_cv_binary_elf" = no; then
+	with_dln_a_out=yes
+    else
+	LDFLAGS="$LDFLAGS -rdynamic"
+    fi])
+LIBEXT=a
+
+AC_SUBST(DLDFLAGS)dnl
+AC_SUBST(ARCH_FLAG)dnl
+
+AC_SUBST(STATIC)dnl
+AC_SUBST(CCDLFLAGS)dnl
+AC_SUBST(LDSHARED)dnl
+AC_SUBST(LDSHAREDXX)dnl
+AC_SUBST(DLEXT)dnl
+AC_SUBST(DLEXT2)dnl
+AC_SUBST(LIBEXT)dnl
+
+STATIC=
+: ${PATHFLAG=''}
+
+if test "$with_dln_a_out" != yes; then
+  rb_cv_dlopen=unknown
+  AC_MSG_CHECKING(whether OS depend dynamic link works)
+  if test "$GCC" = yes; then
+    AS_CASE(["$target_os"],
+    [darwin*], [
+      # The -fno-common is needed if we wish to embed the Ruby interpreter
+      # into a plugin module of some project (as opposed to embedding it
+      # within the project's application).  The -I/usr/local/include is
+      # needed because CPP as discovered by configure (cc -E -traditional)
+      # fails to consult /usr/local/include by default.  This causes
+      # mkmf.rb's have_header() to fail if the desired resource happens to be
+      # installed in the /usr/local tree.
+      RUBY_APPEND_OPTION(CCDLFLAGS, -fno-common)],
+    [bsdi*|beos*|haiku*|cygwin*|mingw*|aix*|interix*], [ ],
+    [
+      RUBY_APPEND_OPTION(CCDLFLAGS, -fPIC)])
+  else
+    AS_CASE(["$target_os"],
+	[hpux*],          [CCDLFLAGS="$CCDLFLAGS +Z"],
+	[solaris*|irix*], [CCDLFLAGS="$CCDLFLAGS -KPIC"],
+	[sunos*],         [CCDLFLAGS="$CCDLFLAGS -PIC"],
+	[esix*|uxpds*],   [CCDLFLAGS="$CCDLFLAGS -KPIC"],
+	                  [: ${CCDLFLAGS=""}])
+  fi
+
+
+  AC_ARG_ENABLE(rpath,
+       AS_HELP_STRING([--enable-rpath], [embed run path into extension libraries.
+       enabled by default on ELF platforms]),
+       [enable_rpath=$enableval], [enable_rpath="$rb_cv_binary_elf"])
+  if test "$enable_rpath" = yes; then
+    RPATHFLAG=" ${linker_flag}-R%1\$-s"
+  fi
+
+  AS_CASE(["$target_os"],
+	[hpux*], [	DLDFLAGS="$DLDFLAGS -E"
+			: ${LDSHARED='ld -b'}
+			XLDFLAGS="$XLDFLAGS -Wl,-E"
+			: ${LIBPATHENV=SHLIB_PATH}
+			if test "$rb_cv_prog_gnu_ld" = no; then
+			    RPATHFLAG=' +b %1$-s'
+			fi
+			rb_cv_dlopen=yes],
+	[solaris*], [ 	if test "$GCC" = yes; then
+			    : ${LDSHARED='$(CC) -shared'}
+			    if test "$rb_cv_prog_gnu_ld" = yes; then
+				LDFLAGS="$LDFLAGS -Wl,-E"
+			    fi
+			else
+			    : ${LDSHARED='$(CC) -G'}
+			fi
+			if test "$ac_cv_sizeof_voidp" = 8; then
+			    : ${LIBPATHENV=LD_LIBRARY_PATH_64}
+			fi
+			rb_cv_dlopen=yes],
+	[sunos*], [	: ${LDSHARED='ld -assert nodefinitions'}
+			rb_cv_dlopen=yes],
+	[irix*], [	: ${LDSHARED='ld -shared'}
+			rb_cv_dlopen=yes],
+	[sysv4*], [	: ${LDSHARED='ld -G'}
+			rb_cv_dlopen=yes],
+	[nto-qnx*], [	: ${LDSHARED='$(CC) -shared'}
+			rb_cv_dlopen=yes],
+	[esix*|uxpds*], [ : ${LDSHARED="ld -G"}
+			rb_cv_dlopen=yes],
+	[osf*], [	: ${LDSHARED="ld -shared -expect_unresolved \"*\""}
+			rb_cv_dlopen=yes],
+	[bsdi3*], [	AS_CASE(["$CC"],
+			[*shlicc*], [	: ${LDSHARED='$(CC) -r'}
+					rb_cv_dlopen=yes])],
+	[linux* | gnu* | k*bsd*-gnu | netbsd* | bsdi* | kopensolaris*-gnu], [
+			: ${LDSHARED='$(CC) -shared'}
+			if test "$rb_cv_binary_elf" = yes; then
+			    LDFLAGS="$LDFLAGS -Wl,-export-dynamic"
+			fi
+			rb_cv_dlopen=yes],
+	[interix*], [	: ${LDSHARED='$(CC) -shared'}
+			XLDFLAGS="$XLDFLAGS -Wl,-E"
+			LIBPATHFLAG=" -L%1\$-s"
+			rb_cv_dlopen=yes],
+	[freebsd*|dragonfly*], [
+			: ${LDSHARED='$(CC) -shared'}
+			if test "$rb_cv_binary_elf" = yes; then
+			    LDFLAGS="$LDFLAGS -rdynamic"
+			    DLDFLAGS="$DLDFLAGS "'-Wl,-soname,$(.TARGET)'
+			else
+			  test "$GCC" = yes && test "$rb_cv_prog_gnu_ld" = yes || LDSHARED="ld -Bshareable"
+			fi
+			rb_cv_dlopen=yes],
+	[openbsd*], [	: ${LDSHARED='$(CC) -shared ${CCDLFLAGS}'}
+			if test "$rb_cv_binary_elf" = yes; then
+			    LDFLAGS="$LDFLAGS -Wl,-E"
+			fi
+			rb_cv_dlopen=yes],
+	[darwin*], [	: ${LDSHARED='$(CC) -dynamic -bundle'}
+			: ${DLDFLAGS="${linker_flag}-undefined${linker_flag:+,}dynamic_lookup ${linker_flag}-multiply_defined${linker_flag:+,}suppress ${linker_flag}-flat_namespace"}
+			: ${LDFLAGS=""}
+			: ${LIBPATHENV=DYLD_LIBRARY_PATH}
+			# /usr/local/include is always searched for
+			# some reason, but /usr/local/lib is not.
+			hdr=`find /usr/local/include -name \*.h -type f | sed 's:^/usr/local/include/::;q'`
+			if test -n "$hdr" && $CC -E -include "$hdr" -xc /dev/null 2>/dev/null | fgrep -q "$hdr"; then
+			    $CC -print-search-dirs | grep -q '^libraries:.*:/usr/local/lib/*' ||
+			    echo " $LDFLAGS " | grep -q ' -L */usr/local/lib/* ' ||
+			    LDFLAGS="${LDFLAGS:+$LDFLAGS }-L/usr/local/lib"
+			fi
+			rb_cv_dlopen=yes],
+        [aix*], [	: ${LDSHARED='$(CC)'}
+			LDSHARED="$LDSHARED ${linker_flag}-G"
+			DLDFLAGS='-eInit_$(TARGET)'
+			XLDFLAGS="${linker_flag}"'-bE:$(ARCHFILE)'" ${linker_flag}-brtl"
+			XLDFLAGS="$XLDFLAGS ${linker_flag}-blibpath:${prefix}/lib:${LIBPATH:-/usr/lib:/lib}"
+			: ${ARCHFILE="ruby.imp"}
+                        TRY_LINK='$(CC) $(LDFLAGS) -oconftest $(INCFLAGS) -I$(hdrdir) $(CPPFLAGS)'
+                        TRY_LINK="$TRY_LINK"' $(CFLAGS) $(src) $(LIBPATH) $(LOCAL_LIBS) $(LIBS)'
+			: ${LIBPATHENV=SHLIB_PATH}
+			RPATHFLAG=" ${linker_flag}-blibpath:%1\$-s:${prefix}/lib:${LIBPATH:-/usr/lib:/lib}"
+			rb_cv_dlopen=yes],
+	[beos*], [	AS_CASE(["$target_cpu"],
+			  [powerpc*], [
+			    : ${LDSHARED="ld -xms"}
+			    DLDFLAGS="$DLDFLAGS "'-export Init_$(TARGET) -lbe -lroot glue-noinit.a init_term_dyn.o start_dyn.o'
+			    LDFLAGS="$LDFLAGS -L/boot/home/config/lib -lbe -lroot"
+			    ],
+			  [i586*], [
+			    : ${LDSHARED="ld -shared"}
+			    DLDFLAGS="$DLDFLAGS -L/boot/develop/lib/x86 -L/boot/home/config/lib \$(topdir)/_APP_ -lbe -lroot"
+			    LDFLAGS="$LDFLAGS -L/boot/develop/lib/x86 -L/boot/home/config/lib -lbe -lroot"
+			    ])
+			: ${LIBPATHENV=LIBRARY_PATH}
+			rb_cv_dlopen=yes],
+	[haiku*], [	AS_CASE(["$target_cpu"],
+			  [powerpc*], [
+			    : ${LDSHARED="ld -xms"}
+			    DLDFLAGS="$DLDFLAGS "'-export Init_$(TARGET) -lbe -lroot glue-noinit.a init_term_dyn.o start_dyn.o'
+                            ],
+			  [i586*], [
+			    : ${LDSHARED="ld -shared"}
+			    DLDFLAGS="$DLDFLAGS -L/boot/develop/lib/x86 -lbe -lroot"
+			    ])
+			: ${LIBPATHENV=LIBRARY_PATH}
+			rb_cv_dlopen=yes ],
+	[nto-qnx*], [	DLDFLAGS="$DLDFLAGS -L/lib -L/usr/lib -L/usr/local/lib"
+			: ${LDSHARED='ld -Bshareable -x'}
+			LDFLAGS="$LDFLAGS -L/lib -L/usr/lib -L/usr/local/lib"
+			rb_cv_dlopen=yes],
+	[cygwin*|mingw*], [
+			: ${LDSHARED='$(CC) -shared $(if $(filter-out -g -g0,$(debugflags)),,-s)'}
+			XLDFLAGS="$XLDFLAGS -Wl,--stack,0x00200000,--enable-auto-import"
+			DLDFLAGS="${DLDFLAGS} -Wl,--enable-auto-image-base,--enable-auto-import"
+			: ${LIBPATHENV=""}
+			rb_cv_dlopen=yes],
+	[hiuxmpp], [	: ${LDSHARED='ld -r'}],
+	[atheos*], [	: ${LDSHARED='$(CC) -shared'}
+			rb_cv_dlopen=yes],
+	[os2-emx*], [	LDFLAGS="$LDFLAGS -Zomf"
+			],
+	[ 	: ${LDSHARED='ld'}])
+  AC_MSG_RESULT($rb_cv_dlopen)
+fi
+if test "${LDSHAREDXX}" = ""; then
+    AS_CASE(["${LDSHARED}"],
+	[*'$(CC)'*], [
+	    LDSHAREDXX=`echo "${LDSHARED}" | sed 's/\$(CC)/$(CXX)/'`
+	    ],
+	[*'${CC}'*], [
+	    LDSHAREDXX=`echo "${LDSHARED}" | sed 's/\${CC}/${CXX}/'`
+	    ],
+	[*$CC*], [
+	    LDSHAREDXX=`echo "${LDSHARED}" | sed "s|$CC|$CXX|"`
+	    ],
+	[ld" "*], [
+	    ])
+fi
+AS_CASE([${RPATHFLAG}],[*'%1$'*],[: ${LIBPATHFLAG=' -L%1$-s'}],[: ${LIBPATHFLAG=' -L%s'}])
+
+AC_SUBST(LINK_SO)
+AC_SUBST(LIBPATHFLAG)
+AC_SUBST(RPATHFLAG)
+AC_SUBST(LIBPATHENV, "${LIBPATHENV-LD_LIBRARY_PATH}")
+AC_SUBST(TRY_LINK)
+
+dln_a_out_works=no
+if test "$ac_cv_header_a_out_h" = yes; then
+  if test "$with_dln_a_out" = yes || test "$rb_cv_dlopen" = unknown; then
+    cat confdefs.h > config.h
+    AC_CACHE_CHECK(whether matz's dln works, rb_cv_dln_a_out,
+    [AC_TRY_COMPILE([
+#define USE_DLN_A_OUT
+#include "dln.c"
+],
+	[],
+	rb_cv_dln_a_out=yes,
+	rb_cv_dln_a_out=no)])
+    if test "$rb_cv_dln_a_out" = yes; then
+      dln_a_out_works=yes
+      AC_DEFINE(USE_DLN_A_OUT)
+    fi
+  fi
+fi
+
+if test "$dln_a_out_works" = yes; then
+  if test "$GCC" = yes; then
+    STATIC=-static
+  else
+    STATIC=-Bstatic
+  fi
+  DLEXT=so
+  CCDLFLAGS=
+else
+  AS_CASE(["$target_os"],
+    [hpux*], [
+	DLEXT=sl],
+    [darwin*], [
+	RUBY_APPEND_OPTION(XLDFLAGS, [-Wl,-u,_objc_msgSend])
+	DLEXT=bundle],
+    [os2-emx*], [
+	LOAD_RELATIVE=1
+	DLEXT=dll],
+    [cygwin*|mingw*|*djgpp*], [
+	LOAD_RELATIVE=1
+	DLEXT=so],
+    [
+	DLEXT=so])
+fi
+if test "$rb_cv_dlopen:$load_relative" = yes:yes; then
+    AC_CHECK_FUNCS(dladdr)
+    if test "$ac_cv_func_dladdr" = yes; then
+	LOAD_RELATIVE=1
+    else
+	unset load_relative
+    fi
+fi
+
+len=2 # .rb
+n=`expr "$DLEXT"  : '.*'`; test "$n" -gt "$len" && len=$n
+n=`expr "$DLEXT2" : '.*'`; test "$n" -gt "$len" && len=$n
+AC_DEFINE_UNQUOTED(DLEXT_MAXLEN, `expr $len + 1`)
+test ".$DLEXT"  = "." || AC_DEFINE_UNQUOTED(DLEXT,  ".$DLEXT")
+test ".$DLEXT2" = "." || AC_DEFINE_UNQUOTED(DLEXT2, ".$DLEXT2")
+AC_SUBST(DLEXT)
+
+if test "$with_dln_a_out" = yes; then
+  STRIP=true
+else
+  AC_CHECK_TOOL(STRIP, strip, :)dnl
+fi
+
+AS_CASE(["$target_os"],
+  [linux* | gnu* | k*bsd*-gnu | kopensolaris*-gnu], [
+	STRIP="$STRIP -S -x"],
+  [darwin*], [
+	STRIP="$STRIP -A -n"])
+
+AC_ARG_WITH(ext,
+            AC_HELP_STRING([--with-ext=EXTS],
+                           [pass to --with-ext option of extmk.rb]))
+AC_ARG_WITH(out-ext,
+            AC_HELP_STRING([--with-out-ext=EXTS],
+                           [pass to --without-ext option of extmk.rb]))
+EXTSTATIC=
+AC_SUBST(EXTSTATIC)dnl
+AC_ARG_WITH(static-linked-ext,
+	    AS_HELP_STRING([--with-static-linked-ext], [link external modules statically]),
+            [AS_CASE([$withval],[yes],[STATIC=;EXTSTATIC=static])])
+
+AS_CASE(["$target_os"],
+  dnl OS/2 environment w/ Autoconf 2.1x for EMX
+  [os2-emx], [
+    setup=Setup.emx
+    ],
+  [*djgpp*], [
+    setup=Setup.dj
+    ],
+  [
+    setup=Setup
+    ])
+
+AC_SUBST(setup)
+
+if test "$prefix" = NONE; then
+  prefix=$ac_default_prefix
+fi
+
+if test x"$cross_compiling" = xyes; then
+  test x"$MINIRUBY" = x && MINIRUBY="${RUBY-$BASERUBY} -I`pwd` "-r'$(arch)-fake'
+  XRUBY_LIBDIR=`${RUBY-$BASERUBY} -rrbconfig -e ['puts RbConfig::CONFIG["libdir"]']`
+  XRUBY_RUBYLIBDIR=`${RUBY-$BASERUBY} -rrbconfig -e ['puts RbConfig::CONFIG["rubylibdir"]']`
+  XRUBY_RUBYHDRDIR=`${RUBY-$BASERUBY} -rrbconfig -e ['puts RbConfig::CONFIG["rubyhdrdir"]']`
+  AC_SUBST(XRUBY_LIBDIR)
+  AC_SUBST(XRUBY_RUBYLIBDIR)
+  AC_SUBST(XRUBY_RUBYHDRDIR)
+  PREP='$(arch)-fake.rb'
+  RUNRUBY='$(MINIRUBY) -I`cd $(srcdir)/lib; pwd`'
+  XRUBY='$(MINIRUBY)'
+  TEST_RUNNABLE=no
+else
+  MINIRUBY='./miniruby$(EXEEXT) -I$(srcdir)/lib -I.'
+  MINIRUBY="$MINIRUBY"' -I$(EXTOUT)/common'
+  PREP='miniruby$(EXEEXT)'
+  RUNRUBY='$(MINIRUBY) $(srcdir)/tool/runruby.rb --extout=$(EXTOUT)'
+  XRUBY='$(RUNRUBY)'
+  TEST_RUNNABLE=yes
+fi
+AC_SUBST(TEST_RUNNABLE)
+AC_SUBST(MINIRUBY)
+AC_SUBST(PREP)
+AC_SUBST(RUNRUBY)
+AC_SUBST(XRUBY)
+AC_SUBST(EXTOUT, [${EXTOUT=.ext}])
+
+FIRSTMAKEFILE=""
+LIBRUBY_A='lib$(RUBY_SO_NAME)-static.a'
+LIBRUBY='$(LIBRUBY_A)'
+LIBRUBYARG_STATIC='-l$(RUBY_SO_NAME)-static'
+LIBRUBYARG='$(LIBRUBYARG_STATIC)'
+SOLIBS=
+
+AS_CASE(["$target_os"],
+  [cygwin*|mingw*|beos*|haiku*|darwin*|os2-emx*], [
+    : ${DLDLIBS=""}
+    ],
+  [
+    DLDLIBS="$DLDLIBS -lc"
+    ])
+
+AC_ARG_WITH(soname,
+	AS_HELP_STRING([--with-soname=SONAME], [base name of shared library]),
+	[RUBY_SO_NAME=$withval], [RUBY_SO_NAME='$(RUBY_BASE_NAME)'])
+
+LIBRUBY_LDSHARED=$LDSHARED
+LIBRUBY_DLDFLAGS=$DLDFLAGS
+LIBRUBY_SO='lib$(RUBY_SO_NAME).so.$(MAJOR).$(MINOR).$(TEENY)'
+LIBRUBY_ALIASES='lib$(RUBY_SO_NAME).so'
+ENABLE_SHARED=no
+
+AC_ARG_ENABLE(shared,
+       AS_HELP_STRING([--enable-shared], [build a shared library for Ruby]),
+       [enable_shared=$enableval])
+libprefix='$(libdir)'
+LIBRUBY_RELATIVE=no
+AS_CASE("$enable_shared", [yes], [
+  LIBRUBY='$(LIBRUBY_SO)'
+  LIBRUBYARG_SHARED='-l$(RUBY_SO_NAME)'
+  LIBRUBYARG='$(LIBRUBYARG_SHARED)'
+  test -z "$CCDLFLAGS" || CFLAGS="$CFLAGS $CCDLFLAGS"
+  ENABLE_SHARED=yes
+  if test "$rb_cv_binary_elf" = yes; then
+    SOLIBS='$(LIBS)'
+  fi
+
+  AS_CASE(["$target_os"],
+    [freebsd*|dragonfly*], [],
+    [
+     if test "$GCC" = yes; then
+       RUBY_TRY_LDFLAGS([${linker_flag}--no-undefined], [no_undefined=yes], [no_undefined=no])
+       if test "no_undefined" = yes; then
+	  RUBY_APPEND_OPTION(EXTLDFLAGS, [${linker_flag}--no-undefined])
+       fi
+     fi
+    ])
+
+  AS_CASE(["$target_os"],
+    [sunos4*], [
+	LIBRUBY_ALIASES='lib$(RUBY_SO_NAME).so.$(MAJOR).$(MINOR) lib$(RUBY_SO_NAME).so'
+	],
+    [linux* | gnu* | k*bsd*-gnu | atheos* | kopensolaris*-gnu], [
+	LIBRUBY_DLDFLAGS='-Wl,-soname,lib$(RUBY_SO_NAME).so.$(MAJOR).$(MINOR)'
+	LIBRUBY_ALIASES='lib$(RUBY_SO_NAME).so.$(MAJOR).$(MINOR) lib$(RUBY_SO_NAME).so'
+	if test "$load_relative" = yes; then
+	    LIBRUBY_RPATHFLAGS="'-Wl,-rpath,\$\${ORIGIN}/../lib'"
+	    LIBRUBY_RELATIVE=yes
+	fi
+	],
+    [freebsd*|dragonfly*], [
+	SOLIBS='$(LIBS)'
+	LIBRUBY_SO='lib$(RUBY_SO_NAME).so.$(MAJOR)$(MINOR)'
+	if test "$rb_cv_binary_elf" != "yes" ; then
+	    LIBRUBY_SO="$LIBRUBY_SO.\$(TEENY)"
+	    LIBRUBY_ALIASES=''
+	fi
+	],
+    [netbsd*], [
+	SOLIBS='$(LIBS)'
+	LIBRUBY_SO='lib$(RUBY_SO_NAME).so.$(MAJOR)$(MINOR).$(TEENY)'
+	LIBRUBY_DLDFLAGS='-Wl,-soname,lib$(RUBY_SO_NAME).so.$(MAJOR)$(MINOR)'
+	if test "$rb_cv_binary_elf" = yes; then # ELF platforms
+	   LIBRUBY_ALIASES='lib$(RUBY_SO_NAME).so.$(MAJOR)$(MINOR) lib$(RUBY_SO_NAME).so'
+	else	# a.out platforms
+	   LIBRUBY_ALIASES=""
+	fi
+	],
+    [openbsd*], [
+	SOLIBS='$(LIBS)'
+	LIBRUBY_SO='lib$(RUBY_SO_NAME).so.$(MAJOR).'`expr ${MINOR} \* 10 + ${TEENY}`
+	],
+    [solaris*], [
+	SOLIBS='$(LIBS)'
+	LIBRUBY_SO='lib$(RUBY_SO_NAME).so.$(MAJOR)'
+	LIBRUBY_ALIASES='lib$(RUBY_SO_NAME).so.$(MAJOR).$(MINOR).$(TEENY) lib$(RUBY_SO_NAME).so'
+	if test "$GCC" = yes; then
+	    LIBRUBY_DLDFLAGS="$DLDFLAGS "'-Wl,-h,$(@F)'
+	else
+	    LIBRUBY_DLDFLAGS="$DLDFLAGS "'-h $(@F)'
+	fi
+	XLDFLAGS="$XLDFLAGS "'-R${libdir}'
+	],
+    [hpux*], [
+	XLDFLAGS="$XLDFLAGS "'-Wl,+s,+b,$(libdir)'
+	LIBRUBY_SO='lib$(RUBY_SO_NAME).sl.$(MAJOR).$(MINOR).$(TEENY)'
+	LIBRUBY_ALIASES='lib$(RUBY_SO_NAME).sl.$(MAJOR).$(MINOR) lib$(RUBY_SO_NAME).sl'
+	],
+    [aix*], [
+	LIBRUBY_DLDFLAGS="${linker_flag}-bnoentry $XLDFLAGS"
+	LIBRUBYARG_SHARED='-L${libdir} -l${RUBY_SO_NAME}'
+	SOLIBS='-lm -lc'
+	],
+    [beos*], [
+	AS_CASE(["$target_cpu"],
+	[powerpc*], [
+	    LIBRUBY_DLDFLAGS='-f ruby.exp -lnet -lbe -lroot glue-noinit.a init_term_dyn.o start_dyn.o'
+	    ])
+	],
+    [darwin*], [
+	RUBY_SO_NAME="$RUBY_SO_NAME"'.$(MAJOR).$(MINOR).$(TEENY)'
+	LIBRUBY_LDSHARED='$(CC) -dynamiclib'
+	if test "$load_relative" = yes; then
+	    libprefix='@executable_path/../lib'
+	    LIBRUBY_RELATIVE=yes
+	fi
+	LIBRUBY_DLDFLAGS="$LIBRUBY_DLDFLAGS "'-install_name '${libprefix}'/$(LIBRUBY_SO)'
+	LIBRUBY_DLDFLAGS="$LIBRUBY_DLDFLAGS "'-current_version $(MAJOR).$(MINOR).$(TEENY)'
+	LIBRUBY_DLDFLAGS="$LIBRUBY_DLDFLAGS "'-compatibility_version $(ruby_version)'
+	if test "$visibility_option" = ld; then
+	    LIBRUBY_DLDFLAGS="$LIBRUBY_DLDFLAGS "'-Wl,-unexported_symbol,_Init_*'
+	    LIBRUBY_DLDFLAGS="$LIBRUBY_DLDFLAGS "'-Wl,-unexported_symbol,*_threadptr_*'
+	fi
+	LIBRUBY_DLDFLAGS="$LIBRUBY_DLDFLAGS "' $(XLDFLAGS)'
+	LIBRUBY_SO='lib$(RUBY_SO_NAME).dylib'
+	LIBRUBY_ALIASES='lib$(RUBY_BASE_NAME).$(MAJOR).$(MINOR).dylib lib$(RUBY_INSTALL_NAME).dylib'
+	],
+    [interix*], [
+	LIBRUBYARG_SHARED='-L. -L${libdir} -l$(RUBY_SO_NAME)'
+	])
+], [
+  LIBRUBYARG_SHARED=
+
+  # enable PIE if possible
+  if test "$GCC" = yes; then
+    RUBY_TRY_CFLAGS(-fPIE, [pie=yes], [pie=no])
+    if test "$pie" = yes; then
+      RUBY_APPEND_OPTION(XCFLAGS, -fPIE)
+      for pie in -pie -Wl,-pie; do
+	RUBY_TRY_LDFLAGS([$pie], [], [pie=])
+	if test "x$pie" != x; then
+	  RUBY_APPEND_OPTION(XLDFLAGS, $pie)
+	  break
+	fi
+      done
+    fi
+  fi
+])
+if test "$enable_rpath" = yes; then
+    test -z "$LIBRUBY_RPATHFLAGS" || LIBRUBY_RPATHFLAGS="$LIBRUBY_RPATHFLAGS "
+    LIBRUBY_RPATHFLAGS="$LIBRUBY_RPATHFLAGS${linker_flag}-R ${linker_flag}${libprefix} -L\$(libdir)"
+    LIBRUBYARG_SHARED="$LIBRUBY_RPATHFLAGS $LIBRUBYARG_SHARED"
+    LIBRUBYARG_STATIC="$LIBRUBY_RPATHFLAGS $LIBRUBYARG_STATIC"
+fi
+AC_SUBST(LIBRUBY_RELATIVE)
+
+LDFLAGS="-L. $LDFLAGS"
+AC_SUBST(ARCHFILE)
+
+if test "$EXEEXT" = .exe; then
+    EXECUTABLE_EXTS='".exe",".com",".cmd",".bat"'
+    AC_DEFINE_UNQUOTED(EXECUTABLE_EXTS, $EXECUTABLE_EXTS)
+    EXECUTABLE_EXTS=`echo $EXECUTABLE_EXTS | tr -d '"' | tr , ' '`
+    AC_SUBST(EXECUTABLE_EXTS)
+fi
+
+dnl }
+dnl build section {
+
+dnl build rdoc index if requested
+RDOCTARGET=""
+CAPITARGET=""
+AC_ARG_ENABLE(install-doc,
+       AS_HELP_STRING([--disable-install-doc], [do not install neither rdoc indexes nor C API documents during install]),
+       [install_doc=$enableval], [install_doc=yes])
+AC_ARG_ENABLE(install-rdoc,
+      AS_HELP_STRING([--disable-install-rdoc], [do not install rdoc indexes during install]),
+      [install_rdoc=$enableval], [install_rdoc=yes])
+AC_ARG_ENABLE(install-capi,
+      AS_HELP_STRING([--disable-install-capi], [do not install C API documents during install]),
+      [install_capi=$enableval], [install_capi=yes])
+
+if test "$install_doc" != no; then
+    if test "$install_rdoc" != no; then
+	RDOCTARGET="rdoc"
+    else
+	RDOCTARGET="nodoc"
+    fi
+    if test "$install_capi" != no -a -n "$DOXYGEN"; then
+	CAPITARGET="capi"
+    else
+	CAPITARGET="nodoc"
+    fi
+else
+    RDOCTARGET="nodoc"
+    CAPITARGET="nodoc"
+fi
+
+AC_SUBST(RDOCTARGET)
+AC_SUBST(CAPITARGET)
+
+AS_CASE(["$RDOCTARGET:$CAPITARGET"],[nodoc:nodoc],[INSTALLDOC=nodoc],[INSTALLDOC=all])
+AC_SUBST(INSTALLDOC)
+
+if test "$rb_with_pthread" = "yes"; then
+    THREAD_MODEL=pthread
+fi
+AC_CACHE_CHECK([for prefix of external symbols], rb_cv_symbol_prefix, [
+    AC_TRY_COMPILE([extern void conftest_external(void) {}], [], [
+	rb_cv_symbol_prefix=`$NM conftest.$ac_objext |
+			     sed -n ['/.*T[ 	]\([^ 	]*\)conftest_external.*/!d;s//\1/p;q']`
+	],
+	[rb_cv_symbol_prefix=''])
+    test -n "$rb_cv_symbol_prefix" || rb_cv_symbol_prefix=NONE
+])
+SYMBOL_PREFIX="$rb_cv_symbol_prefix"
+test "x$SYMBOL_PREFIX" = xNONE && SYMBOL_PREFIX=''
+MINIDLNOBJ=dmydln.o
+AS_CASE(["$target_os"],
+    [linux*], [
+	],
+    [netbsd*], [
+	RUBY_APPEND_OPTION(CFLAGS, -pipe)
+	],
+    [darwin*], [
+	RUBY_APPEND_OPTION(CFLAGS, -pipe)
+	],
+    [os2-emx], [
+	AC_LIBOBJ([os2])
+	CFLAGS="$CFLAGS -DOS2"
+	LIBRUBY_A=`echo $LIBRUBY_A | sed 's/^lib//'`
+	LIBRUBY_SO=`echo $LIBRUBY_SO | sed 's/^lib//'`
+	LIBRUBY_ALIASES=`for i in $LIBRUBY_ALIASES; do echo "$i"; done | sed 's/^lib//'`
+	],
+    [osf*], [
+	if test "$GCC" != "yes" ; then
+	  # compile something small: taint.c is fine for this.
+	  # the main point is the '-v' flag of 'cc'.
+	  AS_CASE(["`cc -v -I. -c main.c -o /tmp/main.o 2>&1`"],
+	  [*/gemc_cc*], [   # we have the new DEC GEM CC
+                        CFLAGS="$CFLAGS -oldc"
+                        ],
+          [            # we have the old MIPS CC
+                        ])
+	  # cleanup
+	  rm -f /tmp/main.o
+	  CFLAGS="$CFLAGS -std"
+	fi
+	],
+    [beos*], [
+	AS_CASE(["$target_cpu"],[powerpc*], [CFLAGS="$CFLAGS -relax_pointers"])
+	CPPFLAGS="$CPPFLAGS -I/boot/home/config/include"
+	],
+    [cygwin*|mingw*], [
+	RUBY_SO_NAME="${RUBY_SO_NAME}${MAJOR}${MINOR}${TEENY}"
+	LIBRUBY_DLDFLAGS="${DLDFLAGS}"' -Wl,--out-implib=$(LIBRUBY)'
+	AS_CASE(["$target_os"],
+	[cygwin*], [
+	    if test x"$enable_shared" = xyes; then
+		LIBRUBY_SO='cyg$(RUBY_SO_NAME)'.dll
+		LIBRUBY_DLDFLAGS="${LIBRUBY_DLDFLAGS}"' $(RUBYDEF)'
+	    fi
+	    ],
+	[mingw*], [
+	    RUBY_SO_NAME="${rb_cv_msvcrt}-${RUBY_SO_NAME}"
+	    if test x"${target_cpu}" != xi386; then
+		RUBY_SO_NAME="${target_cpu}-${RUBY_SO_NAME}"
+	    fi
+	    if test x"$enable_shared" = xyes; then
+		LIBRUBY_SO='$(RUBY_SO_NAME)'.dll
+		LIBRUBY_DLDFLAGS="${LIBRUBY_DLDFLAGS}"' $(RUBYDEF)'
+	    fi
+	    EXPORT_PREFIX=' '
+	    DLDFLAGS="${DLDFLAGS}"' $(DEFFILE)'
+	    AC_LIBOBJ([win32/win32])
+	    AC_LIBOBJ([win32/file])
+	    COMMON_LIBS=m
+#	    COMMON_MACROS="WIN32_LEAN_AND_MEAN="
+	    COMMON_HEADERS="winsock2.h windows.h"
+	    THREAD_MODEL=win32
+	    PLATFORM_DIR=win32
+	    ])
+	LIBRUBY_ALIASES=''
+	FIRSTMAKEFILE=GNUmakefile:cygwin/GNUmakefile.in
+	SOLIBS='$(LIBS)'
+	if test x"$enable_shared" = xyes; then
+	    LIBRUBY='lib$(RUBY_SO_NAME).dll.a'
+	else
+	    LIBRUBY_SO=dummy
+	    LIBRUBY='lib$(RUBY_SO_NAME).a'
+	    LIBRUBYARG='-l$(RUBY_SO_NAME)'
+	fi
+	],
+    [hpux*], [
+	AS_CASE(["$YACC"],[*yacc*], [
+	    XCFLAGS="$XCFLAGS -DYYMAXDEPTH=300"
+	    YACC="$YACC -Nl40000 -Nm40000"
+	])])
+MINIOBJS="$MINIDLNOBJ"
+
+AS_CASE(["$THREAD_MODEL"],
+[pthread], [AC_CHECK_HEADERS(pthread.h)],
+[win32],   [],
+[""],      [AC_MSG_ERROR(thread model is missing)],
+           [AC_MSG_ERROR(unknown thread model $THREAD_MODEL)])
+
+AC_ARG_ENABLE(debug-env,
+       AS_HELP_STRING([--enable-debug-env], [enable RUBY_DEBUG environment variable]),
+       [AC_DEFINE(RUBY_DEBUG_ENV)])
+
+AS_CASE(["$FIRSTMAKEFILE"], [*GNUmakefile:*], [gnumake=yes], [
+    AC_MSG_CHECKING([for if ${MAKE-make} is GNU make])
+    mkdir conftest.dir
+    echo "all:; @echo yes" > conftest.dir/GNUmakefile
+    echo "all:; @echo no" > conftest.dir/Makefile
+    gnumake=`(cd conftest.dir; ${MAKE-make})`
+    rm -fr conftest.dir
+    AS_CASE(["$gnumake"],
+    [*yes*], [
+	echo "include Makefile" > GNUmakefile
+	echo "-include uncommon.mk" >> GNUmakefile
+	gnumake=yes],
+    [
+	gnumake=no])
+    AC_MSG_RESULT($gnumake)
+])
+AS_IF([test "$gnumake" = yes], [ NULLCMD=: ], [
+    AC_MSG_CHECKING([for safe null command for ${MAKE-make}])
+    mkdir conftest.dir
+    echo 'A=1' > conftest.dir/Makefile
+    echo 'B=$(A:1=@:)' >> conftest.dir/Makefile
+    echo 'all:; $B 1 2 3 4 5 6 7 8 9' >> conftest.dir/Makefile
+    if (cd conftest.dir; ${MAKE-make} >/dev/null 2>/dev/null); then
+	NULLCMD=:
+    else
+	echo 'A=1' > conftest.dir/Makefile
+	echo 'B=$(A:1=@true)' >> conftest.dir/Makefile
+	echo 'all:; $B 1 2 3 4 5 6 7 8 9' >> conftest.dir/Makefile
+	if (cd conftest.dir; ${MAKE-make} >/dev/null 2>/dev/null); then
+	    NULLCMD=true
+	else
+	    AC_MSG_ERROR(no candidate for safe null command)
+	fi
+    fi
+    rm -fr conftest.dir
+    AC_MSG_RESULT($NULLCMD)
+])
+AC_SUBST(NULLCMD)
+
+if test "${universal_binary-no}" = yes ; then
+    AC_CACHE_CHECK([for architecture macros], rb_cv_architecture_macros, [
+    mv confdefs.h confdefs1.h
+    : > confdefs.h
+    AC_TRY_COMPILE([@%:@if defined __`echo ${universal_archnames} |
+    sed 's/=[^ ]*//g;s/ /__ || defined __/g'`__
+@%:@else
+@%:@error
+>>>>>><<<<<<
+@%:@endif], [],
+[
+    rb_cv_architecture_macros=yes
+    mv -f confdefs1.h confdefs.h
+], [
+    rb_cv_architecture_macros=no
+    archflagpat=`eval echo '"'"${ARCH_FLAG}"'"' | sed 's/[[][|.*]]/\\&/g'`
+    new_cflags=`echo "$CFLAGS" | sed "s|$archflagpat"'||'`
+    for archs in ${universal_archnames}; do
+	cpu=${archs#*=}
+	archs=${archs%=*}
+	CFLAGS="$new_cflags -arch $archs"
+	archs="__${archs}__"
+	AC_MSG_CHECKING([for macro ${archs} on ${cpu}])
+	AC_TRY_COMPILE([@%:@ifndef ${archs}
+@%:@error
+@%:@endif], [], [AC_MSG_RESULT([yes])], [AC_MSG_RESULT([no])])
+    done
+    mv -f confdefs1.h confdefs.h
+    AC_MSG_ERROR([failed])
+    ])])
+fi
+
+CPPFLAGS="$CPPFLAGS "'$(DEFS)'
+test -z "$CPPFLAGS" || CPPFLAGS="$CPPFLAGS "; CPPFLAGS="$CPPFLAGS"'${cppflags}'
+if test -n "${cflags+set}"; then
+    cflagspat=`eval echo '"'"${cflags}"'"' | sed 's/[[][|.*]]/\\&/g;s/^  */ /;s/^  *$/ /'`
+    CFLAGS=`echo " $CFLAGS " | sed "s|$cflagspat"'|${cflags}|;s/^ *//;s/ *$//'`
+fi
+if test -n "${cxxflags+set}"; then
+    cxxflagspat=`eval echo '"'"${cxxflags}"'"' | sed 's/[[][|.*]]/\\&/g;s/^  */ /;s/^  *$/ /'`
+    CXXFLAGS=`echo " $CXXFLAGS " | sed "s|$cxxflagspat"'|${cxxflags}|;s/^ *//;s/ *$//'`
+fi
+if test "${ARCH_FLAG}"; then
+    archflagpat=`eval echo '"'"${ARCH_FLAG}"'"' | sed 's/[[][|.*]]/\\&/g'`
+    CFLAGS=`echo "$CFLAGS" | sed "s| *$archflagpat"'||'`
+    CXXFLAGS=`echo "$CXXFLAGS" | sed "s| *$archflagpat"'||'`
+    LDFLAGS=`echo "$LDFLAGS" | sed "s| *$archflagpat"'||'`
+fi
+warnflags="$rb_cv_warnflags"
+AC_SUBST(cppflags, [])dnl
+AC_SUBST(cflags, ["$orig_cflags "'${optflags} ${debugflags} ${warnflags}'])dnl
+AC_SUBST(cxxflags, ["$orig_cxxflags "'${optflags} ${debugflags} ${warnflags}'])dnl
+AC_SUBST(optflags)dnl
+AC_SUBST(debugflags)dnl
+AC_SUBST(warnflags)dnl
+AC_SUBST(XCFLAGS)dnl
+AC_SUBST(XLDFLAGS)dnl
+AC_SUBST(EXTLDFLAGS)dnl
+AC_SUBST(LIBRUBY_LDSHARED)
+AC_SUBST(LIBRUBY_DLDFLAGS)
+AC_SUBST(RUBY_INSTALL_NAME)
+AC_SUBST(rubyw_install_name)
+AC_SUBST(RUBYW_INSTALL_NAME)
+AC_SUBST(RUBY_SO_NAME)
+AC_SUBST(LIBRUBY_A)
+AC_SUBST(LIBRUBY_SO)
+AC_SUBST(LIBRUBY_ALIASES)
+AC_SUBST(LIBRUBY)
+AC_SUBST(LIBRUBYARG)
+AC_SUBST(LIBRUBYARG_STATIC)
+AC_SUBST(LIBRUBYARG_SHARED)
+AC_SUBST(SOLIBS)
+AC_SUBST(DLDLIBS)
+AC_SUBST(ENABLE_SHARED)
+AC_SUBST(MAINLIBS)
+AC_SUBST(COMMON_LIBS)
+AC_SUBST(COMMON_MACROS)
+AC_SUBST(COMMON_HEADERS)
+AC_SUBST(EXPORT_PREFIX)
+AC_SUBST(SYMBOL_PREFIX)
+AC_SUBST(MINIOBJS)
+AC_SUBST(THREAD_MODEL)
+AC_SUBST(PLATFORM_DIR)
+
+MAKEFILES="Makefile `echo $FIRSTMAKEFILE | sed 's/:.*//'`"
+MAKEFILES="`echo $MAKEFILES`"
+AC_SUBST(MAKEFILES)
+
+ri_prefix=
+test "$program_prefix" != NONE &&
+  ri_prefix=$program_prefix
+
+ri_suffix=
+test "$program_suffix" != NONE &&
+  ri_suffix=$program_suffix
+
+RUBY_INSTALL_NAME="${ri_prefix}"'$(RUBY_BASE_NAME)'"${ri_suffix}"
+AS_CASE(["$target_os"],
+  [cygwin*|mingw*], [
+    RUBYW_INSTALL_NAME="${ri_prefix}"'$(RUBYW_BASE_NAME)'"${ri_suffix}"
+    rubyw_install_name='$(RUBYW_INSTALL_NAME)'
+    ])
+
+rubylibprefix='${libdir}/${RUBY_BASE_NAME}'
+AC_ARG_WITH(rubylibprefix,
+	    AS_HELP_STRING([--with-rubylibprefix=DIR], [prefix for ruby libraries [[LIBDIR/RUBY_BASE_NAME]]]),
+	    [if test "x$withval" = xno; then
+		AC_MSG_ERROR([No ruby, No libprefix])
+	    fi
+	    rubylibprefix="$withval"])
+RUBY_LIB_PREFIX=`eval echo \\"${rubylibprefix}\\"`
+AC_SUBST(rubylibprefix)
+
+RI_BASE_NAME=`echo ${RUBY_BASE_NAME} | sed 's/ruby/ri/'`
+ridir='${datarootdir}/${RI_BASE_NAME}'
+AC_ARG_WITH(ridir,
+	    AS_HELP_STRING([--with-ridir=DIR], [ri documentation [[DATAROOTDIR/ri]]]),
+	    [ridir=$withval])
+RIDIR=`eval echo \\"${ridir}\\"`
+AC_SUBST(ridir)
+AC_SUBST(RI_BASE_NAME)
+
+AC_ARG_WITH(ruby-version,
+	    AS_HELP_STRING([--with-ruby-version=STR], [ruby version string for version specific directories [[full]] (full|minor|STR)]),
+            [ruby_version=$withval],
+            [ruby_version=full])
+unset RUBY_LIB_VERSION
+unset RUBY_LIB_VERSION_STYLE
+AS_CASE(["$ruby_version"],
+  [full],  [RUBY_LIB_VERSION_STYLE='3	/* full */'],
+  [minor], [RUBY_LIB_VERSION_STYLE='2	/* minor */'])
+if test ${RUBY_LIB_VERSION_STYLE+set}; then
+    {
+    echo "#define RUBY_LIB_VERSION_STYLE $RUBY_LIB_VERSION_STYLE"
+    echo '#define STRINGIZE(x) x'
+    test -f revision.h -o -f "${srcdir}/revision.h" || echo '#define RUBY_REVISION 0'
+    echo '#include "version.h"'
+    echo 'ruby_version=RUBY_LIB_VERSION'
+    } > conftest.c
+    ruby_version="`$CPP -I"${srcdir}" -I"${srcdir}/include" conftest.c | sed '/^ruby_version=/!d;s/ //g'`"
+    eval $ruby_version
+else
+    RUBY_LIB_VERSION="\"${ruby_version}\""
+fi
+
+AC_ARG_WITH(sitedir,
+	    AS_HELP_STRING([--with-sitedir=DIR], [site libraries in DIR [[RUBY_LIB_PREFIX/site_ruby]], "no" to disable site directory]),
+            [sitedir=$withval],
+            [sitedir='${rubylibprefix}/site_ruby'])
+dir="${sitedir}"
+until SITE_DIR=`eval echo \\"${dir}\\"`; test "x${dir}" = "x${SITE_DIR}"; do
+    dir="${SITE_DIR}"
+done
+
+AC_ARG_WITH(vendordir,
+	    AS_HELP_STRING([--with-vendordir=DIR], [vendor libraries in DIR [[RUBY_LIB_PREFIX/vendor_ruby]], "no" to disable vendor directory]),
+            [vendordir=$withval],
+            [vendordir='${rubylibprefix}/vendor_ruby'])
+dir="${vendordir}"
+until VENDOR_DIR=`eval echo \\"${dir}\\"`; test "x${dir}" = "x${VENDOR_DIR}"; do
+    dir="${VENDOR_DIR}"
+done
+
+if test "${LOAD_RELATIVE+set}"; then
+    AC_DEFINE_UNQUOTED(LOAD_RELATIVE, $LOAD_RELATIVE)
+    RUBY_EXEC_PREFIX=""
+    RUBY_LIB_PREFIX="`eval echo "$RUBY_LIB_PREFIX" | sed 's|^NONE/|/|;s|^'"$prefix"'/|/|'`"
+    RUBY_SITE_LIB_PATH="`eval echo "$SITE_DIR" | sed 's|^NONE/|/|;s|^'"$prefix"'/|/|'`"
+    RUBY_VENDOR_LIB_PATH="`eval echo "$VENDOR_DIR" | sed 's|^NONE/|/|;s|^'"$prefix"'/|/|'`"
+else
+    RUBY_EXEC_PREFIX="`eval echo \\"$exec_prefix/\\" | sed 's|^NONE/|'"$prefix"'/|;s|/$||'`"
+    RUBY_LIB_PREFIX="`eval echo \\"$RUBY_LIB_PREFIX\\" | sed 's|^NONE/|'"$prefix"'/|'`"
+    RUBY_SITE_LIB_PATH="`eval echo \\"$SITE_DIR\\" | sed 's|^NONE/|'"$prefix"'/|'`"
+    RUBY_VENDOR_LIB_PATH="`eval echo \\"$VENDOR_DIR\\" | sed 's|^NONE/|'"$prefix"'/|'`"
+fi
+
+pat=`echo "$RUBY_LIB_PREFIX/" | tr -c '\012' .`'\(.*\)'
+AS_CASE(["$RUBY_SITE_LIB_PATH"],
+  ["$RUBY_LIB_PREFIX/"*], [
+    RUBY_SITE_LIB_PATH='RUBY_LIB_PREFIX"/'"`expr \"$RUBY_SITE_LIB_PATH\" : \"$pat\"`"'"'
+    ],
+  [
+    RUBY_SITE_LIB_PATH="\"${RUBY_SITE_LIB_PATH}\""
+    ])
+AS_CASE(["$RUBY_VENDOR_LIB_PATH"],
+  ["$RUBY_LIB_PREFIX/"*], [
+    RUBY_VENDOR_LIB_PATH='RUBY_LIB_PREFIX"/'"`expr \"$RUBY_VENDOR_LIB_PATH\" : \"$pat\"`"'"'
+    ],
+  [
+    RUBY_VENDOR_LIB_PATH="\"${RUBY_VENDOR_LIB_PATH}\""
+    ])
+pat=`echo "$RUBY_EXEC_PREFIX/" | tr -c '\012' .`'\(.*\)'
+AS_CASE(["$RUBY_LIB_PREFIX"],
+  ["$RUBY_EXEC_PREFIX/"*], [
+    RUBY_LIB_PREFIX='RUBY_EXEC_PREFIX"/'"`expr \"$RUBY_LIB_PREFIX\" : \"$pat\"`"'"'
+    ],
+  [
+    RUBY_LIB_PREFIX="\"${RUBY_LIB_PREFIX}\""
+    ])
+
+if test ${RUBY_LIB_VERSION_STYLE+set}; then
+    AC_DEFINE_UNQUOTED(RUBY_LIB_VERSION_STYLE, $RUBY_LIB_VERSION_STYLE)
+else
+    AC_DEFINE_UNQUOTED(RUBY_LIB_VERSION, [$RUBY_LIB_VERSION])
+fi
+AC_DEFINE_UNQUOTED(RUBY_EXEC_PREFIX, "${RUBY_EXEC_PREFIX}")
+AC_DEFINE_UNQUOTED(RUBY_LIB_PREFIX, ${RUBY_LIB_PREFIX})
+if test "x$SITE_DIR" = xno; then
+    AC_DEFINE(NO_RUBY_SITE_LIB)
+else
+    AC_DEFINE_UNQUOTED(RUBY_SITE_LIB, ${RUBY_SITE_LIB_PATH})
+fi
+if test "x$VENDOR_DIR" = xno; then
+    AC_DEFINE(NO_RUBY_VENDOR_LIB)
+else
+    AC_DEFINE_UNQUOTED(RUBY_VENDOR_LIB, ${RUBY_VENDOR_LIB_PATH})
+fi
+
+AC_SUBST(arch)dnl
+AC_SUBST(sitearch)dnl
+AC_SUBST(ruby_version)dnl
+AC_SUBST(sitedir)dnl
+AC_SUBST(vendordir)dnl
+
+configure_args=$ac_configure_args
+AC_SUBST(configure_args)dnl
+
+if test "${universal_binary-no}" = yes ; then
+    arch="universal-${target_os}"
+    AC_CACHE_CHECK(whether __ARCHITECTURE__ is available, rb_cv_architecture_available,
+	AC_TRY_COMPILE([const char arch[] = __ARCHITECTURE__;], [puts(arch);],
+	     [rb_cv_architecture_available=yes], [rb_cv_architecture_available=no]))
+    if test "${rb_cv_architecture_available}" = yes; then
+	AC_DEFINE_UNQUOTED(RUBY_PLATFORM_CPU, __ARCHITECTURE__)
+    else
+	for archs in ${universal_archnames}; do
+	    cpu=`echo $archs | sed 's/.*=//'`
+	    archs=`echo $archs | sed 's/=.*//'`
+	    RUBY_DEFINE_IF([defined __${archs}__], RUBY_PLATFORM_CPU, ["${cpu}"])
+	done
+    fi
+    ints='long int short'
+    test "$ac_cv_type_long_long" = yes && ints="'long long' $ints"
+    AC_SUBST(UNIVERSAL_ARCHNAMES, "${universal_archnames}")
+    AC_SUBST(UNIVERSAL_INTS, "${ints}")
+    AC_DEFINE_UNQUOTED(RUBY_PLATFORM_OS, "${target_os}")
+    AC_DEFINE_UNQUOTED(RUBY_ARCH, "universal-"RUBY_PLATFORM_OS)
+    AC_DEFINE_UNQUOTED(RUBY_PLATFORM, "universal."RUBY_PLATFORM_CPU"-"RUBY_PLATFORM_OS)
+else
+    arch="${target_cpu}-${target_os}"
+    AC_DEFINE_UNQUOTED(RUBY_PLATFORM, "${arch}")
+fi
+
+unset sitearch
+AS_CASE(["$target_os"],[mingw*],[sitearch="$target_cpu-$rb_cv_msvcrt"])
+test ${sitearch+set} && AC_DEFINE_UNQUOTED(RUBY_SITEARCH, "${sitearch}")
+: ${sitearch='${arch}'}
+
+AC_ARG_WITH(search-path,
+		AS_HELP_STRING([--with-search-path=DIR], [specify the additional search path]),
+		[search_path=$withval])
+if test "$search_path" != ""; then
+    AC_DEFINE_UNQUOTED(RUBY_SEARCH_PATH,"$search_path")
+fi
+
+AC_ARG_WITH(rubyhdrdir,
+	    AS_HELP_STRING([--with-rubyhdrdir=DIR], [core headers in DIR [[INCLUDEDIR/RUBY_BASE_NAME-RUBY_VERSION]]]),
+	    [rubyhdrdir=$withval],
+	    [rubyhdrdir='${includedir}/${RUBY_BASE_NAME}-${ruby_version}'])
+
+AC_ARG_WITH(sitehdrdir,
+	    AS_HELP_STRING([--with-sitehdrdir=DIR], [core site headers in DIR [[RUBYHDRDIR/site_ruby]]]),
+	    [sitehdrdir=$withval],
+	    [sitehdrdir='${rubyhdrdir}/site_ruby'])
+
+AC_ARG_WITH(vendorhdrdir,
+	    AS_HELP_STRING([--with-vendorhdrdir=DIR], [core vendor headers in DIR [[RUBYHDRDIR/vendor_ruby]]]),
+	    [vendorhdrdir=$withval],
+	    [vendorhdrdir='${rubyhdrdir}/vendor_ruby'])
+
+AC_SUBST(rubyhdrdir)dnl
+AC_SUBST(sitehdrdir)dnl
+AC_SUBST(vendorhdrdir)dnl
+
+AC_ARG_WITH(opt-dir,
+	AS_HELP_STRING([--with-opt-dir=DIR], [add optional headers and libraries DIR]))
+
+AC_ARG_WITH(mantype,
+	AS_HELP_STRING([--with-mantype=TYPE], [specify man page type; TYPE is one of man and doc]),
+		[
+			AS_CASE(["$withval"],
+			[man|doc], [MANTYPE=$withval],
+			[AC_MSG_ERROR(invalid man type: $withval)])
+		])
+if test -z "$MANTYPE"; then
+	AC_PATH_PROGS(NROFF, nroff awf, /bin/false, "/usr/bin:/usr/ucb")
+	if ${NROFF} -mdoc ${srcdir}/man/ruby.1 >/dev/null 2>&1; then
+		MANTYPE=doc
+	else
+		MANTYPE=man
+	fi
+fi
+AC_SUBST(MANTYPE)
+
+AC_ARG_ENABLE(rubygems,
+	AS_HELP_STRING([--disable-rubygems], [disable rubygems by default]),
+	[enable_rubygems="$enableval"], [enable_rubygems=yes])
+if test x"$enable_rubygems" = xno; then
+    AC_DEFINE(DISABLE_RUBYGEMS, 1)
+    USE_RUBYGEMS=NO
+else
+    USE_RUBYGEMS=YES
+fi
+AC_SUBST(USE_RUBYGEMS)
+
+arch_hdrdir="${EXTOUT}/include/${arch}/ruby"
+AS_MKDIR_P("${arch_hdrdir}")
+config_h="${arch_hdrdir}/config.h"
+guard=INCLUDE_RUBY_CONFIG_H
+{
+  echo "#ifndef $guard"
+  echo "#define $guard 1"
+  grep -v "^#define PACKAGE_" confdefs.h
+  echo "#endif /* $guard */"
+} | tr -d '\015' |
+${srcdir}/tool/ifchange "${config_h}" -
+tr -d '\015' < largefile.h > confdefs.h
+rm largefile.h
+
+BUILTIN_ENCS=["`sed -n -e '/^BUILTIN_ENCS[ 	]*=/{' \
+	-e s/// -e :l -e '/\\\\$/N' -e 's/\\\\\\n/ /' -e 't l' -e p \
+	-e '}' "${srcdir}/enc/Makefile.in"`"]
+BUILTIN_ENCOBJS=
+for e in $BUILTIN_ENCS; do BUILTIN_ENCOBJS="$BUILTIN_ENCOBJS `basename $e .c`"'.$(OBJEXT)'; done
+AC_SUBST(BUILTIN_ENCOBJS)
+
+BUILTIN_TRANSES=["`sed -n -e '/^BUILTIN_TRANSES[ 	]*=/{' \
+	-e s/// -e :l -e '/\\\\$/N' -e 's/\\\\\\n/ /' -e 't l' -e p \
+	-e '}' "${srcdir}/enc/Makefile.in"`"]
+BUILTIN_TRANSSRCS=
+BUILTIN_TRANSOBJS=
+for e in $BUILTIN_TRANSES; do
+  BUILTIN_TRANSSRCS="$BUILTIN_TRANSSRCS `basename $e .trans`"'.c';
+  BUILTIN_TRANSOBJS="$BUILTIN_TRANSOBJS `basename $e .trans`"'.$(OBJEXT)';
+done
+AC_SUBST(BUILTIN_TRANSSRCS)
+AC_SUBST(BUILTIN_TRANSOBJS)
+
+PACKAGE=$RUBY_BASE_NAME
+AC_SUBST(PACKAGE)
+AC_MSG_RESULT($PACKAGE library version = $ruby_version)
+
+AS_CASE([" $CPP "], [*" $CC "*], [CPP=`echo " $CPP " | sed "s| $CC |"' $(CC) |;s/^ *//;s/  *$//'`])
+
+AC_CONFIG_FILES($FIRSTMAKEFILE)
+AC_CONFIG_FILES(Makefile, [{
+	if test -d "$srcdir/.svn"; then
+	    VCS='svn'
+	    VCSUP='$(VCS) up $(SVNUPOPTIONS)'
+	elif test -d "$srcdir/.git/svn"; then
+	    VCS='git svn'
+	    VCSUP='$(VCS) rebase $(GITSVNREBASEOPTIONS)'
+	elif test -d "$srcdir/.git"; then
+	    VCS='git'
+	    VCSUP='$(VCS) pull $(GITPULLOPTIONS)'
+	else
+	    VCS='echo cannot'
+	    VCSUP='$(VCS)'
+	fi
+	sed '/^MISSING/s/\$U\././g;/^VCS *=/s#@VCS@#'"$VCS"'#;/^VCSUP *=/s#@VCSUP@#'"$VCSUP"'#' Makefile
+	echo; test x"$EXEEXT" = x || echo 'miniruby: miniruby$(EXEEXT)'
+	if test "$gnumake" != yes; then
+	    echo ['$(MKFILES): $(srcdir)/common.mk']
+	    sed ['s/{\$([^(){}]*)[^{}]*}//g'] ${srcdir}/common.mk
+	else
+	    echo 'distclean-local::; @$(RM) GNUmakefile uncommon.mk'
+	fi
+    } > confmk$$.tmp && mv -f confmk$$.tmp Makefile &&
+    {
+	grep '^ruby:' Makefile > /dev/null ||
+	${MAKE-make} info-program | grep '^PROGRAM=ruby$' > /dev/null ||
+	echo 'ruby: $(PROGRAM);' >> Makefile
+    }],
+[EXEEXT='$EXEEXT' gnumake='$gnumake'])
+
+AC_ARG_WITH([ruby-pc],
+	    AC_HELP_STRING([pc file basename]),
+	    [ruby_pc="$withval"],
+	    [ruby_pc="${RUBY_BASE_NAME}-${MAJOR}.${MINOR}.pc"])
+AC_SUBST(ruby_pc)
+AC_SUBST(exec, [exec])
+
+AC_CONFIG_FILES($ruby_pc:template/ruby.pc.in,
+    [
+    if sed ['s/\$(\([A-Za-z_][A-Za-z0-9_]*\))/${\1}/g;s/@[A-Za-z_][A-Za-z0-9_]*@//'] $ruby_pc > ruby.tmp.pc &&
+	{
+	    test -z "$PKG_CONFIG" ||
+	    PKG_CONFIG_PATH=. $PKG_CONFIG --print-errors ruby.tmp
+	}
+    then
+	mv -f ruby.tmp.pc $ruby_pc
+    else
+	exit 1
+    fi
+    ],
+    [ruby_pc='$ruby_pc' PKG_CONFIG='$PKG_CONFIG'])
+
+AC_OUTPUT
+dnl }
+dnl }

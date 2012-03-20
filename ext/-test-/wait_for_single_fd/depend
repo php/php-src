@@ -1,0 +1,2 @@
+wait_for_single_fd.o: $(top_srcdir)/thread.c \
+  $(hdrdir)/ruby/ruby.h $(hdrdir)/ruby/io.h

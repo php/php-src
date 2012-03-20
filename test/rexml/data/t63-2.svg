@@ -1,0 +1,2828 @@
+ÿþ<?xml version="1.0" encoding="UTF-16"?>
+<svg height="647px" width="1024px" viewBox="-800000 -505508 1600000 1011016" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rgr="http://www.abbnm.com/ranger">
+	<defs>
+		<font id="pedDef" horiz-adv-x="1470">
+			<font-face font-family="PED2" units-per-em="2048" panose-1="0 0 0 0 0 0 0 0 0 0" ascent="1536" descent="-348" alphabetic="0"/>
+			<missing-glyph horiz-adv-x="1024"/>
+			<glyph unicode="“!" glyph-name="down-arrow" horiz-adv-x="848" d="M14 819L424 0L834 819L526 614V1434H322V614L14 819Z"/>
+			<glyph unicode="’!" glyph-name="right-arrow" horiz-adv-x="1460" d="M625 410L1444 819L625 1229L829 922H10V717H829L625 410Z"/>
+			<glyph unicode="!" glyph-name="left-arrow" horiz-adv-x="1460" d="M836 1229L16 819L836 410L631 717H1450V922H631L836 1229Z"/>
+			<glyph unicode="‘!" glyph-name="up-arrow" horiz-adv-x="848" d="M834 614L424 1434L14 614L322 819V0H526V819L834 614Z"/>
+			<glyph unicode="—!" glyph-name="ne-arrow" horiz-adv-x="1118" d="M809 360L1098 1229L229 940L592 868L12 289L158 143L737 723L809 360Z"/>
+			<glyph unicode="˜!" glyph-name="se-arrow" horiz-adv-x="1118" d="M229 494L1098 205L809 1073L737 711L158 1290L12 1145L592 565L229 494Z"/>
+			<glyph unicode="–!" glyph-name="nw-arrow" horiz-adv-x="1118" d="M889 940L20 1229L309 360L381 723L961 143L1106 289L526 868L889 940Z"/>
+			<glyph unicode="™!" glyph-name="sw-arrow" horiz-adv-x="1118" d="M309 1073L20 205L889 494L526 565L1106 1145L961 1290L381 711L309 1073Z"/>
+			<glyph unicode="%" glyph-name="vert-bar" horiz-adv-x="2355" d="M1229 -410H1126V1843H1229V-410Z"/>
+			<glyph unicode="%" glyph-name="sw-corner" horiz-adv-x="2355" d="M1126 1843V614H2355V717H1229V1843H1126Z"/>
+			<glyph unicode="%" glyph-name="horiz-bar" horiz-adv-x="2355" d="M0 614H2355V717H0V614Z"/>
+			<glyph unicode="%" glyph-name="right-t" horiz-adv-x="2355" d="M1229 614H2355V717H1229V1843H1126V-410H1229V614Z"/>
+			<!-- The following glyphs reside in the private use area of the Unicode standard -->
+			<glyph unicode="à" glyph-name="thin-rt-arrow" horiz-adv-x="1808" d="M1741 666L1024 307L1229 614H0V717H1229L1024 1024L1741 666Z"/>
+			<glyph unicode="à" glyph-name="ground" horiz-adv-x="1128" d="M463 -51H666V-51V51H463V-51V-51ZM819 307V205H309V307H819ZM973 563V461H156V563H973ZM2 717H1126V819H614V1434H514V819H2V717Z"/>
+			<glyph unicode="à" glyph-name="ground-right" horiz-adv-x="1509" d="M1491 666V868V868H1389V666H1491V666ZM1133 1022H1235V512H1133V1022ZM877 1176H979V358H877V1176ZM723 205V1329H621V817H6V717H621V205H723Z"/>
+		</font>
+		<g id="symbol639">
+			<title>SYMBOL 640</title>
+			<g stroke="none" transform=" translate(27, -27)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">OFF</text>
+			</g>
+		</g>
+		<g id="symbol641">
+			<title>SYMBOL 642</title>
+			<g stroke="none">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">NORMAL</text>
+			</g>
+		</g>
+		<g id="symbol642">
+			<title>SYMBOL 643</title>
+			<g stroke="none" transform=" translate(27, -27)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">ARMED</text>
+			</g>
+		</g>
+		<g id="symbol643">
+			<title>SYMBOL 644</title>
+			<g stroke="none">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">ALARM</text>
+			</g>
+		</g>
+		<g id="symbol645">
+			<title>SYMBOL 646</title>
+			<g stroke="none">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">FAILED</text>
+			</g>
+		</g>
+		<g id="symbol651">
+			<title>SYMBOL 652</title>
+			<g stroke="none" transform=" translate(27, -27)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">ON</text>
+			</g>
+		</g>
+		<g id="symbol659">
+			<title>SYMBOL 660</title>
+			<g stroke="none" transform=" translate(27, -27)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">AUTO</text>
+			</g>
+		</g>
+		<g id="symbol674">
+			<title>SYMBOL 675</title>
+			<g stroke="none">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">MARGINAL</text>
+			</g>
+		</g>
+		<g id="symbol834">
+			<title>SYMBOL 835</title>
+			<g stroke="none" transform=" translate(0, 0)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">TRIPPED</text>
+			</g>
+		</g>
+		<g id="symbol921">
+			<title>SYMBOL 922</title>
+			<g stroke="none">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">MANUAL</text>
+			</g>
+		</g>
+		<g id="symbol1679">
+			<title>Select</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">S</text>
+			</g>
+		</g>
+		<g id="symbol1680">
+			<title>Unack</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">U</text>
+			</g>
+		</g>
+		<g id="symbol1681">
+			<title>Alarm</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">A</text>
+			</g>
+		</g>
+		<g id="symbol1682">
+			<title>Deact</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">D</text>
+			</g>
+		</g>
+		<g id="symbol1683">
+			<title>Alinh</title>
+			<g stroke="none" transform=" translate(-1790, 6666)">
+				<text font-size="24357" font-family="PED2, Times New Roman" xml:space="preserve">I</text>
+			</g>
+		</g>
+		<g id="symbol1684">
+			<title>Telem</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">E</text>
+			</g>
+		</g>
+		<g id="symbol1685">
+			<title>Manual</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">M</text>
+			</g>
+		</g>
+		<g id="symbol1686">
+			<title>TagInfo</title>
+			<g stroke="none" transform=" translate(-1751, 2911)">
+				<text font-size="9955" font-family="PED2, Times New Roman" xml:space="preserve">I</text>
+			</g>
+			<g fill="none" stroke-width="1000" style=" stroke-dasharray: 16000 0 ;">
+				<polygon points="-5833,-335 -509,5833 4659,-335 -509,-6326 -5833,-335 ">
+				</polygon>
+			</g>
+		</g>
+		<g id="symbol1687">
+			<title>TagCtl</title>
+			<g fill="none" stroke-width="1000" style=" stroke-dasharray: 16000 0 ;">
+				<polygon points="-5000,81 323,6249 5493,81 323,-5909 -5000,81 ">
+				</polygon>
+			</g>
+			<g stroke="none" transform=" translate(-3418, 3327)">
+				<text font-size="9955" font-family="PED2, Arial" xml:space="preserve">N</text>
+			</g>
+		</g>
+		<g id="symbol1688">
+			<title>TagCls</title>
+			<g fill="none" stroke-width="1000" style=" stroke-dasharray: 16000 0 ;">
+				<polygon points="-5000,81 323,6249 5493,81 323,-5909 -5000,81 ">
+				</polygon>
+			</g>
+			<g stroke="none" transform=" translate(-3418, 3327)">
+				<text font-size="9955" font-family="PED2, Arial" xml:space="preserve">H</text>
+			</g>
+		</g>
+		<g id="symbol1689">
+			<title>TagOpn</title>
+			<g stroke="none" transform=" translate(-3418, 3327)">
+				<text font-size="9955" font-family="PED2, Arial" xml:space="preserve">O</text>
+			</g>
+			<g fill="none" stroke-width="1000" style=" stroke-dasharray: 16000 0 ;">
+				<polygon points="-5000,81 323,6249 5493,81 323,-5909 -5000,81 ">
+				</polygon>
+			</g>
+		</g>
+		<g id="symbol1690">
+			<title>RDV</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">R</text>
+			</g>
+		</g>
+		<g id="symbol1691">
+			<title>Gmerr</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">G</text>
+			</g>
+		</g>
+		<g id="symbol1692">
+			<title>Limovr</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">O</text>
+			</g>
+		</g>
+		<g id="symbol1693">
+			<title>Limit1</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">1</text>
+			</g>
+		</g>
+		<g id="symbol1694">
+			<title>Kimit2</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">2</text>
+			</g>
+		</g>
+		<g id="symbol1695">
+			<title>Limit3</title>
+			<g stroke="none" transform=" translate(-8456, 6666)">
+				<text font-size="24357" font-family="PED2, Arial" xml:space="preserve">3</text>
+			</g>
+		</g>
+	</defs>
+	<rgr:update display="A118TH-SO1">
+	</rgr:update>
+	<rgr:timestamp date="10301" time="57116000">
+	</rgr:timestamp>
+	<rect id="background" x="-800000" y="-505508" height="1011016" width="1600000" fill="#000000">
+	</rect>
+	<g id="layer32">
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-780000, -313333)">
+				<text font-size="18018" font-family="PED2, Arial" xml:space="preserve">03/16/06     ADDED DFK 6 -- K. POPE</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-780000, -353333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">01/05/05     FIXED DFK'S -- K. POPE</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-780000, -373333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">10/14/04     CHANGED ACRONYM FOR REG CONTROL TO MANUAL / AUTO -- O. WAHLSTROM</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-780000, -473333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">12/24/03     DISPLAY BUILT AND DATA ADDED -- K. POPE</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-780000, -453333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">01/06/04     DISPLAY CORRECTED PER R. MCCORMICK -- N. FISHER</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-780000, -433333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">03/18/04     DISPLAY UPDATED/DFK'S FIXED/APPENDED SYMBOLS MOVED -- T. TURNER</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-780000, -413333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">03/29/04     REVIEWED -- O. WAHLSTROM</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-780000, -393333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">05/11/04     RTU BOX FIXED AND DISPLAY UPDATED -- K. POPE</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-780000, -333333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">10/18/05     REMOVED BUS VOLT MAXIMUM ALARM -- K. POPE</text>
+			</g>
+		</g>
+	</g>
+	<g id="layer1">
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-179999, -466666)">
+				<text font-size="30029" font-family="PED2, Arial" xml:space="preserve">118TH SOUTH (118TH-SO)</text>
+			</g>
+		</g>
+		<g>
+			<g fill="none" stroke-width="1000" style=" stroke-dasharray: 16000 0 ;" stroke="#e1d3b3">
+				<rect x="-753333" y="-500000" height="46666" width="1506666">
+				</rect>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(481450, -466666)">
+				<text font-size="25825" font-family="PED2, Arial" xml:space="preserve">Salt Lake County, Utah</text>
+			</g>
+		</g>
+		<g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#e1d3b3">
+				<rect x="-753333" y="-26666" height="520791" width="1506666">
+				</rect>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-600000, 180000)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">REG 1 AUTOMATIC (C)</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-600000, 73333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">To control regulator, right click on the tap position</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-600000, 100000)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">indication and select the regulation option.</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(19999, -226666)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">XFMR 1 TEMPERATURE</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(19999, -199999)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">XFMR 1 NITROGEN CYL LOW</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(19999, -253333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">XFMR 1 LOW OIL LEVEL</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(19999, -173333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">XFMR 1 NITROGEN PRESSURE</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(20000, -146666)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">XFMR 1 PRESSURE FAULT</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(20000, -119999)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">XFMR 1 LTC CONTROL LOSS</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-406666, -93333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">RELAY LOSS OF AC</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-406666, -119999)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">STATION SERVICE</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(20000, -279999)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">XFMR 1 LTC FAIL</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(20000, -306666)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">XFMR 1 WINDING TEMP TRIP</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(20000, -333333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">XFMR 1 LOCKOUT</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-406666, -253333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">CONTROL SYSTEM FAIL</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-406666, -279999)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">UNDER FREQ TRIP RELAY</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-406666, -306666)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">CB LOW SPRING CHARGE</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-406666, -333333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">RELAY FAILURE</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-406666, -146666)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">CAP 1 VOLT CONTROL (C)</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-406666, -173333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">HMI PLC STALLED</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-406666, -199999)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">XFMR 1 LTC FILTER</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-406666, -226666)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">CONTROL SYSTEM NON CRITICAL</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-86666, -406666)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">Station Alarms</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-140000, 20000)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">Regulator 1 Control and Tap Position</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-600000, 213333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">REG 1 TAP POSITION</text>
+			</g>
+		</g>
+		<g transform="translate(-260000, 180000)" id="elm139">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol921" stroke="#ff0000" fill="#ff0000" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol659" stroke="#00ffff" fill="#00ffff" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(77484, -6019) scale(0.678085)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(91920, -6019) scale(0.678085)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="REG 1 AUTOMATIC">
+			</rgr:ranger>
+		</g>
+		<g>
+			<g stroke="none" fill="#ba8864">
+				<polygon points="-59607,187500 -59607,212499 59607,212499 59607,187500 -59607,187500 ">
+				</polygon>
+			</g>
+			<g stroke="none" fill="#ffedb5">
+				<polygon points="63333,183333 -63333,183333 -59607,187500 59607,187500 63333,183333 ">
+				</polygon>
+			</g>
+			<g stroke="none" fill="#96825a">
+				<polyline points="63333,216666 59607,212499 59607,187500 63333,183333 ">
+				</polyline>
+			</g>
+			<g stroke="none" fill="#ffedb5">
+				<polygon points="-63333,183333 -59607,187500 -59607,212499 -63333,216666 -63333,183333 ">
+				</polygon>
+			</g>
+			<g stroke="none" fill="#96825a">
+				<polyline points="-63333,216666 -59607,212500 59607,212500 63333,216666 ">
+				</polyline>
+			</g>
+		</g>
+		<g id="elm141">
+			<g id="appended" transform="translate(-266371, 214890)">
+				<g transform="translate(33332, -6005) scale(0.677048)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(43242, -6005) scale(0.677048)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<g stroke="none" fill="#00ffff" transform=" translate(-266371, 214890)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">- 12 </text>
+			</g>
+			<rgr:ranger type="analog" presentation="numeric" leftJust="false" pos=" " neg="-" substation="118TH.SO" point="REG 1 TAP POSITION">
+			</rgr:ranger>
+		</g>
+		<g id="elm142">
+			<g id="appended" transform="translate(-366666, 400000)">
+				<g transform="translate(66365, -6005) scale(0.677048)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(76274, -6005) scale(0.677048)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<g stroke="none" fill="#00ffff" transform=" translate(-366666, 400000)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">- 1234.6 </text>
+			</g>
+			<rgr:ranger type="analog" presentation="numeric" leftJust="false" pos=" " neg="-" substation="118TH.SO" point="REG 1 A.PH 12KV BV">
+			</rgr:ranger>
+		</g>
+		<g id="elm143">
+			<g id="appended" transform="translate(-199999, 400000)">
+				<g transform="translate(66365, -6005) scale(0.677048)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(76274, -6005) scale(0.677048)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<g stroke="none" fill="#00ffff" transform=" translate(-199999, 400000)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">- 1234.6 </text>
+			</g>
+			<rgr:ranger type="analog" presentation="numeric" leftJust="false" pos=" " neg="-" substation="118TH.SO" point="REG 1 B.PH 12KV BV">
+			</rgr:ranger>
+		</g>
+		<g id="elm144">
+			<g id="appended" transform="translate(-39999, 400000)">
+				<g transform="translate(66365, -6005) scale(0.677048)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(76274, -6005) scale(0.677048)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<g stroke="none" fill="#00ffff" transform=" translate(-39999, 400000)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">- 1234.6 </text>
+			</g>
+			<rgr:ranger type="analog" presentation="numeric" leftJust="false" pos=" " neg="-" substation="118TH.SO" point="REG 1 C.PH 12KV BV">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(306666, -119999)" id="elm145">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="XFMR 1 LTC CONTRL LOSS">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(306666, -146666)" id="elm146">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="XFMR 1 PRESSURE FAULT">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(306666, -173333)" id="elm147">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="XFMR 1 NITROGEN PRESS.">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(306666, -199999)" id="elm148">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="XFMR 1 NITROGEN CYL LO">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(306666, -226666)" id="elm149">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="XFMR 1 TEMP">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(306666, -253333)" id="elm150">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="XFMR 1 LOW OIL LEVEL">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(306666, -333333)" id="elm151">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="XFMR 1 LOCKOUT">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(306666, -306666)" id="elm152">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="XFMR 1 WINDING TEMP">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(306666, -279999)" id="elm153">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="XFMR 1 LTC FAIL">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(-120000, -93333)" id="elm154">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="RELAY LOSS OF AC">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(-119999, -119999)" id="elm155">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="STATION SERVICE">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(-119704, -146666)" id="elm156">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol639" stroke="#ff0000" fill="#ff0000" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol651" stroke="#00ffff" fill="#00ffff" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(44470, -6033) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(58885, -6033) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="CAP 1 VOLT CTRL">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(-119999, -173333)" id="elm157">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="HMI PLC STALLED">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(-119999, -199999)" id="elm158">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="XFMR 1 LTC FILTER">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(-119999, -226666)" id="elm159">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="CTRL SYSTEM NON CRIT">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(-119999, -253333)" id="elm160">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="CTRL SYSTEM FAIL">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(-119999, -279999)" id="elm161">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="UNDER FREQ TRIP RELAY">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(-119999, -306666)" id="elm162">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="CB LOW SPRING CHARGE">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(-119999, -333333)" id="elm163">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(80479, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(94893, -6005) scale(0.677063)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="RELAY FAIL">
+			</rgr:ranger>
+		</g>
+		<g id="elm164">
+			<g stroke="none" fill="#bfbfbf" transform=" translate(476402, 49201)">
+				<text font-size="29514" font-family="PED2, Arial" xml:space="preserve">16</text>
+			</g>
+			<g stroke="none" fill="#bfbfbf" transform=" translate(476402, 99717)">
+				<text font-size="29514" font-family="PED2, Arial" xml:space="preserve">12</text>
+			</g>
+			<g stroke="none" fill="#bfbfbf" transform=" translate(476402, 150234)">
+				<text font-size="29514" font-family="PED2, Arial" xml:space="preserve">8</text>
+			</g>
+			<g stroke="none" fill="#bfbfbf" transform=" translate(476402, 200750)">
+				<text font-size="29514" font-family="PED2, Arial" xml:space="preserve">4</text>
+			</g>
+			<g stroke="none" fill="#bfbfbf" transform=" translate(476402, 251267)">
+				<text font-size="29514" font-family="PED2, Arial" xml:space="preserve">0</text>
+			</g>
+			<g stroke="none" fill="#bfbfbf" transform=" translate(476402, 301783)">
+				<text font-size="29514" font-family="PED2, Arial" xml:space="preserve">-4</text>
+			</g>
+			<g stroke="none" fill="#bfbfbf" transform=" translate(476402, 352300)">
+				<text font-size="29514" font-family="PED2, Arial" xml:space="preserve">-8</text>
+			</g>
+			<g stroke="none" fill="#bfbfbf" transform=" translate(476402, 402816)">
+				<text font-size="29514" font-family="PED2, Arial" xml:space="preserve">-12</text>
+			</g>
+			<g stroke="none" fill="#bfbfbf" transform=" translate(476402, 453333)">
+				<text font-size="29514" font-family="PED2, Arial" xml:space="preserve">-16</text>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="414435,445954 414435,41822 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="462930,41822 414435,41822 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="462930,92339 414435,92339 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="462930,142855 414435,142855 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="462930,193372 414435,193372 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="462930,243888 414435,243888 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="462930,294405 414435,294405 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="462930,344921 414435,344921 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="462930,395438 414435,395438 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="462930,445954 414435,445954 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,54451 414435,54451 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,67081 414435,67081 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,79710 414435,79710 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,104968 414435,104968 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,117597 414435,117597 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,130226 414435,130226 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,155484 414435,155484 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,168113 414435,168113 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,180743 414435,180743 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,206001 414435,206001 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,218630 414435,218630 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,231259 414435,231259 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,256517 414435,256517 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,269146 414435,269146 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,281776 414435,281776 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,307034 414435,307034 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,319663 414435,319663 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,332292 414435,332292 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,357550 414435,357550 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,370179 414435,370179 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,382808 414435,382808 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,408067 414435,408067 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,420696 414435,420696 ">
+				</polyline>
+			</g>
+			<g fill="none" stroke-width="2000" style=" stroke-dasharray: 16000 0 ;" stroke="#bfbfbf">
+				<polyline points="438683,433325 414435,433325 ">
+				</polyline>
+			</g>
+			<rgr:ranger type="analog" presentation="meter" min="-16.000000" max="16.000000" propagationDir="0" displayDir="1" substation="118TH.SO" point="REG 1 TAP POSITION">
+			</rgr:ranger>
+			<g fill="none" stroke="#ff0000" stroke-width="2000">
+				<polyline points="0,0 0,0 0,0 0,0 0,0">
+				</polyline>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-599290, 400000)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">REG 1 12KV BUS VOLTS</text>
+			</g>
+		</g>
+		<g id="elm166">
+			<g id="appended" transform="translate(-26371, 208223)">
+				<g transform="translate(33332, -6005) scale(0.677048)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(43242, -6005) scale(0.677048)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<g stroke="none" fill="#1a1a1a" transform=" translate(-26371, 208223)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">- 12 </text>
+			</g>
+			<rgr:ranger type="analog" presentation="numeric" leftJust="false" pos=" " neg="-" substation="118TH.SO" point="REG 1 TAP POSITION">
+			</rgr:ranger>
+		</g>
+		<g transform="translate(-506666, -353333)" id="elm167">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol834" stroke="#ff0000" fill="#ff0000" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol642" stroke="#00ffff" fill="#00ffff" visibility="hidden">
+				</use>
+			</g>
+			<g id="appended">
+				<g transform="translate(83490, -6019) scale(0.678085)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+				<g transform="translate(97926, -6019) scale(0.678085)">
+					<use visibility="hidden" xlink:href="#symbol1679" stroke="#ffea00" fill="#ffea00">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1680" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1681" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1682" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1683" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1684" stroke="#377800" fill="#377800">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1685" stroke="#00ffff" fill="#00ffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1686" stroke="#ffffff" fill="#ffffff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1687" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1688" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1689" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1690" stroke="#5555ff" fill="#5555ff">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1691" stroke="#fe00fe" fill="#fe00fe">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1692" stroke="#ff6e05" fill="#ff6e05">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1693" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1694" stroke="#ff0000" fill="#ff0000">
+					</use>
+					<use visibility="hidden" xlink:href="#symbol1695" stroke="#ff0000" fill="#ff0000">
+					</use>
+				</g>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="118TH.SO" point="ENTRY">
+			</rgr:ranger>
+		</g>
+		<g>
+			<g stroke="none" fill="#ffffff" transform=" translate(-740000, -393333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">RTU STATUS:</text>
+			</g>
+		</g>
+		<g transform="translate(-506666, -393333)" id="elm169">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol639" stroke="#ff0000" fill="#ff0000" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol651" stroke="#00ffff" fill="#00ffff" visibility="hidden">
+				</use>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="RTUERR.SE" point="481">
+			</rgr:ranger>
+		</g>
+		<g>
+			<g stroke="none" fill="#ffffff" transform=" translate(-740000, -373333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">RTU COMMUNICATIONS:</text>
+			</g>
+		</g>
+		<g>
+			<g stroke="none" fill="#eeeeee" transform=" translate(-740000, -353333)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">ENTRY</text>
+			</g>
+		</g>
+		<g>
+			<g fill="none" stroke-width="1000" style=" stroke-dasharray: 16000 0 ;" stroke="#e1d3b3">
+				<rect x="-753333" y="-446666" height="106666" width="339999">
+				</rect>
+			</g>
+		</g>
+		<g>
+			<g fill="none" stroke-width="1000" style=" stroke-dasharray: 16000 0 ;" stroke="#e1d3b3">
+				<polyline points="-413333,-419999 -753333,-419999 ">
+				</polyline>
+			</g>
+		</g>
+		<g transform="translate(-506666, -373333)" id="elm174">
+			<g id="status" transform="translate(0, 0)">
+				<use xlink:href="#symbol645" stroke="#ff0000" fill="#ff0000" visibility="inherit">
+				</use>
+				<use xlink:href="#symbol641" stroke="#00ffff" fill="#00ffff" visibility="hidden">
+				</use>
+				<use xlink:href="#symbol674" stroke="#ffea00" fill="#ffea00" visibility="hidden">
+				</use>
+				<use xlink:href="#symbol643" stroke="#ff0000" fill="#ff0000" visibility="hidden">
+				</use>
+			</g>
+			<rgr:ranger type="discrete" pos="+" neg="-" presentation="symbolic" substation="RTUERR.COM" point="481">
+			</rgr:ranger>
+		</g>
+		<g>
+			<g stroke="none" fill="#e1d3b3" transform=" translate(-626666, -426666)">
+				<text font-size="18017" font-family="PED2, Arial" xml:space="preserve">RTU - 481</text>
+			</g>
+		</g>
+	</g>
+</svg>

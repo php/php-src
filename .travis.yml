@@ -1,0 +1,8 @@
+# no installation...
+before_script: autoconf
+script: "./configure && make all test"
+
+branches:
+  only:
+    - trunk
+    - ruby_1_9_3

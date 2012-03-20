@@ -1,0 +1,499 @@
+# -*- rd -*-
+= NEWS
+
+This document is a list of user visible feature changes made between
+releases except for bug fixes.
+
+Note that each entry is kept so brief that no reason behind or
+reference information is supplied with.  For a full list of changes
+with all sufficient information, see the ChangeLog file.
+
+== Changes since the 1.9.1 release
+=== Library updates (outstanding ones only)
+
+* builtin classes
+
+  * Array
+    * new method:
+      * Array#keep_if
+      * Array#repeated_combination
+      * Array#repeated_permutation
+      * Array#rotate
+      * Array#rotate!
+      * Array#select!
+      * Array#sort_by!
+
+    * extended methods:
+      * Array#{uniq,uniq!,product} can take a block.
+
+  * Complex
+    * new methods:
+      * Complex#rationalize
+
+  * Dir
+    * new method:
+      * Dir.home
+
+  * Encoding
+    * new encodings:
+      * Big5
+      * Big5-UAO
+      * ISO-2022-JP-KDDI
+      * SJIS-DoCoMo
+      * SJIS-KDDI
+      * SJIS-SoftBank
+      * UTF8-DoCoMo
+      * UTF8-KDDI
+      * UTF8-SoftBank
+
+    * new method:
+      * ascii_compatible?
+
+  * Enumerable
+    * New methods:
+      * Enumerable#chunk
+      * Enumerable#collect_concat
+      * Enumerable#each_entry
+      * Enumerable#flat_map
+      * Enumerable#slice_before
+
+  * Enumerator
+    * new methods:
+      * Enumerator#peek
+      * Enumerator#next_values
+      * Enumerator#peek_values
+      * Enumerator#feed
+      * StopIteration#result
+
+    * extended methods:
+      * #with_index accepts an optional argument that specifies the
+        index number to start with, defaulted to 0.
+
+    * incompatible changes:
+      * #rewind now calls the "rewind" method of the enclosed object
+        if defined.
+      * #next doesn't clear the position at end.
+
+  * ENV
+    * Uses locale's encoding
+    * ENV.[]= raises Errno::{EINVAL,ENOMEM} etc. on failure.
+    * new methods:
+      * ENV.keep_if
+      * ENV.select!
+
+  * Float
+    * new constants:
+      * Float::INFINITY
+      * Float::NAN
+    * new methods:
+      * Float#rationalize
+
+  * File
+    * new methods:
+      * File.realpath
+      * File.realdirpath
+      * File#size
+
+  * GC::Profiler
+    * new method:
+      * GC::Profiler.total_time
+
+  * Hash
+    * new methods:
+      * Hash#keep_if
+      * Hash#select!
+
+  * IO
+    * new method:
+      * IO#autoclose=
+      * IO#autoclose?
+      * IO#fdatasync
+      * IO#codepoints
+      * IO#each_codepoint
+
+    * extended methods:
+      * IO.pipe can take a block.
+
+    * new modules:
+      * IO::WaitReadable
+      * IO::WaitWritable
+        They are used to extend non-blocking exceptions.
+
+  * Integer
+    * new methods:
+      * Integer#rationalize
+
+  * Kernel
+    * new methods:
+      * Kernel#respond_to_missing?
+      * Kernel#singleton_class
+      * Kernel#require_relative
+
+    * extended methods:
+      * Kernel#respond_to? can be used to detect methods not implemented.
+        For example, Process.respond_to?(:fork) returns false on Windows.
+
+    * incompatible changes:
+      * Kernel#instance_eval yields the receiver.
+
+      * Kernel#exec
+      * Kernel#spawn
+      * Kernel#system
+      * Kernel#` (`...`)
+        ..etc.
+
+        On Windows, the current directory is no longer implicitly
+        prepended to the default command search path, just like other
+        platforms.
+
+  * MatchData
+    * New method:
+      * MatchData#==
+
+  * NilClass
+    * new methods:
+      * NilClass#rationalize
+
+  * Object
+    * extended methods:
+      * Float() supports hexadecimal floating point format.
+      * printf() supports %a/%A format.
+
+  * Proc
+    * extended method:
+      * Proc#source_location returns location even if receiver is a method
+        defined by attr_reader / attr_writer / attr_accessor.
+
+  * Process
+    * extended methods:
+      * Process.spawn accepts [:child, FD] for a redirect target.
+
+  * Random (new class to generate pseudo-random numbers)
+
+  * Rational
+    * new methods:
+      * Rational#rationalize
+
+  * String
+    * extended methods:
+      * string[regexp, name] is supported for named capture.
+
+  * Thread
+    * new methods:
+      * Thread#add_trace_func
+      * Thread#set_trace_func
+
+  * Time
+    * extended feature:
+      * time_t restriction is removed to represent before 1901 and after 2038.
+        Proleptic Gregorian calendar is used for old dates.
+      * Time.new have optional arguments to specify date with time offset.
+      * Time#getlocal, Time#localtime have optional time offset argument.
+
+    * new method:
+      * Time#to_r
+      * Time#subsec
+      * Time#round
+
+    * incompatible changes:
+      * The year argument of Time.{utc,gm,local,mktime} is now interpreted as
+        the value itself.  For example, Time.utc(99) means the year 99 AD,
+        not 1999 AD.
+
+* digest
+  * new methods:
+    * Digest::Class.base64digest
+    * Digest::Instance#base64digest
+    * Digest::Instance#base64digest!
+
+  * Digest::HMAC (digest/hmac) has been marked as deprecated because
+    it was unintentional for the experimental library to be included
+    in the final release of 1.9.1.  Please use OpenSSL::HMAC instead.
+
+* rss
+
+  * 0.2.4 -> 0.2.7.
+
+  * RSS::Maker.make
+    * raise an exception not returns nil for invalid feed making.
+    * requires block.
+
+  * RSS::Maker.[]
+    * new method to return maker class.
+
+  * RSS::Maker.supported?(version)
+    * new method to check whether given version is supported.
+
+  * RSS::Maker: item.guid.permanent_link?
+    * new alias of item.guid.isPermaLink
+  * RSS::Maker: item.guid.permanent_link=
+    * new alias of item.guid.isPermaLink=
+
+* DL
+  * Now uses libffi as a backend if avaiable.
+    It means DL works fine on more platforms.
+
+* Fiddle
+  * A lightweight wrapper for libffi.
+
+* YAML
+  * Now uses libyaml as a backend if available.
+    It means YAML library supports new standards for YAML.
+
+* Psych
+  * A wrapper for libyaml.
+
+* JSON
+  * Update to JSON 1.1.9
+
+* REXML
+
+  * REXML::Document.entity_expansion_limit=
+
+    New method to set the entity expansion limit. By default the limit is
+    set to 10000.  See the following URL for details.
+
+    http://www.ruby-lang.org/en/news/2008/08/23/dos-vulnerability-in-rexml/
+
+* RDoc
+
+  * Updated to RDoc 2.5.8
+
+* RubyGems
+
+  * Updated to RubyGems 1.3.7
+
+* logger
+
+  * imported upstream version (logger/1.2.7)
+    * do not raise an exception even if log writing failed.
+    * do not raise ShiftingError if an aged file already exists.
+      (no ShiftingError will be raised from 1.2.7, just warn() instead)
+
+* matrix
+  * API change to adhere strictly to mathematical definitions:
+    * Matrices must now be rectangular.
+    * trace, regular?, singular? are defined only for square matrices
+    * support for empty matrices
+    * all integer matrices now have the right determinant (also an integer)
+
+  * Matrix and Vector include Enumerable.
+
+  * new methods:
+    * Matrix.build
+    * Matrix.empty
+    * Matrix#conj
+    * Matrix#conjugate
+    * Matrix#each
+    * Matrix#each_with_index
+    * Matrix#empty?
+    * Matrix#imag
+    * Matrix#imaginary
+    * Matrix#real
+    * Matrix#real?
+    * Matrix#rect
+    * Matrix#rectangular
+
+* net/http
+  * merged net/https.
+
+* open3
+  * new methods:
+    * Open3.popen2
+    * Open3.popen2e
+    * Open3.capture3
+    * Open3.capture2
+    * Open3.capture2e
+    * Open3.pipeline_rw
+    * Open3.pipeline_r
+    * Open3.pipeline_w
+    * Open3.pipeline_start
+    * Open3.pipeline
+
+* pty
+  * new methods:
+    * PTY.open
+    * PTY.check
+  * deprecated methods:
+    * protect_signal
+    * reset_signal
+
+* openssl
+  * new methods:
+    * OpenSSL::Buffering#read_nonblock
+    * OpenSSL::Buffering#write_nonblock
+    * OpenSSL::SSL::SSLSocket#connect_nonblock
+    * OpenSSL::SSL::SSLSocket#accept_nonblock
+
+* scanf
+  * support %a/%A format.
+
+
+* socket
+
+  * incompatible changes:
+    * Socket#{recvfrom,recvfrom_nonblock,accept,accept_nonblock,sysaccept}
+      returns a sender address as Addrinfo object instead of a binary sockaddr string.
+      Addrinfo#to_s returns the old binary sockaddr string.
+    * BasicSocket#getsockopt returns Socket::Option object instead of a binary string.
+      Socket::Option#to_s returns the old binary string.
+    * Socket.do_not_reverse_lookup is turned on by default now.
+
+  * new class:
+    * Addrinfo
+    * Socket::Option
+    * Socket::AncillaryData
+
+  * new methods:
+    * Socket.ip_address_list
+    * Socket.tcp
+    * Socket.tcp_server_loop
+    * Socket.tcp_server_sockets
+    * Socket.udp_server_sockets
+    * Socket.udp_server_loop_on
+    * Socket.udp_server_loop
+    * Socket.unix
+    * Socket.unix_server_loop
+    * Socket.unix_server_socket
+    * Socket.accept_loop
+    * Socket#ipv6only!
+    * BasicSocket#local_address
+    * BasicSocket#remote_address
+    * BasicSocket#connect_address
+    * BasicSocket#sendmsg
+    * BasicSocket#sendmsg_nonblock
+    * BasicSocket#recvmsg
+    * BasicSocket#recvmsg_nonblock
+    * BasicSocket#getpeereid
+
+  * extended methods:
+    * Socket.new's 3rd argument is optional now.
+    * Socket.pair's 3rd argument is optional now.
+    * Socket.pair and UNIXSocket.pair can take a block.
+    * BasicSocket#send, UDPSocket#send, Socket.getnameinfo, Socket#bind, and
+      Socket#{connect,connect_nonblock} accepts an Addrinfo object as sockaddr.
+    * BasicSocket#getsockopt accepts a Socket::Option object.
+    * Socket.getaddrinfo and IPSocket#{addr,peeraddr} accept an optional
+      argument to turn reverse lookup on/off.
+
+    * constant names can be accepted as well as constant values.
+      i.e. Socket.new(:PF_INET, :SOCK_STREAM, 0)
+      The constant names can be specified without the prefix.
+      i.e. Socket.new(:INET, :STREAM, 0)
+      * protocol/address family
+      * socket type
+      * socket option protocol level
+      * socket option name
+      * shutdown's argument
+
+* stringio
+  * new methods:
+    * StringIO#read_nonblock
+    * StringIO#write_nonblock
+* pathname
+  * new methods:
+    * Pathname#binread
+    * Pathname#realdirpath
+    * Pathname#each_child
+
+  * extended methods:
+    * Pathname#realpath and Pathname#realdirpath takes optional basedir
+      argument.
+
+* Readline
+  * new methods:
+    * Readline.set_screen_size
+    * Readline.get_screen_size
+
+  * extended methods:
+    * Readline.completion_proc= accepts nil.
+      nil means to use default completion proc.
+
+* set
+  * new methods:
+    * Set#keep_if
+    * Set#select!
+
+* time
+  * incompatible changes:
+    * Time.parse raises ArgumentError when no date information.
+
+* thread
+  * extended method:
+    * ConditionVariable#wait takes timeout argument.
+
+* securerandom
+  * new methods:
+    * SecureRandom.urlsafe_base64
+
+* URI
+  * new methods:
+    * URI.encode_www_form
+    * URI.decode_www_form
+    * URI.encode_www_form_component
+    * URI.decode_www_form_component
+  * Obsoleted methods:
+    * URI.decode
+    * URI.encode
+    * URI.escape
+    * URI.unescape
+
+* etc
+  * new methods:
+    * Etc::Passwd.each
+    * Etc::Group.each
+
+* zlib
+  * new methods:
+    * Zlib::GzipFile#path
+    * Zlib.#adler32_combine
+    * Zlib.#crc32_combine
+
+* rbconfig
+  * new methods:
+    * RbConfig.ruby
+
+=== Language changes
+
+* Regexp properties (\p{}) names now ignore underscores, spaces, and case, so
+  \p{ol chiki} is the same as \p{Ol_Chiki}
+* Regexps now support Unicode 5.2 (new characters and scripts)
+* \d, \s, and \w are now ASCII only; use POSIX bracket classes and \p{} for
+  Unicode semantics
+* $: no longer includes the current directory, use require_relative
+* Symbol with an invalid encoding is forbidden to exist.
+
+=== Compilation options
+
+* --program-prefix and --program-suffix no longer act on the shared object
+  names nor paths to libraries.
+
+  use --with-rubylibprefix='${libruby}/${RUBY_INSTALL_NAME}' and
+  --with-soname='${RUBY_INSTALL_NAME}' for the same result as Ruby 1.9.1.
+
+* --with-arch is added for universal binary, instead of
+  --enable-fat-binary option.
+
+=== Compatibility issues (excluding feature bug fixes)
+
+  * Enumerator#rewind
+  * Socket#recvfrom
+  * Socket#recvfrom_nonblock
+  * Socket#accept
+  * Socket#accept_nonblock
+  * Socket#sysaccept
+  * BasicSocket#getsockopt
+  * Time.utc
+  * Time.gm
+  * Time.local
+  * Time.mktime
+  * Time.parse
+  * --program-prefix and --program-suffix
+  * --enable-fat-binary
+  * $:
+
+    See above.
+
+  * Digest::HMAC
+
+    Deprecated.  See above.

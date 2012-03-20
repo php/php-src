@@ -1,0 +1,2787 @@
+<html><body bgcolor="white">
+<hr>
+<h1 align="center">Embedding Tcl in C/C++ Applications</h1>
+
+    <table width="100%">
+    <tr><td valign="top" align="left" width="46%">
+    <b>Presented At:</b>
+  <blockquote>
+     The&nbsp;Tcl2K&nbsp;Conference<br>
+     Austin, Texas<br>
+     <nobr>9:00am, February 15, 2000</nobr><br>
+  </blockquote>
+    </td>
+    <td width="5%">&nbsp;</td>
+    <td valign="top" align="left" width="46%">
+    <b>Instructor:</b>
+  <blockquote>
+     D. Richard Hipp<br>
+     drh@hwaci.com<br>
+     http://www.hwaci.com/drh/<br>
+     704.948.4565
+  </blockquote>
+    </td></tr>
+    </table><p>
+  <center><table border="2">
+  <tr><td>
+  <p align="center">
+  Copies of these notes, example source code,<br>and other
+  resources related to this tutorial<br>are available online at
+  <a href="http://www.hwaci.com/tcl2k/">
+  http://www.hwaci.com/tcl2k/</a></p>
+  <p align="center"><small>$Id$</small></p></td></tr>
+  </table>
+  </center>
+</p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Tutorial Outline</h2>
+<p><ul><li>Introduction</li>
+<li>Building It Yourself</li>
+<ul><li>"Hello, World!" using Tcl</li>
+<li>Tcl scripts as C strings</li>
+<li>Adding new Tcl commands</li>
+<li>A tour of the Tcl API</li>
+<li>Tcl initialization scripts</li>
+<li>Adding Tk</li>
+</ul><li>Tools Survey</li>
+<li>Mktclapp</li>
+<ul><li>"Hello World" using mktclapp</li>
+<li>Adding C code</li>
+<li>Other Features</li>
+<li>Invoking Tcl from C</li>
+<li>Running mktclapp directly</li>
+<li>Real-world examples</li>
+</ul><li>Summary</li>
+</ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Embedding Tcl in C/C++ Applications</h2>
+<p><ul><li>You know how to program in Tcl/Tk</li></ul><ul><li>You know how to program in C/C++</li></ul><ul><li>This tutorial is about how to do both at the same time.</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Why Mix C With Tcl/Tk?</h2>
+<p><ul><li>Use C for the things C is good at and Tcl for the things
+  Tcl is good at.</li></ul><ul><li>Generate standalone executables.
+  <ul><li>Eliminate the need to install Tcl/Tk.</li>
+  <li>Prevent problems when the wrong version of Tcl/Tk is installed.</li>
+  </ul></li></ul><ul><li>Prevent end users from changing the source code.
+  <ul><li>Keeps users from creating new bugs.</li>
+  <li>Protects proprietary code.</li>
+  </ul></li></ul><ul><li>Office politics</li></ul><ul><li>Use Tcl/Tk as a portability layer for a large C program</li></ul><ul><li>Use Tcl as a testing interface</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Why Mix C With Tcl/Tk?</h2>
+<p><blockquote><big><b>
+  "Use C for the things C is good at and use Tcl/Tk for the things
+  Tcl/Tk is good at."
+  </b></blockquote></p><p>
+
+    <table width="100%">
+    <tr><td valign="top" align="left" width="46%">
+    <b>C is good at:</b>
+  <ul>
+  <li>Speed</li>
+  <li>Complex data structures</li>
+  <li>Computation</li>
+  <li>Interacting with hardware</li>
+  <li>Byte-by-byte data analysis</li>
+  </ul>
+    </td>
+    <td width="5%">&nbsp;</td>
+    <td valign="top" align="left" width="46%">
+    <b>Tcl/Tk is good at:</b>
+  <ul>
+  <li>Building a user interface</li>
+  <li>Manipulation of strings</li>
+  <li>Portability</li>
+  <li>Opening sockets</li>
+  <li>Handling events</li>
+  </ul>
+    </td></tr>
+    </table>
+<br clear="both"><p><hr></p>
+<h2 align="center">Programming Models</h2>
+<table width="100%">
+<tr><td valign="top" width="49%">
+
+  <p><b>Mainstream Tcl Programming Model:</b></p>
+</td>
+<td width="2%">&nbsp;</td>
+<td valign="top" width="49%">
+
+  <p><b>Embedded Tcl Programming Model:&nbsp;&nbsp;</b></p>
+</td></tr>
+<tr><td valign="top" width="49%">
+
+  <ul><li>Add bits of C code to a large Tcl program</li></ul>
+</td>
+<td width="2%">&nbsp;</td>
+<td valign="top" width="49%">
+
+  <ul><li>Add bits of Tcl code to a large C program</li></ul>
+</td></tr>
+<tr><td valign="top" width="49%">
+
+  <ul><li>Main Tcl script loads extensions written in C</li></ul>
+</td>
+<td width="2%">&nbsp;</td>
+<td valign="top" width="49%">
+
+  <ul><li>Main C procedure invokes the Tcl interpreter</li></ul>
+</td></tr>
+<tr><td valign="top" width="49%">
+
+  <ul><li>Tcl/Tk is a programming language</li></ul>
+</td>
+<td width="2%">&nbsp;</td>
+<td valign="top" width="49%">
+
+  <ul><li>Tcl/Tk is a C library</li></ul>
+</td></tr>
+<tr><td valign="top" width="49%">
+
+  <center><img src="image1"><br>
+  Most of the Tcl2K conference is about</center>
+</td>
+<td width="2%">&nbsp;</td>
+<td valign="top" width="49%">
+
+  <center><img src="image1"><br>
+  This tutorial is about</center>
+</td></tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">"Hello, World!" Using The Tcl Library</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h></tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Always include &lt;tcl.h></td>
+</tr>
+<tr><td valign="center">
+<small><tt>int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Create a new Tcl interpreter</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;"puts&nbsp;{Hello,&nbsp;World!}");</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Execute a Tcl command.</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Compiling "Hello, World!"</h2>
+<p><p><b>Unix:</b></p>
+  <blockquote><tt>
+  $ gcc hello.c -ltcl -lm -ldl<br>
+  $ ./a.out<br>
+  Hello, World!</tt></blockquote>
+
+  <p><b>Windows using Cygwin:</b></p>
+  <blockquote><tt>
+  C:> gcc hello.c -ltcl80 -lm<br>
+  C:> a.exe<br>
+  Hello, World!</tt></blockquote>
+
+  <p><b>Windows using Mingw32:</b></p>
+  <blockquote><tt>
+  C:> gcc -mno-cygwin hello.c -ltcl82 -lm<br>
+  </tt></blockquote>
+<table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>Also works with VC++</b></td></tr></table></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Where Does <tt>-ltcl</tt> Come From On Unix?</h2>
+<p><p>Build it yourself using these steps:</p></p><p>
+<p><ul><li>Get tcl8.2.2.tar.gz from Scriptics</li></ul><ul><li><tt>zcat tcl8.2.2.tar.gz | tar vx </tt></li></ul><ul><li><tt>cd tcl8.2.2/unix</tt></li></ul><ul><li><tt>./configure --disable-shared</tt></li></ul><ul><li><tt>make</tt></li></ul><ul><li>Move <b>libtcl8.2.a</b> to your lib directory.</li></ul><ul><li>Copy <b>../generic/tcl.h</b> into /usr/include.</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">What Other Libraries Are Required For Unix?</h2>
+<p><ul><li>The sequence of <b>-l</b> options after <b>-ltcl</b>
+  varies from system to system</li></ul><ul><li>Observe what libraries the TCL makefile inserts when
+  it is building <b>tclsh</b></li></ul><ul><li>Examples in this talk are for RedHat Linux 6.0 for Intel</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">How To Compile Under Unix Without Installing Tcl</h2>
+<p><p>Specify the *.a file directly:</p>
+  <blockquote><pre>
+  $ gcc -I../tcl8.2.2/generic hello.c \
+      ../tcl8.2.2/unix/libtcl8.2.a -lm -ldl
+  $ strip a.out
+  $ ./a.out
+  Hello, World!</pre></blockquote>
+
+  <p>Or, tell the C compiler where to look for *.a files:</p>
+  <blockquote><pre>
+  $ gcc -I../tcl8.2.2/generic hello.c \
+      -L../tcl8.2.2/unix -ltcl -lm -ldl
+  $ strip a.out
+  $ ./a.out
+  Hello, World!</pre></blockquote>
+<table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>The <tt>-I../tcl8.2.2</tt> argument
+  tells the compiler where to
+  find <tt>&lt;tcl.h&gt;</tt>.</p></b></td></tr></table></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">What's "Cygwin"?</h2>
+<p><ul><li>An implementation of GCC/G++ and all development tools
+  for Windows95/98/NT/2000</li></ul><ul><li>Available for free download at
+  <blockquote>
+  <tt>http://sourceware.cygnus.com/cygwin/</tt>
+  </blockquote></li></ul><ul><li>Also available shrink-wrapped at your local software retailer or
+  online at
+  <blockquote>
+  <tt>http://www.cygnus.com/cygwin/index.html</tt>
+  </blockquote></li></ul><ul><li>Programs compiled using Cygwin require a special
+  DLL (<b>cygwin1.dll</b>) that provides a POSIX system API</li></ul><ul><li>Cygwin1.dll cannot be shipped with proprietary programs
+  without purchasing a license from Cygnus.</li></ul><ul><li>Mingw32 is the same compiler as Cygwin, but generates
+  binaries that do not use cygwin1.dll</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Where Does <tt>-ltcl82</tt> Come From On Windows?</h2>
+<p><p>Build it like this:</p></p><p>
+<p><ul><li>Get <b>tcl82.lib</b> and <b>tcl82.dll</b> from Scriptics.</li></ul><ul><li><tt>echo EXPORTS >tcl82.def</tt></li></ul><ul><li><tt>nm tcl82.lib | grep 'T _' | sed 's/.* T _//' >>tcl82.def</tt></li></ul><ul><li><tt>dlltool --def tcl82.def --dllname tcl82.dll --output-lib libtcl82.a</tt></li></ul><ul><li>Move <b>libtcl82.a</b> to the lib directory and <b>tcl82.dll</b>
+  to the bin directory.</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Where Does Your Code Go?</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;<br>
+&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;/*&nbsp;Your&nbsp;application&nbsp;code&nbsp;goes&nbsp;here&nbsp;*/</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Insert C code here to do whatever it is your program is
+  suppose to do</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Building A Simple TCLSH</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;<br>
+&nbsp;&nbsp;char&nbsp;*z;<br>
+&nbsp;&nbsp;char&nbsp;zLine[2000];<br>
+&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;while(&nbsp;fgets(zLine,sizeof(zLine),stdin)&nbsp;){</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Get one line of input</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zLine);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Execute the input as Tcl.</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;&nbsp;&nbsp;z&nbsp;=&nbsp;Tcl_GetStringResult(interp);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if(&nbsp;z[0]&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("∏¸ˇøPçX∂\n",&nbsp;z);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Print result if not empty</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>What if user types more than 2000 characters?</b></td></tr></table>
+</p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Building A Simple TCLSH</h2>
+<p>Use TCL to handle input.  Allows input lines of unlimited length.</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+&nbsp;<br>
+/*&nbsp;Tcl&nbsp;code&nbsp;to&nbsp;implement&nbsp;the<br>
+**&nbsp;input&nbsp;loop&nbsp;*/<br>
+static&nbsp;char&nbsp;zLoop[]&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;"while&nbsp;{![eof&nbsp;stdin]}&nbsp;{\n"</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;"&nbsp;&nbsp;set&nbsp;line&nbsp;[gets&nbsp;stdin]\n"</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Get one line of input</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;"&nbsp;&nbsp;set&nbsp;result&nbsp;[eval&nbsp;$line]\n"</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Execute input as Tcl</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;"&nbsp;&nbsp;if&nbsp;{$result!=\"\"}&nbsp;{puts&nbsp;$result}\n"</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Print result</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;"}\n"<br>
+;<br>
+&nbsp;<br>
+<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;<br>
+&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zLoop);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Run the Tcl input loop</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>But what about commands that span multiple lines of input?</b></td></tr></table>
+</p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Better Handling Of Command-Line Input</h2>
+<p>The file "input.tcl"</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>set&nbsp;line&nbsp;{}<br>
+while&nbsp;{![eof&nbsp;stdin]}&nbsp;{</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if&nbsp;{$line!=""}&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;-nonewline&nbsp;">&nbsp;"<br>
+&nbsp;&nbsp;}&nbsp;else&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;-nonewline&nbsp;"%&nbsp;"<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;flush&nbsp;stdout</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Prompt for user input.  The prompt is normally &quot;%&quot;
+  but changes to &quot;&gt;&quot; if the current line is a continuation.</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;append&nbsp;line&nbsp;[gets&nbsp;stdin]<br>
+&nbsp;&nbsp;if&nbsp;{[info&nbsp;complete&nbsp;$line]}&nbsp;{</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;{[catch&nbsp;{uplevel&nbsp;#0&nbsp;$line}&nbsp;result]}&nbsp;{</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">If the command is complete, execute it.</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;stderr&nbsp;"Error:&nbsp;$result"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;elseif&nbsp;{$result!=""}&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;$result<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;line&nbsp;{}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;}&nbsp;else&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;append&nbsp;line&nbsp;\n<br>
+&nbsp;&nbsp;}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">If the command is incomplete, append a newline and get
+  another line of text.</td>
+</tr>
+<tr><td valign="center">
+<small><tt>}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Better Handling Of Command-Line Input</h2>
+<p>The file "input.c"</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;<br>
+&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;"source&nbsp;input.tcl");</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Read and execute the input loop</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>But now the program is not standalone!</b></td></tr></table>
+</p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Converting Scripts Into C Strings</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>static&nbsp;char&nbsp;zInputLoop[]&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;"set&nbsp;line&nbsp;{}\n"<br>
+&nbsp;&nbsp;"while&nbsp;{![eof&nbsp;stdin]}&nbsp;{\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;if&nbsp;{$line!=\"\"}&nbsp;{\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;-nonewline&nbsp;\">&nbsp;\"\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;}&nbsp;else&nbsp;{\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;-nonewline&nbsp;\"%&nbsp;\"\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;}\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;flush&nbsp;stdout\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;append&nbsp;line&nbsp;[gets&nbsp;stdin]\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;if&nbsp;{[info&nbsp;complete&nbsp;$line]}&nbsp;{\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;{[catch&nbsp;{uplevel&nbsp;#0&nbsp;$line}&nbsp;result]}&nbsp;{\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;stderr&nbsp;\"Error:&nbsp;$result\"\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;elseif&nbsp;{$result!=\"\"}&nbsp;{\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;$result\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;&nbsp;&nbsp;}\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;line&nbsp;{}\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;}&nbsp;else&nbsp;{\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;&nbsp;&nbsp;append&nbsp;line&nbsp;\\n\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;}\n"<br>
+&nbsp;&nbsp;"}\n"<br>
+;</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Compile Tcl Scripts Into C Programs</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt><br>
+static&nbsp;char&nbsp;zInputLoop[]&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;/*&nbsp;Actual&nbsp;code&nbsp;omitted&nbsp;*/<br>
+;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Copy and paste the converted Tcl script here</td>
+</tr>
+<tr><td valign="center">
+<small><tt><br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;<br>
+&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Execute the Tcl code</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Converting Scripts To Strings<br>Using SED Or TCLSH</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>sed&nbsp;-e&nbsp;'s/\\/\\\\/g'&nbsp;\&nbsp;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Convert <b>\</b> into <b>\\</b></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;-e&nbsp;'s/"/\\"/g'&nbsp;\&nbsp;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Convert <b>"</b> into <b>\"</b></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;-e&nbsp;'s/^/&nbsp;&nbsp;"/'&nbsp;\&nbsp;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Add <b>"</b> to start of each line</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;-e&nbsp;'s/$/\\n"/'&nbsp;input.tcl</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Add <b>\n"</b> to end of each line</td>
+</tr>
+<tr><td valign="center">
+<small><tt><br>
+&nbsp;<br>
+<br>
+&nbsp;<br>
+<br>
+while&nbsp;{![eof&nbsp;stdin]}&nbsp;{<br>
+&nbsp;&nbsp;set&nbsp;line&nbsp;[gets&nbsp;stdin]</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;regsub&nbsp;-all&nbsp;{\}&nbsp;$line&nbsp;{&amp;&amp;}&nbsp;line</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Convert <b>\</b> into <b>\\</b></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;regsub&nbsp;-all&nbsp;{"}&nbsp;$line&nbsp;{\"}&nbsp;line</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Convert <b>"</b> into <b>\"</b></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;puts&nbsp;"\"$line\\n\""</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Add <b>"</b> in front and <b>\n"</b> at the end</td>
+</tr>
+<tr><td valign="center">
+<small><tt>}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Converting Scripts Into C Strings</h2>
+<p>You may want to save space by removing comments and extra whitespace
+  from scripts.</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>static&nbsp;char&nbsp;zInputLoop[]&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;"set&nbsp;line&nbsp;{}\n"<br>
+&nbsp;&nbsp;"while&nbsp;{![eof&nbsp;stdin]}&nbsp;{\n"<br>
+&nbsp;&nbsp;"if&nbsp;{$line!=\"\"}&nbsp;{\n"<br>
+&nbsp;&nbsp;"puts&nbsp;-nonewline&nbsp;\">&nbsp;\"\n"<br>
+&nbsp;&nbsp;"}&nbsp;else&nbsp;{\n"<br>
+&nbsp;&nbsp;"puts&nbsp;-nonewline&nbsp;\"%&nbsp;\"\n"<br>
+&nbsp;&nbsp;"}\n"<br>
+&nbsp;&nbsp;"flush&nbsp;stdout\n"<br>
+&nbsp;&nbsp;"append&nbsp;line&nbsp;[gets&nbsp;stdin]\n"<br>
+&nbsp;&nbsp;"if&nbsp;{[info&nbsp;complete&nbsp;$line]}&nbsp;{\n"<br>
+&nbsp;&nbsp;"if&nbsp;{[catch&nbsp;{uplevel&nbsp;#0&nbsp;$line}&nbsp;result]}&nbsp;{\n"<br>
+&nbsp;&nbsp;"puts&nbsp;stderr&nbsp;\"Error:&nbsp;$result\"\n"<br>
+&nbsp;&nbsp;"}&nbsp;elseif&nbsp;{$result!=\"\"}&nbsp;{\n"<br>
+&nbsp;&nbsp;"puts&nbsp;$result\n"<br>
+&nbsp;&nbsp;"}\n"<br>
+&nbsp;&nbsp;"set&nbsp;line&nbsp;{}\n"<br>
+&nbsp;&nbsp;"}&nbsp;else&nbsp;{\n"<br>
+&nbsp;&nbsp;"append&nbsp;line&nbsp;\\n\n"<br>
+&nbsp;&nbsp;"}\n"<br>
+&nbsp;&nbsp;"}\n"<br>
+;</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Converting Scripts To Strings</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>sed&nbsp;-e&nbsp;'s/\\/\\\\/g'&nbsp;\&nbsp;<br>
+&nbsp;&nbsp;-e&nbsp;'s/"/\\"/g'&nbsp;\&nbsp;</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;-e&nbsp;'/^&nbsp;*#/d'&nbsp;\&nbsp;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Delete lines that begin with #</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;-e&nbsp;'/^&nbsp;*$/d'&nbsp;\&nbsp;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Delete blank lines</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;-e&nbsp;'s/^&nbsp;*/&nbsp;&nbsp;"/'&nbsp;\&nbsp;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Delete leading spaces</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;-e&nbsp;'s/$/\\n"/'&nbsp;input.tcl<br>
+&nbsp;<br>
+<br>
+&nbsp;<br>
+<br>
+&nbsp;<br>
+while&nbsp;{![eof&nbsp;stdin]}&nbsp;{<br>
+&nbsp;&nbsp;set&nbsp;line&nbsp;[gets&nbsp;stdin]</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;set&nbsp;line&nbsp;[string&nbsp;trimleft&nbsp;$line]</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Remove leading space</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if&nbsp;{$line==""}&nbsp;continue</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Delete blank lines</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if&nbsp;{[string&nbsp;index&nbsp;$line&nbsp;0]=="#"}&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;continue<br>
+&nbsp;&nbsp;}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Delete lines starting with #</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;regsub&nbsp;-all&nbsp;{\}&nbsp;$line&nbsp;{&amp;&amp;}&nbsp;line<br>
+&nbsp;&nbsp;regsub&nbsp;-all&nbsp;{"}&nbsp;$line&nbsp;{\"}&nbsp;line<br>
+&nbsp;&nbsp;puts&nbsp;"\"$line\\n\""<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Removing Comments Or Leading Space<br>Will Break Some Tcl Scripts!</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>image&nbsp;create&nbsp;bitmap&nbsp;smiley&nbsp;-data&nbsp;{</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>#define&nbsp;smile_width&nbsp;15<br>
+#define&nbsp;smile_height&nbsp;15</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">These lines begin with # but are not comment</td>
+</tr>
+<tr><td valign="center">
+<small><tt>static&nbsp;unsigned&nbsp;char&nbsp;smile_bits[]&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;0xc0,&nbsp;0x01,&nbsp;0x30,&nbsp;0x06,&nbsp;0x0c,&nbsp;0x18,<br>
+&nbsp;&nbsp;&nbsp;0x04,&nbsp;0x10,&nbsp;0x22,&nbsp;0x22,&nbsp;0x52,&nbsp;0x25,<br>
+&nbsp;&nbsp;&nbsp;0x01,&nbsp;0x40,&nbsp;0x01,&nbsp;0x40,&nbsp;0x01,&nbsp;0x40,<br>
+&nbsp;&nbsp;&nbsp;0x12,&nbsp;0x24,&nbsp;0xe2,&nbsp;0x23,&nbsp;0x04,&nbsp;0x10,<br>
+&nbsp;&nbsp;&nbsp;0x0c,&nbsp;0x18,&nbsp;0x30,&nbsp;0x06,&nbsp;0xc0,&nbsp;0x01};<br>
+}<br>
+&nbsp;<br>
+<br>
+&nbsp;<br>
+text&nbsp;.t<br>
+pack&nbsp;.t<br>
+.t&nbsp;insert&nbsp;end&nbsp;[string&nbsp;trim&nbsp;{</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>She&nbsp;walks&nbsp;in&nbsp;beauty,&nbsp;like&nbsp;the&nbsp;night<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Of&nbsp;cloudless&nbsp;climes&nbsp;and&nbsp;starry&nbsp;skies;<br>
+And&nbsp;all&nbsp;that's&nbsp;best&nbsp;of&nbsp;dark&nbsp;and&nbsp;bright<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Meet&nbsp;in&nbsp;her&nbsp;aspect&nbsp;and&nbsp;her&nbsp;eyes;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Indentation is deleted on lines 2
+  and 4</td>
+</tr>
+<tr><td valign="center">
+<small><tt>}]&nbsp;<br>
+&nbsp;<br>
+</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>Problems like these are rare</b></td></tr></table>
+</p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Adding A "continue" Command</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>set&nbsp;line&nbsp;{}<br>
+while&nbsp;{![eof&nbsp;stdin]}&nbsp;{<br>
+&nbsp;&nbsp;if&nbsp;{$line!=""}&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;-nonewline&nbsp;">&nbsp;"<br>
+&nbsp;&nbsp;}&nbsp;else&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;-nonewline&nbsp;"%&nbsp;"<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;flush&nbsp;stdout<br>
+&nbsp;&nbsp;append&nbsp;line&nbsp;[gets&nbsp;stdin]<br>
+&nbsp;&nbsp;if&nbsp;{[info&nbsp;complete&nbsp;$line]}&nbsp;{</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;{[lindex&nbsp;$line&nbsp;0]=="continue"}&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Break out of the loop if the command
+  is "continue"</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;elseif&nbsp;{[catch&nbsp;{uplevel&nbsp;#0&nbsp;$line}&nbsp;result]}&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;stderr&nbsp;"Error:&nbsp;$result"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;elseif&nbsp;{$result!=""}&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;puts&nbsp;$result<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;set&nbsp;line&nbsp;{}<br>
+&nbsp;&nbsp;}&nbsp;else&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;append&nbsp;line&nbsp;\n<br>
+&nbsp;&nbsp;}<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Stop For Tcl Input At Various Points<br>In A C Program</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+&nbsp;<br>
+static&nbsp;char&nbsp;zInputLoop[]&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;/*&nbsp;Tcl&nbsp;Input&nbsp;loop&nbsp;as&nbsp;a&nbsp;C&nbsp;string&nbsp;*/<br>
+;<br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;<br>
+&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;/*&nbsp;Application&nbsp;C&nbsp;code&nbsp;*/</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Do some computation</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Stop for some Tcl input</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;/*&nbsp;More&nbsp;application&nbsp;C&nbsp;code&nbsp;*/</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Do more computation</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Stop for more Tcl input</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;/*&nbsp;Finish&nbsp;up&nbsp;the&nbsp;application&nbsp;*/</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Finish the computation</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Using Tcl For Testing</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+&nbsp;<br>
+static&nbsp;char&nbsp;zInputLoop[]&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;/*&nbsp;Tcl&nbsp;Input&nbsp;loop&nbsp;as&nbsp;a&nbsp;C&nbsp;string&nbsp;*/<br>
+;<br>
+&nbsp;<br>
+</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+#ifdef&nbsp;TESTING<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Create interpreter only if TESTING
+ is defined</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();<br>
+#endif<br>
+&nbsp;&nbsp;/*&nbsp;Application&nbsp;C&nbsp;code&nbsp;*/</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>#ifdef&nbsp;TESTING<br>
+&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);<br>
+#endif</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Accept command-line input only if TESTING
+  is defined</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;/*&nbsp;More&nbsp;application&nbsp;C&nbsp;code&nbsp;*/<br>
+#ifdef&nbsp;TESTING<br>
+&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);<br>
+#endif<br>
+&nbsp;&nbsp;/*&nbsp;Finish&nbsp;up&nbsp;the&nbsp;application&nbsp;*/<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Creating A New Tcl Command In C</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+&nbsp;<br>
+int&nbsp;NewCmd(</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;void&nbsp;*clientData,<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp,<br>
+&nbsp;&nbsp;int&nbsp;argc,<br>
+&nbsp;&nbsp;char&nbsp;**argv</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">The Tcl command is implemented as
+  a C function with four arguments.</td>
+</tr>
+<tr><td valign="center">
+<small><tt>){<br>
+&nbsp;&nbsp;printf("Hello,&nbsp;World!\n");</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;TCL_OK;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Returns TCL_OK or TCL_ERROR</td>
+</tr>
+<tr><td valign="center">
+<small><tt>}<br>
+&nbsp;<br>
+static&nbsp;char&nbsp;zInputLoop[]&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;/*&nbsp;Tcl&nbsp;code&nbsp;omitted...&nbsp;*/<br>
+;<br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;<br>
+&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_CreateCommand(interp,&nbsp;"helloworld",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NewCmd,&nbsp;0,&nbsp;0);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Tell the interpreter which C function to call when the
+  "helloworld" Tcl command is executed</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Linkage From Tcl To C</h2>
+<p><p align="center"><img src="image4"></p></p><p><ul><li>3rd parameter of Tcl_CreateCommand() is a pointer to the C subroutine
+ that implements the command.</li></ul><ul><li>4th parameter to Tcl_CreateCommand() becomes the 1st parameter to
+ the C routine whenever the Tcl command is executed.</li></ul><ul><li>1st parameter to Tcl_CreateCommand() must be a valid Tcl interpreter.
+ The same pointer appears as the second parameter to the C routine
+ whenever the Tcl command is executed.</li></ul></p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Linkage From Tcl To C</h2>
+<p><p align="center"><img src="image5"></p></p><p><ul><li>5th parameter of Tcl_CreateCommand() is a pointer to the C subroutine
+ that is called when the Tcl command is deleted.</li></ul><ul><li>4th parameter to Tcl_CreateCommand() becomes the 1st parameter to
+ the C routine.</li></ul></p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">When To Use A Delete Proc</h2>
+<p>Examples of where the delete proc is used in standard Tcl/Tk:</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>button&nbsp;.b&nbsp;-text&nbsp;Hello<br>
+pack&nbsp;.b</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>rename&nbsp;.b&nbsp;{}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Deleting the <b>.b</b> command causes the button to be destroyed</td>
+</tr>
+<tr><td valign="center">
+<small><tt><br>
+&nbsp;<br>
+</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>image&nbsp;create&nbsp;photo&nbsp;smiley&nbsp;\&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-file&nbsp;smiley.gif</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>rename&nbsp;smiley&nbsp;{}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Deleting the <b>smiley</b> command destroys the image and reclaims the
+  memory used to hold the image</td>
+</tr>
+</table>
+<p><ul><li>Always use a delete proc if the clientData is a pointer to
+  malloced memory or some other resource that needs freeing</li></ul><ul><li>Delete procs are never used in the Tcl core but are used
+  extensively in Tk</li></ul></p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Linkage From Tcl To C</h2>
+<p>The <tt>argc</tt> and <tt>argv</tt> parameters work just like in
+ <tt>main()</tt></p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>helloworld&nbsp;one&nbsp;{two&nbsp;three}&nbsp;four</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><tt>argc = 4<br>
+  argv[0] = "helloworld"<br>
+  argv[1] = "one"<br>
+  argv[2] = "two three"<br>
+  argv[3] = "four"<br>
+  argv[4] = NULL</tt></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">A Short-Cut</h2>
+<p>In a program with many new Tcl commands implemented in C, it becomes
+  tedious to type the same four parameters over and over again.  So
+  we define a short-cut.</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#define&nbsp;TCLARGS&nbsp;\&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;void&nbsp;*clientData,&nbsp;\&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Tcl_Interp&nbsp;*interp,&nbsp;\&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;argc,&nbsp;\&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;char&nbsp;*argv</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Define TCLARGS once in a header file</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;<br>
+&nbsp;<br>
+&nbsp;</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>int&nbsp;NewCmd(TCLARGS){</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Use the TCLARGS macro to define new C functions
+  that implement Tcl commands.</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;&nbsp;/*&nbsp;implementation...&nbsp;*/<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>For brevity, we will use the TCLARGS macro during the
+  rest of this talk.</b></td></tr></table>
+</p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Returning A Value From C Back To Tcl</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>int&nbsp;NewCmd(TCLARGS){</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Note that the C function returns an "int"</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;TCL_OK;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Return value is TCL_OK or TCL_ERROR</td>
+</tr>
+<tr><td valign="center">
+<small><tt>}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p><ul><li>TCL_OK and TCL_ERROR are defined in &lt;tcl.h&gt;</li></ul><ul><li>Other valid return values TCL_RETURN, TCL_BREAK and TCL_CONTINUE
+  are rarely used</li></ul><ul><li>Common mistake: forgetting to return TCL_OK</li></ul></p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Returning A Value From C Back To Tcl</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>int&nbsp;NewCmd(TCLARGS){</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_SetResult(interp,"Hello!",TCL_STATIC);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Set the result to "Hello!"</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;TCL_OK;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p><ul><li>Result should be the text of an error message if you
+  return TCL_ERROR.</li></ul><ul><li>3rd argument to Tcl_SetResult() can be TCL_STATIC,
+  TCL_DYNAMIC, TCL_VOLATILE, or a function pointer.</li></ul><ul><li>Also consider using Tcl_AppendResult().</li></ul><ul><li>Direct access to <tt>interp->result</tt> is deprecated.</li></ul><ul><li>See the man pages for details.</li></ul></p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">The Tcl_Obj Interface</h2>
+<p><ul><li>A new way to write Tcl commands in C code</li></ul><ul><li>First introduced in Tcl8.0</li></ul><ul><li>Can be much faster, especially for lists or numeric values.</li></ul><ul><li>Able to handle arbitrary binary data.</li></ul><ul><li>More difficult to program.</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">The Tcl_Obj Interface</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>int&nbsp;NewObjCmd(<br>
+&nbsp;&nbsp;void&nbsp;*clientData,<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp,<br>
+&nbsp;&nbsp;int&nbsp;objc,</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Obj&nbsp;*const*&nbsp;objv</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">4th parameter is an array Tcl_Objs, not an array of strings</td>
+</tr>
+<tr><td valign="center">
+<small><tt>){<br>
+&nbsp;&nbsp;/*&nbsp;Implementation...&nbsp;*/<br>
+&nbsp;&nbsp;return&nbsp;TCL_OK;<br>
+}<br>
+&nbsp;<br>
+static&nbsp;char&nbsp;zInputLoop[]&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;/*&nbsp;Tcl&nbsp;code&nbsp;omitted...&nbsp;*/<br>
+;<br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;<br>
+&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_CreateObjCommand(interp,&nbsp;"newcmd",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NewObjCmd,&nbsp;0,&nbsp;0);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Use a different function to register the command</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">The Tcl_Obj Interface</h2>
+<p><ul><li>There are countless access methods for reading information from and
+  placing information in Tcl_Objs.  Always use the access methods.</li></ul><ul><li>Details provided at Lee Bernhard's talk this afternoon.</li></ul><ul><li>Definitely use Tcl_Objs if you are writing a new Tcl extension.</li></ul><ul><li>Tcl_Objs address some of the weaknesses of Tcl relative to C/C++.
+  <ul>
+  <li> Tcl_Objs are faster </li>
+  <li> Tcl_Objs work with binary data </li>
+  </ul>
+  But C/C++ is faster still and better for working with binary data.</li></ul><ul><li>When mixing C/C++ with Tcl/Tk the benefits of Tcl_Objs are
+  less important.  Using Tcl_Objs in this context may not be
+  worth the extra trouble.</li></ul><ul><li>This talk will focus on the string interface.</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Nickel Tour Of The Tcl API</h2>
+<p><p><b>Memory allocation functions</b></p>
+<center><table width="90%"><tr>
+<td width="32%" valign="top"><small><tt>
+  Tcl_Alloc<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_Free<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_Realloc<br>
+</tt></small></td>
+</table></center><p><b>Functions useful in the implementation of new  Tcl commands</b></p>
+<center><table width="90%"><tr>
+<td width="32%" valign="top"><small><tt>
+  Tcl_AppendElement<br>
+  Tcl_AppendResult<br>
+  Tcl_GetBoolean<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_GetDouble<br>
+  Tcl_GetInt<br>
+  Tcl_GetStringResult<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_ResetResult<br>
+  Tcl_SetResult<br>
+</tt></small></td>
+</table></center><p><b>Functions for controlling the Tcl interpreter</b></p>
+<center><table width="90%"><tr>
+<td width="32%" valign="top"><small><tt>
+  Tcl_CreateCommand<br>
+  Tcl_CreateInterp<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_CreateObjCommand<br>
+  Tcl_DeleteCommand<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_DeleteInterp<br>
+  Tcl_Exit<br>
+</tt></small></td>
+</table></center></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Nickel Tour Of The Tcl API</h2>
+<p><p><b>I/O functions</b></p>
+<center><table width="90%"><tr>
+<td width="32%" valign="top"><small><tt>
+  Tcl_Close<br>
+  Tcl_Eof<br>
+  Tcl_Flush<br>
+  Tcl_GetChannel<br>
+  Tcl_GetChannelMode<br>
+  Tcl_GetChannelName<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_Gets<br>
+  Tcl_OpenCommandChannel<br>
+  Tcl_OpenFileChannel<br>
+  Tcl_OpenTcpClient<br>
+  Tcl_OpenTcpServer<br>
+  Tcl_Read<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_Seek<br>
+  Tcl_Tell<br>
+  Tcl_Ungets<br>
+  Tcl_Write<br>
+  Tcl_WriteChars<br>
+</tt></small></td>
+</table></center><p><b>Names and meanings of system error codes</b></p>
+<center><table width="90%"><tr>
+<td width="32%" valign="top"><small><tt>
+  Tcl_ErrnoId<br>
+  Tcl_ErrnoMsg<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_GetErrno<br>
+  Tcl_SetErrno<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_SignalId<br>
+  Tcl_SignalMsg<br>
+</tt></small></td>
+</table></center></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Nickel Tour Of The Tcl API</h2>
+<p><p><b>General Operating System Calls</b></p>
+<center><table width="90%"><tr>
+<td width="32%" valign="top"><small><tt>
+  Tcl_Access<br>
+  Tcl_Chdir<br>
+  Tcl_GetCwd<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_GetHostName<br>
+  Tcl_GetNameOfExecutable<br>
+  Tcl_Sleep<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_Stat<br>
+</tt></small></td>
+</table></center><p><b>String Manipulation And Comparison</b></p>
+<center><table width="90%"><tr>
+<td width="32%" valign="top"><small><tt>
+  Tcl_Concat<br>
+  Tcl_Merge<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_SplitList<br>
+  Tcl_StringCaseMatch<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_StringMatch<br>
+</tt></small></td>
+</table></center><p><b>Dynamically Resizable Strings</b></p>
+<center><table width="90%"><tr>
+<td width="49%" valign="top"><small><tt>
+  Tcl_DStringAppend<br>
+  Tcl_DStringAppendElement<br>
+  Tcl_DStringEndSublist<br>
+  Tcl_DStringInit<br>
+  Tcl_DStringLength<br>
+</tt></small></td>
+<td width="49%" valign="top"><small><tt>
+  Tcl_DStringResult<br>
+  Tcl_DStringSetLength<br>
+  Tcl_DStringStartSublist<br>
+  Tcl_DStringValue<br>
+</tt></small></td>
+</table></center></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Nickel Tour Of The Tcl API</h2>
+<p><p><b>Event Handlers</b></p>
+<center><table width="90%"><tr>
+<td width="49%" valign="top"><small><tt>
+  Tcl_CancelIdleCall<br>
+  Tcl_CreateChannelHandler<br>
+  Tcl_CreateTimerHandler<br>
+  Tcl_DeleteChannelHandler<br>
+</tt></small></td>
+<td width="49%" valign="top"><small><tt>
+  Tcl_DeleteTimerHandler<br>
+  Tcl_DoOneEvent<br>
+  Tcl_DoWhenIdle<br>
+</tt></small></td>
+</table></center><p><b>Functions For Reading And Writing Tcl Variables</b></p>
+<center><table width="90%"><tr>
+<td width="32%" valign="top"><small><tt>
+  Tcl_GetVar<br>
+  Tcl_GetVar2<br>
+  Tcl_LinkVar<br>
+  Tcl_SetVar<br>
+  Tcl_SetVar2<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_TraceVar<br>
+  Tcl_TraceVar2<br>
+  Tcl_UnlinkVar<br>
+  Tcl_UnsetVar<br>
+  Tcl_UnsetVar2<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_UntraceVar<br>
+  Tcl_UntraceVar2<br>
+  Tcl_UpdateLinkedVar<br>
+</tt></small></td>
+</table></center><p><b>Functions For Executing Tcl Code</b></p>
+<center><table width="90%"><tr>
+<td width="32%" valign="top"><small><tt>
+  Tcl_Eval<br>
+  Tcl_EvalFile<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_EvalObj<br>
+  Tcl_GlobalEval<br>
+</tt></small></td>
+<td width="32%" valign="top"><small><tt>
+  Tcl_GlobalEvalObj<br>
+  Tcl_VarEval<br>
+</tt></small></td>
+</table></center></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Nickel Tour Of The Tcl API</h2>
+<p><p><b>Functions For Dealing With Unicode</b></p>
+<center><table width="90%"><tr>
+<td width="49%" valign="top"><small><tt>
+  Tcl_NumUtfChars<br>
+  Tcl_UniCharAtIndex<br>
+  Tcl_UniCharIsAlnum<br>
+  Tcl_UniCharIsAlpha<br>
+  Tcl_UniCharIsControl<br>
+  Tcl_UniCharIsDigit<br>
+  Tcl_UniCharIsGraph<br>
+  Tcl_UniCharIsLower<br>
+  Tcl_UniCharIsPrint<br>
+  Tcl_UniCharIsPunct<br>
+  Tcl_UniCharIsSpace<br>
+  Tcl_UniCharIsUpper<br>
+  Tcl_UniCharIsWordChar<br>
+  Tcl_UniCharLen<br>
+  Tcl_UniCharNcmp<br>
+  Tcl_UniCharToLower<br>
+  Tcl_UniCharToTitle<br>
+</tt></small></td>
+<td width="49%" valign="top"><small><tt>
+  Tcl_UniCharToUpper<br>
+  Tcl_UniCharToUtf<br>
+  Tcl_UniCharToUtfDString<br>
+  Tcl_UtfAtIndex<br>
+  Tcl_UtfBackslash<br>
+  Tcl_UtfCharComplete<br>
+  Tcl_UtfFindFirst<br>
+  Tcl_UtfFindLast<br>
+  Tcl_UtfNcasecmp<br>
+  Tcl_UtfNcmp<br>
+  Tcl_UtfNext<br>
+  Tcl_UtfPrev<br>
+  Tcl_UtfToLower<br>
+  Tcl_UtfToTitle<br>
+  Tcl_UtfToUniChar<br>
+  Tcl_UtfToUniCharDString<br>
+  Tcl_UtfToUpper<br>
+</tt></small></td>
+</table></center>
+  <p><b>Functions For Dealing With Tcl_Objs</b></p>
+  <blockquote><i>Too numerous to list...</i></blockquote></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Documentation Of The Tcl API</h2>
+<p><ul><li>Tcl comes with excellent man pages</li></ul><ul><li>"Use the source, Luke"</li></ul><ul><li>See <tt>tclDecl.h</tt> for a list of API functions</li></ul><ul><li>The header comments on the implementation of API functions usually
+  gives a good description of what the function does and how it should
+  be used.</li></ul><ul><li>Most API functions are used within Tcl and Tk.  Use grep to locate
+  examples.</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Initialization Scripts</h2>
+<p><ul><li>Run the mini TCLSH implemented above and execute the <tt>parray</tt> command</li></ul><ul><li>It doesn't work!  What's wrong? </p></li></li></ul><ul><li><tt>parray</tt> is really a Tcl proc that is read in when the
+ interpreter is initialized. </p></li></li></ul><ul><li><tt>parray</tt> (and several other commands) are stored in a
+  handful of &quot;Initialization Scripts&quot; </p></li></li></ul><ul><li>All the initialization scripts are stored in the
+ &quot;Tcl Library&quot; - a directory on the host
+ computer. </p></li></li></ul><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>Invoke the Tcl_Init() function to locate and read the
+ Tcl initialization scripts.</b></td></tr></table></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">The <tt>Tcl_Init()</tt> Function</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+&nbsp;<br>
+static&nbsp;char&nbsp;zInputLoop[]&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;/*&nbsp;Tcl&nbsp;code&nbsp;omitted...&nbsp;*/<br>
+;<br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;<br>
+&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Init(interp);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Locate and read the initialization scripts</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;/*&nbsp;Call&nbsp;Tcl_CreateCommand()?&nbsp;*/<br>
+&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>But Tcl_Init() can fail. We need to check its return value...</b></td></tr></table>
+</p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">The <tt>Tcl_Init()</tt> Function</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+&nbsp;<br>
+static&nbsp;char&nbsp;zInputLoop[]&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;/*&nbsp;Tcl&nbsp;code&nbsp;omitted...&nbsp;*/<br>
+;<br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;<br>
+&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if(&nbsp;Tcl_Init(interp)!=TCL_OK&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fprintf(stderr,"Tcl_Init()&nbsp;failed:&nbsp;∏¸ˇøPçX∂",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Tcl_GetStringResult(interp));<br>
+&nbsp;&nbsp;}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Print error message if Tcl_Init() fails</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;/*&nbsp;Call&nbsp;Tcl_CreateCommand()?&nbsp;*/<br>
+&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>But now the program is not standalone.</b></td></tr></table>
+</p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">How <tt>Tcl_Init()</tt> Works</h2>
+<p><ul><li>Computes the value of variable <tt>tcl_libPath</tt>.</li></ul><ul><li>Invokes the procedure named &quot;<tt>tclInit</tt>&quot;</li></ul><ul><li>A default <tt>tclInit</tt> procedure is built into Tcl.
+  You can define an alternative <tt>tclInit</tt> procedure
+  prior to calling <tt>Tcl_Init()</tt>.</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">The Default <tt>initTcl</tt> Procedure</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>set&nbsp;errors&nbsp;{}<br>
+set&nbsp;dirs&nbsp;{}<br>
+if&nbsp;{[info&nbsp;exists&nbsp;tcl_library]}&nbsp;{<br>
+&nbsp;&nbsp;lappend&nbsp;dirs&nbsp;$tcl_library<br>
+}&nbsp;else&nbsp;{<br>
+&nbsp;&nbsp;if&nbsp;{[info&nbsp;exists&nbsp;env(TCL_LIBRARY)]}&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;lappend&nbsp;dirs&nbsp;$env(TCL_LIBRARY)<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;lappend&nbsp;dirs&nbsp;$tclDefaultLibrary<br>
+&nbsp;&nbsp;unset&nbsp;tclDefaultLibrary<br>
+&nbsp;&nbsp;set&nbsp;dirs&nbsp;[concat&nbsp;$dirs&nbsp;$tcl_libPath]<br>
+}<br>
+foreach&nbsp;i&nbsp;$dirs&nbsp;{<br>
+&nbsp;&nbsp;set&nbsp;tcl_library&nbsp;$i<br>
+&nbsp;&nbsp;set&nbsp;tclfile&nbsp;[file&nbsp;join&nbsp;$i&nbsp;init.tcl]<br>
+&nbsp;&nbsp;if&nbsp;{[file&nbsp;exists&nbsp;$tclfile]}&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;{![catch&nbsp;{uplevel&nbsp;#0&nbsp;[list&nbsp;source&nbsp;$tclfile]}&nbsp;msg]}&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;else&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;append&nbsp;errors&nbsp;"$tclfile:&nbsp;$msg\n$errorInfo\n"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;}<br>
+}<br>
+error&nbsp;"Can't&nbsp;find&nbsp;a&nbsp;usable&nbsp;init.tcl&nbsp;..."</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">The Default Initialization Sequence</h2>
+<p><ul><li>The <tt>tclInit</tt> procedure locates and sources the <tt>init.tcl</tt>
+  script.  The directory that contains <tt>init.tcl</tt> is stored in
+  the <tt>tcl_library</tt> variable.</li></ul><ul><li>The <tt>init.tcl</tt> script creates an <tt>unknown</tt> procedure.
+  The <tt>unknown</tt> procedure will run whenever Tcl encounters an
+  unknown command.</li></ul><ul><li>The <tt>unknown</tt> procedure consults the file <tt>tclIndex</tt> in the
+  <tt>tcl_library</tt> directory to see if the command is defined by one of
+  the initialization scripts.</li></ul><ul><li>The <tt>unknown</tt> procedure sources any needed initialization scripts
+  and retries the command.</li></ul><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>Commands defined in the initialization scripts are loaded
+  on demand.</b></td></tr></table></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Standalone Initialization Techniques</h2>
+<p><p><b>Manually execute all initialization scripts</b></p>
+<ul><li>Convert all initialization scripts into C strings and
+  put them in the executable.</li></ul><ul><li>Call <tt>Tcl_Eval()</tt> on each initialization script and omit the
+  call to <tt>Tcl_Init()</tt></li></ul><ul><li>Or, redefine <tt>tclInit</tt> so that it does not attempt to source
+  <tt>init.tcl</tt> then call <tt>Tcl_Eval()</tt> on each initialization
+  script after <tt>Tcl_Init()</tt> returns.</li></ul><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>This approach is not recommended</b></td></tr></table></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Standalone Initialization Techniques</h2>
+<p><p><b>Redefining the builtin <tt>source</tt> command</b></p>
+<ul><li>Convert all initialization scripts into C strings and
+  put them in the executable.</li></ul><ul><li>Create a new <tt>source</tt> command that
+  calls <tt>Tcl_Eval()</tt> on the appropriate built-in string
+  instead of reading from the disk.</li></ul><ul><li>Read from disk if the named file is not one that is built in.</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Redefining <tt>source</tt></h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>static&nbsp;char&nbsp;zInitTcl[]&nbsp;=&nbsp;"...";<br>
+static&nbsp;char&nbsp;zParrayTcl[]&nbsp;=&nbsp;"...";</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Scripts <tt>init.tcl</tt> and <tt>parray.tcl</tt></td>
+</tr>
+<tr><td valign="center">
+<small><tt><br>
+int&nbsp;NewSourceCmd(TCLARGS){</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if(&nbsp;!strcmp(argv[1],"/builtin/init.tcl")&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;Tcl_Eval(interp,&nbsp;zInitTcl);<br>
+&nbsp;&nbsp;if(&nbsp;!strcmp(argv[1],"/builtin/parray.tcl")&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;Tcl_Eval(interp,&nbsp;zParrayTcl);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Call <tt>Tcl_Eval()</tt> on builtin strings if the names match</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;Tcl_EvalFile(interp,&nbsp;argv[1]);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Call <tt>Tcl_EvalFile()</tt> if no match</td>
+</tr>
+<tr><td valign="center">
+<small><tt>}<br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;setenv("TCL_LIBRARY","/builtin");</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Causes <tt>tclInit</tt> to look for <tt>init.tcl</tt> in <tt>/builtin</tt></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_CreateCommand(interp,&nbsp;"source",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NewSourceCmd,&nbsp;0,&nbsp;0);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Redefine <tt>source</tt></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Init(interp);<br>
+&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Redefining <tt>source</tt></h2>
+<p><ul><li>This approach works for all versions of Tcl and Tk.</li></ul><ul><li>Also need to redefine the "<tt>file exists</tt>" Tcl command since it
+  too is used by <tt>tclInit</tt>.</li></ul><ul><li>To verify that the program is really standalone, remove the call
+  to <tt>Tcl_EvalFile()</tt>.</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Standalone Initialization Techniques</h2>
+<p><p><b>Use the <tt>Tcl</tt>*<tt>InsertProc()</tt> functions</b></p>
+<ul><li>Three routines that overload basic file I/O operations:
+  <ul>
+  <li> <tt>TclStatInsertProc()</tt> </li>
+  <li> <tt>TclAccessInsertProc()</tt> </li>
+  <li> <tt>TclOpenFileChannelInsertProc()</tt> </li>
+  </ul></li></ul><ul><li>Allows us to implement a virtual filesystem that overlays the
+  real filesystem.</li></ul><ul><li>The virtual filesystem contains all the initialization scripts
+  as compiled-in strings.  The initialization scripts look like
+  they are resident on disk even though they are built in.</li></ul><ul><li>These functions first appeared in Tcl8.0.3.
+  Presumably to support TclPro Wrapper.</li></ul><ul><li>The only documentation is comments on the code.
+  See the Tcl source file <tt>generic/tclIOUtil.c</tt></li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">The <tt>TclStatInsertProc()</tt> Function</h2>
+<p><ul><li>Sole argument is a pointer to a function whose interface is the
+  same as <tt>stat()</tt></li></ul><ul><li>Functions are stacked. Tcl tries each <tt>stat</tt> function on the
+  list, beginning with the most recently inserted, until one succeeds.</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">The <tt>TclStatInsertProc()</tt> Function</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tclInt.h></tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Rather than <tt>&lt;tcl.h&gt;</tt>!</td>
+</tr>
+<tr><td valign="center">
+<small><tt><br>
+static&nbsp;int<br>
+BltinFileStat(char&nbsp;*path,struct&nbsp;stat&nbsp;*buf){<br>
+&nbsp;&nbsp;char&nbsp;*zData;<br>
+&nbsp;&nbsp;int&nbsp;nData;</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;zData&nbsp;=&nbsp;FindBuiltinFile(path,&nbsp;0,&nbsp;&amp;nData);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Check if <tt>path</tt> is a builtin</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if(&nbsp;zData==0&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;-1;<br>
+&nbsp;&nbsp;}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Fail if <tt>path</tt> is not a builtin</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;memset(buf,&nbsp;0,&nbsp;sizeof(*buf));<br>
+&nbsp;&nbsp;buf->st_mode&nbsp;=&nbsp;0400;<br>
+&nbsp;&nbsp;buf->st_size&nbsp;=&nbsp;nData;</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;0;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Success if it is builtin</td>
+</tr>
+<tr><td valign="center">
+<small><tt>}<br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;TclStatInsertProc(BltinFileStat);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Register new <tt>stat</tt> function</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();<br>
+&nbsp;&nbsp;Tcl_Init(interp);<br>
+&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">The <tt>TclAccessInsertProc()</tt> Function</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tclInt.h></tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Rather than <tt>&lt;tcl.h&gt;</tt>!</td>
+</tr>
+<tr><td valign="center">
+<small><tt><br>
+/*&nbsp;BltinFileStat()&nbsp;not&nbsp;shown...&nbsp;*/<br>
+&nbsp;<br>
+static&nbsp;int<br>
+BltinFileAccess(char&nbsp;*path,&nbsp;int&nbsp;mode){<br>
+&nbsp;&nbsp;char&nbsp;*zData;</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if(&nbsp;mode&nbsp;&amp;&nbsp;3&nbsp;)&nbsp;return&nbsp;-1;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">All builtins are read-only</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;zData&nbsp;=&nbsp;FindBuiltinFile(path,&nbsp;0,&nbsp;&amp;nData);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Check if <tt>path</tt> is a builtin</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if(&nbsp;zData==0&nbsp;)&nbsp;return&nbsp;-1;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Fail if <tt>path</tt> is not a builtin</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;0;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Success if it is builtin</td>
+</tr>
+<tr><td valign="center">
+<small><tt>}<br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;TclStatInsertProc(BltinFileStat);<br>
+&nbsp;&nbsp;TclAccessInsertProc(BltinFileAccess);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Register new <tt>stat</tt> and <tt>access</tt> functions</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();<br>
+&nbsp;&nbsp;Tcl_Init(interp);<br>
+&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zInputLoop);<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">The <tt>TclOpenFileChannelInsertProc()</tt> Function</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>static&nbsp;Tcl_Channel&nbsp;BuiltinFileOpen(<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp,&nbsp;&nbsp;&nbsp;/*&nbsp;The&nbsp;TCL&nbsp;interpreter&nbsp;doing&nbsp;the&nbsp;open&nbsp;*/<br>
+&nbsp;&nbsp;char&nbsp;*zFilename,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;Name&nbsp;of&nbsp;the&nbsp;file&nbsp;to&nbsp;open&nbsp;*/<br>
+&nbsp;&nbsp;char&nbsp;*modeString,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;Mode&nbsp;string&nbsp;for&nbsp;the&nbsp;open&nbsp;(ignored)&nbsp;*/<br>
+&nbsp;&nbsp;int&nbsp;permissions&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;Permissions&nbsp;for&nbsp;a&nbsp;newly&nbsp;created&nbsp;file&nbsp;(ignored)&nbsp;*/<br>
+){<br>
+&nbsp;&nbsp;char&nbsp;*zData;<br>
+&nbsp;&nbsp;BuiltinFileStruct&nbsp;*p;<br>
+&nbsp;&nbsp;int&nbsp;nData;<br>
+&nbsp;&nbsp;char&nbsp;zName[50];<br>
+&nbsp;&nbsp;Tcl_Channel&nbsp;chan;<br>
+&nbsp;&nbsp;static&nbsp;int&nbsp;count&nbsp;=&nbsp;1;<br>
+&nbsp;<br>
+&nbsp;&nbsp;zData&nbsp;=&nbsp;FindBuiltinFile(zFilename,&nbsp;1,&nbsp;&amp;nData);<br>
+&nbsp;&nbsp;if(&nbsp;zData==0&nbsp;)&nbsp;return&nbsp;NULL;<br>
+&nbsp;&nbsp;p&nbsp;=&nbsp;(BuiltinFileStruct*)Tcl_Alloc(&nbsp;sizeof(BuiltinFileStruct)&nbsp;);<br>
+&nbsp;&nbsp;if(&nbsp;p==0&nbsp;)&nbsp;return&nbsp;NULL;<br>
+&nbsp;&nbsp;p->zData&nbsp;=&nbsp;zData;<br>
+&nbsp;&nbsp;p->nData&nbsp;=&nbsp;nData;<br>
+&nbsp;&nbsp;p->cursor&nbsp;=&nbsp;0;<br>
+&nbsp;&nbsp;sprintf(zName,"etbi_bffffc7c_8049b04",((int)BuiltinFileOpen)>>12,count++);<br>
+&nbsp;&nbsp;chan&nbsp;=&nbsp;Tcl_CreateChannel(&amp;builtinChannelType,&nbsp;zName,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(ClientData)p,&nbsp;TCL_READABLE);<br>
+&nbsp;&nbsp;return&nbsp;chan;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">The <tt>TclOpenFileChannelInsertProc()</tt> Function</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>static&nbsp;Tcl_ChannelType&nbsp;builtinChannelType&nbsp;=&nbsp;{<br>
+&nbsp;&nbsp;"builtin",&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;Type&nbsp;name.&nbsp;*/<br>
+&nbsp;&nbsp;NULL,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;Always&nbsp;non-blocking.*/<br>
+&nbsp;&nbsp;BuiltinFileClose,&nbsp;&nbsp;&nbsp;/*&nbsp;Close&nbsp;proc.&nbsp;*/<br>
+&nbsp;&nbsp;BuiltinFileInput,&nbsp;&nbsp;&nbsp;/*&nbsp;Input&nbsp;proc.&nbsp;*/<br>
+&nbsp;&nbsp;BuiltinFileOutput,&nbsp;&nbsp;/*&nbsp;Output&nbsp;proc.&nbsp;*/<br>
+&nbsp;&nbsp;BuiltinFileSeek,&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;Seek&nbsp;proc.&nbsp;*/<br>
+&nbsp;&nbsp;NULL,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;Set&nbsp;option&nbsp;proc.&nbsp;*/<br>
+&nbsp;&nbsp;NULL,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;Get&nbsp;option&nbsp;proc.&nbsp;*/<br>
+&nbsp;&nbsp;BuiltinFileWatch,&nbsp;&nbsp;&nbsp;/*&nbsp;Watch&nbsp;for&nbsp;events&nbsp;on&nbsp;console.&nbsp;*/<br>
+&nbsp;&nbsp;BuiltinFileHandle,&nbsp;&nbsp;/*&nbsp;Get&nbsp;a&nbsp;handle&nbsp;from&nbsp;the&nbsp;device.&nbsp;*/<br>
+};</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p>
+  <p>For additional information see:</p>
+  <ul>
+  <li>The man page for <tt>Tcl_CreateChannel()</tt></li>
+  <li>Tk source code file <tt>generic/tkConsole.c</tt></li>
+  </ul>
+</p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Initializing Tk</h2>
+<p><ul><li>All the same initialization script issues as Tcl</li></ul><ul><li>Tk initialization scripts are in a different directory
+  than the Tcl initialization scripts - the "Tk Library"</li></ul><ul><li>Call <tt>Tk_Init()</tt> after <tt>Tcl_Init()</tt></li></ul><ul><li>Must have an event loop or Tk will not work!</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Implementing An Event Loop</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>button&nbsp;.b&nbsp;-text&nbsp;Hello&nbsp;-command&nbsp;exit<br>
+pack&nbsp;.b</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Create a Tk interface</td>
+</tr>
+<tr><td valign="center">
+<small><tt><br>
+</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>bind&nbsp;.&nbsp;&lt;Destroy>&nbsp;{<br>
+&nbsp;&nbsp;if&nbsp;{![winfo&nbsp;exists&nbsp;.]}&nbsp;exit<br>
+}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Close the application when the main window
+  is destroyed</td>
+</tr>
+<tr><td valign="center">
+<small><tt><br>
+</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>while&nbsp;1&nbsp;{vwait&nbsp;forever}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">The event loop</td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">"Hello, World!" Using Tk</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tk.h><br>
+&nbsp;<br>
+</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>static&nbsp;char&nbsp;zHello[]&nbsp;=&nbsp;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">The application code</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;"button&nbsp;.b&nbsp;"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"-text&nbsp;{Hello,&nbsp;World}&nbsp;"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"-command&nbsp;exit\n"<br>
+&nbsp;&nbsp;"pack&nbsp;.b\n";<br>
+&nbsp;<br>
+</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>static&nbsp;char&nbsp;zEventLoop[]&nbsp;=</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">The event loop</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;"bind&nbsp;.&nbsp;&lt;Destroy>&nbsp;{\n"<br>
+&nbsp;&nbsp;"&nbsp;&nbsp;if&nbsp;{![winfo&nbsp;exists&nbsp;.]}&nbsp;exit\n"<br>
+&nbsp;&nbsp;"}\n"<br>
+&nbsp;&nbsp;"while&nbsp;1&nbsp;{vwait&nbsp;forever}\n";<br>
+&nbsp;<br>
+<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;Tcl_Interp&nbsp;*interp;<br>
+&nbsp;&nbsp;interp&nbsp;=&nbsp;Tcl_CreateInterp();</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Init(interp);<br>
+&nbsp;&nbsp;Tk_Init(interp);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">We really should check the return values of the init functions...</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zHello);</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_Eval(interp,&nbsp;zEventLoop);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">The event loop never returns</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;/*NOTREACHED*/<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Compiling "Hello, World!" For Tk</h2>
+<p><p><b>Unix:</b></p>
+  <blockquote><pre>
+  $ gcc hello.c -ltk -L/usr/X11R6/lib \
+        -lX11 -ltcl -lm -ldl
+  $ ./a.out</pre></blockquote>
+
+  <p><b>Windows using Cygwin:</b></p>
+  <blockquote><pre>
+  C:> gcc hello.c -mwindows -ltk80 -ltcl80 -lm
+  C:> a.exe</pre></blockquote>
+
+  <p><b>Windows using Mingw32:</b></p>
+  <blockquote><pre>
+  C:> gcc -mno-cygwin hello.c -mwindows \
+           -ltk82 -ltcl82 -lm
+  C:> a.exe</pre></blockquote></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Making The Program Standalone</h2>
+<p><p>To make a Tcl application standalone you have to convert the following
+     initialization scripts to C strings and compile them into the
+     executable:</p>
+  <table><tr>
+  <td valign="top"><tt>
+    &nbsp;&nbsp;auto.tcl<br>
+    &nbsp;&nbsp;history.tcl<br>
+    &nbsp;&nbsp;init.tcl
+  </tt></td>
+  <td valign="top"><tt>
+    &nbsp;&nbsp;ldAout.tcl<br>
+    &nbsp;&nbsp;package.tcl
+  </tt></td>
+  <td valign="top"><tt>
+    &nbsp;&nbsp;parray.tcl<br>
+    &nbsp;&nbsp;safe.tcl
+  </tt></td>
+  <td valign="top"><tt>
+    &nbsp;&nbsp;tclIndex<br>
+    &nbsp;&nbsp;word.tcl
+  </tt></td>
+  </tr></table>
+
+  <p>To make a Tk application standalone requires these additional
+     initialization scripts from the Tk Library:</p>
+  <table><tr>
+  <td valign="top"><tt>
+    &nbsp;&nbsp;bgerror.tcl<br>
+    &nbsp;&nbsp;button.tcl<br>
+    &nbsp;&nbsp;clrpick.tcl<br>
+    &nbsp;&nbsp;comdlg.tcl<br>
+    &nbsp;&nbsp;console.tcl<br>
+    &nbsp;&nbsp;dialog.tcl
+  </tt></td>
+  <td valign="top"><tt>
+    &nbsp;&nbsp;entry.tcl<br>
+    &nbsp;&nbsp;focus.tcl<br>
+    &nbsp;&nbsp;listbox.tcl<br>
+    &nbsp;&nbsp;menu.tcl<br>
+    &nbsp;&nbsp;msgbox.tcl<br>
+    &nbsp;&nbsp;optMenu.tcl
+  </tt></td>
+  <td valign="top"><tt>
+    &nbsp;&nbsp;palette.tcl<br>
+    &nbsp;&nbsp;safetk.tcl<br>
+    &nbsp;&nbsp;scale.tcl<br>
+    &nbsp;&nbsp;scrlbar.tcl<br>
+    &nbsp;&nbsp;tclIndex<br>
+    &nbsp;&nbsp;tearoff.tcl
+  </tt></td>
+  <td valign="top"><tt>
+    &nbsp;&nbsp;text.tcl<br>
+    &nbsp;&nbsp;tk.tcl<br>
+    &nbsp;&nbsp;tkfbox.tcl<br>
+    &nbsp;&nbsp;xmfbox.tcl
+  </tt></td>
+  </tr></table>
+
+  <p>Total of about 13K lines and 400K bytes of text or 9K lines and
+     250K bytes if you strip comments and leading spaces</p></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">A Review Of The Features We Want</h2>
+<p><ol type="A">
+  <li value="1">
+  Combine C/C++ with Tcl/Tk into a single executable.</dd>
+  </li></ol>
+
+  <ol type="A">
+  <li value="2">
+  The executable should be standalone.  It must not depend
+  on files not normally found on the system.
+  </li></ol>
+
+  <ol type="A">
+  <li value="3">
+  It should be difficult for end users to alter the program
+  (and introduce bugs).
+  </li></ol></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Available Programming Aids</h2>
+<p><p>Several tools are available.  The chart below shows which tools
+ help achieve which objectives.</p>
+
+ <center><table border="2">
+ <tr>
+   <td></td>
+   <td colspan="3" align="center">
+      <b>Features The Tool Helps To Achieve</b></td>
+ </tr>
+ <tr>
+   <td align="center"><b>Tool Name</b></td>
+   <td align="center">Mix C and Tcl</td>
+   <td align="center">Standalone</td>
+   <td align="center">Hide Source</td>
+ </tr>
+ <tr>
+   <td>SWIG</td>
+   <td align="center"><img src="image6"></td>
+   <td>&nbsp;</td>
+   <td>&nbsp;</td>
+ </tr>
+ <tr>
+   <td>TclPro Wrapper</td>
+   <td>&nbsp;</td>
+   <td align="center"><img src="image6"></td>
+   <td align="center"><img src="image6"></td>
+ </tr>
+ <tr>
+   <td>FreeWrap</td>
+   <td>&nbsp;</td>
+   <td align="center"><img src="image6"></td>
+   <td align="center"><img src="image6"></td>
+ </tr>
+ <tr>
+   <td>Wrap</td>
+   <td>&nbsp;</td>
+   <td align="center"><img src="image6"></td>
+   <td>&nbsp;</td>
+ </tr>
+ <tr>
+   <td>mktclapp</td>
+   <td align="center"><img src="image6"></td>
+   <td align="center"><img src="image6"></td>
+   <td align="center"><img src="image6"></td>
+ </tr>
+ </table></center></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">SWIG</h2>
+<table><tr><td valign="top"><img src="image7"></td>
+<td valign="top"><p><ul><li>Creates an interface between an existing C/C++ library and a high-level
+  programming language.  Support for:
+  <ul>
+  <li> Tcl/Tk </li>
+  <li> Perl </li>
+  <li> Python </li>
+  <li> Java </li>
+  <li> Eiffel </li>
+  <li> Guile </li>
+  </ul></li></ul><ul><li>No changes required to C/C++ code.  Can be used with legacy libraries.</li></ul><ul><li>Generates an extension, not a standalone binary</li></ul><ul><li>The tutorial on SWIG was yesterday afternoon.</li></ul><ul><li>http://www.swig.org/</li></ul></p></td></tr></table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Wrapper Programs</h2>
+<table><tr><td valign="top"><img src="image8"></td>
+<td valign="top"><p><ul><li>Convert a pure Tcl/Tk program into a standalone binary</li></ul><ul><li>Several wrapper programs are available:
+  <ul>
+  <li> TclPro Wrapper - http://www.scriptics.com/ </li>
+  <li> FreeWrap - http://www.albany.net/~dlabelle/freewrap/freewrap.html </li>
+  <li> Wrap - http://members1.chello.nl/~j.nijtmans/wrap.html </li>
+  </ul></li></ul><ul><li>No C compiler required!</li></ul><ul><li>TclPro will convert Tcl script into bytecode so that it cannot be
+  easily read by the end user.  FreeWrap encrypts the scripts.</li></ul><ul><li>FreeWrap uses compression on its executable.
+  Wrap uses compression on both the executable and on the bundled script files.</li></ul><ul><li>Usually include extensions like winico and/or BLT</li></ul></p></td></tr></table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">mktclapp</h2>
+<table><tr><td valign="top"><img src="image9"></td>
+<td valign="top"><p><ul><li>Mix C/C++ with Tcl/Tk into a standalone binary</li></ul>
+<ul><li><tt>mktclapp</tt> generates an application initialization file
+  that contains Tcl scripts as strings and makes all necessary calls
+  to <tt>Tcl_Init</tt>, <tt>Tcl_CreateCommand</tt>,
+  <tt>Tcl</tt>*<tt>InsertProc</tt>, etc.</li></ul><ul><li>Features to make it easier to write new Tcl command in C</li></ul><ul><li><tt>xmktclapp.tcl</tt> provides a GUI interface to <tt>mktclapp</tt></li></ul><ul><li>http://www.hwaci.com/sw/mktclapp/</li></ul></p></td></tr></table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">"Hello, World!" Using Mktclapp</h2>
+<p><ul><li>Download <tt>mktclapp.c</tt> and <tt>xmktclapp.tcl</tt> from
+  http://www.hwaci.com/sw/mktclapp/</li></ul><ul><li>Compile <tt>mktclapp</tt>:
+  <blockquote><pre>
+  cc -o mktclapp mktclapp.c
+  </pre></blockquote></li></ul><ul><li>Create "Hello, World!" as a Tcl script in file <tt>hw.tcl</tt>:
+  <blockquote><pre>
+  button .b -text {Hello, World!} -command exit
+  pack .b
+  </pre></blockquote></li></ul><ul><li>Launch xmktclapp:
+  <blockquote><pre>
+  wish xmktclapp.tcl
+  </pre></blockquote></li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">"Hello, World!" Using Mktclapp</h2>
+<table width="100%"><tr><td valign="top"><p><ul><li>Set "Command Line Input?" to "None"</li></ul><ul><li>Set "Standalone?" to "Yes"</li></ul><ul><li>Enter "<tt>hw.mta</tt>" for the Configuration File</li></ul><ul><li>Enter "<tt>hw.c</tt>" for the Output C File</li></ul></p></td>
+<td valign="top" align="right"><img src="image10"></td></tr></table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">"Hello, World!" Using Mktclapp</h2>
+<table width="100%"><tr><td valign="top"><p><ul><li>Go to the "Tcl Scripts" page</li></ul><ul><li>Press "Insert" and add <tt>hw.tcl</tt> to the list of
+  Tcl scripts</li></ul><ul><li>Change the "Startup Script" to be <tt>hw.tcl</tt>.</li></ul><ul><li>Select File/Build and File/Exit</li></ul></p></td>
+<td valign="top" align="right"><img src="image11"></td></tr></table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">"Hello, World!" Using Mktclapp</h2>
+<p><ul><li>Mktclapp generates <tt>hw.c</tt>.
+  Compile it something like this:
+  <pre>
+  cc hw.c -ltk -L/usr/X11R6/lib -lX11 -ltcl -lm -ldl
+  </pre></li></ul><ul><li>Or, if using Cygwin:
+  <pre>
+  gcc hw.c -mwindows -ltk80 -ltcl80 -lm
+  </pre></li></ul><ul><li>Or, if using Mingw32:
+  <pre>
+  gcc -mno-cygwin hw.c -mwindows -ltk82 -ltcl82 -lm
+  </pre></li></ul><ul><li>And you're done!</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Adding C Code To Your Program</h2>
+<p>Put the new C code in a new source file named "<tt>add.c</tt>"</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;"hw.h"</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Generated by mktclapp</td>
+</tr>
+<tr><td valign="center">
+<small><tt></tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>int&nbsp;ET_COMMAND_add(ET_TCLARGS){</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><tt>ET_TCLARGS</tt> is a macro defined in <tt>hw.h</tt></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;int&nbsp;a,&nbsp;b;<br>
+&nbsp;&nbsp;char&nbsp;zResult[30];<br>
+&nbsp;&nbsp;a&nbsp;=&nbsp;atoi(argv[1]);<br>
+&nbsp;&nbsp;b&nbsp;=&nbsp;atoi(argv[2]);<br>
+&nbsp;&nbsp;sprintf(zResult,&nbsp;"-1073742724",&nbsp;a+b);<br>
+&nbsp;&nbsp;Tcl_SetResult(interp,&nbsp;zResult,&nbsp;TCL_VOLATILE);<br>
+&nbsp;&nbsp;return&nbsp;TCL_OK;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Adding C Code To Your Program</h2>
+<table width="100%"><tr><td valign="top"><p><ul><li>Go to the "C/C++ Modules" page of xmktclapp.tcl</li></ul>
+<ul><li>Press "Insert" and add <tt>add.c</tt> to the list of
+  C/C++ modules</p></li></ul></li></ul><ul><li>Select File/Build and File/Exit</li></ul></p></td>
+<td valign="top" align="right"><img src="image12"></td></tr></table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Adding C Code To Your Program</h2>
+<p><ul><li>Compile as follows:
+  <pre>
+  cc add.c hw.c -ltk -L/usr/X11R6/lib -ltcl -lm -ldl
+  </pre></li></ul><ul><li>Or construct a Makefile that compiles <tt>add.c</tt> into <tt>add.o</tt>
+  and <tt>hw.c</tt> into <tt>hw.o</tt> and then links them.</li></ul><ul><li>Compile the same way for Windows except use the usual Windows
+  libraries and options...</li></ul><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>Don't have to worry with <tt>Tcl_CreateCommand()</tt> - Mktclapp takes
+  care of that automatically.</b></td></tr></table></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Checking Parameters In The <tt>add</tt> Command</h2>
+<p>Modify <tt>add.c</tt> to insure the <tt>add</tt> command
+  is called with exactly two integer arguments</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;"hw.h"<br>
+&nbsp;<br>
+int&nbsp;ET_COMMAND_add(ET_TCLARGS){<br>
+&nbsp;&nbsp;int&nbsp;a,&nbsp;b;<br>
+&nbsp;&nbsp;char&nbsp;zResult[30];</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if(&nbsp;argc!=3&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Tcl_AppendResult(interp,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"wrong&nbsp;#&nbsp;args:&nbsp;should&nbsp;be:&nbsp;\"",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;argv[0],&nbsp;"&nbsp;VALUE&nbsp;VALUE\"",&nbsp;0);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;TCL_ERROR;<br>
+&nbsp;&nbsp;}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Report an error if there are not exactly
+  2 arguments</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if(&nbsp;Tcl_GetInt(interp,&nbsp;argv[1],&nbsp;&amp;a)!=TCL_OK&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;TCL_ERROR;<br>
+&nbsp;&nbsp;}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Report an error if the first argument is
+  not an integer</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if(&nbsp;Tcl_GetInt(interp,&nbsp;argv[2],&nbsp;&amp;b)!=TCL_OK&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;TCL_ERROR;<br>
+&nbsp;&nbsp;}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Do the same for the second argument</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;sprintf(zResult,&nbsp;"-1073742724",&nbsp;a+b);<br>
+&nbsp;&nbsp;Tcl_SetResult(interp,&nbsp;zResult,&nbsp;TCL_VOLATILE);<br>
+&nbsp;&nbsp;return&nbsp;TCL_OK;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Using The Tcl_Obj Interface</h2>
+<p>In the file <tt>objadd.c</tt> put this code:</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;"hw.h"</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt><br>
+int&nbsp;ET_OBJCOMMAND_add2(ET_OBJARGS){<br>
+&nbsp;&nbsp;int&nbsp;a,&nbsp;b;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Use "<tt>ET_OBJCOMMAND</tt>" instead of "<tt>ET_COMMAND</tt>" and
+  "<tt>ET_OBJARGS</tt>" instead of "<tt>ET_TCLARGS</tt>"</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if(&nbsp;objc!=3&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Tcl_WrongNumArgs(interp,&nbsp;1,&nbsp;objv,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"number&nbsp;number");<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;TCL_ERROR;<br>
+&nbsp;&nbsp;}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">A special routine for "wrong # args" error</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if(&nbsp;Tcl_GetIntFromObj(interp,&nbsp;objv[1],&nbsp;&amp;a)&nbsp;){</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Instead of <tt>Tcl_GetInt</tt></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;TCL_ERROR;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;if(&nbsp;Tcl_GetIntFromObj(interp,&nbsp;objv[2],&nbsp;&amp;b)&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;TCL_ERROR;<br>
+&nbsp;&nbsp;}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_SetIntObj(Tcl_GetObjResult(interp),&nbsp;a+b);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Result stored as integer, not a string</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;TCL_OK;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Speed Of Tcl_Obj Versus "char*"  Interfaces</h2>
+<p><ul><li>Compile both <tt>add</tt> and <tt>add2</tt> into the same executable.</li></ul><ul><li>Compare their speeds:
+  <pre>
+   time {add 123456 654321} 10000
+  <font color="blue">26 microseconds per iteration</font>
+   time {add2 123456 654321} 10000
+  <font color="blue">4 microseconds per iteration</font>
+  </pre></li></ul><ul><li>The Tcl_Obj version is 650 faster!</li></ul><ul><li>Replace the addition with a "real" computation that takes
+  10 milliseconds.</li></ul><ul><li>Now the Tcl_Obj version is only 0.2 faster!</li></ul><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>In many real-world problems, the Tcl_Obj interface has no noticeable
+  speed advantage over the string interface.</b></td></tr></table></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">More About Built-in Tcl Scripts</h2>
+<table><tr><td valign="top"><img src="image11"></td>
+<td valign="top"><p><ul><li>Comments and leading white-space are removed from the
+  script by default.  Use the "Don't Strip Comments"
+  button to change this.</li></ul><ul><li>The file name must exactly match the name that is
+  used by the <tt>source</tt> command.</li></ul></p></td></tr></table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Locations Of Libraries</h2>
+<table><tr><td valign="top"><img src="image13"></td>
+<td valign="top"><p><ul><li>Tells mktclapp where to look for script libraries.</li></ul><ul><li>All Tcl scripts in the indicated directories are
+  compiled into the <tt>appinit.c</tt> file.</li></ul><ul><li>Comments and extra white-space are removed.
+  There is no way to turn this off.</li></ul></p></td></tr></table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Built-in Binary Data Files</h2>
+<table><tr><td valign="top"><img src="image14"></td>
+<td valign="top"><p><ul><li>Arbitrary files become part of the virtual filesystem</li></ul><ul><li>No comment or white-space removal is attempted</li></ul><ul><li>Useful for images or other binary data</li></ul></p></td></tr></table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">New Commands In Namespaces</h2>
+<p>Two underscores (__)  are replaced by two colons (::) in
+  command names, thus giving the ability to define new commands
+  in a namespace</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;hw.h></tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt><br>
+int&nbsp;ET_COMMAND_adder__add(ET_TCLARGS){<br>
+&nbsp;&nbsp;int&nbsp;a,&nbsp;b;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Creates the Tcl command called "<tt>adder::add</tt>"</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;char&nbsp;*zResult[30];<br>
+&nbsp;&nbsp;if(&nbsp;argc!=3&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Tcl_AppendResult(interp,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"wrong&nbsp;#&nbsp;args:&nbsp;should&nbsp;be:&nbsp;\"",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;argv[0],&nbsp;"&nbsp;VALUE&nbsp;VALUE\"",&nbsp;0);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;TCL_ERROR;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;if(&nbsp;Tcl_GetInt(interp,&nbsp;argv[1],&nbsp;&amp;a)!=TCL_OK&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;TCL_ERROR;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;if(&nbsp;Tcl_GetInt(interp,&nbsp;argv[1],&nbsp;&amp;b)!=TCL_OK&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;TCL_ERROR;<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;sprintf(zResult,&nbsp;"-1073742724",&nbsp;a+b);<br>
+&nbsp;&nbsp;Tcl_SetResult(interp,&nbsp;zResult,&nbsp;TCL_VOLATILE);<br>
+&nbsp;&nbsp;return&nbsp;TCL_OK;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Adding Your Own <tt>main()</tt></h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;/*&nbsp;Application&nbsp;specific&nbsp;initialization&nbsp;*/</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Et_Init(argc,&nbsp;argv);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Never returns!</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;/*NOTREACHED*/<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p><table><tr><td valign="top"><img src="image3"></td>
+<td valign="top"><b>The "Autofork" feature is disabled if you supply your own <tt>main()</tt></b></td></tr></table>
+</p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Initializing The Tcl Interpreter</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+&nbsp;<br>
+int&nbsp;counter&nbsp;=&nbsp;0;<br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){<br>
+&nbsp;&nbsp;&nbsp;Et_Init(argc,&nbsp;argv);<br>
+&nbsp;&nbsp;&nbsp;/*NOTREACHED*/<br>
+&nbsp;&nbsp;&nbsp;return&nbsp;0;<br>
+}<br>
+&nbsp;<br>
+int&nbsp;Et_AppInit(Tcl_Interp&nbsp;*interp){</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;if(&nbsp;Blt_Init(Interp)&nbsp;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;TCL_ERROR;<br>
+&nbsp;&nbsp;}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Example: Initialize an extension</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Tcl_LinkVar(interp,&nbsp;"counter",&nbsp;&amp;counter,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TCL_LINK_INT);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Or link a C variable to a Tcl variable</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return&nbsp;TCL_OK;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Return TCL_OK if successful</td>
+</tr>
+<tr><td valign="center">
+<small><tt>}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Writing Your Own Event Loop</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>void&nbsp;Et_CustomMainLoop(Tcl_Interp&nbsp;*interp){</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Replaces the default event loop</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;return;</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Ex: Return without handling any events.</td>
+</tr>
+<tr><td valign="center">
+<small><tt>}<br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Et_Init(argc,&nbsp;argv);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">This now returns after initializing Tcl</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;/*&nbsp;Application&nbsp;code&nbsp;here&nbsp;*/<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Writing Your Own Event Loop</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;&lt;tcl.h><br>
+&nbsp;<br>
+void&nbsp;Et_CustomMainLoop(Tcl_Interp&nbsp;*interp){</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;for(;;){<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Tcl_DoOneEvent(TCL_ALL_EVENTS|TCL_DONT_WAIT);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;/*&nbsp;Other&nbsp;processing...&nbsp;*/<br>
+&nbsp;&nbsp;}</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Intermix processing and event handling</td>
+</tr>
+<tr><td valign="center">
+<small><tt>}<br>
+&nbsp;<br>
+int&nbsp;main(int&nbsp;argc,&nbsp;char&nbsp;**argv){</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;Et_Init(argc,&nbsp;argv);</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Never returns</td>
+</tr>
+<tr><td valign="center">
+<small><tt>&nbsp;&nbsp;/*NOTREACHED*/<br>
+&nbsp;&nbsp;return&nbsp;0;<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Mktclapp Initialization Sequence</h2>
+<p><ul><li>Initialization starts when the <tt>Et_Init()</tt>
+  function is called either by client code or by
+  the <tt>main()</tt> that mktclapp generates</li></ul><ul><li>Create the main Tcl interpreter</li></ul><ul><li>Construct the virtual filesystem overlay by redefining
+  the <tt>source</tt> command and by using the
+  <tt>Tcl</tt>*<tt>InsertProc()</tt> functions</li></ul><ul><li>Call <tt>Et_PreInit()</tt> if the client defines it</li></ul><ul><li>Call <tt>Tcl_Init()</tt> and <tt>Tk_Init()</tt></li></ul><ul><li>Call <tt>Tcl_CreateCommand()</tt> and <tt>Tcl_CreateObjCommand()</tt>
+  for every <tt>ET_COMMAND_</tt>* and <tt>ET_OBJCOMMAND_</tt>* function
+  in the client code</li></ul><ul><li>Call <tt>Et_AppInit()</tt> if the client defines it</li></ul><ul><li>Run the main Tcl script if there is one</li></ul><ul><li>Call <tt>Et_CustomMainLoop()</tt> if defined by client code or
+  else run the built-in event loop</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Invoking Tcl From C</h2>
+<p><ul><li>Use one of the built-in evaluation functions:
+  <center><table width="80%">
+  <tr><td valign="top" width="50%"><ul>
+     <li> Tcl_Eval() </li>
+     <li> Tcl_VarEval() </li>
+     <li> Tcl_EvalFile() </li>
+     <li> Tcl_GlobalEval() </li>
+     </ul></td>
+  <td valign="top" width="50%"><ul>
+     <li> Tcl_EvalObj() </li>
+     <li> Tcl_GlobalEvalObj() </li>
+   </ul></td></tr>
+  </table></center></li></ul><ul><li>Mktclapp provides evaluation functions with variable argument
+  lists as in <tt>printf()</tt>:
+  <ul>
+  <li> Et_EvalF() </li>
+  <li> Et_GlobalEvalF() </li>
+  </ul></li></ul><ul><li>Mktclapp provides a global variable <tt>Et_Interp</tt> which is
+  a pointer to the main interpreter</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Invoking Tcl From C</h2>
+<p>Example:  A C function that pops up an error message dialog box</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;"appinit.h"<br>
+&nbsp;<br>
+void&nbsp;ErrMsg(char&nbsp;*zMsg){<br>
+&nbsp;&nbsp;Tcl_SetVar(Et_Interp,&nbsp;"zMsg",&nbsp;zMsg,&nbsp;TCL_GLOBAL_ONLY);<br>
+&nbsp;&nbsp;Tcl_GlobalEval(Et_Interp,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"tk_messageBox&nbsp;-icon&nbsp;error&nbsp;-msg&nbsp;$zMsg&nbsp;-type&nbsp;ok");<br>
+&nbsp;&nbsp;Tcl_UnsetVar(Et_Interp,&nbsp;"zMsg",&nbsp;TCL_GLOBAL_ONLY);<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Invoking Tcl From C</h2>
+<p>The same C function implemented using <tt>Et_EvalF()</tt> instead
+  of <tt>Tcl_GlobalEval()</tt></p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;"appinit.h"<br>
+&nbsp;<br>
+void&nbsp;ErrMsg(char&nbsp;*zMsg){<br>
+&nbsp;&nbsp;Et_EvalF(Et_Interp,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"tk_messageBox&nbsp;-icon&nbsp;error&nbsp;-msg&nbsp;{∏¸ˇøPçX∂}&nbsp;-type&nbsp;ok",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zMsg);<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p>
+  <ul><li>
+  Suppose the function is called as follows:
+  <blockquote>
+    <tt>ErrMsg("Syntax error near \"}\"");</tt>
+  </blockquote>
+  </li></ul>
+
+  <ul><li>
+  The command that gets executed is:
+  <pre>
+    tk_messageBox -icon error -msg \
+        {Syntax error near "}"} -type ok
+  </pre>
+  </li></ul>
+
+  <ul><li>
+  But this is an ill-formed Tcl command!
+  </li></ul>
+</p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Invoking Tcl From C</h2>
+<p>Use the "<tt></tt>" format to generate a quoted string</p><p>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#include&nbsp;"appinit.h"<br>
+&nbsp;<br>
+void&nbsp;ErrMsg(char&nbsp;*zMsg){<br>
+&nbsp;&nbsp;Et_EvalF(Et_Interp,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;"tk_messageBox&nbsp;-icon&nbsp;error&nbsp;-msg&nbsp;\"%\"&nbsp;-type&nbsp;ok",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zMsg);<br>
+}</tt></small></td>
+<td></td><td></td><td></td><td></td>
+</tr>
+</table>
+<p><ul><li>The <tt></tt> puts a backslash before all characters that
+  are special to Tcl</li></ul><ul><li>The Tcl command becomes:
+  <pre>
+    tk_messageBox -icon error -msg \
+        "Syntax error near \"\}\"" -type ok
+  </pre></li></ul></p>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Other Functions Provided By Mktclapp</h2>
+<p><ul><li><tt>void Et_ResultF(Tcl_Interp*, ...);</tt></li></ul><ul><li><tt>char *Et_DStringAppendF(Tcl_DString*, ...);</tt></li></ul><ul><li><tt>int Et_AppendObjF(Tcl_Obj*, ...);</tt></li></ul><ul><li><tt>char *mprintf(const char *format, ...);<br>
+  char *vmprintf(const char *format, va_list);</tt></li></ul><ul><li><tt>void Et_NewBuiltinFile(char *filename, char *data, int amt);</tt></li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Operating Mktclapp From The Command Line</h2>
+<p><ul><li>Generate the <tt>appinit.h</tt> header file like this:
+  <blockquote>
+  <tt>mktclapp -header &gt;appinit.h</tt>
+  </blockquote></li></ul><ul><li>Generate the <tt>appinit.c</tt> file like this:
+  <blockquote>
+  <tt>mktclapp -f appinit.mta >appinit.c</tt>
+  </blockquote></li></ul><ul><li>The <tt>*.mta</tt> file is just a list of command-line options</li></ul><ul><li>Enter
+  <blockquote>
+  <tt>mktclapp -help</tt>
+  </blockquote>
+  to get a list of available options</li></ul><ul><li>Look at MTA files generated by xmktclapp.tcl for examples</li></ul></p>
+<br clear="both"><p><hr></p>
+<h2 align="center">Format Of An MTA File</h2>
+<table cellspacing="0" cellpadding="0" border="0">
+<tr><td valign="center">
+<small><tt>#&nbsp;Configuration&nbsp;file&nbsp;generated&nbsp;by&nbsp;xmktclapp<br>
+#&nbsp;Hand&nbsp;editing&nbsp;is&nbsp;not&nbsp;recommended<br>
+#</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Comments begin with one #</td>
+</tr>
+<tr><td valign="center">
+<small><tt>##&nbsp;Autofork&nbsp;No<br>
+##&nbsp;CFile:add.c&nbsp;1<br>
+##&nbsp;CFile:objadd.c&nbsp;1<br>
+##&nbsp;CmdLine&nbsp;Console<br>
+##&nbsp;ConfigFile&nbsp;hw.mta<br>
+##&nbsp;Data:check.gif&nbsp;1<br>
+##&nbsp;MainScript&nbsp;hw.tcl<br>
+##&nbsp;Mode&nbsp;Tcl/Tk<br>
+##&nbsp;NoSource&nbsp;No<br>
+##&nbsp;OutputFile&nbsp;hw.c<br>
+##&nbsp;Shroud&nbsp;No<br>
+##&nbsp;Standalone&nbsp;Yes<br>
+##&nbsp;TclFile:hw.tcl&nbsp;1<br>
+##&nbsp;TclLib&nbsp;/usr/lib/tcl8.0<br>
+##&nbsp;TkLib&nbsp;/usr/lib/tk8.0</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">Lines beginning with two #s are used
+  by xmktclapp.tcl and ignored by mktclapp</td>
+</tr>
+<tr><td valign="center">
+<small><tt>-console<br>
+-main-script&nbsp;"hw.tcl"<br>
+-tcl-library&nbsp;"/usr/lib/tcl8.0"<br>
+-tk-library&nbsp;"/usr/lib/tk8.0"<br>
+"add.c"<br>
+"objadd.c"<br>
+-i&nbsp;"check.gif"<br>
+-strip-tcl&nbsp;"hw.tcl"</tt></small></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center"><img src="image2"></td>
+<td>&nbsp;&nbsp;</td>
+<td valign="center">All other lines are read by mktclapp and
+  ignored by xmktclapp.tcl</td>
+</tr>
+</table>
+
+<br clear="both"><p><hr></p>
+<h2 align="center">Summary</h2>
+<p><ul><li>Use Tcl for the things Tcl is good at and use C/C++ for the things that
+  C/C++ is good at</li></ul><ul><li>Use wrapper programs to make pure Tcl programs standalone</li></ul><ul><li>Use mktclapp to combine Tcl/Tk with C/C++ into a standalone</li></ul></p>
+<br clear="both"><p><hr></p>

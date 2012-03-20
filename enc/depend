@@ -1,0 +1,162 @@
+% inplace = File.identical?($srcdir, ".")
+% workdirs = %w"$(ENCSODIR) $(TRANSSODIR) enc enc/trans"
+% CONFIG["WORKDIRS"] = workdirs.join(' ')
+% CONFIG["DLDFLAGS"].sub!(/(\A|\s)(-\S+(?:\s*\w*)?\$\(TARGET\)\S*)/, '\1')
+% dldflags = $2
+% enable_shared = CONFIG['ENABLE_SHARED'] == 'yes'
+% deffile = (true if /\$\(DEFFILE\)/ =~ CONFIG["LINK_SO"])
+% encs = Dir.open($srcdir) {|d| d.grep(/.+\.c\z/)} - BUILTIN_ENCS - ["mktable.c"]
+% encs.each {|e| e.chomp!(".c")}
+% encs.reject! {|e| !ENC_PATTERNS.any? {|p| File.fnmatch?(p, e)}} if !ENC_PATTERNS.empty?
+% encs.reject! {|e| NOENC_PATTERNS.any? {|p| File.fnmatch?(p, e)}}
+% alphanumeric_order = proc {|e| e.scan(/(\d+)|(\D+)/).map {|n,a| a||[n.size,n.to_i]}.flatten}
+% encs = encs.sort_by(&alphanumeric_order)
+% encs.unshift(encs.delete("encdb"))
+% atrans = []
+% trans = Dir.open($srcdir+"/trans") {|d|
+%   d.select {|e|
+%     if e.chomp!('.trans')
+%       atrans << e
+%       true
+%     elsif e.chomp!('.c')
+%       true
+%     end
+%   }
+% }
+% trans -= BUILTIN_TRANSES
+% atrans -= BUILTIN_TRANSES
+% trans.uniq!
+% atrans = atrans.sort_by(&alphanumeric_order)
+% trans = trans.sort_by(&alphanumeric_order)
+% trans.unshift(trans.delete("transdb"))
+% trans.compact!
+% trans |= atrans
+% trans.map! {|e| "trans/#{e}"}
+% dependencies = encs + trans
+% cleanlibs = Shellwords.shellwords(CONFIG["cleanlibs"] || "")
+% cleanobjs = Shellwords.shellwords(CONFIG["cleanobjs"] || "")
+% cleanobjs << "$*.def" if deffile
+% rule_subst = CONFIG["RULE_SUBST"] || "%s"
+% transvpath = rule_subst.dup.sub!(/\{[^{}]+\}/, '$(TRANSVPATH)/') || "enc/trans/%s"
+% transvpath_prefix = rule_subst.dup.sub!(/\{[^{}]+\}/, '{$(TRANSVPATH)}') || ""
+% if File::ALT_SEPARATOR
+%   pathrep = proc {|path| path.gsub('/', File::ALT_SEPARATOR).gsub(/\$\(([@<?*]\w?|\w+)\)/, "$(\\1:/=\\#{File::ALT_SEPARATOR})")}
+% else
+%   pathrep = proc {|path| path}
+% end
+
+VPATH = <%=%w[$(arch_hdrdir)/ruby $(hdrdir)/ruby $(srcdir) $(encsrcdir)].join(CONFIG["PATH_SEPARATOR"])%>
+LIBPATH = <%=libpathflag($DEFLIBPATH)%>
+LIBS = <%=
+if enable_shared or RbConfig.expand(CONFIG["LIBRUBY"].dup) != RbConfig.expand(CONFIG["LIBRUBY_A"].dup)
+  CONFIG['LIBRUBYARG']
+else
+  ''
+end %> <%=CONFIG['LIBS']%> $(EXTLIBS)
+
+ENCOBJS = <%=encs.map {|e|"enc/#{e}.$(OBJEXT)"}.join(" \\\n\t  ")%><%="\n" if encs.size>1%>
+ENCSOS = <%=encs.map {|e|"$(ENCSODIR)/#{e}.$(DLEXT)"}.join(" \\\n\t ")%><%="\n" if encs.size>1%>
+ENCCLEANLIBS = <%=cleanlibs.map {|clean|
+  clean.gsub(/\$\*(\.\w+)?/) {"$(ENCOBJS#{$1 ? ":.#{CONFIG["OBJEXT"]}=#{$1}" : ""})"}
+}.join(" ")%>
+ENCCLEANOBJS = <%=cleanobjs.map {|clean|
+  clean.gsub(/\$\*(\.\w+)?/) {"$(ENCOBJS#{$1 ? ":.#{CONFIG["OBJEXT"]}=#{$1}" : ""})"}
+}.join(" ")%>
+
+TRANSVPATH = $(srcdir)/enc/trans
+
+TRANSCSRCS = <%=atrans.map {|e| transvpath % "#{e}.c"}.join(" \\\n\t     ")%><%="\n" if trans.size>1%>
+TRANSOBJS = <%=trans.map {|e|"enc/#{e}.$(OBJEXT)"}.join(" \\\n\t    ")%><%="\n" if trans.size>1%>
+TRANSSOS = <%=trans.map {|e|"$(ENCSODIR)/#{e}.$(DLEXT)"}.join(" \\\n\t   ")%><%="\n" if trans.size>1%>
+TRANSCLEANLIBS = <%=cleanlibs.map {|clean|
+  clean.gsub(/\$\*(\.\w+)?/) {"$(TRANSOBJS#{$1 ? ":.#{CONFIG["OBJEXT"]}=#{$1}" : ""})"}
+}.join(" ")%>
+TRANSCLEANOBJS = <%=cleanobjs.map {|clean|
+  clean.gsub(/\$\*(\.\w+)?/) {"$(TRANSOBJS#{$1 ? ":.#{CONFIG["OBJEXT"]}=#{$1}" : ""})"}
+}.join(" ")%>
+
+encs: all
+all: enc trans
+enc: $(ENCSOS)
+trans: $(TRANSSOS)
+
+srcs: $(TRANSCSRCS)
+
+<%=transvpath_prefix%>.trans<%=transvpath_prefix%>.c:
+	$(ECHO) generating table from $@
+	$(Q)$(MINIRUBY) "$(srcdir)/tool/transcode-tblgen.rb" -vo "$@" "$<"
+
+% unless encs.empty? or trans.empty?
+
+%   unless encs.empty?
+$(ENCOBJS): regenc.h oniguruma.h config.h defines.h
+%   end
+%   unless trans.empty?
+$(TRANSOBJS): ruby.h intern.h config.h defines.h missing.h encoding.h oniguruma.h st.h transcode_data.h
+%   end
+%   atrans.each do |e|
+%     src = "#{e}.trans"
+
+<%=transvpath % "#{e}.c"%>: <%= transvpath % "#{e}.trans"%>
+%     src = [*IO.read(File.join($srcdir, "trans", src)).scan(/^\s*require\s+[\'\"]([^\'\"]*)/).flatten.map{|c|c+".rb"}]
+<%=transvpath % "#{e}.c"%>: <%= src.map {|s| transvpath % "#{s}"}.join(" ")%> $(srcdir)/tool/transcode-tblgen.rb
+%   end
+
+% end
+% link_so = LINK_SO.gsub(/\n/, "\n\t")
+% link_so.gsub!(/(-(?:implib|pdb):\S+)-\$\(arch\)\./, '\1.')
+% dependencies.each do |e|
+%   obj = "enc/#{e}.$(OBJEXT)"
+%   df = ("enc/#{e}.def" if deffile)
+%   target = e.dup
+%   if target.sub!(/\Atrans\//, '$(TRANSSODIR)/')
+%     mesg = "transcoder"
+%   else
+%     target = "$(ENCSODIR)/#{e}"
+%     mesg = "encoding"
+%   end
+<%=target%>.$(DLEXT): <%=obj%>
+	$(ECHO) linking <%=mesg%> $(@F)
+%   cmd = link_so.sub(/\$\(OBJS\)/) {obj}
+%   base = File.basename(e)
+%   cmd.sub!(/(?=\$\(DLDFLAGS\))/) {dldflags.sub(/\$\(TARGET\)/) {base} + " "} if dldflags
+%   if df
+	$(Q)echo> <%=df%> EXPORTS
+	$(Q)echo>> <%=df%> <%=EXPORT_PREFIX%>Init_<%=base%>
+%     cmd.sub!(/\$\(DEFFILE\)/) {df}
+%     cmd.gsub!(/-(?:implib|pdb):/) {|s|"#{s}enc/#{e.sub(/[^\/]+\z/, '')}"}
+%   end
+	$(Q)$(MAKEDIRS) "$(@D)"
+	$(Q)<%=cmd%>
+
+% end
+% dependencies.each do |e|
+<%="enc/#{e}.$(OBJEXT)"%>: <%="$(encsrcdir)/#{e}.c"%>
+	-$(Q)$(MAKEDIRS) "$(@D)"
+	$(ECHO) compiling <%= "$(encsrcdir)/#{e}.c"%>
+	$(Q)<%=COMPILE_C.gsub(/\$(\()?<(\:[^)]+)?(\))?/){"$(encsrcdir)/#{e}.c"}%>
+
+% end
+
+enc/encdb.$(OBJEXT): encdb.h
+enc/trans/transdb.$(OBJEXT): transdb.h
+
+clean:
+% %w[$(ENCSOS) $(ENCOBJS) $(ENCCLEANOBJS) $(ENCCLEANLIBS) $(TRANSSOS) $(TRANSOBJS) $(TRANSCLEANOBJS) $(TRANSCLEANLIBS)].each do |clean|
+	$(Q)$(RM) <%=pathrep[clean]%>
+% end
+% @ignore_error = $nmake ? '' : ' 2> /dev/null || true'
+% unless inplace
+	$(Q)$(RM) enc/unicode/name2ctype.h
+	-$(Q)$(RMDIR) enc/unicode<%=@ignore_error%>
+% end
+% workdirs.reverse_each do|d|
+	-$(Q)$(RMDIR) <%=pathrep[d]%><%=@ignore_error%>
+% end
+
+clean-srcs:
+	$(Q)$(RM) <%=pathrep['$(TRANSCSRCS)']%>
+	-$(Q)$(RMDIR) <%=pathrep['enc/trans']%><%=@ignore_error%>
+	$(Q)$(RM) enc/unicode/name2ctype.h
+	-$(Q)$(RMDIR) <%=pathrep['enc/unicode']%><%=@ignore_error%>
+	-$(Q)$(RMDIR) <%=pathrep['enc']%><%=@ignore_error%>

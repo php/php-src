@@ -1,0 +1,55 @@
+= Rake 0.8.7 Released
+
+Rake version 0.8.5 introduced greatly improved support for executing
+commands on Windows.  The "sh" command now has the same semantics on
+Windows that it has on Unix based platforms.
+
+Rake version 0.8.6 includes minor fixes the the RDoc generation.
+Rake version 0.8.7 includes a minor fix for JRuby running on windows.
+
+== Changes
+
+=== New Features / Enhancements in Version 0.8.5
+
+* Improved implementation of the Rake system command for Windows.
+  (patch from James M. Lawrence/quix)
+
+* Support for Ruby 1.9's improved system command.  (patch from James
+  M. Lawrence/quix)
+
+* Rake now includes the configured extension when invoking an
+  executable (Config::CONFIG['EXEEXT])
+
+=== Bug Fixes in Version 0.8.5
+
+* Environment variable keys are now correctly cased (it matters in
+  some implementations).
+
+== What is Rake
+
+Rake is a build tool similar to the make program in many ways. But
+instead of cryptic make recipes, Rake uses standard Ruby code to
+declare tasks and dependencies. You have the full power of a modern
+scripting language built right into your build tool.
+
+== Availability
+
+The easiest way to get and install rake is via RubyGems ...
+
+  gem install rake    (you may need root/admin privileges)
+
+Otherwise, you can get it from the more traditional places:
+
+Home Page:: http://rake.rubyforge.org/
+Download::  http://rubyforge.org/project/showfiles.php?group_id=50
+GitHub::    git://github.com/jimweirich/rake.git 
+
+== Thanks
+
+As usual, it was input from users that drove a alot of these changes. The
+following people either contributed patches, made suggestions or made
+otherwise helpful comments.  Thanks to ...
+
+* Charles Nutter
+
+-- Jim Weirich

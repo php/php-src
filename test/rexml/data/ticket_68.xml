@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Rev 1.05 
+	Changed the <gram> element name to <pos>
+	Added the g_gend attribute
+	moved the s_inf element
+-->
+<!-- Rev 1.04 
+	Changes:
+     Rename the project  "JMdict" and add the g_lang attribute to the 
+	<gloss> entity - 08 May 1999 
+     Moved the <gram>, <field> and <misc> elements down to be in the
+     <sense> region, as suggested by Chris Czeyka. I have also tidied up
+     some of the "*" as he suggested.  - 27 May 2000
+	 Added the re_nokanji element - Sep 2003.
+     -->
+<!DOCTYPE JMdict [
+<!ELEMENT JMdict (entry*)>
+<!--                                                                   -->
+<!ELEMENT entry (ent_seq, k_ele*, r_ele+, info*, sense+)>
+	<!-- Entries consist of kanji elements, reading elements, 
+	general information and sense elements. Each entry must have at 
+	least one reading element and one sense element. Others are optional.
+	-->
+<!ELEMENT ent_seq (#PCDATA)>
+	<!-- A unique numeric sequence number for each entry
+	-->
+<!ELEMENT k_ele (keb, ke_inf*, ke_pri*)>
+	<!-- The kanji element, or in its absence, the reading element, is 
+	the defining component of each entry.
+	The overwhelming majority of entries will have a single kanji
+	element associated with a word in Japanese. Where there are 
+	multiple kanji elements within an entry, they will be orthographical
+	variants of the same word, either using variations in okurigana, or
+	alternative and equivalent kanji. Common "mis-spellings" may be 
+	included, provided they are associated with appropriate information
+	fields. Synonyms are not included; they may be indicated in the
+	cross-reference field associated with the sense element.
+	-->
+<!ELEMENT keb (#PCDATA)>
+	<!-- This element will contain a word or short phrase in Japanese 
+	which is written using at least one kanji. The valid characters are
+	kanji, kana, related characters such as chouon and kurikaeshi, and
+	in exceptional cases, letters from other alphabets.
+	-->
+<!ELEMENT ke_inf (#PCDATA)>
+	<!-- This is a coded information field related specifically to the 
+	orthography of the keb, and will typically indicate some unusual
+	aspect, such as okurigana irregularity.
+	-->
+<!ELEMENT ke_pri (#PCDATA)>
+	<!-- This and the equivalent re_pri field are provided to record
+	information about the relative priority of the entry,  and consist
+	of codes indicating the word appears in various references which
+	can be taken as an indication of the frequency with which the word
+	is used. This field is intended for use either by applications which 
+	want to concentrate on entries of  a particular priority, or to 
+	generate subset files. 
+	The current values in this field are:
+	- news1/2: appears in the "wordfreq" file compiled by Alexandre Girardi
+	from the Mainichi Shimbun. (See the Monash ftp archive for a copy.)
+	Words in the first 12,000 in that file are marked "news1" and words 
+	in the second 12,000 are marked "news2".
+	- ichi1/2: appears in the "Ichimango goi bunruishuu", Senmon Kyouiku 
+	Publishing, Tokyo, 1998. 
+	- spec1 and spec2: a small number of words use this marker when they 
+	are detected as being common, but are not included in other lists.
+	- gai1: common loanwords, based on the wordfreq file.
+	- nfxx: this is an indicator of frequency-of-use ranking in the
+	wordfreq file. "xx" is the number of the set of 500 words in which
+	the entry can be found, with "01" assigned to the first 500, "02"
+	to the second, and so on.
+
+	The reason both the kanji and reading elements are tagged is because 
+	on occasions a priority is only associated with a particular
+	kanji/reading pair.
+	-->
+<!--                                                                   -->
+<!ELEMENT r_ele (reb, re_nokanji?, re_restr*, re_inf*, re_pri*)>
+	<!-- The reading element typically contains the valid readings
+	of the word(s) in the kanji element using modern kanadzukai. 
+	Where there are multiple reading elements, they will typically be
+	alternative readings of the kanji element. In the absence of a 
+	kanji element, i.e. in the case of a word or phrase written
+	entirely in kana, these elements will define the entry.
+	-->
+<!ELEMENT reb (#PCDATA)>
+	<!-- this element content is restricted to kana and related
+	characters such as chouon and kurikaeshi. Kana usage will be
+	consistent between the keb and reb elements; e.g. if the keb
+	contains katakana, so too will the reb.
+	-->
+<!ELEMENT re_nokanji (#PCDATA)>
+	<!-- This element, which will usually have a null value, indicates
+	that the reb, while associated with the keb, cannot be regarded
+	as a true reading of the kanji. It is typically used for words
+	such as foreign place names, gairaigo which can be in kanji or
+	katakana, etc.
+	-->
+<!ELEMENT re_restr (#PCDATA)>
+	<!-- This element is used to indicate when the reading only applies
+	to a subset of the keb elements in the entry. In its absence, all
+	readings apply to all kanji elements. The contents of this element 
+	must exactly match those of one of the keb elements.
+	-->
+<!ELEMENT re_inf (#PCDATA)>
+	<!-- General coded information pertaining to the specific reading.
+	Typically it will be used to indicate some unusual aspect of 
+	the reading. -->
+<!ELEMENT re_pri (#PCDATA)>
+	<!-- See the comment on ke_pri above. -->
+<!--                                                                   -->
+<!ELEMENT info (lang*, dial*, links*, bibl*, etym*, audit*)>
+	<!-- general coded information relating to the entry as a whole.-->
+<!ELEMENT lang (#PCDATA)>
+	<!-- For loan-words, the ISO 639 two-letter code for the originating
+	language. -->
+<!ELEMENT dial (#PCDATA)>
+	<!-- For words specifically associated with regional dialects in
+	Japanese, the entity code for that dialect, e.g. ksb for Kansaiben.
+	-->
+<!ELEMENT bibl (bib_tag?, bib_txt?)>
+<!ELEMENT bib_tag (#PCDATA)>
+<!ELEMENT bib_txt (#PCDATA)>
+	<!-- Bibliographic information about the entry. The bib_tag will a 
+	coded reference to an entry in an external bibliographic database.
+	The bib_txt field may be used for brief (local) descriptions.-->
+<!ELEMENT etym (#PCDATA)>
+	<!-- This field is used to hold information about the etymology
+	of the entry. -->
+<!ELEMENT links (link_tag, link_desc, link_uri)>
+<!ELEMENT link_tag (#PCDATA)>
+<!ELEMENT link_desc (#PCDATA)>
+<!ELEMENT link_uri (#PCDATA)>
+	<!-- This element holds details of linking information to 
+	entries in other electronic repositories. The link_tag will be
+	coded to indicate the type of link (text, image, sound), the 
+	link_desc will provided a textual label for the link, and the 
+	link_uri contains the actual URI.  -->
+<!ELEMENT audit (upd_date, upd_detl)>
+<!ELEMENT upd_date (#PCDATA)>
+<!ELEMENT upd_detl (#PCDATA)>
+	<!-- The audit element will contain the date and other information
+	about updates to the entry. Can be used to record the source of 
+	the material. -->
+<!--                                                                   -->
+<!ELEMENT sense (stagk*, stagr*, pos*, xref*, ant*, field*, misc*, s_inf*, gloss*, example*)>
+	<!-- The sense element will record the translational equivalent
+	of the Japanese word, plus other related information. Where there
+	are several distinctly different meanings of the word, multiple
+	sense elements will be employed.
+	-->
+<!ELEMENT stagk (#PCDATA)>
+<!ELEMENT stagr (#PCDATA)>
+	<!-- These elements, if present, indicate that the sense is restricted
+	to the lexeme represented by the keb and/or reb. -->
+<!ELEMENT xref (#PCDATA)*>
+	<!-- This element is used to indicate a cross-reference to another
+	entry with a similar or related meaning or sense. The content of
+	this element must exactly match that of a keb or reb element in 
+	another entry.
+	-->
+<!ELEMENT ant (#PCDATA)*>
+	<!-- This element is used to indicate another entry which is an
+	antonym of the current entry/sense. The content of this element
+	must exactly match that of a keb or reb element in another entry.
+	-->
+<!ELEMENT pos (#PCDATA)>
+	<!-- Part-of-speech information about the entry/sense. Should use 
+	appropriate entity codes.
+	-->
+<!ELEMENT field (#PCDATA)>
+	<!-- Information about the field of application of the entry. When
+	absent, general application is implied. Entity coding for specific
+	fields of application. -->
+<!ELEMENT misc (#PCDATA)>
+	<!-- This element is used for other relevant information about 
+	the entry. -->
+<!ELEMENT gloss (#PCDATA | pri)*>
+	<!-- Within each sense will be one or more "glosses", i.e. 
+	target-language words or phrases which are equivalents to the 
+	Japanese word. This element would normally be present, however it 
+	may be omitted in entries which are purely for a cross-reference.
+	-->
+<!ATTLIST gloss g_lang CDATA "en">
+	<!-- The g_lang attribute defines the target language of the
+	gloss. It will be coded using the two-letter language code from
+	the ISO 639 standard. When absent, the value "en" (i.e. English)
+	is the default value. -->
+<!ATTLIST gloss g_gend CDATA #IMPLIED>
+	<!-- The g_gend attribute defines the gender of the gloss (typically
+	a noun in the target language. When absent, the gender is either
+	not relevant or has yet to be provided.
+	-->
+<!ELEMENT pri (#PCDATA)>
+	<!-- These elements highlight particular target-language words which 
+	are strongly associated with the Japanese word. The purpose is to 
+	establish a set of target-language words which can effectively be 
+	used as head-words in a reverse target-language/Japanese relationship.
+	-->
+<!ELEMENT example (#PCDATA)>
+	<!-- The example elements provide for pairs of short Japanese and
+	target-language phrases or sentences which exemplify the usage of the 
+	Japanese head-word and the target-language gloss. Words in example 
+	fields would typically not be indexed by a dictionary application.
+	-->
+<!ELEMENT s_inf (#PCDATA)>
+	<!-- The sense-information elements provided for additional
+	information to be recorded about a sense. Typical usage would
+	be to indicate such things as level of currency of a sense, the
+	regional variations, etc.
+	-->
+<!-- The following entity codes are used for common elements within the
+various information fields.
+-->
+<!ENTITY MA "martial arts term">
+<!ENTITY X "rude or X-rated term (not displayed in educational software)">
+<!ENTITY abbr "abbreviation">
+<!ENTITY adj "adjective (keiyoushi)">
+<!ENTITY adj-na "adjectival nouns or quasi-adjectives (keiyodoshi)">
+<!ENTITY adj-no "nouns which may take the genitive case particle `no'">
+<!ENTITY adj-pn "pre-noun adjectival (rentaishi)">
+<!ENTITY adj-t "`taru' adjective">
+<!ENTITY adv "adverb (fukushi)">
+<!ENTITY adv-n "adverbial noun">
+<!ENTITY adv-to "adverb taking the `to' particle">
+<!ENTITY arch "archaism">
+<!ENTITY ateji "ateji (phonetic) reading">
+<!ENTITY aux "auxiliary">
+<!ENTITY aux-v "auxiliary verb">
+<!ENTITY aux-adj "auxiliary adjective">
+<!ENTITY Buddh "Buddhist term">
+<!ENTITY chn "children's language">
+<!ENTITY col "colloquialism ">
+<!ENTITY comp "computer terminology">
+<!ENTITY conj "conjunction">
+<!ENTITY derog "derogatory">
+<!ENTITY ek "exclusively kanji">
+<!ENTITY exp "Expressions (phrases, clauses, etc.)">
+<!ENTITY fam "familiar language ">
+<!ENTITY fem "female term or language">
+<!ENTITY food "food term">
+<!ENTITY geom "geometry term">
+<!ENTITY gikun "gikun (meaning) reading">
+<!ENTITY gram "grammatical term">
+<!ENTITY hon "honorific or respectful (sonkeigo) language ">
+<!ENTITY hum "humble (kenjougo) language ">
+<!ENTITY iK "word containing irregular kanji usage">
+<!ENTITY id "idiomatic expression ">
+<!ENTITY ik "word containing irregular kana usage">
+<!ENTITY int "interjection (kandoushi)">
+<!ENTITY io "irregular okurigana usage">
+<!ENTITY iv "irregular verb">
+<!ENTITY ling "linguistics terminology">
+<!ENTITY m-sl "manga slang">
+<!ENTITY male "male term or language">
+<!ENTITY male-sl "male slang">
+<!ENTITY math "mathematics">
+<!ENTITY mil "military">
+<!ENTITY n "noun (common) (futsuumeishi)">
+<!ENTITY n-adv "adverbial noun (fukushitekimeishi)">
+<!ENTITY n-suf "noun, used as a suffix">
+<!ENTITY n-pref "noun, used as a prefix">
+<!ENTITY n-t "noun (temporal) (jisoumeishi)">
+<!ENTITY neg "negative (in a negative sentence, or with negative verb)">
+<!ENTITY neg-v "negative verb (when used with)">
+<!ENTITY num "numeric">
+<!ENTITY oK "word containing out-dated kanji ">
+<!ENTITY obs "obsolete term">
+<!ENTITY obsc "obscure term">
+<!ENTITY ok "out-dated or obsolete kana usage">
+<!ENTITY pol "polite (teineigo) language ">
+<!ENTITY pref "prefix ">
+<!ENTITY prt "particle ">
+<!ENTITY physics "physics terminology">
+<!ENTITY qv "quod vide (see another entry)">
+<!ENTITY rare "rare">
+<!ENTITY sl "slang">
+<!ENTITY suf "suffix ">
+<!ENTITY uK "word usually written using kanji alone ">
+<!ENTITY uk "word usually written using kana alone ">
+<!ENTITY v1 "Ichidan verb">
+<!ENTITY v5 "Godan verb (not completely classified)">
+<!ENTITY v5aru "Godan verb - -aru special class">
+<!ENTITY v5b "Godan verb with `bu' ending">
+<!ENTITY v5g "Godan verb with `gu' ending">
+<!ENTITY v5k "Godan verb with `ku' ending">
+<!ENTITY v5k-s "Godan verb - Iku/Yuku special class">
+<!ENTITY v5m "Godan verb with `mu' ending">
+<!ENTITY v5n "Godan verb with `nu' ending">
+<!ENTITY v5r "Godan verb with `ru' ending">
+<!ENTITY v5r-i "Godan verb with `ru' ending (irregular verb)">
+<!ENTITY v5s "Godan verb with `su' ending">
+<!ENTITY v5t "Godan verb with `tsu' ending">
+<!ENTITY v5u "Godan verb with `u' ending">
+<!ENTITY v5u-s "Godan verb with `u' ending (special class)">
+<!ENTITY v5uru "Godan verb - Uru old class verb (old form of Eru)">
+<!ENTITY vi "intransitive verb ">
+<!ENTITY vk "Kuru verb - special class">
+<!ENTITY vs "noun or participle which takes the aux. verb suru">
+<!ENTITY vs-s "suru verb - special class">
+<!ENTITY vs-i "suru verb - irregular">
+<!ENTITY vz "zuru verb - (alternative form of -jiru verbs)">
+<!ENTITY vt "transitive verb">
+<!ENTITY vulg "vulgar expression or word ">
+<!ENTITY mg "masculine gender">
+<!ENTITY fg "feminine gender">
+<!ENTITY ng "neuter gender">
+]>
+<!-- JMdict created: 2006-09-11 -->
+<JMdict>
+<!--  JMdict Japanese-Multilingual Dictionary file (XML format) -->
+<!--  Using V1.05 of the DTD -->
+<!--  Copyright J.W. Breen (jwb@csse.monash.edu.au) -->
+<entry>
+<ent_seq>1000000</ent_seq>
+<k_ele>
+<keb>ヽ</keb>
+</k_ele>
+<r_ele>
+<reb>くりかえし</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>repetition mark in katakana</gloss>
+<gloss g_lang="de">Wiederholungszeichen für Katakana</gloss>
+<gloss g_lang="de">normalerweise nur in vertikaler Schreibweise verwendet</gloss>
+<gloss g_lang="fr">marque de la répétition dans katakana</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000010</ent_seq>
+<k_ele>
+<keb>ヾ</keb>
+</k_ele>
+<r_ele>
+<reb>くりかえし</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>voiced repetition mark in katakana</gloss>
+<gloss g_lang="de">stimmhaftes Wiederholungszeichen für Katakana</gloss>
+<gloss g_lang="de">normalerweise nur in vertikaler Schreibweise verwendet</gloss>
+<gloss g_lang="fr">marque de la répétition sonore dans katakana</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000020</ent_seq>
+<k_ele>
+<keb>ゝ</keb>
+</k_ele>
+<r_ele>
+<reb>くりかえし</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>repetition mark in hiragana</gloss>
+<gloss g_lang="de">Wiederholungszeichen für Hiragana</gloss>
+<gloss g_lang="de">normalerweise nur in vertikaler Schreibweise verwendet</gloss>
+<gloss g_lang="fr">marque de la répétition dans hiragana</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000030</ent_seq>
+<k_ele>
+<keb>ゞ</keb>
+</k_ele>
+<r_ele>
+<reb>くりかえし</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>voiced repetition mark in hiragana</gloss>
+<gloss g_lang="de">stimmhaftes Wiederholungszeichen für Hiragana</gloss>
+<gloss g_lang="de">normalerweise nur in vertikaler Schreibweise verwendet</gloss>
+<gloss g_lang="fr">marque de la répétition sonore dans hiragana</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000040</ent_seq>
+<k_ele>
+<keb>〃</keb>
+</k_ele>
+<r_ele>
+<reb>おなじく</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>ditto mark</gloss>
+<gloss g_lang="ru">знак "то же самое"</gloss>
+<gloss g_lang="de">Wiederholungszeichen in Tabellen</gloss>
+<gloss g_lang="fr">idem marque</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000050</ent_seq>
+<k_ele>
+<keb>仝</keb>
+</k_ele>
+<r_ele>
+<reb>どうじょう</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>"as above" mark</gloss>
+<gloss g_lang="de">Abkürzung für "siehe oben"</gloss>
+<gloss g_lang="fr">comme au-dessus</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000060</ent_seq>
+<k_ele>
+<keb>々</keb>
+</k_ele>
+<r_ele>
+<reb>くりかえし</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>repetition of kanji (sometimes voiced)</gloss>
+<gloss g_lang="de">Wiederholungszeichen für Kanji</gloss>
+<gloss g_lang="de">(Laut wird durch Wiederholung manchmal stimmhaft)</gloss>
+<gloss g_lang="fr">répétition de kanji(quelquefois a exprimé)</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000070</ent_seq>
+<k_ele>
+<keb>〆</keb>
+</k_ele>
+<r_ele>
+<reb>しめ</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>end or closure mark</gloss>
+<gloss g_lang="de">Zeichen als eine Art Versiegelung über der zugeklebten Lasche auf der Rückseite eines Briefumschlages</gloss>
+<gloss g_lang="fr">fin ou marque de la fermeture</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000080</ent_seq>
+<k_ele>
+<keb>〇</keb>
+</k_ele>
+<k_ele>
+<keb>○</keb>
+<ke_inf>&iK;</ke_inf>
+</k_ele>
+<r_ele>
+<reb>かんすうじゼロ</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<xref>漢数字</xref>
+<xref>ゼロ</xref>
+<gloss>"kanji" zero</gloss>
+<gloss g_lang="de">Kanji-Ziffer für Null</gloss>
+<gloss g_lang="fr">kanji</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000090</ent_seq>
+<k_ele>
+<keb>○</keb>
+</k_ele>
+<k_ele>
+<keb>〇</keb>
+<ke_inf>&iK;</ke_inf>
+</k_ele>
+<r_ele>
+<reb>まる</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>circle (sometimes used for zero)</gloss>
+<gloss g_lang="ru">круг</gloss>
+<gloss g_lang="ru">но́ль</gloss>
+<gloss g_lang="de">Kreis</gloss>
+<gloss g_lang="de">Markierung für "richtig"</gloss>
+<gloss g_lang="de">Maru</gloss>
+<gloss g_lang="de">(ein japan. Schriftfont hat mindestens drei verschiedene Codierungen und Darstellungen für "maru")</gloss>
+<gloss g_lang="fr">entourez</gloss>
+<gloss g_lang="fr">mettez à zéro</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000100</ent_seq>
+<k_ele>
+<keb>ＡＢＣ順</keb>
+</k_ele>
+<r_ele>
+<reb>エービーシーじゅん</reb>
+</r_ele>
+<r_ele>
+<reb>ええびいしいじゅん</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>alphabetical order</gloss>
+<gloss g_lang="de">alphabetische Ordnung</gloss>
+<gloss g_lang="de">alphabetische Reihenfolge</gloss>
+<gloss g_lang="fr">ordre alphabétique</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000110</ent_seq>
+<k_ele>
+<keb>ＣＤプレーヤー</keb>
+</k_ele>
+<r_ele>
+<reb>シーディープレーヤー</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>CD player</gloss>
+<gloss g_lang="ru">CD плеер</gloss>
+<gloss g_lang="ru">проигрыватель компакт-дисков</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000120</ent_seq>
+<k_ele>
+<keb>Ｈな映画</keb>
+</k_ele>
+<k_ele>
+<keb>エッチな映画</keb>
+</k_ele>
+<r_ele>
+<reb>エッチなえいが</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>pornographic film</gloss>
+<gloss>salacious film</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000130</ent_seq>
+<k_ele>
+<keb>Ｎ響</keb>
+</k_ele>
+<r_ele>
+<reb>エヌきょう</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<misc>&abbr;</misc>
+<gloss>NHK Symphony Orchestra</gloss>
+<gloss g_lang="fr">NHK Symphonie Orchestre(abbr)</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000140</ent_seq>
+<r_ele>
+<reb>Ｏバック</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>O-back</gloss>
+<gloss>skirt with peek-a-boo hole in rump</gloss>
+<gloss g_lang="fr">O En arrière</gloss>
+<gloss g_lang="fr">contournez avec coucou trou dans croupe</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+<entry>
+<ent_seq>1000150</ent_seq>
+<r_ele>
+<reb>ＲＳ２３２ケーブル</reb>
+</r_ele>
+<sense>
+<pos>&n;</pos>
+<gloss>rs232 cable</gloss>
+<gloss g_lang="fr">les rs232 câblent</gloss>
+<gloss g_lang="fr">(JF2)</gloss>
+</sense>
+</entry>
+</JMdict>

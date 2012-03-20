@@ -1,0 +1,320 @@
+#!/usr/bin/env ruby
+#
+# rolodex --
+# This script is a part of Tom LaStrange's rolodex
+#
+# Copyright (C) 1998 by Takaaki Tateishi <ttate@jaist.ac.jp>
+# Time-stamp: "03/08/02 12:45:21 nagai"
+#
+
+require "tk"
+
+
+def show_help(topic,x=0,y=0)
+  if( topic.is_a?(TkWindow) )
+    w = TkWinfo.containing(x,y)
+    if( TkWinfo.exist?(w) )
+      topic = w
+    end
+  end
+
+  if( $helpTopics.include?(topic) )
+    msg = $helpTopics[topic]
+  else
+    msg = "Sorry, but no help is available for this topic"
+  end
+  TkDialog.new("title"=>"Rolodex Help",
+	       "message"=>"Information on #{topic}:\n\n#{msg}",
+	       "default_button"=>0,
+	       "buttons"=>["OK"])
+end
+
+def fillCard
+  clearAction
+  $root.frame.entry[1].insert(0,"Takaaki Tateishi")
+  $root.frame.entry[2].insert(0,"Japan Advanced Institute of Science and Techonology")
+  $root.frame.entry[3].insert(0,"1-1 Asahidai, Tatsunokuchi")
+  $root.frame.entry[4].insert(0,"Ishikawa 923-1292, Japan")
+  $root.frame.entry[5].insert(0,"private")
+    $root.frame.entry[6].insert(0,"***-***-****")
+  $root.frame.entry[7].insert(0,"***-***-****")
+end
+
+def addAction
+  for i in 1..7
+    STDERR.print format("%-12s %s\n",
+			RolodexFrame::LABEL[i],
+			$root.frame.entry[i].value)
+  end
+end
+
+def clearAction
+  for i in 1..7
+    $root.frame.entry[i].delete(0,"end")
+  end
+end
+
+def fileAction
+  TkDialog.new("title"=>"File Selection",
+	       "message"=>"This is a dummy file selection dialog box.\n",
+	       "default_button"=>0,
+	       "buttons"=>["OK"])
+  STDERR.print "dummy file name\n"
+end
+
+def deleteAction
+  result = TkDialog.new("title"=>"Confirm Action",
+			"message"=>"Are you sure?",
+			"default_button"=>0,
+			"buttons"=>["Cancel"])
+  if( result.value == 0 )
+    clearAction
+  end
+end
+
+
+class RolodexFrame < TkFrame
+  attr_reader :entry, :label
+
+  LABEL = ["","Name:","Address:","","","Home Phone:","Work Phone:","Fax:"]
+
+  def initialize(parent=nil,keys=nil)
+    super(parent,keys)
+    self["relief"] = "flat"
+
+    @i = []
+    @label = []
+    @entry = []
+    for i in 1..7
+      @i[i] = TkFrame.new(self)
+      @i[i].pack("side"=>"top",
+		 "pady"=>2,
+		 "anchor"=>"e")
+      @label[i] = TkLabel.new(@i[i],
+			      "text"=>LABEL[i],
+			      "anchor"=>"e")
+      @entry[i] = TkEntry.new(@i[i],
+			      "width"=>30,
+			      "relief"=>"sunken")
+      @entry[i].pack("side"=>"right")
+      @label[i].pack("side"=>"right")
+    end
+  end
+end
+
+class RolodexButtons < TkFrame
+  attr_reader :clear, :add, :search, :delete
+
+  def initialize(parent,keys=nil)
+    super(parent,keys)
+    @clear = TkButton.new(self,
+			  "text" => "Clear")
+    @add = TkButton.new(self,
+			"text" => "Add")
+    @search = TkButton.new(self,
+			   "text" => "Search")
+    @delete = TkButton.new(self,
+			   "text" => "Delete")
+    for w in [@clear,@add,@search,@delete]
+      w.pack("side"=>"left", "padx"=>2)
+    end
+  end
+end
+
+class RolodexMenuFrame < TkFrame
+  attr_reader :file_menu, :help_menu, :file, :help
+
+  def initialize(parent,keys=nil)
+    super(parent,keys)
+    configure("relief"=>"raised",
+	      "borderwidth"=>1)
+
+    @file = TkMenubutton.new(self,
+			     "text"=>"File",
+			     "underline"=>0)
+    @file_menu = TkMenu.new(@file)
+    @file_menu.add("command",
+		   "label" => "Load ...",
+		   "command" => proc{fileAction},
+		   "underline" => 0)
+    @file_menu.add("command",
+		   "label" => "Exit",
+		   "command" => proc{$root.destroy},
+		   "underline" => 0)
+    @file.menu(@file_menu)
+    @file.pack("side"=>"left")
+
+    @help = TkMenubutton.new(self,
+			     "text"=>"Help",
+			     "underline"=>0)
+    @help_menu = TkMenu.new(@help)
+    @help_menu.add("command",
+		   "label"=>"On Context...",
+		   "command"=>proc{show_help("context")},
+		   "underline"=>3)
+    @help_menu.add("command",
+		   "label"=>"On Help...",
+		   "command"=>proc{show_help("help")},
+		   "underline"=>3)
+    @help_menu.add("command",
+		   "label"=>"On Window...",
+		   "command"=>proc{show_help("window")},
+		   "underline"=>3)
+    @help_menu.add("command",
+		   "label"=>"On Keys...",
+		   "command"=>proc{show_help("keys")},
+		   "underline"=>3)
+    @help_menu.add("command",
+		   "label"=>"On version...",
+		   "command"=>proc{show_help("version")},
+		   "underline"=>3)
+    @help.menu(@help_menu)
+    @help.pack("side"=>"right")
+  end
+end
+
+class Rolodex < TkRoot
+  attr_reader :frame, :buttons, :menu
+
+  def initialize(*args)
+    super(*args)
+    @frame = RolodexFrame.new(self)
+    @frame.pack("side"=>"top",
+		"fill"=>"y",
+		"anchor"=>"center")
+    @buttons = RolodexButtons.new(self)
+    @buttons.pack("side"=>"bottom",
+		  "pady"=>2,
+		  "anchor"=>"center")
+    @menu = RolodexMenuFrame.new(self)
+    @menu.pack("before"=>@frame,
+	       "side"=>"top",
+	       "fill"=>"x")
+  end
+end
+
+$root = Rolodex.new
+
+$root.buttons.delete.configure("command"=>proc{deleteAction})
+$root.buttons.add.configure("command"=>proc{addAction})
+$root.buttons.clear.configure("command"=>proc{clearAction})
+$root.buttons.search.configure("command"=>proc{addAction; fillCard})
+
+$root.buttons.clear.configure("text"=>"Clear   Ctrl+C")
+$root.bind("Control-c",proc{clearAction})
+
+$root.buttons.add.configure("text"=>"Add   Ctrl+A")
+$root.bind("Control-a",proc{addAction})
+
+$root.buttons.search.configure("text"=>"Search   Ctrl+S")
+$root.bind("Control-s",proc{addAction; fillCard})
+
+$root.buttons.delete.configure("text"=>"Delete...   Ctrl+D")
+$root.bind("Control-d",proc{deleteAction})
+
+$root.menu.file_menu.entryconfigure(1, "accel"=>"Ctrl+F")
+$root.bind("Control-f",proc{fileAction})
+
+$root.menu.file_menu.entryconfigure(2, "accel"=>"Ctrl+Q")
+$root.bind("Control-q",proc{$root.destroy})
+
+$root.frame.entry[1].focus
+
+$root.bind("Any-F1",
+	   proc{|event| show_help(event.widget, event.x_root, event.y_root)})
+$root.bind("Any-Help",
+	   proc{|event| show_help(event.widget, event.x_root, event.y_root)})
+
+
+$helpTopics = {}
+
+$helpTopics[$root.menu.file] = <<EOF
+This is the "file" menu. It can be used to invoke\
+some overall operations on the rolodex applications,\
+such as loading a file or exiting.
+EOF
+
+$helpTopics[$root.menu.file_menu.index(0)] = <<EOF
+The "Load" entry in the "File" menu posts a dialog box\
+that you can use to select a rolodex file
+EOF
+
+$helpTopics[$root.menu.file_menu.index(1)] = <<EOF
+The "Exit" entry in the "File" menu causes the rolodex\
+application to terminate
+EOF
+
+$helpTopics[$root.frame.entry[1]] = <<EOF
+In this field of the rolodex entry you should\
+type the person's name
+EOF
+
+$helpTopics[$root.frame.entry[2]] = <<EOF
+In this field of the rolodex entry you should\
+type the first line of the person's address
+EOF
+
+$helpTopics[$root.frame.entry[3]] = <<EOF
+In this field of the rolodex entry you should\
+type the second line of the person's address
+EOF
+
+$helpTopics[$root.frame.entry[4]] = <<EOF
+In this field of the rolodex entry you should\
+type the third line of the person's address
+EOF
+
+$helpTopics[$root.frame.entry[5]] = <<EOF
+In this field of the rolodex entry you should\
+type the person's home phone number, or "private"\
+if the person doesn't want his or he number publicized
+EOF
+
+$helpTopics[$root.frame.entry[6]] = <<EOF
+In this field of the rolodex entry you should\
+type the person's work phone number
+EOF
+
+$helpTopics[$root.frame.entry[7]] = <<EOF
+In this field of the rolodex entry you should\
+type the phone number for the person's FAX machine
+EOF
+
+$helpTopics["context"] = <<EOF
+Unfortunately, this application doesn't support context-sensitive\
+help in the usual way, because when this demo was written Ruby/Tk\
+didn't have a grab mechanism and this is needed for context-sensitive\
+help. Instead, you can achive much the same effect by simply moving\
+the mouse over the window you're curious about and pressing the\
+Help or F1 keys. You can do this anytime.
+EOF
+
+$helpTopics["help"] = <<EOF
+This application provides only very crude help. Besides the\
+entries in this menu, you can get help on individual windows\
+by moving the mouse cursor over the window and pressing the\
+Help or F1 keys.
+EOF
+
+$helpTopics["window"] = <<EOF
+This window is a dummy rolodex application created as part of\
+Tom LaStrange's toolkit benchmark. It doesn't really do anything\
+useful except to demonstrate a few features of the Ruby/Tk.
+EOF
+
+$helpTopics["keys"] = <<EOF
+The following accelerator keys are defined for this application\
+(in addition to those already available for the entry windows):
+Ctrl+A:		Add
+Ctrl+C:		Clear
+Ctrl+D:		Delete
+Ctrl+F:		Enter file name
+Ctrl+Q:		Exit application (quit)
+Ctrl+S:		Search (dummy operation)
+EOF
+
+$helpTopics["version"] = <<EOF
+This is version 1.0.1.
+EOF
+
+Tk.mainloop

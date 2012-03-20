@@ -1,0 +1,39 @@
+.\"Ruby is copyrighted by Yukihiro Matsumoto <matz@netlab.jp>.
+.Dd October 25, 2008
+.Dt GORUBY(1) "" "Ruby Programmers Reference Guide"
+.Os UNIX
+.Sh NAME
+.Nm goruby
+.Nd Code-golfer's best friend
+.Sh SYNOPSIS
+.Nm
+.Op options ...
+.Op Fl -
+.Op Ar program_file
+.Op Ar argument ...
+.Sh DESCRIPTION
+.Sy goruby
+is a kind of Ruby language processor
+which recognizes extremely shorten programs as bellow;
+.Bd -literal -offset indent
+rq"date";s De.td
+.Ed
+.Pp
+This means
+.Bd -literal -offset indent
+require"date";puts Date.today
+.Ed
+.Pp
+.Sh OPTIONS
+.Sy goruby
+takes same options as
+.Xr ruby 1 .
+.Sh SEE ALSO
+.Bl -hang -compact -width "ruby(1)"
+.It Xr ruby 1
+The stiff version of Ruby interpreter.
+.El
+.Pp
+.Sh AUTHORS
+Originally written by Nobuyoshi Nakada and developed by
+Ruby core team.

@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css" href="http://www.germane-software.com/repositories/public/documentation/documentation.css"?>
+<?xml-stylesheet alternative="yes" type="text/css" href="file:/home/ser/Work/documentation/documentation.css"?>
+<?xml-stylesheet alternative="yes" type="text/xsl" href="http://www.germane-software.com/repositories/public/documentation/paged.xsl"?>
+<!DOCTYPE documentation SYSTEM "http://www.germane-software.com/repositories/public/documentation/documentation.dtd">
+<documentation>
+  <head>
+    <title>REXML</title>
+
+    <banner href="img/rexml.png" />
+
+    <version>@ANT_VERSION@</version>
+
+    <date>@ANT_DATE@</date>
+
+    <home>http://www.germane-software.com/software/rexml</home>
+
+    <base>rexml</base>
+
+    <language>ruby</language>
+
+    <author email="ser@germane-software.com"
+    href="http://www.ser1.net/" jabber="seanerussell@gmail.com">Sean
+    Russell</author>
+  </head>
+
+  <overview>
+    <purpose lang="en">
+      <p>REXML is a conformant XML processor for the Ruby programming
+      language. REXML passes 100% of the Oasis non-validating tests and
+      includes full XPath support. It is reasonably fast, and is implemented
+      in pure Ruby. Best of all, it has a clean, intuitive API. REXML is
+      included in the standard library of Ruby</p>
+
+      <p>This software is distribute under the <link href="LICENSE.txt">Ruby
+      license</link>.</p>
+    </purpose>
+
+    <general>
+      <p>REXML arose out of a desire for a straightforward XML API, and is an
+      attempt at an API that doesn't require constant referencing of
+      documentation to do common tasks. "Keep the common case simple, and the
+      uncommon, possible."</p>
+
+      <p>REXML avoids The DOM API, which violates the maxim of simplicity. It
+      does provide <em>a</em> DOM model, but one that is Ruby-ized. It is an
+      XML API oriented for Ruby programmers, not for XML programmers coming
+      from Java.</p>
+
+      <p>Some of the common differences are that the Ruby API relies on block
+      enumerations, rather than iterators. For example, the Java code:</p>
+
+      <example>for (Enumeration e=parent.getChildren(); e.hasMoreElements(); ) { 
+  Element child = (Element)e.nextElement(); // Do something with child 
+}</example>
+
+      <p>in Ruby becomes:</p>
+
+      <example>parent.each_child{ |child| # Do something with child }</example>
+
+      <p>Can't you feel the peace and contentment in this block of code? Ruby
+      is the language Buddha would have programmed in.</p>
+
+      <p>One last thing. If you use and like this software, and you're in a
+      position of power in a company in Western Europe and are looking for a
+      software architect or developer, drop me a line. I took a lot of French
+      classes in college (all of which I've forgotten), and I lived in Munich
+      long enough that I was pretty fluent by the time I left, and I'd love to
+      get back over there.</p>
+    </general>
+
+    <features lang="en">
+      <item>Four intuitive parsing APIs.</item>
+
+      <item>Intuitive, powerful, and reasonably fast tree parsing API (a-la
+      DOM</item>
+
+      <item>Fast stream parsing API (a-la SAX)<footnote>This is not a SAX
+      API.</footnote></item>
+
+      <item>SAX2-based API<footnote>In addition to the native REXML streaming
+      API. This is slower than the native REXML API, but does a lot more work
+      for you.</footnote></item>
+
+      <item>Pull parsing API.</item>
+
+      <item>Small</item>
+
+      <item>Reasonably fast (for interpreted code)</item>
+
+      <item>Native Ruby</item>
+
+      <item>Full XPath support<footnote>Currently only available for the tree
+      API</footnote></item>
+
+      <item>XML 1.0 conformant<footnote>REXML passes all of the non-validating
+      OASIS tests. There are probably places where REXML isn't conformant, but
+      I try to fix them as they're reported.</footnote></item>
+
+      <item>ISO-8859-1, UNILE, UTF-16 and UTF-8 input and output; also,
+      support for any encoding the iconv supports.</item>
+
+      <item>Documentation</item>
+    </features>
+  </overview>
+
+  <operation lang="en">
+    <subsection title="Installation">
+      <p>You don't <em>have</em> to install anything; if you're running a
+      version of Ruby greater than 1.8, REXML is included. However, if you
+      choose to upgrade from the REXML distribution, run the command:
+      <code>ruby bin/install.rb</code>. By the way, you really should look at
+      these sorts of files before you run them as root. They could contain
+      anything, and since (in Ruby, at least) they tend to be mercifully
+      short, it doesn't hurt to glance over them. If you want to uninstall
+      REXML, run <code>ruby bin/install.rb -u</code>.</p>
+    </subsection>
+
+    <subsection title="Unit tests">
+      <p>If you have Test::Unit installed, you can run the unit test cases.
+      Run the command: <code>ruby bin/suite.rb</code>; it runs against the
+      distribution, not against the installed version.</p>
+    </subsection>
+
+    <subsection title="Benchmarks">
+      <p>There is a benchmark suite in <code>benchmarks/</code>. To run the
+      benchmarks, change into that directory and run <code>ruby
+      comparison.rb</code>. If you have nothing else installed, only the
+      benchmarks for REXML will be run. However, if you have any of the
+      following installed, benchmarks for those tools will also be run:</p>
+
+      <list>
+        <item>NQXML</item>
+
+        <item>XMLParser</item>
+
+        <item>Electric XML (you must copy <code>EXML.jar</code> into the
+        <code>benchmarks</code> directory and compile
+        <code>flatbench.java</code> before running the test)</item>
+      </list>
+
+      <p>The results will be written to <code>index.html</code>.</p>
+    </subsection>
+
+    <subsection title="General Usage">
+      <p>Please see <link href="docs/tutorial.html">the Tutorial</link>.</p>
+
+      <p>The API documentation is available <link
+      href="http://www.germane-software.com/software/XML/rexml/doc">on-line</link>,
+      or it can be downloaded as an archive <link
+      href="http://www.germane-software.com/software/archives/rexml_api_@ANT_VERSION@.tgz">in
+      tgz format (~70Kb)</link> or (if you're a masochist) <link
+      href="http://www.germane-software.com/software/archives/rexml_api_@ANT_VERSION@.zip">in
+      zip format (~280Kb)</link>. The best solution is to download and install
+      Dave Thomas' most excellent <link
+      href="http://rdoc.sourceforge.net">rdoc</link> and generate the API docs
+      yourself; then you'll be sure to have the latest API docs and won't have
+      to keep downloading the doc archive.</p>
+
+      <p>The unit tests in <code>test/</code> and the benchmarking code in
+      <code>benchmark/</code> provide additional examples of using REXML. The
+      Tutorial provides examples with commentary. The documentation unpacks
+      into <link href="doc/index.html"><code>rexml/doc</code></link>.</p>
+
+      <p>Kouhei Sutou maintains a <link
+      href="http://www.germane-software.com/software/rexml_doc_ja/current/index.html">Japanese
+      version</link> of the REXML API docs. <link
+      href="http://www.germane-software.com/software/rexml_doc_ja/current/japanese_documentation.html">Kou's
+      documentation page</link> contains links to binary archives for various
+      versions of the documentation.</p>
+    </subsection>
+  </operation>
+
+  <status>
+    <subsection title="Speed and Completeness">
+      <p>Unfortunately, NQXML is the only package REXML can be compared
+      against; XMLParser uses expat, which is a native library, and really is
+      a different beast altogether. So in comparing NQXML and REXML you can
+      look at four things: speed, size, completeness, and API.</p>
+
+      <p><link href="benchmarks/index.html">Benchmarks</link></p>
+
+      <p>REXML is faster than NQXML in some things, and slower than NQXML in a
+      couple of things. You can see this for yourself by running the supplied
+      benchmarks. Most of the places where REXML are slower are because of the
+      convenience methods<footnote>For example,
+      <code>element.elements[index]</code> isn't really an array operation;
+      index can be an Integer or an XPath, and this feature is relatively time
+      expensive.</footnote>. On the positive side, most of the convenience
+      methods can be bypassed if you know what you are doing. Check the <link
+      href="benchmarks/index.html"> benchmark comparison page</link> for a
+      <em>general</em> comparison. You can look at the benchmark code yourself
+      to decide how much salt to take with them.</p>
+
+      <p>The sizes of the XML parsers are close<footnote>As measured with
+      <code>ruby -nle 'print unless /^\s*(#.*|)$/' *.rb | wc -l</code>
+      </footnote>. NQXML 1.1.3 has 1580 non-blank, non-comment lines of code;
+      REXML 2.0 has 2340<footnote>REXML started out with about 1200, but that
+      number has been steadily increasing as features are added. XPath
+      accounts for 541 lines of that code, so the core REXML has about 1800
+      LOC.</footnote>.</p>
+
+      <p>REXML is a conformant XML 1.0 parser. It supports multiple language
+      encodings, and internal processing uses the required UTF-8 and UTF-16
+      encodings. It passes 100% of the Oasis non-validating tests.
+      Furthermore, it provides a full implementation of XPath, a SAX2 and a
+      PullParser API.</p>
+    </subsection>
+
+    <subsection title="XPath">
+      <p>As of release 2.0, XPath 1.0 is fully implemented.</p>
+
+      <p>I fully expect bugs to crop up from time to time, so if you see any
+      bogus XPath results, please let me know. That said, since I'm now
+      following the XPath grammar and spec fairly closely, I suspect that you
+      won't be surprised by REXML's XPath very often, and it should become
+      rock solid fairly quickly.</p>
+
+      <p>Check the "bugs" section for known problems; there are little bits of
+      XPath here and there that are not yet implemented, but I'll get to them
+      soon.</p>
+
+      <p>Namespace support is rather odd, but it isn't my fault. I can only do
+      so much and still conform to the specs. In particular, XPath attempts to
+      help as much as possible. Therefore, in the trivial cases, you can pass
+      namespace prefixes to Element.elements[...] and so on -- in these cases,
+      XPath will use the namespace environment of the base element you're
+      starting your XPath search from. However, if you want to do something
+      more complex, like pass in your own namespace environment, you have to
+      use the XPath first(), each(), and match() methods. Also, default
+      namespaces <em>force</em> you to use the XPath methods, rather than the
+      convenience methods, because there is no way for XPath to know what the
+      mappings for the default namespaces should be. This is exactly why I
+      loath namespaces -- a pox on the person(s) who thought them up!</p>
+    </subsection>
+
+    <subsection title="Namespaces">
+      <p>Namespace support is now fairly stable. One thing to be aware of is
+      that REXML is not (yet) a validating parser. This means that some
+      invalid namespace declarations are not caught.</p>
+    </subsection>
+
+    <subsection title="Mailing list">
+      <p>There is a low-volume mailing list dedicated to REXML. To subscribe,
+      send an empty email to <link
+      href="mailto:ser-rexml-subscribe@germane-software.com">ser-rexml-subscribe@germane-software.com</link>.
+      This list is more or less spam proof. To unsubscribe, similarly send a
+      message to <link
+      href="mailto:ser-rexml-unsubscribe@germane-software.com">ser-rexml-unsubscribe@germane-software.com</link>.</p>
+    </subsection>
+
+    <subsection title="RSS">
+      <p>An <link
+          href="http://www.germane-software.com/projects/rexml/timeline?ticket=on&amp;max=50&amp;daysback=90&amp;format=rss">RSS
+      file</link> for REXML is now being generated from the change log. This
+    allows you to be alerted of bug fixes and feature additions via "pull".
+    <link href="http://www.germane-software.com/software/rexml/rss.xml">Another
+      RSS</link> is available which contains a single item: the release notice
+    for the most recent release.  This is an abuse of the RSS
+      mechanism, which was intended to be a distribution system for headlines
+      linked back to full articles, but it works. The headline for REXML is
+      the version number, and the description is the change log. The links all
+      link back to the REXML home page. The URL for the RSS itself is
+      http://www.germane-software.com/software/rexml/rss.xml.</p>
+
+      <p>The <link href="release.html">changelog itself is here</link>.</p>
+
+      <p>For those who are interested, there's a <link
+      href="docs/sloccount.txt">SLOCCount</link> (by David A. Wheeler) file
+      with stats on the REXML sourcecode. Note that the SLOCCount output
+      includes the files in the test/, benchmarks/, and bin/ directories, as
+      well as the main sourcecode for REXML itself.</p>
+    </subsection>
+
+    <subsection title="Applications that use REXML">
+      <list>
+        <item><link
+        href="http://www.pablotron.org/software/raggle/">Raggle</link> is a
+        console-based RSS aggregator.</item>
+
+        <item><link
+        href="http://www.zweknu.org/technical/index.rhtml?s=p|10/">getrss</link>
+        is an RSS aggregator</item>
+
+        <item>Ned Konz's <link
+        href="http://www.bikenomad.microship.com/ruby/">ruby-htmltools</link>
+        uses REXML</item>
+
+        <item>Hiroshi NAKAMURA's <link
+        href="http://www.ruby-lang.org/en/raa-list.rhtml?name=SOAP4R">SOAP4R</link>
+        package can use REXML as the XML processor.</item>
+
+        <item>Chris Morris' <link href="http://clabs.org/clxmlserial.htm">XML
+        Serializer</link>. XML Serializer provides a serialization mechanism
+        for Ruby that provides a bidirectional mapping between Ruby classes
+        and XML documents.</item>
+
+        <item>Much of the <link href="http://www.rubyxml.com">RubyXML</link>
+        site is generated with scripts that use REXML. RubyXML is a great
+        place to find information about th intersection between Ruby and
+        XML.</item>
+      </list>
+    </subsection>
+
+    <bugs lang="en">
+      <p>You can submit bug reports and feature requests, and view the list of
+      known bugs, at the <link
+      href="http://www.germane-software.com/projects/rexml">REXML bug report
+      page.</link> Please do submit bug reports. If you really want your bug
+      fixed fast, include an runit or Test::Unit method (or methods) that
+      illustrates the problem. At the very least, send me some XML that REXML
+      doesn't process properly.</p>
+
+      <p>You don't have to send an entire test suite -- just the unit test
+      methods. If you don't send me a unit test, I'll have to write one
+      myself, which will mean that your bug will take longer to fix.</p>
+
+      <p>When submitting bug reports, please include the version of Ruby and
+      of REXML that you're using, and the operating system you're running on.
+      Just run: <code>ruby -vrrexml/rexml -e 'p
+      REXML::VERSION,PLATFORM'</code> and paste the results in your bug
+      report. Include your email if you want a response about the bug.</p>
+
+      <item>Attributes are not handled internally as nodes, so you can't
+      perform node functions on them. This will have to change. It'll also
+      probably mean that, rather than returning attribute values, XPath will
+      return the Attribute nodes.</item>
+
+      <item>Some of the XPath <em>functions</em> are untested<footnote>Mike
+      Stok has been testing, debugging, and implementing some of these
+      Functions (and he's been doing a good job) so there's steady improvement
+      in this area.</footnote>. Any XPath functions that don't work are also
+      bugs... please report them. If you send a unit test that illustrates the
+      problem, I'll try to fix the problem within a couple of days (if I can)
+      and send you a patch, personally.</item>
+
+      <item>Accessing prefixes for which there is no defined namespace in an
+      XPath should throw an exception. It currently doesn't -- it just fails
+      to match.</item>
+    </bugs>
+
+    <todo lang="en">
+      <item>Reparsing a tree with a pull/SAX parser</item>
+
+      <item>Better namespace support in SAX</item>
+
+      <item>Lazy tree parsing</item>
+
+      <item>Segregate parsers, for optimized minimal distributions</item>
+
+      <item>XML &lt;-&gt; Ruby</item>
+
+      <item>Validation support</item>
+
+      <item>True XML character support</item>
+
+      <item>Add XPath support for streaming APIs</item>
+
+      <item status="request">XQuery support</item>
+
+      <item status="request">XUpdate support</item>
+
+      <item>Make sure namespaces are supported in pull parser</item>
+
+      <item status="request">Add document start and entity replacement events
+      in pull parser</item>
+
+      <item>Better stream parsing exception handling</item>
+
+      <item>I'd like to hack XMLRPC4R to use REXML, for my own
+      purposes.</item>
+    </todo>
+  </status>
+
+  <faq>
+    <q>REXML is hanging while parsing one of my XML files.</q>
+
+    <a>Your XML is probably malformed. Some malformed XML, especially XML that
+    contains literal '&lt;' embedded in the document, causes REXML to hang.
+    REXML should be throwing an exception, but it doesn't; this is a bug. I'm
+    aware that it is an extremely annoying bug, and it is one I'm trying to
+    solve in a way that doesn't significantly reduce REXML's parsing
+    speed.</a>
+
+    <q>I'm using the XPath '//foo' on an XML branch node X, and keep getting
+    all of the 'foo' elements in the entire document. Why? Shouldn't it return
+    only the 'foo' element descendants of X?</q>
+
+    <a>No. XPath specifies that '/' returns the document root, regardless of
+    the context node. '//' also starts at the document root. If you want to
+    limit your search to a branch, you need to use the self:: axe. EG,
+    'self::node()//foo', or the shorthand './/foo'.</a>
+
+    <q>I want to parse a document both as a tree, and as a stream. Can I do
+    this?</q>
+
+    <a>Yes, and no. There is no mechanism that directly supports this in
+    REXML. However, aside from writing your own traversal layer, there is a
+    way of doing this. To turn a tree into a stream, just turn the branch you
+    want to process as a stream back into a string, and re-parse it with your
+    preferred API. EG: pp = PullParser.new( some_element.to_s ). The other
+    direction is more difficult; you basically have to build a tree from the
+    events. REXML will have one of these builders, eventually, but it doesn't
+    currently exist.</a>
+
+    <q>Why is Element.elements indexed off of '1' instead of '0'?</q>
+
+    <a>Because of XPath. The XPath specification states that the index of the
+    first child node is '1'. Although it may be counter-intuitive to base
+    elements on 1, it is more undesireable to have element.elements[0] ==
+    element.elements[ 'node()[1]' ]. Since I can't change the XPath
+    specification, the result is that Element.elements[1] is the first child
+    element.</a>
+
+    <q>Why isn't REXML a validating parser?</q>
+
+    <a>Because validating parsers must include code that parses and interprets
+    DTDs. I hate DTDs. REXML supports the barest minimum of DTD parsing, and
+    even that isn't complete. There is DTD parsing code in the works, but I
+    only work on it when I'm really, really bored. Rumor has it that a
+    contributor is working on a DTD parser for REXML; rest assured that any
+    such contribution will be included with REXML as soon as it is
+    available.</a>
+
+    <q>I'm trying to create an ISO-8859-1 document, but when I add text to the
+    document it isn't being properly encoded.</q>
+
+    <a>Regardless of what the encoding of your document is, when you add text
+    programmatically to a REXML document you <em>must</em> ensure that you are
+    only adding UTF-8 to the tree. In particular, you can't add ISO-8859-1
+    encoded text that contains characters above 0x80 to REXML trees -- you
+    must convert it to UTF-8 before doing so. Luckily, this is easy:
+    <code>text.unpack('C*').pack('U*')</code> will do the trick. 7-bit ASCII
+    is identical to UTF-8, so you probably won't need to worry about this.</a>
+
+    <q>How do I get the tag name of an Element?</q>
+
+    <a>You take a look at the APIs, and notice that <code>Element</code>
+    includes <code>Namespace</code>. Then you click on the
+    <code>Namespace</code> link and look at the methods that
+    <code>Element</code> includes from <code>Namespace</code>. One of these is
+    <code>name()</code>. Another is <code>expanded_name()</code>. Yet another
+    is <code>prefix()</code>. Then, you email the author of rdoc and ask him
+    to extend rdoc so that it lists methods in the API that are included from
+    other files, so that you don't have to do all of that looking around for
+    your method.</a>
+  </faq>
+
+  <credits>
+    <p>I've had help from a number of resources; if I haven't listed you here,
+    it means that I just haven't gotten around to adding you, or that I'm a
+    dork and have forgotten. In either case, feel free to write me and
+    complain.</p>
+
+    <list>
+      <item>Mike Stok has been very active, sending not only fixes for bugs
+      (especially in Functions), but also by providing unit tests and making
+      sure REXML runs under Ruby 1.7. He also sent the most awesome hand
+      knitted tea cozy, with "REXML" and the Ruby knitted into it.</item>
+
+      <item>Kouhei Sutou translated the REXML API documentation to Japanese!
+      Links are in the API docs section of the main documentation. He has also
+      contributed a large number of bug reports and patches to fix bugs in
+      REXML.</item>
+
+      <item>Erik Terpstra heard my pleas and submitted several logos for
+      REXML. After sagely procrastinating for several weeks, I finally forced
+      my poor slave of a wife to pick one (this is what we call "delegation").
+      She did, with caveats; Erik quickly made the changes, and the result is
+      what you now see at the top of this page. He also supplied a <link
+      href="img/rexml_50p.png">smaller version</link> that you can include
+      with your projects that use REXML, if you'd like.</item>
+
+      <item>Ernest Ellingson contributed the sourcecode for turning UTF16 and
+      UNILE encodings into UTF8, which allowed REXML to get the 100% OASIS
+      valid tests rating.</item>
+
+      <item>Ian Macdonald provided me with a comprehensive, well written RPM
+      spec file.</item>
+
+      <item>Oliver M . Bolzer is maintaining a Debian package distribution of
+      REXML. He also has provided good feedback and bug reports about
+      namespace support.</item>
+
+      <item>Michael Granger supplied a patch for REXML that make the unit
+      tests pass under Ruby 1.7.</item>
+
+      <item>James Britt contributed code that makes using
+      Document.parse_stream easier to use by allowing it to be passed either a
+      Source, File, or String.</item>
+
+      <item>Tobias Reif: Numerous bug reports, and suggestions for
+      improvement.</item>
+
+      <item>Stefan Scholl, who provided a lot of feedback and bug reports
+      while I was trying to get ISO-8859-1 support working.</item>
+
+      <item>Steven E Lumos for volunteering information about XPath
+      particulars.</item>
+
+      <item>Fumitoshi UKAI provided some bug fixes for CData metacharacter
+      quoting.</item>
+
+      <item>TAKAHASHI Masayoshi, for information on UTF</item>
+
+      <item>Robert Feldt: Bug reports and suggestions/recommendations about
+      improving REXML. Testing is one of the most important aspects of
+      software development.</item>
+
+      <item><link
+      href="http://www.themindelectric.com/exml/index.html">Electric
+      XML</link>: This was, after all, the inspiration for REXML. Originally,
+      I was just going to do a straight port, and although REXML doesn't in
+      any way, shape or form resemble Electric XML, still the basic framework
+      and philosophy was inspired by E-XML. And I still use E-XML in my Java
+      projects.</item>
+
+      <item><link
+      href="http://www.io.com/~jimm/downloads/nqxml/index.html">NQXML</link>:
+      While I may complain about the NQXML API, I wrote a few applications
+      using it that wouldn't have been written otherwise, and it was very
+      useful to me. It also encouraged me to write REXML. Never complain about
+      free software *slap*.</item>
+
+      <item>See my <link
+      href="http://www.germane-software.com/~ser/technology.html">technologies
+      page</link> for a more comprehensive list of computer technologies that
+      I depend on for my day-to-day work.</item>
+
+      <item>rdoc, an excellent JavaDoc analog<footnote>When I was first
+      working on REXML, rdoc wasn't, IMO, very good, so I wrote API2XML.
+      API2XML was good enough for a while, and then there was a flurry of work
+      on rdoc, and it quickly surpassed API2XML in features. Since I was never
+      really interested in maintaining a JavaDoc analog, I stopped support of
+      API2XML, and am now recommending that people use
+      rdoc.</footnote>.</item>
+
+      <item>Many, many other people who've submitted bug reports, suggestions,
+      and positive feedback. You're all co-developers!</item>
+    </list>
+  </credits>
+</documentation>

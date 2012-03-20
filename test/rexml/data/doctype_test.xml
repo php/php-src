@@ -1,0 +1,34 @@
+<!DOCTYPE internationalization SYSTEM "l10n.dtd" [
+<!ENTITY af SYSTEM "af.xml">
+<!ENTITY ca SYSTEM "ca.xml">
+<!ENTITY cs SYSTEM "cs.xml">
+<!ENTITY da SYSTEM "da.xml">
+<!ENTITY de SYSTEM "de.xml">
+<!ENTITY el SYSTEM "el.xml">
+<!ENTITY en SYSTEM "en.xml">
+<!ENTITY es SYSTEM "es.xml">
+<!ENTITY et SYSTEM "et.xml">
+<!ENTITY fi SYSTEM "fi.xml">
+<!ENTITY fr SYSTEM "fr.xml">
+<!ENTITY hu SYSTEM "hu.xml">
+<!ENTITY id SYSTEM "id.xml">
+<!ENTITY it SYSTEM "it.xml">
+<!ENTITY ja SYSTEM "ja.xml">
+<!ENTITY ko SYSTEM "ko.xml">
+<!ENTITY nl SYSTEM "nl.xml">
+<!ENTITY no SYSTEM "no.xml">
+<!ENTITY no_ny SYSTEM "no_ny.xml">
+<!ENTITY pl SYSTEM "pl.xml">
+<!ENTITY pt SYSTEM "pt.xml">
+<!ENTITY pt_br SYSTEM "pt_br.xml">
+<!ENTITY ro SYSTEM "ro.xml">
+<!ENTITY ru SYSTEM "ru.xml">
+<!ENTITY sk SYSTEM "sk.xml">
+<!ENTITY sl SYSTEM "sl.xml">
+<!ENTITY sr SYSTEM "sr.xml">
+<!ENTITY sv SYSTEM "sv.xml">
+<!ENTITY tr SYSTEM "tr.xml">
+<!ENTITY zh_cn SYSTEM "zh_cn.xml">
+<!ENTITY zh_tw SYSTEM "zh_tw.xml">
+]>
+<x/>

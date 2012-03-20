@@ -1,0 +1,3 @@
+bubblebabble.o: bubblebabble.c $(srcdir)/../digest.h $(hdrdir)/ruby.h \
+  $(topdir)/config.h $(hdrdir)/defines.h $(hdrdir)/intern.h \
+  $(srcdir)/../defs.h

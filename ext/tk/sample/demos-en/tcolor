@@ -1,0 +1,526 @@
+#!/usr/bin/env ruby
+#
+# tcolor --
+#   simple color editor which supports RGB, HSB and CYM color space
+#
+# Copyright (C) 1998 Takaaki Tateishi(ttate@jaist.ac.jp)
+# last update: Thu Jun 18 06:32:35 JST 1998
+#
+
+require "tk"
+
+
+# use TkVariable instance for the variable which is changed by Tk interpreter
+
+$colorSpace = TkVariable.new(:rgb)
+$master = nil
+$red = 65535
+$green = 0
+$blue = 0
+$color = "#ffff00000000"
+$updating = TkVariable.new(0)
+$autoUpdate = TkVariable.new(1)
+$name = TkVariable.new($color)
+$command = TkVariable.new("print(%%,\"\n\")")
+# $command = TkVariable.new("")
+$label1 = TkVariable.new("label1")
+$label2 = TkVariable.new("label2")
+$label3 = TkVariable.new("label3")
+
+
+# setup the entry of the resourc database
+if (TkVarAccess.new('tcl_platform')['platform'] == 'unix')
+  TkOptionDB.add('*Entry.background', 'white')
+end
+
+
+# methods for events
+
+def rgbToHsv(red,green,blue)
+
+  if ( red > green )
+    max = red
+    min = green
+  else
+    max = green
+    min = red
+  end
+
+  if ( blue > max )
+    max = blue
+  else
+    if ( blue < min )
+      min = blue
+    end
+  end
+
+  range = max - min
+
+  if ( max == 0 )
+    sat = 0.0
+  else
+    sat = (max-min)/max
+  end
+
+  if ( sat == 0 )
+    hue = 0.0
+  else
+    rc = (max-red)/range
+    gc = (max-green)/range
+    bc = (max-blue)/range
+    if ( red == max )
+      hue = 0.166667 * (bc - gc)
+    else
+      if ( green == max )
+	hue = 0.166667 * (2.0 + rc - bc)
+      else
+	hue = 0.166667 * (4.0 + gc - rc)
+      end
+    end
+    if ( hue < 0.0 )
+      hue = hue + 1.0
+    end
+  end
+
+  [hue,sat,max/65535]
+end
+
+
+def hsbToRgb(hue,sat,value)
+  v = 65535.0 * value
+  if( sat == 0 )
+    ans = [v,v,v]
+  else
+    hue = hue*6.0
+    if ( hue >= 6 )
+      hue = 0.0
+    end
+    i = hue.to_i
+    f = hue - i
+    p = 65535.0 * value * (1.0 - sat)
+    q = 65535.0 * value * (1.0 - (sat * f))
+    t = 65535.0 * value * (1.0 - (sat * (1.0 - f)))
+    case i
+    when 0
+      ans = [v,t,p]
+    when 1
+      ans = [q,v,p]
+    when 2
+      ans = [p,v,t]
+    when 3
+      ans = [p,q,v]
+    when 4
+      ans = [t,p,v]
+    when 5
+      ans = [v,p,q]
+    else
+      raise(eException,"i value #{i} is out of range")
+    end
+  end
+  return ans
+end
+
+
+def _null_binding
+  Module.new.instance_eval{binding}
+end
+private :_null_binding
+
+def doUpdate
+  newCmd = $command.to_s.gsub("%%","\"#{$color}\"")
+  eval(newCmd, _null_binding)
+end
+
+
+def tc_scaleChanged
+  if( $updating.to_i == 1 )
+    return
+  end
+
+  $master = :scale if $master == nil
+
+  scale1 = $root.middle.middle.scale1
+  scale2 = $root.middle.middle.scale2
+  scale3 = $root.middle.middle.scale3
+
+  case $colorSpace.value.intern
+  when :rgb
+    $red = (scale1.get * 65.535).to_i
+    $green = (scale2.get * 65.535).to_i
+    $blue = (scale3.get * 65.535).to_i
+  when :cmy
+    $red = (65535 - scale1.get * 65.535).to_i
+    $green = (65535 - scale2.get * 65.535).to_i
+    $blue = (65535 - scale3.get * 65.535).to_i
+  when :hsb
+    list = hsbToRgb(scale1.get / 1000.0,
+		    scale2.get / 1000.0,
+		    scale3.get / 1000.0)
+    $red = list[0]
+    $green = list[1]
+    $blue = list[2]
+  else
+    raise(Exception,"unknown colorSpace")
+  end
+  $color = format("#%04x%04x%04x",$red.to_i,$green.to_i,$blue.to_i)
+  $name.value = $color if $master == :scale
+  $root.middle.right.set_color($color)
+  if( $autoUpdate.to_i == 1 )
+    doUpdate
+  end
+  Tk.update(true)
+  $master = nil if $master == :scale
+end
+
+
+def tc_setScales
+  $updating.value = 1
+
+  scale1 = $root.middle.middle.scale1
+  scale2 = $root.middle.middle.scale2
+  scale3 = $root.middle.middle.scale3
+
+  case $colorSpace.value.intern
+  when :rgb
+    scale1.set($red / 65.535)
+    scale2.set($green / 65.535)
+    scale3.set($blue / 65.535)
+  when :cmy
+    scale1.set((65535 - $red) / 65.535)
+    scale2.set((65535 - $green) / 65.535)
+    scale3.set((65535 - $blue) / 65.535)
+  when :hsb
+    list = rgbToHsv($red,$green,$blue)
+    scale1.set( list[0] * 1000.0 )
+    scale2.set( list[1] * 1000.0 )
+    scale3.set( list[2] * 1000.0 )
+  else
+    raise(Exception,"unknown colorSpace")
+  end
+
+  $updating.value = 0
+end
+
+
+def tc_loadNamedColor(name)
+  $name.value = name
+  $master = :name if $master == nil
+  if name[0,1] != "#"
+    list = TkWinfo.rgb($root.middle.right.swatch,name)
+    $red = list[0]
+    $green = list[1]
+    $blue = list[2]
+  else
+    case name.length
+    when 4
+      fmt = /#(.{1})(.{1})(.{1})/
+      shift = 12
+    when 7
+      fmt = /#(.{2})(.{2})(.{2})/
+      shift = 8
+    when 10
+      fmt = /#(.{3})(.{3})(.{3})/
+      shift = 4
+    when 13
+      fmt = /#(.{4})(.{4})(.{4})/
+      shift = 0
+    else
+      raise(eException,"syntax error in color name \"#{name}\"")
+    end
+    name.scan(fmt){|strlist|
+      if strlist.length != 3
+	raise(eException,"syntax error in color name \"#{name}\"")
+      end
+      $red = strlist[0].hex
+      $green = strlist[1].hex
+      $blue = strlist[2].hex
+    }
+    $red = $red << shift
+    $green = $green << shift
+    $blue = $blue << shift
+  end
+
+  tc_setScales
+  $color = format("#%04x%04x%04x",$red,$green,$blue)
+  $root.middle.right.set_color($color)
+  if $autoUpdate.to_i == 1
+    doUpdate
+  end
+  Tk.update(true)
+  $master = nil if $master == :name
+end
+
+
+def changeColorSpace(space)
+  case space
+  when :rgb
+    $label1.value = "Red"
+    $label2.value = "Green"
+    $label3.value = "Blue"
+  when :cmy
+    $label1.value = "Cyan"
+    $label2.value = "Magenta"
+    $label3.value = "Yellow"
+  when :hsb
+    $label1.value = "Hue"
+    $label2.value = "Saturation"
+    $label3.value = "Brightness"
+  end
+  tc_setScales
+end
+
+
+# menu
+
+class TkColorMenuFrame<TkFrame
+  def initialize(parent)
+    super(parent,
+	  "relief"=>"raised",
+	  "borderwidth"=>"2")
+
+    # File menubutton
+    @file = TkMenubutton.new(self){|button|
+
+      # File menu
+      @file_menu = TkMenu.new(button){
+	add "radio",
+	  "label" => "RGB color space",
+	  "variable" => $colorSpace,
+	  "value" => :rgb,
+	  "underline" => "0",
+	  "command" => proc{changeColorSpace(:rgb)}
+	add "radio",
+	  "label" => "CMY color space",
+	  "variable" => $colorSpace,
+	  "value" => :cmy,
+	  "underline" => "0",
+	  "command" => proc{changeColorSpace(:cmy)}
+	add "radio",
+	  "label" => "HSB color space",
+	  "variable" => $colorSpace,
+	  "value" => :hsb,
+	  "underline" => "0",
+	  "command" => proc{changeColorSpace(:hsb)}
+	add "separator"
+	add "radio",
+	  "label" => "Automatic updates",
+	  "variable" => $autoUpdate,
+	  "value" => "1",
+	  "underline" => "0"
+	add "radio",
+	  "label" => "Manual updates",
+	  "variable" => $autoUpdate,
+	  "value" => "0",
+	  "underline" => "0"
+	add "separator"
+	add "command",
+	  "label" => "Exit program",
+	  "underline" => "0",
+	  "command" => proc{exit}
+      }
+
+      # assign File menu to File button
+      menu @file_menu
+
+      text "File"
+      underline "0"
+    }.pack("side"=>"left")
+
+    self
+  end
+end
+
+
+# bottom frame
+class TkColorBotFrame<TkFrame
+  def initialize(parent)
+    super(parent,
+	  "relief"=> "raised",
+	  "borderwidth"=> 2)
+
+    @commandLabel = TkLabel.new(self,
+				"text"=> "Command:")
+    @command = TkEntry.new(self,
+			   "relief"=> "sunken",
+			   "borderwidth"=> "2",
+			   "textvariable"=> $command,
+			   "font"=> "-Adobe-Courier-Medium-R-Normal--*-120-*-*-*-*-*-*")
+    @update = TkButton.new(self,
+			   "text"=> "Update",
+			   "command"=> proc{doUpdate})
+    @commandLabel.pack("side"=>"left")
+    @update.pack("side"=>"right","pady"=>".1c","padx"=>".25c")
+    @command.pack("expand"=>"yes","fill"=>"x","ipadx"=>".25c")
+
+    self
+  end
+end
+
+
+# left side frame of middle level
+class TkColorMiddleLeftFrame<TkFrame
+  def initialize(parent)
+    super(parent)
+
+    for i in ["/usr/local/lib/X11rgb.txt","/usr/lib/X11/rgb.txt",
+	"/X11/R5/lib/X11/rgb.txt","/X11/R4/lib/rgb/rgb.txt",
+	"/usr/openwin/lib/X11/rgb.txt"]
+      if !File.readable?(i)
+	next
+      end
+      f = File.open(i)
+      @scroll = TkScrollbar.new(self,
+				"orient"=>"vertical",
+				"relief"=>"sunken",
+				"borderwidth"=>"2")
+      @scroll.pack("side"=>"right","fill"=>"y")
+      @names = TkListbox.new(self,
+			     "width"=>"20",
+			     "height"=>"12",
+			     "yscrollcommand"=> proc{|first,last| @scroll.set first,last},
+			     "relief"=>"sunken",
+			     "borderwidth"=>"2",
+			     "exportselection"=>"false")
+      @scroll.command(proc{|*args| @names.yview(*args)})
+      @names.bind("Double-1",proc{
+		    tc_loadNamedColor(@names.get(@names.curselection))})
+      @names.pack("side"=>"left")
+      while (line = f.gets)
+	line.chop!
+	linelist = line.split(/[ \t]+/)
+	if linelist.length == 4
+	  @names.insert("end",linelist[3])
+	end
+      end
+      f.close
+      break
+    end
+
+    self
+  end
+end
+
+
+# middle frame of middle level
+class TkColorMiddleMiddleFrame<TkFrame
+  attr_reader :scale1, :scale2, :scale3
+
+  def initialize(parent)
+    super(parent)
+
+    @f1 = TkFrame.new(self)
+    @f2 = TkFrame.new(self)
+    @f3 = TkFrame.new(self)
+    @f4 = TkFrame.new(self)
+
+    for f in [@f1,@f2,@f3]
+      f.pack("side"=>"top","expand"=>"yes")
+    end
+    @f4.pack("side"=>"top","expand"=>"yes","fill"=>"x")
+
+    @label1 = TkLabel.new(self,"textvariable"=>$label1)
+    @scale1 = TkScale.new(self,"from"=>"0","to"=>"1000","length"=>"6c",
+			  "orient"=>"horizontal",
+			  "command"=>proc{tc_scaleChanged})
+    @scale1.pack("side"=>"top","anchor"=>"w")
+    @label1.pack("side"=>"top","anchor"=>"w")
+
+    @label2 = TkLabel.new(self,"textvariable"=>$label2)
+    @scale2 = TkScale.new(self,"from"=>"0","to"=>"1000","length"=>"6c",
+			  "orient"=>"horizontal",
+			  "command"=>proc{tc_scaleChanged})
+    @scale2.pack("side"=>"top","anchor"=>"w")
+    @label2.pack("side"=>"top","anchor"=>"w")
+
+    @label3 = TkLabel.new(self,"textvariable"=>$label3)
+    @scale3 = TkScale.new(self,"from"=>"0","to"=>"1000","length"=>"6c",
+			  "orient"=>"horizontal",
+			  "command"=>proc{tc_scaleChanged})
+    @scale3.pack("side"=>"top","anchor"=>"w")
+    @label3.pack("side"=>"top","anchor"=>"w")
+
+    @nameLabel = TkLabel.new(self,"text"=>"Name:")
+    @name = TkEntry.new(self,"relief"=>"sunken","borderwidth"=>"2",
+			"textvariable"=>$name,"width"=>"10",
+			"font"=>"-Adobe-Courier-Medium-R-Normal--*-120-*-*-*-*-*-*")
+    @nameLabel.pack("side"=>"left")
+    @name.pack("side"=>"right", "expand"=>"1", "fill"=>"x")
+    @name.bind("Return",proc{tc_loadNamedColor $name.to_s})
+
+    self
+  end
+end
+
+
+class TkColorMiddleRightFrame<TkFrame
+  attr_reader :swatch
+
+  def initialize(parent)
+    super(parent)
+    @swatch = TkFrame.new(self, "width"=>"2c", "height"=>"5c",
+			  "background"=>$color)
+    @value = TkLabel.new(self,
+			 "text"=>$color,
+			 "width"=>"13",
+			 "font"=>"-Adobe-Courier-Medium-R-Normal--*-120-*-*-*-*-*-*")
+    @swatch.pack("side"=>"top","expand"=>"yes","fill"=>"both")
+    @value.pack("side"=>"bottom","pady"=>".25c")
+
+    self
+  end
+
+  def set_color(color)
+    @swatch["background"] = color
+    @value["text"] = color
+  end
+end
+
+
+
+# middle level frame
+class TkColorMiddleFrame<TkFrame
+  attr_reader :left, :middle, :right
+
+  def initialize(parent)
+    super(parent,
+	  "relief"=> "raised",
+	  "borderwidth"=> "2")
+
+    @left = TkColorMiddleLeftFrame.new(self)
+    @left.pack("side"=>"left","padx"=>".25c","pady"=>".25c")
+
+    @middle = TkColorMiddleMiddleFrame.new(self)
+    @middle.pack("side"=>"left","expand"=>"yes","fill"=>"y")
+
+    @right = TkColorMiddleRightFrame.new(self)
+    @right.pack("side"=>"left","padx"=>".25c","pady"=>".25c","anchor"=>"s")
+
+    self
+  end
+end
+
+
+class TkColor<TkRoot
+  attr_reader :menu, :bottom, :middle
+
+  def initialize(*args)
+    super(*args)
+    @menu = TkColorMenuFrame.new(self)
+    @menu.pack("side"=>"top", "fill"=>"x")
+
+    @bottom = TkColorBotFrame.new(self)
+    @bottom.pack("side"=>"bottom","fill"=>"x")
+
+    @middle = TkColorMiddleFrame.new(self)
+    @middle.pack("side"=>"top","fill"=>"both")
+
+    self
+  end
+end
+
+
+$root = TkColor.new
+changeColorSpace :rgb
+
+# start eventloop
+Tk.mainloop

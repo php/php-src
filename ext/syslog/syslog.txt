@@ -1,0 +1,124 @@
+.\" syslog.txt -  -*- Indented-Text -*-
+$RoughId: syslog.txt,v 1.18 2002/02/25 08:20:14 knu Exp $
+$Id$
+
+UNIX Syslog extension for Ruby
+Amos Gouaux, University of Texas at Dallas
+<amos+ruby@utdallas.edu>
+&
+Akinori MUSHA
+<knu@iDaemons.org>
+
+Contact:
+  - Akinori MUSHA <knu@iDaemons.org> (current maintainer)
+
+** Syslog(Module)
+
+Included Modules: Syslog::Constants
+
+require 'syslog'
+
+A Simple wrapper for the UNIX syslog system calls that might be handy
+if you're writing a server in Ruby.  For the details of the syslog(8)
+architecture and constants, see the syslog(3) manual page of your
+platform.
+
+Module Methods:
+
+   open(ident = $0, logopt = Syslog::LOG_PID | Syslog::LOG_CONS,
+		facility = Syslog::LOG_USER) [{ |syslog| ... }]
+
+	Opens syslog with the given options and returns the module
+	itself.  If a block is given, calls it with an argument of
+	itself.  If syslog is already opened, raises RuntimeError.
+
+	Example:
+	  Syslog.open('ftpd', Syslog::LOG_PID | Syslog::LOG_NDELAY,
+			      Syslog::LOG_FTP)
+
+   open!(ident = $0, logopt = Syslog::LOG_PID | Syslog::LOG_CONS,
+		facility = Syslog::LOG_USER)
+   reopen(ident = $0, logopt = Syslog::LOG_PID | Syslog::LOG_CONS,
+		facility = Syslog::LOG_USER)
+
+	Same as open, but does a close first.
+
+   opened?
+
+	Returns true if syslog opened, otherwise false.
+
+   ident
+   options
+   facility
+
+	Returns the parameters given in the last open, respectively.
+	Every call of Syslog::open resets these values.
+
+   log(pri, message, ...)
+
+	Writes message to syslog.
+
+	Example:
+	  Syslog.log(Syslog::LOG_CRIT, "the sky is falling in %d seconds!", 10)
+
+   crit(message, ...)
+   emerg(message, ...)
+   alert(message, ...)
+   err(message, ...)
+   warning(message, ...)
+   notice(message, ...)
+   info(message, ...)
+   debug(message, ...)
+
+	These are shortcut methods of Syslog::log().  The lineup may
+	vary depending on what priorities are defined on your system.
+
+	Example:
+	  Syslog.crit("the sky is falling in %d seconds!", 5)
+
+   mask
+   mask=(mask)
+
+	Returns or sets the log priority mask.  The value of the mask
+	is persistent and will not be reset by Syslog::open or
+	Syslog::close.
+
+	Example:
+	  Syslog.mask = Syslog::LOG_UPTO(Syslog::LOG_ERR)
+
+   close
+
+	Closes syslog.
+
+   inspect
+
+	Returns the "inspect" string of the Syslog module.
+
+   instance
+
+	Returns the module itself. (Just for backward compatibility)
+
+   LOG_MASK(pri)
+
+	Creates a mask for one priority.
+
+   LOG_UPTO(pri)
+
+	Creates a mask for all priorities up to pri.
+
+** Syslog::Constants(Module)
+
+require 'syslog'
+include Syslog::Constants
+
+This module includes the LOG_* constants available on the system.
+
+Module Methods:
+
+   LOG_MASK(pri)
+
+	Creates a mask for one priority.
+
+   LOG_UPTO(pri)
+
+	Creates a mask for all priorities up to pri.

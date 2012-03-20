@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app>
+  <servlet>
+    <servlet-name>snoop</servlet-name>
+    <servlet-class>SnoopServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>file</servlet-name>
+    <servlet-class>ViewFile</servlet-class>
+    <init-param>
+      <param-name>initial</param-name>
+      <param-value>
+        1000
+      </param-value>
+      <description>
+        The initial value for the counter  <!-- optional -->
+      </description>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>
+      mv
+    </servlet-name>
+    <url-pattern>
+      *.wm
+    </url-pattern>
+  </servlet-mapping>
+
+  <distributed/>
+
+  <security-role>
+    <role-name>
+     manager
+    </role-name>
+    <role-name>
+     director
+    </role-name>
+    <role-name>
+     president
+    </role-name>
+  </security-role>
+</web-app>

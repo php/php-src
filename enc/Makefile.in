@@ -1,0 +1,74 @@
+V = 0
+Q1 = $(V:1=)
+Q = $(Q1:0=@)
+n=$(NULLCMD)
+ECHO1 = $(V:1=@$n)
+ECHO = $(ECHO1:0=@echo)
+
+encsrcdir = @srcdir@
+topdir = .
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+libdir = @libdir@
+top_srcdir = $(encsrcdir:/enc=)
+srcdir = $(top_srcdir)
+arch = @arch@
+EXTOUT = @EXTOUT@
+hdrdir = $(srcdir)/include
+arch_hdrdir = $(EXTOUT)/include/$(arch)
+ENCSODIR = $(EXTOUT)/$(arch)/enc
+TRANSSODIR = $(ENCSODIR)/trans
+DLEXT = @DLEXT@
+OBJEXT = @OBJEXT@
+
+BUILTIN_ENCS	= ascii.c us_ascii.c\
+		  unicode.c utf_8.c
+
+BUILTIN_TRANSES	= newline.trans
+
+RUBY_SO_NAME = @RUBY_SO_NAME@
+LIBRUBY = @LIBRUBY@
+LIBRUBYARG_SHARED = @LIBRUBYARG_SHARED@
+LIBRUBYARG_STATIC = $(LIBRUBYARG_SHARED)
+
+empty =
+CC = @CC@
+OUTFLAG = @OUTFLAG@$(empty)
+COUTFLAG = @COUTFLAG@$(empty)
+CFLAGS = $(CCDLFLAGS) @CFLAGS@ @ARCH_FLAG@
+cflags = @cflags@
+optflags = @optflags@
+debugflags = @debugflags@
+warnflags = @warnflags@
+CCDLFLAGS = @CCDLFLAGS@
+INCFLAGS = -I. -I$(arch_hdrdir) -I$(hdrdir) -I$(top_srcdir)
+DEFS = @DEFS@
+CPPFLAGS = @CPPFLAGS@ -DONIG_ENC_REGISTER=rb_enc_register
+LDFLAGS = @LDFLAGS@
+LDSHARED = @LDSHARED@
+ldflags  = $(LDFLAGS)
+dldflags = @DLDFLAGS@
+archflag = @ARCH_FLAG@
+DLDFLAGS = $(ldflags) $(dldflags) $(archflag)
+RUBY     = $(MINIRUBY)
+
+WORKDIRS = @WORKDIRS@
+
+NULLCMD = @NULLCMD@
+RM = @RM@
+RMDIR = @RMDIR@
+RMDIRS = @RMDIRS@
+MAKEDIRS = @MAKEDIRS@
+
+.SUFFIXES: .trans
+
+all: make-workdir
+
+make-workdir:
+	$(Q)$(MAKEDIRS) $(WORKDIRS)
+
+clean:
+
+distclean: clean
+	$(Q)$(RM) enc.mk
+realclean: distclean clean-srcs

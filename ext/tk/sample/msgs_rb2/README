@@ -1,0 +1,5 @@
+Message catalogs in this directory are written in encodings except
+UTF-8. As if you have a trouble to edit UTF-8 text, you can write
+message catalogs in your familier encoding.
+
+Please see '../msgs_rb/README' too.

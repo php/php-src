@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<methodCall>
+  <methodName>Test</methodName>
+  <params>
+    <param>
+      <value>Hallo Leute</value>
+    </param>
+    <param>
+      <value>   Hallo   </value>
+    </param>
+    <param>
+      <value></value>
+    </param>
+    <param>
+      <value>   </value>
+    </param>
+  </params>
+</methodCall>
+
+
+
+

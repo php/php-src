@@ -1,0 +1,157 @@
+.\"Ruby is copyrighted by Yukihiro Matsumoto <matz@netlab.jp>.
+.Dd December 27, 2008
+.Dt ERB(1) "" "Ruby Programmers Reference Guide"
+.Os UNIX
+.Sh NAME
+.Nm erb
+.Nd Ruby Templating
+.Sh SYNOPSIS
+.Nm
+.Op Fl -version
+.Op Fl UPdnvx
+.Op Fl E Ar ext Ns Op Ns : Ns int
+.Op Fl S Ar level
+.Op Fl T Ar mode
+.Op Fl r Ar library
+.Op Fl -
+.Op file ...
+.Pp
+.Sh DESCRIPTION
+.Nm
+is a command line front-end for
+.Li "ERB"
+library, which is an implementation of eRuby.
+.Pp
+eRuby provides an easy to use but powerful templating system for Ruby.
+Using eRuby, actual Ruby code can be added to any plain text document for the
+purposes of generating document information details and/or flow control.
+.Pp
+.Nm
+is a part of
+.Nm Ruby .
+.Pp
+.Sh OPTIONS
+.Bl -tag -width "1234567890123" -compact
+.Pp
+.It Fl -version
+Prints the version of
+.Nm .
+.Pp
+.It Fl E Ar external Ns Op : Ns Ar internal
+.It Fl -encoding Ar external Ns Op : Ns Ar internal
+Specifies the default value(s) for external encodings and internal encoding. Values should be separated with colon (:).
+.Pp
+You can omit the one for internal encodings, then the value
+.Pf ( Li "Encoding.default_internal" ) will be nil.
+.Pp
+.It Fl P
+Evaluates lines starting with
+.Li "%"
+as Ruby code and removes the tailing EOLs.
+.Pp
+.It Fl S Ar level
+Specifies the safe level in which eRuby script will run.
+.Pp
+.It Fl T Ar mode
+Specifies trim mode (default 0).
+.Ar mode
+can be one of
+.Bl -hang -offset indent
+.It Sy 0
+EOL remains after the embedded ruby script is evaluated.
+.Pp
+.It Sy 1
+EOL is removed if the line ends with
+.Li "%>" .
+.Pp
+.It Sy 2
+EOL is removed if the line starts with
+.Li "<%"
+and ends with
+.Li "%>" .
+.Pp
+.It Sy -
+EOL is removed if the line ends with
+.Li "-%>" .
+And leading whitespaces are removed if the erb directive starts with
+.Li "<%-" .
+.Pp
+.El
+.Pp
+.It Fl U
+can be one of
+Sets the default value for internal encodings
+.Pf ( Li "Encoding.default_internal" ) to UTF-8.
+.Pp
+.It Fl d
+.It Fl -debug
+Turns on debug mode.
+.Li "$DEBUG"
+will be set to true.
+.Pp
+.It Fl h
+.It Fl -help
+Prints a summary of the options.
+.Pp
+.It Fl n
+Used with
+.Fl x .
+Prepends the line number to each line in the output.
+.Pp
+.It Fl v
+Enables verbose mode.
+.Li "$VERBOSE"
+will be set to true.
+.Pp
+.It Fl x
+Converts the eRuby script into Ruby script and prints it without line numbers.
+.Pp
+.El
+.Pp
+.Sh EXAMPLES
+Here is an eRuby script
+.Bd -literal -offset indent
+<?xml version="1.0" ?>
+<% require 'prime' -%>
+<erb-example>
+  <calc><%= 1+1 %></calc>
+  <var><%= __FILE__ %></var>
+  <library><%= Prime.each(10).to_a.join(", ") %></library>
+</erb-example>
+.Ed
+.Pp
+Command
+.Dl "% erb -T - example.erb"
+prints
+.Bd -literal -offset indent
+<?xml version="1.0" ?>
+<erb-example>
+  <calc>2</calc>
+  <var>example.erb</var>
+  <library>2, 3, 5, 7</library>
+</erb-example>
+.Ed
+.Pp
+.Sh SEE ALSO
+.Xr ruby 1 .
+.Pp
+And see
+.Xr ri 1
+documentation for
+.Li "ERB"
+class.
+.Pp
+.Sh REPORTING BUGS
+.Bl -bullet
+.Li Security vulnerabilities should be reported via an email to
+.Aq security@ruby-lang.org Ns
+.Li .
+Reported problems will be published after fixed.
+.Pp
+.Li And you can report other bugs and feature requests via the
+Ruby Issue Tracking System (http://bugs.ruby-lang.org).
+Do not report security vulnerabilities
+via the system because it publishes the vulnerabilities immediately.
+.El
+.Sh AUTHORS
+Written by Masatoshi SEKI.

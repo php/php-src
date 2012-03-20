@@ -1,0 +1,47 @@
+GEN  = $(srcdir)/tools/generate.rb
+SRC1 = $(top_srcdir)/parse.y
+SRC2 = $(srcdir)/eventids2.c
+BISON = bison
+
+.SUFFIXES: .y
+
+src: ripper.c eventids1.c eventids2table.c
+
+ripper.o: ripper.c lex.c eventids1.c eventids2.c eventids2table.c \
+	$(hdrdir)/ruby/ruby.h $(arch_hdrdir)/ruby/config.h \
+	$(hdrdir)/ruby/defines.h $(hdrdir)/ruby/intern.h \
+	$(hdrdir)/ruby/encoding.h $(hdrdir)/missing.h \
+	$(hdrdir)/../node.h $(hdrdir)/oniguruma.h \
+	$(hdrdir)/regex.h $(hdrdir)/st.h $(hdrdir)/util.h
+
+.y.c:
+	$(ECHO) compiling compiler $<
+	$(Q) $(BISON) -t -v -oy.tab.c $<
+	$(Q) sed -f $(top_srcdir)/tool/ytab.sed -e "/^#/s!y\.tab\.c!$@!" y.tab.c > $@
+	@$(RM) y.tab.c
+
+all: check
+static: check
+
+ripper.y: $(srcdir)/tools/preproc.rb $(top_srcdir)/parse.y
+	$(ECHO) extracting $@ from $(top_srcdir)/parse.y
+	$(Q) $(RUBY) $(srcdir)/tools/preproc.rb $(top_srcdir)/parse.y --output=$@
+
+check: $(GEN) $(SRC1) $(SRC2)
+	$(ECHO) checking $(SRC1) and $(SRC2)
+	$(Q) $(RUBY) $(GEN) --mode=check --ids1src=$(SRC1) --ids2src=$(SRC2)
+
+eventids1.c: $(srcdir)/tools/generate.rb $(SRC1)
+	$(ECHO) generating $@ from $(SRC1)
+	$(Q) $(RUBY) $(GEN) --mode=eventids1 --ids1src=$(SRC1) --output=$@
+
+eventids2table.c: $(srcdir)/tools/generate.rb $(SRC2)
+	$(ECHO) generating $@ from $(SRC2)
+	$(Q) $(RUBY) $(GEN) --mode=eventids2table --ids2src=$(SRC2) --output=$@
+
+# Entries for Ripper maintainer
+
+preproc: ripper.E
+ripper.E: ripper.c
+	$(ECHO) preprocessing ripper.c
+	$(Q) $(CC) -E $(CPPFLAGS) ripper.c | $(RUBY) $(srcdir)/tools/strip.rb > $@

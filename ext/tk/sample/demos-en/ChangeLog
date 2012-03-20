@@ -1,0 +1,64 @@
+2002-08-29 16:30  matt
+
+	* ChangeLog: ChangeLog is auto-generated *from* CVS log.
+
+2002-08-29 16:27  matt
+
+	* ChangeLog.prev: [no log message]
+
+2002-08-28 18:07  matt
+
+	* browse1, browse2, hello, ixset, rmt, rolodex, rolodex-j, square,
+	tcolor, timer, widget: Changed #! lines to the slightly more
+	portable '#!/usr/bin/env ruby'.
+
+2002-08-28 17:56  matt
+
+	* icon.rb, items.rb, label.rb, menu.rb, ruler.rb: Changed bitmap
+	file extensions from .bmp to .xbm.
+
+2002-08-28 17:55  matt
+
+	* images/: face.bmp, face.xbm, flagdown.bmp, flagdown.xbm,
+	flagup.bmp, flagup.xbm, gray25.bmp, gray25.xbm, letters.bmp,
+	letters.xbm, noletter.bmp, noletter.xbm, pattern.bmp, pattern.xbm:
+	Changed X bitmap file extensions from .bmp to the more intuitive
+	.xbm.
+
+2002-08-28 17:35  matt
+
+	* bitmap.rb, colors.rb, cscroll.rb, ctext.rb, hello, ixset,
+	menubu.rb, patch_1.1c1, rmt, style.rb, timer, ChangeLog, README,
+	README.tkencoding, arrow.rb, bind.rb, browse1, browse2, button.rb,
+	check.rb, clrpick.rb, dialog1.rb, dialog2.rb, entry1.rb, entry2.rb,
+	filebox.rb, floor.rb, form.rb, hscale.rb, icon.rb, image1.rb,
+	image2.rb, items.rb, label.rb, menu.rb, msgbox.rb, plot.rb,
+	puzzle.rb, radio.rb, rolodex, rolodex-j, ruler.rb, sayings.rb,
+	search.rb, square, states.rb, tcolor, text.rb, tkencoding.rb,
+	twind.rb, vscale.rb, widget, doc.org/README, doc.org/README.JP,
+	doc.org/README.tk80, doc.org/license.terms,
+	doc.org/license.terms.tk80, images/earth.gif, images/earthris.gif,
+	images/face.bmp, images/flagdown.bmp, images/flagup.bmp,
+	images/gray25.bmp, images/grey.25, images/grey.5,
+	images/letters.bmp, images/noletter.bmp, images/pattern.bmp,
+	images/tcllogo.gif, images/teapot.ppm: Initial revision
+
+2002-08-28 17:35  matt
+
+	* bitmap.rb, colors.rb, cscroll.rb, ctext.rb, hello, ixset,
+	menubu.rb, patch_1.1c1, rmt, style.rb, timer, ChangeLog, README,
+	README.tkencoding, arrow.rb, bind.rb, browse1, browse2, button.rb,
+	check.rb, clrpick.rb, dialog1.rb, dialog2.rb, entry1.rb, entry2.rb,
+	filebox.rb, floor.rb, form.rb, hscale.rb, icon.rb, image1.rb,
+	image2.rb, items.rb, label.rb, menu.rb, msgbox.rb, plot.rb,
+	puzzle.rb, radio.rb, rolodex, rolodex-j, ruler.rb, sayings.rb,
+	search.rb, square, states.rb, tcolor, text.rb, tkencoding.rb,
+	twind.rb, vscale.rb, widget, doc.org/README, doc.org/README.JP,
+	doc.org/README.tk80, doc.org/license.terms,
+	doc.org/license.terms.tk80, images/earth.gif, images/earthris.gif,
+	images/face.bmp, images/flagdown.bmp, images/flagup.bmp,
+	images/gray25.bmp, images/grey.25, images/grey.5,
+	images/letters.bmp, images/noletter.bmp, images/pattern.bmp,
+	images/tcllogo.gif, images/teapot.ppm: Taking over demo package
+	from Jonathan Conway.
+

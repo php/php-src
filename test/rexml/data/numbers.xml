@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+
+<numbers>
+  <set>
+    <nr>3</nr>
+    <nr>24</nr>
+    <nr>55</nr>
+    <nr>11</nr>
+    <nr>2</nr>
+    <nr>-3</nr>
+  </set>
+  <set>
+    <nr value="66"/>
+    <nr value="123"/>
+    <nr value="55"/>
+    <nr value="9999"/>
+  </set>
+</numbers>

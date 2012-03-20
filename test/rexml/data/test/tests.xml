@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tests xmlns:var="http://jaxen.org/test-harness/var">
+    <!-- test for jaxen-24 -->
+   <document url="xml/jaxen24.xml">
+       <context select="/body/div">
+           <test select="preceding::*[1]" count="1"/>
+           <valueOf select="local-name(preceding::*[1])">span</valueOf>
+       </context>
+        <!-- jaxen-58 -->
+       <context select="/">
+           <test select="//preceding::x" count="0"/>
+           <test select="//following::x" count="0"/>
+           <test select="/descendant::*/preceding::x" count="0"/>
+           <test select="/descendant::node()/preceding::x" count="0"/>
+       </context>
+   </document>
+
+    <!-- test for jaxen-3 -->
+  <document url="xml/simple.xml">
+    <context select="/">
+      <valueOf select="string()">abd</valueOf>
+    </context>
+    <context select="/root">
+      <valueOf select="string()">abd</valueOf>
+    </context>
+    <context select="/root/a">
+      <valueOf select="string()">a</valueOf>
+    </context>
+    <context select="/root/c">
+      <valueOf select="string()">d</valueOf>
+    </context>
+  </document>
+
+
+    <!-- test for jaxen-3 -->
+  <document url="xml/jaxen3.xml">
+    <context select="/">
+      <test select="/Configuration/hostname/attrlist/hostname[. = 'CE-A'] " count="1"/>
+    </context>
+  </document>
+
+    <!-- parser test cases all of which should fail-->
+  <document url="xml/numbers.xml">
+    <context select="/">
+        <!-- repeated xpaths, jaxen-35 -->
+      <test exception="true" select="/numbers numbers" count="0"/>
+        <!-- invalid xpath, jaxen-34 -->
+      <test exception="true" select="/a/b[c > d]efg" count="0"/>
+        <!-- invalid xpath, jaxen-27 -->
+      <test exception="true" select="/inv/child::" count="0"/>
+        <!-- invalid xpath, jaxen-26 -->
+	<!--
+
+      <test exception="true" select="/invoice/@test[abcd" count="0"/>
+      <test exception="true" select="/invoice/@test[abcd > x" count="0"/>
+
+      <test exception="true" select="string-length('a" count="0"/>
+      <test exception="true" select="/descendant::()" count="0"/>
+      <test exception="true" select="(1 + 1" count="0"/>
+
+      -->
+    </context>
+  </document>
+
+
+  <!-- test cases for the use of underscores in names -->
+  <document url="xml/underscore.xml">
+    <context select="/">
+      <test select="/root/@a" count="1"/>
+      <test select="/root/@_a" count="1"/>
+      <test select="/root/b" count="1"/>
+      <test select="/root/_b" count="1"/>
+      <valueOf select="/root/@a">1</valueOf>
+      <valueOf select="/root/@_a">2</valueOf>
+      <valueOf select="/root/b">1</valueOf>
+      <valueOf select="/root/_b">2</valueOf>
+    </context>
+  </document>
+
+  <!-- test cases for the use of = with nodesets -->
+  <document url="xml/web.xml">
+    <context select="/">
+      <valueOf select="/web-app/servlet/servlet-name = 'file'">true</valueOf>
+      <valueOf select="/web-app/servlet/servlet-name = 'snoop'">true</valueOf>
+    </context>
+  </document>
+
+  <document url="xml/numbers.xml">
+    <context select="/">
+      <valueOf select="/numbers/set/nr = '-3'">true</valueOf>
+      <valueOf select="/numbers/set/nr = -3">true</valueOf>
+      <valueOf select="/numbers/set/nr = 24">true</valueOf>
+      <valueOf select="/numbers/set/nr/@value = '9999'">true</valueOf>
+      <valueOf select="/numbers/set/nr/@value = 9999.0">true</valueOf>
+      <valueOf select="/numbers/set/nr/@value = 66">true</valueOf>
+    </context>
+  </document>
+
+  <!-- test basic math... -->
+  <document url="xml/numbers.xml">
+    <context select="/">
+      <valueOf select="(8 * 2 + 1) = 17">true</valueOf>
+      <valueOf select="(1 + 8 * 2) = 17">true</valueOf>
+      <valueOf select="(7 - 3 + 1) = 5">true</valueOf>
+      <valueOf select="(8 - 4 + 5 - 6) = 3">true</valueOf>
+      <!-- left-assoc tests, comments show WRONG evaluation -->
+      <!-- 3 - 2 - 1 != 2 -->
+      <valueOf select="3 - 2 - 1">0</valueOf>
+      <!-- 8 div 4 div 2 != 4 -->
+      <valueOf select="8 div 4 div 2">1</valueOf>
+      <!-- 3 mod 5 mod 7 != 1 -->
+      <valueOf select="3 mod 7 mod 5">3</valueOf>
+        <!-- 1=(2=2) is true-->
+      <valueOf select="1 = 2 = 2">false</valueOf>
+        <!--  2!=(3!=1) => 2!=1 => true, (2!=3)!=1 => 1!=1 => false -->
+      <valueOf select="2 != 3 != 1">false</valueOf>
+        <!-- 3 > (2 > 1) is true -->
+      <valueOf select="3 &gt; 2 &gt; 1">false</valueOf>
+        <!-- 3 >= (2 >= 2) is true -->
+      <valueOf select="3 &gt;= 2 &gt;= 2">false</valueOf>
+        <!-- 1 < (2 < 3) is false -->
+      <valueOf select="1 &lt; 2 &lt; 3">true</valueOf>
+        <!-- 0 <= (2 <= 3) is true -->
+      <valueOf select="2 &lt;= 2 &lt;= 3">true</valueOf>
+    </context>
+  </document>
+
+  <!-- test cases for preceding axis with different node types -->
+  <document url="xml/pi2.xml">
+    <context select="/a/c">
+      <test select="//processing-instruction()" count="1"/>
+      <test select="preceding-sibling::*" count="1"/>
+      <test select="preceding-sibling::node()" count="5"/>
+      <test select="preceding-sibling::*[1]" count="1"/>
+      <test select="preceding-sibling::processing-instruction()" count="1"/>
+      <valueOf select="preceding-sibling::processing-instruction()">order-by="x"</valueOf>
+      <valueOf select="preceding-sibling::*[1]">foo</valueOf>
+      <valueOf select="preceding-sibling::node()[2]">order-by="x"</valueOf>
+    </context>
+  </document>
+
+  <document url="xml/id.xml">
+    <context select="/"
+	     var:foobar="foobar"
+	     var:foo="foo">
+      <valueOf select="$foobar">foobar</valueOf>
+      <test select="/foo[@id=$foobar]" count="1"/>
+      <test select="/foo[@id='$foobar']" count="0"/>
+      <test select="/foo[concat($foo, 'bar')=@id]" count="1"/>
+      <test select="CD_Library/artist[@name=$artist]" count="0"/>
+    </context>
+  </document>
+
+  <document url="xml/id.xml">
+    <context select="/">
+      <!-- attributes have a parent: their element -->
+      <test select="/foo/@id/parent::foo" count="1"/>
+    </context>
+    <!-- attributes can also be used as context nodes -->
+    <context select="/foo/@id">
+      <test select="parent::foo" count="1"/>
+    </context>
+  </document>
+
+  <document url="xml/pi.xml">
+    <context select="/">
+      <test select="//processing-instruction()" count="3"/>
+      <test select="//processing-instruction('cheese')" count="2"/>
+      <test select="//processing-instruction('toast')" count="1">
+	<valueOf select="string()">is tasty</valueOf>
+      </test>
+    </context>
+
+  </document>
+
+  <!-- test evaluate() extension function -->
+  <document url="xml/evaluate.xml">
+    <context select="/">
+      <test select="evaluate('//jumps/*')" count="3"/>
+      <test select="evaluate('//jumps/object/dog')" count="1"/>
+      <test select="evaluate('//jumps/object')/evaluate" count="0"/>
+      <test select="evaluate('//jumps/object')/dog" count="1"/>
+      <test select="evaluate('//jumps/*')/dog" count="1"/>
+      <test select="//metatest[ evaluate(@select) = . ]" count="1"/>
+    </context>
+  </document>
+  
+  <document url="xml/numbers.xml">
+    <context select="/numbers/set[1]">
+      <test select="*[-3 = .]" count="1"/>
+      <valueOf select="54 &lt; *">true</valueOf>
+      <valueOf select="55 &lt;= *">true</valueOf>
+      <valueOf select="69 &lt; *">false</valueOf>
+      <valueOf select="-2 &gt; *">true</valueOf>
+      <valueOf select="-3 &gt;= *">true</valueOf>
+      <valueOf select="-4 &gt;= *">false</valueOf>
+    </context>
+    <!-- TODO
+    This context should work, but needs a fixed version of saxpath to parse the right-hand side
+    of the greater-than expression.
+    <context select="/numbers/set[2]">
+      <valueOf select="1 &gt; nr/@value">false</valueOf>
+      <valueOf select="55 &gt; nr/@value">false</valueOf>
+      <valueOf select="55 &gt;= nr/@value">true</valueOf>
+      <valueOf select="1000000 &gt; nr/@value">true</valueOf>
+    </context>
+    -->
+  </document>
+
+
+  <!-- test sibling axes -->
+  <document url="xml/axis.xml">
+
+    <context select="/root">
+      <test select="preceding-sibling::*" count="0"/>
+    </context>
+
+    <context select="/root/a/a.3">
+      <test select="preceding::*" count="2"/>
+    </context>
+
+    <context select="/root/a/a.3">
+      <test select="preceding-sibling::*" count="2"/>
+    </context>
+
+    <context select="/">
+      <valueOf select="name(/root/a/a.3/preceding-sibling::*[1])">a.2</valueOf>
+      <valueOf select="name(/root/a/a.3/preceding-sibling::*[2])">a.1</valueOf>
+    </context>
+
+    <context select="/">
+      <valueOf select="name(/root/a/a.3/following-sibling::*[1])">a.4</valueOf>
+      <valueOf select="name(/root/a/a.3/following-sibling::*[2])">a.5</valueOf>
+    </context>
+
+  </document>
+
+
+  <document url="xml/web.xml">
+
+    <context select="/">
+      <valueOf select="/web-app/servlet[1]/servlet-name">snoop</valueOf>
+      <valueOf select="/web-app/servlet[1]/servlet-name/text()">snoop</valueOf>
+      <valueOf select="/web-app/servlet[2]/servlet-name">file</valueOf>
+      <valueOf select="/web-app/servlet[2]/servlet-name/text()">file</valueOf>
+    </context>
+
+    <context select="/web-app/servlet[1]">
+      <valueOf select="servlet-name">snoop</valueOf>
+      <valueOf select="servlet-name/text()">snoop</valueOf>
+    </context>
+    
+    <context select="/web-app/servlet[2]/servlet-name">
+      <test select="preceding::*" count="3"/>
+    </context>
+
+    <context select="/web-app/servlet[2]/servlet-name">
+      <test select="following::*" count="13"/>
+    </context>
+
+  </document>
+
+
+  <!-- test name -->
+
+  <document url="xml/web.xml">
+    <context select="/">
+      
+      <test select="*" count="1">
+	<valueOf select="name()">web-app</valueOf>
+      </test>
+
+      <!-- NOTE that the child::node() tests only work if the
+      XML document does not comments or PIs
+      -->
+      
+      <test select="./*" count="1">
+	<valueOf select="name()">web-app</valueOf>
+      </test>
+      <test select="child::*" count="1">
+	<valueOf select="name()">web-app</valueOf>
+      </test>
+      <test select="/*" count="1">
+	<valueOf select="name()">web-app</valueOf>
+      </test>
+      <test select="/child::node()" count="1">
+	<valueOf select="name(.)">web-app</valueOf>
+      </test>
+      <test select="child::node()" count="1">
+	<valueOf select="name(.)">web-app</valueOf>
+      </test>
+
+      <!-- empty names -->
+
+      <valueOf select="name()"></valueOf>
+      <valueOf select="name(.)"></valueOf>
+      <valueOf select="name(parent::*)"></valueOf>
+      <valueOf select="name(/)"></valueOf>
+      <valueOf select="name(/.)"></valueOf>
+      <valueOf select="name(/self::node())"></valueOf>
+
+      <!-- name of root elemet -->
+      <valueOf select="name(node())">web-app</valueOf>
+      <valueOf select="name(/node())">web-app</valueOf>
+      <valueOf select="name(/*)">web-app</valueOf>
+      <valueOf select="name(/child::*)">web-app</valueOf>
+      <valueOf select="name(/child::node())">web-app</valueOf>
+      <valueOf select="name(/child::node())">web-app</valueOf>
+      <valueOf select="name(child::node())">web-app</valueOf>
+      <valueOf select="name(./*)">web-app</valueOf>
+      <valueOf select="name(*)">web-app</valueOf>
+
+    </context>
+
+    <context select="/*">
+      <!-- empty names -->
+      <valueOf select="name(..)"></valueOf>
+      <valueOf select="name(parent::node())"></valueOf>
+      <valueOf select="name(parent::*)"></valueOf>
+
+      <!-- name of root elemet -->
+      <valueOf select="name()">web-app</valueOf>
+      <valueOf select="name(.)">web-app</valueOf>
+      <valueOf select="name(../*)">web-app</valueOf>
+      <valueOf select="name(../child::node())">web-app</valueOf>
+    </context>
+  </document>
+
+
+
+  <!-- test predicates -->
+
+  <document url="xml/nitf.xml">
+    <context select="/nitf/head/docdata">
+      <test select="doc-id[@regsrc='AP' and @id-string='D76UIMO80']" count="1"/>
+    </context>
+    <context select="/nitf/head">
+      <test select="meta[@name='ap-cycle']" count="1"/>
+      <test select="meta[@content='AP']" count="1"/>
+      <test select="meta[@name and @content]" count="8"/>
+      <test select="meta[@name='ap-cycle' and @content='AP']" count="1"/>
+      <test select="meta[@name != 'ap-cycle']" count="7"/>
+    </context>
+    <context select="/">
+      <test select="/nitf/head/meta[@name='ap-cycle']" count="1"/>
+      <test select="/nitf/head/meta[@content='AP']" count="1"/>
+      <test select="/nitf/head/meta[@name and @content]" count="8"/>
+      <test select="/nitf/head/meta[@name='ap-cycle' and @content='AP']" count="1"/>
+      <test select="/nitf/head/meta[@name != 'ap-cycle']" count="7"/>
+    </context>
+  </document>
+
+
+  <document url="xml/moreover.xml">
+    <context select="/">
+      <test select="/child::node()" count="1"/>
+      <test select="/*" count="1"/>
+
+      <test select="/*/article" count="20"/>
+      <test select="//*" count="221"/>
+      <test select="//*[local-name()='article']" count="20"/>
+      <test select="//article" count="20"/>
+      <test select="/*/*[@code]" count="20"/>
+
+      <test select="/moreovernews/article[@code='13563275']" count="1"/>
+
+      <test select="/moreovernews/article[@code='13563275']">
+	<valueOf select="url">http://c.moreover.com/click/here.pl?x13563273</valueOf>
+      </test>
+      <test select="/*/article[@code='13563275']">
+	<valueOf select="url">http://c.moreover.com/click/here.pl?x13563273</valueOf>
+      </test>
+      <test select="//article[@code='13563275']">
+	<valueOf select="url">http://c.moreover.com/click/here.pl?x13563273</valueOf>
+      </test>
+      <test select="//*[@code='13563275']">
+	<valueOf select="url">http://c.moreover.com/click/here.pl?x13563273</valueOf>
+      </test>
+      <test select="/child::node()/child::node()[@code='13563275']">
+	<valueOf select="url">http://c.moreover.com/click/here.pl?x13563273</valueOf>
+      </test>
+      <test select="/*/*[@code='13563275']">
+	<valueOf select="url">http://c.moreover.com/click/here.pl?x13563273</valueOf>
+      </test>
+    </context>
+  </document>
+
+
+
+  <!-- test other node types-->
+
+  <document url="xml/contents.xml">
+    <context select="/">
+      <test select="processing-instruction()" count="3"/>
+      <test select="/processing-instruction()" count="3"/>
+      <test select="/comment()" count="1"/>
+      <test select="comment()" count="1"/>
+      <test select="/child::node()/comment()" count="2"/>
+      <test select="/*/comment()" count="2"/>
+      <test select="//comment()" count="3"/>
+    </context>
+  </document>
+
+
+
+  <!-- test positioning -->
+
+  <document url="xml/fibo.xml">
+    <context select="/">
+      <test select="/*/fibonacci[position() &lt; 10]" count="9"/>
+      <valueOf select="sum(//fibonacci)">196417</valueOf>
+      <valueOf select="sum(//fibonacci/@index)">325</valueOf>
+      <valueOf select="/*/fibonacci[2]">1</valueOf>
+      <valueOf select="/*/fibonacci[ count(/*/fibonacci) ]">75025</valueOf>
+      <valueOf select="/*/fibonacci[ count(/*/fibonacci) - 1 ]">46368</valueOf>
+    </context>
+  </document>
+
+
+  <!-- test number functions -->
+
+  <!-- test Axes -->
+
+  <document url="xml/web.xml">
+    <context select="/">
+      <test select="descendant-or-self::*" count="19"/>
+      <test select="descendant::*" count="19"/>
+      <test select="/descendant::*" count="19"/>
+      <test select="/descendant-or-self::*" count="19"/>
+      <test select="/descendant::servlet" count="2"/>
+      <test select="/descendant-or-self::servlet" count="2"/>
+      <test select="descendant-or-self::servlet" count="2"/>
+      <test select="descendant::servlet" count="2"/>
+      <test select="/*/servlet" count="2"/>
+      <valueOf select="count(/*/servlet)">2</valueOf>
+      <test select="//servlet" count="2"/>
+      <valueOf select="count(//servlet)">2</valueOf>
+    </context>
+    <context select="/web-app">
+      <test select="/descendant::servlet" count="2"/>
+      <test select="/descendant-or-self::servlet" count="2"/>
+      <test select="descendant-or-self::servlet" count="2"/>
+      <test select="descendant::servlet" count="2"/>
+    </context>
+  </document>
+
+  <document url="xml/much_ado.xml">
+    <context select="/">
+      <test select="/descendant::ACT" count="5"/>
+      <test select="descendant::ACT" count="5"/>
+      <valueOf select="/PLAY/TITLE">Much Ado about Nothing</valueOf>
+      <valueOf select="2+2">4</valueOf>
+      <valueOf select="5 * 4 + 1">21</valueOf>
+      <valueOf select="count(descendant::ACT)">5</valueOf>
+      <valueOf select="10 + count(descendant::ACT) * 5">35</valueOf>
+      <valueOf select="(10 + count(descendant::ACT)) * 5">75</valueOf>
+    </context>
+    <context select="/PLAY/ACT[2]/SCENE[1]">
+      <test select="/descendant::ACT" count="5"/>
+      <test select="../../descendant::ACT" count="5"/>
+      <test select="/PLAY/ACT[2]/SCENE[1]/descendant::SPEAKER" count="141"/>
+      <test select="descendant::SPEAKER" count="141"/>
+      <valueOf select="count(descendant::*)+1">646</valueOf>
+      <valueOf select="count(descendant::SPEAKER)+1">142</valueOf>
+      <valueOf select="count(ancestor::*)">2</valueOf>
+      <valueOf select="count(ancestor::PLAY)">1</valueOf>
+      <valueOf select="count(ancestor-or-self::*)">3</valueOf>
+      <valueOf select="count(ancestor-or-self::PLAY)">1</valueOf>
+      <valueOf select="5+count(ancestor::*)-1">6</valueOf>
+    </context>
+    <context select="/">
+      <!-- Test correct predicate application -->
+      <valueOf select="count(/PLAY/ACT/SCENE[1])">5</valueOf>
+    </context>
+  </document>
+
+  <!-- test axis node ordering -->
+  <document url="xml/web.xml">
+    <context select="/">
+      <!-- Reported as Jira issue JAXEN-24 -->
+      <test select="//servlet-mapping/preceding::*[1][name()='description']" count="1"/>
+      <test select="/web-app/servlet//description/following::*[1][name()='servlet-mapping']" count="1"/>
+      <test select="/web-app/servlet//description/following::*[2][name()='servlet-name']" count="1"/>
+    </context>
+  </document>
+  
+  <!-- test document function -->
+  <document url="xml/text.xml">
+    <context select="/">
+      <test select="document('xml/web.xml')" count="1">
+	<valueOf select="/web-app/servlet[1]/servlet-name">snoop</valueOf>
+	<valueOf select="/web-app/servlet[1]/servlet-name/text()">snoop</valueOf>
+      </test>
+      <valueOf select="document('xml/web.xml')/web-app/servlet[1]/servlet-name">snoop</valueOf>
+    </context>
+    <!-- Test to check if the context changes when an extension function is used.
+    First test is an example, second is the actual test.
+    -->
+    <context select="/foo/bar/cheese[1]">
+      <valueOf select="concat(./@id,'foo',@id)">3foo3</valueOf>
+      <valueOf select="concat(./@id,document('xml/web.xml')/web-app/servlet[1]/servlet-name,./@id)">3snoop3</valueOf>
+    </context>
+  </document>
+
+  <document url="xml/message.xml">
+    <context select="/">
+      <valueOf select="/message/body/data/items/item[name/text()='parentinfo']/value">Pruefgebiete</valueOf>
+      <valueOf select="document('xml/message.xml')/message/body/data/items/item[name/text()='parentinfo']/value">Pruefgebiete</valueOf>
+    </context>
+  </document>
+
+  <document url="xml/simple.xml">
+
+    <!-- test behaviour of AbsoluteLocationPath -->
+    <context select="/root/a">
+      <valueOf select="concat( ., /root/b )">ab</valueOf>
+      <valueOf select="concat( ../b, . )">ba</valueOf>
+      <valueOf select="concat( /root/b, . )">ba</valueOf>
+      <valueOf select="concat( /root/c/d, ../b )">db</valueOf>
+    </context>
+
+    <!-- test the translate() function -->
+    <context select="/">
+      <valueOf select="translate( '', '', '' )"></valueOf>
+      <valueOf select="translate( 'abcd', '', '' )">abcd</valueOf>
+      <valueOf select="translate( 'abcd', 'abcd', 'abcd' )">abcd</valueOf>
+      <valueOf select="translate( 'abcd', 'dcba', 'dcba' )">abcd</valueOf>
+      <valueOf select="translate( 'abcd', 'abcd', 'dcba' )">dcba</valueOf>
+      <valueOf select="translate( 'abcd', 'abcd', 'ab' )">ab</valueOf>
+      <valueOf select="translate( 'abcd', 'cdab', 'cd' )">cd</valueOf>
+      <valueOf select="translate( 'abcd', 'acbd', 'xy' )">xy</valueOf>
+      <valueOf select="translate( 'abcd', 'abcdb', 'abcdb' )">abcd</valueOf>
+      <valueOf select="translate( 'abcd', 'abcd', 'abcdb' )">abcd</valueOf>
+    </context>
+
+    <context select="/">
+      <valueOf select="substring('12345', 1.5, 2.6)">234</valueOf>
+      <valueOf select="substring('12345', 0, 3)">12</valueOf>
+      <valueOf select="substring('12345', 0 div 0, 3)"></valueOf>
+      <valueOf select="substring('12345', 1, 0 div 0)"></valueOf>
+      <valueOf select="substring('12345', -42, 1 div 0)">12345</valueOf>
+      <valueOf select="substring('12345', -1 div 0, 1 div 0)"></valueOf>
+      <valueOf select="substring('12345', 3)">345</valueOf>
+      <valueOf select="substring('12345',1,15)">12345</valueOf>
+    </context>
+
+	<!-- Some tests for the normalize-space() function -->
+	
+	<context select="/">
+	  <valueOf select="normalize-space('    abc    ')">abc</valueOf>
+	  <valueOf select="normalize-space(' a  b  c  ')">a b c</valueOf>
+	  <valueOf select="normalize-space(' a &#x0d; b &#x0a;  c  ')">a b c</valueOf>
+	  <!-- Next test case addresses issue JAXEN-22 -->
+	  <valueOf select="normalize-space(' ')"></valueOf>
+	  <!-- Next test case addresses issue JAXEN-29 -->
+	  <valueOf select="normalize-space('')"></valueOf>
+	</context>
+  </document>
+
+
+
+  <!-- test cases for String extension functions -->
+  <document url="xml/web.xml">
+    <context select="/web-app/servlet[1]">
+      <valueOf select="upper-case( servlet-class )">SNOOPSERVLET</valueOf>
+      <valueOf select="lower-case( servlet-class )">snoopservlet</valueOf>
+      <valueOf select="upper-case( servlet-class, 'fr' )">SNOOPSERVLET</valueOf>
+      <valueOf select="upper-case( servlet-class, 'fr-CA' )">SNOOPSERVLET</valueOf>
+      <valueOf select="upper-case( servlet-class, 'es-ES-Traditional_WIN' )">SNOOPSERVLET</valueOf>
+      <valueOf select="ends-with( servlet-class, 'Servlet' )">true</valueOf>
+      <valueOf select="ends-with( servlet-class, 'S' )">false</valueOf>
+    </context>
+  </document>
+
+  <!-- test cases for the lang() function -->
+  <document url="xml/lang.xml">
+    <context select="/">
+      <test select="/e1/e2[lang('hr')]" count="0"/>
+      <test select="/e1/e2/e3[lang('en')]" count="1"/>
+      <test select="/e1/e2/e3[lang('en-US')]" count="1"/>
+      <test select="/e1/e2/e3[lang('en-GB')]" count="0"/>
+      <test select="/e1/e2/e3[lang('hu')]" count="2"/>
+      <test select="/e1/e2/e3[lang('hu-HU')]" count="0"/>
+      <test select="/e1/e2/e3[lang('es')]" count="1"/>
+      <test select="/e1/e2/e3[lang('es-BR')]" count="0"/>
+    </context>
+  </document>
+
+  <!-- test namespace -->
+  <document url="xml/namespaces.xml">
+    <context select="/"
+	     xmlns:foo="http://fooNamespace/"
+	     xmlns:voo="http://fooNamespace/"
+	     xmlns:bar="http://barNamespace/"
+	     xmlns:alias="http://fooNamespace/">
+      <test select="/*" count="1"/>
+      <test select="/foo:a" count="1"/>
+      <test select="/foo:a/b" count="1"/>
+      <test select="/voo:a/b/c" count="1"/>
+      <test select="/voo:a/bar:f" count="1"/>
+      <test select="/*[namespace-uri()='http://fooNamespace/' and local-name()='a']" count="1"/>
+      <test select="/*[local-name()='a' and namespace-uri()='http://fooNamespace/']/*[local-name()='x' and namespace-uri()='http://fooNamespace/']" count="1"/>
+      <test select="/*[local-name()='a' and namespace-uri()='http://fooNamespace/']/*[local-name()='x' and namespace-uri()='http://fooNamespace/']/*[local-name()='y' and namespace-uri()='http://fooNamespace/']" count="1"/>
+    </context>
+    <!-- the prefix here and in the document have no relation; it's their
+    namespace-uri binding that counts -->
+    <context select="/" xmlns:foo="http://somethingElse/">
+      <test select="/foo:a/b/c" count="0"/>
+    </context>
+
+    <context select="/"
+	     xmlns:foo="http://fooNamespace/"
+	     xmlns:bar="http://barNamespace/"
+	     xmlns:alias="http://fooNamespace/">
+      <valueOf select="/foo:a/b/c">Hello</valueOf>
+      <valueOf select="/foo:a/foo:d/foo:e">Hey</valueOf>
+      <valueOf select="/foo:a/alias:x/alias:y">Hey3</valueOf>
+      <valueOf select="/foo:a/foo:x/foo:y">Hey3</valueOf>
+      <valueOf select="/*[local-name()='a' and namespace-uri()='http://fooNamespace/']/*[local-name()='x' and namespace-uri()='http://fooNamespace/']/*[local-name()='y' and namespace-uri()='http://fooNamespace/']">Hey3</valueOf>
+    </context>
+
+  </document>
+
+  <document url="xml/defaultNamespace.xml">
+    <context select="/">
+      <!-- NOTE: /a/b/c selects elements in no namespace only! -->
+      <test select="/a/b/c" count="0"/>
+      <!--
+        The following test uses an unbound prefix 'x' and should throw an exception.
+        Addresses issue JAXEN-18.
+        Turns out this isn't really tested as the test didn't fail when the exception wasn't thrown.
+      <test select="/x:a/x:b/x:c" count="0" exception="true"/>
+      -->
+    </context>
+    <context select="/"
+	     xmlns:dummy="http://dummyNamespace/">
+      <test select="/dummy:a/dummy:b/dummy:c" count="1"/>
+    </context>
+  </document>
+  <document url="xml/text.xml">
+    <context select="/">
+      <test select="/foo/bar/text()" count="3"/>
+      <valueOf select="normalize-space(/foo/bar/text())">baz</valueOf>
+    </context>
+  </document>
+
+  <document url="xml/testNamespaces.xml">
+    <context select="/">
+      <!-- the root is not an element, so no namespaces -->
+      <test select="namespace::*" count="0" debug="off"/>
+      <test select="/namespace::*" count="0" debug="off"/>
+      <test select="/Template/Application1/namespace::*" count="3" debug="off"/>
+      <test select="/Template/Application2/namespace::*" count="3" debug="off"/>
+
+      <test select="//namespace::*" count="25" debug="off"/>
+    </context>
+
+    <!--
+    <context select="/Template/Application1">
+      <test select="namespace::*" count="3" debug="off"/>
+      <test select="/namespace::*" count="0" debug="off"/>
+      <test select="/Template/Application1/namespace::*" count="3" debug="off"/>
+      <test select="/Template/Application2/namespace::*" count="3" debug="off"/>
+      <test select="//namespace::*" count="25" debug="off"/>
+      <test select="//namespace::xplt" count="8" debug="off"/>
+      <test xmlns:somethingelse="http://www.xxxx.com/"
+	    select="//namespace::somethingelse" count="0" debug="off"/>
+    </context>
+  -->
+  </document>
+
+  <document url="xml/testNamespaces.xml">
+    <context select="/">
+      <!-- namespace nodes have their element as their parent -->
+      <test select="/Template/namespace::xml/parent::Template" count="1"/>
+    </context>
+    <!-- namespace nodes can also be used as context nodes -->
+    <context select="/Template/namespace::xml">
+      <test select="parent::Template" count="1"/>
+    </context>
+  </document>
+
+</tests>

@@ -1,0 +1,22 @@
+	README for expect
+		by A. Ito, 28 October, 1998
+
+	Expect library adds IO class a method called expect(), which
+does similar act to tcl's expect extension. 
+
+The usage of the method is:
+
+   IO#expect(pattern,timeout=9999999)
+
+where `pattern' is an instance of String or Regexp and `timeout'
+is Fixnum, which can be omitted. 
+	When the method is called without block, it waits until the
+input which matches the pattern is obtained from the IO or the time
+specified as the timeout passes. When the pattern is obtained from the
+IO, the method returns an array. The first element of the array is the
+entire string obtained from the IO until the pattern matches. The
+following elements indicates the specific pattern which matched to the
+anchor in the regular expression. If the method ends because of
+timeout, it returns nil. 
+ 	When the method is called with block, the array is passed as
+the block parameter.

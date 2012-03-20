@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+require 'tk'
+
+TkButton.new(nil,
+	'text'=>"こんにちは、世界",
+	'command'=>proc{print "こんにちは、世界\n"; exit}
+).pack
+
+Tk.mainloop

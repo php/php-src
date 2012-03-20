@@ -1,0 +1,9 @@
+2001-07-26      <rise@leannan.knavery.net>
+
+	* Moved files to directory ruby-tk81-demos-english in tarball.
+
+2001-07-26      <rise@knavery.net>
+
+	* Added test to widget and hello versus Tk::TCL_VERSION & Tk::JAPANIZED_TK (per Guy Decoux in [ruby-talk:18559]) before requiring tkencoding.rb.
+
+

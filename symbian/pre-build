@@ -1,0 +1,83 @@
+YACC = bison
+IFCHANGE = cmd /C $(srcdir)\win32\ifchange.bat
+RM = del
+MV = cmd /C move
+VCS = svn
+
+
+parse.c: $(srcdir)\parse.y $(srcdir)\tool\ytab.sed
+	$(YACC) -d $(YFLAGS) -o y.tab.c $(<:\\=/)
+	sed -f $(srcdir)/tool/ytab.sed -e "/^#/s!y\.tab\.c!$@!" y.tab.c > $@.new
+	@$(MV) $@.new $(@)
+	sed -e "/^#line.*y\.tab\.h/d;/^#line.*parse\.y/d" y.tab.h > $(@:.c=.h).new
+	@$(IFCHANGE) $(@:.c=.h) $(@:.c=.h).new
+	@$(RM) y.tab.c y.tab.h
+
+INSNS = optinsn.inc insns.inc insns_info.inc vmtc.inc vm.inc
+
+INSNS2VMOPT = --srcdir="$(srcdir)"
+
+$(INSNS): $(srcdir)/insns.def $(srcdir)/vm_opts.h $(srcdir)/defs/opt_operand.def $(srcdir)/defs/opt_insn_unif.def
+	$(BASERUBY) -Ks $(srcdir)/tool/insns2vm.rb $(INSNS2VMOPT) $@
+
+minsns.inc: $(srcdir)/template/minsns.inc.tmpl
+
+opt_sc.inc: $(srcdir)/template/opt_sc.inc.tmpl
+
+optinsn.inc: $(srcdir)/template/optinsn.inc.tmpl
+
+optunifs.inc: $(srcdir)/template/optunifs.inc.tmpl
+
+insns.inc: $(srcdir)/template/insns.inc.tmpl
+
+insns_info.inc: $(srcdir)/template/insns_info.inc.tmpl
+
+vmtc.inc: $(srcdir)/template/vmtc.inc.tmpl
+
+vm.inc: $(srcdir)/template/vm.inc.tmpl
+
+$(srcdir)/id.h: parse.h $(srcdir)/tool/generic_erb.rb $(srcdir)/template/id.h.tmpl
+	$(BASERUBY) $(srcdir)/tool/generic_erb.rb --output=$@ $(srcdir)/template/id.h.tmpl parse.h
+
+node_name.inc: $(srcdir)/node.h
+	$(BASERUBY) -n $(srcdir)/tool/node_name.rb $? > $@
+
+known_errors.inc: $(srcdir)/template/known_errors.inc.tmpl $(srcdir)/defs/known_errors.def
+	$(BASERUBY) $(srcdir)/tool/generic_erb.rb -c -o $@ $(srcdir)/template/known_errors.inc.tmpl $(srcdir)/defs/known_errors.def
+
+newline.c:
+	$(BASERUBY) "$(srcdir)/tool/transcode-tblgen.rb" -vo newline.c $(srcdir)/enc/trans/newline.trans
+
+miniprelude.c: $(srcdir)/tool/compile_prelude.rb $(srcdir)/prelude.rb
+	$(BASERUBY) -I$(srcdir) $(srcdir)/tool/compile_prelude.rb $(srcdir)/prelude.rb $@
+
+$(srcdir)/ext/socket/constants.h: $(srcdir)/ext/socket/mkconstants.rb
+	$(BASERUBY) $(srcdir)/ext/socket/mkconstants.rb >$@
+
+
+
+$(srcdir)/revision.h: $(srcdir)/version.h $(srcdir)/ChangeLog
+	@set LC_MESSAGES=C
+	-@$(SET_LC_MESSAGES) $(VCS) info "$(@D)" | \
+	sed -n "s/.*Rev:/#define RUBY_REVISION/p" > "$@.tmp"
+	@$(IFCHANGE) "$@" "$@.tmp"
+
+incs: $(srcdir)/revision.h $(INSNS) node_name.inc known_errors.inc
+
+ids: $(srcdir)/id.h
+
+srcs: parse.c newline.c lex.c miniprelude.c
+
+lex.c: $(srcdir)\lex.c.blt
+	copy $(?:/=\) $@
+
+socket_const: $(srcdir)/ext/socket/constants.h
+
+MAKMAKE: incs srcs ids socket_const
+
+CLEAN :
+	del $(INSNS) node_name.inc known_errors.inc
+	$(RM) parse.c parse.h newline.c lex.c miniprelude.c $(srcdir)\revision.h $(srcdir)\id.h
+
+BLD LIB CLEANLIB RESOURCE FREEZE SAVESPACE RELEASABLES FINAL :
+

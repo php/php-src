@@ -1,0 +1,139 @@
+#!/usr/bin/ruby
+
+# tool/update-deps assists you to update dependencies in common.mk.
+
+# This script uses preprocessed source files (*.i) to extract
+# dependencies.
+# It is possible to generate *.i using gcc with -save-temps option as:
+#
+#   ./configure CFLAGS='-save-temps'
+#   make all golf
+#
+# After that, tool/update-deps generate common.mk with up-to-date dependencies.
+# Currently, the result is not perfect around version.o, compile.o, etc.
+# So you must see each changes and incorporate right changes.
+#
+#   ./tool/update-deps > z
+#   wdiff =(sed -e 's/\\$//' common.mk ) =(sed -e 's/\\$//' z) |less -j 5 -p '\{\+|\+\}|\[-|-\]'
+#   vi common.mk
+
+src = File.read("common.mk")
+
+includes_macro = {}
+src.scan(/^([A-Z_]+_H_INCLUDES)[ \t]*=(([^\\\n]|\\(.|\n))*)\n/) {
+  name = $1
+  vals = $2
+  #STDERR.puts vals.inspect
+  vals.gsub!(/\\\n/, ' ')
+  vals.gsub!(/\{\$\(VPATH\)\}/, '')
+  vals.gsub!(/thread_\$\(THREAD_MODEL\)/, 'thread_pthread')
+  vals = vals.strip.split(/\s+/)
+  includes_macro[name] = vals
+  #STDERR.puts  [name, vals].inspect
+}
+
+begin
+  again = false
+  includes_macro.each  {|name, vals|
+    vals.map! {|val|
+      if /\A\$\((.*_H_INCLUDES)\)\z/ =~ val
+        again = true
+        includes_macro.fetch($1)
+      else
+        val
+      end
+    }
+    vals.flatten!
+  }
+end while again
+
+src.gsub!(/^([0-9a-z._]+)\.\$\(OBJEXT\):(.*\n(?:[ 	].*\n)*)/) {
+  #STDERR.puts  $&.inspect
+  matched = $&
+  basename = $1
+  deps = $2
+  dd = deps.dup
+  dd.gsub!(/\{\$\(VPATH\)\}/, '')
+  dd.gsub!(/\\\n/, ' ')
+  dd.gsub!(/thread_\$\(THREAD_MODEL\)/, 'thread_pthread')
+  used_imacro = {}
+  includes_macro.each {|k, v|
+    if dd.sub!(/\$\(#{Regexp.escape k}\)/) { v.join(' ') }
+      used_imacro[k] = true
+    end
+  }
+  dd = dd.strip.split(/\s+/)
+  if !File.file?("#{basename}.o")
+    warn "#{basename}.o not found."
+  else
+    unless File.file? "#{basename}.i"
+      puts "#{basename}.i not found."
+      next
+    end
+    incs = []
+    File.foreach("#{basename}.i") {|line|
+      next unless /^# \d+ "([^"]*)"/ =~ line
+      inc = $1
+      next if %r{\A[/<]} =~ inc
+      inc.sub!(%r{\A\./}, '')
+      inc.sub!(%r{\Ainclude/ruby/}, '') or
+      inc.sub!(%r{\Ainclude/}, '') or
+      inc.sub!(%r{\A\.ext/include/[^/]+/ruby/}, '') or
+      inc.sub!(%r{\Aenc/}, '') or
+      inc.sub!(%r{\Amissing/}, '')
+      #p inc
+      incs << inc
+    }
+    incs.uniq!
+    incs = incs.sort_by {|inc| [(dd.index(inc) || dd.length), incs.index(inc)] }
+    add = incs - dd
+    if !add.empty? || true
+      if incs[0] != dd[0]
+        raise "first file not matched: #{incs[0].inspect} v.s. #{dd[0].inspect}"
+      end
+      depline = "#{basename}.$(OBJEXT):"
+      used_imacro.each_key {|k|
+        if includes_macro[k].all? {|v| incs.include? v }
+          im = "$(#{k})"
+          incs.map! {|inc|
+            if includes_macro[k].include? inc
+              im0 = im
+              im = nil
+              im0
+            else
+              inc
+            end
+          }
+          incs.compact!
+        else
+          needless = includes_macro[k].reject {|v| incs.include? v }
+          STDERR.puts "#{basename}.$(OBJEXT) can't use #{k}. #{needless.join(' ')} is not used."
+        end
+      }
+
+      incs.each {|inc|
+        inc = inc.sub(/\Athread_pthread/, 'thread_$(THREAD_MODEL)')
+        if /_INCLUDES\)\z/ =~ inc
+          # use $(RUBY_H_INCLUDES) as is.
+        elsif inc == 'revision.h'
+          inc = '$(srcdir)/revision.h'
+        else
+          inc = "{$(VPATH)}#{inc}"
+        end
+        depline << " #{inc}"
+      }
+      lines = []
+      while 72 < depline.length && depline.sub!(/\A(.{0,72}|.{72}.*?) /, '')
+        lines << $&
+      end
+      lines << depline
+      matched = lines.join("\\\n  ")
+      matched << "\n"
+    end
+  end
+  #STDERR.puts  matched.inspect
+  matched
+}
+
+puts src
+

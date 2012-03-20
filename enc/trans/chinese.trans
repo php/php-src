@@ -1,0 +1,32 @@
+#include "transcode_data.h"
+
+<%
+  gb2312_valid_byte_pattern = ValidEncoding('EUC-KR')
+  gb12345_valid_byte_pattern = ValidEncoding('EUC-KR')
+
+  transcode_tblgen "GB2312", "UTF-8",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("euc", 0x8080, "GB2312/UCS"),
+  gb2312_valid_byte_pattern
+
+  transcode_tblgen "GB12345", "UTF-8",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("euc", 0x8080, "GB12345/UCS"),
+  gb12345_valid_byte_pattern
+
+  transcode_tblgen "UTF-8", "GB2312",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("euc", 0x8080, "UCS/GB2312")
+
+  transcode_tblgen "UTF-8", "GB12345",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("euc", 0x8080, "UCS/GB12345")
+%>
+
+<%= transcode_generated_code %>
+
+void
+Init_chinese(void)
+{
+<%= transcode_register_code %>
+}

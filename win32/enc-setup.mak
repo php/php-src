@@ -1,0 +1,10 @@
+encs: BUILTIN_ENCOBJS BUILTIN_TRANSOBJS
+BUILTIN_ENCOBJS BUILTIN_TRANSOBJS: $(srcdir)/enc/Makefile.in
+
+!include $(srcdir)/enc/Makefile.in
+
+BUILTIN_ENCOBJS:
+	@echo BUILTIN_ENCOBJS = $(BUILTIN_ENCS:.c=.obj) >> $(MAKEFILE)
+
+BUILTIN_TRANSOBJS:
+	@echo BUILTIN_TRANSOBJS = $(BUILTIN_TRANSES:.trans=.obj) >> $(MAKEFILE)

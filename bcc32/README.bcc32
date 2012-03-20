@@ -1,0 +1,130 @@
+=begin
+
+= How to build ruby using Borland C++
+
+== Requirement
+
+(1) Borland C++ 5.0 or later.
+
+(2) Please set environment variable (({PATH}))
+    to run required commands properly from the command line.
+
+    Note: building ruby requires following commands.
+     * make
+     * bcc32
+     * tlib
+     * ilink32
+
+(3) If you want to build from CVS source, following commands are required.
+     * bison ((<URL:http://gnuwin32.sourceforge.net/packages/bison.htm>))
+     * sed   ((<URL:http://gnuwin32.sourceforge.net/packages/sed.htm>))
+
+(4) We strongly recommend to build ruby on C++Builder, to link following files.
+     * usebormm.lib
+     * memmgr.lib
+
+    RTL's internal memory manager cannot handle large memory block properly,
+    so we should use borlndmm.dll instead.
+     10000.times { "" << "." * 529671; GC.start } # crash
+
+== How to compile and install
+
+(1) Execute bcc32\configure.bat on your build directory.
+     ex. c:\src\ruby> bcc32\configure.bat
+    You can specify the target platform as an argument.
+    For example, run `((%configure i686-bccwin32%))'
+    You can also specify the install directory.
+    For example, run `((%configure --prefix=<install_directory>%))'
+    Default of the install directory is /usr .
+    The default ((|<PLATFORM>|)) is `(({i386-bccwin32}))'.
+     
+(2) Change ((|RUBY_INSTALL_NAME|)) and ((|RUBY_SO_NAME|)) in (({Makefile}))
+    if you want to change the name of the executable files. 
+    And add ((|RUBYW_INSTALL_NAME|)) to change the name of the
+    executable without console window if also you want.
+
+(3) Run `((%make%))'
+
+(4) Run `((%make test%))'
+
+(5) Run `((%make install%))'
+
+(6) Requires dynamic RTL (cc3250.dll on C++Builder5) and borlndmm.dll (If built with
+    usebormm.lib) to use installed binary. These files are ordinary in bcc32's bin
+    directory.
+
+== Icons
+
+Any icon files(*.ico) in the build directory, directories specified with
+((|icondirs|)) make variable and (({win32})) directory under the ruby
+source directory will be included in DLL or executable files, according
+to their base names.
+    $(RUBY_INSTALL_NAME).ico or ruby.ico   --> $(RUBY_INSTALL_NAME).exe
+    $(RUBYW_INSTALL_NAME).ico or rubyw.ico --> $(RUBYW_INSTALL_NAME).exe
+    the others                             --> $(RUBY_SO_NAME).dll
+
+Although no icons are distributed with the ruby source or in the official 
+site, you can use anything you like. For example, followings are written 
+in Japanese, but you can download at least.
+
+* ((<URL:http://member.nifty.ne.jp/ueivu/rubyico.html>)) or
+  ((<zipped icons|URL:http://member.nifty.ne.jp/ueivu/Ruby_ico.zip>))
+* ((<URL:http://homepage1.nifty.com/a_nakata/ruby/>)) or
+  ((<icon itself|URL:http://homepage1.nifty.com/a_nakata/ruby/RubyIcon.ico>))
+
+== Build examples
+
+* Build on the ruby source directory.
+
+  ex.)
+    ruby source directory:  C:\ruby
+    build directory:        C:\ruby
+    install directory:      C:\usr\local
+
+    C:
+    cd \ruby
+    bcc32\configure --prefix=/usr/local
+    make
+    make test
+    make install
+
+* Build on the relative directory from the ruby source directory and CPU type 
+  i386.
+
+  ex.)
+    ruby source directory:  C:\ruby
+    build directory:        C:\ruby\bccwin32
+    install directory:      C:\usr\local
+    CPU                     i386
+    
+    C:
+    cd \ruby
+    mkdir bccwin32
+    cd bccwin32
+    ..\bcc32\configure --prefix=/usr/local
+    make
+    make test
+    make install
+
+* Build on the different drive.
+
+  ex.)
+    ruby source directory:  C:\src\ruby
+    build directory:        D:\build\ruby
+    install directory:      C:\usr\local
+
+    D:
+    cd D:\build\ruby
+    C:\src\ruby\bcc32\configure --prefix=C:/usr/local
+    make
+    make test
+    make install
+
+== Bugs
+
+You can ((*NOT*)) use a path name contains any white space characters as
+the ruby source directory, this restriction comes from the behavior of
+(({!INCLUDE})) directives of (({MAKE})).
+((- you may call it a bug. -))
+
+=end

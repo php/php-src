@@ -1,0 +1,84 @@
+pty extension version 0.3 by A.ito
+
+1. Introduction
+
+This extension module adds ruby a functionality to execute an 
+arbitrary command through pseudo tty (pty).
+
+2. Install
+
+Follow the instruction below.
+
+(1) Execute
+
+      ruby extconf.rb
+
+    then Makefile is generated.
+
+(3) Do make; make install.
+
+3. What you can do
+
+This extension module defines a module named PTY, which contains
+following module fungtions:
+
+   getpty(command)
+   spawn(command)
+
+      This function reserves a pty, executes command over the pty 
+      and returns an array. The return value is an array with three
+      elements. The first element in the array is for reading and the 
+      second for writing. The third element is the process ID of the
+      child process. If this function is called with an iterator block,
+      the array is passed to the block as block parameters, and the
+      function itself returns nil.
+
+      When the child process is suspended or finished, an exception is
+      raised.  If this function is called with an iterator block,
+      exception is raised only within the block.  Child process
+      monitor is terminated on block exit.
+
+   protect_signal
+   reset_signal
+
+      These functions are obsolete in this version of pty.
+
+   PTY.open
+
+      Allocates a pty (pseudo-terminal).
+
+      It returns an array which contains an IO object and a File object.
+      The former is the master of the pty.
+      The latter is the slave of the pty.
+
+      If a block is given, it yields the array instead of return.
+      The value of the block is returned.
+      master_io and slave_file is closed when return if they are not closed.
+
+   PTY.check(pid[, raise=false])
+
+      checks the status of the child process specified by pid, and
+      returns nil if the process is still alive and active.
+      Otherwise, returns Process::Status about the process if raise is
+      false, or PTY::ChildExited exception is raised.
+
+4. License
+
+(C) Copyright 1998 by Akinori Ito.
+
+This software may be redistributed freely for this purpose, in full 
+or in part, provided that this entire copyright notice is included 
+on any copies of this software and applications and derivations thereof.
+
+This software is provided on an "as is" basis, without warranty of any
+kind, either expressed or implied, as to any matter including, but not
+limited to warranty of fitness of purpose, or merchantability, or
+results obtained from use of this software.
+
+5. Bug report
+
+Please feel free to send E-mail to
+
+   aito@ei5sun.yz.yamagata-u.ac.jp
+
+for any bug report, opinion, contribution, etc.

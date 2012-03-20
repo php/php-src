@@ -1,0 +1,59 @@
+#
+# configration file for operand union optimization
+#
+# format:
+#   [insn name] op1, op2 ...
+#
+#  wildcard: *
+#
+
+__END__
+
+getlocal 2
+getlocal 3
+getlocal 4
+
+setlocal 2
+setlocal 3
+setlocal 4
+
+getdynamic *, 0
+getdynamic 1, 0
+getdynamic 2, 0
+getdynamic 3, 0
+getdynamic 4, 0
+
+setdynamic *, 0
+setdynamic 1, 0
+setdynamic 2, 0
+setdynamic 3, 0
+setdynamic 4, 0
+
+putobject INT2FIX(0)
+putobject INT2FIX(1)
+putobject Qtrue
+putobject Qfalse
+
+# CALL
+send *, *, Qfalse, 0, *
+send *, 0, Qfalse, 0, *
+send *, 1, Qfalse, 0, *
+send *, 2, Qfalse, 0, *
+send *, 3, Qfalse, 0, *
+
+# FCALL
+send *, *, Qfalse, 0x04, *
+send *, 0, Qfalse, 0x04, *
+send *, 1, Qfalse, 0x04, *
+send *, 2, Qfalse, 0x04, *
+send *, 3, Qfalse, 0x04, *
+
+# VCALL
+send *, 0, Qfalse, 0x0c, *
+
+
+__END__
+
+
+
+

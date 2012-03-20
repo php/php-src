@@ -1,0 +1,191 @@
+* Rubyとは
+
+Rubyはシンプルかつ強力なオブジェクト指向スクリプト言語です．
+Rubyは最初から純粋なオブジェクト指向言語として設計されていま
+すから，オブジェクト指向プログラミングを手軽に行う事が出来ま
+す．もちろん通常の手続き型のプログラミングも可能です．
+
+Rubyはテキスト処理関係の能力などに優れ，Perlと同じくらい強力
+です．さらにシンプルな文法と，例外処理やイテレータなどの機構
+によって，より分かりやすいプログラミングが出来ます．
+
+
+* Rubyの特長
+
+  + シンプルな文法
+  + 普通のオブジェクト指向機能(クラス，メソッドコールなど)
+  + 特殊なオブジェクト指向機能(Mixin, 特異メソッドなど)
+  + 演算子オーバーロード
+  + 例外処理機能
+  + イテレータとクロージャ
+  + ガーベージコレクタ
+  + ダイナミックローディング (アーキテクチャによる)
+  + 移植性が高い．多くのUnix-like/POSIX互換プラットフォーム上で
+    動くだけでなく，Windows， Mac OS X，BeOSなどの上でも動く
+    cf. http://bugs.ruby-lang.org/projects/ruby-trunk/wiki/SupportedPlatformsJa
+
+* 入手法
+
+** FTPで
+
+以下の場所においてあります．
+
+  ftp://ftp.ruby-lang.org/pub/ruby/
+
+** Subversionで
+
+開発先端のソースコードは次のコマンドで取得できます．
+
+  $ svn co http://svn.ruby-lang.org/repos/ruby/trunk/ ruby
+
+他に開発中のブランチの一覧は次のコマンドで見られます．
+
+  $ svn ls http://svn.ruby-lang.org/repos/ruby/branches/
+
+** Gitで
+
+SubversionのミラーをGitHubに公開しています．
+以下のコマンドでリポジトリを取得できます．
+
+  $ git clone git://github.com/ruby/ruby.git
+
+* ホームページ
+
+RubyのホームページのURLは
+
+   http://www.ruby-lang.org/
+
+です．
+
+
+* メーリングリスト
+
+Rubyのメーリングリストがあります。参加希望の方は
+
+   ruby-list-ctl@ruby-lang.org
+
+まで本文に
+
+   subscribe YourFirstName YourFamilyName
+
+と書いて送って下さい。
+
+Ruby開発者向けメーリングリストもあります。こちらではrubyのバ
+グ、将来の仕様拡張など実装上の問題について議論されています。
+参加希望の方は
+
+   ruby-dev-ctl@ruby-lang.org
+
+までruby-listと同様の方法でメールしてください。
+
+Ruby拡張モジュールについて話し合うruby-extメーリングリストと
+数学関係の話題について話し合うruby-mathメーリングリストと
+英語で話し合うruby-talkメーリングリストもあります。参加方法
+はどれも同じです。
+
+
+* コンパイル・インストール
+
+以下の手順で行ってください．
+
+  1. もしconfigureファイルが見つからない、もしくは
+     configure.inより古いようなら、autoconfを実行して
+     新しくconfigureを生成する
+
+  2. configureを実行してMakefileなどを生成する
+
+     環境によってはデフォルトのCコンパイラ用オプションが付き
+     ます．configureオプションで optflags=.. warnflags=.. 等
+     で上書きできます．
+
+  3. (必要ならば)defines.hを編集する
+
+     多分，必要無いと思います．
+
+  4. (必要ならば)ext/Setupに静的にリンクする拡張モジュールを
+     指定する
+
+     ext/Setupに記述したモジュールは静的にリンクされます．
+
+     ダイナミックローディングをサポートしていないアーキテク
+     チャではSetupの1行目の「option nodynamic」という行のコ
+     メントを外す必要があります．また，このアーキテクチャで
+     拡張モジュールを利用するためには，あらかじめ静的にリン
+     クしておく必要があります．
+
+  5. makeを実行してコンパイルする
+
+  6. make checkでテストを行う．
+
+     「check succeeded」と表示されれば成功です．ただしテスト
+     に成功しても完璧だと保証されている訳ではありません．
+
+  7. make install
+
+     以下のディレクトリを作って，そこにファイルをインストー
+     ルします．
+
+       * ${DESTDIR}${prefix}/bin
+       * ${DESTDIR}${prefix}/include/ruby-${MAJOR}.${MINOR}.${TEENY}
+       * ${DESTDIR}${prefix}/include/ruby-${MAJOR}.${MINOR}.${TEENY}/${PLATFORM}
+       * ${DESTDIR}${prefix}/lib
+       * ${DESTDIR}${prefix}/lib/ruby
+       * ${DESTDIR}${prefix}/lib/ruby/${MAJOR}.${MINOR}.${TEENY}
+       * ${DESTDIR}${prefix}/lib/ruby/${MAJOR}.${MINOR}.${TEENY}/${PLATFORM}
+       * ${DESTDIR}${prefix}/lib/ruby/site_ruby
+       * ${DESTDIR}${prefix}/lib/ruby/site_ruby/${MAJOR}.${MINOR}.${TEENY}
+       * ${DESTDIR}${prefix}/lib/ruby/site_ruby/${MAJOR}.${MINOR}.${TEENY}/${PLATFORM}
+       * ${DESTDIR}${prefix}/lib/ruby/vendor_ruby
+       * ${DESTDIR}${prefix}/lib/ruby/vendor_ruby/${MAJOR}.${MINOR}.${TEENY}
+       * ${DESTDIR}${prefix}/lib/ruby/vendor_ruby/${MAJOR}.${MINOR}.${TEENY}/${PLATFORM}
+       * ${DESTDIR}${prefix}/lib/ruby/gems/${MAJOR}.${MINOR}.${TEENY}
+       * ${DESTDIR}${prefix}/share/man/man1
+       * ${DESTDIR}${prefix}/share/ri/${MAJOR}.${MINOR}.${TEENY}/system
+
+     RubyのAPIバージョンが`x.y.z'であれば，((|${MAJOR}|))は
+     `x'で，((|${MINOR}|))は`y'，((|${TEENY}|))は`z'です．
+
+     注意: APIバージョンのteenyは，Rubyプログラムのバージョ
+     ンとは異なることがあります．
+
+     rootで作業する必要があるかもしれません．
+
+もし，コンパイル時にエラーが発生した場合にはエラーのログとマ
+シン，OSの種類を含むできるだけ詳しいレポートを作者に送ってく
+ださると他の方のためにもなります．
+
+
+* 移植
+
+UNIXであればconfigureがほとんどの差異を吸収してくれるはずで
+すが，思わぬ見落としがあった場合(あるに違いない)，作者にその
+ことをレポートすれば，解決できるかも知れません．
+
+アーキテクチャにもっとも依存するのはGC部です．RubyのGCは対象
+のアーキテクチャがsetjmp()またはgetcontext()によって全てのレ
+ジスタをjmp_bufやucontext_tに格納することと，jmp_bufや
+ucontext_tとスタックが32bitアラインメントされていることを仮定
+しています．特に前者が成立しない場合の対応は非常に困難でしょ
+う．後者の解決は比較的簡単で，gc.cでスタックをマークしている
+部分にアラインメントのバイト数だけずらしてマークするコードを
+追加するだけで済みます．「defined(__mc68000__)」で括られてい
+る部分を参考にしてください．
+
+レジスタウィンドウを持つCPUでは，レジスタウィンドウをスタッ
+クにフラッシュするアセンブラコードを追加する必要があるかも知
+れません．
+
+
+* 配布条件
+
+COPYING.jaファイルを参照してください。
+
+
+* 著者
+
+コメント，バグレポートその他は matz@netlab.jp まで．
+-------------------------------------------------------
+created at: Thu Aug  3 11:57:36 JST 1995
+Local variables:
+mode: indented-text
+end:

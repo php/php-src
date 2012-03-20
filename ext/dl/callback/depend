@@ -1,0 +1,15 @@
+src: callback.c \
+     callback-0.c callback-1.c callback-2.c \
+     callback-3.c callback-4.c callback-5.c \
+     callback-6.c callback-7.c callback-8.c
+
+$(OBJS): $(hdrdir)/ruby.h
+
+callback-0.c callback-1.c callback-2.c \
+callback-3.c callback-4.c callback-5.c \
+callback-6.c callback-7.c callback-8.c \
+	: callback.c
+
+callback.c: $(srcdir)/mkcallback.rb $(srcdir)/../dl.h
+	@echo "generating callback.c"
+	@$(RUBY) $(srcdir)/mkcallback.rb -output=callback $(srcdir)/../dl.h

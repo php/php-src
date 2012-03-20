@@ -1,0 +1,48 @@
+#!/bin/sh
+# usage: ifchange target temporary
+
+timestamp=
+until [ "$0" = 0 ]; do
+    case "$1" in
+	--timestamp)
+	    timestamp=.
+	    ;;
+	--timestamp=*)
+	    timestamp=`expr \( "$1" : '[^=]*=\(.*\)' \)`
+	    ;;
+	*)
+	    break
+	    ;;
+    esac
+    shift
+done
+
+target="$1"
+temp="$2"
+if [ "$temp" = - ]; then
+    temp="tmpdata$$.tmp~"
+    cat > "$temp" || exit $?
+    trap 'rm -f "$temp"' 0
+fi
+
+if cmp "$target" "$temp" >/dev/null 2>&1; then
+    echo "$target unchanged"
+    rm -f "$temp"
+else
+    echo "$target updated"
+    mv -f "$temp" "$target"
+fi
+
+if [ -n "${timestamp}" ]; then
+    if [ x"${timestamp}" = x. ]; then
+	case "$target" in
+	    */*)
+		timestamp=`dirname "$target"`/.time.`basename "$target"`
+		;;
+	    *)
+		timestamp=.time."$target"
+		;;
+	esac
+    fi
+    : > "$timestamp"
+fi

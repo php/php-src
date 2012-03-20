@@ -1,0 +1,2 @@
+iconv.o: iconv.c $(hdrdir)/ruby.h $(topdir)/config.h $(hdrdir)/defines.h \
+  $(hdrdir)/st.h $(hdrdir)/intern.h $(hdrdir)/encoding.h

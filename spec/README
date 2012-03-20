@@ -1,0 +1,31 @@
+= RubySpec
+
+RubySpec (http://rubyspec.org) provides the annotation of the Ruby
+implementation in an executable format.  The make task
+`update-rubyspec' retrieves the specification and puts it into this
+directory.
+
+== Directory structure
+ spec
+  +-- mspec            driver library for executing the specification.
+  +-- rubyspec
+       +-- core        specification for core libraries
+       |    +-- array
+       |    +-- bignum
+       |    +-- ...
+       |
+       +-- fixtures    example classes for writing specs
+       +-- language    specification for Ruby language itself
+       +-- library     specification for standard libraries
+            +-- addrev
+            +-- ...
+
+== How to run
+:make target
+  verifies all specs.
+   $ make test-rubyspec
+:mspec command
+  verifies the specified spec.
+   $ mspec {language|core|library}
+   or
+   $ mspec spec/path/to/some_spec.rb

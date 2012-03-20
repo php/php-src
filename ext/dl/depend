@@ -1,0 +1,7 @@
+cfunc.o: cfunc.c dl.h $(hdrdir)/ruby.h
+
+cptr.o: cptr.c dl.h $(hdrdir)/ruby.h $(hdrdir)/io.h
+
+handle.o: handle.c dl.h $(hdrdir)/ruby.h
+
+dl.o: dl.c dl.h $(hdrdir)/ruby.h $(hdrdir)/io.h

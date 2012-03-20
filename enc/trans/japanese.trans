@@ -1,0 +1,98 @@
+#include "transcode_data.h"
+
+<%
+  map = {}
+  map["{00-7f}"] = :nomap
+  map["{a1-fe}{a1-fe}"] = :func_so
+  map["8e{a1-df}"] = :func_so
+  map["8e{e0-fe}"] = :undef
+  map["8f{a1-fe}{a1-fe}"] = :undef
+  transcode_generate_node(ActionMap.parse(map), "eucjp2sjis")
+
+  map = {}
+  map["{00-7f}"] = :nomap
+  map["{81-9f,e0-ef}{40-7e,80-fc}"] = :func_so
+  map["{f0-fc}{40-7e,80-fc}"] = :undef
+  map["{a1-df}"] = :func_so
+  transcode_generate_node(ActionMap.parse(map), "sjis2eucjp")
+%>
+
+<%= transcode_generated_code %>
+
+static ssize_t
+fun_so_eucjp2sjis(void *statep, const unsigned char *s, size_t l, unsigned char *o, size_t osize)
+{
+    if (s[0] == 0x8e) {
+        o[0] = s[1];
+        return 1;
+    }
+    else {
+        int h, m, l;
+        m = s[0] & 1;
+        h = (s[0]+m) >> 1;
+        h += s[0] < 0xdf ? 0x30 : 0x70;
+        l = s[1] - m * 94 - 3;
+        if (0x7f <= l)
+            l++;
+        o[0] = h;
+        o[1] = l;
+        return 2;
+    }
+}
+
+static ssize_t
+fun_so_sjis2eucjp(void *statep, const unsigned char *s, size_t l, unsigned char *o, size_t osize)
+{
+    if (l == 1) {
+        o[0] = '\x8e';
+        o[1] = s[0];
+        return 2;
+    }
+    else {
+        int h, l;
+        h = s[0];
+        l = s[1];
+        if (0xe0 <= h)
+            h -= 64;
+        l += l < 0x80 ? 0x61 : 0x60;
+        h = h * 2 - 0x61;
+        if (0xfe < l) {
+            l -= 94;
+            h += 1;
+        }
+        o[0] = h;
+        o[1] = l;
+        return 2;
+    }
+}
+
+static const rb_transcoder
+rb_eucjp2sjis = {
+    "EUC-JP", "Shift_JIS", eucjp2sjis,
+    TRANSCODE_TABLE_INFO,
+    1, /* input_unit_length */
+    3, /* max_input */
+    2, /* max_output */
+    asciicompat_converter, /* asciicompat_type */
+    0, NULL, NULL, /* state_size, state_init, state_fini */
+    NULL, NULL, NULL, fun_so_eucjp2sjis
+};
+
+static const rb_transcoder
+rb_sjis2eucjp = {
+    "Shift_JIS", "EUC-JP", sjis2eucjp,
+    TRANSCODE_TABLE_INFO,
+    1, /* input_unit_length */
+    2, /* max_input */
+    2, /* max_output */
+    asciicompat_converter, /* asciicompat_type */
+    0, NULL, NULL, /* state_size, state_init, state_fini */
+    NULL, NULL, NULL, fun_so_sjis2eucjp
+};
+
+void
+Init_japanese(void)
+{
+    rb_register_transcoder(&rb_eucjp2sjis);
+    rb_register_transcoder(&rb_sjis2eucjp);
+}

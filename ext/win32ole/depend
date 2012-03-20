@@ -1,0 +1,1 @@
+win32ole.o : win32ole.c $(hdrdir)/ruby.h $(hdrdir)/config.h $(hdrdir)/defines.h

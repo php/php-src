@@ -1,0 +1,440 @@
+
+= Rake Changelog
+
+== Version 0.8.7
+
+* Fixed EXEEXT for JRuby on windows.
+
+== Version 0.8.6
+
+* Minor fixes to the RDoc generation (removed dependency on darkfish
+  and removed inline source option).
+
+== Version 0.8.5
+
+* Better support for the system command on Windows.
+
+== Version 0.8.4
+
+* Preserve case when locating rakefiles (patch from James
+  M. Lawrence/quix)
+
+* Better support for windows paths in the test task (patch from Simon
+  Chiang/bahuvrihi)
+
+* Windows system dir search order is now: HOME, HOMEDRIVE + HOMEPATH,
+  APPDATA, USERPROFILE (patch from Luis Lavena)
+
+* MingGW is now recognized as a windows platform.  (patch from Luis
+  Lavena)
+
+* Numerous fixes to the windows test suite (patch from Luis Lavena).
+
+* Improved Rakefile case insensitivity testing (patch from Luis
+  Lavena).
+
+* Fixed stray ARGV option problem that was interfering with
+  Test::Unit::Runner.
+
+* Fixed default verbose mode (was accidently changed to false).  
+
+* Removed reference to manage_gem to fix the warning produced by the
+  gem package task.
+
+== Version 0.8.3
+
+* Enhanced the system directory detection in windows. We now check
+  HOMEDRIVE/HOMEPATH and USERPROFILE if APPDATA isn't found. (Patch
+  supplied by James Tucker). Rake no long aborts if it can't find the
+  directory.
+
+* Added fix to handle ruby installations in directories with spaces in
+  their name.  
+
+== Version 0.8.2
+
+* Fixed bug in package task so that it will include the subdir
+  directory in the package for testing. (Bug found by Adam Majer)
+
+* Added ENV var to rakefile to prevent OS X from including extended
+  attribute junk in a tar file. (Bug found by Adam Majer)
+
+* Fixed filename dependency order bug in test_inspect_pending and
+  test_to_s_pending. (Bug found by Adam Majer)
+
+* Fixed check for file utils options to make them immune to the
+  symbol/string differences. (Patch supplied by Edwin Pratomo)
+
+* Fixed bug with rules involving multiple source (Patch supplied by
+  Emanuel Indermühle)
+
+* Switched from getoptlong to optparse (patches supplied by Edwin
+  Pratomo)
+
+* The -T option will now attempt to dynamically sense the size of the
+  terminal.  RAKE_COLUMNS will override any dynamic sensing.
+
+* FileList#clone and FileList#dup have better sematics w.r.t. taint
+  and freeze.
+
+* Added ability clear prerequisites, and/or actions from an existing
+  task.
+
+* Added the ability to reenable a task to be invoked a second time.
+
+* Changed RDoc test task to have no default template. This makes it
+  easier for the tempate to pick up the template from the environment.
+
+* Changed from using Mutex to Monitor. Evidently Mutex causes thread
+  join errors when Ruby is compiled with -disable-pthreads. (Patch
+  supplied by Ittay Dror) 
+
+* Fixed bug in makefile parser that had problems with extra spaces in
+  file task names. (Patch supplied by Ittay Dror)
+
+* Added a performance patch for reading large makefile dependency
+  files. (Patch supplied by Ittay Dror)
+
+* Default values for task arguments can easily be specified with the
+  :with_defaults method. (Idea for default argument merging supplied
+  by (Adam Q. Salter)
+
+* The -T output will only self-truncate if the output is a tty.
+  However, if RAKE_COLUMNS is explicitly set, it will be honored in
+  any case. (Patch provided by Gavin Stark).
+
+* Numerous fixes for running under windows. A big thanks to Bheeshmar
+  Redheendran for spending a good part of the afternoon at the
+  Lonestar Ruby Conference to help me work out these issues.
+
+== Version 0.8.1
+
+* Removed requires on parsedate.rb (in Ftptools)
+* Removed ftools from rake.rb.  Made it options in sys.rb
+
+== Version 0.8.0
+
+* Added task parameters (e.g. "rake build[version7]")
+* Made task parameters passable to prerequisites.
+* Comments are limited to 80 columns or so (suggested by Jamis Buck).
+* Added -D to display full comments (suggested by Jamis Buck).
+* The rake program will set the status value used in any explicit
+  exit(n) calls. (patch provided by Stephen Touset)
+* Fixed error in functional tests that were not including session (and
+  silently skipping the functionl tests.
+* Removed --usage and make -h the same as -H.
+* Make a prettier inspect for tasks.
+
+== Version 0.7.3
+
+* Added existing and existing! methods to FileList
+* FileLists now claim to be Arrays (via is_a?) to get better support
+  from the FileUtil module.
+* Added init and top_level for custom rake applications.
+
+== Version 0.7.2
+
+* Error messages are now send to stderr rather than stdout (from
+  Payton Quackenbush).
+* Better error handling on invalid command line arguments (from Payton
+  Quackenbush).
+* Added rcov task and updated unit testing for better code coverage.
+* Fixed some bugs where the application object was going to the global
+  appliation instead of using its own data.
+* Added square and curly bracket patterns to FileList#include (Tilman
+  Sauerbeck). 
+* Added plain filename support to rule dependents (suggested by Nobu
+  Nakada). 
+* Added pathmap support to rule dependents.
+* Added a 'tasks' method to a namespace to get a list of tasks
+  associated with the namespace.
+* Fixed the method name leak from FileUtils (bug found by Glenn
+  Vanderburg). 
+* Added rake_extension to handle detection of extension collisions.
+* Added test for noop, bad_option and verbose flags to sh command.
+* Removed dependency on internal fu_xxx functions from FileUtils.
+* Added a 'shame' task to the Rakefile.
+* Added tar_command and zip_command options to the Package task.
+* Added a description to the gem task in GemPackageTask.
+* Fixed a bug when rules have multiple prerequisites (patch by Joel
+  VanderWerf)
+* Added a protected 'require "rubygems"' to test/test_application to
+  unbreak cruisecontrol.rb.
+* Added the handful of RakeFileUtils to the private method as well.
+* Added block based exclusion.
+* The clean task will no longer delete 'core' if it is a directory.
+* Removed rake_dup.  Now we just simply rescue a bad dup.
+* Refactored the FileList reject logic to remove duplication.
+* Removed if __FILE__ at the end of the rake.rb file.
+
+== Version 0.7.1
+
+* Added optional filter parameter to the --tasks command line option.
+* Added flatten to allow rule transform procs to return lists of
+  prereqs (Joel VanderWerf provided patch).
+* Added pathmap to String and FileList.
+* The -r option will now load .rake files (but a straight require
+  doesn't yet).  NOTE: This is experimental ... it may be
+  discontinued.
+* The -f option without a value will disable the search for a
+  Rakefile.  The assumption is that the -r files are adequate.
+* Fixed the safe_ln function to fall back to cp in more error
+  scenarios.
+
+== Version 0.7.0
+
+* Added Rake.original_dir to return the original starting directory of
+  the rake application.
+* Added safe_ln support for openAFS (from Ludvig Omholt).
+* Added --trace reminder on short exception messages (David Heinemeier
+  Hansson suggestion).
+* Added multitask declaration that executes prerequisites in
+  parallel. (Doug Young providied an initial implementation).
+* Fixed missing_const hack to be compatible with Rails. (Jamis Buck
+  supplied test case).
+* Made the RDoc task default to internal (in-process) RDoc formatting.
+  The old behavior is still available by setting the +external+ flag
+  to true.
+* Rakefiles are now loaded with the expanded path to prevent
+  accidental polution from the Ruby load path.
+* The +namespace+ command now returns a NameSpace object that can be
+  used to lookup tasks defined in that namespace.  This allows for
+  better anonymous namespace behavior.
+* Task objects my now be used in prerequisite lists directly.
+
+== Version 0.6.1
+
+* Rebuilt 0.6.0 gem without signing.
+
+== Version 0.6.0
+
+* Fixed file creation bug in the unit tests (caused infinite loop on
+  windows).
+* Fixed bug where session based functional tests were run under
+  windows.
+* Fixed bug in directory tasks so that updating a directory will not
+  retrigger file tasks depending on the directory (see
+  FileCreationTask and EarlyTime).
+* Added egrep to FileList
+* ruby command now runs same ruby version as rake.
+* Added investigation to task object. (suggested by Martin Fowler)
+* Added ruby_opts to the test task to allow arbitrary ruby options to
+  be passed to the test script. (Greg Fast)
+* Fixed the test loader to ignore options. (Greg Fast)
+* Moved Task, FileTask, FileCreationTask and RakeApp into the Rake
+  module namespace.  Old style namespace behavior can be invoked via
+  the --classic-namespace option. (requested by Kelly Felkins).
+* GemTask is now sensitive to the gem platform (Masao Mutoh).
+* A non-existing file prerequisite will no longer cause an exception
+  (Philipp Neubeck).
+* Multiple prerequisites on Rake rules now allowed (initial patch
+  supplied by Stuart Jansen).
+
+== Version 0.5.4
+
+* Added double quotes to the test runner.
+* Added .svn to default ignore list.
+* Updated FileList#include to support nested arrays and filelists.
+
+== Version 0.5.3
+
+* Added support for importing Rakefile and other dependencies.
+* Fixed bug so that now rules can chain off of existing tasks as well
+  as existing files.
+* Fixed verbose flag bug in the testing task.  Shortened some failure
+  messages.
+* Make FileUtils methods private at the top level module to avoid
+  accidental method leaking into other objects.
+* Added test loader option to test task.  "testrb" is no longer the
+  default test loader.  It is now eating syntax errors that should
+  halt the unit tests.
+* Revamped FileList so that it works more like and array (addressed
+  flatten bug).  Added many tests around file list.
+* Added +ext+ method to both String and FileList.
+
+== Version 0.5.0
+
+* Fixed documentation that was lacking the Rake module name (Tilman
+  Sauerbeck).
+* Added tar.gz and tar.bz2 support to package task (Tilman Sauerbeck).
+* Recursive rules are now supported (Tilman Sauerbeck).
+* Added warning option for the Test Task (requested by Eric Hodel).
+* The jamis rdoc template is only used if it exists.
+* Added fix for Ruby 1.8.2 test/unit and rails problem.
+* Added contributed rake man file (Jani Monoses).
+* Added Brian Candler's fix for problems in --trace and --dry-run
+  mode.
+
+== Version 0.4.15
+
+* Fixed a bug that prevented the TESTOPTS flag from working with the
+  revised for 1.8.2 test task.
+* Updated the docs on --trace to indicate that it also enables a full
+  backtrace on errors. 
+
+== Version 0.4.14
+
+* Modified the TestTask to workaround the Ruby 1.8.2 change in
+  autoexecuting unit tests.
+
+== Version 0.4.13
+
+* Fixed the dry-run flag so it is operating again.
+* Multiple arguments to sh and ruby commands will not be interpreted
+  by the shell (patch provided by Jonathan Paisley).
+
+== Version 0.4.12
+
+* Added --silent (-s) to suppress the (in directory) rake message.
+
+== Version 0.4.11
+
+* Changed the "don't know how to rake" message (finally)
+* Changes references to a literal "Rakefile" to reference the global
+  variable $rakefile (which contains the actual name of the rakefile).
+
+== Version 0.4.10
+
+* Added block support to the "sh" command, allowing users to take
+  special actions on the result of the system call.  E.g.
+
+    sh "shell_command" do |ok, res|
+      puts "Program returned #{res.exitstatus}" if ! ok
+    end
+
+== Version 0.4.9
+
+* Switched to Jamis Buck's RDoc template.
+* Removed autorequire from Rake's gem spec.  This prevents the Rake
+  libraries from loading while using rails.
+
+== Version 0.4.8
+
+* Added support for .rb versions of Rakefile.
+* Removed \\\n's from test task.
+* Fixed Ruby 1.9 compatibility issue with FileList.
+
+== Version 0.4.7
+
+* Fixed problem in FileList that caused Ruby 1.9 to go into infinite
+  recursion.  Since to_a was removed from Object, it does not need to
+  added back into the list of methods to rewrite in FileList.  (Thanks
+  to Kent Sibilev for pointing this out).
+
+== Version 0.4.6
+* Removed test version of ln in FileUtils that prevented safe_ln from
+  using ln.
+
+== Version 0.4.5
+* Upgraded comments in TestTask.
+* FileList to_s and inspect now automatically resolve pending changes.
+* FileList#exclude properly returns the FileList.
+
+== Version 0.4.4
+* Fixed initialization problem with @comment.
+* Now using multi -r technique in TestTask.  Switch Rakefile back to
+  using the built-in test task macros because the rake runtime is no
+  longer needed.
+* Added 'TEST=filename' and 'TESTOPTS=options' to the Test Task
+  macros.
+* Allow a +test_files+ attribute in test tasks.  This allows more
+  flexibility in specifying test files.
+
+== Version 0.4.3
+* Fixed Comment leakage.
+
+== Version 0.4.2
+* Added safe_ln that falls back to a copy if a file link is not supported.
+* Package builder now uses safe_ln.
+
+== Version 0.4.1
+* Task comments are now additive, combined with "/".
+* Works with (soon to be released) rubygems 0.6.2 (or 0.7.0)
+
+== Version 0.4.0
+* FileList now uses deferred loading.  The file system is not searched
+  until the first call that needs the file names.
+* VAR=VALUE options are now accepted on the command line and are
+  treated like environment variables.  The values may be tested in a
+  Rakefile by referencing ENV['VAR'].
+* File.mtime is now used (instead of File.new().mtime).
+
+== Version 0.3.2.x
+
+* Removed some hidden dependencies on rubygems.  Tests now will test
+  gems only if they are installed.
+* Removed Sys from some example files.  I believe that is that last
+  reference to Sys outside of the contrib area.
+* Updated all copyright notices to include 2004.
+
+== Version 0.3.2
+
+* GEM Installation now works with the application stub.
+
+== Version 0.3.1
+
+* FileLists now automatically ignore CVS, .bak, !
+* GEM Installation now works.
+
+== Version 0.3.0
+
+Promoted 0.2.10.
+
+== Version 0.2.10
+General
+
+* Added title to Rake's rdocs
+* Contrib packages are no longer included in the documentation.
+
+RDoc Issues
+
+* Removed default for the '--main' option
+* Fixed rendering of the rdoc options
+* Fixed clean/clobber confusion with rerdoc
+* 'title' attribute added
+
+Package Task Library Issues
+
+* Version (or explicit :noversion) is required.
+* +package_file+ attribute is now writable
+
+FileList Issues
+
+* Dropped bang version of exclude.  Now using ant-like include/exclude semantics.
+* Enabled the "yield self" idiom in FileList#initialize.
+
+== Version 0.2.9
+
+This version contains numerous changes as the RubyConf.new(2003)
+presentation was being prepared.  The changes include:
+
+* The monolithic rubyapp task library is in the process of being
+  dropped in favor of lighter weight task libraries.
+
+== Version 0.2.7
+
+* Added "desc" for task descriptions.
+* -T will now display tasks with descriptions.
+* -P will display tasks and prerequisites.
+* Dropped the Sys module in favor of the 1.8.x FileUtils module.  Sys
+  is still supported in the contrib area.
+
+== Version 0.2.6
+
+* Moved to RubyForge
+
+== Version 0.2.5
+
+* Switched to standard ruby app builder.
+* Added no_match option to file matcher.
+
+== Version 0.2.4
+
+* Fixed indir, which neglected to actually change directories.
+
+== Version 0.2.3
+
+* Added rake module for a help target
+* Added 'for_files' to Sys
+* Added a $rakefile constant
+* Added test for selecting proper rule with multiple targets.

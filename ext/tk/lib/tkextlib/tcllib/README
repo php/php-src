@@ -1,0 +1,135 @@
+
+ [ tcllib extension support files ]
+
+Tcllib includes many utilities. But currently, supports TKLib part
+only (see the following 'tcllib contents').
+
+If you request to support others, please send your message to one of
+ruby-talk/ruby-list/ruby-dev/ruby-ext mailing lists.
+
+-----<from "What is tcllib?">----------------------------
+Tcllib is a collection of utility modules for Tcl. These modules provide
+a wide variety of functionality, from implementations of standard data
+structures to implementations of common networking protocols. The intent
+is to collect commonly used function into a single library, which users
+can rely on to be available and stable.
+---------------------------------------------------------
+
+-----< tcllib contents (based on tcllib-1.6.1) >---------
+Programming tools
+    * cmdline - Procedures to process command lines and options.
+    * comm - A remote communications facility for Tcl (7.6, 8.0, and later)
+    * control - Procedures for control flow structures.
+    * fileutil - Procedures implementing some file utilities
+    * log - Procedures to log messages of libraries and applications.
+    * logger - System to control logging of events.
+    * multiplexer - One-to-many communication with sockets.
+    * snit - Snit's Not Incr Tcl
+    * snitfaq - Snit Frequently Asked Questions
+    * stooop - Object oriented extension.
+    * stoop - Simple Tcl Only Object Oriented Programming
+    * switched - stooop switched class
+    * profiler - Tcl source code profiler
+
+Mathematics
+    * math::statistics - Basic statistical functions and procedures
+    * math::calculus - Integration and ordinary differential equations
+    * math::optimize - Optimisation routines
+    * math::fuzzy - Fuzzy comparison of floating-point numbers
+    * counter - Procedures for counters and histograms
+    * combinatorics - Combinatorial functions in the Tcl Math Library
+
+Data structures
+    * struct::list - Procedures for manipulating lists
+    * struct::set - Procedures for manipulating sets
+    * struct::stack - Create and manipulate stack objects
+    * struct::queue - Create and manipulate queue objects
+    * struct::prioqueue - Create and manipulate prioqueue objects
+    * struct::skiplist - Create and manipulate skiplists
+    * struct::tree - Create and manipulate tree objects
+    * struct::graph - Create and manipulate directed graph objects
+    * struct::record - Define and create records (similar to 'C' structures)
+    * struct::matrix - Create and manipulate matrix objects
+    * struct::pool - Create and manipulate pool objects (of discrete items)
+    * report - Create and manipulate report objects
+
+Text processing
+    * expander - Procedures to process templates and expand text.
+    * base64 - Procedures to encode and decode base64
+    * yencode - encode/decoding a binary file
+    * uuencode - encode/decoding a binary file
+    * csv - Procedures to handle CSV data.
+    * inifile - Parsing of Windows INI files
+    * htmlparse - Procedures to parse HTML strings
+    * mime - Manipulation of MIME body parts
+    * Tcl MIME - generates and parses MIME body parts
+    * textutil - Procedures to manipulate texts and strings.
+    * exif - Tcl EXIF extracts and parses EXIF fields from digital images
+    * EXIF - extract and parse EXIF fields from digital images
+
+Hashes, checksums, and encryption
+    * cksum - calculate a cksum(1) compatible checksum
+    * crc16 - Perform a 16bit Cyclic Redundancy Check
+    * crc32 - Perform a 32bit Cyclic Redundancy Check
+    * des - Perform DES encryption of Tcl data
+    * md4 - MD4 Message-Digest Algorithm
+    * md5 - MD5 Message-Digest Algorithm
+    * ripemd160 - RIPEMD-160 Message-Digest Algorithm
+    * ripemd128 - RIPEMD-128 Message-Digest Algorithm
+    * md5crypt - MD5-based password encryption
+    * sha1 - Perform sha1 hashing
+    * sum - calculate a sum(1) compatible checksum
+    * soundex - Soundex
+
+Documentation tools
+    * mpexpand - Markup processor
+    * doctools - Create and manipulate doctools converter object
+    * doctoc_fmt - Specification of simple tcl markup for table of contents
+    * doctools_api - Interface specification for formatter code
+    * doctools_fmt - Specification of simple tcl markup for manpages
+    * docidx - Create and manipulate docidx converter objects
+    * docidx_api - Interface specification for index formatting code
+    * docidx_fmt - Specification of simple tcl markup for an index
+    * doctoc - Create and manipulate doctoc converter objects
+    * doctoc_api - Interface specification for toc formatting code
+    * doctools::changelog - Handle text in Emacs ChangeLog format
+    * doctools::cvs - Handle text in 'cvs log' format
+
+Networking
+    * uri - URI utilities
+    * dns - Tcl Domain Name Service Client
+    * ntp_time - Tcl Time Service Client
+    * nntp - Tcl client for the NNTP protocol
+    * pop3 - Tcl client for POP3 email protocol
+    * pop3d - Tcl POP3 server implementation
+    * pop3d::udb - Simple user database for pop3d
+    * pop3d::dbox - Simple mailbox database for pop3d
+    * ftp - Client-side tcl implementation of the ftp protocol
+    * ftp - Client-side tcl implementation of the ftp protocol
+    * ftpd - Tcl FTP server implementation
+    * smtp - Client-side tcl implementation of the smtp protocol
+    * smtpd - Tcl SMTP server implementation
+    * irc - Create IRC connection and interface.
+
+CGI programming
+    * ncgi - Procedures to manipulate CGI values.
+    * html - Procedures to generate HTML structures
+    * javascript - Procedures to generate HTML and Java Script structures.
+
+Grammars and finite automata
+    * grammar::fa - Create and manipulate finite automatons
+    * grammar::fa::op - Operations on finite automatons
+    * grammar::dacceptor - Create and use deterministic acceptors
+    * grammar::dexec - Execute deterministic finite automatons
+
+TKLib
+    * Plotchart - Simple plotting and charting package
+    * autoscroll - Provides for a scrollbar to automatically mapped and
+                   unmapped as needed
+    * ctext - An extended text widget with customizable Syntax highlighting
+    * cursor - Procedures to handle CURSOR data
+    * datefield - Tk datefield widget
+    * style - Changes default Tk look&feel
+    * ipentry - An IP address entry widget
+    * tkpiechart - Creates and dynamically updates 2D or 3D pie charts
+---------------------------------------------------------

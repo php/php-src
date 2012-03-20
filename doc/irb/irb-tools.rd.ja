@@ -1,0 +1,184 @@
+﻿irb関連おまけコマンドとライブラリ
+				$Release Version: 0.7.1 $
+			   	$Revision$
+			   	by Keiju ISHITSUKA(Nihon Rational Co.,Ltd.)
+
+=begin
+
+:コマンド:
+* rtags		-- ruby tags command
+
+:関数ライブラリ:
+* xmp		-- irb version of gotoken xmp-function
+
+:クラスライブラリ:
+* frame.rb      -- frame tracer
+* completion.rb -- irb completor
+
+= rtags
+
+rtagsはemacs及びvi用の, TAGファイルをつくるコマンドです.
+
+== 使い方
+
+   rtags [-vi] file....
+
+カレントディレクトリにemacs用のTAGSファイルができます. -viオプションを
+つけた時にはvi用のtagsファイルを作成します.
+
+emacsの場合, 通常のetags.elがそのまま使えます. 検索可能なのは,
+
+* クラス
+* メソッド
+* 特異メソッド
+* alias
+* attrで宣言されたアクセサ(パラメータがシンボルか文字列リテラルに限る)
+* attr_XXXで宣言されたアクセサ(パラメータがシンボルか文字列リテラルに限る)
+
+です.
+
+Cなどで使っているのと違うのは, コンプリーションに関する部分で,
+
+関数名は,
+
+  関数名(
+
+クラスは,
+
+  ::クラス名::....::クラス名
+
+メソッドは,
+
+  ::クラス名::....::クラス名#メソッド名
+
+特異メソッド(クラスメソッド)は
+
+  ::クラス名::....::クラス名.メソッド名
+
+でコンプリーションを行なうところです.
+
+= xmp.rb
+
+ごとけんxmpの上位互換バージョンです. ただ, 非常に重いのでごとけんxmpで
+は対応できない時に, 使用すると良いでしょう.
+
+== 使い方
+
+=== 関数として使う.
+
+    require "irb/xmp"
+    xmp <<END
+    foo = 1
+    foo
+    END
+    ---
+    foo = 1
+        ==>1
+    foo
+	==>1
+
+=== XMPインスタンスを用いる.
+
+この場合は, XMPがコンテキスト情報を持つので, 変数の値などを保持してい
+ます.
+
+  require "irb/xmp"
+  xmp = XMP.new
+  xmp.puts <<END
+  foo = 1
+  foo
+  END
+  xmp.puts <<END
+  foo
+  END
+  ===
+  foo = 1
+      ==>1
+  foo
+      ==>1
+  foo
+      ==>1
+
+== コンテキストに関して
+
+XMPメソッド群のコンテキストは, 呼び出す前のコンテキストで評価されます.
+明示的にコンテキストを指定するとそのコンテキストで評価します.
+
+例:
+
+  xmp "foo", an_binding
+
+:注:
+マルチスレッドには対応していません.
+
+= frame.rb
+現在実行中のフレーム情報を取り扱うためのクラスです. 
+
+* IRB::Frame.top(n = 0)
+  上からn番目のコンテキストを取り出します. nは0が最上位になります.
+* IRB::Frame.bottom(n = 0)
+  下からn番目のコンテキストを取り出します. nは0が最下位になります.
+* IRB::Frame.sender
+  センダになっているオブジェクトを取り出します. センダとは, そのメソッ
+  ドを呼び出した側のselfのことです.
+
+:注:
+set_trace_funcを用いてRubyの実行をトレースしています. マルチスレッドに
+は対応していません.
+
+= completion.rb
+irbのcompletion機能を提供するものです. 
+
+== 使い方
+
+   % irb -r irb/completion
+
+とするか, ~/.irbrc 中に
+
+   require "irb/completion"
+
+を入れてください. irb実行中に require "irb/completion" してもよいです.
+
+irb実行中に (TAB) を押すとコンプレーションします.
+
+トップレベルで(TAB)を押すとすべての構文要素, クラス, メソッドの候補がで
+ます. 候補が唯一ならば完全に補完します.
+
+  irb(main):001:0> in    
+  in                    inspect               instance_eval
+  include               install_alias_method  instance_of?
+  initialize            install_aliases       instance_variables
+  irb(main):001:0> inspect
+  "main"
+  irb(main):002:0> foo = Object.new
+  #<Object:0x4027146c>
+
+  ((|変数名.|))の後に(TAB)を押すと, そのオブジェクトのメソッド一覧がでま
+  す.
+
+  irb(main):003:0> foo.
+  foo.==                  foo.frozen?             foo.protected_methods
+  foo.===                 foo.hash                foo.public_methods
+  foo.=~                  foo.id                  foo.respond_to?
+  foo.__id__              foo.inspect             foo.send
+  foo.__send__            foo.instance_eval       foo.singleton_methods
+  foo.class               foo.instance_of?        foo.taint
+  foo.clone               foo.instance_variables  foo.tainted?
+  foo.display             foo.is_a?               foo.to_a
+  foo.dup                 foo.kind_of?            foo.to_s
+  foo.eql?                foo.method              foo.type
+  foo.equal?              foo.methods             foo.untaint
+  foo.extend              foo.nil?                
+  foo.freeze              foo.private_methods     
+
+=end
+
+% Begin Emacs Environment
+% Local Variables:
+% mode: text
+% comment-column: 0
+% comment-start: "%"
+% comment-end: "\n"
+% End:
+%
+

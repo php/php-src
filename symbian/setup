@@ -1,0 +1,440 @@
+define config_h
+@echo>$(1) #define HAVE_PIPS 1
+@echo>>$(1) #define STDC_HEADERS 1
+@echo>>$(1) #define HAVE_SYS_TYPES_H 1
+@echo>>$(1) #define HAVE_SYS_STAT_H 1
+@echo>>$(1) #define HAVE_STDLIB_H 1
+@echo>>$(1) #define HAVE_STRING_H 1
+@echo>>$(1) #define HAVE_MEMORY_H 1
+@echo>>$(1) #define HAVE_STRINGS_H 1
+@echo>>$(1) #define HAVE_INTTYPES_H 1
+@echo>>$(1) #define HAVE_STDINT_H 1
+@echo>>$(1) #define HAVE_UNISTD_H 1
+@echo>>$(1) #define HAVE_LONG_LONG 1
+@echo>>$(1) #define HAVE_OFF_T 1
+@echo>>$(1) #define SIZEOF_INT 4
+@echo>>$(1) #define SIZEOF_SHORT 2
+@echo>>$(1) #define SIZEOF_LONG 4
+@echo>>$(1) #define SIZEOF_LONG_LONG 8
+@echo>>$(1) #define SIZEOF___INT64 8
+@echo>>$(1) #define SIZEOF_OFF_T 8
+@echo>>$(1) #define SIZEOF_VOIDP 4
+@echo>>$(1) #define SIZEOF_FLOAT 4
+@echo>>$(1) #define SIZEOF_DOUBLE 8
+@echo>>$(1) #define SIZEOF_TIME_T 4
+@echo>>$(1) #define TIMET2NUM(v) LONG2NUM(v)
+@echo>>$(1) #define NUM2TIMET(v) NUM2LONG(v)
+@echo>>$(1) #define SIZEOF_SIZE_T 4
+@echo>>$(1) #define SIZEOF_PTRDIFF_T 4
+@echo>>$(1) #define rb_pid_t pid_t
+@echo>>$(1) #define PIDT2NUM(v) LONG2NUM(v)
+@echo>>$(1) #define NUM2PIDT(v) NUM2LONG(v)
+@echo>>$(1) #define rb_uid_t uid_t
+@echo>>$(1) #define UIDT2NUM(v) ULONG2NUM(v)
+@echo>>$(1) #define NUM2UIDT(v) NUM2ULONG(v)
+@echo>>$(1) #define rb_gid_t gid_t
+@echo>>$(1) #define GIDT2NUM(v) ULONG2NUM(v)
+@echo>>$(1) #define NUM2GIDT(v) NUM2ULONG(v)
+@echo>>$(1) #define HAVE_PROTOTYPES 1
+@echo>>$(1) #define TOKEN_PASTE(x,y) x##y
+@echo>>$(1) #define STRINGIZE(expr) STRINGIZE0(expr)
+@echo>>$(1) #define HAVE_STDARG_PROTOTYPES 1
+@echo>>$(1) #define NORETURN(x) __attribute__ ((noreturn)) x
+@echo>>$(1) #define DEPRECATED(x) __attribute__ ((deprecated)) x
+@echo>>$(1) #define NOINLINE(x) __attribute__ ((noinline)) x
+@echo>>$(1) #define FUNC_STDCALL(x) x
+@echo>>$(1) #define FUNC_CDECL(x) x
+@echo>>$(1) #define FUNC_FASTCALL(x) x
+@echo>>$(1) #define HAVE_DECL_SYS_NERR 0
+@echo>>$(1) #define HAVE_LIBDL 1
+@echo>>$(1) #define HAVE_DIRENT_H 1
+@echo>>$(1) #define STDC_HEADERS 1
+@echo>>$(1) #define HAVE_SYS_WAIT_H 1
+@echo>>$(1) #define HAVE_STDLIB_H 1
+@echo>>$(1) #define HAVE_STRING_H 1
+@echo>>$(1) #define HAVE_UNISTD_H 1
+@echo>>$(1) #define HAVE_LIMITS_H 1
+@echo>>$(1) #define HAVE_SYS_IOCTL_H 1
+@echo>>$(1) #define HAVE_FCNTL_H 1
+@echo>>$(1) #define HAVE_SYS_FCNTL_H 1
+@echo>>$(1) #define HAVE_SYS_SELECT_H 1
+@echo>>$(1) #define HAVE_SYS_TIME_H 1
+@echo>>$(1) #define HAVE_SYS_PARAM_H 1
+@echo>>$(1) #define HAVE_PWD_H 1
+@echo>>$(1) #define HAVE_GRP_H 1
+@echo>>$(1) #define HAVE_UTIME_H 1
+@echo>>$(1) #define HAVE_MEMORY_H 1
+@echo>>$(1) #define HAVE_SYS_RESOURCE_H 1
+@echo>>$(1) #define HAVE_FLOAT_H 1
+@echo>>$(1) #define HAVE_PTHREAD_H 1
+@echo>>$(1) #define HAVE_LANGINFO_H 1
+@echo>>$(1) #define HAVE_LOCALE_H 1
+@echo>>$(1) #define HAVE_STRUCT_STAT_ST_BLKSIZE 1
+@echo>>$(1) #define HAVE_ST_BLKSIZE 1
+@echo>>$(1) #define HAVE_STRUCT_STAT_ST_BLOCKS 1
+@echo>>$(1) #define HAVE_ST_BLOCKS 1
+@echo>>$(1) #define HAVE_STRUCT_STAT_ST_RDEV 1
+@echo>>$(1) #define HAVE_ST_RDEV 1
+@echo>>$(1) #define HAVE_INT8_T 1
+@echo>>$(1) #define HAVE_UINT8_T 1
+@echo>>$(1) #define SIZEOF_INT8_T 1
+@echo>>$(1) #define HAVE_INT16_T 1
+@echo>>$(1) #define HAVE_UINT16_T 1
+@echo>>$(1) #define SIZEOF_INT16_T 2
+@echo>>$(1) #define HAVE_INT32_T 1
+@echo>>$(1) #define HAVE_UINT32_T 1
+@echo>>$(1) #define SIZEOF_INT32_T 4
+@echo>>$(1) #define HAVE_INT64_T 1
+@echo>>$(1) #define HAVE_UINT64_T 1
+@echo>>$(1) #define SIZEOF_INT64_T 8
+@echo>>$(1) #define HAVE_STRUCT_STAT_ST_ATIMESPEC 1
+@echo>>$(1) #define HAVE_STRUCT_STAT_ST_MTIMESPEC 1
+@echo>>$(1) #define HAVE_STRUCT_STAT_ST_CTIMESPEC 1
+@echo>>$(1) #define HAVE_STRUCT_TIMESPEC 1
+@echo>>$(1) #define HAVE_STRUCT_TIMEZONE 1
+@echo>>$(1) #define HAVE_RB_FD_INIT 1
+@echo>>$(1) #define GETGROUPS_T gid_t
+@echo>>$(1) #define RETSIGTYPE void
+@echo>>$(1) #define C_ALLOCA 1
+@echo>>$(1) #define HAVE_DUP2 1
+@echo>>$(1) #define HAVE_MEMMOVE 1
+@echo>>$(1) #define HAVE_STRCASECMP 1
+@echo>>$(1) #define HAVE_STRNCASECMP 1
+@echo>>$(1) #define HAVE_STRERROR 1
+@echo>>$(1) #define HAVE_STRFTIME 1
+@echo>>$(1) #define HAVE_STRCHR 1
+@echo>>$(1) #define HAVE_STRSTR 1
+@echo>>$(1) #define HAVE_STRTOUL 1
+@echo>>$(1) #define HAVE_VSNPRINTF 1
+@echo>>$(1) #define HAVE_ISNAN 1
+@echo>>$(1) #define HAVE_FINITE 1
+@echo>>$(1) #define HAVE_ISINF 1
+@echo>>$(1) #define HAVE_HYPOT 1
+@echo>>$(1) #define HAVE_ACOSH 1
+@echo>>$(1) #define HAVE_ERF 1
+@echo>>$(1) #define HAVE_STRLCPY 1
+@echo>>$(1) #define HAVE_STRLCAT 1
+@echo>>$(1) #define HAVE_FMOD 1
+@echo>>$(1) #define HAVE_WAITPID 1
+@echo>>$(1) #define HAVE_FSYNC 1
+@echo>>$(1) #define HAVE_GETCWD 1
+@echo>>$(1) #define HAVE_TRUNCATE 1
+@echo>>$(1) #define HAVE_UTIMES 1
+@echo>>$(1) #define HAVE_FCNTL 1
+@echo>>$(1) #define HAVE_LSTAT 1
+@echo>>$(1) #define HAVE_LINK 1
+@echo>>$(1) #define HAVE_SYMLINK 1
+@echo>>$(1) #define HAVE_READLINK 1
+@echo>>$(1) #define HAVE_SETEUID 1
+@echo>>$(1) #define HAVE_SETREUID 1
+@echo>>$(1) #define HAVE_SETEGID 1
+@echo>>$(1) #define HAVE_SETREGID 1
+@echo>>$(1) #define HAVE_ISSETUGID 1
+@echo>>$(1) #define HAVE_LCHOWN 1
+@echo>>$(1) #define HAVE_GETPGRP 1
+@echo>>$(1) #define HAVE_SETPGRP 1
+@echo>>$(1) #define HAVE_GETPGID 1
+@echo>>$(1) #define HAVE_SETPGID 1
+@echo>>$(1) #define HAVE_INITGROUPS 1
+@echo>>$(1) #define HAVE_GETGROUPS 1
+@echo>>$(1) #define HAVE_SETGROUPS 1
+@echo>>$(1) #define HAVE_GETPRIORITY 1
+@echo>>$(1) #define HAVE_SYSCONF 1
+@echo>>$(1) #define HAVE_DLOPEN 1
+@echo>>$(1) #define HAVE_SIGACTION 1
+@echo>>$(1) #define HAVE_VSNPRINTF 1
+@echo>>$(1) #define HAVE_SNPRINTF 1
+@echo>>$(1) #define HAVE_SETSID 1
+@echo>>$(1) #define HAVE_TELLDIR 1
+@echo>>$(1) #define HAVE_SEEKDIR 1
+@echo>>$(1) #define HAVE_FCHMOD 1
+@echo>>$(1) #define HAVE_COSH 1
+@echo>>$(1) #define HAVE_SINH 1
+@echo>>$(1) #define HAVE_TANH 1
+@echo>>$(1) #define HAVE_ROUND 1
+@echo>>$(1) #define HAVE_SETUID 1
+@echo>>$(1) #define HAVE_SETGID 1
+@echo>>$(1) #define HAVE_SETENV 1
+@echo>>$(1) #define HAVE_UNSETENV 1
+@echo>>$(1) #define VOID_UNSETENV 1
+@echo>>$(1) #define HAVE_MKTIME 1
+@echo>>$(1) #define HAVE_CLOCK_GETTIME 1
+@echo>>$(1) #define HAVE_GETTIMEOFDAY 1
+@echo>>$(1) #define HAVE_STRUCT_TM_TM_ZONE 1
+@echo>>$(1) #define HAVE_TM_ZONE 1
+@echo>>$(1) #define HAVE_STRUCT_TM_TM_GMTOFF 1
+@echo>>$(1) #define NEGATIVE_TIME_T 1
+@echo>>$(1) #define RSHIFT(x,y) ((x)^>^>(int)y)
+@echo>>$(1) #define DOSISH 1
+@echo>>$(1) #define DOSISH_DRIVE_LETTER
+@echo>>$(1) #define RUBY_JMP_BUF jmp_buf
+@echo>>$(1) #define RUBY_SETJMP(env) _setjmp(env)
+@echo>>$(1) #define RUBY_LONGJMP(env,val) _longjmp(env,val)
+@echo>>$(1) #define FILE_COUNT _r
+@echo>>$(1) #define FILE_READPTR _p
+@echo>>$(1) #define HAVE__SC_CLK_TCK 1
+@echo>>$(1) #define STACK_GROW_DIRECTION -1
+@echo>>$(1) #define _REENTRANT 1
+@echo>>$(1) #define _THREAD_SAFE 1
+@echo>>$(1) #define HAVE_LIBPTHREAD 1
+@echo>>$(1) #define HAVE_NANOSLEEP 1
+@echo>>$(1) #define HAVE_LABS 1
+@echo>>$(1) #define HAVE_LLABS 1
+@echo>>$(1) #define USE_ELF 1
+@echo>>$(1) #define MANGLED_PATH 1
+@echo>>$(1) #define DLEXT_MAXLEN 4
+@echo>>$(1) #define DLEXT ".dll"
+@echo>>$(1) #define EXECUTABLE_EXTS ".exe",".com",".cmd",".bat"
+@echo>>$(1) #define RUBY_EXEC_PREFIX ""
+@echo>>$(1) #define DLN_NEEDS_ALT_SEPARATOR '\\'
+@echo>>$(1) #define RUBY_LIB_VERSION_STYLE 3
+@echo>>$(1) #define RUBY_LIB_PREFIX "C:/Data/Ruby/lib"
+@echo>>$(1) #define RUBY_SITE_LIB "E:/Data/Ruby/lib"
+@echo>>$(1) #define RUBY_VENDOR_LIB "F:/Data/Ruby/lib"
+@echo>>$(1) #define RUBY_PLATFORM "$(arch)"
+endef
+
+define pre_build_mk
+@echo>$(1) srcdir = $(srcdir)
+@echo>>$(1) BASERUBY = $(BASERUBY)
+@echo>>$(1) include pre-build
+endef
+
+define bld_inf
+@echo>$(1) PRJ_PLATFORMS
+@echo>>$(1) GCCE $(2)
+@echo>>$(1) PRJ_MMPFILES
+@echo>>$(1) gnumakefile ..\pre-build.mk
+@echo>>$(1) ruby.mmp
+@if not "$(EXT_LIST)" == "" for %%f in ($(EXT_LIST)) do echo>>$(1) %%f.mmp
+endef
+
+
+ifndef EXTSTATIC
+DLN=dln
+else
+DLN=dmydln
+endif
+
+define ruby_mmp
+@echo>$(1) TARGET Ruby.exe
+@echo>>$(1) TARGETTYPE EXEXP
+
+@echo>>$(1) UID 0x100039CE $(RUBY_UID)
+@echo>>$(1) VENDORID 0
+@echo>>$(1) SECUREID $(RUBY_UID)
+@echo>>$(1) CAPABILITY LocalServices NetworkServices ReadUserData UserEnvironment WriteUserData
+
+@echo>>$(1) MACRO RUBY_EXPORT
+
+
+@echo>>$(1) USERINCLUDE ..\$(subst /,\,$(arch_hdrdir))
+@echo>>$(1) USERINCLUDE ..
+@echo>>$(1) USERINCLUDE ..\$(subst /,\,$(srcdir))
+@echo>>$(1) USERINCLUDE ..\$(subst /,\,$(hdrdir))
+@echo>>$(1) USERINCLUDE ..\$(subst /,\,$(hdrdir))\ruby
+@echo>>$(1) USERINCLUDE ..\$(subst /,\,$(srcdir))\missing
+
+@echo>>$(1) SYSTEMINCLUDE ..\$(subst /,\,$(arch_hdrdir))
+@echo>>$(1) SYSTEMINCLUDE ..
+@echo>>$(1) SYSTEMINCLUDE ..\$(subst /,\,$(srcdir))
+@echo>>$(1) SYSTEMINCLUDE ..\$(subst /,\,$(hdrdir))
+@echo>>$(1) SYSTEMINCLUDE ..\$(subst /,\,$(hdrdir))\ruby
+@echo>>$(1) SYSTEMINCLUDE ..\$(subst /,\,$(srcdir))\missing
+
+@echo>>$(1) SYSTEMINCLUDE \epoc32\include
+@echo>>$(1) SYSTEMINCLUDE \epoc32\include\stdapis
+
+@echo>>$(1) SOURCEPATH ..\$(subst /,\,$(srcdir))
+@echo>>$(1) SOURCE array.c
+@echo>>$(1) SOURCE bignum.c
+@echo>>$(1) SOURCE class.c
+@echo>>$(1) SOURCE compar.c
+@echo>>$(1) SOURCE compile.c
+@echo>>$(1) SOURCE cont.c
+@echo>>$(1) SOURCE debug.c
+@echo>>$(1) SOURCE dir.c
+@echo>>$(1) SOURCE $(DLN).c
+@echo>>$(1) SOURCE dln_find.c
+@echo>>$(1) SOURCE dmyext.c
+@echo>>$(1) SOURCE encoding.c
+@echo>>$(1) SOURCE enum.c
+@echo>>$(1) SOURCE enumerator.c
+@echo>>$(1) SOURCE error.c
+@echo>>$(1) SOURCE eval.c
+@echo>>$(1) SOURCE file.c
+@echo>>$(1) SOURCE gc.c
+@echo>>$(1) SOURCE hash.c
+@echo>>$(1) SOURCE inits.c
+@echo>>$(1) SOURCE io.c
+@echo>>$(1) SOURCE iseq.c
+@echo>>$(1) SOURCE load.c
+@echo>>$(1) SOURCE main.c
+@echo>>$(1) SOURCE marshal.c
+@echo>>$(1) SOURCE math.c
+@echo>>$(1) SOURCE node.c
+@echo>>$(1) SOURCE numeric.c
+@echo>>$(1) SOURCE object.c
+@echo>>$(1) SOURCE pack.c
+@echo>>$(1) SOURCE proc.c
+@echo>>$(1) SOURCE process.c
+@echo>>$(1) SOURCE random.c
+@echo>>$(1) SOURCE range.c
+@echo>>$(1) SOURCE re.c
+@echo>>$(1) SOURCE regcomp.c
+@echo>>$(1) SOURCE regenc.c
+@echo>>$(1) SOURCE regerror.c
+@echo>>$(1) SOURCE regexec.c
+@echo>>$(1) SOURCE regparse.c
+@echo>>$(1) SOURCE regsyntax.c
+@echo>>$(1) SOURCE ruby.c
+@echo>>$(1) SOURCE signal.c
+@echo>>$(1) SOURCE sprintf.c
+@echo>>$(1) SOURCE st.c
+@echo>>$(1) SOURCE string.c
+@echo>>$(1) SOURCE struct.c
+@echo>>$(1) SOURCE thread.c
+@echo>>$(1) SOURCE time.c
+@echo>>$(1) SOURCE transcode.c
+@echo>>$(1) SOURCE util.c
+@echo>>$(1) SOURCE variable.c
+@echo>>$(1) SOURCE version.c
+@echo>>$(1) SOURCE vm.c
+@echo>>$(1) SOURCE vm_dump.c
+@echo>>$(1) SOURCE safe.c
+@echo>>$(1) SOURCE rational.c
+@echo>>$(1) SOURCE strftime.c
+@echo>>$(1) SOURCE complex.c
+
+@echo>>$(1) SOURCEPATH ..\$(subst /,\,$(srcdir))\missing
+@echo>>$(1) SOURCE alloca.c
+@echo>>$(1) SOURCE crypt.c
+@echo>>$(1) SOURCE tgamma.c
+@echo>>$(1) SOURCE flock.c
+
+@echo>>$(1) SOURCEPATH ..\$(subst /,\,$(srcdir))\enc
+@echo>>$(1) SOURCE ascii.c
+@echo>>$(1) SOURCE unicode.c
+@echo>>$(1) SOURCE utf_8.c
+@echo>>$(1) SOURCE us_ascii.c
+
+@echo>>$(1) SOURCEPATH ..
+@echo>>$(1) SOURCE miniprelude.c
+@echo>>$(1) SOURCE parse.c
+@echo>>$(1) SOURCE newline.c
+@echo>>$(1) SOURCE missing-pips.c
+@echo>>$(1) SOURCE missing-aeabi.c
+
+
+@echo>>$(1) LIBRARY euser.lib
+@echo>>$(1) LIBRARY libc.lib
+@echo>>$(1) LIBRARY libm.lib
+@echo>>$(1) LIBRARY libpthread.lib
+@echo>>$(1) LIBRARY libdl.lib
+
+@echo>>$(1) STATICLIBRARY libcrt0.lib
+
+@echo>>$(1) EPOCSTACKSIZE $(2)
+@echo>>$(1) EPOCHEAPSIZE $(3) $(4)
+
+@if "$(EXTSTATIC)" == "" echo>>$(1) OPTION GCCE -fvisibility=default
+endef
+
+define ext_mmp
+@echo>$(1)$(2).mmp TARGET $(2).dll
+@echo>>$(1)$(2).mmp TARGETTYPE DLL
+@echo>>$(1)$(2).mmp EPOCALLOWDLLDATA
+@echo>>$(1)$(2).mmp UID 0x10004262 $(3)
+@echo>>$(1)$(2).mmp VENDORID 0
+@echo>>$(1)$(2).mmp SECUREID $(3)
+@echo>>$(1)$(2).mmp CAPABILITY LocalServices NetworkServices ReadUserData UserEnvironment WriteUserData
+
+@echo>>$(1)$(2).mmp USERINCLUDE ..\$(subst /,\,$(arch_hdrdir))
+@echo>>$(1)$(2).mmp USERINCLUDE ..\$(subst /,\,$(srcdir))
+@echo>>$(1)$(2).mmp USERINCLUDE ..\$(subst /,\,$(hdrdir))
+@echo>>$(1)$(2).mmp USERINCLUDE ..\$(subst /,\,$(hdrdir))\ruby
+@echo>>$(1)$(2).mmp USERINCLUDE ..\$(subst /,\,$(srcdir))\missing
+
+@echo>>$(1)$(2).mmp SYSTEMINCLUDE ..\$(subst /,\,$(arch_hdrdir))
+@echo>>$(1)$(2).mmp SYSTEMINCLUDE ..\$(subst /,\,$(srcdir))
+@echo>>$(1)$(2).mmp SYSTEMINCLUDE ..\$(subst /,\,$(hdrdir))
+@echo>>$(1)$(2).mmp SYSTEMINCLUDE ..\$(subst /,\,$(hdrdir))\ruby
+@echo>>$(1)$(2).mmp SYSTEMINCLUDE ..\$(subst /,\,$(srcdir))\missing
+
+@echo>>$(1)$(2).mmp SYSTEMINCLUDE \epoc32\include\stdapis
+@echo>>$(1)$(2).mmp SYSTEMINCLUDE \epoc32\include
+
+@echo>>$(1)$(2).mmp SOURCEPATH ..\$(subst /,\,$(srcdir))\ext\$(2)
+@echo>>$(1)$(2).mmp SOURCE $(2).c $(4)
+
+@echo>>$(1)$(2).mmp LIBRARY euser.lib
+@echo>>$(1)$(2).mmp LIBRARY libc.lib $(5)
+@echo>>$(1)$(2).mmp LIBRARY Ruby.lib
+
+@echo>>$(1)$(2).mmp OPTION GCCE -fvisibility=default
+endef
+
+define ext_def
+@echo>$(1)$(2)u.def EXPORTS
+@echo>>$(1)$(2)u.def ^	Init_$(2) @ 1 NONAME
+endef
+
+define ruby_pkg
+@echo>$(1) ^&EN
+
+@echo>>$(1) #{"Ruby Core"},($(RUBY_UID)),$(MAJOR),$(MINOR),$(TEENY)
+
+@echo>>$(1) %%{"Symbian Research"}
+
+@echo>>$(1) :"Symbian Research"
+
+@echo>>$(1) (0x20013851), 1, 6, 0, {"Symbian OS PIPS"}
+
+@echo>>$(1) [0x101F7961], 0, 0, 0, {"S60ProductID"}
+
+@echo>>$(1) "$(EPOCROOT)epoc32\release\gcce\urel\Ruby.exe"-"!:\sys\bin\Ruby.exe"
+endef
+
+define core_ext_pkg
+@echo>$(1) ^&EN
+
+@echo>>$(1) #{"Ruby Core Extensions"},($(STRINGIO_UID)),$(MAJOR),$(MINOR),$(TEENY)
+
+@echo>>$(1) %%{"Symbian Research"}
+
+@echo>>$(1) :"Symbian Research"
+
+@echo>>$(1) ($(RUBY_UID)), $(MAJOR),$(MINOR),$(TEENY), {"Symbian Ruby"}
+
+@echo>>$(1) [0x101F7961], 0, 0, 0, {"S60ProductID"}
+endef
+
+define ext_pkg
+@echo>>$(1) "$(EPOCROOT)epoc32\release\gcce\urel\$(2).dll"-"!:\sys\bin\$(2).dll"
+@echo>>$(1) "$(EPOCROOT)epoc32\release\gcce\urel\$(2).dll"-"!:\Data\Ruby\lib\$(MAJOR).$(MINOR).$(TEENY)\$(arch)\$(2).dll"
+endef
+
+define ext_bigdecimal
+$(call ext_pkg,$(1),bigdecimal)
+@echo>>$(1) "..\$(subst /,\,$(srcdir))\ext\bigdecimal\lib\bigdecimal\jacobian.rb"-"!:\Data\Ruby\lib\bigdecimal\jacobian.rb"
+@echo>>$(1) "..\$(subst /,\,$(srcdir))\ext\bigdecimal\lib\bigdecimal\ludcmp.rb"-"!:\Data\Ruby\lib\bigdecimal\ludcmp.rb"
+@echo>>$(1) "..\$(subst /,\,$(srcdir))\ext\bigdecimal\lib\bigdecimal\math.rb"-"!:\Data\Ruby\lib\bigdecimal\math.rb"
+@echo>>$(1) "..\$(subst /,\,$(srcdir))\ext\bigdecimal\lib\bigdecimal\newton.rb"-"!:\Data\Ruby\lib\bigdecimal\newton.rb"
+@echo>>$(1) "..\$(subst /,\,$(srcdir))\ext\bigdecimal\lib\bigdecimal\util.rb"-"!:\Data\Ruby\lib\bigdecimal\util.rb"
+endef
+
+EPOCROOT := $(addsuffix \,$(word 3,$(shell devices -info @$(word 3,$(shell devices -default)) | find "Root")))
+
+ifndef SIGNED
+RUBY_UID=0xA0001BC6
+STRINGIO_UID=0xA0001BC7
+BIGDECIMAL_UID=0xA0001BC8
+ZLIB_UID=0xA0001BCB
+else
+RUBY_UID=0x200205CC
+STRINGIO_UID=0x200205CD
+BIGDECIMAL_UID=0x200205CE
+ZLIB_UID=0x200205D0
+endif
+
+

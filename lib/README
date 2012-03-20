@@ -1,0 +1,91 @@
+English.rb	lets Perl'ish global variables have English names
+README		this file
+abbrev.rb	abbreviation calculator
+base64.rb	Base64 de- and encoder
+benchmark.rb	a benchmark utility
+cgi.rb		CGI support library
+cgi/session.rb	CGI session class
+cmath.rb	math support for complex numbers
+complex.rb	includes cmath and set complex arithemtic as default (obsolete)
+csv.rb		CSV parser/generator
+debug.rb	ruby debugger
+delegate.rb	delegates messages to other object
+drb.rb		distributed Ruby
+e2mmap.rb	exception utilities
+erb.rb		tiny eRuby library
+fileutils.rb	file utilities
+find.rb		traverses directory tree
+forwardable.rb	explicit delegation library
+gauntlet_rubygems.rb 	Gem package validator
+getoptlong.rb	GNU getoptlong compatible
+gserver.rb	general TCP server
+ipaddr.rb	defines the IPAddr class
+irb.rb		interactive ruby
+logger.rb	simple logging utility
+mathn.rb	extended math operation (obsolete)
+matrix.rb	matrix calculation library
+minitest/unit	minimal drop-in replacement for test-unit
+mkmf.rb		Makefile maker
+monitor.rb	exclusive region monitor for thread
+mutex_m.rb	mutex mixin
+net/ftp.rb	ftp access
+net/http.rb	HTTP access
+net/https.rb	HTTPS access
+net/imap.rb	IMAP4 access
+net/pop.rb	POP3 access
+net/protocol.rb	abstract class for net library (DO NOT USE)
+net/smtp.rb	SMTP access
+net/telnet.rb	telnet library
+observer.rb	observer desing pattern library (provides Observable)
+open-uri.rb	easy-to-use network interface using URI and Net
+open3.rb	opens subprocess connection stdin/stdout/stderr
+optparse.rb	command line option analysis
+ostruct.rb	python style object
+pathname.rb	Object-Oriented Pathname Class
+pp.rb		pretty print objects
+prettyprint.rb	pretty printing algorithm
+prime.rb        prime numbers and factorization
+profile.rb	runs ruby profiler
+profiler.rb	ruby profiler module
+pstore.rb	persistent object strage using marshal
+racc/parser.rb	racc (Ruby yACC) runtime
+rake.rb		Ruby Make
+rational.rb	rational number support (obsolete)
+rdoc		source-code documentation tool
+resolv-replace.rb	replace Socket DNS by resolve.rb
+resolv.rb	DNS resolver in Ruby
+rexml		an XML parser for Ruby, in Ruby
+rinda/rinda.rb	Linda distributed computing paradigm for drb
+rinda/ring.rb	RingServer for tuplespace
+rinda/tuplespace.rb	tuplespace for drb
+rss.rb		RSS parser/generator
+rubygems	Ruby package management system
+scanf.rb	scanf for Ruby
+securerandom.rb	Secure random number generator interface
+set.rb		defines the Set class
+shell.rb	runs commands and does pipeline operations like shell
+shellwords.rb	split into words like shell
+singleton.rb	singleton design pattern library
+sync.rb		2 phase lock
+tempfile.rb	temporary file with automatic removal
+test/unit	Ruby Unit Testing Framework
+thread.rb	thread support
+thwait.rb	thread syncronization class
+time.rb		RFC2822, RFC2616, ISO8601 style time formatting/parsing
+timeout.rb	provides timeout
+tmpdir.rb	retrieve temporary directory path
+tracer.rb	execution tracer
+tsort.rb	topological sorting
+ubygems.rb	command line shortcut for RubyGems
+un.rb		Utilities to replace common UNIX commands in Makefiles etc
+uri.rb		URI support
+uri/ftp.rb	ftp scheme support
+uri/http.rb	http scheme support
+uri/https.rb	https scheme support
+uri/ldap.rb	ldap scheme support
+uri/ldaps.rb	ldaps scheme support
+uri/mailto.rb	mailto scheme support
+weakref.rb	weak reference class
+webrick.rb	WEB server toolkit
+xmlrpc		XML-RPC implementation
+yaml.rb		YAML implementation

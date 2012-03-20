@@ -1,0 +1,16 @@
+#include "transcode_data.h"
+
+<%
+  require "gbk-tbl"
+
+  transcode_tblgen "GBK", "UTF-8", [["{00-7f}", :nomap], *GBK_TO_UCS_TBL]
+  transcode_tblgen "UTF-8", "GBK", [["{00-7f}", :nomap], *GBK_TO_UCS_TBL.map {|a,b| [b,a] }]
+%>
+
+<%= transcode_generated_code %>
+
+void
+Init_gbk(void)
+{
+<%= transcode_register_code %>
+}

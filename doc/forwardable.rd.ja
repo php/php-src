@@ -1,0 +1,80 @@
+  -- forwatable.rb
+                                                $Release Version: 1.1 $
+                                                $Revision$
+
+=begin
+= Forwardable
+
+クラスに対しメソッドの委譲機能を定義します.
+
+== 使い方
+
+クラスに対してextendして使います. 
+  
+  class Foo
+    extend Forwardable
+
+    def_delegators("@out", "printf", "print")
+    def_delegators(:@in, :gets)
+    def_delegator(:@contents, :[], "content_at")
+  end
+  f = Foo.new
+  f.printf ...
+  f.gets
+  f.content_at(1)
+
+== メソッド
+
+--- Forwardable#def_instance_delegators(accessor, *methods)
+
+      ((|methods|))で渡されたメソッドのリストを((|accessorに|))委譲する
+      ようにします.
+
+--- Forwardable#def_instance_delegator(accessor, method, ali = method)
+
+      ((||method|))で渡されたメソッドを((|accessor|))に委譲するようにし
+      ます. ((|ali|))が引数として渡されたときは, メソッド((|ali|))が呼ば
+      れたときには, ((|accessor|))に対し((|method|))を呼び出します.
+
+--- Forwardable#def_delegators(accessor, *methods)
+
+      ((|Forwardable#def_instance_delegators|))の別名です.
+
+--- Forwardable#def_delegator(accessor, method, ali = method)
+
+      ((|Forwardable#def_instance_delegator|))の別名です.
+
+= SingleForwardable
+
+オブジェクトに対し, メソッドの委譲機能を定義します.
+
+== 使い方
+
+オブジェクトに対して((|extend|))して使います. 
+
+  g = Goo.new
+  g.extend SingleForwardable
+  g.def_delegator("@out", :puts)
+  g.puts ...
+
+== メソッド
+
+--- SingleForwardable#def_singleton_delegators(accessor, *methods)
+
+      ((|methods|))で渡されたメソッドのリストを((|accessor|))に委譲する
+      ようにします.
+
+--- SingleForwardable#def_singleton_delegator(accessor, method, ali = method)
+
+      ((|method|))で渡されたメソッドを((|accessor|))に委譲するようにしま
+      す. ((|ali|))が引数として渡されたときは, メソッド((|ali|))が呼ばれ
+      たときには, ((|accessor|))に対し((|method|))を呼び出します.
+
+--- SingleForwardable#def_delegators(accessor, *methods)
+
+      ((|SingleForwardable#def_singleton_delegators|))の別名です.
+
+--- SingleForwardable#def_delegator(accessor, method, ali = method)
+
+      ((|SingleForwardable#def_singleton_delegator|))の別名です.
+=end

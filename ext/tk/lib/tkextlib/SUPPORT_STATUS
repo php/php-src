@@ -1,0 +1,198 @@
+
+  [ current support status of Tcl/Tk extensions ]
+
+  *** RELEASE_DATE of the libraries => see 'tkextlib/version.rb' ***
+
+The following list shows *CURRENT* status when this file was modifyed
+at last. If you want to add other Tcl/Tk extensions to the planed list
+(or change its status position), please request them at the ruby-talk,
+ruby-list, or ruby-dev ML. Although we cannot promise to support your
+requests, we'll try to do.
+
+If you want to check that wrapper libraries are ready to use on your
+environment, please execute 'pkg_checker.rb' with no arguments. The
+script may give you some hints about that.
+
+
+  ***** IMPORTANT NOTE **********************************************
+
+    'support' means that Ruby/Tk's wrapper libraries are released.
+    'not support' does *NOT* mean that the extension doesn't work
+    on Ruby/Tk.
+
+    The version number of each extension means the latest version
+    which is checked its feature. That is, it does NOT means only
+    version of working. Library files maybe include some features
+    which is included in the former version but removed from the
+    latest, and maybe able to support the later version then the
+    shown version.
+
+    Even if the status of the extension is 'not support', you can
+    control the functions/widgets of the extension without wrapper
+    libraries by Tk.tk_call(), Tk.ip_eval(), and so on.
+
+    If you cannot use installed Tcl/Tk extension, please check the
+    followings.
+
+     (1) On your Tcl/Tk, does the extention work?
+
+     (2) Do DLL libraries of the extension exist on DLL load-path?
+         (See also "<ruby archive>/ext/tcltklib/README.ActiveTcl")
+
+     (3) Is the Tcl library directory of the extension included in
+         library search-path of the Tcl interpreter linked Ruby/Tk?
+
+    The check results may request you to do some setup operations
+    before using the extension. If so, then please write the step
+    of setup oprations into the "setup.rb" file in the directory
+    of the wrapper libraries for the extention (It is the wrapper
+    libraries have the standard structure of the libraries in this
+    directory). The "setup" file is required before requiring the
+    Tcl library package (TkPackage.require(<libname>)).
+
+  *******************************************************************
+
+
+===< support with some examples (may be beta quality) >=======================
+
+Tcllib       1.11.1
+Tklib        0.5     http://sourceforge.net/projects/tcllib      ==> tcllib
+                       ( partial support; primary support target is Tklib)
+
+IWidgets     4.0.2   http://sourceforge.net/projects/incrtcl     ==> iwidgets
+
+BWidget      1.8 [ CVS/Hd(2009-07-02) ]
+                     http://sourceforge.net/projects/tcllib      ==> bwidget
+
+TkTable      2.10    http://sourceforge.net/projects/tktable     ==> tktable
+                         * see also <http://www.korus.hu/~fery/ruby/tktable.rb>
+                                    written by Ferenc Engard (ferenc@engard.hu)
+
+Vu widgets   2.3.0   http://sourceforge.net/projects/tktable     ==> vu
+
+TkHTML       2.0     http://www.hwaci.com/sw/tkhtml/             ==> tkHTML
+
+ICONS        1.0     http://www.satisoft.com/tcltk/icons/        ==> ICONS
+
+TkImg        1.3     http://sourceforge.net/projects/tkimg       ==> tkimg
+
+
+BLT          2.4z    http://sourceforge.net/projects/blt
+                        * see also tcltk-ext library on RAA
+                                (http://raa.ruby-lang.org/)
+                      ==> blt
+
+TkTreeCtrl   2.2.9
+                     http://tktreectrl.sourceforge.net/          ==> treectrl
+
+Tile         0.8.3/8.6b1
+                     http://sourceforge.net/projects/tktable     ==> tile
+
+
+
+===< support (may be alpha or beta quality) >=================================
+
+IncrTcl      CVS/Hd(2008-12-15)
+                     http://sourceforge.net/projects/incrtcl     ==> itcl, itk
+
+TclX         CVS/Hd(2008-12-15)
+                     http://sourceforge.net/projects/tclx
+                       ==> tclx (partial support; infox command and
+                                                   XPG/3 message catalogs only)
+
+Trofs        0.4.4   http://math.nist.gov/~DPorter/tcltk/trofs/
+
+
+
+===< possibly available (not tested; alpha quality) >=========================
+
+winico       0.6
+                     http://sourceforge.net/projects/tktable
+                       ==> winico (win32 only)
+
+TkTrans      latest(2004-10-11)
+                     http://www2.cmp.uea.ac.uk/~fuzz/tktrans/default.html
+                       ==>  tktrans (win32 only)
+
+TkDND        1.0a2   http://sourceforge.net/projects/tkdnd       ==> tkDND
+
+
+
+===< plan to support (alpha quality libraries may be included) >==============
+
+GraphViz     ***     http://www.graphviz.org/
+
+Tkgeomap     ***     http://tkgeomap.sourceforge.net/index.html
+
+
+
+===< not determined to supprt or not >========================================
+
+Tix          ***     http://tixlibrary.sourceforge.net/
+                        * see also tcltk-ext library on RAA
+                                (http://raa.ruby-lang.org/)
+
+TkZinc       ***     http://www.tkzinc.org/
+
+Wbc          ***     http://home.t-online.de/home/csaba.nemethi/
+
+Mentry       ***     http://home.t-online.de/home/csaba.nemethi/
+
+Tablelist    ***     http://home.t-online.de/home/csaba.nemethi/
+
+ANIGIF       ***     http://cardtable.sourceforge.net/tcltk/
+
+IMG_ROTATE   ***     http://cardtable.sourceforge.net/tcltk/
+
+TclVfs       ***     http://sourceforge.net/projects/tclvfs/
+
+vfwtcl       ***     http://sourceforge.net/projects/avicaptcl
+                        * Win32 only
+
+multicast    ***     http://sourceforge.net/projects/avicaptcl
+                        * Win32 only
+
+XBit         ***     http://www.geocities.com/~chengye/
+                        * current implementation is for Windows only
+
+QuickTimeTcl ***     http://hem.fyristorg.com/matben/qt/
+                        * works under Mac OS (8,9,X) or Windows
+
+
+
+===< may not support (already exist, out of Ruby/Tk scope, and so on) >=======
+
+TkCon        ***     http://sourceforge.net/projects/tkcon
+
+Expect       ***     http://sourceforge.net/projects/expect
+
+TclXML       ***     http://sourceforge.net/projects/tclxml
+
+TclXSLT      ***     http://sourceforge.net/projects/tclxml
+
+TclDOM       ***     http://sourceforge.net/projects/tclxml
+
+TclSOAP      ***     http://sourceforge.net/projects/tclsoap
+
+Snack        ***     http://www.speech.kth.se/~kare/snack2.2.tar.gz
+                        * use Snack for Ruby
+                              (see http://rbsnack.sourceforge.net/)
+
+Tcom         ***     http://www.vex.net/~cthuang/tcom/
+
+tDOM         ***     http://www.tdom.org
+
+Mk4tcl       ***     http://www.equi4.com/metakit/tcl.html
+
+Memchan      ***     http://sourceforge.net/projects/memchan
+
+XOTcl        ***     http://www.xotcl.org/
+
+
+===< tool (may not supprt) >==================================================
+
+tbcload/tclcompiler
+             ***     http://www.tcl.tk/software/tclpro/
+
+
+(End of List)

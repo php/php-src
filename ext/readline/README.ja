@@ -1,0 +1,437 @@
+GNU Readline によるコマンドライン入力インタフェースを提供するモジュール
+です。GNU Readline の互換ライブラリのひとつである Edit Line(libedit) も
+サポートしています。
+
+GNU Readline:: http://www.gnu.org/directory/readline.html
+libedit::      http://www.thrysoee.dk/editline/
+
+Readline.readline を使用してユーザからの入力を取得できます。このとき、
+GNU Readline のように入力の補完やEmacs のようなキー操作などができます。
+
+  require "readline"
+  while buf = Readline.readline("> ", true)
+    p buf
+  end
+
+ユーザが入力した内容を履歴(以下、ヒストリ)として記録することができます。
+定数 Readline::HISTORY を使用してヒストリにアクセスできます。
+
+  require "readline"
+  while buf = Readline.readline("> ", true)
+    p Readline::HISTORY.to_a
+    print("-> ", buf, "\n")
+  end
+
+使用するライブラリにより、いくつかのメソッドで例外 NotImplementedError
+が発生します。
+
+$SAFE が 4 の場合、多くのメソッドで例外 SecurityError が発生します。
+
+== Readline モジュール
+
+=== モジュール関数
+
+readline([prompt, [add_hist]]) -> String | nil
+
+  prompt を出力し、ユーザからのキー入力を待ちます。
+  エンターキーの押下などでユーザが文字列を入力し終えると、
+  入力した文字列を返します。
+  このとき、add_hist が true であれば、入力した文字列をヒストリに追加します。
+
+  何も入力していない状態で EOF(UNIX では ^D) を入力するなどで、
+  ユーザからの入力がない場合は nil を返します。
+
+  次の条件を全て満たす場合、例外 IOError が発生します。
+  1. 標準入力が tty でない。
+  2. 標準入力をクローズしている。(isatty(2) の errno が EBADF である。)
+
+  本メソッドはスレッドに対応しています。
+  入力待ち状態のときはスレッドコンテキストの切替えが発生します。
+
+  入力時には行内編集が可能で、vi モードと Emacs モードが用意されています。
+  デフォルトは Emacs モードです。
+
+  本メソッドには注意事項があります。
+  入力待ちの状態で ^C すると ruby インタプリタが終了し、端末状態を復帰しません。
+  これを回避するための例を3つ挙げます。
+
+  * ^CによるInterrupt例外を補足して、端末状態を復帰します:
+
+      require "readline"
+
+      stty_save = `stty -g`.chomp
+      begin
+        while buf = Readline.readline
+            p buf
+            end
+          rescue Interrupt
+            system("stty", stty_save)
+            exit
+          end
+        end
+      end
+
+  * INTシグナルを補足して、端末状態を復帰します:
+
+      require "readline"
+
+      stty_save = `stty -g`.chomp
+      trap("INT") { system "stty", stty_save; exit }
+
+      while buf = Readline.readline
+        p buf
+      end
+
+  * 単に ^C を無視する方法もあります:
+
+      require "readline"
+
+      trap("INT", "SIG_IGN")
+
+      while buf = Readline.readline
+        p buf
+      end
+
+  入力履歴 Readline::HISTORY を使用して、空行や直前の入力と同じ内容は入力
+  履歴に残さないということもできます。
+
+    require "readline"
+
+    while buf = Readline.readline("> ", true)
+      # p Readline::HISTORY.to_a
+      Readline::HISTORY.pop if /^\s*$/ =~ buf
+
+      begin
+        if Readline::HISTORY[Readline::HISTORY.length-2] == buf
+          Readline::HISTORY.pop
+        end
+      rescue IndexError
+      end
+
+      # p Readline::HISTORY.to_a
+      print "-> ", buf, "\n"
+    end
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+=== クラスメソッド
+
+Readline.input = input
+
+  Readline.readline メソッドで使用する入力用の File オブジェクト input
+  を指定します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.output = output
+
+  Readline.readline メソッドで使用する出力用の File オブジェクト
+  output を指定します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.completion_proc = proc
+
+  ユーザからの入力を補完する時の候補を取得する Proc オブジェクト proc を
+  指定します。proc は、次のものを想定しています。
+  1. call メソッドを持ちます。
+     call メソッドを持たない場合、例外 ArgumentError が発生します。
+  2. 引数にユーザからの入力文字列(注1)を取ります。
+  3. 候補の文字列の配列を返します。
+
+  注1:「/var/lib /v」の後で補完を行うと、
+  デフォルトでは proc の引数に「/v」が渡されます。
+  このように、ユーザが入力した文字列を
+  Readline.completer_word_break_characters に含まれる文字で区切ったも
+  のを単語とすると、カーソルがある単語の最初の文字から現在のカーソル位
+  置までの文字列が proc の引数に渡されます。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.completion_proc -> proc
+
+  ユーザからの入力を補完する時の候補を取得する Proc オブジェクト proc
+  を取得します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.completion_case_fold = bool
+
+  ユーザの入力を補完する際、大文字と小文字を区別する／しないを指定します。
+  bool が真ならば区別しません。bool が偽ならば区別します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.completion_case_fold -> bool
+
+  ユーザの入力を補完する際、大文字と小文字を区別する／しないを取得します。
+  bool が真ならば区別しません。bool が偽ならば区別します。
+
+  なお、Readline.completion_case_fold= メソッドで指定したオブジェクトを
+  そのまま取得するので、次のような動作をします。
+
+    require "readline"
+
+    Readline.completion_case_fold = "This is a String."
+    p Readline.completion_case_fold # => "This is a String."
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.line_buffer -> string
+
+  入力中の行全体を返します。complete_proc の中で使用することを想定し
+  ています。Readline.line_buffer の長さは GNU Readline の rl_end 変数の
+  値と一致します。
+
+Readline.point -> int
+
+  現在のカーソルの位置を返します。
+  Readline モジュールは補完対象の単語の開始位置の情報を提供していません。
+  しかしながら、 completion_proc の中で入力した単語 text と
+  Readline.point を使用することで開始位置を導くことができます。
+
+    開始位置 = 入力した単語の長さ - Readline.point
+
+Readline.vi_editing_mode -> nil
+
+  編集モードを vi モードにします。
+  vi モードの詳細は、GNU Readline のマニュアルを参照してください。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.vi_editing_mode? -> bool
+
+  編集モードが vi モードの場合、true を返します。そうでなければ false
+  を返します。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.emacs_editing_mode -> nil
+
+  編集モードを Emacs モードにします。
+  デフォルトは Emacs モードです。
+  Emacs モードの詳細は、GNU Readline のマニュアルを参照してください。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.emacs_editing_mode? -> bool
+
+  編集モードが Emacs モードの場合、true を返します。そうでなければ false
+  を返します。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.completion_append_character = char
+
+  ユーザの入力の補完が完了した場合に、最後に付加する文字 char を指定し
+  ます。半角スペース「" "」などの単語を区切る文字を指定すれば、連続して
+  入力する際に便利です。
+
+  使用例:
+
+    require "readline"
+
+    Readline.readline("> ", true)
+    Readline.completion_append_character = " "
+
+  実行例:
+
+    >
+    ここで "/var/li" を入力します。
+
+    > /var/li
+    ここで TAB キーを入力します。
+
+    > /var/lib
+    "b" が補完され、最後に " " が追加されるので、"/usr" を連続して入力できます。
+
+    > /var/lib /usr
+
+  なお、1文字しか指定することはできません。
+  例えば、"string"を指定した場合は最初の文字である"s"だけを使用します。
+
+    require "readline"
+
+    Readline.completion_append_character = "string"
+    p Readline.completion_append_character # => "s"
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.completion_append_character -> char
+
+  ユーザの入力の補完が完了した場合に、最後に付加する文字を取得します。
+  デフォルトは空白 (" ") です。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.basic_word_break_characters = string
+
+  ユーザの入力の補完を行う際、単語の区切りを示す複数の文字で構成される
+  文字列 string を指定します。
+
+  GNU Readline のデフォルトの値は、Bash の補完処理で使用している文字列
+  " \t\n\"\\'`@$><=;|&{(" (スペースを含む) になっています。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.basic_word_break_characters -> string
+
+  ユーザの入力の補完を行う際、単語の区切りを示す複数の文字で構成される
+  文字列を取得します。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.completer_word_break_characters = string
+
+  ユーザの入力の補完を行う際、単語の区切りを示す複数の文字で構成される
+  文字列 string を指定します。
+  Readline.basic_word_break_characters= との違いは、
+  GNU Readline の rl_complete_internal 関数で使用されることです。
+
+  GNU Readline のデフォルトの値は、
+  Readline.basic_word_break_characters と同じです。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.completer_word_break_characters -> string
+
+  ユーザの入力の補完を行う際、単語の区切りを示す複数の文字で構成された
+  文字列を取得します。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.basic_quote_characters = string
+
+  スペースなどの単語の区切りをクオートするための複数の文字で構成される
+  文字列 string を指定します。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.basic_quote_characters -> string
+
+  スペースなどの単語の区切りをクオートするための複数の文字で構成される
+  文字列を取得します。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.completer_quote_characters = string
+
+  ユーザの入力の補完を行う際、スペースなどの単語の区切りを
+  クオートするための複数の文字で構成される文字列 string を指定します。
+  指定した文字の間では、Readline.completer_word_break_characters=
+  で指定した文字列に含まれる文字も、普通の文字列として扱われます。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.completer_quote_characters -> string
+
+  ユーザの入力の補完を行う際、スペースなどの単語の区切りを
+  クオートするための複数の文字で構成される文字列を取得します。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.filename_quote_characters = string
+
+  ユーザの入力時にファイル名の補完を行う際、スペースなどの単語の区切りを
+  クオートするための複数の文字で構成される文字列 string を指定します。
+
+  GNU Readline のデフォルト値は nil です。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+Readline.filename_quote_characters -> string
+
+  ユーザの入力時にファイル名の補完を行う際、スペースなどの単語の区切りを
+  クオートするための複数の文字で構成される文字列を取得します。
+
+  サポートしていない環境では、例外 NotImplementedError が発生します。
+
+  $SAFE が 4 の場合、例外 SecurityError が発生します。
+
+=== クラス定数
+
+HISTORY
+
+  定数 HISTORY を使用してヒストリにアクセスできます。
+  Enumerable モジュールを extend しており、
+  配列のように振る舞うことができます。
+  例えば、HISTORY[4] により 5 番目に入力した内容を取り出すことができます。
+
+    require "readline"
+
+    Readline::HISTORY.push("a", "b", "c", "d", "e")
+    p Readline::HISTORY[4] # => "e"
+
+  実装しているメソッドを次に挙げます。
+  * HISTORY.to_s -> "HISTORY"
+  * HISTORY[index] -> string
+  * HISTORY[index] = string
+  * HISTORY.push(string[, string, ...]) -> self
+  * HISTORY << string -> self
+  * HISTORY.pop -> string
+  * HISTORY.shift -> string
+  * HISTORY.each -> Enumerator
+  * HISTORY.each { |i| } -> [string]
+  * HISTORY.length -> Integer
+  * HISTORY.empty? -> true or false
+  * HISTORY.delete_at(index) -> string
+  * HISTORY.clear -> self
+
+  サポートしていない環境では、次のメソッドで例外 NotImplementedError が
+  発生します。
+  * HISTORY[index] = string
+  * HISTORY.pop -> string
+  * HISTORY.shift -> string
+  * HISTORY.delete_at(index) -> string
+  * HISTORY.clear -> self
+
+  $SAFE が 4 の場合、ヒストリにアクセスしたときに例外 SecurityError が
+  発生します。
+
+FILENAME_COMPLETION_PROC
+
+  ファイル名の補完を行う call メソッドを持つオブジェクトです。
+
+  Readline.completion_proc= により、ユーザの入力時にファイル名の補完を
+  行うように設定するために使用することを想定してます。
+
+USERNAME_COMPLETION_PROC
+
+  ユーザ名の補完を行う call メソッドを持つオブジェクトです。
+
+  Readline.completion_proc= により、ユーザの入力時にユーザ名の補完を行
+  うように設定するために使用することを想定してます。
+
+VERSION
+
+  使用している GNU Readline または libedit のバージョンです。

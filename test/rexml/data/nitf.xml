@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nitf>
+
+  <!-- Example of markup of URLs (at the bottom of the story) -->
+
+ <head>
+  <meta name="ap-cycle" content="AP"/>
+  <meta name="ap-online-code" content="1700"/>
+  <meta name="ap-company" content="CO:Media Metrix Inc;TS:MMXI;IG:SVC;"/>
+  <meta name="ap-routing" content="ENTITLEMENTS,pfONLINE,pf1700"/>
+  <meta name="ap-format" content="bx"/>
+  <meta name="ap-category" content="f"/>
+  <meta name="ap-selector" content="-----"/>
+  <meta name="ap-transref" content="V0347"/>
+  <docdata>
+   <doc-id regsrc="AP" id-string="D76UIMO80"/>
+   <urgency ed-urg="7"/>
+   <date.issue norm="20000911T185842Z"/>
+   <du-key key="Napster Traffic"/>
+   <doc.copyright holder="(AP)"/>
+  </docdata>
+ </head>
+ <body>
+  <body.head>
+   <hedline>
+    <hl1>Use of Napster Quadruples</hl1>
+   </hedline>
+   <byline>By PETER SVENSSON
+    <byttl>AP Business Writer</byttl>
+   </byline>
+   <distributor>The Associated Press</distributor>
+   <dateline>
+    <location>NEW YORK</location>
+   </dateline>
+  </body.head>
+  <body.content>
+   <block>
+    <p>Despite the uncertain legality of the Napster online music-sharing service, the number of people
+using it more than quadrupled in just five months, Media Metrix said Monday.</p>
+    <p>That made Napster the fastest-growing software application ever recorded by the Internet research
+company.</p>
+    <p>From 1.1 million home users in the United States in February, the first month Media Metrix
+tracked the application, Napster use rocketed to 4.9 million users in July.</p>
+    <p>That represents 6 percent of U.S. home PC users who have modems, said Media Metrix, which pays
+people to install monitoring software on their computers.</p>
+    <p>It estimates total usage from a panel of about 50,000 people in the United States.</p>
+    <p>Napster was also used at work by 887,000 people in July, Media Metrix said.</p>
+    <p>Napster Inc. has been sued by the recording industry for allegedly enabling copyright
+infringement. The federal government weighed in on the case Friday, saying the service is not protected
+under a key copyright law, as the San Mateo, Calif., company claims.</p>
+    <p>Bruce Ryon, head of Media Metrix&apos;s New Media Group, said Napster was used by &quot;the full spectrum of PC users, not just the youth with time on their hands and a passion for music.&quot;</p>
+    <p>The Napster program allows users to copy digital music files from the hard drives of other
+users over the Internet.</p>
+    <p>Napster Inc. said last week that 28 million people had downloaded its program. It does not reveal
+its own figures for how many people actually use the software.</p>
+    <p>Because the program connects to the company&apos;s computers over the Internet every time
+it is run, Napster Inc. can track usage exactly.</p>
+    <p>__</p>
+    <p>On the Net:</p>
+    <p><a href="http://www.napster.com">
+http://www.napster.com</a></p>
+    <p><a href="http://www.mediametrix.com">
+http://www.mediametrix.com</a></p>
+   </block>
+  </body.content>
+ </body>
+</nitf>

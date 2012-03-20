@@ -1,0 +1,678 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/css"
+href="../../documentation/documentation.css"
+?>
+<?xml-stylesheet type="text/xsl"
+href="../../documentation/documentation.xsl"
+?>
+<!DOCTYPE documentation SYSTEM "http://www.germane-software.com/software/documentation/documentation.dtd">
+<documentation>
+  <head>
+    <title>REXML Tutorial</title>
+
+    <version>$Revision: 1.1.2.1 $</version>
+
+    <date>*2001-296+594</date>
+
+    <home>http://www.germane-software.com/~ser/software/rexml</home>
+
+    <base></base>
+
+    <language>ruby</language>
+
+    <author email="ser@germane-software.com"
+    href="http://www.germane-software.com/~ser">Sean Russell</author>
+  </head>
+
+  <overview>
+    <purpose lang="en">
+      <p>This is a tutorial for using <link
+      href="http://www.germane-software.com/~ser/software/rexml">REXML</link>,
+      a pure Ruby XML processor.</p>
+    </purpose>
+
+    <general>
+      <p>REXML was inspired by the Electric XML library for Java, which
+      features an easy-to-use API, small size, and speed. Hopefully, REXML,
+      designed with the same philosophy, has these same features. I've tried
+      to keep the API as intuitive as possible, and have followed the Ruby
+      methodology for method naming and code flow, rather than mirroring the
+      Java API.</p>
+
+      <p>REXML supports both tree and stream document parsing. Stream parsing
+      is faster (about 1.5 times as fast). However, with stream parsing, you
+      don't get access to features such as XPath.</p>
+
+      <p>The <link href="../doc/index.html">API</link> documentation also
+      contains code snippits to help you learn how to use various methods.
+      This tutorial serves as a starting point and quick guide to using
+      REXML.</p>
+
+      <subsection title="Tree Parsing XML and accessing Elements">
+        <p>We'll start with parsing an XML document</p>
+
+        <example>require "rexml/document"
+file = File.new( "mydoc.xml" )
+doc = REXML::Document.new file</example>
+
+        <p>Line 3 creates a new document and parses the supplied file. You can
+        also do the following</p>
+
+        <example>require "rexml/document"
+include REXML  # so that we don't have to prefix everything with REXML::...
+string = &lt;&lt;EOF
+  &lt;mydoc&gt;
+    &lt;someelement attribute="nanoo"&gt;Text, text, text&lt;/someelement&gt;
+  &lt;/mydoc&gt;
+EOF
+doc = Document.new string</example>
+
+        <p>So parsing a string is just as easy as parsing a file. For future
+        examples, I'm going to omit both the <code>require</code> and
+        <code>include</code> lines.</p>
+
+        <p>Once you have a document, you can access elements in that document
+        in a number of ways:</p>
+
+        <list>
+          <item>The <code>Element</code> class itself has
+          <code>each_element_with_attribute</code>, a common way of accessing
+          elements.</item>
+
+          <item>The attribute <code>Element.elements</code> is an
+          <code>Elements</code> class instance which has the <code>each</code>
+          and <code>[]</code> methods for accessing elements. Both methods can
+          be supplied with an XPath for filtering, which makes them very
+          powerful.</item>
+
+          <item>Since <code>Element</code> is a subclass of Parent, you can
+          also access the element's children directly through the Array-like
+          methods <code>Element[], Element.each, Element.find,
+          Element.delete</code>. This is the fastest way of accessing
+          children, but note that, being a true array, XPath searches are not
+          supported, and that all of the element children are contained in
+          this array, not just the Element children.</item>
+        </list>
+
+        <p>Here are a few examples using these methods. First is the source
+        document used in the examples. Save this as mydoc.xml before running
+        any of the examples that require it:</p>
+
+        <example title="The source document">&lt;inventory title="OmniCorp Store #45x10^3"&gt;
+  &lt;section name="health"&gt;
+    &lt;item upc="123456789" stock="12"&gt;
+      &lt;name&gt;Invisibility Cream&lt;/name&gt;
+      &lt;price&gt;14.50&lt;/price&gt;
+      &lt;description&gt;Makes you invisible&lt;/description&gt;
+    &lt;/item&gt;
+    &lt;item upc="445322344" stock="18"&gt;
+      &lt;name&gt;Levitation Salve&lt;/name&gt;
+      &lt;price&gt;23.99&lt;/price&gt;
+      &lt;description&gt;Levitate yourself for up to 3 hours per application&lt;/description&gt;
+    &lt;/item&gt;
+  &lt;/section&gt;
+  &lt;section name="food"&gt;
+    &lt;item upc="485672034" stock="653"&gt;
+      &lt;name&gt;Blork and Freen Instameal&lt;/name&gt;
+      &lt;price&gt;4.95&lt;/price&gt;
+      &lt;description&gt;A tasty meal in a tablet; just add water&lt;/description&gt;
+    &lt;/item&gt;
+    &lt;item upc="132957764" stock="44"&gt;
+      &lt;name&gt;Grob winglets&lt;/name&gt;
+      &lt;price&gt;3.56&lt;/price&gt;
+      &lt;description&gt;Tender winglets of Grob. Just add water&lt;/description&gt;
+    &lt;/item&gt;
+  &lt;/section&gt;
+&lt;/inventory&gt;</example>
+
+        <example title="Accessing Elements">doc = Document.new File.new("mydoc.xml")
+doc.elements.each("inventory/section") { |element| puts element.attributes["name"] }
+# -&gt; health
+# -&gt; food
+doc.elements.each("*/section/item") { |element| puts element.attributes["upc"] }
+# -&gt; 123456789
+# -&gt; 445322344
+# -&gt; 485672034
+# -&gt; 132957764
+root = doc.root
+puts root.attributes["title"]
+# -&gt; OmniCorp Store #45x10^3
+puts root.elements["section/item[@stock='44']"].attributes["upc"]
+# -&gt; 132957764
+puts root.elements["section"].attributes["name"] 
+# -&gt; health (returns the first encountered matching element) 
+puts root.elements[1].attributes["name"] 
+# -&gt; health (returns the FIRST child element) 
+root.detect {|node| node.kind_of? Element and node.attributes["name"] == "food" }</example>
+
+        <p>Notice the second-to-last line of code. Element children in REXML
+        are indexed starting at 1, not 0. This is because XPath itself counts
+        elements from 1, and REXML maintains this relationship; IE,
+        <code>root.elements['*[1]'] == root.elements[1]</code>. The last line
+        finds the first child element with the name of "food". As you can see
+        in this example, accessing attributes is also straightforward.</p>
+
+        <p>You can also access xpaths directly via the XPath class.</p>
+
+        <example title="Using XPath"># The invisibility cream is the first &lt;item&gt;
+invisibility = XPath.first( doc, "//item" ) 
+# Prints out all of the prices
+XPath.each( doc, "//price") { |element| puts element.text }
+# Gets an array of all of the "name" elements in the document.
+names = XPath.match( doc, "//name" ) </example>
+
+        <p>Another way of getting an array of matching nodes is through
+        Element.elements.to_a(). Although this is a method on elements, if
+        passed an XPath it can return an array of arbitrary objects. This is
+        due to the fact that XPath itself can return arbitrary nodes
+        (Attribute nodes, Text nodes, and Element nodes).</p>
+
+        <example title="Using to_a()">all_elements = doc.elements.to_a
+all_children = doc.to_a
+all_upc_strings = doc.elements.to_a( "//item/attribute::upc" )
+all_name_elements = doc.elements.to_a( "//name" )</example>
+      </subsection>
+
+      <subsection title="Text Nodes">
+        <p>REXML attempts to make the common case simple, but this means that
+        the uncommon case can be complicated. This is especially true with
+        Text nodes.</p>
+
+        <p>Text nodes have a lot of behavior, and in the case of internal
+        entities, what you get may be different from what you expect. When
+        REXML reads an XML document, in parses the DTD and creates an internal
+        table of entities. If it finds any of these entities in the document,
+        it replaces them with their values:</p>
+
+        <example title="Entity Replacement">doc = Document.new '&lt;!DOCTYPE foo [
+&lt;!ENTITY ent "replace"&gt;
+]&gt;&lt;a&gt;&amp;ent;&lt;/a&gt;'
+doc.root.text   #-&gt; "replace"
+</example>
+
+        <p>When you write the document back out, REXML replaces the values
+        with the entity reference:</p>
+
+        <example>doc.to_s
+# Generates:
+# &lt;!DOCTYPE foo [
+# &lt;!ENTITY ent "replace"&gt;
+# ]&gt;&lt;a&gt;&amp;ent;&lt;/a&gt;</example>
+
+        <p>But there's a problem. What happens if only some of the words are
+        also entity reference values?</p>
+
+        <example>doc = Document.new '&lt;!DOCTYPE foo [
+&lt;!ENTITY ent "replace"&gt;
+]&gt;&lt;a&gt;replace &amp;ent;&lt;/a&gt;'
+doc.root.text   #-&gt; "replace replace"
+</example>
+
+        <p>Well, REXML does the only thing it can:</p>
+
+        <example>doc.to_s
+# Generates:
+# &lt;!DOCTYPE foo [
+# &lt;!ENTITY ent "replace"&gt;
+# ]&gt;&lt;a&gt;&amp;ent; &amp;ent;&lt;/a&gt;</example>
+
+        <p>This is probably not what you expect. However, when designing
+        REXML, I had a choice between this behavior, and using immutable text
+        nodes. The problem is that, if you can change the text in a node,
+        REXML can never tell which tokens you want to have replaced with
+        entities. There is a wrinkle: REXML will write what it gets in as long
+        as you don't access the text. This is because REXML does lazy
+        evaluation of entities. Therefore,</p>
+
+        <example title="Lazy Evaluation">doc = Document.new( '&lt;!DOCTYPE foo
+        [ &lt;!ENTITY ent "replace"&gt; ]&gt;&lt;a&gt;replace
+        &amp;ent;&lt;/a&gt;' ) doc.to_s # Generates: # &lt;!DOCTYPE foo [ #
+        &lt;!ENTITY ent "replace"&gt; # ]&gt;&lt;a&gt;<emphasis>replace
+        &amp;ent;</emphasis>&lt;/a&gt; doc.root.text #-&gt; Now accessed,
+        entities have been resolved doc.to_s # Generates: # &lt;!DOCTYPE foo [
+        # &lt;!ENTITY ent "replace"&gt; # ]&gt;&lt;a&gt;<emphasis>&amp;ent;
+        &amp;ent;</emphasis>&lt;/a&gt;</example>
+
+        <p>There is a programmatic solution: <code>:raw</code>. If you set the
+        <code>:raw</code> flag on any Text or Element node, the entities
+        within that node will not be processed. This means that you'll have to
+        deal with entities yourself:</p>
+
+        <example title="Entity Replacement">doc = Document.new('&lt;!DOCTYPE
+        foo [ &lt;!ENTITY ent "replace"&gt; ]&gt;&lt;a&gt;replace
+        &amp;ent;&lt;/a&gt;',<emphasis>{:raw=&gt;:all})</emphasis>
+        doc.root.text #-&gt; "replace &amp;ent;" doc.to_s # Generates: #
+        &lt;!DOCTYPE foo [ # &lt;!ENTITY ent "replace"&gt; #
+        ]&gt;&lt;a&gt;replace &amp;ent;&lt;/a&gt;</example>
+      </subsection>
+
+      <subsection title="Creating XML documents">
+        <p>Again, there are a couple of mechanisms for creating XML documents
+        in REXML. Adding elements by hand is faster than the convenience
+        method, but which you use will probably be a matter of aesthetics.</p>
+
+        <example title="Creating elements">el = someelement.add_element "myel" 
+# creates an element named "myel", adds it to "someelement", and returns it 
+el2 = el.add_element "another", {"id"=&gt;"10"} 
+# does the same, but also sets attribute "id" of el2 to "10" 
+el3 = Element.new "blah" 
+el1.elements &lt;&lt; el3 
+el3.attributes["myid"] = "sean" 
+# creates el3 "blah", adds it to el1, then sets attribute "myid" to "sean"</example>
+
+        <p>If you want to add text to an element, you can do it by either
+        creating Text objects and adding them to the element, or by using the
+        convenience method <code>text=</code></p>
+
+        <example title="Adding text">el1 = Element.new "myelement" 
+el1.text = "Hello world!" 
+# -&gt; &lt;myelement&gt;Hello world!&lt;/myelement&gt; 
+el1.add_text "Hello dolly" 
+# -&gt; &lt;myelement&gt;Hello world!Hello dolly&lt;/element&gt; 
+el1.add Text.new("Goodbye") 
+# -&gt; &lt;myelement&gt;Hello world!Hello dollyGoodbye&lt;/element&gt; 
+el1 &lt;&lt; Text.new(" cruel world") 
+# -&gt; &lt;myelement&gt;Hello world!Hello dollyGoodbye cruel world&lt;/element&gt;</example>
+
+        <p>But note that each of these text objects are still stored as
+        separate objects; <code>el1.text</code> will return "Hello world!";
+        <code>el1[2]</code> will return a Text object with the contents
+        "Goodbye".</p>
+
+        <p>Please be aware that all text nodes in REXML are UTF-8 encoded, and
+        all of your code must reflect this. You may input and output other
+        encodings (UTF-8, UTF-16, ISO-8859-1, and UNILE are all supported,
+        input and output), but within your program, you must pass REXML UTF-8
+        strings.</p>
+
+        <p>I can't emphasize this enough, because people do have problems with
+        this. REXML can't possibly alway guess correctly how your text is
+        encoded, so it always assumes the text is UTF-8. It also does not warn
+        you when you try to add text which isn't properly encoded, for the
+        same reason. You must make sure that you are adding UTF-8 text.
+        &#160;If you're adding standard 7-bit ASCII, which is most common, you
+        don't have to worry. &#160;If you're using ISO-8859-1 text (characters
+        above 0x80), you must convert it to UTF-8 before adding it to an
+        element. &#160;You can do this with the shard:
+        <code>text.unpack("C*").pack("U*")</code>. If you ignore this warning
+        and add 8-bit ASCII characters to your documents, your code may
+        work... or it may not. &#160;In either case, REXML is not at fault.
+        You have been warned.</p>
+
+        <p>One last thing: alternate encoding output support only works from
+        Document.write() and Document.to_s(). If you want to write out other
+        nodes with a particular encoding, you must wrap your output object
+        with Output:</p>
+
+        <example title="Encoded Output">e = Element.new "&lt;a/&gt;"
+e.text = "f\xfcr"   # ISO-8859-1 'ü'
+o = ''
+e.write( Output.new( o, "ISO-8859-1" ) )
+</example>
+
+        <p>You can pass Output any of the supported encodings.</p>
+
+        <p>If you want to insert an element between two elements, you can use
+        either the standard Ruby array notation, or
+        <code>Parent.insert_before</code> and
+        <code>Parent.insert_after</code>.</p>
+
+        <example title="Inserts">doc = Document.new "&lt;a&gt;&lt;one/&gt;&lt;three/&gt;&lt;/a&gt;" 
+doc.root[1,0] = Element.new "two" 
+# -&gt; &lt;a&gt;&lt;one/&gt;&lt;two/&gt;&lt;three/&gt;&lt;/a&gt; 
+three = doc.elements["a/three"] 
+doc.root.insert_after three, Element.new "four" 
+# -&gt; &lt;a&gt;&lt;one/&gt;&lt;two/&gt;&lt;three/&gt;&lt;four/&gt;&lt;/a&gt; 
+# A convenience method allows you to insert before/after an XPath: 
+doc.root.insert_after( "//one", Element.new("one-five") ) 
+# -&gt; &lt;a&gt;&lt;one/&gt;&lt;one-five/&gt;&lt;two/&gt;&lt;three/&gt;&lt;four/&gt;&lt;/a&gt; 
+# Another convenience method allows you to insert after/before an element: 
+four = doc.elements["//four"] 
+four.previous_sibling = Element.new("three-five") 
+# -&gt; &lt;a&gt;&lt;one/&gt;&lt;one-five/&gt;&lt;two/&gt;&lt;three/&gt;&lt;three-five/&gt;&lt;four/&gt;&lt;/a&gt;</example>
+
+        <p>The <code>raw</code> flag in the <code>Text</code> constructor can
+        be used to tell REXML to leave strings which have entities defined for
+        them alone.</p>
+
+        <example title="Raw text">doc = Document.new( "&lt;?xml version='1.0?&gt;
+&lt;!DOCTYPE foo SYSTEM 'foo.dtd' [
+&lt;!ENTITY % s "Sean"&gt;
+]&gt;
+&lt;a/&gt;"
+t = Text.new( "Sean", false, nil, false )
+doc.root.text = t
+t.to_s     # -&gt; &amp;s;
+t = Text.new( "Sean", false, nil, true )
+doc.root.text = t
+t.to_s     # -&gt; Sean</example>
+
+        <p>Note that, in all cases, the <code>value()</code> method returns
+        the text with entities expanded, so the <code>raw</code> flag only
+        affects the <code>to_s()</code> method. If the <code>raw</code> is set
+        for a text node, then <code>to_s()</code> will not entities will not
+        normalize (turn into entities) entity values. You can not create raw
+        text nodes that contain illegal XML, so the following will generate a
+        parse error:</p>
+
+        <example>t = Text.new( "&amp;", false, nil, true )</example>
+
+        <p>You can also tell REXML to set the Text children of given elements
+        to raw automatically, on parsing or creating:</p>
+
+        <example title="Automatic raw text handling">doc = REXML::Document.new( source, { :raw =&gt; %w{ tag1 tag2 tag3 } }</example>
+
+        <p>In this example, all tags named "tag1", "tag2", or "tag3" will have
+        any Text children set to raw text. If you want to have all of the text
+        processed as raw text, pass in the :all tag:</p>
+
+        <example title="Raw documents">doc = REXML::Document.new( source, { :raw =&gt; :all })</example>
+      </subsection>
+
+      <subsection title="Writing a tree">
+        <p>There aren't many things that are more simple than writing a REXML
+        tree. Simply pass an object that supports <code>&lt;&lt;( String
+        )</code> to the <code>write</code> method of any object. In Ruby, both
+        IO instances (File) and String instances support &lt;&lt;.</p>
+
+        <example>doc.write $stdout 
+output = "" 
+doc.write output</example>
+
+        <p>If you want REXML to pretty-print output, pass <code>write()</code>
+        an indent value greater than -1:</p>
+
+        <example title="Write with pretty-printing">doc.write( $stdout, 0 )</example>
+
+        <p>REXML will not, by default, write out the XML declaration unless
+        you specifically ask for them. If a document is read that contains an
+        XML declaration, that declaration <emphasis>will</emphasis> be written
+        faithfully. The other way you can tell REXML to write the declaration
+        is to specifically add the declaration:</p>
+
+        <example title="Adding an XML Declaration to a Document">doc = Document.new 
+doc.add_element 'foo'
+doc.to_s   #-&gt; &lt;foo/&gt;
+doc &lt;&lt; XMLDecl.new
+doc.to_s   #-&gt; &lt;?xml version='1.0'?&gt;&lt;foo/&gt;</example>
+      </subsection>
+
+      <subsection title="Iterating">
+        <p>There are four main methods of iterating over children.
+        <code>Element.each</code>, which iterates over all the children;
+        <code>Element.elements.each</code>, which iterates over just the child
+        Elements; <code>Element.next_element</code> and
+        <code>Element.previous_element</code>, which can be used to fetch the
+        next Element siblings; and <code>Element.next_sibling</code> and
+        <code>Eleemnt.previous_sibling</code>, which fetches the next and
+        previous siblings, regardless of type.</p>
+      </subsection>
+
+      <subsection title="Stream Parsing">
+        <p>REXML stream parsing requires you to supply a Listener class. When
+        REXML encounters events in a document (tag start, text, etc.) it
+        notifies your listener class of the event. You can supply any subset
+        of the methods, but make sure you implement method_missing if you
+        don't implement them all. A StreamListener module has been supplied as
+        a template for you to use.</p>
+
+        <example title="Stream parsing">list = MyListener.new 
+source = File.new "mydoc.xml" 
+REXML::Document.parse_stream(source, list)</example>
+
+        <p>Stream parsing in REXML is much like SAX, where events are
+        generated when the parser encounters them in the process of parsing
+        the document. When a tag is encountered, the stream listener's
+        <code>tag_start()</code> method is called. When the tag end is
+        encountered, <code>tag_end()</code> is called. When text is
+        encountered, <code>text()</code> is called, and so on, until the end
+        of the stream is reached. One other note: the method
+        <code>entity()</code> is called when an <code>&amp;entity;</code> is
+        encountered in text, and only then.</p>
+
+        <p>Please look at the <link
+        href="../doc/classes/REXML/StreamListener.html">StreamListener
+        API</link> for more information.<footnote>You must generate the API
+        documentation with rdoc or download the API documentation from the
+        REXML website for this documentation.</footnote></p>
+      </subsection>
+
+      <subsection title="Whitespace">
+        <p>By default, REXML respects whitespace in your document. In many
+        applications, you want the parser to compress whitespace in your
+        document. In these cases, you have to tell the parser which elements
+        you want to respect whitespace in by passing a context to the
+        parser:</p>
+
+        <example title="Compressing whitespace">doc = REXML::Document.new( source, { :compress_whitespace =&gt; %w{ tag1 tag2 tag3 } }</example>
+
+        <p>Whitespace for tags "tag1", "tag2", and "tag3" will be compressed;
+        all other tags will have their whitespace respected. Like :raw, you
+        can set :compress_whitespace to :all, and have all elements have their
+        whitespace compressed.</p>
+
+        <p>You may also use the tag <code>:respect_whitespace</code>, which
+        flip-flops the behavior. If you use <code>:respect_whitespace</code>
+        for one or more tags, only those elements will have their whitespace
+        respected; all other tags will have their whitespace compressed.</p>
+      </subsection>
+
+      <subsection title="Automatic Entity Processing">
+        <p>REXML does some automatic processing of entities for your
+        convenience. The processed entities are &amp;, &lt;, &gt;, ", and '.
+        If REXML finds any of these characters in Text or Attribute values, it
+        automatically turns them into entity references when it writes them
+        out. Additionally, when REXML finds any of these entity references in
+        a document source, it converts them to their character equivalents.
+        All other entity references are left unprocessed. If REXML finds an
+        &amp;, &lt;, or &gt; in the document source, it will generate a
+        parsing error.</p>
+
+        <example title="Entity processing">bad_source = "&lt;a&gt;Cats &amp; dogs&lt;/a&gt;" 
+good_source = "&lt;a&gt;Cats &amp;amp; &amp;#100;ogs&lt;/a&gt;" 
+doc = REXML::Document.new bad_source 
+# Generates a parse error 
+doc = REXML::Document.new good_source 
+puts doc.root.text 
+# -&gt; "Cats &amp; &amp;#100;ogs" 
+doc.root.write $stdout 
+# -&gt; "&lt;a&gt;Cats &amp;amp; &amp;#100;ogs&lt;/a&gt;" 
+doc.root.attributes["m"] = "x'y\"z" 
+puts doc.root.attributes["m"] 
+# -&gt; "x'y\"z" 
+doc.root.write $stdout 
+# -&gt; "&lt;a m='x&amp;apos;y&amp;quot;z'&gt;Cats &amp;amp; &amp;#100;ogs&lt;/a&gt;"</example>
+      </subsection>
+
+      <subsection title="Namespaces">
+        <p>Namespaces are fully supported in REXML and within the XPath
+        parser. There are a few caveats when using XPath, however:</p>
+
+        <list>
+          <item>If you don't supply a namespace mapping, the default namespace
+          mapping of the context element is used. This has its limitations,
+          but is convenient for most purposes.</item>
+
+          <item>If you need to supply a namespace mapping, you must use the
+          XPath methods <code>each</code>, <code>first</code>, and
+          <code>match</code> and pass them the mapping.</item>
+        </list>
+
+        <example title="Using namespaces">source = "&lt;a xmlns:x='foo' xmlns:y='bar'&gt;&lt;x:b id='1'/&gt;&lt;y:b id='2'/&gt;&lt;/a&gt;"
+doc = Document.new source
+doc.elements["/a/x:b"].attributes["id"]	                     # -&gt; '1'
+XPath.first(doc, "/a/m:b", {"m"=&gt;"bar"}).attributes["id"]   # -&gt; '2'
+doc.elements["//x:b"].prefix                                # -&gt; 'x'
+doc.elements["//x:b"].namespace	                             # -&gt; 'foo'
+XPath.first(doc, "//m:b", {"m"=&gt;"bar"}).prefix              # -&gt; 'y'</example>
+      </subsection>
+
+      <subsection title="Pull parsing">
+        <p>The pull parser API is not yet stable. When it settles down, I'll
+        fill in this section. For now, you'll have to bite the bullet and read
+        the <link
+        href="http://www.germane-software.com/software/rexml_doc/classes/REXML/PullParser.html">PullParser</link>
+        API docs. Ignore the PullListener class; it is a private helper
+        class.</p>
+      </subsection>
+
+      <subsection title="SAX2 Stream Parsing">
+        <p>The original REXML stream parsing API is very minimal. This also
+        means that it is fairly fast. For a more complex, more "standard" API,
+        REXML also includes a streaming parser with a SAX2+ API. This API
+        differs from SAX2 in a couple of ways, such as having more filters and
+        multiple notification mechanisms, but the core API is SAX2.</p>
+
+        <p>The two classes in the SAX2 API are <link
+        href="http://www.germane-software.com/software/rexml_doc/classes/REXML/SAX2Parser.html"><code>SAX2Parser</code></link>
+        and <link
+        href="http://www.germane-software.com/software/rexml_doc/classes/REXML/SAX2Listener.html"><code>SAX2Listener</code></link>.
+        You can use the parser in one of five ways, depending on your needs.
+        Three of the ways are useful if you are filtering for a small number
+        of events in the document, such as just printing out the names of all
+        of the elements in a document, or getting all of the text in a
+        document. The other two ways are for more complex processing, where
+        you want to be notified of multiple events. The first three involve
+        Procs, and the last two involve listeners. The listener mechanisms are
+        very similar to the original REXML streaming API, with the addition of
+        filtering options, and are faster than the proc mechanisms.</p>
+
+        <p>An example is worth a thousand words, so we'll just take a look at
+        a small example of each of the mechanisms. The first example involves
+        printing out only the text content of a document.</p>
+
+        <example title="Filtering for Events with Procs">require 'rexml/sax2parser'
+parser = REXML::SAX2Parser.new( File.new( 'documentation.xml' ) )
+parser.listen( :characters ) {|text| puts text }
+parser.parse</example>
+
+        <p>In this example, we tell the parser to call our block for every
+        <code>characters</code> event. "characters" is what SAX2 calls Text
+        nodes. The event is identified by the symbol <code>:characters</code>.
+        There are a number of these events, including
+        <code>:element_start</code>, <code>:end_prefix_mapping</code>, and so
+        on; the events are named after the methods in the
+        <code>SAX2Listener</code> API, so refer to that document for a
+        complete list.</p>
+
+        <p>You can additionally filter for particular elements by passing an
+        array of tag names to the <code>listen</code> method. In further
+        examples, we will not include the <code>require</code> or parser
+        construction lines, as they are the same for all of these
+        examples.</p>
+
+        <example title="Filtering for Events on Particular Elements with Procs">parser.listen( :characters, %w{ changelog todo } ) {|text| puts text }
+parser.parse</example>
+
+        <p>In this example, only the text content of changelog and todo
+        elements will be printed. The array of tag names can also contain
+        regular expressions which the element names will be matched
+        against.</p>
+
+        <p>Finally, as a shortcut, if you do not pass a symbol to the listen
+        method, it will default to <code>:element_start</code></p>
+
+        <example title="Default Events">parser.listen( %w{ item }) do |uri,localname,qname,attributes| 
+  puts attributes['version']
+end
+parser.parse</example>
+
+        <p>This example prints the "version" attribute of all "item" elements
+        in the document. Notice that the number of arguments passed to the
+        block is larger than for <code>:text</code>; again, check the
+        SAX2Listener API for a list of what arguments are passed the blocks
+        for a given event.</p>
+
+        <p>The last two mechanisms for parsing use the SAX2Listener API. Like
+        StreamListener, SAX2Listener is a <code>module</code>, so you can
+        <code>include</code> it in your class to give you an adapter. To use
+        the listener model, create a class that implements some of the
+        SAX2Listener methods, or all of them if you don't include the
+        SAX2Listener model. Add them to a parser as you would blocks, and when
+        the parser is run, the methods will be called when events occur.
+        Listeners do not use event symbols, but they can filter on element
+        names.</p>
+
+        <example title="Filtering for Events with Listeners">listener1 = MySAX2Listener.new
+listener2 = MySAX2Listener.new
+parser.listen( listener1 )
+parser.listen( %{ changelog, todo, credits }, listener2 )
+parser.parse</example>
+
+        <p>In the previous example, <code>listener1</code> will be notified of
+        all events that occur, and <code>listener2</code> will only be
+        notified of events that occur in <code>changelog</code>,
+        <code>todo</code>, and <code>credits</code> elements. We also see that
+        multiple listeners can be added to the same parser; multiple blocks
+        can also be added, and listeners and blocks can be mixed together.</p>
+
+        <p>There is, as yet, no mechanism for recursion. Two upcoming features
+        of the SAX2 API will be the ability to filter based on an XPath, and
+        the ability to specify filtering on an elemnt and all of its
+        descendants.</p>
+
+        <p><em>WARNING:</em> The SAX2 API for dealing with doctype (DTD)
+        events almost <em>certainly</em> will change.</p>
+      </subsection>
+
+      <subsection title="Convenience methods">
+        <p>Michael Neumann contributed some convenience functions for nodes,
+        and they are general enough that I've included. Michael's use-case
+        examples follow: <example title="Node convenience functions">#
+        Starting with +root_node+, we recursively look for a node with the
+        given # +tag+, the given +attributes+ (a Hash) and whoose text equals
+        or matches the # +text+ string or regular expression. # # To find the
+        following node: # # &lt;td class='abc'&gt;text&lt;/td&gt; # # We use:
+        # # find_node(root, 'td', {'class' =&gt; 'abc'}, "text") # # Returns
+        +nil+ if no matching node was found. def find_node(root_node, tag,
+        attributes, text) root_node.find_first_recursive {|node| node.name ==
+        tag and attributes.all? {|attr, val| node.attributes[attr] == val} and
+        text === node.text } end # # Extract specific columns (specified by
+        the position of it's corrensponding # header column) from a table. # #
+        Given the following table: # # &lt;table&gt; # &lt;tr&gt; #
+        &lt;td&gt;A&lt;/td&gt; # &lt;td&gt;B&lt;/td&gt; #
+        &lt;td&gt;C&lt;/td&gt; # &lt;/tr&gt; # &lt;tr&gt; #
+        &lt;td&gt;A.1&lt;/td&gt; # &lt;td&gt;B.1&lt;/td&gt; #
+        &lt;td&gt;C.1&lt;/td&gt; # &lt;/tr&gt; # &lt;tr&gt; #
+        &lt;td&gt;A.2&lt;/td&gt; # &lt;td&gt;B.2&lt;/td&gt; #
+        &lt;td&gt;C.2&lt;/td&gt; # &lt;/tr&gt; # &lt;/table&gt; # # To extract
+        the first (A) and last (C) column: # # extract_from_table(root_node,
+        ["A", "C"]) # # And you get this as result: # # [ # ["A.1", "C.1"], #
+        ["A.2", "C.2"] # ] # def extract_from_table(root_node, headers) #
+        extract and collect all header nodes header_nodes = headers.collect {
+        |header| find_node(root_node, 'td', {}, header) } raise "some headers
+        not found" if header_nodes.compact.size &lt; headers.size # assert
+        that all headers have the same parent 'header_row', which is the row #
+        in which the header_nodes are contained. 'table' is the surrounding
+        table tag. header_row = header_nodes.first.parent table =
+        header_row.parent raise "different parents" unless header_nodes.all?
+        {|n| n.parent == header_row} # we now iterate over all rows in the
+        table that follows the header_row. # for each row we collect the
+        elements at the same positions as the header_nodes. # this is what we
+        finally return from the method. (header_row.index_in_parent+1 ..
+        table.elements.size).collect do |inx| row = table.elements[inx]
+        header_nodes.collect { |n| row.elements[ n.index_in_parent ].text }
+        end end</example></p>
+      </subsection>
+
+      <subsection title="Conclusion">
+        <p>This isn't everything there is to REXML, but it should be enough to
+        get started. Check the <link href="../doc/index.html">API
+        documentation</link><footnote>You must generate the API documentation
+        with rdoc or download the API documentation from the REXML website for
+        this documentation.</footnote> for particulars and more examples.
+        There are plenty of unit tests in the <code>test/</code> directory,
+        and these are great sources of working examples.</p>
+      </subsection>
+    </general>
+  </overview>
+
+  <credits>
+    <p>Among the people who've contributed to this document are:</p>
+
+    <list>
+      <item><link href="mailto:deicher@sandia.gov">Eichert, Diana</link> (bug
+      fix)</item>
+    </list>
+  </credits>
+</documentation>

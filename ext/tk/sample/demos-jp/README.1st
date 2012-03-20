@@ -1,0 +1,20 @@
+このディレクトリには Ruby/Tk のデモスクリプトが収められています．
+
+'.rb' という拡張子を持っているファイルは，ランチャ─スクリプトで
+ある 'widget' から呼び出されるサブスクリプトです．それぞれ独立に
+は動きません．'widget' スクリプトから呼び出してください．
+
+もしランチャ─スクリプト 'widget' の起動と同時にいくつかのサブス
+クリプトを起動したければ，そのサブスクリプトの名前を引数として与
+えてください．
+( 例: /usr/local/bin/ruby widget button.rb entry1.rb text.rb )
+サブスクリプトの拡張子 '.rb' は省略することもできます．
+( 例: /usr/local/bin/ruby widget button entry1 text )
+
+もしランチャ─スクリプトのウィンドウが必要ない場合には，'-n' オ
+プションを与えてください．
+( 例: /usr/local/bin/ruby widget -n button.rb entry1.rb text.rb )
+
+他のファイル (browse1 や hello など) は単独で動かすことが可能です．
+
+          2004/04/14  Hidetoshi NAGAI (nagai@ai.kyutech.ac.jp)

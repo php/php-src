@@ -1,0 +1,255 @@
+#!/usr/bin/ruby -s
+# -*- coding: us-ascii -*-
+require 'uri'
+require 'digest/md5'
+require 'digest/sha2'
+require 'fileutils'
+require 'tmpdir'
+STDOUT.sync = true
+
+$exported = nil if $exported == ""
+$archname = nil if $archname == ""
+$keep_temp ||= nil
+$patch_file ||= nil
+
+def usage
+  <<USAGE
+usage: #{File.basename $0} [option...] new-directory-to-save [version ...]
+options:
+  -exported=PATH        make snapshot from already exported working directory
+  -archname=NAME        make the basename of snapshots NAME
+  -keep_temp            keep temporary working directory
+  -patch_file=PATCH     apply PATCH file after export
+version:
+  trunk, stable, branches/*, tags/*, X.Y.Z, X.Y.Z-pL
+each versions may be followed by optional @revision.
+USAGE
+end
+
+ENV["LC_ALL"] = ENV["LANG"] = "C"
+SVNURL = URI.parse("http://svn.ruby-lang.org/repos/ruby/")
+RUBY_VERSION_PATTERN = /^\#define\s+RUBY_VERSION\s+"([\d.]+)"/
+
+ENV["VPATH"] ||= "include/ruby"
+YACC = ENV["YACC"] ||= "bison"
+ENV["BASERUBY"] ||= "ruby"
+ENV["RUBY"] ||= "ruby"
+ENV["MV"] ||= "mv"
+ENV["RM"] ||= "rm -f"
+ENV["MINIRUBY"] ||= "ruby"
+ENV["PROGRAM"] ||= "ruby"
+
+class String
+  # for older ruby
+  alias bytesize size unless method_defined?(:bytesize)
+end
+
+class Dir
+  def self.mktmpdir(path)
+    path = File.join(tmpdir, path+"-#{$$}-#{rand(100000)}")
+    begin
+      mkdir(path)
+    rescue Errno::EEXIST
+      path.succ!
+      retry
+    end
+    path
+  end unless respond_to?(:mktmpdir)
+end
+
+$patch_file &&= File.expand_path($patch_file)
+path = ENV["PATH"].split(File::PATH_SEPARATOR)
+%w[YACC BASERUBY RUBY MV MINIRUBY].each do |var|
+  cmd = ENV[var]
+  unless path.any? {|dir|
+      file = File.expand_path(cmd, dir)
+      File.file?(file) and File.executable?(file)
+    }
+    abort "#{File.basename $0}: #{var} command not found - #{cmd}"
+  end
+end
+
+if $help or $_help
+  puts usage
+  exit
+end
+unless destdir = ARGV.shift
+  abort usage
+end
+revisions = ARGV.empty? ? ["trunk"] : ARGV
+unless tmp = $exported
+  FileUtils.mkpath(destdir)
+  destdir = File.expand_path(destdir)
+  tmp = Dir.mktmpdir("ruby-snapshot")
+  FileUtils.mkpath(tmp)
+  at_exit {
+    Dir.chdir "/"
+    FileUtils.rm_rf(tmp)
+  } unless $keep_temp
+end
+Dir.chdir tmp
+
+def package(rev, destdir)
+  patchlevel = false
+  if revision = rev[/@(\d+)\z/, 1]
+    rev = $`
+  end
+  case rev
+  when /\Atrunk\z/, /\Abranches\//, /\Atags\//
+    url = SVNURL + rev
+  when /\Astable\z/
+    url = SVNURL + "branches/"
+    url = url + `svn ls #{url}`[/.*^(ruby_\d+_\d+)\//m, 1]
+  when /\A(.*)\.(.*)\.(.*)-((?!preview)p)?(.*)/
+    patchlevel = !!$4
+    tag = "#{$4}#{$5}"
+    url = SVNURL + "tags/v#{$1}_#{$2}_#{$3}_#{$5}"
+  when /\./
+    url = SVNURL + "branches/ruby_#{rev.tr('.', '_')}"
+  else
+    warn "#{$0}: unknown version - #{rev}"
+    return
+  end
+  revision ||= `svn info #{url} 2>&1`[/Last Changed Rev: (\d+)/, 1]
+  version = nil
+  unless revision
+    url = SVNURL + "trunk"
+    version = `svn cat #{url + "version.h"}`[RUBY_VERSION_PATTERN, 1]
+    unless rev == version
+      warn "#{$0}: #{rev} not found"
+      return
+    end
+    revision = `svn info #{url}`[/Last Changed Rev: (\d+)/, 1]
+  end
+  v = nil
+  if $exported
+    if String === $exported
+      v = $exported
+    end
+  else
+    v = "ruby"
+    puts "Exporting #{rev}@#{revision}"
+    IO.popen("svn export -r #{revision} #{url} #{v}") do |pipe|
+      pipe.each {|line| /^A/ =~ line or print line}
+    end
+    unless $?.success?
+      warn("Export failed")
+      return
+    end
+  end
+
+  if !File.directory?(v)
+    v = Dir.glob("ruby-*").select(&File.method(:directory?))
+    v.size == 1 or abort "not exported"
+    v = v[0]
+  end
+  open("#{v}/revision.h", "wb") {|f| f.puts "#define RUBY_REVISION #{revision}"}
+  open("#{v}/.revision.time", "wb") {}
+  version ||= (versionhdr = IO.read("#{v}/version.h"))[RUBY_VERSION_PATTERN, 1]
+  version or return
+  if patchlevel
+    versionhdr ||= IO.read("#{v}/version.h")
+    patchlevel = versionhdr[/^\#define\s+RUBY_PATCHLEVEL\s+(\d+)/, 1]
+    tag = (patchlevel ? "p#{patchlevel}" : "r#{revision}")
+  else
+    tag ||= "r#{revision}"
+  end
+  unless v == $exported
+    n = "ruby-#{version}-#{tag}"
+    File.directory?(n) or File.rename v, n
+    v = n
+  end
+  system("patch -d #{v} -p0 -i #{$patch_file}") if $patch_file
+  "take a breath, and go ahead".scan(/./) {|c|print c; sleep(c == "," ? 0.7 : 0.05)}; puts
+  def (clean = []).add(n) push(n); n end
+  Dir.chdir(v) do
+    File.open(clean.add("cross.rb"), "w") {|f| f.puts "CROSS_COMPILING=true"}
+    unless File.exist?("configure")
+      print "creating configure..."
+      unless system("autoconf")
+        puts " failed"
+        return
+      end
+      puts " done"
+    end
+    clean.add("autom4te.cache")
+    print "creating prerequisites..."
+    if File.file?("common.mk") && /^prereq/ =~ commonmk = IO.read("common.mk")
+      puts
+      extout = clean.add('tmp')
+      File.open(clean.add("config.status"), "w") {|f|
+        f.puts "s,@configure_args@,|#_!!_#|,g"
+        f.puts "s,@EXTOUT@,|#_!!_#|#{extout},g"
+        f.puts "s,@bindir@,|#_!!_#|,g"
+        f.puts "s,@ruby_install_name@,|#_!!_#|,g"
+        f.puts "s,@ARCH_FLAG@,|#_!!_#|,g"
+        f.puts "s,@CFLAGS@,|#_!!_#|,g"
+        f.puts "s,@CPPFLAGS@,|#_!!_#|,g"
+        f.puts "s,@LDFLAGS@,|#_!!_#|,g"
+        f.puts "s,@DLDFLAGS@,|#_!!_#|,g"
+        f.puts "s,@LIBEXT@,|#_!!_#|a,g"
+        f.puts "s,@OBJEXT@,|#_!!_#|o,g"
+        f.puts "s,@LIBRUBY@,|#_!!_#|liburyb.a,g"
+        f.puts "s,@LIBRUBY_A@,|#_!!_#|liburyb.a,g"
+        f.puts "s,@RM@,|#_!!_#|rm -f,g"
+        f.puts "s,@CP@,|#_!!_#|cp,g"
+      }
+      FileUtils.mkpath(hdrdir = "#{extout}/include/ruby")
+      File.open("#{hdrdir}/config.h", "w") {}
+      miniruby = ENV['MINIRUBY'] + " -r./cross"
+      IO.popen("make -f - prereq srcdir=. CHDIR=cd IFCHANGE=tool/ifchange 'MINIRUBY=#{miniruby}' 'RUBY=#{ENV["RUBY"]}'", "w") do |f|
+        f.puts(IO.read("Makefile.in").gsub(/^@.*\n/, '').gsub(/@([A-Za-z_]\w*)@/) {ENV[$1]})
+        f.puts(commonmk.gsub(/\{[^{}]*\}/, ""))
+      end
+      clean.push("rbconfig.rb", ".rbconfig.time", "enc.mk")
+      print "prerequisites"
+    else
+      system("#{YACC} -o parse.c parse.y")
+    end
+    FileUtils.rm_rf(clean)
+    unless $?.success?
+      puts " failed"
+      return
+    end
+    puts " done"
+  end
+
+  if v == "."
+    v = File.basename(Dir.pwd)
+    Dir.chdir ".."
+  else
+    Dir.chdir(File.dirname(v))
+    v = File.basename(v)
+  end
+
+  return [["bzip tarball", ".tar.bz2", %w"tar cjf"],
+          ["gzip tarball", ".tar.gz", %w"tar czf"],
+          ["zip archive", ".zip", %w"zip -qr"]
+         ].collect do |mesg, ext, cmd|
+    file = "#{destdir}/#{v||$archname}#{ext}"
+    print "creating #{mesg}... #{file}"
+    if system(*(cmd + [file, v]))
+      puts " done"
+      file
+    else
+      puts " failed"
+      nil
+    end
+  end.compact
+ensure
+  FileUtils.rm_rf(v) if v and !$exported and !$keep_temp
+end
+
+revisions.collect {|rev| package(rev, destdir)}.flatten.each do |name|
+  name or next
+  str = open(name, "rb") {|f| f.read}
+  md5 = Digest::MD5.hexdigest str
+  sha = Digest::SHA256.hexdigest str
+  puts "* #{name}"
+  puts "  SIZE:   #{str.bytesize} bytes"
+  puts "  MD5:    #{md5}" 
+  puts "  SHA256: #{sha}"
+  puts
+end
+
+# vim:fileencoding=US-ASCII sw=2 ts=4 noexpandtab ff=unix

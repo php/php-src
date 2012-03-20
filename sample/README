@@ -1,0 +1,45 @@
+README		this file
+biorhythm.rb	biorhythm calculator
+cal.rb		cal(1) clone
+cbreak.rb	no echo done by ioctl
+clnt.rb		socket client
+coverage.rb	simple test code coverage tool
+dir.rb		directory access
+dualstack-fetch.rb	IPv6 demo
+dualstack-httpd.rb	IPv6 demo
+eval.rb		simple evaluator
+export.rb	method access example
+exyacc.rb	extrace BNF from yacc file
+fact.rb		factorial calculator
+fib.awk		Fibonacci number (AWK)
+fib.pl		Fibonacci number (Perl)
+fib.py		Fibonacci number (Python)
+fib.rb		Fibonacci number (Ruby)
+fib.scm		Fibonacci number (Scheme)
+freq.rb		count word occurrence
+from.rb		scan mail spool
+fullpath.rb	convert ls -lR to fullpath format
+less.rb		front end for less
+list.rb		stupid object sample
+list2.rb	stupid object sample
+list3.rb	stupid object sample
+mine.rb		simple mine sweeper	
+mkproto.rb	extract prototype from C
+mpart.rb	split file int multi part
+observ.rb	observer design pattern sample
+occur.pl	count word occurrence (Perl)
+occur.rb	count word occurrence (Ruby)
+occur2.rb	count word occurrence - another style
+philos.rb	famous dining philosophers
+pi.rb		calculate PI
+rcs.awk		random character stereogram (AWK)
+rcs.rb		random character stereogram (Ruby)
+rcs.dat		data for random character stereogram
+sieve.rb	sieve of Eratosthenes
+svr.rb		socket server
+test.rb		test suite used by `make test'
+time.rb		/usr/bin/time clone
+timeout.rb	timeout test
+trojan.rb	simple tool to find file that may be trojan horse.
+tsvr.rb		socket server using thread
+uumerge.rb	merge files and uudecode them

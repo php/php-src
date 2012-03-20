@@ -1,0 +1,169 @@
+.Dd November 30, 2008
+.Dt RAKE(1) "" "Ruby Programmers Reference Guide"
+.Os UNIX
+.Sh NAME
+.Nm rake
+.Nd Ruby Make
+.Sh SYNOPSIS
+.Nm
+.Op Fl -f Ar Rakefile
+.Op Fl -version
+.Op Fl CGNPgnqstv
+.Op Fl D Op Ar PATTERN
+.Op Fl E Ar CODE
+.Op Fl I Ar LIBDIR
+.Op Fl R Ar RAKELIBDIR
+.Op Fl T Op Ar PATTERN
+.Op Fl e Ar CODE
+.Op Fl p Ar CODE
+.Op Fl r Ar MODULE
+.Op Fl -rules
+.Op Ar variable Ns = Ns Ar value
+.Ar target ...
+.Sh DESCRIPTION
+.Nm Rake
+is a simple
+.Xr ruby 1
+build program with capabilities similar to the regular
+.Xr make 1
+command.
+.Pp
+.Nm Rake
+has the following features:
+.Bl -bullet
+.It
+Rakefiles (Rake's version of Makefiles) are completely defined in standard Ruby syntax.
+No XML files to edit. No quirky Makefile syntax to worry about (is that a tab or a space?).
+.It
+Users can specify tasks with prerequisites.
+.It
+Rake supports rule patterns to synthesize implicit tasks.
+.It
+Flexible FileLists that act like arrays but know about manipulating file names and paths.
+.It
+A library of prepackaged tasks to make building rakefiles easier.
+.El
+.Pp
+.Sh OPTIONS
+.Bl -tag -width "--execute-continue" -compact
+.Pp
+.It Fl -version
+Display the program version.
+.Pp
+.It Fl C
+.It Fl -classic-namespace
+Put Task and FileTask in the top level namespace
+.Pp
+.It Fl D Op Ar PATTERN
+.It Fl -describe Op Ar PATTERN
+Describe the tasks (matching optional
+.Ar PATTERN Ns
+), then exit.
+.Pp
+.It Fl E Ar CODE
+.It Fl -execute-continue Ar CODE
+Execute some Ruby code, then continue with normal task processing.
+.Pp
+.It Fl G
+.It Fl -no-system
+.It Fl -nosystem
+Use standard project Rakefile search paths, ignore system wide rakefiles.
+.Pp
+.It Fl I Ar LIBDIR
+.It Fl -libdir Ar LIBDIR
+Include
+.Ar LIBDIR
+in the search path for required modules.
+.Pp
+.It Fl N
+.It Fl -no-search
+.It Fl -nosearch
+Do not search parent directories for the Rakefile.
+.Pp
+.It Fl P
+.It Fl -prereqs
+Display the tasks and dependencies, then exit.
+.Pp
+.It Fl R Ar RAKELIBDIR
+.It Fl -rakelib Ar RAKELIBDIR
+.It Fl -rakelibdir Ar RAKELIBDIR
+Auto-import any .rake files in
+.Ar RAKELIBDIR .
+(default is
+.Pa rakelib
+)
+.Pp
+.It Fl T Op Ar PATTERN
+.It Fl -tasks Op Ar PATTERN
+Display the tasks (matching optional
+.Ar PATTERN Ns
+) with descriptions, then exit.
+.Pp
+.It Fl e Ar CODE
+.It Fl -execute Ar CODE
+Execute some Ruby code and exit.
+.Pp
+.It Fl f Ar FILE
+.It Fl -rakefile Ar FILE
+Use FILE as the rakefile.
+.Pp
+.It Fl h
+.It Fl -help
+Prints a summary of options.
+.Pp
+.It Fl g
+.It Fl -system
+Using system wide (global) rakefiles (usually
+.Pa ~/.rake/*.rake
+).
+.Pp
+.It Fl n
+.It Fl -dry-run
+Do a dry run without executing actions.
+.Pp
+.It Fl p Ar CODE
+.It Fl -execute-print Ar CODE
+Execute some Ruby code, print the result, then exit.
+.Pp
+.It Fl q
+.It Fl -quiet
+Do not log messages to standard output.
+.Pp
+.It Fl r Ar MODULE
+.It Fl -require Ar MODULE
+Require MODULE before executing rakefile.
+.Pp
+.It Fl s
+.It Fl -silent
+Like
+.Fl -quiet ,
+but also suppresses the 'in directory' announcement.
+.Pp
+.It Fl t
+.It Fl -trace
+Turn on invoke/execute tracing, enable full backtrace.
+.Pp
+.It Fl v
+.It Fl -verbose
+Log message to standard output (default).
+.Pp
+.It Fl -rules
+Trace the rules resolution.
+.Pp
+.El
+.Pp
+.Sh SEE ALSO
+.Xr ruby 1
+.Xr make 1
+.Pp
+http://rake.rubyforge.org/
+.Sh REPORTING BUGS
+Bugs, features requests and other issues can be logged at
+<\fBhttp://onestepback.org/redmine/projects/show/rake\fR>.
+.Pp
+You will need an account to before you can post issues. Register at <\fBhttp://onestepback.org/redmine/account/register\fR>.
+Or you can send an email to the author.
+.Sh AUTHOR
+.Nm Rake
+is written by
+.An Jim Weirich Aq jim@weirichhouse.org

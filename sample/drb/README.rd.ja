@@ -1,0 +1,59 @@
+= サンプルスクリプト
+
+* Arrayをリモートから利用してイテレータを試す。
+  * darray.rb --- server
+  * darrayc.rb --- client
+
+* 簡易チャット
+  * dchats.rb --- server
+  * dchatc.rb --- client
+
+* 分散chasen
+  * dhasen.rb --- server
+  * dhasenc.rb --- client
+
+* 簡易ログサーバ
+  * dlogd.rb --- server
+  * dlogc.rb --- client
+
+* Queueサーバ。
+  クライアントdqin.rbはQueueサーバの知らないオブジェクト(DQEntry)を
+  pushするがDRbUnknownによりクライアントdqout.rbがpopできる。
+  * dqueue.rb --- server
+  * dqin.rb --- client。DQEntryオブジェクトをpushする
+  * dqout.rb --- client。DQEntryオブジェクトをpopする
+  * dqlib.rb --- DQEntryを定義したライブラリ
+
+* 名前による参照
+  IdConvをカスタマイズしてidでなく名前で参照する例
+  * name.rb --- server
+  * namec.rb --- client
+
+* extservのサンプル
+  * extserv_test.rb
+
+* TimerIdConvの使用例
+  * holders.rb --- server。ruby -d hodlers.rbとするとTimerIdConvを使用する。
+  * holderc.rb --- client
+
+* rinda.rbの使用例
+  * rinda_ts.rb --- TupleSpaceサーバ。
+  * rindac.rb --- TupleSpaceのclientでアプリケーションのclient
+  * rindas.rb --- TupleSpaceのclientでアプリケーションのserver
+
+* observerの使用例
+  cdbiff - ((<URI:http://namazu.org/~satoru/cdbiff/>))
+  * dbiff.rb --- dcdbiff server
+  * dcdbiff.rb --- dcdbiff client
+
+* drbsslの使用例
+  * drbssl_s.rb
+  * drbssl_c.rb
+
+* DRbProtoclの追加例
+  * http0.rb
+  * http0serv.rb
+
+* ringの使用例
+  * ring_place.rb
+  * ring_echo.rb

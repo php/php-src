@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<evaluate>
+  <data>
+    <jumps>
+      <subject>
+        <the/>
+        <fox color="brown"/>
+        <speed category="quick"/>
+      </subject>
+      <over/>
+      <object>
+        <the/>
+        <dog color="unspecified"/>
+        <speed category="lazy"/>
+      </object>
+    </jumps>
+  </data>
+       
+  <!-- there is one element with attribute color="brown" should this
+  meta-test should succeed -->
+  
+  <metatest select="//@color">brown</metatest>
+ 
+  <!-- there is no element with attribute category="moderate" -->
+  <metatest select="//speed/@category">moderate</metatest>
+
+</evaluate>

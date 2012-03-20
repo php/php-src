@@ -1,0 +1,180 @@
+.\"Ruby is copyrighted by Yukihiro Matsumoto <matz@netlab.jp>.
+.Dd December 29, 2008
+.Dt RI(1) "" "Ruby Programmers Reference Guide"
+.Os UNIX
+.Sh NAME
+.Nm ri
+.Nd Ruby API reference front end
+.Sh SYNOPSIS
+.Nm
+.Op Fl Ti
+.Op Fl d Ar directory
+.Op Fl f Ar format
+.Op Fl -list-doc-dirs
+.Op Fl -no-standard-docs
+.Op Fl - Ns Oo Cm no- Oc Ns Bro Cm system Ns | Ns Cm site Ns | Ns Cm gems Ns | Ns Cm home Brc
+.Op Fl - Ns Oo Cm no- Oc Ns Cm use-cache
+.Op Fl -width Ns = Ns Ar width
+.Op Ar target ...
+.Sh DESCRIPTION
+.Nm
+is a CUI front end for the Ruby API reference.
+You can search and read API reference for classes and methods with
+.Nm .
+.Pp
+.Nm
+is a part of Ruby.
+.Pp
+.Ar target
+can be one of the following forms:
+.Bl -diag -offset indent
+.It Class
+for classes
+.It Class::method
+for class methods
+.It Class#method
+for instance methods
+.It Class.method
+for both class and instance methods
+.It method
+for both class and instance methods
+.El
+.Pp
+All class names may be abbreviated to their minimum unambiguous form. If a name
+is ambiguous, all valid options will be listed.
+.Pp
+For example:
+.Bd -literal -offset indent
+ri Fil
+ri File
+ri File.new
+ri zip
+.Ed
+.Pp
+Note that shell quoting may be required for method names containing
+punctuation:
+.Bd -literal -offset indent
+ri 'Array.[]'
+ri compact\!
+.Ed
+.Sh OPTIONS
+.Bl -tag -width "1234567890123" -compact
+.Pp
+.It Fl -version
+Prints the version of
+.Nm .
+.Pp
+.It Fl T
+.It Fl -no-pager
+Send output directly to stdout, rather than to a pager.
+.Pp
+.It Fl d Ar directory
+.It Fl -doc-dir Ns = Ns Ar directory
+List of directories from which to source documentation in addition to the standard
+directories.  May be repeated.
+.Pp
+.It Fl f Ar FORMAT
+.It Fl -fmt Ar FORMAT
+.It Fl -format Ns = Ns FORMAT
+Format to use when displaying output:
+.Dd ansi, bs, html, plain, simple
+.Pp
+Use 'bs' (backspace) with most pager programs. To use ANSI, either disable the
+pager or tell the pager to allow control characters.
+.Pp
+.It Fl i
+.It Fl -interactive
+This makes
+.Nm
+go into interactive mode.
+.Pp
+When
+.Nm
+is in interactive mode it will allow the user to disambiguate lists of
+methods in case multiple methods match against a method search string.  It also
+will allow the user to enter in a method name (with auto-completion, if readline
+is supported) when viewing a class.
+.Pp
+.It Fl -list-doc-dirs
+List the directories from which ri will source documentation on stdout and exit.
+.Pp
+.It Fl -no-standard-docs
+Do not include documentation from the Ruby standard library,
+.Pa site_lib ,
+installed gems, or
+.Pa ~/.rdoc .
+.Pp
+Equivalent to specifying the options
+.Fl -no-system , Fl -no-site , Fl -no-gems ,
+and
+.Fl -no-home .
+.Pp
+.It Fl - Ns Oo Cm no- Oc Ns Cm system
+Include documentation from Ruby's standard library.  Defaults to true.
+.Pp
+.It Fl - Ns Oo Cm no- Oc Ns Cm site
+ Include documentation from libraries installed in site_lib. Defaults to true.
+.Pp
+.It Fl - Ns Oo Cm no- Oc Ns Cm gems
+Include documentation from RubyGems. Defaults to true.
+.Pp
+.It Fl - Ns Oo Cm no- Oc Ns Cm home
+Include documentation stored in ~/.rdoc.  Defaults to true.
+.Pp
+.It Fl - Ns Oo Cm no- Oc Ns Cm use-cache
+Whether or not to use
+.Nm Ns
+.Ns 's cache. True by default.
+.Pp
+.It Fl w Ar width
+.It Fl -width Ns = Ns Ar width
+Set the width of the output.
+.Pp
+.El
+.Pp
+.Sh ENVIRONMENT
+.Bl -tag -width "USERPROFILE" -compact
+.Pp
+.It Ev RI
+Additional options.
+.Pp
+.It Ev PAGER
+Used as the name of pager program for displaying.
+.Pp
+.It Ev HOME
+.It Ev USERPROFILE
+.It Ev HOMEPATH
+Path to user's home directory.
+.El
+.Pp
+.Sh FILES
+.Bl -tag -width "USERPROFILE" -compact
+.Pp
+.It Pa ~/.ri
+Caches recently referenced documents here.
+.Pp
+.It Pa ~/.rdoc
+Searches user-wide documents here.
+.Pp
+.El
+.Pp
+.Sh SEE ALSO
+.Xr ruby 1
+.Xr rdoc 1
+.Xr gem 1
+.Pp
+.Sh REPORTING BUGS
+.Bl -bullet
+.Li Security vulnerabilities should be reported via an email to
+.Aq security@ruby-lang.org Ns
+.Li .
+Reported problems will be published after fixed.
+.Pp
+.Li And you can report other bugs and feature requests via the
+Ruby Issue Tracking System (http://bugs.ruby-lang.org).
+Do not report security vulnerabilities
+via the system because it publishes the vulnerabilities immediately.
+.El
+.Sh AUTHORS
+Written by Dave Thomas
+.Aq dave@pragmaticprogrammer.com

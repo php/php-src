@@ -1,0 +1,14 @@
+This directory contains "widget" demo for the Japanized Tcl7.6/Tk4.2.
+Most of the messages in the original are translated to Japanese.
+But other tools in this directory are not translated.
+
+Following 2 kanji fonts are defined at the beginning of the file "widget."
+
+	-*--24-*-jisx0208.1983-0
+	-*--16-*-jisx0208.1983-0
+
+These fonts are all part of the core distribution of X11R5, so
+if you are running X11R5, you don't have to modify the file.
+
+But if you don't have these fonts, replace them with appropriate ones.
+"-*--14-*-jisx0208.1983-0" will be a good choice.

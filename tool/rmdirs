@@ -1,0 +1,11 @@
+#!/bin/sh
+for dir do
+    while rmdir "$dir" >/dev/null 2>&1 &&
+          parent=`expr "$dir" : '\(.*\)/[^/][^/]*'`; do
+        case "$parent" in
+        . | .. | "$dir") break;;
+        *) dir="$parent";;
+        esac
+    done
+done
+true

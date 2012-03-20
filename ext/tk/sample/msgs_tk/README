@@ -1,0 +1,4 @@
+Almost all of Message-Catalog files in this directory are quoted
+from Tcl/Tk8.5a1 source archive (only a little are modified for
+'tkmsgcat-load_tk.rb'). Please read the file 'license.terms' in
+this directry (That was included in demo directory of Tcl/Tk8.5a1).

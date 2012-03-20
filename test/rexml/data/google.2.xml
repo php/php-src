@@ -1,0 +1,156 @@
+<form xmlns='http://www.w3.org/1999/xhtml'
+      enctype='application/x-www-form-urlencoded' class='rollover'
+      action='ModifyCampaign' method='POST'
+      onsubmit='return beforeRolloverSubmit(this, &apos;No campaigns selected.&apos;);'>
+  <a name='campaigns' shape='rect'/>
+  <tr bgcolor='#dbe6de'>
+    <th class='boxcolumn' rowspan='1' align='left' colspan='1'
+        width='1%'>
+      <script type='text/javascript'>document.write(" &lt;input
+        type\u003d\"checkbox\" name\u003d\"toggleAll\"
+        onclick\u003d\"rowToggleAll(this);\" title\u003d\"Select or
+        de-select all campaigns on this page\"&gt; ");</script>
+    </th>
+    <th bgcolor='#dbe6de' title='Sort by campaign name' nowrap='nowrap'
+        rowspan='1' align='left' colspan='1'>
+      <b>
+        <a href='CampaignSummary?campaignsummaryt=0%3Aa&amp;gsessionid=ezmXK9aaXnI#campaigns'
+           class='bluelink' shape='rect'>Campaign Name</a>
+      </b>
+    </th>
+    <th bgcolor='#dbe6de' title='Sort by campaign status'
+        nowrap='nowrap' rowspan='1' align='left' colspan='1'>
+      <a href='CampaignSummary?campaignsummaryt=1%3Aa&amp;gsessionid=ezmXK9aaXnI#campaigns'
+         class='bluelink' shape='rect'>Current Status</a>
+    </th>
+    <th bgcolor='#dbe6de'
+        title='Sort by daily budget (maximum spending per day)'
+        nowrap='nowrap' rowspan='1' align='right' colspan='1'>
+      <a href='CampaignSummary?campaignsummaryt=2%3Aa&amp;gsessionid=ezmXK9aaXnI#campaigns'
+         class='bluelink' shape='rect'>Current Budget</a>
+      <span style='white-space: nowrap'>
+        <a href='/support/bin/answer.py?answer=6312&amp;hl=en_US'
+           shape='rect' id='' onclick='return helpPopUp(this);' style=''
+           target='google_popup'>[?]</a>
+      </span>
+    </th>
+    <th bgcolor='#c6d7cf' title='Sort by clicks on your ads'
+        nowrap='nowrap' rowspan='1' align='right' colspan='1'>
+      <a href='CampaignSummary?campaignsummaryt=-3%3Aa&amp;gsessionid=ezmXK9aaXnI#campaigns'
+         class='bluelink' shape='rect'>Clicks</a>
+      <a href='CampaignSummary?campaignsummaryt=-3%3Aa&amp;gsessionid=ezmXK9aaXnI#campaigns'
+         shape='rect' style='text-decoration:none;'>
+        <img src='/select/images/sortdown.gif' border='0' alt=''/>
+      </a>
+    </th>
+    <th bgcolor='#dbe6de' title='Sort by ad impressions served'
+        nowrap='nowrap' rowspan='1' align='right' colspan='1'>
+      <a href='CampaignSummary?campaignsummaryt=4%3Aa&amp;gsessionid=ezmXK9aaXnI#campaigns'
+         class='bluelink' shape='rect'>Impr.</a>
+    </th>
+    <th bgcolor='#dbe6de' title='Sort by CTR (clickthrough rate)'
+        nowrap='nowrap' rowspan='1' align='right' colspan='1'>
+      <a href='CampaignSummary?campaignsummaryt=5%3Aa&amp;gsessionid=ezmXK9aaXnI#campaigns'
+         class='bluelink' shape='rect'>CTR</a>
+    </th>
+    <th bgcolor='#dbe6de' title='Sort by average cost per click (USD)'
+        nowrap='nowrap' rowspan='1' align='right' colspan='1'>
+      <a href='CampaignSummary?campaignsummaryt=6%3Aa&amp;gsessionid=ezmXK9aaXnI#campaigns'
+         class='bluelink' shape='rect'>Avg. CPC</a>
+    </th>
+    <th bgcolor='#dbe6de' class='' title='Sort by total cost (USD)'
+        nowrap='nowrap' rowspan='1' align='right' colspan='1'>
+      <a href='CampaignSummary?campaignsummaryt=8%3Aa&amp;gsessionid=ezmXK9aaXnI#campaigns'
+         class='bluelink' shape='rect'>Cost</a>
+    </th>
+    <th bgcolor='#dbe6de' title='Conversion Rate' nowrap='nowrap'
+        rowspan='1' align='right' colspan='1'>
+      <a href='CampaignSummary?campaignsummaryt=11%3Aa&amp;gsessionid=ezmXK9aaXnI#campaigns'
+         class='bluelink' shape='rect'>Conv. Rate</a>
+    </th>
+    <th bgcolor='#dbe6de' class='rightcolumn'
+        title='Cost per Conversion' nowrap='nowrap' rowspan='1'
+        align='right' colspan='1'>
+      <a href='CampaignSummary?campaignsummaryt=12%3Aa&amp;gsessionid=ezmXK9aaXnI#campaigns'
+         class='bluelink' shape='rect'>Cost/Conv.</a>
+    </th>
+  </tr>
+  <tr onmouseover='ron(3527627);' id='tr_3527627'
+      onmouseout='roff(3527627);'>
+    <td class='boxcolumn' rowspan='1' onclick='rowToggle(3527627);'
+        colspan='1'>
+      <input name='campaignid' type='checkbox' id='box_3527627'
+             value='3527627' onclick='toggleRow(this);'/>
+    </td>
+    <td rowspan='1' colspan='1'>
+      <a href='CampaignManagement?campaignid=3527627#a' shape='rect'>Test</a>
+    </td>
+    <td rowspan='1' colspan='1'>
+      <b>
+        <font size='-1' color='#b98b00'>Paused</font>
+      </b>
+    </td>
+    <td class='r' rowspan='1' colspan='1'>
+      <font color='#666666'>Test</font>
+    </td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='' rowspan='1' align='right' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='rightcolumn' rowspan='1' align='right' colspan='1'>1</td>
+  </tr>
+  <tr onmouseover='ron(7680287);' id='tr_7680287'
+      onmouseout='roff(7680287);'>
+    <td class='boxcolumn' rowspan='1' onclick='rowToggle(7680287);'
+        colspan='1'>
+      <input name='campaignid' type='checkbox' id='box_7680287'
+             value='7680287' onclick='toggleRow(this);'/>
+    </td>
+    <td rowspan='1' colspan='1'>
+      <a href='CampaignManagement?campaignid=7680287#a' shape='rect'>Test</a>
+    </td>
+    <td rowspan='1' colspan='1'>
+      <b>
+        <font size='-1' color='#b98b00'>Paused</font>
+      </b>
+    </td>
+    <td class='r' rowspan='1' colspan='1'>
+      <font color='#666666'>Test</font>
+    </td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='' rowspan='1' align='right' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='rightcolumn' rowspan='1' align='right' colspan='1'>1</td>
+  </tr>
+  <tr onmouseover='ron(6747347);' id='tr_6747347'
+      onmouseout='roff(6747347);'>
+    <td class='boxcolumn' rowspan='1' onclick='rowToggle(6747347);'
+        colspan='1'>
+      <input name='campaignid' type='checkbox' id='box_6747347'
+             value='6747347' onclick='toggleRow(this);'/>
+    </td>
+    <td rowspan='1' colspan='1'>
+      <a href='CampaignManagement?campaignid=6747347#a' shape='rect'>Test</a>
+    </td>
+    <td rowspan='1' colspan='1'>
+      <b>
+        <font size='-1' color='#b98b00'>Test</font>
+      </b>
+    </td>
+    <td class='r' rowspan='1' colspan='1'>
+      <font color='#666666'>Test</font>
+    </td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='' rowspan='1' align='right' colspan='1'>1</td>
+    <td class='r' rowspan='1' colspan='1'>1</td>
+    <td class='rightcolumn' rowspan='1' align='right' colspan='1'>1</td>
+  </tr>
+</form>

@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!DOCTYPE schema SYSTEM "foo.dtd" [
+<!ATTLIST root-el
+	xmlns:human CDATA #FIXED "http://www.foo.com/human">
+]>
+<root-el xmlns="http://www.bar.com/doc"
+  xmlns:table="http://www.foo.com/table">
+   <human:leg>human leg</human:leg>
+   <table:leg>table leg</table:leg>
+</root-el>

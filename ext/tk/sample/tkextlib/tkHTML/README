@@ -1,0 +1,12 @@
+
+   [ TkHtml widget example ]
+
+The directory page1 -- page4 are referd from "test" directory of
+original TkHtml extension's source archive.
+( see http://www.hwaci.com/sw/tkhtml/index.html )
+
+You can see the HTML documents on the 'hv.rb' or 'ss.rb' sample script.
+
+ e.g.
+   LD_LIBRARY_PATH=/usr/local/ActiveTcl/lib:$LD_LIBRARY_PATH /usr/local/bin/ruby ./hv.rb page1/index.html
+

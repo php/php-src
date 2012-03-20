@@ -1,0 +1,136 @@
+#!/usr/bin/env ruby
+#
+# timer --
+# This script generates a counter with start,stop and reset buttons.
+#
+# Copyright (C) 1998 Takaaki Tateishi (ttate@jaist.ac.jp)
+# last update: Sat Jun 27 12:24:14 JST 1998
+#
+
+require "tk"
+require "thread"
+require "tkafter"
+
+$time = "0.00"
+$m = Mutex.new
+$loop = false
+
+def timer_stop
+  $loop = false
+  $m.lock
+end
+
+def timer_start
+  $loop = true
+  $m.unlock
+end
+
+def timer_reset
+  $time = "0.00"
+  $root.countframe.counter['text'] = $time
+end
+
+def timer_loop
+  if $loop
+    $time = $time.succ
+    $root.countframe.counter['text'] = $time
+  end
+  Tk.after(10,proc{timer_loop})
+end
+
+
+#
+# thread version
+#
+def timer_loop2
+  while true
+    $m.lock
+    $time = $time.succ
+    $root.countframe.counter['text'] = $time
+    sleep(0.01)
+    $m.unlock
+  end
+end
+
+#
+# TkAfter
+#
+def timer_loop3
+  if $loop
+    $time = $time.succ
+    $root.countframe.counter['text'] = $time
+  end
+end
+
+
+class CountFrame < TkFrame
+  attr_reader :counter
+
+  def initialize(parent=nil,keys=nil)
+    super(parent,keys)
+    @counter = TkLabel.new(self,
+			   'text'=>$time,
+			   'relief'=>'raised')
+    @counter.pack('fill'=>'both')
+    self
+  end
+end
+
+
+class ButtonFrame < TkFrame
+  def initialize(parent=nil,keys=nil)
+    super(parent,keys)
+=begin
+    @stop = TkButton.new(self,
+			 'text'=>'Stop',
+			 'command'=>proc{timer_stop})
+    @start = TkButton.new(self,
+			  'text'=>'Start',
+			  'command'=>proc{timer_start})
+=end
+    @stop  = TkButton.new(self, :text=>'Stop',  :state=>:disabled)
+    @start = TkButton.new(self, :text=>'Start', :state=>:normal)
+
+    @stop.command proc{
+      timer_stop
+      @start.state(:normal)
+      @stop.state(:disabled)
+    }
+    @start.command proc{
+      timer_start
+      @stop.state(:normal)
+      @start.state(:disabled)
+    }
+
+    @reset = TkButton.new(self,
+			  'text'=>'Reset',
+			  'command'=>proc{timer_reset})
+    for b in [@stop,@start,@reset]
+      b.pack('side'=>'left', 'fill'=>'both', 'expand'=>'yes')
+    end
+  end
+end
+
+
+class Timer < TkRoot
+  attr_reader :countframe
+
+  def initialize(*args)
+    super(*args)
+    @countframe = CountFrame.new(self)
+    @buttonframe = ButtonFrame.new(self)
+    for f in [@buttonframe,@countframe]
+      f.pack('side'=>'top', 'fill'=>'both')
+    end
+    self
+  end
+end
+
+
+$root = Timer.new
+
+#$thread = Thread.start{timer_loop2}
+#timer_loop
+TkAfter.new(10,-1,proc{timer_loop3}).start
+
+Tk.mainloop

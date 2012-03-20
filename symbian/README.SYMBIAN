@@ -1,0 +1,93 @@
+=begin
+
+= How to build ruby using Symbian SDK
+
+== Requirement
+
+(1) Nokia S60 SDK version 3.2 or later from http://www.forum.nokia.com/Resources_and_Information/Tools/Platforms/S60_Platform_SDKs/ with the latest OpenC plugin installed.
+
+    Note: if you want to build dynamic extensions support you need to install the latest version of GCC compiler from http://www.codesourcery.com/gnu_toolchains/arm/portal/release643. After that you need to apply a patch below to a header file (SDK_ROOT)\epoc32\include\gcce\gcce.h
+
+===================================================================
+--- Epoc32/include/gcce/gcce.h
++++ Epoc32/include/gcce/gcce.h
+@@ -22,4 +22,6 @@
+ #define IMPORT_C __declspec(dllimport) 
+ #define EXPORT_C __declspec(dllexport)
++#define IMPORT_D __declspec(dllimport)
++#define EXPORT_D __declspec(dllexport)
+ 
+ 
+@@ -79,6 +81,6 @@
+ 
+ // __NAKED__ from cpudefs.h
+-#define __NAKED__ __asm
+-#define ____ONLY_USE_NAKED_IN_CIA____ __asm
++#define __NAKED__ __declspec(naked)
++#define ____ONLY_USE_NAKED_IN_CIA____ __declspec(naked)
+ 
+ // Int64 and Uint64 from nkern\nklib.h
+@@ -94,5 +96,9 @@
+ #endif  /* __cplusplus */
+ 
++#if __GNUC__ < 4
+ typedef struct __va_list { void *__ap; } va_list;
++#else
++typedef __builtin_va_list va_list;
++#endif
+ 
+ 
+@@ -104,7 +110,13 @@
+ #endif
+ 
++#if __GNUC__ < 4
+ #define va_start(ap, parmN) __builtin_va_start(ap.__ap, parmN)
+ #define va_arg(ap, type) __builtin_va_arg(ap.__ap, type)
+ #define va_end(ap) __builtin_va_end(ap.__ap)
++#else
++#define va_start(ap, parmN) __builtin_va_start(ap, parmN)
++#define va_arg(ap, type) __builtin_va_arg(ap, type)
++#define va_end(ap) __builtin_va_end(ap)
++#endif
+ 
+ 
+@@ -139,5 +151,7 @@
+ 
+ // Deal with operator new issues here
++#ifndef __SYMBIAN_STDCPP_SUPPORT__
+ #include "..\symcpp.h"
++#endif
+ 
+ #ifdef __cplusplus
+===================================================================
+
+
+(2) If you want to build from SVN source, following command line binaries are required that are not a part of Symbain SDK.
+     * sed
+     * ruby 1.8
+     * svn
+
+== How to compile and install
+
+(1) Execute symbian\configure.bat on your build directory (symbian is default).
+
+(2) Run the following commands from symbian\group directory
+     'bldmake bldfiles'
+     'abld makefile gcce'
+     'abld build gcce urel ruby'
+     'abld freeze gcce ruby'
+     'abld build gcce urel'
+
+(3) Run 'makesis ruby.pkg' from symbian\sis directory
+     This command will create unsigned installation file ruby.sis. To sign it follow the guidlines from www.symbiansigned.com
+
+(4) In case dynamic extensions support was enabled repeat (3) for ruby_core_ext.pkg
+
+== Known problems
+
+Currently gems are not supported.
+Currently signals are supported with reduced functionality (see OpenC release notes.)
+Dynamic extensions could be installed only on internal drive "C".
+
+=end
+

@@ -1,0 +1,5 @@
+<a>
+	Here is an XML document.
+	<b>
+		It has some elements, but it also has a hidden < error! (or two)
+	</a>

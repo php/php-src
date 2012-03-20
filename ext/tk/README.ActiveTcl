@@ -1,0 +1,62 @@
+ActiveTcl is ActiveState's quality-assured distribution of Tcl.
+
+# see <http://www.activestate.com/Products/ActiveTcl/>
+#     <http://www.tcl.tk/>
+
+First of all, please try to configure without any options.
+"extconf.rb" searches ActiveTcl as default action.
+If you have ActiveTcl and standard (or your own) Tcl/Tk on your
+environment and don't want to use ActiveTcl on your Ruby/Tk, please
+use --without-ActiveTcl option.
+
+When "extconf.rb" fails to find your ActiveTcl libraries, please try
+the followings.
+
+If you want to use ActiveTcl binary package as the Tcl/Tk libraries,
+please use the following configure options.
+
+   --with-ActiveTcl=<ActiveTcl_root>
+     ( When without argument; no <ActiveTcl_root>; only '--with-ActiveTcl',
+       it same to '--with-ActiveTcl=/opt/ActiveTcl*/lib' )
+
+   --with-tcl-dir=<ActiveTcl_root>
+   --with-tk-dir=<ActiveTcl_root>
+
+And use the followings if you need.
+
+   --with-tcllib=<libname>
+   --with-tklib=<libname>
+   --enable-tcltk-stubs
+
+For example, when you install ActiveTcl-8.4.x to '/usr/local/ActiveTcl',
+
+   configure --with-tcl-dir=/usr/local/ActiveTcl/  \
+             --with-tk-dir=/usr/local/ActiveTcl/   \
+             --with-tcllib=tclstub8.4              \
+             --with-tklib=tkstub8.4                \
+             --enable-tcltk-stubs
+
+It depends on your environment that you have to add the directory of
+ActiveTcl's libraries to your library path when execute Ruby/Tk.
+One of the way is to add entries to TCLLIBPATH environment variable,
+and one of the others add to LD_LIBRARY_PATH environment variable
+
+Probably, using TCLLIBPATH is better. The value is appended at the
+head of Tcl's 'auto_path' variable. You can see the value of the
+variable by using 'Tk::AUTO_PATH.value' or 'Tk::AUTO_PATH.list'.
+
+For example, on Linux, one of the ways is to use LD_LIBRARY_PATH
+environment variable.
+-------------------------------------------------------------------------
+ [bash]$ LD_LIBRARY_PATH=/usr/local/ActiveTcl/lib:$LD_LIBRARY_PATH \
+         ruby your-Ruby/Tk-script
+
+ [bash]$ LD_LIBRARY_PATH=/usr/local/ActiveTcl/lib:$LD_LIBRARY_PATH irb
+-------------------------------------------------------------------------
+Based on it, the Tcl interpreter changes auto_path variable's value.
+
+Then, you'll be able to use Tcl/Tk extension libraries included in the
+ActiveTcl package (e.g. call TkPackage.require('BWidget'), and then,
+use functions/widgets of BWidget extention).
+
+                                  Hidetoshi NAGAI (nagai@ai.kyutech.ac.jp)

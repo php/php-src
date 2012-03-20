@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+
+# browse --
+# This script generates a directory browser, which lists the working
+# directory and allow you to open files or subdirectories by
+# double-clicking.
+
+require 'tk'
+
+# Create a scrollbar on the right side of the main window and a listbox
+# on the left side.
+
+listbox = TkListbox.new(nil, 'relief'=>'sunken',
+			'width'=>20, 'height'=>20, 'setgrid'=>'yes') {|l|
+  TkScrollbar.new(nil, 'command'=>proc{|*args| l.yview *args}) {|s|
+    pack('side'=>'right', 'fill'=>'y')
+    l.yscrollcommand(proc{|first,last| s.set(first,last)})
+  }
+
+  pack('side'=>'left', 'fill'=>'both', 'expand'=>'yes')
+}
+
+root = TkRoot.new
+root.minsize(1,1)
+
+# The procedure below is invoked to open a browser on a given file;  if the
+# file is a directory then another instance of this program is invoked; if
+# the file is a regular file then the Mx editor is invoked to display
+# the file.
+
+def browse (dir, file)
+  file = dir + File::Separator + file if dir != '.'
+  type = File.ftype(file)
+  if type == 'directory'
+    system($0 + ' ' + file + ' &')
+  else
+    if type == 'file'
+      if ENV['EDITOR']
+	system(ENV['EDITOR'] + ' ' + file + ' &')
+      else
+	system('xedit ' + file + ' &')
+      end
+    else
+      STDOUT.print "\"#{file}\" isn't a directory or regular file"
+    end
+  end
+end
+
+# Fill the listbox with a list of all the files in the directory (run
+# the "ls" command to get that information).
+
+dir = ARGV[0] ?  ARGV[0] : '.'
+open("|ls -a #{dir}", 'r'){|fid| fid.readlines}.each{|fname|
+  listbox.insert('end', fname.chomp)
+}
+
+# Set up bindings for the browser.
+
+Tk.bind_all('Control-c', proc{root.destroy})
+listbox.bind('Double-Button-1',
+	     proc{TkSelection.get.each{|f| browse dir, f}})
+
+Tk.mainloop

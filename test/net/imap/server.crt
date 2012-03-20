@@ -1,0 +1,61 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 0 (0x0)
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=JP, ST=Shimane, L=Matz-e city, O=Ruby Core Team, CN=Ruby Test CA/emailAddress=security@ruby-lang.org
+        Validity
+            Not Before: Dec 23 10:23:52 2010 GMT
+            Not After : Jan  1 10:23:52 2014 GMT
+        Subject: C=JP, ST=Shimane, O=Ruby Core Team, OU=Ruby Test, CN=localhost
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (1024 bit)
+                Modulus:
+                    00:db:75:d0:45:de:b1:df:bf:71:a0:0e:b0:a5:e6:
+                    bc:f4:1c:9d:e5:25:67:64:c5:7b:cb:f1:af:c6:be:
+                    9a:aa:ea:7e:0f:cc:05:af:ef:40:69:06:b2:c9:13:
+                    9d:7e:eb:a2:06:e2:ea:7d:07:c7:c7:99:c7:fb:d5:
+                    b8:eb:63:77:62:2b:18:12:c3:53:58:d0:f5:c7:40:
+                    0c:01:d1:26:82:34:16:09:e3:dc:65:f4:dc:bb:5d:
+                    a5:41:60:e7:a9:74:ba:d7:4c:b6:a3:9c:c5:8c:89:
+                    af:cb:e8:9f:05:fe:ea:fe:64:24:bf:e7:ed:e3:f6:
+                    d0:fc:d6:eb:fc:06:82:10:fb
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: 
+                CA:FALSE
+            Netscape Comment: 
+                OpenSSL Generated Certificate
+            X509v3 Subject Key Identifier: 
+                E8:7E:58:AC:13:7B:03:22:8D:9E:AF:32:0B:84:89:80:80:0C:1E:C2
+            X509v3 Authority Key Identifier: 
+                keyid:41:C9:49:37:B1:FA:61:E3:BA:D7:19:3D:D9:DA:8C:B9:82:C9:B4:6A
+
+    Signature Algorithm: sha1WithRSAEncryption
+        ae:ee:cd:fe:c9:af:48:0b:50:37:ac:6a:f6:68:90:9b:67:df:
+        6f:2d:17:c9:3c:a5:da:ad:39:dc:2a:5b:07:88:26:38:19:30:
+        d6:95:cf:10:69:c7:92:14:83:be:f1:b5:8e:6f:d9:91:51:c5:
+        63:ae:1c:89:ac:27:bf:4f:2a:8f:4e:0c:57:42:0a:c9:8e:0c:
+        f4:f3:02:f7:ea:44:b6:e4:47:05:af:4e:74:e4:87:87:d9:c8:
+        76:ed:ab:32:7c:f0:31:34:10:14:bc:a6:37:cd:d7:dc:33:da:
+        82:d3:d4:9b:e9:d5:cd:38:cc:fa:81:5f:4e:fd:5f:53:05:5d:
+        76:f9
+-----BEGIN CERTIFICATE-----
+MIIC3jCCAkegAwIBAgIBADANBgkqhkiG9w0BAQUFADCBjDELMAkGA1UEBhMCSlAx
+EDAOBgNVBAgMB1NoaW1hbmUxFDASBgNVBAcMC01hdHotZSBjaXR5MRcwFQYDVQQK
+DA5SdWJ5IENvcmUgVGVhbTEVMBMGA1UEAwwMUnVieSBUZXN0IENBMSUwIwYJKoZI
+hvcNAQkBFhZzZWN1cml0eUBydWJ5LWxhbmcub3JnMB4XDTEwMTIyMzEwMjM1MloX
+DTE0MDEwMTEwMjM1MlowYDELMAkGA1UEBhMCSlAxEDAOBgNVBAgMB1NoaW1hbmUx
+FzAVBgNVBAoMDlJ1YnkgQ29yZSBUZWFtMRIwEAYDVQQLDAlSdWJ5IFRlc3QxEjAQ
+BgNVBAMMCWxvY2FsaG9zdDCBnzANBgkqhkiG9w0BAQEFAAOBjQAwgYkCgYEA23XQ
+Rd6x379xoA6wpea89Byd5SVnZMV7y/Gvxr6aqup+D8wFr+9AaQayyROdfuuiBuLq
+fQfHx5nH+9W462N3YisYEsNTWND1x0AMAdEmgjQWCePcZfTcu12lQWDnqXS610y2
+o5zFjImvy+ifBf7q/mQkv+ft4/bQ/Nbr/AaCEPsCAwEAAaN7MHkwCQYDVR0TBAIw
+ADAsBglghkgBhvhCAQ0EHxYdT3BlblNTTCBHZW5lcmF0ZWQgQ2VydGlmaWNhdGUw
+HQYDVR0OBBYEFOh+WKwTewMijZ6vMguEiYCADB7CMB8GA1UdIwQYMBaAFEHJSTex
++mHjutcZPdnajLmCybRqMA0GCSqGSIb3DQEBBQUAA4GBAK7uzf7Jr0gLUDesavZo
+kJtn328tF8k8pdqtOdwqWweIJjgZMNaVzxBpx5IUg77xtY5v2ZFRxWOuHImsJ79P
+Ko9ODFdCCsmODPTzAvfqRLbkRwWvTnTkh4fZyHbtqzJ88DE0EBS8pjfN19wz2oLT
+1Jvp1c04zPqBX079X1MFXXb5
+-----END CERTIFICATE-----

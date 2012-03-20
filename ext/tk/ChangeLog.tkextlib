@@ -1,0 +1,949 @@
+2009-07-12  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* ext/tk/lib/tkextlib/*: update release.
+	     Tcllib 1.8/Tklib 0.4.1  ==>  Tcllib 1.11.1/Tklib 0.5
+	     BWidgets 1.7            ==>  BWidgets 1.8
+	     TkTable 2.9             ==>  TkTable 2.10
+	     TkTreeCtrl 2005-12-02   ==>  TkTreeCtrl 2.2.9
+	     Tile 0.8.0/8.5.1        ==>  Tile 0.8.3/8.6b1
+	     IncrTcl 2005-02-14      ==>  IncrTcl 2008-12-15
+	     TclX 2005-02-07         ==>  TclX 2008-12-15
+	     Trofs 0.4.3             ==>  Trofs 0.4.4
+
+--------------< ... some bug fixes ... >------------------
+
+Tue Nov 25 03:37:42 2008  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* ext/tk/lib/tkextlib/blt/tabset.rb,
+	  ext/tk/lib/tkextlib/blt/tabnotebook.rb:
+	  fix many bugs. Now, those work properly.
+
+Sat Nov 22 10:31:25 2008  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* ext/tk/lib/tkextlib/blt.rb, ext/tk/lib/tkextlib/blt/vector.rb:
+	  fix NameError bug.
+
+2008-05-12  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* ext/tk/lib/tkextlib/tkDND/shape.rb: wrong package name.
+
+--------------< ... some changes ... >------------------
+
+2007-05-26  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* ext/tk/lib/tkextlib/tcllib/tablelist.rb: fix typo.
+
+	* ext/tk/lib/tkextlib/tile/dialog.rb: forget to give an argument.
+
+	* ext/tk/lib/tkextlib/version.rb: update RELEASE_DATE.
+
+2007-01-26  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* ext/tk/lib/tkextlib/iwidgets/checkbox.rb: wrong number of arguments
+	  [ruby-Bugs-7776].
+
+	* ext/tk/lib/tkextlib/iwidgets/radiobox.rb: ditto.
+
+	* ext/tk/lib/tkextlib/blt/tile/checkbutton.rb: change primary name
+	  of class [ruby-dev:30080].
+
+	* ext/tk/lib/tkextlib/blt/tile/radiobutton.rb: ditto.
+
+2006-11-07  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tile/treeview.rb : minor bug fix.
+
+	* lib/tkextlib/blt/table.rb: fix bugs which forbade use of
+	  '::blt::table' command. Now, probably, it'll works properly.
+
+2006-11-06  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/version.rb: keep release date of tkextlib on
+	  "Tk::Tkextlib_RELEASE_DATE".
+
+	* lib/tkextlib/tile/treeview.rb : support Tile 0.7.8.
+	  Now, you can handle tree items as objects.
+
+2006-10-04  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tile.rb, lib/tkextlib/tile/* : support Tile 0.7.6.
+
+2006-10-03  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/SUPPORT_STATUS: [ruby-talk:211939] check links
+	  of extensions.
+
+	* lib/tkextlib/blt/container.rb: define instance methods properly.
+
+        * lib/tkextlib/tile/tcombobox.rb: bug fix [ruby-talk:213003].
+
+	* lib/tkextlib/tile/tnotebook.rb: ditto.
+
+	* lib/tkextlib/tile/treeview.rb: ditto.
+
+	* lib/tkextlib/tile/sizegrip.rb: [new] add 'ttk::sizegrip' widget.
+
+2006-08-31  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/blt.rb: double dashes (--) option doesn't work
+	  properly on some versions of BLT (wrong description on the
+	  manual of `blt::bgexec'?).
+
+2005-12-11  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/SUPPORT_STATUS: update to support libraries in
+          ActiveTcl8.4.12.0.
+
+	* lib/tkextlib/tile/tnotebook.rb: add Tk::Tile::TNotebook#insert.
+
+	* sample/tkextlib/tile/demo.rb: improve the look of a part of the demo.
+
+2005-11-25  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* sample/tkextlib/tile/demo.rb: bug fix
+
+	* sample/tkextlib/tile/themes/*: add some themes (blue,
+	  keramik, and plastik; require Tile-0.5 or later).
+
+2005-11-22  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tile.rb: bug fix (Tk::Tile::USE_TTK_NAMESPACE
+	  is not defined).
+
+2005-11-19  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* sample/tkextlib/treectrl/demo.rb: remove dependency on Ruby's
+	  version (1.8 or 1.9).
+
+2005-10-23  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/*: update to support ActiveTcl8.4.11.2
+
+	* lib/tkextlib/trofs/*: support Trofs 0.4.3
+
+	* lib/tkextlib/tile/*: support Tile 0.7.2
+
+	* lib/tkextlib/vu/*: support vu 2.3.0
+
+	* lib/tkextlib/tcllib/*: support Tcllib 1.8 (Tklib 0.3 part only)
+
+	* lib/tkextlib/*: improve conversion of option values
+
+2005-10-04  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tktable/tktable.rb: border_* instance methods
+	  don't call 'border' subcommands.
+
+2005-08-10  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/blt/component.rb: didn't check
+	  __item_ruby2val_optkeys().
+
+2005-08-09  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/blt/barchart.rb: support to treat tkvariable-type
+	  configure options.
+
+	* lib/tkextlib/blt/component.rb: ditto.
+
+	* lib/tkextlib/blt/dragdrop.rb: ditto.
+
+	* lib/tkextlib/blt/treeview.rb: ditto.
+
+	* lib/tkextlib/bwidget/button.rb: ditto.
+
+	* lib/tkextlib/bwidget/entry.rb: ditto.
+
+	* lib/tkextlib/bwidget/label.rb: ditto.
+
+	* lib/tkextlib/bwidget/labelentry.rb: ditto.
+
+	* lib/tkextlib/bwidget/labelframe.rb: ditto.
+
+	* lib/tkextlib/bwidget/mainframe.rb: ditto.
+
+	* lib/tkextlib/bwidget/passwddlg.rb: ditto.
+
+	* lib/tkextlib/bwidget/spinbox.rb: ditto.
+
+	* lib/tkextlib/bwidget/tree.rb: ditto.
+
+	* lib/tkextlib/iwidgets/calendar.rb: ditto.
+
+	* lib/tkextlib/iwidgets/entryfield.rb: ditto.
+
+	* lib/tkextlib/iwidgets/hierarchy.rb: ditto.
+
+	* lib/tkextlib/iwidgets/labeledframe.rb: ditto.
+
+	* lib/tkextlib/iwidgets/labeledwidget.rb: ditto.
+
+	* lib/tkextlib/iwidgets/menubar.rb: ditto.
+
+	* lib/tkextlib/iwidgets/scrolledlistbox.rb: ditto.
+
+	* lib/tkextlib/iwidgets/spinner.rb: ditto.
+
+	* lib/tkextlib/iwidgets/toolbar.rb: ditto.
+
+	* lib/tkextlib/tkimg/pixmap.rb: ditto.
+
+	* lib/tkextlib/tktable/tktable.rb: ditto.
+
+2005-08-06  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/tile/demo.rb: use Tk::Tile::Scale#variable.
+
+2005-08-04  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/tile/demo.rb: followed previous changes.
+
+2005-08-04  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tile/t*.rb: aliased class names starting with 'T'
+	  to non 'T' ones. (ie. Tk::Tile::TButton -> Tk::Tile::Button)
+	  [ruby-dev:26724]
+
+	* lib/tkextlib/tile.rb: ditto. (autoload support)
+
+2005-08-04  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/tile/demo.rb: fixed: Tk::Tile::TProgressbar is
+	  supported on tile 0.6 or later, not tile 0.5.
+
+	* sample/tkextlib/tile/demo.rb: updated scales demo to use
+	  Tk::Tile::TProgressbar for tile 0.6 or later.
+
+	* sample/tkextlib/tile/demo.rb: set some TkVariable default values.
+
+2005-08-03  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tile/treeview.rb: Tk::Tile::Treeview#headingconfigure
+	  is now working and more. [ruby-dev:26716]
+
+	* sample/tkextlib/tile/demo.rb: use Tk::Tile::Treeview#headingconfigure 	  instead of direct Tk.tk_call.
+
+2005-08-02  ocean  <ocean@ruby-lang.org>
+
+	* lib/tkextlib/tile/tprogressbar.rb: Tk::Tile::TProgressbar#start
+	  takes optional argument `interval'.
+
+	* sample/tkextlib/tile/demo.rb: emulate Tk::Tile::TProgressbar
+	  with Tk::Tile::TProgress in tile 0.4. (repeating buttons demo)
+
+2005-08-02  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/tile/demo.rb: added repeating buttons demo.
+
+	* sample/tkextlib/tile/repeater.tcl: ditto. (new file)
+
+2005-08-01  ocean  <ocean@ruby-lang.org>
+
+	* lib/tkextlib/tile.rb: fixed autoload for Treeview.
+
+	* lib/tkextlib/tile/treeview.rb: replaced `ary2tk_list(items)' with
+	  `*items'.
+
+	* sample/tkextlib/tile/demo.rb: added treeview demo. (tile 0.5 or
+	  later is required) [ruby-dev:26668]
+
+2005-08-01  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/tile/demo.rb: added combobox demo.
+
+2005-07-27  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/tile/demo.rb: fixed typo.
+
+2005-06-16  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/SUPPOPRT_STATUS: add RELEASE_DATE information.
+
+	* lib/tkextlib/tile/style.rb: add "style element options <elem>"
+	  command support.
+
+2005-06-08  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/ICONS/icons.rb: fail to create instances of
+	  Tk::ICONS [ruby-dev:26305].
+
+2005-06-07  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/tile/themes/kroc.{rb,tcl}: also support tile 0.4.
+
+2005-06-07  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/tile/themes/kroc.{rb,tcl}: support tile 0.5 or later.
+	  ("pixmap" element constructor replaced by "image")
+
+2005-06-05  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* sample/tkextlib/tile/demo.rb: fix TypeError & create Console
+
+2005-05-30  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/blt.rb: add PACKAGE_NAME information of Tcl/Tk
+          Extension.
+
+	* lib/tkextlib/bwidget.rb: ditto.
+
+	* lib/tkextlib/iwidgets.rb: ditto.
+
+	* lib/tkextlib/tile.rb: ditto.
+
+	* lib/tkextlib/tkimg.rb: ditto.
+
+	* lib/tkextlib/vu.rb: ditto.
+
+	* lib/tkextlib/ICONS/icons.rb: ditto.
+
+	* lib/tkextlib/itcl/incr_tcl.rb: ditto.
+
+	* lib/tkextlib/itk/incr_tk.rb: ditto.
+
+	* lib/tkextlib/tcllib/autoscroll.rb: ditto.
+
+	* lib/tkextlib/tcllib/ctext.rb: ditto.
+
+	* lib/tkextlib/tcllib/cursor.rb: ditto.
+
+	* lib/tkextlib/tcllib/datefield.rb: ditto.
+
+	* lib/tkextlib/tcllib/ico.rb: ditto.
+
+	* lib/tkextlib/tcllib/ip_entry.rb: ditto.
+
+	* lib/tkextlib/tcllib/plotchart.rb: ditto.
+
+	* lib/tkextlib/tcllib/style.rb: ditto.
+
+	* lib/tkextlib/tcllib/tkpiechart.rb: ditto.
+
+	* lib/tkextlib/tclx/tclx.rb: ditto.
+
+	* lib/tkextlib/tkDND/shape.rb: ditto.
+
+	* lib/tkextlib/tkDND/tkdnd.rb: ditto.
+
+	* lib/tkextlib/tkHTML/htmlwidget.rb: ditto.
+
+	* lib/tkextlib/tkimg/bmp.rb: ditto.
+
+	* lib/tkextlib/tkimg/gif.rb: ditto.
+
+	* lib/tkextlib/tkimg/ico.rb: ditto.
+
+	* lib/tkextlib/tkimg/jpeg.rb: ditto.
+
+	* lib/tkextlib/tkimg/pcx.rb: ditto.
+
+	* lib/tkextlib/tkimg/pixmap.rb: ditto.
+
+	* lib/tkextlib/tkimg/png.rb: ditto.
+
+	* lib/tkextlib/tkimg/ppm.rb: ditto.
+
+	* lib/tkextlib/tkimg/ps.rb: ditto.
+
+	* lib/tkextlib/tkimg/sgi.rb: ditto.
+
+	* lib/tkextlib/tkimg/sun.rb: ditto.
+
+	* lib/tkextlib/tkimg/tga.rb: ditto.
+
+	* lib/tkextlib/tkimg/tiff.rb: ditto.
+
+	* lib/tkextlib/tkimg/window.rb: ditto.
+
+	* lib/tkextlib/tkimg/xbm.rb: ditto.
+
+	* lib/tkextlib/tkimg/xpm.rb: ditto.
+
+	* lib/tkextlib/tktable/tktable.rb: ditto.
+
+	* lib/tkextlib/tktrans/tktrans.rb: ditto.
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: ditto.
+
+	* lib/tkextlib/winico/winico.rb: ditto.
+
+2005-05-25  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/iwidgets/scrolledlistbox.rb: follow the change
+          of tk.rb. modify to attend encoding.
+
+	* lib/tkextlib/iwidgets/scrolledtext.rb: ditto.
+
+	* lib/tkextlib/iwidgets/scrolledcanvas.rb: bug fix on
+	  TkCanvas#delete when given non-TkcItem arguments.
+
+2005-05-10  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/blt/winop.rb: fix typo
+
+2005-05-08  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/vu/pie.rb: fix typo
+
+2005-04-10  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/treectrl/mailwasher.rb: fixed typo. [ruby-dev:26008]
+
+2005-04-09  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* sample/tkextlib/tile/demo.rb: new demo of Tile extension.
+
+	* sample/tkextlib/tile/iconlib.tcl: part of the demo.
+
+	* sample/tkextlib/tile/toolbutton.tcl: ditto.
+
+	* sample/tkextlib/tile/readme.txt: document of the demo.
+
+	* sample/tkextlib/tile/Orig_LICENSE.txt: ditto.
+
+	* sample/tkextlib/tile/themes/kroc.tcl: sample theme written with Tcl.
+
+	* sample/tkextlib/tile/themes/pkgIndex.tcl: pkgIndex of kroc.tcl.
+
+	* sample/tkextlib/tile/themes/kroc.rb: Kroc theme written with Ruby.
+
+	* sample/tkextlib/tile/themes/kroc/button-h.gif: images for Kroc theme.
+
+	* sample/tkextlib/tile/themes/kroc/button-n.gif: ditto.
+
+	* sample/tkextlib/tile/themes/kroc/button-p.gif: ditto.
+
+	* sample/tkextlib/tile/themes/kroc/check-hc.gif: ditto.
+
+	* sample/tkextlib/tile/themes/kroc/check-hu.gif: ditto.
+
+	* sample/tkextlib/tile/themes/kroc/check-nc.gif: ditto.
+
+	* sample/tkextlib/tile/themes/kroc/check-nu.gif: ditto.
+
+	* sample/tkextlib/tile/themes/kroc/radio-hc.gif: ditto.
+
+	* sample/tkextlib/tile/themes/kroc/radio-hu.gif: ditto.
+
+	* sample/tkextlib/tile/themes/kroc/radio-nc.gif: ditto.
+
+	* sample/tkextlib/tile/themes/kroc/radio-nu.gif: ditto.
+
+	* lib/tkextlib/tile.rb: bug fix (tested on the new demo).
+
+	* lib/tkextlib/tile/style.rb: ditto.
+
+	* lib/tkextlib/tile/tbutton.rb: ditto.
+
+	* lib/tkextlib/tile/tcheckbutton.rb: ditto.
+
+	* lib/tkextlib/tile/tcombobox.rb: ditto.
+
+	* lib/tkextlib/tile/tentry.rb: ditto.
+
+	* lib/tkextlib/tile/tframe.rb: ditto.
+
+	* lib/tkextlib/tile/tlabel.rb: ditto.
+
+	* lib/tkextlib/tile/tlabelframe.rb: ditto.
+
+	* lib/tkextlib/tile/tmenubutton.rb: ditto.
+
+	* lib/tkextlib/tile/tnotebook.rb: ditto.
+
+	* lib/tkextlib/tile/tprogressbar.rb: ditto.
+
+	* lib/tkextlib/tile/tradiobutton.rb: ditto.
+
+	* lib/tkextlib/tile/treeview.rb: ditto.
+
+	* lib/tkextlib/tile/tscrollbar.rb: ditto.
+
+	* lib/tkextlib/tile/tseparator.rb: ditto.
+
+	* lib/tkextlib/tile/tsquare.rb: ditto.
+
+	* lib/tkextlib/tile/tpaned.rb: new library
+
+	* lib/tkextlib/tile/tscale.rb: ditto.
+
+	* lib/tkextlib/SUPPORT_STATUS: update support status of Tile extension.
+
+	* lib/tkextlib/tcllib/ctext.rb: use TkCommandNames on create_self().
+
+	* lib/tkextlib/tcllib/datefield.rb: ditto.
+
+	* lib/tkextlib/tcllib/ip_entry.rb: ditto.
+
+	* lib/tkextlib/tkHTML/htmlwidget.rb: ditto.
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: ditto.
+
+2005-04-09  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/treectrl/explorer.rb: File.executable? returns true
+	  even if it's plain text file. (this function only checks access right)
+
+2005-04-09  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/treectrl/{help,www-options}.rb: fixed typo.
+	  (click or resize column header)
+
+2005-04-09  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/treectrl/imovie.rb: fixed typo. (click on clip title)
+
+2005-04-08  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/treectrl/random.rb: fixed typo. (drop node outside of
+	  widget, or reenter widget while draggging)
+
+2005-04-08  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/treectrl/outlook-newgrounp.rb: image had disappered when
+	  node was selected.
+
+2005-04-08  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/treectrl/{random,outlook-newgroup}.rb:
+	  tk::treectrl uses 'afterId' not 'afterID'.
+
+	* sample/tkextlib/treectrl/{random,outlook-newgroup}.rb:
+	  item_firstchild can return empty string. (drop node to leaf node)
+
+	* sample/tkextlib/treectrl/random.rb: Enumerable#find didn't work properly
+	  because tried to compare String with Integer. (drag node and leave widget)
+
+	* sample/tkextlib/treectrl/random.rb: and some fixes.
+
+2005-04-08  ocean  <ocean@ruby-lang.org>
+
+	* lib/tkextlib/treectrl/tktreectrl.rb (selection_clear): fixed typo.
+
+	* sample/tkextlib/treectrl/random.rb: node deselection now works.
+
+	* sample/tkextlib/treectrl/demo.rb: fixed typo. (popup menu on column header)
+
+2005-04-08  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/treectrl/help.rb: fixed typo. (wrong color)
+
+2005-04-08  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/treectrl/random.rb: fixed typo. (wrong itemheight)
+
+	* sample/tkextlib/treectrl/outlook-newgroup.rb: ditto.
+
+	* sample/tkextlib/treectrl/explorer.rb: ditto.
+
+	* sample/tkextlib/treectrl/help.rb: ditto.
+
+2005-04-07  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/treectrl/*.rb: some speed up... cache the result of
+	  version checking.
+
+2005-04-07  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: performance tuning by calling
+	  tk_send_without_enc. [ruby-dev:25997]
+
+2005-04-04  ocean  <ocean@ruby-lang.org>
+
+	* lib/tkextlib/tktable/tktable.rb: added Tk::TkTable#selection_present.
+
+2005-04-02  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: support TreeCtrl's cvs head.
+
+2005-04-02  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/blt/component.rb: add TreeCtrl#legend_window_create().
+
+	* sample/tkextlib/blt/graph6.rb: use legend_window_create().
+
+	* lib/tkextlib/blt/tree.rb: forget to call tagid().
+
+	* lib/tkextlib/blt/treeview.rb: ditto.
+
+2005-04-01  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* sample/tkextlib/treectrl/demo.rb: bridge the gap of
+	  Hash#index or Hash#key between ruby 1.8 and 1.9
+
+2005-04-01  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/blt/component.rb: bug fix on treatment of
+	  component objects.
+
+	* sample/tkextlib/blt/graph6.rb: a new sample script.
+
+2005-03-31  ocean  <ocean@ruby-lang.org>
+
+	* sample/tkextlib/treectrl/demo.rb: should use Hash#index.
+
+	* sample/tkextlib/treectrl/demo.rb: TkImage was not
+	  cached properly.
+
+	* sample/tkextlib/treectrl/random.rb: fixed typo.
+
+2005-03-31  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* sample/tkextlib/iwidgets/sample/hierarchy.rb: show basename
+	  only [ruby-dev:25970]
+
+	* sample/tkextlib/treectrl/demo.rb: add check for existence of
+	  'backgroundimage' option.
+
+	* sample/tkextlib/treectrl/bitmaps.rb: ditto.
+
+	* sample/tkextlib/treectrl/outlook-newgroup.rb: lack of '%I'
+	  event callback argument.
+
+2005-03-31  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* sample/tkextlib/iwidgets/sample/hierarchy.rb: fail to treat
+	  Japanese (i18n?) filenames.
+
+2005-03-30  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* sample/tkextlib/bwidget/tree.rb: use 'return' in the Proc object.
+
+	* sample/tkextlib/tkHTML/hv.rb: ditto.
+
+	* sample/tkextlib/tkHTML/ss.rb: ditto.
+
+	* sample/tkextlib/tktable/basic.rb: ditto.
+
+	* sample/tkextlib/tktable/command.rb: ditto.
+
+	* sample/tkextlib/tktable/debug.rb: ditto.
+
+	* sample/tkextlib/tktable/maxsize.rb: ditto.
+
+	* sample/tkextlib/treectrl/demo.rb: ditto.
+
+2005-03-29  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/blt/component.rb: cannot create elements except
+	  default type of element.
+
+	* lib/tkextlib/blt/barchart.rb: ditto.
+
+	* lib/tkextlib/blt/graph.rb: ditto.
+
+	* lib/tkextlib/blt/stripchart.rb: ditto.
+
+	* lib/tkextlib/blt/component.rb: axis command option gets
+	  proper object type of arguments.
+
+	* sample/tkextlib/blt/calendar.rb: new sample.
+
+	* sample/tkextlib/blt/pareto.rb: ditto.
+
+2005-03-28  ocean  <ocean@ruby-lang.org>
+
+	* lib/tkextlib/iwidgets/notebook.rb: fixed typo.
+
+2005-03-26  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/blt.rb: add commands for zooming.
+
+	* lib/tkextlib/blt/bitmap.rb (new_with_name): add for using
+          given name.
+
+	* lib/tkextlib/blt/busy.rb: bug fix on Tk::BLT::Busy::Shild class.
+
+	* lib/tkextlib/blt/component.rb: typo fix.
+
+	* lib/tkextlib/blt/component.rb: fix lack of *_create methods
+
+	* lib/tkextlib/blt/component.rb: proper call on xaxis_* and so on.
+
+	* lib/tkextlib/blt/htext.rb: add TkVariable object to access
+          special Tcl variables.
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: typo fix.
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: proper treatment
+          of 'font' option of element_configure.
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: bug fix on item_sort.
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: add methods to
+          call TreeCtrl commands for bindings.
+
+	* sample/tkextlib/blt/*: add some sample scripts.
+
+	* sample/tkextlib/treectrl/*: add some sample scripts.
+
+2005-03-18  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: bug fix and define some
+	  classes for components of Tk::TreeCtrl
+
+2005-03-17  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: call wrong method in
+	  Tk::TreeCtrl#*_configinfo and current_*_configinfo method
+
+2005-03-16  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/SUPPORT_STATUS: change the status of TkImg
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: bug fix and support
+	  TkTreeCtrl-1.1
+
+	* lib/tkextlib/SUPPORT_STATUS: change the supported version of
+	  TkTreeCtrl
+
+2005-03-15  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* sample/tkextlib/tkimg: add sample
+
+2005-03-06  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/SUPPORT_STATUS: add version info of each extension
+
+2005-03-05  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tile.rb: lack of "autoload TProgressbar"
+
+2005-03-05  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tile.rb: support tile-0.6
+
+	* lib/tkextlib/tile/tbutton.rb: ditto
+
+	* lib/tkextlib/tile/tcheckbutton.rb: ditto
+
+	* lib/tkextlib/tile/tlabel.rb: ditto
+
+	* lib/tkextlib/tile/tmenubutton.rb: ditto
+
+	* lib/tkextlib/tile/tnotebook.rb: ditto
+
+	* lib/tkextlib/tile/tradiobutton.rb: ditto
+
+	* lib/tkextlib/tile/tcombobox.rb: [new] ditto
+
+	* lib/tkextlib/tile/tentry.rb: [new] ditto
+
+	* lib/tkextlib/tile/tframe.rb: [new] ditto
+
+	* lib/tkextlib/tile/tlabelframe.rb: [new] ditto
+
+	* lib/tkextlib/tile/tprogressbar.rb: [new] ditto
+
+	* lib/tkextlib/tile/treeview.rb: [new] ditto
+
+	* lib/tkextlib/tile/tscrollbar.rb: [new] ditto
+
+	* lib/tkextlib/tile/tseparator.rb: [new] ditto
+
+	* lib/tkextlib/tile/tsquare.rb: [new] ditto
+
+2005-02-20  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tclx/tclx.rb: warning TclX's 'signal' command.
+
+2005-01-25  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/blt/component.rb: bug fix. cannot accept
+          a callback ID string for a command argument. [ruby-dev:25479]
+
+	* lib/tkextlib/blt/tabset.rb: ditto
+
+	* lib/tkextlib/blt/treeview.rb: ditto
+
+	* lib/tkextlib/bwidget/labelentry.rb: ditto
+
+	* lib/tkextlib/bwidget/listbox.rb: ditto
+
+	* lib/tkextlib/bwidget/notebook.rb: ditto
+
+	* lib/tkextlib/bwidget/spinbox.rb: ditto
+
+	* lib/tkextlib/bwidget/tree.rb: ditto
+
+	* lib/tkextlib/itk/incr_tk.rb: ditto
+
+	* lib/tkextlib/iwidgets/scrolledcanvas.rb: ditto
+
+	* lib/tkextlib/tkDND/tkdnd.rb: ditto
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: ditto
+
+	* sample/tkextlib/tkHTML/ss.rb: local variable scope bug fix
+          [ruby-dev:25479]
+
+	* sample/tkextlib/vu/vu_demo.rb: rename from vu.rb; avoid the bug on
+	  Windows version of Tcl/Tk. The trouble based on the bug occurs when
+	  the script name (without extension) is a same name as a Tcl/Tk's
+	  library file name (without extension) required in the script.
+
+2004-12-24  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/blt: add BLT extension support
+
+2004-12-16  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/bwidget/labelentry.rb: use TkCore.callback_obj?()
+
+	* lib/tkextlib/bwidget/listbox.rb: ditto
+
+	* lib/tkextlib/bwidget/notebook.rb: ditto
+
+	* lib/tkextlib/bwidget/spinbox.rb: ditto
+
+	* lib/tkextlib/itk/incr_tk.rb: ditto
+
+	* lib/tkextlib/iwidgets/scrolledcanvas.rb: ditto
+
+	* lib/tkextlib/tkDND/tkdnd.rb: ditto
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: ditto
+
+	* lib/tkextlib/winico/winico.rb: ditto
+
+2004-12-10  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tile/style.rb: 'theme_use' method bug fix
+
+2004-12-08  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/bwidget/notebook.rb: raise method cannot return
+          the raised page.
+
+	* lib/tkextlib/bwidget/labelentry.rb: bind methods accept
+          subst_args + block
+
+	* lib/tkextlib/bwidget/listbox.rb: ditto
+
+	* lib/tkextlib/bwidget/notebook.rb: ditto
+
+	* lib/tkextlib/bwidget/spinbox.rb: ditto
+
+	* lib/tkextlib/bwidget/tree.rb: ditto
+
+	* lib/tkextlib/itk/incr_tk.rb: ditto
+
+	* lib/tkextlib/iwidgets/scrolledcanvas.rb: ditto
+
+	* lib/tkextlib/tkDND/tkdnd.rb: ditto
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: ditto
+
+2004-11-26  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/bwidget/notebook.rb: uses epath
+
+	* lib/tkextlib/bwidget/widget.rb: ditto
+
+	* lib/tkextlib/tktable/tktable.rb: ditto
+
+	* lib/tkextlib/tcllib/cursor.rb: ditto, and bug fix
+
+2004-11-10  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tile/style.rb: bug fix
+
+2004-11-07  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/iwidgets/scrolledcanvas.rb: bind-event methods
+	  accept multi substitution arguments.
+
+	* lib/tkextlib/tktable/tktable.rb: ditto.
+
+	* lib/tkextlib/treectrl/tktreectrl.rb: ditto
+
+2004-11-03  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/SUPPORT_STATUS: BLT moves to 'plan to support'
+          from 'not determined'
+
+	* lib/tkextlib/itk/incr_tk.rb: __cget_cmd and __config_cmd are
+          private methods
+
+	* lib/tkextlib/tcllib/autoscroll.rb: extend TkCore
+
+	* lib/tkextlib/tcllib/cursor.rb: ditto.
+
+	* lib/tkextlib/tcllib/plotchart.rb: ditto.
+
+	* lib/tkextlib/tcllib/style.rb: ditto.
+
+	* lib/tkextlib/tile/style.rb: ditto.
+
+	* lib/tkextlib/tkDND/shape.rb: ditto.
+
+2004-10-24  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/bwidget/tree.rb: bug fix on Windows
+
+2004-10-16  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/tcllib/ico.rb: new library (Tk::Tcllib:ICO)
+
+	* lib/tkextlib/tcllib.rb: add Tk::Tcllib::ICO (based on tcllib 1.7)
+
+2004-10-06  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/bwidget.rb (BWidget.grab): bug fix
+
+	* lib/tkextlib/tcllib.rb: typo fix
+
+2004-07-28  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/add winico support
+
+2004-07-23  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* lib/tkextlib/add TclX support (partially; infox command and
+          XPG/3 MsgCat only)
+
+2004-07-15  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* bug fix
+
+	* support TkTable extension
+
+2004-07-12  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* bug fix
+
+	* support Iwidgets extension
+
+2004-07-10  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* bug fix
+
+	* add more part of [incr Widget] support (about 65%? are complete)
+
+	* use Tk::ValidateConfigure.__def_validcmd() method
+          (new function to define validatecommand methods easier)
+
+	* tcllib.rb : avoid the loading trouble that almost all part of
+	  the extension is not available when some libraries are invalid.
+
+2004-07-09  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* add some part of [incr Widget] support (about 50%? are complete)
+
+2004-07-07  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* add [incr Tck], [incr Tk] support
+
+2004-07-06  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* support BWidget extension
+
+	* add BWidget extension demo
+
+	* add ICONS extension demo
+
+	* many bug fix
+
+2004-07-01  Hidetoshi NAGAI  <nagai@ai.kyutech.ac.jp>
+
+	* 1st release of tkextlib ( to support Tcl/Tk extensions )

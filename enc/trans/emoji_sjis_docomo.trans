@@ -1,0 +1,33 @@
+#include "transcode_data.h"
+
+<%
+  transcode_tblgen "SJIS-DOCOMO", "UTF8-DOCOMO",
+    [["{00-7f}", :nomap]] +
+    citrus_decode_mapsrc("mskanji", 1, "JISX0201-KANA/UCS") +
+    citrus_decode_mapsrc("mskanji", 2, %w(EMOJI_SHIFT_JIS-DOCOMO/UCS
+                                          JISX0208VDC:NEC/UCS
+                                          CP932VDC:NEC_IBM/UCS
+                                          CP932VDC:IBM/UCS
+                                          CP932UDA/UCS
+                                          JISX0208:MS/UCS).join(",")),
+    ValidEncoding('Shift_JIS')
+
+  transcode_tblgen "UTF8-DOCOMO", "SJIS-DOCOMO",
+    [["{00-7f}", :nomap]] +
+    citrus_decode_mapsrc("mskanji", 1, "UCS/JISX0201-KANA") +
+    citrus_decode_mapsrc("mskanji", 2, %w(UCS/EMOJI_SHIFT_JIS-DOCOMO
+                                          UCS/JISX0208VDC:NEC
+                                          UCS/CP932VDC:NEC_IBM
+                                          UCS/CP932VDC:IBM
+                                          UCS/CP932UDA
+                                          UCS/JISX0208:MS).join(",")),
+    ValidEncoding('UTF-8')
+%>
+
+<%= transcode_generated_code %>
+
+void
+Init_emoji_sjis_docomo(void)
+{
+<%= transcode_register_code %>
+}

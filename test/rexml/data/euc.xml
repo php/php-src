@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="euc-jp"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN">
+<html xml:lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=euc-jp" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta name="author" content="U.Nakamura" />
+<link rev="made" href="mailto:usa@ruby-lang.org" />
+<link rel="StyleSheet" href="./ruby.css" type="text/css" />
+<title>Ruby-mswin32</title>
+</head>
+<body>
+
+<h1><a id="top">Ruby-mswin32</a></h1>
+<p>あるいは、Windowsとの終わりなき戦い ;-(</p>
+<p>[日本語 / <a href="./index_en.html">English</a>]</p>
+
+
+
+<h2><a id="menu">▼ 目次</a></h2>
+<ul>
+<li><a href="#remark">注意事項</a></li>
+<li><a href="#ruby">Rubyとは?</a></li>
+<li><a href="#mswin32">mswin32版rubyとは?</a></li>
+<li><a href="#download">バイナリ ダウンロード</a></li>
+<li><a href="#install">インストール</a></li>
+<li><a href="#recent">最近の出来事</a></li>
+<li><a href="#link">リンク</a></li>
+</ul>
+
+
+
+<h2><a id="remark">▼ 注意事項</a></h2>
+<p>このページでは、mswin32版rubyの配布と変更状況のお知らせを行っています。</p>
+<p>ここは別に公式ページでもなんでもなくて、私が勝手に書いてるページです。ここで入手できるプログラム・情報(無いに等しいけど)については、各自の判断でご利用ください。<br />
+問い合わせは<a href="mailto:usa@ruby-lang.org">私</a>へ。間違っても他の人に迷惑をかけるようなことはしないでね。</p>
+
+
+
+<h2><a id="ruby">▼ Rubyとは?</a></h2>
+<p><a href="http://www.ruby-lang.org/ja/">Rubyのサイト</a>をご覧下さい。</p>
+
+
+
+<h2><a id="mswin32">▼ mswin32版rubyとは?</a></h2>
+<p>mswin32版rubyとは、32bit版Windows(Windows95・Windows98・WindowsMe・Windows NT・Windows 2000・WindowsXP・Windows 2003 Server、以下Windowsと表記)上で動作するRubyのバイナリの一つです。<br />
+Windows上で動作するRubyとしては、現在、5種類のバイナリが存在します。これらはそれぞれmswin32版・cygwin版・mingw32版・bccwin32版・djgpp版と呼ばれています。<br />
+それぞれの違いをまとめると以下のようになります(事実誤認があればお知らせください)。</p>
+<dl>
+<dt><a id="label:1">mswin32版</a></dt><dd>
+<p>VC++でコンパイルされる。Windowsから見ればもっとも「普通」のバイナリと言えるが、反面、Rubyが持つUNIXで特徴的な機能の一部が使用できない。1.7.3以降はmingw32版と拡張ライブラリについてはバイナリ互換性がある。<br />
+RUBY_PLATFORMは*-mswin32。</p>
+</dd>
+<dt><a id="label:2">cygwin版</a></dt><dd>
+<p>gccでコンパイルされ、<a href="http://sources.redhat.com/cygwin/">cygwin</a>環境で動作する。cygwin環境がUNIXライクな環境をWindows上で構築するものであるので、当然、cygwin版rubyは一般のUNIX用のものとだいたい同じように動作する(ことが期待できる)。<br />
+RUBY_PLATFORMは*-cygwin。</p>
+</dd>
+<dt><a id="label:3">mingw32版</a></dt><dd>
+<p>gccでコンパイルされる。ソースはほとんどmswin32版と共通であり、ランタイムライブラリも共通(MSVCRT.dll)なので、動作も(おそらく)mswin32版とほぼ同じ。1.7.3以降はmswin32版と拡張ライブラリについてはバイナリ互換性がある。<br />
+RUBY_PLATFORMは*-mingw32。</p>
+</dd>
+<dt><a id="label:4">bccwin32版</a></dt><dd>
+<p>BC++でコンパイルされる。ソースはかなりの部分がmswin32版と共通ではあるが、ランタイムライブラリが異なるので、細かいところで挙動がmswin32版とは異なる(はず)。1.7以降でサポートされる。<br />
+RUBY_PLATFORMは*-bccwin32。</p>
+</dd>
+<dt><a id="label:5">djgpp版</a></dt><dd>
+<p>DJGPPでコンパイルされる。DOS用のバイナリなので、もちろんDOSでも動作する。反面、WindowsにあってDOSにない機能の多くが使えない(ネットワーク関連など)。<br />
+RUBY_PLATFORMは*-msdosdjgpp。</p>
+</dd>
+</dl>
+<p>このページでは、上記のうちmswin32版のみを扱っています。<br />
+なお、cygwin版・mingw32版・djgpp版についてはわたなべさんの<a href="http://www.os.rim.or.jp/~eban/">Ruby binaries</a>から入手可能です。また、bccwin32版については小西さんの<a href="http://www001.upp.so-net.ne.jp/konishi/ruby/index.htm">Ruby</a>から入手可能です。</p>
+
+
+
+<h2><a id="download">▼ バイナリ ダウンロード</a></h2>
+<p>現在配布中の全てのバイナリはVC++ 5.0(Version 11.00.7022 for 80x86)でmakeしたものです。ruby自体に関しては、<a href="http://www.ruby-lang.org/ja/download.html">標準配布のソース</a>(または<a href="http://www.ruby-lang.org/~knu/cvsrepo-guide.html">CVS</a>のソース)からそのまま作成しています。拡張ライブラリについては各々のリンク先を参照してください。<br />
+いずれのバイナリもzip形式でアーカイブされています。</p>
+<p>md5sumのチェック方法ですが、例えばrubyがインストールされているなら下記のような方法があります。<br />
+<code>ruby -r md5 -e "puts MD5.new(File.open('filename', 'rb').read).hexdigest"</code></p>
+
+
+
+<h3><a id="release">Release</a></h3>
+<ul>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.8.1-i386-mswin32.zip">ruby-1.8.1-i386-mswin32.zip</a> (3,764KB) <em>最新Release版</em><br />
+  ruby 1.8.1 (2003-12-25) [i386-mswin32]<br />
+  md5sum : 6bbdabeb29f1a15fa69901e87d1108ac</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.8.0-i386-mswin32.zip">ruby-1.8.0-i386-mswin32.zip</a> (2,507KB)<br />
+  ruby 1.8.0 (2003-08-04) [i386-mswin32]<br />
+  md5sum : eaf9263062429fd4f722d9a70a38a9dc</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.6.8-i586-mswin32.zip">ruby-1.6.8-i586-mswin32.zip</a> (1,964KB)<br />
+  ruby 1.6.8 (2002-12-24) [i586-mswin32]<br />
+  md5sum : f704f1248ec25b96e3e1f3070afa915e</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.6.7-i586-mswin32.zip">ruby-1.6.7-i586-mswin32.zip</a> (1,972KB)<br />
+  ruby 1.6.7 (2002-03-01) [i586-mswin32]<br />
+  md5sum : ddedc40d0fc3b0ea1d6ac74f4976bfc6</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.6.6-i586-mswin32.zip">ruby-1.6.6-i586-mswin32.zip</a> (1,944KB)<br />
+  ruby 1.6.6 (2001-12-26) [i586-mswin32]<br />
+  md5sum : 96e0d1d19a37e5e7e50ae7ce99e34636</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.6.5-i586-mswin32.zip">ruby-1.6.5-i586-mswin32.zip</a> (1,896KB)<br />
+  ruby 1.6.5 (2001-09-19) [i586-mswin32]<br />
+  md5sum : c708ae98a05df2ff8dea5a70e3791bfa</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.6.4-i586-mswin32.zip">ruby-1.6.4-i586-mswin32.zip</a> (1,821KB)<br />
+  ruby 1.6.4 (2001-06-04) [i586-mswin32]<br />
+  md5sum : cf813ca19e40be164057b3562575e4da</li>
+</ul>
+
+
+
+
+
+
+
+<h3><a id="develop">Developing versions snapshots</a></h3>
+<ul>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.9.0-20040126-i386-mswin32.zip">ruby-1.9.0-20040126-i386-mswin32.zip</a> (3,849KB)<br />
+  ruby 1.9.0 (2004-01-26) [i386-mswin32]<br />
+  md5sum : fffafbf881cb6a85982220eae5a5b4f5</li>
+</ul>
+
+
+
+<h3><a id="stable">Stable versions snapshots</a></h3>
+<h4><a id="stable">1.8.0</a></h4>
+<ul>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.8.1-20040127-i386-mswin32.zip">ruby-1.8.1-20040127-i386-mswin32.zip</a> (3,822KB)<br />
+  ruby 1.8.1 (2004-01-27) [i386-mswin32]<br />
+  md5sum : 1fc0d5f53f0a75d0c6d1ca5d21082089</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.8.1-20031027-i386-mswin32.zip">ruby-1.8.1-20031027-i386-mswin32.zip</a> (3,075KB)<br />
+  ruby 1.8.1 (2003-10-27) [i386-mswin32]<br />
+  md5sum : 9dbdc644c529d207d0bda5d64478a5c4</li>
+</ul>
+<h4><a id="stable">1.6.8</a></h4>
+<ul>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.6.8-20030727-i586-mswin32.zip">ruby-1.6.8-20030727-i586-mswin32.zip</a> (2,093KB)<br />
+  ruby 1.6.8 (2003-07-27) [i586-mswin32]<br />
+  md5sum : 28c3b92b162319b3d6bc99c9996cad15</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ruby-1.6.8-20030515-i586-mswin32.zip">ruby-1.6.8-20030515-i586-mswin32.zip</a> (2,091KB)<br />
+  ruby 1.6.8 (2003-05-15) [i586-mswin32]<br />
+  md5sum : e5f6558de261d111add4f657ad5e345f</li>
+</ul>
+
+
+
+<h3><a id="ext">Extension libraries</a></h3>
+<h4><a id="ext">1.8.0</a></h4>
+<ul>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/racc-1.4.4-all-i386-mswin32-1.8.zip">racc-1.4.4-all-i386-mswin32-1.8.zip</a> (70KB)<br />
+  <a href="http://www.loveruby.net/en/racc.html">racc</a> 1.4.4-all (for ruby 1.8.1)<br />
+  md5sum : 46c4d48b714fb1ded880e7e7af456b28</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/vrswin-030906-i386-mswin32-1.8.zip">vrswin-030906-i386-mswin32-1.8.zip</a> (54KB)<br />
+  <a href="http://www.osk.3web.ne.jp/~nyasu/vruby/vrproject-e.html">VisualuRuby (swin)</a> 030906 (for ruby 1.8.0)<br />
+  md5sum : 11c2d30e2a05e9ea7e097ec7b066cedf</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/vruby-030906-i386-mswin32-1.8.zip">vruby-030906-i386-mswin32-1.8.zip</a> (96KB)<br />
+  <a href="http://www.osk.3web.ne.jp/~nyasu/vruby/vrproject-e.html">VisualuRuby (vruby)</a> 030906 (for ruby 1.8.0)<br />
+  md5sum : 77a42995e42e869932f5fb282cc297ea</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/eruby-1.0.4-i386-mswin32-1.8.zip">eruby-1.0.4-i386-mswin32-1.8.zip</a> (75KB)<br />
+  <a href="http://www.modruby.net/">eruby</a> 1.0.4 (for ruby 1.8.0)<br />
+  md5sum : de7282647f015b1d20a28dcf7c2b8715</li>
+</ul>
+<h4><a id="ext">1.6.8</a></h4>
+<ul>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/vrswin-030521-i586-mswin32-1.6.zip">vrswin-030521-i586-mswin32-1.6.zip</a> (55KB)<br />
+  <a href="http://www.osk.3web.ne.jp/~nyasu/vruby/vrproject-e.html">VisualuRuby (swin)</a> 030521 (for ruby 1.6.8)<br />
+  md5sum : eae3284c6f79be7a119858ff9e940985</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/vruby-030517-i586-mswin32-1.6.zip">vruby-030517-i586-mswin32-1.6.zip</a> (95KB)<br />
+  <a href="http://www.osk.3web.ne.jp/~nyasu/vruby/vrproject-e.html">VisualuRuby (vruby)</a> 030517 (for ruby 1.6.8)<br />
+  md5sum : a32af752428cf3aa03000d66d8deca33</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/tmail-0.10.7-i586-mswin32-1.6.zip">tmail-0.10.7-i586-mswin32-1.6.zip</a> (160KB)<br />
+  <a href="http://www.loveruby.net/en/tmail.html">TMail</a> 0.10.7 (for ruby 1.6.8)<br />
+  md5sum : 74351ed81550dfbf3bfaf8252c316326</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/eruby-1.0.3-i586-mswin32-1.6.zip">eruby-1.0.3-i586-mswin32-1.6.zip</a> (74KB)<br />
+  <a href="http://www.modruby.net/">eruby</a> 1.0.3 (for ruby 1.6.8)<br />
+  md5sum : e05d654128422846f86ca84f55bf7bcb</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/rubywin-0.0.4.3-i586-mswin32-1.6.zip">rubywin-0.0.4.3-i586-mswin32-1.6.zip</a> (286KB)<br />
+  <a href="http://homepage1.nifty.com/markey/ruby/rubywin/index_e.html">RubyWin</a> 0.0.4.3 (for ruby 1.6.8)<br />
+  md5sum : 3f2226ef0c6e41b31c2f337f778e3e18</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/shim-20021224-i586-mswin32-1.6.zip">shim-20021224-i586-mswin32-1.6.zip</a> (138KB)<br />
+  <a href="http://www.ruby-lang.org/~knu/cgi-bin/cvsweb.cgi/shim/">Ruby Shim</a> 20021224 (for ruby 1.6.8)<br />
+  md5sum : 7ee4363195973a1df0584cb467e5ce82</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/racc-1.4.3-all-i586-mswin32-1.6.zip">racc-1.4.3-all-i586-mswin32-1.6.zip</a> (124KB)<br />
+  <a href="http://www.loveruby.net/en/racc.html">racc</a> 1.4.3-all (for ruby 1.6.8)<br />
+  md5sum : 1f093aabb464bef3074112949228a8c6</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/win32ole-0.5.2-i586-mswin32-1.6.zip">win32ole-0.5.2-i586-mswin32-1.6.zip</a> (59KB)<br />
+  <a href="http://homepage1.nifty.com/markey/ruby/win32ole/index_e.html">Win32OLE</a> 0.5.2 (for ruby 1.6.8)&lt;<br />
+  md5sum : 960f7205923a9243cff567d291b254ad</li>
+<li><a href="ftp://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/ext/uconv-0.4.11-i586-mswin32-1.6.zip">uconv-0.4.11-i586-mswin32-1.6.zip</a> (110KB)<br />
+  <a href="http://www.yoshidam.net/Ruby.html#uconv">uconv</a> 0.4.11 (for ruby 1.6.8)<br />
+  md5sum : c08f3662abee8e7186283741f89b88d7</li>
+</ul>
+
+
+
+<h2><a id="install">▼ インストール</a></h2>
+<p>上記のバイナリをインストールする場合は、お好みのディレクトリ(以下<code>$TOPDIR</code>と記述)に展開してください。ディレクトリ付きで圧縮されてますので、展開時にはディレクトリ付きで展開するのを忘れずに(意味がわからない人は気にしなくていいです)。<br />
+展開後は、<code>$TOPDIR\bin</code>に<code>PATH</code>を通しておいてください。</p>
+<p>なお、以下の拡張ライブラリは、この配布物に含まれない外部のライブラリに依存しています。</p>
+<ul>
+<li>curses.so : PDCursesに依存しています。</li>
+<li>dbm.so : GDBMに依存しています。</li>
+<li>gdbm.so : GDBMに依存しています。</li>
+<li>iconv.so : Iconvに依存しています。</li>
+<li>openssl.so : OpenSSLに依存しています。</li>
+<li>readline.so : readlineに依存しています。</li>
+<li>tcltklib.so : Tcl/Tkに依存しています。</li>
+<li>zlib.so : Zlibに依存しています。</li>
+</ul>
+<p>上記のうち、PDCurses・GDBM・OpenSSL・readline・Zlibについては、<a href="http://jarp.jin.gr.jp/win32/">Porting Libraries to Win32</a>にバイナリが存在します。<br />
+Iconvについては、Meadowy.orgで配布されている<a href="http://www.meadowy.org/meadow/dists/snapshot/iconv-1.8.win32.zip">iconv-1.8.win32.zip</a>を利用しています。<br />
+Tcl/Tkについては、<a href="http://www.activestate.com/">ActiveState</a>で配布されている<a href="http://www.activestate.com/Products/ActiveTcl/">ActiveTcl</a>を利用しています。</p>
+
+
+
+<h2><a id="recent">▼ 最近の出来事</a></h2>
+
+
+
+<h3><a id="d20040127">2004-01-27</a></h3>
+<p>あけましておめでとうございます。って遅いよ!</p>
+<p>ruby-1.8.1-20040127とruby-1.9.0-20040126を置きました。<br />
+前者は主に1.8.1リリース版で発見された不具合の修正です。後者は開発版。</p>
+
+<h3><a id="d20031225">2003-12-25</a></h3>
+<p>メリークリスマス! ruby-1.8.1がリリースされました!<br />
+(previewを一つ飛ばしちゃいました、ごめんなさい...)</p>
+
+<h3><a id="d20031206">2003-12-06</a></h3>
+<p>ruby-1.8.1-preview3を置きました。思いのほか間が空いちゃいましたね。</p>
+
+<h3><a id="d20031101">2003-11-01</a></h3>
+<p>ruby-1.8.1-preview2を置きました。</p>
+
+<h3><a id="d20031028">2003-10-28</a></h3>
+<p>ruby-1.8.1-20031027を置きました。<br />
+racc-1.4.4-allを置きました。</p>
+
+<h3><a id="d20030907">2003-09-07</a></h3>
+<p>eruby-1.0.4・vrswin-030906・vruby-030906を置きました。</p>
+
+<h3><a id="d20030812">2003-08-12</a></h3>
+<p>ruby-1.8.0-20030812を置きました。</p>
+<p>vrswin-030811・vruby-030811を置きました。今回から置く拡張ライブラリは全て1.8用になります。</p>
+
+<h3><a id="d20030804">2003-08-04</a></h3>
+<p>ruby-1.8.0を置きました。Ruby 1.8系最初のリリースとなります。<br />
+1.6系からの変更点については、<a href="ftp://ftp.ruby-lang.org/pub/ruby/1.8/changes.1.8.0">changes.1.8.0</a>などをご覧ください。</p>
+
+<h3><a id="d20030731">2003-07-31</a></h3>
+<p>ruby-1.8.0-preview6を置きました。えーと、これを含めてあと2回previewが出る模様です :)</p>
+
+<h3><a id="d20030728">2003-07-28</a></h3>
+<p>ruby-1.8.0-preview5を置きました。おそらくこれが1.8.0の最後のpreviewになるでしょう。<br />
+ruby-1.6.8-20030727を置きました。</p>
+
+
+
+<h3><a id="old">かつての出来事</a></h3>
+<p><a href="./old.html">こちら</a>をどうぞ。</p>
+
+
+
+<h2><a id="link">▼ リンク</a></h2>
+<p>mswin32版に関する(と思われる)リンクです。勝手に張ってますので、不都合があれば<a href="mailto:usa@osb.att.ne.jp">私</a>までご連絡ください。</p>
+<ul>
+<li><a href="http://www.ruby-lang.org/">Ruby Home Page</a> (<a href="http://www.ruby-lang.org/ja/">日本語</a> / <a href="http://www.ruby-lang.org/en/">English</a>)<br />
+  言わずとしれた、本家サイト。</li>
+<li>雑記帳 (<a href="http://homepage1.nifty.com/markey/">日本語</a> / <a href="http://homepage1.nifty.com/markey/index_e.html">English</a>)<br />
+  助田さんのページ。<a href="http://homepage1.nifty.com/markey/ruby/rubywin/index.html">RubWin</a>・<a href="http://homepage1.nifty.com/markey/ruby/win32ole/index.html">Win32OLE</a>などがあります。</li>
+<li><a href="http://www.moonwolf.com/ruby/">Script/Ruby</a> (日本語)<br />
+  MoonWolfさんのページ。Win32Moduleなどがあります。</li>
+<li>ActiveScriptRuby (<a href="http://www.geocities.co.jp/SiliconValley-PaloAlto/9251/ruby/index.html">日本語</a> / <a href="http://www.geocities.co.jp/SiliconValley-PaloAlto/9251/ruby/main.html">English</a>)<br />
+  artonさんのページ。Windows版Rubyの未来はここにあるのかも。</li>
+<li>VisualuRuby計画(仮称) (<a href="http://www.osk.3web.ne.jp/~nyasu/software/vrproject.html">日本語</a> / <a href="http://www.osk.3web.ne.jp/~nyasu/vruby/vrproject-e.html">English</a>)<br />
+  nyasuさんのページ。VisualuRubyなどがあります(ってこれもそのまんま)。WindowsでRubyを使うための<a href="http://www.osk.3web.ne.jp/~nyasu/software/rubyonwin.html">リンク集</a>が充実してます。ちなみに、当サイトのデザインはこちらのパクリです。多謝!</li>
+<li>Ruby (<a href="http://www.yoshidam.net/Ruby_ja.html">日本語</a> / <a href="http://www.yoshidam.net/Ruby.html">English</a>)<br />
+  よしだむさんのページ。<a href="http://www.yoshidam.net/Ruby_ja.html#susie">Susieプラグインライブラリ</a>や<a href="http://www.yoshidam.net/Ruby_ja.html#rddraw">DirectDraw for Ruby</a>などがあります。</li>
+<li><a href="http://homepage2.nifty.com/sakazuki/rde.html">RDE(Ruby Development Environment)</a> (日本語)<br />
+  sakazukiさんのページ。mswin32版ユーザなら必見です。推奨環境はartonさんとこのActiveScriptRubyですが (^^; ここの配布物を使っても問題なく動作します。</li>
+</ul>
+
+
+
+<p class="footer">
+[<a href="../">戻る</a>]
+</p>
+<address>written by <a href="mailto:usa@ruby-lang.org">U.Nakamura</a></address>
+<p class="versions">
+ruby 1.9.0 (2004-01-13)<br />
+ERb 2.0.4<br />
+RDtool 0.6.11<br />
+rublog 0.0.2
+</p>
+
+</body>
+</html>

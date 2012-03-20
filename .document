@@ -1,0 +1,22 @@
+# This file determines which files in the
+# Ruby hierarchy will be processed by the RDoc
+# tool when it is given the top-level directory
+# as an argument
+
+# Process all the C source files
+*.c
+
+# prelude
+prelude.rb
+
+# the lib/ directory (which has its own .document file)
+
+lib
+
+
+# and some of the ext/ directory (which has its own .document file)
+
+ext
+
+# rdoc files
+doc/*.rdoc

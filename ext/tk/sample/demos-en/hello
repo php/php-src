@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+require 'tk'
+
+#unless /^8\.[1-9]/ =~ Tk::TCL_VERSION && !Tk::JAPANIZED_TK
+#  require 'tkencoding'
+#end
+
+TkButton.new(nil,
+	'text'=>"Hello Ruby world!",
+	'font'=>TkFont.new('k14'),
+	'command'=>proc{print "Hello Ruby world!\n"; exit}
+).pack
+
+Tk.mainloop

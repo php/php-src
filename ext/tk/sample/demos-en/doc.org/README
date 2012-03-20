@@ -1,0 +1,7 @@
+This directory contains a collection of demonstration programs that
+are translated into Japanese.  You need to use a Japanized "wish" to
+see these Japanese-translated demonstration programs.  You also need
+to put this directory ("demos.jp") at the next to "demos" since some
+of the programs refer to the image files at "demos".
+
+Please refer to the README file at "demos" for more detail.

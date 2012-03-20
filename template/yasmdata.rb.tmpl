@@ -1,0 +1,20 @@
+# -*-ruby-*-
+#
+
+class VM
+  class InstructionSequence
+    class Instruction
+      InsnID2NO = {
+<%= insn_id2no %>
+      }
+
+      def self.id2insn_no id
+        if InsnID2NO.has_key? id
+          InsnID2NO[id]
+        end
+      end
+    end
+  end
+end
+
+

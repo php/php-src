@@ -1,0 +1,82 @@
+#!/usr/bin/env ruby
+
+# browse --
+# This script generates a directory browser, which lists the working
+# directory and allow you to open files or subdirectories by
+# double-clicking.
+
+require 'tk'
+
+class Browse
+  BROWSE_WIN_COUNTER = TkVariable.new(0)
+
+  def initialize(dir)
+    BROWSE_WIN_COUNTER.value = BROWSE_WIN_COUNTER.to_i + 1
+
+    # create base frame
+    base = TkToplevel.new {
+      minsize(1,1)
+      title('Browse : ' + dir)
+    }
+
+    # Create a scrollbar on the right side of the main window and a listbox
+    # on the left side.
+    list = TkListbox.new(base, 'relief'=>'sunken',
+			 'width'=>20, 'height'=>20, 'setgrid'=>'yes') {|l|
+      TkScrollbar.new(base, 'command'=>proc{|*args| l.yview *args}) {|s|
+	pack('side'=>'right', 'fill'=>'y')
+	l.yscrollcommand(proc{|first,last| s.set(first,last)})
+      }
+
+      pack('side'=>'left', 'fill'=>'both', 'expand'=>'yes')
+
+      # Fill the listbox with a list of all the files in the directory (run
+      # the "ls" command to get that information).
+      open("|ls -a #{dir}", 'r'){|fid| fid.readlines}.each{|fname|
+	l.insert('end', fname.chomp)
+      }
+
+    }
+
+    # Set up bindings for the browser.
+    base.bind('Destroy', proc{
+		Browse::BROWSE_WIN_COUNTER.value = \
+		                Browse::BROWSE_WIN_COUNTER.to_i - 1
+	      })
+    base.bind('Control-c', proc{base.destroy})
+    list.bind('Double-Button-1',
+	 proc{TkSelection.get.each{|f| self.browse dir, f}})
+  end
+
+  # The method below is invoked to open a browser on a given file;  if the
+  # file is a directory then another instance of this program is invoked; if
+  # the file is a regular file then the Mx editor is invoked to display
+  # the file.
+  def browse (dir, file)
+    file = dir + File::Separator + file if dir != '.'
+    type = File.ftype(file)
+    if type == 'directory'
+      Browse.new(file)
+    else
+      if type == 'file'
+	if ENV['EDITOR']
+	  system(ENV['EDITOR'] + ' ' + file + ' &')
+	else
+	  system('xedit ' + file + ' &')
+	end
+      else
+	STDOUT.print "\"#{file}\" isn't a directory or regular file"
+      end
+    end
+  end
+
+end
+
+Browse.new(ARGV[0] ? ARGV[0] : '.')
+
+TkRoot.new {
+  withdraw
+  Browse::BROWSE_WIN_COUNTER.trace('w', proc{exit if Browse::BROWSE_WIN_COUNTER.to_i == 0})
+}
+
+Tk.mainloop

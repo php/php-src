@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<foo>
+	<bar>
+		baz
+		<cheese id="3"/>
+		baz
+		<cheese/>
+		baz
+	</bar>
+</foo>

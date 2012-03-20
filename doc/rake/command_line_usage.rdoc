@@ -1,0 +1,102 @@
+= Rake Command Line Usage
+
+Rake is invoked from the command line using:
+
+   % rake [<em>options</em> ...]  [<em>VAR</em>=<em>VALUE</em>]  [<em>targets</em> ...]
+
+Options are:
+
+[<tt><em>name</em>=<em>value</em></tt>]
+    Set the environment variable <em>name</em> to <em>value</em>
+    during the execution of the <b>rake</b> command.  You can access
+    the value by using ENV['<em>name</em>'].  
+
+[<tt>--classic-namespace</tt> (-n)]
+    Import the Task, FileTask, and FileCreateTask into the top-level
+    scope to be compatible with older versions of Rake.  Alternatively
+    you can include the line <code>require
+    'rake/classic_namespace'</code> in your Rakefile to get the
+    classic behavior.
+
+[<tt>--describe</tt> _pattern_ (-D)]
+    Describe the tasks (matching optional PATTERN), then exit.
+
+[<tt>--dry-run</tt> (-n)]
+    Do a dry run.  Print the tasks invoked and executed, but do not
+    actually execute any of the actions.
+
+[<tt>--execute</tt> _code_ (-e)]
+    Execute some Ruby code and exit.
+
+[<tt>--execute-print</tt> _code_ (-p)]
+    Execute some Ruby code, print the result, and exit.
+
+[<tt>--execute-continue</tt> _code_ (-p)]
+    Execute some Ruby code, then continue with normal task processing.
+
+[<tt>--help</tt>  (-H)]
+    Display some help text and exit.
+
+[<tt>--libdir</tt> _directory_  (-I)]
+    Add _directory_ to the list of directories searched for require.
+
+[<tt>--nosearch</tt>  (-N)]
+    Do not search for a Rakefile in parent directories.
+
+[<tt>--prereqs</tt>  (-P)]
+    Display a list of all tasks and their immediate prerequisites.
+
+[<tt>--quiet</tt> (-q)]
+    Do not echo commands from FileUtils.
+
+[<tt>--rakefile</tt> _filename_ (-f)]
+    Use _filename_ as the name of the rakefile. The default rakefile
+    names are +rakefile+ and +Rakefile+ (with +rakefile+ taking
+    precedence). If the rakefile is not found in the current
+    directory, +rake+ will search parent directories for a match. The
+    directory where the Rakefile is found will become the current
+    directory for the actions executed in the Rakefile.
+
+[<tt>--rakelibdir</tt> _rakelibdir_ (-R)]
+    Auto-import any .rake files in RAKELIBDIR. (default is 'rakelib')
+
+[<tt>--require</tt> _name_ (-r)]
+    Require _name_ before executing the Rakefile.
+
+[<tt>--rules</tt>]
+    Trace the rules resolution.
+
+[<tt>--silent (-s)</tt>]
+    Like --quiet, but also suppresses the 'in directory' announcement.
+
+[<tt>--system</tt> (-g)]
+    Use the system wide (global) rakefiles. The project Rakefile is
+    ignored. By default, the system wide rakefiles are used only if no
+    project Rakefile is found. On Unix-like system, the system wide
+    rake files are located in $HOME/.rake. On a windows system they
+    are stored in $APPDATA/Rake.
+
+[<tt>--no-system</tt> (-G)]
+    Use the project level Rakefile, ignoring the system-wide (global)
+    rakefiles.
+
+[<tt>--tasks</tt> (-T)]
+    Display a list of the major tasks and their comments.  Comments
+    are defined using the "desc" command.
+
+[<tt>--trace</tt> (-t)]
+    Turn on invoke/execute tracing. Also enable full backtrace on
+    errors.
+
+[<tt>--usage</tt> (-h)]
+    Display a usage message and exit.
+
+[<tt>--verbose</tt> (-v)]
+    Echo the Sys commands to standard output.
+
+[<tt>--version</tt> (-V)]
+    Display the program version and exit.
+
+In addition, any command line option of the form
+<em>VAR</em>=<em>VALUE</em> will be added to the environment hash
+<tt>ENV</tt> and may be tested in the Rakefile.

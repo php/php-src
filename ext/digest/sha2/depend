@@ -1,0 +1,6 @@
+sha2.o: sha2.c sha2.h $(srcdir)/../defs.h $(hdrdir)/ruby.h \
+  $(topdir)/config.h $(hdrdir)/defines.h $(hdrdir)/intern.h
+sha2init.o: sha2init.c $(srcdir)/../digest.h $(hdrdir)/ruby.h \
+  $(topdir)/config.h $(hdrdir)/defines.h $(hdrdir)/intern.h \
+  sha2.h $(srcdir)/../defs.h
+sha2ossl.o: sha2ossl.h $(srcdir)/../defs.h

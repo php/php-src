@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE rdf:RDF [
+  <!ENTITY % HTMLlat1 PUBLIC
+  "-//W3C//ENTITIES Latin 1 for XHTML//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml-lat1.ent">
+  %HTMLlat1;
+]>
+
+<rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:on="http://www.oreillynet.com/csrss/"
+  xmlns="http://purl.org/rss/1.0/"
+>
+
+ <channel rdf:about="http://www.oreillynet.com/">
+   <title>O'Reilly Network Articles</title>
+   <link>http://www.oreillynet.com/</link>
+ </channel>
+</rdf:RDF>

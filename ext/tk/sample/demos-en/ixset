@@ -1,0 +1,333 @@
+#!/usr/bin/env ruby
+
+# ixset --
+# A nice interface to "xset" to change X server settings
+#
+
+require 'tk'
+
+class Xsettings
+  #
+  # Button actions
+  #
+  def quit
+    @root.destroy
+  end
+
+  def ok
+    writesettings
+    quit
+  end
+
+  def cancel
+    readsettings
+    dispsettings
+  end
+
+  # apply is just "writesettings"
+
+
+  #
+  # Read current settings
+  #
+  def readsettings
+    xfd = open("|xset q", 'r')
+    xfd.readlines.each{|line|
+      fields = line.chomp.strip.split(/\s+/)
+      case fields[0]
+      when "auto"
+	if fields[1] == 'repeat:'
+	  @kbdrep = fields[2]
+	  @w_kbdrep.set(@kbdrep)
+	  @kbdcli = fields[6]
+	end
+
+      when "bell"
+	@bellvol = fields[2]
+	@bellpit = fields[5]
+	@belldur = fields[8]
+
+      when "acceleration:"
+	@mouseacc = fields[1]
+	@mousethr = fields[3]
+
+      when "prefer"
+	if fields[2] == 'yes'
+	  @screenbla = 'blank'
+	else
+	  @screenbla = 'noblank'
+	end
+	@w_screenbla.set(@screenbla)
+
+      when "timeout:"
+	@screentim = fields[1]
+	@screencyc = fields[3]
+
+      end
+    }
+
+    xfd.close
+  end
+
+  #
+  # Write settings into the X server
+  #
+  def writesettings
+    @bellvol = @w_bellvol.get
+    @bellpit = @w_bellpit.get
+    @belldur = @w_belldur.get
+
+    @kbdrep = @w_kbdrep.get
+    if @kbdrep == 'on'
+      @kbdcli = @w_kbdcli.get
+    else
+      @kbdcli = 'off'
+    end
+
+    @mouseacc = @w_mouseacc.get
+    @mousethr = @w_mousethr.get
+
+    @screentim = @w_screentim.get
+    @screencyc = @w_screencyc.get
+    @screenbla = @w_screenbla.get
+
+    system("xset \
+            b #{@bellvol} #{@bellpit} #{@belldur} \
+            c #{@kbdcli} \
+            r #{@kbdrep} \
+            m #{@mouseacc} #{@mousethr} \
+            s #{@screentim} #{@screencyc} \
+            s #{@screenbla}")
+  end
+
+  #
+  # Sends all settings to the window
+  #
+  def dispsettings
+    @w_bellvol.set(@bellvol)
+    @w_bellpit.set(@bellpit)
+    @w_belldur.set(@belldur)
+
+    @w_kbdonoff.set(@w_kbdrep.get)
+    @w_kbdcli.set(@kbdcli)
+
+    @w_mouseacc.set(@mouseacc)
+    @w_mousethr.set(@mousethr)
+
+    @w_screenblank.set(@w_screenbla.get)
+    @w_screenpat.set(@w_screenbla.get)
+
+    @w_screentim.set(@screentim)
+    @w_screencyc.set(@screencyc)
+  end
+
+  #
+  # Create all windows, and pack them
+  #
+  class LabelEntry
+    def initialize(parent, text, length)
+      @frame = TkFrame.new(parent)
+      TkLabel.new(@frame, 'text'=>text).pack('side'=>'left','expand'=>'y')
+      @entry = TkEntry.new(@frame, 'width'=>length, 'relief'=>'sunken') {
+	pack('side'=>'left','expand'=>'y')
+      }
+    end
+    def pack(keys)
+      @frame.pack(keys)
+    end
+    def get
+      @entry.value
+    end
+    def set(value)
+      @entry.delete(0,'end')
+      @entry.insert(0, value)
+    end
+  end
+
+  def createwindows
+    win = self
+
+    #
+    # Buttons
+    #
+    buttons = TkFrame.new(@root) {|f|
+      [ TkButton.new(f, 'command'=>proc{win.ok}, 'text'=>'Ok'),
+	TkButton.new(f, 'command'=>proc{win.writesettings}, 'text'=>'Apply'),
+	TkButton.new(f, 'command'=>proc{win.cancel}, 'text'=>'Cancel'),
+	TkButton.new(f, 'command'=>proc{win.quit}, 'text'=>'Quit') ].each{|b|
+	b.pack('side'=>'left', 'expand'=>'yes', 'pady'=>5)
+      }
+    }
+
+    #
+    # Bell settings
+    #
+    bell = TkFrame.new(@root, 'relief'=>'raised', 'borderwidth'=>2)
+    l = TkLabel.new(bell, 'text'=>'Bell Settings')
+    @w_bellvol = TkScale.new(bell, 'from'=>0, 'to'=>100, 'length'=>200,
+			     'tickinterval'=>20, 'orient'=>'horizontal',
+			     'label'=>"Volume (%)")
+
+    f = TkFrame.new(bell)
+    @w_bellpit = LabelEntry.new(f, "Pitch (Hz)", 6)
+    @w_bellpit.pack('side'=>'left', 'padx'=>5)
+    @w_belldur = LabelEntry.new(f, "Duration (ms)", 6)
+    @w_belldur.pack('side'=>'right', 'padx'=>5)
+
+    l.pack('side'=>'top', 'expand'=>'yes')
+    @w_bellvol.pack('side'=>'top', 'expand'=>'yes')
+    f.pack('side'=>'top', 'expand'=>'yes')
+
+    #
+    # Keyboard settings
+    #
+    kbdonoff = nil
+    kbdcli = nil
+    kbd = TkFrame.new(@root, 'relief'=>'raised', 'borderwidth'=>2)
+    l = TkLabel.new(kbd, 'text'=>'Keyboard Repeat Settings')
+    f = TkFrame.new(kbd)
+    @w_kbdonoff = TkCheckButton.new(f, 'text'=>'On', 'relief'=>'flat',
+				    'onvalue'=>'on', 'offvalue'=>'off',
+				    'variable'=>@w_kbdrep ) {
+      def self.set(value)
+	if value == 'on'
+	  self.select
+	else
+	  self.deselect
+	end
+      end
+      pack('side'=>'left', 'expand'=>'yes', 'fill'=>'both')
+    }
+    @w_kbdcli = TkScale.new(f, 'from'=>0, 'to'=>100, 'length'=>200,
+			 'tickinterval'=>20, 'orient'=>'horizontal',
+			 'label'=>'Click Volume (%)')
+    @w_kbdcli.pack('side'=>'left', 'expand'=>'yes')
+    l.pack('side'=>'top', 'expand'=>'yes')
+    f.pack('side'=>'top', 'expand'=>'yes', 'pady'=>2, 'fill'=>'x')
+
+    #
+    # Mouse settings
+    #
+    mouse = TkFrame.new(@root, 'relief'=>'raised', 'borderwidth'=>2)
+    l = TkLabel.new(mouse, 'text'=>'Mouse Settings')
+    f = TkFrame.new(mouse)
+    @w_mouseacc = LabelEntry.new(f, 'Acceleration', 3)
+    @w_mouseacc.pack('side'=>'left')
+    @w_mousethr = LabelEntry.new(f, 'Threshold (pixels)', 3)
+    @w_mousethr.pack('side'=>'right')
+    l.pack('side'=>'top')
+    f.pack('side'=>'top', 'expand'=>'yes')
+
+    #
+    # Screen Saver settings
+    #
+    screen = TkFrame.new(@root, 'relief'=>'raised', 'borderwidth'=>2)
+    l = TkLabel.new(screen, 'text'=>'Screen-saver Settings')
+    f = TkFrame.new(screen)
+    ff1 = TkFrame.new(f)
+    [ @w_screenblank = TkRadioButton.new(ff1, 'text'=>'Blank',
+					 'relief'=>'flat',
+					 'variable'=>@w_screenbla,
+					 'value'=>'blank') {
+	def self.set(value)
+	  if value == 'blank'
+	    self.select
+	  else
+	    self.deselect
+	  end
+	end
+      },
+      @w_screenpat = TkRadioButton.new(ff1, 'text'=>'Pattern',
+				       'relief'=>'flat',
+				       'variable'=>@w_screenbla,
+				       'value'=>'noblank') {
+	def self.set(value)
+	  if value != 'blank'
+	    self.select
+	  else
+	    self.deselect
+	  end
+	end
+      }
+    ].each {|w| w.pack('side'=>'top', 'pady'=>2, 'anchor'=>'w') }
+
+    ff2 = TkFrame.new(f)
+    [ @w_screentim = LabelEntry.new(ff2, 'Timeout (s)', 5),
+      @w_screencyc = LabelEntry.new(ff2, 'Cycle (s)', 5) ].each{|w|
+      w.pack('side'=>'top', 'pady'=>2, 'anchor'=>'e')
+    }
+
+    ff1.pack('side'=>'left')
+    ff2.pack('side'=>'left')
+
+    l.pack('side'=>'top')
+    f.pack('side'=>'top', 'expand'=>'yes')
+
+    #
+    # Main window
+    #
+    buttons.pack('side'=>'top', 'fill'=>'both')
+    bell.pack('side'=>'top', 'fill'=>'both', 'ipady'=>5, 'expand'=>'yes')
+    kbd.pack('side'=>'top', 'fill'=>'both', 'ipady'=>5, 'expand'=>'yes')
+    mouse.pack('side'=>'top', 'fill'=>'both', 'ipady'=>5, 'expand'=>'yes')
+    screen.pack('side'=>'top', 'fill'=>'both', 'ipady'=>5, 'expand'=>'yes')
+
+    #
+    # Let the user resize our window
+    #
+    @root.minsize(10,10)
+  end
+
+  def initialize
+    @root = TkRoot.new
+
+    @kbdrep = 'on'
+    @w_kbdrep = TkVariable.new(@kbdrep)
+    def @w_kbdrep.get
+      self.value
+    end
+    def @w_kbdrep.set(val)
+      self.value=val
+    end
+
+    @kbdcli = 0
+
+    @bellvol = 100
+    @bellpit = 440
+    @belldur = 100
+
+    @mouseacc = "3/1"
+    @mousethr = 4
+
+    @screenbla = "blank"
+    @w_screenbla = TkVariable.new(@screenbla)
+    def @w_screenbla.get
+      self.value
+    end
+    def @w_screenbla.set(val)
+      self.value=val
+    end
+
+    @screentim = 600
+    @screencyc = 600
+
+    #
+    # Listen what "xset" tells us...
+    #
+    readsettings
+
+    #
+    # Create all windows
+    #
+    createwindows
+
+    #
+    # Write xset parameters
+    #
+    dispsettings
+  end
+end
+
+Xsettings.new
+
+Tk.mainloop

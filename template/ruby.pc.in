@@ -1,0 +1,44 @@
+arch=@arch@
+sitearch=@sitearch@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+bindir=@bindir@
+libdir=@libdir@
+includedir=@includedir@
+MAJOR=@MAJOR@
+MINOR=@MINOR@
+TEENY=@TEENY@
+ruby_version=@ruby_version@
+RUBY_PROGRAM_VERSION=@RUBY_PROGRAM_VERSION@
+RUBY_BASE_NAME=@RUBY_BASE_NAME@
+RUBY_SO_NAME=@RUBY_SO_NAME@
+RUBY_INSTALL_NAME=@RUBY_INSTALL_NAME@
+DEFFILE=@DEFFILE@
+LIBPATH=@LIBPATH@
+LIBRUBY_A=@LIBRUBY_A@
+LIBRUBY_SO=@LIBRUBY_SO@
+LIBRUBY=@LIBRUBY@
+LIBRUBYARG_SHARED=@LIBRUBYARG_SHARED@
+LIBRUBYARG_STATIC=@LIBRUBYARG_STATIC@
+LIBRUBYARG=@LIBRUBYARG@
+LIBS=@LIBS@
+DLDFLAGS=@DLDFLAGS@
+ruby=${bindir}/${RUBY_INSTALL_NAME}@EXEEXT@
+rubylibprefix=@rubylibprefix@
+rubylibdir=${rubylibprefix}/${ruby_version}
+vendordir=${rubylibprefix}/vendor_ruby
+sitedir=${rubylibprefix}/site_ruby
+rubyarchdir=${rubylibdir}/${arch}
+vendorarchdir=${vendordir}/${sitearch}
+sitearchdir=${sitedir}/${sitearch}
+rubyhdrdir=@rubyhdrdir@
+vendorhdrdir=@vendorhdrdir@
+sitehdrdir=@sitehdrdir@
+
+Name: Ruby
+Description: Object Oriented Script Language
+Version: ${ruby_version}
+URL: http://www.ruby-lang.org
+Cflags: -I${rubyhdrdir}/${arch} -I${rubyhdrdir}
+Libs: ${DLDFLAGS} ${LIBRUBYARG_SHARED} ${LIBS}
+Requires:

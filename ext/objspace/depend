@@ -1,0 +1,3 @@
+objspace.o: $(hdrdir)/ruby/ruby.h $(hdrdir)/ruby/st.h $(hdrdir)/ruby/io.h \
+	    $(hdrdir)/ruby/re.h $(top_srcdir)/node.h $(top_srcdir)/gc.h \
+	    $(top_srcdir)/regint.h $(top_srcdir)/internal.h

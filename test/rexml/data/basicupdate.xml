@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<xu:modifications xmlns:xu="http://www.xmldb.org/xupdate">
+
+  <xu:append select="/foo/bar/cheese[1]">
+    Goudse kaas
+    <edam type="jong belegen">Rond</edam>
+  </xu:append>
+
+  <xu:remove select="/foo/bar/baz[2]"/>
+
+  <xu:if test="/foo">
+    <xu:insert-before select="/foo/bar/baz[2]">
+      <cheese>More cheese!</cheese>
+    </xu:insert-before>
+  </xu:if>
+
+  <xu:insert-before select="/foo/bar/baz[2]">
+    <cheese>Even more cheese!</cheese>
+  </xu:insert-before>
+
+  <xu:if test="/bar">
+    <xu:insert-before select="/foo/bar/baz[2]">
+      <sausages>No sausages today</sausages>
+    </xu:insert-before>
+  </xu:if>
+
+  <xu:variable
+    xmlns:private="http://www.jaxen.org/private"
+    name="private:twice">
+    <cracker/>
+    <!-- champagne -->
+    <?oisters with a bit of lemon?>
+  </xu:variable>
+
+  <xu:variable name="twice" select="'Twice'"/>
+  
+  <xu:insert-after
+    select="/foo/bar"
+    xmlns:private="http://www.jaxen.org/private"
+    >
+    <xu:value-of select="$private:twice"/>
+    <xu:value-of select="$private:twice"/>
+    <xu:value-of select="$twice"/>
+  </xu:insert-after>
+
+</xu:modifications>

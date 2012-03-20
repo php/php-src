@@ -1,0 +1,584 @@
+(tof)
+                                    2005/07/05  Hidetoshi NAGAI
+
+本ドキュメントには古い tcltk ライブラリ，tcltklib ライブラリの説明
+が含まれていますが，その記述内容は古いものとなっています．
+
+tcltk ライブラリ（tcltk.rb）は現在ではメンテナンスが事実上行われて
+いないため，古いドキュメントの説明がそのまま有効です．それに対し，
+tcltklib ライブラリについては，現在の Ruby/Tk（tk.rb 以下のライブラ
+リ群）を稼働させるための中心としてメンテナンスされているため，少々
+違いが生じています．
+
+そこで，まず古い説明文書を示した後，現在の tcltklib ライブラリにつ
+いての説明を加えます．
+
+以下がライブラリの古い説明文書です．
+==============================================================
+	MANUAL.euc
+		Sep. 19, 1997	Y. Shigehiro
+
+以下, 「tcl/tk」という表記は, tclsh や wish を実現している, 一般でいう
+ところの tcl/tk を指します. 「tcltk ライブラリ」, 「tcltklib ライブラ
+リ」という表記は, 本パッケージに含まれる ruby 用のライブラリを指します.
+
+<< tcltk ライブラリ >>
+
+tcl/tk の C ライブラリを利用するための高(中?)水準インターフェースを提
+供します.
+
+このライブラリは ruby から tcl/tk ライブラリを利用するためのもので, 内
+部で tcltklib ライブラリを利用しています.
+
+[説明]
+
+tcl/tk インタプリタでは, ウィジェットに何か指示を送るには, ウィジェッ
+ト名に続いてパラメータを書きます. したがって, ウィジェットがオブジェク
+トであり, それに対してメソッドを送っている, とみなすことができます. さ
+て, tcl/tk インタプリタでは, 組み込みコマンドも, 前述のウィジェットと
+同じような書式の命令で実行されます. すなわち, コマンドもオブジェクトで
+あると考えることができます.
+
+このような考えに基づき, tcltk ライブラリでは, tcl/tk のコマンドやウィ
+ジェットに対応するオブジェクトを生成します. オブジェクトに対するメソッ
+ド呼び出しは, e() メソッドにより実行されます. 例えば, tcl/tk の info
+コマンドに対応する ruby のオブジェクトが info という名前であるとすると,
+tcl/tk の
+	info commands
+という命令は tcltk ライブラリでは
+	info.e("commands")
+と記述されます. また, 「.」というウィジェット (wish 実行時に自動的に生
+成されるルートウィジェット) に対応する ruby のオブジェクトが root とい
+う名前であるとすると,
+	. configure -height 300 -width 300
+という tcl/tk の命令は
+	root.e("configure -height 300 -width 300")
+と記述されます. このような記述は, 見ためには美しくありませんが, そして,
+スクリプトを読む人には見づらいかも知れませんが, 実際にスクリプトを書い
+てみると予想外に手軽です.
+
+[使用法]
+
+1. ライブラリを読み込む.
+     require "tcltk"
+
+2. tcl/tk インタプリタを生成する.
+     ip = TclTkInterpreter.new()
+
+3. tcl/tk のコマンドに対応するオブジェクトを変数に代入しておく.
+     # コマンドに対応するオブジェクトが入った Hash を取り出す.
+     c = ip.commands()
+     # 使いたいコマンドに対応するオブジェクトを個別の変数に代入する.
+     bind, button, info, wm = c.indexes("bind", "button", "info", "wm")
+
+4. 必要な処理を行う.
+     詳しくは, サンプルを参照のこと.
+
+5. 準備ができたら, イベントループに入る.
+     TclTk.mainloop()
+
+(( 以下, モジュール, クラス等の説明を書く予定.))
+
+
+
+<< tcltklib ライブラリ >>
+
+tcl/tk の C ライブラリを利用するための低水準インターフェースを提供しま
+す.
+
+コンパイル/実行には, tcl/tk の C ライブラリが必要です.
+
+[説明]
+
+このライブラリを用いると, ruby から tcl/tk の C ライブラリを利用できま
+す. 具体的には, ruby インタプリタから tcl/tk インタプリタを呼び出すこ
+とができます. さらに, その(ruby インタプリタから呼び出した) tcl/tk イ
+ンタプリタから, 逆に ruby インタプリタを呼び出すこともできます.
+
+[使用法]
+
+require "tcltklib" すると, 以下のモジュール, クラスが利用可能です.
+
+モジュール TclTkLib
+    tcl/tk ライブラリを呼び出すメソッドを集めたモジュールです. ただし,
+    tcl/tk インタプリタ関係のメソッドはクラス TclTkIp にあります.
+
+  モジュールメソッド mainloop()
+      Tk_MainLoop を実行します. 全ての tk のウインドウが無くなると終了
+      します(例えば, tcl/tk で書くところの "destroy ." をした場合等).
+    引数: 無し
+    戻り値: nil
+
+クラス TclTkIp
+    インスタンスが tcl/tk のインタプリタに対応します. tcl/tk のライブ
+    ラリの仕様通り, インスタンスを複数個生成しても正しく動作します(そ
+    んなことをする必要はあまり無いはずですが). インタプリタは wish の
+    tcl/tk コマンドを実行できます. さらに, 以下のコマンドを実行できま
+    す.
+      コマンド ruby
+	引数を ruby で実行します(ruby_eval_string を実行します). 引数
+	は 1 つでなければなりません. 戻り値は ruby の実行結果です.
+	ruby の実行結果は nil か String でなければなりません.
+
+  クラスメソッド new()
+      TclTkIp クラスのインスタンスを生成します
+    引数: 無し
+    戻り値 (TclTkIp): 生成されたインスタンス
+
+  メソッド _eval(script)
+      インタプリタで script を評価します(Tcl_Eval を実行します). 前述
+      のように, ruby コマンドにより script 内から ruby スクリプトを実
+      行できます.
+    引数: script (String) - インタプリタで評価するスクリプト文字列
+    戻り値 (String): 評価結果 ((Tcl_Interp *)->result)
+
+  メソッド _return_value()
+      直前の Tcl_Eval の戻り値を返します. 0(TCL_OK) で正常終了です.
+    引数: 無し
+    戻り値 (Fixnum): 直前の Tcl_Eval() が返した値.
+
+==============================================================
+
+以下が本ドキュメント作成時点での tcltklib ライブラリの説明です．
+==============================================================
+モジュール TclTkLib
+   : 個々の Tcl/Tk インタープリタに依存しない処理 ( == イベントルー
+   : プに関する処理 ) を呼び出すメソッドを定義したモジュール．
+
+   モジュール TclTkLib::EventFlag
+      : do_one_event を呼び出す際の処理対象イベントを指定するための
+      : フラグ ( WINDOW|DONT_WAIT というようにビット演算子で連結して
+      : 指定 ) を定数として定義したモジュール．以下の定数が含まれる．
+
+      定数  NONE
+         : 値は 0 で，値としてはいかなる種類のイベントも指定していない
+         : ことになるが，実際の処理上は ALL と同じとして扱われる．
+
+      定数  WINDOW
+         : window イベントを処理対象とする
+
+      定数  FILE
+         : file イベントを処理対象とする
+
+      定数  TIMER
+         : timer イベントを処理対象とする
+
+      定数  IDLE
+         : アイドルループ処理 ( 再描画など，他の種類のイベントが発生
+         : していないときに行われる処理 ) を処理対象とする
+
+      定数  ALL
+         : すべての種類のイベントを処理対象とする
+         : WINDOW|FILE|TIMER|IDLE と同じ
+
+      定数  DONT_WAIT
+         : 処理対象イベントが存在しない場合に，イベント発生を待たず
+         : に do_one_event を終了 ( false を返す ) する
+
+   モジュール TclTkLib::VarAccessFlag
+      : _get_variable などでのフラグを指定するためのもの．フラグに
+      : は以下の定数を OR で連結して与える．
+
+      定数  NONE
+         : 値は 0 で，何もフラグを指定していないのに等しい．
+
+      定数  GLOBAL_ONLY
+         : 通常，変数の検索はまず手続き呼び出しを行ったレベルで検
+         : 索し，次に現在の名前空間で検索，最後にグローバル空間で
+         : 検索を行う．しかし，このフラグが指定された場合には，グ
+         : ローバル空間でのみ検索する．
+         : もし GLOBAL_ONLY と NAMESPACE_ONLY とが両方指定された場
+         : 合には，GLOBAL_ONLY の指定は無視される．
+
+      定数  NAMESPACE_ONLY
+         : このフラグが指定された場合には，現在の名前空間でのみ変
+         : 数の検索を行う．GLOBAL_ONLY の説明も参照すること．
+
+      定数  LEAVE_ERR_MSG
+         : 変数アクセスにおいてエラーが発生した場合，このフラグが
+         : 指定されていれば，実行結果として Tcl インタープリタにエ
+         : ラーメッセージが残される．このフラグが指定されていなけ
+         : れば，エラーメッセージは一切残されない．
+
+      定数  APPEND_VALUE
+         : このフラグが指定されていた場合，変数の値を置き換えので
+         : はなく，現在の値に代入値が追加 (append; 文字列連結) さ
+         : れる．変数が未定義あった場合，このフラグは無視される．
+
+      定数  LIST_ELEMENT
+         : このフラグが指定されていた場合，代入値はまず Tcl のリス
+         : ト要素として適切となるように変換される．代入値がリスト
+         : (またはサブリスト) の最初の要素となるのでない限り，代入
+         : 値の直前には空白文字が追加される．
+
+      定数  PARSE_VARNAME
+         : _set_variable などの呼び出しにおいてこのフラグが指定さ
+         : れていた場合，var_name 引数が連想配列名と要素名とを両方
+         : 含む可能性がある (開き括弧を含み，閉じ括弧で終わる) こ
+         : とを示す．その場合，括弧の間が要素名指定，最初の開き括
+         : 弧までが連想配列名として扱われる．_set_variable2 などで
+         : このフラグを指定する場合，連想配列名と要素名は var_name
+         : から抽出されるはずであるから，index_name 引数は nil と
+         : せねばならない．
+
+   モジュール TclTkLib::RELEASE_TYPE
+      : Tcl/Tk のリリースタイプ番号の定義
+
+      定数  ALPHA
+         : ALPHA リリース
+
+      定数  BETA
+         : BETA リリース
+
+      定数  FINAL
+         : FINAL リリース
+
+   モジュールメソッド
+      get_version()
+         : Tcl/Tk の major, minor, release-type 番号, patchlevel を
+         : 配列にして返す．
+
+      mainloop(check_root = true)
+         : イベントループを起動する．check_root が true であれば，
+         : root widget が存在する限り，このメソッドは終了しない．
+         : check_root が false の場合は，root widget が消滅しても
+         : このメソッドは終了しない ( root widget が消滅しても，
+         : WINDOW 以外のイベントは発生しうるため )．終了には，外部
+         : からの働き掛け ( スレッドを活用するなど ) が必要．
+
+      mainloop_thread?
+         : カレントスレッドがイベントループを実行しているスレッド
+         : かどうかを返す．
+         : イベントループを実行しているスレッドであれば true を，
+         : どのスレッドでもイベントループが実行されていない場合は
+         : nil を，他のスレッドでイベントループが実行されている場
+         : 合は false を返す．
+         : false の際に Tk インタープリタを直接呼ぶのは危険である．
+
+      mainloop_watchdog(check_root = true)
+         : 通常のイベントループでは，イベント処理の内容によっては
+         : デッドロックを引き起こす可能性がある (例えばイベントに
+         : 対するコールバック処理中で widget 操作をし，その終了を
+         : 待つなど)．このメソッドは，そうしたデッドロックを回避す
+         : るための監視スレッド付きでイベントループを起動する
+         : ( 監視スレッドを生成した後にイベントループを実行する )．
+         : 引数の意味は mainloop と同じである．
+
+      do_one_event(flag = TclTkLib::EventFlag::ALL |
+                            TclTkLib::EventFlag::DONT_WAIT)
+         : 処理待ちのイベント 1 個を実行する．
+         : イベントを処理した場合は true を返す．
+         : フラグで DONT_WAIT を指定していない場合，フラグで処理対
+         : 象となっている種類のイベントが発生するまで待ち続ける．
+         : DONT_WAIT を指定していた場合，処理対象イベントがなくても
+         : すぐに終了し false を返す．
+         : $SAFE >= 4 か，$SAFE >= 1 かつ flag が汚染されているならば
+         : flag には DONT_WAIT が強制的に付けられる．
+
+      set_eventloop_tick(timer_tick)
+         : イベントループと同時に別スレッドが稼働している場合に，時
+         : 間に基づいた強制的なスレッドスイッチングをどの程度の頻度
+         : ( 時間間隔 ) で発生させるかをミリ秒単位の整数値で指定する．
+         : 0 を指定すると，この強制的なスイッチングは行われない．
+         : 標準では 0 に設定されており，イベント処理数に基づくスイッ
+         : チングだけが行われる ( see set_eventloop_weight )．
+         : ただし，稼働しているスレッドがイベントループだけの場合，
+         : timer_tick を 0 に設定することはできない．もし設定されて
+         : いたら，100 ms ( see NO_THREAD_INTERRUPT_TIME ) に自動設
+         : 定される．
+         : 詳細な説明は略すが，これは CPU パワーを節約しつつ安全で
+         : 安定した動作を実現するために実装した仕様である．
+         : $SAFE >= 4 では実行が禁止される．
+
+      get_eventloop_tick
+         : timer_tick の現在値を返す．
+
+      set_no_event_wait(no_event_wait)
+         : 複数のスレッドが稼働している場合で，処理待ちイベントが全
+         : く存在しなかった際に sleep 状態に入る時間長を指定する．
+         : 稼働スレッドがイベントループだけの場合には意味をなさない．
+         : デフォルトの値は 20 (ms)
+         : $SAFE >= 4 では実行が禁止される．
+
+      get_no_event_wait
+         : no_event_wait の現在値を返す．
+
+      set_eventloop_weight(loop_max, no_event_tick)
+         : 複数のスレッドが稼働している際に Ruby/Tk のイベントルー
+         : プに割り当てる比重を定めるためのパラメータを設定する．
+         : 稼働スレッドがイベントループだけの場合には意味をなさない．
+         : 一度のスレッド切り替えの間に処理するイベントの最大数と，
+         : 処理待ちのイベントが存在しない際の加算数とを設定する．
+         : 処理待ちイベントが存在しない場合は no_event_wait ( see
+         : set_no_event_wait ) だけの間 sleep 状態に入る．
+         : デフォルトではそれぞれ 800 回と 10 回，つまり，800 個のイ
+         : ベント (アイドルイベントを含む) を処理するとか，イベント
+         : が全く発生しないままに 80 回の処理待ちイベント検査が完了
+	 : するとかでカウントが 800 以上になるとスレッドスイッチング
+         : が発生することになる．
+         : $SAFE >= 4 では実行が禁止される．
+
+      get_eventloop_weight
+         : 現在の loop_max と no_event_tick との値を返す．
+         : ( see set_eventloop_wait )
+
+      mainloop_abort_on_exception=(bool)
+         : Tk インタープリタ上で例外を発生した際に，イベントループを
+         : エラー停止させるかどうかを指定する．true を指定した場合は
+         : エラー停止するが，false の場合は例外を無視してイベントルー
+         : プを継続する．さらに nil の場合は警告モードでない限りはエ
+         : ラーメッセージの出力すら省略して，例外を無視する．
+	 : デフォルトでは true に設定されている．
+         : １個のインタープリタだけを使っている場合にはエラー時にその
+         : まま停止しても通常は問題ないが，複数のインタープリタが同時
+         : に動作している場合には，それらを管理するイベントループは１
+         : 個だけであるため，いずれかのインタープリタのエラーが原因で，
+         : 他のインタープリタの処理継続が不可能になることがある．その
+         : ような場合でもエラーを無視してイベントループが稼働を続ける
+         : ことで，他のインタープリタが正常に動作し続けることができる．
+         : $SAFE >= 4 では実行が禁止される．
+
+      mainloop_abort_on_exception
+         : Tk インタープリタ上で例外を発生した際に，イベントループをエ
+         : ラー停止させるかどうかの設定状態を true/false で得る．
+
+      num_of_mainwindows
+         : 現在のメインウィンドウ (ルートウィジェット) の数を返す．
+         : メインウィンドウは一つのインタープリタに付き最大一つである
+         : ので，この値は現在 Tk の機能が有効であるインタープリタの総
+         : 数に等しい．
+
+      _merge_tklist(str, str, ... )
+         : Tcl/Tk のライブラリ関数を使って，引数の文字列がそれぞれ
+         : 正しく一つのリスト要素となるように連結した文字列を返す．
+
+      _conv_listelement(str)
+         : Tcl/Tk のライブラリ関数を使って，引数の文字列が Tcl の
+         : 一つのリスト要素として適切な表現になるように変換した文
+         : 字列を返す．
+
+      _toUTF8(str, encoding=nil)
+      _fromUTF8(str, encoding=nil)
+         : Tcl/Tk が内蔵している UTF8 変換処理を呼び出す．
+
+      _subst_UTF_backslash(str)
+      _subst_Tcl_backslash(str)
+         : Tcl のルールでバックスラッシュ記法 ( \uhhhh による
+         : Unicode 文字表現を含む ) を解析する．
+         : _subst_Tcl_backslash はすべてのバックスラッシュ記法を
+         : 置き換えるのに対し，_subst_UTF_backslash は \uhhhh
+         : による Unicode 文字表現だけを置き換える．
+
+      encoding_system
+      encoding_system=(encoding)
+         : Tcl の system encoding の獲得および設定
+
+      encoding
+      encoding=(encoding)
+         : encoding_system / encoding_system= の alias
+         : ( Ruby/Tk の tk.rb では置き換えられる予定のもの．)
+
+
+クラス TclTkIp
+   クラスメソッド
+      new(ip_name=nil, options='')
+         : TclTkIp クラスのインスタンスを生成する．
+         : ip_name に文字列を与えた場合は，それが winfo interps などで
+         : 表示される名前になる．
+         : options には，-geometry や -use など，wish のコマンドライン
+         : 引数として与えるオプションと同様の情報を文字列として与える．
+         : 与えられた情報は，root widget 生成の際に用いられる．
+         : ( e.g. TclTkIp.new('FOO', '-geometry 500x200 -use 0x2200009') )
+         : もし options に敢えて nil または false を与えた場合，Tk ライ
+         : ブラリが導入されていない (つまりは Tcl のみの) インタープリ
+         : タを生成する．この場合は GUI 環境は必要ないため，ウインドウ
+         : システムが存在しない，または使用できない環境でも Tcl インター
+         : プリタを生成し，Tcl やその拡張ライブラリを活用することができる．
+
+   インスタンスメソッド
+      create_slave(name, safe=false)
+         : レシーバを親とする name という名前のスレーブインタープリタを
+	 : 生成する．
+	 : safe には生成するインタープリタを safe インタープリタとする
+         : かを指定する．デフォルトは false ということになっているが，
+         : たとえ明確に false を指定していたとしても，親となるインター
+         : プリタが safe インタープリタであれば，その設定を引き継いで
+         : safe インタープリタとして生成される．
+         : $SAFE >= 4 では，safe インタープリタ以外の生成が禁止される．
+
+      make_safe
+         : Tcl/Tk インタープリタを safe インタープリタに変更する．
+         : 戻り値はレシーバであるインタープリタ自身である．
+         : 失敗した場合は RuntimeError の例外を発生する．
+
+      safe?
+         : Tcl/Tk インタープリタが safe インタープリタであるかを調べる．
+         : safe インタープリタであれば true を返す．
+
+      allow_ruby_exit?
+         : 対象となるインタープリタ上の評価で，ruby の exit 関数または
+         : Tcl/Tk 上の exit コマンドによって ruby 自体を終了させること
+         : を許すかどうかを返す．
+	 : 許さない場合は対象のインタープリタだけが終了する．
+         : マスターインタープリタのデフォルト値は true，スレーブインター
+         : プリタのデフォルト値は false である．
+
+      allow_ruby_exit=(mode)
+         : 対象となるインタープリタの allow_ruby_exit? の状態を変更する．
+	 : $SAFE >= 4 またはインタープリタが safe インタープリタの場合は
+	 : 変更が許されない (例外を発生)．
+
+      delete
+         : Tcl/Tk インタープリタを delete する．
+         : delete されたインタープリタは，以後一切の操作ができなくなり，
+         : コマンドを送っても例外を発生するようになる．
+
+      deleted?
+         : Tcl/Tk インタープリタがすでに delete されているかを調べる．
+         : delete 済みでコマンドを受け付けない状態になっているならば
+         : true を返す．
+
+      has_mainwindow?
+         : Tcl/Tk インタープリタにメインウィンドウ (root widget) が
+         : 存在すれば true を，存在しなければ false を返す．
+         : インタープリタが既に delete 済みであれば nil を返す．
+
+      restart
+         : Tcl/Tk インタープリタの Tk 部分の初期化，再起動を行う．
+         : 一旦 root widget を破壊した後に再度 Tk の機能が必要と
+         : なった場合に用いる．
+         : $SAFE >= 4 では実行が禁止される．
+
+      _eval(str)
+      _invoke(*args)
+         : Tcl/Tk インタープリタ上で評価を行う．
+         : _eval は評価スクリプトが一つの文字列であることに対し，
+         : _invoke は評価スクリプトの token ごとに一つの引数とな
+         : るように与える．
+         : _invoke の方は Tcl/Tk インタープリタの字句解析器を用い
+         : ないため，評価の負荷がより少なくてすむ．ただし，その代
+         : わりに auto_load のような機構は働かず，load 等によって
+         : Tcl/Tk インタープリタ上に既に登録済みのコマンドしか呼
+         : び出すことができない．
+         : _eval では auto_load 機構が働くため，一度 _eval を実行
+         : して登録に成功しさえすれば，以降は _invoke でも利用で
+         : きるようになる．
+
+      _cancel_eval(str)
+      _cancel_eval_unwind(str)
+         : (Tcl/Tk8.6 or later)
+         : Tcl_CancelEval() 関数を呼び出し，eval の実行を打ち切る．
+
+      _toUTF8(str, encoding=nil)
+      _fromUTF8(str, encoding=nil)
+         : Tcl/Tk が内蔵している UTF8 変換処理を呼び出す．
+
+      _thread_vwait(var_name)
+      _thread_tkwait(mode, target)
+         : スレッド対応の vwait あるいは tkwait 相当のメソッド．
+         : 通常の vwait あるいは tkwait コマンドと異なるのは，イベン
+         : トループとは異なるスレッドから呼び出した場合に vwait 等の
+         : スタックとは独立に条件の成立待ちがなされることである．
+         : 通常の vwait / tkwait では，vwait / tkwait (1) の待ちの途
+         : 中でさらに vwait / tkwait (2) が呼ばれた場合，待ちの対象
+         : となっている条件の成立順序がどうあれ，(2)->(1) の順で待ち
+         : を終了して戻ってくる．
+         : _thread_vwait / _thread_tkwait は，イベントループのスレッ
+         : ドで呼ばれた場合は通常の vwait / tkwait と同様に動作する
+         : が，イベントループ以外のスレッドで呼ばれた場合にはそのス
+         : レッドを停止させて待ちに入り，条件が成立した時にスレッド
+         : の実行を再開する．「vwait 等の待ちスタックとは独立」とい
+         : う意味は，この再開のタイミングが他のスレッドでの待ち状況
+         : とは無関係ということである．つまり，イベントループ等の他
+         : のスレッドで vwait 等で待ちの状態にあったとしてもその完了
+         : を待つことなく，自らの待ち条件が成立次第，処理を継続する
+         : ことになる．
+
+      _return_value
+         : 直前の Tcl/Tk 上での評価の実行結果としての戻り値を返す．
+
+      _get_variable(var_name, flag)
+      _get_variable2(var_name, index_name, flag)
+         : Tcl/Tk 上の var という変数名の変数の値を返す．
+         : もし index_name が指定 (PARSE_VARNAME フラグの説明も参照)
+         : された場合は連想配列 var_name の index_name の要素を返す．
+         : flag には変数を検索する際の条件を指定する．flag に与える
+         : 値はモジュール TclTkLib::VarAccessFlag を参照すること．
+
+      _set_variable(var_name, value, flag)
+      _set_variable2(var_name, index_name, value, flag)
+         : Tcl/Tk 上の var という変数名の変数に値を設定する．
+         : もし index_name が指定 (PARSE_VARNAME フラグの説明も参照)
+         : された場合は連想配列 var_name の index_name の要素を設定
+         : する．
+         : flag には変数を検索する際の条件を指定する．flag に与える
+         : 値はモジュール TclTkLib::VarAccessFlag を参照すること．
+
+      _unset_variable(var_name)
+      _unset_variable2(var_name, index_name)
+         : Tcl/Tk 上の var_name という変数名の変数を消去する．
+         : もし index_name が指定 (PARSE_VARNAME フラグの説明も参照)
+         : された場合は連想配列 var_name から index_name の要素だけ
+         : を消去する．
+
+      _get_global_var(var_name)
+      _get_global_var2(var_name, index_name)
+      _set_global_var(var_name, value)
+      _set_global_var2(var_name, index_name, value)
+      _unset_global_var(var_name)
+      _unset_global_var2(var_name, index_name)
+         : それぞれ，対応する変数アクセスメソッドの flag に対して
+         : (GLOBAL_ONLY | LEAVE_ERR_MSG) を与えたもの．
+
+      _split_tklist(str)
+         : Tcl/Tk のライブラリ関数を使って，文字列 str をリストに
+         : 分割する (文字列の配列として返す)．
+
+      _merge_tklist(str, str, ... )
+         : Tcl/Tk のライブラリ関数を使って，引数の文字列がそれぞれ
+         : 正しく一つのリスト要素となるように連結した文字列を返す．
+
+      _conv_listelement(str)
+         : Tcl/Tk のライブラリ関数を使って，引数の文字列が Tcl の
+         : 一つのリスト要素として適切な表現になるように変換した文
+         : 字列を返す．
+
+      mainloop
+      mainloop_watchdog
+         : スレーブ IP の場合にはイベントループを起動せずに nil を返す．
+         : それ以外の点では引数を含めて TclTkLib の同名メソッドに同じ．
+
+      do_one_event
+         : スレーブ IP の場合には引数のイベントフラグに DONT_WAIT が
+         : 強制的に追加される (イベント待ちでスリープすることは禁止)．
+         : それ以外の点では引数を含めて TclTkLib の同名メソッドに同じ．
+
+      set_eventloop_tick
+      get_eventloop_tick
+      set_no_event_wait
+      get_no_event_wait
+      set_eventloop_weight
+      get_eventloop_weight
+      mainloop_abort_on_exception
+      mainloop_abort_on_exception=
+         : スレーブ IP の場合には値の設定が許されない (無視される)．
+         : それ以外の点では引数を含めて TclTkLib の同名メソッドに同じ．
+
+      encoding_table
+         : Ruby m17n 用に Ruby と Tk との間の encoding 対応表を返す．
+
+クラス TkCallbackBreak < StandardError
+クラス TkCallbackContinue < StandardError
+   : これらはイベントコールバックにおいて，コールバック処理を適切に中
+   : 断したり，次のバインドタグのバインディング処理に進めたりすること
+   : を可能にするための例外クラスである．
+   : コールバックで break や continue を実現するためには，コールバック
+   : である Ruby 手続きが Tcl/Tk インタープリタ側に適切なリターンコー
+   : ドを返す必要がある．Ruby の手続きが普通に値を返すのでは，それが普
+   : 通の戻り値であるのか否かを区別ができないため，例外発生を利用した
+   : 実装を行っている．
+   : ただし現在では，コールバック手続きを Ruby の break, next で終了す
+   : ることで同等の結果を得ることができるようになっている．それゆえ，
+   : これらは必要ないものではあるが，互換性のために残してある．
+
+(eof)

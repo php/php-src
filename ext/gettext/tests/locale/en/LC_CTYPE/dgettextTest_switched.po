@@ -1,2 +1,0 @@
-msgid "item"
-msgstr[0] "cProdukt_switched"

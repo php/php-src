@@ -1,5 +1,0 @@
-XMLReader represents a reader that provides non-cached, 
-forward-only access to XML data. It is based upon the 
-xmlTextReader api from libxml
-
-This extension is designed to only work under PHP 5.

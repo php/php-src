@@ -1,0 +1,3 @@
+Message catalogs in this directory depend on Tcl/Tk's message catalogs.
+Texts of each locale are copied from Tcl/Tk8.5a1 widget demos.
+Please refer to '../msgs_tk/README'.

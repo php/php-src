@@ -1,0 +1,25 @@
+SOCK_HEADERS = $(srcdir)/rubysocket.h $(hdrdir)/ruby/ruby.h $(arch_hdrdir)/ruby/config.h \
+	$(hdrdir)/ruby/defines.h $(hdrdir)/ruby/io.h \
+	$(srcdir)/addrinfo.h $(srcdir)/sockport.h constdefs.h $(top_srcdir)/internal.h
+
+init.o: init.c $(SOCK_HEADERS)
+constants.o: constants.c constdefs.c $(SOCK_HEADERS)
+basicsocket.o: basicsocket.c $(SOCK_HEADERS)
+socket.o: socket.c $(SOCK_HEADERS)
+ipsocket.o: ipsocket.c $(SOCK_HEADERS)
+tcpsocket.o: tcpsocket.c $(SOCK_HEADERS)
+tcpserver.o: tcpserver.c $(SOCK_HEADERS)
+sockssocket.o: sockssocket.c $(SOCK_HEADERS)
+udpsocket.o: udpsocket.c $(SOCK_HEADERS)
+unixsocket.o: unixsocket.c $(SOCK_HEADERS)
+unixserver.o: unixserver.c $(SOCK_HEADERS)
+option.o: option.c $(SOCK_HEADERS)
+ancdata.o: ancdata.c $(SOCK_HEADERS)
+raddrinfo.o: raddrinfo.c $(SOCK_HEADERS)
+
+getnameinfo.o: getnameinfo.c $(arch_hdrdir)/ruby/config.h addrinfo.h sockport.h
+getaddrinfo.o: getaddrinfo.c $(arch_hdrdir)/ruby/config.h addrinfo.h sockport.h
+
+constdefs.h constdefs.c : $(srcdir)/mkconstants.rb
+	@echo "generating constant definitions"
+	@$(RUBY) $(srcdir)/mkconstants.rb -H constdefs.h -o constdefs.c

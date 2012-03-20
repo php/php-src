@@ -1,0 +1,42 @@
+
+  #######################################################################
+  ###  The following text is the original 'license.terms' of iwidges  ###
+  ###  extension.                                                     ###
+  ###  Original Tcl source files are not include in this directry,    ###
+  ###  because of all of them are rewrited to Ruby files.             ###
+  ###  However, the image data files in the 'images' directory are    ###
+  ###  quoted from iwidgets source archive.                           ###
+  #######################################################################
+
+
+This software is copyrighted by DSC Technologies and private individual 
+contributors.  The copyright holder is specifically listed in the header 
+of each file.  The following terms apply to all files associated with the
+software unless explicitly disclaimed in individual files by private
+contributors.
+
+Copyright 1997 DSC Technologies Corporation
+
+Permission to use, copy, modify, distribute and license this software and 
+its documentation for any purpose, and without fee or written agreement 
+with DSC, is hereby granted, provided that the above copyright notice 
+appears in all copies and that both the copyright notice and warranty 
+disclaimer below appear in supporting documentation, and that the names of
+DSC Technologies Corporation or DSC Communications Corporation not be used 
+in advertising or publicity pertaining to the software without specific, 
+written prior permission.
+
+DSC DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, AND NON-INFRINGEMENT.
+THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, AND THE AUTHORS AND 
+DISTRIBUTORS HAVE NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS. IN NO EVENT SHALL DSC BE LIABLE FOR ANY
+SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
+RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
+CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION, ARISING OUT OF OR IN
+CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+RESTRICTED RIGHTS: Use, duplication or disclosure by the government
+is subject to the restrictions as set forth in subparagraph (c) (1) (ii)
+of the Rights in Technical Data and Computer Software Clause as DFARS
+252.227-7013 and FAR 52.227-19.

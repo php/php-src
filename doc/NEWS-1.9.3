@@ -1,0 +1,304 @@
+# -*- rd -*-
+= NEWS
+
+This document is a list of user visible feature changes made between
+releases except for bug fixes.
+
+Note that each entry is kept so brief that no reason behind or
+reference information is supplied with.  For a full list of changes
+with all sufficient information, see the ChangeLog file.
+
+== Changes since the 1.9.2 release
+=== License
+
+* Ruby's License is changed from a dual license with GPLv2
+  to a dual license with 2-clause BSDL.
+
+=== C API updates
+
+* rb_scan_args() is enhanced with support for option hash argument
+  extraction.
+
+* ruby_vm_at_exit() added.  This enables extension libs to hook a VM
+  termination.
+
+=== Library updates (outstanding ones only)
+
+* builtin classes
+
+  * ARGF
+    * new methods:
+      * ARGF.print
+      * ARGF.printf
+      * ARGF.putc
+      * ARGF.puts
+      * ARGF.read_nonblock
+      * ARGF.to_write_io
+      * ARGF.write
+
+  * Array
+    * extended method:
+      * Array#pack supports endian modifiers
+
+  * Bignum
+    * Multiplication algorithm for Bignums with a large number of digits over
+      150 BDIGITs is changed in order to reduce its calculation time.
+      Now such large Bignums are multiplied by using Toom-3 algorithm.
+
+  * Encoding
+    * new encodings:
+      * CP950
+      * CP951
+      * UTF-16
+      * UTF-32
+    * change alias:
+      * SJIS is Windows-31J
+
+  * File
+    * new constant:
+      * File::NULL
+        name of NULL device.
+      * File::DIRECT
+        name of O_DIRECT.
+
+  * IO
+    * extended method:
+      * IO#putc supports multibyte characters
+    * new methods:
+      * IO#advise
+      * IO.write(name, string, [offset] )
+        Write `string` to file `name`.
+        Opposite with File.read.
+      * IO.binwrite(name, string, [offset] )
+        binary version of IO.write.
+
+  * Kernel
+    * move #__id__ to BasicObject.
+    * extended method:
+      * Kernel#rand supports range argument
+
+  * Module
+    * new methods:
+      * Module#private_constant
+      * Module#public_constant
+
+  * Random
+    * extended method:
+      * Random.rand supports range argument
+
+  * String
+    * extended method:
+      * String#unpack supports endian modifiers
+    * new method:
+      * String#prepend
+      * String#byteslice
+
+  * Time
+    * extended method:
+      * Time#strftime supports %:z and %::z.
+
+  * Process
+    * Process#maxgroups and Process#maxgroups= now raise NotImplementedError if
+      the platform don't support supplementary groups concept.
+
+* bigdecimal
+  * BigDecimal#power and BigDecimal#** support non-integral exponent.
+
+  * Kernel.BigDecimal and BigDecimal.new now accept instances of Integer,
+    Rational, and Float.  If you pass a Rational or a Float to them, you must
+    specify the precision to produce the digits of a BigDecimal.
+
+  * The behavior of BigDecimal#coerce with a Rational is changed.  It uses
+    the precision of the receiver BigDecimal to produce the digits of a
+    BigDecimal from the given Rational.
+
+* date
+
+  * Accepts flonum explicitly with limitations.
+    * If the given offset is flonum, DateTime assumes its precision is
+      at most second.
+
+      DateTime.new(2001,2,3,0,0,0,3.0/24) ==
+      DateTime.new(2001,2,3,0,0,0,'+03:00')
+        #=> true
+
+    * If the given operand for -/+ is flonum, DateTime assumes its
+      precision is at most nanosecond.
+
+      DateTime.new(2001,2,3) + 0.5 == DateTime.new(2001,2,3,12)
+        #=> true
+
+    * Precision of offset is always at most second.
+
+      Rational('0.5') == Rational('0.500001')  #=> false
+      DateTime.new(2001,2,3,0,0,0,Rational('0.5')) ==
+      DateTime.new(2001,2,3,0,0,0,Rational('0.500001'))
+        #=> true
+
+  * Ignores long offset and far reform day (with warning).
+
+    * Now accepts only:
+
+      -1<=offset<=1 (-24:00..+24:00)
+      2298874<=start<=2426355 or -/+oo
+        (proleptic Gregorian/Julian mean -/+oo)
+
+  * A method strftime cannot produce huge output (same as Time's one).
+
+    * Even though Date/DateTime can handle far dates, the following causes
+      an exception.
+
+      DateTime.new(1<<10000).strftime('%Y')  # Errno::ERANGE
+
+  * Changed the format of inspect.
+  * Changed the format of marshal (but, can load old dumps).
+
+* io/console
+  * new methods:
+    * IO#noecho {|io| }
+    * IO#echo=
+    * IO#echo?
+    * IO#raw {|io| }
+    * IO#raw!
+    * IO#getch
+    * IO#winsize
+    * IO.console
+
+* matrix
+  * new classes:
+    * Matrix::EigenvalueDecomposition
+    * Matrix::LUPDecomposition
+  * new methods:
+    * Matrix#diagonal?
+    * Matrix#eigen
+    * Matrix#eigensystem
+    * Matrix#hermitian?
+    * Matrix#lower_triangular?
+    * Matrix#lup
+    * Matrix#lup_decomposition
+    * Matrix#normal?
+    * Matrix#orthogonal?
+    * Matrix#permutation?
+    * Matrix#round
+    * Matrix#symmetric?
+    * Matrix#unitary?
+    * Matrix#upper_triangular?
+    * Matrix#zero?
+    * Vector#magnitude, #norm
+    * Vector#normalize
+  * extended methods:
+    * Matrix#each and #each_with_index can iterate on a subset of the elements
+    * Matrix#find_index returns [row, column] and can iterate on a subset
+      of the elements
+    * Matrix#** implements Numeric exponents (using the eigensystem)
+    * Matrix.zero can build rectangular matrices
+
+* minitest
+  * Minitest has been updated to version 2.2.2.
+  * For full details, see https://github.com/seattlerb/minitest/blob/master/History.txt
+
+* net/http
+  * SNI (Server Name Indication) supported for HTTPS.
+
+  * Allow to configure to wait server returning '100 continue' response
+    before sending HTTP request body. Set Net::HTTP#continue_timeout AND pass
+    'expect' => '100-continue' to a extra HTTP header.
+
+    For example, the following code sends HTTP header and waits for getting
+    '100 continue' response before sending HTTP request body. When 0.5 [sec]
+    timeout occurs or the server send '100 continue', the client sends HTTP
+    request body.
+      http.continue_timeout = 0.5
+      http.request_post('/continue', 'body=BODY', 'expect' => '100-continue')
+
+  * new method:
+    * Net::HTTPRequest#set_form: Added to support
+      both application/x-www-form-urlencoded and multipart/form-data.
+
+* openssl
+  * PKey::RSA and PKey::DSA now use the generic X.509 encoding scheme
+    (e.g. used in a X.509 certificate's Subject Public Key Info) when
+    exporting public keys to DER or PEM. Backward compatibility is
+    ensured by (already existing) fallbacks during creation.
+  * OpenSSL::ASN1::Constructive#new and OpenSSL::ASN1::Primitive#new
+    (and the constructors of their sub-classes) will no longer force
+    tagging to be set to :EXPLICIT when tag and/or tag_class are passed
+    as parameters. tagging must be set explicitly.
+  * Support for infinite length encodings via infinite_length attribute.
+  * OpenSSL::PKey.read( file | string [, pwd] ) allows to read arbitrary
+    public/private keys in DER-/PEM-encoded form with an optional password
+    for encrypted PEM encodings.
+  * Add new method OpenSSL::X509::Name#hash_old as a wrapper of
+    X509_NAME_hash_old() defined from OpenSSL 1.0.0. It returns OpenSSL 0.9.8
+    compatible hash value.
+
+* optparse
+  * support for bash/zsh completion.
+
+* Rake
+  * Rake has been upgraded from 0.8.7 to 0.9.2.1.  For full release notes see
+    https://github.com/jimweirich/rake/blob/master/CHANGES
+
+* RDoc
+  * RDoc has been upgraded from 2.5.8 to 3.8.  For full release notes see
+    http://docs.seattlerb.org/rdoc/History_txt.html
+
+* rexml
+  * Support Ruby native encoding mechanism and iconv dependency is dropped.
+
+* RubyGems
+  * RubyGems has been upgraded to version 1.8.5.1. For full release notes see
+    http://rubygems.rubyforge.org/rubygems-update/History_txt.html
+
+* stringio
+  * extended method:
+    * StringIO#set_encoding can get 2nd argument and optional hash.
+
+* test/unit
+  * New arguments:
+    * -j N, --jobs=N: Allow run N testcases at once.
+    * --jobs-status: Show status of jobs when parallel running.
+    * --no-retry: Don't retry testcases which failed when parallel running.
+    * --ruby=RUBY: path to ruby for job(worker) process. optional.
+    * --hide-skip: Hide skip messages. You'll see the number of skips at end of
+      test result.
+
+* uri
+  * new methods:
+    * URI::Generic#hostname
+    * URI::Generic#hostname=
+
+* webrick
+  * new method:
+    * WEBrick::HTTPRequest#continue for generating '100 continue' response.
+  * new logging directive:
+    * %{remote}p for remote (client) port number.
+
+* yaml
+  * The default YAML engine is now Psych. You may downgrade to syck by setting
+    YAML::ENGINE.yamler = 'syck'.
+
+* zlib
+  * new methods:
+    * Zlib.deflate
+    * Zlib.inflate
+
+* FileUtils
+  * extended method:
+    * FileUtils#chmod supports symbolic mode argument.
+
+=== Language changes
+
+* Regexps now support Unicode 6.0. (new characters and scripts)
+
+* [experimental] Regexps now support Age property.
+  Unlike Perl, current implementation takes interpretation of the
+  interpretation of UTS #18.
+  http://www.unicode.org/reports/tr18/
+
+* Turning on/off indentation warnings with directives.
+  ("# -*- warn-indent: true -*-" / "# -*- warn-indent: false -*-")
+
+=== Compatibility issues (excluding feature bug fixes)
+
+  None

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+  <meta content="text/html; charset=<%= @options.charset %>" http-equiv="Content-Type" />
+
+  <title><%= h @options.title %></title>
+
+  <link type="text/css" media="screen" href="rdoc.css" rel="stylesheet" />
+
+  <script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/thickbox-compressed.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/quicksearch.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/darkfish.js" type="text/javascript" charset="utf-8"></script>
+
+</head>
+<body class="indexpage">
+
+  <% $stderr.sync = true %>
+  <h1><%= h @options.title %></h1>
+
+  <% if @options.main_page && main_page = @files.find { |f| f.full_name == @options.main_page } then %>
+  <div id="main">
+    <%= main_page.description.sub(%r{^\s*<h1.*?/h1>}i, '') %>
+  </div>
+  <% else %>
+  <p>This is the API documentation for '<%= @options.title %>'.</p>
+  <% end %>
+
+  <% simple_files = @files.select {|tl| tl.parser == RDoc::Parser::Simple } %>
+  <% unless simple_files.empty? then %>
+  <h2>Files</h2>
+  <ul>
+    <% simple_files.sort.each do |file| %>
+      <li class="file"><a href="<%= file.path %>"><%= h file.base_name %></a></li>
+    <% end %>
+  </ul>
+  <% end %>
+
+  <h2 id="classes">Classes/Modules</h2>
+  <ul>
+    <% @modsort.each do |klass| %>
+    <li class="<%= klass.type %>"><a href="<%= klass.path %>"><%= klass.full_name %></a></li>
+    <% end %>
+  </ul>
+
+  <h2 id="methods">Methods</h2>
+  <ul>
+    <% RDoc::TopLevel.all_classes_and_modules.map do |mod|
+         mod.method_list
+       end.flatten.sort.each do |method| %>
+      <li><a href="<%= method.path %>"><%= method.pretty_name %> &mdash; <%= method.parent.full_name %></a></li>
+    <% end %>
+  </ul>
+
+  <div id="validator-badges">
+    <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+    <p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+      Rdoc Generator</a> <%= RDoc::Generator::Darkfish::VERSION %></small>.</p>
+  </div>
+</body>
+</html>

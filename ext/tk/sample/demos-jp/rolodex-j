@@ -1,0 +1,300 @@
+#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+#
+# rolodex --
+# このスクリプトは Tom LaStrange の rolodex の一部です。
+#
+# Copyright (C) 1998 by Takaaki Tateishi <ttate@jaist.ac.jp>
+# Time-stamp: "04/04/09 00:32:12 nagai"
+#
+
+require "tk"
+Tk.encoding = "utf-8"
+
+def show_help(topic,x=0,y=0)
+  if( topic.is_a?(TkWindow) )
+    w = TkWinfo.containing(x,y)
+    if( w.is_a?(TkWindow) )
+      if( TkWinfo.exist?(w) )
+	topic = w
+      end
+    end
+  end
+
+  if( $helpTopics.include?(topic) )
+    msg = $helpTopics[topic]
+  else
+    msg = "このトピックについてのヘルプはまだ使用できません"
+  end
+  TkDialog.new("title"=>"Rolodex Help",
+	       "message"=>"「#{topic}」\n\n#{msg}",
+	       "default_button"=>0,
+	       "buttons"=>["OK"])
+end
+
+def fillCard
+  clearAction
+  $root.frame.entry[1].insert(0, "立石 孝彰")
+  $root.frame.entry[2].insert(0, "923-1292 石川県")
+  $root.frame.entry[3].insert(0, "辰口町 旭台 1-1")
+  $root.frame.entry[4].insert(0, "北陸先端科学技術大学院大学")
+  $root.frame.entry[5].insert(0,"private")
+  $root.frame.entry[6].insert(0,"***-***-****")
+  $root.frame.entry[7].insert(0,"***-***-****")
+end
+
+def addAction
+  for i in 1..7
+    STDERR.print format("%-12s %s\n",
+			RolodexFrame::LABEL[i],
+			$root.frame.entry[i].value)
+  end
+end
+
+def clearAction
+  for i in 1..7
+    $root.frame.entry[i].delete(0,"end")
+  end
+end
+
+def fileAction
+  TkDialog.new("title"=>"File Selection",
+	       "message"=>"これはファイル選択ダイアログのダミーです。\n",
+	       "default_button"=>0,
+	       "buttons"=>["OK"])
+  STDERR.print "dummy file name\n"
+end
+
+def deleteAction
+  result = TkDialog.new("title"=>"Confirm Action",
+			"message"=>"よろしいですか？",
+			"default_button"=>0,
+			"buttons"=>["キャンセル"])
+  if( result.value == 0 )
+    clearAction
+  end
+end
+
+
+class RolodexFrame < TkFrame
+  attr_reader :entry, :label
+
+  LABEL = ["","名前:","住所","","","電話(自宅):","電話(会社):","Fax:"]
+
+  def initialize(parent=nil,keys=nil)
+    super(parent,keys)
+    self["relief"] = "flat"
+    @i = []
+    @label = []
+    @entry = []
+    for i in 1..7
+      @i[i] = TkFrame.new(self)
+      @i[i].pack("side"=>"top",
+		 "pady"=>2,
+		 "anchor"=>"e")
+      @label[i] = TkLabel.new(@i[i],
+			      "text"=>LABEL[i],
+			      "anchor"=>"e")
+      @entry[i] = TkEntry.new(@i[i],
+			      "width"=>30,
+			      "relief"=>"sunken")
+      @entry[i].pack("side"=>"right")
+      @label[i].pack("side"=>"right")
+    end
+  end
+end
+
+class RolodexButtons < TkFrame
+  attr_reader :clear, :add, :search, :delete
+
+  def initialize(parent,keys=nil)
+    super(parent,keys)
+    @clear = TkButton.new(self,"text" => "クリアー")
+    @add = TkButton.new(self,  "text" => "追加")
+    @search = TkButton.new(self, "text" => "検索")
+    @delete = TkButton.new(self,  "text" => "消去")
+    for w in [@clear,@add,@search,@delete]
+      w.pack("side"=>"left", "padx"=>2)
+    end
+  end
+end
+
+class RolodexMenuFrame < TkFrame
+  attr_reader :file_menu, :help_menu, :file, :help
+
+  def initialize(parent,keys=nil)
+    super(parent,keys)
+    configure("relief"=>"raised",
+	      "borderwidth"=>1)
+
+    @file = TkMenubutton.new(self,
+			     "text"=> "ファイル",
+			     "underline"=>0)
+    @file_menu = TkMenu.new(@file)
+    @file_menu.add("command",
+		   "label" => "読み込み ...",
+		   "command" => proc{fileAction},
+		   "underline" => 0)
+    @file_menu.add("command",
+		   "label" => "終了",
+		   "command" => proc{$root.destroy},
+		   "underline" => 0)
+    @file.menu(@file_menu)
+    @file.pack("side"=>"left")
+
+    @help = TkMenubutton.new(self,
+			     "text"=> "ヘルプ",
+			     "underline"=>0)
+    @help_menu = TkMenu.new(@help)
+    @help_menu.add("command",
+		   "label"=> "コンテキストについて",
+		   "command"=>proc{show_help("コンテキスト")},
+		   "underline"=>3)
+    @help_menu.add("command",
+		   "label"=> "ヘルプについて",
+		   "command"=>proc{show_help("ヘルプ")},
+		   "underline"=>3)
+    @help_menu.add("command",
+		   "label"=> "ウィンドウについて",
+		   "command"=>proc{show_help("ウィンドウ")},
+		   "underline"=>3)
+    @help_menu.add("command",
+		   "label"=> "キー操作について",
+		   "command"=>proc{show_help("キー操作")},
+		   "underline"=>3)
+    @help_menu.add("command",
+		   "label"=> "バージョン情報",
+		   "command"=>proc{show_help("バージョン情報")},
+		   "underline"=>3)
+    @help.menu(@help_menu)
+    @help.pack("side"=>"right")
+  end
+end
+
+class Rolodex < TkRoot
+  attr_reader :frame, :buttons, :menu
+
+  def initialize(*args)
+    super(*args)
+    @frame = RolodexFrame.new(self)
+    @frame.pack("side"=>"top",
+		"fill"=>"y",
+		"anchor"=>"center")
+    @buttons = RolodexButtons.new(self)
+    @buttons.pack("side"=>"bottom",
+		  "pady"=>2,
+		  "anchor"=>"center")
+    @menu = RolodexMenuFrame.new(self)
+    @menu.pack("before"=>@frame,
+	       "side"=>"top",
+	       "fill"=>"x")
+  end
+end
+
+$root = Rolodex.new
+
+$root.buttons.delete.configure("command"=>proc{deleteAction})
+$root.buttons.add.configure("command"=>proc{addAction})
+$root.buttons.clear.configure("command"=>proc{clearAction})
+$root.buttons.search.configure("command"=>proc{addAction; fillCard})
+
+$root.buttons.clear.configure("text"=> "クリアー   Ctrl+C")
+$root.bind("Control-c",proc{clearAction})
+
+$root.buttons.add.configure("text"=> "追加   Ctrl+A")
+$root.bind("Control-a",proc{addAction})
+
+$root.buttons.search.configure("text"=> "検索   Ctrl+S")
+$root.bind("Control-s",proc{addAction; fillCard})
+
+$root.buttons.delete.configure("text"=> "消去   Ctrl+D")
+$root.bind("Control-d",proc{deleteAction})
+
+$root.menu.file_menu.entryconfigure(1, "accel"=>"Ctrl+F")
+$root.bind("Control-f",proc{fileAction})
+
+$root.menu.file_menu.entryconfigure(2, "accel"=>"Ctrl+Q")
+$root.bind("Control-q",proc{$root.destroy})
+
+$root.frame.entry[1].focus
+
+$root.bind("Any-F1",
+	   proc{|event| show_help(event.widget, event.x_root, event.y_root)})
+$root.bind("Any-Help",
+	   proc{|event| show_help(event.widget, event.x_root, event.y_root)})
+
+
+$helpTopics = {}
+
+$helpTopics[$root.menu.file] = <<EOF
+これは「ファイル」メニューです。「読み込み」や「終了」などを
+行なうことができます。
+EOF
+
+$helpTopics[$root.menu.file_menu.index(0)] = <<EOF
+ファイルの読み込みを行なうときに使います。
+EOF
+
+$helpTopics[$root.menu.file_menu.index(1)] = <<EOF
+アプリケーションを終了するときに使います。
+EOF
+
+$helpTopics[$root.frame.entry[1]] = <<EOF
+名前を記入するエントリです。
+EOF
+
+$helpTopics[$root.frame.entry[2]] = <<EOF
+住所を記入するエントリです。
+EOF
+
+$helpTopics[$root.frame.entry[3]] = <<EOF
+住所を記入するエントリです。
+EOF
+
+$helpTopics[$root.frame.entry[4]] = <<EOF
+住所を記入するエントリです。
+EOF
+
+$helpTopics[$root.frame.entry[5]] = <<EOF
+自宅の電話番号を記入するエントリです。公開\
+したくないときは private と記入します。
+EOF
+
+$helpTopics[$root.frame.entry[6]] = <<EOF
+会社の電話番号を記入するエントリです。
+EOF
+
+$helpTopics[$root.frame.entry[7]] = <<EOF
+FAX番号を記入するエントリです。
+EOF
+
+$helpTopics["コンテキスト"] = <<EOF
+Ruby/Tkではgrabの機構がないためこのアプリケーションでは\
+コンテキストヘルプはサポートされていません。
+しかし同じような効果をbindとマウスの位置のWedgetを知る\
+ことで得ることができます。
+EOF
+
+$helpTopics["ヘルプ"] = <<EOF
+マウスをウィンドウにあわせてF1キーを押すことによって\
+そのヘルプを見ることができます。
+EOF
+
+$helpTopics["ウィンドウ"] = <<EOF
+このウィンドウはダミーです。
+EOF
+
+$helpTopics["キー操作"] = <<EOF
+Ctrl+A:		追加
+Ctrl+C:		クリアー
+Ctrl+D:		消去
+Ctrl+F:		ファイル選択
+Ctrl+Q:		終了
+Ctrl+S:		検索
+EOF
+
+$helpTopics["バージョン情報"] = <<EOF
+バージョンは 1.0.1j です。
+EOF
+
+Tk.mainloop

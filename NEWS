@@ -1,39 +1,106 @@
-PHP                                                                        NEWS
-|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 201?, PHP 5.5.0
+# -*- rd -*-
+= NEWS
 
-- General improvements:
-  . Drop Windows XP and 2003 support. (Pierre)
-  . World domination
+This document is a list of user visible feature changes made between
+releases except for bug fixes.
 
-- cURL:
-  . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 
-    CURLOPT_DIRLISTONLY, CURLOPT_NEW_DIRECTORY_PERMS, CURLOPT_NEW_FILE_PERMS, 
-    CURLOPT_NETRC_FILE, CURLOPT_PREQUOTE, CURLOPT_KRBLEVEL, CURLOPT_MAXFILESIZE,
-    CURLOPT_FTP_ACCOUNT, CURLOPT_COOKIELIST, CURLOPT_IGNORE_CONTENT_LENGTH,
-    CURLOPT_CONNECT_ONLY, CURLOPT_LOCALPORT, CURLOPT_LOCALPORTRANGE, 
-    CURLOPT_FTP_ALTERNATIVE_TO_USER, CURLOPT_SSL_SESSIONID_CACHE, 
-    CURLOPT_FTP_SSL_CCC, CURLOPT_HTTP_CONTENT_DECODING, 
-    CURLOPT_HTTP_TRANSFER_DECODING, CURLOPT_PROXY_TRANSFER_MODE, 
-    CURLOPT_ADDRESS_SCOPE, CURLOPT_CRLFILE, CURLOPT_ISSUERCERT, 
-    CURLOPT_USERNAME, CURLOPT_PASSWORD, CURLOPT_PROXYUSERNAME, 
-    CURLOPT_PROXYPASSWORD, CURLOPT_NOPROXY, CURLOPT_SOCKS5_GSSAPI_NEC, 
-    CURLOPT_SOCKS5_GSSAPI_SERVICE, CURLOPT_TFTP_BLKSIZE, 
-    CURLOPT_SSH_KNOWNHOSTS, CURLOPT_FTP_USE_PRET, CURLOPT_MAIL_FROM, 
-    CURLOPT_MAIL_RCPT, CURLOPT_RTSP_CLIENT_CSEQ, CURLOPT_RTSP_SERVER_CSEQ, 
-    CURLOPT_RTSP_SESSION_ID, CURLOPT_RTSP_STREAM_URI, CURLOPT_RTSP_TRANSPORT,
-    CURLOPT_RTSP_REQUEST, CURLOPT_RESOLVE, CURLOPT_ACCEPT_ENCODING, 
-    CURLOPT_TRANSFER_ENCODING, CURLOPT_DNS_SERVERS and CURLOPT_USE_SSL.
-    (Pierrick)
-  . Fixed bug #55635 (CURLOPT_BINARYTRANSFER no longer used. The constant
-	still exists for backward compatibility but is doing nothing). (Pierrick)
-  . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
+Note that each entry is kept so brief that no reason behind or
+reference information is supplied with.  For a full list of changes
+with all sufficient information, see the ChangeLog file.
 
-- PCRE:
-  . Deprecated the /e modifier
-    (https://wiki.php.net/rfc/remove_preg_replace_eval_modifier). (Nikita Popov)
+== Changes since the 1.9.3 release
 
-- pgsql
-  . Added pg_escape_literal() and pg_escape_identifier() (Yasuo)
+=== C API updates
+* NUM2SHORT() and NUM2USHORT() added. They are similar to NUM2INT, but short.
 
-<<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
+=== Library updates (outstanding ones only)
+
+* builtin classes
+
+  * Enumerable
+    * added method:
+      * added Enumerable#lazy method for lazy enumeration.
+
+  * Kernel
+    * added method:
+      * added Kernel#Hash conversion method like Array() or Float().
+    * extended method:
+      * Kernel#warn accepts multiple args in like puts.
+    * incompatible changes:
+      * system() and exec() closes non-standard file descriptors
+        (The default of :close_others option is changed to true by default.)
+      * respond_to? against a protected method now returns false unless
+        the second argument is true.
+
+  * LoadError
+    * added method:
+      * added LoadError#path method to return the file name that could not be
+        loaded.
+
+  * Signal
+    * incompatible changes:
+      * Signal.trap raises ArgumentError when :SEGV, :BUS, :ILL, :FPE, :VTALRM
+        are specified.
+
+  * Time
+    * change return value:
+      * Time#to_s returned encoding defaults to US-ASCII but automatically
+        transcodes to Encoding.default_internal if it is set.
+
+  * Fiber
+    * incompatible changes:
+      * Fiber#resume cannot resume a fiber which invokes "Fiber#transfer".
+
+* net/imap
+  * new methods:
+    * Net::IMAP.default_port
+    * Net::IMAP.default_imap_port
+    * Net::IMAP.default_tls_port
+    * Net::IMAP.default_ssl_port
+    * Net::IMAP.default_imaps_port
+
+* pathname
+  * extended method:
+    * Pathname#find returns an enumerator if no block is given.
+
+* resolv
+  * new methods:
+    * Resolv::DNS#timeouts=
+    * Resolv::DNS::Config#timeouts=
+
+* shellwords
+    * Shellwords#shellescape() now stringifies the given object using to_s.
+    * Shellwords#shelljoin() accepts non-string objects in the given
+      array, each of which is stringified using to_s.
+
+* lib/tmpdir.rb
+  * incompatible changes:
+    * Dir.mktmpdir uses FileUtils.remove_entry instead of
+      FileUtils.remove_entry_secure.  This means that applications should not
+      change the permission of the created temporary directory to make
+      accessible from other users.
+
+* zlib
+  * Added support for the new deflate strategies Zlib::RLE and Zlib::FIXED.
+
+=== Language changes
+=== Compatibility issues (excluding feature bug fixes)
+
+  * Signal.trap
+
+    See above.
+
+  * Merge Onigmo.
+    https://github.com/k-takata/Onigmo
+
+  * The :close_others option is true by default for system() and exec().
+    Also, the close-on-exec flag is set by default for all new file descriptors.
+    This means file descriptors doesn't inherit to spawned process unless
+    explicitly requested such as system(..., fd=>fd).
+
+  * Kernel#respond_to? against a protected method now returns false
+    unless the second argument is true.
+
+  * Dir.mktmpdir in lib/tmpdir.rb
+
+    See above.

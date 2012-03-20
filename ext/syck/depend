@@ -1,0 +1,12 @@
+ruby_headers = $(hdrdir)/ruby.h $(topdir)/config.h $(hdrdir)/defines.h \
+  $(hdrdir)/missing.h $(hdrdir)/intern.h $(hdrdir)/st.h
+bytecode.o: bytecode.c syck.h gram.h $(ruby_headers)
+emitter.o: emitter.c syck.h $(ruby_headers)
+gram.o: gram.c syck.h $(hdrdir)/st.h
+handler.o: handler.c syck.h $(ruby_headers)
+implicit.o: implicit.c syck.h $(ruby_headers)
+node.o: node.c syck.h $(ruby_headers)
+rubyext.o: rubyext.c syck.h $(ruby_headers)
+syck.o: syck.c syck.h $(ruby_headers)
+token.o: token.c syck.h gram.h $(ruby_headers)
+yaml2byte.o: yaml2byte.c syck.h yamlbyte.h $(ruby_headers)

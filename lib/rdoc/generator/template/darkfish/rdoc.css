@@ -1,0 +1,763 @@
+/*
+ * "Darkfish" Rdoc CSS
+ * $Id: rdoc.css 54 2009-01-27 01:09:48Z deveiant $
+ *
+ * Author: Michael Granger <ged@FaerieMUD.org>
+ *
+ */
+
+/* Base Green is: #6C8C22 */
+
+*{ padding: 0; margin: 0; }
+
+body {
+  background: #efefef;
+  font: 14px "Helvetica Neue", Helvetica, Tahoma, sans-serif;
+}
+body.class, body.module, body.file {
+  margin-left: 40px;
+}
+body.file-popup {
+  font-size: 90%;
+  margin-left: 0;
+}
+
+h1 {
+  font-size: 300%;
+  text-shadow: rgba(135,145,135,0.65) 2px 2px 3px;
+  color: #6C8C22;
+}
+h2,h3,h4 { margin-top: 1.5em; }
+
+:link,
+:visited {
+  color: #6C8C22;
+  text-decoration: none;
+}
+:link:hover,
+:visited:hover {
+  border-bottom: 1px dotted #6C8C22;
+}
+
+pre {
+  background: #ddd;
+  padding: 0.5em 0;
+}
+
+
+/* @group Generic Classes */
+
+.initially-hidden {
+  display: none;
+}
+
+.quicksearch-field {
+  width: 98%;
+  background: #ddd;
+  border: 1px solid #aaa;
+  height: 1.5em;
+  -webkit-border-radius: 4px;
+}
+.quicksearch-field:focus {
+  background: #f1edba;
+}
+
+.missing-docs {
+  font-size: 120%;
+  background: white url(images/wrench_orange.png) no-repeat 4px center;
+  color: #ccc;
+  line-height: 2em;
+  border: 1px solid #d00;
+  opacity: 1;
+  padding-left: 20px;
+  text-indent: 24px;
+  letter-spacing: 3px;
+  font-weight: bold;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+}
+
+.target-section {
+  border: 2px solid #dcce90;
+  border-left-width: 8px;
+  padding: 0 1em;
+  background: #fff3c2;
+}
+
+/* @end */
+
+
+/* @group Index Page, Standalone file pages */
+body.indexpage {
+  margin: 1em 3em;
+}
+body.indexpage p,
+body.indexpage div,
+body.file p {
+  margin: 1em 0;
+}
+
+.indexpage .rdoc-list p, .file .rdoc-list p {
+  margin: 0em 0;
+}
+
+.indexpage ol,
+.file #documentation ol {
+  line-height: 160%;
+}
+
+.indexpage ul,
+.file #documentation ul {
+  line-height: 160%;
+  list-style: none;
+}
+.indexpage ul :link,
+.indexpage ul :visited {
+  font-size: 16px;
+}
+
+.indexpage li,
+.file #documentation li {
+  padding-left: 20px;
+}
+
+.indexpage ol,
+.file #documentation ol {
+  margin-left: 20px;
+}
+
+.indexpage ol > li,
+.file #documentation ol > li {
+  padding-left: 0;
+}
+
+.indexpage ul > li,
+.file #documentation ul > li {
+  background: url(images/bullet_black.png) no-repeat left 4px;
+}
+.indexpage li.module {
+  background: url(images/package.png) no-repeat left 4px;
+}
+.indexpage li.class {
+  background: url(images/ruby.png) no-repeat left 4px;
+}
+.indexpage li.file {
+  background: url(images/page_white_text.png) no-repeat left 4px;
+}
+.file li p,
+.indexpage li p {
+  margin: 0 0;
+}
+
+/* @end */
+
+/* @group Top-Level Structure */
+
+.class #metadata,
+.file #metadata,
+.module #metadata {
+  float: left;
+  width: 260px;
+}
+
+.class #documentation,
+.file #documentation,
+.module #documentation {
+  margin: 2em 1em 5em 300px;
+  min-width: 340px;
+}
+
+.file #metadata {
+  margin: 0.8em;
+}
+
+#validator-badges {
+  clear: both;
+  margin: 1em 1em 2em;
+}
+
+/* @end */
+
+/* @group Metadata Section */
+#metadata .section {
+  background-color: #dedede;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border: 1px solid #aaa;
+  margin: 0 8px 16px;
+  font-size: 90%;
+  overflow: hidden;
+}
+#metadata h3.section-header {
+  margin: 0;
+  padding: 2px 8px;
+  background: #ccc;
+  color: #666;
+  -moz-border-radius-topleft: 4px;
+  -moz-border-radius-topright: 4px;
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-top-right-radius: 4px;
+  border-bottom: 1px solid #aaa;
+}
+#metadata #home-section h3.section-header {
+  border-bottom: 0;
+}
+
+#metadata ul,
+#metadata dl,
+#metadata p {
+  padding:  8px;
+  list-style: none;
+}
+
+#file-metadata ul {
+  padding-left: 28px;
+  list-style-image: url(images/page_green.png);
+}
+
+dl.svninfo {
+  color: #666;
+  margin: 0;
+}
+dl.svninfo dt {
+  font-weight: bold;
+}
+
+ul.link-list li {
+  white-space: nowrap;
+}
+ul.link-list .type {
+  font-size: 8px;
+  text-transform: uppercase;
+  color: white;
+  background: #969696;
+  padding: 2px 4px;
+  -webkit-border-radius: 5px;
+}
+
+/* @end */
+
+
+/* @group Project Metadata Section */
+#project-metadata {
+  margin-top: 3em;
+}
+
+.file #project-metadata {
+  margin-top: 0em;
+}
+
+#project-metadata .section {
+  border: 1px solid #aaa;
+}
+#project-metadata h3.section-header {
+  border-bottom: 1px solid #aaa;
+  position: relative;
+}
+#project-metadata h3.section-header .search-toggle {
+  position: absolute;
+  right: 5px;
+}
+
+
+#project-metadata form {
+  color: #777;
+  background: #ccc;
+  padding: 8px 8px 16px;
+  border-bottom: 1px solid #bbb;
+}
+#project-metadata fieldset {
+  border: 0;
+}
+
+#no-class-search-results {
+  margin: 0 auto 1em;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #aaa;
+}
+
+/* @end */
+
+
+/* @group Documentation Section */
+.description {
+  font-size: 100%;
+  color: #333;
+}
+
+.description p {
+  margin: 1em 0.4em;
+}
+
+.description li p {
+  margin: 0;
+}
+
+.description ul {
+  margin-left: 1.5em;
+}
+.description ul li {
+  line-height: 1.4em;
+}
+
+.description dl,
+#documentation dl {
+  margin: 8px 1.5em;
+  border: 1px solid #ccc;
+}
+.description dl {
+  font-size: 14px;
+}
+
+.description dt,
+#documentation dt {
+  padding: 2px 4px;
+  font-weight: bold;
+  background: #ddd;
+}
+.description dd,
+#documentation dd  {
+  padding: 2px 12px;
+}
+.description dd + dt,
+#documentation dd + dt {
+  margin-top: 0.7em;
+}
+
+#documentation .section {
+  font-size: 90%;
+}
+
+#documentation h2.section-header {
+  margin-top: 2em;
+  padding: 0.75em 0.5em;
+  background: #ccc;
+  color: #333;
+  font-size: 175%;
+  border: 1px solid #bbb;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+}
+
+#documentation h3.section-header {
+  margin-top: 2em;
+  padding: 0.25em 0.5em;
+  background-color: #dedede;
+  color: #333;
+  font-size: 150%;
+  border: 1px solid #bbb;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+}
+
+#constants-list > dl,
+#attributes-list > dl {
+  margin: 1em 0 2em;
+  border: 0;
+}
+#constants-list > dl dt,
+#attributes-list > dl dt {
+  padding-left: 0;
+  font-weight: bold;
+  font-family: Monaco, "Andale Mono";
+  background: inherit;
+}
+#constants-list > dl dt a,
+#attributes-list > dl dt a {
+  color: inherit;
+}
+#constants-list > dl dd,
+#attributes-list > dl dd {
+  margin: 0 0 1em 0;
+  padding: 0;
+  color: #666;
+}
+
+.documentation-section h2 {
+  position: relative;
+}
+
+.documentation-section h2 a {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 12px;
+  color: #9b9877;
+  visibility: hidden;
+}
+
+.documentation-section h2:hover a {
+  visibility: visible;
+}
+
+/* @group Method Details */
+
+#documentation .method-source-code {
+  display: none;
+}
+
+#documentation .method-detail {
+  margin: 0.5em 0;
+  padding: 0.5em 0;
+  cursor: pointer;
+}
+#documentation .method-detail:hover {
+  background-color: #f1edba;
+}
+#documentation .method-heading {
+  position: relative;
+  padding: 2px 4px 0 20px;
+  font-size: 125%;
+  font-weight: bold;
+  color: #333;
+  background: url(images/brick.png) no-repeat left bottom;
+}
+#documentation .method-heading :link,
+#documentation .method-heading :visited {
+  color: inherit;
+}
+#documentation .method-click-advice {
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  font-size: 10px;
+  color: #9b9877;
+  visibility: hidden;
+  padding-right: 20px;
+  line-height: 20px;
+  background: url(images/zoom.png) no-repeat right top;
+}
+#documentation .method-detail:hover .method-click-advice {
+  visibility: visible;
+}
+
+#documentation .method-alias .method-heading {
+  color: #666;
+  background: url(images/brick_link.png) no-repeat left bottom;
+}
+
+#documentation .method-description,
+#documentation .aliases {
+  margin: 0 20px;
+  color: #666;
+}
+
+#documentation .method-description p,
+#documentation .aliases p {
+  line-height: 1.2em;
+}
+
+#documentation .aliases {
+  padding-top: 4px;
+  font-style: italic;
+  cursor: default;
+}
+#documentation .method-description p {
+  padding: 0;
+}
+#documentation .method-description p + p {
+  margin-bottom: 0.5em;
+}
+#documentation .method-description ul {
+  margin-left: 1.5em;
+}
+
+#documentation .attribute-method-heading {
+  background: url(images/tag_green.png) no-repeat left bottom;
+}
+#documentation #attribute-method-details .method-detail:hover {
+  background-color: transparent;
+  cursor: default;
+}
+#documentation .attribute-access-type {
+  font-size: 60%;
+  text-transform: uppercase;
+  vertical-align: super;
+  padding: 0 2px;
+}
+/* @end */
+
+/* @end */
+
+
+
+/* @group Source Code */
+
+div.method-source-code {
+  background: #262626;
+  color: #efefef;
+  margin: 1em;
+  padding: 0.5em;
+  border: 1px dashed #999;
+  overflow: hidden;
+}
+
+div.method-source-code pre {
+  background: inherit;
+  padding: 0;
+  color: white;
+  overflow: auto;
+}
+
+/* @group Ruby keyword styles */
+
+.ruby-constant   { color: #7fffd4; background: transparent; }
+.ruby-keyword    { color: #00ffff; background: transparent; }
+.ruby-ivar       { color: #eedd82; background: transparent; }
+.ruby-operator   { color: #00ffee; background: transparent; }
+.ruby-identifier { color: #ffdead; background: transparent; }
+.ruby-node       { color: #ffa07a; background: transparent; }
+.ruby-comment    { color: #b22222; font-weight: bold; background: transparent; }
+.ruby-regexp     { color: #ffa07a; background: transparent; }
+.ruby-value      { color: #7fffd4; background: transparent; }
+
+/* @end */
+/* @end */
+
+
+/* @group File Popup Contents */
+
+.file #metadata,
+.file-popup #metadata {
+}
+
+.file-popup dl {
+  font-size: 80%;
+  padding: 0.75em;
+  background-color: #dedede;
+  color: #333;
+  border: 1px solid #bbb;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+}
+.file dt {
+  font-weight: bold;
+  padding-left: 22px;
+  line-height: 20px;
+  background: url(images/page_white_width.png) no-repeat left top;
+}
+.file dt.modified-date {
+  background: url(images/date.png) no-repeat left top;
+}
+.file dt.requires {
+  background: url(images/plugin.png) no-repeat left top;
+}
+.file dt.scs-url {
+  background: url(images/wrench.png) no-repeat left top;
+}
+
+.file dl dd {
+  margin: 0 0 1em 0;
+}
+.file #metadata dl dd ul {
+  list-style: circle;
+  margin-left: 20px;
+  padding-top: 0;
+}
+.file #metadata dl dd ul li {
+}
+
+
+.file h2 {
+  margin-top: 2em;
+  padding: 0.75em 0.5em;
+  background-color: #dedede;
+  color: #333;
+  font-size: 120%;
+  border: 1px solid #bbb;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+}
+
+/* @end */
+
+
+
+
+/* @group ThickBox Styles */
+#TB_window {
+  font: 12px Arial, Helvetica, sans-serif;
+  color: #333333;
+}
+
+#TB_secondLine {
+  font: 10px Arial, Helvetica, sans-serif;
+  color:#666666;
+}
+
+#TB_window :link,
+#TB_window :visited        { color: #666666; }
+#TB_window :link:hover,
+#TB_window :visited:hover  { color: #000;    }
+#TB_window :link:active,
+#TB_window :visited:active { color: #666666; }
+#TB_window :link:focus,
+#TB_window :visited:focus  { color: #666666; }
+
+#TB_overlay {
+  position: fixed;
+  z-index:100;
+  top: 0px;
+  left: 0px;
+  height:100%;
+  width:100%;
+}
+
+.TB_overlayMacFFBGHack {background: url(images/macFFBgHack.png) repeat;}
+.TB_overlayBG {
+  background-color:#000;
+  filter:alpha(opacity=75);
+  -moz-opacity: 0.75;
+  opacity: 0.75;
+}
+
+* html #TB_overlay { /* ie6 hack */
+  position: absolute;
+  height: expression(document.body.scrollHeight > document.body.offsetHeight ? document.body.scrollHeight : document.body.offsetHeight + 'px');
+}
+
+#TB_window {
+  position: fixed;
+  background: #ffffff;
+  z-index: 102;
+  color:#000000;
+  display:none;
+  border: 4px solid #525252;
+  text-align:left;
+  top:50%;
+  left:50%;
+}
+
+* html #TB_window { /* ie6 hack */
+  position: absolute;
+  margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop) + 'px');
+}
+
+#TB_window img#TB_Image {
+  display:block;
+  margin: 15px 0 0 15px;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  border-top: 1px solid #666;
+  border-left: 1px solid #666;
+}
+
+#TB_caption{
+  height:25px;
+  padding:7px 30px 10px 25px;
+  float:left;
+}
+
+#TB_closeWindow{
+  height:25px;
+  padding:11px 25px 10px 0;
+  float:right;
+}
+
+#TB_closeAjaxWindow{
+  padding:7px 10px 5px 0;
+  margin-bottom:1px;
+  text-align:right;
+  float:right;
+}
+
+#TB_ajaxWindowTitle{
+  float:left;
+  padding:7px 0 5px 10px;
+  margin-bottom:1px;
+  font-size: 22px;
+}
+
+#TB_title{
+  background-color: #6C8C22;
+  color: #dedede;
+  height:40px;
+}
+#TB_title :link,
+#TB_title :visited {
+  color: white !important;
+  border-bottom: 1px dotted #dedede;
+}
+
+#TB_ajaxContent{
+  clear:both;
+  padding:2px 15px 15px 15px;
+  overflow:auto;
+  text-align:left;
+  line-height:1.4em;
+}
+
+#TB_ajaxContent.TB_modal{
+  padding:15px;
+}
+
+#TB_ajaxContent p{
+  padding:5px 0px 5px 0px;
+}
+
+#TB_load{
+  position: fixed;
+  display:none;
+  height:13px;
+  width:208px;
+  z-index:103;
+  top: 50%;
+  left: 50%;
+  margin: -6px 0 0 -104px; /* -height/2 0 0 -width/2 */
+}
+
+* html #TB_load { /* ie6 hack */
+  position: absolute;
+  margin-top: expression(0 - parseInt(this.offsetHeight / 2) + (TBWindowMargin = document.documentElement && document.documentElement.scrollTop || document.body.scrollTop) + 'px');
+}
+
+#TB_HideSelect{
+  z-index:99;
+  position:fixed;
+  top: 0;
+  left: 0;
+  background-color:#fff;
+  border:none;
+  filter:alpha(opacity=0);
+  -moz-opacity: 0;
+  opacity: 0;
+  height:100%;
+  width:100%;
+}
+
+* html #TB_HideSelect { /* ie6 hack */
+  position: absolute;
+  height: expression(document.body.scrollHeight > document.body.offsetHeight ? document.body.scrollHeight : document.body.offsetHeight + 'px');
+}
+
+#TB_iframeContent{
+  clear:both;
+  border:none;
+  margin-bottom:-1px;
+  margin-top:1px;
+  _margin-bottom:1px;
+}
+
+/* @end */
+
+/* @group Debugging Section */
+
+#debugging-toggle {
+  text-align: center;
+}
+#debugging-toggle img {
+  cursor: pointer;
+}
+
+#rdoc-debugging-section-dump {
+  display: none;
+  margin: 0 2em 2em;
+  background: #ccc;
+  border: 1px solid #999;
+}
+
+
+
+/* @end */

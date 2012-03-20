@@ -1,0 +1,46 @@
+#include "transcode_data.h"
+
+<%
+  transcode_tblgen "EUC-JP", "UTF-8",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("euc", 0x8080, "JISX0208:1990/UCS") +
+  citrus_decode_mapsrc("euc", 0x0080, "JISX0201-KANA/UCS") +
+  citrus_decode_mapsrc("euc", 0x8000, "JISX0212/UCS")
+
+  transcode_tblgen "eucJP-ms", "UTF-8",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("euc", 0x8080, "JISX0208VDC:NEC/UCS,JISX0208UDC/UCS,JISX0208:MS/UCS") +
+  citrus_decode_mapsrc("euc", 0x0080, "JISX0201-KANA/UCS") +
+  citrus_decode_mapsrc("euc", 0x8000, "JISX0212VDC:IBM/UCS,JISX0212UDC/UCS,JISX0212:MS/UCS")
+
+  transcode_tblgen "CP51932", "UTF-8",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("euc", 0x8080, "JISX0208VDC:NEC/UCS,CP932VDC:NEC_IBM/UCS,JISX0208:MS/UCS") +
+  citrus_decode_mapsrc("euc", 0x0080, "JISX0201-KANA/UCS")
+
+
+  transcode_tblgen "UTF-8", "EUC-JP",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("euc", 0x8080, "UCS/JISX0208:1990") +
+  citrus_decode_mapsrc("euc", 0x0080, "UCS/JISX0201-KANA") +
+  citrus_decode_mapsrc("euc", 0x8000, "UCS/JISX0212")
+
+  transcode_tblgen "UTF-8", "eucJP-ms",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("euc", 0x8080, "UCS/JISX0208:MS,UCS/JISX0208VDC:NEC,UCS/JISX0208UDC") +
+  citrus_decode_mapsrc("euc", 0x0080, "UCS/JISX0201-KANA") +
+  citrus_decode_mapsrc("euc", 0x8000, "UCS/JISX0212VDC:IBM,UCS/JISX0212UDC,UCS/JISX0212:MS")
+
+  transcode_tblgen "UTF-8", "CP51932",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("euc", 0x8080, "UCS/JISX0208:MS,UCS/JISX0208VDC:NEC,UCS/CP932VDC:NEC_IBM") +
+  citrus_decode_mapsrc("euc", 0x0080, "UCS/JISX0201-KANA")
+%>
+
+<%= transcode_generated_code %>
+
+void
+Init_japanese_euc(void)
+{
+<%= transcode_register_code %>
+}

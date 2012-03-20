@@ -1,0 +1,2 @@
+_sdbm.o: _sdbm.c sdbm.h $(hdrdir)/ruby.h $(topdir)/config.h $(hdrdir)/defines.h
+init.o: init.c sdbm.h $(hdrdir)/ruby.h $(topdir)/config.h $(hdrdir)/defines.h

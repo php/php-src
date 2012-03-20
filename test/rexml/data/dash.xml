@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<content-repository>
+  <content-repository-child-1>
+    <content-1>content-1-text</content-1>
+  </content-repository-child-1>
+  <content-repository-child-2>
+    <content-2>content-2-text</content-2>
+  </content-repository-child-2>
+  <content-repository-child-3>
+    <content-3>content-3-text</content-3>
+  </content-repository-child-3>
+</content-repository>

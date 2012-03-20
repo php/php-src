@@ -1,0 +1,217 @@
+#include "transcode_data.h"
+
+<%
+  # mapping from ISO-2022-JP-KDDI to stateless-ISO-2022-JP-KDDI
+  map = {
+    "1b2842" => :func_so,       # designate US-ASCII to G0.             "ESC ( B"
+    "1b284a" => :func_so,       # designate JIS X 0201 latin to G0.     "ESC ( J"
+    "1b2440" => :func_so,       # designate JIS X 0208 1978 to G0.      "ESC $ @"
+    "1b2442" => :func_so,       # designate JIS X 0208 1983 to G0.      "ESC $ B"
+    "{00-0d,10-1a,1c-7f}" => :func_si,
+  }
+  transcode_generate_node(ActionMap.parse(map), "iso2022jp_kddi_decoder")
+
+  map_jisx0208_rest = {
+    "{21-7e}" => :func_so
+  }
+  transcode_generate_node(ActionMap.parse(map_jisx0208_rest), "iso2022jp_kddi_decoder_jisx0208_rest")
+
+  # mapping from stateless-ISO-2022-JP-KDDI to ISO-2022-JP-KDDI
+  map = {
+    "{00-0d,10-1a,1c-7f}" => :func_so,
+    "90{a1-fe}{a1-fe}" => :func_so,
+    "92{a1-fe}{a1-fe}" => :func_so,
+  }
+  transcode_generate_node(ActionMap.parse(map), "iso2022jp_kddi_encoder")
+
+  # mapping from stateless-ISO-2022-JP-KDDI to UTF8-KDDI
+  transcode_tblgen "stateless-ISO-2022-JP-KDDI", "UTF8-KDDI",
+    [["{00-7f}", :nomap]] +
+    citrus_decode_mapsrc("stateless_iso", 0222, %w(EMOJI_ISO-2022-JP-KDDI/UCS
+                                                   JISX0208VDC:NEC/UCS
+                                                   CP932VDC:NEC_IBM/UCS
+                                                   CP932VDC:IBM/UCS
+                                                   JISX0208:MS/UCS).join(",")),
+    nil
+
+  # mapping from UTF8-KDDI to stateless-ISO-2022-JP-KDDI
+  transcode_tblgen "UTF8-KDDI", "stateless-ISO-2022-JP-KDDI",
+    [["{00-7f}", :nomap]] +
+    citrus_decode_mapsrc("stateless_iso", 0222, %w(UCS/EMOJI_ISO-2022-JP-KDDI
+                                                   UCS/EMOJI_ISO-2022-JP-KDDI-UNDOC
+                                                   UCS/JISX0208VDC:NEC
+                                                   UCS/CP932VDC:NEC_IBM
+                                                   UCS/CP932VDC:IBM
+                                                   UCS/JISX0208:MS).join(",")),
+    ValidEncoding('UTF-8')
+%>
+
+<%= transcode_generated_code %>
+
+#define G0_ASCII 0
+/* ignore JIS X 0201 latin */
+#define G0_JISX0208_1978 1
+#define G0_JISX0208_1983 2
+
+#define EMACS_MULE_LEADING_CODE_JISX0208_1978   0220
+#define EMACS_MULE_LEADING_CODE_JISX0208_1983   0222
+
+static int
+iso2022jp_kddi_init(void *statep)
+{
+    unsigned char *sp = statep;
+    *sp = G0_ASCII;
+    return 0;
+}
+
+static VALUE
+fun_si_iso2022jp_kddi_decoder(void *statep, const unsigned char *s, size_t l)
+{
+    unsigned char *sp = statep;
+    if (*sp == G0_ASCII)
+        return (VALUE)NOMAP;
+    else if (0x21 <= s[0] && s[0] <= 0x7e)
+        return (VALUE)iso2022jp_kddi_decoder_jisx0208_rest;
+    else
+        return (VALUE)INVALID;
+}
+
+static ssize_t
+fun_so_iso2022jp_kddi_decoder(void *statep, const unsigned char *s, size_t l, unsigned char *o, size_t osize)
+{
+    unsigned char *sp = statep;
+    if (s[0] == 0x1b) {
+        if (s[1] == '(') {
+            switch (s[l-1]) {
+              case 'B': /* US-ASCII */
+              case 'J': /* JIS X 0201 Roman */
+                *sp = G0_ASCII;
+                break;
+            }
+        }
+        else {
+            switch (s[l-1]) {
+              case '@':
+                *sp = G0_JISX0208_1978;
+                break;
+
+              case 'B':
+                *sp = G0_JISX0208_1983;
+                break;
+            }
+        }
+        return 0;
+    }
+    else {
+        if (*sp == G0_JISX0208_1978)
+            o[0] = EMACS_MULE_LEADING_CODE_JISX0208_1978;
+        else
+            o[0] = EMACS_MULE_LEADING_CODE_JISX0208_1983;
+        o[1] = s[0] | 0x80;
+        o[2] = s[1] | 0x80;
+        return 3;
+    }
+}
+
+static const rb_transcoder
+rb_iso2022jp_kddi_decoder = {
+    "ISO-2022-JP-KDDI", "stateless-ISO-2022-JP-KDDI", iso2022jp_kddi_decoder,
+    TRANSCODE_TABLE_INFO,
+    1, /* input_unit_length */
+    3, /* max_input */
+    3, /* max_output */
+    asciicompat_decoder, /* asciicompat_type */
+    1, iso2022jp_kddi_init, iso2022jp_kddi_init, /* state_size, state_init, state_fini */
+    NULL, fun_si_iso2022jp_kddi_decoder, NULL, fun_so_iso2022jp_kddi_decoder
+};
+
+static ssize_t
+fun_so_iso2022jp_kddi_encoder(void *statep, const unsigned char *s, size_t l, unsigned char *o, size_t osize)
+{
+    unsigned char *sp = statep;
+    unsigned char *output0 = o;
+    int newstate;
+
+    if (l == 1)
+        newstate = G0_ASCII;
+    else if (s[0] == EMACS_MULE_LEADING_CODE_JISX0208_1978)
+        newstate = G0_JISX0208_1978;
+    else
+        newstate = G0_JISX0208_1983;
+
+    if (*sp != newstate) {
+        *o++ = 0x1b;
+        switch (newstate) {
+          case G0_ASCII:
+            *o++ = '(';
+            *o++ = 'B';
+            break;
+          case G0_JISX0208_1978:
+            *o++ = '$';
+            *o++ = '@';
+            break;
+          default:
+            *o++ = '$';
+            *o++ = 'B';
+            break;
+        }
+        *sp = newstate;
+    }
+
+    if (l == 1) {
+        *o++ = s[0] & 0x7f;
+    }
+    else {
+        *o++ = s[1] & 0x7f;
+        *o++ = s[2] & 0x7f;
+    }
+
+    return o - output0;
+}
+
+static ssize_t
+iso2022jp_kddi_encoder_reset_sequence_size(void *statep)
+{
+  unsigned char *sp = statep;
+  if (*sp != G0_ASCII) return 3;
+  return 0;
+}
+
+static ssize_t
+finish_iso2022jp_kddi_encoder(void *statep, unsigned char *o, size_t osize)
+{
+    unsigned char *sp = statep;
+    unsigned char *output0 = o;
+
+    if (*sp == G0_ASCII)
+        return 0;
+
+    *o++ = 0x1b;
+    *o++ = '(';
+    *o++ = 'B';
+    *sp = G0_ASCII;
+
+    return o - output0;
+}
+
+static const rb_transcoder
+rb_iso2022jp_kddi_encoder = {
+    "stateless-ISO-2022-JP-KDDI", "ISO-2022-JP-KDDI", iso2022jp_kddi_encoder,
+    TRANSCODE_TABLE_INFO,
+    1, /* input_unit_length */
+    3, /* max_input */
+    5, /* max_output */
+    asciicompat_encoder, /* asciicompat_type */
+    1, iso2022jp_kddi_init, iso2022jp_kddi_init, /* state_size, state_init, state_fini */
+    NULL, NULL, NULL, fun_so_iso2022jp_kddi_encoder,
+    finish_iso2022jp_kddi_encoder,
+    iso2022jp_kddi_encoder_reset_sequence_size, finish_iso2022jp_kddi_encoder
+};
+
+void
+Init_emoji_iso2022_kddi(void)
+{
+    rb_register_transcoder(&rb_iso2022jp_kddi_decoder);
+    rb_register_transcoder(&rb_iso2022jp_kddi_encoder);
+<%= transcode_register_code %>
+}

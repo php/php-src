@@ -1,0 +1,34 @@
+#include "transcode_data.h"
+
+<%
+  transcode_tblgen "Shift_JIS", "UTF-8",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("mskanji", 1, "JISX0201-KANA/UCS") +
+  citrus_decode_mapsrc("mskanji", 2, "JISX0208:1990/UCS")
+
+  transcode_tblgen "Windows-31J", "UTF-8",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("mskanji", 1, "JISX0201-KANA/UCS") +
+  citrus_decode_mapsrc("mskanji", 2,
+    "JISX0208VDC:NEC/UCS,CP932VDC:NEC_IBM/UCS,CP932VDC:IBM/UCS,CP932UDA/UCS,JISX0208:MS/UCS")
+
+
+  transcode_tblgen "UTF-8", "Shift_JIS",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("mskanji", 1, "UCS/JISX0201-KANA") +
+  citrus_decode_mapsrc("mskanji", 2, "UCS/JISX0208:1990")
+
+  transcode_tblgen "UTF-8", "Windows-31J",
+  [["{00-7f}", :nomap]] +
+  citrus_decode_mapsrc("mskanji", 1, "UCS/JISX0201-KANA") +
+  citrus_decode_mapsrc("mskanji", 2,
+    "UCS/JISX0208:MS,UCS/JISX0208VDC:NEC,UCS/CP932VDC:IBM,UCS/CP932VDC:NEC_IBM,UCS/CP932UDA")
+%>
+
+<%= transcode_generated_code %>
+
+void
+Init_japanese_sjis(void)
+{
+<%= transcode_register_code %>
+}

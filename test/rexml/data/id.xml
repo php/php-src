@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE foo [
+
+<!ELEMENT foo (bar)>
+<!ATTLIST foo id CDATA #IMPLIED>
+<!ELEMENT bar (#PCDATA|cheese)*>
+<!ATTLIST bar id ID #REQUIRED>
+<!ELEMENT cheese (#PCDATA)>
+<!ATTLIST cheese kind ID #IMPLIED>
+]>
+
+<foo id="foobar">
+  <bar id="fb1">
+    baz
+    <cheese kind="edam">gouda</cheese>
+    baz
+    <cheese kind="gouda">cheddar</cheese>
+    baz
+  </bar>
+</foo>

@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+#
+#   irb.rb - interactive ruby
+#   	$Release Version: 0.9.6 $
+#   	$Revision$
+#   	by Keiju ISHITSUKA(keiju@ruby-lang.org)
+#
+
+require "irb"
+
+if __FILE__ == $0
+  IRB.start(__FILE__)
+else
+  # check -e option
+  if /^-e$/ =~ $0
+    IRB.start(__FILE__)
+  else
+    IRB.setup(__FILE__)
+  end
+end
