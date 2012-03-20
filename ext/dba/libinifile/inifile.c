@@ -42,7 +42,7 @@
 /* {{{ inifile_version */
 char *inifile_version() 
 {
-	return "1.0, $Revision$";
+	return "1.0, $Id$";
 }
 /* }}} */ 
 
