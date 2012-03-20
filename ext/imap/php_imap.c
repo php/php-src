@@ -4013,7 +4013,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 	PHP_IMAP_CLEAN;
 #else
-	if (!INI_STR("sendmain_path")) {
+	if (!INI_STR("sendmail_path")) {
 		return 0;
 	}
 	char *sendmail_path		= INI_STR("sendmail_path");
