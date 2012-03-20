@@ -7,8 +7,8 @@ include "skipif.inc";
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start(<<<PHP
-var_dump(\$_SERVER['SCRIPT_FILENAME']);
+php_cli_server_start(<<<'PHP'
+var_dump($_SERVER['SCRIPT_FILENAME']);
 PHP
 );
 
