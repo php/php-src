@@ -666,7 +666,7 @@ if (isset($argc) && $argc > 1) {
 					$html_output = is_resource($html_file);
 					break;
 				case '--version':
-					echo '$Revision$' . "\n";
+					echo '$Id$' . "\n";
 					exit(1);
 
 				default:

@@ -67,7 +67,7 @@ BEGIN {
 			
 
 	xmlhead = "<?xml version='1.0' encoding='iso-8859-1'?>\n" \
-    "<!-- $Revision$ -->\n" \
+    "<!-- $Id$ -->\n" \
     " <reference id=\"ref." extname "\">\n" \
 		"  <title> functions</title>\n" \
 		"  <titleabbrev></titleabbrev>\n\n" \

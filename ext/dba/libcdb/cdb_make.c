@@ -240,5 +240,5 @@ int cdb_make_finish(struct cdb_make *c TSRMLS_DC)
 /* {{{ cdb_make_version */
 char *cdb_make_version() 
 {
-	return "0.75, $Revision$";
+	return "0.75, $Id$";
 }

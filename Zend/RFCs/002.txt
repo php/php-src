@@ -1,5 +1,5 @@
 Title:           Zend 2.0 Namespaces
-Version:         $Revision$
+Version:         $Id$
 Status:          declined
 Maintainer:      Stig S. Bakken <ssb@php.net>
 Created:         2001-09-08
