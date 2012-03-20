@@ -628,6 +628,17 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 		}
 	} else if (cur_arg_info->type_hint) {
 		switch(cur_arg_info->type_hint) {
+			case IS_LONG:
+				if (!arg) {
+					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type long", "", "none", "" TSRMLS_CC);
+				}
+
+				if (Z_TYPE_P(arg) != IS_LONG && (Z_TYPE_P(arg) != IS_NULL || !cur_arg_info->allow_null)
+						&& (Z_TYPE_P(arg) != IS_STRING || is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 0)) == 0) {
+					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type long", "", zend_zval_type_name(arg), "" TSRMLS_CC);
+				}
+				break;
+
 			case IS_ARRAY:
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type array", "", "none", "" TSRMLS_CC);
