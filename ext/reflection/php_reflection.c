@@ -1980,7 +1980,7 @@ ZEND_METHOD(reflection_function, returnsReference)
 /* }}} */
 
 /* {{{ proto public bool ReflectionFunction::getNumberOfParameters()
-   Gets the number of required parameters */
+   Gets the total number of parameters */
 ZEND_METHOD(reflection_function, getNumberOfParameters)
 {
 	reflection_object *intern;
