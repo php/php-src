@@ -114,11 +114,19 @@ main/php_config.h.in
 */tests/*.php
 */tests/*.exp
 */tests/*.log
+*/tests/*.sh
 */tests/*/*.diff
 */tests/*/*.out
 */tests/*/*.php
 */tests/*/*.exp
 */tests/*/*.log
+*/tests/*/*.sh
+*/*/tests/*.diff
+*/*/tests/*.out
+*/*/tests/*.php
+*/*/tests/*.exp
+*/*/tests/*.log
+*/*/tests/*.sh
 
 # Extension specifc ignores
 ext/*/configure.in
