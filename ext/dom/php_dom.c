@@ -466,6 +466,69 @@ static int dom_property_exists(zval *object, zval *member, int check_empty TSRML
 }
 /* }}} */
 
+static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
+{
+    dom_object *obj = (dom_object *)zend_object_store_get_object(object TSRMLS_CC);
+    HashTable *debug_info, *props;
+    HashPosition pos;
+    dom_prop_handler *entry;
+
+    *is_temp = 1;
+
+    ALLOC_HASHTABLE(debug_info);
+    if (! obj->prop_handler) {
+        return debug_info;
+    }
+
+    props = obj->prop_handler;
+    ZEND_INIT_SYMTABLE_EX(debug_info, zend_hash_num_elements(props) + 1, 0);
+
+    zend_hash_internal_pointer_reset_ex(props, &pos);
+    while (zend_hash_get_current_data_ex(props, (void **)&entry, &pos) == SUCCESS) {
+        zval member;
+        zval *value;
+
+        char *string_key=NULL;
+        uint string_length=0;
+        ulong num_key;
+
+        zend_hash_get_current_key_ex(props, &string_key, &string_length, &num_key, 0, &pos);
+
+        INIT_ZVAL(member);
+        ZVAL_STRINGL(&member, string_key, string_length, 0);
+        value = zend_read_property(Z_OBJCE_P(object), object, Z_STRVAL(member), Z_STRLEN(member)-1, 1 TSRMLS_CC);
+        if (value != EG(uninitialized_zval_ptr)) {
+            switch(Z_TYPE_P(value)) {
+                case IS_STRING:
+                case IS_BOOL:
+                case IS_LONG:
+                case IS_DOUBLE:
+                case IS_ARRAY:
+                    zend_hash_add(debug_info, string_key, string_length, &value, sizeof(zval *), NULL);
+                    break;
+
+                default:
+                    ZVAL_NULL(value);
+                    zend_hash_add(debug_info, string_key, string_length, &value, sizeof(zval *), NULL);
+                    break;
+            }
+        } else {
+            ZVAL_NULL(value);
+            zend_hash_add(debug_info, string_key, string_length, &value, sizeof(zval *), NULL);
+        }
+        zend_hash_move_forward_ex(props, &pos);
+    }
+
+    return debug_info;
+}
+/* }}} */
+
+static HashTable* dom_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
+{
+       return dom_get_debug_info_helper(object, is_temp);
+}
+/* }}} */
+
 void *php_dom_export_node(zval *object TSRMLS_DC) /* {{{ */
 {
 	php_libxml_node_object *intern;
@@ -586,6 +649,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_handlers.get_property_ptr_ptr = dom_get_property_ptr_ptr;
 	dom_object_handlers.clone_obj = dom_objects_store_clone_obj;
 	dom_object_handlers.has_property = dom_property_exists;
+	dom_object_handlers.get_debug_info = dom_get_debug_info;
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
