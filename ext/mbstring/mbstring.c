@@ -325,14 +325,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_substr, 0, 0, 2)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, start)
-	ZEND_ARG_INFO(0, length)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_strcut, 0, 0, 2)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, start)
-	ZEND_ARG_INFO(0, length)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
@@ -2714,10 +2714,11 @@ PHP_FUNCTION(mb_substr)
 	size_t argc = ZEND_NUM_ARGS();
 	char *str, *encoding;
 	long from, len;
+	zval *zlen = NULL;
 	int mblen, str_len, encoding_len;
 	mbfl_string string, result, *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ls", &str, &str_len, &from, &len, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|z!s", &str, &str_len, &from, &zlen, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 
@@ -2736,8 +2737,10 @@ PHP_FUNCTION(mb_substr)
 	string.val = (unsigned char *)str;
 	string.len = str_len;
 
-	if (argc < 3) {
+	if (argc < 3 || !zlen) {
 		len = str_len;
+	} else {
+		len = Z_LVAL_P(zlen);
 	}
 
 	/* measures length */
@@ -2787,6 +2790,7 @@ PHP_FUNCTION(mb_strcut)
 	size_t argc = ZEND_NUM_ARGS();
 	char *encoding;
 	long from, len;
+	zval *zlen = NULL;
 	int encoding_len;
 	mbfl_string string, result, *ret;
 
@@ -2794,7 +2798,7 @@ PHP_FUNCTION(mb_strcut)
 	string.no_language = MBSTRG(language);
 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ls", (char **)&string.val, (int **)&string.len, &from, &len, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|z!s", (char **)&string.val, (int **)&string.len, &from, &zlen, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 
@@ -2806,8 +2810,10 @@ PHP_FUNCTION(mb_strcut)
 		}
 	}
 
-	if (argc < 3) {
+	if (argc < 3 || !zlen) {
 		len = string.len;
+	} else {
+		len = Z_LVAL_P(zlen);
 	}
 
 	/* if "from" position is negative, count start position from the end
