@@ -10,8 +10,8 @@ include "skipif.inc";
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start(<<<PHP
-if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', \$_SERVER["REQUEST_URI"]))
+php_cli_server_start(<<<'PHP'
+if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"]))
         return false; // serve the requested resource as-is.
 else {
         echo "here";
