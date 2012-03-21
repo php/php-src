@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     (Nikic, Laruence)
   . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
 	(Laruence)
+  . Fixed bug #61043 (Regression in magic_quotes_gpc fix for CVE-2012-0831).
+    (Ondřej Surý)
   . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical
 	vars). (Laruence)
   . Fix bug #60895 (Possible invalid handler usage in windows random
