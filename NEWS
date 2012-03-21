@@ -96,6 +96,8 @@ PHP                                                                        NEWS
     ReflectionMethod::invokeArgs()). (Laruence)
 
 - SPL:
+  . Fixed bug #61453 (SplObjectStorage does not identify objects correctly).
+    (Gustavo)
   . Fixed bug #61347 (inconsistent isset behavior of Arrayobject). (Laruence)
 
 - Standard:
