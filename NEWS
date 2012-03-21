@@ -58,7 +58,9 @@ PHP                                                                        NEWS
 - Readline:
   . Fixed bug #61088 (Memory leak in readline_callback_handler_install).
     (Nikic, Laruence)
-
+  . Add open_basedir checks to readline_write_history and readline_read_history.
+    (Rasmus, reported by Mateusz Goik)
+ 
 - Session
   . Fixed bug #60634 (Segmentation fault when trying to die() in 
     SessionHandler::write()). (Ilia)
