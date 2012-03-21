@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.1 RC1
 
 - CLI Server:
+  . Fixed bug #61461 (missing checks around malloc() calls). (Ilia)
   . Implemented FR #60850 (Built in web server does not set 
     $_SERVER['SCRIPT_FILENAME'] when using router). (Laruence)
   . "Connection: close" instead of "Connection: closed" (Gustavo)
