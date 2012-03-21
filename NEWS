@@ -71,6 +71,8 @@ PHP                                                                        NEWS
 - Readline:
   . Fixed bug #61088 (Memory leak in readline_callback_handler_install).
     (Nikic, Laruence)
+  . Add open_basedir checks to readline_write_history and readline_read_history.
+    (Rasmus, reported by Mateusz Goik)
 
 - Reflection:
   . Fixed bug #61388 (ReflectionObject:getProperties() issues invalid reads
