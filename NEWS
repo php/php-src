@@ -73,6 +73,8 @@ PHP                                                                        NEWS
     User-Agent header). (carloschilazo at gmail dot com)
   . Fixed bug #60842, #51775 (Chunked response parsing error when 
     chunksize length line is > 10 bytes). (Ilia)
+  . Fixed bug #49853 (Soap Client stream context header option ignored).
+    (Dmitry)
 
 - PDO
   . Fixed bug #61292 (Segfault while calling a method on an overloaded PDO 
