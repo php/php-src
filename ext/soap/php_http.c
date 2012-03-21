@@ -32,7 +32,7 @@ static int get_http_headers(php_stream *socketd,char **response, int *out_size T
 	smart_str_appendl(str,const,sizeof(const)-1)
 
 /* Proxy HTTP Authentication */
-void proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
+int proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 {
 	zval **login, **password;
 
@@ -53,11 +53,13 @@ void proxy_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 		smart_str_append_const(soap_headers, "\r\n");
 		efree(buf);
 		smart_str_free(&auth);
+		return 1;
 	}
+	return 0;
 }
 
 /* HTTP Authentication */
-void basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
+int basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 {
 	zval **login, **password;
 
@@ -79,6 +81,78 @@ void basic_authentication(zval* this_ptr, smart_str* soap_headers TSRMLS_DC)
 		smart_str_append_const(soap_headers, "\r\n");
 		efree(buf);
 		smart_str_free(&auth);
+		return 1;
+	}
+	return 0;
+}
+
+/* Additional HTTP headers */
+void http_context_headers(php_stream_context* context,
+                          zend_bool has_authorization,
+                          zend_bool has_proxy_authorization,
+                          zend_bool has_cookies,
+                          smart_str* soap_headers TSRMLS_DC)
+{
+	zval **tmp;
+
+	if (context &&
+		php_stream_context_get_option(context, "http", "header", &tmp) == SUCCESS &&
+		Z_TYPE_PP(tmp) == IS_STRING && Z_STRLEN_PP(tmp)) {
+		char *s = Z_STRVAL_PP(tmp);
+		char *p;
+		int name_len;
+
+		while (*s) {
+			/* skip leading newlines and spaces */
+			while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
+				s++;
+			}
+			/* extract header name */
+			p = s;
+			name_len = -1;
+			while (*p) {
+				if (*p == ':') {
+					if (name_len < 0) name_len = p - s;
+					break;
+				} else if (*p == ' ' || *p == '\t') {
+					if (name_len < 0) name_len = p - s;
+				} else if (*p == '\r' || *p == '\n') {
+					break;
+				}
+				p++;
+			}
+			if (*p == ':') {
+				/* extract header value */
+				while (*p && *p != '\r' && *p != '\n') {
+					p++;
+				}
+				/* skip some predefined headers */
+				if ((name_len != sizeof("host")-1 ||
+				     strncasecmp(s, "host", sizeof("host")-1) != 0) &&
+				    (name_len != sizeof("connection")-1 ||
+				     strncasecmp(s, "connection", sizeof("connection")-1) != 0) &&
+				    (name_len != sizeof("user-agent")-1 ||
+				     strncasecmp(s, "user-agent", sizeof("user-agent")-1) != 0) &&
+				    (name_len != sizeof("content-length")-1 ||
+				     strncasecmp(s, "content-length", sizeof("content-length")-1) != 0) &&
+				    (name_len != sizeof("content-type")-1 ||
+				     strncasecmp(s, "content-type", sizeof("content-type")-1) != 0) &&
+				    (!has_cookies ||
+				     name_len != sizeof("cookie")-1 ||
+				     strncasecmp(s, "cookie", sizeof("cookie")-1) != 0) &&
+				    (!has_authorization ||
+				     name_len != sizeof("authorization")-1 ||
+				     strncasecmp(s, "authorization", sizeof("authorization")-1) != 0) &&
+				    (!has_proxy_authorization ||
+				     name_len != sizeof("proxy-authorization")-1 ||
+				     strncasecmp(s, "proxy-authorization", sizeof("proxy-authorization")-1) != 0)) {
+				    /* add header */
+					smart_str_appendl(soap_headers, s, p-s);
+					smart_str_append_const(soap_headers, "\r\n");
+				}
+			}
+			s = (*p) ? (p + 1) : p;
+		}
 	}
 }
 
@@ -662,8 +736,7 @@ try_again:
 
 		/* Proxy HTTP Authentication */
 		if (use_proxy && !use_ssl) {
-			has_proxy_authorization = 1;
-			proxy_authentication(this_ptr, &soap_headers TSRMLS_CC);
+			has_proxy_authorization = proxy_authentication(this_ptr, &soap_headers TSRMLS_CC);
 		}
 
 		/* Send cookies along with request */
@@ -705,65 +778,7 @@ try_again:
 			}
 		}
 
-		if (context &&
-			php_stream_context_get_option(context, "http", "header", &tmp) == SUCCESS &&
-			Z_TYPE_PP(tmp) == IS_STRING && Z_STRLEN_PP(tmp)) {
-			char *s = Z_STRVAL_PP(tmp);
-			char *p;
-			int name_len;
-
-			while (*s) {
-				/* skip leading newlines and spaces */
-				while (*s == ' ' || *s == '\t' || *s == '\r' || *s == '\n') {
-					s++;
-				}
-				/* extract header name */
-				p = s;
-				name_len = -1;
-				while (*p) {
-					if (*p == ':') {
-						if (name_len < 0) name_len = p - s;
-						break;
-					} else if (*p == ' ' || *p == '\t') {
-						if (name_len < 0) name_len = p - s;
-					} else if (*p == '\r' || *p == '\n') {
-						break;
-					}
-					p++;
-				}
-				if (*p == ':') {
-					/* extract header value */
-					while (*p && *p != '\r' && *p != '\n') {
-						p++;
-					}
-					/* skip some predefined headers */
-					if ((name_len != sizeof("host")-1 ||
-					     strncasecmp(s, "host", sizeof("host")-1) != 0) &&
-					    (name_len != sizeof("connection")-1 ||
-					     strncasecmp(s, "connection", sizeof("connection")-1) != 0) &&
-					    (name_len != sizeof("user-agent")-1 ||
-					     strncasecmp(s, "user-agent", sizeof("user-agent")-1) != 0) &&
-					    (name_len != sizeof("content-length")-1 ||
-					     strncasecmp(s, "content-length", sizeof("content-length")-1) != 0) &&
-					    (name_len != sizeof("content-type")-1 ||
-					     strncasecmp(s, "content-type", sizeof("content-type")-1) != 0) &&
-					    (!has_cookies ||
-					     name_len != sizeof("cookie")-1 ||
-					     strncasecmp(s, "cookie", sizeof("cookie")-1) != 0) &&
-					    (!has_authorization ||
-					     name_len != sizeof("authorization")-1 ||
-					     strncasecmp(s, "authorization", sizeof("authorization")-1) != 0) &&
-					    (!has_proxy_authorization ||
-					     name_len != sizeof("proxy-authorization")-1 ||
-					     strncasecmp(s, "proxy-authorization", sizeof("proxy-authorization")-1) != 0)) {
-					    /* add header */
-						smart_str_appendl(&soap_headers, s, p-s);
-						smart_str_append_const(&soap_headers, "\r\n");
-					}
-				}
-				s = (*p) ? (p + 1) : p;
-			}
-		}
+		http_context_headers(context, has_authorization, has_proxy_authorization, has_cookies, &soap_headers TSRMLS_CC);
 
 		smart_str_append_const(&soap_headers, "\r\n");
 		smart_str_0(&soap_headers);
