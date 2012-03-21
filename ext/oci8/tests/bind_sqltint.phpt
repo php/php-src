@@ -123,6 +123,88 @@ oci_execute($s);
 
 check_col($c, 'number_t92', 150);
 
+echo "\nTEST151 - 159 Initialization tests\n";
+
+$s = oci_parse($c, "begin :p2 := :p1; end;");
+unset($p1);
+unset($p2);
+oci_bind_by_name($s, ":p1", $p1, 10);
+oci_bind_by_name($s, ":p2", $p2, -1, SQLT_INT);
+oci_execute($s);
+var_dump($p2);
+
+echo "\nTEST152\n";
+
+unset($p1);
+$p2 = null;
+oci_bind_by_name($s, ":p1", $p1, 10);
+oci_bind_by_name($s, ":p2", $p2, -1, SQLT_INT);
+oci_execute($s);
+var_dump($p2);
+
+echo "\nTEST153\n";
+
+unset($p1);
+$p2 = 1111;
+oci_bind_by_name($s, ":p1", $p1, 10);
+oci_bind_by_name($s, ":p2", $p2, -1, SQLT_INT);
+oci_execute($s);
+var_dump($p2);
+
+echo "\nTEST154\n";
+
+$p1 = null;
+unset($p2);
+oci_bind_by_name($s, ":p1", $p1, 10);
+oci_bind_by_name($s, ":p2", $p2, -1, SQLT_INT);
+oci_execute($s);
+var_dump($p2);
+
+echo "\nTEST155\n";
+
+$p1 = null;
+$p2 = null;
+oci_bind_by_name($s, ":p1", $p1, 10);
+oci_bind_by_name($s, ":p2", $p2, -1, SQLT_INT);
+oci_execute($s);
+var_dump($p2);
+
+echo "\nTEST156\n";
+
+$p1 = null;
+$p2 = 2222;
+oci_bind_by_name($s, ":p1", $p1, 10);
+oci_bind_by_name($s, ":p2", $p2, -1, SQLT_INT);
+oci_execute($s);
+var_dump($p2);
+
+echo "\nTEST157\n";
+
+$p1 = 3333;
+unset($p2);
+oci_bind_by_name($s, ":p1", $p1, 10);
+oci_bind_by_name($s, ":p2", $p2, -1, SQLT_INT);
+oci_execute($s);
+var_dump($p2);
+
+echo "\nTEST158\n";
+
+$p1 = 4444;
+$p2 = null;
+oci_bind_by_name($s, ":p1", $p1, 10);
+oci_bind_by_name($s, ":p2", $p2, -1, SQLT_INT);
+oci_execute($s);
+var_dump($p2);
+
+echo "\nTEST159\n";
+
+$p1 = 5555;
+$p2 = 6666;
+oci_bind_by_name($s, ":p1", $p1, 10);
+oci_bind_by_name($s, ":p2", $p2, -1, SQLT_INT);
+oci_execute($s);
+var_dump($p2);
+
 // Clean up
 
 $stmtarray = array(
@@ -224,4 +306,31 @@ array(1) {
     string(1) "0"
   }
 }
+
+TEST151 - 159 Initialization tests
+NULL
+
+TEST152
+NULL
+
+TEST153
+NULL
+
+TEST154
+NULL
+
+TEST155
+NULL
+
+TEST156
+NULL
+
+TEST157
+int(3333)
+
+TEST158
+int(4444)
+
+TEST159
+int(5555)
 ===DONE===
