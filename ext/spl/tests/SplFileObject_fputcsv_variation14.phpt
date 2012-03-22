@@ -8,7 +8,7 @@ Test fputcsv() : usage variations - with enclosure & delimiter of two chars
 
 echo "*** Testing fputcsv() : with enclosure & delimiter of two chars and file opened in read mode ***\n";
 
-$fo = new SplFileObject('SplFileObject_fputcsv.csv', 'w');
+$fo = new SplFileObject(__DIR__ . '/SplFileObject_fputcsv.csv', 'w');
 
 var_dump($fo->fputcsv(array('water', 'fruit'), ',,', '""'));
 
@@ -18,7 +18,8 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-unlink('SplFileObject::fputcsv.csv');
+$file = __DIR__ . '/SplFileObject_fputcsv.csv';
+unlink($file);
 ?>
 --EXPECTF--
 *** Testing fputcsv() : with enclosure & delimiter of two chars and file opened in read mode ***

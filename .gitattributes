@@ -21,3 +21,4 @@ sapi/nsapi/nsapi.c              ident
 sapi/continuity/capi.c          ident
 Zend/RFCs/002.txt               ident
 Zend/RFCs/003.txt               ident
+NEWS                            merge=NEWS
