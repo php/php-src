@@ -41,6 +41,5 @@ Warning: finfo_open() expects parameter 1 to be long, %unicode_string_optional% 
 bool(false)
 
 Warning: finfo::finfo() expects parameter 1 to be long, %unicode_string_optional% given in %s on line %d
-object(finfo)#%d (%d) {
-}
+NULL
 ===DONE===
