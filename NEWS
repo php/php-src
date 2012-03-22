@@ -13,12 +13,12 @@ PHP                                                                        NEWS
   . Fixed bug #61072 (Memory leak when restoring an exception handler).
     (Nikic, Laruence)
   . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
-	(Laruence)
+    (Laruence)
   . Fixed bug #61043 (Regression in magic_quotes_gpc fix for CVE-2012-0831).
     (Ondřej Surý)
   . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical
-	vars). (Laruence)
-  . Fix bug #60895 (Possible invalid handler usage in windows random
+    vars). (Laruence)
+  . Fixed bug #60895 (Possible invalid handler usage in windows random
     functions). (Pierre)
   . Fixed bug #60825 (Segfault when running symfony 2 tests).
     (Dmitry, Laruence)
@@ -134,7 +134,8 @@ PHP                                                                        NEWS
   . Fixed bug #54682 (tidy null pointer dereference). (Tony, David Soria Parra)
 
 - XMLRPC:
-  . Fixed bug #61264 (xmlrpc_parse_method_descriptions leaks temporary variable). (Nikita Popov)
+  . Fixed bug #61264 (xmlrpc_parse_method_descriptions leaks temporary
+    variable). (Nikita Popov)
   . Fixed bug #61097 (Memory leak in xmlrpc functions copying zvals). (Nikic)
 
 - Zlib:
