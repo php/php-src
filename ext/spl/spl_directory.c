@@ -1644,8 +1644,8 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 		/* ->current must be initialized; rewind doesn't set it and valid
 		 * doesn't check whether it's set */
 		iterator->current = object;
+		Z_SET_REFCOUNT_P(object, Z_REFCOUNT_P(object) + 2);
 	}
-	zval_add_ref(&object);
 	
 	return (zend_object_iterator*)iterator;
 }
@@ -1847,8 +1847,8 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 	if (iterator->intern.data == NULL) {
 		iterator->intern.data = object;
 		iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
+		zval_add_ref(&object);
 	}
-	zval_add_ref(&object);
 	
 	return (zend_object_iterator*)iterator;
 }
