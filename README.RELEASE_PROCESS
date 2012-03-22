@@ -50,38 +50,30 @@ Rolling a non stable release (alpha/beta/RC)
 2. run the "scripts/dev/credits" script in php-src and commit the changes in the
 credits files in ext/standard.
 
-3. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
+3. Checkout the release branch for this release (e.g., PHP-5.4.2).
+
+4. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
 Do not use abbreviations for alpha and beta.
 
-4. Commit those changes and note the revision id.
+5. Commit these changes to the branch with ``git commit -a``.
 
-5. tag the repository with the version. To do the tag in a fast way do a svn copy on the server using full URLs. You should use the revision id from the above commit to prevent mistakes in case there was a commit in between. f.e. "``svn cp https://svn.php.net/repository/php/php-src/branches/PHP_5_3@308399  https://svn.php.net/repository/php/php-src/tags/php_5_3_6RC1``"
-(of course, you need to change that to the version you're rolling an RC for). Mail php-internals to announce the tag so tests/validation/check can be done prior to package it. It is especially important for RCs.
+6. Tag the repository with the version, e.g.: 
+``git tag -u YOURKEYID PHP-5.4.2-RC2``
 
-6. Bump up the version numbers in ``main/php_version.h``, ``configure.in``
-and possibly ``NEWS`` again, to the **next** version. F.e. if the release
-candidate was "4.4.1RC1" then the new one should be "4.4.1RC2-dev" - regardless
-if we get a new RC or not. This is to make sure ``version_compare()`` can
-correctly work.
+7. Push the changes to the main repo:
+``git push --tags origin HEAD``
 
-7. Commit those changes
-
-8. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4
-branch if you're rolling 4.4.x releases).
-
-9. You do not have to update the tree, but of course you can with "``svn up``".
-
-10. run: ``./makedist php 4.4.1RC1``, this will export the tree, create configure
+8. run: ``./makedist 5.4.2-RC2``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
 
-11. Copy those two tarballs to www.php.net, in your homedir there should be a
+9. Copy those two tarballs to www.php.net, in your homedir there should be a
 directory "downloads/". Copy them into there, so that the system can generate
 MD5 sums. If you do not have this directory, talk to Derick.
 
-12. Now the RC can be found on http://downloads.php.net/yourname,
+10. Now the RC can be found on http://downloads.php.net/yourname,
 f.e. http://downloads.php.net/derick/
 
-13. Once the release has been tagged, contact the PHP Windows development team
+11. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once
 those are made, they should be placed into the same directory as the source snapshots.
 
