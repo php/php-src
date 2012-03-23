@@ -17,14 +17,13 @@ $doc = new DOMDocument();
 $doc->loadXML($xml, LIBXML_NOENT);
 $n = $doc->doctype;
 $doc->removeChild($n);
-var_dump($n);
+echo get_class($n), "\n";
 print $doc->saveXML();
 ?>
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-object(DOMDocumentType)#%d (0) {
-}
+DOMDocumentType
 <?xml version="1.0" encoding="utf-8"?>
 <set><foo>footext</foo><bar>bartext</bar></set>
 ===DONE===

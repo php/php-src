@@ -29,7 +29,7 @@ EOXML;
 
 function dumpcourse($current) {
 	$title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title"; 
-	echo "Course: $title:";var_dump($current);
+	echo "Course: $title:";echo get_class($current), "\n";
 	echo "~";var_dump($current->textContent);
 }
 
@@ -60,13 +60,11 @@ for ($index = 0; $index < $children->length; $index++) {
 --EXPECTF--
 orignal has 5 nodes
 node 4
-Course: no title:object(DOMText)#4 (0) {
-}
+Course: no title:DOMText
 ~string(1) "
 "
 node 3
-Course: two:object(DOMElement)#5 (0) {
-}
+Course: two:DOMElement
 ~string(24) "
 		
 			c2n1
@@ -74,13 +72,11 @@ Course: two:object(DOMElement)#5 (0) {
 		
 	"
 node 2
-Course: no title:object(DOMText)#6 (0) {
-}
+Course: no title:DOMText
 ~string(2) "
 	"
 node 1
-Course: one:object(DOMElement)#4 (0) {
-}
+Course: one:DOMElement
 ~string(24) "
 		
 			c1n1
@@ -88,14 +84,12 @@ Course: one:object(DOMElement)#4 (0) {
 		
 	"
 node 0
-Course: no title:object(DOMText)#5 (0) {
-}
+Course: no title:DOMText
 ~string(2) "
 	"
 after text removed it now has 2 nodes
 node 0
-Course: one:object(DOMElement)#3 (0) {
-}
+Course: one:DOMElement
 ~string(24) "
 		
 			c1n1
@@ -103,8 +97,7 @@ Course: one:object(DOMElement)#3 (0) {
 		
 	"
 node 1
-Course: two:object(DOMElement)#4 (0) {
-}
+Course: two:DOMElement
 ~string(24) "
 		
 			c2n1
