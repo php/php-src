@@ -34,6 +34,9 @@ PHP                                                                        NEWS
     function is by reference). (Nikita Popov)
   . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
 
+- DOM
+  . Added debug info handler to DOM objects. (Gustavo, Joey Smith)
+
 - FPM
   . Fixed bug #61430 (Transposed memset() params in sapi/fpm/fpm/fpm_shm.c).
     (michaelhood at gmail dot com, Ilia)
