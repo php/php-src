@@ -1421,13 +1421,15 @@ ZEND_FUNCTION(set_error_handler)
 		return;
 	}
 
-	if (!zend_is_callable(error_handler, 0, &error_handler_name TSRMLS_CC)) {
-		zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-				   get_active_function_name(TSRMLS_C), error_handler_name?error_handler_name:"unknown");
+	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
+		if (!zend_is_callable(error_handler, 0, &error_handler_name TSRMLS_CC)) {
+			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
+					   get_active_function_name(TSRMLS_C), error_handler_name?error_handler_name:"unknown");
+			efree(error_handler_name);
+			return;
+		}
 		efree(error_handler_name);
-		return;
 	}
-	efree(error_handler_name);
 
 	if (EG(user_error_handler)) {
 		had_orig_error_handler = 1;
@@ -1439,7 +1441,7 @@ ZEND_FUNCTION(set_error_handler)
 	}
 	ALLOC_ZVAL(EG(user_error_handler));
 
-	if (!zend_is_true(error_handler)) { /* unset user-defined handler */
+	if (Z_TYPE_P(error_handler) == IS_NULL) { /* unset user-defined handler */
 		FREE_ZVAL(EG(user_error_handler));
 		EG(user_error_handler) = NULL;
 		RETURN_TRUE;
