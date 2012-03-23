@@ -120,6 +120,16 @@ static void spl_filesystem_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 		spl_filesystem_file_free_line(intern TSRMLS_CC);
 		break;
 	}
+
+	{
+		zend_object_iterator *iterator;
+		iterator = (zend_object_iterator*)
+				spl_filesystem_object_to_iterator(intern);
+		if (iterator->data != NULL) {
+			iterator->data = NULL;
+			iterator->funcs->dtor(iterator TSRMLS_CC);
+		}
+	}
 	efree(object);
 } /* }}} */
 
@@ -1638,10 +1648,15 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 	dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
 	iterator   = spl_filesystem_object_to_iterator(dir_object);
 
-	Z_SET_REFCOUNT_P(object, Z_REFCOUNT_P(object) + 2);
-	iterator->intern.data = (void*)object;
-	iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
-	iterator->current = object;
+	/* initialize iterator if it wasn't gotten before */
+	if (iterator->intern.data == NULL) {
+		iterator->intern.data = object;
+		iterator->intern.funcs = &spl_filesystem_dir_it_funcs;
+		/* ->current must be initialized; rewind doesn't set it and valid
+		 * doesn't check whether it's set */
+		iterator->current = object;
+	}
+	zval_add_ref(&object);
 	
 	return (zend_object_iterator*)iterator;
 }
@@ -1651,13 +1666,16 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
-	zval *zfree = (zval*)iterator->intern.data;
 
-	iterator->intern.data = NULL; /* mark as unused */
-	zval_ptr_dtor(&iterator->current);
-	if (zfree) {
-		zval_ptr_dtor(&zfree);
+	if (iterator->intern.data) {
+		zval *object =  iterator->intern.data;
+		zval_ptr_dtor(&object);
 	}
+	/* Otherwise we were called from the owning object free storage handler as
+	 * it sets
+	 * iterator->intern.data to NULL.
+	 * We don't even need to destroy iterator->current as we didn't add a
+	 * reference to it in move_forward or get_iterator */
 }
 /* }}} */
 
@@ -1720,15 +1738,15 @@ static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC)
 static void spl_filesystem_tree_it_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_iterator *iterator = (spl_filesystem_iterator *)iter;
-	zval *zfree = (zval*)iterator->intern.data;
 
-	if (iterator->current) {
-		zval_ptr_dtor(&iterator->current);
+	if (iterator->intern.data) {
+		zval *object = 	iterator->intern.data;
+		zval_ptr_dtor(&object);
+	} else {
+		if (iterator->current) {
+			zval_ptr_dtor(&iterator->current);
+		}
 	}
-	iterator->intern.data = NULL; /* mark as unused */
-	/* free twice as we add ref twice */
-	zval_ptr_dtor(&zfree);
-	zval_ptr_dtor(&zfree);
 }
 /* }}} */
 
@@ -1839,10 +1857,12 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 	dir_object = (spl_filesystem_object*)zend_object_store_get_object(object TSRMLS_CC);
 	iterator   = spl_filesystem_object_to_iterator(dir_object);
 
-	Z_SET_REFCOUNT_P(object, Z_REFCOUNT_P(object) + 2);
-	iterator->intern.data = (void*)object;
-	iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
-	iterator->current = NULL;
+	/* initialize iterator if wasn't gotten before */
+	if (iterator->intern.data == NULL) {
+		iterator->intern.data = object;
+		iterator->intern.funcs = &spl_filesystem_tree_it_funcs;
+	}
+	zval_add_ref(&object);
 	
 	return (zend_object_iterator*)iterator;
 }
