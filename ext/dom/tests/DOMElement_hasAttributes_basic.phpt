@@ -19,7 +19,7 @@ if(!$dom) {
 $element = $dom->documentElement;
 
 echo "Verify that we have a DOMElement object:\n";
-var_dump($element);
+echo get_class($element), "\n";
 
 echo "\nElement should have attributes:\n";
 var_dump($element->hasAttributes()); 
@@ -28,24 +28,22 @@ $nodelist=$dom->getElementsByTagName('tbody') ;
 $element = $nodelist->item(0);
 
 echo "\nVerify that we have a DOMElement object:\n";
-var_dump($element);
+echo get_class($element), "\n";
 
 echo "\nElement should have no attributes:\n"; 
-var_dump($element->hasAttributes()) 
+var_dump($element->hasAttributes());
 
 
 ?>
 --EXPECTF--
 Verify that we have a DOMElement object:
-object(DOMElement)#%d (0) {
-}
+DOMElement
 
 Element should have attributes:
 bool(true)
 
 Verify that we have a DOMElement object:
-object(DOMElement)#%d (0) {
-}
+DOMElement
 
 Element should have no attributes:
 bool(false)

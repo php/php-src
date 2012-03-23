@@ -18,26 +18,23 @@ $doc->registerNodeClass('DOMElement', 'myElement');
 $doc->appendChild(new DOMElement('root'));
 $root = $doc->documentElement;
 $root->setAttribute('a', 'a1');
-var_dump($root);
+echo get_class($root), "\n";
 print $root->testit()."\n";
 $attr = $root->getAttributeNode('a');
-var_dump($attr);
+echo get_class($attr), "\n";
 print $attr->testit()."\n";
 unset($attr);
 $doc->registerNodeClass('DOMAttr', NULL);
 $attr = $root->getAttributeNode('a');
-var_dump($attr);
+echo get_class($attr), "\n";
 print $attr->testit()."\n";
 ?>
 --EXPECTF--
 
-object(myElement)#%d (0) {
-}
+myElement
 HELLO Element
-object(myAttribute)#%d (0) {
-}
+myAttribute
 HELLO Attribute
-object(DOMAttr)#%d (0) {
-}
+DOMAttr
 
 Fatal error: Call to undefined method DOMAttr::testit() in %s on line 25

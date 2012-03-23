@@ -8,8 +8,7 @@ Eric Lee Stewart <ericleestewart@gmail.com>
 --FILE--
 <?php
 $fragment = new DOMDocumentFragment();
-var_dump($fragment);
+var_dump(get_class($fragment));
 ?>
---EXPECTF--
-object(DOMDocumentFragment)#%d (%d) {
-}
+--EXPECT--
+string(19) "DOMDocumentFragment"

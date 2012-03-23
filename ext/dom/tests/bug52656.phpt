@@ -6,9 +6,9 @@ Bug #52656 (DOMCdataSection does not work with splitText).
 <?php
 $CData = new DOMCdataSection('splithere!');
 $CDataSplit = $CData->splitText(5);
-var_dump($CDataSplit, $CDataSplit->data);
+echo get_class($CDataSplit), "\n";
+var_dump($CDataSplit->data);
 ?>
 --EXPECT--
-object(DOMText)#2 (0) {
-}
+DOMText
 string(5) "here!"

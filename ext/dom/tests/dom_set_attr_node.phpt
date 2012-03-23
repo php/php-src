@@ -2,6 +2,8 @@
 Test: setAttributeNode()
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
+--INI--
+error_reporting = E_ALL & ~E_WARNING
 --FILE--
 <?php
 
@@ -24,9 +26,13 @@ $dom2 = new DOMDocument();
 $dom2->loadXML($xml2);
 $root2 = $dom2->documentElement;
 try {
-   $root2->setAttributeNode($attr);
+	$root2->setAttributeNode($attr);
 } catch (domexception $e) {
-    var_dump($e);
+ob_start();
+	var_dump($e);
+	$contents = ob_get_contents();
+	ob_end_clean();
+	echo preg_replace('/object\(DOMAttr\).+\{.*?\}/s', 'DOMAttr', $contents);
 } 
 
 ?>
@@ -57,8 +63,7 @@ object(DOMException)#%d (7) {
       ["args"]=>
       array(1) {
         [0]=>
-        object(DOMAttr)#%d (0) {
-        }
+        DOMAttr
       }
     }
   }

@@ -12,7 +12,11 @@ print "--- Catch exception with try/catch\n";
 try {
     $rootNode->appendChild($rootNode);
 } catch (domexception $e) {
+	ob_start();
     var_dump($e);
+	$contents = ob_get_contents();
+	ob_end_clean();
+	echo preg_replace('/object\(DOMElement\).+\{.*?\}/s', 'DOMElement', $contents);
 }
 print "--- Don't catch exception with try/catch\n";
 $rootNode->appendChild($rootNode);
@@ -47,8 +51,7 @@ object(DOMException)#%d (%d) {
       ["args"]=>
       array(1) {
         [0]=>
-        object(DOMElement)#%d (0) {
-        }
+        DOMElement
       }
     }
   }
@@ -61,6 +64,6 @@ object(DOMException)#%d (%d) {
 
 Fatal error: Uncaught exception 'DOMException' with message 'Hierarchy Request Error' in %sdom003.php:%d
 Stack trace:
-#0 %sdom003.php(13): DOMNode->appendChild(Object(DOMElement))
+#0 %sdom003.php(%d): DOMNode->appendChild(Object(DOMElement))
 #1 {main}
   thrown in %sdom003.php on line %d
