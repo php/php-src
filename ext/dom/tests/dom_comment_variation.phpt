@@ -20,14 +20,13 @@ $children = $root->childNodes;
 for ($index = 0; $index < $children->length; $index++) {
 	echo "--- child $index ---\n";
 	$current = $children->item($index);
-	var_dump($current);
+	echo get_class($current), "\n";
 	var_dump($current->textContent);
 }
 
 --EXPECTF--
 bool(true)
 --- child 0 ---
-object(DOMComment)#%d (0) {
-}
+DOMComment
 string(14) " Hello World! "
 

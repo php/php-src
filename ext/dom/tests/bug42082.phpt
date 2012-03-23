@@ -7,7 +7,7 @@ Bug #42082 (NodeList length zero should be empty)
 $doc = new DOMDocument();
 $xpath = new DOMXPath($doc);
 $nodes = $xpath->query('*');
-var_dump($nodes);
+echo get_class($nodes), "\n";
 var_dump($nodes->length);
 $length = $nodes->length;
 var_dump(empty($nodes->length), empty($length));
@@ -18,8 +18,7 @@ var_dump(empty($doc->nodeType), empty($doc->firstChild->nodeType))
 ?>
 ===DONE===
 --EXPECTF--
-object(DOMNodeList)#%d (0) {
-}
+DOMNodeList
 int(0)
 bool(true)
 bool(true)

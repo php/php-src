@@ -29,7 +29,7 @@ EOXML;
 
 function dumpcourse($current) {
 	$title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title"; 
-	echo "Course: $title:";var_dump($current);
+	echo "Course: $title:";echo(get_class($current)), "\n";
 	echo "~";var_dump($current->textContent);
 }
 
@@ -75,8 +75,7 @@ for ($index = 0; $index < $children->length; $index++) {
 --EXPECTF--
 Start cloneNode test
 node 0
-Course: new title3:object(DOMElement)#6 (0) {
-}
+Course: new title3:DOMElement
 ~string(24) "
 		
 			c1n1
@@ -84,8 +83,7 @@ Course: new title3:object(DOMElement)#6 (0) {
 		
 	"
 node 1
-Course: two:object(DOMElement)#3 (0) {
-}
+Course: two:DOMElement
 ~string(24) "
 		
 			c2n1
@@ -93,12 +91,10 @@ Course: two:object(DOMElement)#3 (0) {
 		
 	"
 node 2
-Course: new title default:object(DOMElement)#4 (0) {
-}
+Course: new title default:DOMElement
 ~string(0) ""
 node 3
-Course: new title true:object(DOMElement)#7 (0) {
-}
+Course: new title true:DOMElement
 ~string(24) "
 		
 			c1n1
@@ -106,6 +102,5 @@ Course: new title true:object(DOMElement)#7 (0) {
 		
 	"
 node 4
-Course: new title false:object(DOMElement)#8 (0) {
-}
+Course: new title false:DOMElement
 ~string(0) ""

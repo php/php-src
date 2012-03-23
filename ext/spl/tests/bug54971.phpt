@@ -21,29 +21,17 @@ $doc->loadXML($source);
 $xpath = new DOMXPath($doc);
 $items = $xpath->query('//node');
 
-print_r(iterator_to_array($items, false));
-print_r(iterator_to_array($items, true));
+print_r(array_map('get_class', iterator_to_array($items, false)));
+print_r(array_map('get_class', iterator_to_array($items, true)));
 ?>
 --EXPECT--
 Array
 (
-    [0] => DOMElement Object
-        (
-        )
-
-    [1] => DOMElement Object
-        (
-        )
-
+    [0] => DOMElement
+    [1] => DOMElement
 )
 Array
 (
-    [0] => DOMElement Object
-        (
-        )
-
-    [1] => DOMElement Object
-        (
-        )
-
+    [0] => DOMElement
+    [1] => DOMElement
 )
