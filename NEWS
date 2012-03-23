@@ -100,9 +100,6 @@ PHP                                                                        NEWS
 
 - SPL
   . Fixed memory leak when calling SplFileInfo's constructor twice. (Felipe)
-  . Fixed bug #61418 (Segmentation fault when DirectoryIterator's or
-    FilesystemIterator's iterators are requested more than once without
-    having had its dtor callback called in between). (Gustavo)
   . Fixed bug #61347 (inconsistent isset behavior of Arrayobject). (Laruence)
   . Fixed bug #61326 (ArrayObject comparison). (Gustavo)
 
