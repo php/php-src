@@ -38,7 +38,7 @@ PHP                                                                        NEWS
   . Fixed bug #60569 (Nullbyte truncates Exception $message). (Ilia)
   . Fixed bug #52719 (array_walk_recursive crashes if third param of the
     function is by reference). (Nikita Popov)
-  . Improve performance of set_exception handler while doing reset (Laruence)
+  . Improve performance of set_exception_handler while doing reset (Laruence)
 
 - FPM
   . Fixed bug #61430 (Transposed memset() params in sapi/fpm/fpm/fpm_shm.c).
