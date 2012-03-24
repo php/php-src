@@ -15,5 +15,3 @@ class c extends b {function f() {}}
 ?>
 --EXPECTF--
 string(60) "Declaration of c::f() should be compatible with b::f($a = 1)"
-
-
