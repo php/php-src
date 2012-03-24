@@ -543,7 +543,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp TSRMLS_DC
 
 static HashTable* dom_get_debug_info(zval *object, int *is_temp TSRMLS_DC) /* {{{ */
 {
-       return dom_get_debug_info_helper(object, is_temp);
+       return dom_get_debug_info_helper(object, is_temp TSRMLS_CC);
 }
 /* }}} */
 
