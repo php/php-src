@@ -93,7 +93,6 @@ PHP                                                                        NEWS
 
 - SOAP
   . Fixed basic HTTP authentication for WSDL sub requests. (Dmitry)
-  . Fixed bug #61423 (gzip compression fails). (Ilia)
   . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
     User-Agent header). (carloschilazo at gmail dot com)
   . Fixed bug #60842, #51775 (Chunked response parsing error when 
