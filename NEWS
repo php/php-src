@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - General improvements:
   . Drop Windows XP and 2003 support. (Pierre)
   . World domination
+  . Improve set_exception_handler while doing reset.(Laruence)
 
 - cURL:
   . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 
