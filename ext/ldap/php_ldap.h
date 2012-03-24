@@ -23,7 +23,7 @@
 #ifndef PHP_LDAP_H
 #define PHP_LDAP_H
 
-#ifndef HAVE_ORALDAP
+#if !defined(HAVE_OCI8) && !defined(HAVE_ORALDAP)
 #include <lber.h>
 #endif
 
