@@ -322,7 +322,6 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
-	my_ulonglong row_count;
 	PDO_DBG_ENTER("pdo_mysql_stmt_execute");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 
