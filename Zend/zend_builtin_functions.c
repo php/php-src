@@ -1512,7 +1512,6 @@ ZEND_FUNCTION(trigger_error)
 ZEND_FUNCTION(set_error_handler)
 {
 	zval *error_handler;
-	zend_bool had_orig_error_handler=0;
 	char *error_handler_name = NULL;
 	long error_type = E_ALL;
 
@@ -1531,29 +1530,20 @@ ZEND_FUNCTION(set_error_handler)
 	}
 
 	if (EG(user_error_handler)) {
-		had_orig_error_handler = 1;
-		*return_value = *EG(user_error_handler);
-		zval_copy_ctor(return_value);
-		INIT_PZVAL(return_value);
+		RETVAL_ZVAL(EG(user_error_handler), 1, 0);
+
 		zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting), sizeof(EG(user_error_handler_error_reporting)));
 		zend_ptr_stack_push(&EG(user_error_handlers), EG(user_error_handler));
 	}
-	ALLOC_ZVAL(EG(user_error_handler));
 
 	if (Z_TYPE_P(error_handler) == IS_NULL) { /* unset user-defined handler */
-		FREE_ZVAL(EG(user_error_handler));
 		EG(user_error_handler) = NULL;
 		return;
 	}
 
+	ALLOC_ZVAL(EG(user_error_handler));
+	MAKE_COPY_ZVAL(&error_handler, EG(user_error_handler));
 	EG(user_error_handler_error_reporting) = (int)error_type;
-	*EG(user_error_handler) = *error_handler;
-	zval_copy_ctor(EG(user_error_handler));
-	INIT_PZVAL(EG(user_error_handler));
-
-	if (!had_orig_error_handler) {
-		RETURN_NULL();
-	}
 }
 /* }}} */
 
@@ -1587,7 +1577,6 @@ ZEND_FUNCTION(set_exception_handler)
 {
 	zval *exception_handler;
 	char *exception_handler_name = NULL;
-	zend_bool had_orig_exception_handler=0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &exception_handler) == FAILURE) {
 		return;
@@ -1604,24 +1593,18 @@ ZEND_FUNCTION(set_exception_handler)
 	}
 
 	if (EG(user_exception_handler)) {
-		had_orig_exception_handler = 1;
-		*return_value = *EG(user_exception_handler);
-		zval_copy_ctor(return_value);
+		RETVAL_ZVAL(EG(user_exception_handler), 1, 0);
+
 		zend_ptr_stack_push(&EG(user_exception_handlers), EG(user_exception_handler));
 	}
-	ALLOC_ZVAL(EG(user_exception_handler));
 
 	if (Z_TYPE_P(exception_handler) == IS_NULL) { /* unset user-defined handler */
-		FREE_ZVAL(EG(user_exception_handler));
 		EG(user_exception_handler) = NULL;
 		return;
 	}
 
+	ALLOC_ZVAL(EG(user_exception_handler));
 	MAKE_COPY_ZVAL(&exception_handler, EG(user_exception_handler))
-
-	if (!had_orig_exception_handler) {
-		RETURN_NULL();
-	}
 }
 /* }}} */
 
