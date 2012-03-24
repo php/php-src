@@ -33,8 +33,6 @@ PHP                                                                        NEWS
   . Fixed bug #60801 (strpbrk() mishandles NUL byte). (Adam)
   . Fixed bug #60717 (Order of traits in use statement can cause a fatal
     error). (Stefan)
-  . Implemented FR #60738 (Allow 'set_error_handler' to handle NULL).
-    (Laruence, Nikita Popov)
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
   . Fixed bug #60569 (Nullbyte truncates Exception $message). (Ilia)
