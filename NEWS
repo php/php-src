@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . World domination
   . Improve set_exception_handler while doing reset.(Laruence)
 
+- Core:
+  . Implemented FR #60738 (Allow 'set_error_handler' to handle NULL).
+    (Laruence, Nikita Popov)
+
 - cURL:
   . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 
     CURLOPT_DIRLISTONLY, CURLOPT_NEW_DIRECTORY_PERMS, CURLOPT_NEW_FILE_PERMS, 
