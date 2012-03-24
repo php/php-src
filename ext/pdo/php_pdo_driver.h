@@ -341,7 +341,7 @@ typedef int (*pdo_stmt_describe_col_func)(pdo_stmt_t *stmt, int colno);
  * If the driver sets caller_frees, ptr should point to emalloc'd memory
  * and PDO will free it as soon as it is done using it.
  */
-typedef int (*pdo_stmt_get_col_data_func)(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulong *len, int *caller_frees);
+typedef int (*pdo_stmt_get_col_data_func)(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len, int *caller_frees);
 
 /* hook for bound params */
 enum pdo_param_event {

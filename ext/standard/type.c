@@ -140,9 +140,6 @@ PHP_FUNCTION(intval)
 	zval *num;
 	zend_long base = 10;
 
-	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
-		WRONG_PARAM_COUNT;
-	}
 #ifndef FAST_ZPP
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &num, &base) == FAILURE) {
 		return;
@@ -411,7 +408,7 @@ PHP_FUNCTION(is_callable)
 	if (syntax_only) {
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}
-	if (ZEND_NUM_ARGS() > 2) {
+	if (callable_name != NULL) {
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, &error);
 		zval_dtor(callable_name);
 		//??? is it necessary to be consistent with old PHP ("\0" support)

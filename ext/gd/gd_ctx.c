@@ -74,9 +74,8 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	zval *imgind;
 	char *file = NULL;
 	size_t file_len = 0;
-	zend_long quality, basefilter;
+	zend_long quality = -1, basefilter = -1;
 	gdImagePtr im;
-	int argc = ZEND_NUM_ARGS();
 	int q = -1, i;
 	int f = -1;
 	gdIOCtx *ctx = NULL;
@@ -104,15 +103,10 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, imgind, -1, "Image", phpi_get_le_gd());
+	q = quality; /* or colorindex for foreground of BW images (defaults to black) */
+	f = basefilter;
 
-	if (argc >= 3) {
-		q = quality; /* or colorindex for foreground of BW images (defaults to black) */
-		if (argc == 4) {
-			f = basefilter;
-		}
-	}
-
-	if (argc > 1 && to_zval != NULL) {
+	if (to_zval != NULL) {
 		if (Z_TYPE_P(to_zval) == IS_RESOURCE) {
 			php_stream_from_zval_no_verify(stream, to_zval);
 			if (stream == NULL) {
@@ -172,7 +166,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			break;
 		case PHP_GDIMG_TYPE_XBM:
 		case PHP_GDIMG_TYPE_WBM:
-			if (argc < 3) {
+			if (ZEND_NUM_ARGS() < 3) {
 				for(i=0; i < gdImageColorsTotal(im); i++) {
 					if(!gdImageRed(im, i) && !gdImageGreen(im, i) && !gdImageBlue(im, i)) break;
 				}

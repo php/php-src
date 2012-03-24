@@ -78,7 +78,7 @@ static zend_class_entry *dir_class_entry_ptr;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &id) == FAILURE) { \
 		return; \
 	} \
-	if (ZEND_NUM_ARGS() == 0) { \
+	if (id == NULL) { \
 		myself = getThis(); \
 		if (myself) { \
 			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(myself), "handle", sizeof("handle")-1)) == NULL) { \

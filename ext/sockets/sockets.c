@@ -1086,7 +1086,7 @@ PHP_FUNCTION(socket_write)
 	php_socket	*php_sock;
 	int			retval;
 	size_t      str_len;
-	zend_long	length = 0;
+	zend_long	length = ZEND_LONG_MAX;
 	char		*str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &arg1, &str, &str_len, &length) == FAILURE) {
@@ -1095,14 +1095,14 @@ PHP_FUNCTION(socket_write)
 
 	ZEND_FETCH_RESOURCE(php_sock, php_socket *, arg1, -1, le_socket_name, le_socket);
 
-	if (ZEND_NUM_ARGS() < 3) {
+	if (length > str_len) {
 		length = str_len;
 	}
 
 #ifndef PHP_WIN32
-	retval = write(php_sock->bsd_socket, str, MIN(length, str_len));
+	retval = write(php_sock->bsd_socket, str, length);
 #else
-	retval = send(php_sock->bsd_socket, str, min(length, str_len), 0);
+	retval = send(php_sock->bsd_socket, str, length, 0);
 #endif
 
 	if (retval < 0) {
@@ -1384,10 +1384,10 @@ PHP_FUNCTION(socket_connect)
 	char				*addr;
 	int					retval;
 	size_t              addr_len;
-	zend_long				port = 0;
+	zend_long			port = 0;
 	int					argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rs|l", &arg1, &addr, &addr_len, &port) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, argc, "rs|l", &arg1, &addr, &addr_len, &port) == FAILURE) {
 		return;
 	}
 
@@ -1775,7 +1775,7 @@ PHP_FUNCTION(socket_sendto)
 	char				*buf, *addr;
 	int					argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc, "rslls|l", &arg1, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, argc, "rslls|l", &arg1, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port) == FAILURE) {
 		return;
 	}
 

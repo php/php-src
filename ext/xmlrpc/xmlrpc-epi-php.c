@@ -1025,12 +1025,8 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|a", &handle, &rawxml, &rawxml_len, &caller_params, &output_opts) != SUCCESS) {
 		return;
 	}
-	/* user output options */
-	if (argc == 3) {
-		set_output_options(&out, NULL);
-	} else {
-		set_output_options(&out, output_opts);
-	}
+	/* user output options, will set to NULL if omitted */
+	set_output_options(&out, output_opts);
 
 	ZEND_FETCH_RESOURCE(server, xmlrpc_server_data*, handle, -1, "xmlrpc server", le_xmlrpc_server);
 

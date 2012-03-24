@@ -243,6 +243,9 @@ typedef struct _zend_try_catch_element {
 /* internal function is allocated at arena */
 #define ZEND_ACC_ARENA_ALLOCATED		0x20000000
 
+/* internal function allows defaults in varargs */
+#define ZEND_ACC_ALLOWS_DEFAULT			0x40000000
+
 #define ZEND_CE_IS_TRAIT(ce) (((ce)->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT)
 
 char *zend_visibility_string(uint32_t fn_flags);
@@ -294,7 +297,7 @@ typedef struct _zend_internal_function_info {
 	const char *_class_name;
 	zend_uchar _type_hint;
 	zend_bool return_reference;
-	zend_bool _allow_null;
+	zend_bool allow_default;
 	zend_bool _is_variadic;
 } zend_internal_function_info;
 
@@ -415,6 +418,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
 #define ZEND_CALL_CTOR               (1 << 3)
 #define ZEND_CALL_CTOR_RESULT_UNUSED (1 << 4)
+#define ZEND_CALL_HAS_DEFAULT        (1 << 5)
 
 #define ZEND_CALL_INFO(call) \
 	(Z_TYPE_INFO((call)->This) >> 24)

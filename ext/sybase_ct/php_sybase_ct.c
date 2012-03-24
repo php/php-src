@@ -1977,7 +1977,7 @@ static char *php_sybase_get_field_name(CS_INT type)
 PHP_FUNCTION(sybase_fetch_field)
 {
 	zval *sybase_result_index = NULL;
-	long field_offset = -1;
+	zend_long field_offset = -1;
 	sybase_result *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &sybase_result_index, &field_offset) == FAILURE) {

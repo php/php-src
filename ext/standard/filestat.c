@@ -714,12 +714,14 @@ PHP_FUNCTION(touch)
 {
 	char *filename;
 	size_t filename_len;
-	zend_long filetime = 0, fileatime = 0;
+	zend_long filetime, fileatime;
 	int ret, argc = ZEND_NUM_ARGS();
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = &newtimebuf;
 	php_stream_wrapper *wrapper;
+
+	filetime = fileatime = time(NULL);
 
 	if (zend_parse_parameters(argc, "p|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
 		return;
@@ -734,7 +736,7 @@ PHP_FUNCTION(touch)
 #ifdef HAVE_UTIME_NULL
 			newtime = NULL;
 #else
-			newtime->modtime = newtime->actime = time(NULL);
+			newtime->modtime = newtime->actime = filetime;
 #endif
 			break;
 		case 2:

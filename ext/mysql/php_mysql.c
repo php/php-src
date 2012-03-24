@@ -2083,7 +2083,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 	ZEND_PARSE_PARAMETERS_END();
 #endif
 
-		if (ZEND_NUM_ARGS() < 2) {
+		if (class_name == NULL) {
 			ce = zend_standard_class_def;
 		} else {
 			ce = zend_fetch_class(class_name, ZEND_FETCH_CLASS_AUTO);

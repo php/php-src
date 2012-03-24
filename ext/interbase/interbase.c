@@ -156,8 +156,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_query, 0, 0, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, query)
-	ZEND_ARG_INFO(0, bind_arg)
-	ZEND_ARG_INFO(0, bind_arg)
+/*	ZEND_ARG_INFO(0, bind_arg)
+	ZEND_ARG_INFO(0, bind_arg) */
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_affected_rows, 0, 0, 0)
@@ -1063,7 +1063,7 @@ PHP_FUNCTION(ibase_close)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (link_arg == NULL) {
 		link_id = IBG(default_link);
 		CHECK_LINK(link_id);
 		IBG(default_link) = -1;
@@ -1101,7 +1101,7 @@ PHP_FUNCTION(ibase_drop_db)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (link_arg == NULL) {
 		link_id = IBG(default_link);
 		CHECK_LINK(link_id);
 		IBG(default_link) = -1;
@@ -1333,7 +1333,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (arg == NULL) {
 		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK, le_link, le_plink);
 		if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 			/* this link doesn't have a default transaction */

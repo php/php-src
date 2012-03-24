@@ -341,6 +341,22 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 		spec_walk++;
 	}
 
+	if(UNEXPECTED(Z_ISUNDEF_P(arg))) {
+		/* consume the arg part */
+		va_arg(*va, void*);
+		if (check_null) {
+			zend_bool *p = va_arg(*va, zend_bool *);
+			/* TODO (SKIP): treat default as null-value? */
+			*p = 1;
+		}
+		/* ones needing more than one va_list entry */
+		if(strchr("psf", c) != NULL) {
+			va_arg(*va, void*);
+		}
+		*spec = spec_walk;
+		return NULL;
+	}
+
 	switch (c) {
 		case 'l':
 		case 'L':
@@ -750,6 +766,22 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		}
 
 		arg = ZEND_CALL_ARG(EG(current_execute_data), i + 1);
+
+		if(UNEXPECTED(Z_ISUNDEF_P(arg))) {
+			/* default arg */
+			if((flags & ZEND_PARSE_PARAMS_NODEFAULT) != 0) {
+				if(!quiet) {
+					zend_error(E_WARNING, "Default can not be used for parameter %d", i+1);
+				}
+				return FAILURE;
+			}
+			if(i < min_num_args) {
+				if(!quiet) {
+					zend_error(E_WARNING, "Default can not be used for mandatory parameter %d", i+1);
+				}
+				return FAILURE;
+			}
+		}
 
 		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet) == FAILURE) {
 			/* clean up varargs array if it was used */
@@ -1995,6 +2027,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 			if (info->return_reference) {
 				internal_function->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+			}
+			if (info->allow_default) {
+				internal_function->fn_flags |= ZEND_ACC_ALLOWS_DEFAULT;
 			}
 			if (ptr->arg_info[ptr->num_args].is_variadic) {
 				internal_function->fn_flags |= ZEND_ACC_VARIADIC;

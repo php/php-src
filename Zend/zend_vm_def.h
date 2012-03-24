@@ -3144,25 +3144,35 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 	}
 }
 
-ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
+ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP|UNUSED, ANY)
 {
 	USE_OPLINE
 	zval *value, *arg;
 	zend_free_op free_op1;
 
 	SAVE_OPLINE();
-	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-	ZVAL_COPY_VALUE(arg, value);
-	if (OP1_TYPE == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
-			zval_copy_ctor_func(arg);
+	if(UNEXPECTED(OP1_TYPE == IS_UNUSED)) {
+		uint32_t arg_num = opline->op2.num-1;
+		if(arg_num < EX(call)->func->common.required_num_args
+			|| (arg_num >= EX(call)->func->common.num_args && !(EX(call)->func->common.fn_flags & ZEND_ACC_ALLOWS_DEFAULT))) {
+			zend_error_noreturn(E_ERROR, "Defaults can be used only for declared optional parameters");
+		}
+		ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_HAS_DEFAULT);
+		ZVAL_UNDEF(arg);
+	} else {
+		value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+		ZVAL_COPY_VALUE(arg, value);
+		if (OP1_TYPE == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
+				zval_copy_ctor_func(arg);
+			}
 		}
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(116, ZEND_SEND_VAL_EX, CONST|TMP, ANY)
+ZEND_VM_HANDLER(116, ZEND_SEND_VAL_EX, CONST|TMP|UNUSED, ANY)
 {
 	USE_OPLINE
 	zval *value, *arg;
@@ -3172,12 +3182,22 @@ ZEND_VM_HANDLER(116, ZEND_SEND_VAL_EX, CONST|TMP, ANY)
 	if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num)) {
 		zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.num);
 	}
-	value = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-	ZVAL_COPY_VALUE(arg, value);
-	if (OP1_TYPE == IS_CONST) {
-		if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
-			zval_copy_ctor_func(arg);
+	if(UNEXPECTED(OP1_TYPE == IS_UNUSED)) {
+		uint32_t arg_num = opline->op2.num-1;
+		if(arg_num < EX(call)->func->common.required_num_args
+			|| (arg_num >= EX(call)->func->common.num_args && !(EX(call)->func->common.fn_flags & ZEND_ACC_ALLOWS_DEFAULT))) {
+			zend_error_noreturn(E_ERROR, "Defaults can be used only for declared optional parameters");
+		}
+		ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_HAS_DEFAULT);
+		ZVAL_UNDEF(arg);
+	} else {
+		value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+		ZVAL_COPY_VALUE(arg, value);
+		if (OP1_TYPE == IS_CONST) {
+			if (UNEXPECTED(Z_OPT_COPYABLE_P(arg))) {
+				zval_copy_ctor_func(arg);
+			}
 		}
 	}
 	ZEND_VM_NEXT_OPCODE();
@@ -3519,6 +3539,26 @@ ZEND_VM_C_LABEL(send_array):
 		arg_num = 1;
 		param = ZEND_CALL_ARG(EX(call), 1);
 		ZEND_HASH_FOREACH_VAL(ht, arg) {
+// TODO (SKIP): this would work but introduces requirement for call_user_func_array arrays to be
+//              numerically indexed, and also needs
+//			if(UNEXPECTED(arg_idx > arg_num-1)) {
+//				uint32_t expected_arg_num = arg_num-1;
+//				/* skip in parameter list */
+//				for(expected_arg_num < arg_idx; expected_arg_num++) {
+//					if(expected_arg_num < EX(call)->func->common.required_num_args
+//							|| (expected_arg_num >= EX(call)->func->common.num_args && !(EX(call)->func->common.fn_flags & ZEND_ACC_ALLOWS_DEFAULT))) {
+//								zend_error_noreturn(E_ERROR, "Defaults can be used only for declared optional parameters");
+//					}
+//					ZVAL_UNDEF(param);
+//					param++;
+//					arg_num++;
+//				}
+//				continue;
+//			}
+//			if(UNEXPECTED(arg_idx != arg_num - 1)) {
+//				zend_error_noreturn(E_WARNING, "Bad parameter key sequence in array: expected %d, found %d", arg_num-1, arg_idx);
+//				ZEND_VM_C_GOTO(parameter_error);
+//			}
 			if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 				// TODO: Scalar values don't have reference counters anymore.
 				// They are assumed to be 1, and they may be easily passed by
@@ -3545,7 +3585,7 @@ ZEND_VM_C_LABEL(send_array):
 							EX(call)->func->common.scope ? EX(call)->func->common.scope->name->val : "",
 							EX(call)->func->common.scope ? "::" : "",
 							EX(call)->func->common.function_name->val);
-
+ZEND_VM_C_LABEL(parameter_error):
 						if (EX(call)->func->common.fn_flags & ZEND_ACC_CLOSURE) {
 							OBJ_RELEASE((zend_object*)EX(call)->func->common.prototype);
 						}
@@ -3694,7 +3734,7 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 
 	SAVE_OPLINE();
 	param = _get_zval_ptr_cv_undef_BP_VAR_W(execute_data, opline->result.var);
-	if (arg_num > EX_NUM_ARGS()) {
+	if (arg_num > EX_NUM_ARGS() || Z_ISUNDEF_P(param)) {
 		ZVAL_COPY_VALUE(param, EX_CONSTANT(opline->op2));
 		if (Z_OPT_CONSTANT_P(param)) {
 			zval_update_constant(param, 0);

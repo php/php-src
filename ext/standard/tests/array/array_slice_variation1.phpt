@@ -54,8 +54,10 @@ array(1) {
   [2]=>
   int(3)
 }
-array(0) {
-}
-array(0) {
-}
+
+Warning: array_slice() expects parameter 3 to be integer, string given in %s/array_slice_variation1.php on line %d
+NULL
+
+Warning: array_slice() expects parameter 3 to be integer, string given in %s/array_slice_variation1.php on line %d
+NULL
 string(3) "foo"

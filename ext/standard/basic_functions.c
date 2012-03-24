@@ -685,7 +685,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_error_get_last, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_DEFAULT(arginfo_call_user_func, 0, 0, 1)
 	ZEND_ARG_INFO(0, function_name)
 	ZEND_ARG_VARIADIC_INFO(0, parameters)
 ZEND_END_ARG_INFO()
@@ -695,7 +695,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func_array, 0, 0, 2)
 	ZEND_ARG_INFO(0, parameters) /* ARRAY_INFO(0, parameters, 1) */
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_forward_static_call, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_DEFAULT(arginfo_forward_static_call, 0, 0, 1)
 	ZEND_ARG_INFO(0, function_name)
 	ZEND_ARG_VARIADIC_INFO(0, parameters)
 ZEND_END_ARG_INFO()
@@ -705,7 +705,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_forward_static_call_array, 0, 0, 2)
 	ZEND_ARG_INFO(0, parameters) /* ARRAY_INFO(0, parameters, 1) */
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_register_shutdown_function, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_DEFAULT(arginfo_register_shutdown_function, 0, 0, 1)
 	ZEND_ARG_INFO(0, function_name)
 	ZEND_ARG_VARIADIC_INFO(0, parameters)
 ZEND_END_ARG_INFO()
@@ -4607,16 +4607,14 @@ PHP_FUNCTION(error_log)
 {
 	char *message, *opt = NULL, *headers = NULL;
 	size_t message_len, opt_len = 0, headers_len = 0;
-	int opt_err = 0, argc = ZEND_NUM_ARGS();
+	int opt_err = 0;
 	zend_long erropt = 0;
 
-	if (zend_parse_parameters(argc, "s|lps", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lps", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
 		return;
 	}
 
-	if (argc > 1) {
-		opt_err = (int)erropt;
-	}
+	opt_err = (int)erropt;
 
 	if (_php_error_log_ex(opt_err, message, message_len, opt, headers) == FAILURE) {
 		RETURN_FALSE;
@@ -4969,7 +4967,6 @@ PHP_FUNCTION(register_shutdown_function)
 	int i;
 
 	shutdown_function_entry.arg_count = ZEND_NUM_ARGS();
-
 	if (shutdown_function_entry.arg_count < 1) {
 		WRONG_PARAM_COUNT;
 	}

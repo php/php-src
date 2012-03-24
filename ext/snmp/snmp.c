@@ -1816,13 +1816,12 @@ PHP_METHOD(snmp, __construct)
 	zend_long timeout = SNMP_DEFAULT_TIMEOUT;
 	zend_long retries = SNMP_DEFAULT_RETRIES;
 	zend_long version = SNMP_DEFAULT_VERSION;
-	int argc = ZEND_NUM_ARGS();
 	zend_error_handling error_handling;
 
 	snmp_object = Z_SNMP_P(object);
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 
-	if (zend_parse_parameters(argc, "lss|ll", &version, &a1, &a1_len, &a2, &a2_len, &timeout, &retries) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lss|ll", &version, &a1, &a1_len, &a2, &a2_len, &timeout, &retries) == FAILURE) {
 		zend_restore_error_handling(&error_handling);
 		return;
 	}
@@ -1916,11 +1915,10 @@ PHP_METHOD(snmp, setSecurity)
 	zval *object = getThis();
 	char *a1 = "", *a2 = "", *a3 = "", *a4 = "", *a5 = "", *a6 = "", *a7 = "";
 	size_t a1_len = 0, a2_len = 0, a3_len = 0, a4_len = 0, a5_len = 0, a6_len = 0, a7_len = 0;
-	int argc = ZEND_NUM_ARGS();
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters(argc, "s|ssssss", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ssssss", &a1, &a1_len, &a2, &a2_len, &a3, &a3_len,
 		&a4, &a4_len, &a5, &a5_len, &a6, &a6_len, &a7, &a7_len) == FAILURE) {
 		RETURN_FALSE;
 	}

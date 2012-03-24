@@ -1341,18 +1341,14 @@ SXE_METHOD(asXML)
 	xmlOutputBufferPtr  outbuf;
 	xmlChar            *strval;
 	int                 strval_len;
-	char               *filename;
-	size_t                 filename_len;
+	char               *filename = NULL;
+	size_t              filename_len;
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() == 1) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-
+	if(filename) {
 		sxe = Z_SXEOBJ_P(getThis());
 		GET_NODE(sxe, node);
 		node = php_sxe_get_first_node(sxe, node);

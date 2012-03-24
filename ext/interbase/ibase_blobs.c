@@ -128,18 +128,16 @@ int _php_ibase_blob_get(zval *return_value, ibase_blob *ib_blob, unsigned long m
 }
 /* }}} */
 
-int _php_ibase_blob_add(zval *string_arg, ibase_blob *ib_blob) /* {{{ */
+int _php_ibase_blob_add(const char *str, size_t str_len, ibase_blob *ib_blob) /* {{{ */
 {
-	unsigned long put_cnt = 0, rem_cnt;
+	size_t put_cnt = 0, rem_cnt;
 	unsigned short chunk_size;
 
-	convert_to_string_ex(string_arg);
-
-	for (rem_cnt = Z_STRLEN_P(string_arg); rem_cnt > 0; rem_cnt -= chunk_size)  {
+	for (rem_cnt = str_len; rem_cnt > 0; rem_cnt -= chunk_size)  {
 
 		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : (unsigned short)rem_cnt;
 
-		if (isc_put_segment(IB_STATUS, &ib_blob->bl_handle, chunk_size, &Z_STRVAL_P(string_arg)[put_cnt] )) {
+		if (isc_put_segment(IB_STATUS, &ib_blob->bl_handle, chunk_size, &str[put_cnt] )) {
 			_php_ibase_error();
 			return FAILURE;
 		}
@@ -295,23 +293,25 @@ PHP_FUNCTION(ibase_blob_open)
    Add data into created blob */
 PHP_FUNCTION(ibase_blob_add)
 {
-	zval *blob_arg, *string_arg;
+	zval *blob_handle = NULL;
+	char *str;
+	size_t str_len;
 	ibase_blob *ib_blob;
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &blob_arg, &string_arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &blob_handle, &str, &str_len)) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_blob, ibase_blob *, blob_arg, -1, "Interbase blob", le_blob);
+	ZEND_FETCH_RESOURCE(ib_blob, ibase_blob *, blob_handle, -1, "Interbase blob", le_blob);
 
 	if (ib_blob->type != BLOB_INPUT) {
 		_php_ibase_module_error("BLOB is not open for input");
 		RETURN_FALSE;
 	}
 
-	if (_php_ibase_blob_add(string_arg, ib_blob) != SUCCESS) {
+	if (_php_ibase_blob_add(str, str_len, ib_blob) != SUCCESS) {
 		RETURN_FALSE;
 	}
 }
@@ -321,25 +321,24 @@ PHP_FUNCTION(ibase_blob_add)
    Get len bytes data from open blob */
 PHP_FUNCTION(ibase_blob_get)
 {
-	zval *blob_arg, *len_arg;
+	zval *blob_handle = NULL;
+	zend_long len;
 	ibase_blob *ib_blob;
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS() != 2 || zend_get_parameters_ex(2, &blob_arg, &len_arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &blob_handle, &len) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
-	ZEND_FETCH_RESOURCE(ib_blob, ibase_blob *, blob_arg, -1, "Interbase blob", le_blob);
+	ZEND_FETCH_RESOURCE(ib_blob, ibase_blob *, blob_handle, -1, "Interbase blob", le_blob);
 
 	if (ib_blob->type != BLOB_OUTPUT) {
 		_php_ibase_module_error("BLOB is not open for output");
 		RETURN_FALSE;
 	}
 
-	convert_to_long_ex(len_arg);
-
-	if (_php_ibase_blob_get(return_value, ib_blob, Z_LVAL_P(len_arg)) != SUCCESS) {
+	if (_php_ibase_blob_get(return_value, ib_blob, len) != SUCCESS) {
 		RETURN_FALSE;
 	}
 }
@@ -347,13 +346,13 @@ PHP_FUNCTION(ibase_blob_get)
 
 static void _php_ibase_blob_end(INTERNAL_FUNCTION_PARAMETERS, int bl_end) /* {{{ */
 {
-	zval *blob_arg;
-	ibase_blob *ib_blob;
+	zval * blob_arg = NULL;
+	ibase_blob *ib_blob = NULL;
 	char *s;
 
 	RESET_ERRMSG;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &blob_arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", & blob_arg) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -544,7 +543,7 @@ PHP_FUNCTION(ibase_blob_echo)
    Create blob, copy file in it, and close it */
 PHP_FUNCTION(ibase_blob_import)
 {
-	zval *link = NULL, *file;
+	zval *link = NULL, *file = NULL;
 	int size;
 	unsigned short b;
 	ibase_blob ib_blob = { NULL, 0 };
@@ -557,7 +556,7 @@ PHP_FUNCTION(ibase_blob_import)
 	RESET_ERRMSG;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r|r",
-			(ZEND_NUM_ARGS()-1) ? &link : &file, &file)) {
+					(ZEND_NUM_ARGS()-1) ? &link : &file, &file)) {
 		RETURN_FALSE;
 	}
 

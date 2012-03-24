@@ -732,7 +732,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 		size_t n_sugg_st;
 		char **suggs;
 
-		if (!sugg && ZEND_NUM_ARGS() == 2) {
+		if (!sugg) {
 			RETURN_FALSE;
 		}
 

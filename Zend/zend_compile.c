@@ -2436,6 +2436,19 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 		}
 
 		arg_count++;
+
+		if(arg->kind == ZEND_AST_DEFAULT) {
+			/* default arg */
+			// TODO (SKIP): should we prevent default from being sent by-ref?
+			//if (fbc && ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
+			//	zend_error_noreturn(E_COMPILE_ERROR, "By-reference parameter can not use default");
+			//}
+			opline = zend_emit_op(NULL, ZEND_SEND_VAL, NULL, NULL);
+			opline->op2.opline_num = arg_num;
+			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, arg_num);
+			continue;
+		}
+
 		if (zend_is_variable(arg)) {
 			if (zend_is_call(arg)) {
 				zend_compile_var(&arg_node, arg, BP_VAR_R);
@@ -2743,6 +2756,8 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 		if (zend_is_variable(arg_ast) && !zend_is_call(arg_ast)) {
 			zend_compile_var(&arg_node, arg_ast, BP_VAR_FUNC_ARG | (i << BP_VAR_SHIFT));
 			send_user = 1;
+		} else if(arg_ast->kind == ZEND_AST_DEFAULT) {
+			arg_node.op_type = IS_UNUSED;
 		} else {
 			zend_compile_expr(&arg_node, arg_ast);
 			if (arg_node.op_type & (IS_VAR|IS_CV)) {
