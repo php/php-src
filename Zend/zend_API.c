@@ -834,6 +834,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 	i = 0;
 	while (num_args-- > 0) {
+		int parse_failed;
+
 		if (*type_spec == '|') {
 			type_spec++;
 		}
@@ -850,17 +852,20 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 				int iv = 0;
 				zval **p = (zval **) (zend_vm_stack_top(TSRMLS_C) - 1 - (arg_count - i));
 
-				*n_varargs = num_varargs;
+				num_args -= num_varargs-1; /* adjust how many args we've left after varargs, -1 because we already subtracted 1 above */
+				i += num_varargs; /* put loop counter after varargs */
 
 				/* allocate space for array and store args */
 				*varargs = safe_emalloc(num_varargs, sizeof(zval **), 0);
-				while (num_varargs-- > 0) {
-					(*varargs)[iv++] = p++;
+				for (;num_varargs-- > 0;p++) {
+					if(*p == NULL) {
+						/* skipped arg - not counting in varargs */
+						continue;
+					}
+					(*varargs)[iv++] = p;
 				}
 
-				/* adjust how many args we have left and restart loop */
-				num_args = num_args + 1 - iv;
-				i += iv;
+				*n_varargs = iv;
 				continue;
 			} else {
 				*varargs = NULL;
@@ -870,7 +875,28 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 
 		arg = (zval **) (zend_vm_stack_top(TSRMLS_C) - 1 - (arg_count-i));
 
-		if (zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
+		parse_failed = 0;
+		if(*arg == NULL) {
+			/* we have skipped arg */
+			if(i < min_num_args) {
+				/* this is one of the required args */
+				if (!quiet) {
+					zend_function *active_function = EG(current_execute_data)->function_state.function;
+					const char *class_name = active_function->common.scope ? active_function->common.scope->name : "";
+					zend_error(E_WARNING, "Parameter %d missing for %s%s%s()",
+							i+1,
+							class_name,
+							class_name[0] ? "::" : "",
+							active_function->common.function_name);
+				}
+				parse_failed = 1;
+			} else {
+				/* optional arg - just skip it */
+				continue;
+			}
+		}
+
+		if (parse_failed || zend_parse_arg(i+1, arg, va, &type_spec, quiet TSRMLS_CC) == FAILURE) {
 			/* clean up varargs array if it was used */
 			if (varargs && *varargs) {
 				efree(*varargs);
