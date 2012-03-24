@@ -7,8 +7,9 @@ Michele Orselli (mo@ideato.it)
 Simone Gentili (sensorario@gmail.com)
 --FILE--
 <?php
-	if(stristr(PHP_OS, "linux")) $file = "/etc/services";
-	elseif(stristr(PHP_OS, "Darwin")) $file = "/etc/services";
+	if (file_exists("/etc/services")) {
+		$file = "/etc/services";
+	}
 	elseif(substr(PHP_OS,0,3) == "WIN") $file = "C:/WINDOWS/system32/drivers/etc/services";
 	else die(PHP_OS. " unsupported");
 
