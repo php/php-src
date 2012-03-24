@@ -17,7 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
+/* $Id: zend_compile.c 323898 2012-03-04 19:34:19Z gron $ */
 
 #include <zend_language_parser.h>
 #include "zend.h"
@@ -2646,6 +2646,19 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{
 	if (++CG(context).used_stack > CG(active_op_array)->used_stack) {
 		CG(active_op_array)->used_stack = CG(context).used_stack;
 	}
+}
+/* }}} */
+
+void zend_do_empty_param(int offset TSRMLS_DC) /* {{{ */
+{
+	zend_op *opline;
+
+	/* TODO: add by-ref check to not allow send defaults by-ref */
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->opcode = ZEND_SEND_VAL;
+	SET_UNUSED(opline->op1);
+	opline->op2.opline_num = offset;
+	SET_UNUSED(opline->op2);
 }
 /* }}} */
 

@@ -2486,7 +2486,9 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 		&& ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
 			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.opline_num);
 	}
-	{
+	if(IS_CONST == IS_UNUSED) {
+		zend_vm_stack_push(NULL TSRMLS_CC);
+	} else {
 		zval *valptr;
 		zval *value;
 
@@ -7814,7 +7816,9 @@ static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		&& ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
 			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.opline_num);
 	}
-	{
+	if(IS_TMP_VAR == IS_UNUSED) {
+		zend_vm_stack_push(NULL TSRMLS_CC);
+	} else {
 		zval *valptr;
 		zval *value;
 		zend_free_op free_op1;
@@ -24265,6 +24269,36 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
+}
+
+static int ZEND_FASTCALL  ZEND_SEND_VAL_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	if (opline->extended_value==ZEND_DO_FCALL_BY_NAME
+		&& ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
+			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.opline_num);
+	}
+	if(IS_UNUSED == IS_UNUSED) {
+		zend_vm_stack_push(NULL TSRMLS_CC);
+	} else {
+		zval *valptr;
+		zval *value;
+
+
+		value = NULL;
+
+		ALLOC_ZVAL(valptr);
+		INIT_PZVAL_COPY(valptr, value);
+		if (!0) {
+			zval_copy_ctor(valptr);
+		}
+		zend_vm_stack_push(valptr TSRMLS_CC);
+
+	}
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 static int ZEND_FASTCALL  ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -42635,11 +42669,11 @@ void zend_init_opcodes_handlers(void)
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_SEND_VAL_SPEC_UNUSED_HANDLER,
+  	ZEND_SEND_VAL_SPEC_UNUSED_HANDLER,
+  	ZEND_SEND_VAL_SPEC_UNUSED_HANDLER,
+  	ZEND_SEND_VAL_SPEC_UNUSED_HANDLER,
+  	ZEND_SEND_VAL_SPEC_UNUSED_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
   	ZEND_NULL_HANDLER,
