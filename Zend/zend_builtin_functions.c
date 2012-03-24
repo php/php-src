@@ -1444,7 +1444,7 @@ ZEND_FUNCTION(set_error_handler)
 	if (Z_TYPE_P(error_handler) == IS_NULL) { /* unset user-defined handler */
 		FREE_ZVAL(EG(user_error_handler));
 		EG(user_error_handler) = NULL;
-		RETURN_TRUE;
+		return;
 	}
 
 	EG(user_error_handler_error_reporting) = (int)error_type;
@@ -1515,7 +1515,7 @@ ZEND_FUNCTION(set_exception_handler)
 	if (Z_TYPE_P(exception_handler) == IS_NULL) { /* unset user-defined handler */
 		FREE_ZVAL(EG(user_exception_handler));
 		EG(user_exception_handler) = NULL;
-		RETURN_TRUE;
+		return;
 	}
 
 	MAKE_COPY_ZVAL(&exception_handler, EG(user_exception_handler))
