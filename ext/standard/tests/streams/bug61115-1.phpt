@@ -8,4 +8,4 @@ stream_context_get_options($fileResourceTemp);
 ftruncate($fileResourceTemp, PHP_INT_MAX);
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of %d bytes exhausted at %s:%d (tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of %d bytes exhausted (tried to allocate %d bytes) in %s on line %d
