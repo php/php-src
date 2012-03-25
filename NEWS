@@ -252,6 +252,8 @@ PHP                                                                        NEWS
     for small images). (Florian)
 
 - Intl:
+  . Fixed bug #61487 (Incorrent bounds checking in grapheme_strpos).
+    (Stas)
   . Fixed bug #60192 (SegFault when Collator not constructed
     properly). (Florian)
   . Fixed memory leak in several Intl locale functions. (Felipe)
