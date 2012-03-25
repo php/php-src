@@ -51,6 +51,10 @@ PHP                                                                        NEWS
 - Installation
   . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
 
+- Intl:
+  . Fixed bug #61487 (Incorrent bounds checking in grapheme_strpos).
+    (Stas)
+
 - mbstring:
   . MFH mb_ereg_replace_callback() for security enhancements. (Rui)
 
