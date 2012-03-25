@@ -45,12 +45,12 @@ PHP                                                                        NEWS
 - Installation
   . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
 
+- Libxml:
+  . Fixed bug #61367 (open_basedir bypass using libxml RSHUTDOWN).
+    (Tim Starling)
+
 - mbstring:
   . MFH mb_ereg_replace_callback() for security enhancements. (Rui)
-
-- Libxml:
-  . Fixed bug #61367 (open_basedir bypass using libxml RSHUTDOWN). 
-    (Tim Starling)
 
 - mysqli
   . Fixed bug #61003 (mysql_stat() require a valid connection). (Johannes).
