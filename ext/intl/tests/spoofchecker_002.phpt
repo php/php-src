@@ -1,7 +1,7 @@
 --TEST--
 spoofchecker confusable tests
 --SKIPIF--
-<?php if(!extension_loaded('intl')) print 'skip'; ?>
+<?php if(!extension_loaded('intl') || !class_exists("Spoofchecker")) print 'skip'; ?>
 --FILE--
 <?php
 
