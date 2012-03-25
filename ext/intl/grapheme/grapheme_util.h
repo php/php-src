@@ -54,6 +54,6 @@ UBreakIterator*
 grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status TSRMLS_DC );
 
 /* OUTSIDE_STRING: check if (possibly negative) long offset is outside the string with int32_t length */
-#define OUTSIDE_STRING(offset, max_len) ( offset < INT32_MIN || offset > INT32_MAX || (offset < 0 ? -offset > (long) max_len : offset >= (long) max_len) )
+#define OUTSIDE_STRING(offset, max_len) ( offset <= INT32_MIN || offset > INT32_MAX || (offset < 0 ? -offset > (long) max_len : offset >= (long) max_len) )
 
 #endif // GRAPHEME_GRAPHEME_UTIL_H
