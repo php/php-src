@@ -88,6 +88,10 @@ PHP                                                                        NEWS
   . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
     bytes). (Nikita Popov)
 
+- Readline:
+  . Add open_basedir checks to readline_write_history and readline_read_history.
+    (Rasmus, reported by Mateusz Goik)
+
 - Reflection:
   . Fixed bug #60968 (Late static binding doesn't work with 
     ReflectionMethod::invokeArgs()). (Laruence)
