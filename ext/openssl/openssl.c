@@ -375,11 +375,40 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_random_pseudo_bytes, 0, 0, 1)
     ZEND_ARG_INFO(0, length)
     ZEND_ARG_INFO(1, result_is_strong)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_spki_new, 0, 0, 2)
+    ZEND_ARG_INFO(0, privkey)
+    ZEND_ARG_INFO(0, challenge)
+    ZEND_ARG_INFO(0, algo)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_verify, 0)
+    ZEND_ARG_INFO(0, spki)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_export, 0)
+    ZEND_ARG_INFO(0, spki)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_export_challenge, 0)
+    ZEND_ARG_INFO(0, spki)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_details, 0)
+    ZEND_ARG_INFO(0, spki)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ openssl_functions[]
  */
 const zend_function_entry openssl_functions[] = {
+/* spki functions */
+	PHP_FE(openssl_spki_new, arginfo_openssl_spki_new)
+	PHP_FE(openssl_spki_verify, arginfo_openssl_spki_verify)
+	PHP_FE(openssl_spki_export, arginfo_openssl_spki_export)
+ PHP_FE(openssl_spki_export_challenge, arginfo_openssl_spki_export_challenge)
+ PHP_FE(openssl_spki_details,	arginfo_openssl_spki_details)
+
 /* public/private key functions */
 	PHP_FE(openssl_pkey_free,			arginfo_openssl_pkey_free)
 	PHP_FE(openssl_pkey_new,			arginfo_openssl_pkey_new)
@@ -1287,6 +1316,291 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 		X509_free(cert);
 	}
 	BIO_free(bio_out);
+}
+/* }}} */
+
+/* {{{ proto string openssl_spki_new(mixed zpkey, string challenge [, string algo='sha256'])
+   Creates new private key (or uses existing) and creates a new spki cert
+   outputting results to var */
+PHP_FUNCTION(openssl_spki_new)
+{
+ zval * zpkey = NULL;
+ EVP_PKEY * pkey = NULL;
+ NETSCAPE_SPKI *spki=NULL;
+ int challenge_len, algo_len;
+ char * challenge, * spkstr, *algo="sha256";
+ long keyresource = -1;
+ const char *spkac = "SPKAC=";
+
+ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|s", &zpkey, &challenge, &challenge_len, &algo, &algo_len) == FAILURE) {
+  return;
+ }
+ RETVAL_FALSE;
+
+ pkey = php_openssl_evp_from_zval(&zpkey, 0, challenge, 1, &keyresource TSRMLS_CC);
+
+ if (pkey == NULL) {
+  goto cleanup;
+ }
+
+ if ((spki = NETSCAPE_SPKI_new()) == NULL) {
+  goto cleanup;
+ }
+
+ if (challenge) {
+  ASN1_STRING_set(spki->spkac->challenge, challenge, (int)strlen(challenge));
+ }
+
+ if (!NETSCAPE_SPKI_set_pubkey(spki, pkey)) {
+  goto cleanup;
+ }
+
+ if (strcmp(algo, "md5")==0){
+  if (!NETSCAPE_SPKI_sign(spki, pkey, EVP_md5())) {
+   goto cleanup;
+  }
+ } else if(strcmp(algo, "sha1")==0){
+  if (!NETSCAPE_SPKI_sign(spki, pkey, EVP_sha1())) {
+   goto cleanup;
+  }
+ } else if(strcmp(algo, "sha256")==0){
+  if (!NETSCAPE_SPKI_sign(spki, pkey, EVP_sha256())) {
+   goto cleanup;
+  }
+ } else if (strcmp(algo, "sha512")==0){
+  if (!NETSCAPE_SPKI_sign(spki, pkey, EVP_sha512())) {
+   goto cleanup;
+  }
+ }
+
+ spkstr = NETSCAPE_SPKI_b64_encode(spki);
+ if (!spkstr){
+  goto cleanup;
+ }
+
+ char * s = malloc(snprintf(NULL, 0, "%s%s", spkac, spkstr));
+ sprintf(s, "%s%s", spkac, spkstr);
+
+ if (strlen(s)<=0) {
+  goto cleanup;
+ }
+ RETURN_STRING(s, 1);
+
+cleanup:
+ if (keyresource == -1 && spki) {
+  NETSCAPE_SPKI_free(spki);
+ }
+ if (keyresource == -1 && pkey) {
+  EVP_PKEY_free(pkey);
+ }
+ if (keyresource == -1 && s) {
+  free(s);
+ }
+ RETURN_NULL();
+}
+/* }}} */
+
+/* {{{ proto bool openssl_spki_verify(string spki)
+   Verifies spki returns boolean */
+PHP_FUNCTION(openssl_spki_verify)
+{
+ int spkstr_len, i, x=0;
+ char *spkstr = NULL;
+ EVP_PKEY *pkey = NULL;
+ NETSCAPE_SPKI *spki = NULL;
+
+ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+  return;
+ }
+
+ if (!spkstr) {
+  goto cleanup;
+ }
+
+ char * spkstr_cleaned = malloc(strlen(spkstr));
+ openssl_spki_cleanup(spkstr, spkstr_cleaned);
+
+ spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+ if (!spki) {
+  goto cleanup;
+ }
+
+ pkey = X509_PUBKEY_get(spki->spkac->pubkey);
+ if (pkey == NULL) {
+  goto cleanup;
+ }
+
+ i = NETSCAPE_SPKI_verify(spki, pkey);
+
+ if (i > 0) {
+  x = 1;
+ }
+ goto cleanup;
+
+cleanup:
+ if (spki) {
+  NETSCAPE_SPKI_free(spki);
+ }
+ if (pkey) {
+  EVP_PKEY_free(pkey);
+ }
+ RETURN_BOOL(x);
+}
+/* }}} */
+
+/* {{{ proto string openssl_spki_export(string spki)
+   Exports public key from existing spki to var */
+PHP_FUNCTION(openssl_spki_export)
+{
+ int spkstr_len;
+ EVP_PKEY *pkey = NULL;
+ NETSCAPE_SPKI *spki = NULL;
+ BIO *out = BIO_new(BIO_s_mem());
+ BUF_MEM *bio_buf;
+ char *spkstr;
+
+ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+  goto cleanup;
+ }
+
+ if (!spkstr) {
+  goto cleanup;
+ }
+
+ char * spkstr_cleaned = malloc(strlen(spkstr));
+ openssl_spki_cleanup(spkstr, spkstr_cleaned);
+
+ spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+ if (!spki) {
+  goto cleanup;
+ }
+
+ pkey = X509_PUBKEY_get(spki->spkac->pubkey);
+ if (!pkey) {
+  goto cleanup;
+ }
+
+ PEM_write_bio_PUBKEY(out, pkey);
+ BIO_get_mem_ptr(out, &bio_buf);
+
+ if ((!bio_buf->data)&&(bio_buf->length<=0)) {
+  goto cleanup;
+ }
+
+ char * s = malloc(bio_buf->length);
+ BIO_read(out, s, bio_buf->length);
+ RETURN_STRING(s, 1);
+
+cleanup:
+ if (spki) {
+  NETSCAPE_SPKI_free(spki);
+ }
+ if (out) {
+  BIO_free_all(out);
+ }
+ if (pkey) {
+  EVP_PKEY_free(pkey);
+ }
+}
+/* }}} */
+
+/* {{{ proto string openssl_spki_export_challenge(string spki)
+   Exports spkac challenge from existing spki to var */
+PHP_FUNCTION(openssl_spki_export_challenge)
+{
+ int spkstr_len;
+ NETSCAPE_SPKI *spki = NULL;
+ char *spkstr;
+
+ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+  goto cleanup;
+ }
+
+ if (!spkstr) {
+  goto cleanup;
+ }
+
+ char * spkstr_cleaned = malloc(strlen(spkstr));
+ openssl_spki_cleanup(spkstr, spkstr_cleaned);
+
+ spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+ if (!spki) {
+  goto cleanup;
+ }
+
+ RETURN_STRING(ASN1_STRING_data(spki->spkac->challenge), 1);
+
+cleanup:
+ if (spki) {
+  NETSCAPE_SPKI_free(spki);
+ }
+}
+/* }}} */
+
+/* {{{ proto string openssl_spki_details(string spki)
+   Provides details from existing spki to var */
+PHP_FUNCTION(openssl_spki_details)
+{
+ int spkstr_len;
+ NETSCAPE_SPKI *spki = NULL;
+ BIO *out = BIO_new(BIO_s_mem());
+ BUF_MEM *bio_buf;
+ zval *zout;
+ char *spkstr;
+
+ if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+  return;
+ }
+ RETVAL_FALSE;
+
+ if (!spkstr) {
+  goto cleanup;
+ }
+
+ char * spkstr_cleaned = malloc(strlen(spkstr));
+ openssl_spki_cleanup(spkstr, spkstr_cleaned);
+
+ spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+ if (!spki) {
+  goto cleanup;
+ }
+
+ NETSCAPE_SPKI_print(out, spki);
+ BIO_get_mem_ptr(out, &bio_buf);
+
+ if ((!bio_buf->data)&&(bio_buf->length<=0)) {
+  goto cleanup;
+ }
+
+ char * s = malloc(bio_buf->length);
+ BIO_read(out, s, bio_buf->length);
+ RETURN_STRING(s, 1);
+
+cleanup:
+ if (spki) {
+  NETSCAPE_SPKI_free(spki);
+ }
+ BIO_free_all(out);
+}
+/* }}} */
+
+/* {{{ proto int openssl_spki_cleanup(const char *src, char *results)
+  This will help remove new line chars in the SPKAC sent from the
+  browser */
+int openssl_spki_cleanup(const char *src, char *dest)
+{
+    int removed=0;
+
+    while (*src) {
+        if (*src!='\n'&&*src!='\r') {
+            *dest++=*src;
+        } else {
+            ++removed;
+        }
+        ++src;
+    }
+    *dest=0;
+    return removed;
 }
 /* }}} */
 
