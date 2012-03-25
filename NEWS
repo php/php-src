@@ -42,6 +42,10 @@ PHP                                                                        NEWS
 - Firebird Database extension (ibase):
   . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
 
+- Libxml:
+  . Fixed bug #61367 (open_basedir bypass using libxml RSHUTDOWN). 
+    (Tim Starling)
+
 - mysqli
   . Fixed bug #61003 (mysql_stat() require a valid connection). (Johannes).
 
