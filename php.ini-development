@@ -1742,7 +1742,7 @@ mssql.secure_connection = Off
 ; Note: Do _not_ use automatic encoding translation for
 ;       portable libs/applications.
 ; http://php.net/mbstring.encoding-translation
-;mbstring.encoding_translation = On
+;mbstring.encoding_translation = Off
 
 ; automatic encoding detection order.
 ; auto means
@@ -1752,7 +1752,7 @@ mssql.secure_connection = Off
 ; substitute_character used when character cannot be converted
 ; one from another
 ; http://php.net/mbstring.substitute-character
-;mbstring.substitute_character = "?"
+;mbstring.substitute_character = none
 
 ; overload(replace) single byte functions by mbstring functions.
 ; mail(), ereg(), etc are overloaded by mb_send_mail(), mb_ereg(),
@@ -1766,7 +1766,7 @@ mssql.secure_connection = Off
 ;mbstring.func_overload = 0
 
 ; enable strict encoding detection.
-;mbstring.strict_detection = Off
+;mbstring.strict_detection = On
 
 ; This directive specifies the regex pattern of content types for which mb_output_handler()
 ; is activated.
