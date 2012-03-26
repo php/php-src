@@ -1725,16 +1725,16 @@ mssql.secure_connection = Off
 ; Some encoding cannot work as internal encoding.
 ; (e.g. SJIS, BIG5, ISO-2022-*)
 ; http://php.net/mbstring.internal-encoding
-;mbstring.internal_encoding = EUC-JP
+;mbstring.internal_encoding = UTF-8
 
 ; http input encoding.
 ; http://php.net/mbstring.http-input
-;mbstring.http_input = auto
+;mbstring.http_input = UTF-8
 
 ; http output encoding. mb_output_handler must be
 ; registered as output buffer to function
 ; http://php.net/mbstring.http-output
-;mbstring.http_output = SJIS
+;mbstring.http_output = pass
 
 ; enable automatic encoding translation according to
 ; mbstring.internal_encoding setting. Input chars are
@@ -1742,7 +1742,7 @@ mssql.secure_connection = Off
 ; Note: Do _not_ use automatic encoding translation for
 ;       portable libs/applications.
 ; http://php.net/mbstring.encoding-translation
-;mbstring.encoding_translation = Off
+;mbstring.encoding_translation = On
 
 ; automatic encoding detection order.
 ; auto means
@@ -1752,7 +1752,7 @@ mssql.secure_connection = Off
 ; substitute_character used when character cannot be converted
 ; one from another
 ; http://php.net/mbstring.substitute-character
-;mbstring.substitute_character = none;
+;mbstring.substitute_character = "?"
 
 ; overload(replace) single byte functions by mbstring functions.
 ; mail(), ereg(), etc are overloaded by mb_send_mail(), mb_ereg(),
