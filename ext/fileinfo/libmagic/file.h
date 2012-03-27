@@ -27,7 +27,7 @@
  */
 /*
  * file.h - definitions for file(1) program
- * @(#)$File: file.h,v 1.119 2009/02/04 18:24:32 christos Exp $
+ * @(#)$File: file.h,v 1.135 2011/09/20 15:30:14 christos Exp $
  */
 
 #ifndef __file_h__
@@ -35,10 +35,25 @@
 
 #include "config.h"
 
+#ifdef PHP_WIN32
+  #ifdef _WIN64
+    #define SIZE_T_FORMAT "I64"
+  #else
+    #define SIZE_T_FORMAT ""
+  #endif
+  #define INT64_T_FORMAT "I64"
+#else
+  #define SIZE_T_FORMAT "z"
+  #define INT64_T_FORMAT "ll"
+#endif
+
 #include <stdio.h>	/* Include that here, to make sure __P gets defined */
 #include <errno.h>
 #include <fcntl.h>	/* For open and flags */
 #ifdef HAVE_STDINT_H
+#ifndef __STDC_LIMIT_MACROS
+#define __STDC_LIMIT_MACROS
+#endif
 #include <stdint.h>
 #endif
 #ifdef HAVE_INTTYPES_H
@@ -80,6 +95,10 @@
 #endif
 #define public
 
+#ifndef __arraycount
+#define __arraycount(a) (sizeof(a) / sizeof(a[0]))
+#endif
+
 #ifndef __GNUC_PREREQ__
 #ifdef __GNUC__
 #define	__GNUC_PREREQ__(x, y)						\
@@ -104,15 +123,16 @@
 #define MAXMAGIS 8192		/* max entries in any one magic file
 				   or directory */
 #define MAXDESC	64		/* max leng of text description/MIME type */
-#define MAXstring 32		/* max leng of "string" types */
+#define MAXstring 64		/* max leng of "string" types */
 
 #define MAGICNO		0xF11E041C
-#define VERSIONNO	7
-#define FILE_MAGICSIZE	200
+#define VERSIONNO	8
+#define FILE_MAGICSIZE	232
 
 #define	FILE_LOAD	0
 #define FILE_CHECK	1
 #define FILE_COMPILE	2
+#define FILE_LIST	3
 
 union VALUETYPE {
 	uint8_t b;
@@ -139,7 +159,7 @@ struct magic {
 #define NOSPACE		0x10	/* suppress space character before output */
 #define BINTEST		0x20	/* test is for a binary type (set only
 				   for top-level tests) */
-#define TEXTTEST	0	/* for passing to file_softmagic */
+#define TEXTTEST	0x40	/* for passing to file_softmagic */
 
 	uint8_t factor;
 
@@ -265,25 +285,45 @@ struct magic {
 #define str_flags _u._s._flags
 	/* Words 9-16 */
 	union VALUETYPE value;	/* either number or string */
-	/* Words 17-24 */
+	/* Words 17-32 */
 	char desc[MAXDESC];	/* description */
-	/* Words 25-32 */
+	/* Words 33-48 */
 	char mimetype[MAXDESC]; /* MIME type */
-	/* Words 33-34 */
+	/* Words 49-50 */
 	char apple[8];
 };
 
 #define BIT(A)   (1 << (A))
-#define STRING_COMPACT_BLANK		BIT(0)
-#define STRING_COMPACT_OPTIONAL_BLANK	BIT(1)
-#define STRING_IGNORE_LOWERCASE		BIT(2)
-#define STRING_IGNORE_UPPERCASE		BIT(3)
-#define REGEX_OFFSET_START		BIT(4)
-#define CHAR_COMPACT_BLANK		'B'
-#define CHAR_COMPACT_OPTIONAL_BLANK	'b'
-#define CHAR_IGNORE_LOWERCASE		'c'
-#define CHAR_IGNORE_UPPERCASE		'C'
-#define CHAR_REGEX_OFFSET_START		's'
+#define STRING_COMPACT_WHITESPACE		BIT(0)
+#define STRING_COMPACT_OPTIONAL_WHITESPACE	BIT(1)
+#define STRING_IGNORE_LOWERCASE			BIT(2)
+#define STRING_IGNORE_UPPERCASE			BIT(3)
+#define REGEX_OFFSET_START			BIT(4)
+#define STRING_TEXTTEST				BIT(5)
+#define STRING_BINTEST				BIT(6)
+#define PSTRING_1_BE				BIT(7)
+#define PSTRING_1_LE				BIT(7)
+#define PSTRING_2_BE				BIT(8)
+#define PSTRING_2_LE				BIT(9)
+#define PSTRING_4_BE				BIT(10)
+#define PSTRING_4_LE				BIT(11)
+#define PSTRING_LEN	\
+    (PSTRING_1_BE|PSTRING_2_LE|PSTRING_2_BE|PSTRING_4_LE|PSTRING_4_BE)
+#define PSTRING_LENGTH_INCLUDES_ITSELF		BIT(12)
+#define CHAR_COMPACT_WHITESPACE			'W'
+#define CHAR_COMPACT_OPTIONAL_WHITESPACE	'w'
+#define CHAR_IGNORE_LOWERCASE			'c'
+#define CHAR_IGNORE_UPPERCASE			'C'
+#define CHAR_REGEX_OFFSET_START			's'
+#define CHAR_TEXTTEST				't'
+#define CHAR_BINTEST				'b'
+#define CHAR_PSTRING_1_BE			'B'
+#define CHAR_PSTRING_1_LE			'B'
+#define CHAR_PSTRING_2_BE			'H'
+#define CHAR_PSTRING_2_LE			'h'
+#define CHAR_PSTRING_4_BE			'L'
+#define CHAR_PSTRING_4_LE			'l'
+#define CHAR_PSTRING_LENGTH_INCLUDES_ITSELF     'J'
 #define STRING_IGNORE_CASE		(STRING_IGNORE_LOWERCASE|STRING_IGNORE_UPPERCASE)
 #define STRING_DEFAULT_RANGE		100
 
@@ -300,8 +340,10 @@ struct mlist {
 
 #ifdef __cplusplus
 #define CAST(T, b)	static_cast<T>(b)
+#define RCAST(T, b)	reinterpret_cast<T>(b)
 #else
-#define CAST(T, b)	(b)
+#define CAST(T, b)	(T)(b)
+#define RCAST(T, b)	(T)(b)
 #endif
 
 struct level_info {
@@ -352,6 +394,7 @@ protected int file_buffer(struct magic_set *, php_stream *, const char *, const 
     size_t);
 protected int file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *stream);
 protected int file_pipe2file(struct magic_set *, int, const void *, size_t);
+protected int file_replace(struct magic_set *, const char *, const char *);
 protected int file_printf(struct magic_set *, const char *, ...);
 protected int file_reset(struct magic_set *);
 protected int file_tryelf(struct magic_set *, int, const unsigned char *,
@@ -362,15 +405,16 @@ protected int file_trycdf(struct magic_set *, int, const unsigned char *,
 protected int file_zmagic(struct magic_set *, int, const char *,
     const unsigned char *, size_t);
 #endif
-protected int file_ascmagic(struct magic_set *, const unsigned char *, size_t);
+protected int file_ascmagic(struct magic_set *, const unsigned char *, size_t,
+    int);
 protected int file_ascmagic_with_encoding(struct magic_set *,
     const unsigned char *, size_t, unichar *, size_t, const char *,
-    const char *);
+    const char *, int);
 protected int file_encoding(struct magic_set *, const unsigned char *, size_t,
     unichar **, size_t *, const char **, const char **, const char **);
 protected int file_is_tar(struct magic_set *, const unsigned char *, size_t);
 protected int file_softmagic(struct magic_set *, const unsigned char *, size_t,
-    int);
+    int, int);
 protected struct mlist *file_apprentice(struct magic_set *, const char *, int);
 protected uint64_t file_signextend(struct magic_set *, struct magic *,
     uint64_t);
@@ -388,6 +432,8 @@ protected ssize_t sread(int, void *, size_t, int);
 protected int file_check_mem(struct magic_set *, unsigned int);
 protected int file_looks_utf8(const unsigned char *, size_t, unichar *,
     size_t *);
+protected size_t file_pstring_length_size(const struct magic *);
+protected size_t file_pstring_get_length(const struct magic *, const char *);
 #ifdef __EMX__
 protected int file_os2_apptype(struct magic_set *, const char *, const void *,
     size_t);
@@ -413,7 +459,10 @@ size_t strlcpy(char *dst, const char *src, size_t siz);
 #ifndef strlcat
 size_t strlcat(char *dst, const char *src, size_t siz);
 #endif
-
+#ifndef HAVE_GETLINE
+ssize_t getline(char **dst, size_t *len, FILE *fp);
+ssize_t getdelim(char **dst, size_t *len, int delimiter, FILE *fp);
+#endif
 
 #if defined(HAVE_MMAP) && defined(HAVE_SYS_MMAN_H) && !defined(QUICK)
 #define QUICK
@@ -424,7 +473,7 @@ size_t strlcat(char *dst, const char *src, size_t siz);
 #endif
 
 #ifndef __cplusplus
-#ifdef __GNUC__
+#if defined(__GNUC__) && (__GNUC__ >= 3)
 #define FILE_RCSID(id) \
 static const char rcsid[] __attribute__((__used__)) = id;
 #else

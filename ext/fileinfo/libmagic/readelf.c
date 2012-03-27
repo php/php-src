@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readelf.c,v 1.81 2008/11/04 16:38:28 christos Exp $")
+FILE_RCSID("@(#)$File: readelf.c,v 1.90 2011/08/23 08:01:12 christos Exp $")
 #endif
 
 #ifdef BUILTIN_ELF
@@ -47,8 +47,8 @@ private int dophn_core(struct magic_set *, int, int, int, off_t, int, size_t,
 #endif
 private int dophn_exec(struct magic_set *, int, int, int, off_t, int, size_t,
     off_t, int *, int);
-private int doshn(struct magic_set *, int, int, int, off_t, int, size_t, int *,
-    int);
+private int doshn(struct magic_set *, int, int, int, off_t, int, size_t,
+    off_t, int *, int);
 private size_t donote(struct magic_set *, unsigned char *, size_t, size_t, int,
     int, size_t, int *);
 
@@ -144,7 +144,7 @@ getu64(int swap, uint64_t value)
 #define xsh_size	(clazz == ELFCLASS32			\
 			 ? elf_getu32(swap, sh32.sh_size)	\
 			 : elf_getu64(swap, sh64.sh_size))
-#define xsh_offset	(clazz == ELFCLASS32			\
+#define xsh_offset	(off_t)(clazz == ELFCLASS32		\
 			 ? elf_getu32(swap, sh32.sh_offset)	\
 			 : elf_getu64(swap, sh64.sh_offset))
 #define xsh_type	(clazz == ELFCLASS32			\
@@ -283,9 +283,11 @@ private const char os_style_names[][8] = {
 	"NetBSD",
 };
 
-#define FLAGS_DID_CORE		1
-#define FLAGS_DID_NOTE		2
-#define FLAGS_DID_CORE_STYLE	4
+#define FLAGS_DID_CORE		0x01
+#define FLAGS_DID_NOTE		0x02
+#define FLAGS_DID_BUILD_ID	0x04
+#define FLAGS_DID_CORE_STYLE	0x08
+#define FLAGS_IS_CORE		0x10
 
 private int
 dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
@@ -296,13 +298,6 @@ dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 	size_t offset;
 	unsigned char nbuf[BUFSIZ];
 	ssize_t bufsize;
-	off_t savedoffset;
- 	struct stat st;
-
-	if (fstat(fd, &st) < 0) {
-		file_badread(ms);
-		return -1;
-	}
 
 	if (size != xph_sizeof) {
 		if (file_printf(ms, ", corrupted program header size") == -1)
@@ -314,7 +309,7 @@ dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 	 * Loop through all the program headers.
 	 */
 	for ( ; num; num--) {
-		if ((savedoffset = lseek(fd, off, SEEK_SET)) == (off_t)-1) {
+		if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
 			file_badseek(ms);
 			return -1;
 		}
@@ -322,15 +317,13 @@ dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 			file_badread(ms);
 			return -1;
 		}
+		off += size;
+
 		if (xph_offset > fsize) {
-			if (lseek(fd, savedoffset, SEEK_SET) == (off_t)-1) {
-				file_badseek(ms);
-				return -1;
-			}
+			/* Perhaps warn here */
 			continue;
 		}
 
-		off += size;
 		if (xph_type != PT_NOTE)
 			continue;
 
@@ -418,7 +411,8 @@ donote(struct magic_set *ms, unsigned char *nbuf, size_t offset, size_t size,
 		return (offset >= size) ? offset : size;
 	}
 
-	if (*flags & FLAGS_DID_NOTE)
+	if ((*flags & (FLAGS_DID_NOTE|FLAGS_DID_BUILD_ID)) ==
+	    (FLAGS_DID_NOTE|FLAGS_DID_BUILD_ID))
 		goto core;
 
 	if (namesz == 4 && strcmp((char *)&nbuf[noff], "GNU") == 0 &&
@@ -458,6 +452,19 @@ donote(struct magic_set *ms, unsigned char *nbuf, size_t offset, size_t size,
 			return size;
 		*flags |= FLAGS_DID_NOTE;
 		return size;
+	}
+
+	if (namesz == 4 && strcmp((char *)&nbuf[noff], "GNU") == 0 &&
+	    xnh_type == NT_GNU_BUILD_ID && (descsz == 16 || descsz == 20)) {
+	    uint32_t desc[5], i;
+	    if (file_printf(ms, ", BuildID[%s]=0x", descsz == 16 ? "md5/uuid" :
+		"sha1") == -1)
+		    return size;
+	    (void)memcpy(desc, &nbuf[doff], descsz);
+	    for (i = 0; i < descsz >> 2; i++)
+		if (file_printf(ms, "%.8x", desc[i]) == -1)
+		    return size;
+	    *flags |= FLAGS_DID_BUILD_ID;
 	}
 
 	if (namesz == 7 && strcmp((char *)&nbuf[noff], "NetBSD") == 0 &&
@@ -675,7 +682,7 @@ core:
 		break;
 
 	default:
-		if (xnh_type == NT_PRPSINFO) {
+		if (xnh_type == NT_PRPSINFO && *flags & FLAGS_IS_CORE) {
 			size_t i, j;
 			unsigned char c;
 			/*
@@ -692,6 +699,7 @@ core:
 				unsigned char *cname, *cp;
 				size_t reloffset = prpsoffsets(i);
 				size_t noffset = doff + reloffset;
+				size_t k;
 				for (j = 0; j < 16; j++, noffset++,
 				    reloffset++) {
 					/*
@@ -737,6 +745,24 @@ core:
 				/*
 				 * Well, that worked.
 				 */
+
+				/*
+				 * Try next offsets, in case this match is
+				 * in the middle of a string.
+				 */
+				for (k = i + 1 ; k < NOFFSETS ; k++) {
+					size_t no;
+					int adjust = 1;
+					if (prpsoffsets(k) >= prpsoffsets(i))
+						continue;
+					for (no = doff + prpsoffsets(k);
+					     no < doff + prpsoffsets(i); no++)
+						adjust = adjust
+						         && isprint(nbuf[no]);
+					if (adjust)
+						i = k;
+				}
+
 				cname = (unsigned char *)
 				    &nbuf[doff + prpsoffsets(i)];
 				for (cp = cname; *cp && isprint(*cp); cp++)
@@ -815,13 +841,13 @@ static const cap_desc_t cap_desc_386[] = {
 
 private int
 doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
-    size_t size, int *flags, int mach)
+    size_t size, off_t fsize, int *flags, int mach)
 {
 	Elf32_Shdr sh32;
 	Elf64_Shdr sh64;
 	int stripped = 1;
 	void *nbuf;
-	off_t noff;
+	off_t noff, coff;
 	uint64_t cap_hw1 = 0;	/* SunOS 5.x hardware capabilites */
 	uint64_t cap_sf1 = 0;	/* SunOS 5.x software capabilites */
 
@@ -831,16 +857,18 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 		return 0;
 	}
 
-	if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
-		file_badseek(ms);
-		return -1;
-	}
-
 	for ( ; num; num--) {
+		if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
+			file_badseek(ms);
+			return -1;
+		}
 		if (read(fd, xsh_addr, xsh_sizeof) == -1) {
 			file_badread(ms);
 			return -1;
 		}
+		off += size;
+
+		/* Things we can determine before we seek */
 		switch (xsh_type) {
 		case SHT_SYMTAB:
 #if 0
@@ -848,12 +876,17 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 #endif
 			stripped = 0;
 			break;
-		case SHT_NOTE:
-			if ((off = lseek(fd, (off_t)0, SEEK_CUR)) ==
-			    (off_t)-1) {
-				file_badread(ms);
-				return -1;
+		default:
+			if (xsh_offset > fsize) {
+				/* Perhaps warn here */
+				continue;
 			}
+			break;
+		}
+
+		/* Things we can determine when we seek */
+		switch (xsh_type) {
+		case SHT_NOTE:
 			nbuf = emalloc((size_t)xsh_size);
 			if ((noff = lseek(fd, (off_t)xsh_offset, SEEK_SET)) ==
 			    (off_t)-1) {
@@ -878,24 +911,12 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 				if (noff == 0)
 					break;
 			}
-			if ((lseek(fd, off, SEEK_SET)) == (off_t)-1) {
-				efree(nbuf);
-				file_badread(ms);
-				return -1;
-			}
 			efree(nbuf);
 			break;
 		case SHT_SUNW_cap:
-		    {
-			off_t coff;
-			if ((off = lseek(fd, (off_t)0, SEEK_CUR)) ==
-			    (off_t)-1) {
-				file_badread(ms);
-				return -1;
-			}
 			if (lseek(fd, (off_t)xsh_offset, SEEK_SET) ==
 			    (off_t)-1) {
-				file_badread(ms);
+				file_badseek(ms);
 				return -1;
 			}
 			coff = 0;
@@ -904,7 +925,7 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 				Elf64_Cap cap64;
 				char cbuf[/*CONSTCOND*/
 				    MAX(sizeof cap32, sizeof cap64)];
-				if ((coff += xcap_sizeof) >= (off_t)xsh_size)
+				if ((coff += xcap_sizeof) > (off_t)xsh_size)
 					break;
 				if (read(fd, cbuf, (size_t)xcap_sizeof) !=
 				    (ssize_t)xcap_sizeof) {
@@ -924,19 +945,18 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 				default:
 					if (file_printf(ms,
 					    ", with unknown capability "
-					    "0x%llx = 0x%llx",
+					    "0x%" INT64_T_FORMAT "x = 0x%"
+					    INT64_T_FORMAT "x",
 					    (unsigned long long)xcap_tag,
 					    (unsigned long long)xcap_val) == -1)
 						return -1;
 					break;
 				}
 			}
-			if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
-				file_badread(ms);
-				return -1;
-			}
 			break;
-		    }
+
+		default:
+			break;
 		}
 	}
 	if (file_printf(ms, ", %sstripped", stripped ? "" : "not ") == -1)
@@ -972,12 +992,13 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 			}
 			if (cap_hw1)
 				if (file_printf(ms,
-				    " unknown hardware capability 0x%llx",
+				    " unknown hardware capability 0x%"
+				    INT64_T_FORMAT "x",
 				    (unsigned long long)cap_hw1) == -1)
 					return -1;
 		} else {
 			if (file_printf(ms,
-			    " hardware capability 0x%llx",
+			    " hardware capability 0x%" INT64_T_FORMAT "x",
 			    (unsigned long long)cap_hw1) == -1)
 				return -1;
 		}
@@ -993,7 +1014,8 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 		cap_sf1 &= ~SF1_SUNW_MASK;
 		if (cap_sf1)
 			if (file_printf(ms,
-			    ", with unknown software capability 0x%llx",
+			    ", with unknown software capability 0x%"
+			    INT64_T_FORMAT "x",
 			    (unsigned long long)cap_sf1) == -1)
 				return -1;
 	}
@@ -1014,15 +1036,8 @@ dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 	const char *linking_style = "statically";
 	const char *shared_libraries = "";
 	unsigned char nbuf[BUFSIZ];
-	int bufsize;
+	ssize_t bufsize;
 	size_t offset, align;
-	off_t savedoffset = (off_t)-1;
-	struct stat st;
-
-	if (fstat(fd, &st) < 0) {
-		file_badread(ms);
-		return -1;
-	}
 	
 	if (size != xph_sizeof) {
 		if (file_printf(ms, ", corrupted program header size") == -1)
@@ -1030,37 +1045,20 @@ dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 		return 0;
 	}
 
-	if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
-		file_badseek(ms);
-		return -1;
-	}
-
   	for ( ; num; num--) {
+		if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
+			file_badseek(ms);
+			return -1;
+		}
+
   		if (read(fd, xph_addr, xph_sizeof) == -1) {
   			file_badread(ms);
 			return -1;
 		}
-		if (xph_offset > st.st_size && savedoffset != (off_t)-1) {
-			if (lseek(fd, savedoffset, SEEK_SET) == (off_t)-1) {
-				file_badseek(ms);
-				return -1;
-			}
-			continue;
-		}
 
-		if ((savedoffset = lseek(fd, (off_t)0, SEEK_CUR)) == (off_t)-1) {
-  			file_badseek(ms);
-			return -1;
-		}
+		off += size;
 
-		if (xph_offset > fsize) {
-			if (lseek(fd, savedoffset, SEEK_SET) == (off_t)-1) {
-				file_badseek(ms);
-				return -1;
-			}
-			continue;
-		}
-
+		/* Things we can determine before we seek */
 		switch (xph_type) {
 		case PT_DYNAMIC:
 			linking_style = "dynamically";
@@ -1068,8 +1066,18 @@ dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 		case PT_INTERP:
 			shared_libraries = " (uses shared libs)";
 			break;
+		default:
+			if (xph_offset > fsize) {
+				/* Maybe warn here? */
+				continue;
+			}
+			break;
+		}
+
+		/* Things we can determine when we seek */
+		switch (xph_type) {
 		case PT_NOTE:
-			if ((align = xph_align) & 0x80000000) {
+			if ((align = xph_align) & 0x80000000UL) {
 				if (file_printf(ms, 
 				    ", invalid note alignment 0x%lx",
 				    (unsigned long)align) == -1)
@@ -1082,8 +1090,7 @@ dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 			 * This is a PT_NOTE section; loop through all the notes
 			 * in the section.
 			 */
-			if (lseek(fd, xph_offset, SEEK_SET)
-			    == (off_t)-1) {
+			if (lseek(fd, xph_offset, SEEK_SET) == (off_t)-1) {
 				file_badseek(ms);
 				return -1;
 			}
@@ -1102,10 +1109,6 @@ dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 				    flags);
 				if (offset == 0)
 					break;
-			}
-			if (lseek(fd, savedoffset, SEEK_SET) == (off_t)-1) {
-				file_badseek(ms);
-				return -1;
 			}
 			break;
 		default:

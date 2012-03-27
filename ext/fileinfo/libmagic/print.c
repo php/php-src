@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: print.c,v 1.66 2009/02/03 20:27:51 christos Exp $")
+FILE_RCSID("@(#)$File: print.c,v 1.71 2011/09/20 15:28:09 christos Exp $")
 #endif  /* lint */
 
 #include <string.h>
@@ -85,7 +85,7 @@ file_fmttime(uint32_t v, int local)
 			(void)time(&now);
 			tm1 = localtime(&now);
 			if (tm1 == NULL)
-				return "*Invalid time*";
+				goto out;
 			daylight = tm1->tm_isdst;
 		}
 #endif /* HAVE_TM_ISDST */
@@ -94,10 +94,14 @@ file_fmttime(uint32_t v, int local)
 			t += 3600;
 		tm = gmtime(&t);
 		if (tm == NULL)
-			return "*Invalid time*";
+			goto out;
 		pp = asctime(tm);
 	}
 
+	if (pp == NULL)
+		goto out;
 	pp[strcspn(pp, "\n")] = '\0';
 	return pp;
+out:
+	return "*Invalid time*";
 }
