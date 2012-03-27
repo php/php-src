@@ -2,7 +2,7 @@
  * Copyright (c) Ian F. Darwin 1986-1995.
  * Software written by Ian F. Darwin and others;
  * maintained 1995-present by Christos Zoulas and others.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -32,7 +32,7 @@
  *
  * Created 25 August 1985 by John Gilmore, ihnp4!hoptoad!gnu.
  *
- * $File: tar.h,v 1.12 2008/02/07 00:58:52 christos Exp $ # checkin only
+ * $File: tar.h,v 1.13 2010/11/30 14:58:53 rrt Exp $ # checkin only
  */
 
 /*
@@ -49,7 +49,7 @@
 #define	TGNMLEN	32
 
 union record {
-	char		charptr[RECORDSIZE];
+	unsigned char	charptr[RECORDSIZE];
 	struct header {
 		char	name[NAMSIZ];
 		char	mode[8];
