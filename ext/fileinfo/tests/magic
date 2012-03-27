@@ -1,16 +1,6 @@
-# Magic data for file(1) command.
-# Format is described in magic(5).
-# Don't edit this file, edit /etc/magic or send your suggested inclusions to
-# this file as a wishlist bug against file (using the reportbug utility).
-
 
 #------------------------------------------------------------------------------
-# Localstuff:  file(1) magic for locally observed files
-#
-# $File: Localstuff,v 1.4 2003/03/23 04:17:27 christos Exp $
-# Add any locally observed files here.  Remember:
-# text if readable, executable if runnable binary, data if unreadable.
-#------------------------------------------------------------------------------
+# $File: acorn,v 1.5 2009/09/19 16:28:07 christos Exp $
 # acorn:  file(1) magic for files found on Acorn systems
 #
 
@@ -79,6 +69,7 @@
 >>10	leshort	!1	%d patterns
 
 #------------------------------------------------------------------------------
+# $File: adi,v 1.4 2009/09/19 16:28:07 christos Exp $
 # adi: file(1) magic for ADi's objects
 # From Gregory McGarry <g.mcgarry@ieee.org>
 #
@@ -91,6 +82,7 @@
 >18	lelong		^010		not stripped
 
 #------------------------------------------------------------------------------
+# $File: adventure,v 1.10 2009/09/19 16:28:07 christos Exp $
 # adventure: file(1) magic for Adventure game files
 #
 # from Allen Garvin <earendil@faeryland.tamu-commerce.edu>
@@ -108,17 +100,23 @@
 #------------------------------------------------------------------------------
 # Z-machine:  file(1) magic for Z-machine binaries.
 #
-# This will match ${TEX_BASE}/texmf/omega/ocp/char2uni/inbig5.ocp which
-# appears to be a version-0 Z-machine binary.
+# Updated by Adam Buchbinder <adam.buchbinder@gmail.com>
 #
-# The (false match) message is to correct that behavior.  Perhaps it is
-# not needed.
+# The first byte is the Z-machine revision; it is always between 1 and 8. We
+# had false matches (for instance, inbig5.ocp from the Omega TeX extension as
+# well as an occasional MP3 file), so we sanity-check the version number.
 #
-16	belong&0xfe00f0f0	0x3030	Infocom game data
->0	ubyte			0	(false match)
->0	ubyte			>0	(Z-machine %d,
->>2	ubeshort		x	Release %d /
->>18	string			>\0	Serial %.6s)
+# It might be possible to sanity-check the release number as well, as it seems
+# (at least in classic Infocom games) to always be a relatively small number,
+# always under 150 or so, but as this isn't rigorous, we'll wait on that until
+# it becomes clear that it's needed.
+#
+0	ubyte			>0
+>0	ubyte			<9
+>>16	belong&0xfe00f0f0	0x3030	Infocom game data
+>>>0	ubyte			x	(Z-machine %d,
+>>>>2	ubeshort		x	Release %d /
+>>>>18	string			>\0	Serial %.6s)
 
 #------------------------------------------------------------------------------
 # Glulx:  file(1) magic for Glulx binaries.
@@ -174,7 +172,9 @@
 #0	belong	0x3C423FC9
 #>4	belong	0x6A87C2CF	Adrift game file
 #!:mime	application/x-adrift
+
 #------------------------------------------------------------------------------
+# $File: allegro,v 1.4 2009/09/19 16:28:07 christos Exp $
 # allegro:  file(1) magic for Allegro datafiles
 # Toby Deshane <hac@shoelace.digivill.net>
 #
@@ -183,6 +183,7 @@
 0 belong 0x736C682B   Allegro datafile (appended exe data)
 
 #------------------------------------------------------------------------------
+# $File: alliant,v 1.7 2009/09/19 16:28:07 christos Exp $
 # alliant:  file(1) magic for Alliant FX series a.out files
 #
 # If the FX series is the one that had a processor with a 68K-derived
@@ -198,7 +199,9 @@
 0	short		0421		0421 Alliant compact executable
 >2	short		&0x0020		common library
 >16	long		>0		not stripped
+
 #------------------------------------------------------------------------------
+# $File: alpha,v 1.7 2009/09/19 16:28:07 christos Exp $
 # alpha architecture description
 #
 
@@ -228,7 +231,9 @@
 0	string		Core\002	Alpha COFF format core dump (Digital UNIX)
 >24	string		>\0		\b, from '%s'
 
+
 #------------------------------------------------------------------------------
+# $File: amanda,v 1.5 2009/09/19 16:28:07 christos Exp $
 # amanda:  file(1) magic for amanda file format
 #
 0	string	AMANDA:\ 		AMANDA 
@@ -238,7 +243,9 @@
 >>23	string	>\ 			DATE %s
 >8	string	FILE\ 			dump file,
 >>13	string	>\ 			DATE %s
+
 #------------------------------------------------------------------------------
+# $File: amigaos,v 1.14 2009/09/19 16:28:07 christos Exp $
 # amigaos:  file(1) magic for AmigaOS binary formats:
 
 #
@@ -303,6 +310,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: animation,v 1.39 2009/09/27 19:02:12 christos Exp $
 # animation:  file(1) magic for animation/movie formats
 #
 # animation formats
@@ -332,7 +340,7 @@
 #!:mime	image/x-quicktime
 4       string          pckg            Apple QuickTime compressed archive
 !:mime	application/x-quicktime-player
-4	string/B	jP		JPEG 2000 image
+4	string/W	jP		JPEG 2000 image
 !:mime	image/jp2
 4	string		ftyp		ISO Media
 >8	string		isom		\b, MPEG v4 system, version 1
@@ -344,7 +352,7 @@
 !:mime	video/mp4
 >8	string		mp7t		\b, MPEG v4 system, MPEG v7 XML
 >8	string		mp7b		\b, MPEG v4 system, MPEG v7 binary XML
->8	string/B	jp2		\b, JPEG 2000
+>8	string/W	jp2		\b, JPEG 2000
 !:mime	image/jp2
 >8	string		3gp		\b, MPEG v4 system, 3GPP
 !:mime	video/3gpp
@@ -355,13 +363,13 @@
 !:mime	video/mp4
 >8	string		avc1		\b, MPEG v4 system, 3GPP JVT AVC
 !:mime	video/3gpp
->8	string/B	M4A		\b, MPEG v4 system, iTunes AAC-LC
+>8	string/W	M4A		\b, MPEG v4 system, iTunes AAC-LC
 !:mime	audio/mp4
->8	string/B	M4V		\b, MPEG v4 system, iTunes AVC-LC
+>8	string/W	M4V		\b, MPEG v4 system, iTunes AVC-LC
 !:mime	video/mp4
->8	string/B	M4P		\b, MPEG v4 system, iTunes AES encrypted
->8	string/B	M4B		\b, MPEG v4 system, iTunes bookmarked
->8	string/B	qt		\b, Apple QuickTime movie
+>8	string/W	M4P		\b, MPEG v4 system, iTunes AES encrypted
+>8	string/W	M4B		\b, MPEG v4 system, iTunes bookmarked
+>8	string/W	qt		\b, Apple QuickTime movie
 !:mime	video/quicktime
 
 # MPEG sequences
@@ -374,6 +382,7 @@
 >>7      byte               x              \b @ L %u
 0        belong&0xFFFFFF00  0x00000100     
 >3       byte               0xBA           MPEG sequence
+!:mime  video/mpeg
 >>4      byte               &0x40          \b, v2, program multiplex
 >>4      byte               ^0x40          \b, v1, system multiplex
 >3       byte               0xBB           MPEG sequence, v1/2, multiplex (missing pack header)
@@ -383,6 +392,7 @@
 >>4      byte               88             \b, extended
 >>6      byte               x              \b @ L %u
 >3       byte               0xB0           MPEG sequence, v4
+!:mime  video/mpeg4-generic
 >>5      belong             0x000001B5
 >>>9     byte               &0x80
 >>>>10   byte&0xF0          16             \b, video
@@ -628,6 +638,7 @@
 
 # MP2, M1A
 0       beshort&0xFFFE  0xFFFC         MPEG ADTS, layer II, v1
+!:mime	audio/mpeg
 # rates
 >2      byte&0xF0       0x10           \b,  32 kbps
 >2      byte&0xF0       0x20           \b,  48 kbps
@@ -702,6 +713,7 @@
 
 # MP3, M2A
 0       beshort&0xFFFE  0xFFF2         MPEG ADTS, layer III, v2
+!:mime	audio/mpeg
 # rate
 >2      byte&0xF0       0x10           \b,   8 kbps
 >2      byte&0xF0       0x20           \b,  16 kbps
@@ -770,6 +782,7 @@
 
 # MPA, M2A
 0       beshort&0xFFFE  0xFFF6         MPEG ADTS, layer I, v2
+!:mime	audio/mpeg
 # rate
 >2      byte&0xF0       0x10           \b,  32 kbps
 >2      byte&0xF0       0x20           \b,  48 kbps
@@ -804,6 +817,7 @@
 
 # MP3, M25A
 0       beshort&0xFFFE  0xFFE2         MPEG ADTS, layer III,  v2.5
+!:mime	audio/mpeg
 # rate  
 >2      byte&0xF0       0x10           \b,   8 kbps
 >2      byte&0xF0       0x20           \b,  16 kbps
@@ -998,7 +1012,7 @@
 
 # Microsoft Advanced Streaming Format (ASF) <mpruett@sgi.com>
 0	belong			0x3026b275	Microsoft ASF
-!:mime	video/x-ms-asf
+!:mime  video/x-ms-asf
 
 # MNG Video Format, <URL:http://www.libpng.org/pub/mng/spec/>
 0	string			\x8aMNG		MNG video data,
@@ -1020,16 +1034,16 @@
 3	string		\x0D\x0AVersion:Vivo	Vivo video data
 
 # VRML (Virtual Reality Modelling Language)
-0       string/b        #VRML\ V1.0\ ascii	VRML 1 file
+0       string/w        #VRML\ V1.0\ ascii	VRML 1 file
 !:mime	model/vrml
-0	string/b	#VRML\ V2.0\ utf8	ISO/IEC 14772 VRML 97 file
+0	string/w	#VRML\ V2.0\ utf8	ISO/IEC 14772 VRML 97 file
 !:mime	model/vrml
 
 # X3D (Extensible 3D) [http://www.web3d.org/specifications/x3d-3.0.dtd]
 # From Michel Briand <michelbriand@free.fr>
 0	string		\<?xml\ version="
 !:strength +1
->20	search/1000/cb  \<!DOCTYPE\ X3D		X3D (Extensible 3D) model xml text
+>20	search/1000/cw  \<!DOCTYPE\ X3D		X3D (Extensible 3D) model xml text
 !:mime model/x3d
 
 #---------------------------------------------------------------------------
@@ -1095,12 +1109,41 @@
 >4      byte&0x1F	   0x07
 !:mime	video/h264
 
+# Type: Bink Video
+# URL:  http://wiki.multimedia.cx/index.php?title=3DBink_Container
+# From: <hoehle@users.sourceforge.net>  2008-07-18
+0	string		BIK	Bink Video
+>3	regex		=[a-z]	rev.%s
+#>4	ulelong		x	size %d
+>20	ulelong		x	\b, %d
+>24	ulelong		x	\bx%d
+>8	ulelong		x	\b, %d frames
+>32	ulelong		x	at rate %d/
+>28	ulelong		>1	\b%d
+>40	ulelong		=0	\b, no audio
+>40	ulelong		!0	\b, %d audio track
+>>40	ulelong		!1	\bs
+# follow properties of the first audio track only
+>>48	uleshort	x	%dHz
+>>51	byte&0x20	0	mono
+>>51	byte&0x20	!0	stereo
+#>>51	byte&0x10	0	FFT
+#>>51	byte&0x10	!0	DCT
+
+# Type:	NUT Container
+# URL:	http://wiki.multimedia.cx/index.php?title=NUT
+# From:	Adam Buchbinder <adam.buchbinder@gmail.com>
+0	string	nut/multimedia\ container\0	NUT multimedia container
+
 #------------------------------------------------------------------------------
+# $File: apl,v 1.6 2009/09/19 16:28:07 christos Exp $
 # apl:  file(1) magic for APL (see also "pdp" and "vax" for other APL
 #       workspaces)
 #
 0	long		0100554		APL workspace (Ken's original?)
+
 #------------------------------------------------------------------------------
+# $File: apple,v 1.23 2009/09/19 16:28:08 christos Exp $
 # apple:  file(1) magic for Apple file formats
 #
 0	search/1	FiLeStArTfIlEsTaRt	binscii (apple ][) text
@@ -1351,6 +1394,7 @@
 4	string innotek\ VirtualBox\ Disk\ Image %s
 
 #------------------------------------------------------------------------------
+# $File: applix,v 1.5 2009/09/19 16:28:08 christos Exp $
 # applix:  file(1) magic for Applixware
 # From: Peter Soos <sp@osb.hu>
 #
@@ -1361,7 +1405,9 @@
 >7	string		SPREADSHEETS		Spreadsheet
 >7	string		MACRO			Macro
 >7	string		BUILDER			Builder Object
+
 #------------------------------------------------------------------------------
+# $File: archive,v 1.55 2009/12/04 15:00:47 christos Exp $
 # archive:  file(1) magic for archive formats (see also "msdos" for self-
 #           extracting compressed archives)
 #
@@ -1923,79 +1969,105 @@
 # [JW] see exe section for self-extracting version
 0	string		UC2\x1a		UC2 archive data
 
+# PKZIP multi-volume archive
+0	string		PK\x07\x08PK\x03\x04	Zip multi-volume archive data, at least PKZIP v2.50 to extract
+!:mime	application/zip
+
 # ZIP archives (Greg Roelofs, c/o zip-bugs@wkuvx1.wku.edu)
 0	string		PK\003\004
->4	byte		0x00		Zip archive data
+>30	ubelong		!0x6d696d65
+>>4	byte		0x00		Zip archive data
 !:mime	application/zip
->4	byte		0x09		Zip archive data, at least v0.9 to extract
+>>4	byte		0x09		Zip archive data, at least v0.9 to extract
 !:mime	application/zip
->4	byte		0x0a		Zip archive data, at least v1.0 to extract
+>>4	byte		0x0a		Zip archive data, at least v1.0 to extract
 !:mime	application/zip
->4	byte		0x0b		Zip archive data, at least v1.1 to extract
+>>4	byte		0x0b		Zip archive data, at least v1.1 to extract
 !:mime	application/zip
->0x161	string		WINZIP          Zip archive data, WinZIP self-extracting
+>>0x161	string		WINZIP          Zip archive data, WinZIP self-extracting
 !:mime	application/zip
->4	byte		0x14
->>30	ubelong		!0x6d696d65	Zip archive data, at least v2.0 to extract
+>>4	byte		0x14		Zip archive data, at least v2.0 to extract
 !:mime	application/zip
 
 # OpenOffice.org / KOffice / StarOffice documents
 # Listed here because they ARE zip files
 #
 # From: Abel Cheung <abel@oaka.org>
->4	byte		0x14
->>30	string		mimetype
+>30	string		mimetype
 
 # KOffice (1.2 or above) formats
->>>50	string	vnd.kde.		KOffice (>=1.2)
->>>>58	string	karbon			Karbon document
->>>>58	string	kchart			KChart document
->>>>58	string	kformula		KFormula document
->>>>58	string	kivio			Kivio document
->>>>58	string	kontour			Kontour document
->>>>58	string	kpresenter		KPresenter document
->>>>58	string	kspread			KSpread document
->>>>58	string	kword			KWord document
+>>50	string	vnd.kde.		KOffice (>=1.2)
+>>>58	string	karbon			Karbon document
+>>>58	string	kchart			KChart document
+>>>58	string	kformula		KFormula document
+>>>58	string	kivio			Kivio document
+>>>58	string	kontour			Kontour document
+>>>58	string	kpresenter		KPresenter document
+>>>58	string	kspread			KSpread document
+>>>58	string	kword			KWord document
 
 # OpenOffice formats (for OpenOffice 1.x / StarOffice 6/7)
->>>50	string	vnd.sun.xml.		OpenOffice.org 1.x
->>>>62	string	writer			Writer
->>>>>68	byte	!0x2e			document
->>>>>68	string	.template		template
->>>>>68	string	.global			global document
->>>>62	string	calc			Calc
->>>>>66	byte	!0x2e			spreadsheet
->>>>>66	string	.template		template
->>>>62	string	draw			Draw
->>>>>66	byte	!0x2e			document
->>>>>66	string	.template		template
->>>>62	string	impress			Impress
->>>>>69	byte	!0x2e			presentation
->>>>>69	string	.template		template
->>>>62	string	math			Math document
->>>>62	string	base			Database file
+>>50	string	vnd.sun.xml.		OpenOffice.org 1.x
+>>>62	string	writer			Writer
+>>>>68	byte	!0x2e			document
+>>>>68	string	.template		template
+>>>>68	string	.global			global document
+>>>62	string	calc			Calc
+>>>>66	byte	!0x2e			spreadsheet
+>>>>66	string	.template		template
+>>>62	string	draw			Draw
+>>>>66	byte	!0x2e			document
+>>>>66	string	.template		template
+>>>62	string	impress			Impress
+>>>>69	byte	!0x2e			presentation
+>>>>69	string	.template		template
+>>>62	string	math			Math document
+>>>62	string	base			Database file
 
 # OpenDocument formats (for OpenOffice 2.x / StarOffice >= 8)
 # http://lists.oasis-open.org/archives/office/200505/msg00006.html
->>>50	string	vnd.oasis.opendocument.	OpenDocument
->>>>73	string	text
->>>>>77	byte	!0x2d			Text
+>>50	string	vnd.oasis.opendocument.	OpenDocument
+>>>73	string	text
+>>>>77	byte	!0x2d			Text
 !:mime	application/vnd.oasis.opendocument.text
->>>>>77	string	-template		Text Template
->>>>>77	string	-web			HTML Document Template
->>>>>77	string	-master			Master Document
->>>>73	string	graphics		Drawing
->>>>>81	string	-template		Template
->>>>73	string	presentation		Presentation
->>>>>85	string	-template		Template
->>>>73	string	spreadsheet		Spreadsheet
->>>>>84	string	-template		Template
->>>>73	string	chart			Chart
->>>>>78	string	-template		Template
->>>>73	string	formula			Formula
->>>>>80	string	-template		Template
->>>>73	string	database		Database
->>>>73	string	image			Image
+>>>>77	string	-template		Text Template
+!:mime	application/vnd.oasis.opendocument.text-template
+>>>>77	string	-web			HTML Document Template
+!:mime	application/vnd.oasis.opendocument.text-web
+>>>>77	string	-master			Master Document
+!:mime	application/vnd.oasis.opendocument.text-master
+>>>73	string	graphics
+>>>>81	byte	!0x2d			Drawing
+!:mime	application/vnd.oasis.opendocument.graphics
+>>>>81	string	-template		Template
+!:mime	application/vnd.oasis.opendocument.graphics-template
+>>>73	string	presentation
+>>>>85	byte	!0x2d			Presentation
+!:mime	application/vnd.oasis.opendocument.presentation
+>>>>85	string	-template		Template
+!:mime	application/vnd.oasis.opendocument.presentation-template
+>>>73	string	spreadsheet
+>>>>84	byte	!0x2d			Spreadsheet
+!:mime	application/vnd.oasis.opendocument.spreadsheet
+>>>>84	string	-template		Template
+!:mime	application/vnd.oasis.opendocument.spreadsheet-template
+>>>73	string	chart
+>>>>78	byte	!0x2d			Chart
+!:mime	application/vnd.oasis.opendocument.chart
+>>>>78	string	-template		Template
+!:mime	application/vnd.oasis.opendocument.chart-template
+>>>73	string	formula
+>>>>80	byte	!0x2d			Formula
+!:mime	application/vnd.oasis.opendocument.formula
+>>>>80	string	-template		Template
+!:mime	application/vnd.oasis.opendocument.formula-template
+>>>73	string	database		Database
+!:mime	application/vnd.oasis.opendocument.database
+>>>73	string	image
+>>>>78	byte	!0x2d			Image
+!:mime	application/vnd.oasis.opendocument.image
+>>>>78	string	-template		Template
+!:mime	application/vnd.oasis.opendocument.image-template
 
 # Zoo archiver
 20	lelong		0xfdc4a7dc	Zoo archive data
@@ -2168,9 +2240,16 @@
 
 # Type: Parity Archive
 # From: Daniel van Eeden <daniel_e@dds.nl>
-0	string	 PAR2		Parity Archive Volume Set
+0	string	PAR2		Parity Archive Volume Set
+
+# Bacula volume format. (Volumes always start with a block header.)
+# URL: http://bacula.org/3.0.x-manuals/en/developers/developers/Block_Header.html
+# From: Adam Buchbinder <adam.buchbinder@gmail.com>
+12	string	BB02		Bacula volume
+>20	bedate	x		\b, started %s
 
 #------------------------------------------------------------------------------
+# $File: asterix,v 1.5 2009/09/19 16:28:08 christos Exp $
 # asterix:  file(1) magic for Aster*x; SunOS 5.5.1 gave the 4-character
 # strings as "long" - we assume they're just strings:
 # From: guy@netapp.com (Guy Harris)
@@ -2188,6 +2267,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: att3b,v 1.8 2009/09/19 16:28:08 christos Exp $
 # att3b:  file(1) magic for AT&T 3B machines
 #
 # The `versions' should be un-commented if they work for you.
@@ -2226,7 +2306,9 @@
 # core file for 3b2 
 0	string		\000\004\036\212\200	3b2 core file
 >364	string		>\0		of '%s'
+
 #------------------------------------------------------------------------------
+# $File: audio,v 1.59 2009/11/04 17:27:37 christos Exp $
 # audio:  file(1) magic for sound formats (see also "iff")
 #
 # Jan Nicolai Langfeldt (janl@ifi.uio.no), Dan Quinlan (quinlan@yggdrasil.com),
@@ -2504,8 +2586,8 @@
 >21	ubyte		<128			note %d,
 >22	byte		=0			replay 5.485 KHz
 >22	byte		=1			replay 8.084 KHz
->22	byte		=2			replay 10.971 Khz
->22	byte		=3			replay 16.168 Khz
+>22	byte		=2			replay 10.971 KHz
+>22	byte		=3			replay 16.168 KHz
 >22	byte		=4			replay 21.942 KHz
 >22	byte		=5			replay 32.336 KHz
 >22	byte		=6			replay 43.885 KHz
@@ -2514,43 +2596,14 @@
 # SGI SoundTrack <mpruett@sgi.com>
 0	string		_SGI_SoundTrack		SGI SoundTrack project file
 # ID3 version 2 tags <waschk@informatik.uni-rostock.de>
-0	string		ID3	Audio file with ID3 version 2.
-# ??? Normally such a file is an MP3 file, but this will give false positives
-!:mime	audio/mpeg
->3	ubyte	<0xff	\b%d
-#>4	ubyte	<0xff	\b%d tag
->2584	string	fLaC		\b, FLAC encoding
->>2588	byte&0x7f		>0		\b, unknown version
->>2588	byte&0x7f		0		\b
-# some common bits/sample values
->>>2600	beshort&0x1f0		0x030		\b, 4 bit
->>>2600	beshort&0x1f0		0x050		\b, 6 bit
->>>2600	beshort&0x1f0		0x070		\b, 8 bit
->>>2600	beshort&0x1f0		0x0b0		\b, 12 bit
->>>2600	beshort&0x1f0		0x0f0		\b, 16 bit
->>>2600	beshort&0x1f0		0x170		\b, 24 bit
->>>2600	byte&0xe		0x0		\b, mono
->>>2600	byte&0xe		0x2		\b, stereo
->>>2600	byte&0xe		0x4		\b, 3 channels
->>>2600	byte&0xe		0x6		\b, 4 channels
->>>2600	byte&0xe		0x8		\b, 5 channels
->>>2600	byte&0xe		0xa		\b, 6 channels
->>>2600	byte&0xe		0xc		\b, 7 channels
->>>2600	byte&0xe		0xe		\b, 8 channels
-# some common sample rates
->>>2597	belong&0xfffff0		0x0ac440	\b, 44.1 kHz
->>>2597	belong&0xfffff0		0x0bb800	\b, 48 kHz
->>>2597	belong&0xfffff0		0x07d000	\b, 32 kHz
->>>2597	belong&0xfffff0		0x056220	\b, 22.05 kHz
->>>2597	belong&0xfffff0		0x05dc00	\b, 24 kHz
->>>2597	belong&0xfffff0		0x03e800	\b, 16 kHz
->>>2597	belong&0xfffff0		0x02b110	\b, 11.025 kHz
->>>2597	belong&0xfffff0		0x02ee00	\b, 12 kHz
->>>2597	belong&0xfffff0		0x01f400	\b, 8 kHz
->>>2597	belong&0xfffff0		0x177000	\b, 96 kHz
->>>2597	belong&0xfffff0		0x0fa000	\b, 64 kHz
->>>2601	byte&0xf		>0		\b, >4G samples
->2584	string	!fLaC		\b, MP3 encoding
+0	string		ID3	Audio file with ID3 version 2
+>3	byte		x	\b.%d
+>4	byte		x	\b.%d
+>>5	byte		&0x80	\b, unsynchronized frames
+>>5	byte		&0x40	\b, extended header
+>>5	byte		&0x20	\b, experimental
+>>5	byte		&0x10	\b, footer present
+>(6.I)	indirect	x	\b, contains: 
 
 # NSF (NES sound file) magic
 0	string		NESM\x1a	NES Sound File
@@ -2875,7 +2928,9 @@
 # From: Mario Lang <mlang@debian.org>
 0	string	SCgf	SuperCollider3 Synth Definition file,
 >4	belong	x	version %d
+
 #----------------------------------------------------------------
+# $File: basis,v 1.4 2009/09/19 16:28:08 christos Exp $
 # basis: file(1) magic for BBx/Pro5-files
 #      Oliver Dammer <dammer@olida.de>	 2005/11/07
 # http://www.basis.com business-basic-files.
@@ -2891,7 +2946,9 @@
 >7	string		\006			mkeyed file
 >>13	short		0			(sort)
 >>8	string		\000			(mkey)
+
 #------------------------------------------------------------------------------
+# $File: bflt,v 1.4 2009/09/19 16:28:08 christos Exp $
 # bFLT: file(1) magic for BFLT uclinux binary files
 #
 # From Philippe De Muyter <phdm@macqel.be>
@@ -2903,7 +2960,34 @@
 >>36	belong&0x2	0x2		gotpic
 >>36	belong&0x4	0x4		gzip
 >>36	belong&0x8	0x8		gzdata
+# Berkeley Lab Checkpoint Restart (BLCR) checkpoint context files
+# http://ftg.lbl.gov/checkpoint
+0	string	C\0\0\0R\0\0\0	BLCR
+>16	lelong	1	x86
+>16	lelong	3	alpha
+>16	lelong	5	x86-64
+>16	lelong	7	ARM
+>8	lelong	x	context data (little endian, version %d)
+# Uncomment the following only of your "file" program supports "search"
+#>0	search/1024	VMA\06	for kernel
+#>>&1	byte	x	%d.
+#>>&2	byte	x	%d.
+#>>&3	byte	x	%d
+0	string	\0\0\0C\0\0\0R	BLCR
+>16	belong	2	SPARC
+>16	belong	4	ppc
+>16	belong	6	ppc64
+>16	belong	7	ARMEB
+>16	belong	8	SPARC64
+>8	belong	x	context data (big endian, version %d)
+# Uncomment the following only of your "file" program supports "search"
+#>0	search/1024	VMA\06	for kernel
+#>>&1	byte	x	%d.
+#>>&2	byte	x	%d.
+#>>&3	byte	x	%d
+
 #------------------------------------------------------------------------------
+# $File: blender,v 1.5 2009/09/19 16:28:08 christos Exp $
 # blender: file(1) magic for Blender 3D related files
 #
 # Native format rule v1.2. For questions use the developers list 
@@ -2942,6 +3026,7 @@
 0		string	#!BPY		Blender3D BPython script
 
 #------------------------------------------------------------------------------
+# $File: blit,v 1.8 2009/09/19 16:28:08 christos Exp $
 # blit:  file(1) magic for 68K Blit stuff as seen from 680x0 machine
 #
 # Note that this 0407 conflicts with several other a.out formats...
@@ -2959,7 +3044,9 @@
 # Need more values for WE32 DMD executables.
 # Note that 0520 is the same as COFF
 #0	short		0520		tty630 layers executable
-#
+
+#------------------------------------------------------------------------------
+# $File: bout,v 1.5 2009/09/19 16:28:08 christos Exp $
 # i80960 b.out objects and archives
 #
 0	long		0x10d		i960 b.out relocatable object
@@ -2968,7 +3055,9 @@
 # b.out archive (hp-rt on i960)
 0	string		=!<bout>	b.out archive
 >8	string		__.SYMDEF	random library
+
 #------------------------------------------------------------------------------
+# $File: bsdi,v 1.5 2009/09/19 16:28:08 christos Exp $
 # bsdi:  file(1) magic for BSD/OS (from BSDI) objects
 #
 
@@ -3009,7 +3098,18 @@
 >0	byte		^0x80		executable
 >16	belong		>0		not stripped
 >36	belong		0xb4100001	(uses shared libs)
+# Chiasmus is a encryption standard developed by the German Federal
+# Office for Information Security (Bundesamt fuer Sicherheit in der
+# Informationstechnik).
+
+# Extension: .xia
+0	string	XIA1	Chiasmus encrypted data
+
+# Extension: .xis
+0	string	XIS	Chiasmus key
+
 #------------------------------------------------------------------------------
+# $File: btsnoop,v 1.5 2009/09/19 16:28:08 christos Exp $
 # BTSnoop:  file(1) magic for BTSnoop files
 #
 # From <marcel@holtmann.org>
@@ -3020,34 +3120,9 @@
 >12	belong		1003			HCI BCSP
 >12	belong		1004			HCI Serial (H5)
 >>12	belong		x			type %d
+
 #------------------------------------------------------------------------------
-# c-lang:  file(1) magic for C programs (or REXX)
-#
-
-# XPM icons (Greg Roelofs, newt@uchicago.edu)
-# if you uncomment "/*" for C/REXX below, also uncomment this entry
-#0	string		/*\ XPM\ */	X pixmap image data
-#!:mime	image/x-xpmi
-
-# 3DS (3d Studio files) Conflicts with diff output 0x3d '='
-#16	beshort		0x3d3d		image/x-3ds
-
-# this first will upset you if you're a PL/1 shop...
-# in which case rm it; ascmagic will catch real C programs
-#0	search/1	/*		C or REXX program text
-#0	search/1	//		C++ program text
-
-# From: Mikhail Teterin <mi@aldan.algebra.com> 
-0	string		cscope		cscope reference data
->7	string		x		version %.2s
-# We skip the path here, because it is often long (so file will
-# truncate it) and mostly redundant.
-# The inverted index functionality was added some time betwen
-# versions 11 and 15, so look for -q if version is above 14:
->7	string		>14
->>10	search/100	\ -q\ 		with inverted index
->10	search/100	\ -c\ 		text (non-compressed)
-#------------------------------------------------------------------------------
+# $File: c64,v 1.5 2009/09/19 16:28:08 christos Exp $
 # c64:  file(1) magic for various commodore 64 related files
 #
 # From: Dirk Jagdmann <doj@cubic.org>
@@ -3090,6 +3165,7 @@
 >40	string		x		Name:%.24s
 
 #------------------------------------------------------------------------------
+# $File: cad,v 1.9 2009/09/19 16:28:08 christos Exp $
 # autocad:  file(1) magic for cad files
 #
 
@@ -3157,7 +3233,9 @@
 0	string	AC1012		AutoDesk AutoCAD R13
 0	string	AC1014		AutoDesk AutoCAD R14 
 0	string	AC1015		AutoDesk AutoCAD R2000
+
 #------------------------------------------------------------------------------
+# $File: cafebabe,v 1.8 2009/09/19 16:28:08 christos Exp $
 # Cafe Babes unite!
 #
 # Since Java bytecode and Mach-O fat-files have the same magic number, the test
@@ -3171,20 +3249,33 @@
 # (and use as a hack). Let's not use 18, because the Mach-O people
 # might add another one or two as time goes by...
 #
-0	beshort		0xcafe
->2	beshort         0xbabe
+0	belong		0xcafebabe
 !:mime	application/x-java-applet
->>2	belong		>30		compiled Java class data,
->>>6	beshort		x	        version %d.
->>>4	beshort		x       	\b%d
->>4	belong		1		Mach-O fat file with 1 architecture
->>4	belong		>1
->>>4	belong		<20		Mach-O fat file with %ld architectures
->2	beshort		0xd00d		JAR compressed with pack200,
+>4	belong		>30		compiled Java class data,
+>>6	beshort		x	        version %d.
+>>4	beshort		x       	\b%d
+# Which is which?
+#>>4	belong		0x032d		(Java 1.0)
+#>>4	belong		0x032d		(Java 1.1)
+>>4	belong		0x002e		(Java 1.2)
+>>4	belong		0x002f		(Java 1.3)
+>>4	belong		0x0030		(Java 1.4)
+>>4	belong		0x0031		(Java 1.5)
+>>4	belong		0x0032		(Java 1.6)
+
+
+0	belong		0xcafebabe
+>4	belong		1		Mach-O fat file with 1 architecture
+>4	belong		>1
+>>4	belong		<20		Mach-O fat file with %ld architectures
+
+0	belong		0xcafed00d	JAR compressed with pack200,
 >>5	byte		x		version %d.
 >>4	byte		x		\b%d
 !:mime	application/x-java-pack200
+
 #------------------------------------------------------------------------------
+# $File: cddb,v 1.4 2009/09/19 16:28:08 christos Exp $
 # CDDB: file(1) magic for CDDB(tm) format CD text data files
 #
 # From <steve@gracenote.com>
@@ -3193,9 +3284,10 @@
 # CDDB-enabled CD player applications.
 #
 
-0	search/1/b	#\040xmcd	CDDB(tm) format CD text data
+0	search/1/w	#\040xmcd	CDDB(tm) format CD text data
 
 #------------------------------------------------------------------------------
+# $File: chord,v 1.4 2009/09/19 16:28:08 christos Exp $
 # chord: file(1) magic for Chord music sheet typesetting utility input files
 #
 # From Philippe De Muyter <phdm@macqel.be>
@@ -3208,7 +3300,9 @@
 # From:	Jelmer Vernooij <jelmer@samba.org>
 0	string		ptab\003\000	Power-Tab v3 Tablature File
 0	string		ptab\004\000	Power-Tab v4 Tablature File
+
 #------------------------------------------------------------------------------
+# $File: cisco,v 1.4 2009/09/19 16:28:08 christos Exp $
 # cisco:  file(1) magic for cisco Systems routers
 #
 # Most cisco file-formats are covered by the generic elf code
@@ -3218,7 +3312,9 @@
 >7	string		>\0		    for '%s'
 0	belong&0xffffff00	0x8501cb00  cisco IOS experimental microcode
 >7	string		>\0		    for '%s'
+
 #------------------------------------------------------------------------------
+# $File: citrus,v 1.4 2009/09/19 16:28:08 christos Exp $
 # citrus locale declaration
 #
 
@@ -3226,6 +3322,36 @@
 
 
 #------------------------------------------------------------------------------
+# $File: c-lang,v 1.14 2009/09/19 16:28:08 christos Exp $
+# c-lang:  file(1) magic for C programs (or REXX)
+#
+
+# XPM icons (Greg Roelofs, newt@uchicago.edu)
+# if you uncomment "/*" for C/REXX below, also uncomment this entry
+#0	string		/*\ XPM\ */	X pixmap image data
+#!:mime	image/x-xpmi
+
+# 3DS (3d Studio files) Conflicts with diff output 0x3d '='
+#16	beshort		0x3d3d		image/x-3ds
+
+# this first will upset you if you're a PL/1 shop...
+# in which case rm it; ascmagic will catch real C programs
+#0	search/1	/*		C or REXX program text
+#0	search/1	//		C++ program text
+
+# From: Mikhail Teterin <mi@aldan.algebra.com> 
+0	string		cscope		cscope reference data
+>7	string		x		version %.2s
+# We skip the path here, because it is often long (so file will
+# truncate it) and mostly redundant.
+# The inverted index functionality was added some time betwen
+# versions 11 and 15, so look for -q if version is above 14:
+>7	string		>14
+>>10	search/100	\ -q\ 		with inverted index
+>10	search/100	\ -c\ 		text (non-compressed)
+
+#------------------------------------------------------------------------------
+# $File: clarion,v 1.4 2009/09/19 16:28:08 christos Exp $
 # clarion:  file(1) magic for # Clarion Personal/Professional Developer
 # (v2 and above)
 # From: Julien Blache <jb@jblache.org>
@@ -3252,6 +3378,7 @@
 0	leshort	0x49e0	Clarion Developer (v2 and above) help data
 
 #------------------------------------------------------------------------------
+# $File: claris,v 1.5 2009/09/19 16:28:08 christos Exp $
 # claris:  file(1) magic for claris
 # "H. Nanosecond" <aldomel@ix.netcom.com>
 # Claris Works a word processor, etc.
@@ -3298,6 +3425,7 @@
 #./windows/claris/userd.spl: data
 
 #------------------------------------------------------------------------------
+# $File: clipper,v 1.6 2009/09/19 16:28:08 christos Exp $
 # clipper:  file(1) magic for Intergraph (formerly Fairchild) Clipper.
 #
 # XXX - what byte order does the Clipper use?
@@ -3362,70 +3490,71 @@
 4	string		prof		CLIPPER instruction profile
 
 #------------------------------------------------------------------------------
+# $File: commands,v 1.36 2010/01/24 18:41:11 christos Exp $
 # commands:  file(1) magic for various shells and interpreters
 #
 #0	string		:			shell archive or script for antique kernel text
-0	string/b	#!\ /bin/sh		POSIX shell script text executable
+0	string/w	#!\ /bin/sh		POSIX shell script text executable
 !:mime	text/x-shellscript
-0	string/b	#!\ /bin/csh		C shell script text executable
+0	string/w	#!\ /bin/csh		C shell script text executable
 !:mime	text/x-shellscript
 # korn shell magic, sent by George Wu, gwu@clyde.att.com
-0	string/b	#!\ /bin/ksh		Korn shell script text executable
+0	string/w	#!\ /bin/ksh		Korn shell script text executable
 !:mime	text/x-shellscript
-0	string/b 	#!\ /bin/tcsh		Tenex C shell script text executable
+0	string/w 	#!\ /bin/tcsh		Tenex C shell script text executable
 !:mime	text/x-shellscript
-0	string/b	#!\ /usr/bin/tcsh	Tenex C shell script text executable
+0	string/w	#!\ /usr/bin/tcsh	Tenex C shell script text executable
 !:mime	text/x-shellscript
-0	string/b 	#!\ /usr/local/tcsh	Tenex C shell script text executable
+0	string/w 	#!\ /usr/local/tcsh	Tenex C shell script text executable
 !:mime	text/x-shellscript
-0	string/b	#!\ /usr/local/bin/tcsh	Tenex C shell script text executable
+0	string/w	#!\ /usr/local/bin/tcsh	Tenex C shell script text executable
 !:mime	text/x-shellscript
 
 #
 # zsh/ash/ae/nawk/gawk magic from cameron@cs.unsw.oz.au (Cameron Simpson)
-0	string/b	#!\ /bin/zsh		Paul Falstad's zsh script text executable
+0	string/w	#!\ /bin/zsh		Paul Falstad's zsh script text executable
 !:mime	text/x-shellscript
-0	string/b	#!\ /usr/bin/zsh	Paul Falstad's zsh script text executable
+0	string/w	#!\ /usr/bin/zsh	Paul Falstad's zsh script text executable
 !:mime	text/x-shellscript
-0	string/b	#!\ /usr/local/bin/zsh	Paul Falstad's zsh script text executable
+0	string/w	#!\ /usr/local/bin/zsh	Paul Falstad's zsh script text executable
 !:mime	text/x-shellscript
-0	string/b	#!\ /usr/local/bin/ash	Neil Brown's ash script text executable
+0	string/w	#!\ /usr/local/bin/ash	Neil Brown's ash script text executable
 !:mime	text/x-shellscript
-0	string/b	#!\ /usr/local/bin/ae	Neil Brown's ae script text executable
+0	string/w	#!\ /usr/local/bin/ae	Neil Brown's ae script text executable
 !:mime	text/x-shellscript
-0	string/b	#!\ /bin/nawk		new awk script text executable
+0	string/w	#!\ /bin/nawk		new awk script text executable
 !:mime	text/x-nawk
-0	string/b	#!\ /usr/bin/nawk	new awk script text executable
+0	string/w	#!\ /usr/bin/nawk	new awk script text executable
 !:mime	text/x-nawk
-0	string/b	#!\ /usr/local/bin/nawk	new awk script text executable
+0	string/w	#!\ /usr/local/bin/nawk	new awk script text executable
 !:mime	text/x-nawk
-0	string/b	#!\ /bin/gawk		GNU awk script text executable
+0	string/w	#!\ /bin/gawk		GNU awk script text executable
 !:mime	text/x-gawk
-0	string/b	#!\ /usr/bin/gawk	GNU awk script text executable
+0	string/w	#!\ /usr/bin/gawk	GNU awk script text executable
 !:mime	text/x-gawk
-0	string/b	#!\ /usr/local/bin/gawk	GNU awk script text executable
+0	string/w	#!\ /usr/local/bin/gawk	GNU awk script text executable
 !:mime	text/x-gawk
 #
-0	string/b	#!\ /bin/awk		awk script text executable
+0	string/w	#!\ /bin/awk		awk script text executable
 !:mime	text/x-awk
-0	string/b	#!\ /usr/bin/awk	awk script text executable
+0	string/w	#!\ /usr/bin/awk	awk script text executable
 !:mime	text/x-awk
 # update to distinguish from *.vcf files
 # this is broken because postscript has /EBEGIN{ for example.
-#0	search/Bb	BEGIN {			awk script text
+#0	search/Ww	BEGIN {			awk script text
 0	regex		=^\\s*BEGIN\\s*[{]	awk script text
 
 # AT&T Bell Labs' Plan 9 shell
-0	string/b	#!\ /bin/rc	Plan 9 rc shell script text executable
+0	string/w	#!\ /bin/rc	Plan 9 rc shell script text executable
 
 # bash shell magic, from Peter Tobias (tobias@server.et-inf.fho-emden.de)
-0	string/b	#!\ /bin/bash	Bourne-Again shell script text executable
+0	string/w	#!\ /bin/bash	Bourne-Again shell script text executable
 !:mime	text/x-shellscript
-0	string/b	#!\ /usr/bin/bash	Bourne-Again shell script text executable
-!:mime text/x-shellscript
-0	string/b	#!\ /usr/local/bash	Bourne-Again shell script text executable
-!:mime text/x-shellscript
-0	string/b	#!\ /usr/local/bin/bash	Bourne-Again shell script text executable
+0	string/w	#!\ /usr/bin/bash	Bourne-Again shell script text executable
+!:mime	text/x-shellscript
+0	string/w	#!\ /usr/local/bash	Bourne-Again shell script text executable
+!:mime	text/x-shellscript
+0	string/w	#!\ /usr/local/bin/bash	Bourne-Again shell script text executable
 !:mime	text/x-shellscript
 
 # using env
@@ -3442,9 +3571,9 @@
 !:mime	text/x-php
 0	search/1	=<?\r			PHP script text
 !:mime	text/x-php
-0	search/1/b	#!\ /usr/local/bin/php	PHP script text executable
+0	search/1/w	#!\ /usr/local/bin/php	PHP script text executable
 !:mime	text/x-php
-0	search/1/b	#!\ /usr/bin/php	PHP script text executable
+0	search/1/w	#!\ /usr/bin/php	PHP script text executable
 !:mime	text/x-php
 
 0	string		Zend\x00		PHP script Zend Optimizer data
@@ -3457,6 +3586,7 @@
 0	string	#!/usr/bin/pdmenu	Pdmenu configuration file text
 
 #----------------------------------------------------------------------------
+# $File: communications,v 1.5 2009/09/19 16:28:08 christos Exp $
 # communication
 
 # TTCN is the Tree and Tabular Combined Notation described in ISO 9646-3.
@@ -3478,6 +3608,7 @@
 0	string		submsc		Message Sequence Chart (subchart)
 
 #------------------------------------------------------------------------------
+# $File: compress,v 1.42 2009/09/19 16:28:08 christos Exp $
 # compress:  file(1) magic for pure-compression formats (no archives)
 #
 # compress, gzip, pack, compact, huf, squeeze, crunch, freeze, yabba, etc.
@@ -3489,6 +3620,7 @@
 # standard unix compress
 0	string		\037\235	compress'd data
 !:mime	application/x-compress
+!:apple	LZIVZIVU
 >2	byte&0x80	>0		block compressed
 >2	byte&0x1f	x		%d bits
 
@@ -3553,6 +3685,11 @@
 0	string		BZh		bzip2 compressed data
 !:mime	application/x-bzip2
 >3	byte		>47		\b, block size = %c00k
+
+# lzip
+0	string		LZIP		lzip compressed data
+!:mime application/x-lzip
+>4	byte		x		\b, version: %d
 
 # squeeze and crunch
 # Michael Haardt <michael@cantor.informatik.rwth-aachen.de>
@@ -3659,13 +3796,16 @@
 0	string		7z\274\257\047\034	7-zip archive data,
 >6	byte		x			version %d
 >7	byte		x			\b.%d
+!:mime	application/x-7z-compressed
 
 # Type: LZMA
-# URL:  http://www.7-zip.org/sdk.html
-# From: Robert Millan <rmh@aybabtu.com> and Reuben Thomas <rrt@sc3d.org>
-# Commented out because apparently not reliable (according to Debian
-# bug #364260)
-#0	string		]\000\000\200\000	LZMA compressed data
+0	lelong		0x8000005d		LZMA compressed data,
+>5	lequad		=0xffffffffffffffff	streamed
+>5	lequad		!0xffffffffffffffff	non-streamed, size %lld
+
+# http://tukaani.org/xz/xz-file-format.txt
+0	ustring		\xFD7zXZ\x00		XZ compressed data
+!:mime	application/x-xz
 
 # AFX compressed files (Wolfram Kleff)
 2	string		-afx-		AFX compressed file data
@@ -3680,7 +3820,22 @@
 >4	byte		x		- version %d
 >5	byte		x		\b.%d
 >6	belong		x		(%d bytes)
+
+# Type: XZ
+# URL: http://tukaani.org/xz/
+0	string		\xfd\x37\x7a\x58\x5a\x00	XZ compressed data
+!:mime application/x-xz
+
+# Type:	DACT compressed files
+0	long	0x444354C3	DACT compressed data
+>4	byte	>-1		(version %i.
+>5	byte	>-1		%i.
+>6	byte	>-1		%i)
+>7	long	>0		, original size: %i bytes
+>15	long	>30		, block size: %i bytes
+
 #------------------------------------------------------------------------------
+# $File: console,v 1.16 2009/09/19 16:28:08 christos Exp $
 # Console game magic
 # Toby Deshane <hac@shoelace.digivill.net>
 #    ines:  file(1) magic for Marat's iNES Nintendo Entertainment System
@@ -3936,9 +4091,11 @@
 
 # Type: scummVM savegame files
 # From: Sven Hartge <debian@ds9.argh.org>
-0	string	SCVM	scummVM savegame
+0	string	SCVM	ScummVM savegame
 >12	string	>\0	"%s"
+
 #------------------------------------------------------------------------------
+# $File: convex,v 1.7 2009/09/19 16:28:08 christos Exp $
 # convex:  file(1) magic for Convex boxes
 #
 # Convexes are big-endian.
@@ -4009,6 +4166,7 @@
 >84	belong&0x18000000	=0x18000000	undefined fpmode
 
 #------------------------------------------------------------------------------
+# $File: cracklib,v 1.7 2009/09/19 16:28:08 christos Exp $
 # cracklib:  file (1) magic for cracklib v2.7
 
 0	lelong	0x70775631	Cracklib password index, little endian
@@ -4020,12 +4178,15 @@
 # really bellong 0x0000000070775631
 0	search/1	\0\0\0\0pwV1	Cracklib password index, big endian ("64-bit")
 >12	belong	>0		(%i words)
+
 # ----------------------------------------------------------------------------
+# $File: ctags,v 1.6 2009/09/19 16:28:08 christos Exp $
 # ctags:  file (1) magic for Exuberant Ctags files
 # From: Alexander Mai <mai@migdal.ikp.physik.tu-darmstadt.de>
 0	search/1	=!_TAG	Exuberant Ctags tag file text
 
 #------------------------------------------------------------------------------
+# $File: dact,v 1.4 2009/09/19 16:28:08 christos Exp $
 # dact:  file(1) magic for DACT compressed files
 #
 0	long		0x444354C3	DACT compressed data
@@ -4036,6 +4197,7 @@
 >15	long		>30		$BS, block size: %i bytes
 
 #------------------------------------------------------------------------------
+# $File: database,v 1.24 2009/09/19 16:28:08 christos Exp $
 # database:  file(1) magic for various databases
 #
 # extracted from header/code files by Graeme Wilford (eep2gw@ee.surrey.ac.uk)
@@ -4279,18 +4441,44 @@
 # From: Nicolas Chauvat <nicolas.chauvat@logilab.fr>
 0	string	@(#)ADF\ Database	CGNS Advanced Data Format
 
+# Tokyo Cabinet magic data
+# http://tokyocabinet.sourceforge.net/index.html
+0	string		ToKyO\ CaBiNeT\n	Tokyo Cabinet
+>14	string		x			\b (%s)
+>32	byte		0			\b, Hash
+!:mime	application/x-tokyocabinet-hash
+>32	byte		1			\b, B+ tree
+!:mime	application/x-tokyocabinet-btree
+>32	byte		2			\b, Fixed-length
+!:mime	application/x-tokyocabinet-fixed
+>32	byte		3			\b, Table
+!:mime	application/x-tokyocabinet-table
+>33	byte		&1			\b, [open]
+>33	byte		&2			\b, [fatal]
+>34	byte		x			\b, apow=%d
+>35	byte		x			\b, fpow=%d
+>36	byte		&0x01			\b, [large]
+>36	byte		&0x02			\b, [deflate]
+>36	byte		&0x04			\b, [bzip]
+>36	byte		&0x08			\b, [tcbs]
+>36	byte		&0x10			\b, [excodec]
+>40	lequad		x			\b, bnum=%lld
+>48	lequad		x			\b, rnum=%lld
+>56	lequad		x			\b, fsiz=%lld
+
 # Type:	QDBM Quick Database Manager
 # From:	Benoit Sibaud <bsibaud@april.org>
-0	string	\\[depot\\]\n\f		Quick Database Manager, little endian
-0	string	\\[DEPOT\\]\n\f		Quick Database Manager, big endian
+0	string		\\[depot\\]\n\f		Quick Database Manager, little endian
+0	string		\\[DEPOT\\]\n\f		Quick Database Manager, big endian
 
 # Type:	TokyoCabinet database
 # URL:	http://tokyocabinet.sourceforge.net/
 # From:	Benoit Sibaud <bsibaud@april.org>
-0	string	ToKyO\ CaBiNeT\n	TokyoCabinet database
->14	string	x			(version %s)
+0	string		ToKyO\ CaBiNeT\n	TokyoCabinet database
+>14	string		x			(version %s)
 
 #------------------------------------------------------------------------------
+# $File: diamond,v 1.7 2009/09/19 16:28:08 christos Exp $
 # diamond:  file(1) magic for Diamond system
 #
 # ... diamond is a multi-media mail and electronic conferencing system....
@@ -4300,7 +4488,9 @@
 #	The full deal is too long...
 #0	string	<list>\n<protocol\ bbn-multimedia-format>	Diamond Multimedia Document
 0	string	=<list>\n<protocol\ bbn-m	Diamond Multimedia Document
+
 #------------------------------------------------------------------------------
+# $File: diff,v 1.10 2009/09/19 16:28:08 christos Exp $
 # diff:  file(1) magic for diff(1) output
 #
 0	search/1	diff\ 		diff output text
@@ -4314,6 +4504,12 @@
 
 0	search/1	Index:		RCS/CVS diff output text
 !:mime	text/x-diff
+
+# bsdiff:  file(1) magic for bsdiff(1) output
+0	string		BSDIFF40	bsdiff(1) patch file
+
+#------------------------------------------------------------------------------
+# $File: digital,v 1.8 2009/09/19 16:28:08 christos Exp $
 #  Digital UNIX - Info
 #
 0	string	=!<arch>\n________64E	Alpha archive
@@ -4355,6 +4551,9 @@
 0	short		0x0501		locale data table
 >6	short		0x24		for MIPS
 >6	short		0x40		for Alpha
+
+#------------------------------------------------------------------------------
+# $File: dolby,v 1.5 2009/09/19 16:28:08 christos Exp $
 # ATSC A/53 aka AC-3 aka Dolby Digital <ashitaka@gmx.at>
 # from http://www.atsc.org/standards/a_52a.pdf
 # corrections, additions, etc. are always welcome!
@@ -4414,6 +4613,7 @@
 >6      beshort&0x0180  0x0180  reserved Dolby Surround mode
 
 #------------------------------------------------------------------------------
+# $File: dump,v 1.11 2009/09/19 16:28:09 christos Exp $
 # dump:  file(1) magic for dump file format--for new and old dump filesystems
 #
 # We specify both byte orders in order to recognize byte-swapped dumps.
@@ -4545,9 +4745,10 @@
 >888	lelong	>0		Flags %x
 
 #------------------------------------------------------------------------------
+# $File: dyadic,v 1.4 2009/09/19 16:28:09 christos Exp $
 # Dyadic: file(1) magic for Dyalog APL.
 #
-0 	byte	0xaa
+0	byte	0xaa
 >1	byte	<4		Dyalog APL
 >>1	byte	0x00		incomplete workspace
 >>1	byte	0x01		component file
@@ -4556,7 +4757,41 @@
 >>2	byte	x		version %d
 >>3	byte	x		.%d
 
+0	beshort		0xaa03		Dyalog APL
+>2	byte		x		workspace type %d
+>3	byte		x		subtype %d
+>7	byte&0x28	0x00		32-bit
+>7	byte&0x28	0x20		64-bit
+>7	byte&0x0c	0x00		classic
+>7	byte&0x0c	0x04		unicode
+>7	byte&0x88	0x00		big-endian
+>7	byte&0x88	0x80		little-endian
+
+0	byte		0xaa		Dyalog APL
+>1	byte		0x00		aplcore
+>1	byte		0x01		component file 32-bit non-journaled non-checksummed
+>1	byte		0x02		external variable exclusive
+>1	byte		0x06		external variable shared
+>1	byte		0x07		session
+>1	byte		0x08		mapped file 32-bit
+>1	byte		0x09		component file 64-bit non-journaled non-checksummed
+>1	byte		0x0a		mapped file 64-bit
+>1	byte		0x0b		component file 32-bit level 1 journaled non-checksummed
+>1	byte		0x0c		component file 64-bit level 1 journaled non-checksummed
+>1	byte		0x0d		component file 32-bit level 1 journaled checksummed
+>1	byte		0x0e		component file 64-bit level 1 journaled checksummed
+>1	byte		0x0f		component file 32-bit level 2 journaled checksummed
+>1	byte		0x10		component file 64-bit level 2 journaled checksummed
+>1	byte		0x11		component file 32-bit level 3 journaled checksummed
+>1	byte		0x12		component file 64-bit level 3 journaled checksummed
+>1	byte		0x13		component file 32-bit non-journaled checksummed
+>1	byte		0x14		component file 64-bit non-journaled checksummed
+>1	byte		0x80		DDB
+
+0	short		0x6060		Dyalog APL transfer
+
 #------------------------------------------------------------------------------
+# $File: editors,v 1.8 2009/09/19 16:28:09 christos Exp $
 # T602 editor documents 
 # by David Necas <yeti@physics.muni.cz>
 0	string	@CT\ 	T602 document data,
@@ -4574,6 +4809,7 @@
 >&0	string	>\0		\b, version %s
 
 #------------------------------------------------------------------------------
+# $File: efi,v 1.4 2009/09/19 16:28:09 christos Exp $
 # efi:  file(1) magic for Universal EFI binaries
 
 0	lelong	0x0ef1fab9
@@ -4588,6 +4824,7 @@
 >4	lelong	>2		Universal EFI binary with %ld architectures
 
 #------------------------------------------------------------------------------
+# $File: elf,v 1.53 2009/09/19 16:28:09 christos Exp $
 # elf:  file(1) magic for ELF executables
 #
 # We have to check the byte order flag to see what byte order all the
@@ -4731,11 +4968,13 @@
 >>18	leshort		91		picoJava,
 >>18	leshort		92		OpenRISC,
 >>18	leshort		93		ARC Cores Tangent-A5,
->>18	leshort		0x3426		OpenRISC (obsolete),
->>18	leshort		0x8472		OpenRISC (obsolete),
 >>18	leshort		94		Tensilica Xtensa,
 >>18	leshort		97		NatSemi 32k,
 >>18	leshort		106		Analog Devices Blackfin,
+>>18	leshort		113		Altera Nios II,
+>>18	leshort		0xae		META,
+>>18	leshort		0x3426		OpenRISC (obsolete),
+>>18	leshort		0x8472		OpenRISC (obsolete),
 >>18	leshort		0x9026		Alpha (unofficial),
 >>20	lelong		0		invalid version
 >>20	lelong		1		version 1
@@ -4874,6 +5113,7 @@
 >>7	byte		255		(embedded)
 
 #------------------------------------------------------------------------------
+# $File: encore,v 1.6 2009/09/19 16:28:09 christos Exp $
 # encore:  file(1) magic for Encore machines
 #
 # XXX - needs to have the byte order specified (NS32K was little-endian,
@@ -4895,16 +5135,60 @@
 #>4	date		x		stamp %s
 
 #------------------------------------------------------------------------------
-# Epoc 32 : file(1) magic for Epoc Documents [psion/osaris
-# Stefan Praszalowicz (hpicollo@worldnet.fr)
-#0	lelong		0x10000037	Epoc32
+# $File: epoc,v 1.7 2009/09/19 16:28:09 christos Exp $
+# EPOC : file(1) magic for EPOC documents [Psion Series 5/Osaris/Geofox 1]
+# Stefan Praszalowicz <hpicollo@worldnet.fr> and Peter Breitenlohner <peb@mppmu.mpg.de>
+# Useful information for improving this file can be found at:
+# http://software.frodo.looijaard.name/psiconv/formats/Index.html
+#------------------------------------------------------------------------------
+0	lelong		0x10000037	Psion Series 5
+>4	lelong		0x10000039	font file
+>4	lelong		0x1000003A	printer driver
+>4	lelong		0x1000003B	clipboard
+>4	lelong		0x10000042	multi-bitmap image
+!:mime image/x-epoc-mbm
+>4	lelong		0x1000006A	application information file
 >4	lelong		0x1000006D
->>8	lelong		0x1000007F	Word
->>8	lelong		0x10000088	Sheet
->>8	lelong		0x1000007D	Sketch
->>8	lelong		0x10000085	TextEd
+>>8	lelong		0x1000007D	Sketch image
+!:mime image/x-epoc-sketch
+>>8	lelong		0x1000007E	voice note
+>>8	lelong		0x1000007F	Word file
+!:mime application/x-epoc-word
+>>8	lelong		0x10000085	OPL program (TextEd)
+!:mime application/x-epoc-opl
+>>8	lelong		0x10000088	Sheet file
+!:mime application/x-epoc-sheet
+>>8	lelong		0x100001C4	EasyFax initialisation file
+>4	lelong		0x10000073	OPO module
+!:mime application/x-epoc-opo
+>4	lelong		0x10000074	OPL application
+!:mime application/x-epoc-app
+>4	lelong		0x1000008A	exported multi-bitmap image
+
+0	lelong		0x10000041	Psion Series 5 ROM multi-bitmap image
+
+0	lelong		0x10000050	Psion Series 5
+>4	lelong		0x1000006D	database
+>4	lelong		0x100000E4	ini file
+
+0	lelong		0x10000079	Psion Series 5 binary:
+>4	lelong		0x00000000	DLL
+>4	lelong		0x10000049	comms hardware library
+>4	lelong		0x1000004A	comms protocol library
+>4	lelong		0x1000005D	OPX
+>4	lelong		0x1000006C	application
+>4	lelong		0x1000008D	DLL
+>4	lelong		0x100000AC	logical device driver
+>4	lelong		0x100000AD	physical device driver
+>4	lelong		0x100000E5	file transfer protocol
+>4	lelong		0x100000E5	file transfer protocol
+>4	lelong		0x10000140	printer definition
+>4	lelong		0x10000141	printer definition
+
+0	lelong		0x1000007A	Psion Series 5 executable
 
 #------------------------------------------------------------------------------
+# $File: erlang,v 1.5 2009/09/19 16:28:09 christos Exp $
 # erlang:  file(1) magic for Erlang JAM and BEAM files
 # URL:  http://www.erlang.org/faq/x779.html#AEN812
 
@@ -4917,12 +5201,15 @@
 >8	string	BEAM		Erlang BEAM file
 
 # 4.2 version may have a copyright notice!
-4	string	Tue Jan 22 14:32:44 MET 1991	Erlang JAM file - version 4.2
-79	string	Tue Jan 22 14:32:44 MET 1991	Erlang JAM file - version 4.2
+4	string	Tue\ Jan\ 22\ 14:32:44\ MET\ 1991	Erlang JAM file - version 4.2
+79	string	Tue\ Jan\ 22\ 14:32:44\ MET\ 1991	Erlang JAM file - version 4.2
 
-4	string	1.0 Fri Feb 3 09:55:56 MET 1995	Erlang JAM file - version 4.3
+4	string	1.0\ Fri\ Feb\ 3\ 09:55:56\ MET\ 1995	Erlang JAM file - version 4.3
+
+0	bequad	0x0000000000ABCDEF	Erlang DETS file
 
 #------------------------------------------------------------------------------
+# $File: esri,v 1.4 2009/09/19 16:28:09 christos Exp $
 # ESRI Shapefile format (.shp .shx .dbf=DBaseIII)
 # Based on info from
 # <URL:http://www.esri.com/library/whitepapers/pdfs/shapefile.pdf>
@@ -4950,6 +5237,7 @@
 >32	lelong	=31	type MultiPatch
 
 #------------------------------------------------------------------------------
+# $File: fcs,v 1.4 2009/09/19 16:28:09 christos Exp $
 # fcs: file(1) magic for FCS (Flow Cytometry Standard) data files
 # From Roger Leigh <roger@whinlatter.uklinux.net>
 0       string          FCS1.0          Flow Cytometry Standard (FCS) data, version 1.0
@@ -4958,6 +5246,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: filesystems,v 1.55 2010/01/16 17:45:12 chl Exp $
 # filesystems:  file(1) magic for different filesystems
 #
 0	string	\366\366\366\366	PC formatted floppy with no filesystem
@@ -5062,9 +5351,32 @@
 >>>346	string	des\ Betriebssystems	
 >>>>366	string	Betriebssystem\ nicht\ vorhanden	\b, Microsoft Windows XP MBR (german)
 >>>>>0x1B8	ulelong	>0				\b, Serial 0x%-.4x
->0x145	string	Default:\ F				\b, FREE-DOS MBR
+#>0x145	string	Default:\ F				\b, FREE-DOS MBR
+#>0x14B	string	Default:\ F				\b, FREE-DOS 1.0 MBR
+>0x145	search/7	Default:\ F			\b, FREE-DOS MBR
+#>>313		string	F0\ .\ .\ .			
+#>>>322		string	disk\ 1				
+#>>>>382	string	FAT3				
 >64	string	no\ active\ partition\ found	
 >>96	string	read\ error\ while\ reading\ drive	\b, FREE-DOS Beta 0.9 MBR
+# Ranish Partition Manager http://www.ranish.com/part/
+>387	search/4	\0\ Error!\r			
+>>378	search/7	Virus! 				
+>>>397	search/4	Booting\ 			
+>>>>408	search/4	HD1/\0	 			\b, Ranish MBR (
+>>>>>416	string	Writing\ changes...		\b2.37
+>>>>>>438	ubyte		x			\b,0x%x dots
+>>>>>>440	ubyte		>0			\b,virus check
+>>>>>>441	ubyte		>0			\b,partition %c
+#2.38,2.42,2.44
+>>>>>416	string	!Writing\ changes...		\b
+>>>>>>418	ubyte	1				\bvirus check,
+>>>>>>419	ubyte	x				\b0x%x seconds
+>>>>>>420	ubyte&0x0F	>0			\b,partition
+>>>>>>>420	ubyte&0x0F	<5			\b %x
+>>>>>>>420	ubyte&0x0F	0Xf			\b ask
+>>>>>420	ubyte		x			\b)
+#
 >271	string	Operating\ system\ loading 		
 >>296	string	error\r					\b, SYSLINUX MBR (2.10)
 # http://www.acronis.de/
@@ -5082,18 +5394,20 @@
 >0x40	string	SBML				
 # label with 11 characters of FAT 12 bit filesystem
 >>43	string	SMART\ BTMGR			
->>>430	string	SBMK\ Bad!\r			
->>>>3	string	SBM				\b, Smart Boot Manager
->>>>>6	string	>\0                             \b, version %s
+>>>430	string	SBMK\ Bad!\r			\b, Smart Boot Manager
+# OEM-ID not always "SBM"
+#>>>>3	strings	SBM				
+>>>>6	string	>\0                             \b, version %s
 >382	string	XOSLLOADXCF			\b, eXtended Operating System Loader
 >6	string	LILO				\b, LInux i386 boot LOader
 >>120	string	LILO				\b, version 22.3.4 SuSe
 >>172	string	LILO				\b, version 22.5.8 Debian
-# updated by Joerg Jenderek
+# updated by Joerg Jenderek at Oct 2008
 # variables according to grub-0.97/stage1/stage1.S or
 # http://www.gnu.org/software/grub/manual/grub.html#Embedded-data
 # usual values are marked with comments to get only informations of strange GRUB loaders
->0		ulelong		0x009048EB	
+>342		search/60	\0Geom\0	
+#>0		ulelong		x		%x=0x009048EB ,	0x2a9048EB  0
 >>0x41		ubyte		<2		
 >>>0x3E		ubyte		>2		\b; GRand Unified Bootloader
 # 0x3 for 0.5.95,0.93,0.94,0.96 0x4 for 1.90 
@@ -5135,16 +5449,15 @@
 # http://www.bcdwb.de/bcdw/index_e.htm
 >3	string	BCDL				
 >>498	string	BCDL\ \ \ \ BIN			\b, Bootable CD Loader (1.50Z)
-# mbr partion table entries
-# OEM-ID not Microsoft,SYSLINUX,or MTOOLs
+# mbr partition table entries
+# OEM-ID does not contain MicroSoft,NEWLDR,DOS,SYSLINUX,or MTOOLs
 >3			string		!MS
 >>3			string		!SYSLINUX
 >>>3			string		!MTOOL
+>>>>3			string		!NEWLDR
+>>>>>5			string		!DOS
 # not FAT (32 bit)
->>>>82			string		!FAT32	
-#not IO.SYS
->>>>>472		string		!IO\ \ \ \ \ \ SYS
->>>>>>480		string		!IO\ \ \ \ \ \ SYS
+>>>>>>82		string		!FAT32
 #not Linux kernel
 >>>>>>>514		string		!HdrS
 #not BeOS
@@ -5190,7 +5503,7 @@
 #>>>>>>>>>>>>496		ubeshort&1023	x	\b, startcylinder? %d
 >>>>>>>>>>>>502		ulelong		x	\b, startsector %u
 >>>>>>>>>>>>506		ulelong		x	\b, %u sectors
-# mbr partion table entries end
+# mbr partition table entries end
 # http://www.acronis.de/
 #FAT label=ACRONIS\ SZ
 #OEM-ID=BOOTWIZ0
@@ -5230,6 +5543,11 @@
 >>>>>>>>>(1.b+11)	ubyte	0xb			
 >>>>>>>>>>(1.b+12)	ubyte	0x56			
 >>>>>>>>>>(1.b+13)	ubyte	0xb4			\b, mkdosfs boot message display
+>214	string	Please\ try\ to\ install\ FreeDOS\ 	\b, DOS Emulator boot message display
+#>>244	string	from\ dosemu-freedos-*-bin.tgz\r	
+#>>>170	string	Sorry,\ could\ not\ load\ an\ 		
+#>>>>195	string	operating\ system.\r\n		
+#
 >103	string	This\ is\ not\ a\ bootable\ disk.\ 	
 >>132	string	Please\ insert\ a\ bootable\ 		
 >>>157	string	floppy\ and\r\n				
@@ -5332,12 +5650,22 @@
 >430	string	Datentr\204ger\ entfernen\xFF\r\n	
 >>454	string	Medienfehler\xFF\r\n			
 >>>469	string	Neustart:\ Taste\ dr\201cken\r		\b, Microsoft Windows XP Bootloader (4.german)
->>>>368		ubyte&0xDF	>0			
->>>>>368	string		x 			%-.5s
->>>>>>373	ubyte&0xDF	>0			
->>>>>>>373	string		x 			\b%-.3s
->>>>>376	ubyte&0xDF	>0			
->>>>>>376	string		x 			\b.%-.3s
+>>>>379		string		\0			
+>>>>>368	ubyte&0xDF	>0			
+>>>>>>368	string		x 			%-.5s
+>>>>>>>373	ubyte&0xDF	>0			
+>>>>>>>>373	string		x 			\b%-.3s
+>>>>>>376	ubyte&0xDF	>0			
+>>>>>>>376	string		x 			\b.%-.3s
+# variant
+>>>>417		ubyte&0xDF	>0			
+>>>>>417	string		x			%-.5s
+>>>>>>422	ubyte&0xDF	>0			
+>>>>>>>422	string		x 			\b%-.3s
+>>>>>425	ubyte&0xDF	>0			
+>>>>>>425	string		>\ 			\b.%-.3s
+#
+
 #>3	string	NTFS\ \ \ \ 				
 >389	string	Fehler\ beim\ Lesen\ 
 >>407	string	des\ Datentr\204gers
@@ -5525,12 +5853,27 @@
 >>>489	string	Any\ key\ to\ retry			\b, DR-DOS Bootloader
 >>471	string	Cannot\ load\ DOS\ 			
 >>487	string	press\ key\ to\ retry			\b, Open-DOS Bootloader
+#??
 >444	string	KERNEL\ \ SYS					
 >>314	string	BOOT\ error!				\b, FREE-DOS Bootloader
 >499	string	KERNEL\ \ SYS				
 >>305	string	BOOT\ err!\0				\b, Free-DOS Bootloader
 >449	string	KERNEL\ \ SYS				
 >>319	string	BOOT\ error!				\b, FREE-DOS 0.5 Bootloader
+#
+>449	string	Loading\ FreeDOS			
+>>0x1AF		ulelong		>0			\b, FREE-DOS 0.95,1.0 Bootloader
+>>>497		ubyte&0xDF	>0			
+>>>>497		string		x 			\b %-.6s
+>>>>>503	ubyte&0xDF	>0			
+>>>>>>503	string		x 			\b%-.1s
+>>>>>>>504	ubyte&0xDF	>0			
+>>>>>>>>504	string		x 			\b%-.1s
+>>>>505		ubyte&0xDF	>0			
+>>>>>505	string		x 			\b.%-.3s
+#
+>331	string	Error!.0				\b, FREE-DOS 1.0 bootloader
+#
 >125	string	Loading\ FreeDOS...\r			
 >>311	string	BOOT\ error!\r				\b, FREE-DOS bootloader
 >>>441		ubyte&0xDF	>0			
@@ -5664,13 +6007,7 @@
 #it also hangs with another message ("NF").
 >>>>>492		string		RENF		\b, FAT (12 bit)
 >>>>>495		string		RENF		\b, FAT (16 bit)
-# added by Joerg Jenderek
-# http://syslinux.zytor.com/iso.php
-0	ulelong	0x7c40eafa		isolinux Loader
-# http://syslinux.zytor.com/pxe.php
-0	ulelong	0x007c05ea		pxelinux Loader
-0	ulelong	0x60669c66		pxelinux Loader
-# loader end
+# x86 bootloader end
 # updated by Joerg Jenderek at Sep 2007
 >3	ubyte	0			
 #no active flag
@@ -5690,6 +6027,7 @@
 # older drives may use Near JuMP instruction E9 xx xx
 >0		lelong&0x009000EB	0x009000EB 
 >0		lelong&0x000000E9	0x000000E9 
+# minimal short forward jump found 03cx??
 # maximal short forward jump is 07fx
 >1		ubyte			<0xff	\b, code offset 0x%x
 # mtools-3.9.8/msdos.h
@@ -5698,91 +6036,92 @@
 >>11		uleshort&0x000f	x		
 >>>11		uleshort	<32769		
 >>>>11		uleshort	>31		
->>>>>3		string		>\0		\b, OEM-ID "%8.8s"
+>>>>>21		ubyte&0xf0	0xF0		
+>>>>>>3		string		>\0		\b, OEM-ID "%8.8s"
 #http://mirror.href.com/thestarman/asm/debug/debug2.htm#IHC
->>>>>>8		string		IHC		\b cached by Windows 9M
->>>>>11		uleshort	>512		\b, Bytes/sector %u
-#>>>>>11	uleshort	=512		\b, Bytes/sector %u=512 (usual)
->>>>>11		uleshort	<512		\b, Bytes/sector %u
->>>>>13		ubyte		>1		\b, sectors/cluster %u
-#>>>>>13	ubyte		=1		\b, sectors/cluster %u (usual on Floppies)
->>>>>14		uleshort	>32		\b, reserved sectors %u
-#>>>>>14	uleshort	=32		\b, reserved sectors %u (usual Fat32)
-#>>>>>14	uleshort	>1		\b, reserved sectors %u
-#>>>>>14	uleshort	=1		\b, reserved sectors %u (usual FAT12,FAT16)
->>>>>14		uleshort	<1		\b, reserved sectors %u
->>>>>16		ubyte		>2		\b, FATs %u
-#>>>>>16	ubyte		=2		\b, FATs %u (usual)
->>>>>16		ubyte		=1		\b, FAT  %u
->>>>>16		ubyte		>0
->>>>>17		uleshort	>0		\b, root entries %u
-#>>>>>17	uleshort	=0		\b, root entries %u=0 (usual Fat32)
->>>>>19		uleshort	>0		\b, sectors %u (volumes <=32 MB) 
-#>>>>>19	uleshort	=0		\b, sectors %u=0 (usual Fat32)
->>>>>21		ubyte		>0xF0		\b, Media descriptor 0x%x
-#>>>>>21	ubyte		=0xF0		\b, Media descriptor 0x%x (usual floppy)
->>>>>21		ubyte		<0xF0		\b, Media descriptor 0x%x
->>>>>22		uleshort	>0		\b, sectors/FAT %u
-#>>>>>22	uleshort	=0		\b, sectors/FAT %u=0 (usual Fat32)
->>>>>26		ubyte		>2		\b, heads %u
-#>>>>>26	ubyte		=2		\b, heads %u (usual floppy)
->>>>>26		ubyte		=1		\b, heads %u
+>>>>>>>8	string		IHC		\b cached by Windows 9M
+>>>>>>11	uleshort	>512		\b, Bytes/sector %u
+#>>>>>>11	uleshort	=512		\b, Bytes/sector %u=512 (usual)
+>>>>>>11	uleshort	<512		\b, Bytes/sector %u
+>>>>>>13	ubyte		>1		\b, sectors/cluster %u
+#>>>>>>13	ubyte		=1		\b, sectors/cluster %u (usual on Floppies)
+>>>>>>14	uleshort	>32		\b, reserved sectors %u
+#>>>>>>14	uleshort	=32		\b, reserved sectors %u (usual Fat32)
+#>>>>>>14	uleshort	>1		\b, reserved sectors %u
+#>>>>>>14	uleshort	=1		\b, reserved sectors %u (usual FAT12,FAT16)
+>>>>>>14	uleshort	<1		\b, reserved sectors %u
+>>>>>>16	ubyte		>2		\b, FATs %u
+#>>>>>>16	ubyte		=2		\b, FATs %u (usual)
+>>>>>>16	ubyte		=1		\b, FAT  %u
+>>>>>>16	ubyte		>0
+>>>>>>17	uleshort	>0		\b, root entries %u
+#>>>>>>17	uleshort	=0		\b, root entries %u=0 (usual Fat32)
+>>>>>>19	uleshort	>0		\b, sectors %u (volumes <=32 MB) 
+#>>>>>>19	uleshort	=0		\b, sectors %u=0 (usual Fat32)
+>>>>>>21	ubyte		>0xF0		\b, Media descriptor 0x%x
+#>>>>>>21	ubyte		=0xF0		\b, Media descriptor 0x%x (usual floppy)
+>>>>>>21	ubyte		<0xF0		\b, Media descriptor 0x%x
+>>>>>>22	uleshort	>0		\b, sectors/FAT %u
+#>>>>>>22	uleshort	=0		\b, sectors/FAT %u=0 (usual Fat32)
+>>>>>>26	ubyte		>2		\b, heads %u
+#>>>>>>26	ubyte		=2		\b, heads %u (usual floppy)
+>>>>>>26	ubyte		=1		\b, heads %u
 #skip for Digital Research DOS (version 3.41) 1440 kB Bootdisk
->>>>>38		ubyte		!0x70		
->>>>>>28	ulelong		>0		\b, hidden sectors %u
-#>>>>>>28	ulelong		=0		\b, hidden sectors %u (usual floppy)
->>>>>>32	ulelong		>0		\b, sectors %u (volumes > 32 MB) 
-#>>>>>>32	ulelong		=0		\b, sectors %u (volumes > 32 MB)
+>>>>>>38	ubyte		!0x70		
+>>>>>>>28	ulelong		>0		\b, hidden sectors %u
+#>>>>>>>28	ulelong		=0		\b, hidden sectors %u (usual floppy)
+>>>>>>>32	ulelong		>0		\b, sectors %u (volumes > 32 MB) 
+#>>>>>>>32	ulelong		=0		\b, sectors %u (volumes > 32 MB)
 # FAT<32 specific 
->>>>>82		string		!FAT32
-#>>>>>>36	ubyte		0x80		\b, physical drive 0x%x=0x80 (usual harddisk)
-#>>>>>>36	ubyte		0		\b, physical drive 0x%x=0 (usual floppy)
->>>>>>36	ubyte		!0x80		
->>>>>>>36	ubyte		!0		\b, physical drive 0x%x
->>>>>>37	ubyte		>0		\b, reserved 0x%x
-#>>>>>>37	ubyte		=0		\b, reserved 0x%x
->>>>>>38	ubyte		>0x29		\b, dos < 4.0 BootSector (0x%x)
->>>>>>38	ubyte		<0x29		\b, dos < 4.0 BootSector (0x%x)
->>>>>>38	ubyte		=0x29
->>>>>>>39	ulelong		x		\b, serial number 0x%x
->>>>>>>43	string		<NO\ NAME	\b, label: "%11.11s"
->>>>>>>43	string		>NO\ NAME	\b, label: "%11.11s"
->>>>>>>43	string		=NO\ NAME	\b, unlabeled
->>>>>>54	string		FAT		\b, FAT
->>>>>>>54	string		FAT12		\b (12 bit)
->>>>>>>54	string		FAT16		\b (16 bit)
+>>>>>>82	string		!FAT32
+#>>>>>>>36	ubyte		0x80		\b, physical drive 0x%x=0x80 (usual harddisk)
+#>>>>>>>36	ubyte		0		\b, physical drive 0x%x=0 (usual floppy)
+>>>>>>>36	ubyte		!0x80		
+>>>>>>>>36	ubyte		!0		\b, physical drive 0x%x
+>>>>>>>37	ubyte		>0		\b, reserved 0x%x
+#>>>>>>>37	ubyte		=0		\b, reserved 0x%x
+>>>>>>>38	ubyte		>0x29		\b, dos < 4.0 BootSector (0x%x)
+>>>>>>>38	ubyte		<0x29		\b, dos < 4.0 BootSector (0x%x)
+>>>>>>>38	ubyte		=0x29
+>>>>>>>>39	ulelong		x		\b, serial number 0x%x
+>>>>>>>>43	string		<NO\ NAME	\b, label: "%11.11s"
+>>>>>>>>43	string		>NO\ NAME	\b, label: "%11.11s"
+>>>>>>>>43	string		=NO\ NAME	\b, unlabeled
+>>>>>>>54	string		FAT		\b, FAT
+>>>>>>>>54	string		FAT12		\b (12 bit)
+>>>>>>>>54	string		FAT16		\b (16 bit)
 # FAT32 specific
->>>>>82		string		FAT32		\b, FAT (32 bit)
->>>>>>36	ulelong		x		\b, sectors/FAT %u
->>>>>>40	uleshort	>0		\b, extension flags %u
-#>>>>>>40	uleshort	=0		\b, extension flags %u
->>>>>>42	uleshort	>0		\b, fsVersion %u
-#>>>>>>42	uleshort	=0		\b, fsVersion %u (usual)
->>>>>>44	ulelong		>2		\b, rootdir cluster %u
-#>>>>>>44	ulelong		=2		\b, rootdir cluster %u
-#>>>>>>44	ulelong		=1		\b, rootdir cluster %u
->>>>>>48	uleshort	>1		\b, infoSector %u
-#>>>>>>48	uleshort	=1		\b, infoSector %u (usual)
->>>>>>48	uleshort	<1		\b, infoSector %u
->>>>>>50	uleshort	>6		\b, Backup boot sector %u
-#>>>>>>50	uleshort	=6		\b, Backup boot sector %u (usual) 
->>>>>>50	uleshort	<6		\b, Backup boot sector %u
->>>>>>54	ulelong		>0		\b, reserved1 0x%x
->>>>>>58	ulelong		>0		\b, reserved2 0x%x
->>>>>>62	ulelong		>0		\b, reserved3 0x%x
+>>>>>>82	string		FAT32		\b, FAT (32 bit)
+>>>>>>>36	ulelong		x		\b, sectors/FAT %u
+>>>>>>>40	uleshort	>0		\b, extension flags %u
+#>>>>>>>40	uleshort	=0		\b, extension flags %u
+>>>>>>>42	uleshort	>0		\b, fsVersion %u
+#>>>>>>>42	uleshort	=0		\b, fsVersion %u (usual)
+>>>>>>>44	ulelong		>2		\b, rootdir cluster %u
+#>>>>>>>44	ulelong		=2		\b, rootdir cluster %u
+#>>>>>>>44	ulelong		=1		\b, rootdir cluster %u
+>>>>>>>48	uleshort	>1		\b, infoSector %u
+#>>>>>>>48	uleshort	=1		\b, infoSector %u (usual)
+>>>>>>>48	uleshort	<1		\b, infoSector %u
+>>>>>>>50	uleshort	>6		\b, Backup boot sector %u
+#>>>>>>>50	uleshort	=6		\b, Backup boot sector %u (usual) 
+>>>>>>>50	uleshort	<6		\b, Backup boot sector %u
+>>>>>>>54	ulelong		>0		\b, reserved1 0x%x
+>>>>>>>58	ulelong		>0		\b, reserved2 0x%x
+>>>>>>>62	ulelong		>0		\b, reserved3 0x%x
 # same structure as FAT1X 
->>>>>>64	ubyte		>0x80		\b, physical drive 0x%x
-#>>>>>>64	ubyte		=0x80		\b, physical drive 0x%x=80 (usual harddisk)
->>>>>>64	ubyte&0x7F	>0		\b, physical drive 0x%x
-#>>>>>>64	ubyte		=0		\b, physical drive 0x%x=0 (usual floppy)
->>>>>>65	ubyte		>0		\b, reserved 0x%x
->>>>>>66	ubyte		>0x29		\b, dos < 4.0 BootSector (0x%x)
->>>>>>66	ubyte		<0x29		\b, dos < 4.0 BootSector (0x%x)
->>>>>>66	ubyte		=0x29
->>>>>>>67	ulelong		x		\b, serial number 0x%x
->>>>>>>71	string		<NO\ NAME	\b, label: "%11.11s"
->>>>>>71	string		>NO\ NAME	\b, label: "%11.11s"
->>>>>>71	string		=NO\ NAME	\b, unlabeled
+>>>>>>>64	ubyte		>0x80		\b, physical drive 0x%x
+#>>>>>>>64	ubyte		=0x80		\b, physical drive 0x%x=80 (usual harddisk)
+>>>>>>>64	ubyte&0x7F	>0		\b, physical drive 0x%x
+#>>>>>>>64	ubyte		=0		\b, physical drive 0x%x=0 (usual floppy)
+>>>>>>>65	ubyte		>0		\b, reserved 0x%x
+>>>>>>>66	ubyte		>0x29		\b, dos < 4.0 BootSector (0x%x)
+>>>>>>>66	ubyte		<0x29		\b, dos < 4.0 BootSector (0x%x)
+>>>>>>>66	ubyte		=0x29
+>>>>>>>>67	ulelong		x		\b, serial number 0x%x
+>>>>>>>>71	string		<NO\ NAME	\b, label: "%11.11s"
+>>>>>>>71	string		>NO\ NAME	\b, label: "%11.11s"
+>>>>>>>71	string		=NO\ NAME	\b, unlabeled
 ### FATs end
 >0x200	lelong	0x82564557		\b, BSD disklabel
 # FATX 
@@ -5790,16 +6129,40 @@
 
 
 # Minix filesystems - Juan Cespedes <cespedes@debian.org>
-0x410	leshort		0x137f		Minix filesystem
-0x410	beshort		0x137f		Minix filesystem (big endian)
->0x402	beshort		!0		\b, %d zones
+0x410	leshort		0x137f
+>0x402	beshort		< 100		Minix filesystem, V1, %d zones
 >0x1e	string		minix		\b, bootable
-0x410	leshort		0x138f		Minix filesystem, 30 char names
-0x410	leshort		0x2468		Minix filesystem, version 2
-0x410	leshort		0x2478		Minix filesystem, version 2, 30 char names
+0x410	beshort		0x137f
+>0x402	beshort		< 100		Minix filesystem, V1 (big endian), %d zones
+>0x1e	string		minix		\b, bootable
+0x410	leshort		0x138f
+>0x402	beshort		< 100		Minix filesystem, V1, 30 char names, %d zones
+>0x1e	string		minix		\b, bootable
+0x410	beshort		0x138f
+>0x402	beshort		< 100		Minix filesystem, V1, 30 char names (big endian), %d zones
+>0x1e	string		minix		\b, bootable
+0x410	leshort		0x2468
+>0x402	beshort		< 100		Minix filesystem, V2, %d zones
+>0x1e	string		minix		\b, bootable
+0x410	beshort		0x2468
+>0x402	beshort		< 100		Minix filesystem, V2 (big endian), %d zones
+>0x1e	string		minix		\b, bootable
+
+0x410	leshort		0x2478
+>0x402	beshort		< 100		Minix filesystem, V2, 30 char names, %d zones
+>0x1e	string		minix		\b, bootable
+0x410	leshort		0x2478
+>0x402	beshort		< 100		Minix filesystem, V2, 30 char names, %d zones
+>0x1e	string		minix		\b, bootable
+0x410	beshort		0x2478
+>0x402	beshort		!0		Minix filesystem, V2, 30 char names (big endian), %d zones
+>0x1e	string		minix		\b, bootable
+0x410	leshort		0x4d5a
+>0x402	beshort		!0		Minix filesystem, V3, %d zones
+>0x1e	string		minix		\b, bootable
 
 # romfs filesystems - Juan Cespedes <cespedes@debian.org>
-0	string		-rom1fs-\0	romfs filesystem, version 1
+0	string		-rom1fs-	romfs filesystem, version 1
 >8	belong	x			%d bytes,
 >16	string	x			named %s.
 
@@ -5811,6 +6174,13 @@
 >4	lelong&0xFFFFFF00	!0	unknown mode
 
 0x18b	string	OS/2	OS/2 Boot Manager
+
+# updated by Joerg Jenderek at Oct 2008!!
+# http://syslinux.zytor.com/iso.php
+0	ulelong	0x7c40eafa		isolinux Loader
+# http://syslinux.zytor.com/pxe.php
+0	ulelong	0x007c05ea		pxelinux Loader
+0	ulelong	0x60669c66		pxelinux Loader
 
 # added by Joerg Jenderek
 # In the second sector (+0x200) are variables according to grub-0.97/stage2/asm.S or
@@ -6003,12 +6373,12 @@
 >>>0x464 lelong         >0x0000007      ext4 filesystem data
 #  else large INCOMPAT?
 >>0x460	lelong          >0x000003f      ext4 filesystem data
->0x468	belong		x		\b, UUID=%x
->0x46c	beshort		x		\b-%x
->0x46e	beshort		x		\b-%x
->0x470	beshort		x		\b-%x
->0x472	belong		x		\b-%x
->0x476	beshort		x		\b%x
+>0x468	belong		x		\b, UUID=%08x
+>0x46c	beshort		x		\b-%04x
+>0x46e	beshort		x		\b-%04x
+>0x470	beshort		x		\b-%04x
+>0x472	belong		x		\b-%08x
+>0x476	beshort		x		\b%04x
 >0x478	string		>0		\b, volume name "%s"
 # General flags for any ext* fs
 >0x460	lelong          &0x0000004      (needs journal recovery)
@@ -6121,6 +6491,9 @@
 !:mime	application/x-iso9660-image
 32776	string    CDROM     High Sierra CD-ROM filesystem data
 
+# .cso files
+0    string    CISO	Compressed ISO CD image
+
 # cramfs filesystem - russell@coker.com.au
 0       lelong    0x28cd3d45      Linux Compressed ROM File System data, little endian
 >4      lelong  x size %lu
@@ -6166,11 +6539,70 @@
 0	string	VoIP\ Startup\ and	Aculab VoIP firmware
 >35	string	x	format %s
 
-# u-boot/PPCBoot image file
-# From: Mark Brown <broonie@sirena.org.uk>
-0	belong	0x27051956	u-boot/PPCBoot image
->4	string  PPCBoot
->>12	string  x		version %s
+# From: Mark Brown <broonie@sirena.org.uk> [old]
+# From: Behan Webster <behanw@websterwood.com>
+0	belong	0x27051956	u-boot legacy uImage,
+>32	string	x		%s,
+>28	byte	0		Invalid os/
+>28	byte	1		OpenBSD/
+>28	byte	2		NetBSD/
+>28	byte	3		FreeBSD/
+>28	byte	4		4.4BSD/
+>28	byte	5		Linux/
+>28	byte	6		SVR4/
+>28	byte	7		Esix/
+>28	byte	8		Solaris/
+>28	byte	9		Irix/
+>28	byte	10		SCO/
+>28	byte	11		Dell/
+>28	byte	12		NCR/
+>28	byte	13		LynxOS/
+>28	byte	14		VxWorks/
+>28	byte	15		pSOS/
+>28	byte	16		QNX/
+>28	byte	17		Firmware/
+>28	byte	18		RTEMS/
+>28	byte	19		ARTOS/
+>28	byte	20		Unity OS/
+>28	byte	21		INTEGRITY/
+>29	byte	0		\bInvalid CPU,
+>29	byte	1		\bAlpha,
+>29	byte	2		\bARM,
+>29	byte	3		\bIntel x86,
+>29	byte	4		\bIA64,
+>29	byte	5		\bMIPS,
+>29	byte	6		\bMIPS 64-bit,
+>29	byte	7		\bPowerPC,
+>29	byte	8		\bIBM S390,
+>29	byte	9		\bSuperH,
+>29	byte	10		\bSparc,
+>29	byte	11		\bSparc 64-bit,
+>29	byte	12		\bM68K,
+>29	byte	13		\bNios-32,
+>29	byte	14		\bMicroBlaze,
+>29	byte	15		\bNios-II,
+>29	byte	16		\bBlackfin,
+>29	byte	17		\bAVR32,
+>29	byte	18		\bSTMicroelectronics ST200,
+>30	byte	0		Invalid Image
+>30	byte	1		Standalone Program
+>30	byte	2		OS Kernel Image
+>30	byte	3		RAMDisk Image
+>30	byte	4		Multi-File Image
+>30	byte	5		Firmware Image
+>30	byte	6		Script File
+>30	byte	7		Filesystem Image (any type)
+>30	byte	8		Binary Flat Device Tree BLOB
+>31	byte	0		(Not compressed),
+>31	byte	1		(gzip),
+>31	byte	2		(bzip2),
+>31	byte	3		(lzma),
+>12	belong	x		%d bytes,
+>8	bedate	x		%s,
+>16	belong	x		Load Address: 0x%08X,
+>20	belong	x		Entry Point: 0x%08X,
+>4	belong	x		Header CRC: 0x%08X,
+>24	belong	x		Data CRC: 0x%08X
 
 # JFFS2 file system
 0	leshort	0x1984		Linux old jffs2 filesystem data little endian
@@ -6223,6 +6655,10 @@
 >>>>>>>>&0      bedate          !0                      incremental since: %s
 
 #----------------------------------------------------------
+#delta ISO    Daniel Novotny (dnovotny@redhat.com)
+0	string  DISO	Delta ISO data
+>4	belong  x	version %d
+
 # VMS backup savesets - gerardo.cacciari@gmail.com
 #
 4            string  \x01\x00\x01\x00\x01\x00
@@ -6292,9 +6728,23 @@
 >0x10024        belong          x               (blocksize %d,
 >0x10060        string          >\0             lockproto %s)
 
+# BTRFS
+0x10040         string          _BHRfS_M        BTRFS Filesystem
+>0x1012b        string          >\0             (label "%s",
+>0x10090        lelong          x               sectorsize %d,
+>0x10094        lelong          x               nodesize %d,
+>0x10098        lelong          x               leafsize %d)
+
+
 # dvdisaster's .ecc
 # From: "Nelson A. de Oliveira" <naoliv@gmail.com>
 0	string	*dvdisaster*	dvdisaster error correction file
+
+# xfs metadump image 
+# mb_magic XFSM at 0; superblock magic XFSB at 1 << mb_blocklog
+# but can we do the << ?  For now it's always 512 (0x200) anyway.
+0	string XFSM
+>0x200	string XFSB	XFS filesystem metadump image
 
 # Type:	CROM filesystem
 # From:	Werner Fink <werner@suse.de>
@@ -6308,7 +6758,36 @@
 >44	ulelong	>0	\b block size = %ld,
 >48	ulequad	>0	\b bytes = %lld
 
+# Type:	xfs metadump image
+# From:	Daniel Novotny <dnovotny@redhat.com>
+# mb_magic XFSM at 0; superblock magic XFSB at 1 << mb_blocklog
+# but can we do the << ? For now it's always 512 (0x200) anyway.
+0	string	XFSM
+>0x200	string	XFSB	XFS filesystem metadump image
+
+# Type:	delta ISO
+# From:	Daniel Novotny <dnovotny@redhat.com>
+0	string	DISO	Delta ISO data,
+>4	belong	x	version %d
+
+# JFS2 (Journaling File System) image. (Old JFS1 has superblock at 0x1000.)
+# See linux/fs/jfs/jfs_superblock.h for layout; see jfs_filsys.h for flags.
+# From: Adam Buchbinder <adam.buchbinder@gmail.com>
+0x8000	string	JFS1
+# Because it's text-only magic, check a binary value (version) to be sure.
+# Should always be 2, but mkfs.jfs writes it as 1. Needs to be 2 or 1 to be
+# mountable.
+>&0	lelong	<3	JFS2 filesystem image
+# Label is followed by a UUID; we have to limit string length to avoid
+# appending the UUID in the case of a 16-byte label.
+>>&144	regex	[\x20-\x7E]{1,16}	(label "%s")
+>>&0	lequad	x	\b, %lld blocks
+>>&8	lelong	x	\b, blocksize %d
+>>&32	lelong&0x00000006	>0	(dirty)
+>>&36	lelong	>0	(compressed)
+
 #------------------------------------------------------------------------------
+# $File: flash,v 1.9 2009/11/08 01:30:01 christos Exp $
 # flash:	file(1) magic for Macromedia Flash file format
 #
 # See
@@ -6326,9 +6805,14 @@
 !:mime	video/x-flv
 
 #
+# Yosu Gomez
+0       string AGD2\xbe\xb8\xbb\xcd\x00 Macromedia Freehand 7 Document
+0       string AGD3\xbe\xb8\xbb\xcc\x00 Macromedia Freehand 8 Document
 # From Dave Wilson
 0	string AGD4\xbe\xb8\xbb\xcb\x00	Macromedia Freehand 9 Document
+
 #------------------------------------------------------------------------------
+# $File: fonts,v 1.21 2009/12/06 23:17:52 rrt Exp $
 # fonts:  file(1) magic for font data
 #
 0	search/1	FONT		ASCII vfont text
@@ -6336,9 +6820,12 @@
 0	short		017001		byte-swapped Berkeley vfont data
 
 # PostScript fonts (must precede "printer" entries), quinlan@yggdrasil.com
-0	search/1	%!PS-AdobeFont-1.	PostScript Type 1 font text
->20	search/1	>\0			(%s)
+0	string		%!PS-AdobeFont-1.	PostScript Type 1 font text
+>20	string		>\0			(%s)
 6	string		%!PS-AdobeFont-1.	PostScript Type 1 font program data
+0	string		%!FontType1	PostScript Type 1 font program data
+6	string		%!FontType1	PostScript Type 1 font program data
+0	string		%!PS-Adobe-3.0\ Resource-Font	PostScript Type 1 font text
 
 # X11 font files in SNF (Server Natural Format) format
 0	belong		00000004		X11 SNF font data, MSB first
@@ -6381,20 +6868,38 @@
 
 # True Type fonts
 0	string	\000\001\000\000\000	TrueType font data
+!:mime application/x-font-ttf
 
 0	string		\007\001\001\000Copyright\ (c)\ 199	Adobe Multiple Master font
 0	string		\012\001\001\000Copyright\ (c)\ 199	Adobe Multiple Master font
 
+# TrueType/OpenType font collections (.ttc)
+# http://www.microsoft.com/typography/otspec/otff.htm
+0	string		ttcf		TrueType font collection data
+>4	belong		0x00010000	\b, 1.0
+>>8	belong		>0		\b, %d fonts
+>4	belong		0x00020000	\b, 2.0
+>>8	belong		>0		\b, %d fonts
+# 0x44454947 = 'DSIG'
+>>>16	belong		0x44534947	\b, digitally signed
+
 # Opentype font data from Avi Bercovich
-0	string		OTTO		OpenType font data 
+0	string		OTTO		OpenType font data
+!:mime application/vnd.ms-opentype
 
 # Gürkan Sengün <gurkan@linuks.mine.nu>, www.linuks.mine.nu 
 0	string		SplineFontDB:	Spline Font Database 
+!:mime application/vnd.font-fontforge-sfd
 >14	string		x		version %s
-# FORTRAN source
-0	string/c	c\ 		FORTRAN program
-!:mime	text/x-fortran
+
 #------------------------------------------------------------------------------
+# $File: fortran,v 1.6 2009/09/19 16:28:09 christos Exp $
+# FORTRAN source
+0	regex/100	\^[Cc][\ \t]	FORTRAN program
+!:mime	text/x-fortran
+
+#------------------------------------------------------------------------------
+# $File: frame,v 1.12 2009/09/19 16:28:09 christos Exp $
 # frame:  file(1) magic for FrameMaker files
 #
 # This stuff came on a FrameMaker demo tape, most of which is
@@ -6444,6 +6949,7 @@
 !:mime	application/x-mif
 
 #------------------------------------------------------------------------------
+# $File: freebsd,v 1.7 2009/09/19 16:28:09 christos Exp $
 # freebsd:  file(1) magic for FreeBSD objects
 #
 # All new-style FreeBSD magic numbers are in host byte order (i.e.,
@@ -6587,6 +7093,7 @@
 >>11	byte	x		%d chars high
 
 #------------------------------------------------------------------------------
+# $File: fsav,v 1.11 2009/09/19 16:28:09 christos Exp $
 # fsav:  file(1) magic for datafellows fsav virus definition files
 # Anthon van der Neut (anthon@mnt.org)
 
@@ -6647,7 +7154,9 @@
 # Type: Grisoft AVG AntiVirus
 # From: David Newgas <david@newgas.net>
 0	string	AVG7_ANTIVIRUS_VAULT_FILE	AVG 7 Antivirus vault file data
+
 #------------------------------------------------------------------------------
+# $File: games,v 1.8 2009/09/19 16:28:09 christos Exp $
 # games:  file(1) for games
 
 # Fabio Bonelli <fabiobonelli@libero.it>
@@ -6682,6 +7191,7 @@
 # Quake
 
 0       string  PACK    Quake I or II world or extension
+>8	lelong	>0	\b, %d entries
 
 #0       string  -1\x0a  Quake I demo
 #>30     string  x        version %.4s
@@ -6905,6 +7415,7 @@
 >2	regex/c	GM\\[21\\]			- twix Game
 
 #------------------------------------------------------------------------------
+# $File: gcc,v 1.4 2009/09/19 16:28:09 christos Exp $
 # gcc:  file(1) magic for GCC special files
 #
 0	string		gpch		GCC precompiled header
@@ -6921,6 +7432,7 @@
 >4	byte		79			for Objective C++
 
 #------------------------------------------------------------------------------
+# $File: geos,v 1.4 2009/09/19 16:28:09 christos Exp $
 # GEOS files (Vidar Madsen, vidar@gimp.org)
 # semi-commonly used in embedded and handheld systems.
 0	belong	0xc745c153	GEOS
@@ -6938,7 +7450,9 @@
 #>52	short	x	\b, proto %d
 #>54	short	x	\br%d
 #>168	string	>\0	\b, copyright "%s"
+
 #------------------------------------------------------------------------------
+# $File: gimp,v 1.6 2009/09/19 16:28:09 christos Exp $
 # GIMP Gradient: file(1) magic for the GIMP's gradient data files
 # by Federico Mena <federico@nuclecu.unam.mx>
 
@@ -6950,6 +7464,7 @@
 #       ('Bucky' LaDieu, nega@vt.edu)
 
 0	string		gimp\ xcf	GIMP XCF image data,
+!:mime	image/x-xcf
 >9	string		file		version 0,
 >9	string		v		version
 >>10	string		>\0		%s,
@@ -6978,6 +7493,9 @@
 # GIMP Curves File
 # From: "Nelson A. de Oliveira" <naoliv@gmail.com>
 0	string	#\040GIMP\040Curves\040File	GIMP curve file
+
+#------------------------------------------------------------------------------
+# $File: gnome-keyring,v 1.2 2009/09/19 16:28:09 christos Exp $
 # GNOME keyring
 # Contributed by Josh Triplett
 # FIXME: Could be simplified if pstring supported two-byte counts
@@ -7001,7 +7519,9 @@
 >>>>>>&24 ubelong  x                    \b, hash iterations %u
 >>>>>>&28 ubequad  x                    \b, salt %llu
 >>>>>>&52 ubelong  x                    \b, %u item(s)
+
 #------------------------------------------------------------------------------
+# $File: gnu,v 1.11 2009/09/19 16:28:09 christos Exp $
 # gnu:  file(1) magic for various GNU tools
 #
 # GNU nlsutils message catalog file format
@@ -7045,6 +7565,7 @@
 0	long	0x950412DE		GNU-format message catalog data
 
 #------------------------------------------------------------------------------
+# $File: gnumeric,v 1.4 2009/09/19 16:28:09 christos Exp $
 # gnumeric:  file(1) magic for Gnumeric spreadsheet
 # This entry is only semi-helpful, as Gnumeric compresses its files, so
 # they will ordinarily reported as "compressed", but at least -z helps
@@ -7052,6 +7573,7 @@
 !:mime	application/x-gnumeric
 
 #------------------------------------------------------------------------------
+# $File: grace,v 1.4 2009/09/19 16:28:09 christos Exp $
 # ACE/gr and Grace type files - PLEASE DO NOT REMOVE THIS LINE
 #
 # ACE/gr binary
@@ -7072,13 +7594,19 @@
 # end of ACE/gr and Grace type files - PLEASE DO NOT REMOVE THIS LINE
 
 #------------------------------------------------------------------------------
+# $File: graphviz,v 1.7 2009/09/19 16:28:09 christos Exp $
 # graphviz:  file(1) magic for http://www.graphviz.org/
-0	regex/100	[\r\n\t\ ]*graph[\r\n\t\ ]*.*\\{	graphviz graph text
-!:mime	text/vnd.graphviz
-0	regex/100	[\r\n\t\ ]*digraph[\r\n\t\ ]*.*\\{	graphviz digraph text
-!:mime	text/vnd.graphviz
+
+# FIXME: These patterns match too generally. For example, the first
+# line matches a LaTeX file containing the word "graph" (with a {
+# following later) and the second line matches this file.
+#0	regex/100	[\r\n\t\ ]*graph[\r\n\t\ ]+.*\\{	graphviz graph text
+#!:mime	text/vnd.graphviz
+#0	regex/100	[\r\n\t\ ]*digraph[\r\n\t\ ]+.*\\{	graphviz digraph text
+#!:mime	text/vnd.graphviz
 
 #------------------------------------------------------------------------------
+# $File: gringotts,v 1.5 2009/09/19 16:28:09 christos Exp $
 # gringotts:  file(1) magic for Gringotts
 # http://devel.pluto.linux.it/projects/Gringotts/
 # author: Germano Rizzo <mano@pluto.linux.it>
@@ -7126,6 +7654,7 @@
 >3	string		>3		v.%.1s (unknown details)
 
 #------------------------------------------------------------------------------
+# $File: hitachi-sh,v 1.5 2009/09/19 16:28:09 christos Exp $
 # hitach-sh: file(1) magic for Hitachi Super-H
 #
 # Super-H COFF
@@ -7142,7 +7671,9 @@
 >18	leshort&0x0008	=0x0008		\b, stripped
 >18	leshort&0x0008	=0x0000		\b, not stripped
 
+
 #------------------------------------------------------------------------------
+# $File: hp,v 1.23 2009/09/19 16:28:09 christos Exp $
 # hp:  file(1) magic for Hewlett Packard machines (see also "printer")
 #
 # XXX - somebody should figure out whether any byte order needs to be
@@ -7581,6 +8112,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: human68k,v 1.5 2009/09/19 16:28:09 christos Exp $
 # human68k:  file(1) magic for Human68k (X680x0 DOS) binary formats
 # Magic too short!
 #0		string	HU		Human68k
@@ -7606,6 +8138,7 @@
 #2		string	#HUPAIR		Human68k hupair R executable
 
 #------------------------------------------------------------------------------
+# $File: ibm370,v 1.8 2009/09/19 16:28:09 christos Exp $
 # ibm370:  file(1) magic for IBM 370 and compatibles.
 #
 # "ibm370" said that 0x15d == 0535 was "ibm 370 pure executable".
@@ -7653,6 +8186,7 @@
 >24	belong		>0		- version %ld
 
 #------------------------------------------------------------------------------
+# $File: ibm6000,v 1.9 2009/09/19 16:28:09 christos Exp $
 # ibm6000:  file(1) magic for RS/6000 and the RT PC.
 #
 0	beshort		0x01df		executable (RISC System/6000 V3.1) or obj module
@@ -7672,6 +8206,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: iff,v 1.12 2009/09/19 16:28:09 christos Exp $
 # iff:	file(1) magic for Interchange File Format (see also "audio" & "images")
 #
 # Daniel Quinlan (quinlan@yggdrasil.com) -- IFF was designed by Electronic
@@ -7733,7 +8268,9 @@
 >8	string		IFRS		\b, Blorb Interactive Fiction
 >>24	string		Exec		with executable chunk
 >8	string          IFZS		\b, Z-machine or Glulx saved game file (Quetzal)
+
 #------------------------------------------------------------------------------
+# $File: images,v 1.64 2009/12/06 00:38:50 christos Exp $
 # images:  file(1) magic for image formats (see also "iff", and "c-lang" for
 # XPM bitmaps)
 #
@@ -7796,6 +8333,25 @@
 0	string		IIN1		NIFF image data
 !:mime	image/x-niff
 
+# Canon RAW version 1 (CRW) files are a type of Canon Image File Format
+# (CIFF) file. These are apparently all little-endian.
+# From: Adam Buchbinder <adam.buchbinder@gmail.com>
+# URL: http://www.sno.phy.queensu.ca/~phil/exiftool/canon_raw.html
+0	string		II\x1a\0\0\0HEAPCCDR	Canon CIFF raw image data
+!:mime	image/x-canon-crw
+>16	leshort		x	\b, version %d.
+>14	leshort		x	\b%d
+
+# Canon RAW version 2 (CR2) files are a kind of TIFF with an extra magic
+# number. Put this above the TIFF test to make sure we detect them.
+# These are apparently all little-endian.
+# From: Adam Buchbinder <adam.buchbinder@gmail.com>
+# URL: http://libopenraw.freedesktop.org/wiki/Canon_CR2
+0	string		II\x2a\0\x10\0\0\0CR	Canon CR2 raw image data
+!:mime	image/x-canon-cr2
+>10	byte		x	\b, version %d.
+>11	byte		x	\b%d
+
 # Tag Image File Format, from Daniel Quinlan (quinlan@yggdrasil.com)
 # The second word of TIFF files is the TIFF version number, 42, which has
 # never changed.  The TIFF specification recommends testing for it.
@@ -7810,7 +8366,7 @@
 #
 # 137 P N G \r \n ^Z \n [4-byte length] H E A D [HEAD data] [HEAD crc] ...
 #
-0	string		\x89PNG\x0d\x0a\x1a\x0a		PNG image
+0	string		\x89PNG\x0d\x0a\x1a\x0a		PNG image data
 !:mime	image/png
 >16	belong		x		\b, %ld x
 >20	belong		x		%ld,
@@ -7845,6 +8401,7 @@
 # GIF
 0	string		GIF8		GIF image data
 !:mime	image/gif
+!:apple	8BIMGIFf
 >4	string		7a		\b, version 8%s,
 >4	string		9a		\b, version 8%s,
 >6	leshort		>0		%hd x
@@ -8042,11 +8599,20 @@
 #   As described in /usr/X11R6/include/X11/XWDFile.h
 #   used by the xwd program.
 #   Bradford Castalia, idaeim, 1/01
-4	belong	7			XWD X Window Dump image data
->100	string	>\0			\b, "%s"
->16	belong	x			\b, %dx
->20	belong	x			\b%dx
->12	belong	x			\b%d
+#   updated by Adam Buchbinder, 2/09
+# The following assumes version 7 of the format; the first long is the length
+# of the header, which is at least 25 4-byte longs, and the one at offset 8
+# is a constant which is always either 1 or 2. Offset 12 is the pixmap depth,
+# which is a maximum of 32.
+0	belong	>100
+>8	belong	<3
+>>12	belong	<33
+>>>4	belong	7			XWD X Window Dump image data
+!:mime	image/x-xwindowdump
+>>>>100	string	>\0			\b, "%s"
+>>>>16	belong	x			\b, %dx
+>>>>20	belong	x			\b%dx
+>>>>12	belong	x			\b%d
 
 # PDS - Planetary Data System
 #   These files use Parameter Value Language in the header section.
@@ -8134,8 +8700,28 @@
 >2	byte		1	RLE compressed
 
 # Adobe Photoshop
+# From: Asbjoern Sloth Toennesen <asbjorn@lila.io>
 0	string		8BPS Adobe Photoshop Image
 !:mime	image/vnd.adobe.photoshop
+>4   beshort 2 (PSB)
+>18  belong  x \b, %d x
+>14  belong  x %d,
+>24  beshort 0 bitmap
+>24  beshort 1 grayscale
+>>12 beshort 2 with alpha
+>24  beshort 2 indexed
+>24  beshort 3 RGB
+>>12 beshort 4 \bA
+>24  beshort 4 CMYK
+>>12 beshort 5 \bA
+>24  beshort 7 multichannel
+>24  beshort 8 duotone
+>24  beshort 9 lab
+>12  beshort > 1
+>>12  beshort x \b, %dx
+>12  beshort 1 \b,
+>22  beshort x %d-bit channel
+>12  beshort > 1 \bs
 
 # XV thumbnail indicator (ThMO)
 0	string		P7\ 332		XV thumbnail image data
@@ -8263,11 +8849,16 @@
 # Bio-Rad .PIC is an image format used by microscope control systems
 # and related image processing software used by biologists.
 # From: Vebjorn Ljosa <vebjorn@ljosa.com>
-54	leshort 12345		Bio-Rad .PIC Image File
->0	leshort >0		%hd x
->2	leshort >0		%hd,
->4	leshort =1		1 image in file
->4	leshort >1		%hd images in file
+# BOOL values are two-byte integers; use them to rule out false positives.
+# http://web.archive.org/web/20050317223257/www.cs.ubc.ca/spider/ladic/text/biorad.txt
+# Samples: http://www.loci.wisc.edu/software/sample-data
+14	leshort <2
+>62	leshort <2
+>>54	leshort 12345		Bio-Rad .PIC Image File
+>>>0	leshort >0		%hd x
+>>>2	leshort >0		%hd,
+>>>4	leshort =1		1 image in file
+>>>4	leshort >1		%hd images in file
 
 # From Jan "Yenya" Kasprzak <kas@fi.muni.cz>
 # The description of *.mrw format can be found at
@@ -8280,11 +8871,14 @@
 # Submitted by: Stephane Loeuillet <stephane.loeuillet@tiscali.fr>
 # Modified by (1): Abel Cheung <abelcheung@gmail.com>
 0	string	AT&TFORM
-!:mime	image/vnd.djvu
 >12	string	DJVM		DjVu multiple page document
+!:mime	image/vnd.djvu
 >12	string	DJVU		DjVu image or single page document
+!:mime	image/vnd.djvu
 >12	string	DJVI		DjVu shared document
+!:mime	image/vnd.djvu
 >12	string	THUM		DjVu page thumbnails
+!:mime	image/vnd.djvu
 
 
 # From Marc Espie
@@ -8336,25 +8930,79 @@
 # From Tano M Fotang <mfotang@quanteq.com>
 0	string	\xff\xa0\xff\xa8\x00	Wavelet Scalar Quantization image data
 
+# JPEG 2000 Code Stream Bitmap
+# From Petr Splichal <psplicha@redhat.com>
+0	string	\xFF\x4F\xFF\x51\x00	JPEG-2000 Code Stream Bitmap data
+
 # Type:	Ulead Photo Explorer5 (.pe5)
 # URL:	http://www.jisyo.com/cgibin/view.cgi?EXT=pe5 (Japanese)
 # From:	Simon Horman <horms@debian.org>
-0	string	IIO2H	Ulead Photo Explorer5
+0	string	IIO2H			Ulead Photo Explorer5
 
 # Type:	X11 cursor
 # URL:	http://webcvs.freedesktop.org/mime/shared-mime-info/freedesktop.org.xml.in?view=markup
 # From:	Mathias Brodala <info@noctus.net>
-0	string	Xcur	X11 cursor
+0	string	Xcur			X11 cursor
+
+# Type:	Olympus ORF raw images.
+# URL:	http://libopenraw.freedesktop.org/wiki/Olympus_ORF
+# From:	Adam Buchbinder <adam.buchbinder@gmail.com>
+0	string		MMOR		Olympus ORF raw image data, big-endian
+!:mime	image/x-olympus-orf
+0	string		IIRO		Olympus ORF raw image data, little-endian
+!:mime	image/x-olympus-orf
+0	string		IIRS		Olympus ORF raw image data, little-endian
+!:mime	image/x-olympus-orf
+
+# Type: files used in modern AVCHD camcoders to store clip information
+# Extension: .cpi
+# From: Alexander Danilov <alexander.a.danilov@gmail.com>
+0	string	HDMV0100	AVCHD Clip Information
+
+# From: Adam Buchbinder <adam.buchbinder@gmail.com>
+# URL: http://local.wasp.uwa.edu.au/~pbourke/dataformats/pic/
+# Radiance HDR; usually has .pic or .hdr extension.
+0	string	#?RADIANCE\n	Radiance HDR image data
+#!mime	image/vnd.radiance
+
+# From: Adam Buchbinder <adam.buchbinder@gmail.com>
+# URL: http://www.mpi-inf.mpg.de/resources/pfstools/pfs_format_spec.pdf
+# Used by the pfstools packages. The regex matches for the image size could
+# probably use some work. The MIME type is made up; if there's one in
+# actual common use, it should replace the one below.
+0	string	PFS1\x0a	PFS HDR image data
+#!mime	image/x-pfs
+>1	regex	[0-9]*\ 		\b, %s
+>>1	regex	\ [0-9]{4}		\bx%s
+
+# Type: Foveon X3F
+# URL:  http://www.photofo.com/downloads/x3f-raw-format.pdf
+# From: Adam Buchbinder <adam.buchbinder@gmail.com>
+# Note that the MIME type isn't defined anywhere that I can find; if
+# there's a canonical type for this format, it should replace this one.
+0	string	FOVb	Foveon X3F raw image data
+!:mime	image/x-x3f
+>6	leshort	x	\b, version %d.
+>4	leshort	x	\b%d
+>28	lelong	x	\b, %dx
+>32	lelong	x	\b%d
+
+# Paint.NET file
+# From Adam Buchbinder <adam.buchbinder@gmail.com>
+0	string	PDN3	Paint.NET image data
+!:mime	image/x-paintnet
 
 #------------------------------------------------------------------------------
+# $File: inform,v 1.5 2009/09/19 16:28:09 christos Exp $
 # inform:  file(1) magic for Inform interactive fiction language
 
 # URL:  http://www.inform-fiction.org/
 # From: Reuben Thomas <rrt@sc3d.org>
 
-0	search/cB/100	constant\ story		Inform source text
+0	search/100/cW	constant\ story		Inform source text
 
 #------------------------------------------------------------------------------
+# $File: intel,v 1.8 2009/09/19 16:28:10 christos Exp $
 # intel:  file(1) magic for x86 Unix
 #
 # Various flavors of x86 UNIX executable/object (other than Xenix, which
@@ -8402,6 +9050,7 @@
 >2       byte            x            (%d*512)
 
 #------------------------------------------------------------------------------
+# $File: interleaf,v 1.10 2009/09/19 16:28:10 christos Exp $
 # interleaf:  file(1) magic for InterLeaf TPS:
 #
 0	string		=\210OPS	Interleaf saved data
@@ -8410,6 +9059,7 @@
 >>17	string		>\0		%.3s
 
 #------------------------------------------------------------------------------
+# $File: island,v 1.5 2009/09/19 16:28:10 christos Exp $
 # island:  file(1) magic for IslandWite/IslandDraw, from SunOS 5.5.1
 # "/etc/magic":
 # From: guy@netapp.com (Guy Harris)
@@ -8419,6 +9069,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: ispell,v 1.8 2009/09/19 16:28:10 christos Exp $
 # ispell:  file(1) magic for ispell
 #
 # Ispell 3.0 has a magic of 0x9601 and ispell 3.1 has 0x9602.  This magic
@@ -8479,7 +9130,9 @@
 >12     long            x               lexsize %d,
 >16     long            x               hashsize %d,
 >20     long            x               stblsize %d
+
 #------------------------------------------------------------
+# $File: java,v 1.12 2009/09/19 16:28:10 christos Exp $
 # Java ByteCode and Mach-O binaries (e.g., Mac OS X) use the
 # same magic number, 0xcafebabe, so they are both handled
 # in the entry called "cafebabe".
@@ -8505,6 +9158,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: jpeg,v 1.15 2009/09/19 16:28:10 christos Exp $
 # JPEG images
 # SunOS 5.5.1 had
 #
@@ -8515,6 +9169,7 @@
 #
 0	beshort		0xffd8		JPEG image data
 !:mime	image/jpeg
+!:apple	8BIMJPEG
 !:strength +1
 >6	string		JFIF		\b, JFIF standard
 # The following added by Erik Rossen <rossen@freesurf.ch> 1999-09-06
@@ -8669,6 +9324,7 @@
 45	beshort		0xff52
 
 #------------------------------------------------------------------------------
+# $File: karma,v 1.6 2009/09/19 16:28:10 christos Exp $
 # karma:  file(1) magic for Karma data files
 #
 # From <rgooch@atnf.csiro.au>
@@ -8677,6 +9333,7 @@
 >16	belong		x		%lu
 
 #------------------------------------------------------------------------------
+# $File: kde,v 1.4 2009/09/19 16:28:10 christos Exp $
 # kde:  file(1) magic for KDE
 
 0		string	[KDE\ Desktop\ Entry]	KDE desktop entry
@@ -8685,11 +9342,49 @@
 !:mime	application/x-kdelnk
 0		string	#\ xmcd	xmcd database file for kscd
 !:mime	text/x-xmcd
+
 #------------------------------------------------------------------------------
+# $File: kml,v 1.2 2009/09/19 16:28:10 christos Exp $
+# Type: Google KML, formerly Keyhole Markup Language
+# Future development of this format has been handed
+# over to the Open Geospatial Consortium.
+# http://www.opengeospatial.org/standards/kml/
+# From: Asbjoern Sloth Toennesen <asbjorn@lila.io>
+0 string    \<?xml
+>20  search/400 \ xmlns= 
+>>&0 regex ['"]http://earth.google.com/kml Google KML document
+!:mime application/vnd.google-earth.kml+xml
+>>>&1 string 2.0' \b, version 2.0
+>>>&1 string 2.1' \b, version 2.1
+>>>&1 string 2.2' \b, version 2.2
+
+#------------------------------------------------------------------------------
+# Type: OpenGIS KML, formerly Keyhole Markup Language
+# This standard is maintained by the
+# Open Geospatial Consortium.
+# http://www.opengeospatial.org/standards/kml/
+# From: Asbjoern Sloth Toennesen <asbjorn@lila.io>
+>>&0 regex ['"]http://www.opengis.net/kml OpenGIS KML document
+!:mime application/vnd.google-earth.kml+xml
+>>>&1 string 2.2 \b, version 2.2
+
+#------------------------------------------------------------------------------
+# Type: Google KML Archive (ZIP based) 
+# http://code.google.com/apis/kml/documentation/kml_tut.html
+# From: Asbjoern Sloth Toennesen <asbjorn@lila.io>
+0 string    PK\003\004
+>4  byte    0x14
+>>30  string doc.kml Compressed Google KML Document, including resources.
+!:mime application/vnd.google-earth.kmz
+
+#------------------------------------------------------------------------------
+# $File: lecter,v 1.4 2009/09/19 16:28:10 christos Exp $
 # DEC SRC Virtual Paper: Lectern files
 # Karl M. Hegbloom <karlheg@inetarena.com>
 0	string	lect	DEC SRC Virtual Paper Lectern file
+
 #------------------------------------------------------------------------------
+# $File: lex,v 1.6 2009/09/19 16:28:10 christos Exp $
 # lex:  file(1) magic for lex
 #
 #	derived empirically, your offsets may vary!
@@ -8701,12 +9396,15 @@
 0	search/1	%{		lex description text
 
 #------------------------------------------------------------------------------
+# $File: lif,v 1.8 2009/09/19 16:28:10 christos Exp $
 # lif:  file(1) magic for lif
 #
 # (Daniel Quinlan <quinlan@yggdrasil.com>)
 #
 0	beshort		0x8000		lif file
+
 #------------------------------------------------------------------------------
+# $File: linux,v 1.33 2009/10/23 16:44:59 christos Exp $
 # linux:  file(1) magic for Linux files
 #
 # Values for Linux/i386 binaries, from Daniel Quinlan <quinlan@yggdrasil.com>
@@ -8752,12 +9450,21 @@
 2	string		LILO		Linux/i386 LILO boot/chain loader
 #
 # PSF fonts, from H. Peter Anvin <hpa@yggdrasil.com>
-0	leshort		0x0436		Linux/i386 PC Screen Font data,
->2	byte		0		256 characters, no directory,
->2	byte		1		512 characters, no directory,
->2	byte		2		256 characters, Unicode directory,
->2	byte		3		512 characters, Unicode directory,
+# Updated by Adam Buchbinder <adam.buchbinder@gmail.com>
+# See: http://www.win.tue.nl/~aeb/linux/kbd/font-formats-1.html
+0	leshort		0x0436		Linux/i386 PC Screen Font v1 data,
+>2	byte&0x01	0		256 characters,
+>2	byte&0x01	!0		512 characters,
+>2	byte&0x02	0		no directory,
+>2	byte&0x02	!0		Unicode directory,
 >3	byte		>0		8x%d
+0	string		\x72\xb5\x4a\x86\x00\x00 Linux/i386 PC Screen Font v2 data,
+>16	lelong		x		%d characters,
+>12	lelong&0x01	0		no directory,
+>12	lelong&0x01	!0		Unicode directory,
+>24	lelong		x		%d
+>28	lelong		x		\bx%d
+
 # Linux swap file, from Daniel Quinlan <quinlan@yggdrasil.com>
 4086	string		SWAP-SPACE	Linux/i386 swap file
 # From: Jeff Bailey <jbailey@ubuntu.com>
@@ -8771,12 +9478,15 @@
 >0x404	long		x		size %d pages,
 >1052	string		\0		no label,
 >1052	string		>\0		LABEL=%s,
->0x40c	belong		x		UUID=%x
->0x410	beshort		x		\b-%x
->0x412	beshort		x		\b-%x
->0x414	beshort		x		\b-%x
->0x416	belong		x		\b-%x
->0x41a	beshort		x		\b%x
+>0x40c	belong		x		UUID=%08x
+>0x410	beshort		x		\b-%04x
+>0x412	beshort		x		\b-%04x
+>0x414	beshort		x		\b-%04x
+>0x416	belong		x		\b-%08x
+>0x41a	beshort		x		\b%04x
+# From Daniel Novotny <dnovotny@redhat.com>
+# swap file for PowerPC
+65526	string		SWAPSPACE2	Linux/ppc swap file
 # ECOFF magic for OSF/1 and Linux (only tested under Linux though)
 #
 #	from Erik Troan (ewt@redhat.com) examining od dumps, so this
@@ -8800,7 +9510,7 @@
 514	string		HdrS		Linux kernel
 >510	leshort		0xAA55		x86 boot executable
 >>518	leshort		>0x1ff
->>529	byte		0		zImage,
+>>>529	byte		0		zImage,
 >>>529	byte		1		bzImage,
 >>>(526.s+0x200) string	>\0		version %s,
 >>498	leshort		1		RO-rootFS,
@@ -8984,7 +9694,9 @@
 #>2	regex		\(name\ [^)]*\)		%s
 >20	search/256	(name			(name
 >>&1	string		x			%s...)
+
 #------------------------------------------------------------------------------
+# $File: lisp,v 1.23 2009/09/19 16:28:10 christos Exp $
 # lisp:  file(1) magic for lisp programs
 #
 # various lisp types, from Daniel Quinlan (quinlan@yggdrasil.com)
@@ -8994,22 +9706,20 @@
 #0	string	;;			
 # windows INF files often begin with semicolon and use CRLF as line end
 # lisp files are mainly created on unix system with LF as line end
-#>2	search/2048	!\r		Lisp/Scheme program text
-#>2	search/2048	\r		Windows INF file
+#>2	search/4096	!\r		Lisp/Scheme program text
+#>2	search/4096	\r		Windows INF file
 
-0	search/256	(if\ 			Lisp/Scheme program text
+0	search/4096	(setq\ 			Lisp/Scheme program text
 !:mime	text/x-lisp
-0	search/256	(setq\ 			Lisp/Scheme program text
+0	search/4096	(defvar\ 		Lisp/Scheme program text
 !:mime	text/x-lisp
-0	search/256	(defvar\ 		Lisp/Scheme program text
+0	search/4096	(defparam\ 		Lisp/Scheme program text
 !:mime	text/x-lisp
-0	search/256	(defparam\ 		Lisp/Scheme program text
+0	search/4096	(defun\  		Lisp/Scheme program text
 !:mime	text/x-lisp
-0	search/256	(defun\  		Lisp/Scheme program text
+0	search/4096	(autoload\ 		Lisp/Scheme program text
 !:mime	text/x-lisp
-0	search/256	(autoload\ 		Lisp/Scheme program text
-!:mime	text/x-lisp
-0	search/256	(custom-set-variables\ 	Lisp/Scheme program text
+0	search/4096	(custom-set-variables\ 	Lisp/Scheme program text
 !:mime	text/x-lisp
 
 # Emacs 18 - this is always correct, but not very magical.
@@ -9038,23 +9748,28 @@
 !:mime	text/texmacs
 
 #------------------------------------------------------------------------------
+# $File: llvm,v 1.4 2009/09/19 16:28:10 christos Exp $
 # llvm:  file(1) magic for LLVM byte-codes
-# URL:  http://llvm.cs.uiuc.edu/docs/BytecodeFormat.html#signature
+# URL:  http://llvm.org/docs/BitCodeFormat.html
 # From: Al Stone <ahs3@fc.hp.com>
 
 0	string	llvm	LLVM byte-codes, uncompressed
 0	string	llvc0	LLVM byte-codes, null compression
 0	string	llvc1	LLVM byte-codes, gzip compression
 0	string	llvc2	LLVM byte-codes, bzip2 compression
+0	string	\xde\xc0\x17\x0b	LLVM bitcode, wrapper
+0       string	BC\xc0\xde	LLVM bitcode
+
 #------------------------------------------------------------------------------
+# $File: lua,v 1.5 2009/09/19 16:28:10 christos Exp $
 # lua:  file(1) magic for Lua scripting language
 # URL:  http://www.lua.org/
 # From: Reuben Thomas <rrt@sc3d.org>, Seo Sanghyeon <tinuviel@sparcs.kaist.ac.kr>
 
 # Lua scripts
-0	search/1/b	#!\ /usr/bin/lua	Lua script text executable
+0	search/1/w	#!\ /usr/bin/lua	Lua script text executable
 !:mime	text/x-lua
-0	search/1/b	#!\ /usr/local/bin/lua	Lua script text executable
+0	search/1/w	#!\ /usr/local/bin/lua	Lua script text executable
 !:mime	text/x-lua
 0	search/1	#!/usr/bin/env\ lua	Lua script text executable
 !:mime	text/x-lua
@@ -9067,6 +9782,7 @@
 >4	byte		0x51			version 5.1
 
 #------------------------------------------------------------------------------
+# $File: luks,v 1.4 2009/09/19 16:28:10 christos Exp $
 # luks:  file(1) magic for Linux Unified Key Setup
 # URL:	http://luks.endorphin.org/spec
 # From:	Anthon van der Neut <anthon@mnt.org>
@@ -9077,13 +9793,15 @@
 >40	string		x		%s,
 >72	string		x		%s]
 >168	string		x		UUID: %s
+
 #------------------------------------------------------------
+# $File: mach,v 1.9 2009/09/19 16:28:10 christos Exp $
 # Mach has two magic numbers, 0xcafebabe and 0xfeedface.
 # Unfortunately the first, cafebabe, is shared with
 # Java ByteCode, so they are both handled in the file "cafebabe".
 # The "feedface" ones are handled herein.
 #------------------------------------------------------------
-0	lelong&0xfeffffff	0xfeedface	Mach-O
+0	lelong&0xfffffffe	0xfeedface	Mach-O
 >0	byte		0xcf		64-bit
 >12	lelong		1		object
 >12	lelong		2		executable
@@ -9163,6 +9881,7 @@
 >>4	belong		x		architecture=%ld
 
 #------------------------------------------------------------------------------
+# $File: macintosh,v 1.20 2009/09/19 16:28:10 christos Exp $
 # macintosh description
 #
 # BinHex is the Macintosh ASCII-encoded file format (see also "apple")
@@ -9174,6 +9893,8 @@
 # Stuffit archives are the de facto standard of compression for Macintosh
 # files obtained from most archives. (franklsm@tuns.ca)
 0	string		SIT!			StuffIt Archive (data)
+!:mime	application/x-stuffit
+!:apple	SIT!SIT!
 >2	string		x			: %s
 0	string		SITD			StuffIt Deluxe (data)
 >2	string		x			: %s
@@ -9183,6 +9904,7 @@
 # Newer StuffIt archives (grant@netbsd.org)
 0	string		StuffIt			StuffIt Archive
 !:mime	application/x-stuffit
+!:apple	SIT!SIT!
 #>162	string		>0			: %s
 
 # Macintosh Applications and Installation binaries (franklsm@tuns.ca)
@@ -9536,7 +10258,20 @@
 # From: Remi Mommsen <mommsen@slac.stanford.edu>
 0		string		BOMStore	Mac OS X bill of materials (BOM) file
 
+# From: Adam Buchbinder <adam.buchbinder@gmail.com>
+# URL: http://en.wikipedia.org/wiki/Datafork_TrueType
+# Derived from the 'fondu' and 'ufond' source code (fondu.sf.net). 'sfnt' is
+# TrueType; 'POST' is PostScript. 'FONT' and 'NFNT' sometimes appear, but I
+# don't know what they mean.
+0	belong	0x100
+>(0x4.L+24)	beshort	x
+>>&4	belong	0x73666e74	Mac OSX datafork font, TrueType
+>>&4	belong	0x464f4e54	Mac OSX datafork font, 'FONT'
+>>&4	belong	0x4e464e54	Mac OSX datafork font, 'NFNT'
+>>&4	belong	0x504f5354	Mac OSX datafork font, PostScript
+
 #------------------------------------------------------------------------------
+# $File: magic,v 1.9 2009/09/19 16:28:10 christos Exp $
 # magic:  file(1) magic for magic files
 #
 0	string		#\ Magic	magic text file for file(1) cmd
@@ -9544,7 +10279,9 @@
 >4	lelong		x		(version %d) (little endian)
 0	belong		0xF11E041C	magic binary file for file(1) cmd
 >4	belong		x		(version %d) (big endian)
+
 #------------------------------------------------------------------------------
+# $File: mail.news,v 1.17 2009/09/19 16:28:10 christos Exp $
 # mail.news:  file(1) magic for mail and news
 #
 # Unfortunately, saved netnews also has From line added in some news software.
@@ -9599,6 +10336,7 @@
 #0	string		\<!--\ MHonArc		text/html; x-type=mhonarc
 
 #------------------------------------------------------------------------------
+# $File: maple,v 1.6 2009/09/19 16:28:10 christos Exp $
 # maple:  file(1) magic for maple files
 # "H. Nanosecond" <aldomel@ix.netcom.com>
 # Maple V release 4, a multi-purpose math program
@@ -9655,12 +10393,15 @@
 0	string	#\ \r##\ <DESCRIBE>	Maple something anomalous.
 
 #------------------------------------------------------------------------------
+# $File: mathcad,v 1.5 2009/09/19 16:28:10 christos Exp $
 # mathcad:  file(1) magic for Mathcad documents
 # URL:	http://www.mathsoft.com/
 # From:	Josh Triplett <josh@freedesktop.org>
 
 0	string	.MCAD\t		Mathcad document
+
 #------------------------------------------------------------------------------
+# $File: mathematica,v 1.7 2009/09/19 16:28:10 christos Exp $
 # mathematica:  file(1) magic for mathematica files
 # "H. Nanosecond" <aldomel@ix.netcom.com>
 # Mathematica a multi-purpose math program
@@ -9730,6 +10471,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: matroska,v 1.5 2009/09/27 19:02:12 christos Exp $
 # matroska:  file(1) magic for Matroska files
 #
 # See http://www.matroska.org/
@@ -9741,8 +10483,10 @@
 >5		beshort		0x4282
 # DocType contents:
 >>8		string		matroska	Matroska data
+!:mime  video/x-matroska
 
 #------------------------------------------------------------------------------
+# $File: mcrypt,v 1.5 2009/09/19 16:28:10 christos Exp $
 # Mavroyanopoulos Nikos <nmav@hellug.gr>
 # mcrypt:   file(1) magic for mcrypt 2.2.x;
 0	string		\0m\3		mcrypt 2.5 encrypted data,
@@ -9780,6 +10524,7 @@
 >5	byte		3		keymode: MD5 hash
 
 #------------------------------------------------------------------------------
+# $File: mercurial,v 1.4 2009/09/19 16:28:10 christos Exp $
 # mercurial:  file(1) magic for Mercurial changeset bundles
 # http://www.selenic.com/mercurial/wiki/
 #
@@ -9790,7 +10535,9 @@
 >4	string		UN		(uncompressed)
 >4	string		GZ		(gzip compressed)
 >4	string		BZ		(bzip2 compressed)
+
 #------------------------------------------------------------------------------
+# $File: mime,v 1.5 2009/09/19 16:28:10 christos Exp $
 # mime:  file(1) magic for MIME encoded files
 #
 0	string		Content-Type:\ 
@@ -9799,6 +10546,7 @@
 >13	string		>\0		%s
 
 #------------------------------------------------------------------------------
+# $File: mips,v 1.5 2009/09/19 16:28:10 christos Exp $
 # mips:  file(1) magic for Silicon Graphics (MIPS, IRIS, IRIX, etc.)
 #                         Dec Ultrix (MIPS)
 # all of SGI's *current* machines and OSes run in big-endian mode on the
@@ -9976,12 +10724,15 @@
 4	belong	0x00000010		GLS_BINARY_MSB_FIRST
 
 #------------------------------------------------------------------------------
+# $File: mirage,v 1.7 2009/09/19 16:28:10 christos Exp $
 # mirage:  file(1) magic for Mirage executables
 #
 # XXX - byte order?
 #
 0	long	31415		Mirage Assembler m.out executable
+
 #-----------------------------------------------------------------------------
+# $File: misctools,v 1.10 2009/09/19 16:28:10 christos Exp $
 # misctools:  file(1) magic for miscellaneous UNIX tools.
 #
 0	search/1	%%!!			X-Post-It-Note text
@@ -9993,6 +10744,12 @@
 4	string	gtktalog		GNOME Catalogue (gtktalog)
 >13	string	>\0			version %s
 
+# Summary: GStreamer binary registry
+# Extension: .bin
+# Submitted by: Josh Triplett <josh@joshtriplett.org>
+0	belong	0xc0def00d		GStreamer binary registry
+>4	string	x			\b, version %s
+
 # Summary: Libtool library file
 # Extension: .la
 # Submitted by: Tomasz Trojanowski <tomek@uninet.com.pl>
@@ -10003,7 +10760,11 @@
 # Submitted by: Abel Cheung <abelcheung@gmail.com>
 0	search/80	.lo\ -\ a\ libtool\ object\ file	libtool object file
 
+# From: Daniel Novotny <dnovotny@redhat.com>
+0	string		MDMP\x93\xA7				MDMP crash report data
+
 #------------------------------------------------------------------------------
+# $File: mkid,v 1.6 2009/09/19 16:28:10 christos Exp $
 # mkid:  file(1) magic for mkid(1) databases
 #
 # ID is the binary tags database produced by mkid(1).
@@ -10014,6 +10775,7 @@
 >2	short		>0		version %d
 
 #------------------------------------------------------------------------------
+# $File: mlssa,v 1.4 2009/09/19 16:28:10 christos Exp $
 # mlssa: file(1) magic for MLSSA datafiles
 #
 0		lelong		0xffffabcd	MLSSA datafile,
@@ -10021,10 +10783,13 @@
 >10		lelong		x		%d samples
 
 #------------------------------------------------------------------------------
+# $File: mmdf,v 1.6 2009/09/19 16:28:10 christos Exp $
 # mmdf:  file(1) magic for MMDF mail files
 #
 0	string	\001\001\001\001	MMDF mailbox
+
 #------------------------------------------------------------------------------
+# $File: modem,v 1.4 2009/09/19 16:28:10 christos Exp $
 # modem:  file(1) magic for modem programs
 #
 # From: Florian La Roche <florian@knorke.saar.de>
@@ -10059,6 +10824,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: motorola,v 1.10 2009/09/19 16:28:11 christos Exp $
 # motorola:  file(1) magic for Motorola 68K and 88K binaries
 #
 # 68K
@@ -10129,6 +10895,7 @@
 >8      beshort         x               (version %04lx)
 
 #------------------------------------------------------------------------------
+# $File: mozilla,v 1.4 2009/09/19 16:28:11 christos Exp $
 # mozilla:  file(1) magic for Mozilla XUL fastload files 
 # (XUL.mfasl and XPC.mfasl)
 # URL:	http://www.mozilla.org/
@@ -10137,19 +10904,20 @@
 0	string	XPCOM\nMozFASL\r\n\x1A		Mozilla XUL fastload data
 
 #------------------------------------------------------------------------------
+# $File: msdos,v 1.65 2009/09/19 16:28:11 christos Exp $
 # msdos:  file(1) magic for MS-DOS files
 #
 
 # .BAT files (Daniel Quinlan, quinlan@yggdrasil.com)
-# updated by Joerg Jenderek
+# updated by Joerg Jenderek at Oct 2008
 0	string	@			
->1	string/cB	\ echo\ off	MS-DOS batch file text
+>1	string/cW	\ echo\ off	DOS batch file text
 !:mime	text/x-msdos-batch
->1	string/cB	echo\ off	MS-DOS batch file text
+>1	string/cW	echo\ off	DOS batch file text
 !:mime	text/x-msdos-batch
->1	string/cB	rem\ 		MS-DOS batch file text
+>1	string/cW	rem\ 		DOS batch file text
 !:mime	text/x-msdos-batch
->1	string/cB	set\ 		MS-DOS batch file text
+>1	string/cW	set\ 		DOS batch file text
 !:mime	text/x-msdos-batch
 
 
@@ -10425,8 +11193,9 @@
 # Uncommenting only the first two lines will cover about 2/3 of COM files,
 # but it isn't feasible to match all COM files since there must be at least
 # two dozen different one-byte "magics".
-#0	byte		0xe9		DOS executable (COM)
-#>0x1FE leshort		0xAA55		\b, boot code
+# test too generic ?
+0	byte		0xe9		DOS executable (COM)
+>0x1FE leshort		0xAA55		\b, boot code
 >6	string		SFX\ of\ LHarc	(%s)
 0	belong	0xffffffff		DOS executable (device driver)
 #CMD640X2.SYS
@@ -10449,25 +11218,38 @@
 >>77	string	>\x40			
 >>>77	string	<\x5B			
 >>>>77	string	x			\b, name: %.8s
-#0	byte		0x8c		DOS executable (COM)
-# 0xeb conflicts with "sequent" magic
-#0	byte		0xeb		DOS executable (COM)
-#>0x1FE leshort		0xAA55		\b, boot code
-#>85	string		UPX		\b, UPX compressed
-#>4	string		\ $ARX		\b, ARX self-extracting archive
-#>4	string		\ $LHarc	\b, LHarc self-extracting archive
-#>0x20e string		SFX\ by\ LARC	\b, LARC self-extracting archive
+# test too generic ?
+0	byte		0x8c		DOS executable (COM)
+# updated by Joerg Jenderek at Oct 2008
+0	ulelong		0xffff10eb	DR-DOS executable (COM)
+# byte 0xeb conflicts with "sequent" magic leshort 0xn2eb
+0	ubeshort&0xeb8d	>0xeb00		
+# DR-DOS STACKER.COM SCREATE.SYS missed
+>0	byte		0xeb		DOS executable (COM)
+>>0x1FE leshort		0xAA55		\b, boot code
+>>85	string		UPX		\b, UPX compressed
+>>4	string		\ $ARX		\b, ARX self-extracting archive
+>>4	string		\ $LHarc	\b, LHarc self-extracting archive
+>>0x20e string		SFX\ by\ LARC	\b, LARC self-extracting archive
+# updated by Joerg Jenderek at Oct 2008
 #0	byte		0xb8		COM executable
+0	uleshort&0x80ff	0x00b8		
 # modified by Joerg Jenderek
->1	lelong		!0x21cd4cff	for DOS
+>1	lelong		!0x21cd4cff	COM executable for DOS
 # http://syslinux.zytor.com/comboot.php
 # (32-bit COMBOOT) programs *.C32 contain 32-bit code and run in flat-memory 32-bit protected mode
 # start with assembler instructions mov eax,21cd4cffh
->1	lelong		0x21cd4cff	(32-bit COMBOOT)
+0	uleshort&0xc0ff	0xc0b8		
+>1	lelong		0x21cd4cff	COM executable (32-bit COMBOOT)
 0	string	\x81\xfc		
 >4	string	\x77\x02\xcd\x20\xb9	
 >>36	string	UPX!			FREE-DOS executable (COM), UPX compressed
 252	string Must\ have\ DOS\ version DR-DOS executable (COM)
+# added by Joerg Jenderek at Oct 2008
+# GRR search is not working
+#34	search/2	UPX!		FREE-DOS executable (COM), UPX compressed
+34	string	UPX!			FREE-DOS executable (COM), UPX compressed
+35	string	UPX!			FREE-DOS executable (COM), UPX compressed
 # GRR search is not working
 #2	search/28	\xcd\x21	COM executable for MS-DOS
 #WHICHFAT.cOM
@@ -10711,6 +11493,7 @@
 # From Stuart Caie <kyzer@4u.net> (developer of cabextract)
 # Microsoft Cabinet files
 0	string		MSCF\0\0\0\0	Microsoft Cabinet archive data
+!:mime application/vnd.ms-cab-compressed
 >8	lelong		x		\b, %u bytes
 >28	leshort		1		\b, 1 file
 >28	leshort		>1		\b, %u files
@@ -10760,43 +11543,58 @@
 #--------------------------------------------------------------------
 # Qemu Emulator Images
 # Lines written by Friedrich Schwittay (f.schwittay@yousable.de)
-# Made by reading sources and doing trial and error on existing
-# qcow files
-0	string	QFI	Qemu Image, Format: Qcow
+# Updated by Adam Buchbinder (adam.buchbinder@gmail.com)
+# Made by reading sources, reading documentation, and doing trial and error
+# on existing QCOW files
+0	string	QFI\xFB	QEMU QCOW Image
 
 # Uncomment the following line to display Magic (only used for debugging
 # this magic number)
 #>0	string	x	, Magic: %s
 
-# There are currently 2 Versions: "1" and "2"
-# I do not use Version 2 and therefor branch here
-# but can assure: it works (tested on both versions)
-# Also my Qemu 0.9.0 which uses this Version 2 refuses
-# to start in its bios
->0x04	belong	2	, Version: 2
->0x04	belong	1	, Version: 1
+# There are currently 2 Versions: "1" and "2".
+# http://www.gnome.org/~markmc/qcow-image-format-version-1.html
+>4	belong	1	(v1)
 
-# Using the existence of the Backing File Offset to Branch or not
+# Using the existence of the Backing File Offset to determine whether
 # to read Backing File Information
->>0xc	 belong	 >0	 , Backing File( Offset: %lu
->>>(0xc.L)	 string >\0	, Path: %s
-
-# Didn't get the trick here how qemu stores the "Size" at this Position
-# There is actually something stored but nothing makes sense
-# The header in the sources talks about it
-#>>>16	 lelong	 x	 , Size: %lu
+>>12	belong	 >0	 \b, has backing file (
+# Note that this isn't a null-terminated string; the length is actually
+# (16.L). Assuming a null-terminated string happens to work usually, but it
+# may spew junk until it reaches a \0 in some cases.
+>>>(12.L)	 string >\0	\bpath %s
 
 # Modification time of the Backing File
 # Really useful if you want to know if your backing
 # file is still usable together with this image
->>>20	 bedate x	, Mtime: %s )
+>>>>20	bedate >0	\b, mtime %s)
+>>>>20	default x	\b)
 
-# Don't know how to calculate in Magicfiles
-# Also: this Information is not reliably
-#	stored in image-files
->>24	 lelong	 x	 , Disk Size could be: %d * 256 bytes
+# Size is stored in bytes in a big-endian u64.
+>>24	bequad	x	 \b, %lld bytes
 
-0	string	QEVM		QEMU's suspend to disk image
+# 1 for AES encryption, 0 for none.
+>>36	belong	1	\b, AES-encrypted
+
+# http://www.gnome.org/~markmc/qcow-image-format.html
+>4	belong	2	(v2)
+# Using the existence of the Backing File Offset to determine whether
+# to read Backing File Information
+>>8	bequad  >0	 \b, has backing file
+# Note that this isn't a null-terminated string; the length is actually
+# (16.L). Assuming a null-terminated string happens to work usually, but it
+# may spew junk until it reaches a \0 in some cases. Also, since there's no
+# .Q modifier, we just use the bottom four bytes as an offset. Note that if
+# the file is over 4G, and the backing file path is stored after the first 4G,
+# the wrong filename will be printed. (This should be (8.Q), when that syntax
+# is introduced.)
+>>>(12.L)	 string >\0	(path %s)
+>>24	bequad	x	\b, %lld bytes
+>>32	belong	1	\b, AES-encrypted
+
+>4	default x	(unknown version)
+
+0	string	QEVM		QEMU suspend to disk image
 
 0	string	Bochs\ Virtual\ HD\ Image	Bochs disk image,
 >32	string	x				type %s,
@@ -10847,6 +11645,7 @@
 !:mime					application/x-ms-reader
 
 #------------------------------------------------------------------------------
+# $File: msvc,v 1.5 2009/09/19 16:28:11 christos Exp $
 # msvc:  file(1) magic for msvc
 # "H. Nanosecond" <aldomel@ix.netcom.com>
 # Microsoft visual C
@@ -10889,7 +11688,9 @@
 #.wsp
 0	string	1.00\ .0000.0000\000\003	MSVC .wsp version 1.0000.0000
 # these seem to start with the version and contain menus
+
 # ------------------------------------------------------------------------
+# $File: mup,v 1.4 2009/09/19 16:28:11 christos Exp $
 # mup: file(1) magic for Mup (Music Publisher) input file.
 #
 # From: Abel Cheung <abel (@) oaka.org>
@@ -10913,6 +11714,7 @@
 >>>7		string		x		\b, need V%.3s
 
 #-----------------------------------------------------------------------------
+# $File: natinst,v 1.4 2009/09/19 16:28:11 christos Exp $
 # natinst:  file(1) magic for National Instruments Code Files
 
 #
@@ -10936,6 +11738,7 @@
 0       string          VMAP            National Instruments, VXI File, data
 
 #------------------------------------------------------------------------------
+# $File: ncr,v 1.7 2009/09/19 16:28:11 christos Exp $
 # ncr:  file(1) magic for NCR Tower objects
 #
 # contributed by
@@ -10984,6 +11787,7 @@
 >22	   beshort		>0	- version %ld
 
 #------------------------------------------------------------------------------
+# $File: netbsd,v 1.18 2009/09/19 16:28:11 christos Exp $
 # netbsd:  file(1) magic for NetBSD objects
 #
 # All new-style magic numbers are in network byte order.
@@ -11230,6 +12034,7 @@
 >32	lelong			!0		(signal %d)
 
 #------------------------------------------------------------------------------
+# $File: netscape,v 1.6 2009/09/19 16:28:11 christos Exp $
 # netscape:  file(1) magic for Netscape files
 # "H. Nanosecond" <aldomel@ix.netcom.com>
 # version 3 and 4 I think
@@ -11254,12 +12059,14 @@
 0       string          JG\004\016\0\0\0\0      ART
 
 #------------------------------------------------------------------------------
+# $File: netware,v 1.4 2009/09/19 16:28:11 christos Exp $
 # netware:  file(1) magic for NetWare Loadable Modules (NLMs)
 # From: Mads Martin Joergensen <mmj@suse.de>
 
 0	string	NetWare\ Loadable\ Module	NetWare Loadable Module
 
 #------------------------------------------------------------------------------
+# $File: news,v 1.6 2009/09/19 16:28:11 christos Exp $
 # news:  file(1) magic for SunOS NeWS fonts (not "news" as in "netnews")
 #
 0	string		StartFontMetrics	ASCII font metrics
@@ -11270,7 +12077,9 @@
 0	belong		0x137A2951	encrypted scalable OpenFont binary
 8	belong		0x137A2B45	X11/NeWS bitmap font
 8	belong		0x137A2B48	X11/NeWS font family
+
 #------------------------------------------------------------------------------
+# $File: nitpicker,v 1.4 2009/09/19 16:28:11 christos Exp $
 # nitpicker:  file(1) magic for Flowfiles.
 # From: Christian Jachmann <C.Jachmann@gmx.net> http://www.nitpicker.de
 0	string	NPFF	NItpicker Flow File 
@@ -11284,6 +12093,7 @@
 >26	belong	x	Pkts: %u
 
 #------------------------------------------------------------------------------
+# $File: ocaml,v 1.4 2009/09/19 16:28:11 christos Exp $
 # ocaml: file(1) magic for Objective Caml files.
 0	string	Caml1999	OCaml
 >8	string	X		exec file
@@ -11295,12 +12105,15 @@
 >8	string	M		abstract syntax tree implementation file
 >8	string	N		abstract syntax tree interface file
 >9	string	>\0		(Version %3.3s)
+
 #------------------------------------------------------------------------------
+# $File: octave,v 1.4 2009/09/19 16:28:11 christos Exp $
 # octave binary data file(1) magic, from Dirk Eddelbuettel <edd@debian.org>
 0	string		Octave-1-L	Octave binary data (little endian)
 0	string		Octave-1-B	Octave binary data (big endian)
 
 #------------------------------------------------------------------------------
+# $File: ole2compounddocs,v 1.4 2009/09/19 16:28:11 christos Exp $
 # Microsoft OLE 2 Compound Documents : file(1) magic for Microsoft Structured
 # storage (http://en.wikipedia.org/wiki/Structured_Storage)
 # Additional tests for OLE 2 Compound Documents should be under this recipe.
@@ -11314,6 +12127,7 @@
 > 0x480  string  V\000i\000s\000i\000o\000D\000o\000c : Visio Document
 
 #------------------------------------------------------------------------------
+# $File: olf,v 1.4 2009/09/19 16:28:11 christos Exp $
 # olf:  file(1) magic for OLF executables
 #
 # We have to check the byte order flag to see what byte order all the
@@ -11409,7 +12223,9 @@
 >>20	belong		0		invalid version
 >>20	belong		1		version 1
 >>36	belong		1		MathCoPro/FPU/MAU Required
+
 #------------------------------------------------------------------------------
+# $File: os2,v 1.7 2009/09/19 16:28:11 christos Exp $
 # os2:  file(1) magic for OS/2 files
 #
 
@@ -11455,7 +12271,9 @@
 
 # OS/2 INI (this is a guess)
 0  string   \xff\xff\xff\xff\x14\0\0\0  OS/2 INI
+
 #------------------------------------------------------------------------------
+# $File: os400,v 1.5 2009/09/19 16:28:11 christos Exp $
 # os400:  file(1) magic for IBM OS/400 files
 #
 # IBM OS/400 (i5/OS) Save file (SAVF) - gerardo.cacciari@gmail.com
@@ -11492,6 +12310,9 @@
 >&213	 byte		0x34			 \b, at least V3R1 to open
 >&213	 byte		0x31			 \b, at least V3R0M5 to open
 >&213	 byte		0x30			 \b, at least V2R3 to open
+
+#------------------------------------------------------------------------------
+# $File: os9,v 1.6 2009/09/19 16:28:11 christos Exp $
 #
 # Copyright (c) 1996 Ignatios Souvatzis. All rights reserved.
 #
@@ -11576,6 +12397,9 @@
 >0x12	byte		13	file manager
 >0x12	byte		14	device driver
 >0x12	byte		15	device descriptor
+
+#------------------------------------------------------------------------------
+# $File: osf1,v 1.7 2009/09/19 16:28:11 christos Exp $
 #
 # Mach magic number info
 #
@@ -11585,6 +12409,7 @@
 0	short		0565	i386 COFF object
 
 #------------------------------------------------------------------------------
+# $File: palm,v 1.7 2009/09/19 16:28:11 christos Exp $
 # palm:  file(1) magic for PalmOS {.prc,.pdb}: applications, docfiles, and hacks
 #
 # Brian Lalor <blalor@hcirisc.cs.binghamton.edu>
@@ -11676,6 +12501,7 @@
 >0	string                  >\0             "%s"
 
 #------------------------------------------------------------------------------
+# $File: parix,v 1.4 2009/09/19 16:28:11 christos Exp $
 #
 # Parix COFF executables
 # From: Ignatios Souvatzis <ignatios@cs.uni-bonn.de>
@@ -11688,12 +12514,15 @@
 >19	byte&0x0c	0x00	not stripped
 
 #------------------------------------------------------------------------------
+# $File: pbm,v 1.6 2009/09/19 16:28:11 christos Exp $
 # pbm:  file(1) magic for Portable Bitmap files
 #
 # XXX - byte order?
 #
 0	short	0x2a17	"compact bitmap" format (Poskanzer)
+
 #------------------------------------------------------------------------------
+# $File: pdf,v 1.6 2009/09/19 16:28:11 christos Exp $
 # pdf:  file(1) magic for Portable Document Format
 #
 
@@ -11709,6 +12538,7 @@
 >7      byte            x               \b.%c
 
 #------------------------------------------------------------------------------
+# $File: pdp,v 1.8 2009/09/19 16:28:11 christos Exp $
 # pdp:  file(1) magic for PDP-11 executable/object and APL workspace
 #
 0	lelong		0101555		PDP-11 single precision APL workspace
@@ -11742,21 +12572,23 @@
 
 0	leshort		0431		PDP-11 overlaid separate executable
 >8	leshort		>0		not stripped
+
 #------------------------------------------------------------------------------
+# $File: perl,v 1.16 2009/09/19 16:28:11 christos Exp $
 # perl:  file(1) magic for Larry Wall's perl language.
 #
 # The `eval' lines recognizes an outrageously clever hack.
 # Keith Waclena <keith@cerberus.uchicago.edu>
 # Send additions to <perl5-porters@perl.org>
-0	search/1/b	#!\ /bin/perl			Perl script text executable
+0	search/1/w	#!\ /bin/perl			Perl script text executable
 !:mime	text/x-perl
 0	search/1	eval\ "exec\ /bin/perl		Perl script text
 !:mime	text/x-perl
-0	search/1/b	#!\ /usr/bin/perl		Perl script text executable
+0	search/1/w	#!\ /usr/bin/perl		Perl script text executable
 !:mime	text/x-perl
 0	search/1	eval\ "exec\ /usr/bin/perl	Perl script text
 !:mime	text/x-perl
-0	search/1/b	#!\ /usr/local/bin/perl		Perl script text executable
+0	search/1/w	#!\ /usr/local/bin/perl		Perl script text executable
 !:mime	text/x-perl
 0	search/1	eval\ "exec\ /usr/local/bin/perl	Perl script text
 !:mime	text/x-perl
@@ -11767,7 +12599,6 @@
 # by Dmitry V. Levin and Alexey Tourbin
 # check the first line
 0	search/1	package
-0	regex		\^package[\ \t]+[A-Za-z_]
 >0	regex		\^package[\ \t]+[0-9A-Za-z_:]+\ *;	Perl5 module source text
 # not 'p', check other lines
 0	search/1	!p
@@ -11778,12 +12609,12 @@
 
 # Perl POD documents
 # From: Tom Hukins <tom@eborcom.com>
-0	search/1/B	\=pod\n		Perl POD document text
-0	search/1/B	\n\=pod\n	Perl POD document text
-0	search/1/B	\=head1\ 	Perl POD document text
-0	search/1/B	\n\=head1\ 	Perl POD document text
-0	search/1/B	\=head2\ 	Perl POD document text
-0	search/1/B	\n\=head2\ 	Perl POD document text
+0	search/1/W	\=pod\n		Perl POD document text
+0	search/1/W	\n\=pod\n	Perl POD document text
+0	search/1/W	\=head1\ 	Perl POD document text
+0	search/1/W	\n\=head1\ 	Perl POD document text
+0	search/1/W	\=head2\ 	Perl POD document text
+0	search/1/W	\n\=head2\ 	Perl POD document text
 
 # Perl Storable data files.
 0	string	perl-store	perl Storable (v0.6) data
@@ -11800,6 +12631,7 @@
 >>5	byte	>0	(minor %d)
 
 #------------------------------------------------------------------------------
+# $File: pgp,v 1.9 2009/09/19 16:28:11 christos Exp $
 # pgp:  file(1) magic for Pretty Good Privacy
 # see http://lists.gnupg.org/pipermail/gnupg-devel/1999-September/016052.html
 #
@@ -11826,12 +12658,14 @@
 !:mime	application/pgp-signature
 
 #------------------------------------------------------------------------------
+# $File: pkgadd,v 1.6 2009/09/19 16:28:11 christos Exp $
 # pkgadd:  file(1) magic for SysV R4 PKG Datastreams
 #
 0       string          #\ PaCkAgE\ DaTaStReAm  pkg Datastream (SVR4)
 !:mime	application/x-svr4-package
 
 #------------------------------------------------------------------------------
+# $File: plan9,v 1.5 2009/09/19 16:28:11 christos Exp $
 # plan9:  file(1) magic for AT&T Bell Labs' Plan 9 executables
 # From: "Stefan A. Haubenthal" <polluks@web.de>
 #
@@ -11849,6 +12683,7 @@
 0	belong		0x0000084B	Plan 9 executable, DEC Alpha
 
 #------------------------------------------------------------------------------
+# $File: plus5,v 1.6 2009/09/19 16:28:11 christos Exp $
 # plus5:  file(1) magic for Plus Five's UNIX MUMPS
 #
 # XXX - byte order?  Paging Hokey....
@@ -11866,12 +12701,14 @@
 >15	byte		>0x02		- Bad Flags
 
 #------------------------------------------------------------------------------
+# $File: printer,v 1.22 2009/09/19 16:28:11 christos Exp $
 # printer:  file(1) magic for printer-formatted files
 #
 
 # PostScript, updated by Daniel Quinlan (quinlan@yggdrasil.com)
 0	string		%!		PostScript document text
 !:mime	application/postscript
+!:apple	ASPSTEXT
 >2	string		PS-Adobe-	conforming
 >>11	string		>\0		DSC level %.3s
 >>>15	string		EPS		\b, type %s
@@ -11882,6 +12719,7 @@
 # Some PCs have the annoying habit of adding a ^D as a document separator
 0	string		\004%!		PostScript document text
 !:mime	application/postscript
+!:apple	ASPSTEXT
 >3	string		PS-Adobe-	conforming
 >>12	string		>\0		DSC level %.3s
 >>>16	string		EPS		\b, type %s
@@ -11993,6 +12831,7 @@
 0	string	\x1b\x01@EJL	Epson ESC/Page language printer data
 
 #------------------------------------------------------------------------------
+# $File: project,v 1.4 2009/09/19 16:28:11 christos Exp $
 # project:  file(1) magic for Project management
 # 
 # Magic strings for ftnchek project files. Alexander Mai
@@ -12002,56 +12841,15 @@
 >10	string	3		version 2.11 or later
 
 #------------------------------------------------------------------------------
+# $File: psdbms,v 1.6 2009/09/19 16:28:11 christos Exp $
 # psdbms:  file(1) magic for psdatabase
 #
 0	belong&0xff00ffff	0x56000000	ps database
 >1	string	>\0	version %s
 >4	string	>\0	from kernel %s
-#------------------------------------------------------------------------------
-# psion:  file(1) magic for Psion handhelds data
-# from: Peter Breitenlohner <peb@mppmu.mpg.de>
-#
-0	lelong		0x10000037	Psion Series 5
->4	lelong		0x10000039	font file
->4	lelong		0x1000003A	printer driver
->4	lelong		0x1000003B	clipboard
->4	lelong		0x10000042	multi-bitmap image
->4	lelong		0x1000006A	application information file
->4	lelong		0x1000006D
->>8	lelong		0x1000007D	sketch image
-!:mime image/x-psion-sketch
->>8	lelong		0x1000007E	voice note
->>8	lelong		0x1000007F	word file
->>8	lelong		0x10000085	OPL program
->>8	lelong		0x10000088	sheet file
->>8	lelong		0x100001C4	EasyFax initialisation file
->4	lelong		0x10000073	OPO module
->4	lelong		0x10000074	OPL application
->4	lelong		0x1000008A	exported multi-bitmap image
-
-0	lelong		0x10000041	Psion Series 5 ROM multi-bitmap image
-
-0	lelong		0x10000050	Psion Series 5
->4	lelong		0x1000006D	database
->4	lelong		0x100000E4	ini file
-
-0	lelong		0x10000079	Psion Series 5 binary:
->4	lelong		0x00000000	DLL
->4	lelong		0x10000049	comms hardware library
->4	lelong		0x1000004A	comms protocol library
->4	lelong		0x1000005D	OPX
->4	lelong		0x1000006C	application
->4	lelong		0x1000008D	DLL
->4	lelong		0x100000AC	logical device driver
->4	lelong		0x100000AD	physical device driver
->4	lelong		0x100000E5	file transfer protocol
->4	lelong		0x100000E5	file transfer protocol
->4	lelong		0x10000140	printer definition
->4	lelong		0x10000141	printer definition
-
-0	lelong		0x1000007A	Psion Series 5 executable
 
 #------------------------------------------------------------------------------
+# $File: pulsar,v 1.5 2009/09/19 16:28:12 christos Exp $
 # pulsar:  file(1) magic for Pulsar POP3 daemon binary files
 #
 # http://pulsar.sourceforge.net
@@ -12064,6 +12862,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: pyramid,v 1.7 2009/09/19 16:28:12 christos Exp $
 # pyramid:  file(1) magic for Pyramids
 #
 # XXX - byte order?
@@ -12075,12 +12874,14 @@
 >16	long		>0		not stripped
 
 #------------------------------------------------------------------------------
+# $File: python,v 1.12 2009/10/27 14:49:57 christos Exp $
 # python:  file(1) magic for python
 #
 # From: David Necas <yeti@physics.muni.cz>
 # often the module starts with a multiline string
 0	string		"""	a python script text executable
-# MAGIC as specified in Python/import.c (1.5 to 2.3.0a)
+# MAGIC as specified in Python/import.c (1.5 to 2.6a1 and 3.1a0, assuming
+# that Py_UnicodeFlag is off for Python 2)
 # 20121  ( YEAR - 1995 ) + MONTH  + DAY (little endian followed by "\r\n"
 0	belong		0x994e0d0a	python 1.5/1.6 byte-compiled
 0	belong		0x87c60d0a	python 2.0 byte-compiled
@@ -12089,11 +12890,21 @@
 0	belong		0x3bf20d0a	python 2.3 byte-compiled
 0	belong		0x6df20d0a	python 2.4 byte-compiled
 0	belong		0xb3f20d0a	python 2.5 byte-compiled
+0	belong		0xd1f20d0a	python 2.6 byte-compiled
+0	belong		0x3b0c0d0a	python 3.0 byte-compiled
+0	belong		0x4f0c0d0a	python 3.1 byte-compiled
 
-0	string/b  #!\ /usr/bin/python	python script text executable
-
+0	search/1/w	#!\ /usr/bin/python	Python script text executable
+!:mime text/x-python
+0	search/1/w	#!\ /usr/local/bin/python	Python script text executable
+!:mime text/x-python
+0	search/1	#!/usr/bin/env\ python	Python script text executable
+!:mime text/x-python
+0	search/1	#!\ /usr/bin/env\ ruby	Python script text executable
+!:mime text/x-python
 
 #------------------------------------------------------------------------------
+# $File: revision,v 1.6 2009/09/19 16:28:12 christos Exp $
 # file(1) magic for revision control files
 # From Hendrik Scholz <hendrik@scholz.net>
 0	string	/1\ :pserver:	cvs password text file
@@ -12105,6 +12916,27 @@
 # Type: Git bundles (git-bundle)
 # From: Josh Triplett <josh@freedesktop.org>
 0	string	#\ v2\ git\ bundle\n	Git bundle
+
+# Type: Git pack
+# From: Adam Buchbinder <adam.buchbinder@gmail.com>
+# The actual magic is 'PACK', but that clashes with Doom/Quake packs. However,
+# those have a little-endian offset immediately following the magic 'PACK',
+# the first byte of which is never 0, while the first byte of the Git pack
+# version, since it's a tiny number stored in big-endian format, is always 0.
+0	string	PACK\0		Git pack
+>4	belong	>0		\b, version %d
+>>8	belong	>0		\b, %d objects
+
+# Type: Git pack index
+# From: Adam Buchbinder <adam.buchbinder@gmail.com>
+0	string	\377tOc		Git pack index
+>4	belong	=2		\b, version 2
+
+# Type: Git index file
+# From: Frédéric Brière <fbriere@fbriere.net>
+0	string	DIRC		Git index
+>4	belong	>0		\b, version %d
+>>8	belong	>0		\b, %d entries
 
 # Type:	Mercurial bundles
 # From:	Seo Sanghyeon <tinuviel@sparcs.kaist.ac.kr>
@@ -12124,6 +12956,7 @@
 0	string	#\ Bazaar\ merge\ directive\ format Bazaar merge directive
 
 #------------------------------------------------------------------------------
+# $File: riff,v 1.18 2009/09/19 16:28:12 christos Exp $
 # riff:  file(1) magic for RIFF format
 # See
 #
@@ -12163,12 +12996,14 @@
 >>20	leshort		2		\b, Microsoft ADPCM
 >>20	leshort		6		\b, ITU G.711 A-law
 >>20	leshort		7		\b, ITU G.711 mu-law
+>>20	leshort		8		\b, Microsoft DTS
 >>20	leshort		17		\b, IMA ADPCM
 >>20	leshort		20		\b, ITU G.723 ADPCM (Yamaha)
 >>20	leshort		49		\b, GSM 6.10
 >>20	leshort		64		\b, ITU G.721 ADPCM
 >>20	leshort		80		\b, MPEG
 >>20	leshort		85		\b, MPEG Layer 3
+>>20	leshort		0x2001		\b, DTS
 >>22	leshort		=1		\b, mono
 >>22	leshort		=2		\b, stereo
 >>22	leshort		>2		\b, %d channels
@@ -12347,7 +13182,9 @@
 >8	string		NIFF		\b, Notation Interchange File Format
 # SoundFont 2 <mpruett@sgi.com>
 >8	string		sfbk		SoundFont/Bank
+
 #------------------------------------------------------------------------------
+# $File: rpm,v 1.9 2009/11/06 13:53:52 christos Exp $
 #
 # RPM: file(1) magic for Red Hat Packages   Erik Troan (ewt@redhat.com)
 #
@@ -12355,23 +13192,43 @@
 >2	beshort		0xeedb		RPM
 !:mime	application/x-rpm
 >>4	byte		x		v%d
->>6	beshort		0		bin
+>>5	byte		x		\b.%d
 >>6	beshort		1		src
->>8	beshort		1		i386
->>8	beshort		2		Alpha
->>8	beshort		3		Sparc
->>8	beshort		4		MIPS
->>8	beshort		5		PowerPC
->>8	beshort		6		68000
->>8	beshort		7		SGI
->>8	beshort		8		RS6000
->>8	beshort		9		IA64
->>8	beshort		10		Sparc64
->>8	beshort		11		MIPSel
->>8	beshort		12		ARM
+>>6	beshort		0		bin
+>>>8	beshort		1		i386/x86_64
+>>>8	beshort		2		Alpha/Sparc64
+>>>8	beshort		3		Sparc
+>>>8	beshort		4		MIPS
+>>>8	beshort		5		PowerPC
+>>>8	beshort		6		68000
+>>>8	beshort		7		SGI
+>>>8	beshort		8		RS6000
+>>>8	beshort		9		IA64
+>>>8	beshort		10		Sparc64
+
+#delta RPM    Daniel Novotny (dnovotny@redhat.com)
+0	string	drpm	Delta RPM
+!:mime  application/x-rpm
+>12	string 	x	%s
+
+>>>8	beshort		11		MIPSel
+>>>8	beshort		12		ARM
+>>>8	beshort		13		MiNT
+>>>8	beshort		14		S/390
+>>>8	beshort		15		S/390x
+>>>8	beshort		16		PowerPC64
+>>>8	beshort		17		SuperH
+>>>8	beshort		18		Xtensa
 >>10	string		x		%s
 
+# Type:	Delta RPM
+# From:	Daniel Novotny (dnovotny@redhat.com)
+0	string		drpm		Delta RPM
+!:mime application/x-rpm
+>12	string		x		%s
+
 #------------------------------------------------------------------------------
+# $File: rtf,v 1.7 2009/09/19 16:28:12 christos Exp $
 # rtf:	file(1) magic for Rich Text Format (RTF)
 #
 # Duncan P. Simpson, D.P.Simpson@dcs.warwick.ac.uk
@@ -12385,24 +13242,32 @@
 >>6	string		\\pca		IBM PS/2, code page 850
 >>6	default		x		unknown character set
 >5	default		x		unknown version
+
 #------------------------------------------------------------------------------
-# ruby:  file(1) magic for Lua scripting language
+# $File: ruby,v 1.3 2009/09/19 16:28:12 christos Exp $
+# ruby:  file(1) magic for Ruby scripting language
 # URL:  http://www.ruby-lang.org/
 # From: Reuben Thomas <rrt@sc3d.org>
 
 # Ruby scripts
-0	search/1/b	#!\ /usr/bin/ruby	Ruby script text executable
-0	search/1/b	#!\ /usr/local/bin/ruby	Ruby script text executable
+0	search/1/w	#!\ /usr/bin/ruby	Ruby script text executable
+!:mime text/x-ruby
+0	search/1/w	#!\ /usr/local/bin/ruby	Ruby script text executable
+!:mime text/x-ruby
 0	search/1	#!/usr/bin/env\ ruby	Ruby script text executable
+!:mime text/x-ruby
 0	search/1	#!\ /usr/bin/env\ ruby	Ruby script text executable
+!:mime text/x-ruby
 
 #------------------------------------------------------------------------------
+# $File: sc,v 1.6 2009/09/19 16:28:12 christos Exp $
 # sc:  file(1) magic for "sc" spreadsheet
 #
 38	string		Spreadsheet	sc spreadsheet file
 !:mime	application/x-sc
 
 #------------------------------------------------------------------------------
+# $File: sccs,v 1.6 2009/09/19 16:28:12 christos Exp $
 # sccs:  file(1) magic for SCCS archives
 #
 # SCCS archive structure:
@@ -12422,7 +13287,9 @@
 # and we don't have regular expression matching yet. 
 # Hence the following official kludge:
 8	string		\001s\ 			SCCS archive data
+
 #------------------------------------------------------------------------------
+# $File: scientific,v 1.6 2009/09/19 16:28:12 christos Exp $
 # scientific:  file(1) magic for scientific formats 
 #
 # From: Joe Krahn <krahn@niehs.nih.gov>
@@ -12493,6 +13360,42 @@
 0	string	\060\000\040\000\110\000\105\000\101\000\104\000		GEDCOM data
 0	string	\376\377\000\060\000\040\000\110\000\105\000\101\000\104	GEDCOM data
 0	string	\377\376\060\000\040\000\110\000\105\000\101\000\104\000	GEDCOM data
+
+# PDB: Protein Data Bank files
+# Adam Buchbinder <adam.buchbinder@gmail.com>
+#
+# http://www.wwpdb.org/documentation/format32/sect2.html
+# http://www.ch.ic.ac.uk/chemime/
+#
+# The PDB file format is fixed-field, 80 columns. From the spec:
+#
+# COLS        DATA
+#  1 -  6      "HEADER"
+#  11 - 50     String(40)
+#  51 - 59     Date
+#  63 - 66     IDcode
+#
+# Thus, positions 7-10, 60-62 and 67-80 are spaces. The Date must be in the
+# format DD-MMM-YY, e.g., 01-JAN-70, and the IDcode consists of numbers and
+# uppercase letters. However, examples have been seen without the date string,
+# e.g., the example on the chemime site.
+0	string	HEADER\ \ \ \ 
+>&0	regex/1	\^.{40}
+>>&0	regex/1	[0-9]{2}-[A-Z]{3}-[0-9]{2}\ {3}
+>>>&0	regex/1s	[A-Z0-9]{4}.{14}$
+>>>>&0	regex/1	[A-Z0-9]{4}	Protein Data Bank data, ID Code %s
+!:mime	chemical/x-pdb
+>>>>0	regex/1	[0-9]{2}-[A-Z]{3}-[0-9]{2}	\b, %s
+
+# Type:	GDSII Stream file
+0	belong	0x00060002	GDSII Stream file
+>4	byte	0x00
+>>5	byte	x		version %d.0
+>4	byte	>0x00		version %d
+>>5	byte	x		\b.%d
+
+#------------------------------------------------------------------------------
+# $File: securitycerts,v 1.4 2009/09/19 16:28:12 christos Exp $
 0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
 0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
 0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
@@ -12522,6 +13425,7 @@
 #0	search	gen_sens(	SE Linux policy MLS constraints source
 
 #------------------------------------------------------------------------------
+# $File: sendmail,v 1.7 2009/09/19 16:28:12 christos Exp $
 # sendmail:  file(1) magic for sendmail config files
 #
 # XXX - byte order?
@@ -12541,6 +13445,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: sequent,v 1.8 2009/09/19 16:28:12 christos Exp $
 # sequent:  file(1) magic for Sequent machines
 #
 # Sequent information updated by Don Dwiggins <atsun!dwiggins>.
@@ -12575,6 +13480,7 @@
 >124	lelong	>0		version %ld
 
 #------------------------------------------------------------------------------
+# $File: sgi,v 1.17 2009/09/19 16:28:12 christos Exp $
 # sgi:  file(1) magic for Silicon Graphics applications
 
 #
@@ -12644,38 +13550,61 @@
 8	string	CIMG		Alias Maya Image File
 8	string	DEEP		Alias Maya Image File
 #------------------------------------------------------------------------------
+# $File: sgml,v 1.24 2009/09/19 17:31:35 christos Exp $
 # Type:	SVG Vectorial Graphics
 # From:	Noel Torres <tecnico@ejerciciosresueltos.com>
 0	string		\<?xml\ version="
 >15	string		>\0
->>23	search/400	\<svg			SVG Scalable Vector Graphics image
+>>19	search/4096	\<svg			SVG Scalable Vector Graphics image
 !:mime	image/svg+xml
->>23	search/400	\<gnc-v2		GnuCash file
+>>19	search/4096	\<gnc-v2		GnuCash file
 !:mime	application/x-gnucash
 
 # Sitemap file
 0	string		\<?xml\ version="
 >15	string		>\0
->>23	search/400	\<urlset		XML Sitemap document text
+>>19	search/4096	\<urlset		XML Sitemap document text
 !:mime	application/xml-sitemap
+
+# xhtml
+0	string		\<?xml\ version="
+>15	string		>\0
+>>19	search/4096/cWbt	\<!doctype\ html	xHTML document text
+!:mime	text/html
+0	string		\<?xml\ version='
+>15	string		>\0
+>>19	search/4096/cWbt	\<!doctype\ html	xHTML document text
+!:mime	text/html
+0	string		\<?xml\ version="
+>15	string		>\0
+>>19	search/4096/cWbt	\<html	broken xHTML document text
+!:mime	text/html
 
 #------------------------------------------------------------------------------
 # sgml:  file(1) magic for Standard Generalized Markup Language
 # HyperText Markup Language (HTML) is an SGML document type,
 # from Daniel Quinlan (quinlan@yggdrasil.com)
 # adapted to string extenstions by Anthon van der Neut <anthon@mnt.org)
-0	search/1/cB	\<!doctype\ html	HTML document text
+0	search/4096/cWbt	\<!doctype\ html	HTML document text
 !:mime	text/html
-0	search/1/cb	\<head			HTML document text
+0	search/4096/cwbt	\<head			HTML document text
 !:mime	text/html
-0	search/1/cb	\<title			HTML document text
+0	search/4096/cwbt	\<title			HTML document text
 !:mime	text/html
-0	search/1/cb	\<html			HTML document text
+0	search/4096/cwbt	\<html			HTML document text
+!:mime	text/html
+0	search/4096/cwbt	\<script 		HTML document text
+!:mime	text/html
+0	search/4096/cwbt	\<style 		HTML document text
+!:mime	text/html
+0	search/4096/cwbt	\<table			HTML document text
+!:mime	text/html
+0	search/4096/cwbt	\<a\ href=		HTML document text
 !:mime	text/html
 
 # Extensible markup language (XML), a subset of SGML
 # from Marc Prud'hommeaux (marc@apocalypse.org)
-0	search/1/cb	\<?xml			XML document text
+0	search/1/cwbt	\<?xml			XML document text
 !:mime	application/xml
 0	string		\<?xml\ version\ "	XML
 !:mime	application/xml
@@ -12689,16 +13618,19 @@
 >15	search/1	>\0			%.3s document text
 >>23	search/1	\<xsl:stylesheet	(XSL stylesheet)
 >>24	search/1	\<xsl:stylesheet	(XSL stylesheet)
-0	search/1/b	\<?xml			XML document text
+0	search/1/wbt	\<?xml			XML document text
 !:mime	application/xml
-0	search/1/b	\<?XML			broken XML document text
+!:strength - 10
+0	search/1/wbt	\<?XML			broken XML document text
 !:mime	application/xml
+!:strength - 10
 
 
 # SGML, mostly from rph@sq
-0	search/1/cb	\<!doctype		exported SGML document text
-0	search/1/cb	\<!subdoc		exported SGML subdocument text
-0	search/1/cb	\<!--			exported SGML document text
+0	search/4096/cwbt	\<!doctype		exported SGML document text
+0	search/4096/cwbt	\<!subdoc		exported SGML subdocument text
+0	search/4096/cwbt	\<!--			exported SGML document text
+!:strength - 10
 
 # Web browser cookie files
 # (Mozilla, Galeon, Netscape 4, Konqueror..)
@@ -12708,6 +13640,7 @@
 0	search/1	#\ KDE\ Cookie\ File	Konqueror cookie text
 
 #------------------------------------------------------------------------
+# $File: sharc,v 1.6 2009/09/19 16:28:12 christos Exp $
 # file(1) magic for sharc files
 #
 # SHARC DSP, MIDI SysEx and RiscOS filetype definitions added by 
@@ -12730,6 +13663,7 @@
 >>12	lelong			>0		, not stripped
 
 #------------------------------------------------------------------------------
+# $File: sinclair,v 1.5 2009/09/19 16:28:12 christos Exp $
 # sinclair:  file(1) sinclair QL
 
 # additions to /etc/magic by Thomas M. Ott (ThMO)
@@ -12790,12 +13724,15 @@
 
 0	regex	\^%*[\ \t]*sisu-[0-9.]+		SiSU text
 >5	regex	[0-9.]+				%s
+
 #------------------------------------------------------------------------------
+# $File: sketch,v 1.4 2009/09/19 16:28:12 christos Exp $
 # Sketch Drawings: http://sketch.sourceforge.net/ 
 # From: Edwin Mons <e@ik.nu>
 0	search/1	##Sketch	Sketch document text
 
 #-----------------------------------------------
+# $File: smalltalk,v 1.5 2009/09/19 16:28:12 christos Exp $
 # GNU Smalltalk image, starting at version 1.6.2
 # From: catull_us@yahoo.com
 #
@@ -12820,6 +13757,7 @@
 
 
 #------------------------------------------------------------------------------
+# $File: sniffer,v 1.14 2009/09/19 16:28:12 christos Exp $
 # sniffer:  file(1) magic for packet capture files
 #
 # From: guy@alum.mit.edu (Guy Harris)
@@ -13115,7 +14053,9 @@
 # Files from Accellent Group's 5View products.
 #
 0	string		\xaa\xaa\xaa\xaa	5View capture file
+
 #------------------------------------------------------------------------------
+# $File: softquad,v 1.13 2009/09/19 16:28:12 christos Exp $
 # softquad:  file(1) magic for SoftQuad Publishing Software
 #
 # Author/Editor and RulesBuilder
@@ -13152,6 +14092,7 @@
 0	string		X\ ps		SoftQuad troff Context intermediate for PostScript
 
 #------------------------------------------------------------------------------
+# $File: spec,v 1.4 2009/09/19 16:28:12 christos Exp $
 # spec:  file(1) magic for SPEC raw results (*.raw, *.rsf)
 #
 # Cloyce D. Spradling <cloyce@headgear.org>
@@ -13172,6 +14113,7 @@
 >>16	string	<:			v%.4s raw result text
 
 #------------------------------------------------------------------------------
+# $File: spectrum,v 1.6 2009/09/19 16:28:12 christos Exp $
 # spectrum:  file(1) magic for Spectrum emulator files.
 #
 # John Elliott <jce@seasip.demon.co.uk>
@@ -13191,13 +14133,17 @@
 # Tape file. This assumes the .TAP starts with a Spectrum-format header,
 # which nearly all will.
 #
-0       string          \023\000\000    Spectrum .TAP data
->4      string          x               "%-10.10s"
->3      byte            0               - BASIC program
->3      byte            1               - number array
->3      byte            2               - character array
->3      byte            3               - memory block
->>14    belong          0x001B0040      (screen)
+# Update: Sanity-check string contents to be printable.
+#  -Adam Buchbinder <adam.buchbinder@gmail.com>
+#
+0       string          \023\000\000
+>4      string          >\0
+>>4     string          <\177           Spectrum .TAP data "%-10.10s"
+>>>3    byte            0               - BASIC program
+>>>3    byte            1               - number array
+>>>3    byte            2               - character array
+>>>3    byte            3               - memory block
+>>>>14  belong          0x001B0040      (screen)
 
 # The following three blocks are from pak21-spectrum@srcf.ucam.org
 # TZX tape images
@@ -13221,6 +14167,7 @@
 >7     byte            x               \b, version 0x%02x
 
 #------------------------------------------------------------------------------
+# $File: sql,v 1.6 2009/09/19 16:28:12 christos Exp $
 # sql:  file(1) magic for SQL files
 #
 # From: "Marty Leisner" <mleisner@eng.mc.xerox.com>
@@ -13264,8 +14211,24 @@
 >60 string  _MTN               Monotone source repository
 >60 belong  !0                 SQLite 3.x database, user version %u
 >60 belong  0                  SQLite 3.x database
+# Type:	OpenSSH key files
+# From:	Nicolas Collignon <tsointsoin@gmail.com>
+
+0	string	SSH\ PRIVATE\ KEY	OpenSSH RSA1 private key,
+>28	string	>\0			version %s
+
+0	string	ssh-dss\		OpenSSH DSA public key
+0	string	ssh-rsa\		OpenSSH RSA public key
+# Type: OpenSSL certificates/key files
+# From: Nicolas Collignon <tsointsoin@gmail.com>
+
+0	string	-----BEGIN\ CERTIFICATE-----	PEM certificate
+0	string	-----BEGIN\ CERTIFICATE\ REQ	PEM certificate request
+0	string	-----BEGIN\ RSA\ PRIVATE	PEM RSA private key
+0	string	-----BEGIN\ DSA\ PRIVATE	PEM DSA private key
 
 #------------------------------------------------------------------------------
+# $File: sun,v 1.20 2009/09/19 16:28:12 christos Exp $
 # sun:  file(1) magic for Sun machines
 #
 # Values for big-endian Sun (MC680x0, SPARC) binaries on pre-5.x
@@ -13395,7 +14358,9 @@
 0       string CRfs     COBALT boot rom data (Flat boot rom or file system)
 
 
+
 #------------------------------------------------------------------------
+# $File: sysex,v 1.6 2009/09/19 16:28:12 christos Exp $
 # sysex: file(1) magic for MIDI sysex files
 #
 # 
@@ -13711,12 +14676,15 @@
 >1	belong&0xffffff00	0x00204800	Noteheads AB
 
 0	string			T707		Roland TR-707 Data
+
 #------------------------------------------------------------------------------
+# $File: teapot,v 1.4 2009/09/19 16:28:12 christos Exp $
 # teapot:  file(1) magic for "teapot" spreadsheet
 #
 0       string          #!teapot\012xdr      teapot work sheet (XDR format)
 
 #------------------------------------------------------------------------------
+# $File: terminfo,v 1.6 2009/09/19 16:28:12 christos Exp $
 # terminfo:  file(1) magic for terminfo
 #
 # XXX - byte order for screen images?
@@ -13724,7 +14692,9 @@
 0	string		\032\001	Compiled terminfo entry
 0	short		0433		Curses screen image
 0	short		0434		Curses screen image
+
 #------------------------------------------------------------------------------
+# $File: tex,v 1.16 2009/09/19 16:28:12 christos Exp $
 # tex:  file(1) magic for TeX files
 #
 # XXX - needs byte-endian stuff (big-endian and little-endian DVI?)
@@ -13817,13 +14787,18 @@
 0	search/1	%\ BibTeX\ `	BibTeX custom bibliography style text file
 
 0	search/1	@c\ @mapfile{	TeX font aliases text file
+
+0	string		\#LyX		LyX document text
+
 #------------------------------------------------------------------------------
+# $File: tgif,v 1.5 2009/09/19 16:28:12 christos Exp $
 # file(1) magic for tgif(1) files
 # From Hendrik Scholz <hendrik@scholz.net>
+0	string	%TGIF\			Tgif file version
+>6	string	x			%s
 
-0	string	%TGIF\ x 		Tgif file version %s
-
-# ------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+# $File: ti-8x,v 1.6 2009/09/19 16:28:12 christos Exp $
 # ti-8x: file(1) magic for the TI-8x and TI-9x Graphing Calculators.
 #
 # From: Ryan McGuire (rmcguire@freenet.columbus.oh.us).
@@ -14062,19 +15037,39 @@
 >>10		byte		x		\b%c
 
 #------------------------------------------------------------------------------
+# $File: timezone,v 1.11 2009/09/19 16:28:12 christos Exp $
 # timezone:  file(1) magic for timezone data
 #
 # from Daniel Quinlan (quinlan@yggdrasil.com)
 # this should work on Linux, SunOS, and maybe others
 # Added new official magic number for recent versions of the Olson code
 0	string	TZif	timezone data
+>4	byte	0	\b, old version
+>4	byte	>0	\b, version %c
+>20	belong	0	\b, no gmt time flags
+>20	belong	1	\b, 1 gmt time flag
+>20	belong	>1	\b, %d gmt time flags
+>24	belong	0	\b, no std time flags
+>20	belong	1	\b, 1 std time flag
+>24	belong	>1	\b, %d std time flags
+>28	belong	0	\b, no leap seconds
+>28	belong	1	\b, 1 leap second
+>28	belong  >1	\b, %d leap seconds
+>32	belong	0	\b, no transition times
+>32	belong	1	\b, 1 transition time
+>32	belong  >1	\b, %d transition times
+>36	belong	0	\b, no abbreviation chars
+>36	belong	1	\b, 1 abbreviation char
+>36	belong	>1	\b, %d abbreviation chars
 0	string	\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\1\0	old timezone data
 0	string	\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\2\0	old timezone data
 0	string  \0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\3\0	old timezone data
 0	string	\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\4\0	old timezone data
 0	string	\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\5\0	old timezone data
 0	string	\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\6\0	old timezone data
+
 #------------------------------------------------------------------------------
+# $File: troff,v 1.10 2009/09/19 16:28:12 christos Exp $
 # troff:  file(1) magic for *roff
 #
 # updated by Daniel Quinlan (quinlan@yggdrasil.com)
@@ -14089,6 +15084,10 @@
 0	search/1	\\"		troff or preprocessor input text
 !:mime	text/troff
 0	search/1	'''		troff or preprocessor input text
+!:mime	text/troff
+0	regex/20	\^\\.[A-Za-z0-9][A-Za-z0-9][\ \t]	troff or preprocessor input text
+!:mime	text/troff
+0	regex/20	\^\\.[A-Za-z0-9][A-Za-z0-9]$	troff or preprocessor input text
 !:mime	text/troff
 
 # ditroff intermediate output text
@@ -14106,8 +15105,9 @@
 
 # output data formats
 0	string		\100\357	very old (C/A/T) troff output data
-#
+
 #------------------------------------------------------------------------------
+# $File: tuxedo,v 1.4 2009/09/19 16:28:13 christos Exp $
 # tuxedo:	file(1) magic for BEA TUXEDO data files
 #
 # from Ian Springer <ispringer@hotmail.com>
@@ -14115,12 +15115,15 @@
 0	string		\0\0\1\236\0\0\0\0\0\0\0\0\0\0\0\0	BEA TUXEDO DES mask data
 
 #------------------------------------------------------------------------------
+# $File: typeset,v 1.8 2009/09/19 16:28:13 christos Exp $
 # typeset:  file(1) magic for other typesetting
 #
 0	string		Interpress/Xerox	Xerox InterPress data
 >16	string		/			(version
 >>17	string		>\0			%s)
-#---------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# $File: unicode,v 1.5 2009/09/19 16:28:13 christos Exp $
 # Unicode:  BOM prefixed text files - Adrian Havill <havill@turbolinux.co.jp>
 # GRR: These types should be recognised in file_ascmagic so these
 # encodings can be treated by text patterns.
@@ -14131,11 +15134,12 @@
 0	string	+/v+			Unicode text, UTF-7
 0	string	+/v/			Unicode text, UTF-7
 0	string	\335\163\146\163	Unicode text, UTF-8-EBCDIC
-0	string	\376\377\000\000	Unicode text, UTF-32, big-endian
+0	string	\000\000\376\377	Unicode text, UTF-32, big-endian
 0	string	\377\376\000\000	Unicode text, UTF-32, little-endian
 0	string	\016\376\377		Unicode text, SCSU (Standard Compression Scheme for Unicode)
 
 #------------------------------------------------------------------------------
+# $File: unknown,v 1.7 2009/09/19 16:28:13 christos Exp $
 # unknown:  file(1) magic for unknown machines
 #
 # XXX - this probably should be pruned, as it'll match PDP-11 and
@@ -14168,7 +15172,9 @@
 0	long		0x10c		unknown demand paged pure executable
 >16	long		>0		not stripped
 0	long		0x10e		unknown readable demand paged pure executable
+
 #------------------------------------------------------------------------------
+# $File: uuencode,v 1.7 2009/09/19 16:28:13 christos Exp $
 # uuencode:  file(1) magic for ASCII-encoded files
 #
 
@@ -14199,6 +15205,7 @@
 # GRR: handle BASE64
 
 #------------------------------------------------------------------------------
+# $File: varied.out,v 1.21 2009/09/19 16:28:13 christos Exp $
 # varied.out:  file(1) magic for various USG systems
 #
 #	Herewith many of the object file formats used by USG systems.
@@ -14239,7 +15246,9 @@
 0	lelong		0x13a9f17e	ST40 component image format
 >4	string		>\0		\b, name '%s'
 
+
 #------------------------------------------------------------------------------
+# $File: varied.script,v 1.6 2009/09/19 16:28:13 christos Exp $
 # varied.script:  file(1) magic for various interpreter scripts
 
 0	string		#!\ /			a
@@ -14259,6 +15268,7 @@
 >>0x11 byte        x      \b.%d
 
 #------------------------------------------------------------------------------
+# $File: vax,v 1.7 2009/09/19 16:28:13 christos Exp $
 # vax:  file(1) magic for VAX executable/object and APL workspace
 #
 0	lelong		0101557		VAX single precision APL workspace
@@ -14293,6 +15303,7 @@
 >22	leshort		>0		- version %ld
 
 #------------------------------------------------------------------------------
+# $File: vicar,v 1.4 2009/09/19 16:28:13 christos Exp $
 # vicar:  file(1) magic for VICAR files.
 #
 # From: Ossama Othman <othman@astrosun.tn.cornell.edu
@@ -14307,7 +15318,26 @@
 >32	string	COMPLEX		\b, 64 bits = VAX quadword = Fortran COMPLEX*8
 # VICAR label file
 43	string	SFDU_LABEL	VICAR label file
+
 #------------------------------------------------------------------------------
+# $File: virtual,v 1.1 2009/12/25 16:04:30 christos Exp $
+# From: James Nobis <quel@quelrod.net>
+# Microsoft hard disk images for:
+# Virtual Server
+# Virtual PC
+# http://technet.microsoft.com/en-us/virtualserver/bb676673.aspx
+# .vhd
+0	string	conectix	Microsoft Disk Image, Virtual Server or Virtual PC
+
+# Sun xVM VirtualBox Disk Image
+# string  <<< Sun xVM VirtualBox Disk Image >>>
+# .vdi
+0	string	\<\<\<\ Sun\ xVM\ VirtualBox\ Disk	Sun xVM VirtualBox Disk Image
+
+
+
+#------------------------------------------------------------------------------
+# $File: virtutech,v 1.4 2009/09/19 16:28:13 christos Exp $
 # Virtutech Compressed Random Access File Format
 #
 # From <gustav@virtutech.com>
@@ -14319,6 +15349,7 @@
 >24    belong          0               not clean
 
 #------------------------------------------------------------------------------
+# $File: visx,v 1.5 2009/09/19 16:28:13 christos Exp $
 # visx:  file(1) magic for Visx format files
 #
 0	short		0x5555		VISX image file
@@ -14350,6 +15381,7 @@
 >2	string		.VISIX		(ascii text)
 
 #------------------------------------------------------------------------------
+# $File: vms,v 1.6 2009/09/19 16:28:13 christos Exp $
 # vms:  file(1) magic for VMS executables (experimental)
 #
 # VMS .exe formats, both VAX and AXP (Greg Roelofs, newt@uchicago.edu)
@@ -14376,12 +15408,14 @@
 0	belong	0x03000000	VMS Alpha executable
 >75264	string	PK\003\004	\b, Info-ZIP SFX archive v5.12 w/decryption
 
-# -----------------------------------------------------------
+#------------------------------------------------------------------------------
+# $File: vmware,v 1.7 2009/09/19 16:28:13 christos Exp $
 # VMware specific files (deducted from version 1.1 and log file entries)
 # Anthon van der Neut (anthon@mnt.org)
 0	belong	0x4d52564e	VMware nvram 
 
 #------------------------------------------------------------------------------
+# $File: vorbis,v 1.16 2009/09/19 16:28:13 christos Exp $
 # vorbis:  file(1) magic for Ogg/Vorbis files
 #
 # From Felix von Leitner <leitner@fefe.de>
@@ -14499,6 +15533,7 @@
 >>>>>>(84.b+117)	string		20040629	(1.1.0 RC1)
 
 #------------------------------------------------------------------------------
+# $File: vxl,v 1.4 2009/09/19 16:28:13 christos Exp $
 # VXL: file(1) magic for VXL binary IO data files
 #
 # from Ian Scott <scottim@sf.net>
@@ -14512,10 +15547,12 @@
 >0	leshort	>0		schema version no %d
 
 #------------------------------------------------------------------------------
+# $File: warc,v 1.2 2009/09/19 16:28:13 christos Exp $
 # warc:  file(1) magic for WARC files
 
 0	string	WARC/	WARC Archive
 >5	string	x	version %.4s
+
 #------------------------------------------------------------------------------
 # weak:  file(1) magic for very weak magic entries, disabled by default
 #
@@ -14533,6 +15570,7 @@
 #0	string		=!!		Bennet Yee's "face" format
 
 #------------------------------------------------------------------------------
+# $File: windows,v 1.4 2009/09/19 16:28:13 christos Exp $
 # windows:  file(1) magic for Microsoft Windows
 #
 # This file is mainly reserved for files where programs
@@ -14646,7 +15684,22 @@
 0	string		REGEDIT4\r\n\r\n	Windows Registry text (Win95 or above)
 0	string		Windows\ Registry\ Editor\ 
 >&0	string		Version\ 5.00\r\n\r\n	Windows Registry text (Win2K or above)
+
+
+# From: Pal Tamas <folti@balabit.hu>
+# Autorun File
+0       string/c          [autorun]\r\n   Microsoft Windows Autorun file.
+!:mime	application/x-setupscript. 
+
 #------------------------------------------------------------------------------
+# $File: wireless,v 1.2 2009/09/19 16:28:13 christos Exp $
+# wireless-regdb:        file(1) magic for CRDA wireless-regdb file format
+#
+0	string	RGDB	CRDA wireless regulatory database file
+>4	belong	19	(Version 1)
+
+#------------------------------------------------------------------------------
+# $File: wordprocessors,v 1.14 2009/09/19 16:28:13 christos Exp $
 # wordprocessors:  file(1) magic fo word processors.
 #
 ####### PWP file format used on Smith Corona Personal Word Processors:
@@ -14799,7 +15852,7 @@
 
 # Type: Freemind mindmap documents
 # From: Jamie Thompson <debian-bugs@jamie-thompson.co.uk>
-0	string/cB	\<map\ version	Freemind document
+0	string/w	\<map\ version	Freemind document
 !:mime	application/x-freemind
 
 # Type:        Scribus
@@ -14809,6 +15862,7 @@
 !:mime	application/x-scribus
 
 #------------------------------------------------------------------------------
+# $File: xdelta,v 1.4 2009/09/19 16:28:13 christos Exp $
 # file(1) magic(5) data for xdelta  Josh MacDonald <jmacd@CS.Berkeley.EDU>
 #
 0	string	%XDELTA%	XDelta binary patch file 0.14
@@ -14819,6 +15873,7 @@
 0	string	%XDZ004%	XDelta binary patch file 1.1
 
 #------------------------------------------------------------------------------
+# $File: xenix,v 1.9 2009/09/19 16:28:13 christos Exp $
 # xenix:  file(1) magic for Microsoft Xenix
 #
 # "Middle model" stuff, and "Xenix 8086 relocatable or 80286 small
@@ -14891,6 +15946,7 @@
 0	leshort		0x580		XENIX 8086 relocatable or 80286 small model
 
 #------------------------------------------------------------------------------
+# $File: xilinx,v 1.4 2009/09/19 16:28:13 christos Exp $
 # This is Aaron's attempt at a MAGIC file for Xilinx .bit files.
 # Xilinx-Magic@RevRagnarok.com
 # Got the info from FPGA-FAQ 0026
@@ -14925,6 +15981,7 @@
 >>>>>>>>&4	belong	x	- data length 0x%lx
 
 #------------------------------------------------------------------------------
+# $File: xo65,v 1.4 2009/09/19 16:28:13 christos Exp $
 # xo65 object files
 # From: "Ullrich von Bassewitz" <uz@cc65.org>
 #
@@ -14954,6 +16011,7 @@
 >6	leshort&0x0003	=0x0003			alignment 256
 
 #------------------------------------------------------------------------------
+# $File: xwindows,v 1.6 2009/09/19 16:28:13 christos Exp $
 # xwindows:  file(1) magic for various X/Window system file formats.
 
 # Compiled X Keymap 
@@ -14978,7 +16036,17 @@
 >28	long	1008				YUV422]
 >28	long	1000				RGB24]
 
+# Xcursor data
+# X11 mouse cursor format defined in libXcursor, see
+# http://www.x.org/archive/X11R6.8.1/doc/Xcursor.3.html
+# http://cgit.freedesktop.org/xorg/lib/libXcursor/tree/include/X11/Xcursor/Xcursor.h
+0	string		Xcur		Xcursor data
+!:mime	image/x-xcursor
+>10	leshort		x		version %hd
+>>8	leshort		x		\b.%hd
+
 #------------------------------------------------------------------------------
+# $File: zilog,v 1.7 2009/09/19 16:28:13 christos Exp $
 # zilog:  file(1) magic for Zilog Z8000.
 #
 # Was it big-endian or little-endian?  My Product Specification doesn't
@@ -14990,6 +16058,7 @@
 0	long		0xe805		overlay object file (z8000 a.out)
 
 #------------------------------------------------------------------------------
+# $File: zyxel,v 1.6 2009/09/19 16:28:13 christos Exp $
 # zyxel:  file(1) magic for ZyXEL modems
 #
 # From <rob@pe1chl.ampr.org>

@@ -24,11 +24,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /*
- * Info from: http://sc.openoffice.org/compdocfileformat.pdf 
+ * Parse Composite Document Files, the format used in Microsoft Office
+ * document files before they switched to zipped XML.
+ * Info from: http://sc.openoffice.org/compdocfileformat.pdf
+ *
+ * N.B. This is the "Composite Document File" format, and not the
+ * "Compound Document Format", nor the "Channel Definition Format".
  */
 
 #ifndef _H_CDF_
 #define _H_CDF_
+
+#ifdef PHP_WIN32
+#include <winsock2.h>
+#define timespec timeval
+#define tv_nsec tv_usec
+#endif
+#ifdef __DJGPP__
+#define timespec timeval
+#define tv_nsec tv_usec
+#endif
 
 typedef int32_t cdf_secid_t;
 
@@ -36,8 +51,8 @@ typedef int32_t cdf_secid_t;
 
 #define CDF_SECID_NULL					0
 #define CDF_SECID_FREE					-1
-#define	CDF_SECID_END_OF_CHAIN				-2
-#define	CDF_SECID_SECTOR_ALLOCATION_TABLE		-3
+#define CDF_SECID_END_OF_CHAIN				-2
+#define CDF_SECID_SECTOR_ALLOCATION_TABLE		-3
 #define CDF_SECID_MASTER_SECTOR_ALLOCATION_TABLE	-4
 
 typedef struct {
@@ -65,15 +80,15 @@ typedef struct {
 	cdf_secid_t	h_master_sat[436/4];
 } cdf_header_t;
 
-#define CDF_SEC_SIZE(h)	(1 << (h)->h_sec_size_p2)
+#define CDF_SEC_SIZE(h) ((size_t)(1 << (h)->h_sec_size_p2))
 #define CDF_SEC_POS(h, secid) (CDF_SEC_SIZE(h) + (secid) * CDF_SEC_SIZE(h))
-#define CDF_SHORT_SEC_SIZE(h)	(1 << (h)->h_short_sec_size_p2)
+#define CDF_SHORT_SEC_SIZE(h)	((size_t)(1 << (h)->h_short_sec_size_p2))
 #define CDF_SHORT_SEC_POS(h, secid) ((secid) * CDF_SHORT_SEC_SIZE(h))
 
-typedef int32_t	cdf_dirid_t;
+typedef int32_t cdf_dirid_t;
 #define CDF_DIRID_NULL	-1
 
-typedef int64_t	cdf_timestamp_t;
+typedef int64_t cdf_timestamp_t;
 #define CDF_BASE_YEAR	1601
 #define CDF_TIME_PREC	10000000
 
@@ -82,11 +97,11 @@ typedef struct {
 	uint16_t	d_namelen;
 	uint8_t		d_type;
 #define CDF_DIR_TYPE_EMPTY		0
-#define	CDF_DIR_TYPE_USER_STORAGE	1
-#define	CDF_DIR_TYPE_USER_STREAM	2
-#define	CDF_DIR_TYPE_LOCKBYTES		3
-#define	CDF_DIR_TYPE_PROPERTY		4
-#define	CDF_DIR_TYPE_ROOT_STORAGE	5
+#define CDF_DIR_TYPE_USER_STORAGE	1
+#define CDF_DIR_TYPE_USER_STREAM	2
+#define CDF_DIR_TYPE_LOCKBYTES		3
+#define CDF_DIR_TYPE_PROPERTY		4
+#define CDF_DIR_TYPE_ROOT_STORAGE	5
 	uint8_t		d_color;
 #define CDF_DIR_COLOR_READ	0
 #define CDF_DIR_COLOR_BLACK	1
@@ -95,8 +110,8 @@ typedef struct {
 	cdf_dirid_t	d_storage;
 	uint64_t	d_storage_uuid[2];
 	uint32_t	d_flags;
-	cdf_timestamp_t	d_created;
-	cdf_timestamp_t	d_modified;
+	cdf_timestamp_t d_created;
+	cdf_timestamp_t d_modified;
 	cdf_secid_t	d_stream_first_sector;
 	uint32_t	d_size;
 	uint32_t	d_unused0;
@@ -158,7 +173,9 @@ typedef struct {
 		int32_t		_pi_s32;
 		uint64_t	_pi_u64;
 		int64_t		_pi_s64;
-		cdf_timestamp_t	_pi_tp;
+		cdf_timestamp_t _pi_tp;
+		float		_pi_f;
+		double		_pi_d;
 		struct {
 			uint32_t s_len;
 			const char *s_buf;
@@ -170,6 +187,8 @@ typedef struct {
 #define pi_s32	pi_val._pi_s32
 #define pi_u16	pi_val._pi_u16
 #define pi_s16	pi_val._pi_s16
+#define pi_f	pi_val._pi_f
+#define pi_d	pi_val._pi_d
 #define pi_tp	pi_val._pi_tp
 #define pi_str	pi_val._pi_str
 } cdf_property_info_t;
@@ -178,13 +197,13 @@ typedef struct {
 
 /* Variant type definitions */
 #define CDF_EMPTY		0x00000000
-#define	CDF_NULL		0x00000001
+#define CDF_NULL		0x00000001
 #define CDF_SIGNED16		0x00000002
 #define CDF_SIGNED32		0x00000003
 #define CDF_FLOAT		0x00000004
 #define CDF_DOUBLE		0x00000005
 #define CDF_CY			0x00000006
-#define	CDF_DATE		0x00000007
+#define CDF_DATE		0x00000007
 #define CDF_BSTR		0x00000008
 #define CDF_DISPATCH		0x00000009
 #define CDF_ERROR		0x0000000a
@@ -195,7 +214,7 @@ typedef struct {
 #define CDF_SIGNED8		0x00000010
 #define CDF_UNSIGNED8		0x00000011
 #define CDF_UNSIGNED16		0x00000012
-#define	CDF_UNSIGNED32		0x00000013
+#define CDF_UNSIGNED32		0x00000013
 #define CDF_SIGNED64		0x00000014
 #define CDF_UNSIGNED64		0x00000015
 #define CDF_INT			0x00000016
@@ -230,7 +249,7 @@ typedef struct {
 #define CDF_PROPERTY_SUBJECT			0x00000003
 #define CDF_PROPERTY_AUTHOR			0x00000004
 #define CDF_PROPERTY_KEYWORDS			0x00000005
-#define CDF_PROPERTY_COMMENTS 			0x00000006
+#define CDF_PROPERTY_COMMENTS			0x00000006
 #define CDF_PROPERTY_TEMPLATE			0x00000007
 #define CDF_PROPERTY_LAST_SAVED_BY		0x00000008
 #define CDF_PROPERTY_REVISION_NUMBER		0x00000009
@@ -280,19 +299,20 @@ int cdf_read_ssat(const cdf_info_t *, const cdf_header_t *, const cdf_sat_t *,
     cdf_sat_t *);
 int cdf_read_short_stream(const cdf_info_t *, const cdf_header_t *,
     const cdf_sat_t *, const cdf_dir_t *, cdf_stream_t *);
-int cdf_read_property_info(const cdf_stream_t *, uint32_t,
+int cdf_read_property_info(const cdf_stream_t *, const cdf_header_t *, uint32_t,
     cdf_property_info_t **, size_t *, size_t *);
 int cdf_read_summary_info(const cdf_info_t *, const cdf_header_t *,
     const cdf_sat_t *, const cdf_sat_t *, const cdf_stream_t *,
     const cdf_dir_t *, cdf_stream_t *);
-int cdf_unpack_summary_info(const cdf_stream_t *, cdf_summary_info_header_t *,
-    cdf_property_info_t **, size_t *);
+int cdf_unpack_summary_info(const cdf_stream_t *, const cdf_header_t *,
+    cdf_summary_info_header_t *, cdf_property_info_t **, size_t *);
 int cdf_print_classid(char *, size_t, const cdf_classid_t *);
 int cdf_print_property_name(char *, size_t, uint32_t);
 int cdf_print_elapsed_time(char *, size_t, cdf_timestamp_t);
 uint16_t cdf_tole2(uint16_t);
 uint32_t cdf_tole4(uint32_t);
 uint64_t cdf_tole8(uint64_t);
+char *cdf_ctime(const time_t *);
 
 #ifdef CDF_DEBUG
 void cdf_dump_header(const cdf_header_t *);

@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: fsmagic.c,v 1.59 2009/02/03 20:27:51 christos Exp $")
+FILE_RCSID("@(#)$File: fsmagic.c,v 1.64 2011/08/14 09:03:12 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -78,7 +78,7 @@ private int
 handle_mime(struct magic_set *ms, int mime, const char *str)
 {
 	if ((mime & MAGIC_MIME_TYPE)) {
-		if (file_printf(ms, "application/%s", str) == -1)
+		if (file_printf(ms, "inode/%s", str) == -1)
 			return -1;
 		if ((mime & MAGIC_MIME_ENCODING) && file_printf(ms,
 		    "; charset=") == -1)
@@ -139,7 +139,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 				return -1;
 #endif
 	}
-
+	
 	switch (sb->st_mode & S_IFMT) {
 #ifndef PHP_WIN32
 # ifdef S_IFCHR
@@ -178,26 +178,25 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 #endif
 
 #ifdef	S_IFIFO
-			case S_IFIFO:
-				if((ms->flags & MAGIC_DEVICES) != 0)
-					break;
-				if (mime) {
-					if (handle_mime(ms, mime, "x-fifo") == -1)
-						return -1;
-				} else if (file_printf(ms, "fifo (named pipe)") == -1)
-					return -1;
-				return 1;
+	case S_IFIFO:
+		if((ms->flags & MAGIC_DEVICES) != 0)
+			break;
+		if (mime) {
+			if (handle_mime(ms, mime, "fifo") == -1)
+				return -1;
+		} else if (file_printf(ms, "fifo (named pipe)") == -1)
+			return -1;
+		return 1;
 #endif
 #ifdef	S_IFDOOR
-				case S_IFDOOR:
-					if (mime) {
-						if (handle_mime(ms, mime, "x-door") == -1)
-							return -1;
-					} else if (file_printf(ms, "door") == -1)
-						return -1;
-					return 1;
+	case S_IFDOOR:
+		if (mime) {
+			if (handle_mime(ms, mime, "door") == -1)
+				return -1;
+		} else if (file_printf(ms, "door") == -1)
+			return -1;
+		return 1;
 #endif
-
 #ifdef	S_IFLNK
 	case S_IFLNK:
 		/* stat is used, if it made here then the link is broken */
@@ -212,7 +211,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 #ifndef __COHERENT__
 	case S_IFSOCK:
 		if (mime) {
-			if (handle_mime(ms, mime, "x-socket") == -1)
+			if (handle_mime(ms, mime, "socket") == -1)
 				return -1;
 		} else if (file_printf(ms, "socket") == -1)
 			return -1;
