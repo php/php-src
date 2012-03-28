@@ -1,8 +1,8 @@
 --TEST--
-locale_parse_locale() icu <= 4.2
+locale_parse_locale() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -140,10 +140,10 @@ sr-Latn-CS:
 language : 'sr' , script : 'Latn' , region : 'CS' ,
 ---------------------
 sl-rozaj:
-language : 'sl' ,%r( region : 'ROZAJ' ,)?%r
+language : 'sl' , variant0 : 'ROZAJ' ,
 ---------------------
 sl-nedis:
-language : 'sl' ,%r( region : 'NEDIS' ,)?%r
+language : 'sl' , variant0 : 'NEDIS' ,
 ---------------------
 de-CH-1901:
 language : 'de' , region : 'CH' , variant0 : '1901' ,

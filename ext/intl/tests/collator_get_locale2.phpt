@@ -1,8 +1,8 @@
 --TEST--
-get_locale() icu <= 4.2
+get_locale() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -43,7 +43,7 @@ ut_run();
 ?>
 --EXPECT--
 Locale of type 1 is 'en_US'
-Locale of type 0 is 'en'
+Locale of type 0 is 'root'
 Locale of type 100 is false
 Locale of type -100 is false
 Locale of type -9999999999999 is false

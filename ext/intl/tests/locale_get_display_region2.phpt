@@ -1,8 +1,8 @@
 --TEST--
-locale_get_display_region() icu <= 4.2
+locale_get_display_region() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -199,9 +199,9 @@ disp_locale=fr :  display_region=États-Unis
 disp_locale=de :  display_region=Vereinigte Staaten
 -----------------
 locale='es-419'
-disp_locale=en :  display_region=Latin America and the Caribbean
-disp_locale=fr :  display_region=Amérique latine et Caraïbes
-disp_locale=de :  display_region=Lateinamerika und Karibik
+disp_locale=en :  display_region=Latin America
+disp_locale=fr :  display_region=Amérique latine
+disp_locale=de :  display_region=Lateinamerika
 -----------------
 locale='de-CH-x-phonebk'
 disp_locale=en :  display_region=Switzerland
@@ -259,9 +259,9 @@ disp_locale=fr :  display_region=A?
 disp_locale=de :  display_region=A?
 -----------------
 locale='de-419-DE'
-disp_locale=en :  display_region=Latin America and the Caribbean
-disp_locale=fr :  display_region=Amérique latine et Caraïbes
-disp_locale=de :  display_region=Lateinamerika und Karibik
+disp_locale=en :  display_region=Latin America
+disp_locale=fr :  display_region=Amérique latine
+disp_locale=de :  display_region=Lateinamerika
 -----------------
 locale='a-DE'
 disp_locale=en :  display_region=Germany

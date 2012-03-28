@@ -1,8 +1,8 @@
 --TEST--
-numfmt_format_currency() icu <= 4.2
+numfmt_format_currency() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -47,4 +47,4 @@ en_UK: '£1,234,567.89'
 en_US: '$1,234,567.89'
 ru: '1 234 567,89 р.'
 uk: '1 234 567,89 ₴'
-en: '₴1,234,567.89'
+en: 'UAH1,234,567.89'

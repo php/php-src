@@ -1,8 +1,8 @@
 --TEST--
-locale_get_display_script() icu <= 4.2
+locale_get_display_script()  icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -134,14 +134,14 @@ disp_locale=fr :  display_script=
 disp_locale=de :  display_script=
 -----------------
 locale='zh-Hant'
-disp_locale=en :  display_script=Traditional Han
+disp_locale=en :  display_script=Traditional
 disp_locale=fr :  display_script=idéogrammes han (\(variante traditionnelle\)|traditionnels)
-disp_locale=de :  display_script=Traditionelle Chinesische Schrift
+disp_locale=de :  display_script=Traditionell
 -----------------
 locale='zh-Hans'
-disp_locale=en :  display_script=Simplified Han
+disp_locale=en :  display_script=Simplified
 disp_locale=fr :  display_script=idéogrammes han (\(variante simplifiée\)|simplifiés)
-disp_locale=de :  display_script=Vereinfachte Chinesische Schrift
+disp_locale=de :  display_script=Vereinfacht
 -----------------
 locale='sr-Cyrl'
 disp_locale=en :  display_script=Cyrillic
@@ -154,9 +154,9 @@ disp_locale=fr :  display_script=latin
 disp_locale=de :  display_script=Lateinisch
 -----------------
 locale='zh-Hans-CN'
-disp_locale=en :  display_script=Simplified Han
+disp_locale=en :  display_script=Simplified
 disp_locale=fr :  display_script=idéogrammes han (\(variante simplifiée\)|simplifiés)
-disp_locale=de :  display_script=Vereinfachte Chinesische Schrift
+disp_locale=de :  display_script=Vereinfacht
 -----------------
 locale='sr-Latn-CS'
 disp_locale=en :  display_script=Latin
