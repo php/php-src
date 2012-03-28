@@ -28,7 +28,18 @@ pclose($file_handle);
 
 echo "*** Testing popen(): writing to the pipe ***\n";
 $arr = array("ggg", "ddd", "aaa", "sss");
-$file_handle = popen("sort", "w");
+// popen("sort", "w") fails if variables_order="GPCS"
+// this is set in the default INI file
+// it doesn't seem to be changeable in the --INI-- section
+//	also, doing: ini_set('variables_order', ''); doesn't work!
+//
+// the only solution is to either put the absolute path here, or
+// remove variables_order= from PHP.ini (setting it in run-test's
+// default INI will fail too)
+// 
+// since we can't depend on PHP.ini being set a certain way, 
+// have to put the absolute path here.
+$file_handle = popen("/windows/system32/sort", "w");
 $newline = "\n";
 foreach($arr as $str) {
   fwrite($file_handle, (binary)$str);
