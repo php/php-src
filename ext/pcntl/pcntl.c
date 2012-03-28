@@ -760,7 +760,7 @@ PHP_FUNCTION(pcntl_exec)
 	}
 	
 	if (ZEND_NUM_ARGS() > 1) {
-		/* Build argumnent list */
+		/* Build argument list */
 		args_hash = HASH_OF(args);
 		argc = zend_hash_num_elements(args_hash);
 		
