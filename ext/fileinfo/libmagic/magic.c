@@ -92,7 +92,6 @@ private const char *file_or_stream(struct magic_set *, const char *, php_stream 
 #endif
 
 /* XXX this functionality is excluded in php, enable it in apprentice.c:340 */
-#if 0
 private const char *
 get_default_magic(void)
 {
@@ -216,7 +215,6 @@ magic_getpath(const char *magicfile, int action)
 
 	return action == FILE_LOAD ? get_default_magic() : MAGIC;
 }
-#endif
 
 public struct magic_set *
 magic_open(int flags)
