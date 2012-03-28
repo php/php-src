@@ -435,11 +435,11 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 {
 	zval *patt;
 	int opts = 0;
-	TSRMLS_FETCH();
 	pcre_cache_entry *pce;
 	char *res;
 	zval *repl;
 	int res_len, rep_cnt;
+	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(patt);
 	ZVAL_STRINGL(patt, pat, strlen(pat), 0);
@@ -477,31 +477,3 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	return rep_cnt;
 }
 
-#if 0
-protected int
-file_replace(struct magic_set *ms, const char *pat, const char *rep)
-{
-	regex_t rx;
-	int rc;
-
-	rc = regcomp(&rx, pat, REG_EXTENDED);
-	if (rc) {
-		char errmsg[512];
-		(void)regerror(rc, &rx, errmsg, sizeof(errmsg));
-		file_magerror(ms, "regex error %d, (%s)", rc, errmsg);
-		return -1;
-	} else {
-		regmatch_t rm;
-		int nm = 0;
-		while (regexec(&rx, ms->o.buf, 1, &rm, 0) == 0) {
-			ms->o.buf[rm.rm_so] = '\0';
-			if (file_printf(ms, "%s%s", rep,
-			    rm.rm_eo != 0 ? ms->o.buf + rm.rm_eo : "") == -1)
-				return -1;
-			nm++;
-		}
-		regfree(&rx);
-		return nm;
-	}
-}
-#endif
