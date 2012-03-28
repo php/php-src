@@ -1,8 +1,8 @@
 --TEST--
-datefmt_get_pattern_code and datefmt_set_pattern_code() icu <= 4.2
+datefmt_get_pattern_code and datefmt_set_pattern_code() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 
 <?php
@@ -59,12 +59,12 @@ ut_run();
 Creating IntlDateFormatter with pattern = dd-MM-YY 
 After call to get_pattern :  pattern= dd-MM-YY
 Result of formatting timestamp=0 is :  
-31-12-69
+31-12-70
 -------------------
 Setting IntlDateFormatter with pattern = DD-MM-YYYY hh:mm:ss 
 After call to get_pattern :  pattern= DD-MM-YYYY hh:mm:ss
 Result of formatting timestamp=0 with the new pattern is :  
-365-12-1969 07:00:00
+365-12-1970 07:00:00
 
 -------------------
 Setting IntlDateFormatter with pattern = yyyy-DDD.hh:mm:ss z 

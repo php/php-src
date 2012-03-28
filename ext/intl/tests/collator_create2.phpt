@@ -1,8 +1,8 @@
 --TEST--
-create() icu <= 4.2
+create() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -58,7 +58,7 @@ ut_run();
 Locale: 'EN-US-ODESSA'
   ULOC_REQUESTED_LOCALE = 'EN-US-ODESSA'
   ULOC_VALID_LOCALE     = 'en_US'
-  ULOC_ACTUAL_LOCALE    = 'en'
+  ULOC_ACTUAL_LOCALE    = 'root'
 Locale: 'UK_UA_ODESSA'
   ULOC_REQUESTED_LOCALE = 'UK_UA_ODESSA'
   ULOC_VALID_LOCALE     = 'uk_UA'

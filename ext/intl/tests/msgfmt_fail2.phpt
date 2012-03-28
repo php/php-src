@@ -1,8 +1,8 @@
 --TEST--
-msgfmt creation failures icu <= 4.2
+msgfmt creation failures icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -91,9 +91,9 @@ Warning: MessageFormatter::create() expects parameter 1 to be string, array give
 
 Warning: msgfmt_create() expects parameter 1 to be string, array given in %s on line %d
 'msgfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
-'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
-'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
-'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
+'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
+'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
+'msgfmt_create: message formatter creation failed: U_PATTERN_SYNTAX_ERROR'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'
 'msgfmt_create: message formatter creation failed: U_UNMATCHED_BRACES'

@@ -1,8 +1,8 @@
 --TEST--
-locale_get_keywords() icu <= 4.2
+locale_get_keywords() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -109,7 +109,8 @@ Hindi: No keywords found.
 de: No keywords found.
 fr: No keywords found.
 ja: No keywords found.
-i-enochian: No keywords found.
+i-enochian: Key is x and Value is i-enochian 
+
 zh-Hant: No keywords found.
 zh-Hans: No keywords found.
 sr-Cyrl: No keywords found.
@@ -124,17 +125,27 @@ sl-Latn-IT-nedis: No keywords found.
 de-DE: No keywords found.
 en-US: No keywords found.
 es-419: No keywords found.
-de-CH-x-phonebk: No keywords found.
-az-Arab-x-AZE-derbend: No keywords found.
+de-CH-x-phonebk: Key is x and Value is phonebk 
+
+az-Arab-x-AZE-derbend: Key is x and Value is aze-derbend 
+
 zh-min: No keywords found.
 zh-min-nan-Hant-CN: No keywords found.
-x-whatever: No keywords found.
-qaa-Qaaa-QM-x-southern: No keywords found.
+x-whatever: Key is x and Value is whatever 
+
+qaa-Qaaa-QM-x-southern: Key is x and Value is southern 
+
 sr-Latn-QM: No keywords found.
 sr-Qaaa-CS: No keywords found.
-en-US-u-islamCal: No keywords found.
-zh-CN-a-myExt-x-private: No keywords found.
-en-a-myExt-b-another: No keywords found.
+en-US-u-islamCal: Key is attribute and Value is islamcal 
+
+zh-CN-a-myExt-x-private: Key is a and Value is myext 
+Key is x and Value is private 
+
+en-a-myExt-b-another: Key is a and Value is myext 
+Key is b and Value is another 
+
 de-419-DE: No keywords found.
 a-DE: No keywords found.
-ar-a-aaa-b-bbb-a-ccc: No keywords found.
+ar-a-aaa-b-bbb-a-ccc: Key is a and Value is aaa 
+Key is b and Value is bbb

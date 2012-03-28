@@ -1,7 +1,8 @@
 --TEST--
-datefmt_parse_localtime() with parse pos
+datefmt_parse_localtime() with parse pos icu <= 4.2
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
 --FILE--
 <?php
 

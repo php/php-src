@@ -1,8 +1,8 @@
 --TEST--
-datefmt_set_timezone_id_code() icu <= 4.2
+datefmt_set_timezone_id_code() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -72,5 +72,5 @@ Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 7:00:00 PM C
 -----------
 Trying to set timezone_id= CN
 After call to set_timezone_id :  timezone_id= CN
-Formatting timestamp=0 resulted in  Thursday, January 1, 1970 12:00:00 AM GMT+00:00
-Formatting timestamp=3600 resulted in  Thursday, January 1, 1970 1:00:00 AM GMT+00:00
+Formatting timestamp=0 resulted in  Thursday, January 1, 1970 12:00:00 AM GMT
+Formatting timestamp=3600 resulted in  Thursday, January 1, 1970 1:00:00 AM GMT
