@@ -156,9 +156,13 @@ PHP_FUNCTION(class_uses)
 {
 	zval *obj;
 	zend_bool autoload = 1;
+	char *trait_name = NULL;
+	int trait_name_len;
+	int i;
 	zend_class_entry *ce;
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &obj, &autoload) == FAILURE) {
+	zend_class_entry **trait_ce;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|bs", &obj, &autoload, &trait_name, &trait_name_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
@@ -173,9 +177,24 @@ PHP_FUNCTION(class_uses)
 	} else {
 		ce = Z_OBJCE_P(obj);
 	}
-	
-	array_init(return_value);
-	spl_add_traits(return_value, ce, 1, ZEND_ACC_TRAIT TSRMLS_CC);
+
+	if (trait_name == NULL) {
+		array_init(return_value);
+		spl_add_traits(return_value, ce, 1, ZEND_ACC_TRAIT TSRMLS_CC);
+	} else {
+		if (zend_lookup_class_ex(trait_name, trait_name_len, NULL, 0, &trait_ce TSRMLS_CC) != FAILURE) {
+			while (ce) {
+				for (i=0; i < ce->num_traits; i++) {
+					if (ce->traits[i] == *trait_ce) {
+						RETURN_TRUE;
+					}
+				}
+				ce = ce->parent;
+			}
+		}
+
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
