@@ -225,6 +225,17 @@ PHPAPI void php_end_ob_buffer(zend_bool send_buffer, zend_bool just_flush TSRMLS
 		zval *orig_buffer;
 		zval *z_status;
 
+		if(OG(ob_lock)) {
+			if (SG(headers_sent) && !SG(request_info).headers_only) {
+				OG(php_body_write) = php_ub_body_write_no_header;
+			} else {
+				OG(php_body_write) = php_ub_body_write;
+			}
+			OG(ob_nesting_level) = 0;
+			php_error_docref("ref.outcontrol" TSRMLS_CC, E_ERROR, "Cannot use output buffering in output buffering display handlers");
+			return;
+		}
+
 		ALLOC_INIT_ZVAL(orig_buffer);
 		ZVAL_STRINGL(orig_buffer, OG(active_ob_buffer).buffer, OG(active_ob_buffer).text_length, 1);
 
