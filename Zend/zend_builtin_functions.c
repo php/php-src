@@ -890,7 +890,6 @@ static void is_using_impl(INTERNAL_FUNCTION_PARAMETERS) {
 	zend_class_entry *instance_ce;
 	zend_class_entry **trait_ce;
 	zend_bool allow_string = 1;
-	zend_bool retval = 0;
 	zend_uint i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|b", &obj, &class_name, &class_name_len, &allow_string) == FAILURE) {
@@ -912,18 +911,20 @@ static void is_using_impl(INTERNAL_FUNCTION_PARAMETERS) {
 		RETURN_FALSE;
 	}
 
-	if (zend_lookup_class_ex(class_name, class_name_len, NULL, 0, &trait_ce TSRMLS_CC) == FAILURE) {
-		retval = 0;
-	} else {
-		for (i=0; i < instance_ce->num_traits; i++) {
-			if (instance_ce->traits[i] == *trait_ce) {
-				retval = 1;
-				break;
+	if (zend_lookup_class_ex(class_name, class_name_len, NULL, 0, &trait_ce TSRMLS_CC) != FAILURE) {
+		// go up the class hierarchy
+		while (instance_ce) {
+			for (i=0; i < instance_ce->num_traits; i++) {
+				if (instance_ce->traits[i] == *trait_ce) {
+					// trait found
+					RETURN_TRUE;
+				}
 			}
+			instance_ce = instance_ce->parent;
 		}
 	}
 
-	RETURN_BOOL(retval);
+	RETURN_FALSE;
 }
 
 
