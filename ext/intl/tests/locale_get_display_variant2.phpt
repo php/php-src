@@ -1,8 +1,8 @@
 --TEST--
-locale_get_display_variant() icu <= 4.2
+locale_get_display_variant() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -164,14 +164,14 @@ disp_locale=fr :  display_variant=
 disp_locale=de :  display_variant=
 -----------------
 locale='sl-rozaj'
-disp_locale=en :  display_variant=
-disp_locale=fr :  display_variant=
-disp_locale=de :  display_variant=
+disp_locale=en :  display_variant=Resian
+disp_locale=fr :  display_variant=dialecte de Resia
+disp_locale=de :  display_variant=Resianisch
 -----------------
 locale='sl-nedis'
-disp_locale=en :  display_variant=
-disp_locale=fr :  display_variant=
-disp_locale=de :  display_variant=
+disp_locale=en :  display_variant=Natisone dialect
+disp_locale=fr :  display_variant=dialecte de Natisone
+disp_locale=de :  display_variant=Natisone-Dialekt
 -----------------
 locale='de-CH-1901'
 disp_locale=en :  display_variant=Traditional German orthography
@@ -204,9 +204,9 @@ disp_locale=fr :  display_variant=
 disp_locale=de :  display_variant=
 -----------------
 locale='de-CH-x-phonebk'
-disp_locale=en :  display_variant=X_PHONEBK
-disp_locale=fr :  display_variant=X_PHONEBK
-disp_locale=de :  display_variant=X_PHONEBK
+disp_locale=en :  display_variant=
+disp_locale=fr :  display_variant=
+disp_locale=de :  display_variant=
 -----------------
 locale='az-Arab-x-AZE-derbend'
 disp_locale=en :  display_variant=(AZE_DERBEND)?
@@ -229,9 +229,9 @@ disp_locale=fr :  display_variant=
 disp_locale=de :  display_variant=
 -----------------
 locale='qaa-Qaaa-QM-x-southern'
-disp_locale=en :  display_variant=X_SOUTHERN
-disp_locale=fr :  display_variant=X_SOUTHERN
-disp_locale=de :  display_variant=X_SOUTHERN
+disp_locale=en :  display_variant=
+disp_locale=fr :  display_variant=
+disp_locale=de :  display_variant=
 -----------------
 locale='sr-Latn-QM'
 disp_locale=en :  display_variant=
@@ -244,14 +244,14 @@ disp_locale=fr :  display_variant=
 disp_locale=de :  display_variant=
 -----------------
 locale='en-US-u-islamCal'
-disp_locale=en :  display_variant=U_ISLAMCAL
-disp_locale=fr :  display_variant=U_ISLAMCAL
-disp_locale=de :  display_variant=U_ISLAMCAL
+disp_locale=en :  display_variant=
+disp_locale=fr :  display_variant=
+disp_locale=de :  display_variant=
 -----------------
 locale='zh-CN-a-myExt-x-private'
-disp_locale=en :  display_variant=A_MYEXT_X_PRIVATE
-disp_locale=fr :  display_variant=A_MYEXT_X_PRIVATE
-disp_locale=de :  display_variant=A_MYEXT_X_PRIVATE
+disp_locale=en :  display_variant=
+disp_locale=fr :  display_variant=
+disp_locale=de :  display_variant=
 -----------------
 locale='en-a-myExt-b-another'
 disp_locale=en :  display_variant=(MYEXT_B_ANOTHER)?

@@ -1,7 +1,8 @@
 --TEST--
-datefmt_parse_timestamp_code()  with parse pos
+datefmt_parse_timestamp_code()  with parse pos icu <= 4.2
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
 --INI--
 datetime.timezone="America/Los_Angeles"
 --ENV--

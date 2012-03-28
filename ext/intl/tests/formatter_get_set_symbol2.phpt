@@ -1,8 +1,8 @@
 --TEST--
-numfmt_get/set_symbol() icu <= 4.2
+numfmt_get/set_symbol() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -111,7 +111,7 @@ A number formatted with the new symbol: 1,234,512_%_
 Symbol 'ZERO_DIGIT_SYMBOL'
 Default symbol: [0]
 New symbol: [_ZD_]
-A number formatted with the new symbol: `a,bcd.`ab
+A number formatted with the new symbol: 12,345.123
 
 Symbol 'DIGIT_SYMBOL'
 Default symbol: [#]
