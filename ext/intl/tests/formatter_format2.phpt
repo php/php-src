@@ -1,8 +1,8 @@
 --TEST--
-numfmt_format() icu <= 4.2
+numfmt_format() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -87,7 +87,7 @@ Locale is: ru_UA
 '1 234 567,89 ?(грн\.|₴)'
 '123 456 789 ?%'
 '1,23456789123457E6'
-'один миллион двасти тридцать четыре тысяч пятьсот шестьдесят семь запятая восемь девять один два три четыре пять семь'
+'один миллион двести тридцать четыре тысяч пятьсот шестьдесят семь запятая восемь девять один два три четыре пять семь'
 '1 234 567.?'
 '1 234 567'
 '#####.###'
@@ -112,7 +112,7 @@ Locale is: fr
 '123 456 789 ?%'
 '1,23456789123457E6'
 'un million deux-cent-trente-quatre-mille-cinq-cent-soixante-sept virgule huit neuf un deux trois quatre cinq sept'
-'1 234 567ᵉ?'
+'1 234 567e'
 '1 234 567'
 '#####.###'
 Bad formatter!

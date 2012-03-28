@@ -1,8 +1,8 @@
 --TEST--
-Cloning datefmt icu <= 4.2
+Cloning datefmt icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.3', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 include_once( 'ut_common.inc' );
@@ -30,8 +30,8 @@ echo $res_str;
 ?>
 --EXPECTF--
 Result of formatting timestamp=0 is :  
-31-12-69
+31-12-70
 Result of formatting timestamp=0 is :  
 1969-365.07:00:00 EST
 Result of clone formatting timestamp=0 is :  
-31-12-69
+31-12-70

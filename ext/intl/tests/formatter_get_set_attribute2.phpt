@@ -1,8 +1,8 @@
 --TEST--
-numfmt_get/set_attribute() icu < 4.2
+numfmt_get/set_attribute() icu >= 4.8
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.2', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -159,7 +159,7 @@ Setting attribute: ok
 New attribute value: 1 ;  Format result: '0,012,345.12345' ; Parse result: 12345.12345
 
 Attribute ROUNDING_INCREMENT
-Old attribute value: 1.0E-5 ;  Format result: '0,012,345.12346' ; Parse result: 12345.12346
+Old attribute value: 0 ;  Format result: '0,012,345.12346' ; Parse result: 12345.12346
 Setting attribute: ok
 New attribute value: 2 ;  Format result: '0,012,346.00000' ; Parse result: 12346
 
