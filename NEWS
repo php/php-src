@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.3.11
+29 Mar 2012, PHP 5.3.11RC1
 
 - Core:
   . Fixed bug #61273 (call_user_func_array with more than 16333 arguments
