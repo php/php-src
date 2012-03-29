@@ -384,6 +384,10 @@ PHP_FUNCTION(readline_read_history)
 		return;
 	}
 
+	if (php_check_open_basedir(arg TSRMLS_CC)) {
+		RETURN_FALSE;
+	}
+
 	/* XXX from & to NYI */
 	if (read_history(arg)) {
 		RETURN_FALSE;
@@ -402,6 +406,10 @@ PHP_FUNCTION(readline_write_history)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &arg, &arg_len) == FAILURE) {
 		return;
+	}
+
+	if (php_check_open_basedir(arg TSRMLS_CC)) {
+		RETURN_FALSE;
 	}
 
 	if (write_history(arg)) {
