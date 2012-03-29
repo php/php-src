@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-22 Mar 2012, PHP 5.4.1 RC1
+29 Mar 2012, PHP 5.4.1 RC1
 
 - CLI Server:
   . Fixed bug #61461 (missing checks around malloc() calls). (Ilia)
