@@ -54,6 +54,10 @@ PHP                                                                        NEWS
 - Firebird Database extension (ibase):
   . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
 
+- Libxml:
+  . Fixed bug #61367 (open_basedir bypass using libxml RSHUTDOWN). 
+    (Tim Starling)
+
 - mysqli
   . Fixed bug #61003 (mysql_stat() require a valid connection). (Johannes).
 
@@ -83,6 +87,8 @@ PHP                                                                        NEWS
 - Readline:
   . Fixed bug #61088 (Memory leak in readline_callback_handler_install).
     (Nikic, Laruence)
+  . Add open_basedir checks to readline_write_history and readline_read_history.
+    (Rasmus, reported by Mateusz Goik)
 
 - Reflection:
   . Fixed bug #61388 (ReflectionObject:getProperties() issues invalid reads
