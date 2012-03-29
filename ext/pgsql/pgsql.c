@@ -4787,7 +4787,9 @@ PHP_FUNCTION(pg_get_notify)
 #else 
 		if (atof(PG_VERSION) >= 9.0) {
 #endif 
+#if HAVE_PQPARAMETERSTATUS
 			add_index_string(return_value, 2, pgsql_notify->extra, 1);
+#endif
 		}
 	}
 	if (result_type & PGSQL_ASSOC) {
@@ -4798,7 +4800,9 @@ PHP_FUNCTION(pg_get_notify)
 #else 
 		if (atof(PG_VERSION) >= 9.0) {
 #endif 
+#if HAVE_PQPARAMETERSTATUS
 			add_assoc_string(return_value, "payload", pgsql_notify->extra, 1);
+#endif
 		}
 	}
 	PQfreemem(pgsql_notify);
