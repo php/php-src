@@ -153,8 +153,6 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 					efree(token.value.str.val);
 					break;
 			}
-		} else if (token_type == T_END_HEREDOC) {
-			efree(token.value.str.val);
 		}
 		token.type = 0;
 	}
