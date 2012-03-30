@@ -86,8 +86,8 @@ ZEND_GET_MODULE(libxml)
 static PHP_MINIT_FUNCTION(libxml);
 static PHP_RINIT_FUNCTION(libxml);
 static PHP_MSHUTDOWN_FUNCTION(libxml);
-static PHP_RSHUTDOWN_FUNCTION(libxml);
 static PHP_MINFO_FUNCTION(libxml);
+static int php_libxml_post_deactivate();
 
 /* }}} */
 
@@ -137,13 +137,13 @@ zend_module_entry libxml_module_entry = {
 	PHP_MINIT(libxml),       /* extension-wide startup function */
 	PHP_MSHUTDOWN(libxml),   /* extension-wide shutdown function */
 	PHP_RINIT(libxml),       /* per-request startup function */
-	PHP_RSHUTDOWN(libxml),   /* per-request shutdown function */
+	NULL,                    /* per-request shutdown function */
 	PHP_MINFO(libxml),       /* information function */
 	NO_VERSION_YET,
 	PHP_MODULE_GLOBALS(libxml), /* globals descriptor */
 	PHP_GINIT(libxml),          /* globals ctor */
 	NULL,                       /* globals dtor */
-	NULL,                       /* post deactivate */
+	php_libxml_post_deactivate, /* post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
 };
 
@@ -861,9 +861,9 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
 	return SUCCESS;
 }
 
-
-static PHP_RSHUTDOWN_FUNCTION(libxml)
+static int php_libxml_post_deactivate()
 {
+	TSRMLS_FETCH();
 	/* reset libxml generic error handling */
 	if (_php_libxml_per_request_initialization) {
 		xmlSetGenericErrorFunc(NULL, NULL);
