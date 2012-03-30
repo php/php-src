@@ -3310,11 +3310,51 @@ ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count
 }
 /* }}} */
 
+ZEND_API zval ***zend_fcall_create_args(HashTable *params_ar, zval ***args, int *param_count)  /* {{{ */
+{
+	int num_elems = zend_hash_num_elements(params_ar);
+	zval ***method_args;
+	int element = 0, i;
+	HashPosition pos;
+
+	if(args) {
+		method_args = (zval ***) safe_erealloc(args, sizeof(zval **), num_elems, 0);
+		for(i=0;i<num_elems;i++) {
+			method_args[i] = NULL;
+		}
+	} else {
+		method_args = (zval ***) ecalloc(sizeof(zval **), num_elems);
+	}
+
+	for (zend_hash_internal_pointer_reset_ex(params_ar, &pos);
+		zend_hash_has_more_elements_ex(params_ar, &pos) == SUCCESS;
+		zend_hash_move_forward_ex(params_ar, &pos)
+	) {
+		char *str_index;
+		ulong index;
+
+		if(zend_hash_get_current_key_ex(params_ar, &str_index, NULL, &index, 0, &pos) == HASH_KEY_IS_LONG) {
+			/* TODO: limit on index */
+			if(index >= num_elems) {
+				int last_elem = num_elems;
+				num_elems = index+1;
+				method_args = (zval ***) safe_erealloc(method_args, sizeof(zval **), num_elems, 0);
+				for(i=last_elem;i<num_elems;i++) {
+					method_args[i] = NULL;
+				}
+			}
+			element = index;
+		}
+		if(zend_hash_get_current_data_ex(params_ar, (void **) &(method_args[element]), &pos) != SUCCESS) break;
+		element++;
+	}
+	*param_count = num_elems;
+	return method_args;
+}
+/* }}} */
+
 ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /* {{{ */
 {
-	HashPosition pos;
-	zval **arg, ***params;
-
 	zend_fcall_info_args_clear(fci, !args);
 
 	if (!args) {
@@ -3325,14 +3365,7 @@ ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC) /*
 		return FAILURE;
 	}
 
-	fci->param_count = zend_hash_num_elements(Z_ARRVAL_P(args));
-	fci->params = params = (zval ***) erealloc(fci->params, fci->param_count * sizeof(zval **));
-
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void *) &arg, &pos) == SUCCESS) {
-		*params++ = arg;
-		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos);
-	}
+	fci->params = zend_fcall_create_args(HASH_OF(args), fci->params, &fci->param_count);
 
 	return SUCCESS;
 }
