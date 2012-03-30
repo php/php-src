@@ -8,7 +8,7 @@
 #if (_WIN32_WINNT < 0x0600) /* Vista/2k8 have these functions */
 
 
-PHPAPI int inet_pton(int af, const char* src, void* dst)
+PHPAPI short int inet_pton(int af, const char* src, void* dst)
 {
 	int address_length;
 	struct sockaddr_storage sa;
@@ -79,7 +79,7 @@ PHPAPI const char* inet_ntop(int af, const void* src, char* dst, size_t size)
 
 #endif
 
-int inet_aton(const char *cp, struct in_addr *inp) {
+unsigned short int inet_aton(const char *cp, struct in_addr *inp) {
   inp->s_addr = inet_addr(cp);
 
   if (inp->s_addr == INADDR_NONE) {
