@@ -2,8 +2,7 @@
 /* $Id$ */
 
 if (php_sapi_name() != "cli") {
-	echo "Please run this script using the CLI version of PHP\n";
-	exit;
+	exit ("Please run this script using the CLI version of PHP\n");
 }
 /*
 	This script can be used on Win32 systems
@@ -18,14 +17,14 @@ if (php_sapi_name() != "cli") {
 
 $cygwin_path = 'c:\cygwin\bin';
 
-$path = getenv("PATH");
-putenv("PATH=$cygwin_path;$path");
+$path = getenv('PATH');
+putenv("PATH={$cygwin_path};{$path}");
 
 array_shift($argv);
-system("sh ext_skel " . implode(" ", $argv));
+system('sh ext_skel ' . implode(' ', $argv));
 
-$extname = "";
-$skel = "skeleton";
+$extname = '';
+$skel = 'skeleton';
 foreach($argv as $arg) {
 	if (strtolower(substr($arg, 0, 9)) == "--extname") {
 		$extname = substr($arg, 10);
