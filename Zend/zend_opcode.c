@@ -124,6 +124,14 @@ ZEND_API void zend_function_dtor(zend_function *function)
 	destroy_zend_function(function TSRMLS_CC);
 }
 
+ZEND_API void zend_accessor_dtor(zend_accessor_info **ai)
+{
+	if((*ai)->doc_comment) {
+		efree((void*)(*ai)->doc_comment);
+	}
+	efree(*ai);
+}
+
 static void zend_cleanup_op_array_data(zend_op_array *op_array)
 {
 	if (op_array->static_variables) {
@@ -291,6 +299,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				efree(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
+			zend_hash_destroy(&ce->accessors);
 			str_efree(ce->name);
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);

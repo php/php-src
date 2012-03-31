@@ -34,6 +34,14 @@
 
 #define FREE_PNODE(znode)	zval_dtor(&znode->u.constant);
 
+#define MAKE_ZNODE(zn, str)	 \
+	{															\
+		zn.op_type = IS_CONST;									\
+		INIT_PZVAL(&zn.u.constant);								\
+		ZVAL_STRINGL(&zn.u.constant, str, strlen(str), 1);		\
+		zn.EA = 0;												\
+	}
+
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
 #define INC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count++); }
@@ -207,7 +215,16 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
+#define ZEND_ACC_IS_GETTER				0x10000000
+#define ZEND_ACC_IS_SETTER				0x20000000
+#define ZEND_ACC_IS_ACCESSOR			0x30000000	/* Mask */
+
+#define ZEND_ACC_READONLY				0x40000000
+#define ZEND_ACC_WRITEONLY				0x80000000
+
+
 char *zend_visibility_string(zend_uint fn_flags);
+char *zend_accessor_type_string(zend_uint fn_flags);
 
 
 typedef struct _zend_property_info {
@@ -341,6 +358,15 @@ typedef union _zend_function {
 	zend_internal_function internal_function;
 } zend_function;
 
+#define ZEND_ACC_NAME(func) &func->common.function_name[5]
+
+typedef struct _zend_accessor_info {
+	zend_uint		flags;
+	const char 		*doc_comment;
+	int 			doc_comment_len;
+	zend_function 	*getter;
+	zend_function 	*setter;
+} zend_accessor_info;
 
 typedef struct _zend_function_state {
 	zend_function *function;
@@ -491,6 +517,10 @@ void zend_do_end_function_call(znode *function_name, znode *result, const znode 
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 void zend_do_handle_exception(TSRMLS_D);
 
+
+void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, znode *modifiers TSRMLS_DC);
+void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, znode *modifiers, const znode *body TSRMLS_DC);
+
 void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC);
 void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC);
 
@@ -625,6 +655,8 @@ void zend_do_goto(const znode *label TSRMLS_DC);
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
 void zend_release_labels(TSRMLS_D);
 
+static inline zend_op *find_previous_op(zend_uchar opcode TSRMLS_DC);
+
 ZEND_API void function_add_ref(zend_function *function);
 
 #define INITIAL_OP_ARRAY_SIZE 64
@@ -648,6 +680,7 @@ ZEND_API int zend_cleanup_function_data(zend_function *function TSRMLS_DC);
 ZEND_API int zend_cleanup_function_data_full(zend_function *function TSRMLS_DC);
 
 ZEND_API void destroy_zend_function(zend_function *function TSRMLS_DC);
+ZEND_API void zend_accessor_dtor(zend_accessor_info **ai);
 ZEND_API void zend_function_dtor(zend_function *function);
 ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
@@ -655,6 +688,7 @@ void zend_class_add_ref(zend_class_entry **ce);
 ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, const char *src1, int src1_length, const char *src2, int src2_length, int internal);
 ZEND_API int zend_unmangle_property_name(const char *mangled_property, int mangled_property_len, const char **class_name, const char **prop_name);
 
+#define ZEND_ACCESSOR_DTOR (void (*)(void *)) zend_accessor_dtor
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) zend_function_dtor
 #define ZEND_CLASS_DTOR (void (*)(void *)) destroy_zend_class
 

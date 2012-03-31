@@ -178,6 +178,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_HALT_COMPILER "__halt_compiler (T_HALT_COMPILER)"
 %token T_CLASS      "class (T_CLASS)"
 %token T_TRAIT      "trait (T_TRAIT)"
+%token T_READONLY      "read-only (T_READONLY)"
+%token T_WRITEONLY      "write-only (T_WRITEONLY)"
 %token T_INTERFACE  "interface (T_INTERFACE)"
 %token T_EXTENDS    "extends (T_EXTENDS)"
 %token T_IMPLEMENTS "implements (T_IMPLEMENTS)"
@@ -573,7 +575,7 @@ class_statement_list:
 
 
 class_statement:
-		variable_modifiers { CG(access_type) = Z_LVAL($1.u.constant); } class_variable_declaration ';'
+		variable_modifiers { CG(access_type) = Z_LVAL($1.u.constant); } class_variable_accessor_declarations
 	|	class_constant_declaration ';'
 	|	trait_use_statement
 	|	method_modifiers function is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$4, 1, $3.op_type, &$1 TSRMLS_CC); } '('
@@ -664,6 +666,56 @@ member_modifier:
 	|	T_STATIC				{ Z_LVAL($$.u.constant) = ZEND_ACC_STATIC; }
 	|	T_ABSTRACT				{ Z_LVAL($$.u.constant) = ZEND_ACC_ABSTRACT; }
 	|	T_FINAL					{ Z_LVAL($$.u.constant) = ZEND_ACC_FINAL; }
+	|	T_READONLY				{ Z_LVAL($$.u.constant) = ZEND_ACC_READONLY; }
+	|	T_WRITEONLY				{ Z_LVAL($$.u.constant) = ZEND_ACC_WRITEONLY; }
+;
+
+accessors:
+		accessor_function
+	|	accessor_function
+		accessor_function
+	| /* Empty */
+;
+
+accessor_modifiers:
+		/* empty */						{ Z_LVAL($$.u.constant) = CG(access_type); }
+	|	non_empty_accessor_modifiers	{ $$ = $1; }
+;
+
+non_empty_accessor_modifiers:
+		accessor_modifier								{ $$ = $1; }
+	|	non_empty_accessor_modifiers accessor_modifier	{ Z_LVAL($$.u.constant) = zend_do_verify_access_types(&$1, &$2); }
+
+
+accessor_modifier:
+		T_PUBLIC				{ Z_LVAL($$.u.constant) = ZEND_ACC_PUBLIC; }
+	|	T_PROTECTED				{ Z_LVAL($$.u.constant) = ZEND_ACC_PROTECTED; }
+	|	T_PRIVATE				{ Z_LVAL($$.u.constant) = ZEND_ACC_PRIVATE; }
+	|	T_STATIC				{ Z_LVAL($$.u.constant) = ZEND_ACC_STATIC; }
+	|	T_FINAL					{ Z_LVAL($$.u.constant) = ZEND_ACC_FINAL; }
+;
+
+accessor_function:
+		accessor_modifiers T_STRING
+			{ zend_do_begin_accessor_declaration(&$2, CG(accessor_node), &$1 TSRMLS_CC); }
+				'{' inner_statement_list '}'
+			{ zend_do_end_accessor_declaration(&$2, CG(accessor_node), &$1, &$4 TSRMLS_CC); }
+	|	accessor_modifiers T_STRING 
+		{
+			zend_do_begin_accessor_declaration(&$2, CG(accessor_node), &$1 TSRMLS_CC);
+			zend_do_end_accessor_declaration(&$2, CG(accessor_node), &$1, NULL TSRMLS_CC);
+			/* efree(Z_STRVAL($2.u.constant)); */
+		}
+		';'
+;
+
+class_variable_accessor_declarations:
+		T_VARIABLE '{'
+			{ zend_declare_accessor(&$1 TSRMLS_CC); CG(accessor_node) = &$1; }
+			accessors
+			{ efree($1.u.constant.value.str.val); }
+		'}'
+	|	class_variable_declaration ';'
 ;
 
 class_variable_declaration:

@@ -1624,33 +1624,53 @@ zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_na
 
 #define MAX_ABSTRACT_INFO_CNT 3
 #define MAX_ABSTRACT_INFO_FMT "%s%s%s%s"
+#define MAX_ABS_ACCESSOR_INFO_FMT "%s%s%s%s%s%s"
+
 #define DISPLAY_ABSTRACT_FN(idx) \
 	ai.afn[idx] ? ZEND_FN_SCOPE_NAME(ai.afn[idx]) : "", \
 	ai.afn[idx] ? "::" : "", \
 	ai.afn[idx] ? ai.afn[idx]->common.function_name : "", \
-	ai.afn[idx] && ai.afn[idx + 1] ? ", " : (ai.afn[idx] && ai.cnt > MAX_ABSTRACT_INFO_CNT ? ", ..." : "")
+	ai.afn[idx] && ai.afn[idx + 1] ? ", " : (ai.afn[idx] && ai.afn_cnt > MAX_ABSTRACT_INFO_CNT ? ", ..." : "")
+
+#define DISPLAY_ABS_ACCESSOR_FN(idx) \
+	ai.abs_acc[idx] ? zend_accessor_type_string(ai.abs_acc[idx]->common.fn_flags) : "", \
+	ai.abs_acc[idx] ? " " : "", \
+	ai.abs_acc[idx] ? ZEND_FN_SCOPE_NAME(ai.abs_acc[idx]) : "", \
+	ai.abs_acc[idx] ? "::$" : "", \
+	ai.abs_acc[idx] ? ZEND_ACC_NAME(ai.abs_acc[idx]) : "", \
+	ai.abs_acc[idx] && ai.abs_acc[idx + 1] ? ", " : (ai.abs_acc[idx] && ai.abs_acc_count > MAX_ABSTRACT_INFO_CNT ? ", ..." : "")
 
 typedef struct _zend_abstract_info {
 	zend_function *afn[MAX_ABSTRACT_INFO_CNT + 1];
-	int cnt;
+	int afn_cnt;
+
+	zend_function *abs_acc[MAX_ABSTRACT_INFO_CNT + 1];
+	int abs_acc_count;
+
 	int ctor;
 } zend_abstract_info;
 
 static int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai TSRMLS_DC) /* {{{ */
 {
 	if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
-			ai->afn[ai->cnt] = fn;
+		if(fn->common.fn_flags & ZEND_ACC_IS_ACCESSOR) {
+			if (ai->abs_acc_count < MAX_ABSTRACT_INFO_CNT)
+				ai->abs_acc[ai->abs_acc_count] = fn;
+			ai->abs_acc_count++;
+		} else {
+			if (ai->afn_cnt < MAX_ABSTRACT_INFO_CNT) {
+				ai->afn[ai->afn_cnt] = fn;
 		}
 		if (fn->common.fn_flags & ZEND_ACC_CTOR) {
 			if (!ai->ctor) {
-				ai->cnt++;
+					ai->afn_cnt++;
 				ai->ctor = 1;
 			} else {
-				ai->afn[ai->cnt] = NULL;
+					ai->afn[ai->afn_cnt] = NULL;
 			}
 		} else {
-			ai->cnt++;
+				ai->afn_cnt++;
+			}
 		}
 	}
 	return 0;
@@ -1666,14 +1686,23 @@ void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) zend_verify_abstract_class_function, &ai TSRMLS_CC);
 
-		if (ai.cnt) {
+		if (ai.afn_cnt) {
 			zend_error(E_ERROR, "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
-				ce->name, ai.cnt,
-				ai.cnt > 1 ? "s" : "",
+				ce->name, ai.afn_cnt,
+				ai.afn_cnt > 1 ? "s" : "",
 				DISPLAY_ABSTRACT_FN(0),
 				DISPLAY_ABSTRACT_FN(1),
 				DISPLAY_ABSTRACT_FN(2)
 				);
+		}
+		if (ai.abs_acc_count) {
+			zend_error(E_ERROR, "Class %s contains %d abstract accessor%s and must be declared abstract or implement the remaining accessors (" MAX_ABS_ACCESSOR_INFO_FMT MAX_ABS_ACCESSOR_INFO_FMT MAX_ABS_ACCESSOR_INFO_FMT ")",
+				ce->name, ai.abs_acc_count,
+				ai.abs_acc_count > 1 ? "s" : "",
+				DISPLAY_ABS_ACCESSOR_FN(0),
+				DISPLAY_ABS_ACCESSOR_FN(1),
+				DISPLAY_ABS_ACCESSOR_FN(2)
+			);
 		}
 	}
 }

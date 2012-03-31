@@ -124,6 +124,7 @@ struct _zend_compiler_globals {
 	zend_bool increment_lineno;
 
 	znode implementing_class;
+	znode *accessor_node;
 
 	zend_uint access_type;
 
