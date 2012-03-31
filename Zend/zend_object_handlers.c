@@ -51,6 +51,7 @@
   if we have __call and method which is not part of the class function table is
   called, we cal __call handler.
 */
+static union _zend_function *zend_std_get_method(zval **object_ptr, char *method_name, int method_len, const struct _zend_literal *key TSRMLS_DC);
 
 ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 {
@@ -131,7 +132,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC
 }
 /* }}} */
 
-static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC) /* {{{ */
+static zval *zend_std_call_getter(zval *object, zval *member, zend_function *func TSRMLS_DC) /* {{{ */
 {
 	zval *retval = NULL;
 	zend_class_entry *ce = Z_OBJCE_P(object);
@@ -144,7 +145,11 @@ static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC) /* {{{ *
 
 	SEPARATE_ARG_IF_REF(member);
 
-	zend_call_method_with_1_params(&object, ce, &ce->__get, ZEND_GET_FUNC_NAME, &retval, member);
+	if (func->common.num_args == 1) {
+		zend_call_method_with_1_params(&object, ce, &func, func->common.function_name, &retval, member);
+	} else {
+		zend_call_method_with_0_params(&object, ce, &func, func->common.function_name, &retval);
+	}
 
 	zval_ptr_dtor(&member);
 
@@ -156,7 +161,7 @@ static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC) /* {{{ *
 }
 /* }}} */
 
-static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_DC) /* {{{ */
+static int zend_std_call_setter(zval *object, zval *member, zval *value, zend_function *func TSRMLS_DC) /* {{{ */
 {
 	zval *retval = NULL;
 	int result;
@@ -171,7 +176,11 @@ static int zend_std_call_setter(zval *object, zval *member, zval *value TSRMLS_D
 
 	   it should return whether the call was successfull or not
 	*/
-	zend_call_method_with_2_params(&object, ce, &ce->__set, ZEND_SET_FUNC_NAME, &retval, member, value);
+	if (func->common.num_args == 2) {
+		zend_call_method_with_2_params(&object, ce, &func, func->common.function_name, &retval, member, value);
+	} else {
+		zend_call_method_with_1_params(&object, ce, &func, func->common.function_name, &retval, value);
+	}
 
 	zval_ptr_dtor(&member);
 	zval_ptr_dtor(&value);
@@ -397,6 +406,62 @@ static int zend_get_property_guard(zend_object *zobj, zend_property_info *proper
 }
 /* }}} */
 
+zend_function inline *zend_locate_getter(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
+{
+	zend_object *zobj = Z_OBJ_P(object);
+	zend_accessor_info **ai;
+	ulong hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+
+	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
+		if((*ai)->flags & ZEND_ACC_WRITEONLY) {
+			if((*ai)->setter) {
+				zend_error_noreturn(E_ERROR, "Cannot get write-only property %s::$%s.", ZEND_FN_SCOPE_NAME((*ai)->setter), Z_STRVAL_P(member));
+			}
+		} else if((*ai)->getter) {
+			/* If public getter, no access check required */
+			if((*ai)->getter->common.fn_flags & ZEND_ACC_PUBLIC) {
+				return (*ai)->getter;
+			}
+			return zend_std_get_method(&object, (char *)(*ai)->getter->common.function_name, strlen((*ai)->getter->common.function_name), NULL TSRMLS_CC);
+		}
+		if((*ai)->setter) {
+			zend_error_noreturn(E_ERROR, "Cannot get property %s::$%s, no getter defined.", ZEND_FN_SCOPE_NAME((*ai)->setter), Z_STRVAL_P(member));
+		}
+		/* This technically shouldn't ever happen, this would mean that an accessor is defined but there is no getter or setter */
+		zend_error_noreturn(E_ERROR, "Cannot get property $%s, no getter or setter defined.", Z_STRVAL_P(member));
+	}
+	return zobj->ce->__get;
+}
+/* }}} */
+
+zend_function inline *zend_locate_setter(zval *object, zval *member, zend_guard *guard, const zend_literal *key TSRMLS_DC) /* {{{ */
+{
+	zend_object *zobj = Z_OBJ_P(object);
+	zend_accessor_info **ai;
+	ulong hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+
+	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
+		if((*ai)->flags & ZEND_ACC_READONLY) {
+			if((*ai)->getter) {
+				zend_error_noreturn(E_ERROR, "Cannot set read-only property %s::$%s.", ZEND_FN_SCOPE_NAME((*ai)->getter), Z_STRVAL_P(member));
+			}
+		} else if((*ai)->setter) {
+			/* If public setter, no access check required */
+			if((*ai)->setter->common.fn_flags & ZEND_ACC_PUBLIC) {
+				return (*ai)->setter;
+			}
+			return zend_std_get_method(&object, (char *)(*ai)->setter->common.function_name, strlen((*ai)->setter->common.function_name), NULL TSRMLS_CC);
+		}
+		if((*ai)->getter) {
+			zend_error_noreturn(E_ERROR, "Cannot set property %s::$%s, no setter defined.", ZEND_FN_SCOPE_NAME((*ai)->getter), Z_STRVAL_P(member));
+		}
+		/* This technically shouldn't ever happen, this would mean that an accessor is defined but there is no getter or setter */
+		zend_error_noreturn(E_ERROR, "Cannot set property $%s, no getter or setter defined.", Z_STRVAL_P(member));
+	}
+	return zobj->ce->__set;
+}
+/* }}} */
+
 zval *zend_std_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
@@ -434,18 +499,19 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 	            (*(retval = &zobj->properties_table[property_info->offset]) == NULL)) :
 	        (UNEXPECTED(!zobj->properties) ||
 	          UNEXPECTED(zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE)))) {
-		zend_guard *guard = NULL;
 
-		if (zobj->ce->__get &&
-		    zend_get_property_guard(zobj, property_info, member, &guard) == SUCCESS &&
-		    !guard->in_get) {
+		zend_guard *guard = NULL;
+		zend_function 		*getter = zend_locate_getter(object, member, key TSRMLS_CC);
+
+		if ( getter != NULL && zend_get_property_guard(zobj, property_info, member, &guard) == SUCCESS && !guard->in_get) {
 			/* have getter - try with it! */
+			
 			Z_ADDREF_P(object);
 			if (PZVAL_IS_REF(object)) {
 				SEPARATE_ZVAL(&object);
 			}
 			guard->in_get = 1; /* prevent circular getting */
-			rv = zend_std_call_getter(object, member TSRMLS_CC);
+			rv = zend_std_call_getter(object, member, getter TSRMLS_CC);
 			guard->in_get = 0;
 
 			if (rv) {
@@ -556,15 +622,17 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 	} else {
 		zend_guard *guard = NULL;
 
-		if (zobj->ce->__set &&
-		    zend_get_property_guard(zobj, property_info, member, &guard) == SUCCESS &&
-		    !guard->in_set) {
+		zend_get_property_guard(zobj, property_info, member, &guard);
+
+		zend_function 		*setter = zend_locate_setter(object, member, guard, key TSRMLS_CC);
+
+		if (setter && guard && !guard->in_set) {
 			Z_ADDREF_P(object);
 			if (PZVAL_IS_REF(object)) {
 				SEPARATE_ZVAL(&object);
 			}
 			guard->in_set = 1; /* prevent circular setting */
-			if (zend_std_call_setter(object, member, value TSRMLS_CC) != SUCCESS) {
+			if (zend_std_call_setter(object, member, value, setter TSRMLS_CC) != SUCCESS) {
 				/* for now, just ignore it - __set should take care of warnings, etc. */
 			}
 			guard->in_set = 0;
@@ -1020,8 +1088,12 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 			if (zobj->ce->__call) {
 				fbc = zend_get_user_call_function(zobj->ce, method_name, method_len);
 			} else {
+				if(fbc->op_array.fn_flags & ZEND_ACC_IS_ACCESSOR) {
+					zend_error_noreturn(E_ERROR, "Cannot %s %s property %s::$%s from context '%s'", zend_accessor_type_string(fbc->op_array.fn_flags), zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZEND_ACC_NAME(fbc), EG(scope) ? EG(scope)->name : "");
+				} else {
 				zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
 			}
+		}
 		}
 	} else {
 		/* Ensure that we haven't overridden a private function and end up calling
@@ -1046,10 +1118,14 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 				if (zobj->ce->__call) {
 					fbc = zend_get_user_call_function(zobj->ce, method_name, method_len);
 				} else {
+					if(fbc->op_array.fn_flags & ZEND_ACC_IS_ACCESSOR) {
+						zend_error_noreturn(E_ERROR, "Cannot %s %s property %s::$%s from context '%s'", zend_accessor_type_string(fbc->common.fn_flags), zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZEND_ACC_NAME(fbc), EG(scope) ? EG(scope)->name : "");
+					} else {
 					zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
 				}
 			}
 		}
+	}
 	}
 
 	if (UNEXPECTED(!key)) {
@@ -1187,8 +1263,12 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 			if (ce->__callstatic) {
 				fbc = zend_get_user_callstatic_function(ce, function_name_strval, function_name_strlen);
 			} else {
+				if(fbc->op_array.fn_flags & ZEND_ACC_IS_ACCESSOR) {
+					zend_error_noreturn(E_ERROR, "Cannot %s %s property %s::$%s from context '%s'", zend_accessor_type_string(fbc->common.fn_flags), zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZEND_ACC_NAME(fbc), EG(scope) ? EG(scope)->name : "");
+				} else {
 				zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name_strval, EG(scope) ? EG(scope)->name : "");
 			}
+		}
 		}
 	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
@@ -1197,9 +1277,13 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 			if (ce->__callstatic) {
 				fbc = zend_get_user_callstatic_function(ce, function_name_strval, function_name_strlen);
 			} else {
+				if(fbc->op_array.fn_flags & ZEND_ACC_IS_ACCESSOR) {
+					zend_error_noreturn(E_ERROR, "Cannot %s %s property %s::$%s from context '%s'", zend_accessor_type_string(fbc->common.fn_flags), zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZEND_ACC_NAME(fbc), EG(scope) ? EG(scope)->name : "");
+				} else {
 				zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name_strval, EG(scope) ? EG(scope)->name : "");
 			}
 		}
+	}
 	}
 
 	if (UNEXPECTED(!key)) {
@@ -1406,9 +1490,12 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 				result = zend_is_true(rv);
 				zval_ptr_dtor(&rv);
 				if (has_set_exists && result) {
-					if (EXPECTED(!EG(exception)) && zobj->ce->__get && !guard->in_get) {
+				
+					zend_function 		*getter = zend_locate_getter(object, member, key TSRMLS_CC);
+
+					if (EXPECTED(!EG(exception)) && getter && !guard->in_get) {
 						guard->in_get = 1;
-						rv = zend_std_call_getter(object, member TSRMLS_CC);
+						rv = zend_std_call_getter(object, member, getter TSRMLS_CC);
 						guard->in_get = 0;
 						if (rv) {
 							Z_ADDREF_P(rv);

@@ -1382,6 +1382,16 @@ void free_estring(char **str_p) /* {{{ */
 }
 /* }}} */
 
+/* Returns a new string of combined strings */
+char *strcatalloc(const char *a, const char *b) /* {{{ */
+{
+	char *out = estrndup(a, strlen(a) + strlen(b)+1);
+	memcpy(&out[strlen(a)], b, strlen(b)+1);
+	return out;
+}
+/* }}} */
+
+
 /*
  * Local variables:
  * tab-width: 4

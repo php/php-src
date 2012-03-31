@@ -1163,6 +1163,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_TRAIT;
 }
 
+<ST_IN_SCRIPTING>"read-only" {
+	return T_READONLY;
+}
+
+<ST_IN_SCRIPTING>"write-only" {
+	return T_WRITEONLY;
+}
+
 <ST_IN_SCRIPTING>"extends" {
 	return T_EXTENDS;
 }
