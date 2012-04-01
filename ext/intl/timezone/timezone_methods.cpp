@@ -84,6 +84,20 @@ U_CFUNC PHP_FUNCTION(intltz_get_gmt)
 	timezone_object_construct(TimeZone::getGMT(), return_value, 0 TSRMLS_CC);
 }
 
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+U_CFUNC PHP_FUNCTION(intltz_get_unknown)
+{
+	intl_error_reset(NULL TSRMLS_CC);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intltz_get_unknown: bad arguments", 0 TSRMLS_CC);
+		RETURN_NULL();
+	}
+
+	timezone_object_construct(&TimeZone::getUnknown(), return_value, 0 TSRMLS_CC);
+}
+#endif
 
 U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 {

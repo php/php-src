@@ -718,6 +718,9 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intltz_create_default, arginfo_tz_void )
 	PHP_FE( intltz_get_id, arginfo_tz_only_tz )
 	PHP_FE( intltz_get_gmt, arginfo_tz_void )
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+	PHP_FE( intltz_get_unknown, arginfo_tz_void )
+#endif
 	PHP_FE( intltz_create_enumeration, arginfo_tz_create_enumeration )
 	PHP_FE( intltz_count_equivalent_ids, arginfo_tz_idarg_static )
 	PHP_FE( intltz_create_time_zone_id_enumeration, arginfo_tz_create_time_zone_id_enumeration )

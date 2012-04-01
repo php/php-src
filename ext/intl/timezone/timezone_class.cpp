@@ -371,6 +371,9 @@ static zend_function_entry TimeZone_class_functions[] = {
 	PHP_ME_MAPPING(createTimeZone,		intltz_create_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createDefault,		intltz_create_default,			ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getGMT,				intltz_get_gmt,					ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+	PHP_ME_MAPPING(getUnknown,			intltz_get_unknown,				ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+#endif
 	PHP_ME_MAPPING(createEnumeration,	intltz_create_enumeration,		ainfo_tz_createEnumeration,	ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(countEquivalentIDs,	intltz_count_equivalent_ids,	ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createTimeZoneIDEnumeration, intltz_create_time_zone_id_enumeration, ainfo_tz_createTimeZoneIDEnumeration, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)

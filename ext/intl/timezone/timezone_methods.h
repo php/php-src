@@ -27,6 +27,8 @@ PHP_FUNCTION(intltz_get_id);
 
 PHP_FUNCTION(intltz_get_gmt);
 
+PHP_FUNCTION(intltz_get_unknown);
+
 PHP_FUNCTION(intltz_create_enumeration);
 
 PHP_FUNCTION(intltz_count_equivalent_ids);
