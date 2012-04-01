@@ -18,7 +18,7 @@ var_dump($lsb->getDisplayName());
 
 ?>
 ==DONE==
---EXPECT--
-string(21) "Western European Time"
-string(24) "Hora da Europa Ocidental"
+--EXPECTF--
+string(%d) "Western European%sTime"
+string(%d) "Hora%sda Europa Ocidental"
 ==DONE==

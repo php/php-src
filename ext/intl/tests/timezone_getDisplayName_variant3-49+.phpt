@@ -4,8 +4,8 @@ IntlTimeZone::getDisplayName(): locale parameter
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '49') >= 0)
-	die('skip for ICU <= 4.8');
+if (version_compare(INTL_ICU_VERSION, '49') < 0)
+	die('skip for ICU 49+');
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -22,7 +22,7 @@ var_dump($lsb->getDisplayName(false, IntlTimeZone::DISPLAY_LONG, 'pt_PT'));
 ?>
 ==DONE==
 --EXPECT--
-string(21) "Western European Time"
-string(21) "Western European Time"
-string(24) "Hora da Europa Ocidental"
-==DONE==
+string(30) "Western European Standard Time"
+string(30) "Western European Standard Time"
+string(32) "Hora Padrão da Europa Ocidental"
+==DONE==
