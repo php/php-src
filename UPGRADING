@@ -49,13 +49,13 @@ PHP X.Y UPGRADE NOTES
 5. New Functions
 ========================================
 
+- SPL:
+  - SplFixedArray::__wakeup()
 
 ========================================
 6. New Classes and Interfaces
 ========================================
 
-- SPL:
-  - SplFixedArray::__wakeup()
 
 ========================================
 7. Removed Extensions
