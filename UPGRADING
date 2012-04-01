@@ -49,6 +49,74 @@ PHP X.Y UPGRADE NOTES
 5. New Functions
 ========================================
 
+- Intl:
+  - intlcal_create_instance()
+  - intlcal_get_keyword_values_for_locale()
+  - intlcal_get_now()
+  - intlcal_get_available_locales()
+  - intlcal_get()
+  - intlcal_get_time()
+  - intlcal_set_time()
+  - intlcal_add()
+  - intlcal_set_time_zone()
+  - intlcal_after()
+  - intlcal_before()
+  - intlcal_set()
+  - intlcal_roll()
+  - intlcal_clear()
+  - intlcal_field_difference()
+  - intlcal_get_actual_maximum()
+  - intlcal_get_actual_minimum()
+  - intlcal_get_day_of_week_type()
+  - intlcal_get_first_day_of_week()
+  - intlcal_get_greatest_minimum()
+  - intlcal_get_least_maximum()
+  - intlcal_get_locale()
+  - intlcal_get_maximum()
+  - intlcal_get_minimal_days_in_first_week()
+  - intlcal_get_minimum()
+  - intlcal_get_time_zone()
+  - intlcal_get_type()
+  - intlcal_get_weekend_transition()
+  - intlcal_in_daylight_time()
+  - intlcal_is_equivalent_to()
+  - intlcal_is_lenient()
+  - intlcal_is_set()
+  - intlcal_is_weekend()
+  - intlcal_set_first_day_of_week()
+  - intlcal_set_lenient()
+  - intlcal_equals()
+  - intlcal_get_repeated_wall_time_option()
+  - intlcal_get_skipped_wall_time_option()
+  - intlcal_set_repeated_wall_time_option()
+  - intlcal_set_skipped_wall_time_option()
+  - intlcal_get_error_code()
+  - intlcal_get_error_message()
+  - intlgregcal_create_instance()
+  - intlgregcal_set_gregorian_change()
+  - intlgregcal_get_gregorian_change()
+  - intlgregcal_is_leap_year()
+  - intltz_create_time_zone()
+  - intltz_create_default()
+  - intltz_get_id()
+  - intltz_get_gmt()
+  - intltz_get_unknown()
+  - intltz_create_enumeration()
+  - intltz_count_equivalent_ids()
+  - intltz_create_time_zone_id_enumeration()
+  - intltz_get_canonical_id()
+  - intltz_get_region()
+  - intltz_get_tz_data_version()
+  - intltz_get_equivalent_id()
+  - intltz_use_daylight_time()
+  - intltz_get_offset()
+  - intltz_get_raw_offset()
+  - intltz_has_same_rules()
+  - intltz_get_display_name()
+  - intltz_get_dst_savings()
+  - intltz_get_error_code()
+  - intltz_get_error_message()
+
 - SPL:
   - SplFixedArray::__wakeup()
 
@@ -56,6 +124,10 @@ PHP X.Y UPGRADE NOTES
 6. New Classes and Interfaces
 ========================================
 
+- Intl:
+  - IntlCalendar
+  - IntlGregorianCalendar
+  - IntlTimeZone
 
 ========================================
 7. Removed Extensions
