@@ -10,31 +10,23 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
+   | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
-*/
+ */
 
-/* $Id$ */
-
-#ifndef LOCALE_LOCALE_H
-#define LOCALE_LOCALE_H
+#ifndef GREORIANCALENDAR_METHODS_H
+#define GREORIANCALENDAR_METHODS_H
 
 #include <php.h>
 
-void locale_register_constants( INIT_FUNC_ARGS );
+PHP_FUNCTION(intlgregcal_create_instance);
 
-const char *intl_locale_get_default( TSRMLS_D );
- 
-#define OPTION_DEFAULT NULL
-#define LOC_LANG_TAG "language"
-#define LOC_SCRIPT_TAG "script"
-#define LOC_REGION_TAG "region"
-#define LOC_VARIANT_TAG "variant"
-#define LOC_EXTLANG_TAG "extlang"
-#define LOC_GRANDFATHERED_LANG_TAG "grandfathered"
-#define LOC_PRIVATE_TAG "private"
-#define LOC_CANONICALIZE_TAG "canonicalize"
+PHP_METHOD(IntlGregorianCalendar, __construct);
 
-#define LOCALE_INI_NAME "intl.default_locale"
+PHP_FUNCTION(intlgregcal_set_gregorian_change);
 
-#endif // LOCALE_LOCALE_H
+PHP_FUNCTION(intlgregcal_get_gregorian_change);
+
+PHP_FUNCTION(intlgregcal_is_leap_year);
+
+#endif

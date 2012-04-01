@@ -10,31 +10,29 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
+   | Authors: Vadim Savchuk <vsavchuk@productengine.com>                  |
+   |          Dmitry Lakhtyuk <dlakhtyuk@productengine.com>               |
    +----------------------------------------------------------------------+
-*/
+ */
 
-/* $Id$ */
+#ifndef INTL_COMMON_ENUM_H
+#define INTL_COMMON_ENUM_H
 
-#ifndef LOCALE_LOCALE_H
-#define LOCALE_LOCALE_H
-
+#include <unicode/umachine.h>
+#ifdef __cplusplus
+#include <unicode/strenum.h>
+extern "C" {
+#include <math.h>
+#endif
 #include <php.h>
+#ifdef __cplusplus
+}
+#endif
 
-void locale_register_constants( INIT_FUNC_ARGS );
+#ifdef __cplusplus
+U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object TSRMLS_DC);
+#endif
 
-const char *intl_locale_get_default( TSRMLS_D );
- 
-#define OPTION_DEFAULT NULL
-#define LOC_LANG_TAG "language"
-#define LOC_SCRIPT_TAG "script"
-#define LOC_REGION_TAG "region"
-#define LOC_VARIANT_TAG "variant"
-#define LOC_EXTLANG_TAG "extlang"
-#define LOC_GRANDFATHERED_LANG_TAG "grandfathered"
-#define LOC_PRIVATE_TAG "private"
-#define LOC_CANONICALIZE_TAG "canonicalize"
+U_CFUNC void intl_register_IntlIterator_class(TSRMLS_D);
 
-#define LOCALE_INI_NAME "intl.default_locale"
-
-#endif // LOCALE_LOCALE_H
+#endif // INTL_COMMON_ENUM_H

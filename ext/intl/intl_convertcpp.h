@@ -10,31 +10,23 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
+   | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#ifndef LOCALE_LOCALE_H
-#define LOCALE_LOCALE_H
+#ifndef INTL_CONVERTCPP_H
+#define INTL_CONVERTCPP_H
 
-#include <php.h>
+#ifndef __cplusplus
+#error Should be included only in C++ Files
+#endif
 
-void locale_register_constants( INIT_FUNC_ARGS );
+#include <unicode/unistr.h>
 
-const char *intl_locale_get_default( TSRMLS_D );
- 
-#define OPTION_DEFAULT NULL
-#define LOC_LANG_TAG "language"
-#define LOC_SCRIPT_TAG "script"
-#define LOC_REGION_TAG "region"
-#define LOC_VARIANT_TAG "variant"
-#define LOC_EXTLANG_TAG "extlang"
-#define LOC_GRANDFATHERED_LANG_TAG "grandfathered"
-#define LOC_PRIVATE_TAG "private"
-#define LOC_CANONICALIZE_TAG "canonicalize"
+int intl_stringFromChar(UnicodeString &ret, char *str, int32_t str_len, UErrorCode *status);
 
-#define LOCALE_INI_NAME "intl.default_locale"
+int intl_charFromString(const UnicodeString &from, char **res, int *res_len, UErrorCode *status);
 
-#endif // LOCALE_LOCALE_H
+#endif /* INTL_CONVERTCPP_H */

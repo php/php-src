@@ -10,31 +10,51 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
+   | Authors: Gustavo Lopes <cataphract@netcabo.pt>                       |
    +----------------------------------------------------------------------+
-*/
+ */
 
-/* $Id$ */
-
-#ifndef LOCALE_LOCALE_H
-#define LOCALE_LOCALE_H
+#ifndef TIMEZONE_METHODS_H
+#define TIMEZONE_METHODS_H
 
 #include <php.h>
 
-void locale_register_constants( INIT_FUNC_ARGS );
+PHP_FUNCTION(intltz_create_time_zone);
 
-const char *intl_locale_get_default( TSRMLS_D );
- 
-#define OPTION_DEFAULT NULL
-#define LOC_LANG_TAG "language"
-#define LOC_SCRIPT_TAG "script"
-#define LOC_REGION_TAG "region"
-#define LOC_VARIANT_TAG "variant"
-#define LOC_EXTLANG_TAG "extlang"
-#define LOC_GRANDFATHERED_LANG_TAG "grandfathered"
-#define LOC_PRIVATE_TAG "private"
-#define LOC_CANONICALIZE_TAG "canonicalize"
+PHP_FUNCTION(intltz_create_default);
 
-#define LOCALE_INI_NAME "intl.default_locale"
+PHP_FUNCTION(intltz_get_id);
 
-#endif // LOCALE_LOCALE_H
+PHP_FUNCTION(intltz_get_gmt);
+
+PHP_FUNCTION(intltz_create_enumeration);
+
+PHP_FUNCTION(intltz_count_equivalent_ids);
+
+PHP_FUNCTION(intltz_create_time_zone_id_enumeration);
+
+PHP_FUNCTION(intltz_get_canonical_id);
+
+PHP_FUNCTION(intltz_get_region);
+
+PHP_FUNCTION(intltz_get_tz_data_version);
+
+PHP_FUNCTION(intltz_get_equivalent_id);
+
+PHP_FUNCTION(intltz_use_daylight_time);
+
+PHP_FUNCTION(intltz_get_offset);
+
+PHP_FUNCTION(intltz_get_raw_offset);
+
+PHP_FUNCTION(intltz_has_same_rules);
+
+PHP_FUNCTION(intltz_get_display_name);
+
+PHP_FUNCTION(intltz_get_dst_savings);
+
+PHP_FUNCTION(intltz_get_error_code);
+
+PHP_FUNCTION(intltz_get_error_message);
+
+#endif /* #ifndef TIMEZONE_METHODS_H */

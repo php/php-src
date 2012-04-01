@@ -7,7 +7,7 @@ if (PHP_INTL != "no") {
 	if (CHECK_LIB("icuuc.lib", "intl", PHP_INTL) &&
 					CHECK_HEADER_ADD_INCLUDE("unicode/utf.h", "CFLAGS_INTL")) {
 		// always build as shared - zend_strtod.c/ICU type conflict
-		EXTENSION("intl", "php_intl.c intl_convert.c intl_error.c ", true,
+		EXTENSION("intl", "php_intl.c intl_convert.c intl_convertcpp.cpp intl_error.c ", true,
 								"/I \"" + configure_module_dirname + "\"");
 		ADD_SOURCES(configure_module_dirname + "/collator", "\
 				collator.c \
@@ -23,6 +23,7 @@ if (PHP_INTL != "no") {
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/common", "\
 				common_error.c \
+				common_enum.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/formatter", "\
 				formatter.c \
@@ -87,6 +88,18 @@ if (PHP_INTL != "no") {
 				transliterator_class.c \
 				transliterator_methods.c",
 				"intl");
+		
+		ADD_SOURCES(configure_module_dirname + "/timezone", "\
+				timezone_class.cpp \
+				timezone_methods.cpp",
+				"intl");
+				
+		ADD_SOURCES(configure_module_dirname + "/calendar", "\
+				calendar_methods.cpp \
+				gregoriancalendar_methods.cpp \
+				calendar_class.cpp",
+				"intl");
+		
 		ADD_FLAG("LIBS_INTL", "icudt.lib icuin.lib icuio.lib icule.lib iculx.lib");
 		AC_DEFINE("HAVE_INTL", 1, "Internationalization support enabled");
 	} else {
