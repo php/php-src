@@ -1,5 +1,7 @@
 --TEST--
 IntlCalendar::roll() bool argument variation
+--INI--
+date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))

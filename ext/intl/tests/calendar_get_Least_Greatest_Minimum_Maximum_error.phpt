@@ -1,5 +1,7 @@
 --TEST--
 IntlCalendar::get/Least/Greatest/Minimum/Maximum(): bad arguments
+--INI--
+date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))

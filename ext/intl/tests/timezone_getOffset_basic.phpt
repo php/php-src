@@ -1,5 +1,7 @@
 --TEST--
 IntlTimeZone::getOffset(): basic test
+--INI--
+date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
