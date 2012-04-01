@@ -1019,6 +1019,93 @@ U_CFUNC PHP_FUNCTION(intlcal_equals)
 	RETURN_BOOL((int)result);
 }
 
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+
+U_CFUNC PHP_FUNCTION(intlcal_get_repeated_wall_time_option)
+{
+	CALENDAR_METHOD_INIT_VARS;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
+			"O", &object, Calendar_ce_ptr) == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_get_repeated_wall_time_option: bad arguments", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	CALENDAR_METHOD_FETCH_OBJECT;
+
+	RETURN_LONG(co->ucal->getRepeatedWallTimeOption());
+}
+
+U_CFUNC PHP_FUNCTION(intlcal_get_skipped_wall_time_option)
+{
+	CALENDAR_METHOD_INIT_VARS;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
+			"O", &object, Calendar_ce_ptr) == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_get_skipped_wall_time_option: bad arguments", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	CALENDAR_METHOD_FETCH_OBJECT;
+
+	RETURN_LONG(co->ucal->getSkippedWallTimeOption());
+}
+
+U_CFUNC PHP_FUNCTION(intlcal_set_repeated_wall_time_option)
+{
+	long	option;
+	CALENDAR_METHOD_INIT_VARS;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
+			"Ol", &object, Calendar_ce_ptr, &option) == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_set_repeated_wall_time_option: bad arguments", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	if (option != UCAL_WALLTIME_FIRST && option != UCAL_WALLTIME_LAST) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_set_repeated_wall_time_option: invalid option", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	CALENDAR_METHOD_FETCH_OBJECT;
+
+	co->ucal->setRepeatedWallTimeOption((UCalendarWallTimeOption)option);
+
+	RETURN_TRUE;
+}
+
+U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
+{
+	long	option;
+	CALENDAR_METHOD_INIT_VARS;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
+			"Ol", &object, Calendar_ce_ptr, &option) == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_set_skipped_wall_time_option: bad arguments", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	if (option != UCAL_WALLTIME_FIRST && option != UCAL_WALLTIME_LAST
+			&& option != UCAL_WALLTIME_NEXT_VALID) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_set_skipped_wall_time_option: invalid option", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	CALENDAR_METHOD_FETCH_OBJECT;
+
+	co->ucal->setSkippedWallTimeOption((UCalendarWallTimeOption)option);
+
+	RETURN_TRUE;
+}
+
+#endif
+
 U_CFUNC PHP_FUNCTION(intlcal_get_error_code)
 {
 	CALENDAR_METHOD_INIT_VARS;

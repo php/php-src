@@ -556,6 +556,11 @@ ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_set_lenient, 0, 0, 2 )
 	ZEND_ARG_INFO( 0, isLenient )
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_wall_time_option, 0, 0, 2 )
+	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
+	ZEND_ARG_INFO( 0, wallTimeOption )
+ZEND_END_ARG_INFO()
+
 /* Gregorian Calendar */
 ZEND_BEGIN_ARG_INFO_EX( ainfo_gregcal_create_instance, 0, 0, 0 )
 	ZEND_ARG_INFO(0, timeZoneOrYear)
@@ -765,6 +770,12 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intlcal_set_first_day_of_week, ainfo_cal_dow )
 	PHP_FE( intlcal_set_lenient, ainfo_cal_set_lenient )
 	PHP_FE( intlcal_equals, ainfo_cal_other_cal )
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+	PHP_FE( intlcal_get_repeated_wall_time_option, ainfo_cal_only_cal )
+	PHP_FE( intlcal_get_skipped_wall_time_option, ainfo_cal_only_cal )
+	PHP_FE( intlcal_set_repeated_wall_time_option, ainfo_cal_wall_time_option )
+	PHP_FE( intlcal_set_skipped_wall_time_option, ainfo_cal_wall_time_option )
+#endif
 	PHP_FE( intlcal_get_error_code, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_error_message, ainfo_cal_only_cal )
 

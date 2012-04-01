@@ -93,6 +93,14 @@ PHP_FUNCTION(intlcal_set_lenient);
 
 PHP_FUNCTION(intlcal_equals);
 
+PHP_FUNCTION(intlcal_get_repeated_wall_time_option);
+
+PHP_FUNCTION(intlcal_get_skipped_wall_time_option);
+
+PHP_FUNCTION(intlcal_set_repeated_wall_time_option);
+
+PHP_FUNCTION(intlcal_set_skipped_wall_time_option);
+
 PHP_FUNCTION(intlcal_get_error_code);
 
 PHP_FUNCTION(intlcal_get_error_message);

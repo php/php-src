@@ -351,6 +351,10 @@ ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setLenient, 0, 0, 1)
 	ZEND_ARG_INFO(0, isLenient)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_wall_time_option, 0, 0, 1)
+	ZEND_ARG_INFO(0, wallTimeOption)
+ZEND_END_ARG_INFO()
+
 /* Gregorian Calendar */
 ZEND_BEGIN_ARG_INFO_EX(ainfo_gregcal___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, timeZoneOrYear)
@@ -408,6 +412,12 @@ static const zend_function_entry Calendar_class_functions[] = {
 	PHP_ME_MAPPING(setFirstDayOfWeek,	intlcal_set_first_day_of_week, ainfo_cal_dow,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(setLenient,			intlcal_set_lenient,		ainfo_cal_setLenient,				ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(equals,				intlcal_equals,				ainfo_cal_other_cal,				ZEND_ACC_PUBLIC)
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+	PHP_ME_MAPPING(getRepeatedWallTimeOption,intlcal_get_repeated_wall_time_option,ainfo_cal_void,		ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getSkippedWallTimeOption,intlcal_get_skipped_wall_time_option,ainfo_cal_void,		ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(setRepeatedWallTimeOption,intlcal_set_repeated_wall_time_option,ainfo_cal_wall_time_option,ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(setSkippedWallTimeOption,intlcal_set_skipped_wall_time_option,ainfo_cal_wall_time_option,ZEND_ACC_PUBLIC)
+#endif
 	PHP_ME_MAPPING(getErrorCode,		intlcal_get_error_code,		ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getErrorMessage,		intlcal_get_error_message,	ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_FE_END
@@ -505,5 +515,10 @@ void calendar_register_IntlCalendar_class(TSRMLS_D)
 	CALENDAR_DECL_LONG_CONST("DOW_TYPE_WEEKEND_OFFSET",		UCAL_WEEKEND_ONSET);
 	CALENDAR_DECL_LONG_CONST("DOW_TYPE_WEEKEND_CEASE",		UCAL_WEEKEND_CEASE);
 
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+	CALENDAR_DECL_LONG_CONST("WALLTIME_FIRST",				UCAL_WALLTIME_FIRST);
+	CALENDAR_DECL_LONG_CONST("WALLTIME_LAST",				UCAL_WALLTIME_LAST);
+	CALENDAR_DECL_LONG_CONST("WALLTIME_NEXT_VALID",			UCAL_WALLTIME_NEXT_VALID);
+#endif
 }
 /* }}} */
