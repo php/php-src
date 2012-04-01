@@ -20,6 +20,9 @@
 //redefinition of inline in PHP headers causes problems, so include this before
 #include <math.h>
 
+//fixes the build on windows for old versions of ICU
+#include <stdio.h>
+
 #include <php.h>
 #include "intl_error.h"
 #include "intl_data.h"

@@ -16,6 +16,9 @@
 
 /* $Id$ */
 
+//Fixes the build on old versions of ICU with Windows
+#include <stdio.h>
+
 #include "intl_convertcpp.h"
 #include <unicode/ustring.h>
 extern "C" {

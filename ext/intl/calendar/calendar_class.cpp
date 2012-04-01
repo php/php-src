@@ -377,7 +377,9 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry Calendar_class_functions[] = {
 	PHP_ME(IntlCalendar,				__construct,				ainfo_cal_void,						ZEND_ACC_PRIVATE)
 	PHP_ME_MAPPING(createInstance,		intlcal_create_instance,	ainfo_cal_createInstance,			ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42
 	PHP_ME_MAPPING(getKeywordValuesForLocale, intlcal_get_keyword_values_for_locale, ainfo_cal_get_keyword_values_for_locale, ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+#endif
 	PHP_ME_MAPPING(getNow,				intlcal_get_now,			ainfo_cal_void,						ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getAvailableLocales,	intlcal_get_available_locales, ainfo_cal_void,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(get,					intlcal_get,				ainfo_cal_field,					ZEND_ACC_PUBLIC)
@@ -393,7 +395,9 @@ static const zend_function_entry Calendar_class_functions[] = {
 	PHP_ME_MAPPING(fieldDifference,		intlcal_field_difference,	ainfo_cal_field_difference,			ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getActualMaximum,	intlcal_get_actual_maximum,	ainfo_cal_field,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getActualMinimum,	intlcal_get_actual_minimum,	ainfo_cal_field,					ZEND_ACC_PUBLIC)
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_ME_MAPPING(getDayOfWeekType,	intlcal_get_day_of_week_type, ainfo_cal_dow,					ZEND_ACC_PUBLIC)
+#endif
 	PHP_ME_MAPPING(getFirstDayOfWeek,	intlcal_get_first_day_of_week, ainfo_cal_void,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getGreatestMinimum,	intlcal_get_greatest_minimum, ainfo_cal_field,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getLeastMaximum,		intlcal_get_least_maximum,	ainfo_cal_field,					ZEND_ACC_PUBLIC)
@@ -403,12 +407,16 @@ static const zend_function_entry Calendar_class_functions[] = {
 	PHP_ME_MAPPING(getMinimum,			intlcal_get_minimum,		ainfo_cal_field,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getTimeZone,			intlcal_get_time_zone,		ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getType,				intlcal_get_type,			ainfo_cal_void,						ZEND_ACC_PUBLIC)
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_ME_MAPPING(getWeekendTransition,intlcal_get_weekend_transition, ainfo_cal_dow,					ZEND_ACC_PUBLIC)
+#endif
 	PHP_ME_MAPPING(inDaylightTime,		intlcal_in_daylight_time,	ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(isEquivalentTo,		intlcal_is_equivalent_to,	ainfo_cal_other_cal,				ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(isLenient,			intlcal_is_lenient,			ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(isSet,				intlcal_is_set,				ainfo_cal_field,					ZEND_ACC_PUBLIC)
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_ME_MAPPING(isWeekend,			intlcal_is_weekend,			ainfo_cal_date_optional,			ZEND_ACC_PUBLIC)
+#endif
 	PHP_ME_MAPPING(setFirstDayOfWeek,	intlcal_set_first_day_of_week, ainfo_cal_dow,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(setLenient,			intlcal_set_lenient,		ainfo_cal_setLenient,				ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(equals,				intlcal_equals,				ainfo_cal_other_cal,				ZEND_ACC_PUBLIC)
@@ -510,10 +518,12 @@ void calendar_register_IntlCalendar_class(TSRMLS_D)
 	CALENDAR_DECL_LONG_CONST("DOW_FRIDAY",					UCAL_FRIDAY);
 	CALENDAR_DECL_LONG_CONST("DOW_SATURDAY",				UCAL_SATURDAY);
 
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	CALENDAR_DECL_LONG_CONST("DOW_TYPE_WEEKDAY",			UCAL_WEEKDAY);
 	CALENDAR_DECL_LONG_CONST("DOW_TYPE_WEEKEND",			UCAL_WEEKEND);
 	CALENDAR_DECL_LONG_CONST("DOW_TYPE_WEEKEND_OFFSET",		UCAL_WEEKEND_ONSET);
 	CALENDAR_DECL_LONG_CONST("DOW_TYPE_WEEKEND_CEASE",		UCAL_WEEKEND_CEASE);
+#endif
 
 #if U_ICU_VERSION_MAJOR_NUM >= 49
 	CALENDAR_DECL_LONG_CONST("WALLTIME_FIRST",				UCAL_WALLTIME_FIRST);

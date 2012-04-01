@@ -189,6 +189,7 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 	RETURN_LONG((long)result);
 }
 
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 {
 	long	zoneType,
@@ -243,6 +244,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 
 	IntlIterator_from_StringEnumeration(se, return_value TSRMLS_CC);
 }
+#endif
 
 U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 {
@@ -283,6 +285,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	}
 }
 
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 U_CFUNC PHP_FUNCTION(intltz_get_region)
 {
 	char	*str_id;
@@ -310,6 +313,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_region)
 
 	RETURN_STRINGL(outbuf, region_len, 1);
 }
+#endif
 
 U_CFUNC PHP_FUNCTION(intltz_get_tz_data_version)
 {
@@ -477,9 +481,11 @@ U_CFUNC PHP_FUNCTION(intltz_has_same_rules)
 
 static const TimeZone::EDisplayType display_types[] = {
 	TimeZone::SHORT,				TimeZone::LONG,
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	TimeZone::SHORT_GENERIC,		TimeZone::LONG_GENERIC,
 	TimeZone::SHORT_GMT,			TimeZone::LONG_GMT,
 	TimeZone::SHORT_COMMONLY_USED,	TimeZone::GENERIC_LOCATION
+#endif
 };
 
 U_CFUNC PHP_FUNCTION(intltz_get_display_name)

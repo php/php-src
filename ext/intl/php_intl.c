@@ -723,9 +723,13 @@ zend_function_entry intl_functions[] = {
 #endif
 	PHP_FE( intltz_create_enumeration, arginfo_tz_create_enumeration )
 	PHP_FE( intltz_count_equivalent_ids, arginfo_tz_idarg_static )
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 	PHP_FE( intltz_create_time_zone_id_enumeration, arginfo_tz_create_time_zone_id_enumeration )
+#endif
 	PHP_FE( intltz_get_canonical_id, arginfo_tz_get_canonical_id )
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 	PHP_FE( intltz_get_region, arginfo_tz_idarg_static )
+#endif
 	PHP_FE( intltz_get_tz_data_version, arginfo_tz_void )
 	PHP_FE( intltz_get_equivalent_id, arginfo_tz_get_equivalent_id )
 	PHP_FE( intltz_use_daylight_time, arginfo_tz_only_tz )
@@ -738,7 +742,9 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intltz_get_error_message, arginfo_tz_only_tz )
 
 	PHP_FE( intlcal_create_instance, ainfo_cal_create_instance )
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42
 	PHP_FE( intlcal_get_keyword_values_for_locale, ainfo_cal_get_keyword_values_for_locale )
+#endif
 	PHP_FE( intlcal_get_now, ainfo_cal_void )
 	PHP_FE( intlcal_get_available_locales, ainfo_cal_void )
 	PHP_FE( intlcal_get, ainfo_cal_field )
@@ -754,7 +760,9 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intlcal_field_difference, ainfo_cal_field_difference )
 	PHP_FE( intlcal_get_actual_maximum, ainfo_cal_field )
 	PHP_FE( intlcal_get_actual_minimum, ainfo_cal_field )
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_FE( intlcal_get_day_of_week_type, ainfo_cal_dow )
+#endif
 	PHP_FE( intlcal_get_first_day_of_week, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_greatest_minimum, ainfo_cal_field )
 	PHP_FE( intlcal_get_least_maximum, ainfo_cal_field )
@@ -764,12 +772,16 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intlcal_get_minimum, ainfo_cal_field )
 	PHP_FE( intlcal_get_time_zone, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_type, ainfo_cal_only_cal )
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_FE( intlcal_get_weekend_transition, ainfo_cal_dow )
+#endif
 	PHP_FE( intlcal_in_daylight_time, ainfo_cal_only_cal )
 	PHP_FE( intlcal_is_equivalent_to, ainfo_cal_other_cal )
 	PHP_FE( intlcal_is_lenient, ainfo_cal_only_cal )
 	PHP_FE( intlcal_is_set, ainfo_cal_field )
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	PHP_FE( intlcal_is_weekend, ainfo_cal_date_optional )
+#endif
 	PHP_FE( intlcal_set_first_day_of_week, ainfo_cal_dow )
 	PHP_FE( intlcal_set_lenient, ainfo_cal_set_lenient )
 	PHP_FE( intlcal_equals, ainfo_cal_other_cal )

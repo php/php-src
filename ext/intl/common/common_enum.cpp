@@ -18,6 +18,9 @@
 #include "config.h"
 #endif
 
+// Fix build on Windows/old versions of ICU
+#include <stdio.h>
+
 #include "common_enum.h"
 
 extern "C" {

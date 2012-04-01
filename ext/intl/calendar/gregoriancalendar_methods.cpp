@@ -140,7 +140,12 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		}
 
 		timelib_tzinfo *tzinfo = get_timezone_info(TSRMLS_C);
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 42
 		UnicodeString tzstr = UnicodeString::fromUTF8(StringPiece(tzinfo->name));
+#else
+		UnicodeString tzstr = UnicodeString(tzinfo->name,
+			strlen(tzinfo->name), US_INV);
+#endif
 		if (tzstr.isBogus()) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intlgregcal_create_instance: could not create UTF-8 string "
