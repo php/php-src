@@ -18,6 +18,9 @@
 #include "config.h"
 #endif
 
+// Fix build on Windows / old versions of ICU
+#include <stdio.h>
+
 #include <math.h>
 #include <unicode/msgfmt.h>
 #include <unicode/chariter.h>
