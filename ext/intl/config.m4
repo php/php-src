@@ -20,6 +20,7 @@ if test "$PHP_INTL" != "no"; then
   PHP_NEW_EXTENSION(intl, php_intl.c \
     intl_error.c \
     intl_convert.c \
+	intl_convertcpp.cpp \
     collator/collator.c \
     collator/collator_class.c \
     collator/collator_sort.c \
@@ -31,6 +32,7 @@ if test "$PHP_INTL" != "no"; then
     collator/collator_is_numeric.c \
     collator/collator_error.c \
     common/common_error.c \
+	common/common_enum.cpp \
     formatter/formatter.c \
     formatter/formatter_main.c \
     formatter/formatter_class.c \
@@ -65,8 +67,13 @@ if test "$PHP_INTL" != "no"; then
     transliterator/transliterator.c \
     transliterator/transliterator_class.c \
     transliterator/transliterator_methods.c \
+	timezone/timezone_class.cpp \
+	timezone/timezone_methods.cpp \
+	calendar/calendar_class.cpp \
+	calendar/calendar_methods.cpp \
+	calendar/gregoriancalendar_methods.cpp \
     idn/idn.c \
-    $icu_spoof_src, $ext_shared,,$ICU_INCS)
+    $icu_spoof_src, $ext_shared,,$ICU_INCS -Wno-write-strings)
   PHP_ADD_BUILD_DIR($ext_builddir/collator)
   PHP_ADD_BUILD_DIR($ext_builddir/common)
   PHP_ADD_BUILD_DIR($ext_builddir/formatter)
@@ -77,6 +84,8 @@ if test "$PHP_INTL" != "no"; then
   PHP_ADD_BUILD_DIR($ext_builddir/grapheme)
   PHP_ADD_BUILD_DIR($ext_builddir/resourcebundle)
   PHP_ADD_BUILD_DIR($ext_builddir/transliterator)
+  PHP_ADD_BUILD_DIR($ext_builddir/timezone)
+  PHP_ADD_BUILD_DIR($ext_builddir/calendar)
   PHP_ADD_BUILD_DIR($ext_builddir/idn)
   PHP_ADD_BUILD_DIR($ext_builddir/spoofchecker)
 fi
