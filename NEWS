@@ -3,6 +3,11 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.3.12
 
 ?? ??? 2012, PHP 5.3.11
+- Iconv extension:
+  . Fixed a bug that iconv extension fails to link to the correct library
+    when another extension makes use of a library that links to the iconv
+    library. See https://bugs.gentoo.org/show_bug.cgi?id=364139 for detail.
+    (Moriyoshi)
 
 (merge after 5.3.11 release)
 
