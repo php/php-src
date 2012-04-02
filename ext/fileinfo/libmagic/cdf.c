@@ -306,10 +306,10 @@ cdf_read(const cdf_info_t *info, off_t off, void *buf, size_t len)
 	if (info->i_fd == -1)
 		return -1;
 
-	if (lseek(info->i_fd, off, SEEK_SET) == (off_t)-1)
+	if (FINFO_LSEEK_FUNC(info->i_fd, off, SEEK_SET) == (off_t)-1)
 		return -1;
 
-	if (read(info->i_fd, buf, len) != (ssize_t)len)
+	if (FINFO_READ_FUNC(info->i_fd, buf, len) != (ssize_t)len)
 		return -1;
 
 	return (ssize_t)len;
