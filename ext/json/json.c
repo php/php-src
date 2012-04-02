@@ -73,6 +73,7 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_HEX_QUOT", PHP_JSON_HEX_QUOT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_FORCE_OBJECT", PHP_JSON_FORCE_OBJECT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_NUMERIC_CHECK", PHP_JSON_NUMERIC_CHECK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_PARTIAL_OUTPUT_ON_ERROR", PHP_JSON_PARTIAL_OUTPUT_ON_ERROR, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH, CONST_CS | CONST_PERSISTENT);
@@ -320,9 +321,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 		}
 		if (len < 0) {
 			JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
-			if (!PG(display_errors)) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid UTF-8 sequence in argument");
-			}
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid UTF-8 sequence in argument");
 			smart_str_appendl(buf, "null", 4);
 		} else {
 			smart_str_appendl(buf, "\"\"", 2);
@@ -571,7 +570,11 @@ static PHP_FUNCTION(json_encode)
 
 	php_json_encode(&buf, parameter, options TSRMLS_CC);
 
-	ZVAL_STRINGL(return_value, buf.c, buf.len, 1);
+	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE && options ^ PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
+		ZVAL_FALSE(return_value);
+	} else {
+		ZVAL_STRINGL(return_value, buf.c, buf.len, 1);
+	}
 
 	smart_str_free(&buf);
 }

@@ -29,7 +29,14 @@ json_encode($c);
 var_dump(json_last_error());
 ?>
 --EXPECTF--
+Warning: json_encode(): Invalid UTF-8 sequence in argument in %s on line %d
 int(5)
+
+Warning: json_encode(): Invalid UTF-8 sequence in argument in %s on line %d
 int(5)
+
+Warning: json_encode(): Invalid UTF-8 sequence in argument in %s on line %d
 int(5)
+
+Warning: json_encode(): Invalid UTF-8 sequence in argument in %s on line %d
 int(5)
