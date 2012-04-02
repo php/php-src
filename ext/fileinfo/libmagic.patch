@@ -1,6 +1,5 @@
-diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
---- libmagic.orig/apprentice.c	2012-03-28 12:00:34.017709605 +0200
-+++ libmagic/apprentice.c	2012-03-28 01:53:04.283305402 +0200
+--- libmagic.orig/apprentice.c	Mon Apr  2 16:46:43 2012
++++ libmagic/apprentice.c	Wed Mar 28 15:35:25 2012
 @@ -29,6 +29,8 @@
   * apprentice - make one pass through /etc/magic, learning its secrets.
   */
@@ -728,9 +727,8 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		m->str_range = swap4(m->str_range);
  		m->str_flags = swap4(m->str_flags);
  	}
-diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
---- libmagic.orig/ascmagic.c	2012-03-28 12:00:34.017709605 +0200
-+++ libmagic/ascmagic.c	2012-03-28 01:53:04.287303117 +0200
+--- libmagic.orig/ascmagic.c	Mon Apr  2 16:46:43 2012
++++ libmagic/ascmagic.c	Wed Mar 28 15:35:25 2012
 @@ -139,10 +139,8 @@
  		/* malloc size is a conservative overestimate; could be
  		   improved, or at least realloced after conversion. */
@@ -754,10 +752,8 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  
  	return rv;
  }
-Only in libmagic.orig: asprintf.c
-diff -u libmagic.orig/cdf.c libmagic/cdf.c
---- libmagic.orig/cdf.c	2012-03-28 12:00:34.012709598 +0200
-+++ libmagic/cdf.c	2012-03-28 01:53:04.299331601 +0200
+--- libmagic.orig/cdf.c	Mon Apr  2 16:46:43 2012
++++ libmagic/cdf.c	Mon Apr  2 16:41:41 2012
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -776,6 +772,19 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  #include <string.h>
  #include <time.h>
  #include <ctype.h>
+@@ -296,10 +306,10 @@
+ 	if (info->i_fd == -1)
+ 		return -1;
+ 
+-	if (lseek(info->i_fd, off, SEEK_SET) == (off_t)-1)
++	if (FINFO_LSEEK_FUNC(info->i_fd, off, SEEK_SET) == (off_t)-1)
+ 		return -1;
+ 
+-	if (read(info->i_fd, buf, len) != (ssize_t)len)
++	if (FINFO_READ_FUNC(info->i_fd, buf, len) != (ssize_t)len)
+ 		return -1;
+ 
+ 	return (ssize_t)len;
 @@ -1135,7 +1145,7 @@
  	cdf_directory_t *d;
  	char name[__arraycount(d->d_name)];
@@ -806,9 +815,8 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  				cdf_print_elapsed_time(buf, sizeof(buf), tp);
  				(void)fprintf(stderr, "timestamp %s\n", buf);
  			} else {
-diff -u libmagic.orig/cdf.h libmagic/cdf.h
---- libmagic.orig/cdf.h	2012-03-28 12:00:34.017709605 +0200
-+++ libmagic/cdf.h	2012-03-28 01:53:04.299331601 +0200
+--- libmagic.orig/cdf.h	Mon Apr  2 16:46:43 2012
++++ libmagic/cdf.h	Wed Mar 28 15:35:25 2012
 @@ -35,7 +35,7 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -844,9 +852,8 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  int cdf_read_header(const cdf_info_t *, cdf_header_t *);
  void cdf_swap_header(cdf_header_t *);
  void cdf_unpack_header(cdf_header_t *, char *);
-diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
---- libmagic.orig/cdf_time.c	2012-03-28 12:00:34.017709605 +0200
-+++ libmagic/cdf_time.c	2012-03-28 01:53:04.299331601 +0200
+--- libmagic.orig/cdf_time.c	Mon Apr  2 16:46:43 2012
++++ libmagic/cdf_time.c	Wed Mar 28 15:35:25 2012
 @@ -96,7 +96,7 @@
  }
  
@@ -903,9 +910,8 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  	static const cdf_timestamp_t tst = 0x01A5E403C2D59C00ULL;
  	static const char *ref = "Sat Apr 23 01:30:00 1977";
  	char *p, *q;
-diff -u libmagic.orig/compress.c libmagic/compress.c
---- libmagic.orig/compress.c	2012-03-28 12:00:34.012709598 +0200
-+++ libmagic/compress.c	2012-03-28 01:53:04.299331601 +0200
+--- libmagic.orig/compress.c	Mon Apr  2 16:46:43 2012
++++ libmagic/compress.c	Mon Apr  2 16:41:41 2012
 @@ -32,6 +32,7 @@
   *	uncompress(method, old, n, newch) - uncompress old into new, 
   *					    using method, return sizeof new
@@ -990,7 +996,23 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  		for (cnt = 0;; cnt++) {
  			fd_set check;
  			struct timeval tout = {0, 100 * 1000};
-@@ -301,7 +307,8 @@
+@@ -218,7 +224,7 @@
+ 
+ nocheck:
+ 	do
+-		switch ((rv = read(fd, buf, n))) {
++		switch ((rv = FINFO_READ_FUNC(fd, buf, n))) {
+ 		case -1:
+ 			if (errno == EINTR)
+ 				continue;
+@@ -295,13 +301,14 @@
+ 		return -1;
+ 	}
+ 	(void)close(tfd);
+-	if (lseek(fd, (off_t)0, SEEK_SET) == (off_t)-1) {
++	if (FINFO_LSEEK_FUNC(fd, (off_t)0, SEEK_SET) == (off_t)-1) {
+ 		file_badseek(ms);
+ 		return -1;
  	}
  	return fd;
  }
@@ -1011,6 +1033,15 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  	
  	/* XXX: const castaway, via strchr */
  	z.next_in = (Bytef *)strchr((const char *)old + data_start,
+@@ -400,7 +405,7 @@
+ 		(void) close(0);
+ 		if (fd != -1) {
+ 		    (void) dup(fd);
+-		    (void) lseek(0, (off_t)0, SEEK_SET);
++		    (void) FINFO_LSEEK_FUNC(0, (off_t)0, SEEK_SET);
+ 		} else {
+ 		    (void) dup(fdin[0]);
+ 		    (void) close(fdin[0]);
 @@ -465,20 +470,14 @@
  			fdin[1] = -1;
  		}
@@ -1041,11 +1072,8 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  }
 -#endif
 +#endif /* if PHP_FILEINFO_UNCOMPRESS */
-Only in libmagic: config.h
-Only in libmagic.orig: file.c
-diff -u libmagic.orig/file.h libmagic/file.h
---- libmagic.orig/file.h	2012-03-28 12:00:34.017709605 +0200
-+++ libmagic/file.h	2012-03-28 01:53:04.304322598 +0200
+--- libmagic.orig/file.h	Mon Apr  2 16:46:43 2012
++++ libmagic/file.h	Mon Apr  2 16:41:41 2012
 @@ -33,11 +33,9 @@
  #ifndef __file_h__
  #define __file_h__
@@ -1197,10 +1225,23 @@ diff -u libmagic.orig/file.h libmagic/file.h
  size_t strlcat(char *dst, const char *src, size_t siz);
  #endif
  #ifndef HAVE_GETLINE
-Only in libmagic.orig: file_opts.h
-diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
---- libmagic.orig/fsmagic.c	2012-03-28 12:00:34.012709598 +0200
-+++ libmagic/fsmagic.c	2012-03-28 01:53:04.304322598 +0200
+@@ -498,6 +484,14 @@
+ #endif
+ #else
+ #define FILE_RCSID(id)
++#endif
++
++#ifdef PHP_WIN32
++#define FINFO_LSEEK_FUNC _lseek
++#define FINFO_READ_FUNC _read
++#else
++#define FINFO_LSEEK_FUNC lseek
++#define FINFO_READ_FUNC read
+ #endif
+ 
+ #endif /* __file_h__ */
+--- libmagic.orig/fsmagic.c	Mon Apr  2 16:46:43 2012
++++ libmagic/fsmagic.c	Wed Mar 28 15:35:26 2012
 @@ -59,27 +59,21 @@
  # define minor(dev)  ((dev) & 0xff)
  #endif
@@ -1411,10 +1452,10 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
 -#else
 -			if (file_printf(ms, "block special") == -1)
 -				return -1;
--#endif
+ #endif
 -		}
 -		return 1;
- #endif
+-#endif
 -	/* TODO add code to handle V7 MUX and Blit MUX files */
 +
  #ifdef	S_IFIFO
@@ -1523,9 +1564,8 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
  	}
  
  	/*
-diff -u libmagic.orig/funcs.c libmagic/funcs.c
---- libmagic.orig/funcs.c	2012-03-28 12:00:34.012709598 +0200
-+++ libmagic/funcs.c	2012-03-28 11:49:56.089607390 +0200
+--- libmagic.orig/funcs.c	Mon Apr  2 16:46:43 2012
++++ libmagic/funcs.c	Fri Mar 30 16:43:40 2012
 @@ -41,52 +41,42 @@
  #if defined(HAVE_WCTYPE_H)
  #include <wctype.h>
@@ -1819,12 +1859,8 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
 +	return rep_cnt;
  }
 +
-Only in libmagic.orig: getline.c
-Only in libmagic.orig: getopt_long.c
-Only in libmagic: LICENSE
-diff -u libmagic.orig/magic.c libmagic/magic.c
---- libmagic.orig/magic.c	2012-03-28 12:00:34.012709598 +0200
-+++ libmagic/magic.c	2012-03-28 11:42:50.404750579 +0200
+--- libmagic.orig/magic.c	Mon Apr  2 16:46:43 2012
++++ libmagic/magic.c	Mon Apr  2 12:38:04 2012
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
   */
@@ -2200,9 +2236,8 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  
  public const char *
  magic_error(struct magic_set *ms)
-diff -u libmagic.orig/magic.h libmagic/magic.h
---- libmagic.orig/magic.h	2012-03-28 12:00:34.017709605 +0200
-+++ libmagic/magic.h	2012-03-28 01:53:04.304322598 +0200
+--- libmagic.orig/magic.h	Mon Apr  2 16:46:43 2012
++++ libmagic/magic.h	Wed Mar 28 15:35:26 2012
 @@ -85,6 +85,7 @@
  
  const char *magic_getpath(const char *, int);
@@ -2219,14 +2254,8 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  int magic_list(magic_t, const char *);
  int magic_errno(magic_t);
  
-Only in libmagic.orig: Makefile.am
-Only in libmagic.orig: Makefile.in
-Only in libmagic.orig: mygetopt.h
-Only in libmagic: names.h
-Only in libmagic: patchlevel.h
-diff -u libmagic.orig/print.c libmagic/print.c
---- libmagic.orig/print.c	2012-03-28 12:00:34.017709605 +0200
-+++ libmagic/print.c	2012-03-28 01:53:04.304322598 +0200
+--- libmagic.orig/print.c	Mon Apr  2 16:46:43 2012
++++ libmagic/print.c	Wed Mar 28 19:58:09 2012
 @@ -29,6 +29,9 @@
   * print.c - debugging printout routines
   */
@@ -2419,9 +2448,8 @@ diff -u libmagic.orig/print.c libmagic/print.c
  }
  
  protected const char *
-diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
---- libmagic.orig/readcdf.c	2012-03-28 12:00:34.012709598 +0200
-+++ libmagic/readcdf.c	2012-03-28 01:53:04.304322598 +0200
+--- libmagic.orig/readcdf.c	Mon Apr  2 16:46:43 2012
++++ libmagic/readcdf.c	Wed Mar 28 15:35:26 2012
 @@ -30,7 +30,11 @@
  #endif
  
@@ -2467,9 +2495,8 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
                                          c = cdf_ctime(&ts.tv_sec);
                                          if ((ec = strchr(c, '\n')) != NULL)
                                                  *ec = '\0';
-diff -u libmagic.orig/readelf.c libmagic/readelf.c
---- libmagic.orig/readelf.c	2012-03-28 12:00:34.017709605 +0200
-+++ libmagic/readelf.c	2012-03-28 01:53:04.308322618 +0200
+--- libmagic.orig/readelf.c	Mon Apr  2 16:46:43 2012
++++ libmagic/readelf.c	Mon Apr  2 16:41:41 2012
 @@ -49,7 +49,7 @@
      off_t, int *, int);
  private int doshn(struct magic_set *, int, int, int, off_t, int, size_t,
@@ -2479,6 +2506,34 @@ diff -u libmagic.orig/readelf.c libmagic/readelf.c
      int, size_t, int *);
  
  #define	ELF_ALIGN(a)	((((a) + align - 1) / align) * align)
+@@ -309,11 +309,11 @@
+ 	 * Loop through all the program headers.
+ 	 */
+ 	for ( ; num; num--) {
+-		if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
++		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (off_t)-1) {
+ 			file_badseek(ms);
+ 			return -1;
+ 		}
+-		if (read(fd, xph_addr, xph_sizeof) == -1) {
++		if (FINFO_READ_FUNC(fd, xph_addr, xph_sizeof) == -1) {
+ 			file_badread(ms);
+ 			return -1;
+ 		}
+@@ -331,11 +331,11 @@
+ 		 * This is a PT_NOTE section; loop through all the notes
+ 		 * in the section.
+ 		 */
+-		if (lseek(fd, xph_offset, SEEK_SET) == (off_t)-1) {
++		if (FINFO_LSEEK_FUNC(fd, xph_offset, SEEK_SET) == (off_t)-1) {
+ 			file_badseek(ms);
+ 			return -1;
+ 		}
+-		bufsize = read(fd, nbuf,
++		bufsize = FINFO_READ_FUNC(fd, nbuf,
+ 		    ((xph_filesz < sizeof(nbuf)) ? xph_filesz : sizeof(nbuf)));
+ 		if (bufsize == -1) {
+ 			file_badread(ms);
 @@ -357,7 +357,7 @@
  #endif
  
@@ -2496,6 +2551,20 @@ diff -u libmagic.orig/readelf.c libmagic/readelf.c
  
  	(void)memcpy(xnh_addr, &nbuf[offset], xnh_sizeof);
  	offset += xnh_sizeof;
+@@ -859,11 +858,11 @@
+ 	}
+ 
+ 	for ( ; num; num--) {
+-		if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
++		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (off_t)-1) {
+ 			file_badseek(ms);
+ 			return -1;
+ 		}
+-		if (read(fd, xsh_addr, xsh_sizeof) == -1) {
++		if (FINFO_READ_FUNC(fd, xsh_addr, xsh_sizeof) == -1) {
+ 			file_badread(ms);
+ 			return -1;
+ 		}
 @@ -888,20 +887,16 @@
  		/* Things we can determine when we seek */
  		switch (xsh_type) {
@@ -2505,22 +2574,24 @@ diff -u libmagic.orig/readelf.c libmagic/readelf.c
 -				    " for note");
 -				return -1;
 -			}
+-			if ((noff = lseek(fd, (off_t)xsh_offset, SEEK_SET)) ==
 +			nbuf = emalloc((size_t)xsh_size);
- 			if ((noff = lseek(fd, (off_t)xsh_offset, SEEK_SET)) ==
++			if ((noff = FINFO_LSEEK_FUNC(fd, (off_t)xsh_offset, SEEK_SET)) ==
  			    (off_t)-1) {
  				file_badread(ms);
 -				free(nbuf);
 +				efree(nbuf);
  				return -1;
  			}
- 			if (read(fd, nbuf, (size_t)xsh_size) !=
+-			if (read(fd, nbuf, (size_t)xsh_size) !=
++			if (FINFO_READ_FUNC(fd, nbuf, (size_t)xsh_size) !=
  			    (ssize_t)xsh_size) {
 -				free(nbuf);
 +				efree(nbuf);
  				file_badread(ms);
  				return -1;
  			}
-@@ -916,7 +911,7 @@
+@@ -916,10 +911,10 @@
  				if (noff == 0)
  					break;
  			}
@@ -2528,10 +2599,60 @@ diff -u libmagic.orig/readelf.c libmagic/readelf.c
 +			efree(nbuf);
  			break;
  		case SHT_SUNW_cap:
- 			if (lseek(fd, (off_t)xsh_offset, SEEK_SET) ==
-diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
---- libmagic.orig/softmagic.c	2012-03-28 12:00:34.012709598 +0200
-+++ libmagic/softmagic.c	2012-03-28 01:53:04.308322618 +0200
+-			if (lseek(fd, (off_t)xsh_offset, SEEK_SET) ==
++			if (FINFO_LSEEK_FUNC(fd, (off_t)xsh_offset, SEEK_SET) ==
+ 			    (off_t)-1) {
+ 				file_badseek(ms);
+ 				return -1;
+@@ -932,7 +927,7 @@
+ 				    MAX(sizeof cap32, sizeof cap64)];
+ 				if ((coff += xcap_sizeof) > (off_t)xsh_size)
+ 					break;
+-				if (read(fd, cbuf, (size_t)xcap_sizeof) !=
++				if (FINFO_READ_FUNC(fd, cbuf, (size_t)xcap_sizeof) !=
+ 				    (ssize_t)xcap_sizeof) {
+ 					file_badread(ms);
+ 					return -1;
+@@ -1051,12 +1046,12 @@
+ 	}
+ 
+   	for ( ; num; num--) {
+-		if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
++		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (off_t)-1) {
+ 			file_badseek(ms);
+ 			return -1;
+ 		}
+ 
+-  		if (read(fd, xph_addr, xph_sizeof) == -1) {
++  		if (FINFO_READ_FUNC(fd, xph_addr, xph_sizeof) == -1) {
+   			file_badread(ms);
+ 			return -1;
+ 		}
+@@ -1095,11 +1090,11 @@
+ 			 * This is a PT_NOTE section; loop through all the notes
+ 			 * in the section.
+ 			 */
+-			if (lseek(fd, xph_offset, SEEK_SET) == (off_t)-1) {
++			if (FINFO_LSEEK_FUNC(fd, xph_offset, SEEK_SET) == (off_t)-1) {
+ 				file_badseek(ms);
+ 				return -1;
+ 			}
+-			bufsize = read(fd, nbuf, ((xph_filesz < sizeof(nbuf)) ?
++			bufsize = FINFO_READ_FUNC(fd, nbuf, ((xph_filesz < sizeof(nbuf)) ?
+ 			    xph_filesz : sizeof(nbuf)));
+ 			if (bufsize == -1) {
+ 				file_badread(ms);
+@@ -1161,7 +1156,7 @@
+ 	/*
+ 	 * If we cannot seek, it must be a pipe, socket or fifo.
+ 	 */
+-	if((lseek(fd, (off_t)0, SEEK_SET) == (off_t)-1) && (errno == ESPIPE))
++	if((FINFO_LSEEK_FUNC(fd, (off_t)0, SEEK_SET) == (off_t)-1) && (errno == ESPIPE))
+ 		fd = file_pipe2file(ms, fd, buf, nbytes);
+ 
+ 	if (fstat(fd, &st) == -1) {
+--- libmagic.orig/softmagic.c	Mon Apr  2 16:46:43 2012
++++ libmagic/softmagic.c	Wed Mar 28 15:35:26 2012
 @@ -41,6 +41,11 @@
  #include <stdlib.h>
  #include <time.h>
@@ -2999,6 +3120,3 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  	default:
  		file_magerror(ms, "invalid type %d in magiccheck()", m->type);
  		return -1;
-Only in libmagic.orig: strlcat.c
-Only in libmagic.orig: strlcpy.c
-Only in libmagic.orig: vasprintf.c
