@@ -4,12 +4,12 @@
 #
 # Usage: makedist version
 # Example: makedist 5.4.1
-# Example: makedist 5.3.5-RC1
+# Example: makedist 5.3.5RC1
 #
 # To work, this script needs a consistent tagging of all releases.
 # Each release of a package should have a tag of the form
 #
-#  PHP-X.Y.Z[-sub]
+#  php-X.Y.Z[sub]
 #
 # The distribution ends up in a .tar.gz file that contains the distribution
 # in a directory called php-<version>.  
@@ -63,8 +63,8 @@ if test -d "$DIRPATH"; then
 fi
 
 # Export PHP
-$ECHO_N "makedist: exporting tag 'PHP-$VER' from '$PHPROOT'...$ECHO_C"
-git archive --format=tar --remote=$PHPROOT refs/tags/PHP-$VER --prefix=php-$VER/ | (cd $MY_OLDPWD; tar xvf -) || exit 4
+$ECHO_N "makedist: exporting tag 'php-$VER' from '$PHPROOT'...$ECHO_C"
+git archive --format=tar --remote=$PHPROOT refs/tags/php-$VER --prefix=php-$VER/ | (cd $MY_OLDPWD; tar xvf -) || exit 4
 echo ""
 
 cd $DIR || exit 5
