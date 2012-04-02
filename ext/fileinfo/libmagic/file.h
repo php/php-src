@@ -486,4 +486,12 @@ static const char *rcsid(const char *p) { \
 #define FILE_RCSID(id)
 #endif
 
+#ifdef PHP_WIN32
+#define FINFO_LSEEK_FUNC _lseek
+#define FINFO_READ_FUNC _read
+#else
+#define FINFO_LSEEK_FUNC lseek
+#define FINFO_READ_FUNC read
+#endif
+
 #endif /* __file_h__ */

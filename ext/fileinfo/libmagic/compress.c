@@ -224,7 +224,7 @@ sread(int fd, void *buf, size_t n, int canbepipe)
 
 nocheck:
 	do
-		switch ((rv = read(fd, buf, n))) {
+		switch ((rv = FINFO_READ_FUNC(fd, buf, n))) {
 		case -1:
 			if (errno == EINTR)
 				continue;
@@ -301,7 +301,7 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 		return -1;
 	}
 	(void)close(tfd);
-	if (lseek(fd, (off_t)0, SEEK_SET) == (off_t)-1) {
+	if (FINFO_LSEEK_FUNC(fd, (off_t)0, SEEK_SET) == (off_t)-1) {
 		file_badseek(ms);
 		return -1;
 	}
@@ -405,7 +405,7 @@ uncompressbuf(struct magic_set *ms, int fd, size_t method,
 		(void) close(0);
 		if (fd != -1) {
 		    (void) dup(fd);
-		    (void) lseek(0, (off_t)0, SEEK_SET);
+		    (void) FINFO_LSEEK_FUNC(0, (off_t)0, SEEK_SET);
 		} else {
 		    (void) dup(fdin[0]);
 		    (void) close(fdin[0]);

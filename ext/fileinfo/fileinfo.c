@@ -510,11 +510,22 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			wrap = php_stream_locate_url_wrapper(buffer, &tmp2, 0 TSRMLS_CC);
 
 			if (wrap) {
+				php_stream *stream;
 				php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
+
+#ifdef PHP_WIN32
+				if (php_stream_stat_path_ex(buffer, 0, &ssb, context) == SUCCESS) {
+					if (ssb.sb.st_mode & S_IFDIR) {
+						ret_val = mime_directory;
+						goto common;
+					}
+				}
+#endif
+
 #if PHP_API_VERSION < 20100412
-				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
+				stream = php_stream_open_wrapper_ex(buffer, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
 #else
-				php_stream *stream = php_stream_open_wrapper_ex(buffer, "rb", REPORT_ERRORS, NULL, context);
+				stream = php_stream_open_wrapper_ex(buffer, "rb", REPORT_ERRORS, NULL, context);
 #endif
 
 				if (!stream) {

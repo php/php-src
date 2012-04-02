@@ -27,11 +27,11 @@ var_dump( new finfo('foobar') );
 --EXPECTF--
 *** Testing finfo_open() : error functionality ***
 
-Warning: finfo_open(%s/foobarfile): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(%sfoobarfile): failed to open stream: No such file or directory in %s on line %d
 
-Warning: finfo_open(%s/foobarfile): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_open(%sfoobarfile): failed to open stream: No such file or directory in %s on line %d
 
-Warning: finfo_open(): Failed to load magic database at '%s/foobarfile'. in %s on line %d
+Warning: finfo_open(): Failed to load magic database at '%sfoobarfile'. in %s on line %d
 bool(false)
 
 Warning: finfo_open() expects parameter 1 to be long, array given in %s on line %d
