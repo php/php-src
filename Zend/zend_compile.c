@@ -1630,6 +1630,20 @@ void zend_declare_accessor(znode *var_name TSRMLS_DC) { /* {{{ */
 
 	/* Locate or create accessor_info structure */
 	if(zend_hash_quick_find(&CG(active_class_entry)->accessors, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant)+1, hash_value, (void**) &aipp) != SUCCESS) {
+
+		/* Inheritence check for read-only & write-only */
+		if(CG(active_class_entry)->parent != NULL) {
+			zend_class_entry *parent = CG(active_class_entry)->parent;
+
+			if(zend_hash_quick_find(&parent->accessors, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant)+1, hash_value, (void**) &aipp) == SUCCESS) {
+				ai = *aipp;
+				if(ai->flags & ZEND_ACC_WRITEONLY && !(CG(access_type) & ZEND_ACC_WRITEONLY))
+					zend_error(E_COMPILE_ERROR, "$%s must be declared write-only as in parent class %s.", Z_STRVAL(var_name->u.constant), parent->name);
+				if(ai->flags & ZEND_ACC_READONLY && !(CG(access_type) & ZEND_ACC_READONLY))
+					zend_error(E_COMPILE_ERROR, "$%s must be declared read-only as in parent class %s.", Z_STRVAL(var_name->u.constant), parent->name);
+			}
+		}
+
 		ai = emalloc(sizeof(zend_accessor_info));
 		memset(ai, 0, sizeof(zend_accessor_info));
 		ai->flags = CG(access_type);
