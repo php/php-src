@@ -32,4 +32,4 @@ class implem13 implements constr1, constr3
 
 ?>
 --EXPECTF--
-Fatal error: Declaration of implem13::__construct() must be compatible with constr3::__construct($a) in %s on line %d
+Fatal error: Declaration of implem13::__construct() must be compatible with that of constr3::__construct() in %sctor_in_interface_02.php on line %d
