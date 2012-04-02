@@ -61,6 +61,7 @@ static ZEND_FUNCTION(crash);
 #endif
 #endif
 static ZEND_FUNCTION(get_included_files);
+static ZEND_FUNCTION(is_using);
 static ZEND_FUNCTION(is_subclass_of);
 static ZEND_FUNCTION(is_a);
 static ZEND_FUNCTION(get_class_vars);
@@ -273,6 +274,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 #endif
 	ZEND_FE(get_included_files,	arginfo_zend__void)
 	ZEND_FALIAS(get_required_files,	get_included_files,		arginfo_zend__void)
+	ZEND_FE(is_using,			arginfo_is_subclass_of)
 	ZEND_FE(is_subclass_of,		arginfo_is_subclass_of)
 	ZEND_FE(is_a,				arginfo_is_subclass_of)
 	ZEND_FE(get_class_vars,		arginfo_get_class_vars)
@@ -880,6 +882,59 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 
 	RETURN_BOOL(retval);
 }
+
+static void is_using_impl(INTERNAL_FUNCTION_PARAMETERS) {
+	zval *obj;
+	char *class_name;
+	int class_name_len;
+	zend_class_entry *instance_ce;
+	zend_class_entry **trait_ce;
+	zend_bool allow_string = 1;
+	zend_uint i;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs|b", &obj, &class_name, &class_name_len, &allow_string) == FAILURE) {
+		return;
+	}
+	/*
+	 * allow_string - if it's allowed, then the autoloader will be called if the class does not exist.
+	 */
+
+	if (allow_string && Z_TYPE_P(obj) == IS_STRING) {
+		zend_class_entry **the_ce;
+		if (zend_lookup_class(Z_STRVAL_P(obj), Z_STRLEN_P(obj), &the_ce TSRMLS_CC) == FAILURE) {
+			RETURN_FALSE;
+		}
+		instance_ce = *the_ce;
+	} else if (Z_TYPE_P(obj) == IS_OBJECT && HAS_CLASS_ENTRY(*obj)) {
+		instance_ce = Z_OBJCE_P(obj);
+	} else {
+		RETURN_FALSE;
+	}
+
+	if (zend_lookup_class_ex(class_name, class_name_len, NULL, 0, &trait_ce TSRMLS_CC) != FAILURE) {
+		// go up the class hierarchy
+		while (instance_ce) {
+			for (i=0; i < instance_ce->num_traits; i++) {
+				if (instance_ce->traits[i] == *trait_ce) {
+					// trait found
+					RETURN_TRUE;
+				}
+			}
+			instance_ce = instance_ce->parent;
+		}
+	}
+
+	RETURN_FALSE;
+}
+
+
+/* {{{ proto bool is_using(mixed object_or_string, string trait_name [, bool allow_string=true])
+   Returns true if the object uses this trait */
+ZEND_FUNCTION(is_using)
+{
+	is_using_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
 
 
 /* {{{ proto bool is_subclass_of(mixed object_or_string, string class_name [, bool allow_string=true])
