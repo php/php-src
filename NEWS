@@ -8,6 +8,14 @@ PHP                                                                        NEWS
     $_SERVER['SCRIPT_FILENAME'] when using router). (Laruence)
   . "Connection: close" instead of "Connection: closed" (Gustavo)
 
+- JSON
+  . Fixed bug #61537 (json_encode() incorrectly truncates/discards
+    information). (Adam)
+
+?? ??? 2012, PHP 5.3.11
+
+(merge after 5.3.11 release)
+
 - Core:
   . Fixed bug #61660 (bin2hex(hex2bin($data)) != $data). (Nikita Popov)
   . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
