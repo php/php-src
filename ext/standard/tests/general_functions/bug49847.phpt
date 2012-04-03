@@ -9,7 +9,7 @@ if ($iswin) {
 	$s = str_repeat(' ', 4097);
 	$s .= '1';
 	file_put_contents($f, $s);
-	exec('more ' . $f, $output);
+	exec('type ' . $f, $output);
 } else {
 	exec("printf %4098d 1", $output);
 }
