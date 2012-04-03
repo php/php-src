@@ -100,6 +100,8 @@ PHP                                                                        NEWS
     bytes). (Nikita Popov)
 
 - Reflection:
+  . Implemented FR #61602 (Allow access to the name of constant
+    used as function/method parameter's default value). (reeze.xia@gmail.com)
   . Fixed bug #60968 (Late static binding doesn't work with 
     ReflectionMethod::invokeArgs()). (Laruence)
 
