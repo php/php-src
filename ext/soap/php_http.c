@@ -336,7 +336,7 @@ int make_http_soap_request(zval  *this_ptr,
 	      n = 3;
 				ZVAL_STRING(&func, "gzencode", 0);
 				smart_str_append_const(&soap_headers_z,"Content-Encoding: gzip\r\n");
-				ZVAL_LONG(params[2], 1);
+				ZVAL_LONG(params[2], 0x1f);
 	    }
 			if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, n, params TSRMLS_CC) == SUCCESS &&
 			    Z_TYPE(retval) == IS_STRING) {
