@@ -767,8 +767,9 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 			if(zend_hash_quick_find(&(*classpp)->function_table, lcname, lcname_len+1, hash_value, (void**)&fbc) == SUCCESS) {
 				efree(lcname);
 
-				if(!(fbc->common.fn_flags & ZEND_ACC_STATIC))
+				if(!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 					zend_error(E_COMPILE_ERROR, "Cannot access non-static accessor %s::$%s in a static manner.", (*classpp)->name, ZEND_ACC_NAME(fbc));
+				}
 
 				znode zn_class, zn_func, zn_arg_list;
 				MAKE_ZNODE(zn_class, Z_STRVAL(class_node.u.constant));
@@ -1816,10 +1817,12 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		}
 		fn_flags = Z_LVAL(fn_flags_znode->u.constant); /* must be done *after* the above check */
 
-		if(fn_flags & ZEND_ACC_READONLY && !(fn_flags & ZEND_ACC_IS_ACCESSOR))
+		if(fn_flags & ZEND_ACC_READONLY && !(fn_flags & ZEND_ACC_IS_ACCESSOR)) {
 			zend_error(E_COMPILE_ERROR, "Method %s::%s() cannot be defined read-only, not permitted for methods.", CG(active_class_entry)->name, function_name->u.constant.value.str.val);
-		if(fn_flags & ZEND_ACC_WRITEONLY && !(fn_flags & ZEND_ACC_IS_ACCESSOR))
+		}
+		if(fn_flags & ZEND_ACC_WRITEONLY && !(fn_flags & ZEND_ACC_IS_ACCESSOR)) {
 			zend_error(E_COMPILE_ERROR, "Method %s::%s() cannot be defined write-only, not permitted for methods.", CG(active_class_entry)->name, function_name->u.constant.value.str.val);
+		}
 	} else {
 		fn_flags = 0;
 	}
@@ -3598,8 +3601,8 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 		if (parent_flags & ZEND_ACC_IS_ACCESSOR) {
 			zend_error(E_COMPILE_ERROR, "Cannot override final property %ster %s::$%s", zend_accessor_type_string(child->common.fn_flags), ZEND_FN_SCOPE_NAME(parent), ZEND_ACC_NAME(child));
 		} else {
-		zend_error(E_COMPILE_ERROR, "Cannot override final method %s::%s()", ZEND_FN_SCOPE_NAME(parent), child->common.function_name);
-	}
+			zend_error(E_COMPILE_ERROR, "Cannot override final method %s::%s()", ZEND_FN_SCOPE_NAME(parent), child->common.function_name);
+		}
 	}
 
 	child_flags	= child->common.fn_flags;
@@ -3610,15 +3613,15 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			if(child->common.fn_flags & ZEND_ACC_IS_ACCESSOR) {
 				zend_error(E_COMPILE_ERROR, "Cannot make non static accessor %s::$%s static in class %s", ZEND_FN_SCOPE_NAME(parent), ZEND_ACC_NAME(child), ZEND_FN_SCOPE_NAME(child));
 			} else {
-			zend_error(E_COMPILE_ERROR, "Cannot make non static method %s::%s() static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
+				zend_error(E_COMPILE_ERROR, "Cannot make non static method %s::%s() static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
 			}
 		} else {
 			if(child->common.fn_flags & ZEND_ACC_IS_ACCESSOR) {
 				zend_error(E_COMPILE_ERROR, "Cannot make static accessor %s::$%s non static in class %s", ZEND_FN_SCOPE_NAME(parent), ZEND_ACC_NAME(child), ZEND_FN_SCOPE_NAME(child));
-		} else {
-			zend_error(E_COMPILE_ERROR, "Cannot make static method %s::%s() non static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
+			} else {
+				zend_error(E_COMPILE_ERROR, "Cannot make static method %s::%s() non static in class %s", ZEND_FN_SCOPE_NAME(parent), child->common.function_name, ZEND_FN_SCOPE_NAME(child));
+			}
 		}
-	}
 	}
 
 	/* Disallow making an inherited method abstract. */
@@ -3635,16 +3638,16 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			if (child_flags & ZEND_ACC_IS_ACCESSOR) {
 				zend_error(E_COMPILE_ERROR, "Access level to %ster %s::$%s must be %s (as in class %s)%s", zend_accessor_type_string(child->common.fn_flags), ZEND_FN_SCOPE_NAME(child), ZEND_ACC_NAME(child), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 			} else {
-			zend_error(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
+				zend_error(E_COMPILE_ERROR, "Access level to %s::%s() must be %s (as in class %s)%s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 			}
 		} else if (((child_flags & ZEND_ACC_PPP_MASK) < (parent_flags & ZEND_ACC_PPP_MASK))
 			&& ((parent_flags & ZEND_ACC_PPP_MASK) & ZEND_ACC_PRIVATE)) {
-			child->common.fn_flags |= ZEND_ACC_CHANGED;
+				child->common.fn_flags |= ZEND_ACC_CHANGED;
 		}
 	}
 
 	if (parent_flags & ZEND_ACC_PRIVATE) {
-		child->common.prototype = NULL;		
+		child->common.prototype = NULL;
 	} else if (parent_flags & ZEND_ACC_ABSTRACT) {
 		child->common.fn_flags |= ZEND_ACC_IMPLEMENTED_ABSTRACT;
 		child->common.prototype = parent;
@@ -4583,8 +4586,9 @@ static inline zend_op *find_previous_op(zend_uchar opcode TSRMLS_DC) /* {{{ */
 
 	while (last_op_number - n > 0) {
 		last_op = &CG(active_op_array)->opcodes[last_op_number-n-1];
-		if(last_op->opcode == opcode)
+		if(last_op->opcode == opcode) {
 			return last_op;
+		}
 		n++;
 	}
 	return NULL;

@@ -1658,21 +1658,22 @@ static int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_
 {
 	if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 		if(fn->common.fn_flags & ZEND_ACC_IS_ACCESSOR) {
-			if (ai->abs_acc_count < MAX_ABSTRACT_INFO_CNT)
+			if (ai->abs_acc_count < MAX_ABSTRACT_INFO_CNT) {
 				ai->abs_acc[ai->abs_acc_count] = fn;
+			}
 			ai->abs_acc_count++;
 		} else {
 			if (ai->afn_cnt < MAX_ABSTRACT_INFO_CNT) {
 				ai->afn[ai->afn_cnt] = fn;
-		}
-		if (fn->common.fn_flags & ZEND_ACC_CTOR) {
-			if (!ai->ctor) {
-					ai->afn_cnt++;
-				ai->ctor = 1;
-			} else {
-					ai->afn[ai->afn_cnt] = NULL;
 			}
-		} else {
+			if (fn->common.fn_flags & ZEND_ACC_CTOR) {
+				if (!ai->ctor) {
+					ai->afn_cnt++;
+					ai->ctor = 1;
+				} else {
+					ai->afn[ai->afn_cnt] = NULL;
+				}
+			} else {
 				ai->afn_cnt++;
 			}
 		}
