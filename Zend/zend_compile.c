@@ -735,10 +735,11 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 		if(zend_hash_find((const HashTable *)&CG(active_class_entry)->parent->accessors, member_name, strlen(member_name)+1, (void**)&aipp) == SUCCESS) {
 			znode zn_parent, zn_func, zn_arg_list;
 
+			char *fname = strcatalloc("__get", member_name);
+
 			MAKE_ZNODE(zn_parent, "parent");
 			Z_LVAL(zn_arg_list.u.constant) = 0;
 
-			char *fname = strcatalloc("__get", member_name);
 			MAKE_ZNODE(zn_func, fname);
 			efree(fname);
 
@@ -753,25 +754,29 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 	if(class_node.op_type == IS_CONST && result->op_type == IS_CV) {
 		zend_class_entry	**classpp;
 		char 				*lcname = zend_str_tolower_dup(Z_STRVAL(class_node.u.constant), Z_STRLEN(class_node.u.constant));
+		uint				lcname_len  = 0;
 
 		if(zend_hash_find(CG(class_table), lcname, Z_STRLEN(class_node.u.constant)+1, (void**)&classpp) == SUCCESS) {
+			ulong 			hash_value;
+			zend_function	*fbc;
+
 			efree(lcname);
 
 			lcname = strcatalloc("__get", CG(active_op_array)->vars[result->u.op.var].name);
-			uint	lcname_len = strlen(lcname);
-			zend_str_tolower(lcname, lcname_len);
+			lcname_len = strlen(lcname);
 
-			ulong 	hash_value = zend_hash_func(lcname, lcname_len+1);
-			zend_function	*fbc;
+			zend_str_tolower(lcname, lcname_len);
+			hash_value = zend_hash_func(lcname, lcname_len+1);
 
 			if(zend_hash_quick_find(&(*classpp)->function_table, lcname, lcname_len+1, hash_value, (void**)&fbc) == SUCCESS) {
+				znode zn_class, zn_func, zn_arg_list;
+
 				efree(lcname);
 
 				if(!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
 					zend_error(E_COMPILE_ERROR, "Cannot access non-static accessor %s::$%s in a static manner.", (*classpp)->name, ZEND_ACC_NAME(fbc));
 				}
 
-				znode zn_class, zn_func, zn_arg_list;
 				MAKE_ZNODE(zn_class, Z_STRVAL(class_node.u.constant));
 				MAKE_ZNODE(zn_func, fbc->common.function_name);
 				Z_LVAL(zn_arg_list.u.constant) = 0;
@@ -1662,6 +1667,7 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 	/* Generate Hash Value for Variable */
 	ulong hash_value = zend_hash_func(Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant)+1);
 	zend_accessor_info **aipp, *ai;
+	zend_function *func = NULL;
 
 	/* Locate or create accessor_info structure */
 	if(zend_hash_quick_find(&CG(active_class_entry)->accessors, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant)+1, hash_value, (void**) &aipp) == SUCCESS) {
@@ -1709,7 +1715,7 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		zend_error(E_COMPILE_ERROR, "Unknown accessor '%s', expecting get or set for variable $%s", function_token->u.constant.value.str.val, var_name->u.constant.value.str.val);
 	}
 
-	zend_function *func = (zend_function*)CG(active_op_array);
+	func = (zend_function*)CG(active_op_array);
 
 	/* Ensure we are not defining an accessor contrary to read-only/write-only */
 	if((func->common.fn_flags & ZEND_ACC_IS_GETTER) && (ai->flags & ZEND_ACC_WRITEONLY)) {
@@ -1735,12 +1741,14 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 		zend_property_info **zpi;
 
 		znode zn_this_rv, zn_this;
-		MAKE_ZNODE(zn_this, "this");
-
 		znode zn_prop_rv, zn_prop;
+
+		MAKE_ZNODE(zn_this, "this");
 		MAKE_ZNODE(zn_prop, int_var_name);
 
 		if(strstr(CG(active_op_array)->function_name, "get") != NULL) {
+			znode zn_prop_rv;
+
 			if(zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(zn_prop.u.constant), Z_STRLEN(zn_prop.u.constant)+1, (void**) &zpi) != SUCCESS) {
 				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED TSRMLS_CC);
 			}
@@ -1752,7 +1760,6 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			fetch_simple_variable(&zn_this_rv, &zn_this, 1 TSRMLS_CC);
 
 			/* Fetch Internal Variable Name */
-			znode zn_prop_rv;
 			MAKE_ZNODE(zn_prop, int_var_name);
 			zend_do_fetch_property(&zn_prop_rv, &zn_this_rv, &zn_prop TSRMLS_CC);
 
@@ -1760,6 +1767,9 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			zend_do_return(&zn_prop_rv, 1 TSRMLS_CC);
 
 		} else if(strstr(CG(active_op_array)->function_name, "set") != NULL) {
+			znode zn_value_rv, zn_value;
+			znode zn_assign_rv;
+
 			if(zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(zn_prop.u.constant), Z_STRLEN(zn_prop.u.constant)+1, (void**) &zpi) != SUCCESS) {
 				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED TSRMLS_CC);
 			}
@@ -1773,7 +1783,7 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			/* Fetch Internal Variable Name */
 			zend_do_fetch_property(&zn_prop_rv, &zn_this_rv, &zn_prop TSRMLS_CC);
 
-			znode zn_value_rv, zn_value;
+
 			MAKE_ZNODE(zn_value, "value");
 
 			/* Fetch $value */
@@ -1784,7 +1794,6 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			zend_check_writable_variable(&zn_prop_rv);
 
 			/* Assign $value to $this->[Internal Value] */
-			znode zn_assign_rv;
 			zend_do_assign(&zn_assign_rv, &zn_prop_rv, &zn_value_rv TSRMLS_CC);
 
 			zend_do_free(&zn_assign_rv TSRMLS_CC);
@@ -5463,6 +5472,8 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	opline->op2_type = IS_CONST;
 
 	if (doing_inheritance) {
+		zend_op *fetch_class = NULL;
+
 		/* Make sure a trait does not try to extend a class */
 		if ((new_class_entry->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 			zend_error(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error", new_class_entry->name);
@@ -5472,7 +5483,8 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 		opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
 
 		/* Locate parent_class_name and parent_class_entry to assign */
-		zend_op *fetch_class = find_previous_op(ZEND_FETCH_CLASS);
+		fetch_class = find_previous_op(ZEND_FETCH_CLASS);
+
 		if(fetch_class != NULL && fetch_class->op2_type == IS_CONST) {
 			zend_class_entry **parent_cepp = NULL;
 			zval *parent_class_zv = &CG(active_op_array)->literals[fetch_class->op2.constant].constant;

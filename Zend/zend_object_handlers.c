@@ -434,7 +434,7 @@ zend_function inline *zend_locate_getter(zval *object, zval *member, const zend_
 }
 /* }}} */
 
-zend_function inline *zend_locate_setter(zval *object, zval *member, zend_guard *guard, const zend_literal *key TSRMLS_DC) /* {{{ */
+zend_function inline *zend_locate_setter(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj = Z_OBJ_P(object);
 	zend_accessor_info **ai;
@@ -620,11 +620,10 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 			}
 		}
 	} else {
-		zend_guard *guard = NULL;
+		zend_guard 		*guard = NULL;
+		zend_function 	*setter = zend_locate_setter(object, member, key TSRMLS_CC);
 
 		zend_get_property_guard(zobj, property_info, member, &guard);
-
-		zend_function 		*setter = zend_locate_setter(object, member, guard, key TSRMLS_CC);
 
 		if (setter && guard && !guard->in_set) {
 			Z_ADDREF_P(object);
