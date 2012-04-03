@@ -501,10 +501,38 @@ static void sapi_update_response_code(int ncode TSRMLS_DC)
 	SG(sapi_headers).http_response_code = ncode;
 }
 
-static int sapi_find_matching_header(void *element1, void *element2)
+static void sapi_remove_all_matching_headers_by_name(zend_llist *headers, char *name)
 {
-	int len = strlen((char*)element2);
-	return strncasecmp(((sapi_header_struct*)element1)->header, (char*)element2, len) == 0 && ((sapi_header_struct*)element1)->header[len] == ':';
+	zend_llist_element *element, *next;
+	int len = strlen(name);
+	char *header;
+
+	element = headers->head;
+	while (element) {
+		next = element->next;
+		header = (char *)((sapi_header_struct *)element->data)->header;
+
+		if (strncasecmp(header, name, len) == 0 && header[len] == ':') {
+			if (element->prev) {
+				element->prev->next = (element)->next;
+			} else {
+				headers->head = element->next;
+			}
+			if (element->next) {
+				element->next->prev = (element)->prev;
+			} else {
+				headers->tail = element->prev;
+			}
+			if (headers->dtor) {
+				headers->dtor(element->data);
+			}
+
+			pefree(element, headers->persistent);
+			--headers->count;
+		}
+
+		element = next;
+	}
 }
 
 SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
@@ -611,7 +639,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 		if (sapi_module.header_handler) {
 			sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
 		}
-		zend_llist_del_element(&SG(sapi_headers).headers, sapi_header.header, (int(*)(void*, void*))sapi_find_matching_header);
+		sapi_remove_all_matching_headers_by_name(&SG(sapi_headers).headers, sapi_header.header);
 		sapi_free_header(&sapi_header);
 		return SUCCESS;
 	}
@@ -769,7 +797,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 				char sav;
 				sav = *colon_offset;
 				*colon_offset = 0;
-				zend_llist_del_element(&SG(sapi_headers).headers, sapi_header.header, (int(*)(void*, void*))sapi_find_matching_header);
+				sapi_remove_all_matching_headers_by_name(&SG(sapi_headers).headers, sapi_header.header);
 				*colon_offset = sav;
 			}
 		}

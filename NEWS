@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 (merge after 5.3.11 release)
 
 - Core:
+  . Fixed bug #61605 header_remove() does not remove all headers. (Reeze)
   . Fixed bug #61273 (call_user_func_array with more than 16333 arguments
     leaks / crashes). (Laruence)
   . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
