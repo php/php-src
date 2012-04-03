@@ -1097,9 +1097,9 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 				if(fbc->op_array.fn_flags & ZEND_ACC_IS_ACCESSOR) {
 					zend_error_noreturn(E_ERROR, "Cannot %s %s property %s::$%s from context '%s'", zend_accessor_type_string(fbc->op_array.fn_flags), zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZEND_ACC_NAME(fbc), EG(scope) ? EG(scope)->name : "");
 				} else {
-				zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+					zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+				}
 			}
-		}
 		}
 	} else {
 		/* Ensure that we haven't overridden a private function and end up calling
@@ -1127,11 +1127,11 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 					if(fbc->op_array.fn_flags & ZEND_ACC_IS_ACCESSOR) {
 						zend_error_noreturn(E_ERROR, "Cannot %s %s property %s::$%s from context '%s'", zend_accessor_type_string(fbc->common.fn_flags), zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZEND_ACC_NAME(fbc), EG(scope) ? EG(scope)->name : "");
 					} else {
-					zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+						zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), method_name, EG(scope) ? EG(scope)->name : "");
+					}
 				}
 			}
 		}
-	}
 	}
 
 	if (UNEXPECTED(!key)) {
@@ -1272,9 +1272,9 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 				if(fbc->op_array.fn_flags & ZEND_ACC_IS_ACCESSOR) {
 					zend_error_noreturn(E_ERROR, "Cannot %s %s property %s::$%s from context '%s'", zend_accessor_type_string(fbc->common.fn_flags), zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZEND_ACC_NAME(fbc), EG(scope) ? EG(scope)->name : "");
 				} else {
-				zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name_strval, EG(scope) ? EG(scope)->name : "");
+					zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name_strval, EG(scope) ? EG(scope)->name : "");
+				}
 			}
-		}
 		}
 	} else if ((fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
 		/* Ensure that if we're calling a protected function, we're allowed to do so.
@@ -1286,10 +1286,10 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 				if(fbc->op_array.fn_flags & ZEND_ACC_IS_ACCESSOR) {
 					zend_error_noreturn(E_ERROR, "Cannot %s %s property %s::$%s from context '%s'", zend_accessor_type_string(fbc->common.fn_flags), zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), ZEND_ACC_NAME(fbc), EG(scope) ? EG(scope)->name : "");
 				} else {
-				zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name_strval, EG(scope) ? EG(scope)->name : "");
+					zend_error_noreturn(E_ERROR, "Call to %s method %s::%s() from context '%s'", zend_visibility_string(fbc->common.fn_flags), ZEND_FN_SCOPE_NAME(fbc), function_name_strval, EG(scope) ? EG(scope)->name : "");
+				}
 			}
 		}
-	}
 	}
 
 	if (UNEXPECTED(!key)) {
