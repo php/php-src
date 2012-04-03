@@ -17,7 +17,7 @@ if (PHP_DEBUG) die("skip Not Valid for debug builds");
  * Description: Closes process file pointer.
  */
 $file_path = dirname(__FILE__);
-echo "*** Testing for error conditions ***\n";
+echo "*** Testing for error conditions ***" . PHP_EOL;
 var_dump( popen() );  // Zero Arguments
 var_dump( popen("abc.txt") );   // Single Argument
 var_dump( popen("abc.txt", "rw") );   // Invalid mode Argument
@@ -26,7 +26,7 @@ $file_handle = fopen($file_path."/popen.tmp", "w");
 var_dump( pclose($file_handle, $file_handle) );
 pclose($file_handle);
 var_dump( pclose(1) );
-echo "\n--- Done ---";
+echo PHP_EOL . PHP_EOL . "--- Done ---";
 ?>
 --CLEAN--
 <?php
@@ -53,6 +53,7 @@ bool(false)
 
 Warning: pclose() expects parameter 1 to be resource, integer given in %s on line %d
 bool(false)
+
 
 --- Done ---'abc.txt' is not recognized as an internal or external command,
 operable program or batch file.
