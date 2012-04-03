@@ -393,10 +393,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_export_challenge, 0)
     ZEND_ARG_INFO(0, spki)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_details, 0)
-    ZEND_ARG_INFO(0, spki)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ openssl_functions[]
@@ -406,8 +402,7 @@ const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_spki_new, arginfo_openssl_spki_new)
 	PHP_FE(openssl_spki_verify, arginfo_openssl_spki_verify)
 	PHP_FE(openssl_spki_export, arginfo_openssl_spki_export)
- PHP_FE(openssl_spki_export_challenge, arginfo_openssl_spki_export_challenge)
- PHP_FE(openssl_spki_details,	arginfo_openssl_spki_details)
+	PHP_FE(openssl_spki_export_challenge, arginfo_openssl_spki_export_challenge)
 
 /* public/private key functions */
 	PHP_FE(openssl_pkey_free,			arginfo_openssl_pkey_free)
@@ -1548,51 +1543,6 @@ PHP_FUNCTION(openssl_spki_export_challenge)
     }
 
     RETURN_STRINGL(ASN1_STRING_data(spki->spkac->challenge), strlen(ASN1_STRING_data(spki->spkac->challenge)), 1);
-}
-/* }}} */
-
-/* {{{ proto string openssl_spki_details(string spki)
-   Provides details from existing spki to var */
-PHP_FUNCTION(openssl_spki_details)
-{
-    int spkstr_len;
-    char *spkstr, * spkstr_cleaned, * s;
-
-    NETSCAPE_SPKI *spki = NULL;
-    BIO *out = BIO_new(BIO_s_mem());
-    BUF_MEM *bio_buf;
-    zval *zout;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
-        return;
-    }
-
-    if (!spkstr) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to use supplied SPKAC");
-        RETURN_NULL();
-    }
-
-    spkstr_cleaned = emalloc(spkstr_len + 1);
-    openssl_spki_cleanup(spkstr, spkstr_cleaned);
-
-    spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
-    if (!spki) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to decode supplied SPKAC");
-        RETURN_NULL();
-    }
-
-    NETSCAPE_SPKI_print(out, spki);
-    BIO_get_mem_ptr(out, &bio_buf);
-
-    if ((!bio_buf->data)&&(bio_buf->length<=0)) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to obtain details of SPKAC");
-        RETURN_NULL();
-    }
-
-    s = emalloc(bio_buf->length);
-    BIO_read(out, s, bio_buf->length);
-
-    RETURN_STRINGL(s, strlen(s), 1);
 }
 /* }}} */
 
