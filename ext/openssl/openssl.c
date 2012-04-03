@@ -1591,7 +1591,7 @@ PHP_FUNCTION(openssl_spki_details)
         RETURN_NULL();
     }
 
-    s = malloc(bio_buf->length);
+    s = emalloc(bio_buf->length);
     BIO_read(out, s, bio_buf->length);
 
     RETURN_STRINGL(s, strlen(s), 1);
