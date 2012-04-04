@@ -9,8 +9,7 @@ PHP                                                                        NEWS
   . "Connection: close" instead of "Connection: closed" (Gustavo)
 
 - Core:
-  . Fixed bug Fixed bug #61605 (header_remove() does not remove all headers).
-    (Laruence)
+  . Fixed bug #61605 (header_remove() does not remove all headers). (Laruence)
   . Fixed bug #61374 (html_entity_decode tries to decode code points that don't
     exist in ISO-8859-1). (Gustavo)
   . Fixed bug #61273 (call_user_func_array with more than 16333 arguments 
