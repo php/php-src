@@ -735,7 +735,7 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 		if(zend_hash_find((const HashTable *)&CG(active_class_entry)->parent->accessors, member_name, strlen(member_name)+1, (void**)&aipp) == SUCCESS) {
 			znode zn_parent, zn_func, zn_arg_list;
 
-			char *fname = strcatalloc("__get", member_name);
+			char *fname = strcatalloc("__get", 5, member_name, strlen(member_name));
 
 			MAKE_ZNODE(zn_parent, "parent");
 			Z_LVAL(zn_arg_list.u.constant) = 0;
@@ -759,11 +759,13 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 		if(zend_hash_find(CG(class_table), lcname, Z_STRLEN(class_node.u.constant)+1, (void**)&classpp) == SUCCESS) {
 			ulong 			hash_value;
 			zend_function	*fbc;
+			const char		*member_name = CG(active_op_array)->vars[result->u.op.var].name;
+			uint			member_name_len = strlen(member_name);
 
 			efree(lcname);
 
-			lcname = strcatalloc("__get", CG(active_op_array)->vars[result->u.op.var].name);
-			lcname_len = strlen(lcname);
+			lcname = strcatalloc("__get", 5, member_name, member_name_len);
+			lcname_len = member_name_len + 5;
 
 			zend_str_tolower(lcname, lcname_len);
 			hash_value = zend_hash_func(lcname, lcname_len+1);
@@ -1682,10 +1684,10 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 	if(strcasecmp("get", function_token->u.constant.value.str.val) == 0) {
 		modifiers->u.constant.value.lval |= ZEND_ACC_IS_GETTER;
 		/* Convert type and variable name to __getHours() */
-		char *tmp = strcatalloc("__get", Z_STRVAL(var_name->u.constant));
+		char *tmp = strcatalloc("__get", 5, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
 		efree(Z_STRVAL(function_token->u.constant));
 		Z_STRVAL(function_token->u.constant) = tmp;
-		Z_STRLEN(function_token->u.constant) = strlen(tmp);
+		Z_STRLEN(function_token->u.constant) = 5 + Z_STRLEN(var_name->u.constant);
 
 		/* Declare Function */
 		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers TSRMLS_CC);
@@ -1693,10 +1695,10 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		modifiers->u.constant.value.lval |= ZEND_ACC_IS_SETTER;
 
 		/* Convert type and variable name to __setHours() */
-		char *tmp = strcatalloc("__set", Z_STRVAL(var_name->u.constant));
+		char *tmp = strcatalloc("__set", 5, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
 		efree(Z_STRVAL(function_token->u.constant));
 		Z_STRVAL(function_token->u.constant) = tmp;
-		Z_STRLEN(function_token->u.constant) = strlen(tmp);
+		Z_STRLEN(function_token->u.constant) = 5 + Z_STRLEN(var_name->u.constant);
 
 		/* Declare Function */
 		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers TSRMLS_CC);
@@ -1735,7 +1737,7 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 {
 	/* If we have no function body, create an automatic body */
 	if(body == NULL && (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) == 0) {
-		char *int_var_name = strcatalloc("__", Z_STRVAL(var_name->u.constant));
+		char *int_var_name = strcatalloc("__", 2, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
 
 		zend_property_info **zpi;
 

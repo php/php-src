@@ -1344,11 +1344,8 @@ void free_estring(char **str_p) /* {{{ */
 /* }}} */
 
 /* Returns a new string of combined strings */
-char *strcatalloc(const char *a, const char *b) /* {{{ */
+char *strcatalloc(const char *a, size_t len_a, const char *b, size_t len_b) /* {{{ */
 {
-	zend_uint 	len_a = strlen(a),
-				len_b = strlen(b);
-
 	char *out = emalloc(len_a + len_b + 1);
 	memcpy(&out[0], a, len_a);
 	memcpy(&out[len_a], b, len_b+1);
