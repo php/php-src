@@ -1650,8 +1650,7 @@ void zend_declare_accessor(znode *var_name TSRMLS_DC) { /* {{{ */
 			}
 		}
 
-		ai = emalloc(sizeof(zend_accessor_info));
-		memset(ai, 0, sizeof(zend_accessor_info));
+		ai = ecalloc(1, sizeof(zend_accessor_info));
 		ai->flags = CG(access_type);
 		ai->doc_comment = CG(doc_comment);
 		ai->doc_comment_len = CG(doc_comment_len);
