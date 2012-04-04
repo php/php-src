@@ -57,6 +57,10 @@ PHP                                                                        NEWS
   . Fixed bug #61487 (Incorrent bounds checking in grapheme_strpos).
     (Stas)
 
+- Libxml:
+  . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
+    (Laruence)
+
 - mbstring:
   . MFH mb_ereg_replace_callback() for security enhancements. (Rui)
 
