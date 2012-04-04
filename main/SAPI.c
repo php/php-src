@@ -618,7 +618,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 	} else {
 		/* new line safety check */
 		char *s = header_line;
-		while (s = strpbrk(s, "\n\r")) {
+		while ((s = strpbrk(s, "\n\r"))) {
 			if (s[1] == ' ' || s[1] == '\t') {
 				/* RFC 2616 allows new lines if followed by SP or HT */
 				s++;
