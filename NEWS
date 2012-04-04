@@ -68,6 +68,8 @@ PHP                                                                        NEWS
   . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
 
 - Libxml:
+  . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
+    (Laruence)
   . Fixed bug #61367 (open_basedir bypass using libxml RSHUTDOWN). 
     (Tim Starling)
 
