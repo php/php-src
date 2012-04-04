@@ -1375,15 +1375,18 @@ PHP_FUNCTION(openssl_spki_new)
         RETURN_NULL();
     }
 
-	if (Z_TYPE_P(method) == IS_LONG) {
-		if (method != NULL) {
+	if (method != NULL) {
+		if (Z_TYPE_P(method) == IS_LONG) {
 			algo = Z_LVAL_P(method);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Algorithm must be of supported type");
+			RETURN_NULL();
 		}
-		mdtype = php_openssl_get_evp_md_from_algo(algo);
     }
+	mdtype = php_openssl_get_evp_md_from_algo(algo);
 
 	if (!mdtype) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm.");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
 		RETURN_NULL();
 	}
 
