@@ -1463,10 +1463,6 @@ static parameter_reference *_reflection_param_get_default_param(INTERNAL_FUNCTIO
 	reflection_object *intern;
 	parameter_reference *param;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return NULL;
-	}
-
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->fptr->type != ZEND_USER_FUNCTION)
@@ -1485,16 +1481,12 @@ static parameter_reference *_reflection_param_get_default_param(INTERNAL_FUNCTIO
 /* }}} */
 
 /* {{{ _reflection_param_get_default_precv */
-static zend_op *_reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAMETERS)
+static zend_op *_reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAMETERS, parameter_reference *param)
 {
 	zend_op *precv;
-	parameter_reference *param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return NULL;
-	}
-
-	if(!param) {
+	param = param ? param : _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (!param) {
 		return NULL;
 	}
 
@@ -2587,9 +2579,13 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 ZEND_METHOD(reflection_parameter, getDefaultValue)
 {
 	parameter_reference *param =  _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	zend_op *precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_op *precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
 
-	if(!(param && precv)) {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	if (!(param && precv)) {
 		return;
 	}
 
@@ -2606,7 +2602,11 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
    Returns whether the default value of this parameter is constant */
 ZEND_METHOD(reflection_parameter, isDefaultValueConstant)
 {
-	zend_op *precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_op *precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (precv && (Z_TYPE_P(precv->op2.zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		RETURN_TRUE;
@@ -2620,7 +2620,11 @@ ZEND_METHOD(reflection_parameter, isDefaultValueConstant)
    Returns the default value's constant name if default value is constant or false */
 ZEND_METHOD(reflection_parameter, getDefaultValueConstantName)
 {
-	zend_op *precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	zend_op *precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, NULL);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (precv && (Z_TYPE_P(precv->op2.zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
 		RETURN_STRING(Z_STRVAL_P(precv->op2.zv), 1);
