@@ -41,6 +41,13 @@
 		ZVAL_STRINGL(&zn.u.constant, str, strlen(str), 1);		\
 		zn.EA = 0;												\
 	}
+#define MAKE_ZNODEL(zn, str, l)	 \
+	{													\
+		zn.op_type = IS_CONST;							\
+		INIT_PZVAL(&zn.u.constant);						\
+		ZVAL_STRINGL(&zn.u.constant, str, l;, 1);		\
+		zn.EA = 0;										\
+	}
 
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 

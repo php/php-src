@@ -734,13 +734,14 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 		/* If the member_name is an accessor */
 		if(zend_hash_find((const HashTable *)&CG(active_class_entry)->parent->accessors, member_name, strlen(member_name)+1, (void**)&aipp) == SUCCESS) {
 			znode zn_parent, zn_func, zn_arg_list;
+			size_t member_name_len = strlen(member_name);
 
-			char *fname = strcatalloc("__get", 5, member_name, strlen(member_name));
+			char *fname = strcatalloc("__get", 5, member_name, member_name_len);
 
-			MAKE_ZNODE(zn_parent, "parent");
-			Z_LVAL(zn_arg_list.u.constant) = 0;
+			MAKE_ZNODEL(zn_parent, "parent", 6);
+			ZVAL_LONG(&zn_arg_list.u.constant, 0);
 
-			MAKE_ZNODE(zn_func, fname);
+			MAKE_ZNODEL(zn_func, fname, 5 + member_name_len);
 			efree(fname);
 
 			/* We assume we will be used as a getter, if zend_do_assign() is called, it will backpatch as calling a setter */
@@ -779,9 +780,9 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 					zend_error(E_COMPILE_ERROR, "Cannot access non-static accessor %s::$%s in a static manner.", (*classpp)->name, ZEND_ACC_NAME(fbc));
 				}
 
-				MAKE_ZNODE(zn_class, Z_STRVAL(class_node.u.constant));
+				MAKE_ZNODEL(zn_class, Z_STRVAL(class_node.u.constant), Z_STRLEN(class_node.u.constant));
 				MAKE_ZNODE(zn_func, fbc->common.function_name);
-				Z_LVAL(zn_arg_list.u.constant) = 0;
+				ZVAL_LONG(&zn_arg_list.u.constant, 0);
 
 				/* We assume we will be used as a getter, if zend_do_assign() is called, it will backpatch as calling a setter */
 				zend_do_begin_class_member_function_call(&zn_class, &zn_func TSRMLS_CC);
@@ -1041,7 +1042,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 				switch((last_op-1)->op1_type) {
 					case IS_VAR:
 						if((last_op-1)->extended_value == ZEND_FETCH_CLASS_PARENT) {
-							MAKE_ZNODE(zn_class, "parent");
+							MAKE_ZNODEL(zn_class, "parent", 6);
 						}
 						break;
 					case IS_CONST:
@@ -1051,7 +1052,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 
 				MAKE_ZNODE(zn_func, Z_STRVAL(CG(active_op_array)->literals[(last_op-1)->op2.constant].constant));	/* Capture function name */
 				Z_STRVAL(zn_func.u.constant)[2] = 's';	/* Change from __getXXX() to __setXXX() */
-				Z_LVAL(zn_arg_list.u.constant) = 1;
+				ZVAL_LONG(&zn_arg_list.u.constant, 1);
 
 				/* Clear ZEND_INIT_STATIC_METHOD_CALL and ZEND_DO_FCALL_BY_NAME oplines */
 				MAKE_NOP(last_op);
@@ -1686,8 +1687,7 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		/* Convert type and variable name to __getHours() */
 		char *tmp = strcatalloc("__get", 5, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
 		efree(Z_STRVAL(function_token->u.constant));
-		Z_STRVAL(function_token->u.constant) = tmp;
-		Z_STRLEN(function_token->u.constant) = 5 + Z_STRLEN(var_name->u.constant);
+		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
 
 		/* Declare Function */
 		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers TSRMLS_CC);
@@ -1697,8 +1697,7 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		/* Convert type and variable name to __setHours() */
 		char *tmp = strcatalloc("__set", 5, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
 		efree(Z_STRVAL(function_token->u.constant));
-		Z_STRVAL(function_token->u.constant) = tmp;
-		Z_STRLEN(function_token->u.constant) = 5 + Z_STRLEN(var_name->u.constant);
+		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
 
 		/* Declare Function */
 		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers TSRMLS_CC);
@@ -1708,8 +1707,7 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		unused_node.op_type = unused_node2.op_type = IS_UNUSED;
 		unused_node.u.op.num = unused_node2.u.op.num = 1;
 
-		Z_STRVAL(value_node.u.constant) = estrndup("value", 5);
-		Z_STRLEN(value_node.u.constant) = 5;
+		ZVAL_STRINGL(&value_node.u.constant, "value", 5, 1);
 
 		zend_do_receive_arg(ZEND_RECV, &value_node, &unused_node, NULL, &unused_node2, 0 TSRMLS_CC);
 	} else {
@@ -1744,8 +1742,8 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 		znode zn_this_rv, zn_this;
 		znode zn_prop_rv, zn_prop;
 
-		MAKE_ZNODE(zn_this, "this");
-		MAKE_ZNODE(zn_prop, int_var_name);
+		MAKE_ZNODEL(zn_this, "this", 4);
+		MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
 
 		if(strstr(CG(active_op_array)->function_name, "get") != NULL) {
 			znode zn_prop_rv;
@@ -1761,7 +1759,7 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			fetch_simple_variable(&zn_this_rv, &zn_this, 1 TSRMLS_CC);
 
 			/* Fetch Internal Variable Name */
-			MAKE_ZNODE(zn_prop, int_var_name);
+			MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
 			zend_do_fetch_property(&zn_prop_rv, &zn_this_rv, &zn_prop TSRMLS_CC);
 
 			/* Return value fetched */
@@ -1785,7 +1783,7 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			zend_do_fetch_property(&zn_prop_rv, &zn_this_rv, &zn_prop TSRMLS_CC);
 
 
-			MAKE_ZNODE(zn_value, "value");
+			MAKE_ZNODEL(zn_value, "value", 5);
 
 			/* Fetch $value */
 			zend_do_begin_variable_parse(TSRMLS_C);
