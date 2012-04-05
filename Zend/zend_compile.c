@@ -5391,7 +5391,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 		opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
 
 		/* Locate parent_class_name and parent_class_entry to assign */
-		fetch_class = find_previous_op(ZEND_FETCH_CLASS);
+		fetch_class = find_previous_op(ZEND_FETCH_CLASS TSRMLS_CC);
 
 		if(fetch_class != NULL && fetch_class->op2_type == IS_CONST) {
 			zend_class_entry **parent_cepp = NULL;
