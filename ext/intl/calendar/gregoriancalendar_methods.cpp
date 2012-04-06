@@ -88,7 +88,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (variant <= 2) {
 		// From timezone and locale (0 to 2 arguments)
-		TimeZone *tz = timezone_process_timezone_argument(tz_object,
+		TimeZone *tz = timezone_process_timezone_argument(tz_object, NULL,
 			"intlgregcal_create_instance" TSRMLS_CC);
 		if (tz == NULL) {
 			RETURN_NULL();

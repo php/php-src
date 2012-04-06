@@ -53,10 +53,84 @@ U_CFUNC void timezone_object_construct(const TimeZone *zone, zval *object, int o
 }
 /* }}} */
 
+/* {{{ timezone_convert_datetimezone
+ *      The timezone in DateTime and DateTimeZone is not unified. */
+U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
+												void *object,
+												int is_datetime,
+												intl_error *outside_error,
+												const char *func TSRMLS_DC)
+{
+	const char	*id = NULL,
+				offset_id[] = "GMT+00:00";
+	int			id_len = 0;
+	char		*message;
+	TimeZone	*timeZone;
+
+	switch (type) {
+		case TIMELIB_ZONETYPE_ID:
+			id = is_datetime
+				? ((php_date_obj*)object)->time->tz_info->name
+				: ((php_timezone_obj*)object)->tzi.tz->name;
+			id_len = strlen(id);
+			break;
+		case TIMELIB_ZONETYPE_OFFSET: {
+			int offset_mins = is_datetime
+				? -((php_date_obj*)object)->time->z
+				: -(int)((php_timezone_obj*)object)->tzi.utc_offset,
+				hours = offset_mins / 60,
+				minutes = offset_mins - hours * 60;
+			minutes *= minutes > 0 ? 1 : -1;
+
+			if (offset_mins <= -24 * 60 || offset_mins >= 24 * 60) {
+				spprintf(&message, 0, "%s: object has an time zone offset "
+					"that's too large", func);
+				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
+					message, 1 TSRMLS_CC);
+				efree(message);
+				return NULL;
+			}
+
+			id = offset_id;
+			id_len = spprintf((char**)&id, sizeof(offset_id), "GMT%+03d:%02d",
+				hours, minutes);
+			break;
+		}
+		case TIMELIB_ZONETYPE_ABBR:
+			id = is_datetime
+				? ((php_date_obj*)object)->time->tz_abbr
+				: ((php_timezone_obj*)object)->tzi.z.abbr;
+			id_len = strlen(id);
+			break;
+	}
+
+	UnicodeString s = UnicodeString(id, id_len, US_INV);
+	timeZone = TimeZone::createTimeZone(s);
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+	if (timeZone == TimeZone::getUnknown()) {
+#else
+	UnicodeString resultingId;
+	timeZone->getID(resultingId);
+	if (resultingId == UnicodeString("Etc/Unknown", -1, US_INV)
+			|| resultingId == UnicodeString("GMT", -1, US_INV)) {
+#endif
+		spprintf(&message, 0, "%s: time zone id '%s' "
+			"extracted from ext/date TimeZone not recognized", func, id);
+		intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
+			message, 1 TSRMLS_CC);
+		efree(message);
+		delete timeZone;
+		return NULL;
+	}
+	return timeZone;
+}
+/* }}} */
+
 /* {{{ timezone_process_timezone_argument
- * TimeZone argument processor for constructor like functions (sets the global
- * error). */
-TimeZone *timezone_process_timezone_argument(zval **zv_timezone, const char *func TSRMLS_DC)
+ * TimeZone argument processor. outside_error may be NULL (for static functions/constructors) */
+U_CFUNC TimeZone *timezone_process_timezone_argument(zval **zv_timezone,
+													 intl_error *outside_error,
+													 const char *func TSRMLS_DC)
 {
 	zval		local_zv_tz		= zval_used_for_init,
 				*local_zv_tz_p	= &local_zv_tz;
@@ -77,7 +151,7 @@ TimeZone *timezone_process_timezone_argument(zval **zv_timezone, const char *fun
 			spprintf(&message, 0, "%s: passed IntlTimeZone is not "
 				"properly constructed", func);
 			if (message) {
-				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
+				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
 				efree(message);
 			}
 			return NULL;
@@ -86,22 +160,30 @@ TimeZone *timezone_process_timezone_argument(zval **zv_timezone, const char *fun
 		if (timeZone == NULL) {
 			spprintf(&message, 0, "%s: could not clone TimeZone", func);
 			if (message) {
-				intl_error_set(NULL, U_MEMORY_ALLOCATION_ERROR, message, 1 TSRMLS_CC);
+				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1 TSRMLS_CC);
 				efree(message);
 			}
 			return NULL;
 		}
+	} else if (Z_TYPE_PP(zv_timezone) == IS_OBJECT &&
+			instanceof_function(Z_OBJCE_PP(zv_timezone), php_date_get_timezone_ce() TSRMLS_CC)) {
+
+		php_timezone_obj *tzobj = (php_timezone_obj *)zend_objects_get_address(
+				*zv_timezone TSRMLS_CC);
+
+		return timezone_convert_datetimezone(tzobj->type, tzobj, 0,
+			outside_error, func TSRMLS_CC);
 	} else {
 		UnicodeString	id,
 						gottenId;
-		UErrorCode		status = U_ZERO_ERROR;
+		UErrorCode		status = U_ZERO_ERROR; /* outside_error may be NULL */
 		convert_to_string_ex(zv_timezone);
 		if (intl_stringFromChar(id, Z_STRVAL_PP(zv_timezone), Z_STRLEN_PP(zv_timezone),
 				&status) == FAILURE) {
 			spprintf(&message, 0, "%s: Time zone identifier given is not a "
 				"valid UTF-8 string", func);
 			if (message) {
-				intl_error_set(NULL, status, message, 1 TSRMLS_CC);
+				intl_errors_set(outside_error, status, message, 1 TSRMLS_CC);
 				efree(message);
 			}
 			return NULL;
@@ -110,7 +192,7 @@ TimeZone *timezone_process_timezone_argument(zval **zv_timezone, const char *fun
 		if (timeZone == NULL) {
 			spprintf(&message, 0, "%s: could not create time zone", func);
 			if (message) {
-				intl_error_set(NULL, U_MEMORY_ALLOCATION_ERROR, message, 1 TSRMLS_CC);
+				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1 TSRMLS_CC);
 				efree(message);
 			}
 			return NULL;
@@ -119,7 +201,7 @@ TimeZone *timezone_process_timezone_argument(zval **zv_timezone, const char *fun
 			spprintf(&message, 0, "%s: no such time zone: '%s'",
 				func, Z_STRVAL_PP(zv_timezone));
 			if (message) {
-				intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
+				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
 				efree(message);
 			}
 			delete timeZone;

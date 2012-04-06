@@ -316,8 +316,8 @@ ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_add, 0, 0, 2)
 	ZEND_ARG_INFO(0, amount)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setTimeZone, 0, 0, 2)
-	ZEND_ARG_OBJ_INFO(0, timeZone, IntlTimeZone, 1)
+ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setTimeZone, 0, 0, 1)
+	ZEND_ARG_INFO(0, timeZone)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_set, 0, 0, 2)

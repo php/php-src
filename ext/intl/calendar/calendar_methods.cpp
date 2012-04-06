@@ -30,6 +30,9 @@ extern "C" {
 #include "../intl_convert.h"
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
+#include <zend_interfaces.h>
+#define _MSC_STDINT_H_ /* avoid redefinitions */
+#include <ext/date/php_date.h>
 }
 #include "../common/common_enum.h"
 
@@ -56,7 +59,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 		RETURN_NULL();
 	}
 
-	timeZone = timezone_process_timezone_argument(zv_timezone,
+	timeZone = timezone_process_timezone_argument(zv_timezone, NULL,
 		"intlcal_create_instance" TSRMLS_CC);
 	if (timeZone == NULL) {
 		RETURN_NULL();
@@ -323,11 +326,10 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 {
 	zval			*zv_timezone;
 	TimeZone		*timeZone;
-	TimeZone_object	*tzo;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
-			"OO!", &object, Calendar_ce_ptr, &zv_timezone, TimeZone_ce_ptr) == FAILURE) {
+			"Oz!", &object, Calendar_ce_ptr, &zv_timezone) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_set_time_zone: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
@@ -338,18 +340,10 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 	if (zv_timezone == NULL) {
 		RETURN_TRUE; /* the method does nothing if passed null */
 	}
-
-	tzo = static_cast<TimeZone_object*>(
-		zend_object_store_get_object(zv_timezone TSRMLS_CC));
-	if (tzo->utimezone == NULL) {
-		intl_errors_set(&co->err, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set_time_zone: found unsconstructed IntlTimeZone", 0 TSRMLS_CC);
-		RETURN_FALSE;
-	}
-	timeZone = tzo->utimezone->clone();
+	
+	timeZone = timezone_process_timezone_argument(&zv_timezone,
+		CALENDAR_ERROR_P(co), "intlcal_set_time_zone" TSRMLS_CC);
 	if (timeZone == NULL) {
-		intl_errors_set(&co->err, U_MEMORY_ALLOCATION_ERROR,
-			"intlcal_set_time_zone: error cloning ICU TimeZone", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
