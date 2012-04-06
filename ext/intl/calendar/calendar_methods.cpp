@@ -1108,6 +1108,97 @@ U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 
 #endif
 
+U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
+{
+	zval			**zv_arg,
+					*zv_datetime		= NULL,
+					*zv_timestamp		= NULL;
+	php_date_obj	*datetime;
+	char			*locale_str			= NULL;
+	int				locale_str_len;
+	TimeZone		*timeZone;
+	UErrorCode		status				= U_ZERO_ERROR;
+	intl_error_reset(NULL TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|s!",
+			&zv_arg, &locale_str, &locale_str_len) == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_from_date_time: bad arguments", 0 TSRMLS_CC);
+		RETURN_NULL();
+	}
+
+	if (!(Z_TYPE_PP(zv_arg) == IS_OBJECT && instanceof_function(
+			Z_OBJCE_PP(zv_arg), php_date_get_date_ce() TSRMLS_CC))) {
+		ALLOC_INIT_ZVAL(zv_datetime);
+		object_init_ex(zv_datetime, php_date_get_date_ce());
+		zend_call_method_with_1_params(&zv_datetime, NULL, NULL, "__construct",
+			NULL, *zv_arg);
+		if (EG(exception)) {
+			zend_object_store_ctor_failed(zv_datetime TSRMLS_CC);
+			goto error;
+		}
+	} else {
+		zv_datetime = *zv_arg;
+	}
+
+	datetime = (php_date_obj*)zend_object_store_get_object(zv_datetime TSRMLS_CC);
+	if (!datetime) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_from_date_time: DateTime object is unconstructed",
+			0 TSRMLS_CC);
+		goto error;
+	}
+
+	zend_call_method_with_0_params(&zv_datetime, php_date_get_date_ce(),
+		NULL, "gettimestamp", &zv_timestamp);
+	if (!zv_timestamp || Z_TYPE_P(zv_timestamp) != IS_LONG) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_from_date_time: bad DateTime; call to "
+			"DateTime::getTimestamp() failed", 0 TSRMLS_CC);
+		goto error;
+	}
+
+	if (!datetime->time->is_localtime) {
+		timeZone = TimeZone::getGMT()->clone();
+	} else {
+		timeZone = timezone_convert_datetimezone(datetime->time->zone_type,
+			datetime, 1, NULL, "intlcal_from_date_time" TSRMLS_CC);
+		if (timeZone == NULL) {
+			goto error;
+		}
+	}
+
+	if (!locale_str) {
+		locale_str = const_cast<char*>(intl_locale_get_default(TSRMLS_C));
+	}
+
+	Calendar *cal = Calendar::createInstance(timeZone,
+		Locale::createFromName(locale_str), status);
+	if (cal == NULL) {
+		delete timeZone;
+		intl_error_set(NULL, status, "intlcal_from_date_time: "
+				"error creating ICU Calendar object", 0 TSRMLS_CC);
+		goto error;
+	}
+	cal->setTime(((UDate)Z_LVAL_P(zv_timestamp)) * 1000., status);
+    if (U_FAILURE(status)) {
+		delete cal;
+		intl_error_set(NULL, status, "intlcal_from_date_time: "
+				"error creating ICU Calendar::setTime()", 0 TSRMLS_CC);
+        goto error;
+    }
+
+	calendar_object_create(return_value, cal TSRMLS_CC);
+
+error:
+	if (zv_datetime != *zv_arg) {
+		zval_ptr_dtor(&zv_datetime);
+	}
+	if (zv_timestamp) {
+		zval_ptr_dtor(&zv_timestamp);
+	}
+}
+
 U_CFUNC PHP_FUNCTION(intlcal_get_error_code)
 {
 	CALENDAR_METHOD_INIT_VARS;
