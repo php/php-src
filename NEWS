@@ -18,7 +18,9 @@ PHP                                                                        NEWS
 (merge after 5.3.11 release)
 
 - Core:
-  - Fixed bug #61605 (header_remove() does not remove all headers).
+  . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
+    (without apache2)). (Laruence)
+  . Fixed bug #61605 (header_remove() does not remove all headers).
     (Laruence)
   . Fixed bug #61541 (Segfault when using ob_* in output_callback).
     (reeze.xia@gmail.com)
