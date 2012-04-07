@@ -957,8 +957,8 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 	char	*ret_buf,				/* returned buffer */
 			*found_delim = NULL;
 	size_t	buffered_len,
-			tent_ret_len;			/* tentative returned length*/
-	int		has_delim	 = delim_len > 0 && delim[0] != '\0';
+			tent_ret_len;			/* tentative returned length */
+	int		has_delim	 = delim_len > 0;
 
 	if (maxlen == 0) {
 		return NULL;
