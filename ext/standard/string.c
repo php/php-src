@@ -151,8 +151,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 static char *php_hex2bin(const unsigned char *old, const size_t oldlen, size_t *newlen)
 {
 	size_t target_length = oldlen >> 1;
-	int e;
-	e = oldlen & 1;
+	int e = oldlen & 1;
 	if (e) {
 		target_length++;
 	}
