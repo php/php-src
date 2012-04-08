@@ -154,7 +154,7 @@ static char *php_hex2bin(const unsigned char *old, const size_t oldlen, size_t *
 	register unsigned char *str = (unsigned char *)safe_emalloc(target_length, sizeof(char), 1);
 	size_t i, j;
 	/* if we have an odd length, point to the end of the string to distinguish the special case */
-	j = oldlen & 1 ? oldlen + 1: 0;
+	j = oldlen & 1 ? oldlen : 0;
 	for (i = 0; i < target_length; i++) {
 		char c = old[j++];
 		if (c >= '0' && c <= '9') {
