@@ -802,6 +802,7 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 
 static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo);
 
+int openssl_spki_cleanup(const char *src, char *dest);
 
 static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args TSRMLS_DC) /* {{{ */
 {
@@ -1352,29 +1353,29 @@ PHP_FUNCTION(openssl_x509_export_to_file)
    outputting results to var */
 PHP_FUNCTION(openssl_spki_new)
 {
-    int challenge_len, algo_len;
-    char * challenge, * spkstr, * s;
-    long keyresource = -1;
-    const char *spkac = "SPKAC=";
+	int challenge_len;
+	char * challenge, * spkstr, * s;
+	long keyresource = -1;
+	const char *spkac = "SPKAC=";
 	long algo = OPENSSL_ALGO_MD5;
-
-    zval *method = NULL;
-    zval * zpkey = NULL;
-    EVP_PKEY * pkey = NULL;
-    NETSCAPE_SPKI *spki=NULL;
-    const EVP_MD *mdtype;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|z", &zpkey, &challenge, &challenge_len, &method) == FAILURE) {
-        return;
-    }
-
-    pkey = php_openssl_evp_from_zval(&zpkey, 0, challenge, 1, &keyresource TSRMLS_CC);
-
-    if (pkey == NULL) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied private key");
-        RETURN_NULL();
-    }
-
+	
+	zval *method = NULL;
+	zval * zpkey = NULL;
+	EVP_PKEY * pkey = NULL;
+	NETSCAPE_SPKI *spki=NULL;
+	const EVP_MD *mdtype;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|z", &zpkey, &challenge, &challenge_len, &method) == FAILURE) {
+		return;
+	}
+	
+	pkey = php_openssl_evp_from_zval(&zpkey, 0, challenge, 1, &keyresource TSRMLS_CC);
+	
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied private key");
+		RETURN_NULL();
+	}
+	
 	if (method != NULL) {
 		if (Z_TYPE_P(method) == IS_LONG) {
 			algo = Z_LVAL_P(method);
@@ -1382,55 +1383,50 @@ PHP_FUNCTION(openssl_spki_new)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Algorithm must be of supported type");
 			RETURN_NULL();
 		}
-    }
+	}
 	mdtype = php_openssl_get_evp_md_from_algo(algo);
-
+	
 	if (!mdtype) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
 		RETURN_NULL();
 	}
-
-    if ((spki = NETSCAPE_SPKI_new()) == NULL) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create new SPKAC");
-        RETURN_NULL();
-    }
-
-    if (challenge) {
-        ASN1_STRING_set(spki->spkac->challenge, challenge, (int)strlen(challenge));
-    }
-
-    if (!NETSCAPE_SPKI_set_pubkey(spki, pkey)) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to embed public key");
-        RETURN_NULL();
-    }
-
-    if (!NETSCAPE_SPKI_sign(spki, pkey, mdtype)) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to sign with %l algorithm", method);
-        RETURN_NULL();
-    }
-
-    spkstr = NETSCAPE_SPKI_b64_encode(spki);
-    if (!spkstr){
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable encode SPKAC");
-        RETURN_NULL();
-    }
-
-    s = emalloc(strlen(spkac) + strlen(spkstr) + 1);
-    sprintf(s, "%s%s", spkac, spkstr);
-
-    if (sizeof(s)<=0) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to allocate memory for SPKAC");
-        RETURN_NULL();
-    }
-
-    if (keyresource == -1 && spki != NULL) {
-        NETSCAPE_SPKI_free(spki);
-    }
-    if (keyresource == -1 && pkey != NULL) {
-        EVP_PKEY_free(pkey);
-    }
-
-    RETURN_STRINGL(s, strlen(s), 1);
+	
+	if ((spki = NETSCAPE_SPKI_new()) == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create new SPKAC");
+		RETURN_NULL();
+	}
+	
+	if (challenge) {
+		ASN1_STRING_set(spki->spkac->challenge, challenge, (int)strlen(challenge));
+	}
+	
+	if (!NETSCAPE_SPKI_set_pubkey(spki, pkey)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to embed public key");
+		RETURN_NULL();
+	}
+	
+	if (!NETSCAPE_SPKI_sign(spki, pkey, mdtype)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to sign with specified algorithm");
+		RETURN_NULL();
+	}
+	
+	spkstr = NETSCAPE_SPKI_b64_encode(spki);
+	if (!spkstr){
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable encode SPKAC");
+		RETURN_NULL();
+	}
+	
+	s = emalloc(strlen(spkac) + strlen(spkstr) + 1);
+	sprintf(s, "%s%s", spkac, spkstr);
+	
+	if (keyresource == -1 && spki != NULL) {
+		NETSCAPE_SPKI_free(spki);
+	}
+	if (keyresource == -1 && pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+	
+	RETURN_STRINGL(s, strlen(s), 0);
 }
 /* }}} */
 
@@ -1438,55 +1434,62 @@ PHP_FUNCTION(openssl_spki_new)
    Verifies spki returns boolean */
 PHP_FUNCTION(openssl_spki_verify)
 {
-    int spkstr_len, i;
-    char *spkstr = NULL, * spkstr_cleaned;
-
-    EVP_PKEY *pkey = NULL;
-    NETSCAPE_SPKI *spki = NULL;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
-        return;
-    }
-
-    if (spkstr == NULL) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to use supplied SPKAC");
-        RETURN_FALSE;
-    }
-
-    spkstr_cleaned = emalloc(spkstr_len + 1);
-    openssl_spki_cleanup(spkstr, spkstr_cleaned);
-
-    if (strlen(spkstr_cleaned)<=0) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to allocate memory for SPKAC");
-        RETURN_FALSE;
-    }
-
-    spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
-    if (spki == NULL) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to decode supplied SPKAC");
-        RETURN_FALSE;
-    }
-
-    pkey = X509_PUBKEY_get(spki->spkac->pubkey);
-    if (pkey == NULL) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to aquire signed public key");
-        RETURN_FALSE;
-    }
-
-    i = NETSCAPE_SPKI_verify(spki, pkey);
-
-    if (spki != NULL) {
-        NETSCAPE_SPKI_free(spki);
-    }
-    if (pkey != NULL) {
-        EVP_PKEY_free(pkey);
-    }
-
-    if (i > 0) {
-        RETURN_TRUE;
-    } else {
-        RETURN_FALSE;
-    }
+	int spkstr_len, i;
+	char *spkstr = NULL, * spkstr_cleaned;
+	
+	EVP_PKEY *pkey = NULL;
+	NETSCAPE_SPKI *spki = NULL;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+		return;
+	}
+	
+	if (spkstr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied SPKAC");
+		RETURN_FALSE;
+	}
+	
+	spkstr_cleaned = emalloc(spkstr_len + 1);
+	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+	
+	if (strlen(spkstr_cleaned)<=0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate memory for SPKAC");
+		RETURN_FALSE;
+	}
+	
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spki == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to decode supplied SPKAC");
+		RETURN_FALSE;
+	}
+	
+	pkey = X509_PUBKEY_get(spki->spkac->pubkey);
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to aquire signed public key");
+		RETURN_FALSE;
+	}
+	
+	i = NETSCAPE_SPKI_verify(spki, pkey);
+	
+	if (spki != NULL) {
+		NETSCAPE_SPKI_free(spki);
+	}
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+	/*
+	if (spkstr != NULL) {
+		efree(spkstr);
+	}
+	if (spkstr_cleaned != NULL) {
+		efree(spkstr_cleaned);
+	}
+	*/
+	if (i > 0) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
 /* }}} */
 
@@ -1494,60 +1497,67 @@ PHP_FUNCTION(openssl_spki_verify)
    Exports public key from existing spki to var */
 PHP_FUNCTION(openssl_spki_export)
 {
-    int spkstr_len;
-    char *spkstr, * spkstr_cleaned, * s;
-
-    EVP_PKEY *pkey = NULL;
-    NETSCAPE_SPKI *spki = NULL;
-    BIO *out = BIO_new(BIO_s_mem());
-    BUF_MEM *bio_buf;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
-        return;
-    }
-
-    if (spkstr == NULL) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to use supplied SPKAC");
-        RETURN_NULL();
-    }
-
-    spkstr_cleaned = emalloc(spkstr_len + 1);
-    openssl_spki_cleanup(spkstr, spkstr_cleaned);
-
-    spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
-    if (spki == NULL) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to decode supplied SPKAC");
-        RETURN_NULL();
-    }
-
-    pkey = X509_PUBKEY_get(spki->spkac->pubkey);
-    if (pkey == NULL) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to aquire signed public key");
-        RETURN_NULL();
-    }
-
-    PEM_write_bio_PUBKEY(out, pkey);
-    BIO_get_mem_ptr(out, &bio_buf);
-
-    if ((!bio_buf->data)&&(bio_buf->length<=0)) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to allocate memory for public key");
-        RETURN_NULL();
-    }
-
-    s = emalloc(bio_buf->length);
-    BIO_read(out, s, bio_buf->length);
-
-    if (spki != NULL) {
-        NETSCAPE_SPKI_free(spki);
-    }
-    if (out != NULL) {
-        BIO_free_all(out);
-    }
-    if (pkey != NULL) {
-        EVP_PKEY_free(pkey);
-    }
-
-    RETURN_STRINGL(s, strlen(s), 1);
+	int spkstr_len;
+	char *spkstr, * spkstr_cleaned, * s;
+	
+	EVP_PKEY *pkey = NULL;
+	NETSCAPE_SPKI *spki = NULL;
+	BIO *out = BIO_new(BIO_s_mem());
+	BUF_MEM *bio_buf;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+		return;
+	}
+	
+	if (spkstr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied SPKAC");
+		RETURN_NULL();
+	}
+	
+	spkstr_cleaned = emalloc(spkstr_len + 1);
+	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+	
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spki == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to decode supplied SPKAC");
+		RETURN_NULL();
+	}
+	
+	pkey = X509_PUBKEY_get(spki->spkac->pubkey);
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to aquire signed public key");
+		RETURN_NULL();
+	}
+	
+	PEM_write_bio_PUBKEY(out, pkey);
+	BIO_get_mem_ptr(out, &bio_buf);
+	
+	if ((!bio_buf->data)&&(bio_buf->length<=0)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate memory for public key");
+		RETURN_NULL();
+	}
+	
+	s = emalloc(bio_buf->length);
+	BIO_read(out, s, bio_buf->length);
+	
+	if (spki != NULL) {
+		NETSCAPE_SPKI_free(spki);
+	}
+	if (out != NULL) {
+		BIO_free_all(out);
+	}
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+	/*
+	if (spkstr != NULL) {
+		efree(spkstr);
+	}
+	if (spkstr_cleaned != NULL) {
+		efree(spkstr_cleaned);
+	}
+	*/	
+	RETURN_STRINGL(s, strlen(s), 1);
 }
 /* }}} */
 
@@ -1555,30 +1565,37 @@ PHP_FUNCTION(openssl_spki_export)
    Exports spkac challenge from existing spki to var */
 PHP_FUNCTION(openssl_spki_export_challenge)
 {
-    int spkstr_len;
-    char *spkstr, * spkstr_cleaned;
-
-    NETSCAPE_SPKI *spki = NULL;
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
-        return;
-    }
-
-    if (spkstr == NULL) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to use supplied SPKAC");
-        RETURN_NULL();
-    }
-
-    spkstr_cleaned = emalloc(spkstr_len + 1);
-    openssl_spki_cleanup(spkstr, spkstr_cleaned);
-
-    spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
-    if (spki == NULL) {
-        php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to allocate memory for public key");
-        RETURN_NULL();
-    }
-
-    RETURN_STRINGL(ASN1_STRING_data(spki->spkac->challenge), strlen(ASN1_STRING_data(spki->spkac->challenge)), 1);
+	int spkstr_len;
+	char *spkstr, * spkstr_cleaned;
+	
+	NETSCAPE_SPKI *spki = NULL;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+		return;
+	}
+	
+	if (spkstr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied SPKAC");
+		RETURN_NULL();
+	}
+	
+	spkstr_cleaned = emalloc(spkstr_len + 1);
+	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+	
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spki == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate memory for public key");
+		RETURN_NULL();
+	}
+	/*	
+	if (spkstr != NULL) {
+		efree(spkstr);
+	}
+	if (spkstr_cleaned != NULL) {
+		efree(spkstr_cleaned);
+	}
+	*/
+	RETURN_STRING(ASN1_STRING_data(spki->spkac->challenge), 0);
 }
 /* }}} */
 
