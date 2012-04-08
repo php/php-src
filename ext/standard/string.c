@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Stig Sæther Bakken <ssb@php.net>                            |
+   |          Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
  */
@@ -153,7 +153,9 @@ static char *php_hex2bin(const unsigned char *old, const size_t oldlen, size_t *
 	size_t target_length = oldlen >> 1;
 	register unsigned char *str = (unsigned char *)safe_emalloc(target_length, sizeof(char), 1);
 	size_t i, j;
-	for (i = j = 0; i < target_length; i++) {
+	/* if we have an odd length, point to the end of the string to distinguish the special case */
+	j = oldlen & 1 == 0 ? 0 : oldlen + 1;
+	for (i = 0; i < target_length; i++) {
 		char c = old[j++];
 		if (c >= '0' && c <= '9') {
 			str[i] = (c - '0') << 4;
@@ -161,7 +163,11 @@ static char *php_hex2bin(const unsigned char *old, const size_t oldlen, size_t *
 			str[i] = (c - 'a' + 10) << 4;
 		} else if (c >= 'A' && c <= 'F') {
 			str[i] = (c - 'A' + 10) << 4;
-		} else {
+		} else if(c == '\0') {
+			/* odd length, put the first 4 bits to 0 and restart at the beginning of the string */
+			str[i] = 0;
+			j = 0;
+ 		} else {
 			efree(str);
 			return NULL;
 		}
