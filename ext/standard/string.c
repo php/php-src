@@ -151,10 +151,20 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 static char *php_hex2bin(const unsigned char *old, const size_t oldlen, size_t *newlen)
 {
 	size_t target_length = oldlen >> 1;
+	int e;
+	e = oldlen & 1;
+	if (e) {
+		target_length++;
+	}
 	register unsigned char *str = (unsigned char *)safe_emalloc(target_length, sizeof(char), 1);
 	size_t i, j;
 	for (i = j = 0; i < target_length; i++) {
-		char c = old[j++];
+		char c = '0';
+		if (j == 0 && e) {
+			c = '0';
+		} else {
+	 		c = old[j++];
+		}
 		if (c >= '0' && c <= '9') {
 			str[i] = (c - '0') << 4;
 		} else if (c >= 'a' && c <= 'f') {
