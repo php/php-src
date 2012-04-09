@@ -41,4 +41,7 @@ PHP                                                                        NEWS
 - pgsql
   . Added pg_escape_literal() and pg_escape_identifier() (Yasuo)
 
+- Tokenizer:
+  . Fixed bug #60097 (token_get_all fails to lex nested heredoc). (Nikita Popov)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
