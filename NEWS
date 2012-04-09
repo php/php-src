@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 - Core:
   . Implemented FR #60738 (Allow 'set_error_handler' to handle NULL).
     (Laruence, Nikita Popov)
+  . Fixed bug #61681 (Malformed grammar). (Nikita Popov, Etienne, Laruence).
 
 - cURL:
   . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 

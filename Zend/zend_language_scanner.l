@@ -1454,7 +1454,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_LOOKING_FOR_VARNAME>{LABEL} {
+<ST_LOOKING_FOR_VARNAME>{LABEL}[[}] {
+	yyless(yyleng - 1);
 	zend_copy_value(zendlval, yytext, yyleng);
 	zendlval->type = IS_STRING;
 	yy_pop_state(TSRMLS_C);
