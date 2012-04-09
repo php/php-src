@@ -272,8 +272,8 @@ PHPAPI char *php_escape_shell_cmd(char *str)
 					p = NULL;
 				} else {
 					cmd[y++] = '\\';
-					cmd[y++] = str[x];
 				}
+				cmd[y++] = str[x];
 				break;
 #else
 			/* % is Windows specific for enviromental variables, ^%PATH% will 
