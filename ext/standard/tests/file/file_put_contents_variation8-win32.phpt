@@ -77,8 +77,6 @@ Warning: file_put_contents( ): failed to open stream: Permission denied in %s on
 Failed to write data to: " "
 
 -- Filename: \0 --
-
-Warning: file_put_contents(): Filename cannot be empty in %s on line %d
 Failed to write data to: \0
 
 -- Filename: array() --
