@@ -28,9 +28,9 @@ echo "Done\n";
 --EXPECTF--	
 Warning: symlink(): Could not fetch file information(error 2) in %s on line %d
 
-Warning: readlink(): Could not open file (error 2) in %s on line %d
+Warning: readlink(): readlink failed to read the symbolic link (%s), error 2) in %s on line %d
 bool(false)
 
-Warning: readlink(): Could not open file (error 2) in %s on line %d
+Warning: readlink(): readlink failed to read the symbolic link (%s), error 2) in %s on line %d
 bool(false)
 Done
