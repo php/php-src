@@ -2,8 +2,8 @@
 mb_send_mail() test 1 (lang=neutral)
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) == "WIN") {
-  die("skip Won't run on Windows");
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+	die('skip.. Not valid for Windows');
 }
 if (!function_exists("mb_send_mail") || !mb_language("neutral")) {
 	die("skip mb_send_mail() not available");
