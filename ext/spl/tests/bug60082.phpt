@@ -7,6 +7,8 @@ if ((stristr(PHP_OS, 'freebsd')))  {
     die('skip.. this test causes the run-tests.php to hang on Freebsd, see #60186');
 }
 ?>
+--INI--
+allow_call_time_pass_reference = Off
 --FILE--
 <?php
 $test = array();
