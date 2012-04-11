@@ -4037,7 +4037,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 	
 	if (extra_cmd) {
-		spprintf(&sendmail_p[ath, 0, "%s %s", sendmail_path, extra_cmd);
+		spprintf(&sendmail_path, 0, "%s %s", sendmail_path, extra_cmd);
 	}
 	
 	sendmail = popen(sendmail_path, "w");
