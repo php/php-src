@@ -4051,16 +4051,29 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 	
 	if (sendmail) {
-		if (rpath && rpath[0]) fprintf(sendmail, "From: %s\n", rpath);
+		if (rpath && rpath[0]) {
+            fprintf(sendmail, "From: %s\n", rpath);
+        }
+
 		fprintf(sendmail, "To: %s\n", to);
-		if (cc && cc[0]) fprintf(sendmail, "Cc: %s\n", cc);
-		if (bcc && bcc[0]) fprintf(sendmail, "Bcc: %s\n", bcc);
+
+		if (cc && cc[0]) {
+            fprintf(sendmail, "Cc: %s\n", cc);
+        }
+
+		if (bcc && bcc[0]) {
+            fprintf(sendmail, "Bcc: %s\n", bcc);
+        }
+
 		fprintf(sendmail, "Subject: %s\n", subject);
+
 		if (headers != NULL) {
 			fprintf(sendmail, "%s\n", headers);
 		}
+
 		fprintf(sendmail, "\n%s\n", message);
 		ret = pclose(sendmail);
+
 		if (ret == -1) {
 			return 0;
 		} else {
