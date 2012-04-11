@@ -472,10 +472,8 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 			Z_STRLEN_P(tmp) = strlen(SG(request_info).argv[i]);
 			Z_STRVAL_P(tmp) = estrndup(SG(request_info).argv[i], Z_STRLEN_P(tmp));
 			INIT_PZVAL(tmp);
-			if (zend_hash_next_index_insert(Z_ARRVAL_P(arr), &tmp, sizeof(zval *), NULL) == FAILURE) {
-				if (Z_TYPE_P(tmp) == IS_STRING) {
-					efree(Z_STRVAL_P(tmp));
-				}
+			if (zend_hash_next_index_insert(Z_ARRVAL_P(arr), &tmp, sizeof(zval *), NULL) == FAILURE && Z_TYPE_P(tmp) == IS_STRING) {
+				efree(Z_STRVAL_P(tmp));
 			}
 		}
 	} else 	if (s && *s) {
@@ -492,10 +490,8 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 			Z_STRVAL_P(tmp) = estrndup(ss, Z_STRLEN_P(tmp));
 			INIT_PZVAL(tmp);
 			count++;
-			if (zend_hash_next_index_insert(Z_ARRVAL_P(arr), &tmp, sizeof(zval *), NULL) == FAILURE) {
-				if (Z_TYPE_P(tmp) == IS_STRING) {
-					efree(Z_STRVAL_P(tmp));
-				}
+			if (zend_hash_next_index_insert(Z_ARRVAL_P(arr), &tmp, sizeof(zval *), NULL) == FAILURE && Z_TYPE_P(tmp) == IS_STRING) {
+				efree(Z_STRVAL_P(tmp));
 			}
 			if (space) {
 				*space = '+';
