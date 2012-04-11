@@ -162,6 +162,8 @@ PHPAPI char *php_strerror(int errnum);
 # endif
 #endif
 
+#define PHP_HEX2BIN_PARTIAL_OUTPUT_ON_ERROR	1<<1
+
 void register_string_constants(INIT_FUNC_ARGS);
 
 #endif /* PHP_STRING_H */
