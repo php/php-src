@@ -1,5 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+11 Apr 2012, PHP 5.4.1 RC2
+
+- Core:
+  . Fixed crash in ZTS using same class in many threads. (Johannes)
+
+- fileinfo:
+  . Fix fileinfo test problems. (Anatoliy Belsky)
+
 29 Mar 2012, PHP 5.4.1 RC1
 
 - CLI Server:
