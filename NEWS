@@ -1,5 +1,22 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+12 Apr 2012, PHP 5.3.11RC2
+
+- Core:
+  . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
+    (without apache2)). (Laruence)
+
+- Fileinfo
+  . Upgraded libmagic to 5.11 (Pierre, Anatoliy)
+  . Fixed bug #61565 where php_stream_open_wrapper_ex tries to open a
+    directory descriptor under windows. (Anatoliy)
+  . Fixed bug #61566 failure caused by the posix lseek and read versions
+    under windows in cdf_read(). (Anatoliy)
+
+- pgsql:
+  . Fixed bug #60718 (Compile problem with libpq (PostgreSQL 7.3 or less).
+    (Yasuo Ohgaki)
+
 29 Mar 2012, PHP 5.3.11RC1
 
 - Core:
