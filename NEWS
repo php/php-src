@@ -12,18 +12,10 @@ PHP                                                                        NEWS
     when another extension makes use of a library that links to the iconv
     library. See https://bugs.gentoo.org/show_bug.cgi?id=364139 for detail.
     (Moriyoshi)
-- Fileinfo
-  . Upgraded libmagic to 5.11 (Pierre, Anatoliy) 
-  . Fixed bug #61565 where php_stream_open_wrapper_ex tries to open a
-    directory descriptor under windows. (Anatoliy)
-  . Fixed bug #61566 failure caused by the posix lseek and read versions
-    under windows in cdf_read(). (Anatoliy)
 
 (merge after 5.3.11 release)
 
 - Core:
-  . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
-    (without apache2)). (Laruence)
   . Fixed bug #61605 (header_remove() does not remove all headers).
     (Laruence)
   . Fixed bug #61541 (Segfault when using ob_* in output_callback).
