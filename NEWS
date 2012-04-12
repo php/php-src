@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . World domination
   . Improve set_exception_handler while doing reset.(Laruence)
   . Support constant array/string dereferencing. (Laruence)
+  . Add support for using empty() on the result of function calls and
+    other expressions (https://wiki.php.net/rfc/empty_isset_exprs).
+    (Nikita Popov)
 
 - Core:
   . Fixed bug #61681 (Malformed grammar). (Nikita Popov, Etienne, Laruence).

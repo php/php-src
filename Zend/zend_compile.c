@@ -6089,7 +6089,16 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 
 	zend_do_end_variable_parse(variable, BP_VAR_IS, 0 TSRMLS_CC);
 
-	zend_check_writable_variable(variable);
+	if (zend_is_function_or_method_call(variable)) {
+		if (type == ZEND_ISEMPTY) {
+			/* empty(func()) can be transformed to !func() */
+			zend_do_unary_op(ZEND_BOOL_NOT, result, variable TSRMLS_CC);
+		} else {
+			zend_error(E_COMPILE_ERROR, "Cannot use isset() on the result of a function call (you can use \"null !== func()\" instead)");
+		}
+
+		return;
+	}
 
 	if (variable->op_type == IS_CV) {
 		last_op = get_next_op(CG(active_op_array) TSRMLS_CC);
