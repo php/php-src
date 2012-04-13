@@ -763,8 +763,11 @@ static char *type_to_name_native(int type) /* {{{ */
     switch (type) {
         PDO_MYSQL_NATIVE_TYPE_NAME(STRING)
         PDO_MYSQL_NATIVE_TYPE_NAME(VAR_STRING)
-#ifdef MYSQL_HAS_TINY
+#ifdef FIELD_TYPE_TINY
         PDO_MYSQL_NATIVE_TYPE_NAME(TINY)
+#endif
+#ifdef FIELD_TYPE_BIT
+        PDO_MYSQL_NATIVE_TYPE_NAME(BIT)
 #endif
         PDO_MYSQL_NATIVE_TYPE_NAME(SHORT)
         PDO_MYSQL_NATIVE_TYPE_NAME(LONG)
@@ -780,7 +783,7 @@ static char *type_to_name_native(int type) /* {{{ */
         PDO_MYSQL_NATIVE_TYPE_NAME(GEOMETRY)
 #endif
         PDO_MYSQL_NATIVE_TYPE_NAME(TIMESTAMP)
-#ifdef MYSQL_HAS_YEAR
+#ifdef FIELD_TYPE_YEAR
         PDO_MYSQL_NATIVE_TYPE_NAME(YEAR)
 #endif
         PDO_MYSQL_NATIVE_TYPE_NAME(SET)
