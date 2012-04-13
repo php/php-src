@@ -31,7 +31,7 @@ dnl Basic autoconf + automake initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
 AC_PREREQ(2.13)
-AC_INIT(README.SVN-RULES)
+AC_INIT(README.GIT-RULES)
 
 PHP_CONFIG_NICE(config.nice)
 
