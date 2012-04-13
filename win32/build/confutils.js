@@ -65,7 +65,7 @@ if (MODE_PHPIZE) {
 		WScript.Quit(10);
 	}
 } else {
-	if (!FSO.FileExists("README.SVN-RULES")) {
+	if (!FSO.FileExists("README.GIT-RULES")) {
 		STDERR.WriteLine("Must be run from the root of the php source");
 		WScript.Quit(10);
 	}
@@ -74,7 +74,7 @@ if (MODE_PHPIZE) {
 var CWD = WshShell.CurrentDirectory;
 
 if (typeof(CWD) == "undefined") {
-	CWD = FSO.GetParentFolderName(FSO.GetAbsolutePathName("README.SVN-RULES"));
+	CWD = FSO.GetParentFolderName(FSO.GetAbsolutePathName("README.GIT-RULES"));
 }
 
 /* defaults; we pick up the precise versions from configure.in */
