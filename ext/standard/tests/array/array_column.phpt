@@ -1,5 +1,5 @@
 --TEST--
-Test array_column_values() function
+Test array_column() function
 --FILE--
 <?php
 /* Prototype:
