@@ -82,6 +82,14 @@ $numericCols = array(
 );
 var_dump(array_column($numericCols, 1));
 
+echo "\n*** Testing failure to find specified column ***\n";
+var_dump(array_column($numericCols, 2));
+var_dump(array_column($numericCols, 'foo'));
+
+echo "\n*** Testing single dimensional array ***\n";
+$singleDimension = array('foo', 'bar', 'baz');
+var_dump(array_column($singleDimension, 1));
+
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -134,5 +142,15 @@ array(3) {
   string(3) "222"
   [2]=>
   string(3) "333"
+}
+
+*** Testing failure to find specified column ***
+array(0) {
+}
+array(0) {
+}
+
+*** Testing single dimensional array ***
+array(0) {
 }
 Done
