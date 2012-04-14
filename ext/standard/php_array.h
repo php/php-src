@@ -71,6 +71,7 @@ PHP_FUNCTION(array_replace_recursive);
 PHP_FUNCTION(array_keys);
 PHP_FUNCTION(array_values);
 PHP_FUNCTION(array_count_values);
+PHP_FUNCTION(array_column);
 PHP_FUNCTION(array_reverse);
 PHP_FUNCTION(array_reduce);
 PHP_FUNCTION(array_pad);

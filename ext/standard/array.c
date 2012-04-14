@@ -2565,6 +2565,87 @@ PHP_FUNCTION(array_count_values)
 }
 /* }}} */
 
+/* {{{ proto array array_column(array input, mixed key)
+   Return the values from a single column in the input array, identified by the key */
+PHP_FUNCTION(array_column)
+{
+	zval *zarray, *zoffset, **data, **zvalue;
+	HashTable *arr_hash;
+	HashPosition pointer;
+	long index = 0;
+	char *key = NULL;
+	int key_len = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "az", &zarray, &zoffset) == FAILURE) {
+		return;
+	}
+
+	arr_hash = Z_ARRVAL_P(zarray);
+	array_init(return_value);
+
+	switch (Z_TYPE_P(zoffset)) {
+		case IS_NULL:
+			index = 0;
+			break;
+		case IS_DOUBLE:
+			index = (long)Z_DVAL_P(zoffset);
+			break;
+		case IS_BOOL:
+		case IS_LONG:
+		case IS_RESOURCE:
+			index = Z_LVAL_P(zoffset);
+			break;
+		case IS_STRING:
+			key = Z_STRVAL_P(zoffset);
+			key_len = Z_STRLEN_P(zoffset);
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The key should be either a string or an integer");
+			return;
+	}
+
+	for (zend_hash_internal_pointer_reset_ex(arr_hash, &pointer);
+			zend_hash_get_current_data_ex(arr_hash, (void**)&data, &pointer) == SUCCESS;
+			zend_hash_move_forward_ex(arr_hash, &pointer)) {
+
+		if (Z_TYPE_PP(data) == IS_ARRAY) {
+			if (key && zend_hash_find(Z_ARRVAL_PP(data), key, key_len + 1, (void**)&zvalue) == FAILURE) {
+				continue;
+			} else if (!key && zend_hash_index_find(Z_ARRVAL_PP(data), index, (void**)&zvalue) == FAILURE) {
+				continue;
+			}
+
+			switch (Z_TYPE_PP(zvalue)) {
+				case IS_NULL:
+					add_next_index_null(return_value);
+					break;
+				case IS_LONG:
+					add_next_index_long(return_value, Z_LVAL_PP(zvalue));
+					break;
+				case IS_DOUBLE:
+					add_next_index_double(return_value, Z_DVAL_PP(zvalue));
+					break;
+				case IS_BOOL:
+					add_next_index_bool(return_value, Z_BVAL_PP(zvalue));
+					break;
+				case IS_OBJECT:
+					zval_add_ref(zvalue);
+					add_next_index_zval(return_value, *zvalue);
+					break;
+				case IS_STRING:
+					add_next_index_stringl(return_value, Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue), 1);
+					break;
+				case IS_RESOURCE:
+					zval_add_ref(zvalue);
+					add_next_index_resource(return_value, Z_RESVAL_PP(zvalue));
+					break;
+			}
+		}
+
+	}
+}
+/* }}} */
+
 /* {{{ proto array array_reverse(array input [, bool preserve keys])
    Return input as a new array with the order of the entries reversed */
 PHP_FUNCTION(array_reverse)
