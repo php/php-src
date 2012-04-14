@@ -2613,31 +2613,8 @@ PHP_FUNCTION(array_column)
 				continue;
 			}
 
-			switch (Z_TYPE_PP(zvalue)) {
-				case IS_NULL:
-					add_next_index_null(return_value);
-					break;
-				case IS_LONG:
-					add_next_index_long(return_value, Z_LVAL_PP(zvalue));
-					break;
-				case IS_DOUBLE:
-					add_next_index_double(return_value, Z_DVAL_PP(zvalue));
-					break;
-				case IS_BOOL:
-					add_next_index_bool(return_value, Z_BVAL_PP(zvalue));
-					break;
-				case IS_OBJECT:
-					zval_add_ref(zvalue);
-					add_next_index_zval(return_value, *zvalue);
-					break;
-				case IS_STRING:
-					add_next_index_stringl(return_value, Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue), 1);
-					break;
-				case IS_RESOURCE:
-					zval_add_ref(zvalue);
-					add_next_index_resource(return_value, Z_RESVAL_PP(zvalue));
-					break;
-			}
+			Z_ADDREF_PP(zvalue);
+			zend_hash_next_index_insert(HASH_OF(return_value), (void **)zvalue, sizeof(zval *), NULL);
 		}
 
 	}
