@@ -2578,19 +2578,11 @@ PHP_FUNCTION(array_column)
 		return;
 	}
 
-	arr_hash = Z_ARRVAL_P(zarray);
-	array_init(return_value);
-
 	switch (Z_TYPE_P(zoffset)) {
 		case IS_NULL:
 			index = 0;
 			break;
-		case IS_DOUBLE:
-			index = (long)Z_DVAL_P(zoffset);
-			break;
-		case IS_BOOL:
 		case IS_LONG:
-		case IS_RESOURCE:
 			index = Z_LVAL_P(zoffset);
 			break;
 		case IS_STRING:
@@ -2599,8 +2591,11 @@ PHP_FUNCTION(array_column)
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The key should be either a string or an integer");
-			return;
+			RETURN_FALSE;
 	}
+
+	arr_hash = Z_ARRVAL_P(zarray);
+	array_init(return_value);
 
 	for (zend_hash_internal_pointer_reset_ex(arr_hash, &pointer);
 			zend_hash_get_current_data_ex(arr_hash, (void**)&data, &pointer) == SUCCESS;
