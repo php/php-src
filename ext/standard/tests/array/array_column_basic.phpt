@@ -1,5 +1,5 @@
 --TEST--
-Test array_column() function
+Test array_column() function: basic functionality
 --FILE--
 <?php
 /* Prototype:
@@ -9,7 +9,7 @@ Test array_column() function
  *  the specified "column" in a two-dimensional array.
  */
 
-echo "*** Testing basic functionalities ***\n";
+echo "*** Testing array_column() : basic functionality ***\n";
 /* Array representing a possible record set returned from a database */
 $records = array(
 	array(
@@ -100,7 +100,7 @@ var_dump(array_column($mismatchedColumns, 'c'));
 echo "Done\n";
 ?>
 --EXPECTF--
-*** Testing basic functionalities ***
+*** Testing array_column() : basic functionality ***
 -- first_name column from recordset --
 array(3) {
   [0]=>
