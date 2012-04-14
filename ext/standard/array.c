@@ -2611,7 +2611,7 @@ PHP_FUNCTION(array_column)
 			}
 
 			Z_ADDREF_PP(zvalue);
-			zend_hash_next_index_insert(HASH_OF(return_value), (void **)zvalue, sizeof(zval *), NULL);
+			add_next_index_zval(return_value, *zvalue);
 		}
 
 	}
