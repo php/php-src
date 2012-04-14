@@ -90,6 +90,13 @@ echo "\n*** Testing single dimensional array ***\n";
 $singleDimension = array('foo', 'bar', 'baz');
 var_dump(array_column($singleDimension, 1));
 
+echo "\n*** Testing columns not present in all rows ***\n";
+$mismatchedColumns = array(
+    array('a' => 'foo', 'b' => 'bar'),
+    array('a' => 'baz', 'c' => 'qux'),
+);
+var_dump(array_column($mismatchedColumns, 'c'));
+
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -152,5 +159,11 @@ array(0) {
 
 *** Testing single dimensional array ***
 array(0) {
+}
+
+*** Testing columns not present in all rows ***
+array(1) {
+  [0]=>
+  string(3) "qux"
 }
 Done
