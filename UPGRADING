@@ -26,6 +26,8 @@ PHP X.Y UPGRADE NOTES
 2. New Features
 ========================================
 
+- Support constant array/string dereferencing. (Laruence)
+  (https://wiki.php.net/rfc/constdereference)
 
 ========================================
 2. Changes in SAPI modules

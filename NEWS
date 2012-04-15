@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Drop Windows XP and 2003 support. (Pierre)
   . World domination
   . Improve set_exception_handler while doing reset.(Laruence)
+  . Support constant array/string dereferencing. (Laruence)
 
 - Core:
   . Implemented FR #60738 (Allow 'set_error_handler' to handle NULL).
