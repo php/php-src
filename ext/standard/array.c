@@ -2589,6 +2589,11 @@ PHP_FUNCTION(array_column)
 			key = Z_STRVAL_P(zoffset);
 			key_len = Z_STRLEN_P(zoffset);
 			break;
+		case IS_OBJECT:
+			convert_to_string_ex(&zoffset);
+			key = Z_STRVAL_P(zoffset);
+			key_len = Z_STRLEN_P(zoffset);
+			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The key should be either a string or an integer");
 			RETURN_FALSE;
