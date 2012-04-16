@@ -1,5 +1,5 @@
 --TEST--
-Bug #61728 (php-fpm SIGSEGV running friendica on nginx)
+Bug #61728 (PHP crash when calling ob_start in request_shutdown phase)
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
