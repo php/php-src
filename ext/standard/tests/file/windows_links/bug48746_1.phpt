@@ -17,13 +17,14 @@ if (count($output) == 0) {
 ?>
 --FILE--
 <?php
+$mountvol = "c:\\Windows\\System32\\mountvol.exe";
 $old_dir = __DIR__;
 $dirname = __DIR__ . "\\mnt\\test\\directory";
 exec("mkdir " . $dirname, $output, $ret_val);
 chdir(__DIR__ . "\\mnt\\test");
 $drive = substr(__DIR__, 0, 2);
 $pathwithoutdrive = substr(__DIR__, 2);
-$ret = exec("mountvol " . $drive . " /L", $output, $ret_val);
+$ret = exec($mountvol . " " . $drive . " /L", $output, $ret_val);
 exec("mklink /j mounted_volume " . $ret, $output, $ret_val);
 $fullpath = "mounted_volume" . $pathwithoutdrive;
 exec("mklink /j mklink_junction directory", $output, $ret_val);
