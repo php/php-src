@@ -17,7 +17,7 @@ PHP                                                                        NEWS
 (merge after 5.3.11 release)
 
 - Core:
-  . Fixed bug #61728 (php-fpm SIGSEGV running friendica on nginx). (Laruence)
+  . Fixed bug #61728 (PHP crash when calling ob_start in request_shutdown phase). (Laruence)
   . Fixed bug #61660 (bin2hex(hex2bin($data)) != $data). (Nikita Popov)
   . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
     (without apache2)). (Laruence)
