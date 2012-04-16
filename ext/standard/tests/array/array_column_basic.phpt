@@ -97,6 +97,17 @@ $mismatchedColumns = array(
 );
 var_dump(array_column($mismatchedColumns, 'c'));
 
+echo "\n*** Testing use of object converted to string ***\n";
+class Foo
+{
+    public function __toString()
+    {
+        return 'last_name';
+    }
+}
+$f = new Foo();
+var_dump(array_column($records, $f));
+
 echo "Done\n";
 ?>
 --EXPECTF--
@@ -165,5 +176,15 @@ array(0) {
 array(1) {
   [0]=>
   string(3) "qux"
+}
+
+*** Testing use of object converted to string ***
+array(3) {
+  [0]=>
+  string(3) "Doe"
+  [1]=>
+  string(5) "Smith"
+  [2]=>
+  string(5) "Jones"
 }
 Done
