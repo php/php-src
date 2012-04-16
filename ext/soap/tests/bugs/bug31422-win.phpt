@@ -2,8 +2,8 @@
 Bug #31422 (No Error-Logging on SoapServer-Side)
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip not valid for windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip not valid for non windows');
 }
 require_once('skipif.inc');
 ?>
@@ -41,7 +41,7 @@ $server->handle($HTTP_RAW_POST_DATA);
 echo "ok\n";
 ?>
 --EXPECTF--
-PHP Warning:  fopen() expects at least 2 parameters, 0 given in %sbug31422.php on line %d
-PHP Fatal error:  Hello in %sbug31422.php on line %d
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>SOAP-ENV:Server</faultcode><faultstring>Hello</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
+PHP Warning:  fopen() expects at least 2 parameters, 0 given in %sbug31422-win.php on line %d
+PHP Fatal error:  Hello in %sbug31422-win.php on line %d
