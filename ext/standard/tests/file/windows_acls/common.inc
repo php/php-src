@@ -19,7 +19,13 @@ function skipif() {
 }
 
 function get_username(){
-	return getenv('USERNAME');
+	$user = getenv('USERNAME');
+
+	if (!$user) {
+		$user = get_current_user();
+	}
+
+	return $user;
 }
 
 function get_domainname()
@@ -28,6 +34,7 @@ function get_domainname()
 }
 
 function icacls_set($path, $mode, $perm) {
+	$icacls = 'c:\\Windows\\System32\\icacls.exe';
 	$user = get_username();
 	$path_escaped =  '"' . $path . '"';
 	$perm_entry = array();
@@ -38,7 +45,7 @@ function icacls_set($path, $mode, $perm) {
 	if ($perm & PHPT_ACL_FULL) $perm_entry[]  = 'F';
 
 	// Deny all
-	$cmd = 'icacls ' . $path_escaped . ' /inheritance:r /deny ' . $user . ':(F,M,R,RX,W)';
+	$cmd = $icacls . ' ' . $path_escaped . ' /inheritance:r /deny ' . $user . ':(F,M,R,RX,W)';
 	exec($cmd);
 
 	if ($perm & PHPT_ACL_NONE) {
@@ -47,11 +54,9 @@ function icacls_set($path, $mode, $perm) {
 		 permission for the USER. Just granting permission doesn't
 		 remove the previously denied permission.
 		*/
-		$cmd = 'icacls ' . $path_escaped . ' /' . 'remove:d';
-		$cmd .= ' ' . $user;
+		$cmd = $icacls . ' ' . $path_escaped . ' /remove:d ' . $user;
 		exec($cmd);
-		$cmd = 'icacls ' . $path_escaped . ' /' . 'remove:g';
-		$cmd .= ' ' . $user;
+		$cmd = $icacls . ' ' . $path_escaped . ' /remove:g ' . $user;
 		exec($cmd);
 		return;
 	}
@@ -64,7 +69,7 @@ function icacls_set($path, $mode, $perm) {
 
 
 	// Deny all
-	$cmd = 'icacls ' . $path_escaped . ' /deny ' . $user . ':(F,M,R,RX,W)';
+	$cmd = $icacls . ' ' . $path_escaped . ' /deny ' . $user . ':(F,M,R,RX,W)';
 	exec($cmd);
 
 	/*
@@ -72,11 +77,9 @@ function icacls_set($path, $mode, $perm) {
 	 permission for the USER. Just granting permission doesn't
 	 remove the previously denied permission.
 	*/
-	$cmd = 'icacls ' . $path_escaped . ' /' . 'remove:d';
-	$cmd .= ' ' . $user;
+	$cmd = $icacls . ' ' . $path_escaped . ' /remove:d ' . $user;
 	exec($cmd);
-	$cmd = 'icacls ' . $path_escaped . ' /' . 'remove:g';
-	$cmd .= ' ' . $user;
+	$cmd = $icacls . ' ' . $path_escaped . ' /remove:g ' . $user;
 	exec($cmd);
 
 
@@ -91,15 +94,12 @@ function icacls_set($path, $mode, $perm) {
 		 permission for the USER. Just granting permission doesn't
 		 remove the previously denied permission.
 		*/
-		$cmd = 'icacls ' . $path_escaped . ' /' . 'remove:d';
-		$cmd .= ' ' . get_username();
+		$cmd = $icacls . ' ' . $path_escaped . ' /remove:d ' . $user;
 		exec($cmd);
-		$cmd = 'icacls ' . $path_escaped . ' /' . 'remove:g';
-		$cmd .= ' ' . get_username();
+		$cmd = $icacls . ' ' . $path_escaped . ' /remove:g ' . $user;
 		exec($cmd);
 
-		$cmd = 'icacls ' . $path_escaped . ' /' . $mode;
-		$cmd .= ' ' . get_username();
+		$cmd = $icacls . ' ' . $path_escaped . ' /' . $mode . ' ' . $user;
 		$cmd .= ':' . '(' . implode($perm_entry, ',') . ')';
 		exec($cmd);
 	}
