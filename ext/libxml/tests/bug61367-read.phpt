@@ -15,6 +15,7 @@ class StreamExploiter {
 		$doc->resolveExternals = true;
 		$doc->substituteEntities = true;
 		$dir = htmlspecialchars(dirname(getcwd()));
+		$dir = str_replace('\\', '/', $dir); // fix for windows
 		$doc->loadXML( <<<XML
 <!DOCTYPE doc [
 	<!ENTITY file SYSTEM "file:///$dir/bad">
