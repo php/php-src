@@ -187,6 +187,12 @@ PHP_FUNCTION(pack)
 					}
 					convert_to_string_ex(argv[currentarg]);
 					arg = Z_STRLEN_PP(argv[currentarg]);
+					if (code == 'Z') {
+						/* add one because Z is always NUL-terminated:
+						 * pack("Z*", "aa") === "aa\0"
+						 * pack("Z2", "aa") === "a\0" */
+						arg++;
+					}
 				}
 
 				currentarg++;
@@ -317,7 +323,8 @@ PHP_FUNCTION(pack)
 		switch ((int) code) {
 			case 'a': 
 			case 'A': 
-			case 'Z': 
+			case 'Z': {
+				int arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
 				memset(&output[outputpos], (code == 'a' || code == 'Z') ? '\0' : ' ', arg);
 				val = argv[currentarg++];
 				if (Z_ISREF_PP(val)) {
@@ -325,9 +332,10 @@ PHP_FUNCTION(pack)
 				}
 				convert_to_string_ex(val);
 				memcpy(&output[outputpos], Z_STRVAL_PP(val),
-					   (Z_STRLEN_PP(val) < arg) ? Z_STRLEN_PP(val) : arg);
+					   (Z_STRLEN_PP(val) < arg_cp) ? Z_STRLEN_PP(val) : arg_cp);
 				outputpos += arg;
 				break;
+			}
 
 			case 'h': 
 			case 'H': {
