@@ -182,6 +182,10 @@ PHP 5.4 UPGRADE NOTES
 4. Changes to existing functions
 ================================
 
+- pack/unpack will now implement format character Z: NULL-padded string
+  Z: will strip everything after the first null on unpack, a: does not strip,
+  A: will strip any trailing whitespace on unpack.
+
 - array_combine now returns array() instead of FALSE when two empty arrays are
   provided as parameters.
 
