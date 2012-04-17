@@ -788,6 +788,7 @@ PHP                                                                        NEWS
 - Postgres:
   . Fixed bug #60244 (pg_fetch_* functions do not validate that row param 
     is >0). (Ilia)
+  . Added PGSQL_LIBPQ_VERSION/PGSQL_LIBPQ_VERSION_STR constants. (Yasuo)
 
 - Reflection:
   . Fixed bug #60367 (Reflection and Late Static Binding). (Laruence)
