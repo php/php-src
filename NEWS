@@ -9,9 +9,11 @@ PHP                                                                        NEWS
   . Support constant array/string dereferencing. (Laruence)
 
 - Core:
+  . Fixed bug #61681 (Malformed grammar). (Nikita Popov, Etienne, Laruence).
+  . Fixed bug #61038 (unpack("a5", "str\0\0") does not work as expected).
+    (srgoogleguy, Gustavo)
   . Implemented FR #60738 (Allow 'set_error_handler' to handle NULL).
     (Laruence, Nikita Popov)
-  . Fixed bug #61681 (Malformed grammar). (Nikita Popov, Etienne, Laruence).
 
 - cURL:
   . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 

@@ -46,6 +46,12 @@ PHP X.Y UPGRADE NOTES
 4. Changed Functions
 ========================================
 
+- pack()/unpack() had the following changes, which bring it more in line
+  with Perl's behavior:
+  - Implemented format character "Z": NUL-padded string
+  - "a" now does not remove trailing NUL characters on unpack() anymore
+  - "A" will now strip all trailing ASCII whitespace on unpack() (it used to
+    remove only trailing spaces.
 
 ========================================
 5. New Functions
