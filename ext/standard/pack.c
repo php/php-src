@@ -99,7 +99,7 @@ static void php_pack(zval **val, int size, int *map, char *output)
 /* }}} */
 
 /* pack() idea stolen from Perl (implemented formats behave the same as there)
- * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
+ * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
  */
 /* {{{ proto string pack(string format, mixed arg1 [, mixed arg2 [, mixed ...]])
    Takes one or more arguments and packs them into a binary string according to the format argument */
@@ -170,6 +170,7 @@ PHP_FUNCTION(pack)
 			/* Always uses one arg */
 			case 'a': 
 			case 'A': 
+			case 'Z': 
 			case 'h': 
 			case 'H':
 				if (currentarg >= num_args) {
@@ -250,6 +251,7 @@ PHP_FUNCTION(pack)
 
 			case 'a': 
 			case 'A':
+			case 'Z':
 			case 'c': 
 			case 'C':
 			case 'x':
@@ -315,7 +317,8 @@ PHP_FUNCTION(pack)
 		switch ((int) code) {
 			case 'a': 
 			case 'A': 
-				memset(&output[outputpos], (code == 'a') ? '\0' : ' ', arg);
+			case 'Z': 
+				memset(&output[outputpos], (code == 'a' || code == 'Z') ? '\0' : ' ', arg);
 				val = argv[currentarg++];
 				if (Z_ISREF_PP(val)) {
 					SEPARATE_ZVAL(val);
@@ -511,7 +514,7 @@ static long php_unpack(char *data, int size, int issigned, int *map)
  * chars1, chars2, and ints.
  * Numeric pack types will return numbers, a and A will return strings,
  * f and d will return doubles.
- * Implemented formats are A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
+ * Implemented formats are Z, A, a, h, H, c, C, s, S, i, I, l, L, n, N, f, d, x, X, @.
  */
 /* {{{ proto array unpack(string format, string input)
    Unpack binary string into named array elements according to format argument */
@@ -586,6 +589,7 @@ PHP_FUNCTION(unpack)
 
 			case 'a': 
 			case 'A':
+			case 'Z':
 				size = arg;
 				arg = 1;
 				break;
@@ -662,9 +666,9 @@ PHP_FUNCTION(unpack)
 
 			if ((inputpos + size) <= inputlen) {
 				switch ((int) type) {
-					case 'a': 
-					case 'A': {
-						char pad = (type == 'a') ? '\0' : ' ';
+					case 'a': {
+						/* a will not strip any trailing whitespace or null padding */
+						char pad = ' ';
 						int len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
@@ -674,15 +678,60 @@ PHP_FUNCTION(unpack)
 
 						size = len;
 
-						/* Remove padding chars from unpacked data */
+						add_assoc_stringl(return_value, n, &input[inputpos], len, 1);
+						break;
+					}
+					case 'A': {
+						/* A will strip any trailing whitespace */
+						char padn = '\0'; char pads = ' '; char padt = '\t'; char padc = '\r'; char padl = '\n';
+						int len = inputlen - inputpos;	/* Remaining string */
+
+						/* If size was given take minimum of len and size */
+						if ((size >= 0) && (len > size)) {
+							len = size;
+						}
+
+						size = len;
+
+						/* Remove trailing white space and nulls chars from unpacked data */
 						while (--len >= 0) {
-							if (input[inputpos + len] != pad)
+							if (input[inputpos + len] != padn
+								&& input[inputpos + len] != pads
+								&& input[inputpos + len] != padt
+								&& input[inputpos + len] != padc
+								&& input[inputpos + len] != padl
+							)
 								break;
 						}
 
 						add_assoc_stringl(return_value, n, &input[inputpos], len + 1, 1);
 						break;
 					}
+					/* New option added for Z to remain in-line with the Perl implementation */
+					case 'Z': {
+						/* Z will strip everything after the first null character */
+						char pad = '\0';
+						int len = inputlen - inputpos;	/* Remaining string */
+
+						/* If size was given take minimum of len and size */
+						if ((size >= 0) && (len > size)) {
+							len = size;
+						}
+
+						size = len;
+
+						/* Remove everything after the first null */
+						int s = 0;
+						while (s++ <= len) {
+							if (input[inputpos + s] == pad)
+								break;
+						}
+						len = s;
+
+						add_assoc_stringl(return_value, n, &input[inputpos], len, 1);
+						break;
+					}
+
 					
 					case 'h': 
 					case 'H': {
