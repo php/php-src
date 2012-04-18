@@ -8,14 +8,6 @@ PHP                                                                        NEWS
     $_SERVER['SCRIPT_FILENAME'] when using router). (Laruence)
   . "Connection: close" instead of "Connection: closed" (Gustavo)
 
-- JSON
-  . Fixed bug #61537 (json_encode() incorrectly truncates/discards
-    information). (Adam)
-
-?? ??? 2012, PHP 5.3.11
-
-(merge after 5.3.11 release)
-
 - Core:
   . Fixed bug #61761 ('Overriding' a private static method with a different 
     signature causes crash). (Laruence)
@@ -70,6 +62,10 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #61487 (Incorrent bounds checking in grapheme_strpos).
     (Stas)
+
+- JSON
+  . Fixed bug #61537 (json_encode() incorrectly truncates/discards
+    information). (Adam)
 
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
