@@ -19,7 +19,7 @@
 ; See the PHP docs for more specific information.
 ; http://php.net/configuration.file
 
-; The syntax of the file is extremely simple.  Whitespace and Lines
+; The syntax of the file is extremely simple.  Whitespace and lines
 ; beginning with a semicolon are silently ignored (as you probably guessed).
 ; Section headers (e.g. [Foo]) are also silently ignored, even though
 ; they might mean something in the future.
