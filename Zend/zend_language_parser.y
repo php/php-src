@@ -869,6 +869,7 @@ fully_qualified_class_name:
 class_name_reference:
 		class_name						{ zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
 	|	dynamic_class_name_reference	{ zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
+	| '{' expr '}' { zend_do_fetch_class(&$$, &$2 TSRMLS_CC); }
 ;
 
 
