@@ -18,20 +18,27 @@ function test($name, $lc, $lp)
 	var_dump($o == $c);
 	var_dump($o->getPathname() == $c->getPathname());
 	
-	$f = new SplFileObject($name);
-	var_dump($name);
-	var_dump($f->getPathName());
-	$l = substr($f->getPathName(), -1);
-	var_dump($l != '/' && $l != '\\' && $l == $lc);
-	var_dump($f->getFileName());
-	$l = substr($f->getFileName(), -1);
-	var_dump($l != '/' && $l != '\\' && $l == $lc);
-	var_dump($f->getPath());
-	$l = substr($f->getPath(), -1);
-	var_dump($l != '/' && $l != '\\' && $l == $lp);
-
-	$fo = $o->openFile();
-	var_dump($fo->getPathName(), $fo->getFileName(), $fo->getPath());
+	try {
+		$f = new SplFileObject($name);
+		var_dump($name);
+		var_dump($f->getPathName());
+		$l = substr($f->getPathName(), -1);
+		var_dump($l != '/' && $l != '\\' && $l == $lc);
+		var_dump($f->getFileName());
+		$l = substr($f->getFileName(), -1);
+		var_dump($l != '/' && $l != '\\' && $l == $lc);
+		var_dump($f->getPath());
+		$l = substr($f->getPath(), -1);
+		var_dump($l != '/' && $l != '\\' && $l == $lp);
+	} catch (LogicException $e) {
+		echo "LogicException: ".$e->getMessage()."\n";
+	}
+	try {
+		$fo = $o->openFile();
+		var_dump($fo->getPathName(), $fo->getFileName(), $fo->getPath());
+	} catch (LogicException $e) {
+		echo "LogicException: ".$e->getMessage()."\n";
+	}
 }
 
 test(dirname(__FILE__) . '/' . 'fileobject_001a.txt', 't', substr(dirname(__FILE__),-1));
@@ -84,16 +91,8 @@ object(SplFileInfo)#%d (2) {
 bool(false)
 bool(true)
 bool(true)
-%s(%d) "%stests/"
-string(%d) "%stests"
-bool(true)
-string(5) "tests"
-bool(true)
-string(%d) "%sspl"
-bool(true)
-string(%d) "%stests"
-string(%d) "tests"
-string(%d) "%sspl"
+LogicException: Cannot use SplFileObject with directories
+LogicException: Cannot use SplFileObject with directories
 ===2===
 object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
@@ -110,14 +109,6 @@ object(SplFileInfo)#%d (2) {
 bool(false)
 bool(true)
 bool(true)
-%s(%d) "%stests"
-string(%d) "%stests"
-bool(true)
-string(%d) "tests"
-bool(true)
-string(%d) "%sspl"
-bool(true)
-string(%d) "%stests"
-string(5) "tests"
-string(%d) "%sspl"
+LogicException: Cannot use SplFileObject with directories
+LogicException: Cannot use SplFileObject with directories
 ===DONE===
