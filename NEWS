@@ -6,7 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #61537 (json_encode() incorrectly truncates/discards
     information). (Adam)
 
-?? ??? 2012, PHP 5.3.11
+- PDO:
+  . Fixed bug #61755 (A parsing bug in the prepared statements can lead to
+    access violations). (Johannes)
+
 - Iconv extension:
   . Fixed a bug that iconv extension fails to link to the correct library
     when another extension makes use of a library that links to the iconv
