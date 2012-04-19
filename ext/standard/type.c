@@ -187,7 +187,7 @@ PHP_FUNCTION(boolval)
 	}
 
 	RETVAL_ZVAL(*val, 1, 0);
-	convert_to_boolean_ex(return_value);
+	convert_to_boolean(return_value);
 }
 /* }}} */
 
