@@ -180,14 +180,14 @@ PHP_FUNCTION(floatval)
    Get the boolean value of a variable */
 PHP_FUNCTION(boolval)
 {
-	zval **num;
+	zval **val;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &num) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &val) == FAILURE) {
 		return;
 	}
 
-	RETVAL_ZVAL(*num, 1, 0);
-	convert_to_boolean(return_value);
+	RETVAL_ZVAL(*val, 1, 0);
+	convert_to_boolean_ex(return_value);
 }
 /* }}} */
 
