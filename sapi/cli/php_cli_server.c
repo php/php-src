@@ -1781,11 +1781,14 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 			php_output_discard(TSRMLS_C);
 			if (!SG(sapi_started)) {
 				static int (*send_header_func)(sapi_headers_struct * TSRMLS_DC);
+				unsigned char send_default_content_type = SG(sapi_headers).send_default_content_type;
 				send_header_func = sapi_module.send_headers;
 				/* we don't want the header to be sent now */
 				sapi_module.send_headers = sapi_cli_server_discard_headers;
+				SG(sapi_headers).send_default_content_type = 0;
 				php_output_deactivate(TSRMLS_C);
 				sapi_module.send_headers = send_header_func;
+				SG(sapi_headers).send_default_content_type = send_default_content_type;
 			}
 			if (style && Z_STRVAL_P(style)) {
 				char *block = pestrndup(Z_STRVAL_P(style), Z_STRLEN_P(style), 1);
