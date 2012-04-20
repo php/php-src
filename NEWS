@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.12
 
+- Core:
+  . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
+   set to null). (Anatoliy)
+
 - JSON
   . Fixed bug #61537 (json_encode() incorrectly truncates/discards
     information). (Adam)
