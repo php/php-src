@@ -174,8 +174,6 @@ typedef struct php_cli_server_client {
 	php_cli_server_request request;
 	unsigned int content_sender_initialized:1;
 	php_cli_server_content_sender content_sender;
-	php_cli_server_buffer capture_buffer;
-	unsigned int capturing:1;
 	int file_fd;
 } php_cli_server_client;
 
@@ -425,17 +423,7 @@ static int sapi_cli_server_ub_write(const char *str, uint str_length TSRMLS_DC) 
 	if (!client) {
 		return 0;
 	}
-	if (client->capturing) {
-		php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(str_length);
-		if (!chunk) {
-			zend_bailout();
-		}
-		memmove(chunk->data.heap.p, str, str_length);
-		php_cli_server_buffer_append(&client->capture_buffer, chunk);
-		return str_length;
-	} else {
-		return php_cli_server_client_send_through(client, str, str_length);
-	}
+	return php_cli_server_client_send_through(client, str, str_length);
 } /* }}} */
 
 static void sapi_cli_server_flush(void *server_context) /* {{{ */
@@ -470,7 +458,7 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers TSRMLS
 	sapi_header_struct *h;
 	zend_llist_position pos;
 
-	if (client == NULL || client->capturing || SG(request_info).no_headers) {
+	if (client == NULL || SG(request_info).no_headers) {
 		return SAPI_HEADER_SENT_SUCCESSFULLY;
 	}
 
@@ -1677,18 +1665,6 @@ static void destroy_request_info(sapi_request_info *request_info) /* {{{ */
 {
 } /* }}} */
 
-static void php_cli_server_client_begin_capture(php_cli_server_client *client) /* {{{ */
-{
-	php_cli_server_buffer_ctor(&client->capture_buffer);
-	client->capturing = 1;
-} /* }}} */
-
-static void php_cli_server_client_end_capture(php_cli_server_client *client) /* {{{ */
-{
-	client->capturing = 0;
-	php_cli_server_buffer_dtor(&client->capture_buffer);
-} /* }}} */
-
 static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_server *server, int client_sock, struct sockaddr *addr, socklen_t addr_len TSRMLS_DC) /* {{{ */
 {
 	client->server = server;
@@ -1713,7 +1689,6 @@ static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_ser
 		return FAILURE;
 	}
 	client->content_sender_initialized = 0;
-	client->capturing = 0;
 	client->file_fd = -1;
 	return SUCCESS;
 } /* }}} */
@@ -1729,9 +1704,6 @@ static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
 	pefree(client->addr_str, 1);
 	if (client->content_sender_initialized) {
 		php_cli_server_content_sender_dtor(&client->content_sender);
-	}
-	if (client->capturing) {
-		php_cli_server_buffer_dtor(&client->capture_buffer);
 	}
 } /* }}} */
 
