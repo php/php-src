@@ -38,14 +38,14 @@
 /*
   __X accessors explanation:
 
-  if we have __get and property that is not part of the properties array is
-  requested, we call __get handler. If it fails, we return uninitialized.
+  if we have __get/getter and property that is not part of the properties array is
+  requested, we call __get/getter handler. If it fails, we return uninitialized.
 
-  if we have __set and property that is not part of the properties array is
-  set, we call __set handler. If it fails, we do not change the array.
+  if we have __set/setter and property that is not part of the properties array is
+  set, we call __set/setter handler. If it fails, we do not change the array.
 
-  for both handlers above, when we are inside __get/__set, no further calls for
-  __get/__set for this property of this object will be made, to prevent endless
+  for both handlers above, when we are inside __get/__set/accessor, no further calls for
+  __get/__set/accessor for this property of this object will be made, to prevent endless
   recursion and enable accessors to change properties array.
 
   if we have __call and method which is not part of the class function table is
@@ -470,6 +470,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 	zval *rv = NULL;
 	zend_property_info *property_info;
 	int silent;
+	zend_function 		*getter = zend_locate_getter(object, member, key TSRMLS_CC);
 
 	silent = (type == BP_VAR_IS);
 	zobj = Z_OBJ_P(object);
@@ -489,7 +490,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 #endif
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
-	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__get != NULL), key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, member, (getter != NULL), key TSRMLS_CC);
 
 	if (UNEXPECTED(!property_info) ||
 	    ((EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -501,7 +502,6 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 	          UNEXPECTED(zend_hash_quick_find(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, (void **) &retval) == FAILURE)))) {
 
 		zend_guard *guard = NULL;
-		zend_function 		*getter = zend_locate_getter(object, member, key TSRMLS_CC);
 
 		if ( getter != NULL && zend_get_property_guard(zobj, property_info, member, &guard) == SUCCESS && !guard->in_get) {
 			/* have getter - try with it! */
@@ -540,7 +540,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 				Z_DELREF_P(object);
 			}
 		} else {
-			if (zobj->ce->__get && guard && guard->in_get == 1) {
+			if (getter && guard && guard->in_get == 1) {
 				if (Z_STRVAL_P(member)[0] == '\0') {
 					if (Z_STRLEN_P(member) == 0) {
 						zend_error(E_ERROR, "Cannot access empty property");
@@ -570,6 +570,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 	zval *tmp_member = NULL;
 	zval **variable_ptr;
 	zend_property_info *property_info;
+	zend_function 	*setter = zend_locate_setter(object, member, key TSRMLS_CC);
 
 	zobj = Z_OBJ_P(object);
 
@@ -583,7 +584,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 		key = NULL;
 	}
 
-	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__set != NULL), key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, member, (setter != NULL), key TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL) &&
 	    ((EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -621,7 +622,6 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 		}
 	} else {
 		zend_guard 		*guard = NULL;
-		zend_function 	*setter = zend_locate_setter(object, member, key TSRMLS_CC);
 
 		zend_get_property_guard(zobj, property_info, member, &guard);
 
@@ -632,7 +632,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 			}
 			guard->in_set = 1; /* prevent circular setting */
 			if (zend_std_call_setter(object, member, value, setter TSRMLS_CC) != SUCCESS) {
-				/* for now, just ignore it - __set should take care of warnings, etc. */
+				/* for now, just ignore it - setter should take care of warnings, etc. */
 			}
 			guard->in_set = 0;
 			zval_ptr_dtor(&object);
@@ -657,7 +657,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 				}
 				zend_hash_quick_update(zobj->properties, property_info->name, property_info->name_length+1, property_info->h, &value, sizeof(zval *), NULL);
 			}
-		} else if (zobj->ce->__set && guard && guard->in_set == 1) {
+		} else if (setter && guard && guard->in_set == 1) {
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {
 					zend_error(E_ERROR, "Cannot access empty property");
@@ -763,6 +763,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const ze
 	zval tmp_member;
 	zval **retval;
 	zend_property_info *property_info;
+	zend_function 		*getter = zend_locate_getter(object, member, key TSRMLS_CC);
 
 	zobj = Z_OBJ_P(object);
 
@@ -778,7 +779,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const ze
 	fprintf(stderr, "Ptr object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
 #endif
 
-	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__get != NULL), key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, member, (getter != NULL), key TSRMLS_CC);
 
 	if (UNEXPECTED(!property_info) ||
 	    ((EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -791,7 +792,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const ze
 		zval *new_zval;
 		zend_guard *guard;
 
-		if (!zobj->ce->__get ||
+		if (!getter ||
 			zend_get_property_guard(zobj, property_info, member, &guard) != SUCCESS ||
 			(property_info && guard->in_get)) {
 			/* we don't have access controls - will just add it */

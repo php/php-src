@@ -102,7 +102,7 @@ $o->Hours += 2: 5
 $o->Hours -= 2: 3
 $o->Hours *= 3: 9
 $o->Hours /= 3: 3
-$o->Hours % 3: 1
+$o->Hours % 3: 0
 $o->Hours << 3: 24
 $o->Hours >> 1: 1
 -$o->Hours : -3
@@ -129,8 +129,8 @@ $o->aString."def": "abcdef"
 $o->aString .= "ghi": "abcghi"
 
 --- Array Tests ---
-$o->anArray = array('a' => 1, 'b' => 2)
-$o->anArray + array('c' => 3,'d' => 4) = array(1,2,3,4)
+$o->anArray = array(1,2)
+$o->anArray + array('c' => 3, 'd' => 4) = array(1,2,3,4)
 $o->anArray == array('a' => 1, 'b' => 2) = 1
 $o->anArray != array('a' => 1, 'b' => 2) = 0
 $o->anArray <> array('a' => 1, 'b' => 2) = 0
