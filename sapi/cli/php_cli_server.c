@@ -276,7 +276,7 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_server);
 /* {{{ static char php_cli_server_css[] 
  * copied from ext/standard/info.c
  */
-static char php_cli_server_css[] = "<style type=\"text/css\">\n" \
+static const char php_cli_server_css[] = "<style type=\"text/css\">\n" \
 								   "body {background-color: #ffffff; color: #000000;}\n" \
 								   "body, td, th, h1, h2 {font-family: sans-serif;}\n" \
 								   ".center {text-align: center;}\n" \
