@@ -52,6 +52,12 @@ $o->Hours *= 3;
 echo "\$o->Hours *= 3: {$o->Hours}\n";
 $o->Hours /= 3;
 echo "\$o->Hours /= 3: {$o->Hours}\n";
+$o->Hours &= 2;
+echo "\$o->Hours &= 2: {$o->Hours}\n";
+$o->Hours = 3;	/* Reset */
+echo "\$o->Hours = ".$o->Hours."\n";
+$o->Hours |= 2;
+echo "\$o->Hours |= 2: {$o->Hours}\n";
 echo "\$o->Hours % 3: ".($o->Hours % 3)."\n";
 echo "\$o->Hours << 3: ".($o->Hours << 3)."\n";
 echo "\$o->Hours >> 1: ".($o->Hours >> 1)."\n";
@@ -102,6 +108,9 @@ $o->Hours += 2: 5
 $o->Hours -= 2: 3
 $o->Hours *= 3: 9
 $o->Hours /= 3: 3
+$o->Hours &= 2: 2
+$o->Hours = 3
+$o->Hours |= 2: 3
 $o->Hours % 3: 0
 $o->Hours << 3: 24
 $o->Hours >> 1: 1
