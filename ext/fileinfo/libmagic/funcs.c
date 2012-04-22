@@ -438,7 +438,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	pcre_cache_entry *pce;
 	char *res;
 	zval *repl;
-	int res_len, rep_cnt;
+	int res_len, rep_cnt = 0;
 	TSRMLS_FETCH();
 
 	MAKE_STD_ZVAL(patt);
