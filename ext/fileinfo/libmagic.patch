@@ -1080,7 +1080,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
 +#endif /* if PHP_FILEINFO_UNCOMPRESS */
 diff -u libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2012-04-22 19:30:43.186305188 +0800
-+++ libmagic/file.h	2012-04-22 19:28:57.378309534 +0800
++++ libmagic/file.h	2012-04-22 19:49:58.922256776 +0800
 @@ -33,11 +33,9 @@
  #ifndef __file_h__
  #define __file_h__
@@ -1200,7 +1200,13 @@ diff -u libmagic.orig/file.h libmagic/file.h
  protected void file_showstr(FILE *, const char *, size_t);
  protected size_t file_mbswidth(const char *);
  protected const char *file_getbuffer(struct magic_set *);
-@@ -443,11 +439,8 @@
+@@ -438,16 +434,14 @@
+     size_t *);
+ protected size_t file_pstring_length_size(const struct magic *);
+ protected size_t file_pstring_get_length(const struct magic *, const char *);
++protected size_t file_printedlen(const struct magic_set *ms);
+ #ifdef __EMX__
+ protected int file_os2_apptype(struct magic_set *, const char *, const void *,
      size_t);
  #endif /* __EMX__ */
  
@@ -1212,7 +1218,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  
  #ifndef HAVE_STRERROR
  extern int sys_nerr;
-@@ -460,17 +453,10 @@
+@@ -460,17 +454,10 @@
  #define strtoul(a, b, c)	strtol(a, b, c)
  #endif
  
@@ -1232,7 +1238,7 @@ diff -u libmagic.orig/file.h libmagic/file.h
  size_t strlcat(char *dst, const char *src, size_t siz);
  #endif
  #ifndef HAVE_GETLINE
-@@ -500,4 +486,12 @@
+@@ -500,4 +487,12 @@
  #define FILE_RCSID(id)
  #endif
  
