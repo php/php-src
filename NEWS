@@ -54,6 +54,8 @@ PHP                                                                        NEWS
   . Improve performance of set_exception_handler while doing reset (Laruence)
 
 - FPM
+  . Fixed bug #61812 (Uninitialised value used in libmagic). 
+    (Laruence, Gustavo)
   . Fixed bug #61430 (Transposed memset() params in sapi/fpm/fpm/fpm_shm.c).
     (michaelhood at gmail dot com, Ilia)
 
