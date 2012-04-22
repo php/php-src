@@ -11,8 +11,9 @@ define('FILE_NAME', dirname(__FILE__) . '/php.gif');
 // pg_escape_string() test
 $before = "ABC\\ABC\'";
 $expect  = "ABC\\\\ABC\\'";
+$expect2  = "ABC\\\\ABC\\\\''"; //the way escape string differs from PostgreSQL 9.0
 $after = pg_escape_string($before);
-if ($expect === $after) {
+if ($expect === $after || $expect2 === $after) {
 	echo "pg_escape_string() is Ok\n";
 }
 else {
@@ -58,11 +59,37 @@ else {
 	echo "pg_escape_bytea() is broken\n";
 }
 
+// pg_escape_literal/pg_escape_identifier
+$before = "ABC\\ABC\'";
+$expect	 = " E'ABC\\\\ABC\\\\'''";
+$after = pg_escape_literal($before);
+if ($expect === $after) {
+	echo "pg_escape_literal() is Ok\n";
+}
+else {
+	echo "pg_escape_literal() is NOT Ok\n";
+	var_dump($before);
+	var_dump($after);
+	var_dump($expect);
+}
+
+$before = "ABC\\ABC\'";
+$expect	 = "\"ABC\ABC\'\"";
+$after = pg_escape_identifier($before);
+if ($expect === $after) {
+	echo "pg_escape_identifier() is Ok\n";
+}
+else {
+	echo "pg_escape_identifier() is NOT Ok\n";
+	var_dump($before);
+	var_dump($after);
+	var_dump($expect);
+}
+
 ?>
 --EXPECT--
-pg_escape_string() is NOT Ok
-string(9) "ABC\ABC\'"
-string(12) "ABC\\ABC\\''"
-string(10) "ABC\\ABC\'"
+pg_escape_string() is Ok
 pg_escape_bytea() is Ok
 pg_escape_bytea() actually works with database
+pg_escape_literal() is Ok
+pg_escape_identifier() is Ok

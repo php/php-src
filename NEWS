@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.1 RC1
 
 - CLI Server:
+  . Improved performance while sending error page, this also fixed
+    bug #61785 (Memory leak when access a non-exists file without router).
+    (Laruence)
   . Fixed bug #61461 (missing checks around malloc() calls). (Ilia)
   . Implemented FR #60850 (Built in web server does not set 
     $_SERVER['SCRIPT_FILENAME'] when using router). (Laruence)
@@ -44,6 +47,8 @@ PHP                                                                        NEWS
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
   . Fixed bug #60569 (Nullbyte truncates Exception $message). (Ilia)
+  . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
+    set to null). (Anatoliy)
   . Fixed bug #52719 (array_walk_recursive crashes if third param of the
     function is by reference). (Nikita Popov)
   . Improve performance of set_exception_handler while doing reset (Laruence)

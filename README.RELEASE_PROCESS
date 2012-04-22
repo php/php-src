@@ -58,12 +58,12 @@ Do not use abbreviations for alpha and beta.
 5. Commit these changes to the branch with ``git commit -a``.
 
 6. Tag the repository with the version, e.g.: 
-``git tag -u YOURKEYID PHP-5.4.2-RC2``
+``git tag -u YOURKEYID php-5.4.2RC2``
 
 7. Push the changes to the main repo:
 ``git push --tags origin HEAD``
 
-8. run: ``./makedist 5.4.2-RC2``, this will export the tree, create configure
+8. run: ``./makedist 5.4.2RC2``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
 
 9. Copy those two tarballs to www.php.net, in your homedir there should be a
