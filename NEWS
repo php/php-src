@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
    set to null). (Anatoliy)
 
+- Fileinfo:
+  . Fixed bug #61812 (Uninitialised value used in libmagic). 
+    (Laruence, Gustavo)
+
 - JSON
   . Fixed bug #61537 (json_encode() incorrectly truncates/discards
     information). (Adam)
