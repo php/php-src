@@ -975,7 +975,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 	}
 	DBG_RETURN(ret);
 }
-
+/* }}} */
 
 /* {{{ mysqlnd_connect */
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
