@@ -758,16 +758,14 @@ PHP_FUNCTION(unpack)
 
 					case 'i': 
 					case 'I': {
-						long v = 0;
+						long v;
 						int issigned = 0;
 
 						if (type == 'i') {
 							issigned = input[inputpos + (machine_little_endian ? (sizeof(int) - 1) : 0)] & 0x80;
-						} else if (sizeof(long) > 4 && (input[inputpos + machine_endian_long_map[3]] & 0x80) == 0x80) {
-							v = ~INT_MAX;
 						}
 
-						v |= php_unpack(&input[inputpos], sizeof(int), issigned, int_map);
+						v = php_unpack(&input[inputpos], sizeof(int), issigned, int_map);
 						add_assoc_long(return_value, n, v);
 						break;
 					}
