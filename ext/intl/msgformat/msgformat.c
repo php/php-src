@@ -68,6 +68,10 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to quote-friendly format");
 	}
 
+	if ((mfo)->mf_data.orig_format) {
+		msgformat_data_free(&mfo->mf_data TSRMLS_CC);
+	}
+
 	(mfo)->mf_data.orig_format = estrndup(pattern, pattern_len);
 	(mfo)->mf_data.orig_format_len = pattern_len;
 	
