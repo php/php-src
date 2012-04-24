@@ -1,25 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-12 Apr 2012, PHP 5.3.11RC2
+26 Apr 2012, PHP 5.3.11
 
 - Core:
   . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
     (without apache2)). (Laruence)
-
-- Fileinfo
-  . Upgraded libmagic to 5.11 (Pierre, Anatoliy)
-  . Fixed bug #61565 where php_stream_open_wrapper_ex tries to open a
-    directory descriptor under windows. (Anatoliy)
-  . Fixed bug #61566 failure caused by the posix lseek and read versions
-    under windows in cdf_read(). (Anatoliy)
-
-- pgsql:
-  . Fixed bug #60718 (Compile problem with libpq (PostgreSQL 7.3 or less).
-    (Yasuo Ohgaki)
-
-29 Mar 2012, PHP 5.3.11RC1
-
-- Core:
   . Fixed bug #61273 (call_user_func_array with more than 16333 arguments
     leaks / crashes). (Laruence)
   . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
@@ -66,6 +51,11 @@ PHP                                                                        NEWS
   . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
 
 - Fileinfo
+  . Upgraded libmagic to 5.11 (Pierre, Anatoliy)
+  . Fixed bug #61565 where php_stream_open_wrapper_ex tries to open a
+    directory descriptor under windows. (Anatoliy)
+  . Fixed bug #61566 failure caused by the posix lseek and read versions
+    under windows in cdf_read(). (Anatoliy)
   . Fixed bug #61173 (Unable to detect error from finfo constructor). (Gustavo)
 
 - Firebird Database extension (ibase):
@@ -93,6 +83,10 @@ PHP                                                                        NEWS
 
 - PDO_Sqlite extension:
   . Add createCollation support. (Damien)
+
+- pgsql:
+  . Fixed bug #60718 (Compile problem with libpq (PostgreSQL 7.3 or less).
+    (Yasuo Ohgaki)
 
 - Phar:
   . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
