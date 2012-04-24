@@ -1,14 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-11 Apr 2012, PHP 5.4.1 RC2
-
-- Core:
-  . Fixed crash in ZTS using same class in many threads. (Johannes)
-
-- fileinfo:
-  . Fix fileinfo test problems. (Anatoliy Belsky)
-
-29 Mar 2012, PHP 5.4.1 RC1
+26 Apr 2012, PHP 5.4.1
 
 - CLI Server:
   . Fixed bug #61461 (missing checks around malloc() calls). (Ilia)
@@ -17,6 +9,7 @@ PHP                                                                        NEWS
   . "Connection: close" instead of "Connection: closed" (Gustavo)
 
 - Core:
+  . Fixed crash in ZTS using same class in many threads. (Johannes)
   . Fixed bug #61374 (html_entity_decode tries to decode code points that don't
     exist in ISO-8859-1). (Gustavo)
   . Fixed bug #61273 (call_user_func_array with more than 16333 arguments 
@@ -47,6 +40,9 @@ PHP                                                                        NEWS
   . Fixed bug #52719 (array_walk_recursive crashes if third param of the
     function is by reference). (Nikita Popov)
   . Improve performance of set_exception_handler while doing reset (Laruence)
+
+- fileinfo:
+  . Fix fileinfo test problems. (Anatoliy Belsky)
 
 - FPM
   . Fixed bug #61430 (Transposed memset() params in sapi/fpm/fpm/fpm_shm.c).
