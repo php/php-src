@@ -98,7 +98,6 @@
 #include "ext/standard/html.h"
 #include "ext/standard/url.h" /* for php_url_decode() */
 #include "ext/standard/php_string.h" /* for php_dirname() */
-#include "ext/standard/info.h" /* for php_info_print_style() */
 #include "php_network.h"
 
 #include "php_http_parser.h"
@@ -174,8 +173,6 @@ typedef struct php_cli_server_client {
 	php_cli_server_request request;
 	unsigned int content_sender_initialized:1;
 	php_cli_server_content_sender content_sender;
-	php_cli_server_buffer capture_buffer;
-	unsigned int capturing:1;
 	int file_fd;
 } php_cli_server_client;
 
@@ -275,6 +272,27 @@ static void php_cli_server_logf(const char *format TSRMLS_DC, ...);
 static void php_cli_server_log_response(php_cli_server_client *client, int status, const char *message TSRMLS_DC);
 
 ZEND_DECLARE_MODULE_GLOBALS(cli_server);
+
+/* {{{ static char php_cli_server_css[] 
+ * copied from ext/standard/info.c
+ */
+static const char php_cli_server_css[] = "<style type=\"text/css\">\n" \
+								   "body {background-color: #ffffff; color: #000000;}\n" \
+								   "body, td, th, h1, h2 {font-family: sans-serif;}\n" \
+								   ".center {text-align: center;}\n" \
+								   ".center table { margin-left: auto; margin-right: auto; text-align: left;}\n" \
+								   ".center th { text-align: center !important; }\n" \
+								   "h1 {font-size: 150%;}\n" \
+								   "h2 {font-size: 125%;}\n" \
+								   ".p {text-align: left;}\n" \
+								   ".e {background-color: #ccccff; font-weight: bold; color: #000000;}\n" \
+								   ".h {background-color: #9999cc; font-weight: bold; color: #000000;}\n" \
+								   ".v {background-color: #cccccc; color: #000000;}\n" \
+								   ".vr {background-color: #cccccc; text-align: right; color: #000000;}\n" \
+								   "img {float: right; border: 0px;}\n" \
+								   "hr {width: 600px; background-color: #cccccc; border: 0px; height: 1px; color: #000000;}\n" \
+								   "</style>\n";
+/* }}} */
 
 static void char_ptr_dtor_p(char **p) /* {{{ */
 {
@@ -425,17 +443,7 @@ static int sapi_cli_server_ub_write(const char *str, uint str_length TSRMLS_DC) 
 	if (!client) {
 		return 0;
 	}
-	if (client->capturing) {
-		php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(str_length);
-		if (!chunk) {
-			zend_bailout();
-		}
-		memmove(chunk->data.heap.p, str, str_length);
-		php_cli_server_buffer_append(&client->capture_buffer, chunk);
-		return str_length;
-	} else {
-		return php_cli_server_client_send_through(client, str, str_length);
-	}
+	return php_cli_server_client_send_through(client, str, str_length);
 } /* }}} */
 
 static void sapi_cli_server_flush(void *server_context) /* {{{ */
@@ -470,7 +478,7 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers TSRMLS
 	sapi_header_struct *h;
 	zend_llist_position pos;
 
-	if (client == NULL || client->capturing || SG(request_info).no_headers) {
+	if (client == NULL || SG(request_info).no_headers) {
 		return SAPI_HEADER_SENT_SUCCESSFULLY;
 	}
 
@@ -1677,18 +1685,6 @@ static void destroy_request_info(sapi_request_info *request_info) /* {{{ */
 {
 } /* }}} */
 
-static void php_cli_server_client_begin_capture(php_cli_server_client *client) /* {{{ */
-{
-	php_cli_server_buffer_ctor(&client->capture_buffer);
-	client->capturing = 1;
-} /* }}} */
-
-static void php_cli_server_client_end_capture(php_cli_server_client *client) /* {{{ */
-{
-	client->capturing = 0;
-	php_cli_server_buffer_dtor(&client->capture_buffer);
-} /* }}} */
-
 static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_server *server, int client_sock, struct sockaddr *addr, socklen_t addr_len TSRMLS_DC) /* {{{ */
 {
 	client->server = server;
@@ -1713,7 +1709,6 @@ static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_ser
 		return FAILURE;
 	}
 	client->content_sender_initialized = 0;
-	client->capturing = 0;
 	client->file_fd = -1;
 	return SUCCESS;
 } /* }}} */
@@ -1729,9 +1724,6 @@ static void php_cli_server_client_dtor(php_cli_server_client *client) /* {{{ */
 	pefree(client->addr_str, 1);
 	if (client->content_sender_initialized) {
 		php_cli_server_content_sender_dtor(&client->content_sender);
-	}
-	if (client->capturing) {
-		php_cli_server_buffer_dtor(&client->capture_buffer);
 	}
 } /* }}} */
 
@@ -1768,43 +1760,11 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}
 	{
-		int err = 0;
-		zval *style = NULL; 
-		zend_try {
-			if (!SG(sapi_started)) {
-				php_output_activate(TSRMLS_C);
-			}
-			php_output_start_user(NULL, 0, PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC);
-			php_info_print_style(TSRMLS_C);
-			MAKE_STD_ZVAL(style);
-			php_output_get_contents(style TSRMLS_CC);
-			php_output_discard(TSRMLS_C);
-			if (!SG(sapi_started)) {
-				static int (*send_header_func)(sapi_headers_struct * TSRMLS_DC);
-				send_header_func = sapi_module.send_headers;
-				/* we don't want the header to be sent now */
-				sapi_module.send_headers = sapi_cli_server_discard_headers;
-				php_output_deactivate(TSRMLS_C);
-				sapi_module.send_headers = send_header_func;
-			}
-			if (style && Z_STRVAL_P(style)) {
-				char *block = pestrndup(Z_STRVAL_P(style), Z_STRLEN_P(style), 1);
-				php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new(block, block, Z_STRLEN_P(style));
-				if (!chunk) {
-					zval_ptr_dtor(&style);
-					goto fail;
-				}
-				php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
-				zval_ptr_dtor(&style);
-			} else {
-				err = 1;
-			}
-		} zend_catch {
-			err = 1;
-		} zend_end_try();
-		if (err) {
+		php_cli_server_chunk *chunk = php_cli_server_chunk_immortal_new(php_cli_server_css, sizeof(php_cli_server_css) - 1);
+		if (!chunk) {
 			goto fail;
 		}
+		php_cli_server_buffer_append(&client->content_sender.buffer, chunk);
 	}
 	{
 		static const char template[] = "</head><body>";
@@ -2052,10 +2012,13 @@ static int php_cli_server_dispatch(php_cli_server *server, php_cli_server_client
 		if (server->router) {
 			static int (*send_header_func)(sapi_headers_struct * TSRMLS_DC);
 			send_header_func = sapi_module.send_headers;
-			/* we don't want the header to be sent now */
+			/* do not generate default content type header */
+		    SG(sapi_headers).send_default_content_type = 0;
+			/* we don't want headers to be sent */
 			sapi_module.send_headers = sapi_cli_server_discard_headers;
 			php_request_shutdown(0);
 			sapi_module.send_headers = send_header_func;
+		    SG(sapi_headers).send_default_content_type = 1;
 			SG(rfc1867_uploaded_files) = NULL;
 		} 
 		if (SUCCESS != php_cli_server_begin_send_static(server, client TSRMLS_CC)) {

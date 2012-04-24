@@ -41,4 +41,4 @@ Connection: close
 X-Powered-By: %s
 Content-type: text/html
 
-string(%d) "%s/tests/index.php"
+string(%d) "%sindex.php"
