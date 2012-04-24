@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . "Connection: close" instead of "Connection: closed" (Gustavo)
 
 - Core:
+  . Fixed bug #61820 (using ob_gzhandler will complain about headers already 
+    sent when no compression). (Mike)
   . Fixed bug #61761 ('Overriding' a private static method with a different 
     signature causes crash). (Laruence)
   . Fixed bug #61728 (PHP crash when calling ob_start in request_shutdown 
@@ -20,6 +22,7 @@ PHP                                                                        NEWS
   . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
     (without apache2)). (Laruence)
   . Fixed bug #61605 (header_remove() does not remove all headers). (Laruence)
+  . Fixed bug #61443 (can't change zlib.output_compression on the fly). (Mike)
   . Fixed bug #61374 (html_entity_decode tries to decode code points that don't
     exist in ISO-8859-1). (Gustavo)
   . Fixed bug #61273 (call_user_func_array with more than 16333 arguments 
