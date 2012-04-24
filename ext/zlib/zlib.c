@@ -884,9 +884,6 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 		if (status & PHP_OUTPUT_SENT) {
 			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "Cannot change zlib.output_compression - headers already sent");
 			return FAILURE;
-		} else if ((status & PHP_OUTPUT_WRITTEN) && int_value) {
-			php_error_docref("ref.outcontrol" TSRMLS_CC, E_WARNING, "Cannot enable zlib.output_compression - there has already been output");
-			return FAILURE;
 		}
 	}
 
