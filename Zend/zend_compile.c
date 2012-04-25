@@ -1664,7 +1664,7 @@ void zend_declare_accessor(znode *var_name TSRMLS_DC) { /* {{{ */
 }
 /* }}} */
 
-void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, znode *modifiers TSRMLS_DC) /* {{{ */
+void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, znode *modifiers, int return_reference TSRMLS_DC) /* {{{ */
 {
 	/* Generate Hash Value for Variable */
 	ulong hash_value = zend_hash_func(Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant)+1);
@@ -1690,7 +1690,7 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
 
 		/* Declare Function */
-		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers TSRMLS_CC);
+		zend_do_begin_function_declaration(function_token, function_token, 1, return_reference, modifiers TSRMLS_CC);
 	} else if(strcasecmp("set", function_token->u.constant.value.str.val) == 0) {
 		modifiers->u.constant.value.lval |= ZEND_ACC_IS_SETTER;
 
@@ -1699,6 +1699,9 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		efree(Z_STRVAL(function_token->u.constant));
 		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
 
+		if(return_reference) {
+			zend_error(E_WARNING, "Property setter %s::$%s indicates a return reference with '&', setters do not return values, ignored.", CG(active_class_entry)->name, Z_STRVAL(var_name->u.constant));
+		}
 		/* Declare Function */
 		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers TSRMLS_CC);
 
@@ -1711,7 +1714,7 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 
 		zend_do_receive_arg(ZEND_RECV, &value_node, &unused_node, NULL, &unused_node2, 0 TSRMLS_CC);
 	} else {
-		zend_error(E_COMPILE_ERROR, "Unknown accessor '%s', expecting get or set for variable $%s", function_token->u.constant.value.str.val, var_name->u.constant.value.str.val);
+		zend_error(E_COMPILE_ERROR, "Unknown accessor '%s', expecting get or set for variable $%s", Z_STRVAL(function_token->u.constant), Z_STRVAL(var_name->u.constant));
 	}
 
 	func = (zend_function*)CG(active_op_array);
