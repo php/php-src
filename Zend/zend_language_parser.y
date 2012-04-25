@@ -709,15 +709,14 @@ accessor_modifier:
 ;
 
 accessor_function:
-		accessor_modifiers T_STRING
-			{ zend_do_begin_accessor_declaration(&$2, CG(accessor_node), &$1 TSRMLS_CC); }
+		accessor_modifiers is_reference T_STRING
+			{ zend_do_begin_accessor_declaration(&$3, CG(accessor_node), &$1, $2.op_type TSRMLS_CC); }
 				'{' inner_statement_list '}'
-			{ zend_do_end_accessor_declaration(&$2, CG(accessor_node), &$1, &$4 TSRMLS_CC); }
-	|	accessor_modifiers T_STRING 
+			{ zend_do_end_accessor_declaration(&$3, CG(accessor_node), &$1, &$5 TSRMLS_CC); }
+	|	accessor_modifiers is_reference T_STRING 
 		{
-			zend_do_begin_accessor_declaration(&$2, CG(accessor_node), &$1 TSRMLS_CC);
-			zend_do_end_accessor_declaration(&$2, CG(accessor_node), &$1, NULL TSRMLS_CC);
-			/* efree(Z_STRVAL($2.u.constant)); */
+			zend_do_begin_accessor_declaration(&$3, CG(accessor_node), &$1, $2.op_type TSRMLS_CC);
+			zend_do_end_accessor_declaration(&$3, CG(accessor_node), &$1, NULL TSRMLS_CC);
 		}
 		';'
 ;
