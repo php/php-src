@@ -1798,6 +1798,8 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			zend_do_free(&zn_assign_rv TSRMLS_CC);
 		}
 		efree(int_var_name);
+	} else if(body != NULL && (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) == ZEND_ACC_INTERFACE) {
+		zend_error(E_WARNING, "Interface %s::$%s %ster cannot have implementation defined, implementation ignored.", CG(active_class_entry)->name, Z_STRVAL(var_name->u.constant), zend_accessor_type_string(CG(active_op_array)->fn_flags));
 	}
 
 	zend_do_end_function_declaration(function_token TSRMLS_CC);
