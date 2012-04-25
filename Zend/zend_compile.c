@@ -1750,6 +1750,7 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 
 			if(zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(zn_prop.u.constant), Z_STRLEN(zn_prop.u.constant)+1, (void**) &zpi) != SUCCESS) {
 				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED TSRMLS_CC);
+				MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
 			}
 
 			zend_do_extended_info(TSRMLS_C);
@@ -1759,7 +1760,6 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			fetch_simple_variable(&zn_this_rv, &zn_this, 1 TSRMLS_CC);
 
 			/* Fetch Internal Variable Name */
-			MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
 			zend_do_fetch_property(&zn_prop_rv, &zn_this_rv, &zn_prop TSRMLS_CC);
 
 			/* Return value fetched */
@@ -1771,6 +1771,7 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 
 			if(zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(zn_prop.u.constant), Z_STRLEN(zn_prop.u.constant)+1, (void**) &zpi) != SUCCESS) {
 				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED TSRMLS_CC);
+				MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
 			}
 
 			zend_do_extended_info(TSRMLS_C);
@@ -1780,7 +1781,6 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			fetch_simple_variable(&zn_this_rv, &zn_this, 1 TSRMLS_CC);
 
 			/* Fetch Internal Variable Name */
-			MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
 			zend_do_fetch_property(&zn_prop_rv, &zn_this_rv, &zn_prop TSRMLS_CC);
 
 			MAKE_ZNODEL(zn_value, "value", 5);
