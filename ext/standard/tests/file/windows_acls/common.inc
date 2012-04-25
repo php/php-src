@@ -25,16 +25,29 @@ function get_username(){
 		$user = get_current_user();
 	}
 
+	if (!$user) {
+		$user =  exec('echo %USERNAME%');
+	}
+
 	return $user;
 }
 
 function get_domainname()
 {
-	return getenv('USERDOMAIN');
+	$domain = getenv('USERDOMAIN');
+
+	return $domain;
+}
+
+function get_icacls()
+{
+	$sysroot = exec('echo %SYSTEMROOT%');
+
+	return "$sysroot\\System32\\icacls.exe";
 }
 
 function icacls_set($path, $mode, $perm) {
-	$icacls = 'c:\\Windows\\System32\\icacls.exe';
+	$icacls = get_icacls();
 	$user = get_username();
 	$path_escaped =  '"' . $path . '"';
 	$perm_entry = array();
