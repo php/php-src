@@ -1,0 +1,11 @@
+language: php
+# We only specify one version so we only get one worker
+php:
+    - 5.4
+# Compile PHP
+before_script:
+    - ./travis/compile.sh
+# Return 1 with failed testso
+env: REPORT_EXIT_STATUS=1
+# Run PHP's make test
+script: make test
