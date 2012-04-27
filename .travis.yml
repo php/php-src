@@ -1,11 +1,17 @@
 language: php
-# We only specify one version so we only get one worker
+
 php:
+    # We only specify one version so we only get one worker
     - 5.4
-# Compile PHP
+
+env:
+    - REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE=./sapi/cli/php DB=mysql
+
 before_script:
+    # Compile PHP
     - ./travis/compile.sh
-# Return 1 with failed testso
-env: REPORT_EXIT_STATUS=1
-# Run PHP's make test
-script: make test
+    # Create the MySQL test DB
+    - mysql -u root -e "CREATE DATABASE test"
+
+# Run PHPs run-tests.php 
+script: ./sapi/cli/php run-tests.php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP"
