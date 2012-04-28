@@ -719,7 +719,8 @@ PHP_FUNCTION(unpack)
 					case 'Z': {
 						/* Z will strip everything after the first null character */
 						char pad = '\0';
-						int len = inputlen - inputpos;	/* Remaining string */
+						int	 s,
+							 len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -729,7 +730,7 @@ PHP_FUNCTION(unpack)
 						size = len;
 
 						/* Remove everything after the first null */
-						int s = 0;
+						s = 0;
 						while (s++ <= len) {
 							if (input[inputpos + s] == pad)
 								break;
