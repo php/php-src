@@ -11,11 +11,11 @@ before_script:
     # Compile PHP
     - ./travis/compile.sh
     # Setup Extensions 
-    - ./travis/ext/mysql/setup.sh
-    - ./travis/ext/mysqli/setup.sh
-    - ./travis/ext/pdo_mysql/setup.sh
-    - ./travis/ext/pgsql/setup.sh
-    - ./travis/ext/pdo_pgsql/setup.sh
+    - . ./travis/ext/mysql/setup.sh
+    - . ./travis/ext/mysqli/setup.sh
+    - . ./travis/ext/pdo_mysql/setup.sh
+    - . ./travis/ext/pgsql/setup.sh
+    - . ./travis/ext/pdo_pgsql/setup.sh
 
 # Run PHPs run-tests.php 
 script: ./sapi/cli/php run-tests.php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP"
