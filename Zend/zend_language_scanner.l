@@ -905,7 +905,11 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 					zendlval->value.str.len--;
 					break;
 				case 'e':
+#ifdef PHP_WIN32
+					*t++ = (char) 27;
+#else
 					*t++ = '\e';
+#endif
 					zendlval->value.str.len--;
 					break;
 				case '"':
