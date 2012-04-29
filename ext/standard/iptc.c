@@ -342,12 +342,12 @@ PHP_FUNCTION(iptcparse)
 			len = (((unsigned short) buffer[ inx ])<<8) | (unsigned short)buffer[ inx+1 ];
 			inx += 2;
 		}
-
-		snprintf(key, sizeof(key), "%d#%03d", (unsigned int) dataset, (unsigned int) recnum);
-
-		if ((len > str_len) || (inx + len) > str_len) {
+		
+		if ((len < 0) || (len > str_len) || (inx + len) > str_len) {
 			break;
 		}
+
+		snprintf(key, sizeof(key), "%d#%03d", (unsigned int) dataset, (unsigned int) recnum);
 
 		if (tagsfound == 0) { /* found the 1st tag - initialize the return array */
 			array_init(return_value);
