@@ -1073,7 +1073,7 @@ int main(int argc, char *argv[])
 		SG(request_info).argc=argc-php_optind+1;
 		arg_excp = argv+php_optind-1;
 		arg_free = argv[php_optind-1];
-		SG(request_info).path_translated = file_handle.filename;
+		SG(request_info).path_translated = tsrm_realpath(file_handle.filename, NULL TSRMLS_CC);
 		argv[php_optind-1] = file_handle.filename;
 		SG(request_info).argv=argv+php_optind-1;
 
