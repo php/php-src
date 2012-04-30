@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.1 RC1
 
 - CLI Server:
+  . Fixed bug #61546 (functions related to current script failed when chdir() 
+    in cli sapi). (Laruence, reeze.xia@gmail.com)
   . Improved performance while sending error page, this also fixed
     bug #61785 (Memory leak when access a non-exists file without router).
     (Laruence)
