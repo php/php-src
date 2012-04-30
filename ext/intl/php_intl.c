@@ -414,6 +414,10 @@ ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_idarg_static, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, zoneId )
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_from_date_time_zone, 0, 0, 1 )
+	ZEND_ARG_OBJ_INFO( 0, dateTimeZone, IntlDateTimeZone, 0 )
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_create_enumeration, 0, 0, 0 )
 	ZEND_ARG_INFO( 0, countryOrRawOffset )
 ZEND_END_ARG_INFO()
@@ -719,6 +723,7 @@ zend_function_entry intl_functions[] = {
 
 	/* TimeZone functions */
 	PHP_FE( intltz_create_time_zone, arginfo_tz_idarg_static )
+	PHP_FE( intltz_from_date_time_zone, arginfo_tz_from_date_time_zone )
 	PHP_FE( intltz_create_default, arginfo_tz_void )
 	PHP_FE( intltz_get_id, arginfo_tz_only_tz )
 	PHP_FE( intltz_get_gmt, arginfo_tz_void )
@@ -742,6 +747,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intltz_has_same_rules, arginfo_tz_has_same_rules )
 	PHP_FE( intltz_get_display_name, arginfo_tz_get_display_name )
 	PHP_FE( intltz_get_dst_savings, arginfo_tz_only_tz )
+	PHP_FE( intltz_to_date_time_zone, arginfo_tz_only_tz )
 	PHP_FE( intltz_get_error_code, arginfo_tz_only_tz )
 	PHP_FE( intltz_get_error_message, arginfo_tz_only_tz )
 
