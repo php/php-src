@@ -12,7 +12,7 @@ require_once('skipif.inc');
 
 require_once('dom_test.inc');
 
-chdir(__DIR__ . "/../examples");
+chdir(__DIR__);
 $XMLStringGood = file_get_contents('note.xml');
 
 $dom = new DOMDocument;
