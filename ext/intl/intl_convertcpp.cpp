@@ -48,9 +48,16 @@ int intl_stringFromChar(UnicodeString &ret, char *str, int32_t str_len, UErrorCo
 }
 /* }}} */
 
-/* {{{ intl_charFromString */
+/* {{{ intl_charFromString
+ * faster than doing intl_convert_utf16_to_utf8(&res, &res_len,
+ *		from.getBuffer(), from.length(), &status),
+ * but consumes more memory */
 int intl_charFromString(const UnicodeString &from, char **res, int *res_len, UErrorCode *status)
 {
+	if (from.isBogus()) {
+		return FAILURE;
+	}
+
 	//the number of UTF-8 code units is not larger than that of UTF-16 code
 	//units * 3 + 1 for the terminator
 	int32_t capacity = from.length() * 3 + 1;
