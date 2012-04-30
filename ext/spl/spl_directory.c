@@ -708,6 +708,12 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_fla
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	intern->flags = flags;
+
+	if (intern->_path) {
+		efree(intern->_path);
+		php_stream_close(intern->u.dir.dirp);
+	}
+
 #ifdef HAVE_GLOB
 	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_GLOB) && strstr(path, "glob://") != path) {
 		spprintf(&path, 0, "glob://%s", path);
@@ -2285,6 +2291,14 @@ SPL_METHOD(SplFileObject, __construct)
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling TSRMLS_CC);
 
+	if (intern->file_name) {
+		php_stream_close(intern->u.dir.dirp);
+		efree(intern->_path);
+		efree(intern->file_name);
+		efree(intern->orig_path);
+		efree(intern->u.file.open_mode);
+	}
+
 	intern->u.file.open_mode = NULL;
 	intern->u.file.open_mode_len = 0;
 
@@ -2347,6 +2361,14 @@ SPL_METHOD(SplTempFileObject, __construct)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &max_memory) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
+	}
+
+	if (intern->file_name) {
+		php_stream_close(intern->u.dir.dirp);
+		efree(intern->_path);
+		efree(intern->file_name);
+		efree(intern->orig_path);
+		efree(intern->u.file.open_mode);
 	}
 
 	if (max_memory < 0) {
