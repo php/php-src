@@ -6,15 +6,14 @@ error_log=
 --SKIPIF--
 <?php 
 include('skipif.inc');
-if(substr(PHP_OS, 0, 3) == "WIN")
-        die("skip Not for Windows");
+if(substr(PHP_OS, 0, 3) != "WIN")
+        die("skip windows only test");
 ?>
 --FILE--
 <?php
 var_dump(ini_get("session.upload_progress.freq"));
 ?>
 --EXPECTF--
-PHP Warning:  PHP Startup: session.upload_progress.freq cannot be over 100% in %s
-
 Warning: PHP Startup: session.upload_progress.freq cannot be over 100% in %s
-string(%d) "1%"
+string(2) "1%"
+PHP Warning:  PHP Startup: session.upload_progress.freq cannot be over 100% in %s
