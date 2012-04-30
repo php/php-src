@@ -30,11 +30,12 @@
 #endif
 
 #include "zend_language_scanner_defs.h"
+
+#include <errno.h>
+#include "zend.h"
 #ifdef PHP_WIN32
 # include <Winuser.h>
 #endif
-#include <errno.h>
-#include "zend.h"
 #include "zend_alloc.h"
 #include <zend_language_parser.h>
 #include "zend_compile.h"
