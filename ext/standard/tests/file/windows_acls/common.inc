@@ -46,6 +46,16 @@ function get_icacls()
 	return "$sysroot\\System32\\icacls.exe";
 }
 
+function fix_acls() {
+	$user = get_username();
+	/* Current user needs to be owner of the test files. As well
+	   all the other users having acls on the files must loose them.
+	   The following fixes this just partially, as dynamically reading
+	   all the users having acls on a file could be sophisticated. */
+	exec(get_icacls() . ' . /setowner $user /T /L /Q 2> nul');
+	exec(get_icacls() . ' . /remove:g Administrators /T /L /Q 2> nul');
+}
+
 function icacls_set($path, $mode, $perm) {
 	$icacls = get_icacls();
 	$user = get_username();
