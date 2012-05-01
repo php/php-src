@@ -105,6 +105,9 @@ PHP_FUNCTION(posix_getgrnam);
 PHP_FUNCTION(posix_getgrgid);
 PHP_FUNCTION(posix_getpwnam);
 PHP_FUNCTION(posix_getpwuid);
+#ifdef HAVE_GETSPNAM
+PHP_FUNCTION(posix_getspnam);
+#endif
 
 #ifdef HAVE_GETRLIMIT
 PHP_FUNCTION(posix_getrlimit);

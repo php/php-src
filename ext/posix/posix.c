@@ -49,6 +49,9 @@
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
+#ifdef HAVE_GETSPNAM
+# include <shadow.h>
+#endif
 #if HAVE_SYS_MKDEV_H
 # include <sys/mkdev.h>
 #endif
@@ -190,6 +193,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getpwnam, 0, 0, 1)
 	ZEND_ARG_INFO(0, username)
 ZEND_END_ARG_INFO()
 
+#ifdef HAVE_GETSPNAM
+ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getspnam, 0, 0, 1)
+	ZEND_ARG_INFO(0, username)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_getpwuid, 0, 0, 1)
 	ZEND_ARG_INFO(0, uid)
 ZEND_END_ARG_INFO()
@@ -288,6 +297,9 @@ const zend_function_entry posix_functions[] = {
 	PHP_FE(posix_getgrnam,	arginfo_posix_getgrnam)
 	PHP_FE(posix_getgrgid,	arginfo_posix_getgrgid)
 	PHP_FE(posix_getpwnam,	arginfo_posix_getpwnam)
+#ifdef HAVE_GETSPNAM
+	PHP_FE(posix_getspnam,  arginfo_posix_getspnam)
+#endif
 	PHP_FE(posix_getpwuid,	arginfo_posix_getpwuid)
 
 #ifdef HAVE_GETRLIMIT
@@ -1120,6 +1132,28 @@ int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 }
 /* }}} */
 
+#ifdef HAVE_GETSPNAM
+int php_posix_spwd_to_array(struct spwd *spw, zval *return_value) /* {{{ */
+{
+	if (NULL == spw)
+		return 0;
+	if (NULL == return_value || Z_TYPE_P(return_value) != IS_ARRAY)
+		return 0;
+
+	add_assoc_string(return_value, "namp",      spw->sp_namp, 1);
+	add_assoc_string(return_value, "pwdp",      spw->sp_pwdp, 1);
+	add_assoc_long  (return_value, "lstchg",    spw->sp_lstchg);
+	add_assoc_long  (return_value, "min",		spw->sp_min);
+	add_assoc_long  (return_value, "max",		spw->sp_max);
+	add_assoc_long  (return_value, "warn",		spw->sp_warn);
+	add_assoc_long  (return_value, "inact",		spw->sp_inact);
+	add_assoc_long  (return_value, "expire",	spw->sp_expire);
+	add_assoc_long  (return_value, "flag",		spw->sp_flag);
+	return 1;
+}
+#endif
+/* }}} */
+
 /* {{{ proto array posix_getpwnam(string groupname) 
    User database access (POSIX.1, 9.2.2) */
 PHP_FUNCTION(posix_getpwnam)
@@ -1167,6 +1201,57 @@ PHP_FUNCTION(posix_getpwnam)
 	efree(buf);
 #endif
 }
+/* }}} */
+
+/* {{{ proto array posix_getspnam(string username) */
+#ifdef HAVE_GETSPNAM
+PHP_FUNCTION(posix_getspnam)
+{
+	struct spwd *spw;
+	char *name;
+	int name_len;
+#if defined(ZTS) && defined(HAVE_GETSPNAM_R)
+	struct spwd spwbuf;
+	long buflen;
+	char *buf;
+#endif
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+#if defined(ZTS) && defined(HAVE_GETSPNAM_R)
+	/* No POSIX function to find out. Use a safe value here */
+	buflen = sysconf(sizeof(*spwd) * 2);
+	if (buflen < 1) {
+		RETURN_FALSE;
+	}
+	buf = emalloc(buflen);
+	pw = &spwbuf;
+
+	if (getspnam_r(name, spw, buf, buflen, &spw) || spw == NULL) {
+		efree(buf);
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+#else
+	if (NULL == (spw = getspnam(name))) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+#endif	
+	array_init(return_value);
+
+	if (!php_posix_spwd_to_array(spw, return_value)) {
+		zval_dtor(return_value);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "unable to convert spwd struct to array");
+		RETVAL_FALSE;
+	}
+#if defined(ZTS) && defined(HAVE_GETPWNAM_R)
+	efree(buf);
+#endif
+}
+#endif
 /* }}} */
 
 /* {{{ proto array posix_getpwuid(long uid) 
