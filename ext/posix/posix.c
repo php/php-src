@@ -1133,7 +1133,7 @@ int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 /* }}} */
 
 #ifdef HAVE_GETSPNAM
-int php_posix_spwd_to_array(struct spwd *spw, zval *return_value) /* {{{ */
+static int php_posix_spwd_to_array(struct spwd *spw, zval *return_value) /* {{{ */
 {
 	if (NULL == spw)
 		return 0;
