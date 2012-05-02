@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.1 RC1
 
 - CLI Server:
+  . Fixed bug #61546 (functions related to current script failed when chdir() 
+    in cli sapi). (Laruence, reeze.xia@gmail.com)
   . Improved performance while sending error page, this also fixed
     bug #61785 (Memory leak when access a non-exists file without router).
     (Laruence)
@@ -12,6 +14,8 @@ PHP                                                                        NEWS
   . "Connection: close" instead of "Connection: closed" (Gustavo)
 
 - Core:
+  . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
+  . Fixed bug #61827 (incorrect \e processing on Windows) (Anatoliy)
   . Fixed bug #61761 ('Overriding' a private static method with a different 
     signature causes crash). (Laruence)
   . Fixed bug #61728 (PHP crash when calling ob_start in request_shutdown 

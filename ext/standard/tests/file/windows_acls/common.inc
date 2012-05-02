@@ -25,16 +25,39 @@ function get_username(){
 		$user = get_current_user();
 	}
 
+	if (!$user) {
+		$user =  exec('echo %USERNAME%');
+	}
+
 	return $user;
 }
 
 function get_domainname()
 {
-	return getenv('USERDOMAIN');
+	$domain = getenv('USERDOMAIN');
+
+	return $domain;
+}
+
+function get_icacls()
+{
+	$sysroot = exec('echo %SYSTEMROOT%');
+
+	return "$sysroot\\System32\\icacls.exe";
+}
+
+function fix_acls() {
+	$user = get_username();
+	/* Current user needs to be owner of the test files. As well
+	   all the other users having acls on the files must loose them.
+	   The following fixes this just partially, as dynamically reading
+	   all the users having acls on a file could be sophisticated. */
+	exec(get_icacls() . ' . /setowner $user /T /L /Q 2> nul');
+	exec(get_icacls() . ' . /remove:g Administrators /T /L /Q 2> nul');
 }
 
 function icacls_set($path, $mode, $perm) {
-	$icacls = 'c:\\Windows\\System32\\icacls.exe';
+	$icacls = get_icacls();
 	$user = get_username();
 	$path_escaped =  '"' . $path . '"';
 	$perm_entry = array();

@@ -1,7 +1,10 @@
 --TEST--
 Bug #42596 (session.save_path MODE option will not set "write" bit for group or world)
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php
+	if(substr(PHP_OS, 0, 3) == "WIN") die("skip not for Windows");
+	include('skipif.inc');
+?>
 --INI--
 session.use_cookies=0
 session.cache_limiter=

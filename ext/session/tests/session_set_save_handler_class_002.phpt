@@ -23,7 +23,7 @@ class MySession2 extends SessionHandler {
 
 	public function open($path, $name) {
 		if (!$path) {
-			$path = '/tmp';
+			$path = sys_get_temp_dir();
 		}
 		$this->path = $path . '/u_sess_' . $name;
 		return true;

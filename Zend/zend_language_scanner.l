@@ -33,6 +33,9 @@
 
 #include <errno.h>
 #include "zend.h"
+#ifdef PHP_WIN32
+# include <Winuser.h>
+#endif
 #include "zend_alloc.h"
 #include <zend_language_parser.h>
 #include "zend_compile.h"
@@ -905,7 +908,11 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 					zendlval->value.str.len--;
 					break;
 				case 'e':
+#ifdef PHP_WIN32
+					*t++ = VK_ESCAPE;
+#else
 					*t++ = '\e';
+#endif
 					zendlval->value.str.len--;
 					break;
 				case '"':
