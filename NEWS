@@ -599,6 +599,161 @@ PHP                                                                        NEWS
   . Fixed bug #55544 (ob_gzhandler always conflicts with zlib.output_compression).
     (Mike)
 
+26 Apr 2012, PHP 5.3.11
+
+- Core:
+  . Fixed bug #61605 (header_remove() does not remove all headers).
+    (Laruence)
+  . Fixed bug #61541 (Segfault when using ob_* in output_callback).
+    (reeze.xia@gmail.com)
+  . Fixed bug #61273 (call_user_func_array with more than 16333 arguments
+    leaks / crashes). (Laruence)
+  . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
+  . Improved max_input_vars directive to check nested variables (Dmitry).
+  . Fixed bug #61095 (Incorect lexing of 0x00*+<NUM>). (Etienne)
+  . Fixed bug #61087 (Memory leak in parse_ini_file when specifying
+    invalid scanner mode). (Nikic, Laruence)
+  . Fixed bug #61072 (Memory leak when restoring an exception handler).
+    (Nikic, Laruence)
+  . Fixed bug #61058 (array_fill leaks if start index is PHP_INT_MAX).
+    (Laruence)
+  . Fixed bug #61043 (Regression in magic_quotes_gpc fix for CVE-2012-0831).
+    (Ondřej Surý)
+  . Fixed bug #61000 (Exceeding max nesting level doesn't delete numerical
+    vars). (Laruence)
+  . Fixed bug #60895 (Possible invalid handler usage in windows random
+    functions). (Pierre)
+  . Fixed bug #60825 (Segfault when running symfony 2 tests).
+    (Dmitry, Laruence)
+  . Fixed bug #60801 (strpbrk() mishandles NUL byte). (Adam)
+  . Fixed bug #60569 (Nullbyte truncates Exception $message). (Ilia)
+  . Fixed bug #60227 (header() cannot detect the multi-line header with CR).
+    (rui, Gustavo)
+  . Fixed bug #60222 (time_nanosleep() does validate input params). (Ilia)
+  . Fixed bug #54374 (Insufficient validating of upload name leading to 
+    corrupted $_FILES indices). (CVE-2012-1172). (Stas, lekensteyn at
+    gmail dot com, Pierre)
+  . Fixed bug #52719 (array_walk_recursive crashes if third param of the
+    function is by reference). (Nikita Popov)
+  . Fixed bug #51860 (Include fails with toplevel symlink to /). (Dmitry)
+
+- DOM
+  . Added debug info handler to DOM objects. (Gustavo, Joey Smith)
+
+- FPM
+  . Fixed bug #61430 (Transposed memset() params in sapi/fpm/fpm/fpm_shm.c).
+    (michaelhood at gmail dot com, Ilia)
+
+- Ibase
+  . Fixed bug #60947 (Segmentation fault while executing ibase_db_info).
+    (Ilia)
+
+- Installation
+  . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
+
+- Fileinfo
+  . Fixed bug #61173 (Unable to detect error from finfo constructor). (Gustavo)
+
+- Firebird Database extension (ibase):
+  . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
+
+- Libxml:
+  . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
+    (Laruence)
+  . Fixed bug #61367 (open_basedir bypass using libxml RSHUTDOWN). 
+    (Tim Starling)
+
+- mysqli
+  . Fixed bug #61003 (mysql_stat() require a valid connection). (Johannes).
+
+- PDO_mysql
+  . Fixed bug #61207 (PDO::nextRowset() after a multi-statement query doesn't
+    always work). (Johannes)
+  . Fixed bug #61194 (PDO should export compression flag with myslqnd).
+    (Johannes)
+
+- PDO_odbc 
+  . Fixed bug #61212 (PDO ODBC Segfaults on SQL_SUCESS_WITH_INFO). (Ilia)
+
+- PDO_pgsql
+  . Fixed bug #61267 (pdo_pgsql's PDO::exec() returns the number of SELECTed
+    rows on postgresql >= 9). (ben dot pineau at gmail dot com)
+
+- PDO_Sqlite extension:
+  . Add createCollation support. (Damien)
+
+- Phar:
+  . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
+    bytes). (Nikic)
+
+- PHP-FPM SAPI:
+  . Fixed bug #60811 (php-fpm compilation problem). (rasmus)
+
+- Readline:
+  . Fixed bug #61088 (Memory leak in readline_callback_handler_install).
+    (Nikic, Laruence)
+  . Add open_basedir checks to readline_write_history and readline_read_history.
+    (Rasmus, reported by Mateusz Goik)
+
+- Reflection:
+  . Fixed bug #61388 (ReflectionObject:getProperties() issues invalid reads
+    when get_properties returns a hash table with (inaccessible) dynamic
+    numeric properties). (Gustavo)
+  . Fixed bug #60968 (Late static binding doesn't work with 
+    ReflectionMethod::invokeArgs()). (Laruence)
+
+- SOAP
+  . Fixed basic HTTP authentication for WSDL sub requests. (Dmitry)
+  . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
+    User-Agent header). (carloschilazo at gmail dot com)
+  . Fixed bug #60842, #51775 (Chunked response parsing error when 
+    chunksize length line is > 10 bytes). (Ilia)
+  . Fixed bug #49853 (Soap Client stream context header option ignored).
+    (Dmitry)
+
+- SPL
+  . Fixed memory leak when calling SplFileInfo's constructor twice. (Felipe)
+  . Fixed bug #61418 (Segmentation fault when DirectoryIterator's or
+    FilesystemIterator's iterators are requested more than once without
+    having had its dtor callback called in between). (Gustavo)
+  . Fixed bug #61347 (inconsistent isset behavior of Arrayobject). (Laruence)
+  . Fixed bug #61326 (ArrayObject comparison). (Gustavo)
+
+- SQLite3 extension:
+  . Add createCollation() method. (Brad Dewar)
+
+- Session:
+  . Fixed bug #60860 (session.save_handler=user without defined function core
+    dumps). (Felipe)
+  . Fixed bug #60634 (Segmentation fault when trying to die() in
+    SessionHandler::write()). (Ilia)
+
+- Streams:
+  . Fixed bug #61371 (stream_context_create() causes memory leaks on use
+    streams_socket_create). (Gustavo)
+  . Fixed bug #61253 (Wrappers opened with errors concurrency problem on ZTS).
+    (Gustavo)
+  . Fixed bug #61115 (stream related segfault on fatal error in
+    php_stream_context_link). (Gustavo)
+  . Fixed bug #60817 (stream_get_line() reads from stream even when there is
+    already sufficient data buffered). stream_get_line() now behaves more like
+    fgets(), as is documented. (Gustavo)
+  . Further fix for bug #60455 (stream_get_line misbehaves if EOF is not
+    detected together with the last read). (Gustavo)
+  . Fixed bug #60106 (stream_socket_server silently truncates long unix
+    socket paths). (Ilia)
+
+- Tidy:
+  . Fixed bug #54682 (tidy null pointer dereference). (Tony, David Soria Parra)
+
+- XMLRPC:
+  . Fixed bug #61264 (xmlrpc_parse_method_descriptions leaks temporary
+    variable). (Nikita Popov)
+  . Fixed bug #61097 (Memory leak in xmlrpc functions copying zvals). (Nikic)
+
+- Zlib:
+  . Fixed bug #61139 (gzopen leaks when specifying invalid mode). (Nikic)
+
 02 Feb 2012, PHP 5.3.10
 
 - Core:
