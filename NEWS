@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.4.1 RC1
+?? ??? 2012, PHP 5.4.2
 
 - CLI Server:
   . Fixed bug #61546 (functions related to current script failed when chdir() 
@@ -8,10 +8,6 @@ PHP                                                                        NEWS
   . Improved performance while sending error page, this also fixed
     bug #61785 (Memory leak when access a non-exists file without router).
     (Laruence)
-  . Fixed bug #61461 (missing checks around malloc() calls). (Ilia)
-  . Implemented FR #60850 (Built in web server does not set 
-    $_SERVER['SCRIPT_FILENAME'] when using router). (Laruence)
-  . "Connection: close" instead of "Connection: closed" (Gustavo)
 
 - Core:
   . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
@@ -24,6 +20,32 @@ PHP                                                                        NEWS
   . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
     (without apache2)). (Laruence)
   . Fixed bug #61605 (header_remove() does not remove all headers). (Laruence)
+  . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
+    set to null). (Anatoliy)
+
+- FPM
+  . Fixed bug #61812 (Uninitialised value used in libmagic). 
+    (Laruence, Gustavo)
+
+- Libxml:
+  . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
+    (Laruence)
+
+- Zlib:
+  . Fixed bug #61820 (using ob_gzhandler will complain about headers already 
+    sent when no compression). (Mike)
+  . Fixed bug #61443 (can't change zlib.output_compression on the fly). (Mike)
+
+26 Apr 2012, PHP 5.4.1
+
+- CLI Server:
+  . Fixed bug #61461 (missing checks around malloc() calls). (Ilia)
+  . Implemented FR #60850 (Built in web server does not set 
+    $_SERVER['SCRIPT_FILENAME'] when using router). (Laruence)
+  . "Connection: close" instead of "Connection: closed" (Gustavo)
+
+- Core:
+  . Fixed crash in ZTS using same class in many threads. (Johannes)
   . Fixed bug #61374 (html_entity_decode tries to decode code points that don't
     exist in ISO-8859-1). (Gustavo)
   . Fixed bug #61273 (call_user_func_array with more than 16333 arguments 
@@ -51,15 +73,14 @@ PHP                                                                        NEWS
   . Fixed bug #60573 (type hinting with "self" keyword causes weird errors).
     (Laruence)
   . Fixed bug #60569 (Nullbyte truncates Exception $message). (Ilia)
-  . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
-    set to null). (Anatoliy)
   . Fixed bug #52719 (array_walk_recursive crashes if third param of the
     function is by reference). (Nikita Popov)
   . Improve performance of set_exception_handler while doing reset (Laruence)
 
+- fileinfo:
+  . Fix fileinfo test problems. (Anatoliy Belsky)
+
 - FPM
-  . Fixed bug #61812 (Uninitialised value used in libmagic). 
-    (Laruence, Gustavo)
   . Fixed bug #61430 (Transposed memset() params in sapi/fpm/fpm/fpm_shm.c).
     (michaelhood at gmail dot com, Ilia)
 
@@ -73,10 +94,6 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #61487 (Incorrent bounds checking in grapheme_strpos).
     (Stas)
-
-- Libxml:
-  . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
-    (Laruence)
 
 - mbstring:
   . MFH mb_ereg_replace_callback() for security enhancements. (Rui)
@@ -146,9 +163,6 @@ PHP                                                                        NEWS
     Popov)
 
 - Zlib:
-  . Fixed bug #61820 (using ob_gzhandler will complain about headers already 
-    sent when no compression). (Mike)
-  . Fixed bug #61443 (can't change zlib.output_compression on the fly). (Mike)
   . Fixed bug #61306 (initialization of global inappropriate for ZTS). (Gustavo)
   . Fixed bug #61287 (A particular string fails to decompress). (Mike)
   . Fixed bug #61139 (gzopen leaks when specifying invalid mode). (Nikita Popov)
