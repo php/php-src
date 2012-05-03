@@ -127,7 +127,7 @@ ZEND_API zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRM
 }
 /* }}} */
 
-/* {{{ zend_user_it_dtor */
+/* {{{ zend_user_it_invalidate_current */
 ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
