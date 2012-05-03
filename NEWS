@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     (Laruence)
 
 - Core:
+  . Fixed bug #61922 (ZTS build doesn't accept zend.script_encoding config).
+    (Laruence)
   . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
   . Fixed bug #61827 (incorrect \e processing on Windows) (Anatoliy)
   . Fixed bug #61761 ('Overriding' a private static method with a different 
