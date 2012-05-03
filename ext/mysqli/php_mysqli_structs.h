@@ -158,12 +158,6 @@ typedef struct _mysqli_property_entry {
 	int (*w_func)(mysqli_object *obj, zval *value TSRMLS_DC);
 } mysqli_property_entry;
 
-#if !defined(MYSQLI_USE_MYSQLND)
-typedef struct {
-	char	error_msg[LOCAL_INFILE_ERROR_LEN];
-  	void	*userdata;
-} mysqli_local_infile;
-#endif
 
 typedef struct {
 	zend_ptr_stack free_links;
