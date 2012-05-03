@@ -131,12 +131,6 @@ typedef struct {
 } MY_MYSQL;
 
 typedef struct {
-	int			mode;
-	int			socket;
-	FILE		*fp;
-} PROFILER;
-
-typedef struct {
 	void				*ptr;		/* resource: (mysql, result, stmt)   */
 	void				*info;		/* additional buffer				 */
 	enum mysqli_status	status;		/* object status */
