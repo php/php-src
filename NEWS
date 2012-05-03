@@ -38,6 +38,10 @@ PHP                                                                        NEWS
 	still exists for backward compatibility but is doing nothing). (Pierrick)
   . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
 
+- MySQLi
+  . Dropped support for LOAD DATA LOCAL INFILE handlers when using libmysql.
+    Known for stability problems. (Andrey)
+
 - PCRE:
   . Deprecated the /e modifier
     (https://wiki.php.net/rfc/remove_preg_replace_eval_modifier). (Nikita Popov)
