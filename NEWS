@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #61546 (functions related to current script failed when chdir() 
     in cli sapi). (Laruence, reeze.xia@gmail.com)
 
+- CURL
+  . Fixed bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction).
+    (Laruence)
+
 - Core:
   . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
   . Fixed bug #61764 ('I' unpacks n as signed if n > 2^31-1 on LP64). (Gustavo)
