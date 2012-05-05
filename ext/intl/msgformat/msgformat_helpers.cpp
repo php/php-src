@@ -117,14 +117,14 @@ static HashTable *umsg_parse_format(const MessagePattern& mp, UErrorCode& uec)
 	parts_count = mp.countParts();
 
 	// See MessageFormat::cacheExplicitFormats()
-    /*
-     * Looking through the pattern, go to each arg_start part type.
-     * The arg-typeof that tells us the argument type (simple, complicated)
-     * then the next part is either the arg_name or arg number
-     * and then if it's simple after that there could be a part-type=arg-type
+	/*
+	 * Looking through the pattern, go to each arg_start part type.
+	 * The arg-typeof that tells us the argument type (simple, complicated)
+	 * then the next part is either the arg_name or arg number
+	 * and then if it's simple after that there could be a part-type=arg-type
 	 * while substring will tell us number, spellout, etc.
-     * If the next thing isn't an arg-type then assume string.
-    */
+	 * If the next thing isn't an arg-type then assume string.
+	*/
 	/* The last two "parts" can at most be ARG_LIMIT and MSG_LIMIT
 	 * which we need not examine. */
 	for (int32_t i = 0; i < parts_count - 2 && U_SUCCESS(uec); i++) {
@@ -226,7 +226,7 @@ static HashTable *umsg_parse_format(const MessagePattern& mp, UErrorCode& uec)
 		}
 
 		*storedType = type;
-    } /* visiting each part */
+	} /* visiting each part */
 
 	if (U_FAILURE(uec)) {
 		zend_hash_destroy(ret);

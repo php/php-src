@@ -44,10 +44,10 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
     /* umsg_format_arg_count() always returns 0 for named argument patterns,
      * so this check is ignored and un-substituted {name} strings
      * in a pattern are returned unmodified. */
-	if(count < umsg_format_arg_count(MSG_FORMAT_OBJECT(mfo))) {
+	if (count < umsg_format_arg_count(MSG_FORMAT_OBJECT(mfo))) {
 		/* Not enough aguments for format! */
-		intl_error_set( INTL_DATA_ERROR_P(mfo), U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_format: not enough parameters", 0 TSRMLS_CC );
+		intl_errors_set(INTL_DATA_ERROR_P(mfo), U_ILLEGAL_ARGUMENT_ERROR,
+			"msgfmt_format: not enough parameters", 0 TSRMLS_CC);
 		RETVAL_FALSE;
 		return;
 	}
