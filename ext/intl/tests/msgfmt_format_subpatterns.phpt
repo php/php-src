@@ -67,5 +67,5 @@ ut_run();
 'Alice invites Bob to his party.'
 'Alice invites Bob and one other person to their party.'
 'Alice invites Bob and one other person to their party.'
-'Alice invites Bob as one of the 27 people invited to her party.'
-'Alice invites Bob as one of the 27 people invited to her party.'
+'Alice invites Bob as one of the 26 people invited to her party.'
+'Alice invites Bob as one of the 26 people invited to her party.'
