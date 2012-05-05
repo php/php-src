@@ -6,7 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #61546 (functions related to current script failed when chdir() 
     in cli sapi). (Laruence, reeze.xia@gmail.com)
 
-- CURL
+- CURL:
   . Fixed bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction).
     (Laruence)
 
