@@ -18,7 +18,7 @@
 #define MSG_FORMAT_HELPERS_H
 
 int32_t umsg_format_arg_count(UMessageFormat *fmt);
-void umsg_format_helper(UMessageFormat *fmt, int arg_count, zval **args, char **arg_names,
+void umsg_format_helper(UMessageFormat *fmt, HashTable *args,
 						UChar **formatted, int *formatted_len, UErrorCode *status TSRMLS_DC);
 void umsg_parse_helper(UMessageFormat *fmt, int *count, zval ***args,
 					   UChar *source, int source_len, UErrorCode *status);

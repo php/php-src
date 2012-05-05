@@ -34,13 +34,10 @@
 /* {{{ */
 static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *return_value TSRMLS_DC)
 {
-	zval **fargs;
 	int count;
 	UChar* formatted = NULL;
-    char **farg_names = NULL;
 	int formatted_len = 0;
-	HashPosition pos;
-	int i;
+	HashTable *args_copy;
 
 	count = zend_hash_num_elements(Z_ARRVAL_P(args));
 
@@ -55,51 +52,17 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 		return;
 	}
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
-	fargs = safe_emalloc(count, sizeof(zval *), 0);
-    /* If the first key is a string, then treat everything as a named argument */
-    if (HASH_KEY_IS_STRING == zend_hash_get_current_key_type_ex(Z_ARRVAL_P(args), &pos)) {
-        farg_names = safe_emalloc(count, sizeof(char *), 0);
-    }
+	ALLOC_HASHTABLE(args_copy);
+	zend_hash_init(args_copy, count, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(args_copy, Z_ARRVAL_P(args), (copy_ctor_func_t)zval_add_ref,
+		NULL, sizeof(zval*));
 
-	for(i=0;i<count;i++) {
-		zval **val;
-		zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void **)&val, &pos);
-		fargs[i] = *val;
-		Z_ADDREF_P(fargs[i]);
-		/* TODO: needs refcount increase here? */
-        if (NULL != farg_names) {
-            char *key;
-            uint key_len;
-            ulong index;
-            int key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(args), &key, &key_len, &index, 0, &pos);
-            if (HASH_KEY_IS_STRING == key_type) {
-                farg_names[i] = estrndup(key, key_len);
-            }
-            else if (HASH_KEY_IS_LONG == key_type) {
-                farg_names[i] = emalloc(sizeof("18446744073709551616")); // 2^64
-                snprintf(farg_names[i], sizeof("18446744073709551616"), "%lu", (unsigned long) index);
-            }
-            else {
-                farg_names[i] = estrndup("", 0);
-            }
-        }
-		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos);
-	}
+	umsg_format_helper(MSG_FORMAT_OBJECT(mfo), args_copy,
+		&formatted, &formatted_len, &INTL_DATA_ERROR_CODE(mfo) TSRMLS_CC);
 
-	umsg_format_helper(MSG_FORMAT_OBJECT(mfo), count, fargs, farg_names, &formatted, &formatted_len, &INTL_DATA_ERROR_CODE(mfo) TSRMLS_CC);
+	zend_hash_destroy(args_copy);
+	efree(args_copy);
 
-	for(i=0;i<count;i++) {
-		zval_ptr_dtor(&fargs[i]);
-	}
-
-	efree(fargs);
-    if (farg_names) {
-        for (i = 0; i < count; i++) {
-            efree(farg_names[i]);
-        }
-        efree(farg_names);
-    }
 	if (formatted && U_FAILURE( INTL_DATA_ERROR_CODE(mfo) ) ) {
 			efree(formatted);
 	}

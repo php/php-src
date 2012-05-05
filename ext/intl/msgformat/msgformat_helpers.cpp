@@ -25,8 +25,11 @@
 #include <unicode/msgfmt.h>
 #include <unicode/chariter.h>
 #include <unicode/messagepattern.h>
+#include <unicode/ustdio.h>
 
-#include <map>
+#include <vector>
+
+#include "../intl_convertcpp.h"
 
 extern "C" {
 #include "php_intl.h"
@@ -70,283 +73,339 @@ U_CFUNC int32_t umsg_format_arg_count(UMessageFormat *fmt)
 }
 
 double umsg_helper_zval_to_millis(zval *z, UErrorCode *status TSRMLS_DC) {
-    double rv = 0.0;
-    if (Z_TYPE_P(z) == IS_DOUBLE) {
-        rv = U_MILLIS_PER_SECOND * Z_DVAL_P(z);
-    }
-    else if (Z_TYPE_P(z) == IS_LONG) {
-        rv = U_MILLIS_PER_SECOND * (double) Z_LVAL_P(z);
-    }
-    else if (Z_TYPE_P(z) == IS_OBJECT) {
-        /* Borrowed from datefmt_format() in intl/dateformat/dateformat_format.c */
-        if (instanceof_function(Z_OBJCE_P(z), php_date_get_date_ce() TSRMLS_CC)) {
-            zval retval;
-            zval *zfuncname;
-            INIT_ZVAL(retval);
-            MAKE_STD_ZVAL(zfuncname);
-            ZVAL_STRING(zfuncname, "getTimestamp", 1);
-            if (call_user_function(NULL, &(z), zfuncname, &retval, 0, NULL TSRMLS_CC) != SUCCESS || Z_TYPE(retval) != IS_LONG) {
-                *status = U_RESOURCE_TYPE_MISMATCH;
-            } else {
-                rv = U_MILLIS_PER_SECOND * (double) Z_LVAL(retval);
-            }
-            zval_ptr_dtor(&zfuncname);
-        } else {
-            *status = U_ILLEGAL_ARGUMENT_ERROR;
-        }
-    }
-    return rv;
+	double rv = 0.0;
+	if (Z_TYPE_P(z) == IS_DOUBLE) {
+		rv = U_MILLIS_PER_SECOND * Z_DVAL_P(z);
+	} else if (Z_TYPE_P(z) == IS_LONG) {
+		rv = U_MILLIS_PER_SECOND * (double)Z_LVAL_P(z);
+	} else if (Z_TYPE_P(z) == IS_OBJECT) {
+		/* Borrowed from datefmt_format() in intl/dateformat/dateformat_format.c */
+		if (instanceof_function(Z_OBJCE_P(z), php_date_get_date_ce() TSRMLS_CC)) {
+			zval retval;
+			zval *zfuncname;
+			INIT_ZVAL(retval);
+			MAKE_STD_ZVAL(zfuncname);
+			ZVAL_STRING(zfuncname, "getTimestamp", 1);
+			if (call_user_function(NULL, &(z), zfuncname, &retval, 0, NULL TSRMLS_CC)
+					!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
+				*status = U_RESOURCE_TYPE_MISMATCH;
+			} else {
+				rv = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval);
+			}
+			zval_ptr_dtor(&zfuncname);
+		} else {
+			*status = U_ILLEGAL_ARGUMENT_ERROR;
+		}
+	}
+	return rv;
 }
 
-U_CFUNC void umsg_format_helper(UMessageFormat *fmt, int arg_count, zval **args, char **arg_names, UChar **formatted, int *formatted_len, UErrorCode *status TSRMLS_DC)
+static HashTable *umsg_parse_format(const MessagePattern& mp, UErrorCode& uec)
 {
-	int fmt_count;
-    int32_t i;
-	Formattable* fargs;
-    UnicodeString *farg_names;
-    MessageFormat *mf = (MessageFormat *) fmt;
-    MessagePattern mp = MessageFormatAdapter::getMessagePattern(mf);
-    std::map<UnicodeString, Formattable::Type> argTypesNamed;
-    std::map<int32_t, Formattable::Type> argTypesNumbered;
+	HashTable *ret;
+	int32_t parts_count;
 
-    int32_t usingNamedArguments = mf->usesNamedArguments();
+	if (U_FAILURE(uec)) {
+		return NULL;
+	}
 
+	/* Hash table will store Formattable::Type objects directly,
+	 * so no need for destructor */
+	ALLOC_HASHTABLE(ret);
+	zend_hash_init(ret, 32, NULL, NULL, 0);
+
+	parts_count = mp.countParts();
+
+	// See MessageFormat::cacheExplicitFormats()
     /*
-      looking through the pattern, go to each arg_start part type.
-      the arg-typeof that tells us the argument type (simple, complicated)
-      then the next part is either the arg_name or arg number
-      and then if it's simple after that there could be a part-type=arg-type whise substring will tell us number, spellout, etc
-      if the next thing isn't an arg-type then assume string
-      same name that appears more than once in a complicated pattern will appear more than once, we could
-      -- ignore subsequent occurances
-      -- complain if types differ?
+     * Looking through the pattern, go to each arg_start part type.
+     * The arg-typeof that tells us the argument type (simple, complicated)
+     * then the next part is either the arg_name or arg number
+     * and then if it's simple after that there could be a part-type=arg-type
+	 * while substring will tell us number, spellout, etc.
+     * If the next thing isn't an arg-type then assume string.
     */
-
-    int32_t parts_count = mp.countParts();
-
-    for (i = 0; i < parts_count; i++) {
+	/* The last two "parts" can at most be ARG_LIMIT and MSG_LIMIT
+	 * which we need not examine. */
+	for (int32_t i = 0; i < parts_count - 2 && U_SUCCESS(uec); i++) {
         MessagePattern::Part p = mp.getPart(i);
-        if (p.getType() == UMSGPAT_PART_TYPE_ARG_START) {
-            MessagePattern::Part name_part = mp.getPart(++i); /* Getting name, advancing i */
-            UnicodeString argName;
-            int32_t argNumber;
-            if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NAME) {
-                argName = mp.getSubstring(name_part);
-            }
-            else if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NUMBER) {
-                argNumber = name_part.getValue();
-            }
-            /* If we haven't seen this arg name before */
-            int seenBefore = usingNamedArguments ? argTypesNamed.count(argName) : argTypesNumbered.count(argNumber);
-            if (0 == seenBefore) {
-                Formattable::Type fargType;
-                UMessagePatternArgType argType = p.getArgType();
-                /* No type specified, treat it as a string */
-                if (argType == UMSGPAT_ARG_TYPE_NONE) {
-                    fargType = Formattable::kString;
-                }
-                /* Some type was specified, might be simple or complicated */
-                else {
-                    if (argType == UMSGPAT_ARG_TYPE_SIMPLE) {
-                        /* For a SIMPLE arg, after the name part, there should be
-                         * an ARG_TYPE part whose string value tells us what to do */
-                        MessagePattern::Part type_part = mp.getPart(++i); /* Getting type, advancing i */
-                        if (type_part.getType() == UMSGPAT_PART_TYPE_ARG_TYPE) {
-                            UnicodeString typeString = mp.getSubstring(type_part);
-                            /* This is all based on the rules in the docs for MessageFormat
-                             * @see http://icu-project.org/apiref/icu4c/classMessageFormat.html */
-                            if (typeString == "number") {
-                                MessagePattern::Part style_part = mp.getPart(i + 1); /* Not advancing i */
-                                if (style_part.getType() == UMSGPAT_PART_TYPE_ARG_STYLE) {
-                                    UnicodeString styleString = mp.getSubstring(style_part);
-                                    if (styleString == "integer") {
-                                        fargType = Formattable::kInt64;
-                                    }
-                                    else if (styleString == "currency") {
-                                        fargType = Formattable::kDouble;
-                                    }
-                                    else if (styleString == "percent") {
-                                        fargType = Formattable::kDouble;
-                                    }
-                                }
-                                // if missing style, part, make it a double
-                                else {
-                                    fargType = Formattable::kDouble;
-                                }
-                            }
-                            else if ((typeString == "date") || (typeString == "time")) {
-                                fargType = Formattable::kDate;
-                            }
-                            else if ((typeString == "spellout") || (typeString == "ordinal") || (typeString == "duration")) {
-                                fargType = Formattable::kDouble;
-                            }
 
+        if (p.getType() != UMSGPAT_PART_TYPE_ARG_START) {
+			continue;
+		}
+
+        MessagePattern::Part name_part = mp.getPart(++i); /* Getting name, advancing i */
+		Formattable::Type type,
+						  *storedType;
+
+        if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NAME) {
+            UnicodeString argName = mp.getSubstring(name_part);
+			if (zend_hash_find(ret, (char*)argName.getBuffer(), argName.length(),
+					(void**)&storedType) == FAILURE) {
+				/* not found already; create new entry in HT */
+				Formattable::Type bogusType = Formattable::kObject;
+				if (zend_hash_update(ret, (char*)argName.getBuffer(), argName.length(),
+						(void*)&bogusType, sizeof(bogusType), (void**)&storedType) == FAILURE) {
+					uec = U_MEMORY_ALLOCATION_ERROR;
+					continue;
+				}
+			}
+        } else if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NUMBER) {
+            int32_t argNumber = name_part.getValue();
+			if (argNumber < 0) {
+				uec = U_INVALID_FORMAT_ERROR;
+				continue;
+			}
+			if (zend_hash_index_find(ret, (ulong)argNumber, (void**)&storedType)
+					== FAILURE) {
+				/* not found already; create new entry in HT */
+				Formattable::Type bogusType = Formattable::kObject;
+				if (zend_hash_index_update(ret, (ulong)argNumber, (void*)&bogusType,
+						sizeof(bogusType), (void**)&storedType) == FAILURE) {
+					uec = U_MEMORY_ALLOCATION_ERROR;
+					continue;
+				}
+			}
+        }
+
+        UMessagePatternArgType argType = p.getArgType();
+        /* No type specified, treat it as a string */
+        if (argType == UMSGPAT_ARG_TYPE_NONE) {
+            type = Formattable::kString;
+		} else { /* Some type was specified, might be simple or complicated */
+            if (argType == UMSGPAT_ARG_TYPE_SIMPLE) {
+                /* For a SIMPLE arg, after the name part, there should be
+                 * an ARG_TYPE part whose string value tells us what to do */
+                MessagePattern::Part type_part = mp.getPart(++i); /* Getting type, advancing i */
+                if (type_part.getType() == UMSGPAT_PART_TYPE_ARG_TYPE) {
+                    UnicodeString typeString = mp.getSubstring(type_part);
+                    /* This is all based on the rules in the docs for MessageFormat
+                     * @see http://icu-project.org/apiref/icu4c/classMessageFormat.html */
+                    if (typeString == "number") {
+                        MessagePattern::Part style_part = mp.getPart(i + 1); /* Not advancing i */
+                        if (style_part.getType() == UMSGPAT_PART_TYPE_ARG_STYLE) {
+                            UnicodeString styleString = mp.getSubstring(style_part);
+                            if (styleString == "integer") {
+                                type = Formattable::kInt64;
+                            } else if (styleString == "currency") {
+                                type = Formattable::kDouble;
+                            } else if (styleString == "percent") {
+                                type = Formattable::kDouble;
+                            }
+                        } else { // if missing style, part, make it a double
+                            type = Formattable::kDouble;
                         }
-                        else {
-                            /* If there's no UMSGPAT_PART_TYPE_ARG_TYPE right after a
-                             * UMSGPAT_ARG_TYPE_SIMPLE argument, then the pattern
-                             * is broken. */
-                            *status = U_PARSE_ERROR;
-                            return;
-                        }
+                    } else if ((typeString == "date") || (typeString == "time")) {
+                        type = Formattable::kDate;
+                    } else if ((typeString == "spellout") || (typeString == "ordinal")
+							|| (typeString == "duration")) {
+                        type = Formattable::kDouble;
                     }
-                    else if (argType == UMSGPAT_ARG_TYPE_PLURAL) {
-                        fargType = Formattable::kDouble;
-                    }
-                    else if (argType == UMSGPAT_ARG_TYPE_CHOICE) {
-                        fargType = Formattable::kDouble;
-                    }
-                    else if (argType == UMSGPAT_ARG_TYPE_SELECT) {
-                        fargType = Formattable::kString;
-                    }
-                    else {
-                        fargType = Formattable::kString;
-                    }
-                } /* was type specified? */
-                if (usingNamedArguments) {
-                    argTypesNamed.insert(std::pair<UnicodeString, Formattable::Type>(argName, fargType));
                 } else {
-                    argTypesNumbered.insert(std::pair<int32_t, Formattable::Type>(argNumber, fargType));
+                    /* If there's no UMSGPAT_PART_TYPE_ARG_TYPE right after a
+                     * UMSGPAT_ARG_TYPE_SIMPLE argument, then the pattern
+                     * is broken. */
+                    uec = U_PARSE_ERROR;
+                    continue;
                 }
-            } /* Haven't seen arg before? */
-        } /* checking for ARG_START */
+            } else if (argType == UMSGPAT_ARG_TYPE_PLURAL) {
+                type = Formattable::kDouble;
+            } else if (argType == UMSGPAT_ARG_TYPE_CHOICE) {
+                type = Formattable::kDouble;
+            } else if (argType == UMSGPAT_ARG_TYPE_SELECT) {
+                type = Formattable::kString;
+            } else {
+                type = Formattable::kString;
+            }
+        } /* was type specified? */
+
+		/* We found a different type for the same arg! */
+		if (*storedType != Formattable::kObject && *storedType != type) {
+			uec = U_ARGUMENT_TYPE_MISMATCH;
+			continue;
+		}
+
+		*storedType = type;
     } /* visiting each part */
 
-#define CLEANUP_AND_RETURN_ON_ERROR(status) do { \
-        if (U_FAILURE(*status)) {                \
-            delete[] fargs;                      \
-            if (usingNamedArguments) {           \
-                delete[] farg_names;             \
-            }                                    \
-            return;                              \
-        }                                        \
-    } while (0)
+	if (U_FAILURE(uec)) {
+		zend_hash_destroy(ret);
+		efree(ret);
 
+		return NULL;
+	}
 
-    fmt_count = arg_count;
-    fargs = new Formattable[fmt_count];
-    if (usingNamedArguments) {
-        farg_names = new UnicodeString[fmt_count];
+	return ret;
+}
+
+U_CFUNC void umsg_format_helper(UMessageFormat *fmt, HashTable *args, UChar **formatted, int *formatted_len, UErrorCode *status TSRMLS_DC)
+{
+	int arg_count = zend_hash_num_elements(args);
+	std::vector<Formattable> fargs;
+	std::vector<UnicodeString> farg_names;
+    MessageFormat *mf = (MessageFormat *) fmt;
+    const MessagePattern mp = MessageFormatAdapter::getMessagePattern(mf);
+	HashTable *types;
+
+	fargs.resize(arg_count);
+	farg_names.resize(arg_count);
+
+	types = umsg_parse_format(mp, *status);
+	if (U_FAILURE(*status)) {
+		return;
+	}
+
+	int				argNum = 0;
+	HashPosition	pos;
+	zval			**elem;
+
+	// Key related variables
+	int				key_type;
+	char			*str_index;
+	uint			str_len;
+	ulong			num_index;
+
+	for (zend_hash_internal_pointer_reset_ex(args, &pos);
+		U_SUCCESS(*status) &&
+			(key_type = zend_hash_get_current_key_ex(
+					args, &str_index, &str_len, &num_index, 0, &pos),
+				zend_hash_get_current_data_ex(args, (void **)&elem, &pos)
+			) == SUCCESS;
+		zend_hash_move_forward_ex(args, &pos), argNum++)
+	{
+		Formattable& formattable = fargs[argNum];
+		UnicodeString& key = farg_names[argNum];
+		Formattable::Type argType = Formattable::kObject, //unknown
+						  *storedArgType = NULL;
+
+		/* Process key and retrieve type */
+		if (key_type == HASH_KEY_IS_LONG) {
+			/* includes case where index < 0 because it's exposed as unsigned */
+			if (num_index > INT32_MAX) {
+				*status = U_ILLEGAL_ARGUMENT_ERROR;
+				continue;
+			}
+
+           UChar temp[16];
+		   int32_t len = u_sprintf(temp, "%u", (uint32_t)num_index);
+           key.append(temp, len);
+
+		   zend_hash_index_find(types, (ulong)num_index, (void**)&storedArgType);
+		} else { //string; assumed to be in UTF-8
+			intl_stringFromChar(key, str_index, str_len-1, status);
+			if (U_FAILURE(*status)) {
+				   continue;
+			}
+
+			zend_hash_find(types, (char*)key.getBuffer(), key.length(),
+				(void**)&storedArgType);
+		}
+
+		if (storedArgType != NULL) {
+			argType = *storedArgType;
+		}
+
+		/* Convert zval to formattable according to message format type
+		 * or (as a fallback) the zval type */
+		if (argType != Formattable::kObject) {
+            switch (argType) {
+			case Formattable::kString:
+				{
+string_arg: //XXX: make function
+					/* This implicitly converts objects */
+					convert_to_string_ex(elem);
+
+					UnicodeString *text = new UnicodeString();
+					intl_stringFromChar(*text, Z_STRVAL_PP(elem), Z_STRLEN_PP(elem), status);
+					if (U_FAILURE(*status)) {
+						delete text;
+						continue;
+					}
+					formattable.adoptString(text);
+					break;
+				}
+            case Formattable::kDouble:
+                {
+                    double d;
+                    if (Z_TYPE_PP(elem) == IS_DOUBLE) {
+                        d = Z_DVAL_PP(elem);
+                    } else if (Z_TYPE_PP(elem) == IS_LONG) {
+                        d = (double)Z_LVAL_PP(elem);
+                    } else {
+                        SEPARATE_ZVAL_IF_NOT_REF(elem);
+                        convert_scalar_to_number(*elem TSRMLS_CC);
+                        d = (Z_TYPE_PP(elem) == IS_DOUBLE)
+							? Z_DVAL_PP(elem)
+							: (double)Z_LVAL_PP(elem);
+                    }
+					formattable.setDouble(d);
+                    break;
+                }
+            case Formattable::kInt64:
+                {
+                    int64_t tInt64;
+                    if (Z_TYPE_PP(elem) == IS_DOUBLE) {
+                        tInt64 = (int64_t)Z_DVAL_PP(elem);
+                    } else if (Z_TYPE_PP(elem) == IS_LONG) {
+                        tInt64 = (int64_t)Z_LVAL_PP(elem);
+                    } else {
+                        SEPARATE_ZVAL_IF_NOT_REF(elem);
+                        convert_scalar_to_number(*elem TSRMLS_CC);
+                        tInt64 = (Z_TYPE_PP(elem) == IS_DOUBLE)
+							? (int64_t)Z_DVAL_PP(elem)
+							: Z_LVAL_PP(elem);
+                    }
+                    formattable.setInt64(tInt64);
+                    break;
+                }
+            case Formattable::kDate:
+                {
+                    double dd = umsg_helper_zval_to_millis(*elem, status TSRMLS_CC);
+					if (U_FAILURE(*status)) {
+						continue;
+					}
+                    formattable.setDate(dd);
+                    break;
+                }
+            }
+        } else {
+            /* We couldn't find any information about the argument in the pattern, this
+             * means it's an extra argument. So convert it to a number if it's a number or
+             * bool or null and to a string if it's anything else. */
+            switch (Z_TYPE_PP(elem)) {
+            case IS_DOUBLE:
+                formattable.setDouble(Z_DVAL_PP(elem));
+                break;
+            case IS_BOOL:
+                convert_to_long_ex(elem);
+                /* Intentional fallthrough */
+            case IS_LONG:
+                formattable.setInt64((int64_t)Z_LVAL_PP(elem));
+                break;
+            case IS_NULL:
+                formattable.setInt64((int64_t)0);
+                break;
+            default:
+                goto string_arg;
+            }
+		}
+    } // visiting each argument
+
+	zend_hash_destroy(types);
+	efree(types);
+
+    if (U_FAILURE(*status)){
+        return;
     }
-    for (int32_t i = 0; i < fmt_count; ++i) {
-            UChar* text = NULL;
-            int textLen = 0;
-            int found = 0;
-            Formattable::Type argType;
 
-            if (usingNamedArguments) {
-                intl_convert_utf8_to_utf16(&text, &textLen, arg_names[i], strlen(arg_names[i]), status);
-                CLEANUP_AND_RETURN_ON_ERROR(status);
-                farg_names[i].setTo(text, textLen);
-                efree(text);
-                text = NULL; textLen = 0;
-                std::map<UnicodeString, Formattable::Type>::iterator it;
-                it = argTypesNamed.find(farg_names[i]);
-                if (it != argTypesNamed.end()) {
-                    argType = it->second;
-                    found = 1;
-                }
-            }
-            else {
-                std::map<int32_t, Formattable::Type>::iterator it;
-                it = argTypesNumbered.find(i);
-                if (it != argTypesNumbered.end()) {
-                    argType = it->second;
-                    found = 1;
-                }
-            }
-            if (found) {
-                switch (argType) {
-                case Formattable::kString:
-                    /* This implicitly converts objects by attempting to call __toString() */
-                    convert_to_string_ex(&args[i]);
-                    intl_convert_utf8_to_utf16(&text, &textLen, Z_STRVAL_P(args[i]), Z_STRLEN_P(args[i]), status);
-                    CLEANUP_AND_RETURN_ON_ERROR(status);
-                    fargs[i].setString(text);
-                    efree(text);
-                    text = NULL; textLen = 0;
-                    break;
-                case Formattable::kDouble:
-                    {
-                        double d;
-                        if(Z_TYPE_P(args[i]) == IS_DOUBLE) {
-                            d = Z_DVAL_P(args[i]);
-                        } else if(Z_TYPE_P(args[i]) == IS_LONG) {
-                            d = (double)Z_LVAL_P(args[i]);
-                        } else {
-                            SEPARATE_ZVAL_IF_NOT_REF(&args[i]);
-                            convert_scalar_to_number( args[i] TSRMLS_CC );
-                            d = (Z_TYPE_P(args[i]) == IS_DOUBLE)?Z_DVAL_P(args[i]):(double)Z_LVAL_P(args[i]);
-                        }
-                        fargs[i].setDouble(d);
-                        break;
-                    }
-                case Formattable::kInt64:
-                    {
-                        int64_t tInt64;
-                        if(Z_TYPE_P(args[i]) == IS_DOUBLE) {
-                            tInt64 = (int64_t)Z_DVAL_P(args[i]);
-                        } else if(Z_TYPE_P(args[i]) == IS_LONG) {
-                            tInt64 = (int64_t)Z_LVAL_P(args[i]);
-                        } else {
-                            SEPARATE_ZVAL_IF_NOT_REF(&args[i]);
-                            convert_scalar_to_number( args[i] TSRMLS_CC );
-                            tInt64 = (Z_TYPE_P(args[i]) == IS_DOUBLE)?(int64_t)Z_DVAL_P(args[i]):Z_LVAL_P(args[i]);
-                        }
-                        fargs[i].setInt64(tInt64);
-                        break;
-                    }
-                case Formattable::kDate:
-                    {
-                        double dd = umsg_helper_zval_to_millis(args[i], status TSRMLS_CC);
-                        CLEANUP_AND_RETURN_ON_ERROR(status);
-                        fargs[i].setDate(dd);
-                        break;
-                    }
-                }
-            }
-            else {
-                /* We couldn't find any information about the argument in the pattern, this
-                 * means it's an extra argument. So convert it to a number if it's a number or
-                 * bool or null and to a string if it's anything else. */
-                switch (Z_TYPE_P(args[i])) {
-                case IS_DOUBLE:
-                    fargs[i].setDouble(Z_DVAL_P(args[i]));
-                    break;
-                case IS_BOOL:
-                    convert_to_long_ex(&args[i]);
-                    /* Intentional fallthrough */
-                case IS_LONG:
-                    fargs[i].setInt64((int64_t) Z_LVAL_P(args[i]));
-                    break;
-                case IS_NULL:
-                    fargs[i].setInt64((int64_t) 0);
-                    break;
-                default:
-                    convert_to_string_ex(&args[i]);
-                    intl_convert_utf8_to_utf16(&text, &textLen, Z_STRVAL_P(args[i]), Z_STRLEN_P(args[i]), status);
-                    CLEANUP_AND_RETURN_ON_ERROR(status);
-                    fargs[i].setString(text);
-                    efree(text);
-                    text = NULL; textLen = 0;
-                    break;
-                }
-            }
-    } // visiting each argument argument
-
-    UnicodeString resultStr;
-    FieldPosition fieldPosition(0);
+	UnicodeString resultStr;
+	FieldPosition fieldPosition(0);
 
     /* format the message */
-    if (usingNamedArguments) {
-        mf->format(farg_names, fargs, fmt_count, resultStr, *status);
-        delete[] farg_names;
-    } else {
-        mf->format(fargs, fmt_count, resultStr, fieldPosition, *status);
-    }
-    delete[] fargs;
+	mf->format(farg_names.empty() ? NULL : &farg_names[0],
+		fargs.empty() ? NULL : &fargs[0], arg_count, resultStr, *status);
 
-    if(U_FAILURE(*status)){
+    if (U_FAILURE(*status)) {
         return;
     }
 
