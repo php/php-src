@@ -32,17 +32,21 @@
 #endif
 
 /* {{{ */
-static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *return_value TSRMLS_DC) 
+static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *return_value TSRMLS_DC)
 {
 	zval **fargs;
 	int count;
 	UChar* formatted = NULL;
+    char **farg_names = NULL;
 	int formatted_len = 0;
 	HashPosition pos;
 	int i;
 
 	count = zend_hash_num_elements(Z_ARRVAL_P(args));
 
+    /* umsg_format_arg_count() always returns 0 for named argument patterns,
+     * so this check is ignored and un-substituted {name} strings
+     * in a pattern are returned unmodified. */
 	if(count < umsg_format_arg_count(MSG_FORMAT_OBJECT(mfo))) {
 		/* Not enough aguments for format! */
 		intl_error_set( INTL_DATA_ERROR_P(mfo), U_ILLEGAL_ARGUMENT_ERROR,
@@ -51,26 +55,51 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 		return;
 	}
 
-	fargs = safe_emalloc(count, sizeof(zval *), 0);
-
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
+	fargs = safe_emalloc(count, sizeof(zval *), 0);
+    /* If the first key is a string, then treat everything as a named argument */
+    if (HASH_KEY_IS_STRING == zend_hash_get_current_key_type_ex(Z_ARRVAL_P(args), &pos)) {
+        farg_names = safe_emalloc(count, sizeof(char *), 0);
+    }
+
 	for(i=0;i<count;i++) {
 		zval **val;
 		zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void **)&val, &pos);
 		fargs[i] = *val;
 		Z_ADDREF_P(fargs[i]);
 		/* TODO: needs refcount increase here? */
+        if (NULL != farg_names) {
+            char *key;
+            uint key_len;
+            ulong index;
+            int key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(args), &key, &key_len, &index, 0, &pos);
+            if (HASH_KEY_IS_STRING == key_type) {
+                farg_names[i] = estrndup(key, key_len);
+            }
+            else if (HASH_KEY_IS_LONG == key_type) {
+                farg_names[i] = emalloc(sizeof("18446744073709551616")); // 2^64
+                snprintf(farg_names[i], sizeof("18446744073709551616"), "%lu", (unsigned long) index);
+            }
+            else {
+                farg_names[i] = estrndup("", 0);
+            }
+        }
 		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos);
 	}
 
-	umsg_format_helper(MSG_FORMAT_OBJECT(mfo), count, fargs, &formatted, &formatted_len, &INTL_DATA_ERROR_CODE(mfo) TSRMLS_CC);
+	umsg_format_helper(MSG_FORMAT_OBJECT(mfo), count, fargs, farg_names, &formatted, &formatted_len, &INTL_DATA_ERROR_CODE(mfo) TSRMLS_CC);
 
 	for(i=0;i<count;i++) {
 		zval_ptr_dtor(&fargs[i]);
 	}
 
 	efree(fargs);
-
+    if (farg_names) {
+        for (i = 0; i < count; i++) {
+            efree(farg_names[i]);
+        }
+        efree(farg_names);
+    }
 	if (formatted && U_FAILURE( INTL_DATA_ERROR_CODE(mfo) ) ) {
 			efree(formatted);
 	}
