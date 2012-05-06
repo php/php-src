@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include <math.h>
+#include <limits.h>
 #include <unicode/msgfmt.h>
 #include <unicode/chariter.h>
 #include <unicode/messagepattern.h>
@@ -41,6 +42,14 @@ extern "C" {
 #define _MSC_STDINT_H_ 1
 #include "ext/date/php_date.h"
 }
+
+#ifndef INFINITY
+#define INFINITY (DBL_MAX+DBL_MAX)
+#endif
+
+#ifndef NAN
+#define NAN (INFINITY-INFINITY)
+#endif
 
 U_NAMESPACE_BEGIN
 /**
@@ -72,14 +81,33 @@ U_CFUNC int32_t umsg_format_arg_count(UMessageFormat *fmt)
 	return fmt_count;
 }
 
-double umsg_helper_zval_to_millis(zval *z, UErrorCode *status TSRMLS_DC) {
-	double rv = 0.0;
-	if (Z_TYPE_P(z) == IS_DOUBLE) {
-		rv = U_MILLIS_PER_SECOND * Z_DVAL_P(z);
-	} else if (Z_TYPE_P(z) == IS_LONG) {
+static double umsg_helper_zval_to_millis(zval *z, UErrorCode *status TSRMLS_DC) {
+	double rv = NAN;
+	long lv;
+	int type;
+
+	if (U_FAILURE(*status)) {
+		return NAN;
+	}
+
+	switch (Z_TYPE_P(z)) {
+	case IS_STRING:
+		type = is_numeric_string(Z_STRVAL_P(z), Z_STRLEN_P(z), &lv, &rv, 0);
+		if (type == IS_DOUBLE) {
+			rv *= U_MILLIS_PER_SECOND;
+		} else if (type == IS_LONG) {
+			rv = U_MILLIS_PER_SECOND * (double)lv;
+		} else {
+			*status = U_ILLEGAL_ARGUMENT_ERROR;
+		}
+		break;
+	case IS_LONG:
 		rv = U_MILLIS_PER_SECOND * (double)Z_LVAL_P(z);
-	} else if (Z_TYPE_P(z) == IS_OBJECT) {
-		/* Borrowed from datefmt_format() in intl/dateformat/dateformat_format.c */
+		break;
+	case IS_DOUBLE:
+		rv = U_MILLIS_PER_SECOND * Z_DVAL_P(z);
+		break;
+	case IS_OBJECT:
 		if (instanceof_function(Z_OBJCE_P(z), php_date_get_date_ce() TSRMLS_CC)) {
 			zval retval;
 			zval *zfuncname;
@@ -88,15 +116,20 @@ double umsg_helper_zval_to_millis(zval *z, UErrorCode *status TSRMLS_DC) {
 			ZVAL_STRING(zfuncname, "getTimestamp", 1);
 			if (call_user_function(NULL, &(z), zfuncname, &retval, 0, NULL TSRMLS_CC)
 					!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
-				*status = U_RESOURCE_TYPE_MISMATCH;
+				*status = U_INTERNAL_PROGRAM_ERROR;
 			} else {
 				rv = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval);
 			}
 			zval_ptr_dtor(&zfuncname);
 		} else {
+			/* TODO: try with cast(), get() to obtain a number */
 			*status = U_ILLEGAL_ARGUMENT_ERROR;
 		}
+		break;
+	default:
+		*status = U_ILLEGAL_ARGUMENT_ERROR;
 	}
+
 	return rv;
 }
 
