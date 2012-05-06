@@ -100,13 +100,20 @@ double umsg_helper_zval_to_millis(zval *z, UErrorCode *status TSRMLS_DC) {
 	return rv;
 }
 
-static HashTable *umsg_parse_format(const MessagePattern& mp, UErrorCode& uec)
+static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
+									const MessagePattern& mp,
+									UErrorCode& uec)
 {
 	HashTable *ret;
 	int32_t parts_count;
 
 	if (U_FAILURE(uec)) {
 		return NULL;
+	}
+
+	if (mfo->mf_data.arg_types) {
+		/* already cached */
+		return mfo->mf_data.arg_types;
 	}
 
 	/* Hash table will store Formattable::Type objects directly,
@@ -235,22 +242,24 @@ static HashTable *umsg_parse_format(const MessagePattern& mp, UErrorCode& uec)
 		return NULL;
 	}
 
+	mfo->mf_data.arg_types = ret;
+
 	return ret;
 }
 
-U_CFUNC void umsg_format_helper(UMessageFormat *fmt, HashTable *args, UChar **formatted, int *formatted_len, UErrorCode *status TSRMLS_DC)
+U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo, HashTable *args, UChar **formatted, int *formatted_len, UErrorCode *status TSRMLS_DC)
 {
 	int arg_count = zend_hash_num_elements(args);
 	std::vector<Formattable> fargs;
 	std::vector<UnicodeString> farg_names;
-    MessageFormat *mf = (MessageFormat *) fmt;
+	MessageFormat *mf = (MessageFormat *)mfo->mf_data.umsgf;
     const MessagePattern mp = MessageFormatAdapter::getMessagePattern(mf);
 	HashTable *types;
 
 	fargs.resize(arg_count);
 	farg_names.resize(arg_count);
 
-	types = umsg_parse_format(mp, *status);
+	types = umsg_parse_format(mfo, mp, *status);
 	if (U_FAILURE(*status)) {
 		return;
 	}
@@ -390,9 +399,6 @@ string_arg: //XXX: make function
             }
 		}
     } // visiting each argument
-
-	zend_hash_destroy(types);
-	efree(types);
 
     if (U_FAILURE(*status)){
         return;

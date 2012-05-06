@@ -57,7 +57,7 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 	zend_hash_copy(args_copy, Z_ARRVAL_P(args), (copy_ctor_func_t)zval_add_ref,
 		NULL, sizeof(zval*));
 
-	umsg_format_helper(MSG_FORMAT_OBJECT(mfo), args_copy,
+	umsg_format_helper(mfo, args_copy,
 		&formatted, &formatted_len, &INTL_DATA_ERROR_CODE(mfo) TSRMLS_CC);
 
 	zend_hash_destroy(args_copy);
