@@ -1058,7 +1058,6 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 	char  *string_key;
 	uint   string_key_len;
 	ulong  num_key;
-	HashPosition pos;
 
 	/* Set up known arguments */
 	args[1] = &key;
@@ -1067,15 +1066,14 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 		Z_ADDREF_P(userdata);
 	}
 
-	zend_hash_internal_pointer_reset_ex(target_hash, &pos);
-
 	BG(array_walk_fci).retval_ptr_ptr = &retval_ptr;
 	BG(array_walk_fci).param_count = userdata ? 3 : 2;
 	BG(array_walk_fci).params = args;
 	BG(array_walk_fci).no_separation = 0;
-
+	
 	/* Iterate through hash */
-	while (!EG(exception) && zend_hash_get_current_data_ex(target_hash, (void **)&args[0], &pos) == SUCCESS) {
+	zend_hash_internal_pointer_reset(target_hash);
+	while (!EG(exception) && zend_hash_get_current_data(target_hash, (void **)&args[0]) == SUCCESS) {
 		if (recursive && Z_TYPE_PP(args[0]) == IS_ARRAY) {
 			HashTable *thash;
 			zend_fcall_info orig_array_walk_fci;
@@ -1107,7 +1105,7 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 			MAKE_STD_ZVAL(key);
 
 			/* Set up the key */
-			switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_key_len, &num_key, 0, &pos)) {
+			switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_key_len, &num_key, 0, NULL)) {
 				case HASH_KEY_IS_LONG:
 					Z_TYPE_P(key) = IS_LONG;
 					Z_LVAL_P(key) = num_key;
@@ -1135,7 +1133,7 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 			zval_ptr_dtor(&key);
 			key = NULL;
 		}
-		zend_hash_move_forward_ex(target_hash, &pos);
+		zend_hash_move_forward(target_hash);
 	}
 
 	if (userdata) {
