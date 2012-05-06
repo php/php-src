@@ -57,18 +57,20 @@ static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *ret
 	zend_hash_copy(args_copy, Z_ARRVAL_P(args), (copy_ctor_func_t)zval_add_ref,
 		NULL, sizeof(zval*));
 
-	umsg_format_helper(mfo, args_copy,
-		&formatted, &formatted_len, &INTL_DATA_ERROR_CODE(mfo) TSRMLS_CC);
+	umsg_format_helper(mfo, args_copy, &formatted, &formatted_len TSRMLS_CC);
 
 	zend_hash_destroy(args_copy);
 	efree(args_copy);
 
-	if (formatted && U_FAILURE( INTL_DATA_ERROR_CODE(mfo) ) ) {
+	if (formatted && U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
 			efree(formatted);
 	}
 
-	INTL_METHOD_CHECK_STATUS( mfo, "Number formatting failed" );
-	INTL_METHOD_RETVAL_UTF8( mfo, formatted, formatted_len, 1 );
+	if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
+		RETURN_FALSE;
+	} else {
+		INTL_METHOD_RETVAL_UTF8(mfo, formatted, formatted_len, 1);
+	}
 }
 /* }}} */
 
