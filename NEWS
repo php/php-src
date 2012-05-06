@@ -34,6 +34,10 @@ PHP                                                                        NEWS
     library. See https://bugs.gentoo.org/show_bug.cgi?id=364139 for detail.
     (Moriyoshi)
 
+- Streams:
+  . Fixed bug #61961 (file_get_contents leaks when access empty file with
+    maxlen set). (Reeze)
+
 (merge after 5.3.11 release)
 
 - Core:
