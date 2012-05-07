@@ -1,6 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-03 Mar 2012, PHP 5.4.2
+08 May 2012, PHP 5.4.3
+
+- CGI
+  . Re-Fix PHP-CGI query string parameter vulnerability, CVE-2012-1823.
+    (Stas)
+
+03 May 2012, PHP 5.4.2
 
 - Fix PHP-CGI query string parameter vulnerability, CVE-2012-1823. (Rasmus)
 
