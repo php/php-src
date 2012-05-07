@@ -34,6 +34,8 @@
 
 #define FREE_PNODE(znode)	zval_dtor(&znode->u.constant);
 
+#define IS_ACCESSOR(purpose) ( purpose >= ZEND_FNP_PROP_GETTER && purpose <= ZEND_FNP_PROP_UNSETTER )
+
 #define MAKE_ZNODE(zn, str)	 \
 	{															\
 		zn.op_type = IS_CONST;									\
@@ -146,7 +148,7 @@ typedef struct _zend_label {
 
 typedef struct _zend_try_catch_element {
 	zend_uint try_op;
-	zend_uint catch_op;  /* ketchup! */
+	zend_uint catch_op; /* ketchup! */
 } zend_try_catch_element;
 
 #if SIZEOF_LONG == 8
@@ -222,16 +224,17 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
-#define ZEND_ACC_IS_GETTER				0x10000000
-#define ZEND_ACC_IS_SETTER				0x20000000
-#define ZEND_ACC_IS_ACCESSOR			0x30000000	/* Mask */
+#define ZEND_ACC_READONLY				0x10000000
+#define ZEND_ACC_WRITEONLY				0x20000000
 
-#define ZEND_ACC_READONLY				0x40000000
-#define ZEND_ACC_WRITEONLY				0x80000000
+/** Function Purposes **/
 
+#define ZEND_FNP_UNDEFINED				0
+#define ZEND_FNP_PROP_GETTER			1
+#define ZEND_FNP_PROP_SETTER			2
 
 char *zend_visibility_string(zend_uint fn_flags);
-char *zend_accessor_type_string(zend_uint fn_flags);
+char *zend_fn_purpose_string(zend_uchar purpose);
 
 
 typedef struct _zend_property_info {
@@ -279,13 +282,14 @@ typedef struct _zend_compiled_variable {
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
-	const char *function_name;		
+	const char *function_name;
 	zend_class_entry *scope;
 	zend_uint fn_flags;
 	union _zend_function *prototype;
 	zend_uint num_args;
 	zend_uint required_num_args;
 	zend_arg_info *arg_info;
+	zend_uchar purpose;			/* ZEND_FNP_UNDEFINED || ZEND_FNP_PROP_GETTER || ZEND_FNP_PROP_SETTER || ZEND_FNP_PROP_ISSETTER || ZEND_FNP_PROP_UNSETTER */
 	/* END of common elements */
 
 	zend_uint *refcount;
@@ -339,6 +343,7 @@ typedef struct _zend_internal_function {
 	zend_uint num_args;
 	zend_uint required_num_args;
 	zend_arg_info *arg_info;
+	zend_uchar purpose;			/* ZEND_FN_ACC_GETTER || ZEND_FN_ACC_SETTER || ZEND_FN_ACC_ISSETTER || ZEND_FN_ACC_UNSETTER */
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -348,10 +353,10 @@ typedef struct _zend_internal_function {
 #define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name : "")
 
 typedef union _zend_function {
-	zend_uchar type;	/* MUST be the first element of this struct! */
+	zend_uchar type; /* MUST be the first element of this struct! */
 
 	struct {
-		zend_uchar type;  /* never used */
+		zend_uchar type; /* never used */
 		const char *function_name;
 		zend_class_entry *scope;
 		zend_uint fn_flags;
@@ -359,6 +364,7 @@ typedef union _zend_function {
 		zend_uint num_args;
 		zend_uint required_num_args;
 		zend_arg_info *arg_info;
+		zend_uchar purpose;			/* ZEND_FN_ACC_GETTER || ZEND_FN_ACC_SETTER || ZEND_FN_ACC_ISSETTER || ZEND_FN_ACC_UNSETTER */
 	} common;
 
 	zend_op_array op_array;
@@ -510,7 +516,7 @@ void zend_do_add_string(znode *result, const znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_add_variable(znode *result, const znode *op1, const znode *op2 TSRMLS_DC);
 
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
+void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode, zend_uchar purpose TSRMLS_DC);
 void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC);
 void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, const znode *initialization, znode *class_type, zend_bool pass_by_reference TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace TSRMLS_DC);
