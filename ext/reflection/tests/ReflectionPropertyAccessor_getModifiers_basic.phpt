@@ -24,7 +24,7 @@ Clint Priest <php-dev@zerocue.com>
 ?>
 ==DONE==
 --EXPECT--
-a1 = int(1073742080)
-a2 = int(2147483904)
+a1 = int(268435712)
+a2 = int(536871168)
 a3 = int(1024)
 ==DONE==

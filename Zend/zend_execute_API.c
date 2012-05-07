@@ -1637,7 +1637,7 @@ zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_na
 	ai.afn[idx] && ai.afn[idx + 1] ? ", " : (ai.afn[idx] && ai.afn_cnt > MAX_ABSTRACT_INFO_CNT ? ", ..." : "")
 
 #define DISPLAY_ABS_ACCESSOR_FN(idx) \
-	ai.abs_acc[idx] ? zend_accessor_type_string(ai.abs_acc[idx]->common.fn_flags) : "", \
+	ai.abs_acc[idx] ? zend_fn_purpose_string(ai.abs_acc[idx]->common.purpose) : "", \
 	ai.abs_acc[idx] ? " " : "", \
 	ai.abs_acc[idx] ? ZEND_FN_SCOPE_NAME(ai.abs_acc[idx]) : "", \
 	ai.abs_acc[idx] ? "::$" : "", \
@@ -1657,7 +1657,7 @@ typedef struct _zend_abstract_info {
 static int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai TSRMLS_DC) /* {{{ */
 {
 	if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-		if(fn->common.fn_flags & ZEND_ACC_IS_ACCESSOR) {
+		if(IS_ACCESSOR(fn->common.purpose)) {
 			if (ai->abs_acc_count < MAX_ABSTRACT_INFO_CNT) {
 				ai->abs_acc[ai->abs_acc_count] = fn;
 			}

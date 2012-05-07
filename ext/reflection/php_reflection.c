@@ -978,13 +978,13 @@ static void _property_string(string *str, zend_property_info *prop, char *prop_n
 /* {{{ _property_accessor_string */
 static void _property_accessor_string(string *str, zend_accessor_info *ai, char* indent TSRMLS_DC)
 {
+	const char *name = NULL;
 	string sub_indent;
 	string_init(&sub_indent);
 	string_printf(&sub_indent, "%s    ", indent);
 
 	string_printf(str, "%sAccessor [ ", indent);
 	if (ai) {
-		const char *name = NULL;
 		if(ai->getter) {
 			name = ZEND_ACC_NAME(ai->getter);
 		} else if(ai->setter) {
@@ -1430,6 +1430,7 @@ static void reflection_property_accessor_factory(zend_class_entry *ce, zend_acce
 	zval *name;
 	zval *classname;
 	property_accessor_reference *reference;
+	const char *prop_name = NULL;
 
 	zend_function *func;
 
@@ -1438,7 +1439,7 @@ static void reflection_property_accessor_factory(zend_class_entry *ce, zend_acce
 	} else {
 		func = ai->setter;
 	}
-	const char *prop_name = ZEND_ACC_NAME(func);
+	prop_name = ZEND_ACC_NAME(func);
 
 	MAKE_STD_ZVAL(name);
 	MAKE_STD_ZVAL(classname);
@@ -3834,7 +3835,7 @@ static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, 
 	uint len = strlen(mptr->common.function_name);
 	zend_function *closure;
 
-	if (mptr->common.fn_flags & filter && !(mptr->common.fn_flags & ZEND_ACC_IS_ACCESSOR)) {
+	if (mptr->common.fn_flags & filter && !(IS_ACCESSOR(mptr->common.purpose))) {
 		ALLOC_ZVAL(method);
 		if (ce == zend_ce_closure && obj && (len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 			&& memcmp(mptr->common.function_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
@@ -4075,10 +4076,10 @@ static int _addaccessors(zend_accessor_info **pptr TSRMLS_DC, int num_args, va_l
 		HashPosition pos;
 		const char *name = ZEND_ACC_NAME(func);
 		zval member;
+		zval **entry, *result;
+		zval *property;
 
 		ZVAL_STRINGL(&member, "name", 4, 0);
-
-		zval **entry, *result;
 
 		/* Search existing values to ensure we don't already have a property defined by name */
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(retval), &pos);
@@ -4090,7 +4091,6 @@ static int _addaccessors(zend_accessor_info **pptr TSRMLS_DC, int num_args, va_l
 			zend_hash_move_forward_ex(Z_ARRVAL_P(retval), &pos);
 		}
 
-		zval *property;
 		MAKE_STD_ZVAL(property);
 		reflection_property_accessor_factory(ce, ai, property TSRMLS_CC);
 
@@ -5310,6 +5310,7 @@ ZEND_METHOD(reflection_property_accessor, __construct)
 	zend_class_entry *ce;
 	zend_accessor_info *ai = NULL, **aipp;
 	property_accessor_reference *reference;
+	zend_function *func = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {
 		return;
@@ -5350,7 +5351,7 @@ ZEND_METHOD(reflection_property_accessor, __construct)
 	MAKE_STD_ZVAL(classname);
 	MAKE_STD_ZVAL(propname);
 
-	zend_function *func = ai->getter ? ai->getter : ai->setter;
+	func = ai->getter ? ai->getter : ai->setter;
 
 	ZVAL_STRINGL(classname, func->common.scope->name, func->common.scope->name_length, 1);
 	ZVAL_STRING(propname, ZEND_ACC_NAME(func), 1);
@@ -5559,6 +5560,7 @@ ZEND_METHOD(reflection_property_accessor, getValue)
 	reflection_object *intern;
 	property_accessor_reference *ref;
 	zval *object, name;
+	zval *retval = NULL;
 
 	METHOD_NOTSTATIC(reflection_property_accessor_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
@@ -5582,8 +5584,6 @@ ZEND_METHOD(reflection_property_accessor, getValue)
 		return;
 	}
 
-	zval *retval = NULL;
-
 	zend_call_method_with_0_params(&object, ref->ai.getter->common.scope, &ref->ai.getter, ref->ai.getter->common.function_name, &retval);
 	MAKE_COPY_ZVAL(&retval, return_value);
 	if (retval != EG(uninitialized_zval_ptr)) {
@@ -5600,6 +5600,7 @@ ZEND_METHOD(reflection_property_accessor, setValue)
 	property_accessor_reference *ref;
 	zval *object, name;
 	zval *value;
+	zval *retval = NULL;
 
 	METHOD_NOTSTATIC(reflection_property_accessor_ptr);
 	GET_REFLECTION_OBJECT_PTR(ref);
@@ -5614,8 +5615,6 @@ ZEND_METHOD(reflection_property_accessor, setValue)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {
 		return;
 	}
-
-	zval *retval = NULL;
 
 	zend_call_method_with_1_params(&object, ref->ai.setter->common.scope, &ref->ai.setter, ref->ai.setter->common.function_name, &retval, value);
 
@@ -6711,8 +6710,6 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_PRIVATE", ZEND_ACC_PRIVATE);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_READONLY", ZEND_ACC_READONLY);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_WRITEONLY", ZEND_ACC_WRITEONLY);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_GETTER", ZEND_ACC_IS_GETTER);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_SETTER", ZEND_ACC_IS_SETTER);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionExtension", reflection_extension_functions);
 	_reflection_entry.create_object = reflection_objects_new;

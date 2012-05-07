@@ -92,6 +92,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->this_var = -1;
 
 	op_array->fn_flags = CG(interactive)?ZEND_ACC_INTERACTIVE:0;
+	op_array->purpose = ZEND_FNP_UNDEFINED;
 
 	op_array->early_binding = -1;
 
