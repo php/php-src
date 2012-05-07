@@ -283,7 +283,7 @@ typedef enum_func_status	(*func_mysqlnd_net__init)(MYSQLND_NET * const net, MYSQ
 typedef void				(*func_mysqlnd_net__dtor)(MYSQLND_NET * const net, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__connect_ex)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
 typedef void				(*func_mysqlnd_net__close_stream)(MYSQLND_NET * const net, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
-typedef enum_func_status	(*func_mysqlnd_net__open_stream)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
+typedef php_stream *		(*func_mysqlnd_net__open_stream)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
 typedef php_stream *		(*func_mysqlnd_net__get_stream)(const MYSQLND_NET * const net TSRMLS_DC);
 typedef php_stream *		(*func_mysqlnd_net__set_stream)(MYSQLND_NET * const net, php_stream * net_stream TSRMLS_DC);
 typedef func_mysqlnd_net__open_stream (*func_mysqlnd_net__get_open_stream)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);

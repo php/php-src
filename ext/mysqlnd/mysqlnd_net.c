@@ -105,7 +105,7 @@ MYSQLND_METHOD(mysqlnd_net, network_write_ex)(MYSQLND_NET * const net, const zen
 /* }}} */
 
 /* {{{ mysqlnd_net::open_pipe */
-static enum_func_status
+static php_stream *
 MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len,
 									   const zend_bool persistent,
 									   MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC)
@@ -125,7 +125,7 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 	net_stream = php_stream_open_wrapper((char*) scheme + sizeof("pipe://") - 1, "r+", streams_options, NULL);
 	if (!net_stream) {
 		SET_CLIENT_ERROR(*error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown errror while connecting");
-		DBG_RETURN(FAIL);
+		DBG_RETURN(NULL);
 	}
 	/*
 	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
@@ -136,15 +136,14 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 	zend_hash_index_del(&EG(regular_list), net_stream->rsrc_id);
 	net_stream->in_free = 0;
 
-	(void) net->data->m.set_stream(net, net_stream TSRMLS_CC);
 
-	DBG_RETURN(PASS);
+	DBG_RETURN(net_stream);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_net::open_tcp_or_unix */
-static enum_func_status
+static php_stream *
 MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len,
 											  const zend_bool persistent,
 											  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC)
@@ -191,7 +190,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 			/* no mnd_ since we don't allocate it */
 			efree(errstr);
 		}
-		DBG_RETURN(FAIL);
+		DBG_RETURN(NULL);
 	}
 	if (hashed_details) {
 		/*
@@ -227,8 +226,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	zend_hash_index_del(&EG(regular_list), net_stream->rsrc_id);
 	net_stream->in_free = 0;
 
-	(void) net->data->m.set_stream(net, net_stream TSRMLS_CC);
-	DBG_RETURN(PASS);
+	DBG_RETURN(net_stream);
 }
 /* }}} */
 
@@ -300,8 +298,11 @@ MYSQLND_METHOD(mysqlnd_net, connect_ex)(MYSQLND_NET * const net, const char * co
 
 	open_stream = net->data->m.get_open_stream(net, scheme, scheme_len, error_info TSRMLS_CC);
 	if (open_stream) {
-		if (PASS == (ret = open_stream(net, scheme, scheme_len, persistent, conn_stats, error_info TSRMLS_CC))) {
+		php_stream * net_stream = open_stream(net, scheme, scheme_len, persistent, conn_stats, error_info TSRMLS_CC);
+		if (net_stream) {
+			(void) net->data->m.set_stream(net, net_stream TSRMLS_CC);
 			net->data->m.post_connect_set_opt(net, scheme, scheme_len, conn_stats, error_info TSRMLS_CC);
+			ret = PASS;
 		}
 	}
 
