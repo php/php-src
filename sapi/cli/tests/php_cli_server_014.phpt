@@ -13,6 +13,10 @@ list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
 $port = intval($port)?:80;
 $output = '';
 
+// note: select() on Windows (& some other platforms) has historical issues with
+//       timeouts less than 1000 millis(0.5). it may be better to increase these
+//       timeouts to 1000 millis(1.0) (fsockopen eventually calls select()).
+//       see articles like: http://support.microsoft.com/kb/257821
 $fp = fsockopen($host, $port, $errno, $errstr, 0.5);
 if (!$fp) {
   die("connect failed");
