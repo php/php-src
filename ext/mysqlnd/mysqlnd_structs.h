@@ -284,11 +284,11 @@ typedef void				(*func_mysqlnd_net__dtor)(MYSQLND_NET * const net, MYSQLND_STATS
 typedef enum_func_status	(*func_mysqlnd_net__connect_ex)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
 typedef void				(*func_mysqlnd_net__close_stream)(MYSQLND_NET * const net, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__open_stream)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
-typedef void				(*func_mysqlnd_net__post_connect_set_opt)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
-typedef enum_func_status	(*func_mysqlnd_net__read_compressed_packet_from_stream_and_fill_read_buffer)(MYSQLND_NET * net, size_t net_payload_size, MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC);
 typedef php_stream *		(*func_mysqlnd_net__get_stream)(const MYSQLND_NET * const net TSRMLS_DC);
 typedef php_stream *		(*func_mysqlnd_net__set_stream)(MYSQLND_NET * const net, php_stream * net_stream TSRMLS_DC);
 typedef func_mysqlnd_net__open_stream (*func_mysqlnd_net__get_open_stream)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
+typedef void				(*func_mysqlnd_net__post_connect_set_opt)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_net__read_compressed_packet_from_stream_and_fill_read_buffer)(MYSQLND_NET * net, size_t net_payload_size, MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC);
 
 struct st_mysqlnd_net_methods
 {
@@ -299,8 +299,10 @@ struct st_mysqlnd_net_methods
 	func_mysqlnd_net__open_stream open_pipe;
 	func_mysqlnd_net__open_stream open_tcp_or_unix;
 
-	void * unused1;
-	void * unused2;
+	func_mysqlnd_net__get_stream get_stream;
+	func_mysqlnd_net__set_stream set_stream;
+	func_mysqlnd_net__get_open_stream get_open_stream;
+
 	func_mysqlnd_net__post_connect_set_opt post_connect_set_opt;
 
 	func_mysqlnd_net__set_client_option set_client_option;
@@ -318,11 +320,11 @@ struct st_mysqlnd_net_methods
 
 	func_mysqlnd_net__read_compressed_packet_from_stream_and_fill_read_buffer read_compressed_packet_from_stream_and_fill_read_buffer;
 
-	func_mysqlnd_net__get_stream get_stream;
-	func_mysqlnd_net__set_stream set_stream;
-	func_mysqlnd_net__get_open_stream get_open_stream;
-	void * unused6;
-	void * unused7;
+	void * unused1;
+	void * unused2;
+	void * unused3;
+	void * unused4;
+	void * unused5;
 };
 
 

@@ -266,8 +266,15 @@ MYSQLND_METHOD(mysqlnd_net, get_open_stream)(MYSQLND_NET * const net, const char
 {
 	func_mysqlnd_net__open_stream ret = NULL;
 	DBG_ENTER("mysqlnd_net::get_open_stream");
-	ret = (scheme_len > (sizeof("pipe://") - 1) && !memcmp(scheme, "pipe://", sizeof("pipe://") - 1))? net->data->m.open_pipe:
-																									   net->data->m.open_tcp_or_unix;
+	if (scheme_len > (sizeof("pipe://") - 1) && !memcmp(scheme, "pipe://", sizeof("pipe://") - 1)) {
+		ret = net->data->m.open_pipe;
+	} else if ((scheme_len > (sizeof("tcp://") - 1) && !memcmp(scheme, "tcp://", sizeof("tcp://") - 1))
+				||
+				(scheme_len > (sizeof("unix://") - 1) && !memcmp(scheme, "unix://", sizeof("unix://") - 1)))
+	{
+		ret = net->data->m.open_tcp_or_unix;
+	}
+
 	if (!ret) {
 		SET_CLIENT_ERROR(*error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "No handler for this scheme");
 	}	
@@ -514,7 +521,7 @@ MYSQLND_METHOD(mysqlnd_net, read_compressed_packet_from_stream_and_fill_read_buf
 		(MYSQLND_NET * net, size_t net_payload_size, MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC)
 {
 	size_t decompressed_size;
-	enum_func_status ret = PASS;
+	enum_func_status retval = PASS;
 	zend_uchar * compressed_data = NULL;
 	zend_uchar comp_header[COMPRESSED_HEADER_SIZE];
 	DBG_ENTER("mysqlnd_net::read_compressed_packet_from_stream_and_fill_read_buffe");
@@ -531,19 +538,19 @@ MYSQLND_METHOD(mysqlnd_net, read_compressed_packet_from_stream_and_fill_read_buf
 	if (decompressed_size) {
 		compressed_data = mnd_emalloc(net_payload_size);
 		if (FAIL == net->data->m.network_read_ex(net, compressed_data, net_payload_size, conn_stats, error_info TSRMLS_CC)) {
-			ret = FAIL;
+			retval = FAIL;
 			goto end;
 		}
 		net->uncompressed_data = mysqlnd_create_read_buffer(decompressed_size TSRMLS_CC);
-		ret = net->data->m.decode(net->uncompressed_data->data, decompressed_size, compressed_data, net_payload_size TSRMLS_CC);
-		if (ret == FAIL) {
+		retval = net->data->m.decode(net->uncompressed_data->data, decompressed_size, compressed_data, net_payload_size TSRMLS_CC);
+		if (FAIL == retval) {
 			goto end;
 		}
 	} else {
 		DBG_INF_FMT("The server decided not to compress the data. Our job is easy. Copying %u bytes", net_payload_size);
 		net->uncompressed_data = mysqlnd_create_read_buffer(net_payload_size TSRMLS_CC);
 		if (FAIL == net->data->m.network_read_ex(net, net->uncompressed_data->data, net_payload_size, conn_stats, error_info TSRMLS_CC)) {
-			ret = FAIL;
+			retval = FAIL;
 			goto end;
 		}
 	}
@@ -551,7 +558,7 @@ end:
 	if (compressed_data) {
 		mnd_efree(compressed_data);
 	}
-	DBG_RETURN(ret);
+	DBG_RETURN(retval);
 }
 /* }}} */
 #endif /* MYSQLND_COMPRESSION_ENABLED */
@@ -909,6 +916,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	DBG_RETURN(PASS);
 #else
 	DBG_ENTER("mysqlnd_net::enable_ssl");
+	DBG_INFO("MYSQLND_SSL_SUPPORTED is not defined");
 	DBG_RETURN(PASS);
 #endif
 }
@@ -1069,8 +1077,9 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_net)
 	MYSQLND_METHOD(mysqlnd_net, close_stream),
 	MYSQLND_METHOD(mysqlnd_net, open_pipe),
 	MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix),
-	NULL, /* unused 1 */
-	NULL, /* unused 2 */
+	MYSQLND_METHOD(mysqlnd_net, get_stream),
+	MYSQLND_METHOD(mysqlnd_net, set_stream),
+	MYSQLND_METHOD(mysqlnd_net, get_open_stream),
 	MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt),
 	MYSQLND_METHOD(mysqlnd_net, set_client_option),
 	MYSQLND_METHOD(mysqlnd_net, decode),
@@ -1088,9 +1097,11 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_net)
 #else
 	NULL,
 #endif
-	MYSQLND_METHOD(mysqlnd_net, get_stream),
-	MYSQLND_METHOD(mysqlnd_net, set_stream),
-	MYSQLND_METHOD(mysqlnd_net, get_open_stream)
+	NULL, /* unused 1 */
+	NULL, /* unused 2 */
+	NULL, /* unused 3 */
+	NULL, /* unused 4 */
+	NULL  /* unused 5 */
 MYSQLND_CLASS_METHODS_END;
 
 
