@@ -257,8 +257,10 @@ static php_cli_server_ext_mime_type_pair mime_type_map[] = {
 	{ "jpg", "image/jpeg" },
 	{ "jpeg", "image/jpeg" },
 	{ "css", "text/css" },
+	{ "htm", "text/html" },
 	{ "html", "text/html" },
 	{ "txt", "text/plain" },
+	{ "svg", "image/svg+xml" },
 	{ "js", "text/javascript" },
 	{ NULL, NULL }
 };
