@@ -1614,21 +1614,21 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 				p = var + 5;
 
 				var = q = t;
-                                // First char keep uppercase
+				// First char keep uppercase
 				*q++ = *p++;
 				while (*p) {
 					if (*p == '=') {
-                                               // End of name
-                                               break;
-                                        } else if (*p == '_') {
+						// End of name
+						break;
+					} else if (*p == '_') {
 						*q++ = '-';
 						p++;
-                                                // First char after - keep uppercase
-						if (*p && *p!='=' && *p!='_') {
+						// First char after - keep uppercase
+						if (*p && *p!='=') {
 							*q++ = *p++;
 						}
 					} else if (*p >= 'A' && *p <= 'Z') {
-                                                // lowercase
+						// lowercase
 						*q++ = (*p++ - 'A' + 'a');
 					} else {
 						*q++ = *p++;
