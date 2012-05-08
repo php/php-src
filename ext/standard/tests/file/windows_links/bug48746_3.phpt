@@ -9,7 +9,8 @@ Venkat Raman Don (don.raman@microsoft.com)
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 	die('skip windows only test');
 }
-$ret = exec('junction /? 2>&1', $out);
+include_once __DIR__ . '/common.inc';
+$ret = exec(get_junction().' /? 2>&1', $out);
 if (strpos($out[0], 'recognized')) {
 	die('skip. junction.exe not found in PATH.');
 }
@@ -17,11 +18,12 @@ if (strpos($out[0], 'recognized')) {
 ?>
 --FILE--
 <?php
+include_once __DIR__ . '/common.inc';
 $old_dir = __DIR__;
 $dirname = __DIR__ . "\\mnt\\test\\directory";
 exec("mkdir " . $dirname, $output, $ret_val);
 chdir(__DIR__ . "\\mnt\\test");
-exec("junction junction directory", $output, $ret_val);
+exec(get_junction()." junction directory", $output, $ret_val);
 file_put_contents("junction\\a.php", "<?php echo \"I am included.\n\" ?>");
 file_put_contents("junction\\b.php", "<?php echo \"I am included.\n\" ?>");
 include "junction/a.php";
