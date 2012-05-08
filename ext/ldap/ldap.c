@@ -546,6 +546,10 @@ PHP_FUNCTION(ldap_unbind)
 
 /* {{{ php_set_opts
  */
+#if LDAP_API_VERSION > 2000
+static void php_set_opts(LDAP *ldap, int timelimit, int deref, int *old_timelimit, int *old_deref)
+{
+#else
 static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, int *old_sizelimit, int *old_timelimit, int *old_deref)
 {
 	/* sizelimit */
@@ -558,7 +562,7 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
 		ldap->ld_sizelimit = sizelimit; 
 #endif
 	}
-
+#endif
 	/* timelimit */
 	if (timelimit > -1) {
 #if (LDAP_API_VERSION >= 2004) || HAVE_NSLDAP || HAVE_ORALDAP_10
@@ -592,6 +596,9 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	char *ldap_base_dn = NULL, *ldap_filter = NULL, **ldap_attrs = NULL; 
 	ldap_linkdata *ld = NULL;
 	LDAPMessage *ldap_res;
+#if LDAP_API_VERSION > 2000
+	LDAPControl **clientctrl = NULL, ** serverctrl = NULL;
+#endif
 	int ldap_attrsonly = 0, ldap_sizelimit = -1, ldap_timelimit = -1, ldap_deref = -1;	 
 	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;	 
 	int num_attribs = 0, ret = 1, i, errno, argcount = ZEND_NUM_ARGS();
@@ -706,11 +713,46 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 				ldap_filter = Z_STRVAL_PP(entry);
 			}
 
-			php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
+#if LDAP_API_VERSION > 2000
+			php_set_opts(ld->link, ldap_timelimit, ldap_deref, &old_ldap_timelimit, &old_ldap_deref);
+			/* Fill controls.
+			   Discouraged by documentation but there's no way to pass 
+			   controls yet. Better than nothing
+			 */
+			if(LDAP_OPT_SUCCESS != ldap_get_option(
+						ld->link,
+						LDAP_OPT_CLIENT_CONTROLS,
+						&clientctrl)) {
+				clientctrl = NULL;
+			}
+			if(LDAP_OPT_SUCCESS != ldap_get_option(
+						ld->link,
+						LDAP_OPT_SERVER_CONTROLS,
+						&serverctrl)) {
+				serverctrl = NULL;
+			}
 
 			/* Run the actual search */	
+			if(LDAP_OPT_SUCCESS != ldap_search_ext(
+					ld->link,
+					ldap_base_dn,
+					scope,
+					ldap_filter,
+					ldap_attrs,
+					ldap_attrsonly,
+					serverctrl,
+					clientctrl,
+					NULL, /* timeval not defined, see ldap.h */
+					ldap_sizelimit,
+					&(rcs[i]))) {
+				rcs[i] = -1;
+			}
+#else
+			php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 			rcs[i] = ldap_search(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly);
+#endif
 			lds[i] = ld;
+			
 			zend_hash_move_forward(Z_ARRVAL_P(link));
 		}
 		
@@ -748,11 +790,44 @@ cleanup_parallel:
 			goto cleanup;
 		}
 
-		php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
+#if LDAP_API_VERSION > 2000
+		php_set_opts(ld->link, ldap_timelimit, ldap_deref, &old_ldap_timelimit, &old_ldap_deref);
+
+		/* Fill controls.
+		   Discouraged by documentation but there's no way to pass 
+		   controls yet. Better than nothing
+		 */
+		if(LDAP_OPT_SUCCESS != ldap_get_option(
+					ld->link,
+					LDAP_OPT_CLIENT_CONTROLS,
+					&clientctrl)) {
+			clientctrl = NULL;
+		}
+		if(LDAP_OPT_SUCCESS != ldap_get_option(
+					ld->link,
+					LDAP_OPT_SERVER_CONTROLS,
+					&serverctrl)) {
+			serverctrl = NULL;
+		}
 
 		/* Run the actual search */	
+		errno = ldap_search_ext_s(
+				ld->link,
+				ldap_base_dn,
+				scope,
+				ldap_filter,
+				ldap_attrs,
+				ldap_attrsonly,
+				serverctrl,
+				clientctrl,
+				NULL, /* timeval not defined, see ldap.h */
+				ldap_sizelimit,
+				&ldap_res);
+#else
+		php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 		errno = ldap_search_s(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, &ldap_res);
-	
+#endif
+
 		if (errno != LDAP_SUCCESS
 			&& errno != LDAP_SIZELIMIT_EXCEEDED
 #ifdef LDAP_ADMINLIMIT_EXCEEDED
@@ -779,10 +854,27 @@ cleanup_parallel:
 	}
 
 cleanup:
+#if LDAP_API_VERSION > 2000
+	/* Free controls */
+	if(clientctrl != NULL) {
+		ldap_controls_free(clientctrl);
+		clientctrl = NULL;
+	}
+	if(serverctrl != NULL) {
+		ldap_controls_free(serverctrl);
+		serverctrl = NULL;
+	}
+
+	/* Restoring previous options */
 	if (ld) {
-		/* Restoring previous options */
+		php_set_opts(ld->link, old_ldap_timelimit, old_ldap_deref, &ldap_timelimit, &ldap_deref);
+	}
+#else
+	if (ld) {
 		php_set_opts(ld->link, old_ldap_sizelimit, old_ldap_timelimit, old_ldap_deref, &ldap_sizelimit, &ldap_timelimit, &ldap_deref);
 	}
+#endif
+
 	if (ldap_attrs != NULL) {
 		efree(ldap_attrs);
 	}
@@ -1261,6 +1353,9 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	ldap_linkdata *ld;
 	char *dn;
 	LDAPMod **ldap_mods;
+#if LDAP_API_VERSION > 2000
+	LDAPControl **clientctrl = NULL, **serverctrl = NULL;
+#endif
 	int i, j, num_attribs, num_values, dn_len;
 	int *num_berval;
 	char *attribute;
@@ -1344,20 +1439,49 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	}
 	ldap_mods[num_attribs] = NULL;
 
+#if LDAP_API_VERSION > 2000
+	if(LDAP_OPT_SUCCESS != ldap_get_option(ld->link, LDAP_OPT_CLIENT_CONTROLS, &clientctrl)) {
+		clientctrl = NULL;
+	}
+	if(LDAP_OPT_SUCCESS != ldap_get_option(ld->link, LDAP_OPT_SERVER_CONTROLS, &serverctrl)) {
+		serverctrl = NULL;
+	}
+#endif
+
 /* check flag to see if do_mod was called to perform full add , gerrit thomson */
 	if (is_full_add == 1) {
+#if LDAP_API_VERSION > 2000
+		if ((i = ldap_add_ext_s(ld->link, dn, ldap_mods, serverctrl, clientctrl)) != LDAP_SUCCESS) {
+#else
 		if ((i = ldap_add_s(ld->link, dn, ldap_mods)) != LDAP_SUCCESS) {
+#endif
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Add: %s", ldap_err2string(i));
 			RETVAL_FALSE;
 		} else RETVAL_TRUE;
 	} else {
-		if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, NULL, NULL)) != LDAP_SUCCESS) {
+#if LDAP_API_VERSION > 2000
+		if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, serverctrl, clientctrl)) != LDAP_SUCCESS) {
+#else
+		if ((i = ldap_modify_s(ld->link, dn, ldap_mods)) != LDAP_SUCCESS) {
+#endif
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Modify: %s", ldap_err2string(i));
 			RETVAL_FALSE;
 		} else RETVAL_TRUE;	
 	}
 
 errexit:
+
+#if LDAP_API_VERSION > 2000
+	if(serverctrl != NULL) {
+		ldap_controls_free(serverctrl);
+		serverctrl = NULL;
+	}
+	if(clientctrl != NULL) {
+		ldap_controls_free(clientctrl);
+		clientctrl = NULL;
+	}
+#endif
+
 	for (i = 0; i < num_attribs; i++) {
 		efree(ldap_mods[i]->mod_type);
 		for (j = 0; j < num_berval[i]; j++) {
