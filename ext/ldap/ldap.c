@@ -125,6 +125,435 @@ static void _free_ldap_result_entry(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{
 } 
 /* }}} */
 
+/* {{{ _php_ber_to_array_recursive
+   Convert 'struct berval' to an indexed array. This function does the work
+   recursively as BER is a recursive data structure.
+ */
+static int _php_ber_to_array_recursive(BerElement * element, zval * array)
+{
+	int error_count = 0;
+	zval *new = NULL, *value = NULL, *root = NULL;
+	char *cookie = NULL;
+	ber_tag_t tag = LBER_ERROR;
+	ber_len_t len = 0, bitstring_len = 0, bitstring_len_bytes = 0;
+	ber_int_t int_value = 0;
+	struct berval * berval_value = NULL;
+	char * char_value = NULL;
+	div_t bits_to_bytes = {0, 0};
+
+	if(element != NULL && array != NULL) {
+		for(
+				tag = ber_first_element(element, &len, &cookie);
+				tag != LBER_ERROR;
+				tag = ber_next_element(element, &len, cookie))
+		{
+			switch(tag) {
+				case LBER_BOOLEAN:
+					if( LBER_ERROR != ber_scanf(element, "b" ,&int_value)) {
+						ALLOC_INIT_ZVAL(value);
+						array_init(value);
+
+						add_assoc_string(value, "type", "boolean", 1);
+						add_assoc_bool(value, "value", int_value ? 1 : 0);
+
+						add_next_index_zval(array, value);
+						value = NULL;
+					} else {
+						error_count++;
+					}
+					break;
+				case LBER_INTEGER:
+					if( LBER_ERROR != ber_scanf(element, "i", &int_value)) {
+						ALLOC_INIT_ZVAL(value);
+						array_init(value);
+
+						add_assoc_string(value, "type", "integer", 1);
+						add_assoc_long(value, "value", int_value);
+
+						add_next_index_zval(array, value);
+						value = NULL;
+					} else {
+						add_next_index_null(array);
+						error_count++;
+					}
+					break;
+				case LBER_BITSTRING:
+					if( LBER_ERROR != ber_scanf(
+								element,
+								"B",
+								&char_value,
+								&bitstring_len)) {
+						ALLOC_INIT_ZVAL(value);
+						array_init(value);
+
+						/* bitstrings length is in bits. We calculate enough
+						   space for the whole bitstring.
+						 */
+						bits_to_bytes = div(abs(bitstring_len), 8);
+						bitstring_len_bytes = bits_to_bytes.quot;
+						if(bits_to_bytes.rem > 0) bitstring_len_bytes++;
+
+						add_assoc_string(value, "type", "bitstring", 1);
+						add_assoc_stringl(
+								value,
+								"value",
+								char_value,
+								bitstring_len_bytes,
+								1);
+						add_assoc_long(value, "lenght", bitstring_len);
+
+						add_next_index_zval(array, value);
+						value = NULL;
+
+						ber_memfree(char_value);
+						char_value=NULL;
+					} else {
+						error_count++;
+					}
+					break;
+				case LBER_OCTETSTRING:
+					if( LBER_ERROR != ber_scanf(element, "O", &berval_value)) {
+						ALLOC_INIT_ZVAL(value);
+						array_init(value);
+
+						add_assoc_string(value, "type", "octetstring", 1);
+						add_assoc_stringl(
+								value,
+								"value",
+								berval_value->bv_val,
+								berval_value->bv_len,
+								1);
+						add_assoc_long(value, "length", berval_value->bv_len);
+						
+						add_next_index_zval(array, value);
+						value = NULL;
+
+						ber_bvfree(berval_value);
+						char_value = NULL;
+					} else {
+						add_next_index_null(array);
+						error_count++;
+					}
+					break;
+				case LBER_NULL:
+					if( LBER_ERROR != ber_scanf(element, "n")) {
+						ALLOC_INIT_ZVAL(value);
+						array_init(value);
+
+						add_assoc_string(value, "type", "null", 1);
+						add_assoc_null(value, "value");
+
+						add_next_index_zval(array, value);
+						value = NULL;
+					} else {
+						add_next_index_null(array);
+						error_count++;
+					}
+					break;
+				case LBER_ENUMERATED:
+					if( LBER_ERROR != ber_scanf(element, "e", &int_value)) {
+						ALLOC_INIT_ZVAL(value);
+						array_init(value);
+
+						add_assoc_string(value, "type", "enumerated", 1);
+						add_assoc_long(value, "value", int_value);
+
+						add_next_index_zval(array, value);
+					} else {
+						add_next_index_null(array);
+						error_count++;
+					}
+					break;
+				/* Recursive call for sequence and set */
+				case LBER_SEQUENCE:
+				case LBER_SET:
+					if(LBER_SEQUENCE == ber_scanf(element, "}") ||
+							LBER_SET == ber_scanf(element, "]")) {
+						return error_count;
+					}
+
+					ALLOC_INIT_ZVAL(value);
+					array_init(value);
+					
+					if(tag == LBER_SEQUENCE) {
+						add_assoc_string(value, "type", "sequence", 1);
+					} else {
+						add_assoc_string(value, "type", "set", 1);
+					}
+
+					ALLOC_INIT_ZVAL(new);
+					array_init(new);
+					error_count+=_php_ber_to_array_recursive(element, new);
+					
+					add_assoc_zval(value, "value", new);
+
+					add_next_index_zval(array, value);
+					new = NULL;
+					break;
+				default: break;	
+			}
+
+		}
+	}
+	
+	return error_count;
+}
+/* }}}
+ */
+
+/* {{{ _php_ber_to_array
+   Convert 'struct berval' to an indexed array. Does some initialization then
+   call _php_ber_to_array_recursive.
+ */
+static int _php_ber_to_array(struct berval * ber, zval ** array) 
+{
+	int error_count = -1;
+	ber_tag_t tag = LBER_DEFAULT;
+	ber_len_t len = 0;
+	BerElement *element = NULL;
+	zval *new = NULL, *root = NULL;
+
+	if(array != NULL) {
+		if(	ber == NULL) {
+			*array=NULL;
+		} else {
+			element = ber_init(ber);
+			if(element == NULL) {
+				*array=NULL;
+			} else {
+				/* First ber element is either a set or a sequence but libler
+				   skips this firts one. We add it now. If it's not a sequence
+				   or a set, we add a sequence anyway.
+				   LBER_DEFAULT is returned if something's wrong.
+		 		 */
+				ALLOC_INIT_ZVAL(root);
+				array_init(root);
+
+				tag = ber_peek_tag(element, &len);
+				if(tag == LBER_SET) {
+					add_assoc_string(root, "type", "set", 1);
+				} else {
+					add_assoc_string(root, "type", "sequence", 1);
+				}
+				
+				ALLOC_INIT_ZVAL(new);
+				array_init(new);
+				error_count = _php_ber_to_array_recursive(element, new);
+				
+				add_assoc_zval(root, "value", new);
+
+				*array=root;
+				ber_memfree(element);
+				element = NULL;
+			}
+		}
+	}
+
+	return error_count;
+}
+/* }}}
+ */
+
+/* {{{ _php_ber_from_array_recursive
+ */
+static int _php_ber_from_array_recursive(HashTable * array, BerElement ** pelement) 
+{
+	zval **data = NULL, **type = NULL, **value = NULL, **length=NULL;
+	HashPosition p;
+	HashTable * sub = NULL;
+	int i = 0, error_count = 0;
+	BerElement * element = NULL;
+	ber_tag_t tag = LBER_DEFAULT;
+
+	if(pelement != NULL) {
+		element = *pelement;
+	} else {
+		return -1;
+	}
+
+	if(array != NULL && element != NULL) {
+		if(zend_hash_find(array, "type", sizeof("type"), (void **) &type) != FAILURE) {
+			if(zend_hash_find(array, "value", sizeof("value"), (void **) &value) != FAILURE) {
+				convert_to_string_ex(type);
+				if(strncmp(Z_STRVAL_PP(type), "null", Z_STRLEN_PP(type)) == 0) {
+					if(LBER_ERROR == ber_printf(element, "n")) {
+						error_count++;
+					}
+				} else if(strncmp(
+							Z_STRVAL_PP(type),
+							"boolean",
+							Z_STRLEN_PP(type))==0) {
+					convert_to_long_ex(value);
+					if(LBER_ERROR == ber_printf(
+								element,
+								"b",
+								(ber_int_t)Z_LVAL_PP(value) ? 1 : 0)) {
+						error_count++;
+					}
+				} else if(strncmp(
+							Z_STRVAL_PP(type),
+							"integer",
+							Z_STRLEN_PP(type))==0) {
+					convert_to_long_ex(value);
+					if(LBER_ERROR == ber_printf(
+								element,
+								"i",
+								(ber_int_t)Z_LVAL_PP(value))) {
+						error_count++;
+					}
+				} else if(strncmp(
+							Z_STRVAL_PP(type),
+							"bitstring",
+							Z_STRLEN_PP(type))==0) {
+					
+					convert_to_string_ex(value);
+					if(FAILURE != zend_hash_find(
+								array,
+								"length",
+								sizeof("length"), 
+								(void **) &length)) {
+						convert_to_long_ex(length);
+						
+						if(LBER_ERROR == ber_printf(
+									element,
+									"B",
+									Z_STRVAL_PP(value),
+									(ber_len_t)Z_LVAL_PP(length))) {
+							error_count++;
+						}
+					} else {
+						if(LBER_ERROR == ber_printf(
+									element,
+									"B",
+									Z_STRVAL_PP(value),
+									/* bistrings require number of _bits_ */
+									(ber_len_t)(Z_STRLEN_PP(value) * 8))) {
+							error_count++;
+						}
+					}
+				} else if(strncmp(
+							Z_STRVAL_PP(type),
+							"octetstring",
+							Z_STRLEN_PP(type))==0) {
+					convert_to_string_ex(value);
+					
+					if(FAILURE != zend_hash_find(
+								array,
+								"length",
+								sizeof("length"), 
+								(void **) &length)) {
+						convert_to_long_ex(length);
+
+						if(LBER_ERROR == ber_printf(
+									element,
+									"o",
+									Z_STRVAL_PP(value),
+									(ber_len_t)Z_LVAL_PP(length))) {
+							error_count++;
+						}
+					} else {
+						if(LBER_ERROR == ber_printf(
+									element,
+									"o",
+									Z_STRVAL_PP(value),
+									(ber_len_t)Z_STRLEN_PP(value))) {
+							error_count++;
+						}
+					}
+				} else if(strncmp(
+							Z_STRVAL_PP(type),
+							"enumerated",
+							Z_STRLEN_PP(type)) == 0) {
+					convert_to_long_ex(value);
+					if(LBER_ERROR == ber_printf(
+								element,
+								"e",
+								(ber_int_t)Z_LVAL_PP(value))) {
+						error_count++;
+					}
+				} else if(
+						(strncmp(Z_STRVAL_PP(type), "sequence", Z_STRLEN_PP(type)) == 0) ||
+						(strncmp(Z_STRVAL_PP(type), "set", Z_STRLEN_PP(type)) == 0)) {
+					if(Z_TYPE_PP(value) == IS_ARRAY) {
+						if(strncmp(Z_STRVAL_PP(type), "set", Z_STRLEN_PP(type)) == 0) {
+							tag = ber_printf(element, "[");
+						} else {
+							tag = ber_printf(element, "{");
+						}
+						if(LBER_ERROR != tag) {
+							for(
+									zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(value), &p);
+									zend_hash_get_current_data_ex(Z_ARRVAL_PP(value), (void **) &data, &p) == SUCCESS;
+									zend_hash_move_forward_ex(Z_ARRVAL_PP(value), &p)) {
+								if(Z_TYPE_PP(data) == IS_ARRAY) {
+									sub = Z_ARRVAL_PP(data);
+									error_count+=_php_ber_from_array_recursive(
+											sub,
+											&element);
+								}
+							}
+							
+							if(strncmp(Z_STRVAL_PP(type), "set", Z_STRLEN_PP(type)) == 0) {
+								tag = ber_printf(element, "]");
+							} else {
+								tag = ber_printf(element, "}");
+							}
+							if(LBER_ERROR == tag) {
+								error_count++;
+							}
+						} else {
+							error_count++;
+						}
+					} else {
+						error_count++;
+					}
+				} else {
+					error_count++;
+				}
+			} else {
+				error_count++;
+			}
+		} else {
+			error_count++;
+		}
+	}
+	*pelement = element;
+
+	return error_count;
+}
+/* }}}
+ */
+
+/* {{{ _php_ber_from_array
+ */
+static int _php_ber_from_array(HashTable * array, struct berval ** ber)
+{
+	BerElement * new = NULL;
+	int error_count = -1;
+	
+	if(array != NULL && ber != NULL) {
+		new = ber_alloc_t(LBER_USE_DER);
+		
+		error_count=_php_ber_from_array_recursive(array, &new);
+
+		if(error_count == 0) {
+			if(LBER_ERROR == ber_flatten(new, ber)) {
+				*ber = NULL;
+			}
+		} else {
+			*ber = NULL;
+		}
+
+		ber_memfree(new);
+	}
+	return error_count;
+}
+/* }}}
+ */
+
+
+
+
 /* {{{ PHP_INI_BEGIN
  */
 PHP_INI_BEGIN()
@@ -1783,7 +2212,10 @@ PHP_FUNCTION(ldap_set_option)
 	ldap_linkdata *ld;
 	LDAP *ldap;
 	long option;
-	
+	struct berval * control_value = NULL;
+	int control_iscritical = 0;
+	char * control_oid = NULL;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlZ", &link, &option, &newval) != SUCCESS) {
 		return;
 	}
@@ -1902,34 +2334,54 @@ PHP_FUNCTION(ldap_set_option)
 					error = 1;
 					break;
 				}
-				ctrl = *ctrlp = emalloc(sizeof(**ctrlp));
+				
 				convert_to_string_ex(val);
-				ctrl->ldctl_oid = Z_STRVAL_PP(val);
+				control_oid = Z_STRVAL_PP(val);
 				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "value", sizeof("value"), (void **) &val) == SUCCESS) {
-					convert_to_string_ex(val);
-					ctrl->ldctl_value.bv_val = Z_STRVAL_PP(val);
-					ctrl->ldctl_value.bv_len = Z_STRLEN_PP(val);
+					if(Z_TYPE_PP(val) != IS_ARRAY) {
+						convert_to_string_ex(val);
+						control_value = ber_memalloc(sizeof * control_value);
+						if(control_value != NULL) {
+							control_value->bv_val = Z_STRVAL_PP(val);
+							control_value->bv_len = Z_STRLEN_PP(val);
+						}
+					} else {
+						if(_php_ber_from_array(Z_ARRVAL_PP(val), &control_value) != 0) {
+							if(control_value != NULL) {
+								ber_memfree(control_value);
+								control_value = NULL;				
+							}
+						}
+					}
 				} else {
-					ctrl->ldctl_value.bv_val = NULL;
-					ctrl->ldctl_value.bv_len = 0;
+					control_value = NULL;
 				}
 				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "iscritical", sizeof("iscritical"), (void **) &val) == SUCCESS) {
 					convert_to_boolean_ex(val);
-					ctrl->ldctl_iscritical = Z_BVAL_PP(val);
+					control_iscritical = Z_BVAL_PP(val);
 				} else {
-					ctrl->ldctl_iscritical = 0;
+					control_iscritical = 0;
 				}
 				
-				++ctrlp;
+				if(ldap_control_create(control_oid, control_iscritical, 
+						control_value, 1, &ctrl) == LDAP_SUCCESS) {
+					*ctrlp = ctrl;
+					++ctrlp;
+				}
+
+				if(control_value != NULL) {
+					ber_memfree(control_value);
+					control_value = NULL;
+				}
+
 				*ctrlp = NULL;
 				zend_hash_move_forward(Z_ARRVAL_PP(newval));
 			}
 			if (!error) {
 				error = ldap_set_option(ldap, option, ctrls);
 			}
-			ctrlp = ctrls;
 			while (*ctrlp) {
-				efree(*ctrlp);
+				ldap_control_free(*ctrlp);
 				ctrlp++;
 			}
 			efree(ctrls);
@@ -1945,18 +2397,19 @@ PHP_FUNCTION(ldap_set_option)
 /* }}} */
 
 #ifdef HAVE_LDAP_PARSE_RESULT
-/* {{{ proto bool ldap_parse_result(resource link, resource result, int errcode, string matcheddn, string errmsg, array referrals)
+/* {{{ proto bool ldap_parse_result(resource link, resource result, int errcode, string matcheddn, string errmsg, array referrals, array serverctrls)
    Extract information from result */
 PHP_FUNCTION(ldap_parse_result) 
 {
-	zval *link, *result, *errcode, *matcheddn, *errmsg, *referrals;
+	zval *link, *result, *errcode, *matcheddn, *errmsg, *referrals, *serverctrls, *ctrl, *php_ber;
 	ldap_linkdata *ld;
 	LDAPMessage *ldap_result;
+	LDAPControl **lserverctrls = NULL, **ctrlp = NULL;
 	char **lreferrals, **refp;
 	char *lmatcheddn, *lerrmsg;
-	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
+	int rc, lerrcode, myargcount = ZEND_NUM_ARGS(), ber_decode_error_count = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz|zzz", &link, &result, &errcode, &matcheddn, &errmsg, &referrals) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrz|zzzz", &link, &result, &errcode, &matcheddn, &errmsg, &referrals, &serverctrls) != SUCCESS) {
 		return; 
 	}
 
@@ -1967,7 +2420,7 @@ PHP_FUNCTION(ldap_parse_result)
 				myargcount > 3 ? &lmatcheddn : NULL,
 				myargcount > 4 ? &lerrmsg : NULL,
 				myargcount > 5 ? &lreferrals : NULL,
-				NULL /* &serverctrls */,
+				myargcount > 6 ? &lserverctrls : NULL,
 				0);
 	if (rc != LDAP_SUCCESS) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to parse result: %s", ldap_err2string(rc));
@@ -1979,6 +2432,40 @@ PHP_FUNCTION(ldap_parse_result)
 
 	/* Reverse -> fall through */
 	switch (myargcount) {
+		case 7:
+			zval_dtor(serverctrls);
+			array_init(serverctrls);
+			if(lserverctrls != NULL) {
+				ctrlp = lserverctrls;
+				while (*ctrlp) {
+					ALLOC_INIT_ZVAL(ctrl);
+					array_init(ctrl);
+
+					add_assoc_bool(
+							ctrl,
+							"critical",
+							(*ctrlp)->ldctl_iscritical ? 1 : 0);
+
+					php_ber = NULL;
+					ber_decode_error_count = _php_ber_to_array(
+							&((*ctrlp)->ldctl_value), 
+							&php_ber);
+					if(php_ber != NULL) {
+						add_assoc_zval(ctrl, "value", php_ber);
+					} else {
+						add_assoc_null(ctrl, "value");
+					}
+					add_assoc_long(
+							ctrl,
+							"ber_error_count",
+							ber_decode_error_count);
+					add_assoc_string(ctrl, "oid", (*ctrlp)->ldctl_oid, 1);	
+
+					add_next_index_zval(serverctrls, ctrl);
+					ctrlp++;
+				}
+				ldap_controls_free(lserverctrls);
+			}
 		case 6:
 			zval_dtor(referrals);
 			array_init(referrals);
@@ -2738,6 +3225,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_result, 0, 0, 3)
 	ZEND_ARG_INFO(1, matcheddn)
 	ZEND_ARG_INFO(1, errmsg)
 	ZEND_ARG_INFO(1, referrals)
+	ZEND_ARG_INFO(1, serverctrls)
 ZEND_END_ARG_INFO()
 #endif
 #endif
