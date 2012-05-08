@@ -65,7 +65,7 @@ static struct st_mysqlnd_typeii_plugin_example mysqlnd_example_plugin =
 };
 
 
-/* {{{ mysqlnd_plugin_subsystem_init */
+/* {{{ mysqlnd_example_plugin_end */
 static 
 enum_func_status mysqlnd_example_plugin_end(void * p TSRMLS_DC)
 {
@@ -78,7 +78,7 @@ enum_func_status mysqlnd_example_plugin_end(void * p TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ mysqlnd_plugin_subsystem_init */
+/* {{{ mysqlnd_example_plugin_register */
 void
 mysqlnd_example_plugin_register(TSRMLS_D)
 {
@@ -104,7 +104,7 @@ mysqlnd_plugin_subsystem_init(TSRMLS_D)
 /* }}} */
 
 
-/* {{{ mysqlnd_plugin_subsystem_init */
+/* {{{ mysqlnd_plugin_end_apply_func */
 int
 mysqlnd_plugin_end_apply_func(void *pDest TSRMLS_DC)
 {
@@ -136,7 +136,7 @@ PHPAPI unsigned int mysqlnd_plugin_register()
 /* }}} */
 
 
-/* {{{ mysqlnd_plugin_register */
+/* {{{ mysqlnd_plugin_register_ex */
 PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin TSRMLS_DC)
 {
 	if (plugin) {
