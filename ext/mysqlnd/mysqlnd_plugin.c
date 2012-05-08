@@ -169,7 +169,24 @@ PHPAPI void * _mysqlnd_plugin_find(const char * const name TSRMLS_DC)
 /* {{{ _mysqlnd_plugin_apply_with_argument */
 PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void * argument TSRMLS_DC)
 {
-	zend_hash_apply_with_argument(&mysqlnd_registered_plugins, apply_func, argument TSRMLS_CC);
+	/* Note: We want to be thread-safe (read-only), so we can use neither
+	 * zend_hash_apply_with_argument nor zend_hash_internal_pointer_reset and
+	 * friends
+	 */
+	Bucket *p;
+
+	p = mysqlnd_registered_plugins.pListHead;
+	while (p != NULL) {
+		int result = apply_func(p->pData, argument TSRMLS_CC);
+
+		if (result & ZEND_HASH_APPLY_REMOVE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mysqlnd_plugin_apply_with_argument must not remove table entries");
+		}
+		p = p->pListNext;
+		if (result & ZEND_HASH_APPLY_STOP) {
+			break;
+		}
+	}
 }
 /* }}} */
 

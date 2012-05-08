@@ -110,6 +110,7 @@ PHP                                                                        NEWS
   . Fixed bug #61003 (mysql_stat() require a valid connection). (Johannes).
 
 - mysqlnd
+  . Fixed bug #61704 (Crash apache, phpinfo() threading issue). (Johannes)
   . Fixed bug #60948 (mysqlnd FTBFS when -Wformat-security is enabled).
     (Johannes)
 
