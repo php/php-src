@@ -1356,7 +1356,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	if (prev_path) {
 		request->path_info_len = prev_path_len;
 #ifdef PHP_WIN32
-		while (prev_pach_len--) {
+		while (prev_path_len--) {
 			if (prev_path[prev_path_len] == '\\') {
 				prev_path[prev_path_len] = '/';
 			}
