@@ -5,7 +5,8 @@ PHP                                                                        NEWS
 - CGI
   . Re-Fix PHP-CGI query string parameter vulnerability, CVE-2012-1823.
     (Stas)
-  . Fix bug #61807 - Buffer Overflow in apache_request_headers. 
+  . Fix bug #61807 - Buffer Overflow in apache_request_headers.
+    (nyt-php at countercultured dot net). 
 
 03 May 2012, PHP 5.4.2
 
