@@ -40,13 +40,19 @@ PHP                                                                        NEWS
   . Fixed bug #61961 (file_get_contents leaks when access empty file with
     maxlen set). (Reeze)
 
-(merge after 5.3.11 release)
+08 May 2012, PHP 5.3.13
+- CGI
+  . Improve fix for PHP-CGI query string parameter vulnerability, CVE-2012-2311.
+    (Stas)
+
+03 May 2012, PHP 5.3.12
+- Fix PHP-CGI query string parameter vulnerability, CVE-2012-1823. (Rasmus)
+
+26 Apr 2012, PHP 5.3.11
 
 - Core:
-  . Fixed bug #61605 (header_remove() does not remove all headers).
-    (Laruence)
-  . Fixed bug #61541 (Segfault when using ob_* in output_callback).
-    (reeze.xia@gmail.com)
+  . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
+    (without apache2)). (Laruence)
   . Fixed bug #61273 (call_user_func_array with more than 16333 arguments
     leaks / crashes). (Laruence)
   . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
@@ -93,14 +99,17 @@ PHP                                                                        NEWS
   . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
 
 - Fileinfo
+  . Upgraded libmagic to 5.11 (Pierre, Anatoliy)
+  . Fixed bug #61565 where php_stream_open_wrapper_ex tries to open a
+    directory descriptor under windows. (Anatoliy)
+  . Fixed bug #61566 failure caused by the posix lseek and read versions
+    under windows in cdf_read(). (Anatoliy)
   . Fixed bug #61173 (Unable to detect error from finfo constructor). (Gustavo)
 
 - Firebird Database extension (ibase):
   . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
 
 - Libxml:
-  . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
-    (Laruence)
   . Fixed bug #61367 (open_basedir bypass using libxml RSHUTDOWN). 
     (Tim Starling)
 
@@ -122,6 +131,10 @@ PHP                                                                        NEWS
 
 - PDO_Sqlite extension:
   . Add createCollation support. (Damien)
+
+- pgsql:
+  . Fixed bug #60718 (Compile problem with libpq (PostgreSQL 7.3 or less).
+    (Yasuo Ohgaki)
 
 - Phar:
   . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
