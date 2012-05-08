@@ -793,8 +793,11 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 					charset_hint = NULL;
 					len = 0;
 				}
+			} else {
+				/* Jump to det_charset only if mbstring isn't one of above eq pass, auto, none.
+				   Otherwise try default_charset next */
+				goto det_charset;
 			}
-			goto det_charset;
 		}
 	}
 #endif
