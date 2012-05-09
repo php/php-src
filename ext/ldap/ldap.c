@@ -1135,19 +1135,47 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 	ldap_linkdata *ld = NULL;
 	LDAPMessage *ldap_res;
 #if LDAP_API_VERSION > 2000
-	LDAPControl **clientctrl = NULL, ** serverctrl = NULL;
+	int ctrls_count = 0, created_ctrls = 0, expected_ctrls = 0;
+	LDAPControl ** ctrls[2] = { NULL, NULL }, ** tmp_ctrls = NULL;
+	zval * zctrls[2] = { NULL, NULL };
 #endif
 	int ldap_attrsonly = 0, ldap_sizelimit = -1, ldap_timelimit = -1, ldap_deref = -1;	 
 	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;	 
 	int num_attribs = 0, ret = 1, i, errno, argcount = ZEND_NUM_ARGS();
 
+#if LDAP_API_VERSION > 2000
+	if (zend_parse_parameters(argcount TSRMLS_CC, "zzZ|allllzz", &link, &base_dn, &filter, &attrs, &attrsonly,
+		&sizelimit, &timelimit, &deref, &zctrls[0], &zctrls[1]) == FAILURE) {
+#else
 	if (zend_parse_parameters(argcount TSRMLS_CC, "zzZ|allll", &link, &base_dn, &filter, &attrs, &attrsonly,
 		&sizelimit, &timelimit, &deref) == FAILURE) {
+#endif
 		return;
 	}
 
 	/* Reverse -> fall through */
 	switch (argcount) {
+#if LDAP_API_VERSION > 2000
+		case 10:
+			ctrls_count = 1;
+		case 9:
+			for(;ctrls_count >= 0; ctrls_count--) {
+				if((Z_TYPE_P(zctrls[i]) == IS_ARRAY) &&
+						(zend_hash_num_elements(Z_ARRVAL_P(zctrls[i])) > 0)) {
+					if(_php_ldap_create_controls(Z_ARRVAL_P(zctrls[i]), &ctrls[i],
+								&created_ctrls, &expected_ctrls) > 0) {
+						if(created_ctrls != expected_ctrls) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING,
+									"Not all controls have been converted to "
+									"LDAPControl. Expected %d, created %d.",
+									expected_ctrls, created_ctrls);
+						}
+					} else {
+						zctrls[i] = NULL;
+					}
+				}
+			}
+#endif
 		case 8:
 			ldap_deref = deref;
 		case 7:
@@ -1253,23 +1281,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 #if LDAP_API_VERSION > 2000
 			php_set_opts(ld->link, ldap_timelimit, ldap_deref, &old_ldap_timelimit, &old_ldap_deref);
-			/* Fill controls.
-			   Discouraged by documentation but there's no way to pass 
-			   controls yet. Better than nothing
-			 */
-			if(LDAP_OPT_SUCCESS != ldap_get_option(
-						ld->link,
-						LDAP_OPT_CLIENT_CONTROLS,
-						&clientctrl)) {
-				clientctrl = NULL;
-			}
-			if(LDAP_OPT_SUCCESS != ldap_get_option(
-						ld->link,
-						LDAP_OPT_SERVER_CONTROLS,
-						&serverctrl)) {
-				serverctrl = NULL;
-			}
-
+			
 			/* Run the actual search */	
 			if(LDAP_OPT_SUCCESS != ldap_search_ext(
 					ld->link,
@@ -1278,8 +1290,8 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 					ldap_filter,
 					ldap_attrs,
 					ldap_attrsonly,
-					serverctrl,
-					clientctrl,
+					ctrls[0],
+					ctrls[1],
 					NULL, /* timeval not defined, see ldap.h */
 					ldap_sizelimit,
 					&(rcs[i]))) {
@@ -1331,23 +1343,6 @@ cleanup_parallel:
 #if LDAP_API_VERSION > 2000
 		php_set_opts(ld->link, ldap_timelimit, ldap_deref, &old_ldap_timelimit, &old_ldap_deref);
 
-		/* Fill controls.
-		   Discouraged by documentation but there's no way to pass 
-		   controls yet. Better than nothing
-		 */
-		if(LDAP_OPT_SUCCESS != ldap_get_option(
-					ld->link,
-					LDAP_OPT_CLIENT_CONTROLS,
-					&clientctrl)) {
-			clientctrl = NULL;
-		}
-		if(LDAP_OPT_SUCCESS != ldap_get_option(
-					ld->link,
-					LDAP_OPT_SERVER_CONTROLS,
-					&serverctrl)) {
-			serverctrl = NULL;
-		}
-
 		/* Run the actual search */	
 		errno = ldap_search_ext_s(
 				ld->link,
@@ -1356,8 +1351,8 @@ cleanup_parallel:
 				ldap_filter,
 				ldap_attrs,
 				ldap_attrsonly,
-				serverctrl,
-				clientctrl,
+				ctrls[0],
+				ctrls[1],
 				NULL, /* timeval not defined, see ldap.h */
 				ldap_sizelimit,
 				&ldap_res);
@@ -1393,14 +1388,20 @@ cleanup_parallel:
 
 cleanup:
 #if LDAP_API_VERSION > 2000
-	/* Free controls */
-	if(clientctrl != NULL) {
-		ldap_controls_free(clientctrl);
-		clientctrl = NULL;
-	}
-	if(serverctrl != NULL) {
-		ldap_controls_free(serverctrl);
-		serverctrl = NULL;
+	/* Free controls. Don't use ldap_controls_free as we allocate with
+	 * safe_emalloc the list of LDAPControl.
+	 */
+	for(ctrls_count = 0; ctrls_count < 2; ctrls_count++) {
+		if(ctrls[ctrls_count] != NULL) {
+			for(tmp_ctrls = ctrls[ctrls_count];
+					*tmp_ctrls!=NULL;
+					tmp_ctrls++) {
+				ldap_control_free(*tmp_ctrls);
+			}
+		
+			efree(ctrls[ctrls_count]);
+			ctrls[ctrls_count] = NULL;
+		}
 	}
 
 	/* Restoring previous options */
@@ -3088,6 +3089,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_read, 0, 0, 3)
 	ZEND_ARG_INFO(0, sizelimit)
 	ZEND_ARG_INFO(0, timelimit)
 	ZEND_ARG_INFO(0, deref)
+	ZEND_ARG_INFO(0, serverctrls)
+	ZEND_ARG_INFO(0, clientctrls)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_list, 0, 0, 3)
@@ -3099,6 +3102,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_list, 0, 0, 3)
 	ZEND_ARG_INFO(0, sizelimit)
 	ZEND_ARG_INFO(0, timelimit)
 	ZEND_ARG_INFO(0, deref)
+	ZEND_ARG_INFO(0, serverctrls)
+	ZEND_ARG_INFO(0, clientctrls)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_search, 0, 0, 3)
@@ -3110,6 +3115,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_search, 0, 0, 3)
 	ZEND_ARG_INFO(0, sizelimit)
 	ZEND_ARG_INFO(0, timelimit)
 	ZEND_ARG_INFO(0, deref)
+	ZEND_ARG_INFO(0, serverctrls)
+	ZEND_ARG_INFO(0, clientctrls)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_count_entries, 0, 0, 2)
