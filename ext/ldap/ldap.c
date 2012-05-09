@@ -551,8 +551,117 @@ static int _php_ber_from_array(HashTable * array, struct berval ** ber)
 /* }}}
  */
 
+/* _php_ldap_create_controls returns <= 0 if ctrls must not be freed by the
+ * caller and > 0 if it must be freed. controls_succeed, if not NULL, returns
+ * the number of controls created. controls_expected returns the number of
+ * controls that should have been created. Everything is fine when return value
+ * is > 1 and controls_succeed == controls_expected.
+ */
+/* {{{ _php_ldap_create_controls
+ */
+static int _php_ldap_create_controls(HashTable * array, LDAPControl *** ctrls, 
+		int * controls_succeed, int * controls_expected)
+{
+	int ctrls_created = 0, ret = -1, iscritical = 0, to_create = 0, i = 0;
+	zval ** php_ctrl = NULL, **php_val = NULL;
+	LDAPControl *ctrl = NULL, **ctrlp = NULL;
+	HashPosition p;
+	char * oid = NULL;
+	struct berval * value = NULL;
 
+	if(ctrls == NULL) return ret;
 
+	if((to_create = zend_hash_num_elements(array)) > 0) {
+
+		*ctrls = safe_emalloc((to_create + 1),  sizeof(***ctrls), 0);
+
+		if(*ctrls != NULL) {
+			/* If ret > 0, ctrls must be freed by the caller */
+			ret = 1;
+
+			ctrlp = *ctrls;
+			/* Set to NULL the whole array */
+			for(i = 0;i < (to_create + 1); i++) *(ctrlp + i) = NULL;
+			ctrlp = *ctrls;
+
+			for(zend_hash_internal_pointer_reset_ex(array, &p);
+					zend_hash_get_current_data_ex(array, (void **)&php_ctrl, &p) == SUCCESS;
+					zend_hash_move_forward_ex(array, &p)) {
+				oid = NULL;
+				value = NULL;
+
+				/* Get OID */
+				if(Z_TYPE_PP(php_ctrl) == IS_ARRAY) {
+					if(zend_hash_find(Z_ARRVAL_PP(php_ctrl), "oid", sizeof("oid"),
+								(void **)&php_val) == SUCCESS) {
+						if(Z_TYPE_PP(php_val) == IS_STRING) {
+							convert_to_string_ex(php_val);
+							oid = Z_STRVAL_PP(php_val);
+						}
+					}
+				}
+
+				if(oid != NULL && strlen(oid) > 0) {
+					if(zend_hash_find(Z_ARRVAL_PP(php_ctrl), "iscritical",
+								sizeof("iscritical"), (void **)&php_val) == SUCCESS) {
+						convert_to_boolean_ex(php_val);
+						iscritical = Z_BVAL_PP(php_val) ? 1 : 0;
+					} else {
+						iscritical = 0;
+					}
+
+					if(zend_hash_find(Z_ARRVAL_PP(php_ctrl), "value", sizeof("value"),
+								(void **)&php_val) == SUCCESS) {
+						/* If value is not an array, we assume it's a berval. */
+						if(Z_TYPE_PP(php_val) != IS_ARRAY) {
+							convert_to_string_ex(php_val);
+							value = ber_memalloc(sizeof * value);
+							if(value != NULL) {
+								value->bv_val = Z_STRVAL_PP(php_val);
+								value->bv_len = Z_STRLEN_PP(php_val);
+							}
+						} else {
+							if(_php_ber_from_array(Z_ARRVAL_PP(php_val), &value) != 0) {
+								if(value != NULL) {
+									ber_memfree(value);
+									value = NULL;
+								}
+							}
+						}
+					} else {
+						value = NULL;
+					}
+				
+					if(LDAP_SUCCESS == ldap_control_create(oid, iscritical,
+								value, 1, &ctrl)) {
+						*ctrlp = ctrl;
+						++ctrlp;
+						++ctrls_created;
+					}
+					/* Free value as ldap_control_create copies value */
+					if(value != NULL) {
+						ber_memfree(value);
+						value = NULL;
+					}
+				}
+			}
+		}
+	} else {
+		/* No error, but no controls to create */
+		ret = 0;
+	}
+
+	if(controls_succeed != NULL) {
+		*controls_succeed = ctrls_created;
+	}
+	if(controls_expected != NULL) {
+		*controls_expected = to_create;
+	}
+
+	return ret;
+}
+/* }}}
+ */
 
 /* {{{ PHP_INI_BEGIN
  */
@@ -2212,9 +2321,6 @@ PHP_FUNCTION(ldap_set_option)
 	ldap_linkdata *ld;
 	LDAP *ldap;
 	long option;
-	struct berval * control_value = NULL;
-	int control_iscritical = 0;
-	char * control_oid = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zlZ", &link, &option, &newval) != SUCCESS) {
 		return;
@@ -2310,84 +2416,42 @@ PHP_FUNCTION(ldap_set_option)
 	case LDAP_OPT_SERVER_CONTROLS:
 	case LDAP_OPT_CLIENT_CONTROLS:
 		{
-			LDAPControl *ctrl, **ctrls, **ctrlp;
-			zval **ctrlval, **val;
-			int ncontrols;
-			char error=0;
+			LDAPControl **ctrls = NULL, **tmp_ctrls = NULL;
+			int created_controls = 0, expected_controls = 0,
+				set_error = LDAP_OPT_ERROR;
 
-			if ((Z_TYPE_PP(newval) != IS_ARRAY) || !(ncontrols = zend_hash_num_elements(Z_ARRVAL_PP(newval)))) {
+			if ((Z_TYPE_PP(newval) != IS_ARRAY) || (zend_hash_num_elements(Z_ARRVAL_PP(newval)) <= 0)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected non-empty array value for this option");
 				RETURN_FALSE;
 			}
-			ctrls = safe_emalloc((1 + ncontrols), sizeof(*ctrls), 0);
-			*ctrls = NULL;
-			ctrlp = ctrls;
-			zend_hash_internal_pointer_reset(Z_ARRVAL_PP(newval));
-			while (zend_hash_get_current_data(Z_ARRVAL_PP(newval), (void**)&ctrlval) == SUCCESS) {
-				if (Z_TYPE_PP(ctrlval) != IS_ARRAY) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "The array value must contain only arrays, where each array is a control");
-					error = 1;
-					break;
-				}
-				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "oid", sizeof("oid"), (void **) &val) != SUCCESS) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Control must have an oid key");
-					error = 1;
-					break;
+
+			if(_php_ldap_create_controls(Z_ARRVAL_PP(newval), &ctrls,
+					&created_controls, &expected_controls) > 0) {
+				if(created_controls != expected_controls) {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING,
+							"Not all controls have been converted to "
+							"LDAPControl. Expected %d, created %d.",
+							expected_controls, created_controls);
 				}
 				
-				convert_to_string_ex(val);
-				control_oid = Z_STRVAL_PP(val);
-				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "value", sizeof("value"), (void **) &val) == SUCCESS) {
-					if(Z_TYPE_PP(val) != IS_ARRAY) {
-						convert_to_string_ex(val);
-						control_value = ber_memalloc(sizeof * control_value);
-						if(control_value != NULL) {
-							control_value->bv_val = Z_STRVAL_PP(val);
-							control_value->bv_len = Z_STRLEN_PP(val);
-						}
-					} else {
-						if(_php_ber_from_array(Z_ARRVAL_PP(val), &control_value) != 0) {
-							if(control_value != NULL) {
-								ber_memfree(control_value);
-								control_value = NULL;				
-							}
-						}
-					}
-				} else {
-					control_value = NULL;
-				}
-				if (zend_hash_find(Z_ARRVAL_PP(ctrlval), "iscritical", sizeof("iscritical"), (void **) &val) == SUCCESS) {
-					convert_to_boolean_ex(val);
-					control_iscritical = Z_BVAL_PP(val);
-				} else {
-					control_iscritical = 0;
+				if(created_controls > 0 && ctrls != NULL) {
+					set_error = ldap_set_option(ldap, option, ctrls);
 				}
 				
-				if(ldap_control_create(control_oid, control_iscritical, 
-						control_value, 1, &ctrl) == LDAP_SUCCESS) {
-					*ctrlp = ctrl;
-					++ctrlp;
+				/* Free ctrls. If return value is >0, ctrls must not be NULL.
+				 * Better safe than sorry
+				 */
+				if(ctrls != NULL) {
+					for(tmp_ctrls = ctrls; *tmp_ctrls != NULL; tmp_ctrls++) ldap_control_free(*tmp_ctrls);
+					efree(ctrls);
 				}
 
-				if(control_value != NULL) {
-					ber_memfree(control_value);
-					control_value = NULL;
-				}
-
-				*ctrlp = NULL;
-				zend_hash_move_forward(Z_ARRVAL_PP(newval));
-			}
-			if (!error) {
-				error = ldap_set_option(ldap, option, ctrls);
-			}
-			while (*ctrlp) {
-				ldap_control_free(*ctrlp);
-				ctrlp++;
-			}
-			efree(ctrls);
-			if (error) {
+				if(set_error != LDAP_OPT_SUCCESS) RETURN_FALSE;
+			} else {
+				/* No cleaning needed if return value is <=0 */
 				RETURN_FALSE;
 			}
+
 		} break;
 	default:
 		RETURN_FALSE;
