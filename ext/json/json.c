@@ -513,6 +513,19 @@ static void json_encode_serializable_object(smart_str *buf, zval *val, int optio
 {
 	zend_class_entry *ce = Z_OBJCE_P(val);
 	zval *retval = NULL, fname;
+	HashTable* myht;
+	
+	if (Z_TYPE_P(val) == IS_ARRAY) {
+		myht = HASH_OF(val);
+	} else {
+		myht = Z_OBJPROP_P(val);
+	}	
+	
+	if (myht && myht->nApplyCount > 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
+		smart_str_appendl(buf, "null", 4);
+		return;
+	}
 
 	ZVAL_STRING(&fname, "jsonSerialize", 0);
 
