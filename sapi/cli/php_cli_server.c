@@ -251,15 +251,17 @@ static php_cli_server_http_reponse_status_code_pair template_map[] = {
 };
 
 static php_cli_server_ext_mime_type_pair mime_type_map[] = {
+	{ "html", "text/html" },
+	{ "htm", "text/html" },
+	{ "js", "text/javascript" },
+	{ "css", "text/css" },
 	{ "gif", "image/gif" },
-	{ "png", "image/png" },
-	{ "jpe", "image/jpeg" },
 	{ "jpg", "image/jpeg" },
 	{ "jpeg", "image/jpeg" },
-	{ "css", "text/css" },
-	{ "html", "text/html" },
+	{ "png", "image/png" },
+	{ "jpe", "image/jpeg" },
+	{ "svg", "image/svg+xml" },
 	{ "txt", "text/plain" },
-	{ "js", "text/javascript" },
 	{ NULL, NULL }
 };
 
