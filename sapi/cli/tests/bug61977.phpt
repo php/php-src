@@ -1,5 +1,5 @@
 --TEST--
-Bug #60159 (Router returns false, but POST is not passed to requested resource)
+Bug #61977 (Need CLI web-server support for files with .htm & svg extensions)
 --SKIPIF--
 <?php
 include "skipif.inc"; 
