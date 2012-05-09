@@ -37,16 +37,14 @@ function php_cli_server_start($code = 'echo "Hello world";', $no_router = FALSE)
 	
 	// note: even when server prints 'Listening on localhost:8964...Press Ctrl-C to quit.'
 	//       it might not be listening yet...need to wait until fsockopen() call returns
-	$fp = fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT);
-	if ($fp) {
-		// server will report Unexpected EOF error (socket opened, closed without writing
-		// anything) but that can be ignored
-		fclose($fp);
-	} else {
-		// test will fail to connect if server doesn't start listening/accepting
-		// in the next few microseconds
-	}
+    $i = 0;
+    while (($i++ < 5) && !($fp = @fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT))) {
+        usleep(10000);
+    }
 
+    if ($fp) {
+        fclose($fp);
+    }
 
 	register_shutdown_function(
 		function($handle) use($router) {
@@ -56,7 +54,6 @@ function php_cli_server_start($code = 'echo "Hello world";', $no_router = FALSE)
 			$handle
 		);
 	// don't bother sleeping, server is already up
-	//usleep(50000);
 	// server can take a variable amount of time to be up, so just sleeping a guessed amount of time
 	// does not work. this is why tests sometimes pass and sometimes fail. to get a reliable pass
 	// sleeping doesn't work.
