@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.2
 
 - CLI Server:
+  . Implemented FR #61977 (Need CLI web-server support for files with .htm & 
+    svg extensions). (Sixd, Laruence)
   . Fixed bug #61546 (functions related to current script failed when chdir() 
     in cli sapi). (Laruence, reeze.xia@gmail.com)
   . Improved performance while sending error page, this also fixed
