@@ -19,6 +19,7 @@ PHP                                                                        NEWS
     set to null). (Anatoliy)
   . Fixed bug #61713 (Logic error in charset detection for htmlentities).
     (Anatoliy)
+  . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
 
 - Fileinfo:
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
