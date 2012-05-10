@@ -187,13 +187,6 @@ if (PHP_$EXTNAME != "no") {
 
 eof
 
-$ECHO_N " .svnignore$ECHO_C"
-cat >.svnignore <<eof
-.deps
-*.lo
-*.la
-eof
-
 $ECHO_N " $extname.c$ECHO_C"
 echo "s/extname/$extname/g" > sedscript
 echo "s/EXTNAME/$EXTNAME/g"  >> sedscript
