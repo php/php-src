@@ -96,7 +96,6 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_SLASHES", PHP_JSON_UNESCAPED_SLASHES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_PRETTY_PRINT", PHP_JSON_PRETTY_PRINT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_UNICODE", PHP_JSON_UNESCAPED_UNICODE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_PARTIAL_OUTPUT_ON_ERROR", PHP_JSON_PARTIAL_OUTPUT_ON_ERROR, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("JSON_ERROR_NONE", PHP_JSON_ERROR_NONE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_DEPTH", PHP_JSON_ERROR_DEPTH, CONST_CS | CONST_PERSISTENT);
@@ -390,7 +389,9 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 		}
 		if (ulen < 0) {
 			JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid UTF-8 sequence in argument");
+			if (!PG(display_errors)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid UTF-8 sequence in argument");
+			}
 			smart_str_appendl(buf, "null", 4);
 		} else {
 			smart_str_appendl(buf, "\"\"", 2);
@@ -512,6 +513,19 @@ static void json_encode_serializable_object(smart_str *buf, zval *val, int optio
 {
 	zend_class_entry *ce = Z_OBJCE_P(val);
 	zval *retval = NULL, fname;
+	HashTable* myht;
+	
+	if (Z_TYPE_P(val) == IS_ARRAY) {
+		myht = HASH_OF(val);
+	} else {
+		myht = Z_OBJPROP_P(val);
+	}	
+	
+	if (myht && myht->nApplyCount > 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
+		smart_str_appendl(buf, "null", 4);
+		return;
+	}
 
 	ZVAL_STRING(&fname, "jsonSerialize", 0);
 
@@ -688,11 +702,7 @@ static PHP_FUNCTION(json_encode)
 
 	php_json_encode(&buf, parameter, options TSRMLS_CC);
 
-	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE && options ^ PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
-		ZVAL_FALSE(return_value);
-	} else {
-		ZVAL_STRINGL(return_value, buf.c, buf.len, 1);
-	}
+	ZVAL_STRINGL(return_value, buf.c, buf.len, 1);
 
 	smart_str_free(&buf);
 }

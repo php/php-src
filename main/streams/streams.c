@@ -1437,7 +1437,12 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 			len += ret;
 			ptr += ret;
 		}
-		*ptr = '\0';
+		if (len) {
+			*ptr = '\0';
+		} else {
+			pefree(*buf, persistent);
+			*buf = NULL;
+		}
 		return len;
 	}
 

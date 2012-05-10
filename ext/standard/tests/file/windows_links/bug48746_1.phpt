@@ -9,7 +9,8 @@ Venkat Raman Don (don.raman@microsoft.com)
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
     die('skip windows only test');
 }
-$cmd = "mklink.exe /?";
+include_once __DIR__ . '/common.inc';
+$cmd = "mklink /?";
 $ret = @exec($cmd, $output, $return_val);
 if (count($output) == 0) {
     die("mklink.exe not found in PATH");
@@ -17,7 +18,8 @@ if (count($output) == 0) {
 ?>
 --FILE--
 <?php
-$mountvol = "c:\\Windows\\System32\\mountvol.exe";
+include_once __DIR__ . '/common.inc';
+$mountvol = get_mountvol();
 $old_dir = __DIR__;
 $dirname = __DIR__ . "\\mnt\\test\\directory";
 exec("mkdir " . $dirname, $output, $ret_val);

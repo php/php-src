@@ -135,16 +135,22 @@ mysqlnd_minfo_dump_loaded_plugins(void *pDest, void * buf TSRMLS_DC)
 /* }}} */
 
 /* {{{ mysqlnd_minfo_dump_api_plugins */
-static int
-mysqlnd_minfo_dump_api_plugins(void * pDest, void * buf TSRMLS_DC)
+static void
+mysqlnd_minfo_dump_api_plugins(smart_str * buffer TSRMLS_DC)
 {
-	smart_str * buffer = (smart_str *) buf;
-	MYSQLND_REVERSE_API * ext = *(MYSQLND_REVERSE_API **) pDest;
-	if (buffer->len) {
-		smart_str_appendc(buffer, ',');
+	HashTable *ht = mysqlnd_reverse_api_get_api_list(TSRMLS_C);
+	Bucket *p;
+
+	p = ht->pListHead;
+	while(p != NULL) {
+		MYSQLND_REVERSE_API * ext = *(MYSQLND_REVERSE_API **) p->pData;
+		if (buffer->len) {
+			smart_str_appendc(buffer, ',');
+		}
+		smart_str_appends(buffer, ext->module->name);
+
+		p = p->pListNext;
 	}
-	smart_str_appends(buffer, ext->module->name);
-	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
 
@@ -189,7 +195,7 @@ PHP_MINFO_FUNCTION(mysqlnd)
 		php_info_print_table_row(2, "Loaded plugins", tmp_str.c);
 		smart_str_free(&tmp_str);
 
-		zend_hash_apply_with_argument(mysqlnd_reverse_api_get_api_list(TSRMLS_C), mysqlnd_minfo_dump_api_plugins, &tmp_str TSRMLS_CC);
+		mysqlnd_minfo_dump_api_plugins(&tmp_str TSRMLS_CC);
 		smart_str_0(&tmp_str);
 		php_info_print_table_row(2, "API Extensions", tmp_str.c);
 		smart_str_free(&tmp_str);
