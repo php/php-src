@@ -1907,7 +1907,8 @@ ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned in
 	register unsigned char *end = str + length;
 
 	while (str < end) {
-		*result++ = zend_tolower((int)*str++);
+		*result++ = (*str == 'I') ? 'i' : zend_tolower((int)*str);
+		str++;
 	}
 	*result = '\0';
 
@@ -1927,7 +1928,7 @@ ZEND_API void zend_str_tolower(char *str, unsigned int length) /* {{{ */
 	register unsigned char *end = p + length;
 
 	while (p < end) {
-		*p = zend_tolower((int)*p);
+		*p = (*p == 'I') ? 'i' : zend_tolower((int)*p);
 		p++;
 	}
 }
