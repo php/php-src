@@ -34,6 +34,7 @@ PHP                                                                        NEWS
   . Fixed bug #61605 (header_remove() does not remove all headers). (Laruence)
   . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
     set to null). (Anatoliy)
+  . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
 
 - FPM
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
