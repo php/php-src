@@ -100,9 +100,12 @@ static zend_always_inline long zend_dval_to_lval(double d)
  * if the number was out of long range or contained a decimal point/exponent.
  * The number's value is returned into the respective pointer, *lval or *dval,
  * if that pointer is not NULL.
+ *
+ * This variant also gives information if a string that represents an integer
+ * could not be represented as such due to overflow. It writes 1 to oflow_info
+ * if the integer is larger than LONG_MAX and -1 if it's smaller than LONG_MIN.
  */
-
-static inline zend_uchar is_numeric_string(const char *str, int length, long *lval, double *dval, int allow_errors)
+static inline zend_uchar is_numeric_string_ex(const char *str, int length, long *lval, double *dval, int allow_errors, int *oflow_info)
 {
 	const char *ptr;
 	int base = 10, digits = 0, dp_or_e = 0;
@@ -111,6 +114,10 @@ static inline zend_uchar is_numeric_string(const char *str, int length, long *lv
 
 	if (!length) {
 		return 0;
+	}
+
+	if (oflow_info != NULL) {
+		*oflow_info = 0;
 	}
 
 	/* Skip any whitespace
@@ -165,12 +172,18 @@ check_digits:
 
 		if (base == 10) {
 			if (digits >= MAX_LENGTH_OF_LONG) {
+				if (oflow_info != NULL) {
+					*oflow_info = *str == '-' ? -1 : 1;
+				}
 				dp_or_e = -1;
 				goto process_double;
 			}
 		} else if (!(digits < SIZEOF_LONG * 2 || (digits == SIZEOF_LONG * 2 && ptr[-digits] <= '7'))) {
 			if (dval) {
 				local_dval = zend_hex_strtod(str, &ptr);
+			}
+			if (oflow_info != NULL) {
+				*oflow_info = 1;
 			}
 			type = IS_DOUBLE;
 		}
@@ -207,6 +220,9 @@ process_double:
 				if (dval) {
 					*dval = zend_strtod(str, NULL);
 				}
+				if (oflow_info != NULL) {
+					*oflow_info = *str == '-' ? -1 : 1;
+				}
 
 				return IS_DOUBLE;
 			}
@@ -224,6 +240,10 @@ process_double:
 
 		return IS_DOUBLE;
 	}
+}
+
+static inline zend_uchar is_numeric_string(const char *str, int length, long *lval, double *dval, int allow_errors) {
+    return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
 static inline char *
