@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     (Laruence)
 
 - Core:
+  . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
+    member of a null object). (Laruence)
   . Fixed bug #61978 (Object recursion not detected for classes that implement
     JsonSerializable). (Felipe)
   . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
