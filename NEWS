@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     (Laruence)
 
 - Core:
+  . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
+    member of a null object). (Laruence)
   . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
     reference). (Laruence)
   . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
