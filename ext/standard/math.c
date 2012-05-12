@@ -1094,10 +1094,10 @@ PHP_FUNCTION(base_convert)
 */
 PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char thousand_sep)
 {
-	return _php_math_number_format_ex(d, dec, &dec_point, 1, &thousand_sep, 1);
+	return _php_math_number_format_ex(d, dec, &dec_point, &thousand_sep);
 }
 
-PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
+PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, char *thousand_sep)
 {
 	char *tmpbuf = NULL, *resbuf;
 	char *s, *t;  /* source, target */
@@ -1106,6 +1106,8 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size
 	int tmplen, reslen=0;
 	int count=0;
 	int is_negative=0;
+	size_t dec_point_len = strlen(dec_point);
+	size_t thousand_sep_len = strlen(thousand_sep);
 
 	if (d < 0) {
 		is_negative = 1;
@@ -1137,7 +1139,7 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size
 	}
 
 	/* allow for thousand separators */
-	if (thousand_sep) {
+	if (thousand_sep_len) {
 		integral += thousand_sep_len * ((integral-1) / 3);
 	}
 	
@@ -1146,7 +1148,7 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size
 	if (dec) {
 		reslen += dec;
 
-		if (dec_point) {
+		if (dec_point_len) {
 			reslen += dec_point_len;
 		}
 	}
@@ -1182,7 +1184,7 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size
 		}
 
 		/* add decimal point */
-		if (dec_point) {
+		if (dec_point_len) {
 			t -= dec_point_len;
 			memcpy(t + 1, dec_point, dec_point_len);
 		}
@@ -1192,7 +1194,7 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size
 	 * separator every three digits */
 	while(s >= tmpbuf) {
 		*t-- = *s--;
-		if (thousand_sep && (++count%3)==0 && s>=tmpbuf) {
+		if (thousand_sep_len && (++count%3)==0 && s>=tmpbuf) {
 			t -= thousand_sep_len;
 			memcpy(t + 1, thousand_sep, thousand_sep_len);
 		}
@@ -1233,15 +1235,13 @@ PHP_FUNCTION(number_format)
 	case 4:
 		if (dec_point == NULL) {
 			dec_point = &dec_point_chr;
-			dec_point_len = 1;
 		}
 
 		if (thousand_sep == NULL) {
 			thousand_sep = &thousand_sep_chr;
-			thousand_sep_len = 1;
 		}
 
-		RETURN_STRING(_php_math_number_format_ex(num, dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len), 0);
+		RETURN_STRING(_php_math_number_format_ex(num, dec, dec_point, thousand_sep), 0);
 		break;
 	default:
 		WRONG_PARAM_COUNT;
