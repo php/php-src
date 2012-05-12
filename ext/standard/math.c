@@ -37,7 +37,7 @@ static inline int php_intlog10abs(double value) {
 	int result;
 	value = fabs(value);
 
-	if (value < 1e-8 || value > 1e23) {
+	if (value < 1e-8 || value > 1e22) {
 		result = (int)floor(log10(value));
 	} else {
 		static const double values[] = {
@@ -46,7 +46,7 @@ static inline int php_intlog10abs(double value) {
 			1e8,  1e9,  1e10, 1e11, 1e12, 1e13, 1e14, 1e15,
 			1e16, 1e17, 1e18, 1e19, 1e20, 1e21, 1e22};
 		/* Do a binary search with 5 steps */
-		result = 16;
+		result = 15;
 		if (value < values[result]) {
 			result -= 8;
 		} else {

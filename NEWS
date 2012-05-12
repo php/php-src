@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     (Laruence)
 
 - Core:
+  . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
+    member of a null object). (Laruence)
   . Fixed bug #61978 (Object recursion not detected for classes that implement
     JsonSerializable). (Felipe)
   . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
@@ -34,6 +36,7 @@ PHP                                                                        NEWS
   . Fixed bug #61605 (header_remove() does not remove all headers). (Laruence)
   . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
     set to null). (Anatoliy)
+  . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
 
 - FPM
   . Fixed bug #61812 (Uninitialised value used in libmagic). 

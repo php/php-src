@@ -1208,7 +1208,12 @@ PHP_FUNCTION(realpath_cache_get)
 			MAKE_STD_ZVAL(entry);
 			array_init(entry);
 
-			add_assoc_long(entry, "key", bucket->key);
+			/* bucket->key is unsigned long */
+			if (LONG_MAX >= bucket->key) {
+				add_assoc_long(entry, "key", bucket->key);
+			} else {
+				add_assoc_double(entry, "key", (double)bucket->key);
+			}
 			add_assoc_bool(entry, "is_dir", bucket->is_dir);
 			add_assoc_stringl(entry, "realpath", bucket->realpath, bucket->realpath_len, 1);
 			add_assoc_long(entry, "expires", bucket->expires);
