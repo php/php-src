@@ -38,6 +38,13 @@ for ($i = 0; $i < count($values); $i++) {
 	$res = number_format($values[$i], 2, ',' , ' ');
 	var_dump($res);
 }
+
+echo "\n number_format tests.....Null thousand separater\n";
+for ($i = 0; $i < count($values); $i++) {
+	$res = number_format($values[$i], 2, '.', "\0");
+	var_dump($res);
+}
+
 ?>
 --EXPECTF--
  number_format tests.....default
@@ -95,3 +102,17 @@ string(6) "123,46"
 string(4) "0,00"
 string(4) "1,00"
 string(4) "0,00"
+
+ number_format tests.....Null thousand separater
+string(7) "1234.57"
+string(8) "-1234.57"
+string(11) "12345678.00"
+string(12) "-12345678.90"
+string(12) "305450479.00"
+string(12) "402653183.00"
+string(12) "123456789.00"
+string(6) "123.46"
+string(6) "123.46"
+string(4) "0.00"
+string(4) "1.00"
+string(4) "0.00"
