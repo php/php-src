@@ -57,6 +57,9 @@ PHP X.Y UPGRADE NOTES
 - MessageFormatter::format() and related functions now don't error out when
   an insufficient argument count is provided. Instead, the placeholders will
   remain unsubstituted.
+- MessageFormatter::parse() and MessageFormat::format() (and their static
+  equivalents) now don't throw away better than second precision in the
+  arguments.
 
 ========================================
 5. New Functions

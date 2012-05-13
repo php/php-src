@@ -665,11 +665,7 @@ U_CFUNC void umsg_parse_helper(UMessageFormat *fmt, int *count, zval ***args, UC
 		switch(fargs[i].getType()) {
         case Formattable::kDate:
 			aDate = ((double)fargs[i].getDate())/U_MILLIS_PER_SECOND;
-			if(aDate > LONG_MAX || aDate < -LONG_MAX) {
-				ZVAL_DOUBLE((*args)[i], aDate<0?ceil(aDate):floor(aDate));
-			} else {
-				ZVAL_LONG((*args)[i], (long)aDate);
-			}
+			ZVAL_DOUBLE((*args)[i], aDate);
             break;
 
         case Formattable::kDouble:
