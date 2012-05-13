@@ -1709,6 +1709,22 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		ZVAL_STRINGL(&value_node.u.constant, "value", 5, 1);
 
 		zend_do_receive_arg(ZEND_RECV, &value_node, &unused_node, NULL, &unused_node2, 0 TSRMLS_CC);
+	} else if(strcasecmp("_isset", Z_STRVAL(function_token->u.constant)) == 0) {
+		/* Convert type and variable name to __issetHours() */
+		char *tmp = strcatalloc("__isset", 7, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
+		efree(Z_STRVAL(function_token->u.constant));
+		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
+
+		/* Declare Function */
+		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers, ZEND_FNP_PROP_ISSETTER TSRMLS_CC);
+	} else if(strcasecmp("_unset", Z_STRVAL(function_token->u.constant)) == 0) {
+		/* Convert type and variable name to __issetHours() */
+		char *tmp = strcatalloc("__unset", 7, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
+		efree(Z_STRVAL(function_token->u.constant));
+		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
+
+		/* Declare Function */
+		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers, ZEND_FNP_PROP_UNSETTER TSRMLS_CC);
 	} else {
 		zend_error(E_COMPILE_ERROR, "Unknown accessor '%s', expecting get or set for variable $%s", Z_STRVAL(function_token->u.constant), Z_STRVAL(var_name->u.constant));
 	}
@@ -1721,6 +1737,14 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 	} else if(func->common.purpose == ZEND_FNP_PROP_SETTER) {
 		if((ai->flags & ZEND_ACC_READONLY))
 			zend_error(E_COMPILE_ERROR, "Cannot define setter for read-only property $%s", Z_STRVAL(var_name->u.constant));
+		ai->setter = func;
+	} else if(func->common.purpose == ZEND_FNP_PROP_ISSETTER) {
+		if((ai->flags & ZEND_ACC_WRITEONLY))
+			zend_error(E_COMPILE_ERROR, "Cannot define issetter for write-only property $%s", Z_STRVAL(var_name->u.constant));
+		ai->setter = func;
+	} else if(func->common.purpose == ZEND_FNP_PROP_UNSETTER) {
+		if((ai->flags & ZEND_ACC_READONLY))
+			zend_error(E_COMPILE_ERROR, "Cannot define unsetter for read-only property $%s", Z_STRVAL(var_name->u.constant));
 		ai->setter = func;
 	}
 }
@@ -1740,7 +1764,8 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 		MAKE_ZNODEL(zn_this, "this", 4);
 		MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
 
-		if(strstr(CG(active_op_array)->function_name, "get") != NULL) {
+		if(CG(active_op_array)->purpose == ZEND_FNP_PROP_GETTER) {
+			/* Equivalent to:  	return $this->__Property;  */
 			znode zn_prop_rv;
 
 			if(zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(zn_prop.u.constant), Z_STRLEN(zn_prop.u.constant)+1, (void**) &zpi) != SUCCESS) {
@@ -1760,7 +1785,8 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			/* Return value fetched */
 			zend_do_return(&zn_prop_rv, 1 TSRMLS_CC);
 
-		} else if(strstr(CG(active_op_array)->function_name, "set") != NULL) {
+		} else if(CG(active_op_array)->purpose == ZEND_FNP_PROP_SETTER) {
+			/* Equivalent to: $this->__Property = $value; */
 			znode zn_value_rv, zn_value;
 			znode zn_assign_rv;
 
@@ -1789,6 +1815,62 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 
 			/* Assign $value to $this->[Internal Value] */
 			zend_do_assign(&zn_assign_rv, &zn_prop_rv, &zn_value_rv TSRMLS_CC);
+
+			zend_do_free(&zn_assign_rv TSRMLS_CC);
+		} else if(CG(active_op_array)->purpose == ZEND_FNP_PROP_ISSETTER) {
+			/* Equivalent to: return $this->__Property != NULL; */
+
+			/** zend_do_binary_op(ZEND_IS_NOT_EQUAL, &result, &op1, &op2 TSRMLS_CC); */
+
+			znode zn_null;
+			znode zn_result_rv;
+
+			if(zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(zn_prop.u.constant), Z_STRLEN(zn_prop.u.constant)+1, (void**) &zpi) != SUCCESS) {
+				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED TSRMLS_CC);
+				MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
+			}
+
+			zend_do_extended_info(TSRMLS_C);
+			zend_do_begin_variable_parse(TSRMLS_C);
+
+			/* Fetch $this */
+			fetch_simple_variable(&zn_this_rv, &zn_this, 1 TSRMLS_CC);
+
+			/* Fetch Internal Variable Name */
+			zend_do_fetch_property(&zn_prop_rv, &zn_this_rv, &zn_prop TSRMLS_CC);
+
+			MAKE_ZNODEL(zn_null, "NULL", 4);
+
+			zend_do_binary_op(ZEND_IS_NOT_EQUAL, &zn_result_rv, &zn_prop_rv, &zn_null TSRMLS_CC);
+
+			/* Return result */
+			zend_do_return(&zn_result_rv, 1 TSRMLS_CC);
+
+		} else if(CG(active_op_array)->purpose == ZEND_FNP_PROP_UNSETTER) {
+			/* Equivalent to: $this->__Property = NULL; */
+			znode zn_null;
+			znode zn_assign_rv;
+
+			if(zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(zn_prop.u.constant), Z_STRLEN(zn_prop.u.constant)+1, (void**) &zpi) != SUCCESS) {
+				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED TSRMLS_CC);
+				MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
+			}
+
+			zend_do_extended_info(TSRMLS_C);
+			zend_do_begin_variable_parse(TSRMLS_C);
+
+			/* Fetch $this */
+			fetch_simple_variable(&zn_this_rv, &zn_this, 1 TSRMLS_CC);
+
+			/* Fetch Internal Variable Name */
+			zend_do_fetch_property(&zn_prop_rv, &zn_this_rv, &zn_prop TSRMLS_CC);
+
+			MAKE_ZNODEL(zn_null, "NULL", 4);
+
+			zend_check_writable_variable(&zn_prop_rv);
+
+			/* Assign NULL to $this->__Property */
+			zend_do_assign(&zn_assign_rv, &zn_prop_rv, &zn_null TSRMLS_CC);
 
 			zend_do_free(&zn_assign_rv TSRMLS_CC);
 		}
@@ -3201,6 +3283,10 @@ char *zend_fn_purpose_string(zend_uchar purpose) /* {{{ */
 		return "get";
 	} else if (purpose == ZEND_FNP_PROP_SETTER) {
 		return "set";
+	} else if (purpose == ZEND_FNP_PROP_ISSETTER) {
+		return "isset";
+	} else if (purpose == ZEND_FNP_PROP_UNSETTER) {
+		return "unset";
 	}
 	return "access";
 }
@@ -3748,6 +3834,10 @@ static inline void zend_do_update_accessors(zend_class_entry *ce TSRMLS_DC) /* {
 				ai->getter = func;
 			} else if(func->common.purpose == ZEND_FNP_PROP_SETTER) {
 				ai->setter = func;
+			} else if(func->common.purpose == ZEND_FNP_PROP_ISSETTER) {
+				ai->isset = func;
+			} else if(func->common.purpose == ZEND_FNP_PROP_UNSETTER) {
+				ai->unset = func;
 			}
 		}
 	}
