@@ -2451,7 +2451,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 				if (UNEXPECTED(EX(fbc) == NULL)) {
 					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), Z_STRVAL_PP(method));
 				}
-				
+
 				if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 					EX(object) = NULL;
 				} else {
@@ -2983,7 +2983,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 		catch_ce = CACHED_PTR(opline->op1.literal->cache_slot);
 	} else {
 		catch_ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD TSRMLS_CC);
-		
+
 		CACHE_PTR(opline->op1.literal->cache_slot, catch_ce);
 	}
 	ce = Z_OBJCE_P(EG(exception));
@@ -3435,7 +3435,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
-			if (UNEXPECTED(!zend_check_protected(clone->common.scope, EG(scope)))) {
+			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), EG(scope)))) {
 				zend_error_noreturn(E_ERROR, "Call to protected %s::__clone() from context '%s'", ce->name, EG(scope) ? EG(scope)->name : "");
 			}
 		}
