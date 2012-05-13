@@ -1,7 +1,11 @@
 --TEST--
 msgfmt_format() with subpatterns
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+<?php
+if (!extension_loaded('intl'))
+	die('skip intl extension not enabled');
+if (version_compare(INTL_ICU_VERSION, '4.8') < 0)
+	die('skip for ICU 4.8+');
 --FILE--
 <?php
 
@@ -45,7 +49,7 @@ $str_res = '';
         $fmt = ut_msgfmt_create( 'en_US', $pattern );
 		if(!$fmt) {
 			$str_res .= dump(intl_get_error_message())."\n";
-			continue;
+			return $str_res;
 		}
         foreach ($args as $arg) {
             $str_res .= dump( ut_msgfmt_format($fmt, $arg) ). "\n";

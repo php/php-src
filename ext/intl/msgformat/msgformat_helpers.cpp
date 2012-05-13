@@ -25,7 +25,6 @@
 #include <limits.h>
 #include <unicode/msgfmt.h>
 #include <unicode/chariter.h>
-#include <unicode/messagepattern.h>
 #include <unicode/ustdio.h>
 
 #include <vector>
@@ -51,6 +50,10 @@ extern "C" {
 #define NAN (INFINITY-INFINITY)
 #endif
 
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
+#define HAS_MESSAGE_PATTERN 1
+#endif
+
 U_NAMESPACE_BEGIN
 /**
  * This class isolates our access to private internal methods of
@@ -61,17 +64,23 @@ class MessageFormatAdapter {
 public:
     static const Formattable::Type* getArgTypeList(const MessageFormat& m,
                                                    int32_t& count);
+#ifdef HAS_MESSAGE_PATTERN
     static const MessagePattern getMessagePattern(MessageFormat* m);
+#endif
 };
+
 const Formattable::Type*
 MessageFormatAdapter::getArgTypeList(const MessageFormat& m,
                                      int32_t& count) {
     return m.getArgTypeList(count);
 }
+
+#ifdef HAS_MESSAGE_PATTERN
 const MessagePattern
 MessageFormatAdapter::getMessagePattern(MessageFormat* m) {
     return m->msgPattern;
 }
+#endif
 U_NAMESPACE_END
 
 U_CFUNC int32_t umsg_format_arg_count(UMessageFormat *fmt)
@@ -133,6 +142,52 @@ static double umsg_helper_zval_to_millis(zval *z, UErrorCode *status TSRMLS_DC) 
 	return rv;
 }
 
+static HashTable *umsg_get_numeric_types(MessageFormatter_object *mfo,
+										 intl_error& err TSRMLS_DC)
+{
+	HashTable *ret;
+	int32_t parts_count;
+
+	if (U_FAILURE(err.code)) {
+		return NULL;
+	}
+
+	if (mfo->mf_data.arg_types) {
+		/* already cached */
+		return mfo->mf_data.arg_types;
+	}
+
+	const Formattable::Type *types = MessageFormatAdapter::getArgTypeList(
+		*(MessageFormat*)mfo->mf_data.umsgf, parts_count);
+
+	/* Hash table will store Formattable::Type objects directly,
+	 * so no need for destructor */
+	ALLOC_HASHTABLE(ret);
+	zend_hash_init(ret, parts_count, NULL, NULL, 0);
+
+	for (int i = 0; i < parts_count; i++) {
+		const Formattable::Type t = types[i];
+		if (zend_hash_index_update(ret, (ulong)i, (void*)&t, sizeof(t), NULL)
+				== FAILURE) {
+			intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
+				"Write to argument types hash table failed", 0 TSRMLS_CC);
+			break;
+		}
+	}
+
+	if (U_FAILURE(err.code)) {
+		zend_hash_destroy(ret);
+		efree(ret);
+
+		return NULL;
+	}
+
+	mfo->mf_data.arg_types = ret;
+
+	return ret;
+}
+
+#ifdef HAS_MESSAGE_PATTERN
 static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 									const MessagePattern& mp,
 									intl_error& err TSRMLS_DC)
@@ -142,6 +197,10 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 
 	if (U_FAILURE(err.code)) {
 		return NULL;
+	}
+
+	if (!((MessageFormat *)mfo->mf_data.umsgf)->usesNamedArguments()) {
+		return umsg_get_numeric_types(mfo, err TSRMLS_CC);
 	}
 
 	if (mfo->mf_data.arg_types) {
@@ -287,6 +346,27 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 
 	return ret;
 }
+#endif
+
+static HashTable *umsg_get_types(MessageFormatter_object *mfo,
+								 intl_error& err TSRMLS_DC)
+{
+	MessageFormat *mf = (MessageFormat *)mfo->mf_data.umsgf;
+
+#ifdef HAS_MESSAGE_PATTERN
+	const MessagePattern mp = MessageFormatAdapter::getMessagePattern(mf);
+
+	return umsg_parse_format(mfo, mp, err TSRMLS_CC);
+#else
+	if (mf->usesNamedArguments()) {
+			intl_errors_set(&err, U_UNSUPPORTED_ERROR,
+				"This extension supports named arguments only on ICU 4.8+",
+				0 TSRMLS_CC);
+		return NULL;
+	}
+	return umsg_get_numeric_types(mfo, err TSRMLS_CC);
+#endif
+}
 
 U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 								HashTable *args,
@@ -297,7 +377,6 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 	std::vector<Formattable> fargs;
 	std::vector<UnicodeString> farg_names;
 	MessageFormat *mf = (MessageFormat *)mfo->mf_data.umsgf;
-	const MessagePattern mp = MessageFormatAdapter::getMessagePattern(mf);
 	HashTable *types;
 	intl_error& err = INTL_DATA_ERROR(mfo);
 
@@ -305,10 +384,10 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 		return;
 	}
 
+	types = umsg_get_types(mfo, err TSRMLS_CC);
+
 	fargs.resize(arg_count);
 	farg_names.resize(arg_count);
-
-	types = umsg_parse_format(mfo, mp, err TSRMLS_CC);
 
 	int				argNum = 0;
 	HashPosition	pos;
@@ -414,19 +493,56 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 					formattable.setDouble(d);
 					break;
 				}
+			case Formattable::kLong:
+				{
+					int32_t tInt32;
+retry_klong:
+					if (Z_TYPE_PP(elem) == IS_DOUBLE) {
+						if (Z_DVAL_PP(elem) > (double)INT32_MAX ||
+								Z_DVAL_PP(elem) < (double)INT32_MIN) {
+							intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
+								"Found PHP float with absolute value too large for "
+								"32 bit integer argument", 0 TSRMLS_CC);
+						} else {
+							tInt32 = (int32_t)Z_DVAL_PP(elem);
+						}
+					} else if (Z_TYPE_PP(elem) == IS_LONG) {
+						if (Z_LVAL_PP(elem) > INT32_MAX ||
+								Z_LVAL_PP(elem) < INT32_MIN) {
+							intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
+								"Found PHP integer with absolute value too large "
+								"for 32 bit integer argument", 0 TSRMLS_CC);
+						} else {
+							tInt32 = (int32_t)Z_LVAL_PP(elem);
+						}
+					} else {
+						SEPARATE_ZVAL_IF_NOT_REF(elem);
+						convert_scalar_to_number(*elem TSRMLS_CC);
+						goto retry_klong;
+					}
+					formattable.setLong(tInt32);
+					break;
+				}
 			case Formattable::kInt64:
 				{
 					int64_t tInt64;
+retry_kint64:
 					if (Z_TYPE_PP(elem) == IS_DOUBLE) {
-						tInt64 = (int64_t)Z_DVAL_PP(elem);
+						if (Z_DVAL_PP(elem) > (double)U_INT64_MAX ||
+								Z_DVAL_PP(elem) < (double)U_INT64_MIN) {
+							intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
+								"Found PHP float with absolute value too large for "
+								"64 bit integer argument", 0 TSRMLS_CC);
+						} else {
+							tInt64 = (int64_t)Z_DVAL_PP(elem);
+						}
 					} else if (Z_TYPE_PP(elem) == IS_LONG) {
+						/* assume long is not wider than 64 bits */
 						tInt64 = (int64_t)Z_LVAL_PP(elem);
 					} else {
 						SEPARATE_ZVAL_IF_NOT_REF(elem);
 						convert_scalar_to_number(*elem TSRMLS_CC);
-						tInt64 = (Z_TYPE_PP(elem) == IS_DOUBLE)
-							? (int64_t)Z_DVAL_PP(elem)
-							: Z_LVAL_PP(elem);
+						goto retry_kint64;
 					}
 					formattable.setInt64(tInt64);
 					break;
@@ -451,6 +567,10 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 					formattable.setDate(dd);
 					break;
 				}
+			default:
+				intl_errors_set(&err, U_ILLEGAL_ARGUMENT_ERROR,
+					"Found unsupported argument type", 0 TSRMLS_CC);
+				break;
 			}
 		} else {
 			/* We couldn't find any information about the argument in the pattern, this
