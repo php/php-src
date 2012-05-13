@@ -236,6 +236,8 @@ typedef struct _zend_try_catch_element {
 #define ZEND_FNP_UNDEFINED				0
 #define ZEND_FNP_PROP_GETTER			1
 #define ZEND_FNP_PROP_SETTER			2
+#define ZEND_FNP_PROP_ISSETTER			3
+#define ZEND_FNP_PROP_UNSETTER			4
 
 char *zend_visibility_string(zend_uint fn_flags);
 char *zend_fn_purpose_string(zend_uchar purpose);
@@ -384,6 +386,8 @@ typedef struct _zend_accessor_info {
 	int 			doc_comment_len;
 	zend_function 	*getter;
 	zend_function 	*setter;
+	zend_function 	*isset;
+	zend_function 	*unset;
 } zend_accessor_info;
 
 typedef struct _zend_function_state {
