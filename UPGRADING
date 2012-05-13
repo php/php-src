@@ -169,6 +169,10 @@ PHP 5.4 UPGRADE NOTES
   non-numeric and produce warning, but are converted to 12 and 5
   respectively for backwards compatibility reasons.
 
+- Long numeric strings that do not fit in integer or double (such as
+  "92233720368547758070") are compared using string comparison if 
+  they could otherwise result in precision loss - since 5.4.4.
+
 - Closures now support scopes and $this and can be rebound to
   objects using Closure::bind() and Closure::bindTo().
 
@@ -177,6 +181,9 @@ PHP 5.4 UPGRADE NOTES
 
 - Parse error messages are changed to contain more information about
   the error.
+
+- __clone and __destruct since 5.4.4 follow the same scoping rules as 
+  the rest of the methods (see bug #61782 for details).
 
 ================================
 4. Changes to existing functions
