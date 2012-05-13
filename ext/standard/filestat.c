@@ -803,7 +803,7 @@ PHP_FUNCTION(touch)
 PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, int filename_len TSRMLS_DC)
 {
 	/* always clear CurrentStatFile and CurrentLStatFile even if filename is not NULL
-	 * as it may contains outdated data (e.g. "nlink" for a directory when deleting a file
+	 * as it may contain outdated data (e.g. "nlink" for a directory when deleting a file
 	 * in this directory, as shown by lstat_stat_variation9.phpt) */
 	if (BG(CurrentStatFile)) {
 		efree(BG(CurrentStatFile));
