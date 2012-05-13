@@ -52,6 +52,11 @@ PHP X.Y UPGRADE NOTES
   - "a" now does not remove trailing NUL characters on unpack() anymore
   - "A" will now strip all trailing ASCII whitespace on unpack() (it used to
     remove only trailing spaces.
+- MessageFormatter::format() and related functions now accepted named arguments
+  and mixed numeric/named arguments in ICU 4.8+.
+- MessageFormatter::format() and related functions now don't error out when
+  an insufficient argument count is provided. Instead, the placeholders will
+  remain unsubstituted.
 
 ========================================
 5. New Functions
@@ -146,6 +151,7 @@ PHP X.Y UPGRADE NOTES
 8. Other Changes to Extensions
 ========================================
 
+- The intl extension now requires ICU 4.0+.
 
 ========================================
 9. New Global Constants
