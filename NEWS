@@ -20,6 +20,8 @@ PHP                                                                        NEWS
     member of a null object). (Laruence)
   . Fixed bug #61978 (Object recursion not detected for classes that implement
     JsonSerializable). (Felipe)
+  . Fixed bug #61782 (__clone/__destruct do not match other methods when checking
+    access controls). (Stas)
   . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
     reference). (Laruence)
   . Fixed bug #61922 (ZTS build doesn't accept zend.script_encoding config).
