@@ -1741,11 +1741,11 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 	} else if(func->common.purpose == ZEND_FNP_PROP_ISSETTER) {
 		if((ai->flags & ZEND_ACC_WRITEONLY))
 			zend_error(E_COMPILE_ERROR, "Cannot define issetter for write-only property $%s", Z_STRVAL(var_name->u.constant));
-		ai->setter = func;
+		ai->isset = func;
 	} else if(func->common.purpose == ZEND_FNP_PROP_UNSETTER) {
 		if((ai->flags & ZEND_ACC_READONLY))
 			zend_error(E_COMPILE_ERROR, "Cannot define unsetter for read-only property $%s", Z_STRVAL(var_name->u.constant));
-		ai->setter = func;
+		ai->unset = func;
 	}
 }
 /* }}} */
@@ -1762,12 +1762,12 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 		znode zn_prop_rv, zn_prop;
 
 		MAKE_ZNODEL(zn_this, "this", 4);
-		MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
 
 		if(CG(active_op_array)->purpose == ZEND_FNP_PROP_GETTER) {
 			/* Equivalent to:  	return $this->__Property;  */
 			znode zn_prop_rv;
 
+			MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
 			if(zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(zn_prop.u.constant), Z_STRLEN(zn_prop.u.constant)+1, (void**) &zpi) != SUCCESS) {
 				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED TSRMLS_CC);
 				MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
@@ -1790,6 +1790,7 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			znode zn_value_rv, zn_value;
 			znode zn_assign_rv;
 
+			MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
 			if(zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(zn_prop.u.constant), Z_STRLEN(zn_prop.u.constant)+1, (void**) &zpi) != SUCCESS) {
 				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED TSRMLS_CC);
 				MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
@@ -1818,18 +1819,11 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 
 			zend_do_free(&zn_assign_rv TSRMLS_CC);
 		} else if(CG(active_op_array)->purpose == ZEND_FNP_PROP_ISSETTER) {
-			/* Equivalent to: return $this->__Property != NULL; */
+			/* Equivalent to: return $this->Property != NULL; (via getter) */
 
-			/** zend_do_binary_op(ZEND_IS_NOT_EQUAL, &result, &op1, &op2 TSRMLS_CC); */
-
-			znode zn_null;
+			znode zn_null, zn_null_rv;
 			znode zn_result_rv;
 
-			if(zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(zn_prop.u.constant), Z_STRLEN(zn_prop.u.constant)+1, (void**) &zpi) != SUCCESS) {
-				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED TSRMLS_CC);
-				MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
-			}
-
 			zend_do_extended_info(TSRMLS_C);
 			zend_do_begin_variable_parse(TSRMLS_C);
 
@@ -1837,24 +1831,22 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			fetch_simple_variable(&zn_this_rv, &zn_this, 1 TSRMLS_CC);
 
 			/* Fetch Internal Variable Name */
+			MAKE_ZNODEL(zn_prop, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
 			zend_do_fetch_property(&zn_prop_rv, &zn_this_rv, &zn_prop TSRMLS_CC);
+			zend_do_end_variable_parse(&zn_prop_rv, BP_VAR_R, 0 TSRMLS_CC);
 
 			MAKE_ZNODEL(zn_null, "NULL", 4);
+			zend_do_fetch_constant(&zn_null_rv, NULL, &zn_null, ZEND_CT, 1 TSRMLS_CC);
 
-			zend_do_binary_op(ZEND_IS_NOT_EQUAL, &zn_result_rv, &zn_prop_rv, &zn_null TSRMLS_CC);
+			zend_do_binary_op(ZEND_IS_NOT_IDENTICAL, &zn_result_rv, &zn_prop_rv, &zn_null_rv TSRMLS_CC);
 
 			/* Return result */
-			zend_do_return(&zn_result_rv, 1 TSRMLS_CC);
-
+			zend_do_return(&zn_result_rv, 0 TSRMLS_CC);
 		} else if(CG(active_op_array)->purpose == ZEND_FNP_PROP_UNSETTER) {
-			/* Equivalent to: $this->__Property = NULL; */
-			znode zn_null;
-			znode zn_assign_rv;
+			/* Equivalent to: $this->Property = NULL; (via setter) */
 
-			if(zend_hash_find(&CG(active_class_entry)->properties_info, Z_STRVAL(zn_prop.u.constant), Z_STRLEN(zn_prop.u.constant)+1, (void**) &zpi) != SUCCESS) {
-				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED TSRMLS_CC);
-				MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
-			}
+			znode zn_null, zn_null_rv;
+			znode zn_assign_rv;
 
 			zend_do_extended_info(TSRMLS_C);
 			zend_do_begin_variable_parse(TSRMLS_C);
@@ -1863,14 +1855,16 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			fetch_simple_variable(&zn_this_rv, &zn_this, 1 TSRMLS_CC);
 
 			/* Fetch Internal Variable Name */
+			MAKE_ZNODEL(zn_prop, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
 			zend_do_fetch_property(&zn_prop_rv, &zn_this_rv, &zn_prop TSRMLS_CC);
 
 			MAKE_ZNODEL(zn_null, "NULL", 4);
+			zend_do_fetch_constant(&zn_null_rv, NULL, &zn_null, ZEND_CT, 1 TSRMLS_CC);
 
 			zend_check_writable_variable(&zn_prop_rv);
 
-			/* Assign NULL to $this->__Property */
-			zend_do_assign(&zn_assign_rv, &zn_prop_rv, &zn_null TSRMLS_CC);
+			/* Assign NULL to $this->Property */
+			zend_do_assign(&zn_assign_rv, &zn_prop_rv, &zn_null_rv TSRMLS_CC);
 
 			zend_do_free(&zn_assign_rv TSRMLS_CC);
 		}
