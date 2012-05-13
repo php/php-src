@@ -699,7 +699,35 @@ accessor_modifier:
 ;
 
 accessor_function:
-		accessor_modifiers is_reference T_STRING
+		T_ISSET
+			{ 	Z_LVAL($1.u.constant) = T_ISSET;
+				Z_LVAL($$.u.constant) = CG(access_type);
+				zend_do_begin_accessor_declaration(&$1, CG(accessor_node), &$$, 0 TSRMLS_CC); }
+				'{' inner_statement_list '}'
+			{ zend_do_end_accessor_declaration(&$1, CG(accessor_node), &$$, &$3 TSRMLS_CC); }
+	|	T_ISSET
+			{ 
+				Z_LVAL($1.u.constant) = T_ISSET;	
+				Z_LVAL($$.u.constant) = CG(access_type);
+				zend_do_begin_accessor_declaration(&$1, CG(accessor_node), &$$, 0 TSRMLS_CC);
+				zend_do_end_accessor_declaration(&$1, CG(accessor_node), &$$, NULL TSRMLS_CC);
+			}
+		';'
+	|	T_UNSET
+			{ 	Z_LVAL($1.u.constant) = T_UNSET;
+				Z_LVAL($$.u.constant) = CG(access_type);
+				zend_do_begin_accessor_declaration(&$1, CG(accessor_node), &$$, 0 TSRMLS_CC); }
+				'{' inner_statement_list '}'
+			{ zend_do_end_accessor_declaration(&$1, CG(accessor_node), &$$, &$3 TSRMLS_CC); }
+	|	T_UNSET
+			{ 
+				Z_LVAL($1.u.constant) = T_UNSET;	
+				Z_LVAL($$.u.constant) = CG(access_type);
+				zend_do_begin_accessor_declaration(&$1, CG(accessor_node), &$$, 0 TSRMLS_CC);
+				zend_do_end_accessor_declaration(&$1, CG(accessor_node), &$$, NULL TSRMLS_CC);
+			}
+		';'
+	|	accessor_modifiers is_reference T_STRING
 			{ zend_do_begin_accessor_declaration(&$3, CG(accessor_node), &$1, $2.op_type TSRMLS_CC); }
 				'{' inner_statement_list '}'
 			{ zend_do_end_accessor_declaration(&$3, CG(accessor_node), &$1, &$5 TSRMLS_CC); }

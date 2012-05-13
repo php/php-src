@@ -736,7 +736,7 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 			znode zn_parent, zn_func, zn_arg_list;
 			size_t member_name_len = strlen(member_name);
 
-			char *fname = strcatalloc("__get", 5, member_name, member_name_len);
+			char *fname = strcatalloc("__get", 5, member_name, member_name_len TSRMLS_CC);
 
 			MAKE_ZNODEL(zn_parent, "parent", 6);
 			ZVAL_LONG(&zn_arg_list.u.constant, 0);
@@ -765,7 +765,7 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 
 			efree(lcname);
 
-			lcname = strcatalloc("__get", 5, member_name, member_name_len);
+			lcname = strcatalloc("__get", 5, member_name, member_name_len TSRMLS_CC);
 			lcname_len = member_name_len + 5;
 
 			zend_str_tolower(lcname, lcname_len);
@@ -1681,17 +1681,17 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 	/* Inherit flags from outer accessor definition */
 	Z_LVAL(modifiers->u.constant) |= (ai->flags & ZEND_ACC_STATIC);
 
-	if(strcasecmp("get", Z_STRVAL(function_token->u.constant)) == 0) {
+	if(Z_TYPE(function_token->u.constant) == IS_STRING && strcasecmp("get", Z_STRVAL(function_token->u.constant)) == 0) {
 		/* Convert type and variable name to __getHours() */
-		char *tmp = strcatalloc("__get", 5, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
+		char *tmp = strcatalloc("__get", 5, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant) TSRMLS_CC);
 		efree(Z_STRVAL(function_token->u.constant));
 		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
 
 		/* Declare Function */
 		zend_do_begin_function_declaration(function_token, function_token, 1, return_reference, modifiers, ZEND_FNP_PROP_GETTER TSRMLS_CC);
-	} else if(strcasecmp("set", Z_STRVAL(function_token->u.constant)) == 0) {
+	} else if(Z_TYPE(function_token->u.constant) == IS_STRING && strcasecmp("set", Z_STRVAL(function_token->u.constant)) == 0) {
 		/* Convert type and variable name to __setHours() */
-		char *tmp = strcatalloc("__set", 5, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
+		char *tmp = strcatalloc("__set", 5, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant) TSRMLS_CC);
 		efree(Z_STRVAL(function_token->u.constant));
 		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
 
@@ -1709,18 +1709,16 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		ZVAL_STRINGL(&value_node.u.constant, "value", 5, 1);
 
 		zend_do_receive_arg(ZEND_RECV, &value_node, &unused_node, NULL, &unused_node2, 0 TSRMLS_CC);
-	} else if(strcasecmp("_isset", Z_STRVAL(function_token->u.constant)) == 0) {
+	} else if(Z_TYPE(function_token->u.constant) == IS_LONG && Z_LVAL(function_token->u.constant) == T_ISSET) {
 		/* Convert type and variable name to __issetHours() */
-		char *tmp = strcatalloc("__isset", 7, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
-		efree(Z_STRVAL(function_token->u.constant));
+		char *tmp = strcatalloc("__isset", 7, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant) TSRMLS_CC);
 		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
 
 		/* Declare Function */
 		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers, ZEND_FNP_PROP_ISSETTER TSRMLS_CC);
-	} else if(strcasecmp("_unset", Z_STRVAL(function_token->u.constant)) == 0) {
+	} else if(Z_TYPE(function_token->u.constant) == IS_LONG && Z_LVAL(function_token->u.constant) == T_UNSET) {
 		/* Convert type and variable name to __issetHours() */
-		char *tmp = strcatalloc("__unset", 7, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
-		efree(Z_STRVAL(function_token->u.constant));
+		char *tmp = strcatalloc("__unset", 7, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant) TSRMLS_CC);
 		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
 
 		/* Declare Function */
@@ -1754,7 +1752,7 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 {
 	/* If we have no function body, create an automatic body */
 	if(body == NULL && (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) == 0) {
-		char *int_var_name = strcatalloc("__", 2, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant));
+		char *int_var_name = strcatalloc("__", 2, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant) TSRMLS_CC);
 
 		zend_property_info **zpi;
 

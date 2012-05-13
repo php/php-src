@@ -9,8 +9,8 @@ class AccessorTest {
 	public $b {
 		get { echo "Getting \$b\n"; return $this->a; }
 		set { echo "Setting \$b\n"; $this->a = $value; }
-		_isset;
-		_unset;
+		isset;
+		unset;
 	}
 }
 
