@@ -414,9 +414,7 @@ zend_function inline *zend_locate_getter(zval *object, zval *member, const zend_
 
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
 		if((*ai)->flags & ZEND_ACC_WRITEONLY) {
-			if((*ai)->setter) {
-				zend_error_noreturn(E_ERROR, "Cannot get write-only property %s::$%s.", ZEND_FN_SCOPE_NAME((*ai)->setter), Z_STRVAL_P(member));
-			}
+			zend_error_noreturn(E_ERROR, "Cannot get write-only property %s::$%s.", zobj->ce->name, Z_STRVAL_P(member));
 		} else if((*ai)->getter) {
 			/* If public getter, no access check required */
 			if((*ai)->getter->common.fn_flags & ZEND_ACC_PUBLIC) {
@@ -424,11 +422,7 @@ zend_function inline *zend_locate_getter(zval *object, zval *member, const zend_
 			}
 			return zend_std_get_method(&object, (char *)(*ai)->getter->common.function_name, strlen((*ai)->getter->common.function_name), NULL TSRMLS_CC);
 		}
-		if((*ai)->setter) {
-			zend_error_noreturn(E_ERROR, "Cannot get property %s::$%s, no getter defined.", ZEND_FN_SCOPE_NAME((*ai)->setter), Z_STRVAL_P(member));
-		}
-		/* This technically shouldn't ever happen, this would mean that an accessor is defined but there is no getter or setter */
-		zend_error_noreturn(E_ERROR, "Cannot get property $%s, no getter or setter defined.", Z_STRVAL_P(member));
+		zend_error_noreturn(E_ERROR, "Cannot get property %s::$%s, no getter defined.", zobj->ce->name, Z_STRVAL_P(member));
 	}
 	return zobj->ce->__get;
 }
@@ -442,9 +436,7 @@ zend_function inline *zend_locate_setter(zval *object, zval *member, const zend_
 
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
 		if((*ai)->flags & ZEND_ACC_READONLY) {
-			if((*ai)->getter) {
-				zend_error_noreturn(E_ERROR, "Cannot set read-only property %s::$%s.", ZEND_FN_SCOPE_NAME((*ai)->getter), Z_STRVAL_P(member));
-			}
+			zend_error_noreturn(E_ERROR, "Cannot set read-only property %s::$%s.", zobj->ce->name, Z_STRVAL_P(member));
 		} else if((*ai)->setter) {
 			/* If public setter, no access check required */
 			if((*ai)->setter->common.fn_flags & ZEND_ACC_PUBLIC) {
@@ -452,11 +444,7 @@ zend_function inline *zend_locate_setter(zval *object, zval *member, const zend_
 			}
 			return zend_std_get_method(&object, (char *)(*ai)->setter->common.function_name, strlen((*ai)->setter->common.function_name), NULL TSRMLS_CC);
 		}
-		if((*ai)->getter) {
-			zend_error_noreturn(E_ERROR, "Cannot set property %s::$%s, no setter defined.", ZEND_FN_SCOPE_NAME((*ai)->getter), Z_STRVAL_P(member));
-		}
-		/* This technically shouldn't ever happen, this would mean that an accessor is defined but there is no getter or setter */
-		zend_error_noreturn(E_ERROR, "Cannot set property $%s, no getter or setter defined.", Z_STRVAL_P(member));
+		zend_error_noreturn(E_ERROR, "Cannot set property %s::$%s, no setter defined.", zobj->ce->name, Z_STRVAL_P(member));
 	}
 	return zobj->ce->__set;
 }
@@ -832,11 +820,26 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const ze
 
 static void zend_std_unset_property(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
-	zend_object *zobj;
+	zend_object *zobj = Z_OBJ_P(object);
 	zval *tmp_member = NULL;
 	zend_property_info *property_info;
+	zend_function 		*unsetter = NULL;
 
-	zobj = Z_OBJ_P(object);
+	zend_accessor_info **ai = NULL;
+	ulong hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+
+	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
+		if((*ai)->flags & ZEND_ACC_READONLY) {
+			zend_error_noreturn(E_ERROR, "Cannot unset read-only property %s::$%s.", zobj->ce->name, Z_STRVAL_P(member));
+		} else if((*ai)->unset) {
+			/* If public unsetter, no access check required */
+			if((*ai)->unset->common.fn_flags & ZEND_ACC_PUBLIC) {
+				unsetter = (*ai)->unset;
+			} else {
+				unsetter = zend_std_get_method(&object, (char *)(*ai)->unset->common.function_name, strlen((*ai)->unset->common.function_name), NULL TSRMLS_CC);
+			}
+		}
+	}
 
  	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
  		ALLOC_ZVAL(tmp_member);
@@ -848,7 +851,7 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 		key = NULL;
 	}
 
-	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__unset != NULL), key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, member, (ai != NULL || zobj->ce->__unset != NULL), key TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL) &&
 	    EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) && 
@@ -862,16 +865,31 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 	           UNEXPECTED(zend_hash_quick_del(zobj->properties, property_info->name, property_info->name_length+1, property_info->h) == FAILURE)) {
 		zend_guard *guard = NULL;
 
-		if (zobj->ce->__unset &&
+		if ((ai != NULL || zobj->ce->__unset) &&
 		    zend_get_property_guard(zobj, property_info, member, &guard) == SUCCESS &&
 		    !guard->in_unset) {
-			/* have unseter - try with it! */
+			/* have unsetter - try with it! */
 			Z_ADDREF_P(object);
 			if (PZVAL_IS_REF(object)) {
 				SEPARATE_ZVAL(&object);
 			}
 			guard->in_unset = 1; /* prevent circular unsetting */
-			zend_std_call_unsetter(object, member TSRMLS_CC);
+			if(ai != NULL) {
+				if(unsetter != NULL) {
+					zend_call_method_with_0_params(&object, zobj->ce, &unsetter, unsetter->common.function_name, NULL);
+				} else {
+					/* Default implementation, equivalent to: $this->Property = NULL */
+					zval *zv_null;
+					ALLOC_ZVAL(zv_null);
+					INIT_PZVAL(zv_null);
+					Z_TYPE_P(zv_null) = IS_NULL;
+					Z_LVAL_P(zv_null) = 0;
+					zend_std_write_property(object, member, zv_null, key TSRMLS_CC);
+					zval_ptr_dtor(&zv_null);
+				}
+			} else if(zobj->ce->__unset) {
+				zend_std_call_unsetter(object, member TSRMLS_CC);
+			}
 			guard->in_unset = 0;
 			zval_ptr_dtor(&object);
 		} else if (zobj->ce->__unset && guard && guard->in_unset == 1) {
@@ -1444,13 +1462,28 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 
 static int zend_std_has_property(zval *object, zval *member, int has_set_exists, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
-	zend_object *zobj;
+	zend_object *zobj = Z_OBJ_P(object);
 	int result;
 	zval **value = NULL;
 	zval *tmp_member = NULL;
 	zend_property_info *property_info;
 
-	zobj = Z_OBJ_P(object);
+	zend_function *issetter = NULL;
+	zend_accessor_info **ai;
+	ulong hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+
+	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
+		if((*ai)->flags & ZEND_ACC_WRITEONLY) {
+			zend_error_noreturn(E_ERROR, "Cannot isset write-only property %s::$%s.", zobj->ce->name, Z_STRVAL_P(member));
+		} else if((*ai)->isset) {
+			/* If public issetter, no access check required */
+			if((*ai)->isset->common.fn_flags & ZEND_ACC_PUBLIC) {
+				issetter = (*ai)->isset;
+			} else {
+				issetter = zend_std_get_method(&object, (char *)(*ai)->isset->common.function_name, strlen((*ai)->isset->common.function_name), NULL TSRMLS_CC);
+			}
+		}
+	}
 
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
 		ALLOC_ZVAL(tmp_member);
@@ -1480,7 +1513,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 
 		result = 0;
 		if ((has_set_exists != 2) &&
-		    zobj->ce->__isset &&
+		    (ai != NULL || zobj->ce->__isset) &&
 		    zend_get_property_guard(zobj, property_info, member, &guard) == SUCCESS &&
 		    !guard->in_isset) {
 			zval *rv;
@@ -1491,7 +1524,26 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 				SEPARATE_ZVAL(&object);
 			}
 			guard->in_isset = 1; /* prevent circular getting */
-			rv = zend_std_call_issetter(object, member TSRMLS_CC);
+			if(ai != NULL) {
+				if(issetter) {
+					zend_call_method_with_0_params(&object, zobj->ce, &issetter, issetter->common.function_name, &rv);
+				} else {
+					/* Default Implementation: $this->Property != NULL */
+
+					zval *value = zend_std_read_property(object, member, BP_VAR_R, key TSRMLS_CC);
+
+					ALLOC_ZVAL(rv);
+					INIT_PZVAL(rv);
+					Z_TYPE_P(rv) = IS_BOOL;
+					if(Z_TYPE_P(value) == IS_NULL) {
+						Z_LVAL_P(rv) = 0;
+					} else {
+						Z_LVAL_P(rv) = 1;
+					}
+				}
+			} else {
+				rv = zend_std_call_issetter(object, member TSRMLS_CC);
+			}
 			if (rv) {
 				result = zend_is_true(rv);
 				zval_ptr_dtor(&rv);
