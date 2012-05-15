@@ -1,6 +1,6 @@
 --TEST--
 Read empty $value. 
---CREDIT--
+--CREDITS--
 Jason Bouffard <jbouffard1@yahoo.com>
 # TestFest Atlanta 2009-05-14
 --SKIPIF--
