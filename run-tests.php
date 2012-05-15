@@ -1315,7 +1315,7 @@ TEST $file
 	$tested = trim($section_text['TEST']);
 
 	/* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
-	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
+	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['GZIP_POST']) || !empty($section_text['DEFLATE_POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
 		if (isset($php_cgi)) {
 			$old_php = $php;
 			$php = $php_cgi . ' -C ';
@@ -1700,15 +1700,6 @@ TEST $file
 	} else if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
 		$post = trim($section_text['POST']);
-
-		if (array_key_exists('GZIP_POST', $section_text) && function_exists('gzencode')) {
-			$post = gzencode($post, 9, FORCE_GZIP);
-			$env['HTTP_CONTENT_ENCODING'] = 'gzip';
-		} else if (array_key_exists('DEFLATE_POST', $section_text) && function_exists('gzcompress')) {
-			$post = gzcompress($post, 9);
-			$env['HTTP_CONTENT_ENCODING'] = 'deflate';
-		}
-
 		save_text($tmp_post, $post);
 		$content_length = strlen($post);
 
@@ -1717,6 +1708,35 @@ TEST $file
 		$env['CONTENT_LENGTH'] = $content_length;
 
 		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+
+    } else if (array_key_exists('GZIP_POST', $section_text) && !empty($section_text['GZIP_POST'])) {
+
+        $post = trim($section_text['GZIP_POST']);
+        $post = gzencode($post, 9, FORCE_GZIP);
+        $env['HTTP_CONTENT_ENCODING'] = 'gzip';
+
+        save_text($tmp_post, $post);
+        $content_length = strlen($post);
+
+        $env['REQUEST_METHOD'] = 'POST';
+        $env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+        $env['CONTENT_LENGTH'] = $content_length;
+
+        $cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+
+    } else if (array_key_exists('DEFLATE_POST', $section_text) && !empty($section_text['DEFLATE_POST'])) {
+        $post = trim($section_text['DEFLATE_POST']);
+        $post = gzcompress($post, 9);
+        $env['HTTP_CONTENT_ENCODING'] = 'deflate';
+        save_text($tmp_post, $post);
+        $content_length = strlen($post);
+
+        $env['REQUEST_METHOD'] = 'POST';
+        $env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+        $env['CONTENT_LENGTH'] = $content_length;
+
+        $cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+
 
 	} else {
 
