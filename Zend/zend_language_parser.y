@@ -158,6 +158,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_FUNCTION   "function (T_FUNCTION)"
 %token T_CONST      "const (T_CONST)"
 %token T_RETURN     "return (T_RETURN)"
+%token T_YIELD      "yield (T_YIELD)"
 %token T_TRY        "try (T_TRY)"
 %token T_CATCH      "catch (T_CATCH)"
 %token T_THROW      "throw (T_THROW)"
@@ -297,6 +298,7 @@ unticked_statement:
 	|	T_RETURN ';'						{ zend_do_return(NULL, 0 TSRMLS_CC); }
 	|	T_RETURN expr_without_variable ';'	{ zend_do_return(&$2, 0 TSRMLS_CC); }
 	|	T_RETURN variable ';'				{ zend_do_return(&$2, 1 TSRMLS_CC); }
+	|	T_YIELD expr ';'					{ zend_do_yield(&$2 TSRMLS_CC); }
 	|	T_GLOBAL global_var_list ';'
 	|	T_STATIC static_var_list ';'
 	|	T_ECHO echo_expr_list ';'

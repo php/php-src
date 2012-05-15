@@ -2655,6 +2655,12 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+void zend_do_yield(znode *expr TSRMLS_DC) /* {{{ */
+{
+    /* do nothing for now */
+}
+/* }}} */
+
 static int zend_add_try_element(zend_uint try_op TSRMLS_DC) /* {{{ */
 {
 	int try_catch_offset = CG(active_op_array)->last_try_catch++;
