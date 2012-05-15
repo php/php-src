@@ -57,6 +57,7 @@ PHP                                                                        NEWS
   . Fixed bug #61820 (using ob_gzhandler will complain about headers already 
     sent when no compression). (Mike)
   . Fixed bug #61443 (can't change zlib.output_compression on the fly). (Mike)
+  . Fixed bug #60761 (zlib.output_compression fails on refresh). (Mike)
 
 08 May 2012, PHP 5.4.3
 
