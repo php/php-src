@@ -3832,11 +3832,21 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		}
    
 		zend_add_magic_methods(ce, hash_key->arKey, hash_key->nKeyLength, fn_copy_p TSRMLS_CC);
-   
-		zend_function_dtor(fn);
 	} else {
-		zend_function_dtor(fn);
+		/* User defined a function with the same name, add a reference to the original
+		   trait function to avoid function name memory releasing problem */
+		char *tmp_fn_name = emalloc(hash_key->nKeyLength + 1);
+		tmp_fn_name[0] = '\0';
+		snprintf(tmp_fn_name + 1, hash_key->nKeyLength, "%s", hash_key->arKey);
+		fn_copy = *fn;
+		function_add_ref(&fn_copy);
+
+		if (zend_hash_add(&ce->function_table, tmp_fn_name, hash_key->nKeyLength + 1, &fn_copy, sizeof(zend_function), NULL)==FAILURE) {
+			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
+		}
+		efree(tmp_fn_name);
 	}
+	zend_function_dtor(fn);
 
 	return ZEND_HASH_APPLY_REMOVE;
 }
@@ -3869,11 +3879,9 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				&& (zend_binary_strcasecmp(aliases[i]->trait_method->method_name, aliases[i]->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
 				fn_copy = *fn;
 				function_add_ref(&fn_copy);
-				/* this function_name is never destroyed, because its refcount
-				   greater than 1, classes are always destoyed in reverse order
-				   and trait is declared early than this class */
+
 				fn_copy.common.function_name = aliases[i]->alias;
-					
+
 				/* if it is 0, no modifieres has been changed */
 				if (aliases[i]->modifiers) { 
 					fn_copy.common.fn_flags = aliases[i]->modifiers;
