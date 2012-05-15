@@ -41,6 +41,10 @@ PHP                                                                        NEWS
   . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
     set to null). (Anatoliy)
 
+- Reflection:
+  . Implemented FR #61602 (Allow access to the name of constant
+    used as function/method parameter's default value). (reeze.xia@gmail.com)
+
 - FPM
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
     (Laruence, Gustavo)
