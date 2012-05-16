@@ -1,53 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.3.12
+?? ??? 2012, PHP 5.3.15
 
-- CLI SAPI:
-  . Fixed bug #61546 (functions related to current script failed when chdir() 
-    in cli sapi). (Laruence, reeze.xia@gmail.com)
+?? ??? 2012, PHP 5.3.14
 
-- CURL:
-  . Fixed bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction).
-    (Laruence)
-
-- Core:
-  . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
-    member of a null object). (Laruence)
-  . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
-    reference). (Laruence)
-  . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
-  . Fixed bug #61764 ('I' unpacks n as signed if n > 2^31-1 on LP64). (Gustavo)
-  . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
-    set to null). (Anatoliy)
-  . Fixed bug #61713 (Logic error in charset detection for htmlentities).
-    (Anatoliy)
-  . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
-  . Changed php://fd to be available only for CLI.
-
-- Fileinfo:
-  . Fixed bug #61812 (Uninitialised value used in libmagic). 
-    (Laruence, Gustavo)
-
-- JSON
-  . Fixed bug #61537 (json_encode() incorrectly truncates/discards
-    information). (Adam)
-
-- PDO:
-  . Fixed bug #61755 (A parsing bug in the prepared statements can lead to
-    access violations). (Johannes)
-
-- Phar:
-  . Fix bug #61065 (Secunia SA44335). (Rasmus)
-
-- Iconv extension:
-  . Fixed a bug that iconv extension fails to link to the correct library
-    when another extension makes use of a library that links to the iconv
-    library. See https://bugs.gentoo.org/show_bug.cgi?id=364139 for detail.
-    (Moriyoshi)
-
-- Streams:
-  . Fixed bug #61961 (file_get_contents leaks when access empty file with
-    maxlen set). (Reeze)
+(merge after release)
 
 08 May 2012, PHP 5.3.13
 - CGI
