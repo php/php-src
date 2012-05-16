@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.3.12
+17 May 2012, PHP 5.3.14RC1
 
 - CLI SAPI:
   . Fixed bug #61546 (functions related to current script failed when chdir() 
