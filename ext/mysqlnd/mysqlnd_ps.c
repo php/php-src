@@ -1265,8 +1265,6 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s TSRMLS_DC)
 			stmt->error_info = conn->error_info;
 		}
 		stmt->upsert_status = conn->upsert_status;
-
-		stmt->state = MYSQLND_STMT_PREPARED;
 	}
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
