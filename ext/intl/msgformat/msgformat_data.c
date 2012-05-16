@@ -29,9 +29,10 @@ void msgformat_data_init( msgformat_data* mf_data TSRMLS_DC )
 	if( !mf_data )
 		return;
 
-	mf_data->umsgf = NULL;
-	mf_data->orig_format = NULL;
-	mf_data->arg_types = NULL;
+	mf_data->umsgf			= NULL;
+	mf_data->orig_format	= NULL;
+	mf_data->arg_types		= NULL;
+	mf_data->tz_set			= 0;
 	intl_error_reset( &mf_data->error TSRMLS_CC );
 }
 /* }}} */
