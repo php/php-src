@@ -339,6 +339,8 @@ PHP 5.4 UPGRADE NOTES
 - ob_start() no longer starts multiple output buffers when passed
   array("callback1", "callback2", "callback3", ...).
 
+- Since 5.4.4, "php://fd" stream syntax is available only in CLI build.
+
 ==============================
 5. Changes to existing classes
 ==============================
