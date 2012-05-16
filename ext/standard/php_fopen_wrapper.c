@@ -263,6 +263,20 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, char *path, ch
 		long	   fildes_ori;
 		int		   dtablesize;
 
+		if (strcmp(sapi_module.name, "cli")) {
+			if (options & REPORT_ERRORS) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Direct access to file descriptors is only available from command-line PHP");
+			}
+			return NULL;
+		}
+
+		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
+			if (options & REPORT_ERRORS) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL file-access is disabled in the server configuration");
+			}
+			return NULL;
+		}
+
 		start = &path[3];
 		fildes_ori = strtol(start, &end, 10);
 		if (end == start || *end != '\0') {
