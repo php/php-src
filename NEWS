@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.4.4
+17 May 2012, PHP 5.4.4 RC1
 
 - CLI Server:
   . Implemented FR #61977 (Need CLI web-server support for files with .htm & 
