@@ -40,6 +40,10 @@ PHP                                                                        NEWS
   . Fixed bug #54547 (wrong equality of string numbers). (Gustavo)
   . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
     set to null). (Anatoliy)
+  . Changed php://fd to be available only for CLI.
+
+- Phar:
+  . Fix bug #61065 (Secunia SA44335). (Rasmus)
 
 - Reflection:
   . Implemented FR #61602 (Allow access to the name of constant
