@@ -93,7 +93,7 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 			}
 
 			id = offset_id;
-			id_len = spprintf((char**)&id, sizeof(offset_id), "GMT%+03d:%02d",
+			id_len = slprintf((char*)id, sizeof(offset_id), "GMT%+03d:%02d",
 				hours, minutes);
 			break;
 		}
@@ -137,6 +137,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 	UnicodeString		id;
 	char				*message = NULL;
 	php_timezone_obj	*tzobj;
+	zval				arg = zval_used_for_init;
 
 	timeZone->getID(id);
 	if (id.isBogus()) {
@@ -159,7 +160,6 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 		tzobj->tzi.utc_offset = -1 * timeZone->getRawOffset() / (60 * 1000);
 	} else {
 		/* Call the constructor! */
-		zval arg = zval_used_for_init;
 		Z_TYPE(arg) = IS_STRING;
 		if (intl_charFromString(id, &Z_STRVAL(arg), &Z_STRLEN(arg),
 				&INTL_ERROR_CODE(*outside_error)) == FAILURE) {
@@ -180,16 +180,21 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 		}
 	}
 
-	return ret;
-
+	if (0) {
 error:
+		if (ret) {
+			zval_ptr_dtor(&ret);
+		}
+		ret = NULL;
+	}
+
 	if (message) {
 		efree(message);
 	}
-	if (ret) {
-		zval_ptr_dtor(&ret);
+	if (Z_TYPE(arg) == IS_STRING) {
+		zval_dtor(&arg);
 	}
-	return NULL;
+	return ret;
 }
 /* }}} */
 
