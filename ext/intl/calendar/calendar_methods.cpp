@@ -1142,7 +1142,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	}
 
 	datetime = (php_date_obj*)zend_object_store_get_object(zv_datetime TSRMLS_CC);
-	if (!datetime) {
+	if (!datetime->time) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_from_date_time: DateTime object is unconstructed",
 			0 TSRMLS_CC);
@@ -1182,6 +1182,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	}
 	cal->setTime(((UDate)Z_LVAL_P(zv_timestamp)) * 1000., status);
     if (U_FAILURE(status)) {
+		/* time zone was adopted by cal; should not be deleted here */
 		delete cal;
 		intl_error_set(NULL, status, "intlcal_from_date_time: "
 				"error creating ICU Calendar::setTime()", 0 TSRMLS_CC);

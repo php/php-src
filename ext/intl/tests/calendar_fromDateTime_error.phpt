@@ -44,9 +44,7 @@ Warning: IntlCalendar::fromDateTime() expects at most 2 parameters, 3 given in %
 Warning: IntlCalendar::fromDateTime(): intlcal_from_date_time: bad arguments in %s on line %d
 NULL
 threw exception, OK
-Warning: DateTime::getTimestamp(): The DateTime object has not been correctly initialized by its constructor in %s on line %d
-
-Warning: IntlCalendar::fromDateTime(): intlcal_from_date_time: bad DateTime; call to DateTime::getTimestamp() failed in %s on line %d
+Warning: IntlCalendar::fromDateTime(): intlcal_from_date_time: DateTime object is unconstructed in %s on line %d
 NULL
 
 Warning: IntlCalendar::fromDateTime(): intlcal_from_date_time: object has an time zone offset that's too large in %s on line %d
