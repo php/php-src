@@ -28,6 +28,7 @@
 #include <unicode/ustdio.h>
 #include <unicode/timezone.h>
 #include <unicode/datefmt.h>
+#include <unicode/calendar.h>
 
 #include <vector>
 
@@ -39,6 +40,8 @@ extern "C" {
 #include "msgformat_format.h"
 #include "msgformat_helpers.h"
 #include "intl_convert.h"
+#define USE_CALENDAR_POINTER 1
+#include "../calendar/calendar_class.h"
 /* avoid redefinition of int8_t, already defined in unicode/pwin32.h */
 #define _MSC_STDINT_H_ 1
 #include "ext/date/php_date.h"
@@ -134,6 +137,14 @@ static double umsg_helper_zval_to_millis(zval *z, UErrorCode *status TSRMLS_DC) 
 				rv = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval);
 			}
 			zval_ptr_dtor(&zfuncname);
+		} else if (instanceof_function(Z_OBJCE_P(z), Calendar_ce_ptr TSRMLS_CC)) {
+			Calendar_object *co = (Calendar_object *)
+				zend_object_store_get_object(z TSRMLS_CC );
+			if (co->ucal == NULL) {
+				*status = U_ILLEGAL_ARGUMENT_ERROR;
+			} else {
+				rv = (double)co->ucal->getTime(*status);
+			}
 		} else {
 			/* TODO: try with cast(), get() to obtain a number */
 			*status = U_ILLEGAL_ARGUMENT_ERROR;
