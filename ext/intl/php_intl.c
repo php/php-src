@@ -796,6 +796,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( intlcal_set_lenient, ainfo_cal_set_lenient )
 	PHP_FE( intlcal_equals, ainfo_cal_other_cal )
 	PHP_FE( intlcal_from_date_time, ainfo_cal_from_date_time )
+	PHP_FE( intlcal_to_date_time, ainfo_cal_only_cal )
 #if U_ICU_VERSION_MAJOR_NUM >= 49
 	PHP_FE( intlcal_get_repeated_wall_time_option, ainfo_cal_only_cal )
 	PHP_FE( intlcal_get_skipped_wall_time_option, ainfo_cal_only_cal )

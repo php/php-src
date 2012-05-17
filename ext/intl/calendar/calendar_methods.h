@@ -103,6 +103,8 @@ PHP_FUNCTION(intlcal_set_skipped_wall_time_option);
 
 PHP_FUNCTION(intlcal_from_date_time);
 
+PHP_FUNCTION(intlcal_to_date_time);
+
 PHP_FUNCTION(intlcal_get_error_code);
 
 PHP_FUNCTION(intlcal_get_error_message);

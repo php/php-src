@@ -431,6 +431,7 @@ static const zend_function_entry Calendar_class_functions[] = {
 	PHP_ME_MAPPING(setSkippedWallTimeOption,intlcal_set_skipped_wall_time_option,ainfo_cal_wall_time_option,ZEND_ACC_PUBLIC)
 #endif
 	PHP_ME_MAPPING(fromDateTime,		intlcal_from_date_time,		ainfo_cal_from_date_time,			ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(toDateTime,			intlcal_to_date_time,		ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getErrorCode,		intlcal_get_error_code,		ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getErrorMessage,		intlcal_get_error_message,	ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_FE_END
