@@ -17,7 +17,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: php_cli.c 306938 2011-01-01 02:17:06Z felipe $ */
+/* $Id$ */
 
 #include <stdio.h>
 #include <fcntl.h>
@@ -1289,7 +1289,8 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_path = NULL, *q, *vpath;
 	size_t prev_path_len;
-	int  is_static_file = 0;
+	int is_static_file = 0;
+	int is_index_file_matched = 0;
 
 	if (!buf) {
 		return;
@@ -1322,7 +1323,8 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	q = p;
 	while (q > buf) {
 		if (!stat(buf, &sb)) {
-			if (sb.st_mode & S_IFDIR) {
+			if (!is_index_file_matched && (sb.st_mode & S_IFDIR)) {
+				is_index_file_matched = 1;
 				const char **file = index_files;
 				if (q[-1] != DEFAULT_SLASH) {
 					*q++ = DEFAULT_SLASH;
@@ -1345,7 +1347,10 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 				}
 			}
 			break; /* regular file */
-		} 
+		} else {
+			is_index_file_matched = 1;
+		}
+
 		if (prev_path) {
 			pefree(prev_path, 1);
 			*q = DEFAULT_SLASH;
@@ -1355,7 +1360,10 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 		prev_path = pestrndup(q, prev_path_len, 1);
 		*q = '\0';
 	}
-	if (prev_path) {
+	if (!(sb.st_mode & S_IFREG)) {
+		request->path_translated = NULL;
+		return;
+	} else if (prev_path) {
 		request->path_info_len = prev_path_len;
 #ifdef PHP_WIN32
 		while (prev_path_len--) {

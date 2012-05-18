@@ -20,25 +20,6 @@ if (!$fp) {
   die("connect failed");
 }
 
-if(fwrite($fp, <<<HEADER
-GET /foo/bar HTTP/1.1
-Host: {$host}
-
-
-HEADER
-)) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
-}
-
-fclose($fp);
-
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
-
 
 if(fwrite($fp, <<<HEADER
 GET /foo/bar/ HTTP/1.0
@@ -49,6 +30,7 @@ HEADER
 )) {
 	while (!feof($fp)) {
 		echo fgets($fp);
+		break;
 	}
 }
 
@@ -76,18 +58,5 @@ HEADER
 fclose($fp);
 ?>
 --EXPECTF--
-HTTP/1.1 200 OK
-Host: %s
-Connection: close
-X-Powered-By: PHP/%s
-Content-type: text/html
-
-string(8) "/foo/bar"
-HTTP/1.0 200 OK
-Host: %s
-Connection: close
-X-Powered-By: PHP/%s
-Content-type: text/html
-
-string(9) "/foo/bar/"
+HTTP/1.0 404 Not Found
 HTTP/1.0 404 Not Found
