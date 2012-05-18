@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 
 ?? ??? 2012, PHP 5.3.14
 
+- XML Writer:
+  . Fixed bug #62064 (memory leak in the XML Writer module). 
+    (jean-pierre dot lozi at lip6 dot fr)
+
 (merge after release)
 
 08 May 2012, PHP 5.3.13
