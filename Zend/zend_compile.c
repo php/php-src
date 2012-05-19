@@ -2660,7 +2660,11 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 
 void zend_do_yield(znode *expr TSRMLS_DC) /* {{{ */
 {
-    /* do nothing for now */
+	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) == 0) {
+		zend_error(E_COMPILE_ERROR, "The \"yield\" statement can only be used inside a generator function");
+	}
+
+	/* do nothing for now */
 }
 /* }}} */
 
