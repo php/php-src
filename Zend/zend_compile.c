@@ -1725,7 +1725,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	}
 
 	{
-		/* Push a seperator to the switch and foreach stacks */
+		/* Push a seperator to the switch stack */
 		zend_switch_entry switch_entry;
 
 		switch_entry.cond.op_type = IS_UNUSED;
@@ -1733,16 +1733,16 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		switch_entry.control_var = 0;
 
 		zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry, sizeof(switch_entry));
+	}
 
-		{
-			/* Foreach stack separator */
-			zend_op dummy_opline;
+	{
+		/* Push a separator to the foreach stack */
+		zend_op dummy_opline;
 
-			dummy_opline.result_type = IS_UNUSED;
-			dummy_opline.op1_type = IS_UNUSED;
+		dummy_opline.result_type = IS_UNUSED;
+		dummy_opline.op1_type = IS_UNUSED;
 
-			zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline, sizeof(zend_op));
-		}
+		zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline, sizeof(zend_op));
 	}
 
 	if (CG(doc_comment)) {
