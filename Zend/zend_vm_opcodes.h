@@ -159,3 +159,4 @@
 #define ZEND_SEPARATE                        156
 #define ZEND_QM_ASSIGN_VAR                   157
 #define ZEND_JMP_SET_VAR                     158
+#define ZEND_SUSPEND_AND_RETURN_GENERATOR    159

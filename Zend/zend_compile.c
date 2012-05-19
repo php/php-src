@@ -2670,12 +2670,18 @@ void zend_do_yield(znode *expr TSRMLS_DC) /* {{{ */
 
 void zend_do_suspend_if_generator(TSRMLS_D) /* {{{ */
 {
+	zend_op *opline;
+
 	// we only suspend execution if the current function is a generator
 	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) == 0) {
 		return;
 	}
 
-	/* do nothing for now */
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_SUSPEND_AND_RETURN_GENERATOR;
+	SET_UNUSED(opline->op1);
+	SET_UNUSED(opline->op2);
 }
 /* }}} */
 
