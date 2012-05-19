@@ -26,6 +26,7 @@ HEADER
 )) {
 	while (!feof($fp)) {
 		echo fgets($fp);
+		break;
 	}
 }
 
@@ -53,16 +54,7 @@ fclose($fp);
 
 ?>
 --EXPECTF--
-HTTP/1.1 200 OK
-Host: %s
-Connection: close
-X-Powered-By: PHP/%s
-Content-type: text/html
-
-string(18) "/index.php/foo/bar"
-string(10) "/index.php"
-string(8) "/foo/bar"
-string(7) "foo=bar"
+HTTP/1.1 404 Not Found
 HTTP/1.0 200 OK
 Host: %s
 Connection: close
