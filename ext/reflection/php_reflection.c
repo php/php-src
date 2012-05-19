@@ -3725,7 +3725,10 @@ static int _addmethod_va(zend_function *mptr TSRMLS_DC, int num_args, va_list ar
 	long filter = va_arg(args, long);
 	zval *obj = va_arg(args, zval *);
 
-	_addmethod(mptr, ce, retval, filter, obj TSRMLS_CC);
+	if (hash_key->nKeyLength != 0 && hash_key->arKey[0] != '\0') {
+		_addmethod(mptr, ce, retval, filter, obj TSRMLS_CC);
+	}
+
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
