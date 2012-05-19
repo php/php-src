@@ -372,7 +372,8 @@ is_reference:
 
 unticked_function_declaration_statement:
 		function is_generator is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 0, $2.op_type, $3.op_type, NULL TSRMLS_CC); }
-			'(' parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
+		'(' parameter_list ')' { zend_do_suspend_if_generator(TSRMLS_C); }
+		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 ;
 
 unticked_class_declaration_statement:
@@ -583,7 +584,8 @@ class_statement:
 	|	class_constant_declaration ';'
 	|	trait_use_statement
 	|	method_modifiers function is_generator is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$5, 1, $3.op_type, $4.op_type, &$1 TSRMLS_CC); }
-		'(' parameter_list ')' method_body { zend_do_abstract_method(&$5, &$1, &$10 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
+		'(' parameter_list ')' { zend_do_suspend_if_generator(TSRMLS_C); }
+		method_body { zend_do_abstract_method(&$5, &$1, &$11 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
 ;
 
 trait_use_statement:
@@ -800,9 +802,11 @@ expr_without_variable:
 	|	'`' backticks_expr '`' { zend_do_shell_exec(&$$, &$2 TSRMLS_CC); }
 	|	T_PRINT expr  { zend_do_print(&$$, &$2 TSRMLS_CC); }
 	|	function is_generator is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, $3.op_type, 0 TSRMLS_CC); }
-		'(' parameter_list ')' lexical_vars '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $4; }
+		'(' parameter_list ')' lexical_vars { zend_do_suspend_if_generator(TSRMLS_C); }
+		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $4; }
 	|	T_STATIC function is_generator is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, $4.op_type, 1 TSRMLS_CC); }
-		'(' parameter_list ')' lexical_vars '{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); $$ = $5; }
+		'(' parameter_list ')' lexical_vars { zend_do_suspend_if_generator(TSRMLS_C); }
+		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); $$ = $5; }
 ;
 
 combined_scalar_offset:
