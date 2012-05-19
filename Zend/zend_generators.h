@@ -12,30 +12,24 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Sterling Hughes <sterling@php.net>                          |
-   |          Marcus Boerger <helly@php.net>                              |
+   | Authors: Nikita Popov <nikic@php.net>                                |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#include "zend.h"
-#include "zend_API.h"
-#include "zend_builtin_functions.h"
-#include "zend_interfaces.h"
-#include "zend_exceptions.h"
-#include "zend_closures.h"
-#include "zend_generators.h"
+#ifndef ZEND_GENERATORS_H
+#define ZEND_GENERATORS_H
 
+BEGIN_EXTERN_C()
 
-ZEND_API void zend_register_default_classes(TSRMLS_D)
-{
-	zend_register_interfaces(TSRMLS_C);
-	zend_register_default_exception(TSRMLS_C);
-	zend_register_iterator_wrapper(TSRMLS_C);
-	zend_register_closure_ce(TSRMLS_C);
-	zend_register_generator_ce(TSRMLS_C);
-}
+void zend_register_generator_ce(TSRMLS_D);
+
+extern ZEND_API zend_class_entry *zend_ce_generator;
+
+END_EXTERN_C()
+
+#endif
 
 /*
  * Local variables:
