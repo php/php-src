@@ -1118,6 +1118,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 	int				locale_str_len;
 	TimeZone		*timeZone;
 	UErrorCode		status				= U_ZERO_ERROR;
+	Calendar        *cal;
 	intl_error_reset(NULL TSRMLS_CC);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|s!",
@@ -1172,7 +1173,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 		locale_str = const_cast<char*>(intl_locale_get_default(TSRMLS_C));
 	}
 
-	Calendar *cal = Calendar::createInstance(timeZone,
+	cal = Calendar::createInstance(timeZone,
 		Locale::createFromName(locale_str), status);
 	if (cal == NULL) {
 		delete timeZone;
