@@ -106,6 +106,8 @@ PHP X.Y UPGRADE NOTES
   - intlcal_get_skipped_wall_time_option()
   - intlcal_set_repeated_wall_time_option()
   - intlcal_set_skipped_wall_time_option()
+  - intlcal_from_date_time()
+  - intlcal_to_date_time()
   - intlcal_get_error_code()
   - intlcal_get_error_message()
   - intlgregcal_create_instance()
@@ -130,6 +132,8 @@ PHP X.Y UPGRADE NOTES
   - intltz_has_same_rules()
   - intltz_get_display_name()
   - intltz_get_dst_savings()
+  - intltz_from_date_time_zone()
+  - intltz_to_date_time_zone()
   - intltz_get_error_code()
   - intltz_get_error_message()
 
@@ -154,7 +158,10 @@ PHP X.Y UPGRADE NOTES
 8. Other Changes to Extensions
 ========================================
 
-- The intl extension now requires ICU 4.0+.
+- Intl:
+  - This extension now requires ICU 4.0+.
+  - Added intl.use_exceptions INI directive, which controls what happens when
+    global errors are set together with intl.error_level.
 
 ========================================
 9. New Global Constants
