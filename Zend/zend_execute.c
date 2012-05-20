@@ -35,6 +35,7 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "zend_closures.h"
+#include "zend_generators.h"
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 

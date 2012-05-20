@@ -1154,9 +1154,17 @@ static int ZEND_FASTCALL  ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 static int ZEND_FASTCALL  ZEND_SUSPEND_AND_RETURN_GENERATOR_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	/* do nothing for now */
+	if (EG(return_value_ptr_ptr)) {
+		zval *return_value;
 
-	ZEND_VM_NEXT_OPCODE();
+		ALLOC_INIT_ZVAL(return_value);
+		object_init_ex(return_value, zend_ce_generator);
+
+		*EG(return_value_ptr_ptr) = return_value;
+	}
+
+	/* for now we just do a normal return without suspension */
+	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_FETCH_CLASS_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
