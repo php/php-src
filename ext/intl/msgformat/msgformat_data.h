@@ -32,6 +32,7 @@ typedef struct {
 	char*			orig_format;
 	ulong			orig_format_len;
 	HashTable*		arg_types;
+	int				tz_set; /* if we've already the time zone in sub-formats */
 } msgformat_data;
 
 msgformat_data* msgformat_data_create( TSRMLS_D );

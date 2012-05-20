@@ -59,7 +59,9 @@ typedef struct {
 		RETURN_FALSE; \
 	}
 
-TimeZone *timezone_process_timezone_argument(zval **zv_timezone, const char *func TSRMLS_DC);
+TimeZone *timezone_convert_datetimezone(int type, void *object, int is_datetime, intl_error *outside_error, const char *func TSRMLS_DC);
+zval *timezone_convert_to_datetimezone(const TimeZone *timeZone, intl_error *outside_error, const char *func TSRMLS_DC);
+TimeZone *timezone_process_timezone_argument(zval **zv_timezone, intl_error *error, const char *func TSRMLS_DC);
 
 void timezone_object_construct(const TimeZone *zone, zval *object, int owned TSRMLS_DC);
 

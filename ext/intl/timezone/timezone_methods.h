@@ -21,6 +21,8 @@
 
 PHP_FUNCTION(intltz_create_time_zone);
 
+PHP_FUNCTION(intltz_from_date_time_zone);
+
 PHP_FUNCTION(intltz_create_default);
 
 PHP_FUNCTION(intltz_get_id);
@@ -54,6 +56,8 @@ PHP_FUNCTION(intltz_has_same_rules);
 PHP_FUNCTION(intltz_get_display_name);
 
 PHP_FUNCTION(intltz_get_dst_savings);
+
+PHP_FUNCTION(intltz_to_date_time_zone);
 
 PHP_FUNCTION(intltz_get_error_code);
 

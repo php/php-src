@@ -316,8 +316,8 @@ ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_add, 0, 0, 2)
 	ZEND_ARG_INFO(0, amount)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setTimeZone, 0, 0, 2)
-	ZEND_ARG_OBJ_INFO(0, timeZone, IntlTimeZone, 1)
+ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setTimeZone, 0, 0, 1)
+	ZEND_ARG_INFO(0, timeZone)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_set, 0, 0, 2)
@@ -349,6 +349,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setLenient, 0, 0, 1)
 	ZEND_ARG_INFO(0, isLenient)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_from_date_time, 0, 0, 1)
+	ZEND_ARG_INFO(0, dateTime)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_wall_time_option, 0, 0, 1)
@@ -426,6 +430,8 @@ static const zend_function_entry Calendar_class_functions[] = {
 	PHP_ME_MAPPING(setRepeatedWallTimeOption,intlcal_set_repeated_wall_time_option,ainfo_cal_wall_time_option,ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(setSkippedWallTimeOption,intlcal_set_skipped_wall_time_option,ainfo_cal_wall_time_option,ZEND_ACC_PUBLIC)
 #endif
+	PHP_ME_MAPPING(fromDateTime,		intlcal_from_date_time,		ainfo_cal_from_date_time,			ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(toDateTime,			intlcal_to_date_time,		ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getErrorCode,		intlcal_get_error_code,		ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getErrorMessage,		intlcal_get_error_message,	ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_FE_END

@@ -26,6 +26,9 @@
 #include <unicode/msgfmt.h>
 #include <unicode/chariter.h>
 #include <unicode/ustdio.h>
+#include <unicode/timezone.h>
+#include <unicode/datefmt.h>
+#include <unicode/calendar.h>
 
 #include <vector>
 
@@ -37,9 +40,13 @@ extern "C" {
 #include "msgformat_format.h"
 #include "msgformat_helpers.h"
 #include "intl_convert.h"
+#define USE_CALENDAR_POINTER 1
+#include "../calendar/calendar_class.h"
 /* avoid redefinition of int8_t, already defined in unicode/pwin32.h */
 #define _MSC_STDINT_H_ 1
 #include "ext/date/php_date.h"
+#define USE_TIMEZONE_POINTER
+#include "../timezone/timezone_class.h"
 }
 
 #ifndef INFINITY
@@ -130,6 +137,14 @@ static double umsg_helper_zval_to_millis(zval *z, UErrorCode *status TSRMLS_DC) 
 				rv = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval);
 			}
 			zval_ptr_dtor(&zfuncname);
+		} else if (instanceof_function(Z_OBJCE_P(z), Calendar_ce_ptr TSRMLS_CC)) {
+			Calendar_object *co = (Calendar_object *)
+				zend_object_store_get_object(z TSRMLS_CC );
+			if (co->ucal == NULL) {
+				*status = U_ILLEGAL_ARGUMENT_ERROR;
+			} else {
+				rv = (double)co->ucal->getTime(*status);
+			}
 		} else {
 			/* TODO: try with cast(), get() to obtain a number */
 			*status = U_ILLEGAL_ARGUMENT_ERROR;
@@ -368,6 +383,55 @@ static HashTable *umsg_get_types(MessageFormatter_object *mfo,
 #endif
 }
 
+static void umsg_set_timezone(MessageFormatter_object *mfo,
+							  intl_error& err TSRMLS_DC)
+{
+	MessageFormat *mf = (MessageFormat *)mfo->mf_data.umsgf;
+	TimeZone	  *used_tz = NULL;
+	const Format  **formats;
+	int32_t		  count;
+
+	/* Unfortanely, this cannot change the time zone for arguments that
+	 * appear inside complex formats because ::getFormats() returns NULL
+	 * for all uncached formats, which is the case for complex formats
+	 * unless they were set via one of the ::setFormat() methods */
+	
+	if (mfo->mf_data.tz_set) {
+		return; /* already done */
+	}
+
+	formats = mf->getFormats(count);
+	
+	if (formats == NULL) {
+		intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
+			"Out of memory retrieving subformats", 0 TSRMLS_CC);
+	}
+
+	for (int i = 0; U_SUCCESS(err.code) && i < count; i++) {
+		DateFormat* df = dynamic_cast<DateFormat*>(
+			const_cast<Format *>(formats[i]));
+		if (df == NULL) {
+			continue;
+		}
+		
+		if (used_tz == NULL) {
+			zval nullzv = zval_used_for_init,
+				 *zvptr = &nullzv;
+			used_tz = timezone_process_timezone_argument(&zvptr, &err,
+				"msgfmt_format" TSRMLS_CC);
+			if (used_tz == NULL) {
+				continue;
+			}
+		}
+		
+		df->setTimeZone(*used_tz);
+	}
+
+	if (U_SUCCESS(err.code)) {
+		mfo->mf_data.tz_set = 1;
+	}
+}
+
 U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 								HashTable *args,
 								UChar **formatted,
@@ -385,6 +449,8 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 	}
 
 	types = umsg_get_types(mfo, err TSRMLS_CC);
+	
+	umsg_set_timezone(mfo, err TSRMLS_CC);
 
 	fargs.resize(arg_count);
 	farg_names.resize(arg_count);
