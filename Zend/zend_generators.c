@@ -23,6 +23,49 @@
 #include "zend_generators.h"
 
 ZEND_API zend_class_entry *zend_ce_generator;
+static zend_object_handlers zend_generator_handlers;
+
+typedef struct _zend_generator {
+	zend_object std;
+	/* nothing more for now */
+} zend_generator;
+
+static void zend_generator_free_storage(zend_generator *generator TSRMLS_DC) /* {{{ */
+{
+	zend_object_std_dtor(&generator->std TSRMLS_CC);
+
+	efree(generator);
+}
+/* }}} */
+
+static zend_object_value zend_generator_create(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
+{
+	zend_generator *generator;
+	zend_object_value object;
+
+	generator = emalloc(sizeof(zend_generator));
+	memset(generator, 0, sizeof(zend_generator));
+
+	zend_object_std_init(&generator->std, class_type TSRMLS_CC);
+
+	object.handle = zend_objects_store_put(generator, NULL,
+		(zend_objects_free_object_storage_t) zend_generator_free_storage,
+		NULL /* no clone handler for now */
+		TSRMLS_CC
+	);
+	object.handlers = &zend_generator_handlers;
+
+	return object;
+}
+/* }}} */
+
+static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* {{{ */
+{
+	zend_error(E_RECOVERABLE_ERROR, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
+
+	return NULL;
+}
+/* }}} */
 
 static const zend_function_entry generator_functions[] = {
 	ZEND_FE_END
@@ -35,6 +78,10 @@ void zend_register_generator_ce(TSRMLS_D) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "Generator", generator_functions);
 	zend_ce_generator = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	zend_ce_generator->create_object = zend_generator_create;
+
+	memcpy(&zend_generator_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
 }
 /* }}} */
 
