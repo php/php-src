@@ -3619,6 +3619,7 @@ ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *tr
 			}
 		}
 		ce->traits[ce->num_traits++] = trait;
+		trait->refcount++;
 	}
 }
 /* }}} */
@@ -3870,8 +3871,8 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				fn_copy = *fn;
 				function_add_ref(&fn_copy);
 				/* this function_name is never destroyed, because its refcount
-				   greater than 1, classes are always destoyed in reverse order
-				   and trait is declared early than this class */
+				   greater than 1 and classes are always destoyed before the
+				   traits they use */
 				fn_copy.common.function_name = aliases[i]->alias;
 					
 				/* if it is 0, no modifieres has been changed */
