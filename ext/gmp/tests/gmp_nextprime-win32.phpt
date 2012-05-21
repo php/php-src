@@ -1,9 +1,9 @@
 --TEST--
 gmp_nextprime()
 --SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip";
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. only for Non Windows Systems');
+<?php if (!extension_loaded("gmp")) print "skip"; 
+if(substr(PHP_OS, 0, 3) != 'WIN' ) {
+    die('skip windows only test');
 }
 ?>
 --FILE--
@@ -31,7 +31,7 @@ echo "Done\n";
 --EXPECTF--	
 string(1) "2"
 string(1) "2"
-string(1) "2"
+string(4) "-997"
 string(4) "1009"
 string(6) "100003"
 
@@ -42,3 +42,4 @@ string(1) "0"
 Warning: gmp_nextprime(): Unable to convert variable to GMP - wrong type in %s on line %d
 string(1) "0"
 Done
+
