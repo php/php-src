@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
   . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
     member of a null object). (Laruence)
+  . Fixed bug #61998 (Using traits with method aliases appears to result in
+    crash during execution). (Dmitry)
   . Fixed bug #61978 (Object recursion not detected for classes that implement
     JsonSerializable). (Felipe)
   . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
