@@ -45,6 +45,9 @@ PHP                                                                        NEWS
 - Phar:
   . Fix bug #61065 (Secunia SA44335). (Rasmus)
 
+- Pgsql:
+  . Added pg_escape_identifier/pg_escape_literal. (Yasuo Ohgaki)
+
 - Reflection:
   . Implemented FR #61602 (Allow access to the name of constant
     used as function/method parameter's default value). (reeze.xia@gmail.com)
