@@ -77,7 +77,7 @@
 # define IS_INVALID_SOCKET(a)	(a->bsd_socket < 0)
 # define set_errno(a) (errno = a)
 # include "php_sockets.h"
-# if defined(AIX) && !defined(HAVE_SA_SS_FAMILY)
+# if defined(_AIX) && !defined(HAVE_SA_SS_FAMILY)
 # define ss_family __ss_family
 # endif
 # if HAVE_IF_NAMETOINDEX
