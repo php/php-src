@@ -1,9 +1,9 @@
 --TEST--
 gmp_gcdext() basic tests
 --SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip";
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. only for Non Windows Systems');
+<?php if (!extension_loaded("gmp")) print "skip"; 
+if(substr(PHP_OS, 0, 3) != 'WIN' ) {
+    die('skip windows only test');
 }
 ?>
 --FILE--
@@ -42,8 +42,8 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 string(1) "3"
-string(2) "-4"
-string(2) "11"
+string(2) "41"
+string(4) "-112"
 string(1) "1"
 string(4) "-805"
 string(3) "359"
@@ -66,11 +66,11 @@ string(1) "1"
 string(5) "84319"
 string(9) "-84241831"
 string(1) "1"
-string(13) "-156252240050"
-string(14) "16689072773537"
+string(12) "167180205823"
+string(15) "-17856272782919"
 string(3) "195"
-string(11) "46994884483"
-string(9) "-68772552"
+string(15) "-23387298979862"
+string(11) "34225091793"
 
 Warning: gmp_gcdext(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
@@ -87,3 +87,4 @@ NULL
 Warning: gmp_gcdext() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 Done
+
