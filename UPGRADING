@@ -297,6 +297,8 @@ PHP 5.5 UPGRADE NOTES
 - SPL:
   - SplFixedArray::__wakeup()
   - SplDoublyLinkedList::add()
+  - RecursiveTreeIterator::getPostfix() (5.5.2)
+  - RecursiveTreeIterator::setPostfix() (5.5.2)
 
 - Zend OPcache:
  - opcache_get_configuration()

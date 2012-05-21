@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
     limited case). (Arpad)
 
+- SPL:
+  . Added RecursiveTreeIterator setPostfix and getPostifx methods. (Joshua 
+    Thijssen)
+
 - Streams:
   . Fixed bug #65268 (select() implementation uses outdated tick API). (Anatol)
 
