@@ -342,9 +342,13 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* o
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 {
 	DCL_OPLINE
+
 	zend_execute_data *execute_data;
+	size_t execute_data_size;
+
 	zend_bool nested = 0;
 	zend_bool original_in_execution = EG(in_execution);
+
 
 
 	if (EG(exception)) {
@@ -354,11 +358,35 @@ ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 	EG(in_execution) = 1;
 
 zend_vm_enter:
-	/* Initialize execute_data */
-	execute_data = (zend_execute_data *)zend_vm_stack_alloc(
+	/*
+	 * When allocating the execute_data, memory for compiled variables and
+	 * temporary variables is also allocated after the actual zend_execute_data
+	 * struct. op_array->last_var specifies the number of compiled variables and
+	 * op_array->T is the number of temporary variables. If there is no symbol
+	 * table, then twice as much memory is allocated for compiled variables.
+	 * In that case the first half contains zval**s and the second half the
+	 * actual zval*s (which would otherwise be in the symbol table).
+	 */
+	execute_data_size =
 		ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) +
-		ZEND_MM_ALIGNED_SIZE(sizeof(zval**) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2)) +
-		ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T TSRMLS_CC);
+		ZEND_MM_ALIGNED_SIZE(sizeof(zval **) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2)) +
+		ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T
+	;
+
+	/*
+	 * Normally the execute_data is allocated on the VM stack (because it does
+	 * not actually do any allocation and thus is faster). For generators
+	 * though this behavior would be suboptimal, because the (rather large)
+	 * structure would have to be copied back and forth every time execution is
+	 * suspended or resumed. That's why for generators the execution context
+	 * is allocated using emalloc, thus allowing to save and restore it simply
+	 * by replacing a pointer.
+	 */
+	if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+		execute_data = emalloc(execute_data_size);
+	} else {
+		execute_data = zend_vm_stack_alloc(execute_data_size TSRMLS_CC);
+	}
 
 	EX(CVs) = (zval***)((char*)execute_data + ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)));
 	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
@@ -477,7 +505,13 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 
 	nested = EX(nested);
 
-	zend_vm_stack_free(execute_data TSRMLS_CC);
+	/* For generators the execute_data is stored on the heap, for everything
+	 * else it is stored on the VM stack. */
+	if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+		efree(execute_data);
+	} else {
+		zend_vm_stack_free(execute_data TSRMLS_CC);
+	}
 
 	if (nested) {
 		execute_data = EG(current_execute_data);
