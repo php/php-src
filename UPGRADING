@@ -610,6 +610,10 @@ c. New functions
     - mysqli_error_list()
     - mysqli_stmt_error_list()
 
+  - pgsql
+    - pg_escape_identifier() (5.4.4)
+    - pg_escape_literal() (5.4.4)
+
   - Session:
     - session_register_shutdown()
     - session_status()
