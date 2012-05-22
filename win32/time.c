@@ -46,7 +46,7 @@ ULARGE_INTEGER convFromft;
             
             via  http://technet.microsoft.com/zh-cn/library/ms724284%28v=vs.85%29.aspx
         */
-    //ff = *(__int64*)(&ft);
+
 	convFromft.HighPart=ft.dwHighDateTime;
 	convFromft.LowPart=ft.dwLowDateTime;
 	ff=convFromft.QuadPart;
