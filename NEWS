@@ -1,42 +1,58 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.4.2
+?? ??? 2012, PHP 5.4.4
 
 - CLI Server:
   . Implemented FR #61977 (Need CLI web-server support for files with .htm & 
     svg extensions). (Sixd, Laruence)
-  . Fixed bug #61546 (functions related to current script failed when chdir() 
-    in cli sapi). (Laruence, reeze.xia@gmail.com)
   . Improved performance while sending error page, this also fixed
     bug #61785 (Memory leak when access a non-exists file without router).
     (Laruence)
+  . Fixed bug #61546 (functions related to current script failed when chdir() 
+    in cli sapi). (Laruence, reeze.xia@gmail.com)
 
 - CURL:
   . Fixed bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction).
     (Laruence)
 
 - Core:
+  . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
   . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
     member of a null object). (Laruence)
+  . Fixed bug #61998 (Using traits with method aliases appears to result in
+    crash during execution). (Dmitry)
   . Fixed bug #61978 (Object recursion not detected for classes that implement
     JsonSerializable). (Felipe)
-  . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
-    reference). (Laruence)
+  . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
   . Fixed bug #61922 (ZTS build doesn't accept zend.script_encoding config).
     (Laruence)
-  . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
   . Fixed bug #61827 (incorrect \e processing on Windows) (Anatoliy)
+  . Fixed bug #61782 (__clone/__destruct do not match other methods when checking
+    access controls). (Stas)
   . Fixed bug #61761 ('Overriding' a private static method with a different 
     signature causes crash). (Laruence)
+  . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
+    reference). (Laruence)
   . Fixed bug #61728 (PHP crash when calling ob_start in request_shutdown 
     phase). (Laruence)
   . Fixed bug #61660 (bin2hex(hex2bin($data)) != $data). (Nikita Popov)
   . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
     (without apache2)). (Laruence)
   . Fixed bug #61605 (header_remove() does not remove all headers). (Laruence)
+  . Fixed bug #54547 (wrong equality of string numbers). (Gustavo)
   . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
     set to null). (Anatoliy)
-  . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
+  . Changed php://fd to be available only for CLI.
+
+- Phar:
+  . Fix bug #61065 (Secunia SA44335). (Rasmus)
+
+- Pgsql:
+  . Added pg_escape_identifier/pg_escape_literal. (Yasuo Ohgaki)
+
+- Reflection:
+  . Implemented FR #61602 (Allow access to the name of constant
+    used as function/method parameter's default value). (reeze.xia@gmail.com)
 
 - FPM
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
@@ -45,11 +61,31 @@ PHP                                                                        NEWS
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
     (Laruence)
+    
+- Sockets:
+  . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
+    
+- XML Writer:
+  . Fixed bug #62064 (memory leak in the XML Writer module). 
+    (jean-pierre dot lozi at lip6 dot fr)
 
 - Zlib:
   . Fixed bug #61820 (using ob_gzhandler will complain about headers already 
     sent when no compression). (Mike)
   . Fixed bug #61443 (can't change zlib.output_compression on the fly). (Mike)
+  . Fixed bug #60761 (zlib.output_compression fails on refresh). (Mike)
+
+08 May 2012, PHP 5.4.3
+
+- CGI
+  . Re-Fix PHP-CGI query string parameter vulnerability, CVE-2012-1823.
+    (Stas)
+  . Fix bug #61807 - Buffer Overflow in apache_request_headers.
+    (nyt-php at countercultured dot net). 
+
+03 May 2012, PHP 5.4.2
+
+- Fix PHP-CGI query string parameter vulnerability, CVE-2012-1823. (Rasmus)
 
 26 Apr 2012, PHP 5.4.1
 
@@ -156,6 +192,8 @@ PHP                                                                        NEWS
     bytes). (Nikita Popov)
 
 - Reflection:
+  . Implemented FR #61602 (Allow access to the name of constant
+    used as function/method parameter's default value). (reeze.xia@gmail.com)
   . Fixed bug #60968 (Late static binding doesn't work with 
     ReflectionMethod::invokeArgs()). (Laruence)
 

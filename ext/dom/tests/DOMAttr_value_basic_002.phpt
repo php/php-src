@@ -1,6 +1,6 @@
 --TEST--
 Write non-string $value property
---CREDIT--
+--CREDITS--
 Eric Berg <ehberg@gmail.com>
 # TestFest Atlanta 2009-05-14
 --SKIPIF--

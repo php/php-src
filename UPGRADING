@@ -37,9 +37,9 @@ PHP 5.4 UPGRADE NOTES
 =============================
 
 - PHP 5.4 now checks at compile time if /dev/urandom or /dev/arandom
-  are present.  If either is available, session.entropy_file now
+  are present. If either is available, session.entropy_file now
   defaults to that file and session.entropy_length defaults to 32.
-  This provides non-blocking entropy to session id generation.  If you
+  This provides non-blocking entropy to session id generation. If you
   do not want extra entropy for your session ids, add:
 
     session.entropy_file=
@@ -89,9 +89,9 @@ PHP 5.4 UPGRADE NOTES
     session.upload_progress.min_freq
 
 - Added a zend.multibyte directive as a replacement of the PHP compile time
-  configuration option --enable-zend-multibyte.  Now the Zend Engine always
+  configuration option --enable-zend-multibyte. Now the Zend Engine always
   contains code for multibyte support, which can be enabled or disabled at
-  runtime.  Note: It doesn't make a lot of sense to enable this option if
+  runtime. Note: It doesn't make a lot of sense to enable this option if
   ext/mbstring is not enabled, because most functionality is implemented by
   mbstrings callbacks.
 
@@ -107,7 +107,7 @@ PHP 5.4 UPGRADE NOTES
   in a stream fashion (through php://input) without having it copied in memory
   multiple times.
 
-- Added windows_show_crt_warning.  This directive shows the CRT warnings when
+- Added windows_show_crt_warning. This directive shows the CRT warnings when
   enabled. These warnings were displayed by default until now. It is disabled
   by default.
 
@@ -162,12 +162,16 @@ PHP 5.4 UPGRADE NOTES
 
 - Non-numeric string offsets, e.g. $a['foo'] where $a is a string, now
   return false on isset() and true on empty(), and produce warning if
-  trying to use them.  Offsets of types double, bool and null produce
+  trying to use them. Offsets of types double, bool and null produce
   notice. Numeric strings ($a['2']) still work as before.
 
   Note that offsets like '12.3' and '5 and a half' are considered
   non-numeric and produce warning, but are converted to 12 and 5
   respectively for backwards compatibility reasons.
+
+- Long numeric strings that do not fit in integer or double (such as
+  "92233720368547758070") are compared using string comparison if 
+  they could otherwise result in precision loss - since 5.4.4.
 
 - Closures now support scopes and $this and can be rebound to
   objects using Closure::bind() and Closure::bindTo().
@@ -177,6 +181,9 @@ PHP 5.4 UPGRADE NOTES
 
 - Parse error messages are changed to contain more information about
   the error.
+
+- __clone and __destruct since 5.4.4 follow the same scoping rules as 
+  the rest of the methods (see bug #61782 for details).
 
 ================================
 4. Changes to existing functions
@@ -200,7 +207,7 @@ PHP 5.4 UPGRADE NOTES
 
 - htmlentities() and htmlspecialchars() are stricter in the code units they
   accept for the asian encodings. For Big5-HKSCS, the octets 0x80 and 0xFF are
-  rejected.  For GB2312/EUC-CN, the octets 0x8E, 0x8F, 0xA0 and 0xFF are
+  rejected. For GB2312/EUC-CN, the octets 0x8E, 0x8F, 0xA0 and 0xFF are
   rejected. For SJIS, the octets 0x80, 0xA0, 0xFD, 0xFE and 0xFF are rejected,
   except maybe after a valid starting byte. For EUC-JP, the octets 0xA0 and
   0xFF are rejected.
@@ -226,7 +233,7 @@ PHP 5.4 UPGRADE NOTES
   checks on the validity of the entities. Numerical entities are checked for a
   valid range (0 to 0x10FFFF); if the flag ENT_DISALLOWED is given, the
   validity of such numerical entity in the target document type is also
-  checked.  Named entities are checked for necessary existence in the target
+  checked. Named entities are checked for necessary existence in the target
   document type instead of only checking whether they were constituted by
   alphanumeric characters.
 
@@ -332,6 +339,8 @@ PHP 5.4 UPGRADE NOTES
 - ob_start() no longer starts multiple output buffers when passed
   array("callback1", "callback2", "callback3", ...).
 
+- Since 5.4.4, "php://fd" stream syntax is available only in CLI build.
+
 ==============================
 5. Changes to existing classes
 ==============================
@@ -422,7 +431,7 @@ d. Removed hash algorithms
 a. Extensions no longer maintained
 
    - ext/sqlite is no longer part of the base distribution and has been moved
-     to PECL.  Use sqlite3 or PDO_SQLITE instead.
+     to PECL. Use sqlite3 or PDO_SQLITE instead.
 
 b. Extensions with changed behavior
 
@@ -476,7 +485,7 @@ b. Extensions with changed behavior
 ===========================
 
 - A REQUEST_TIME_FLOAT value returns a floating point number indicating the
-  time with microsecond precision.  All SAPIs providing this value should be
+  time with microsecond precision. All SAPIs providing this value should be
   returning float and not time_t.
 
 - apache_child_terminate(), getallheaders(), apache_request_headers()
@@ -600,6 +609,10 @@ c. New functions
   - mysqli:
     - mysqli_error_list()
     - mysqli_stmt_error_list()
+
+  - pgsql
+    - pg_escape_identifier() (5.4.4)
+    - pg_escape_literal() (5.4.4)
 
   - Session:
     - session_register_shutdown()

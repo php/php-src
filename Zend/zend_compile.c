@@ -3619,6 +3619,7 @@ ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *tr
 			}
 		}
 		ce->traits[ce->num_traits++] = trait;
+		trait->refcount++;
 	}
 }
 /* }}} */
@@ -3870,8 +3871,8 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				fn_copy = *fn;
 				function_add_ref(&fn_copy);
 				/* this function_name is never destroyed, because its refcount
-				   greater than 1, classes are always destoyed in reverse order
-				   and trait is declared early than this class */
+				   greater than 1 and classes are always destoyed before the
+				   traits they use */
 				fn_copy.common.function_name = aliases[i]->alias;
 					
 				/* if it is 0, no modifieres has been changed */
@@ -4076,14 +4077,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	size_t i;
 
 	/* prepare copies of trait function tables for combination */
-	function_tables = malloc(sizeof(HashTable*) * ce->num_traits);
-	resulting_table = (HashTable *) malloc(sizeof(HashTable));
+	function_tables = emalloc(sizeof(HashTable*) * ce->num_traits);
+	resulting_table = (HashTable *)emalloc(sizeof(HashTable));
 	
 	/* TODO: revisit this start size, may be its not optimal */
-	zend_hash_init_ex(resulting_table, 10, NULL, NULL, 1, 0);
+	zend_hash_init_ex(resulting_table, 10, NULL, NULL, 0, 0);
   
 	for (i = 0; i < ce->num_traits; i++) {
-		function_tables[i] = (HashTable *) malloc(sizeof(HashTable));
+		function_tables[i] = (HashTable *)emalloc(sizeof(HashTable));
 		zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements, NULL, NULL, 1, 0);
 
 		if (ce->trait_precedences) {
@@ -4116,14 +4117,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	for (i = 0; i < ce->num_traits; i++) {
 		/* zend_hash_destroy(function_tables[i]); */
 		zend_hash_graceful_destroy(function_tables[i]);
-		free(function_tables[i]);
+		efree(function_tables[i]);
 	}
-	free(function_tables);
+	efree(function_tables);
 
 	/* free temporary resulting table */
 	/* zend_hash_destroy(resulting_table); */
 	zend_hash_graceful_destroy(resulting_table);
-	free(resulting_table);
+	efree(resulting_table);
 }
 /* }}} */
 
