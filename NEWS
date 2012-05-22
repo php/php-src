@@ -54,9 +54,12 @@ PHP                                                                        NEWS
   . Implemented FR #61602 (Allow access to the name of constant
     used as function/method parameter's default value). (reeze.xia@gmail.com)
 
-- FPM
+- Fileinfo
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
     (Laruence, Gustavo)
+
+- FPM
+  . Fixed bug #61045 (fpm don't send error log to fastcgi clients). (fat)
 
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
