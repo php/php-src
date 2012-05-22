@@ -9,6 +9,7 @@
 
 struct timeval;
 
+void zlog_set_external_logger(void (*logger)(int, char *, size_t));
 int zlog_set_fd(int new_fd);
 int zlog_set_level(int new_value);
 const char *zlog_get_level_name(int log_level);
