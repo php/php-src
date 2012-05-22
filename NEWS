@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 
 ?? ??? 2012, PHP 5.3.14
 
+- FPM
+  . Fixed bug #61045 (fpm don't send error log to fastcgi clients). (fat)
+
 - XML Writer:
   . Fixed bug #62064 (memory leak in the XML Writer module). 
     (jean-pierre dot lozi at lip6 dot fr)

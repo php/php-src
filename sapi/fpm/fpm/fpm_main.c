@@ -655,14 +655,38 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 	}
 }
 
-static void sapi_cgi_log_message(char *message)
+/* {{{ sapi_cgi_log_fastcgi
+ *
+ * Ignore level, we want to send all messages through fastcgi
+ */
+void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 {
 	TSRMLS_FETCH();
 
-	if (CGIG(fcgi_logging)) {
-		zlog(ZLOG_NOTICE, "PHP message: %s", message);
+	fcgi_request *request = (fcgi_request*) SG(server_context);
+
+	/* ensure we want:
+	 * - to log (fastcgi.logging in php.ini)
+	 * - we are currently dealing with a request
+	 * - the message is not empty
+	 */
+	if (CGIG(fcgi_logging) && request && message && len > 0) {
+		char *buf = malloc(len + 2);
+		memcpy(buf, message, len);
+		memcpy(buf + len, "\n", sizeof("\n"));
+		fcgi_write(request, FCGI_STDERR, buf, len+1);
+		free(buf);
 	}
 }
+/* }}} */
+
+/* {{{ sapi_cgi_log_message
+ */
+static void sapi_cgi_log_message(char *message)
+{
+	zlog(ZLOG_NOTICE, "PHP message: %s", message);
+}
+/* }}} */
 
 /* {{{ php_cgi_ini_activate_user_config
  */
@@ -1777,6 +1801,9 @@ consult the installation file that came with this distribution, or visit \n\
 
 	fcgi_fd = fpm_run(&max_requests);
 	parent = 0;
+
+	/* onced forked tell zlog to also send messages through sapi_cgi_log_fastcgi() */
+	zlog_set_external_logger(sapi_cgi_log_fastcgi);
 
 	/* make php call us to get _ENV vars */
 	php_php_import_environment_variables = php_import_environment_variables;
