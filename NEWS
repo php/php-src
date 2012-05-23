@@ -12,7 +12,7 @@ PHP                                                                        NEWS
   . Fixed bug #61026 (FPM pools can listen on the same address). (fat)
 
 - Intl
-  . Fixed bug #62082 (grapheme_extract() memory leaks). (Gustavo)
+  . Fixed bug #62083 (grapheme_extract() memory leaks). (Gustavo)
   . Fixed bug #62082 (Memory corruption in internal get_icu_disp_value_src_php
     function). (Gustavo)
   . Fixed bug #62081 (IntlDateFormatter constructor leaks memory when called
