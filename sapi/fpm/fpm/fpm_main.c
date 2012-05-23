@@ -154,6 +154,7 @@ static const opt_struct OPTIONS[] = {
 	{'t', 0, "test"},
 	{'p', 1, "prefix"},
 	{'g', 1, "pid"},
+	{'R', 0, "allow-to-run-as-root"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -1557,6 +1558,7 @@ int main(int argc, char *argv[])
 	char *fpm_pid = NULL;
 	int test_conf = 0;
 	int php_information = 0;
+	int php_allow_to_run_as_root = 0;
 
 	fcgi_init();
 
@@ -1668,6 +1670,10 @@ int main(int argc, char *argv[])
 
 			case 'i': /* php info & quit */
 				php_information = 1;
+				break;
+
+			case 'R': /* allow to run as root */
+				php_allow_to_run_as_root = 1;
 				break;
 
 			default:
@@ -1793,7 +1799,7 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf)) {
+	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root)) {
 		return FAILURE;
 	}
 
