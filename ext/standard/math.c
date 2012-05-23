@@ -1097,7 +1097,9 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 	return _php_math_number_format_ex(d, dec, &dec_point, 1, &thousand_sep, 1);
 }
 
-PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
+static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
+		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len,
+		int *result_len)
 {
 	char *tmpbuf = NULL, *resbuf;
 	char *s, *t;  /* source, target */
@@ -1205,7 +1207,18 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size
 
 	efree(tmpbuf);
 	
+	if (result_len) {
+		*result_len = reslen;
+	}
+
 	return resbuf;
+}
+
+PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point,
+		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
+{
+	return _php_math_number_format_ex_len(d, dec, dec_point, dec_point_len,
+			thousand_sep, thousand_sep_len, NULL);
 }
 /* }}} */
 
@@ -1241,7 +1254,10 @@ PHP_FUNCTION(number_format)
 			thousand_sep_len = 1;
 		}
 
-		RETURN_STRING(_php_math_number_format_ex(num, dec, dec_point, dec_point_len, thousand_sep, thousand_sep_len), 0);
+		Z_TYPE_P(return_value) = IS_STRING;
+		Z_STRVAL_P(return_value) = _php_math_number_format_ex_len(num, dec,
+				dec_point, dec_point_len, thousand_sep, thousand_sep_len,
+				&Z_STRLEN_P(return_value));
 		break;
 	default:
 		WRONG_PARAM_COUNT;
