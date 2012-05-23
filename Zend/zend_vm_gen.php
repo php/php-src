@@ -1182,7 +1182,7 @@ function gen_vm($def, $skel) {
 
 	// Generate opcode #defines (zend_vm_opcodes.h)
 	$code_len = strlen((string)$max_opcode);
-	$f = fopen("zend_vm_opcodes.h", "w+") or die("ERROR: Cannot create zend_vm_opcodes.h\n");
+	$f = fopen(__DIR__ . "/zend_vm_opcodes.h", "w+") or die("ERROR: Cannot create zend_vm_opcodes.h\n");
 
 	// Insert header
 	out($f, $GLOBALS['header_text']);
@@ -1196,8 +1196,8 @@ function gen_vm($def, $skel) {
 	echo "zend_vm_opcodes.h generated successfully.\n";
 
 	// Generate zend_vm_execute.h
-	$f = fopen("zend_vm_execute.h", "w+") or die("ERROR: Cannot create zend_vm_execute.h\n");
-	$executor_file = realpath("zend_vm_execute.h");
+	$f = fopen(__DIR__ . "/zend_vm_execute.h", "w+") or die("ERROR: Cannot create zend_vm_execute.h\n");
+	$executor_file = realpath(__DIR__ . "/zend_vm_execute.h");
 
 	// Insert header
 	out($f, $GLOBALS['header_text']);
@@ -1440,6 +1440,6 @@ if (!defined("ZEND_VM_LINES")) {
 	define("ZEND_VM_LINES", 0);
 }
 
-gen_vm("zend_vm_def.h", "zend_vm_execute.skl");
+gen_vm(__DIR__ . "/zend_vm_def.h", __DIR__ . "/zend_vm_execute.skl");
 
 ?>
