@@ -17,6 +17,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
+  . Fixed bug #62112 (number_format() is not binary safe). (Gustavo)
   . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
     member of a null object). (Laruence)
   . Fixed bug #61998 (Using traits with method aliases appears to result in
