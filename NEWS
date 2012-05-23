@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-17 May 2012, PHP 5.4.4 RC1
+30 May 2012, PHP 5.4.4 RC2
 
 - CLI Server:
   . Implemented FR #61977 (Need CLI web-server support for files with .htm & 
@@ -47,10 +47,6 @@ PHP                                                                        NEWS
 
 - Pgsql:
   . Added pg_escape_identifier/pg_escape_literal. (Yasuo Ohgaki)
-
-- Reflection:
-  . Implemented FR #61602 (Allow access to the name of constant
-    used as function/method parameter's default value). (reeze.xia@gmail.com)
 
 - FPM
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
