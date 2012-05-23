@@ -27,6 +27,13 @@ void zend_register_generator_ce(TSRMLS_D);
 
 extern ZEND_API zend_class_entry *zend_ce_generator;
 
+typedef struct _zend_generator {
+	zend_object std;
+
+	/* The suspended execution context. */
+	zend_execute_data *execute_data;
+} zend_generator;
+
 END_EXTERN_C()
 
 #endif

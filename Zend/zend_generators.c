@@ -25,14 +25,32 @@
 ZEND_API zend_class_entry *zend_ce_generator;
 static zend_object_handlers zend_generator_handlers;
 
-typedef struct _zend_generator {
-	zend_object std;
-	/* nothing more for now */
-} zend_generator;
-
 static void zend_generator_free_storage(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
 	zend_object_std_dtor(&generator->std TSRMLS_CC);
+
+	if (generator->execute_data) {
+		zend_execute_data *execute_data = generator->execute_data;
+
+		if (!execute_data->symbol_table) {
+			int i;
+			for (i = 0; i < execute_data->op_array->last_var; ++i) {
+				if (execute_data->CVs[i]) {
+					zval_ptr_dtor(execute_data->CVs[i]);
+				}
+			}
+		} else {
+			if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
+				zend_hash_destroy(execute_data->symbol_table);
+				FREE_HASHTABLE(execute_data->symbol_table);
+			} else {
+				zend_hash_clean(execute_data->symbol_table);
+				*(++EG(symtable_cache_ptr)) = execute_data->symbol_table;
+			}
+		}
+
+		efree(execute_data);
+	}
 
 	efree(generator);
 }

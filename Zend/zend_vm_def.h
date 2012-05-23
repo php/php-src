@@ -5203,17 +5203,56 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 
 ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 {
+	zend_bool nested;
+
 	if (EG(return_value_ptr_ptr)) {
 		zval *return_value;
+		zend_generator *generator;
 
 		ALLOC_INIT_ZVAL(return_value);
 		object_init_ex(return_value, zend_ce_generator);
 
 		*EG(return_value_ptr_ptr) = return_value;
+
+		/* back up the execution context */
+		generator = (zend_generator *) zend_object_store_get_object(return_value TSRMLS_CC);
+		generator->execute_data = execute_data;
 	}
 
-	/* for now we just do a normal return without suspension */
-	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+	/* restore the previous execution context */
+	EG(current_execute_data) = EX(prev_execute_data);
+	nested = EX(nested);
+
+	/* if there is no return value pointer we are responsible for freeing the
+     * execution data */
+	if (!EG(return_value_ptr_ptr)) {
+		/* something has to be done in here, not sure yet what exactly */
+	}
+
+	EG(opline_ptr) = NULL;
+	if (nested) {
+		/* so we can use EX() again */
+		execute_data = EG(current_execute_data);
+
+		EG(opline_ptr)           = &EX(opline);
+		EG(active_op_array)      = EX(op_array);
+		EG(return_value_ptr_ptr) = EX(original_return_value);
+		EG(active_symbol_table)  = EX(symbol_table);
+		EG(This)                 = EX(current_this);
+		EG(scope)                = EX(current_scope);
+		EG(called_scope)         = EX(current_called_scope);
+		
+		EX(function_state).function  = (zend_function *) EX(op_array);
+		EX(function_state).arguments = NULL;
+
+		EX(object) = EX(current_object);
+		EX(called_scope) = DECODE_CTOR(EX(called_scope));
+
+		zend_vm_stack_clear_multiple(TSRMLS_C);
+	}
+
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_LEAVE();
 }
 
 ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)
