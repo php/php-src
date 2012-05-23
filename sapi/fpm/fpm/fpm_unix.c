@@ -112,12 +112,12 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 			}
 		}
 
-#ifndef I_REALLY_WANT_ROOT_PHP
-		if (wp->set_uid == 0 || wp->set_gid == 0) {
-			zlog(ZLOG_ERROR, "[pool %s] please specify user and group other than root", wp->config->name);
-			return -1;
+		if (!fpm_globals.run_as_root) {
+			if (wp->set_uid == 0 || wp->set_gid == 0) {
+				zlog(ZLOG_ERROR, "[pool %s] please specify user and group other than root", wp->config->name);
+				return -1;
+			}
 		}
-#endif
 	} else { /* not root */
 		if (wp->config->user && *wp->config->user) {
 			zlog(ZLOG_WARNING, "[pool %s] 'user' directive is ignored when FPM is not running as root", wp->config->name);
