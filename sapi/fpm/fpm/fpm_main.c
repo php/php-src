@@ -936,7 +936,10 @@ static void php_cgi_usage(char *argv0)
 				"                   Specify the PID file location.\n"
 				"  -y, --fpm-config <file>\n"
 				"                   Specify alternative path to FastCGI process manager config file.\n"
-				"  -t, --test       Test FPM configuration and exit\n",
+				"  -t, --test       Test FPM configuration and exit\n"
+				"  -R, allow-to-run-as-root\n"
+				"                   Allow pool to run as root (disabled by default)\n",
+
 				prog, PHP_PREFIX);
 }
 /* }}} */
