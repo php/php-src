@@ -20,6 +20,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_interfaces.h"
 #include "zend_generators.h"
 
 ZEND_API zend_class_entry *zend_ce_generator;
@@ -85,7 +86,65 @@ static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* 
 }
 /* }}} */
 
+/* {{{ proto void Generator::rewind()
+ * Rewind the generator */
+ZEND_METHOD(Generator, rewind)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool Generator::valid()
+ * Check whether the generator is valid */
+ZEND_METHOD(Generator, valid)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed Generator::current()
+ * Get the current value */
+ZEND_METHOD(Generator, current)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed Generator::key()
+ * Get the current key */
+ZEND_METHOD(Generator, key)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+}
+/* }}} */
+
+/* {{{ proto void Generator::next()
+ * Advances the generator */
+ZEND_METHOD(Generator, next)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+}
+/* }}} */
+
+ZEND_BEGIN_ARG_INFO(arginfo_generator_void, 0)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry generator_functions[] = {
+	ZEND_ME(Generator, rewind,  arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, valid,   arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, current, arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, key,     arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, next,    arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -97,6 +156,8 @@ void zend_register_generator_ce(TSRMLS_D) /* {{{ */
 	zend_ce_generator = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL_CLASS;
 	zend_ce_generator->create_object = zend_generator_create;
+
+	zend_class_implements(zend_ce_generator TSRMLS_CC, 1, zend_ce_iterator);
 
 	memcpy(&zend_generator_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
