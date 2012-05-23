@@ -18,6 +18,8 @@ PHP                                                                        NEWS
   . Fixed bug #62081 (IntlDateFormatter constructor leaks memory when called
     twice). (Gustavo)
   . Fixed bug #62070 (Collator::getSortKey() returns garbage). (Gustavo)
+  . Fixed bug #62017 (datefmt_create with incorrectly encoded timezone leaks
+    pattern). (Gustavo)
 
 - XML Writer:
   . Fixed bug #62064 (memory leak in the XML Writer module). 
