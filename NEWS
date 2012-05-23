@@ -59,6 +59,7 @@ PHP                                                                        NEWS
   . Fixed bug #61835 (php-fpm is not allowed to run as root). (fat)
   . Fixed bug #61295 (php-fpm should not fail with commented 'user'
     for non-root start). (fat)
+  . Fixed bug #61839 (Unable to cross-compile PHP with --enable-fpm). (fat)
 
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
