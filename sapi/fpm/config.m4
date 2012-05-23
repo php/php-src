@@ -192,6 +192,8 @@ AC_DEFUN([AC_FPM_TRACE],
       have_ptrace=no
       have_broken_ptrace=yes
       AC_MSG_RESULT([no])
+    ], [
+      AC_MSG_RESULT([skipped (cross compiling)])
     ])
   fi
 
@@ -264,6 +266,8 @@ AC_DEFUN([AC_FPM_TRACE],
     ], [
       proc_mem_file=""
       AC_MSG_RESULT([no])
+    ], [
+      AC_MSG_RESULT([skipped (cross compiling)])
     ])
   fi
   
