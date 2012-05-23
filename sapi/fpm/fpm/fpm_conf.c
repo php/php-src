@@ -723,8 +723,8 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		}
 
-		/* user */
-		if (!wp->config->user) {
+		/* alert if user is not set only if we are not root*/
+		if (!wp->config->user && !geteuid()) {
 			zlog(ZLOG_ALERT, "[pool %s] user has not been defined", wp->config->name);
 			return -1;
 		}

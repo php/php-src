@@ -57,6 +57,8 @@ PHP                                                                        NEWS
 - FPM
   . Fixed bug #61045 (fpm don't send error log to fastcgi clients). (fat)
   . Fixed bug #61835 (php-fpm is not allowed to run as root). (fat)
+  . Fixed bug #61295 (php-fpm should not fail with commented 'user'
+    for non-root start). (fat)
 
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
