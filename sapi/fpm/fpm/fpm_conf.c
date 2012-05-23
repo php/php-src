@@ -704,7 +704,7 @@ static int fpm_evaluate_full_path(char **path, struct fpm_worker_pool_s *wp, cha
 
 static int fpm_conf_process_all_pools() /* {{{ */
 {
-	struct fpm_worker_pool_s *wp;
+	struct fpm_worker_pool_s *wp, *wp2;
 
 	if (!fpm_worker_all_pools) {
 		zlog(ZLOG_ERROR, "No pool defined. at least one pool section must be specified in config file");
@@ -1041,6 +1041,20 @@ static int fpm_conf_process_all_pools() /* {{{ */
 						fpm_evaluate_full_path(&kv->value, wp, NULL, 0);
 					}
 				}
+			}
+		}
+	}
+
+	/* ensure 2 pools do not use the same listening address */
+	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
+		for (wp2 = fpm_worker_all_pools; wp2; wp2 = wp2->next) {
+			if (wp == wp2) {
+				continue;
+			}
+
+			if (wp->config->listen_address && *wp->config->listen_address && wp2->config->listen_address && *wp2->config->listen_address && !strcmp(wp->config->listen_address, wp2->config->listen_address)) {
+				zlog(ZLOG_ERROR, "[pool %s] unable to set listen address as it's already used in another pool '%s'", wp2->config->name, wp->config->name);
+				return -1;
 			}
 		}
 	}
