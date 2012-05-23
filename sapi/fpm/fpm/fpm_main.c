@@ -154,6 +154,7 @@ static const opt_struct OPTIONS[] = {
 	{'t', 0, "test"},
 	{'p', 1, "prefix"},
 	{'g', 1, "pid"},
+	{'R', 0, "allow-to-run-as-root"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -926,7 +927,9 @@ static void php_cgi_usage(char *argv0)
 				"                   Specify the PID file location.\n"
 				"  -y, --fpm-config <file>\n"
 				"                   Specify alternative path to FastCGI process manager config file.\n"
-				"  -t, --test       Test FPM configuration and exit\n",
+				"  -t, --test       Test FPM configuration and exit\n"
+				"  -R, --allow-to-run-as-root\n"
+				"                   Allow pool to run as root (disabled by default)\n",
 				prog, PHP_PREFIX);
 }
 /* }}} */
@@ -1548,6 +1551,7 @@ int main(int argc, char *argv[])
 	char *fpm_pid = NULL;
 	int test_conf = 0;
 	int php_information = 0;
+	int php_allow_to_run_as_root = 0;
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -1660,6 +1664,10 @@ int main(int argc, char *argv[])
 
 			case 'i': /* php info & quit */
 				php_information = 1;
+				break;
+
+			case 'R': /* allow to run as root */
+				php_allow_to_run_as_root = 1;
 				break;
 
 			default:
@@ -1789,7 +1797,7 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf)) {
+	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root)) {
 		return FAILURE;
 	}
 
