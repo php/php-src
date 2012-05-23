@@ -1,5 +1,7 @@
 --TEST--
 MessageFormatter::format(): simple types handling with numeric strings
+--INI--
+date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))

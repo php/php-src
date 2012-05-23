@@ -6,9 +6,7 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
-exec('pause');
 ini_set("intl.error_level", E_WARNING);
-//ini_set("intl.default_locale", "nl");
 date_default_timezone_set('Europe/Lisbon'); //ignored for now, see bug #58756
 
 $d = 1336308097.123;

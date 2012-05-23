@@ -1,5 +1,7 @@
 --TEST--
 MessageFormatter::format() invalid date/time argument
+--INI--
+date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))

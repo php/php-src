@@ -1,5 +1,7 @@
 --TEST--
 MessageFormatter::format(): DateTime accepted to format dates and times
+--INI--
+date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
