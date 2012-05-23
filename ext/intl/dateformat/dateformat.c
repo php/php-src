@@ -100,6 +100,13 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
+	
+	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
+		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR,
+				"datefmt_create: cannot call constructor twice", 0 TSRMLS_CC);
+		return;
+	}
+	
 	/* Convert pattern (if specified) to UTF-16. */
 	if( pattern_str && pattern_str_len>0 ){
 		intl_convert_utf8_to_utf16(&svalue, &slength, pattern_str, pattern_str_len, &INTL_DATA_ERROR_CODE(dfo));
@@ -169,6 +176,8 @@ PHP_FUNCTION( datefmt_create )
  */
 PHP_METHOD( IntlDateFormatter, __construct )
 {
+	/* return_value param is being changed, therefore we will always return
+	 * NULL here */
 	return_value = getThis();
 	datefmt_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
