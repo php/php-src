@@ -1137,7 +1137,7 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size
 	}
 
 	/* allow for thousand separators */
-	if (thousand_sep) {
+	if (thousand_sep && *thousand_sep) {
 		integral += thousand_sep_len * ((integral-1) / 3);
 	}
 	
@@ -1146,7 +1146,7 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size
 	if (dec) {
 		reslen += dec;
 
-		if (dec_point) {
+		if (dec_point && *dec_point) {
 			reslen += dec_point_len;
 		}
 	}
@@ -1182,7 +1182,7 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size
 		}
 
 		/* add decimal point */
-		if (dec_point) {
+		if (dec_point && *dec_point) {
 			t -= dec_point_len;
 			memcpy(t + 1, dec_point, dec_point_len);
 		}
@@ -1192,7 +1192,7 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point, size
 	 * separator every three digits */
 	while(s >= tmpbuf) {
 		*t-- = *s--;
-		if (thousand_sep && (++count%3)==0 && s>=tmpbuf) {
+		if (thousand_sep && *thousand_sep && (++count%3)==0 && s>=tmpbuf) {
 			t -= thousand_sep_len;
 			memcpy(t + 1, thousand_sep, thousand_sep_len);
 		}
