@@ -5,6 +5,7 @@ PHP                                                                        NEWS
   . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
 
 - Core:
+  . Fixed CVE-2012-2143. (Solar Designer)
   . Fixed bug #62097 (fix for for bug #54547). (Gustavo)
 
 - Intl:
