@@ -28,6 +28,14 @@ extern zend_module_entry com_dotnet_module_entry;
 #include "TSRM.h"
 #endif
 
+#ifdef PHP_WIN32
+# define PHP_COM_DOTNET_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_COM_DOTNET_API __attribute__ ((visibility("default")))
+#else
+# define PHP_COM_DOTNET_API
+#endif
+
 PHP_MINIT_FUNCTION(com_dotnet);
 PHP_MSHUTDOWN_FUNCTION(com_dotnet);
 PHP_RINIT_FUNCTION(com_dotnet);

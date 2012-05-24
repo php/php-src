@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.15
+- COM:
+  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
+
 - Fileinfo:
   . Fixed magic file regex support. (Felipe)
 
