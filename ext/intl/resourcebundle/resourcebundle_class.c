@@ -91,7 +91,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	intl_error_reset( NULL TSRMLS_CC );
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", 
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s!s!|b", 
 		&locale, &locale_len, &bundlename, &bundlename_len, &fallback ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -101,6 +101,10 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
+	
+	if (locale == NULL) {
+		locale = intl_locale_get_default(TSRMLS_C);
+	}
 
 	if (fallback) {
 		rb->me = ures_open(bundlename, locale, &INTL_DATA_ERROR_CODE(rb));
@@ -110,13 +114,17 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	INTL_CTOR_CHECK_STATUS(rb, "resourcebundle_ctor: Cannot load libICU resource bundle");
 
-	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING || INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
-		intl_errors_set_code( NULL, INTL_DATA_ERROR_CODE(rb) TSRMLS_CC );
-		spprintf( &pbuf, 0, "resourcebundle_ctor: Cannot load libICU resource '%s' without fallback from %s to %s",
-				bundlename, locale, ures_getLocaleByType( rb->me, ULOC_ACTUAL_LOCALE, &INTL_DATA_ERROR_CODE(rb)) );
-		intl_errors_set_custom_msg( INTL_DATA_ERROR_P(rb), pbuf, 1 TSRMLS_CC );
+	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING ||
+			INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
+		intl_errors_set_code(NULL, INTL_DATA_ERROR_CODE(rb) TSRMLS_CC);
+		spprintf(&pbuf, 0, "resourcebundle_ctor: Cannot load libICU resource "
+				"'%s' without fallback from %s to %s",
+				bundlename ? bundlename : "(default data)", locale,
+				ures_getLocaleByType(
+					rb->me, ULOC_ACTUAL_LOCALE, &INTL_DATA_ERROR_CODE(rb)));
+		intl_errors_set_custom_msg(INTL_DATA_ERROR_P(rb), pbuf, 1 TSRMLS_CC);
 		efree(pbuf);
-		zval_dtor( return_value );
+		zval_dtor(return_value);
 		RETURN_NULL();
 	}
 }

@@ -62,6 +62,10 @@ PHP                                                                        NEWS
   . Fixed bug #61839 (Unable to cross-compile PHP with --enable-fpm). (fat)
   . Fixed bug #61026 (FPM pools can listen on the same address). (fat)
 
+- Intl
+  . ResourceBundle constructor now accepts NULL for the first two arguments.
+    (Gustavo)
+
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
     (Laruence)
