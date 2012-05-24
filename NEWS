@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
 
+- Core:
+  . Fixed CVE-2012-2143. (Solar Designer)
+
 - Fileinfo:
   . Fixed magic file regex support. (Felipe)
 
