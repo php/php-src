@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Fixed bug #62017 (datefmt_create with incorrectly encoded timezone leaks
     pattern). (Gustavo)
   . Fixed bug #60785 (memory leak in IntlDateFormatter constructor). (Gustavo)
+  . Fixed bug #55610 (ResourceBundle should implement Traversable). (stealth35)
 
 - XML Writer:
   . Fixed bug #62064 (memory leak in the XML Writer module). 
