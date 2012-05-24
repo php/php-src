@@ -1654,29 +1654,6 @@ convert_libmagic_pattern(zval *pattern, int options)
 		
 		for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
 			switch (Z_STRVAL_P(pattern)[i]) {
-				case '?':
-					t[j] = '.';
-					break;
-				case '*':
-					t[j++] = '.';
-					t[j] = '*';
-					break;
-				case '.':
-					t[j++] = '\\';
-					t[j] = '.';
-					break;
-				case '\\':
-					t[j++] = '\\';
-					t[j] = '\\';
-					break;
-				case '(':
-					t[j++] = '\\';
-					t[j] = '(';
-					break;
-				case ')':
-					t[j++] = '\\';
-					t[j] = ')';
-					break;
 				case '~':
 					t[j++] = '\\';
 					t[j] = '~';
@@ -1873,7 +1850,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		
 		convert_libmagic_pattern(pattern, options);
 		
-		l = 0;
+		l = v = 0;
 #if (PHP_MAJOR_VERSION < 6)
 		if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern) TSRMLS_CC)) == NULL) {
 #else
