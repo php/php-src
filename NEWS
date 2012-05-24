@@ -4,14 +4,17 @@ PHP                                                                        NEWS
 
 ?? ??? 2012, PHP 5.3.14
 
-- FPM
+- Fileinfo:
+  . Fixed magic file regex support. (Felipe)
+
+- FPM:
   . Fixed bug #61045 (fpm don't send error log to fastcgi clients). (fat)
   . Fixed bug #61835 (php-fpm is not allowed to run as root). (fat)
   . Fixed bug #61295 (php-fpm should not fail with commented 'user'
     for non-root start). (fat)
   . Fixed bug #61026 (FPM pools can listen on the same address). (fat)
 
-- Intl
+- Intl:
   . Fixed bug #62083 (grapheme_extract() memory leaks). (Gustavo)
   . Fixed bug #62082 (memory corruption in internal get_icu_disp_value_src_php
     function). (Gustavo)
