@@ -271,7 +271,7 @@ static void istream_destructor(php_istream *stm)
 }
 /* }}} */
 
-PHPAPI IStream *php_com_wrapper_export_stream(php_stream *stream TSRMLS_DC)
+PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream TSRMLS_DC)
 {
 	php_istream *stm = (php_istream*)CoTaskMemAlloc(sizeof(*stm));
 
