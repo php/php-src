@@ -72,6 +72,8 @@ PHP                                                                        NEWS
 - Intl
   . ResourceBundle constructor now accepts NULL for the first two arguments.
     (Gustavo)
+  . Fixed bug #62082 (Memory corruption in internal function 
+    get_icu_disp_value_src_php()). (Gustavo)
 
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
