@@ -99,6 +99,15 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
     }
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
+	
+	if (calendar != UCAL_TRADITIONAL && calendar != UCAL_GREGORIAN) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: "
+				"invalid value for calendar type; it must be one of "
+				"IntlDateFormatter::TRADITIONAL (locale's default calendar) "
+				"or IntlDateFormatter::GREGORIAN", 0 TSRMLS_CC);
+		goto error;
+	}
+	
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 	
 	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
@@ -142,13 +151,13 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		DATE_FORMAT_OBJECT(dfo) = udat_open(time_type, date_type, locale, timezone_utf16, timezone_utf16_len, svalue, slength, &INTL_DATA_ERROR_CODE(dfo));
 	}
 
-    /* Set the calendar if passed */
-    if(!U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
-		if (calendar) {
+    if (!U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
+		if (calendar != UCAL_TRADITIONAL) {
 			ucal_obj = ucal_open(timezone_utf16, timezone_utf16_len, locale,
 					calendar, &INTL_DATA_ERROR_CODE(dfo));
 			if (!U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
-				udat_setCalendar( DATE_FORMAT_OBJECT(dfo), ucal_obj );
+				udat_setCalendar(DATE_FORMAT_OBJECT(dfo), ucal_obj);
+				ucal_close(ucal_obj);
 			} else {
 				intl_error_set(NULL, INTL_DATA_ERROR_CODE(dfo), "datefmt_create"
 						": error opening calendar", 0 TSRMLS_CC);
