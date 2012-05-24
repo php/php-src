@@ -42,7 +42,7 @@ void php_com_throw_exception(HRESULT code, char *message TSRMLS_DC)
 	}
 }
 
-PHPAPI void php_com_wrap_dispatch(zval *z, IDispatch *disp,
+PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 		int codepage TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
@@ -65,7 +65,7 @@ PHPAPI void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 	z->value.obj.handlers = &php_com_object_handlers;
 }
 
-PHPAPI void php_com_wrap_variant(zval *z, VARIANT *v,
+PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 		int codepage TSRMLS_DC)
 {
 	php_com_dotnet_object *obj;
@@ -92,7 +92,7 @@ PHPAPI void php_com_wrap_variant(zval *z, VARIANT *v,
 
 /* this is a convenience function for fetching a particular
  * element from a (possibly multi-dimensional) safe array */
-PHPAPI int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1 TSRMLS_DC)
+PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1 TSRMLS_DC)
 {
 	UINT dims;
 	LONG lbound, ubound;
