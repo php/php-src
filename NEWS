@@ -63,6 +63,8 @@ PHP                                                                        NEWS
   . Fixed bug #61026 (FPM pools can listen on the same address). (fat)
   . Fixed bug #62033 (php-fpm exits with status 0 on some failures to start).
     (fat)
+  . Fixed bug #62153 (when using unix sockets, multiples FPM instances
+    can be launched without errors). (fat)
 
 - Intl
   . ResourceBundle constructor now accepts NULL for the first two arguments.
