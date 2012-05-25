@@ -842,7 +842,7 @@ enable_dl = Off
 ; will look for to know it is OK to continue execution.  Setting this variable MAY
 ; cause security issues, KNOW WHAT YOU ARE DOING FIRST.
 ; http://php.net/cgi.redirect-status-env
-;cgi.redirect_status_env = ;
+;cgi.redirect_status_env = 
 
 ; cgi.fix_pathinfo provides *real* PATH_INFO/PATH_TRANSLATED support for CGI.  PHP's
 ; previous behaviour was to set PATH_TRANSLATED to SCRIPT_FILENAME, and to not grok
@@ -859,7 +859,7 @@ enable_dl = Off
 ; does not currently support this feature (03/17/2002)
 ; Set to 1 if running under IIS.  Default is zero.
 ; http://php.net/fastcgi.impersonate
-;fastcgi.impersonate = 1;
+;fastcgi.impersonate = 1
 
 ; Disable logging through FastCGI connection. PHP's default behavior is to enable
 ; this feature.
