@@ -143,6 +143,8 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 	Calendar_object	*co;
 	const Calendar	*cal;
 	
+	*is_temp = 1;
+
 	array_init_size(&zv, 8);
 
 	co  = (Calendar_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -203,8 +205,6 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 	}
 
 	add_assoc_zval_ex(&zv, "fields", sizeof("fields"), zfields);
-
-	*is_temp = 1;
 
 	return Z_ARRVAL(zv);
 }

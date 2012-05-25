@@ -395,8 +395,6 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 	add_assoc_long_ex(&zv, "currentOffset", sizeof("currentOffset"),
 		(long)(rawOffset + dstOffset));
 
-	*is_temp = 1;
-
 	return Z_ARRVAL(zv);
 }
 /* }}} */
