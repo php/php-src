@@ -61,6 +61,8 @@ PHP                                                                        NEWS
     for non-root start). (fat)
   . Fixed bug #61839 (Unable to cross-compile PHP with --enable-fpm). (fat)
   . Fixed bug #61026 (FPM pools can listen on the same address). (fat)
+  . Fixed bug #62033 (php-fpm exits with status 0 on some failures to start).
+    (fat)
 
 - Intl
   . ResourceBundle constructor now accepts NULL for the first two arguments.
