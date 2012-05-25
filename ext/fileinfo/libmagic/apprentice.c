@@ -753,7 +753,7 @@ private int
 apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
     const char *fn, int action)
 {
-	int errs = 0;
+	int errs = 0, mflen = 0;
 	struct magic_entry *marray;
 	uint32_t marraycount, i, mentrycount = 0, starttest;
 	size_t files = 0, maxfiles = 0;
@@ -782,7 +782,7 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 			goto out;
 		}
 		while ((d = readdir(dir)) != NULL) {
-			if (snprintf(mfn, sizeof(mfn), "%s/%s", fn, d->d_name) < 0) {
+			if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d->d_name)) < 0) {
 				file_oomem(ms,
 				    strlen(fn) + strlen(d->d_name) + 2);
 				errs++;
@@ -804,14 +804,14 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 					goto out;
 				}
 			}
-			filearr[files++] = mfn;
+			filearr[files++] = estrndup(mfn, mflen);
 		}
 		closedir(dir);
 		qsort(filearr, files, sizeof(*filearr), cmpstrp);
 		for (i = 0; i < files; i++) {
 			load_1(ms, action, filearr[i], &errs, &marray,
 			    &marraycount);
-			free(filearr[i]);
+			efree(filearr[i]);
 		}
 		free(filearr);
 	} else
@@ -886,9 +886,14 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 		mentrycount += marray[i].cont_count;
 	}
 out:
-	for (i = 0; i < marraycount; i++)
-		efree(marray[i].mp);
-	efree(marray);
+	for (i = 0; i < marraycount; i++) {
+		if (marray[i].mp) {
+			efree(marray[i].mp);
+		}
+	}
+	if (marray) {
+		efree(marray);
+	}
 	if (errs) {
 		*magicp = NULL;
 		*nmagicp = 0;
@@ -1165,6 +1170,9 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 			return -1;
 		}
 		me = &(*mentryp)[*nmentryp - 1];
+		if (me->mp == NULL) {
+			return -1;
+		}
 		if (me->cont_count == me->max_count) {
 			struct magic *nm;
 			size_t cnt = me->max_count + ALLOC_CHUNK;
@@ -1329,6 +1337,10 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 	if (m->type == FILE_INVALID) {
 		if (ms->flags & MAGIC_CHECK)
 			file_magwarn(ms, "type `%s' invalid", l);
+		if (me->mp) {
+			efree(me->mp);
+			me->mp = NULL;
+		}
 		return -1;
 	}
 
@@ -2219,6 +2231,7 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	mm = emalloc((size_t)st.sb.st_size);
 	if (php_stream_read(stream, mm, (size_t)st.sb.st_size) != (size_t)st.sb.st_size) {
 		file_badread(ms);
+		ret = 1;
 		goto error1;
 	}
 	ret = 1;
