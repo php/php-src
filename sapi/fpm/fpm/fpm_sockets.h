@@ -5,6 +5,8 @@
 #ifndef FPM_MISC_H
 #define FPM_MISC_H 1
 
+#include <sys/types.h>
+#include <sys/socket.h>
 #include <unistd.h>
 #include <fcntl.h>
 
