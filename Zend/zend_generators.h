@@ -32,6 +32,8 @@ typedef struct _zend_generator {
 
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;
+	/* Current value */
+	zval *value;
 } zend_generator;
 
 END_EXTERN_C()

@@ -976,8 +976,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 						        $m[1]."\t\tEG(in_execution) = original_in_execution;\n".
 						        $m[1]."\t\treturn;\n".
 						        $m[1]."\tcase 2:\n" . 
-						        $m[1]."\t\top_array = EG(active_op_array);\n".
-						        $m[1]."\t\tgoto zend_vm_enter;\n".
+						        $m[1]."\t\texecute_data = zend_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);\n".
 						        $m[1]."\tcase 3:\n" . 
 						        $m[1]."\t\texecute_data = EG(current_execute_data);\n".
 						        $m[1]."\tdefault:\n".

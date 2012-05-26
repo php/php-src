@@ -339,25 +339,9 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* o
 #define EX_Ts() EX(Ts)
 
 
-ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
-{
-	DCL_OPLINE
-
+static zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC) {
 	zend_execute_data *execute_data;
-	size_t execute_data_size;
 
-	zend_bool nested = 0;
-	zend_bool original_in_execution = EG(in_execution);
-
-
-
-	if (EG(exception)) {
-		return;
-	}
-
-	EG(in_execution) = 1;
-
-zend_vm_enter:
 	/*
 	 * When allocating the execute_data, memory for compiled variables and
 	 * temporary variables is also allocated after the actual zend_execute_data
@@ -367,11 +351,10 @@ zend_vm_enter:
 	 * In that case the first half contains zval**s and the second half the
 	 * actual zval*s (which would otherwise be in the symbol table).
 	 */
-	execute_data_size =
-		ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)) +
-		ZEND_MM_ALIGNED_SIZE(sizeof(zval **) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2)) +
-		ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T
-	;
+	size_t execute_data_size = ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data));
+	size_t CVs_size = ZEND_MM_ALIGNED_SIZE(sizeof(zval **) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2));
+	size_t Ts_size = ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T;
+	size_t total_size = execute_data_size + CVs_size + Ts_size;
 
 	/*
 	 * Normally the execute_data is allocated on the VM stack (because it does
@@ -383,14 +366,16 @@ zend_vm_enter:
 	 * by replacing a pointer.
 	 */
 	if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-		execute_data = emalloc(execute_data_size);
+		execute_data = emalloc(total_size);
 	} else {
-		execute_data = zend_vm_stack_alloc(execute_data_size TSRMLS_CC);
+		execute_data = zend_vm_stack_alloc(total_size TSRMLS_CC);
 	}
 
-	EX(CVs) = (zval***)((char*)execute_data + ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data)));
-	memset(EX(CVs), 0, sizeof(zval**) * op_array->last_var);
-	EX(Ts) = (temp_variable *)(((char*)EX(CVs)) + ZEND_MM_ALIGNED_SIZE(sizeof(zval**) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2)));
+	EX(CVs) = (zval ***) ((char *) execute_data + execute_data_size);
+	memset(EX(CVs), 0, sizeof(zval **) * op_array->last_var);
+
+	EX(Ts) = (temp_variable *) ((char *) EX(CVs) + CVs_size);
+
 	EX(fbc) = NULL;
 	EX(called_scope) = NULL;
 	EX(object) = NULL;
@@ -400,9 +385,6 @@ zend_vm_enter:
 	EX(prev_execute_data) = EG(current_execute_data);
 	EG(current_execute_data) = execute_data;
 	EX(nested) = nested;
-	nested = 1;
-
-	LOAD_REGS();
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
 		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
@@ -422,10 +404,30 @@ zend_vm_enter:
 
 	EX(opline) = UNEXPECTED((op_array->fn_flags & ZEND_ACC_INTERACTIVE) != 0) && EG(start_op) ? EG(start_op) : op_array->opcodes;
 	EG(opline_ptr) = &EX(opline);
-	LOAD_OPLINE();
 
 	EX(function_state).function = (zend_function *) op_array;
 	EX(function_state).arguments = NULL;
+
+	return execute_data;
+}
+
+ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
+{
+	DCL_OPLINE
+
+	zend_bool original_in_execution = EG(in_execution);
+
+
+
+	if (EG(exception)) {
+		return;
+	}
+
+	EG(in_execution) = 1;
+
+zend_vm_enter:
+	LOAD_REGS();
+	LOAD_OPLINE();
 
 	while (1) {
     	int ret;
@@ -441,8 +443,7 @@ zend_vm_enter:
 					EG(in_execution) = original_in_execution;
 					return;
 				case 2:
-					op_array = EG(active_op_array);
-					goto zend_vm_enter;
+					execute_data = zend_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);
 				case 3:
 					execute_data = EG(current_execute_data);
 				default:
@@ -452,6 +453,13 @@ zend_vm_enter:
 
 	}
 	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
+}
+
+ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
+{
+	zend_execute_data *execute_data = zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC);
+
+	execute_ex(execute_data TSRMLS_CC);
 }
 
 static int ZEND_FASTCALL  ZEND_JMP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
