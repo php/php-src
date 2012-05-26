@@ -55,6 +55,7 @@ struct fpm_globals_s {
 	int test_successful;
 	int heartbeat;
 	int run_as_root;
+	int send_config_signal;
 };
 
 extern struct fpm_globals_s fpm_globals;

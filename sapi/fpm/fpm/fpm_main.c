@@ -1804,14 +1804,14 @@ consult the installation file that came with this distribution, or visit \n\
 
 	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root)) {
 
-		if (fpm_global_config.daemonize) {
+		if (fpm_globals.send_config_signal) {
 			zlog(ZLOG_DEBUG, "Sending SIGUSR2 (error) to parent %d", getppid());
 			kill(getppid(), SIGUSR2);
 		}
 		return FPM_EXIT_CONFIG;
 	}
 
-	if (fpm_global_config.daemonize) {
+	if (fpm_globals.send_config_signal) {
 		zlog(ZLOG_DEBUG, "Sending SIGUSR1 (OK) to parent %d", getppid());
 		kill(getppid(), SIGUSR1);
 	}
