@@ -35,6 +35,7 @@ struct fpm_global_config_s {
 	int emergency_restart_interval;
 	int process_control_timeout;
 	int process_max;
+	int process_priority;
 	int daemonize;
 	int rlimit_files;
 	int rlimit_core;
@@ -57,6 +58,7 @@ struct fpm_worker_pool_config_s {
 	char *listen_group;
 	char *listen_mode;
 	char *listen_allowed_clients;
+	int process_priority;
 	int pm;
 	int pm_max_children;
 	int pm_start_servers;
