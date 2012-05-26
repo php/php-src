@@ -86,17 +86,23 @@ static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* 
 }
 /* }}} */
 
-static void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
+static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS_DC) /* {{{ */
 {
+	/* Go to next opcode (we don't want to run the last one again) */
 	generator->execute_data->opline++;
+
+	/* We (mis) use the return_value_ptr_ptr to provide the generator object
+	 * to the executor. This way YIELD will be able to set the yielded value */
+	EG(return_value_ptr_ptr) = &object;
+
 	execute_ex(generator->execute_data TSRMLS_CC);
 }
 /* }}} */
 
-static void zend_generator_ensure_initialized(zend_generator *generator TSRMLS_DC) /* {{{ */
+static void zend_generator_ensure_initialized(zval *object, zend_generator *generator TSRMLS_DC) /* {{{ */
 {
 	if (!generator->value) {
-		zend_generator_resume(generator TSRMLS_CC);
+		zend_generator_resume(object, generator TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -105,15 +111,17 @@ static void zend_generator_ensure_initialized(zend_generator *generator TSRMLS_D
  * Rewind the generator */
 ZEND_METHOD(Generator, rewind)
 {
+	zval *object;
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
+	object = getThis();
+	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
-	zend_generator_ensure_initialized(generator TSRMLS_CC);
+	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
 }
 /* }}} */
 
@@ -121,15 +129,17 @@ ZEND_METHOD(Generator, rewind)
  * Check whether the generator is valid */
 ZEND_METHOD(Generator, valid)
 {
+	zval *object;
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
+	object = getThis();
+	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
-	zend_generator_ensure_initialized(generator TSRMLS_CC);
+	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
 }
 /* }}} */
 
@@ -137,15 +147,17 @@ ZEND_METHOD(Generator, valid)
  * Get the current value */
 ZEND_METHOD(Generator, current)
 {
+	zval *object;
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
+	object = getThis();
+	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
-	zend_generator_ensure_initialized(generator TSRMLS_CC);
+	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
 }
 /* }}} */
 
@@ -153,15 +165,17 @@ ZEND_METHOD(Generator, current)
  * Get the current key */
 ZEND_METHOD(Generator, key)
 {
+	zval *object;
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
+	object = getThis();
+	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
-	zend_generator_ensure_initialized(generator TSRMLS_CC);
+	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
 }
 /* }}} */
 
@@ -169,15 +183,16 @@ ZEND_METHOD(Generator, key)
  * Advances the generator */
 ZEND_METHOD(Generator, next)
 {
+	zval *object;
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
+	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
-	zend_generator_ensure_initialized(generator TSRMLS_CC);
+	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
 }
 /* }}} */
 
