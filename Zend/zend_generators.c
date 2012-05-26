@@ -140,6 +140,9 @@ ZEND_METHOD(Generator, rewind)
 	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
 	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+
+	/* Generators aren't rewindable, so rewind() only has to make sure that
+	 * the generator is initialized, nothing more */
 }
 /* }}} */
 
@@ -158,6 +161,8 @@ ZEND_METHOD(Generator, valid)
 	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
 	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+
+	RETURN_BOOL(generator->value != NULL);
 }
 /* }}} */
 
@@ -176,6 +181,10 @@ ZEND_METHOD(Generator, current)
 	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
 	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+
+	if (generator->value) {
+		RETURN_ZVAL(generator->value, 1, 1);
+	}
 }
 /* }}} */
 
@@ -212,6 +221,8 @@ ZEND_METHOD(Generator, next)
 	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
 	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+
+	zend_generator_resume(object, generator TSRMLS_CC);
 }
 /* }}} */
 

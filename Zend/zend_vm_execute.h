@@ -2321,6 +2321,11 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	zval *retval_ptr;
 
 
+	/* For generators return means to simply stop executing */
+	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		ZEND_VM_RETURN();
+	}
+
 	SAVE_OPLINE();
 	retval_ptr = opline->op1.zv;
 
@@ -6894,6 +6899,11 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *retval_ptr;
 	zend_free_op free_op1;
 
+	/* For generators return means to simply stop executing */
+	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		ZEND_VM_RETURN();
+	}
+
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 
@@ -11371,6 +11381,11 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	USE_OPLINE
 	zval *retval_ptr;
 	zend_free_op free_op1;
+
+	/* For generators return means to simply stop executing */
+	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		ZEND_VM_RETURN();
+	}
 
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
@@ -27405,6 +27420,11 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	USE_OPLINE
 	zval *retval_ptr;
 
+
+	/* For generators return means to simply stop executing */
+	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		ZEND_VM_RETURN();
+	}
 
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);

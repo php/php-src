@@ -2615,6 +2615,10 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 	zend_op *opline;
 	int start_op_number, end_op_number;
 
+	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && expr != NULL) {
+		zend_error(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
+	}
+
 	if (do_end_vparse) {
 		if ((CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) && !zend_is_function_or_method_call(expr)) {
 			zend_do_end_variable_parse(expr, BP_VAR_W, 0 TSRMLS_CC);

@@ -2840,6 +2840,11 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	zval *retval_ptr;
 	zend_free_op free_op1;
 
+	/* For generators return means to simply stop executing */
+	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		ZEND_VM_RETURN();
+	}
+
 	SAVE_OPLINE();
 	retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
