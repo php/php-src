@@ -26,10 +26,8 @@
 ZEND_API zend_class_entry *zend_ce_generator;
 static zend_object_handlers zend_generator_handlers;
 
-static void zend_generator_free_storage(zend_generator *generator TSRMLS_DC) /* {{{ */
+void zend_generator_close(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
-	zend_object_std_dtor(&generator->std TSRMLS_CC);
-
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
 
@@ -51,12 +49,22 @@ static void zend_generator_free_storage(zend_generator *generator TSRMLS_DC) /* 
 		}
 
 		efree(execute_data);
+		generator->execute_data = NULL;
 	}
 
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
+		generator->value = NULL;
 	}
 
+}
+/* }}} */
+
+static void zend_generator_free_storage(zend_generator *generator TSRMLS_DC) /* {{{ */
+{
+	zend_generator_close(generator TSRMLS_CC);
+
+	zend_object_std_dtor(&generator->std TSRMLS_CC);
 	efree(generator);
 }
 /* }}} */
@@ -92,6 +100,11 @@ static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* 
 
 static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS_DC) /* {{{ */
 {
+	/* The generator is already closed, thus can't resume */
+	if (!generator->execute_data) {
+		return;
+	}
+
 	/* Backup executor globals */
 	zval **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
 	zend_op **original_opline_ptr = EG(opline_ptr);

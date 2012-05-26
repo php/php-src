@@ -23,10 +23,6 @@
 
 BEGIN_EXTERN_C()
 
-void zend_register_generator_ce(TSRMLS_D);
-
-extern ZEND_API zend_class_entry *zend_ce_generator;
-
 typedef struct _zend_generator {
 	zend_object std;
 
@@ -35,6 +31,11 @@ typedef struct _zend_generator {
 	/* Current value */
 	zval *value;
 } zend_generator;
+
+extern ZEND_API zend_class_entry *zend_ce_generator;
+
+void zend_register_generator_ce(TSRMLS_D);
+void zend_generator_close(zend_generator *generator TSRMLS_DC);
 
 END_EXTERN_C()
 

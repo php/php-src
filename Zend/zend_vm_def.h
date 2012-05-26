@@ -2840,8 +2840,14 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	zval *retval_ptr;
 	zend_free_op free_op1;
 
-	/* For generators return means to simply stop executing */
 	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		/* The generator object is stored in return_value_ptr_ptr */
+		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+		/* Close the generator to free up resources. */
+		zend_generator_close(generator TSRMLS_CC);
+
+		/* Pass execution back to generator handling code */
 		ZEND_VM_RETURN();
 	}
 
