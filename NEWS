@@ -66,6 +66,8 @@ PHP                                                                        NEWS
   . Fixed bug #62153 (when using unix sockets, multiples FPM instances
     can be launched without errors). (fat)
   . Fixed bug #62160 (Add process.priority to set nice(2) priorities). (fat)
+  . Fixed bug #61218 (FPM drops connection while receiving some binary values
+    in FastCGI requests). (fat)
 
 - Intl
   . ResourceBundle constructor now accepts NULL for the first two arguments.
