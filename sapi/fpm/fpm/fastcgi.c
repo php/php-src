@@ -395,39 +395,12 @@ static inline size_t fcgi_get_params_len( int *result, unsigned char *p, unsigne
 	return ret;
 }
 
-static inline int fcgi_param_get_eff_len( unsigned char *p, unsigned char *end, uint *eff_len)
-{
-	int ret = 1;
-	int zero_found = 0;
-        *eff_len = 0;
-	for (; p != end; ++p) {
-		if (*p == '\0') {
-			zero_found = 1;
-		}
-		else {
-			if (zero_found) {
-				ret = 0;
-				break;
-			}
-			if (*eff_len < ((uint)-1)) {
-				++*eff_len;
-			}
-			else {
-				ret = 0;
-				break;
-			}
-		}
-	}
-	return ret;
-}
-
 static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *end)
 {
 	char buf[128];
 	char *tmp = buf;
 	size_t buf_size = sizeof(buf);
 	int name_len, val_len;
-	uint eff_name_len, eff_val_len;
 	char *s;
 	int ret = 1;
 	size_t bytes_consumed;
@@ -453,32 +426,27 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			ret = 0;
 			break;
 		}
-		if (!fcgi_param_get_eff_len(p, p+name_len, &eff_name_len) ||
-		    !fcgi_param_get_eff_len(p+name_len, p+name_len+val_len, &eff_val_len)) {
-			/* Malicious request */
-			ret = 0;
-			break;
-		}
-		if (eff_name_len >= buf_size-1) {
-			if (eff_name_len > ((uint)-1)-64) { 
+
+		if (name_len >= buf_size-1) {
+			if (name_len > ((uint)-1)-64) { 
 				ret = 0;
 				break;
 			}
-			buf_size = eff_name_len + 64;
+			buf_size = name_len + 64;
 			tmp = (tmp == buf ? emalloc(buf_size): erealloc(tmp, buf_size));
 			if (tmp == NULL) {
 				ret = 0;
 				break;
 			}
 		}
-		memcpy(tmp, p, eff_name_len);
-		tmp[eff_name_len] = 0;
-		s = estrndup((char*)p + name_len, eff_val_len);
+		memcpy(tmp, p, name_len);
+		tmp[name_len] = 0;
+		s = estrndup((char*)p + name_len, val_len);
 		if (s == NULL) {
 			ret = 0;
 			break;
 		}
-		zend_hash_update(req->env, tmp, eff_name_len+1, &s, sizeof(char*), NULL);
+		zend_hash_update(req->env, tmp, name_len+1, &s, sizeof(char*), NULL);
 		p += name_len + val_len;
 	}
 	if (tmp != buf && tmp != NULL) {
