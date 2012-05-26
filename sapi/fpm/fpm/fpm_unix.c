@@ -305,6 +305,7 @@ int fpm_unix_init_main() /* {{{ */
 				/* restore USR1 and USR2 sigaction */
 				sigaction(SIGUSR1, &oldact_usr1, NULL);
 				sigaction(SIGUSR2, &oldact_usr2, NULL);
+				fpm_globals.send_config_signal = 1;
 				break;
 
 			default : /* parent */
