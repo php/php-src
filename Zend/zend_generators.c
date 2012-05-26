@@ -196,7 +196,7 @@ ZEND_METHOD(Generator, current)
 	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
 
 	if (generator->value) {
-		RETURN_ZVAL(generator->value, 1, 1);
+		RETURN_ZVAL(generator->value, 1, 0);
 	}
 }
 /* }}} */
