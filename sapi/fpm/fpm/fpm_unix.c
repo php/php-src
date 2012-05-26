@@ -129,6 +129,9 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 		if (wp->config->chroot && *wp->config->chroot) {
 			zlog(ZLOG_WARNING, "[pool %s] 'chroot' directive is ignored when FPM is not running as root", wp->config->name);
 		}
+		if (wp->config->process_priority != 64) {
+			zlog(ZLOG_WARNING, "[pool %s] 'process.priority' directive is ignored when FPM is not running as root", wp->config->name);
+		}
 
 		/* set up HOME and USER anyway */
 		pwd = getpwuid(getuid());
@@ -184,6 +187,14 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 
 	if (is_root) {
+
+		if (wp->config->process_priority != 64) {
+			if (setpriority(PRIO_PROCESS, 0, wp->config->process_priority) < 0) {
+				zlog(ZLOG_SYSERROR, "[pool %s] Unable to set priority for this new process", wp->config->name);
+				return -1;
+			}
+		}
+
 		if (wp->set_gid) {
 			if (0 > setgid(wp->set_gid)) {
 				zlog(ZLOG_SYSERROR, "[pool %s] failed to setgid(%d)", wp->config->name, wp->set_gid);
@@ -218,6 +229,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 int fpm_unix_init_main() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
+	int is_root = !geteuid();
 
 	if (fpm_global_config.rlimit_files) {
 		struct rlimit r;
@@ -315,6 +327,17 @@ int fpm_unix_init_main() /* {{{ */
 	setsid();
 	if (0 > fpm_clock_init()) {
 		return -1;
+	}
+
+	if (fpm_global_config.process_priority != 64) {
+		if (is_root) {
+			if (setpriority(PRIO_PROCESS, 0, fpm_global_config.process_priority) < 0) {
+				zlog(ZLOG_SYSERROR, "Unable to set priority for the master process");
+				return -1;
+			}
+		} else {
+			zlog(ZLOG_WARNING, "'process.priority' directive is ignored when FPM is not running as root");
+		}
 	}
 
 	fpm_globals.parent_pid = getpid();
