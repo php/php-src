@@ -3030,6 +3030,46 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	{
+		USE_OPLINE
+
+		zval *value = opline->op1.zv;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			generator->value = value;
+			Z_ADDREF_P(value);
+		}
+
+	}
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -7614,6 +7654,46 @@ static int ZEND_FASTCALL  ZEND_INSTANCEOF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 	zval_dtor(free_op1.var);
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	{
+		USE_OPLINE
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!1) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			generator->value = value;
+			Z_ADDREF_P(value);
+		}
+
+	}
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -12277,6 +12357,47 @@ static int ZEND_FASTCALL  ZEND_INSTANCEOF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	{
+		USE_OPLINE
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			generator->value = value;
+			Z_ADDREF_P(value);
+		}
+
+		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+	}
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -28113,6 +28234,46 @@ static int ZEND_FASTCALL  ZEND_INSTANCEOF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	{
+		USE_OPLINE
+
+		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			generator->value = value;
+			Z_ADDREF_P(value);
+		}
+
+	}
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -40903,6 +41064,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_SUSPEND_AND_RETURN_GENERATOR_SPEC_HANDLER,
   	ZEND_SUSPEND_AND_RETURN_GENERATOR_SPEC_HANDLER,
   	ZEND_SUSPEND_AND_RETURN_GENERATOR_SPEC_HANDLER,
+  	ZEND_YIELD_SPEC_CONST_HANDLER,
+  	ZEND_YIELD_SPEC_CONST_HANDLER,
+  	ZEND_YIELD_SPEC_CONST_HANDLER,
+  	ZEND_YIELD_SPEC_CONST_HANDLER,
+  	ZEND_YIELD_SPEC_CONST_HANDLER,
+  	ZEND_YIELD_SPEC_TMP_HANDLER,
+  	ZEND_YIELD_SPEC_TMP_HANDLER,
+  	ZEND_YIELD_SPEC_TMP_HANDLER,
+  	ZEND_YIELD_SPEC_TMP_HANDLER,
+  	ZEND_YIELD_SPEC_TMP_HANDLER,
+  	ZEND_YIELD_SPEC_VAR_HANDLER,
+  	ZEND_YIELD_SPEC_VAR_HANDLER,
+  	ZEND_YIELD_SPEC_VAR_HANDLER,
+  	ZEND_YIELD_SPEC_VAR_HANDLER,
+  	ZEND_YIELD_SPEC_VAR_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_NULL_HANDLER,
+  	ZEND_YIELD_SPEC_CV_HANDLER,
+  	ZEND_YIELD_SPEC_CV_HANDLER,
+  	ZEND_YIELD_SPEC_CV_HANDLER,
+  	ZEND_YIELD_SPEC_CV_HANDLER,
+  	ZEND_YIELD_SPEC_CV_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;

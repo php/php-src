@@ -5255,4 +5255,45 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 	ZEND_VM_LEAVE();
 }
 
+ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV, ANY)
+{
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	{
+		USE_OPLINE
+		zend_free_op free_op1;
+		zval *value = GET_OP1_ZVAL_PTR(BP_VAR_R);
+
+		/* Consts, temporary variables and references need copying */
+		if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!IS_OP1_TMP_FREE()) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			generator->value = value;
+			Z_ADDREF_P(value);
+		}
+
+		FREE_OP1_IF_VAR();
+	}
+
+	ZEND_VM_RETURN();
+}
+
 ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)

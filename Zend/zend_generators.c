@@ -53,6 +53,10 @@ static void zend_generator_free_storage(zend_generator *generator TSRMLS_DC) /* 
 		efree(execute_data);
 	}
 
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
 	efree(generator);
 }
 /* }}} */
@@ -88,14 +92,28 @@ static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* 
 
 static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS_DC) /* {{{ */
 {
-	/* Go to next opcode (we don't want to run the last one again) */
-	generator->execute_data->opline++;
+	/* Backup executor globals */
+	zval **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
+	zend_op **original_opline_ptr = EG(opline_ptr);
+	zend_op_array *original_active_op_array = EG(active_op_array);
 
 	/* We (mis) use the return_value_ptr_ptr to provide the generator object
 	 * to the executor. This way YIELD will be able to set the yielded value */
 	EG(return_value_ptr_ptr) = &object;
 
+	EG(opline_ptr) = &generator->execute_data->opline;
+	EG(active_op_array) = generator->execute_data->op_array;
+
+	/* Go to next opcode (we don't want to run the last one again) */
+	generator->execute_data->opline++;
+
+	/* Resume execution */
 	execute_ex(generator->execute_data TSRMLS_CC);
+
+	/* Restore executor globals */
+	EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
+	EG(opline_ptr) = original_opline_ptr;
+	EG(active_op_array) = original_active_op_array;
 }
 /* }}} */
 
@@ -190,6 +208,7 @@ ZEND_METHOD(Generator, next)
 		return;
 	}
 
+	object = getThis();
 	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
 	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
