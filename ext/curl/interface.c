@@ -18,7 +18,6 @@
 
 /* $Id$ */
 
-#include <syslog.h>
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #ifdef HAVE_CONFIG_H
