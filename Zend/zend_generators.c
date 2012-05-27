@@ -148,6 +148,7 @@ static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS
 	{
 		/* Backup executor globals */
 		zval **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
+		zend_execute_data *original_execute_data = EG(current_execute_data);
 		zend_op **original_opline_ptr = EG(opline_ptr);
 		zend_op_array *original_active_op_array = EG(active_op_array);
 		HashTable *original_active_symbol_table = EG(active_symbol_table);
@@ -160,6 +161,7 @@ static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS
 		EG(return_value_ptr_ptr) = &object;
 
 		/* Set executor globals */
+		EG(current_execute_data) = generator->execute_data;
 		EG(opline_ptr) = &generator->execute_data->opline;
 		EG(active_op_array) = generator->execute_data->op_array;
 		EG(active_symbol_table) = generator->execute_data->symbol_table;
@@ -175,6 +177,7 @@ static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS
 
 		/* Restore executor globals */
 		EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
+		EG(current_execute_data) = original_execute_data;
 		EG(opline_ptr) = original_opline_ptr;
 		EG(active_op_array) = original_active_op_array;
 		EG(active_symbol_table) = original_active_symbol_table;
