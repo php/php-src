@@ -2219,7 +2219,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_DNS_SERVERS:
 #endif	
 #if LIBCURL_VERSION_NUM >= 0x071900 /* Available since 7.25.0 */
-        case CURLOPT_MAIL_AUTH:
+		case CURLOPT_MAIL_AUTH:
 #endif
 		{
 #if LIBCURL_VERSION_NUM < 0x071100
