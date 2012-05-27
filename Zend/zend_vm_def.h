@@ -5225,6 +5225,11 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 
 		*EG(return_value_ptr_ptr) = return_value;
 
+		/* back up some executor globals */
+		EX(current_this) = EG(This);
+		EX(current_scope) = EG(scope);
+		EX(current_called_scope) = EG(called_scope);
+
 		/* back up the execution context */
 		generator = (zend_generator *) zend_object_store_get_object(return_value TSRMLS_CC);
 		generator->execute_data = execute_data;

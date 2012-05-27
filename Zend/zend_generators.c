@@ -48,6 +48,10 @@ void zend_generator_close(zend_generator *generator TSRMLS_DC) /* {{{ */
 			}
 		}
 
+		if (execute_data->current_this) {
+			zval_ptr_dtor(&execute_data->current_this);
+		}
+
 		efree(execute_data);
 		generator->execute_data = NULL;
 	}
@@ -105,28 +109,43 @@ static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS
 		return;
 	}
 
-	/* Backup executor globals */
-	zval **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
-	zend_op **original_opline_ptr = EG(opline_ptr);
-	zend_op_array *original_active_op_array = EG(active_op_array);
+	{
+		/* Backup executor globals */
+		zval **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
+		zend_op **original_opline_ptr = EG(opline_ptr);
+		zend_op_array *original_active_op_array = EG(active_op_array);
+		HashTable *original_active_symbol_table = EG(active_symbol_table);
+		zval *original_This = EG(This);
+		zend_class_entry *original_scope = EG(scope);
+		zend_class_entry *original_called_scope = EG(called_scope);
 
-	/* We (mis) use the return_value_ptr_ptr to provide the generator object
-	 * to the executor. This way YIELD will be able to set the yielded value */
-	EG(return_value_ptr_ptr) = &object;
+		/* We (mis)use the return_value_ptr_ptr to provide the generator object
+		 * to the executor, so YIELD will be able to set the yielded value */
+		EG(return_value_ptr_ptr) = &object;
 
-	EG(opline_ptr) = &generator->execute_data->opline;
-	EG(active_op_array) = generator->execute_data->op_array;
+		/* Set executor globals */
+		EG(opline_ptr) = &generator->execute_data->opline;
+		EG(active_op_array) = generator->execute_data->op_array;
+		EG(active_symbol_table) = generator->execute_data->symbol_table;
+		EG(This) = generator->execute_data->current_this;
+		EG(scope) = generator->execute_data->current_scope;
+		EG(called_scope) = generator->execute_data->current_called_scope;
 
-	/* Go to next opcode (we don't want to run the last one again) */
-	generator->execute_data->opline++;
+		/* Go to next opcode (we don't want to run the last one again) */
+		generator->execute_data->opline++;
 
-	/* Resume execution */
-	execute_ex(generator->execute_data TSRMLS_CC);
+		/* Resume execution */
+		execute_ex(generator->execute_data TSRMLS_CC);
 
-	/* Restore executor globals */
-	EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
-	EG(opline_ptr) = original_opline_ptr;
-	EG(active_op_array) = original_active_op_array;
+		/* Restore executor globals */
+		EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
+		EG(opline_ptr) = original_opline_ptr;
+		EG(active_op_array) = original_active_op_array;
+		EG(active_symbol_table) = original_active_symbol_table;
+		EG(This) = original_This;
+		EG(scope) = original_scope;
+		EG(called_scope) = original_called_scope;
+	}
 }
 /* }}} */
 
