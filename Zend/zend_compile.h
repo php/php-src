@@ -565,10 +565,6 @@ void zend_prepare_trait_precedence(znode *result, znode *method_reference, znode
 void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC);
 void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC);
 
-void init_trait_alias_list(znode* result, const znode* trait_alias TSRMLS_DC);
-void add_trait_alias(znode* result, const znode* trait_alias TSRMLS_DC);
-void init_trait_alias(znode* result, const znode* method_name, const znode* alias, const znode* modifiers TSRMLS_DC);
-
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
 void zend_do_early_binding(TSRMLS_D);
 ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array TSRMLS_DC);

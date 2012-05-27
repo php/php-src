@@ -1,7 +1,7 @@
 --TEST--
 Bug#48746 - Junction not working properly
 
---CREDIT--
+--CREDITS--
 Venkat Raman Don (don.raman@microsoft.com)
 
 --SKIPIF--
@@ -9,21 +9,24 @@ Venkat Raman Don (don.raman@microsoft.com)
 if(substr(PHP_OS, 0, 3) != 'WIN' ) {
     die('skip windows only test');
 }
+include_once __DIR__ . '/common.inc';
 $ret = exec('mklink bug48746_tmp.lnk ' . __FILE__ .' 2>&1', $out);
 if (strpos($ret, 'privilege')) {
 	die('skip. SeCreateSymbolicLinkPrivilege not enable for this user.');
 }
-unlink('mklink bug48746_tmp.lnk');
+unlink('bug48746_tmp.lnk');
 ?>
 --FILE--
 <?php
+include_once __DIR__ . '/common.inc';
+$mountvol = get_mountvol();
 $old_dir = __DIR__;
 $dirname = __DIR__ . "\\mnt\\test\\directory";
 exec("mkdir " . $dirname, $output, $ret_val);
 chdir(__DIR__ . "\\mnt\\test");
 $drive = substr(__DIR__, 0, 2);
 $pathwithoutdrive = substr(__DIR__, 2);
-$ret = exec("mountvol " . $drive . " /L", $output, $ret_val);
+$ret = exec($mountvol . " " . $drive . " /L", $output, $ret_val);
 exec("mklink /j mounted_volume " . $ret, $output, $ret_val);
 $fullpath = "mounted_volume" . $pathwithoutdrive;
 exec("mklink /j mklink_junction directory", $output, $ret_val);

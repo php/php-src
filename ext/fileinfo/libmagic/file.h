@@ -434,6 +434,7 @@ protected int file_looks_utf8(const unsigned char *, size_t, unichar *,
     size_t *);
 protected size_t file_pstring_length_size(const struct magic *);
 protected size_t file_pstring_get_length(const struct magic *, const char *);
+protected size_t file_printedlen(const struct magic_set *ms);
 #ifdef __EMX__
 protected int file_os2_apptype(struct magic_set *, const char *, const void *,
     size_t);
@@ -484,6 +485,14 @@ static const char *rcsid(const char *p) { \
 #endif
 #else
 #define FILE_RCSID(id)
+#endif
+
+#ifdef PHP_WIN32
+#define FINFO_LSEEK_FUNC _lseek
+#define FINFO_READ_FUNC _read
+#else
+#define FINFO_LSEEK_FUNC lseek
+#define FINFO_READ_FUNC read
 #endif
 
 #endif /* __file_h__ */

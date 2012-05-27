@@ -45,6 +45,7 @@
 /* handler status flags */
 #define PHP_OUTPUT_HANDLER_STARTED		0x1000
 #define PHP_OUTPUT_HANDLER_DISABLED		0x2000
+#define PHP_OUTPUT_HANDLER_PROCESSED	0x4000
 
 /* handler op return values */
 typedef enum _php_output_handler_status_t {
@@ -82,7 +83,7 @@ typedef enum _php_output_handler_hook_t {
 } php_output_handler_hook_t;
 
 #define PHP_OUTPUT_HANDLER_INITBUF_SIZE(s) \
-( (s) ? \
+( ((s) > 1) ? \
 	(s) + PHP_OUTPUT_HANDLER_ALIGNTO_SIZE - ((s) % (PHP_OUTPUT_HANDLER_ALIGNTO_SIZE)) : \
 	PHP_OUTPUT_HANDLER_DEFAULT_SIZE \
 )

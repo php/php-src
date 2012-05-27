@@ -70,6 +70,7 @@ struct fpm_global_config_s fpm_global_config = {
 	.syslog_facility = -1,
 #endif
 	.process_max = 0,
+	.process_priority = 64, /* 64 means unset */
 };
 static struct fpm_worker_pool_s *current_wp = NULL;
 static int ini_recursion = 0;
@@ -92,6 +93,7 @@ static struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ "emergency_restart_interval",  &fpm_conf_set_time,            GO(emergency_restart_interval) },
 	{ "process_control_timeout",     &fpm_conf_set_time,            GO(process_control_timeout) },
 	{ "process.max",                 &fpm_conf_set_integer,         GO(process_max) },
+	{ "process.priority",            &fpm_conf_set_integer,         GO(process_priority) },
 	{ "daemonize",                   &fpm_conf_set_boolean,         GO(daemonize) },
 	{ "rlimit_files",                &fpm_conf_set_integer,         GO(rlimit_files) },
 	{ "rlimit_core",                 &fpm_conf_set_rlimit_core,     GO(rlimit_core) },
@@ -112,6 +114,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "listen.group",              &fpm_conf_set_string,      WPO(listen_group) },
 	{ "listen.mode",               &fpm_conf_set_string,      WPO(listen_mode) },
 	{ "listen.allowed_clients",    &fpm_conf_set_string,      WPO(listen_allowed_clients) },
+	{ "process.priority",          &fpm_conf_set_integer,     WPO(process_priority) },
 	{ "pm",                        &fpm_conf_set_pm,          WPO(pm) },
 	{ "pm.max_children",           &fpm_conf_set_integer,     WPO(pm_max_children) },
 	{ "pm.start_servers",          &fpm_conf_set_integer,     WPO(pm_start_servers) },
@@ -577,6 +580,7 @@ static void *fpm_worker_pool_config_alloc() /* {{{ */
 	memset(wp->config, 0, sizeof(struct fpm_worker_pool_config_s));
 	wp->config->listen_backlog = FPM_BACKLOG_DEFAULT;
 	wp->config->pm_process_idle_timeout = 10; /* 10s by default */
+	wp->config->process_priority = 64; /* 64 means unset */
 
 	if (!fpm_worker_all_pools) {
 		fpm_worker_all_pools = wp;
@@ -704,7 +708,7 @@ static int fpm_evaluate_full_path(char **path, struct fpm_worker_pool_s *wp, cha
 
 static int fpm_conf_process_all_pools() /* {{{ */
 {
-	struct fpm_worker_pool_s *wp;
+	struct fpm_worker_pool_s *wp, *wp2;
 
 	if (!fpm_worker_all_pools) {
 		zlog(ZLOG_ERROR, "No pool defined. at least one pool section must be specified in config file");
@@ -723,8 +727,8 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		}
 
-		/* user */
-		if (!wp->config->user) {
+		/* alert if user is not set only if we are not root*/
+		if (!wp->config->user && !geteuid()) {
 			zlog(ZLOG_ALERT, "[pool %s] user has not been defined", wp->config->name);
 			return -1;
 		}
@@ -738,6 +742,11 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		} else {
 			zlog(ZLOG_ALERT, "[pool %s] no listen address have been defined!", wp->config->name);
+			return -1;
+		}
+
+		if (wp->config->process_priority != 64 && (wp->config->process_priority < -19 || wp->config->process_priority > 20)) {
+			zlog(ZLOG_ERROR, "[pool %s] process.priority must be included into [-19,20]", wp->config->name);
 			return -1;
 		}
 
@@ -1044,6 +1053,20 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		}
 	}
+
+	/* ensure 2 pools do not use the same listening address */
+	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
+		for (wp2 = fpm_worker_all_pools; wp2; wp2 = wp2->next) {
+			if (wp == wp2) {
+				continue;
+			}
+
+			if (wp->config->listen_address && *wp->config->listen_address && wp2->config->listen_address && *wp2->config->listen_address && !strcmp(wp->config->listen_address, wp2->config->listen_address)) {
+				zlog(ZLOG_ERROR, "[pool %s] unable to set listen address as it's already used in another pool '%s'", wp2->config->name, wp->config->name);
+				return -1;
+			}
+		}
+	}
 	return 0;
 }
 /* }}} */
@@ -1100,6 +1123,11 @@ static int fpm_conf_post_process(TSRMLS_D) /* {{{ */
 
 	if (fpm_global_config.process_max < 0) {
 		zlog(ZLOG_ERROR, "process_max can't be negative");
+		return -1;
+	}
+
+	if (fpm_global_config.process_priority != 64 && (fpm_global_config.process_priority < -19 || fpm_global_config.process_priority > 20)) {
+		zlog(ZLOG_ERROR, "process.priority must be included into [-19,20]");
 		return -1;
 	}
 
@@ -1485,6 +1513,11 @@ static void fpm_conf_dump() /* {{{ */
 	zlog(ZLOG_NOTICE, "\temergency_restart_threshold = %d", fpm_global_config.emergency_restart_threshold);
 	zlog(ZLOG_NOTICE, "\tprocess_control_timeout = %ds",    fpm_global_config.process_control_timeout);
 	zlog(ZLOG_NOTICE, "\tprocess.max = %d",                 fpm_global_config.process_max);
+	if (fpm_global_config.process_priority == 64) {
+		zlog(ZLOG_NOTICE, "\tprocess.priority = undefined");
+	} else {
+		zlog(ZLOG_NOTICE, "\tprocess.priority = %d", fpm_global_config.process_priority);
+	}
 	zlog(ZLOG_NOTICE, "\tdaemonize = %s",                   BOOL2STR(fpm_global_config.daemonize));
 	zlog(ZLOG_NOTICE, "\trlimit_files = %d",                fpm_global_config.rlimit_files);
 	zlog(ZLOG_NOTICE, "\trlimit_core = %d",                 fpm_global_config.rlimit_core);
@@ -1504,6 +1537,11 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tlisten.group = %s",               STR2STR(wp->config->listen_group));
 		zlog(ZLOG_NOTICE, "\tlisten.mode = %s",                STR2STR(wp->config->listen_mode));
 		zlog(ZLOG_NOTICE, "\tlisten.allowed_clients = %s",     STR2STR(wp->config->listen_allowed_clients));
+		if (wp->config->process_priority == 64) {
+			zlog(ZLOG_NOTICE, "\tprocess.priority = undefined");
+		} else {
+			zlog(ZLOG_NOTICE, "\tprocess.priority = %d", wp->config->process_priority);
+		}
 		zlog(ZLOG_NOTICE, "\tpm = %s",                         PM2STR(wp->config->pm));
 		zlog(ZLOG_NOTICE, "\tpm.max_children = %d",            wp->config->pm_max_children);
 		zlog(ZLOG_NOTICE, "\tpm.start_servers = %d",           wp->config->pm_start_servers);

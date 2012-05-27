@@ -22,6 +22,8 @@
 #include <php.h>
 
 void locale_register_constants( INIT_FUNC_ARGS );
+
+const char *intl_locale_get_default( TSRMLS_D );
  
 #define OPTION_DEFAULT NULL
 #define LOC_LANG_TAG "language"

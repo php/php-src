@@ -2,6 +2,9 @@
 Unix domain socket Loopback test
 --SKIPIF--
 <?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+	die('skip.. Not valid for Windows');
+}
 	if (!extension_loaded('sockets')) {
 		die('skip sockets extension not available.');
 	}

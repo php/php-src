@@ -6,8 +6,15 @@ PHP                                                                        NEWS
   . Drop Windows XP and 2003 support. (Pierre)
   . World domination
   . Improve set_exception_handler while doing reset.(Laruence)
+  . Support constant array/string dereferencing. (Laruence)
+  . Add support for using empty() on the result of function calls and
+    other expressions (https://wiki.php.net/rfc/empty_isset_exprs).
+    (Nikita Popov)
 
 - Core:
+  . Fixed bug #61681 (Malformed grammar). (Nikita Popov, Etienne, Laruence).
+  . Fixed bug #61038 (unpack("a5", "str\0\0") does not work as expected).
+    (srgoogleguy, Gustavo)
   . Implemented FR #60738 (Allow 'set_error_handler' to handle NULL).
     (Laruence, Nikita Popov)
 
@@ -33,6 +40,10 @@ PHP                                                                        NEWS
   . Fixed bug #55635 (CURLOPT_BINARYTRANSFER no longer used. The constant
 	still exists for backward compatibility but is doing nothing). (Pierrick)
   . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
+
+- MySQLi
+  . Dropped support for LOAD DATA LOCAL INFILE handlers when using libmysql.
+    Known for stability problems. (Andrey)
 
 - PCRE:
   . Deprecated the /e modifier

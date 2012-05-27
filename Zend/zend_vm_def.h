@@ -1174,7 +1174,7 @@ ZEND_VM_HANDLER(89, ZEND_FETCH_IS, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_fetch_var_address_helper, type, BP_VAR_IS);
 }
 
-ZEND_VM_HANDLER(81, ZEND_FETCH_DIM_R, VAR|CV, CONST|TMP|VAR|CV)
+ZEND_VM_HANDLER(81, ZEND_FETCH_DIM_R, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -1187,10 +1187,19 @@ ZEND_VM_HANDLER(81, ZEND_FETCH_DIM_R, VAR|CV, CONST|TMP|VAR|CV)
 	    EX_T(opline->op1.var).var.ptr_ptr) {
 		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
 	}
-	container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
-	zend_fetch_dimension_address_read(&EX_T(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_R TSRMLS_CC);
-	FREE_OP2();
-	FREE_OP1_VAR_PTR();
+    
+    if (OP1_TYPE == IS_TMP_VAR || OP1_TYPE == IS_CONST) {
+        zval *container = GET_OP1_ZVAL_PTR(BP_VAR_R);
+        zend_fetch_dimension_address_read(&EX_T(opline->result.var), &container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_R TSRMLS_CC);
+        FREE_OP2();
+        FREE_OP1();
+    } else {
+        container = GET_OP1_ZVAL_PTR_PTR(BP_VAR_R);
+        zend_fetch_dimension_address_read(&EX_T(opline->result.var), container, GET_OP2_ZVAL_PTR(BP_VAR_R), OP2_TYPE, BP_VAR_R TSRMLS_CC);
+        FREE_OP2();
+        FREE_OP1_VAR_PTR();
+    }
+
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -2442,7 +2451,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 				if (UNEXPECTED(EX(fbc) == NULL)) {
 					zend_error_noreturn(E_ERROR, "Call to undefined method %s::%s()", Z_OBJ_CLASS_NAME_P(EX(object)), Z_STRVAL_PP(method));
 				}
-				
+
 				if ((EX(fbc)->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 					EX(object) = NULL;
 				} else {
@@ -2974,7 +2983,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 		catch_ce = CACHED_PTR(opline->op1.literal->cache_slot);
 	} else {
 		catch_ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD TSRMLS_CC);
-		
+
 		CACHE_PTR(opline->op1.literal->cache_slot, catch_ce);
 	}
 	ce = Z_OBJCE_P(EG(exception));
@@ -3426,7 +3435,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMP|VAR|UNUSED|CV, ANY)
 		} else if ((clone->common.fn_flags & ZEND_ACC_PROTECTED)) {
 			/* Ensure that if we're calling a protected function, we're allowed to do so.
 			 */
-			if (UNEXPECTED(!zend_check_protected(clone->common.scope, EG(scope)))) {
+			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), EG(scope)))) {
 				zend_error_noreturn(E_ERROR, "Call to protected %s::__clone() from context '%s'", ce->name, EG(scope) ? EG(scope)->name : "");
 			}
 		}

@@ -781,6 +781,8 @@ void zend_register_standard_ini_entries(TSRMLS_D) /* {{{ */
 void zend_post_startup(TSRMLS_D) /* {{{ */
 {
 #ifdef ZTS
+	zend_encoding **script_encoding_list;
+
 	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id);
 	zend_executor_globals *executor_globals = ts_resource(executor_globals_id);
 
@@ -795,7 +797,12 @@ void zend_post_startup(TSRMLS_D) /* {{{ */
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	free(compiler_globals->function_table);
 	free(compiler_globals->class_table);
-	compiler_globals_ctor(compiler_globals, tsrm_ls);
+	if ((script_encoding_list = (zend_encoding **)compiler_globals->script_encoding_list)) {
+		compiler_globals_ctor(compiler_globals, tsrm_ls);
+		compiler_globals->script_encoding_list = (const zend_encoding **)script_encoding_list;
+	} else {
+		compiler_globals_ctor(compiler_globals, tsrm_ls);
+	}
 	free(EG(zend_constants));
 	executor_globals_ctor(executor_globals, tsrm_ls);
 	global_persistent_list = &EG(persistent_list);

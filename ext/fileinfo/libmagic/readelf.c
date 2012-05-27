@@ -309,11 +309,11 @@ dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 	 * Loop through all the program headers.
 	 */
 	for ( ; num; num--) {
-		if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
+		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (off_t)-1) {
 			file_badseek(ms);
 			return -1;
 		}
-		if (read(fd, xph_addr, xph_sizeof) == -1) {
+		if (FINFO_READ_FUNC(fd, xph_addr, xph_sizeof) == -1) {
 			file_badread(ms);
 			return -1;
 		}
@@ -331,11 +331,11 @@ dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 		 * This is a PT_NOTE section; loop through all the notes
 		 * in the section.
 		 */
-		if (lseek(fd, xph_offset, SEEK_SET) == (off_t)-1) {
+		if (FINFO_LSEEK_FUNC(fd, xph_offset, SEEK_SET) == (off_t)-1) {
 			file_badseek(ms);
 			return -1;
 		}
-		bufsize = read(fd, nbuf,
+		bufsize = FINFO_READ_FUNC(fd, nbuf,
 		    ((xph_filesz < sizeof(nbuf)) ? xph_filesz : sizeof(nbuf)));
 		if (bufsize == -1) {
 			file_badread(ms);
@@ -858,11 +858,11 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 	}
 
 	for ( ; num; num--) {
-		if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
+		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (off_t)-1) {
 			file_badseek(ms);
 			return -1;
 		}
-		if (read(fd, xsh_addr, xsh_sizeof) == -1) {
+		if (FINFO_READ_FUNC(fd, xsh_addr, xsh_sizeof) == -1) {
 			file_badread(ms);
 			return -1;
 		}
@@ -888,13 +888,13 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 		switch (xsh_type) {
 		case SHT_NOTE:
 			nbuf = emalloc((size_t)xsh_size);
-			if ((noff = lseek(fd, (off_t)xsh_offset, SEEK_SET)) ==
+			if ((noff = FINFO_LSEEK_FUNC(fd, (off_t)xsh_offset, SEEK_SET)) ==
 			    (off_t)-1) {
 				file_badread(ms);
 				efree(nbuf);
 				return -1;
 			}
-			if (read(fd, nbuf, (size_t)xsh_size) !=
+			if (FINFO_READ_FUNC(fd, nbuf, (size_t)xsh_size) !=
 			    (ssize_t)xsh_size) {
 				efree(nbuf);
 				file_badread(ms);
@@ -914,7 +914,7 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 			efree(nbuf);
 			break;
 		case SHT_SUNW_cap:
-			if (lseek(fd, (off_t)xsh_offset, SEEK_SET) ==
+			if (FINFO_LSEEK_FUNC(fd, (off_t)xsh_offset, SEEK_SET) ==
 			    (off_t)-1) {
 				file_badseek(ms);
 				return -1;
@@ -927,7 +927,7 @@ doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
 				    MAX(sizeof cap32, sizeof cap64)];
 				if ((coff += xcap_sizeof) > (off_t)xsh_size)
 					break;
-				if (read(fd, cbuf, (size_t)xcap_sizeof) !=
+				if (FINFO_READ_FUNC(fd, cbuf, (size_t)xcap_sizeof) !=
 				    (ssize_t)xcap_sizeof) {
 					file_badread(ms);
 					return -1;
@@ -1046,12 +1046,12 @@ dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 	}
 
   	for ( ; num; num--) {
-		if (lseek(fd, off, SEEK_SET) == (off_t)-1) {
+		if (FINFO_LSEEK_FUNC(fd, off, SEEK_SET) == (off_t)-1) {
 			file_badseek(ms);
 			return -1;
 		}
 
-  		if (read(fd, xph_addr, xph_sizeof) == -1) {
+  		if (FINFO_READ_FUNC(fd, xph_addr, xph_sizeof) == -1) {
   			file_badread(ms);
 			return -1;
 		}
@@ -1090,11 +1090,11 @@ dophn_exec(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 			 * This is a PT_NOTE section; loop through all the notes
 			 * in the section.
 			 */
-			if (lseek(fd, xph_offset, SEEK_SET) == (off_t)-1) {
+			if (FINFO_LSEEK_FUNC(fd, xph_offset, SEEK_SET) == (off_t)-1) {
 				file_badseek(ms);
 				return -1;
 			}
-			bufsize = read(fd, nbuf, ((xph_filesz < sizeof(nbuf)) ?
+			bufsize = FINFO_READ_FUNC(fd, nbuf, ((xph_filesz < sizeof(nbuf)) ?
 			    xph_filesz : sizeof(nbuf)));
 			if (bufsize == -1) {
 				file_badread(ms);
@@ -1156,7 +1156,7 @@ file_tryelf(struct magic_set *ms, int fd, const unsigned char *buf,
 	/*
 	 * If we cannot seek, it must be a pipe, socket or fifo.
 	 */
-	if((lseek(fd, (off_t)0, SEEK_SET) == (off_t)-1) && (errno == ESPIPE))
+	if((FINFO_LSEEK_FUNC(fd, (off_t)0, SEEK_SET) == (off_t)-1) && (errno == ESPIPE))
 		fd = file_pipe2file(ms, fd, buf, nbytes);
 
 	if (fstat(fd, &st) == -1) {

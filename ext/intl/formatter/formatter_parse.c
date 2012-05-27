@@ -83,11 +83,10 @@ PHP_FUNCTION( numfmt_parse )
 			break;
 		case FORMAT_TYPE_INT64:
 			val64 = unum_parseInt64(FORMATTER_OBJECT(nfo), sstr, sstr_len, position_p, &INTL_DATA_ERROR_CODE(nfo));
-			if(val64 > LONG_MAX || val64 < -LONG_MAX) {
+			if(val64 > LONG_MAX || val64 < LONG_MIN) {
 				RETVAL_DOUBLE(val64);
 			} else {
-				val32 = (int32_t)val64;
-				RETVAL_LONG(val32);
+				RETVAL_LONG((long)val64);
 			}
 			break;
 		case FORMAT_TYPE_DOUBLE:

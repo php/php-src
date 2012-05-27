@@ -803,7 +803,7 @@ PHP_FUNCTION(touch)
 PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, int filename_len TSRMLS_DC)
 {
 	/* always clear CurrentStatFile and CurrentLStatFile even if filename is not NULL
-	 * as it may contains outdated data (e.g. "nlink" for a directory when deleting a file
+	 * as it may contain outdated data (e.g. "nlink" for a directory when deleting a file
 	 * in this directory, as shown by lstat_stat_variation9.phpt) */
 	if (BG(CurrentStatFile)) {
 		efree(BG(CurrentStatFile));
@@ -1208,7 +1208,12 @@ PHP_FUNCTION(realpath_cache_get)
 			MAKE_STD_ZVAL(entry);
 			array_init(entry);
 
-			add_assoc_long(entry, "key", bucket->key);
+			/* bucket->key is unsigned long */
+			if (LONG_MAX >= bucket->key) {
+				add_assoc_long(entry, "key", bucket->key);
+			} else {
+				add_assoc_double(entry, "key", (double)bucket->key);
+			}
 			add_assoc_bool(entry, "is_dir", bucket->is_dir);
 			add_assoc_stringl(entry, "realpath", bucket->realpath, bucket->realpath_len, 1);
 			add_assoc_long(entry, "expires", bucket->expires);

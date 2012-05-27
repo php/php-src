@@ -874,7 +874,8 @@ static int php_libxml_post_deactivate()
 	}
 
 	if (LIBXML(stream_context)) {
-		zval_ptr_dtor(&LIBXML(stream_context));
+		/* the steam_context resource will be released by resource list destructor */
+		efree(LIBXML(stream_context));
 		LIBXML(stream_context) = NULL;
 	}
 	smart_str_free(&LIBXML(error_buffer));

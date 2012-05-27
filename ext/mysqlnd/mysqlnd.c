@@ -114,7 +114,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn TSRMLS
 	}
 
 	if (conn->net) {
-		conn->net->m.free_contents(conn->net TSRMLS_CC);
+		conn->net->data->m.free_contents(conn->net TSRMLS_CC);
 	}
 
 	DBG_INF("Freeing memory of members");
@@ -457,9 +457,9 @@ mysqlnd_switch_to_ssl_if_needed(
 			goto end;
 		}
 
-		conn->net->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify TSRMLS_CC);
+		conn->net->data->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify TSRMLS_CC);
 
-		if (FAIL == conn->net->m.enable_ssl(conn->net TSRMLS_CC)) {
+		if (FAIL == conn->net->data->m.enable_ssl(conn->net TSRMLS_CC)) {
 			goto end;
 		}
 	}
@@ -623,6 +623,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	zend_bool reconnect = FALSE;
 	zend_bool saved_compression = FALSE;
 	zend_bool local_tx_started = FALSE;
+	MYSQLND_NET * net = conn->net;
 
 	MYSQLND_PACKET_GREET * greet_packet = NULL;
 
@@ -655,14 +656,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
 		}
 		/* Now reconnect using the same handle */
-		if (conn->net->compressed) {
+		if (net->data->compressed) {
 			/*
 			  we need to save the state. As we will re-connect, net->compressed should be off, or
 			  we will look for a compression header as part of the greet message, but there will
 			  be none.
 			*/
 			saved_compression = TRUE;
-			conn->net->compressed = FALSE;
+			net->data->compressed = FALSE;
 		}
 	} else {
 		unsigned int max_allowed_size = MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
@@ -734,13 +735,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		goto err; /* OOM */
 	}
 
-	if (FAIL == conn->net->m.connect_ex(conn->net, conn->scheme, conn->scheme_len, conn->persistent,
+	if (FAIL == net->data->m.connect_ex(conn->net, conn->scheme, conn->scheme_len, conn->persistent,
 										conn->stats, conn->error_info TSRMLS_CC))
 	{
 		goto err;
 	}
 
-	DBG_INF_FMT("stream=%p", conn->net->stream);
+	DBG_INF_FMT("stream=%p", net->data->m.get_stream(net TSRMLS_CC));
 
 	if (FAIL == PACKET_READ(greet_packet, conn)) {
 		DBG_ERR("Error while reading greeting packet");
@@ -780,7 +781,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		mysql_flags &= ~CLIENT_COMPRESS;
 	}
 #else
-	if (conn->net->options.flags & MYSQLND_NET_FLAG_USE_COMPRESSION) {
+	if (net->data->options.flags & MYSQLND_NET_FLAG_USE_COMPRESSION) {
 		mysql_flags |= CLIENT_COMPRESS;
 	}
 #endif
@@ -789,8 +790,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		mysql_flags &= ~CLIENT_SSL;
 	}
 #else
-	if (conn->net->options.ssl_key || conn->net->options.ssl_cert ||
-		conn->net->options.ssl_ca || conn->net->options.ssl_capath || conn->net->options.ssl_cipher)
+	if (net->data->options.ssl_key || net->data->options.ssl_cert ||
+		net->data->options.ssl_ca || net->data->options.ssl_capath || net->data->options.ssl_cipher)
 	{
 		mysql_flags |= CLIENT_SSL;
 	}
@@ -806,14 +807,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		CONN_SET_STATE(conn, CONN_READY);
 
 		if (saved_compression) {
-			conn->net->compressed = TRUE;
+			net->data->compressed = TRUE;
 		}
 		/*
 		  If a connect on a existing handle is performed and mysql_flags is
 		  passed which doesn't CLIENT_COMPRESS, then we need to overwrite the value
 		  which we set based on saved_compression.
 		*/
-		conn->net->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
+		net->data->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
 
 		conn->user				= mnd_pestrdup(user, conn->persistent);
 		conn->user_len			= strlen(conn->user);
@@ -975,7 +976,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 	}
 	DBG_RETURN(ret);
 }
-
+/* }}} */
 
 /* {{{ mysqlnd_connect */
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
@@ -1142,7 +1143,7 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 		 * when casting.  It is only used here so that the buffered data warning
 		 * is not displayed.
 		 * */
-		if (SUCCESS == php_stream_cast((*p)->data->net->stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+		if (SUCCESS == php_stream_cast((*p)->data->net->data->m.get_stream((*p)->data->net TSRMLS_CC), PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && this_fd >= 0) {
 
 			PHP_SAFE_FD_SET(this_fd, fds);
@@ -1167,7 +1168,7 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds 
 	MYSQLND **fwd = conn_array, **bckwd = conn_array;
 
 	while (*fwd) {
-		if (SUCCESS == php_stream_cast((*fwd)->data->net->stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+		if (SUCCESS == php_stream_cast((*fwd)->data->net->data->m.get_stream((*fwd)->data->net TSRMLS_CC), PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && this_fd >= 0) {
 			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
 				if (disproportion) {
@@ -1438,14 +1439,15 @@ MYSQLND_METHOD(mysqlnd_conn_data, ssl_set)(MYSQLND_CONN_DATA * const conn, const
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, ssl_set);
 	enum_func_status ret = FAIL;
+	MYSQLND_NET * net = conn->net;
 	DBG_ENTER("mysqlnd_conn_data::ssl_set");
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
-		ret = (PASS == conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_KEY, key TSRMLS_CC) &&
-			PASS == conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CERT, cert TSRMLS_CC) &&
-			PASS == conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CA, ca TSRMLS_CC) &&
-			PASS == conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CAPATH, capath TSRMLS_CC) &&
-			PASS == conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CIPHER, cipher TSRMLS_CC)) ? PASS : FAIL;
+		ret = (PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_KEY, key TSRMLS_CC) &&
+			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CERT, cert TSRMLS_CC) &&
+			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CA, ca TSRMLS_CC) &&
+			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CAPATH, capath TSRMLS_CC) &&
+			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CIPHER, cipher TSRMLS_CC)) ? PASS : FAIL;
 
 		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);
 	}
@@ -1717,10 +1719,11 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
+	MYSQLND_NET * net = conn->net;
+	php_stream * net_stream = net->data->m.get_stream(net TSRMLS_CC);
 
 	DBG_ENTER("mysqlnd_send_close");
-	DBG_INF_FMT("conn=%llu conn->net->stream->abstract=%p",
-				conn->thread_id, conn->net->stream? conn->net->stream->abstract:NULL);
+	DBG_INF_FMT("conn=%llu net->data->stream->abstract=%p", conn->thread_id, net_stream? net_stream->abstract:NULL);
 
 	if (CONN_GET_STATE(conn) >= CONN_READY) {
 		MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
@@ -1731,7 +1734,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 	switch (CONN_GET_STATE(conn)) {
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
-			if (conn->net->stream) {
+			if (net_stream) {
 				ret = conn->m->simple_command(conn, COM_QUIT, NULL, 0, PROT_LAST, TRUE, TRUE TSRMLS_CC);
 			}
 			/* Do nothing */
@@ -2264,7 +2267,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
-			ret = conn->net->m.set_client_option(conn->net, option, value TSRMLS_CC);
+			ret = conn->net->data->m.set_client_option(conn->net, option, value TSRMLS_CC);
 			break;
 #if MYSQLND_UNICODE
 		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:

@@ -67,12 +67,6 @@ require_once('skipifconnectfailure.inc');
 		$expected_methods['get_connection_stats']	= true;
 		$expected_methods['reap_async_query']	= true;
 		$expected_methods['poll'] = true;
-	} else {
-		// libmysql only
-		if (function_exists('mysqli_ssl_set'))
-			$expected_methods['ssl_set'] = true;
-		$expected_methods['set_local_infile_default']	= true;
-		$expected_methods['set_local_infile_handler']	= true;
 	}
 
 	/* we should add ruled when to expect them */

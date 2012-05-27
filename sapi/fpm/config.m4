@@ -16,6 +16,7 @@ AC_DEFUN([AC_FPM_STDLIBS],
   AC_CHECK_HEADERS([errno.h fcntl.h stdio.h stdlib.h unistd.h sys/uio.h])
   AC_CHECK_HEADERS([sys/select.h sys/socket.h sys/time.h])
   AC_CHECK_HEADERS([arpa/inet.h netinet/in.h])
+  AC_CHECK_HEADERS([sysexits.h])
 ])
 
 AC_DEFUN([AC_FPM_PRCTL],
@@ -192,6 +193,8 @@ AC_DEFUN([AC_FPM_TRACE],
       have_ptrace=no
       have_broken_ptrace=yes
       AC_MSG_RESULT([no])
+    ], [
+      AC_MSG_RESULT([skipped (cross compiling)])
     ])
   fi
 
@@ -264,6 +267,8 @@ AC_DEFUN([AC_FPM_TRACE],
     ], [
       proc_mem_file=""
       AC_MSG_RESULT([no])
+    ], [
+      AC_MSG_RESULT([skipped (cross compiling)])
     ])
   fi
   

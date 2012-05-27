@@ -636,6 +636,8 @@ MYSQLND_METHOD(mysqlnd_stmt, execute)(MYSQLND_STMT * const s TSRMLS_DC)
 		  have it again.
 		*/
 		stmt->result->m.free_result_buffers(stmt->result TSRMLS_CC);
+
+		stmt->state = MYSQLND_STMT_PREPARED;
 	} else if (stmt->state < MYSQLND_STMT_PREPARED) {
 		/* Only initted - error */
 		SET_CLIENT_ERROR(*conn->error_info, CR_COMMANDS_OUT_OF_SYNC, UNKNOWN_SQLSTATE,
@@ -1221,8 +1223,6 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s TSRMLS_DC)
 			COPY_CLIENT_ERROR(*stmt->error_info, *conn->error_info);
 		}
 		*stmt->upsert_status = *conn->upsert_status;
-
-		stmt->state = MYSQLND_STMT_PREPARED;
 	}
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
@@ -1261,8 +1261,6 @@ MYSQLND_METHOD(mysqlnd_stmt, flush)(MYSQLND_STMT * const s TSRMLS_DC)
 				stmt->result->m.skip_result(stmt->result TSRMLS_CC);
 			}
 		} while (mysqlnd_stmt_more_results(s) && mysqlnd_stmt_next_result(s) == PASS);
-
-		stmt->state = MYSQLND_STMT_PREPARED;
 	}
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
@@ -1622,9 +1620,9 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const s, unsigned i
 		mysqlnd_stmt_separate_one_result_bind(s, param_no TSRMLS_CC);
 		/* Guaranteed is that stmt->result_bind is NULL */
 		if (!stmt->result_bind) {
-			stmt->result_bind = mnd_ecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND));
+			stmt->result_bind = mnd_pecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND), stmt->persistent);
 		} else {
-			stmt->result_bind = mnd_erealloc(stmt->result_bind, stmt->field_count * sizeof(MYSQLND_RESULT_BIND));
+			stmt->result_bind = mnd_perealloc(stmt->result_bind, stmt->field_count * sizeof(MYSQLND_RESULT_BIND), stmt->persistent);
 		}
 		if (!stmt->result_bind) {
 			DBG_RETURN(FAIL);

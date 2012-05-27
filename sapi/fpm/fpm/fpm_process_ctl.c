@@ -71,7 +71,7 @@ static void fpm_pctl_exit() /* {{{ */
 
 	fpm_conf_unlink_pid();
 	fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT_MAIN);
-	exit(0);
+	exit(FPM_EXIT_OK);
 }
 /* }}} */
 
@@ -100,7 +100,7 @@ static void fpm_pctl_exec() /* {{{ */
 	fpm_cleanups_run(FPM_CLEANUP_PARENT_EXEC);
 	execvp(saved_argv[0], saved_argv);
 	zlog(ZLOG_SYSERROR, "failed to reload: execvp() failed");
-	exit(1);
+	exit(FPM_EXIT_SOFTWARE);
 }
 /* }}} */
 

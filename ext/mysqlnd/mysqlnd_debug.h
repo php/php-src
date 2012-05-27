@@ -141,7 +141,7 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 
 
 
-#else
+#else  /* defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400)) */
 static inline void DBG_INF_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
 static inline void DBG_ERR_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
 static inline void DBG_INF_FMT_EX(MYSQLND_DEBUG * dbg_obj, ...) {}

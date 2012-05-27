@@ -3656,12 +3656,12 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 	if (child->common.prototype && (child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 		if (!zend_do_perform_implementation_check(child, child->common.prototype TSRMLS_CC)) {
-			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_get_function_declaration(child->common.prototype TSRMLS_CC));
+			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_get_function_declaration(child->common.prototype? child->common.prototype : parent TSRMLS_CC)); 
 		}
 	} else if (EG(error_reporting) & E_STRICT || EG(user_error_handler)) { /* Check E_STRICT (or custom error handler) before the check so that we save some time */
 		if (!zend_do_perform_implementation_check(child, parent TSRMLS_CC)) {
-			char *method_prototype = zend_get_function_declaration(child->common.prototype TSRMLS_CC);
-			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
+			char *method_prototype = zend_get_function_declaration(child->common.prototype? child->common.prototype : parent TSRMLS_CC);
+			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype); 
 			efree(method_prototype);
 		}
 	}
@@ -4053,6 +4053,7 @@ ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *tr
 			}
 		}
 		ce->traits[ce->num_traits++] = trait;
+		trait->refcount++;
 	}
 }
 /* }}} */
@@ -4304,8 +4305,8 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				fn_copy = *fn;
 				function_add_ref(&fn_copy);
 				/* this function_name is never destroyed, because its refcount
-				   greater than 1, classes are always destoyed in reverse order
-				   and trait is declared early than this class */
+				   greater than 1 and classes are always destoyed before the
+				   traits they use */
 				fn_copy.common.function_name = aliases[i]->alias;
 
 				/* if it is 0, no modifieres has been changed */
@@ -4510,14 +4511,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	size_t i;
 
 	/* prepare copies of trait function tables for combination */
-	function_tables = malloc(sizeof(HashTable*) * ce->num_traits);
-	resulting_table = (HashTable *) malloc(sizeof(HashTable));
-
+	function_tables = emalloc(sizeof(HashTable*) * ce->num_traits);
+	resulting_table = (HashTable *)emalloc(sizeof(HashTable));
+	
 	/* TODO: revisit this start size, may be its not optimal */
-	zend_hash_init_ex(resulting_table, 10, NULL, NULL, 1, 0);
-
+	zend_hash_init_ex(resulting_table, 10, NULL, NULL, 0, 0);
+  
 	for (i = 0; i < ce->num_traits; i++) {
-		function_tables[i] = (HashTable *) malloc(sizeof(HashTable));
+		function_tables[i] = (HashTable *)emalloc(sizeof(HashTable));
 		zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements, NULL, NULL, 1, 0);
 
 		if (ce->trait_precedences) {
@@ -4550,14 +4551,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	for (i = 0; i < ce->num_traits; i++) {
 		/* zend_hash_destroy(function_tables[i]); */
 		zend_hash_graceful_destroy(function_tables[i]);
-		free(function_tables[i]);
+		efree(function_tables[i]);
 	}
-	free(function_tables);
+	efree(function_tables);
 
 	/* free temporary resulting table */
 	/* zend_hash_destroy(resulting_table); */
 	zend_hash_graceful_destroy(resulting_table);
-	free(resulting_table);
+	efree(resulting_table);
 }
 /* }}} */
 
@@ -6565,7 +6566,16 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 
 	zend_do_end_variable_parse(variable, BP_VAR_IS, 0 TSRMLS_CC);
 
-	zend_check_writable_variable(variable);
+	if (zend_is_function_or_method_call(variable)) {
+		if (type == ZEND_ISEMPTY) {
+			/* empty(func()) can be transformed to !func() */
+			zend_do_unary_op(ZEND_BOOL_NOT, result, variable TSRMLS_CC);
+		} else {
+			zend_error(E_COMPILE_ERROR, "Cannot use isset() on the result of a function call (you can use \"null !== func()\" instead)");
+		}
+
+		return;
+	}
 
 	if (variable->op_type == IS_CV) {
 		last_op = get_next_op(CG(active_op_array) TSRMLS_CC);

@@ -1,7 +1,13 @@
 --TEST--
 Bug #52209 (INPUT_ENV returns NULL for set variables (CLI))
 --SKIPIF--
-<?php if (!extension_loaded("filter") || !empty($_ENV['PWD'])) die("skip"); ?>
+<?php
+/* This test makes no sense on windows as an empty variable 
+   would never show up in the "set" list. Which means, it's 
+   always undefined in PHP. */
+if(substr(PHP_OS, 0, 3) == "WIN") die("skip Not for Windows");
+if (!extension_loaded("filter") || !empty($_ENV['PWD'])) die("skip");
+?>
 --INI--
 variables_order=GPCSE
 --FILE--

@@ -1456,64 +1456,6 @@ PHP_FUNCTION(mysqli_kill)
 }
 /* }}} */
 
-/* {{{ proto void mysqli_set_local_infile_default(object link)
-   unsets user defined handler for load local infile command */
-#if !defined(MYSQLI_USE_MYSQLND)
-PHP_FUNCTION(mysqli_set_local_infile_default)
-{
-	MY_MYSQL	*mysql;
-	zval		*mysql_link;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
-		return;
-	}
-
-	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
-
-	if (mysql->li_read) {
-		zval_ptr_dtor(&(mysql->li_read));
-		mysql->li_read = NULL;
-	}
-}
-/* }}} */
-
-/* {{{ proto bool mysqli_set_local_infile_handler(object link, callback read_func)
-   Set callback functions for LOAD DATA LOCAL INFILE */
-PHP_FUNCTION(mysqli_set_local_infile_handler)
-{
-	MY_MYSQL	*mysql;
-	zval		*mysql_link;
-	char		*callback_name;
-	zval		*callback_func;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz", &mysql_link, mysqli_link_class_entry,
-			&callback_func) == FAILURE) {
-		return;
-	}
-
-	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
-
-	/* check callback function */
-	if (!zend_is_callable(callback_func, 0, &callback_name TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Not a valid callback function %s", callback_name);
-		efree(callback_name);
-		RETURN_FALSE;
-	}
-	efree(callback_name);
-
-	/* save callback function */
-	if (!mysql->li_read) {
-		MAKE_STD_ZVAL(mysql->li_read);
-	} else {
-		zval_dtor(mysql->li_read);
-	}
-	ZVAL_ZVAL(mysql->li_read, callback_func, 1, 0);
-
-	RETURN_TRUE;
-}
-#endif
-/* }}} */
-
 /* {{{ proto bool mysqli_more_results(object link)
    check if there any more query results from a multi query */
 PHP_FUNCTION(mysqli_more_results)
