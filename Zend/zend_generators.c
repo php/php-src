@@ -26,7 +26,7 @@
 ZEND_API zend_class_entry *zend_ce_generator;
 static zend_object_handlers zend_generator_handlers;
 
-void zend_generator_close(zend_generator *generator TSRMLS_DC) /* {{{ */
+void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC) /* {{{ */
 {
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
@@ -52,6 +52,42 @@ void zend_generator_close(zend_generator *generator TSRMLS_DC) /* {{{ */
 			zval_ptr_dtor(&execute_data->current_this);
 		}
 
+		/* If the generator is closed before it can finish execution (reach
+		 * a return statement) we have to free loop variables manually, as
+		 * we don't know whether the SWITCH_FREE / FREE opcodes have run */
+		if (!finished_execution) {
+			zend_op_array *op_array = execute_data->op_array;
+			zend_uint op_num = execute_data->opline - op_array->opcodes;
+
+			int i;
+			for (i = 0; i < op_array->last_brk_cont; ++i) {
+				zend_brk_cont_element *brk_cont = op_array->brk_cont_array + i;
+
+				if (brk_cont->start < 0) {
+					continue;
+				} else if (brk_cont->start > op_num) {
+					break;
+				} else if (brk_cont->brk > op_num) {
+					zend_op *brk_opline = op_array->opcodes + brk_cont->brk;
+
+					switch (brk_opline->opcode) {
+						case ZEND_SWITCH_FREE:
+							{
+								temp_variable *var = (temp_variable *) ((char *) execute_data->Ts + brk_opline->op1.var);
+								zval_ptr_dtor(&var->var.ptr);
+							}
+							break;
+						case ZEND_FREE:
+							{
+								temp_variable *var = (temp_variable *) ((char *) execute_data->Ts + brk_opline->op1.var);
+								zval_dtor(&var->tmp_var);
+							}
+							break;
+					}
+				}
+			}
+		}
+
 		efree(execute_data);
 		generator->execute_data = NULL;
 	}
@@ -66,7 +102,7 @@ void zend_generator_close(zend_generator *generator TSRMLS_DC) /* {{{ */
 
 static void zend_generator_free_storage(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
-	zend_generator_close(generator TSRMLS_CC);
+	zend_generator_close(generator, 0 TSRMLS_CC);
 
 	zend_object_std_dtor(&generator->std TSRMLS_CC);
 	efree(generator);

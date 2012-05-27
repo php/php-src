@@ -2845,7 +2845,7 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
 
 		/* Close the generator to free up resources. */
-		zend_generator_close(generator TSRMLS_CC);
+		zend_generator_close(generator, 1 TSRMLS_CC);
 
 		/* Pass execution back to generator handling code */
 		ZEND_VM_RETURN();

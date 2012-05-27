@@ -2331,7 +2331,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
 
 		/* Close the generator to free up resources. */
-		zend_generator_close(generator TSRMLS_CC);
+		zend_generator_close(generator, 1 TSRMLS_CC);
 
 		/* Pass execution back to generator handling code */
 		ZEND_VM_RETURN();
@@ -6915,7 +6915,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
 
 		/* Close the generator to free up resources. */
-		zend_generator_close(generator TSRMLS_CC);
+		zend_generator_close(generator, 1 TSRMLS_CC);
 
 		/* Pass execution back to generator handling code */
 		ZEND_VM_RETURN();
@@ -11404,7 +11404,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
 
 		/* Close the generator to free up resources. */
-		zend_generator_close(generator TSRMLS_CC);
+		zend_generator_close(generator, 1 TSRMLS_CC);
 
 		/* Pass execution back to generator handling code */
 		ZEND_VM_RETURN();
@@ -27449,7 +27449,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
 
 		/* Close the generator to free up resources. */
-		zend_generator_close(generator TSRMLS_CC);
+		zend_generator_close(generator, 1 TSRMLS_CC);
 
 		/* Pass execution back to generator handling code */
 		ZEND_VM_RETURN();
