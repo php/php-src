@@ -23,6 +23,7 @@
 #include "fpm_clock.h"
 #include "fpm_stdio.h"
 #include "fpm_unix.h"
+#include "fpm_signals.h"
 #include "zlog.h"
 
 size_t fpm_pagesize;
@@ -128,6 +129,9 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 		if (wp->config->chroot && *wp->config->chroot) {
 			zlog(ZLOG_WARNING, "[pool %s] 'chroot' directive is ignored when FPM is not running as root", wp->config->name);
 		}
+		if (wp->config->process_priority != 64) {
+			zlog(ZLOG_WARNING, "[pool %s] 'process.priority' directive is ignored when FPM is not running as root", wp->config->name);
+		}
 
 		/* set up HOME and USER anyway */
 		pwd = getpwuid(getuid());
@@ -183,6 +187,14 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 
 	if (is_root) {
+
+		if (wp->config->process_priority != 64) {
+			if (setpriority(PRIO_PROCESS, 0, wp->config->process_priority) < 0) {
+				zlog(ZLOG_SYSERROR, "[pool %s] Unable to set priority for this new process", wp->config->name);
+				return -1;
+			}
+		}
+
 		if (wp->set_gid) {
 			if (0 > setgid(wp->set_gid)) {
 				zlog(ZLOG_SYSERROR, "[pool %s] failed to setgid(%d)", wp->config->name, wp->set_gid);
@@ -217,6 +229,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 int fpm_unix_init_main() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
+	int is_root = !geteuid();
 
 	if (fpm_global_config.rlimit_files) {
 		struct rlimit r;
@@ -242,21 +255,90 @@ int fpm_unix_init_main() /* {{{ */
 
 	fpm_pagesize = getpagesize();
 	if (fpm_global_config.daemonize) {
-		switch (fork()) {
-			case -1 :
+		/*
+		 * If daemonize, the calling process will die soon
+		 * and the master process continues to initialize itself.
+		 *
+		 * The parent process has then to wait for the master
+		 * process to initialize to return a consistent exit
+		 * value. For this pupose, the master process will
+		 * send USR1 if everything went well and USR2
+		 * otherwise.
+		 */
+
+		struct sigaction act;
+		struct sigaction oldact_usr1;
+		struct sigaction oldact_usr2;
+		struct timeval tv;
+
+		/*
+		 * set sigaction for USR1 before fork
+		 * save old sigaction to restore it after
+		 * fork in the child process (the master process)
+		 */
+		memset(&act, 0, sizeof(act));
+		memset(&act, 0, sizeof(oldact_usr1));
+		act.sa_handler = fpm_signals_sighandler_exit_ok;
+		sigfillset(&act.sa_mask);
+		sigaction(SIGUSR1, &act, &oldact_usr1);
+
+		/*
+		 * set sigaction for USR2 before fork
+		 * save old sigaction to restore it after
+		 * fork in the child process (the master process)
+		 */
+		memset(&act, 0, sizeof(act));
+		memset(&act, 0, sizeof(oldact_usr2));
+		act.sa_handler = fpm_signals_sighandler_exit_config;
+		sigfillset(&act.sa_mask);
+		sigaction(SIGUSR2, &act, &oldact_usr2);
+
+		/* then fork */
+		pid_t pid = fork();
+		switch (pid) {
+
+			case -1 : /* error */
 				zlog(ZLOG_SYSERROR, "failed to daemonize");
 				return -1;
-			case 0 :
+
+			case 0 : /* children */
+				/* restore USR1 and USR2 sigaction */
+				sigaction(SIGUSR1, &oldact_usr1, NULL);
+				sigaction(SIGUSR2, &oldact_usr2, NULL);
+				fpm_globals.send_config_signal = 1;
 				break;
-			default :
+
+			default : /* parent */
 				fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT);
-				exit(0);
+
+				/*
+				 * wait for 10s before exiting with error
+				 * the child is supposed to send USR1 or USR2 to tell the parent
+				 * how it goes for it
+				 */
+				tv.tv_sec = 10;
+				tv.tv_usec = 0;
+				zlog(ZLOG_DEBUG, "The calling process is waiting for the master process to ping");
+				select(0, NULL, NULL, NULL, &tv);
+				exit(FPM_EXIT_SOFTWARE);
 		}
 	}
 
+	/* continue as a child */
 	setsid();
 	if (0 > fpm_clock_init()) {
 		return -1;
+	}
+
+	if (fpm_global_config.process_priority != 64) {
+		if (is_root) {
+			if (setpriority(PRIO_PROCESS, 0, fpm_global_config.process_priority) < 0) {
+				zlog(ZLOG_SYSERROR, "Unable to set priority for the master process");
+				return -1;
+			}
+		} else {
+			zlog(ZLOG_WARNING, "'process.priority' directive is ignored when FPM is not running as root");
+		}
 	}
 
 	fpm_globals.parent_pid = getpid();

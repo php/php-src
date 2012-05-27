@@ -1528,7 +1528,7 @@ static zend_module_entry cgi_module_entry = {
  */
 int main(int argc, char *argv[])
 {
-	int exit_status = SUCCESS;
+	int exit_status = FPM_EXIT_OK;
 	int cgi = 0, c, use_extended_info = 0;
 	zend_file_handle file_handle;
 
@@ -1659,7 +1659,7 @@ int main(int argc, char *argv[])
 				php_output_end_all(TSRMLS_C);
 				php_output_deactivate(TSRMLS_C);
 				fcgi_shutdown();
-				exit_status = 0;
+				exit_status = FPM_EXIT_OK;
 				goto out;
 
 			case 'i': /* php info & quit */
@@ -1680,7 +1680,7 @@ int main(int argc, char *argv[])
 				php_output_end_all(TSRMLS_C);
 				php_output_deactivate(TSRMLS_C);
 				fcgi_shutdown();
-				exit_status = 0;
+				exit_status = (c == 'h') ? FPM_EXIT_OK : FPM_EXIT_USAGE;
 				goto out;
 
 			case 'v': /* show php version & quit */
@@ -1688,7 +1688,7 @@ int main(int argc, char *argv[])
 				if (php_request_startup(TSRMLS_C) == FAILURE) {
 					SG(server_context) = NULL;
 					php_module_shutdown(TSRMLS_C);
-					return FAILURE;
+					return FPM_EXIT_SOFTWARE;
 				}
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
@@ -1700,7 +1700,7 @@ int main(int argc, char *argv[])
 #endif
 				php_request_shutdown((void *) 0);
 				fcgi_shutdown();
-				exit_status = 0;
+				exit_status = FPM_EXIT_OK;
 				goto out;
 		}
 	}
@@ -1711,14 +1711,14 @@ int main(int argc, char *argv[])
 		if (php_request_startup(TSRMLS_C) == FAILURE) {
 			SG(server_context) = NULL;
 			php_module_shutdown(TSRMLS_C);
-			return FAILURE;
+			return FPM_EXIT_SOFTWARE;
 		}
 		SG(headers_sent) = 1;
 		SG(request_info).no_headers = 1;
 		php_print_info(0xFFFFFFFF TSRMLS_CC);
 		php_request_shutdown((void *) 0);
 		fcgi_shutdown();
-		exit_status = 0;
+		exit_status = FPM_EXIT_OK;
 		goto out;
 	}
 
@@ -1731,7 +1731,7 @@ int main(int argc, char *argv[])
 		php_output_end_all(TSRMLS_C);
 		php_output_deactivate(TSRMLS_C);
 		fcgi_shutdown();
-		exit_status = 0;
+		exit_status = FPM_EXIT_USAGE;
 		goto out;
 	}
 
@@ -1750,7 +1750,7 @@ int main(int argc, char *argv[])
 #ifdef ZTS
 		tsrm_shutdown();
 #endif
-		return FAILURE;
+		return FPM_EXIT_SOFTWARE;
 	}
 	
 	if (use_extended_info) {
@@ -1793,14 +1793,23 @@ consult the installation file that came with this distribution, or visit \n\
 			 */
 			tsrm_shutdown();
 #endif
-			return FAILURE;
+			return FPM_EXIT_SOFTWARE;
 		}
 	}
 
 	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root)) {
-		return FAILURE;
+
+		if (fpm_globals.send_config_signal) {
+			zlog(ZLOG_DEBUG, "Sending SIGUSR2 (error) to parent %d", getppid());
+			kill(getppid(), SIGUSR2);
+		}
+		return FPM_EXIT_CONFIG;
 	}
 
+	if (fpm_globals.send_config_signal) {
+		zlog(ZLOG_DEBUG, "Sending SIGUSR1 (OK) to parent %d", getppid());
+		kill(getppid(), SIGUSR1);
+	}
 	fpm_is_running = 1;
 
 	fcgi_fd = fpm_run(&max_requests);
@@ -1832,7 +1841,7 @@ consult the installation file that came with this distribution, or visit \n\
 				fcgi_finish_request(&request, 1);
 				SG(server_context) = NULL;
 				php_module_shutdown(TSRMLS_C);
-				return FAILURE;
+				return FPM_EXIT_SOFTWARE;
 			}
 
 			/* check if request_method has been sent.
@@ -1920,17 +1929,9 @@ fastcgi_request_done:
 
 			php_request_shutdown((void *) 0);
 
-			if (exit_status == 0) {
-				exit_status = EG(exit_status);
-			}
-
 			requests++;
 			if (max_requests && (requests == max_requests)) {
 				fcgi_finish_request(&request, 1);
-				if (max_requests != 1) {
-					/* no need to return exit_status of the last request */
-					exit_status = 0;
-				}
 				break;
 			}
 			/* end of fastcgi loop */
@@ -1944,7 +1945,7 @@ fastcgi_request_done:
 			free(cgi_sapi_module.ini_entries);
 		}
 	} zend_catch {
-		exit_status = 255;
+		exit_status = FPM_EXIT_SOFTWARE;
 	} zend_end_try();
 
 out:

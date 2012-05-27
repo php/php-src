@@ -179,6 +179,10 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &flags, sizeof(flags));
 
 	if (wp->listen_address_domain == FPM_AF_UNIX) {
+		if (fpm_socket_unix_test_connect((struct sockaddr_un *)sa, socklen) == 0) {
+			zlog(ZLOG_ERROR, "An another FPM instance seems to already listen on %s", ((struct sockaddr_un *) sa)->sun_path);
+			return -1;
+		}
 		unlink( ((struct sockaddr_un *) sa)->sun_path);
 		saved_umask = umask(0777 ^ wp->socket_mode);
 	}
@@ -450,3 +454,24 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 }
 
 #endif
+
+int fpm_socket_unix_test_connect(struct sockaddr_un *sun, size_t socklen) /* {{{ */
+{
+	int fd;
+
+	if (!sun || sun->sun_family != AF_UNIX) {
+		return -1;
+	}
+
+	if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+		return -1;
+	}
+
+	if (connect(fd, (struct sockaddr *)sun, socklen) == -1) {
+		return -1;
+	}
+
+	close(fd);
+	return 0;
+}
+/* }}} */
