@@ -25177,7 +25177,6 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 	}
 
 	/* clean up a bit */
-	/*if (s->time->h == TIMELIB_UNSET || s->time->i != TIMELIB_UNSET || s->time->s != TIMELIB_UNSET) {*/
         if (s->time->h == TIMELIB_UNSET ) {
                 s->time->h = 0;
         }
@@ -25187,7 +25186,6 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
         if (s->time->s == TIMELIB_UNSET ) {
                 s->time->s = 0;
         }
-	/*}*/
 
 	/* do funky checking whether the parsed time was valid time */
 	if (s->time->h != TIMELIB_UNSET && s->time->i != TIMELIB_UNSET &&
