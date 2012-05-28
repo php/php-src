@@ -453,6 +453,40 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filen
 	Z_SET_REFCOUNT_P(us->object, 1);
 	Z_SET_ISREF_P(us->object);
 
+	if (uwrap->ce->constructor) {
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		zval *retval_ptr;
+
+		fci.size = sizeof(fci);
+		fci.function_table = &uwrap->ce->function_table;
+		fci.function_name = NULL;
+		fci.symbol_table = NULL;
+		fci.object_ptr = us->object;
+		fci.retval_ptr_ptr = &retval_ptr;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+
+		fcc.initialized = 1;
+		fcc.function_handler = uwrap->ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.called_scope = Z_OBJCE_P(us->object);
+		fcc.object_ptr = us->object;
+
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name, uwrap->ce->constructor->common.function_name);
+			zval_dtor(us->object);
+			FREE_ZVAL(us->object);
+			efree(us);
+			return NULL;
+		} else {
+			if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+			}
+		}
+	}
+
 	if (context) {
 		add_property_resource(us->object, "context", context->rsrc_id);
 		zend_list_addref(context->rsrc_id);
@@ -1162,6 +1196,38 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	Z_SET_REFCOUNT_P(object, 1);
 	Z_SET_ISREF_P(object);
 
+	if (uwrap->ce->constructor) {
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		zval *retval_ptr;
+
+		fci.size = sizeof(fci);
+		fci.function_table = &uwrap->ce->function_table;
+		fci.function_name = NULL;
+		fci.symbol_table = NULL;
+		fci.object_ptr = object;
+		fci.retval_ptr_ptr = &retval_ptr;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+
+		fcc.initialized = 1;
+		fcc.function_handler = uwrap->ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.called_scope = Z_OBJCE_P(object);
+		fcc.object_ptr = object;
+
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name, uwrap->ce->constructor->common.function_name);
+			zval_dtor(object);
+			FREE_ZVAL(object);
+			return ret;
+		} else {
+			if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+			}
+		}
+	}
 	if (context) {
 		add_property_resource(object, "context", context->rsrc_id);
 		zend_list_addref(context->rsrc_id);
@@ -1216,6 +1282,38 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	Z_SET_REFCOUNT_P(object, 1);
 	Z_SET_ISREF_P(object);
 
+	if (uwrap->ce->constructor) {
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		zval *retval_ptr;
+
+		fci.size = sizeof(fci);
+		fci.function_table = &uwrap->ce->function_table;
+		fci.function_name = NULL;
+		fci.symbol_table = NULL;
+		fci.object_ptr = object;
+		fci.retval_ptr_ptr = &retval_ptr;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+
+		fcc.initialized = 1;
+		fcc.function_handler = uwrap->ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.called_scope = Z_OBJCE_P(object);
+		fcc.object_ptr = object;
+
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name, uwrap->ce->constructor->common.function_name);
+			zval_dtor(object);
+			FREE_ZVAL(object);
+			return ret;
+		} else {
+			if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+			}
+		}
+	}
 	if (context) {
 		add_property_resource(object, "context", context->rsrc_id);
 		zend_list_addref(context->rsrc_id);
@@ -1275,6 +1373,38 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, 
 	Z_SET_REFCOUNT_P(object, 1);
 	Z_SET_ISREF_P(object);
 
+	if (uwrap->ce->constructor) {
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		zval *retval_ptr;
+
+		fci.size = sizeof(fci);
+		fci.function_table = &uwrap->ce->function_table;
+		fci.function_name = NULL;
+		fci.symbol_table = NULL;
+		fci.object_ptr = object;
+		fci.retval_ptr_ptr = &retval_ptr;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+
+		fcc.initialized = 1;
+		fcc.function_handler = uwrap->ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.called_scope = Z_OBJCE_P(object);
+		fcc.object_ptr = object;
+
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name, uwrap->ce->constructor->common.function_name);
+			zval_dtor(object);
+			FREE_ZVAL(object);
+			return ret;
+		} else {
+			if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+			}
+		}
+	}
 	if (context) {
 		add_property_resource(object, "context", context->rsrc_id);
 		zend_list_addref(context->rsrc_id);
@@ -1340,6 +1470,38 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int option
 	Z_SET_REFCOUNT_P(object, 1);
 	Z_SET_ISREF_P(object);
 
+	if (uwrap->ce->constructor) {
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		zval *retval_ptr;
+
+		fci.size = sizeof(fci);
+		fci.function_table = &uwrap->ce->function_table;
+		fci.function_name = NULL;
+		fci.symbol_table = NULL;
+		fci.object_ptr = object;
+		fci.retval_ptr_ptr = &retval_ptr;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+
+		fcc.initialized = 1;
+		fcc.function_handler = uwrap->ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.called_scope = Z_OBJCE_P(object);
+		fcc.object_ptr = object;
+
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name, uwrap->ce->constructor->common.function_name);
+			zval_dtor(object);
+			FREE_ZVAL(object);
+			return ret;
+		} else {
+			if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+			}
+		}
+	}
 	if (context) {
 		add_property_resource(object, "context", context->rsrc_id);
 		zend_list_addref(context->rsrc_id);
@@ -1489,6 +1651,38 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int fla
 	Z_SET_REFCOUNT_P(object, 1);
 	Z_SET_ISREF_P(object);
 
+	if (uwrap->ce->constructor) {
+		zend_fcall_info fci;
+		zend_fcall_info_cache fcc;
+		zval *retval_ptr;
+
+		fci.size = sizeof(fci);
+		fci.function_table = &uwrap->ce->function_table;
+		fci.function_name = NULL;
+		fci.symbol_table = NULL;
+		fci.object_ptr = object;
+		fci.retval_ptr_ptr = &retval_ptr;
+		fci.param_count = 0;
+		fci.params = NULL;
+		fci.no_separation = 1;
+
+		fcc.initialized = 1;
+		fcc.function_handler = uwrap->ce->constructor;
+		fcc.calling_scope = EG(scope);
+		fcc.called_scope = Z_OBJCE_P(object);
+		fcc.object_ptr = object;
+
+		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not execute %s::%s()", uwrap->ce->name, uwrap->ce->constructor->common.function_name);
+			zval_dtor(object);
+			FREE_ZVAL(object);
+			return ret;
+		} else {
+			if (retval_ptr) {
+				zval_ptr_dtor(&retval_ptr);
+			}
+		}
+	}
 	if (context) {
 		add_property_resource(object, "context", context->rsrc_id);
 		zend_list_addref(context->rsrc_id);
