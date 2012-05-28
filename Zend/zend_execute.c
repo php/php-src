@@ -1538,6 +1538,31 @@ ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const t
 	return get_zval_ptr_ptr(op_type, node, Ts, should_free, type);
 }
 
+void zend_clean_and_cache_symbol_table(HashTable *symbol_table) /* {{{ */
+{
+	if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
+		zend_hash_destroy(symbol_table);
+		FREE_HASHTABLE(symbol_table);
+	} else {
+		/* clean before putting into the cache, since clean
+		   could call dtors, which could use cached hash */
+		zend_hash_clean(symbol_table);
+		*(++EG(symtable_cache_ptr)) = symbol_table;
+	}
+}
+/* }}} */
+
+void zend_free_compiled_variables(zval ***CVs, int num) /* {{{ */
+{
+	int i;
+	for (i = 0; i < num; ++i) {
+		if (CVs[i]) {
+			zval_ptr_dtor(CVs[i]);
+		}
+	}
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

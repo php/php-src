@@ -432,6 +432,9 @@ ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const t
 
 ZEND_API int zend_do_fcall(ZEND_OPCODE_HANDLER_ARGS);
 
+void zend_clean_and_cache_symbol_table(HashTable *symbol_table);
+void zend_free_compiled_variables(zval ***CVs, int num);
+
 #define CACHED_PTR(num) \
 	EG(active_op_array)->run_time_cache[(num)]
 

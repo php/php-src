@@ -2514,14 +2514,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
 	if (!EG(active_symbol_table)) {
-		zval ***cv = EX_CVs();
-		zval ***end = cv + op_array->last_var;
-		while (cv != end) {
-			if (*cv) {
-				zval_ptr_dtor(*cv);
-			}
-			cv++;
-		}
+		zend_free_compiled_variables(EX_CVs(), op_array->last_var);
 	}
 
 	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {
@@ -2579,15 +2572,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			EG(active_op_array) = EX(op_array);
 			EG(return_value_ptr_ptr) = EX(original_return_value);
 			if (EG(active_symbol_table)) {
-				if (EG(symtable_cache_ptr)>=EG(symtable_cache_limit)) {
-					zend_hash_destroy(EG(active_symbol_table));
-					FREE_HASHTABLE(EG(active_symbol_table));
-				} else {
-					/* clean before putting into the cache, since clean
-					   could call dtors, which could use cached hash */
-					zend_hash_clean(EG(active_symbol_table));
-					*(++EG(symtable_cache_ptr)) = EG(active_symbol_table);
-				}
+				zend_clean_and_cache_symbol_table(EG(active_symbol_table));
 			}
 			EG(active_symbol_table) = EX(symbol_table);
 
@@ -2732,15 +2717,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		EG(active_op_array) = EX(op_array);
 		EG(return_value_ptr_ptr) = EX(original_return_value);
 		if (EG(active_symbol_table)) {
-			if (EG(symtable_cache_ptr)>=EG(symtable_cache_limit)) {
-				zend_hash_destroy(EG(active_symbol_table));
-				FREE_HASHTABLE(EG(active_symbol_table));
-			} else {
-				/* clean before putting into the cache, since clean
-				   could call dtors, which could use cached hash */
-				zend_hash_clean(EG(active_symbol_table));
-				*(++EG(symtable_cache_ptr)) = EG(active_symbol_table);
-			}
+			zend_clean_and_cache_symbol_table(EG(active_symbol_table));
 		}
 		EG(active_symbol_table) = EX(symbol_table);
 	} else { /* ZEND_OVERLOADED_FUNCTION */
@@ -5242,7 +5219,12 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 	/* if there is no return value pointer we are responsible for freeing the
      * execution data */
 	if (!EG(return_value_ptr_ptr)) {
-		/* something has to be done in here, not sure yet what exactly */
+		if (!EG(active_symbol_table)) {
+			zend_free_compiled_variables(EX_CVs(), execute_data->op_array->last_var);
+		} else {
+			zend_clean_and_cache_symbol_table(EG(active_symbol_table));
+		}
+		efree(execute_data);
 	}
 
 	EG(opline_ptr) = NULL;

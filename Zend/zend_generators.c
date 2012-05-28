@@ -32,12 +32,7 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 		zend_execute_data *execute_data = generator->execute_data;
 
 		if (!execute_data->symbol_table) {
-			int i;
-			for (i = 0; i < execute_data->op_array->last_var; ++i) {
-				if (execute_data->CVs[i]) {
-					zval_ptr_dtor(execute_data->CVs[i]);
-				}
-			}
+			zend_free_compiled_variables(execute_data->CVs, execute_data->op_array->last_var);
 		} else {
 			if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
 				zend_hash_destroy(execute_data->symbol_table);
