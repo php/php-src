@@ -490,7 +490,7 @@ void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_c
 int zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC);
 void zend_do_end_function_call(znode *function_name, znode *result, const znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
-void zend_do_yield(znode *expr TSRMLS_DC);
+void zend_do_yield(znode *result, const znode *expr TSRMLS_DC);
 void zend_do_suspend_if_generator(TSRMLS_D);
 void zend_do_handle_exception(TSRMLS_D);
 

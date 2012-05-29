@@ -30,6 +30,8 @@ typedef struct _zend_generator {
 	zend_execute_data *execute_data;
 	/* Current value */
 	zval *value;
+	/* Variable to put sent value into */
+	temp_variable *send_target;
 } zend_generator;
 
 extern ZEND_API zend_class_entry *zend_ce_generator;

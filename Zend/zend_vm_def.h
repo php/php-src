@@ -5260,6 +5260,8 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 
 ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV, ANY)
 {
+	USE_OPLINE
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
 
@@ -5268,8 +5270,8 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV, ANY)
 		zval_ptr_dtor(&generator->value);
 	}
 
+	/* Set the new yielded value */
 	{
-		USE_OPLINE
 		zend_free_op free_op1;
 		zval *value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
@@ -5295,6 +5297,13 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV, ANY)
 
 		FREE_OP1_IF_VAR();
 	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */

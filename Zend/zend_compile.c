@@ -2662,7 +2662,7 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_do_yield(znode *expr TSRMLS_DC) /* {{{ */
+void zend_do_yield(znode *result, const znode *expr TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -2675,6 +2675,10 @@ void zend_do_yield(znode *expr TSRMLS_DC) /* {{{ */
 	opline->opcode = ZEND_YIELD;
 	SET_NODE(opline->op1, expr);
 	SET_UNUSED(opline->op2);
+
+	opline->result_type = IS_VAR;
+	opline->result.var = get_temporary_variable(CG(active_op_array));
+	GET_NODE(result, opline->result);
 }
 /* }}} */
 

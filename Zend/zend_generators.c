@@ -292,7 +292,38 @@ ZEND_METHOD(Generator, next)
 }
 /* }}} */
 
+/* {{{ proto void Generator::send()
+ * Sends a value to the generator */
+ZEND_METHOD(Generator, send)
+{
+	zval *object, *value;
+	zend_generator *generator;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
+		return;
+	}
+
+	object = getThis();
+	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
+
+	zend_generator_ensure_initialized(object, generator TSRMLS_CC); 
+
+	/* The sent value was initialized to NULL, so dtor that */
+	zval_ptr_dtor(generator->send_target->var.ptr_ptr);
+
+	/* Set new sent value */
+	Z_ADDREF_P(value);
+	generator->send_target->var.ptr = value;
+	generator->send_target->var.ptr_ptr = &value;
+
+	zend_generator_resume(object, generator TSRMLS_CC);
+}
+
 ZEND_BEGIN_ARG_INFO(arginfo_generator_void, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_send, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry generator_functions[] = {
@@ -301,6 +332,7 @@ static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, current, arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, key,     arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, next,    arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, send,    arginfo_generator_send, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

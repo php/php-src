@@ -68,6 +68,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_LOGICAL_AND  "and (T_LOGICAL_AND)"
 %right T_PRINT
 %token T_PRINT        "print (T_PRINT)"
+%right T_YIELD
+%token T_YIELD        "yield (T_YIELD)"
 %left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL
 %token T_PLUS_EQUAL   "+= (T_PLUS_EQUAL)"
 %token T_MINUS_EQUAL  "-= (T_MINUS_EQUAL)"
@@ -158,7 +160,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_FUNCTION   "function (T_FUNCTION)"
 %token T_CONST      "const (T_CONST)"
 %token T_RETURN     "return (T_RETURN)"
-%token T_YIELD      "yield (T_YIELD)"
 %token T_TRY        "try (T_TRY)"
 %token T_CATCH      "catch (T_CATCH)"
 %token T_THROW      "throw (T_THROW)"
@@ -298,7 +299,6 @@ unticked_statement:
 	|	T_RETURN ';'						{ zend_do_return(NULL, 0 TSRMLS_CC); }
 	|	T_RETURN expr_without_variable ';'	{ zend_do_return(&$2, 0 TSRMLS_CC); }
 	|	T_RETURN variable ';'				{ zend_do_return(&$2, 1 TSRMLS_CC); }
-	|	T_YIELD expr ';'					{ zend_do_yield(&$2 TSRMLS_CC); }
 	|	T_GLOBAL global_var_list ';'
 	|	T_STATIC static_var_list ';'
 	|	T_ECHO echo_expr_list ';'
@@ -801,6 +801,7 @@ expr_without_variable:
 	|	combined_scalar { $$ = $1; }
 	|	'`' backticks_expr '`' { zend_do_shell_exec(&$$, &$2 TSRMLS_CC); }
 	|	T_PRINT expr  { zend_do_print(&$$, &$2 TSRMLS_CC); }
+	|	T_YIELD expr { zend_do_yield(&$$, &$2 TSRMLS_CC); }
 	|	function is_generator is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, $3.op_type, 0 TSRMLS_CC); }
 		'(' parameter_list ')' lexical_vars { zend_do_suspend_if_generator(TSRMLS_C); }
 		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $4; }
