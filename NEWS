@@ -54,7 +54,7 @@ PHP                                                                        NEWS
   . Changed php://fd to be available only for CLI.
 
 - Phar:
-  . Fix bug #61065 (Secunia SA44335). (Rasmus)
+  . Fix bug #61065 (Secunia SA44335, CVE-2012-2386). (Rasmus)
 
 - Pgsql:
   . Added pg_escape_identifier/pg_escape_literal. (Yasuo Ohgaki)
