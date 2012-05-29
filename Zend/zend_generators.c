@@ -308,6 +308,11 @@ ZEND_METHOD(Generator, send)
 
 	zend_generator_ensure_initialized(object, generator TSRMLS_CC); 
 
+	/* The generator is already closed, thus can't send anything */
+	if (!generator->execute_data) {
+		return;
+	}
+
 	/* The sent value was initialized to NULL, so dtor that */
 	zval_ptr_dtor(generator->send_target->var.ptr_ptr);
 
