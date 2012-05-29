@@ -324,6 +324,22 @@ ZEND_METHOD(Generator, send)
 	zend_generator_resume(object, generator TSRMLS_CC);
 }
 
+/* {{{ proto void Generator::close()
+ * Closes the generator */
+ZEND_METHOD(Generator, close)
+{
+	zend_generator *generator;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	zend_generator_close(generator, 0);
+}
+/* }}} */
+
 ZEND_BEGIN_ARG_INFO(arginfo_generator_void, 0)
 ZEND_END_ARG_INFO()
 
@@ -338,6 +354,7 @@ static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, key,     arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, next,    arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, send,    arginfo_generator_send, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, close,   arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
