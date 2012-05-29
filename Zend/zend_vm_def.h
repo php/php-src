@@ -5203,6 +5203,7 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 		*EG(return_value_ptr_ptr) = return_value;
 
 		/* back up some executor globals */
+		SAVE_OPLINE();
 		EX(current_this) = EG(This);
 		EX(current_scope) = EG(scope);
 		EX(current_called_scope) = EG(called_scope);
@@ -5248,6 +5249,8 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 
 		zend_vm_stack_clear_multiple(TSRMLS_C);
 
+		LOAD_REGS();
+		LOAD_OPLINE();
 		ZEND_VM_INC_OPCODE();
 		ZEND_VM_LEAVE();
 	}
@@ -5292,6 +5295,10 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV, ANY)
 
 		FREE_OP1_IF_VAR();
 	}
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
 }

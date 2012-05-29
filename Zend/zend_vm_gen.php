@@ -856,7 +856,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#define LOAD_REGS()                do {Ts = EX(Ts); CVs = EX(CVs);} while (0)\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto zend_vm_continue\n");
 							out($f,"#define ZEND_VM_RETURN()   EG(in_execution) = original_in_execution; return\n");
-							out($f,"#define ZEND_VM_ENTER()    op_array = EG(active_op_array); goto zend_vm_enter\n");
+							out($f,"#define ZEND_VM_ENTER()    execute_data = zend_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC); LOAD_REGS(); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) dispatch_handler = zend_vm_get_opcode_handler(opcode, opline); goto zend_vm_dispatch;\n\n");
 							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC\n");
@@ -892,7 +892,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 							out($f,"#define LOAD_REGS()                do {Ts = EX(Ts); CVs = EX(CVs);} while (0)\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(OPLINE->handler)\n");
 							out($f,"#define ZEND_VM_RETURN()   EG(in_execution) = original_in_execution; return\n");
-							out($f,"#define ZEND_VM_ENTER()    op_array = EG(active_op_array); goto zend_vm_enter\n");
+							out($f,"#define ZEND_VM_ENTER()    execute_data = zend_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC); LOAD_REGS(); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_DISPATCH(opcode, opline) goto *(void**)(zend_vm_get_opcode_handler(opcode, opline));\n\n");
 							out($f,"#define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC\n");
@@ -932,7 +932,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 					  // Emit array of labels of opcode handlers and code for
 					  // zend_opcode_handlers initialization
 						$prolog = $m[1];
-						out($f,$prolog."if (op_array == NULL) {\n");
+						out($f,$prolog."if (execute_data == NULL) {\n");
 						out($f,$prolog."\tstatic const opcode_handler_t labels[] = {\n");
 						gen_labels($f, $spec, $kind, $prolog."\t\t");
 						out($f,$prolog."\t};\n");
@@ -977,8 +977,10 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 						        $m[1]."\t\treturn;\n".
 						        $m[1]."\tcase 2:\n" . 
 						        $m[1]."\t\texecute_data = zend_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);\n".
+						        $m[1]."\t\tbreak;\n" .
 						        $m[1]."\tcase 3:\n" . 
 						        $m[1]."\t\texecute_data = EG(current_execute_data);\n".
+						        $m[1]."\t\tbreak;\n" .
 						        $m[1]."\tdefault:\n".
 						        $m[1]."\t\tbreak;\n".
 						        $m[1]."}".$m[3]."\n");
@@ -1005,9 +1007,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 					$prolog = $m[1];
 					if ($kind == ZEND_VM_KIND_GOTO) {
 					  // Labels are defined in the executor itself, so we call it
-					  // with op_array NULL and it sets zend_opcode_handlers array
+					  // with execute_data NULL and it sets zend_opcode_handlers array
 						out($f,$prolog."TSRMLS_FETCH();\n");
-						out($f,$prolog."zend_execute(NULL TSRMLS_CC);\n");
+						out($f,$prolog.$executor_name."_ex(NULL TSRMLS_CC);\n");
 					} else {
 						if ($old) {
 						  // Reserving space for user-defined opcodes

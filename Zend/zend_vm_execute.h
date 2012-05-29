@@ -393,10 +393,10 @@ static zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *
 	if (op_array->this_var != -1 && EG(This)) {
  		Z_ADDREF_P(EG(This)); /* For $this pointer */
 		if (!EG(active_symbol_table)) {
-			EX_CV(op_array->this_var) = (zval**)EX_CVs() + (op_array->last_var + op_array->this_var);
-			*EX_CV(op_array->this_var) = EG(This);
+			EX(CVs)[op_array->this_var] = (zval **) EX(CVs) + op_array->last_var + op_array->this_var;
+			*EX(CVs)[op_array->this_var] = EG(This);
 		} else {
-			if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), (void**)&EX_CV(op_array->this_var))==FAILURE) {
+			if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), (void **) &EX(CVs)[op_array->this_var])==FAILURE) {
 				Z_DELREF_P(EG(This));
 			}
 		}
@@ -425,7 +425,6 @@ ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	EG(in_execution) = 1;
 
-zend_vm_enter:
 	LOAD_REGS();
 	LOAD_OPLINE();
 
@@ -444,8 +443,10 @@ zend_vm_enter:
 					return;
 				case 2:
 					execute_data = zend_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);
+					break;
 				case 3:
 					execute_data = EG(current_execute_data);
+					break;
 				default:
 					break;
 			}
@@ -1185,6 +1186,7 @@ static int ZEND_FASTCALL  ZEND_SUSPEND_AND_RETURN_GENERATOR_SPEC_HANDLER(ZEND_OP
 		*EG(return_value_ptr_ptr) = return_value;
 
 		/* back up some executor globals */
+		SAVE_OPLINE();
 		EX(current_this) = EG(This);
 		EX(current_scope) = EG(scope);
 		EX(current_called_scope) = EG(called_scope);
@@ -1230,6 +1232,8 @@ static int ZEND_FASTCALL  ZEND_SUSPEND_AND_RETURN_GENERATOR_SPEC_HANDLER(ZEND_OP
 
 		zend_vm_stack_clear_multiple(TSRMLS_C);
 
+		LOAD_REGS();
+		LOAD_OPLINE();
 		ZEND_VM_INC_OPCODE();
 		ZEND_VM_LEAVE();
 	}
@@ -3066,6 +3070,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		}
 
 	}
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
 }
@@ -7703,6 +7711,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 	}
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
 }
@@ -12418,6 +12430,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	}
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
 }
@@ -28303,6 +28319,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		}
 
 	}
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
 }
