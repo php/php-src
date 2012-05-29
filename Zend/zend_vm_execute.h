@@ -3047,7 +3047,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 
 	/* Set the new yielded value */
-	{
+	if (IS_CONST != IS_UNUSED) {
 
 		zval *value = opline->op1.zv;
 
@@ -3067,10 +3067,14 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 			generator->value = copy;
 		} else {
-			generator->value = value;
 			Z_ADDREF_P(value);
+			generator->value = value;
 		}
 
+	} else {
+		/* If no value way specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -7697,7 +7701,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	/* Set the new yielded value */
-	{
+	if (IS_TMP_VAR != IS_UNUSED) {
 		zend_free_op free_op1;
 		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 
@@ -7717,10 +7721,14 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 			generator->value = copy;
 		} else {
-			generator->value = value;
 			Z_ADDREF_P(value);
+			generator->value = value;
 		}
 
+	} else {
+		/* If no value way specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -12424,7 +12432,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	/* Set the new yielded value */
-	{
+	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op1;
 		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 
@@ -12444,11 +12452,15 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 			generator->value = copy;
 		} else {
-			generator->value = value;
 			Z_ADDREF_P(value);
+			generator->value = value;
 		}
 
 		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+	} else {
+		/* If no value way specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -22080,6 +22092,63 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Set the new yielded value */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *value = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value way specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -28323,7 +28392,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	/* Set the new yielded value */
-	{
+	if (IS_CV != IS_UNUSED) {
 
 		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
 
@@ -28343,10 +28412,14 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 			generator->value = copy;
 		} else {
-			generator->value = value;
 			Z_ADDREF_P(value);
+			generator->value = value;
 		}
 
+	} else {
+		/* If no value way specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -41168,11 +41241,11 @@ void zend_init_opcodes_handlers(void)
   	ZEND_YIELD_SPEC_VAR_HANDLER,
   	ZEND_YIELD_SPEC_VAR_HANDLER,
   	ZEND_YIELD_SPEC_VAR_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
-  	ZEND_NULL_HANDLER,
+  	ZEND_YIELD_SPEC_UNUSED_HANDLER,
+  	ZEND_YIELD_SPEC_UNUSED_HANDLER,
+  	ZEND_YIELD_SPEC_UNUSED_HANDLER,
+  	ZEND_YIELD_SPEC_UNUSED_HANDLER,
+  	ZEND_YIELD_SPEC_UNUSED_HANDLER,
   	ZEND_YIELD_SPEC_CV_HANDLER,
   	ZEND_YIELD_SPEC_CV_HANDLER,
   	ZEND_YIELD_SPEC_CV_HANDLER,

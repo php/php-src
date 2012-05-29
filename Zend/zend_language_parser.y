@@ -801,6 +801,7 @@ expr_without_variable:
 	|	combined_scalar { $$ = $1; }
 	|	'`' backticks_expr '`' { zend_do_shell_exec(&$$, &$2 TSRMLS_CC); }
 	|	T_PRINT expr  { zend_do_print(&$$, &$2 TSRMLS_CC); }
+	|	T_YIELD { zend_do_yield(&$$, NULL TSRMLS_CC); }
 	|	T_YIELD expr { zend_do_yield(&$$, &$2 TSRMLS_CC); }
 	|	function is_generator is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, $3.op_type, 0 TSRMLS_CC); }
 		'(' parameter_list ')' lexical_vars { zend_do_suspend_if_generator(TSRMLS_C); }

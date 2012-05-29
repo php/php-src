@@ -2673,8 +2673,12 @@ void zend_do_yield(znode *result, const znode *expr TSRMLS_DC) /* {{{ */
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_YIELD;
-	SET_NODE(opline->op1, expr);
-	SET_UNUSED(opline->op2);
+
+	if (expr) {
+		SET_NODE(opline->op1, expr);
+	} else {
+		SET_UNUSED(opline->op2);
+	}
 
 	opline->result_type = IS_VAR;
 	opline->result.var = get_temporary_variable(CG(active_op_array));

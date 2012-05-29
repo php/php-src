@@ -5258,7 +5258,7 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 	ZEND_VM_RETURN();
 }
 
-ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV, ANY)
+ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, ANY)
 {
 	USE_OPLINE
 
@@ -5271,7 +5271,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV, ANY)
 	}
 
 	/* Set the new yielded value */
-	{
+	if (OP1_TYPE != IS_UNUSED) {
 		zend_free_op free_op1;
 		zval *value = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
@@ -5291,11 +5291,15 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV, ANY)
 
 			generator->value = copy;
 		} else {
-			generator->value = value;
 			Z_ADDREF_P(value);
+			generator->value = value;
 		}
 
 		FREE_OP1_IF_VAR();
+	} else {
+		/* If no value way specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
 	}
 
 	/* If a value is sent it should go into the result var */
