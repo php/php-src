@@ -38,7 +38,7 @@ static php_uint32 phar_tar_number(char *buf, int len) /* {{{ */
 /* }}} */
 
 /* adapted from format_octal() in libarchive
- * 
+ *
  * Copyright (c) 2003-2009 Tim Kientzle
  * All rights reserved.
  *
@@ -161,7 +161,7 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRM
 	size_t save = php_stream_tell(fp), read;
 	phar_entry_info *mentry;
 
-	metadata = (char *) emalloc(entry->uncompressed_filesize + 1);
+	metadata = (char *) safe_emalloc(1, entry->uncompressed_filesize, 1);
 
 	read = php_stream_read(fp, metadata, entry->uncompressed_filesize);
 	if (read != entry->uncompressed_filesize) {
@@ -377,7 +377,7 @@ bail:
 			}
 
 			read = php_stream_read(fp, buf, sizeof(buf));
-	
+
 			if (read != sizeof(buf)) {
 				efree(entry.filename);
 				if (error) {
