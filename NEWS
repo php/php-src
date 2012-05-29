@@ -1,6 +1,17 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 30 May 2012, PHP 5.4.4 RC2
+- COM:
+  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
+
+- Core:
+  . Fixed bug #62097 (fix for for bug #54547). (Gustavo)
+
+- Intl:
+  . Fixed bug #62082 (Memory corruption in internal function 
+    get_icu_disp_value_src_php()). (Gustavo)
+
+17 May 2012, PHP 5.4.4 RC1
 
 - CLI Server:
   . Implemented FR #61977 (Need CLI web-server support for files with .htm & 
