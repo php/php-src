@@ -1055,11 +1055,25 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 	int i;
 	zend_uint catch_op_num = 0;
 	int catched = 0;
-	zval restored_error_reporting;
+	void **stack_frame;
 
-	void **stack_frame = (void**)(((char*)EX_Ts()) +
-		(ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * EX(op_array)->T));
+	/* Figure out where the next stack frame (which maybe contains pushed
+	 * arguments that have to be dtor'ed) starts */
+	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		/* For generators the execution context is not stored on the stack so
+		 * I don't know yet how to figure out where the next stack frame
+		 * starts. For now I'll just use the stack top to ignore argument
+		 * dtor'ing altogether. */
+		stack_frame = zend_vm_stack_top(TSRMLS_C);
+	} else {
+		/* In all other cases the next stack frame starts after the temporary
+		 * variables section of the current execution context */
+		stack_frame = (void **) ((char *) EX_Ts() +
+			ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * EX(op_array)->T);
+	}
 
+	/* If the exception was thrown during a function call there might be
+	 * arguments pushed to the stack that have to be dtor'ed. */
 	while (zend_vm_stack_top(TSRMLS_C) != stack_frame) {
 		zval *stack_zval_p = zend_vm_stack_pop(TSRMLS_C);
 		zval_ptr_dtor(&stack_zval_p);
@@ -1121,6 +1135,8 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* restore previous error_reporting value */
 	if (!EG(error_reporting) && EX(old_error_reporting) != NULL && Z_LVAL_P(EX(old_error_reporting)) != 0) {
+		zval restored_error_reporting;
+
 		Z_TYPE(restored_error_reporting) = IS_LONG;
 		Z_LVAL(restored_error_reporting) = Z_LVAL_P(EX(old_error_reporting));
 		convert_to_string(&restored_error_reporting);
@@ -1130,6 +1146,18 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 	EX(old_error_reporting) = NULL;
 
 	if (!catched) {
+		/* For generators skip the leave handler return directly */
+		if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+			/* The generator object is stored in return_value_ptr_ptr */
+			zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+			/* Close the generator to free up resources */
+			zend_generator_close(generator, 1 TSRMLS_CC);
+
+			/* Pass execution back to handling code */
+			ZEND_VM_RETURN();
+		}
+
 		return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
  	} else {
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
@@ -2318,10 +2346,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		/* The generator object is stored in return_value_ptr_ptr */
 		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
 
-		/* Close the generator to free up resources. */
+		/* Close the generator to free up resources */
 		zend_generator_close(generator, 1 TSRMLS_CC);
 
-		/* Pass execution back to generator handling code */
+		/* Pass execution back to handling code */
 		ZEND_VM_RETURN();
 	}
 
@@ -7368,10 +7396,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		/* The generator object is stored in return_value_ptr_ptr */
 		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
 
-		/* Close the generator to free up resources. */
+		/* Close the generator to free up resources */
 		zend_generator_close(generator, 1 TSRMLS_CC);
 
-		/* Pass execution back to generator handling code */
+		/* Pass execution back to handling code */
 		ZEND_VM_RETURN();
 	}
 
@@ -12323,10 +12351,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		/* The generator object is stored in return_value_ptr_ptr */
 		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
 
-		/* Close the generator to free up resources. */
+		/* Close the generator to free up resources */
 		zend_generator_close(generator, 1 TSRMLS_CC);
 
-		/* Pass execution back to generator handling code */
+		/* Pass execution back to handling code */
 		ZEND_VM_RETURN();
 	}
 
@@ -29344,10 +29372,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		/* The generator object is stored in return_value_ptr_ptr */
 		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
 
-		/* Close the generator to free up resources. */
+		/* Close the generator to free up resources */
 		zend_generator_close(generator, 1 TSRMLS_CC);
 
-		/* Pass execution back to generator handling code */
+		/* Pass execution back to handling code */
 		ZEND_VM_RETURN();
 	}
 
