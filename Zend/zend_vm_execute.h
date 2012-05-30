@@ -4127,10 +4127,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -4760,10 +4768,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -5718,11 +5734,19 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -6371,10 +6395,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -7063,10 +7095,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -9058,10 +9098,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -9691,10 +9739,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -10649,11 +10705,19 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -11168,10 +11232,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -11798,10 +11870,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -15650,10 +15730,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -17670,10 +17758,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -20070,11 +20166,19 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -21149,10 +21253,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -23218,10 +23330,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -24645,10 +24765,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -25896,10 +26024,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -27147,11 +27283,19 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -27510,10 +27654,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -28758,10 +28910,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -32210,10 +32370,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -34100,10 +34268,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -36369,11 +36545,19 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -37308,10 +37492,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */
@@ -39246,10 +39438,18 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */

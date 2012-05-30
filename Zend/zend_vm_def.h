@@ -5332,11 +5332,19 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 			generator->key = key;
 		}
 
+		if (Z_TYPE_P(generator->key) == IS_LONG
+		    && Z_LVAL_P(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL_P(generator->key);
+		}
+
 		FREE_OP2_IF_VAR();
 	} else {
-		/* Setting the key to NULL signals that the auto-increment key
-		 * generation should be used */
-		generator->key = NULL;
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+
+		ALLOC_INIT_ZVAL(generator->key);
+		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
 	/* If a value is sent it should go into the result var */

@@ -116,6 +116,9 @@ static zend_object_value zend_generator_create(zend_class_entry *class_type TSRM
 	generator = emalloc(sizeof(zend_generator));
 	memset(generator, 0, sizeof(zend_generator));
 
+	/* The key will be incremented on first use, so it'll start at 0 */
+	generator->largest_used_integer_key = -1;
+
 	zend_object_std_init(&generator->std, class_type TSRMLS_CC);
 
 	object.handle = zend_objects_store_put(generator, NULL,

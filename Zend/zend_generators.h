@@ -34,6 +34,8 @@ typedef struct _zend_generator {
 	zval *key;
 	/* Variable to put sent value into */
 	temp_variable *send_target;
+	/* Largest used integer key for auto-incrementing keys */
+	long largest_used_integer_key;
 } zend_generator;
 
 extern ZEND_API zend_class_entry *zend_ce_generator;
