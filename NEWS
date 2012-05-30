@@ -82,7 +82,11 @@ PHP                                                                        NEWS
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
     (Laruence)
-    
+
+- Readline:
+  . Fixed bug #62186 (readline fails to compile - void function should not
+    return a value). (Johannes)
+
 - Sockets:
   . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
     
