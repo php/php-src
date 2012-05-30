@@ -1,5 +1,16 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+31 May 2012, PHP 5.3.14 RC2
+- COM:
+  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
+
+- Core:
+  . Fixed CVE-2012-2143. (Solar Designer)
+
+- Intl:
+  . Fixed bug #62082 (Memory corruption in internal function
+    get_icu_disp_value_src_php()). (Gustavo)
+
 17 May 2012, PHP 5.3.14RC1
 
 - CLI SAPI:
