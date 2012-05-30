@@ -83,6 +83,19 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 			}
 		}
 
+		/* Clear any backed up stack arguments */
+		if (generator->backed_up_stack) {
+			zval **zvals = (zval **) generator->backed_up_stack;
+			size_t zval_num = generator->backed_up_stack_size / sizeof(zval *);
+			int i;
+
+			for (i = 0; i < zval_num; i++) {
+				zval_ptr_dtor(&zvals[i]);
+			}
+
+			efree(generator->backed_up_stack);
+		}
+
 		efree(execute_data);
 		generator->execute_data = NULL;
 	}
@@ -158,6 +171,17 @@ static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS
 		zend_class_entry *original_scope = EG(scope);
 		zend_class_entry *original_called_scope = EG(called_scope);
 
+		/* Remember the current stack position so we can back up pushed args */
+		generator->original_stack_top = zend_vm_stack_top(TSRMLS_C);
+
+		/* If there is a backed up stack copy it to the VM stack */
+		if (generator->backed_up_stack) {
+			void *stack = zend_vm_stack_alloc(generator->backed_up_stack_size TSRMLS_CC);
+			memcpy(stack, generator->backed_up_stack, generator->backed_up_stack_size);
+			efree(generator->backed_up_stack);
+			generator->backed_up_stack = NULL;
+		}
+
 		/* We (mis)use the return_value_ptr_ptr to provide the generator object
 		 * to the executor, so YIELD will be able to set the yielded value */
 		EG(return_value_ptr_ptr) = &object;
@@ -186,6 +210,15 @@ static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS
 		EG(This) = original_This;
 		EG(scope) = original_scope;
 		EG(called_scope) = original_called_scope;
+
+		/* The stack top before and after the execution differ, i.e. there are
+		 * arguments pushed to the stack. */
+		if (generator->original_stack_top != zend_vm_stack_top(TSRMLS_C)) {
+			generator->backed_up_stack_size = (zend_vm_stack_top(TSRMLS_C) - generator->original_stack_top) * sizeof(void *);
+			generator->backed_up_stack = emalloc(generator->backed_up_stack_size);
+			memcpy(generator->backed_up_stack, generator->original_stack_top, generator->backed_up_stack_size);
+			zend_vm_stack_free(generator->original_stack_top TSRMLS_CC);
+		}
 	}
 }
 /* }}} */

@@ -28,6 +28,16 @@ typedef struct _zend_generator {
 
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;
+
+	/* If the execution is suspended during a function call there may be
+	 * arguments pushed to the stack, so it has to be backed up. */
+	void *backed_up_stack;
+	size_t backed_up_stack_size;
+
+	/* The original stack top before resuming the generator. This is required
+	 * for proper cleanup during exception handling. */
+	void **original_stack_top;
+
 	/* Current value */
 	zval *value;
 	/* Current key */

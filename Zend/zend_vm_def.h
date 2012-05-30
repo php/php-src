@@ -4997,11 +4997,12 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	/* Figure out where the next stack frame (which maybe contains pushed
 	 * arguments that have to be dtor'ed) starts */
 	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
-		/* For generators the execution context is not stored on the stack so
-		 * I don't know yet how to figure out where the next stack frame
-		 * starts. For now I'll just use the stack top to ignore argument
-		 * dtor'ing altogether. */
-		stack_frame = zend_vm_stack_top(TSRMLS_C);
+		/* The generator object is stored in return_value_ptr_ptr */
+		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+		/* For generators the next stack frame is conveniently stored in the
+		 * generator object. */
+		stack_frame = generator->original_stack_top;
 	} else {
 		/* In all other cases the next stack frame starts after the temporary
 		 * variables section of the current execution context */
