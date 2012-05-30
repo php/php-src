@@ -3034,63 +3034,6 @@ static int ZEND_FASTCALL  ZEND_QM_ASSIGN_VAR_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
-
-	/* Destroy the previously yielded value */
-	if (generator->value) {
-		zval_ptr_dtor(&generator->value);
-	}
-
-	/* Set the new yielded value */
-	if (IS_CONST != IS_UNUSED) {
-
-		zval *value = opline->op1.zv;
-
-		/* Consts, temporary variables and references need copying */
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
-
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
-
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
-			}
-
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
-		}
-
-	} else {
-		/* If no value way specified yield null */
-		Z_ADDREF(EG(uninitialized_zval));
-		generator->value = &EG(uninitialized_zval);
-	}
-
-	/* If a value is sent it should go into the result var */
-	generator->send_target = &EX_T(opline->result.var);
-
-	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
-}
-
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -4111,6 +4054,99 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCOD
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_CONST != IS_UNUSED) {
+
+		zval *value = opline->op1.zv;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_CONST != IS_UNUSED) {
+
+		zval *key = opline->op2.zv;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -4649,6 +4685,99 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HAN
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
 	}
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_CONST != IS_UNUSED) {
+
+		zval *value = opline->op1.zv;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op2;
+		zval *key = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -5516,6 +5645,100 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_CONST != IS_UNUSED) {
+
+		zval *value = opline->op1.zv;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op2;
+		zval *key = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int type, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -6073,6 +6296,99 @@ static int ZEND_FASTCALL  ZEND_DECLARE_LAMBDA_FUNCTION_SPEC_CONST_UNUSED_HANDLER
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_CONST != IS_UNUSED) {
+
+		zval *value = opline->op1.zv;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *key = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -6672,6 +6988,99 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HAND
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
 	}
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_CONST != IS_UNUSED) {
+
+		zval *value = opline->op1.zv;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_CV != IS_UNUSED) {
+
+		zval *key = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_BW_NOT_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -7688,63 +8097,6 @@ static int ZEND_FASTCALL  ZEND_INSTANCEOF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_A
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
-
-	/* Destroy the previously yielded value */
-	if (generator->value) {
-		zval_ptr_dtor(&generator->value);
-	}
-
-	/* Set the new yielded value */
-	if (IS_TMP_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
-
-		/* Consts, temporary variables and references need copying */
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
-
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
-
-			/* Temporary variables don't need ctor copying */
-			if (!1) {
-				zval_copy_ctor(copy);
-			}
-
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
-		}
-
-	} else {
-		/* If no value way specified yield null */
-		Z_ADDREF(EG(uninitialized_zval));
-		generator->value = &EG(uninitialized_zval);
-	}
-
-	/* If a value is sent it should go into the result var */
-	generator->send_target = &EX_T(opline->result.var);
-
-	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
-}
-
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -8633,6 +8985,99 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!1) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_CONST != IS_UNUSED) {
+
+		zval *key = opline->op2.zv;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!1) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -9171,6 +9616,99 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDL
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
 	}
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!1) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op2;
+		zval *key = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!1) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -10038,6 +10576,100 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!1) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op2;
+		zval *key = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!1) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type, ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -10461,6 +11093,99 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!1) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *key = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!1) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -10998,6 +11723,99 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLE
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
 	}
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!1) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_CV != IS_UNUSED) {
+
+		zval *key = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!1) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_BW_NOT_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -12417,64 +13235,6 @@ static int ZEND_FASTCALL  ZEND_INSTANCEOF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_A
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
-}
-
-static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
-
-	/* Destroy the previously yielded value */
-	if (generator->value) {
-		zval_ptr_dtor(&generator->value);
-	}
-
-	/* Set the new yielded value */
-	if (IS_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
-
-		/* Consts, temporary variables and references need copying */
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
-
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
-
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
-			}
-
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
-		}
-
-		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
-	} else {
-		/* If no value way specified yield null */
-		Z_ADDREF(EG(uninitialized_zval));
-		generator->value = &EG(uninitialized_zval);
-	}
-
-	/* If a value is sent it should go into the result var */
-	generator->send_target = &EX_T(opline->result.var);
-
-	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -14816,6 +15576,100 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_CONST_HANDLER(ZEN
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_CONST != IS_UNUSED) {
+
+		zval *key = opline->op2.zv;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -16740,6 +17594,100 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_VAR_TMP_HANDLER(ZEND_O
 static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op2;
+		zval *key = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -19048,6 +19996,101 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_VAR_HANDLER(ZEND_
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op2;
+		zval *key = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_VAR_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -20030,6 +21073,100 @@ static int ZEND_FASTCALL  ZEND_SEPARATE_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		EX_T(opline->op1.var).var.ptr = var_ptr;
 	}
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *key = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -22007,6 +23144,100 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_CV_HANDLER(ZEND_O
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_CV != IS_UNUSED) {
+
+		zval *key = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL  ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -22090,63 +23321,6 @@ static int ZEND_FASTCALL  ZEND_EXIT_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 #endif
 	zend_bailout();
 	ZEND_VM_NEXT_OPCODE(); /* Never reached */
-}
-
-static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
-
-	/* Destroy the previously yielded value */
-	if (generator->value) {
-		zval_ptr_dtor(&generator->value);
-	}
-
-	/* Set the new yielded value */
-	if (IS_UNUSED != IS_UNUSED) {
-
-		zval *value = NULL;
-
-		/* Consts, temporary variables and references need copying */
-		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
-
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
-
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
-			}
-
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
-		}
-
-	} else {
-		/* If no value way specified yield null */
-		Z_ADDREF(EG(uninitialized_zval));
-		generator->value = &EG(uninitialized_zval);
-	}
-
-	/* If a value is sent it should go into the result var */
-	generator->send_target = &EX_T(opline->result.var);
-
-	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CONST(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
@@ -23398,6 +24572,99 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UNUSED_CONST_HANDLER(
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CONST(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *value = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_CONST != IS_UNUSED) {
+
+		zval *key = opline->op2.zv;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_TMP(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -24554,6 +25821,99 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_UNUSED_TMP_HANDLER(ZEN
 static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *value = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op2;
+		zval *key = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_VAR(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
@@ -25714,6 +27074,100 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UNUSED_VAR_HANDLER(ZE
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *value = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op2;
+		zval *key = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -25981,6 +27435,99 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE
 		return ZEND_ADD_ARRAY_ELEMENT_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 #endif
 	}
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *value = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *key = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_UNUSED_CV(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
@@ -27136,6 +28683,99 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND
 static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *value = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_CV != IS_UNUSED) {
+
+		zval *key = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_BW_NOT_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -28377,63 +30017,6 @@ static int ZEND_FASTCALL  ZEND_INSTANCEOF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
-}
-
-static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
-
-	/* Destroy the previously yielded value */
-	if (generator->value) {
-		zval_ptr_dtor(&generator->value);
-	}
-
-	/* Set the new yielded value */
-	if (IS_CV != IS_UNUSED) {
-
-		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
-
-		/* Consts, temporary variables and references need copying */
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
-
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
-
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
-			}
-
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
-		}
-
-	} else {
-		/* If no value way specified yield null */
-		Z_ADDREF(EG(uninitialized_zval));
-		generator->value = &EG(uninitialized_zval);
-	}
-
-	/* If a value is sent it should go into the result var */
-	generator->send_target = &EX_T(opline->result.var);
-
-	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -30554,6 +32137,99 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV_CONST_HANDLER(ZEND
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_CV != IS_UNUSED) {
+
+		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_CONST != IS_UNUSED) {
+
+		zval *key = opline->op2.zv;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -32349,6 +34025,99 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_TMP_HANDLER(ZEND_OP
 static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_CV != IS_UNUSED) {
+
+		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op2;
+		zval *key = _get_zval_ptr_tmp(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -34527,6 +36296,100 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV_VAR_HANDLER(ZEND_O
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_CV != IS_UNUSED) {
+
+		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op2;
+		zval *key = _get_zval_ptr_var(opline->op2.var, EX_Ts(), &free_op2 TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static int ZEND_FASTCALL zend_binary_assign_op_obj_helper_SPEC_CV_UNUSED(int (*binary_op)(zval *result, zval *op1, zval *op2 TSRMLS_DC), ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -35370,6 +37233,99 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_CV != IS_UNUSED) {
+
+		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_UNUSED != IS_UNUSED) {
+
+		zval *key = NULL;
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -37215,6 +39171,99 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CV_CV_HANDLER(ZEND_OPC
 static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	return zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(1, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
+static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+
+	/* Destroy the previously yielded value */
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+	}
+
+	/* Set the new yielded value */
+	if (IS_CV != IS_UNUSED) {
+
+		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, value);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->value = copy;
+		} else {
+			Z_ADDREF_P(value);
+			generator->value = value;
+		}
+
+	} else {
+		/* If no value was specified yield null */
+		Z_ADDREF(EG(uninitialized_zval));
+		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (IS_CV != IS_UNUSED) {
+
+		zval *key = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op2.var TSRMLS_CC);
+
+		/* Consts, temporary variables and references need copying */
+		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!0) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
+	}
+
+	/* If a value is sent it should go into the result var */
+	generator->send_target = &EX_T(opline->result.var);
+
+	/* Initialize the sent value to NULL */
+	Z_ADDREF(EG(uninitialized_zval));
+	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -41226,31 +43275,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_SUSPEND_AND_RETURN_GENERATOR_SPEC_HANDLER,
   	ZEND_SUSPEND_AND_RETURN_GENERATOR_SPEC_HANDLER,
   	ZEND_SUSPEND_AND_RETURN_GENERATOR_SPEC_HANDLER,
-  	ZEND_YIELD_SPEC_CONST_HANDLER,
-  	ZEND_YIELD_SPEC_CONST_HANDLER,
-  	ZEND_YIELD_SPEC_CONST_HANDLER,
-  	ZEND_YIELD_SPEC_CONST_HANDLER,
-  	ZEND_YIELD_SPEC_CONST_HANDLER,
-  	ZEND_YIELD_SPEC_TMP_HANDLER,
-  	ZEND_YIELD_SPEC_TMP_HANDLER,
-  	ZEND_YIELD_SPEC_TMP_HANDLER,
-  	ZEND_YIELD_SPEC_TMP_HANDLER,
-  	ZEND_YIELD_SPEC_TMP_HANDLER,
-  	ZEND_YIELD_SPEC_VAR_HANDLER,
-  	ZEND_YIELD_SPEC_VAR_HANDLER,
-  	ZEND_YIELD_SPEC_VAR_HANDLER,
-  	ZEND_YIELD_SPEC_VAR_HANDLER,
-  	ZEND_YIELD_SPEC_VAR_HANDLER,
-  	ZEND_YIELD_SPEC_UNUSED_HANDLER,
-  	ZEND_YIELD_SPEC_UNUSED_HANDLER,
-  	ZEND_YIELD_SPEC_UNUSED_HANDLER,
-  	ZEND_YIELD_SPEC_UNUSED_HANDLER,
-  	ZEND_YIELD_SPEC_UNUSED_HANDLER,
-  	ZEND_YIELD_SPEC_CV_HANDLER,
-  	ZEND_YIELD_SPEC_CV_HANDLER,
-  	ZEND_YIELD_SPEC_CV_HANDLER,
-  	ZEND_YIELD_SPEC_CV_HANDLER,
-  	ZEND_YIELD_SPEC_CV_HANDLER,
+  	ZEND_YIELD_SPEC_CONST_CONST_HANDLER,
+  	ZEND_YIELD_SPEC_CONST_TMP_HANDLER,
+  	ZEND_YIELD_SPEC_CONST_VAR_HANDLER,
+  	ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER,
+  	ZEND_YIELD_SPEC_CONST_CV_HANDLER,
+  	ZEND_YIELD_SPEC_TMP_CONST_HANDLER,
+  	ZEND_YIELD_SPEC_TMP_TMP_HANDLER,
+  	ZEND_YIELD_SPEC_TMP_VAR_HANDLER,
+  	ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER,
+  	ZEND_YIELD_SPEC_TMP_CV_HANDLER,
+  	ZEND_YIELD_SPEC_VAR_CONST_HANDLER,
+  	ZEND_YIELD_SPEC_VAR_TMP_HANDLER,
+  	ZEND_YIELD_SPEC_VAR_VAR_HANDLER,
+  	ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER,
+  	ZEND_YIELD_SPEC_VAR_CV_HANDLER,
+  	ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER,
+  	ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER,
+  	ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER,
+  	ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER,
+  	ZEND_YIELD_SPEC_UNUSED_CV_HANDLER,
+  	ZEND_YIELD_SPEC_CV_CONST_HANDLER,
+  	ZEND_YIELD_SPEC_CV_TMP_HANDLER,
+  	ZEND_YIELD_SPEC_CV_VAR_HANDLER,
+  	ZEND_YIELD_SPEC_CV_UNUSED_HANDLER,
+  	ZEND_YIELD_SPEC_CV_CV_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;

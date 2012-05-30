@@ -92,6 +92,10 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 		generator->value = NULL;
 	}
 
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+		generator->key = NULL;
+	}
 }
 /* }}} */
 
@@ -269,6 +273,10 @@ ZEND_METHOD(Generator, key)
 	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
 	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+
+	if (generator->key) {
+		RETURN_ZVAL(generator->key, 1, 0);
+	}
 }
 /* }}} */
 

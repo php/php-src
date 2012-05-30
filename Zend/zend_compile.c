@@ -2662,7 +2662,7 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_do_yield(znode *result, const znode *expr TSRMLS_DC) /* {{{ */
+void zend_do_yield(znode *result, const znode *value, const znode *key TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -2674,8 +2674,14 @@ void zend_do_yield(znode *result, const znode *expr TSRMLS_DC) /* {{{ */
 
 	opline->opcode = ZEND_YIELD;
 
-	if (expr) {
-		SET_NODE(opline->op1, expr);
+	if (value) {
+		SET_NODE(opline->op1, value);
+	} else {
+		SET_UNUSED(opline->op1);
+	}
+
+	if (key) {
+		SET_NODE(opline->op2, key);
 	} else {
 		SET_UNUSED(opline->op2);
 	}

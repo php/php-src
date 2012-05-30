@@ -5258,7 +5258,7 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 	ZEND_VM_RETURN();
 }
 
-ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, ANY)
+ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSED)
 {
 	USE_OPLINE
 
@@ -5268,6 +5268,11 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, ANY)
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
+	}
+
+	/* Destroy the previously yielded key */
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
 	}
 
 	/* Set the new yielded value */
@@ -5297,9 +5302,41 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, ANY)
 
 		FREE_OP1_IF_VAR();
 	} else {
-		/* If no value way specified yield null */
+		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
 		generator->value = &EG(uninitialized_zval);
+	}
+
+	/* Set the new yielded key */
+	if (OP2_TYPE != IS_UNUSED) {
+		zend_free_op free_op2;
+		zval *key = GET_OP2_ZVAL_PTR(BP_VAR_R);
+
+		/* Consts, temporary variables and references need copying */
+		if (OP2_TYPE == IS_CONST || OP2_TYPE == IS_TMP_VAR
+			|| (PZVAL_IS_REF(key) && Z_REFCOUNT_P(key) > 0)
+		) {
+			zval *copy;
+
+			ALLOC_ZVAL(copy);
+			INIT_PZVAL_COPY(copy, key);
+
+			/* Temporary variables don't need ctor copying */
+			if (!IS_OP1_TMP_FREE()) {
+				zval_copy_ctor(copy);
+			}
+
+			generator->key = copy;
+		} else {
+			Z_ADDREF_P(key);
+			generator->key = key;
+		}
+
+		FREE_OP2_IF_VAR();
+	} else {
+		/* Setting the key to NULL signals that the auto-increment key
+		 * generation should be used */
+		generator->key = NULL;
 	}
 
 	/* If a value is sent it should go into the result var */
