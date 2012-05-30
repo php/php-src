@@ -629,7 +629,8 @@ _crypt_extended_r(const char *key, const char *setting,
 	 */
 	q = (u_char *) keybuf;
 	while (q - (u_char *) keybuf < sizeof(keybuf)) {
-		if ((*q++ = *key << 1))
+		*q++ = *key << 1;
+		if (*key)
 			key++;
 	}
 	if (des_setkey((u_char *) keybuf, data))
