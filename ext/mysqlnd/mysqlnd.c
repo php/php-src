@@ -303,17 +303,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command_handle_response)(MYSQLND_CONN_D
 /* }}} */
 
 
-/* {{{ mysqlnd_conn_data::simple_command */
+/* {{{ mysqlnd_conn_data::simple_command_send_request */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, simple_command)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
-			   const zend_uchar * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent,
-			   zend_bool ignore_upsert_status TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
+			   const zend_uchar * const arg, size_t arg_len, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_COMMAND * cmd_packet;
 
-	DBG_ENTER("mysqlnd_conn_data::simple_command");
-	DBG_INF_FMT("command=%s ok_packet=%u silent=%u", mysqlnd_command_to_text[command], ok_packet, silent);
+	DBG_ENTER("mysqlnd_conn_data::simple_command_send_request");
+	DBG_INF_FMT("command=%s silent=%u", mysqlnd_command_to_text[command], silent);
 
 	switch (CONN_GET_STATE(conn)) {
 		case CONN_READY:
@@ -357,11 +356,27 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command)(MYSQLND_CONN_DATA * conn, enum
 		CONN_SET_STATE(conn, CONN_QUIT_SENT);
 		DBG_ERR("Server is gone");
 		ret = FAIL;
-	} else if (ok_packet != PROT_LAST) {
+	}
+	PACKET_FREE(cmd_packet);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::simple_command */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, simple_command)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
+			   const zend_uchar * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent,
+			   zend_bool ignore_upsert_status TSRMLS_DC)
+{
+	enum_func_status ret;
+	DBG_ENTER("mysqlnd_conn_data::simple_command");
+
+	ret = conn->m->simple_command_send_request(conn, command, arg, arg_len, silent, ignore_upsert_status TSRMLS_CC);
+	if (PASS == ret && ok_packet != PROT_LAST) {
 		ret = conn->m->simple_command_handle_response(conn, ok_packet, silent, command, ignore_upsert_status TSRMLS_CC);
 	}
 
-	PACKET_FREE(cmd_packet);
 	DBG_INF(ret == PASS ? "PASS":"FAIL");
 	DBG_RETURN(ret);
 }
@@ -472,6 +487,157 @@ end:
 /* }}} */
 
 
+/* {{{ mysqlnd_conn_data::fetch_auth_plugin_by_name */
+static struct st_mysqlnd_authentication_plugin *
+MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name)(const char * const requested_protocol TSRMLS_DC)
+{
+	struct st_mysqlnd_authentication_plugin * auth_plugin;
+	char * plugin_name = NULL;
+	DBG_ENTER("mysqlnd_conn_data::fetch_auth_plugin_by_name");
+
+	mnd_sprintf(&plugin_name, 0, "auth_plugin_%s", requested_protocol);
+	DBG_INF_FMT("looking for %s auth plugin", plugin_name);
+	auth_plugin = mysqlnd_plugin_find(plugin_name);
+	mnd_sprintf_free(plugin_name);
+
+	DBG_RETURN(auth_plugin);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_run_authentication */
+static enum_func_status
+mysqlnd_run_authentication(
+			MYSQLND_CONN_DATA * conn,
+			const char * const user,
+			const char * const passwd,
+			const size_t passwd_len,
+			const char * const db,
+			const size_t db_len,
+			const zend_uchar * const auth_plugin_data,
+			const size_t auth_plugin_data_len,
+			const char * const auth_protocol,
+			unsigned int charset_no,
+			const MYSQLND_OPTIONS * const options,
+			unsigned long mysql_flags,
+			zend_bool silent,
+			zend_bool is_change_user
+			TSRMLS_DC)
+{
+	enum_func_status ret = FAIL;
+	zend_bool first_call = TRUE;
+
+	char * switch_to_auth_protocol = NULL;
+	size_t switch_to_auth_protocol_len = 0;
+	char * requested_protocol = NULL;
+	zend_uchar * plugin_data;
+	size_t plugin_data_len;
+
+	DBG_ENTER("mysqlnd_run_authentication");
+
+	plugin_data_len = auth_plugin_data_len;
+	plugin_data = mnd_emalloc(plugin_data_len + 1);
+	if (!plugin_data) {
+		goto end;
+	}
+	memcpy(plugin_data, auth_plugin_data, plugin_data_len);
+	plugin_data[plugin_data_len] = '\0';
+
+	requested_protocol = mnd_pestrdup(auth_protocol? auth_protocol : MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
+	if (!requested_protocol) {
+		goto end;
+	}
+
+	do {
+		struct st_mysqlnd_authentication_plugin * auth_plugin = conn->m->fetch_auth_plugin_by_name(requested_protocol TSRMLS_CC);
+
+		if (!auth_plugin) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
+			SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method umknown to the client");
+			goto end;
+		}
+		DBG_INF("plugin found");
+
+		{
+			zend_uchar * switch_to_auth_protocol_data = NULL;
+			size_t switch_to_auth_protocol_data_len = 0;
+			zend_uchar * scrambled_data = NULL;
+			size_t scrambled_data_len = 0;
+
+			switch_to_auth_protocol = NULL;
+			switch_to_auth_protocol_len = 0;
+
+			if (conn->auth_plugin_data) {
+				mnd_pefree(conn->auth_plugin_data, conn->persistent);
+				conn->auth_plugin_data = NULL;
+			}
+			conn->auth_plugin_data_len = plugin_data_len;
+			conn->auth_plugin_data = mnd_pemalloc(conn->auth_plugin_data_len, conn->persistent);
+			if (!conn->auth_plugin_data) {
+				SET_OOM_ERROR(*conn->error_info);
+				goto end;
+			}
+			memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
+
+			DBG_INF_FMT("salt=[%*s]", plugin_data_len - 1, plugin_data);
+			/* The data should be allocated with malloc() */
+			scrambled_data =
+				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
+												   plugin_data, plugin_data_len, options, mysql_flags TSRMLS_CC);
+
+			if (FALSE == is_change_user) {
+				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, options, mysql_flags,
+											charset_no,
+											first_call,
+											requested_protocol,
+											scrambled_data, scrambled_data_len,
+											&switch_to_auth_protocol, &switch_to_auth_protocol_len,
+											&switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
+											TSRMLS_CC);
+			} else {
+				ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, passwd_len, db, db_len, silent,
+											   first_call,
+											   requested_protocol,
+											   scrambled_data, scrambled_data_len,
+											   &switch_to_auth_protocol, &switch_to_auth_protocol_len,
+											   &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
+											   TSRMLS_CC);				
+			}
+			first_call = FALSE;
+			free(scrambled_data);
+
+			DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
+			if (requested_protocol && switch_to_auth_protocol) {
+				mnd_efree(requested_protocol);
+				requested_protocol = switch_to_auth_protocol;
+			}
+
+			if (plugin_data) {
+				mnd_efree(plugin_data);
+			}
+			plugin_data_len = switch_to_auth_protocol_data_len;
+			plugin_data = switch_to_auth_protocol_data;
+		}
+		DBG_INF_FMT("conn->error_info->error_no = %d", conn->error_info->error_no);
+	} while (ret == FAIL && conn->error_info->error_no == 0 && switch_to_auth_protocol != NULL);
+	if (plugin_data) {
+		mnd_efree(plugin_data);
+	}
+		
+	if (ret == PASS) {
+		DBG_INF_FMT("saving requested_protocol=%s", requested_protocol);
+		conn->m->set_client_option(conn, MYSQLND_OPT_AUTH_PROTOCOL, requested_protocol TSRMLS_CC);
+	}
+
+	if (requested_protocol) {
+		mnd_efree(requested_protocol);
+	}
+end:
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_connect_run_authentication */
 static enum_func_status
 mysqlnd_connect_run_authentication(
@@ -491,115 +657,10 @@ mysqlnd_connect_run_authentication(
 
 	ret = mysqlnd_switch_to_ssl_if_needed(conn, greet_packet, options, mysql_flags TSRMLS_CC);
 	if (PASS == ret) {
-		zend_bool first_call = TRUE;
-
-		char * switch_to_auth_protocol = NULL;
-		size_t switch_to_auth_protocol_len = 0;
-		char * requested_protocol = NULL;
-		zend_uchar * plugin_data;
-		size_t plugin_data_len;
-
-		plugin_data_len = greet_packet->auth_plugin_data_len;
-		plugin_data = mnd_emalloc(plugin_data_len + 1);
-		if (!plugin_data) {
-			ret = FAIL;
-			goto end;
-		}
-		memcpy(plugin_data, greet_packet->auth_plugin_data, plugin_data_len);
-		plugin_data[plugin_data_len] = '\0';
-
-		requested_protocol = mnd_pestrdup(greet_packet->auth_protocol? greet_packet->auth_protocol: "mysql_native_password", FALSE);
-		if (!requested_protocol) {
-			ret = FAIL;
-			goto end;
-		}
-
-		do {
-			struct st_mysqlnd_authentication_plugin * auth_plugin;
-			{
-				char * plugin_name = NULL;
-
-				mnd_sprintf(&plugin_name, 0, "auth_plugin_%s", requested_protocol);
-
-				DBG_INF_FMT("looking for %s auth plugin", plugin_name);
-				auth_plugin = mysqlnd_plugin_find(plugin_name);
-				mnd_sprintf_free(plugin_name);
-
-				if (!auth_plugin) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
-					SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method umknown to the client");
-					break;
-				}
-			}
-			DBG_INF("plugin found");
-
-			{
-				zend_uchar * switch_to_auth_protocol_data = NULL;
-				size_t switch_to_auth_protocol_data_len = 0;
-				zend_uchar * scrambled_data = NULL;
-				size_t scrambled_data_len = 0;
-
-				switch_to_auth_protocol = NULL;
-				switch_to_auth_protocol_len = 0;
-
-				if (conn->auth_plugin_data) {
-					mnd_pefree(conn->auth_plugin_data, conn->persistent);
-					conn->auth_plugin_data = NULL;
-				}
-				conn->auth_plugin_data_len = plugin_data_len;
-				conn->auth_plugin_data = mnd_pemalloc(conn->auth_plugin_data_len, conn->persistent);
-				if (!conn->auth_plugin_data) {
-					SET_OOM_ERROR(*conn->error_info);
-					goto end;
-				}
-				memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
-
-				DBG_INF_FMT("salt=[%*s]", plugin_data_len - 1, plugin_data);
-				/* The data should be allocated with malloc() */
-				scrambled_data =
-					auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
-													   plugin_data, plugin_data_len, options, mysql_flags TSRMLS_CC);
-
-
-				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, options, mysql_flags,
-											greet_packet->charset_no,
-											first_call,
-											requested_protocol,
-											scrambled_data, scrambled_data_len,
-											&switch_to_auth_protocol, &switch_to_auth_protocol_len,
-											&switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
-											TSRMLS_CC);
-				first_call = FALSE;
-				free(scrambled_data);
-
-				DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
-				if (requested_protocol && switch_to_auth_protocol) {
-					mnd_efree(requested_protocol);
-					requested_protocol = switch_to_auth_protocol;
-				}
-
-				if (plugin_data) {
-					mnd_efree(plugin_data);
-				}
-				plugin_data_len = switch_to_auth_protocol_data_len;
-				plugin_data = switch_to_auth_protocol_data;
-			}
-			DBG_INF_FMT("conn->error_info->error_no = %d", conn->error_info->error_no);
-		} while (ret == FAIL && conn->error_info->error_no == 0 && switch_to_auth_protocol != NULL);
-		if (plugin_data) {
-			mnd_efree(plugin_data);
-		}
-		
-		if (ret == PASS) {
-			DBG_INF_FMT("saving requested_protocol=%s", requested_protocol);
-			conn->m->set_client_option(conn, MYSQLND_OPT_AUTH_PROTOCOL, requested_protocol TSRMLS_CC);
-		}
-
-		if (requested_protocol) {
-			mnd_efree(requested_protocol);
-		}
+		ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, db_len,
+										 greet_packet->auth_plugin_data, greet_packet->auth_plugin_data_len, greet_packet->auth_protocol,
+										 greet_packet->charset_no, options, mysql_flags, FALSE /*silent*/, FALSE/*is_change*/ TSRMLS_CC);
 	}
-end:
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -2136,13 +2197,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 										  TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, change_user);
-	/*
-	  User could be max 16 * 3 (utf8), pass is 20 usually, db is up to 64*3
-	  Stack space is not that expensive, so use a bit more to be protected against
-	  buffer overflows.
-	*/
 	enum_func_status ret = FAIL;
-	zend_bool local_tx_started = FALSE;
 
 	DBG_ENTER("mysqlnd_conn_data::change_user");
 	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%u",
@@ -2151,7 +2206,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	if (PASS != conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		goto end;
 	}
-	local_tx_started = TRUE;
 
 	SET_EMPTY_ERROR(*conn->error_info);
 	SET_ERROR_AFF_ROWS(conn);
@@ -2164,122 +2218,20 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	}
 	if (!db) {
 		db = "";
+
 	}
 
-	{
-		zend_bool first_call = TRUE;
-		char * switch_to_auth_protocol = NULL;
-		size_t switch_to_auth_protocol_len = 0;
-		char * requested_protocol = NULL;
-		zend_uchar * plugin_data;
-		size_t plugin_data_len;
+	/* XXX: passwords that have \0 inside work during auth, but in this case won't work with change user */
+	ret = mysqlnd_run_authentication(conn, user, passwd, strlen(passwd), db, strlen(db),
+									conn->auth_plugin_data, conn->auth_plugin_data_len, conn->options->auth_protocol,
+									0 /*charset not used*/, conn->options, conn->server_capabilities, silent, TRUE/*is_change*/ TSRMLS_CC);
 
-		plugin_data_len = conn->auth_plugin_data_len;
-		plugin_data = mnd_emalloc(plugin_data_len);
-		if (!plugin_data) {
-			ret = FAIL;
-			goto end;
-		}
-		memcpy(plugin_data, conn->auth_plugin_data, plugin_data_len);
-
-		requested_protocol = mnd_pestrdup(conn->options->auth_protocol? conn->options->auth_protocol:MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
-		if (!requested_protocol) {
-			ret = FAIL;
-			goto end;
-		}
-
-		do {
-			struct st_mysqlnd_authentication_plugin * auth_plugin;
-			{
-				char * plugin_name = NULL;
-
-				mnd_sprintf(&plugin_name, 0, "auth_plugin_%s", requested_protocol);
-
-				DBG_INF_FMT("looking for %s auth plugin", plugin_name);
-				auth_plugin = mysqlnd_plugin_find(plugin_name);
-				mnd_sprintf_free(plugin_name);
-
-				if (!auth_plugin) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
-					SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method umknown to the client");
-					break;
-				}
-			}
-			DBG_INF("plugin found");
-
-			{
-				zend_uchar * switch_to_auth_protocol_data = NULL;
-				size_t switch_to_auth_protocol_data_len = 0;
-				zend_uchar * scrambled_data = NULL;
-				size_t scrambled_data_len = 0;
-
-				switch_to_auth_protocol = NULL;
-				switch_to_auth_protocol_len = 0;
-
-				if (conn->auth_plugin_data) {
-					mnd_pefree(conn->auth_plugin_data, conn->persistent);
-					conn->auth_plugin_data = NULL;
-				}
-				conn->auth_plugin_data_len = plugin_data_len;
-				conn->auth_plugin_data = mnd_pemalloc(conn->auth_plugin_data_len, conn->persistent);
-				if (!conn->auth_plugin_data) {
-					SET_OOM_ERROR(*conn->error_info);
-					ret = FAIL;
-					goto end;
-				}
-				memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
-
-				DBG_INF_FMT("salt=[%*s]", plugin_data_len - 1, plugin_data);
-
-				/* The data should be allocated with malloc() */
-				scrambled_data =
-						auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
-														   plugin_data, plugin_data_len, 0, conn->server_capabilities TSRMLS_CC);
-
-
-				ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, passwd_len, db, strlen(db), silent,
-											   first_call,
-											   requested_protocol,
-											   scrambled_data, scrambled_data_len,
-											   &switch_to_auth_protocol, &switch_to_auth_protocol_len,
-											   &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
-											   TSRMLS_CC);
-
-				first_call = FALSE;
-				free(scrambled_data);
-
-				DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
-				if (requested_protocol) {
-					mnd_efree(requested_protocol);
-				}
-				requested_protocol = switch_to_auth_protocol;
-
-				if (plugin_data) {
-					mnd_efree(plugin_data);
-				}
-				plugin_data_len = switch_to_auth_protocol_data_len;
-				plugin_data = switch_to_auth_protocol_data;
-			}
-			DBG_INF_FMT("conn->error_info->error_no = %d", conn->error_info->error_no);
-		} while (ret == FAIL && conn->error_info->error_no == 0 && switch_to_auth_protocol != NULL);
-		if (plugin_data) {
-			mnd_efree(plugin_data);
-		}
-		if (ret == PASS) {
-			conn->m->set_client_option(conn, MYSQLND_OPT_AUTH_PROTOCOL, requested_protocol TSRMLS_CC);
-		}
-		if (requested_protocol) {
-			mnd_efree(requested_protocol);
-		}
-	}
 	/*
 	  Here we should close all statements. Unbuffered queries should not be a
 	  problem as we won't allow sending COM_CHANGE_USER.
 	*/
+	conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
 end:
-	if (TRUE == local_tx_started) {
-		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
-	}
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
 }
@@ -2698,7 +2650,9 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD(mysqlnd_conn_data, local_tx_end),
 	MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands),
 	MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags),
-	MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)
+	MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake),
+	MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request),
+	MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name)	
 MYSQLND_CLASS_METHODS_END;
 
 
