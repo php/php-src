@@ -336,7 +336,7 @@ ZEND_METHOD(Generator, next)
 }
 /* }}} */
 
-/* {{{ proto void Generator::send()
+/* {{{ proto mixed Generator::send()
  * Sends a value to the generator */
 ZEND_METHOD(Generator, send)
 {
@@ -366,6 +366,10 @@ ZEND_METHOD(Generator, send)
 	generator->send_target->var.ptr_ptr = &value;
 
 	zend_generator_resume(object, generator TSRMLS_CC);
+
+	if (generator->value) {
+		RETURN_ZVAL(generator->value, 1, 0);
+	}
 }
 
 /* {{{ proto void Generator::close()
