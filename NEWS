@@ -35,6 +35,10 @@ PHP                                                                        NEWS
     pattern). (Gustavo)
   . Fixed bug #60785 (memory leak in IntlDateFormatter constructor). (Gustavo)
 
+- Reflection:
+  . Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
+    with constant). (Laruence)
+
 - XML Writer:
   . Fixed bug #62064 (memory leak in the XML Writer module). 
     (jean-pierre dot lozi at lip6 dot fr)
