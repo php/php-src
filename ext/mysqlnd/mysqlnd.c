@@ -354,6 +354,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request)(MYSQLND_CONN_DATA
 			php_error(E_WARNING, "Error while sending %s packet. PID=%d", mysqlnd_command_to_text[command], getpid());
 		}
 		CONN_SET_STATE(conn, CONN_QUIT_SENT);
+		conn->m->send_close(conn TSRMLS_CC);
 		DBG_ERR("Server is gone");
 		ret = FAIL;
 	}
@@ -468,6 +469,7 @@ mysqlnd_switch_to_ssl_if_needed(
 		DBG_INF("Switching to SSL");
 		if (!PACKET_WRITE(auth_packet, conn)) {
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			conn->m->send_close(conn TSRMLS_CC);
 			SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 			goto end;
 		}
@@ -1732,6 +1734,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int p
 			SET_ERROR_AFF_ROWS(conn);
 		} else if (PASS == (ret = conn->m->simple_command(conn, COM_PROCESS_KILL, buff, 4, PROT_LAST, FALSE, TRUE TSRMLS_CC))) {
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			conn->m->send_close(conn TSRMLS_CC);
 		}
 
 		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);
@@ -1879,6 +1882,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 	  connection does increase it by 1.
 	*/
 	CONN_SET_STATE(conn, CONN_QUIT_SENT);
+	net->data->m.close_stream(net, conn->stats, conn->error_info TSRMLS_CC);
 
 	DBG_RETURN(ret);
 }
@@ -2118,6 +2122,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn TS
 					DBG_ERR_FMT("Serious error. %s::%u", __FILE__, __LINE__);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Serious error. PID=%d", getpid());
 					CONN_SET_STATE(conn, CONN_QUIT_SENT);
+					conn->m->send_close(conn TSRMLS_CC);
 				} else {
 					DBG_INF_FMT("Error from the server : (%u) %s", conn->error_info->error_no, conn->error_info->error);
 				}
