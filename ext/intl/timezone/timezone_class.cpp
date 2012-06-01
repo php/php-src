@@ -62,7 +62,7 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 												intl_error *outside_error,
 												const char *func TSRMLS_DC)
 {
-	const char	*id = NULL,
+	char		*id = NULL,
 				offset_id[] = "GMT+00:00";
 	int			id_len = 0;
 	char		*message;
@@ -93,7 +93,7 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 			}
 
 			id = offset_id;
-			id_len = slprintf((char*)id, sizeof(offset_id), "GMT%+03d:%02d",
+			id_len = slprintf(id, sizeof(offset_id), "GMT%+03d:%02d",
 				hours, minutes);
 			break;
 		}
