@@ -34,6 +34,13 @@ extern "C" {
 }
 #include "common/common_enum.h"
 
+U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
+{
+	zend_throw_exception( NULL,
+		"An object of this type cannot be created with the new operator",
+		0 TSRMLS_CC );
+}
+
 U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 {
 	char	*str_id;
