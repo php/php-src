@@ -2397,6 +2397,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 	reflection_object *intern;
 	parameter_reference *param;
 	zend_op *precv;
+	int type;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2420,7 +2421,8 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 
 	*return_value = precv->op2.u.constant;
 	INIT_PZVAL(return_value);
-	if (Z_TYPE_P(return_value) != IS_CONSTANT && Z_TYPE_P(return_value) != IS_CONSTANT_ARRAY) {
+	type = Z_TYPE_P(return_value);
+	if (type != IS_CONSTANT && type != IS_CONSTANT_ARRAY && type != (IS_CONSTANT | IS_CONSTANT_UNQUALIFIED)) {
 		zval_copy_ctor(return_value);
 	}
 	zval_update_constant_ex(&return_value, (void*)0, param->fptr->common.scope TSRMLS_CC);
