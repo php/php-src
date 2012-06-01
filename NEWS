@@ -23,6 +23,7 @@ PHP                                                                        NEWS
   . Fixed bug #62160 (Add process.priority to set nice(2) priorities). (fat)
   . Fixed bug #61218 (FPM drops connection while receiving some binary values
     in FastCGI requests). (fat)
+  . Fixed bug #62205 (php-fpm segfaults (null passed to strstr)). (fat)
 
 - Intl:
   . Fixed bug #62083 (grapheme_extract() memory leaks). (Gustavo)
