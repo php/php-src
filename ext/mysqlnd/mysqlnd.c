@@ -1849,8 +1849,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 			DBG_INF("Connection clean, sending COM_QUIT");
 			if (net_stream) {
 				ret = conn->m->simple_command(conn, COM_QUIT, NULL, 0, PROT_LAST, TRUE, TRUE TSRMLS_CC);
+				net->data->m.close_stream(net, conn->stats, conn->error_info TSRMLS_CC);
 			}
-			/* Do nothing */
+			CONN_SET_STATE(conn, CONN_QUIT_SENT);
 			break;
 		case CONN_SENDING_LOAD_DATA:
 			/*
@@ -1866,6 +1867,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 			  Do nothing, the connection will be brutally closed
 			  and the server will catch it and free close from its side.
 			*/
+			/* Fall-through */
 		case CONN_ALLOCED:
 			/*
 			  Allocated but not connected or there was failure when trying
@@ -1873,16 +1875,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 
 			  Fall-through
 			*/
+			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			net->data->m.close_stream(net, conn->stats, conn->error_info TSRMLS_CC);
+			/* Fall-through */
 		case CONN_QUIT_SENT:
 			/* The user has killed its own connection */
 			break;
 	}
-	/*
-	  We hold one reference, and every other object which needs the
-	  connection does increase it by 1.
-	*/
-	CONN_SET_STATE(conn, CONN_QUIT_SENT);
-	net->data->m.close_stream(net, conn->stats, conn->error_info TSRMLS_CC);
 
 	DBG_RETURN(ret);
 }
