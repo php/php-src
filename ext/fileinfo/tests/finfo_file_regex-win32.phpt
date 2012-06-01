@@ -2,8 +2,8 @@
 Test finfo_file() function : regex rules
 --SKIPIF--
 <?php require_once(dirname(__FILE__) . '/skipif.inc'); 
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip.. only for Non Windows Systems');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+    die('skip.. only for Windows');
 }
 ?>
 --FILE--
@@ -23,10 +23,14 @@ $file = __DIR__ . '/resources/test.awk';
 var_dump( finfo_file( $finfo, $file ) );
 var_dump( finfo_file( $finfo, $file, FILEINFO_CONTINUE ) );
 
+// Windows uses libfileinfo 1.0.5-dev
+// this may be causing the slightly different output from the first
+// finfo_file() call
+
 ?>
 ===DONE===
 --EXPECTF--
 *** Testing finfo_file() : regex rules ***
-string(28) "text/plain; charset=us-ascii"
+string(10) "text/plain"
 string(22) "awk script, ASCII text"
 ===DONE===

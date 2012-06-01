@@ -15,7 +15,7 @@ $value = $formatter->parse('2147483650', \NumberFormatter::TYPE_INT64);
 var_dump($value);
 
 ?>
---EXPECTREGEX--
+--EXPECT--
 int(2147483647)
 int(2147483650)
 
