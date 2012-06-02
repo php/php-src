@@ -34,13 +34,7 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 		if (!execute_data->symbol_table) {
 			zend_free_compiled_variables(execute_data->CVs, execute_data->op_array->last_var);
 		} else {
-			if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
-				zend_hash_destroy(execute_data->symbol_table);
-				FREE_HASHTABLE(execute_data->symbol_table);
-			} else {
-				zend_hash_clean(execute_data->symbol_table);
-				*(++EG(symtable_cache_ptr)) = execute_data->symbol_table;
-			}
+			zend_clean_and_cache_symbol_table(execute_data->symbol_table);
 		}
 
 		if (execute_data->current_this) {
@@ -121,6 +115,134 @@ static void zend_generator_free_storage(zend_generator *generator TSRMLS_DC) /* 
 }
 /* }}} */
 
+static void zend_generator_clone_storage(zend_generator *orig, zend_generator **clone_ptr) /* {{{ */
+{
+	zend_generator *clone = emalloc(sizeof(zend_generator));
+	memcpy(clone, orig, sizeof(zend_generator));
+
+	if (orig->execute_data) {
+		/* Create a few shorter aliases to the old execution data */
+		zend_execute_data *execute_data = orig->execute_data;
+		zend_op_array *op_array = execute_data->op_array;
+		HashTable *symbol_table = execute_data->symbol_table;
+
+		/* Alloc separate execution context, as well as separate sections for
+		 * compiled variables and temporary variables */
+		size_t execute_data_size = ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data));
+		size_t CVs_size = ZEND_MM_ALIGNED_SIZE(sizeof(zval **) * op_array->last_var * (symbol_table ? 1 : 2));
+		size_t Ts_size = ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T;
+		size_t total_size = execute_data_size + CVs_size + Ts_size;
+
+		clone->execute_data = emalloc(total_size);
+
+		/* Copy the zend_execute_data struct */
+		memcpy(clone->execute_data, execute_data, execute_data_size);
+
+		/* Set the pointers to the memory segments for the compiled and
+		 * temporary variables (which are located after the execute_data) */
+		clone->execute_data->CVs = (zval ***) ((char *) clone->execute_data + execute_data_size);
+		clone->execute_data->Ts = (temp_variable *) ((char *) clone->execute_data->CVs + CVs_size);
+
+		/* Zero out the compiled variables section */
+		memset(clone->execute_data->CVs, 0, sizeof(zval **) * op_array->last_var);
+
+		if (!symbol_table) {
+			int i;
+
+			/* Copy compiled variables */
+			for (i = 0; i < op_array->last_var; i++) {
+				if (execute_data->CVs[i]) {
+					clone->execute_data->CVs[i] = (zval **) clone->execute_data->CVs + op_array->last_var + i;
+					*clone->execute_data->CVs[i] = (zval *) orig->execute_data->CVs[op_array->last_var + i];
+					Z_ADDREF_PP(clone->execute_data->CVs[i]);
+				}
+			}
+		} else {
+			/* Copy symbol table */
+			ALLOC_HASHTABLE(clone->execute_data->symbol_table);
+			zend_hash_init(clone->execute_data->symbol_table, zend_hash_num_elements(symbol_table), NULL, ZVAL_PTR_DTOR, 0);
+			zend_hash_copy(clone->execute_data->symbol_table, symbol_table, (copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval *));
+
+			/* Update zval** pointers for compiled variables */
+			{
+				int i;
+				for (i = 0; i < op_array->last_var; i++) {
+					if (zend_hash_quick_find(clone->execute_data->symbol_table, op_array->vars[i].name, op_array->vars[i].name_len + 1, op_array->vars[i].hash_value, (void **) &clone->execute_data->CVs[i]) == FAILURE) {
+						clone->execute_data->CVs[i] = NULL;
+					}
+				}
+			}
+		}
+
+		/* Copy the temporary variables */
+		memcpy(clone->execute_data->Ts, orig->execute_data->Ts, Ts_size);
+
+		/* Add references to loop variables */
+		{
+			zend_uint op_num = execute_data->opline - op_array->opcodes;
+
+			int i;
+			for (i = 0; i < op_array->last_brk_cont; ++i) {
+				zend_brk_cont_element *brk_cont = op_array->brk_cont_array + i;
+
+				if (brk_cont->start < 0) {
+					continue;
+				} else if (brk_cont->start > op_num) {
+					break;
+				} else if (brk_cont->brk > op_num) {
+					zend_op *brk_opline = op_array->opcodes + brk_cont->brk;
+
+					if (brk_opline->opcode == ZEND_SWITCH_FREE) {
+						temp_variable *var = (temp_variable *) ((char *) execute_data->Ts + brk_opline->op1.var);
+
+						Z_ADDREF_P(var->var.ptr);
+					}
+				}
+			}
+		}
+
+		if (orig->backed_up_stack) {
+			/* Copy backed up stack */
+			clone->backed_up_stack = emalloc(orig->backed_up_stack_size);
+			memcpy(clone->backed_up_stack, orig->backed_up_stack, orig->backed_up_stack_size);
+
+			/* Add refs to stack variables */
+			{
+				zval **zvals = (zval **) orig->backed_up_stack;
+				size_t zval_num = orig->backed_up_stack_size / sizeof(zval *);
+				int i;
+
+				for (i = 0; i < zval_num; i++) {
+					Z_ADDREF_P(zvals[i]);
+				}
+			}
+		}
+
+		/* Update the send_target to use the temporary variable with the same
+		 * offset as the original generator, but in out temporary variable
+		 * memory segment. */
+		if (orig->send_target) {
+			size_t offset = (char *) orig->send_target - (char *) execute_data->Ts;
+			clone->send_target = (temp_variable *) (
+				(char *) clone->execute_data->Ts + offset
+			);
+			Z_ADDREF_P(clone->send_target->var.ptr);
+		}
+	}
+
+	/* The value and key are known not to be references, so simply add refs */
+	if (orig->value) {
+		Z_ADDREF_P(orig->value);
+	}
+
+	if (orig->key) {
+		Z_ADDREF_P(orig->key);
+	}
+
+	*clone_ptr = clone;
+}
+/* }}} */
+
 static zend_object_value zend_generator_create(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
 	zend_generator *generator;
@@ -136,7 +258,7 @@ static zend_object_value zend_generator_create(zend_class_entry *class_type TSRM
 
 	object.handle = zend_objects_store_put(generator, NULL,
 		(zend_objects_free_object_storage_t) zend_generator_free_storage,
-		NULL /* no clone handler for now */
+		(zend_objects_store_clone_t)         zend_generator_clone_storage
 		TSRMLS_CC
 	);
 	object.handlers = &zend_generator_handlers;
@@ -358,7 +480,8 @@ ZEND_METHOD(Generator, send)
 	}
 
 	/* The sent value was initialized to NULL, so dtor that */
-	zval_ptr_dtor(generator->send_target->var.ptr_ptr);
+	zval_ptr_dtor(&generator->send_target->var.ptr);
+
 
 	/* Set new sent value */
 	Z_ADDREF_P(value);
@@ -419,6 +542,7 @@ void zend_register_generator_ce(TSRMLS_D) /* {{{ */
 
 	memcpy(&zend_generator_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
+	zend_generator_handlers.clone_obj = zend_objects_store_clone_obj;
 }
 /* }}} */
 
