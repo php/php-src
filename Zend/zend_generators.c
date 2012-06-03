@@ -41,6 +41,10 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 			zval_ptr_dtor(&execute_data->current_this);
 		}
 
+		if (execute_data->object) {
+			zval_ptr_dtor(&execute_data->object);
+		}
+
 		/* If the generator is closed before it can finish execution (reach
 		 * a return statement) we have to free loop variables manually, as
 		 * we don't know whether the SWITCH_FREE / FREE opcodes have run */
@@ -227,6 +231,10 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 				(char *) clone->execute_data->Ts + offset
 			);
 			Z_ADDREF_P(clone->send_target->var.ptr);
+		}
+
+		if (execute_data->object) {
+			Z_ADDREF_P(execute_data->object);
 		}
 	}
 
