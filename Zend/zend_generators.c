@@ -233,6 +233,10 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 			Z_ADDREF_P(clone->send_target->var.ptr);
 		}
 
+		if (execute_data->current_this) {
+			Z_ADDREF_P(execute_data->current_this);
+		}
+
 		if (execute_data->object) {
 			Z_ADDREF_P(execute_data->object);
 		}
