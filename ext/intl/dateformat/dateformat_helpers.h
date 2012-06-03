@@ -10,21 +10,30 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
+   | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
 */
-#ifndef DATE_FORMAT_ATTR_H
-#define DATE_FORMAT_ATTR_H
 
-#include <php.h>
+#ifndef DATEFORMAT_HELPERS_H
+#define	DATEFORMAT_HELPERS_H
 
-//PHP_FUNCTION( datefmt_get_timezone );
-PHP_FUNCTION( datefmt_get_datetype );
-PHP_FUNCTION( datefmt_get_timetype );
-PHP_FUNCTION( datefmt_get_locale );
-PHP_FUNCTION( datefmt_get_pattern );
-PHP_FUNCTION( datefmt_set_pattern );
-PHP_FUNCTION( datefmt_is_lenient );
-PHP_FUNCTION( datefmt_set_lenient );
+#ifndef __cplusplus
+#error For C++ only
+#endif
 
-#endif // DATE_FORMAT_ATTR_H
+#include <unicode/calendar.h>
+
+extern "C" {
+#include "../php_intl.h"
+}
+
+int datefmt_process_calendar_arg(zval* calendar_zv,
+								 Locale const& locale,
+								 const char *func_name,
+								 intl_error *err,
+								 Calendar*& cal,
+								 long& cal_int_type,
+								 bool& calendar_owned TSRMLS_DC);
+
+#endif	/* DATEFORMAT_HELPERS_H */
+

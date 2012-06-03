@@ -18,6 +18,8 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 #include <unicode/calendar.h>
 #include <unicode/gregocal.h>
 
@@ -53,6 +55,14 @@ U_CFUNC	void calendar_object_create(zval *object,
 
 	object_init_ex(object, ce);
 	calendar_object_construct(object, calendar TSRMLS_CC);
+}
+
+U_CFUNC Calendar *calendar_fetch_native_calendar(zval *object TSRMLS_DC)
+{
+	Calendar_object *co = (Calendar_object*)
+			zend_object_store_get_object(object TSRMLS_CC);
+
+	return co->ucal;
 }
 
 U_CFUNC void calendar_object_construct(zval *object,

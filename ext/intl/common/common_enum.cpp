@@ -18,6 +18,8 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 // Fix build on Windows/old versions of ICU
 #include <stdio.h>
 
