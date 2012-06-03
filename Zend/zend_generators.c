@@ -317,6 +317,10 @@ static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS
 		EG(scope) = generator->execute_data->current_scope;
 		EG(called_scope) = generator->execute_data->current_called_scope;
 
+		/* Set prev_execute_data to the current execute_data to get halfways
+		 * reasonable backtraces */
+		generator->execute_data->prev_execute_data = original_execute_data;
+
 		/* Go to next opcode (we don't want to run the last one again) */
 		generator->execute_data->opline++;
 
