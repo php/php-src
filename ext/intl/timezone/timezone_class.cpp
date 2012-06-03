@@ -19,6 +19,8 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 #include <unicode/timezone.h>
 #include <unicode/calendar.h>
 #include "../intl_convertcpp.h"
@@ -30,8 +32,6 @@ extern "C" {
 #include "timezone_methods.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
-/* avoid redefinition of int8_t, already defined in unicode/pwin32.h */
-#define _MSC_STDINT_H_ 1
 #include <ext/date/php_date.h>
 }
 

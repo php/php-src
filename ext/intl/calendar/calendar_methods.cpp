@@ -18,6 +18,8 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 #include <unicode/locid.h>
 #include <unicode/calendar.h>
 #include <unicode/ustring.h>
@@ -31,7 +33,6 @@ extern "C" {
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
-#define _MSC_STDINT_H_ /* avoid redefinitions */
 #include <ext/date/php_date.h>
 }
 #include "../common/common_enum.h"

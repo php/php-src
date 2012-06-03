@@ -10,21 +10,16 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
+   | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
 */
-#ifndef DATE_FORMAT_ATTR_H
-#define DATE_FORMAT_ATTR_H
+#ifndef DATE_FORMATTER_H
+#define DATE_FORMATTER_H
 
 #include <php.h>
 
-//PHP_FUNCTION( datefmt_get_timezone );
-PHP_FUNCTION( datefmt_get_datetype );
-PHP_FUNCTION( datefmt_get_timetype );
-PHP_FUNCTION( datefmt_get_locale );
-PHP_FUNCTION( datefmt_get_pattern );
-PHP_FUNCTION( datefmt_set_pattern );
-PHP_FUNCTION( datefmt_is_lenient );
-PHP_FUNCTION( datefmt_set_lenient );
+PHP_FUNCTION( datefmt_create );
+PHP_METHOD( IntlDateFormatter, __construct );
+void dateformat_register_constants( INIT_FUNC_ARGS );
 
-#endif // DATE_FORMAT_ATTR_H
+#endif // DATE_FORMATTER_H

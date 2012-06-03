@@ -19,7 +19,7 @@
 
 #include <php.h>
 
-PHP_METHOD(IntlTimeZone, __construct)
+PHP_METHOD(IntlTimeZone, __construct);
 
 PHP_FUNCTION(intltz_create_time_zone);
 

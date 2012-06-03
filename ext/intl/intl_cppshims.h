@@ -10,21 +10,25 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
+   | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
 */
-#ifndef DATE_FORMAT_ATTR_H
-#define DATE_FORMAT_ATTR_H
 
-#include <php.h>
+#ifndef INTL_CPPSHIMS_H
+#define INTL_CPPSHIMS_H
 
-//PHP_FUNCTION( datefmt_get_timezone );
-PHP_FUNCTION( datefmt_get_datetype );
-PHP_FUNCTION( datefmt_get_timetype );
-PHP_FUNCTION( datefmt_get_locale );
-PHP_FUNCTION( datefmt_get_pattern );
-PHP_FUNCTION( datefmt_set_pattern );
-PHP_FUNCTION( datefmt_is_lenient );
-PHP_FUNCTION( datefmt_set_lenient );
+#ifndef __cplusplus
+#error For inclusion form C++ files only
+#endif
 
-#endif // DATE_FORMAT_ATTR_H
+#ifdef _MSC_VER
+//This is only required for old versions of ICU only
+#include <stdio.h>
+
+#include <math.h>
+
+/* avoid redefinition of int8_t, also defined in unicode/pwin32.h */
+#define _MSC_STDINT_H_ 1
+#endif
+
+#endif

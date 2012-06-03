@@ -18,6 +18,8 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 #include <unicode/locid.h>
 #include <unicode/timezone.h>
 #include <unicode/ustring.h>
@@ -28,8 +30,6 @@ extern "C" {
 #include "intl_convert.h"
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
-/* avoid redefinition of int8_t, already defined in unicode/pwin32.h */
-#define _MSC_STDINT_H_ 1
 #include <ext/date/php_date.h>
 }
 #include "common/common_enum.h"

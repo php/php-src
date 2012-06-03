@@ -41,6 +41,8 @@
 #include "formatter/formatter_main.h"
 #include "formatter/formatter_parse.h"
 
+#include "grapheme/grapheme.h"
+
 #include "msgformat/msgformat.h"
 #include "msgformat/msgformat_class.h"
 #include "msgformat/msgformat_attr.h"
@@ -58,6 +60,7 @@
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
 #include "dateformat/dateformat_attr.h"
+#include "dateformat/dateformat_attrcpp.h"
 #include "dateformat/dateformat_format.h"
 #include "dateformat/dateformat_parse.h"
 #include "dateformat/dateformat_data.h"
@@ -319,6 +322,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_set_pattern, 0, 0, 2)
 	ZEND_ARG_INFO(0, mf)
 	ZEND_ARG_INFO(0, pattern)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_set_timezone, 0, 0, 2)
+	ZEND_ARG_INFO(0, mf)
+	ZEND_ARG_INFO(0, timezone)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_set_calendar, 0, 0, 2)
@@ -675,10 +683,13 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( datefmt_get_datetype, arginfo_msgfmt_get_locale )
 	PHP_FE( datefmt_get_timetype, arginfo_msgfmt_get_locale )
 	PHP_FE( datefmt_get_calendar, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_get_calendar_object, arginfo_msgfmt_get_locale )
 	PHP_FE( datefmt_set_calendar, arginfo_datefmt_set_calendar )
 	PHP_FE( datefmt_get_locale, arginfo_msgfmt_get_locale )
 	PHP_FE( datefmt_get_timezone_id, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_set_timezone_id, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_set_timezone_id, arginfo_datefmt_set_timezone )
+	PHP_FE( datefmt_get_timezone, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_set_timezone, arginfo_datefmt_set_timezone )
 	PHP_FE( datefmt_get_pattern, arginfo_msgfmt_get_locale )
 	PHP_FE( datefmt_set_pattern, arginfo_datefmt_set_pattern )
 	PHP_FE( datefmt_is_lenient, arginfo_msgfmt_get_locale )
