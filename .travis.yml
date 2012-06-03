@@ -4,6 +4,13 @@ php:
     # We only specify one version so we only get one worker
     - 5.4
 
+notifications:
+email:
+    recipients:
+        - php-qa@lists.php.net
+    on_success: change # [always|never|change] default: change
+    on_failure: always # [always|never|change] default: always
+
 env:
     - REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE=./sapi/cli/php
 
