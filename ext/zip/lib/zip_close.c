@@ -337,8 +337,6 @@ zip_close(struct zip *za)
     umask(mask);
     chmod(za->zn, 0666&~mask);
 #endif
-    if (za->ch_comment)
-        free(za->ch_comment);
 
     _zip_free(za);
 	free(temp);
