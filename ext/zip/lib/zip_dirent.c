@@ -45,7 +45,6 @@
 static time_t _zip_d2u_time(int, int);
 static char *_zip_readfpstr(FILE *, unsigned int, int, struct zip_error *);
 static char *_zip_readstr(unsigned char **, int, int, struct zip_error *);
-static void _zip_u2d_time(time_t, unsigned short *, unsigned short *);
 static void _zip_write2(unsigned short, FILE *);
 static void _zip_write4(unsigned int, FILE *);
 
@@ -213,13 +212,13 @@ _zip_dirent_init(struct zip_dirent *de)
 
 int
 _zip_dirent_read(struct zip_dirent *zde, FILE *fp,
-		 unsigned char **bufp, unsigned int *leftp, int local,
+		 unsigned char **bufp, zip_uint32_t *leftp, int local,
 		 struct zip_error *error)
 {
     unsigned char buf[CDENTRYSIZE];
     unsigned char *cur;
     unsigned short dostime, dosdate;
-    unsigned int size;
+    zip_uint32_t size;
 
     if (local)
 	size = LENTRYSIZE;
@@ -475,6 +474,8 @@ _zip_d2u_time(int dtime, int ddate)
 {
     struct tm tm = {0};
 
+    memset(&tm, 0, sizeof(tm));
+    
     /* let mktime decide if DST is in effect */
     tm.tm_isdst = -1;
     
@@ -598,7 +599,7 @@ _zip_write4(unsigned int i, FILE *fp)
 
 
 
-static void
+void
 _zip_u2d_time(time_t time, unsigned short *dtime, unsigned short *ddate)
 {
     struct tm *tm;

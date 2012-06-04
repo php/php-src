@@ -1,6 +1,6 @@
 /*
-  zip_get_archive_flag.c -- set archive global flag
-  Copyright (C) 2008-2009 Dieter Baron and Thomas Klausner
+  zip_source_close.c -- close zip_source (stop reading)
+  Copyright (C) 2009 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -37,33 +37,18 @@
 
 
 
-ZIP_EXTERN(int)
-zip_set_archive_flag(struct zip *za, int flag, int value)
+ZIP_EXTERN(void)
+zip_source_close(struct zip_source *src)
 {
-    unsigned int new_flags;
+    if (!src->is_open)
+	return;
+
+    if (src->src == NULL)
+	(void)src->cb.f(src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
+    else {
+	(void)src->cb.l(src->src, src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
+	zip_source_close(src->src);
+    }
     
-    if (value)
-	new_flags = za->ch_flags | flag;
-    else
-	new_flags = za->ch_flags & ~flag;
-
-    if (new_flags == za->ch_flags)
-	return 0;
-
-    if (ZIP_IS_RDONLY(za)) {
-	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
-	return -1;
-    }
-
-    if ((flag & ZIP_AFL_RDONLY) && value
-	&& (za->ch_flags & ZIP_AFL_RDONLY) == 0) {
-	if (_zip_changed(za, NULL)) {
-	    _zip_error_set(&za->error, ZIP_ER_CHANGED, 0);
-	    return -1;
-	}
-    }
-
-    za->ch_flags = new_flags;
-
-    return 0;
+    src->is_open = 0;
 }

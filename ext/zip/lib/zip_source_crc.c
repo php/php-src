@@ -1,6 +1,6 @@
 /*
-  zip_source_buffer.c -- create zip data source from buffer
-  Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
+  zip_source_crc.c -- pass-through source that calculates CRC32 and size
+  Copyright (C) 2009 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -38,126 +38,122 @@
 
 #include "zipint.h"
 
-struct read_data {
-    const char *buf, *data, *end;
-    time_t mtime;
-    int freep;
+struct crc {
+    int eof;
+    int validate;
+    int e[2];
+    zip_uint64_t size;
+    zip_uint32_t crc;
 };
 
-static zip_int64_t read_data(void *, void *, zip_uint64_t, enum zip_source_cmd);
+static zip_int64_t crc_read(struct zip_source *, void *, void *
+			    , zip_uint64_t, enum zip_source_cmd);
 
 
 
 ZIP_EXTERN(struct zip_source *)
-zip_source_buffer(struct zip *za, const void *data, zip_uint64_t len, int freep)
+zip_source_crc(struct zip *za, struct zip_source *src, int validate)
 {
-    struct read_data *f;
-    struct zip_source *zs;
+    struct crc *ctx;
 
-    if (za == NULL)
-	return NULL;
-
-    if (data == NULL && len > 0) {
+    if (src == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return NULL;
     }
 
-    if ((f=(struct read_data *)malloc(sizeof(*f))) == NULL) {
+    if ((ctx=(struct crc *)malloc(sizeof(*ctx))) == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
 	return NULL;
     }
 
-    f->data = (const char *)data;
-    f->end = ((const char *)data)+len;
-    f->freep = freep;
-    f->mtime = time(NULL);
-    
-    if ((zs=zip_source_function(za, read_data, f)) == NULL) {
-	free(f);
-	return NULL;
-    }
+    ctx->validate = validate;
 
-    return zs;
+    return zip_source_layered(za, src, crc_read, ctx);
 }
 
 
 
 static zip_int64_t
-read_data(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
+crc_read(struct zip_source *src, void *_ctx, void *data,
+	 zip_uint64_t len, enum zip_source_cmd cmd)
 {
-    struct read_data *z;
-    char *buf;
-    zip_uint64_t n;
+    struct crc *ctx;
+    zip_int64_t n;
 
-    z = (struct read_data *)state;
-    buf = (char *)data;
+    ctx = (struct crc *)_ctx;
 
     switch (cmd) {
     case ZIP_SOURCE_OPEN:
-	z->buf = z->data;
+	ctx->eof = 0;
+	ctx->crc = crc32(0, NULL, 0);
+	ctx->size = 0;
+
 	return 0;
-	
+
     case ZIP_SOURCE_READ:
-	/* XXX: return error if (len > ZIP_INT64_MAX) */
+	if (ctx->eof || len == 0)
+	    return 0;
 
-	n = z->end - z->buf;
-	if (n > len)
-	    n = len;
+	if ((n=zip_source_read(src, data, len)) < 0)
+	    return ZIP_SOURCE_ERR_LOWER;
 
-	if (n) {
-	    memcpy(buf, z->buf, n);
-	    z->buf += n;
+	if (n == 0) {
+	    ctx->eof = 1;
+	    if (ctx->validate) {
+		struct zip_stat st;
+
+		if (zip_source_stat(src, &st) < 0)
+		    return ZIP_SOURCE_ERR_LOWER;
+
+		if ((st.valid & ZIP_STAT_CRC) && st.crc != ctx->crc) {
+		    ctx->e[0] = ZIP_ER_CRC;
+		    ctx->e[1] = 0;
+		    
+		    return -1;
+		}
+		if ((st.valid & ZIP_STAT_SIZE) && st.size != ctx->size) {
+		    ctx->e[0] = ZIP_ER_INCONS;
+		    ctx->e[1] = 0;
+		    
+		    return -1;
+		}
+	    }
 	}
-
+	else {
+	    ctx->size += n;
+	    ctx->crc = crc32(ctx->crc, data, n);
+	}
 	return n;
-	
+
     case ZIP_SOURCE_CLOSE:
 	return 0;
 
     case ZIP_SOURCE_STAT:
-        {
+	{
 	    struct zip_stat *st;
-	    
-	    if (len < sizeof(*st))
-		return -1;
 
 	    st = (struct zip_stat *)data;
 
-	    zip_stat_init(st);
-	    st->mtime = z->mtime;
-	    st->size = z->end - z->data;
-	    st->comp_size = st->size;
-	    st->comp_method = ZIP_CM_STORE;
-	    st->encryption_method = ZIP_EM_NONE;
-	    st->valid = ZIP_STAT_MTIME|ZIP_STAT_SIZE|ZIP_STAT_COMP_SIZE
-		|ZIP_STAT_COMP_METHOD|ZIP_STAT_ENCRYPTION_METHOD;
-	    
-	    return sizeof(*st);
+	    if (ctx->eof) {
+		/* XXX: Set comp_size, comp_method, encryption_method?
+		        After all, this only works for uncompressed data. */
+		st->size = ctx->size;
+		st->crc = ctx->crc;
+		st->valid |= ZIP_STAT_SIZE|ZIP_STAT_CRC;
+	    }
 	}
-
+	return 0;
+	
     case ZIP_SOURCE_ERROR:
-	{
-	    int *e;
-
-	    if (len < sizeof(int)*2)
-		return -1;
-
-	    e = (int *)data;
-	    e[0] = e[1] = 0;
-	}
-	return sizeof(int)*2;
+	memcpy(data, ctx->e, sizeof(ctx->e));
+	return 0;
 
     case ZIP_SOURCE_FREE:
-	if (z->freep) {
-	    free((void *)z->data);
-	    z->data = NULL;
-	}
-	free(z);
+	free(ctx);
 	return 0;
 
     default:
-	;
+	return -1;
     }
-
-    return -1;
+    
 }

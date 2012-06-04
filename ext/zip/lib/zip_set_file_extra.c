@@ -1,6 +1,6 @@
 /*
-  zip_get_archive_flag.c -- set archive global flag
-  Copyright (C) 2008-2009 Dieter Baron and Thomas Klausner
+  zip_set_file_extra.c -- set extra field for file in archive
+  Copyright (C) 2006-2010 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -31,39 +31,42 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-
+
+
+#include <stdlib.h>
 
 #include "zipint.h"
 
-
+
 
 ZIP_EXTERN(int)
-zip_set_archive_flag(struct zip *za, int flag, int value)
+zip_set_file_extra(struct zip *za, zip_uint64_t idx,
+		   const char *extra, int len)
 {
-    unsigned int new_flags;
-    
-    if (value)
-	new_flags = za->ch_flags | flag;
-    else
-	new_flags = za->ch_flags & ~flag;
+    char *tmpext;
 
-    if (new_flags == za->ch_flags)
-	return 0;
+    if (idx >= za->nentry
+	|| len < 0 || len > MAXEXTLEN
+	|| (len > 0 && extra == NULL)) {
+	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return -1;
+    }
 
     if (ZIP_IS_RDONLY(za)) {
 	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
 	return -1;
     }
 
-    if ((flag & ZIP_AFL_RDONLY) && value
-	&& (za->ch_flags & ZIP_AFL_RDONLY) == 0) {
-	if (_zip_changed(za, NULL)) {
-	    _zip_error_set(&za->error, ZIP_ER_CHANGED, 0);
+    if (len > 0) {
+	if ((tmpext=(char *)_zip_memdup(extra, len, &za->error)) == NULL)
 	    return -1;
-	}
     }
+    else
+	tmpext = NULL;
 
-    za->ch_flags = new_flags;
+    free(za->entry[idx].ch_extra);
+    za->entry[idx].ch_extra = tmpext;
+    za->entry[idx].ch_extra_len = len;
 
     return 0;
 }
