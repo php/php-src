@@ -63,12 +63,42 @@ PHP X.Y UPGRADE NOTES
 - MessageFormatter::parse() and MessageFormat::format() (and their static
   equivalents) now don't throw away better than second precision in the
   arguments.
+- IntlDateFormatter::__construct and datefmt_create() now accept for the
+  $timezone argument time zone identifiers, IntlTimeZone objects, DateTimeZone
+  objects and NULL. It used to accept only time zone identifiers and NULL.
+  Invalid time zone identifiers are no longer accepted. Emptry strings are
+  no longer accepted.
+- The default time zone used in IntlDateFormatter::__construct and
+  datefmt_create() (when the corresponding argument is not passed or NULL is
+  passed) is now the one given by date_default_timezone_get(), not the
+  default ICU time zone.
+- The time zone passed to the IntlDateFormatter is ignored if it is NULL and if
+  the calendar passed is an IntlCalendar object -- in this case, the
+  IntlCalendar's time zone will be used instead. Otherwise, the time zone
+  specified in the $timezone argument is used instead. This does not affect
+  old code, as IntlCalendar was introduced in this version.
+- IntlDateFormatter::__construct and datefmt_create() now accept for the
+  $calendar argument also IntlCalendar objects.
+- IntlDateFormatter::getCalendar() and datefmt_get_calendar() return false
+  if the IntlDateFormatter was set up with an IntlCalendar instead of the
+  constants IntlDateFormatter::GREGORIAN/TRADITIONAL. IntlCalendar did not
+  exist before this version.
+- IntlDateFormatter::setCalendar() and datefmt_set_calendar() now also accept
+  an IntlCalendar object, in which case its time zone is taken. Passing a
+  constant is still allowed, and still keeps the time zone.
+- IntlDateFormatter::setTimeZoneID() and datefmt_set_timezone_id() are
+  deprecated. Use IntlDateFormatter::setTimeZone() or datefmt_set_timezone()
+  instead.
 
 ========================================
 5. New Functions
 ========================================
 
 - Intl:
+  - datefmt_get_calendar_object()
+  - datefmt_get_timezone()
+  - datefmt_set_timezone()
+  - datefmt_get_calendar_object()
   - intlcal_create_instance()
   - intlcal_get_keyword_values_for_locale()
   - intlcal_get_now()
@@ -139,6 +169,10 @@ PHP X.Y UPGRADE NOTES
   - intltz_to_date_time_zone()
   - intltz_get_error_code()
   - intltz_get_error_message()
+
+  - IntlDateFormatter::getCalendarObject()
+  - IntlDateFormatter::getTimeZone()
+  - IntlDateFormatter::setTimeZone()
 
 - SPL:
   - SplFixedArray::__wakeup()
