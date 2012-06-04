@@ -52,7 +52,7 @@
 
 BEGIN_EXTERN_C()
 
-#include <lib/zipconf.h>
+#include "zipconf.h"
 
 #include <sys/types.h>
 #include <stdio.h>
