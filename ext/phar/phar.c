@@ -1799,7 +1799,11 @@ static int phar_analyze_path(const char *fname, const char *ext, int ext_len, in
 #ifdef PHP_WIN32
 				phar_unixify_path_separators(realpath, strlen(realpath));
 #endif
-				a = strstr(realpath, fname) + ((ext - fname) + ext_len);
+				if ((a = strstr(realpath, fname)) == NULL) {
+					return FAILURE;
+				}
+				
+				a += ((ext - fname) + ext_len);
 				*a = '\0';
 				slash = strrchr(realpath, '/');
 
