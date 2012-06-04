@@ -1302,7 +1302,12 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 				INIT_PZVAL(ptr);
 				Z_TYPE_P(ptr) = IS_STRING;
 
-				if (Z_LVAL_P(dim) < 0 || Z_STRLEN_P(container) <= Z_LVAL_P(dim)) {
+				long ldim = Z_LVAL_P(dim);
+				if (ldim < 0) {
+				    ldim += Z_STRLEN_P(container);
+				}
+
+				if (ldim < 0 || Z_STRLEN_P(container) <= ldim) {
 					if (type != BP_VAR_IS) {
 						zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
 					}
@@ -1310,7 +1315,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 					Z_STRLEN_P(ptr) = 0;
 				} else {
 					Z_STRVAL_P(ptr) = (char*)emalloc(2);
-					Z_STRVAL_P(ptr)[0] = Z_STRVAL_P(container)[Z_LVAL_P(dim)];
+					Z_STRVAL_P(ptr)[0] = Z_STRVAL_P(container)[ldim];
 					Z_STRVAL_P(ptr)[1] = 0;
 					Z_STRLEN_P(ptr) = 1;
 				}
