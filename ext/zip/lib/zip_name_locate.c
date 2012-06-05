@@ -68,7 +68,7 @@ _zip_name_locate(struct zip *za, const char *fname, int flags,
         return -1;
     }
 
-    cmp = (flags & ZIP_FL_NOCASE) ? strcasecmp : strcmp;
+    cmp = (flags & ZIP_FL_NOCASE) ? strcmpi : strcmp;
 
     n = (flags & ZIP_FL_UNCHANGED) ? za->cdir->nentry : za->nentry;
     for (i=0; i<n; i++) {
@@ -80,7 +80,7 @@ _zip_name_locate(struct zip *za, const char *fname, int flags,
 	/* newly added (partially filled) entry */
 	if (fn == NULL)
 	    continue;
-
+	
 	if (flags & ZIP_FL_NODIR) {
 	    p = strrchr(fn, '/');
 	    if (p)
