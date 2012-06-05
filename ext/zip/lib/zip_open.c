@@ -357,17 +357,17 @@ _zip_check_torrentzip(struct zip *za)
     if (za->cdir->comment_len != TORRENT_SIG_LEN+8
 	|| strncmp(za->cdir->comment, TORRENT_SIG, TORRENT_SIG_LEN) != 0)
 	return;
-    
+
     memcpy(buf, za->cdir->comment+TORRENT_SIG_LEN, 8);
     buf[8] = '\0';
     errno = 0;
     crc_should = strtoul(buf, &end, 16);
     if ((crc_should == UINT_MAX && errno != 0) || (end && *end))
 	return;
-    
+
     if (_zip_filerange_crc(za->zp, za->cdir->offset, za->cdir->size,
 			   &crc_got, NULL) < 0)
-	    return;
+	return;
 
     if (crc_got == crc_should)
 	za->flags |= ZIP_AFL_TORRENT;

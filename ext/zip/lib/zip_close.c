@@ -316,22 +316,22 @@ zip_close(struct zip *za)
 	free(temp);
 	return -1;
     }
-
-	if (za->zp) {
-		fclose(za->zp);
-		za->zp = NULL;
-		reopen_on_error = 1;
+    
+    if (za->zp) {
+	fclose(za->zp);
+	za->zp = NULL;
+	reopen_on_error = 1;
     }
     if (_zip_rename(temp, za->zn) != 0) {
-		_zip_error_set(&za->error, ZIP_ER_RENAME, errno);
-		remove(temp);
-		free(temp);
-		if (reopen_on_error) {
-	    	/* ignore errors, since we're already in an error case */
-	    	za->zp = fopen(za->zn, "rb");
-		}
-		return -1;
+	_zip_error_set(&za->error, ZIP_ER_RENAME, errno);
+	remove(temp);
+	free(temp);
+	if (reopen_on_error) {
+	    /* ignore errors, since we're already in an error case */
+	    za->zp = fopen(za->zn, "rb");
 	}
+	return -1;
+    }
 #ifndef PHP_WIN32
     mask = umask(0);
     umask(mask);

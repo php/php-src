@@ -60,15 +60,6 @@ zip_fread(struct zip_file *zf, void *outbuf, zip_uint64_t toread)
 	_zip_error_set_from_source(&zf->error, zf->src);
 	return -1;
     }
-    
-	/* XXX the following left from the previous PHP port, let's see how to use it now */
-    /*zf->zstr->next_out = (Bytef *)outbuf;
-    zf->zstr->avail_out = toread;
-    out_before = zf->zstr->total_out;*/
-    
-    /* endless loop until something has been accomplished */
-    /*for (;;) {
-	ret = inflate(zf->zstr, Z_SYNC_FLUSH);*/
 
     return n;
 }

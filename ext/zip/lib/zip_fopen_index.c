@@ -39,7 +39,6 @@
 
 #include "zipint.h"
 
-
 
 
 ZIP_EXTERN(struct zip_file *)

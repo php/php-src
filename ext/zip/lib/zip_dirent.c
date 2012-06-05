@@ -472,7 +472,7 @@ _zip_dirent_write(struct zip_dirent *zde, FILE *fp, int localp,
 static time_t
 _zip_d2u_time(int dtime, int ddate)
 {
-    struct tm tm = {0};
+    struct tm tm;
 
     memset(&tm, 0, sizeof(tm));
     
