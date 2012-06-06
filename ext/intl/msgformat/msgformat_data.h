@@ -19,9 +19,9 @@
 
 #include <php.h>
 
-#include <unicode/umsg.h>
+#include "../intl_error.h"
 
-#include "intl_error.h"
+#include <unicode/umsg.h>
 
 typedef struct {
 	// error hangling
@@ -36,6 +36,9 @@ typedef struct {
 msgformat_data* msgformat_data_create( TSRMLS_D );
 void msgformat_data_init( msgformat_data* mf_data TSRMLS_DC );
 void msgformat_data_free( msgformat_data* mf_data TSRMLS_DC );
+
+#ifdef MSG_FORMAT_QUOTE_APOS
 int msgformat_fix_quotes(UChar **spattern, uint32_t *spattern_len, UErrorCode *ec);
+#endif
 
 #endif // MSG_FORMAT_DATA_H
