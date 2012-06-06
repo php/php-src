@@ -93,13 +93,13 @@ File created in => temp dir
 Warning: tempnam() expects parameter 1 to be a valid path, string given in %stempnam_variation7-win32.php on line %d
 -- File is not created --
 
-Warning: unlink(): Invalid argument in %s on line %d
+Warning: unlink(): %r(Invalid argument|No such file or directory)%r in %s on line %d
 -- Iteration 7 --
 
 Warning: tempnam() expects parameter 1 to be a valid path, array given in %s on line %d
 -- File is not created --
 
-Warning: unlink(): Invalid argument in %s on line %d
+Warning: unlink(): %r(Invalid argument|No such file or directory)%r in %s on line %d
 -- Iteration 8 --
 File name is => %s%et%s
 File permissions are => 100666

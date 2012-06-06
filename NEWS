@@ -50,13 +50,29 @@ PHP                                                                        NEWS
 - Pgsql:
   . Added pg_escape_identifier/pg_escape_literal. (Yasuo Ohgaki)
 
-- Reflection:
-  . Implemented FR #61602 (Allow access to the name of constant
-    used as function/method parameter's default value). (reeze.xia@gmail.com)
-
-- FPM
+- Fileinfo
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
     (Laruence, Gustavo)
+
+- FPM
+  . Fixed bug #61045 (fpm don't send error log to fastcgi clients). (fat)
+  . Fixed bug #61835 (php-fpm is not allowed to run as root). (fat)
+  . Fixed bug #61295 (php-fpm should not fail with commented 'user'
+    for non-root start). (fat)
+  . Fixed bug #61839 (Unable to cross-compile PHP with --enable-fpm). (fat)
+  . Fixed bug #61026 (FPM pools can listen on the same address). (fat)
+  . Fixed bug #62033 (php-fpm exits with status 0 on some failures to start).
+    (fat)
+  . Fixed bug #62153 (when using unix sockets, multiples FPM instances
+    can be launched without errors). (fat)
+  . Fixed bug #62160 (Add process.priority to set nice(2) priorities). (fat)
+  . Fixed bug #61218 (FPM drops connection while receiving some binary values
+    in FastCGI requests). (fat)
+  . Fixed bug #62205 (php-fpm segfaults (null passed to strstr)). (fat)
+
+- Intl
+  . ResourceBundle constructor now accepts NULL for the first two arguments.
+    (Gustavo)
 
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).

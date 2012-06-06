@@ -257,3 +257,41 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 	return 1; /* extension not found: not allowed  */
 }
 /* }}} */
+
+char* fpm_php_get_string_from_table(char *table, char *key TSRMLS_DC) /* {{{ */
+{
+	zval **data, **tmp;
+	char *string_key;
+	uint string_len;
+	ulong num_key;
+	if (!table || !key) {
+		return NULL;
+	}
+
+	/* inspired from ext/standard/info.c */
+
+	zend_is_auto_global(table, strlen(table) TSRMLS_CC);
+
+	/* find the table and ensure it's an array */
+	if (zend_hash_find(&EG(symbol_table), table, strlen(table) + 1, (void **) &data) == SUCCESS && Z_TYPE_PP(data) == IS_ARRAY) {
+
+		/* reset the internal pointer */
+		zend_hash_internal_pointer_reset(Z_ARRVAL_PP(data));
+
+		/* parse the array to look for our key */
+		while (zend_hash_get_current_data(Z_ARRVAL_PP(data), (void **) &tmp) == SUCCESS) {
+			/* ensure the key is a string */
+			if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(data), &string_key, &string_len, &num_key, 0, NULL) == HASH_KEY_IS_STRING) {
+				/* compare to our key */
+				if (!strncmp(string_key, key, string_len)) {
+					return Z_STRVAL_PP(tmp);
+				}
+			}
+			zend_hash_move_forward(Z_ARRVAL_PP(data));
+		}
+	}
+
+	return NULL;
+}
+/* }}} */
+
