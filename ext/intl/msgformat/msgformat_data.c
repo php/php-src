@@ -21,6 +21,8 @@
 #include <unicode/ustring.h>
 #include "msgformat_data.h"
 
+#include "msgformat_class.h"
+
 /* {{{ void msgformat_data_init( msgformat_data* mf_data )
  * Initialize internals of msgformat_data.
  */
