@@ -64,9 +64,11 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 		locale = INTL_G(default_locale);
 	}
 
+#ifdef MSG_FORMAT_QUOTE_APOS
 	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
 		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to quote-friendly format");
 	}
+#endif
 
 	if ((mfo)->mf_data.orig_format) {
 		msgformat_data_free(&mfo->mf_data TSRMLS_CC);

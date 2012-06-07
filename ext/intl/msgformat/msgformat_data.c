@@ -21,6 +21,8 @@
 #include <unicode/ustring.h>
 #include "msgformat_data.h"
 
+#include "msgformat_class.h"
+
 /* {{{ void msgformat_data_init( msgformat_data* mf_data )
  * Initialize internals of msgformat_data.
  */
@@ -69,6 +71,7 @@ msgformat_data* msgformat_data_create( TSRMLS_D )
 }
 /* }}} */
 
+#ifdef MSG_FORMAT_QUOTE_APOS
 int msgformat_fix_quotes(UChar **spattern, uint32_t *spattern_len, UErrorCode *ec) 
 {
 	if(*spattern && *spattern_len && u_strchr(*spattern, (UChar)'\'')) {
@@ -86,6 +89,7 @@ int msgformat_fix_quotes(UChar **spattern, uint32_t *spattern_len, UErrorCode *e
 	}
 	return SUCCESS;
 }
+#endif
 
 
 /*

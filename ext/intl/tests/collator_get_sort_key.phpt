@@ -2,8 +2,7 @@
 collator_get_sort_key()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
---XFAIL--
-Sort keys are not fixed, comparing them to fixed strings doesn't work.
+<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip ICU >= 4.8 only'; ?>
 --FILE--
 <?php
 
@@ -18,8 +17,8 @@ function sort_arrays( $locale, $data )
 
 	foreach($data as $value) {
 		$res_val = ut_coll_get_sort_key( $coll, $value );
-		$res_str .= "source: ".urlencode($value)."\n".
-					"key: ".urlencode($res_val)."\n";
+		$res_str .= "source: ".$value."\n".
+					"key: ".bin2hex($res_val)."\n";
 	}
 
     return $res_str;
@@ -58,42 +57,42 @@ ut_run();
 ?>
 --EXPECT--
 source: abc
-key: %29%2B-%01%07%01%07%00
+key: 27292b01070107
 source: abd
-key: %29%2B%2F%01%07%01%07%00
+key: 27292d01070107
 source: aaa
-key: %29%29%29%01%07%01%07%00
-source: %D0%B0%D0%B0
-key: _++%01%06%01%06%00
-source: %D0%B0
-key: _+%01%05%01%05%00
+key: 27272701070107
+source: аа
+key: 5c0a0a01060106
+source: а
+key: 5c0a01050105
 source: z
-key: %5B%01%05%01%05%00
-source:
-key: %01%01%00
-source:
-key: %01%01%00
+key: 5901050105
+source: 
+key: 0101
+source: 
+key: 0101
 source: 3
-key: %26%80%01%05%01%05%00
+key: 1801050105
 source: y
-key: Y%01%05%01%05%00
+key: 5701050105
 source: i
-key: 9%01%05%01%05%00
+key: 3701050105
 source: k
-key: %3D%01%05%01%05%00
-source: %D0%B0%D0%B1%D0%B3
-key: _+%2C0%01%07%01%07%00
-source: %D0%B0%D0%B1%D0%B2
-key: _+%2C.%01%07%01%07%00
-source: %D0%B6%D0%B6%D0%B6
-key: _LLL%01%07%01%07%00
-source: %D1%8D%D1%8E%D1%8F
-key: %60%05%09%0B%01%07%01%07%00
-source: %D0%B0%D0%B1%D0%B3
-key: _+%2C0%01%07%01%07%00
-source: %D0%B0%D0%B1%D0%B2
-key: _+%2C.%01%07%01%07%00
-source: %D0%B6%D0%B6%D0%B6
-key: _LLL%01%07%01%07%00
-source: %D1%8D%D1%8E%D1%8F
-key: %60%05%09%0B%01%07%01%07%00
+key: 3b01050105
+source: абг
+key: 5c0a161a01070107
+source: абв
+key: 5c0a161801070107
+source: жжж
+key: 5c3a3a3a01070107
+source: эюя
+key: 5d3b3f4501070107
+source: абг
+key: 5c0a161a01070107
+source: абв
+key: 5c0a161801070107
+source: жжж
+key: 5c3a3a3a01070107
+source: эюя
+key: 5d3b3f4501070107
