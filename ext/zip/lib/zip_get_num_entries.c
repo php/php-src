@@ -1,6 +1,6 @@
 /*
-  zip_get_archive_flag.c -- set archive global flag
-  Copyright (C) 2008-2009 Dieter Baron and Thomas Klausner
+  zip_get_num_entries.c -- get number of entries in archive
+  Copyright (C) 1999-2011 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -37,33 +37,16 @@
 
 
 
-ZIP_EXTERN(int)
-zip_set_archive_flag(struct zip *za, int flag, int value)
+ZIP_EXTERN(zip_uint64_t)
+zip_get_num_entries(struct zip *za, int flags)
 {
-    unsigned int new_flags;
-    
-    if (value)
-	new_flags = za->ch_flags | flag;
-    else
-	new_flags = za->ch_flags & ~flag;
-
-    if (new_flags == za->ch_flags)
-	return 0;
-
-    if (ZIP_IS_RDONLY(za)) {
-	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
+    if (za == NULL)
 	return -1;
+
+    if (flags & ZIP_FL_UNCHANGED) {
+      if (za->cdir == NULL)
+	return 0;
+      return za->cdir->nentry;
     }
-
-    if ((flag & ZIP_AFL_RDONLY) && value
-	&& (za->ch_flags & ZIP_AFL_RDONLY) == 0) {
-	if (_zip_changed(za, NULL)) {
-	    _zip_error_set(&za->error, ZIP_ER_CHANGED, 0);
-	    return -1;
-	}
-    }
-
-    za->ch_flags = new_flags;
-
-    return 0;
+    return za->nentry;
 }

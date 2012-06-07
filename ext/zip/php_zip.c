@@ -1152,7 +1152,13 @@ static void php_zip_free_entry(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 
 	if (zr_rsrc) {
 		if (zr_rsrc->zf) {
-			zip_fclose(zr_rsrc->zf);
+			if (zr_rsrc->zf->za) {
+				zip_fclose(zr_rsrc->zf);
+			} else {
+				if (zr_rsrc->zf->src)
+					zip_source_free(zr_rsrc->zf->src);
+				free(zr_rsrc->zf);
+			}
 			zr_rsrc->zf = NULL;
 		}
 		efree(zr_rsrc);
@@ -1321,9 +1327,8 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_open)
 }
 /* }}} */
 
-/* {{{ proto void zip_entry_close(resource zip_ent)
+/* {{{ proto bool zip_entry_close(resource zip_ent)
    Close a zip entry */
-/* another dummy function to fit in the old api*/
 static PHP_NAMED_FUNCTION(zif_zip_entry_close)
 {
 	zval * zip_entry;
@@ -1334,8 +1339,8 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_close)
 	}
 
 	ZEND_FETCH_RESOURCE(zr_rsrc, zip_read_rsrc *, &zip_entry, -1, le_zip_entry_name, le_zip_entry);
-	/*  we got a zip_entry resource, be happy */
-	RETURN_TRUE;
+
+	RETURN_BOOL(SUCCESS == zend_list_delete(Z_LVAL_P(zip_entry)));
 }
 /* }}} */
 
