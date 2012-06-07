@@ -30,16 +30,22 @@ PHP                                                                        NEWS
   . Fix bug #55042 (Erealloc in iconv.c unsafe). (Stas)
 
 - Intl
+  . Fixed bug #62083 (grapheme_extract() memory leaks). (Gustavo)
   . ResourceBundle constructor now accepts NULL for the first two arguments.
     (Gustavo)
+  . Fixed bug #62081 (IntlDateFormatter constructor leaks memory when called
+    twice). (Gustavo)
+  . Fixed bug #62070 (Collator::getSortKey() returns garbage). (Gustavo)
+  . Fixed bug #62017 (datefmt_create with incorrectly encoded timezone leaks
+    pattern). (Gustavo)
 
 - Readline:
   . Fixed bug #62186 (readline fails to compile - void function should not
     return a value). (Johannes)
 
 - Reflection:
-	. Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
-	  with constant). (Laruence)
+   . Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
+     with constant). (Laruence)
 
 - Sockets:
   . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
@@ -104,6 +110,10 @@ PHP                                                                        NEWS
 - Fileinfo
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
     (Laruence, Gustavo)
+  . Fixed bug #61566 failure caused by the posix lseek and read versions
+    under windows in cdf_read(). (Anatoliy)
+  . Fixed bug #61565 where php_stream_open_wrapper_ex tries to open a
+    directory descriptor under windows. (Anatoliy)
 
 - Intl
   . Fixed bug #62082 (Memory corruption in internal function 
@@ -696,6 +706,14 @@ PHP                                                                        NEWS
   . Re-implemented non-file related functionality. (Mike)
   . Fixed bug #55544 (ob_gzhandler always conflicts with zlib.output_compression).
     (Mike)
+
+08 May 2012, PHP 5.3.13
+- CGI
+  . Improve fix for PHP-CGI query string parameter vulnerability, CVE-2012-2311.
+    (Stas)
+
+03 May 2012, PHP 5.3.12
+- Fix PHP-CGI query string parameter vulnerability, CVE-2012-1823. (Rasmus)
 
 26 Apr 2012, PHP 5.3.11
 
