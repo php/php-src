@@ -1,6 +1,6 @@
 /*
-  zip_get_archive_flag.c -- set archive global flag
-  Copyright (C) 2008-2009 Dieter Baron and Thomas Klausner
+  zip_set_default_password.c -- set default password for decryption
+  Copyright (C) 2009 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -33,37 +33,30 @@
 
 
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "zipint.h"
 
 
 
 ZIP_EXTERN(int)
-zip_set_archive_flag(struct zip *za, int flag, int value)
+zip_set_default_password(struct zip *za, const char *passwd)
 {
-    unsigned int new_flags;
-    
-    if (value)
-	new_flags = za->ch_flags | flag;
-    else
-	new_flags = za->ch_flags & ~flag;
-
-    if (new_flags == za->ch_flags)
-	return 0;
-
-    if (ZIP_IS_RDONLY(za)) {
-	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
+    if (za == NULL)
 	return -1;
-    }
 
-    if ((flag & ZIP_AFL_RDONLY) && value
-	&& (za->ch_flags & ZIP_AFL_RDONLY) == 0) {
-	if (_zip_changed(za, NULL)) {
-	    _zip_error_set(&za->error, ZIP_ER_CHANGED, 0);
+    if (za->default_password)
+	free(za->default_password);
+    
+    if (passwd) {
+	if ((za->default_password=strdup(passwd)) == NULL) {
+	    _zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
 	    return -1;
 	}
     }
-
-    za->ch_flags = new_flags;
+    else
+	za->default_password = NULL;
 
     return 0;
 }

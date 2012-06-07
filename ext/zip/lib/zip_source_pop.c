@@ -1,6 +1,6 @@
 /*
-  zip_get_archive_flag.c -- set archive global flag
-  Copyright (C) 2008-2009 Dieter Baron and Thomas Klausner
+  zip_source_pop.c -- pop top layer from zip data source
+  Copyright (C) 2009 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -33,37 +33,31 @@
 
 
 
+#include <stdlib.h>
+
 #include "zipint.h"
 
 
 
-ZIP_EXTERN(int)
-zip_set_archive_flag(struct zip *za, int flag, int value)
+ZIP_EXTERN(struct zip_source *)
+zip_source_pop(struct zip_source *src)
 {
-    unsigned int new_flags;
-    
-    if (value)
-	new_flags = za->ch_flags | flag;
-    else
-	new_flags = za->ch_flags & ~flag;
+    struct zip_source *lower;
 
-    if (new_flags == za->ch_flags)
-	return 0;
+    if (src == NULL)
+	return NULL;
 
-    if (ZIP_IS_RDONLY(za)) {
-	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
-	return -1;
+    lower = src->src;
+
+    if (lower == NULL)
+	zip_source_free(src);
+    else {
+	if (src->is_open)
+	    (void)src->cb.l(src, src->ud, NULL, 0, ZIP_SOURCE_CLOSE);
+	(void)src->cb.l(src, src->ud, NULL, 0, ZIP_SOURCE_FREE);
+	
+	free(src);
     }
 
-    if ((flag & ZIP_AFL_RDONLY) && value
-	&& (za->ch_flags & ZIP_AFL_RDONLY) == 0) {
-	if (_zip_changed(za, NULL)) {
-	    _zip_error_set(&za->error, ZIP_ER_CHANGED, 0);
-	    return -1;
-	}
-    }
-
-    za->ch_flags = new_flags;
-
-    return 0;
+    return lower;
 }
