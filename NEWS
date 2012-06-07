@@ -1,6 +1,57 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2012, PHP 5.4.5
+
+- Core:
+  . Fixed bug #61998 (Using traits with method aliases appears to result in
+    crash during execution). (Dmitry)
+
+- EXIF:
+  . Fixed information leak in ext exif (discovered by Martin Noga, 
+    Matthew "j00ru" Jurczyk, Gynvael Coldwind)
+
+- FPM
+  . Fixed bug #62205 (php-fpm segfaults (null passed to strstr)). (fat)
+  . Fixed bug #62160 (Add process.priority to set nice(2) priorities). (fat)
+  . Fixed bug #62153 (when using unix sockets, multiples FPM instances
+  . Fixed bug #62033 (php-fpm exits with status 0 on some failures to start).
+    (fat)
+  . Fixed bug #61839 (Unable to cross-compile PHP with --enable-fpm). (fat)
+  . Fixed bug #61835 (php-fpm is not allowed to run as root). (fat)
+  . Fixed bug #61295 (php-fpm should not fail with commented 'user'
+  . Fixed bug #61218 (FPM drops connection while receiving some binary values
+    in FastCGI requests). (fat)
+  . Fixed bug #61045 (fpm don't send error log to fastcgi clients). (fat)
+    for non-root start). (fat)
+  . Fixed bug #61026 (FPM pools can listen on the same address). (fat)
+    can be launched without errors). (fat)
+
+- Iconv:
+  . Fix bug #55042 (Erealloc in iconv.c unsafe). (Stas)
+
+- Intl
+  . ResourceBundle constructor now accepts NULL for the first two arguments.
+    (Gustavo)
+
+- Readline:
+  . Fixed bug #62186 (readline fails to compile - void function should not
+    return a value). (Johannes)
+
+- Reflection:
+	. Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
+	  with constant). (Laruence)
+
+- Sockets:
+  . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
+    
+- XML Writer:
+  . Fixed bug #62064 (memory leak in the XML Writer module). 
+    (jean-pierre dot lozi at lip6 dot fr)
+
 ?? ??? 2012, PHP 5.4.4
+
+- COM:
+  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
 
 - CLI Server:
   . Implemented FR #61977 (Need CLI web-server support for files with .htm & 
@@ -17,10 +68,10 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
+  . Fixed CVE-2012-2143. (Solar Designer)
+  . Fixed bug #62097 (fix for for bug #54547). (Gustavo)
   . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
     member of a null object). (Laruence)
-  . Fixed bug #61998 (Using traits with method aliases appears to result in
-    crash during execution). (Dmitry)
   . Fixed bug #61978 (Object recursion not detected for classes that implement
     JsonSerializable). (Felipe)
   . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
@@ -45,7 +96,7 @@ PHP                                                                        NEWS
   . Changed php://fd to be available only for CLI.
 
 - Phar:
-  . Fix bug #61065 (Secunia SA44335). (Rasmus)
+  . Fix bug #61065 (Secunia SA44335, CVE-2012-2386). (Rasmus)
 
 - Pgsql:
   . Added pg_escape_identifier/pg_escape_literal. (Yasuo Ohgaki)
@@ -54,36 +105,13 @@ PHP                                                                        NEWS
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
     (Laruence, Gustavo)
 
-- FPM
-  . Fixed bug #61045 (fpm don't send error log to fastcgi clients). (fat)
-  . Fixed bug #61835 (php-fpm is not allowed to run as root). (fat)
-  . Fixed bug #61295 (php-fpm should not fail with commented 'user'
-    for non-root start). (fat)
-  . Fixed bug #61839 (Unable to cross-compile PHP with --enable-fpm). (fat)
-  . Fixed bug #61026 (FPM pools can listen on the same address). (fat)
-  . Fixed bug #62033 (php-fpm exits with status 0 on some failures to start).
-    (fat)
-  . Fixed bug #62153 (when using unix sockets, multiples FPM instances
-    can be launched without errors). (fat)
-  . Fixed bug #62160 (Add process.priority to set nice(2) priorities). (fat)
-  . Fixed bug #61218 (FPM drops connection while receiving some binary values
-    in FastCGI requests). (fat)
-  . Fixed bug #62205 (php-fpm segfaults (null passed to strstr)). (fat)
-
 - Intl
-  . ResourceBundle constructor now accepts NULL for the first two arguments.
-    (Gustavo)
+  . Fixed bug #62082 (Memory corruption in internal function 
+    get_icu_disp_value_src_php()). (Gustavo)
 
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
     (Laruence)
-    
-- Sockets:
-  . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
-    
-- XML Writer:
-  . Fixed bug #62064 (memory leak in the XML Writer module). 
-    (jean-pierre dot lozi at lip6 dot fr)
 
 - Zlib:
   . Fixed bug #61820 (using ob_gzhandler will complain about headers already 
