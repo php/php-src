@@ -46,9 +46,11 @@
 #define ftello(s)	((long)ftell((s)))
 #endif
 
+#ifndef PHP_WIN32
 #ifndef HAVE_MKSTEMP
 int _zip_mkstemp(char *);
 #define mkstemp _zip_mkstemp
+#endif
 #endif
 
 #ifdef PHP_WIN32
