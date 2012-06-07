@@ -34,23 +34,21 @@
 
 int getfilesystemtime(struct timeval *time_Info) 
 {
-FILETIME ft;
-__int64 ff;
-ULARGE_INTEGER convFromft;
+    FILETIME ft;
+    __int64 ff;
+    ULARGE_INTEGER convFromft;
 
     GetSystemTimeAsFileTime(&ft);   /* 100 ns blocks since 01-Jan-1641 */
-                                    /* resolution seems to be 0.01 sec */ 
-    /* ff = *(__int64*)(&ft); */
+                                    /* resolution seems to be 0.01 sec */
     /*
-            Do not cast a pointer to a FILETIME structure to either a 
-            ULARGE_INTEGER* or __int64* value because it can cause alignment faults on 64-bit Windows.
-            
-            via  http://technet.microsoft.com/en-us/library/ms724284(v=vs.85).aspx
+     * Do not cast a pointer to a FILETIME structure to either a 
+     * ULARGE_INTEGER* or __int64* value because it can cause alignment faults on 64-bit Windows.
+     * via  http://technet.microsoft.com/en-us/library/ms724284(v=vs.85).aspx
      */
     convFromft.HighPart = ft.dwHighDateTime;
     convFromft.LowPart = ft.dwLowDateTime;
     ff = convFromft.QuadPart;
-    
+
     time_Info->tv_sec = (int)(ff/(__int64)10000000-(__int64)11644473600);
     time_Info->tv_usec = (int)(ff % 10000000)/10;
     return 0;
