@@ -16,24 +16,20 @@
 #ifndef INTL_BREAKITERATOR_ITERATORS_H
 #define INTL_BREAKITERATOR_ITERATORS_H
 
-#ifndef __cplusplus
-#error Header for C++ only
-#endif
-
-#include <unicode/brkiter.h>
 #include <unicode/umachine.h>
 
-#include "../common/common_enum.h"
-
-extern "C" {
+U_CDECL_BEGIN
 #include <math.h>
 #include <php.h>
-}
+U_CDECL_END
 
+#ifdef __cplusplus
 void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 										   zval *object TSRMLS_DC);
+#endif
 
 U_CFUNC zend_object_iterator *_breakiterator_get_iterator(
-	zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
+		zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
+U_CFUNC void breakiterator_register_IntlPartsIterator_class(TSRMLS_D);
 
 #endif

@@ -79,6 +79,7 @@
 #include "calendar/gregoriancalendar_methods.h"
 
 #include "breakiterator/breakiterator_class.h"
+#include "breakiterator/breakiterator_iterators.h"
 
 #include "idn/idn.h"
 
@@ -962,6 +963,9 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'BreakIterator' class */
 	breakiterator_register_BreakIterator_class( TSRMLS_C );
+
+	/* Register 'IntlPartsIterator' class */
+	breakiterator_register_IntlPartsIterator_class( TSRMLS_C );
 
 	/* Global error handling. */
 	intl_error_init( NULL TSRMLS_CC );

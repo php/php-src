@@ -31,7 +31,7 @@ extern "C" {
 }
 
 zend_class_entry *IntlIterator_ce_ptr;
-static zend_object_handlers IntlIterator_handlers;
+zend_object_handlers IntlIterator_handlers;
 
 void zoi_with_current_dtor(zend_object_iterator *iter TSRMLS_DC)
 {

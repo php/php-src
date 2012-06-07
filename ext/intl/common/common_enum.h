@@ -61,6 +61,7 @@ typedef struct {
 } zoi_with_current;
 
 extern zend_class_entry *IntlIterator_ce_ptr;
+extern zend_object_handlers IntlIterator_handlers;
 
 U_CFUNC void zoi_with_current_dtor(zend_object_iterator *iter TSRMLS_DC);
 U_CFUNC int zoi_with_current_valid(zend_object_iterator *iter TSRMLS_DC);

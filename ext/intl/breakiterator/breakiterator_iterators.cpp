@@ -18,7 +18,10 @@
 #include "config.h"
 #endif
 
+#include <unicode/brkiter.h>
+
 #include "breakiterator_iterators.h"
+#include "../common/common_enum.h"
 
 extern "C" {
 #define USE_BREAKITERATOR_POINTER
@@ -27,6 +30,9 @@ extern "C" {
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
 }
+
+static zend_class_entry *IntlPartsIterator_ce_ptr;
+static zend_object_handlers IntlPartsIterator_handlers;
 
 /* BreakIterator's iterator */
 
@@ -201,7 +207,7 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 
 	zval_add_ref(&break_iter_zv);
 
-	object_init_ex(object, IntlIterator_ce_ptr);
+	object_init_ex(object, IntlPartsIterator_ce_ptr);
 	ii = (IntlIterator_object*)zend_object_store_get_object(object TSRMLS_CC);
 
 	ii->iterator = (zend_object_iterator*)emalloc(sizeof(zoi_break_iter_parts));
@@ -215,4 +221,95 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	((zoi_break_iter_parts*)ii->iterator)->bio = (BreakIterator_object*)
 		zend_object_store_get_object(break_iter_zv TSRMLS_CC);
 	assert(((zoi_break_iter_parts*)ii->iterator)->bio->biter != NULL);
+}
+
+U_CFUNC zend_object_value IntlPartsIterator_object_create(zend_class_entry *ce TSRMLS_DC)
+{
+	zend_object_value		retval;
+	
+	retval = IntlIterator_ce_ptr->create_object(ce TSRMLS_CC);
+	retval.handlers = &IntlPartsIterator_handlers;
+	
+	return retval;
+}
+
+U_CFUNC zend_function *IntlPartsIterator_get_method(zval **object_ptr,
+		char *method, int method_len, const zend_literal *key TSRMLS_DC)
+{
+	zend_literal local_literal = {0};
+	zend_function *ret;
+	ALLOCA_FLAG(use_heap)
+
+	if (key == NULL) {
+		Z_STRVAL(local_literal.constant) = static_cast<char*>(
+				do_alloca(method_len + 1, use_heap));
+		zend_str_tolower_copy(Z_STRVAL(local_literal.constant),
+				method, method_len);
+		local_literal.hash_value = zend_hash_func(
+				Z_STRVAL(local_literal.constant), method_len + 1);
+		key = &local_literal;
+	}
+
+	if ((key->hash_value & 0xFFFFFFFF) == 0xA2B486A1 /* hash of getrulestatus\0 */
+			&& method_len == sizeof("getrulestatus") - 1
+			&& memcmp("getrulestatus", Z_STRVAL(key->constant),	method_len) == 0) {
+		IntlIterator_object *obj = (IntlIterator_object*)
+				zend_object_store_get_object(*object_ptr TSRMLS_CC);
+		if (obj->iterator && obj->iterator->data) {
+			zval *break_iter_zv = static_cast<zval*>(obj->iterator->data);
+			*object_ptr = break_iter_zv;
+			ret = Z_OBJ_HANDLER_P(break_iter_zv, get_method)(object_ptr,
+					method, method_len, key TSRMLS_CC);
+			goto end;
+		}
+	}
+	
+	ret = std_object_handlers.get_method(object_ptr,
+			method, method_len, key TSRMLS_CC);
+
+end:
+	if (key == &local_literal) {
+		free_alloca(Z_STRVAL(local_literal.constant), use_heap);
+	}
+
+	return ret;
+}
+
+U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
+{
+	INTLITERATOR_METHOD_INIT_VARS;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"IntlPartsIterator::getBreakIterator: bad arguments", 0 TSRMLS_CC);
+		return;
+	}
+
+	INTLITERATOR_METHOD_FETCH_OBJECT;
+	
+	zval *biter_zval = static_cast<zval*>(ii->iterator->data);
+	RETURN_ZVAL(biter_zval, 1, 0);
+}
+
+ZEND_BEGIN_ARG_INFO_EX(ainfo_parts_it_void, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+static const zend_function_entry IntlPartsIterator_class_functions[] = {
+	PHP_ME(IntlPartsIterator,	getBreakIterator,	ainfo_parts_it_void,	ZEND_ACC_PUBLIC)
+	PHP_FE_END
+};
+
+U_CFUNC void breakiterator_register_IntlPartsIterator_class(TSRMLS_D)
+{
+	zend_class_entry ce;
+
+	/* Create and register 'BreakIterator' class. */
+	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", IntlPartsIterator_class_functions);
+	IntlPartsIterator_ce_ptr = zend_register_internal_class_ex(&ce,
+			IntlIterator_ce_ptr, NULL TSRMLS_CC);
+	IntlPartsIterator_ce_ptr->create_object = IntlPartsIterator_object_create;
+
+	memcpy(&IntlPartsIterator_handlers, &IntlIterator_handlers,
+			sizeof IntlPartsIterator_handlers);
+	IntlPartsIterator_handlers.get_method = IntlPartsIterator_get_method;
 }
