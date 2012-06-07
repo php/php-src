@@ -39,6 +39,9 @@ PHP                                                                        NEWS
   . Fixed bug #62017 (datefmt_create with incorrectly encoded timezone leaks
     pattern). (Gustavo)
   . Fixed bug #60785 (memory leak in IntlDateFormatter constructor). (Gustavo)
+  
+- Phar:
+  . Fixed bug #62227 (Invalid phar stream path causes crash). (Felipe)
 
 - Reflection:
   . Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
