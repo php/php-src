@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.15
+- Zend Engine:
+  . Fixed bug #51094 (parse_ini_file() with INI_SCANNER_RAW cuts a value that
+    includes a semi-colon). (Pierrick)
+
 - COM:
   . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
 
