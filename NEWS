@@ -53,4 +53,7 @@ PHP                                                                        NEWS
 - pgsql
   . Added pg_escape_literal() and pg_escape_identifier() (Yasuo)
 
+- Zip:
+  . Upgraded libzip to 0.10.1 (Anatoliy)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
