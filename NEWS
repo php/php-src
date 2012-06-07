@@ -53,6 +53,8 @@ PHP                                                                        NEWS
 - XML Writer:
   . Fixed bug #62064 (memory leak in the XML Writer module). 
     (jean-pierre dot lozi at lip6 dot fr)
+- Zip:
+  . Upgraded libzip to 0.10.1 (Anatoliy)
 
 ?? ??? 2012, PHP 5.4.4
 
