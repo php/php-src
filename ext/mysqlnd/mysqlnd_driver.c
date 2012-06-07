@@ -91,6 +91,7 @@ PHPAPI void mysqlnd_library_init(TSRMLS_D)
 /* }}} */
 
 
+
 /* {{{ mysqlnd_error_list_pdtor */
 static void
 mysqlnd_error_list_pdtor(void * pDest)
@@ -248,17 +249,29 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 PHPAPI MYSQLND_NET *
 MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC)
 {
-	size_t alloc_size = sizeof(MYSQLND_NET) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_NET * net = mnd_pecalloc(1, alloc_size, persistent);
+	size_t net_alloc_size = sizeof(MYSQLND_NET) + mysqlnd_plugin_count() * sizeof(void *);
+	size_t net_data_alloc_size = sizeof(MYSQLND_NET_DATA) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_NET * net = mnd_pecalloc(1, net_alloc_size, persistent);
+	MYSQLND_NET_DATA * net_data = mnd_pecalloc(1, net_data_alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_object_factory::get_io_channel");
 	DBG_INF_FMT("persistent=%u", persistent);
-	if (net) {
-		net->persistent = persistent;
-		net->m = *mysqlnd_net_get_methods();
+	if (net && net_data) {
+		net->data = net_data;
+		net->persistent = net->data->persistent = persistent;
+		net->data->m = *mysqlnd_net_get_methods();
 
-		if (PASS != net->m.init(net, stats, error_info TSRMLS_CC)) {
-			net->m.dtor(net, stats, error_info TSRMLS_CC);
+		if (PASS != net->data->m.init(net, stats, error_info TSRMLS_CC)) {
+			net->data->m.dtor(net, stats, error_info TSRMLS_CC);
+			net = NULL;
+		}
+	} else {
+		if (net_data) {
+			mnd_pefree(net_data, persistent);
+			net_data = NULL;
+		}
+		if (net) {
+			mnd_pefree(net, persistent);
 			net = NULL;
 		}
 	}
@@ -268,7 +281,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYS
 
 
 /* {{{ mysqlnd_object_factory::get_protocol_decoder */
-PHPAPI MYSQLND_PROTOCOL *
+static MYSQLND_PROTOCOL *
 MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)(zend_bool persistent TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_PROTOCOL) + mysqlnd_plugin_count() * sizeof(void *);
@@ -286,7 +299,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)(zend_bool persisten
 /* }}} */
 
 
-MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
+PHPAPI MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
 	MYSQLND_METHOD(mysqlnd_object_factory, get_connection),
 	MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement),

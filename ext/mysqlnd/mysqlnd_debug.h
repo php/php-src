@@ -117,6 +117,7 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 					if ((dbg_obj)) { \
 						dbg_skip_trace = !(dbg_obj)->m->func_enter((dbg_obj), __LINE__, __FILE__, func_name, strlen(func_name)); \
 					} \
+					if (dbg_skip_trace); /* shut compiler's mouth */\ 
 					do { \
 						if ((dbg_obj) && (dbg_obj)->flags & MYSQLND_DEBUG_PROFILE_CALLS) { \
 							DBG_PROFILE_START_TIME(); \
@@ -141,7 +142,7 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 
 
 
-#else
+#else  /* defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400)) */
 static inline void DBG_INF_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
 static inline void DBG_ERR_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
 static inline void DBG_INF_FMT_EX(MYSQLND_DEBUG * dbg_obj, ...) {}

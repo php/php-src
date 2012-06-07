@@ -21,11 +21,14 @@
 #endif
 
 #include <php.h>
+#include <zend_exceptions.h>
 
 #include "php_intl.h"
 #include "intl_error.h"
 
 ZEND_EXTERN_MODULE_GLOBALS( intl )
+
+static zend_class_entry *IntlException_ce_ptr;
 
 /* {{{ intl_error* intl_g_error_get()
  * Return global error structure.
@@ -102,8 +105,11 @@ void intl_error_set_custom_msg( intl_error* err, char* msg, int copyMsg TSRMLS_D
 	if( !msg )
 		return;
 
-	if(!err && INTL_G(error_level)) {
-		php_error_docref(NULL TSRMLS_CC, INTL_G(error_level), "%s", msg);		
+	if( !err ) {
+		if( INTL_G( error_level ) )
+			php_error_docref( NULL TSRMLS_CC, INTL_G( error_level ), "%s", msg );
+		if( INTL_G( use_exceptions ) )
+			zend_throw_exception_ex( IntlException_ce_ptr, 0 TSRMLS_CC, "%s", msg );
 	}
 	if( !err && !( err = intl_g_error_get( TSRMLS_C ) ) )
 		return;
@@ -220,6 +226,21 @@ void intl_errors_set_code( intl_error* err, UErrorCode err_code TSRMLS_DC )
 		intl_error_set_code( err, err_code TSRMLS_CC );
 	}
 	intl_error_set_code( NULL, err_code TSRMLS_CC );
+}
+/* }}} */
+
+void intl_register_IntlException_class( TSRMLS_D )
+{
+	zend_class_entry ce,
+					 *default_exception_ce;
+
+	default_exception_ce = zend_exception_get_default( TSRMLS_C );
+
+	/* Create and register 'IntlException' class. */
+	INIT_CLASS_ENTRY_EX( ce, "IntlException", sizeof( "IntlException" ) - 1, NULL );
+	IntlException_ce_ptr = zend_register_internal_class_ex( &ce,
+		default_exception_ce, NULL TSRMLS_CC );
+	IntlException_ce_ptr->create_object = default_exception_ce->create_object;
 }
 /* }}} */
 

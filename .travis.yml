@@ -1,0 +1,28 @@
+language: php
+
+php:
+    # We only specify one version so we only get one worker
+    - 5.4
+
+notifications:
+    email:
+        recipients:
+            - php-qa@lists.php.net
+        on_success: never # [always|never|change] default: change
+        on_failure: never # [always|never|change] default: always
+
+env:
+    - REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE=./sapi/cli/php
+
+before_script:
+    # Compile PHP
+    - ./travis/compile.sh
+    # Setup Extensions 
+    - . ./travis/ext/mysql/setup.sh
+    - . ./travis/ext/mysqli/setup.sh
+    - . ./travis/ext/pdo_mysql/setup.sh
+    - . ./travis/ext/pgsql/setup.sh
+    - . ./travis/ext/pdo_pgsql/setup.sh
+
+# Run PHPs run-tests.php 
+script: ./sapi/cli/php run-tests.php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP"

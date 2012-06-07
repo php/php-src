@@ -118,8 +118,8 @@ int zend_sprintf(char *buffer, const char *format, ...);
 ])
 
 PHP_MAJOR_VERSION=5
-PHP_MINOR_VERSION=4
-PHP_RELEASE_VERSION=5
+PHP_MINOR_VERSION=5
+PHP_RELEASE_VERSION=0
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
 PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
@@ -784,7 +784,7 @@ if test "$PHP_GCOV" = "yes"; then
     AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
   fi
   
-  ltp_version_list="1.5 1.6 1.7"
+  ltp_version_list="1.5 1.6 1.7 1.9"
 
   AC_CHECK_PROG(LTP, lcov, lcov)
   AC_CHECK_PROG(LTP_GENHTML, genhtml, genhtml)
@@ -1587,9 +1587,9 @@ cat <<X
 X
   fi
 
-  if test "$PHP_SAPI" = "apache2handler" || test "$PHP_SAPI" = "apache2filter"; then
-    if test "$APACHE_VERSION" -ge 2004001; then
-      if test -z "$APACHE_THREADED_MPM"; then
+    if test "$PHP_SAPI" = "apache2handler" || test "$PHP_SAPI" = "apache2filter"; then
+      if test "$APACHE_VERSION" -ge 2004001; then
+        if test -z "$APACHE_THREADED_MPM"; then
 cat <<X
 +--------------------------------------------------------------------+
 |                        *** WARNING ***                             |
@@ -1598,9 +1598,9 @@ cat <<X
 | If you change Apache to use a threaded MPM you must reconfigure    |
 | PHP with --enable-maintainer-zts                                   |
 X
+        fi
       fi
     fi
-  fi
 
   # Warn about linking Apache with libpthread if oci8 extension is enabled on linux.
   if test "$PHP_OCI8" != "no"; then

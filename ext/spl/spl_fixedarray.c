@@ -579,6 +579,38 @@ SPL_METHOD(SplFixedArray, __construct)
 }
 /* }}} */
 
+/* {{{ proto void SplFixedArray::__wakeup()
+*/
+SPL_METHOD(SplFixedArray, __wakeup)
+{
+	spl_fixedarray_object *intern = (spl_fixedarray_object *) zend_object_store_get_object(getThis() TSRMLS_CC);
+	HashPosition ptr;
+	HashTable *intern_ht = zend_std_get_properties(getThis() TSRMLS_CC);
+	zval **data;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")) {
+		return;
+	}
+
+	if (!intern->array) {
+		int index = 0;
+		int size = zend_hash_num_elements(intern_ht);
+
+		intern->array = emalloc(sizeof(spl_fixedarray));
+		spl_fixedarray_init(intern->array, size TSRMLS_CC);
+
+		for (zend_hash_internal_pointer_reset_ex(intern_ht, &ptr); zend_hash_get_current_data_ex(intern_ht, (void **) &data, &ptr) == SUCCESS; zend_hash_move_forward_ex(intern_ht, &ptr)) {
+			Z_ADDREF_PP(data);
+			intern->array->elements[index++] = *data;
+		}
+
+		/* Remove the unserialised properties, since we now have the elements
+		 * within the spl_fixedarray_object structure. */
+		zend_hash_clean(intern_ht);
+	}
+}
+/* }}} */
+
 /* {{{ proto int SplFixedArray::count(void)
 */
 SPL_METHOD(SplFixedArray, count)
@@ -1056,6 +1088,7 @@ ZEND_END_ARG_INFO()
 
 static zend_function_entry spl_funcs_SplFixedArray[] = { /* {{{ */
 	SPL_ME(SplFixedArray, __construct,     arginfo_splfixedarray_construct,ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, __wakeup,        arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, count,           arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, toArray,         arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, fromArray,       arginfo_fixedarray_fromArray,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

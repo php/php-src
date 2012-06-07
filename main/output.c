@@ -1510,7 +1510,7 @@ PHP_FUNCTION(ob_get_status)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &full_status) == FAILURE) {
 		return;
 	}
-
+	
 	array_init(return_value);
 
 	if (!OG(active)) {

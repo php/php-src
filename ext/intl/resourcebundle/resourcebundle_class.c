@@ -103,7 +103,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 	
 	if (locale == NULL) {
-		locale = INTL_G(default_locale);
+		locale = intl_locale_get_default(TSRMLS_C);
 	}
 
 	if (fallback) {

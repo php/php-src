@@ -2,7 +2,7 @@
   euc_tw.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,17 +67,11 @@ euctw_code_to_mbc(OnigCodePoint code, UChar *buf)
 }
 
 static int
-euctw_mbc_to_normalize(OnigAmbigType flag, const UChar** pp, const UChar* end,
-                       UChar* lower)
+euctw_mbc_case_fold(OnigCaseFoldType flag, const UChar** pp, const UChar* end,
+                    UChar* lower)
 {
-  return onigenc_mbn_mbc_to_normalize(ONIG_ENCODING_EUC_TW, flag,
-                                      pp, end, lower);
-}
-
-static int
-euctw_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
-{
-  return onigenc_mbn_is_mbc_ambiguous(ONIG_ENCODING_EUC_TW, flag, pp, end);
+  return onigenc_mbn_mbc_case_fold(ONIG_ENCODING_EUC_TW, flag,
+                                   pp, end, lower);
 }
 
 static int
@@ -86,7 +80,7 @@ euctw_is_code_ctype(OnigCodePoint code, unsigned int ctype)
   return onigenc_mb4_is_code_ctype(ONIG_ENCODING_EUC_TW, code, ctype);
 }
 
-#define euctw_islead(c)    (((c) < 0xa1 && (c) != 0x8e) || (c) == 0xff)
+#define euctw_islead(c)    ((UChar )((c) - 0xa1) > 0xfe - 0xa1)
 
 static UChar*
 euctw_left_adjust_char_head(const UChar* start, const UChar* s)
@@ -101,14 +95,14 @@ euctw_left_adjust_char_head(const UChar* start, const UChar* s)
   p = s;
 
   while (!euctw_islead(*p) && p > start) p--;
-  len = enc_len(ONIG_ENCODING_EUC_TW, p);
+  len = enclen(ONIG_ENCODING_EUC_TW, p);
   if (p + len > s) return (UChar* )p;
   p += len;
   return (UChar* )(p + ((s - p) & ~1));
 }
 
 static int
-euctw_is_allowed_reverse_match(const UChar* s, const UChar* end)
+euctw_is_allowed_reverse_match(const UChar* s, const UChar* end ARG_UNUSED)
 {
   const UChar c = *s;
   if (c <= 0x7e) return TRUE;
@@ -120,23 +114,14 @@ OnigEncodingType OnigEncodingEUC_TW = {
   "EUC-TW",   /* name */
   4,          /* max enc length */
   1,          /* min enc length */
-  ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE,
-  {
-      (OnigCodePoint )'\\'                       /* esc */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar '.'  */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anytime '*'  */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* zero or one time '?' */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* one or more time '+' */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar anytime */
-  },
   onigenc_is_mbc_newline_0x0a,
   euctw_mbc_to_code,
   onigenc_mb4_code_to_mbclen,
   euctw_code_to_mbc,
-  euctw_mbc_to_normalize,
-  euctw_is_mbc_ambiguous,
-  onigenc_ascii_get_all_pair_ambig_codes,
-  onigenc_nothing_get_all_comp_ambig_codes,
+  euctw_mbc_case_fold,
+  onigenc_ascii_apply_all_case_fold,
+  onigenc_ascii_get_case_fold_codes_by_str,
+  onigenc_minimum_property_name_to_ctype,
   euctw_is_code_ctype,
   onigenc_not_support_get_ctype_code_range,
   euctw_left_adjust_char_head,

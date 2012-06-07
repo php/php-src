@@ -27,6 +27,8 @@
 #include "dateformat_class.h"
 #include "dateformat_format.h"
 #include "dateformat_data.h"
+/* avoid redefinition of int8_t, already defined in unicode/pwin32.h */
+#define _MSC_STDINT_H_ 1
 #include "ext/date/php_date.h"
 
 /* {{{ 
@@ -91,7 +93,7 @@ static UDate internal_get_timestamp(IntlDateFormatter_object *dfo, HashTable* ha
 	long yday =0;
 	long mday =0;
 	UBool isInDST = FALSE;
-	UCalendar *pcal;
+	const UCalendar *pcal;
 
 	/* Fetch  values from the incoming array */
 	year = internal_get_arr_ele( dfo, hash_arr, CALENDAR_YEAR TSRMLS_CC) + 1900; /* tm_year is years since 1900 */
