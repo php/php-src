@@ -12,6 +12,7 @@ PHP                                                                        NEWS
     (Nikita Popov)
 
 - Core:
+  . Added boolval(). (Jille Timmermans).
   . Fixed bug #61681 (Malformed grammar). (Nikita Popov, Etienne, Laruence).
   . Fixed bug #61038 (unpack("a5", "str\0\0") does not work as expected).
     (srgoogleguy, Gustavo)
