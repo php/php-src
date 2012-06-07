@@ -63,6 +63,10 @@ PHP                                                                        NEWS
 - FPM
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
     (Laruence, Gustavo)
+  . Fixed bug #61565 where php_stream_open_wrapper_ex tries to open a
+    directory descriptor under windows. (Anatoliy)
+  . Fixed bug #61566 failure caused by the posix lseek and read versions
+    under windows in cdf_read(). (Anatoliy)
 
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
@@ -651,6 +655,14 @@ PHP                                                                        NEWS
   . Re-implemented non-file related functionality. (Mike)
   . Fixed bug #55544 (ob_gzhandler always conflicts with zlib.output_compression).
     (Mike)
+
+08 May 2012, PHP 5.3.13
+- CGI
+  . Improve fix for PHP-CGI query string parameter vulnerability, CVE-2012-2311.
+    (Stas)
+
+03 May 2012, PHP 5.3.12
+- Fix PHP-CGI query string parameter vulnerability, CVE-2012-1823. (Rasmus)
 
 26 Apr 2012, PHP 5.3.11
 
