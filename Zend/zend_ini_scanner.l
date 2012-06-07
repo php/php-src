@@ -347,7 +347,7 @@ DOLLAR_CURLY "${"
 
 SECTION_RAW_CHARS [^\]\n\r]
 SINGLE_QUOTED_CHARS [^']
-RAW_VALUE_CHARS [^\n\r;\000]
+RAW_VALUE_CHARS [^"\n\r;\000]
 
 LITERAL_DOLLAR ("$"([^{\000]|("\\"{ANY_CHAR})))
 VALUE_CHARS         ([^$= \t\n\r;&|~()!"'\000]|{LITERAL_DOLLAR})
@@ -445,12 +445,33 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	return '=';
 }
 
-<ST_RAW>{RAW_VALUE_CHARS}+ { /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
-	/* Eat leading and trailing double quotes */
-	if (yytext[0] == '"' && yytext[yyleng - 1] == '"') {
-		SCNG(yy_text)++;
-		yyleng = yyleng - 2;
+<ST_RAW>["] {
+	while (YYCURSOR < YYLIMIT) {
+		switch (*YYCURSOR++) {
+			case '\n':
+				SCNG(lineno)++;
+				break;
+			case '\r':
+				if (*YYCURSOR != '\n') {
+					SCNG(lineno)++;
+				}
+				break;
+			case '"':
+				yyleng = YYCURSOR - SCNG(yy_text) - 2;
+				SCNG(yy_text)++;
+				RETURN_TOKEN(TC_RAW, yytext, yyleng);
+			case '\\':
+				if (YYCURSOR < YYLIMIT) {
+					YYCURSOR++;
+				}
+				break;
+		}
 	}
+	yyleng = YYCURSOR - SCNG(yy_text);
+	RETURN_TOKEN(TC_RAW, yytext, yyleng);
+}
+
+<ST_RAW>{RAW_VALUE_CHARS}+ { /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }
 
