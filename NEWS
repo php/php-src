@@ -1,13 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.5
-- Zend Engine:
-  . Fixed bug #51094 (parse_ini_file() with INI_SCANNER_RAW cuts a value that
-    includes a semi-colon). (Pierrick)
 
 - Core:
   . Fixed bug #61998 (Using traits with method aliases appears to result in
     crash during execution). (Dmitry)
+  . Fixed bug #51094 (parse_ini_file() with INI_SCANNER_RAW cuts a value that
+    includes a semi-colon). (Pierrick)
   . Fixed potential overflow in _php_stream_scandir. (Jason Powell,
     Stas)
 
