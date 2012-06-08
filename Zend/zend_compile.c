@@ -1685,7 +1685,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		zval key;
 
 		if (CG(current_namespace)) {
-			/* Prefix function name with current namespcae name */
+			/* Prefix function name with current namespace name */
 			znode tmp;
 
 			tmp.u.constant = *CG(current_namespace);
