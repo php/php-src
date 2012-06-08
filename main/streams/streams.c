@@ -2332,8 +2332,8 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 	php_stream *stream;
 	php_stream_dirent sdp;
 	char **vector = NULL;
-	int vector_size = 0;
-	int nfiles = 0;
+	unsigned int vector_size = 0;
+	unsigned int nfiles = 0;
 
 	if (!namelist) {
 		return FAILURE;
@@ -2351,12 +2351,17 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 			} else {
 				vector_size *= 2;
 			}
-			vector = (char **) erealloc(vector, vector_size * sizeof(char *));
+			vector = (char **) safe_erealloc(vector, vector_size, sizeof(char *), 0);
 		}
 
 		vector[nfiles] = estrdup(sdp.d_name);
 
 		nfiles++;
+		if(vector_size < 10 || nfiles == 0) {
+			/* overflow */
+			efree(vector);
+			return FAILURE;
+		}
 	}
 	php_stream_closedir(stream);
 
