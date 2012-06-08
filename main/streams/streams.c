@@ -2349,6 +2349,11 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 			if (vector_size == 0) {
 				vector_size = 10;
 			} else {
+				if(vector_size*2 < vector_size) {
+					/* overflow */
+					efree(vector);
+					return FAILURE;
+				}
 				vector_size *= 2;
 			}
 			vector = (char **) safe_erealloc(vector, vector_size, sizeof(char *), 0);
