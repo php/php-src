@@ -1113,7 +1113,8 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 
 	/* Bail out if we can't recover */
 	/* eval() errors do not affect exit_status or response code */
-	zend_bool during_eval = (EG(current_execute_data)->opline &&
+	zend_bool during_eval = (EG(current_execute_data) &&
+				EG(current_execute_data)->opline &&
 				EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
 				EG(current_execute_data)->opline->extended_value == ZEND_EVAL);
 	switch (type) {
