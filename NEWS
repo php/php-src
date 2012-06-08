@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #61998 (Using traits with method aliases appears to result in
     crash during execution). (Dmitry)
+  . Fixed potential overflow in _php_stream_scandir. (Jason Powell,
+    Stas)
 
 - EXIF:
   . Fixed information leak in ext exif (discovered by Martin Noga, 
