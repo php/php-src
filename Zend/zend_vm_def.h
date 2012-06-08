@@ -5220,7 +5220,8 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 
 ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 {
-	zend_bool nested;
+	zend_bool nested = EX(nested);
+	zend_execute_data *prev_execute_data = EX(prev_execute_data);
 
 	if (EG(return_value_ptr_ptr)) {
 		zval *return_value;
@@ -5240,11 +5241,23 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 		/* back up the execution context */
 		generator = (zend_generator *) zend_object_store_get_object(return_value TSRMLS_CC);
 		generator->execute_data = execute_data;
+
+		/* We have to add another stack frame so the generator function shows
+		 * up in backtraces and func_get_all() can access the function
+		 * arguments. */
+		EX(prev_execute_data) = emalloc(sizeof(zend_execute_data));
+		if (prev_execute_data) {
+			memcpy(EX(prev_execute_data), prev_execute_data, sizeof(zend_execute_data));
+			EX(prev_execute_data)->function_state.arguments = zend_copy_arguments(prev_execute_data->function_state.arguments);
+		} else {
+			memset(EX(prev_execute_data), 0, sizeof(zend_execute_data));
+			EX(prev_execute_data)->function_state.function = (zend_function *) EX(op_array);
+			EX(prev_execute_data)->function_state.arguments = NULL;
+		}
 	}
 
 	/* restore the previous execution context */
-	EG(current_execute_data) = EX(prev_execute_data);
-	nested = EX(nested);
+	EG(current_execute_data) = prev_execute_data;
 
 	/* if there is no return value pointer we are responsible for freeing the
      * execution data */
@@ -5257,34 +5270,37 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 		efree(execute_data);
 	}
 
-	EG(opline_ptr) = NULL;
-	if (nested) {
-		/* so we can use EX() again */
-		execute_data = EG(current_execute_data);
 
-		EG(opline_ptr)           = &EX(opline);
-		EG(active_op_array)      = EX(op_array);
-		EG(return_value_ptr_ptr) = EX(original_return_value);
-		EG(active_symbol_table)  = EX(symbol_table);
-		EG(This)                 = EX(current_this);
-		EG(scope)                = EX(current_scope);
-		EG(called_scope)         = EX(current_called_scope);
-		
-		EX(function_state).function  = (zend_function *) EX(op_array);
-		EX(function_state).arguments = NULL;
-
-		EX(object) = EX(current_object);
-		EX(called_scope) = DECODE_CTOR(EX(called_scope));
-
-		zend_vm_stack_clear_multiple(TSRMLS_C);
-
-		LOAD_REGS();
-		LOAD_OPLINE();
-		ZEND_VM_INC_OPCODE();
-		ZEND_VM_LEAVE();
+	/* Happens whenever the function is invoked using call_user_function,
+	 * e.g. when doing a dynamic function call using call_user_func(). */
+	if (!nested) {
+		EG(opline_ptr) = NULL;
+		ZEND_VM_RETURN();
 	}
 
-	ZEND_VM_RETURN();
+	/* Bring back the previous execution context */
+	execute_data = EG(current_execute_data);
+
+	EG(opline_ptr)           = &EX(opline);
+	EG(active_op_array)      = EX(op_array);
+	EG(return_value_ptr_ptr) = EX(original_return_value);
+	EG(active_symbol_table)  = EX(symbol_table);
+	EG(This)                 = EX(current_this);
+	EG(scope)                = EX(current_scope);
+	EG(called_scope)         = EX(current_called_scope);
+		
+	EX(function_state).function  = (zend_function *) EX(op_array);
+	EX(function_state).arguments = NULL;
+
+	EX(object) = EX(current_object);
+	EX(called_scope) = DECODE_CTOR(EX(called_scope));
+
+	zend_vm_stack_clear_multiple(TSRMLS_C);
+
+	LOAD_REGS();
+	LOAD_OPLINE();
+	ZEND_VM_INC_OPCODE();
+	ZEND_VM_LEAVE();
 }
 
 ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSED)

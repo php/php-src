@@ -94,6 +94,28 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 			efree(generator->backed_up_stack);
 		}
 
+		/* We have added an additional stack frame in prev_execute_data, so we
+		 * have to free it. It also contains the arguments passed to the
+		 * generator (for func_get_args) so those have to be freed too. */
+		{
+			zend_execute_data *prev_execute_data = execute_data->prev_execute_data;
+			void **arguments = prev_execute_data->function_state.arguments;
+
+			if (arguments) {
+				int arguments_count = (int) (zend_uintptr_t) *arguments;
+				zval **arguments_start = (zval **) (arguments - arguments_count);
+				int i;
+
+				for (i = 0; i < arguments_count; ++i) {
+					zval_ptr_dtor(arguments_start + i);
+				}
+
+				efree(arguments_start);
+			}
+
+			efree(prev_execute_data);
+		}
+
 		efree(execute_data);
 		generator->execute_data = NULL;
 	}
@@ -240,6 +262,18 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 		if (execute_data->object) {
 			Z_ADDREF_P(execute_data->object);
 		}
+
+		/* Prev execute data contains an additional stack frame (for proper)
+		 * backtraces) which has to be copied. */
+		clone->execute_data->prev_execute_data = emalloc(sizeof(zend_execute_data));
+		memcpy(clone->execute_data->prev_execute_data, execute_data->prev_execute_data, sizeof(zend_execute_data));
+
+		/* It also contains the arguments passed to the generator, which also
+		 * have to be copied */
+		if (execute_data->prev_execute_data->function_state.arguments) {
+			clone->execute_data->prev_execute_data->function_state.arguments
+				= zend_copy_arguments(execute_data->prev_execute_data->function_state.arguments);
+		}
 	}
 
 	/* The value and key are known not to be references, so simply add refs */
@@ -329,9 +363,13 @@ static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS
 		EG(scope) = generator->execute_data->current_scope;
 		EG(called_scope) = generator->execute_data->current_called_scope;
 
-		/* Set prev_execute_data to the current execute_data to get halfways
-		 * reasonable backtraces */
-		generator->execute_data->prev_execute_data = original_execute_data;
+		/* We want the backtrace to look as if the generator function was
+		 * called from whatever method we are current running (e.g. next()).
+		 * The first prev_execute_data contains an additional stack frame,
+		 * which makes the generator function show up in the backtrace and
+		 * makes the arguments available to func_get_args(). So we have to
+		 * set the prev_execute_data of that prev_execute_data :) */
+		generator->execute_data->prev_execute_data->prev_execute_data = original_execute_data;
 
 		/* Go to next opcode (we don't want to run the last one again) */
 		generator->execute_data->opline++;

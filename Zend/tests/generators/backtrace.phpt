@@ -7,7 +7,7 @@ function f1() {
     debug_print_backtrace();
 }
 
-function *f2() {
+function *f2($arg1, $arg2) {
     f1();
 }
 
@@ -15,11 +15,12 @@ function f3($gen) {
     $gen->rewind(); // trigger run
 }
 
-$gen = f2();
+$gen = f2('foo', 'bar');
 f3($gen);
 
 ?>
 --EXPECTF--
 #0  f1() called at [%s:%d]
-#1  Generator->rewind() called at [%s:%d]
-#2  f3(Generator Object ()) called at [%s:%d]
+#1  f2(foo, bar) called at [%s:%d]
+#2  Generator->rewind() called at [%s:%d]
+#3  f3(Generator Object ()) called at [%s:%d]

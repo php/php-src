@@ -1563,6 +1563,25 @@ void zend_free_compiled_variables(zval ***CVs, int num) /* {{{ */
 }
 /* }}} */
 
+void** zend_copy_arguments(void **arguments_end) /* {{{ */
+{
+	int arguments_count = (int) (zend_uintptr_t) *arguments_end;
+	size_t arguments_size = (arguments_count + 1) * sizeof(void **);
+	void **arguments_start = arguments_end - arguments_count;
+	void **copied_arguments_start = emalloc(arguments_size);
+	void **copied_arguments_end = copied_arguments_start + arguments_count;
+	int i;
+
+	memcpy(copied_arguments_start, arguments_start, arguments_size);
+
+	for (i = 0; i < arguments_count; i++) {
+		Z_ADDREF_P((zval *) arguments_start[i]);
+	}
+
+	return copied_arguments_end;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
