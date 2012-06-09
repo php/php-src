@@ -14,7 +14,7 @@ PHP                                                                        NEWS
   . Fixed information leak in ext exif (discovered by Martin Noga, 
     Matthew "j00ru" Jurczyk, Gynvael Coldwind)
 
-- FPM
+- FPM:
   . Fixed bug #62205 (php-fpm segfaults (null passed to strstr)). (fat)
   . Fixed bug #62160 (Add process.priority to set nice(2) priorities). (fat)
   . Fixed bug #62153 (when using unix sockets, multiples FPM instances
@@ -33,7 +33,7 @@ PHP                                                                        NEWS
 - Iconv:
   . Fix bug #55042 (Erealloc in iconv.c unsafe). (Stas)
 
-- Intl
+- Intl:
   . Fixed bug #62083 (grapheme_extract() memory leaks). (Gustavo)
   . ResourceBundle constructor now accepts NULL for the first two arguments.
     (Gustavo)
@@ -42,6 +42,10 @@ PHP                                                                        NEWS
   . Fixed bug #62070 (Collator::getSortKey() returns garbage). (Gustavo)
   . Fixed bug #62017 (datefmt_create with incorrectly encoded timezone leaks
     pattern). (Gustavo)
+
+- libxml:
+  . Fixed bug #62266 (Custom extension segfaults during xmlParseFile with FPM
+    SAPI). (Gustavo)
 
 - Readline:
   . Fixed bug #62186 (readline fails to compile - void function should not
