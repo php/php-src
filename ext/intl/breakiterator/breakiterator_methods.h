@@ -31,8 +31,6 @@ PHP_FUNCTION(breakiter_create_sentence_instance);
 
 PHP_FUNCTION(breakiter_create_title_instance);
 
-PHP_FUNCTION(breakiter_get_available_locales);
-
 PHP_FUNCTION(breakiter_get_text);
 
 PHP_FUNCTION(breakiter_set_text);

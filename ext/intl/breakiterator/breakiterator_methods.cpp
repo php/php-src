@@ -107,27 +107,6 @@ U_CFUNC PHP_FUNCTION(breakiter_create_title_instance)
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_get_available_locales)
-{
-	intl_error_reset(NULL TSRMLS_CC);
-	
-	if (zend_parse_parameters_none() == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"breakiter_get_available_locales: bad arguments", 0 TSRMLS_CC);
-		RETURN_FALSE;
-	}
-	
-	const	Locale *locales;
-	int32_t	count;
-	
-	locales = BreakIterator::getAvailableLocales(count);
-	array_init_size(return_value, (uint)count);
-	for (int i = 0; i < count; i++) {
-		Locale locale = locales[i];
-		add_next_index_string(return_value, locale.getName(), 1);
-	}
-}
-
 U_CFUNC PHP_FUNCTION(breakiter_get_text)
 {
 	BREAKITER_METHOD_INIT_VARS;

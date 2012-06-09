@@ -21,8 +21,6 @@
 
 PHP_METHOD(RuleBasedBreakIterator, __construct);
 
-PHP_FUNCTION(rbbi_hash_code);
-
 PHP_FUNCTION(rbbi_get_rules);
 
 PHP_FUNCTION(rbbi_get_rule_status);
