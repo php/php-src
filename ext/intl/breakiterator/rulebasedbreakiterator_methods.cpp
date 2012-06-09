@@ -101,11 +101,11 @@ U_CFUNC PHP_METHOD(RuleBasedBreakIterator, __construct)
 U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 {
 	BREAKITER_METHOD_INIT_VARS;
+	object = getThis();
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
-			&object, BreakIterator_ce_ptr) == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"rbbi_hash_code: bad arguments", 0 TSRMLS_CC);
+			"rbbi_get_rules: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
 	
@@ -127,9 +127,9 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 {
 	BREAKITER_METHOD_INIT_VARS;
+	object = getThis();
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
-			&object, BreakIterator_ce_ptr) == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"rbbi_get_rule_status: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
@@ -143,9 +143,9 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 {
 	BREAKITER_METHOD_INIT_VARS;
+	object = getThis();
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
-			&object, BreakIterator_ce_ptr) == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"rbbi_get_rule_status_vec: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
@@ -183,9 +183,9 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 {
 	BREAKITER_METHOD_INIT_VARS;
+	object = getThis();
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
-			&object, BreakIterator_ce_ptr) == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"rbbi_get_binary_rules: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
