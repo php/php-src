@@ -362,6 +362,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, interval_spec)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_set_default_format, 0, 0, 1)
+	ZEND_ARG_INFO(0, format)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /* {{{ Function table */
@@ -432,6 +436,9 @@ const zend_function_entry date_funcs_date[] = {
 	PHP_ME(DateTime,			__construct,		arginfo_date_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__wakeup,			NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__set_state,		NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DateTime, 			__toString, 		NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(DateTime, 			setDefaultFormat, 	arginfo_date_set_default_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DateTime, 			getDefaultFormat, 	NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createFromFormat, date_create_from_format,	arginfo_date_create_from_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getLastErrors, date_get_last_errors,	arginfo_date_get_last_errors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(format,		date_format,		arginfo_date_method_format, 0)
@@ -1899,6 +1906,12 @@ static void date_register_classes(TSRMLS_D)
 	REGISTER_DATE_CLASS_CONST_STRING("RSS",     DATE_FORMAT_RFC1123);
 	REGISTER_DATE_CLASS_CONST_STRING("W3C",     DATE_FORMAT_RFC3339);
 
+#define REGISTER_DATE_CLASS_PROPERTY_PROTECTED_STRING(const_name, value, access_type ) \
+	zend_declare_property_string(date_ce_date, const_name, sizeof(const_name)-1, value, access_type)
+
+	REGISTER_DATE_CLASS_PROPERTY_PROTECTED_STRING("defaultFormat", DATE_FORMAT_ISO8601,
+			ZEND_ACC_STATIC|ZEND_ACC_PROTECTED TSRMLS_DC);
+
 
 	INIT_CLASS_ENTRY(ce_timezone, "DateTimeZone", date_funcs_timezone);
 	ce_timezone.create_object = date_object_new_timezone;
@@ -2533,6 +2546,70 @@ PHP_METHOD(DateTime, __wakeup)
 	myht = Z_OBJPROP_P(object);
 
 	php_date_initialize_from_hash(&return_value, &dateobj, myht TSRMLS_CC);
+}
+/* }}} */
+/* {{{ proto DateTime::__toString()
+ */PHP_METHOD(DateTime, __toString) {
+	php_date_obj *dateobj;
+	zval *format;
+	zval *object = getThis();
+
+	char *property = "defaultFormat";
+	zend_class_entry* ce = 0L;
+
+	if (EG(called_scope)) {
+	    ce = EG(called_scope);
+	} else if (!EG(scope))  {
+	    ce = EG(scope);
+	}
+
+	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
+
+	format = zend_read_static_property(ce, property, strlen(property), 0);
+
+
+	RETURN_STRING(date_format(Z_STRVAL_P(format), Z_STRLEN_P(format), dateobj->time, dateobj->time->is_localtime),0);
+}
+/* }}} */
+
+/* {{{ proto DateTime::setDefaultFormat(string format)
+ */PHP_METHOD(DateTime, setDefaultFormat) {
+	zval *object = getThis();
+	char *property = "defaultFormat";
+	zend_class_entry* ce = 0L;
+
+	char *format;
+	int format_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &format, &format_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (EG(called_scope)) {
+		ce = EG(called_scope);
+	} else if (!EG(scope))  {
+		ce = EG(scope);
+	}
+	zend_update_static_property_stringl(ce, property, strlen(property), format, format_len);
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto DateTime::getDefaultFormat()
+ */PHP_METHOD(DateTime, getDefaultFormat) {
+	zval *object = getThis();
+	char *property = "defaultFormat";
+	zend_class_entry* ce = 0L;
+	zval *format;
+
+	if (EG(called_scope)) {
+		ce = EG(called_scope);
+	} else if (!EG(scope))  {
+		ce = EG(scope);
+	}
+	format = zend_read_static_property(ce, property, strlen(property), 0);
+	RETURN_STRINGL(Z_STRVAL_P(format), Z_STRLEN_P(format), 1);
 }
 /* }}} */
 

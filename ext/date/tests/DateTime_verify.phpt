@@ -22,133 +22,154 @@ var_dump($constants);
 --EXPECTF--
 *** Verify DateTime class ***
 Verify DateTime class registered OK
-object(ReflectionClass)#%d (1) {
+object(ReflectionClass)#1 (1) {
   ["name"]=>
   string(8) "DateTime"
 }
 ..and get names of all its methods
-array(18) {
+array(21) {
   [0]=>
-  &object(ReflectionMethod)#%d (2) {
+  &object(ReflectionMethod)#2 (2) {
     ["name"]=>
     string(11) "__construct"
     ["class"]=>
     string(8) "DateTime"
   }
   [1]=>
-  &object(ReflectionMethod)#%d (2) {
+  &object(ReflectionMethod)#3 (2) {
     ["name"]=>
     string(8) "__wakeup"
     ["class"]=>
     string(8) "DateTime"
   }
   [2]=>
-  &object(ReflectionMethod)#%d (2) {
+  &object(ReflectionMethod)#4 (2) {
     ["name"]=>
     string(11) "__set_state"
     ["class"]=>
     string(8) "DateTime"
   }
   [3]=>
-  &object(ReflectionMethod)#%d (2) {
+  &object(ReflectionMethod)#5 (2) {
+    ["name"]=>
+    string(10) "__toString"
+    ["class"]=>
+    string(8) "DateTime"
+  }
+  [4]=>
+  &object(ReflectionMethod)#6 (2) {
+    ["name"]=>
+    string(16) "setDefaultFormat"
+    ["class"]=>
+    string(8) "DateTime"
+  }
+  [5]=>
+  &object(ReflectionMethod)#7 (2) {
+    ["name"]=>
+    string(16) "getDefaultFormat"
+    ["class"]=>
+    string(8) "DateTime"
+  }
+  [6]=>
+  &object(ReflectionMethod)#8 (2) {
     ["name"]=>
     string(16) "createFromFormat"
     ["class"]=>
     string(8) "DateTime"
   }
-  [4]=>
-  &object(ReflectionMethod)#%d (2) {
+  [7]=>
+  &object(ReflectionMethod)#9 (2) {
     ["name"]=>
     string(13) "getLastErrors"
     ["class"]=>
     string(8) "DateTime"
   }
-  [5]=>
-  &object(ReflectionMethod)#%d (2) {
+  [8]=>
+  &object(ReflectionMethod)#10 (2) {
     ["name"]=>
     string(6) "format"
     ["class"]=>
     string(8) "DateTime"
   }
-  [6]=>
-  &object(ReflectionMethod)#%d (2) {
+  [9]=>
+  &object(ReflectionMethod)#11 (2) {
     ["name"]=>
     string(6) "modify"
     ["class"]=>
     string(8) "DateTime"
   }
-  [7]=>
-  &object(ReflectionMethod)#%d (2) {
+  [10]=>
+  &object(ReflectionMethod)#12 (2) {
     ["name"]=>
     string(3) "add"
     ["class"]=>
     string(8) "DateTime"
   }
-  [8]=>
-  &object(ReflectionMethod)#%d (2) {
+  [11]=>
+  &object(ReflectionMethod)#13 (2) {
     ["name"]=>
     string(3) "sub"
     ["class"]=>
     string(8) "DateTime"
   }
-  [9]=>
-  &object(ReflectionMethod)#%d (2) {
+  [12]=>
+  &object(ReflectionMethod)#14 (2) {
     ["name"]=>
     string(11) "getTimezone"
     ["class"]=>
     string(8) "DateTime"
   }
-  [10]=>
-  &object(ReflectionMethod)#%d (2) {
+  [13]=>
+  &object(ReflectionMethod)#15 (2) {
     ["name"]=>
     string(11) "setTimezone"
     ["class"]=>
     string(8) "DateTime"
   }
-  [11]=>
-  &object(ReflectionMethod)#%d (2) {
+  [14]=>
+  &object(ReflectionMethod)#16 (2) {
     ["name"]=>
     string(9) "getOffset"
     ["class"]=>
     string(8) "DateTime"
   }
-  [12]=>
-  &object(ReflectionMethod)#%d (2) {
+  [15]=>
+  &object(ReflectionMethod)#17 (2) {
     ["name"]=>
     string(7) "setTime"
     ["class"]=>
     string(8) "DateTime"
   }
-  [13]=>
-  &object(ReflectionMethod)#%d (2) {
+  [16]=>
+  &object(ReflectionMethod)#18 (2) {
     ["name"]=>
     string(7) "setDate"
     ["class"]=>
     string(8) "DateTime"
   }
-  [14]=>
-  &object(ReflectionMethod)#%d (2) {
+  [17]=>
+  &object(ReflectionMethod)#19 (2) {
     ["name"]=>
     string(10) "setISODate"
     ["class"]=>
     string(8) "DateTime"
   }
-  [15]=>
-  &object(ReflectionMethod)#%d (2) {
+  [18]=>
+  &object(ReflectionMethod)#20 (2) {
     ["name"]=>
     string(12) "setTimestamp"
     ["class"]=>
     string(8) "DateTime"
   }
-  [16]=>
-  &object(ReflectionMethod)#%d (2) {
+  [19]=>
+  &object(ReflectionMethod)#21 (2) {
     ["name"]=>
     string(12) "getTimestamp"
     ["class"]=>
     string(8) "DateTime"
   }
-  [17]=>
-  &object(ReflectionMethod)#%d (2) {
+  [20]=>
+  &object(ReflectionMethod)#22 (2) {
     ["name"]=>
     string(4) "diff"
     ["class"]=>
