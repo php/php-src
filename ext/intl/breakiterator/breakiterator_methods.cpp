@@ -46,7 +46,7 @@ static void _breakiter_factory(const char *func_name,
 	char			*msg;
 	UErrorCode		status = UErrorCode();
 	intl_error_reset(NULL TSRMLS_CC);
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!",
 			&locale_str, &dummy) == FAILURE) {
 		spprintf(&msg, NULL, "%s: bad arguments", func_name);
@@ -54,11 +54,11 @@ static void _breakiter_factory(const char *func_name,
 		efree(msg);
 		RETURN_NULL();
 	}
-	
+
 	if (locale_str == NULL) {
 		locale_str = intl_locale_get_default(TSRMLS_C);
 	}
-	
+
 	biter = func(Locale::createFromName(locale_str), status);
 	intl_error_set_code(NULL, status TSRMLS_CC);
 	if (U_FAILURE(status)) {
@@ -68,7 +68,7 @@ static void _breakiter_factory(const char *func_name,
 		efree(msg);
 		RETURN_NULL();
 	}
-	
+
 	breakiterator_object_create(return_value, biter TSRMLS_CC);
 }
 
@@ -117,9 +117,9 @@ U_CFUNC PHP_FUNCTION(breakiter_get_text)
 			"breakiter_get_text: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
-	
+
 	BREAKITER_METHOD_FETCH_OBJECT;
-	
+
 	if (bio->text == NULL) {
 		RETURN_NULL();
 	} else {
@@ -135,31 +135,31 @@ U_CFUNC PHP_FUNCTION(breakiter_set_text)
 	zval	**textzv;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
 			&text, &text_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"breakiter_set_text: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
-	
+
 	int res = zend_get_parameters_ex(1, &textzv);
 	assert(res == SUCCESS);
-	
+
 	BREAKITER_METHOD_FETCH_OBJECT;
-	
+
 	/* assert it's safe to use text and text_len because zpp changes the
 	 * arguments in the stack */
 	assert(text == Z_STRVAL_PP(textzv));
-	
+
 	ut = utext_openUTF8(ut, text, text_len, BREAKITER_ERROR_CODE_P(bio));
 	INTL_CTOR_CHECK_STATUS(bio, "breakiter_set_text: error opening UText");
-	
+
 	bio->biter->setText(ut, BREAKITER_ERROR_CODE(bio));
 	utext_close(ut); /* ICU shallow clones the UText */
 	INTL_CTOR_CHECK_STATUS(bio, "breakiter_set_text: error calling "
 		"BreakIterator::setText()");
-	
+
 	/* When ICU clones the UText, it does not copy the buffer, so we have to
 	 * keep the string buffer around by holding a reference to its zval. This
 	 * also allows a faste implementation of getText() */
@@ -168,7 +168,7 @@ U_CFUNC PHP_FUNCTION(breakiter_set_text)
 	}
 	bio->text = *textzv;
 	zval_add_ref(&bio->text);
-	
+
 	RETURN_TRUE;
 }
 
@@ -180,18 +180,18 @@ static void _breakiter_no_args_ret_int32(
 	char	*msg;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		spprintf(&msg, NULL, "%s: bad arguments", func_name);
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
 		efree(msg);
 		RETURN_FALSE;
 	}
-	
+
 	BREAKITER_METHOD_FETCH_OBJECT;
-	
+
 	int32_t res = (bio->biter->*func)();
-	
+
 	RETURN_LONG((long)res);
 }
 
@@ -204,16 +204,16 @@ static void _breakiter_int32_ret_int32(
 	long	arg;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &arg) == FAILURE) {
 		spprintf(&msg, NULL, "%s: bad arguments", func_name);
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
 		efree(msg);
 		RETURN_FALSE;
 	}
-	
+
 	BREAKITER_METHOD_FETCH_OBJECT;
-	
+
 	if (arg < INT32_MIN || arg > INT32_MAX) {
 		spprintf(&msg, NULL, "%s: offset argument is outside bounds of "
 				"a 32-bit wide integer", func_name);
@@ -221,9 +221,9 @@ static void _breakiter_int32_ret_int32(
 		efree(msg);
 		RETURN_FALSE;
 	}
-	
+
 	int32_t res = (bio->biter->*func)((int32_t)arg);
-	
+
 	RETURN_LONG((long)res);
 }
 
@@ -251,7 +251,7 @@ U_CFUNC PHP_FUNCTION(breakiter_previous)
 U_CFUNC PHP_FUNCTION(breakiter_next)
 {
 	bool no_arg_version = false;
-	
+
 	if (ZEND_NUM_ARGS() == 0) {
 		no_arg_version = true;
 	} else if (ZEND_NUM_ARGS() == 1) {
@@ -265,7 +265,7 @@ U_CFUNC PHP_FUNCTION(breakiter_next)
 			no_arg_version = false;
 		}
 	}
-	
+
 	if (no_arg_version) {
 		_breakiter_no_args_ret_int32("breakiter_next",
 				&BreakIterator::next,
@@ -281,17 +281,17 @@ U_CFUNC PHP_FUNCTION(breakiter_current)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"breakiter_current: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
-	
+
 	BREAKITER_METHOD_FETCH_OBJECT;
-	
+
 	int32_t res = bio->biter->current();
-	
+
 	RETURN_LONG((long)res);
 }
 
@@ -314,25 +314,25 @@ U_CFUNC PHP_FUNCTION(breakiter_is_boundary)
 	long offset;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l",
 			&offset) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"breakiter_is_boundary: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
-	
+
 	if (offset < INT32_MIN || offset > INT32_MAX) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"breakiter_is_boundary: offset argument is outside bounds of "
 				"a 32-bit wide integer", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
-	
+
 	BREAKITER_METHOD_FETCH_OBJECT;
-	
+
 	UBool res = bio->biter->isBoundary((int32_t)offset);
-	
+
 	RETURN_BOOL((long)res);
 }
 
@@ -368,7 +368,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_parts_iterator)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"breakiter_get_parts_iterator: bad arguments", 0 TSRMLS_CC);

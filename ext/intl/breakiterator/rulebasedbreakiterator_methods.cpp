@@ -44,7 +44,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			"rbbi_create_instance: bad arguments", 0 TSRMLS_CC);
 		RETURN_NULL();
 	}
-	
+
 	// instantiation of ICU object
 	RuleBasedBreakIterator *rbbi;
 
@@ -108,11 +108,11 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 			"rbbi_get_rules: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
-	
+
 	BREAKITER_METHOD_FETCH_OBJECT;
-	
+
 	const UnicodeString rules = fetch_rbbi(bio)->getRules();
-	
+
 	Z_TYPE_P(return_value) = IS_STRING;
 	if (intl_charFromString(rules, &Z_STRVAL_P(return_value),
 			&Z_STRLEN_P(return_value), BREAKITER_ERROR_CODE_P(bio)) == FAILURE)
@@ -134,9 +134,9 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 			"rbbi_get_rule_status: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
-	
+
 	BREAKITER_METHOD_FETCH_OBJECT;
-	
+
 	RETURN_LONG(fetch_rbbi(bio)->getRuleStatus());
 }
 
@@ -150,9 +150,9 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 			"rbbi_get_rule_status_vec: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
-	
+
 	BREAKITER_METHOD_FETCH_OBJECT;
-	
+
 	int32_t num_rules = fetch_rbbi(bio)->getRuleStatusVec(NULL, 0,
 			BREAKITER_ERROR_CODE(bio));
 	if (BREAKITER_ERROR_CODE(bio) == U_BUFFER_OVERFLOW_ERROR) {
@@ -172,7 +172,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 				0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
-	
+
 	array_init_size(return_value, num_rules);
 	for (int32_t i = 0; i < num_rules; i++) {
 		add_next_index_long(return_value, rules[i]);
@@ -190,22 +190,22 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 			"rbbi_get_binary_rules: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
-	
+
 	BREAKITER_METHOD_FETCH_OBJECT;
-	
+
 	uint32_t		rules_len;
 	const uint8_t	*rules = fetch_rbbi(bio)->getBinaryRules(rules_len);
-	
+
 	if (rules_len > INT_MAX - 1) {
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"rbbi_get_binary_rules: the rules are too large",
 				0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
-	
+
 	char *ret_rules = static_cast<char*>(emalloc(rules_len + 1));
 	memcpy(ret_rules, rules, rules_len);
 	ret_rules[rules_len] = '\0';
-	
+
 	RETURN_STRINGL(ret_rules, rules_len, 0);
 }

@@ -76,11 +76,11 @@ static int BreakIterator_compare_objects(zval *object1,
 
 	bio1 = (BreakIterator_object*)zend_object_store_get_object(object1 TSRMLS_CC);
 	bio2 = (BreakIterator_object*)zend_object_store_get_object(object2 TSRMLS_CC);
-	
+
 	if (bio1->biter == NULL || bio2->biter == NULL) {
 		return bio1->biter == bio2->biter ? 0 : 1;
 	}
-	
+
 	return *bio1->biter == *bio2->biter ? 0 : 1;
 }
 /* }}} */
@@ -136,9 +136,9 @@ static HashTable *BreakIterator_get_debug_info(zval *object, int *is_temp TSRMLS
 	zval					zv = zval_used_for_init;
 	BreakIterator_object	*bio;
 	const BreakIterator		*biter;
-	
+
 	*is_temp = 1;
-	
+
 	array_init_size(&zv, 8);
 
 	bio  = (BreakIterator_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -149,14 +149,14 @@ static HashTable *BreakIterator_get_debug_info(zval *object, int *is_temp TSRMLS
 		return Z_ARRVAL(zv);
 	}
 	add_assoc_bool_ex(&zv, "valid", sizeof("valid"), 1);
-	
+
 	if (bio->text == NULL) {
 		add_assoc_null_ex(&zv, "text", sizeof("text"));
 	} else {
 		zval_add_ref(&bio->text);
 		add_assoc_zval_ex(&zv, "text", sizeof("text"), bio->text);
 	}
-	
+
 	add_assoc_string_ex(&zv, "type", sizeof("type"),
 			const_cast<char*>(typeid(*biter).name()), 1);
 
@@ -210,7 +210,7 @@ static zend_object_value BreakIterator_object_create(zend_class_entry *ce TSRMLS
 	BreakIterator_object*	intern;
 
 	intern = (BreakIterator_object*)ecalloc(1, sizeof(BreakIterator_object));
-	
+
 	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
 #if PHP_VERSION_ID < 50399
     zend_hash_copy(intern->zo.properties, &(ce->default_properties),
@@ -324,7 +324,7 @@ void breakiterator_register_BreakIterator_class(TSRMLS_D)
 	BreakIterator_handlers.compare_objects = BreakIterator_compare_objects;
 	BreakIterator_handlers.clone_obj = BreakIterator_clone_obj;
 	BreakIterator_handlers.get_debug_info = BreakIterator_get_debug_info;
-	
+
 	zend_class_implements(BreakIterator_ce_ptr TSRMLS_CC, 1,
 			zend_ce_traversable);
 

@@ -226,10 +226,10 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 U_CFUNC zend_object_value IntlPartsIterator_object_create(zend_class_entry *ce TSRMLS_DC)
 {
 	zend_object_value		retval;
-	
+
 	retval = IntlIterator_ce_ptr->create_object(ce TSRMLS_CC);
 	retval.handlers = &IntlPartsIterator_handlers;
-	
+
 	return retval;
 }
 
@@ -263,7 +263,7 @@ U_CFUNC zend_function *IntlPartsIterator_get_method(zval **object_ptr,
 			goto end;
 		}
 	}
-	
+
 	ret = std_object_handlers.get_method(object_ptr,
 			method, method_len, key TSRMLS_CC);
 
@@ -286,7 +286,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
-	
+
 	zval *biter_zval = static_cast<zval*>(ii->iterator->data);
 	RETURN_ZVAL(biter_zval, 1, 0);
 }

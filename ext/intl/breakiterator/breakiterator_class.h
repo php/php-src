@@ -36,7 +36,7 @@ typedef struct {
 
 	// ICU break iterator
 	BreakIterator*	biter;
-	
+
 	// current text
 	zval *text;
 } BreakIterator_object;
