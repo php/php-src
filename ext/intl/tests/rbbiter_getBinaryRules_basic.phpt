@@ -1,5 +1,5 @@
 --TEST--
-RuleBasedBreakIterator::getBinaryRules(): basic test
+IntlRuleBasedBreakIterator::getBinaryRules(): basic test
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -18,12 +18,12 @@ $rules = <<<RULES
 !!safe_forward;
 !!safe_reverse;
 RULES;
-$rbbi = new RuleBasedBreakIterator($rules);
+$rbbi = new IntlRuleBasedBreakIterator($rules);
 $rbbi->setText('sdfkjsdf88á.... ,;');;
 
 $br = $rbbi->getBinaryRules();
 
-$rbbi2 = new RuleBasedBreakIterator($br, true);
+$rbbi2 = new IntlRuleBasedBreakIterator($br, true);
 
 var_dump($rbbi->getRules(), $rbbi2->getRules());
 var_dump($rbbi->getRules() == $rbbi2->getRules());

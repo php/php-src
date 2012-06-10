@@ -19,7 +19,7 @@
 
 #include <php.h>
 
-PHP_METHOD(RuleBasedBreakIterator, __construct);
+PHP_METHOD(IntlRuleBasedBreakIterator, __construct);
 
 PHP_FUNCTION(rbbi_get_rules);
 

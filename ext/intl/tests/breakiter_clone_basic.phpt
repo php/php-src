@@ -1,10 +1,10 @@
 --TEST--
-BreakIterator: clone handler
+IntlBreakIterator: clone handler
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
 
-$bi = new RuleBasedBreakiterator('[\p{Letter}\uFFFD]+;[:number:]+;');
+$bi = new IntlRuleBasedBreakIterator('[\p{Letter}\uFFFD]+;[:number:]+;');
 $bi_clone = clone $bi;
 var_dump(get_class($bi), get_class($bi_clone));
 var_dump($bi == $bi_clone);
@@ -15,9 +15,9 @@ var_dump(get_class($bi), get_class($bi_clone));
 var_dump($bi == $bi_clone);
 
 --EXPECT--
-string(22) "RuleBasedBreakIterator"
-string(22) "RuleBasedBreakIterator"
+string(26) "IntlRuleBasedBreakIterator"
+string(26) "IntlRuleBasedBreakIterator"
 bool(true)
-string(22) "RuleBasedBreakIterator"
-string(22) "RuleBasedBreakIterator"
+string(26) "IntlRuleBasedBreakIterator"
+string(26) "IntlRuleBasedBreakIterator"
 bool(true)

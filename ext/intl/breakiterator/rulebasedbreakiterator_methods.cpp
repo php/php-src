@@ -84,7 +84,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	breakiterator_object_create(return_value, rbbi TSRMLS_CC);
 }
 
-U_CFUNC PHP_METHOD(RuleBasedBreakIterator, __construct)
+U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 {
 	zval	orig_this		= *getThis();
 

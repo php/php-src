@@ -1,5 +1,5 @@
 --TEST--
-BreakIterator::getText(): basic test
+IntlBreakIterator::getText(): basic test
 --SKIPIF--
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
@@ -7,7 +7,7 @@ if (!extension_loaded('intl'))
 <?php
 ini_set("intl.error_level", E_WARNING);
 
-$bi = BreakIterator::createWordInstance('pt');
+$bi = IntlBreakIterator::createWordInstance('pt');
 var_dump($bi->getText());
 $bi->setText('foo bar');
 var_dump($bi->getText());

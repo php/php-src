@@ -296,7 +296,7 @@ static const zend_function_entry BreakIterator_class_functions[] = {
 /* {{{ RuleBasedBreakIterator_class_functions
  */
 static const zend_function_entry RuleBasedBreakIterator_class_functions[] = {
-	PHP_ME(RuleBasedBreakIterator,			__construct,							ainfo_rbbi___construct,				ZEND_ACC_PUBLIC)
+	PHP_ME(IntlRuleBasedBreakIterator,		__construct,							ainfo_rbbi___construct,				ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getRules,				rbbi_get_rules,							ainfo_biter_void,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getRuleStatus,			rbbi_get_rule_status,					ainfo_biter_void,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getRuleStatusVec,		rbbi_get_rule_status_vec,				ainfo_biter_void,					ZEND_ACC_PUBLIC)
@@ -314,12 +314,12 @@ void breakiterator_register_BreakIterator_class(TSRMLS_D)
 	zend_class_entry ce;
 
 	/* Create and register 'BreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "BreakIterator", BreakIterator_class_functions);
+	INIT_CLASS_ENTRY(ce, "IntlBreakIterator", BreakIterator_class_functions);
 	ce.create_object = BreakIterator_object_create;
 	ce.get_iterator = _breakiterator_get_iterator;
 	BreakIterator_ce_ptr = zend_register_internal_class(&ce TSRMLS_CC);
 
-	memcpy( &BreakIterator_handlers, zend_get_std_object_handlers(),
+	memcpy(&BreakIterator_handlers, zend_get_std_object_handlers(),
 		sizeof BreakIterator_handlers);
 	BreakIterator_handlers.compare_objects = BreakIterator_compare_objects;
 	BreakIterator_handlers.clone_obj = BreakIterator_clone_obj;
@@ -361,7 +361,7 @@ void breakiterator_register_BreakIterator_class(TSRMLS_D)
 
 
 	/* Create and register 'RuleBasedBreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "RuleBasedBreakIterator",
+	INIT_CLASS_ENTRY(ce, "IntlRuleBasedBreakIterator",
 			RuleBasedBreakIterator_class_functions);
 	RuleBasedBreakIterator_ce_ptr = zend_register_internal_class_ex(&ce,
 		BreakIterator_ce_ptr, NULL TSRMLS_CC);

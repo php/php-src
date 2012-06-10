@@ -1,5 +1,5 @@
 --TEST--
-BreakIterator factories: basic tests
+IntlBreakIterator factories: basic tests
 --SKIPIF--
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
@@ -16,9 +16,9 @@ $t = 'Frase 1... Frase 2'.
 $o1 = $o2 = null;
 foreach ($m as $method) {
 	echo "===== $method =====\n";
-	$o1 = call_user_func(array('Breakiterator', $method), 'ja');
+	$o1 = call_user_func(array('IntlBreakIterator', $method), 'ja');
 	var_dump($o1 == $o2);
-	$o2 = call_user_func(array('Breakiterator', $method), NULL);
+	$o2 = call_user_func(array('IntlBreakIterator', $method), NULL);
 	var_dump($o1 == $o2);
 	echo "\n";
 }

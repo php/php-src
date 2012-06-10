@@ -1,5 +1,5 @@
 --TEST--
-RuleBasedBreakIterator::getRuleStatus(): basic test
+IntlRuleBasedBreakIterator::getRuleStatus(): basic test
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -18,13 +18,13 @@ $rules = <<<RULES
 !!safe_forward;
 !!safe_reverse;
 RULES;
-$rbbi = new RuleBasedBreakIterator($rules);
+$rbbi = new IntlRuleBasedBreakIterator($rules);
 $rbbi->setText('sdfkjsdf88á.... ,;');
 
 do {
 	echo "pos        : {$rbbi->current()}\n",
 		 "rule status: {$rbbi->getRuleStatus()}\n";
-} while ($rbbi->next() != BreakIterator::DONE);
+} while ($rbbi->next() != IntlBreakIterator::DONE);
 
 ?>
 ==DONE==

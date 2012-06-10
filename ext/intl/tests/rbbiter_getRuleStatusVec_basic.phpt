@@ -1,5 +1,5 @@
 --TEST--
-RuleBasedBreakIterator::getRuleStatusVec(): basic test
+IntlRuleBasedBreakIterator::getRuleStatusVec(): basic test
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -20,12 +20,12 @@ $rules = <<<RULES
 !!safe_forward;
 !!safe_reverse;
 RULES;
-$rbbi = new RuleBasedBreakIterator($rules);
+$rbbi = new IntlRuleBasedBreakIterator($rules);
 $rbbi->setText('sdfkjsdf88á.... ,;');;
 
 do {
 	var_dump($rbbi->current(), $rbbi->getRuleStatusVec());
-} while ($rbbi->next() != BreakIterator::DONE);
+} while ($rbbi->next() != IntlBreakIterator::DONE);
 
 ?>
 ==DONE==

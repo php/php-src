@@ -1,5 +1,5 @@
 --TEST--
-BreakIterator::setText(): basic test
+IntlBreakIterator::setText(): basic test
 --SKIPIF--
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
@@ -11,7 +11,7 @@ class A {
 function __tostring() { return 'aaa'; }
 }
 
-$bi = BreakIterator::createWordInstance('pt');
+$bi = IntlBreakIterator::createWordInstance('pt');
 var_dump($bi->setText('foo bar'));
 var_dump($bi->getText());
 var_dump($bi->setText(1));

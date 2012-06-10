@@ -1,5 +1,5 @@
 --TEST--
-RuleBasedBreakIterator::__construct: basic test
+IntlRuleBasedBreakIterator::__construct: basic test
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -18,10 +18,10 @@ $rules = <<<RULES
 !!safe_forward;
 !!safe_reverse;
 RULES;
-$rbbi = new RuleBasedBreakIterator($rules);
+$rbbi = new IntlRuleBasedBreakIterator($rules);
 var_dump(get_class($rbbi));
 ?>
 ==DONE==
 --EXPECT--
-string(22) "RuleBasedBreakIterator"
+string(26) "IntlRuleBasedBreakIterator"
 ==DONE==
