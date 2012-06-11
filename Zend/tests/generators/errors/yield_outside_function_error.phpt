@@ -7,4 +7,4 @@ yield "Test";
 
 ?>
 --EXPECTF--
-Fatal error: The "yield" statement can only be used inside a generator function in %s on line %d
+Fatal error: The "yield" expression can only be used inside a generator function in %s on line %d

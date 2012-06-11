@@ -2667,7 +2667,7 @@ void zend_do_yield(znode *result, const znode *value, const znode *key TSRMLS_DC
 	zend_op *opline;
 
 	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) == 0) {
-		zend_error(E_COMPILE_ERROR, "The \"yield\" statement can only be used inside a generator function");
+		zend_error(E_COMPILE_ERROR, "The \"yield\" expression can only be used inside a generator function");
 	}
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -2685,6 +2685,27 @@ void zend_do_yield(znode *result, const znode *value, const znode *key TSRMLS_DC
 	} else {
 		SET_UNUSED(opline->op2);
 	}
+
+	opline->result_type = IS_VAR;
+	opline->result.var = get_temporary_variable(CG(active_op_array));
+	GET_NODE(result, opline->result);
+}
+/* }}} */
+
+void zend_do_delegate_yield(znode *result, const znode *value TSRMLS_DC) /* {{{ */
+{
+	zend_op *opline;
+
+	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) == 0) {
+		zend_error(E_COMPILE_ERROR, "The \"yield*\" expression can only be used inside a generator function");
+	}
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_DELEGATE_YIELD;
+
+	SET_NODE(opline->op1, value);
+	SET_UNUSED(opline->op2);
 
 	opline->result_type = IS_VAR;
 	opline->result.var = get_temporary_variable(CG(active_op_array));

@@ -804,6 +804,7 @@ expr_without_variable:
 	|	T_PRINT expr  { zend_do_print(&$$, &$2 TSRMLS_CC); }
 	|	T_YIELD { zend_do_yield(&$$, NULL, NULL TSRMLS_CC); }
 	|	T_YIELD expr { zend_do_yield(&$$, &$2, NULL TSRMLS_CC); }
+	|	T_YIELD '*' expr { zend_do_delegate_yield(&$$, &$3 TSRMLS_CC); }
 	|	function is_generator is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, $3.op_type, 0 TSRMLS_CC); }
 		'(' parameter_list ')' lexical_vars { zend_do_suspend_if_generator(TSRMLS_C); }
 		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $4; }

@@ -491,6 +491,7 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 void zend_do_end_function_call(znode *function_name, znode *result, const znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 void zend_do_yield(znode *result, const znode *value, const znode *key TSRMLS_DC);
+void zend_do_delegate_yield(znode *result, const znode *value TSRMLS_DC);
 void zend_do_suspend_if_generator(TSRMLS_D);
 void zend_do_handle_exception(TSRMLS_D);
 

@@ -245,7 +245,7 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 		}
 
 		/* Update the send_target to use the temporary variable with the same
-		 * offset as the original generator, but in out temporary variable
+		 * offset as the original generator, but in our temporary variable
 		 * memory segment. */
 		if (orig->send_target) {
 			size_t offset = (char *) orig->send_target - (char *) execute_data->Ts;
@@ -535,7 +535,6 @@ ZEND_METHOD(Generator, send)
 
 	/* The sent value was initialized to NULL, so dtor that */
 	zval_ptr_dtor(&generator->send_target->var.ptr);
-
 
 	/* Set new sent value */
 	Z_ADDREF_P(value);

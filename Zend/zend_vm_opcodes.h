@@ -161,3 +161,4 @@
 #define ZEND_JMP_SET_VAR                     158
 #define ZEND_SUSPEND_AND_RETURN_GENERATOR    159
 #define ZEND_YIELD                           160
+#define ZEND_DELEGATE_YIELD                  161
