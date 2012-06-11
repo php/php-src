@@ -1268,6 +1268,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 		case IS_STRING: {
 				zval tmp;
 				zval *ptr;
+				long ldim;
 
 				if (Z_TYPE_P(dim) != IS_LONG) {
 					switch(Z_TYPE_P(dim)) {
@@ -1302,7 +1303,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 				INIT_PZVAL(ptr);
 				Z_TYPE_P(ptr) = IS_STRING;
 
-				long ldim = Z_LVAL_P(dim);
+				ldim = Z_LVAL_P(dim);
 				if (ldim < 0) {
 				    ldim += Z_STRLEN_P(container);
 				}
