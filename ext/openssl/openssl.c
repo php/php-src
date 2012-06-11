@@ -239,7 +239,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_get_details, 0)
 ZEND_END_ARG_INFO()
 
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs5_pbkdf2_hmac, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pbkdf2, 0, 0, 4)
     ZEND_ARG_INFO(0, password)
     ZEND_ARG_INFO(0, salt)
     ZEND_ARG_INFO(0, key_length)
@@ -435,7 +435,7 @@ const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_open,				arginfo_openssl_open)
 
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
-	PHP_FE(openssl_pkcs5_pbkdf2_hmac,	arginfo_openssl_pkcs5_pbkdf2_hmac)
+	PHP_FE(openssl_pbkdf2,	arginfo_openssl_pbkdf2)
 #endif
 
 /* for S/MIME handling */
@@ -3329,9 +3329,9 @@ PHP_FUNCTION(openssl_pkey_get_details)
 
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
 
-/* {{{ proto string openssl_pkcs5_pbkdf2_hmac(string password, string salt, long key_length, long iterations [, string digest_method = "sha1"])
+/* {{{ proto string openssl_pbkdf2(string password, string salt, long key_length, long iterations [, string digest_method = "sha1"])
    Generates a PKCS5 v2 PBKDF2 string, defaults to sha1 */
-PHP_FUNCTION(openssl_pkcs5_pbkdf2_hmac)
+PHP_FUNCTION(openssl_pbkdf2)
 {
 	long key_length = 0, iterations = 0;
 	char *password; int password_len;
