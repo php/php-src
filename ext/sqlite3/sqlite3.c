@@ -1094,7 +1094,7 @@ static int php_sqlite3_stream_close(php_stream *stream, int close_handle TSRMLS_
 	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
 	
 	if (sqlite3_blob_close(sqlite3_stream->blob) != SQLITE_OK) {
-		/* Error occured, but it still closed */
+		/* Error occurred, but it still closed */
 	}
 
 	efree(sqlite3_stream);
