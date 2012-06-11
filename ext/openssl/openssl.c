@@ -3328,7 +3328,6 @@ PHP_FUNCTION(openssl_pkey_get_details)
 /* }}} */
 
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
-
 /* {{{ proto string openssl_pbkdf2(string password, string salt, long key_length, long iterations [, string digest_method = "sha1"])
    Generates a PKCS5 v2 PBKDF2 string, defaults to sha1 */
 PHP_FUNCTION(openssl_pbkdf2)
