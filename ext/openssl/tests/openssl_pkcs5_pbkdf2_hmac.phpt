@@ -1,7 +1,7 @@
 --TEST--
 openssl_pkcs5_pbkdf2_hmac() tests
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+<?php if (!extension_loaded("openssl") || !function_exists("openssl_pkcs5_pbkdf2_hmac")) print "skip"; ?>
 --FILE--
 <?php
 // official test vectors

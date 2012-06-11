@@ -238,6 +238,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_get_details, 0)
     ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs5_pbkdf2_hmac, 0, 0, 4)
     ZEND_ARG_INFO(0, password)
     ZEND_ARG_INFO(0, salt)
@@ -245,6 +246,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs5_pbkdf2_hmac, 0, 0, 4)
     ZEND_ARG_INFO(0, iterations)
     ZEND_ARG_INFO(0, digest_algorithm)
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_verify, 0, 0, 2)
     ZEND_ARG_INFO(0, filename)
@@ -432,7 +434,9 @@ const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_seal,				arginfo_openssl_seal)
 	PHP_FE(openssl_open,				arginfo_openssl_open)
 
-  PHP_FE(openssl_pkcs5_pbkdf2_hmac,	arginfo_openssl_pkcs5_pbkdf2_hmac)
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+	PHP_FE(openssl_pkcs5_pbkdf2_hmac,	arginfo_openssl_pkcs5_pbkdf2_hmac)
+#endif
 
 /* for S/MIME handling */
 	PHP_FE(openssl_pkcs7_verify,		arginfo_openssl_pkcs7_verify)
@@ -3323,6 +3327,8 @@ PHP_FUNCTION(openssl_pkey_get_details)
 
 /* }}} */
 
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+
 /* {{{ proto string openssl_pkcs5_pbkdf2_hmac(string password, string salt, long key_length, long iterations [, string digest_method = "sha1"])
    Generates a PKCS5 v2 PBKDF2 string, defaults to sha1 */
 PHP_FUNCTION(openssl_pkcs5_pbkdf2_hmac)
@@ -3369,6 +3375,8 @@ PHP_FUNCTION(openssl_pkcs5_pbkdf2_hmac)
 	}
 }
 /* }}} */
+
+#endif
 
 /* {{{ PKCS7 S/MIME functions */
 
