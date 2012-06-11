@@ -1080,7 +1080,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
 					) {
 #ifdef PHP_WIN32
-						fprintf(stderr, "%s: %s in %s on line%d\n", error_type_str, buffer, error_filename, error_lineno);
+						fprintf(stderr, "%s: %s in %s on line %d\n", error_type_str, buffer, error_filename, error_lineno);
 						fflush(stderr);
 #else
 						fprintf(stderr, "%s: %s in %s on line %d\n", error_type_str, buffer, error_filename, error_lineno);
