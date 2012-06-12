@@ -43,7 +43,7 @@ PHP                                                                        NEWS
   . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
 
 - Hash
-  . Added support for PBKDF2 via hash_pbkdf2()F
+  . Added support for PBKDF2 via hash_pbkdf2(). (Anthony Ferrara)
 
 - MySQLi
   . Dropped support for LOAD DATA LOCAL INFILE handlers when using libmysql.
