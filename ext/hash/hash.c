@@ -652,7 +652,6 @@ PHP_FUNCTION(hash_pbkdf2)
 	temp = emalloc(ops->digest_size);
 
 	/* Setup Keys that will be used for all hmac rounds */
-	memset(K2, 0, ops->block_size);
 	php_hash_hmac_prep_key(K1, ops, context, (unsigned char *) pass, pass_len);
 	/* Convert K1 to opad -- 0x6A = 0x36 ^ 0x5C */
 	php_hash_string_xor_char(K2, K1, 0x6A, ops->block_size);
@@ -661,7 +660,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	if (length == 0) {
 		length = ops->digest_size;
 	}
-        digest_length = length;
+	digest_length = length;
 	if (!raw_output) {
 		digest_length = (long) ceil((float) length / 2.0);
 	}
