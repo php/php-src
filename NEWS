@@ -7,8 +7,8 @@ PHP                                                                        NEWS
     crash during execution). (Dmitry)
   . Fixed bug #51094 (parse_ini_file() with INI_SCANNER_RAW cuts a value that
     includes a semi-colon). (Pierrick)
-  . Fixed potential overflow in _php_stream_scandir. (Jason Powell,
-    Stas)
+  . Fixed potential overflow in _php_stream_scandir (CVE-2012-2688). 
+    (Jason Powell, Stas)
 
 - EXIF:
   . Fixed information leak in ext exif (discovered by Martin Noga, 
