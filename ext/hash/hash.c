@@ -222,8 +222,8 @@ static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *
 	if (key_len > ops->block_size) {
 		/* Reduce the key first */
 		ops->hash_init(context);
-		ops->hash_update(context, (unsigned char *) key, key_len);
-		ops->hash_final((unsigned char *) K, context);
+		ops->hash_update(context, key, key_len);
+		ops->hash_final(K, context);
 	} else {
 		memcpy(K, key, key_len);
 	}
