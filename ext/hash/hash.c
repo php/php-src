@@ -205,14 +205,14 @@ PHP_FUNCTION(hash_file)
 
 static inline void php_hash_string_xor_char(unsigned char *out, const unsigned char *in, const unsigned char xor_with, const int length) {
 	int i;
-	for(i=0; i < length; i++) {
+	for (i=0; i < length; i++) {
 		out[i] = in[i] ^ xor_with;
 	}
 }
 
 static inline void php_hash_string_xor(unsigned char *out, const unsigned char *in, const unsigned char *xor_with, const int length) {
 	int i;
-	for(i=0; i < length; i++) {
+	for (i=0; i < length; i++) {
 		out[i] = in[i] ^ xor_with[i];
 	}
 }
@@ -687,6 +687,11 @@ PHP_FUNCTION(hash_pbkdf2)
 
 		/* temp = digest */
 		memcpy(temp, digest, ops->digest_size);
+
+		/* 
+		 * Note that the loop starting at 1 is intentional, since we've already done
+		 * the first round of the algorithm.
+		 */
 		for (j = 1; j < iterations; j++) {
 			/* digest = hash_hmac(digest, password) { */
 			php_hash_hmac_round(digest, ops, context, K1, digest, ops->digest_size);
@@ -698,7 +703,7 @@ PHP_FUNCTION(hash_pbkdf2)
 		/* result += temp */
 		memcpy(result + ((i - 1) * ops->digest_size), temp, ops->digest_size);
 	}
-	/* Zero potentiall sensitive variables */
+	/* Zero potentially sensitive variables */
 	memset(K1, 0, ops->block_size);
 	memset(K2, 0, ops->block_size);
 	memset(computed_salt, 0, salt_len + 4);
