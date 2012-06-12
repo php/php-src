@@ -42,6 +42,10 @@ PHP                                                                        NEWS
     pattern). (Gustavo)
   . Fixed bug #60785 (memory leak in IntlDateFormatter constructor). (Gustavo)
   
+- PDO:
+  . Fixed bug #61755 (A parsing bug in the prepared statements can lead to
+    access violations). (Johannes)
+
 - Phar:
   . Fixed bug #62227 (Invalid phar stream path causes crash). (Felipe)
 
