@@ -629,12 +629,12 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 
 	if (iterations <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Iterations Must Be A Positive Integer: %ld", iterations);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Iterations must be a positive integer: %ld", iterations);
 		RETURN_FALSE;
 	}
 
 	if (length < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length Must Be Greater Than Or Equal To 0: %ld", length);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length must be greater than or equal to 0: %ld", length);
 		RETURN_FALSE;
 	}
 
