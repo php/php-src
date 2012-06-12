@@ -42,6 +42,9 @@ PHP                                                                        NEWS
 	still exists for backward compatibility but is doing nothing). (Pierrick)
   . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
 
+- Hash
+  . Added support for PBKDF2 via hash_pbkdf2()F
+
 - MySQLi
   . Dropped support for LOAD DATA LOCAL INFILE handlers when using libmysql.
     Known for stability problems. (Andrey)

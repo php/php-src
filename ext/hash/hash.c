@@ -23,6 +23,7 @@
 #include "config.h"
 #endif
 
+#include <math.h>
 #include "php_hash.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -202,10 +203,45 @@ PHP_FUNCTION(hash_file)
 }
 /* }}} */
 
+static inline void php_hash_string_xor_char(unsigned char *out, const unsigned char *in, const unsigned char xor_with, const int length) {
+	int i;
+	for(i=0; i < length; i++) {
+		out[i] = in[i] ^ xor_with;
+	}
+}
+
+static inline void php_hash_string_xor(unsigned char *out, const unsigned char *in, const unsigned char *xor_with, const int length) {
+	int i;
+	for(i=0; i < length; i++) {
+		out[i] = in[i] ^ xor_with[i];
+	}
+}
+
+static inline void php_hash_hmac_prep_key(unsigned char *K, const php_hash_ops *ops, void *context, const unsigned char *key, const int key_len) {
+	memset(K, 0, ops->block_size);
+	if (key_len > ops->block_size) {
+		/* Reduce the key first */
+		ops->hash_init(context);
+		ops->hash_update(context, (unsigned char *) key, key_len);
+		ops->hash_final((unsigned char *) K, context);
+	} else {
+		memcpy(K, key, key_len);
+	}
+	/* XOR the key with 0x36 to get the ipad) */
+	php_hash_string_xor_char(K, K, 0x36, ops->block_size);
+}
+
+static inline void php_hash_hmac_round(unsigned char *final, const php_hash_ops *ops, void *context, const unsigned char *key, const unsigned char *data, const long data_size) {
+	ops->hash_init(context);
+	ops->hash_update(context, key, ops->block_size);
+	ops->hash_update(context, data, data_size);
+	ops->hash_final(final, context);
+}
+
 static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_bool raw_output_default) /* {{{ */
 {
 	char *algo, *data, *digest, *key, *K;
-	int algo_len, data_len, key_len, i;
+	int algo_len, data_len, key_len;
 	zend_bool raw_output = raw_output_default;
 	const php_hash_ops *ops;
 	void *context;
@@ -230,52 +266,29 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 	}
 
 	context = emalloc(ops->context_size);
-	ops->hash_init(context);
 
 	K = emalloc(ops->block_size);
-	memset(K, 0, ops->block_size);
+	digest = emalloc(ops->digest_size + 1);
 
-	if (key_len > ops->block_size) {
-		/* Reduce the key first */
-		ops->hash_update(context, (unsigned char *) key, key_len);
-		ops->hash_final((unsigned char *) K, context);
-		/* Make the context ready to start over */
-		ops->hash_init(context);
-	} else {
-		memcpy(K, key, key_len);
-	}
-			
-	/* XOR ipad */
-	for(i=0; i < ops->block_size; i++) {
-		K[i] ^= 0x36;
-	}
-	ops->hash_update(context, (unsigned char *) K, ops->block_size);
+	php_hash_hmac_prep_key((unsigned char *) K, ops, context, (unsigned char *) key, key_len);		
 
 	if (isfilename) {
 		char buf[1024];
 		int n;
-
+		ops->hash_init(context);
+		ops->hash_update(context, (unsigned char *) K, ops->block_size);
 		while ((n = php_stream_read(stream, buf, sizeof(buf))) > 0) {
 			ops->hash_update(context, (unsigned char *) buf, n);
 		}
 		php_stream_close(stream);
+		ops->hash_final((unsigned char *) digest, context);
 	} else {
-		ops->hash_update(context, (unsigned char *) data, data_len);
+		php_hash_hmac_round((unsigned char *) digest, ops, context, (unsigned char *) K, (unsigned char *) data, data_len);
 	}
 
-	digest = emalloc(ops->digest_size + 1);
-	ops->hash_final((unsigned char *) digest, context);
+	php_hash_string_xor_char((unsigned char *) K, (unsigned char *) K, 0x6A, ops->block_size);
 
-	/* Convert K to opad -- 0x6A = 0x36 ^ 0x5C */
-	for(i=0; i < ops->block_size; i++) {
-		K[i] ^= 0x6A;
-	}
-
-	/* Feed this result into the outter hash */
-	ops->hash_init(context);
-	ops->hash_update(context, (unsigned char *) K, ops->block_size);
-	ops->hash_update(context, (unsigned char *) digest, ops->digest_size);
-	ops->hash_final((unsigned char *) digest, context);
+	php_hash_hmac_round((unsigned char *) digest, ops, context, (unsigned char *) K, (unsigned char *) digest, ops->digest_size);
 
 	/* Zero the key */
 	memset(K, 0, ops->block_size);
@@ -588,6 +601,124 @@ PHP_FUNCTION(hash_algos)
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
 		add_next_index_stringl(return_value, str, str_len-1, 1);
 	}
+}
+/* }}} */
+
+/* {{{ proto string hash_pbkdf2(string algo, string password, string salt, int iterations [, int length = 0, bool raw_output = false])
+Generate a PBKDF2 hash of the given password and salt
+Returns lowercase hexits by default */
+PHP_FUNCTION(hash_pbkdf2)
+{
+	char *returnval, *algo, *salt, *pass = NULL;
+	unsigned char *computed_salt, *digest, *temp, *result, *K1, *K2 = NULL;
+	long loops, i, j, algo_len, pass_len, iterations, length, digest_length = 0;
+	int argc, salt_len = 0;
+	zend_bool raw_output = 0;
+	const php_hash_ops *ops;
+	void *context;
+
+	argc = ZEND_NUM_ARGS();
+	if (zend_parse_parameters(argc TSRMLS_CC, "sssl|lb", &algo, &algo_len, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output) == FAILURE) {
+		return;
+	}
+
+	ops = php_hash_fetch_ops(algo, algo_len);
+	if (!ops) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown hashing algorithm: %s", algo);
+		RETURN_FALSE;
+	}
+
+	if (iterations <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Iterations Must Be A Positive Integer: %ld", iterations);
+		RETURN_FALSE;
+	}
+
+	if (length < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length Must Be Greater Than Or Equal To 0: %ld", length);
+		RETURN_FALSE;
+	}
+
+	if (salt_len > INT_MAX - 4) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long, max of INT_MAX - 4 bytes: %d supplied", salt_len);
+		RETURN_FALSE;
+	}
+
+	context = emalloc(ops->context_size);
+	ops->hash_init(context);
+
+	K1 = emalloc(ops->block_size);
+	K2 = emalloc(ops->block_size);
+	digest = emalloc(ops->digest_size);
+	temp = emalloc(ops->digest_size);
+
+	/* Setup Keys that will be used for all hmac rounds */
+	memset(K2, 0, ops->block_size);
+	php_hash_hmac_prep_key(K1, ops, context, (unsigned char *) pass, pass_len);
+	/* Convert K1 to opad -- 0x6A = 0x36 ^ 0x5C */
+	php_hash_string_xor_char(K2, K1, 0x6A, ops->block_size);
+
+	/* Setup Main Loop to build a long enough result */
+	if (length == 0) {
+		length = ops->digest_size;
+	}
+        digest_length = length;
+	if (!raw_output) {
+		digest_length = (long) ceil((float) length / 2.0);
+	}
+
+	loops = (long) ceil((float) digest_length / (float) ops->digest_size);
+
+	result = safe_emalloc(loops, ops->digest_size, 0);
+
+	computed_salt = safe_emalloc(salt_len, 1, 4);
+	memcpy(computed_salt, (unsigned char *) salt, salt_len);
+
+	for (i = 1; i <= loops; i++) {
+		/* digest = hash_hmac(salt + pack('N', i), password) { */
+
+		/* pack("N", i) */
+		computed_salt[salt_len] = (unsigned char) (i >> 24);
+		computed_salt[salt_len + 1] = (unsigned char) ((i & 0xFF0000) >> 16);
+		computed_salt[salt_len + 2] = (unsigned char) ((i & 0xFF00) >> 8);
+		computed_salt[salt_len + 3] = (unsigned char) (i & 0xFF);
+
+		php_hash_hmac_round(digest, ops, context, K1, computed_salt, (long) salt_len + 4);
+		php_hash_hmac_round(digest, ops, context, K2, digest, ops->digest_size);
+		/* } */
+
+		/* temp = digest */
+		memcpy(temp, digest, ops->digest_size);
+		for (j = 1; j < iterations; j++) {
+			/* digest = hash_hmac(digest, password) { */
+			php_hash_hmac_round(digest, ops, context, K1, digest, ops->digest_size);
+			php_hash_hmac_round(digest, ops, context, K2, digest, ops->digest_size);
+			/* } */
+			/* temp ^= digest */
+			php_hash_string_xor(temp, temp, digest, ops->digest_size);
+		}
+		/* result += temp */
+		memcpy(result + ((i - 1) * ops->digest_size), temp, ops->digest_size);
+	}
+	/* Zero potentiall sensitive variables */
+	memset(K1, 0, ops->block_size);
+	memset(K2, 0, ops->block_size);
+	memset(computed_salt, 0, salt_len + 4);
+	efree(K1);
+	efree(K2);
+	efree(computed_salt);
+	efree(context);
+	efree(digest);
+	efree(temp);
+
+	returnval = safe_emalloc(length, 1, 1);
+	if (raw_output) {
+		memcpy(returnval, result, length);
+	} else {
+		php_hash_bin2hex(returnval, result, digest_length);
+	}
+	returnval[length] = 0;
+	efree(result);
+	RETURN_STRINGL(returnval, length, 0);
 }
 /* }}} */
 
@@ -1003,6 +1134,15 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_hash_algos, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_hash_pbkdf2, 0, 0, 4)
+	ZEND_ARG_INFO(0, algo)
+	ZEND_ARG_INFO(0, password)
+	ZEND_ARG_INFO(0, salt)
+	ZEND_ARG_INFO(0, iterations)
+	ZEND_ARG_INFO(0, length)
+	ZEND_ARG_INFO(0, raw_output)
+ZEND_END_ARG_INFO()
+
 /* BC Land */
 #ifdef PHP_MHASH_BC
 ZEND_BEGIN_ARG_INFO(arginfo_mhash_get_block_size, 0)
@@ -1049,6 +1189,7 @@ const zend_function_entry hash_functions[] = {
 	PHP_FE(hash_copy,								arginfo_hash_copy)
 
 	PHP_FE(hash_algos,								arginfo_hash_algos)
+	PHP_FE(hash_pbkdf2,								arginfo_hash_pbkdf2)
 
 	/* BC Land */
 #ifdef PHP_HASH_MD5_NOT_IN_CORE
@@ -1105,3 +1246,4 @@ ZEND_GET_MODULE(hash)
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
+
