@@ -67,12 +67,12 @@ hash_pbkdf2(): Unknown hashing algorithm: foo
 
 -- Testing hash_pbkdf2() function with invalid iterations --
 bool(false)
-hash_pbkdf2(): Iterations Must Be A Positive Integer: 0
+hash_pbkdf2(): Iterations must be a positive integer: 0
 bool(false)
-hash_pbkdf2(): Iterations Must Be A Positive Integer: -1
+hash_pbkdf2(): Iterations must be a positive integer: -1
 
 -- Testing hash_pbkdf2() function with invalid length --
 bool(false)
-hash_pbkdf2(): Length Must Be Greater Than Or Equal To 0: -1
+hash_pbkdf2(): Length must be greater than or equal to 0: -1
 
 ===Done===
