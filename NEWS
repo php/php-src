@@ -1,18 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-30 May 2012, PHP 5.4.4 RC2
-- COM:
-  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
-
-- Core:
-  . Fixed CVE-2012-2143. (Solar Designer)
-  . Fixed bug #62097 (fix for for bug #54547). (Gustavo)
-
-- Intl:
-  . Fixed bug #62082 (Memory corruption in internal function 
-    get_icu_disp_value_src_php()). (Gustavo)
-
-17 May 2012, PHP 5.4.4 RC1
+14 Jun 2012, PHP 5.4.4
 
 - CLI Server:
   . Implemented FR #61977 (Need CLI web-server support for files with .htm & 
@@ -23,12 +11,13 @@ PHP                                                                        NEWS
   . Fixed bug #61546 (functions related to current script failed when chdir() 
     in cli sapi). (Laruence, reeze.xia@gmail.com)
 
-- CURL:
-  . Fixed bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction).
-    (Laruence)
+- COM:
+  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
 
 - Core:
   . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
+  . Fixed CVE-2012-2143. (Solar Designer)
+  . Fixed bug #62097 (fix for for bug #54547). (Gustavo)
   . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
     member of a null object). (Laruence)
   . Fixed bug #61978 (Object recursion not detected for classes that implement
@@ -53,6 +42,18 @@ PHP                                                                        NEWS
   . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
     set to null). (Anatoliy)
   . Changed php://fd to be available only for CLI.
+
+- CURL:
+  . Fixed bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction).
+    (Laruence)
+
+- Intl:
+  . Fixed bug #62082 (Memory corruption in internal function 
+    get_icu_disp_value_src_php()). (Gustavo)
+
+- PDO:
+  . Fixed bug #61755 (A parsing bug in the prepared statements can lead to
+    access violations). (Johannes)
 
 - Phar:
   . Fix bug #61065 (Secunia SA44335, CVE-2012-2386). (Rasmus)
