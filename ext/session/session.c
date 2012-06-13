@@ -229,7 +229,7 @@ static void php_session_decode(const char *val, int vallen TSRMLS_DC) /* {{{ */
  * into URLs.
  */
 
-static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,-";
+static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-";
 
 enum {
 	PS_HASH_FUNC_MD5,
