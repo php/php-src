@@ -1,17 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-31 May 2012, PHP 5.3.14 RC2
-- COM:
-  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
-
-- Core:
-  . Fixed CVE-2012-2143. (Solar Designer)
-
-- Intl:
-  . Fixed bug #62082 (Memory corruption in internal function
-    get_icu_disp_value_src_php()). (Gustavo)
-
-17 May 2012, PHP 5.3.14RC1
+14 Jun 2012, PHP 5.3.14
 
 - CLI SAPI:
   . Fixed bug #61546 (functions related to current script failed when chdir() 
@@ -21,7 +10,11 @@ PHP                                                                        NEWS
   . Fixed bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction).
     (Laruence)
 
+- COM:
+  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
+
 - Core:
+  . Fixed CVE-2012-2143. (Solar Designer)
   . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
     member of a null object). (Laruence)
   . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
@@ -39,6 +32,16 @@ PHP                                                                        NEWS
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
     (Laruence, Gustavo)
 
+- Iconv extension:
+  . Fixed a bug that iconv extension fails to link to the correct library
+    when another extension makes use of a library that links to the iconv
+    library. See https://bugs.gentoo.org/show_bug.cgi?id=364139 for detail.
+    (Moriyoshi)
+
+- Intl:
+  . Fixed bug #62082 (Memory corruption in internal function
+    get_icu_disp_value_src_php()). (Gustavo)
+
 - JSON
   . Fixed bug #61537 (json_encode() incorrectly truncates/discards
     information). (Adam)
@@ -49,12 +52,6 @@ PHP                                                                        NEWS
 
 - Phar:
   . Fix bug #61065 (Secunia SA44335). (Rasmus)
-
-- Iconv extension:
-  . Fixed a bug that iconv extension fails to link to the correct library
-    when another extension makes use of a library that links to the iconv
-    library. See https://bugs.gentoo.org/show_bug.cgi?id=364139 for detail.
-    (Moriyoshi)
 
 - Streams:
   . Fixed bug #61961 (file_get_contents leaks when access empty file with
