@@ -5,9 +5,10 @@ socket_import_stream: effects of closing
 if (!extension_loaded('sockets')) {
 	die('SKIP sockets extension not available.');
 }
-if(substr(PHP_OS, 0, 3) == 'WIN' ) {
-  die("skip Not Valid for Windows");
+if(substr(PHP_OS, 0, 3) != 'WIN' ) {
+  die("skip Not Valid for Linux");
 }
+
 --FILE--
 <?php
 
@@ -79,10 +80,15 @@ stream_set_blocking
 Warning: stream_set_blocking(): %d is not a valid stream resource in %s on line %d
 
 socket_set_block 
-Warning: socket_set_block(): unable to set blocking mode [%d]: %s in %s on line %d
+Warning: socket_set_block(): An operation was attempted on something that is not a socket.
+ in %ssocket_import_stream-4-win.php on line %d
+
+Warning: socket_set_block(): unable to set blocking mode [0]: The operation completed successfully.
+ in %ssocket_import_stream-4-win.php on line %d
 
 socket_get_option 
-Warning: socket_get_option(): unable to retrieve socket option [%d]: %s in %s on line %d
+Warning: socket_get_option(): unable to retrieve socket option [0]: An operation was attempted on something that is not a socket.
+ in %ssocket_import_stream-4-win.php on line %d
 
 
 
