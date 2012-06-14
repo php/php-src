@@ -2390,6 +2390,25 @@ ZEND_METHOD(reflection_parameter, getClass)
 }
 /* }}} */
 
+/* {{{ proto public string|NULL ReflectionParameter::getTypeHint()
+   Returns the type hint, or NULL if there is none */
+ZEND_METHOD(reflection_parameter, getTypeHint)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	if (!param->arg_info->type_hint) {
+		RETVAL_NULL();
+	} else {
+		RETVAL_STRING(zend_get_type_by_const(param->arg_info->type_hint), 1);
+	}
+}
+
 /* {{{ proto public bool ReflectionParameter::isArray()
    Returns whether parameter MUST be an array */
 ZEND_METHOD(reflection_parameter, isArray)
@@ -5876,14 +5895,14 @@ static const zend_function_entry reflection_property_functions[] = {
 };
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_parameter_export, 0, 0, 2)
-	ZEND_ARG_INFO(0, function)
-	ZEND_ARG_INFO(0, parameter)
-	ZEND_ARG_INFO(0, return)
+	ZEND_ARG_TYPE_INFO(0, function, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, return, IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_reflection_parameter___construct, 0)
-	ZEND_ARG_INFO(0, function)
-	ZEND_ARG_INFO(0, parameter)
+	ZEND_ARG_TYPE_INFO(0, function, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_parameter_functions[] = {
@@ -5897,6 +5916,7 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, getDeclaringFunction, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getClass, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, getTypeHint, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isArray, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isCallable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, allowsNull, arginfo_reflection__void, 0)
