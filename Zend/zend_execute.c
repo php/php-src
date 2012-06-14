@@ -645,9 +645,6 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be callable", "", zend_zval_type_name(arg), "" TSRMLS_CC);
 				}
 				break;
-
-			default:
-				zend_error(E_ERROR, "Unknown typehint");
 		}
 	}
 	return 1;
