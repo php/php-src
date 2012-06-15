@@ -50,6 +50,9 @@ PHP                                                                        NEWS
   . Deprecated the /e modifier
     (https://wiki.php.net/rfc/remove_preg_replace_eval_modifier). (Nikita Popov)
 
+- PDO_MySQL:
+  . Changed default value for ATTR_EMULATE_PREPARES to 0. (Anthony Ferrara)
+
 - pgsql
   . Added pg_escape_literal() and pg_escape_identifier() (Yasuo)
 

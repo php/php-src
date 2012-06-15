@@ -587,7 +587,8 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	H->max_buffer_size = 1024*1024;
 #endif
 
-	H->buffered = H->emulate_prepare = 1;
+	H->buffered = 1;
+	H->emulate_prepare = 0;
 
 	/* handle MySQL options */
 	if (driver_options) {
