@@ -206,9 +206,7 @@ _zip_readcdir(FILE *fp, off_t buf_offset, unsigned char *buf, unsigned char *eoc
     cd->comment = NULL;
     cd->comment_len = _zip_read2(&cdp);
 
-	/* without checking the ZIP_CHECKCONS flag we'll not able even to open inconsistent
-	   archives at this place, which would break bc in PHP */
-    if ((ZIP_CHECKCONS == (flags & ZIP_CHECKCONS)) && ((zip_uint64_t)cd->offset)+cd->size > buf_offset + (eocd-buf)) {
+    if (((zip_uint64_t)cd->offset)+cd->size > buf_offset + (eocd-buf)) {
 	/* cdir spans past EOCD record */
 	_zip_error_set(error, ZIP_ER_INCONS, 0);
 	cd->nentry = 0;
@@ -239,13 +237,7 @@ _zip_readcdir(FILE *fp, off_t buf_offset, unsigned char *buf, unsigned char *eoc
 	}
     }
 
-	/* the first if branch goes the old way of libzip 0.9 so we don't loose 
-	   the bc for reading inconsistent files */
-	if ((ZIP_CHECKCONS != (flags & ZIP_CHECKCONS)) && cd->size < (unsigned int)(eocd-buf)) {
-	cdp = eocd - cd->size;
-	bufp = &cdp;
-	}
-	else if (cd->offset >= buf_offset) {
+    if (cd->offset >= buf_offset) {
 	/* if buffer already read in, use it */
 	cdp = buf + (cd->offset - buf_offset);
 	bufp = &cdp;
