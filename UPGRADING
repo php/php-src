@@ -479,6 +479,10 @@ UPGRADE NOTES - PHP 5.3
 - Firebird and SNMP support are no longer available on Windows. Firebird support
   may be reintroduced in the future.
 
+- As of PHP 5.3.15 and above the COM extension isn't compiled into PHP anymore.
+  It'll still be delivered with the standard PHP release but must be enclosed
+  with the "extension = php_com_dotnet.dll".
+
 =====================
 11.1 New in PHP 5.3.4
 =====================
