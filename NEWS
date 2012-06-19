@@ -53,6 +53,10 @@ PHP                                                                        NEWS
   . Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
     with constant). (Laruence)
 
+- SPL:
+  . Fixed bug #62262 (RecursiveArrayIterator does not implement Countable).
+    (Nikita Popov)
+
 - XML Writer:
   . Fixed bug #62064 (memory leak in the XML Writer module). 
     (jean-pierre dot lozi at lip6 dot fr)
