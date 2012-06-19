@@ -512,10 +512,11 @@ b. Extensions with changed behavior
 
 - is_link now works properly for symbolic links on Windows Vista
   or later. Earlier systems do not support symbolic links.
- 
- - As of PHP 5.4.5 and above the COM extension isn't compiled into PHP anymore.
-   It'll still be delivered with the standard PHP release but must be enclosed
-   with the "extension = php_com_dotnet.dll" directive in php.ini.
+
+- As of PHP 5.4.5 and above the COM extension isn't compiled statically in PHP
+  anymore but shared. It'll still be delivered with the standard PHP release but
+  must be activated manually with the "extension = php_com_dotnet.dll" directive
+  in php.ini.
 
 ==================
 12. New in PHP 5.4
