@@ -1538,7 +1538,7 @@ ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const t
 	return get_zval_ptr_ptr(op_type, node, Ts, should_free, type);
 }
 
-void zend_clean_and_cache_symbol_table(HashTable *symbol_table) /* {{{ */
+void zend_clean_and_cache_symbol_table(HashTable *symbol_table TSRMLS_DC) /* {{{ */
 {
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
 		zend_hash_destroy(symbol_table);

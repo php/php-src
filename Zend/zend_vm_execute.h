@@ -556,7 +556,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			EG(active_op_array) = EX(op_array);
 			EG(return_value_ptr_ptr) = EX(original_return_value);
 			if (EG(active_symbol_table)) {
-				zend_clean_and_cache_symbol_table(EG(active_symbol_table));
+				zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
 			}
 			EG(active_symbol_table) = EX(symbol_table);
 
@@ -701,7 +701,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 		EG(active_op_array) = EX(op_array);
 		EG(return_value_ptr_ptr) = EX(original_return_value);
 		if (EG(active_symbol_table)) {
-			zend_clean_and_cache_symbol_table(EG(active_symbol_table));
+			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
 		}
 		EG(active_symbol_table) = EX(symbol_table);
 	} else { /* ZEND_OVERLOADED_FUNCTION */
@@ -1248,7 +1248,7 @@ static int ZEND_FASTCALL  ZEND_SUSPEND_AND_RETURN_GENERATOR_SPEC_HANDLER(ZEND_OP
 		if (!EG(active_symbol_table)) {
 			zend_free_compiled_variables(EX_CVs(), execute_data->op_array->last_var);
 		} else {
-			zend_clean_and_cache_symbol_table(EG(active_symbol_table));
+			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
 		}
 		efree(execute_data);
 	}

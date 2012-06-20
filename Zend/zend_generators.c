@@ -34,7 +34,7 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 		if (!execute_data->symbol_table) {
 			zend_free_compiled_variables(execute_data->CVs, execute_data->op_array->last_var);
 		} else {
-			zend_clean_and_cache_symbol_table(execute_data->symbol_table);
+			zend_clean_and_cache_symbol_table(execute_data->symbol_table TSRMLS_CC);
 		}
 
 		if (execute_data->current_this) {
@@ -560,7 +560,7 @@ ZEND_METHOD(Generator, close)
 
 	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	zend_generator_close(generator, 0);
+	zend_generator_close(generator, 0 TSRMLS_CC);
 }
 /* }}} */
 
