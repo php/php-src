@@ -2590,7 +2590,7 @@ PHP_FUNCTION(array_column)
 			key_len = Z_STRLEN_P(zoffset);
 			break;
 		case IS_OBJECT:
-			convert_to_string_ex(&zoffset);
+			convert_to_string(zoffset);
 			key = Z_STRVAL_P(zoffset);
 			key_len = Z_STRLEN_P(zoffset);
 			break;
