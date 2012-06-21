@@ -6,6 +6,7 @@ Bug #46313 (Magic quotes broke $_FILES)
 magic_quotes_gpc=1
 file_uploads=1
 register_globals=1
+display_errors=0
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737
@@ -26,19 +27,19 @@ var_dump($GLOBALS["o1\'file_name"]);
 var_dump($GLOBALS["o1\'file_name"] === $_FILES["o1\'file"]["name"]);
 var_dump($GLOBALS["o1\'file"]);
 var_dump($GLOBALS["o1\'file"] === $_FILES["o1\'file"]["tmp_name"]);
+/* The windows policy is walking to the last (single)quote in a file name and taking the remain.
+   This way some'file.gif becomes file.gif */
 ?>
 --EXPECTF--
-Deprecated: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
-Deprecated: Directive 'magic_quotes_gpc' is deprecated in PHP 5.3 and greater in Unknown on line 0
 array(2) {
   ["o1\'file"]=>
   array(5) {
     ["name"]=>
-    string(12) "o1"
+    string(8) "file.png"
     ["type"]=>
     string(16) "text/plain-file1"
     ["tmp_name"]=>
-    string(14) "%s"
+    string(%d) "%s.tmp"
     ["error"]=>
     int(0)
     ["size"]=>
@@ -47,18 +48,18 @@ array(2) {
   ["o2\'file"]=>
   array(5) {
     ["name"]=>
-    string(13) "o2"
+    string(9) "file2.txt"
     ["type"]=>
     string(16) "text/plain-file2"
     ["tmp_name"]=>
-    string(14) "%s"
+    string(%d) "%s.tmp"
     ["error"]=>
     int(0)
     ["size"]=>
     int(1)
   }
 }
-string(12) "o1"
+string(8) "file.png"
 bool(true)
 string(%d) "%s"
 bool(true)

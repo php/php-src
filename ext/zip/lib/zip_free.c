@@ -57,7 +57,9 @@ _zip_free(struct zip *za)
     if (za->zp)
 	fclose(za->zp);
 
+    free(za->default_password);
     _zip_cdir_free(za->cdir);
+    free(za->ch_comment);
 
     if (za->entry) {
 	for (i=0; i<za->nentry; i++) {

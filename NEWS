@@ -1,25 +1,138 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.3.12
+?? ??? 2012, PHP 5.3.15
+- Zend Engine:
+  . Fixed bug #51094 (parse_ini_file() with INI_SCANNER_RAW cuts a value that
+    includes a semi-colon). (Pierrick)
 
-- JSON
-  . Fixed bug #61537 (json_encode() incorrectly truncates/discards
-    information). (Adam)
+- COM:
+  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
 
-?? ??? 2012, PHP 5.3.11
+- Core:
+  . Fixed CVE-2012-2143. (Solar Designer)
+  . Fixed potential overflow in _php_stream_scandir. (Jason Powell,
+    Stas)
+
+- Fileinfo:
+  . Fixed magic file regex support. (Felipe)
+
+- FPM:
+  . Fixed bug #61045 (fpm don't send error log to fastcgi clients). (fat)
+  . Fixed bug #61835 (php-fpm is not allowed to run as root). (fat)
+  . Fixed bug #61295 (php-fpm should not fail with commented 'user'
+    for non-root start). (fat)
+  . Fixed bug #61026 (FPM pools can listen on the same address). (fat)
+  . Fixed bug #62033 (php-fpm exits with status 0 on some failures to start).
+    (fat)
+  . Fixed bug #62153 (when using unix sockets, multiples FPM instances
+    can be launched without errors). (fat)
+  . Fixed bug #62160 (Add process.priority to set nice(2) priorities). (fat)
+  . Fixed bug #61218 (FPM drops connection while receiving some binary values
+    in FastCGI requests). (fat)
+  . Fixed bug #62205 (php-fpm segfaults (null passed to strstr)). (fat)
+
+- Intl:
+  . Fixed bug #62083 (grapheme_extract() memory leaks). (Gustavo)
+  . Fixed bug #62082 (memory corruption in internal get_icu_disp_value_src_php
+    function). (Gustavo)
+  . Fixed bug #62081 (IntlDateFormatter constructor leaks memory when called
+    twice). (Gustavo)
+  . Fixed bug #62070 (Collator::getSortKey() returns garbage). (Gustavo)
+  . Fixed bug #62017 (datefmt_create with incorrectly encoded timezone leaks
+    pattern). (Gustavo)
+  . Fixed bug #60785 (memory leak in IntlDateFormatter constructor). (Gustavo)
+  
+- PDO:
+  . Fixed bug #61755 (A parsing bug in the prepared statements can lead to
+    access violations). (Johannes)
+
+- Phar:
+  . Fixed bug #62227 (Invalid phar stream path causes crash). (Felipe)
+
+- Reflection:
+  . Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
+    with constant). (Laruence)
+
+- SPL:
+  . Fixed bug #62262 (RecursiveArrayIterator does not implement Countable).
+    (Nikita Popov)
+
+- XML Writer:
+  . Fixed bug #62064 (memory leak in the XML Writer module). 
+    (jean-pierre dot lozi at lip6 dot fr)
+- Zip:
+  . Upgraded libzip to 0.10.1 (Anatoliy)
+
+14 Jun 2012, PHP 5.3.14
+
+- CLI SAPI:
+  . Fixed bug #61546 (functions related to current script failed when chdir() 
+    in cli sapi). (Laruence, reeze.xia@gmail.com)
+
+- CURL:
+  . Fixed bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction).
+    (Laruence)
+
+- COM:
+  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
+
+- Core:
+  . Fixed CVE-2012-2143. (Solar Designer)
+  . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
+    member of a null object). (Laruence)
+  . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
+    reference). (Laruence)
+  . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
+  . Fixed bug #61764 ('I' unpacks n as signed if n > 2^31-1 on LP64). (Gustavo)
+  . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
+    set to null). (Anatoliy)
+  . Fixed bug #61713 (Logic error in charset detection for htmlentities).
+    (Anatoliy)
+  . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
+  . Changed php://fd to be available only for CLI.
+
+- Fileinfo:
+  . Fixed bug #61812 (Uninitialised value used in libmagic). 
+    (Laruence, Gustavo)
+
 - Iconv extension:
   . Fixed a bug that iconv extension fails to link to the correct library
     when another extension makes use of a library that links to the iconv
     library. See https://bugs.gentoo.org/show_bug.cgi?id=364139 for detail.
     (Moriyoshi)
 
-(merge after 5.3.11 release)
+- Intl:
+  . Fixed bug #62082 (Memory corruption in internal function
+    get_icu_disp_value_src_php()). (Gustavo)
+
+- JSON
+  . Fixed bug #61537 (json_encode() incorrectly truncates/discards
+    information). (Adam)
+
+- PDO:
+  . Fixed bug #61755 (A parsing bug in the prepared statements can lead to
+    access violations). (Johannes)
+
+- Phar:
+  . Fix bug #61065 (Secunia SA44335). (Rasmus)
+
+- Streams:
+  . Fixed bug #61961 (file_get_contents leaks when access empty file with
+    maxlen set). (Reeze)
+
+08 May 2012, PHP 5.3.13
+- CGI
+  . Improve fix for PHP-CGI query string parameter vulnerability, CVE-2012-2311.
+    (Stas)
+
+03 May 2012, PHP 5.3.12
+- Fix PHP-CGI query string parameter vulnerability, CVE-2012-1823. (Rasmus)
+
+26 Apr 2012, PHP 5.3.11
 
 - Core:
-  . Fixed bug #61605 (header_remove() does not remove all headers).
-    (Laruence)
-  . Fixed bug #61541 (Segfault when using ob_* in output_callback).
-    (reeze.xia@gmail.com)
+  . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
+    (without apache2)). (Laruence)
   . Fixed bug #61273 (call_user_func_array with more than 16333 arguments
     leaks / crashes). (Laruence)
   . Fixed bug #61165 (Segfault - strip_tags()). (Laruence)
@@ -66,14 +179,17 @@ PHP                                                                        NEWS
   . Fixed bug #61172 (Add Apache 2.4 support). (Chris Jones)
 
 - Fileinfo
+  . Upgraded libmagic to 5.11 (Pierre, Anatoliy)
+  . Fixed bug #61565 where php_stream_open_wrapper_ex tries to open a
+    directory descriptor under windows. (Anatoliy)
+  . Fixed bug #61566 failure caused by the posix lseek and read versions
+    under windows in cdf_read(). (Anatoliy)
   . Fixed bug #61173 (Unable to detect error from finfo constructor). (Gustavo)
 
 - Firebird Database extension (ibase):
   . Fixed bug #60802 (ibase_trans() gives segfault when passing params).
 
 - Libxml:
-  . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
-    (Laruence)
   . Fixed bug #61367 (open_basedir bypass using libxml RSHUTDOWN). 
     (Tim Starling)
 
@@ -95,6 +211,10 @@ PHP                                                                        NEWS
 
 - PDO_Sqlite extension:
   . Add createCollation support. (Damien)
+
+- pgsql:
+  . Fixed bug #60718 (Compile problem with libpq (PostgreSQL 7.3 or less).
+    (Yasuo Ohgaki)
 
 - Phar:
   . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL

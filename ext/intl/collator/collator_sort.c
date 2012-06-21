@@ -594,6 +594,8 @@ PHP_FUNCTION( collator_get_sort_key )
 		RETURN_FALSE;
 	}
 
+	/* ucol_getSortKey is exception in that the key length includes the 
+	 * NUL terminator*/
 	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, 0);
 	if(!key_len) {
 		efree( ustr );
@@ -605,7 +607,7 @@ PHP_FUNCTION( collator_get_sort_key )
 	if(!key_len) {
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL((char *)key, key_len, 0);
+	RETURN_STRINGL((char *)key, key_len - 1, 0);
 }
 /* }}} */
 

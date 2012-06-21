@@ -154,6 +154,7 @@ static const opt_struct OPTIONS[] = {
 	{'t', 0, "test"},
 	{'p', 1, "prefix"},
 	{'g', 1, "pid"},
+	{'R', 0, "allow-to-run-as-root"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -655,14 +656,38 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 	}
 }
 
-static void sapi_cgi_log_message(char *message)
+/* {{{ sapi_cgi_log_fastcgi
+ *
+ * Ignore level, we want to send all messages through fastcgi
+ */
+void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 {
 	TSRMLS_FETCH();
 
-	if (CGIG(fcgi_logging)) {
-		zlog(ZLOG_NOTICE, "PHP message: %s", message);
+	fcgi_request *request = (fcgi_request*) SG(server_context);
+
+	/* ensure we want:
+	 * - to log (fastcgi.logging in php.ini)
+	 * - we are currently dealing with a request
+	 * - the message is not empty
+	 */
+	if (CGIG(fcgi_logging) && request && message && len > 0) {
+		char *buf = malloc(len + 2);
+		memcpy(buf, message, len);
+		memcpy(buf + len, "\n", sizeof("\n"));
+		fcgi_write(request, FCGI_STDERR, buf, len+1);
+		free(buf);
 	}
 }
+/* }}} */
+
+/* {{{ sapi_cgi_log_message
+ */
+static void sapi_cgi_log_message(char *message)
+{
+	zlog(ZLOG_NOTICE, "PHP message: %s", message);
+}
+/* }}} */
 
 /* {{{ php_cgi_ini_activate_user_config
  */
@@ -911,7 +936,10 @@ static void php_cgi_usage(char *argv0)
 				"                   Specify the PID file location.\n"
 				"  -y, --fpm-config <file>\n"
 				"                   Specify alternative path to FastCGI process manager config file.\n"
-				"  -t, --test       Test FPM configuration and exit\n",
+				"  -t, --test       Test FPM configuration and exit\n"
+				"  -R, --allow-to-run-as-root\n"
+				"                   Allow pool to run as root (disabled by default)\n",
+
 				prog, PHP_PREFIX);
 }
 /* }}} */
@@ -1510,7 +1538,7 @@ static zend_module_entry cgi_module_entry = {
  */
 int main(int argc, char *argv[])
 {
-	int exit_status = SUCCESS;
+	int exit_status = FPM_EXIT_OK;
 	int cgi = 0, c;
 	zend_file_handle file_handle;
 
@@ -1533,6 +1561,7 @@ int main(int argc, char *argv[])
 	char *fpm_pid = NULL;
 	int test_conf = 0;
 	int php_information = 0;
+	int php_allow_to_run_as_root = 0;
 
 	fcgi_init();
 
@@ -1639,11 +1668,15 @@ int main(int argc, char *argv[])
 				php_printf("\n");
 				php_end_ob_buffers(1 TSRMLS_CC);
 				fcgi_shutdown();
-				exit_status = 0;
+				exit_status = FPM_EXIT_OK;
 				goto out;
 
 			case 'i': /* php info & quit */
 				php_information = 1;
+				break;
+
+			case 'R': /* allow to run as root */
+				php_allow_to_run_as_root = 1;
 				break;
 
 			default:
@@ -1656,7 +1689,7 @@ int main(int argc, char *argv[])
 				php_cgi_usage(argv[0]);
 				php_end_ob_buffers(1 TSRMLS_CC);
 				fcgi_shutdown();
-				exit_status = 0;
+				exit_status = (c == 'h') ? FPM_EXIT_OK : FPM_EXIT_USAGE;
 				goto out;
 
 			case 'v': /* show php version & quit */
@@ -1664,7 +1697,7 @@ int main(int argc, char *argv[])
 				if (php_request_startup(TSRMLS_C) == FAILURE) {
 					SG(server_context) = NULL;
 					php_module_shutdown(TSRMLS_C);
-					return FAILURE;
+					return FPM_EXIT_SOFTWARE;
 				}
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
@@ -1676,7 +1709,7 @@ int main(int argc, char *argv[])
 #endif
 				php_request_shutdown((void *) 0);
 				fcgi_shutdown();
-				exit_status = 0;
+				exit_status = FPM_EXIT_OK;
 				goto out;
 		}
 	}
@@ -1687,14 +1720,14 @@ int main(int argc, char *argv[])
 		if (php_request_startup(TSRMLS_C) == FAILURE) {
 			SG(server_context) = NULL;
 			php_module_shutdown(TSRMLS_C);
-			return FAILURE;
+			return FPM_EXIT_SOFTWARE;
 		}
 		SG(headers_sent) = 1;
 		SG(request_info).no_headers = 1;
 		php_print_info(0xFFFFFFFF TSRMLS_CC);
 		php_request_shutdown((void *) 0);
 		fcgi_shutdown();
-		exit_status = 0;
+		exit_status = FPM_EXIT_OK;
 		goto out;
 	}
 
@@ -1706,7 +1739,7 @@ int main(int argc, char *argv[])
 		SG(headers_sent) = 1;
 		php_cgi_usage(argv[0]);
 		php_end_ob_buffers(1 TSRMLS_CC);
-		exit_status = 0;
+		exit_status = FPM_EXIT_USAGE;
 		fcgi_shutdown();
 		goto out;
 	}
@@ -1726,7 +1759,7 @@ int main(int argc, char *argv[])
 #ifdef ZTS
 		tsrm_shutdown();
 #endif
-		return FAILURE;
+		return FPM_EXIT_SOFTWARE;
 	}
 
 	/* check force_cgi after startup, so we have proper output */
@@ -1765,18 +1798,30 @@ consult the installation file that came with this distribution, or visit \n\
 			 */
 			tsrm_shutdown();
 #endif
-			return FAILURE;
+			return FPM_EXIT_SOFTWARE;
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf)) {
-		return FAILURE;
+	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root)) {
+
+		if (fpm_globals.send_config_signal) {
+			zlog(ZLOG_DEBUG, "Sending SIGUSR2 (error) to parent %d", getppid());
+			kill(getppid(), SIGUSR2);
+		}
+		return FPM_EXIT_CONFIG;
 	}
 
+	if (fpm_globals.send_config_signal) {
+		zlog(ZLOG_DEBUG, "Sending SIGUSR1 (OK) to parent %d", getppid());
+		kill(getppid(), SIGUSR1);
+	}
 	fpm_is_running = 1;
 
 	fcgi_fd = fpm_run(&max_requests);
 	parent = 0;
+
+	/* onced forked tell zlog to also send messages through sapi_cgi_log_fastcgi() */
+	zlog_set_external_logger(sapi_cgi_log_fastcgi);
 
 	/* make php call us to get _ENV vars */
 	php_php_import_environment_variables = php_import_environment_variables;
@@ -1801,7 +1846,7 @@ consult the installation file that came with this distribution, or visit \n\
 				fcgi_finish_request(&request, 1);
 				SG(server_context) = NULL;
 				php_module_shutdown(TSRMLS_C);
-				return FAILURE;
+				return FPM_EXIT_SOFTWARE;
 			}
 
 			/* check if request_method has been sent.
@@ -1889,17 +1934,9 @@ fastcgi_request_done:
 
 			php_request_shutdown((void *) 0);
 
-			if (exit_status == 0) {
-				exit_status = EG(exit_status);
-			}
-
 			requests++;
 			if (max_requests && (requests == max_requests)) {
 				fcgi_finish_request(&request, 1);
-				if (max_requests != 1) {
-					/* no need to return exit_status of the last request */
-					exit_status = 0;
-				}
 				break;
 			}
 			/* end of fastcgi loop */
@@ -1913,7 +1950,7 @@ fastcgi_request_done:
 			free(cgi_sapi_module.ini_entries);
 		}
 	} zend_catch {
-		exit_status = 255;
+		exit_status = FPM_EXIT_SOFTWARE;
 	} zend_end_try();
 
 out:

@@ -98,7 +98,7 @@ bogus:
 	}
 }
 
-PHPAPI void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC)
 {
 	OLECHAR *olestring;
 	php_com_dotnet_object *obj;
@@ -166,7 +166,7 @@ PHPAPI void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_D
 	}
 }
 
-PHPAPI int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC)
 {
 	OLECHAR *olestring = NULL;
 	int ret = SUCCESS;
@@ -258,7 +258,7 @@ PHPAPI int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC
 }
 
 
-PHPAPI int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar TSRMLS_DC)
+PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar TSRMLS_DC)
 {
 	int ret = SUCCESS;
 	

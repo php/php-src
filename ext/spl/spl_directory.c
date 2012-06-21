@@ -271,7 +271,18 @@ static void spl_filesystem_dir_open(spl_filesystem_object* intern, char *path TS
 
 static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_include_path, int silent TSRMLS_DC) /* {{{ */
 {
+	zval  tmp;
+
 	intern->type = SPL_FS_FILE;
+
+	php_stat(intern->file_name, intern->file_name_len, FS_IS_DIR, &tmp TSRMLS_CC);
+	if (Z_LVAL(tmp)) {
+		intern->u.file.open_mode = NULL;
+		intern->file_name = NULL;
+		zend_throw_exception_ex(spl_ce_LogicException, 0 TSRMLS_CC, "Cannot use SplFileObject with directories");
+		return FAILURE;
+	}
+
 	intern->u.file.context = php_stream_context_from_zval(intern->u.file.zcontext, 0);
 	intern->u.file.stream = php_stream_open_wrapper_ex(intern->file_name, intern->u.file.open_mode, (use_include_path ? USE_PATH : 0) | ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, intern->u.file.context);
 

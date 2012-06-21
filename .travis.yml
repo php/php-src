@@ -1,0 +1,10 @@
+language: php
+
+php:
+    # We only specify one version so we only get one worker
+    - 5.4
+
+notifications:
+    email: false
+
+script: exit 0

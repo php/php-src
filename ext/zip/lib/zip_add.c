@@ -37,13 +37,20 @@
 
 
 
-ZIP_EXTERN(int)
+/*
+  NOTE: Return type is signed so we can return -1 on error.
+        The index can not be larger than ZIP_INT64_MAX since the size
+        of the central directory cannot be larger than
+        ZIP_UINT64_MAX, and each entry is larger than 2 bytes.
+*/
+
+ZIP_EXTERN(zip_int64_t)
 zip_add(struct zip *za, const char *name, struct zip_source *source)
 {
     if (name == NULL || source == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
     }
-
-    return _zip_replace(za, -1, name, source);
+	
+    return _zip_replace(za, ZIP_UINT64_MAX, name, source);
 }

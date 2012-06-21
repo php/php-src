@@ -63,12 +63,24 @@ echo "\n";
 $ents = $dtd->entities;
 $length = $ents->length;
 echo "Length: ".$length."\n";
+
+$xkeys = array();
 foreach ($ents AS $key=>$node) {
-	echo "Key: $key Name: ".$node->nodeName."\n";
+	$xkeys[] = "Key: $key Name: ".$node->nodeName."\n";
+}
+sort($xkeys);  // fix inconsistent output ordering (bug #61810)
+foreach ($xkeys as $key => $node) {
+	echo $node;
 }
 echo "\n";
+
+$xkeys = array();
 for($x=0; $x < $length; $x++) {
-	echo "Index $x: ".$ents->item($x)->nodeName."\n";
+	$xkeys[] = "Index: ".$ents->item($x)->nodeName."\n";
+}
+sort($xkeys);  // fix inconsistent output ordering (bug #61810)
+foreach ($xkeys as $key => $node) {
+	echo $node;
 }
 
 echo "\n";
@@ -87,13 +99,13 @@ Index 0: GIF (image/gif) (-)
 NULL
 
 Length: 3
-Key: test Name: test
-Key: rdf Name: rdf
 Key: myimage Name: myimage
+Key: rdf Name: rdf
+Key: test Name: test
 
-Index 0: test
-Index 1: rdf
-Index 2: myimage
+Index: myimage
+Index: rdf
+Index: test
 
 NULL
 NULL

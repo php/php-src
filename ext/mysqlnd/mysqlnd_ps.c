@@ -1265,8 +1265,6 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s TSRMLS_DC)
 			stmt->error_info = conn->error_info;
 		}
 		stmt->upsert_status = conn->upsert_status;
-
-		stmt->state = MYSQLND_STMT_PREPARED;
 	}
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
@@ -1630,9 +1628,9 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const s, unsigned i
 		mysqlnd_stmt_separate_one_result_bind(s, param_no TSRMLS_CC);
 		/* Guaranteed is that stmt->result_bind is NULL */
 		if (!stmt->result_bind) {
-			stmt->result_bind = mnd_ecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND));
+			stmt->result_bind = mnd_pecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND), stmt->persistent);
 		} else {
-			stmt->result_bind = mnd_erealloc(stmt->result_bind, stmt->field_count * sizeof(MYSQLND_RESULT_BIND));
+			stmt->result_bind = mnd_perealloc(stmt->result_bind, stmt->field_count * sizeof(MYSQLND_RESULT_BIND), stmt->persistent);
 		}
 		if (!stmt->result_bind) {
 			DBG_RETURN(FAIL);

@@ -2005,6 +2005,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Aggregate);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, ArrayAccess);
 	REGISTER_SPL_IMPLEMENTS(ArrayObject, Serializable);
+	REGISTER_SPL_IMPLEMENTS(ArrayObject, Countable);
 	spl_ce_ArrayObject->serialize   = spl_array_serialize;
 	spl_ce_ArrayObject->unserialize = spl_array_unserialize;
 	memcpy(&spl_handler_ArrayObject, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -2031,6 +2032,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, ArrayAccess);
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, SeekableIterator);
 	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Serializable);
+	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Countable);
 	spl_ce_ArrayIterator->serialize   = spl_array_serialize;
 	spl_ce_ArrayIterator->unserialize = spl_array_unserialize;
 	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
@@ -2039,9 +2041,6 @@ PHP_MINIT_FUNCTION(spl_array)
 	REGISTER_SPL_SUB_CLASS_EX(RecursiveArrayIterator, ArrayIterator, spl_array_object_new, spl_funcs_RecursiveArrayIterator);
 	REGISTER_SPL_IMPLEMENTS(RecursiveArrayIterator, RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
-
-	REGISTER_SPL_IMPLEMENTS(ArrayObject, Countable);
-	REGISTER_SPL_IMPLEMENTS(ArrayIterator, Countable);
 
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);

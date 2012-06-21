@@ -5,6 +5,9 @@ Phar::setStub()/stopBuffering() tar-based
 --INI--
 phar.require_hash=0
 phar.readonly=0
+--ENV--
+TEMP=.
+TMP=.
 --FILE--
 <?php
 $p = new Phar(dirname(__FILE__) . '/brandnewphar.phar.tar', 0, 'brandnewphar.phar');

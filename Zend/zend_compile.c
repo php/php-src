@@ -1336,7 +1336,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 		if (CG(current_namespace)) {
-			/* Prefix function name with current namespcae name */
+			/* Prefix function name with current namespace name */
 			znode tmp;
 
 			tmp.u.constant = *CG(current_namespace);
