@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Handling of errors occured in static methods
+ * Handling of errors occurred in static methods
  * when there's no object to get error code/message from.
  *
  * Example #1:
@@ -29,7 +29,7 @@ function intl_get_error_code() {}
 /**
  * Get description of the last error.
  *
- * @return string  Description of an error occured in the last
+ * @return string  Description of an error occurred in the last
  *                 API function call.
  */
 function intl_get_error_message() {}

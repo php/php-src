@@ -216,7 +216,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 			if (Z_TYPE(handler) == IS_STRING) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
 			}
-		/* retval is == NULL, when an exception occured, don't report anything, because PHP itself will handle that */
+		/* retval is == NULL, when an exception occurred, don't report anything, because PHP itself will handle that */
 		} else if (retval == NULL) {
 		} else {
 			if (retval->type == IS_OBJECT && instanceof_function( Z_OBJCE_P(retval), dom_node_class_entry TSRMLS_CC)) {

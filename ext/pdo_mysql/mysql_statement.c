@@ -134,7 +134,7 @@ static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 	row_count = mysql_affected_rows(H->server);
 	if (row_count == (my_ulonglong)-1) {
-		/* we either have a query that returned a result set or an error occured
+		/* we either have a query that returned a result set or an error occurred
 		   lets see if we have access to a result set */
 		if (!H->buffered) {
 			S->result = mysql_use_result(H->server);
