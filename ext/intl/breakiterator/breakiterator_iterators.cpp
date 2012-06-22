@@ -130,12 +130,23 @@ U_CFUNC zend_object_iterator *_breakiterator_get_iterator(
 
 typedef struct zoi_break_iter_parts {
 	zoi_with_current zoi_cur;
+	parts_iter_key_type key_type;
 	BreakIterator_object *bio; /* so we don't have to fetch it all the time */
 } zoi_break_iter_parts;
 
 static void _breakiterator_parts_destroy_it(zend_object_iterator *iter TSRMLS_DC)
 {
 	zval_ptr_dtor(reinterpret_cast<zval**>(&iter->data));
+}
+
+static int _breakiterator_parts_get_current_key(zend_object_iterator *iter,
+										  char **str_key,
+										  uint *str_key_len,
+										  ulong *int_key TSRMLS_DC)
+{
+	/* the actual work is done in move_forward and rewind */
+	*int_key = iter->index;
+	return HASH_KEY_IS_LONG;
 }
 
 static void _breakiterator_parts_move_forward(zend_object_iterator *iter TSRMLS_DC)
@@ -156,6 +167,14 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter TSRMLS_
 	if (next == BreakIterator::DONE) {
 		return;
 	}
+
+	if (zoi_bit->key_type == PARTS_ITERATOR_KEY_LEFT) {
+		iter->index = cur;
+	} else if (zoi_bit->key_type == PARTS_ITERATOR_KEY_RIGHT) {
+		iter->index = next;
+	}
+	/* else zoi_bit->key_type == PARTS_ITERATOR_KEY_SEQUENTIAL
+	 * No need to do anything, the engine increments ->index */
 
 	const char	*s = Z_STRVAL_P(bio->text);
 	int32_t		slen = Z_STRLEN_P(bio->text),
@@ -194,14 +213,15 @@ static zend_object_iterator_funcs breakiterator_parts_it_funcs = {
 	zoi_with_current_dtor,
 	zoi_with_current_valid,
 	zoi_with_current_get_current_data,
-	NULL,
+	_breakiterator_parts_get_current_key,
 	_breakiterator_parts_move_forward,
 	_breakiterator_parts_rewind,
 	zoi_with_current_invalidate_current
 };
 
 void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
-										   zval *object TSRMLS_DC)
+										   zval *object,
+										   parts_iter_key_type key_type TSRMLS_DC)
 {
 	IntlIterator_object *ii;
 
@@ -221,6 +241,7 @@ void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
 	((zoi_break_iter_parts*)ii->iterator)->bio = (BreakIterator_object*)
 		zend_object_store_get_object(break_iter_zv TSRMLS_CC);
 	assert(((zoi_break_iter_parts*)ii->iterator)->bio->biter != NULL);
+	((zoi_break_iter_parts*)ii->iterator)->key_type = key_type;
 }
 
 U_CFUNC zend_object_value IntlPartsIterator_object_create(zend_class_entry *ce TSRMLS_DC)
@@ -312,4 +333,14 @@ U_CFUNC void breakiterator_register_IntlPartsIterator_class(TSRMLS_D)
 	memcpy(&IntlPartsIterator_handlers, &IntlIterator_handlers,
 			sizeof IntlPartsIterator_handlers);
 	IntlPartsIterator_handlers.get_method = IntlPartsIterator_get_method;
+
+#define PARTSITER_DECL_LONG_CONST(name) \
+	zend_declare_class_constant_long(IntlPartsIterator_ce_ptr, #name, \
+		sizeof(#name) - 1, PARTS_ITERATOR_ ## name TSRMLS_CC)
+
+	PARTSITER_DECL_LONG_CONST(KEY_SEQUENTIAL);
+	PARTSITER_DECL_LONG_CONST(KEY_LEFT);
+	PARTSITER_DECL_LONG_CONST(KEY_RIGHT);
+
+#undef PARTSITER_DECL_LONG_CONST
 }

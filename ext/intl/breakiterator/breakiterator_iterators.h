@@ -23,9 +23,16 @@ U_CDECL_BEGIN
 #include <php.h>
 U_CDECL_END
 
+typedef enum {
+	PARTS_ITERATOR_KEY_SEQUENTIAL,
+	PARTS_ITERATOR_KEY_LEFT,
+	PARTS_ITERATOR_KEY_RIGHT,
+} parts_iter_key_type;
+
 #ifdef __cplusplus
 void IntlIterator_from_BreakIterator_parts(zval *break_iter_zv,
-										   zval *object TSRMLS_DC);
+										   zval *object,
+										   parts_iter_key_type key_type TSRMLS_DC);
 #endif
 
 U_CFUNC zend_object_iterator *_breakiterator_get_iterator(

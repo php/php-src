@@ -384,18 +384,28 @@ U_CFUNC PHP_FUNCTION(breakiter_get_locale)
 
 U_CFUNC PHP_FUNCTION(breakiter_get_parts_iterator)
 {
+	long key_type = 0;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
 
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &key_type) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"breakiter_get_parts_iterator: bad arguments", 0 TSRMLS_CC);
+			"breakiter_get_parts_iterator: bad arguments", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	if (key_type != PARTS_ITERATOR_KEY_SEQUENTIAL
+			&& key_type != PARTS_ITERATOR_KEY_LEFT
+			&& key_type != PARTS_ITERATOR_KEY_RIGHT) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"breakiter_get_parts_iterator: bad key type", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
 
-	IntlIterator_from_BreakIterator_parts(object, return_value TSRMLS_CC);
+	IntlIterator_from_BreakIterator_parts(
+		object, return_value, (parts_iter_key_type)key_type TSRMLS_CC);
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_get_error_code)
