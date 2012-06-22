@@ -56,7 +56,7 @@
 #include "mod_mm.h"
 #endif
 
-PHPAPI ZEND_DECLARE_MODULE_GLOBALS(ps);
+PHPAPI ZEND_DECLARE_MODULE_GLOBALS(ps)
 
 /* ***********
    * Helpers *

@@ -43,7 +43,7 @@ ZEND_BEGIN_MODULE_GLOBALS(browscap)
 	browser_data activation_bdata;
 ZEND_END_MODULE_GLOBALS(browscap)
 
-ZEND_DECLARE_MODULE_GLOBALS(browscap);
+ZEND_DECLARE_MODULE_GLOBALS(browscap)
 
 #ifdef ZTS
 #define BROWSCAP_G(v)	TSRMG(browscap_globals_id, zend_browscap_globals *, v)

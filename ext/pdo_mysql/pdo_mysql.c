@@ -35,7 +35,7 @@
 ZEND_GET_MODULE(pdo_mysql)
 #endif
 
-ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql);
+ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 
 /*
  The default socket location is sometimes defined by configure.
