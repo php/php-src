@@ -69,9 +69,6 @@ echo ""
 
 cd $DIR || exit 5
 
-# The full ChangeLog is available separately from lxr.php.net
-rm -f ChangeLog*
-
 # hide away our own versions of libtool-generated files
 for i in $LT_TARGETS; do
   if test -f "$i"; then
