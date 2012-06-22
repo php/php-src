@@ -114,7 +114,10 @@ PHP_METHOD(sqlite3, open)
 		zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Already initialised DB Object", 0 TSRMLS_CC);
 	}
 
-	if (strncmp(filename, ":memory:", 8) != 0) {
+	if (strlen(filename) != filename_len) {
+		return;
+	}
+	if (memcmp(filename, ":memory:", sizeof(":memory:")) != 0) {
 		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
 			zend_throw_exception(zend_exception_get_default(TSRMLS_C), "Unable to expand filepath", 0 TSRMLS_CC);
 			return;
@@ -1959,7 +1962,7 @@ static int php_sqlite3_authorizer(void *autharg, int access_type, const char *ar
 	switch (access_type) {
 		case SQLITE_ATTACH:
 		{
-			if (strncmp(arg3, ":memory:", sizeof(":memory:")-1) && *arg3) {
+			if (memcmp(arg3, ":memory:", sizeof(":memory:")) && *arg3) {
 				TSRMLS_FETCH();
 
 #if PHP_API_VERSION < 20100412
