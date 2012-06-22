@@ -5234,9 +5234,14 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 
 		/* back up some executor globals */
 		SAVE_OPLINE();
-		EX(current_this) = EG(This);
+
 		EX(current_scope) = EG(scope);
 		EX(current_called_scope) = EG(called_scope);
+
+		if (EG(This)) {
+			Z_ADDREF_P(EG(This));
+		}
+		EX(current_this) = EG(This);
 
 		/* back up the execution context */
 		generator = (zend_generator *) zend_object_store_get_object(return_value TSRMLS_CC);
@@ -5278,6 +5283,13 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 		ZEND_VM_RETURN();
 	}
 
+	/* Free $this and stack arguments */
+	if (EG(This)) {
+		zval_ptr_dtor(&EG(This));
+	}
+
+	zend_vm_stack_clear_multiple(TSRMLS_C);
+
 	/* Bring back the previous execution context */
 	execute_data = EG(current_execute_data);
 
@@ -5294,8 +5306,6 @@ ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
 
 	EX(object) = EX(current_object);
 	EX(called_scope) = DECODE_CTOR(EX(called_scope));
-
-	zend_vm_stack_clear_multiple(TSRMLS_C);
 
 	LOAD_REGS();
 	LOAD_OPLINE();
