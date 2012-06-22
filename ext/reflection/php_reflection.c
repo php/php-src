@@ -2923,6 +2923,16 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
 	fcc.object_ptr = object;
+	
+	/* 
+	 * Closure::__invoke() actually expects a copy of zend_function, so that it
+	 * frees it after the invoking.
+	 */
+	if (obj_ce == zend_ce_closure && object &&
+		strlen(mptr->common.function_name) == sizeof(ZEND_INVOKE_FUNC_NAME)-1 &&
+		memcmp(mptr->common.function_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0) {
+		fcc.function_handler = _copy_function(mptr TSRMLS_CC);
+	}
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
