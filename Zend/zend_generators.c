@@ -564,6 +564,114 @@ ZEND_METHOD(Generator, close)
 }
 /* }}} */
 
+/* get_iterator implementation */
+
+typedef struct _zend_generator_iterator {
+	zend_object_iterator intern;
+	zend_generator *generator;
+} zend_generator_iterator;
+
+static void zend_generator_iterator_dtor(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
+{
+	zval_ptr_dtor((zval **) &iterator->data);
+	efree(iterator);
+}
+/* }}} */
+
+static int zend_generator_iterator_valid(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
+{
+	zval *object = (zval *) iterator->data;
+	zend_generator *generator = ((zend_generator_iterator *) iterator)->generator;
+
+	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+
+	return generator->value != NULL ? SUCCESS : FAILURE;
+}
+/* }}} */
+
+static void zend_generator_iterator_get_data(zend_object_iterator *iterator, zval ***data TSRMLS_DC) /* {{{ */
+{
+	zval *object = (zval *) iterator->data;
+	zend_generator *generator = ((zend_generator_iterator *) iterator)->generator;
+
+	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+
+	if (generator->value) {
+		*data = &generator->value;
+	} else {
+		*data = NULL;
+	}
+}
+/* }}} */
+
+static int zend_generator_iterator_get_key(zend_object_iterator *iterator, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+{
+	zval *object = (zval *) iterator->data;
+	zend_generator *generator = ((zend_generator_iterator *) iterator)->generator;
+
+	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+
+	if (!generator->key) {
+		return HASH_KEY_NON_EXISTANT;
+	}
+
+	if (Z_TYPE_P(generator->key) == IS_LONG) {
+		*int_key = Z_LVAL_P(generator->key);
+		return HASH_KEY_IS_LONG;
+	}
+
+	if (Z_TYPE_P(generator->key) == IS_STRING) {
+		*str_key = estrndup(Z_STRVAL_P(generator->key), Z_STRLEN_P(generator->key));
+		*str_key_len = Z_STRLEN_P(generator->key) + 1;
+		return HASH_KEY_IS_STRING;
+	}
+
+	/* Waiting for Etienne's patch to allow arbitrary zval keys. Until then
+	 * error out on non-int and non-string keys. */
+	zend_error(E_ERROR, "Currently only int and string keys can be yielded");
+}
+/* }}} */
+
+static void zend_generator_iterator_move_forward(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
+{
+	zval *object = (zval *) iterator->data;
+	zend_generator *generator = ((zend_generator_iterator *) iterator)->generator;
+
+	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+
+	zend_generator_resume(object, generator TSRMLS_CC);
+}
+/* }}} */
+
+static zend_object_iterator_funcs zend_generator_iterator_functions = {
+	zend_generator_iterator_dtor,
+	zend_generator_iterator_valid,
+	zend_generator_iterator_get_data,
+	zend_generator_iterator_get_key,
+	zend_generator_iterator_move_forward,
+	NULL
+};
+
+zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
+{
+	zend_generator_iterator *iterator;
+
+	if (by_ref) {
+		zend_error(E_ERROR, "By reference iteration of generators is currently not supported");
+	}
+
+	iterator = emalloc(sizeof(zend_generator_iterator));
+	iterator->intern.funcs = &zend_generator_iterator_functions;
+
+	Z_ADDREF_P(object);
+	iterator->intern.data = (void *) object;
+	
+	iterator->generator = zend_object_store_get_object(object TSRMLS_CC);
+
+	return (zend_object_iterator *) iterator;
+}
+/* }}} */
+
 ZEND_BEGIN_ARG_INFO(arginfo_generator_void, 0)
 ZEND_END_ARG_INFO()
 
@@ -590,6 +698,7 @@ void zend_register_generator_ce(TSRMLS_D) /* {{{ */
 	zend_ce_generator = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL_CLASS;
 	zend_ce_generator->create_object = zend_generator_create;
+	zend_ce_generator->get_iterator = zend_generator_get_iterator;
 
 	zend_class_implements(zend_ce_generator TSRMLS_CC, 1, zend_ce_iterator);
 
