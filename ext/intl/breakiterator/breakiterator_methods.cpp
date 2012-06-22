@@ -19,6 +19,7 @@
 #endif
 
 #include <unicode/brkiter.h>
+#include "codepointiterator_internal.h"
 
 #include "breakiterator_iterators.h"
 
@@ -28,6 +29,8 @@ extern "C" {
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
 }
+
+using PHP::CodePointBreakIterator;
 
 U_CFUNC PHP_METHOD(BreakIterator, __construct)
 {
@@ -105,6 +108,21 @@ U_CFUNC PHP_FUNCTION(breakiter_create_title_instance)
 	_breakiter_factory("breakiter_create_title_instance",
 			&BreakIterator::createTitleInstance,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+U_CFUNC PHP_FUNCTION(breakiter_create_code_point_instance)
+{
+	UErrorCode status = UErrorCode();
+	intl_error_reset(NULL TSRMLS_CC);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"breakiter_create_code_point_instance: bad arguments", 0 TSRMLS_CC);
+		RETURN_NULL();
+	}
+
+	CodePointBreakIterator *cpbi = new CodePointBreakIterator();
+	breakiterator_object_create(return_value, cpbi TSRMLS_CC);
 }
 
 U_CFUNC PHP_FUNCTION(breakiter_get_text)

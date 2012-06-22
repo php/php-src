@@ -14,51 +14,11 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef BREAKITERATOR_METHODS_H
-#define BREAKITERATOR_METHODS_H
+#ifndef CODEPOINTITERATOR_METHODS_H
+#define CODEPOINTITERATOR_METHODS_H
 
 #include <php.h>
 
-PHP_METHOD(BreakIterator, __construct);
-
-PHP_FUNCTION(breakiter_create_word_instance);
-
-PHP_FUNCTION(breakiter_create_line_instance);
-
-PHP_FUNCTION(breakiter_create_character_instance);
-
-PHP_FUNCTION(breakiter_create_sentence_instance);
-
-PHP_FUNCTION(breakiter_create_title_instance);
-
-PHP_FUNCTION(breakiter_create_code_point_instance);
-
-PHP_FUNCTION(breakiter_get_text);
-
-PHP_FUNCTION(breakiter_set_text);
-
-PHP_FUNCTION(breakiter_first);
-
-PHP_FUNCTION(breakiter_last);
-
-PHP_FUNCTION(breakiter_previous);
-
-PHP_FUNCTION(breakiter_next);
-
-PHP_FUNCTION(breakiter_current);
-
-PHP_FUNCTION(breakiter_following);
-
-PHP_FUNCTION(breakiter_preceding);
-
-PHP_FUNCTION(breakiter_is_boundary);
-
-PHP_FUNCTION(breakiter_get_locale);
-
-PHP_FUNCTION(breakiter_get_parts_iterator);
-
-PHP_FUNCTION(breakiter_get_error_code);
-
-PHP_FUNCTION(breakiter_get_error_message);
+PHP_FUNCTION(cpbi_get_last_code_point);
 
 #endif

@@ -14,51 +14,31 @@
    +----------------------------------------------------------------------+
  */
 
-#ifndef BREAKITERATOR_METHODS_H
-#define BREAKITERATOR_METHODS_H
+#include "codepointiterator_internal.h"
 
-#include <php.h>
+extern "C" {
+#define USE_BREAKITERATOR_POINTER 1
+#include "breakiterator_class.h"
+}
 
-PHP_METHOD(BreakIterator, __construct);
+using PHP::CodePointBreakIterator;
 
-PHP_FUNCTION(breakiter_create_word_instance);
+static inline CodePointBreakIterator *fetch_cpbi(BreakIterator_object *bio) {
+	return (CodePointBreakIterator*)bio->biter;
+}
 
-PHP_FUNCTION(breakiter_create_line_instance);
+U_CFUNC PHP_FUNCTION(cpbi_get_last_code_point)
+{
+	BREAKITER_METHOD_INIT_VARS;
+	object = getThis();
 
-PHP_FUNCTION(breakiter_create_character_instance);
+	if (zend_parse_parameters_none() == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"cpbi_get_last_code_point: bad arguments", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
 
-PHP_FUNCTION(breakiter_create_sentence_instance);
+	BREAKITER_METHOD_FETCH_OBJECT;
 
-PHP_FUNCTION(breakiter_create_title_instance);
-
-PHP_FUNCTION(breakiter_create_code_point_instance);
-
-PHP_FUNCTION(breakiter_get_text);
-
-PHP_FUNCTION(breakiter_set_text);
-
-PHP_FUNCTION(breakiter_first);
-
-PHP_FUNCTION(breakiter_last);
-
-PHP_FUNCTION(breakiter_previous);
-
-PHP_FUNCTION(breakiter_next);
-
-PHP_FUNCTION(breakiter_current);
-
-PHP_FUNCTION(breakiter_following);
-
-PHP_FUNCTION(breakiter_preceding);
-
-PHP_FUNCTION(breakiter_is_boundary);
-
-PHP_FUNCTION(breakiter_get_locale);
-
-PHP_FUNCTION(breakiter_get_parts_iterator);
-
-PHP_FUNCTION(breakiter_get_error_code);
-
-PHP_FUNCTION(breakiter_get_error_message);
-
-#endif
+	RETURN_LONG(fetch_cpbi(bio)->getLastCodePoint());
+}

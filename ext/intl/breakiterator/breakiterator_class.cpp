@@ -20,6 +20,7 @@
 
 #include <unicode/brkiter.h>
 #include <unicode/rbbi.h>
+#include "codepointiterator_internal.h"
 
 #include "breakiterator_iterators.h"
 
@@ -30,14 +31,18 @@ extern "C" {
 #include "breakiterator_class.h"
 #include "breakiterator_methods.h"
 #include "rulebasedbreakiterator_methods.h"
+#include "codepointiterator_methods.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
 #include <assert.h>
 }
 
+using PHP::CodePointBreakIterator;
+
 /* {{{ Global variables */
 zend_class_entry *BreakIterator_ce_ptr;
 zend_class_entry *RuleBasedBreakIterator_ce_ptr;
+zend_class_entry *CodePointBreakIterator_ce_ptr;
 zend_object_handlers BreakIterator_handlers;
 /* }}} */
 
@@ -49,6 +54,8 @@ U_CFUNC	void breakiterator_object_create(zval *object,
 
 	if (classId == RuleBasedBreakIterator::getStaticClassID()) {
 		ce = RuleBasedBreakIterator_ce_ptr;
+	} else if (classId == CodePointBreakIterator::getStaticClassID()) {
+		ce = CodePointBreakIterator_ce_ptr;
 	} else {
 		ce = BreakIterator_ce_ptr;
 	}
@@ -274,6 +281,7 @@ static const zend_function_entry BreakIterator_class_functions[] = {
 	PHP_ME_MAPPING(createCharacterInstance,	breakiter_create_character_instance,	ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(createSentenceInstance,	breakiter_create_sentence_instance,		ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(createTitleInstance,		breakiter_create_title_instance,		ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(createCodePointInstance,	breakiter_create_code_point_instance,	ainfo_biter_void,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getText,					breakiter_get_text,						ainfo_biter_void,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(setText,					breakiter_set_text,						ainfo_biter_setText,				ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(first,					breakiter_first,						ainfo_biter_void,					ZEND_ACC_PUBLIC)
@@ -301,6 +309,14 @@ static const zend_function_entry RuleBasedBreakIterator_class_functions[] = {
 	PHP_ME_MAPPING(getRuleStatus,			rbbi_get_rule_status,					ainfo_biter_void,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getRuleStatusVec,		rbbi_get_rule_status_vec,				ainfo_biter_void,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getBinaryRules,			rbbi_get_binary_rules,					ainfo_biter_void,					ZEND_ACC_PUBLIC)
+	PHP_FE_END
+};
+/* }}} */
+
+/* {{{ CodePointBreakIterator_class_functions
+ */
+static const zend_function_entry CodePointBreakIterator_class_functions[] = {
+	PHP_ME_MAPPING(getLastCodePoint,		cpbi_get_last_code_point,				ainfo_biter_void,					ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -364,6 +380,12 @@ void breakiterator_register_BreakIterator_class(TSRMLS_D)
 	INIT_CLASS_ENTRY(ce, "IntlRuleBasedBreakIterator",
 			RuleBasedBreakIterator_class_functions);
 	RuleBasedBreakIterator_ce_ptr = zend_register_internal_class_ex(&ce,
-		BreakIterator_ce_ptr, NULL TSRMLS_CC);
+			BreakIterator_ce_ptr, NULL TSRMLS_CC);
+
+	/* Create and register 'CodePointBreakIterator' class. */
+	INIT_CLASS_ENTRY(ce, "IntlCodePointBreakIterator",
+			CodePointBreakIterator_class_functions);
+	CodePointBreakIterator_ce_ptr = zend_register_internal_class_ex(&ce,
+			BreakIterator_ce_ptr, NULL TSRMLS_CC);
 }
 /* }}} */
