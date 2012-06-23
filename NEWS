@@ -52,8 +52,10 @@ PHP                                                                        NEWS
     return a value). (Johannes)
 
 - Reflection:
-   . Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
-     with constant). (Laruence)
+  . Fixed bug #62384 (Attempting to invoke a Closure more than once causes 
+    segfault). (Felipe)
+  . Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
+    with constant). (Laruence)
 
 - Sockets:
   . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
