@@ -28,6 +28,7 @@ ZEND_API zend_class_entry *zend_ce_aggregate;
 ZEND_API zend_class_entry *zend_ce_iterator;
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
+ZEND_API zend_class_entry *zend_ce_validator;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
@@ -514,6 +515,13 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 }
 /* }}}*/
 
+/* {{{ zend_implement_validator */
+static int zend_implement_validator(zend_class_entry *interface, zend_class_entry *class_type TSRMLS_DC)
+{
+	return SUCCESS;
+}
+/* }}}*/
+
 /* {{{ function tables */
 const zend_function_entry zend_funcs_aggregate[] = {
 	ZEND_ABSTRACT_ME(iterator, getIterator, NULL)
@@ -561,6 +569,15 @@ const zend_function_entry zend_funcs_serializable[] = {
 	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)
 	{NULL, NULL, NULL}
 };
+
+ZEND_BEGIN_ARG_INFO(arginfo_validator_is_valid, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+const zend_function_entry zend_funcs_validator[] = {
+	ZEND_ABSTRACT_ME(validator, isValid,   arginfo_validator_is_valid)
+	{NULL, NULL, NULL}
+};
 /* }}} */
 
 #define REGISTER_ITERATOR_INTERFACE(class_name, class_name_str) \
@@ -588,6 +605,8 @@ ZEND_API void zend_register_interfaces(TSRMLS_D)
 	REGISTER_ITERATOR_INTERFACE(arrayaccess, ArrayAccess);
 
 	REGISTER_ITERATOR_INTERFACE(serializable, Serializable)
+	
+	REGISTER_ITERATOR_INTERFACE(validator, Validator)
 }
 /* }}} */
 
