@@ -81,6 +81,9 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_ERROR_CTRL_CHAR", PHP_JSON_ERROR_CTRL_CHAR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_SYNTAX", PHP_JSON_ERROR_SYNTAX, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_UTF8", PHP_JSON_ERROR_UTF8, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_ERROR_RECURSION", PHP_JSON_ERROR_RECURSION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_ERROR_INF_OR_NAN", PHP_JSON_ERROR_INF_OR_NAN, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_ERROR_UNSUPPORTED_TYPE", PHP_JSON_ERROR_UNSUPPORTED_TYPE, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -181,6 +184,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 	}
 
 	if (myht && myht->nApplyCount > 1) {
+		JSON_G(error_code) = PHP_JSON_ERROR_RECURSION;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 		smart_str_appendl(buf, "null", 4);
 		return;
@@ -303,7 +307,8 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 					smart_str_appendl(buf, tmp, l);
 					efree(tmp);
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "double %.9g does not conform to the JSON spec, encoded as 0", d);
+					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "double %.9g does not conform to the JSON spec", d);
 					smart_str_appendc(buf, '0');
 				}
 			}
@@ -460,7 +465,8 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 					smart_str_appendl(buf, d, len);
 					efree(d);
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "double %.9g does not conform to the JSON spec, encoded as 0", dbl);
+					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "double %.9g does not conform to the JSON spec", dbl);
 					smart_str_appendc(buf, '0');
 				}
 			}
@@ -476,7 +482,8 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "type is unsupported, encoded as null");
+			JSON_G(error_code) = PHP_JSON_ERROR_UNSUPPORTED_TYPE;
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "type is unsupported");
 			smart_str_appendl(buf, "null", 4);
 			break;
 	}
@@ -570,7 +577,7 @@ static PHP_FUNCTION(json_encode)
 
 	php_json_encode(&buf, parameter, options TSRMLS_CC);
 
-	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE && options ^ PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
+	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 		ZVAL_FALSE(return_value);
 	} else {
 		ZVAL_STRINGL(return_value, buf.c, buf.len, 1);
