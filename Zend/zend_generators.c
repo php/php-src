@@ -321,7 +321,7 @@ static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* 
 }
 /* }}} */
 
-static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS_DC) /* {{{ */
+static void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
 	/* The generator is already closed, thus can't resume */
 	if (!generator->execute_data) {
@@ -352,7 +352,7 @@ static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS
 
 		/* We (mis)use the return_value_ptr_ptr to provide the generator object
 		 * to the executor, so YIELD will be able to set the yielded value */
-		EG(return_value_ptr_ptr) = &object;
+		EG(return_value_ptr_ptr) = (zval **) generator;
 
 		/* Set executor globals */
 		EG(current_execute_data) = generator->execute_data;
@@ -399,10 +399,10 @@ static void zend_generator_resume(zval *object, zend_generator *generator TSRMLS
 }
 /* }}} */
 
-static void zend_generator_ensure_initialized(zval *object, zend_generator *generator TSRMLS_DC) /* {{{ */
+static void zend_generator_ensure_initialized(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
 	if (!generator->value) {
-		zend_generator_resume(object, generator TSRMLS_CC);
+		zend_generator_resume(generator TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -411,17 +411,15 @@ static void zend_generator_ensure_initialized(zval *object, zend_generator *gene
  * Rewind the generator */
 ZEND_METHOD(Generator, rewind)
 {
-	zval *object;
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	object = getThis();
-	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
+	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	/* Generators aren't rewindable, so rewind() only has to make sure that
 	 * the generator is initialized, nothing more */
@@ -432,17 +430,15 @@ ZEND_METHOD(Generator, rewind)
  * Check whether the generator is valid */
 ZEND_METHOD(Generator, valid)
 {
-	zval *object;
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	object = getThis();
-	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
+	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	RETURN_BOOL(generator->value != NULL);
 }
@@ -452,17 +448,15 @@ ZEND_METHOD(Generator, valid)
  * Get the current value */
 ZEND_METHOD(Generator, current)
 {
-	zval *object;
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	object = getThis();
-	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
+	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	if (generator->value) {
 		RETURN_ZVAL(generator->value, 1, 0);
@@ -474,17 +468,15 @@ ZEND_METHOD(Generator, current)
  * Get the current key */
 ZEND_METHOD(Generator, key)
 {
-	zval *object;
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	object = getThis();
-	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
+	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	if (generator->key) {
 		RETURN_ZVAL(generator->key, 1, 0);
@@ -496,19 +488,17 @@ ZEND_METHOD(Generator, key)
  * Advances the generator */
 ZEND_METHOD(Generator, next)
 {
-	zval *object;
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	object = getThis();
-	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
+	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
-	zend_generator_resume(object, generator TSRMLS_CC);
+	zend_generator_resume(generator TSRMLS_CC);
 }
 /* }}} */
 
@@ -516,17 +506,16 @@ ZEND_METHOD(Generator, next)
  * Sends a value to the generator */
 ZEND_METHOD(Generator, send)
 {
-	zval *object, *value;
+	zval *value;
 	zend_generator *generator;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &value) == FAILURE) {
 		return;
 	}
 
-	object = getThis();
-	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
+	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	zend_generator_ensure_initialized(object, generator TSRMLS_CC); 
+	zend_generator_ensure_initialized(generator TSRMLS_CC); 
 
 	/* The generator is already closed, thus can't send anything */
 	if (!generator->execute_data) {
@@ -541,7 +530,7 @@ ZEND_METHOD(Generator, send)
 	generator->send_target->var.ptr = value;
 	generator->send_target->var.ptr_ptr = &value;
 
-	zend_generator_resume(object, generator TSRMLS_CC);
+	zend_generator_resume(generator TSRMLS_CC);
 
 	if (generator->value) {
 		RETURN_ZVAL(generator->value, 1, 0);
@@ -568,22 +557,27 @@ ZEND_METHOD(Generator, close)
 
 typedef struct _zend_generator_iterator {
 	zend_object_iterator intern;
-	zend_generator *generator;
+
+	/* The generator object zval has to be stored, because the iterator is
+	 * holding a ref to it, which has to be dtored. */
+	zval *object;
 } zend_generator_iterator;
 
 static void zend_generator_iterator_dtor(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
-	zval_ptr_dtor((zval **) &iterator->data);
+	zval *object = ((zend_generator_iterator *) iterator)->object;
+
+	zval_ptr_dtor(&object);
+
 	efree(iterator);
 }
 /* }}} */
 
 static int zend_generator_iterator_valid(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
-	zval *object = (zval *) iterator->data;
-	zend_generator *generator = ((zend_generator_iterator *) iterator)->generator;
+	zend_generator *generator = (zend_generator *) iterator->data;
 
-	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	return generator->value != NULL ? SUCCESS : FAILURE;
 }
@@ -591,10 +585,9 @@ static int zend_generator_iterator_valid(zend_object_iterator *iterator TSRMLS_D
 
 static void zend_generator_iterator_get_data(zend_object_iterator *iterator, zval ***data TSRMLS_DC) /* {{{ */
 {
-	zval *object = (zval *) iterator->data;
-	zend_generator *generator = ((zend_generator_iterator *) iterator)->generator;
+	zend_generator *generator = (zend_generator *) iterator->data;
 
-	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	if (generator->value) {
 		*data = &generator->value;
@@ -606,10 +599,9 @@ static void zend_generator_iterator_get_data(zend_object_iterator *iterator, zva
 
 static int zend_generator_iterator_get_key(zend_object_iterator *iterator, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
 {
-	zval *object = (zval *) iterator->data;
-	zend_generator *generator = ((zend_generator_iterator *) iterator)->generator;
+	zend_generator *generator = (zend_generator *) iterator->data;
 
-	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	if (!generator->key) {
 		return HASH_KEY_NON_EXISTANT;
@@ -628,18 +620,17 @@ static int zend_generator_iterator_get_key(zend_object_iterator *iterator, char 
 
 	/* Waiting for Etienne's patch to allow arbitrary zval keys. Until then
 	 * error out on non-int and non-string keys. */
-	zend_error(E_ERROR, "Currently only int and string keys can be yielded");
+	zend_error_noreturn(E_ERROR, "Currently only int and string keys can be yielded");
 }
 /* }}} */
 
 static void zend_generator_iterator_move_forward(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
-	zval *object = (zval *) iterator->data;
-	zend_generator *generator = ((zend_generator_iterator *) iterator)->generator;
+	zend_generator *generator = (zend_generator *) iterator->data;
 
-	zend_generator_ensure_initialized(object, generator TSRMLS_CC);
+	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
-	zend_generator_resume(object, generator TSRMLS_CC);
+	zend_generator_resume(generator TSRMLS_CC);
 }
 /* }}} */
 
@@ -655,18 +646,22 @@ static zend_object_iterator_funcs zend_generator_iterator_functions = {
 zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */
 {
 	zend_generator_iterator *iterator;
+	zend_generator *generator;
 
 	if (by_ref) {
 		zend_error(E_ERROR, "By reference iteration of generators is currently not supported");
 	}
 
+	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
+
 	iterator = emalloc(sizeof(zend_generator_iterator));
 	iterator->intern.funcs = &zend_generator_iterator_functions;
+	iterator->intern.data = (void *) generator;
 
+	/* We have to keep a reference to the generator object zval around,
+	 * otherwise the generator may be destroyed during iteration. */
 	Z_ADDREF_P(object);
-	iterator->intern.data = (void *) object;
-	
-	iterator->generator = zend_object_store_get_object(object TSRMLS_CC);
+	iterator->object = object;
 
 	return (zend_object_iterator *) iterator;
 }

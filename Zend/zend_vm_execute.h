@@ -1061,7 +1061,7 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 	 * arguments that have to be dtor'ed) starts */
 	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 		/* For generators the next stack frame is conveniently stored in the
 		 * generator object. */
@@ -1150,7 +1150,7 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 		/* For generators skip the leave handler return directly */
 		if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 			/* The generator object is stored in return_value_ptr_ptr */
-			zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+			zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 			/* Close the generator to free up resources */
 			zend_generator_close(generator, 1 TSRMLS_CC);
@@ -2371,7 +2371,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 		/* Close the generator to free up resources */
 		zend_generator_close(generator, 1 TSRMLS_CC);
@@ -4119,7 +4119,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -4760,7 +4760,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -5726,7 +5726,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -6387,7 +6387,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -7087,7 +7087,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -7426,7 +7426,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 		/* Close the generator to free up resources */
 		zend_generator_close(generator, 1 TSRMLS_CC);
@@ -9095,7 +9095,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -9736,7 +9736,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -10702,7 +10702,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -11229,7 +11229,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -11867,7 +11867,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -12386,7 +12386,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 		/* Close the generator to free up resources */
 		zend_generator_close(generator, 1 TSRMLS_CC);
@@ -15731,7 +15731,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -17759,7 +17759,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -20167,7 +20167,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -21254,7 +21254,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -23331,7 +23331,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -24767,7 +24767,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -26026,7 +26026,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -27285,7 +27285,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -27656,7 +27656,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -28912,7 +28912,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -29412,7 +29412,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 
 	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 		/* Close the generator to free up resources */
 		zend_generator_close(generator, 1 TSRMLS_CC);
@@ -32377,7 +32377,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -34275,7 +34275,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -36552,7 +36552,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -37499,7 +37499,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -39445,7 +39445,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {

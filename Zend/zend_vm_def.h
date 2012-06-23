@@ -2819,7 +2819,7 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 
 	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 		/* Close the generator to free up resources */
 		zend_generator_close(generator, 1 TSRMLS_CC);
@@ -4998,7 +4998,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	 * arguments that have to be dtor'ed) starts */
 	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 		/* For generators the next stack frame is conveniently stored in the
 		 * generator object. */
@@ -5087,7 +5087,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		/* For generators skip the leave handler return directly */
 		if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 			/* The generator object is stored in return_value_ptr_ptr */
-			zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+			zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 			/* Close the generator to free up resources */
 			zend_generator_close(generator, 1 TSRMLS_CC);
@@ -5318,7 +5318,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	USE_OPLINE
 
 	/* The generator object is stored in return_value_ptr_ptr */
-	zend_generator *generator = (zend_generator *) zend_object_store_get_object(*EG(return_value_ptr_ptr) TSRMLS_CC);
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
