@@ -50,6 +50,8 @@ PHP                                                                        NEWS
   . Fixed bug #62227 (Invalid phar stream path causes crash). (Felipe)
 
 - Reflection:
+  . Fixed bug #62384 (Attempting to invoke a Closure more than once causes 
+    segfault). (Felipe)
   . Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
     with constant). (Laruence)
 
