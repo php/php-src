@@ -1,8 +1,8 @@
 --TEST--
-locale_get_display_script()  icu = 4.8
+locale_get_display_script()  icu >= 49
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0 || version_compare(INTL_ICU_VERSION, '49') >= 0) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '49') < 0) print 'skip'; ?>
 --FILE--
 <?php
 
@@ -92,7 +92,7 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECTREGEX--
+--EXPECT--
 locale='uk-ua_CALIFORNIA@currency=;currency=GRN'
 disp_locale=en :  display_script=
 disp_locale=fr :  display_script=
@@ -134,14 +134,14 @@ disp_locale=fr :  display_script=
 disp_locale=de :  display_script=
 -----------------
 locale='zh-Hant'
-disp_locale=en :  display_script=Traditional
-disp_locale=fr :  display_script=idéogrammes han (\(variante traditionnelle\)|traditionnels)
-disp_locale=de :  display_script=Traditionell
+disp_locale=en :  display_script=Traditional Han
+disp_locale=fr :  display_script=chinois traditionnel
+disp_locale=de :  display_script=Traditionelles Chinesisch
 -----------------
 locale='zh-Hans'
-disp_locale=en :  display_script=Simplified
-disp_locale=fr :  display_script=idéogrammes han (\(variante simplifiée\)|simplifiés)
-disp_locale=de :  display_script=Vereinfacht
+disp_locale=en :  display_script=Simplified Han
+disp_locale=fr :  display_script=chinois simplifié
+disp_locale=de :  display_script=Vereinfachtes Chinesisch
 -----------------
 locale='sr-Cyrl'
 disp_locale=en :  display_script=Cyrillic
@@ -154,9 +154,9 @@ disp_locale=fr :  display_script=latin
 disp_locale=de :  display_script=Lateinisch
 -----------------
 locale='zh-Hans-CN'
-disp_locale=en :  display_script=Simplified
-disp_locale=fr :  display_script=idéogrammes han (\(variante simplifiée\)|simplifiés)
-disp_locale=de :  display_script=Vereinfacht
+disp_locale=en :  display_script=Simplified Han
+disp_locale=fr :  display_script=chinois simplifié
+disp_locale=de :  display_script=Vereinfachtes Chinesisch
 -----------------
 locale='sr-Latn-CS'
 disp_locale=en :  display_script=Latin
