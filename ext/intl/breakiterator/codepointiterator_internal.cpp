@@ -16,6 +16,7 @@
 
 #include "codepointiterator_internal.h"
 #include <unicode/uchriter.h>
+#include <typeinfo>
 
 //copied from cmemory.h, which is not public
 typedef union {
