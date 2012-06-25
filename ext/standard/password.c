@@ -246,6 +246,7 @@ PHP_FUNCTION(password_create)
 			salt = emalloc(required_salt_len + 1);
                         if (php_password_salt_to64(buffer, buffer_len, required_salt_len, salt) == FAILURE) {
 				efree(hash_format);
+				efree(salt);
 			        zval_ptr_dtor(option_buffer);
 	                        php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %d", salt_len);
 				RETURN_FALSE;
