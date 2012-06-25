@@ -112,6 +112,33 @@ static int php_password_make_salt(int length, int raw, char *ret)
 
 PHP_FUNCTION(password_verify)
 {
+	zval *password, *hash, *ret;
+	int status = 0, i;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &password, &hash) == FAILURE) {
+                RETURN_FALSE;
+        }
+
+	zend_call_method_with_2_params(NULL, NULL, NULL, "crypt", &ret, password, hash);
+	
+	if (Z_TYPE_P(ret) != IS_STRING) {
+		zval_ptr_dtor(&ret);
+		RETURN_FALSE;
+	}
+
+	if (Z_STRLEN_P(ret) != Z_STRLEN_P(hash)) {
+		zval_ptr_dtor(&ret);
+		RETURN_FALSE;
+	}
+
+	for (i = 0; i < Z_STRLEN_P(ret); i++) {
+		status |= (Z_STRVAL_P(ret)[i] ^ Z_STRVAL_P(hash)[i]);
+	}
+
+	zval_ptr_dtor(&ret);
+
+	RETURN_BOOL(status == 0);
+	
 }
 
 PHP_FUNCTION(password_make_salt)
