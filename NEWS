@@ -92,6 +92,8 @@ PHP                                                                        NEWS
     (Anatoliy)
   . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
   . Changed php://fd to be available only for CLI.
+  . Fixed bug #62373 (serialize() generates wrong reference to the object).
+    (Moriyoshi)
 
 - Fileinfo:
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
