@@ -34,5 +34,5 @@ Warning: IntlRuleBasedBreakIterator::__construct() expects parameter 2 to be boo
 Warning: IntlRuleBasedBreakIterator::__construct(): rbbi_create_instance: bad arguments in %s on line %d
 NULL
 
-Warning: IntlRuleBasedBreakIterator::__construct(): rbbi_create_instance: unable to creaete instance from compiled rules in %s on line %d
+Warning: IntlRuleBasedBreakIterator::__construct(): rbbi_create_instance: unable to create instance from compiled rules in %s on line %d
 NULL

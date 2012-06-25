@@ -77,7 +77,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		rbbi = new RuleBasedBreakIterator((uint8_t*)rules, rules_len, status);
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "rbbi_create_instance: unable to "
-				"creaete instance from compiled rules", 0 TSRMLS_CC);
+				"create instance from compiled rules", 0 TSRMLS_CC);
 			RETURN_NULL();
 		}
 #else
