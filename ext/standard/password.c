@@ -28,7 +28,7 @@
 #include "php_password.h"
 #include "php_rand.h"
 #include "base64.h"
-
+#include "zend_interfaces.h"
 
 PHP_MINIT_FUNCTION(password) /* {{{ */
 {
@@ -139,14 +139,19 @@ PHP_FUNCTION(password_make_salt)
 Hash a password */
 PHP_FUNCTION(password_create)
 {
-        char *password, *algo = 0, *hash_format, *hash, *salt;
-        int password_len, algo_len = 0, salt_len = 0, required_salt_len = 0, hash_format_len;
+        char *algo = 0, *hash_format, *hash, *salt;
+        int algo_len = 0, salt_len = 0, required_salt_len = 0, hash_format_len;
         HashTable *options = 0;
-        zval **option_buffer;
+        zval **option_buffer, *ret, *password, *hash_zval;
 
-        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sH", &password, &password_len, &algo, &algo_len, &options) == FAILURE) {
+        if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|sH", &password, &algo, &algo_len, &options) == FAILURE) {
                 RETURN_FALSE;
         }
+
+	if (Z_TYPE_P(password) != IS_STRING) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Password must be a string");
+		RETURN_FALSE;
+	}
 
         if (algo_len == 0) {
 		algo = PHP_PASSWORD_DEFAULT;
@@ -240,10 +245,26 @@ PHP_FUNCTION(password_create)
 	hash = emalloc(salt_len + hash_format_len + 1);
 	sprintf(hash, "%s%s", hash_format, salt);
 	hash[hash_format_len + salt_len] = 0;
+
+	ALLOC_INIT_ZVAL(hash_zval);
+	ZVAL_STRINGL(hash_zval, hash, hash_format_len + salt_len, 0);
+
 	efree(hash_format);
 	efree(salt);
 
-        RETURN_STRINGL(hash, hash_format_len + salt_len, 0);
+	zend_call_method_with_2_params(NULL, NULL, NULL, "crypt", &ret, password, hash_zval);
+
+	zval_ptr_dtor(&hash_zval);
+
+	if (Z_TYPE_P(ret) != IS_STRING) {
+		zval_ptr_dtor(&ret);
+		RETURN_FALSE;
+	} else if(Z_STRLEN_P(ret) < 13) {
+		zval_ptr_dtor(&ret);
+		RETURN_FALSE;
+	}
+
+	RETURN_ZVAL(ret, 0, 1);
 }
 /* }}} */
 
