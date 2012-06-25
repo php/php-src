@@ -96,11 +96,24 @@ static int php_password_make_salt(int length, int raw, char *ret TSRMLS_DC)
 		zval_ptr_dtor(&size);
 		zval_ptr_dtor(&source);
 		if (Z_TYPE_P(ret) == IS_STRING) {
-			memcpy(buffer, Z_STRVAL_P(ret), Z_STRLEN_P(ret));
+			memcpy(buffer, Z_STRVAL_P(ret), raw_length);
 			buffer_valid = 1;
 		}
 		zval_ptr_dtor(&ret);
 	}
+	if (!buffer_valid && PHP_PASSWORD_FUNCTION_EXISTS("openssl_random_pseudo_bytes", 27)) {
+		zval *ret, *size;
+		ALLOC_INIT_ZVAL(size);
+		ZVAL_LONG(size, raw_length);
+		zend_call_method_with_1_params(NULL, NULL, NULL, "openssl_random_pseudo_bytes", &ret, size);
+		zval_ptr_dtor(&size);
+		if (Z_TYPE_P(ret) == IS_STRING) {
+			memcpy(buffer, Z_STRVAL_P(ret), raw_length);
+			buffer_valid = 1;
+		}
+		zval_ptr_dtor(&ret);
+	}
+
 	if (!buffer_valid) {
 		long number;
 		for (i = 0; i < raw_length; i++) {
