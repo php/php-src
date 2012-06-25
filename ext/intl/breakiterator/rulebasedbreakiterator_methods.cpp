@@ -73,12 +73,18 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			RETURN_NULL();
 		}
 	} else { // compiled
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 		rbbi = new RuleBasedBreakIterator((uint8_t*)rules, rules_len, status);
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "rbbi_create_instance: unable to "
 				"creaete instance from compiled rules", 0 TSRMLS_CC);
 			RETURN_NULL();
 		}
+#else
+		intl_error_set(NULL, U_UNSUPPORTED_ERROR, "rbbi_create_instance: "
+			"compiled rules require ICU >= 4.8", 0 TSRMLS_CC);
+		RETURN_NULL();
+#endif
 	}
 
 	breakiterator_object_create(return_value, rbbi TSRMLS_CC);
@@ -180,6 +186,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 	delete[] rules;
 }
 
+#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 {
 	BREAKITER_METHOD_INIT_VARS;
@@ -209,3 +216,4 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 
 	RETURN_STRINGL(ret_rules, rules_len, 0);
 }
+#endif

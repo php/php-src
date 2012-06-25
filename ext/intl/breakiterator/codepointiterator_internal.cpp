@@ -212,6 +212,10 @@ int32_t CodePointBreakIterator::next(int32_t n)
 {
 	UBool res = utext_moveIndex32(this->fText, n);
 
+#ifndef UTEXT_CURRENT32
+#define UTEXT_CURRENT32 utext_current32
+#endif
+
 	if (res) {
 		this->lastCodePoint = UTEXT_CURRENT32(this->fText);
 		return (int32_t)UTEXT_GETNATIVEINDEX(this->fText);
