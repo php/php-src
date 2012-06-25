@@ -21,10 +21,6 @@
 #include <stdlib.h>
 
 #include "php.h"
-#if HAVE_CRYPT
-#include "php_crypt.h"
-#endif
-
 #include "ext/hash/php_hash.h"
 #include "php_password.h"
 #include "php_rand.h"
@@ -121,7 +117,7 @@ static int php_password_make_salt(int length, int raw, char *ret TSRMLS_DC)
 		char *result;
 		result = emalloc(length + 1); 
 		if (php_password_salt_to64(buffer, raw_length, length, result) == FAILURE) {
-			php_error_docref(NULL, E_WARNING, "Generated salt too short");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Generated salt too short");
 			efree(buffer);
 			efree(result);
 			return FAILURE;
@@ -139,6 +135,12 @@ PHP_FUNCTION(password_verify)
 {
 	zval *password, *hash, *ret;
 	int status = 0, i;
+	zend_function *func_ptr;
+
+	if (!PHP_PASSWORD_FUNCTION_EXISTS("crypt", 5)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Crypt must be loaded for password_verify to function");
+		RETURN_FALSE;
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &password, &hash) == FAILURE) {
                 RETURN_FALSE;
@@ -195,6 +197,12 @@ PHP_FUNCTION(password_create)
         int algo_len = 0, salt_len = 0, required_salt_len = 0, hash_format_len;
         HashTable *options = 0;
         zval **option_buffer, *ret, *password, *hash_zval;
+	zend_function *func_ptr;
+
+	if (!PHP_PASSWORD_FUNCTION_EXISTS("crypt", 5)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Crypt must be loaded for password_verify to function");
+		RETURN_FALSE;
+	}
 
         if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|sH", &password, &algo, &algo_len, &options) == FAILURE) {
                 RETURN_FALSE;
