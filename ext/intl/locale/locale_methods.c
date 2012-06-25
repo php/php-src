@@ -201,14 +201,6 @@ static int getSingletonPos(char* str)
 }
 /* }}} */
 
-const char *intl_locale_get_default( TSRMLS_D )
-{
-	if( INTL_G(default_locale) == NULL ) {
-		return uloc_getDefault();
- 	}
-	return INTL_G(default_locale);
-}
-
 /* {{{ proto static string Locale::getDefault(  )
    Get default locale */
 /* }}} */

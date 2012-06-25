@@ -109,6 +109,14 @@
 
 ZEND_DECLARE_MODULE_GLOBALS( intl )
 
+const char *intl_locale_get_default( TSRMLS_D )
+{
+	if( INTL_G(default_locale) == NULL ) {
+		return uloc_getDefault();
+	}
+	return INTL_G(default_locale);
+}
+
 /* {{{ Arguments info */
 ZEND_BEGIN_ARG_INFO_EX(collator_static_0_args, 0, 0, 0)
 ZEND_END_ARG_INFO()
