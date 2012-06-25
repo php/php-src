@@ -188,6 +188,9 @@ PHP X.Y UPGRADE NOTES
   - IntlCalendar
   - IntlGregorianCalendar
   - IntlTimeZone
+  - IntlBreakIterator
+  - IntlRuleBasedBreakIterator
+  - IntlCodePointBreakIterator
 
 ========================================
 7. Removed Extensions
