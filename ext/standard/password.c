@@ -25,6 +25,7 @@
 #include "php_crypt.h"
 #endif
 
+#include "ext/hash/php_hash.h"
 #include "php_password.h"
 #include "php_rand.h"
 #include "base64.h"
@@ -73,10 +74,14 @@ static int php_password_salt_to64(const char *str, const int str_len, const int 
 	return SUCCESS;
 }
 
-static int php_password_make_salt(int length, int raw, char *ret)
+#define PHP_PASSWORD_FUNCTION_EXISTS(func, func_len) (zend_hash_find(EG(function_table), (func), (func_len) + 1, (void **) &func_ptr) == SUCCESS && func_ptr->type == ZEND_INTERNAL_FUNCTION && func_ptr->internal_function.handler != zif_display_disabled_function)
+
+static int php_password_make_salt(int length, int raw, char *ret TSRMLS_DC)
 {
-	int i, raw_length;
+	int i, raw_length, buffer_valid = 0;
 	char *buffer;
+	zend_function *func_ptr;
+
 	if (raw) {
 		raw_length = length;
 	} else {
@@ -85,8 +90,28 @@ static int php_password_make_salt(int length, int raw, char *ret)
 	buffer = (char *) emalloc(raw_length + 1);
 	
 	/* Temp Placeholder */
-	for (i = 0; i < raw_length; i++) {
-		buffer[i] = i;
+	if (PHP_PASSWORD_FUNCTION_EXISTS("mcrypt_create_iv", 16)) {
+		zval *ret, *size, *source;
+		ALLOC_INIT_ZVAL(size);
+		ZVAL_LONG(size, raw_length);
+		ALLOC_INIT_ZVAL(source)
+		ZVAL_LONG(source, 1); // MCRYPT_DEV_URANDOM
+		zend_call_method_with_2_params(NULL, NULL, NULL, "mcrypt_create_iv", &ret, size, source);
+		zval_ptr_dtor(&size);
+		zval_ptr_dtor(&source);
+		if (Z_TYPE_P(ret) == IS_STRING) {
+			memcpy(buffer, Z_STRVAL_P(ret), Z_STRLEN_P(ret));
+			buffer_valid = 1;
+		}
+		zval_ptr_dtor(&ret);
+	}
+	if (!buffer_valid) {
+		long number;
+		for (i = 0; i < raw_length; i++) {
+			number = php_rand(TSRMLS_C);
+			RAND_RANGE(number, 0, 255, PHP_RAND_MAX);
+			buffer[i] = (char) number;
+		}
 	}
 	/* /Temp Placeholder */
 
@@ -154,7 +179,7 @@ PHP_FUNCTION(password_make_salt)
 		RETURN_FALSE;
 	}
 	salt = emalloc(length + 1);
-	if (php_password_make_salt(length, (int) raw_output, salt) == FAILURE) {
+	if (php_password_make_salt(length, (int) raw_output, salt TSRMLS_CC) == FAILURE) {
 		efree(salt);
 		RETURN_FALSE;
 	}
@@ -260,7 +285,7 @@ PHP_FUNCTION(password_create)
 		zval_ptr_dtor(option_buffer);
         } else {
 		salt = emalloc(required_salt_len + 1);
-		if (php_password_make_salt(required_salt_len, 0, salt) == FAILURE) {
+		if (php_password_make_salt(required_salt_len, 0, salt TSRMLS_CC) == FAILURE) {
 			efree(hash_format);
 			efree(salt);
 			RETURN_FALSE;
