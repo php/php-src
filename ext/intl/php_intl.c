@@ -78,6 +78,9 @@
 #include "calendar/calendar_methods.h"
 #include "calendar/gregoriancalendar_methods.h"
 
+#include "breakiterator/breakiterator_class.h"
+#include "breakiterator/breakiterator_iterators.h"
+
 #include "idn/idn.h"
 
 #if U_ICU_VERSION_MAJOR_NUM > 3 && U_ICU_VERSION_MINOR_NUM >=2
@@ -965,6 +968,12 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'IntlIterator' PHP class */
 	intl_register_IntlIterator_class( TSRMLS_C );
+
+	/* Register 'BreakIterator' class */
+	breakiterator_register_BreakIterator_class( TSRMLS_C );
+
+	/* Register 'IntlPartsIterator' class */
+	breakiterator_register_IntlPartsIterator_class( TSRMLS_C );
 
 	/* Global error handling. */
 	intl_error_init( NULL TSRMLS_CC );
