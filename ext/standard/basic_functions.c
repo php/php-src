@@ -1867,7 +1867,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_getlastmod, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ password.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_password_create, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_password_hash, 0, 0, 1)
 	ZEND_ARG_INFO(0, password)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, options)
@@ -2895,7 +2895,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(base64_decode,													arginfo_base64_decode)
 	PHP_FE(base64_encode,													arginfo_base64_encode)
 
-	PHP_FE(password_create,													arginfo_password_create)
+	PHP_FE(password_hash,													arginfo_password_hash)
 	PHP_FE(password_verify,													arginfo_password_verify)
 	PHP_FE(password_make_salt,												arginfo_password_make_salt)
 

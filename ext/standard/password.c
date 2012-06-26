@@ -21,19 +21,24 @@
 #include <stdlib.h>
 
 #include "php.h"
-#include "ext/hash/php_hash.h"
+
+#include "fcntl.h"
 #include "php_password.h"
 #include "php_rand.h"
 #include "base64.h"
 #include "zend_interfaces.h"
+#include "info.h"
+
+#if PHP_WIN32
+#include "win32/winutil.h"
+#endif
+
+
 
 PHP_MINIT_FUNCTION(password) /* {{{ */
 {
 	REGISTER_STRING_CONSTANT("PASSWORD_DEFAULT", PHP_PASSWORD_DEFAULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("PASSWORD_MD5", PHP_PASSWORD_MD5, CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("PASSWORD_SHA256", PHP_PASSWORD_SHA256, CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("PASSWORD_SHA512", PHP_PASSWORD_SHA512, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -76,7 +81,6 @@ static int php_password_make_salt(int length, int raw, char *ret TSRMLS_DC)
 {
 	int i, raw_length, buffer_valid = 0;
 	char *buffer;
-	zend_function *func_ptr;
 
 	if (raw) {
 		raw_length = length;
@@ -84,42 +88,37 @@ static int php_password_make_salt(int length, int raw, char *ret TSRMLS_DC)
 		raw_length = length * 3 / 4 + 1;
 	}
 	buffer = (char *) emalloc(raw_length + 1);
-	
-	/* Temp Placeholder */
-	if (PHP_PASSWORD_FUNCTION_EXISTS("mcrypt_create_iv", 16)) {
-		zval *ret, *size, *source;
-		ALLOC_INIT_ZVAL(size);
-		ZVAL_LONG(size, raw_length);
-		ALLOC_INIT_ZVAL(source)
-		ZVAL_LONG(source, 1); // MCRYPT_DEV_URANDOM
-		zend_call_method_with_2_params(NULL, NULL, NULL, "mcrypt_create_iv", &ret, size, source);
-		zval_ptr_dtor(&size);
-		zval_ptr_dtor(&source);
-		if (Z_TYPE_P(ret) == IS_STRING) {
-			memcpy(buffer, Z_STRVAL_P(ret), raw_length);
-			buffer_valid = 1;
-		}
-		zval_ptr_dtor(&ret);
-	}
-	if (!buffer_valid && PHP_PASSWORD_FUNCTION_EXISTS("openssl_random_pseudo_bytes", 27)) {
-		zval *ret, *size;
-		ALLOC_INIT_ZVAL(size);
-		ZVAL_LONG(size, raw_length);
-		zend_call_method_with_1_params(NULL, NULL, NULL, "openssl_random_pseudo_bytes", &ret, size);
-		zval_ptr_dtor(&size);
-		if (Z_TYPE_P(ret) == IS_STRING) {
-			memcpy(buffer, Z_STRVAL_P(ret), raw_length);
-			buffer_valid = 1;
-		}
-		zval_ptr_dtor(&ret);
-	}
 
+#if PHP_WIN32
+	{
+		BYTE *iv_b = (BYTE *) buffer;
+		if (php_win32_get_random_bytes(iv_b, (size_t) raw_length) == SUCCESS) {
+			buffer_valid = 1;
+		}
+	}
+#else
+	{
+		int fd, n;
+		size_t read_bytes = 0;
+		fd = open("/dev/urandom", O_RDONLY);
+		if (fd >= 0) {
+			while (read_bytes < raw_length) {
+				n = read(fd, buffer + read_bytes, raw_length - read_bytes);
+				if (n < 0) {
+					break;
+				}
+				read_bytes += n;
+			}
+			close(fd);
+		}
+		if (read_bytes == raw_length) {
+			buffer_valid = 1;
+		}
+	}
+#endif
 	if (!buffer_valid) {
-		long number;
 		for (i = 0; i < raw_length; i++) {
-			number = php_rand(TSRMLS_C);
-			RAND_RANGE(number, 0, 255, PHP_RAND_MAX);
-			buffer[i] = (char) number;
+			buffer[i] ^= (char) (255.0 * php_rand(TSRMLS_C) / RAND_MAX);
 		}
 	}
 	/* /Temp Placeholder */
@@ -202,9 +201,9 @@ PHP_FUNCTION(password_make_salt)
 }
 
 
-/* {{{ proto string password(string password, string algo = PASSWORD_DEFAULT, array options = array())
+/* {{{ proto string password_hash(string password, string algo = PASSWORD_DEFAULT, array options = array())
 Hash a password */
-PHP_FUNCTION(password_create)
+PHP_FUNCTION(password_hash)
 {
         char *algo = 0, *hash_format, *hash, *salt;
         int algo_len = 0, salt_len = 0, required_salt_len = 0, hash_format_len;
@@ -213,7 +212,7 @@ PHP_FUNCTION(password_create)
 	zend_function *func_ptr;
 
 	if (!PHP_PASSWORD_FUNCTION_EXISTS("crypt", 5)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Crypt must be loaded for password_verify to function");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Crypt must be loaded for password_hash to function");
 		RETURN_FALSE;
 	}
 
@@ -246,26 +245,6 @@ PHP_FUNCTION(password_create)
 		hash_format = emalloc(8);
 		sprintf(hash_format, "$2y$%02d$", cost);
 		hash_format_len = 7;
-        } else if (strcmp(algo, PHP_PASSWORD_MD5) == 0) {
-                required_salt_len = 12;
-		hash_format = emalloc(4);
-		memcpy(hash_format, "$1$", 3);
-		hash_format_len = 3;
-        } else if (strcmp(algo, PHP_PASSWORD_SHA256) == 0 || strcmp(algo, PHP_PASSWORD_SHA512) == 0) {
-                int rounds = PHP_PASSWORD_SHA_DEFAULT_ROUNDS;
-                if (options && zend_symtable_find(options, "rounds", 7, (void **) &option_buffer) == SUCCESS) {
-                        convert_to_long_ex(option_buffer);
-                        rounds = Z_LVAL_PP(option_buffer);
-                        zval_ptr_dtor(option_buffer);
-                        if (rounds < 1000 || rounds > 999999999) {
-                                php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid SHA rounds parameter specified: %d", rounds);
-                                RETURN_FALSE;
-                        }
-                }
-                required_salt_len = 16;
-		hash_format = emalloc(21);
-		sprintf(hash_format, "$%s$rounds=%d$", algo, rounds);
-		hash_format_len = strlen(hash_format);
         } else {
                 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown password hashing algorithm: %s", algo);
                 RETURN_FALSE;

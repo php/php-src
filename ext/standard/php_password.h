@@ -21,7 +21,7 @@
 #ifndef PHP_PASSWORD_H
 #define PHP_PASSWORD_H
 
-PHP_FUNCTION(password_create);
+PHP_FUNCTION(password_hash);
 PHP_FUNCTION(password_verify);
 PHP_FUNCTION(password_make_salt);
 
@@ -29,12 +29,8 @@ PHP_MINIT_FUNCTION(password);
 
 #define PHP_PASSWORD_DEFAULT	"2y"
 #define PHP_PASSWORD_BCRYPT	"2y"
-#define PHP_PASSWORD_MD5	"1"
-#define PHP_PASSWORD_SHA256	"5"
-#define PHP_PASSWORD_SHA512	"6"
 
 #define PHP_PASSWORD_BCRYPT_DEFAULT_COST 12;
-#define PHP_PASSWORD_SHA_DEFAULT_ROUNDS 5000;
 
 
 #endif
