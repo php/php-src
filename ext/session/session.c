@@ -2079,6 +2079,7 @@ static const zend_function_entry php_session_iface_functions[] = {
 	PHP_ABSTRACT_ME(SessionHandlerInterface, write, arginfo_session_class_write)
 	PHP_ABSTRACT_ME(SessionHandlerInterface, destroy, arginfo_session_class_destroy)
 	PHP_ABSTRACT_ME(SessionHandlerInterface, gc, arginfo_session_class_gc)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, create_sid, arginfo_session_class_create_sid)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -2092,7 +2093,6 @@ static const zend_function_entry php_session_class_functions[] = {
 	PHP_ME(SessionHandler, write, arginfo_session_class_write, ZEND_ACC_PUBLIC)
 	PHP_ME(SessionHandler, destroy, arginfo_session_class_destroy, ZEND_ACC_PUBLIC)
 	PHP_ME(SessionHandler, gc, arginfo_session_class_gc, ZEND_ACC_PUBLIC)
-/* Added to the class but not the interface, to maintain backwards compatibility */
 	PHP_ME(SessionHandler, create_sid, arginfo_session_class_create_sid, ZEND_ACC_PUBLIC)
 	{ NULL, NULL, NULL }
 };

@@ -53,6 +53,10 @@ class MySession2 implements SessionHandlerInterface {
 		}
 		return true;
 	}
+	
+	public function create_sid() {
+		return md5(mt_rand());
+	}
 }
 
 $handler = new MySession2;

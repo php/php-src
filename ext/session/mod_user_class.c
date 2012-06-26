@@ -149,12 +149,12 @@ PHP_METHOD(SessionHandler, create_sid)
 {
 	char *id;
 
-	zend_parse_parameters_none();
+	if (zend_parse_parameters_none() == FAILURE) {
+	    return;
+	}
 
 	id = PS(default_mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
 
-	RETVAL_STRING(id, 1);
-	efree(id);
-	return;
+	RETURN_STRING(id, 0);
 }
 /* }}} */
