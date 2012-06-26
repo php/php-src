@@ -29,12 +29,12 @@ class JsonTest2 implements JsonSerializable {
 
 
 $obj1 = new JsonTest1();
-var_dump(json_encode($obj1));
+var_dump(json_encode($obj1, JSON_PARTIAL_OUTPUT_ON_ERROR));
 
 echo "\n==\n";
 
 $obj2 = new JsonTest2();
-var_dump(json_encode($obj2));
+var_dump(json_encode($obj2, JSON_PARTIAL_OUTPUT_ON_ERROR));
 
 ?>
 --EXPECTF--
