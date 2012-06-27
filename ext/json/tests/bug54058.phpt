@@ -9,17 +9,20 @@ $bad_utf8 = quoted_printable_decode('=B0');
 
 json_encode($bad_utf8);
 var_dump(json_last_error());
+var_dump(json_last_error(true));
 
 $a = new stdclass;
 $a->foo = quoted_printable_decode('=B0');
 json_encode($a);
 var_dump(json_last_error());
+var_dump(json_last_error(true));
 
 $b = new stdclass;
 $b->foo = $bad_utf8;
 $b->bar = 1;
 json_encode($b);
 var_dump(json_last_error());
+var_dump(json_last_error(true));
 
 $c = array(
     'foo' => $bad_utf8,
@@ -27,17 +30,15 @@ $c = array(
 );
 json_encode($c);
 var_dump(json_last_error());
+var_dump(json_last_error(true));
+
 ?>
 --EXPECTF--
-
-Warning: json_encode(): Invalid UTF-8 sequence in argument in %s on line %d
 int(5)
-
-Warning: json_encode(): Invalid UTF-8 sequence in argument in %s on line %d
+string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
 int(5)
-
-Warning: json_encode(): Invalid UTF-8 sequence in argument in %s on line %d
+string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
 int(5)
-
-Warning: json_encode(): Invalid UTF-8 sequence in argument in %s on line %d
+string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
 int(5)
+string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"

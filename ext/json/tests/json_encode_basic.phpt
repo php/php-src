@@ -150,8 +150,6 @@ string(4) "null"
 -- Iteration 25 --
 string(4) "null"
 -- Iteration 26 --
-
-Warning: json_encode(): type is unsupported in %s on line %d
 bool(false)
 -- Iteration 27 --
 string(82) "{"MyInt":99,"MyFloat":123.45,"MyBool":true,"MyNull":null,"MyString":"Hello World"}"
