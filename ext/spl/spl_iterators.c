@@ -921,7 +921,7 @@ static zend_object_value spl_RecursiveIteratorIterator_new_ex(zend_class_entry *
 	}
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_property_ctor, (void *) &tmp, sizeof(zval *));
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)spl_RecursiveIteratorIterator_dtor, (zend_objects_free_object_storage_t) spl_RecursiveIteratorIterator_free_storage, NULL TSRMLS_CC);
 	retval.handlers = &spl_handlers_rec_it_it;

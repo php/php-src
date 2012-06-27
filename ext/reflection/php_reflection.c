@@ -314,7 +314,7 @@ static zend_object_value reflection_objects_new(zend_class_entry *class_type TSR
 	intern->zo.ce = class_type;
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_property_ctor, (void *) &tmp, sizeof(zval *));
 	retval.handle = zend_objects_store_put(intern, NULL, reflection_free_objects_storage, NULL TSRMLS_CC);
 	retval.handlers = &reflection_object_handlers;
 	return retval;

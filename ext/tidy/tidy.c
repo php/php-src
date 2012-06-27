@@ -687,7 +687,7 @@ static void tidy_object_new(zend_class_entry *class_type, zend_object_handlers *
 	memset(intern, 0, sizeof(PHPTidyObj));
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_property_ctor, (void *) &tmp, sizeof(zval *));
 
 	switch(objtype) {
 		case is_node:

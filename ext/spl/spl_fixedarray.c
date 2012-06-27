@@ -215,7 +215,7 @@ static zend_object_value spl_fixedarray_object_new_ex(zend_class_entry *class_ty
 	ALLOC_INIT_ZVAL(intern->retval);
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_property_ctor, (void *) &tmp, sizeof(zval *));
 
 	intern->current = 0;
 	intern->flags = 0;

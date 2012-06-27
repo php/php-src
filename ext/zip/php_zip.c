@@ -1104,7 +1104,7 @@ static zend_object_value php_zip_object_new(zend_class_entry *class_type TSRMLS_
 	intern->zo.ce = class_type;
 #endif
 
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
+	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_property_ctor, 
 					(void *) &tmp, sizeof(zval *));
 
 	retval.handle = zend_objects_store_put(intern,

@@ -1265,7 +1265,7 @@ PHP_METHOD(SoapServer, SoapServer)
 
 			ALLOC_HASHTABLE(service->class_map);
 			zend_hash_init(service->class_map, zend_hash_num_elements((*tmp)->value.ht), NULL, ZVAL_PTR_DTOR, 0);
-			zend_hash_copy(service->class_map, (*tmp)->value.ht, (copy_ctor_func_t) zval_add_ref, (void *) &ztmp, sizeof(zval *));
+			zend_hash_copy(service->class_map, (*tmp)->value.ht, (copy_ctor_func_t) zval_property_ctor, (void *) &ztmp, sizeof(zval *));
 		}
 
 		if (zend_hash_find(ht, "typemap", sizeof("typemap"), (void**)&tmp) == SUCCESS &&
