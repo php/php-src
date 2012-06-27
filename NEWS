@@ -41,6 +41,9 @@ PHP                                                                        NEWS
   . Fixed bug #62017 (datefmt_create with incorrectly encoded timezone leaks
     pattern). (Gustavo)
   . Fixed bug #60785 (memory leak in IntlDateFormatter constructor). (Gustavo)
+
+- JSON:
+  . Improved error handling. (Nikita Popov)
   
 - PDO:
   . Fixed bug #61755 (A parsing bug in the prepared statements can lead to
