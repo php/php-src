@@ -17,6 +17,11 @@ var_dump(password_hash("rasmuslerdorf", PASSWORD_BCRYPT, array("cost" => 7, "sal
 
 var_dump(password_hash("test", PASSWORD_BCRYPT, array("salt" => "123456789012345678901" . chr(0))));
 
+// test ini parameter to ensure that it updates
+ini_set('password.bcrypt_cost', '5');
+var_dump(password_hash("test", PASSWORD_BCRYPT, array("salt" => "123456789012345678901" . chr(0))));
+
+
 echo "OK!";
 ?>
 --EXPECT--
@@ -24,4 +29,5 @@ int(60)
 bool(true)
 string(60) "$2y$07$usesomesillystringfore2uDLvp1Ii2e./U9C8sBjqp8I90dH6hi"
 string(60) "$2y$04$MTIzNDU2Nzg5MDEyMzQ1NekACxf2CF7ipfk/b9FllU9Fs8RcUm5UG"
+string(60) "$2y$05$MTIzNDU2Nzg5MDEyMzQ1NeVt1jFvl6ZQVujUMmcYvue.Mr5oZVQa2"
 OK!
