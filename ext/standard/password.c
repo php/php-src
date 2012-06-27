@@ -82,14 +82,19 @@ static int php_password_salt_to64(const char *str, const int str_len, const int 
 
 #define PHP_PASSWORD_FUNCTION_EXISTS(func, func_len) (zend_hash_find(EG(function_table), (func), (func_len) + 1, (void **) &func_ptr) == SUCCESS && func_ptr->type == ZEND_INTERNAL_FUNCTION && func_ptr->internal_function.handler != zif_display_disabled_function)
 
-static int php_password_make_salt(int length, int raw, char *ret TSRMLS_DC)
+static int php_password_make_salt(long length, int raw, char *ret TSRMLS_DC)
 {
-	int i, raw_length, buffer_valid = 0;
+	int buffer_valid = 0;
+	long i, raw_length;
 	char *buffer;
 
 	if (raw) {
 		raw_length = length;
 	} else {
+		if (length > (LONG_MAX / 3)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length is too large to safely generate");
+			return FAILURE;
+		}
 		raw_length = length * 3 / 4 + 1;
 	}
 	buffer = (char *) emalloc(raw_length + 1);
@@ -192,15 +197,19 @@ PHP_FUNCTION(password_verify)
 PHP_FUNCTION(password_make_salt)
 {
 	char *salt;
-	int length = 0;
+	long length = 0;
 	zend_bool raw_output = 0;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|b", &length, &raw_output) == FAILURE) {
                 RETURN_FALSE;
         }
 	if (length <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length cannot be less than or equal zero: %d", length);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length cannot be less than or equal zero: %ld", length);
+		RETURN_FALSE;
+	} else if (length > (LONG_MAX / 3)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length is too large to safely generate");
 		RETURN_FALSE;
 	}
+
 	salt = emalloc(length + 1);
 	if (php_password_make_salt(length, (int) raw_output, salt TSRMLS_CC) == FAILURE) {
 		efree(salt);
@@ -298,7 +307,7 @@ PHP_FUNCTION(password_hash)
 		zval_ptr_dtor(option_buffer);
         } else {
 		salt = emalloc(required_salt_len + 1);
-		if (php_password_make_salt(required_salt_len, 0, salt TSRMLS_CC) == FAILURE) {
+		if (php_password_make_salt((long) required_salt_len, 0, salt TSRMLS_CC) == FAILURE) {
 			efree(hash_format);
 			efree(salt);
 			RETURN_FALSE;
