@@ -1367,6 +1367,9 @@ out:
 	if (request_started) {
 		php_request_shutdown((void *) 0);
 	}
+	if (translated_path) {
+		free(translated_path);
+	}
 	if (exit_status == 0) {
 		exit_status = EG(exit_status);
 	}
