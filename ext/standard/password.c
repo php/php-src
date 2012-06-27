@@ -43,6 +43,11 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 }
 /* }}} */
 
+PHP_MINFO_FUNCTION(password) /* {{{ */
+{
+	php_info_print_table_row(2, "Default Password BCrypt Cost", INI_STR("password.bcrypt_cost"));
+}
+/* }}} */
 
 static int php_password_salt_is_alphabet(const char *str, const int len)
 {
@@ -169,7 +174,11 @@ PHP_FUNCTION(password_verify)
 		zval_ptr_dtor(&ret);
 		RETURN_FALSE;
 	}
-
+	
+	/* We're using this method instead of == in order to provide
+	 * resistence towards timing attacks. This is a constant time
+	 * equality check that will always check every byte of both
+	 * values. */
 	for (i = 0; i < Z_STRLEN_P(ret); i++) {
 		status |= (Z_STRVAL_P(ret)[i] ^ Z_STRVAL_P(hash)[i]);
 	}
@@ -231,16 +240,20 @@ PHP_FUNCTION(password_hash)
         }
 
         if (strcmp(algo, PHP_PASSWORD_BCRYPT) == 0) {
-		int cost = PHP_PASSWORD_BCRYPT_DEFAULT_COST;
+		int cost = 0;
+		cost = (int) INI_INT("password.bcrypt_cost");
+
 		if (options && zend_symtable_find(options, "cost", 5, (void **) &option_buffer) == SUCCESS) {
 			convert_to_long_ex(option_buffer);
 			cost = Z_LVAL_PP(option_buffer);
 			zval_ptr_dtor(option_buffer);
-			if (cost < 4 || cost > 31) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid bcrypt cost parameter specified: %d", cost);
-        		        RETURN_FALSE;
-			}
 		}
+
+		if (cost < 4 || cost > 31) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid bcrypt cost parameter specified: %d", cost);
+        	        RETURN_FALSE;
+		}
+		
                 required_salt_len = 22;
 		hash_format = emalloc(8);
 		sprintf(hash_format, "$2y$%02d$", cost);

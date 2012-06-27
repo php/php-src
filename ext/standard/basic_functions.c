@@ -3846,6 +3846,7 @@ PHP_MINFO_FUNCTION(basic) /* {{{ */
 	php_info_print_table_start();
 	BASIC_MINFO_SUBMODULE(dl)
 	BASIC_MINFO_SUBMODULE(mail)
+	BASIC_MINFO_SUBMODULE(password)
 	php_info_print_table_end();
 	BASIC_MINFO_SUBMODULE(assert)
 }

@@ -26,12 +26,10 @@ PHP_FUNCTION(password_verify);
 PHP_FUNCTION(password_make_salt);
 
 PHP_MINIT_FUNCTION(password);
+PHP_MINFO_FUNCTION(password);
 
 #define PHP_PASSWORD_DEFAULT	"2y"
 #define PHP_PASSWORD_BCRYPT	"2y"
-
-#define PHP_PASSWORD_BCRYPT_DEFAULT_COST 12;
-
 
 #endif
 
