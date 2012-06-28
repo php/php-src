@@ -7,18 +7,7 @@ Erwin Poeze <erwin.poeze@gmail.com>
 --FILE--
 <?php
 
-$aFlags = array(
-
-	'DROP_NEW_LINE',
-	'READ_AHEAD',
-	'SKIP_EMPTY',
-	'READ_CSV',
-);
-
 $fo = new SplFileObject(__FILE__);
-
-$aResult = array();
-
 
 $fo->setFlags(SplFileObject::DROP_NEW_LINE);
 var_dump($fo->getFlags());
