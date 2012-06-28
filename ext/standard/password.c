@@ -21,10 +21,12 @@
 #include <stdlib.h>
 
 #include "php.h"
+#if HAVE_CRYPT
 
 #include "fcntl.h"
 #include "php_password.h"
 #include "php_rand.h"
+#include "php_crypt.h"
 #include "base64.h"
 #include "zend_interfaces.h"
 #include "info.h"
@@ -157,28 +159,19 @@ static int php_password_make_salt(long length, int raw, char *ret TSRMLS_DC) /* 
 Verify a hash created using crypt() or password_hash() */
 PHP_FUNCTION(password_verify)
 {
-	zval *password, *hash, *ret;
 	int status = 0, i;
-	zend_function *func_ptr;
-
-	if (!PHP_PASSWORD_FUNCTION_EXISTS("crypt", 5)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Crypt must be loaded for password_verify to function");
-		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &password, &hash) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	zend_call_method_with_2_params(NULL, NULL, NULL, "crypt", &ret, password, hash);
+	int password_len, hash_len;
+	char *ret, *password, *hash;
 	
-	if (Z_TYPE_P(ret) != IS_STRING) {
-		zval_ptr_dtor(&ret);
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &password, &password_len, &hash, &hash_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (crypt_execute(password, password_len, hash, hash_len, &ret) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (Z_STRLEN_P(ret) != Z_STRLEN_P(hash)) {
-		zval_ptr_dtor(&ret);
+	if (strlen(ret) != hash_len) {
+		efree(ret);
 		RETURN_FALSE;
 	}
 	
@@ -186,11 +179,11 @@ PHP_FUNCTION(password_verify)
 	 * resistence towards timing attacks. This is a constant time
 	 * equality check that will always check every byte of both
 	 * values. */
-	for (i = 0; i < Z_STRLEN_P(ret); i++) {
-		status |= (Z_STRVAL_P(ret)[i] ^ Z_STRVAL_P(hash)[i]);
+	for (i = 0; i < hash_len; i++) {
+		status |= (ret[i] ^ hash[i]);
 	}
 
-	zval_ptr_dtor(&ret);
+	efree(ret);
 
 	RETURN_BOOL(status == 0);
 	
@@ -205,14 +198,14 @@ PHP_FUNCTION(password_make_salt)
 	long length = 0;
 	zend_bool raw_output = 0;
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|b", &length, &raw_output) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 	if (length <= 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length cannot be less than or equal zero: %ld", length);
-		RETURN_FALSE;
+		RETURN_NULL();
 	} else if (length > (LONG_MAX / 3)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length is too large to safely generate");
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 
 	salt = emalloc(length + 1);
@@ -228,24 +221,13 @@ PHP_FUNCTION(password_make_salt)
 Hash a password */
 PHP_FUNCTION(password_hash)
 {
-	char *algo = 0, *hash_format, *hash, *salt;
-	int algo_len = 0, salt_len = 0, required_salt_len = 0, hash_format_len;
+	char *algo = 0, *hash_format, *hash, *salt, *password, *result;
+	int algo_len = 0, salt_len = 0, required_salt_len = 0, hash_format_len, password_len;
 	HashTable *options = 0;
-	zval **option_buffer, *ret, *password, *hash_zval;
-	zend_function *func_ptr;
+	zval **option_buffer;
 
-	if (!PHP_PASSWORD_FUNCTION_EXISTS("crypt", 5)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Crypt must be loaded for password_hash to function");
-		RETURN_FALSE;
-	}
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|sH", &password, &algo, &algo_len, &options) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (Z_TYPE_P(password) != IS_STRING) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Password must be a string");
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sH", &password, &password_len, &algo, &algo_len, &options) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	if (algo_len == 0) {
@@ -265,7 +247,7 @@ PHP_FUNCTION(password_hash)
 
 		if (cost < 4 || cost > 31) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid bcrypt cost parameter specified: %d", cost);
-			RETURN_FALSE;
+			RETURN_NULL();
 		}
 		
 		required_salt_len = 22;
@@ -274,26 +256,38 @@ PHP_FUNCTION(password_hash)
 		hash_format_len = 7;
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown password hashing algorithm: %s", algo);
-		RETURN_FALSE;
+		RETURN_NULL();
 	}
 
 	if (options && zend_symtable_find(options, "salt", 5, (void**) &option_buffer) == SUCCESS) {
 		char *buffer;
 		int buffer_len;
-		if (Z_TYPE_PP(option_buffer) == IS_STRING) {
-			buffer = Z_STRVAL_PP(option_buffer);
-			buffer_len = Z_STRLEN_PP(option_buffer);
-		} else {
-			zval_ptr_dtor(option_buffer);
-			efree(hash_format);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Non-string salt parameter supplied");
-			RETURN_FALSE;
+		switch (Z_TYPE_PP(option_buffer)) {
+			case IS_NULL:
+			case IS_STRING:
+			case IS_LONG:
+			case IS_DOUBLE:
+			case IS_BOOL:
+			case IS_OBJECT:
+				convert_to_string_ex(option_buffer);
+				if (Z_TYPE_PP(option_buffer) == IS_STRING) {
+					buffer = Z_STRVAL_PP(option_buffer);
+					buffer_len = Z_STRLEN_PP(option_buffer);
+					break;
+				}
+			case IS_RESOURCE:
+			case IS_ARRAY:
+			default:
+				zval_ptr_dtor(option_buffer);
+				efree(hash_format);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Non-string salt parameter supplied");
+				RETURN_NULL();
 		}
 		if (buffer_len < required_salt_len) {
 			efree(hash_format);
 			zval_ptr_dtor(option_buffer);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %d expecting %d", buffer_len, required_salt_len);
-			RETURN_FALSE;
+			RETURN_NULL();
 		} else if (0 == php_password_salt_is_alphabet(buffer, buffer_len)) {
 			salt = emalloc(required_salt_len + 1);
 			if (php_password_salt_to64(buffer, buffer_len, required_salt_len, salt) == FAILURE) {
@@ -301,7 +295,7 @@ PHP_FUNCTION(password_hash)
 				efree(salt);
 				zval_ptr_dtor(option_buffer);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %d", salt_len);
-				RETURN_FALSE;
+				RETURN_NULL();
 			}
 			salt_len = required_salt_len;
 		} else {
@@ -326,28 +320,27 @@ PHP_FUNCTION(password_hash)
 	sprintf(hash, "%s%s", hash_format, salt);
 	hash[hash_format_len + salt_len] = 0;
 
-	ALLOC_INIT_ZVAL(hash_zval);
-	ZVAL_STRINGL(hash_zval, hash, hash_format_len + salt_len, 0);
-
 	efree(hash_format);
 	efree(salt);
 
-	zend_call_method_with_2_params(NULL, NULL, NULL, "crypt", &ret, password, hash_zval);
-
-	zval_ptr_dtor(&hash_zval);
-
-	if (Z_TYPE_P(ret) != IS_STRING) {
-		zval_ptr_dtor(&ret);
-		RETURN_FALSE;
-	} else if(Z_STRLEN_P(ret) < 13) {
-		zval_ptr_dtor(&ret);
+	if (crypt_execute(password, password_len, hash, hash_format_len + salt_len, &result) == FAILURE) {
+		efree(hash);
 		RETURN_FALSE;
 	}
 
-	RETURN_ZVAL(ret, 0, 1);
+	efree(hash);
+
+	if (strlen(result) < 13) {
+		efree(result);
+		RETURN_FALSE;
+	}
+
+	RETVAL_STRING(result, 1);
+	efree(result);
 }
 /* }}} */
 
+#endif /* HAVE_CRYPT */
 /*
  * Local variables:
  * tab-width: 4

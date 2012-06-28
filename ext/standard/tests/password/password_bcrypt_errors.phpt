@@ -15,14 +15,14 @@ var_dump(password_hash("foo", PASSWORD_BCRYPT, array("salt" => "1234567890123456
 ?>
 --EXPECTF--
 Warning: password_hash(): Invalid bcrypt cost parameter specified: 3 in %s on line %d
-bool(false)
+NULL
 
 Warning: password_hash(): Invalid bcrypt cost parameter specified: 32 in %s on line %d
-bool(false)
+NULL
 
 Warning: password_hash(): Provided salt is too short: 3 expecting 22 in %s on line %d
-bool(false)
+NULL
 
 Warning: password_hash(): Provided salt is too short: 21 expecting 22 in %s on line %d
-bool(false)
+NULL
 
