@@ -2,8 +2,6 @@
 SPL: SplFileObject::setCsvControl variation 001
 --CREDITS--
 Erwin Poeze <erwin.poeze at gmail.com>
---INI--
-include_path=.
 --FILE--
 <?php
 file_put_contents('csv_control_data.csv',
