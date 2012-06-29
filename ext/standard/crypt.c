@@ -199,7 +199,7 @@ PHP_FUNCTION(crypt)
 			char *output;
 			int needed = (sizeof(sha512_salt_prefix) - 1
 						+ sizeof(sha512_rounds_prefix) + 9 + 1
-						+ strlen(salt) + 1 + 43 + 1);
+						+ PHP_MAX_SALT_LEN + 1 + 43 + 1);
 			output = emalloc(needed * sizeof(char *));
 			salt[salt_in_len] = '\0';
 
@@ -222,7 +222,7 @@ PHP_FUNCTION(crypt)
 			char *output;
 			int needed = (sizeof(sha256_salt_prefix) - 1
 						+ sizeof(sha256_rounds_prefix) + 9 + 1
-						+ strlen(salt) + 1 + 43 + 1);
+						+ PHP_MAX_SALT_LEN + 1 + 43 + 1);
 			output = emalloc(needed * sizeof(char *));
 			salt[salt_in_len] = '\0';
 

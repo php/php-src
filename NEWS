@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     Stas)
   . Fixed bug #62432 (ReflectionMethod random corrupt memory on high
     concurrent). (Johannes)
+  . Fixed bug #62443 (Crypt SHA256/512 Segfaults With Malformed 
+    Salt). (Anthony Ferrara)
 
 - Fileinfo:
   . Fixed magic file regex support. (Felipe)
