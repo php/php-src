@@ -99,7 +99,7 @@ static int php_password_make_salt(long length, int raw, char *ret TSRMLS_DC) /* 
 		}
 		raw_length = length * 3 / 4 + 1;
 	}
-	buffer = (char *) emalloc(raw_length + 1);
+	buffer = (char *) safe_emalloc(raw_length, 1, 1);
 
 #if PHP_WIN32
 	{
@@ -138,7 +138,7 @@ static int php_password_make_salt(long length, int raw, char *ret TSRMLS_DC) /* 
 		memcpy(ret, buffer, length);
 	} else {
 		char *result;
-		result = emalloc(length + 1); 
+		result = safe_emalloc(length, 1, 1); 
 		if (php_password_salt_to64(buffer, raw_length, length, result) == FAILURE) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Generated salt too short");
 			efree(buffer);
@@ -208,7 +208,7 @@ PHP_FUNCTION(password_make_salt)
 		RETURN_NULL();
 	}
 
-	salt = emalloc(length + 1);
+	salt = safe_emalloc(length, 1, 1);
 	if (php_password_make_salt(length, (int) raw_output, salt TSRMLS_CC) == FAILURE) {
 		efree(salt);
 		RETURN_FALSE;
@@ -316,7 +316,7 @@ PHP_FUNCTION(password_hash)
 	
 	salt[salt_len] = 0;
 
-	hash = emalloc(salt_len + hash_format_len + 1);
+	hash = safe_emalloc(salt_len + hash_format_len, 1, 1);
 	sprintf(hash, "%s%s", hash_format, salt);
 	hash[hash_format_len + salt_len] = 0;
 
