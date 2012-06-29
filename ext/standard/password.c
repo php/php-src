@@ -166,7 +166,7 @@ PHP_FUNCTION(password_verify)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &password, &password_len, &hash, &hash_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (crypt_execute(password, password_len, hash, hash_len, &ret) == FAILURE) {
+	if (php_crypt(password, password_len, hash, hash_len, &ret) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -323,7 +323,7 @@ PHP_FUNCTION(password_hash)
 	efree(hash_format);
 	efree(salt);
 
-	if (crypt_execute(password, password_len, hash, hash_format_len + salt_len, &result) == FAILURE) {
+	if (php_crypt(password, password_len, hash, hash_format_len + salt_len, &result) == FAILURE) {
 		efree(hash);
 		RETURN_FALSE;
 	}
@@ -335,8 +335,7 @@ PHP_FUNCTION(password_hash)
 		RETURN_FALSE;
 	}
 
-	RETVAL_STRING(result, 1);
-	efree(result);
+	RETURN_STRING(result, 0);
 }
 /* }}} */
 

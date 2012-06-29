@@ -145,7 +145,7 @@ static void php_to64(char *s, long v, int n) /* {{{ */
 }
 /* }}} */
 
-PHPAPI int crypt_execute(const char *password, const int pass_len, const char *salt, int salt_len, char **result)
+PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, char **result)
 {
 	char *crypt_res;
 /* Windows (win32/crypt) has a stripped down version of libxcrypt and 
@@ -159,46 +159,38 @@ PHPAPI int crypt_execute(const char *password, const int pass_len, const char *s
 
 			out = php_md5_crypt_r(password, salt, output);
 			if (out) {
-				*result = (char *) emalloc(MD5_HASH_MAX_LEN + 1);
-				memcpy(*result, out, MD5_HASH_MAX_LEN);
-				*result[MD5_HASH_MAX_LEN] = 0;
+				*result = estrdup(out);
 				return SUCCESS;
 			}
 			return FAILURE;
 		} else if (salt[0]=='$' && salt[1]=='6' && salt[2]=='$') {
-			const char sha512_salt_prefix[] = "$6$";
-			const char sha512_rounds_prefix[] = "rounds=";
 			char *output;
-			int needed = (sizeof(sha512_salt_prefix) - 1
-						+ sizeof(sha512_rounds_prefix) + 9 + 1
-						+ salt_in_len + 1 + 86 + 1);
-			output = emalloc(needed);
+			output = emalloc(PHP_MAX_SALT_LEN);
 
-			crypt_res = php_sha512_crypt_r(password, salt, output, needed);
+			crypt_res = php_sha512_crypt_r(password, salt, output, PHP_MAX_SALT_LEN);
 			if (!crypt_res) {
-				memset(output, 0, needed);
+				memset(output, 0, PHP_MAX_SALT_LEN);
 				efree(output);
 				return FAILURE;
 			} else {
-				*result = output;
+				*result = estrdup(output);
+				memset(output, 0, PHP_MAX_SALT_LEN);
+				efree(output);
 				return SUCCESS;
 			}
 		} else if (salt[0]=='$' && salt[1]=='5' && salt[2]=='$') {
-			const char sha256_salt_prefix[] = "$5$";
-			const char sha256_rounds_prefix[] = "rounds=";
 			char *output;
-			int needed = (sizeof(sha256_salt_prefix) - 1
-						+ sizeof(sha256_rounds_prefix) + 9 + 1
-						+ salt_in_len + 1 + 43 + 1);
-			output = emalloc(needed);
+			output = emalloc(PHP_MAX_SALT_LEN);
 
-			crypt_res = php_sha256_crypt_r(password, salt, output, needed);
+			crypt_res = php_sha256_crypt_r(password, salt, output, PHP_MAX_SALT_LEN);
 			if (!crypt_res) {
-				memset(output, 0, needed);
+				memset(output, 0, PHP_MAX_SALT_LEN);
 				efree(output);
 				return FAILURE;
 			} else {
-				*result = output;
+				*result = estrdup(output);
+				memset(output, 0, PHP_MAX_SALT_LEN);
+				efree(output);
 				return SUCCESS;
 			}
 		} else if (
@@ -218,11 +210,7 @@ PHPAPI int crypt_execute(const char *password, const int pass_len, const char *s
 				memset(output, 0, PHP_MAX_SALT_LEN + 1);
 				return FAILURE;
 			} else {
-				int result_len;
-				result_len = strlen(output);
-				*result = emalloc(result_len + 1);
-				memcpy(*result, output, result_len);
-				(*result)[result_len] = 0;
+				*result = estrdup(output);
 				memset(output, 0, PHP_MAX_SALT_LEN + 1);
 				return SUCCESS;
 			}
@@ -234,11 +222,7 @@ PHPAPI int crypt_execute(const char *password, const int pass_len, const char *s
 			if (!crypt_res) {
 				return FAILURE;
 			} else {
-				int result_len;
-				result_len = strlen(crypt_res);
-				*result = emalloc(result_len + 1);
-				memcpy(*result, crypt_res, result_len);
-				(*result)[result_len] = 0;
+				*result = estrdup(crypt_res);
 				return SUCCESS;
 			}
 		}
@@ -259,11 +243,7 @@ PHPAPI int crypt_execute(const char *password, const int pass_len, const char *s
 		if (!crypt_res) {
 			return FAILURE;
 		} else {
-			int result_len;
-			result_len = strlen(crypt_res);
-			*result = emalloc(result_len + 1);
-			memcpy(*result, crypt_res, result_len);
-			(*result)[result_len] = '\0';
+			*result = estrdup(crypt_res);
 			return SUCCESS;
 		}
 	}
@@ -311,15 +291,14 @@ PHP_FUNCTION(crypt)
 	}
 	salt[salt_in_len] = '\0';
 
-	if (crypt_execute(str, str_len, salt, salt_in_len, &result) == FAILURE) {
+	if (php_crypt(str, str_len, salt, salt_in_len, &result) == FAILURE) {
 		if (salt[0] == '*' && salt[1] == '0') {
 			RETURN_STRING("*1", 1);
 		} else {
 			RETURN_STRING("*0", 1);
 		}
 	}
-	RETVAL_STRING(result, 1);
-	efree(result);
+	RETURN_STRING(result, 0);
 }
 /* }}} */
 #endif
