@@ -767,7 +767,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	if (!conn->greet_charset) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"Server sent charset (%d) unknown to the client. Please, report to the developers", greet_packet->charset_no);
-		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
+		SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
 			"Server sent charset unknown to the client. Please, report to the developers");
 		goto err;
 	}
