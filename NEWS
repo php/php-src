@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.5
 
 - Core:
+  . Fixed bug #62443 (Crypt SHA256/512 Segfaults With Malformed 
+    Salt). (Anthony Ferrara)
   . Fixed bug #62357 (compile failure: (S) Arguments missing for built-in
     function __memcmp). (Laruence)
   . Fixed bug #61998 (Using traits with method aliases appears to result in
