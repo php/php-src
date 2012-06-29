@@ -199,8 +199,8 @@ PHP_FUNCTION(crypt)
 			char *output;
 			int needed = (sizeof(sha512_salt_prefix) - 1
 						+ sizeof(sha512_rounds_prefix) + 9 + 1
-						+ PHP_MAX_SALT_LEN + 1 + 43 + 1);
-			output = emalloc(needed * sizeof(char *));
+						+ salt_in_len + 1 + 86 + 1);
+			output = emalloc(needed);
 			salt[salt_in_len] = '\0';
 
 			crypt_res = php_sha512_crypt_r(str, salt, output, needed);
@@ -214,7 +214,7 @@ PHP_FUNCTION(crypt)
 				RETVAL_STRING(output, 1);
 			}
 
-			memset(output, 0, PHP_MAX_SALT_LEN + 1);
+			memset(output, 0, needed);
 			efree(output);
 		} else if (salt[0]=='$' && salt[1]=='5' && salt[2]=='$') {
 			const char sha256_salt_prefix[] = "$5$";
@@ -222,8 +222,8 @@ PHP_FUNCTION(crypt)
 			char *output;
 			int needed = (sizeof(sha256_salt_prefix) - 1
 						+ sizeof(sha256_rounds_prefix) + 9 + 1
-						+ PHP_MAX_SALT_LEN + 1 + 43 + 1);
-			output = emalloc(needed * sizeof(char *));
+						+ salt_in_len + 1 + 43 + 1);
+			output = emalloc(needed);
 			salt[salt_in_len] = '\0';
 
 			crypt_res = php_sha256_crypt_r(str, salt, output, needed);
@@ -237,7 +237,7 @@ PHP_FUNCTION(crypt)
 				RETVAL_STRING(output, 1);
 			}
 
-			memset(output, 0, PHP_MAX_SALT_LEN + 1);
+			memset(output, 0, needed);
 			efree(output);
 		} else if (
 				salt[0] == '$' &&
