@@ -1,5 +1,7 @@
 --TEST--
 An error is thrown when an unsupported type is encoded
+--SKIPIF--
+<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -8,19 +10,17 @@ $resource = fopen(__FILE__, "r");
 var_dump($resource);
 
 var_dump(json_encode($resource));
-var_dump(json_last_error());
+var_dump(json_last_error(), json_last_error_msg());
 
 var_dump(json_encode($resource, JSON_PARTIAL_OUTPUT_ON_ERROR));
-var_dump(json_last_error());
+var_dump(json_last_error(), json_last_error_msg());
 
 ?>
 --EXPECTF--
 resource(5) of type (stream)
-
-Warning: json_encode(): type is unsupported in %s on line %d
 bool(false)
 int(8)
-
-Warning: json_encode(): type is unsupported in %s on line %d
+string(21) "Type is not supported"
 string(4) "null"
 int(8)
+string(21) "Type is not supported"

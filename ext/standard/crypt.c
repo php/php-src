@@ -171,7 +171,7 @@ PHPAPI int crypt_execute(const char *password, const int pass_len, const char *s
 			char *output;
 			int needed = (sizeof(sha512_salt_prefix) - 1
 						+ sizeof(sha512_rounds_prefix) + 9 + 1
-						+ PHP_MAX_SALT_LEN + 43 + 1);
+						+ salt_in_len + 1 + 86 + 1);
 			output = emalloc(needed);
 
 			crypt_res = php_sha512_crypt_r(password, salt, output, needed);
@@ -189,7 +189,7 @@ PHPAPI int crypt_execute(const char *password, const int pass_len, const char *s
 			char *output;
 			int needed = (sizeof(sha256_salt_prefix) - 1
 						+ sizeof(sha256_rounds_prefix) + 9 + 1
-						+ PHP_MAX_SALT_LEN + 43 + 1);
+						+ salt_in_len + 1 + 43 + 1);
 			output = emalloc(needed);
 
 			crypt_res = php_sha256_crypt_r(password, salt, output, needed);

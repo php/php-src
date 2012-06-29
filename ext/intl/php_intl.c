@@ -78,6 +78,9 @@
 #include "calendar/calendar_methods.h"
 #include "calendar/gregoriancalendar_methods.h"
 
+#include "breakiterator/breakiterator_class.h"
+#include "breakiterator/breakiterator_iterators.h"
+
 #include "idn/idn.h"
 
 #if U_ICU_VERSION_MAJOR_NUM > 3 && U_ICU_VERSION_MINOR_NUM >=2
@@ -108,6 +111,14 @@
 #undef locale_set_default
 
 ZEND_DECLARE_MODULE_GLOBALS( intl )
+
+const char *intl_locale_get_default( TSRMLS_D )
+{
+	if( INTL_G(default_locale) == NULL ) {
+		return uloc_getDefault();
+	}
+	return INTL_G(default_locale);
+}
 
 /* {{{ Arguments info */
 ZEND_BEGIN_ARG_INFO_EX(collator_static_0_args, 0, 0, 0)
@@ -957,6 +968,12 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Register 'IntlIterator' PHP class */
 	intl_register_IntlIterator_class( TSRMLS_C );
+
+	/* Register 'BreakIterator' class */
+	breakiterator_register_BreakIterator_class( TSRMLS_C );
+
+	/* Register 'IntlPartsIterator' class */
+	breakiterator_register_IntlPartsIterator_class( TSRMLS_C );
 
 	/* Global error handling. */
 	intl_error_init( NULL TSRMLS_CC );
