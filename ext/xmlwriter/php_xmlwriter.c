@@ -151,7 +151,7 @@ static zend_object_value xmlwriter_object_new(zend_class_entry *class_type TSRML
 	intern->xmlwriter_ptr = NULL;
 	
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,
+	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_property_ctor,
 					(void *) &tmp, sizeof(zval *));
 
 	retval.handle = zend_objects_store_put(intern,

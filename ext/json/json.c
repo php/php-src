@@ -34,6 +34,7 @@ static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);
 static PHP_FUNCTION(json_decode);
 static PHP_FUNCTION(json_last_error);
+static PHP_FUNCTION(json_last_error_msg);
 
 static const char digits[] = "0123456789abcdef";
 
@@ -51,8 +52,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_json_decode, 0, 0, 1)
 	ZEND_ARG_INFO(0, depth)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_json_last_error, 0, 0, 0)
-	ZEND_ARG_INFO(0, as_string)
+ZEND_BEGIN_ARG_INFO(arginfo_json_last_error, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_json_last_error_msg, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
@@ -61,6 +64,7 @@ static const function_entry json_functions[] = {
 	PHP_FE(json_encode, arginfo_json_encode)
 	PHP_FE(json_decode, arginfo_json_decode)
 	PHP_FE(json_last_error, arginfo_json_last_error)
+	PHP_FE(json_last_error_msg, arginfo_json_last_error_msg)
 	PHP_FE_END
 };
 /* }}} */
@@ -607,21 +611,25 @@ static PHP_FUNCTION(json_decode)
 /* }}} */
 
 /* {{{ proto int json_last_error()
-   Returns the error code of the last json_decode(). */
+   Returns the error code of the last json_encode() or json_decode() call. */
 static PHP_FUNCTION(json_last_error)
 {
-	zend_bool as_string = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &as_string) == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	/* return error code (JSON_ERROR_* constants) */
-	if (!as_string) {
-		RETURN_LONG(JSON_G(error_code));
+	RETURN_LONG(JSON_G(error_code));
+}
+/* }}} */
+
+/* {{{ proto string json_last_error_msg()
+   Returns the error string of the last json_encode() or json_decode() call. */
+static PHP_FUNCTION(json_last_error_msg)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
-	/* return error message (for debugging purposes) */
 	switch(JSON_G(error_code)) {
 		case PHP_JSON_ERROR_NONE:
 			RETURN_STRING("No error", 1);
@@ -644,6 +652,7 @@ static PHP_FUNCTION(json_last_error)
 		default:
 			RETURN_STRING("Unknown error", 1);
 	}
+
 }
 /* }}} */
 
