@@ -39,6 +39,10 @@ PHP                                                                        NEWS
 - Installation:
   . Fixed bug #62460 (php binaries installed as binary.dSYM). (Reeze Xia)
 
+- PCRE:
+  . Fixed bug #55856 (preg_replace should fail on trailing garbage). 
+    (reg dot php at alf dot nu)
+
 - PDO:
   . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
 
