@@ -2092,8 +2092,10 @@ $output
 	if (isset($old_php)) {
 		$php = $old_php;
 	}
+	
+	$diff = empty($diff) ? '' : "<![CDATA[\n " . preg_replace('/\e/', '<esc>', $diff) . "\n]]>";
 
-	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, "<![CDATA[\n " . preg_replace('/\e/', '<esc>', $diff) . "\n]]>");
+	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, $diff);
 
 	return $restype[0] . 'ED';
 }
