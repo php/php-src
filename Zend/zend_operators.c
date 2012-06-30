@@ -321,16 +321,21 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 
 /* }}} */
 
-ZEND_API int convert_to_long_safe(zval *op)
+ZEND_API int convert_to_long_safe(zval **op_ptr, int separate)
 {
-	if (Z_TYPE_P(op) != IS_LONG) {
-		return convert_to_long_base_safe(op, 10);
+	if (Z_TYPE_PP(op_ptr) != IS_LONG) {
+		return convert_to_long_base_safe(op_ptr, 10, separate);
 	}
 	return SUCCESS;
 }
 
-ZEND_API int convert_to_long_base_safe(zval *op, int base)
+ZEND_API int convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 {
+	zval *op = *op_ptr;
+	if (separate && Z_TYPE_P(op) != IS_LONG) {
+		SEPARATE_ZVAL_IF_NOT_REF(op_ptr);
+		op = *op_ptr;
+	}
 	switch (Z_TYPE_P(op)) {
 		case IS_STRING:
 			{
@@ -401,8 +406,13 @@ ZEND_API int convert_to_long_base_safe(zval *op, int base)
 	}
 }
 
-ZEND_API int convert_to_double_safe(zval *op)
+ZEND_API int convert_to_double_safe(zval **op_ptr, int separate)
 {
+	zval *op = *op_ptr;
+	if (separate && Z_TYPE_P(op) != IS_DOUBLE) {
+		SEPARATE_ZVAL_IF_NOT_REF(op_ptr);
+		op = *op_ptr;
+	}
 	switch (Z_TYPE_P(op)) {
 		case IS_STRING:
 			{
@@ -471,8 +481,14 @@ ZEND_API int convert_to_double_safe(zval *op)
 	}
 }
 
-ZEND_API int convert_to_string_safe(zval *op)
+ZEND_API int convert_to_string_safe(zval **op_ptr, int separate)
 {
+	zval *op = *op_ptr;
+	if (separate && Z_TYPE_P(op) != IS_LONG) {
+		SEPARATE_ZVAL_IF_NOT_REF(op_ptr);
+		op = *op_ptr;
+	}
+
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 			ZVAL_STRING(op, "", 1);
@@ -547,7 +563,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_OBJECT: {
 				char *name;
 				name = estrdup(Z_OBJCE_P(op)->name);
-				if (convert_to_long_base_safe(op, base) == FAILURE) {
+				if (convert_to_long_base_safe(&op, base, 0) == FAILURE) {
 					zend_error(E_NOTICE, "Object of class %s could not be converted to int", name);
 				}
 				efree(name);
@@ -560,7 +576,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
-			convert_to_long_base_safe(op, base);
+			convert_to_long_base_safe(&op, base, 0);
 			break;
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
@@ -725,14 +741,14 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			{
 			        char *name;
                                 name = estrdup(Z_OBJCE_P(op)->name);
-                                if (convert_to_string_safe(op) == FAILURE) {
+                                if (convert_to_string_safe(&op, 0) == FAILURE) {
 					zend_error(E_NOTICE, "Object of class %s to string conversion", name);
                                 }
                                 efree(name);
 				return;
                         }
 		default:
-			convert_to_string_safe(op);
+			convert_to_string_safe(&op, 0);
 
 	}
 }

@@ -309,10 +309,12 @@ ZEND_API void convert_to_null(zval *op);
 ZEND_API void convert_to_boolean(zval *op);
 ZEND_API void convert_to_array(zval *op);
 ZEND_API void convert_to_object(zval *op);
-ZEND_API int convert_to_long_safe(zval *op);
-ZEND_API int convert_to_long_base_safe(zval *op, int base);
-ZEND_API int convert_to_double_safe(zval *op);
-ZEND_API int convert_to_string_safe(zval *op);
+
+ZEND_API int convert_to_long_safe(zval **op_ptr, int separate);
+ZEND_API int convert_to_long_base_safe(zval **op_ptr, int base, int separate);
+ZEND_API int convert_to_double_safe(zval **op_ptr, int separate);
+ZEND_API int convert_to_string_safe(zval **op_ptr, int separate);
+
 ZEND_API void multi_convert_to_long_ex(int argc, ...);
 ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);

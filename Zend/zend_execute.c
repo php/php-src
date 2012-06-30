@@ -636,7 +636,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			case IS_STRING:
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type string", "", "none", "" TSRMLS_CC);
-				} else if (FAILURE == convert_to_string_safe(*arg)) {
+				} else if (FAILURE == convert_to_string_safe(arg, 1)) {
 					zend_verify_arg_cast_error(E_NOTICE, zf, arg_num, "string" TSRMLS_CC);
 				}
 				break;
@@ -644,8 +644,10 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 			case IS_DOUBLE:
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type float", "", "none", "" TSRMLS_CC);
-				} else 	if (FAILURE == convert_to_double_safe(*arg)) {
-					zend_verify_arg_cast_error(E_NOTICE, zf, arg_num, "float" TSRMLS_CC);
+				} else {
+					if (FAILURE == convert_to_double_safe(arg, 1)) {
+						zend_verify_arg_cast_error(E_NOTICE, zf, arg_num, "float" TSRMLS_CC);
+					}
 				}
 				break;
 
@@ -653,14 +655,14 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type boolean", "", "none", "" TSRMLS_CC);
 				} else {
-					convert_to_boolean(*arg);
+					convert_to_boolean_ex(arg);
 				}
 				break;
 
 			case IS_LONG:
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type int", "", "none", "" TSRMLS_CC);
-				} else if (FAILURE == convert_to_long_safe(*arg)) {
+				} else if (FAILURE == convert_to_long_safe(arg, 1)) {
 					zend_verify_arg_cast_error(E_NOTICE, zf, arg_num, "int" TSRMLS_CC);
 				}
 				break;
