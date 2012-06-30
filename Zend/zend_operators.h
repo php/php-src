@@ -406,12 +406,6 @@ END_EXTERN_C()
 #define convert_to_object_ex(ppzv)	convert_to_ex_master(ppzv, object, OBJECT)
 #define convert_to_null_ex(ppzv)	convert_to_ex_master(ppzv, null, NULL)
 
-#define convert_to_boolean_safe_ex(ppzv)	convert_to_ex_master(ppzv, boolean_safe, BOOL);
-#define convert_to_long_safe_ex(ppzv)		convert_to_ex_master(ppzv, long_safe, LONG);
-#define convert_to_double_safe_ex(ppzv)		convert_to_ex_master(ppzv, double_safe, DOUBLE);
-#define convert_to_string_safe_ex(ppzv)		convert_to_ex_master(ppzv, stringsafe, STRING);
-
-
 #define convert_scalar_to_number_ex(ppzv)							\
 	if (Z_TYPE_PP(ppzv)!=IS_LONG && Z_TYPE_PP(ppzv)!=IS_DOUBLE) {	\
 		if (!Z_ISREF_PP(ppzv)) {									\
