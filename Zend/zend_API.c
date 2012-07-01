@@ -327,160 +327,45 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		case 'L':
 			{
 				long *p = va_arg(*va, long *);
-				switch (Z_TYPE_PP(arg)) {
-					case IS_STRING:
-						{
-							double d;
-							int type;
-
-							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), p, &d, -1)) == 0) {
-								return "long";
-							} else if (type == IS_DOUBLE) {
-								if (c == 'L') {
-									if (d > LONG_MAX) {
-										*p = LONG_MAX;
-										break;
-									} else if (d < LONG_MIN) {
-										*p = LONG_MIN;
-										break;
-									}
-								}
-
-								*p = zend_dval_to_lval(d);
-							}
-						}
-						break;
-
-					case IS_DOUBLE:
-						if (c == 'L') {
-							if (Z_DVAL_PP(arg) > LONG_MAX) {
-								*p = LONG_MAX;
-								break;
-							} else if (Z_DVAL_PP(arg) < LONG_MIN) {
-								*p = LONG_MIN;
-								break;
-							}
-						}
-					case IS_NULL:
-					case IS_LONG:
-					case IS_BOOL:
-						convert_to_long_ex(arg);
-						*p = Z_LVAL_PP(arg);
-						break;
-
-					case IS_ARRAY:
-					case IS_OBJECT:
-					case IS_RESOURCE:
-					default:
-						return "long";
+				if (FAILURE == convert_to_long_safe_ex(arg)) {
+					return "long";
 				}
+				*p = Z_LVAL_PP(arg);
+				break;
 			}
-			break;
-
 		case 'd':
 			{
 				double *p = va_arg(*va, double *);
-				switch (Z_TYPE_PP(arg)) {
-					case IS_STRING:
-						{
-							long l;
-							int type;
-
-							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &l, p, -1)) == 0) {
-								return "double";
-							} else if (type == IS_LONG) {
-								*p = (double) l;
-							}
-						}
-						break;
-
-					case IS_NULL:
-					case IS_LONG:
-					case IS_DOUBLE:
-					case IS_BOOL:
-						convert_to_double_ex(arg);
-						*p = Z_DVAL_PP(arg);
-						break;
-
-					case IS_ARRAY:
-					case IS_OBJECT:
-					case IS_RESOURCE:
-					default:
-						return "double";
+				if (FAILURE == convert_to_double_safe_ex(arg)) {
+					return "double";
 				}
+				*p = Z_DVAL_PP(arg);
+				break;
 			}
-			break;
-
 		case 'p':
 		case 's':
 			{
 				char **p = va_arg(*va, char **);
 				int *pl = va_arg(*va, int *);
-				switch (Z_TYPE_PP(arg)) {
-					case IS_NULL:
-						if (return_null) {
-							*p = NULL;
-							*pl = 0;
-							break;
-						}
-						/* break omitted intentionally */
-
-					case IS_STRING:
-					case IS_LONG:
-					case IS_DOUBLE:
-					case IS_BOOL:
-						convert_to_string_ex(arg);
-						if (UNEXPECTED(Z_ISREF_PP(arg) != 0)) {
-							/* it's dangerous to return pointers to string
-							   buffer of referenced variable, because it can
-							   be clobbered throug magic callbacks */
-							SEPARATE_ZVAL(arg);
-						}
-						*p = Z_STRVAL_PP(arg);
-						*pl = Z_STRLEN_PP(arg);
-						if (c == 'p' && CHECK_ZVAL_NULL_PATH(*arg)) {
-							return "a valid path";
-						}
-						break;
-
-					case IS_OBJECT:
-						if (parse_arg_object_to_string(arg, p, pl, IS_STRING TSRMLS_CC) == SUCCESS) {
-							if (c == 'p' && CHECK_ZVAL_NULL_PATH(*arg)) {
-								return "a valid path";
-							}
-							break;
-						}
-
-					case IS_ARRAY:
-					case IS_RESOURCE:
-					default:
-						return c == 's' ? "string" : "a valid path";
+				if (FAILURE == convert_to_string_safe_ex(arg)) {
+					return c == 's' ? "string" : "a valid path";
 				}
+				if (c == 'p' && CHECK_ZVAL_NULL_PATH(*arg)) {
+					return "a valid path";
+				}
+				*p = Z_STRVAL_PP(arg);
+				*pl = Z_STRLEN_PP(arg);
+				break;
 			}
-			break;
-
 		case 'b':
 			{
 				zend_bool *p = va_arg(*va, zend_bool *);
-				switch (Z_TYPE_PP(arg)) {
-					case IS_NULL:
-					case IS_STRING:
-					case IS_LONG:
-					case IS_DOUBLE:
-					case IS_BOOL:
-						convert_to_boolean_ex(arg);
-						*p = Z_BVAL_PP(arg);
-						break;
-
-					case IS_ARRAY:
-					case IS_OBJECT:
-					case IS_RESOURCE:
-					default:
-						return "boolean";
+				if (FAILURE == convert_to_boolean_safe_ex(arg)) {
+					return "boolean";
 				}
+				*p = Z_BVAL_PP(arg);
+				break;
 			}
-			break;
-
 		case 'r':
 			{
 				zval **p = va_arg(*va, zval **);
