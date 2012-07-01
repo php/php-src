@@ -321,15 +321,15 @@ ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC) /* {{{ */
 
 /* }}} */
 
-ZEND_API int convert_to_long_safe(zval **op_ptr, int separate)
+ZEND_API int _convert_to_long_safe(zval **op_ptr, int separate)
 {
 	if (Z_TYPE_PP(op_ptr) != IS_LONG) {
-		return convert_to_long_base_safe(op_ptr, 10, separate);
+		return _convert_to_long_base_safe(op_ptr, 10, separate);
 	}
 	return SUCCESS;
 }
 
-ZEND_API int convert_to_long_base_safe(zval **op_ptr, int base, int separate)
+ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 {
 	zval *op = *op_ptr;
 	if (separate && Z_TYPE_P(op) != IS_LONG) {
@@ -342,7 +342,7 @@ ZEND_API int convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 				int type;
 				long lval;
 				double dval;
-				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, 0)) == 0) {
+				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, -1)) == 0) {
 					char *strval = Z_STRVAL_P(op);
 					ZVAL_LONG(op, strtol(strval, NULL, base));
 					STR_FREE(strval);
@@ -406,7 +406,7 @@ ZEND_API int convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 	}
 }
 
-ZEND_API int convert_to_double_safe(zval **op_ptr, int separate)
+ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 {
 	zval *op = *op_ptr;
 	if (separate && Z_TYPE_P(op) != IS_DOUBLE) {
@@ -419,7 +419,7 @@ ZEND_API int convert_to_double_safe(zval **op_ptr, int separate)
 				int type;
 				long lval;
 				double dval;
-				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, 0)) == 0) {
+				if ((type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, -1)) == 0) {
 					char *strval = Z_STRVAL_P(op);
 					ZVAL_LONG(op, strtod(strval, NULL));
 					STR_FREE(strval);
@@ -481,7 +481,71 @@ ZEND_API int convert_to_double_safe(zval **op_ptr, int separate)
 	}
 }
 
-ZEND_API int convert_to_string_safe(zval **op_ptr, int separate)
+ZEND_API int _convert_to_boolean_safe(zval **op_ptr, int separate)
+{
+	zval *op = *op_ptr;
+	if (separate && Z_TYPE_P(op) != IS_BOOL) {
+		SEPARATE_ZVAL_IF_NOT_REF(op_ptr);
+		op = *op_ptr;
+	}
+
+	switch (Z_TYPE_P(op)) {
+		case IS_NULL:
+			ZVAL_BOOL(op, 0);
+			return SUCCESS;
+		case IS_STRING:
+			{
+				char *strval = Z_STRVAL_P(op);
+				if (Z_STRLEN_P(op) == 0
+					|| (Z_STRLEN_P(op) == 1 && strval[0] == '0')) {
+					ZVAL_BOOL(op, 0);
+				} else {
+					ZVAL_BOOL(op, 1);
+				}
+				STR_FREE(strval);
+				return SUCCESS;
+			}
+		case IS_BOOL:
+			return SUCCESS;
+		case IS_RESOURCE:
+			ZVAL_BOOL(op, Z_LVAL_P(op) ? 1 : 0);
+			return FAILURE;
+		case IS_LONG:
+			ZVAL_BOOL(op, Z_LVAL_P(op) ? 1 : 0);
+			return SUCCESS;
+		case IS_DOUBLE:
+			ZVAL_BOOL(op, Z_DVAL_P(op) ? 1 : 0);
+			return SUCCESS;
+		case IS_ARRAY:
+			{
+				zend_bool temp;
+				temp = (zend_hash_num_elements(Z_ARRVAL_P(op)) ? 1 : 0);
+				zval_dtor(op);
+				ZVAL_BOOL(op, temp);
+				return FAILURE;
+			}
+		case IS_OBJECT:
+			{
+				TSRMLS_FETCH();
+				
+				convert_object_to_type(op, IS_BOOL, convert_to_boolean);
+			
+				if (Z_TYPE_P(op) == IS_BOOL) {
+					return SUCCESS;
+				}
+				zval_dtor(op);
+				ZVAL_BOOL(op, 1);
+				return FAILURE;
+			}
+				
+		default:
+			zval_dtor(op);
+			ZVAL_BOOL(op, 0);
+			return FAILURE;
+	}
+}
+
+ZEND_API int _convert_to_string_safe(zval **op_ptr, int separate)
 {
 	zval *op = *op_ptr;
 	if (separate && Z_TYPE_P(op) != IS_LONG) {
@@ -563,7 +627,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_OBJECT: {
 				char *name;
 				name = estrdup(Z_OBJCE_P(op)->name);
-				if (convert_to_long_base_safe(&op, base, 0) == FAILURE) {
+				if (_convert_to_long_base_safe(&op, base, 0) == FAILURE) {
 					zend_error(E_NOTICE, "Object of class %s could not be converted to int", name);
 				}
 				efree(name);
@@ -576,7 +640,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
-			convert_to_long_base_safe(&op, base, 0);
+			_convert_to_long_base_safe(&op, base, 0);
 			break;
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");
@@ -670,65 +734,7 @@ ZEND_API void convert_to_null(zval *op) /* {{{ */
 
 ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 {
-	int tmp;
-
-	switch (Z_TYPE_P(op)) {
-		case IS_BOOL:
-			break;
-		case IS_NULL:
-			Z_LVAL_P(op) = 0;
-			break;
-		case IS_RESOURCE: {
-				TSRMLS_FETCH();
-
-				zend_list_delete(Z_LVAL_P(op));
-			}
-			/* break missing intentionally */
-		case IS_LONG:
-			Z_LVAL_P(op) = (Z_LVAL_P(op) ? 1 : 0);
-			break;
-		case IS_DOUBLE:
-			Z_LVAL_P(op) = (Z_DVAL_P(op) ? 1 : 0);
-			break;
-		case IS_STRING:
-			{
-				char *strval = Z_STRVAL_P(op);
-
-				if (Z_STRLEN_P(op) == 0
-					|| (Z_STRLEN_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
-					Z_LVAL_P(op) = 0;
-				} else {
-					Z_LVAL_P(op) = 1;
-				}
-				STR_FREE(strval);
-			}
-			break;
-		case IS_ARRAY:
-			tmp = (zend_hash_num_elements(Z_ARRVAL_P(op))?1:0);
-			zval_dtor(op);
-			Z_LVAL_P(op) = tmp;
-			break;
-		case IS_OBJECT:
-			{
-				zend_bool retval = 1;
-				TSRMLS_FETCH();
-
-				convert_object_to_type(op, IS_BOOL, convert_to_boolean);
-
-				if (Z_TYPE_P(op) == IS_BOOL) {
-					return;
-				}
-
-				zval_dtor(op);
-				ZVAL_BOOL(op, retval);
-				break;
-			}
-		default:
-			zval_dtor(op);
-			Z_LVAL_P(op) = 0;
-			break;
-	}
-	Z_TYPE_P(op) = IS_BOOL;
+	_convert_to_boolean_safe(&op, 0);
 }
 /* }}} */
 
@@ -741,14 +747,14 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			{
 			        char *name;
                                 name = estrdup(Z_OBJCE_P(op)->name);
-                                if (convert_to_string_safe(&op, 0) == FAILURE) {
+                                if (_convert_to_string_safe(&op, 0) == FAILURE) {
 					zend_error(E_NOTICE, "Object of class %s to string conversion", name);
                                 }
                                 efree(name);
 				return;
                         }
 		default:
-			convert_to_string_safe(&op, 0);
+			_convert_to_string_safe(&op, 0);
 
 	}
 }
