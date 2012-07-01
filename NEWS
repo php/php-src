@@ -9,7 +9,6 @@ PHP                                                                        NEWS
   . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
 
 - Core:
-  . Fixed CVE-2012-2143. (Solar Designer)
   . Fixed potential overflow in _php_stream_scandir. (Jason Powell,
     Stas)
   . Fixed bug #62432 (ReflectionMethod random corrupt memory on high
@@ -37,8 +36,6 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fixed bug #62083 (grapheme_extract() memory leaks). (Gustavo)
-  . Fixed bug #62082 (memory corruption in internal get_icu_disp_value_src_php
-    function). (Gustavo)
   . Fixed bug #62081 (IntlDateFormatter constructor leaks memory when called
     twice). (Gustavo)
   . Fixed bug #62070 (Collator::getSortKey() returns garbage). (Gustavo)
@@ -48,10 +45,6 @@ PHP                                                                        NEWS
 
 - JSON:
   . Improved error handling. (Nikita Popov)
-  
-- PDO:
-  . Fixed bug #61755 (A parsing bug in the prepared statements can lead to
-    access violations). (Johannes)
 
 - Phar:
   . Fixed bug #62227 (Invalid phar stream path causes crash). (Felipe)
@@ -87,20 +80,20 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed CVE-2012-2143. (Solar Designer)
-  . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
-    member of a null object). (Laruence)
-  . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
-    reference). (Laruence)
   . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
-  . Fixed bug #61764 ('I' unpacks n as signed if n > 2^31-1 on LP64). (Gustavo)
-  . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
-    set to null). (Anatoliy)
-  . Fixed bug #61713 (Logic error in charset detection for htmlentities).
-    (Anatoliy)
-  . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
-  . Changed php://fd to be available only for CLI.
   . Fixed bug #62373 (serialize() generates wrong reference to the object).
     (Moriyoshi)
+  . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
+    member of a null object). (Laruence)
+  . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
+  . Fixed bug #61764 ('I' unpacks n as signed if n > 2^31-1 on LP64). (Gustavo)
+  . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
+    reference). (Laruence)
+  . Fixed bug #61713 (Logic error in charset detection for htmlentities).
+    (Anatoliy)
+  . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
+    set to null). (Anatoliy)
+  . Changed php://fd to be available only for CLI.
 
 - Fileinfo:
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
