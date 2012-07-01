@@ -215,7 +215,7 @@ class DateFormatter {
         /**
 	 * Sets the pattern to  use 
          * @param  string $pattern new pattern string to use
-         * @return boolean 'true' if successful, 'false' if an error occured. Bad format
+         * @return boolean 'true' if successful, 'false' if an error occurred. Bad format
          *                 strings are usually the cause of the latter.
          */
 	public function setPattern($pattern) {}
@@ -410,7 +410,7 @@ class DateFormatter {
 	 * Sets the pattern to use
          * @param DateFormatter $fmt The date formatter resource
          * @param  string $pattern new pattern string to use
-         * @return boolean 'true' if successful, 'false' if an error occured. Bad format
+         * @return boolean 'true' if successful, 'false' if an error occurred. Bad format
          *                 strings are usually the cause of the latter.
          */
         function datefmt_set_pattern($fmt , $pattern) {}
