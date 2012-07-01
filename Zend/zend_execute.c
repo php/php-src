@@ -641,7 +641,7 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 				if (!arg) {
 					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type string", "", "none", "" TSRMLS_CC);
 				} else if (FAILURE == convert_to_string_safe_ex(arg)) {
-					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "by of the type string", "", type, "" TSRMLS_CC);
+					return zend_verify_arg_error(E_RECOVERABLE_ERROR, zf, arg_num, "be of the type string", "", type, "" TSRMLS_CC);
 				}
 				break;
 
