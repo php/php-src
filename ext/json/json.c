@@ -311,7 +311,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 						smart_str_appendc(buf, ':');
 
 						json_pretty_print_char(buf, options, ' ' TSRMLS_CC);
- 
+
 						php_json_encode(buf, *data, options TSRMLS_CC);
 					} else {
 						if (need_comma) {
@@ -329,7 +329,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 						smart_str_appendc(buf, ':');
 
 						json_pretty_print_char(buf, options, ' ' TSRMLS_CC);
- 
+
 						php_json_encode(buf, *data, options TSRMLS_CC);
 					}
 				}
@@ -340,7 +340,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 			}
 		}
 	}
-	
+
 	--JSON_G(encoder_depth);
 	json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 	json_pretty_print_indent(buf, options TSRMLS_CC);
@@ -360,6 +360,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 	int pos = 0, ulen = 0;
 	unsigned short us;
 	unsigned short *utf16;
+	size_t newlen;
 
 	if (len == 0) {
 		smart_str_appendl(buf, "\"\"", 2);
@@ -387,9 +388,9 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 			}
 			return;
 		}
-		
+
 	}
-	
+
 	utf16 = (options & PHP_JSON_UNESCAPED_UNICODE) ? NULL : (unsigned short *) safe_emalloc(len, sizeof(unsigned short), 0);
 	ulen = utf8_to_utf16(utf16, s, len);
 	if (ulen <= 0) {
@@ -408,6 +409,8 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 		len = ulen;
 	}
 
+	/* pre-allocate for string length plus 2 quotes */
+	smart_str_alloc(buf, len+2, 0);
 	smart_str_appendc(buf, '"');
 
 	while (pos < len)
@@ -520,13 +523,13 @@ static void json_encode_serializable_object(smart_str *buf, zval *val, int optio
 	zend_class_entry *ce = Z_OBJCE_P(val);
 	zval *retval = NULL, fname;
 	HashTable* myht;
-	
+
 	if (Z_TYPE_P(val) == IS_ARRAY) {
 		myht = HASH_OF(val);
 	} else {
 		myht = Z_OBJPROP_P(val);
-	}	
-	
+	}
+
 	if (myht && myht->nApplyCount > 1) {
 		JSON_G(error_code) = PHP_JSON_ERROR_RECURSION;
 		smart_str_appendl(buf, "null", 4);
@@ -539,7 +542,7 @@ static void json_encode_serializable_object(smart_str *buf, zval *val, int optio
 		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Failed calling %s::jsonSerialize()", ce->name);
 		smart_str_appendl(buf, "null", sizeof("null") - 1);
 		return;
-    }   
+    }
 
 	if (EG(exception)) {
 		/* Error already raised */

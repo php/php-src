@@ -52,6 +52,9 @@ PHP                                                                        NEWS
     pattern). (Gustavo)
   . Fixed bug #60785 (memory leak in IntlDateFormatter constructor). (Gustavo)
 
+- JSON:
+  . Fixed bug #61359 (json_encode() calls too many reallocs). (Stas)
+
 - libxml:
   . Fixed bug #62266 (Custom extension segfaults during xmlParseFile with FPM
     SAPI). (Gustavo)
