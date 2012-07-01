@@ -258,6 +258,49 @@ ZEND_API int zend_get_object_classname(const zval *object, const char **class_na
 }
 /* }}} */
 
+static int parse_arg_object_to_string(zval **arg, char **p, int *pl, int type TSRMLS_DC) /* {{{ */
+{
+	if (Z_OBJ_HANDLER_PP(arg, cast_object)) {
+		zval *obj;
+		MAKE_STD_ZVAL(obj);
+		if (Z_OBJ_HANDLER_P(*arg, cast_object)(*arg, obj, type TSRMLS_CC) == SUCCESS) {
+			zval_ptr_dtor(arg);
+			*arg = obj;
+			*pl = Z_STRLEN_PP(arg);
+			*p = Z_STRVAL_PP(arg);
+			return SUCCESS;
+		}
+		efree(obj);
+	}
+	/* Standard PHP objects */
+	if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HANDLER_PP(arg, cast_object)) {
+		SEPARATE_ZVAL_IF_NOT_REF(arg);
+		if (zend_std_cast_object_tostring(*arg, *arg, type TSRMLS_CC) == SUCCESS) {
+			*pl = Z_STRLEN_PP(arg);
+			*p = Z_STRVAL_PP(arg);
+			return SUCCESS;
+		}
+	}
+	if (!Z_OBJ_HANDLER_PP(arg, cast_object) && Z_OBJ_HANDLER_PP(arg, get)) {
+		int use_copy;
+		zval *z = Z_OBJ_HANDLER_PP(arg, get)(*arg TSRMLS_CC);
+		Z_ADDREF_P(z);
+		if(Z_TYPE_P(z) != IS_OBJECT) {
+			zval_dtor(*arg);
+			Z_TYPE_P(*arg) = IS_NULL;
+			zend_make_printable_zval(z, *arg, &use_copy);
+			if (!use_copy) {
+				ZVAL_ZVAL(*arg, z, 1, 1);
+			}
+			*pl = Z_STRLEN_PP(arg);
+			*p = Z_STRVAL_PP(arg);
+			return SUCCESS;
+		}
+		zval_ptr_dtor(&z);
+	}
+	return FAILURE;
+}
+/* }}} */
 
 static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, const char **spec, char **error, int *severity TSRMLS_DC) /* {{{ */
 {
@@ -284,45 +327,160 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		case 'L':
 			{
 				long *p = va_arg(*va, long *);
-				if (FAILURE == convert_to_long_safe_ex(arg)) {
-					return "long";
+				switch (Z_TYPE_PP(arg)) {
+					case IS_STRING:
+						{
+							double d;
+							int type;
+
+							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), p, &d, -1)) == 0) {
+								return "long";
+							} else if (type == IS_DOUBLE) {
+								if (c == 'L') {
+									if (d > LONG_MAX) {
+										*p = LONG_MAX;
+										break;
+									} else if (d < LONG_MIN) {
+										*p = LONG_MIN;
+										break;
+									}
+								}
+
+								*p = zend_dval_to_lval(d);
+							}
+						}
+						break;
+
+					case IS_DOUBLE:
+						if (c == 'L') {
+							if (Z_DVAL_PP(arg) > LONG_MAX) {
+								*p = LONG_MAX;
+								break;
+							} else if (Z_DVAL_PP(arg) < LONG_MIN) {
+								*p = LONG_MIN;
+								break;
+							}
+						}
+					case IS_NULL:
+					case IS_LONG:
+					case IS_BOOL:
+						convert_to_long_ex(arg);
+						*p = Z_LVAL_PP(arg);
+						break;
+
+					case IS_ARRAY:
+					case IS_OBJECT:
+					case IS_RESOURCE:
+					default:
+						return "long";
 				}
-				*p = Z_LVAL_PP(arg);
-				break;
 			}
+			break;
+
 		case 'd':
 			{
 				double *p = va_arg(*va, double *);
-				if (FAILURE == convert_to_double_safe_ex(arg)) {
-					return "double";
+				switch (Z_TYPE_PP(arg)) {
+					case IS_STRING:
+						{
+							long l;
+							int type;
+
+							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &l, p, -1)) == 0) {
+								return "double";
+							} else if (type == IS_LONG) {
+								*p = (double) l;
+							}
+						}
+						break;
+
+					case IS_NULL:
+					case IS_LONG:
+					case IS_DOUBLE:
+					case IS_BOOL:
+						convert_to_double_ex(arg);
+						*p = Z_DVAL_PP(arg);
+						break;
+
+					case IS_ARRAY:
+					case IS_OBJECT:
+					case IS_RESOURCE:
+					default:
+						return "double";
 				}
-				*p = Z_DVAL_PP(arg);
-				break;
 			}
+			break;
+
 		case 'p':
 		case 's':
 			{
 				char **p = va_arg(*va, char **);
 				int *pl = va_arg(*va, int *);
-				if (FAILURE == convert_to_string_safe_ex(arg)) {
-					return c == 's' ? "string" : "a valid path";
+				switch (Z_TYPE_PP(arg)) {
+					case IS_NULL:
+						if (return_null) {
+							*p = NULL;
+							*pl = 0;
+							break;
+						}
+						/* break omitted intentionally */
+
+					case IS_STRING:
+					case IS_LONG:
+					case IS_DOUBLE:
+					case IS_BOOL:
+						convert_to_string_ex(arg);
+						if (UNEXPECTED(Z_ISREF_PP(arg) != 0)) {
+							/* it's dangerous to return pointers to string
+							   buffer of referenced variable, because it can
+							   be clobbered throug magic callbacks */
+							SEPARATE_ZVAL(arg);
+						}
+						*p = Z_STRVAL_PP(arg);
+						*pl = Z_STRLEN_PP(arg);
+						if (c == 'p' && CHECK_ZVAL_NULL_PATH(*arg)) {
+							return "a valid path";
+						}
+						break;
+
+					case IS_OBJECT:
+						if (parse_arg_object_to_string(arg, p, pl, IS_STRING TSRMLS_CC) == SUCCESS) {
+							if (c == 'p' && CHECK_ZVAL_NULL_PATH(*arg)) {
+								return "a valid path";
+							}
+							break;
+						}
+
+					case IS_ARRAY:
+					case IS_RESOURCE:
+					default:
+						return c == 's' ? "string" : "a valid path";
 				}
-				if (c == 'p' && CHECK_ZVAL_NULL_PATH(*arg)) {
-					return "a valid path";
-				}
-				*p = Z_STRVAL_PP(arg);
-				*pl = Z_STRLEN_PP(arg);
-				break;
 			}
+			break;
+
 		case 'b':
 			{
 				zend_bool *p = va_arg(*va, zend_bool *);
-				if (FAILURE == convert_to_boolean_safe_ex(arg)) {
-					return "boolean";
+				switch (Z_TYPE_PP(arg)) {
+					case IS_NULL:
+					case IS_STRING:
+					case IS_LONG:
+					case IS_DOUBLE:
+					case IS_BOOL:
+						convert_to_boolean_ex(arg);
+						*p = Z_BVAL_PP(arg);
+						break;
+
+					case IS_ARRAY:
+					case IS_OBJECT:
+					case IS_RESOURCE:
+					default:
+						return "boolean";
 				}
-				*p = Z_BVAL_PP(arg);
-				break;
 			}
+			break;
+
 		case 'r':
 			{
 				zval **p = va_arg(*va, zval **);
