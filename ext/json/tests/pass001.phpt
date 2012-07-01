@@ -79,10 +79,10 @@ $arr = json_decode($test, true);
 var_dump($arr);
 
 echo "ENCODE: FROM OBJECT\n";
-$obj_enc = json_encode($obj, JSON_PARTIAL_OUTPUT_ON_ERROR);
+$obj_enc = json_encode($obj);
 echo $obj_enc . "\n";
 echo "ENCODE: FROM ARRAY\n";
-$arr_enc = json_encode($arr, JSON_PARTIAL_OUTPUT_ON_ERROR);
+$arr_enc = json_encode($arr);
 echo $arr_enc . "\n";
 
 echo "DECODE AGAIN: AS OBJECT\n";

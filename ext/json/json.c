@@ -34,7 +34,6 @@ static PHP_MINFO_FUNCTION(json);
 static PHP_FUNCTION(json_encode);
 static PHP_FUNCTION(json_decode);
 static PHP_FUNCTION(json_last_error);
-static PHP_FUNCTION(json_last_error_msg);
 
 static const char digits[] = "0123456789abcdef";
 
@@ -54,9 +53,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_json_last_error, 0)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_json_last_error_msg, 0)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ json_functions[] */
@@ -64,7 +60,6 @@ static const function_entry json_functions[] = {
 	PHP_FE(json_encode, arginfo_json_encode)
 	PHP_FE(json_decode, arginfo_json_decode)
 	PHP_FE(json_last_error, arginfo_json_last_error)
-	PHP_FE(json_last_error_msg, arginfo_json_last_error_msg)
 	PHP_FE_END
 };
 /* }}} */
@@ -86,9 +81,6 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_ERROR_CTRL_CHAR", PHP_JSON_ERROR_CTRL_CHAR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_SYNTAX", PHP_JSON_ERROR_SYNTAX, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_ERROR_UTF8", PHP_JSON_ERROR_UTF8, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_RECURSION", PHP_JSON_ERROR_RECURSION, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_INF_OR_NAN", PHP_JSON_ERROR_INF_OR_NAN, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("JSON_ERROR_UNSUPPORTED_TYPE", PHP_JSON_ERROR_UNSUPPORTED_TYPE, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -189,7 +181,7 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 	}
 
 	if (myht && myht->nApplyCount > 1) {
-		JSON_G(error_code) = PHP_JSON_ERROR_RECURSION;
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 		smart_str_appendl(buf, "null", 4);
 		return;
 	}
@@ -311,7 +303,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 					smart_str_appendl(buf, tmp, l);
 					efree(tmp);
 				} else {
-					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "double %.9g does not conform to the JSON spec, encoded as 0", d);
 					smart_str_appendc(buf, '0');
 				}
 			}
@@ -329,6 +321,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 		}
 		if (len < 0) {
 			JSON_G(error_code) = PHP_JSON_ERROR_UTF8;
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid UTF-8 sequence in argument");
 			smart_str_appendl(buf, "null", 4);
 		} else {
 			smart_str_appendl(buf, "\"\"", 2);
@@ -467,7 +460,7 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 					smart_str_appendl(buf, d, len);
 					efree(d);
 				} else {
-					JSON_G(error_code) = PHP_JSON_ERROR_INF_OR_NAN;
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "double %.9g does not conform to the JSON spec, encoded as 0", dbl);
 					smart_str_appendc(buf, '0');
 				}
 			}
@@ -483,7 +476,7 @@ PHP_JSON_API void php_json_encode(smart_str *buf, zval *val, int options TSRMLS_
 			break;
 
 		default:
-			JSON_G(error_code) = PHP_JSON_ERROR_UNSUPPORTED_TYPE;
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "type is unsupported, encoded as null");
 			smart_str_appendl(buf, "null", 4);
 			break;
 	}
@@ -577,7 +570,7 @@ static PHP_FUNCTION(json_encode)
 
 	php_json_encode(&buf, parameter, options TSRMLS_CC);
 
-	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
+	if (JSON_G(error_code) != PHP_JSON_ERROR_NONE && options ^ PHP_JSON_PARTIAL_OUTPUT_ON_ERROR) {
 		ZVAL_FALSE(return_value);
 	} else {
 		ZVAL_STRINGL(return_value, buf.c, buf.len, 1);
@@ -611,7 +604,7 @@ static PHP_FUNCTION(json_decode)
 /* }}} */
 
 /* {{{ proto int json_last_error()
-   Returns the error code of the last json_encode() or json_decode() call. */
+   Returns the error code of the last json_decode(). */
 static PHP_FUNCTION(json_last_error)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -619,40 +612,6 @@ static PHP_FUNCTION(json_last_error)
 	}
 
 	RETURN_LONG(JSON_G(error_code));
-}
-/* }}} */
-
-/* {{{ proto string json_last_error_msg()
-   Returns the error string of the last json_encode() or json_decode() call. */
-static PHP_FUNCTION(json_last_error_msg)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	switch(JSON_G(error_code)) {
-		case PHP_JSON_ERROR_NONE:
-			RETURN_STRING("No error", 1);
-		case PHP_JSON_ERROR_DEPTH:
-			RETURN_STRING("Maximum stack depth exceeded", 1);
-		case PHP_JSON_ERROR_STATE_MISMATCH:
-			RETURN_STRING("State mismatch (invalid or malformed JSON)", 1);
-		case PHP_JSON_ERROR_CTRL_CHAR:
-			RETURN_STRING("Control character error, possibly incorrectly encoded", 1);
-		case PHP_JSON_ERROR_SYNTAX:
-			RETURN_STRING("Syntax error", 1);
-		case PHP_JSON_ERROR_UTF8:
-			RETURN_STRING("Malformed UTF-8 characters, possibly incorrectly encoded", 1);
-		case PHP_JSON_ERROR_RECURSION:
-			RETURN_STRING("Recursion detected", 1);
-		case PHP_JSON_ERROR_INF_OR_NAN:
-			RETURN_STRING("Inf and NaN cannot be JSON encoded", 1);
-		case PHP_JSON_ERROR_UNSUPPORTED_TYPE:
-			RETURN_STRING("Type is not supported", 1);
-		default:
-			RETURN_STRING("Unknown error", 1);
-	}
-
 }
 /* }}} */
 

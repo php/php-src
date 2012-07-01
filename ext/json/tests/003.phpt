@@ -9,16 +9,10 @@ $a = array();
 $a[] = &$a;
 
 var_dump($a);
-
-echo "\n";
-
 var_dump(json_encode($a));
-var_dump(json_last_error(), json_last_error_msg());
 
-echo "\n";
-
-var_dump(json_encode($a, JSON_PARTIAL_OUTPUT_ON_ERROR));
-var_dump(json_last_error(), json_last_error_msg());
+/* Break circular data structure to prevent memory leaks */
+unset($a[0]);
 
 echo "Done\n";
 ?>
@@ -31,11 +25,6 @@ array(1) {
   }
 }
 
-bool(false)
-int(6)
-string(%d) "Recursion detected"
-
+Warning: json_encode(): recursion detected in %s on line %d
 string(8) "[[null]]"
-int(6)
-string(%d) "Recursion detected"
 Done
