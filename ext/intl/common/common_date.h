@@ -10,35 +10,20 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Kirti Velankar <kirtig@yahoo-inc.com>                       |
+   | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
 */
-#ifndef DATE_FORMATTER_H
-#define DATE_FORMATTER_H
 
+#ifndef COMMON_DATE_H
+#define	COMMON_DATE_H
+
+#include <unicode/umachine.h>
+
+U_CDECL_BEGIN
 #include <php.h>
+U_CDECL_END
 
-PHP_FUNCTION( datefmt_create );
-PHP_FUNCTION( datefmt_get_error_code );
-PHP_FUNCTION( datefmt_get_error_message );
-PHP_METHOD( IntlDateFormatter, __construct );
-void dateformat_register_constants( INIT_FUNC_ARGS );
+U_CFUNC double intl_zval_to_millis(zval *z, UErrorCode *status TSRMLS_DC);
 
-/*
-These are not necessary at this point of time
-#define DATEF_GREGORIAN 1
-#define DATEF_CUSTOMARY 2
-#define DATEF_BUDDHIST 3
-#define DATEF_JAPANESE_IMPERIAL 4
-*/
+#endif	/* COMMON_DATE_H */
 
-#define CALENDAR_SEC "tm_sec"
-#define CALENDAR_MIN "tm_min"
-#define CALENDAR_HOUR "tm_hour"
-#define CALENDAR_MDAY "tm_mday"
-#define CALENDAR_MON "tm_mon"
-#define CALENDAR_YEAR "tm_year"
-#define CALENDAR_WDAY "tm_wday"
-#define CALENDAR_YDAY "tm_yday"
-
-#endif // DATE_FORMATTER_H

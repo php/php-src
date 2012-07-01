@@ -33,6 +33,7 @@ if test "$PHP_INTL" != "no"; then
     collator/collator_error.c \
     common/common_error.c \
 	common/common_enum.cpp \
+	common/common_date.cpp \
     formatter/formatter.c \
     formatter/formatter_main.c \
     formatter/formatter_class.c \
