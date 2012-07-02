@@ -331,7 +331,7 @@ END_EXTERN_C()
 				if (idx-1 > LONG_MAX) { /* overflow */						\
 					break;													\
 				}															\
-				idx = (ulong)(-(long)idx);									\
+				idx = -idx;               									\
 			} else if (idx > LONG_MAX) { /* overflow */						\
 				break;														\
 			}																\
