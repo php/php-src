@@ -43,12 +43,6 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 }
 /* }}} */
 
-PHP_MINFO_FUNCTION(password) /* {{{ */
-{
-	php_info_print_table_row(2, "Default Password BCrypt Cost", INI_STR("password.bcrypt_cost"));
-}
-/* }}} */
-
 static int php_password_salt_is_alphabet(const char *str, const int len) /* {{{ */
 {
 	int i = 0;
@@ -236,8 +230,7 @@ PHP_FUNCTION(password_hash)
 	}
 
 	if (strcmp(algo, PHP_PASSWORD_BCRYPT) == 0) {
-		int cost = 0;
-		cost = (int) INI_INT("password.bcrypt_cost");
+		int cost = PHP_PASSWORD_BCRYPT_COST;
 
 		if (options && zend_symtable_find(options, "cost", 5, (void **) &option_buffer) == SUCCESS) {
 			convert_to_long_ex(option_buffer);

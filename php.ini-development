@@ -1359,15 +1359,6 @@ bcmath.scale = 0
 ; http://php.net/browscap
 ;browscap = extra/browscap.ini
 
-[password]
-; The default cost of a bcrypt hash created using password_hash()
-; Note that this is only the default, and can be overriden by the
-; options argument to password_hash(). Additionally, it only affects
-; newly created hashes. A higher value will make the generated
-; hash more resistent to brute forcing, but will also use more CPU
-; Default: 11
-; password.bcrypt_cost = 11
-
 [Session]
 ; Handler used to store/retrieve data.
 ; http://php.net/session.save-handler
