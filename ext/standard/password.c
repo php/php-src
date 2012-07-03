@@ -211,7 +211,7 @@ PHP_FUNCTION(password_make_salt)
 }
 /* }}} */
 
-/* {{{ proto string password_hash(string password, string algo, array options = array())
+/* {{{ proto string password_hash(string password, int algo, array options = array())
 Hash a password */
 PHP_FUNCTION(password_hash)
 {
