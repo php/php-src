@@ -37,8 +37,8 @@
 
 PHP_MINIT_FUNCTION(password) /* {{{ */
 {
-	REGISTER_STRING_CONSTANT("PASSWORD_DEFAULT", PHP_PASSWORD_DEFAULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_DEFAULT", PHP_PASSWORD_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
 }
 /* }}} */
@@ -211,45 +211,44 @@ PHP_FUNCTION(password_make_salt)
 }
 /* }}} */
 
-/* {{{ proto string password_hash(string password, string algo = PASSWORD_DEFAULT, array options = array())
+/* {{{ proto string password_hash(string password, string algo, array options = array())
 Hash a password */
 PHP_FUNCTION(password_hash)
 {
-	char *algo = 0, *hash_format, *hash, *salt, *password, *result;
-	int algo_len = 0, salt_len = 0, required_salt_len = 0, hash_format_len, password_len;
+	char *hash_format, *hash, *salt, *password, *result;
+	int algo = 0, salt_len = 0, required_salt_len = 0, hash_format_len, password_len;
 	HashTable *options = 0;
 	zval **option_buffer;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sH", &password, &password_len, &algo, &algo_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &password, &password_len, &algo, &options) == FAILURE) {
 		RETURN_NULL();
 	}
 
-	if (algo_len == 0) {
-		algo = PHP_PASSWORD_DEFAULT;
-		algo_len = strlen(PHP_PASSWORD_DEFAULT);
-	}
-
-	if (strcmp(algo, PHP_PASSWORD_BCRYPT) == 0) {
-		int cost = PHP_PASSWORD_BCRYPT_COST;
-
-		if (options && zend_symtable_find(options, "cost", 5, (void **) &option_buffer) == SUCCESS) {
-			convert_to_long_ex(option_buffer);
-			cost = Z_LVAL_PP(option_buffer);
-			zval_ptr_dtor(option_buffer);
+	switch (algo) {
+		case PHP_PASSWORD_BCRYPT:
+		{
+			int cost = PHP_PASSWORD_BCRYPT_COST;
+	
+			if (options && zend_symtable_find(options, "cost", 5, (void **) &option_buffer) == SUCCESS) {
+				convert_to_long_ex(option_buffer);
+				cost = Z_LVAL_PP(option_buffer);
+				zval_ptr_dtor(option_buffer);
+			}
+	
+			if (cost < 4 || cost > 31) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid bcrypt cost parameter specified: %d", cost);
+				RETURN_NULL();
+			}
+			
+			required_salt_len = 22;
+			hash_format = emalloc(8);
+			sprintf(hash_format, "$2y$%02d$", cost);
+			hash_format_len = 7;
 		}
-
-		if (cost < 4 || cost > 31) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid bcrypt cost parameter specified: %d", cost);
+		break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown password hashing algorithm: %d", algo);
 			RETURN_NULL();
-		}
-		
-		required_salt_len = 22;
-		hash_format = emalloc(8);
-		sprintf(hash_format, "$2y$%02d$", cost);
-		hash_format_len = 7;
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown password hashing algorithm: %s", algo);
-		RETURN_NULL();
 	}
 
 	if (options && zend_symtable_find(options, "salt", 5, (void**) &option_buffer) == SUCCESS) {

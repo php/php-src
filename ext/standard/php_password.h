@@ -27,8 +27,8 @@ PHP_FUNCTION(password_make_salt);
 
 PHP_MINIT_FUNCTION(password);
 
-#define PHP_PASSWORD_DEFAULT	"2y"
-#define PHP_PASSWORD_BCRYPT	"2y"
+#define PHP_PASSWORD_DEFAULT	1
+#define PHP_PASSWORD_BCRYPT	1
 
 #define PHP_PASSWORD_BCRYPT_COST 10
 

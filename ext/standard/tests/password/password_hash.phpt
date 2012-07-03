@@ -4,9 +4,9 @@ Test normal operation of password_hash()
 <?php
 //-=-=-=-
 
-var_dump(strlen(password_hash("foo")));
+var_dump(strlen(password_hash("foo", PASSWORD_BCRYPT)));
 
-$hash = password_hash("foo");
+$hash = password_hash("foo", PASSWORD_BCRYPT);
 
 var_dump($hash == crypt("foo", $hash));
 
