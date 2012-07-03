@@ -158,6 +158,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 					"<tr><th>total processes</th><td>%d</td></tr>\n"
 					"<tr><th>max active processes</th><td>%d</td></tr>\n"
 					"<tr><th>max children reached</th><td>%u</td></tr>\n"
+					"<tr><th>slow requests</th><td>%lu</td></tr>\n"
 				"</table>\n";
 
 			if (!full) {
@@ -228,7 +229,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"<active-processes>%d</active-processes>\n"
 				"<total-processes>%d</total-processes>\n"
 				"<max-active-processes>%d</max-active-processes>\n"
-				"<max-children-reached>%u</max-children-reached>\n";
+				"<max-children-reached>%u</max-children-reached>\n"
+				"<slow-requests>%lu</slow-requests>\n";
 
 				if (!full) {
 					short_post = "</status>";
@@ -277,7 +279,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"\"active processes\":%d,"
 				"\"total processes\":%d,"
 				"\"max active processes\":%d,"
-				"\"max children reached\":%u";
+				"\"max children reached\":%u,"
+				"\"slow requests:\":%lu";
 
 			if (!full) {
 				short_post = "}";
@@ -326,7 +329,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"active processes:     %d\n"
 				"total processes:      %d\n"
 				"max active processes: %d\n"
-				"max children reached: %u\n";
+				"max children reached: %u\n"
+				"slow requests:        %lu\n";
 
 				if (full) {
 					full_syntax =
@@ -367,7 +371,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				scoreboard.active,
 				scoreboard.idle + scoreboard.active,
 				scoreboard.active_max,
-				scoreboard.max_children_reached);
+				scoreboard.max_children_reached,
+				scoreboard.slow_rq);
 
 		PUTS(buffer);
 		efree(buffer);
