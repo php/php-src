@@ -186,6 +186,11 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_LIST            "list (T_LIST)"
 %token T_ARRAY           "array (T_ARRAY)"
 %token T_CALLABLE        "callable (T_CALLABLE)"
+%token T_TYPE_INT	 "int (T_TYPE_INT)"
+%token T_TYPE_FLOAT	 "float (T_TYPE_FLOAT)"
+%token T_TYPE_STRING	 "string (T_TYPE_STRING)"
+%token T_TYPE_BOOL	 "bool (T_TYPE_BOOL)"
+%token T_TYPE_RESOURCE	 "resource (T_TYPE_RESOURCE)"
 %token T_CLASS_C         "__CLASS__ (T_CLASS_C)"
 %token T_TRAIT_C         "__TRAIT__ (T_TRAIT_C)"
 %token T_METHOD_C        "__METHOD__ (T_METHOD_C)"
@@ -525,6 +530,11 @@ optional_class_type:
 		/* empty */					{ $$.op_type = IS_UNUSED; }
 	|	T_ARRAY						{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_ARRAY; }
 	|	T_CALLABLE					{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_CALLABLE; }
+	|	T_TYPE_INT					{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_LONG; }
+	|	T_TYPE_FLOAT					{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_DOUBLE; }
+	|	T_TYPE_STRING					{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_STRING_HINT; }
+	|	T_TYPE_BOOL					{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_BOOL; }
+	|	T_TYPE_RESOURCE					{ $$.op_type = IS_CONST; Z_TYPE($$.u.constant)=IS_RESOURCE; }
 	|	fully_qualified_class_name			{ $$ = $1; }
 ;
 

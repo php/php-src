@@ -366,15 +366,15 @@ static int parse_object_to_string(zval **arg, char **p, int *pl, int type TSRMLS
 /* }}} */
 
 
-ZEND_API int _convert_to_long_safe(zval **op_ptr, int separate)
+ZEND_API int _convert_to_long_safe(zval **op_ptr, int separate, int errors)
 {
 	if (Z_TYPE_PP(op_ptr) != IS_LONG) {
-		return _convert_to_long_base_safe(op_ptr, 10, separate);
+		return _convert_to_long_base_safe(op_ptr, 10, separate, errors);
 	}
 	return SUCCESS;
 }
 
-ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
+ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate, int errors)
 {
 	zval *op = *op_ptr;
 	if (separate && Z_TYPE_P(op) != IS_LONG) {
@@ -402,13 +402,12 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 			}
 			/* break missing intentionally */
 		case IS_DOUBLE:
-			if (Z_DVAL_P(op) == (double)(long) Z_DVAL_P(op)) {
-				/* Exactly representable as long */
-				ZVAL_LONG(op, zend_dval_to_lval(Z_DVAL_P(op)));
-				return SUCCESS;
+			if (errors && Z_DVAL_P(op) != (double)(long) Z_DVAL_P(op)) {
+				/* Not exactly representable as long */
+				zend_error(E_NOTICE, "Float to Int conversion caused data loss");
 			}
 			ZVAL_LONG(op, zend_dval_to_lval(Z_DVAL_P(op)));
-			return FAILURE;
+			return SUCCESS;
 			break;
 		case IS_RESOURCE:
 			{
@@ -423,7 +422,7 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 			return SUCCESS;
 		case IS_NULL:
 			ZVAL_LONG(op, 0);
-			return SUCCESS;
+			return FAILURE;
 		case IS_ARRAY: 
 			{
 				long temp;
@@ -451,7 +450,7 @@ ZEND_API int _convert_to_long_base_safe(zval **op_ptr, int base, int separate)
 	}
 }
 
-ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
+ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate, int errors)
 {
 	zval *op = *op_ptr;
 	if (separate && Z_TYPE_P(op) != IS_DOUBLE) {
@@ -479,10 +478,9 @@ ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 			}
 			/* break missing intentionally */
 		case IS_LONG:
-			if (Z_LVAL_P(op) != (long) (double) Z_LVAL_P(op)) {
+			if (errors && Z_LVAL_P(op) != (long) (double) Z_LVAL_P(op)) {
 				/* Not exactly representable */
-				ZVAL_DOUBLE(op, (double) Z_LVAL_P(op));
-				return FAILURE;
+				zend_error(E_NOTICE, "Int to Float conversion caused data loss");
 			}
 		case IS_BOOL:
 			ZVAL_DOUBLE(op, (double) Z_LVAL_P(op));
@@ -498,7 +496,7 @@ ZEND_API int _convert_to_double_safe(zval **op_ptr, int separate)
 			return SUCCESS;
 		case IS_NULL:
 			ZVAL_DOUBLE(op, (double) 0.0);
-			return SUCCESS;
+			return FAILURE;
 		case IS_ARRAY: 
 			{
 				double temp;
@@ -537,7 +535,7 @@ ZEND_API int _convert_to_boolean_safe(zval **op_ptr, int separate)
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 			ZVAL_BOOL(op, 0);
-			return SUCCESS;
+			return FAILURE;
 		case IS_STRING:
 			{
 				char *strval = Z_STRVAL_P(op);
@@ -601,7 +599,7 @@ ZEND_API int _convert_to_string_safe(zval **op_ptr, int separate)
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
 			ZVAL_STRING(op, "", 1);
-			return SUCCESS;
+			return FAILURE;
 		case IS_STRING:
 			return SUCCESS;
 		case IS_BOOL:
@@ -642,8 +640,8 @@ ZEND_API int _convert_to_string_safe(zval **op_ptr, int separate)
 			return FAILURE;
 		case IS_OBJECT:
 			{
-				char **p;
-				int *pl;
+				char **p = 0;
+				int *pl = 0;
 				if (SUCCESS == parse_object_to_string(op_ptr, p, pl, IS_STRING TSRMLS_CC)) {
 					zval_dtor(op);
 					ZVAL_STRINGL(op, *p, *pl, 0);
@@ -674,7 +672,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_OBJECT: {
 				char *name;
 				name = estrdup(Z_OBJCE_P(op)->name);
-				if (_convert_to_long_base_safe(&op, base, 0) == FAILURE) {
+				if (_convert_to_long_base_safe(&op, base, 0, 0) == FAILURE) {
 					zend_error(E_NOTICE, "Object of class %s could not be converted to int", name);
 				}
 				efree(name);
@@ -687,7 +685,7 @@ ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 		case IS_DOUBLE:
 		case IS_STRING:
 		case IS_ARRAY:
-			_convert_to_long_base_safe(&op, base, 0);
+			_convert_to_long_base_safe(&op, base, 0, 0);
 			break;
 		default:
 			zend_error(E_WARNING, "Cannot convert to ordinal value");

@@ -596,6 +596,9 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_LEXICAL_REF				0x040
 #define IS_CONSTANT_IN_NAMESPACE	0x100
 
+/* Ugly hack to keep track of string hints vs class names */
+#define IS_STRING_HINT			0x026
+
 /* overloaded elements data types */
 #define OE_IS_ARRAY		(1<<0)
 #define OE_IS_OBJECT	(1<<1)
