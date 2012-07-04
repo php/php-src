@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.5
 
+05 Jul 2012, PHP 5.4.5 RC1
+
 - Core:
   . Fixed bug #62443 (Crypt SHA256/512 Segfaults With Malformed 
     Salt). (Anthony Ferrara)
