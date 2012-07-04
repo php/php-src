@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.3.15
+05 Jul 2012, PHP 5.3.15RC1
 - Zend Engine:
   . Fixed bug #51094 (parse_ini_file() with INI_SCANNER_RAW cuts a value that
     includes a semi-colon). (Pierrick)
@@ -62,6 +62,7 @@ PHP                                                                        NEWS
 - XML Writer:
   . Fixed bug #62064 (memory leak in the XML Writer module). 
     (jean-pierre dot lozi at lip6 dot fr)
+
 - Zip:
   . Upgraded libzip to 0.10.1 (Anatoliy)
 
