@@ -168,9 +168,9 @@ PHP_FUNCTION(password_get_info)
 	char *hash;
 	zval *options;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hash, &hash_len) == FAILURE) {
-        RETURN_NULL();
-    }
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hash, &hash_len) == FAILURE) {
+		RETURN_NULL();
+	}
 
 	ALLOC_INIT_ZVAL(options);
 	array_init(options);
@@ -202,8 +202,8 @@ PHP_FUNCTION(password_needs_rehash)
 	zval **option_buffer;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
-        RETURN_NULL();
-    }
+		RETURN_NULL();
+	}
 	algo = php_password_determine_algo(hash, hash_len);
 	
 	if (algo != new_algo) {
