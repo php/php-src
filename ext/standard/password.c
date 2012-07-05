@@ -266,7 +266,8 @@ Hash a password */
 PHP_FUNCTION(password_hash)
 {
 	char *hash_format, *hash, *salt, *password, *result;
-	int algo = 0, salt_len = 0, required_salt_len = 0, hash_format_len, password_len;
+	long algo = 0;
+	int salt_len = 0, required_salt_len = 0, hash_format_len, password_len;
 	HashTable *options = 0;
 	zval **option_buffer;
 
@@ -297,7 +298,7 @@ PHP_FUNCTION(password_hash)
 		}
 		break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown password hashing algorithm: %d", algo);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown password hashing algorithm: %ld", algo);
 			RETURN_NULL();
 	}
 
