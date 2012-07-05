@@ -241,6 +241,9 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	 * returns false for "0", "false", "off", "no", and ""
 	 * null otherwise. */
 	switch (len) {
+		case 0:
+			ret = 0;
+			break;
 		case 1:
 			if (*str == '1') {
 				ret = 1;
