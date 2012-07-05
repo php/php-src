@@ -161,6 +161,38 @@ static int php_password_make_salt(long length, int raw, char *ret TSRMLS_DC) /* 
 }
 /* }}} */
 
+PHP_FUNCTION(password_get_info)
+{
+	long algo;
+	int hash_len;
+	char *hash;
+	zval *options;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hash, &hash_len) == FAILURE) {
+        RETURN_NULL();
+    }
+
+	ALLOC_INIT_ZVAL(options);
+	array_init(options);
+
+	algo = php_password_determine_algo(hash, hash_len);
+	
+	switch (algo) {
+		case PHP_PASSWORD_BCRYPT:
+			{
+				long cost = PHP_PASSWORD_BCRYPT_COST;
+				sscanf(hash, "$2y$%ld$", &cost);
+				add_assoc_long(options, "cost", cost);
+			}
+		break;
+	}
+
+	array_init(return_value);
+	
+	add_assoc_long(return_value, "algo", algo);
+	add_assoc_zval(return_value, "options", options);	
+}
+
 PHP_FUNCTION(password_needs_rehash)
 {
 	long new_algo = 0, algo = 0;
