@@ -131,8 +131,8 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	register unsigned char *result = NULL;
 	size_t i, j;
 
-	result = (unsigned char *) safe_emalloc(oldlen * 2, sizeof(char), 1);
-
+	result = (unsigned char *) safe_emalloc(oldlen, 2 * sizeof(char), 1);
+	
 	for (i = j = 0; i < oldlen; i++) {
 		result[j++] = hexconvtab[old[i] >> 4];
 		result[j++] = hexconvtab[old[i] & 15];
@@ -4029,13 +4029,12 @@ PHP_FUNCTION(nl2br)
 		RETURN_STRINGL(str, str_len, 1);
 	}
 
-	if (is_xhtml) {
-		new_length = str_len + repl_cnt * (sizeof("<br />") - 1);
-	} else {
-		new_length = str_len + repl_cnt * (sizeof("<br>") - 1);
-	}
+	{
+		size_t repl_len = is_xhtml ? (sizeof("<br />") - 1) : (sizeof("<br>") - 1);
 
-	tmp = target = emalloc(new_length + 1);
+		new_length = str_len + repl_cnt * repl_len;
+		tmp = target = safe_emalloc(repl_cnt, repl_len, str_len + 1);
+	}
 
 	while (str < end) {
 		switch (*str) {
