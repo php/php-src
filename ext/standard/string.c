@@ -131,7 +131,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	register unsigned char *result = NULL;
 	size_t i, j;
 
-	result = (unsigned char *) safe_emalloc(oldlen * 2, sizeof(char), 1);
+	result = (unsigned char *) safe_emalloc(oldlen, 2 * sizeof(char), 1);
 	
 	for (i = j = 0; i < oldlen; i++) {
 		result[j++] = hexconvtab[old[i] >> 4];
