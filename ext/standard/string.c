@@ -4001,13 +4001,12 @@ PHP_FUNCTION(nl2br)
 		RETURN_STRINGL(str, str_len, 1);
 	}
 
-	if (is_xhtml) {
-		new_length = str_len + repl_cnt * (sizeof("<br />") - 1);
-	} else {
-		new_length = str_len + repl_cnt * (sizeof("<br>") - 1);
-	}
+	{
+		size_t repl_len = is_xhtml ? (sizeof("<br />") - 1) : (sizeof("<br>") - 1);
 
-	tmp = target = emalloc(new_length + 1);
+		new_length = str_len + repl_cnt * repl_len;
+		tmp = target = safe_emalloc(repl_cnt, repl_len, str_len + 1);
+	}
 
 	while (str < end) {
 		switch (*str) {
