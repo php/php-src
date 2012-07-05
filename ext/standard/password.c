@@ -43,6 +43,18 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 }
 /* }}} */
 
+static long php_password_determine_algo(const char *hash, const int len) 
+{
+	if (len < 3) {
+		return 0;
+	}
+	if (hash[0] == '$' && hash[1] == '2' && hash[2] == 'y' && len == 60) {
+		return PHP_PASSWORD_BCRYPT;
+	}
+
+	return 0;
+}
+
 static int php_password_salt_is_alphabet(const char *str, const int len) /* {{{ */
 {
 	int i = 0;
@@ -148,6 +160,44 @@ static int php_password_make_salt(long length, int raw, char *ret TSRMLS_DC) /* 
 	return SUCCESS;
 }
 /* }}} */
+
+PHP_FUNCTION(password_needs_rehash)
+{
+	long new_algo = 0, algo = 0;
+	int hash_len;
+	char *hash;
+	HashTable *options = 0;
+	zval **option_buffer;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
+        RETURN_NULL();
+    }
+	algo = php_password_determine_algo(hash, hash_len);
+	
+	if (algo != new_algo) {
+		RETURN_TRUE;
+	}
+
+	switch (algo) {
+		case PHP_PASSWORD_BCRYPT:
+			{
+				int newCost = PHP_PASSWORD_BCRYPT_COST, cost = 0;
+				
+				if (options && zend_symtable_find(options, "cost", 5, (void **) &option_buffer) == SUCCESS) {
+					convert_to_long_ex(option_buffer);
+					newCost = Z_LVAL_PP(option_buffer);
+					zval_ptr_dtor(option_buffer);
+				}
+
+				sscanf(hash, "$2y$%d$", &cost);
+				if (cost != newCost) {
+					RETURN_TRUE;
+				}
+			}
+			break;
+	}
+	RETURN_FALSE;
+}
 
 /* {{{ proto boolean password_make_salt(string password, string hash)
 Verify a hash created using crypt() or password_hash() */
