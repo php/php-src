@@ -72,6 +72,9 @@ PHP                                                                        NEWS
   . Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
     with constant). (Laruence)
 
+- SimpleXMLElement:
+  . Implemented FR #55218 Get namespaces from current node. (Lonny)
+
 - Sockets:
   . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
     

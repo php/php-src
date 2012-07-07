@@ -343,6 +343,10 @@ PHP 5.4 UPGRADE NOTES
 
 - Since 5.4.5, resourcebundle_create() accepts null for the first two arguments.
 
+- Since 5.4.5, SimpleXMLElement::getDocNamespaces() has and extra parameter which
+  allows for toggling if the list of namespaces starts from the document root
+  or from the node you call the method on
+
 ==============================
 5. Changes to existing classes
 ==============================
