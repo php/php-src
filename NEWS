@@ -1,5 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2012, PHP 5.4.6
+
+- SimpleXML:
+  . Implemented FR #55218 Get namespaces from current node. (Lonny)
+
 ?? ??? 2012, PHP 5.4.5
 
 - Core:
