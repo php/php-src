@@ -550,18 +550,15 @@ function_call_parameter_list:
 
 
 non_empty_function_call_parameter_list:
-		comma_or_nothing expr_without_variable	{ Z_LVAL($$.u.constant) = Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$2, ZEND_SEND_VAL, Z_LVAL($$.u.constant) TSRMLS_CC); }
-	|	comma_or_nothing variable				{ Z_LVAL($$.u.constant) = Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$2, ZEND_SEND_VAR, Z_LVAL($$.u.constant) TSRMLS_CC); }
-	|	comma_or_nothing '&' w_variable 				{ Z_LVAL($$.u.constant) = Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$3, ZEND_SEND_REF, Z_LVAL($$.u.constant) TSRMLS_CC); }
+	 	expr_without_variable	{ Z_LVAL($$.u.constant) = 1;  zend_do_pass_param(&$1, ZEND_SEND_VAL, Z_LVAL($$.u.constant) TSRMLS_CC); }
+	|	variable				{ Z_LVAL($$.u.constant) = 1;  zend_do_pass_param(&$1, ZEND_SEND_VAR, Z_LVAL($$.u.constant) TSRMLS_CC); }
+	|	'&' w_variable 			{ Z_LVAL($$.u.constant) = 1;  zend_do_pass_param(&$2, ZEND_SEND_REF, Z_LVAL($$.u.constant) TSRMLS_CC); }
+	|   T_DEFAULT				{ Z_LVAL($$.u.constant) = 1;  zend_do_empty_param(Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	non_empty_function_call_parameter_list ',' expr_without_variable	{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$3, ZEND_SEND_VAL, Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	non_empty_function_call_parameter_list ',' variable					{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$3, ZEND_SEND_VAR, Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	non_empty_function_call_parameter_list ',' '&' w_variable			{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$4, ZEND_SEND_REF, Z_LVAL($$.u.constant) TSRMLS_CC); }
-	|	non_empty_function_call_parameter_list ',' 							{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_empty_param(Z_LVAL($$.u.constant) TSRMLS_CC); }
+	|	non_empty_function_call_parameter_list ',' 	T_DEFAULT				{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_empty_param(Z_LVAL($$.u.constant) TSRMLS_CC); }
 	;
-
-comma_or_nothing:
-		',' comma_or_nothing  {  Z_LVAL($$.u.constant) = Z_LVAL($2.u.constant)+1; zend_do_empty_param(Z_LVAL($$.u.constant) TSRMLS_CC); }
-	| /* empty */  {  Z_LVAL($$.u.constant) = 0; }
 
 global_var_list:
 		global_var_list ',' global_var	{ zend_do_fetch_global_variable(&$3, NULL, ZEND_FETCH_GLOBAL_LOCK TSRMLS_CC); }
