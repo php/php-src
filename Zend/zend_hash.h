@@ -330,7 +330,7 @@ END_EXTERN_C()
 				if (idx-1 > LONG_MAX) { /* overflow */						\
 					break;													\
 				}															\
-				idx = -idx;               									\
+				idx = 0 - idx;               									\
 			} else if (idx > LONG_MAX) { /* overflow */						\
 				break;														\
 			}																\
