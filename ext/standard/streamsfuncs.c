@@ -692,7 +692,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 				} else { /* HASH_KEY_IS_STRING */
 					zend_hash_update(new_hash, key, key_len, (void *)elem, sizeof(zval *), (void **)&dest_elem);
 				}
-				
+
 				if (dest_elem) {
 					zval_add_ref(dest_elem);
 				}
@@ -1377,9 +1377,8 @@ PHP_FUNCTION(stream_set_timeout)
 	long seconds, microseconds = 0;
 	struct timeval t;
 	php_stream *stream;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "rl|l", &socket, &seconds, &microseconds) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &socket, &seconds, &microseconds) == FAILURE) {
 		return;
 	}
 
@@ -1387,7 +1386,7 @@ PHP_FUNCTION(stream_set_timeout)
 
 	t.tv_sec = seconds;
 
-	if (argc == 3) {
+	if (microseconds != 0) {
 		t.tv_usec = microseconds % 1000000;
 		t.tv_sec += microseconds / 1000000;
 	} else {
@@ -1449,7 +1448,7 @@ PHP_FUNCTION(stream_set_chunk_size)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The chunk size must be a positive integer, given %ld", csize);
 		RETURN_FALSE;
 	}
-	/* stream.chunk_size is actually a size_t, but php_stream_set_option 
+	/* stream.chunk_size is actually a size_t, but php_stream_set_option
 	 * can only use an int to accept the new value and return the old one.
 	 * In any case, values larger than INT_MAX for a chunk size make no sense.
 	 */
@@ -1457,11 +1456,11 @@ PHP_FUNCTION(stream_set_chunk_size)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The chunk size cannot be larger than %d", INT_MAX);
 		RETURN_FALSE;
 	}
-	
+
 	php_stream_from_zval(stream, &zstream);
 
 	ret = php_stream_set_option(stream, PHP_STREAM_OPTION_SET_CHUNK_SIZE, (int)csize, NULL);
-	
+
 	RETURN_LONG(ret > 0 ? (long)ret : (long)EOF);
 }
 /* }}} */
@@ -1499,7 +1498,7 @@ PHP_FUNCTION(stream_set_read_buffer)
    Enable or disable a specific kind of crypto on the stream */
 PHP_FUNCTION(stream_socket_enable_crypto)
 {
-	long cryptokind = 0;
+	long cryptokind = -1;
 	zval *zstream, *zsessstream = NULL;
 	php_stream *stream, *sessstream = NULL;
 	zend_bool enable;
@@ -1511,7 +1510,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 
 	php_stream_from_zval(stream, &zstream);
 
-	if (ZEND_NUM_ARGS() >= 3) {
+	if (cryptokind != -1) {
 		if (zsessstream) {
 			php_stream_from_zval(sessstream, &zsessstream);
 		}

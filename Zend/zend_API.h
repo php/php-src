@@ -237,6 +237,7 @@ ZEND_API int zend_get_parameters(int ht, int param_count, ...);
 ZEND_API int _zend_get_parameters_array(int ht, int param_count, zval **argument_array TSRMLS_DC);
 ZEND_API ZEND_ATTRIBUTE_DEPRECATED int zend_get_parameters_ex(int param_count, ...);
 ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_array TSRMLS_DC);
+ZEND_API int zend_get_parameters_array_nodefault(int param_count, zval ***argument_array TSRMLS_DC);
 
 /* internal function to efficiently copy parameters when executing __call() */
 ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TSRMLS_DC);
@@ -251,6 +252,7 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array TS
 /* Parameter parsing API -- andrei */
 
 #define ZEND_PARSE_PARAMS_QUIET 1<<1
+#define ZEND_PARSE_PARAMS_NODEFAULT 1<<2
 ZEND_API int zend_parse_parameters(int num_args TSRMLS_DC, const char *type_spec, ...);
 ZEND_API int zend_parse_parameters_ex(int flags, int num_args TSRMLS_DC, const char *type_spec, ...);
 ZEND_API char *zend_zval_type_name(const zval *arg);
@@ -444,7 +446,7 @@ ZEND_API int add_property_zval_ex(zval *arg, const char *key, uint key_len, zval
 #define add_property_double(__arg, __key, __d) add_property_double_ex(__arg, __key, strlen(__key)+1, __d TSRMLS_CC)
 #define add_property_string(__arg, __key, __str, __duplicate) add_property_string_ex(__arg, __key, strlen(__key)+1, __str, __duplicate TSRMLS_CC)
 #define add_property_stringl(__arg, __key, __str, __length, __duplicate) add_property_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __duplicate TSRMLS_CC)
-#define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value TSRMLS_CC)       
+#define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key)+1, __value TSRMLS_CC)
 
 
 ZEND_API int call_user_function(HashTable *function_table, zval **object_pp, zval *function_name, zval *retval_ptr, zend_uint param_count, zval *params[] TSRMLS_DC);
@@ -455,7 +457,7 @@ ZEND_API extern const zend_fcall_info_cache empty_fcall_info_cache;
 
 /** Build zend_call_info/cache from a zval*
  *
- * Caller is responsible to provide a return value, otherwise the we will crash. 
+ * Caller is responsible to provide a return value, otherwise the we will crash.
  * fci->retval_ptr_ptr = NULL;
  * In order to pass parameters the following members need to be set:
  * fci->param_count = 0;
@@ -483,6 +485,11 @@ ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count
  * refcount. If args is NULL and arguments are set then those are cleared.
  */
 ZEND_API int zend_fcall_info_args(zend_fcall_info *fci, zval *args TSRMLS_DC);
+
+/**
+ * Create arguments structure from zval
+ */
+ZEND_API zval ***zend_fcall_create_args(HashTable *params_ar, zval ***args, unsigned int *param_count);
 
 /** Set arguments in the zend_fcall_info struct taking care of refcount.
  * If argc is 0 the arguments which are set will be cleared, else pass

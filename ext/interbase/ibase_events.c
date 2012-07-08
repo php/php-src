@@ -84,7 +84,7 @@ static void _php_ibase_free_event_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* 
 
 void php_ibase_events_minit(INIT_FUNC_ARGS) /* {{{ */
 {
-	le_event = zend_register_list_destructors_ex(_php_ibase_free_event_rsrc, NULL, 
+	le_event = zend_register_list_destructors_ex(_php_ibase_free_event_rsrc, NULL,
 	    "interbase event", module_number);
 }
 /* }}} */
@@ -161,7 +161,7 @@ PHP_FUNCTION(ibase_wait_event)
 		}
 	}
 
-	for (; i < ZEND_NUM_ARGS(); ++i) {
+	for (; i < num_args; ++i) {
 		convert_to_string_ex(args[i]);
 		events[event_count++] = Z_STRVAL_PP(args[i]);
 	}
@@ -275,7 +275,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	int link_res_id, num_args;
 
 	RESET_ERRMSG;
-	
+
 	/* Minimum and maximum number of arguments allowed */
 	if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 17) {
 		WRONG_PARAM_COUNT;
@@ -307,7 +307,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 		link_res_id = Z_LVAL_PP(args[0]);
 
 	} else {
-		/* callback, event_1 [, ... event_15] 
+		/* callback, event_1 [, ... event_15]
 		 * No more than 15 events
 		 */
 		if (ZEND_NUM_ARGS() < 2 || ZEND_NUM_ARGS() > 16) {
@@ -340,14 +340,14 @@ PHP_FUNCTION(ibase_set_event_handler)
 	event->link = ib_link;
 	event->event_count = 0;
 	event->state = NEW;
-	event->events = (char **) safe_emalloc(sizeof(char *),ZEND_NUM_ARGS()-i,0);
+	event->events = (char **) safe_emalloc(sizeof(char *),num_args-i,0);
 
 	ALLOC_ZVAL(event->callback);
 	*event->callback = **cb_arg;
 	INIT_PZVAL(event->callback);
 	zval_copy_ctor(event->callback);
 
-	for (; i < ZEND_NUM_ARGS(); ++i) {
+	for (; i < num_args; ++i) {
 		convert_to_string_ex(args[i]);
 		event->events[event->event_count++] = estrdup(Z_STRVAL_PP(args[i]));
 	}

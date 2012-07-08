@@ -273,10 +273,7 @@ PHP_METHOD(mysqli_warning, __construct)
 	MYSQLI_WARNING  *w;
 	MYSQLI_RESOURCE *mysqli_resource;
 
-	if (ZEND_NUM_ARGS() != 1) {
-		WRONG_PARAM_COUNT;
-	}
-	if (zend_parse_parameters(1 TSRMLS_CC, "o", &z)==FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &z)==FAILURE) {
 		return;
 	}
 	obj = (mysqli_object *)zend_object_store_get_object(z TSRMLS_CC);\

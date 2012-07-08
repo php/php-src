@@ -289,7 +289,7 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 	int len1, len2;
 	long start = 0, len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &s11, &len1,
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, ZEND_NUM_ARGS() TSRMLS_CC, "ss|ll", &s11, &len1,
 				&s22, &len2, &start, &len) == FAILURE) {
 		return;
 	}
@@ -1271,7 +1271,7 @@ PHP_FUNCTION(strtok)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 1) {
+	if (tok == NULL) {
 		tok = str;
 		tok_len = str_len;
 	} else {
@@ -2217,22 +2217,17 @@ PHP_FUNCTION(chunk_split)
 PHP_FUNCTION(substr)
 {
 	char *str;
-	long l = 0, f;
+	long l = LONG_MAX, f;
 	int str_len;
-	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|l", &str, &str_len, &f, &l) == FAILURE) {
 		return;
 	}
 
-	if (argc > 2) {
-		if ((l < 0 && -l > str_len)) {
-			RETURN_FALSE;
-		} else if (l > str_len) {
-			l = str_len;
-		}
-	} else {
+	if (l > str_len) {
 		l = str_len;
+	} else if ((l < 0 && -l > str_len)) {
+		RETURN_FALSE;
 	}
 
 	if (f > str_len) {
@@ -2289,7 +2284,6 @@ PHP_FUNCTION(substr_replace)
 	int result_len;
 	int l = 0;
 	int f;
-	int argc = ZEND_NUM_ARGS();
 
 	HashPosition pos_str, pos_from, pos_repl, pos_len;
 	zval **tmp_str = NULL, **tmp_from = NULL, **tmp_repl = NULL, **tmp_len= NULL;
@@ -2317,7 +2311,7 @@ PHP_FUNCTION(substr_replace)
 		convert_to_long_ex(from);
 	}
 
-	if (argc > 3) {
+	if (len != NULL) {
 		SEPARATE_ZVAL(len);
 		if (Z_TYPE_PP(len) != IS_ARRAY) {
 			convert_to_long_ex(len);
@@ -2331,13 +2325,13 @@ PHP_FUNCTION(substr_replace)
 
 	if (Z_TYPE_PP(str) == IS_STRING) {
 		if (
-			(argc == 3 && Z_TYPE_PP(from) == IS_ARRAY) ||
-			(argc == 4 && Z_TYPE_PP(from) != Z_TYPE_PP(len))
+			(len == NULL && Z_TYPE_PP(from) == IS_ARRAY) ||
+			(len != NULL && Z_TYPE_PP(from) != Z_TYPE_PP(len))
 		) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "'from' and 'len' should be of same type - numerical or array ");
 			RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
 		}
-		if (argc == 4 && Z_TYPE_PP(from) == IS_ARRAY) {
+		if (len != NULL && Z_TYPE_PP(from) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_PP(from)) != zend_hash_num_elements(Z_ARRVAL_PP(len))) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "'from' and 'len' should have the same number of elements");
 				RETURN_STRINGL(Z_STRVAL_PP(str), Z_STRLEN_PP(str), 1);
@@ -2415,7 +2409,7 @@ PHP_FUNCTION(substr_replace)
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(from), &pos_from);
 		}
 
-		if (argc > 3 && Z_TYPE_PP(len) == IS_ARRAY) {
+		if (len != NULL && Z_TYPE_PP(len) == IS_ARRAY) {
 			zend_hash_internal_pointer_reset_ex(Z_ARRVAL_PP(len), &pos_len);
 		}
 
@@ -2477,7 +2471,7 @@ PHP_FUNCTION(substr_replace)
 				}
 			}
 
-			if (argc > 3 && Z_TYPE_PP(len) == IS_ARRAY) {
+			if (len != NULL && Z_TYPE_PP(len) == IS_ARRAY) {
 				if (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_PP(len), (void **) &tmp_len, &pos_len)) {
 					if(Z_TYPE_PP(tmp_len) != IS_LONG) {
 						zval dummy = **tmp_len;
@@ -2491,7 +2485,7 @@ PHP_FUNCTION(substr_replace)
 				} else {
 					l = Z_STRLEN_P(orig_str);
 				}
-			} else if (argc > 3) {
+			} else if (len != NULL) {
 				l = Z_LVAL_PP(len);
 			} else {
 				l = Z_STRLEN_P(orig_str);
@@ -3111,13 +3105,12 @@ PHP_FUNCTION(strtr)
 	zval **from;
 	char *str, *to = NULL;
 	int str_len, to_len = 0;
-	int ac = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sZ|s", &str, &str_len, &from, &to, &to_len) == FAILURE) {
 		return;
 	}
 
-	if (ac == 2 && Z_TYPE_PP(from) != IS_ARRAY) {
+	if (to == NULL && Z_TYPE_PP(from) != IS_ARRAY) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The second argument is not an array");
 		RETURN_FALSE;
 	}
@@ -3127,7 +3120,7 @@ PHP_FUNCTION(strtr)
 		RETURN_EMPTY_STRING();
 	}
 
-	if (ac == 2) {
+	if (to == NULL) {
 		php_strtr_array(return_value, str, str_len, HASH_OF(*from));
 	} else {
 		convert_to_string_ex(from);
@@ -3223,7 +3216,6 @@ PHP_FUNCTION(similar_text)
 {
 	char *t1, *t2;
 	zval **percent = NULL;
-	int ac = ZEND_NUM_ARGS();
 	int sim;
 	int t1_len, t2_len;
 
@@ -3231,12 +3223,12 @@ PHP_FUNCTION(similar_text)
 		return;
 	}
 
-	if (ac > 2) {
+	if (percent != NULL) {
 		convert_to_double_ex(percent);
 	}
 
 	if (t1_len + t2_len == 0) {
-		if (ac > 2) {
+		if (percent != NULL) {
 			Z_DVAL_PP(percent) = 0;
 		}
 
@@ -3245,7 +3237,7 @@ PHP_FUNCTION(similar_text)
 
 	sim = php_similar_char(t1, t1_len, t2, t2_len);
 
-	if (ac > 2) {
+	if (percent != NULL) {
 		Z_DVAL_PP(percent) = sim * 200.0 / (t1_len + t2_len);
 	}
 
@@ -3946,7 +3938,6 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	uint string_key_len;
 	ulong num_key;
 	int count = 0;
-	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZZ|Z", &search, &replace, &subject, &zcount) == FAILURE) {
 		return;
@@ -3975,7 +3966,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 			if (Z_TYPE_PP(subject_entry) != IS_ARRAY && Z_TYPE_PP(subject_entry) != IS_OBJECT) {
 				MAKE_STD_ZVAL(result);
 				SEPARATE_ZVAL(subject_entry);
-				php_str_replace_in_subject(*search, *replace, subject_entry, result, case_sensitivity, (argc > 3) ? &count : NULL);
+				php_str_replace_in_subject(*search, *replace, subject_entry, result, case_sensitivity, (zcount) ? &count : NULL);
 			} else {
 				ALLOC_ZVAL(result);
 				Z_ADDREF_P(*subject_entry);
@@ -3996,9 +3987,9 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 			zend_hash_move_forward(Z_ARRVAL_PP(subject));
 		}
 	} else {	/* if subject is not an array */
-		php_str_replace_in_subject(*search, *replace, subject, return_value, case_sensitivity, (argc > 3) ? &count : NULL);
+		php_str_replace_in_subject(*search, *replace, subject, return_value, case_sensitivity, (zcount) ? &count : NULL);
 	}
-	if (argc > 3) {
+	if (zcount) {
 		zval_dtor(*zcount);
 		ZVAL_LONG(*zcount, count);
 	}
@@ -5574,7 +5565,7 @@ PHP_FUNCTION(substr_compare)
 	zend_bool cs=0;
 	uint cmp_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssl|lb", &s1, &s1_len, &s2, &s2_len, &offset, &len, &cs) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, ZEND_NUM_ARGS() TSRMLS_CC, "ssl|lb", &s1, &s1_len, &s2, &s2_len, &offset, &len, &cs) == FAILURE) {
 		RETURN_FALSE;
 	}
 

@@ -47,11 +47,11 @@ PHP_FUNCTION(gettype)
 		case IS_DOUBLE:
 			RETVAL_STRING("double", 1);
 			break;
-	
+
 		case IS_STRING:
 			RETVAL_STRING("string", 1);
 			break;
-	
+
 		case IS_ARRAY:
 			RETVAL_STRING("array", 1);
 			break;
@@ -134,27 +134,13 @@ PHP_FUNCTION(settype)
 PHP_FUNCTION(intval)
 {
 	zval **num;
-	long arg_base;
+	long arg_base = 10;
 	int base;
 
-	switch (ZEND_NUM_ARGS()) {
-		case 1:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &num) == FAILURE) {
-				return;
-			}
-			base = 10;
-			break;
-
-		case 2:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl", &num, &arg_base) == FAILURE) {
-				return;
-			}
-			base = arg_base;
-			break;
-
-		default:
-			WRONG_PARAM_COUNT;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|l", &num, &arg_base) == FAILURE) {
+		return;
 	}
+	base = (int)arg_base;
 
 	RETVAL_ZVAL(*num, 1, 0);
 	convert_to_long_base(return_value, base);
@@ -365,7 +351,7 @@ PHP_FUNCTION(is_scalar)
 }
 /* }}} */
 
-/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]]) 
+/* {{{ proto bool is_callable(mixed var [, bool syntax_only [, string callable_name]])
    Returns true if var is callable. */
 PHP_FUNCTION(is_callable)
 {
@@ -380,11 +366,11 @@ PHP_FUNCTION(is_callable)
 							  &syntax_only, &callable_name) == FAILURE) {
 		return;
 	}
-	
+
 	if (syntax_only) {
 		check_flags |= IS_CALLABLE_CHECK_SYNTAX_ONLY;
 	}
-	if (ZEND_NUM_ARGS() > 2) {
+	if (callable_name != NULL) {
 		retval = zend_is_callable_ex(var, NULL, check_flags, &name, NULL, NULL, &error TSRMLS_CC);
 		zval_dtor(*callable_name);
 		ZVAL_STRING(*callable_name, name, 0);

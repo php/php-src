@@ -80,8 +80,7 @@ PHP_FUNCTION(mysqli_autocommit)
 /* {{{ mysqli_stmt_bind_param_do_bind */
 #ifndef MYSQLI_USE_MYSQLND
 static
-int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned int num_vars,
-								   zval ***args, unsigned int start, const char * const types TSRMLS_DC)
+int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int offset, unsigned int num_vars, zval ***args,  const char * const types TSRMLS_DC)
 {
 	int				i, ofs;
 	MYSQL_BIND		*bind;
@@ -95,9 +94,8 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 	stmt->param.is_null = ecalloc(num_vars, sizeof(char));
 	bind = (MYSQL_BIND *) ecalloc(num_vars, sizeof(MYSQL_BIND));
 
-	ofs = 0;
-	for (i = start; i < argc; i++) {
-
+	for (i = 0; i < num_vars; i++) {
+		ofs = i;
 		/* set specified type */
 		switch (types[ofs]) {
 			case 'd': /* Double */
@@ -128,11 +126,10 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 				break;
 
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[ofs], i+1);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[ofs], i+1+offset);
 				rc = 1;
 				goto end_1;
 		}
-		ofs++;
 	}
 	rc = mysql_stmt_bind_param(stmt->stmt, bind);
 
@@ -144,8 +141,8 @@ end_1:
 		stmt->param.vars = (zval **)safe_emalloc(num_vars, sizeof(zval), 0);
 		for (i = 0; i < num_vars; i++) {
 			if (bind[i].buffer_type  != MYSQL_TYPE_LONG_BLOB) {
-				Z_ADDREF_P(*args[i+start]);
-				stmt->param.vars[i] = *args[i+start];
+				Z_ADDREF_P(*args[i]);
+				stmt->param.vars[i] = *args[i];
 			} else {
 				stmt->param.vars[i] = NULL;
 			}
@@ -157,22 +154,21 @@ end_1:
 }
 #else
 static
-int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned int num_vars,
-								   zval ***args, unsigned int start, const char * const types TSRMLS_DC)
+int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int offset, unsigned int num_vars, zval ***args, const char * const types TSRMLS_DC)
 {
 	unsigned int i;
 	MYSQLND_PARAM_BIND	*params;
 	enum_func_status	ret = FAIL;
 
 	/* If no params -> skip binding and return directly */
-	if (argc == start) {
+	if (args == NULL || num_vars == 0) {
 		return PASS;
 	}
 	params = mysqlnd_stmt_alloc_param_bind(stmt->stmt);
 	if (!params) {
 		goto end;
 	}
-	for (i = 0; i < (argc - start); i++) {
+	for (i = 0; i < num_vars; i++) {
 		zend_uchar type;
 		switch (types[i]) {
 			case 'd': /* Double */
@@ -193,12 +189,12 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int argc, unsigned in
 				break;
 			default:
 				/* We count parameters from 1 */
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[i], i + start + 1);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Undefined fieldtype %c (parameter %d)", types[i], i + 1 + offset);
 				ret = FAIL;
 				mysqlnd_stmt_free_param_bind(stmt->stmt, params);
 				goto end;
 		}
-		params[i].zv = *(args[i + start]);
+		params[i].zv = *(args[i]);
 		params[i].type = type;
 	}
 	ret = mysqlnd_stmt_bind_param(stmt->stmt, params);
@@ -213,42 +209,27 @@ end:
    Bind variables to a prepared statement as parameters */
 PHP_FUNCTION(mysqli_stmt_bind_param)
 {
-	zval			***args;
-	int				argc = ZEND_NUM_ARGS();
-	int				num_vars;
-	int				start = 2;
+	zval			***args = NULL;
+	int				num_vars = 0;
 	MY_STMT			*stmt;
 	zval			*mysql_stmt;
-	char			*types;
+	char			*types = NULL;
 	int				types_len;
 	unsigned long	rc;
 
-	/* calculate and check number of parameters */
-	if (argc < 2) {
-		/* there has to be at least one pair */
-		WRONG_PARAM_COUNT;
-	}
-
-	if (zend_parse_method_parameters((getThis()) ? 1:2 TSRMLS_CC, getThis(), "Os", &mysql_stmt, mysqli_stmt_class_entry,
-									&types, &types_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os*", &mysql_stmt, mysqli_stmt_class_entry,
+									&types, &types_len, &args, &num_vars) == FAILURE) {
 		return;
 	}
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, &mysql_stmt, MYSQLI_STATUS_VALID);
 
-	num_vars = argc - 1;
-	if (getThis()) {
-		start = 1;
-	} else {
-		/* ignore handle parameter in procedural interface*/
-		--num_vars;
-	}
 	if (!types_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type or no types specified");
 		RETURN_FALSE;
 	}
 
-	if (types_len != argc - start) {
+	if (types_len != num_vars) {
 		/* number of bind variables doesn't match number of elements in type definition string */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of elements in type definition string doesn't match number of bind variables");
 		RETURN_FALSE;
@@ -259,17 +240,12 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 		RETURN_FALSE;
 	}
 
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
+	rc = mysqli_stmt_bind_param_do_bind(stmt, 2, num_vars, args, types TSRMLS_CC);
+	MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		zend_wrong_param_count(TSRMLS_C);
-		rc = 1;
-	} else {
-		rc = mysqli_stmt_bind_param_do_bind(stmt, argc, num_vars, args, start, types TSRMLS_CC);
-		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
+	if(args) {
+		efree(args);
 	}
-
-	efree(args);
 
 	RETURN_BOOL(!rc);
 }
@@ -281,11 +257,10 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
    do_alloca, free_alloca
 */
 static int
-mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, unsigned int start TSRMLS_DC)
+mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int var_cnt TSRMLS_DC)
 {
 	MYSQL_BIND	*bind;
 	int			i, ofs;
-	int			var_cnt = argc - start;
 	long		col_type;
 	ulong		rc;
 
@@ -303,8 +278,8 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 		memset(p, 0, size);
 	}
 
-	for (i=start; i < var_cnt + start ; i++) {
-		ofs = i - start;
+	for (i=0; i < var_cnt; i++) {
+		ofs = i;
 		col_type = (stmt->stmt->fields) ? stmt->stmt->fields[ofs].type : MYSQL_TYPE_STRING;
 
 		switch (col_type) {
@@ -442,10 +417,9 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 	} else {
 		stmt->result.var_cnt = var_cnt;
 		stmt->result.vars = (zval **)safe_emalloc((var_cnt), sizeof(zval), 0);
-		for (i = start; i < var_cnt+start; i++) {
-			ofs = i-start;
+		for (i = 0; i < var_cnt; i++) {
 			Z_ADDREF_PP(args[i]);
-			stmt->result.vars[ofs] = *args[i];
+			stmt->result.vars[i] = *args[i];
 		}
 	}
 	efree(bind);
@@ -454,13 +428,13 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
 }
 #else
 static int
-mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, unsigned int start TSRMLS_DC)
+mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc TSRMLS_DC)
 {
 	unsigned int i;
 	MYSQLND_RESULT_BIND * params = mysqlnd_stmt_alloc_result_bind(stmt->stmt);
 	if (params) {
-		for (i = 0; i < (argc - start); i++) {
-			params[i].zv = *(args[i + start]);
+		for (i = 0; i < argc; i++) {
+			params[i].zv = *(args[i]);
 		}
 		return mysqlnd_stmt_bind_result(stmt->stmt, params);
 	}
@@ -473,41 +447,24 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval ***args, unsigned int argc, 
    Bind variables to a prepared statement for result storage */
 PHP_FUNCTION(mysqli_stmt_bind_result)
 {
-	zval		***args;
-	int			argc = ZEND_NUM_ARGS();
-	int			start = 1;
+	zval		***args = NULL;
+	int			num_args;
 	ulong		rc;
 	MY_STMT		*stmt;
 	zval		*mysql_stmt;
 
-	if (getThis()) {
-		start = 0;
-	}
-
-	if (zend_parse_method_parameters((getThis()) ? 0:1 TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O+", &mysql_stmt, mysqli_stmt_class_entry, &args, &num_args) == FAILURE) {
 		return;
 	}
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, &mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if (argc < (getThis() ? 1 : 2)) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if ((argc - start) != mysql_stmt_field_count(stmt->stmt)) {
+	if (num_args != mysql_stmt_field_count(stmt->stmt)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of bind variables doesn't match number of fields in prepared statement");
 		RETURN_FALSE;
 	}
 
-	args = (zval ***)safe_emalloc(argc, sizeof(zval **), 0);
-
-	if (zend_get_parameters_array_ex(argc, args) == FAILURE) {
-		efree(args);
-		WRONG_PARAM_COUNT;
-	}
-
-	rc = mysqli_stmt_bind_result_do_bind(stmt, args, argc, start TSRMLS_CC);
-
+	rc = mysqli_stmt_bind_result_do_bind(stmt, args, num_args TSRMLS_CC);
 	efree(args);
 
 	RETURN_BOOL(!rc);

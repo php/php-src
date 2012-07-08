@@ -831,7 +831,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		zval *param;
 
 		if(UNEXPECTED(fci->params[i] == NULL)) {
-			zend_vm_stack_push_nocheck(NULL TSRMLS_CC);
+			zend_vm_stack_push(NULL TSRMLS_CC);
 			continue;
 		}
 

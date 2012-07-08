@@ -97,7 +97,7 @@ ZEND_API int _zend_get_parameters_array(int ht, int param_count, zval **argument
 
 	while (param_count-->0) {
 		param_ptr = *(p-arg_count);
-		if (!PZVAL_IS_REF(param_ptr) && Z_REFCOUNT_P(param_ptr) > 1) {
+		if (param_ptr != NULL && !PZVAL_IS_REF(param_ptr) && Z_REFCOUNT_P(param_ptr) > 1) {
 			zval *new_tmp;
 
 			ALLOC_ZVAL(new_tmp);
@@ -159,6 +159,32 @@ ZEND_API int _zend_get_parameters_array_ex(int param_count, zval ***argument_arr
 	while (param_count-->0) {
 		zval **value = (zval**)(p-arg_count);
 
+		*(argument_array++) = value;
+		arg_count--;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int zend_get_parameters_array_nodefault(int param_count, zval ***argument_array TSRMLS_DC) /* {{{ */
+{
+	void **p;
+	int arg_count;
+
+	p = zend_vm_stack_top(TSRMLS_C) - 1;
+	arg_count = (int)(zend_uintptr_t) *p;
+
+	if (param_count>arg_count) {
+		return FAILURE;
+	}
+
+	while (param_count-->0) {
+		zval **value = (zval**)(p-arg_count);
+		if(*value == NULL) {
+			// defaults not allowed
+			return FAILURE;
+		}
 		*(argument_array++) = value;
 		arg_count--;
 	}
@@ -739,6 +765,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 	zend_bool have_varargs = 0;
 	zval ****varargs = NULL;
 	int *n_varargs = NULL;
+	int disallow_default = flags & ZEND_PARSE_PARAMS_NODEFAULT;
 
 	for (spec_walk = type_spec; *spec_walk; spec_walk++) {
 		c = *spec_walk;
@@ -864,6 +891,26 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 					}
 					(*varargs)[iv++] = p;
 				}
+				if(iv == 0) {
+					efree(*varargs);
+					*varargs = NULL;
+
+					if(type_spec[-1] == '+') {
+						if (!quiet) {
+							zend_function *active_function = EG(current_execute_data)->function_state.function;
+							const char *class_name = active_function->common.scope ? active_function->common.scope->name : "";
+							zend_error(E_WARNING, "%s%s%s() expects %s %d parameter%s, %d given",
+									class_name,
+									class_name[0] ? "::" : "",
+									active_function->common.function_name,
+									min_num_args == max_num_args ? "exactly" : num_args < min_num_args ? "at least" : "at most",
+									num_args < min_num_args ? min_num_args : max_num_args,
+									(num_args < min_num_args ? min_num_args : max_num_args) == 1 ? "" : "s",
+									num_args);
+						}
+						return FAILURE;
+					}
+				}
 
 				*n_varargs = iv;
 				continue;
@@ -878,8 +925,8 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 		parse_failed = 0;
 		if(*arg == NULL) {
 			/* we have skipped arg */
-			if(i < min_num_args) {
-				/* this is one of the required args */
+			if(i < min_num_args || disallow_default || type_spec[1] == '/') {
+				/* this is one of the required args or skipping is prohibited or we'd need to write there */
 				if (!quiet) {
 					zend_function *active_function = EG(current_execute_data)->function_state.function;
 					const char *class_name = active_function->common.scope ? active_function->common.scope->name : "";
@@ -891,8 +938,16 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 				}
 				parse_failed = 1;
 			} else {
-				/* optional arg - just skip it */
-				continue;
+				if(type_spec[1] == '!') {
+					/* for !, create a null */
+					zval tmp = {0};
+					zval *ptmp = &tmp;
+					ZVAL_NULL(ptmp);
+					arg = &ptmp;
+				} else {
+					/* optional arg - just skip it */
+					continue;
+				}
 			}
 		}
 
@@ -1080,7 +1135,7 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 static int zval_update_class_constant(zval **pp, int is_static, int offset TSRMLS_DC) /* {{{ */
 {
 	if ((Z_TYPE_PP(pp) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT ||
-	    (Z_TYPE_PP(pp) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT_ARRAY) {	    
+	    (Z_TYPE_PP(pp) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT_ARRAY) {
 		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
 
 		if ((*scope)->parent) {
@@ -1101,10 +1156,10 @@ static int zval_update_class_constant(zval **pp, int is_static, int offset TSRML
 						*scope = old_scope;
 						return ret;
 					}
-				}				
+				}
 				ce = ce->parent;
 			} while (ce);
-			
+
 		}
 		return zval_update_constant(pp, (void*)1 TSRMLS_CC);
 	}
@@ -3310,7 +3365,7 @@ ZEND_API void zend_fcall_info_args_restore(zend_fcall_info *fci, int param_count
 }
 /* }}} */
 
-ZEND_API zval ***zend_fcall_create_args(HashTable *params_ar, zval ***args, int *param_count)  /* {{{ */
+ZEND_API zval ***zend_fcall_create_args(HashTable *params_ar, zval ***args, unsigned int *param_count)  /* {{{ */
 {
 	int num_elems = zend_hash_num_elements(params_ar);
 	zval ***method_args;

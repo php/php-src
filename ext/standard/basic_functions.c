@@ -4678,16 +4678,14 @@ PHP_FUNCTION(error_log)
 {
 	char *message, *opt = NULL, *headers = NULL;
 	int message_len, opt_len = 0, headers_len = 0;
-	int opt_err = 0, argc = ZEND_NUM_ARGS();
+	int opt_err = 0;
 	long erropt = 0;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|lps", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lps", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
 		return;
 	}
 
-	if (argc > 1) {
-		opt_err = erropt;
-	}
+	opt_err = (int)erropt;
 
 	if (_php_error_log_ex(opt_err, message, message_len, opt, headers TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
@@ -4950,7 +4948,9 @@ void user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_
 	int i;
 
 	for (i = 0; i < shutdown_function_entry->arg_count; i++) {
-		zval_ptr_dtor(&shutdown_function_entry->arguments[i]);
+		if(shutdown_function_entry->arguments[i]) {
+			zval_ptr_dtor(&shutdown_function_entry->arguments[i]);
+		}
 	}
 	efree(shutdown_function_entry->arguments);
 }
@@ -4961,7 +4961,9 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {
 	int i;
 
 	for (i = 0; i < tick_function_entry->arg_count; i++) {
-		zval_ptr_dtor(&tick_function_entry->arguments[i]);
+		if(tick_function_entry->arguments[i]) {
+			zval_ptr_dtor(&tick_function_entry->arguments[i]);
+		}
 	}
 	efree(tick_function_entry->arguments);
 }
@@ -5107,7 +5109,6 @@ PHP_FUNCTION(register_shutdown_function)
 	int i;
 
 	shutdown_function_entry.arg_count = ZEND_NUM_ARGS();
-
 	if (shutdown_function_entry.arg_count < 1) {
 		WRONG_PARAM_COUNT;
 	}
@@ -5120,7 +5121,7 @@ PHP_FUNCTION(register_shutdown_function)
 	}
 
 	/* Prevent entering of anything but valid callback (syntax check only!) */
-	if (!zend_is_callable(shutdown_function_entry.arguments[0], 0, &callback_name TSRMLS_CC)) {
+	if (!shutdown_function_entry.arguments[0] || !zend_is_callable(shutdown_function_entry.arguments[0], 0, &callback_name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", callback_name);
 		efree(shutdown_function_entry.arguments);
 		RETVAL_FALSE;
@@ -5131,7 +5132,9 @@ PHP_FUNCTION(register_shutdown_function)
 		}
 
 		for (i = 0; i < shutdown_function_entry.arg_count; i++) {
-			Z_ADDREF_P(shutdown_function_entry.arguments[i]);
+			if(shutdown_function_entry.arguments[i]) {
+				Z_ADDREF_P(shutdown_function_entry.arguments[i]);
+			}
 		}
 		zend_hash_next_index_insert(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL);
 	}
@@ -5720,7 +5723,7 @@ PHP_FUNCTION(register_tick_function)
 		RETURN_FALSE;
 	}
 
-	if (!zend_is_callable(tick_fe.arguments[0], 0, &function_name TSRMLS_CC)) {
+	if (!tick_fe.arguments[0] || !zend_is_callable(tick_fe.arguments[0], 0, &function_name TSRMLS_CC)) {
 		efree(tick_fe.arguments);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid tick callback '%s' passed", function_name);
 		efree(function_name);
@@ -5742,7 +5745,9 @@ PHP_FUNCTION(register_tick_function)
 	}
 
 	for (i = 0; i < tick_fe.arg_count; i++) {
-		Z_ADDREF_P(tick_fe.arguments[i]);
+		if(tick_fe.arguments[i]) {
+			Z_ADDREF_P(tick_fe.arguments[i]);
+		}
 	}
 
 	zend_llist_add_element(BG(user_tick_functions), &tick_fe);

@@ -113,7 +113,7 @@ zend_class_entry *oci_coll_class_entry_ptr;
 #define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE2
 #else
 #define PHP_OCI_ERRBUF_LEN OCI_ERROR_MAXMSG_SIZE
-#endif 
+#endif
 
 #if ZEND_MODULE_API_NO > 20020429
 #define ONUPDATELONGFUNC OnUpdateLong
@@ -1096,7 +1096,7 @@ static void php_oci_init_global_handles(TSRMLS_D)
 			&& *tmp_buf) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", tmp_buf);
 		}
-		
+
 		OCI_G(env) = NULL;
 		OCI_G(err) = NULL;
 		return;
@@ -1125,18 +1125,18 @@ static void php_oci_init_global_handles(TSRMLS_D)
 
 		if (ora_error_code) {
 			int tmp_buf_len = strlen((char *)tmp_buf);
-			
+
 			if (tmp_buf_len > 0 && tmp_buf[tmp_buf_len - 1] == '\n') {
 				tmp_buf[tmp_buf_len - 1] = '\0';
 			}
-			
+
 			if (errstatus == OCI_SUCCESS_WITH_INFO) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Initialization error: OCI_SUCCESS_WITH_INFO: %s", tmp_buf);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Initialization error: OCI_ERROR: %s", tmp_buf);
-				
+
 				OCIHandleFree((dvoid *) OCI_G(env), OCI_HTYPE_ENV);
-				
+
 				OCI_G(env) = NULL;
 				OCI_G(err) = NULL;
 			}
@@ -2483,7 +2483,7 @@ void php_oci_client_get_version(char **version TSRMLS_DC)
 	char  version_buff[256];
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))	/* OCIClientVersion only available 10.2 onwards */
 	sword major_version = 0;
-	sword minor_version = 0; 
+	sword minor_version = 0;
 	sword update_num = 0;
 	sword patch_num = 0;
 	sword port_update_num = 0;
@@ -2616,7 +2616,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 	php_oci_out_column *column;
 	ub4 nrows = 1;
 	int i;
-	long fetch_mode = 0;
+	long fetch_mode = mode;
 
 	if (expected_args > 2) {
 		/* only for ocifetchinto BC */
@@ -2625,9 +2625,6 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 			return;
 		}
 
-		if (ZEND_NUM_ARGS() == 2) {
-			fetch_mode = mode;
-		}
 	} else if (expected_args == 2) {
 		/* only for oci_fetch_array() */
 
@@ -2635,9 +2632,6 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 			return;
 		}
 
-		if (ZEND_NUM_ARGS() == 1) {
-			fetch_mode = mode;
-		}
 	} else {
 		/* for all oci_fetch_*() */
 
@@ -2645,7 +2639,6 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 			return;
 		}
 
-		fetch_mode = mode;
 	}
 
 	if (!(fetch_mode & PHP_OCI_NUM) && !(fetch_mode & PHP_OCI_ASSOC)) {
@@ -3029,7 +3022,7 @@ static OCIEnv *php_oci_create_env(ub2 charsetid TSRMLS_DC)
 			&& *ora_msg_buf) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", ora_msg_buf);
 		}
-		
+
 		return NULL;
 	}
 	return retenv;

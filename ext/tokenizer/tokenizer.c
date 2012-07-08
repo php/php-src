@@ -180,12 +180,11 @@ static void tokenize(zval *return_value TSRMLS_DC)
 PHP_FUNCTION(token_get_all)
 {
 	char *source = NULL;
-	int argc = ZEND_NUM_ARGS();
 	int source_len;
 	zval source_z;
 	zend_lex_state original_lex_state;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &source, &source_len) == FAILURE) {
 		return;
 	}
 
@@ -200,7 +199,7 @@ PHP_FUNCTION(token_get_all)
 	LANG_SCNG(yy_state) = yycINITIAL;
 
 	tokenize(return_value TSRMLS_CC);
-	
+
 	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
 	zval_dtor(&source_z);
 }
@@ -210,10 +209,9 @@ PHP_FUNCTION(token_get_all)
  */
 PHP_FUNCTION(token_name)
 {
-	int argc = ZEND_NUM_ARGS();
 	long type;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "l", &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &type) == FAILURE) {
 		return;
 	}
 	RETVAL_STRING(get_token_type_name(type), 1);

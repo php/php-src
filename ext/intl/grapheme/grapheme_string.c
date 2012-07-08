@@ -409,13 +409,21 @@ PHP_FUNCTION(grapheme_substr)
 	UBreakIterator* bi = NULL;
 	int sub_str_start_pos, sub_str_end_pos;
 	int32_t (*iter_func)(UBreakIterator *);
+	int no_length = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|l", (char **)&str, &str_len, &lstart, &length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|l!", (char **)&str, &str_len, &lstart, &length, &no_length) == FAILURE) {
 
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			 "grapheme_substr: unable to parse input param", 0 TSRMLS_CC );
 
 		RETURN_FALSE;
+	}
+	if(no_length) {
+		length = str_len;
+	} else if(length < INT32_MIN) {
+		length = INT32_MIN;
+	} else if(length > INT32_MAX) {
+		length = INT32_MAX;
 	}
 
 	if ( OUTSIDE_STRING(lstart, str_len) ) {
@@ -431,7 +439,7 @@ PHP_FUNCTION(grapheme_substr)
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
 	if ( grapheme_ascii_check(str, str_len) >= 0 ) {
-		grapheme_substr_ascii((char *)str, str_len, start, length, ZEND_NUM_ARGS(), (char **) &sub_str, &sub_str_len);
+		grapheme_substr_ascii((char *)str, str_len, start, (int32_t)length, (char **) &sub_str, &sub_str_len);
 
 		if ( NULL == sub_str ) {
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: invalid parameters", 1 TSRMLS_CC );
@@ -499,9 +507,9 @@ PHP_FUNCTION(grapheme_substr)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() <= 2) {
+	if (length >= str_len) {
 
-		/* no length supplied, return the rest of the string */
+		/* no length supplied or length too big, return the rest of the string */
 
 		sub_str = NULL;
 		sub_str_len = 0;
@@ -537,7 +545,7 @@ PHP_FUNCTION(grapheme_substr)
 			efree(ustr);
 		}
 		ubrk_close(bi);
-		RETURN_EMPTY_STRING();		
+		RETURN_EMPTY_STRING();
 	}
 
 	/* find the end point of the string to return */
@@ -576,7 +584,7 @@ PHP_FUNCTION(grapheme_substr)
 			sub_str_end_pos = ustr_len;
 		}
 	}
-	
+
 	if(sub_str_start_pos > sub_str_end_pos) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: length is beyond start", 1 TSRMLS_CC );
 

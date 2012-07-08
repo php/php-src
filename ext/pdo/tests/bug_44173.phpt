@@ -61,7 +61,7 @@ bool(false)
 Warning: PDO::query(): SQLSTATE[HY000]: General error: fetch mode doesn't allow any extra arguments in %s
 bool(false)
 
-Warning: PDO::query(): SQLSTATE[HY000]: General error: mode must be an integer in %s
+Warning: PDO::query() expects parameter 2 to be long, string given in %s
 bool(false)
 
 Warning: PDO::query(): SQLSTATE[HY000]: General error: too many arguments in %s

@@ -320,8 +320,7 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_stmt_bind_result(): invalid object or resource mysqli_stmt
- in %s on line %d
+Warning: mysqli_stmt_bind_result() expects at least 2 parameters, 1 given in %s on line %d
 
 Warning: mysqli_stmt_bind_result(): Number of bind variables doesn't match number of fields in prepared statement in %s on line %d
 

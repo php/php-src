@@ -989,7 +989,7 @@ static inline char * sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list, in
 {
 	xmlChar *tmp = xmlNodeListGetString(doc, list, inLine);
 	char    *res;
-	
+
 	if (tmp) {
 		res = estrdup((char*)tmp);
 		xmlFree(tmp);
@@ -1147,7 +1147,7 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 			} else {
 				if (node->type == XML_TEXT_NODE) {
 					const xmlChar *cur = node->content;
-					
+
 					if (*cur != 0) {
 						MAKE_STD_ZVAL(value);
 						ZVAL_STRING(value, sxe_xmlNodeListGetString(node->doc, node, 1), 0);
@@ -1299,7 +1299,7 @@ SXE_METHOD(xpath)
 	result = retval->nodesetval;
 
 	array_init(return_value);
-		
+
 	if (result != NULL) {
 		for (i = 0; i < result->nodeNr; ++i) {
 			nodeptr = result->nodeTab[i];
@@ -1361,18 +1361,14 @@ SXE_METHOD(asXML)
 	xmlOutputBufferPtr  outbuf;
 	xmlChar            *strval;
 	int                 strval_len;
-	char               *filename;
+	char               *filename = NULL;
 	int                 filename_len;
 
-	if (ZEND_NUM_ARGS() > 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() == 1) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
-			RETURN_FALSE;
-		}
-
+	if(filename) {
 		sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
 		GET_NODE(sxe, node);
 		node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
@@ -1927,7 +1923,7 @@ SXE_METHOD(count)
 	}
 
 	php_sxe_count_elements_helper(sxe, &count TSRMLS_CC);
-	
+
 	RETURN_LONG(count);
 }
 /* }}} */

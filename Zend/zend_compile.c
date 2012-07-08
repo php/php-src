@@ -2652,13 +2652,31 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{
 void zend_do_empty_param(int offset TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
+	zend_function **function_ptr_ptr, *function_ptr;
+	int send_by_reference;
+	int send_function = 0;
 
-	/* TODO: add by-ref check to not allow send defaults by-ref */
+	zend_stack_top(&CG(function_call_stack), (void **) &function_ptr_ptr);
+	function_ptr = *function_ptr_ptr;
+
+	if (function_ptr) {
+		/* by-ref check to not allow send defaults by-ref */
+		if (ARG_SHOULD_BE_SENT_BY_REF(function_ptr, (zend_uint) offset)) {
+			zend_error(E_COMPILE_ERROR, "Cannot pass parameter %d by reference", offset);
+			return;
+		}
+	}
+
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_SEND_VAL;
 	SET_UNUSED(opline->op1);
 	opline->op2.opline_num = offset;
 	SET_UNUSED(opline->op2);
+	if (function_ptr) {
+		opline->extended_value = ZEND_DO_FCALL;
+	} else {
+		opline->extended_value = ZEND_DO_FCALL_BY_NAME;
+	}
 }
 /* }}} */
 

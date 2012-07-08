@@ -311,7 +311,7 @@ static zend_always_inline int zend_vm_stack_get_args_count_ex(zend_execute_data 
 		void **p = ex->function_state.arguments;
 		return (int)(zend_uintptr_t) *p;
 	} else {
-		return 0;			
+		return 0;
 	}
 }
 
@@ -330,6 +330,15 @@ static zend_always_inline zval** zend_vm_stack_get_arg_ex(zend_execute_data *ex,
 	}
 	return arg;
 }
+
+static zend_always_inline zval** zend_vm_stack_get_args(zend_execute_data *ex)
+{
+	void **p = ex->function_state.arguments;
+	int arg_count = (int)(zend_uintptr_t) *p;
+
+	return (zval**)p - arg_count;
+}
+
 
 static zend_always_inline int zend_vm_stack_get_args_count(TSRMLS_D)
 {

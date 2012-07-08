@@ -1737,7 +1737,7 @@ PHP_FUNCTION(imagefilledarc)
 	long cx, cy, w, h, ST, E, col, style;
 	gdImagePtr im;
 	int e, st;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllllllll", &IM, &cx, &cy, &w, &h, &ST, &E, &col, &style) == FAILURE) {
 		return;
 	}
@@ -1978,7 +1978,7 @@ PHP_FUNCTION(imagegrabwindow)
 	if ( handle == 0 ) {
 		goto clean;
 	}
-	pPrintWindow = (tPrintWindow) GetProcAddress(handle, "PrintWindow");  
+	pPrintWindow = (tPrintWindow) GetProcAddress(handle, "PrintWindow");
 
 	if ( pPrintWindow )  {
 		pPrintWindow(window, memDC, (UINT) client_area);
@@ -2550,35 +2550,26 @@ PHP_FUNCTION(imagecreatefromgd2part)
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)())
 {
 	zval *imgind;
-	char *file = NULL;
-	long quality = 0, type = 0;
+	long quality = -1, type = 1;
 	gdImagePtr im;
 	char *fn = NULL;
 	FILE *fp;
-	int file_len = 0, argc = ZEND_NUM_ARGS();
+	int file_len = 0;
 	int q = -1, i, t = 1;
 
 	/* The quality parameter for Wbmp stands for the threshold when called from image2wbmp() */
 	/* When called from imagewbmp() the quality parameter stands for the foreground color. Default: black. */
 	/* The quality parameter for gd2 stands for chunk size */
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "r|pll", &imgind, &file, &file_len, &quality, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|pll", &imgind, &fn, &file_len, &quality, &type) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &imgind, -1, "Image", le_gd);
+	q = quality;
+	t = type;
 
-	if (argc > 1) {
-		fn = file;
-		if (argc == 3) {
-			q = quality;
-		}
-		if (argc == 4) {
-			t = type;
-		}
-	}
-
-	if (argc >= 2 && file_len) {
+	if (fn != NULL && file_len) {
 		PHP_GD_CHECK_OPEN_BASEDIR(fn, "Invalid filename");
 
 		fp = VCWD_FOPEN(fn, "wb");
@@ -3273,7 +3264,7 @@ PHP_FUNCTION(imagecolorstotal)
 PHP_FUNCTION(imagecolortransparent)
 {
 	zval *IM;
-	long COL = 0;
+	long COL = -1;
 	gdImagePtr im;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3297,7 +3288,7 @@ PHP_FUNCTION(imageinterlace)
 {
 	zval *IM;
 	int argc = ZEND_NUM_ARGS();
-	long INT = 0;
+	long INT = 1;
 	gdImagePtr im;
 
 	if (zend_parse_parameters(argc TSRMLS_CC, "r|l", &IM, &INT) == FAILURE) {
@@ -3835,7 +3826,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 			if (zend_hash_get_current_data_ex(HASH_OF(EXT), (void **) &item, &pos) == FAILURE) {
 				continue;
 			}
-		
+
 			if (strcmp("linespacing", key) == 0) {
 				convert_to_double_ex(item);
 				strex.flags |= gdFTEX_LINESPACE;
@@ -4254,11 +4245,11 @@ PHP_FUNCTION(imagepsbbox)
 	if (argc != 3 && argc != 6) {
 		ZEND_WRONG_PARAM_COUNT();
 	}
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "srl|lld", &str, &str_len, &fnt, &sz, &sp, &wd, &angle) == FAILURE) {
+
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, ZEND_NUM_ARGS() TSRMLS_CC, "srl|lld", &str, &str_len, &fnt, &sz, &sp, &wd, &angle) == FAILURE) {
 		return;
 	}
-	
+
 	if (argc == 6) {
 		space = sp;
 		add_width = wd;
@@ -4433,8 +4424,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	int int_threshold;
 	int x, y;
 	float x_ratio, y_ratio;
-    long ignore_warning;
-	
+	long ignore_warning;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pplll", &f_org, &f_org_len, &f_dest, &f_dest_len, &height, &width, &threshold) == FAILURE) {
 		return;
 	}

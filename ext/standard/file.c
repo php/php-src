@@ -994,11 +994,12 @@ PHPAPI PHP_FUNCTION(feof)
 PHPAPI PHP_FUNCTION(fgets)
 {
 	zval *arg1;
-	long len = 1024;
+	long len = LONG_MIN;
 	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
 	php_stream *stream;
+	int alloc_buf = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &arg1, &len) == FAILURE) {
 		RETURN_FALSE;
@@ -1006,20 +1007,25 @@ PHPAPI PHP_FUNCTION(fgets)
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
-	if (argc == 1) {
+	if(len == LONG_MIN) {
+		len = 1024;
+		alloc_buf = 0;
+	}
+
+	if (len <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
+		RETURN_FALSE;
+	}
+
+	if(alloc_buf) {
+		buf = ecalloc(len + 1, sizeof(char));
+		if (php_stream_get_line(stream, buf, len, &line_len) == NULL) {
+			goto exit_failed;
+		}
+	} else {
 		/* ask streams to give us a buffer of an appropriate size */
 		buf = php_stream_get_line(stream, NULL, 0, &line_len);
 		if (buf == NULL) {
-			goto exit_failed;
-		}
-	} else if (argc > 1) {
-		if (len <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
-			RETURN_FALSE;
-		}
-
-		buf = ecalloc(len + 1, sizeof(char));
-		if (php_stream_get_line(stream, buf, len, &line_len) == NULL) {
 			goto exit_failed;
 		}
 	}
@@ -1027,7 +1033,7 @@ PHPAPI PHP_FUNCTION(fgets)
 	ZVAL_STRINGL(return_value, buf, line_len, 0);
 	/* resize buffer if it's much larger than the result.
 	 * Only needed if the user requested a buffer size. */
-	if (argc > 1 && Z_STRLEN_P(return_value) < len / 2) {
+	if (alloc_buf && Z_STRLEN_P(return_value) < len / 2) {
 		Z_STRVAL_P(return_value) = erealloc(buf, line_len + 1);
 	}
 	return;
@@ -1073,7 +1079,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 PHPAPI PHP_FUNCTION(fgetss)
 {
 	zval *fd;
-	long bytes = 0;
+	long bytes = LONG_MIN;
 	size_t len = 0;
 	size_t actual_len, retval_len;
 	char *buf = NULL, *retval;
@@ -1087,7 +1093,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 
 	PHP_STREAM_TO_ZVAL(stream, &fd);
 
-	if (ZEND_NUM_ARGS() >= 2) {
+	if (bytes != LONG_MIN) {
 		if (bytes <= 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
@@ -1169,7 +1175,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 	int arg2len;
 	int ret;
 	int num_bytes;
-	long arg3 = 0;
+	long arg3 = LONG_MIN;
 	char *buffer = NULL;
 	php_stream *stream;
 
@@ -1177,7 +1183,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() == 2) {
+	if (arg3 == LONG_MIN) {
 		num_bytes = arg2len;
 	} else {
 		num_bytes = MAX(0, MIN((int)arg3, arg2len));
@@ -1386,6 +1392,7 @@ PHP_FUNCTION(umask)
 	if (BG(umask) == -1) {
 		BG(umask) = oldumask;
 	}
+	arg1 = oldumask;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
 		RETURN_FALSE;

@@ -45,7 +45,7 @@
 #define PSPELL_SPEED_MASK_INTERNAL 3L
 #define PSPELL_RUN_TOGETHER 8L
 
-/* Largest ignored word can be 999 characters (this seems sane enough), 
+/* Largest ignored word can be 999 characters (this seems sane enough),
  * and it takes 3 bytes to represent that (see pspell_config_ignore)
  */
 #define PSPELL_LARGEST_WORD 3
@@ -262,7 +262,6 @@ static PHP_FUNCTION(pspell_new)
 	char *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	int language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
 	long mode = 0L,  speed = 0L;
-	int argc = ZEND_NUM_ARGS();
 	int ind;
 
 #ifdef PHP_WIN32
@@ -276,8 +275,8 @@ static PHP_FUNCTION(pspell_new)
 	PspellCanHaveError *ret;
 	PspellManager *manager;
 	PspellConfig *config;
-	
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|sssl", &language, &language_len, &spelling, &spelling_len,
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sssl", &language, &language_len, &spelling, &spelling_len,
 		&jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
 		return;
 	}
@@ -319,7 +318,7 @@ static PHP_FUNCTION(pspell_new)
 		pspell_config_replace(config, "encoding", encoding);
 	}
 
-	if (argc > 4) {
+	if (mode) {
 		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
 
 		/* First check what mode we want (how many suggestions) */
@@ -330,7 +329,7 @@ static PHP_FUNCTION(pspell_new)
 		} else if (speed == PSPELL_BAD_SPELLERS) {
 			pspell_config_replace(config, "sug-mode", "bad-spellers");
 		}
-		
+
 		/* Then we see if run-together words should be treated as valid components */
 		if (mode & PSPELL_RUN_TOGETHER) {
 			pspell_config_replace(config, "run-together", "true");
@@ -345,7 +344,7 @@ static PHP_FUNCTION(pspell_new)
 		delete_pspell_can_have_error(ret);
 		RETURN_FALSE;
 	}
-	
+
 	manager = to_pspell_manager(ret);
 	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
@@ -359,7 +358,6 @@ static PHP_FUNCTION(pspell_new_personal)
 	char *personal, *language, *spelling = NULL, *jargon = NULL, *encoding = NULL;
 	int personal_len, language_len, spelling_len = 0, jargon_len = 0, encoding_len = 0;
 	long mode = 0L,  speed = 0L;
-	int argc = ZEND_NUM_ARGS();
 	int ind;
 
 #ifdef PHP_WIN32
@@ -374,7 +372,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	PspellManager *manager;
 	PspellConfig *config;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "ps|sssl", &personal, &personal_len, &language, &language_len, 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps|sssl", &personal, &personal_len, &language, &language_len,
 		&spelling, &spelling_len, &jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
 		return;
 	}
@@ -424,7 +422,7 @@ static PHP_FUNCTION(pspell_new_personal)
 		pspell_config_replace(config, "encoding", encoding);
 	}
 
-	if (argc > 5) {
+	if (mode) {
 		speed = mode & PSPELL_SPEED_MASK_INTERNAL;
 
 		/* First check what mode we want (how many suggestions) */
@@ -435,7 +433,7 @@ static PHP_FUNCTION(pspell_new_personal)
 		} else if (speed == PSPELL_BAD_SPELLERS) {
 			pspell_config_replace(config, "sug-mode", "bad-spellers");
 		}
-		
+
 		/* Then we see if run-together words should be treated as valid components */
 		if (mode & PSPELL_RUN_TOGETHER) {
 			pspell_config_replace(config, "run-together", "true");
@@ -450,7 +448,7 @@ static PHP_FUNCTION(pspell_new_personal)
 		delete_pspell_can_have_error(ret);
 		RETURN_FALSE;
 	}
-	
+
 	manager = to_pspell_manager(ret);
 	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
@@ -462,11 +460,11 @@ static PHP_FUNCTION(pspell_new_personal)
 static PHP_FUNCTION(pspell_new_config)
 {
 	int type, ind;
-	long conf;	
+	long conf;
 	PspellCanHaveError *ret;
 	PspellManager *manager;
 	PspellConfig *config;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &conf) == FAILURE) {
 		return;
 	}
@@ -480,7 +478,7 @@ static PHP_FUNCTION(pspell_new_config)
 		delete_pspell_can_have_error(ret);
 		RETURN_FALSE;
 	}
-	
+
 	manager = to_pspell_manager(ret);
 	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
@@ -588,7 +586,7 @@ static PHP_FUNCTION(pspell_add_to_personal)
 	if (word_len == 0) {
 		RETURN_FALSE;
 	}
-	
+
 	pspell_manager_add_to_personal(manager, word);
 	if (pspell_manager_error_number(manager) == 0) {
 		RETURN_TRUE;
@@ -640,8 +638,8 @@ static PHP_FUNCTION(pspell_clear_session)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &scin) == FAILURE) {
 		return;
 	}
-    
-	PSPELL_FETCH_MANAGER;	
+
+	PSPELL_FETCH_MANAGER;
 
 	pspell_manager_clear_session(manager);
 	if (pspell_manager_error_number(manager) == 0) {
@@ -664,8 +662,8 @@ static PHP_FUNCTION(pspell_save_wordlist)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &scin) == FAILURE) {
 		return;
 	}
-    
-	PSPELL_FETCH_MANAGER;	
+
+	PSPELL_FETCH_MANAGER;
 
 	pspell_manager_save_all_word_lists(manager);
 
@@ -695,8 +693,8 @@ static PHP_FUNCTION(pspell_config_create)
 	HKEY hkey;
 	DWORD dwType,dwLen;
 #endif
-	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sss", &language, &language_len, &spelling, &spelling_len, 
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sss", &language, &language_len, &spelling, &spelling_len,
 		&jargon, &jargon_len, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
@@ -755,15 +753,15 @@ static PHP_FUNCTION(pspell_config_runtogether)
 	long conf;
 	zend_bool runtogether;
 	PspellConfig *config;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lb", &conf, &runtogether) == FAILURE) {
 		return;
 	}
 
-	PSPELL_FETCH_CONFIG;	
+	PSPELL_FETCH_CONFIG;
 
 	pspell_config_replace(config, "run-together", runtogether ? "true" : "false");
-	
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -800,10 +798,10 @@ static PHP_FUNCTION(pspell_config_mode)
 static PHP_FUNCTION(pspell_config_ignore)
 {
 	int type;
-	char ignore_str[MAX_LENGTH_OF_LONG + 1];	
+	char ignore_str[MAX_LENGTH_OF_LONG + 1];
 	long conf, ignore = 0L;
 	PspellConfig *config;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ll", &conf, &ignore) == FAILURE) {
 		return;
 	}
@@ -824,7 +822,7 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 	char *value;
 	int value_len;
 	PspellConfig *config;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lp", &conf, &value, &value_len) == FAILURE) {
 		return;
 	}
@@ -873,7 +871,7 @@ static PHP_FUNCTION(pspell_config_repl)
 	char *repl;
 	int repl_len;
 	PspellConfig *config;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lp", &conf, &repl, &repl_len) == FAILURE) {
 		return;
 	}
@@ -900,7 +898,7 @@ static PHP_FUNCTION(pspell_config_save_repl)
 	long conf;
 	zend_bool save;
 	PspellConfig *config;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lb", &conf, &save) == FAILURE) {
 		return;
 	}

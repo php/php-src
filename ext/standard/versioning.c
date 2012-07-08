@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Stig Sæther Bakken <ssb@php.net>                             |
+   | Author: Stig Sï¿½ther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
 
@@ -212,15 +212,14 @@ PHP_FUNCTION(version_compare)
 {
 	char *v1, *v2, *op = NULL;
 	int v1_len, v2_len, op_len = 0;
-	int compare, argc;
+	int compare;
 
-	argc = ZEND_NUM_ARGS();
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|s", &v1, &v1_len, &v2,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|s", &v1, &v1_len, &v2,
 							  &v2_len, &op, &op_len) == FAILURE) {
 		return;
 	}
 	compare = php_version_compare(v1, v2);
-	if (argc == 2) {
+	if (op == NULL) {
 		RETURN_LONG(compare);
 	}
 	if (!strncmp(op, "<", op_len) || !strncmp(op, "lt", op_len)) {

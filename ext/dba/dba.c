@@ -28,12 +28,12 @@
 #if HAVE_DBA
 
 #include "php_ini.h"
-#include <stdio.h> 
+#include <stdio.h>
 #include <fcntl.h>
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
- 
+
 #include "php_dba.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
@@ -157,7 +157,7 @@ PHP_MINFO_FUNCTION(dba);
 ZEND_BEGIN_MODULE_GLOBALS(dba)
 	char *default_handler;
 	dba_handler *default_hptr;
-ZEND_END_MODULE_GLOBALS(dba) 
+ZEND_END_MODULE_GLOBALS(dba)
 
 ZEND_DECLARE_MODULE_GLOBALS(dba)
 
@@ -165,15 +165,15 @@ ZEND_DECLARE_MODULE_GLOBALS(dba)
 #define DBA_G(v) TSRMG(dba_globals_id, zend_dba_globals *, v)
 #else
 #define DBA_G(v) (dba_globals.v)
-#endif 
+#endif
 
 static PHP_GINIT_FUNCTION(dba);
 
 zend_module_entry dba_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"dba",
-	dba_functions, 
-	PHP_MINIT(dba), 
+	dba_functions,
+	PHP_MINIT(dba),
 	PHP_MSHUTDOWN(dba),
 	NULL,
 	NULL,
@@ -206,7 +206,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 		zval **group, **name;
 		HashPosition pos;
 		size_t len;
-	
+
 		if (zend_hash_num_elements(Z_ARRVAL_P(key)) != 2) {
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Key does not have exactly two elements: (key, name)");
 			return -1;
@@ -393,8 +393,8 @@ PHPAPI dba_handler *dba_get_handler(const char* handler_name)
 */
 /* }}} */
 
-/* {{{ dba_close 
- */ 
+/* {{{ dba_close
+ */
 static void dba_close(dba_info *info TSRMLS_DC)
 {
 	if (info->hnd) {
@@ -428,7 +428,7 @@ static void dba_close(dba_info *info TSRMLS_DC)
  */
 static void dba_close_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	dba_info *info = (dba_info *)rsrc->ptr; 
+	dba_info *info = (dba_info *)rsrc->ptr;
 
 	dba_close(info TSRMLS_CC);
 }
@@ -444,7 +444,7 @@ int dba_close_pe_rsrc_deleter(zend_rsrc_list_entry *le, void *pDba TSRMLS_DC)
 /* {{{ dba_close_pe_rsrc */
 static void dba_close_pe_rsrc(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
-	dba_info *info = (dba_info *)rsrc->ptr; 
+	dba_info *info = (dba_info *)rsrc->ptr;
 
 	/* closes the resource by calling dba_close_rsrc() */
 	zend_hash_apply_with_argument(&EG(persistent_list), (apply_func_arg_t) dba_close_pe_rsrc_deleter, info TSRMLS_CC);
@@ -476,7 +476,7 @@ PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY("dba.default_handler", DBA_DEFAULT, PHP_INI_ALL, OnUpdateDefaultHandler, default_handler,    zend_dba_globals, dba_globals)
 PHP_INI_END()
 /* }}} */
- 
+
 /* {{{ PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(dba)
@@ -541,13 +541,12 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	int val_len;
 	zval *id;
 	dba_info *info = NULL;
-	int ac = ZEND_NUM_ARGS();
 	zval *key;
 	char *val;
 	char *key_str, *key_free;
 	size_t key_len;
 
-	if (zend_parse_parameters(ac TSRMLS_CC, "zsr", &key, &val, &val_len, &id) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zsr", &key, &val, &val_len, &id) == FAILURE) {
 		return;
 	}
 
@@ -613,18 +612,18 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	char mode[4], *pmode, *lock_file_mode = NULL;
 	int persistent_flag = persistent ? STREAM_OPEN_PERSISTENT : 0;
 	char *opened_path, *lock_name;
-	
+
 	if(ac < 2) {
 		WRONG_PARAM_COUNT;
 	}
-	
+
 	/* we pass additional args to the respective handler */
 	args = safe_emalloc(ac, sizeof(zval *), 0);
-	if (zend_get_parameters_array_ex(ac, args) != SUCCESS) {
+	if (zend_get_parameters_array_nodefault(ac, args TSRMLS_CC) != SUCCESS) {
 		FREENOW;
 		WRONG_PARAM_COUNT;
 	}
-		
+
 	/* we only take string arguments */
 	for (i = 0; i < ac; i++) {
 		convert_to_string_ex(args[i]);
@@ -633,12 +632,12 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (persistent) {
 		zend_rsrc_list_entry *le;
-		
+
 		/* calculate hash */
 		key = safe_emalloc(keylen, 1, 1);
 		key[keylen] = '\0';
 		keylen = 0;
-		
+
 		for(i = 0; i < ac; i++) {
 			memcpy(key+keylen, Z_STRVAL_PP(args[i]), Z_STRLEN_PP(args[i]));
 			keylen += Z_STRLEN_PP(args[i]);
@@ -647,18 +646,18 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		/* try to find if we already have this link in our persistent list */
 		if (zend_hash_find(&EG(persistent_list), key, keylen+1, (void **) &le) == SUCCESS) {
 			FREENOW;
-			
+
 			if (Z_TYPE_P(le) != le_pdb) {
 				RETURN_FALSE;
 			}
-		
+
 			info = (dba_info *)le->ptr;
 
 			ZEND_REGISTER_RESOURCE(return_value, info, le_pdb);
 			return;
 		}
 	}
-	
+
 	if (ac==2) {
 		hptr = DBA_G(default_hptr);
 		if (!hptr) {
@@ -720,18 +719,18 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		lock_dbf = 1;
 	}
 	switch (*pmode++) {
-		case 'r': 
-			modenr = DBA_READER; 
+		case 'r':
+			modenr = DBA_READER;
 			lock_mode = (lock_flag & DBA_LOCK_READER) ? LOCK_SH : 0;
 			file_mode = "r";
 			break;
-		case 'w': 
-			modenr = DBA_WRITER; 
+		case 'w':
+			modenr = DBA_WRITER;
 			lock_mode = (lock_flag & DBA_LOCK_WRITER) ? LOCK_EX : 0;
 			file_mode = "r+b";
 			break;
-		case 'c': 
-			modenr = DBA_CREAT; 
+		case 'c':
+			modenr = DBA_CREAT;
 			lock_mode = (lock_flag & DBA_LOCK_CREAT) ? LOCK_EX : 0;
 			if (lock_mode) {
 				if (lock_dbf) {
@@ -747,7 +746,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			} else {
 				file_mode = "a+b";
 			}
-			/* In case of the 'a+b' append mode, the handler is responsible 
+			/* In case of the 'a+b' append mode, the handler is responsible
 			 * to handle any rewind problems (see flatfile handler).
 			 */
 			break;
@@ -793,7 +792,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		FREENOW;
 		RETURN_FALSE;
 	}
-			
+
 	info = pemalloc(sizeof(dba_info), persistent);
 	memset(info, 0, sizeof(dba_info));
 	info->path = pestrdup(Z_STRVAL_PP(args[0]), persistent);
@@ -902,7 +901,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 				fcntl(info->fd, F_SETFL, flags & ~O_APPEND);
 #endif
 			}
-				
+
 		}
 	}
 
@@ -999,11 +998,11 @@ PHP_FUNCTION(dba_fetch)
 				skip = 0;
 			}
 		} else if (!strcmp(info->hnd->name, "inifile")) {
-			/* "-1" is compareable to 0 but allows a non restrictive 
+			/* "-1" is compareable to 0 but allows a non restrictive
 			 * access which is fater. For example 'inifile' uses this
 			 * to allow faster access when the key was already found
 			 * using firstkey/nextkey. However explicitly setting the
-			 * value to 0 ensures the first value. 
+			 * value to 0 ensures the first value.
 			 */
 			if (skip < -1) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s accepts only skip value -1 and greater, using skip=0", info->hnd->name);
@@ -1011,15 +1010,15 @@ PHP_FUNCTION(dba_fetch)
 			}
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Handler %s does not support optional skip parameter, the value will be ignored", info->hnd->name);
-			skip = 0;			
+			skip = 0;
 		}
 	} else {
-		skip = 0; 
+		skip = 0;
 	}
 	if((val = info->hnd->fetch(info, key_str, key_len, skip, &len TSRMLS_CC)) != NULL) {
 		DBA_ID_DONE;
 		RETURN_STRINGL(val, len, 0);
-	} 
+	}
 	DBA_ID_DONE;
 	RETURN_FALSE;
 }
@@ -1109,9 +1108,9 @@ PHP_FUNCTION(dba_nextkey)
 PHP_FUNCTION(dba_delete)
 {
 	DBA_ID_GET2;
-	
+
 	DBA_WRITE_CHECK;
-	
+
 	if(info->hnd->delete(info, key_str, key_len TSRMLS_CC) == SUCCESS)
 	{
 		DBA_ID_DONE;
@@ -1123,7 +1122,7 @@ PHP_FUNCTION(dba_delete)
 /* }}} */
 
 /* {{{ proto bool dba_insert(string key, string value, resource handle)
-   If not inifile: Insert value as key, return false, if key exists already 
+   If not inifile: Insert value as key, return false, if key exists already
    If inifile: Add vakue as key (next instance of key) */
 PHP_FUNCTION(dba_insert)
 {
