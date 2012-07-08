@@ -3511,6 +3511,11 @@ zval *date_interval_read_property(zval *object, zval *member, int type TSRMLS_DC
 
 	obj = (php_interval_obj *)zend_objects_get_address(object TSRMLS_CC);
 
+	if (!obj->initialized) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The DateInterval object has not been correctly initialized by its constructor");
+		return EG(uninitialized_zval_ptr);
+	}
+
 #define GET_VALUE_FROM_STRUCT(n,m)            \
 	if (strcmp(Z_STRVAL_P(member), m) == 0) { \
 		value = obj->diff->n;                 \
@@ -3561,6 +3566,12 @@ void date_interval_write_property(zval *object, zval *member, zval *value TSRMLS
 		member = &tmp_member;
 	}
 	obj = (php_interval_obj *)zend_objects_get_address(object TSRMLS_CC);
+
+
+	if (!obj->initialized) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The DateInterval object has not been correctly initialized by its constructor");
+		return;
+	}
 
 #define SET_VALUE_FROM_STRUCT(n,m)            \
 	if (strcmp(Z_STRVAL_P(member), m) == 0) { \
