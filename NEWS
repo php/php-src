@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - SimpleXML:
   . Implemented FR #55218 Get namespaces from current node. (Lonny)
 
+- DateTime:
+  . Fixed Bug #62500 (Segfault in DateInterval class when extended). (Laruence)
+
 ?? ??? 2012, PHP 5.4.5
 
 - Core:
