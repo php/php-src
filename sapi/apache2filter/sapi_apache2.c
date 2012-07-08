@@ -311,7 +311,7 @@ php_apache_disable_caching(ap_filter_t *f)
 static double php_apache_sapi_get_request_time(TSRMLS_D)
 {
 	php_struct *ctx = SG(server_context);
-	return apr_time_as_msec(ctx->r->request_time);
+	return ((double) apr_time_as_msec(ctx->r->request_time)) / 1000.0;
 }
 
 extern zend_module_entry php_apache_module;
