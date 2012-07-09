@@ -1238,7 +1238,7 @@ static PHP_FUNCTION(tidy_parse_string)
 /* }}} */
 
 /* {{{ proto string tidy_get_error_buffer()
-   Return warnings and errors which occured parsing the specified document*/
+   Return warnings and errors which occurred parsing the specified document*/
 static PHP_FUNCTION(tidy_get_error_buffer)
 {
 	TIDY_FETCH_OBJECT;

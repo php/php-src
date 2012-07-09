@@ -3833,7 +3833,7 @@ PHP_NAMED_FUNCTION(php_inet_ntop)
 	}
 
 	if (!inet_ntop(af, address, buffer, sizeof(buffer))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An unknown error occured");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An unknown error occurred");
 		RETURN_FALSE;
 	}
 

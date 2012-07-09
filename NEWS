@@ -1,10 +1,26 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2012, PHP 5.4.6
+
+- CURL:
+  . Fixed bug #62499 (curl_setopt($ch, CURLOPT_COOKIEFILE, "") returns false).
+    (r.hampartsumyan@gmail.com, Laruence)
+
+- DateTime:
+  . Fixed Bug #62500 (Segfault in DateInterval class when extended). (Laruence)
+
+- SimpleXML:
+  . Implemented FR #55218 Get namespaces from current node. (Lonny)
+
 ?? ??? 2012, PHP 5.4.5
 
 - Core:
   . Fixed bug #62443 (Crypt SHA256/512 Segfaults With Malformed 
     Salt). (Anthony Ferrara)
+  . Fixed bug #62432 (ReflectionMethod random corrupt memory on high
+    concurrent). (Johannes)
+  . Fixed bug #62373 (serialize() generates wrong reference to the object).
+    (Moriyoshi)
   . Fixed bug #62357 (compile failure: (S) Arguments missing for built-in
     function __memcmp). (Laruence)
   . Fixed bug #61998 (Using traits with method aliases appears to result in
@@ -46,10 +62,17 @@ PHP                                                                        NEWS
   . Fixed bug #62070 (Collator::getSortKey() returns garbage). (Gustavo)
   . Fixed bug #62017 (datefmt_create with incorrectly encoded timezone leaks
     pattern). (Gustavo)
+  . Fixed bug #60785 (memory leak in IntlDateFormatter constructor). (Gustavo)
+
+- JSON:
+  . Fixed bug #61359 (json_encode() calls too many reallocs). (Stas)
 
 - libxml:
   . Fixed bug #62266 (Custom extension segfaults during xmlParseFile with FPM
     SAPI). (Gustavo)
+
+- Phar:
+  . Fixed bug #62227 (Invalid phar stream path causes crash). (Felipe)
 
 - Readline:
   . Fixed bug #62186 (readline fails to compile - void function should not
@@ -64,6 +87,12 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
     
+- SPL:
+  . Fixed bug #62433 (Inconsistent behavior of RecursiveDirectoryIterator to
+    dot files). (Laruence)
+  . Fixed bug #62262 (RecursiveArrayIterator does not implement Countable).
+    (Nikita Popov)
+
 - XML Writer:
   . Fixed bug #62064 (memory leak in the XML Writer module). 
     (jean-pierre dot lozi at lip6 dot fr)
@@ -85,10 +114,6 @@ PHP                                                                        NEWS
   . Fixed bug #61546 (functions related to current script failed when chdir() 
     in cli sapi). (Laruence, reeze.xia@gmail.com)
 
-- CURL:
-  . Fixed bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction).
-    (Laruence)
-
 - Core:
   . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
   . Fixed CVE-2012-2143. (Solar Designer)
@@ -103,12 +128,15 @@ PHP                                                                        NEWS
   . Fixed bug #61827 (incorrect \e processing on Windows) (Anatoliy)
   . Fixed bug #61782 (__clone/__destruct do not match other methods when checking
     access controls). (Stas)
+  . Fixed bug #61764 ('I' unpacks n as signed if n > 2^31-1 on LP64). (Gustavo)
   . Fixed bug #61761 ('Overriding' a private static method with a different 
     signature causes crash). (Laruence)
   . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
     reference). (Laruence)
   . Fixed bug #61728 (PHP crash when calling ob_start in request_shutdown 
     phase). (Laruence)
+  . Fixed bug #61713 (Logic error in charset detection for htmlentities).
+    (Anatoliy)
   . Fixed bug #61660 (bin2hex(hex2bin($data)) != $data). (Nikita Popov)
   . Fixed bug #61650 (ini parser crashes when using ${xxxx} ini variables
     (without apache2)). (Laruence)
@@ -118,15 +146,9 @@ PHP                                                                        NEWS
     set to null). (Anatoliy)
   . Changed php://fd to be available only for CLI.
 
-- PDO:
-  . Fixed bug #61755 (A parsing bug in the prepared statements can lead to
-    access violations). (Johannes)
-
-- Phar:
-  . Fix bug #61065 (Secunia SA44335, CVE-2012-2386). (Rasmus)
-
-- Pgsql:
-  . Added pg_escape_identifier/pg_escape_literal. (Yasuo Ohgaki)
+- CURL:
+  . Fixed bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction).
+    (Laruence)
 
 - Fileinfo
   . Fixed bug #61812 (Uninitialised value used in libmagic). 
@@ -143,6 +165,20 @@ PHP                                                                        NEWS
 - Libxml:
   . Fixed bug #61617 (Libxml tests failed(ht is already destroyed)).
     (Laruence)
+
+- PDO:
+  . Fixed bug #61755 (A parsing bug in the prepared statements can lead to
+    access violations). (Johannes)
+
+- Phar:
+  . Fixed bug #61065 (Secunia SA44335, CVE-2012-2386). (Rasmus)
+
+- Pgsql:
+  . Added pg_escape_identifier/pg_escape_literal. (Yasuo Ohgaki)
+
+- Streams:
+  . Fixed bug #61961 (file_get_contents leaks when access empty file with
+    maxlen set). (Reeze)
 
 - Zlib:
   . Fixed bug #61820 (using ob_gzhandler will complain about headers already 
@@ -232,23 +268,6 @@ PHP                                                                        NEWS
   . Fixed bug #60948 (mysqlnd FTBFS when -Wformat-security is enabled).
     (Johannes)
 
-- Readline:
-  . Fixed bug #61088 (Memory leak in readline_callback_handler_install).
-    (Nikic, Laruence)
-
-- Session
-  . Fixed bug #60634 (Segmentation fault when trying to die() in 
-    SessionHandler::write()). (Ilia)
-
-- SOAP
-  . Fixed bug #61423 (gzip compression fails). (Ilia)
-  . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
-    User-Agent header). (carloschilazo at gmail dot com)
-  . Fixed bug #60842, #51775 (Chunked response parsing error when 
-    chunksize length line is > 10 bytes). (Ilia)
-  . Fixed bug #49853 (Soap Client stream context header option ignored).
-    (Dmitry)
-
 - PDO
   . Fixed bug #61292 (Segfault while calling a method on an overloaded PDO 
     object). (Laruence)
@@ -266,11 +285,28 @@ PHP                                                                        NEWS
   . Fixed bug #61184 (Phar::webPhar() generates headers with trailing NUL
     bytes). (Nikita Popov)
 
+- Readline:
+  . Fixed bug #61088 (Memory leak in readline_callback_handler_install).
+    (Nikic, Laruence)
+
 - Reflection:
   . Implemented FR #61602 (Allow access to the name of constant
     used as function/method parameter's default value). (reeze.xia@gmail.com)
   . Fixed bug #60968 (Late static binding doesn't work with 
     ReflectionMethod::invokeArgs()). (Laruence)
+
+- Session
+  . Fixed bug #60634 (Segmentation fault when trying to die() in 
+    SessionHandler::write()). (Ilia)
+
+- SOAP
+  . Fixed bug #61423 (gzip compression fails). (Ilia)
+  . Fixed bug #60887 (SoapClient ignores user_agent option and sends no
+    User-Agent header). (carloschilazo at gmail dot com)
+  . Fixed bug #60842, #51775 (Chunked response parsing error when 
+    chunksize length line is > 10 bytes). (Ilia)
+  . Fixed bug #49853 (Soap Client stream context header option ignored).
+    (Dmitry)
 
 - SPL:
   . Fixed bug #61453 (SplObjectStorage does not identify objects correctly).
@@ -727,6 +763,65 @@ PHP                                                                        NEWS
   . Re-implemented non-file related functionality. (Mike)
   . Fixed bug #55544 (ob_gzhandler always conflicts with zlib.output_compression).
     (Mike)
+
+14 Jun 2012, PHP 5.3.14
+
+- CLI SAPI:
+  . Fixed bug #61546 (functions related to current script failed when chdir() 
+    in cli sapi). (Laruence, reeze.xia@gmail.com)
+
+- CURL:
+  . Fixed bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction).
+    (Laruence)
+
+- COM:
+  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
+
+- Core:
+  . Fixed CVE-2012-2143. (Solar Designer)
+  . Fixed missing bound check in iptcparse(). (chris at chiappa.net)
+  . Fixed bug #62373 (serialize() generates wrong reference to the object).
+    (Moriyoshi)
+  . Fixed bug #62005 (unexpected behavior when incrementally assigning to a 
+    member of a null object). (Laruence)
+  . Fixed bug #61991 (long overflow in realpath_cache_get()). (Anatoliy)
+  . Fixed bug #61764 ('I' unpacks n as signed if n > 2^31-1 on LP64). (Gustavo)
+  . Fixed bug #61730 (Segfault from array_walk modifying an array passed by
+    reference). (Laruence)
+  . Fixed bug #61713 (Logic error in charset detection for htmlentities).
+    (Anatoliy)
+  . Fixed bug #54197 ([PATH=] sections incompatibility with user_ini.filename
+    set to null). (Anatoliy)
+  . Changed php://fd to be available only for CLI.
+
+- Fileinfo:
+  . Fixed bug #61812 (Uninitialised value used in libmagic). 
+    (Laruence, Gustavo)
+
+- Iconv extension:
+  . Fixed a bug that iconv extension fails to link to the correct library
+    when another extension makes use of a library that links to the iconv
+    library. See https://bugs.gentoo.org/show_bug.cgi?id=364139 for detail.
+    (Moriyoshi)
+
+- Intl:
+  . Fixed bug #62082 (Memory corruption in internal function
+    get_icu_disp_value_src_php()). (Gustavo)
+
+- JSON
+  . Fixed bug #61537 (json_encode() incorrectly truncates/discards
+    information). (Adam)
+
+- PDO:
+  . Fixed bug #61755 (A parsing bug in the prepared statements can lead to
+    access violations). (Johannes)
+
+- Phar:
+  . Fix bug #61065 (Secunia SA44335). (Rasmus)
+
+- Streams:
+  . Fixed bug #61961 (file_get_contents leaks when access empty file with
+    maxlen set). (Reeze)
 
 08 May 2012, PHP 5.3.13
 - CGI

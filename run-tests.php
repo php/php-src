@@ -2089,8 +2089,10 @@ $output
 	if (isset($old_php)) {
 		$php = $old_php;
 	}
+	
+	$diff = empty($diff) ? '' : "<![CDATA[\n " . preg_replace('/\e/', '<esc>', $diff) . "\n]]>";
 
-	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, "<![CDATA[\n " . preg_replace('/\e/', '<esc>', $diff) . "\n]]>");
+	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, $diff);
 
 	return $restype[0] . 'ED';
 }
@@ -2666,12 +2668,15 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	$time = null !== $time ? $time : junit_get_timer($file_name);
 	junit_suite_record($suite, 'execution_time', $time);
 
+	$escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
+
     $escaped_test_name = basename($file_name) . ' - ' . htmlspecialchars($test_name, ENT_QUOTES);
     $JUNIT['files'][$file_name]['xml'] = "<testcase classname='$suite' name='$escaped_test_name' time='$time'>\n";
 
 	if (is_array($type)) {
 		$output_type = $type[0] . 'ED';
-		$type = reset(array_intersect(array('XFAIL', 'FAIL'), $type));
+		$temp = array_intersect(array('XFAIL', 'FAIL'), $type);
+		$type = reset($temp);
 	} else {
 		$output_type = $type . 'ED';
 	}
@@ -2686,10 +2691,10 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 		$JUNIT['files'][$file_name]['xml'] .= "<skipped>$message</skipped>\n";
 	} elseif('FAIL' == $type) {
 		junit_suite_record($suite, 'test_fail');
-		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$message'>$details</failure>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$message'>$escaped_details</failure>\n";
 	} else {
 		junit_suite_record($suite, 'test_error');
-		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$message'>$details</error>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$message'>$escaped_details</error>\n";
 	}
 
 	$JUNIT['files'][$file_name]['xml'] .= "</testcase>\n";

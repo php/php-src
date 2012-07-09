@@ -1161,7 +1161,7 @@ convert_to_array:
 						case IS_DOUBLE:
 						case IS_NULL:
 						case IS_BOOL:
-							zend_error(E_NOTICE, "String offset cast occured");
+							zend_error(E_NOTICE, "String offset cast occurred");
 							break;
 						default:
 							zend_error(E_WARNING, "Illegal offset type");
@@ -1284,7 +1284,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 						case IS_NULL:
 						case IS_BOOL:
 							if (type != BP_VAR_IS) {
-								zend_error(E_NOTICE, "String offset cast occured");
+								zend_error(E_NOTICE, "String offset cast occurred");
 							}
 							break;
 						default:
