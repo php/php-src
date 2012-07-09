@@ -581,7 +581,7 @@ mysqlnd_run_authentication(
 			}
 			memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
 
-			DBG_INF_FMT("salt=[%*s]", plugin_data_len - 1, plugin_data);
+			DBG_INF_FMT("salt=[%*.s]", plugin_data_len - 1, plugin_data);
 			/* The data should be allocated with malloc() */
 			scrambled_data =
 				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
