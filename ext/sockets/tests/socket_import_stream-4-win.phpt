@@ -83,11 +83,11 @@ socket_set_block
 Warning: socket_set_block(): An operation was attempted on something that is not a socket.
  in %ssocket_import_stream-4-win.php on line %d
 
-Warning: socket_set_block(): unable to set blocking mode [0]: The operation completed successfully.
+Warning: socket_set_block(): unable to set blocking mode [%d]: An operation was attempted on something that is not a socket.
  in %ssocket_import_stream-4-win.php on line %d
 
 socket_get_option 
-Warning: socket_get_option(): unable to retrieve socket option [0]: An operation was attempted on something that is not a socket.
+Warning: socket_get_option(): unable to retrieve socket option [%d]: An operation was attempted on something that is not a socket.
  in %ssocket_import_stream-4-win.php on line %d
 
 
