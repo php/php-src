@@ -2177,7 +2177,7 @@ string_copy:
 
 			convert_to_string_ex(zvalue);
 
-			if (!Z_STRLEN_PP(zvalue) || php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC)) {
+			if (Z_STRLEN_PP(zvalue) && php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC)) {
 				RETVAL_FALSE;
 				return 1;
 			}
