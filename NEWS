@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   (NEWS will be merged after release by johannes. Formerging changes to the  
   PHP-5.3.15 release branch talk to johannes)
 
+- CURL:
+  . Fixed bug #62499 (curl_setopt($ch, CURLOPT_COOKIEFILE, "") returns false).
+    (r.hampartsumyan@gmail.com, Laruence)
+
 14 Jun 2012, PHP 5.3.14
 
 - CLI SAPI:
