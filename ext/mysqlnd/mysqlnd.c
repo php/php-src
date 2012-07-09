@@ -2184,7 +2184,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 				}
 				memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
 
-				DBG_INF_FMT("salt=[%*s]", plugin_data_len - 1, plugin_data);
+				DBG_INF_FMT("salt=[%*.s]", plugin_data_len - 1, plugin_data);
 
 				/* The data should be allocated with malloc() */
 				scrambled_data =
