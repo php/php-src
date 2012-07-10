@@ -1173,6 +1173,9 @@ out:
 	if (request_started) {
 		php_request_shutdown((void *) 0);
 	}
+	if (translated_path) {
+		free(translated_path);
+	}
 	return exit_status;
 err:
 	sapi_deactivate(TSRMLS_C);

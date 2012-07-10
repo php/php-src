@@ -1826,6 +1826,9 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 	return SUCCESS;
 
 fail:
+	if (errstr) {
+		pefree(errstr, 1);
+	}
 	efree(escaped_request_uri);
 	return FAILURE;
 } /* }}} */

@@ -2923,6 +2923,14 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
 	fcc.object_ptr = object;
+	
+	/* 
+	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
+	 */
+	if (mptr->type == ZEND_INTERNAL_FUNCTION &&
+		(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0) {
+		fcc.function_handler = _copy_function(mptr TSRMLS_CC);
+	}
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 

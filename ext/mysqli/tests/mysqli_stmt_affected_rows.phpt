@@ -63,7 +63,7 @@ require_once('skipifconnectfailure.inc');
 		// NOTE: the error message varies with the MySQL Server version, dump only the error code!
 		printf("[009] [%d] (error message varies with the MySQL Server version, check the error code)\n", mysqli_stmt_errno($stmt));
 
-	/* an error occured: affected rows should return -1 */
+	/* an error occurred: affected rows should return -1 */
 	if (-1 !== ($tmp = mysqli_stmt_affected_rows($stmt)))
 		printf("[010] Expecting int/0, got %s/%s\n", gettype($tmp), $tmp);
 
