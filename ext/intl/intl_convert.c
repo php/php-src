@@ -67,7 +67,7 @@ void intl_convert_utf8_to_utf16(
 		return;
 	}
 
-	/* Bail out if an unexpected error occured.
+	/* Bail out if an unexpected error occurred.
 	 * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
 	 * (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
 	 */
@@ -119,7 +119,7 @@ void intl_convert_utf16_to_utf8(
 	*status = U_ZERO_ERROR;
 	u_strToUTF8( NULL, 0, &dst_len, src, src_len, status );
 
-	/* Bail out if an unexpected error occured.
+	/* Bail out if an unexpected error occurred.
 	 * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
 	 * (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
 	 */
