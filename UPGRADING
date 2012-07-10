@@ -97,6 +97,9 @@ PHP X.Y UPGRADE NOTES
 - Core:
   - boolval()
 
+- Hash:
+  - hash_pbkdf2()
+
 - Intl:
   - datefmt_get_calendar_object()
   - datefmt_get_timezone()
