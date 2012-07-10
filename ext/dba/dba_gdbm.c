@@ -104,11 +104,16 @@ DBA_UPDATE_FUNC(gdbm)
 	gval.dptr = (char *) val;
 	gval.dsize = vallen;
 
-	if(gdbm_store(dba->dbf, gkey, gval, 
-				mode == 1 ? GDBM_INSERT : GDBM_REPLACE) == 0)
+	switch(gdbm_store(dba->dbf, gkey, gval, mode == 1 ? GDBM_INSERT : GDBM_REPLACE)) {
+	case -1:
+		php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
+		return FAILURE;
+	default:
+	case 0:
 		return SUCCESS;
-	php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
-	return FAILURE;
+	case 1:
+		return FAILURE;
+	}
 }
 
 DBA_EXISTS_FUNC(gdbm)
