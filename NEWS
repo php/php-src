@@ -92,6 +92,7 @@ PHP                                                                        NEWS
     dot files). (Laruence)
   . Fixed bug #62262 (RecursiveArrayIterator does not implement Countable).
     (Nikita Popov)
+  . Fixed bug #62477 LimitIterator int overflow. (Anatoliy)
 
 - XML Writer:
   . Fixed bug #62064 (memory leak in the XML Writer module). 
