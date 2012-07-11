@@ -241,7 +241,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 	char *key_str, *key_free;									\
 	size_t key_len; 											\
 	if (zend_parse_parameters(ac TSRMLS_CC, "zr", &key, &id) == FAILURE) { 	\
-		return; 												\
+		RETURN_FALSE;											\
 	} 															\
 	if ((key_len = php_dba_make_key(key, &key_str, &key_free TSRMLS_CC)) == 0) {\
 		RETURN_FALSE;											\
@@ -255,12 +255,12 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free TSRMLS
 	switch(ac) {												\
 	case 2: 													\
 		if (zend_parse_parameters(ac TSRMLS_CC, "zr", &key, &id) == FAILURE) { \
-			return;												\
+			RETURN_FALSE;										\
 		} 														\
 		break;  												\
 	case 3: 													\
 		if (zend_parse_parameters(ac TSRMLS_CC, "zlr", &key, &skip, &id) == FAILURE) { \
-			return;												\
+			RETURN_FALSE;										\
 		} 														\
 		break;  												\
 	default:													\
@@ -961,7 +961,7 @@ PHP_FUNCTION(dba_close)
 	dba_info *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	DBA_FETCH_RESOURCE(info, &id);
@@ -1066,7 +1066,7 @@ PHP_FUNCTION(dba_firstkey)
 	dba_info *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	DBA_FETCH_RESOURCE(info, &id);
@@ -1090,7 +1090,7 @@ PHP_FUNCTION(dba_nextkey)
 	dba_info *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	DBA_FETCH_RESOURCE(info, &id);
@@ -1149,7 +1149,7 @@ PHP_FUNCTION(dba_optimize)
 	dba_info *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	DBA_FETCH_RESOURCE(info, &id);
@@ -1172,7 +1172,7 @@ PHP_FUNCTION(dba_sync)
 	dba_info *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &id) == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	DBA_FETCH_RESOURCE(info, &id);
