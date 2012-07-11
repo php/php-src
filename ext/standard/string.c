@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Stig Sæther Bakken <ssb@php.net>                            |
+   |          Stig Sï¿½ther Bakken <ssb@php.net>                            |
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
  */
@@ -132,7 +132,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	size_t i, j;
 
 	result = (unsigned char *) safe_emalloc(oldlen, 2 * sizeof(char), 1);
-	
+
 	for (i = j = 0; i < oldlen; i++) {
 		result[j++] = hexconvtab[old[i] >> 4];
 		result[j++] = hexconvtab[old[i] & 15];
@@ -5376,7 +5376,7 @@ PHP_FUNCTION(substr_compare)
 	if (!cs) {
 		RETURN_LONG(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
 	} else {
-		RETURN_LONG(zend_binary_strncasecmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+		RETURN_LONG(zend_binary_strncasecmp_l(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
 	}
 }
 /* }}} */
