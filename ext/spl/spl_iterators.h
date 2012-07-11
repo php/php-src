@@ -128,7 +128,7 @@ typedef struct _spl_dual_it_object {
 		uint                 str_key_len;
 		ulong                int_key;
 		int                  key_type; /* HASH_KEY_IS_STRING or HASH_KEY_IS_LONG */
-		int                  pos;
+		long                  pos;
 	} current;
 	dual_it_type             dit_type;
 	union {

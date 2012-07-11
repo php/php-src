@@ -1380,11 +1380,30 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 	intern->dit_type = dit_type;
 	switch (dit_type) {
 		case DIT_LimitIterator: {
+			zval *tmp_offset, *tmp_count;
 			intern->u.limit.offset = 0; /* start at beginning */
 			intern->u.limit.count = -1; /* get all */
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|ll", &zobject, ce_inner, &intern->u.limit.offset, &intern->u.limit.count) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|zz", &zobject, ce_inner, &tmp_offset, &tmp_count) == FAILURE) {
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
 				return NULL;
+			}
+			if (tmp_offset && Z_TYPE_P(tmp_offset) != IS_NULL) {
+				if (Z_TYPE_P(tmp_offset) != IS_LONG) {
+					zend_throw_exception(spl_ce_OutOfRangeException, "offset param must be of type int", 0 TSRMLS_CC);
+					zend_restore_error_handling(&error_handling TSRMLS_CC);
+					return NULL;
+				} else {
+					intern->u.limit.offset = Z_LVAL_P(tmp_offset);
+				}
+			}
+			if (tmp_count && Z_TYPE_P(tmp_count) != IS_NULL) {
+				if (Z_TYPE_P(tmp_count) != IS_LONG) {
+					zend_throw_exception(spl_ce_OutOfRangeException, "count param must be of type int", 0 TSRMLS_CC);
+					zend_restore_error_handling(&error_handling TSRMLS_CC);
+					return NULL;
+				} else {
+					intern->u.limit.count = Z_LVAL_P(tmp_count);
+				}
 			}
 			if (intern->u.limit.offset < 0) {
 				zend_throw_exception(spl_ce_OutOfRangeException, "Parameter offset must be >= 0", 0 TSRMLS_CC);
