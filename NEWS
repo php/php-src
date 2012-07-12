@@ -1,6 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-05 Jul 2012, PHP 5.3.15RC1
+19 Jul 2012, PHP 5.3.15
+
 - Zend Engine:
   . Fixed bug #51094 (parse_ini_file() with INI_SCANNER_RAW cuts a value that
     includes a semi-colon). (Pierrick)
@@ -9,8 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
 
 - Core:
-  . Fixed potential overflow in _php_stream_scandir. (Jason Powell,
-    Stas)
+  . Fixed potential overflow in _php_stream_scandir, CVE-2012-2688. (Jason 
+    Powell, Stas)
   . Fixed bug #62432 (ReflectionMethod random corrupt memory on high
     concurrent). (Johannes)
   . Fixed bug #62443 (Crypt SHA256/512 Segfaults With Malformed 
@@ -44,7 +45,7 @@ PHP                                                                        NEWS
   . Fixed bug #60785 (memory leak in IntlDateFormatter constructor). (Gustavo)
 
 - JSON:
-  . Improved error handling. (Nikita Popov)
+  . Reverted fix for bug #61537. (Johannes)
 
 - Phar:
   . Fixed bug #62227 (Invalid phar stream path causes crash). (Felipe)
@@ -58,6 +59,10 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #62262 (RecursiveArrayIterator does not implement Countable).
     (Nikita Popov)
+
+- SQLite:
+  . Fixed open_basedir bypass, CVE-2012-3365. (Johannes, reported by Yury
+    Maryshev)
 
 - XML Writer:
   . Fixed bug #62064 (memory leak in the XML Writer module). 
