@@ -587,11 +587,11 @@ void SdnToJewish(
 				(*pMonth)--;
 				(*pDay) += 30;
 			} else {
-				*pMonth = 6;
+				*pMonth = 7;
 				*pDay = inputDay - tishri1 + 207;
 				if (*pDay > 0)
 					return;
-				(*pMonth)--;
+				(*pMonth) -= 2;
 				(*pDay) += 30;
 			}
 			if (*pDay > 0)
