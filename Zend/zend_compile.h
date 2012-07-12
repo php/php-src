@@ -47,7 +47,7 @@
 	{													\
 		zn.op_type = IS_CONST;							\
 		INIT_PZVAL(&zn.u.constant);						\
-		ZVAL_STRINGL(&zn.u.constant, str, l;, 1);		\
+		ZVAL_STRINGL(&zn.u.constant, str, l, 1);		\
 		zn.EA = 0;										\
 	}
 
