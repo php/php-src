@@ -14,6 +14,8 @@ var_dump(password_make_salt(PHP_INT_MAX));
 
 var_dump(password_make_salt(floor(PHP_INT_MAX / 2.9)));
 
+var_dump(password_make_salt(5, 999));
+
 ?>
 --EXPECTF--
 Warning: password_make_salt() expects at least 1 parameter, 0 given in %s on line %d
@@ -31,3 +33,5 @@ NULL
 Warning: password_make_salt(): Length is too large to safely generate in %s on line %d
 NULL
 
+Warning: password_make_salt(): Unknown salt type paramter in %s on line %d
+bool(false)
