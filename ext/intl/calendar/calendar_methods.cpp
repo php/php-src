@@ -18,20 +18,21 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 #include <unicode/locid.h>
 #include <unicode/calendar.h>
 #include <unicode/ustring.h>
 #include "../intl_convertcpp.h"
 extern "C" {
+#include "../php_intl.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
 #include "calendar_class.h"
 #include "../intl_convert.h"
-#include "../locale/locale.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
-#define _MSC_STDINT_H_ /* avoid redefinitions */
 #include <ext/date/php_date.h>
 }
 #include "../common/common_enum.h"

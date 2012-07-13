@@ -18,10 +18,8 @@
 #include "config.h"
 #endif
 
-// Fix build on Windows / old versions of ICU
-#include <stdio.h>
+#include "../intl_cppshims.h"
 
-#include <math.h>
 #include <limits.h>
 #include <unicode/msgfmt.h>
 #include <unicode/chariter.h>

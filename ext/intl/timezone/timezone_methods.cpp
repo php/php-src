@@ -18,21 +18,28 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 #include <unicode/locid.h>
 #include <unicode/timezone.h>
 #include <unicode/ustring.h>
 #include "intl_convertcpp.h"
 extern "C" {
+#include "../php_intl.h"
 #define USE_TIMEZONE_POINTER 1
 #include "timezone_class.h"
 #include "intl_convert.h"
-#include "../locale/locale.h"
 #include <zend_exceptions.h>
-/* avoid redefinition of int8_t, already defined in unicode/pwin32.h */
-#define _MSC_STDINT_H_ 1
 #include <ext/date/php_date.h>
 }
 #include "common/common_enum.h"
+
+U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
+{
+	zend_throw_exception( NULL,
+		"An object of this type cannot be created with the new operator",
+		0 TSRMLS_CC );
+}
 
 U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 {

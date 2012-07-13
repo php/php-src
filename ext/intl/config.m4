@@ -52,6 +52,9 @@ if test "$PHP_INTL" != "no"; then
     dateformat/dateformat_data.c \
     dateformat/dateformat_format.c \
     dateformat/dateformat_parse.c \
+    dateformat/dateformat_create.cpp \
+    dateformat/dateformat_attrcpp.cpp \
+    dateformat/dateformat_helpers.cpp \
     msgformat/msgformat.c \
     msgformat/msgformat_attr.c \
     msgformat/msgformat_class.c \
@@ -67,11 +70,17 @@ if test "$PHP_INTL" != "no"; then
     transliterator/transliterator.c \
     transliterator/transliterator_class.c \
     transliterator/transliterator_methods.c \
-	timezone/timezone_class.cpp \
-	timezone/timezone_methods.cpp \
-	calendar/calendar_class.cpp \
-	calendar/calendar_methods.cpp \
-	calendar/gregoriancalendar_methods.cpp \
+    timezone/timezone_class.cpp \
+    timezone/timezone_methods.cpp \
+    calendar/calendar_class.cpp \
+    calendar/calendar_methods.cpp \
+    calendar/gregoriancalendar_methods.cpp \
+    breakiterator/breakiterator_class.cpp \
+    breakiterator/breakiterator_iterators.cpp \
+    breakiterator/breakiterator_methods.cpp \
+    breakiterator/rulebasedbreakiterator_methods.cpp \
+    breakiterator/codepointiterator_internal.cpp \
+    breakiterator/codepointiterator_methods.cpp \
     idn/idn.c \
     $icu_spoof_src, $ext_shared,,$ICU_INCS -Wno-write-strings)
   PHP_ADD_BUILD_DIR($ext_builddir/collator)
@@ -88,4 +97,5 @@ if test "$PHP_INTL" != "no"; then
   PHP_ADD_BUILD_DIR($ext_builddir/calendar)
   PHP_ADD_BUILD_DIR($ext_builddir/idn)
   PHP_ADD_BUILD_DIR($ext_builddir/spoofchecker)
+  PHP_ADD_BUILD_DIR($ext_builddir/breakiterator)
 fi

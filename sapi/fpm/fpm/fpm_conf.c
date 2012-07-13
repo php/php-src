@@ -53,7 +53,9 @@
 
 static int fpm_conf_load_ini_file(char *filename TSRMLS_DC);
 static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset);
+#if 0 /* not used for now */
 static char *fpm_conf_set_long(zval *value, void **config, intptr_t offset);
+#endif
 static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset);
 static char *fpm_conf_set_string(zval *value, void **config, intptr_t offset);
@@ -242,6 +244,7 @@ static char *fpm_conf_set_integer(zval *value, void **config, intptr_t offset) /
 }
 /* }}} */
 
+#if 0 /* not used for now */
 static char *fpm_conf_set_long(zval *value, void **config, intptr_t offset) /* {{{ */
 {
 	char *val = Z_STRVAL_P(value);
@@ -257,6 +260,7 @@ static char *fpm_conf_set_long(zval *value, void **config, intptr_t offset) /* {
 	return NULL;
 }
 /* }}} */
+#endif
 
 static char *fpm_conf_set_time(zval *value, void **config, intptr_t offset) /* {{{ */
 {

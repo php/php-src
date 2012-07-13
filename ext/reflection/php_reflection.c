@@ -2663,7 +2663,8 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 
 	*return_value = *precv->op2.zv;
 	INIT_PZVAL(return_value);
-	if (Z_TYPE_P(return_value) != IS_CONSTANT && Z_TYPE_P(return_value) != IS_CONSTANT_ARRAY) {
+	if ((Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT
+			&& (Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT_ARRAY) {
 		zval_copy_ctor(return_value);
 	}
 	zval_update_constant_ex(&return_value, (void*)0, param->fptr->common.scope TSRMLS_CC);
@@ -3024,6 +3025,14 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
 	fcc.object_ptr = object;
+	
+	/* 
+	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
+	 */
+	if (mptr->type == ZEND_INTERNAL_FUNCTION &&
+		(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0) {
+		fcc.function_handler = _copy_function(mptr TSRMLS_CC);
+	}
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 

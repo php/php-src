@@ -19,6 +19,8 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 #include <unicode/timezone.h>
 #include <unicode/calendar.h>
 #include "../intl_convertcpp.h"
@@ -30,8 +32,6 @@ extern "C" {
 #include "timezone_methods.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
-/* avoid redefinition of int8_t, already defined in unicode/pwin32.h */
-#define _MSC_STDINT_H_ 1
 #include <ext/date/php_date.h>
 }
 
@@ -62,7 +62,7 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 												intl_error *outside_error,
 												const char *func TSRMLS_DC)
 {
-	const char	*id = NULL,
+	char		*id = NULL,
 				offset_id[] = "GMT+00:00";
 	int			id_len = 0;
 	char		*message;
@@ -93,7 +93,7 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 			}
 
 			id = offset_id;
-			id_len = slprintf((char*)id, sizeof(offset_id), "GMT%+03d:%02d",
+			id_len = slprintf(id, sizeof(offset_id), "GMT%+03d:%02d",
 				hours, minutes);
 			break;
 		}
@@ -524,6 +524,7 @@ ZEND_END_ARG_INFO()
  * Every 'IntlTimeZone' class method has an entry in this table
  */
 static zend_function_entry TimeZone_class_functions[] = {
+	PHP_ME(IntlTimeZone,				__construct,					ainfo_tz_void,				ZEND_ACC_PRIVATE)
 	PHP_ME_MAPPING(createTimeZone,		intltz_create_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(fromDateTimeZone,	intltz_from_date_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createDefault,		intltz_create_default,			ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)

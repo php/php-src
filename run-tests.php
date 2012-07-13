@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php
 /*
    +----------------------------------------------------------------------+
@@ -239,10 +239,7 @@ $ini_overwrites = array(
 		'magic_quotes_runtime=0',
 		'ignore_repeated_errors=0',
 		'precision=14',
-		'unicode.runtime_encoding=ISO-8859-1',
-		'unicode.script_encoding=UTF-8',
-		'unicode.output_encoding=UTF-8',
-		'unicode.from_error_mode=U_INVALID_SUBSTITUTE',
+		'memory_limit=128M',
 	);
 
 function write_information($show_html)
@@ -314,6 +311,7 @@ VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
 define('PHP_QA_EMAIL', 'qa-reports@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 define('QA_REPORTS_PAGE', 'http://qa.php.net/reports');
+define('TRAVIS_CI' , (bool) getenv('TRAVIS_PHP_VERSION'));
 
 function save_or_mail_results()
 {
@@ -321,7 +319,7 @@ function save_or_mail_results()
 		   $PHP_FAILED_TESTS, $CUR_DIR, $php, $output_file, $compression;
 
 	/* We got failed Tests, offer the user to send an e-mail to QA team, unless NO_INTERACTION is set */
-	if (!getenv('NO_INTERACTION')) {
+	if (!getenv('NO_INTERACTION') && !TRAVIS_CI) {
 		$fp = fopen("php://stdin", "r+");
 		if ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['WARNED'] || $sum_results['LEAKED'] || $sum_results['XFAILED']) {
 			echo "\nYou may have found a problem in PHP.";
@@ -338,8 +336,8 @@ function save_or_mail_results()
 		$just_save_results = (strtolower($user_input[0]) == 's');
 	}
 
-	if ($just_save_results || !getenv('NO_INTERACTION')) {
-		if ($just_save_results || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
+	if ($just_save_results || !getenv('NO_INTERACTION') || TRAVIS_CI) {
+		if ($just_save_results || TRAVIS_CI || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
 			/*
 			 * Collect information about the host system for our report
 			 * Fetch phpinfo() output so that we can see the PHP enviroment
@@ -351,7 +349,9 @@ function save_or_mail_results()
 			}
 
 			/* Ask the user to provide an email address, so that QA team can contact the user */
-			if (!strncasecmp($user_input, 'y', 1) || strlen(trim($user_input)) == 0) {
+			if (TRAVIS_CI) {
+				$user_email = 'travis at php dot net';
+			} elseif (!strncasecmp($user_input, 'y', 1) || strlen(trim($user_input)) == 0) {
 				echo "\nPlease enter your email address.\n(Your address will be mangled so that it will not go out on any\nmailinglist in plain text): ";
 				flush();
 				$user_email = trim(fgets($fp, 1024));
@@ -427,7 +427,7 @@ function save_or_mail_results()
 			$failed_tests_data .= $sep . "PHPINFO" . $sep;
 			$failed_tests_data .= shell_exec($php . ' -ddisplay_errors=stderr -dhtml_errors=0 -i 2> /dev/null');
 
-			if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status)) {
+			if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status) && !TRAVIS_CI) {
 				file_put_contents($output_file, $failed_tests_data);
 
 				if (!$just_save_results) {
@@ -435,7 +435,7 @@ function save_or_mail_results()
 				}
 
 				echo "Please send " . $output_file . " to " . PHP_QA_EMAIL . " manually, thank you.\n";
-			} else {
+			} elseif (!getenv('NO_INTERACTION') && !TRAVIS_CI) {
 				fwrite($fp, "\nThank you for helping to make PHP better.\n");
 				fclose($fp);
 			}
@@ -2092,8 +2092,10 @@ $output
 	if (isset($old_php)) {
 		$php = $old_php;
 	}
+	
+	$diff = empty($diff) ? '' : "<![CDATA[\n " . preg_replace('/\e/', '<esc>', $diff) . "\n]]>";
 
-	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, "<![CDATA[\n " . preg_replace('/\e/', '<esc>', $diff) . "\n]]>");
+	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, $diff);
 
 	return $restype[0] . 'ED';
 }
@@ -2669,12 +2671,15 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	$time = null !== $time ? $time : junit_get_timer($file_name);
 	junit_suite_record($suite, 'execution_time', $time);
 
+	$escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
+
     $escaped_test_name = basename($file_name) . ' - ' . htmlspecialchars($test_name, ENT_QUOTES);
     $JUNIT['files'][$file_name]['xml'] = "<testcase classname='$suite' name='$escaped_test_name' time='$time'>\n";
 
 	if (is_array($type)) {
 		$output_type = $type[0] . 'ED';
-		$type = reset(array_intersect(array('XFAIL', 'FAIL'), $type));
+		$temp = array_intersect(array('XFAIL', 'FAIL'), $type);
+		$type = reset($temp);
 	} else {
 		$output_type = $type . 'ED';
 	}
@@ -2689,10 +2694,10 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 		$JUNIT['files'][$file_name]['xml'] .= "<skipped>$message</skipped>\n";
 	} elseif('FAIL' == $type) {
 		junit_suite_record($suite, 'test_fail');
-		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$message'>$details</failure>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$message'>$escaped_details</failure>\n";
 	} else {
 		junit_suite_record($suite, 'test_error');
-		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$message'>$details</error>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$message'>$escaped_details</error>\n";
 	}
 
 	$JUNIT['files'][$file_name]['xml'] .= "</testcase>\n";
