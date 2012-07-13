@@ -1692,6 +1692,8 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 	} else if(Z_TYPE(function_token->u.constant) == IS_STRING && strcasecmp("set", Z_STRVAL(function_token->u.constant)) == 0) {
 		/* Convert type and variable name to __setHours() */
 		char *tmp = strcatalloc("__set", 5, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant) TSRMLS_CC);
+		znode unused_node, unused_node2, value_node;
+
 		efree(Z_STRVAL(function_token->u.constant));
 		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
 
@@ -1702,7 +1704,6 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers, ZEND_FNP_PROP_SETTER TSRMLS_CC);
 
 		/* Add $value parameter to __setHours() */
-		znode unused_node, unused_node2, value_node;
 		unused_node.op_type = unused_node2.op_type = IS_UNUSED;
 		unused_node.u.op.num = unused_node2.u.op.num = 1;
 
