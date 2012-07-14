@@ -809,7 +809,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print("            document.getElementById('credits').style.display = 'block';\n");
 		php_info_print("            document.getElementById('revealcredits').style.display = 'none';\n");
 		php_info_print("        };\n");
-	    php_info_print("    };\n");
+		php_info_print("    };\n");
 		php_info_print("}());</script>\n");
 		php_info_print("<h1><a id=\"revealcredits\" href=\"#credits\" style=\"display: none;\">");
 		php_info_print("PHP Credits");
