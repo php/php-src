@@ -63,6 +63,7 @@ static zend_object_value ResourceBundle_object_create( zend_class_entry *ce TSRM
 	rb = ecalloc( 1, sizeof(ResourceBundle_object) );
 
 	zend_object_std_init( (zend_object *) rb, ce TSRMLS_CC );
+	object_properties_init((zend_object *) rb, ce);
 
 	intl_error_init( INTL_DATA_ERROR_P(rb) TSRMLS_CC );
 	rb->me = NULL;

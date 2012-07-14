@@ -61,6 +61,7 @@ zend_object_value Spoofchecker_object_create(
 	intern = ecalloc(1, sizeof(Spoofchecker_object));
 	intl_error_init(SPOOFCHECKER_ERROR_P(intern) TSRMLS_CC);
 	zend_object_std_init(&intern->zo, ce TSRMLS_CC);
+	object_properties_init(&intern->zo, ce);
 
 	retval.handle = zend_objects_store_put(
 		intern,
