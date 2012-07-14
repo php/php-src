@@ -652,7 +652,6 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 {
 	char **env, *tmp1, *tmp2;
 	char *php_uname;
-	int expose_php = INI_INT("expose_php");
 
 	if (!sapi_module.phpinfo_as_text) {
 		php_print_info_htmlhead(TSRMLS_C);
@@ -670,7 +669,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			php_info_print_box_start(1);
 		}
 
-		if (expose_php && !sapi_module.phpinfo_as_text) {
+		if (!sapi_module.phpinfo_as_text) {
 	        time_t the_time;
 	        struct tm *ta, tmbuf;
 
@@ -783,7 +782,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 		/* Zend Engine */
 		php_info_print_box_start(0);
-		if (expose_php && !sapi_module.phpinfo_as_text) {
+		if (!sapi_module.phpinfo_as_text) {
 			php_info_print("<a href=\"http://www.zend.com/\"><img border=\"0\" src=\"");
 			php_info_print(ZEND_LOGO_DATA_URI "\" alt=\"Zend logo\" /></a>\n");
 		}
@@ -798,7 +797,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		efree(php_uname);
 	}
 
-	if ((flag & PHP_INFO_CREDITS) && expose_php && !sapi_module.phpinfo_as_text) {	
+	if ((flag & PHP_INFO_CREDITS) && !sapi_module.phpinfo_as_text) {	
 		php_info_print_hr();
 		php_info_print("<script>(function () {\n");
 		php_info_print("'use strict';\n");
