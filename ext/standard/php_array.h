@@ -48,6 +48,7 @@ PHP_FUNCTION(reset);
 PHP_FUNCTION(current);
 PHP_FUNCTION(key);
 PHP_FUNCTION(array_last_key);
+PHP_FUNCTION(array_first_key);
 PHP_FUNCTION(min);
 PHP_FUNCTION(max);
 PHP_FUNCTION(in_array);
