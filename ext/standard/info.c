@@ -92,14 +92,6 @@ static int php_info_printf(const char *fmt, ...) /* {{{ */
 }
 /* }}} */
 
-static void php_info_print_request_uri(TSRMLS_D) /* {{{ */
-{
-	if (SG(request_info).request_uri) {
-		php_info_print_html_esc(SG(request_info).request_uri, strlen(SG(request_info).request_uri));
-	}
-}
-/* }}} */
-
 static int php_info_print(const char *str) /* {{{ */
 {
 	TSRMLS_FETCH();
@@ -671,7 +663,6 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	if (flag & PHP_INFO_GENERAL) {
 		char *zend_version = get_zend_version();
 		char temp_api[10];
-		char *logo_guid;
 
 		php_uname = php_get_uname('a');
 		
@@ -680,13 +671,18 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		}
 
 		if (expose_php && !sapi_module.phpinfo_as_text) {
-			php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
-			php_info_print_request_uri(TSRMLS_C);
-			php_info_print("?=");
-			logo_guid = php_logo_guid();
-			php_info_print(logo_guid);
-			efree(logo_guid);
-			php_info_print("\" alt=\"PHP Logo\" /></a>");
+	        time_t the_time;
+	        struct tm *ta, tmbuf;
+
+	        the_time = time(NULL);
+	        ta = php_localtime_r(&the_time, &tmbuf);
+
+            php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
+	        if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
+		        php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
+	        } else {
+		        php_info_print(PHP_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
+			}
 		}
 
 		if (!sapi_module.phpinfo_as_text) {
@@ -789,8 +785,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_box_start(0);
 		if (expose_php && !sapi_module.phpinfo_as_text) {
 			php_info_print("<a href=\"http://www.zend.com/\"><img border=\"0\" src=\"");
-			php_info_print_request_uri(TSRMLS_C);
-			php_info_print("?="ZEND_LOGO_GUID"\" alt=\"Zend logo\" /></a>\n");
+			php_info_print(ZEND_LOGO_DATA_URI "\" alt=\"Zend logo\" /></a>\n");
 		}
 		php_info_print("This program makes use of the Zend Scripting Language Engine:");
 		php_info_print(!sapi_module.phpinfo_as_text?"<br />":"\n");
@@ -805,11 +800,23 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 	if ((flag & PHP_INFO_CREDITS) && expose_php && !sapi_module.phpinfo_as_text) {	
 		php_info_print_hr();
-		php_info_print("<h1><a href=\"");
-		php_info_print_request_uri(TSRMLS_C);
-		php_info_print("?=PHPB8B5F2A0-3C92-11d3-A3A9-4C7B08C10000\">");
+		php_info_print("<script>(function () {\n");
+		php_info_print("'use strict';\n");
+		php_info_print("    window.onload = function () {\n");
+		php_info_print("        document.getElementById('credits').style.display = 'none';\n");
+		php_info_print("        document.getElementById('revealcredits').style.display = 'block';\n");
+		php_info_print("        document.getElementById('revealcredits').onclick = function () {\n");
+		php_info_print("            document.getElementById('credits').style.display = 'block';\n");
+		php_info_print("            document.getElementById('revealcredits').style.display = 'none';\n");
+		php_info_print("        };\n");
+	    php_info_print("    };\n");
+		php_info_print("}());</script>\n");
+		php_info_print("<h1><a id=\"revealcredits\" href=\"#credits\" style=\"display: none;\">");
 		php_info_print("PHP Credits");
 		php_info_print("</a></h1>\n");
+		php_info_print("<div id=\"credits\">\n");
+		php_print_credits(PHP_CREDITS_ALL, TSRMLS_C);
+		php_info_print("</div>\n");
 	}
 
 	zend_ini_sort_entries(TSRMLS_C);
@@ -1188,77 +1195,6 @@ PHP_FUNCTION(phpcredits)
 
 	php_print_credits(flag TSRMLS_CC);
 	RETURN_TRUE;
-}
-/* }}} */
-
-/* {{{ php_logo_guid
- */
-PHPAPI char *php_logo_guid(void)
-{
-	char *logo_guid;
-
-	time_t the_time;
-	struct tm *ta, tmbuf;
-
-	the_time = time(NULL);
-	ta = php_localtime_r(&the_time, &tmbuf);
-
-	if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
-		logo_guid = PHP_EGG_LOGO_GUID;
-	} else {
-		logo_guid = PHP_LOGO_GUID;
-	}
-
-	return estrdup(logo_guid);
-
-}
-/* }}} */
-
-/* {{{ proto string php_logo_guid(void)
-   Return the special ID used to request the PHP logo in phpinfo screens*/
-PHP_FUNCTION(php_logo_guid)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	RETURN_STRING(php_logo_guid(), 0);
-}
-/* }}} */
-
-/* {{{ proto string php_real_logo_guid(void)
-   Return the special ID used to request the PHP logo in phpinfo screens*/
-PHP_FUNCTION(php_real_logo_guid)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	RETURN_STRINGL(PHP_LOGO_GUID, sizeof(PHP_LOGO_GUID)-1, 1);
-}
-/* }}} */
-
-/* {{{ proto string php_egg_logo_guid(void)
-   Return the special ID used to request the PHP logo in phpinfo screens*/
-PHP_FUNCTION(php_egg_logo_guid)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	RETURN_STRINGL(PHP_EGG_LOGO_GUID, sizeof(PHP_EGG_LOGO_GUID)-1, 1);
-}
-/* }}} */
-
-/* {{{ proto string zend_logo_guid(void)
-   Return the special ID used to request the Zend logo in phpinfo screens*/
-PHP_FUNCTION(zend_logo_guid)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	RETURN_STRINGL(ZEND_LOGO_GUID, sizeof(ZEND_LOGO_GUID)-1, 1);
 }
 /* }}} */
 
