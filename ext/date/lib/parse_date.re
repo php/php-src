@@ -2183,8 +2183,8 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 		}
 	}
 
-	/* clean up a bit */
-	if (s->time->h != TIMELIB_UNSET || s->time->i != TIMELIB_UNSET || s->time->s != TIMELIB_UNSET) {
+	/* clean up a bit if there is a date, to be consistant with DateTime::__construct*/
+	if (s->time->d != TIMELIB_UNSET || s->time->m != TIMELIB_UNSET || s->time->y != TIMELIB_UNSET) {
 		if (s->time->h == TIMELIB_UNSET ) {
 			s->time->h = 0;
 		}
