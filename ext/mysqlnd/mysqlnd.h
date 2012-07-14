@@ -22,10 +22,10 @@
 #ifndef MYSQLND_H
 #define MYSQLND_H
 
-#define MYSQLND_VERSION "mysqlnd 5.0.10 - 20111026 - $Id$"
-#define MYSQLND_VERSION_ID 50010
+#define MYSQLND_VERSION "mysqlnd 5.0.11-dev - 20120503 - $Id$"
+#define MYSQLND_VERSION_ID 50011
 
-#define MYSQLND_PLUGIN_API_VERSION 1
+#define MYSQLND_PLUGIN_API_VERSION 2
 
 #define MYSQLND_STRING_TO_INT_CONVERSION
 /*
@@ -262,8 +262,10 @@ PHPAPI void			_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_L
 ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	zend_bool		collect_statistics;
 	zend_bool		collect_memory_statistics;
-	char*			debug;	/* The actual string */
-	MYSQLND_DEBUG	*dbg;	/* The DBG object */
+	char *			debug;	/* The actual string */
+	char *			trace_alloc_settings;	/* The actual string */
+	MYSQLND_DEBUG *	dbg;	/* The DBG object for standard tracing */
+	MYSQLND_DEBUG *	trace_alloc;	/* The DBG object for allocation tracing */
 	long			net_cmd_buffer_size;
 	long			net_read_buffer_size;
 	long			log_mask;

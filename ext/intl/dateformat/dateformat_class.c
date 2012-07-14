@@ -22,6 +22,7 @@
 #include "dateformat_parse.h"
 #include "dateformat.h"
 #include "dateformat_attr.h"
+#include "dateformat_attrcpp.h"
 
 zend_class_entry *IntlDateFormatter_ce_ptr = NULL;
 static zend_object_handlers IntlDateFormatter_handlers;
@@ -44,11 +45,11 @@ void IntlDateFormatter_object_free( zend_object *object TSRMLS_DC )
 
 	zend_object_std_dtor( &dfo->zo TSRMLS_CC );
 
-	dateformat_data_free( &dfo->datef_data TSRMLS_CC );
-	
-	if( dfo->timezone_id ){
-		efree(dfo->timezone_id);
+	if (dfo->requested_locale) {
+		efree( dfo->requested_locale );
 	}
+
+	dateformat_data_free( &dfo->datef_data TSRMLS_CC );
 
 	efree( dfo );
 }
@@ -64,10 +65,10 @@ zend_object_value IntlDateFormatter_object_create(zend_class_entry *ce TSRMLS_DC
 	dateformat_data_init( &intern->datef_data TSRMLS_CC );
 	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
 	object_properties_init(&intern->zo, ce);
-	intern->date_type = 0;
-	intern->time_type = 0;
-	intern->calendar  = 1;		/* Gregorian calendar */
-	intern->timezone_id =  NULL;
+	intern->date_type			= 0;
+	intern->time_type			= 0;
+	intern->calendar			= -1;
+	intern->requested_locale	= NULL;
 
 	retval.handle = zend_objects_store_put(
 		intern,
@@ -158,9 +159,12 @@ static zend_function_entry IntlDateFormatter_class_functions[] = {
 	PHP_NAMED_FE( getDateType, ZEND_FN( datefmt_get_datetype ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( getTimeType, ZEND_FN( datefmt_get_timetype ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( getCalendar, ZEND_FN( datefmt_get_calendar ), arginfo_intldateformatter_getdatetype )
+	PHP_NAMED_FE( getCalendarObject, ZEND_FN( datefmt_get_calendar_object ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( setCalendar, ZEND_FN( datefmt_set_calendar ), arginfo_intldateformatter_setcalendar )
 	PHP_NAMED_FE( getTimeZoneId, ZEND_FN( datefmt_get_timezone_id ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( setTimeZoneId, ZEND_FN( datefmt_set_timezone_id ), arginfo_intldateformatter_settimezoneid )
+	PHP_NAMED_FE( getTimeZone, ZEND_FN( datefmt_get_timezone ), arginfo_intldateformatter_getdatetype )
+	PHP_NAMED_FE( setTimeZone, ZEND_FN( datefmt_set_timezone ), arginfo_intldateformatter_settimezoneid )
 	PHP_NAMED_FE( setPattern, ZEND_FN( datefmt_set_pattern ), arginfo_intldateformatter_setpattern )
 	PHP_NAMED_FE( getPattern, ZEND_FN( datefmt_get_pattern ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( getLocale, ZEND_FN( datefmt_get_locale ), arginfo_intldateformatter_getdatetype )

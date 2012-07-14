@@ -1019,6 +1019,10 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 		replace_end = replace + replace_len;
 	}
 
+	if (eval) {
+		php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "The /e modifier is deprecated, use preg_replace_callback instead");
+	}
+
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	rc = pcre_fullinfo(pce->re, extra, PCRE_INFO_CAPTURECOUNT, &num_subpats);
 	if (rc < 0) {

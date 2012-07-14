@@ -39,6 +39,7 @@ package.xml added to support installation using pear installer
    <file role="src" name="curl.dsp"/>
    <file role="src" name="interface.c"/>
    <file role="src" name="multi.c"/>
+   <file role="src" name="share.c"/>
    <file role="src" name="streams.c"/>
    <file role="src" name="php_curl.h"/>
   </filelist>

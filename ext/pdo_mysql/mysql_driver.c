@@ -138,7 +138,7 @@ static int pdo_mysql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 /* }}} */
 
 /* {{{ mysql_handle_closer */
-static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC)
+static int mysql_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	

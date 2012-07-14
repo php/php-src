@@ -2,7 +2,7 @@
   utf32_be.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2006  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 #include "regenc.h"
 
 static int
-utf32be_mbc_enc_len(const UChar* p)
+utf32be_mbc_enc_len(const UChar* p ARG_UNUSED)
 {
   return 4;
 }
@@ -42,7 +42,11 @@ utf32be_is_mbc_newline(const UChar* p, const UChar* end)
     if (*(p+3) == 0x0a && *(p+2) == 0 && *(p+1) == 0 && *p == 0)
       return 1;
 #ifdef USE_UNICODE_ALL_LINE_TERMINATORS
-    if ((*(p+3) == 0x0d || *(p+3) == 0x85)
+    if ((
+#ifndef USE_CRNL_AS_LINE_TERMINATOR
+	 *(p+3) == 0x0d ||
+#endif
+	 *(p+3) == 0x85)
 	&& *(p+2) == 0 && *(p+1) == 0 && *p == 0x00)
       return 1;
     if (*(p+2) == 0x20 && (*(p+3) == 0x29 || *(p+3) == 0x28)
@@ -54,13 +58,13 @@ utf32be_is_mbc_newline(const UChar* p, const UChar* end)
 }
 
 static OnigCodePoint
-utf32be_mbc_to_code(const UChar* p, const UChar* end)
+utf32be_mbc_to_code(const UChar* p, const UChar* end ARG_UNUSED)
 {
   return (OnigCodePoint )(((p[0] * 256 + p[1]) * 256 + p[2]) * 256 + p[3]);
 }
 
 static int
-utf32be_code_to_mbclen(OnigCodePoint code)
+utf32be_code_to_mbclen(OnigCodePoint code ARG_UNUSED)
 {
   return 4;
 }
@@ -78,44 +82,39 @@ utf32be_code_to_mbc(OnigCodePoint code, UChar *buf)
 }
 
 static int
-utf32be_mbc_to_normalize(OnigAmbigType flag, const UChar** pp, const UChar* end,
-                         UChar* lower)
+utf32be_mbc_case_fold(OnigCaseFoldType flag,
+		      const UChar** pp, const UChar* end, UChar* fold)
 {
   const UChar* p = *pp;
 
-  if (*(p+2) == 0 && *(p+1) == 0 && *p == 0) {
-    p += 3;
-    *lower++ = '\0';
-    *lower++ = '\0';
-    *lower++ = '\0';
-    if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-	 ONIGENC_IS_MBC_ASCII(p)) ||
-	((flag & ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE) != 0 &&
-	 !ONIGENC_IS_MBC_ASCII(p))) {
-      *lower = ONIGENC_ISO_8859_1_TO_LOWER_CASE(*p);
-    }
-    else {
-      *lower = *p;
-    }
+  if (ONIGENC_IS_ASCII_CODE(*(p+3)) && *(p+2) == 0 && *(p+1) == 0 && *p == 0) {
+    *fold++ = 0;
+    *fold++ = 0;
 
-    (*pp) += 4;
-    return 4;  /* return byte length of converted char to lower */
-  }
-  else {
-    int len = 4;
-    if (lower != p) {
-      int i;
-      for (i = 0; i < len; i++) {
-	*lower++ = *p++;
+#ifdef USE_UNICODE_CASE_FOLD_TURKISH_AZERI
+    if ((flag & ONIGENC_CASE_FOLD_TURKISH_AZERI) != 0) {
+      if (*(p+3) == 0x49) {
+	*fold++ = 0x01;
+	*fold   = 0x31;
+	(*pp) += 4;
+	return 4;
       }
     }
-    (*pp) += len;
-    return len; /* return byte length of converted char to lower */
+#endif
+
+    *fold++ = 0;
+    *fold   = ONIGENC_ASCII_CODE_TO_LOWER_CASE(*(p+3));
+    *pp += 4;
+    return 4;
   }
+  else
+    return onigenc_unicode_mbc_case_fold(ONIG_ENCODING_UTF32_BE, flag, pp, end,
+					 fold);
 }
 
+#if 0
 static int
-utf32be_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
+utf32be_is_mbc_ambiguous(OnigCaseFoldType flag, const UChar** pp, const UChar* end)
 {
   const UChar* p = *pp;
 
@@ -125,26 +124,26 @@ utf32be_is_mbc_ambiguous(OnigAmbigType flag, const UChar** pp, const UChar* end)
     int c, v;
 
     p += 3;
-    if (((flag & ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE) != 0 &&
-	 ONIGENC_IS_MBC_ASCII(p)) ||
-	((flag & ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE) != 0 &&
-	 !ONIGENC_IS_MBC_ASCII(p))) {
-      c = *p;
-      v = ONIGENC_IS_UNICODE_ISO_8859_1_CTYPE(c,
-                       (ONIGENC_CTYPE_UPPER | ONIGENC_CTYPE_LOWER));
-      if ((v | ONIGENC_CTYPE_LOWER) != 0) {
-        /* 0xaa, 0xb5, 0xba are lower case letter, but can't convert. */
-        if (c >= 0xaa && c <= 0xba)
-          return FALSE;
-        else
-          return TRUE;
-      }
-      return (v != 0 ? TRUE : FALSE);
+    if (*p == 0xdf && (flag & INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR) != 0) {
+      return TRUE;
     }
+
+    c = *p;
+    v = ONIGENC_IS_UNICODE_ISO_8859_1_BIT_CTYPE(c,
+                       (BIT_CTYPE_UPPER | BIT_CTYPE_LOWER));
+    if ((v | BIT_CTYPE_LOWER) != 0) {
+      /* 0xaa, 0xb5, 0xba are lower case letter, but can't convert. */
+      if (c >= 0xaa && c <= 0xba)
+	return FALSE;
+      else
+	return TRUE;
+    }
+    return (v != 0 ? TRUE : FALSE);
   }
 
   return FALSE;
 }
+#endif
 
 static UChar*
 utf32be_left_adjust_char_head(const UChar* start, const UChar* s)
@@ -157,31 +156,29 @@ utf32be_left_adjust_char_head(const UChar* start, const UChar* s)
   return (UChar* )(s - rem);
 }
 
+static int
+utf32be_get_case_fold_codes_by_str(OnigCaseFoldType flag,
+    const OnigUChar* p, const OnigUChar* end, OnigCaseFoldCodeItem items[])
+{
+  return onigenc_unicode_get_case_fold_codes_by_str(ONIG_ENCODING_UTF32_BE,
+						    flag, p, end, items);
+}
+
 OnigEncodingType OnigEncodingUTF32_BE = {
   utf32be_mbc_enc_len,
   "UTF-32BE",   /* name */
   4,            /* max byte length */
   4,            /* min byte length */
-  (ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE |
-   ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE ),
-  {
-      (OnigCodePoint )'\\'                       /* esc */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar '.'  */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anytime '*'  */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* zero or one time '?' */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* one or more time '+' */
-    , (OnigCodePoint )ONIG_INEFFECTIVE_META_CHAR /* anychar anytime */
-  },
   utf32be_is_mbc_newline,
   utf32be_mbc_to_code,
   utf32be_code_to_mbclen,
   utf32be_code_to_mbc,
-  utf32be_mbc_to_normalize,
-  utf32be_is_mbc_ambiguous,
-  onigenc_iso_8859_1_get_all_pair_ambig_codes,
-  onigenc_ess_tsett_get_all_comp_ambig_codes,
+  utf32be_mbc_case_fold,
+  onigenc_unicode_apply_all_case_fold,
+  utf32be_get_case_fold_codes_by_str,
+  onigenc_unicode_property_name_to_ctype,
   onigenc_unicode_is_code_ctype,
-  onigenc_unicode_get_ctype_code_range,
+  onigenc_utf16_32_get_ctype_code_range,
   utf32be_left_adjust_char_head,
   onigenc_always_false_is_allowed_reverse_match
 };

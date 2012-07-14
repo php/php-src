@@ -136,4 +136,3 @@ PHP_METHOD(mysqli_warning,__construct);
 
 #endif /* MYSQLI_FE_H */
 
-

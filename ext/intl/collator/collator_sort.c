@@ -78,6 +78,7 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 			intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
 				"Object not initialized", 0 TSRMLS_CC );
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Object not initialized");
+
 		}
 
 		/* Compare the strings using ICU. */

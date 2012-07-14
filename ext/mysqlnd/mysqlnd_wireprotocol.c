@@ -47,7 +47,7 @@
 						(buf_size), (packet)->header.size, (packet)->header.size - (buf_size)); \
 						DBG_RETURN(FAIL); \
 		}\
-		if (FAIL == conn->net->m.receive_ex((conn)->net, (buf), (packet)->header.size, (conn)->stats, ((conn)->error_info) TSRMLS_CC)) { \
+		if (FAIL == conn->net->data->m.receive_ex((conn)->net, (buf), (packet)->header.size, (conn)->stats, ((conn)->error_info) TSRMLS_CC)) { \
 			CONN_SET_STATE(conn, CONN_QUIT_SENT); \
 			SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);\
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", mysqlnd_server_gone); \
@@ -264,8 +264,8 @@ mysqlnd_read_header(MYSQLND_NET * net, MYSQLND_PACKET_HEADER * header,
 	zend_uchar buffer[MYSQLND_HEADER_SIZE];
 
 	DBG_ENTER(mysqlnd_read_header_name);
-	DBG_INF_FMT("compressed=%u", net->compressed);
-	if (FAIL == net->m.receive_ex(net, buffer, MYSQLND_HEADER_SIZE, conn_stats, error_info TSRMLS_CC)) {
+	DBG_INF_FMT("compressed=%u", net->data->compressed);
+	if (FAIL == net->data->m.receive_ex(net, buffer, MYSQLND_HEADER_SIZE, conn_stats, error_info TSRMLS_CC)) {
 		DBG_RETURN(FAIL);
 	}
 
@@ -279,7 +279,7 @@ mysqlnd_read_header(MYSQLND_NET * net, MYSQLND_PACKET_HEADER * header,
 							STAT_PROTOCOL_OVERHEAD_IN, MYSQLND_HEADER_SIZE,
 							STAT_PACKETS_RECEIVED, 1);
 
-	if (net->compressed || net->packet_no == header->packet_no) {
+	if (net->data->compressed || net->packet_no == header->packet_no) {
 		/*
 		  Have to increase the number, so we can send correct number back. It will
 		  round at 255 as this is unsigned char. The server needs this for simple
@@ -549,7 +549,7 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 		}
 		DBG_RETURN(p - buffer - MYSQLND_HEADER_SIZE);
 	} else {
-		size_t sent = conn->net->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
+		size_t sent = conn->net->data->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
 		if (!sent) {
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
 		}
@@ -709,7 +709,7 @@ php_mysqlnd_change_auth_response_write(void * _packet, MYSQLND_CONN_DATA * conn 
 	}
 
 	{
-		size_t sent = conn->net->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
+		size_t sent = conn->net->data->m.send_ex(conn->net, buffer, p - buffer - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
 		if (buffer != conn->net->cmd_buffer.buffer) {
 			mnd_efree(buffer);
 		}
@@ -923,14 +923,14 @@ size_t php_mysqlnd_cmd_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_PACKETS_SENT_CMD);
 
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
-	net->m.consume_uneaten_data(net, packet->command TSRMLS_CC);
+	net->data->m.consume_uneaten_data(net, packet->command TSRMLS_CC);
 #endif
 
 	if (!packet->argument || !packet->arg_len) {
 		zend_uchar buffer[MYSQLND_HEADER_SIZE + 1];
 
 		int1store(buffer + MYSQLND_HEADER_SIZE, packet->command);
-		sent = net->m.send_ex(net, buffer, 1, conn->stats, conn->error_info TSRMLS_CC);
+		sent = net->data->m.send_ex(net, buffer, 1, conn->stats, conn->error_info TSRMLS_CC);
 	} else {
 		size_t tmp_len = packet->arg_len + 1 + MYSQLND_HEADER_SIZE;
 		zend_uchar *tmp, *p;
@@ -945,7 +945,7 @@ size_t php_mysqlnd_cmd_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 
 		memcpy(p, packet->argument, packet->arg_len);
 
-		sent = net->m.send_ex(net, tmp, tmp_len - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
+		sent = net->data->m.send_ex(net, tmp, tmp_len - MYSQLND_HEADER_SIZE, conn->stats, conn->error_info TSRMLS_CC);
 		if (tmp != net->cmd_buffer.buffer) {
 			MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_CMD_BUFFER_TOO_SMALL);
 			mnd_efree(tmp);
@@ -1388,7 +1388,7 @@ php_mysqlnd_read_row_ex(MYSQLND_CONN_DATA * conn, MYSQLND_MEMORY_POOL * result_s
 			p = (*buffer)->ptr + (*data_size - header.size);
 		}
 
-		if (PASS != (ret = conn->net->m.receive_ex(conn->net, p, header.size, conn->stats, conn->error_info TSRMLS_CC))) {
+		if (PASS != (ret = conn->net->data->m.receive_ex(conn->net, p, header.size, conn->stats, conn->error_info TSRMLS_CC))) {
 			DBG_ERR("Empty row packet body");
 			php_error(E_WARNING, "Empty row packet body");
 			break;
@@ -1744,10 +1744,8 @@ php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval
 static enum_func_status
 php_mysqlnd_rowp_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
-	MYSQLND_NET * net = conn->net;
 	zend_uchar *p;
 	enum_func_status ret = PASS;
-	size_t old_chunk_size = net->stream->chunk_size;
 	MYSQLND_PACKET_ROW *packet= (MYSQLND_PACKET_ROW *) _packet;
 	size_t post_alloc_for_bit_fields = 0;
 	size_t data_size = 0;
@@ -1829,7 +1827,6 @@ php_mysqlnd_rowp_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	}
 
 end:
-	net->stream->chunk_size = old_chunk_size;
 	DBG_RETURN(ret);
 }
 /* }}} */

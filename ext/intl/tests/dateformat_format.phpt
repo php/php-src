@@ -5,6 +5,8 @@ datefmt_format_code()
 --FILE--
 <?php
 
+//ini_set("intl.error_level", E_WARNING);
+
 /*
  * Test for the datefmt_format  function
  */
@@ -12,7 +14,7 @@ datefmt_format_code()
 
 function ut_main()
 {
-	$timezone = 'GMT-10';
+	$timezone = 'GMT-10:00';
 
 	$locale_arr = array (
 		'en_US'

@@ -213,6 +213,7 @@ typedef struct st_mysqlnd_net_options
 typedef struct st_mysqlnd_connection MYSQLND;
 typedef struct st_mysqlnd_connection_data MYSQLND_CONN_DATA;
 typedef struct st_mysqlnd_net	MYSQLND_NET;
+typedef struct st_mysqlnd_net_data	MYSQLND_NET_DATA;
 typedef struct st_mysqlnd_protocol	MYSQLND_PROTOCOL;
 typedef struct st_mysqlnd_res	MYSQLND_RES;
 typedef char** 					MYSQLND_ROW_C;		/* return data as array of strings */
@@ -282,7 +283,10 @@ typedef enum_func_status	(*func_mysqlnd_net__init)(MYSQLND_NET * const net, MYSQ
 typedef void				(*func_mysqlnd_net__dtor)(MYSQLND_NET * const net, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__connect_ex)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
 typedef void				(*func_mysqlnd_net__close_stream)(MYSQLND_NET * const net, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
-typedef enum_func_status	(*func_mysqlnd_net__open_stream)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
+typedef php_stream *		(*func_mysqlnd_net__open_stream)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, const zend_bool persistent, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
+typedef php_stream *		(*func_mysqlnd_net__get_stream)(const MYSQLND_NET * const net TSRMLS_DC);
+typedef php_stream *		(*func_mysqlnd_net__set_stream)(MYSQLND_NET * const net, php_stream * net_stream TSRMLS_DC);
+typedef func_mysqlnd_net__open_stream (*func_mysqlnd_net__get_open_stream)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
 typedef void				(*func_mysqlnd_net__post_connect_set_opt)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len, MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_net__read_compressed_packet_from_stream_and_fill_read_buffer)(MYSQLND_NET * net, size_t net_payload_size, MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC);
 
@@ -295,8 +299,10 @@ struct st_mysqlnd_net_methods
 	func_mysqlnd_net__open_stream open_pipe;
 	func_mysqlnd_net__open_stream open_tcp_or_unix;
 
-	void * unused1;
-	void * unused2;
+	func_mysqlnd_net__get_stream get_stream;
+	func_mysqlnd_net__set_stream set_stream;
+	func_mysqlnd_net__get_open_stream get_open_stream;
+
 	func_mysqlnd_net__post_connect_set_opt post_connect_set_opt;
 
 	func_mysqlnd_net__set_client_option set_client_option;
@@ -314,11 +320,11 @@ struct st_mysqlnd_net_methods
 
 	func_mysqlnd_net__read_compressed_packet_from_stream_and_fill_read_buffer read_compressed_packet_from_stream_and_fill_read_buffer;
 
+	void * unused1;
+	void * unused2;
 	void * unused3;
 	void * unused4;
 	void * unused5;
-	void * unused6;
-	void * unused7;
 };
 
 
@@ -467,7 +473,11 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__tx_rollback)(MYSQLND_CONN_DAT
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__local_tx_start)(MYSQLND_CONN_DATA * conn, size_t this_func TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__local_tx_end)(MYSQLND_CONN_DATA * conn, size_t this_func, enum_func_status status TSRMLS_DC);
-
+typedef enum_func_status	(*func_mysqlnd_conn_data__execute_init_commands)(MYSQLND_CONN_DATA * conn TSRMLS_DC);
+typedef unsigned int		(*func_mysqlnd_conn_data__get_updated_connect_flags)(MYSQLND_CONN_DATA * conn, unsigned int mysql_flags TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__connect_handshake)(MYSQLND_CONN_DATA * conn, const char * const host, const char * const user, const char * const passwd, const unsigned int passwd_len, const char * const db, const unsigned int db_len, const unsigned int mysql_flags TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__simple_command_send_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command, const zend_uchar * const arg, size_t arg_len, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
+typedef struct st_mysqlnd_authentication_plugin * (*func_mysqlnd_conn_data__fetch_auth_plugin_by_name)(const char * const requested_protocol TSRMLS_DC);
 
 struct st_mysqlnd_conn_data_methods
 {
@@ -547,6 +557,12 @@ struct st_mysqlnd_conn_data_methods
 
 	func_mysqlnd_conn_data__local_tx_start local_tx_start;
 	func_mysqlnd_conn_data__local_tx_end local_tx_end;
+
+	func_mysqlnd_conn_data__execute_init_commands execute_init_commands;
+	func_mysqlnd_conn_data__get_updated_connect_flags get_updated_connect_flags;
+	func_mysqlnd_conn_data__connect_handshake connect_handshake;
+	func_mysqlnd_conn_data__simple_command_send_request simple_command_send_request;
+	func_mysqlnd_conn_data__fetch_auth_plugin_by_name fetch_auth_plugin_by_name;
 };
 
 
@@ -768,31 +784,43 @@ struct st_mysqlnd_stmt_methods
 };
 
 
-struct st_mysqlnd_net
+struct st_mysqlnd_net_data
 {
 	php_stream			*stream;
+	zend_bool			compressed;
+#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
+	zend_uchar			last_command;
+#else
+	zend_uchar			unused_pad1;
+#endif
+	MYSQLND_NET_OPTIONS	options;
+
+	unsigned int		refcount;
+
+	zend_bool			persistent;
+
+	struct st_mysqlnd_net_methods m;
+};
+
+
+struct st_mysqlnd_net
+{
+	struct st_mysqlnd_net_data * data;
+
 	/* sequence for simple checking of correct packets */
 	zend_uchar			packet_no;
-	zend_bool			compressed;
 	zend_uchar			compressed_envelope_packet_no;
+
 #ifdef MYSQLND_COMPRESSION_ENABLED
 	MYSQLND_READ_BUFFER	* uncompressed_data;
 #else
 	void * 				unused_pad1;
 #endif
-#ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
-	zend_uchar			last_command;
-#else
-	zend_uchar			unused_pad2;
-#endif
+
 	/* cmd buffer */
 	MYSQLND_CMD_BUFFER	cmd_buffer;
 
-	MYSQLND_NET_OPTIONS	options;
-
-	zend_bool			persistent;
-
-	struct st_mysqlnd_net_methods m;
+	zend_bool persistent;
 };
 
 

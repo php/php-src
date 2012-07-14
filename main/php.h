@@ -60,7 +60,6 @@
 #	else
 #		define PHPAPI
 #	endif
-
 #	define THREAD_LS
 #	define PHP_DIR_SEPARATOR '/'
 #	define PHP_EOL "\n"

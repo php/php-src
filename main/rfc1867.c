@@ -408,7 +408,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 
 	/* get lines of text, or CRLF_CRLF */
 
-	while( (line = get_line(self TSRMLS_CC)) && strlen(line) > 0 )
+	while( (line = get_line(self TSRMLS_CC)) && line[0] != '\0' )
 	{
 		/* add header to table */
 		char *key = line;
@@ -979,7 +979,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				continue;
 			}
 
-			if (strlen(filename) == 0) {
+			if (filename[0] == '\0') {
 #if DEBUG_FILE_UPLOAD
 				sapi_module.sapi_error(E_NOTICE, "No file uploaded");
 #endif
@@ -1063,12 +1063,12 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 			if (!cancel_upload && !end) {
 #if DEBUG_FILE_UPLOAD
-				sapi_module.sapi_error(E_NOTICE, "Missing mime boundary at the end of the data for file %s", strlen(filename) > 0 ? filename : "");
+				sapi_module.sapi_error(E_NOTICE, "Missing mime boundary at the end of the data for file %s", filename[0] != '\0' ? filename : "");
 #endif
 				cancel_upload = UPLOAD_ERROR_C;
 			}
 #if DEBUG_FILE_UPLOAD
-			if (strlen(filename) > 0 && total_bytes == 0 && !cancel_upload) {
+			if (filename[0] != '\0' && total_bytes == 0 && !cancel_upload) {
 				sapi_module.sapi_error(E_WARNING, "Uploaded file size 0 - file [%s=%s] not saved", param, filename);
 				cancel_upload = 5;
 			}
