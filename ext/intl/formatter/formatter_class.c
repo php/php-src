@@ -62,6 +62,7 @@ zend_object_value NumberFormatter_object_create(zend_class_entry *ce TSRMLS_DC)
 	intern = ecalloc( 1, sizeof(NumberFormatter_object) );
 	formatter_data_init( &intern->nf_data TSRMLS_CC );
 	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
+	object_properties_init(&intern->zo, ce);
 
 	retval.handle = zend_objects_store_put(
 		intern,
