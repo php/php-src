@@ -25,6 +25,7 @@ foreach(get_declared_classes() as $class)
 {
 	if(!class_exists($class))
 		echo "$class No Longer Exists!\n";
+
 }
 echo "Done.\n";
 ?>
