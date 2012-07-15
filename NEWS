@@ -24,6 +24,10 @@ PHP                                                                        NEWS
 - SimpleXML:
   . Implemented FR #55218 Get namespaces from current node. (Lonny)
 
+- SPL:
+  . Fixed bug #61527 (ArrayIterator gives misleading notice on next() when 
+    moved to the end). (reeze.xia@gmail.com)
+
 ?? ??? 2012, PHP 5.4.5
 
 - Core:
