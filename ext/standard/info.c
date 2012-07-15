@@ -800,13 +800,18 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	if ((flag & PHP_INFO_CREDITS) && !sapi_module.phpinfo_as_text) {	
 		php_info_print_hr();
 		php_info_print("<script>(function () {\n");
-		php_info_print("'use strict';\n");
+		php_info_print("    'use strict';\n");
 		php_info_print("    window.onload = function () {\n");
-		php_info_print("        document.getElementById('credits').style.display = 'none';\n");
-		php_info_print("        document.getElementById('revealcredits').style.display = 'block';\n");
-		php_info_print("        document.getElementById('revealcredits').onclick = function () {\n");
-		php_info_print("            document.getElementById('credits').style.display = 'block';\n");
-		php_info_print("            document.getElementById('revealcredits').style.display = 'none';\n");
+		php_info_print("        var credits, reveal;\n");
+		php_info_print("\n");
+		php_info_print("        credits = document.getElementById('credits');\n");
+		php_info_print("        reveal = document.getElementById('revealcredits');\n");
+		php_info_print("\n");
+		php_info_print("        credits.style.display = 'none';\n");
+		php_info_print("        reveal.style.display = 'block';\n");
+		php_info_print("        reveal.onclick = function () {\n");
+		php_info_print("            credits.style.display = 'block';\n");
+		php_info_print("            reveal.style.display = 'none';\n");
 		php_info_print("        };\n");
 		php_info_print("    };\n");
 		php_info_print("}());</script>\n");
