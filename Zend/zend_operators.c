@@ -42,7 +42,7 @@ static _locale_t current_locale = NULL;
 
 #define TYPE_PAIR(t1,t2) (((t1) << 4) | (t2))
 
-static unsigned char tolower_map[256] = {
+static const unsigned char tolower_map[256] = {
 0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,
 0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,
 0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x2a,0x2b,0x2c,0x2d,0x2e,0x2f,
@@ -61,7 +61,7 @@ static unsigned char tolower_map[256] = {
 0xf0,0xf1,0xf2,0xf3,0xf4,0xf5,0xf6,0xf7,0xf8,0xf9,0xfa,0xfb,0xfc,0xfd,0xfe,0xff
 };
 
-#define zend_tolower_ascii(c) (tolower_map[(c)])
+#define zend_tolower_ascii(c) (tolower_map[(unsigned char)(c)])
 
 /**
  * Functions using locale lowercase:
@@ -1945,7 +1945,7 @@ ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned in
 	register unsigned char *end = str + length;
 
 	while (str < end) {
-		*result++ = zend_tolower_ascii((int)*str++);
+		*result++ = zend_tolower_ascii(*str++);
 	}
 	*result = '\0';
 
@@ -1965,7 +1965,7 @@ ZEND_API void zend_str_tolower(char *str, unsigned int length) /* {{{ */
 	register unsigned char *end = p + length;
 
 	while (p < end) {
-		*p = zend_tolower_ascii((int)*p);
+		*p = zend_tolower_ascii(*p);
 		p++;
 	}
 }
@@ -2014,8 +2014,8 @@ ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, u
 
 	len = MIN(len1, len2);
 	while (len--) {
-		c1 = zend_tolower_ascii((int)*(unsigned char *)s1++);
-		c2 = zend_tolower_ascii((int)*(unsigned char *)s2++);
+		c1 = zend_tolower_ascii(*(unsigned char *)s1++);
+		c2 = zend_tolower_ascii(*(unsigned char *)s2++);
 		if (c1 != c2) {
 			return c1 - c2;
 		}
@@ -2035,8 +2035,8 @@ ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, 
 	}
 	len = MIN(length, MIN(len1, len2));
 	while (len--) {
-		c1 = zend_tolower_ascii((int)*(unsigned char *)s1++);
-		c2 = zend_tolower_ascii((int)*(unsigned char *)s2++);
+		c1 = zend_tolower_ascii(*(unsigned char *)s1++);
+		c2 = zend_tolower_ascii(*(unsigned char *)s2++);
 		if (c1 != c2) {
 			return c1 - c2;
 		}
