@@ -297,9 +297,10 @@ static int yearOffset[19] =
 	136, 148, 160, 173, 185, 197, 210, 222
 };
 
-char *JewishMonthName[14] =
+/* names for leap (13-month) year */
+char *JewishMonthNameLeap[14] =
 {
-	"",
+	"", 
 	"Tishri",
 	"Heshvan",
 	"Kislev",
@@ -315,16 +316,55 @@ char *JewishMonthName[14] =
 	"Elul"
 };
 
-char *JewishMonthHebName[14] =
+/* names for regular year */
+char *JewishMonthName[14] =
 {
+	"", 
+	"Tishri",
+	"Heshvan",
+	"Kislev",
+	"Tevet",
+	"Shevat",
 	"",
+	"Adar",
+	"Nisan",
+	"Iyyar",
+	"Sivan",
+	"Tammuz",
+	"Av",
+	"Elul"
+};
+
+/* names for leap (13-month) year */
+char *JewishMonthHebNameLeap[14] =
+{
+	"", 
 	"תשרי",
 	"חשון",
 	"כסלו",
 	"טבת",
 	"שבט",
-	"אדר",
+	"'אדר ר",
 	"'אדר ב",
+	"ניסן",
+	"אייר",
+	"סיון",
+	"תמוז",
+	"אב",
+	"אלול"
+};
+
+/* names for regular year */
+char *JewishMonthHebName[14] =
+{
+	"", 
+	"תשרי",
+	"חשון",
+	"כסלו",
+	"טבת",
+	"שבט",
+	"",
+	"אדר",
 	"ניסן",
 	"אייר",
 	"סיון",
@@ -587,11 +627,11 @@ void SdnToJewish(
 				(*pMonth)--;
 				(*pDay) += 30;
 			} else {
-				*pMonth = 6;
+				*pMonth = 7;
 				*pDay = inputDay - tishri1 + 207;
 				if (*pDay > 0)
 					return;
-				(*pMonth)--;
+				(*pMonth) -= 2;
 				(*pDay) += 30;
 			}
 			if (*pDay > 0)
