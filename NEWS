@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #62564 (Extending MessageFormatter and adding property causes 
     crash). (Felipe)
 
+- Reflection:
+  . Implemented FR ##61602 (Allow access to name of constant used as default 
+    value). (reeze.xia@gmail.com)
+  
 - SimpleXML:
   . Implemented FR #55218 Get namespaces from current node. (Lonny)
 
