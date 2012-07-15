@@ -21,7 +21,7 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 - Drop Windows XP and 2003 support. (Pierre)
-- All internal case insensitivity handling for class, fucntion and constant 
+- All internal case insensitivity handling for class, function and constant 
   names is done according to ASCII rules, current locale settings are ignored. 
 
 ========================================
