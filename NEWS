@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - DateTime:
   . Fixed Bug #62500 (Segfault in DateInterval class when extended). (Laruence)
   
+- Fileinfo:
+  . Fixed bug #61964 (finfo_open with directory causes invalid free). 
+  (reeze.xia@gmail.com)
+
 - Intl:
   . Fixed bug #62564 (Extending MessageFormatter and adding property causes 
     crash). (Felipe)
