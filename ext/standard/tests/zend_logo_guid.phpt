@@ -1,5 +1,5 @@
 --TEST--
-Checking the zend_logo_guid() functio
+Checking the zend_logo_guid() function
 --CREDITS--
 Sebastian Schürmann
 sschuermann@chip.de
