@@ -4118,6 +4118,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -4133,29 +4134,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = opline->op1.zv;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = opline->op1.zv;
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_CONST == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_CONST == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = opline->op1.zv;
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -4759,6 +4803,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -4774,29 +4819,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = opline->op1.zv;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = opline->op1.zv;
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_CONST == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_CONST == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = opline->op1.zv;
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -5725,6 +5813,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -5740,29 +5829,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = opline->op1.zv;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = opline->op1.zv;
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_CONST == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_CONST == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = opline->op1.zv;
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -6386,6 +6518,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -6401,29 +6534,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = opline->op1.zv;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = opline->op1.zv;
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_CONST == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_CONST == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = opline->op1.zv;
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -7086,6 +7262,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -7101,29 +7278,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = opline->op1.zv;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = opline->op1.zv;
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_CONST == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_CONST == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = opline->op1.zv;
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_CONST == IS_CONST || IS_CONST == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -9093,6 +9313,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -9109,29 +9330,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_TMP_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			/* Temporary variables don't need ctor copying */
-			if (!1) {
-				zval_copy_ctor(copy);
+				/* Temporary variables don't need ctor copying */
+				if (!1) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_TMP_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_TMP_VAR == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!1) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -9734,6 +9998,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -9750,29 +10015,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	/* Set the new yielded value */
 	if (IS_TMP_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			/* Temporary variables don't need ctor copying */
-			if (!1) {
-				zval_copy_ctor(copy);
+				/* Temporary variables don't need ctor copying */
+				if (!1) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_TMP_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_TMP_VAR == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!1) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -10700,6 +11008,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -10716,29 +11025,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	/* Set the new yielded value */
 	if (IS_TMP_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			/* Temporary variables don't need ctor copying */
-			if (!1) {
-				zval_copy_ctor(copy);
+				/* Temporary variables don't need ctor copying */
+				if (!1) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_TMP_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_TMP_VAR == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!1) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -11227,6 +11579,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -11243,29 +11596,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded value */
 	if (IS_TMP_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			/* Temporary variables don't need ctor copying */
-			if (!1) {
-				zval_copy_ctor(copy);
+				/* Temporary variables don't need ctor copying */
+				if (!1) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_TMP_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_TMP_VAR == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!1) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -11865,6 +12261,7 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -11881,29 +12278,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded value */
 	if (IS_TMP_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			/* Temporary variables don't need ctor copying */
-			if (!1) {
-				zval_copy_ctor(copy);
+				/* Temporary variables don't need ctor copying */
+				if (!1) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_TMP_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_TMP_VAR == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_TMP_VAR == IS_CONST || IS_TMP_VAR == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!1) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -15729,6 +16169,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_CONST_HANDLER(ZEN
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -15745,30 +16186,74 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				zval **value_ptr = _get_zval_ptr_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+				if (IS_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_VAR == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+				if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			}
+		} else {
+			zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
+			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 		}
-
-		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -17757,6 +18242,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_TMP_HANDLER(ZEND_
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -17773,30 +18259,74 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	/* Set the new yielded value */
 	if (IS_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				zval **value_ptr = _get_zval_ptr_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+				if (IS_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_VAR == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+				if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			}
+		} else {
+			zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
+			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 		}
-
-		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -20165,6 +20695,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_VAR_HANDLER(ZEND_
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -20181,30 +20712,74 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	/* Set the new yielded value */
 	if (IS_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				zval **value_ptr = _get_zval_ptr_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+				if (IS_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_VAR == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+				if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			}
+		} else {
+			zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
+			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 		}
-
-		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -21252,6 +21827,7 @@ static int ZEND_FASTCALL  ZEND_SEPARATE_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -21268,30 +21844,74 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded value */
 	if (IS_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				zval **value_ptr = _get_zval_ptr_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+				if (IS_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_VAR == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+				if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			}
+		} else {
+			zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
+			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 		}
-
-		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -23329,6 +23949,7 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_CV_HANDLER(ZEND_O
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
+	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -23345,30 +23966,74 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded value */
 	if (IS_VAR != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				zval **value_ptr = _get_zval_ptr_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+				if (IS_VAR == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_VAR == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+				if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
+			}
+		} else {
+			zval *value = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_VAR == IS_CONST || IS_VAR == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
+			if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 		}
-
-		if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -24766,6 +25431,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -24781,29 +25447,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = NULL;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = NULL;
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_UNUSED == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_UNUSED == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = NULL;
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -26025,6 +26734,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -26040,29 +26750,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = NULL;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = NULL;
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_UNUSED == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_UNUSED == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = NULL;
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -27284,6 +28037,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -27299,29 +28053,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = NULL;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = NULL;
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_UNUSED == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_UNUSED == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = NULL;
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -27655,6 +28452,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -27670,29 +28468,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = NULL;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = NULL;
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_UNUSED == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_UNUSED == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = NULL;
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -28911,6 +29752,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -28926,29 +29768,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = NULL;
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = NULL;
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = NULL;
+
+				if (IS_UNUSED == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_UNUSED == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = NULL;
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_UNUSED == IS_CONST || IS_UNUSED == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -32376,6 +33261,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -32391,29 +33277,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+				if (IS_CV == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_CV == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -34274,6 +35203,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -34289,29 +35219,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+				if (IS_CV == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_CV == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -36551,6 +37524,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -36566,29 +37540,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+				if (IS_CV == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_CV == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -37498,6 +38515,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -37513,29 +38531,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+				if (IS_CV == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_CV == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));
@@ -39444,6 +40505,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	USE_OPLINE
 
+
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -39459,29 +40521,72 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
+		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR) {
+				zval *value, *copy;
 
-		zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
 
-		/* Consts, temporary variables and references need copying */
-		if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
-			|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
-		) {
-			zval *copy;
+				value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
 
-			ALLOC_ZVAL(copy);
-			INIT_PZVAL_COPY(copy, value);
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
 
-			/* Temporary variables don't need ctor copying */
-			if (!0) {
-				zval_copy_ctor(copy);
+				generator->value = copy;
+			} else {
+				zval **value_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+				if (IS_CV == IS_VAR && UNEXPECTED(value_ptr == NULL)) {
+					zend_error_noreturn(E_ERROR, "Cannot yield string offsets by reference");
+				}
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				if (IS_CV == IS_VAR && !Z_ISREF_PP(value_ptr)
+				    && !(opline->extended_value == ZEND_RETURNS_FUNCTION
+				         && EX_T(opline->op1.var).var.fcall_returned_reference)
+				    && EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
+					zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				} else {
+					SEPARATE_ZVAL_TO_MAKE_IS_REF(value_ptr);
+					Z_ADDREF_PP(value_ptr);
+					generator->value = *value_ptr;
+				}
+
+			}
+		} else {
+			zval *value = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_CV == IS_CONST || IS_CV == IS_TMP_VAR
+				|| (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0)
+			) {
+				zval *copy;
+
+				ALLOC_ZVAL(copy);
+				INIT_PZVAL_COPY(copy, value);
+
+				/* Temporary variables don't need ctor copying */
+				if (!0) {
+					zval_copy_ctor(copy);
+				}
+
+				generator->value = copy;
+			} else {
+				Z_ADDREF_P(value);
+				generator->value = value;
 			}
 
-			generator->value = copy;
-		} else {
-			Z_ADDREF_P(value);
-			generator->value = value;
 		}
-
 	} else {
 		/* If no value was specified yield null */
 		Z_ADDREF(EG(uninitialized_zval));

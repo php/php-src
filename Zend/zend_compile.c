@@ -2615,12 +2615,16 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 	zend_op *opline;
 	int start_op_number, end_op_number;
 
+	/* For generators the & modifier applies to the yielded values, not the
+	 * return value. */
+	zend_bool returns_reference = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) && !(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR);
+
 	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && expr != NULL) {
 		zend_error(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
 	}
 
 	if (do_end_vparse) {
-		if ((CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) && !zend_is_function_or_method_call(expr)) {
+		if (returns_reference && !zend_is_function_or_method_call(expr)) {
 			zend_do_end_variable_parse(expr, BP_VAR_W, 0 TSRMLS_CC);
 		} else {
 			zend_do_end_variable_parse(expr, BP_VAR_R, 0 TSRMLS_CC);
@@ -2645,7 +2649,7 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) ? ZEND_RETURN_BY_REF : ZEND_RETURN;
+	opline->opcode = returns_reference ? ZEND_RETURN_BY_REF : ZEND_RETURN;
 
 	if (expr) {
 		SET_NODE(opline->op1, expr);
@@ -2676,6 +2680,10 @@ void zend_do_yield(znode *result, const znode *value, const znode *key TSRMLS_DC
 
 	if (value) {
 		SET_NODE(opline->op1, value);
+
+		if (zend_is_function_or_method_call(value)) {
+			opline->extended_value = ZEND_RETURNS_FUNCTION;
+		}
 	} else {
 		SET_UNUSED(opline->op1);
 	}

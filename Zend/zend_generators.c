@@ -661,11 +661,11 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 	zend_generator_iterator *iterator;
 	zend_generator *generator;
 
-	if (by_ref) {
-		zend_error(E_ERROR, "By reference iteration of generators is currently not supported");
-	}
-
 	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
+
+	if (by_ref && !(generator->execute_data->op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+		zend_error(E_ERROR, "You can only iterate a generator by-reference if it declared that it yields by-reference");
+	}
 
 	iterator = emalloc(sizeof(zend_generator_iterator));
 	iterator->intern.funcs = &zend_generator_iterator_functions;
