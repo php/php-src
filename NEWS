@@ -35,6 +35,10 @@ PHP                                                                        NEWS
   . Fixed bug #61527 (ArrayIterator gives misleading notice on next() when 
     moved to the end). (reeze.xia@gmail.com)
 
+- Streams:
+  . Fixed bug #62597 (segfault in php_stream_wrapper_log_error with ZTS build).
+    (Laruence)
+
 ?? ??? 2012, PHP 5.4.5
 
 - Core:
