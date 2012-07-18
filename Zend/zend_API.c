@@ -713,6 +713,19 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, const char **spe
 }
 /* }}} */
 
+int zend_parse_parameter(int flags, int arg_num TSRMLS_DC, zval **arg, const char *spec, ...)
+{
+	va_list va;
+	int ret;
+	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
+
+	va_start(va, spec);
+	ret = zend_parse_arg(arg_num, arg, &va, &spec, quiet TSRMLS_CC);
+	va_end(va);
+
+	return ret;
+}
+
 static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, int flags TSRMLS_DC) /* {{{ */
 {
 	const  char *spec_walk;
