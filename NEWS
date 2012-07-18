@@ -3,8 +3,6 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.6
 
 - Core:
-  . Fixed bug in number_format() when the number was not finite. See pull
-    request #134. (Reeze Xia)
   . Fixed bug #62565 (Crashes due non-initialized internal properties_table).
     (Felipe)
 
@@ -17,7 +15,7 @@ PHP                                                                        NEWS
   
 - Fileinfo:
   . Fixed bug #61964 (finfo_open with directory causes invalid free). 
-  (reeze.xia@gmail.com)
+    (reeze.xia@gmail.com)
 
 - Intl:
   . Fixed bug #62564 (Extending MessageFormatter and adding property causes 
