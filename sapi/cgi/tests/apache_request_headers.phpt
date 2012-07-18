@@ -31,7 +31,7 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 X-Powered-By: PHP/%s
-Content-type: text/html; charset=UTF-8
+Content-type: text/%s
 
 Array
 (
