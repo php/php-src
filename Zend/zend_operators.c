@@ -1605,7 +1605,8 @@ ZEND_API int is_identical_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 				&& (!memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1))));
 			break;
 		case IS_ARRAY:
-			Z_LVAL_P(result) = zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_identical_function, 1 TSRMLS_CC)==0;
+			Z_LVAL_P(result) = (Z_ARRVAL_P(op1) == Z_ARRVAL_P(op2) ||
+				zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_identical_function, 1 TSRMLS_CC)==0);
 			break;
 		case IS_OBJECT:
 			if (Z_OBJ_HT_P(op1) == Z_OBJ_HT_P(op2)) {
@@ -2035,15 +2036,36 @@ ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3) /* {{{ *
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
 {
 	int ret1, ret2;
+	int oflow1, oflow2;
 	long lval1, lval2;
 	double dval1, dval2;
 
-	if ((ret1=is_numeric_string(Z_STRVAL_P(s1), Z_STRLEN_P(s1), &lval1, &dval1, 0)) &&
-		(ret2=is_numeric_string(Z_STRVAL_P(s2), Z_STRLEN_P(s2), &lval2, &dval2, 0))) {
+	if ((ret1=is_numeric_string_ex(Z_STRVAL_P(s1), Z_STRLEN_P(s1), &lval1, &dval1, 0, &oflow1)) &&
+		(ret2=is_numeric_string_ex(Z_STRVAL_P(s2), Z_STRLEN_P(s2), &lval2, &dval2, 0, &oflow2))) {
+#if ULONG_MAX == 0xFFFFFFFF
+		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
+			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
+			|| (oflow1 == -1 && dval1 < -9007199254740991.))) {
+#else
+		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0.) {
+#endif
+			/* both values are integers overflown to the same side, and the
+			 * double comparison may have resulted in crucial accuracy lost */
+			goto string_cmp;
+		}
 		if ((ret1==IS_DOUBLE) || (ret2==IS_DOUBLE)) {
 			if (ret1!=IS_DOUBLE) {
+				if (oflow2) {
+					/* 2nd operand is integer > LONG_MAX (oflow2==1) or < LONG_MIN (-1) */
+					ZVAL_LONG(result, -1 * oflow2);
+					return;
+				}
 				dval1 = (double) lval1;
 			} else if (ret2!=IS_DOUBLE) {
+				if (oflow1) {
+					ZVAL_LONG(result, oflow1);
+					return; 
+				}
 				dval2 = (double) lval2;
 			} else if (dval1 == dval2 && !zend_finite(dval1)) {
 				/* Both values overflowed and have the same sign,
@@ -2076,13 +2098,13 @@ static int hash_zval_compare_function(const zval **z1, const zval **z2 TSRMLS_DC
 
 ZEND_API int zend_compare_symbol_tables_i(HashTable *ht1, HashTable *ht2 TSRMLS_DC) /* {{{ */
 {
-	return zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0 TSRMLS_CC);
+	return ht1 == ht2 ? 0 : zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0 TSRMLS_CC);
 }
 /* }}} */
 
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2 TSRMLS_DC) /* {{{ */
 {
-	ZVAL_LONG(result, zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0 TSRMLS_CC));
+	ZVAL_LONG(result, ht1 == ht2 ? 0 : zend_hash_compare(ht1, ht2, (compare_func_t) hash_zval_compare_function, 0 TSRMLS_CC));
 }
 /* }}} */
 

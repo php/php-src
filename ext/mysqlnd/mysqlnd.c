@@ -764,6 +764,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	conn->server_version	= mnd_pestrdup(greet_packet->server_version, conn->persistent);
 
 	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet->charset_no);
+	if (!conn->greet_charset) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"Server sent charset (%d) unknown to the client. Please, report to the developers", greet_packet->charset_no);
+		SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
+			"Server sent charset unknown to the client. Please, report to the developers");
+		goto err;
+	}
 	/* we allow load data local infile by default */
 	mysql_flags |= MYSQLND_CAPABILITIES;
 
@@ -2177,7 +2184,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 				}
 				memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
 
-				DBG_INF_FMT("salt=[%*s]", plugin_data_len - 1, plugin_data);
+				DBG_INF_FMT("salt=[%*.s]", plugin_data_len - 1, plugin_data);
 
 				/* The data should be allocated with malloc() */
 				scrambled_data =

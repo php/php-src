@@ -1685,7 +1685,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		zval key;
 
 		if (CG(current_namespace)) {
-			/* Prefix function name with current namespcae name */
+			/* Prefix function name with current namespace name */
 			znode tmp;
 
 			tmp.u.constant = *CG(current_namespace);
@@ -3619,6 +3619,7 @@ ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *tr
 			}
 		}
 		ce->traits[ce->num_traits++] = trait;
+		trait->refcount++;
 	}
 }
 /* }}} */
@@ -3711,7 +3712,7 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 	} else {
 		/* Add it to result function table */
 		if (zend_hash_quick_add(resulting_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, fn, sizeof(zend_function), NULL)==FAILURE) {
-			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occured during updating resulting trait method table", fn->common.function_name);
+			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occurred during updating resulting trait method table", fn->common.function_name);
 		}
 	}
 
@@ -3828,7 +3829,7 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		function_add_ref(&fn_copy);
 
 		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, &fn_copy, sizeof(zend_function), (void**)&fn_copy_p)==FAILURE) {
-			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
+			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occurred during updating class method table", hash_key->arKey);
 		}
    
 		zend_add_magic_methods(ce, hash_key->arKey, hash_key->nKeyLength, fn_copy_p TSRMLS_CC);
@@ -3870,8 +3871,8 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				fn_copy = *fn;
 				function_add_ref(&fn_copy);
 				/* this function_name is never destroyed, because its refcount
-				   greater than 1, classes are always destoyed in reverse order
-				   and trait is declared early than this class */
+				   greater than 1 and classes are always destoyed before the
+				   traits they use */
 				fn_copy.common.function_name = aliases[i]->alias;
 					
 				/* if it is 0, no modifieres has been changed */
@@ -4076,14 +4077,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	size_t i;
 
 	/* prepare copies of trait function tables for combination */
-	function_tables = malloc(sizeof(HashTable*) * ce->num_traits);
-	resulting_table = (HashTable *) malloc(sizeof(HashTable));
+	function_tables = emalloc(sizeof(HashTable*) * ce->num_traits);
+	resulting_table = (HashTable *)emalloc(sizeof(HashTable));
 	
 	/* TODO: revisit this start size, may be its not optimal */
-	zend_hash_init_ex(resulting_table, 10, NULL, NULL, 1, 0);
+	zend_hash_init_ex(resulting_table, 10, NULL, NULL, 0, 0);
   
 	for (i = 0; i < ce->num_traits; i++) {
-		function_tables[i] = (HashTable *) malloc(sizeof(HashTable));
+		function_tables[i] = (HashTable *)emalloc(sizeof(HashTable));
 		zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements, NULL, NULL, 1, 0);
 
 		if (ce->trait_precedences) {
@@ -4116,14 +4117,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	for (i = 0; i < ce->num_traits; i++) {
 		/* zend_hash_destroy(function_tables[i]); */
 		zend_hash_graceful_destroy(function_tables[i]);
-		free(function_tables[i]);
+		efree(function_tables[i]);
 	}
-	free(function_tables);
+	efree(function_tables);
 
 	/* free temporary resulting table */
 	/* zend_hash_destroy(resulting_table); */
 	zend_hash_graceful_destroy(resulting_table);
-	free(resulting_table);
+	efree(resulting_table);
 }
 /* }}} */
 

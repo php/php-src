@@ -63,6 +63,7 @@ zend_object_value IntlDateFormatter_object_create(zend_class_entry *ce TSRMLS_DC
 	intern = ecalloc( 1, sizeof(IntlDateFormatter_object) );
 	dateformat_data_init( &intern->datef_data TSRMLS_CC );
 	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
+	object_properties_init(&intern->zo, ce);
 	intern->date_type = 0;
 	intern->time_type = 0;
 	intern->calendar  = 1;		/* Gregorian calendar */

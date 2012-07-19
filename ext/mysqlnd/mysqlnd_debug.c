@@ -516,8 +516,10 @@ enum mysqlnd_debug_parser_state
 static void
 MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const mode)
 {
-	unsigned int mode_len = strlen(mode), i;
+	unsigned int mode_len, i;
 	enum mysqlnd_debug_parser_state state = PARSER_WAIT_MODIFIER;
+
+	mode_len = mode? strlen(mode) : 0;
 
 	self->flags = 0;
 	self->nest_level_limit = 0;

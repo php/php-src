@@ -66,11 +66,11 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 			     zend_hash_get_current_data_ex(&ce->properties_info, (void**)&prop_info, &pos) == SUCCESS;
 			     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
 				if (/*prop_info->ce == ce &&*/
-				    (prop_info->flags & ZEND_ACC_STATIC) == 0 && 
+				    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
 				    prop_info->offset >= 0 &&
 				    zobj->properties_table[prop_info->offset]) {
 					zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)&zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
-				}				
+				}
 			}
 			while (ce->parent && ce->parent->default_properties_count) {
 				ce = ce->parent;
@@ -78,12 +78,12 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 				     zend_hash_get_current_data_ex(&ce->properties_info, (void**)&prop_info, &pos) == SUCCESS;
 				     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
 					if (prop_info->ce == ce &&
-					    (prop_info->flags & ZEND_ACC_STATIC) == 0 && 
-					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0 && 
+					    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
+					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0 &&
 					    prop_info->offset >= 0 &&
 						zobj->properties_table[prop_info->offset]) {
 						zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)&zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
-					}				
+					}
 				}
 			}
 		}
@@ -783,7 +783,7 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__unset != NULL), key TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL) &&
-	    EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) && 
+	    EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 	    !zobj->properties &&
 	    property_info->offset >= 0 &&
 	    EXPECTED(zobj->properties_table[property_info->offset] != NULL)) {
@@ -815,8 +815,8 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 				}
 			}
 		}
-	} else if (EXPECTED(property_info != NULL) && 
-	           EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) && 
+	} else if (EXPECTED(property_info != NULL) &&
+	           EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 	           property_info->offset >= 0) {
 		zobj->properties_table[property_info->offset] = NULL;
 	}
@@ -957,12 +957,6 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 		scope = scope->parent;
 	}
 	return 0;
-}
-/* }}} */
-
-static inline zend_class_entry * zend_get_function_root_class(zend_function *fbc) /* {{{ */
-{
-	return fbc->common.prototype ? fbc->common.prototype->common.scope : fbc->common.scope;
 }
 /* }}} */
 
@@ -1143,7 +1137,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 		zend_str_tolower_copy(lc_function_name, function_name_strval, function_name_strlen);
 		hash_value = zend_hash_func(lc_function_name, function_name_strlen+1);
 	}
-	
+
 	if (function_name_strlen == ce->name_length && ce->constructor) {
 		lc_class_name = zend_str_tolower_dup(ce->name, ce->name_length);
 		/* Only change the method to the constructor if the constructor isn't called __construct
@@ -1178,7 +1172,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 	if (UNEXPECTED(!(fbc->common.fn_flags & ZEND_ACC_STATIC))) {
 		zend_error_noreturn(E_ERROR, "Cannot call non static method %s::%s() without object", ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name);
 	}
-#endif 
+#endif
 	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
 		/* No further checks necessary, most common case */
 	} else if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -1220,7 +1214,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *p
 {
 	zend_property_info *property_info;
 	ulong hash_value;
-	
+
 	if (UNEXPECTED(!key) ||
 	    (property_info = CACHED_POLYMORPHIC_PTR(key->cache_slot, ce)) == NULL) {
 		if (EXPECTED(key != NULL)) {

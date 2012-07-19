@@ -251,15 +251,17 @@ static php_cli_server_http_reponse_status_code_pair template_map[] = {
 };
 
 static php_cli_server_ext_mime_type_pair mime_type_map[] = {
+	{ "html", "text/html" },
+	{ "htm", "text/html" },
+	{ "js", "text/javascript" },
+	{ "css", "text/css" },
 	{ "gif", "image/gif" },
-	{ "png", "image/png" },
-	{ "jpe", "image/jpeg" },
 	{ "jpg", "image/jpeg" },
 	{ "jpeg", "image/jpeg" },
-	{ "css", "text/css" },
-	{ "html", "text/html" },
+	{ "png", "image/png" },
+	{ "jpe", "image/jpeg" },
+	{ "svg", "image/svg+xml" },
 	{ "txt", "text/plain" },
-	{ "js", "text/javascript" },
 	{ NULL, NULL }
 };
 
@@ -1285,8 +1287,8 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	struct stat sb;
 	static const char *index_files[] = { "index.php", "index.html", NULL };
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
-	char *p = buf, *prev_patch = 0, *q, *vpath;
-	size_t prev_patch_len;
+	char *p = buf, *prev_path = NULL, *q, *vpath;
+	size_t prev_path_len;
 	int  is_static_file = 0;
 
 	if (!buf) {
@@ -1335,8 +1337,8 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 					file++;
 				}
 				if (!*file || is_static_file) {
-					if (prev_patch) {
-						pefree(prev_patch, 1);
+					if (prev_path) {
+						pefree(prev_path, 1);
 					}
 					pefree(buf, 1);
 					return;
@@ -1344,25 +1346,25 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 			}
 			break; /* regular file */
 		} 
-		if (prev_patch) {
-			pefree(prev_patch, 1);
+		if (prev_path) {
+			pefree(prev_path, 1);
 			*q = DEFAULT_SLASH;
 		}
 		while (q > buf && *(--q) != DEFAULT_SLASH);
-		prev_patch_len = p - q;
-		prev_patch = pestrndup(q, prev_patch_len, 1);
+		prev_path_len = p - q;
+		prev_path = pestrndup(q, prev_path_len, 1);
 		*q = '\0';
 	}
-	if (prev_patch) {
-		request->path_info_len = prev_patch_len;
+	if (prev_path) {
+		request->path_info_len = prev_path_len;
 #ifdef PHP_WIN32
-		while (prev_patch_len--) {
-			if (prev_patch[prev_patch_len] == '\\') {
-				prev_patch[prev_patch_len] = '/';
+		while (prev_path_len--) {
+			if (prev_path[prev_path_len] == '\\') {
+				prev_path[prev_path_len] = '/';
 			}
 		}
 #endif
-		request->path_info = prev_patch;
+		request->path_info = prev_path;
 		pefree(request->vpath, 1);
 		request->vpath = pestrndup(vpath, q - vpath, 1);
 		request->vpath_len = q - vpath;
@@ -1824,6 +1826,9 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 	return SUCCESS;
 
 fail:
+	if (errstr) {
+		pefree(errstr, 1);
+	}
 	efree(escaped_request_uri);
 	return FAILURE;
 } /* }}} */

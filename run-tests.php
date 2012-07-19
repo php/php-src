@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/bin/env php
 <?php
 /*
    +----------------------------------------------------------------------+
@@ -239,10 +239,7 @@ $ini_overwrites = array(
 		'magic_quotes_runtime=0',
 		'ignore_repeated_errors=0',
 		'precision=14',
-		'unicode.runtime_encoding=ISO-8859-1',
-		'unicode.script_encoding=UTF-8',
-		'unicode.output_encoding=UTF-8',
-		'unicode.from_error_mode=U_INVALID_SUBSTITUTE',
+		'memory_limit=128M',
 	);
 
 function write_information($show_html)
@@ -1315,7 +1312,7 @@ TEST $file
 	$tested = trim($section_text['TEST']);
 
 	/* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
-	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
+	if (!empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['GZIP_POST']) || !empty($section_text['DEFLATE_POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
 		if (isset($php_cgi)) {
 			$old_php = $php;
 			$php = $php_cgi . ' -C ';
@@ -1481,8 +1478,10 @@ TEST $file
 
 			if ($leak_check) {
 				$env['USE_ZEND_ALLOC'] = '0';
+				$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 			} else {
 				$env['USE_ZEND_ALLOC'] = '1';
+				$env['ZEND_DONT_UNLOAD_MODULES'] = 0;
 			}
 
 			junit_start_timer($shortname);
@@ -1700,15 +1699,6 @@ TEST $file
 	} else if (array_key_exists('POST', $section_text) && !empty($section_text['POST'])) {
 
 		$post = trim($section_text['POST']);
-
-		if (array_key_exists('GZIP_POST', $section_text) && function_exists('gzencode')) {
-			$post = gzencode($post, 9, FORCE_GZIP);
-			$env['HTTP_CONTENT_ENCODING'] = 'gzip';
-		} else if (array_key_exists('DEFLATE_POST', $section_text) && function_exists('gzcompress')) {
-			$post = gzcompress($post, 9);
-			$env['HTTP_CONTENT_ENCODING'] = 'deflate';
-		}
-
 		save_text($tmp_post, $post);
 		$content_length = strlen($post);
 
@@ -1717,6 +1707,35 @@ TEST $file
 		$env['CONTENT_LENGTH'] = $content_length;
 
 		$cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+
+    } else if (array_key_exists('GZIP_POST', $section_text) && !empty($section_text['GZIP_POST'])) {
+
+        $post = trim($section_text['GZIP_POST']);
+        $post = gzencode($post, 9, FORCE_GZIP);
+        $env['HTTP_CONTENT_ENCODING'] = 'gzip';
+
+        save_text($tmp_post, $post);
+        $content_length = strlen($post);
+
+        $env['REQUEST_METHOD'] = 'POST';
+        $env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+        $env['CONTENT_LENGTH'] = $content_length;
+
+        $cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+
+    } else if (array_key_exists('DEFLATE_POST', $section_text) && !empty($section_text['DEFLATE_POST'])) {
+        $post = trim($section_text['DEFLATE_POST']);
+        $post = gzcompress($post, 9);
+        $env['HTTP_CONTENT_ENCODING'] = 'deflate';
+        save_text($tmp_post, $post);
+        $content_length = strlen($post);
+
+        $env['REQUEST_METHOD'] = 'POST';
+        $env['CONTENT_TYPE']   = 'application/x-www-form-urlencoded';
+        $env['CONTENT_LENGTH'] = $content_length;
+
+        $cmd = "$php $pass_options $ini_settings -f \"$test_file\" 2>&1 < \"$tmp_post\"";
+
 
 	} else {
 
@@ -1729,6 +1748,7 @@ TEST $file
 
 	if ($leak_check) {
 		$env['USE_ZEND_ALLOC'] = '0';
+		$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
 		if ($valgrind_version >= 330) {
 			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
@@ -1739,6 +1759,7 @@ TEST $file
 
 	} else {
 		$env['USE_ZEND_ALLOC'] = '1';
+		$env['ZEND_DONT_UNLOAD_MODULES'] = 0;
 	}
 
 	if ($DETAILED) echo "
@@ -2072,8 +2093,10 @@ $output
 	if (isset($old_php)) {
 		$php = $old_php;
 	}
+	
+	$diff = empty($diff) ? '' : "<![CDATA[\n " . preg_replace('/\e/', '<esc>', $diff) . "\n]]>";
 
-	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, "<![CDATA[\n " . preg_replace('/\e/', '<esc>', $diff) . "\n]]>");
+	junit_mark_test_as($restype, str_replace($cwd . '/', '', $tested_file), $tested, null, $info, $diff);
 
 	return $restype[0] . 'ED';
 }
@@ -2649,12 +2672,15 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	$time = null !== $time ? $time : junit_get_timer($file_name);
 	junit_suite_record($suite, 'execution_time', $time);
 
+	$escaped_details = htmlspecialchars($details, ENT_QUOTES, 'UTF-8');
+
     $escaped_test_name = basename($file_name) . ' - ' . htmlspecialchars($test_name, ENT_QUOTES);
     $JUNIT['files'][$file_name]['xml'] = "<testcase classname='$suite' name='$escaped_test_name' time='$time'>\n";
 
 	if (is_array($type)) {
 		$output_type = $type[0] . 'ED';
-		$type = reset(array_intersect(array('XFAIL', 'FAIL'), $type));
+		$temp = array_intersect(array('XFAIL', 'FAIL'), $type);
+		$type = reset($temp);
 	} else {
 		$output_type = $type . 'ED';
 	}
@@ -2669,10 +2695,10 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 		$JUNIT['files'][$file_name]['xml'] .= "<skipped>$message</skipped>\n";
 	} elseif('FAIL' == $type) {
 		junit_suite_record($suite, 'test_fail');
-		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$message'>$details</failure>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<failure type='$output_type' message='$message'>$escaped_details</failure>\n";
 	} else {
 		junit_suite_record($suite, 'test_error');
-		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$message'>$details</error>\n";
+		$JUNIT['files'][$file_name]['xml'] .= "<error type='$output_type' message='$message'>$escaped_details</error>\n";
 	}
 
 	$JUNIT['files'][$file_name]['xml'] .= "</testcase>\n";

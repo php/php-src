@@ -1457,6 +1457,54 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 }
 /* }}} */
 
+/* {{{ _reflection_param_get_default_param */
+static parameter_reference *_reflection_param_get_default_param(INTERNAL_FUNCTION_PARAMETERS)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	intern = (reflection_object *) zend_object_store_get_object(getThis() TSRMLS_CC);
+	if (intern == NULL || intern->ptr == NULL) {
+		if (EG(exception) && Z_OBJCE_P(EG(exception)) == reflection_exception_ptr) {
+			return NULL;
+		}
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Failed to retrieve the reflection object");
+	}
+
+	param = intern->ptr;
+	if (param->fptr->type != ZEND_USER_FUNCTION) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Cannot determine default value for internal functions");
+		return NULL;
+	}
+
+	if (param->offset < param->required) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Parameter is not optional");
+		return NULL;
+	}
+
+	return param;
+}
+/* }}} */
+
+/* {{{ _reflection_param_get_default_precv */
+static zend_op *_reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAMETERS, parameter_reference *param)
+{
+	zend_op *precv;
+
+	if (param == NULL) {
+		return NULL;
+	}
+
+	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
+	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Internal error");
+		return NULL;
+	}
+
+	return precv;
+}
+/* }}} */
+
 /* {{{ Preventing __clone from being called */
 ZEND_METHOD(reflection, __clone)
 {
@@ -2535,36 +2583,78 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
    Returns the default value of this parameter or throws an exception */
 ZEND_METHOD(reflection_parameter, getDefaultValue)
 {
-	reflection_object *intern;
 	parameter_reference *param;
 	zend_op *precv;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	GET_REFLECTION_OBJECT_PTR(param);
 
-	if (param->fptr->type != ZEND_USER_FUNCTION)
-	{
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Cannot determine default value for internal functions");
+	param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (!param) {
 		return;
 	}
-	if (param->offset < param->required) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Parameter is not optional");
-		return;
-	}
-	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
-	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Internal error");
+
+	precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
+	if (!precv) {
 		return;
 	}
 
 	*return_value = *precv->op2.zv;
 	INIT_PZVAL(return_value);
-	if (Z_TYPE_P(return_value) != IS_CONSTANT && Z_TYPE_P(return_value) != IS_CONSTANT_ARRAY) {
+	if ((Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT
+			&& (Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT_ARRAY) {
 		zval_copy_ctor(return_value);
 	}
 	zval_update_constant_ex(&return_value, (void*)0, param->fptr->common.scope TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isDefaultValueConstant()
+   Returns whether the default value of this parameter is constant */
+ZEND_METHOD(reflection_parameter, isDefaultValueConstant)
+{
+	zend_op *precv;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (!param) {
+		RETURN_FALSE;
+	}
+
+	precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
+	if (precv && (Z_TYPE_P(precv->op2.zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto public mixed ReflectionParameter::getDefaultValueConstantName()
+   Returns the default value's constant name if default value is constant or null */
+ZEND_METHOD(reflection_parameter, getDefaultValueConstantName)
+{
+	zend_op *precv;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (!param) {
+		return;
+	}
+
+	precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
+	if (precv && (Z_TYPE_P(precv->op2.zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
+		RETURN_STRINGL(Z_STRVAL_P(precv->op2.zv), Z_STRLEN_P(precv->op2.zv), 1);
+	}
 }
 /* }}} */
 
@@ -2922,6 +3012,14 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
 	fcc.object_ptr = object;
+	
+	/* 
+	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
+	 */
+	if (mptr->type == ZEND_INTERNAL_FUNCTION &&
+		(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0) {
+		fcc.function_handler = _copy_function(mptr TSRMLS_CC);
+	}
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -5903,6 +6001,8 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, isOptional, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isDefaultValueAvailable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDefaultValue, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isDefaultValueConstant, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, getDefaultValueConstantName, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 

@@ -1025,6 +1025,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 		case PHP_OUTPUT_HANDLER_SUCCESS:
 			/* no more buffered data */
 			handler->buffer.used = 0;
+			handler->flags |= PHP_OUTPUT_HANDLER_PROCESSED;
 			break;
 	}
 
