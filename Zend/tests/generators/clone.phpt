@@ -3,7 +3,7 @@ Generators can be cloned
 --FILE--
 <?php
 
-function *firstN($end) {
+function firstN($end) {
     for ($i = 0; $i < $end; ++$i) {
         yield $i;
     }

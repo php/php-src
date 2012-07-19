@@ -3,7 +3,7 @@ A generator with an active stack can be cloned
 --FILE--
 <?php
 
-function *gen() {
+function gen() {
     var_dump(str_repeat("x", yield));
 }
 

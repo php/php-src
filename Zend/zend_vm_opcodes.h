@@ -159,6 +159,5 @@
 #define ZEND_SEPARATE                        156
 #define ZEND_QM_ASSIGN_VAR                   157
 #define ZEND_JMP_SET_VAR                     158
-#define ZEND_SUSPEND_AND_RETURN_GENERATOR    159
-#define ZEND_YIELD                           160
-#define ZEND_DELEGATE_YIELD                  161
+#define ZEND_YIELD                           159
+#define ZEND_DELEGATE_YIELD                  160

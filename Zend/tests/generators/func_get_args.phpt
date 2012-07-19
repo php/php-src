@@ -3,8 +3,9 @@ func_get_args() can be used inside generator functions
 --FILE--
 <?php
 
-function *gen() {
+function gen() {
     var_dump(func_get_args());
+    yield; // trigger generator
 }
 
 $gen = gen("foo", "bar");

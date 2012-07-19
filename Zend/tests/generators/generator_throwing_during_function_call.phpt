@@ -7,7 +7,7 @@ function throwException() {
     throw new Exception('test');
 }
 
-function *gen() {
+function gen() {
     yield 'foo';
     strlen("foo", "bar", throwException());
     yield 'bar';

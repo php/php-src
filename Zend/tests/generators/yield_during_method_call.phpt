@@ -9,7 +9,7 @@ class A {
     }
 }
 
-function *gen() {
+function gen() {
     $a = new A;
     $a->b(yield);
 }

@@ -3,7 +3,7 @@ Values can be sent back to the generator
 --FILE--
 <?php
 
-function *gen() {
+function gen() {
     var_dump(yield "yield foo");
     var_dump(yield "yield bar");
 }

@@ -1,12 +1,12 @@
 --TEST--
-Cloning a generator method (with this)
+Cloning a generator method (with $this)
 --FILE--
 <?php
 
 class Test {
     protected $foo;
 
-    public function *gen() {
+    public function gen() {
         $this->foo = 'bar';
         yield; // interrupt
         var_dump($this->foo);

@@ -3,12 +3,12 @@ Calls to send() after close should do nothing
 --FILE--
 <?php
 
-function *gen() { }
+function gen() { var_dump(yield); }
 
 $gen = gen();
-$gen->send("Test");
+$gen->send('foo');
+$gen->send('bar');
 
 ?>
-===DONE===
 --EXPECT--
-===DONE===
+string(3) "foo"

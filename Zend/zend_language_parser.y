@@ -360,11 +360,6 @@ class_declaration_statement:
 		unticked_class_declaration_statement	{ DO_TICKS(); }
 ;
 
-is_generator:
-		/* empty */ { $$.op_type = 0; }
-	|	'*'			{ $$.op_type = 1; }
-;
-
 is_reference:
 		/* empty */	{ $$.op_type = ZEND_RETURN_VAL; }
 	|	'&'			{ $$.op_type = ZEND_RETURN_REF; }
@@ -372,8 +367,8 @@ is_reference:
 
 
 unticked_function_declaration_statement:
-		function is_generator is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$4, 0, $2.op_type, $3.op_type, NULL TSRMLS_CC); }
-		'(' parameter_list ')' { zend_do_suspend_if_generator(TSRMLS_C); }
+		function is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, NULL TSRMLS_CC); }
+		'(' parameter_list ')'
 		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 ;
 
@@ -584,9 +579,9 @@ class_statement:
 		variable_modifiers { CG(access_type) = Z_LVAL($1.u.constant); } class_variable_declaration ';'
 	|	class_constant_declaration ';'
 	|	trait_use_statement
-	|	method_modifiers function is_generator is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$5, 1, $3.op_type, $4.op_type, &$1 TSRMLS_CC); }
-		'(' parameter_list ')' { zend_do_suspend_if_generator(TSRMLS_C); }
-		method_body { zend_do_abstract_method(&$5, &$1, &$11 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
+	|	method_modifiers function is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$4, 1, $3.op_type, &$1 TSRMLS_CC); }
+		'(' parameter_list ')'
+		method_body { zend_do_abstract_method(&$4, &$1, &$9 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
 ;
 
 trait_use_statement:
@@ -805,12 +800,12 @@ expr_without_variable:
 	|	T_YIELD { zend_do_yield(&$$, NULL, NULL TSRMLS_CC); }
 	|	T_YIELD expr { zend_do_yield(&$$, &$2, NULL TSRMLS_CC); }
 	|	T_YIELD '*' expr { zend_do_delegate_yield(&$$, &$3 TSRMLS_CC); }
-	|	function is_generator is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, $3.op_type, 0 TSRMLS_CC); }
-		'(' parameter_list ')' lexical_vars { zend_do_suspend_if_generator(TSRMLS_C); }
-		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $4; }
-	|	T_STATIC function is_generator is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, $4.op_type, 1 TSRMLS_CC); }
-		'(' parameter_list ')' lexical_vars { zend_do_suspend_if_generator(TSRMLS_C); }
-		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); $$ = $5; }
+	|	function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, 0 TSRMLS_CC); }
+		'(' parameter_list ')' lexical_vars
+		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $3; }
+	|	T_STATIC function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
+		'(' parameter_list ')' lexical_vars
+		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); $$ = $4; }
 ;
 
 combined_scalar_offset:

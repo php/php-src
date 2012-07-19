@@ -3,7 +3,7 @@ Calling close() during the exectution of the generator
 --FILE--
 <?php
 
-function *gen() {
+function gen() {
     /* Pass the generator object itself in */
     $gen = yield;
 

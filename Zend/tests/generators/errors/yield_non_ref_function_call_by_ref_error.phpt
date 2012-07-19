@@ -7,7 +7,7 @@ function foo() {
     return "bar";
 }
 
-function *&gen() {
+function &gen() {
     yield foo();
 }
 

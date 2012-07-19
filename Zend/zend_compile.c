@@ -1519,7 +1519,7 @@ int zend_do_verify_access_types(const znode *current_access_type, const znode *n
 }
 /* }}} */
 
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int is_generator, int return_reference, znode *fn_flags_znode TSRMLS_DC) /* {{{ */
+void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC) /* {{{ */
 {
 	zend_op_array op_array;
 	char *name = function_name->u.constant.value.str.val;
@@ -1553,9 +1553,6 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	CG(interactive) = orig_interactive;
 
 	op_array.function_name = name;
-	if (is_generator) {
-		op_array.fn_flags |= ZEND_ACC_GENERATOR;
-	}
 	if (return_reference) {
 		op_array.fn_flags |= ZEND_ACC_RETURN_REFERENCE;
 	}
@@ -1754,7 +1751,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 }
 /* }}} */
 
-void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int is_generator, int return_reference, int is_static TSRMLS_DC) /* {{{ */
+void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC) /* {{{ */
 {
 	znode          function_name;
 	zend_op_array *current_op_array = CG(active_op_array);
@@ -1764,7 +1761,7 @@ void zend_do_begin_lambda_function_declaration(znode *result, znode *function_to
 	function_name.op_type = IS_CONST;
 	ZVAL_STRINGL(&function_name.u.constant, "{closure}", sizeof("{closure}")-1, 1);
 
-	zend_do_begin_function_declaration(function_token, &function_name, 0, is_generator, return_reference, NULL TSRMLS_CC);
+	zend_do_begin_function_declaration(function_token, &function_name, 0, return_reference, NULL TSRMLS_CC);
 
 	result->op_type = IS_TMP_VAR;
 	result->u.op.var = get_temporary_variable(current_op_array);
@@ -2670,9 +2667,11 @@ void zend_do_yield(znode *result, const znode *value, const znode *key TSRMLS_DC
 {
 	zend_op *opline;
 
-	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) == 0) {
-		zend_error(E_COMPILE_ERROR, "The \"yield\" expression can only be used inside a generator function");
+	if (!CG(active_op_array)->function_name) {
+		zend_error(E_COMPILE_ERROR, "The \"yield\" expression can only be used inside a function");
 	}
+
+	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -2704,9 +2703,11 @@ void zend_do_delegate_yield(znode *result, const znode *value TSRMLS_DC) /* {{{ 
 {
 	zend_op *opline;
 
-	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) == 0) {
-		zend_error(E_COMPILE_ERROR, "The \"yield*\" expression can only be used inside a generator function");
+	if (!CG(active_op_array)->function_name) {
+		zend_error(E_COMPILE_ERROR, "The \"yield*\" expression can only be used inside a function");
 	}
+
+	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -2718,23 +2719,6 @@ void zend_do_delegate_yield(znode *result, const znode *value TSRMLS_DC) /* {{{ 
 	opline->result_type = IS_VAR;
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	GET_NODE(result, opline->result);
-}
-/* }}} */
-
-void zend_do_suspend_if_generator(TSRMLS_D) /* {{{ */
-{
-	zend_op *opline;
-
-	// we only suspend execution if the current function is a generator
-	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) == 0) {
-		return;
-	}
-
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_SUSPEND_AND_RETURN_GENERATOR;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
 }
 /* }}} */
 

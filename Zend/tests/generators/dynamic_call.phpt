@@ -3,7 +3,7 @@ It's possible to invoke a generator dynamically
 --FILE--
 <?php
 
-function *gen($foo, $bar) {
+function gen($foo, $bar) {
     yield $foo;
     yield $bar;
 }

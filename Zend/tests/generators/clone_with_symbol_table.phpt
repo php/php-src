@@ -3,7 +3,7 @@ A generator using a symbol table can be cloned
 --FILE--
 <?php
 
-function *gen() {
+function gen() {
     // force compiled variable for $foo
     $foo = 'foo';
 

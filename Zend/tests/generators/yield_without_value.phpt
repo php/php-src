@@ -3,7 +3,7 @@ yield can be used without a value
 --FILE--
 <?php
 
-function *recv() {
+function recv() {
     while (true) {
         var_dump(yield);
     }

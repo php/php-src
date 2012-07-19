@@ -1,6 +1,6 @@
 {%DEFINES%}
 
-static zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC) {
+zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC) {
 	zend_execute_data *execute_data;
 
 	/*

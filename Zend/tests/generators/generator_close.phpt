@@ -3,7 +3,7 @@ Generator can be closed by calling ->close()
 --FILE--
 <?php
 
-function *allNumbers() {
+function allNumbers() {
     for ($i = 0; true; ++$i) {
         yield $i;
     }

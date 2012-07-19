@@ -478,7 +478,7 @@ void zend_do_add_string(znode *result, const znode *op1, znode *op2 TSRMLS_DC);
 void zend_do_add_variable(znode *result, const znode *op1, const znode *op2 TSRMLS_DC);
 
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
-void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int is_generator, int return_reference, znode *fn_flags_znode TSRMLS_DC);
+void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC);
 void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, const znode *initialization, znode *class_type, zend_bool pass_by_reference TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace TSRMLS_DC);
@@ -492,10 +492,9 @@ void zend_do_end_function_call(znode *function_name, znode *result, const znode 
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 void zend_do_yield(znode *result, const znode *value, const znode *key TSRMLS_DC);
 void zend_do_delegate_yield(znode *result, const znode *value TSRMLS_DC);
-void zend_do_suspend_if_generator(TSRMLS_D);
 void zend_do_handle_exception(TSRMLS_D);
 
-void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int is_generator, int return_reference, int is_static TSRMLS_DC);
+void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC);
 void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC);
 
 void zend_do_try(znode *try_token TSRMLS_DC);

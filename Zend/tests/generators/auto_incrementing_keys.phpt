@@ -3,7 +3,7 @@ Generator keys are auto-incrementing by default
 --FILE--
 <?php
 
-function *gen() {
+function gen() {
     yield 'foo';
     yield 'bar';
     yield 5 => 'rab';

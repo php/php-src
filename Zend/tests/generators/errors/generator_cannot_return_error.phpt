@@ -3,7 +3,8 @@ Generators cannot return values
 --FILE--
 <?php
 
-function *gen() {
+function gen() {
+    yield;
 	return $abc;
 }
 

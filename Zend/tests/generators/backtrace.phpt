@@ -7,8 +7,9 @@ function f1() {
     debug_print_backtrace();
 }
 
-function *f2($arg1, $arg2) {
+function f2($arg1, $arg2) {
     f1();
+    yield; // force generator
 }
 
 function f3($gen) {

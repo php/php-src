@@ -7,7 +7,7 @@ function &nop(&$var) {
     return $var;
 }
 
-function *&gen(&$var) {
+function &gen(&$var) {
     yield nop($var);
 }
 

@@ -3,7 +3,7 @@
 --FILE--
 <?php
 
-function *gen() {
+function gen() {
 	var_dump(str_repeat("x", yield));
 }
 

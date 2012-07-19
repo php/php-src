@@ -315,6 +315,56 @@ static zend_object_value zend_generator_create(zend_class_entry *class_type TSRM
 }
 /* }}} */
 
+/* Requires globals EG(scope), EG(current_scope), EG(This),
+ * EG(active_symbol_table) and EG(current_execute_data). */
+zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+{
+	zval *return_value;
+	zend_generator *generator;
+
+	/* Create new execution context. We have to back up and restore
+	 * EG(current_execute_data) and EG(opline_ptr) here because the function
+	 * modifies it. */
+	zend_execute_data *current_execute_data = EG(current_execute_data);
+	zend_op **opline_ptr = EG(opline_ptr);
+	zend_execute_data *execute_data = zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC);
+	EG(current_execute_data) = current_execute_data;
+	EG(opline_ptr) = opline_ptr;
+
+	ALLOC_INIT_ZVAL(return_value);
+	object_init_ex(return_value, zend_ce_generator);
+
+	if (EG(This)) {
+		Z_ADDREF_P(EG(This));
+	}
+
+	/* Back up executor globals. */
+	execute_data->current_scope = EG(scope);
+	execute_data->current_called_scope = EG(called_scope);
+	execute_data->symbol_table = EG(active_symbol_table);
+	execute_data->current_this = EG(This);
+
+	/* Save execution context in generator object. */
+	generator = (zend_generator *) zend_object_store_get_object(return_value TSRMLS_CC);
+	generator->execute_data = execute_data;
+
+	/* We have to add another stack frame so the generator function shows
+	 * up in backtraces and func_get_all() can access the function
+	 * arguments. */
+	execute_data->prev_execute_data = emalloc(sizeof(zend_execute_data));
+	if (EG(current_execute_data)) {
+		memcpy(execute_data->prev_execute_data, EG(current_execute_data), sizeof(zend_execute_data));
+		execute_data->prev_execute_data->function_state.arguments = zend_copy_arguments(EG(current_execute_data)->function_state.arguments);
+	} else {
+		memset(execute_data->prev_execute_data, 0, sizeof(zend_execute_data));
+		execute_data->prev_execute_data->function_state.function = (zend_function *) op_array;
+		execute_data->prev_execute_data->function_state.arguments = NULL;
+	}
+
+	return return_value;
+}
+/* }}} */
+
 static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* {{{ */
 {
 	zend_error(E_RECOVERABLE_ERROR, "The \"Generator\" class is reserved for internal use and cannot be manually instantiated");
@@ -376,9 +426,6 @@ static void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 		 * makes the arguments available to func_get_args(). So we have to
 		 * set the prev_execute_data of that prev_execute_data :) */
 		generator->execute_data->prev_execute_data->prev_execute_data = original_execute_data;
-
-		/* Go to next opcode (we don't want to run the last one again) */
-		generator->execute_data->opline++;
 
 		/* Resume execution */
 		execute_ex(generator->execute_data TSRMLS_CC);

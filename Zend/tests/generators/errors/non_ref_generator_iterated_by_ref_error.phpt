@@ -3,7 +3,7 @@ Non-ref generators cannot be iterated by-ref
 --FILE--
 <?php
 
-function *gen() { }
+function gen() { yield; }
 
 $gen = gen();
 foreach ($gen as &$value) { }

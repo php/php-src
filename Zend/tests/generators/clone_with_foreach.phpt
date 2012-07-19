@@ -3,7 +3,7 @@ Cloning a generator with a foreach loop properly adds a ref for the loop var
 --FILE--
 <?php
 
-function *gen() {
+function gen() {
     foreach ([1, 2, 3] as $i) {
         yield $i;
     }

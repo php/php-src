@@ -2705,7 +2705,11 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			ret->var.fcall_returned_reference = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 		}
 
-		if (EXPECTED(zend_execute == execute)) {
+		if (EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+			if (RETURN_VALUE_USED(opline)) {
+				EX_T(opline->result.var).var.ptr = zend_generator_create_zval(EG(active_op_array) TSRMLS_CC);
+			}
+		} else if (EXPECTED(zend_execute == execute)) {
 			if (EXPECTED(EG(exception) == NULL)) {
 				ZEND_VM_ENTER();
 			}
@@ -5218,102 +5222,7 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(159, ZEND_SUSPEND_AND_RETURN_GENERATOR, ANY, ANY)
-{
-	zend_bool nested = EX(nested);
-	zend_execute_data *prev_execute_data = EX(prev_execute_data);
-
-	if (EG(return_value_ptr_ptr)) {
-		zval *return_value;
-		zend_generator *generator;
-
-		ALLOC_INIT_ZVAL(return_value);
-		object_init_ex(return_value, zend_ce_generator);
-
-		*EG(return_value_ptr_ptr) = return_value;
-
-		/* back up some executor globals */
-		SAVE_OPLINE();
-
-		EX(current_scope) = EG(scope);
-		EX(current_called_scope) = EG(called_scope);
-
-		if (EG(This)) {
-			Z_ADDREF_P(EG(This));
-		}
-		EX(current_this) = EG(This);
-
-		/* back up the execution context */
-		generator = (zend_generator *) zend_object_store_get_object(return_value TSRMLS_CC);
-		generator->execute_data = execute_data;
-
-		/* We have to add another stack frame so the generator function shows
-		 * up in backtraces and func_get_all() can access the function
-		 * arguments. */
-		EX(prev_execute_data) = emalloc(sizeof(zend_execute_data));
-		if (prev_execute_data) {
-			memcpy(EX(prev_execute_data), prev_execute_data, sizeof(zend_execute_data));
-			EX(prev_execute_data)->function_state.arguments = zend_copy_arguments(prev_execute_data->function_state.arguments);
-		} else {
-			memset(EX(prev_execute_data), 0, sizeof(zend_execute_data));
-			EX(prev_execute_data)->function_state.function = (zend_function *) EX(op_array);
-			EX(prev_execute_data)->function_state.arguments = NULL;
-		}
-	}
-
-	/* restore the previous execution context */
-	EG(current_execute_data) = prev_execute_data;
-
-	/* if there is no return value pointer we are responsible for freeing the
-     * execution data */
-	if (!EG(return_value_ptr_ptr)) {
-		if (!EG(active_symbol_table)) {
-			zend_free_compiled_variables(EX_CVs(), execute_data->op_array->last_var);
-		} else {
-			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
-		}
-		efree(execute_data);
-	}
-
-
-	/* Happens whenever the function is invoked using call_user_function,
-	 * e.g. when doing a dynamic function call using call_user_func(). */
-	if (!nested) {
-		EG(opline_ptr) = NULL;
-		ZEND_VM_RETURN();
-	}
-
-	/* Free $this and stack arguments */
-	if (EG(This)) {
-		zval_ptr_dtor(&EG(This));
-	}
-
-	zend_vm_stack_clear_multiple(TSRMLS_C);
-
-	/* Bring back the previous execution context */
-	execute_data = EG(current_execute_data);
-
-	EG(opline_ptr)           = &EX(opline);
-	EG(active_op_array)      = EX(op_array);
-	EG(return_value_ptr_ptr) = EX(original_return_value);
-	EG(active_symbol_table)  = EX(symbol_table);
-	EG(This)                 = EX(current_this);
-	EG(scope)                = EX(current_scope);
-	EG(called_scope)         = EX(current_called_scope);
-		
-	EX(function_state).function  = (zend_function *) EX(op_array);
-	EX(function_state).arguments = NULL;
-
-	EX(object) = EX(current_object);
-	EX(called_scope) = DECODE_CTOR(EX(called_scope));
-
-	LOAD_REGS();
-	LOAD_OPLINE();
-	ZEND_VM_INC_OPCODE();
-	ZEND_VM_LEAVE();
-}
-
-ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSED)
+ZEND_VM_HANDLER(159, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSED)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
@@ -5454,6 +5363,10 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	Z_ADDREF(EG(uninitialized_zval));
 	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 
+	/* We increment to the next op, so we are at the correct position when the
+	 * generator is resumed. */
+	ZEND_VM_INC_OPCODE();
+
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -5461,7 +5374,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	ZEND_VM_RETURN();
 }
 
-ZEND_VM_HANDLER(161, ZEND_DELEGATE_YIELD, CONST|TMP|VAR|CV, ANY)
+ZEND_VM_HANDLER(160, ZEND_DELEGATE_YIELD, CONST|TMP|VAR|CV, ANY)
 {
 	ZEND_VM_NEXT_OPCODE();
 }
