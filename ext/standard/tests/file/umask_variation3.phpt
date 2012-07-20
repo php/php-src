@@ -110,7 +110,7 @@ foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
       umask(0);
       var_dump(umask($value));
-      var_dump( umask());
+      var_dump(umask() & 0777);
 };
 
 ?>
