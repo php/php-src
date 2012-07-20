@@ -5225,7 +5225,6 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 ZEND_VM_HANDLER(159, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSED)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -5242,6 +5241,8 @@ ZEND_VM_HANDLER(159, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 
 	/* Set the new yielded value */
 	if (OP1_TYPE != IS_UNUSED) {
+		zend_free_op free_op1;
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */

@@ -4027,7 +4027,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -4043,6 +4042,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -4716,7 +4717,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -4732,6 +4732,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -5730,7 +5732,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -5746,6 +5747,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -6439,7 +6442,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -6455,6 +6457,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -7187,7 +7191,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -7203,6 +7206,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	/* Set the new yielded value */
 	if (IS_CONST != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -9242,7 +9247,6 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -9259,6 +9263,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -9931,7 +9937,6 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDL
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -9948,6 +9953,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	/* Set the new yielded value */
 	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -10945,7 +10952,6 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -10962,6 +10968,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	/* Set the new yielded value */
 	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -11520,7 +11528,6 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -11537,6 +11544,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded value */
 	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -12206,7 +12215,6 @@ static int ZEND_FASTCALL  ZEND_INIT_ARRAY_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLE
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -12223,6 +12231,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded value */
 	if (IS_TMP_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -16118,7 +16128,6 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_CONST_HANDLER(ZEN
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -16135,6 +16144,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -18195,7 +18206,6 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_TMP_HANDLER(ZEND_
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -18212,6 +18222,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	/* Set the new yielded value */
 	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -20652,7 +20664,6 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_VAR_HANDLER(ZEND_
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -20669,6 +20680,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	/* Set the new yielded value */
 	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -21788,7 +21801,6 @@ static int ZEND_FASTCALL  ZEND_SEPARATE_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAND
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -21805,6 +21817,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded value */
 	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -23914,7 +23928,6 @@ static int ZEND_FASTCALL  ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_VAR_CV_HANDLER(ZEND_O
 static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zend_free_op free_op1;
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
@@ -23931,6 +23944,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded value */
 	if (IS_VAR != IS_UNUSED) {
+		zend_free_op free_op1;
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -25400,7 +25415,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -25416,6 +25430,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -26707,7 +26723,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -26723,6 +26738,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -28014,7 +28031,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -28030,6 +28046,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -28433,7 +28451,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -28449,6 +28466,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -29737,7 +29756,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -29753,6 +29771,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_UNUSED != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -33250,7 +33270,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -33266,6 +33285,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -35196,7 +35217,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -35212,6 +35232,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -37521,7 +37543,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -37537,6 +37558,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -38516,7 +38539,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -38532,6 +38554,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
@@ -40510,7 +40534,6 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	USE_OPLINE
 
-
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -40526,6 +40549,8 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	/* Set the new yielded value */
 	if (IS_CV != IS_UNUSED) {
+
+
 		if (EX(op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			/* Constants and temporary variables aren't yieldable by reference,
 			 * but we still allow them with a notice. */
