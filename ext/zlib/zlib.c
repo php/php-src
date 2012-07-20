@@ -890,6 +890,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 
 	status = OnUpdateLong(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
+	ZLIBG(output_compression) = ZLIBG(output_compression_default);
 	if (stage == PHP_INI_STAGE_RUNTIME && int_value) {
 		if (!php_output_handler_started(ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME) TSRMLS_CC)) {
 			php_zlib_output_compression_start(TSRMLS_C);
@@ -914,7 +915,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_handler)
  
 /* {{{ INI */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("zlib.output_compression",      "0", PHP_INI_ALL, OnUpdate_zlib_output_compression,       output_compression,       zend_zlib_globals, zlib_globals)
+	STD_PHP_INI_BOOLEAN("zlib.output_compression",      "0", PHP_INI_ALL, OnUpdate_zlib_output_compression,       output_compression_default,       zend_zlib_globals, zlib_globals)
 	STD_PHP_INI_ENTRY("zlib.output_compression_level", "-1", PHP_INI_ALL, OnUpdateLong,                           output_compression_level, zend_zlib_globals, zlib_globals)
 	STD_PHP_INI_ENTRY("zlib.output_handler",             "", PHP_INI_ALL, OnUpdate_zlib_output_handler,           output_handler,           zend_zlib_globals, zlib_globals)
 PHP_INI_END()
@@ -958,6 +959,7 @@ static PHP_MSHUTDOWN_FUNCTION(zlib)
 static PHP_RINIT_FUNCTION(zlib)
 {
 	ZLIBG(compression_coding) = 0;
+	ZLIBG(output_compression) = ZLIBG(output_compression_default);
 
 	php_zlib_output_compression_start(TSRMLS_C);
 

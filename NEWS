@@ -39,6 +39,10 @@ PHP                                                                        NEWS
   . Fixed bug #62597 (segfault in php_stream_wrapper_log_error with ZTS build).
     (Laruence)
 
+- Zlib:
+  . Fixed bug #55544 (ob_gzhandler always conflicts with
+    zlib.output_compression). (Laruence)
+
 ?? ??? 2012, PHP 5.4.5
 
 - Core:
