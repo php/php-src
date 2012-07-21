@@ -6,7 +6,7 @@ $generator->send() returns the yielded value
 function reverseEchoGenerator() {
     $data = yield;
     while (true) {
-        $data = yield strrev($data);
+        $data = (yield strrev($data));
     }
 }
 

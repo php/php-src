@@ -2663,7 +2663,7 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_do_yield(znode *result, const znode *value, const znode *key TSRMLS_DC) /* {{{ */
+void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_variable TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 
@@ -2673,6 +2673,14 @@ void zend_do_yield(znode *result, const znode *value, const znode *key TSRMLS_DC
 
 	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
 
+	if (is_variable) {
+		if ((CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) && !zend_is_function_or_method_call(value)) {
+			zend_do_end_variable_parse(value, BP_VAR_W, 0 TSRMLS_CC);
+		} else {
+			zend_do_end_variable_parse(value, BP_VAR_R, 0 TSRMLS_CC);
+		}
+	}
+
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = ZEND_YIELD;
@@ -2680,7 +2688,7 @@ void zend_do_yield(znode *result, const znode *value, const znode *key TSRMLS_DC
 	if (value) {
 		SET_NODE(opline->op1, value);
 
-		if (zend_is_function_or_method_call(value)) {
+		if (is_variable && zend_is_function_or_method_call(value)) {
 			opline->extended_value = ZEND_RETURNS_FUNCTION;
 		}
 	} else {
