@@ -32,6 +32,8 @@ PHP                                                                        NEWS
   . Implemented FR #55218 Get namespaces from current node. (Lonny)
 
 - SPL:
+  . Fixed bug #62616 (ArrayIterator::count() from IteratorIterator instance
+    gives Segmentation fault). (Laruence, Gustavo)
   . Fixed bug #61527 (ArrayIterator gives misleading notice on next() when 
     moved to the end). (reeze.xia@gmail.com)
 
