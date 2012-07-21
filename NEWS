@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - DateTime:
   . Fixed Bug #62500 (Segfault in DateInterval class when extended). (Laruence)
 
+- SPL:
+  . Fixed bug #62616 (ArrayIterator::count() from IteratorIterator instance
+    gives Segmentation fault). (Laruence, Gustavo)
+
 14 Jun 2012, PHP 5.3.14
 
 - CLI SAPI:
