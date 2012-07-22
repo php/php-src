@@ -2611,14 +2611,9 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	int start_op_number, end_op_number;
+	zend_bool returns_reference = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 
-	/* For generators the & modifier applies to the yielded values, not the
-	 * return value. */
-	zend_bool returns_reference = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) && !(CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR);
-
-	if ((CG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) && expr != NULL) {
-		zend_error(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
-	}
+	/* The error for use of return inside a generator is thrown in pass_two. */
 
 	if (do_end_vparse) {
 		if (returns_reference && !zend_is_function_or_method_call(expr)) {

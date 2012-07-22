@@ -10,4 +10,4 @@ function gen() {
 
 ?>
 --EXPECTF--
-Fatal error: Generators cannot return values using "return" in %s on line %d
+Fatal error: Generators cannot return values using "return" in %s on line 5
