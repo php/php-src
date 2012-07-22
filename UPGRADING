@@ -91,6 +91,8 @@ PHP X.Y UPGRADE NOTES
 - IntlDateFormatter::setTimeZoneID() and datefmt_set_timezone_id() are
   deprecated. Use IntlDateFormatter::setTimeZone() or datefmt_set_timezone()
   instead.
+- IntlDateFormatter::format() and datefmt_format() now also accept an
+  IntlCalendar object for formatting.
 
 ========================================
 5. New Functions
@@ -103,6 +105,7 @@ PHP X.Y UPGRADE NOTES
   - hash_pbkdf2()
 
 - Intl:
+  - datefmt_format_object()
   - datefmt_get_calendar_object()
   - datefmt_get_timezone()
   - datefmt_set_timezone()
@@ -178,6 +181,7 @@ PHP X.Y UPGRADE NOTES
   - intltz_get_error_code()
   - intltz_get_error_message()
 
+  - IntlDateFormatter::formatObject()
   - IntlDateFormatter::getCalendarObject()
   - IntlDateFormatter::getTimeZone()
   - IntlDateFormatter::setTimeZone()
