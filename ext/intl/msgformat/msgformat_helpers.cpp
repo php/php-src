@@ -43,14 +43,6 @@ extern "C" {
 #include "../timezone/timezone_class.h"
 }
 
-#ifndef INFINITY
-#define INFINITY (DBL_MAX+DBL_MAX)
-#endif
-
-#ifndef NAN
-#define NAN (INFINITY-INFINITY)
-#endif
-
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 #define HAS_MESSAGE_PATTERN 1
 #endif
@@ -549,7 +541,7 @@ retry_kint64:
 				}
 			case Formattable::kDate:
 				{
-					double dd = intl_zval_to_millis(*elem, &err.code TSRMLS_CC);
+					double dd = intl_zval_to_millis(*elem, &err, "msgfmt_format" TSRMLS_CC);
 					if (U_FAILURE(err.code)) {
 						char *message, *key_char;
 						int key_len;

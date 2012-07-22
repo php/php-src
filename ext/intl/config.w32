@@ -62,6 +62,7 @@ if (PHP_INTL != "no") {
 				dateformat_class.c \
 				dateformat_attr.c \
 				dateformat_format.c \
+				dateformat_format_object.cpp \
 				dateformat_parse.c \
 				dateformat_data.c \
 				dateformat_attrcpp.cpp \

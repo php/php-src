@@ -23,7 +23,10 @@
 #include <unicode/locid.h>
 #include <unicode/calendar.h>
 #include <unicode/ustring.h>
+
 #include "../intl_convertcpp.h"
+#include "../common/common_date.h"
+
 extern "C" {
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"

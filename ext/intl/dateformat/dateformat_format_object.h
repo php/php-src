@@ -12,29 +12,8 @@
    +----------------------------------------------------------------------+
    | Authors: Gustavo Lopes <cataphract@php.net>                          |
    +----------------------------------------------------------------------+
-*/
+ */
 
-#ifndef COMMON_DATE_H
-#define	COMMON_DATE_H
-
-#include <unicode/umachine.h>
-
-U_CDECL_BEGIN
 #include <php.h>
-#include "../intl_error.h"
-U_CDECL_END
 
-#ifdef __cplusplus
-
-#include <unicode/timezone.h>
-
-U_CFUNC TimeZone *timezone_convert_datetimezone(int type, void *object, int is_datetime, intl_error *outside_error, const char *func TSRMLS_DC);
-U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
-		intl_error *err, const char *func TSRMLS_DC);
-
-#endif
-
-U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TSRMLS_DC);
-
-#endif	/* COMMON_DATE_H */
-
+PHP_FUNCTION(datefmt_format_object);

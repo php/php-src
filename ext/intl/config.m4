@@ -52,6 +52,7 @@ if test "$PHP_INTL" != "no"; then
     dateformat/dateformat_attr.c \
     dateformat/dateformat_data.c \
     dateformat/dateformat_format.c \
+    dateformat/dateformat_format_object.cpp \
     dateformat/dateformat_parse.c \
     dateformat/dateformat_create.cpp \
     dateformat/dateformat_attrcpp.cpp \

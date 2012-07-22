@@ -175,10 +175,11 @@ PHP_FUNCTION(datefmt_format)
 		timestamp = internal_get_timestamp(dfo, hash_arr TSRMLS_CC);
 		INTL_METHOD_CHECK_STATUS(dfo, "datefmt_format: date formatting failed")
 	} else {
-		timestamp = intl_zval_to_millis(zarg,
-				&INTL_DATA_ERROR_CODE(dfo) TSRMLS_CC);
-		INTL_METHOD_CHECK_STATUS(dfo, "datefmt_format: could not convert input "
-				"into a date")
+		timestamp = intl_zval_to_millis(zarg, INTL_DATA_ERROR_P(dfo),
+				"datefmt_format" TSRMLS_CC);
+		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
+			RETURN_FALSE;
+		}
 	}
 	
 	internal_format( dfo, timestamp, return_value TSRMLS_CC);
