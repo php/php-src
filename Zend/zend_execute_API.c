@@ -407,7 +407,7 @@ ZEND_API const char *zend_get_executed_filename(TSRMLS_D) /* {{{ */
 
 ZEND_API uint zend_get_executed_lineno(TSRMLS_D) /* {{{ */
 {
-	if(EG(exception) && EG(opline_ptr) && active_opline->opcode == ZEND_HANDLE_EXCEPTION && 
+	if(EG(exception) && EG(opline_ptr) && active_opline->opcode == ZEND_HANDLE_EXCEPTION &&
 		active_opline->lineno == 0 && EG(opline_before_exception)) {
 		return EG(opline_before_exception)->lineno;
 	}
@@ -601,7 +601,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 			zend_hash_init(tmp_ht, zend_hash_num_elements(Z_ARRVAL_P(p)), NULL, ZVAL_PTR_DTOR, 0);
 			zend_hash_copy(tmp_ht, Z_ARRVAL_P(p), (copy_ctor_func_t) zval_deep_copy, (void *) &tmp, sizeof(zval *));
 			Z_ARRVAL_P(p) = tmp_ht;
-		} 
+		}
 
 		/* First go over the array and see if there are any constant indices */
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(p));
@@ -976,7 +976,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (EX(function_state).function->common.scope) {
 			EG(scope) = EX(function_state).function->common.scope;
 		}
-		((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
+
+		if (!zend_execute_internal) {
+			/* saves one function call if zend_execute_internal is not used */
+			((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
+		} else {
+			zend_execute_internal(&execute_data, 1 TSRMLS_CC);
+		}
+
+
 		/*  We shouldn't fix bad extensions here,
 			because it can break proper ones (Bug #34045)
 		if (!EX(function_state).function->common.return_reference)
@@ -1311,9 +1319,9 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
-	
+
 	zend_release_labels(TSRMLS_C);
-	
+
 	EG(return_value_ptr_ptr) = NULL;
 	EG(active_op_array) = CG(active_op_array);
 	orig_interactive = CG(interactive);
@@ -1336,11 +1344,11 @@ ZEND_API void zend_timeout(int dummy) /* {{{ */
 
 	if (zend_on_timeout) {
 #ifdef ZEND_SIGNALS
-		/* 
+		/*
 		   We got here because we got a timeout signal, so we are in a signal handler
 		   at this point. However, we want to be able to timeout any user-supplied
 		   shutdown functions, so pretend we are not in a signal handler while we are
-		   calling these 
+		   calling these
 		*/
 		SIGG(running) = 0;
 #endif
@@ -1589,7 +1597,7 @@ check_fetch_type:
                 	zend_error(E_ERROR, "Trait '%s' not found", class_name);
                 } else {
 					zend_error(E_ERROR, "Class '%s' not found", class_name);
-				}	
+				}
 			}
 		}
 		return NULL;
@@ -1612,7 +1620,7 @@ zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_na
 					zend_error(E_ERROR, "Trait '%s' not found", class_name);
 				} else {
 					zend_error(E_ERROR, "Class '%s' not found", class_name);
-				}	
+				}
 			}
 		}
 		return NULL;
@@ -1753,7 +1761,7 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 	zend_execute_data *ex;
 
 	if (!EG(active_symbol_table)) {
-		
+
 		/* Search for last called user function */
 		ex = EG(current_execute_data);
 		while (ex && !ex->op_array) {
