@@ -40,5 +40,6 @@ These are not necessary at this point of time
 #define CALENDAR_YEAR "tm_year"
 #define CALENDAR_WDAY "tm_wday"
 #define CALENDAR_YDAY "tm_yday"
+#define CALENDAR_ISDST "tm_isdst"
 
 #endif // DATE_FORMATTER_H
