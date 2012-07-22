@@ -797,32 +797,6 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		efree(php_uname);
 	}
 
-	if ((flag & PHP_INFO_CREDITS) && !sapi_module.phpinfo_as_text) {	
-		php_info_print_hr();
-		php_info_print("<script>(function () {\n");
-		php_info_print("    'use strict';\n");
-		php_info_print("    window.onload = function () {\n");
-		php_info_print("        var credits, reveal;\n");
-		php_info_print("\n");
-		php_info_print("        credits = document.getElementById('credits');\n");
-		php_info_print("        reveal = document.getElementById('revealcredits');\n");
-		php_info_print("\n");
-		php_info_print("        credits.style.display = 'none';\n");
-		php_info_print("        reveal.style.display = 'block';\n");
-		php_info_print("        reveal.onclick = function () {\n");
-		php_info_print("            credits.style.display = 'block';\n");
-		php_info_print("            reveal.style.display = 'none';\n");
-		php_info_print("        };\n");
-		php_info_print("    };\n");
-		php_info_print("}());</script>\n");
-		php_info_print("<h1><a id=\"revealcredits\" href=\"#credits\" style=\"display: none;\">");
-		php_info_print("PHP Credits");
-		php_info_print("</a></h1>\n");
-		php_info_print("<div id=\"credits\">\n");
-		php_print_credits(PHP_CREDITS_ALL, TSRMLS_C);
-		php_info_print("</div>\n");
-	}
-
 	zend_ini_sort_entries(TSRMLS_C);
 
 	if (flag & PHP_INFO_CONFIGURATION) {
@@ -904,6 +878,12 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		php_info_print_table_end();
 	}
 
+
+	if ((flag & PHP_INFO_CREDITS) && !sapi_module.phpinfo_as_text) {	
+		php_info_print_hr();
+		php_print_credits(PHP_CREDITS_ALL, TSRMLS_C);
+	}
+
 	if (flag & PHP_INFO_LICENSE) {
 		if (!sapi_module.phpinfo_as_text) {
 			SECTION("PHP License");
@@ -937,6 +917,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 			php_info_print("questions about PHP licensing, please contact license@php.net.\n");
 		}
 	}
+
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_print("</div></body></html>");
 	}	
