@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "../intl_convertcpp.h"
+#include "../common/common_date.h"
 
 extern "C" {
 #include "php_intl.h"
@@ -38,22 +39,9 @@ extern "C" {
 #include "msgformat_format.h"
 #include "msgformat_helpers.h"
 #include "intl_convert.h"
-#define USE_CALENDAR_POINTER 1
-#include "../calendar/calendar_class.h"
-/* avoid redefinition of int8_t, already defined in unicode/pwin32.h */
-#define _MSC_STDINT_H_ 1
-#include "ext/date/php_date.h"
 #define USE_TIMEZONE_POINTER
 #include "../timezone/timezone_class.h"
 }
-
-#ifndef INFINITY
-#define INFINITY (DBL_MAX+DBL_MAX)
-#endif
-
-#ifndef NAN
-#define NAN (INFINITY-INFINITY)
-#endif
 
 #if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 #define HAS_MESSAGE_PATTERN 1
@@ -93,66 +81,6 @@ U_CFUNC int32_t umsg_format_arg_count(UMessageFormat *fmt)
 	int32_t fmt_count = 0;
 	MessageFormatAdapter::getArgTypeList(*(const MessageFormat*)fmt, fmt_count);
 	return fmt_count;
-}
-
-static double umsg_helper_zval_to_millis(zval *z, UErrorCode *status TSRMLS_DC) {
-	double rv = NAN;
-	long lv;
-	int type;
-
-	if (U_FAILURE(*status)) {
-		return NAN;
-	}
-
-	switch (Z_TYPE_P(z)) {
-	case IS_STRING:
-		type = is_numeric_string(Z_STRVAL_P(z), Z_STRLEN_P(z), &lv, &rv, 0);
-		if (type == IS_DOUBLE) {
-			rv *= U_MILLIS_PER_SECOND;
-		} else if (type == IS_LONG) {
-			rv = U_MILLIS_PER_SECOND * (double)lv;
-		} else {
-			*status = U_ILLEGAL_ARGUMENT_ERROR;
-		}
-		break;
-	case IS_LONG:
-		rv = U_MILLIS_PER_SECOND * (double)Z_LVAL_P(z);
-		break;
-	case IS_DOUBLE:
-		rv = U_MILLIS_PER_SECOND * Z_DVAL_P(z);
-		break;
-	case IS_OBJECT:
-		if (instanceof_function(Z_OBJCE_P(z), php_date_get_date_ce() TSRMLS_CC)) {
-			zval retval;
-			zval *zfuncname;
-			INIT_ZVAL(retval);
-			MAKE_STD_ZVAL(zfuncname);
-			ZVAL_STRING(zfuncname, "getTimestamp", 1);
-			if (call_user_function(NULL, &(z), zfuncname, &retval, 0, NULL TSRMLS_CC)
-					!= SUCCESS || Z_TYPE(retval) != IS_LONG) {
-				*status = U_INTERNAL_PROGRAM_ERROR;
-			} else {
-				rv = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval);
-			}
-			zval_ptr_dtor(&zfuncname);
-		} else if (instanceof_function(Z_OBJCE_P(z), Calendar_ce_ptr TSRMLS_CC)) {
-			Calendar_object *co = (Calendar_object *)
-				zend_object_store_get_object(z TSRMLS_CC );
-			if (co->ucal == NULL) {
-				*status = U_ILLEGAL_ARGUMENT_ERROR;
-			} else {
-				rv = (double)co->ucal->getTime(*status);
-			}
-		} else {
-			/* TODO: try with cast(), get() to obtain a number */
-			*status = U_ILLEGAL_ARGUMENT_ERROR;
-		}
-		break;
-	default:
-		*status = U_ILLEGAL_ARGUMENT_ERROR;
-	}
-
-	return rv;
 }
 
 static HashTable *umsg_get_numeric_types(MessageFormatter_object *mfo,
@@ -613,7 +541,7 @@ retry_kint64:
 				}
 			case Formattable::kDate:
 				{
-					double dd = umsg_helper_zval_to_millis(*elem, &err.code TSRMLS_CC);
+					double dd = intl_zval_to_millis(*elem, &err, "msgfmt_format" TSRMLS_CC);
 					if (U_FAILURE(err.code)) {
 						char *message, *key_char;
 						int key_len;
