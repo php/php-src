@@ -9,24 +9,34 @@ function &iter(array &$array) {
     }
 }
 
-$array = [1, 2, 3, 4, 5];
+$array = [1, 2, 3];
 $iter = iter($array);
 foreach ($iter as &$value) {
     $value *= -1;
 }
 var_dump($array);
 
+$array = [1, 2, 3];
+foreach (iter($array) as &$value) {
+    $value *= -1;
+}
+var_dump($array);
+
 ?>
 --EXPECT--
-array(5) {
+array(3) {
   [0]=>
   int(-1)
   [1]=>
   int(-2)
   [2]=>
-  int(-3)
-  [3]=>
-  int(-4)
-  [4]=>
-  &int(-5)
+  &int(-3)
+}
+array(3) {
+  [0]=>
+  int(-1)
+  [1]=>
+  int(-2)
+  [2]=>
+  &int(-3)
 }

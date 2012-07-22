@@ -6317,9 +6317,7 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 
 	if (value->EA & ZEND_PARSED_REFERENCE_VARIABLE) {
 		assign_by_ref = 1;
-		if (!(opline-1)->extended_value) {
-			zend_error(E_COMPILE_ERROR, "Cannot create references to elements of a temporary array expression");
-		}
+
 		/* Mark extended_value for assign-by-reference */
 		opline->extended_value |= ZEND_FE_FETCH_BYREF;
 		CG(active_op_array)->opcodes[foreach_token->u.op.opline_num].extended_value |= ZEND_FE_RESET_REFERENCE;
