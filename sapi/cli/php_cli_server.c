@@ -1618,7 +1618,11 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 	client->parser.data = client;
 	nbytes_consumed = php_http_parser_execute(&client->parser, &settings, buf, nbytes_read);
 	if (nbytes_consumed != nbytes_read) {
-		*errstr = estrdup("Malformed HTTP request");
+		if (buf[0] & 0x80 /* SSLv2 */ || buf[0] == 0x16 /* SSLv3/TLSv1 */) {
+			*errstr = estrdup("Unsupported SSL request");
+		} else {
+			*errstr = estrdup("Malformed HTTP request");
+		}
 		return -1;
 	}
 	if (client->current_header_name) {
