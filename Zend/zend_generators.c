@@ -21,6 +21,7 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_interfaces.h"
+#include "zend_exceptions.h"
 #include "zend_generators.h"
 
 ZEND_API zend_class_entry *zend_ce_generator;
@@ -352,12 +353,11 @@ zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	 * up in backtraces and func_get_all() can access the function
 	 * arguments. */
 	execute_data->prev_execute_data = emalloc(sizeof(zend_execute_data));
+	memset(execute_data->prev_execute_data, 0, sizeof(zend_execute_data));
+	execute_data->prev_execute_data->function_state.function = (zend_function *) op_array;
 	if (EG(current_execute_data)) {
-		memcpy(execute_data->prev_execute_data, EG(current_execute_data), sizeof(zend_execute_data));
 		execute_data->prev_execute_data->function_state.arguments = zend_copy_arguments(EG(current_execute_data)->function_state.arguments);
 	} else {
-		memset(execute_data->prev_execute_data, 0, sizeof(zend_execute_data));
-		execute_data->prev_execute_data->function_state.function = (zend_function *) op_array;
 		execute_data->prev_execute_data->function_state.arguments = NULL;
 	}
 
@@ -449,6 +449,12 @@ static void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 			generator->backed_up_stack = emalloc(generator->backed_up_stack_size);
 			memcpy(generator->backed_up_stack, generator->original_stack_top, generator->backed_up_stack_size);
 			zend_vm_stack_free(generator->original_stack_top TSRMLS_CC);
+		}
+
+		/* If an exception was thrown in the generator we have to internally
+		 * rethrow it in the parent scope. */
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			zend_throw_exception_internal(NULL TSRMLS_CC);
 		}
 	}
 }

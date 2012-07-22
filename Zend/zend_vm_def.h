@@ -5088,7 +5088,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	EX(old_error_reporting) = NULL;
 
 	if (!catched) {
-		/* For generators skip the leave handler return directly */
+		/* For generators skip the leave handler and return directly */
 		if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 			/* The generator object is stored in return_value_ptr_ptr */
 			zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
