@@ -96,6 +96,7 @@
 #include "common/common_enum.h"
 
 #include <unicode/uloc.h>
+#include <unicode/uclean.h>
 #include <ext/standard/info.h>
 
 #include "php_ini.h"
@@ -852,15 +853,38 @@ zend_function_entry intl_functions[] = {
 };
 /* }}} */
 
+static zend_bool explicit_cleanup = 0;
+
+static ZEND_INI_MH(OnExplicitCleanupUpdate)
+{
+	if (stage == PHP_INI_STAGE_STARTUP) {
+		if (new_value_length == 2 && strcasecmp("on", new_value) == 0) {
+			explicit_cleanup = (zend_bool)1;
+		}
+		else if (new_value_length == 3 && strcasecmp("yes", new_value) == 0) {
+			explicit_cleanup = (zend_bool)1;
+		}
+		else if (new_value_length == 4 && strcasecmp("true", new_value) == 0) {
+			explicit_cleanup = (zend_bool)1;
+		}
+		else {
+			explicit_cleanup = (zend_bool)atoi(new_value);
+		}
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
+}
+
 
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY(LOCALE_INI_NAME, NULL, PHP_INI_ALL, OnUpdateStringUnempty, default_locale, zend_intl_globals, intl_globals)
     STD_PHP_INI_ENTRY("intl.error_level", "0", PHP_INI_ALL, OnUpdateLong, error_level, zend_intl_globals, intl_globals)
 	STD_PHP_INI_ENTRY("intl.use_exceptions", "0", PHP_INI_ALL, OnUpdateBool, use_exceptions, zend_intl_globals, intl_globals)
+	PHP_INI_ENTRY_EX("intl.explicit_cleanup", "0", 0, OnExplicitCleanupUpdate, zend_ini_boolean_displayer_cb)
 PHP_INI_END()
 /* }}} */
-
 
 static PHP_GINIT_FUNCTION(intl);
 
@@ -1002,6 +1026,10 @@ PHP_MSHUTDOWN_FUNCTION( intl )
 {
     /* For the default locale php.ini setting */
     UNREGISTER_INI_ENTRIES();
+
+    if (explicit_cleanup) {
+		u_cleanup();
+    }
 
     return SUCCESS;
 }
