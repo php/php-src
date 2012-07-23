@@ -70,6 +70,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			smart_str_free(&parse_error_str);
 			intl_error_set_custom_msg(NULL, msg, 1 TSRMLS_CC);
 			efree(msg);
+			delete rbbi;
 			RETURN_NULL();
 		}
 	} else { // compiled
@@ -78,6 +79,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "rbbi_create_instance: unable to "
 				"create instance from compiled rules", 0 TSRMLS_CC);
+			delete rbbi;
 			RETURN_NULL();
 		}
 #else
