@@ -24,6 +24,10 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug #62594 (segfault in mysqlnd_res_meta::set_mode). (Laruence)
 
+- readline:
+  . Fixed bug #62612 (readline extension compilation fails with
+    sapi/cli/cli.h: No such file). (Johannes)
+
 - Reflection:
   . Implemented FR #61602 (Allow access to name of constant used as default 
     value). (reeze.xia@gmail.com)
@@ -32,12 +36,18 @@ PHP                                                                        NEWS
   . Implemented FR #55218 Get namespaces from current node. (Lonny)
 
 - SPL:
+  . Fixed bug #62616 (ArrayIterator::count() from IteratorIterator instance
+    gives Segmentation fault). (Laruence, Gustavo)
   . Fixed bug #61527 (ArrayIterator gives misleading notice on next() when 
     moved to the end). (reeze.xia@gmail.com)
 
 - Streams:
   . Fixed bug #62597 (segfault in php_stream_wrapper_log_error with ZTS build).
     (Laruence)
+
+- Zlib:
+  . Fixed bug #55544 (ob_gzhandler always conflicts with
+    zlib.output_compression). (Laruence)
 
 ?? ??? 2012, PHP 5.4.5
 
