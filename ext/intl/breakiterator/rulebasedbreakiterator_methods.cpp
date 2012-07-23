@@ -29,7 +29,7 @@ static inline RuleBasedBreakIterator *fetch_rbbi(BreakIterator_object *bio) {
 	return (RuleBasedBreakIterator*)bio->biter;
 }
 
-static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
+static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object		= getThis();
 	char		*rules;
@@ -96,7 +96,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 
 	return_value = getThis();
 	//changes this to IS_NULL (without first destroying) if there's an error
-	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	_php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (Z_TYPE_P(return_value) == IS_NULL) {
 		zend_object_store_ctor_failed(&orig_this TSRMLS_CC);
