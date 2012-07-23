@@ -108,6 +108,7 @@ static UDate internal_get_timestamp(IntlDateFormatter_object *dfo,
 				second,
 				mday;
 	UCalendar	*pcal;
+	UDate		result;
 	intl_error	*err = &dfo->datef_data.error;
 
 #define INTL_GET_ELEM(elem) \
@@ -137,10 +138,11 @@ static UDate internal_get_timestamp(IntlDateFormatter_object *dfo,
 	/* set the incoming values for the calendar */
 	ucal_setDateTime(pcal, year, month, mday, hour, minute, second, &INTL_DATA_ERROR_CODE(dfo));
 	/* actually, ucal_setDateTime cannot fail */
-	
+
 	/* Fetch the timestamp from the UCalendar */
-	return ucal_getMillis(pcal, &INTL_DATA_ERROR_CODE(dfo));
-	udat_close(pcal);
+	result = ucal_getMillis(pcal, &INTL_DATA_ERROR_CODE(dfo));
+	ucal_close(pcal);
+	return result;
 }
 
 
