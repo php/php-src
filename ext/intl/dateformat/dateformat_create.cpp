@@ -40,7 +40,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object;
 
-    char		*locale_str;
+	const char	*locale_str;
 	int			locale_len		= 0;
 	Locale		locale;
     long		date_type		= 0;
@@ -72,7 +72,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 	if (locale_len == 0) {
-		locale_str = INTL_G(default_locale);
+		locale_str = intl_locale_get_default(TSRMLS_C);
 	}
 	locale = Locale::createFromName(locale_str);
 

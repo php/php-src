@@ -48,7 +48,7 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	co = (Collator_object *) zend_object_store_get_object( object TSRMLS_CC );
 
 	if(locale_len == 0) {
-		locale = INTL_G(default_locale);
+		locale = intl_locale_get_default(TSRMLS_C);
 	}
 
 	/* Open ICU collator. */

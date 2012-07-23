@@ -1011,11 +1011,6 @@ PHP_MINIT_FUNCTION( intl )
 	/* Global error handling. */
 	intl_error_init( NULL TSRMLS_CC );
 
-	/* Set the default_locale value */
-	if( INTL_G(default_locale) == NULL ) {
-		INTL_G(default_locale) = pestrdup(uloc_getDefault(), 1) ;
-	}
-
 	return SUCCESS;
 }
 /* }}} */
@@ -1039,10 +1034,6 @@ PHP_MSHUTDOWN_FUNCTION( intl )
  */
 PHP_RINIT_FUNCTION( intl )
 {
-	/* Set the default_locale value */
-    if( INTL_G(default_locale) == NULL ) {
-        INTL_G(default_locale) = pestrdup(uloc_getDefault(), 1) ;
-    }
 	return SUCCESS;
 }
 /* }}} */
