@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug #62564 (Extending MessageFormatter and adding property causes 
     crash). (Felipe)
 
+- Mail:
+  . Fixed bug #62356 (Add syslog support to mail.log). (Michael Orlitzky)
+
 - MySQLnd:
   . Fixed bug #62594 (segfault in mysqlnd_res_meta::set_mode). (Laruence)
 
