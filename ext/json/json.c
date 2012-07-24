@@ -47,6 +47,7 @@ ZEND_DECLARE_MODULE_GLOBALS(json)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_encode, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_INFO(0, depth)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_json_decode, 0, 0, 1)
@@ -126,6 +127,7 @@ static PHP_GINIT_FUNCTION(json)
 {
 	json_globals->encoder_depth = 0;
 	json_globals->error_code = 0;
+	json_globals->encode_max_depth = 0;
 }
 /* }}} */
 
@@ -341,6 +343,9 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 		}
 	}
 
+	if (JSON_G(encoder_depth) > JSON_G(encode_max_depth)) {
+		JSON_G(error_code) = PHP_JSON_ERROR_DEPTH;
+	}
 	--JSON_G(encoder_depth);
 	json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 	json_pretty_print_indent(buf, options TSRMLS_CC);
@@ -702,12 +707,15 @@ static PHP_FUNCTION(json_encode)
 	zval *parameter;
 	smart_str buf = {0};
 	long options = 0;
+    long depth = JSON_PARSER_DEFAULT_DEPTH;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &parameter, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|ll", &parameter, &options, &depth) == FAILURE) {
 		return;
 	}
 
 	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+
+	JSON_G(encode_max_depth) = depth;
 
 	php_json_encode(&buf, parameter, options TSRMLS_CC);
 
