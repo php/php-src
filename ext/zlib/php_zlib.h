@@ -55,6 +55,7 @@ ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	long output_compression_default;
 	char *output_handler;
 	php_zlib_context *ob_gzhandler;
+    zend_bool handler_registered;
 ZEND_END_MODULE_GLOBALS(zlib);
 
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
