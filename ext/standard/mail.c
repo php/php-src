@@ -39,6 +39,7 @@
 #endif
 #endif
 
+#include "php_syslog.h"
 #include "php_mail.h"
 #include "php_ini.h"
 #include "php_string.h"
@@ -189,6 +190,37 @@ PHP_FUNCTION(mail)
 }
 /* }}} */
 
+
+void php_mail_log_crlf_to_spaces(char *message) {
+	/* Find all instances of carriage returns or line feeds and
+	 * replace them with spaces. Thus, a log line is always one line
+	 * long
+	 */
+	char *p = message;
+	while ((p = strpbrk(p, "\r\n"))) {
+		*p = ' ';
+	}
+}
+
+void php_mail_log_to_syslog(char *message) {
+	/* Write 'message' to syslog. */
+#ifdef HAVE_SYSLOG_H
+	php_syslog(LOG_NOTICE, "%s", message);
+#endif
+}
+
+
+void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
+	/* Write 'message' to the given file. */
+	uint flags = IGNORE_URL_WIN | REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR;
+	php_stream *stream = php_stream_open_wrapper(filename, "a", flags, NULL);
+	if (stream) {
+		php_stream_write(stream, message, message_size);
+		php_stream_close(stream);
+	}
+}
+
+
 /* {{{ php_mail
  */
 PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd TSRMLS_DC)
@@ -216,19 +248,22 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	if (mail_log && *mail_log) {
 		char *tmp;
 		int l = spprintf(&tmp, 0, "mail() on [%s:%d]: To: %s -- Headers: %s\n", zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), to, hdr ? hdr : "");
-		php_stream *stream = php_stream_open_wrapper(mail_log, "a", IGNORE_URL_WIN | REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR, NULL);
 
-		if (hdr) { /* find all \r\n instances and replace them with spaces, so a log line is always one line long */ 
-			char *p = tmp;
-			while ((p = strpbrk(p, "\r\n"))) {
-				*p = ' ';
-			}
+		if (hdr) {
+			php_mail_log_crlf_to_spaces(tmp);
+		}
+
+		if (!strcmp(mail_log, "syslog")) {
+			/* Drop the final space when logging to syslog. */
+			tmp[l - 1] = 0;
+			php_mail_log_to_syslog(tmp);
+		}
+		else {
+			/* Convert the final space to a newline when logging to file. */
 			tmp[l - 1] = '\n';
+			php_mail_log_to_file(mail_log, tmp, l);
 		}
-		if (stream) {
-			php_stream_write(stream, tmp, l);
-			php_stream_close(stream);
-		}
+
 		efree(tmp);
 	}
 	if (PG(mail_x_header)) {
