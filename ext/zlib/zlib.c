@@ -690,6 +690,7 @@ PHP_ZLIB_ENCODE_FUNC(zlib_encode, 0);
 /* {{{ proto binary zlib_decode(binary data[, int max_decoded_len])
    Uncompress any raw/gzip/zlib encoded data */
 PHP_ZLIB_DECODE_FUNC(zlib_decode, PHP_ZLIB_ENCODING_ANY);
+/* }}} */
 
 /* NOTE: The naming of these userland functions was quite unlucky */
 /* {{{ proto binary gzdeflate(binary data[, int level = -1[, int encoding = ZLIB_ENCODING_RAW])
@@ -701,18 +702,22 @@ PHP_ZLIB_ENCODE_FUNC(gzdeflate, PHP_ZLIB_ENCODING_RAW);
    Encode data with the gzip encoding */
 PHP_ZLIB_ENCODE_FUNC(gzencode, PHP_ZLIB_ENCODING_GZIP);
 /* }}} */
+
 /* {{{ proto binary gzcompress(binary data[, int level = -1[, int encoding = ZLIB_ENCODING_DEFLATE])
    Encode data with the zlib encoding */
 PHP_ZLIB_ENCODE_FUNC(gzcompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
+
 /* {{{ proto binary gzinflate(binary data[, int max_decoded_len])
    Decode raw deflate encoded data */
 PHP_ZLIB_DECODE_FUNC(gzinflate, PHP_ZLIB_ENCODING_RAW);
 /* }}} */
+
 /* {{{ proto binary gzdecode(binary data[, int max_decoded_len])
    Decode gzip encoded data */
 PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
 /* }}} */
+
 /* {{{ proto binary gzuncompress(binary data[, int max_decoded_len])
    Decode zlib encoded data */
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
@@ -967,12 +972,14 @@ static PHP_RINIT_FUNCTION(zlib)
 }
 /* }}} */
 
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
 static PHP_RSHUTDOWN_FUNCTION(zlib)
 {
 	php_zlib_cleanup_ob_gzhandler_mess(TSRMLS_C);
 
     return SUCCESS;
 }
+/* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(zlib)
