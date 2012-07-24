@@ -210,7 +210,7 @@ void php_mail_log_to_syslog(char *message) {
 }
 
 
-void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
+void php_mail_log_to_file(char *filename, char *message, size_t message_size TSRMLS_DC) {
 	/* Write 'message' to the given file. */
 	uint flags = IGNORE_URL_WIN | REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR;
 	php_stream *stream = php_stream_open_wrapper(filename, "a", flags, NULL);
@@ -261,7 +261,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		else {
 			/* Convert the final space to a newline when logging to file. */
 			tmp[l - 1] = '\n';
-			php_mail_log_to_file(mail_log, tmp, l);
+			php_mail_log_to_file(mail_log, tmp, l TSRMLS_CC);
 		}
 
 		efree(tmp);
