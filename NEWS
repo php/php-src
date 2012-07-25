@@ -53,7 +53,7 @@ PHP                                                                        NEWS
   . Fixed bug #55544 (ob_gzhandler always conflicts with
     zlib.output_compression). (Laruence)
 
-?? ??? 2012, PHP 5.4.5
+19 Jul 2012, PHP 5.4.5
 
 - Core:
   . Fixed bug #62443 (Crypt SHA256/512 Segfaults With Malformed 
