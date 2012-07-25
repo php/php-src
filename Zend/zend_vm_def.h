@@ -3956,7 +3956,8 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						ZEND_VM_C_GOTO(num_index_dim);
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
