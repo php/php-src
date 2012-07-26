@@ -1261,6 +1261,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 	zend_file_handle *file_handle;
 	zend_op_array *orig_op_array = EG(active_op_array);
 	zval **orig_retval_ptr_ptr = EG(return_value_ptr_ptr);
+    long orig_interactive = CG(interactive);
 
 	va_start(files, file_count);
 	for (i = 0; i < file_count; i++) {
@@ -1268,6 +1269,15 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 		if (!file_handle) {
 			continue;
 		}
+
+        if (orig_interactive) {
+            if (file_handle->filename[0] != '-' || file_handle->filename[1]) {
+                CG(interactive) = 0;
+            } else {
+                CG(interactive) = 1;
+            }
+        }
+       
 		EG(active_op_array) = zend_compile_file(file_handle, type TSRMLS_CC);
 		if (file_handle->opened_path) {
 			int dummy = 1;
@@ -1309,12 +1319,14 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 			va_end(files);
 			EG(active_op_array) = orig_op_array;
 			EG(return_value_ptr_ptr) = orig_retval_ptr_ptr;
+            CG(interactive) = orig_interactive;
 			return FAILURE;
 		}
 	}
 	va_end(files);
 	EG(active_op_array) = orig_op_array;
 	EG(return_value_ptr_ptr) = orig_retval_ptr_ptr;
+    CG(interactive) = orig_interactive;
 
 	return SUCCESS;
 }
