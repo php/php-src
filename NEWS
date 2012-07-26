@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.6
 
 - Core:
+  . Fixed bug #62661 (Interactive php-cli crashes if include() is used in
+    auto_prepend_file). (Laruence)
   . Fixed bug #62565 (Crashes due non-initialized internal properties_table).
     (Felipe)
 
