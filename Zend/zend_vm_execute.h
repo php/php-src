@@ -13917,7 +13917,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
@@ -15919,7 +15920,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
@@ -18131,7 +18133,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
@@ -21166,7 +21169,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
@@ -22504,7 +22508,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
@@ -23662,7 +23667,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
@@ -24820,7 +24826,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
@@ -26244,7 +26251,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
@@ -29498,7 +29506,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
@@ -31371,7 +31380,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
@@ -33453,7 +33463,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
@@ -36219,7 +36230,8 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						goto num_index_dim;
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:
