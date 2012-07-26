@@ -23,12 +23,14 @@
 
 #include "zend.h"
 
+BEGIN_EXTERN_C()
 ZEND_API extern const char *(*zend_new_interned_string)(const char *str, int len, int free_src TSRMLS_DC);
 ZEND_API extern void (*zend_interned_strings_snapshot)(TSRMLS_D);
 ZEND_API extern void (*zend_interned_strings_restore)(TSRMLS_D);
 
 void zend_interned_strings_init(TSRMLS_D);
 void zend_interned_strings_dtor(TSRMLS_D);
+END_EXTERN_C()
 
 #ifndef ZTS
 
