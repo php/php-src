@@ -709,8 +709,8 @@ void php_ini_register_extensions(TSRMLS_D)
 	zend_llist_apply(&extension_lists.engine, php_load_zend_extension_cb TSRMLS_CC);
 	zend_llist_apply(&extension_lists.functions, php_load_php_extension_cb TSRMLS_CC);
 
-	zend_llist_destroy(&extension_lists.engine);
-	zend_llist_destroy(&extension_lists.functions);
+	zend_llist_clean(&extension_lists.engine);
+	zend_llist_clean(&extension_lists.functions);
 }
 /* }}} */
 

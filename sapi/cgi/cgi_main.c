@@ -818,6 +818,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 
 	/* Activate ini entries with values from the user config hash */
 	php_ini_activate_config(entry->user_config, PHP_INI_PERDIR, PHP_INI_STAGE_HTACCESS TSRMLS_CC);
+	php_ini_register_extensions(TSRMLS_CC);
 }
 /* }}} */
 
