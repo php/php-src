@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.16
 
+- Core:
+  . Fixed bug #60194 (--with-zend-multibyte and --enable-debug reports LEAK
+    with run-test.php). (Laruence)
+
 - CURL:
   . Fixed bug #62499 (curl_setopt($ch, CURLOPT_COOKIEFILE, "") returns false).
     (r.hampartsumyan@gmail.com, Laruence)
