@@ -700,7 +700,7 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 /* }}} */
 
 
-/* {{{ proto string json_encode(mixed data [, int options])
+/* {{{ proto string json_encode(mixed data [, int options[, int depth]])
    Returns the JSON representation of a value */
 static PHP_FUNCTION(json_encode)
 {
