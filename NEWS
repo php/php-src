@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.6
 
+- CLI Server:
+  . Implemented FR #62700 (have the console output 'Listening on 
+    http://localhost:8000'). (pascal.chevrel@free.fr)
+
 - Core:
   . Fixed bug #62661 (Interactive php-cli crashes if include() is used in
     auto_prepend_file). (Laruence)
