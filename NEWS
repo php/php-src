@@ -39,6 +39,8 @@ PHP                                                                        NEWS
     sapi/cli/cli.h: No such file). (Johannes)
 
 - Reflection:
+  . Fixed bug #62715 (ReflectionParameter::isDefaultValueAvailable() wrong
+    result). (Laruence)
   . Implemented FR #61602 (Allow access to name of constant used as default 
     value). (reeze.xia@gmail.com)
   
