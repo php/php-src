@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.4.6
+02 Aug 2012, PHP 5.4.6 RC1
 
 - CLI Server:
   . Implemented FR #62700 (have the console output 'Listening on 
