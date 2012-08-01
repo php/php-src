@@ -2379,9 +2379,7 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 	{
 		RETURN_FALSE;
 	}
-	if (param->offset < param->required) {
-		RETURN_FALSE;
-	}
+
 	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
 	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2.op_type == IS_UNUSED) {
 		RETURN_FALSE;
