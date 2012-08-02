@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.7
 
+- PDO:
+  . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
+
 - Reflection:
   . Fixed bug #62715 (ReflectionParameter::isDefaultValueAvailable() wrong
     result). (Laruence)
