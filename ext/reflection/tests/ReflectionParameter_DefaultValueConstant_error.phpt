@@ -18,8 +18,6 @@ foreach($reflect->getParameters() as $param) {
 	}
 }
 ?>
-==DONE==
 --EXPECT--
-Parameter is not optional
+Internal error: Failed to retrieve the default value
 CONST_TEST_1
-==DONE==
