@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.7
 
+- Core:
+  . Fixed bug #62725 (Calling exit() in a shutdown function does not return
+    the exit value). (Laruence)
+
 - PDO:
   . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
 
