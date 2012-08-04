@@ -2350,7 +2350,6 @@ ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_
 	}
 	INIT_CLASS_ENTRY_INIT_METHODS((**disabled_class), disabled_class_new, NULL, NULL, NULL, NULL, NULL);
 	(*disabled_class)->create_object = display_disabled_class;
-	(*disabled_class)->builtin_functions = disabled_class_new;
 	zend_hash_clean(&((*disabled_class)->function_table));
 	return SUCCESS;
 }
