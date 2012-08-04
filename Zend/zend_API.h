@@ -170,6 +170,11 @@ typedef struct _zend_fcall_info_cache {
 		int _len = class_name_len;								\
 		class_container.name = zend_strndup(class_name, _len);	\
 		class_container.name_length = _len;						\
+		INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
+	}
+
+#define INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
+	{															\
 		class_container.builtin_functions = functions;			\
 		class_container.constructor = NULL;						\
 		class_container.destructor = NULL;						\
