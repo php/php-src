@@ -2,6 +2,8 @@
 Phar front controller mime type override, other
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+--INI--
+detect_unicode=0
 --ENV--
 SCRIPT_NAME=/frontcontroller14.php
 REQUEST_URI=/frontcontroller14.php/a.jpg

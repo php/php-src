@@ -2,6 +2,7 @@
 Phar front controller with weird SCRIPT_NAME [cache_list]
 --INI--
 phar.cache_list={PWD}/frontcontroller30.php
+detect_unicode=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--

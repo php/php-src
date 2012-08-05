@@ -5,6 +5,7 @@ Phar: rename_dir test
 --INI--
 phar.readonly=0
 phar.require_hash=0
+detect_unicode=0
 --FILE--
 <?php
 

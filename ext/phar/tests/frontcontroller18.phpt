@@ -2,6 +2,8 @@
 Phar front controller $_SERVER munging failure
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+--INI--
+detect_unicode=0
 --ENV--
 SCRIPT_NAME=/frontcontroller18.php
 REQUEST_URI=/frontcontroller18.php/fronk.gronk
