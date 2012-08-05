@@ -101,7 +101,6 @@ DBA_UPDATE_FUNC(inifile)
 	case 0:
 		return SUCCESS;
 	case 1:
-		php_error_docref1(NULL TSRMLS_CC, key, E_WARNING, "Key already exists");
 		return FAILURE;
 	}
 }
