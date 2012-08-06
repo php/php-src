@@ -894,7 +894,7 @@ static inline void zend_mm_init(zend_mm_heap *heap)
 	heap->large_free_bitmap = 0;
 #if ZEND_MM_CACHE
 	heap->cached = 0;
-	memset(heap->cache, 0, sizeof(heap->cache));
+	memset(heap->cache, 0, sizeof(heap->cache) * ZEND_MM_NUM_BUCKETS);
 #endif
 #if ZEND_MM_CACHE_STAT
 	for (i = 0; i < ZEND_MM_NUM_BUCKETS; i++) {
