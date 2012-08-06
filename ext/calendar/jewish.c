@@ -86,7 +86,7 @@
  *          4 Tevet     29   29   29         29   29   29
  *          5 Shevat    30   30   30         30   30   30
  *          6 Adar I    --   --   --         30   30   30 (optional)
- *          7 Adar II   29   29   29         29   29   29
+ *          7 Adar (II) 29   29   29         29   29   29
  *          8 Nisan     30   30   30         30   30   30
  *          9 Iyyar     29   29   29         29   29   29
  *         10 Sivan     30   30   30         30   30   30
@@ -286,7 +286,7 @@
 #define AM3_11_20 ((9 * HALAKIM_PER_HOUR) + 204)
 #define AM9_32_43 ((15 * HALAKIM_PER_HOUR) + 589)
 
-static int monthsPerYear[19] =
+int monthsPerYear[19] =
 {
 12, 12, 13, 12, 12, 13, 12, 13, 12, 12, 13, 12, 12, 13, 12, 12, 13, 12, 13
 };

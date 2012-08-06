@@ -204,8 +204,8 @@ static struct cal_entry_t cal_conversion_table[CAL_NUM_CALS] = {
 	 FrenchMonthName, FrenchMonthName}
 };
 
-#define JEWISH_MONTH_NAME(year) 	((monthsPerYear[(year) % 19] == 13)?JewishMonthNameLeap:JewishMonthName)
-#define JEWISH_HEB_MONTH_NAME(year) ((monthsPerYear[(year) % 19] == 13)?JewishMonthHebNameLeap:JewishMonthHebName)
+#define JEWISH_MONTH_NAME(year) 	((monthsPerYear[((year)-1) % 19] == 13)?JewishMonthNameLeap:JewishMonthName)
+#define JEWISH_HEB_MONTH_NAME(year) ((monthsPerYear[((year)-1) % 19] == 13)?JewishMonthHebNameLeap:JewishMonthHebName)
 
 /* For jddayofweek */
 enum { CAL_DOW_DAYNO, CAL_DOW_SHORT, CAL_DOW_LONG };
