@@ -27,10 +27,6 @@
 
 PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 {
-	if (!sapi_module.phpinfo_as_text && flag & PHP_CREDITS_FULLPAGE) {
-		php_print_info_htmlhead(TSRMLS_C);
-	}
-
 	if (!sapi_module.phpinfo_as_text) {
 		PUTS("<h1>PHP Credits</h1>\n");
 	} else {
@@ -122,10 +118,6 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 		/* Windows build boxes and such things */
 		CREDIT_LINE("Windows Infrastructure", "Alex Schoenmaker");
 		php_info_print_table_end();
-	}
-
-	if (!sapi_module.phpinfo_as_text && flag & PHP_CREDITS_FULLPAGE) {
-		PUTS("</div></body></html>\n");
 	}
 }
 /* }}} */

@@ -201,10 +201,6 @@ SOURCE=..\main\php_ini.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\main\php_logos.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\main\php_open_temporary_file.c
 # End Source File
 # Begin Source File
@@ -314,10 +310,6 @@ SOURCE=..\main\php_globals.h
 # Begin Source File
 
 SOURCE=..\main\php_ini.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\main\php_logos.h
 # End Source File
 # Begin Source File
 

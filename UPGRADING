@@ -23,6 +23,9 @@ PHP X.Y UPGRADE NOTES
 - Drop Windows XP and 2003 support. (Pierre)
 - All internal case insensitivity handling for class, function and constant 
   names is done according to ASCII rules, current locale settings are ignored. 
+- php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
+  zend_logo_guid() have been removed
+- Removal of Logo GUIDs
 
 ========================================
 2. New Features
@@ -94,6 +97,8 @@ PHP X.Y UPGRADE NOTES
 - IntlDateFormatter::format() and datefmt_format() now also accept an
   IntlCalendar object for formatting.
 - Deprecated mcrypt_ecb() made to produce E_DEPRECATED.
+- php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
+  zend_logo_guid() have been removed
 
 ========================================
 5. New Functions
@@ -229,3 +234,5 @@ PHP X.Y UPGRADE NOTES
 ========================================
 11. Other Changes
 ========================================
+
+- Logo GUIDs will no longer work
