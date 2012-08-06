@@ -40,8 +40,12 @@ PHP                                                                        NEWS
     CURLOPT_TRANSFER_ENCODING, CURLOPT_DNS_SERVERS and CURLOPT_USE_SSL.
     (Pierrick)
   . Fixed bug #55635 (CURLOPT_BINARYTRANSFER no longer used. The constant
-	still exists for backward compatibility but is doing nothing). (Pierrick)
+    still exists for backward compatibility but is doing nothing). (Pierrick)
   . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
+
+- Datetime
+  . Fixed bug #61642 (modify("+5 weekdays") returns Sunday). 
+    (Dmitri Iouchtchenko) 
 
 - Hash
   . Added support for PBKDF2 via hash_pbkdf2(). (Anthony Ferrara)
