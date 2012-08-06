@@ -2407,7 +2407,7 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 		php_localtime_r(&tv.tv_sec, &tm);
 		php_asctime_r(&tm, buf);
 		printf("PHP %s Development Server started at %s"
-				"Listening on %s\n"
+				"Listening on http://%s\n"
 				"Document root is %s\n"
 				"Press Ctrl-C to quit.\n",
 				PHP_VERSION, buf, server_bind_address, document_root);
