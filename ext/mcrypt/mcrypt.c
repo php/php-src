@@ -238,7 +238,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 const zend_function_entry mcrypt_functions[] = { /* {{{ */
-	PHP_FE(mcrypt_ecb, 				arginfo_mcrypt_ecb)
+	PHP_DEP_FE(mcrypt_ecb, 				arginfo_mcrypt_ecb)
 	PHP_FE(mcrypt_cbc, 				arginfo_mcrypt_cbc)
 	PHP_FE(mcrypt_cfb, 				arginfo_mcrypt_cfb)
 	PHP_FE(mcrypt_ofb, 				arginfo_mcrypt_ofb)
