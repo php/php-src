@@ -93,6 +93,7 @@ PHP X.Y UPGRADE NOTES
   instead.
 - IntlDateFormatter::format() and datefmt_format() now also accept an
   IntlCalendar object for formatting.
+- Deprecated mcrypt_ecb() made to produce E_DEPRECATED.
 
 ========================================
 5. New Functions
