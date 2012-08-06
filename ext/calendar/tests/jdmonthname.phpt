@@ -178,7 +178,7 @@ Heshvan
 Kislev
 Tevet
 Shevat
-AdarI
+AdarII
 Nisan
 Iyyar
 Sivan
@@ -279,7 +279,7 @@ Heshvan
 Kislev
 Tevet
 Shevat
-AdarI
+AdarII
 Nisan
 Iyyar
 Sivan

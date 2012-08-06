@@ -85,8 +85,8 @@
  *          3 Kislev    29   30   30         29   30   30 (variable)
  *          4 Tevet     29   29   29         29   29   29
  *          5 Shevat    30   30   30         30   30   30
- *          6 Adar I    29   29   29         30   30   30 (variable)
- *          7 Adar II   --   --   --         29   29   29 (optional)
+ *          6 Adar I    --   --   --         30   30   30 (optional)
+ *          7 Adar II   29   29   29         29   29   29
  *          8 Nisan     30   30   30         30   30   30
  *          9 Iyyar     29   29   29         29   29   29
  *         10 Sivan     30   30   30         30   30   30
@@ -100,8 +100,8 @@
  *     have multiple possible spellings in the Roman character set.  I have
  *     chosen to use the spellings found in the Encyclopedia Judaica.
  *
- *     Adar II, the month added for leap years, is sometimes referred to as
- *     the 13th month, but I have chosen to assign it the number 7 to keep
+ *     Adar I, the month added for leap years, is sometimes referred to as
+ *     the 13th month, but I have chosen to assign it the number 6 to keep
  *     the months in chronological order.  This may not be consistent with
  *     other numbering schemes.
  *
@@ -587,11 +587,11 @@ void SdnToJewish(
 				(*pMonth)--;
 				(*pDay) += 30;
 			} else {
-				*pMonth = 6;
+				*pMonth = 7;
 				*pDay = inputDay - tishri1 + 207;
 				if (*pDay > 0)
 					return;
-				(*pMonth)--;
+				(*pMonth) -= 2;
 				(*pDay) += 30;
 			}
 			if (*pDay > 0)
