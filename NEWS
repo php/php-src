@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #62744 (dangling pointers made by zend_disable_class). (Laruence)
   . Fixed bug #62716 (munmap() is called with the incorrect length). 
     (slangley@google.com)
+  . Fixed bug ##62460 (php binaries installed as binary.dSYM). (Reeze Xia)
   . Fixed bug #60194 (--with-zend-multibyte and --enable-debug reports LEAK
     with run-test.php). (Laruence)
 
