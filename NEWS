@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #62725 (Calling exit() in a shutdown function does not return
     the exit value). (Laruence)
+  . Fixed bug #51363 (Fatal error raised by var_export() not caught by error 
+    handler). (Lonny Kapelushnik)
 
 - PDO:
   . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
