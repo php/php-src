@@ -75,8 +75,8 @@ December
 --- mode 4 ---
 Tevet
 Shevat
-AdarI
-AdarII
+Adar I
+Adar II
 Nisan
 Iyyar
 Sivan
