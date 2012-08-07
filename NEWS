@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     other expressions (https://wiki.php.net/rfc/empty_isset_exprs).
     (Nikita Popov)
 
+- Calendar:
+  . Fixed bug #54254 (cal_from_jd returns month = 6 when there is only one Adar)
+    (Stas, Eitan Mosenkis).
+
 - Core:
   . Added boolval(). (Jille Timmermans).
   . Fixed bug #18556 (Engine uses locale rules to handle class names). (Stas)
