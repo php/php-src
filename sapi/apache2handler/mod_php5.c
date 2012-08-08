@@ -25,6 +25,10 @@
 #include "php.h"
 #include "php_apache.h"
 
+#ifdef APLOG_USE_MODULE
+APLOG_USE_MODULE(php5);
+#endif
+
 AP_MODULE_DECLARE_DATA module php5_module = {
 	STANDARD20_MODULE_STUFF,
 	create_php_config,		/* create per-directory config structure */

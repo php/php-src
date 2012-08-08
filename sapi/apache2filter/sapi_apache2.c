@@ -744,6 +744,9 @@ static size_t php_apache_fsizer_stream(void *handle TSRMLS_DC)
 	return 0;
 }
 
+#ifdef APLOG_USE_MODULE
+APLOG_USE_MODULE(php5);
+#endif 
 AP_MODULE_DECLARE_DATA module php5_module = {
 	STANDARD20_MODULE_STUFF,
 	create_php_config,		/* create per-directory config structure */
