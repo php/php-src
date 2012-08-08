@@ -606,11 +606,17 @@ static int
 php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
                           apr_pool_t *ptemp, server_rec *s)
 {
+
+#if AP_MODULE_MAGIC_AT_LEAST(20110203,1)
+        /* Apache will load, unload and then reload a DSO module. This
+         * prevents us from starting PHP until the second load. */
+         if (ap_state_query(AP_SQ_MAIN_STATE) == AP_SQ_MS_CREATE_PRE_CONFIG) {
+                return OK;
+         }
+#else
 	void *data = NULL;
 	const char *userdata_key = "apache2filter_post_config";
 
-	/* Apache will load, unload and then reload a DSO module. This
-	 * prevents us from starting PHP until the second load. */
 	apr_pool_userdata_get(&data, userdata_key, s->process->pool);
 	if (data == NULL) {
 		/* We must use set() here and *not* setn(), otherwise the
@@ -622,6 +628,7 @@ php_apache_server_startup(apr_pool_t *pconf, apr_pool_t *plog,
 							  apr_pool_cleanup_null, s->process->pool);
 		return OK;
 	}
+#endif
 
 	/* Set up our overridden path. */
 	if (apache2_php_ini_path_override) {
