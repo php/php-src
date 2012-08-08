@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     the exit value). (Laruence)
   . Fixed bug #51363 (Fatal error raised by var_export() not caught by error 
     handler). (Lonny Kapelushnik)
+  . Fixed bug #40459 (Stat and Dir stream wrapper methods do not call 
+    constructor). (Stas)
 
 - PDO:
   . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)

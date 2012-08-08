@@ -347,6 +347,9 @@ PHP 5.4 UPGRADE NOTES
   allows for toggling if the list of namespaces starts from the document root
   or from the node you call the method on
 
+- Since 5.4.7, ctor is always called when new user stream wrapper object is created.
+  Before, it was called only when stream_open was called.
+
 ==============================
 5. Changes to existing classes
 ==============================
