@@ -125,7 +125,7 @@ PHPAPI void php_print_credits(int flag TSRMLS_DC) /* {{{ */
 	}
 
 	if (!sapi_module.phpinfo_as_text && flag & PHP_CREDITS_FULLPAGE) {
-		PUTS("</div></body></html>\n");
+		PUTS("</div>\n");
 	}
 }
 /* }}} */
