@@ -17,15 +17,15 @@ var_dump(phpinfo(INFO_LICENSE));
 
 ?>
 --EXPECTF--
-<!DOCTYPE %s>
-%a</html>bool(true)
+<!doctype html>
+%abool(true)
 --
 
 Warning: phpinfo() expects parameter 1 to be long, array given in %sphpinfo2.php on line 5
 NULL
 --
-<!DOCTYPE %s>
-%a</html>bool(true)
+<!doctype html>
+%abool(true)
 --
-<!DOCTYPE %s>
-%a</html>bool(true)
+<!doctype html>
+%abool(true)
