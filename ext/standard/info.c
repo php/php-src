@@ -878,7 +878,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 
 	if ((flag & PHP_INFO_CREDITS) && !sapi_module.phpinfo_as_text) {	
 		php_info_print_hr();
-		php_print_credits(PHP_CREDITS_ALL TSRMLS_CC);
+		php_print_credits(PHP_CREDITS_ALL & ~PHP_CREDITS_FULLPAGE TSRMLS_CC);
 	}
 
 	if (flag & PHP_INFO_LICENSE) {
