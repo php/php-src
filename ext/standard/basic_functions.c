@@ -3751,8 +3751,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	/* Default to global filters only */
 	FG(stream_filters) = NULL;
 
-	FG(wrapper_errors) = NULL;
-
 	return SUCCESS;
 }
 /* }}} */
