@@ -1830,6 +1830,7 @@ timelib_time* timelib_strtotime(char *s, int len, struct timelib_error_container
 	in.tzdb = tzdb;
 	in.time->is_localtime = 0;
 	in.time->zone_type = 0;
+	in.time->relative.days = TIMELIB_UNSET;
 
 	do {
 		t = scan(&in, tz_get_wrapper);
