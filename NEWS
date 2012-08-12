@@ -3,14 +3,16 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.7
 
 - Core:
-  . Fixed bug #62328 (implementing __toString and a cast to string fails)
-    (Laruence)
   . Fixed bug #62725 (Calling exit() in a shutdown function does not return
     the exit value). (Laruence)
   . Fixed bug #51363 (Fatal error raised by var_export() not caught by error 
     handler). (Lonny Kapelushnik)
   . Fixed bug #40459 (Stat and Dir stream wrapper methods do not call 
     constructor). (Stas)
+
+- SimpleXML:
+  . Fixed bug #62328 (implementing __toString and a cast to string fails)
+    (Laruence)
 
 - PDO:
   . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
