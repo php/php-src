@@ -258,6 +258,12 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			{
 				TSRMLS_FETCH();
 
+				if (Z_OBJCE_P(expr)->__tostring) {
+					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+						break;
+					}
+				}
+
 				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
 					zval *val;
 
