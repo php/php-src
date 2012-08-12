@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.3.16
 
 - Core:
+  . Fixed bug #62763 (register_shutdown_function and extending class). 
+    (Laruence)
   . Fixed bug #62744 (dangling pointers made by zend_disable_class). (Laruence)
   . Fixed bug #62716 (munmap() is called with the incorrect length). 
     (slangley@google.com)
