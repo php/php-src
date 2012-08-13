@@ -2513,6 +2513,18 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	zend_bool nested;
 	zend_op_array *op_array = EX(op_array);
 
+	/* Generators go throw a different cleanup process */
+	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		/* The generator object is stored in return_value_ptr_ptr */
+		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+		/* Close the generator to free up resources */
+		zend_generator_close(generator, 1 TSRMLS_CC);
+
+		/* Pass execution back to handling code */
+		ZEND_VM_RETURN();
+	}
+
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
 	if (!EG(active_symbol_table)) {
@@ -5213,18 +5225,6 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
         ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
         ZEND_VM_CONTINUE();
     } else {
-		/* For generators skip the leave handler and return directly */
-		if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
-			/* The generator object is stored in return_value_ptr_ptr */
-			zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-			/* Close the generator to free up resources */
-			zend_generator_close(generator, 1 TSRMLS_CC);
-
-			/* Pass execution back to handling code */
-			ZEND_VM_RETURN();
-		}
-
         ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
     }
 }
