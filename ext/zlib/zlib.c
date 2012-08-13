@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@lerdorf.on.ca>                       |
-   |          Stefan R�hrich <sr@linux.de>                                |
+   |          Stefan Röhrich <sr@linux.de>                                |
    |          Zeev Suraski <zeev@zend.com>                                |
    |          Jade Nicoletti <nicoletti@nns.ch>                           |
    |          Michael Wallner <mike@php.net>                              |
@@ -263,6 +263,8 @@ static php_output_handler *php_zlib_output_handler_init(const char *handler_name
 		ZLIBG(output_compression) = chunk_size ? chunk_size : PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
 	}
 
+    ZLIBG(handler_registered) = 1;
+
 	if ((h = php_output_handler_create_internal(handler_name, handler_name_len, php_zlib_output_handler, chunk_size, flags TSRMLS_CC))) {
 		php_output_handler_set_context(h, php_zlib_output_handler_context_init(TSRMLS_C), php_zlib_output_handler_context_dtor TSRMLS_CC);
 	}
@@ -284,7 +286,8 @@ static void php_zlib_output_compression_start(TSRMLS_D)
 			ZLIBG(output_compression) = PHP_OUTPUT_HANDLER_DEFAULT_SIZE;
 			/* break omitted intentionally */
 		default:
-			if (	(h = php_zlib_output_handler_init(ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME), ZLIBG(output_compression), PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC)) &&
+			if (	php_zlib_output_encoding(TSRMLS_C) &&
+					(h = php_zlib_output_handler_init(ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME), ZLIBG(output_compression), PHP_OUTPUT_HANDLER_STDFLAGS TSRMLS_CC)) &&
 					(SUCCESS == php_output_handler_start(h TSRMLS_CC))) {
 				if (ZLIBG(output_handler) && *ZLIBG(output_handler)) {
 					MAKE_STD_ZVAL(zoh);
@@ -689,6 +692,7 @@ PHP_ZLIB_ENCODE_FUNC(zlib_encode, 0);
 /* {{{ proto binary zlib_decode(binary data[, int max_decoded_len])
    Uncompress any raw/gzip/zlib encoded data */
 PHP_ZLIB_DECODE_FUNC(zlib_decode, PHP_ZLIB_ENCODING_ANY);
+/* }}} */
 
 /* NOTE: The naming of these userland functions was quite unlucky */
 /* {{{ proto binary gzdeflate(binary data[, int level = -1[, int encoding = ZLIB_ENCODING_RAW])
@@ -700,18 +704,22 @@ PHP_ZLIB_ENCODE_FUNC(gzdeflate, PHP_ZLIB_ENCODING_RAW);
    Encode data with the gzip encoding */
 PHP_ZLIB_ENCODE_FUNC(gzencode, PHP_ZLIB_ENCODING_GZIP);
 /* }}} */
+
 /* {{{ proto binary gzcompress(binary data[, int level = -1[, int encoding = ZLIB_ENCODING_DEFLATE])
    Encode data with the zlib encoding */
 PHP_ZLIB_ENCODE_FUNC(gzcompress, PHP_ZLIB_ENCODING_DEFLATE);
 /* }}} */
+
 /* {{{ proto binary gzinflate(binary data[, int max_decoded_len])
    Decode raw deflate encoded data */
 PHP_ZLIB_DECODE_FUNC(gzinflate, PHP_ZLIB_ENCODING_RAW);
 /* }}} */
+
 /* {{{ proto binary gzdecode(binary data[, int max_decoded_len])
    Decode gzip encoded data */
 PHP_ZLIB_DECODE_FUNC(gzdecode, PHP_ZLIB_ENCODING_GZIP);
 /* }}} */
+
 /* {{{ proto binary gzuncompress(binary data[, int max_decoded_len])
    Decode zlib encoded data */
 PHP_ZLIB_DECODE_FUNC(gzuncompress, PHP_ZLIB_ENCODING_DEFLATE);
@@ -889,6 +897,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_compression)
 
 	status = OnUpdateLong(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 
+	ZLIBG(output_compression) = ZLIBG(output_compression_default);
 	if (stage == PHP_INI_STAGE_RUNTIME && int_value) {
 		if (!php_output_handler_started(ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME) TSRMLS_CC)) {
 			php_zlib_output_compression_start(TSRMLS_C);
@@ -913,7 +922,7 @@ static PHP_INI_MH(OnUpdate_zlib_output_handler)
  
 /* {{{ INI */
 PHP_INI_BEGIN()
-	STD_PHP_INI_BOOLEAN("zlib.output_compression",      "0", PHP_INI_ALL, OnUpdate_zlib_output_compression,       output_compression,       zend_zlib_globals, zlib_globals)
+	STD_PHP_INI_BOOLEAN("zlib.output_compression",      "0", PHP_INI_ALL, OnUpdate_zlib_output_compression,       output_compression_default,       zend_zlib_globals, zlib_globals)
 	STD_PHP_INI_ENTRY("zlib.output_compression_level", "-1", PHP_INI_ALL, OnUpdateLong,                           output_compression_level, zend_zlib_globals, zlib_globals)
 	STD_PHP_INI_ENTRY("zlib.output_handler",             "", PHP_INI_ALL, OnUpdate_zlib_output_handler,           output_handler,           zend_zlib_globals, zlib_globals)
 PHP_INI_END()
@@ -957,21 +966,24 @@ static PHP_MSHUTDOWN_FUNCTION(zlib)
 static PHP_RINIT_FUNCTION(zlib)
 {
 	ZLIBG(compression_coding) = 0;
-
-	php_zlib_output_compression_start(TSRMLS_C);
+    if (!ZLIBG(handler_registered)) {
+        ZLIBG(output_compression) = ZLIBG(output_compression_default);
+        php_zlib_output_compression_start(TSRMLS_C);
+    }
 
 	return SUCCESS;
 }
 /* }}} */
 
+/* {{{ PHP_RSHUTDOWN_FUNCTION */
 static PHP_RSHUTDOWN_FUNCTION(zlib)
 {
-	ZLIBG(output_compression) = 0;
-
 	php_zlib_cleanup_ob_gzhandler_mess(TSRMLS_C);
+    ZLIBG(handler_registered) = 0;
 
     return SUCCESS;
 }
+/* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION */
 static PHP_MINFO_FUNCTION(zlib)
@@ -992,6 +1004,7 @@ static PHP_MINFO_FUNCTION(zlib)
 static ZEND_MODULE_GLOBALS_CTOR_D(zlib)
 {
 	zlib_globals->ob_gzhandler = NULL;
+    zlib_globals->handler_registered = 0;
 }
 /* }}} */
 

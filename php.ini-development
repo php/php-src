@@ -751,7 +751,7 @@ enable_dl = Off
 ; will look for to know it is OK to continue execution.  Setting this variable MAY
 ; cause security issues, KNOW WHAT YOU ARE DOING FIRST.
 ; http://php.net/cgi.redirect-status-env
-;cgi.redirect_status_env = ;
+;cgi.redirect_status_env = 
 
 ; cgi.fix_pathinfo provides *real* PATH_INFO/PATH_TRANSLATED support for CGI.  PHP's
 ; previous behaviour was to set PATH_TRANSLATED to SCRIPT_FILENAME, and to not grok
@@ -768,7 +768,7 @@ enable_dl = Off
 ; does not currently support this feature (03/17/2002)
 ; Set to 1 if running under IIS.  Default is zero.
 ; http://php.net/fastcgi.impersonate
-;fastcgi.impersonate = 1;
+;fastcgi.impersonate = 1
 
 ; Disable logging through FastCGI connection. PHP's default behavior is to enable
 ; this feature.
@@ -1020,6 +1020,8 @@ mail.add_x_header = On
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
 ;mail.log =
+; Log mail to syslog (Event Log on NT, not valid in Windows 95).
+;mail.log = syslog
 
 [SQL]
 ; http://php.net/sql.safe-mode

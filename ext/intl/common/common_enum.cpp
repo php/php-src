@@ -18,51 +18,22 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 // Fix build on Windows/old versions of ICU
 #include <stdio.h>
 
 #include "common_enum.h"
 
 extern "C" {
-#include "intl_error.h"
-#include "intl_data.h"
 #include <zend_interfaces.h>
 #include <zend_exceptions.h>
 }
 
-static zend_class_entry *IntlIterator_ce_ptr;
-static zend_object_handlers IntlIterator_handlers;
+zend_class_entry *IntlIterator_ce_ptr;
+zend_object_handlers IntlIterator_handlers;
 
-typedef struct {
-	zend_object				zo;
-	intl_error				err;
-	zend_object_iterator	*iterator;
-} IntlIterator_object;
-
-#define INTLITERATOR_ERROR(ii)						(ii)->err
-#define INTLITERATOR_ERROR_P(ii)					&(INTLITERATOR_ERROR(ii))
-
-#define INTLITERATOR_ERROR_CODE(ii)					INTL_ERROR_CODE(INTLITERATOR_ERROR(ii))
-#define INTLITERATOR_ERROR_CODE_P(ii)				&(INTL_ERROR_CODE(INTLITERATOR_ERROR(ii)))
-
-#define INTLITERATOR_METHOD_INIT_VARS				INTL_METHOD_INIT_VARS(IntlIterator, ii)
-#define INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(IntlIterator, ii)
-#define INTLITERATOR_METHOD_FETCH_OBJECT\
-	object = getThis(); \
-	INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; \
-	if (ii->iterator == NULL) { \
-		intl_errors_set(&ii->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlIterator", 0 TSRMLS_CC); \
-		RETURN_FALSE; \
-	}
-
-typedef struct {
-	zend_object_iterator	zoi;
-	zval					*current;
-	zval					*wrapping_obj;
-	void					(*destroy_free_it)(zend_object_iterator	*iterator TSRMLS_DC);
-} zoi_with_current;
-
-static void zoi_with_current_dtor(zend_object_iterator *iter TSRMLS_DC)
+void zoi_with_current_dtor(zend_object_iterator *iter TSRMLS_DC)
 {
 	zoi_with_current *zoiwc = (zoi_with_current*)iter;
 	
@@ -82,22 +53,22 @@ static void zoi_with_current_dtor(zend_object_iterator *iter TSRMLS_DC)
 		 * function being called by the iterator wrapper destructor function and
 		 * not finding the memory of this iterator allocated anymore. */
 		iter->funcs->invalidate_current(iter TSRMLS_CC);
-		zoiwc->destroy_free_it(iter TSRMLS_CC);
+		zoiwc->destroy_it(iter TSRMLS_CC);
 		efree(iter);
 	}
 }
 
-static int zoi_with_current_valid(zend_object_iterator *iter TSRMLS_DC)
+U_CFUNC int zoi_with_current_valid(zend_object_iterator *iter TSRMLS_DC)
 {
 	return ((zoi_with_current*)iter)->current != NULL ? SUCCESS : FAILURE;
 }
 
-static void zoi_with_current_get_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
+U_CFUNC void zoi_with_current_get_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC)
 {
 	*data = &((zoi_with_current*)iter)->current;
 }
 
-static void zoi_with_current_invalidate_current(zend_object_iterator *iter TSRMLS_DC)
+U_CFUNC void zoi_with_current_invalidate_current(zend_object_iterator *iter TSRMLS_DC)
 {
 	zoi_with_current *zoi_iter = (zoi_with_current*)iter;
 	if (zoi_iter->current) {
@@ -153,7 +124,7 @@ static void string_enum_rewind(zend_object_iterator *iter TSRMLS_DC)
 	}
 }
 
-static void string_enum_destroy_free_it(zend_object_iterator *iter TSRMLS_DC)
+static void string_enum_destroy_it(zend_object_iterator *iter TSRMLS_DC)
 {
 	delete (StringEnumeration*)iter->data;
 }
@@ -177,7 +148,7 @@ U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *ob
 	ii->iterator->data = (void*)se;
 	ii->iterator->funcs = &string_enum_object_iterator_funcs;
 	ii->iterator->index = 0;
-	((zoi_with_current*)ii->iterator)->destroy_free_it = string_enum_destroy_free_it;
+	((zoi_with_current*)ii->iterator)->destroy_it = string_enum_destroy_it;
 	((zoi_with_current*)ii->iterator)->wrapping_obj = object;
 	((zoi_with_current*)ii->iterator)->current = NULL;
 }
@@ -329,7 +300,7 @@ static PHP_METHOD(IntlIterator, rewind)
 	if (ii->iterator->funcs->rewind) {
 		ii->iterator->funcs->rewind(ii->iterator TSRMLS_CC);
 	} else {
-		intl_error_set(NULL, U_UNSUPPORTED_ERROR,
+		intl_errors_set(INTLITERATOR_ERROR_P(ii), U_UNSUPPORTED_ERROR,
 			"IntlIterator::rewind: rewind not supported", 0 TSRMLS_CC);
 	}
 }

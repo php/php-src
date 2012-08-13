@@ -401,7 +401,7 @@ function copy_test_dir($directory, $dest)
 	while (FALSE !== ($file = readdir($directory_list))) {
 		$full_path = $directory . '/' . $file;
 		if($file != '.' && $file != '..' && $file != '.svn' && is_dir($full_path)) {
-			if ($file == 'tests') {
+			if ($file == 'tests' || $file == 'examples') {
 				if (!is_dir($dest . '/' . $full_path)) {
 					mkdir($dest . '/' . $full_path , 0775, true);
 				}

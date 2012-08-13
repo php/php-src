@@ -19,7 +19,7 @@ function ut_main()
     if( $num === false )
         return $fmt->getErrorMessage() . " (" . $fmt->getErrorCode() . ")\n";
     else
-        return "Ooops, an error should have occured.";
+        return "Ooops, an error should have occurred.";
 }
 
 include_once( 'ut_common.inc' );

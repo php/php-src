@@ -38,7 +38,7 @@ function php_cli_server_start($code = 'echo "Hello world";', $no_router = FALSE)
 	// note: even when server prints 'Listening on localhost:8964...Press Ctrl-C to quit.'
 	//       it might not be listening yet...need to wait until fsockopen() call returns
     $i = 0;
-    while (($i++ < 5) && !($fp = @fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT))) {
+    while (($i++ < 30) && !($fp = @fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT))) {
         usleep(10000);
     }
 

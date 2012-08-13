@@ -26,8 +26,8 @@
 
 extern const char * mysqlnd_debug_std_no_trace_funcs[];
 
-#define MYSQLND_MEM_D	TSRMLS_DC ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC
-#define MYSQLND_MEM_C	TSRMLS_CC ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC
+#define MYSQLND_MEM_D	TSRMLS_DC ZEND_FILE_LINE_ORIG_DC
+#define MYSQLND_MEM_C	TSRMLS_CC ZEND_FILE_LINE_CC
 
 struct st_mysqlnd_allocator_methods
 {

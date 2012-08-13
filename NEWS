@@ -3,12 +3,22 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.5.0
 
 - General improvements:
+  . Implemented 'finally' keyword (https://wiki.php.net/rfc/finally). (Laruence)
   . Drop Windows XP and 2003 support. (Pierre)
   . World domination
   . Improve set_exception_handler while doing reset.(Laruence)
   . Support constant array/string dereferencing. (Laruence)
+  . Add support for using empty() on the result of function calls and
+    other expressions (https://wiki.php.net/rfc/empty_isset_exprs).
+    (Nikita Popov)
+
+- Calendar:
+  . Fixed bug #54254 (cal_from_jd returns month = 6 when there is only one Adar)
+    (Stas, Eitan Mosenkis).
 
 - Core:
+  . Added boolval(). (Jille Timmermans).
+  . Fixed bug #18556 (Engine uses locale rules to handle class names). (Stas)
   . Fixed bug #61681 (Malformed grammar). (Nikita Popov, Etienne, Laruence).
   . Fixed bug #61038 (unpack("a5", "str\0\0") does not work as expected).
     (srgoogleguy, Gustavo)
@@ -35,8 +45,15 @@ PHP                                                                        NEWS
     CURLOPT_TRANSFER_ENCODING, CURLOPT_DNS_SERVERS and CURLOPT_USE_SSL.
     (Pierrick)
   . Fixed bug #55635 (CURLOPT_BINARYTRANSFER no longer used. The constant
-	still exists for backward compatibility but is doing nothing). (Pierrick)
+    still exists for backward compatibility but is doing nothing). (Pierrick)
   . Fixed bug #54995 (Missing CURLINFO_RESPONSE_CODE support). (Pierrick)
+
+- Datetime
+  . Fixed bug #61642 (modify("+5 weekdays") returns Sunday). 
+    (Dmitri Iouchtchenko) 
+
+- Hash
+  . Added support for PBKDF2 via hash_pbkdf2(). (Anthony Ferrara)
 
 - MySQLi
   . Dropped support for LOAD DATA LOCAL INFILE handlers when using libmysql.
@@ -48,5 +65,8 @@ PHP                                                                        NEWS
 
 - pgsql
   . Added pg_escape_literal() and pg_escape_identifier() (Yasuo)
+
+- Zip:
+  . Upgraded libzip to 0.10.1 (Anatoliy)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

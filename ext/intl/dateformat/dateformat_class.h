@@ -24,12 +24,12 @@
 #include "dateformat_data.h"
 
 typedef struct {
-	zend_object     	zo;
-	dateformat_data  	datef_data;
-	int			date_type ;
-	int			time_type ;
-	int			calendar ;
-	char*			timezone_id;
+	zend_object		zo;
+	dateformat_data	datef_data;
+	int				date_type;
+	int				time_type;
+	int				calendar;
+	char			*requested_locale;
 } IntlDateFormatter_object;
 
 void dateformat_register_IntlDateFormatter_class( TSRMLS_D );

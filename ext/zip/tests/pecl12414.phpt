@@ -35,5 +35,4 @@ if ($res === TRUE) {
 ?>
 --DONE--
 --EXPECTF--
-ZIP contents size: %d
-zip_readfile recorded data does not match unpacked size: %specl12414.zip : MYLOGOV2.GFX
+zip_readfile could not read from %specl12414.zip : MYLOGOV2.GFX

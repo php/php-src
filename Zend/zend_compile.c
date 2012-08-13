@@ -1685,7 +1685,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		zval key;
 
 		if (CG(current_namespace)) {
-			/* Prefix function name with current namespcae name */
+			/* Prefix function name with current namespace name */
 			znode tmp;
 
 			tmp.u.constant = *CG(current_namespace);
@@ -2731,6 +2731,7 @@ static int zend_add_try_element(zend_uint try_op TSRMLS_DC) /* {{{ */
 
 	CG(active_op_array)->try_catch_array = erealloc(CG(active_op_array)->try_catch_array, sizeof(zend_try_catch_element)*CG(active_op_array)->last_try_catch);
 	CG(active_op_array)->try_catch_array[try_catch_offset].try_op = try_op;
+	CG(active_op_array)->try_catch_array[try_catch_offset].finally_op = 0;
 	return try_catch_offset;
 }
 /* }}} */
@@ -2747,7 +2748,7 @@ void zend_do_first_catch(znode *open_parentheses TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_initialize_try_catch_element(const znode *try_token TSRMLS_DC) /* {{{ */
+void zend_initialize_try_catch_element(znode *catch_token TSRMLS_DC) /* {{{ */
 {
 	int jmp_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -2764,7 +2765,7 @@ void zend_initialize_try_catch_element(const znode *try_token TSRMLS_DC) /* {{{ 
 	zend_stack_top(&CG(bp_stack), (void **) &jmp_list_ptr);
 	zend_llist_add_element(jmp_list_ptr, &jmp_op_number);
 
-	zend_add_catch_element(try_token->u.op.opline_num, get_next_op_number(CG(active_op_array)) TSRMLS_CC);
+    catch_token->EA = get_next_op_number(CG(active_op_array));
 }
 /* }}} */
 
@@ -2790,7 +2791,11 @@ void zend_do_try(znode *try_token TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_do_begin_catch(znode *try_token, znode *class_name, znode *catch_var, znode *first_catch TSRMLS_DC) /* {{{ */
+void zend_do_finally(znode *finally_token TSRMLS_DC) /* {{{ */ {
+    finally_token->u.op.opline_num = get_next_op_number(CG(active_op_array));
+} /* }}} */
+
+void zend_do_begin_catch(znode *catch_token, znode *class_name, znode *catch_var, znode *first_catch TSRMLS_DC) /* {{{ */
 {
 	long catch_op_number;
 	zend_op *opline;
@@ -2818,11 +2823,11 @@ void zend_do_begin_catch(znode *try_token, znode *class_name, znode *catch_var, 
 	Z_STRVAL(catch_var->u.constant) = (char*)CG(active_op_array)->vars[opline->op2.var].name;
 	opline->result.num = 0; /* 1 means it's the last catch in the block */
 
-	try_token->u.op.opline_num = catch_op_number;
+	catch_token->u.op.opline_num = catch_op_number;
 }
 /* }}} */
 
-void zend_do_end_catch(const znode *try_token TSRMLS_DC) /* {{{ */
+void zend_do_end_catch(znode *catch_token TSRMLS_DC) /* {{{ */
 {
 	int jmp_op_number = get_next_op_number(CG(active_op_array));
 	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
@@ -2836,7 +2841,39 @@ void zend_do_end_catch(const znode *try_token TSRMLS_DC) /* {{{ */
 	zend_stack_top(&CG(bp_stack), (void **) &jmp_list_ptr);
 	zend_llist_add_element(jmp_list_ptr, &jmp_op_number);
 
-	CG(active_op_array)->opcodes[try_token->u.op.opline_num].extended_value = get_next_op_number(CG(active_op_array));
+	CG(active_op_array)->opcodes[catch_token->u.op.opline_num].extended_value = get_next_op_number(CG(active_op_array));
+}
+/* }}} */
+
+void zend_do_bind_catch(znode *try_token, znode *catch_token TSRMLS_DC) /* {{{ */ {
+    if (catch_token->op_type != IS_UNUSED) {
+       zend_add_catch_element(try_token->u.op.opline_num, catch_token->EA TSRMLS_CC);
+    }
+}
+/* }}} */
+
+
+void zend_do_end_finally(znode *try_token, znode* catch_token, znode *finally_token TSRMLS_DC) /* {{{ */
+{
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+    if (catch_token->op_type == IS_UNUSED && finally_token->op_type == IS_UNUSED) {
+        zend_error(E_COMPILE_ERROR, "Cannot use try without catch or finally");
+    } 
+    if (finally_token->op_type != IS_UNUSED) {
+        CG(active_op_array)->try_catch_array[try_token->u.op.opline_num].finally_op = finally_token->u.op.opline_num;
+        //try_token->u.op.opline_num = catch_token->u.op.opline_num;
+
+        opline->opcode = ZEND_LEAVE;
+        SET_UNUSED(opline->op1);
+        SET_UNUSED(opline->op2);
+    } 
+    if (catch_token->op_type == IS_UNUSED) {
+        CG(active_op_array)->try_catch_array[try_token->u.op.opline_num].catch_op = 0;
+    } //else {
+    //    try_token->u.op.opline_num = catch_token->u.op.opline_num;
+    //}
+
 }
 /* }}} */
 
@@ -3689,6 +3726,7 @@ ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *tr
 			}
 		}
 		ce->traits[ce->num_traits++] = trait;
+		trait->refcount++;
 	}
 }
 /* }}} */
@@ -3781,7 +3819,7 @@ static int zend_traits_merge_functions(zend_function *fn TSRMLS_DC, int num_args
 	} else {
 		/* Add it to result function table */
 		if (zend_hash_quick_add(resulting_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, fn, sizeof(zend_function), NULL)==FAILURE) {
-			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occured during updating resulting trait method table", fn->common.function_name);
+			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occurred during updating resulting trait method table", fn->common.function_name);
 		}
 	}
 
@@ -3898,7 +3936,7 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		function_add_ref(&fn_copy);
 
 		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, &fn_copy, sizeof(zend_function), (void**)&fn_copy_p)==FAILURE) {
-			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occured during updating class method table", hash_key->arKey);
+			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occurred during updating class method table", hash_key->arKey);
 		}
    
 		zend_add_magic_methods(ce, hash_key->arKey, hash_key->nKeyLength, fn_copy_p TSRMLS_CC);
@@ -3940,8 +3978,8 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				fn_copy = *fn;
 				function_add_ref(&fn_copy);
 				/* this function_name is never destroyed, because its refcount
-				   greater than 1, classes are always destoyed in reverse order
-				   and trait is declared early than this class */
+				   greater than 1 and classes are always destoyed before the
+				   traits they use */
 				fn_copy.common.function_name = aliases[i]->alias;
 					
 				/* if it is 0, no modifieres has been changed */
@@ -4146,14 +4184,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	size_t i;
 
 	/* prepare copies of trait function tables for combination */
-	function_tables = malloc(sizeof(HashTable*) * ce->num_traits);
-	resulting_table = (HashTable *) malloc(sizeof(HashTable));
+	function_tables = emalloc(sizeof(HashTable*) * ce->num_traits);
+	resulting_table = (HashTable *)emalloc(sizeof(HashTable));
 	
 	/* TODO: revisit this start size, may be its not optimal */
-	zend_hash_init_ex(resulting_table, 10, NULL, NULL, 1, 0);
+	zend_hash_init_ex(resulting_table, 10, NULL, NULL, 0, 0);
   
 	for (i = 0; i < ce->num_traits; i++) {
-		function_tables[i] = (HashTable *) malloc(sizeof(HashTable));
+		function_tables[i] = (HashTable *)emalloc(sizeof(HashTable));
 		zend_hash_init_ex(function_tables[i], ce->traits[i]->function_table.nNumOfElements, NULL, NULL, 1, 0);
 
 		if (ce->trait_precedences) {
@@ -4186,14 +4224,14 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 	for (i = 0; i < ce->num_traits; i++) {
 		/* zend_hash_destroy(function_tables[i]); */
 		zend_hash_graceful_destroy(function_tables[i]);
-		free(function_tables[i]);
+		efree(function_tables[i]);
 	}
-	free(function_tables);
+	efree(function_tables);
 
 	/* free temporary resulting table */
 	/* zend_hash_destroy(resulting_table); */
 	zend_hash_graceful_destroy(resulting_table);
-	free(resulting_table);
+	efree(resulting_table);
 }
 /* }}} */
 
@@ -6159,7 +6197,16 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 
 	zend_do_end_variable_parse(variable, BP_VAR_IS, 0 TSRMLS_CC);
 
-	zend_check_writable_variable(variable);
+	if (zend_is_function_or_method_call(variable)) {
+		if (type == ZEND_ISEMPTY) {
+			/* empty(func()) can be transformed to !func() */
+			zend_do_unary_op(ZEND_BOOL_NOT, result, variable TSRMLS_CC);
+		} else {
+			zend_error(E_COMPILE_ERROR, "Cannot use isset() on the result of a function call (you can use \"null !== func()\" instead)");
+		}
+
+		return;
+	}
 
 	if (variable->op_type == IS_CV) {
 		last_op = get_next_op(CG(active_op_array) TSRMLS_CC);

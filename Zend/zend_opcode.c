@@ -215,6 +215,12 @@ ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 void _destroy_zend_class_traits_info(zend_class_entry *ce)
 {
 	if (ce->num_traits > 0 && ce->traits) {
+		size_t i;
+		for (i = 0; i < ce->num_traits; i++) {
+			if (ce->traits[i]) {
+				destroy_zend_class(&ce->traits[i]);
+			}
+		}
 		efree(ce->traits);
 	}
 	

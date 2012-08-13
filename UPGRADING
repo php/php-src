@@ -21,13 +21,23 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 - Drop Windows XP and 2003 support. (Pierre)
+- All internal case insensitivity handling for class, function and constant 
+  names is done according to ASCII rules, current locale settings are ignored. 
+- php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
+  zend_logo_guid() have been removed
+- Removal of Logo GUIDs
 
 ========================================
 2. New Features
 ========================================
 
+- Support finally keyword. (Laruence)
+  (wiki.php.net/rfc/finally)
 - Support constant array/string dereferencing. (Laruence)
   (https://wiki.php.net/rfc/constdereference)
+- Add support for using empty() on the result of function calls and
+  other expressions. Thus it is now possible to write empty(getArray()),
+  for example. (https://wiki.php.net/rfc/empty_isset_exprs)
 
 ========================================
 2. Changes in SAPI modules
@@ -51,13 +61,63 @@ PHP X.Y UPGRADE NOTES
   - Implemented format character "Z": NUL-padded string
   - "a" now does not remove trailing NUL characters on unpack() anymore
   - "A" will now strip all trailing ASCII whitespace on unpack() (it used to
-    remove only trailing spaces.
+    remove only trailing spaces).
+- MessageFormatter::format() and related functions now accepted named arguments
+  and mixed numeric/named arguments in ICU 4.8+.
+- MessageFormatter::format() and related functions now don't error out when
+  an insufficient argument count is provided. Instead, the placeholders will
+  remain unsubstituted.
+- MessageFormatter::parse() and MessageFormat::format() (and their static
+  equivalents) now don't throw away better than second precision in the
+  arguments.
+- IntlDateFormatter::__construct and datefmt_create() now accept for the
+  $timezone argument time zone identifiers, IntlTimeZone objects, DateTimeZone
+  objects and NULL. It used to accept only time zone identifiers and NULL.
+  Invalid time zone identifiers are no longer accepted. Emptry strings are
+  no longer accepted.
+- The default time zone used in IntlDateFormatter::__construct and
+  datefmt_create() (when the corresponding argument is not passed or NULL is
+  passed) is now the one given by date_default_timezone_get(), not the
+  default ICU time zone.
+- The time zone passed to the IntlDateFormatter is ignored if it is NULL and if
+  the calendar passed is an IntlCalendar object -- in this case, the
+  IntlCalendar's time zone will be used instead. Otherwise, the time zone
+  specified in the $timezone argument is used instead. This does not affect
+  old code, as IntlCalendar was introduced in this version.
+- IntlDateFormatter::__construct and datefmt_create() now accept for the
+  $calendar argument also IntlCalendar objects.
+- IntlDateFormatter::getCalendar() and datefmt_get_calendar() return false
+  if the IntlDateFormatter was set up with an IntlCalendar instead of the
+  constants IntlDateFormatter::GREGORIAN/TRADITIONAL. IntlCalendar did not
+  exist before this version.
+- IntlDateFormatter::setCalendar() and datefmt_set_calendar() now also accept
+  an IntlCalendar object, in which case its time zone is taken. Passing a
+  constant is still allowed, and still keeps the time zone.
+- IntlDateFormatter::setTimeZoneID() and datefmt_set_timezone_id() are
+  deprecated. Use IntlDateFormatter::setTimeZone() or datefmt_set_timezone()
+  instead.
+- IntlDateFormatter::format() and datefmt_format() now also accept an
+  IntlCalendar object for formatting.
+- Deprecated mcrypt_ecb() made to produce E_DEPRECATED.
+- php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
+  zend_logo_guid() have been removed
 
 ========================================
 5. New Functions
 ========================================
 
+- Core:
+  - boolval()
+
+- Hash:
+  - hash_pbkdf2()
+
 - Intl:
+  - datefmt_format_object()
+  - datefmt_get_calendar_object()
+  - datefmt_get_timezone()
+  - datefmt_set_timezone()
+  - datefmt_get_calendar_object()
   - intlcal_create_instance()
   - intlcal_get_keyword_values_for_locale()
   - intlcal_get_now()
@@ -98,6 +158,8 @@ PHP X.Y UPGRADE NOTES
   - intlcal_get_skipped_wall_time_option()
   - intlcal_set_repeated_wall_time_option()
   - intlcal_set_skipped_wall_time_option()
+  - intlcal_from_date_time()
+  - intlcal_to_date_time()
   - intlcal_get_error_code()
   - intlcal_get_error_message()
   - intlgregcal_create_instance()
@@ -122,8 +184,15 @@ PHP X.Y UPGRADE NOTES
   - intltz_has_same_rules()
   - intltz_get_display_name()
   - intltz_get_dst_savings()
+  - intltz_from_date_time_zone()
+  - intltz_to_date_time_zone()
   - intltz_get_error_code()
   - intltz_get_error_message()
+
+  - IntlDateFormatter::formatObject()
+  - IntlDateFormatter::getCalendarObject()
+  - IntlDateFormatter::getTimeZone()
+  - IntlDateFormatter::setTimeZone()
 
 - SPL:
   - SplFixedArray::__wakeup()
@@ -136,6 +205,9 @@ PHP X.Y UPGRADE NOTES
   - IntlCalendar
   - IntlGregorianCalendar
   - IntlTimeZone
+  - IntlBreakIterator
+  - IntlRuleBasedBreakIterator
+  - IntlCodePointBreakIterator
 
 ========================================
 7. Removed Extensions
@@ -146,6 +218,10 @@ PHP X.Y UPGRADE NOTES
 8. Other Changes to Extensions
 ========================================
 
+- Intl:
+  - This extension now requires ICU 4.0+.
+  - Added intl.use_exceptions INI directive, which controls what happens when
+    global errors are set together with intl.error_level.
 
 ========================================
 9. New Global Constants
@@ -160,3 +236,5 @@ PHP X.Y UPGRADE NOTES
 ========================================
 11. Other Changes
 ========================================
+
+- Logo GUIDs will no longer work

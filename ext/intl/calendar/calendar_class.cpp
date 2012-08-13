@@ -18,6 +18,8 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 #include <unicode/calendar.h>
 #include <unicode/gregocal.h>
 
@@ -53,6 +55,14 @@ U_CFUNC	void calendar_object_create(zval *object,
 
 	object_init_ex(object, ce);
 	calendar_object_construct(object, calendar TSRMLS_CC);
+}
+
+U_CFUNC Calendar *calendar_fetch_native_calendar(zval *object TSRMLS_DC)
+{
+	Calendar_object *co = (Calendar_object*)
+			zend_object_store_get_object(object TSRMLS_CC);
+
+	return co->ucal;
 }
 
 U_CFUNC void calendar_object_construct(zval *object,
@@ -143,6 +153,8 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 	Calendar_object	*co;
 	const Calendar	*cal;
 	
+	*is_temp = 1;
+
 	array_init_size(&zv, 8);
 
 	co  = (Calendar_object*)zend_object_store_get_object(object TSRMLS_CC);
@@ -203,8 +215,6 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 	}
 
 	add_assoc_zval_ex(&zv, "fields", sizeof("fields"), zfields);
-
-	*is_temp = 1;
 
 	return Z_ARRVAL(zv);
 }
@@ -316,8 +326,8 @@ ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_add, 0, 0, 2)
 	ZEND_ARG_INFO(0, amount)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setTimeZone, 0, 0, 2)
-	ZEND_ARG_OBJ_INFO(0, timeZone, IntlTimeZone, 1)
+ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setTimeZone, 0, 0, 1)
+	ZEND_ARG_INFO(0, timeZone)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_set, 0, 0, 2)
@@ -349,6 +359,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setLenient, 0, 0, 1)
 	ZEND_ARG_INFO(0, isLenient)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_from_date_time, 0, 0, 1)
+	ZEND_ARG_INFO(0, dateTime)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_wall_time_option, 0, 0, 1)
@@ -426,6 +440,8 @@ static const zend_function_entry Calendar_class_functions[] = {
 	PHP_ME_MAPPING(setRepeatedWallTimeOption,intlcal_set_repeated_wall_time_option,ainfo_cal_wall_time_option,ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(setSkippedWallTimeOption,intlcal_set_skipped_wall_time_option,ainfo_cal_wall_time_option,ZEND_ACC_PUBLIC)
 #endif
+	PHP_ME_MAPPING(fromDateTime,		intlcal_from_date_time,		ainfo_cal_from_date_time,			ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(toDateTime,			intlcal_to_date_time,		ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getErrorCode,		intlcal_get_error_code,		ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getErrorMessage,		intlcal_get_error_message,	ainfo_cal_void,						ZEND_ACC_PUBLIC)
 	PHP_FE_END

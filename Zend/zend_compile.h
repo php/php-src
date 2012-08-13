@@ -132,6 +132,7 @@ typedef struct _zend_label {
 typedef struct _zend_try_catch_element {
 	zend_uint try_op;
 	zend_uint catch_op;  /* ketchup! */
+    zend_uint finally_op;
 } zend_try_catch_element;
 
 #if SIZEOF_LONG == 8
@@ -382,6 +383,7 @@ struct _zend_execute_data {
 	zend_class_entry *current_called_scope;
 	zval *current_this;
 	zval *current_object;
+    zend_bool leaving;
 };
 
 #define EX(element) execute_data.element
@@ -499,7 +501,7 @@ void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC);
 
 void zend_do_try(znode *try_token TSRMLS_DC);
 void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, znode *first_catch TSRMLS_DC);
-void zend_do_end_catch(const znode *try_token TSRMLS_DC);
+void zend_do_end_catch(znode *catch_token TSRMLS_DC);
 void zend_do_throw(const znode *expr TSRMLS_DC);
 
 ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time);
@@ -520,10 +522,6 @@ ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC);
 void zend_prepare_trait_precedence(znode *result, znode *method_reference, znode *trait_list TSRMLS_DC);
 void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC);
 void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC);
-
-void init_trait_alias_list(znode* result, const znode* trait_alias TSRMLS_DC);
-void add_trait_alias(znode* result, const znode* trait_alias TSRMLS_DC);
-void init_trait_alias(znode* result, const znode* method_name, const znode* alias, const znode* modifiers TSRMLS_DC);
 
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
 void zend_do_early_binding(TSRMLS_D);
@@ -669,7 +667,7 @@ void print_op_array(zend_op_array *op_array, int optimizations);
 ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 void zend_do_first_catch(znode *open_parentheses TSRMLS_DC);
-void zend_initialize_try_catch_element(const znode *try_token TSRMLS_DC);
+void zend_initialize_try_catch_element(znode *catch_token TSRMLS_DC);
 void zend_do_mark_last_catch(const znode *first_catch, const znode *last_additional_catch TSRMLS_DC);
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(const char *name TSRMLS_DC);

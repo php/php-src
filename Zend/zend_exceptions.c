@@ -29,8 +29,8 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 
-zend_class_entry *default_exception_ce;
-zend_class_entry *error_exception_ce;
+static zend_class_entry *default_exception_ce;
+static zend_class_entry *error_exception_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 

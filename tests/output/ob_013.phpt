@@ -39,7 +39,7 @@ Array
 (
     [name] => d
     [type] => 1
-    [flags] => 4209
+    [flags] => 20593
     [level] => 4
     [chunk_size] => %d
     [buffer_size] => 16384
@@ -95,7 +95,7 @@ Array
         (
             [name] => d
             [type] => 1
-            [flags] => 4209
+            [flags] => 20593
             [level] => 4
             [chunk_size] => %d
             [buffer_size] => 16384

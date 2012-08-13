@@ -1,7 +1,11 @@
 --TEST--
 gmp_gcdext() basic tests
 --SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+<?php if (!extension_loaded("gmp")) print "skip";
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip.. only for Non Windows Systems');
+}
+?>
 --FILE--
 <?php
 

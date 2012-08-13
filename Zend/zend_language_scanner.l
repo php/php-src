@@ -1045,6 +1045,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_CATCH;
 }
 
+<ST_IN_SCRIPTING>"finally" {
+	return T_FINALLY;
+}
+
 <ST_IN_SCRIPTING>"throw" {
 	return T_THROW;
 }

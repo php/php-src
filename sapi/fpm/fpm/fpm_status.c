@@ -14,6 +14,7 @@
 #include "zlog.h"
 #include "fpm_atomic.h"
 #include "fpm_conf.h"
+#include "fpm_php.h"
 #include <ext/standard/html.h>
 
 static char *fpm_status_uri = NULL;
@@ -125,13 +126,13 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		}
 
 		/* full status ? */
-		full = SG(request_info).request_uri && strstr(SG(request_info).query_string, "full");
+		full = (fpm_php_get_string_from_table("_GET", "full" TSRMLS_CC) != NULL);
 		short_syntax = short_post = NULL;
 		full_separator = full_pre = full_syntax = full_post = NULL;
 		encode = 0;
 
 		/* HTML */
-		if (SG(request_info).query_string && strstr(SG(request_info).query_string, "html")) {
+		if (fpm_php_get_string_from_table("_GET", "html" TSRMLS_CC)) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/html"), 1, 1 TSRMLS_CC);
 			time_format = "%d/%b/%Y:%H:%M:%S %z";
 			encode = 1;
@@ -205,7 +206,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 			}
 
 		/* XML */
-		} else if (SG(request_info).request_uri && strstr(SG(request_info).query_string, "xml")) {
+		} else if (fpm_php_get_string_from_table("_GET", "xml" TSRMLS_CC)) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/xml"), 1, 1 TSRMLS_CC);
 			time_format = "%s";
 			encode = 1;
@@ -256,7 +257,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				}
 
 			/* JSON */
-		} else if (SG(request_info).request_uri && strstr(SG(request_info).query_string, "json")) {
+		} else if (fpm_php_get_string_from_table("_GET", "json" TSRMLS_CC)) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: application/json"), 1, 1 TSRMLS_CC);
 			time_format = "%s";
 

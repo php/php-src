@@ -2,6 +2,7 @@
 Bug #47415 PDO_Firebird segfaults when passing lowercased column name to bindColumn()
 --SKIPIF--
 <?php extension_loaded("pdo_firebird") or die("skip"); ?>
+<?php function_exists("ibase_query") or die("skip"); ?>
 --FILE--
 <?php
 

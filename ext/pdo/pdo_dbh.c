@@ -700,7 +700,7 @@ static PHP_METHOD(PDO, inTransaction)
 		RETURN_BOOL(dbh->in_txn);
 	}	
 
-	RETURN_LONG(dbh->methods->in_transaction(dbh TSRMLS_CC));
+	RETURN_BOOL(dbh->methods->in_transaction(dbh TSRMLS_CC));
 }
 /* }}} */
 

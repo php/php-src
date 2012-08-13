@@ -146,6 +146,9 @@ struct _zend_object_handlers {
 
 extern ZEND_API zend_object_handlers std_object_handlers;
 
+#define zend_get_function_root_class(fbc) \
+	((fbc)->common.prototype ? (fbc)->common.prototype->common.scope : (fbc)->common.scope)
+
 BEGIN_EXTERN_C()
 ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, const char *function_name_strval, int function_name_strlen, const struct _zend_literal *key TSRMLS_DC);
 ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *property_name, int property_name_len, zend_bool silent, const struct _zend_literal *key TSRMLS_DC);

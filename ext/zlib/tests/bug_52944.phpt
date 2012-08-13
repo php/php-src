@@ -2,6 +2,11 @@
 Bug #52944 (segfault with zlib filter and corrupted data)
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
+<?php
+include "func.inc";
+if (substr(PHP_OS, 0, 3) == 'WIN' && version_compare(get_zlib_version(), '1.2.7') < 0) {
+	die('skip - only for zlib >= 1.2.7 on windows');
+}
 --INI--
 allow_url_fopen=1
 --FILE--
