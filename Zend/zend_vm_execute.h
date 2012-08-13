@@ -1177,10 +1177,10 @@ static int ZEND_FASTCALL  ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 static int ZEND_FASTCALL  ZEND_LEAVE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-    USE_OPLINE;
-	SAVE_OPLINE();
+    USE_OPLINE
     zend_uint i, op_num = opline - EG(active_op_array)->opcodes;
 
+    SAVE_OPLINE();
     zend_exception_restore(TSRMLS_C);
     if (EX(leaving)) {
         zend_uint catch_op_num = 0, finally_op_num = 0;
