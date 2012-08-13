@@ -160,6 +160,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_RETURN     "return (T_RETURN)"
 %token T_TRY        "try (T_TRY)"
 %token T_CATCH      "catch (T_CATCH)"
+%token T_FINALLY    "finally (T_FINALLY)"
 %token T_THROW      "throw (T_THROW)"
 %token T_USE        "use (T_USE)"
 %token T_INSTEADOF  "insteadof (T_INSTEADOF)"
@@ -314,15 +315,24 @@ unticked_statement:
 	|	T_DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); }
 	|	';'		/* empty statement */
 	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}'
-		T_CATCH '(' { zend_initialize_try_catch_element(&$1 TSRMLS_CC); }
-		fully_qualified_class_name { zend_do_first_catch(&$7 TSRMLS_CC); }
-		T_VARIABLE ')' { zend_do_begin_catch(&$1, &$9, &$11, &$7 TSRMLS_CC); }
-		'{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
-		additional_catches { zend_do_mark_last_catch(&$7, &$18 TSRMLS_CC); }
+        catch_statement { zend_do_bind_catch(&$1, &$6 TSRMLS_CC); }
+        finally_statement { zend_do_end_finally(&$1, &$6, &$8 TSRMLS_CC); }
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
 	|	T_GOTO T_STRING ';' { zend_do_goto(&$2 TSRMLS_CC); }
 ;
 
+catch_statement:
+       /* empty */ { $$.op_type = IS_UNUSED; }
+    |   T_CATCH '(' { zend_initialize_try_catch_element(&$1 TSRMLS_CC); } 
+        fully_qualified_class_name { zend_do_first_catch(&$2 TSRMLS_CC); }
+        T_VARIABLE ')' { zend_do_begin_catch(&$1, &$4, &$6, &$2 TSRMLS_CC); }
+		'{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
+		additional_catches { zend_do_mark_last_catch(&$2, &$13 TSRMLS_CC); $$ = $1;}
+
+finally_statement:
+       /* empty */ { $$.op_type = IS_UNUSED; }
+    |  T_FINALLY { zend_do_finally(&$1 TSRMLS_CC); } '{' inner_statement_list '}' { $$ = $1; }
+;
 
 additional_catches:
 		non_empty_additional_catches { $$ = $1; }
@@ -334,11 +344,9 @@ non_empty_additional_catches:
 	|	non_empty_additional_catches additional_catch { $$ = $2; }
 ;
 
-
 additional_catch:
 	T_CATCH '(' fully_qualified_class_name { $$.u.op.opline_num = get_next_op_number(CG(active_op_array)); } T_VARIABLE ')' { zend_do_begin_catch(&$1, &$3, &$5, NULL TSRMLS_CC); } '{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 ;
-
 
 unset_variables:
 		unset_variable
