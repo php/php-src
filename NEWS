@@ -22,6 +22,7 @@ PHP                                                                        NEWS
     result). (Laruence)
 
 - Session:
+  . Fixed bug (segfault due to retval is not initialized). (Laruence)
   . Fixed bug (segfault due to PS(mod_user_implemented) not be reseted 
     when close handler call exit). (Laruence)
 
