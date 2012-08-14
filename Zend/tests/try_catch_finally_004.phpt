@@ -1,5 +1,5 @@
 --TEST--
-Try catch finally
+Try catch finally (re-throw exception in catch block)
 --CREDITS--
 adoy
 --FILE--
