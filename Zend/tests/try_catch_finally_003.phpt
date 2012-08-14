@@ -1,5 +1,5 @@
 --TEST--
-Try catch finally (multi catch blcoks with return)
+Try catch finally (multi catch blocks with return)
 --FILE--
 <?php
 
