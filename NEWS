@@ -21,6 +21,11 @@ PHP                                                                        NEWS
   . Fixed bug #62715 (ReflectionParameter::isDefaultValueAvailable() wrong
     result). (Laruence)
 
+- Session:
+  . Fixed bug (segfault due to PS(mod_user_implemented) not be reseted 
+    when close handler call exit). (Laruence)
+
+
 ?? ??? 2012, PHP 5.4.6
 
 - CLI Server:
