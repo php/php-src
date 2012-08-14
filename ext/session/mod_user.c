@@ -99,6 +99,7 @@ PS_OPEN_FUNC(user)
 
 PS_CLOSE_FUNC(user)
 {
+	zend_bool bailout = 0;
 	STDVARS;
 
 	if (!PS(mod_user_implemented)) {
@@ -106,8 +107,21 @@ PS_CLOSE_FUNC(user)
 		return SUCCESS;
 	}
 
-	retval = ps_call_handler(PSF(close), 0, NULL TSRMLS_CC);
+	zend_try {
+		retval = ps_call_handler(PSF(close), 0, NULL TSRMLS_CC);
+	} zend_catch {
+		bailout = 1;
+		PS(mod_user_implemented) = 0;
+	} zend_end_try();
+
 	PS(mod_user_implemented) = 0;
+
+	if (bailout) {
+		if (retval) {
+			zval_ptr_dtor(&retval);
+		}
+		zend_bailout();
+	}
 
 	FINISH;
 }
