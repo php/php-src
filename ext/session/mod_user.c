@@ -114,14 +114,14 @@ PS_CLOSE_FUNC(user)
 		PS(mod_user_implemented) = 0;
 	} zend_end_try();
 
-	PS(mod_user_implemented) = 0;
-
 	if (bailout) {
 		if (retval) {
 			zval_ptr_dtor(&retval);
 		}
 		zend_bailout();
 	}
+
+	PS(mod_user_implemented) = 0;
 
 	FINISH;
 }
