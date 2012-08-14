@@ -111,8 +111,9 @@ PS_CLOSE_FUNC(user)
 		retval = ps_call_handler(PSF(close), 0, NULL TSRMLS_CC);
 	} zend_catch {
 		bailout = 1;
-		PS(mod_user_implemented) = 0;
 	} zend_end_try();
+
+	PS(mod_user_implemented) = 0;
 
 	if (bailout) {
 		if (retval) {
@@ -120,8 +121,6 @@ PS_CLOSE_FUNC(user)
 		}
 		zend_bailout();
 	}
-
-	PS(mod_user_implemented) = 0;
 
 	FINISH;
 }
