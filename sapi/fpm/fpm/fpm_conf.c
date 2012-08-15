@@ -1077,7 +1077,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 int fpm_conf_unlink_pid() /* {{{ */
 {
-	if (fpm_global_config.pid_file) {
+	if (!fpm_global_config.daemonize && fpm_global_config.pid_file) {
 		if (0 > unlink(fpm_global_config.pid_file)) {
 			zlog(ZLOG_SYSERROR, "Unable to remove the PID file (%s).", fpm_global_config.pid_file);
 			return -1;
@@ -1091,7 +1091,7 @@ int fpm_conf_write_pid() /* {{{ */
 {
 	int fd;
 
-	if (fpm_global_config.pid_file) {
+	if (!fpm_global_config.daemonize && fpm_global_config.pid_file) {
 		char buf[64];
 		int len;
 
