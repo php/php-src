@@ -31,6 +31,8 @@ PHP X.Y UPGRADE NOTES
 2. New Features
 ========================================
 
+- Support finally keyword. (Laruence)
+  (wiki.php.net/rfc/finally)
 - Support constant array/string dereferencing. (Laruence)
   (https://wiki.php.net/rfc/constdereference)
 - Add support for using empty() on the result of function calls and
