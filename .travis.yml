@@ -10,6 +10,10 @@ notifications:
 env:
     - REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE=./sapi/cli/php
 
+before_install:
+    # Required by dba-tcadb
+    - sudo apt-get install -qq libtokyocabinet-dev
+
 before_script:
     # Compile PHP
     - ./travis/compile.sh

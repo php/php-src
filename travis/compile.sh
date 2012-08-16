@@ -1,14 +1,17 @@
 #!/bin/bash
 ./buildconf
 ./configure \
+--without-pear \
 --with-pdo-mysql \
 --with-mysql \
 --with-mysqli \
 --with-pgsql \
 --with-pdo-pgsql \
 --with-pdo-sqlite \
+--enable-dba \
+--with-gdbm \
+--with-tcadb \
 --enable-intl \
---without-pear \
 --with-gd \
 --with-jpeg-dir=/usr \
 --with-png-dir=/usr \
