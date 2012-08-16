@@ -6,6 +6,9 @@ $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on t
 require(dirname(__FILE__).'/skipif.inc');
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platforms only");
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
+if (getenv("USE_ZEND_ALLOC") === "0") {
+    die("skip Zend MM disabled");
+}
 ?> 
 --INI--
 memory_limit=3M
