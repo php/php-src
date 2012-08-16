@@ -2278,8 +2278,8 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 	Z_TYPE_P(label) = IS_NULL;
 
 	if (op_array->last_try_catch) {
-		zend_uint i, op_num = opline - CG(active_op_array)->opcodes;
-		for (i=0; i<op_array->last_try_catch; i++) {
+		zend_uint i, op_num = opline - op_array->opcodes;
+		for (i=0; i < op_array->last_try_catch; i++) {
 			if (op_array->try_catch_array[i].try_op > op_num) {
 				break;
 			}
