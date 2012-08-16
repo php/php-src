@@ -258,6 +258,9 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			{
 				TSRMLS_FETCH();
 
+				if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+					break;
+				}
 				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
 					zval *val;
 
@@ -269,12 +272,6 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 						break;
 					}
 					zval_ptr_dtor(&val);
-				}
-				/* Standard PHP objects */
-				if (Z_OBJ_HT_P(expr) == &std_object_handlers || !Z_OBJ_HANDLER_P(expr, cast_object)) {
-					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-						break;
-					}
 				}
 				if (!Z_OBJ_HANDLER_P(expr, cast_object) && Z_OBJ_HANDLER_P(expr, get)) {
 					zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
