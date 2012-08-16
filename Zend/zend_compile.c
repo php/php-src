@@ -2277,6 +2277,25 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 	zval_dtor(label);
 	Z_TYPE_P(label) = IS_NULL;
 
+	if (op_array->last_try_catch) {
+		zend_uint i, op_num = opline - CG(active_op_array)->opcodes;
+		for (i=0; i<op_array->last_try_catch; i++) {
+			if (op_array->try_catch_array[i].try_op > op_num) {
+				break;
+			}
+			if (op_num >= op_array->try_catch_array[i].finally_op) {
+				zend_op *p, *end; 
+				p = opline;
+				end = op_array->opcodes + opline->op1.opline_num;
+				while (++p < end) {
+					if (p->opcode == ZEND_LEAVE) {
+						zend_error(E_COMPILE_ERROR, "'goto' out of a finally block is disallowed");
+					}
+				}
+			}
+		}
+	}
+
 	/* Check that we are not moving into loop or switch */
 	current = opline->extended_value;
 	for (distance = 0; current != dest->brk_cont; distance++) {
