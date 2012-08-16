@@ -72,15 +72,23 @@ function special_var_dump($str) {
 --- testing different key lengths
 
 key length=8
+
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 string(32) "736563726574206d6573736167650000"
 
 key length=20
+
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 string(32) "736563726574206d6573736167650000"
 
 key length=24
+
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 string(32) "736563726574206d6573736167650000"
 
 key length=26
+
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
 Warning: mcrypt_cbc(): Size of key is too large for this algorithm in %s on line %d
 string(32) "736563726574206d6573736167650000"
@@ -89,13 +97,19 @@ string(32) "736563726574206d6573736167650000"
 
 iv length=4
 
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
+
 Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
 string(32) "736563726574206d6573736167650000"
 
 iv length=8
+
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 string(32) "736563726574206d6573736167650000"
 
 iv length=9
+
+Deprecated: Function mcrypt_cbc() is deprecated in %s on line %d
 
 Warning: mcrypt_cbc(): The IV parameter must be as long as the blocksize in %s on line %d
 string(32) "736563726574206d6573736167650000"
