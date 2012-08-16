@@ -98,7 +98,9 @@ PHP X.Y UPGRADE NOTES
   instead.
 - IntlDateFormatter::format() and datefmt_format() now also accept an
   IntlCalendar object for formatting.
-- Deprecated mcrypt_ecb() made to produce E_DEPRECATED.
+- mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb() now throw
+  E_DEPRECATED. Their use was already previously discouraged in the docs,
+  but that predated the existence of E_DEPRECATED.
 - php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
   zend_logo_guid() have been removed
 
