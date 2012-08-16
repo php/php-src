@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug #62616 (ArrayIterator::count() from IteratorIterator instance
     gives Segmentation fault). (Laruence, Gustavo)
 
+- Enchant:
+  . Fixed bug #62838 (enchant_dict_quick_check() destroys zval, but fails to 
+  initialize it). (Tony, Mateusz Goik).
+
 19 Jul 2012, PHP 5.3.15
 
 - Zend Engine:
