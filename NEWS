@@ -13,6 +13,7 @@ PHP                                                                        NEWS
     with run-test.php). (Laruence)
 
 - CURL:
+  . Fixed bug #62839 (curl_copy_handle segfault with CURLOPT_FILE). (Pierrick)
   . Fixed bug #62499 (curl_setopt($ch, CURLOPT_COOKIEFILE, "") returns false).
     (r.hampartsumyan@gmail.com, Laruence)
 
