@@ -132,7 +132,8 @@ typedef struct _zend_label {
 typedef struct _zend_try_catch_element {
 	zend_uint try_op;
 	zend_uint catch_op;  /* ketchup! */
-    zend_uint finally_op;
+	zend_uint finally_op;
+	zend_uint finally_end;
 } zend_try_catch_element;
 
 #if SIZEOF_LONG == 8

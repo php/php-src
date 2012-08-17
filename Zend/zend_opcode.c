@@ -528,6 +528,23 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:
+				if (op_array->last_try_catch) {
+					zend_uint i, op_num = opline - op_array->opcodes;
+					for (i=0; i < op_array->last_try_catch; i++) {
+						if (op_array->try_catch_array[i].try_op > op_num) {
+							break;
+						}
+						if ((op_num >= op_array->try_catch_array[i].finally_op 
+									&& op_num < op_array->try_catch_array[i].finally_end)
+								&& (opline->op1.opline_num >= op_array->try_catch_array[i].finally_end 
+									|| opline->op1.opline_num < op_array->try_catch_array[i].finally_op)) {
+							CG(in_compilation) = 1;
+							CG(active_op_array) = op_array;
+							CG(zend_lineno) = opline->lineno;
+							zend_error(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
+						}
+					} 
+				}
 				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.opline_num];
 				break;
 			case ZEND_JMPZ:

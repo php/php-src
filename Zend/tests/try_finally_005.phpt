@@ -14,4 +14,4 @@ label:
 foo();
 ?>
 --EXPECTF--
-Fatal error: 'goto' out of a finally block is disallowed in %stry_finally_005.php on line %d
+Fatal error: jump out of a finally block is disallowed in %stry_finally_005.php on line %d
