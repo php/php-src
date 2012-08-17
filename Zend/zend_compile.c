@@ -2289,6 +2289,11 @@ void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2
 				end = op_array->opcodes + opline->op1.opline_num;
 				while (++p < end) {
 					if (p->opcode == ZEND_LEAVE) {
+						if (pass2) {
+							CG(in_compilation) = 1;
+							CG(active_op_array) = op_array;
+							CG(zend_lineno) = opline->lineno;
+						}
 						zend_error(E_COMPILE_ERROR, "'goto' out of a finally block is disallowed");
 					}
 				}
