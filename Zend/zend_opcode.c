@@ -554,7 +554,6 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
             case ZEND_BRK:
             case ZEND_CONT:
 				if (op_array->last_try_catch) {
-					zend_uint i, op_num = opline - op_array->opcodes;
 					int nest_levels, array_offset;
 					zend_brk_cont_element *jmp_to;
 
