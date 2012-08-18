@@ -1185,6 +1185,35 @@ static PHP_METHOD(PDO, quote)
 }
 /* }}} */
 
+/* {{{ proto string PDO::quoteName(string identifier)
+   Quotes string for use as a table or column name. */
+static PHP_METHOD(PDO, quoteName)
+{
+	pdo_dbh_t *dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	char *str;
+	int str_len;
+	char *qstr;
+	int qlen;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len)) {
+		RETURN_FALSE;
+	}
+	
+	PDO_DBH_CLEAR_ERR();
+	PDO_CONSTRUCT_CHECK;
+	if (!dbh->methods->name_quoter) {
+		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support name quoting" TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	if (dbh->methods->name_quoter(dbh, str, str_len, &qstr, &qlen TSRMLS_CC)) {
+		RETURN_STRINGL(qstr, qlen, 0);
+	}
+	PDO_HANDLE_DBH_ERR();
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ proto int PDO::__wakeup()
    Prevents use of a PDO instance that has been unserialized */
 static PHP_METHOD(PDO, __wakeup)
@@ -1257,6 +1286,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo_quote, 0, 0, 1)
 	ZEND_ARG_INFO(0, paramtype)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo_quotename, 0, 0, 1)
+	ZEND_ARG_INFO(0, identifier)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_pdo__void, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -1276,6 +1309,7 @@ const zend_function_entry pdo_dbh_functions[] = {
 	PHP_ME(PDO, errorInfo,              arginfo_pdo__void,         ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, getAttribute,	arginfo_pdo_getattribute,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, quote,			arginfo_pdo_quote,		ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, quoteName,		arginfo_pdo_quotename,	ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, __wakeup,               arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDO, __sleep,                arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PDO, getAvailableDrivers,    arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

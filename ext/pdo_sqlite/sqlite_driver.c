@@ -238,6 +238,26 @@ static int sqlite_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquot
 	return 1;
 }
 
+/* {{{ sqlite_handle_name_quoter */
+static int sqlite_handle_name_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen TSRMLS_DC)
+{
+	int i;
+	int j = 0;
+	*quoted = safe_emalloc(2, unquotedlen, 3);
+	(*quoted)[j++] = '"';
+	for (i = 0; i < unquotedlen; i++) {
+		(*quoted)[j++] = unquoted[i];
+		if (unquoted[i] == '"') {
+			(*quoted)[j++] = '"';
+		}
+	}
+	(*quoted)[j++] = '"';
+	(*quoted)[j] = '\0';
+	*quotedlen = j;
+	return 1;
+}
+/* }}} */
+
 static int sqlite_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_sqlite_db_handle *H = (pdo_sqlite_db_handle *)dbh->driver_data;
@@ -755,7 +775,9 @@ static struct pdo_dbh_methods sqlite_methods = {
 	pdo_sqlite_get_attribute,
 	NULL,	/* check_liveness: not needed */
 	get_driver_methods,
-	pdo_sqlite_request_shutdown
+	pdo_sqlite_request_shutdown,
+	NULL, /* in_transaction */
+	sqlite_handle_name_quoter,
 };
 
 static char *make_filename_safe(const char *filename TSRMLS_DC)

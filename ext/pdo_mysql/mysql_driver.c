@@ -314,10 +314,35 @@ static int mysql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 }
 /* }}} */
 
+/* {{{ mysql_handle_name_quoter */
+static int mysql_handle_name_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen TSRMLS_DC)
+{
+	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
+	int i;
+	int j = 0;
+	PDO_DBG_ENTER("mysql_handle_name_quoter");
+	PDO_DBG_INF_FMT("dbh=%p", dbh);
+	PDO_DBG_INF_FMT("unquoted=%.*s", unquotedlen, unquoted);
+	*quoted = safe_emalloc(2, unquotedlen, 3);
+	(*quoted)[j++] = '`';
+	for (i = 0; i < unquotedlen; i++) {
+		(*quoted)[j++] = unquoted[i];
+		if (unquoted[i] == '`') {
+			(*quoted)[j++] = '`';
+		}
+	}
+	(*quoted)[j++] = '`';
+	(*quoted)[j] = '\0';
+	*quotedlen = j;
+	PDO_DBG_INF_FMT("quoted=%.*s", *quotedlen, *quoted);
+	PDO_DBG_RETURN(1);
+}
+/* }}} */
+
 /* {{{ mysql_handle_begin */
 static int mysql_handle_begin(pdo_dbh_t *dbh TSRMLS_DC)
 {
-	PDO_DBG_ENTER("mysql_handle_quoter");
+	PDO_DBG_ENTER("mysql_handle_begin");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_RETURN(0 <= mysql_handle_doer(dbh, ZEND_STRL("START TRANSACTION") TSRMLS_CC));
 }
@@ -522,7 +547,11 @@ static struct pdo_dbh_methods mysql_methods = {
 	pdo_mysql_last_insert_id,
 	pdo_mysql_fetch_error_func,
 	pdo_mysql_get_attribute,
-	pdo_mysql_check_liveness
+	pdo_mysql_check_liveness,
+	NULL, /* get_driver_methods */
+	NULL, /* persistent_shutdown */
+	NULL, /* in_transaction */
+	mysql_handle_name_quoter,
 };
 /* }}} */
 
