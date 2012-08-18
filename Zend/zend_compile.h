@@ -80,7 +80,7 @@ typedef union _znode_op {
 	zend_op       *jmp_addr;
 	zval          *zv;
 	zend_literal  *literal;
-  void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
+	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */ 
