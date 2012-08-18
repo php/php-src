@@ -5317,10 +5317,10 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(159, ZEND_LEAVE, ANY, ANY) {
-	{
+ZEND_VM_HANDLER(159, ZEND_LEAVE, ANY, ANY)
+{
 	USE_OPLINE
-		zend_uint i, op_num = opline - EG(active_op_array)->opcodes;
+	zend_uint i, op_num = opline - EG(active_op_array)->opcodes;
 
 	SAVE_OPLINE();
 	zend_exception_restore(TSRMLS_C);

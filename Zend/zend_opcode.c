@@ -485,6 +485,24 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 	}
 }
 
+static void zend_check_finally_breakout(zend_op_array *op_array, zend_op *opline, zend_uint dst_num TSRMLS_DC) {
+	zend_uint i, op_num = opline - op_array->opcodes;
+	for (i=0; i < op_array->last_try_catch; i++) {
+		if (op_array->try_catch_array[i].try_op > op_num) {
+			break;
+		}
+		if ((op_num >= op_array->try_catch_array[i].finally_op 
+					&& op_num < op_array->try_catch_array[i].finally_end)
+				&& (dst_num >= op_array->try_catch_array[i].finally_end 
+					|| dst_num < op_array->try_catch_array[i].finally_op)) {
+			CG(in_compilation) = 1;
+			CG(active_op_array) = op_array;
+			CG(zend_lineno) = opline->lineno;
+			zend_error(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
+		}
+	} 
+}
+
 ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline, *end;
@@ -529,23 +547,29 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 				/* break omitted intentionally */
 			case ZEND_JMP:
 				if (op_array->last_try_catch) {
-					zend_uint i, op_num = opline - op_array->opcodes;
-					for (i=0; i < op_array->last_try_catch; i++) {
-						if (op_array->try_catch_array[i].try_op > op_num) {
-							break;
-						}
-						if ((op_num >= op_array->try_catch_array[i].finally_op 
-									&& op_num < op_array->try_catch_array[i].finally_end)
-								&& (opline->op1.opline_num >= op_array->try_catch_array[i].finally_end 
-									|| opline->op1.opline_num < op_array->try_catch_array[i].finally_op)) {
-							CG(in_compilation) = 1;
-							CG(active_op_array) = op_array;
-							CG(zend_lineno) = opline->lineno;
-							zend_error(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
-						}
-					} 
+					zend_check_finally_breakout(op_array, opline, opline->op1.opline_num TSRMLS_CC);
 				}
 				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.opline_num];
+				break;
+            case ZEND_BRK:
+            case ZEND_CONT:
+				if (op_array->last_try_catch) {
+					zend_uint i, op_num = opline - op_array->opcodes;
+					int nest_levels, array_offset;
+					zend_brk_cont_element *jmp_to;
+
+					nest_levels = Z_LVAL_P(opline->op2.zv);
+					array_offset = opline->op1.opline_num;
+					do {
+						jmp_to = &op_array->brk_cont_array[array_offset];
+						if (nest_levels > 1) {
+							array_offset = jmp_to->parent;
+						}
+					} while (--nest_levels > 0);
+					if (op_array->last_try_catch) {
+						zend_check_finally_breakout(op_array, opline, jmp_to->brk TSRMLS_CC);
+					}
+				}
 				break;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:

@@ -7,15 +7,12 @@ function foo () {
         try {
             try {
             } finally {
-                goto label;
-                echo "dummy";
+                break;
             }
         } catch (Exception $e) {
         } finally {
         }
     } while (0);
-label:
-        echo "label"; 
 }
 
 foo();
