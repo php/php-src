@@ -18,6 +18,8 @@ PHP                                                                        NEWS
     (r.hampartsumyan@gmail.com, Laruence)
 
 - DateTime:
+  . Fixed bug #62852 (Unserialize invalid DateTime causes crash).
+    (reeze.xia@gmail.com)
   . Fixed bug #62500 (Segfault in DateInterval class when extended). (Laruence)
 
 - PDO:
