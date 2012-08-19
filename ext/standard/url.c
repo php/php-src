@@ -204,7 +204,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 		} else {
 			goto just_path;
 		}
-	} else if (*s == '/' && *(s+1) == '/') { /* same-scheme (relative) URL */
+	} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
 		s += 2;
 	} else {
 		just_path:
