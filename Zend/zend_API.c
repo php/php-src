@@ -2445,11 +2445,9 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		/* Skip leading \ */
 		if (Z_STRVAL_P(callable)[0] == '\\') {
 			mlen = Z_STRLEN_P(callable) - 1;
-			mname = Z_STRVAL_P(callable) + 1;
 			lmname = zend_str_tolower_dup(Z_STRVAL_P(callable) + 1, mlen);
 		} else {
 			mlen = Z_STRLEN_P(callable);
-			mname = Z_STRVAL_P(callable);
 			lmname = zend_str_tolower_dup(Z_STRVAL_P(callable), mlen);
 		}
 		/* Check if function with given name exists.
