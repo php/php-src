@@ -434,7 +434,6 @@ static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_
 		if (file_path && !use_copy) {
 			efree(file_path);
 		}
-		use_copy = 1;
 		file_path_len = 1;
 		file_path = "/";
 #endif
