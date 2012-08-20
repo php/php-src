@@ -20,13 +20,13 @@ $gen->send('foo');
 // test resource cleanup
 $gen = gen();
 $gen->rewind();
-$gen->close();
+unset($gen);
 
 // test cloning
 $g1 = gen();
 $g1->rewind();
 $g2 = clone $g1;
-$g1->close();
+unset($g1);
 $g2->send('bar');
 
 ?>

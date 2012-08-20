@@ -301,8 +301,6 @@ static zend_object_value zend_generator_create(zend_class_entry *class_type TSRM
 	/* The key will be incremented on first use, so it'll start at 0 */
 	generator->largest_used_integer_key = -1;
 
-	generator->is_currently_running = 0;
-
 	zend_object_std_init(&generator->std, class_type TSRMLS_CC);
 
 	object.handle = zend_objects_store_put(generator, NULL,
@@ -391,8 +389,6 @@ static void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 		zend_class_entry *original_scope = EG(scope);
 		zend_class_entry *original_called_scope = EG(called_scope);
 
-		zend_bool original_is_currently_running = generator->is_currently_running;
-
 		/* Remember the current stack position so we can back up pushed args */
 		generator->original_stack_top = zend_vm_stack_top(TSRMLS_C);
 
@@ -417,8 +413,6 @@ static void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 		EG(scope) = generator->execute_data->current_scope;
 		EG(called_scope) = generator->execute_data->current_called_scope;
 
-		generator->is_currently_running = 1;
-
 		/* We want the backtrace to look as if the generator function was
 		 * called from whatever method we are current running (e.g. next()).
 		 * The first prev_execute_data contains an additional stack frame,
@@ -439,8 +433,6 @@ static void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 		EG(This) = original_This;
 		EG(scope) = original_scope;
 		EG(called_scope) = original_called_scope;
-
-		generator->is_currently_running = original_is_currently_running;
 
 		/* The stack top before and after the execution differ, i.e. there are
 		 * arguments pushed to the stack. */
@@ -598,27 +590,6 @@ ZEND_METHOD(Generator, send)
 	}
 }
 
-/* {{{ proto void Generator::close()
- * Closes the generator */
-ZEND_METHOD(Generator, close)
-{
-	zend_generator *generator;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
-
-	if (generator->is_currently_running) {
-		zend_error(E_WARNING, "A generator cannot be closed while it is running");
-		return;
-	}
-
-	zend_generator_close(generator, 0 TSRMLS_CC);
-}
-/* }}} */
-
 /* get_iterator implementation */
 
 typedef struct _zend_generator_iterator {
@@ -747,7 +718,6 @@ static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, key,     arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, next,    arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, send,    arginfo_generator_send, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, close,   arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

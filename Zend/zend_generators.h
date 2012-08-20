@@ -46,10 +46,6 @@ typedef struct _zend_generator {
 	temp_variable *send_target;
 	/* Largest used integer key for auto-incrementing keys */
 	long largest_used_integer_key;
-
-	/* We need to know whether the generator is currently executed to avoid it
-	 * being closed while still running */
-	zend_bool is_currently_running;
 } zend_generator;
 
 extern ZEND_API zend_class_entry *zend_ce_generator;

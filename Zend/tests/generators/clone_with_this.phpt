@@ -16,7 +16,7 @@ class Test {
 $g1 = (new Test)->gen();
 $g1->rewind(); // goto yield
 $g2 = clone $g1;
-$g1->close();
+unset($g1);
 $g2->next();
 
 ?>

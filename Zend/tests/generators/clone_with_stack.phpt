@@ -10,7 +10,7 @@ function gen() {
 $g1 = gen();
 $g1->rewind();
 $g2 = clone $g1;
-$g1->close();
+unset($g1);
 $g2->send(10);
 
 ?>

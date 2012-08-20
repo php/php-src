@@ -20,7 +20,7 @@ $g2->next();
 var_dump($g1->current());
 var_dump($g2->current());
 
-$g1->close();
+unset($g1);
 $g2->next();
 var_dump($g2->current());
 
