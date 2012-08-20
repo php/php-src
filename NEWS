@@ -7,12 +7,23 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #62725 (Calling exit() in a shutdown function does not return
     the exit value). (Laruence)
+  . Fixed bug #62744 (dangling pointers made by zend_disable_class). (Laruence)
+  . Fixed bug #62716 (munmap() is called with the incorrect length).
+    (slangley@google.com)
+  . Fixed bug #62460 (php binaries installed as binary.dSYM). (Reeze Xia)
   . Fixed bug #62328 (implementing __toString and a cast to string fails)
     (Laruence)
   . Fixed bug #51363 (Fatal error raised by var_export() not caught by error 
     handler). (Lonny Kapelushnik)
   . Fixed bug #40459 (Stat and Dir stream wrapper methods do not call 
     constructor). (Stas)
+
+- CURL:
+  . Fixed bug #62839 (curl_copy_handle segfault with CURLOPT_FILE). (Pierrick)
+
+- DateTime:
+  . Fixed bug #62852 (Unserialize invalid DateTime causes crash).
+    (reeze.xia@gmail.com)
 
 - PDO:
   . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
@@ -31,7 +42,7 @@ PHP                                                                        NEWS
     (Laruence)
 
 
-?? ??? 2012, PHP 5.4.6
+16 Aug 2012, PHP 5.4.6
 
 - CLI Server:
   . Implemented FR #62700 (have the console output 'Listening on 
