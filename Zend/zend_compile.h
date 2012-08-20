@@ -80,7 +80,7 @@ typedef union _znode_op {
 	zend_op       *jmp_addr;
 	zval          *zv;
 	zend_literal  *literal;
-  void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
+	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */ 
@@ -132,7 +132,8 @@ typedef struct _zend_label {
 typedef struct _zend_try_catch_element {
 	zend_uint try_op;
 	zend_uint catch_op;  /* ketchup! */
-    zend_uint finally_op;
+	zend_uint finally_op;
+	zend_uint finally_end;
 } zend_try_catch_element;
 
 #if SIZEOF_LONG == 8
@@ -502,6 +503,8 @@ void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC);
 void zend_do_try(znode *try_token TSRMLS_DC);
 void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, znode *first_catch TSRMLS_DC);
 void zend_do_end_catch(znode *catch_token TSRMLS_DC);
+void zend_do_finally(znode *finally_token TSRMLS_DC);
+void zend_do_end_finally(znode *try_token, znode* catch_token, znode *finally_token TSRMLS_DC);
 void zend_do_throw(const znode *expr TSRMLS_DC);
 
 ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time);

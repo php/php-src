@@ -676,7 +676,6 @@ PHP_FUNCTION(unpack)
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
-						char pad = ' ';
 						int len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */

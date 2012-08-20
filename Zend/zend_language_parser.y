@@ -318,23 +318,23 @@ unticked_statement:
 	|	T_DECLARE { $1.u.op.opline_num = get_next_op_number(CG(active_op_array)); zend_do_declare_begin(TSRMLS_C); } '(' declare_list ')' declare_statement { zend_do_declare_end(&$1 TSRMLS_CC); }
 	|	';'		/* empty statement */
 	|	T_TRY { zend_do_try(&$1 TSRMLS_CC); } '{' inner_statement_list '}'
-        catch_statement { zend_do_bind_catch(&$1, &$6 TSRMLS_CC); }
-        finally_statement { zend_do_end_finally(&$1, &$6, &$8 TSRMLS_CC); }
+		catch_statement { zend_do_bind_catch(&$1, &$6 TSRMLS_CC); }
+		finally_statement { zend_do_end_finally(&$1, &$6, &$8 TSRMLS_CC); }
 	|	T_THROW expr ';' { zend_do_throw(&$2 TSRMLS_CC); }
 	|	T_GOTO T_STRING ';' { zend_do_goto(&$2 TSRMLS_CC); }
 ;
 
 catch_statement:
-       /* empty */ { $$.op_type = IS_UNUSED; }
-    |   T_CATCH '(' { zend_initialize_try_catch_element(&$1 TSRMLS_CC); } 
-        fully_qualified_class_name { zend_do_first_catch(&$2 TSRMLS_CC); }
-        T_VARIABLE ')' { zend_do_begin_catch(&$1, &$4, &$6, &$2 TSRMLS_CC); }
+				/* empty */ { $$.op_type = IS_UNUSED; }
+	|	T_CATCH '(' { zend_initialize_try_catch_element(&$1 TSRMLS_CC); } 
+		fully_qualified_class_name { zend_do_first_catch(&$2 TSRMLS_CC); }
+		T_VARIABLE ')' { zend_do_begin_catch(&$1, &$4, &$6, &$2 TSRMLS_CC); }
 		'{' inner_statement_list '}' { zend_do_end_catch(&$1 TSRMLS_CC); }
 		additional_catches { zend_do_mark_last_catch(&$2, &$13 TSRMLS_CC); $$ = $1;}
 
 finally_statement:
-       /* empty */ { $$.op_type = IS_UNUSED; }
-    |  T_FINALLY { zend_do_finally(&$1 TSRMLS_CC); } '{' inner_statement_list '}' { $$ = $1; }
+					/* empty */ { $$.op_type = IS_UNUSED; }
+	|	T_FINALLY { zend_do_finally(&$1 TSRMLS_CC); } '{' inner_statement_list '}' { $$ = $1; }
 ;
 
 additional_catches:
@@ -938,8 +938,8 @@ common_scalar:
 	|	T_METHOD_C					{ $$ = $1; }
 	|	T_FUNC_C					{ $$ = $1; }
 	|	T_NS_C						{ $$ = $1; }
-	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$ = $2; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
-	|	T_START_HEREDOC T_END_HEREDOC { ZVAL_EMPTY_STRING(&$$.u.constant); INIT_PZVAL(&$$.u.constant); $$.op_type = IS_CONST; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
+	|	T_START_HEREDOC T_ENCAPSED_AND_WHITESPACE T_END_HEREDOC { $$ = $2; }
+	|	T_START_HEREDOC T_END_HEREDOC { ZVAL_EMPTY_STRING(&$$.u.constant); INIT_PZVAL(&$$.u.constant); $$.op_type = IS_CONST; }
 ;
 
 
@@ -968,7 +968,7 @@ scalar:
 	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); zend_do_fetch_constant(&$$, NULL, &$2, ZEND_RT, 0 TSRMLS_CC); }
 	|	common_scalar			{ $$ = $1; }
 	|	'"' encaps_list '"' 	{ $$ = $2; }
-	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; CG(heredoc) = Z_STRVAL($1.u.constant); CG(heredoc_len) = Z_STRLEN($1.u.constant); }
+	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; }
 	|	T_CLASS_C				{ if (Z_TYPE($1.u.constant) == IS_CONSTANT) {zend_do_fetch_constant(&$$, NULL, &$1, ZEND_RT, 1 TSRMLS_CC);} else {$$ = $1;} }
 ;
 
