@@ -590,6 +590,23 @@ ZEND_METHOD(Generator, send)
 	}
 }
 
+
+/* {{{ proto void Generator::__wakeup
+ * Throws an Exception as generators can't be serialized */
+ZEND_METHOD(Generator, __wakeup)
+{
+	/* Just specifying the zend_class_unserialize_deny handler is not enough,
+	 * because it is only invoked for C unserialization. For O the error has
+	 * to be thrown in __wakeup. */
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	zend_throw_exception(NULL, "Unserialization of 'Generator' is not allowed", 0 TSRMLS_CC);
+}
+/* }}} */
+
 /* get_iterator implementation */
 
 typedef struct _zend_generator_iterator {
@@ -712,12 +729,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_send, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry generator_functions[] = {
-	ZEND_ME(Generator, rewind,  arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, valid,   arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, current, arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, key,     arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, next,    arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, send,    arginfo_generator_send, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, rewind,   arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, valid,    arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, current,  arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, key,      arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, next,     arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, send,     arginfo_generator_send, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, __wakeup, arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -729,6 +747,8 @@ void zend_register_generator_ce(TSRMLS_D) /* {{{ */
 	zend_ce_generator = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_ce_generator->ce_flags |= ZEND_ACC_FINAL_CLASS;
 	zend_ce_generator->create_object = zend_generator_create;
+	zend_ce_generator->serialize = zend_class_serialize_deny;
+	zend_ce_generator->unserialize = zend_class_unserialize_deny;
 
 	/* get_iterator has to be assigned *after* implementing the inferface */
 	zend_class_implements(zend_ce_generator TSRMLS_CC, 1, zend_ce_iterator);
