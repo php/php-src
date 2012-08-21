@@ -58,6 +58,10 @@ PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 #define SPL_ARRAY_INT_MASK           0xFFFF0000
 #define SPL_ARRAY_CLONE_MASK         0x0300FFFF
 
+#define SPL_ARRAY_METHOD_NO_ARG				0
+#define SPL_ARRAY_METHOD_USE_ARG    		1
+#define SPL_ARRAY_METHOD_MAY_USER_ARG 		2
+
 typedef struct _spl_array_object {
 	zend_object       std;
 	zval              *array;
@@ -1426,14 +1430,28 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-	zval *tmp, *arg;
+	zval *tmp, *arg = NULL;
 	zval *retval_ptr = NULL;
 	
 	MAKE_STD_ZVAL(tmp);
 	Z_TYPE_P(tmp) = IS_ARRAY;
 	Z_ARRVAL_P(tmp) = aht;
 	
-	if (use_arg) {
+	if (!use_arg) {
+		aht->nApplyCount++;
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval_ptr, 1, tmp, NULL TSRMLS_CC);
+		aht->nApplyCount--;
+	} else if (use_arg == SPL_ARRAY_METHOD_MAY_USER_ARG) {
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "|z", &arg) == FAILURE) {
+			Z_TYPE_P(tmp) = IS_NULL;
+			zval_ptr_dtor(&tmp);
+			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects one argument at most", 0 TSRMLS_CC);
+			return;
+		}
+		aht->nApplyCount++;
+		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval_ptr, arg? 2 : 1, tmp, arg TSRMLS_CC);
+		aht->nApplyCount--;
+	} else {
 		if (ZEND_NUM_ARGS() != 1 || zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
 			Z_TYPE_P(tmp) = IS_NULL;
 			zval_ptr_dtor(&tmp);
@@ -1442,10 +1460,6 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		}
 		aht->nApplyCount++;
 		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval_ptr, 2, tmp, arg TSRMLS_CC);
-		aht->nApplyCount--;
-	} else {
-		aht->nApplyCount++;
-		zend_call_method(NULL, NULL, NULL, fname, fname_len, &retval_ptr, 1, tmp, NULL TSRMLS_CC);
 		aht->nApplyCount--;
 	}
 	Z_TYPE_P(tmp) = IS_NULL; /* we want to destroy the zval, not the hashtable */
@@ -1461,35 +1475,35 @@ SPL_METHOD(cname, fname) \
 	spl_array_method(INTERNAL_FUNCTION_PARAM_PASSTHRU, #fname, sizeof(#fname)-1, use_arg); \
 }
 
-/* {{{ proto int ArrayObject::asort()
-       proto int ArrayIterator::asort()
+/* {{{ proto int ArrayObject::asort([int $sort_flags = SORT_REGULAR ])
+       proto int ArrayIterator::asort([int $sort_flags = SORT_REGULAR ])
    Sort the entries by values. */
-SPL_ARRAY_METHOD(Array, asort, 0) /* }}} */
+SPL_ARRAY_METHOD(Array, asort, SPL_ARRAY_METHOD_MAY_USER_ARG) /* }}} */
 
-/* {{{ proto int ArrayObject::ksort()
-       proto int ArrayIterator::ksort()
+/* {{{ proto int ArrayObject::ksort([int $sort_flags = SORT_REGULAR ])
+       proto int ArrayIterator::ksort([int $sort_flags = SORT_REGULAR ])
    Sort the entries by key. */
-SPL_ARRAY_METHOD(Array, ksort, 0) /* }}} */
+SPL_ARRAY_METHOD(Array, ksort, SPL_ARRAY_METHOD_MAY_USER_ARG) /* }}} */
 
 /* {{{ proto int ArrayObject::uasort(callback cmp_function)
        proto int ArrayIterator::uasort(callback cmp_function)
    Sort the entries by values user defined function. */
-SPL_ARRAY_METHOD(Array, uasort, 1) /* }}} */
+SPL_ARRAY_METHOD(Array, uasort, SPL_ARRAY_METHOD_USE_ARG) /* }}} */
 
 /* {{{ proto int ArrayObject::uksort(callback cmp_function)
        proto int ArrayIterator::uksort(callback cmp_function)
    Sort the entries by key using user defined function. */
-SPL_ARRAY_METHOD(Array, uksort, 1) /* }}} */
+SPL_ARRAY_METHOD(Array, uksort, SPL_ARRAY_METHOD_USE_ARG) /* }}} */
 
 /* {{{ proto int ArrayObject::natsort()
        proto int ArrayIterator::natsort()
    Sort the entries by values using "natural order" algorithm. */
-SPL_ARRAY_METHOD(Array, natsort, 0) /* }}} */
+SPL_ARRAY_METHOD(Array, natsort, SPL_ARRAY_METHOD_NO_ARG) /* }}} */
 
 /* {{{ proto int ArrayObject::natcasesort()
        proto int ArrayIterator::natcasesort()
    Sort the entries by key using case insensitive "natural order" algorithm. */
-SPL_ARRAY_METHOD(Array, natcasesort, 0) /* }}} */
+SPL_ARRAY_METHOD(Array, natcasesort, SPL_ARRAY_METHOD_NO_ARG) /* }}} */
 
 /* {{{ proto mixed|NULL ArrayIterator::current()
    Return current array entry */
