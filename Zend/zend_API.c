@@ -2547,16 +2547,15 @@ static const zend_function_entry disabled_class_new[] = {
 
 ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_DC) /* {{{ */
 {
-	zend_class_entry disabled_class;
+	zend_class_entry **disabled_class;
 
 	zend_str_tolower(class_name, class_name_length);
-	if (zend_hash_del(CG(class_table), class_name, class_name_length+1)==FAILURE) {
+	if (zend_hash_find(CG(class_table), class_name, class_name_length+1, (void **)&disabled_class)==FAILURE) {
 		return FAILURE;
 	}
-	INIT_OVERLOADED_CLASS_ENTRY_EX(disabled_class, class_name, class_name_length, disabled_class_new, NULL, NULL, NULL, NULL, NULL);
-	disabled_class.create_object = display_disabled_class;
-	disabled_class.name_length = class_name_length;
-	zend_register_internal_class(&disabled_class TSRMLS_CC);
+	INIT_CLASS_ENTRY_INIT_METHODS((**disabled_class), disabled_class_new, NULL, NULL, NULL, NULL, NULL);
+	(*disabled_class)->create_object = display_disabled_class;
+	zend_hash_clean(&((*disabled_class)->function_table));
 	return SUCCESS;
 }
 /* }}} */
@@ -2630,7 +2629,6 @@ static int zend_is_callable_check_class(const char *name, int name_len, zend_fca
 }
 /* }}} */
 
-
 static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fcall_info_cache *fcc, int strict_class, char **error TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
@@ -2653,11 +2651,9 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		/* Skip leading \ */
 		if (Z_STRVAL_P(callable)[0] == '\\') {
 			mlen = Z_STRLEN_P(callable) - 1;
-			mname = Z_STRVAL_P(callable) + 1;
 			lmname = zend_str_tolower_dup(Z_STRVAL_P(callable) + 1, mlen);
 		} else {
 			mlen = Z_STRLEN_P(callable);
-			mname = Z_STRVAL_P(callable);
 			lmname = zend_str_tolower_dup(Z_STRVAL_P(callable), mlen);
 		}
 		/* Check if function with given name exists.

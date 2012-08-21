@@ -19,6 +19,7 @@
 #include "php_intl.h"
 #include "dateformat_data.h"
 #include "dateformat_format.h"
+#include "dateformat_format_object.h"
 #include "dateformat_parse.h"
 #include "dateformat.h"
 #include "dateformat_attr.h"
@@ -64,6 +65,7 @@ zend_object_value IntlDateFormatter_object_create(zend_class_entry *ce TSRMLS_DC
 	intern = ecalloc( 1, sizeof(IntlDateFormatter_object) );
 	dateformat_data_init( &intern->datef_data TSRMLS_CC );
 	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
+	object_properties_init(&intern->zo, ce);
 	intern->date_type			= 0;
 	intern->time_type			= 0;
 	intern->calendar			= -1;
@@ -120,6 +122,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_intldateformatter_format, 0, 0, 0)
 	ZEND_ARG_INFO(0, array)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_intldateformatter_format_object, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, locale)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_intldateformatter_getdatetype, 0)
 ZEND_END_ARG_INFO()
 
@@ -170,6 +178,7 @@ static zend_function_entry IntlDateFormatter_class_functions[] = {
 	PHP_NAMED_FE( setLenient, ZEND_FN( datefmt_set_lenient ), arginfo_intldateformatter_setlenient )
 	PHP_NAMED_FE( isLenient, ZEND_FN( datefmt_is_lenient ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( format, ZEND_FN( datefmt_format ), arginfo_intldateformatter_format )
+	PHP_ME_MAPPING( formatObject, datefmt_format_object, arginfo_intldateformatter_format_object, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_NAMED_FE( parse, ZEND_FN( datefmt_parse), datefmt_parse_args )
 	PHP_NAMED_FE( localtime, ZEND_FN( datefmt_localtime ), datefmt_parse_args )
 	PHP_NAMED_FE( getErrorCode, ZEND_FN( datefmt_get_error_code ), arginfo_intldateformatter_getdatetype )

@@ -186,8 +186,7 @@ PHP_FUNCTION(boolval)
 		return;
 	}
 
-	RETVAL_ZVAL(*val, 1, 0);
-	convert_to_boolean(return_value);
+	RETURN_BOOL(zend_is_true(*val));
 }
 /* }}} */
 

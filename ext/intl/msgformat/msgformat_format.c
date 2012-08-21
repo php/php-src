@@ -134,7 +134,7 @@ PHP_FUNCTION( msgfmt_format_message )
 	}
 
 	if(slocale_len == 0) {
-		slocale = INTL_G(default_locale);
+		slocale = intl_locale_get_default(TSRMLS_C);
 	}
 
 #ifdef MSG_FORMAT_QUOTE_APOS

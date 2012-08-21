@@ -433,7 +433,6 @@ static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_
 		if (file_path && !use_copy) {
 			efree(file_path);
 		}
-		use_copy = 1;
 		file_path_len = 1;
 		file_path = "/";
 #endif
@@ -1432,6 +1431,7 @@ SPL_METHOD(FilesystemIterator, __construct)
 SPL_METHOD(FilesystemIterator, rewind)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	int skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1443,7 +1443,7 @@ SPL_METHOD(FilesystemIterator, rewind)
 	}
 	do {
 		spl_filesystem_dir_read(intern TSRMLS_CC);
-	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
+	} while (skip_dots && spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 }
 /* }}} */
 

@@ -1550,18 +1550,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phpcredits, 0, 0, 0)
 	ZEND_ARG_INFO(0, flag)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_php_logo_guid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_php_real_logo_guid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_php_egg_logo_guid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_zend_logo_guid, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO(arginfo_php_sapi_name, 0)
 ZEND_END_ARG_INFO()
 
@@ -2723,10 +2711,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(phpinfo,															arginfo_phpinfo)
 	PHP_FE(phpversion,														arginfo_phpversion)
 	PHP_FE(phpcredits,														arginfo_phpcredits)
-	PHP_FE(php_logo_guid,													arginfo_php_logo_guid)
-	PHP_FE(php_real_logo_guid,												arginfo_php_real_logo_guid)
-	PHP_FE(php_egg_logo_guid,												arginfo_php_egg_logo_guid)
-	PHP_FE(zend_logo_guid,													arginfo_zend_logo_guid)
 	PHP_FE(php_sapi_name,													arginfo_php_sapi_name)
 	PHP_FE(php_uname,														arginfo_php_uname)
 	PHP_FE(php_ini_scanned_files,											arginfo_php_ini_scanned_files)
@@ -3759,8 +3743,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	/* Default to global filters only */
 	FG(stream_filters) = NULL;
 
-	FG(wrapper_errors) = NULL;
-
 	return SUCCESS;
 }
 /* }}} */
@@ -3873,7 +3855,7 @@ PHP_NAMED_FUNCTION(php_inet_ntop)
 	}
 
 	if (!inet_ntop(af, address, buffer, sizeof(buffer))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An unknown error occured");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An unknown error occurred");
 		RETURN_FALSE;
 	}
 
@@ -5085,8 +5067,11 @@ void php_free_shutdown_functions(TSRMLS_D) /* {{{ */
 			zend_hash_destroy(BG(user_shutdown_function_names));
 			FREE_HASHTABLE(BG(user_shutdown_function_names));
 			BG(user_shutdown_function_names) = NULL;
-		}
-		zend_end_try();
+		} zend_catch {
+			/* maybe shutdown method call exit, we just ignore it */
+			FREE_HASHTABLE(BG(user_shutdown_function_names));
+			BG(user_shutdown_function_names) = NULL;
+		} zend_end_try();
 }
 /* }}} */
 

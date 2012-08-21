@@ -62,6 +62,7 @@
 #include "dateformat/dateformat_attr.h"
 #include "dateformat/dateformat_attrcpp.h"
 #include "dateformat/dateformat_format.h"
+#include "dateformat/dateformat_format_object.h"
 #include "dateformat/dateformat_parse.h"
 #include "dateformat/dateformat_data.h"
 
@@ -78,6 +79,9 @@
 #include "calendar/calendar_methods.h"
 #include "calendar/gregoriancalendar_methods.h"
 
+#include "breakiterator/breakiterator_class.h"
+#include "breakiterator/breakiterator_iterators.h"
+
 #include "idn/idn.h"
 
 #if U_ICU_VERSION_MAJOR_NUM > 3 && U_ICU_VERSION_MINOR_NUM >=2
@@ -92,6 +96,7 @@
 #include "common/common_enum.h"
 
 #include <unicode/uloc.h>
+#include <unicode/uclean.h>
 #include <ext/standard/info.h>
 
 #include "php_ini.h"
@@ -108,6 +113,14 @@
 #undef locale_set_default
 
 ZEND_DECLARE_MODULE_GLOBALS( intl )
+
+const char *intl_locale_get_default( TSRMLS_D )
+{
+	if( INTL_G(default_locale) == NULL ) {
+		return uloc_getDefault();
+	}
+	return INTL_G(default_locale);
+}
 
 /* {{{ Arguments info */
 ZEND_BEGIN_ARG_INFO_EX(collator_static_0_args, 0, 0, 0)
@@ -338,6 +351,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_format, 0, 0, 0)
 	ZEND_ARG_INFO(0, args)
 	ZEND_ARG_INFO(0, array)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_format_object, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, locale)
+ZEND_END_ARG_INFO()
+
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_create, 0, 0, 3)
 	ZEND_ARG_INFO(0, locale)
@@ -695,6 +715,7 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( datefmt_is_lenient, arginfo_msgfmt_get_locale )
 	PHP_FE( datefmt_set_lenient, arginfo_msgfmt_get_locale )
 	PHP_FE( datefmt_format, arginfo_datefmt_format )
+	PHP_FE( datefmt_format_object, arginfo_datefmt_format_object )
 	PHP_FE( datefmt_parse, datefmt_parse_args )
 	PHP_FE( datefmt_localtime , datefmt_parse_args )
 	PHP_FE( datefmt_get_error_code, arginfo_msgfmt_get_error_code )
@@ -832,7 +853,6 @@ zend_function_entry intl_functions[] = {
 };
 /* }}} */
 
-
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
     STD_PHP_INI_ENTRY(LOCALE_INI_NAME, NULL, PHP_INI_ALL, OnUpdateStringUnempty, default_locale, zend_intl_globals, intl_globals)
@@ -840,7 +860,6 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("intl.use_exceptions", "0", PHP_INI_ALL, OnUpdateBool, use_exceptions, zend_intl_globals, intl_globals)
 PHP_INI_END()
 /* }}} */
-
 
 static PHP_GINIT_FUNCTION(intl);
 
@@ -958,24 +977,33 @@ PHP_MINIT_FUNCTION( intl )
 	/* Register 'IntlIterator' PHP class */
 	intl_register_IntlIterator_class( TSRMLS_C );
 
+	/* Register 'BreakIterator' class */
+	breakiterator_register_BreakIterator_class( TSRMLS_C );
+
+	/* Register 'IntlPartsIterator' class */
+	breakiterator_register_IntlPartsIterator_class( TSRMLS_C );
+
 	/* Global error handling. */
 	intl_error_init( NULL TSRMLS_CC );
-
-	/* Set the default_locale value */
-	if( INTL_G(default_locale) == NULL ) {
-		INTL_G(default_locale) = pestrdup(uloc_getDefault(), 1) ;
-	}
 
 	return SUCCESS;
 }
 /* }}} */
 
+#define EXPLICIT_CLEANUP_ENV_VAR "INTL_EXPLICIT_CLEANUP"
+
 /* {{{ PHP_MSHUTDOWN_FUNCTION
  */
 PHP_MSHUTDOWN_FUNCTION( intl )
 {
+	const char *cleanup;
     /* For the default locale php.ini setting */
     UNREGISTER_INI_ENTRIES();
+
+	cleanup = getenv(EXPLICIT_CLEANUP_ENV_VAR);
+    if (cleanup != NULL && !(cleanup[0] == '0' && cleanup[1] == '\0')) {
+		u_cleanup();
+    }
 
     return SUCCESS;
 }
@@ -985,10 +1013,6 @@ PHP_MSHUTDOWN_FUNCTION( intl )
  */
 PHP_RINIT_FUNCTION( intl )
 {
-	/* Set the default_locale value */
-    if( INTL_G(default_locale) == NULL ) {
-        INTL_G(default_locale) = pestrdup(uloc_getDefault(), 1) ;
-    }
 	return SUCCESS;
 }
 /* }}} */

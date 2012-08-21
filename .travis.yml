@@ -5,11 +5,7 @@ php:
     - 5.4
 
 notifications:
-    email:
-        recipients:
-            - php-qa@lists.php.net
-        on_success: never # [always|never|change] default: change
-        on_failure: never # [always|never|change] default: always
+    email: false
 
 env:
     - REPORT_EXIT_STATUS=1 TEST_PHP_EXECUTABLE=./sapi/cli/php

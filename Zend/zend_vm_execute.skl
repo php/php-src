@@ -35,6 +35,7 @@ zend_vm_enter:
 	EX(prev_execute_data) = EG(current_execute_data);
 	EG(current_execute_data) = execute_data;
 	EX(nested) = nested;
+    EX(leaving) = 0;
 	nested = 1;
 
 	LOAD_REGS();

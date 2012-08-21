@@ -2467,6 +2467,9 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 		if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS) {
 			convert_to_long(*z_timezone_type);
 			if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS) {
+				zend_error_handling error_handling;
+
+				zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 				convert_to_string(*z_timezone);
 
 				switch (Z_LVAL_PP(z_timezone_type)) {
@@ -2474,9 +2477,9 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 					case TIMELIB_ZONETYPE_ABBR: {
 						char *tmp = emalloc(Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 2);
 						snprintf(tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 2, "%s %s", Z_STRVAL_PP(z_date), Z_STRVAL_PP(z_timezone));
-						php_date_initialize(*dateobj, tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 1, NULL, NULL, 0 TSRMLS_CC);
+						php_date_initialize(*dateobj, tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 1, NULL, NULL, 1 TSRMLS_CC);
 						efree(tmp);
-						return 1;
+						break;
 					}
 
 					case TIMELIB_ZONETYPE_ID:
@@ -2490,10 +2493,15 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 						tzobj->tzi.tz = tzi;
 						tzobj->initialized = 1;
 
-						php_date_initialize(*dateobj, Z_STRVAL_PP(z_date), Z_STRLEN_PP(z_date), NULL, tmp_obj, 0 TSRMLS_CC);
+						php_date_initialize(*dateobj, Z_STRVAL_PP(z_date), Z_STRLEN_PP(z_date), NULL, tmp_obj, 1 TSRMLS_CC);
 						zval_ptr_dtor(&tmp_obj);
-						return 1;
+						break;
+					default:
+						zend_restore_error_handling(&error_handling TSRMLS_CC);
+						return 0;
 				}
+				zend_restore_error_handling(&error_handling TSRMLS_CC);
+				return 1;
 			}
 		}
 	}
@@ -3430,9 +3438,18 @@ zval *date_interval_read_property(zval *object, zval *member, int type, const ze
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
+		key = NULL;
 	}
 
 	obj = (php_interval_obj *)zend_objects_get_address(object TSRMLS_CC);
+
+	if (!obj->initialized) {
+		retval = (zend_get_std_object_handlers())->read_property(object, member, type, key TSRMLS_CC);
+		if (member == &tmp_member) {
+			zval_dtor(member);
+		}
+		return retval;
+	}
 
 #define GET_VALUE_FROM_STRUCT(n,m)            \
 	if (strcmp(Z_STRVAL_P(member), m) == 0) { \
@@ -3482,8 +3499,18 @@ void date_interval_write_property(zval *object, zval *member, zval *value, const
 		zval_copy_ctor(&tmp_member);
 		convert_to_string(&tmp_member);
 		member = &tmp_member;
+		key = NULL;
 	}
+
 	obj = (php_interval_obj *)zend_objects_get_address(object TSRMLS_CC);
+
+	if (!obj->initialized) {
+		(zend_get_std_object_handlers())->write_property(object, member, value, key TSRMLS_CC);
+		if (member == &tmp_member) {
+			zval_dtor(member);
+		}
+		return;
+	}
 
 #define SET_VALUE_FROM_STRUCT(n,m)            \
 	if (strcmp(Z_STRVAL_P(member), m) == 0) { \

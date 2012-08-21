@@ -20,7 +20,7 @@ for($mask = 0000; $mask <= 0777; $mask++) {
   var_dump( umask() );
   echo "\n";
   if ($mask != umask()) {
-    die('An error occured while changing back the umask');
+    die('An error occurred while changing back the umask');
   }
 }
 

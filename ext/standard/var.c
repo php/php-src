@@ -453,6 +453,11 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
+		if(myht && myht->nApplyCount > 0){
+			smart_str_appendl(buf, "NULL", 4);
+			zend_error(E_WARNING, "var_export does not handle circular references");
+			return;
+		}
 		if (level > 1) {
 			smart_str_appendc(buf, '\n');
 			buffer_append_spaces(buf, level - 1);
@@ -469,6 +474,11 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 
 	case IS_OBJECT:
 		myht = Z_OBJPROP_PP(struc);
+		if(myht && myht->nApplyCount > 0){
+			smart_str_appendl(buf, "NULL", 4);
+			zend_error(E_WARNING, "var_export does not handle circular references");
+			return;
+		}
 		if (level > 1) {
 			smart_str_appendc(buf, '\n');
 			buffer_append_spaces(buf, level - 1);
@@ -541,12 +551,9 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 
 	/* relies on "(long)" being a perfect hash function for data pointers,
 	 * however the actual identity of an object has had to be determined
-	 * by its object handle and the class entry since 5.0. */
+	 * by its object handle since 5.0. */
 	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
-		p = smart_str_print_long(id + sizeof(id) - 1,
-				(((size_t)Z_OBJCE_P(var) << 5)
-				| ((size_t)Z_OBJCE_P(var) >> (sizeof(long) * 8 - 5)))
-				+ (long) Z_OBJ_HANDLE_P(var));
+		p = smart_str_print_long(id + sizeof(id) - 1, (long) Z_OBJ_HANDLE_P(var));
 		*(--p) = 'O';
 		len = id + sizeof(id) - 1 - p;
 	} else {

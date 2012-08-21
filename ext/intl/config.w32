@@ -24,6 +24,7 @@ if (PHP_INTL != "no") {
 		ADD_SOURCES(configure_module_dirname + "/common", "\
 				common_error.c \
 				common_enum.cpp \
+				common_date.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/formatter", "\
 				formatter.c \
@@ -61,6 +62,7 @@ if (PHP_INTL != "no") {
 				dateformat_class.c \
 				dateformat_attr.c \
 				dateformat_format.c \
+				dateformat_format_object.cpp \
 				dateformat_parse.c \
 				dateformat_data.c \
 				dateformat_attrcpp.cpp \
@@ -101,6 +103,15 @@ if (PHP_INTL != "no") {
 				calendar_methods.cpp \
 				gregoriancalendar_methods.cpp \
 				calendar_class.cpp",
+				"intl");
+				
+		ADD_SOURCES(configure_module_dirname + "/breakiterator", "\
+				breakiterator_class.cpp \
+				breakiterator_methods.cpp \
+				breakiterator_iterators.cpp \
+				rulebasedbreakiterator_methods.cpp \
+				codepointiterator_internal.cpp \
+				codepointiterator_methods.cpp ",
 				"intl");
 		
 		ADD_FLAG("LIBS_INTL", "icudt.lib icuin.lib icuio.lib icule.lib iculx.lib");

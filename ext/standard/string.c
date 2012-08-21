@@ -131,8 +131,8 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	register unsigned char *result = NULL;
 	size_t i, j;
 
-	result = (unsigned char *) safe_emalloc(oldlen * 2, sizeof(char), 1);
-
+	result = (unsigned char *) safe_emalloc(oldlen, 2 * sizeof(char), 1);
+	
 	for (i = j = 0; i < oldlen; i++) {
 		result[j++] = hexconvtab[old[i] >> 4];
 		result[j++] = hexconvtab[old[i] & 15];
@@ -3930,7 +3930,6 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				new_char_count--;
 			}
 			if (new_char_count > 0) {
-				char_count=new_char_count;
 				begin=new_begin;
 			}
 		}
@@ -4029,13 +4028,12 @@ PHP_FUNCTION(nl2br)
 		RETURN_STRINGL(str, str_len, 1);
 	}
 
-	if (is_xhtml) {
-		new_length = str_len + repl_cnt * (sizeof("<br />") - 1);
-	} else {
-		new_length = str_len + repl_cnt * (sizeof("<br>") - 1);
-	}
+	{
+		size_t repl_len = is_xhtml ? (sizeof("<br />") - 1) : (sizeof("<br>") - 1);
 
-	tmp = target = emalloc(new_length + 1);
+		new_length = str_len + repl_cnt * repl_len;
+		tmp = target = safe_emalloc(repl_cnt, repl_len, str_len + 1);
+	}
 
 	while (str < end) {
 		switch (*str) {
@@ -5377,7 +5375,7 @@ PHP_FUNCTION(substr_compare)
 	if (!cs) {
 		RETURN_LONG(zend_binary_strncmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
 	} else {
-		RETURN_LONG(zend_binary_strncasecmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
+		RETURN_LONG(zend_binary_strncasecmp_l(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len));
 	}
 }
 /* }}} */

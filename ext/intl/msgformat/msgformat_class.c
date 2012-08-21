@@ -60,6 +60,7 @@ zend_object_value MessageFormatter_object_create(zend_class_entry *ce TSRMLS_DC)
 	intern = ecalloc( 1, sizeof(MessageFormatter_object) );
 	msgformat_data_init( &intern->mf_data TSRMLS_CC );
 	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
+	object_properties_init(&intern->zo, ce);
 
 	retval.handle = zend_objects_store_put(
 		intern,

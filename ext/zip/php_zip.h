@@ -30,7 +30,7 @@ extern zend_module_entry zip_module_entry;
 
 #include "lib/zip.h"
 
-#define PHP_ZIP_VERSION_STRING "1.9.2"
+#define PHP_ZIP_VERSION_STRING "1.11.0"
 
 #if ((PHP_MAJOR_VERSION >= 5 && PHP_MINOR_VERSION >= 2) || PHP_MAJOR_VERSION >= 6)
 # define PHP_ZIP_USE_OO 1

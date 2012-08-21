@@ -21,11 +21,18 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 - Drop Windows XP and 2003 support. (Pierre)
+- All internal case insensitivity handling for class, function and constant 
+  names is done according to ASCII rules, current locale settings are ignored. 
+- php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
+  zend_logo_guid() have been removed
+- Removal of Logo GUIDs
 
 ========================================
 2. New Features
 ========================================
 
+- Support finally keyword. (Laruence)
+  (wiki.php.net/rfc/finally)
 - Support constant array/string dereferencing. (Laruence)
   (https://wiki.php.net/rfc/constdereference)
 - Add support for using empty() on the result of function calls and
@@ -89,6 +96,13 @@ PHP X.Y UPGRADE NOTES
 - IntlDateFormatter::setTimeZoneID() and datefmt_set_timezone_id() are
   deprecated. Use IntlDateFormatter::setTimeZone() or datefmt_set_timezone()
   instead.
+- IntlDateFormatter::format() and datefmt_format() now also accept an
+  IntlCalendar object for formatting.
+- mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb() now throw
+  E_DEPRECATED. Their use was already previously discouraged in the docs,
+  but that predated the existence of E_DEPRECATED.
+- php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
+  zend_logo_guid() have been removed
 
 ========================================
 5. New Functions
@@ -97,7 +111,11 @@ PHP X.Y UPGRADE NOTES
 - Core:
   - boolval()
 
+- Hash:
+  - hash_pbkdf2()
+
 - Intl:
+  - datefmt_format_object()
   - datefmt_get_calendar_object()
   - datefmt_get_timezone()
   - datefmt_set_timezone()
@@ -173,6 +191,7 @@ PHP X.Y UPGRADE NOTES
   - intltz_get_error_code()
   - intltz_get_error_message()
 
+  - IntlDateFormatter::formatObject()
   - IntlDateFormatter::getCalendarObject()
   - IntlDateFormatter::getTimeZone()
   - IntlDateFormatter::setTimeZone()
@@ -188,6 +207,9 @@ PHP X.Y UPGRADE NOTES
   - IntlCalendar
   - IntlGregorianCalendar
   - IntlTimeZone
+  - IntlBreakIterator
+  - IntlRuleBasedBreakIterator
+  - IntlCodePointBreakIterator
 
 ========================================
 7. Removed Extensions
@@ -216,3 +238,5 @@ PHP X.Y UPGRADE NOTES
 ========================================
 11. Other Changes
 ========================================
+
+- Logo GUIDs will no longer work
