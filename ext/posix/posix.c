@@ -1018,6 +1018,11 @@ PHP_FUNCTION(posix_getgrnam)
 		RETURN_FALSE;
 	}
 
+	/* getgrnam/_r() is buggy on Mac OSX 10.8, do early check for invalid empty name */
+	if (name_len == 0) {
+		RETURN_FALSE;
+	}
+
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
 	if (buflen < 1) {
@@ -1120,7 +1125,7 @@ int php_posix_passwd_to_array(struct passwd *pw, zval *return_value) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto array posix_getpwnam(string groupname) 
+/* {{{ proto array posix_getpwnam(string username)
    User database access (POSIX.1, 9.2.2) */
 PHP_FUNCTION(posix_getpwnam)
 {
@@ -1134,6 +1139,11 @@ PHP_FUNCTION(posix_getpwnam)
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	/* getpwnam/_r() is buggy on Mac OSX 10.8, do early check for invalid empty name */
+	if (name_len == 0) {
 		RETURN_FALSE;
 	}
 
