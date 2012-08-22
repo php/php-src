@@ -47,7 +47,7 @@ static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
 	object = return_value;
-	FORMATTER_METHOD_FETCH_OBJECT;
+	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	/* Convert pattern (if specified) to UTF-16. */
 	if(pattern && pattern_len) {
