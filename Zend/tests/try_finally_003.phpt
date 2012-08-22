@@ -1,5 +1,5 @@
 --TEST--
-Try finally
+Try finally (call sequence test)
 --FILE--
 <?php
 function foo () {

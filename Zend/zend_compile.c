@@ -2696,7 +2696,7 @@ void zend_initialize_try_catch_element(znode *catch_token TSRMLS_DC) /* {{{ */
 	zend_stack_top(&CG(bp_stack), (void **) &jmp_list_ptr);
 	zend_llist_add_element(jmp_list_ptr, &jmp_op_number);
 
-    catch_token->EA = get_next_op_number(CG(active_op_array));
+	catch_token->EA = get_next_op_number(CG(active_op_array));
 }
 /* }}} */
 
@@ -2792,7 +2792,7 @@ void zend_do_end_finally(znode *try_token, znode* catch_token, znode *finally_to
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		CG(active_op_array)->try_catch_array[try_token->u.op.opline_num].finally_op = finally_token->u.op.opline_num;
 		CG(active_op_array)->try_catch_array[try_token->u.op.opline_num].finally_end = get_next_op_number(CG(active_op_array));
-        CG(active_op_array)->has_finally_block = 1;
+		CG(active_op_array)->has_finally_block = 1;
 
 		opline->opcode = ZEND_LEAVE;
 		SET_UNUSED(opline->op1);
@@ -4059,9 +4059,9 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 
 				/** And, ensure that the referenced method is resolvable, too. */
 				lcname = zend_str_tolower_dup(cur_method_ref->method_name,
-                                      cur_method_ref->mname_len);
+						cur_method_ref->mname_len);
 				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
-                                         lcname, cur_method_ref->mname_len + 1);
+						lcname, cur_method_ref->mname_len + 1);
 				efree(lcname);
 
 				if (!method_exists) {
@@ -5043,11 +5043,11 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	opline->op2_type = IS_CONST;
 
 	if (doing_inheritance) {
-       /* Make sure a trait does not try to extend a class */
-       if ((new_class_entry->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-           zend_error(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error", new_class_entry->name);
-       }
-    
+		/* Make sure a trait does not try to extend a class */
+		if ((new_class_entry->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+			zend_error(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error", new_class_entry->name);
+		}
+
 		opline->extended_value = parent_class_name->u.op.var;
 		opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
 	} else {
@@ -6998,9 +6998,9 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 	lcname = zend_str_tolower_dup(Z_STRVAL_P(name), Z_STRLEN_P(name));
 
 	if (((Z_STRLEN_P(name) == sizeof("self")-1) &&
-          !memcmp(lcname, "self", sizeof("self")-1)) ||
-	    ((Z_STRLEN_P(name) == sizeof("parent")-1) &&
-          !memcmp(lcname, "parent", sizeof("parent")-1))) {
+				!memcmp(lcname, "self", sizeof("self")-1)) ||
+			((Z_STRLEN_P(name) == sizeof("parent")-1) &&
+	   !memcmp(lcname, "parent", sizeof("parent")-1))) {
 		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' is a special class name", Z_STRVAL_P(ns), Z_STRVAL_P(name), Z_STRVAL_P(name));
 	}
 

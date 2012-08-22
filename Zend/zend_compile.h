@@ -281,7 +281,7 @@ struct _zend_op_array {
 
 	zend_try_catch_element *try_catch_array;
 	int last_try_catch;
-    zend_bool has_finally_block;
+	zend_bool has_finally_block;
 
 	/* static variables support */
 	HashTable *static_variables;
@@ -384,8 +384,8 @@ struct _zend_execute_data {
 	zend_class_entry *current_called_scope;
 	zval *current_this;
 	zval *current_object;
-    zend_uint leaving;
-    zend_uint leaving_dest;
+	zend_uint leaving;
+	zend_uint leaving_dest;
 };
 
 #define EX(element) execute_data.element

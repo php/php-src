@@ -87,7 +87,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->static_variables = NULL;
 	op_array->last_try_catch = 0;
-    op_array->has_finally_block = 0;
+	op_array->has_finally_block = 0;
 
 	op_array->this_var = -1;
 
@@ -552,8 +552,8 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 				}
 				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.opline_num];
 				break;
-            case ZEND_BRK:
-            case ZEND_CONT:
+			case ZEND_BRK:
+			case ZEND_CONT:
 				if (op_array->last_try_catch) {
 					int nest_levels, array_offset;
 					zend_brk_cont_element *jmp_to;

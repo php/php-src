@@ -1,5 +1,5 @@
 --TEST--
-Nesting try catch finally
+Try catch finally (nesting try-catch-finally)
 --FILE--
 <?php
 
