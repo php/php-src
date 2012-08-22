@@ -622,19 +622,19 @@ mysqlnd_run_authentication(
 		}
 		DBG_INF_FMT("conn->error_info->error_no = %d", conn->error_info->error_no);
 	} while (ret == FAIL && conn->error_info->error_no == 0 && switch_to_auth_protocol != NULL);
-	if (plugin_data) {
-		mnd_efree(plugin_data);
-	}
 		
 	if (ret == PASS) {
 		DBG_INF_FMT("saving requested_protocol=%s", requested_protocol);
 		conn->m->set_client_option(conn, MYSQLND_OPT_AUTH_PROTOCOL, requested_protocol TSRMLS_CC);
 	}
-
+end:
+	if (plugin_data) {
+		mnd_efree(plugin_data);
+	}
 	if (requested_protocol) {
 		mnd_efree(requested_protocol);
 	}
-end:
+
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -838,6 +838,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	MYSQLND_NET * net = conn->net;
 
 	DBG_ENTER("mysqlnd_conn_data::connect");
+	DBG_INF_FMT("conn=%p", conn);
 
 	if (PASS != conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		goto err;
@@ -1149,7 +1150,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * 
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, query);
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::query");
-	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
+	DBG_INF_FMT("conn=%p conn=%llu query=%s", conn, conn->thread_id, query);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		if (PASS == conn->m->send_query(conn, query, query_len TSRMLS_CC) &&
@@ -1883,10 +1884,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 			  Fall-through
 			*/
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
-			net->data->m.close_stream(net, conn->stats, conn->error_info TSRMLS_CC);
 			/* Fall-through */
 		case CONN_QUIT_SENT:
 			/* The user has killed its own connection */
+			net->data->m.close_stream(net, conn->stats, conn->error_info TSRMLS_CC);
 			break;
 	}
 
@@ -2446,7 +2447,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn T
 	MYSQLND_RES * result = NULL;
 
 	DBG_ENTER("mysqlnd_conn_data::store_result");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%llu conn=%p", conn->thread_id, conn);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		do {
