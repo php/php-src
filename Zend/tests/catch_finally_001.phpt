@@ -1,5 +1,5 @@
 --TEST--
-Try catch finally
+Try catch finally (basic test)
 --FILE--
 <?php
 function foo ($throw = FALSE) {

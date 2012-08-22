@@ -1,5 +1,5 @@
 --TEST--
-Try without catch/finally block
+Try finally (without catch/finally block)
 --FILE--
 <?php
 function foo () {

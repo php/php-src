@@ -1,5 +1,5 @@
 --TEST--
-Try finally
+Try finally (basic test)
 --FILE--
 <?php
 function foo ($a) {
@@ -20,4 +20,3 @@ Stack trace:
 #0 %stry_finally_001.php(%d): foo('finally')
 #1 {main}
   thrown in %stry_finally_001.php on line %d
-

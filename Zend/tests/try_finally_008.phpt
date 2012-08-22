@@ -1,5 +1,5 @@
 --TEST--
-Finally with jmp (do while)
+Try finally (with break in do...while)
 --FILE--
 <?php
 function foo () {

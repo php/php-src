@@ -1,5 +1,5 @@
 --TEST--
-Finally with jmp (for continue)
+Try finally (with for continue)
 --FILE--
 <?php
 function foo () {

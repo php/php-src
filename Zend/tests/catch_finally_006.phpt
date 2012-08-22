@@ -1,5 +1,5 @@
 --TEST--
-Try catch finally: re-throw exception in catch block
+Try catch finally (re-throw exception in catch block)
 --FILE--
 <?php
 function foo ($a) {
