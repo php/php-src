@@ -2792,6 +2792,7 @@ void zend_do_end_finally(znode *try_token, znode* catch_token, znode *finally_to
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		CG(active_op_array)->try_catch_array[try_token->u.op.opline_num].finally_op = finally_token->u.op.opline_num;
 		CG(active_op_array)->try_catch_array[try_token->u.op.opline_num].finally_end = get_next_op_number(CG(active_op_array));
+        CG(active_op_array)->has_finally_block = 1;
 
 		opline->opcode = ZEND_LEAVE;
 		SET_UNUSED(opline->op1);

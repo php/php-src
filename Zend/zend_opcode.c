@@ -87,6 +87,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->static_variables = NULL;
 	op_array->last_try_catch = 0;
+    op_array->has_finally_block = 0;
 
 	op_array->this_var = -1;
 
