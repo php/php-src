@@ -2531,6 +2531,9 @@ ZEND_API int zend_disable_function(char *function_name, uint function_name_lengt
 }
 /* }}} */
 
+#ifdef ZEND_WIN32
+#pragma optimize("", off)
+#endif
 static zend_object_value display_disabled_class(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
 	zend_object_value retval;
@@ -2539,6 +2542,9 @@ static zend_object_value display_disabled_class(zend_class_entry *class_type TSR
 	zend_error(E_WARNING, "%s() has been disabled for security reasons", class_type->name);
 	return retval;
 }
+#ifdef ZEND_WIN32
+#pragma optimize("", on)
+#endif
 /* }}} */
 
 static const zend_function_entry disabled_class_new[] = {
