@@ -5,7 +5,6 @@ PHP                                                                        NEWS
 - General improvements:
   . Implemented 'finally' keyword (https://wiki.php.net/rfc/finally). (Laruence)
   . Drop Windows XP and 2003 support. (Pierre)
-  . World domination
   . Improve set_exception_handler while doing reset.(Laruence)
   . Support constant array/string dereferencing. (Laruence)
   . Add support for using empty() on the result of function calls and
