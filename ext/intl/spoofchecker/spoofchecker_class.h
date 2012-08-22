@@ -55,6 +55,15 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
     Spoofchecker_object*  co  = NULL;   \
     intl_error_reset(NULL TSRMLS_CC); \
 
+#define SPOOFCHECKER_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(Spoofchecker, co)
+#define SPOOFCHECKER_METHOD_FETCH_OBJECT							\
+	SPOOFCHECKERMETHOD_FETCH_OBJECT_NO_CHECK;					\
+	if (co->uspoof == NULL)	{										\
+		intl_errors_set(&co->err, U_ILLEGAL_ARGUMENT_ERROR,			\
+				"Found unconstructed Spoofchecker", 0 TSRMLS_CC);	\
+		RETURN_FALSE;												\
+	}
+
 #define SPOOFCHECKER_METHOD_FETCH_OBJECT                                           \
     co = (Spoofchecker_object *) zend_object_store_get_object(object TSRMLS_CC); \
     intl_error_reset(SPOOFCHECKER_ERROR_P(co) TSRMLS_CC);                      \
