@@ -3,8 +3,6 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.7
 
 - Core:
-  . Fixed bug #62892 (ReflectionClass::getTraitAliases crashes on importing 
-    trait methods as private). (Felipe)
   . Fixed bug #62844 (parse_url() does not recognize //). (Andrew Faulds).
   . Fixed bug #62829 (stdint.h included on platform where HAVE_STDINT_H is not 
     set). (Felipe)
@@ -34,6 +32,8 @@ PHP                                                                        NEWS
   . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
 
 - Reflection:
+  . Fixed bug #62892 (ReflectionClass::getTraitAliases crashes on importing 
+    trait methods as private). (Felipe)
   . Fixed bug #62715 (ReflectionParameter::isDefaultValueAvailable() wrong
     result). (Laruence)
 
