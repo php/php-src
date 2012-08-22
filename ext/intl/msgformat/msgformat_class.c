@@ -97,10 +97,10 @@ zend_object_value MessageFormatter_object_clone(zval *object TSRMLS_DC)
 		if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
 			intl_errors_set(INTL_DATA_ERROR_P(mfo), INTL_DATA_ERROR_CODE(mfo),
 					"Failed to clone MessageFormatter object", 0 TSRMLS_CC);
-			zend_throw_exception_ex(NULL, 0, "Failed to clone MessageFormatter object");
+			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Failed to clone MessageFormatter object");
 		}
 	} else {
-		zend_throw_exception_ex(NULL, 0, "Cannot clone unconstructed MessageFormatter");
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Cannot clone unconstructed MessageFormatter");
 	}
 	return new_obj_val;
 }
