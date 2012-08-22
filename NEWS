@@ -22,6 +22,9 @@ PHP                                                                        NEWS
     (reeze.xia@gmail.com)
   . Fixed bug #62500 (Segfault in DateInterval class when extended). (Laruence)
 
+- Intl:
+  . Fix null pointer dereferences in some classes of ext/intl. (Gustavo)
+
 - MySQLnd:
   . Fixed bug #62885 (mysqli_poll - Segmentation fault). (Laruence)
 
