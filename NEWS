@@ -3,7 +3,11 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.7
 
 - Core:
+  . Fixed bug #62892 (ReflectionClass::getTraitAliases crashes on importing 
+    trait methods as private). (Felipe)
   . Fixed bug #62844 (parse_url() does not recognize //). (Andrew Faulds).
+  . Fixed bug #62829 (stdint.h included on platform where HAVE_STDINT_H is not 
+    set). (Felipe)
   . Fixed bug #62763 (register_shutdown_function and extending class).
     (Laruence)
   . Fixed bug #62725 (Calling exit() in a shutdown function does not return
