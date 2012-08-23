@@ -3804,9 +3804,9 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 
 		/* one more thing: make sure we properly implement an abstract method */
 		if (existing_fn && existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-            prototype = fn->common.prototype;
+			prototype = fn->common.prototype;
 			do_inheritance_check_on_method(fn, existing_fn TSRMLS_CC);
-            fn->common.prototype = prototype;
+			fn->common.prototype = prototype;
 		}
 
 		/* delete inherited fn if the function to be added is not abstract */
@@ -3834,9 +3834,9 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, &fn_copy, sizeof(zend_function), (void**)&fn_copy_p)==FAILURE) {
 			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occurred during updating class method table", hash_key->arKey);
 		}
-   
+
 		zend_add_magic_methods(ce, hash_key->arKey, hash_key->nKeyLength, fn_copy_p TSRMLS_CC);
-   
+
 		zend_function_dtor(fn);
 	} else {
 		zend_function_dtor(fn);
@@ -4028,9 +4028,9 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 
 				/** And, ensure that the referenced method is resolvable, too. */
 				lcname = zend_str_tolower_dup(cur_method_ref->method_name,
-                                      cur_method_ref->mname_len);
+						cur_method_ref->mname_len);
 				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
-                                         lcname, cur_method_ref->mname_len + 1);
+						lcname, cur_method_ref->mname_len + 1);
 				efree(lcname);
 
 				if (!method_exists) {
@@ -5012,11 +5012,11 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	opline->op2_type = IS_CONST;
 
 	if (doing_inheritance) {
-       /* Make sure a trait does not try to extend a class */
-       if ((new_class_entry->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-           zend_error(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error", new_class_entry->name);
-       }
-    
+		/* Make sure a trait does not try to extend a class */
+		if ((new_class_entry->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+			zend_error(E_COMPILE_ERROR, "A trait (%s) cannot extend a class. Traits can only be composed from other traits with the 'use' keyword. Error", new_class_entry->name);
+		}
+
 		opline->extended_value = parent_class_name->u.op.var;
 		opline->opcode = ZEND_DECLARE_INHERITED_CLASS;
 	} else {
@@ -6961,9 +6961,9 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 	lcname = zend_str_tolower_dup(Z_STRVAL_P(name), Z_STRLEN_P(name));
 
 	if (((Z_STRLEN_P(name) == sizeof("self")-1) &&
-          !memcmp(lcname, "self", sizeof("self")-1)) ||
-	    ((Z_STRLEN_P(name) == sizeof("parent")-1) &&
-          !memcmp(lcname, "parent", sizeof("parent")-1))) {
+				!memcmp(lcname, "self", sizeof("self")-1)) ||
+			((Z_STRLEN_P(name) == sizeof("parent")-1) &&
+	   !memcmp(lcname, "parent", sizeof("parent")-1))) {
 		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' is a special class name", Z_STRVAL_P(ns), Z_STRVAL_P(name), Z_STRVAL_P(name));
 	}
 
