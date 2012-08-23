@@ -3838,9 +3838,9 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 
 		/* one more thing: make sure we properly implement an abstract method */
 		if (existing_fn && existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-            prototype = fn->common.prototype;
+			prototype = fn->common.prototype;
 			do_inheritance_check_on_method(fn, existing_fn TSRMLS_CC);
-            fn->common.prototype = prototype;
+			fn->common.prototype = prototype;
 		}
 
 		/* delete inherited fn if the function to be added is not abstract */
@@ -3868,9 +3868,9 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		if (zend_hash_quick_update(&ce->function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, &fn_copy, sizeof(zend_function), (void**)&fn_copy_p)==FAILURE) {
 			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because failure occurred during updating class method table", hash_key->arKey);
 		}
-   
+
 		zend_add_magic_methods(ce, hash_key->arKey, hash_key->nKeyLength, fn_copy_p TSRMLS_CC);
-   
+
 		zend_function_dtor(fn);
 	} else {
 		zend_function_dtor(fn);
