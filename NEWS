@@ -13,7 +13,7 @@ PHP                                                                        NEWS
   . Fixed bug #62744 (dangling pointers made by zend_disable_class). (Laruence)
   . Fixed bug #62716 (munmap() is called with the incorrect length).
     (slangley@google.com)
-  . Fixed bug #62460 (php binaries installed as binary.dSYM). (Reeze Xia)
+  . Fixed bug #62358 (Segfault when using traits a lot). (Laruence)
   . Fixed bug #62328 (implementing __toString and a cast to string fails)
     (Laruence)
   . Fixed bug #51363 (Fatal error raised by var_export() not caught by error 
@@ -27,6 +27,9 @@ PHP                                                                        NEWS
 - DateTime:
   . Fixed bug #62852 (Unserialize invalid DateTime causes crash).
     (reeze.xia@gmail.com)
+
+- Installation:
+  . Fixed bug #62460 (php binaries installed as binary.dSYM). (Reeze Xia)
 
 - PDO:
   . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
