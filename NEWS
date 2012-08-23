@@ -39,6 +39,8 @@ PHP                                                                        NEWS
   . Fixed bug (segfault due to retval is not initialized). (Laruence)
 
 - SPL:
+  . Fixed bug #62904 (Crash when cloning an object which inherits SplFixedArray)
+    (Laruence)
   . Fixed bug #62616 (ArrayIterator::count() from IteratorIterator instance
     gives Segmentation fault). (Laruence, Gustavo)
 
