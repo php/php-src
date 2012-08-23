@@ -3820,7 +3820,6 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		}
 
 		fn->common.scope = ce;
-		fn->common.prototype = prototype;
 
 		if (prototype
 			&& (prototype->common.fn_flags & ZEND_ACC_IMPLEMENTED_ABSTRACT
@@ -3835,10 +3834,13 @@ static int zend_traits_merge_functions_to_class(zend_function *fn TSRMLS_DC, int
 		if (prototype) {
 			do_inheritance_check_on_method(fn, prototype TSRMLS_CC);
 		}
+
 		/* one more thing: make sure we properly implement an abstract method */
 		if (existing_fn && existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			do_inheritance_check_on_method(fn, existing_fn TSRMLS_CC);
 		}
+
+		fn->common.prototype = prototype;
 
 		/* delete inherited fn if the function to be added is not abstract */
 		if (existing_fn
