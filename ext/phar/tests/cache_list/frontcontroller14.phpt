@@ -2,6 +2,7 @@
 Phar front controller mime type override, other [cache_list]
 --INI--
 phar.cache_list={PWD}/frontcontroller14.php
+detect_unicode=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--

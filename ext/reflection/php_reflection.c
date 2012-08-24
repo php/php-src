@@ -2379,9 +2379,7 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 	{
 		RETURN_FALSE;
 	}
-	if (param->offset < param->required) {
-		RETURN_FALSE;
-	}
+
 	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
 	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2.op_type == IS_UNUSED) {
 		RETURN_FALSE;
@@ -2406,10 +2404,6 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 	if (param->fptr->type != ZEND_USER_FUNCTION)
 	{
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Cannot determine default value for internal functions");
-		return;
-	}
-	if (param->offset < param->required) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Parameter is not optional");
 		return;
 	}
 	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);

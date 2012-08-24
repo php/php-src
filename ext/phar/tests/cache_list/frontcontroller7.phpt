@@ -2,6 +2,7 @@
 Phar front controller alternate index file [cache_list]
 --INI--
 phar.cache_list={PWD}/frontcontroller7.php
+detect_unicode=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--

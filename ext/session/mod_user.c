@@ -63,7 +63,7 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 }
 
 #define STDVARS1							\
-	zval *retval;							\
+	zval *retval = NULL;					\
 	int ret = FAILURE
 
 #define STDVARS								\

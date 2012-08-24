@@ -7,6 +7,7 @@ if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of P
 ?>
 --INI--
 phar.readonly=0
+detect_unicode=0
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/tempmanifest1.phar.php';

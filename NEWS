@@ -2,16 +2,122 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.16
 
-?? ??? 2012, PHP 5.3.15
-  (NEWS will be merged after release by johannes. Formerging changes to the  
-  PHP-5.3.15 release branch talk to johannes)
+- Core:
+  . Fixed bug #62763 (register_shutdown_function and extending class). 
+    (Laruence)
+  . Fixed bug #62744 (dangling pointers made by zend_disable_class). (Laruence)
+  . Fixed bug #62716 (munmap() is called with the incorrect length). 
+    (slangley@google.com)
+  . Fixed bug ##62460 (php binaries installed as binary.dSYM). (Reeze Xia)
+  . Fixed bug #60194 (--with-zend-multibyte and --enable-debug reports LEAK
+    with run-test.php). (Laruence)
 
 - CURL:
+  . Fixed bug #62839 (curl_copy_handle segfault with CURLOPT_FILE). (Pierrick)
   . Fixed bug #62499 (curl_setopt($ch, CURLOPT_COOKIEFILE, "") returns false).
     (r.hampartsumyan@gmail.com, Laruence)
 
 - DateTime:
-  . Fixed Bug #62500 (Segfault in DateInterval class when extended). (Laruence)
+  . Fixed bug #62852 (Unserialize invalid DateTime causes crash).
+    (reeze.xia@gmail.com)
+  . Fixed bug #62500 (Segfault in DateInterval class when extended). (Laruence)
+
+- Intl:
+  . Fix null pointer dereferences in some classes of ext/intl. (Gustavo)
+
+- MySQLnd:
+  . Fixed bug #62885 (mysqli_poll - Segmentation fault). (Laruence)
+
+- PDO:
+  . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
+
+- Reflection:
+  . Fixed bug #62715 (ReflectionParameter::isDefaultValueAvailable() wrong
+    result). (Laruence)
+
+- Session:
+  . Fixed bug (segfault due to retval is not initialized). (Laruence)
+
+- SPL:
+  . Fixed bug #62904 (Crash when cloning an object which inherits SplFixedArray)
+    (Laruence)
+  . Fixed bug #62616 (ArrayIterator::count() from IteratorIterator instance
+    gives Segmentation fault). (Laruence, Gustavo)
+
+- Enchant:
+  . Fixed bug #62838 (enchant_dict_quick_check() destroys zval, but fails to 
+  initialize it). (Tony, Mateusz Goik).
+
+19 Jul 2012, PHP 5.3.15
+
+- Zend Engine:
+  . Fixed bug #51094 (parse_ini_file() with INI_SCANNER_RAW cuts a value that
+    includes a semi-colon). (Pierrick)
+
+- COM:
+  . Fixed bug #62146 com_dotnet cannot be built shared. (Johannes)
+
+- Core:
+  . Fixed potential overflow in _php_stream_scandir, CVE-2012-2688. (Jason 
+    Powell, Stas)
+  . Fixed bug #62432 (ReflectionMethod random corrupt memory on high
+    concurrent). (Johannes)
+  . Fixed bug #62443 (Crypt SHA256/512 Segfaults With Malformed 
+    Salt). (Anthony Ferrara)
+
+- Fileinfo:
+  . Fixed magic file regex support. (Felipe)
+
+- FPM:
+  . Fixed bug #61045 (fpm don't send error log to fastcgi clients). (fat)
+  . Fixed bug #61835 (php-fpm is not allowed to run as root). (fat)
+  . Fixed bug #61295 (php-fpm should not fail with commented 'user'
+    for non-root start). (fat)
+  . Fixed bug #61026 (FPM pools can listen on the same address). (fat)
+  . Fixed bug #62033 (php-fpm exits with status 0 on some failures to start).
+    (fat)
+  . Fixed bug #62153 (when using unix sockets, multiples FPM instances
+    can be launched without errors). (fat)
+  . Fixed bug #62160 (Add process.priority to set nice(2) priorities). (fat)
+  . Fixed bug #61218 (FPM drops connection while receiving some binary values
+    in FastCGI requests). (fat)
+  . Fixed bug #62205 (php-fpm segfaults (null passed to strstr)). (fat)
+
+- Intl:
+  . Fixed bug #62083 (grapheme_extract() memory leaks). (Gustavo)
+  . Fixed bug #62081 (IntlDateFormatter constructor leaks memory when called
+    twice). (Gustavo)
+  . Fixed bug #62070 (Collator::getSortKey() returns garbage). (Gustavo)
+  . Fixed bug #62017 (datefmt_create with incorrectly encoded timezone leaks
+    pattern). (Gustavo)
+  . Fixed bug #60785 (memory leak in IntlDateFormatter constructor). (Gustavo)
+
+- JSON:
+  . Reverted fix for bug #61537. (Johannes)
+
+- Phar:
+  . Fixed bug #62227 (Invalid phar stream path causes crash). (Felipe)
+
+- Reflection:
+  . Fixed bug #62384 (Attempting to invoke a Closure more than once causes 
+    segfault). (Felipe)
+  . Fixed bug #62202 (ReflectionParameter::getDefaultValue() memory leaks 
+    with constant). (Laruence)
+
+- SPL:
+  . Fixed bug #62262 (RecursiveArrayIterator does not implement Countable).
+    (Nikita Popov)
+
+- SQLite:
+  . Fixed open_basedir bypass, CVE-2012-3365. (Johannes, reported by Yury
+    Maryshev)
+
+- XML Writer:
+  . Fixed bug #62064 (memory leak in the XML Writer module). 
+    (jean-pierre dot lozi at lip6 dot fr)
+
+- Zip:
+  . Upgraded libzip to 0.10.1 (Anatoliy)
 
 14 Jun 2012, PHP 5.3.14
 

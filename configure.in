@@ -1335,10 +1335,10 @@ PHP_CONFIGURE_PART(Configuring libtool)
 
 LDFLAGS="$LDFLAGS $PHP_AIX_LDFLAGS"
 
-dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5 and 10.6.
+dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5, 10.6, 10.7 and 10.8.
 dnl This hack works around it. Ugly.
 case $host_alias in
-*darwin9*|*darwin10*)
+*darwin9*|*darwin10*|*darwin11*|*darwin12*)
   ac_cv_exeext=
   ;;
 esac

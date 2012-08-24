@@ -45,7 +45,7 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
-	co = (Collator_object *) zend_object_store_get_object( object TSRMLS_CC );
+	COLLATOR_METHOD_FETCH_OBJECT;
 
 	if(locale_len == 0) {
 		locale = INTL_G(default_locale);
