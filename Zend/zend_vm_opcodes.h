@@ -162,3 +162,4 @@
 #define ZEND_LEAVE                           159
 #define ZEND_YIELD                           160
 #define ZEND_DELEGATE_YIELD                  161
+#define ZEND_GENERATOR_RETURN                162

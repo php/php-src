@@ -885,6 +885,14 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 	return zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
+static int ZEND_FASTCALL  ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	if (EX(op_array)->has_finally_block) {
+		return zend_finally_handler_leaving_SPEC(ZEND_RETURN, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	}
+	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+}
+
 static int ZEND_FASTCALL  ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -2442,17 +2450,6 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	USE_OPLINE
 	zval *retval_ptr;
 
-
-	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
-		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-		/* Close the generator to free up resources */
-		zend_generator_close(generator, 1 TSRMLS_CC);
-
-		/* Pass execution back to handling code */
-		ZEND_VM_RETURN();
-	}
 
 	SAVE_OPLINE();
 	retval_ptr = opline->op1.zv;
@@ -7760,17 +7757,6 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *retval_ptr;
 	zend_free_op free_op1;
 
-	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
-		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-		/* Close the generator to free up resources */
-		zend_generator_close(generator, 1 TSRMLS_CC);
-
-		/* Pass execution back to handling code */
-		ZEND_VM_RETURN();
-	}
-
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_tmp(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
 
@@ -12981,17 +12967,6 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	USE_OPLINE
 	zval *retval_ptr;
 	zend_free_op free_op1;
-
-	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
-		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-		/* Close the generator to free up resources */
-		zend_generator_close(generator, 1 TSRMLS_CC);
-
-		/* Pass execution back to handling code */
-		ZEND_VM_RETURN();
-	}
 
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_var(opline->op1.var, EX_Ts(), &free_op1 TSRMLS_CC);
@@ -30530,17 +30505,6 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	zval *retval_ptr;
 
 
-	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
-		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-		/* Close the generator to free up resources */
-		zend_generator_close(generator, 1 TSRMLS_CC);
-
-		/* Pass execution back to handling code */
-		ZEND_VM_RETURN();
-	}
-
 	SAVE_OPLINE();
 	retval_ptr = _get_zval_ptr_cv_BP_VAR_R(EX_CVs(), opline->op1.var TSRMLS_CC);
 
@@ -44986,6 +44950,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_DELEGATE_YIELD_SPEC_CV_HANDLER,
   	ZEND_DELEGATE_YIELD_SPEC_CV_HANDLER,
   	ZEND_DELEGATE_YIELD_SPEC_CV_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
+  	ZEND_GENERATOR_RETURN_SPEC_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;

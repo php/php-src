@@ -586,9 +586,8 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 						CG(zend_lineno) = opline->lineno;
 						zend_error(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
 					}
-					if (opline->opcode == ZEND_RETURN_BY_REF) {
-						opline->opcode = ZEND_RETURN;
-					}
+
+					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
 		}

@@ -2931,17 +2931,6 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	zval *retval_ptr;
 	zend_free_op free_op1;
 
-	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
-		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-		/* Close the generator to free up resources */
-		zend_generator_close(generator, 1 TSRMLS_CC);
-
-		/* Pass execution back to handling code */
-		ZEND_VM_RETURN();
-	}
-
 	SAVE_OPLINE();
 	retval_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 
@@ -3062,6 +3051,14 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 
 	if (EX(op_array)->has_finally_block) {
 		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_RETURN_BY_REF);
+	}
+	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+}
+
+ZEND_VM_HANDLER(162, ZEND_GENERATOR_RETURN, ANY, ANY)
+{
+	if (EX(op_array)->has_finally_block) {
+		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_RETURN);
 	}
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
