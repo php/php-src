@@ -32,6 +32,39 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
 
+		if (!finished_execution) {
+			zend_op_array *op_array = execute_data->op_array;
+			if (op_array->has_finally_block) {
+				zend_uint op_num = execute_data->opline - op_array->opcodes;
+				zend_uint finally_op_num = 0;
+
+				/* Find next finally block */
+				int i;
+				for (i = 0; i < op_array->last_try_catch; i++) {
+					zend_try_catch_element *try_catch = &op_array->try_catch_array[i];
+
+					if (op_num < try_catch->try_op) {
+						break;
+					}
+
+					if (op_num < try_catch->finally_op) {
+						finally_op_num = try_catch->finally_op;
+					}
+				}
+
+				/* If a finally block was found we jump directly to it and
+				 * resume the generator. Furthermore we abort this close call
+				 * because the generator will already be closed somewhere in
+				 * the resume. */
+				if (finally_op_num) {
+					execute_data->opline = &op_array->opcodes[finally_op_num];
+					execute_data->leaving = ZEND_RETURN;
+					zend_generator_resume(generator TSRMLS_CC);
+					return;
+				}
+			}
+		}
+
 		if (!execute_data->symbol_table) {
 			zend_free_compiled_variables(execute_data->CVs, execute_data->op_array->last_var);
 		} else {
@@ -371,7 +404,7 @@ static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* 
 }
 /* }}} */
 
-static void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
+void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
 	/* The generator is already closed, thus can't resume */
 	if (!generator->execute_data) {
