@@ -1,5 +1,5 @@
 --TEST--
-Finally with goto previous label
+Try finally (with goto previous label)
 --FILE--
 <?php
 function foo () {

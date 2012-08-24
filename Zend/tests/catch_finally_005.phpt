@@ -1,5 +1,5 @@
 --TEST--
-Try catch finally with return
+Try catch finally (with multi-returns and exception)
 --FILE--
 <?php
 function foo ($a) {

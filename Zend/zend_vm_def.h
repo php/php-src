@@ -1840,6 +1840,390 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
+{
+	zend_bool nested;
+	zend_op_array *op_array = EX(op_array);
+
+	/* Generators go throw a different cleanup process */
+	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		/* The generator object is stored in return_value_ptr_ptr */
+		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+		/* Close the generator to free up resources */
+		zend_generator_close(generator, 1 TSRMLS_CC);
+
+		/* Pass execution back to handling code */
+		ZEND_VM_RETURN();
+	}
+
+	EG(current_execute_data) = EX(prev_execute_data);
+	EG(opline_ptr) = NULL;
+	if (!EG(active_symbol_table)) {
+		zend_free_compiled_variables(EX_CVs(), op_array->last_var);
+	}
+
+	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {
+		zval_ptr_dtor((zval**)&op_array->prototype);
+	}
+
+	nested = EX(nested);
+
+	/* For generators the execute_data is stored on the heap, for everything
+	 * else it is stored on the VM stack. */
+	if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+		efree(execute_data);
+	} else {
+		zend_vm_stack_free(execute_data TSRMLS_CC);
+	}
+
+	if (nested) {
+		execute_data = EG(current_execute_data);
+	}
+	if (nested) {
+		USE_OPLINE
+
+		LOAD_REGS();
+		LOAD_OPLINE();
+		if (UNEXPECTED(opline->opcode == ZEND_INCLUDE_OR_EVAL)) {
+
+			EX(function_state).function = (zend_function *) EX(op_array);
+			EX(function_state).arguments = NULL;
+			EX(object) = EX(current_object);
+
+			EG(opline_ptr) = &EX(opline);
+			EG(active_op_array) = EX(op_array);
+			EG(return_value_ptr_ptr) = EX(original_return_value);
+			destroy_op_array(op_array TSRMLS_CC);
+			efree(op_array);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				zend_throw_exception_internal(NULL TSRMLS_CC);
+				HANDLE_EXCEPTION_LEAVE();
+			} else if (RETURN_VALUE_USED(opline)) {
+				if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
+					zval *retval;
+
+					ALLOC_ZVAL(retval);
+					ZVAL_BOOL(retval, 1);
+					INIT_PZVAL(retval);
+					EX_T(opline->result.var).var.ptr = retval;
+				}
+			}
+
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_LEAVE();
+		} else {
+			EG(opline_ptr) = &EX(opline);
+			EG(active_op_array) = EX(op_array);
+			EG(return_value_ptr_ptr) = EX(original_return_value);
+			if (EG(active_symbol_table)) {
+				zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
+			}
+			EG(active_symbol_table) = EX(symbol_table);
+
+			EX(function_state).function = (zend_function *) EX(op_array);
+			EX(function_state).arguments = NULL;
+
+			if (EG(This)) {
+				if (UNEXPECTED(EG(exception) != NULL) && IS_CTOR_CALL(EX(called_scope))) {
+					if (IS_CTOR_USED(EX(called_scope))) {
+						Z_DELREF_P(EG(This));
+					}
+					if (Z_REFCOUNT_P(EG(This)) == 1) {
+						zend_object_store_ctor_failed(EG(This) TSRMLS_CC);
+					}
+				}
+				zval_ptr_dtor(&EG(This));
+			}
+			EG(This) = EX(current_this);
+			EG(scope) = EX(current_scope);
+			EG(called_scope) = EX(current_called_scope);
+
+			EX(object) = EX(current_object);
+			EX(called_scope) = DECODE_CTOR(EX(called_scope));
+
+			zend_vm_stack_clear_multiple(TSRMLS_C);
+
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				zend_throw_exception_internal(NULL TSRMLS_CC);
+				if (RETURN_VALUE_USED(opline) && EX_T(opline->result.var).var.ptr) {
+					zval_ptr_dtor(&EX_T(opline->result.var).var.ptr);
+				}
+				HANDLE_EXCEPTION_LEAVE();
+			}
+
+			ZEND_VM_INC_OPCODE();
+			ZEND_VM_LEAVE();
+		}
+	}
+	ZEND_VM_RETURN();
+}
+
+ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
+{
+	USE_OPLINE
+	zend_bool should_change_scope = 0;
+	zend_function *fbc = EX(function_state).function;
+
+	SAVE_OPLINE();
+	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
+			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name, fbc->common.function_name);
+			CHECK_EXCEPTION();
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
+		}
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
+				fbc->common.scope ? fbc->common.scope->name : "",
+				fbc->common.scope ? "::" : "",
+				fbc->common.function_name);
+		}
+	}
+	if (fbc->common.scope &&
+		!(fbc->common.fn_flags & ZEND_ACC_STATIC) &&
+		!EX(object)) {
+
+		if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+			/* FIXME: output identifiers properly */
+			zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically", fbc->common.scope->name, fbc->common.function_name);
+		} else {
+			/* FIXME: output identifiers properly */
+			/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
+			zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically", fbc->common.scope->name, fbc->common.function_name);
+		}
+	}
+
+	if (fbc->type == ZEND_USER_FUNCTION || fbc->common.scope) {
+		should_change_scope = 1;
+		EX(current_this) = EG(This);
+		EX(current_scope) = EG(scope);
+		EX(current_called_scope) = EG(called_scope);
+		EG(This) = EX(object);
+		EG(scope) = (fbc->type == ZEND_USER_FUNCTION || !EX(object)) ? fbc->common.scope : NULL;
+		EG(called_scope) = EX(called_scope);
+	}
+
+	zend_arg_types_stack_3_pop(&EG(arg_types_stack), &EX(called_scope), &EX(current_object), &EX(fbc));
+	EX(function_state).arguments = zend_vm_stack_push_args(opline->extended_value TSRMLS_CC);
+	LOAD_OPLINE();
+
+	if (fbc->type == ZEND_INTERNAL_FUNCTION) {
+		temp_variable *ret = &EX_T(opline->result.var);
+
+		MAKE_STD_ZVAL(ret->var.ptr);
+		ZVAL_NULL(ret->var.ptr);
+		ret->var.ptr_ptr = &ret->var.ptr;
+		ret->var.fcall_returned_reference = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+
+		if (fbc->common.arg_info) {
+			zend_uint i=0;
+			zval **p = (zval**)EX(function_state).arguments;
+			ulong arg_count = opline->extended_value;
+
+			while (arg_count>0) {
+				zend_verify_arg_type(fbc, ++i, *(p-arg_count), 0 TSRMLS_CC);
+				arg_count--;
+			}
+		}
+
+		if (!zend_execute_internal) {
+			/* saves one function call if zend_execute_internal is not used */
+			fbc->internal_function.handler(opline->extended_value, ret->var.ptr, (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) ? &ret->var.ptr : NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+		} else {
+			zend_execute_internal(EXECUTE_DATA, RETURN_VALUE_USED(opline) TSRMLS_CC);
+		}
+
+		if (!RETURN_VALUE_USED(opline)) {
+			zval_ptr_dtor(&ret->var.ptr);
+		}
+	} else if (fbc->type == ZEND_USER_FUNCTION) {
+		EX(original_return_value) = EG(return_value_ptr_ptr);
+		EG(active_symbol_table) = NULL;
+		EG(active_op_array) = &fbc->op_array;
+		EG(return_value_ptr_ptr) = NULL;
+		if (RETURN_VALUE_USED(opline)) {
+			temp_variable *ret = &EX_T(opline->result.var);
+
+			ret->var.ptr = NULL;
+			EG(return_value_ptr_ptr) = &ret->var.ptr;
+			ret->var.ptr_ptr = &ret->var.ptr;
+			ret->var.fcall_returned_reference = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+		}
+
+		if (EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+			if (RETURN_VALUE_USED(opline)) {
+				EX_T(opline->result.var).var.ptr = zend_generator_create_zval(EG(active_op_array) TSRMLS_CC);
+			}
+		} else if (EXPECTED(zend_execute == execute)) {
+			if (EXPECTED(EG(exception) == NULL)) {
+				ZEND_VM_ENTER();
+			}
+		} else {
+			zend_execute(EG(active_op_array) TSRMLS_CC);
+		}
+
+		EG(opline_ptr) = &EX(opline);
+		EG(active_op_array) = EX(op_array);
+		EG(return_value_ptr_ptr) = EX(original_return_value);
+		if (EG(active_symbol_table)) {
+			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
+		}
+		EG(active_symbol_table) = EX(symbol_table);
+	} else { /* ZEND_OVERLOADED_FUNCTION */
+		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
+		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
+
+		/* Not sure what should be done here if it's a static method */
+		if (EXPECTED(EX(object) != NULL)) {
+			Z_OBJ_HT_P(EX(object))->call_method(fbc->common.function_name, opline->extended_value, EX_T(opline->result.var).var.ptr, &EX_T(opline->result.var).var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+		} else {
+			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
+		}
+
+		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
+			efree((char*)fbc->common.function_name);
+		}
+		efree(fbc);
+
+		if (!RETURN_VALUE_USED(opline)) {
+			zval_ptr_dtor(&EX_T(opline->result.var).var.ptr);
+		} else {
+			Z_UNSET_ISREF_P(EX_T(opline->result.var).var.ptr);
+			Z_SET_REFCOUNT_P(EX_T(opline->result.var).var.ptr, 1);
+			EX_T(opline->result.var).var.fcall_returned_reference = 0;
+			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
+		}
+	}
+
+	EX(function_state).function = (zend_function *) EX(op_array);
+	EX(function_state).arguments = NULL;
+
+	if (should_change_scope) {
+		if (EG(This)) {
+			if (UNEXPECTED(EG(exception) != NULL) && IS_CTOR_CALL(EX(called_scope))) {
+				if (IS_CTOR_USED(EX(called_scope))) {
+					Z_DELREF_P(EG(This));
+				}
+				if (Z_REFCOUNT_P(EG(This)) == 1) {
+					zend_object_store_ctor_failed(EG(This) TSRMLS_CC);
+				}
+			}
+			zval_ptr_dtor(&EG(This));
+		}
+		EG(This) = EX(current_this);
+		EG(scope) = EX(current_scope);
+		EG(called_scope) = EX(current_called_scope);
+	}
+
+	EX(object) = EX(current_object);
+	EX(called_scope) = DECODE_CTOR(EX(called_scope));
+
+	zend_vm_stack_clear_multiple(TSRMLS_C);
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		zend_throw_exception_internal(NULL TSRMLS_CC);
+		if (RETURN_VALUE_USED(opline) && EX_T(opline->result.var).var.ptr) {
+			zval_ptr_dtor(&EX_T(opline->result.var).var.ptr);
+		}
+		HANDLE_EXCEPTION();
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HELPER_EX(zend_finally_handler_leaving, ANY, ANY, int type)
+{
+	USE_OPLINE
+	zend_uint i, op_num = opline - EX(op_array)->opcodes;
+	zend_uint catch_op_num = 0, finally_op_num = 0;
+
+	SAVE_OPLINE();
+
+	switch (type) {
+		case ZEND_THROW:
+		case ZEND_RETURN:
+		case ZEND_RETURN_BY_REF:
+		case ZEND_LEAVE:
+			{
+				if (EG(prev_exception) || (type == ZEND_LEAVE && EG(exception))) {
+					for (i=0; i<EX(op_array)->last_try_catch; i++) {
+						if (EX(op_array)->try_catch_array[i].try_op > op_num) {
+							break;
+						} 
+						if (op_num < EX(op_array)->try_catch_array[i].finally_op) {
+							finally_op_num = EX(op_array)->try_catch_array[i].finally_op;
+						}
+						if (op_num < EX(op_array)->try_catch_array[i].catch_op) {
+							catch_op_num = EX(op_array)->try_catch_array[i].catch_op;
+						}
+					}
+				} else {
+					for (i=0; i<EX(op_array)->last_try_catch; i++) {
+						if (EX(op_array)->try_catch_array[i].try_op > op_num) {
+							break;
+						} 
+						if (op_num < EX(op_array)->try_catch_array[i].finally_op) {
+							finally_op_num = EX(op_array)->try_catch_array[i].finally_op;
+						}
+					}
+				}
+
+				if (catch_op_num && finally_op_num) {
+					/* EG(exception) || EG(prev_exception) */
+					if (catch_op_num > finally_op_num) {
+						EX(leaving) = ZEND_THROW;
+						ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
+					} else {
+						EX(leaving) = 0;
+						ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
+					}
+				} else if (catch_op_num) {
+					EX(leaving) = 0;
+					ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
+				} else if (finally_op_num) {
+					if (type != ZEND_LEAVE) {
+						EX(leaving) = type;
+					}
+					ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
+				} else if (EX(leaving) && type != ZEND_LEAVE) {
+					/* leave it to ZEND_LEAVE */
+					EX(leaving) = type;
+					ZEND_VM_NEXT_OPCODE();
+				} else {
+					ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+				}
+			}
+			break;
+		case ZEND_JMP:
+		case ZEND_BRK:
+		case ZEND_CONT:
+		case ZEND_GOTO:
+			{
+		  /* these can not occurred in exception context */
+		  for (i=0; i<EG(active_op_array)->last_try_catch; i++) {
+			  if (EG(active_op_array)->try_catch_array[i].try_op > op_num) {
+				  break;
+			  } 
+			  if (op_num < EG(active_op_array)->try_catch_array[i].finally_op 
+					  && (EX(leaving_dest) < EG(active_op_array)->try_catch_array[i].try_op
+						  || EX(leaving_dest) >= EG(active_op_array)->try_catch_array[i].finally_end)) {
+				  finally_op_num = EG(active_op_array)->try_catch_array[i].finally_op;
+			  }
+		  }
+
+		  if (finally_op_num) {
+			  EX(leaving) = type;
+			  ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
+		  } else {
+			  EX(leaving) = 0;
+			  ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[EX(leaving_dest)]);
+		  }
+	  }
+			break;
+	}
+	ZEND_VM_CONTINUE();
+}
+
 ZEND_VM_HANDLER(42, ZEND_JMP, ANY, ANY)
 {
 	USE_OPLINE
@@ -1847,6 +2231,10 @@ ZEND_VM_HANDLER(42, ZEND_JMP, ANY, ANY)
 #if DEBUG_ZEND>=2
 	printf("Jumping to %d\n", opline->op1.opline_num);
 #endif
+	if (EX(op_array)->has_finally_block) {
+		EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
+		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_JMP);
+	}
 	ZEND_VM_SET_OPCODE(opline->op1.jmp_addr);
 	ZEND_VM_CONTINUE(); /* CHECK_ME */
 }
@@ -2508,298 +2896,6 @@ ZEND_VM_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
-{
-	zend_bool nested;
-	zend_op_array *op_array = EX(op_array);
-
-	/* Generators go throw a different cleanup process */
-	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
-		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-		/* Close the generator to free up resources */
-		zend_generator_close(generator, 1 TSRMLS_CC);
-
-		/* Pass execution back to handling code */
-		ZEND_VM_RETURN();
-	}
-
-	EG(current_execute_data) = EX(prev_execute_data);
-	EG(opline_ptr) = NULL;
-	if (!EG(active_symbol_table)) {
-		zend_free_compiled_variables(EX_CVs(), op_array->last_var);
-	}
-
-	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {
-		zval_ptr_dtor((zval**)&op_array->prototype);
-	}
-
-	nested = EX(nested);
-
-	/* For generators the execute_data is stored on the heap, for everything
-	 * else it is stored on the VM stack. */
-	if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-		efree(execute_data);
-	} else {
-		zend_vm_stack_free(execute_data TSRMLS_CC);
-	}
-
-	if (nested) {
-		execute_data = EG(current_execute_data);
-	}
-	if (nested) {
-		USE_OPLINE
-
-		LOAD_REGS();
-		LOAD_OPLINE();
-		if (UNEXPECTED(opline->opcode == ZEND_INCLUDE_OR_EVAL)) {
-
-			EX(function_state).function = (zend_function *) EX(op_array);
-			EX(function_state).arguments = NULL;
-			EX(object) = EX(current_object);
-
-			EG(opline_ptr) = &EX(opline);
-			EG(active_op_array) = EX(op_array);
-			EG(return_value_ptr_ptr) = EX(original_return_value);
-			destroy_op_array(op_array TSRMLS_CC);
-			efree(op_array);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				zend_throw_exception_internal(NULL TSRMLS_CC);
-				HANDLE_EXCEPTION_LEAVE();
-			} else if (RETURN_VALUE_USED(opline)) {
-				if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-					zval *retval;
-
-					ALLOC_ZVAL(retval);
-					ZVAL_BOOL(retval, 1);
-					INIT_PZVAL(retval);
-					EX_T(opline->result.var).var.ptr = retval;
-				}
-			}
-
-			ZEND_VM_INC_OPCODE();
-			ZEND_VM_LEAVE();
-		} else {
-
-			EG(opline_ptr) = &EX(opline);
-			EG(active_op_array) = EX(op_array);
-			EG(return_value_ptr_ptr) = EX(original_return_value);
-			if (EG(active_symbol_table)) {
-				zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
-			}
-			EG(active_symbol_table) = EX(symbol_table);
-
-			EX(function_state).function = (zend_function *) EX(op_array);
-			EX(function_state).arguments = NULL;
-
-			if (EG(This)) {
-				if (UNEXPECTED(EG(exception) != NULL) && IS_CTOR_CALL(EX(called_scope))) {
-					if (IS_CTOR_USED(EX(called_scope))) {
-						Z_DELREF_P(EG(This));
-					}
-					if (Z_REFCOUNT_P(EG(This)) == 1) {
-						zend_object_store_ctor_failed(EG(This) TSRMLS_CC);
-					}
-				}
-				zval_ptr_dtor(&EG(This));
-			}
-			EG(This) = EX(current_this);
-			EG(scope) = EX(current_scope);
-			EG(called_scope) = EX(current_called_scope);
-
-			EX(object) = EX(current_object);
-			EX(called_scope) = DECODE_CTOR(EX(called_scope));
-
-			zend_vm_stack_clear_multiple(TSRMLS_C);
-
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				zend_throw_exception_internal(NULL TSRMLS_CC);
-				if (RETURN_VALUE_USED(opline) && EX_T(opline->result.var).var.ptr) {
-					zval_ptr_dtor(&EX_T(opline->result.var).var.ptr);
-				}
-				HANDLE_EXCEPTION_LEAVE();
-			}
-
-			ZEND_VM_INC_OPCODE();
-			ZEND_VM_LEAVE();
-		}
-	}
-	ZEND_VM_RETURN();
-}
-
-ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
-{
-	USE_OPLINE
-	zend_bool should_change_scope = 0;
-	zend_function *fbc = EX(function_state).function;
-
-	SAVE_OPLINE();
-	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
-			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name, fbc->common.function_name);
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE(); /* Never reached */
-		}
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
-				fbc->common.scope ? fbc->common.scope->name : "",
-				fbc->common.scope ? "::" : "",
-				fbc->common.function_name);
-		}
-	}
-	if (fbc->common.scope &&
-		!(fbc->common.fn_flags & ZEND_ACC_STATIC) &&
-		!EX(object)) {
-
-		if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-			/* FIXME: output identifiers properly */
-			zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically", fbc->common.scope->name, fbc->common.function_name);
-		} else {
-			/* FIXME: output identifiers properly */
-			/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
-			zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically", fbc->common.scope->name, fbc->common.function_name);
-		}
-	}
-
-	if (fbc->type == ZEND_USER_FUNCTION || fbc->common.scope) {
-		should_change_scope = 1;
-		EX(current_this) = EG(This);
-		EX(current_scope) = EG(scope);
-		EX(current_called_scope) = EG(called_scope);
-		EG(This) = EX(object);
-		EG(scope) = (fbc->type == ZEND_USER_FUNCTION || !EX(object)) ? fbc->common.scope : NULL;
-		EG(called_scope) = EX(called_scope);
-	}
-
-	zend_arg_types_stack_3_pop(&EG(arg_types_stack), &EX(called_scope), &EX(current_object), &EX(fbc));
-	EX(function_state).arguments = zend_vm_stack_push_args(opline->extended_value TSRMLS_CC);
-	LOAD_OPLINE();
-
-	if (fbc->type == ZEND_INTERNAL_FUNCTION) {
-		temp_variable *ret = &EX_T(opline->result.var);
-
-		MAKE_STD_ZVAL(ret->var.ptr);
-		ZVAL_NULL(ret->var.ptr);
-		ret->var.ptr_ptr = &ret->var.ptr;
-		ret->var.fcall_returned_reference = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
-
-		if (fbc->common.arg_info) {
-			zend_uint i=0;
-			zval **p = (zval**)EX(function_state).arguments;
-			ulong arg_count = opline->extended_value;
-
-			while (arg_count>0) {
-				zend_verify_arg_type(fbc, ++i, *(p-arg_count), 0 TSRMLS_CC);
-				arg_count--;
-			}
-		}
-
-		if (!zend_execute_internal) {
-			/* saves one function call if zend_execute_internal is not used */
-			fbc->internal_function.handler(opline->extended_value, ret->var.ptr, (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) ? &ret->var.ptr : NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
-		} else {
-			zend_execute_internal(EXECUTE_DATA, RETURN_VALUE_USED(opline) TSRMLS_CC);
-		}
-
-		if (!RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(&ret->var.ptr);
-		}
-	} else if (fbc->type == ZEND_USER_FUNCTION) {
-		EX(original_return_value) = EG(return_value_ptr_ptr);
-		EG(active_symbol_table) = NULL;
-		EG(active_op_array) = &fbc->op_array;
-		EG(return_value_ptr_ptr) = NULL;
-		if (RETURN_VALUE_USED(opline)) {
-			temp_variable *ret = &EX_T(opline->result.var);
-
-			ret->var.ptr = NULL;
-			EG(return_value_ptr_ptr) = &ret->var.ptr;
-			ret->var.ptr_ptr = &ret->var.ptr;
-			ret->var.fcall_returned_reference = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
-		}
-
-		if (EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
-			if (RETURN_VALUE_USED(opline)) {
-				EX_T(opline->result.var).var.ptr = zend_generator_create_zval(EG(active_op_array) TSRMLS_CC);
-			}
-		} else if (EXPECTED(zend_execute == execute)) {
-			if (EXPECTED(EG(exception) == NULL)) {
-				ZEND_VM_ENTER();
-			}
-		} else {
-			zend_execute(EG(active_op_array) TSRMLS_CC);
-		}
-
-		EG(opline_ptr) = &EX(opline);
-		EG(active_op_array) = EX(op_array);
-		EG(return_value_ptr_ptr) = EX(original_return_value);
-		if (EG(active_symbol_table)) {
-			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
-		}
-		EG(active_symbol_table) = EX(symbol_table);
-	} else { /* ZEND_OVERLOADED_FUNCTION */
-		MAKE_STD_ZVAL(EX_T(opline->result.var).var.ptr);
-		ZVAL_NULL(EX_T(opline->result.var).var.ptr);
-
-			/* Not sure what should be done here if it's a static method */
-		if (EXPECTED(EX(object) != NULL)) {
-			Z_OBJ_HT_P(EX(object))->call_method(fbc->common.function_name, opline->extended_value, EX_T(opline->result.var).var.ptr, &EX_T(opline->result.var).var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
-		} else {
-			zend_error_noreturn(E_ERROR, "Cannot call overloaded function for non-object");
-		}
-
-		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			efree((char*)fbc->common.function_name);
-		}
-		efree(fbc);
-
-		if (!RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(&EX_T(opline->result.var).var.ptr);
-		} else {
-			Z_UNSET_ISREF_P(EX_T(opline->result.var).var.ptr);
-			Z_SET_REFCOUNT_P(EX_T(opline->result.var).var.ptr, 1);
-			EX_T(opline->result.var).var.fcall_returned_reference = 0;
-			EX_T(opline->result.var).var.ptr_ptr = &EX_T(opline->result.var).var.ptr;
-		}
-	}
-
-	EX(function_state).function = (zend_function *) EX(op_array);
-	EX(function_state).arguments = NULL;
-
-	if (should_change_scope) {
-		if (EG(This)) {
-			if (UNEXPECTED(EG(exception) != NULL) && IS_CTOR_CALL(EX(called_scope))) {
-				if (IS_CTOR_USED(EX(called_scope))) {
-					Z_DELREF_P(EG(This));
-				}
-				if (Z_REFCOUNT_P(EG(This)) == 1) {
-					zend_object_store_ctor_failed(EG(This) TSRMLS_CC);
-				}
-			}
-			zval_ptr_dtor(&EG(This));
-		}
-		EG(This) = EX(current_this);
-		EG(scope) = EX(current_scope);
-		EG(called_scope) = EX(current_called_scope);
-	}
-
-	EX(object) = EX(current_object);
-	EX(called_scope) = DECODE_CTOR(EX(called_scope));
-
-	zend_vm_stack_clear_multiple(TSRMLS_C);
-
-	if (UNEXPECTED(EG(exception) != NULL)) {
-		zend_throw_exception_internal(NULL TSRMLS_CC);
-		if (RETURN_VALUE_USED(opline) && EX_T(opline->result.var).var.ptr) {
-			zval_ptr_dtor(&EX_T(opline->result.var).var.ptr);
-		}
-		HANDLE_EXCEPTION();
-	}
-
-	ZEND_VM_NEXT_OPCODE();
-}
-
 ZEND_VM_HANDLER(61, ZEND_DO_FCALL_BY_NAME, ANY, ANY)
 {
 	EX(function_state).function = EX(fbc);
@@ -2888,49 +2984,10 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	}
 	FREE_OP1_IF_VAR();
 
-	if (!(EG(active_op_array)->last_try_catch)) {
-		ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
-	} else {
-		zend_uint i, op_num = opline - EX(op_array)->opcodes;
-		zend_uint catch_op_num = 0, finally_op_num = 0;
-		for (i=0; i<EG(active_op_array)->last_try_catch; i++) {
-			if (EG(active_op_array)->try_catch_array[i].try_op > op_num) {
-				break;
-			} 
-			if (op_num < EG(active_op_array)->try_catch_array[i].finally_op) {
-				finally_op_num = EG(active_op_array)->try_catch_array[i].finally_op;
-			}
-			if (EG(prev_exception)) {
-				/* leaving */
-				if (op_num < EG(active_op_array)->try_catch_array[i].catch_op) {
-					catch_op_num = EG(active_op_array)->try_catch_array[i].catch_op;
-				}
-			}
-		}
-
-		if (catch_op_num && finally_op_num) {
-			if (catch_op_num > finally_op_num) {
-				EX(leaving) = 1;
-				ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
-				ZEND_VM_CONTINUE();
-			} else {
-				EX(leaving) = 0;
-				ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
-				ZEND_VM_CONTINUE();
-			}
-		} else if (catch_op_num) {
-			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
-			ZEND_VM_CONTINUE();
-		} else if (finally_op_num) {
-			EX(leaving) = 1;
-			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
-			ZEND_VM_CONTINUE();
-		} else if (EX(leaving)) {
-			ZEND_VM_NEXT_OPCODE();
-		} else {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
-		}
+	if (EX(op_array)->has_finally_block) {
+		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_RETURN);
 	}
+	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
 ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
@@ -3003,49 +3060,10 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 
 	FREE_OP1_IF_VAR();
 
-	if (!(EG(active_op_array)->last_try_catch)) {
-		ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
-	} else {
-		zend_uint i, op_num = opline - EX(op_array)->opcodes;
-		zend_uint catch_op_num = 0, finally_op_num = 0;
-		for (i=0; i<EG(active_op_array)->last_try_catch; i++) {
-			if (EG(active_op_array)->try_catch_array[i].try_op > op_num) {
-				break;
-			} 
-			if (op_num < EG(active_op_array)->try_catch_array[i].finally_op) {
-				finally_op_num = EG(active_op_array)->try_catch_array[i].finally_op;
-			}
-			if (EG(prev_exception)) {
-				/* leaving */
-				if (op_num < EG(active_op_array)->try_catch_array[i].catch_op) {
-					catch_op_num = EG(active_op_array)->try_catch_array[i].catch_op;
-				}
-			}
-		}
-
-		if (catch_op_num && finally_op_num) {
-			if (catch_op_num > finally_op_num) {
-				EX(leaving) = 1;
-				ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
-				ZEND_VM_CONTINUE();
-			} else {
-				EX(leaving) = 0;
-				ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
-				ZEND_VM_CONTINUE();
-			}
-		} else if (catch_op_num) {
-			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
-			ZEND_VM_CONTINUE();
-		} else if (finally_op_num) {
-			EX(leaving) = 1;
-			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
-			ZEND_VM_CONTINUE();
-		} else if (EX(leaving)) {
-			ZEND_VM_NEXT_OPCODE();
-		} else {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
-		}
+	if (EX(op_array)->has_finally_block) {
+		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_RETURN_BY_REF);
 	}
+	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
 ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
@@ -3389,6 +3407,10 @@ ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST)
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), EX_Ts() TSRMLS_CC);
 	FREE_OP2();
+	if (EX(op_array)->has_finally_block) {
+		EX(leaving_dest) = el->brk;
+		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_BRK);
+	}
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
 }
 
@@ -3401,6 +3423,10 @@ ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), EX_Ts() TSRMLS_CC);
 	FREE_OP2();
+	if (EG(active_op_array)->has_finally_block) {
+		EX(leaving_dest) = el->cont;
+		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_CONT);
+	}
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
 }
 
@@ -3427,6 +3453,10 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 				zendi_zval_dtor(EX_T(brk_opline->op1.var).tmp_var);
 			}
 			break;
+	}
+	if (EX(op_array)->has_finally_block) {
+		EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
+		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_GOTO);
 	}
 	ZEND_VM_JMP(opline->op1.jmp_addr);
 }
@@ -5211,7 +5241,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			ZEND_VM_CONTINUE();
 		} else {
 			zend_exception_save(TSRMLS_C);
-			EX(leaving) = finally;
+			EX(leaving) = ZEND_THROW;
 			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
 			ZEND_VM_CONTINUE();
 		}
@@ -5221,7 +5251,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		ZEND_VM_CONTINUE();
 	} else if (finally) {
 		zend_exception_save(TSRMLS_C);
-		EX(leaving) = finally;
+		EX(leaving) = ZEND_THROW;
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
 		ZEND_VM_CONTINUE();
 	} else {
@@ -5346,48 +5376,26 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 
 ZEND_VM_HANDLER(159, ZEND_LEAVE, ANY, ANY)
 {
-	USE_OPLINE
-	zend_uint i, op_num = opline - EG(active_op_array)->opcodes;
-
-	SAVE_OPLINE();
 	zend_exception_restore(TSRMLS_C);
-	if (EX(leaving)) {
-		zend_uint catch_op_num = 0, finally_op_num = 0;
-		for (i = 0; i < EX(leaving); i++) {
-			if (EG(active_op_array)->try_catch_array[i].try_op > op_num) {
-				break;
-			} 
-			if (op_num < EG(active_op_array)->try_catch_array[i].finally_op) {
-				finally_op_num = EG(active_op_array)->try_catch_array[i].finally_op;
-			}
-			if (EG(exception)) {
-				if (op_num < EG(active_op_array)->try_catch_array[i].catch_op) {
-					catch_op_num = EG(active_op_array)->try_catch_array[i].catch_op;
-				}
-			}
-		}
-
-		if (catch_op_num && finally_op_num) {
-			if (catch_op_num > finally_op_num) {
-				ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
-				ZEND_VM_CONTINUE();
-			} else {
-				EX(leaving) = 0;
-				ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
-				ZEND_VM_CONTINUE();
-			}
-		} else if (catch_op_num) {
-			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
-			ZEND_VM_CONTINUE();
-		} else if (finally_op_num) {
-			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
-			ZEND_VM_CONTINUE();
-		} else {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
-		}
-	} else {
+	if (!EX(leaving)) {
 		ZEND_VM_NEXT_OPCODE();
+	} else {
+		zend_uint leaving = EX(leaving);
+		switch (leaving) {
+			case ZEND_RETURN:
+			case ZEND_RETURN_BY_REF:
+			case ZEND_THROW:
+				leaving = ZEND_LEAVE;
+			case ZEND_JMP:
+			case ZEND_BRK:
+			case ZEND_CONT:
+			case ZEND_GOTO:
+				 ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, leaving);
+			break;
+		}
 	}
+
+	ZEND_VM_CONTINUE();
 }
 
 ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSED)

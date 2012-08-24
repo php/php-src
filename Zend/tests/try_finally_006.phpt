@@ -1,5 +1,5 @@
 --TEST--
-Finally with near goto
+Try finally (with near goto)
 --FILE--
 <?php
 function foo () {

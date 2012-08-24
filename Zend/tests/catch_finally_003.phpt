@@ -1,5 +1,5 @@
 --TEST--
-Try catch finally multi-return
+Try catch finally (with multi-returns)
 --FILE--
 <?php
 function dummy($msg) {

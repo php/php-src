@@ -76,7 +76,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	locale = Locale::createFromName(locale_str);
 
-	DATE_FORMAT_METHOD_FETCH_OBJECT;
+	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
 		intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR,

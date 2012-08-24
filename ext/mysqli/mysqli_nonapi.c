@@ -778,6 +778,11 @@ PHP_FUNCTION(mysqli_poll)
 		RETURN_FALSE;
 	}
 
+	if (!r_array && !e_array) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No stream arrays were passed");
+		RETURN_FALSE;
+	}
+
 	if (r_array != NULL) {
 		mysqlnd_zval_array_to_mysqlnd_array(r_array, &new_r_array TSRMLS_CC);
 	}

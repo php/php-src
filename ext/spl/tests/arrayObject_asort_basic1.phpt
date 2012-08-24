@@ -17,12 +17,14 @@ var_dump($ao1->asort());
 var_dump($ao1);
 var_dump($ao2->asort('blah'));
 var_dump($ao2);
+var_dump($ao2->asort(SORT_NUMERIC));
+var_dump($ao2);
 ?>
 ===DONE===
 --EXPECTF--
 *** Testing ArrayObject::asort() : basic functionality ***
 bool(true)
-object(ArrayObject)#1 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {
     [1]=>
@@ -33,8 +35,22 @@ object(ArrayObject)#1 (1) {
     int(4)
   }
 }
+
+Warning: asort() expects parameter 2 to be long, string given in %sarrayObject_asort_basic1.php on line %d
+bool(false)
+object(ArrayObject)#%d (1) {
+  ["storage":"ArrayObject":private]=>
+  array(3) {
+    ["a"]=>
+    int(4)
+    ["b"]=>
+    int(2)
+    ["c"]=>
+    int(3)
+  }
+}
 bool(true)
-object(ArrayObject)#2 (1) {
+object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {
     ["b"]=>
