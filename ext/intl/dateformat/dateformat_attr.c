@@ -17,8 +17,9 @@
 #include "config.h"
 #endif
 
-#include "php_intl.h"
-#include "intl_convert.h"
+#include "../php_intl.h"
+#include "dateformat_class.h"
+#include "../intl_convert.h"
 #include "dateformat_class.h"
 #include "dateformat_attr.h"
 

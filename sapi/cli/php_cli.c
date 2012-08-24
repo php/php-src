@@ -1167,14 +1167,14 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 	} zend_end_try();
 
 out:
-	if (exit_status == 0) {
-		exit_status = EG(exit_status);
-	}
 	if (request_started) {
 		php_request_shutdown((void *) 0);
 	}
 	if (translated_path) {
 		free(translated_path);
+	}
+	if (exit_status == 0) {
+		exit_status = EG(exit_status);
 	}
 	return exit_status;
 err:

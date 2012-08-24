@@ -1477,11 +1477,6 @@ static parameter_reference *_reflection_param_get_default_param(INTERNAL_FUNCTIO
 		return NULL;
 	}
 
-	if (param->offset < param->required) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Parameter is not optional");
-		return NULL;
-	}
-
 	return param;
 }
 /* }}} */
@@ -1497,7 +1492,7 @@ static zend_op *_reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAMETERS
 
 	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
 	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Internal error");
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Internal error: Failed to retrieve the default value");
 		return NULL;
 	}
 
@@ -2568,9 +2563,7 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 	{
 		RETURN_FALSE;
 	}
-	if (param->offset < param->required) {
-		RETURN_FALSE;
-	}
+
 	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
 	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
 		RETURN_FALSE;
@@ -4471,8 +4464,10 @@ ZEND_METHOD(reflection_class, getTraitAliases)
 			int method_name_len;
 			zend_trait_method_reference *cur_ref = ce->trait_aliases[i]->trait_method;
 
-			method_name_len = spprintf(&method_name, 0, "%s::%s", cur_ref->class_name, cur_ref->method_name);
-			add_assoc_stringl_ex(return_value, ce->trait_aliases[i]->alias, ce->trait_aliases[i]->alias_len + 1, method_name, method_name_len, 0);
+			if (ce->trait_aliases[i]->alias) {
+				method_name_len = spprintf(&method_name, 0, "%s::%s", cur_ref->class_name, cur_ref->method_name);
+				add_assoc_stringl_ex(return_value, ce->trait_aliases[i]->alias, ce->trait_aliases[i]->alias_len + 1, method_name, method_name_len, 0);
+			}
 			i++;
 		}
 	}

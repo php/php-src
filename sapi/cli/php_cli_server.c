@@ -1618,7 +1618,11 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 	client->parser.data = client;
 	nbytes_consumed = php_http_parser_execute(&client->parser, &settings, buf, nbytes_read);
 	if (nbytes_consumed != nbytes_read) {
-		*errstr = estrdup("Malformed HTTP request");
+		if (buf[0] & 0x80 /* SSLv2 */ || buf[0] == 0x16 /* SSLv3/TLSv1 */) {
+			*errstr = estrdup("Unsupported SSL request");
+		} else {
+			*errstr = estrdup("Malformed HTTP request");
+		}
 		return -1;
 	}
 	if (client->current_header_name) {
@@ -2403,7 +2407,7 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 		php_localtime_r(&tv.tv_sec, &tm);
 		php_asctime_r(&tm, buf);
 		printf("PHP %s Development Server started at %s"
-				"Listening on %s\n"
+				"Listening on http://%s\n"
 				"Document root is %s\n"
 				"Press Ctrl-C to quit.\n",
 				PHP_VERSION, buf, server_bind_address, document_root);

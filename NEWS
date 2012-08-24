@@ -1,10 +1,75 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.4.6
+?? ??? 2012, PHP 5.4.7
 
 - Core:
+  . Fixed bug #62844 (parse_url() does not recognize //). (Andrew Faulds).
+  . Fixed bug #62829 (stdint.h included on platform where HAVE_STDINT_H is not 
+    set). (Felipe)
+  . Fixed bug #62763 (register_shutdown_function and extending class).
+    (Laruence)
+  . Fixed bug #62725 (Calling exit() in a shutdown function does not return
+    the exit value). (Laruence)
+  . Fixed bug #62744 (dangling pointers made by zend_disable_class). (Laruence)
+  . Fixed bug #62716 (munmap() is called with the incorrect length).
+    (slangley@google.com)
+  . Fixed bug #62358 (Segfault when using traits a lot). (Laruence)
+  . Fixed bug #62328 (implementing __toString and a cast to string fails)
+    (Laruence)
+  . Fixed bug #51363 (Fatal error raised by var_export() not caught by error 
+    handler). (Lonny Kapelushnik)
+  . Fixed bug #40459 (Stat and Dir stream wrapper methods do not call 
+    constructor). (Stas)
+
+- CURL:
+  . Fixed bug #62839 (curl_copy_handle segfault with CURLOPT_FILE). (Pierrick)
+
+- DateTime:
+  . Fixed bug #62852 (Unserialize invalid DateTime causes crash).
+    (reeze.xia@gmail.com)
+
+- Installation:
+  . Fixed bug #62460 (php binaries installed as binary.dSYM). (Reeze Xia)
+
+- PDO:
+  . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
+
+- Reflection:
+  . Fixed bug #62892 (ReflectionClass::getTraitAliases crashes on importing 
+    trait methods as private). (Felipe)
+  . Fixed bug #62715 (ReflectionParameter::isDefaultValueAvailable() wrong
+    result). (Laruence)
+
+- Session:
+  . Fixed bug (segfault due to retval is not initialized). (Laruence)
+  . Fixed bug (segfault due to PS(mod_user_implemented) not be reseted 
+    when close handler call exit). (Laruence)
+
+- SPL:
+  . Fixed bug #62904 (Crash when cloning an object which inherits SplFixedArray)
+    (Laruence)
+  . Implemented FR #62840 (Add sort flag to ArrayObject::ksort). (Laruence)
+
+- Standard:
+  . Fixed bug #62836 (Seg fault or broken object references on unserialize()).
+    (Laruence)
+
+
+16 Aug 2012, PHP 5.4.6
+
+- CLI Server:
+  . Implemented FR #62700 (have the console output 'Listening on 
+    http://localhost:8000'). (pascal.chevrel@free.fr)
+
+- Core:
+  . Fixed bug #62661 (Interactive php-cli crashes if include() is used in
+    auto_prepend_file). (Laruence)
+  . Fixed bug #62653: (unset($array[$float]) causes a crash). (Nikita Popov,
+    Laruence)
   . Fixed bug #62565 (Crashes due non-initialized internal properties_table).
     (Felipe)
+  . Fixed bug #60194 (--with-zend-multibyte and --enable-debug reports LEAK
+    with run-test.php). (Laruence)
 
 - CURL:
   . Fixed bug #62499 (curl_setopt($ch, CURLOPT_COOKIEFILE, "") returns false).
@@ -24,6 +89,10 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug #62594 (segfault in mysqlnd_res_meta::set_mode). (Laruence)
 
+- readline:
+  . Fixed bug #62612 (readline extension compilation fails with
+    sapi/cli/cli.h: No such file). (Johannes)
+
 - Reflection:
   . Implemented FR #61602 (Allow access to name of constant used as default 
     value). (reeze.xia@gmail.com)
@@ -32,6 +101,8 @@ PHP                                                                        NEWS
   . Implemented FR #55218 Get namespaces from current node. (Lonny)
 
 - SPL:
+  . Fixed bug #62616 (ArrayIterator::count() from IteratorIterator instance
+    gives Segmentation fault). (Laruence, Gustavo)
   . Fixed bug #61527 (ArrayIterator gives misleading notice on next() when 
     moved to the end). (reeze.xia@gmail.com)
 
@@ -39,7 +110,11 @@ PHP                                                                        NEWS
   . Fixed bug #62597 (segfault in php_stream_wrapper_log_error with ZTS build).
     (Laruence)
 
-?? ??? 2012, PHP 5.4.5
+- Zlib:
+  . Fixed bug #55544 (ob_gzhandler always conflicts with
+    zlib.output_compression). (Laruence)
+
+19 Jul 2012, PHP 5.4.5
 
 - Core:
   . Fixed bug #62443 (Crypt SHA256/512 Segfaults With Malformed 
