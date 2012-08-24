@@ -399,24 +399,24 @@ Formatted DateTime is : 20001230 05:04 PM
 Date is: stdClass::__set_state(array(
 ))
 ------------
-Error while formatting as: 'datefmt_format: object must be an instance of DateTime: U_ILLEGAL_ARGUMENT_ERROR'
+Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTime permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
 Date is: stdClass::__set_state(array(
 ))
 ------------
-Error while formatting as: 'datefmt_format: object must be an instance of DateTime: U_ILLEGAL_ARGUMENT_ERROR'
+Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTime permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
 Date is: stdClass::__set_state(array(
 ))
 ------------
-Error while formatting as: 'datefmt_format: object must be an instance of DateTime: U_ILLEGAL_ARGUMENT_ERROR'
+Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTime permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
 Date is: stdClass::__set_state(array(
 ))
 ------------
-Error while formatting as: 'datefmt_format: object must be an instance of DateTime: U_ILLEGAL_ARGUMENT_ERROR'
+Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTime permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
 Date is: stdClass::__set_state(array(
 ))
 ------------
-Error while formatting as: 'datefmt_format: object must be an instance of DateTime: U_ILLEGAL_ARGUMENT_ERROR'
+Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTime permitted): U_ILLEGAL_ARGUMENT_ERROR'

@@ -25,6 +25,8 @@
 #include <unicode/calendar.h>
 #include "../intl_convertcpp.h"
 
+#include "../common/common_date.h"
+
 extern "C" {
 #include "../intl_convert.h"
 #define USE_TIMEZONE_POINTER 1
@@ -51,79 +53,6 @@ U_CFUNC void timezone_object_construct(const TimeZone *zone, zval *object, int o
 	TIMEZONE_METHOD_FETCH_OBJECT_NO_CHECK; /* fetch zend object from zval "object" into "to" */
 	to->utimezone = zone;
 	to->should_delete = owned;
-}
-/* }}} */
-
-/* {{{ timezone_convert_datetimezone
- *      The timezone in DateTime and DateTimeZone is not unified. */
-U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
-												void *object,
-												int is_datetime,
-												intl_error *outside_error,
-												const char *func TSRMLS_DC)
-{
-	char		*id = NULL,
-				offset_id[] = "GMT+00:00";
-	int			id_len = 0;
-	char		*message;
-	TimeZone	*timeZone;
-
-	switch (type) {
-		case TIMELIB_ZONETYPE_ID:
-			id = is_datetime
-				? ((php_date_obj*)object)->time->tz_info->name
-				: ((php_timezone_obj*)object)->tzi.tz->name;
-			id_len = strlen(id);
-			break;
-		case TIMELIB_ZONETYPE_OFFSET: {
-			int offset_mins = is_datetime
-				? -((php_date_obj*)object)->time->z
-				: -(int)((php_timezone_obj*)object)->tzi.utc_offset,
-				hours = offset_mins / 60,
-				minutes = offset_mins - hours * 60;
-			minutes *= minutes > 0 ? 1 : -1;
-
-			if (offset_mins <= -24 * 60 || offset_mins >= 24 * 60) {
-				spprintf(&message, 0, "%s: object has an time zone offset "
-					"that's too large", func);
-				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-					message, 1 TSRMLS_CC);
-				efree(message);
-				return NULL;
-			}
-
-			id = offset_id;
-			id_len = slprintf(id, sizeof(offset_id), "GMT%+03d:%02d",
-				hours, minutes);
-			break;
-		}
-		case TIMELIB_ZONETYPE_ABBR:
-			id = is_datetime
-				? ((php_date_obj*)object)->time->tz_abbr
-				: ((php_timezone_obj*)object)->tzi.z.abbr;
-			id_len = strlen(id);
-			break;
-	}
-
-	UnicodeString s = UnicodeString(id, id_len, US_INV);
-	timeZone = TimeZone::createTimeZone(s);
-#if U_ICU_VERSION_MAJOR_NUM >= 49
-	if (*timeZone == TimeZone::getUnknown()) {
-#else
-	UnicodeString resultingId;
-	timeZone->getID(resultingId);
-	if (resultingId == UnicodeString("Etc/Unknown", -1, US_INV)
-			|| resultingId == UnicodeString("GMT", -1, US_INV)) {
-#endif
-		spprintf(&message, 0, "%s: time zone id '%s' "
-			"extracted from ext/date DateTimeZone not recognized", func, id);
-		intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-			message, 1 TSRMLS_CC);
-		efree(message);
-		delete timeZone;
-		return NULL;
-	}
-	return timeZone;
 }
 /* }}} */
 

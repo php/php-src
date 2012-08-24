@@ -20,8 +20,9 @@
 
 #include <php.h>
 
-#include "intl_common.h"
-#include "intl_error.h"
+#include "../intl_common.h"
+#include "../intl_error.h"
+#include "../intl_data.h"
 
 #include <unicode/ucol.h>
 
@@ -54,9 +55,7 @@ extern zend_class_entry *Collator_ce_ptr;
     Collator_object*  co      = NULL;   \
     intl_error_reset( NULL TSRMLS_CC ); \
 
-#define COLLATOR_METHOD_FETCH_OBJECT                                           \
-    co = (Collator_object *) zend_object_store_get_object( object TSRMLS_CC ); \
-    intl_error_reset( COLLATOR_ERROR_P( co ) TSRMLS_CC );                      \
+#define COLLATOR_METHOD_FETCH_OBJECT	INTL_METHOD_FETCH_OBJECT(Collator, co)
 
 // Macro to check return value of a ucol_* function call.
 #define COLLATOR_CHECK_STATUS( co, msg )                                        \

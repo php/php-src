@@ -455,11 +455,11 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 
 #endif
 
-int fpm_socket_unix_test_connect(struct sockaddr_un *sun, size_t socklen) /* {{{ */
+int fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen) /* {{{ */
 {
 	int fd;
 
-	if (!sun || sun->sun_family != AF_UNIX) {
+	if (!sock || sock->sun_family != AF_UNIX) {
 		return -1;
 	}
 
@@ -467,7 +467,7 @@ int fpm_socket_unix_test_connect(struct sockaddr_un *sun, size_t socklen) /* {{{
 		return -1;
 	}
 
-	if (connect(fd, (struct sockaddr *)sun, socklen) == -1) {
+	if (connect(fd, (struct sockaddr *)sock, socklen) == -1) {
 		return -1;
 	}
 
