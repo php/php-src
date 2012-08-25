@@ -2702,29 +2702,6 @@ void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_v
 }
 /* }}} */
 
-void zend_do_delegate_yield(znode *result, const znode *value TSRMLS_DC) /* {{{ */
-{
-	zend_op *opline;
-
-	if (!CG(active_op_array)->function_name) {
-		zend_error(E_COMPILE_ERROR, "The \"yield*\" expression can only be used inside a function");
-	}
-
-	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
-
-	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-
-	opline->opcode = ZEND_DELEGATE_YIELD;
-
-	SET_NODE(opline->op1, value);
-	SET_UNUSED(opline->op2);
-
-	opline->result_type = IS_VAR;
-	opline->result.var = get_temporary_variable(CG(active_op_array));
-	GET_NODE(result, opline->result);
-}
-/* }}} */
-
 static int zend_add_try_element(zend_uint try_op TSRMLS_DC) /* {{{ */
 {
 	int try_catch_offset = CG(active_op_array)->last_try_catch++;
