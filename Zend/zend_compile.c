@@ -6320,13 +6320,18 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 
 	GET_NODE(&value_node, opline->result);
 
-	if (assign_by_ref) {
-		zend_do_end_variable_parse(value, BP_VAR_W, 0 TSRMLS_CC);
-		/* Mark FE_FETCH as IS_VAR as it holds the data directly as a value */
-		zend_do_assign_ref(NULL, value, &value_node TSRMLS_CC);
-	} else {
-		zend_do_assign(&dummy, value, &value_node TSRMLS_CC);
+	if (value->EA & ZEND_PARSED_LIST_EXPR) {
+		zend_do_list_end(&dummy, &value_node TSRMLS_CC);
 		zend_do_free(&dummy TSRMLS_CC);
+	} else {
+		if (assign_by_ref) {
+			zend_do_end_variable_parse(value, BP_VAR_W, 0 TSRMLS_CC);
+			/* Mark FE_FETCH as IS_VAR as it holds the data directly as a value */
+			zend_do_assign_ref(NULL, value, &value_node TSRMLS_CC);
+		} else {
+			zend_do_assign(&dummy, value, &value_node TSRMLS_CC);
+			zend_do_free(&dummy TSRMLS_CC);
+		}
 	}
 
 	if (key->op_type != IS_UNUSED) {
