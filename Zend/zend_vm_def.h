@@ -2171,6 +2171,7 @@ ZEND_VM_HELPER_EX(zend_finally_handler_leaving, ANY, ANY, int type)
 				if (catch_op_num && finally_op_num) {
 					/* EG(exception) || EG(prev_exception) */
 					if (catch_op_num > finally_op_num) {
+						zend_exception_save(TSRMLS_C);
 						EX(leaving) = ZEND_THROW;
 						ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
 					} else {
@@ -2181,6 +2182,7 @@ ZEND_VM_HELPER_EX(zend_finally_handler_leaving, ANY, ANY, int type)
 					EX(leaving) = 0;
 					ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
 				} else if (finally_op_num) {
+					zend_exception_save(TSRMLS_C);
 					if (type != ZEND_LEAVE) {
 						EX(leaving) = type;
 					}
@@ -2231,12 +2233,12 @@ ZEND_VM_HANDLER(42, ZEND_JMP, ANY, ANY)
 #if DEBUG_ZEND>=2
 	printf("Jumping to %d\n", opline->op1.opline_num);
 #endif
-	if (EX(op_array)->has_finally_block) {
-		EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
-		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_JMP);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		ZEND_VM_SET_OPCODE(opline->op1.jmp_addr);
+		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	}
-	ZEND_VM_SET_OPCODE(opline->op1.jmp_addr);
-	ZEND_VM_CONTINUE(); /* CHECK_ME */
+	EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
+	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_JMP);
 }
 
 ZEND_VM_HANDLER(43, ZEND_JMPZ, CONST|TMP|VAR|CV, ANY)
@@ -2973,10 +2975,10 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 	}
 	FREE_OP1_IF_VAR();
 
-	if (EX(op_array)->has_finally_block) {
-		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_RETURN);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 	}
-	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_RETURN);
 }
 
 ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
@@ -3049,10 +3051,10 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 
 	FREE_OP1_IF_VAR();
 
-	if (EX(op_array)->has_finally_block) {
-		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_RETURN_BY_REF);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 	}
-	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_RETURN_BY_REF);
 }
 
 ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, ANY, ANY)
@@ -3404,11 +3406,11 @@ ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST)
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), EX_Ts() TSRMLS_CC);
 	FREE_OP2();
-	if (EX(op_array)->has_finally_block) {
-		EX(leaving_dest) = el->brk;
-		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_BRK);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
 	}
-	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
+	EX(leaving_dest) = el->brk;
+	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_BRK);
 }
 
 ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
@@ -3420,11 +3422,11 @@ ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), EX_Ts() TSRMLS_CC);
 	FREE_OP2();
-	if (EG(active_op_array)->has_finally_block) {
-		EX(leaving_dest) = el->cont;
-		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_CONT);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
 	}
-	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
+	EX(leaving_dest) = el->cont;
+	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_CONT);
 }
 
 ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
@@ -3451,11 +3453,11 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 			}
 			break;
 	}
-	if (EX(op_array)->has_finally_block) {
-		EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
-		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_GOTO);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		ZEND_VM_JMP(opline->op1.jmp_addr);
 	}
-	ZEND_VM_JMP(opline->op1.jmp_addr);
+	EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
+	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_GOTO);
 }
 
 ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)

@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.5.0
 
 - General improvements:
+  . Support list in foreach (https://wiki.php.net/rfc/foreachlist). (Laruence)
   . Implemented 'finally' keyword (https://wiki.php.net/rfc/finally). (Laruence)
   . Drop Windows XP and 2003 support. (Pierre)
   . Improve set_exception_handler while doing reset.(Laruence)

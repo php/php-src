@@ -76,8 +76,7 @@ zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_arra
 ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data TSRMLS_DC)
 {
 	DCL_OPLINE
-
-	zend_bool original_in_execution = EG(in_execution);
+	zend_bool original_in_execution;
 
 	{%HELPER_VARS%}
 
@@ -87,6 +86,7 @@ ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data TSRMLS_DC)
 		return;
 	}
 
+	original_in_execution = EG(in_execution);
 	EG(in_execution) = 1;
 
 	LOAD_REGS();

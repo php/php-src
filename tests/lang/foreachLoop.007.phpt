@@ -8,4 +8,4 @@ foreach (array(1,2) as &$v) {
 }
 ?>
 --EXPECTF--
-Parse error: %s on line 3
+Fatal error: Cannot create references to elements of a temporary array expression in %sforeachLoop.007.php on line %d

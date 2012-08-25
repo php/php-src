@@ -727,6 +727,7 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 #define ZEND_PARSED_VARIABLE			(1<<4)
 #define ZEND_PARSED_REFERENCE_VARIABLE	(1<<5)
 #define ZEND_PARSED_NEW					(1<<6)
+#define ZEND_PARSED_LIST_EXPR			(1<<7)
 
 
 /* unset types */

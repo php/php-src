@@ -432,10 +432,10 @@ foreach_optional_arg:
 	|	T_DOUBLE_ARROW foreach_variable	{ $$ = $2; }
 ;
 
-
 foreach_variable:
 		variable			{ zend_check_writable_variable(&$1); $$ = $1; }
 	|	'&' variable		{ zend_check_writable_variable(&$2); $$ = $2;  $$.EA |= ZEND_PARSED_REFERENCE_VARIABLE; }
+	|	T_LIST '(' { zend_do_list_init(TSRMLS_C); } assignment_list ')' { $$ = $1; $$.EA = ZEND_PARSED_LIST_EXPR; }
 ;
 
 for_statement:
