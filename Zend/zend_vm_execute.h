@@ -760,6 +760,7 @@ static int ZEND_FASTCALL zend_finally_handler_leaving_SPEC(int type, ZEND_OPCODE
 				if (catch_op_num && finally_op_num) {
 					/* EG(exception) || EG(prev_exception) */
 					if (catch_op_num > finally_op_num) {
+						zend_exception_save(TSRMLS_C);
 						EX(leaving) = ZEND_THROW;
 						ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
 					} else {
@@ -770,6 +771,7 @@ static int ZEND_FASTCALL zend_finally_handler_leaving_SPEC(int type, ZEND_OPCODE
 					EX(leaving) = 0;
 					ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
 				} else if (finally_op_num) {
+					zend_exception_save(TSRMLS_C);
 					if (type != ZEND_LEAVE) {
 						EX(leaving) = type;
 					}
@@ -820,12 +822,12 @@ static int ZEND_FASTCALL  ZEND_JMP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 #if DEBUG_ZEND>=2
 	printf("Jumping to %d\n", opline->op1.opline_num);
 #endif
-	if (EX(op_array)->has_finally_block) {
-		EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
-		return zend_finally_handler_leaving_SPEC(ZEND_JMP, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		ZEND_VM_SET_OPCODE(opline->op1.jmp_addr);
+		ZEND_VM_CONTINUE(); /* CHECK_ME */
 	}
-	ZEND_VM_SET_OPCODE(opline->op1.jmp_addr);
-	ZEND_VM_CONTINUE(); /* CHECK_ME */
+	EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
+	return zend_finally_handler_leaving_SPEC(ZEND_JMP, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_INIT_STRING_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -1530,11 +1532,11 @@ static int ZEND_FASTCALL  ZEND_BRK_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), EX_Ts() TSRMLS_CC);
 
-	if (EX(op_array)->has_finally_block) {
-		EX(leaving_dest) = el->brk;
-		return zend_finally_handler_leaving_SPEC(ZEND_BRK, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
 	}
-	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
+	EX(leaving_dest) = el->brk;
+	return zend_finally_handler_leaving_SPEC(ZEND_BRK, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_CONT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -1546,11 +1548,11 @@ static int ZEND_FASTCALL  ZEND_CONT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), EX_Ts() TSRMLS_CC);
 
-	if (EG(active_op_array)->has_finally_block) {
-		EX(leaving_dest) = el->cont;
-		return zend_finally_handler_leaving_SPEC(ZEND_CONT, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
 	}
-	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
+	EX(leaving_dest) = el->cont;
+	return zend_finally_handler_leaving_SPEC(ZEND_CONT, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_GOTO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -1577,11 +1579,11 @@ static int ZEND_FASTCALL  ZEND_GOTO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			}
 			break;
 	}
-	if (EX(op_array)->has_finally_block) {
-		EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
-		return zend_finally_handler_leaving_SPEC(ZEND_GOTO, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		ZEND_VM_JMP(opline->op1.jmp_addr);
 	}
-	ZEND_VM_JMP(opline->op1.jmp_addr);
+	EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
+	return zend_finally_handler_leaving_SPEC(ZEND_GOTO, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_ADD_INTERFACE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -2432,10 +2434,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		*EG(return_value_ptr_ptr) = ret;
 	}
 
-	if (EX(op_array)->has_finally_block) {
-		return zend_finally_handler_leaving_SPEC(ZEND_RETURN, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_finally_handler_leaving_SPEC(ZEND_RETURN, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -2506,10 +2508,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 		}
 	} while (0);
 
-	if (EX(op_array)->has_finally_block) {
-		return zend_finally_handler_leaving_SPEC(ZEND_RETURN_BY_REF, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_finally_handler_leaving_SPEC(ZEND_RETURN_BY_REF, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_THROW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -6982,10 +6984,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		*EG(return_value_ptr_ptr) = ret;
 	}
 
-	if (EX(op_array)->has_finally_block) {
-		return zend_finally_handler_leaving_SPEC(ZEND_RETURN, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_finally_handler_leaving_SPEC(ZEND_RETURN, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -7056,10 +7058,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 		}
 	} while (0);
 
-	if (EX(op_array)->has_finally_block) {
-		return zend_finally_handler_leaving_SPEC(ZEND_RETURN_BY_REF, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_finally_handler_leaving_SPEC(ZEND_RETURN_BY_REF, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -11438,10 +11440,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 
-	if (EX(op_array)->has_finally_block) {
-		return zend_finally_handler_leaving_SPEC(ZEND_RETURN, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_finally_handler_leaving_SPEC(ZEND_RETURN, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -11514,10 +11516,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 
-	if (EX(op_array)->has_finally_block) {
-		return zend_finally_handler_leaving_SPEC(ZEND_RETURN_BY_REF, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_finally_handler_leaving_SPEC(ZEND_RETURN_BY_REF, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -27457,10 +27459,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		*EG(return_value_ptr_ptr) = ret;
 	}
 
-	if (EX(op_array)->has_finally_block) {
-		return zend_finally_handler_leaving_SPEC(ZEND_RETURN, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_finally_handler_leaving_SPEC(ZEND_RETURN, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -27531,10 +27533,10 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 		}
 	} while (0);
 
-	if (EX(op_array)->has_finally_block) {
-		return zend_finally_handler_leaving_SPEC(ZEND_RETURN_BY_REF, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	if (EXPECTED(!EX(op_array)->has_finally_block)) {
+		return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
-	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	return zend_finally_handler_leaving_SPEC(ZEND_RETURN_BY_REF, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 }
 
 static int ZEND_FASTCALL  ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
