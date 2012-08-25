@@ -22,6 +22,8 @@
 #define ZEND_GENERATORS_H
 
 BEGIN_EXTERN_C()
+extern ZEND_API zend_class_entry *zend_ce_generator;
+END_EXTERN_C()
 
 typedef struct _zend_generator {
 	zend_object std;
@@ -46,16 +48,19 @@ typedef struct _zend_generator {
 	temp_variable *send_target;
 	/* Largest used integer key for auto-incrementing keys */
 	long largest_used_integer_key;
+
+	/* ZEND_GENERATOR_* flags */
+	zend_uchar flags;
 } zend_generator;
 
-extern ZEND_API zend_class_entry *zend_ce_generator;
+static const zend_uchar ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;
+static const zend_uchar ZEND_GENERATOR_FORCED_CLOSE      = 0x2;
+static const zend_uchar ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
 
 void zend_register_generator_ce(TSRMLS_D);
 zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC);
 void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC);
 void zend_generator_resume(zend_generator *generator TSRMLS_DC);
-
-END_EXTERN_C()
 
 #endif
 

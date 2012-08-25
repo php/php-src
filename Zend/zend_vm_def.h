@@ -5402,6 +5402,10 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);

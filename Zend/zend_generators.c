@@ -31,11 +31,13 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 {
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
+		zend_op_array *op_array = execute_data->op_array;
 
 		if (!finished_execution) {
-			zend_op_array *op_array = execute_data->op_array;
 			if (op_array->has_finally_block) {
-				zend_uint op_num = execute_data->opline - op_array->opcodes;
+				/* -1 required because we want the last run opcode, not the
+				 * next to-be-run one. */
+				zend_uint op_num = execute_data->opline - op_array->opcodes - 1;
 				zend_uint finally_op_num = 0;
 
 				/* Find next finally block */
@@ -59,6 +61,7 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 				if (finally_op_num) {
 					execute_data->opline = &op_array->opcodes[finally_op_num];
 					execute_data->leaving = ZEND_RETURN;
+					generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
 					zend_generator_resume(generator TSRMLS_CC);
 					return;
 				}
@@ -66,7 +69,7 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 		}
 
 		if (!execute_data->symbol_table) {
-			zend_free_compiled_variables(execute_data->CVs, execute_data->op_array->last_var);
+			zend_free_compiled_variables(execute_data->CVs, op_array->last_var);
 		} else {
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table TSRMLS_CC);
 		}
@@ -83,8 +86,9 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 		 * a return statement) we have to free loop variables manually, as
 		 * we don't know whether the SWITCH_FREE / FREE opcodes have run */
 		if (!finished_execution) {
-			zend_op_array *op_array = execute_data->op_array;
-			zend_uint op_num = execute_data->opline - op_array->opcodes;
+			/* -1 required because we want the last run opcode, not the
+			 * next to-be-run one. */
+			zend_uint op_num = execute_data->opline - op_array->opcodes - 1;
 
 			int i;
 			for (i = 0; i < op_array->last_brk_cont; ++i) {
@@ -411,6 +415,13 @@ void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 		return;
 	}
 
+	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
+		zend_error(E_ERROR, "Cannot resume an already running generator");
+	}
+
+	/* Drop the AT_FIRST_YIELD flag */
+	generator->flags &= ~ZEND_GENERATOR_AT_FIRST_YIELD;
+
 	{
 		/* Backup executor globals */
 		zval **original_return_value_ptr_ptr = EG(return_value_ptr_ptr);
@@ -455,7 +466,9 @@ void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 		generator->execute_data->prev_execute_data->prev_execute_data = original_execute_data;
 
 		/* Resume execution */
+		generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
 		execute_ex(generator->execute_data TSRMLS_CC);
+		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
 		/* Restore executor globals */
 		EG(return_value_ptr_ptr) = original_return_value_ptr_ptr;
@@ -489,6 +502,17 @@ static void zend_generator_ensure_initialized(zend_generator *generator TSRMLS_D
 {
 	if (!generator->value) {
 		zend_generator_resume(generator TSRMLS_CC);
+		generator->flags |= ZEND_GENERATOR_AT_FIRST_YIELD;
+	}
+}
+/* }}} */
+
+static void zend_generator_rewind(zend_generator *generator TSRMLS_DC) /* {{{ */
+{
+	zend_generator_ensure_initialized(generator TSRMLS_CC);
+
+	if (!(generator->flags & ZEND_GENERATOR_AT_FIRST_YIELD)) {
+		zend_throw_exception(NULL, "Cannot rewind a generator that was already run", 0 TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -505,10 +529,7 @@ ZEND_METHOD(Generator, rewind)
 
 	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	zend_generator_ensure_initialized(generator TSRMLS_CC);
-
-	/* Generators aren't rewindable, so rewind() only has to make sure that
-	 * the generator is initialized, nothing more */
+	zend_generator_rewind(generator TSRMLS_CC);
 }
 /* }}} */
 
@@ -721,13 +742,21 @@ static void zend_generator_iterator_move_forward(zend_object_iterator *iterator 
 }
 /* }}} */
 
+static void zend_generator_iterator_rewind(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
+{
+	zend_generator *generator = (zend_generator *) iterator->data;
+
+	zend_generator_rewind(generator TSRMLS_CC);
+}
+/* }}} */
+
 static zend_object_iterator_funcs zend_generator_iterator_functions = {
 	zend_generator_iterator_dtor,
 	zend_generator_iterator_valid,
 	zend_generator_iterator_get_data,
 	zend_generator_iterator_get_key,
 	zend_generator_iterator_move_forward,
-	NULL
+	zend_generator_iterator_rewind
 };
 
 zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC) /* {{{ */

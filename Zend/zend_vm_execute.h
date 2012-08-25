@@ -4209,6 +4209,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -4898,6 +4902,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -5914,6 +5922,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -6623,6 +6635,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -7372,6 +7388,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -9436,6 +9456,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -10125,6 +10149,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -11141,6 +11169,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -11716,6 +11748,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -12403,6 +12439,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -16326,6 +16366,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -18404,6 +18448,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -20864,6 +20912,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -22000,6 +22052,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -24129,6 +24185,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -25616,6 +25676,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -26924,6 +26988,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -28234,6 +28302,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -28653,6 +28725,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -29959,6 +30035,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -33481,6 +33561,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -35428,6 +35512,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -37756,6 +37844,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
+
 	/* Destroy the previously yielded value */
 	if (generator->value) {
 		zval_ptr_dtor(&generator->value);
@@ -38751,6 +38843,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
@@ -40747,6 +40843,10 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (generator->flags & ZEND_GENERATOR_FORCED_CLOSE) {
+		zend_error_noreturn(E_ERROR, "Cannot yield from finally in a force-closed generator");
+	}
 
 	/* Destroy the previously yielded value */
 	if (generator->value) {
