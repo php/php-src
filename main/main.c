@@ -1123,11 +1123,20 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 		case E_PARSE:
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
-			EG(exit_status) = 255;
+		{ /* new block to allow variable definition */
+			/* eval() errors do not affect exit_status or response code */
+			zend_bool during_eval = (EG(current_execute_data) &&
+						EG(current_execute_data)->opline &&
+						EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
+						EG(current_execute_data)->opline->extended_value == ZEND_EVAL);
+			if (!during_eval) {
+				EG(exit_status) = 255;
+			}
 			if (module_initialized) {
 				if (!PG(display_errors) &&
 				    !SG(headers_sent) &&
-					SG(sapi_headers).http_response_code == 200
+					SG(sapi_headers).http_response_code == 200 &&
+				    !during_eval
 				) {
 					sapi_header_line ctr = {0};
 
@@ -1148,6 +1157,7 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 				}
 			}
 			break;
+		}
 	}
 
 	/* Log if necessary */
