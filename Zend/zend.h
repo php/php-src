@@ -279,7 +279,7 @@ static const char long_min_digits[] = "9223372036854775808";
 typedef enum {
   SUCCESS =  0,
   FAILURE = -1,		/* this MUST stay a negative number, or it may affect functions! */
-} RESULT_CODE;
+} ZEND_RESULT_CODE;
 
 #include "zend_hash.h"
 #include "zend_ts_hash.h"
