@@ -6283,8 +6283,13 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 		opline->extended_value |= ZEND_FE_FETCH_WITH_KEY;
 	}
 
-	if ((key->op_type != IS_UNUSED) && (key->EA & ZEND_PARSED_REFERENCE_VARIABLE)) {
+	if ((key->op_type != IS_UNUSED)) {
+       if (key->EA & ZEND_PARSED_REFERENCE_VARIABLE) {
 		zend_error(E_COMPILE_ERROR, "Key element cannot be a reference");
+       }
+       if (key->EA & ZEND_PARSED_LIST_EXPR) {
+		zend_error(E_COMPILE_ERROR, "Cannot use list as Key element");
+       }
 	}
 
 	if (value->EA & ZEND_PARSED_REFERENCE_VARIABLE) {
