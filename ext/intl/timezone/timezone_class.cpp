@@ -225,7 +225,7 @@ static zend_object_value TimeZone_clone_obj(zval *object TSRMLS_DC)
 	to_orig = (TimeZone_object*)zend_object_store_get_object(object TSRMLS_CC);
 	intl_error_reset(TIMEZONE_ERROR_P(to_orig) TSRMLS_CC);
 
-	ret_val = TimeZone_ce_ptr->create_object(TimeZone_ce_ptr TSRMLS_CC);
+	ret_val = TimeZone_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
 	to_new  = (TimeZone_object*)zend_object_store_get_object_by_handle(
 		ret_val.handle TSRMLS_CC);
 
