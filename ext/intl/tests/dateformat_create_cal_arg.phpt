@@ -42,12 +42,12 @@ echo $df->format($ts), "\n";
 
 ?>
 ==DONE==
---EXPECT--
-domingo, 1 de enero de 2012 00:00:00 GMT
-domingo, 8 de Safar de 1433 00:00:00 GMT
-domingo, 1 de enero de 2012 01:00:00 Hora estándar de Europa Central
-sábado, 31 de diciembre de 2011 d.C. 23:00:00 Hora estándar de las Azores
-sábado, 7 de Safar de 1433 AH 23:00:00 Hora estándar de las Azores
-domingo, 8 de Safar de 1433 AH 00:00:00 GMT
-domingo, 1 de enero de 2012 00:00:00 GMT
+--EXPECTF--
+domingo%S 1 de enero de 2012 00:00:00 GMT
+domingo%S 8 de Safar de 1433 00:00:00 GMT
+domingo%S 1 de enero de 2012 01:00:00 Hora estándar de Europa Central
+sábado%S 31 de diciembre de 2011 d.C. 23:00:00 Hora %Sde las Azores
+sábado%S 7 de Safar de 1433 AH 23:00:00 Hora %Sde las Azores
+domingo%S 8 de Safar de 1433 AH 00:00:00 GMT
+domingo%S 1 de enero de 2012 00:00:00 GMT
 ==DONE==
