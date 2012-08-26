@@ -2226,7 +2226,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
     AC_MSG_RESULT([$icu_install_prefix])
 
     dnl Check ICU version
-    AC_MSG_CHECKING([for ICU 3.4 or greater])
+    AC_MSG_CHECKING([for ICU 4.0 or greater])
     icu_version_full=`$ICU_CONFIG --version`
     ac_IFS=$IFS
     IFS="."
