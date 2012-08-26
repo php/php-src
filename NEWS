@@ -32,6 +32,7 @@ PHP                                                                        NEWS
     (reeze.xia@gmail.com)
 
 - Intl:
+  . Fixed Spoofchecker not being registered on ICU 49.1. (Gustavo)
   . Fix bug #62933 (ext/intl compilation error on icu 3.4.1). (Gustavo)
 
 - Installation:
