@@ -6288,7 +6288,7 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 			zend_error(E_COMPILE_ERROR, "Key element cannot be a reference");
 		}
 		if (key->EA & ZEND_PARSED_LIST_EXPR) {
-			zend_error(E_COMPILE_ERROR, "Cannot use list as Key element");
+			zend_error(E_COMPILE_ERROR, "Cannot use list as key element");
 		}
 	}
 
@@ -6326,6 +6326,9 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 	GET_NODE(&value_node, opline->result);
 
 	if (value->EA & ZEND_PARSED_LIST_EXPR) {
+		if (!CG(list_llist).head) {
+			zend_error(E_COMPILE_ERROR, "Cannot use empty list");
+		}
 		zend_do_list_end(&dummy, &value_node TSRMLS_CC);
 		zend_do_free(&dummy TSRMLS_CC);
 	} else {
