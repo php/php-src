@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug #62852 (Unserialize invalid DateTime causes crash).
     (reeze.xia@gmail.com)
 
+- Intl:
+  . Fix bug #62933 (ext/intl compilation error on icu 3.4.1). (Gustavo)
+
 - Installation:
   . Fixed bug #62460 (php binaries installed as binary.dSYM). (Reeze Xia)
 
