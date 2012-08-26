@@ -57,6 +57,9 @@ PHP                                                                        NEWS
   . Fixed bug #62836 (Seg fault or broken object references on unserialize()).
     (Laruence)
 
+- FPM:
+  . Merged PR 121 by minitux to add support for slow request counting on PHP
+    FPM status page. (Lars)
 
 16 Aug 2012, PHP 5.4.6
 
