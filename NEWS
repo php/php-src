@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fix null pointer dereferences in some classes of ext/intl. (Gustavo)
+  . Fix bug #62915 (defective cloning in several intl classes). (Gustavo)
 
 - MySQLnd:
   . Fixed bug #62885 (mysqli_poll - Segmentation fault). (Laruence)

@@ -91,7 +91,7 @@ zend_object_value IntlDateFormatter_object_clone(zval *object TSRMLS_DC)
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 
-	new_obj_val = IntlDateFormatter_ce_ptr->create_object(IntlDateFormatter_ce_ptr TSRMLS_CC);
+	new_obj_val = IntlDateFormatter_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
 	new_dfo = (IntlDateFormatter_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
 	/* clone standard parts */	
 	zend_objects_clone_members(&new_dfo->zo, new_obj_val, &dfo->zo, handle TSRMLS_CC);
