@@ -2691,7 +2691,7 @@ string_copy:
 		case CURLOPT_SHARE:
 			{
 				php_curlsh *sh = NULL;
-				ZEND_FETCH_RESOURCE(sh, php_curlsh *, zvalue, -1, le_curl_share_handle_name, le_curl_share_handle);
+				ZEND_FETCH_RESOURCE_NO_RETURN(sh, php_curlsh *, zvalue, -1, le_curl_share_handle_name, le_curl_share_handle);
 				if (sh) {
 					curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
 				}
@@ -3215,7 +3215,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 #if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
 /* {{{ _php_curl_reset_handlers()
    Reset all handlers of a given php_curl */
-static _php_curl_reset_handlers(php_curl *ch)
+static void _php_curl_reset_handlers(php_curl *ch)
 {
 	if (ch->handlers->write->stream) {
 		Z_DELREF_P(ch->handlers->write->stream);
@@ -3306,7 +3306,7 @@ PHP_FUNCTION(curl_escape)
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
-	if (res = curl_easy_escape(ch->cp, str, str_len)) {
+	if ((res = curl_easy_escape(ch->cp, str, str_len))) {
 		RETVAL_STRING(res, 1);
 		free(res);
 	} else {
@@ -3330,7 +3330,7 @@ PHP_FUNCTION(curl_unescape)
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
-	if (out = curl_easy_unescape(ch->cp, str, str_len, &out_len)) {
+	if ((out = curl_easy_unescape(ch->cp, str, str_len, &out_len))) {
 		RETVAL_STRINGL(out, out_len, 1);
 		free(out);
 	} else {
