@@ -2028,7 +2028,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			/* saves one function call if zend_execute_internal is not used */
 			fbc->internal_function.handler(opline->extended_value, ret->var.ptr, (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) ? &ret->var.ptr : NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
 		} else {
-			zend_execute_internal(EXECUTE_DATA, RETURN_VALUE_USED(opline) TSRMLS_CC);
+			zend_execute_internal(EXECUTE_DATA, NULL, RETURN_VALUE_USED(opline) TSRMLS_CC);
 		}
 
 		if (!RETURN_VALUE_USED(opline)) {
@@ -2151,7 +2151,7 @@ ZEND_VM_HELPER_EX(zend_finally_handler_leaving, ANY, ANY, int type)
 					for (i=0; i<EX(op_array)->last_try_catch; i++) {
 						if (EX(op_array)->try_catch_array[i].try_op > op_num) {
 							break;
-						} 
+						}
 						if (op_num < EX(op_array)->try_catch_array[i].finally_op) {
 							finally_op_num = EX(op_array)->try_catch_array[i].finally_op;
 						}
@@ -2163,7 +2163,7 @@ ZEND_VM_HELPER_EX(zend_finally_handler_leaving, ANY, ANY, int type)
 					for (i=0; i<EX(op_array)->last_try_catch; i++) {
 						if (EX(op_array)->try_catch_array[i].try_op > op_num) {
 							break;
-						} 
+						}
 						if (op_num < EX(op_array)->try_catch_array[i].finally_op) {
 							finally_op_num = EX(op_array)->try_catch_array[i].finally_op;
 						}
@@ -2207,8 +2207,8 @@ ZEND_VM_HELPER_EX(zend_finally_handler_leaving, ANY, ANY, int type)
 		  for (i=0; i<EG(active_op_array)->last_try_catch; i++) {
 			  if (EG(active_op_array)->try_catch_array[i].try_op > op_num) {
 				  break;
-			  } 
-			  if (op_num < EG(active_op_array)->try_catch_array[i].finally_op 
+			  }
+			  if (op_num < EG(active_op_array)->try_catch_array[i].finally_op
 					  && (EX(leaving_dest) < EG(active_op_array)->try_catch_array[i].try_op
 						  || EX(leaving_dest) >= EG(active_op_array)->try_catch_array[i].finally_end)) {
 				  finally_op_num = EG(active_op_array)->try_catch_array[i].finally_op;
@@ -5145,7 +5145,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		if (EG(active_op_array)->try_catch_array[i].try_op > op_num) {
 			/* further blocks will not be relevant... */
 			break;
-		} 
+		}
 		if (op_num < EG(active_op_array)->try_catch_array[i].catch_op) {
 			catch_op_num = EX(op_array)->try_catch_array[i].catch_op;
 			catched = i + 1;
@@ -5221,7 +5221,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
 			ZEND_VM_CONTINUE();
 		}
-	} else if (catched) { 
+	} else if (catched) {
 		EX(leaving) = 0;
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
 		ZEND_VM_CONTINUE();
