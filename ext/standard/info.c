@@ -144,7 +144,7 @@ PHPAPI void php_info_print_module(zend_module_entry *zend_module TSRMLS_DC) /* {
 {
 	if (zend_module->info_func || zend_module->version) {
 		if (!sapi_module.phpinfo_as_text) {
-			php_info_printf("<h2><a name=\"module_%s\">%s</a></h2>\n", zend_module->name, zend_module->name);
+			php_info_printf("<h2><a id=\"module_%s\">%s</a></h2>\n", zend_module->name, zend_module->name);
 		} else {
 			php_info_print_table_start();
 			php_info_print_table_header(1, zend_module->name);
@@ -624,14 +624,11 @@ PHPAPI char *php_get_uname(char mode)
  */
 PHPAPI void php_print_info_htmlhead(TSRMLS_D)
 {
-	php_info_print("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"DTD/xhtml1-transitional.dtd\">\n");
-	php_info_print("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
-	php_info_print("<head>\n");
+	php_info_print("<!doctype html>\n<meta charset=utf-8>");
 	php_info_print_style(TSRMLS_C);
 	php_info_print("<title>phpinfo()</title>");
 	php_info_print("<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW,NOARCHIVE\" />");
-	php_info_print("</head>\n");
-	php_info_print("<body><div class=\"center\">\n");
+	php_info_print("<div class=\"center\">\n");
 }
 /* }}} */
 
@@ -676,7 +673,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	        the_time = time(NULL);
 	        ta = php_localtime_r(&the_time, &tmbuf);
 
-            php_info_print("<a href=\"http://www.php.net/\"><img border=\"0\" src=\"");
+            php_info_print("<a href=\"http://www.php.net/\"><img src=\"");
 	        if (ta && (ta->tm_mon==3) && (ta->tm_mday==1)) {
 		        php_info_print(PHP_EGG_LOGO_DATA_URI "\" alt=\"PHP logo\" /></a>");
 	        } else {
@@ -783,7 +780,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 		/* Zend Engine */
 		php_info_print_box_start(0);
 		if (!sapi_module.phpinfo_as_text) {
-			php_info_print("<a href=\"http://www.zend.com/\"><img border=\"0\" src=\"");
+			php_info_print("<a href=\"http://www.zend.com/\"><img src=\"");
 			php_info_print(ZEND_LOGO_DATA_URI "\" alt=\"Zend logo\" /></a>\n");
 		}
 		php_info_print("This program makes use of the Zend Scripting Language Engine:");
@@ -919,7 +916,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 	}
 
 	if (!sapi_module.phpinfo_as_text) {
-		php_info_print("</div></body></html>");
+		php_info_print("</div>");
 	}	
 }
 /* }}} */
@@ -927,7 +924,7 @@ PHPAPI void php_print_info(int flag TSRMLS_DC)
 PHPAPI void php_info_print_table_start(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
-		php_info_print("<table border=\"0\" cellpadding=\"3\" width=\"600\">\n");
+		php_info_print("<table>\n");
 	} else {
 		php_info_print("\n");
 	}	
@@ -945,14 +942,13 @@ PHPAPI void php_info_print_table_end(void) /* {{{ */
 
 PHPAPI void php_info_print_box_start(int flag) /* {{{ */
 {
-	php_info_print_table_start();
 	if (flag) {
 		if (!sapi_module.phpinfo_as_text) {
-			php_info_print("<tr class=\"h\"><td>\n");
+			php_info_print("<div class=\"h box\">\n");
 		}
 	} else {
 		if (!sapi_module.phpinfo_as_text) {
-			php_info_print("<tr class=\"v\"><td>\n");
+			php_info_print("<div class=\"v box\">\n");
 		} else {
 			php_info_print("\n");
 		}	
@@ -963,7 +959,7 @@ PHPAPI void php_info_print_box_start(int flag) /* {{{ */
 PHPAPI void php_info_print_box_end(void) /* {{{ */
 {
 	if (!sapi_module.phpinfo_as_text) {
-		php_info_print("</td></tr>\n");
+		php_info_print("</div>\n");
 	}
 	php_info_print_table_end();
 }

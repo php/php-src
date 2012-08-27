@@ -43,7 +43,6 @@ DTrace Support => %s
 Registered PHP Streams => %s
 Registered Stream Socket Transports => %s
 Registered Stream Filters => %s
-
 %a
  _______________________________________________________________________
 
