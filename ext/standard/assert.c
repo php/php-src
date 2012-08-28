@@ -141,7 +141,7 @@ PHP_MINFO_FUNCTION(assert) /* {{{ */
 PHP_FUNCTION(assert)
 {
 	zval **assertion;
-	int val, descriptionlen = 0;
+	int val, description_len = 0;
 	char *myeval = NULL;
 	char *compiled_string_description, *description;
 
@@ -149,7 +149,7 @@ PHP_FUNCTION(assert)
 		RETURN_TRUE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|s", &assertion, &description, &descriptionlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|s", &assertion, &description, &description_len) == FAILURE) {
 		return;
 	}
 
@@ -167,7 +167,7 @@ PHP_FUNCTION(assert)
 		compiled_string_description = zend_make_compiled_string_description("assert code" TSRMLS_CC);
 		if (zend_eval_stringl(myeval, Z_STRLEN_PP(assertion), &retval, compiled_string_description TSRMLS_CC) == FAILURE) {
 			efree(compiled_string_description);
-			if (descriptionlen == 0) {
+			if (description_len == 0) {
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s", PHP_EOL, myeval);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Failure evaluating code: %s%s:\"%s\"", PHP_EOL, description, myeval);
@@ -200,14 +200,14 @@ PHP_FUNCTION(assert)
 	}
 
 	if (ASSERTG(callback)) {
-		zval *args[descriptionlen == 0?3:4];
+		zval *args[ description_len == 0?3:4 ];
 		zval *retval;
 		int i;
 		uint lineno = zend_get_executed_lineno(TSRMLS_C);
 		const char *filename = zend_get_executed_filename(TSRMLS_C);
-		if (descriptionlen != 0) {
+		if (description_len != 0) {
 			MAKE_STD_ZVAL(args[3]);
-			ZVAL_STRINGL(args[3], SAFE_STRING(description), descriptionlen, 1);
+			ZVAL_STRINGL(args[3], SAFE_STRING(description), description_len, 1);
 		}
 		MAKE_STD_ZVAL(args[0]);
 		MAKE_STD_ZVAL(args[1]);
@@ -221,7 +221,7 @@ PHP_FUNCTION(assert)
 		ZVAL_FALSE(retval);
 
 		/* XXX do we want to check for error here? */
-		if (descriptionlen == 0) {
+		if (description_len == 0) {
 			call_user_function(CG(function_table), NULL, ASSERTG(callback), retval, 3, args TSRMLS_CC);
 			for (i = 0; i <= 2; i++) {
 				zval_ptr_dtor(&(args[i]));
@@ -237,7 +237,7 @@ PHP_FUNCTION(assert)
 	}
 
 	if (ASSERTG(warning)) {
-		if (descriptionlen == 0) {
+		if (description_len == 0) {
 			if (myeval) {
                 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assertion \"%s\" failed", myeval);
             } else {
