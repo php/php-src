@@ -40,9 +40,6 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 	REGISTER_LONG_CONSTANT("PASSWORD_DEFAULT", PHP_PASSWORD_DEFAULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("PASSWORD_SALT_RAW", PHP_PASSWORD_SALT_RAW, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_SALT_BCRYPT", PHP_PASSWORD_SALT_BCRYPT, CONST_CS | CONST_PERSISTENT);
-
 	return SUCCESS;
 }
 /* }}} */
@@ -94,8 +91,6 @@ static int php_password_salt_to64(const char *str, const int str_len, const int 
 	return SUCCESS;
 }
 /* }}} */
-
-#define PHP_PASSWORD_FUNCTION_EXISTS(func, func_len) (zend_hash_find(EG(function_table), (func), (func_len) + 1, (void **) &func_ptr) == SUCCESS && func_ptr->type == ZEND_INTERNAL_FUNCTION && func_ptr->internal_function.handler != zif_display_disabled_function)
 
 static int php_password_make_salt(long length, int salt_type, char *ret TSRMLS_DC) /* {{{ */
 {
@@ -274,35 +269,6 @@ PHP_FUNCTION(password_verify)
 
 	RETURN_BOOL(status == 0);
 	
-}
-/* }}} */
-
-/* {{{ proto string password_make_salt(int length, int salt_type = PASSWORD_SALT_BCRYPT)
-Make a new random salt */
-PHP_FUNCTION(password_make_salt)
-{
-	char *salt;
-	long length = 0, salt_type = 0;
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|l", &length, &salt_type) == FAILURE) {
-		RETURN_NULL();
-	}
-	if (length <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length cannot be less than or equal zero: %ld", length);
-		RETURN_NULL();
-	} else if (length > (LONG_MAX / 3)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length is too large to safely generate");
-		RETURN_NULL();
-	}
-
-	if (!salt_type) {
-		salt_type = PHP_PASSWORD_SALT_BCRYPT;
-	}
-	salt = safe_emalloc(length, 1, 1);
-	if (php_password_make_salt(length, (int) salt_type, salt TSRMLS_CC) == FAILURE) {
-		efree(salt);
-		RETURN_FALSE;
-	}
-	RETURN_STRINGL(salt, length, 0);
 }
 /* }}} */
 

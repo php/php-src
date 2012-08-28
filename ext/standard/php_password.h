@@ -23,7 +23,6 @@
 
 PHP_FUNCTION(password_hash);
 PHP_FUNCTION(password_verify);
-PHP_FUNCTION(password_make_salt);
 PHP_FUNCTION(password_needs_rehash);
 PHP_FUNCTION(password_get_info);
 
