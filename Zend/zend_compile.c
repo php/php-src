@@ -2969,6 +2969,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		return 1;
 	}
 
+	/* If both methods are private do not enforce a signature */
+    if ((fe->common.fn_flags & ZEND_ACC_PRIVATE) && (proto->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		return 1;
+	}
+
 	/* check number of arguments */
 	if (proto->common.required_num_args < fe->common.required_num_args
 		|| proto->common.num_args > fe->common.num_args) {
