@@ -500,7 +500,7 @@ void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 
 static void zend_generator_ensure_initialized(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
-	if (!generator->value) {
+	if (generator->execute_data && !generator->value) {
 		zend_generator_resume(generator TSRMLS_CC);
 		generator->flags |= ZEND_GENERATOR_AT_FIRST_YIELD;
 	}
