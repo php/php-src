@@ -200,15 +200,12 @@ PHP_FUNCTION(assert)
 	}
 
 	if (ASSERTG(callback)) {
-		zval *args[ description_len == 0?3:4 ];
+		zval **args = safe_emalloc( description_len == 0 ? 3 : 4, sizeof(zval **), 0);
 		zval *retval;
 		int i;
 		uint lineno = zend_get_executed_lineno(TSRMLS_C);
 		const char *filename = zend_get_executed_filename(TSRMLS_C);
-		if (description_len != 0) {
-			MAKE_STD_ZVAL(args[3]);
-			ZVAL_STRINGL(args[3], SAFE_STRING(description), description_len, 1);
-		}
+
 		MAKE_STD_ZVAL(args[0]);
 		MAKE_STD_ZVAL(args[1]);
 		MAKE_STD_ZVAL(args[2]);
@@ -227,28 +224,32 @@ PHP_FUNCTION(assert)
 				zval_ptr_dtor(&(args[i]));
 			}
 		} else {
+			MAKE_STD_ZVAL(args[3]);
+			ZVAL_STRINGL(args[3], SAFE_STRING(description), description_len, 1);
+
 			call_user_function(CG(function_table), NULL, ASSERTG(callback), retval, 4, args TSRMLS_CC);
 			for (i = 0; i <= 3; i++) {
 				zval_ptr_dtor(&(args[i]));
 			}
 		}
 
+		efree(args);
 		zval_ptr_dtor(&retval);
 	}
 
 	if (ASSERTG(warning)) {
 		if (description_len == 0) {
 			if (myeval) {
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assertion \"%s\" failed", myeval);
-            } else {
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assertion failed");
-            }
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assertion \"%s\" failed", myeval);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Assertion failed");
+			}
 		} else {
 			if (myeval) {
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s:\"%s\" failed", description, myeval);
-            } else {
-                php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s failed", description);
-            }
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s:\"%s\" failed", description, myeval);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s failed", description);
+			}
 		}
 	}
 

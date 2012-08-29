@@ -15,7 +15,7 @@ assert(1);
  
 /* Wrong parameter count in assert */
 assert_options(ASSERT_ACTIVE, 1);
-assert(2,"failure",3);
+assert(2, "failure", 3);
  
 /* Wrong parameter count in assert_options */
 assert_options(ASSERT_ACTIVE, 0, 2);

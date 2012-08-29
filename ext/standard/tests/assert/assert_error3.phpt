@@ -11,7 +11,7 @@ display_errors = 1
 --FILE--
 <?php
 $sa = "0 $ 0";
-var_dump($r2=assert($sa));
+var_dump($r2 = assert($sa));
 --EXPECTF--
 
 Parse error: syntax error, unexpected '$' in %s(3) : assert code on line 1
