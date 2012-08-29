@@ -766,8 +766,14 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 
 	generator = (zend_generator *) zend_object_store_get_object(object TSRMLS_CC);
 
+	if (!generator->execute_data) {
+		zend_throw_exception(NULL, "Cannot traverse an already closed generator", 0 TSRMLS_CC);
+		return NULL;
+	}
+
 	if (by_ref && !(generator->execute_data->op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-		zend_error(E_ERROR, "You can only iterate a generator by-reference if it declared that it yields by-reference");
+		zend_throw_exception(NULL, "You can only iterate a generator by-reference if it declared that it yields by-reference", 0 TSRMLS_CC);
+		return NULL;
 	}
 
 	iterator = emalloc(sizeof(zend_generator_iterator));
