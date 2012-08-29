@@ -301,7 +301,7 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 			Z_ADDREF_P(execute_data->object);
 		}
 
-		/* Prev execute data contains an additional stack frame (for proper)
+		/* Prev execute data contains an additional stack frame (for proper
 		 * backtraces) which has to be copied. */
 		clone->execute_data->prev_execute_data = emalloc(sizeof(zend_execute_data));
 		memcpy(clone->execute_data->prev_execute_data, execute_data->prev_execute_data, sizeof(zend_execute_data));
@@ -643,9 +643,9 @@ ZEND_METHOD(Generator, send)
 		RETURN_ZVAL(generator->value, 1, 0);
 	}
 }
+/* }}} */
 
-
-/* {{{ proto void Generator::__wakeup
+/* {{{ proto void Generator::__wakeup()
  * Throws an Exception as generators can't be serialized */
 ZEND_METHOD(Generator, __wakeup)
 {
