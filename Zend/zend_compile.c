@@ -1722,7 +1722,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	}
 
 	{
-		/* Push a seperator to the switch and foreach stacks */
+		/* Push a seperator to the switch stack */
 		zend_switch_entry switch_entry;
 
 		switch_entry.cond.op_type = IS_UNUSED;
@@ -1730,16 +1730,16 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		switch_entry.control_var = 0;
 
 		zend_stack_push(&CG(switch_cond_stack), (void *) &switch_entry, sizeof(switch_entry));
+	}
 
-		{
-			/* Foreach stack separator */
-			zend_op dummy_opline;
+	{
+		/* Push a separator to the foreach stack */
+		zend_op dummy_opline;
 
-			dummy_opline.result_type = IS_UNUSED;
-			dummy_opline.op1_type = IS_UNUSED;
+		dummy_opline.result_type = IS_UNUSED;
+		dummy_opline.op1_type = IS_UNUSED;
 
-			zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline, sizeof(zend_op));
-		}
+		zend_stack_push(&CG(foreach_copy_stack), (void *) &dummy_opline, sizeof(zend_op));
 	}
 
 	if (CG(doc_comment)) {
@@ -2611,9 +2611,12 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	int start_op_number, end_op_number;
+	zend_bool returns_reference = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
+
+	/* The error for use of return inside a generator is thrown in pass_two. */
 
 	if (do_end_vparse) {
-		if ((CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) && !zend_is_function_or_method_call(expr)) {
+		if (returns_reference && !zend_is_function_or_method_call(expr)) {
 			zend_do_end_variable_parse(expr, BP_VAR_W, 0 TSRMLS_CC);
 		} else {
 			zend_do_end_variable_parse(expr, BP_VAR_R, 0 TSRMLS_CC);
@@ -2638,7 +2641,7 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
-	opline->opcode = (CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) ? ZEND_RETURN_BY_REF : ZEND_RETURN;
+	opline->opcode = returns_reference ? ZEND_RETURN_BY_REF : ZEND_RETURN;
 
 	if (expr) {
 		SET_NODE(opline->op1, expr);
@@ -2652,6 +2655,50 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 	}
 
 	SET_UNUSED(opline->op2);
+}
+/* }}} */
+
+void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_variable TSRMLS_DC) /* {{{ */
+{
+	zend_op *opline;
+
+	if (!CG(active_op_array)->function_name) {
+		zend_error(E_COMPILE_ERROR, "The \"yield\" expression can only be used inside a function");
+	}
+
+	CG(active_op_array)->fn_flags |= ZEND_ACC_GENERATOR;
+
+	if (is_variable) {
+		if ((CG(active_op_array)->fn_flags & ZEND_ACC_RETURN_REFERENCE) && !zend_is_function_or_method_call(value)) {
+			zend_do_end_variable_parse(value, BP_VAR_W, 0 TSRMLS_CC);
+		} else {
+			zend_do_end_variable_parse(value, BP_VAR_R, 0 TSRMLS_CC);
+		}
+	}
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
+	opline->opcode = ZEND_YIELD;
+
+	if (value) {
+		SET_NODE(opline->op1, value);
+
+		if (is_variable && zend_is_function_or_method_call(value)) {
+			opline->extended_value = ZEND_RETURNS_FUNCTION;
+		}
+	} else {
+		SET_UNUSED(opline->op1);
+	}
+
+	if (key) {
+		SET_NODE(opline->op2, key);
+	} else {
+		SET_UNUSED(opline->op2);
+	}
+
+	opline->result_type = IS_VAR;
+	opline->result.var = get_temporary_variable(CG(active_op_array));
+	GET_NODE(result, opline->result);
 }
 /* }}} */
 
@@ -6299,9 +6346,7 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 
 	if (value->EA & ZEND_PARSED_REFERENCE_VARIABLE) {
 		assign_by_ref = 1;
-		if (!(opline-1)->extended_value) {
-			zend_error(E_COMPILE_ERROR, "Cannot create references to elements of a temporary array expression");
-		}
+
 		/* Mark extended_value for assign-by-reference */
 		opline->extended_value |= ZEND_FE_FETCH_BYREF;
 		CG(active_op_array)->opcodes[foreach_token->u.op.opline_num].extended_value |= ZEND_FE_RESET_REFERENCE;

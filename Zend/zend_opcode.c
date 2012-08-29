@@ -579,6 +579,17 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 			case ZEND_JMP_SET_VAR:
 				opline->op2.jmp_addr = &op_array->opcodes[opline->op2.opline_num];
 				break;
+			case ZEND_RETURN:
+			case ZEND_RETURN_BY_REF:
+				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+					if (opline->op1_type != IS_CONST || Z_TYPE_P(opline->op1.zv) != IS_NULL) {
+						CG(zend_lineno) = opline->lineno;
+						zend_error(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
+					}
+
+					opline->opcode = ZEND_GENERATOR_RETURN;
+				}
+				break;
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
