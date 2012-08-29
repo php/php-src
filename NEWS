@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.4.7
+30 Aug 2012, PHP 5.4.7 RC1
 
 - Core:
   . Fixed bug (segfault while build with zts and GOTO vm-kind). (Laruence)
