@@ -5,4 +5,4 @@
 #define PHP_RELEASE_VERSION 8
 #define PHP_EXTRA_VERSION "-dev"
 #define PHP_VERSION "5.4.8-dev"
-#define PHP_VERSION_ID 50407
+#define PHP_VERSION_ID 50408
