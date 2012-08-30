@@ -37,6 +37,8 @@
 #include "spl_dllist.h"
 #include "spl_fixedarray.h"
 #include "spl_heap.h"
+#include "spl_validators.h"
+#include "spl_filters.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "ext/standard/php_rand.h"
@@ -195,6 +197,7 @@ PHP_FUNCTION(class_uses)
 	SPL_ADD_CLASS(DomainException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(EmptyIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(FilesystemIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(Filter, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(FilterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(GlobIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(InfiniteIterator, z_list, sub, allow, ce_flags); \
@@ -239,6 +242,7 @@ PHP_FUNCTION(class_uses)
 	SPL_ADD_CLASS(SplTempFileObject, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnderflowException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(UnexpectedValueException, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(Validator, z_list, sub, allow, ce_flags); \
 
 /* {{{ proto array spl_classes()
  Return an array containing the names of all clsses and interfaces defined in SPL */
@@ -939,7 +943,9 @@ PHP_MINIT_FUNCTION(spl)
 	PHP_MINIT(spl_heap)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_fixedarray)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_observer)(INIT_FUNC_ARGS_PASSTHRU);
-
+	PHP_MINIT(spl_filters)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(spl_validators)(INIT_FUNC_ARGS_PASSTHRU);
+    
 	return SUCCESS;
 }
 /* }}} */
