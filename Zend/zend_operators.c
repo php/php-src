@@ -1473,6 +1473,7 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						return ret;
 					}
 				}
+
 				if (Z_TYPE_P(op2) == IS_OBJECT) {
 					if (Z_OBJ_HT_P(op2)->get) {
 						op_free = Z_OBJ_HT_P(op2)->get(op2 TSRMLS_CC);
@@ -1491,6 +1492,12 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						return ret;
 					}
 				}
+
+				if (Z_TYPE_P(op1) == IS_OBJECT && Z_TYPE_P(op2) == IS_OBJECT) {
+					ZVAL_LONG(result, -1);
+					return SUCCESS;
+				}
+
 				if (!converted) {
 					if (Z_TYPE_P(op1) == IS_NULL) {
 						zendi_convert_to_boolean(op2, op2_copy, result);
