@@ -2,6 +2,8 @@
 Phar front controller with unknown extension mime type
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+--INI--
+detect_unicode=0
 --ENV--
 SCRIPT_NAME=/frontcontroller26.php
 REQUEST_URI=/frontcontroller26.php/unknown.ext

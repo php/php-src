@@ -2,6 +2,8 @@
 Phar front controller no index file 404
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+--INI--
+detect_unicode=0
 --ENV--
 SCRIPT_NAME=/frontcontroller8.php
 REQUEST_URI=/frontcontroller8.php/

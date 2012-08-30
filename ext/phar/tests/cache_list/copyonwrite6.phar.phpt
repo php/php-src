@@ -5,6 +5,7 @@ default_charset=UTF-8
 phar.cache_list={PWD}/copyonwrite6.phar.php
 phar.readonly=0
 open_basedir=
+detect_unicode=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 <?php if (version_compare(PHP_VERSION, "5.3", "<")) die("skip PHP 5.3+ required"); ?>

@@ -79,7 +79,7 @@ static size_t zend_stream_stdio_fsizer(void *handle TSRMLS_DC) /* {{{ */
 static void zend_stream_unmap(zend_stream *stream TSRMLS_DC) { /* {{{ */
 #if HAVE_MMAP
 	if (stream->mmap.map) {
-		munmap(stream->mmap.map, stream->mmap.len);
+		munmap(stream->mmap.map, stream->mmap.len + ZEND_MMAP_AHEAD);
 	} else
 #endif
 	if (stream->mmap.buf) {

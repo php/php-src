@@ -2,13 +2,12 @@
 LOAD DATA INFILE - open_basedir
 --SKIPIF--
 <?php
-@include_once("connect.inc");
+include_once('skipif.inc');
 
 if (!isset($db)) {
   die("skip open_basedir setting prevents inclusing of required files");
 }
 
-include_once('skipif.inc');
 include_once('skipifconnectfailure.inc');
 
 

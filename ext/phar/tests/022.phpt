@@ -4,6 +4,7 @@ Phar: stream stat
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
 phar.require_hash=0
+detect_unicode=0
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';

@@ -285,7 +285,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 		zend_multibyte_set_filter(NULL TSRMLS_CC);
 
 		if (!SCNG(input_filter)) {
-			SCNG(script_filtered) = (unsigned char*)emalloc(SCNG(script_org_size)+1);
+			SCNG(script_filtered) = (unsigned char*)emalloc(SCNG(script_org_size)+2);
 			memcpy(SCNG(script_filtered), SCNG(script_org), SCNG(script_org_size)+1);
 			SCNG(script_filtered_size) = SCNG(script_org_size);
 		} else {
@@ -443,7 +443,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 	zend_multibyte_set_filter(CG(internal_encoding) TSRMLS_CC);
 
 	if (!SCNG(input_filter)) {
-		SCNG(script_filtered) = (unsigned char*)emalloc(SCNG(script_org_size)+1);
+		SCNG(script_filtered) = (unsigned char*)emalloc(SCNG(script_org_size)+2);
 		memcpy(SCNG(script_filtered), SCNG(script_org), SCNG(script_org_size)+1);
 		SCNG(script_filtered_size) = SCNG(script_org_size);
 	} else {

@@ -2,16 +2,53 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.16
 
+- Core:
+  . Fixed bug (segfault while build with zts and GOTO vm-kind). (Laruence)
+  . Fixed bug #62763 (register_shutdown_function and extending class). 
+    (Laruence)
+  . Fixed bug #62744 (dangling pointers made by zend_disable_class). (Laruence)
+  . Fixed bug #62716 (munmap() is called with the incorrect length). 
+    (slangley@google.com)
+  . Fixed bug ##62460 (php binaries installed as binary.dSYM). (Reeze Xia)
+  . Fixed bug #60194 (--with-zend-multibyte and --enable-debug reports LEAK
+    with run-test.php). (Laruence)
+
 - CURL:
+  . Fixed bug #62839 (curl_copy_handle segfault with CURLOPT_FILE). (Pierrick)
   . Fixed bug #62499 (curl_setopt($ch, CURLOPT_COOKIEFILE, "") returns false).
     (r.hampartsumyan@gmail.com, Laruence)
 
 - DateTime:
-  . Fixed Bug #62500 (Segfault in DateInterval class when extended). (Laruence)
+  . Fixed bug #62852 (Unserialize invalid DateTime causes crash).
+    (reeze.xia@gmail.com)
+  . Fixed bug #62500 (Segfault in DateInterval class when extended). (Laruence)
+
+- Intl:
+  . Fix null pointer dereferences in some classes of ext/intl. (Gustavo)
+  . Fix bug #62915 (defective cloning in several intl classes). (Gustavo)
+
+- MySQLnd:
+  . Fixed bug #62885 (mysqli_poll - Segmentation fault). (Laruence)
+
+- PDO:
+  . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
+
+- Reflection:
+  . Fixed bug #62715 (ReflectionParameter::isDefaultValueAvailable() wrong
+    result). (Laruence)
+
+- Session:
+  . Fixed bug (segfault due to retval is not initialized). (Laruence)
 
 - SPL:
+  . Fixed bug #62904 (Crash when cloning an object which inherits SplFixedArray)
+    (Laruence)
   . Fixed bug #62616 (ArrayIterator::count() from IteratorIterator instance
     gives Segmentation fault). (Laruence, Gustavo)
+
+- Enchant:
+  . Fixed bug #62838 (enchant_dict_quick_check() destroys zval, but fails to 
+  initialize it). (Tony, Mateusz Goik).
 
 19 Jul 2012, PHP 5.3.15
 

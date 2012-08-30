@@ -3,6 +3,7 @@ Phar front controller with valid callback that does not return any value [cache_
 --INI--
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller33.php
+detect_unicode=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--

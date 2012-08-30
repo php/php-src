@@ -3,6 +3,7 @@ Phar front controller phps [cache_list]
 --INI--
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller3.php
+detect_unicode=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--

@@ -694,7 +694,7 @@ static PHP_METHOD(PDO, inTransaction)
 	}
 	PDO_CONSTRUCT_CHECK;
 
-	RETURN_LONG(dbh->in_txn);
+	RETURN_BOOL(dbh->in_txn);
 }
 /* }}} */
 

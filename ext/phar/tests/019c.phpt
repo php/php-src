@@ -7,6 +7,7 @@ if (version_compare(PHP_VERSION, "6.0", ">")) die("skip pre-unicode version of P
 ?>
 --INI--
 phar.require_hash=0
+detect_unicode=0
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';

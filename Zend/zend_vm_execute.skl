@@ -4,8 +4,8 @@ ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_execute_data *execute_data;
 	zend_bool nested = 0;
-	zend_bool original_in_execution = EG(in_execution);
 	{%HELPER_VARS%}
+	{%EXECUTION_STATUS%}
 
 	{%INTERNAL_LABELS%}
 
