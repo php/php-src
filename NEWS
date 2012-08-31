@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.3.16
 
 - Core:
+  . Fixed bug #62976 (Notice: could not be converted to int when comparing
+    some builtin classes). (Laruence)
   . Fixed bug (segfault while build with zts and GOTO vm-kind). (Laruence)
   . Fixed bug #62955 (Only one directive is loaded from "Per Directory Values" 
     Windows registry). (aserbulov at parallels dot com)
