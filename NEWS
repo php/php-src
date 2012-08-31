@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     (srgoogleguy, Gustavo)
   . Implemented FR #60738 (Allow 'set_error_handler' to handle NULL).
     (Laruence, Nikita Popov)
+  . Added optional second argument for assert() to specify custom message. Patch
+    by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
 
 - cURL:
   . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 
