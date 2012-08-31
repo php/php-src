@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.7
 
 - Core:
+  . Fixed bug #62976 (Notice: could not be converted to int when comparing
+    some builtin classes). (Laruence)
   . Fixed bug (segfault while build with zts and GOTO vm-kind). (Laruence)
   . Fixed bug #62844 (parse_url() does not recognize //). (Andrew Faulds).
   . Fixed bug #62829 (stdint.h included on platform where HAVE_STDINT_H is not 
