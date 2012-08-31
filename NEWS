@@ -25,6 +25,8 @@ PHP                                                                        NEWS
     handler). (Lonny Kapelushnik)
   . Fixed bug #40459 (Stat and Dir stream wrapper methods do not call 
     constructor). (Stas)
+  . Added optional second argument for assert() to specify custom message. Patch
+    by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
 
 - CURL:
   . Fixed bug #62912 (CURLINFO_PRIMARY_* AND CURLINFO_LOCAL_* not exposed).
