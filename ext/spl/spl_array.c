@@ -323,13 +323,13 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 		if (zend_symtable_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval) == FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined index:  %s", Z_STRVAL_P(offset));
+					zend_error(E_NOTICE, "Undefined index: %s", Z_STRVAL_P(offset));
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
+					zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 				case BP_VAR_W: {
 				    zval *value;
 				    ALLOC_INIT_ZVAL(value);
@@ -351,13 +351,13 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 		if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined offset:  %ld", index);
+					zend_error(E_NOTICE, "Undefined offset: %ld", index);
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval_ptr);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE, "Undefined offset:  %ld", index);
+					zend_error(E_NOTICE, "Undefined offset: %ld", index);
 				case BP_VAR_W: {
 				    zval *value;
 				    ALLOC_INIT_ZVAL(value);
@@ -520,11 +520,11 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 		}
 		if (ht == &EG(symbol_table)) {
 			if (zend_delete_global_variable(Z_STRVAL_P(offset), Z_STRLEN_P(offset) TSRMLS_CC)) {
-				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
+				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 			}
 		} else {
 			if (zend_symtable_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1) == FAILURE) {
-				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
+				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 			} else {
 				spl_array_object *obj = intern;
 
@@ -570,7 +570,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 			return;
 		}
 		if (zend_hash_index_del(ht, index) == FAILURE) {
-			zend_error(E_NOTICE,"Undefined offset:  %ld", Z_LVAL_P(offset));
+			zend_error(E_NOTICE,"Undefined offset: %ld", Z_LVAL_P(offset));
 		}
 		break;
 	default:
