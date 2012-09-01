@@ -5511,7 +5511,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 			INIT_PZVAL_COPY(copy, key);
 
 			/* Temporary variables don't need ctor copying */
-			if (!IS_OP1_TMP_FREE()) {
+			if (!IS_OP2_TMP_FREE()) {
 				zval_copy_ctor(copy);
 			}
 

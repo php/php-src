@@ -5005,7 +5005,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 			INIT_PZVAL_COPY(copy, key);
 
 			/* Temporary variables don't need ctor copying */
-			if (!0) {
+			if (!1) {
 				zval_copy_ctor(copy);
 			}
 
@@ -9553,7 +9553,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 			INIT_PZVAL_COPY(copy, key);
 
 			/* Temporary variables don't need ctor copying */
-			if (!1) {
+			if (!0) {
 				zval_copy_ctor(copy);
 			}
 
@@ -11266,7 +11266,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 			INIT_PZVAL_COPY(copy, key);
 
 			/* Temporary variables don't need ctor copying */
-			if (!1) {
+			if (!0) {
 				zval_copy_ctor(copy);
 			}
 
@@ -11846,7 +11846,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 			INIT_PZVAL_COPY(copy, key);
 
 			/* Temporary variables don't need ctor copying */
-			if (!1) {
+			if (!0) {
 				zval_copy_ctor(copy);
 			}
 
@@ -12537,7 +12537,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			INIT_PZVAL_COPY(copy, key);
 
 			/* Temporary variables don't need ctor copying */
-			if (!1) {
+			if (!0) {
 				zval_copy_ctor(copy);
 			}
 
@@ -18543,7 +18543,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 			INIT_PZVAL_COPY(copy, key);
 
 			/* Temporary variables don't need ctor copying */
-			if (!0) {
+			if (!1) {
 				zval_copy_ctor(copy);
 			}
 
@@ -27081,7 +27081,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 			INIT_PZVAL_COPY(copy, key);
 
 			/* Temporary variables don't need ctor copying */
-			if (!0) {
+			if (!1) {
 				zval_copy_ctor(copy);
 			}
 
@@ -35600,7 +35600,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			INIT_PZVAL_COPY(copy, key);
 
 			/* Temporary variables don't need ctor copying */
-			if (!0) {
+			if (!1) {
 				zval_copy_ctor(copy);
 			}
 
