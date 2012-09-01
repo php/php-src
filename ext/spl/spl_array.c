@@ -327,6 +327,10 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 	}
 
 	switch(Z_TYPE_P(offset)) {
+	case IS_NULL:
+		Z_STRVAL_P(offset) = "";
+		Z_STRLEN_P(offset) = 0;
+		/* Fall Through */
 	case IS_STRING:
 		if (zend_symtable_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval) == FAILURE) {
 			if (type == BP_VAR_W || type == BP_VAR_RW) {
@@ -367,8 +371,8 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 		}
 		break;
 	default:
-		zend_error(E_WARNING, "Illegal offset type");
-		return &EG(uninitialized_zval_ptr);
+		return (type == BP_VAR_W || type == BP_VAR_RW) ?
+			&EG(error_zval_ptr) : &EG(uninitialized_zval_ptr);
 	}
 } /* }}} */
 
