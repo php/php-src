@@ -1474,10 +1474,18 @@ static int zend_check_symbol(zval **pz TSRMLS_DC)
 
 ZEND_API opcode_handler_t *zend_opcode_handlers;
 
-ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC)
+ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC)
 {
-	zval **return_value_ptr = &(*(temp_variable *)((char *) execute_data_ptr->Ts + execute_data_ptr->opline->result.var)).var.ptr;
-	((zend_internal_function *) execute_data_ptr->function_state.function)->handler(execute_data_ptr->opline->extended_value, *return_value_ptr, (execute_data_ptr->function_state.function->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)?return_value_ptr:NULL, execute_data_ptr->object, return_value_used TSRMLS_CC);
+	if(fci != NULL) {
+		((zend_internal_function *) execute_data_ptr->function_state.function)->handler(fci->param_count,
+				*fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
+
+	} else {
+		zval **return_value_ptr = &(*(temp_variable *)((char *) execute_data_ptr->Ts + execute_data_ptr->opline->result.var)).var.ptr;
+		((zend_internal_function *) execute_data_ptr->function_state.function)->handler(execute_data_ptr->opline->extended_value, *return_value_ptr,
+					(execute_data_ptr->function_state.function->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)?return_value_ptr:NULL,
+					execute_data_ptr->object, return_value_used TSRMLS_CC);
+	}
 }
 
 #define ZEND_VM_NEXT_OPCODE() \
@@ -1512,7 +1520,7 @@ ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler
 {
 	if (opcode != ZEND_USER_OPCODE) {
 		if (handler == NULL) {
-			/* restore the original handler */			
+			/* restore the original handler */
 			zend_user_opcodes[opcode] = opcode;
 		} else {
 			zend_user_opcodes[opcode] = ZEND_USER_OPCODE;
