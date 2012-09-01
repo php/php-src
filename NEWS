@@ -45,6 +45,8 @@ PHP                                                                        NEWS
   . Fixed bug (segfault due to retval is not initialized). (Laruence)
 
 - SPL:
+  . Bug #62987 (Assigning to ArrayObject[null][something] overrides all 
+    undefined variables). (Laruence)
   . Fixed bug #62904 (Crash when cloning an object which inherits SplFixedArray)
     (Laruence)
   . Fixed bug #62616 (ArrayIterator::count() from IteratorIterator instance
