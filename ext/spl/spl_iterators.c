@@ -2820,7 +2820,7 @@ SPL_METHOD(CachingIterator, offsetGet)
 	}
 
 	if (zend_symtable_find(HASH_OF(intern->u.caching.zcache), arKey, nKeyLength+1, (void**)&value) == FAILURE) {
-		zend_error(E_NOTICE, "Undefined index:  %s", arKey);
+		zend_error(E_NOTICE, "Undefined index: %s", arKey);
 		return;
 	}
 	
