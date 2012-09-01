@@ -2,11 +2,21 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.8
 
+- Core:
+  . Added optional second argument for assert() to specify custom message. Patch
+    by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
+  . Fixed bug #62976 (Notice: could not be converted to int when comparing
+    some builtin classes). (Laruence)
+  . Fixed bug #62955 (Only one directive is loaded from "Per Directory Values" 
+    Windows registry). (aserbulov at parallels dot com)
+
+- SPL:
+  . Bug #62987 (Assigning to ArrayObject[null][something] overrides all 
+    undefined variables). (Laruence)
+
 ?? ??? 2012, PHP 5.4.7
 
 - Core:
-  . Fixed bug #62976 (Notice: could not be converted to int when comparing
-    some builtin classes). (Laruence)
   . Fixed bug (segfault while build with zts and GOTO vm-kind). (Laruence)
   . Fixed bug #62844 (parse_url() does not recognize //). (Andrew Faulds).
   . Fixed bug #62829 (stdint.h included on platform where HAVE_STDINT_H is not 
@@ -25,8 +35,6 @@ PHP                                                                        NEWS
     handler). (Lonny Kapelushnik)
   . Fixed bug #40459 (Stat and Dir stream wrapper methods do not call 
     constructor). (Stas)
-  . Added optional second argument for assert() to specify custom message. Patch
-    by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
 
 - CURL:
   . Fixed bug #62912 (CURLINFO_PRIMARY_* AND CURLINFO_LOCAL_* not exposed).
@@ -64,8 +72,6 @@ PHP                                                                        NEWS
     when close handler call exit). (Laruence)
 
 - SPL:
-  . Bug #62987 (Assigning to ArrayObject[null][something] overrides all 
-    undefined variables). (Laruence)
   . Fixed bug #62904 (Crash when cloning an object which inherits SplFixedArray)
     (Laruence)
   . Implemented FR #62840 (Add sort flag to ArrayObject::ksort). (Laruence)
