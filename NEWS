@@ -64,6 +64,8 @@ PHP                                                                        NEWS
     when close handler call exit). (Laruence)
 
 - SPL:
+  . Bug #62987 (Assigning to ArrayObject[null][something] overrides all 
+    undefined variables). (Laruence)
   . Fixed bug #62904 (Crash when cloning an object which inherits SplFixedArray)
     (Laruence)
   . Implemented FR #62840 (Add sort flag to ArrayObject::ksort). (Laruence)
