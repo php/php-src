@@ -143,7 +143,7 @@ PHP_FUNCTION(assert)
 	zval **assertion;
 	int val, description_len = 0;
 	char *myeval = NULL;
-	char *compiled_string_description, *description;
+	char *compiled_string_description, *description = NULL;
 
 	if (! ASSERTG(active)) {
 		RETURN_TRUE;
