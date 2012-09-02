@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Bug #62987 (Assigning to ArrayObject[null][something] overrides all 
     undefined variables). (Laruence)
 
+- mbstring:
+  . Allow passing null as a default value to mb_substr() and mb_strcut(). Patch
+    by Alexander Moskaliov via GitHub PR #133. (Lars)
+
 ?? ??? 2012, PHP 5.4.7
 
 - Core:
