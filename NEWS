@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Allow passing null as a default value to mb_substr() and mb_strcut(). Patch
     by Alexander Moskaliov via GitHub PR #133. (Lars)
 
+- Filter extension:
+  . Bug #49510: Boolean validation fails with FILTER_NULL_ON_FAILURE with empty
+    string or false. (Lars)
+
 ?? ??? 2012, PHP 5.4.7
 
 - Core:
