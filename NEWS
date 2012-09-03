@@ -83,6 +83,10 @@ PHP                                                                        NEWS
   . Fixed bug (segfault due to PS(mod_user_implemented) not be reseted 
     when close handler call exit). (Laruence)
 
+- SOAP
+  . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
+    (Dmitry)
+
 - SPL:
   . Fixed bug #62904 (Crash when cloning an object which inherits SplFixedArray)
     (Laruence)
