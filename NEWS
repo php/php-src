@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #62955 (Only one directive is loaded from "Per Directory Values" 
     Windows registry). (aserbulov at parallels dot com)
 
+- SOAP
+  . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
+    (Dmitry)
+
 - SPL:
   . Bug #62987 (Assigning to ArrayObject[null][something] overrides all 
     undefined variables). (Laruence)
