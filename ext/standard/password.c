@@ -44,7 +44,17 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 }
 /* }}} */
 
-static long php_password_determine_algo(const char *hash, const int len) 
+static char* php_password_get_algo_name(const int algo)
+{
+	switch (algo) {
+		case PHP_PASSWORD_BCRYPT:
+			return "bcrypt";
+		default:
+			return "unknown";
+	}
+}
+
+static int php_password_determine_algo(const char *hash, const size_t len) 
 {
 	if (len < 3) {
 		return 0;
@@ -56,27 +66,33 @@ static long php_password_determine_algo(const char *hash, const int len)
 	return 0;
 }
 
-static int php_password_salt_is_alphabet(const char *str, const int len, const int salt_type) /* {{{ */
+static int php_password_salt_is_alphabet(const char *str, const size_t len) /* {{{ */
 {
-	int i = 0;
+	size_t i = 0;
 
-	if (salt_type == PHP_PASSWORD_SALT_BCRYPT) {
-		for (i = 0; i < len; i++) {
-			if (!((str[i] >= 'A' && str[i] <= 'Z') || (str[i] >= 'a' && str[i] <= 'z') || (str[i] >= '0' && str[i] <= '9') || str[i] == '.' || str[i] == '/')) {
-				return 0;
-			}
+	for (i = 0; i < len; i++) {
+		if (!((str[i] >= 'A' && str[i] <= 'Z') || (str[i] >= 'a' && str[i] <= 'z') || (str[i] >= '0' && str[i] <= '9') || str[i] == '.' || str[i] == '/')) {
+			return 0;
 		}
 	}
-
 	return 1;
 }
 /* }}} */
 
-static int php_password_salt_to64(const char *str, const int str_len, const int out_len, char *ret) /* {{{ */
+static int php_password_salt_to64(const char *str, const size_t str_len, const size_t out_len, char *ret) /* {{{ */
 {
-	int pos = 0;
+	size_t pos = 0;
+	size_t ret_len = 0;
 	unsigned char *buffer;
-	buffer = php_base64_encode((unsigned char*) str, str_len, NULL);
+	if ((int) str_len < 0) {
+		return FAILURE;
+	}
+	buffer = php_base64_encode((unsigned char*) str, (int) str_len, (int*) &ret_len);
+	if (ret_len < out_len) {
+		/* Too short of an encoded string generated */
+		efree(buffer);
+		return FAILURE;
+	}
 	for (pos = 0; pos < out_len; pos++) {
 		if (buffer[pos] == '+') {
 			ret[pos] = '.';
@@ -92,30 +108,26 @@ static int php_password_salt_to64(const char *str, const int str_len, const int 
 }
 /* }}} */
 
-static int php_password_make_salt(long length, int salt_type, char *ret TSRMLS_DC) /* {{{ */
+static int php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {{{ */
 {
 	int buffer_valid = 0;
-	long i, raw_length;
+	size_t i, raw_length;
 	char *buffer;
+	char *result;
 
-	if (salt_type == PHP_PASSWORD_SALT_RAW) {
-		raw_length = length;
-	} else if (salt_type == PHP_PASSWORD_SALT_BCRYPT) {
-		if (length > (LONG_MAX / 3)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length is too large to safely generate");
-			return FAILURE;
-		}
-		raw_length = length * 3 / 4 + 1;
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown salt type paramter");
+	if (length > (INT_MAX / 3)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Length is too large to safely generate");
 		return FAILURE;
 	}
+
+	raw_length = length * 3 / 4 + 1;
+
 	buffer = (char *) safe_emalloc(raw_length, 1, 1);
 
 #if PHP_WIN32
 	{
 		BYTE *iv_b = (BYTE *) buffer;
-		if (php_win32_get_random_bytes(iv_b, (size_t) raw_length) == SUCCESS) {
+		if (php_win32_get_random_bytes(iv_b, raw_length) == SUCCESS) {
 			buffer_valid = 1;
 		}
 	}
@@ -130,11 +142,11 @@ static int php_password_make_salt(long length, int salt_type, char *ret TSRMLS_D
 				if (n < 0) {
 					break;
 				}
-				read_bytes += n;
+				read_bytes += (size_t) n;
 			}
 			close(fd);
 		}
-		if (read_bytes == raw_length) {
+		if (read_bytes >= raw_length) {
 			buffer_valid = 1;
 		}
 	}
@@ -145,22 +157,16 @@ static int php_password_make_salt(long length, int salt_type, char *ret TSRMLS_D
 		}
 	}
 
-	if (salt_type == PHP_PASSWORD_SALT_BCRYPT) {
-		char *result;
-		result = safe_emalloc(length, 1, 1); 
-		if (php_password_salt_to64(buffer, raw_length, length, result) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Generated salt too short");
-			efree(buffer);
-			efree(result);
-			return FAILURE;
-		} else {
-			memcpy(ret, result, length);
-			efree(result);
-		}
+	result = safe_emalloc(length, 1, 1); 
+	if (php_password_salt_to64(buffer, raw_length, length, result) == FAILURE) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Generated salt too short");
+		efree(buffer);
+		efree(result);
+		return FAILURE;
 	} else {
-		/* PHP_PASSWORD_SALT_RAW */
-		memcpy(ret, buffer, length);
+		memcpy(ret, result, (int) length);
 	}
+	efree(result);
 	efree(buffer);
 	ret[length] = 0;
 	return SUCCESS;
@@ -171,17 +177,23 @@ PHP_FUNCTION(password_get_info)
 {
 	long algo;
 	int hash_len;
-	char *hash;
+	char *hash, *algoName;
 	zval *options;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hash, &hash_len) == FAILURE) {
 		RETURN_NULL();
 	}
 
+	if (hash_len < 0 || (size_t) hash_len < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied Password Hash Too Long To Safely Identify");
+		RETURN_FALSE;
+	}
+
 	ALLOC_INIT_ZVAL(options);
 	array_init(options);
 
-	algo = php_password_determine_algo(hash, hash_len);
+	algo = php_password_determine_algo(hash, (size_t) hash_len);
+	algoName = php_password_get_algo_name(algo);
 	
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
@@ -196,6 +208,7 @@ PHP_FUNCTION(password_get_info)
 	array_init(return_value);
 	
 	add_assoc_long(return_value, "algo", algo);
+	add_assoc_string(return_value, "algoName", algoName, 1);
 	add_assoc_zval(return_value, "options", options);	
 }
 
@@ -210,7 +223,13 @@ PHP_FUNCTION(password_needs_rehash)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
 		RETURN_NULL();
 	}
-	algo = php_password_determine_algo(hash, hash_len);
+
+	if (hash_len < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied Password Hash Too Long To Safely Identify");
+		RETURN_FALSE;
+	}
+
+	algo = php_password_determine_algo(hash, (size_t) hash_len);
 	
 	if (algo != new_algo) {
 		RETURN_TRUE;
@@ -252,7 +271,7 @@ PHP_FUNCTION(password_verify)
 		RETURN_FALSE;
 	}
 
-	if (strlen(ret) != hash_len) {
+	if (strlen(ret) != hash_len || hash_len < 13) {
 		efree(ret);
 		RETURN_FALSE;
 	}
@@ -278,7 +297,8 @@ PHP_FUNCTION(password_hash)
 {
 	char *hash_format, *hash, *salt, *password, *result;
 	long algo = 0;
-	int salt_len = 0, required_salt_len = 0, hash_format_len, password_len;
+	int password_len = 0, hash_len;
+	size_t salt_len = 0, required_salt_len = 0, hash_format_len;
 	HashTable *options = 0;
 	zval **option_buffer;
 
@@ -289,7 +309,7 @@ PHP_FUNCTION(password_hash)
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 		{
-			int cost = PHP_PASSWORD_BCRYPT_COST;
+			long cost = PHP_PASSWORD_BCRYPT_COST;
 	
 			if (options && zend_symtable_find(options, "cost", 5, (void **) &option_buffer) == SUCCESS) {
 				convert_to_long_ex(option_buffer);
@@ -298,13 +318,13 @@ PHP_FUNCTION(password_hash)
 			}
 	
 			if (cost < 4 || cost > 31) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid bcrypt cost parameter specified: %d", cost);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid bcrypt cost parameter specified: %ld", cost);
 				RETURN_NULL();
 			}
 			
 			required_salt_len = 22;
 			hash_format = emalloc(8);
-			sprintf(hash_format, "$2y$%02d$", cost);
+			sprintf(hash_format, "$2y$%02ld$", cost);
 			hash_format_len = 7;
 		}
 		break;
@@ -315,7 +335,8 @@ PHP_FUNCTION(password_hash)
 
 	if (options && zend_symtable_find(options, "salt", 5, (void**) &option_buffer) == SUCCESS) {
 		char *buffer;
-		int buffer_len;
+		int buffer_len_int;
+		size_t buffer_len;
 		switch (Z_TYPE_PP(option_buffer)) {
 			case IS_NULL:
 			case IS_STRING:
@@ -326,7 +347,13 @@ PHP_FUNCTION(password_hash)
 				convert_to_string_ex(option_buffer);
 				if (Z_TYPE_PP(option_buffer) == IS_STRING) {
 					buffer = Z_STRVAL_PP(option_buffer);
-					buffer_len = Z_STRLEN_PP(option_buffer);
+					buffer_len_int = Z_STRLEN_PP(option_buffer);
+					if (buffer_len_int < 0) {
+						zval_ptr_dtor(option_buffer);
+						efree(hash_format);
+						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long");
+					}
+					buffer_len = (size_t) buffer_len_int;
 					break;
 				}
 			case IS_RESOURCE:
@@ -340,27 +367,27 @@ PHP_FUNCTION(password_hash)
 		if (buffer_len < required_salt_len) {
 			efree(hash_format);
 			zval_ptr_dtor(option_buffer);
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %d expecting %d", buffer_len, required_salt_len);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu expecting %lu", (unsigned long) buffer_len, (unsigned long) required_salt_len);
 			RETURN_NULL();
-		} else if (0 == php_password_salt_is_alphabet(buffer, buffer_len, PHP_PASSWORD_SALT_BCRYPT)) {
-			salt = emalloc(required_salt_len + 1);
+		} else if (0 == php_password_salt_is_alphabet(buffer, buffer_len)) {
+			salt = safe_emalloc(required_salt_len, 1, 1);
 			if (php_password_salt_to64(buffer, buffer_len, required_salt_len, salt) == FAILURE) {
 				efree(hash_format);
 				efree(salt);
 				zval_ptr_dtor(option_buffer);
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %d", salt_len);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu", (unsigned long) buffer_len);
 				RETURN_NULL();
 			}
 			salt_len = required_salt_len;
 		} else {
-			salt = emalloc(required_salt_len + 1);
-			memcpy(salt, buffer, required_salt_len);
+			salt = safe_emalloc(required_salt_len, 1, 1);
+			memcpy(salt, buffer, (int) required_salt_len);
 			salt_len = required_salt_len;
 		}
 		zval_ptr_dtor(option_buffer);
 	} else {
-		salt = emalloc(required_salt_len + 1);
-		if (php_password_make_salt((long) required_salt_len, PHP_PASSWORD_SALT_BCRYPT, salt TSRMLS_CC) == FAILURE) {
+		salt = safe_emalloc(required_salt_len, 1, 1);
+		if (php_password_make_salt(required_salt_len, salt TSRMLS_CC) == FAILURE) {
 			efree(hash_format);
 			efree(salt);
 			RETURN_FALSE;
@@ -377,7 +404,10 @@ PHP_FUNCTION(password_hash)
 	efree(hash_format);
 	efree(salt);
 
-	if (php_crypt(password, password_len, hash, hash_format_len + salt_len, &result) == FAILURE) {
+	/* This cast is safe, since both values are defined here in code and cannot overflow */
+	hash_len = (int) (hash_format_len + salt_len);
+
+	if (php_crypt(password, password_len, hash, hash_len, &result) == FAILURE) {
 		efree(hash);
 		RETURN_FALSE;
 	}
