@@ -29,7 +29,7 @@ static inline RuleBasedBreakIterator *fetch_rbbi(BreakIterator_object *bio) {
 	return (RuleBasedBreakIterator*)bio->biter;
 }
 
-static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
+static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 {
 	zval		*object		= getThis();
 	char		*rules;
@@ -70,6 +70,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 			smart_str_free(&parse_error_str);
 			intl_error_set_custom_msg(NULL, msg, 1 TSRMLS_CC);
 			efree(msg);
+			delete rbbi;
 			RETURN_NULL();
 		}
 	} else { // compiled
@@ -78,6 +79,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "rbbi_create_instance: unable to "
 				"create instance from compiled rules", 0 TSRMLS_CC);
+			delete rbbi;
 			RETURN_NULL();
 		}
 #else
@@ -96,7 +98,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 
 	return_value = getThis();
 	//changes this to IS_NULL (without first destroying) if there's an error
-	_php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	_php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (Z_TYPE_P(return_value) == IS_NULL) {
 		zend_object_store_ctor_failed(&orig_this TSRMLS_CC);

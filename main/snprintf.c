@@ -94,7 +94,7 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, 
 			*decpt = 0;
 			c = *p;
 			zend_freedtoa(p);
-			return(c == 'I' ? "INF" : "NAN");
+			return strdup((c == 'I' ? "INF" : "NAN"));
 		}
 		/* Make a local copy and adjust rve to be in terms of s */
 		if (pad && fmode) {

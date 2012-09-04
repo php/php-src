@@ -43,13 +43,7 @@ bool(false)
 
 Warning: finfo_open() expects at most 2 parameters, 3 given in %sfinfo_open_error-win32.php on line %d
 bool(false)
-
-Warning: finfo_open(%smagic): failed to open stream: No such file or directory in %sfinfo_open_error-win32.php on line %d
-
-Warning: finfo_open(%smagic): failed to open stream: No such file or directory in %sfinfo_open_error-win32.php on line %d
-
-Warning: finfo_open(): Failed to load magic database at '%smagic'. in %sfinfo_open_error-win32.php on line %d
-bool(false)
+resource(6) of type (file_info)
 
 Warning: finfo_open() expects parameter 1 to be long, string given in %sfinfo_open_error-win32.php on line %d
 bool(false)

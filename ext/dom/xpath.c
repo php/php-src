@@ -321,6 +321,7 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlDoc *docp = NULL;
 	xmlXPathContextPtr ctx;
 	int ret;
+	zval *tmp;
 
 	ctx = (xmlXPathContextPtr) obj->ptr;
 
@@ -329,9 +330,15 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 	}
 
 	ALLOC_ZVAL(*retval);
+	tmp = *retval;
+
 	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) docp, &ret, *retval, obj TSRMLS_CC))) {
+		FREE_ZVAL(tmp);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
+	}
+	if (tmp != *retval) {
+		FREE_ZVAL(tmp);
 	}
 	return SUCCESS;
 }

@@ -1020,6 +1020,8 @@ mail.add_x_header = On
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
 ;mail.log =
+; Log mail to syslog (Event Log on NT, not valid in Windows 95).
+;mail.log = syslog
 
 [SQL]
 ; http://php.net/sql.safe-mode

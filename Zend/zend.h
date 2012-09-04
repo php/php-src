@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "2.4.0"
+#define ZEND_VERSION "2.5.0-dev"
 
 #define ZEND_ENGINE_2
 
@@ -276,10 +276,10 @@ static const char long_min_digits[] = "9223372036854775808";
 
 #define MAX_LENGTH_OF_DOUBLE 32
 
-#undef SUCCESS
-#undef FAILURE
-#define SUCCESS 0
-#define FAILURE -1				/* this MUST stay a negative number, or it may affect functions! */
+typedef enum {
+  SUCCESS =  0,
+  FAILURE = -1,		/* this MUST stay a negative number, or it may affect functions! */
+} ZEND_RESULT_CODE;
 
 #include "zend_hash.h"
 #include "zend_ts_hash.h"

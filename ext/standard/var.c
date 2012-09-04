@@ -453,6 +453,11 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
+		if(myht && myht->nApplyCount > 0){
+			smart_str_appendl(buf, "NULL", 4);
+			zend_error(E_WARNING, "var_export does not handle circular references");
+			return;
+		}
 		if (level > 1) {
 			smart_str_appendc(buf, '\n');
 			buffer_append_spaces(buf, level - 1);
@@ -469,6 +474,11 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 
 	case IS_OBJECT:
 		myht = Z_OBJPROP_PP(struc);
+		if(myht && myht->nApplyCount > 0){
+			smart_str_appendl(buf, "NULL", 4);
+			zend_error(E_WARNING, "var_export does not handle circular references");
+			return;
+		}
 		if (level > 1) {
 			smart_str_appendc(buf, '\n');
 			buffer_append_spaces(buf, level - 1);
