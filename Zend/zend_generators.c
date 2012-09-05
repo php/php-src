@@ -154,6 +154,12 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 			efree(prev_execute_data);
 		}
 
+		/* Free a clone of closure */
+		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+			destroy_op_array(op_array TSRMLS_CC);
+			efree(op_array);
+		}
+
 		efree(execute_data);
 		generator->execute_data = NULL;
 	}
@@ -358,6 +364,14 @@ zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	zval *return_value;
 	zend_generator *generator;
 
+	/* Create a clone of closure, because it may be destroyed */
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		zend_op_array *op_array_copy = (zend_op_array*)emalloc(sizeof(zend_op_array));
+		*op_array_copy = *op_array;
+		function_add_ref(op_array_copy);
+		op_array = op_array_copy;
+	}
+	
 	/* Create new execution context. We have to back up and restore
 	 * EG(current_execute_data) and EG(opline_ptr) here because the function
 	 * modifies it. */
