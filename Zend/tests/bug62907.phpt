@@ -1,7 +1,5 @@
 --TEST--
 Bug #62907 (Double free when use traits)
---XFAIL--
-bug is not fixed yet
 --FILE--
 <?php
 function __autoload($name) {
