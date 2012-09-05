@@ -308,6 +308,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			zend_hash_destroy(&ce->properties_info);
 			str_efree(ce->name);
 			if ((ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+				TSRMLS_FETCH();
 				zend_hash_apply(&ce->function_table, (apply_func_t)zend_clear_trait_method_name TSRMLS_CC);
 			}
 			zend_hash_destroy(&ce->function_table);
