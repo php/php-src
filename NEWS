@@ -13,9 +13,13 @@ PHP                                                                        NEWS
   . Fixed bug #62744 (dangling pointers made by zend_disable_class). (Laruence)
   . Fixed bug #62716 (munmap() is called with the incorrect length). 
     (slangley@google.com)
-  . Fixed bug ##62460 (php binaries installed as binary.dSYM). (Reeze Xia)
+  . Fixed bug #62460 (php binaries installed as binary.dSYM). (Reeze Xia)
+  . Fixed bug #61767 (Shutdown functions not called in certain error
+    situation). (Dmitry)
   . Fixed bug #60194 (--with-zend-multibyte and --enable-debug reports LEAK
     with run-test.php). (Laruence)
+  . Fixed bug #60909 (custom error handler throwing Exception + fatal error
+    = no shutdown function). (Dmitry)
 
 - CURL:
   . Fixed bug #62839 (curl_copy_handle segfault with CURLOPT_FILE). (Pierrick)
