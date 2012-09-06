@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #62955 (Only one directive is loaded from "Per Directory Values" 
     Windows registry). (aserbulov at parallels dot com)
   . Fixed bug #62907 (Double free when use traits). (Dmitry)
+  . Fixed bug #61767 (Shutdown functions not called in certain error
+    situation). (Dmitry)
+  . Fixed bug #60909 (custom error handler throwing Exception + fatal error
+    = no shutdown function). (Dmitry)
 
 - SOAP
   . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
