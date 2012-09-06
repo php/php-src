@@ -301,6 +301,7 @@ ZEND_API int increment_function(zval *op1);
 ZEND_API int decrement_function(zval *op2);
 
 ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC);
+ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void convert_to_long(zval *op);
 ZEND_API void convert_to_double(zval *op);
@@ -314,6 +315,7 @@ ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2);
 ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2);
+#define convert_to_cstring(op) if ((op)->type != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
 #define convert_to_string(op) if ((op)->type != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
 
 ZEND_API double zend_string_to_double(const char *number, zend_uint length);
