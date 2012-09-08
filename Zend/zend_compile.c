@@ -2169,12 +2169,21 @@ void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_n
 			lctype = zend_get_class_fetch_type(lcname, strlen(lcname));
 			switch (lctype) {
 				case ZEND_FETCH_CLASS_SELF:
+					if (!CG(active_class_entry)) {
+						zend_error(E_COMPILE_ERROR, "Cannot access self::class when no class scope is active");
+					}
 					tmp.op_type = IS_CONST;
 					ZVAL_STRINGL(&tmp.u.constant, CG(active_class_entry)->name, strlen(CG(active_class_entry)->name), 1);
 					*class_name = tmp;
 					break;
 				case ZEND_FETCH_CLASS_STATIC:
+					if (!CG(active_class_entry)) {
+						zend_error(E_COMPILE_ERROR, "Cannot access static::class when no class scope is active");
+					}
 				case ZEND_FETCH_CLASS_PARENT:
+					if (!CG(active_class_entry)) {
+						zend_error(E_COMPILE_ERROR, "Cannot access parent::class when no class scope is active");
+					}
 					opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 					opline->opcode = ZEND_DO_FCALL;
 					opline->result.var = get_temporary_variable(CG(active_op_array));
