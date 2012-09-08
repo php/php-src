@@ -181,8 +181,13 @@ if (VCVERS >= 1500 && PHP_MP != 'disable') {
 }
 
 // General link flags
-DEFINE("LDFLAGS", "/nologo /version:" +
-	PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION);
+
+if (VCVERS >= 1700) {
+	DEFINE("LDFLAGS", "/nologo ");
+} else {
+	DEFINE("LDFLAGS", "/nologo /version:" +
+			PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION);
+}
 
 // General DLL link flags
 DEFINE("DLL_LDFLAGS", "/dll ");
