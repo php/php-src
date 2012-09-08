@@ -2109,6 +2109,8 @@ void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_n
 	zval **ns;
 	znode tmp;
 	int len;
+	int lctype;
+	zend_op *opline;
 
 	compound = memchr(Z_STRVAL(class_name->u.constant), '\\', Z_STRLEN(class_name->u.constant));
 	if (compound) {
@@ -2153,7 +2155,7 @@ void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_n
 				*class_name = tmp;
 			}
 		}
-	} else if (CG(current_import) || CG(current_namespace)) {
+	} else {
 		/* this is a plain name (without \) */
 		lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 
@@ -2163,13 +2165,43 @@ void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_n
 			zval_dtor(&class_name->u.constant);
 			class_name->u.constant = **ns;
 			zval_copy_ctor(&class_name->u.constant);
-		} else if (CG(current_namespace)) {
-			/* plain name, no import - prepend current namespace to it */
-			tmp.op_type = IS_CONST;
-			tmp.u.constant = *CG(current_namespace);
-			zval_copy_ctor(&tmp.u.constant);
-			zend_do_build_namespace_name(&tmp, &tmp, class_name TSRMLS_CC);
-			*class_name = tmp;
+		} else {
+			lctype = zend_get_class_fetch_type(lcname, strlen(lcname));
+			switch (lctype) {
+				case ZEND_FETCH_CLASS_SELF:
+					tmp.op_type = IS_CONST;
+					ZVAL_STRINGL(&tmp.u.constant, CG(active_class_entry)->name, strlen(CG(active_class_entry)->name), 1);
+					*class_name = tmp;
+					break;
+				case ZEND_FETCH_CLASS_STATIC:
+				case ZEND_FETCH_CLASS_PARENT:
+					opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+					opline->opcode = ZEND_DO_FCALL;
+					opline->result.var = get_temporary_variable(CG(active_op_array));
+					opline->result_type = IS_VAR;
+					if (lctype == ZEND_FETCH_CLASS_STATIC) {
+						LITERAL_STRINGL(opline->op1, estrndup("get_called_class", sizeof("get_called_class")-1), sizeof("get_called_class")-1, 0);
+					} else {
+						LITERAL_STRINGL(opline->op1, estrndup("get_parent_class", sizeof("get_parent_class")-1), sizeof("get_parent_class")-1, 0);
+					}
+					CALCULATE_LITERAL_HASH(opline->op1.constant);
+					opline->op1_type = IS_CONST;
+					GET_CACHE_SLOT(opline->op1.constant);
+					opline->extended_value = 0;
+					SET_UNUSED(opline->op2);
+					GET_NODE(class_name, opline->result);
+					break;
+				case ZEND_FETCH_CLASS_DEFAULT:
+					if (CG(current_namespace)) {
+						/* plain name, no import - prepend current namespace to it */
+						tmp.op_type = IS_CONST;
+						tmp.u.constant = *CG(current_namespace);
+						zval_copy_ctor(&tmp.u.constant);
+						zend_do_build_namespace_name(&tmp, &tmp, class_name TSRMLS_CC);
+						*class_name = tmp;
+					}
+					break;
+			}
 		}
 		efree(lcname);
 	}
