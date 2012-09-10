@@ -2172,9 +2172,9 @@ void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_n
 					if (!CG(active_class_entry)) {
 						zend_error(E_COMPILE_ERROR, "Cannot access self::class when no class scope is active");
 					}
-					tmp.op_type = IS_CONST;
-					ZVAL_STRINGL(&tmp.u.constant, CG(active_class_entry)->name, strlen(CG(active_class_entry)->name), 1);
-					*class_name = tmp;
+					zval_dtor(&class_name->u.constant);
+					class_name->op_type = IS_CONST;
+					ZVAL_STRINGL(&class_name->u.constant, CG(active_class_entry)->name, CG(active_class_entry)->name_length, 1);
 					break;
 				case ZEND_FETCH_CLASS_STATIC:
 					if (!CG(active_class_entry)) {
@@ -2184,6 +2184,7 @@ void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_n
 					if (!CG(active_class_entry)) {
 						zend_error(E_COMPILE_ERROR, "Cannot access parent::class when no class scope is active");
 					}
+					zval_dtor(&class_name->u.constant);
 					opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 					opline->opcode = ZEND_DO_FCALL;
 					opline->result.var = get_temporary_variable(CG(active_op_array));
