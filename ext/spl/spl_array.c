@@ -306,41 +306,41 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 	long index;
 	HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 
-/*  We cannot get the pointer pointer so we don't allow it here for now
-	if (check_inherited && intern->fptr_offset_get) {
-		return zend_call_method_with_1_params(&object, Z_OBJCE_P(object), &intern->fptr_offset_get, "offsetGet", NULL, offset);
-	}*/
-
 	if (!offset) {
 		return &EG(uninitialized_zval_ptr);
 	}
 	
 	if ((type == BP_VAR_W || type == BP_VAR_RW) && (ht->nApplyCount > 0)) {
 		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
-		return &EG(uninitialized_zval_ptr);;
+		return &EG(error_zval_ptr);;
 	}
 
 	switch(Z_TYPE_P(offset)) {
+	case IS_NULL:
+		Z_STRVAL_P(offset) = "";
+		Z_STRLEN_P(offset) = 0;
 	case IS_STRING:
 		if (zend_symtable_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval) == FAILURE) {
-			if (type == BP_VAR_W || type == BP_VAR_RW) {
-				zval *value;
-				ALLOC_INIT_ZVAL(value);
-				zend_symtable_update(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
-				if (zend_symtable_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval) != FAILURE) {
-					return retval;
-				} else {
-					return &EG(uninitialized_zval_ptr);
+			switch (type) {
+				case BP_VAR_R:
+					zend_error(E_NOTICE, "Undefined index: %s", Z_STRVAL_P(offset));
+				case BP_VAR_UNSET:
+				case BP_VAR_IS:
+					retval = &EG(uninitialized_zval_ptr);
+					break;
+				case BP_VAR_RW:
+					zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
+				case BP_VAR_W: {
+				    zval *value;
+				    ALLOC_INIT_ZVAL(value);
+				    zend_symtable_update(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void**)&value, sizeof(void*), (void **)&retval);
 				}
-			} else {
-				zend_error(E_NOTICE, "Undefined index:  %s", Z_STRVAL_P(offset));
-				return &EG(uninitialized_zval_ptr);
 			}
-		} else {
-			return retval;
 		}
-	case IS_DOUBLE:
+		return retval;
 	case IS_RESOURCE:
+		zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(offset), Z_LVAL_P(offset));
+	case IS_DOUBLE:
 	case IS_BOOL: 
 	case IS_LONG: 
 		if (offset->type == IS_DOUBLE) {
@@ -349,26 +349,27 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 			index = Z_LVAL_P(offset);
 		}
 		if (zend_hash_index_find(ht, index, (void **) &retval) == FAILURE) {
-			if (type == BP_VAR_W || type == BP_VAR_RW) {
-				zval *value;
-				ALLOC_INIT_ZVAL(value);
-				zend_hash_index_update(ht, index, (void**)&value, sizeof(void*), NULL);
-				if (zend_hash_index_find(ht, index, (void **) &retval) != FAILURE) {
-					return retval;
-				} else {
-					return &EG(uninitialized_zval_ptr);
-				}
-			} else {
-				zend_error(E_NOTICE, "Undefined offset:  %ld", index);
-				return &EG(uninitialized_zval_ptr);
+			switch (type) {
+				case BP_VAR_R:
+					zend_error(E_NOTICE, "Undefined offset: %ld", index);
+				case BP_VAR_UNSET:
+				case BP_VAR_IS:
+					retval = &EG(uninitialized_zval_ptr);
+					break;
+				case BP_VAR_RW:
+					zend_error(E_NOTICE, "Undefined offset: %ld", index);
+				case BP_VAR_W: {
+				    zval *value;
+				    ALLOC_INIT_ZVAL(value);
+					zend_hash_index_update(ht, index, (void**)&value, sizeof(void*), (void **)&retval);
+			   }
 			}
-		} else {
-			return retval;
 		}
-		break;
+		return retval;
 	default:
 		zend_error(E_WARNING, "Illegal offset type");
-		return &EG(uninitialized_zval_ptr);
+		return (type == BP_VAR_W || type == BP_VAR_RW) ?
+			&EG(error_zval_ptr) : &EG(uninitialized_zval_ptr);
 	}
 } /* }}} */
 
@@ -519,11 +520,11 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 		}
 		if (ht == &EG(symbol_table)) {
 			if (zend_delete_global_variable(Z_STRVAL_P(offset), Z_STRLEN_P(offset) TSRMLS_CC)) {
-				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
+				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 			}
 		} else {
 			if (zend_symtable_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1) == FAILURE) {
-				zend_error(E_NOTICE,"Undefined index:  %s", Z_STRVAL_P(offset));
+				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 			} else {
 				spl_array_object *obj = intern;
 
@@ -569,7 +570,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 			return;
 		}
 		if (zend_hash_index_del(ht, index) == FAILURE) {
-			zend_error(E_NOTICE,"Undefined offset:  %ld", Z_LVAL_P(offset));
+			zend_error(E_NOTICE,"Undefined offset: %ld", Z_LVAL_P(offset));
 		}
 		break;
 	default:
@@ -712,7 +713,6 @@ SPL_METHOD(Array, offsetSet)
 	}
 	spl_array_write_dimension_ex(0, getThis(), index, value TSRMLS_CC);
 } /* }}} */
-
 
 void spl_array_iterator_append(zval *object, zval *append_value TSRMLS_DC) /* {{{ */
 {

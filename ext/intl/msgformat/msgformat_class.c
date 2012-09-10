@@ -84,7 +84,7 @@ zend_object_value MessageFormatter_object_clone(zval *object TSRMLS_DC)
 	MessageFormatter_object *mfo, *new_mfo;
 
 	MSG_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
-	new_obj_val = MessageFormatter_ce_ptr->create_object(MessageFormatter_ce_ptr TSRMLS_CC);
+	new_obj_val = MessageFormatter_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
 	new_mfo = (MessageFormatter_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
 	/* clone standard parts */	
 	zend_objects_clone_members(&new_mfo->zo, new_obj_val, &mfo->zo, handle TSRMLS_CC);
@@ -97,10 +97,10 @@ zend_object_value MessageFormatter_object_clone(zval *object TSRMLS_DC)
 		if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
 			intl_errors_set(INTL_DATA_ERROR_P(mfo), INTL_DATA_ERROR_CODE(mfo),
 					"Failed to clone MessageFormatter object", 0 TSRMLS_CC);
-			zend_throw_exception_ex(NULL, 0, "Failed to clone MessageFormatter object");
+			zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Failed to clone MessageFormatter object");
 		}
 	} else {
-		zend_throw_exception_ex(NULL, 0, "Cannot clone unconstructed MessageFormatter");
+		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Cannot clone unconstructed MessageFormatter");
 	}
 	return new_obj_val;
 }
