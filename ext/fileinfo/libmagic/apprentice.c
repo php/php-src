@@ -753,7 +753,7 @@ private int
 apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
     const char *fn, int action)
 {
-	int errs = 0, mflen = 0;
+	int errs = 0;
 	struct magic_entry *marray;
 	uint32_t marraycount, i, mentrycount = 0, starttest;
 	size_t files = 0, maxfiles = 0;
@@ -782,7 +782,7 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 			goto out;
 		}
 		while ((d = readdir(dir)) != NULL) {
-			if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d->d_name)) < 0) {
+			if (snprintf(mfn, sizeof(mfn), "%s/%s", fn, d->d_name) < 0) {
 				file_oomem(ms,
 				    strlen(fn) + strlen(d->d_name) + 2);
 				errs++;
@@ -804,7 +804,7 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 					goto out;
 				}
 			}
-			filearr[files++] = estrndup(mfn, mflen);
+			filearr[files++] = estrdup(mfn);
 		}
 		closedir(dir);
 		qsort(filearr, files, sizeof(*filearr), cmpstrp);
