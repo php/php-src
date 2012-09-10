@@ -3086,6 +3086,14 @@ ZEND_METHOD(reflection_function, isDeprecated)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionFunction::isGenerator()
+   Returns whether this function is a generator */
+ZEND_METHOD(reflection_function, isGenerator)
+{
+	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_GENERATOR);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionFunction::inNamespace()
    Returns whether this function is defined in namespace */
 ZEND_METHOD(reflection_function, inNamespace)
@@ -5696,6 +5704,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, isDeprecated, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isInternal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isUserDefined, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, isGenerator, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureScopeClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
