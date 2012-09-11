@@ -713,6 +713,14 @@ PHP_MINIT_FUNCTION(curl)
 #if LIBCURL_VERSION_NUM >= 0x071202
     REGISTER_CURL_CONSTANT(CURLINFO_REDIRECT_URL);
 #endif
+#if LIBCURL_VERSION_NUM >= 0x071300 /* 7.19.0 */
+	REGISTER_CURL_CONSTANT(CURLINFO_PRIMARY_IP);
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071500 /* 7.21.0 */
+	REGISTER_CURL_CONSTANT(CURLINFO_PRIMARY_PORT);
+	REGISTER_CURL_CONSTANT(CURLINFO_LOCAL_IP);
+	REGISTER_CURL_CONSTANT(CURLINFO_LOCAL_PORT);
+#endif
 
 
 	/* cURL protocol constants (curl_version) */
@@ -1606,9 +1614,9 @@ PHP_FUNCTION(curl_copy_handle)
 	dupch->uses = 0;
 	ch->uses++;
 	if (ch->handlers->write->stream) {
-		Z_ADDREF_P(dupch->handlers->write->stream);
-		dupch->handlers->write->stream = ch->handlers->write->stream;
+		Z_ADDREF_P(ch->handlers->write->stream);
 	}
+	dupch->handlers->write->stream = ch->handlers->write->stream;
 	dupch->handlers->write->method = ch->handlers->write->method;
 	dupch->handlers->write->type   = ch->handlers->write->type;
 	if (ch->handlers->read->stream) {
@@ -2447,6 +2455,8 @@ PHP_FUNCTION(curl_getinfo)
 			create_certinfo(ci, listcode TSRMLS_CC);
 			CAAZ("certinfo", listcode);
 		}
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071300 /* 7.19.0 */
 		if (curl_easy_getinfo(ch->cp, CURLINFO_PRIMARY_IP, &s_code) == CURLE_OK) {
 			CAAS("primary_ip", s_code);
 		}
@@ -2473,10 +2483,10 @@ PHP_FUNCTION(curl_getinfo)
 	} else {
 		switch (option) {
 			/* string variable types */
-#if LIBCURL_VERSION_NUM >= 0x071500
+#if LIBCURL_VERSION_NUM >= 0x071300 /* 7.19.0 */
 			case CURLINFO_PRIMARY_IP:
 #endif
-#if LIBCURL_VERSION_NUM >= 0x071500
+#if LIBCURL_VERSION_NUM >= 0x071500 /* 7.21.0 */
 			case CURLINFO_LOCAL_IP:
 #endif
 			case CURLINFO_PRIVATE:
@@ -2496,7 +2506,7 @@ PHP_FUNCTION(curl_getinfo)
 				break;
 			}
 			/* Long variable types */
-#if LIBCURL_VERSION_NUM >= 0x071500
+#if LIBCURL_VERSION_NUM >= 0x071500 /* 7.21.0 */
 			case CURLINFO_PRIMARY_PORT:
 			case CURLINFO_LOCAL_PORT:
 #endif

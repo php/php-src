@@ -127,7 +127,7 @@ static zend_object_value spoofchecker_clone_obj(zval *object TSRMLS_DC) /* {{{ *
     sfo = (Spoofchecker_object *) zend_object_store_get_object(object TSRMLS_CC);
     intl_error_reset(SPOOFCHECKER_ERROR_P(sfo) TSRMLS_CC);
 
-	new_obj_val = Spoofchecker_ce_ptr->create_object(Spoofchecker_ce_ptr TSRMLS_CC);
+	new_obj_val = Spoofchecker_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
 	new_sfo = (Spoofchecker_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
 	/* clone standard parts */	
 	zend_objects_clone_members(&new_sfo->zo, new_obj_val, &sfo->zo, handle TSRMLS_CC);
