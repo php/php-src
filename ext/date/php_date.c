@@ -864,7 +864,7 @@ static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 			return DATEG(default_timezone);
 		}
 		/* Invalid date.timezone value */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "date.timezone value '%s' is invalid. We selected the timezone 'UTC' for now.", DATEG(default_timezone));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid date.timezone value '%s', we selected the timezone 'UTC' for now.", DATEG(default_timezone));
 	} else {
 		/* No date.timezone value */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected the timezone 'UTC' for now, but please set date.timezone to select your timezone.");
