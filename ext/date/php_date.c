@@ -738,7 +738,6 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define SUNFUNCS_RET_STRING    1
 #define SUNFUNCS_RET_DOUBLE    2
 
-
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(date)
 {
@@ -860,9 +859,10 @@ static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 		    timelib_timezone_id_is_valid(Z_STRVAL(ztz), tzdb)) {
 			return Z_STRVAL(ztz);
 		}
-	} else if (*DATEG(default_timezone) && timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
-		return DATEG(default_timezone);
 	} else if (*DATEG(default_timezone)) {
+		if (timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
+			return DATEG(default_timezone);
+		}
 		/* Invalid date.timezone value */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "date.timezone value '%s' is invalid. We selected the timezone 'UTC' for now.", DATEG(default_timezone));
 	} else {
@@ -886,7 +886,6 @@ PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D)
 	return tzi;
 }
 /* }}} */
-
 
 /* {{{ date() and gmdate() data */
 #include "ext/standard/php_smart_str.h"
@@ -1323,7 +1322,6 @@ PHPAPI signed long php_parse_date(char *string, signed long *now)
 }
 /* }}} */
 
-
 /* {{{ proto int strtotime(string time [, int now ])
    Convert string representation of date and time to a timestamp */
 PHP_FUNCTION(strtotime)
@@ -1383,7 +1381,6 @@ PHP_FUNCTION(strtotime)
 	}
 }
 /* }}} */
-
 
 /* {{{ php_mktime - (gm)mktime helper */
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
@@ -1492,7 +1489,6 @@ PHP_FUNCTION(gmmktime)
 	php_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
 
 /* {{{ proto bool checkdate(int month, int day, int year)
    Returns true(1) if it is a valid date in gregorian calendar */
