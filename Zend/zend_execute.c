@@ -35,6 +35,7 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "zend_closures.h"
+#include "zend_generators.h"
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 
@@ -1535,6 +1536,50 @@ ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const temp_v
 ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC) {
 	return get_zval_ptr_ptr(op_type, node, Ts, should_free, type);
 }
+
+void zend_clean_and_cache_symbol_table(HashTable *symbol_table TSRMLS_DC) /* {{{ */
+{
+	if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
+		zend_hash_destroy(symbol_table);
+		FREE_HASHTABLE(symbol_table);
+	} else {
+		/* clean before putting into the cache, since clean
+		   could call dtors, which could use cached hash */
+		zend_hash_clean(symbol_table);
+		*(++EG(symtable_cache_ptr)) = symbol_table;
+	}
+}
+/* }}} */
+
+void zend_free_compiled_variables(zval ***CVs, int num) /* {{{ */
+{
+	int i;
+	for (i = 0; i < num; ++i) {
+		if (CVs[i]) {
+			zval_ptr_dtor(CVs[i]);
+		}
+	}
+}
+/* }}} */
+
+void** zend_copy_arguments(void **arguments_end) /* {{{ */
+{
+	int arguments_count = (int) (zend_uintptr_t) *arguments_end;
+	size_t arguments_size = (arguments_count + 1) * sizeof(void **);
+	void **arguments_start = arguments_end - arguments_count;
+	void **copied_arguments_start = emalloc(arguments_size);
+	void **copied_arguments_end = copied_arguments_start + arguments_count;
+	int i;
+
+	memcpy(copied_arguments_start, arguments_start, arguments_size);
+
+	for (i = 0; i < arguments_count; i++) {
+		Z_ADDREF_P((zval *) arguments_start[i]);
+	}
+
+	return copied_arguments_end;
+}
+/* }}} */
 
 /*
  * Local variables:

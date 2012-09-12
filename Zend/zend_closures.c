@@ -78,7 +78,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 
 /* {{{ proto Closure Closure::bind(Closure $old, object $to [, mixed $scope = "static" ] )
    Create a closure from another one and bind to another object and scope */
-ZEND_METHOD(Closure, bind) /* {{{ */
+ZEND_METHOD(Closure, bind)
 {
 	zval *newthis, *zclosure, *scope_arg = NULL;
 	zend_closure *closure;
