@@ -28,5 +28,3 @@ baz
 baz
 foo
 ==DONE==
---XFAIL--
-mb functions fail to allow null instead of actual value

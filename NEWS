@@ -2,6 +2,35 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.8
 
+- Core:
+  . Added optional second argument for assert() to specify custom message. Patch
+    by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
+  . Fixed bug #62976 (Notice: could not be converted to int when comparing
+    some builtin classes). (Laruence)
+  . Fixed bug #62955 (Only one directive is loaded from "Per Directory Values" 
+    Windows registry). (aserbulov at parallels dot com)
+  . Fixed bug #62907 (Double free when use traits). (Dmitry)
+  . Fixed bug #61767 (Shutdown functions not called in certain error
+    situation). (Dmitry)
+  . Fixed bug #60909 (custom error handler throwing Exception + fatal error
+    = no shutdown function). (Dmitry)
+
+- SOAP
+  . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
+    (Dmitry)
+
+- SPL:
+  . Bug #62987 (Assigning to ArrayObject[null][something] overrides all 
+    undefined variables). (Laruence)
+
+- mbstring:
+  . Allow passing null as a default value to mb_substr() and mb_strcut(). Patch
+    by Alexander Moskaliov via GitHub PR #133. (Lars)
+
+- Filter extension:
+  . Bug #49510: Boolean validation fails with FILTER_NULL_ON_FAILURE with empty
+    string or false. (Lars)
+
 ?? ??? 2012, PHP 5.4.7
 
 - Core:
@@ -58,6 +87,10 @@ PHP                                                                        NEWS
   . Fixed bug (segfault due to retval is not initialized). (Laruence)
   . Fixed bug (segfault due to PS(mod_user_implemented) not be reseted 
     when close handler call exit). (Laruence)
+
+- SOAP
+  . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
+    (Dmitry)
 
 - SPL:
   . Fixed bug #62904 (Crash when cloning an object which inherits SplFixedArray)
