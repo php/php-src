@@ -22,9 +22,9 @@ var_dump(password_needs_rehash('$2y$10$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9H
 // Invalid, different (higher) cost
 var_dump(password_needs_rehash('$2y$10$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT, array('cost' => 11)));
 
-// Valid with cost the default (may need to be updated as the default cost increases)
-var_dump(password_needs_rehash('$2y$10$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT));
-
+// Valid with cost the default
+$cost = str_pad(PASSWORD_BCRYPT_DEFAULT_COST, 2, '0', STR_PAD_LEFT);
+var_dump(password_needs_rehash('$2y$'.$cost.'$MTIzNDU2Nzg5MDEyMzQ1Nej0NmcAWSLR.oP7XOR9HD/vjUuOj100y', PASSWORD_BCRYPT));
 
 echo "OK!";
 ?>
