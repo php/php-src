@@ -3959,10 +3959,10 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				&& (zend_binary_strcasecmp(aliases[i]->trait_method->method_name, aliases[i]->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
 				fn_copy = *fn;
 				function_add_ref(&fn_copy);
-				/* this function_name is never destroyed, because its refcount
-				   greater than 1 and classes are always destoyed before the
-				   traits they use */
+				/* this function_name is never destroyed, because ZEND_ACC_ALIAS
+				   flag is set */
 				fn_copy.common.function_name = aliases[i]->alias;
+				fn_copy.common.fn_flags |= ZEND_ACC_ALIAS;
 					
 				/* if it is 0, no modifieres has been changed */
 				if (aliases[i]->modifiers) { 
@@ -3995,6 +3995,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 		/* is not in hashtable, thus, function is not to be excluded */
 		fn_copy = *fn;
 		function_add_ref(&fn_copy);
+		fn_copy.common.fn_flags |= ZEND_ACC_ALIAS;
 
 		/* apply aliases which are not qualified by a class name, or which have not
 		 * alias name, just setting visibility */
