@@ -8,7 +8,7 @@ var_dump(strlen(password_hash("foo", PASSWORD_BCRYPT)));
 
 $hash = password_hash("foo", PASSWORD_BCRYPT);
 
-var_dump($hash == crypt("foo", $hash));
+var_dump($hash === crypt("foo", $hash));
 
 var_dump(password_hash("rasmuslerdorf", PASSWORD_BCRYPT, array("cost" => 7, "salt" => "usesomesillystringforsalt")));
 
