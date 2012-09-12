@@ -1,9 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-30 Aug 2012, PHP 5.4.7 RC1
+13 Sep 2012, PHP 5.4.7 
 
 - Core:
   . Fixed bug (segfault while build with zts and GOTO vm-kind). (Laruence)
+  . Fixed bug #62955 (Only one directive is loaded from "Per Directory Values"
+    Windows registry). (Felipe)
   . Fixed bug #62844 (parse_url() does not recognize //). (Andrew Faulds).
   . Fixed bug #62829 (stdint.h included on platform where HAVE_STDINT_H is not 
     set). (Felipe)
@@ -24,7 +26,7 @@ PHP                                                                        NEWS
 
 - CURL:
   . Fixed bug #62912 (CURLINFO_PRIMARY_* AND CURLINFO_LOCAL_* not exposed).
-	(Pierrick)
+    (Pierrick)
   . Fixed bug #62839 (curl_copy_handle segfault with CURLOPT_FILE). (Pierrick)
 
 - DateTime:
