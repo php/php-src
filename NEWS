@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug (segfault while build with zts and GOTO vm-kind). (Laruence)
+  . Fixed bug #62955 (Only one directive is loaded from "Per Directory Values" 
+    Windows registry). (aserbulov at parallels dot com)
   . Fixed bug #62763 (register_shutdown_function and extending class). 
     (Laruence)
   . Fixed bug #62744 (dangling pointers made by zend_disable_class). (Laruence)
