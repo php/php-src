@@ -1855,7 +1855,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_getlastmod, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ password.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_password_hash, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_password_hash, 0, 0, 2)
 	ZEND_ARG_INFO(0, password)
 	ZEND_ARG_INFO(0, algo)
 	ZEND_ARG_INFO(0, options)
