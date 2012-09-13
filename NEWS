@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.4
 
 - Core:
+  . Improved fputcsv() to allow specifying escape character.
   . Fixed bug #65490 (Duplicate calls to get lineno & filename for 
     DTRACE_FUNCTION_*). (Chris Jones)
   . Fixed bug #65483 (quoted-printable encode stream filter incorrectly encoding
