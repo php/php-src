@@ -1814,11 +1814,19 @@ PHP_FUNCTION(fputcsv)
 	char escape_char = '\\'; /* allow this to be set as parameter */
 	php_stream *stream;
 	zval *fp = NULL, *fields = NULL;
+<<<<<<< HEAD
 	zend_str_size_int ret;
 	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
 	zend_str_size_int delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|SS",
+=======
+	int ret;
+	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
+	int delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|sss",
+>>>>>>> Expose fputcsv's escape_char to userland
 			&fp, &fields, &delimiter_str, &delimiter_str_len,
 			&enclosure_str, &enclosure_str_len,
 			&escape_str, &escape_str_len) == FAILURE) {
