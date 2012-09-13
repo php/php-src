@@ -40,6 +40,8 @@ PHP X.Y UPGRADE NOTES
 - Add support for using empty() on the result of function calls and
   other expressions. Thus it is now possible to write empty(getArray()),
   for example. (https://wiki.php.net/rfc/empty_isset_exprs)
+- Added generators.
+  (https://wiki.php.net/rfc/generators)
 
 ========================================
 2. Changes in SAPI modules
