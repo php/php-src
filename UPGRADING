@@ -44,6 +44,9 @@ PHP X.Y UPGRADE NOTES
   CURLOPT_SAFE_UPLOAD is now turned on by default and uploads with @file 
   do not work unless it is explicitly set to false.
 
+- Since 5.5.4, fputcsv() has fifth parameter escape_char, allowing to
+  specify escape char.
+
 ========================================
 5. New Functions
 ========================================
