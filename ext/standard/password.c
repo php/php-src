@@ -38,7 +38,7 @@
 PHP_MINIT_FUNCTION(password) /* {{{ */
 {
 	REGISTER_LONG_CONSTANT("PASSWORD_DEFAULT", PHP_PASSWORD_DEFAULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
 
@@ -46,29 +46,26 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 }
 /* }}} */
 
-static char* php_password_get_algo_name(const int algo)
+static char* php_password_get_algo_name(const php_password_algos algo)
 {
 	switch (algo) {
-		case PHP_PASSWORD_BCRYPT:
+		case PASSWORD_BCRYPT:
 			return "bcrypt";
 		default:
 			return "unknown";
 	}
 }
 
-static int php_password_determine_algo(const char *hash, const size_t len) 
+static php_password_algos php_password_determine_algo(const char *hash, const size_t len) 
 {
-	if (len < 3) {
-		return 0;
-	}
-	if (hash[0] == '$' && hash[1] == '2' && hash[2] == 'y' && len == 60) {
-		return PHP_PASSWORD_BCRYPT;
+	if (len > 3 && hash[0] == '$' && hash[1] == '2' && hash[2] == 'y' && len == 60) {
+		return PASSWORD_BCRYPT;
 	}
 
-	return 0;
+	return PASSWORD_UNKNOWN;
 }
 
-static int php_password_salt_is_alphabet(const char *str, const size_t len) /* {{{ */
+static zend_bool php_password_salt_is_alphabet(const char *str, const size_t len) /* {{{ */
 {
 	size_t i = 0;
 
@@ -177,7 +174,7 @@ static int php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {{{ */
 
 PHP_FUNCTION(password_get_info)
 {
-	long algo;
+	php_password_algos algo;
 	int hash_len;
 	char *hash, *algoName;
 	zval *options;
@@ -198,13 +195,16 @@ PHP_FUNCTION(password_get_info)
 	algoName = php_password_get_algo_name(algo);
 	
 	switch (algo) {
-		case PHP_PASSWORD_BCRYPT:
+		case PASSWORD_BCRYPT:
 			{
 				long cost = PHP_PASSWORD_BCRYPT_COST;
 				sscanf(hash, "$2y$%ld$", &cost);
 				add_assoc_long(options, "cost", cost);
 			}
-		break;
+			break;
+		case PASSWORD_UNKNOWN:
+		default:
+			break;
 	}
 
 	array_init(return_value);
@@ -216,7 +216,8 @@ PHP_FUNCTION(password_get_info)
 
 PHP_FUNCTION(password_needs_rehash)
 {
-	long new_algo = 0, algo = 0;
+	long new_algo = 0;
+	php_password_algos algo;
 	int hash_len;
 	char *hash;
 	HashTable *options = 0;
@@ -238,7 +239,7 @@ PHP_FUNCTION(password_needs_rehash)
 	}
 
 	switch (algo) {
-		case PHP_PASSWORD_BCRYPT:
+		case PASSWORD_BCRYPT:
 			{
 				int newCost = PHP_PASSWORD_BCRYPT_COST, cost = 0;
 				
@@ -253,6 +254,9 @@ PHP_FUNCTION(password_needs_rehash)
 					RETURN_TRUE;
 				}
 			}
+			break;
+		case PASSWORD_UNKNOWN:
+		default:
 			break;
 	}
 	RETURN_FALSE;
@@ -309,7 +313,7 @@ PHP_FUNCTION(password_hash)
 	}
 
 	switch (algo) {
-		case PHP_PASSWORD_BCRYPT:
+		case PASSWORD_BCRYPT:
 		{
 			long cost = PHP_PASSWORD_BCRYPT_COST;
 	

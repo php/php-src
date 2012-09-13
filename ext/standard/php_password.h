@@ -28,10 +28,14 @@ PHP_FUNCTION(password_get_info);
 
 PHP_MINIT_FUNCTION(password);
 
-#define PHP_PASSWORD_DEFAULT	1
-#define PHP_PASSWORD_BCRYPT	1
+#define PHP_PASSWORD_DEFAULT	PASSWORD_BCRYPT
 
 #define PHP_PASSWORD_BCRYPT_COST 10
+
+typedef enum {
+	PASSWORD_UNKNOWN,
+	PASSWORD_BCRYPT
+} php_password_algos;
 
 #endif
 
