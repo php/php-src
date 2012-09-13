@@ -1765,7 +1765,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		if (result_type & ODBC_NUM) {
 			zend_hash_index_update(Z_ARRVAL_P(return_value), i, &tmp, sizeof(zval *), NULL);
 		} else {
-			if (!*(result->values[i].name)) {
+			if (!*(result->values[i].name) && Z_TYPE_P(tmp) != IS_NULL) {
 				zend_hash_update(Z_ARRVAL_P(return_value), Z_STRVAL_P(tmp),	Z_STRLEN_P(tmp)+1, &tmp, sizeof(zval *), NULL);
 			} else {
 				zend_hash_update(Z_ARRVAL_P(return_value), result->values[i].name, strlen(result->values[i].name)+1, &tmp, sizeof(zval *), NULL);
