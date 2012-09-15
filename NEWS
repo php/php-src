@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.8
 
 - Core:
+  . Fixed bug #63093 (Segfault while load extension failed in zts-build).
+    (Laruence)
   . Added optional second argument for assert() to specify custom message. Patch
     by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
   . Fixed bug #62976 (Notice: could not be converted to int when comparing
