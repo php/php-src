@@ -2468,9 +2468,6 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 		if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS) {
 			convert_to_long(*z_timezone_type);
 			if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS) {
-				zend_error_handling error_handling;
-
-				zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 				convert_to_string(*z_timezone);
 
 				switch (Z_LVAL_PP(z_timezone_type)) {
@@ -2478,9 +2475,9 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 					case TIMELIB_ZONETYPE_ABBR: {
 						char *tmp = emalloc(Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 2);
 						snprintf(tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 2, "%s %s", Z_STRVAL_PP(z_date), Z_STRVAL_PP(z_timezone));
-						php_date_initialize(*dateobj, tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 1, NULL, NULL, 1 TSRMLS_CC);
+						php_date_initialize(*dateobj, tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 1, NULL, NULL, 0 TSRMLS_CC);
 						efree(tmp);
-						break;
+						return 1;
 					}
 
 					case TIMELIB_ZONETYPE_ID:
@@ -2494,15 +2491,10 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 						tzobj->tzi.tz = tzi;
 						tzobj->initialized = 1;
 
-						php_date_initialize(*dateobj, Z_STRVAL_PP(z_date), Z_STRLEN_PP(z_date), NULL, tmp_obj, 1 TSRMLS_CC);
+						php_date_initialize(*dateobj, Z_STRVAL_PP(z_date), Z_STRLEN_PP(z_date), NULL, tmp_obj, 0 TSRMLS_CC);
 						zval_ptr_dtor(&tmp_obj);
-						break;
-					default:
-						zend_restore_error_handling(&error_handling TSRMLS_CC);
-						return 0;
+						return 1;
 				}
-				zend_restore_error_handling(&error_handling TSRMLS_CC);
-				return 1;
 			}
 		}
 	}
