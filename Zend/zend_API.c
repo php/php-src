@@ -2122,7 +2122,9 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 	/* Deinitilaise module globals */
 	if (module->globals_size) {
 #ifdef ZTS
-		ts_free_id(*module->globals_id_ptr);
+		if (*module->globals_id_ptr) {
+			ts_free_id(*module->globals_id_ptr);
+		}
 #else
 		if (module->globals_dtor) {
 			module->globals_dtor(module->globals_ptr TSRMLS_CC);

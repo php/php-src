@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.3.18
 
 - Core:
+  . Fixed bug #63093 (Segfault while load extension failed in zts-build).
+    (Laruence)
   . Fixed bug #62976 (Notice: could not be converted to int when comparing
     some builtin classes). (Laruence)
   . Fixed bug #61767 (Shutdown functions not called in certain error
