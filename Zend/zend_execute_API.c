@@ -964,15 +964,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		}
 
 		if (!fci->symbol_table && EG(active_symbol_table)) {
-			if (EG(symtable_cache_ptr)>=EG(symtable_cache_limit)) {
-				zend_hash_destroy(EG(active_symbol_table));
-				FREE_HASHTABLE(EG(active_symbol_table));
-			} else {
-				/* clean before putting into the cache, since clean
-				   could call dtors, which could use cached hash */
-				zend_hash_clean(EG(active_symbol_table));
-				*(++EG(symtable_cache_ptr)) = EG(active_symbol_table);
-			}
+			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
 		}
 		EG(active_symbol_table) = calling_symbol_table;
 		EG(active_op_array) = original_op_array;
