@@ -371,7 +371,7 @@ zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 		zend_op_array *op_array_copy = (zend_op_array*)emalloc(sizeof(zend_op_array));
 		*op_array_copy = *op_array;
-		function_add_ref(op_array_copy);
+		function_add_ref((zend_function *) op_array_copy);
 		op_array = op_array_copy;
 	}
 	
