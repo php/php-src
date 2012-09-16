@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #60909 (custom error handler throwing Exception + fatal error
     = no shutdown function). (Dmitry)
 
+- OpenSSL:
+  . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 
+    SHA224, SHA256, SHA384, SHA512). (Mark Jones)
+
 - SOAP
   . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
     (Dmitry)
