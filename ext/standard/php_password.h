@@ -12,26 +12,33 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Bakken <ssb@php.net>                                   |
-   |          Zeev Suraski <zeev@zend.com>                                |
-   |          Rasmus Lerdorf <rasmus@php.net>                             |
+   | Authors: Anthony Ferrara <ircmaxell@php.net>                         |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
-#ifndef PHP_CRYPT_H
-#define PHP_CRYPT_H
+#ifndef PHP_PASSWORD_H
+#define PHP_PASSWORD_H
 
-PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, char **result);
-PHP_FUNCTION(crypt);
-#if HAVE_CRYPT
-PHP_MINIT_FUNCTION(crypt);
-PHP_MSHUTDOWN_FUNCTION(crypt);
-PHP_RINIT_FUNCTION(crypt);
+PHP_FUNCTION(password_hash);
+PHP_FUNCTION(password_verify);
+PHP_FUNCTION(password_needs_rehash);
+PHP_FUNCTION(password_get_info);
+
+PHP_MINIT_FUNCTION(password);
+
+#define PHP_PASSWORD_DEFAULT	PASSWORD_BCRYPT
+
+#define PHP_PASSWORD_BCRYPT_COST 10
+
+typedef enum {
+	PASSWORD_UNKNOWN,
+	PASSWORD_BCRYPT
+} php_password_algos;
+
 #endif
 
-#endif
 
 /*
  * Local variables:
