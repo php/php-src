@@ -99,6 +99,7 @@ static const char *method_strings[] =
   , "NOTIFY"
   , "SUBSCRIBE"
   , "UNSUBSCRIBE"
+  , "NOTIMPLEMENTED"
   };
 
 
@@ -589,7 +590,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           case 'S': parser->method = PHP_HTTP_SUBSCRIBE; break;
           case 'T': parser->method = PHP_HTTP_TRACE; break;
           case 'U': parser->method = PHP_HTTP_UNLOCK; /* or UNSUBSCRIBE */ break;
-          default: goto error;
+          default: parser->method = PHP_HTTP_NOT_IMPLEMENTED; break;
         }
         state = s_req_method;
         break;
@@ -602,7 +603,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           goto error;
 
         matcher = method_strings[parser->method];
-        if (ch == ' ' && matcher[index] == '\0') {
+        if (ch == ' ' && (matcher[index] == '\0' || parser->method == PHP_HTTP_NOT_IMPLEMENTED)) {
           state = s_req_spaces_before_url;
         } else if (ch == matcher[index]) {
           ; /* nada */
@@ -631,7 +632,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
         } else if (index == 4 && parser->method == PHP_HTTP_PROPFIND && ch == 'P') {
           parser->method = PHP_HTTP_PROPPATCH;
         } else {
-          goto error;
+          parser->method = PHP_HTTP_NOT_IMPLEMENTED;
         }
 
         ++index;
