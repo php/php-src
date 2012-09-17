@@ -185,7 +185,7 @@ PHP_FUNCTION(password_get_info)
 	}
 
 	if (hash_len < 0 || (size_t) hash_len < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied Password Hash Too Long To Safely Identify");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied password hash too long to safely identify");
 		RETURN_FALSE;
 	}
 
@@ -229,7 +229,7 @@ PHP_FUNCTION(password_needs_rehash)
 	}
 
 	if (hash_len < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied Password Hash Too Long To Safely Identify");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied password hash too long to safely identify");
 		RETURN_FALSE;
 	}
 
