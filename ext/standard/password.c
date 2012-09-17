@@ -38,7 +38,7 @@
 PHP_MINIT_FUNCTION(password) /* {{{ */
 {
 	REGISTER_LONG_CONSTANT("PASSWORD_DEFAULT", PHP_PASSWORD_DEFAULT, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
 
@@ -46,23 +46,24 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 }
 /* }}} */
 
-static char* php_password_get_algo_name(const php_password_algos algo)
+static char* php_password_get_algo_name(const php_password_algo algo)
 {
 	switch (algo) {
-		case PASSWORD_BCRYPT:
+		case PHP_PASSWORD_BCRYPT:
 			return "bcrypt";
+		case PHP_PASSWORD_UNKNOWN:
 		default:
 			return "unknown";
 	}
 }
 
-static php_password_algos php_password_determine_algo(const char *hash, const size_t len) 
+static php_password_algo php_password_determine_algo(const char *hash, const size_t len) 
 {
 	if (len > 3 && hash[0] == '$' && hash[1] == '2' && hash[2] == 'y' && len == 60) {
-		return PASSWORD_BCRYPT;
+		return PHP_PASSWORD_BCRYPT;
 	}
 
-	return PASSWORD_UNKNOWN;
+	return PHP_PASSWORD_UNKNOWN;
 }
 
 static zend_bool php_password_salt_is_alphabet(const char *str, const size_t len) /* {{{ */
@@ -174,13 +175,13 @@ static int php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {{{ */
 
 PHP_FUNCTION(password_get_info)
 {
-	php_password_algos algo;
+	php_password_algo algo;
 	int hash_len;
-	char *hash, *algoName;
+	char *hash, *algo_name;
 	zval *options;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hash, &hash_len) == FAILURE) {
-		RETURN_NULL();
+		return;
 	}
 
 	if (hash_len < 0 || (size_t) hash_len < 0) {
@@ -192,17 +193,17 @@ PHP_FUNCTION(password_get_info)
 	array_init(options);
 
 	algo = php_password_determine_algo(hash, (size_t) hash_len);
-	algoName = php_password_get_algo_name(algo);
+	algo_name = php_password_get_algo_name(algo);
 	
 	switch (algo) {
-		case PASSWORD_BCRYPT:
+		case PHP_PASSWORD_BCRYPT:
 			{
 				long cost = PHP_PASSWORD_BCRYPT_COST;
 				sscanf(hash, "$2y$%ld$", &cost);
 				add_assoc_long(options, "cost", cost);
 			}
 			break;
-		case PASSWORD_UNKNOWN:
+		case PHP_PASSWORD_UNKNOWN:
 		default:
 			break;
 	}
@@ -210,21 +211,21 @@ PHP_FUNCTION(password_get_info)
 	array_init(return_value);
 	
 	add_assoc_long(return_value, "algo", algo);
-	add_assoc_string(return_value, "algoName", algoName, 1);
+	add_assoc_string(return_value, "algoName", algo_name, 1);
 	add_assoc_zval(return_value, "options", options);	
 }
 
 PHP_FUNCTION(password_needs_rehash)
 {
 	long new_algo = 0;
-	php_password_algos algo;
+	php_password_algo algo;
 	int hash_len;
 	char *hash;
 	HashTable *options = 0;
 	zval **option_buffer;
 	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
-		RETURN_NULL();
+		return;
 	}
 
 	if (hash_len < 0) {
@@ -239,7 +240,7 @@ PHP_FUNCTION(password_needs_rehash)
 	}
 
 	switch (algo) {
-		case PASSWORD_BCRYPT:
+		case PHP_PASSWORD_BCRYPT:
 			{
 				int newCost = PHP_PASSWORD_BCRYPT_COST, cost = 0;
 				
@@ -255,7 +256,7 @@ PHP_FUNCTION(password_needs_rehash)
 				}
 			}
 			break;
-		case PASSWORD_UNKNOWN:
+		case PHP_PASSWORD_UNKNOWN:
 		default:
 			break;
 	}
@@ -309,11 +310,11 @@ PHP_FUNCTION(password_hash)
 	zval **option_buffer;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &password, &password_len, &algo, &options) == FAILURE) {
-		RETURN_NULL();
+		return;
 	}
 
 	switch (algo) {
-		case PASSWORD_BCRYPT:
+		case PHP_PASSWORD_BCRYPT:
 		{
 			long cost = PHP_PASSWORD_BCRYPT_COST;
 	
@@ -334,6 +335,7 @@ PHP_FUNCTION(password_hash)
 			hash_format_len = 7;
 		}
 		break;
+		case PHP_PASSWORD_UNKNOWN:
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown password hashing algorithm: %ld", algo);
 			RETURN_NULL();
