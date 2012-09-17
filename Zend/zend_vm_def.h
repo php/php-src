@@ -1869,13 +1869,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 
 	nested = EX(nested);
 
-	/* For generators the execute_data is stored on the heap, for everything
-	 * else it is stored on the VM stack. */
-	if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
-		efree(execute_data);
-	} else {
-		zend_vm_stack_free(execute_data TSRMLS_CC);
-	}
+	zend_vm_stack_free(execute_data TSRMLS_CC);
 
 	if (nested) {
 		execute_data = EG(current_execute_data);
@@ -5346,7 +5340,7 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 		zend_error_noreturn(E_ERROR, "Base lambda function for closure not found");
 	}
 
-	zend_create_closure(&EX_T(opline->result.var).tmp_var, op_array, EG(scope), EG(This) TSRMLS_CC);
+	zend_create_closure(&EX_T(opline->result.var).tmp_var, (zend_function *) op_array, EG(scope), EG(This) TSRMLS_CC);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
