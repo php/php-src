@@ -242,16 +242,16 @@ PHP_FUNCTION(password_needs_rehash)
 	switch (algo) {
 		case PHP_PASSWORD_BCRYPT:
 			{
-				int newCost = PHP_PASSWORD_BCRYPT_COST, cost = 0;
+				long new_cost = PHP_PASSWORD_BCRYPT_COST, cost = 0;
 				
-				if (options && zend_symtable_find(options, "cost", 5, (void **) &option_buffer) == SUCCESS) {
+				if (options && zend_symtable_find(options, "cost", sizeof("cost"), (void **) &option_buffer) == SUCCESS) {
 					convert_to_long_ex(option_buffer);
-					newCost = Z_LVAL_PP(option_buffer);
+					new_cost = Z_LVAL_PP(option_buffer);
 					zval_ptr_dtor(option_buffer);
 				}
 
-				sscanf(hash, "$2y$%d$", &cost);
-				if (cost != newCost) {
+				sscanf(hash, "$2y$%ld$", &cost);
+				if (cost != new_cost) {
 					RETURN_TRUE;
 				}
 			}
