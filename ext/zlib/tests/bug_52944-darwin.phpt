@@ -3,11 +3,8 @@ Bug #52944 (segfault with zlib filter and corrupted data)
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die("skip not for windows");
-}
-if (PHP_OS == 'Darwin') {
-	die("skip not for Darwin");
+if (PHP_OS != 'Darwin') {
+	die("skip Darwin only");
 }
 --INI--
 allow_url_fopen=1
@@ -22,6 +19,6 @@ var_dump(fread($fp,1));
 fclose($fp);
 echo "Done.\n";
 --EXPECT--
-string(0) ""
-string(0) ""
+string(1) "%"
+string(1) "C"
 Done.
