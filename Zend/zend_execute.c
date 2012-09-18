@@ -752,13 +752,12 @@ static inline void zend_assign_to_object(zval **retval, zval **object_ptr, zval 
 	FREE_OP_IF_VAR(free_value);
 }
 
-static inline int zend_assign_to_string_offset(const temp_variable *T, const zval *value, int value_type TSRMLS_DC)
+static inline int zend_assign_to_string_offset(temp_variable *T, const zval *value, int value_type TSRMLS_DC)
 {
 	if (Z_TYPE_P(T->str_offset.str) == IS_STRING) {
 
 		if (((int)T->str_offset.offset < 0)) {
-			zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
-			return 0;
+		      T->str_offset.offset += Z_STRLEN_P(T->str_offset.str);
 		}
 
 		if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
@@ -1269,6 +1268,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 		case IS_STRING: {
 				zval tmp;
 				zval *ptr;
+				long ldim;
 
 				if (Z_TYPE_P(dim) != IS_LONG) {
 					switch(Z_TYPE_P(dim)) {
@@ -1303,7 +1303,12 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 				INIT_PZVAL(ptr);
 				Z_TYPE_P(ptr) = IS_STRING;
 
-				if (Z_LVAL_P(dim) < 0 || Z_STRLEN_P(container) <= Z_LVAL_P(dim)) {
+				ldim = Z_LVAL_P(dim);
+				if (ldim < 0) {
+				    ldim += Z_STRLEN_P(container);
+				}
+
+				if (ldim < 0 || Z_STRLEN_P(container) <= ldim) {
 					if (type != BP_VAR_IS) {
 						zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
 					}
@@ -1311,7 +1316,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 					Z_STRLEN_P(ptr) = 0;
 				} else {
 					Z_STRVAL_P(ptr) = (char*)emalloc(2);
-					Z_STRVAL_P(ptr)[0] = Z_STRVAL_P(container)[Z_LVAL_P(dim)];
+					Z_STRVAL_P(ptr)[0] = Z_STRVAL_P(container)[ldim];
 					Z_STRVAL_P(ptr)[1] = 0;
 					Z_STRLEN_P(ptr) = 1;
 				}
