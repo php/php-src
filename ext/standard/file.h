@@ -89,6 +89,7 @@ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char en
 #define PHP_FILE_SKIP_EMPTY_LINES 4
 #define PHP_FILE_APPEND 8
 #define PHP_FILE_NO_DEFAULT_CONTEXT 16
+#define PHP_FILE_INDEX_LINES 32
 
 typedef enum _php_meta_tags_token {
 	TOK_EOF = 0,
