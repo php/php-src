@@ -166,6 +166,26 @@ static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	return 1;
 }
 
+/* {{{ dblib_handle_name_quoter */
+static int dblib_handle_name_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen TSRMLS_DC)
+{
+	int i;
+	int j = 0;
+	*quoted = safe_emalloc(2, unquotedlen, 3);
+	(*quoted)[j++] = '[';
+	for (i = 0; i < unquotedlen; i++) {
+		(*quoted)[j++] = unquoted[i];
+		if (unquoted[i] == ']') {
+			(*quoted)[j++] = ']';
+		}
+	}
+	(*quoted)[j++] = ']';
+	(*quoted)[j] = '\0';
+	*quotedlen = j;
+	return 1;
+}
+/* }}} */
+
 static int pdo_dblib_transaction_cmd(const char *cmd, pdo_dbh_t *dbh TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
@@ -256,7 +276,8 @@ static struct pdo_dbh_methods dblib_methods = {
 	NULL, /* check liveness */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
-	NULL  /* in transaction */
+	NULL, /* in_transaction */
+	dblib_handle_name_quoter,
 };
 
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC)

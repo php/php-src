@@ -342,6 +342,26 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 	return 1;
 }
 
+/* {{{ pgsql_handle_name_quoter */
+static int pgsql_handle_name_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen TSRMLS_DC)
+{
+	int i;
+	int j = 0;
+	*quoted = safe_emalloc(2, unquotedlen, 3);
+	(*quoted)[j++] = '"';
+	for (i = 0; i < unquotedlen; i++) {
+		(*quoted)[j++] = unquoted[i];
+		if (unquoted[i] == '"') {
+			(*quoted)[j++] = '"';
+		}
+	}
+	(*quoted)[j++] = '"';
+	(*quoted)[j] = '\0';
+	*quotedlen = j;
+	return 1;
+}
+/* }}} */
+
 static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, unsigned int *len TSRMLS_DC)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -1030,8 +1050,9 @@ static struct pdo_dbh_methods pgsql_methods = {
 	pdo_pgsql_get_attribute,
 	pdo_pgsql_check_liveness,	/* check_liveness */
 	pdo_pgsql_get_driver_methods,  /* get_driver_methods */
-	NULL,
+	NULL, /* persistent_shutdown */
 	pgsql_handle_in_transaction,
+	pgsql_handle_name_quoter,
 };
 
 static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */

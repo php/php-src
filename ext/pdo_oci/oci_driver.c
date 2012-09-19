@@ -403,6 +403,26 @@ static int oci_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedl
 }
 /* }}} */
 
+/* {{{ oci_handle_name_quoter */
+static int oci_handle_name_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen TSRMLS_DC)
+{
+	int i;
+	int j = 0;
+	*quoted = safe_emalloc(2, unquotedlen, 3);
+	(*quoted)[j++] = '"';
+	for (i = 0; i < unquotedlen; i++) {
+		(*quoted)[j++] = unquoted[i];
+		if (unquoted[i] == '"') {
+			(*quoted)[j++] = '"';
+		}
+	}
+	(*quoted)[j++] = '"';
+	(*quoted)[j] = '\0';
+	*quotedlen = j;
+	return 1;
+}
+/* }}} */
+
 static int oci_handle_begin(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 {
 	/* with Oracle, there is nothing special to be done */
@@ -581,7 +601,10 @@ static struct pdo_dbh_methods oci_methods = {
 	pdo_oci_fetch_error_func,
 	oci_handle_get_attribute,
 	pdo_oci_check_liveness,	/* check_liveness */
-	NULL	/* get_driver_methods */
+	NULL, /* get_driver_methods */
+	NULL, /* persistent_shutdown */
+	NULL, /* in_transaction */
+	oci_handle_name_quoter,
 };
 
 static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */

@@ -250,6 +250,9 @@ typedef long (*pdo_dbh_do_func)(pdo_dbh_t *dbh, const char *sql, long sql_len TS
 /* quote a string */
 typedef int (*pdo_dbh_quote_func)(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen, enum pdo_param_type paramtype TSRMLS_DC);
 
+/* quote an identifier */
+typedef int (*pdo_dbh_quote_name_func)(pdo_dbh_t *dbh, const char *unquoted, int unquotedlen, char **quoted, int *quotedlen);
+
 /* transaction related */
 typedef int (*pdo_dbh_txn_func)(pdo_dbh_t *dbh TSRMLS_DC);
 
@@ -311,6 +314,7 @@ struct pdo_dbh_methods {
 	pdo_dbh_get_driver_methods_func get_driver_methods;
 	pdo_dbh_request_shutdown	persistent_shutdown;
 	pdo_dbh_txn_func		in_transaction;
+	pdo_dbh_quote_name_func		name_quoter;
 };
 
 /* }}} */
