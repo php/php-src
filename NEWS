@@ -247,7 +247,9 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
-    
+  . Fixed bug #63000 (MCAST_JOIN_GROUP on OSX is broken, merge of PR 185 by
+    Igor Wiedler). (Lars)
+
 - SPL:
   . Fixed bug #62433 (Inconsistent behavior of RecursiveDirectoryIterator to
     dot files). (Laruence)
