@@ -1037,8 +1037,8 @@ static struct pdo_dbh_methods pgsql_methods = {
 static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC) /* {{{ */
 {
 	pdo_pgsql_db_handle *H;
-	int ret = 0;
-	char *conn_str, *p, *e;
+	int ret = 0, password_len = 0;
+	char *conn_str, *p, *e, *tmp_pass = NULL;
 	long connect_timeout = 30;
 
 	H = pecalloc(1, sizeof(pdo_pgsql_db_handle), dbh->is_persistent);
@@ -1056,22 +1056,43 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		*p = ' ';
 	}
 
+	/* If the password is defined, we need to account for special chars */
+	if (dbh->password) {
+		password_len = strlen(dbh->password);
+		/* If the password isn't already quoted, let's quote it */
+		if (dbh->password[0] != '\'' && dbh->password[password_len - 1] != '\'') {
+			tmp_pass = emalloc(sizeof(dbh->password) + 3);
+			snprintf(tmp_pass, sizeof(dbh->password) + 3, "'%s'", dbh->password);
+		} else {
+			/* Our default is to just use what password has been provided -
+			 * assuming it is already surrounded by quotes. This keeps BC for
+			 * users who already use workarounds
+			 */
+			tmp_pass = estrdup(dbh->password);
+		}
+	}
+
 	if (driver_options) {
 		connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30 TSRMLS_CC);
 	}
 
 	/* support both full connection string & connection string + login and/or password */
 	if (dbh->username && dbh->password) {
-		spprintf(&conn_str, 0, "%s user=%s password=%s connect_timeout=%ld", dbh->data_source, dbh->username, dbh->password, connect_timeout);
+		spprintf(&conn_str, 0, "%s user=%s password=%s connect_timeout=%ld", dbh->data_source, dbh->username, tmp_pass, connect_timeout);
 	} else if (dbh->username) {
 		spprintf(&conn_str, 0, "%s user=%s connect_timeout=%ld", dbh->data_source, dbh->username, connect_timeout);
 	} else if (dbh->password) {
-		spprintf(&conn_str, 0, "%s password=%s connect_timeout=%ld", dbh->data_source, dbh->password, connect_timeout);
+		spprintf(&conn_str, 0, "%s password=%s connect_timeout=%ld", dbh->data_source, tmp_pass, connect_timeout);
 	} else {
 		spprintf(&conn_str, 0, "%s connect_timeout=%ld", (char *) dbh->data_source, connect_timeout);
 	}
 
 	H->server = PQconnectdb(conn_str);
+
+	/* Free the tmp password created above */
+	if (dbh->password) {
+		efree(tmp_pass);
+	}
 
 	efree(conn_str);
 
