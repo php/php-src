@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed bug #60909 (custom error handler throwing Exception + fatal error
     = no shutdown function). (Dmitry)
 
+- DOM:
+  . Fixed bug #63015 (Incorrect arginfo for DOMErrorHandler). (Rob)
+
 - OpenSSL:
   . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 
     SHA224, SHA256, SHA384, SHA512). (Mark Jones)
