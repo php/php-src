@@ -2,9 +2,18 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.8
 
+- CLI server:
+  . Changed response to unknown HTTP method to 501 according to RFC.
+    (Niklas Lindgren).
+  . Support HTTP PATCH method. Patch by Niklas Lindgren, GitHub PR #190.
+    (Lars)
+
 - Core:
   . Added optional second argument for assert() to specify custom message. Patch
     by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
+  . Support building PHP with the native client toolchain. (Stuart Langley)
+  . Fixed bug #63093 (Segfault while load extension failed in zts-build).
+    (Laruence)
   . Fixed bug #62976 (Notice: could not be converted to int when comparing
     some builtin classes). (Laruence)
   . Fixed bug #62955 (Only one directive is loaded from "Per Directory Values" 
@@ -14,6 +23,13 @@ PHP                                                                        NEWS
     situation). (Dmitry)
   . Fixed bug #60909 (custom error handler throwing Exception + fatal error
     = no shutdown function). (Dmitry)
+
+- DOM:
+  . Fixed bug #63015 (Incorrect arginfo for DOMErrorHandler). (Rob)
+
+- OpenSSL:
+  . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 
+    SHA224, SHA256, SHA384, SHA512). (Mark Jones)
 
 - SOAP
   . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
@@ -57,10 +73,6 @@ PHP                                                                        NEWS
   . Fixed bug #62912 (CURLINFO_PRIMARY_* AND CURLINFO_LOCAL_* not exposed).
 	(Pierrick)
   . Fixed bug #62839 (curl_copy_handle segfault with CURLOPT_FILE). (Pierrick)
-
-- DateTime:
-  . Fixed bug #62852 (Unserialize invalid DateTime causes crash).
-    (reeze.xia@gmail.com)
 
 - Intl:
   . Fixed Spoofchecker not being registered on ICU 49.1. (Gustavo)
@@ -238,7 +250,9 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
-    
+  . Fixed bug #63000 (MCAST_JOIN_GROUP on OSX is broken, merge of PR 185 by
+    Igor Wiedler). (Lars)
+
 - SPL:
   . Fixed bug #62433 (Inconsistent behavior of RecursiveDirectoryIterator to
     dot files). (Laruence)
