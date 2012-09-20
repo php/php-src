@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     some builtin classes). (Laruence)
   . Fixed bug #61767 (Shutdown functions not called in certain error
     situation). (Dmitry)
+  . Fixed bug #61442 (exception threw in __autoload can not be catched).
+    (Laruence)
   . Fixed bug #60909 (custom error handler throwing Exception + fatal error
     = no shutdown function). (Dmitry)
 

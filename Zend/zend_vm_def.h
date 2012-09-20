@@ -1990,6 +1990,9 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 	if (OP1_TYPE == IS_CONST) {
 		/* no function found. try a static method in class */
 		ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			ZEND_VM_CONTINUE();
+		}
 		if (!ce) {
 			zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL(opline->op1.u.constant));
 		}
@@ -3043,6 +3046,9 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 		if (OP1_TYPE == IS_CONST) {
 
 			ce = zend_fetch_class(Z_STRVAL(opline->op1.u.constant), Z_STRLEN(opline->op1.u.constant), opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				ZEND_VM_CONTINUE();
+			}
 			if (!ce) {
 				zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL(opline->op2.u.constant));
 			}
