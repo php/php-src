@@ -132,6 +132,21 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 			efree(generator->backed_up_stack);
 		}
 
+		if (generator->backed_up_arg_types_stack) {
+			/* The arg types stack contains three elements per call: fbc, object
+			 * and called_scope. Here we traverse the stack from top to bottom
+			 * and dtor the object. */
+			int i = generator->backed_up_arg_types_stack_count / 3;
+			while (i--) {
+				zval *object = (zval *) generator->backed_up_arg_types_stack[3*i + 1];
+				if (object) {
+					zval_ptr_dtor(&object);
+				}
+			}
+
+			efree(generator->backed_up_arg_types_stack);
+		} 
+
 		/* We have added an additional stack frame in prev_execute_data, so we
 		 * have to free it. It also contains the arguments passed to the
 		 * generator (for func_get_args) so those have to be freed too. */
@@ -284,6 +299,25 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 
 				for (i = 0; i < zval_num; i++) {
 					Z_ADDREF_P(zvals[i]);
+				}
+			}
+		}
+
+		if (orig->backed_up_arg_types_stack) {
+			size_t stack_size = orig->backed_up_arg_types_stack_count * sizeof(void *);
+
+			clone->backed_up_arg_types_stack = emalloc(stack_size);
+			memcpy(clone->backed_up_arg_types_stack, orig->backed_up_arg_types_stack, stack_size);
+
+			/* We have to add refs to the objects in the arg types stack (the
+			 * object is always the second element of a three-pack. */
+			{
+				int i, stack_frames = clone->backed_up_arg_types_stack_count / 3;
+				for (i = 0; i < stack_frames; i++) {
+					zval *object = (zval *) clone->backed_up_arg_types_stack[3*i + 1];
+					if (object) {
+						Z_ADDREF_P(object);
+					}
 				}
 			}
 		}
@@ -449,6 +483,7 @@ void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 		zval *original_This = EG(This);
 		zend_class_entry *original_scope = EG(scope);
 		zend_class_entry *original_called_scope = EG(called_scope);
+		int original_arg_types_stack_count = EG(arg_types_stack).top;
 
 		/* Remember the current stack position so we can back up pushed args */
 		generator->original_stack_top = zend_vm_stack_top(TSRMLS_C);
@@ -459,6 +494,16 @@ void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 			memcpy(stack, generator->backed_up_stack, generator->backed_up_stack_size);
 			efree(generator->backed_up_stack);
 			generator->backed_up_stack = NULL;
+		}
+
+		if (generator->backed_up_arg_types_stack) {
+			zend_ptr_stack_push_from_memory(
+				&EG(arg_types_stack),
+				generator->backed_up_arg_types_stack_count,
+				generator->backed_up_arg_types_stack
+			);
+			efree(generator->backed_up_arg_types_stack);
+			generator->backed_up_arg_types_stack = NULL;
 		}
 
 		/* We (mis)use the return_value_ptr_ptr to provide the generator object
@@ -504,6 +549,18 @@ void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 			generator->backed_up_stack = emalloc(generator->backed_up_stack_size);
 			memcpy(generator->backed_up_stack, generator->original_stack_top, generator->backed_up_stack_size);
 			zend_vm_stack_free(generator->original_stack_top TSRMLS_CC);
+		}
+
+		if (original_arg_types_stack_count != EG(arg_types_stack).top) {
+			generator->backed_up_arg_types_stack_count =
+				EG(arg_types_stack).top - original_arg_types_stack_count;
+
+			generator->backed_up_arg_types_stack = emalloc(generator->backed_up_arg_types_stack_count * sizeof(void *));
+			zend_ptr_stack_pop_into_memory(
+				&EG(arg_types_stack),
+				generator->backed_up_arg_types_stack_count,
+				generator->backed_up_arg_types_stack
+			);
 		}
 
 		/* If an exception was thrown in the generator we have to internally

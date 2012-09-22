@@ -36,6 +36,11 @@ typedef struct _zend_generator {
 	void *backed_up_stack;
 	size_t backed_up_stack_size;
 
+	/* For method calls PHP also pushes various type information on a second
+	 * stack, which also needs to be backed up. */
+	void **backed_up_arg_types_stack;
+	int backed_up_arg_types_stack_count;
+
 	/* The original stack top before resuming the generator. This is required
 	 * for proper cleanup during exception handling. */
 	void **original_stack_top;
