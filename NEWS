@@ -24,6 +24,8 @@ PHP                                                                        NEWS
     situation). (Dmitry)
   . Fixed bug #60909 (custom error handler throwing Exception + fatal error
     = no shutdown function). (Dmitry)
+  . Fixed bug #60723 (error_log error time has changed to UTC ignoring default
+    timezo). (Laruence)
 
 - DOM:
   . Fixed bug #63015 (Incorrect arginfo for DOMErrorHandler). (Rob)
