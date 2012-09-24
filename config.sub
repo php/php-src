@@ -739,6 +739,10 @@ case $basic_machine in
 		basic_machine=i370-ibm
 		os=-mvs
 		;;
+        nacl)
+                basic_machine=1e32-unknown
+                os=-nacl
+                ;;
 	ncr3000)
 		basic_machine=i486-ncr
 		os=-sysv4
@@ -1388,6 +1392,8 @@ case $os in
 	-zvmoe)
 		os=-zvmoe
 		;;
+        -nacl*)
+                ;;
 	-none)
 		;;
 	*)
