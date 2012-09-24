@@ -13,42 +13,32 @@ require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+$errors = array();
 
 $query = $db->prepare('SELECT :foo IS FALSE as val_is_false');
 $query->bindValue(':foo', true, PDO::PARAM_BOOL);
 $query->execute();
-print_r($query->errorInfo());
+$errors[] = $query->errorInfo();
 
 $query->bindValue(':foo', 0, PDO::PARAM_BOOL);
 $query->execute();
-print_r($query->errorInfo());
+$errors[] = $query->errorInfo();
 
 $query->bindValue(':foo', false, PDO::PARAM_BOOL);
 $query->execute();
-print_r($query->errorInfo());
+$errors[] = $query->errorInfo();
+
+$expect = 'No errors found';
+
+foreach ($errors as $error)
+{
+  if (strpos('Invalid text representation', $error[2]) !== false)
+  {
+    $expect = 'Invalid boolean found';
+  }
+}
+echo $expect;
 ?>
 --EXPECTF--
-array(3) {
-  [0]=>
-  string(5) "00000"
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-}
-array(3) {
-  [0]=>
-  string(5) "00000"
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-}
-array(3) {
-  [0]=>
-  string(5) "00000"
-  [1]=>
-  NULL
-  [2]=>
-  NULL
-}
+
+No errors found
