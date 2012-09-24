@@ -1,5 +1,5 @@
 --TEST--
-Bug #55371 (get_magic_quotes_gpc() and get_magic_quotes_runtime() throw deprecated warning)
+Bug #60723  (error_log error time has changed to UTC ignoring default timezo)
 --INI--
 date.timezone=ASIA/Chongqing
 log_errors=On
