@@ -15,18 +15,22 @@ $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 $errors = array();
 
+$value = true;
 $query = $db->prepare('SELECT :foo IS FALSE as val_is_false');
-$query->bindValue(':foo', true, PDO::PARAM_BOOL);
+$query->bindValue(':foo', $value, PDO::PARAM_BOOL);
 $query->execute();
 $errors[] = $query->errorInfo();
+var_dump($value);
 
 $query->bindValue(':foo', 0, PDO::PARAM_BOOL);
 $query->execute();
 $errors[] = $query->errorInfo();
 
-$query->bindValue(':foo', false, PDO::PARAM_BOOL);
+$value = false;
+$query->bindParam(':foo', $value, PDO::PARAM_BOOL);
 $query->execute();
 $errors[] = $query->errorInfo();
+var_dump($value);
 
 $expect = 'No errors found';
 
@@ -40,5 +44,6 @@ foreach ($errors as $error)
 echo $expect;
 ?>
 --EXPECTF--
-
+bool(true)
+bool(false)
 No errors found
