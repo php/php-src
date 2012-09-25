@@ -456,11 +456,7 @@ mysqlnd_switch_to_ssl_if_needed(
 	if (options->charset_name && (charset = mysqlnd_find_charset_name(options->charset_name))) {
 		auth_packet->charset_no	= charset->nr;
 	} else {
-#if MYSQLND_UNICODE
-		auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
-#else
 		auth_packet->charset_no	= greet_packet->charset_no;
-#endif
 	}
 
 #ifdef MYSQLND_SSL_SUPPORTED
@@ -1030,13 +1026,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 		mysqlnd_local_infile_default(conn);
 
-#if MYSQLND_UNICODE
-		{
-			unsigned int as_unicode = 1;
-			conn->m->set_client_option(conn, MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE, (char *)&as_unicode TSRMLS_CC);
-			DBG_INF("unicode set");
-		}
-#endif
 		if (FAIL == conn->m->execute_init_commands(conn TSRMLS_CC)) {
 			goto err;
 		}
@@ -2283,11 +2272,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
 			ret = conn->net->data->m.set_client_option(conn->net, option, value TSRMLS_CC);
 			break;
-#if MYSQLND_UNICODE
-		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:
-			conn->options->numeric_and_datetime_as_unicode = *(unsigned int*) value;
-			break;
-#endif
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 		case MYSQLND_OPT_INT_AND_FLOAT_NATIVE:
 			conn->options->int_and_float_native = *(unsigned int*) value;

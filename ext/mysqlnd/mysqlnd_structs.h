@@ -183,7 +183,6 @@ typedef struct st_mysqlnd_options
 	/* maximum allowed packet size for communication */
 	ulong		max_allowed_packet;
 
-	zend_bool	numeric_and_datetime_as_unicode;
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	zend_bool	int_and_float_native;
 #endif
@@ -625,9 +624,8 @@ typedef void				(*func_mysqlnd_res__unbuffered_free_last_data)(MYSQLND_RES *resu
 
 	/* for decoding - binary or text protocol */
 typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-									unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-									zend_bool as_unicode, zend_bool as_int_or_float,
-									MYSQLND_STATS * stats TSRMLS_DC);
+									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC);
 
 typedef MYSQLND_RES_METADATA * (*func_mysqlnd_res__result_meta_init)(unsigned int field_count, zend_bool persistent TSRMLS_DC);
 
@@ -932,10 +930,6 @@ struct mysqlnd_field_hash_key
 {
 	zend_bool		is_numeric;
 	unsigned long	key;
-#if MYSQLND_UNICODE
-	zstr			ustr;
-	unsigned int	ulen;
-#endif
 };
 
 

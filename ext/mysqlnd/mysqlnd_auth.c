@@ -88,11 +88,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 		if (options->charset_name && (charset = mysqlnd_find_charset_name(options->charset_name))) {
 			auth_packet->charset_no	= charset->nr;
 		} else {
-#if MYSQLND_UNICODE
-			auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
-#else
 			auth_packet->charset_no	= server_charset_no;
-#endif
 		}
 
 		auth_packet->send_auth_data = TRUE;
