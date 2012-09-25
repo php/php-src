@@ -26,8 +26,10 @@ $query->bindValue(':foo', 0, PDO::PARAM_BOOL);
 $query->execute();
 $errors[] = $query->errorInfo();
 
-$value = false;
+// Verify bindParam maintains reference and only passes when execute is called
+$value = true;
 $query->bindParam(':foo', $value, PDO::PARAM_BOOL);
+$value = false;
 $query->execute();
 $errors[] = $query->errorInfo();
 var_dump($value);
