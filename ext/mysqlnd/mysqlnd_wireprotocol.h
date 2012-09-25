@@ -286,6 +286,18 @@ typedef struct st_mysqlnd_packet_chg_user_resp {
 } MYSQLND_PACKET_CHG_USER_RESPONSE;
 
 
+/* Command packet */
+typedef struct st_mysqlnd_packet_sha256_pk_request {
+	MYSQLND_PACKET_HEADER			header;
+} MYSQLND_PACKET_SHA256_PK_REQUEST;
+
+typedef struct  st_mysqlnd_packet_sha256_pk_request_response {
+	MYSQLND_PACKET_HEADER	header;
+	zend_uchar 				*public_key;
+	size_t					public_key_len;
+} MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE;
+
+
 PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass, size_t pass_len);
 
 unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);

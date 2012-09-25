@@ -207,6 +207,13 @@ typedef struct st_mysqlnd_net_options
 	char		*ssl_passphrase;
 	zend_bool	ssl_verify_peer;
 	uint64_t	flags;
+
+	char *		sha256_server_public_key;
+
+	char *		unused1;
+	char *		unused2;
+	char *		unused3;
+	char *		unused4;
 } MYSQLND_NET_OPTIONS;
 
 
@@ -341,6 +348,8 @@ struct st_mysqlnd_packet_stats;
 struct st_mysqlnd_packet_prepare_response;
 struct st_mysqlnd_packet_chg_user_resp;
 struct st_mysqlnd_packet_auth_pam;
+struct st_mysqlnd_packet_sha256_pk_request;
+struct st_mysqlnd_packet_sha256_pk_request_response;
 
 typedef struct st_mysqlnd_packet_greet *		(*func_mysqlnd_protocol__get_greet_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 typedef struct st_mysqlnd_packet_auth *			(*func_mysqlnd_protocol__get_auth_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
@@ -355,6 +364,8 @@ typedef struct st_mysqlnd_packet_row *			(*func_mysqlnd_protocol__get_row_packet
 typedef struct st_mysqlnd_packet_stats *		(*func_mysqlnd_protocol__get_stats_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 typedef struct st_mysqlnd_packet_prepare_response *(*func_mysqlnd_protocol__get_prepare_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 typedef struct st_mysqlnd_packet_chg_user_resp*(*func_mysqlnd_protocol__get_change_user_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+typedef struct st_mysqlnd_packet_sha256_pk_request *(*func_mysqlnd_protocol__get_sha256_pk_request_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+typedef struct st_mysqlnd_packet_sha256_pk_request_response *(*func_mysqlnd_protocol__get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 
 struct st_mysqlnd_protocol_methods
 {
@@ -371,12 +382,12 @@ struct st_mysqlnd_protocol_methods
 	func_mysqlnd_protocol__get_stats_packet get_stats_packet;
 	func_mysqlnd_protocol__get_prepare_response_packet get_prepare_response_packet;
 	func_mysqlnd_protocol__get_change_user_response_packet get_change_user_response_packet;
+	func_mysqlnd_protocol__get_sha256_pk_request_packet get_sha256_pk_request_packet;
+	func_mysqlnd_protocol__get_sha256_pk_request_response_packet get_sha256_pk_request_response_packet;
 
 	void * unused1;
 	void * unused2;
 	void * unused3;
-	void * unused4;
-	void * unused5;
 };
 
 
@@ -1098,7 +1109,8 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 														size_t * auth_data_len,
 														MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 														const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-														const MYSQLND_OPTIONS * const options, unsigned long mysql_flags
+														const MYSQLND_OPTIONS * const options, 
+														const MYSQLND_NET_OPTIONS * const net_options, unsigned long mysql_flags
 														TSRMLS_DC);
 
 struct st_mysqlnd_authentication_plugin

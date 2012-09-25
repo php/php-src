@@ -360,7 +360,9 @@ mysqlnd_native_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 								  size_t * auth_data_len,
 								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-								  const MYSQLND_OPTIONS * const options, unsigned long mysql_flags
+								  const MYSQLND_OPTIONS * const options,
+								  const MYSQLND_NET_OPTIONS * const net_options,
+								  unsigned long mysql_flags
 								  TSRMLS_DC)
 {
 	zend_uchar * ret = NULL;
@@ -418,7 +420,9 @@ mysqlnd_pam_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
 							   size_t * auth_data_len,
 							   MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 							   const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-							   const MYSQLND_OPTIONS * const options, unsigned long mysql_flags
+							   const MYSQLND_OPTIONS * const options,
+							   const MYSQLND_NET_OPTIONS * const net_options,
+							   unsigned long mysql_flags
 							   TSRMLS_DC)
 {
 	zend_uchar * ret = NULL;
@@ -442,7 +446,7 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_pam_authentication_plugin
 		MYSQLND_VERSION_ID,
 		MYSQLND_VERSION,
 		"PHP License 3.01",
-		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
+		"Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>, Georg Richter <georg@php.net>",
 		{
 			NULL, /* no statistics , will be filled later if there are some */
 			NULL, /* no statistics */
@@ -457,12 +461,190 @@ static struct st_mysqlnd_authentication_plugin mysqlnd_pam_authentication_plugin
 };
 
 
+/******************************************* SHA256 Password ***********************************/
+#ifdef MYSQLND_HAVE_SSL
+static void
+mysqlnd_xor_string(char * dst, const size_t dst_len, const char * xor_str, const size_t xor_str_len)
+{
+	unsigned int i;
+	for (i = 0; i <= dst_len; ++i) {
+		dst[i] ^= xor_str[i % xor_str_len];
+	}
+}
+
+
+#include <openssl/rsa.h>
+#include <openssl/pem.h>
+#include <openssl/err.h>
+
+
+/* {{{ mysqlnd_sha256_get_rsa_key */
+static RSA *
+mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
+						   const MYSQLND_OPTIONS * const options,
+						   const MYSQLND_NET_OPTIONS * const net_options
+						   TSRMLS_DC)
+{
+	RSA * ret = NULL;
+	int len;
+	const char * fname = (net_options->sha256_server_public_key && net_options->sha256_server_public_key[0] != '\0')? 
+								net_options->sha256_server_public_key:
+								MYSQLND_G(sha256_server_public_key);
+	php_stream * stream;
+	DBG_ENTER("mysqlnd_sha256_get_rsa_key");
+
+	if (!fname || fname[0] == '\0') {
+		MYSQLND_PACKET_SHA256_PK_REQUEST * pk_req_packet = NULL;
+		MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE * pk_resp_packet = NULL;
+
+		do {
+			DBG_INF("requesting the public key from the server");
+			pk_req_packet = conn->protocol->m.get_sha256_pk_request_packet(conn->protocol, FALSE TSRMLS_CC);
+			if (!pk_req_packet) {
+				SET_OOM_ERROR(*conn->error_info);
+				break;
+			}
+			pk_resp_packet = conn->protocol->m.get_sha256_pk_request_response_packet(conn->protocol, FALSE TSRMLS_CC);
+			if (!pk_resp_packet) {
+				SET_OOM_ERROR(*conn->error_info);
+				PACKET_FREE(pk_req_packet);
+				break;
+			}
+
+			if (! PACKET_WRITE(pk_req_packet, conn)) {
+				DBG_ERR_FMT("Error while sending public key request packet");
+				php_error(E_WARNING, "Error while sending public key request packet. PID=%d", getpid());
+				CONN_SET_STATE(conn, CONN_QUIT_SENT);
+				break;
+			}
+			if (FAIL == PACKET_READ(pk_resp_packet, conn) || NULL == pk_resp_packet->public_key) {
+				DBG_ERR_FMT("Error while receiving public key");
+				php_error(E_WARNING, "Error while receiving public key. PID=%d", getpid());
+				CONN_SET_STATE(conn, CONN_QUIT_SENT);
+				break;
+			}
+			DBG_INF_FMT("Public key(%d):\n%s", pk_resp_packet->public_key_len, pk_resp_packet->public_key);
+			/* now extract the public key */
+			{
+				BIO * bio = BIO_new_mem_buf(pk_resp_packet->public_key, pk_resp_packet->public_key_len);
+				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
+				BIO_free(bio);
+			}
+		} while (0);
+		PACKET_FREE(pk_req_packet);
+		PACKET_FREE(pk_resp_packet);
+
+		DBG_INF_FMT("ret=%p", ret);
+		DBG_RETURN(ret);
+	
+		SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE,
+			"sha256_server_public_key is not set for the connection or as mysqlnd.sha256_server_public_key");
+		DBG_ERR("server_public_key is not set");
+		DBG_RETURN(NULL);
+	} else {
+		char * key_str = NULL;
+		stream = php_stream_open_wrapper((char *) fname, "rb", REPORT_ERRORS, NULL);
+
+		if (stream) {
+			if ((len = php_stream_copy_to_mem(stream, &key_str, PHP_STREAM_COPY_ALL, 0)) >= 0 ) {
+				BIO * bio = BIO_new_mem_buf(key_str, len);
+				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
+				BIO_free(bio);
+			}
+			if (key_str) {
+				DBG_INF_FMT("Public key:%*.s", len, key_str);
+				efree(key_str);
+			}
+		}
+		php_stream_free(stream, PHP_STREAM_FREE_CLOSE);
+	}
+	DBG_RETURN(ret)
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_sha256_auth_get_auth_data */
+static zend_uchar *
+mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self,
+								  size_t * auth_data_len,
+								  MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
+								  const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+								  const MYSQLND_OPTIONS * const options,
+								  const MYSQLND_NET_OPTIONS * const net_options,
+								  unsigned long mysql_flags
+								  TSRMLS_DC)
+{
+	RSA * server_public_key;
+	zend_uchar * ret = NULL;
+	DBG_ENTER("mysqlnd_sha256_auth_get_auth_data");
+	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
+
+	*auth_data_len = 0;
+
+	server_public_key = mysqlnd_sha256_get_rsa_key(conn, options, net_options TSRMLS_CC);
+
+	if (server_public_key) {
+		int server_public_key_len;
+		char xor_str[passwd_len + 1];
+		memcpy(xor_str, passwd, passwd_len);
+		xor_str[passwd_len] = '\0';
+		mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
+
+		server_public_key_len = RSA_size(server_public_key);
+		/*
+		  Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
+		  RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
+		  http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
+		*/
+		if ((size_t) server_public_key_len - 41 <= passwd_len) {
+			/* password message is to long */
+			SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
+			DBG_ERR("password is too long");
+			DBG_RETURN(NULL);
+		}
+
+		*auth_data_len = server_public_key_len;
+		ret = malloc(*auth_data_len);
+		RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, ret, server_public_key, RSA_PKCS1_OAEP_PADDING);
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+static struct st_mysqlnd_authentication_plugin mysqlnd_sha256_authentication_plugin =
+{
+	{
+		MYSQLND_PLUGIN_API_VERSION,
+		"auth_plugin_sha256_password",
+		MYSQLND_VERSION_ID,
+		MYSQLND_VERSION,
+		"PHP License 3.01",
+		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>",
+		{
+			NULL, /* no statistics , will be filled later if there are some */
+			NULL, /* no statistics */
+		},
+		{
+			NULL /* plugin shutdown */
+		}
+	},
+	{/* methods */
+		mysqlnd_sha256_auth_get_auth_data
+	}
+};
+#endif
+
 /* {{{ mysqlnd_register_builtin_authentication_plugins */
 void
 mysqlnd_register_builtin_authentication_plugins(TSRMLS_D)
 {
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_native_auth_plugin TSRMLS_CC);
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_pam_authentication_plugin TSRMLS_CC);
+#ifdef MYSQLND_HAVE_SSL
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_sha256_authentication_plugin TSRMLS_CC);
+#endif
 }
 /* }}} */
 

@@ -581,12 +581,14 @@ mysqlnd_run_authentication(
 			}
 			memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
 
-			DBG_INF_FMT("salt=[%*.s]", plugin_data_len - 1, plugin_data);
+			DBG_INF_FMT("salt(%d)=[%.*s]", plugin_data_len, plugin_data_len, plugin_data);
 			/* The data should be allocated with malloc() */
 			scrambled_data =
 				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
-												   plugin_data, plugin_data_len, options, mysql_flags TSRMLS_CC);
-
+												   plugin_data, plugin_data_len, options, &conn->net->data->options, mysql_flags TSRMLS_CC);
+			if (!scrambled_data || conn->error_info->error_no) {
+				goto end;			
+			}
 			if (FALSE == is_change_user) {
 				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, options, mysql_flags,
 											charset_no,
@@ -1334,13 +1336,12 @@ _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long s
 		DBG_RETURN(FAIL);
 	}
 
-	*dont_poll = mysqlnd_stream_array_check_for_readiness(r_array TSRMLS_CC);
-
 	FD_ZERO(&rfds);
 	FD_ZERO(&wfds);
 	FD_ZERO(&efds);
 
 	if (r_array != NULL) {
+		*dont_poll = mysqlnd_stream_array_check_for_readiness(r_array TSRMLS_CC);
 		set_count = mysqlnd_stream_array_to_fd_set(r_array, &rfds, &max_fd TSRMLS_CC);
 		if (set_count > max_set_count) {
 			max_set_count = set_count;

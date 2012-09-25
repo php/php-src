@@ -170,8 +170,14 @@ PHP_MINFO_FUNCTION(mysqlnd)
 #else
 								"not supported");
 #endif
-	php_info_print_table_row(2, "SSL",
+	php_info_print_table_row(2, "core SSL",
 #ifdef MYSQLND_SSL_SUPPORTED
+								"supported");
+#else
+								"not supported");
+#endif
+	php_info_print_table_row(2, "extended SSL",
+#ifdef MYSQLND_HAVE_SSL
 								"supported");
 #else
 								"not supported");
@@ -234,6 +240,7 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 	mysqlnd_globals->debug_malloc_fail_threshold = -1;
 	mysqlnd_globals->debug_calloc_fail_threshold = -1;
 	mysqlnd_globals->debug_realloc_fail_threshold = -1;
+	mysqlnd_globals->sha256_server_public_key = NULL;
 }
 /* }}} */
 
@@ -261,6 +268,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqlnd.net_read_timeout",	"31536000",	PHP_INI_SYSTEM, OnUpdateLong,	net_read_timeout, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.log_mask",				"0", 	PHP_INI_ALL,	OnUpdateLong,	log_mask, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.mempool_default_size","16000",   PHP_INI_ALL,	OnUpdateLong,	mempool_default_size,	zend_mysqlnd_globals,		mysqlnd_globals)
+	STD_PHP_INI_ENTRY("mysqlnd.sha256_server_public_key",NULL, 	PHP_INI_SYSTEM, OnUpdateString,	sha256_server_public_key, zend_mysqlnd_globals, mysqlnd_globals)
 
 #if PHP_DEBUG
 	STD_PHP_INI_ENTRY("mysqlnd.debug_emalloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_emalloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)

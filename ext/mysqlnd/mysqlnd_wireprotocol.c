@@ -623,7 +623,7 @@ php_mysqlnd_auth_response_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_D
 				memcpy(packet->new_auth_protocol_data, p, packet->new_auth_protocol_data_len);
 			}
 			DBG_INF_FMT("The server requested switching auth plugin to : %s", packet->new_auth_protocol);
-			DBG_INF_FMT("Server salt : [%*s]", packet->new_auth_protocol_data_len, packet->new_auth_protocol_data);
+			DBG_INF_FMT("Server salt : [%d][%.*s]", packet->new_auth_protocol_data_len, packet->new_auth_protocol_data_len, packet->new_auth_protocol_data);
 		}
 	} else {
 		/* Everything was fine! */
@@ -2078,6 +2078,89 @@ php_mysqlnd_chg_user_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_
 /* }}} */
 
 
+/* {{{ php_mysqlnd_sha256_pk_request_write */
+static
+size_t php_mysqlnd_sha256_pk_request_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+{
+	zend_uchar buffer[MYSQLND_HEADER_SIZE + 1];
+	size_t sent;
+
+	DBG_ENTER("php_mysqlnd_sha256_pk_request_write");
+
+	int1store(buffer + MYSQLND_HEADER_SIZE, '\1');
+	sent = conn->net->data->m.send_ex(conn->net, buffer, 1, conn->stats, conn->error_info TSRMLS_CC);
+
+	DBG_RETURN(sent);
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_sha256_pk_request_free_mem */
+static
+void php_mysqlnd_sha256_pk_request_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+{
+	if (!stack_allocation) {
+		MYSQLND_PACKET_SHA256_PK_REQUEST * p = (MYSQLND_PACKET_SHA256_PK_REQUEST *) _packet;
+		mnd_pefree(p, p->header.persistent);
+	}
+}
+/* }}} */
+
+
+#define SHA256_PK_REQUEST_RESP_BUFFER_SIZE 2048
+
+/* {{{ php_mysqlnd_sha256_pk_request_response_read */
+static enum_func_status
+php_mysqlnd_sha256_pk_request_response_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
+{
+	zend_uchar buf[SHA256_PK_REQUEST_RESP_BUFFER_SIZE];
+	zend_uchar *p = buf;
+	zend_uchar *begin = buf;
+	MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE * packet= (MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE *) _packet;
+
+	DBG_ENTER("php_mysqlnd_sha256_pk_request_response_read");
+
+	/* leave space for terminating safety \0 */
+	PACKET_READ_HEADER_AND_BODY(packet, conn, buf, sizeof(buf), "SHA256_PK_REQUEST_RESPONSE", PROT_SHA256_PK_REQUEST_RESPONSE_PACKET);
+	BAIL_IF_NO_MORE_DATA;
+
+	p++;
+	BAIL_IF_NO_MORE_DATA;
+
+	packet->public_key_len = packet->header.size - (p - buf);
+	packet->public_key = mnd_emalloc(packet->public_key_len + 1);
+	memcpy(packet->public_key, p, packet->public_key_len);
+	packet->public_key[packet->public_key_len] = '\0';
+
+	DBG_RETURN(PASS);
+
+premature_end:
+	DBG_ERR_FMT("OK packet %d bytes shorter than expected", p - begin - packet->header.size);
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, "SHA256_PK_REQUEST_RESPONSE packet "MYSQLND_SZ_T_SPEC" bytes shorter than expected",
+					 p - begin - packet->header.size);
+	DBG_RETURN(FAIL);
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_sha256_pk_request_response_free_mem */
+static void
+php_mysqlnd_sha256_pk_request_response_free_mem(void * _packet, zend_bool stack_allocation TSRMLS_DC)
+{
+	MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE * p = (MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE *) _packet;
+	if (p->public_key) {
+		mnd_efree(p->public_key);
+		p->public_key = NULL;
+	}
+	p->public_key_len = 0;
+
+	if (!stack_allocation) {
+		mnd_pefree(p, p->header.persistent);
+	}
+}
+/* }}} */
+
+
 /* {{{ packet_methods */
 static
 mysqlnd_packet_methods packet_methods[PROT_LAST] =
@@ -2159,7 +2242,19 @@ mysqlnd_packet_methods packet_methods[PROT_LAST] =
 		php_mysqlnd_chg_user_read, /* read */
 		NULL, /* write */
 		php_mysqlnd_chg_user_free_mem,
-	} /* PROT_CHG_USER_RESP_PACKET */
+	}, /* PROT_CHG_USER_RESP_PACKET */
+	{
+		sizeof(MYSQLND_PACKET_SHA256_PK_REQUEST),
+		NULL, /* read */
+		php_mysqlnd_sha256_pk_request_write,
+		php_mysqlnd_sha256_pk_request_free_mem,
+	}, /* PROT_SHA256_PK_REQUEST_PACKET */
+	{
+		sizeof(MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE),
+		php_mysqlnd_sha256_pk_request_response_read,
+		NULL, /* write */
+		php_mysqlnd_sha256_pk_request_response_free_mem,
+	} /* PROT_SHA256_PK_REQUEST_RESPONSE_PACKET */
 };
 /* }}} */
 
@@ -2359,6 +2454,37 @@ MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)(MYSQLND_PROTOC
 /* }}} */
 
 
+/* {{{ mysqlnd_protocol::get_sha256_pk_request_packet */
+static struct st_mysqlnd_packet_sha256_pk_request *
+MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_mysqlnd_packet_sha256_pk_request * packet = mnd_pecalloc(1, packet_methods[PROT_SHA256_PK_REQUEST_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_sha256_pk_request_packet");
+	if (packet) {
+		packet->header.m = &packet_methods[PROT_SHA256_PK_REQUEST_PACKET];
+		packet->header.persistent = persistent;
+	}
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_protocol::get_sha256_pk_request_response_packet */
+static struct st_mysqlnd_packet_sha256_pk_request_response *
+MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC)
+{
+	struct st_mysqlnd_packet_sha256_pk_request_response * packet = mnd_pecalloc(1, packet_methods[PROT_SHA256_PK_REQUEST_RESPONSE_PACKET].struct_size, persistent);
+	DBG_ENTER("mysqlnd_protocol::get_sha256_pk_request_response_packet");
+	if (packet) {
+		packet->header.m = &packet_methods[PROT_SHA256_PK_REQUEST_RESPONSE_PACKET];
+		packet->header.persistent = persistent;
+	}
+	DBG_RETURN(packet);
+}
+/* }}} */
+
+
+
 MYSQLND_CLASS_METHODS_START(mysqlnd_protocol)
 	MYSQLND_METHOD(mysqlnd_protocol, get_greet_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_auth_packet),
@@ -2372,7 +2498,9 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_protocol)
 	MYSQLND_METHOD(mysqlnd_protocol, get_row_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_stats_packet),
 	MYSQLND_METHOD(mysqlnd_protocol, get_prepare_response_packet),
-	MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet)
+	MYSQLND_METHOD(mysqlnd_protocol, get_change_user_response_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_packet),
+	MYSQLND_METHOD(mysqlnd_protocol, get_sha256_pk_request_response_packet)
 MYSQLND_CLASS_METHODS_END;
 
 
