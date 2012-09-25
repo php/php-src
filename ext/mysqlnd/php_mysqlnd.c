@@ -236,7 +236,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqlnd.net_read_timeout",	"31536000",	PHP_INI_SYSTEM, OnUpdateLong,	net_read_timeout, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.log_mask",				"0", 	PHP_INI_ALL,	OnUpdateLong,	log_mask, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.mempool_default_size","16000",   PHP_INI_ALL,	OnUpdateLong,	mempool_default_size,	zend_mysqlnd_globals,		mysqlnd_globals)
-	STD_PHP_INI_ENTRY("mysqlnd.sha256_server_public_key",NULL, 	PHP_INI_SYSTEM, OnUpdateString,	sha256_server_public_key, zend_mysqlnd_globals, mysqlnd_globals)
+	STD_PHP_INI_ENTRY("mysqlnd.sha256_server_public_key",NULL, 	PHP_INI_PERDIR, OnUpdateString,	sha256_server_public_key, zend_mysqlnd_globals, mysqlnd_globals)
 
 #if PHP_DEBUG
 	STD_PHP_INI_ENTRY("mysqlnd.debug_emalloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_emalloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)

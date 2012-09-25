@@ -488,7 +488,9 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 								MYSQLND_G(sha256_server_public_key);
 	php_stream * stream;
 	DBG_ENTER("mysqlnd_sha256_get_rsa_key");
-
+	DBG_INF_FMT("options_s256_pk=[%s] MYSQLND_G(sha256_server_public_key)=[%s]",
+				 net_options->sha256_server_public_key? net_options->sha256_server_public_key:"n/a",
+				 MYSQLND_G(sha256_server_public_key)? MYSQLND_G(sha256_server_public_key):"n/a");
 	if (!fname || fname[0] == '\0') {
 		MYSQLND_PACKET_SHA256_PK_REQUEST * pk_req_packet = NULL;
 		MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE * pk_resp_packet = NULL;
@@ -539,6 +541,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 		DBG_RETURN(NULL);
 	} else {
 		char * key_str = NULL;
+		DBG_INF_FMT("Key in a file. [%s]", fname);
 		stream = php_stream_open_wrapper((char *) fname, "rb", REPORT_ERRORS, NULL);
 
 		if (stream) {
@@ -546,6 +549,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 				BIO * bio = BIO_new_mem_buf(key_str, len);
 				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 				BIO_free(bio);
+				DBG_INF("Successfully loaded");
 			}
 			if (key_str) {
 				DBG_INF_FMT("Public key:%*.s", len, key_str);

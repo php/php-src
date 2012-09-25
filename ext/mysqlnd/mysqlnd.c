@@ -2270,6 +2270,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
+		case MYSQL_SERVER_PUBLIC_KEY:
 			ret = conn->net->data->m.set_client_option(conn->net, option, value TSRMLS_CC);
 			break;
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION

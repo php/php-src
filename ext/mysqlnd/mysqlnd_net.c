@@ -781,6 +781,15 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 		case MYSQL_OPT_COMPRESS:
 			net->data->options.flags |= MYSQLND_NET_FLAG_USE_COMPRESSION;
 			break;
+		case MYSQL_SERVER_PUBLIC_KEY:
+			{
+				zend_bool pers = net->persistent;
+				if (net->data->options.sha256_server_public_key) {
+					mnd_pefree(net->data->options.sha256_server_public_key, pers);
+				}
+				net->data->options.sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
+				break;
+			}
 		default:
 			DBG_RETURN(FAIL);
 	}
