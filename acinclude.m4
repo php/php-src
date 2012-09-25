@@ -1124,9 +1124,15 @@ dnl
 dnl PHP_CHECK_TYPES(type-list, include-file [, extra-headers])
 dnl
 AC_DEFUN([PHP_CHECK_TYPES], [
+  cross_compile_value=0
+  case $host_alias in
+  *nacl*)
+    cross_compile_value=1
+    ;;
+  esac
   for php_typename in $1; do
     AC_MSG_CHECKING([whether $php_typename exists])
-    _PHP_CHECK_SIZEOF($php_typename, 0, $3, [
+    _PHP_CHECK_SIZEOF($php_typename, cross_compile_value, $3, [
       _PHP_DEF_HAVE_FILE($php_typename, $2)
       AC_MSG_RESULT([yes])
     ], [
