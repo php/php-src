@@ -558,7 +558,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 		}
 		php_stream_free(stream, PHP_STREAM_FREE_CLOSE);
 	}
-	DBG_RETURN(ret)
+	DBG_RETURN(ret);
 }
 /* }}} */
 

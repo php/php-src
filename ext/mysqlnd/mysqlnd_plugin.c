@@ -26,7 +26,7 @@
 #include "mysqlnd_debug.h"
 
 /*--------------------------------------------------------------------*/
-
+#if defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1
 static enum_func_status mysqlnd_example_plugin_end(void * p TSRMLS_DC);
 
 static MYSQLND_STATS * mysqlnd_plugin_example_stats = NULL;
@@ -87,7 +87,7 @@ mysqlnd_example_plugin_register(TSRMLS_D)
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_example_plugin TSRMLS_CC);
 }
 /* }}} */
-
+#endif /* defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1 */
 /*--------------------------------------------------------------------*/
 
 static HashTable mysqlnd_registered_plugins;
