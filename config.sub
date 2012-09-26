@@ -740,7 +740,7 @@ case $basic_machine in
 		os=-mvs
 		;;
         nacl)
-                basic_machine=1e32-unknown
+                basic_machine=i686-pc
                 os=-nacl
                 ;;
 	ncr3000)
