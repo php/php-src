@@ -26,6 +26,8 @@ PHP                                                                        NEWS
     (srgoogleguy, Gustavo)
   . Implemented FR #60738 (Allow 'set_error_handler' to handle NULL).
     (Laruence, Nikita Popov)
+  . Return previous handler when passing NULL to set_error_handler and
+    set_exception_handler. (Nikita Popov)
   . Added optional second argument for assert() to specify custom message. Patch
     by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
 

@@ -107,6 +107,10 @@ PHP X.Y UPGRADE NOTES
   but that predated the existence of E_DEPRECATED.
 - php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
   zend_logo_guid() have been removed
+- set_error_handler(NULL) can now be used to reset the error handler.
+  Furthermore both set_error_handler(NULL) and set_exception_handler(NULL) will
+  now return the previously defined error/exception handler. Previously
+  bool(true) was returned.
 
 ========================================
 5. New Functions
