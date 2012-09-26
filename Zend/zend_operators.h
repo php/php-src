@@ -477,7 +477,7 @@ ZEND_API void zend_update_current_locale(void);
 static zend_always_inline int fast_increment_function(zval *op1)
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
-#if defined(__GNUC__) && (defined(__native_client__) || defined(__i386__))
+#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"incl (%0)\n\t"
 			"jno  0f\n\t"
@@ -487,7 +487,7 @@ static zend_always_inline int fast_increment_function(zval *op1)
 			"0:"
 			:
 			: "r"(op1));
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(__native_client__)
 		__asm__(
 			"incq (%0)\n\t"
 			"jno  0f\n\t"
@@ -514,7 +514,7 @@ static zend_always_inline int fast_increment_function(zval *op1)
 static zend_always_inline int fast_decrement_function(zval *op1)
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
-#if defined(__GNUC__) && (defined(__native_client__) || defined(__i386__))
+#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"decl (%0)\n\t"
 			"jno  0f\n\t"
@@ -524,7 +524,7 @@ static zend_always_inline int fast_decrement_function(zval *op1)
 			"0:"
 			:
 			: "r"(op1));
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(__native_client__)
 		__asm__(
 			"decq (%0)\n\t"
 			"jno  0f\n\t"
@@ -552,7 +552,7 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-#if defined(__GNUC__) && (defined(__native_client__) || defined(__i386__))
+#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"movl	(%1), %%eax\n\t"
 			"addl   (%2), %%eax\n\t"
@@ -572,7 +572,7 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 			  "r"(op1),
 			  "r"(op2)
 			: "eax");
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(__native_client__)
 		__asm__(
 			"movq	(%1), %%rax\n\t"
 			"addq   (%2), %%rax\n\t"
@@ -627,7 +627,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
-#if defined(__GNUC__) && (defined(__native_client__) || defined(__i386__))
+#if defined(__GNUC__) && defined(__i386__)
 		__asm__(
 			"movl	(%1), %%eax\n\t"
 			"subl   (%2), %%eax\n\t"
@@ -651,7 +651,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			  "r"(op1),
 			  "r"(op2)
 			: "eax");
-#elif defined(__GNUC__) && defined(__x86_64__)
+#elif defined(__GNUC__) && defined(__x86_64__) && !defined(__native_client__)
 		__asm__(
 			"movq	(%1), %%rax\n\t"
 			"subq   (%2), %%rax\n\t"
