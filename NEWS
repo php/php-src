@@ -19,6 +19,7 @@ PHP                                                                        NEWS
   . Fixed bug #62954 (startup problems fpm / php-fpm). (fat)
   . Fixed bug #62886 (PHP-FPM may segfault/hang on startup). (fat)
   . Fixed bug #63085 (Systemd integration and daemonize). (remi, fat)
+  . Fixed bug #62947 (Unneccesary warnings on FPM). (fat)
 
 - Intl:
   . Fix bug #62915 (defective cloning in several intl classes). (Gustavo)
