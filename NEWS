@@ -30,6 +30,10 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug #63015 (Incorrect arginfo for DOMErrorHandler). (Rob)
 
+- FPM:
+  . Fixed bug #62954 (startup problems fpm / php-fpm). (fat)
+  . Fixed bug #62886 (PHP-FPM may segfault/hang on startup). (fat)
+
 - OpenSSL:
   . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 
     SHA224, SHA256, SHA384, SHA512). (Mark Jones)
