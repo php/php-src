@@ -35,6 +35,7 @@ PHP                                                                        NEWS
   . Fixed bug #62886 (PHP-FPM may segfault/hang on startup). (fat)
   . Fixed bug #63085 (Systemd integration and daemonize). (remi, fat)
   . Fixed bug #62947 (Unneccesary warnings on FPM). (fat)
+  . Fixed bug #62887 (Only /status?plain&full gives "last request cpu"). (fat)
 
 - OpenSSL:
   . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 
