@@ -777,6 +777,49 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 }
 
 
+void compile_string_inline(zval *source_string, char *filename TSRMLS_DC)
+{
+	zend_lex_state original_lex_state;
+	zval tmp;
+	int compiler_result;
+	zend_bool original_in_compilation = CG(in_compilation);
+
+	if (Z_STRLEN_P(source_string) == 0) {
+		return;
+	}
+
+	CG(in_compilation) = 1;
+
+	tmp = *source_string;
+	zval_copy_ctor(&tmp);
+	convert_to_string(&tmp);
+	source_string = &tmp;
+
+	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
+	if (zend_prepare_string_for_scanning(source_string, filename TSRMLS_CC)==SUCCESS) {
+		CG(zend_lineno) = original_lex_state.lineno;
+		zend_bool orig_interactive = CG(interactive);
+
+		CG(interactive) = 0;
+		CG(interactive) = orig_interactive;
+		BEGIN(ST_IN_SCRIPTING);
+		compiler_result = zendparse(TSRMLS_C);
+
+		if (SCNG(script_filtered)) {
+			efree(SCNG(script_filtered));
+			SCNG(script_filtered) = NULL;
+		}
+
+		if (compiler_result==1) {
+			CG(unclean_shutdown)=1;
+		}
+	}
+	zend_restore_lexical_state(&original_lex_state TSRMLS_CC);
+	zval_dtor(&tmp);
+	CG(in_compilation) = original_in_compilation;
+}
+
+
 BEGIN_EXTERN_C()
 int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlighter_ini TSRMLS_DC)
 {

@@ -1,15 +1,17 @@
 --TEST--
-ZE2 Tests that an undefined static setter emits an error
+ZE2 Tests that an undefined setter produces an error on unset()
 --FILE--
 <?php
 
 class AccessorTest {
-	public static $b {
+	public $b {
 		get;
 	}
 }
 
-AccessorTest::$b = 12;
+$o = new AccessorTest();
+
+unset($o->b);
 ?>
 --EXPECTF--
 Fatal error: Cannot set property AccessorTest::$b, no setter defined. in %s on line %d
