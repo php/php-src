@@ -33,6 +33,7 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #62954 (startup problems fpm / php-fpm). (fat)
   . Fixed bug #62886 (PHP-FPM may segfault/hang on startup). (fat)
+  . Fixed bug #63085 (Systemd integration and daemonize). (remi, fat)
 
 - OpenSSL:
   . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 

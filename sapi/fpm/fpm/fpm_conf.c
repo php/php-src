@@ -1115,12 +1115,17 @@ int fpm_conf_write_pid() /* {{{ */
 }
 /* }}} */
 
-static int fpm_conf_post_process(TSRMLS_D) /* {{{ */
+static int fpm_conf_post_process(int force_daemon TSRMLS_DC) /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
 
 	if (fpm_global_config.pid_file) {
 		fpm_evaluate_full_path(&fpm_global_config.pid_file, NULL, PHP_LOCALSTATEDIR, 0);
+	}
+
+	if (force_daemon >= 0) {
+		/* forced from command line options */
+		fpm_global_config.daemonize = force_daemon;
 	}
 
 	fpm_globals.log_level = fpm_global_config.log_level;
@@ -1584,7 +1589,7 @@ static void fpm_conf_dump() /* {{{ */
 }
 /* }}} */
 
-int fpm_conf_init_main(int test_conf) /* {{{ */
+int fpm_conf_init_main(int test_conf, int force_daemon) /* {{{ */
 {
 	int ret;
 	TSRMLS_FETCH();
@@ -1630,7 +1635,7 @@ int fpm_conf_init_main(int test_conf) /* {{{ */
 		return -1;
 	}
 
-	if (0 > fpm_conf_post_process(TSRMLS_C)) {
+	if (0 > fpm_conf_post_process(force_daemon TSRMLS_CC)) {
 		zlog(ZLOG_ERROR, "failed to post process the configuration");
 		return -1;
 	}
