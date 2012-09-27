@@ -1,6 +1,6 @@
 /*
   zip_source_zip.c -- create data source from zip file
-  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -41,17 +41,18 @@
 struct read_zip {
     struct zip_file *zf;
     struct zip_stat st;
-    off_t off, len;
+    zip_uint64_t off;
+    zip_int64_t len;
 };
 
-static ssize_t read_zip(void *st, void *data, size_t len,
+static zip_int64_t read_zip(void *st, void *data, zip_uint64_t len,
 			enum zip_source_cmd cmd);
 
 
 
 ZIP_EXTERN(struct zip_source *)
-zip_source_zip(struct zip *za, struct zip *srcza, int srcidx, int flags,
-	       off_t start, off_t len)
+zip_source_zip(struct zip *za, struct zip *srcza, zip_uint64_t srcidx,
+	       int flags, zip_uint64_t start, zip_int64_t len)
 {
     struct zip_error error;
     struct zip_source *zs;
@@ -62,7 +63,7 @@ zip_source_zip(struct zip *za, struct zip *srcza, int srcidx, int flags,
     if (za == NULL)
 	return NULL;
 
-    if (srcza == NULL || start < 0 || len < -1 || srcidx < 0 || srcidx >= srcza->nentry) {
+    if (srcza == NULL || len < -1 || srcidx < 0 || srcidx >= srcza->nentry) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return NULL;
     }
@@ -115,12 +116,13 @@ zip_source_zip(struct zip *za, struct zip *srcza, int srcidx, int flags,
 
 
 
-static ssize_t
-read_zip(void *state, void *data, size_t len, enum zip_source_cmd cmd)
+static zip_int64_t
+read_zip(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
 {
     struct read_zip *z;
     char b[8192], *buf;
-    int i, n;
+    int i;
+    zip_uint64_t n;
 
     z = (struct read_zip *)state;
     buf = (char *)data;

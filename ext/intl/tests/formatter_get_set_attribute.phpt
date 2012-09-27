@@ -1,8 +1,8 @@
 --TEST--
-numfmt_get/set_attribute() icu < 4.2
+numfmt_get/set_attribute()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.2', '<') != 1) print 'skip'; ?>
+<?php if(version_compare(INTL_ICU_VERSION, '4.2', '<') != 1) print 'skip for ICU 4.4+'; ?>
 --FILE--
 <?php
 
@@ -29,7 +29,7 @@ function ut_main()
         'ROUNDING_MODE' => array( NumberFormatter::ROUNDING_MODE, 1, 12345.123456 ),
         'ROUNDING_INCREMENT' => array( NumberFormatter::ROUNDING_INCREMENT, (float)2, 12345.123456 ),
         'FORMAT_WIDTH' => array( NumberFormatter::FORMAT_WIDTH, 27, 12345.123456 ),
-        'PADDING_POSITION' => array( NumberFormatter::PADDING_POSITION, 21, 12345.123456 ),
+        'PADDING_POSITION' => array( NumberFormatter::PADDING_POSITION, 2, 12345.123456 ),
         'SECONDARY_GROUPING_SIZE' => array( NumberFormatter::SECONDARY_GROUPING_SIZE, 2, 12345.123456 ),
         'SIGNIFICANT_DIGITS_USED' => array( NumberFormatter::SIGNIFICANT_DIGITS_USED, 1, 12345.123456 ),
         'MIN_SIGNIFICANT_DIGITS' => array( NumberFormatter::MIN_SIGNIFICANT_DIGITS, 3, 1 ),
@@ -159,7 +159,7 @@ Setting attribute: ok
 New attribute value: 1 ;  Format result: '0,012,345.12345' ; Parse result: 12345.12345
 
 Attribute ROUNDING_INCREMENT
-Old attribute value: 1.0E-5 ;  Format result: '0,012,345.12346' ; Parse result: 12345.12346
+Old attribute value: 0 ;  Format result: '0,012,345.12346' ; Parse result: 12345.12346
 Setting attribute: ok
 New attribute value: 2 ;  Format result: '0,012,346.00000' ; Parse result: 12346
 
@@ -171,7 +171,7 @@ New attribute value: 27 ;  Format result: '************0,012,345.12346' ; Parse 
 Attribute PADDING_POSITION
 Old attribute value: 0 ;  Format result: '************0,012,345.12346' ; Parse result: 12345.12346
 Setting attribute: ok
-New attribute value: 21 ;  Format result: '0,012,345.12346' ; Parse result: 12345.12346
+New attribute value: 2 ;  Format result: '0,012,345.12346************' ; Parse result: 12345.12346
 
 Attribute SECONDARY_GROUPING_SIZE
 Old attribute value: 0 ;  Format result: '************0,012,345.12346' ; Parse result: 12345.12346

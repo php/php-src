@@ -3719,8 +3719,6 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	/* Default to global filters only */
 	FG(stream_filters) = NULL;
 
-	FG(wrapper_errors) = NULL;
-
 	return SUCCESS;
 }
 /* }}} */
@@ -3833,7 +3831,7 @@ PHP_NAMED_FUNCTION(php_inet_ntop)
 	}
 
 	if (!inet_ntop(af, address, buffer, sizeof(buffer))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An unknown error occured");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "An unknown error occurred");
 		RETURN_FALSE;
 	}
 
@@ -5045,8 +5043,11 @@ void php_free_shutdown_functions(TSRMLS_D) /* {{{ */
 			zend_hash_destroy(BG(user_shutdown_function_names));
 			FREE_HASHTABLE(BG(user_shutdown_function_names));
 			BG(user_shutdown_function_names) = NULL;
-		}
-		zend_end_try();
+		} zend_catch {
+			/* maybe shutdown method call exit, we just ignore it */
+			FREE_HASHTABLE(BG(user_shutdown_function_names));
+			BG(user_shutdown_function_names) = NULL;
+		} zend_end_try();
 }
 /* }}} */
 

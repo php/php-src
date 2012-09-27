@@ -2412,6 +2412,10 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 0, (void **) &obj);
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 1, (void **) &method);
 
+			if (!obj || !method) {
+				zend_error_noreturn(E_ERROR, "Array callback has to contain indices 0 and 1");
+			}
+
 			if (Z_TYPE_PP(obj) != IS_STRING && Z_TYPE_PP(obj) != IS_OBJECT) {
 				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");
 			}
@@ -3947,7 +3951,8 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 				switch (Z_TYPE_P(offset)) {
 					case IS_DOUBLE:
 						hval = zend_dval_to_lval(Z_DVAL_P(offset));
-						ZEND_VM_C_GOTO(num_index_dim);
+						zend_hash_index_del(ht, hval);
+						break;
 					case IS_RESOURCE:
 					case IS_BOOL:
 					case IS_LONG:

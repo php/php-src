@@ -70,7 +70,7 @@
 
 #include "idn/idn.h"
 
-#if U_ICU_VERSION_MAJOR_NUM > 3 && U_ICU_VERSION_MINOR_NUM >=2
+#if U_ICU_VERSION_MAJOR_NUM * 1000 + U_ICU_VERSION_MINOR_NUM >= 4002
 # include "spoofchecker/spoofchecker_class.h"
 # include "spoofchecker/spoofchecker.h"
 # include "spoofchecker/spoofchecker_create.h"
@@ -646,7 +646,7 @@ PHP_MINIT_FUNCTION( intl )
 	/* Expose IDN constants to PHP scripts. */
 	idn_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 
-#if U_ICU_VERSION_MAJOR_NUM > 3 && U_ICU_VERSION_MINOR_NUM >=2
+#if U_ICU_VERSION_MAJOR_NUM * 1000 + U_ICU_VERSION_MINOR_NUM >= 4002
 	/* Register 'Spoofchecker' PHP class */
 	spoofchecker_register_Spoofchecker_class( TSRMLS_C );
 

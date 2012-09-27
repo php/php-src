@@ -77,12 +77,13 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 				value_len = max_value+1;
 				if (RegEnumValue(key, i, name, &name_len, NULL, &type, value, &value_len) == ERROR_SUCCESS) {
 					if ((type == REG_SZ) || (type == REG_EXPAND_SZ)) {
-						ht = (HashTable*)malloc(sizeof(HashTable));
 						if (!ht) {
-							return ret;
+							ht = (HashTable*)malloc(sizeof(HashTable));
+							if (!ht) {
+								return ret;
+							}
+							zend_hash_init(ht, 0, NULL, ZVAL_INTERNAL_PTR_DTOR, 1);
 						}
-						zend_hash_init(ht, 0, NULL, ZVAL_INTERNAL_PTR_DTOR, 1);
-
 						data = (zval*)malloc(sizeof(zval));
 						if (!data) {
 							return ret;

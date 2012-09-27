@@ -1289,6 +1289,8 @@ static union _zend_function *spl_dual_it_get_method(zval **object_ptr, char *met
 				*object_ptr = intern->inner.zobject;
 				function_handler = Z_OBJ_HT_P(*object_ptr)->get_method(object_ptr, method, method_len, key TSRMLS_CC);
 			}
+		} else {
+			*object_ptr = intern->inner.zobject;
 		}
 	}
 	return function_handler;
@@ -2818,7 +2820,7 @@ SPL_METHOD(CachingIterator, offsetGet)
 	}
 
 	if (zend_symtable_find(HASH_OF(intern->u.caching.zcache), arKey, nKeyLength+1, (void**)&value) == FAILURE) {
-		zend_error(E_NOTICE, "Undefined index:  %s", arKey);
+		zend_error(E_NOTICE, "Undefined index: %s", arKey);
 		return;
 	}
 	

@@ -275,7 +275,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 	   get to the end without encountering a delimiter. */
 	while (isspace((int)*(unsigned char *)p)) p++;
 	if (*p == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty regular expression");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
+						 p < regex + regex_len ? "Null byte in regex" : "Empty regular expression");
 		return NULL;
 	}
 	
@@ -292,20 +293,17 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 		delimiter = pp[5];
 	end_delimiter = delimiter;
 
+	pp = p;
+
 	if (start_delimiter == end_delimiter) {
 		/* We need to iterate through the pattern, searching for the ending delimiter,
 		   but skipping the backslashed delimiters.  If the ending delimiter is not
 		   found, display a warning. */
-		pp = p;
 		while (*pp != 0) {
 			if (*pp == '\\' && pp[1] != 0) pp++;
 			else if (*pp == delimiter)
 				break;
 			pp++;
-		}
-		if (*pp == 0) {
-			php_error_docref(NULL TSRMLS_CC,E_WARNING, "No ending delimiter '%c' found", delimiter);
-			return NULL;
 		}
 	} else {
 		/* We iterate through the pattern, searching for the matching ending
@@ -314,7 +312,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 		 * reach the end of the pattern without matching, display a warning.
 		 */
 		int brackets = 1; 	/* brackets nesting level */
-		pp = p;
 		while (*pp != 0) {
 			if (*pp == '\\' && pp[1] != 0) pp++;
 			else if (*pp == end_delimiter && --brackets <= 0)
@@ -323,10 +320,17 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 				brackets++;
 			pp++;
 		}
-		if (*pp == 0) {
-			php_error_docref(NULL TSRMLS_CC,E_WARNING, "No ending matching delimiter '%c' found", end_delimiter);
-			return NULL;
+	}
+
+	if (*pp == 0) {
+		if (pp < regex + regex_len) {
+			php_error_docref(NULL TSRMLS_CC,E_WARNING, "Null byte in regex");
+		} else if (start_delimiter == end_delimiter) {
+			php_error_docref(NULL TSRMLS_CC,E_WARNING, "No ending delimiter '%c' found", delimiter);
+		} else {
+			php_error_docref(NULL TSRMLS_CC,E_WARNING, "No ending matching delimiter '%c' found", delimiter);
 		}
+		return NULL;
 	}
 	
 	/* Make a copy of the actual pattern. */
@@ -337,7 +341,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 
 	/* Parse through the options, setting appropriate flags.  Display
 	   a warning if we encounter an unknown modifier. */	
-	while (*pp != 0) {
+	while (pp < regex + regex_len) {
 		switch (*pp++) {
 			/* Perl compatible options */
 			case 'i':	coptions |= PCRE_CASELESS;		break;
@@ -368,7 +372,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 				break;
 
 			default:
-				php_error_docref(NULL TSRMLS_CC,E_WARNING, "Unknown modifier '%c'", pp[-1]);
+				if (pp[-1]) {
+					php_error_docref(NULL TSRMLS_CC,E_WARNING, "Unknown modifier '%c'", pp[-1]);
+				} else {
+					php_error_docref(NULL TSRMLS_CC,E_WARNING, "Null byte in regex");
+				}
 				efree(pattern);
 				return NULL;
 		}

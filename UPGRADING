@@ -343,6 +343,13 @@ PHP 5.4 UPGRADE NOTES
 
 - Since 5.4.5, resourcebundle_create() accepts null for the first two arguments.
 
+- Since 5.4.6, SimpleXMLElement::getDocNamespaces() has and extra parameter which
+  allows for toggling if the list of namespaces starts from the document root
+  or from the node you call the method on
+
+- Since 5.4.7, ctor is always called when new user stream wrapper object is created.
+  Before, it was called only when stream_open was called.
+
 ==============================
 5. Changes to existing classes
 ==============================
@@ -512,6 +519,11 @@ b. Extensions with changed behavior
 
 - is_link now works properly for symbolic links on Windows Vista
   or later. Earlier systems do not support symbolic links.
+
+- As of PHP 5.4.5 and above the COM extension isn't compiled statically in PHP
+  anymore but shared. It'll still be delivered with the standard PHP release but
+  must be activated manually with the "extension = php_com_dotnet.dll" directive
+  in php.ini.
 
 ==================
 12. New in PHP 5.4

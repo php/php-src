@@ -207,6 +207,8 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
+#define ZEND_ACC_ALIAS					0x10000000
+
 char *zend_visibility_string(zend_uint fn_flags);
 
 

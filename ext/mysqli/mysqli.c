@@ -162,7 +162,7 @@ void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC)
 {
 	if (stmt->stmt) {
 		if (mysqli_stmt_close(stmt->stmt, TRUE)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error occured while closing statement");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error occurred while closing statement");
 			return;
 		}
 	}

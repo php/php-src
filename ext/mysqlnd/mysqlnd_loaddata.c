@@ -188,7 +188,7 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zen
 		char tmp_buf[sizeof(conn->error_info->error)];
 		int tmp_error_no;
 		*is_warning = TRUE;
-		/* error occured */
+		/* error occurred */
 		tmp_error_no = infile.local_infile_error(info, tmp_buf, sizeof(tmp_buf) TSRMLS_CC);
 		SET_CLIENT_ERROR(*conn->error_info, tmp_error_no, UNKNOWN_SQLSTATE, tmp_buf);
 		/* write empty packet to server */
@@ -211,7 +211,7 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zen
 		goto infile_error;
 	}
 
-	/* error during read occured */
+	/* error during read occurred */
 	if (bufsize < 0) {
 		char tmp_buf[sizeof(conn->error_info->error)];
 		int tmp_error_no;
