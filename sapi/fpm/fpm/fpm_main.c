@@ -1799,16 +1799,20 @@ consult the installation file that came with this distribution, or visit \n\
 
 	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root)) {
 
-		if (fpm_globals.send_config_signal) {
-			zlog(ZLOG_DEBUG, "Sending SIGUSR2 (error) to parent %d", getppid());
-			kill(getppid(), SIGUSR2);
+		if (fpm_globals.send_config_pipe[1]) {
+			int writeval = 0;
+			zlog(ZLOG_DEBUG, "Sending \"0\" (error) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
+			write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
+			close(fpm_globals.send_config_pipe[1]);
 		}
 		return FPM_EXIT_CONFIG;
 	}
 
-	if (fpm_globals.send_config_signal) {
-		zlog(ZLOG_DEBUG, "Sending SIGUSR1 (OK) to parent %d", getppid());
-		kill(getppid(), SIGUSR1);
+	if (fpm_globals.send_config_pipe[1]) {
+		int writeval = 1;
+		zlog(ZLOG_DEBUG, "Sending \"1\" (OK) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
+		write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
+		close(fpm_globals.send_config_pipe[1]);
 	}
 	fpm_is_running = 1;
 

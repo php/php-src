@@ -249,15 +249,3 @@ int fpm_signals_get_fd() /* {{{ */
 }
 /* }}} */
 
-void fpm_signals_sighandler_exit_ok(pid_t pid) /* {{{ */
-{
-	exit(FPM_EXIT_OK);
-}
-/* }}} */
-
-void fpm_signals_sighandler_exit_config(pid_t pid) /* {{{ */
-{
-	exit(FPM_EXIT_CONFIG);
-}
-/* }}} */
-
