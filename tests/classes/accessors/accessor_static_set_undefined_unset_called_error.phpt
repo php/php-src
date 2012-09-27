@@ -9,7 +9,7 @@ class AccessorTest {
 	}
 }
 
-AccessorTest::$b = 12;
+unset(AccessorTest::$b);
 ?>
 --EXPECTF--
-Fatal error: Cannot set property AccessorTest::$b, no setter defined. in %s on line %d
+Fatal error: Cannot unset property AccessorTest::$b, no setter defined. in %s on line %d

@@ -11,12 +11,11 @@ class AccessorTest {
 	}
 }
 
-AccessorTest::$b = 12;
 echo "AccessorTest::\$b = 12;\n";
-echo "AccessorTest::\$b: ".AccessorTest::$b."\n";
+AccessorTest::$b = 12;
 echo "Done\n";
 ?>
 --EXPECTF--
-set AccessorTest::$b Called $value = 12.
 AccessorTest::$b = 12;
+set AccessorTest::$b Called $value = 12.
 Done

@@ -16,4 +16,4 @@ class TimePeriod implements Hours {
 
 ?>
 --EXPECTF--
-Fatal error: Class TimePeriod contains 2 abstract accessors and must be declared abstract or implement the remaining accessors (get Hours::$Hours, set Hours::$Hours) in %s on line %d
+Fatal error: Class TimePeriod contains 4 abstract accessors and must be declared abstract or implement the remaining accessors (get Hours::$Hours, set Hours::$Hours, isset Hours::$Hours, ...) in %s on line %d

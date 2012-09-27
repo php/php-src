@@ -5,6 +5,7 @@ ZE2 Tests that a static auto-implemented setter has a protected auto-implemented
 
 class AccessorTest {
 	public static $b {
+		get;
 		set;
 		isset {
 			echo "static isset AccessorTest::\$b Called.\n"; 

@@ -4,7 +4,7 @@ ZE2 Tests that a static defined unset will have the unset code called
 <?php
 
 class AccessorTest {
-	public $b {
+	public static $b {
 		get;
 		set;
 		isset;

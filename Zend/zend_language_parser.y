@@ -756,7 +756,7 @@ class_variable_accessor_declarations:
 		T_VARIABLE '{'
 			{ zend_declare_accessor(&$1 TSRMLS_CC); CG(accessor_node) = &$1; }
 			accessors
-			{ efree($1.u.constant.value.str.val); }
+			{ zend_finalize_accessor(&$1 TSRMLS_CC); efree($1.u.constant.value.str.val); }
 		'}'
 	|	class_variable_declaration ';'
 ;
