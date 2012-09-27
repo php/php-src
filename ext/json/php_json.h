@@ -40,6 +40,7 @@ extern zend_module_entry json_module_entry;
 ZEND_BEGIN_MODULE_GLOBALS(json)
 	int encoder_depth;
 	int error_code;
+	int encode_max_depth;
 ZEND_END_MODULE_GLOBALS(json)
 
 #ifdef ZTS

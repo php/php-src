@@ -191,6 +191,9 @@ PHP_FUNCTION(curl_multi_select)
 	FD_ZERO(&exceptfds);
 
 	curl_multi_fdset(mh->multi, &readfds, &writefds, &exceptfds, &maxfd);
+	if (maxfd == -1) {
+		RETURN_LONG(-1);
+	}
 	RETURN_LONG(select(maxfd + 1, &readfds, &writefds, &exceptfds, &to));
 }
 /* }}} */

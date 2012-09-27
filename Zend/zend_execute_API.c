@@ -31,6 +31,7 @@
 #include "zend_extensions.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_generators.h"
 #include "zend_vm.h"
 #include "zend_float.h"
 #ifdef HAVE_SYS_TIME_H
@@ -955,17 +956,15 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(return_value_ptr_ptr) = fci->retval_ptr_ptr;
 		EG(active_op_array) = (zend_op_array *) EX(function_state).function;
 		original_opline_ptr = EG(opline_ptr);
-		zend_execute(EG(active_op_array) TSRMLS_CC);
+
+		if (EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+			*fci->retval_ptr_ptr = zend_generator_create_zval(EG(active_op_array) TSRMLS_CC);
+		} else {
+			zend_execute(EG(active_op_array) TSRMLS_CC);
+		}
+
 		if (!fci->symbol_table && EG(active_symbol_table)) {
-			if (EG(symtable_cache_ptr)>=EG(symtable_cache_limit)) {
-				zend_hash_destroy(EG(active_symbol_table));
-				FREE_HASHTABLE(EG(active_symbol_table));
-			} else {
-				/* clean before putting into the cache, since clean
-				   could call dtors, which could use cached hash */
-				zend_hash_clean(EG(active_symbol_table));
-				*(++EG(symtable_cache_ptr)) = EG(active_symbol_table);
-			}
+			zend_clean_and_cache_symbol_table(EG(active_symbol_table) TSRMLS_CC);
 		}
 		EG(active_symbol_table) = calling_symbol_table;
 		EG(active_op_array) = original_op_array;

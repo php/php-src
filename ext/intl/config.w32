@@ -24,6 +24,7 @@ if (PHP_INTL != "no") {
 		ADD_SOURCES(configure_module_dirname + "/common", "\
 				common_error.c \
 				common_enum.cpp \
+				common_date.cpp \
 				", "intl");
 		ADD_SOURCES(configure_module_dirname + "/formatter", "\
 				formatter.c \
@@ -61,6 +62,7 @@ if (PHP_INTL != "no") {
 				dateformat_class.c \
 				dateformat_attr.c \
 				dateformat_format.c \
+				dateformat_format_object.cpp \
 				dateformat_parse.c \
 				dateformat_data.c \
 				dateformat_attrcpp.cpp \

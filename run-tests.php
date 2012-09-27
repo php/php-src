@@ -1481,8 +1481,10 @@ TEST $file
 
 			if ($leak_check) {
 				$env['USE_ZEND_ALLOC'] = '0';
+				$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 			} else {
 				$env['USE_ZEND_ALLOC'] = '1';
+				$env['ZEND_DONT_UNLOAD_MODULES'] = 0;
 			}
 
 			junit_start_timer($shortname);
@@ -1749,6 +1751,7 @@ TEST $file
 
 	if ($leak_check) {
 		$env['USE_ZEND_ALLOC'] = '0';
+		$env['ZEND_DONT_UNLOAD_MODULES'] = 1;
 
 		if ($valgrind_version >= 330) {
 			/* valgrind 3.3.0+ doesn't have --log-file-exactly option */
@@ -1759,6 +1762,7 @@ TEST $file
 
 	} else {
 		$env['USE_ZEND_ALLOC'] = '1';
+		$env['ZEND_DONT_UNLOAD_MODULES'] = 0;
 	}
 
 	if ($DETAILED) echo "

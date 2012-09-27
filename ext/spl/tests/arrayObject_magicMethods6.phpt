@@ -107,7 +107,7 @@ object(UsesMagic)#2 (2) {
 --> Read existent, non-existent and dynamic:
 string(7) "changed"
 
-Notice: Undefined index:  nonexistent in %s on line 45
+Notice: Undefined index: nonexistent in %s on line 45
 NULL
 string(11) "new.changed"
   Original wrapped object:
@@ -180,7 +180,7 @@ object(UsesMagic)#2 (2) {
 
 --> Unset existent, non-existent and dynamic:
 
-Notice: Undefined index:  nonexistent in %s on line 63
+Notice: Undefined index: nonexistent in %s on line 63
   Original wrapped object:
 object(C)#1 (3) {
   ["b"]=>

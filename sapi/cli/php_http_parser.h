@@ -32,7 +32,10 @@ extern "C" {
 # include "win32/php_stdint.h"
 # include "config.w32.h"
 #else
-# include <stdint.h>
+# include "php_config.h"
+# ifdef HAVE_STDINT_H
+#  include <stdint.h>
+# endif
 #endif
 
 /* Compile with -DPHP_HTTP_PARSER_STRICT=0 to make less checks, but run
@@ -77,6 +80,7 @@ enum php_http_method
   , PHP_HTTP_HEAD
   , PHP_HTTP_POST
   , PHP_HTTP_PUT
+  , PHP_HTTP_PATCH
   /* pathological */
   , PHP_HTTP_CONNECT
   , PHP_HTTP_OPTIONS
@@ -99,6 +103,8 @@ enum php_http_method
   , PHP_HTTP_NOTIFY
   , PHP_HTTP_SUBSCRIBE
   , PHP_HTTP_UNSUBSCRIBE
+  /* unknown, not implemented */
+  , PHP_HTTP_NOT_IMPLEMENTED
   };
 
 

@@ -1417,7 +1417,11 @@ SXE_METHOD(asXML)
 
 			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, ((xmlDocPtr) sxe->document->ptr)->encoding);
 			xmlOutputBufferFlush(outbuf);
+#ifdef LIBXML2_NEW_BUFFER
+			RETVAL_STRINGL((char *)xmlOutputBufferGetContent(outbuf), xmlOutputBufferGetSize(outbuf), 1);
+#else
 			RETVAL_STRINGL((char *)outbuf->buffer->content, outbuf->buffer->use, 1);
+#endif
 			xmlOutputBufferClose(outbuf);
 		}
 	} else {

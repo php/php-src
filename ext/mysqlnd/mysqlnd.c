@@ -456,11 +456,7 @@ mysqlnd_switch_to_ssl_if_needed(
 	if (options->charset_name && (charset = mysqlnd_find_charset_name(options->charset_name))) {
 		auth_packet->charset_no	= charset->nr;
 	} else {
-#if MYSQLND_UNICODE
-		auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
-#else
 		auth_packet->charset_no	= greet_packet->charset_no;
-#endif
 	}
 
 #ifdef MYSQLND_SSL_SUPPORTED
@@ -581,12 +577,14 @@ mysqlnd_run_authentication(
 			}
 			memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
 
-			DBG_INF_FMT("salt=[%*.s]", plugin_data_len - 1, plugin_data);
+			DBG_INF_FMT("salt(%d)=[%.*s]", plugin_data_len, plugin_data_len, plugin_data);
 			/* The data should be allocated with malloc() */
 			scrambled_data =
 				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
-												   plugin_data, plugin_data_len, options, mysql_flags TSRMLS_CC);
-
+												   plugin_data, plugin_data_len, options, &conn->net->data->options, mysql_flags TSRMLS_CC);
+			if (!scrambled_data || conn->error_info->error_no) {
+				goto end;			
+			}
 			if (FALSE == is_change_user) {
 				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, options, mysql_flags,
 											charset_no,
@@ -622,19 +620,19 @@ mysqlnd_run_authentication(
 		}
 		DBG_INF_FMT("conn->error_info->error_no = %d", conn->error_info->error_no);
 	} while (ret == FAIL && conn->error_info->error_no == 0 && switch_to_auth_protocol != NULL);
-	if (plugin_data) {
-		mnd_efree(plugin_data);
-	}
 		
 	if (ret == PASS) {
 		DBG_INF_FMT("saving requested_protocol=%s", requested_protocol);
 		conn->m->set_client_option(conn, MYSQLND_OPT_AUTH_PROTOCOL, requested_protocol TSRMLS_CC);
 	}
-
+end:
+	if (plugin_data) {
+		mnd_efree(plugin_data);
+	}
 	if (requested_protocol) {
 		mnd_efree(requested_protocol);
 	}
-end:
+
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -838,6 +836,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	MYSQLND_NET * net = conn->net;
 
 	DBG_ENTER("mysqlnd_conn_data::connect");
+	DBG_INF_FMT("conn=%p", conn);
 
 	if (PASS != conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		goto err;
@@ -1027,13 +1026,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 		mysqlnd_local_infile_default(conn);
 
-#if MYSQLND_UNICODE
-		{
-			unsigned int as_unicode = 1;
-			conn->m->set_client_option(conn, MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE, (char *)&as_unicode TSRMLS_CC);
-			DBG_INF("unicode set");
-		}
-#endif
 		if (FAIL == conn->m->execute_init_commands(conn TSRMLS_CC)) {
 			goto err;
 		}
@@ -1149,7 +1141,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * 
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, query);
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::query");
-	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
+	DBG_INF_FMT("conn=%p conn=%llu query=%s", conn, conn->thread_id, query);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		if (PASS == conn->m->send_query(conn, query, query_len TSRMLS_CC) &&
@@ -1333,13 +1325,12 @@ _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long s
 		DBG_RETURN(FAIL);
 	}
 
-	*dont_poll = mysqlnd_stream_array_check_for_readiness(r_array TSRMLS_CC);
-
 	FD_ZERO(&rfds);
 	FD_ZERO(&wfds);
 	FD_ZERO(&efds);
 
 	if (r_array != NULL) {
+		*dont_poll = mysqlnd_stream_array_check_for_readiness(r_array TSRMLS_CC);
 		set_count = mysqlnd_stream_array_to_fd_set(r_array, &rfds, &max_fd TSRMLS_CC);
 		if (set_count > max_set_count) {
 			max_set_count = set_count;
@@ -1883,10 +1874,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 			  Fall-through
 			*/
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
-			net->data->m.close_stream(net, conn->stats, conn->error_info TSRMLS_CC);
 			/* Fall-through */
 		case CONN_QUIT_SENT:
 			/* The user has killed its own connection */
+			net->data->m.close_stream(net, conn->stats, conn->error_info TSRMLS_CC);
 			break;
 	}
 
@@ -2279,13 +2270,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
+		case MYSQL_SERVER_PUBLIC_KEY:
 			ret = conn->net->data->m.set_client_option(conn->net, option, value TSRMLS_CC);
 			break;
-#if MYSQLND_UNICODE
-		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:
-			conn->options->numeric_and_datetime_as_unicode = *(unsigned int*) value;
-			break;
-#endif
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 		case MYSQLND_OPT_INT_AND_FLOAT_NATIVE:
 			conn->options->int_and_float_native = *(unsigned int*) value;
@@ -2446,7 +2433,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn T
 	MYSQLND_RES * result = NULL;
 
 	DBG_ENTER("mysqlnd_conn_data::store_result");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%llu conn=%p", conn->thread_id, conn);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		do {

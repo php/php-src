@@ -277,6 +277,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	long			debug_malloc_fail_threshold;
 	long			debug_calloc_fail_threshold;
 	long			debug_realloc_fail_threshold;
+	char *			sha256_server_public_key;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)

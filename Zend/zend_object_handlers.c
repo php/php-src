@@ -1629,6 +1629,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					if (retval) {
 						zval_ptr_dtor(&retval);
 					}
+					EG(exception) = NULL;
 					zend_error_noreturn(E_ERROR, "Method %s::__toString() must not throw an exception", ce->name);
 					return FAILURE;
 				}

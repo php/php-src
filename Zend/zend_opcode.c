@@ -87,6 +87,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->static_variables = NULL;
 	op_array->last_try_catch = 0;
+	op_array->has_finally_block = 0;
 
 	op_array->this_var = -1;
 
@@ -276,6 +277,15 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 	}
 }
 
+static int zend_clear_trait_method_name(zend_op_array *op_array TSRMLS_DC)
+{
+	if (op_array->function_name && (op_array->fn_flags & ZEND_ACC_ALIAS) == 0) {
+		efree(op_array->function_name);
+		op_array->function_name = NULL;
+	}
+	return 0;
+}
+
 ZEND_API void destroy_zend_class(zend_class_entry **pce)
 {
 	zend_class_entry *ce = *pce;
@@ -308,6 +318,10 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			zend_hash_destroy(&ce->properties_info);
 			zend_hash_destroy(&ce->accessors);
 			str_efree(ce->name);
+			if ((ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
+				TSRMLS_FETCH();
+				zend_hash_apply(&ce->function_table, (apply_func_t)zend_clear_trait_method_name TSRMLS_CC);
+			}
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
@@ -397,7 +411,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	}
 	efree(op_array->opcodes);
 
-	if (op_array->function_name) {
+	if (op_array->function_name && (op_array->fn_flags & ZEND_ACC_ALIAS) == 0) {
 		efree((char*)op_array->function_name);
 	}
 	if (op_array->doc_comment) {
@@ -495,6 +509,24 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 	}
 }
 
+static void zend_check_finally_breakout(zend_op_array *op_array, zend_op *opline, zend_uint dst_num TSRMLS_DC) {
+	zend_uint i, op_num = opline - op_array->opcodes;
+	for (i=0; i < op_array->last_try_catch; i++) {
+		if (op_array->try_catch_array[i].try_op > op_num) {
+			break;
+		}
+		if ((op_num >= op_array->try_catch_array[i].finally_op 
+					&& op_num < op_array->try_catch_array[i].finally_end)
+				&& (dst_num >= op_array->try_catch_array[i].finally_end 
+					|| dst_num < op_array->try_catch_array[i].finally_op)) {
+			CG(in_compilation) = 1;
+			CG(active_op_array) = op_array;
+			CG(zend_lineno) = opline->lineno;
+			zend_error(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
+		}
+	} 
+}
+
 ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline, *end;
@@ -548,7 +580,29 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:
+				if (op_array->last_try_catch) {
+					zend_check_finally_breakout(op_array, opline, opline->op1.opline_num TSRMLS_CC);
+				}
 				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.opline_num];
+				break;
+			case ZEND_BRK:
+			case ZEND_CONT:
+				if (op_array->last_try_catch) {
+					int nest_levels, array_offset;
+					zend_brk_cont_element *jmp_to;
+
+					nest_levels = Z_LVAL_P(opline->op2.zv);
+					array_offset = opline->op1.opline_num;
+					do {
+						jmp_to = &op_array->brk_cont_array[array_offset];
+						if (nest_levels > 1) {
+							array_offset = jmp_to->parent;
+						}
+					} while (--nest_levels > 0);
+					if (op_array->last_try_catch) {
+						zend_check_finally_breakout(op_array, opline, jmp_to->brk TSRMLS_CC);
+					}
+				}
 				break;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
@@ -557,6 +611,17 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 			case ZEND_JMP_SET:
 			case ZEND_JMP_SET_VAR:
 				opline->op2.jmp_addr = &op_array->opcodes[opline->op2.opline_num];
+				break;
+			case ZEND_RETURN:
+			case ZEND_RETURN_BY_REF:
+				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+					if (opline->op1_type != IS_CONST || Z_TYPE_P(opline->op1.zv) != IS_NULL) {
+						CG(zend_lineno) = opline->lineno;
+						zend_error(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
+					}
+
+					opline->opcode = ZEND_GENERATOR_RETURN;
+				}
 				break;
 			case ZEND_INIT_STATIC_METHOD_CALL: {
 					/** Is this a call to a static getter, static setters are dependent on static getters (which get backpatched to setter calls), so during compilation

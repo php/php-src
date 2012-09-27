@@ -210,8 +210,6 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		return FAILURE;
 	}
 #endif
-
-	filename_len = strlen(entry.tmp);
 	filename = entry.tmp;
 
 	/* only check openbasedir for files, not for phar streams */

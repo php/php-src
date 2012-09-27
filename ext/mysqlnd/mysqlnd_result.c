@@ -55,7 +55,6 @@ MYSQLND_METHOD(mysqlnd_res, initialize_result_set_rest)(MYSQLND_RES * const resu
 									data_cursor,
 									result->meta->field_count,
 									result->meta->fields,
-									result->conn->options->numeric_and_datetime_as_unicode,
 									result->conn->options->int_and_float_native,
 									result->conn->stats TSRMLS_CC);
 			if (rc != PASS) {
@@ -106,16 +105,6 @@ mysqlnd_rset_zval_ptr_dtor(zval **zv, enum_mysqlnd_res_type type, zend_bool * co
 		/*
 		  Not a prepared statement, then we have to
 		  call copy_ctor and then zval_ptr_dtor()
-
-		  In Unicode mode the destruction  of the zvals should not call
-		  zval_copy_ctor() because then we will leak.
-		  I suppose we can use UG(unicode) in mysqlnd.c when freeing a result set
-		  to check if we need to call copy_ctor().
-
-		  If the type is IS_UNICODE, which can happen with PHP6, then we don't
-		  need to copy_ctor, as the data doesn't point to our internal buffers.
-		  If it's string (in PHP5 always) and in PHP6 if data is binary, then
-		  it still points to internal buffers and has to be copied.
 		*/
 		if (Z_TYPE_PP(zv) == IS_STRING) {
 			zval_copy_ctor(*zv);
@@ -669,7 +658,6 @@ mysqlnd_fetch_row_unbuffered_c(MYSQLND_RES * result TSRMLS_DC)
 										  result->unbuf->last_row_data,
 										  row_packet->field_count,
 										  row_packet->fields_metadata,
-										  result->conn->options->numeric_and_datetime_as_unicode,
 										  result->conn->options->int_and_float_native,
 										  result->conn->stats TSRMLS_CC);
 			if (PASS != rc) {
@@ -784,7 +772,6 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 											result->unbuf->last_row_data,
 											field_count,
 											row_packet->fields_metadata,
-											result->conn->options->numeric_and_datetime_as_unicode,
 											result->conn->options->int_and_float_native,
 											result->conn->stats TSRMLS_CC);
 			if (PASS != rc) {
@@ -812,19 +799,11 @@ mysqlnd_fetch_row_unbuffered(MYSQLND_RES * result, void *param, unsigned int fla
 					*/
 					Z_ADDREF_P(data);
 					if (hash_key->is_numeric == FALSE) {
-#if MYSQLND_UNICODE
-						zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
-												 hash_key->ustr,
-												 hash_key->ulen + 1,
-												 hash_key->key,
-												 (void *) &data, sizeof(zval *), NULL);
-#else
 						zend_hash_quick_update(Z_ARRVAL_P(row),
 											   field->name,
 											   field->name_length + 1,
 											   hash_key->key,
 											   (void *) &data, sizeof(zval *), NULL);
-#endif
 					} else {
 						zend_hash_index_update(Z_ARRVAL_P(row),
 											   hash_key->key,
@@ -950,7 +929,6 @@ mysqlnd_fetch_row_buffered_c(MYSQLND_RES * result TSRMLS_DC)
 											current_row,
 											result->meta->field_count,
 											result->meta->fields,
-											result->conn->options->numeric_and_datetime_as_unicode,
 											result->conn->options->int_and_float_native,
 											result->conn->stats TSRMLS_CC);
 			if (rc != PASS) {
@@ -1023,7 +1001,6 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags
 											current_row,
 											result->meta->field_count,
 											result->meta->fields,
-											result->conn->options->numeric_and_datetime_as_unicode,
 											result->conn->options->int_and_float_native,
 											result->conn->stats TSRMLS_CC);
 			if (rc != PASS) {
@@ -1062,19 +1039,11 @@ mysqlnd_fetch_row_buffered(MYSQLND_RES * result, void *param, unsigned int flags
 				*/
 				Z_ADDREF_P(data);
 				if (hash_key->is_numeric == FALSE) {
-#if MYSQLND_UNICODE
-					zend_u_hash_quick_update(Z_ARRVAL_P(row), IS_UNICODE,
-											 hash_key->ustr,
-											 hash_key->ulen + 1,
-											 hash_key->key,
-											 (void *) &data, sizeof(zval *), NULL);
-#else
 					zend_hash_quick_update(Z_ARRVAL_P(row),
 										   field->name,
 										   field->name_length + 1,
 										   hash_key->key,
 										   (void *) &data, sizeof(zval *), NULL);
-#endif
 				} else {
 					zend_hash_index_update(Z_ARRVAL_P(row),
 										   hash_key->key,
