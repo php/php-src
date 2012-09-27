@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #60909 (custom error handler throwing Exception + fatal error
     = no shutdown function). (Dmitry)
 
+- FPM:
+  . Fixed bug #62954 (startup problems fpm / php-fpm). (fat)
+  . Fixed bug #62886 (PHP-FPM may segfault/hang on startup). (fat)
+
 - Intl:
   . Fix bug #62915 (defective cloning in several intl classes). (Gustavo)
 
