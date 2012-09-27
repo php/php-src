@@ -44,15 +44,15 @@ function rrmdir($dir) {
 $targetDir = __DIR__ . DIRECTORY_SEPARATOR . md5('recursiveDirectoryIterator::getSubPathname');
 rrmdir($targetDir);
 ?>
---EXPECT--
+--EXPECTF--
 .
 .
 ..
-a0c967a6c2c34786e4802f59af9356f5/.
-a0c967a6c2c34786e4802f59af9356f5/..
-a0c967a6c2c34786e4802f59af9356f5/9925aabb545352472e4d77942627b507/.
-a0c967a6c2c34786e4802f59af9356f5/9925aabb545352472e4d77942627b507/..
-a0c967a6c2c34786e4802f59af9356f5/9925aabb545352472e4d77942627b507/getSubPathname_test_2.tmp
-a0c967a6c2c34786e4802f59af9356f5/getSubPathname_test_3.tmp
+a0c967a6c2c34786e4802f59af9356f5%c.
+a0c967a6c2c34786e4802f59af9356f5%c..
+a0c967a6c2c34786e4802f59af9356f5%c9925aabb545352472e4d77942627b507%c.
+a0c967a6c2c34786e4802f59af9356f5%c9925aabb545352472e4d77942627b507%c..
+a0c967a6c2c34786e4802f59af9356f5%c9925aabb545352472e4d77942627b507%cgetSubPathname_test_2.tmp
+a0c967a6c2c34786e4802f59af9356f5%cgetSubPathname_test_3.tmp
 getSubPathname_test_1.tmp
 ==DONE==
