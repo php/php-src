@@ -37,7 +37,7 @@
 
 
 int fpm_run(int *max_requests);
-int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root);
+int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon);
 
 struct fpm_globals_s {
 	pid_t parent_pid;
