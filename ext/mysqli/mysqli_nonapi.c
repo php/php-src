@@ -728,7 +728,7 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 	int ret = 0;
 
 	ALLOC_HASHTABLE(new_hash);
-	zend_hash_init(new_hash, zend_hash_num_elements(Z_ARRVAL_P(in_zval_array)), NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(new_hash, in_zval_array? zend_hash_num_elements(Z_ARRVAL_P(in_zval_array)):0, NULL, ZVAL_PTR_DTOR, 0);
 	if (in_array) {
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(in_zval_array));
 			 zend_hash_get_current_data(Z_ARRVAL_P(in_zval_array), (void **) &elem) == SUCCESS;
@@ -775,6 +775,11 @@ PHP_FUNCTION(mysqli_poll)
 	}
 	if (sec < 0 || usec < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Negative values passed for sec and/or usec");
+		RETURN_FALSE;
+	}
+
+	if (!r_array && !e_array) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No stream arrays were passed");
 		RETURN_FALSE;
 	}
 

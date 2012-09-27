@@ -681,6 +681,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLE_ABORTED_BY_CALLBACK);
 	REGISTER_CURL_CONSTANT(CURLE_BAD_CALLING_ORDER);
 	REGISTER_CURL_CONSTANT(CURLE_BAD_CONTENT_ENCODING);
+	REGISTER_CURL_CONSTANT(CURLE_BAD_DOWNLOAD_RESUME);
 	REGISTER_CURL_CONSTANT(CURLE_BAD_FUNCTION_ARGUMENT);
 	REGISTER_CURL_CONSTANT(CURLE_BAD_PASSWORD_ENTERED);
 	REGISTER_CURL_CONSTANT(CURLE_COULDNT_CONNECT);
@@ -713,12 +714,14 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLE_HTTP_PORT_FAILED);
 	REGISTER_CURL_CONSTANT(CURLE_HTTP_POST_ERROR);
 	REGISTER_CURL_CONSTANT(CURLE_HTTP_RANGE_ERROR);
+	REGISTER_CURL_CONSTANT(CURLE_HTTP_RETURNED_ERROR);
 	REGISTER_CURL_CONSTANT(CURLE_LDAP_CANNOT_BIND);
 	REGISTER_CURL_CONSTANT(CURLE_LDAP_SEARCH_FAILED);
 	REGISTER_CURL_CONSTANT(CURLE_LIBRARY_NOT_FOUND);
 	REGISTER_CURL_CONSTANT(CURLE_MALFORMAT_USER);
 	REGISTER_CURL_CONSTANT(CURLE_OBSOLETE);
 	REGISTER_CURL_CONSTANT(CURLE_OK);
+	REGISTER_CURL_CONSTANT(CURLE_OPERATION_TIMEDOUT);
 	REGISTER_CURL_CONSTANT(CURLE_OPERATION_TIMEOUTED);
 	REGISTER_CURL_CONSTANT(CURLE_OUT_OF_MEMORY);
 	REGISTER_CURL_CONSTANT(CURLE_PARTIAL_FILE);
@@ -751,6 +754,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLINFO_HEADER_OUT);
 	REGISTER_CURL_CONSTANT(CURLINFO_HEADER_SIZE);
 	REGISTER_CURL_CONSTANT(CURLINFO_HTTP_CODE);
+	REGISTER_CURL_CONSTANT(CURLINFO_LASTONE);
 	REGISTER_CURL_CONSTANT(CURLINFO_NAMELOOKUP_TIME);
 	REGISTER_CURL_CONSTANT(CURLINFO_PRETRANSFER_TIME);
 	REGISTER_CURL_CONSTANT(CURLINFO_PRIVATE);
@@ -783,6 +787,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLPROXY_SOCKS5);
 
 	/* Curl Share constants */
+	REGISTER_CURL_CONSTANT(CURLSHOPT_NONE);
 	REGISTER_CURL_CONSTANT(CURLSHOPT_SHARE);
 	REGISTER_CURL_CONSTANT(CURLSHOPT_UNSHARE);
 
@@ -811,6 +816,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURL_TIMECOND_IFMODSINCE);
 	REGISTER_CURL_CONSTANT(CURL_TIMECOND_IFUNMODSINCE);
 	REGISTER_CURL_CONSTANT(CURL_TIMECOND_LASTMOD);
+	REGISTER_CURL_CONSTANT(CURL_TIMECOND_NONE);
 
 	/* Curl version constants */
 	REGISTER_CURL_CONSTANT(CURL_VERSION_IPV6);
@@ -925,7 +931,11 @@ PHP_MINIT_FUNCTION(curl)
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1 */
+	REGISTER_CURL_CONSTANT(CURLE_SSH);
 	REGISTER_CURL_CONSTANT(CURLOPT_FTP_SSL_CCC);
+	REGISTER_CURL_CONSTANT(CURLOPT_SSH_AUTH_TYPES);
+	REGISTER_CURL_CONSTANT(CURLOPT_SSH_PRIVATE_KEYFILE);
+	REGISTER_CURL_CONSTANT(CURLOPT_SSH_PUBLIC_KEYFILE);
 	REGISTER_CURL_CONSTANT(CURLFTPSSL_CCC_ACTIVE);
 	REGISTER_CURL_CONSTANT(CURLFTPSSL_CCC_NONE);
 	REGISTER_CURL_CONSTANT(CURLFTPSSL_CCC_PASSIVE);
@@ -940,13 +950,13 @@ PHP_MINIT_FUNCTION(curl)
 
 #if LIBCURL_VERSION_NUM >= 0x071004 /* Available since 7.16.4 */
 	REGISTER_CURL_CONSTANT(CURLOPT_KRBLEVEL);
+	REGISTER_CURL_CONSTANT(CURLOPT_NEW_DIRECTORY_PERMS);
+	REGISTER_CURL_CONSTANT(CURLOPT_NEW_FILE_PERMS);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071100 /* Available since 7.17.0 */
 	REGISTER_CURL_CONSTANT(CURLOPT_APPEND);
 	REGISTER_CURL_CONSTANT(CURLOPT_DIRLISTONLY);
-	REGISTER_CURL_CONSTANT(CURLOPT_NEW_DIRECTORY_PERMS);
-	REGISTER_CURL_CONSTANT(CURLOPT_NEW_FILE_PERMS);
 	REGISTER_CURL_CONSTANT(CURLOPT_USE_SSL);
 	/* Curl SSL Constants */
 	REGISTER_CURL_CONSTANT(CURLUSESSL_ALL);
@@ -954,6 +964,10 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLUSESSL_NONE);
 	REGISTER_CURL_CONSTANT(CURLUSESSL_TRY);
 #endif	
+
+#if LIBCURL_VERSION_NUM >= 0x071101 /* Available since 7.17.1 */
+	REGISTER_CURL_CONSTANT(CURLOPT_SSH_HOST_PUBLIC_KEY_MD5);
+#endif
 
 #if LIBCURL_VERSION_NUM >= 0x071200 /* Available since 7.18.0 */
 	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_TRANSFER_MODE);
@@ -964,7 +978,6 @@ PHP_MINIT_FUNCTION(curl)
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
-	REGISTER_CURL_CONSTANT(CURLE_SSH);
 	REGISTER_CURL_CONSTANT(CURLINFO_APPCONNECT_TIME);
 	REGISTER_CURL_CONSTANT(CURLINFO_PRIMARY_IP);
 
@@ -972,10 +985,6 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_CRLFILE);
 	REGISTER_CURL_CONSTANT(CURLOPT_ISSUERCERT);
 	REGISTER_CURL_CONSTANT(CURLOPT_KEYPASSWD);
-	REGISTER_CURL_CONSTANT(CURLOPT_SSH_AUTH_TYPES);
-	REGISTER_CURL_CONSTANT(CURLOPT_SSH_HOST_PUBLIC_KEY_MD5);
-	REGISTER_CURL_CONSTANT(CURLOPT_SSH_PRIVATE_KEYFILE);
-	REGISTER_CURL_CONSTANT(CURLOPT_SSH_PUBLIC_KEYFILE);
 
 	REGISTER_CURL_CONSTANT(CURLSSH_AUTH_ANY);
 	REGISTER_CURL_CONSTANT(CURLSSH_AUTH_DEFAULT);
@@ -1737,7 +1746,7 @@ static void alloc_curl_handle(php_curl **ch)
 }
 /* }}} */
 
-#if LIBCURL_VERSION_NUM > 0x071301
+#if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
 /* {{{ split_certinfo
  */
 static void split_certinfo(char *string, zval *hash)
@@ -1920,9 +1929,9 @@ PHP_FUNCTION(curl_copy_handle)
 	dupch->uses = 0;
 	ch->uses++;
 	if (ch->handlers->write->stream) {
-		Z_ADDREF_P(dupch->handlers->write->stream);
-		dupch->handlers->write->stream = ch->handlers->write->stream;
+		Z_ADDREF_P(ch->handlers->write->stream);
 	}
+	dupch->handlers->write->stream = ch->handlers->write->stream;
 	dupch->handlers->write->method = ch->handlers->write->method;
 	if (ch->handlers->read->stream) {
 		Z_ADDREF_P(ch->handlers->read->stream);
@@ -2085,12 +2094,17 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1 */
 		case CURLOPT_FTP_SSL_CCC:
+		case CURLOPT_SSH_AUTH_TYPES:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071002 /* Available since 7.16.2 */
 		case CURLOPT_CONNECTTIMEOUT_MS:
 		case CURLOPT_HTTP_CONTENT_DECODING:
 		case CURLOPT_HTTP_TRANSFER_DECODING:
 		case CURLOPT_TIMEOUT_MS:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071004 /* Available since 7.16.4 */
+		case CURLOPT_NEW_DIRECTORY_PERMS:
+		case CURLOPT_NEW_FILE_PERMS:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071100 /* Available since 7.17.0 */
 		case CURLOPT_USE_SSL:
@@ -2100,8 +2114,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #if LIBCURL_VERSION_NUM >= 0x071100 /* Available since 7.17.0 */
 		case CURLOPT_APPEND:
 		case CURLOPT_DIRLISTONLY:
-		case CURLOPT_NEW_DIRECTORY_PERMS:
-		case CURLOPT_NEW_FILE_PERMS:
 #else			
 		case CURLOPT_FTPAPPEND:
 		case CURLOPT_FTPLISTONLY:
@@ -2111,7 +2123,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
 		case CURLOPT_ADDRESS_SCOPE:
-		case CURLOPT_SSH_AUTH_TYPES:
 #endif
 #if LIBCURL_VERSION_NUM >  0x071301 /* Available since 7.19.1 */
 		case CURLOPT_CERTINFO:
@@ -2187,7 +2198,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #else			
 		case CURLOPT_KRB4LEVEL:
 #endif
-#if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
+#if LIBCURL_VERSION_NUM >= 0x071101 /* Available since 7.17.1 */
 		case CURLOPT_SSH_HOST_PUBLIC_KEY_MD5:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071301 /* Available since 7.19.1 */
@@ -2631,11 +2642,13 @@ string_copy:
 #if LIBCURL_VERSION_NUM >= 0x070b00 /* Available since 7.11.0 */
 		case CURLOPT_NETRC_FILE:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1 */
+		case CURLOPT_SSH_PRIVATE_KEYFILE:
+		case CURLOPT_SSH_PUBLIC_KEYFILE:
+#endif
 #if LIBCURL_VERSION_NUM >= 0x071300 /* Available since 7.19.0 */
 		case CURLOPT_CRLFILE:
 		case CURLOPT_ISSUERCERT:
-		case CURLOPT_SSH_PRIVATE_KEYFILE:
-		case CURLOPT_SSH_PUBLIC_KEYFILE:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x071306 /* Available since 7.19.6 */
 		case CURLOPT_SSH_KNOWNHOSTS:
@@ -2647,7 +2660,7 @@ string_copy:
 
 			convert_to_string_ex(zvalue);
 
-			if (!Z_STRLEN_PP(zvalue) || php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC)) {
+			if (Z_STRLEN_PP(zvalue) && php_check_open_basedir(Z_STRVAL_PP(zvalue) TSRMLS_CC)) {
 				RETVAL_FALSE;
 				return 1;
 			}
@@ -2679,7 +2692,7 @@ string_copy:
 		case CURLOPT_SHARE:
 			{
 				php_curlsh *sh = NULL;
-				ZEND_FETCH_RESOURCE(sh, php_curlsh *, zvalue, -1, le_curl_share_handle_name, le_curl_share_handle);
+				ZEND_FETCH_RESOURCE_NO_RETURN(sh, php_curlsh *, zvalue, -1, le_curl_share_handle_name, le_curl_share_handle);
 				if (sh) {
 					curl_easy_setopt(ch->cp, CURLOPT_SHARE, sh->share);
 				}
@@ -3203,7 +3216,7 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 #if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
 /* {{{ _php_curl_reset_handlers()
    Reset all handlers of a given php_curl */
-static _php_curl_reset_handlers(php_curl *ch)
+static void _php_curl_reset_handlers(php_curl *ch)
 {
 	if (ch->handlers->write->stream) {
 		Z_DELREF_P(ch->handlers->write->stream);
@@ -3294,7 +3307,7 @@ PHP_FUNCTION(curl_escape)
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
-	if (res = curl_easy_escape(ch->cp, str, str_len)) {
+	if ((res = curl_easy_escape(ch->cp, str, str_len))) {
 		RETVAL_STRING(res, 1);
 		free(res);
 	} else {
@@ -3318,7 +3331,7 @@ PHP_FUNCTION(curl_unescape)
 
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
 
-	if (out = curl_easy_unescape(ch->cp, str, str_len, &out_len)) {
+	if ((out = curl_easy_unescape(ch->cp, str, str_len, &out_len))) {
 		RETVAL_STRINGL(out, out_len, 1);
 		free(out);
 	} else {

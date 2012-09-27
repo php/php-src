@@ -1519,41 +1519,31 @@ ZEND_FUNCTION(set_error_handler)
 		return;
 	}
 
-	if (IS_NULL != Z_TYPE_P(error_handler)) {
-	    zend_bool had_orig_error_handler = 0;
+	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(error_handler, 0, &error_handler_name TSRMLS_CC)) {
 			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-					get_active_function_name(TSRMLS_C), error_handler_name?error_handler_name:"unknown");
+					   get_active_function_name(TSRMLS_C), error_handler_name?error_handler_name:"unknown");
 			efree(error_handler_name);
 			return;
 		}
 		efree(error_handler_name);
-
-		if (EG(user_error_handler)) {
-			had_orig_error_handler = 1;
-			*return_value = *EG(user_error_handler);
-			zval_copy_ctor(return_value);
-			INIT_PZVAL(return_value);
-			zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting), sizeof(EG(user_error_handler_error_reporting)));
-			zend_ptr_stack_push(&EG(user_error_handlers), EG(user_error_handler));
-		}
-
-		ALLOC_ZVAL(EG(user_error_handler));
-		EG(user_error_handler_error_reporting) = (int)error_type;
-		MAKE_COPY_ZVAL(&error_handler, EG(user_error_handler));
-
-		if (!had_orig_error_handler) {
-			RETURN_NULL();
-		}
-	} else { /* unset user-defined handler */
-		if (EG(user_error_handler)) {
-			zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting), sizeof(EG(user_error_handler_error_reporting)));
-			zend_ptr_stack_push(&EG(user_error_handlers), EG(user_error_handler));
-		}
-
-		EG(user_error_handler) = NULL;
-		RETURN_TRUE;
 	}
+
+	if (EG(user_error_handler)) {
+		RETVAL_ZVAL(EG(user_error_handler), 1, 0);
+
+		zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting), sizeof(EG(user_error_handler_error_reporting)));
+		zend_ptr_stack_push(&EG(user_error_handlers), EG(user_error_handler));
+	}
+
+	if (Z_TYPE_P(error_handler) == IS_NULL) { /* unset user-defined handler */
+		EG(user_error_handler) = NULL;
+		return;
+	}
+
+	ALLOC_ZVAL(EG(user_error_handler));
+	MAKE_COPY_ZVAL(&error_handler, EG(user_error_handler));
+	EG(user_error_handler_error_reporting) = (int)error_type;
 }
 /* }}} */
 
@@ -1593,36 +1583,28 @@ ZEND_FUNCTION(set_exception_handler)
 	}
 
 	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
-		zend_bool had_orig_exception_handler = 0;
-
 		if (!zend_is_callable(exception_handler, 0, &exception_handler_name TSRMLS_CC)) {
 			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-					get_active_function_name(TSRMLS_C), exception_handler_name?exception_handler_name:"unknown");
+					   get_active_function_name(TSRMLS_C), exception_handler_name?exception_handler_name:"unknown");
 			efree(exception_handler_name);
 			return;
 		}
 		efree(exception_handler_name);
-
-		if (EG(user_exception_handler)) {
-			had_orig_exception_handler = 1;
-			*return_value = *EG(user_exception_handler);
-			zval_copy_ctor(return_value);
-			zend_ptr_stack_push(&EG(user_exception_handlers), EG(user_exception_handler));
-		}
-
-		ALLOC_ZVAL(EG(user_exception_handler));
-		MAKE_COPY_ZVAL(&exception_handler, EG(user_exception_handler));
-
-		if (!had_orig_exception_handler) {
-			RETURN_NULL();
-		}
-	} else {
-		if (EG(user_exception_handler)) {
-			zend_ptr_stack_push(&EG(user_exception_handlers), EG(user_exception_handler));
-		}
-		EG(user_exception_handler) = NULL;
-		RETURN_TRUE;
 	}
+
+	if (EG(user_exception_handler)) {
+		RETVAL_ZVAL(EG(user_exception_handler), 1, 0);
+
+		zend_ptr_stack_push(&EG(user_exception_handlers), EG(user_exception_handler));
+	}
+
+	if (Z_TYPE_P(exception_handler) == IS_NULL) { /* unset user-defined handler */
+		EG(user_exception_handler) = NULL;
+		return;
+	}
+
+	ALLOC_ZVAL(EG(user_exception_handler));
+	MAKE_COPY_ZVAL(&exception_handler, EG(user_exception_handler))
 }
 /* }}} */
 

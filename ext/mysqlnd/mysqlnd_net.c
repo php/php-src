@@ -239,17 +239,19 @@ MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt)(MYSQLND_NET * const net,
 {
 	php_stream * net_stream = net->data->m.get_stream(net TSRMLS_CC);
 	DBG_ENTER("mysqlnd_net::post_connect_set_opt");
-	if (net->data->options.timeout_read) {
-		struct timeval tv;
-		DBG_INF_FMT("setting %u as PHP_STREAM_OPTION_READ_TIMEOUT", net->data->options.timeout_read);
-		tv.tv_sec = net->data->options.timeout_read;
-		tv.tv_usec = 0;
-		php_stream_set_option(net_stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
-	}
+	if (net_stream) {
+		if (net->data->options.timeout_read) {
+			struct timeval tv;
+			DBG_INF_FMT("setting %u as PHP_STREAM_OPTION_READ_TIMEOUT", net->data->options.timeout_read);
+			tv.tv_sec = net->data->options.timeout_read;
+			tv.tv_usec = 0;
+			php_stream_set_option(net_stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+		}
 
-	if (!memcmp(scheme, "tcp://", sizeof("tcp://") - 1)) {
-		/* TCP -> Set TCP_NODELAY */
-		mysqlnd_set_sock_no_delay(net_stream TSRMLS_CC);
+		if (!memcmp(scheme, "tcp://", sizeof("tcp://") - 1)) {
+			/* TCP -> Set TCP_NODELAY */
+			mysqlnd_set_sock_no_delay(net_stream TSRMLS_CC);
+		}
 	}
 
 	DBG_VOID_RETURN;
@@ -779,6 +781,15 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 		case MYSQL_OPT_COMPRESS:
 			net->data->options.flags |= MYSQLND_NET_FLAG_USE_COMPRESSION;
 			break;
+		case MYSQL_SERVER_PUBLIC_KEY:
+			{
+				zend_bool pers = net->persistent;
+				if (net->data->options.sha256_server_public_key) {
+					mnd_pefree(net->data->options.sha256_server_public_key, pers);
+				}
+				net->data->options.sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
+				break;
+			}
 		default:
 			DBG_RETURN(FAIL);
 	}
@@ -1051,6 +1062,7 @@ static php_stream *
 MYSQLND_METHOD(mysqlnd_net, get_stream)(const MYSQLND_NET * const net TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_net::get_stream");
+	DBG_INF_FMT("%p", net? net->data->stream:NULL);
 	DBG_RETURN(net? net->data->stream:NULL);
 }
 /* }}} */

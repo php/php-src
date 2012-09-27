@@ -19,9 +19,13 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 #include <unicode/timezone.h>
 #include <unicode/calendar.h>
 #include "../intl_convertcpp.h"
+
+#include "../common/common_date.h"
 
 extern "C" {
 #include "../intl_convert.h"
@@ -30,8 +34,6 @@ extern "C" {
 #include "timezone_methods.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
-/* avoid redefinition of int8_t, already defined in unicode/pwin32.h */
-#define _MSC_STDINT_H_ 1
 #include <ext/date/php_date.h>
 }
 
@@ -51,79 +53,6 @@ U_CFUNC void timezone_object_construct(const TimeZone *zone, zval *object, int o
 	TIMEZONE_METHOD_FETCH_OBJECT_NO_CHECK; /* fetch zend object from zval "object" into "to" */
 	to->utimezone = zone;
 	to->should_delete = owned;
-}
-/* }}} */
-
-/* {{{ timezone_convert_datetimezone
- *      The timezone in DateTime and DateTimeZone is not unified. */
-U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
-												void *object,
-												int is_datetime,
-												intl_error *outside_error,
-												const char *func TSRMLS_DC)
-{
-	const char	*id = NULL,
-				offset_id[] = "GMT+00:00";
-	int			id_len = 0;
-	char		*message;
-	TimeZone	*timeZone;
-
-	switch (type) {
-		case TIMELIB_ZONETYPE_ID:
-			id = is_datetime
-				? ((php_date_obj*)object)->time->tz_info->name
-				: ((php_timezone_obj*)object)->tzi.tz->name;
-			id_len = strlen(id);
-			break;
-		case TIMELIB_ZONETYPE_OFFSET: {
-			int offset_mins = is_datetime
-				? -((php_date_obj*)object)->time->z
-				: -(int)((php_timezone_obj*)object)->tzi.utc_offset,
-				hours = offset_mins / 60,
-				minutes = offset_mins - hours * 60;
-			minutes *= minutes > 0 ? 1 : -1;
-
-			if (offset_mins <= -24 * 60 || offset_mins >= 24 * 60) {
-				spprintf(&message, 0, "%s: object has an time zone offset "
-					"that's too large", func);
-				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-					message, 1 TSRMLS_CC);
-				efree(message);
-				return NULL;
-			}
-
-			id = offset_id;
-			id_len = slprintf((char*)id, sizeof(offset_id), "GMT%+03d:%02d",
-				hours, minutes);
-			break;
-		}
-		case TIMELIB_ZONETYPE_ABBR:
-			id = is_datetime
-				? ((php_date_obj*)object)->time->tz_abbr
-				: ((php_timezone_obj*)object)->tzi.z.abbr;
-			id_len = strlen(id);
-			break;
-	}
-
-	UnicodeString s = UnicodeString(id, id_len, US_INV);
-	timeZone = TimeZone::createTimeZone(s);
-#if U_ICU_VERSION_MAJOR_NUM >= 49
-	if (*timeZone == TimeZone::getUnknown()) {
-#else
-	UnicodeString resultingId;
-	timeZone->getID(resultingId);
-	if (resultingId == UnicodeString("Etc/Unknown", -1, US_INV)
-			|| resultingId == UnicodeString("GMT", -1, US_INV)) {
-#endif
-		spprintf(&message, 0, "%s: time zone id '%s' "
-			"extracted from ext/date DateTimeZone not recognized", func, id);
-		intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR,
-			message, 1 TSRMLS_CC);
-		efree(message);
-		delete timeZone;
-		return NULL;
-	}
-	return timeZone;
 }
 /* }}} */
 
@@ -296,7 +225,7 @@ static zend_object_value TimeZone_clone_obj(zval *object TSRMLS_DC)
 	to_orig = (TimeZone_object*)zend_object_store_get_object(object TSRMLS_CC);
 	intl_error_reset(TIMEZONE_ERROR_P(to_orig) TSRMLS_CC);
 
-	ret_val = TimeZone_ce_ptr->create_object(TimeZone_ce_ptr TSRMLS_CC);
+	ret_val = TimeZone_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
 	to_new  = (TimeZone_object*)zend_object_store_get_object_by_handle(
 		ret_val.handle TSRMLS_CC);
 
@@ -524,6 +453,7 @@ ZEND_END_ARG_INFO()
  * Every 'IntlTimeZone' class method has an entry in this table
  */
 static zend_function_entry TimeZone_class_functions[] = {
+	PHP_ME(IntlTimeZone,				__construct,					ainfo_tz_void,				ZEND_ACC_PRIVATE)
 	PHP_ME_MAPPING(createTimeZone,		intltz_create_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(fromDateTimeZone,	intltz_from_date_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createDefault,		intltz_create_default,			ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)

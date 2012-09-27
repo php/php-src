@@ -63,7 +63,7 @@ ZEND_END_MODULE_GLOBALS(recode)
 # define ReSG(v) (recode_globals.v)
 #endif
     
-ZEND_DECLARE_MODULE_GLOBALS(recode);
+ZEND_DECLARE_MODULE_GLOBALS(recode)
 static PHP_GINIT_FUNCTION(recode);
 
 /* {{{ arginfo */

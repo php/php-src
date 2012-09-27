@@ -63,6 +63,7 @@ static zend_object_value ResourceBundle_object_create( zend_class_entry *ce TSRM
 	rb = ecalloc( 1, sizeof(ResourceBundle_object) );
 
 	zend_object_std_init( (zend_object *) rb, ce TSRMLS_CC );
+	object_properties_init((zend_object *) rb, ce);
 
 	intl_error_init( INTL_DATA_ERROR_P(rb) TSRMLS_CC );
 	rb->me = NULL;
@@ -78,13 +79,11 @@ static zend_object_value ResourceBundle_object_create( zend_class_entry *ce TSRM
 /* {{{ ResourceBundle_ctor */
 static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
-	char *    bundlename;
-	int       bundlename_len = 0;
-	char *    locale;
-	int       locale_len = 0;
-	zend_bool fallback = 1;
-
-	char *    pbuf;
+	const char	*bundlename;
+	int			bundlename_len = 0;
+	const char	*locale;
+	int			locale_len = 0;
+	zend_bool	fallback = 1;
 
 	zval                  *object = return_value;
 	ResourceBundle_object *rb = (ResourceBundle_object *) zend_object_store_get_object( object TSRMLS_CC);
@@ -116,6 +115,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (!fallback && (INTL_DATA_ERROR_CODE(rb) == U_USING_FALLBACK_WARNING ||
 			INTL_DATA_ERROR_CODE(rb) == U_USING_DEFAULT_WARNING)) {
+		char *pbuf;
 		intl_errors_set_code(NULL, INTL_DATA_ERROR_CODE(rb) TSRMLS_CC);
 		spprintf(&pbuf, 0, "resourcebundle_ctor: Cannot load libICU resource "
 				"'%s' without fallback from %s to %s",
@@ -260,7 +260,14 @@ PHP_FUNCTION( resourcebundle_get )
 /* {{{ resourcebundle_array_count */
 int resourcebundle_array_count(zval *object, long *count TSRMLS_DC) 
 {
-	ResourceBundle_object *rb = (ResourceBundle_object *) zend_object_store_get_object( object TSRMLS_CC);
+	ResourceBundle_object *rb;
+	RESOURCEBUNDLE_METHOD_FETCH_OBJECT_NO_CHECK;
+
+	if (rb->me == NULL) {
+		intl_errors_set(&rb->error, U_ILLEGAL_ARGUMENT_ERROR,
+				"Found unconstructed ResourceBundle", 0 TSRMLS_CC);
+		return 0;
+	}
 
 	*count = ures_getSize( rb->me );
 

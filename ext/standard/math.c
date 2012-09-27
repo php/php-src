@@ -1120,6 +1120,10 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 	tmplen = spprintf(&tmpbuf, 0, "%.*F", dec, d);
 
 	if (tmpbuf == NULL || !isdigit((int)tmpbuf[0])) {
+		if (result_len) {
+			*result_len = tmplen;
+		}
+
 		return tmpbuf;
 	}
 

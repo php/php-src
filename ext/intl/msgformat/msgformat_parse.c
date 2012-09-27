@@ -126,14 +126,16 @@ PHP_FUNCTION( msgfmt_parse_message )
 	}
 
 	if(slocale_len == 0) {
-		slocale = INTL_G(default_locale);
+		slocale = intl_locale_get_default(TSRMLS_C);
 	}
 
+#ifdef MSG_FORMAT_QUOTE_APOS
 	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
 		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
 			"msgfmt_parse_message: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
 		RETURN_FALSE;
 	}
+#endif
 
 	/* Create an ICU message formatter. */
 	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, slocale, NULL, &INTL_DATA_ERROR_CODE(mfo));

@@ -2,6 +2,7 @@
 PDO_Firebird: prepare/execute/binding
 --SKIPIF--
 <?php include("skipif.inc"); ?>
+<?php function_exists("ibase_query") or die("skip"); ?>
 --INI--
 ibase.timestampformat=%Y-%m-%d %H:%M:%S
 --FILE--

@@ -214,7 +214,7 @@ PHPAPI void php_output_register_constants(TSRMLS_D)
  * Used by SAPIs to disable output */
 PHPAPI void php_output_set_status(int status TSRMLS_DC)
 {
-	OG(flags) = status & 0xf;
+	OG(flags) = (OG(flags) & ~0xf) | (status & 0xf);
 }
 /* }}} */
 

@@ -18,11 +18,11 @@
 
 /* $Id$ */
 
-#if defined(MCAST_JOIN_GROUP)
+#if defined(MCAST_JOIN_GROUP) && !defined(__APPLE__)
 #define RFC3678_API 1
 /* has block/unblock and source membership, in this case for both IPv4 and IPv6 */
 #define HAS_MCAST_EXT 1
-#elif defined(IP_ADD_SOURCE_MEMBERSHIP)
+#elif defined(IP_ADD_SOURCE_MEMBERSHIP) && !defined(__APPLE__)
 /* has block/unblock and source membership, but only for IPv4 */
 #define HAS_MCAST_EXT 1
 #endif

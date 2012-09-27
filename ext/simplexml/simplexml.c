@@ -1417,7 +1417,11 @@ SXE_METHOD(asXML)
 
 			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, ((xmlDocPtr) sxe->document->ptr)->encoding);
 			xmlOutputBufferFlush(outbuf);
+#ifdef LIBXML2_NEW_BUFFER
+			RETVAL_STRINGL((char *)xmlOutputBufferGetContent(outbuf), xmlOutputBufferGetSize(outbuf), 1);
+#else
 			RETVAL_STRINGL((char *)outbuf->buffer->content, outbuf->buffer->use, 1);
+#endif
 			xmlOutputBufferClose(outbuf);
 		}
 	} else {
@@ -1513,22 +1517,28 @@ static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, 
 }
 /* }}} */
 
-/* {{{ proto string SimpleXMLElement::getDocNamespaces([bool recursive])
+/* {{{ proto string SimpleXMLElement::getDocNamespaces([bool recursive [, bool from_root])
    Return all namespaces registered with document */
 SXE_METHOD(getDocNamespaces)
 {
-	zend_bool           recursive = 0;
+	zend_bool           recursive = 0, from_root = 1;
 	php_sxe_object     *sxe;
+	xmlNodePtr          node;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &recursive) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bb", &recursive, &from_root) == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
 
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+	if(from_root){
+		node = xmlDocGetRootElement((xmlDocPtr)sxe->document->ptr);
+	}else{
+		GET_NODE(sxe, node);
+	}
 
-	sxe_add_registered_namespaces(sxe, xmlDocGetRootElement((xmlDocPtr)sxe->document->ptr), recursive, return_value TSRMLS_CC);
+	sxe_add_registered_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -2518,6 +2528,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_getnamespaces, 0, 0, 0)
 	ZEND_ARG_INFO(0, recursve)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_getdocnamespaces, 0, 0, 0)
+	ZEND_ARG_INFO(0, recursve)
+	ZEND_ARG_INFO(0, from_root)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_children, 0, 0, 0)
 	ZEND_ARG_INFO(0, ns)
 	ZEND_ARG_INFO(0, is_prefix)
@@ -2586,7 +2601,7 @@ static const zend_function_entry sxe_functions[] = { /* {{{ */
 	SXE_ME(attributes,             arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
 	SXE_ME(children,               arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
 	SXE_ME(getNamespaces,          arginfo_simplexmlelement_getnamespaces, ZEND_ACC_PUBLIC)
-	SXE_ME(getDocNamespaces,       arginfo_simplexmlelement_getnamespaces, ZEND_ACC_PUBLIC)
+	SXE_ME(getDocNamespaces,       arginfo_simplexmlelement_getdocnamespaces, ZEND_ACC_PUBLIC)
 	SXE_ME(getName,                arginfo_simplexmlelement__void, ZEND_ACC_PUBLIC)
 	SXE_ME(addChild,               arginfo_simplexmlelement_addchild, ZEND_ACC_PUBLIC)
 	SXE_ME(addAttribute,           arginfo_simplexmlelement_addchild, ZEND_ACC_PUBLIC)

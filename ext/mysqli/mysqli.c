@@ -162,7 +162,7 @@ void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC)
 {
 	if (stmt->stmt) {
 		if (mysqli_stmt_close(stmt->stmt, TRUE)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error occured while closing statement");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error occurred while closing statement");
 			return;
 		}
 	}
@@ -698,6 +698,8 @@ PHP_MINIT_FUNCTION(mysqli)
 #if MYSQL_VERSION_ID > 50110 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_SSL_VERIFY_SERVER_CERT", MYSQL_OPT_SSL_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
 #endif
+
+	REGISTER_LONG_CONSTANT("MYSQLI_SERVER_PUBLIC_KEY", MYSQL_SERVER_PUBLIC_KEY, CONST_CS | CONST_PERSISTENT);
 
 	/* mysqli_real_connect flags */
 	REGISTER_LONG_CONSTANT("MYSQLI_CLIENT_SSL", CLIENT_SSL, CONST_CS | CONST_PERSISTENT);

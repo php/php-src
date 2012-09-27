@@ -262,8 +262,10 @@ PHPAPI void			_mysqlnd_get_client_stats(zval *return_value TSRMLS_DC ZEND_FILE_L
 ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	zend_bool		collect_statistics;
 	zend_bool		collect_memory_statistics;
-	char*			debug;	/* The actual string */
-	MYSQLND_DEBUG	*dbg;	/* The DBG object */
+	char *			debug;	/* The actual string */
+	char *			trace_alloc_settings;	/* The actual string */
+	MYSQLND_DEBUG *	dbg;	/* The DBG object for standard tracing */
+	MYSQLND_DEBUG *	trace_alloc;	/* The DBG object for allocation tracing */
 	long			net_cmd_buffer_size;
 	long			net_read_buffer_size;
 	long			log_mask;
@@ -275,6 +277,7 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqlnd)
 	long			debug_malloc_fail_threshold;
 	long			debug_calloc_fail_threshold;
 	long			debug_realloc_fail_threshold;
+	char *			sha256_server_public_key;
 ZEND_END_MODULE_GLOBALS(mysqlnd)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(mysqlnd)

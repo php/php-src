@@ -2,6 +2,7 @@
 PDO_Firebird: rowCount
 --SKIPIF--
 <?php extension_loaded("pdo_firebird") or die("skip"); ?>
+<?php function_exists("ibase_query") or die("skip"); ?>
 --FILE--
 <?php /* $Id$ */
 
