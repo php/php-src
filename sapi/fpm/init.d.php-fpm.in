@@ -54,7 +54,7 @@ case "$1" in
 	start)
 		echo -n "Starting php-fpm "
 
-		$php_fpm_BIN $php_opts
+		$php_fpm_BIN --daemonize $php_opts
 
 		if [ "$?" != 0 ] ; then
 			echo " failed"
