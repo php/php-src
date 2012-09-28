@@ -36,6 +36,7 @@ PHP                                                                        NEWS
   . Fixed bug #63085 (Systemd integration and daemonize). (remi, fat)
   . Fixed bug #62947 (Unneccesary warnings on FPM). (fat)
   . Fixed bug #62887 (Only /status?plain&full gives "last request cpu"). (fat)
+  . Fixed bug #62216 (Add PID to php-fpm init.d script). (fat)
 
 - OpenSSL:
   . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 
