@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug #60723 (error_log error time has changed to UTC ignoring default
     timezo). (Laruence)
 
+- cURL:
+  . Fixed bug #62085 (file_get_contents a remote file by Curl wrapper will
+    cause cpu Soaring). (Pierrick)
+
 - DOM:
   . Fixed bug #63015 (Incorrect arginfo for DOMErrorHandler). (Rob)
 
