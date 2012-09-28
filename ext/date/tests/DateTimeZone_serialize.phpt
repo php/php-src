@@ -18,12 +18,18 @@ var_dump( $tz2->getName() );
 ?>
 ===DONE=== 
 --EXPECTF--
-object(DateTimeZone)#%d (0) {
+object(DateTimeZone)#%d (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(16) "America/New_York"
 }
-string(24) "O:12:"DateTimeZone":0:{}"
-object(DateTimeZone)#%d (0) {
+string(88) "O:12:"DateTimeZone":2:{s:13:"timezone_type";i:3;s:8:"timezone";s:16:"America/New_York";}"
+object(DateTimeZone)#%d (2) {
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(16) "America/New_York"
 }
-
-Warning: DateTimeZone::getName(): The DateTimeZone object has not been correctly initialized by its constructor in %s on line %d
-bool(false)
+string(16) "America/New_York"
 ===DONE===

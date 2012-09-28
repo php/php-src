@@ -71,6 +71,8 @@ PHP_FUNCTION(date_timestamp_set);
 PHP_FUNCTION(date_timestamp_get);
 
 PHP_METHOD(DateTimeZone, __construct);
+PHP_METHOD(DateTimeZone, __wakeup);
+PHP_METHOD(DateTimeZone, __set_state);
 PHP_FUNCTION(timezone_open);
 PHP_FUNCTION(timezone_name_get);
 PHP_FUNCTION(timezone_name_from_abbr);
@@ -129,6 +131,7 @@ struct _php_timezone_obj {
 			int          dst;
 		} z;
 	} tzi;
+	HashTable *props;
 };
 
 struct _php_interval_obj {
