@@ -162,6 +162,10 @@ static size_t php_curl_stream_read(php_stream *stream, char *buf, size_t count T
 		}
 		
 		do {
+			FD_ZERO(&curlstream->readfds);
+			FD_ZERO(&curlstream->writefds);
+			FD_ZERO(&curlstream->excfds);
+
 			/* get the descriptors from curl */
 			curl_multi_fdset(curlstream->multi, &curlstream->readfds, &curlstream->writefds, &curlstream->excfds, &curlstream->maxfd);
 
