@@ -582,8 +582,8 @@ mysqlnd_run_authentication(
 			scrambled_data =
 				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
 												   plugin_data, plugin_data_len, options, &conn->net->data->options, mysql_flags TSRMLS_CC);
-			if (!scrambled_data || conn->error_info->error_no) {
-				goto end;			
+			if (conn->error_info->error_no) {
+				goto end;	
 			}
 			if (FALSE == is_change_user) {
 				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, options, mysql_flags,
