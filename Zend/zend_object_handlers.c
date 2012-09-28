@@ -751,7 +751,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const ze
 	zval tmp_member;
 	zval **retval;
 	zend_property_info *property_info;
-	zend_function 		*getter = zend_locate_getter(object, member, key TSRMLS_CC);
+	zend_function 		*getter = NULL;
 
 	zobj = Z_OBJ_P(object);
 
@@ -767,6 +767,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, const ze
 	fprintf(stderr, "Ptr object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
 #endif
 
+ 	getter = zend_locate_getter(object, member, key TSRMLS_CC);
 	property_info = zend_get_property_info_quick(zobj->ce, member, (getter != NULL), key TSRMLS_CC);
 
 	if (UNEXPECTED(!property_info) ||
