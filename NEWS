@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #60909 (custom error handler throwing Exception + fatal error
     = no shutdown function). (Dmitry)
 
+- cURL:
+  . Fixed bug #62085 (file_get_contents a remote file by Curl wrapper will
+    cause cpu Soaring). (Pierrick)
+
 - FPM:
   . Fixed bug #62954 (startup problems fpm / php-fpm). (fat)
   . Fixed bug #62886 (PHP-FPM may segfault/hang on startup). (fat)
