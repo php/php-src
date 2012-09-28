@@ -1059,10 +1059,33 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	/* If the password is defined, we need to account for special chars */
 	if (dbh->password) {
 		password_len = strlen(dbh->password);
+
 		/* If the password isn't already quoted, let's quote it */
 		if (dbh->password[0] != '\'' && dbh->password[password_len - 1] != '\'') {
-			tmp_pass = emalloc(sizeof(dbh->password) + 3);
-			snprintf(tmp_pass, sizeof(dbh->password) + 3, "'%s'", dbh->password);
+			char *source, *target, *end;
+			int new_password_length = 0;
+			tmp_pass = (char *) safe_emalloc(2, password_len, 1);
+			source = dbh->password;
+			end = source + password_len;
+			target = tmp_pass;
+			*target++ = '\'';
+
+			while (source < end) {
+				switch (*source) {
+					case '\'':
+						*target++ = '\\';
+					default:
+						*target++ = *source;
+						break;
+				}
+
+				source++;
+			}
+
+			*target++ = '\'';
+			*target++ = 0;
+			new_password_length = target - tmp_pass;
+			tmp_pass = (char *) erealloc(tmp_pass, new_password_length);
 		} else {
 			/* Our default is to just use what password has been provided -
 			 * assuming it is already surrounded by quotes. This keeps BC for
