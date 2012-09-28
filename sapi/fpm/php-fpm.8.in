@@ -99,6 +99,20 @@ Test FPM configuration file and exit
 If called twice (-tt), the configuration is dumped before exiting.
 .TP
 .PD 0
+.B \-\-daemonize
+.TP
+.PD 1
+.B \-D
+Force to run in background and ignore daemonize option from configuration file.
+.TP
+.PD 0
+.B \-\-nodaemonize
+.TP
+.PD 1
+.B \-F
+Force to stay in foreground and ignore daemonize option from configuration file.
+.TP
+.PD 0
 .B \-\-zend\-extension \fIfile\fP
 .TP
 .PD 1
@@ -113,11 +127,18 @@ The configuration file for the php-fpm daemon.
 .B php.ini
 The standard php configuration file.
 .SH EXAMPLES
-You should use the init script provided to start and stop the php-fpm daemon. This situation applies for any unix systems which use init.d for their main process manager.
+For any unix systems which use init.d for their main process manager, you should use the init script provided to start and stop the php-fpm daemon.
 .P
 .PD 1
 .RS
 sudo /etc/init.d/php-fpm start
+.RE
+.TP
+For any unix systems which use systemd for their main process manager, you should use the unit file provided to start and stop the php-fpm daemon.
+.P
+.PD 1
+.RS
+sudo systemctl start php-fpm.service
 .RE
 .TP
 If your installation has no appropriate init script, launch php-fpm with no arguments. It will launch as a daemon (background process) by default. The file @php_fpm_localstatedir@/run/php-fpm.pid determines whether php-fpm is already up and running. Once started, php-fpm then responds to several POSIX signals:
