@@ -581,6 +581,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 
 
 	if (conn->net->data->ssl) {
+		DBG_INF("simple clear text under SSL");
 		/* clear text under SSL */
 		*auth_data_len = passwd_len;
 		ret = malloc(passwd_len);
