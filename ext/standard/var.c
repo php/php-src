@@ -639,6 +639,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		HashPosition pos;
 		int i;
 		zval nval, *nvalp;
+		HashTable *propers;
 
 		ZVAL_NULL(&nval);
 		nvalp = &nval;
@@ -664,7 +665,8 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 				smart_str_appendl(buf,"N;", 2);
 				continue;
 			}
-			if (zend_hash_find(Z_OBJPROP_P(struc), Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, (void *) &d) == SUCCESS) {
+			propers = Z_OBJPROP_P(struc);
+			if (zend_hash_find(propers, Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, (void *) &d) == SUCCESS) {
 				php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
 				php_var_serialize_intern(buf, *d, var_hash TSRMLS_CC);
 			} else {
@@ -676,7 +678,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 
 					do {
 						zend_mangle_property_name(&priv_name, &prop_name_length, ce->name, ce->name_length, Z_STRVAL_PP(name), Z_STRLEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
-						if (zend_hash_find(Z_OBJPROP_P(struc), priv_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
+						if (zend_hash_find(propers, priv_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
 							php_var_serialize_string(buf, priv_name, prop_name_length);
 							pefree(priv_name, ce->type & ZEND_INTERNAL_CLASS);
 							php_var_serialize_intern(buf, *d, var_hash TSRMLS_CC);
@@ -684,7 +686,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 						}
 						pefree(priv_name, ce->type & ZEND_INTERNAL_CLASS);
 						zend_mangle_property_name(&prot_name, &prop_name_length, "*", 1, Z_STRVAL_PP(name), Z_STRLEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
-						if (zend_hash_find(Z_OBJPROP_P(struc), prot_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
+						if (zend_hash_find(propers, prot_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
 							php_var_serialize_string(buf, prot_name, prop_name_length);
 							pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
 							php_var_serialize_intern(buf, *d, var_hash TSRMLS_CC);

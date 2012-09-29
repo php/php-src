@@ -97,7 +97,7 @@ enum {
 	PM_STYLE_ONDEMAND = 3
 };
 
-int fpm_conf_init_main(int test_conf);
+int fpm_conf_init_main(int test_conf, int force_daemon);
 int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc);
 int fpm_conf_write_pid();
 int fpm_conf_unlink_pid();

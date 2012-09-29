@@ -3975,8 +3975,10 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 			/** Resolve classes for all precedence operations. */
 			if (cur_precedence->exclude_from_classes) {
 				cur_method_ref = cur_precedence->trait_method;
-				cur_precedence->trait_method->ce = zend_fetch_class(cur_method_ref->class_name,
-																	cur_method_ref->cname_len, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
+				if (!(cur_precedence->trait_method->ce = zend_fetch_class(cur_method_ref->class_name, cur_method_ref->cname_len,
+								ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD TSRMLS_CC))) {
+					zend_error(E_COMPILE_ERROR, "Could not find trait %s", cur_method_ref->class_name);
+				}
 
 				/** Ensure that the prefered method is actually available. */
 				lcname = zend_str_tolower_dup(cur_method_ref->method_name,
@@ -4003,7 +4005,9 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 					char* class_name = (char*)cur_precedence->exclude_from_classes[j];
 					zend_uint name_length = strlen(class_name);
 
-					cur_precedence->exclude_from_classes[j] = zend_fetch_class(class_name, name_length, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
+					if (!(cur_precedence->exclude_from_classes[j] = zend_fetch_class(class_name, name_length, ZEND_FETCH_CLASS_TRAIT |ZEND_FETCH_CLASS_NO_AUTOLOAD TSRMLS_CC))) {
+						zend_error(E_COMPILE_ERROR, "Could not find trait %s", class_name);
+					}
 					
 					/* make sure that the trait method is not from a class mentioned in
 					 exclude_from_classes, for consistency */
@@ -4030,7 +4034,9 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 			/** For all aliases with an explicit class name, resolve the class now. */
 			if (ce->trait_aliases[i]->trait_method->class_name) {
 				cur_method_ref = ce->trait_aliases[i]->trait_method;
-				cur_method_ref->ce = zend_fetch_class(cur_method_ref->class_name, cur_method_ref->cname_len, ZEND_FETCH_CLASS_TRAIT TSRMLS_CC);
+				if (!(cur_method_ref->ce = zend_fetch_class(cur_method_ref->class_name, cur_method_ref->cname_len, ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD TSRMLS_CC))) {
+					zend_error(E_COMPILE_ERROR, "Could not find trait %s", cur_method_ref->class_name);
+				}
 
 				/** And, ensure that the referenced method is resolvable, too. */
 				lcname = zend_str_tolower_dup(cur_method_ref->method_name,

@@ -155,6 +155,8 @@ static const opt_struct OPTIONS[] = {
 	{'p', 1, "prefix"},
 	{'g', 1, "pid"},
 	{'R', 0, "allow-to-run-as-root"},
+	{'D', 0, "daemonize"},
+	{'F', 0, "nodaemonize"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -912,7 +914,7 @@ static void php_cgi_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-t] [-p <prefix>] [-g <pid>] [-c <file>] [-d foo[=bar]] [-y <file>]\n"
+	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-t] [-p <prefix>] [-g <pid>] [-c <file>] [-d foo[=bar]] [-y <file>] [-D] [-F]\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
 				"  -n               No php.ini file will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
@@ -928,6 +930,9 @@ static void php_cgi_usage(char *argv0)
 				"  -y, --fpm-config <file>\n"
 				"                   Specify alternative path to FastCGI process manager config file.\n"
 				"  -t, --test       Test FPM configuration and exit\n"
+				"  -D, --daemonize  force to run in background, and ignore daemonize option from config file\n"
+				"  -F, --nodaemonize\n"
+				"                   force to stay in foreground, and ignore daemonize option from config file\n"
 				"  -R, --allow-to-run-as-root\n"
 				"                   Allow pool to run as root (disabled by default)\n",
 				prog, PHP_PREFIX);
@@ -1550,6 +1555,7 @@ int main(int argc, char *argv[])
 	char *fpm_prefix = NULL;
 	char *fpm_pid = NULL;
 	int test_conf = 0;
+	int force_daemon = -1;
 	int php_information = 0;
 	int php_allow_to_run_as_root = 0;
 
@@ -1668,6 +1674,14 @@ int main(int argc, char *argv[])
 
 			case 'R': /* allow to run as root */
 				php_allow_to_run_as_root = 1;
+				break;
+
+			case 'D': /* daemonize */
+				force_daemon = 1;
+				break;
+
+			case 'F': /* nodaemonize */
+				force_daemon = 0;
 				break;
 
 			default:
@@ -1797,18 +1811,22 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root)) {
+	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon)) {
 
-		if (fpm_globals.send_config_signal) {
-			zlog(ZLOG_DEBUG, "Sending SIGUSR2 (error) to parent %d", getppid());
-			kill(getppid(), SIGUSR2);
+		if (fpm_globals.send_config_pipe[1]) {
+			int writeval = 0;
+			zlog(ZLOG_DEBUG, "Sending \"0\" (error) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
+			write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
+			close(fpm_globals.send_config_pipe[1]);
 		}
 		return FPM_EXIT_CONFIG;
 	}
 
-	if (fpm_globals.send_config_signal) {
-		zlog(ZLOG_DEBUG, "Sending SIGUSR1 (OK) to parent %d", getppid());
-		kill(getppid(), SIGUSR1);
+	if (fpm_globals.send_config_pipe[1]) {
+		int writeval = 1;
+		zlog(ZLOG_DEBUG, "Sending \"1\" (OK) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
+		write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
+		close(fpm_globals.send_config_pipe[1]);
 	}
 	fpm_is_running = 1;
 
