@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.5.0
 
 - General improvements:
+  . Add simplified password hashing API 
+    (https://wiki.php.net/rfc/password_hash). (Anthony Ferrara)
   . Add generators and coroutines (https://wiki.php.net/rfc/generators).
     (Nikita Popov)
   . Support list in foreach (https://wiki.php.net/rfc/foreachlist). (Laruence)
@@ -83,5 +85,9 @@ PHP                                                                        NEWS
 
 - Zip:
   . Upgraded libzip to 0.10.1 (Anatoliy)
+
+- Fileinfo:
+  . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
+      (Anatoliy)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
