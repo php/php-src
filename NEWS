@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.9
 
+- Fileinfo:
+  . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
+    (Anatoliy)
+
 ?? ??? 2012, PHP 5.4.8
 
 - CLI server:
