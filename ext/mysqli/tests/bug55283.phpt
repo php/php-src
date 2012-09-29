@@ -29,7 +29,7 @@ if ($res = $link->query('SHOW VARIABLES LIKE "have_ssl"')) {
 if (empty($row))
 	die(sprintf("skip Failed to test for MySQL SSL support, [%d] %s", $link->errno, $link->error));
 
-if ($row[1] == 'NO')
+if (($row[1] == 'NO') || ($row[1] == 'DISABLED'))
 	die(sprintf("skip MySQL has no SSL support, [%d] %s", $link->errno, $link->error));
 
 $link->close();
@@ -41,7 +41,7 @@ $link->close();
 
 
 	$flags = MYSQLI_CLIENT_SSL;
-	
+
 	$link = mysqli_init();
 	mysqli_ssl_set($link, null, null, null, null, "RC4-MD5");
 	if (my_mysqli_real_connect($link, 'p:' . $host, $user, $passwd, $db, $port, null, $flags)) {
