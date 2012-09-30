@@ -47,23 +47,34 @@ define dump_bt
 					if $fst.function.common.scope
 						printf "%s->", $fst.function.common.scope->name
 					else
-						____executor_globals
-						set $class_name_ptr = (char **)malloc(sizeof(char **))
-						set $class_name_len = (int *)malloc(sizeof(int *))
-
-						if basic_functions_module.zts
-							set $dup = zend_get_object_classname($t->object, $class_name_ptr, $class_name_len, $tsrm_ls)
-						else
-							set $dup = zend_get_object_classname($t->object, $class_name_ptr, $class_name_len)
+						if !$eg && !basic_functions_module.zts
+							____executor_globals
 						end
 
-						printf "%s->", *$class_name_ptr
+						set $known_class = 0
+						if $eg
+							set $handle = $t->object.value.obj.handle
+							set $handlers = $t->object.value.obj.handlers
+							set $zobj = (zend_object *)$eg.objects_store.object_buckets[$handle].bucket.obj.object
 
-						if !$dup
-							call _efree(*$class_name_ptr, "[GDB]", 0, "", 0)
+							if $handlers->get_class_entry == &zend_std_object_get_class
+								set $known_class = 1
+
+								if $handlers.get_class_name
+									if $handlers.get_class_name != &zend_std_object_get_class_name
+										set $known_class = 0
+									end
+								end
+
+								if $known_class
+									printf "%s->", $zobj->ce.name
+								end
+							end
 						end
-						call (void) free($class_name_ptr)
-						call (void) free($class_name_len)
+
+						if !$known_class
+							printf "Unknow->"
+						end
 					end
 				else
 					if $fst.function.common.scope
