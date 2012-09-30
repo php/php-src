@@ -44,9 +44,10 @@ define dump_bt
 				set $count = (int)*($fst.arguments)
 
 				if $t->object
-					if $fst.function.common.scope->name
+					if $fst.function.common.scope
 						printf "%s->", $fst.function.common.scope->name
 					else
+						____executor_globals
 						set $class_name_ptr = (char **)malloc(sizeof(char **))
 						set $class_name_len = (int *)malloc(sizeof(int *))
 
