@@ -1256,6 +1256,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 0, (void **) &obj);
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 1, (void **) &method);
 
+			if (!obj || !method) {
+				zend_error_noreturn(E_ERROR, "Array callback has to contain indices 0 and 1");
+			}
+
 			if (Z_TYPE_PP(obj) != IS_STRING && Z_TYPE_PP(obj) != IS_OBJECT) {
 				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");
 			}
@@ -1558,6 +1562,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 0, (void **) &obj);
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 1, (void **) &method);
 
+			if (!obj || !method) {
+				zend_error_noreturn(E_ERROR, "Array callback has to contain indices 0 and 1");
+			}
+
 			if (Z_TYPE_PP(obj) != IS_STRING && Z_TYPE_PP(obj) != IS_OBJECT) {
 				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");
 			}
@@ -1721,6 +1729,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 0, (void **) &obj);
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 1, (void **) &method);
+
+			if (!obj || !method) {
+				zend_error_noreturn(E_ERROR, "Array callback has to contain indices 0 and 1");
+			}
 
 			if (Z_TYPE_PP(obj) != IS_STRING && Z_TYPE_PP(obj) != IS_OBJECT) {
 				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");
@@ -1918,6 +1930,10 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 0, (void **) &obj);
 			zend_hash_index_find(Z_ARRVAL_P(function_name), 1, (void **) &method);
+
+			if (!obj || !method) {
+				zend_error_noreturn(E_ERROR, "Array callback has to contain indices 0 and 1");
+			}
 
 			if (Z_TYPE_PP(obj) != IS_STRING && Z_TYPE_PP(obj) != IS_OBJECT) {
 				zend_error_noreturn(E_ERROR, "First array member is not a valid class name or object");

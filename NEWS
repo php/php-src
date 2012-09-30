@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Added optional second argument for assert() to specify custom message. Patch
     by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
   . Support building PHP with the native client toolchain. (Stuart Langley)
+  . Fixed bug #63111 (is_callable() lies for abstract static method). (Dmitry)
   . Fixed bug #63093 (Segfault while load extension failed in zts-build).
     (Laruence)
   . Fixed bug #62976 (Notice: could not be converted to int when comparing
@@ -23,6 +24,23 @@ PHP                                                                        NEWS
     situation). (Dmitry)
   . Fixed bug #60909 (custom error handler throwing Exception + fatal error
     = no shutdown function). (Dmitry)
+  . Fixed bug #60723 (error_log error time has changed to UTC ignoring default
+    timezo). (Laruence)
+
+- cURL:
+  . Fixed bug #62085 (file_get_contents a remote file by Curl wrapper will
+    cause cpu Soaring). (Pierrick)
+
+- DOM:
+  . Fixed bug #63015 (Incorrect arginfo for DOMErrorHandler). (Rob)
+
+- FPM:
+  . Fixed bug #62954 (startup problems fpm / php-fpm). (fat)
+  . Fixed bug #62886 (PHP-FPM may segfault/hang on startup). (fat)
+  . Fixed bug #63085 (Systemd integration and daemonize). (remi, fat)
+  . Fixed bug #62947 (Unneccesary warnings on FPM). (fat)
+  . Fixed bug #62887 (Only /status?plain&full gives "last request cpu"). (fat)
+  . Fixed bug #62216 (Add PID to php-fpm init.d script). (fat)
 
 - OpenSSL:
   . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 
@@ -43,6 +61,10 @@ PHP                                                                        NEWS
 - Filter extension:
   . Bug #49510: Boolean validation fails with FILTER_NULL_ON_FAILURE with empty
     string or false. (Lars)
+
+- Sockets
+  . Fixed bug #63000 (MCAST_JOIN_GROUP on OSX is broken, merge of PR 185 by
+    Igor Wiedler). (Lars)
 
 ?? ??? 2012, PHP 5.4.7
 
@@ -247,7 +269,7 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
-    
+
 - SPL:
   . Fixed bug #62433 (Inconsistent behavior of RecursiveDirectoryIterator to
     dot files). (Laruence)
