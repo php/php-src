@@ -35,14 +35,14 @@ array(9) {
     string(12) "DateTimeZone"
   }
   [1]=>
-  &object(ReflectionMethod)#3 (2) {
+  &object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(8) "__wakeup"
     ["class"]=>
     string(12) "DateTimeZone"
   }
   [2]=>
-  &object(ReflectionMethod)#4 (2) {
+  &object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(11) "__set_state"
     ["class"]=>
