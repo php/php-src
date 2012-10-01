@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Added optional second argument for assert() to specify custom message. Patch
     by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
   . Support building PHP with the native client toolchain. (Stuart Langley)
+  . Fixed bug #63162 (parse_url does not match password component). (husman)
   . Fixed bug #63111 (is_callable() lies for abstract static method). (Dmitry)
   . Fixed bug #63093 (Segfault while load extension failed in zts-build).
     (Laruence)
