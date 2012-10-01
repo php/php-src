@@ -25,7 +25,7 @@ PHP                                                                        NEWS
   . Fixed bug #60909 (custom error handler throwing Exception + fatal error
     = no shutdown function). (Dmitry)
   . Fixed bug #60723 (error_log error time has changed to UTC ignoring default
-    timezo). (Laruence)
+    timezone). (Laruence)
 
 - cURL:
   . Fixed bug #62085 (file_get_contents a remote file by Curl wrapper will
@@ -66,7 +66,7 @@ PHP                                                                        NEWS
   . Fixed bug #63000 (MCAST_JOIN_GROUP on OSX is broken, merge of PR 185 by
     Igor Wiedler). (Lars)
 
-?? ??? 2012, PHP 5.4.7
+13 Sep 2012, PHP 5.4.7
 
 - Core:
   . Fixed bug (segfault while build with zts and GOTO vm-kind). (Laruence)
