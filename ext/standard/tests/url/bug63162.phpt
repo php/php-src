@@ -22,7 +22,6 @@ array(4) {
   ["pass"]=>
   string(4) "pass"
 }
-
 array(3) {
   ["host"]=>
   string(4) "host"
@@ -31,7 +30,6 @@ array(3) {
   ["pass"]=>
   string(4) "pass"
 }
-
 array(2) {
   ["host"]=>
   string(4) "host"
