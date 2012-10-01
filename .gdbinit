@@ -1,6 +1,19 @@
+define set_ts
+	set $tsrm_ls = $arg0
+end
+
+document set_ts
+	set the ts resource, it is impossible for gdb to
+	call ts_resource_ex while no process is running,
+	but we could get the resource from the argument 
+	of frame info.
+end
+
 define ____executor_globals
 	if basic_functions_module.zts
-		set $tsrm_ls = ts_resource_ex(0, 0)
+		if !$tsrm_ls
+			set $tsrm_ls = ts_resource_ex(0, 0)
+		end
 		set $eg = ((zend_executor_globals*) (*((void ***) $tsrm_ls))[executor_globals_id-1])
 		set $cg = ((zend_compiler_globals*) (*((void ***) $tsrm_ls))[compiler_globals_id-1])
 	else
@@ -47,7 +60,7 @@ define dump_bt
 					if $fst.function.common.scope
 						printf "%s->", $fst.function.common.scope->name
 					else
-						if !$eg && !basic_functions_module.zts
+						if !$eg
 							____executor_globals
 						end
 
@@ -73,7 +86,7 @@ define dump_bt
 						end
 
 						if !$known_class
-							printf "Unknown->"
+							printf "(Unknown)->"
 						end
 					end
 				else
