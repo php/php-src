@@ -33,6 +33,11 @@ PHP                                                                        NEWS
   . Fixed bug #62085 (file_get_contents a remote file by Curl wrapper will
     cause cpu Soaring). (Pierrick)
 
+- Date:
+  . Fixed bug #62896 ("DateTime->modify('+0 days')" modifies DateTime object)
+    (Lonny Kapelushnik)
+  . Fixed bug #62561 (DateTime add 'P1D' adds 25 hours). (Lonny Kapelushnik)
+
 - DOM:
   . Fixed bug #63015 (Incorrect arginfo for DOMErrorHandler). (Rob)
 
