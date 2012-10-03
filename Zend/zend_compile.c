@@ -7828,7 +7828,11 @@ zend_accessor_info *zend_get_accessor_from_init_static_method_call(zend_op_array
 			op2zv = &op_array->literals[opline->op2.constant].constant;
 		else
 			op2zv = opline->op2.zv;
+	} else {
+		/* we only handle cases where op2_type == IS_CONST */
+		return NULL;
 	}
+
 
 	if(op2zv->type == IS_STRING && (memcmp(Z_STRVAL_P(op2zv),"__get", 5) == 0 || memcmp(Z_STRVAL_P(op2zv),"__set", 5) == 0)) {
 		zend_class_entry	**classpp = NULL;
