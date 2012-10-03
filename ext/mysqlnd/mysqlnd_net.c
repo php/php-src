@@ -908,6 +908,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot connect to MySQL by using SSL");
 		DBG_RETURN(FAIL);
 	}
+	net->data->ssl = TRUE;
 	/*
 	  get rid of the context. we are persistent and if this is a real pconn used by mysql/mysqli,
 	  then the context would not survive cleaning of EG(regular_list), where it is registered, as a

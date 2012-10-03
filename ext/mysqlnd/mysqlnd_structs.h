@@ -797,6 +797,7 @@ struct st_mysqlnd_net_data
 {
 	php_stream			*stream;
 	zend_bool			compressed;
+	zend_bool			ssl;
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 	zend_uchar			last_command;
 #else
