@@ -1,6 +1,19 @@
+define set_ts
+	set $tsrm_ls = $arg0
+end
+
+document set_ts
+	set the ts resource, it is impossible for gdb to
+	call ts_resource_ex while no process is running,
+	but we could get the resource from the argument 
+	of frame info.
+end
+
 define ____executor_globals
 	if basic_functions_module.zts
-		set $tsrm_ls = ts_resource_ex(0, 0)
+		if !$tsrm_ls
+			set $tsrm_ls = ts_resource_ex(0, 0)
+		end
 		set $eg = ((zend_executor_globals*) (*((void ***) $tsrm_ls))[executor_globals_id-1])
 		set $cg = ((zend_compiler_globals*) (*((void ***) $tsrm_ls))[compiler_globals_id-1])
 	else
@@ -38,12 +51,53 @@ define dump_bt
 	set $t = $arg0
 	while $t
 		printf "[%p] ", $t
-		if $t->function_state.function->common.function_name
-			if $t->function_state.arguments
-				set $count = (int)*($t->function_state.arguments)
-				printf "%s(", $t->function_state.function->common.function_name
+		set $fst = $t->function_state
+		if $fst.function->common.function_name
+			if $fst.arguments
+				set $count = (int)*($fst.arguments)
+
+				if $t->object
+					if $fst.function.common.scope
+						printf "%s->", $fst.function.common.scope->name
+					else
+						if !$eg
+							____executor_globals
+						end
+
+						set $known_class = 0
+						if $eg
+							set $handle = $t->object.value.obj.handle
+							set $handlers = $t->object.value.obj.handlers
+							set $zobj = (zend_object *)$eg.objects_store.object_buckets[$handle].bucket.obj.object
+
+							if $handlers->get_class_entry == &zend_std_object_get_class
+								set $known_class = 1
+
+								if $handlers.get_class_name
+									if $handlers.get_class_name != &zend_std_object_get_class_name
+										set $known_class = 0
+									end
+								end
+
+								if $known_class
+									printf "%s->", $zobj->ce.name
+								end
+							end
+						end
+
+						if !$known_class
+							printf "(Unknown)->"
+						end
+					end
+				else
+					if $fst.function.common.scope
+						printf "%s::", $fst.function.common.scope->name
+					end
+				end
+
+				printf "%s(", $fst.function->common.function_name
 				while $count > 0
-					set $zvalue = *(zval **)($t->function_state.arguments - $count)
+					set $zvalue = *(zval **)($fst.arguments - $count)
 					set $type = $zvalue->type
 					if $type == 0
 						printf "NULL"
@@ -73,7 +127,7 @@ define dump_bt
 					if $type == 7
 						printf "resource(#%d)", $zvalue->value.lval
 					end
-					if $type == 8 
+					if $type == 8
 						printf "constant"
 					end
 					if $type == 9
@@ -89,7 +143,7 @@ define dump_bt
 				end
 				printf ") "
 			else
-				printf "%s() ", $t->function_state.function->common.function_name
+				printf "%s() ", $fst.function->common.function_name
 			end
 		else
 			printf "??? "
@@ -600,7 +654,7 @@ define zmemcheck
 		end
 	end
 	if $not_found
-		printf "no such block that begins at %p.\n", $aptr 
+		printf "no such block that begins at %p.\n", $aptr
 	end
 	if $arg0 == 0
 		printf "-------------------------------------------------------------------------------\n"
