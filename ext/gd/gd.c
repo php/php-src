@@ -1328,6 +1328,11 @@ PHP_MINFO_FUNCTION(gd)
 #endif
 #if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
 	php_info_print_table_row(2, "XPM Support", "enabled");
+	{
+		char tmp[12];
+		snprintf(tmp, sizeof(tmp), "%d", XpmLibraryVersion());
+		php_info_print_table_row(2, "libXpm Version", tmp);
+	}
 #endif
 #ifdef HAVE_GD_XBM
 	php_info_print_table_row(2, "XBM Support", "enabled");
