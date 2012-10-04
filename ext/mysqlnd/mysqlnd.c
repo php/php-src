@@ -874,6 +874,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			saved_compression = TRUE;
 			net->data->compressed = FALSE;
 		}
+		if (net->data->ssl) {
+			net->data->ssl = FALSE;
+		}
 	} else {
 		unsigned int max_allowed_size = MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
 		conn->m->set_client_option(conn, MYSQLND_OPT_MAX_ALLOWED_PACKET, (char *)&max_allowed_size TSRMLS_CC);

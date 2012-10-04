@@ -1627,7 +1627,9 @@ static int mysqli_options_get_option_zval_type(int option)
 		case MYSQL_INIT_COMMAND:
 		case MYSQL_SET_CHARSET_NAME:
 		case MYSQL_SET_CHARSET_DIR:
+#if MYSQL_VERSION_ID > 50605 || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_SERVER_PUBLIC_KEY:
+#endif
 			return IS_STRING;
 
 		default:
