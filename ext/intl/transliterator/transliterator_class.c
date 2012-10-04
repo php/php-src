@@ -162,7 +162,7 @@ static zend_object_value Transliterator_clone_obj( zval *object TSRMLS_DC )
 
 	to_orig = zend_object_store_get_object( object TSRMLS_CC );
 	intl_error_reset( INTL_DATA_ERROR_P( to_orig ) TSRMLS_CC );
-	ret_val = Transliterator_ce_ptr->create_object( Transliterator_ce_ptr TSRMLS_CC );
+	ret_val = Transliterator_ce_ptr->create_object( Z_OBJCE_P( object ) TSRMLS_CC );
 	to_new  = zend_object_store_get_object_by_handle( ret_val.handle TSRMLS_CC );
 
 	zend_objects_clone_members( &to_new->zo, ret_val,

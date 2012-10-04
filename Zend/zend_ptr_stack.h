@@ -41,6 +41,8 @@ ZEND_API void zend_ptr_stack_destroy(zend_ptr_stack *stack);
 ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *));
 ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements);
 ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack);
+ZEND_API void zend_ptr_stack_push_from_memory(zend_ptr_stack *stack, int count, void **pointers);
+ZEND_API void zend_ptr_stack_pop_into_memory(zend_ptr_stack *stack, int count, void **pointers);
 END_EXTERN_C()
 
 #define ZEND_PTR_STACK_RESIZE_IF_NEEDED(stack, count)		\

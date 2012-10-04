@@ -55,7 +55,9 @@ ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data_pt
 void init_executor(TSRMLS_D);
 void shutdown_executor(TSRMLS_D);
 void shutdown_destructors(TSRMLS_D);
+zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC);
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC);
+ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op);
 #define safe_free_zval_ptr(p) safe_free_zval_ptr_rel(p ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
@@ -430,6 +432,10 @@ ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const temp_v
 ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
 
 ZEND_API int zend_do_fcall(ZEND_OPCODE_HANDLER_ARGS);
+
+void zend_clean_and_cache_symbol_table(HashTable *symbol_table TSRMLS_DC);
+void zend_free_compiled_variables(zval ***CVs, int num);
+void **zend_copy_arguments(void **arguments_end);
 
 #define CACHED_PTR(num) \
 	EG(active_op_array)->run_time_cache[(num)]

@@ -781,6 +781,15 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 		case MYSQL_OPT_COMPRESS:
 			net->data->options.flags |= MYSQLND_NET_FLAG_USE_COMPRESSION;
 			break;
+		case MYSQL_SERVER_PUBLIC_KEY:
+			{
+				zend_bool pers = net->persistent;
+				if (net->data->options.sha256_server_public_key) {
+					mnd_pefree(net->data->options.sha256_server_public_key, pers);
+				}
+				net->data->options.sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
+				break;
+			}
 		default:
 			DBG_RETURN(FAIL);
 	}
@@ -899,6 +908,7 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot connect to MySQL by using SSL");
 		DBG_RETURN(FAIL);
 	}
+	net->data->ssl = TRUE;
 	/*
 	  get rid of the context. we are persistent and if this is a real pconn used by mysql/mysqli,
 	  then the context would not survive cleaning of EG(regular_list), where it is registered, as a

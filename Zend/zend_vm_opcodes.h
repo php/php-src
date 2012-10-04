@@ -160,3 +160,5 @@
 #define ZEND_QM_ASSIGN_VAR                   157
 #define ZEND_JMP_SET_VAR                     158
 #define ZEND_LEAVE                           159
+#define ZEND_YIELD                           160
+#define ZEND_GENERATOR_RETURN                161

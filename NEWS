@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.5.0
 
 - General improvements:
+  . Add generators and coroutines (https://wiki.php.net/rfc/generators).
+    (Nikita Popov)
+  . Support list in foreach (https://wiki.php.net/rfc/foreachlist). (Laruence)
   . Implemented 'finally' keyword (https://wiki.php.net/rfc/finally). (Laruence)
   . Drop Windows XP and 2003 support. (Pierre)
   . Improve set_exception_handler while doing reset.(Laruence)
@@ -23,6 +26,10 @@ PHP                                                                        NEWS
     (srgoogleguy, Gustavo)
   . Implemented FR #60738 (Allow 'set_error_handler' to handle NULL).
     (Laruence, Nikita Popov)
+  . Return previous handler when passing NULL to set_error_handler and
+    set_exception_handler. (Nikita Popov)
+  . Added optional second argument for assert() to specify custom message. Patch
+    by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
 
 - cURL:
   . Added support for CURLOPT_FTP_RESPONSE_TIMEOUT, CURLOPT_APPEND, 

@@ -235,12 +235,15 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int len = Z_STRLEN_P(value);
 	int ret;
 
-	PHP_FILTER_TRIM_DEFAULT(str, len);
+	PHP_FILTER_TRIM_DEFAULT_EX(str, len, 0);
 
 	/* returns true for "1", "true", "on" and "yes"
 	 * returns false for "0", "false", "off", "no", and ""
 	 * null otherwise. */
 	switch (len) {
+		case 0:
+			ret = 0;
+			break;
 		case 1:
 			if (*str == '1') {
 				ret = 1;
@@ -286,7 +289,7 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			ret = -1;
 	}
 
-	if (ret == -1) {	
+	if (ret == -1) {
 		RETURN_VALIDATION_FAILED
 	} else {
 		zval_dtor(value);

@@ -31,6 +31,8 @@ PHP X.Y UPGRADE NOTES
 2. New Features
 ========================================
 
+- Support list in foreach. (Laruence)
+  (wiki.php.net/rfc/foreachlist)
 - Support finally keyword. (Laruence)
   (wiki.php.net/rfc/finally)
 - Support constant array/string dereferencing. (Laruence)
@@ -38,6 +40,8 @@ PHP X.Y UPGRADE NOTES
 - Add support for using empty() on the result of function calls and
   other expressions. Thus it is now possible to write empty(getArray()),
   for example. (https://wiki.php.net/rfc/empty_isset_exprs)
+- Added generators.
+  (https://wiki.php.net/rfc/generators)
 
 ========================================
 2. Changes in SAPI modules
@@ -103,6 +107,10 @@ PHP X.Y UPGRADE NOTES
   but that predated the existence of E_DEPRECATED.
 - php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
   zend_logo_guid() have been removed
+- set_error_handler(NULL) can now be used to reset the error handler.
+  Furthermore both set_error_handler(NULL) and set_exception_handler(NULL) will
+  now return the previously defined error/exception handler. Previously
+  bool(true) was returned.
 
 ========================================
 5. New Functions

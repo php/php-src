@@ -40,39 +40,8 @@ static zend_function_entry mysqlnd_functions[] = {
 
 
 /* {{{ mysqlnd_minfo_print_hash */
-#if MYSQLND_UNICODE
-PHPAPI void mysqlnd_minfo_print_hash(zval *values)
-{
-	zval **values_entry;
-	HashPosition pos_values;
-
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos_values);
-	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(values),
-		(void **)&values_entry, &pos_values) == SUCCESS) {
-		zstr	string_key;
-		uint	string_key_len;
-		ulong	num_key;
-		int		s_len;
-		char	*s = NULL;
-
-		TSRMLS_FETCH();
-		zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &string_key, &string_key_len, &num_key, 0, &pos_values);
-
-		convert_to_string(*values_entry);
-
-		if (zend_unicode_to_string(ZEND_U_CONVERTER(UG(runtime_encoding_conv)),
-								   &s, &s_len, string_key.u, string_key_len TSRMLS_CC) == SUCCESS) {
-			php_info_print_table_row(2, s, Z_STRVAL_PP(values_entry));
-		}
-		if (s) {
-			mnd_efree(s);
-		}
-
-		zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos_values);
-	}
-}
-#else
-PHPAPI void mysqlnd_minfo_print_hash(zval *values)
+PHPAPI void
+mysqlnd_minfo_print_hash(zval *values)
 {
 	zval **values_entry;
 	HashPosition pos_values;
@@ -91,7 +60,6 @@ PHPAPI void mysqlnd_minfo_print_hash(zval *values)
 		zend_hash_move_forward_ex(Z_ARRVAL_P(values), &pos_values);
 	}
 }
-#endif
 /* }}} */
 
 
@@ -170,8 +138,14 @@ PHP_MINFO_FUNCTION(mysqlnd)
 #else
 								"not supported");
 #endif
-	php_info_print_table_row(2, "SSL",
+	php_info_print_table_row(2, "core SSL",
 #ifdef MYSQLND_SSL_SUPPORTED
+								"supported");
+#else
+								"not supported");
+#endif
+	php_info_print_table_row(2, "extended SSL",
+#ifdef MYSQLND_HAVE_SSL
 								"supported");
 #else
 								"not supported");
@@ -234,6 +208,7 @@ static PHP_GINIT_FUNCTION(mysqlnd)
 	mysqlnd_globals->debug_malloc_fail_threshold = -1;
 	mysqlnd_globals->debug_calloc_fail_threshold = -1;
 	mysqlnd_globals->debug_realloc_fail_threshold = -1;
+	mysqlnd_globals->sha256_server_public_key = NULL;
 }
 /* }}} */
 
@@ -261,6 +236,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mysqlnd.net_read_timeout",	"31536000",	PHP_INI_SYSTEM, OnUpdateLong,	net_read_timeout, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.log_mask",				"0", 	PHP_INI_ALL,	OnUpdateLong,	log_mask, zend_mysqlnd_globals, mysqlnd_globals)
 	STD_PHP_INI_ENTRY("mysqlnd.mempool_default_size","16000",   PHP_INI_ALL,	OnUpdateLong,	mempool_default_size,	zend_mysqlnd_globals,		mysqlnd_globals)
+	STD_PHP_INI_ENTRY("mysqlnd.sha256_server_public_key",NULL, 	PHP_INI_PERDIR, OnUpdateString,	sha256_server_public_key, zend_mysqlnd_globals, mysqlnd_globals)
 
 #if PHP_DEBUG
 	STD_PHP_INI_ENTRY("mysqlnd.debug_emalloc_fail_threshold","-1",   PHP_INI_SYSTEM,	OnUpdateLong,	debug_emalloc_fail_threshold,	zend_mysqlnd_globals,		mysqlnd_globals)

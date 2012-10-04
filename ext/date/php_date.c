@@ -738,7 +738,6 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define SUNFUNCS_RET_STRING    1
 #define SUNFUNCS_RET_DOUBLE    2
 
-
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(date)
 {
@@ -860,11 +859,17 @@ static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 		    timelib_timezone_id_is_valid(Z_STRVAL(ztz), tzdb)) {
 			return Z_STRVAL(ztz);
 		}
-	} else if (*DATEG(default_timezone) && timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
-		return DATEG(default_timezone);
+	} else if (*DATEG(default_timezone)) {
+		if (timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
+			return DATEG(default_timezone);
+		}
+		/* Invalid date.timezone value */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid date.timezone value '%s', we selected the timezone 'UTC' for now.", DATEG(default_timezone));
+	} else {
+		/* No date.timezone value */
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected the timezone 'UTC' for now, but please set date.timezone to select your timezone.");
 	}
 	/* Fallback to UTC */
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected the timezone 'UTC' for now, but please set date.timezone to select your timezone.");
 	return "UTC";
 }
 
@@ -881,7 +886,6 @@ PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D)
 	return tzi;
 }
 /* }}} */
-
 
 /* {{{ date() and gmdate() data */
 #include "ext/standard/php_smart_str.h"
@@ -1318,7 +1322,6 @@ PHPAPI signed long php_parse_date(char *string, signed long *now)
 }
 /* }}} */
 
-
 /* {{{ proto int strtotime(string time [, int now ])
    Convert string representation of date and time to a timestamp */
 PHP_FUNCTION(strtotime)
@@ -1378,7 +1381,6 @@ PHP_FUNCTION(strtotime)
 	}
 }
 /* }}} */
-
 
 /* {{{ php_mktime - (gm)mktime helper */
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
@@ -1487,7 +1489,6 @@ PHP_FUNCTION(gmmktime)
 	php_mktime(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
-
 
 /* {{{ proto bool checkdate(int month, int day, int year)
    Returns true(1) if it is a valid date in gregorian calendar */
@@ -2467,9 +2468,6 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 		if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS) {
 			convert_to_long(*z_timezone_type);
 			if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS) {
-				zend_error_handling error_handling;
-
-				zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 				convert_to_string(*z_timezone);
 
 				switch (Z_LVAL_PP(z_timezone_type)) {
@@ -2477,9 +2475,9 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 					case TIMELIB_ZONETYPE_ABBR: {
 						char *tmp = emalloc(Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 2);
 						snprintf(tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 2, "%s %s", Z_STRVAL_PP(z_date), Z_STRVAL_PP(z_timezone));
-						php_date_initialize(*dateobj, tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 1, NULL, NULL, 1 TSRMLS_CC);
+						php_date_initialize(*dateobj, tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 1, NULL, NULL, 0 TSRMLS_CC);
 						efree(tmp);
-						break;
+						return 1;
 					}
 
 					case TIMELIB_ZONETYPE_ID:
@@ -2493,15 +2491,10 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 						tzobj->tzi.tz = tzi;
 						tzobj->initialized = 1;
 
-						php_date_initialize(*dateobj, Z_STRVAL_PP(z_date), Z_STRLEN_PP(z_date), NULL, tmp_obj, 1 TSRMLS_CC);
+						php_date_initialize(*dateobj, Z_STRVAL_PP(z_date), Z_STRLEN_PP(z_date), NULL, tmp_obj, 0 TSRMLS_CC);
 						zval_ptr_dtor(&tmp_obj);
-						break;
-					default:
-						zend_restore_error_handling(&error_handling TSRMLS_CC);
-						return 0;
+						return 1;
 				}
-				zend_restore_error_handling(&error_handling TSRMLS_CC);
-				return 1;
 			}
 		}
 	}

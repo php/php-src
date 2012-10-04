@@ -1587,10 +1587,10 @@ static int mysqli_options_get_option_zval_type(int option)
 #endif /* MYSQLI_USE_MYSQLND */
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 #ifdef MYSQL_REPORT_DATA_TRUNCATION
-                case MYSQL_REPORT_DATA_TRUNCATION:
+		case MYSQL_REPORT_DATA_TRUNCATION:
 #endif
-                case MYSQL_OPT_LOCAL_INFILE:
-                case MYSQL_OPT_NAMED_PIPE:
+		case MYSQL_OPT_LOCAL_INFILE:
+		case MYSQL_OPT_NAMED_PIPE:
 #ifdef MYSQL_OPT_PROTOCOL
                 case MYSQL_OPT_PROTOCOL:
 #endif /* MySQL 4.1.0 */
@@ -1606,7 +1606,7 @@ static int mysqli_options_get_option_zval_type(int option)
 		case MYSQL_OPT_RECONNECT:
 #endif /* MySQL 5.0.13 */
 #ifdef MYSQL_OPT_SSL_VERIFY_SERVER_CERT
-                case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
+		case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
 #endif /* MySQL 5.0.23 */
 #ifdef MYSQL_OPT_COMPRESS
 		case MYSQL_OPT_COMPRESS:
@@ -1627,6 +1627,9 @@ static int mysqli_options_get_option_zval_type(int option)
 		case MYSQL_INIT_COMMAND:
 		case MYSQL_SET_CHARSET_NAME:
 		case MYSQL_SET_CHARSET_DIR:
+#if MYSQL_VERSION_ID > 50605 || defined(MYSQLI_USE_MYSQLND)
+		case MYSQL_SERVER_PUBLIC_KEY:
+#endif
 			return IS_STRING;
 
 		default:
