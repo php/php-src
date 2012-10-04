@@ -410,7 +410,7 @@ zend_function inline *zend_locate_getter(zval *object, zval *member, const zend_
 {
 	zend_object *zobj = Z_OBJ_P(object);
 	zend_accessor_info **ai;
-	ulong hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+	ulong hash_value = key ? key->hash_value : member & member->type == IS_STRING ? zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1) : 0;
 
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
 		if((*ai)->flags & ZEND_ACC_WRITEONLY) {
@@ -432,7 +432,7 @@ zend_function inline *zend_locate_setter(zval *object, zval *member, const zend_
 {
 	zend_object *zobj = Z_OBJ_P(object);
 	zend_accessor_info **ai;
-	ulong hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+	ulong hash_value = key ? key->hash_value : member & member->type == IS_STRING ? zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1) : 0;
 
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
 		if((*ai)->flags & ZEND_ACC_READONLY) {
@@ -871,7 +871,7 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 	zend_function 		*unsetter = NULL;
 
 	zend_accessor_info **ai = NULL;
-	ulong hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+	ulong hash_value = key ? key->hash_value : member & member->type == IS_STRING ? zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1) : 0;
 
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
 		if((*ai)->flags & ZEND_ACC_READONLY) {
@@ -1515,7 +1515,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 
 	zend_function *issetter = NULL;
 	zend_accessor_info **ai;
-	ulong hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+	ulong hash_value = key ? key->hash_value : member->type == IS_STRING ? zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1) : 0;
 
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
 		if((*ai)->flags & ZEND_ACC_WRITEONLY) {
