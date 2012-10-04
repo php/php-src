@@ -1489,6 +1489,9 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 						ret = compare_function(result, op1, op_free TSRMLS_CC);
 						zend_free_obj_get_result(op_free TSRMLS_CC);
 						return ret;
+					} else if (Z_TYPE_P(op1) == IS_OBJECT) {
+						ZVAL_LONG(result, 1);
+						return SUCCESS;
 					}
 				}
 				if (!converted) {

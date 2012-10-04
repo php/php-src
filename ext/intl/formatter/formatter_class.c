@@ -85,7 +85,7 @@ zend_object_value NumberFormatter_object_clone(zval *object TSRMLS_DC)
 	NumberFormatter_object *nfo, *new_nfo;
 
 	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
-	new_obj_val = NumberFormatter_ce_ptr->create_object(NumberFormatter_ce_ptr TSRMLS_CC);
+	new_obj_val = NumberFormatter_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
 	new_nfo = (NumberFormatter_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
 	/* clone standard parts */	
 	zend_objects_clone_members(&new_nfo->zo, new_obj_val, &nfo->zo, handle TSRMLS_CC);
