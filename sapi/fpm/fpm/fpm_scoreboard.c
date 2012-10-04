@@ -73,7 +73,7 @@ int fpm_scoreboard_init_main() /* {{{ */
 }
 /* }}} */
 
-void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int action, struct fpm_scoreboard_s *scoreboard) /* {{{ */
+void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int requests, int max_children_reached, int slow_rq, int action, struct fpm_scoreboard_s *scoreboard) /* {{{ */
 {
 	if (!scoreboard) {
 		scoreboard = fpm_scoreboard;
@@ -109,6 +109,9 @@ void fpm_scoreboard_update(int idle, int active, int lq, int lq_len, int request
 
 		if (max_children_reached >= 0) {
 			scoreboard->max_children_reached = max_children_reached;
+		}
+		if (slow_rq > 0) {
+			scoreboard->slow_rq += slow_rq;
 		}
 	} else {
 		if (scoreboard->idle + idle > 0) {

@@ -3,6 +3,7 @@ getmxrr() test
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
+if (getenv("SKIP_ONLINE_TESTS")) die("skip test requiring internet connection");
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip: no Windows support');
 }

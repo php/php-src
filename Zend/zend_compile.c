@@ -2935,6 +2935,11 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		return 1;
 	}
 
+	/* If both methods are private do not enforce a signature */
+    if ((fe->common.fn_flags & ZEND_ACC_PRIVATE) && (proto->common.fn_flags & ZEND_ACC_PRIVATE)) {
+		return 1;
+	}
+
 	/* check number of arguments */
 	if (proto->common.required_num_args < fe->common.required_num_args
 		|| proto->common.num_args > fe->common.num_args) {
@@ -3873,10 +3878,10 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				&& (zend_binary_strcasecmp(aliases[i]->trait_method->method_name, aliases[i]->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
 				fn_copy = *fn;
 				function_add_ref(&fn_copy);
-				/* this function_name is never destroyed, because its refcount
-				   greater than 1 and classes are always destoyed before the
-				   traits they use */
+				/* this function_name is never destroyed, because ZEND_ACC_ALIAS
+				   flag is set */
 				fn_copy.common.function_name = aliases[i]->alias;
+				fn_copy.common.fn_flags |= ZEND_ACC_ALIAS;
 					
 				/* if it is 0, no modifieres has been changed */
 				if (aliases[i]->modifiers) { 
@@ -3909,6 +3914,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 		/* is not in hashtable, thus, function is not to be excluded */
 		fn_copy = *fn;
 		function_add_ref(&fn_copy);
+		fn_copy.common.fn_flags |= ZEND_ACC_ALIAS;
 
 		/* apply aliases which are not qualified by a class name, or which have not
 		 * alias name, just setting visibility */

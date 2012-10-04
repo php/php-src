@@ -927,6 +927,13 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name,
 						skip_blanks($f, $m[1], $m[3]."\n");
 					}
 					break;
+				case "EXECUTION_STATUS":
+					if ($kind != ZEND_VM_KIND_GOTO) {
+						out($f, $m[1] . "zend_bool original_in_execution = EG(in_execution);\n");
+					} else {
+						out($f, $m[1] . "zend_bool original_in_execution = op_array? EG(in_execution) : 0;\n");
+					}
+					break;
 				case "INTERNAL_LABELS":
 					if ($kind == ZEND_VM_KIND_GOTO) {
 					  // Emit array of labels of opcode handlers and code for

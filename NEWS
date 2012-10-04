@@ -1,8 +1,84 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.4.7
+?? ??? 2012, PHP 5.4.9
+
+?? ??? 2012, PHP 5.4.8
+
+- CLI server:
+  . Changed response to unknown HTTP method to 501 according to RFC.
+    (Niklas Lindgren).
+  . Support HTTP PATCH method. Patch by Niklas Lindgren, GitHub PR #190.
+    (Lars)
 
 - Core:
+  . Added optional second argument for assert() to specify custom message. Patch
+    by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
+  . Support building PHP with the native client toolchain. (Stuart Langley)
+  . Added --offline option for tests. (Remi)
+  . Fixed bug #63162 (parse_url does not match password component). (husman)
+  . Fixed bug #63111 (is_callable() lies for abstract static method). (Dmitry)
+  . Fixed bug #63093 (Segfault while load extension failed in zts-build).
+    (Laruence)
+  . Fixed bug #62976 (Notice: could not be converted to int when comparing
+    some builtin classes). (Laruence)
+  . Fixed bug #62955 (Only one directive is loaded from "Per Directory Values" 
+    Windows registry). (aserbulov at parallels dot com)
+  . Fixed bug #62907 (Double free when use traits). (Dmitry)
+  . Fixed bug #61767 (Shutdown functions not called in certain error
+    situation). (Dmitry)
+  . Fixed bug #60909 (custom error handler throwing Exception + fatal error
+    = no shutdown function). (Dmitry)
+  . Fixed bug #60723 (error_log error time has changed to UTC ignoring default
+    timezone). (Laruence)
+
+- cURL:
+  . Fixed bug #62085 (file_get_contents a remote file by Curl wrapper will
+    cause cpu Soaring). (Pierrick)
+
+- Date:
+  . Fixed bug #62896 ("DateTime->modify('+0 days')" modifies DateTime object)
+    (Lonny Kapelushnik)
+  . Fixed bug #62561 (DateTime add 'P1D' adds 25 hours). (Lonny Kapelushnik)
+
+- DOM:
+  . Fixed bug #63015 (Incorrect arginfo for DOMErrorHandler). (Rob)
+
+- FPM:
+  . Fixed bug #62954 (startup problems fpm / php-fpm). (fat)
+  . Fixed bug #62886 (PHP-FPM may segfault/hang on startup). (fat)
+  . Fixed bug #63085 (Systemd integration and daemonize). (remi, fat)
+  . Fixed bug #62947 (Unneccesary warnings on FPM). (fat)
+  . Fixed bug #62887 (Only /status?plain&full gives "last request cpu"). (fat)
+  . Fixed bug #62216 (Add PID to php-fpm init.d script). (fat)
+
+- OpenSSL:
+  . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 
+    SHA224, SHA256, SHA384, SHA512). (Mark Jones)
+
+- SOAP
+  . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
+    (Dmitry)
+
+- SPL:
+  . Bug #62987 (Assigning to ArrayObject[null][something] overrides all 
+    undefined variables). (Laruence)
+
+- mbstring:
+  . Allow passing null as a default value to mb_substr() and mb_strcut(). Patch
+    by Alexander Moskaliov via GitHub PR #133. (Lars)
+
+- Filter extension:
+  . Bug #49510: Boolean validation fails with FILTER_NULL_ON_FAILURE with empty
+    string or false. (Lars)
+
+- Sockets
+  . Fixed bug #63000 (MCAST_JOIN_GROUP on OSX is broken, merge of PR 185 by
+    Igor Wiedler). (Lars)
+
+13 Sep 2012, PHP 5.4.7
+
+- Core:
+  . Fixed bug (segfault while build with zts and GOTO vm-kind). (Laruence)
   . Fixed bug #62844 (parse_url() does not recognize //). (Andrew Faulds).
   . Fixed bug #62829 (stdint.h included on platform where HAVE_STDINT_H is not 
     set). (Felipe)
@@ -22,14 +98,21 @@ PHP                                                                        NEWS
     constructor). (Stas)
 
 - CURL:
+  . Fixed bug #62912 (CURLINFO_PRIMARY_* AND CURLINFO_LOCAL_* not exposed).
+	(Pierrick)
   . Fixed bug #62839 (curl_copy_handle segfault with CURLOPT_FILE). (Pierrick)
 
-- DateTime:
-  . Fixed bug #62852 (Unserialize invalid DateTime causes crash).
-    (reeze.xia@gmail.com)
+- Intl:
+  . Fixed Spoofchecker not being registered on ICU 49.1. (Gustavo)
+  . Fix bug #62933 (ext/intl compilation error on icu 3.4.1). (Gustavo)
+  . Fix bug #62915 (defective cloning in several intl classes). (Gustavo)
 
 - Installation:
   . Fixed bug #62460 (php binaries installed as binary.dSYM). (Reeze Xia)
+
+- PCRE:
+  . Fixed bug #55856 (preg_replace should fail on trailing garbage). 
+    (reg dot php at alf dot nu)
 
 - PDO:
   . Fixed bug #62685 (Wrong return datatype in PDO::inTransaction()). (Laruence)
@@ -45,6 +128,10 @@ PHP                                                                        NEWS
   . Fixed bug (segfault due to PS(mod_user_implemented) not be reseted 
     when close handler call exit). (Laruence)
 
+- SOAP
+  . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
+    (Dmitry)
+
 - SPL:
   . Fixed bug #62904 (Crash when cloning an object which inherits SplFixedArray)
     (Laruence)
@@ -54,6 +141,9 @@ PHP                                                                        NEWS
   . Fixed bug #62836 (Seg fault or broken object references on unserialize()).
     (Laruence)
 
+- FPM:
+  . Merged PR 121 by minitux to add support for slow request counting on PHP
+    FPM status page. (Lars)
 
 16 Aug 2012, PHP 5.4.6
 
@@ -188,7 +278,7 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Fixed bug #62025 (__ss_family was changed on AIX 5.3). (Felipe)
-    
+
 - SPL:
   . Fixed bug #62433 (Inconsistent behavior of RecursiveDirectoryIterator to
     dot files). (Laruence)
