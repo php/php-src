@@ -236,11 +236,16 @@ PHP X.Y UPGRADE NOTES
 ========================================
 9. New Global Constants
 ========================================
-
+- mysqli
+  - Added MYSQLI_SERVER_PUBLIC_KEY constant to be used with mysqli_options()
 
 ========================================
 10. Changes to INI File Handling
 ========================================
+- mysqlnd
+  - Added mysqlnd.sha256_server_public_key INI PERDIR setting that affects all
+    APIs which use(are built) for mysqlnd. This allows ext/mysqli to be used
+	with the new auth protocol, although at coarser level.
 
 
 ========================================
