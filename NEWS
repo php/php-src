@@ -1,6 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2012, PHP 5.3.19
+
 ?? ??? 2012, PHP 5.3.18
+
+(NOTE: Add your entries above for 5.3.19, entries for 5.3.18 should only
+be added after merge by RM)
 
 - Core:
   . Fixed bug #63111 (is_callable() lies for abstract static method). (Dmitry)
