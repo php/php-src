@@ -350,7 +350,7 @@ PHP_FUNCTION(password_hash)
 
 	if (options && zend_symtable_find(options, "salt", 5, (void**) &option_buffer) == SUCCESS) {
 		char *buffer;
-		int buffer_len_int;
+		int buffer_len_int = 0;
 		size_t buffer_len;
 		switch (Z_TYPE_PP(option_buffer)) {
 			case IS_NULL:
@@ -359,17 +359,20 @@ PHP_FUNCTION(password_hash)
 			case IS_DOUBLE:
 			case IS_BOOL:
 			case IS_OBJECT:
-				convert_to_string_ex(option_buffer);
 				if (Z_TYPE_PP(option_buffer) == IS_STRING) {
 					buffer = Z_STRVAL_PP(option_buffer);
 					buffer_len_int = Z_STRLEN_PP(option_buffer);
-					if (buffer_len_int < 0) {
-						zval_ptr_dtor(option_buffer);
-						efree(hash_format);
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long");
-					}
-					buffer_len = (size_t) buffer_len_int;
 					break;
+				} else {
+					SEPARATE_ZVAL(option_buffer);
+					convert_to_string_ex(option_buffer);
+					if (Z_TYPE_PP(option_buffer) == IS_STRING) {
+						buffer = Z_STRVAL_PP(option_buffer);
+						buffer_len_int = Z_STRLEN_PP(option_buffer);
+						zval_ptr_dtor(option_buffer);
+						break;
+					}
+					zval_ptr_dtor(option_buffer);
 				}
 			case IS_RESOURCE:
 			case IS_ARRAY:
@@ -378,6 +381,11 @@ PHP_FUNCTION(password_hash)
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Non-string salt parameter supplied");
 				RETURN_NULL();
 		}
+		if (buffer_len_int < 0) {
+			efree(hash_format);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long");
+		}
+		buffer_len = (size_t) buffer_len_int;
 		if (buffer_len < required_salt_len) {
 			efree(hash_format);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu expecting %lu", (unsigned long) buffer_len, (unsigned long) required_salt_len);
