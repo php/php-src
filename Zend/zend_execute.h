@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -49,8 +49,9 @@ typedef union _temp_variable {
 
 
 BEGIN_EXTERN_C()
+struct _zend_fcall_info;
 ZEND_API extern void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
-ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
+ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 
 void init_executor(TSRMLS_D);
 void shutdown_executor(TSRMLS_D);
@@ -58,7 +59,7 @@ void shutdown_destructors(TSRMLS_D);
 zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC);
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
-ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
+ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op);
 #define safe_free_zval_ptr(p) safe_free_zval_ptr_rel(p ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
 static zend_always_inline void safe_free_zval_ptr_rel(zval *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
@@ -272,7 +273,7 @@ static zend_always_inline void *zend_vm_stack_alloc(size_t size TSRMLS_DC)
 }
 
 static zend_always_inline void zend_vm_stack_free_int(void *ptr TSRMLS_DC)
-{	
+{
 	if (UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (void**)ptr)) {
 		zend_vm_stack p = EG(argument_stack);
 
@@ -284,7 +285,7 @@ static zend_always_inline void zend_vm_stack_free_int(void *ptr TSRMLS_DC)
 }
 
 static zend_always_inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
-{	
+{
 	if (UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (void**)ptr)) {
 		zend_vm_stack p = EG(argument_stack);
 
@@ -304,7 +305,7 @@ static zend_always_inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
 static zend_always_inline void** zend_vm_stack_push_args(int count TSRMLS_DC)
 {
 
-	if (UNEXPECTED(EG(argument_stack)->top - ZEND_VM_STACK_ELEMETS(EG(argument_stack)) < count)  || 
+	if (UNEXPECTED(EG(argument_stack)->top - ZEND_VM_STACK_ELEMETS(EG(argument_stack)) < count)  ||
 		UNEXPECTED(EG(argument_stack)->top == EG(argument_stack)->end)) {
 		zend_vm_stack p = EG(argument_stack);
 

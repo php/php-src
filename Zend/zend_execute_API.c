@@ -39,7 +39,7 @@
 #endif
 
 ZEND_API void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
-ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC);
+ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = { 0, NULL, NULL, NULL, NULL, 0, NULL, NULL, 0 };
@@ -976,15 +976,12 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (EX(function_state).function->common.scope) {
 			EG(scope) = EX(function_state).function->common.scope;
 		}
-
-		if (!zend_execute_internal) {
+		if(EXPECTED(zend_execute_internal == NULL)) {
 			/* saves one function call if zend_execute_internal is not used */
 			((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
 		} else {
-			zend_execute_internal(&execute_data, 1 TSRMLS_CC);
+			zend_execute_internal(&execute_data, fci, 1 TSRMLS_CC);
 		}
-
-
 		/*  We shouldn't fix bad extensions here,
 			because it can break proper ones (Bug #34045)
 		if (!EX(function_state).function->common.return_reference)
