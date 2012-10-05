@@ -79,7 +79,7 @@ static zend_bool php_password_salt_is_alphabet(const char *str, const size_t len
 }
 /* }}} */
 
-static int php_password_salt_to64(const char *str, const size_t str_len, const size_t out_len, char *ret) /* {{{ */
+static zend_bool php_password_salt_to64(const char *str, const size_t str_len, const size_t out_len, char *ret) /* {{{ */
 {
 	size_t pos = 0;
 	size_t ret_len = 0;
@@ -108,7 +108,7 @@ static int php_password_salt_to64(const char *str, const size_t str_len, const s
 }
 /* }}} */
 
-static int php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {{{ */
+static zend_bool php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {{{ */
 {
 	int buffer_valid = 0;
 	size_t i, raw_length;
@@ -163,9 +163,8 @@ static int php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {{{ */
 		efree(buffer);
 		efree(result);
 		return FAILURE;
-	} else {
-		memcpy(ret, result, (int) length);
 	}
+	memcpy(ret, result, (int) length);
 	efree(result);
 	efree(buffer);
 	ret[length] = 0;
@@ -245,9 +244,13 @@ PHP_FUNCTION(password_needs_rehash)
 				long new_cost = PHP_PASSWORD_BCRYPT_COST, cost = 0;
 				
 				if (options && zend_symtable_find(options, "cost", sizeof("cost"), (void **) &option_buffer) == SUCCESS) {
-					convert_to_long_ex(option_buffer);
-					new_cost = Z_LVAL_PP(option_buffer);
-					zval_ptr_dtor(option_buffer);
+					if (Z_TYPE_PP(option_buffer) != IS_LONG) {
+						convert_to_long_ex(option_buffer);
+						new_cost = Z_LVAL_PP(option_buffer);
+						zval_ptr_dtor(option_buffer);
+					} else {
+						new_cost = Z_LVAL_PP(option_buffer);
+					}
 				}
 
 				sscanf(hash, "$2y$%ld$", &cost);
@@ -319,9 +322,13 @@ PHP_FUNCTION(password_hash)
 			long cost = PHP_PASSWORD_BCRYPT_COST;
 	
 			if (options && zend_symtable_find(options, "cost", 5, (void **) &option_buffer) == SUCCESS) {
-				convert_to_long_ex(option_buffer);
-				cost = Z_LVAL_PP(option_buffer);
-				zval_ptr_dtor(option_buffer);
+				if (Z_TYPE_PP(option_buffer) != IS_LONG) {
+					convert_to_long_ex(option_buffer);
+					cost = Z_LVAL_PP(option_buffer);
+					zval_ptr_dtor(option_buffer);
+				} else {
+					cost = Z_LVAL_PP(option_buffer);
+				}
 			}
 	
 			if (cost < 4 || cost > 31) {
@@ -367,14 +374,12 @@ PHP_FUNCTION(password_hash)
 			case IS_RESOURCE:
 			case IS_ARRAY:
 			default:
-				zval_ptr_dtor(option_buffer);
 				efree(hash_format);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Non-string salt parameter supplied");
 				RETURN_NULL();
 		}
 		if (buffer_len < required_salt_len) {
 			efree(hash_format);
-			zval_ptr_dtor(option_buffer);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu expecting %lu", (unsigned long) buffer_len, (unsigned long) required_salt_len);
 			RETURN_NULL();
 		} else if (0 == php_password_salt_is_alphabet(buffer, buffer_len)) {
@@ -382,7 +387,6 @@ PHP_FUNCTION(password_hash)
 			if (php_password_salt_to64(buffer, buffer_len, required_salt_len, salt) == FAILURE) {
 				efree(hash_format);
 				efree(salt);
-				zval_ptr_dtor(option_buffer);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu", (unsigned long) buffer_len);
 				RETURN_NULL();
 			}
@@ -392,7 +396,6 @@ PHP_FUNCTION(password_hash)
 			memcpy(salt, buffer, (int) required_salt_len);
 			salt_len = required_salt_len;
 		}
-		zval_ptr_dtor(option_buffer);
 	} else {
 		salt = safe_emalloc(required_salt_len, 1, 1);
 		if (php_password_make_salt(required_salt_len, salt TSRMLS_CC) == FAILURE) {
