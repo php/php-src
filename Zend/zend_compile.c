@@ -726,95 +726,97 @@ void zend_do_fetch_static_member(znode *result, znode *class_name TSRMLS_DC) /* 
 		zend_do_fetch_class(&class_node, class_name TSRMLS_CC);
 	}
 
-	/* Handle self::$Area accessors (normal and static) */
-	if(class_node.op_type == IS_VAR && class_node.EA == ZEND_FETCH_CLASS_SELF && CG(active_class_entry)) {
+	if(result->op_type == IS_CV) {
+		/* Handle self::$Area accessors (normal and static) */
+		if(class_node.op_type == IS_VAR && class_node.EA == ZEND_FETCH_CLASS_SELF && CG(active_class_entry)) {
 
-		const char *member_name = CG(active_op_array)->vars[result->u.op.var].name;
-		zend_accessor_info **aipp;
-
-		/* If the member_name is an accessor */
-		if(zend_hash_find((const HashTable *)&CG(active_class_entry)->accessors, member_name, strlen(member_name)+1, (void**)&aipp) == SUCCESS) {
-			znode zn_self, zn_func, zn_arg_list;
-			size_t member_name_len = strlen(member_name);
-
-			char *fname = strcatalloc("__get", 5, member_name, member_name_len TSRMLS_CC);
-
-			MAKE_ZNODEL(zn_self, "self", 4);
-			ZVAL_LONG(&zn_arg_list.u.constant, 0);
-
-			MAKE_ZNODEL(zn_func, fname, 5 + member_name_len);
-			efree(fname);
-
-			/* We assume we will be used as a getter, if zend_do_assign() is called, it will backpatch as calling a setter */
-			zend_do_begin_class_member_function_call(&zn_self, &zn_func TSRMLS_CC);
-			zend_do_end_function_call(&zn_func, result, &zn_arg_list, 1, 0 TSRMLS_CC);
-			zend_do_extended_fcall_end(TSRMLS_C);
-			return;
-		}
-	}
-	/* Handle parent::$Area accessors (normal and static) */
-	if(class_node.op_type == IS_VAR && class_node.EA == ZEND_FETCH_CLASS_PARENT && CG(active_class_entry) && CG(active_class_entry)->parent) {
-
-		const char *member_name = CG(active_op_array)->vars[result->u.op.var].name;
-		zend_accessor_info **aipp;
-
-		/* If the member_name is an accessor */
-		if(zend_hash_find((const HashTable *)&CG(active_class_entry)->parent->accessors, member_name, strlen(member_name)+1, (void**)&aipp) == SUCCESS) {
-			znode zn_parent, zn_func, zn_arg_list;
-			size_t member_name_len = strlen(member_name);
-
-			char *fname = strcatalloc("__get", 5, member_name, member_name_len TSRMLS_CC);
-
-			MAKE_ZNODEL(zn_parent, "parent", 6);
-			ZVAL_LONG(&zn_arg_list.u.constant, 0);
-
-			MAKE_ZNODEL(zn_func, fname, 5 + member_name_len);
-			efree(fname);
-
-			/* We assume we will be used as a getter, if zend_do_assign() is called, it will backpatch as calling a setter */
-			zend_do_begin_class_member_function_call(&zn_parent, &zn_func TSRMLS_CC);
-			zend_do_end_function_call(&zn_func, result, &zn_arg_list, 1, 0 TSRMLS_CC);
-			zend_do_extended_fcall_end(TSRMLS_C);
-			return;
-		}
-	}
-	/* Handle Shape::$Area static accessor */
-	if(class_node.op_type == IS_CONST && result->op_type == IS_CV) {
-		zend_class_entry	**classpp;
-		char 				*lcname = zend_str_tolower_dup(Z_STRVAL(class_node.u.constant), Z_STRLEN(class_node.u.constant));
-
-		if(zend_hash_find(CG(class_table), lcname, Z_STRLEN(class_node.u.constant)+1, (void**)&classpp) == SUCCESS) {
-			ulong 			hash_value;
+			const char *member_name = CG(active_op_array)->vars[result->u.op.var].name;
 			zend_accessor_info **aipp;
-			const char		*member_name = CG(active_op_array)->vars[result->u.op.var].name;
-			uint			member_name_len = strlen(member_name);
 
-			hash_value = zend_hash_func(member_name, member_name_len+1);
+			/* If the member_name is an accessor */
+			if(zend_hash_find((const HashTable *)&CG(active_class_entry)->accessors, member_name, strlen(member_name)+1, (void**)&aipp) == SUCCESS) {
+				znode zn_self, zn_func, zn_arg_list;
+				size_t member_name_len = strlen(member_name);
 
-			if(zend_hash_quick_find(&(*classpp)->accessors, member_name, member_name_len+1, hash_value, (void**)&aipp) == SUCCESS
-					&& ( (*aipp)->getter || (*aipp)->setter ) ) {
-				znode zn_class, zn_func, zn_arg_list;
+				char *fname = strcatalloc("__get", 5, member_name, member_name_len TSRMLS_CC);
 
-				efree(lcname);
-
-				if(!((*aipp)->flags & ZEND_ACC_STATIC)) {
-					zend_error(E_COMPILE_ERROR, "Cannot access non-static accessor %s::$%s in a static manner.", (*classpp)->name, member_name);
-				}
-
-				MAKE_ZNODEL(zn_class, Z_STRVAL(class_node.u.constant), Z_STRLEN(class_node.u.constant));
-				MAKE_ZNODE(zn_func, ((*aipp)->getter ? (*aipp)->getter->common.function_name : (*aipp)->setter->common.function_name));
-				Z_STRVAL(zn_func.u.constant)[2] = 'g';
+				MAKE_ZNODEL(zn_self, "self", 4);
 				ZVAL_LONG(&zn_arg_list.u.constant, 0);
 
+				MAKE_ZNODEL(zn_func, fname, 5 + member_name_len);
+				efree(fname);
+
 				/* We assume we will be used as a getter, if zend_do_assign() is called, it will backpatch as calling a setter */
-				zend_do_begin_class_member_function_call(&zn_class, &zn_func TSRMLS_CC);
+				zend_do_begin_class_member_function_call(&zn_self, &zn_func TSRMLS_CC);
 				zend_do_end_function_call(&zn_func, result, &zn_arg_list, 1, 0 TSRMLS_CC);
 				zend_do_extended_fcall_end(TSRMLS_C);
-				zval_dtor(&class_node.u.constant);
 				return;
 			}
 		}
-		efree(lcname);
+		/* Handle parent::$Area accessors (normal and static) */
+		if(class_node.op_type == IS_VAR && class_node.EA == ZEND_FETCH_CLASS_PARENT && CG(active_class_entry) && CG(active_class_entry)->parent) {
+
+			const char *member_name = CG(active_op_array)->vars[result->u.op.var].name;
+			zend_accessor_info **aipp;
+
+			/* If the member_name is an accessor */
+			if(zend_hash_find((const HashTable *)&CG(active_class_entry)->parent->accessors, member_name, strlen(member_name)+1, (void**)&aipp) == SUCCESS) {
+				znode zn_parent, zn_func, zn_arg_list;
+				size_t member_name_len = strlen(member_name);
+
+				char *fname = strcatalloc("__get", 5, member_name, member_name_len TSRMLS_CC);
+
+				MAKE_ZNODEL(zn_parent, "parent", 6);
+				ZVAL_LONG(&zn_arg_list.u.constant, 0);
+
+				MAKE_ZNODEL(zn_func, fname, 5 + member_name_len);
+				efree(fname);
+
+				/* We assume we will be used as a getter, if zend_do_assign() is called, it will backpatch as calling a setter */
+				zend_do_begin_class_member_function_call(&zn_parent, &zn_func TSRMLS_CC);
+				zend_do_end_function_call(&zn_func, result, &zn_arg_list, 1, 0 TSRMLS_CC);
+				zend_do_extended_fcall_end(TSRMLS_C);
+				return;
+			}
+		}
+		/* Handle Shape::$Area static accessor */
+		if(class_node.op_type == IS_CONST) {
+			zend_class_entry	**classpp;
+			char 				*lcname = zend_str_tolower_dup(Z_STRVAL(class_node.u.constant), Z_STRLEN(class_node.u.constant));
+
+			if(zend_hash_find(CG(class_table), lcname, Z_STRLEN(class_node.u.constant)+1, (void**)&classpp) == SUCCESS) {
+				ulong 			hash_value;
+				zend_accessor_info **aipp;
+				const char		*member_name = CG(active_op_array)->vars[result->u.op.var].name;
+				uint			member_name_len = strlen(member_name);
+
+				hash_value = zend_hash_func(member_name, member_name_len+1);
+
+				if(zend_hash_quick_find(&(*classpp)->accessors, member_name, member_name_len+1, hash_value, (void**)&aipp) == SUCCESS
+						&& ( (*aipp)->getter || (*aipp)->setter ) ) {
+					znode zn_class, zn_func, zn_arg_list;
+
+					efree(lcname);
+
+					if(!((*aipp)->flags & ZEND_ACC_STATIC)) {
+						zend_error(E_COMPILE_ERROR, "Cannot access non-static accessor %s::$%s in a static manner.", (*classpp)->name, member_name);
+					}
+
+					MAKE_ZNODEL(zn_class, Z_STRVAL(class_node.u.constant), Z_STRLEN(class_node.u.constant));
+					MAKE_ZNODE(zn_func, ((*aipp)->getter ? (*aipp)->getter->common.function_name : (*aipp)->setter->common.function_name));
+					Z_STRVAL(zn_func.u.constant)[2] = 'g';
+					ZVAL_LONG(&zn_arg_list.u.constant, 0);
+
+					/* We assume we will be used as a getter, if zend_do_assign() is called, it will backpatch as calling a setter */
+					zend_do_begin_class_member_function_call(&zn_class, &zn_func TSRMLS_CC);
+					zend_do_end_function_call(&zn_func, result, &zn_arg_list, 1, 0 TSRMLS_CC);
+					zend_do_extended_fcall_end(TSRMLS_C);
+					zval_dtor(&class_node.u.constant);
+					return;
+				}
+			}
+			efree(lcname);
+		}
 	}
 
 
