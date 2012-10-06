@@ -242,6 +242,17 @@ typedef struct _zend_try_catch_element {
 #define ZEND_FNP_PROP_ISSETTER			3
 #define ZEND_FNP_PROP_UNSETTER			4
 
+#define ZEND_ACC_READONLY				0x20000000
+#define ZEND_ACC_WRITEONLY				0x40000000
+
+/** Function Purposes **/
+
+#define ZEND_FNP_UNDEFINED				0
+#define ZEND_FNP_PROP_GETTER			1
+#define ZEND_FNP_PROP_SETTER			2
+#define ZEND_FNP_PROP_ISSETTER			3
+#define ZEND_FNP_PROP_UNSETTER			4
+
 char *zend_visibility_string(zend_uint fn_flags);
 char *zend_fn_purpose_string(zend_uchar purpose);
 

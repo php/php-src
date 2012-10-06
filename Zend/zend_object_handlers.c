@@ -450,50 +450,6 @@ zend_function inline *zend_locate_setter(zval *object, zval *member, const zend_
 }
 /* }}} */
 
-zend_function inline *zend_locate_issetter(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
-{
-	zend_object *zobj = Z_OBJ_P(object);
-	zend_accessor_info **ai;
-	ulong hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
-
-	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
-		if((*ai)->flags & ZEND_ACC_WRITEONLY) {
-			zend_error_noreturn(E_ERROR, "Cannot isset write-only property %s::$%s.", zobj->ce->name, Z_STRVAL_P(member));
-		} else if((*ai)->isset) {
-			/* If public issetter, no access check required */
-			if((*ai)->isset->common.fn_flags & ZEND_ACC_PUBLIC) {
-				return (*ai)->isset;
-			}
-			return zend_std_get_method(&object, (char *)(*ai)->isset->common.function_name, strlen((*ai)->isset->common.function_name), NULL TSRMLS_CC);
-		}
-		return NULL;	/* No Implementation Defined */
-	}
-	return zobj->ce->__isset;
-}
-/* }}} */
-
-zend_function inline *zend_locate_unsetter(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
-{
-	zend_object *zobj = Z_OBJ_P(object);
-	zend_accessor_info **ai;
-	ulong hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
-
-	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
-		if((*ai)->flags & ZEND_ACC_READONLY) {
-			zend_error_noreturn(E_ERROR, "Cannot unset read-only property %s::$%s.", zobj->ce->name, Z_STRVAL_P(member));
-		} else if((*ai)->unset) {
-			/* If public unsetter, no access check required */
-			if((*ai)->unset->common.fn_flags & ZEND_ACC_PUBLIC) {
-				return (*ai)->unset;
-			}
-			return zend_std_get_method(&object, (char *)(*ai)->unset->common.function_name, strlen((*ai)->unset->common.function_name), NULL TSRMLS_CC);
-		}
-		return NULL;	/* No Implementation Defined */
-	}
-	return zobj->ce->__unset;
-}
-/* }}} */
-
 zval *zend_std_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
@@ -895,12 +851,6 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 		member = tmp_member;
 		key = NULL;
 	}
-
- 	/* Need to modify for this unset_property -- Next line with ( != NULL )
- 	 * 		New routine isn't exactly is_silent only if defined.
- 	 * 		is_silent is true if we have an accessor
- 	 * 		or if __unset != NULL
- 	 */
 
 	property_info = zend_get_property_info_quick(zobj->ce, member, (ai != NULL || zobj->ce->__unset != NULL), key TSRMLS_CC);
 
