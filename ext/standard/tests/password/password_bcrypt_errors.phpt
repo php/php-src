@@ -12,6 +12,10 @@ var_dump(password_hash("foo", PASSWORD_BCRYPT, array("salt" => "foo")));
 
 var_dump(password_hash("foo", PASSWORD_BCRYPT, array("salt" => "123456789012345678901")));
 
+var_dump(password_hash("foo", PASSWORD_BCRYPT, array("salt" => 123)));
+
+var_dump(password_hash("foo", PASSWORD_BCRYPT, array("cost" => "foo")));
+
 ?>
 --EXPECTF--
 Warning: password_hash(): Invalid bcrypt cost parameter specified: 3 in %s on line %d
@@ -25,4 +29,11 @@ NULL
 
 Warning: password_hash(): Provided salt is too short: 21 expecting 22 in %s on line %d
 NULL
+
+Warning: password_hash(): Provided salt is too short: 3 expecting 22 in %s on line %d
+NULL
+
+Warning: password_hash(): Invalid bcrypt cost parameter specified: 0 in %s on line %d
+NULL
+
 

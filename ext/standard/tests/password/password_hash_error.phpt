@@ -18,6 +18,9 @@ var_dump(password_hash(array(), PASSWORD_BCRYPT));
 
 var_dump(password_hash("123", PASSWORD_BCRYPT, array("salt" => array())));
 
+/* Non-string salt, checking for memory leaks */
+var_dump(password_hash('123', PASSWORD_BCRYPT, array('salt' => 1234)));
+
 ?>
 --EXPECTF--
 Warning: password_hash() expects at least 2 parameters, 0 given in %s on line %d
@@ -41,3 +44,5 @@ NULL
 Warning: password_hash(): Non-string salt parameter supplied in %s on line %d
 NULL
 
+Warning: password_hash(): Provided salt is too short: 4 expecting 22 in %s on line %d
+NULL

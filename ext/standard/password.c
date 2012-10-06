@@ -245,9 +245,12 @@ PHP_FUNCTION(password_needs_rehash)
 				
 				if (options && zend_symtable_find(options, "cost", sizeof("cost"), (void **) &option_buffer) == SUCCESS) {
 					if (Z_TYPE_PP(option_buffer) != IS_LONG) {
-						convert_to_long_ex(option_buffer);
-						new_cost = Z_LVAL_PP(option_buffer);
-						zval_ptr_dtor(option_buffer);
+						zval *cast_option_buffer;
+						ALLOC_ZVAL(cast_option_buffer);
+						INIT_PZVAL_COPY(cast_option_buffer, *option_buffer);
+						convert_to_long(cast_option_buffer);
+						new_cost = Z_LVAL_P(cast_option_buffer);
+						zval_dtor(cast_option_buffer);
 					} else {
 						new_cost = Z_LVAL_PP(option_buffer);
 					}
@@ -323,9 +326,12 @@ PHP_FUNCTION(password_hash)
 	
 			if (options && zend_symtable_find(options, "cost", 5, (void **) &option_buffer) == SUCCESS) {
 				if (Z_TYPE_PP(option_buffer) != IS_LONG) {
-					convert_to_long_ex(option_buffer);
-					cost = Z_LVAL_PP(option_buffer);
-					zval_ptr_dtor(option_buffer);
+					zval *cast_option_buffer;
+					ALLOC_ZVAL(cast_option_buffer);
+					INIT_PZVAL_COPY(cast_option_buffer, *option_buffer);
+					convert_to_long(cast_option_buffer);
+					cost = Z_LVAL_P(cast_option_buffer);
+					zval_dtor(cast_option_buffer);
 				} else {
 					cost = Z_LVAL_PP(option_buffer);
 				}
@@ -353,27 +359,27 @@ PHP_FUNCTION(password_hash)
 		int buffer_len_int = 0;
 		size_t buffer_len;
 		switch (Z_TYPE_PP(option_buffer)) {
-			case IS_NULL:
 			case IS_STRING:
+				buffer = estrndup(Z_STRVAL_PP(option_buffer), Z_STRLEN_PP(option_buffer));
+				buffer_len_int = Z_STRLEN_PP(option_buffer);
+				break;
 			case IS_LONG:
 			case IS_DOUBLE:
-			case IS_BOOL:
-			case IS_OBJECT:
-				if (Z_TYPE_PP(option_buffer) == IS_STRING) {
-					buffer = Z_STRVAL_PP(option_buffer);
-					buffer_len_int = Z_STRLEN_PP(option_buffer);
+			case IS_OBJECT: {
+				zval *cast_option_buffer;
+				ALLOC_ZVAL(cast_option_buffer);
+				INIT_PZVAL_COPY(cast_option_buffer, *option_buffer);
+				convert_to_string(cast_option_buffer);
+				if (Z_TYPE_P(cast_option_buffer) == IS_STRING) {
+					buffer = estrndup(Z_STRVAL_P(cast_option_buffer), Z_STRLEN_P(cast_option_buffer));
+					buffer_len_int = Z_STRLEN_P(cast_option_buffer);
+					zval_dtor(cast_option_buffer);
 					break;
-				} else {
-					SEPARATE_ZVAL(option_buffer);
-					convert_to_string_ex(option_buffer);
-					if (Z_TYPE_PP(option_buffer) == IS_STRING) {
-						buffer = Z_STRVAL_PP(option_buffer);
-						buffer_len_int = Z_STRLEN_PP(option_buffer);
-						zval_ptr_dtor(option_buffer);
-						break;
-					}
-					zval_ptr_dtor(option_buffer);
 				}
+				zval_dtor(cast_option_buffer);
+			}
+			case IS_BOOL:
+			case IS_NULL:
 			case IS_RESOURCE:
 			case IS_ARRAY:
 			default:
@@ -383,17 +389,20 @@ PHP_FUNCTION(password_hash)
 		}
 		if (buffer_len_int < 0) {
 			efree(hash_format);
+			efree(buffer);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Supplied salt is too long");
 		}
 		buffer_len = (size_t) buffer_len_int;
 		if (buffer_len < required_salt_len) {
 			efree(hash_format);
+			efree(buffer);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu expecting %lu", (unsigned long) buffer_len, (unsigned long) required_salt_len);
 			RETURN_NULL();
 		} else if (0 == php_password_salt_is_alphabet(buffer, buffer_len)) {
 			salt = safe_emalloc(required_salt_len, 1, 1);
 			if (php_password_salt_to64(buffer, buffer_len, required_salt_len, salt) == FAILURE) {
 				efree(hash_format);
+				efree(buffer);
 				efree(salt);
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu", (unsigned long) buffer_len);
 				RETURN_NULL();
@@ -404,6 +413,7 @@ PHP_FUNCTION(password_hash)
 			memcpy(salt, buffer, (int) required_salt_len);
 			salt_len = required_salt_len;
 		}
+		efree(buffer);
 	} else {
 		salt = safe_emalloc(required_salt_len, 1, 1);
 		if (php_password_make_salt(required_salt_len, salt TSRMLS_CC) == FAILURE) {
