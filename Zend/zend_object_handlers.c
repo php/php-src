@@ -895,7 +895,7 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 		member = tmp_member;
 		key = NULL;
 	}
- 	asdf
+
  	/* Need to modify for this unset_property -- Next line with ( != NULL )
  	 * 		New routine isn't exactly is_silent only if defined.
  	 * 		is_silent is true if we have an accessor
