@@ -247,7 +247,7 @@ PHP_FUNCTION(password_needs_rehash)
 					if (Z_TYPE_PP(option_buffer) != IS_LONG) {
 						zval *cast_option_buffer;
 						ALLOC_ZVAL(cast_option_buffer);
-						INIT_PZVAL_COPY(cast_option_buffer, *option_buffer);
+						MAKE_COPY_ZVAL(option_buffer, cast_option_buffer);
 						convert_to_long(cast_option_buffer);
 						new_cost = Z_LVAL_P(cast_option_buffer);
 						zval_dtor(cast_option_buffer);
@@ -328,7 +328,7 @@ PHP_FUNCTION(password_hash)
 				if (Z_TYPE_PP(option_buffer) != IS_LONG) {
 					zval *cast_option_buffer;
 					ALLOC_ZVAL(cast_option_buffer);
-					INIT_PZVAL_COPY(cast_option_buffer, *option_buffer);
+					MAKE_COPY_ZVAL(option_buffer, cast_option_buffer);
 					convert_to_long(cast_option_buffer);
 					cost = Z_LVAL_P(cast_option_buffer);
 					zval_dtor(cast_option_buffer);
@@ -368,7 +368,7 @@ PHP_FUNCTION(password_hash)
 			case IS_OBJECT: {
 				zval *cast_option_buffer;
 				ALLOC_ZVAL(cast_option_buffer);
-				INIT_PZVAL_COPY(cast_option_buffer, *option_buffer);
+				MAKE_COPY_ZVAL(option_buffer, cast_option_buffer);
 				convert_to_string(cast_option_buffer);
 				if (Z_TYPE_P(cast_option_buffer) == IS_STRING) {
 					buffer = estrndup(Z_STRVAL_P(cast_option_buffer), Z_STRLEN_P(cast_option_buffer));
