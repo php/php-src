@@ -250,7 +250,7 @@ PHP_FUNCTION(password_needs_rehash)
 						MAKE_COPY_ZVAL(option_buffer, cast_option_buffer);
 						convert_to_long(cast_option_buffer);
 						new_cost = Z_LVAL_P(cast_option_buffer);
-						zval_dtor(cast_option_buffer);
+						zval_ptr_dtor(&cast_option_buffer);
 					} else {
 						new_cost = Z_LVAL_PP(option_buffer);
 					}
@@ -331,7 +331,7 @@ PHP_FUNCTION(password_hash)
 					MAKE_COPY_ZVAL(option_buffer, cast_option_buffer);
 					convert_to_long(cast_option_buffer);
 					cost = Z_LVAL_P(cast_option_buffer);
-					zval_dtor(cast_option_buffer);
+					zval_ptr_dtor(&cast_option_buffer);
 				} else {
 					cost = Z_LVAL_PP(option_buffer);
 				}
@@ -373,10 +373,10 @@ PHP_FUNCTION(password_hash)
 				if (Z_TYPE_P(cast_option_buffer) == IS_STRING) {
 					buffer = estrndup(Z_STRVAL_P(cast_option_buffer), Z_STRLEN_P(cast_option_buffer));
 					buffer_len_int = Z_STRLEN_P(cast_option_buffer);
-					zval_dtor(cast_option_buffer);
+					zval_ptr_dtor(&cast_option_buffer);
 					break;
 				}
-				zval_dtor(cast_option_buffer);
+				zval_ptr_dtor(&cast_option_buffer);
 			}
 			case IS_BOOL:
 			case IS_NULL:
