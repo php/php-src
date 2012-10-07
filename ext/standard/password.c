@@ -245,12 +245,11 @@ PHP_FUNCTION(password_needs_rehash)
 				
 				if (options && zend_symtable_find(options, "cost", sizeof("cost"), (void **) &option_buffer) == SUCCESS) {
 					if (Z_TYPE_PP(option_buffer) != IS_LONG) {
-						zval *cast_option_buffer;
-						ALLOC_ZVAL(cast_option_buffer);
-						MAKE_COPY_ZVAL(option_buffer, cast_option_buffer);
-						convert_to_long(cast_option_buffer);
-						new_cost = Z_LVAL_P(cast_option_buffer);
-						zval_ptr_dtor(&cast_option_buffer);
+						zval cast_option_buffer;
+						MAKE_COPY_ZVAL(option_buffer, &cast_option_buffer);
+						convert_to_long(&cast_option_buffer);
+						new_cost = Z_LVAL(cast_option_buffer);
+						zval_dtor(&cast_option_buffer);
 					} else {
 						new_cost = Z_LVAL_PP(option_buffer);
 					}
@@ -326,12 +325,11 @@ PHP_FUNCTION(password_hash)
 	
 			if (options && zend_symtable_find(options, "cost", 5, (void **) &option_buffer) == SUCCESS) {
 				if (Z_TYPE_PP(option_buffer) != IS_LONG) {
-					zval *cast_option_buffer;
-					ALLOC_ZVAL(cast_option_buffer);
-					MAKE_COPY_ZVAL(option_buffer, cast_option_buffer);
-					convert_to_long(cast_option_buffer);
-					cost = Z_LVAL_P(cast_option_buffer);
-					zval_ptr_dtor(&cast_option_buffer);
+					zval cast_option_buffer;
+					MAKE_COPY_ZVAL(option_buffer, &cast_option_buffer);
+					convert_to_long(&cast_option_buffer);
+					cost = Z_LVAL(cast_option_buffer);
+					zval_dtor(&cast_option_buffer);
 				} else {
 					cost = Z_LVAL_PP(option_buffer);
 				}
@@ -366,17 +364,16 @@ PHP_FUNCTION(password_hash)
 			case IS_LONG:
 			case IS_DOUBLE:
 			case IS_OBJECT: {
-				zval *cast_option_buffer;
-				ALLOC_ZVAL(cast_option_buffer);
-				MAKE_COPY_ZVAL(option_buffer, cast_option_buffer);
-				convert_to_string(cast_option_buffer);
-				if (Z_TYPE_P(cast_option_buffer) == IS_STRING) {
-					buffer = estrndup(Z_STRVAL_P(cast_option_buffer), Z_STRLEN_P(cast_option_buffer));
-					buffer_len_int = Z_STRLEN_P(cast_option_buffer);
-					zval_ptr_dtor(&cast_option_buffer);
+				zval cast_option_buffer;
+				MAKE_COPY_ZVAL(option_buffer, &cast_option_buffer);
+				convert_to_string(&cast_option_buffer);
+				if (Z_TYPE(cast_option_buffer) == IS_STRING) {
+					buffer = estrndup(Z_STRVAL(cast_option_buffer), Z_STRLEN(cast_option_buffer));
+					buffer_len_int = Z_STRLEN(cast_option_buffer);
+					zval_dtor(&cast_option_buffer);
 					break;
 				}
-				zval_ptr_dtor(&cast_option_buffer);
+				zval_dtor(&cast_option_buffer);
 			}
 			case IS_BOOL:
 			case IS_NULL:
