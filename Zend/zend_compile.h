@@ -247,11 +247,11 @@ typedef struct _zend_try_catch_element {
 
 /** Function Purposes **/
 
-#define ZEND_FNP_UNDEFINED				0
-#define ZEND_FNP_PROP_GETTER			1
-#define ZEND_FNP_PROP_SETTER			2
-#define ZEND_FNP_PROP_ISSETTER			3
-#define ZEND_FNP_PROP_UNSETTER			4
+#define ZEND_FNP_UNDEFINED				0		/* No special purpose function */
+#define ZEND_FNP_PROP_GETTER			1		/* Special purpose accessor: getter */
+#define ZEND_FNP_PROP_SETTER			2		/* Special purpose accessor: setter */
+#define ZEND_FNP_PROP_ISSETTER			3		/* Special purpose accessor: issetter */
+#define ZEND_FNP_PROP_UNSETTER			4		/* Special purpose accessor: unsetter */
 
 char *zend_visibility_string(zend_uint fn_flags);
 char *zend_fn_purpose_string(zend_uchar purpose);
