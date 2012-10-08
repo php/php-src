@@ -68,6 +68,8 @@ PHP                                                                        NEWS
 - MySQLi
   . Dropped support for LOAD DATA LOCAL INFILE handlers when using libmysql.
     Known for stability problems. (Andrey)
+  . Added support for SHA256 authentication available with MySQL 5.6.6+. (Andrey)
+	
 
 - PCRE:
   . Deprecated the /e modifier

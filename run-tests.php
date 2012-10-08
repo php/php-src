@@ -635,6 +635,9 @@ if (isset($argc) && $argc > 1) {
 				case 'x':
 					$environment['SKIP_SLOW_TESTS'] = 1;
 					break;
+				case '--offline':
+					$environment['SKIP_ONLINE_TESTS'] = 1;
+					break;
 				//case 'w'
 				case '-':
 					// repeat check with full switch
@@ -691,6 +694,8 @@ Options:
     -s <file>   Write output to <file>.
 
     -x          Sets 'SKIP_SLOW_TESTS' environmental variable.
+
+    --offline   Sets 'SKIP_ONLINE_TESTS' environmental variable.
 
     --verbose
     -v          Verbose mode.

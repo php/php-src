@@ -579,33 +579,40 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 	DBG_ENTER("mysqlnd_sha256_auth_get_auth_data");
 	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
 
-	*auth_data_len = 0;
 
-	server_public_key = mysqlnd_sha256_get_rsa_key(conn, options, net_options TSRMLS_CC);
+	if (conn->net->data->ssl) {
+		/* clear text under SSL */
+		*auth_data_len = passwd_len;
+		ret = malloc(passwd_len);
+		memcpy(ret, passwd, passwd_len);
+	} else {
+		*auth_data_len = 0;
+		server_public_key = mysqlnd_sha256_get_rsa_key(conn, options, net_options TSRMLS_CC);
 
-	if (server_public_key) {
-		int server_public_key_len;
-		char xor_str[passwd_len + 1];
-		memcpy(xor_str, passwd, passwd_len);
-		xor_str[passwd_len] = '\0';
-		mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
+		if (server_public_key) {
+			int server_public_key_len;
+			char xor_str[passwd_len + 1];
+			memcpy(xor_str, passwd, passwd_len);
+			xor_str[passwd_len] = '\0';
+			mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
 
-		server_public_key_len = RSA_size(server_public_key);
-		/*
-		  Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
-		  RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
-		  http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
-		*/
-		if ((size_t) server_public_key_len - 41 <= passwd_len) {
-			/* password message is to long */
-			SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
-			DBG_ERR("password is too long");
-			DBG_RETURN(NULL);
+			server_public_key_len = RSA_size(server_public_key);
+			/*
+			  Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
+			  RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
+			  http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
+			*/
+			if ((size_t) server_public_key_len - 41 <= passwd_len) {
+				/* password message is to long */
+				SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
+				DBG_ERR("password is too long");
+				DBG_RETURN(NULL);
+			}
+
+			*auth_data_len = server_public_key_len;
+			ret = malloc(*auth_data_len);
+			RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, ret, server_public_key, RSA_PKCS1_OAEP_PADDING);
 		}
-
-		*auth_data_len = server_public_key_len;
-		ret = malloc(*auth_data_len);
-		RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, ret, server_public_key, RSA_PKCS1_OAEP_PADDING);
 	}
 
 	DBG_RETURN(ret);
