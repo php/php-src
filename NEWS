@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     (Lars)
 
 - Core:
+  . Fixed bug #63219 (Segfault when aliasing trait method when autoloader
+    throws excpetion). (Laruence)
   . Added optional second argument for assert() to specify custom message. Patch
     by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
   . Support building PHP with the native client toolchain. (Stuart Langley)
