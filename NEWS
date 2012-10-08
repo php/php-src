@@ -1,6 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2012, PHP 5.3.19
+
 ?? ??? 2012, PHP 5.3.18
+
+(NOTE: Add your entries above for 5.3.19, entries for 5.3.18 should only
+be added after merge by RM)
 
 - Core:
   . Fixed bug #63111 (is_callable() lies for abstract static method). (Dmitry)
@@ -14,6 +19,18 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #60909 (custom error handler throwing Exception + fatal error
     = no shutdown function). (Dmitry)
+
+- cURL:
+  . Fixed bug #62085 (file_get_contents a remote file by Curl wrapper will
+    cause cpu Soaring). (Pierrick)
+
+- FPM:
+  . Fixed bug #62954 (startup problems fpm / php-fpm). (fat)
+  . Fixed bug #62886 (PHP-FPM may segfault/hang on startup). (fat)
+  . Fixed bug #63085 (Systemd integration and daemonize). (remi, fat)
+  . Fixed bug #62947 (Unneccesary warnings on FPM). (fat)
+  . Fixed bug #62887 (Only /status?plain&full gives "last request cpu"). (fat)
+  . Fixed bug #62216 (Add PID to php-fpm init.d script). (fat)
 
 - Intl:
   . Fix bug #62915 (defective cloning in several intl classes). (Gustavo)
