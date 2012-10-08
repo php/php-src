@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2012, PHP 5.4.9
+
 ?? ??? 2012, PHP 5.4.8
 
 - CLI server:
@@ -9,9 +11,13 @@ PHP                                                                        NEWS
     (Lars)
 
 - Core:
+  . Fixed bug #63219 (Segfault when aliasing trait method when autoloader
+    throws excpetion). (Laruence)
   . Added optional second argument for assert() to specify custom message. Patch
     by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
   . Support building PHP with the native client toolchain. (Stuart Langley)
+  . Added --offline option for tests. (Remi)
+  . Fixed bug #63162 (parse_url does not match password component). (husman)
   . Fixed bug #63111 (is_callable() lies for abstract static method). (Dmitry)
   . Fixed bug #63093 (Segfault while load extension failed in zts-build).
     (Laruence)
@@ -25,10 +31,27 @@ PHP                                                                        NEWS
   . Fixed bug #60909 (custom error handler throwing Exception + fatal error
     = no shutdown function). (Dmitry)
   . Fixed bug #60723 (error_log error time has changed to UTC ignoring default
-    timezo). (Laruence)
+    timezone). (Laruence)
+
+- cURL:
+  . Fixed bug #62085 (file_get_contents a remote file by Curl wrapper will
+    cause cpu Soaring). (Pierrick)
+
+- Date:
+  . Fixed bug #62896 ("DateTime->modify('+0 days')" modifies DateTime object)
+    (Lonny Kapelushnik)
+  . Fixed bug #62561 (DateTime add 'P1D' adds 25 hours). (Lonny Kapelushnik)
 
 - DOM:
   . Fixed bug #63015 (Incorrect arginfo for DOMErrorHandler). (Rob)
+
+- FPM:
+  . Fixed bug #62954 (startup problems fpm / php-fpm). (fat)
+  . Fixed bug #62886 (PHP-FPM may segfault/hang on startup). (fat)
+  . Fixed bug #63085 (Systemd integration and daemonize). (remi, fat)
+  . Fixed bug #62947 (Unneccesary warnings on FPM). (fat)
+  . Fixed bug #62887 (Only /status?plain&full gives "last request cpu"). (fat)
+  . Fixed bug #62216 (Add PID to php-fpm init.d script). (fat)
 
 - OpenSSL:
   . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 
@@ -54,7 +77,7 @@ PHP                                                                        NEWS
   . Fixed bug #63000 (MCAST_JOIN_GROUP on OSX is broken, merge of PR 185 by
     Igor Wiedler). (Lars)
 
-?? ??? 2012, PHP 5.4.7
+13 Sep 2012, PHP 5.4.7
 
 - Core:
   . Fixed bug (segfault while build with zts and GOTO vm-kind). (Laruence)

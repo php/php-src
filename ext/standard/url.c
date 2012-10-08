@@ -201,6 +201,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 			STR_FREE(ret->scheme);
 			efree(ret);
 			return NULL;
+		} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+			s += 2;
 		} else {
 			goto just_path;
 		}
