@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.19
 
+- PDO:
+  . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
+    (Martin Osvald, Remi)
+
 ?? ??? 2012, PHP 5.3.18
 
 (NOTE: Add your entries above for 5.3.19, entries for 5.3.18 should only
