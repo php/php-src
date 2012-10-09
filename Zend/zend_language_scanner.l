@@ -799,8 +799,8 @@ void compile_string_inline(zval *source_string, char *filename TSRMLS_DC)
 
 	zend_save_lexical_state(&original_lex_state TSRMLS_CC);
 	if (zend_prepare_string_for_scanning(source_string, filename TSRMLS_CC)==SUCCESS) {
-		CG(zend_lineno) = original_lex_state.lineno;
 		zend_bool orig_interactive = CG(interactive);
+		CG(zend_lineno) = original_lex_state.lineno;
 
 		CG(interactive) = 0;
 		CG(interactive) = orig_interactive;

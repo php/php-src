@@ -236,17 +236,6 @@ typedef struct _zend_try_catch_element {
 
 /** Function Purposes **/
 
-#define ZEND_FNP_UNDEFINED				0
-#define ZEND_FNP_PROP_GETTER			1
-#define ZEND_FNP_PROP_SETTER			2
-#define ZEND_FNP_PROP_ISSETTER			3
-#define ZEND_FNP_PROP_UNSETTER			4
-
-#define ZEND_ACC_READONLY				0x20000000
-#define ZEND_ACC_WRITEONLY				0x40000000
-
-/** Function Purposes **/
-
 #define ZEND_FNP_UNDEFINED				0		/* No special purpose function */
 #define ZEND_FNP_PROP_GETTER			1		/* Special purpose accessor: getter */
 #define ZEND_FNP_PROP_SETTER			2		/* Special purpose accessor: setter */
@@ -309,7 +298,7 @@ struct _zend_op_array {
 	zend_uint num_args;
 	zend_uint required_num_args;
 	zend_arg_info *arg_info;
-	zend_uchar purpose;			/* ZEND_FNP_UNDEFINED || ZEND_FNP_PROP_GETTER || ZEND_FNP_PROP_SETTER || ZEND_FNP_PROP_ISSETTER || ZEND_FNP_PROP_UNSETTER */
+	zend_uchar purpose;			/* ZEND_FNP_* */
 	/* END of common elements */
 
 	zend_uint *refcount;
@@ -364,7 +353,7 @@ typedef struct _zend_internal_function {
 	zend_uint num_args;
 	zend_uint required_num_args;
 	zend_arg_info *arg_info;
-	zend_uchar purpose;			/* ZEND_FN_ACC_GETTER || ZEND_FN_ACC_SETTER || ZEND_FN_ACC_ISSETTER || ZEND_FN_ACC_UNSETTER */
+	zend_uchar purpose;			/* ZEND_FNP_* */
 	/* END of common elements */
 
 	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -385,7 +374,7 @@ typedef union _zend_function {
 		zend_uint num_args;
 		zend_uint required_num_args;
 		zend_arg_info *arg_info;
-		zend_uchar purpose;			/* ZEND_FN_ACC_GETTER || ZEND_FN_ACC_SETTER || ZEND_FN_ACC_ISSETTER || ZEND_FN_ACC_UNSETTER */
+		zend_uchar purpose;			/* ZEND_FNP_* */
 	} common;
 
 	zend_op_array op_array;

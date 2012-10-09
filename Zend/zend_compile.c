@@ -1757,20 +1757,24 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 	func = (zend_function*)CG(active_op_array);
 
 	if (func->common.purpose == ZEND_FNP_PROP_GETTER) {
-		if((ai->flags & ZEND_ACC_WRITEONLY))
+		if((ai->flags & ZEND_ACC_WRITEONLY)) {
 			zend_error(E_COMPILE_ERROR, "Cannot define getter for write-only property $%s", Z_STRVAL(var_name->u.constant));
+		}
 		ai->getter = func;
 	} else if(func->common.purpose == ZEND_FNP_PROP_SETTER) {
-		if((ai->flags & ZEND_ACC_READONLY))
+		if((ai->flags & ZEND_ACC_READONLY)) {
 			zend_error(E_COMPILE_ERROR, "Cannot define setter for read-only property $%s", Z_STRVAL(var_name->u.constant));
+		}
 		ai->setter = func;
 	} else if(func->common.purpose == ZEND_FNP_PROP_ISSETTER) {
-		if((ai->flags & ZEND_ACC_WRITEONLY))
+		if((ai->flags & ZEND_ACC_WRITEONLY)) {
 			zend_error(E_COMPILE_ERROR, "Cannot define isset for write-only property $%s", Z_STRVAL(var_name->u.constant));
+		}
 		ai->isset = func;
 	} else if(func->common.purpose == ZEND_FNP_PROP_UNSETTER) {
-		if((ai->flags & ZEND_ACC_READONLY))
+		if((ai->flags & ZEND_ACC_READONLY)) {
 			zend_error(E_COMPILE_ERROR, "Cannot define unset for read-only property $%s", Z_STRVAL(var_name->u.constant));
+		}
 		ai->unset = func;
 	}
 }
@@ -1792,22 +1796,30 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 		if(CG(active_op_array)->purpose == ZEND_FNP_PROP_GETTER) {
 			/* Equivalent to:  	return $this->__Property;  or static equivalent */
 
+			zend_uint		bufsize = 16 + Z_STRLEN(var_name->u.constant) + 1 + 1;
+			char			*buffer = emalloc(bufsize);
+
 			if(zend_hash_find(&CG(active_class_entry)->properties_info, int_var_name, Z_STRLEN(var_name->u.constant)+3, (void**) &zpi) != SUCCESS) {
 				znode zn_prop;
 				MAKE_ZNODEL(zn_prop, int_var_name, 2 + Z_STRLEN(var_name->u.constant));
 				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED | (Z_LVAL(modifiers->u.constant) & ZEND_ACC_STATIC) TSRMLS_CC);
 			}
 
-			if((Z_LVAL(modifiers->u.constant) & ZEND_ACC_STATIC))
-				Z_STRLEN(eval_php_code) = asprintf(&Z_STRVAL(eval_php_code), "return self::$__%s;", Z_STRVAL(var_name->u.constant));
-			else
-				Z_STRLEN(eval_php_code) = asprintf(&Z_STRVAL(eval_php_code), "return $this->__%s;", Z_STRVAL(var_name->u.constant));
-			ZVAL_STRINGL(&eval_php_code, Z_STRVAL(eval_php_code), Z_STRLEN(eval_php_code),0);
+			Z_STRVAL(eval_php_code) = buffer;
+			Z_TYPE(eval_php_code) = IS_STRING;
+			if((Z_LVAL(modifiers->u.constant) & ZEND_ACC_STATIC)) {
+				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "return self::$__%s;", Z_STRVAL(var_name->u.constant));
+			} else {
+				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "return $this->__%s;", Z_STRVAL(var_name->u.constant));
+			}
 			zend_compile_string_inline(&eval_php_code, (char*)CG(active_op_array)->filename TSRMLS_CC);
+			efree(buffer);
 			zend_do_extended_info(TSRMLS_C);
 
 		} else if(CG(active_op_array)->purpose == ZEND_FNP_PROP_SETTER) {
 			/* Equivalent to: $this->__Property = $value; */
+			zend_uint		bufsize = 9 + Z_STRLEN(var_name->u.constant) + 10 + 1;
+			char			*buffer = emalloc(bufsize);
 
 			if(zend_hash_find(&CG(active_class_entry)->properties_info, int_var_name, Z_STRLEN(var_name->u.constant)+3, (void**) &zpi) != SUCCESS) {
 				znode zn_prop;
@@ -1815,34 +1827,47 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 				zend_do_declare_property(&zn_prop, NULL, ZEND_ACC_PROTECTED | (Z_LVAL(modifiers->u.constant) & ZEND_ACC_STATIC) TSRMLS_CC);
 			}
 
-			if((Z_LVAL(modifiers->u.constant) & ZEND_ACC_STATIC))
-				Z_STRLEN(eval_php_code) = asprintf(&Z_STRVAL(eval_php_code), "self::$__%s = $value;", Z_STRVAL(var_name->u.constant));
-			else
-				Z_STRLEN(eval_php_code) = asprintf(&Z_STRVAL(eval_php_code), "$this->__%s = $value;", Z_STRVAL(var_name->u.constant));
-			ZVAL_STRINGL(&eval_php_code, Z_STRVAL(eval_php_code), Z_STRLEN(eval_php_code),0);
+			Z_STRVAL(eval_php_code) = buffer;
+			Z_TYPE(eval_php_code) = IS_STRING;
+			if((Z_LVAL(modifiers->u.constant) & ZEND_ACC_STATIC)) {
+				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "self::$__%s = $value;", Z_STRVAL(var_name->u.constant));
+			} else {
+				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "$this->__%s = $value;", Z_STRVAL(var_name->u.constant));
+			}
 			zend_compile_string_inline(&eval_php_code, (char*)CG(active_op_array)->filename TSRMLS_CC);
+			efree(buffer);
 			zend_do_extended_info(TSRMLS_C);
 
 		} else if(CG(active_op_array)->purpose == ZEND_FNP_PROP_ISSETTER) {
 			/* Equivalent to: return $this->Property != NULL; (via getter) */
+			zend_uint		bufsize = 14 + Z_STRLEN(var_name->u.constant) + 9 + 1;
+			char			*buffer = emalloc(bufsize);
 
-			if((Z_LVAL(modifiers->u.constant) & ZEND_ACC_STATIC))
-				Z_STRLEN(eval_php_code) = asprintf(&Z_STRVAL(eval_php_code), "return self::$%s != NULL;", Z_STRVAL(var_name->u.constant));
-			else
-				Z_STRLEN(eval_php_code) = asprintf(&Z_STRVAL(eval_php_code), "return $this->%s != NULL;", Z_STRVAL(var_name->u.constant));
-			ZVAL_STRINGL(&eval_php_code, Z_STRVAL(eval_php_code), Z_STRLEN(eval_php_code),0);
+			Z_STRVAL(eval_php_code) = buffer;
+			Z_TYPE(eval_php_code) = IS_STRING;
+			if((Z_LVAL(modifiers->u.constant) & ZEND_ACC_STATIC)) {
+				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "return self::$%s != NULL;", Z_STRVAL(var_name->u.constant));
+			} else {
+				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "return $this->%s != NULL;", Z_STRVAL(var_name->u.constant));
+			}
 			zend_compile_string_inline(&eval_php_code, (char*)CG(active_op_array)->filename TSRMLS_CC);
+			efree(buffer);
 			zend_do_extended_info(TSRMLS_C);
 
 		} else if(CG(active_op_array)->purpose == ZEND_FNP_PROP_UNSETTER) {
 			/* Equivalent to: $this->Property = NULL; (via setter) */
+			zend_uint		bufsize = 7 + Z_STRLEN(var_name->u.constant) + 8 + 1;
+			char			*buffer = emalloc(bufsize);
 
-			if((Z_LVAL(modifiers->u.constant) & ZEND_ACC_STATIC))
-				Z_STRLEN(eval_php_code) = asprintf(&Z_STRVAL(eval_php_code), "self::$%s = NULL;", Z_STRVAL(var_name->u.constant));
-			else
-				Z_STRLEN(eval_php_code) = asprintf(&Z_STRVAL(eval_php_code), "$this->%s = NULL;", Z_STRVAL(var_name->u.constant));
-			ZVAL_STRINGL(&eval_php_code, Z_STRVAL(eval_php_code), Z_STRLEN(eval_php_code),0);
+			Z_STRVAL(eval_php_code) = buffer;
+			Z_TYPE(eval_php_code) = IS_STRING;
+			if((Z_LVAL(modifiers->u.constant) & ZEND_ACC_STATIC)) {
+				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "self::$%s = NULL;", Z_STRVAL(var_name->u.constant));
+			} else {
+				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "$this->%s = NULL;", Z_STRVAL(var_name->u.constant));
+			}
 			zend_compile_string_inline(&eval_php_code, (char*)CG(active_op_array)->filename TSRMLS_CC);
+			efree(buffer);
 			zend_do_extended_info(TSRMLS_C);
 		}
 		efree(int_var_name);
@@ -6689,7 +6714,7 @@ void zend_do_unset(const znode *variable TSRMLS_DC) /* {{{ */
 							opline->opcode = ZEND_FREE;
 							opline->op1_type = last_op->result_type;
 							if (last_op->result_type == IS_CONST) {
-								opline->op1.constant = zend_add_literal((compiler_globals.active_op_array), &last_op->result.literal->constant);
+								opline->op1.constant = zend_add_literal(CG(active_op_array), &last_op->result.literal->constant TSRMLS_CC);
 							} else {
 								opline->op1 = last_op->result;
 							}
@@ -7765,16 +7790,16 @@ const char *zend_get_accessor_name_from_accessor_info(zend_accessor_info *ai TSR
 		return "Not an accessor";
 
 	if(ai->getter) {
-		return zend_get_accessor_name_from_function(ai->getter);
+		return ZEND_ACC_NAME(ai->getter);
 	}
 	if(ai->setter) {
-		return zend_get_accessor_name_from_function(ai->setter);
+		return ZEND_ACC_NAME(ai->setter);
 	}
 	if(ai->isset) {
-		return zend_get_accessor_name_from_function(ai->isset);
+		return ZEND_ACC_NAME(ai->isset);
 	}
 	if(ai->unset) {
-		return zend_get_accessor_name_from_function(ai->unset);
+		return ZEND_ACC_NAME(ai->unset);
 	}
 	return "Unknown Accessor Name";
 }
@@ -7815,22 +7840,25 @@ zend_accessor_info *zend_get_accessor_info_from_function(zend_function *func TSR
 zend_accessor_info *zend_get_accessor_from_init_static_method_call(zend_op_array *op_array, zend_op *opline, const char **context_name_out TSRMLS_DC)  /* {{{ */
 {
 	/* Unsure if we can rely on .zv to be resolved here already, normally resolved in pass_two on about line 597 */
-	if(!opline || !opline->opcode == ZEND_INIT_STATIC_METHOD_CALL)
+	if(!opline || !opline->opcode == ZEND_INIT_STATIC_METHOD_CALL) {
 		return NULL;
+	}
 
 	zval *op1zv=NULL, *op2zv=NULL;
 
 	if (opline->op1_type == IS_CONST) {
-		if(opline->op2.constant < op_array->last_literal)	/* constant may already be translated to zv by pass_two() */
+		if(opline->op2.constant < op_array->last_literal) {	/* constant may already be translated to zv by pass_two() */
 			op1zv = &op_array->literals[opline->op1.constant].constant;
-		else
+		} else {
 			op1zv = opline->op1.zv;
+		}
 	}
 	if (opline->op2_type == IS_CONST) {
-		if(opline->op2.constant < op_array->last_literal)	/* constant may already be translated to zv by pass_two() */
+		if(opline->op2.constant < op_array->last_literal) {	/* constant may already be translated to zv by pass_two() */
 			op2zv = &op_array->literals[opline->op2.constant].constant;
-		else
+		} else {
 			op2zv = opline->op2.zv;
+		}
 	} else {
 		/* we only handle cases where op2_type == IS_CONST */
 		return NULL;
@@ -7851,16 +7879,19 @@ zend_accessor_info *zend_get_accessor_from_init_static_method_call(zend_op_array
 		} else if(opline->op1_type == IS_VAR) {
 			switch(opline->extended_value) {
 				case ZEND_FETCH_CLASS_SELF:
-					if(!CG(active_class_entry))
+					if(!CG(active_class_entry)) {
 						zend_error_noreturn(E_ERROR, "Cannot access self:: when no class scope is active");
+					}
 					*context_name_out = "self";
 					classpp = &CG(active_class_entry);
 					break;
 				case ZEND_FETCH_CLASS_PARENT:
-					if(!CG(active_class_entry))
+					if(!CG(active_class_entry)) {
 						zend_error_noreturn(E_ERROR, "Cannot access parent:: when no class scope is active");
-					if(!CG(active_class_entry)->parent)
+					}
+					if(!CG(active_class_entry)->parent) {
 						zend_error_noreturn(E_ERROR, "Cannot access parent::%s, %s has no parent class.", Z_STRVAL_P(op2zv)+5, CG(active_class_entry)->name);
+					}
 					*context_name_out = "parent";
 					classpp = &CG(active_class_entry)->parent;
 					break;
@@ -7874,8 +7905,9 @@ zend_accessor_info *zend_get_accessor_from_init_static_method_call(zend_op_array
 				efree(lcname2);
 
 				return *aipp;
-			} else
+			} else {
 				efree(lcname2);
+			}
 		}
 	}
 	return NULL;
