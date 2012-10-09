@@ -57,6 +57,10 @@ PHP                                                                        NEWS
   . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 
     SHA224, SHA256, SHA384, SHA512). (Mark Jones)
 
+- PDO:
+  . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
+    (Martin Osvald, Remi)
+
 - SOAP
   . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
     (Dmitry)
