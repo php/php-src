@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.8
 
 - CLI server:
+  . Implemented FR #63242 (Default error page in PHP built-in web server uses 
+    outdated html/css). (pascal.chevrel@free.fr)
   . Changed response to unknown HTTP method to 501 according to RFC.
     (Niklas Lindgren).
   . Support HTTP PATCH method. Patch by Niklas Lindgren, GitHub PR #190.
