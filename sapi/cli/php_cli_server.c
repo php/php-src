@@ -245,10 +245,10 @@ static php_cli_server_http_reponse_status_code_pair status_map[] = {
 };
 
 static php_cli_server_http_reponse_status_code_pair template_map[] = {
-	{ 400, "<h1 class=\"h\">%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
-	{ 404, "<h1 class=\"h\">%s</h1><p>The requested resource %s was not found on this server.</p>" },
-	{ 500, "<h1 class=\"h\">%s</h1><p>The server is temporarily unavailable.</p>" },
-	{ 501, "<h1 class=\"h\">%s</h1><p>Request method not supported.</p>" }
+	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
+	{ 404, "<h1>%s</h1><p>The requested resource %s was not found on this server.</p>" },
+	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
+	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
 };
 
 static php_cli_server_ext_mime_type_pair mime_type_map[] = {
@@ -279,22 +279,10 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_server);
 /* {{{ static char php_cli_server_css[]
  * copied from ext/standard/info.c
  */
-static const char php_cli_server_css[] = "<style type=\"text/css\">\n" \
-								   "body {background-color: #ffffff; color: #000000;}\n" \
-								   "body, td, th, h1, h2 {font-family: sans-serif;}\n" \
-								   ".center {text-align: center;}\n" \
-								   ".center table { margin-left: auto; margin-right: auto; text-align: left;}\n" \
-								   ".center th { text-align: center !important; }\n" \
-								   "h1 {font-size: 150%;}\n" \
-								   "h2 {font-size: 125%;}\n" \
-								   ".p {text-align: left;}\n" \
-								   ".e {background-color: #ccccff; font-weight: bold; color: #000000;}\n" \
-								   ".h {background-color: #9999cc; font-weight: bold; color: #000000;}\n" \
-								   ".v {background-color: #cccccc; color: #000000;}\n" \
-								   ".vr {background-color: #cccccc; text-align: right; color: #000000;}\n" \
-								   "img {float: right; border: 0px;}\n" \
-								   "hr {width: 600px; background-color: #cccccc; border: 0px; height: 1px; color: #000000;}\n" \
-								   "</style>\n";
+static const char php_cli_server_css[] = "<style>\n" \
+										"body { background-color: #ffffff; color: #000000; }\n" \
+										"h1 { font-family: sans-serif; font-size: 150%; background-color: #9999cc; font-weight: bold; color: #000000; margin-top: 0;}\n" \
+										"</style>\n";
 /* }}} */
 
 static void char_ptr_dtor_p(char **p) /* {{{ */
@@ -1757,7 +1745,7 @@ static int php_cli_server_send_error_page(php_cli_server *server, php_cli_server
 	escaped_request_uri = php_escape_html_entities_ex((unsigned char *)client->request.request_uri, client->request.request_uri_len, &escaped_request_uri_len, 0, ENT_QUOTES, NULL, 0 TSRMLS_CC);
 
 	{
-		static const char prologue_template[] = "<html><head><title>%d %s</title>";
+		static const char prologue_template[] = "<!doctype html><html><head><title>%d %s</title>";
 		php_cli_server_chunk *chunk = php_cli_server_chunk_heap_new_self_contained(strlen(prologue_template) + 3 + strlen(status_string) + 1);
 		if (!chunk) {
 			goto fail;
