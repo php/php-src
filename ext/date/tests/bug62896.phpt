@@ -1,5 +1,7 @@
 --TEST--
 Bug #62896 Unixtimestamp may take on local times DST flag (this test will only be valid during CEST)
+--INI--
+date.timezone=Europe/Berlin
 --FILE--
 <?php
   $tz = new DateTimeZone('Europe/Berlin');
