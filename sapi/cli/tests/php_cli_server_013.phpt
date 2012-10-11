@@ -33,7 +33,7 @@ HEADER
 	}
 }
 
-echo preg_replace("/<style type=\"text\/css\">(.*?)<\/style>/s", "<style type=\"text/css\">AAA</style>", $output), "\n";
+echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";
 fclose($fp);
 
 
@@ -55,7 +55,7 @@ HEADER
 	}
 }
 
-echo preg_replace("/<style type=\"text\/css\">(.*?)<\/style>/s", "<style type=\"text/css\">AAA</style>", $output), "\n";
+echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";
 fclose($fp);
 
 $output = '';
@@ -76,7 +76,7 @@ HEADER
 	}
 }
 
-echo preg_replace("/<style type=\"text\/css\">(.*?)<\/style>/s", "<style type=\"text/css\">AAA</style>", $output), "\n";
+echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";
 fclose($fp);
 ?>
 --EXPECTF--
@@ -87,22 +87,22 @@ Connection: close
 Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 
-<html><head><title>404 Not Found</title><style type="text/css">AAA</style>
-</head><body><h1 class="h">Not Found</h1><p>The requested resource / was not found on this server.</p></body></html>
+<!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
+</head><body><h1>Not Found</h1><p>The requested resource / was not found on this server.</p></body></html>
 HTTP/1.1 404 Not Found
 Host: %s
 Connection: close
 Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 
-<html><head><title>404 Not Found</title><style type="text/css">AAA</style>
-</head><body><h1 class="h">Not Found</h1><p>The requested resource /main/style.css was not found on this server.</p></body></html>
+<!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
+</head><body><h1>Not Found</h1><p>The requested resource /main/style.css was not found on this server.</p></body></html>
 HTTP/1.1 404 Not Found
 Host: %s
 Connection: close
 Content-Type: text/html; charset=UTF-8
 Content-Length: %d
 
-<html><head><title>404 Not Found</title><style type="text/css">AAA</style>
-</head><body><h1 class="h">Not Found</h1><p>The requested resource /main/foo/bar was not found on this server.</p></body></html>
+<!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
+</head><body><h1>Not Found</h1><p>The requested resource /main/foo/bar was not found on this server.</p></body></html>
 

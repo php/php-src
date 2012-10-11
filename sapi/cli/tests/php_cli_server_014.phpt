@@ -57,7 +57,7 @@ HEADER
 	}
 }
 
-echo preg_replace("/<style type=\"text\/css\">(.*?)<\/style>/s", "<style type=\"text/css\">AAA</style>", $output), "\n";
+echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";
 fclose($fp);
 
 ?>
@@ -76,5 +76,5 @@ Connection: close
 Content-Type: %s
 Content-Length: %d
 
-<html><head><title>404 Not Found</title><style type="text/css">AAA</style>
-</head><body><h1 class="h">Not Found</h1><p>The requested resource /main/no-exists.php was not found on this server.</p></body></html>
+<!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
+</head><body><h1>Not Found</h1><p>The requested resource /main/no-exists.php was not found on this server.</p></body></html>
