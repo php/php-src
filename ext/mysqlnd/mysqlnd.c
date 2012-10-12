@@ -1924,7 +1924,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, free_reference)(MYSQLND_CONN_DATA * co
 
 /* {{{ mysqlnd_conn_data::get_state */
 static enum mysqlnd_connection_state
-MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_state)(MYSQLND_CONN_DATA * const conn TSRMLS_DC)
+MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_state)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_conn_data::get_state");
 	DBG_RETURN(conn->state);
