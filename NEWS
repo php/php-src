@@ -64,6 +64,10 @@ PHP                                                                        NEWS
     DBQUOTEDIDENT, 1)). (Laruence)
   . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
     (Martin Osvald, Remi)
+    
+- PDO Firebird:
+  . Fixed bug #63214 (Large PDO Firebird Queries).
+    (james at kenjim dot com)
 
 - SOAP
   . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
