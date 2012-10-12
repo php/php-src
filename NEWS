@@ -60,6 +60,8 @@ PHP                                                                        NEWS
     SHA224, SHA256, SHA384, SHA512). (Mark Jones)
 
 - PDO:
+  . Fixed bug #63258 (seg fault with PDO and dblib using DBSETOPT(H->link,
+    DBQUOTEDIDENT, 1)). (Laruence)
   . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
     (Martin Osvald, Remi)
 
