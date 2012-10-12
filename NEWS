@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
     (Martin Osvald, Remi)
 
+- Streams:
+  . Fixed bug #63240 (stream_get_line() return contains delimiter string).
+    (Tjerk, Gustavo)
+
 ?? ??? 2012, PHP 5.3.18
 
 (NOTE: Add your entries above for 5.3.19, entries for 5.3.18 should only
