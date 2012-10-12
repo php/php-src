@@ -615,7 +615,7 @@ static void cli_usage( TSRMLS_D )
         "  args...    Arguments passed to script.\n";
     php_output_startup();
     php_output_activate(TSRMLS_C);
-    php_printf( usage );
+    php_printf( "%s", usage );
 #ifdef PHP_OUTPUT_NEWAPI
     php_output_end_all(TSRMLS_C);
 #else
