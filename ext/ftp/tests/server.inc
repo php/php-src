@@ -395,9 +395,9 @@ if ($pid) {
 
 		}elseif (preg_match('/^REST \d+/', $buf, $matches)) {
 			fputs($s, "350 OK\r\n");
-		}
-
-		else {
+                }elseif (preg_match('/^SIZE largefile/', $buf)) {
+                        fputs($s, "213 5368709120\r\n");
+                }else {
 			fputs($s, "500 Syntax error, command unrecognized.\r\n");
 			dump_and_exit($buf);
 		}
