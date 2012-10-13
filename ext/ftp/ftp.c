@@ -806,7 +806,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t type, 
 	ftp->data = data;
 
 	if (resumepos > 0) {
-		snprintf(arg, sizeof(arg), "%u", resumepos);
+		snprintf(arg, sizeof(arg), "%ld", resumepos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -899,7 +899,7 @@ ftp_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type, l
 	ftp->data = data;	
 
 	if (startpos > 0) {
-		snprintf(arg, sizeof(arg), "%u", startpos);
+		snprintf(arg, sizeof(arg), "%ld", startpos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -1715,7 +1715,7 @@ ftp_nb_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, ftptype_t typ
 	}
 
 	if (resumepos>0) {
-		snprintf(arg, sizeof(arg), "%u", resumepos);
+		snprintf(arg, sizeof(arg), "%ld", resumepos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
@@ -1829,11 +1829,7 @@ ftp_nb_put(ftpbuf_t *ftp, const char *path, php_stream *instream, ftptype_t type
 		goto bail;
 	}
 	if (startpos > 0) {
-		if (startpos > 2147483647) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "PHP cannot handle files with a size greater than 2147483647 bytes.");
-			goto bail;
-		}
-		snprintf(arg, sizeof(arg), "%u", startpos);
+		snprintf(arg, sizeof(arg), "%ld", startpos);
 		if (!ftp_putcmd(ftp, "REST", arg)) {
 			goto bail;
 		}
