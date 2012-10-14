@@ -3943,9 +3943,15 @@ static inline void zend_do_update_accessors(zend_class_entry *ce TSRMLS_DC) /* {
 			zend_accessor_info **aipp, *ai;
 
 			if(zend_hash_quick_find(&ce->accessors, varname, strlen(varname)+1, hash_value, (void**) &aipp) != SUCCESS) {
+				zend_accessor_info **parent_aipp = NULL;
+
 				ai = emalloc(sizeof(zend_accessor_info));
 				memset(ai, 0, sizeof(zend_accessor_info));
 				zend_hash_quick_update(&ce->accessors, varname, strlen(varname)+1, hash_value, (void**)&ai, sizeof(zend_accessor_info*), NULL);
+
+				if(ce && ce->parent && zend_hash_quick_find(&ce->parent->accessors, varname, strlen(varname)+1, hash_value, (void**) &parent_aipp) == SUCCESS) {
+					ai->flags = (*parent_aipp)->flags;
+				}
 			} else {
 				ai = *aipp;
 			}

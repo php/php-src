@@ -458,7 +458,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 	zval *rv = NULL;
 	zend_property_info *property_info;
 	int silent;
-	zend_function 		*getter = zend_locate_getter(object, member, key TSRMLS_CC);
+	zend_function 		*getter = NULL;
 
 	silent = (type == BP_VAR_IS);
 	zobj = Z_OBJ_P(object);
@@ -472,6 +472,8 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 		member = tmp_member;
 		key = NULL;
 	}
+
+	getter = zend_locate_getter(object, member, key TSRMLS_CC);
 
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Read object #%d property: %s\n", Z_OBJ_HANDLE_P(object), Z_STRVAL_P(member));
@@ -558,7 +560,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 	zval *tmp_member = NULL;
 	zval **variable_ptr;
 	zend_property_info *property_info;
-	zend_function 	*setter = zend_locate_setter(object, member, key TSRMLS_CC);
+	zend_function 	*setter = NULL;
 
 	zobj = Z_OBJ_P(object);
 
@@ -571,6 +573,8 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 		member = tmp_member;
 		key = NULL;
 	}
+
+ 	setter = zend_locate_setter(object, member, key TSRMLS_CC);
 
 	property_info = zend_get_property_info_quick(zobj->ce, member, (setter != NULL), key TSRMLS_CC);
 
@@ -827,7 +831,19 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 	zend_function 		*unsetter = NULL;
 
 	zend_accessor_info **ai = NULL;
-	ulong hash_value = key ? key->hash_value : member && member->type == IS_STRING ? zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1) : 0;
+	ulong hash_value;
+
+ 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
+ 		ALLOC_ZVAL(tmp_member);
+		*tmp_member = *member;
+		INIT_PZVAL(tmp_member);
+		zval_copy_ctor(tmp_member);
+		convert_to_string(tmp_member);
+		member = tmp_member;
+		key = NULL;
+	}
+
+ 	hash_value  = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
 
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
 		if((*ai)->flags & ZEND_ACC_READONLY) {
@@ -840,16 +856,6 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 				unsetter = zend_std_get_method(&object, (char *)(*ai)->unset->common.function_name, strlen((*ai)->unset->common.function_name), NULL TSRMLS_CC);
 			}
 		}
-	}
-
- 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
- 		ALLOC_ZVAL(tmp_member);
-		*tmp_member = *member;
-		INIT_PZVAL(tmp_member);
-		zval_copy_ctor(tmp_member);
-		convert_to_string(tmp_member);
-		member = tmp_member;
-		key = NULL;
 	}
 
 	property_info = zend_get_property_info_quick(zobj->ce, member, (ai != NULL || zobj->ce->__unset != NULL), key TSRMLS_CC);
@@ -1477,7 +1483,8 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 		key = NULL;
 	}
 
-	hash_value = key ? key->hash_value : member && member->type == IS_STRING ? zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1) : 0;
+	hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
 		if((*ai)->flags & ZEND_ACC_WRITEONLY) {
 			zend_error_noreturn(E_ERROR, "Cannot isset write-only property %s::$%s.", zobj->ce->name, Z_STRVAL_P(member));
