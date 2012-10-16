@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-04 Oct 2012, PHP 5.4.8 RC1
+18 Oct 2012, PHP 5.4.8
 
 - CLI server:
   . Changed response to unknown HTTP method to 501 according to RFC.
