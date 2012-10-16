@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.5.0
 
 - General improvements:
+  . Add simplified password hashing API 
+    (https://wiki.php.net/rfc/password_hash). (Anthony Ferrara)
   . Add generators and coroutines (https://wiki.php.net/rfc/generators).
     (Nikita Popov)
   . Support list in foreach (https://wiki.php.net/rfc/foreachlist). (Laruence)
