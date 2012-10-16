@@ -86,4 +86,8 @@ PHP                                                                        NEWS
 - Zip:
   . Upgraded libzip to 0.10.1 (Anatoliy)
 
+- Fileinfo:
+  . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
+      (Anatoliy)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
