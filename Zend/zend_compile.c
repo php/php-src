@@ -7851,12 +7851,12 @@ zend_accessor_info *zend_get_accessor_info_from_function(zend_function *func TSR
 
 zend_accessor_info *zend_get_accessor_from_init_static_method_call(zend_op_array *op_array, zend_op *opline, const char **context_name_out TSRMLS_DC)  /* {{{ */
 {
+	zval *op1zv=NULL, *op2zv=NULL;
+
 	/* Unsure if we can rely on .zv to be resolved here already, normally resolved in pass_two on about line 597 */
 	if(!opline || !opline->opcode == ZEND_INIT_STATIC_METHOD_CALL) {
 		return NULL;
 	}
-
-	zval *op1zv=NULL, *op2zv=NULL;
 
 	if (opline->op1_type == IS_CONST) {
 		if(opline->op2.constant < op_array->last_literal) {	/* constant may already be translated to zv by pass_two() */
