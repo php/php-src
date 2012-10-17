@@ -226,6 +226,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_recvfrom, 0, 0, 5)
 	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(1, name)
 	ZEND_ARG_INFO(1, port)
+	ZEND_ARG_INFO(1, ifindex)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_sendto, 0, 0, 5)
@@ -235,6 +236,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_sendto, 0, 0, 5)
 	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, addr)
 	ZEND_ARG_INFO(0, port)
+	ZEND_ARG_INFO(0, ifindex)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_get_option, 0, 0, 3)
@@ -1742,11 +1744,11 @@ PHP_FUNCTION(socket_send)
 }
 /* }}} */
 
-/* {{{ proto int socket_recvfrom(resource socket, string &buf, int len, int flags, string &name [, int &port])
+/* {{{ proto int socket_recvfrom(resource socket, string &buf, int len, int flags, string &name [, int &port [, int &ifindex]])
    Receives data from a socket, connected or not */
 PHP_FUNCTION(socket_recvfrom)
 {
-	zval				*arg1, *arg2, *arg5, *arg6 = NULL;
+	zval				*arg1, *arg2, *arg5, *arg6 = NULL, *arg7 = NULL;
 	php_socket			*php_sock;
 	struct sockaddr_un	s_un;
 	struct sockaddr_in	sin;
@@ -1759,7 +1761,7 @@ PHP_FUNCTION(socket_recvfrom)
 	long				arg3, arg4;
 	char				*recv_buf, *address;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzllz|z", &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rzllz|zz", &arg1, &arg2, &arg3, &arg4, &arg5, &arg6, &arg7) == FAILURE) {
 		return;
 	}
 
@@ -1819,6 +1821,11 @@ PHP_FUNCTION(socket_recvfrom)
 			ZVAL_STRINGL(arg2, recv_buf, retval, 0);
 			ZVAL_STRING(arg5, address ? address : "0.0.0.0", 1);
 			ZVAL_LONG(arg6, ntohs(sin.sin_port));
+
+			if(arg7 != NULL) {
+				zval_dtor(arg7);
+				ZVAL_LONG(arg7, -1);
+			}
 			break;
 #if HAVE_IPV6
 		case AF_INET6:
@@ -1849,6 +1856,10 @@ PHP_FUNCTION(socket_recvfrom)
 			ZVAL_STRINGL(arg2, recv_buf, retval, 0);
 			ZVAL_STRING(arg5, addr6[0] ? addr6 : "::", 1);
 			ZVAL_LONG(arg6, ntohs(sin6.sin6_port));
+			if(arg7 != NULL) {
+				zval_dtor(arg7);
+				ZVAL_LONG(arg7, sin6.sin6_scope_id);
+			}
 			break;
 #endif
 		default:
@@ -1860,7 +1871,7 @@ PHP_FUNCTION(socket_recvfrom)
 }
 /* }}} */
 
-/* {{{ proto int socket_sendto(resource socket, string buf, int len, int flags, string addr [, int port])
+/* {{{ proto int socket_sendto(resource socket, string buf, int len, int flags, string addr [, int port [, int ifindex]])
    Sends a message to a socket, whether it is connected or not */
 PHP_FUNCTION(socket_sendto)
 {
@@ -1872,11 +1883,11 @@ PHP_FUNCTION(socket_sendto)
 	struct sockaddr_in6	sin6;
 #endif
 	int					retval, buf_len, addr_len;
-	long				len, flags, port = 0;
+	long				len, flags, port = 0, ifindex=-1;
 	char				*buf, *addr;
 	int					argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "rslls|l", &arg1, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "rslls|ll", &arg1, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port, &ifindex) == FAILURE) {
 		return;
 	}
 
@@ -1908,13 +1919,17 @@ PHP_FUNCTION(socket_sendto)
 			break;
 #if HAVE_IPV6
 		case AF_INET6:
-			if (argc != 6) {
+			if (argc != 6 && argc != 7) {
 				WRONG_PARAM_COUNT;
 			}
 
 			memset(&sin6, 0, sizeof(sin6));
 			sin6.sin6_family = AF_INET6;
 			sin6.sin6_port = htons((unsigned short) port);
+
+			if(ifindex>-1) {
+				sin6.sin6_scope_id = ifindex;
+			}
 
 			if (! php_set_inet6_addr(&sin6, addr, php_sock TSRMLS_CC)) {
 				RETURN_FALSE;
