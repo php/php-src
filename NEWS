@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.19
 
+- mysql:
+  . Fixed compilation failure on mixed 32/64 bit systems. (Andrey)
+
 - PDO:
   . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
     (Martin Osvald, Remi)
@@ -66,12 +69,13 @@ be added after merge by RM)
 
 - CURL:
   . Fixed bug #62839 (curl_copy_handle segfault with CURLOPT_FILE). (Pierrick)
-
-- Intl:
-  . Fix null pointer dereferences in some classes of ext/intl. (Gustavo)
-
-- mysql:
-  . Fixed compilation failure on mixed 32/64 bit systems. (Andrey)
+   . Fixed bug #62499 (curl_setopt($ch, CURLOPT_COOKIEFILE, "") returns false).
+     (r.hampartsumyan@gmail.com, Laruence)
+  
+ - DateTime:
+   . Fixed bug #62852 (Unserialize invalid DateTime causes crash).
+     (reeze.xia@gmail.com)
+   . Fixed bug #62500 (Segfault in DateInterval class when extended). (Laruence)
 
 - MySQLnd:
   . Fixed bug #62885 (mysqli_poll - Segmentation fault). (Laruence)
