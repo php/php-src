@@ -227,8 +227,10 @@ static int oci_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 		H->server = NULL;
 	}
 
-	OCIHandleFree(H->err, OCI_HTYPE_ERROR);
-	H->err = NULL;
+	if (H->err) {
+		OCIHandleFree(H->err, OCI_HTYPE_ERROR);
+		H->err = NULL;
+	}
 
 	if (H->charset && H->env) {
 		OCIHandleFree(H->env, OCI_HTYPE_ENV);
