@@ -22,6 +22,9 @@ PHP                                                                        NEWS
     (reeze.xia@gmail.com)
   . Fixed bug #62500 (Segfault in DateInterval class when extended). (Laruence)
 
+- mysql:
+  . Fixed compilation failure on mixed 32/64 bit systems. (Andrey)
+
 - MySQLnd:
   . Fixed bug #62885 (mysqli_poll - Segmentation fault). (Laruence)
 
