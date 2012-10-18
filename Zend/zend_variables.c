@@ -40,6 +40,8 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 				TSRMLS_FETCH();
 
 				if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
+					/* break possible cycles */
+					Z_TYPE_P(zvalue) = IS_NULL;
 					zend_hash_destroy(zvalue->value.ht);
 					FREE_HASHTABLE(zvalue->value.ht);
 				}
