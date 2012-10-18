@@ -2,8 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.19
 
-- mysql:
+- MySQL:
   . Fixed compilation failure on mixed 32/64 bit systems. (Andrey)
+
+- PCRE:
+  . Fixed bug #63055 (Segfault in zend_gc with SF2 testsuite).
+    (Dmitry, Laruence)
 
 - PDO:
   . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
