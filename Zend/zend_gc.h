@@ -179,7 +179,7 @@ END_EXTERN_C()
 
 static zend_always_inline void gc_zval_check_possible_root(zval *z TSRMLS_DC)
 {
-	if ((z->type == IS_ARRAY && !z->value.ht->inconsistent) || z->type == IS_OBJECT) {
+	if (z->type == IS_ARRAY || z->type == IS_OBJECT) {
 		gc_zval_possible_root(z TSRMLS_CC);
 	}
 }
