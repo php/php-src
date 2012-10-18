@@ -193,6 +193,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_connect, 0, 0, 2)
 	ZEND_ARG_INFO(0, socket)
 	ZEND_ARG_INFO(0, addr)
 	ZEND_ARG_INFO(0, port)
+	ZEND_ARG_INFO(0, ifindex)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_strerror, 0, 0, 1)
@@ -1488,7 +1489,7 @@ PHP_FUNCTION(socket_create)
 }
 /* }}} */
 
-/* {{{ proto bool socket_connect(resource socket, string addr [, int port])
+/* {{{ proto bool socket_connect(resource socket, string addr [, int port [, int ifindex]])
    Opens a connection to addr:port on the socket specified by socket */
 PHP_FUNCTION(socket_connect)
 {
@@ -1496,10 +1497,10 @@ PHP_FUNCTION(socket_connect)
 	php_socket			*php_sock;
 	char				*addr;
 	int					retval, addr_len;
-	long				port = 0;
+	long				port = 0, ifindex = -1;
 	int					argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "rs|l", &arg1, &addr, &addr_len, &port) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "rs|ll", &arg1, &addr, &addr_len, &port, &ifindex) == FAILURE) {
 		return;
 	}
 
@@ -1510,7 +1511,7 @@ PHP_FUNCTION(socket_connect)
 		case AF_INET6: {
 			struct sockaddr_in6 sin6 = {0};
 			
-			if (argc != 3) {
+			if (argc != 3 && argc != 4) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Socket of type AF_INET6 requires 3 arguments");
 				RETURN_FALSE;
 			}
@@ -1519,6 +1520,8 @@ PHP_FUNCTION(socket_connect)
 
 			sin6.sin6_family = AF_INET6;
 			sin6.sin6_port   = htons((unsigned short int)port);
+
+			if(ifindex != -1) sin6.sin6_scope_id = ifindex;
 
 			if (! php_set_inet6_addr(&sin6, addr, php_sock TSRMLS_CC)) {
 				RETURN_FALSE;
