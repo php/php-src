@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
     (Anatoliy)
 
+- PCRE:
+  . Fixed bug #63055 (Segfault in zend_gc with SF2 testsuite).
+    (Dmitry, Laruence)
+
 ?? ??? 2012, PHP 5.4.8
 
 - CLI server:
