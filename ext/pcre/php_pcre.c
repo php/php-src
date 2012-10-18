@@ -555,9 +555,8 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, int subjec
 
 	/* Overwrite the passed-in value for subpatterns with an empty array. */
 	if (subpats != NULL) {
-		zval garbage = *subpats;
+        zval_dtor(subpats);
 		array_init(subpats);
-		zval_dtor(&garbage);
 	}
 
 	subpats_order = global ? PREG_PATTERN_ORDER : 0;
