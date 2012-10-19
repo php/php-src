@@ -21,8 +21,8 @@ require_once('skipifconnectfailure.inc');
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// NOTE: empty string, no multiple insert syntax
-	if (!is_string($tmp = mysqli_info($link)) || ('' != $tmp))
-		printf("[004] Expecting string/empty, got %s/%s\n", gettype($tmp), $tmp);
+	if (!is_null($tmp = mysqli_info($link)) || ('' != $tmp))
+		printf("[004] Expecting null, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!$res = mysqli_query($link, "INSERT INTO test(id, label) VALUES (101, 'a'), (102, 'b')"))
 		printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -54,8 +54,8 @@ require_once('skipifconnectfailure.inc');
 	if (!$res = mysqli_query($link, "SELECT 1"))
 		printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (!is_string($tmp = mysqli_info($link)) || ('' != $tmp))
-		printf("[014] Expecting string/empty, got %s/%s\n", gettype($tmp), $tmp);
+	if (!is_null($tmp = mysqli_info($link)) || ('' != $tmp))
+		printf("[014] Expecting null, got %s/%s\n", gettype($tmp), $tmp);
 	mysqli_free_result($res);
 
 	// NOTE: no LOAD DATA INFILE test

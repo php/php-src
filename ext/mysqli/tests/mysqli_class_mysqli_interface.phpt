@@ -205,7 +205,7 @@ require_once('skipifconnectfailure.inc');
 		$mysqli->sqlstate, gettype($mysqli->sqlstate),
 		mysqli_sqlstate($link), gettype(mysqli_sqlstate($link)));
 
-	assert(mysqli_stat($link) === $mysqli->stat);
+	assert(soundex(mysqli_stat($link)) == soundex($mysqli->stat));
 	printf("mysqli->stat = '%s'/%s ('%s'/%s)\n",
 		$mysqli->stat, gettype($mysqli->stat),
 		mysqli_stat($link), gettype(mysqli_stat($link)));
@@ -295,7 +295,7 @@ mysqli->insert_id = '0'/integer ('0'/integer)
 mysqli->sqlstate = '00000'/%unicode|string% ('00000'/%unicode|string%)
 mysqli->stat = 'Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string ('Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string)
 mysqli->host_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
-mysqli->info = ''/NULL (''/%unicode|string%)
+mysqli->info = ''/NULL (''/NULL)
 mysqli->thread_id = '%d'/integer ('%d'/integer)
 mysqli->protocol_version = '%d'/integer ('%d'/integer)
 mysqli->server_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
