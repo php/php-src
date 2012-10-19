@@ -33,7 +33,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2011-11-18</date>
+ <date>2012-10-21</date>
  <time>12:00:00</time>
 
  <version>
@@ -47,6 +47,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
    Fixed bug #60901 (Improve "tail" syntax for AIX installation)
+   Fixed bug #63265 (Add ORA-00028 to the PHP_OCI_HANDLE_ERROR macro)
  </notes>
  <contents>
   <dir name="/">
