@@ -46,8 +46,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-   Fixed bug #60901 (Improve "tail" syntax for AIX installation)
+   Fixed bug #63307 (Unused variable in oci8.c)
    Fixed bug #63265 (Add ORA-00028 to the PHP_OCI_HANDLE_ERROR macro)
+   Fixed bug #60901 (Improve "tail" syntax for AIX installation)
  </notes>
  <contents>
   <dir name="/">
