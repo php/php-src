@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2012 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -65,16 +65,25 @@ Arguments:
   type         the newline type
   endptr       pointer to the end of the string
   lenptr       where to return the length
-  utf8         TRUE if in utf8 mode
+  utf          TRUE if in utf mode
 
 Returns:       TRUE or FALSE
 */
 
 BOOL
-_pcre_is_newline(USPTR ptr, int type, USPTR endptr, int *lenptr, BOOL utf8)
+PRIV(is_newline)(PCRE_PUCHAR ptr, int type, PCRE_PUCHAR endptr, int *lenptr,
+  BOOL utf)
 {
 int c;
-if (utf8) { GETCHAR(c, ptr); } else c = *ptr;
+(void)utf;
+#ifdef SUPPORT_UTF
+if (utf)
+  {
+  GETCHAR(c, ptr);
+  }
+else
+#endif  /* SUPPORT_UTF */
+  c = *ptr;
 
 if (type == NLTYPE_ANYCRLF) switch(c)
   {
@@ -93,9 +102,15 @@ else switch(c)
   case 0x000c: *lenptr = 1; return TRUE;             /* FF */
   case 0x000d: *lenptr = (ptr < endptr - 1 && ptr[1] == 0x0a)? 2 : 1;
                return TRUE;                          /* CR */
-  case 0x0085: *lenptr = utf8? 2 : 1; return TRUE;   /* NEL */
+#ifdef COMPILE_PCRE8
+  case 0x0085: *lenptr = utf? 2 : 1; return TRUE;    /* NEL */
   case 0x2028:                                       /* LS */
   case 0x2029: *lenptr = 3; return TRUE;             /* PS */
+#else
+  case 0x0085:                                       /* NEL */
+  case 0x2028:                                       /* LS */
+  case 0x2029: *lenptr = 1; return TRUE;             /* PS */
+#endif /* COMPILE_PCRE8 */
   default: return FALSE;
   }
 }
@@ -114,26 +129,27 @@ Arguments:
   type         the newline type
   startptr     pointer to the start of the string
   lenptr       where to return the length
-  utf8         TRUE if in utf8 mode
+  utf          TRUE if in utf mode
 
 Returns:       TRUE or FALSE
 */
 
 BOOL
-_pcre_was_newline(USPTR ptr, int type, USPTR startptr, int *lenptr, BOOL utf8)
+PRIV(was_newline)(PCRE_PUCHAR ptr, int type, PCRE_PUCHAR startptr, int *lenptr,
+  BOOL utf)
 {
 int c;
+(void)utf;
 ptr--;
-#ifdef SUPPORT_UTF8
-if (utf8)
+#ifdef SUPPORT_UTF
+if (utf)
   {
   BACKCHAR(ptr);
   GETCHAR(c, ptr);
   }
-else c = *ptr;
-#else   /* no UTF-8 support */
-c = *ptr;
-#endif  /* SUPPORT_UTF8 */
+else
+#endif  /* SUPPORT_UTF */
+  c = *ptr;
 
 if (type == NLTYPE_ANYCRLF) switch(c)
   {
@@ -150,9 +166,15 @@ else switch(c)
   case 0x000b:                                      /* VT */
   case 0x000c:                                      /* FF */
   case 0x000d: *lenptr = 1; return TRUE;            /* CR */
-  case 0x0085: *lenptr = utf8? 2 : 1; return TRUE;  /* NEL */
+#ifdef COMPILE_PCRE8
+  case 0x0085: *lenptr = utf? 2 : 1; return TRUE;   /* NEL */
   case 0x2028:                                      /* LS */
   case 0x2029: *lenptr = 3; return TRUE;            /* PS */
+#else
+  case 0x0085:                                       /* NEL */
+  case 0x2028:                                       /* LS */
+  case 0x2029: *lenptr = 1; return TRUE;             /* PS */
+#endif /* COMPILE_PCRE8 */
   default: return FALSE;
   }
 }
