@@ -12,6 +12,7 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #63055 (Segfault in zend_gc with SF2 testsuite).
     (Dmitry, Laruence)
+  . Fixed bug #63284 (Upgrade PCRE to 8.31). (Anatoliy)
 
 - PDO:
   . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
