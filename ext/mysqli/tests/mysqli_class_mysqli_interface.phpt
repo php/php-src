@@ -211,7 +211,7 @@ require_once('skipifconnectfailure.inc');
 		$mysqli->sqlstate, gettype($mysqli->sqlstate),
 		mysqli_sqlstate($link), gettype(mysqli_sqlstate($link)));
 
-	assert(mysqli_stat($link) === $mysqli->stat);
+	assert(soundex(mysqli_stat($link)) == soundex($mysqli->stat));
 	printf("mysqli->stat = '%s'/%s ('%s'/%s)\n",
 		$mysqli->stat, gettype($mysqli->stat),
 		mysqli_stat($link), gettype(mysqli_stat($link)));

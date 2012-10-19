@@ -2,6 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.9
 
+- Fileinfo:
+  . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
+    (Anatoliy)
+
+- PCRE:
+  . Fixed bug #63055 (Segfault in zend_gc with SF2 testsuite).
+    (Dmitry, Laruence)
+
 ?? ??? 2012, PHP 5.4.8
 
 - CLI server:
@@ -60,8 +68,14 @@ PHP                                                                        NEWS
     SHA224, SHA256, SHA384, SHA512). (Mark Jones)
 
 - PDO:
+  . Fixed bug #63258 (seg fault with PDO and dblib using DBSETOPT(H->link,
+    DBQUOTEDIDENT, 1)). (Laruence)
   . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
     (Martin Osvald, Remi)
+    
+- PDO Firebird:
+  . Fixed bug #63214 (Large PDO Firebird Queries).
+    (james at kenjim dot com)
 
 - SOAP
   . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
