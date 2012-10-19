@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2008 University of Cambridge
+           Copyright (c) 1997-2012 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -66,11 +66,18 @@ Returns:        the (possibly updated) count value (a non-negative number), or
                 a negative error number
 */
 
+#ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_refcount(pcre *argument_re, int adjust)
+#else
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre16_refcount(pcre16 *argument_re, int adjust)
+#endif
 {
-real_pcre *re = (real_pcre *)argument_re;
+REAL_PCRE *re = (REAL_PCRE *)argument_re;
 if (re == NULL) return PCRE_ERROR_NULL;
+if (re->magic_number != MAGIC_NUMBER) return PCRE_ERROR_BADMAGIC;
+if ((re->flags & PCRE_MODE) == 0) return PCRE_ERROR_BADMODE;
 re->ref_count = (-adjust > re->ref_count)? 0 :
                 (adjust + re->ref_count > 65535)? 65535 :
                 re->ref_count + adjust;

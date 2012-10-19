@@ -2,7 +2,7 @@
 /* edit configure.in to change version number */
 #define PHP_MAJOR_VERSION 5
 #define PHP_MINOR_VERSION 4
-#define PHP_RELEASE_VERSION 8
+#define PHP_RELEASE_VERSION 9
 #define PHP_EXTRA_VERSION "-dev"
-#define PHP_VERSION "5.4.8-dev"
-#define PHP_VERSION_ID 50408
+#define PHP_VERSION "5.4.9-dev"
+#define PHP_VERSION_ID 50409

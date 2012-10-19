@@ -17,6 +17,7 @@ $iterator = new RecursiveDirectoryIterator(__DIR__ . DIRECTORY_SEPARATOR . $dept
 $it = new RecursiveIteratorIterator($iterator);
 
 $list = [];
+$it->rewind(); //see https://bugs.php.net/bug.php?id=62914
 while($it->valid()) {
   $list[] = $it->getSubPathname();
   $it->next();
@@ -45,7 +46,6 @@ rrmdir($targetDir);
 ?>
 --EXPECTF--
 .
-..
 ..
 depth1%c.
 depth1%c..
