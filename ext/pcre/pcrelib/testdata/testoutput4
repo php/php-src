@@ -1,5 +1,6 @@
-/-- This set of tests if for UTF-8 support, excluding Unicode properties. It is
-    compatible with all versions of Perl 5. --/
+/-- This set of tests is for UTF support, excluding Unicode properties. It is
+    compatible with all versions of Perl >= 5.10 and both the 8-bit and 16-bit
+    PCRE libraries. --/
    
 /a.b/8
     acb
@@ -254,46 +255,6 @@ No match
 No match
     XYZ 
 No match
-
-/X(\C{3})/8
-    X\x{1234}
- 0: X\x{1234}
- 1: \x{1234}
-
-/X(\C{4})/8
-    X\x{1234}YZ
- 0: X\x{1234}Y
- 1: \x{1234}Y
-    
-/X\C*/8
-    XYZabcdce
- 0: XYZabcdce
-    
-/X\C*?/8
-    XYZabcde
- 0: X
-    
-/X\C{3,5}/8
-    Xabcdefg   
- 0: Xabcde
-    X\x{1234} 
- 0: X\x{1234}
-    X\x{1234}YZ
- 0: X\x{1234}YZ
-    X\x{1234}\x{512}  
- 0: X\x{1234}\x{512}
-    X\x{1234}\x{512}YZ
- 0: X\x{1234}\x{512}
-
-/X\C{3,5}?/8
-    Xabcdefg   
- 0: Xabc
-    X\x{1234} 
- 0: X\x{1234}
-    X\x{1234}YZ
- 0: X\x{1234}
-    X\x{1234}\x{512}  
- 0: X\x{1234}
 
 /[^a]+/8g
     bcd
@@ -791,22 +752,6 @@ No match
     \x{200}X   
 No match
 
-/a\Cb/
-    aXb
- 0: aXb
-    a\nb
- 0: a\x0ab
-  
-/a\Cb/8
-    aXb
- 0: aXb
-    a\nb
- 0: a\x{0a}b
-    
-/a\C\Cb/8 
-    a\x{100}b 
- 0: a\x{100}b
-
 /[z-\x{100}]/8i
     z
  0: z
@@ -1127,5 +1072,23 @@ No match
  0: 
  0: AA
  0: 
+
+/(abc)\1/8i
+   abc
+No match
+
+/(abc)\1/8
+   abc
+No match
+
+/a(*:a\x{1234}b)/8K
+    abc
+ 0: a
+MK: a\x{1234}b
+
+/a(*:a£b)/8K 
+    abc
+ 0: a
+MK: a\x{a3}b
 
 /-- End of testinput4 --/
