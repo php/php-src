@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - MySQL:
   . Fixed compilation failure on mixed 32/64 bit systems. (Andrey)
 
+- OCI8:
+  . Fixed bug #63265 (Add ORA-00028 to the PHP_OCI_HANDLE_ERROR macro)
+    (Chris Jones)
+
 - PCRE:
   . Fixed bug #63055 (Segfault in zend_gc with SF2 testsuite).
     (Dmitry, Laruence)
@@ -46,6 +50,9 @@ PHP                                                                        NEWS
 
 - Intl:
   . Fix bug #62915 (defective cloning in several intl classes). (Gustavo)
+
+- OCI8:
+  . Fixed bug #60901 (Improve "tail" syntax for AIX installation) (Chris Jones)
 
 - SOAP
   . Fixed bug #50997 (SOAP Error when trying to submit 2nd Element of a choice).
