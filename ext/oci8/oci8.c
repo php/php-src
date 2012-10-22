@@ -3197,7 +3197,7 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrGet, ((dvoid *)actual_spool->poolh, OCI_HTYPE_SPOOL, (dvoid *)&numopen, (ub4 *)0, OCI_ATTR_SPOOL_OPEN_COUNT, OCI_G(err)));
 		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrGet, ((dvoid *)actual_spool->poolh, OCI_HTYPE_SPOOL, (dvoid *)&numbusy, (ub4 *)0, OCI_ATTR_SPOOL_BUSY_COUNT, OCI_G(err)));
 		numfree = numopen - numbusy;	/* number of free connections in the pool */
-		php_printf ("OCI8 DEBUG L1: (numopen=%d)(numbusy=%d) at (%s:%d) \n", numopen, numbusy, __FILE__, __LINE__);
+		php_printf ("OCI8 DEBUG L1: (numopen=%d)(numbusy=%d)(numfree=%d) at (%s:%d) \n", numopen, numbusy, numfree, __FILE__, __LINE__);
 	} /* }}} */
 
 		/* Ping loop: Ping and loop till we get a good connection. When a database instance goes

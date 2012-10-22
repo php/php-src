@@ -289,6 +289,7 @@ typedef struct { /* php_oci_out_column {{{ */
 				zend_bailout();					  \
 				break;							  \
 			case	22:							  \
+			case	28:							  \
 			case   378:							  \
 			case   602:							  \
 			case   603:							  \
