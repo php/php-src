@@ -96,10 +96,10 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 #define DBG_PROFILE_END_TIME(duration)
 #endif
 
-#define DBG_INF_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
-#define DBG_ERR_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
-#define DBG_INF_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
-#define DBG_ERR_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "error: ", __VA_ARGS__); } while (0)
+#define DBG_INF_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE && (dbg_obj)) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
+#define DBG_ERR_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE && (dbg_obj)) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
+#define DBG_INF_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE && (dbg_obj)) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
+#define DBG_ERR_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE && (dbg_obj)) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "error: ", __VA_ARGS__); } while (0)
 
 #define DBG_BLOCK_ENTER_EX(dbg_obj, block_name) DBG_BLOCK_ENTER_EX2((dbg_obj), NULL, (block_name))
 #define DBG_BLOCK_LEAVE_EX(dbg_obj)				DBG_BLOCK_LEAVE_EX2((dbg_obj))
@@ -124,7 +124,7 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 						dbg_skip_trace = !(dbg_obj1)->m->func_enter((dbg_obj1), __LINE__, __FILE__, func_name, strlen(func_name)); \
 					} \
 					if ((dbg_obj2)) { \
-						dbg_skip_trace = !(dbg_obj2)->m->func_enter((dbg_obj2), __LINE__, __FILE__, func_name, strlen(func_name)); \
+						dbg_skip_trace |= !(dbg_obj2)->m->func_enter((dbg_obj2), __LINE__, __FILE__, func_name, strlen(func_name)); \
 					} \
 					if (dbg_skip_trace); /* shut compiler's mouth */\
 					do { \
