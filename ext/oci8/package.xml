@@ -37,8 +37,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <time>12:00:00</time>
 
  <version>
-  <release>1.4.8</release>
-  <api>1.4.8</api>
+  <release>1.4.9</release>
+  <api>1.4.9</api>
  </version>
  <stability>
   <release>stable</release>
@@ -46,9 +46,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-   Fixed bug #63307 (Unused variable in oci8.c)
-   Fixed bug #63265 (Add ORA-00028 to the PHP_OCI_HANDLE_ERROR macro)
-   Fixed bug #60901 (Improve "tail" syntax for AIX installation)
+   Re-fixed bug #60901 (Improve "tail" syntax for AIX installation)
  </notes>
  <contents>
   <dir name="/">
@@ -411,6 +409,23 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+ <version>
+  <release>1.4.8</release>
+  <api>1.4.8</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+   Fixed bug #63307 (Unused variable in oci8.c)
+   Fixed bug #63265 (Add ORA-00028 to the PHP_OCI_HANDLE_ERROR macro)
+   Fixed bug #60901 (Improve "tail" syntax for AIX installation)
+ </notes>
+</release>
 
 <release>
  <version>
