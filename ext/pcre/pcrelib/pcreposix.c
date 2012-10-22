@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2010 University of Cambridge
+           Copyright (c) 1997-2012 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -150,6 +150,16 @@ static const int eint[] = {
   REG_BADPAT,  /* (*MARK) must have an argument */
   REG_INVARG,  /* this version of PCRE is not compiled with PCRE_UCP support */
   REG_BADPAT,  /* \c must be followed by an ASCII character */
+  REG_BADPAT,  /* \k is not followed by a braced, angle-bracketed, or quoted name */
+  /* 70 */
+  REG_BADPAT,  /* internal error: unknown opcode in find_fixedlength() */
+  REG_BADPAT,  /* \N is not supported in a class */
+  REG_BADPAT,  /* too many forward references */
+  REG_BADPAT,  /* disallowed UTF-8/16 code point (>= 0xd800 && <= 0xdfff) */
+  REG_BADPAT,  /* invalid UTF-16 string (should not occur) */
+  /* 75 */
+  REG_BADPAT,  /* overlong MARK name */
+  REG_BADPAT   /* character value in \u.... sequence is too large */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -220,7 +230,7 @@ return length + addlength;
 PCREPOSIX_EXP_DEFN void PCRE_CALL_CONVENTION
 regfree(regex_t *preg)
 {
-(pcre_free)(preg->re_pcre);
+(PUBL(free))(preg->re_pcre);
 }
 
 
@@ -265,11 +275,12 @@ should not happen, but we all make mistakes), return REG_BADPAT. */
 
 if (preg->re_pcre == NULL)
   {
-  return (errorcode < sizeof(eint)/sizeof(const int))?
+  return (errorcode < (int)(sizeof(eint)/sizeof(const int)))?
     eint[errorcode] : REG_BADPAT;
   }
 
-preg->re_nsub = pcre_info((const pcre *)preg->re_pcre, NULL, NULL);
+(void)pcre_fullinfo((const pcre *)preg->re_pcre, NULL, PCRE_INFO_CAPTURECOUNT,
+  &(preg->re_nsub));
 return 0;
 }
 
@@ -395,6 +406,7 @@ switch(rc)
   case PCRE_ERROR_MATCHLIMIT: return REG_ESPACE;
   case PCRE_ERROR_BADUTF8: return REG_INVARG;
   case PCRE_ERROR_BADUTF8_OFFSET: return REG_INVARG;
+  case PCRE_ERROR_BADMODE: return REG_INVARG;
   default: return REG_ASSERT;
   }
 }

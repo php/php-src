@@ -6,7 +6,16 @@ PHP                                                                        NEWS
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
     (Anatoliy)
 
-?? ??? 2012, PHP 5.4.8
+- OCI8:
+  . Fixed bug #63265 (Add ORA-00028 to the PHP_OCI_HANDLE_ERROR macro)
+    (Chris Jones)
+
+- PCRE:
+  . Fixed bug #63055 (Segfault in zend_gc with SF2 testsuite).
+    (Dmitry, Laruence)
+  . Fixed bug #63284 (Upgrade PCRE to 8.31). (Anatoliy)
+
+18 Oct 2012, PHP 5.4.8
 
 - CLI server:
   . Implemented FR #63242 (Default error page in PHP built-in web server uses 
@@ -58,6 +67,9 @@ PHP                                                                        NEWS
   . Fixed bug #62947 (Unneccesary warnings on FPM). (fat)
   . Fixed bug #62887 (Only /status?plain&full gives "last request cpu"). (fat)
   . Fixed bug #62216 (Add PID to php-fpm init.d script). (fat)
+
+- OCI8:
+  . Fixed bug #60901 (Improve "tail" syntax for AIX installation) (Chris Jones)
 
 - OpenSSL:
   . Implemented FR #61421 (OpenSSL signature verification missing RMD160, 
