@@ -76,6 +76,7 @@ PHP                                                                        NEWS
 - PCRE:
   . Deprecated the /e modifier
     (https://wiki.php.net/rfc/remove_preg_replace_eval_modifier). (Nikita Popov)
+  . Fixed bug #63284 (Upgrade PCRE to 8.31). (Anatoliy)
 
 - pgsql
   . Added pg_escape_literal() and pg_escape_identifier() (Yasuo)
