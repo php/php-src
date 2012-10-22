@@ -2289,9 +2289,10 @@ void gdImageCopyMerge (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int s
    but it has restrictions. */
 void gdImageCopyMergeAlpha (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h, int pct)
 {
-	int c;
+	int c, dc;
 	int x, y;
-	int toy;
+	int tox, toy;
+	int ncR, ncG, ncB;
 	toy = dstY;
 	
 	if (pct == 100) {
@@ -2309,7 +2310,7 @@ void gdImageCopyMergeAlpha (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, 
 		/* support for maintaining the alpha (transparency) of both source and
 		 * destination images (assuming they are true colour) while opacity blending.
 		 */
-		int         ca, cr, cg, cb, nc;
+		int         ca, cr, cg, cb;
 		float       na;
 		float       ac;
 
@@ -2344,7 +2345,7 @@ void gdImageCopyMergeAlpha (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, 
 				na = (ca + gdAlphaMax - (gdAlphaMax * ((float)pct / 100))) * ac;
 				na = (na > gdAlphaMax) ? gdAlphaMax : ((na < gdAlphaOpaque) ? gdAlphaOpaque: na);
 
-				nc = gdImageColorAllocateAlpha(dst, cr, cg, cb, (int)na);
+				int nc = gdImageColorAllocateAlpha(dst, cr, cg, cb, (int)na);
 				if (nc == -1) {
 					gdImageColorClosestAlpha(dst, cr, cg, cb, (int)na);
 				}
@@ -2360,7 +2361,6 @@ void gdImageCopyMergeAlpha (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, 
 	/* falback */
 	gdImageCopyMerge(dst, src, dstX, dstY, srcX, srcY, w, h, pct);
 }
-
 /* This function is a substitute for real alpha channel operations,
    so it doesn't pay attention to the alpha channel. */
 void gdImageCopyMergeGray (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int srcX, int srcY, int w, int h, int pct)

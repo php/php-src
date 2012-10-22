@@ -33,12 +33,10 @@
 #if HAVE_LIBGD
 
 /* open_basedir and safe_mode checks */
-#define PHP_GD_CHECK_OPEN_BASEDIR(filename, errormsg)                                   \
-	if (!filename || php_check_open_basedir(filename TSRMLS_CC) ||                      \
-		(PG(safe_mode) && !php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))   \
-	) {                                                                                 \
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, errormsg);                          \
-		RETURN_FALSE;                                                                   \
+#define PHP_GD_CHECK_OPEN_BASEDIR(filename, errormsg)                       \
+	if (!filename || php_check_open_basedir(filename TSRMLS_CC)) {      \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, errormsg);      \
+		RETURN_FALSE;                                               \
 	}
 
 #define PHP_GDIMG_TYPE_GIF      1
@@ -50,7 +48,8 @@
 #define PHP_GDIMG_CONVERT_WBM   7
 #define PHP_GDIMG_TYPE_GD       8
 #define PHP_GDIMG_TYPE_GD2      9
-#define PHP_GDIMG_TYPE_GD2PART 10
+#define PHP_GDIMG_TYPE_GD2PART  10
+#define PHP_GDIMG_TYPE_WEBP     11
 
 #ifdef PHP_WIN32
 #	define PHP_GD_API __declspec(dllexport)
@@ -97,7 +96,6 @@ PHP_FUNCTION(imagecolorsforindex);
 PHP_FUNCTION(imagecolortransparent);
 PHP_FUNCTION(imagecopy);
 PHP_FUNCTION(imagecopymerge);
-PHP_FUNCTION(imagecopymergealpha);
 PHP_FUNCTION(imagecopyresized);
 PHP_FUNCTION(imagetypes);
 PHP_FUNCTION(imagecreate);
@@ -138,6 +136,7 @@ PHP_FUNCTION(imagecreatefromstring);
 PHP_FUNCTION(imagecreatefromgif);
 PHP_FUNCTION(imagecreatefromjpeg);
 PHP_FUNCTION(imagecreatefromxbm);
+PHP_FUNCTION(imagecreatefromwebp);
 PHP_FUNCTION(imagecreatefrompng);
 PHP_FUNCTION(imagecreatefromwbmp);
 PHP_FUNCTION(imagecreatefromgd);
@@ -159,6 +158,7 @@ PHP_FUNCTION(imagefontheight);
 PHP_FUNCTION(imagegif );
 PHP_FUNCTION(imagejpeg );
 PHP_FUNCTION(imagepng);
+PHP_FUNCTION(imagewebp);
 PHP_FUNCTION(imagewbmp);
 PHP_FUNCTION(imagegd);
 PHP_FUNCTION(imagegd2);
