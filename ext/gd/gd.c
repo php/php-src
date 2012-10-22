@@ -351,12 +351,6 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefrompng, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#ifdef HAVE_GD_WEBP
-ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromwebp, 0)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-#endif
-
 #ifdef HAVE_GD_XBM
 ZEND_BEGIN_ARG_INFO(arginfo_imagecreatefromxbm, 0)
 	ZEND_ARG_INFO(0, filename)
@@ -410,13 +404,6 @@ ZEND_END_ARG_INFO()
 
 #ifdef HAVE_GD_PNG
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagepng, 0, 0, 1)
-	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, filename)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_GD_WEBP
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagewebp, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
@@ -511,13 +498,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecolorexact, 0)
 	ZEND_ARG_INFO(0, blue)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecolorset, 0, 0, 5)
+ZEND_BEGIN_ARG_INFO(arginfo_imagecolorset, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, color)
 	ZEND_ARG_INFO(0, red)
 	ZEND_ARG_INFO(0, green)
 	ZEND_ARG_INFO(0, blue)
-	ZEND_ARG_INFO(0, alpha)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_imagecolorsforindex, 0)
@@ -704,7 +690,17 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecopymerge, 0)
 	ZEND_ARG_INFO(0, src_h)
 	ZEND_ARG_INFO(0, pct)
 ZEND_END_ARG_INFO()
-
+ZEND_BEGIN_ARG_INFO(arginfo_imagecopymergealpha, 0)
+	ZEND_ARG_INFO(0, src_im)
+	ZEND_ARG_INFO(0, dst_im)
+	ZEND_ARG_INFO(0, dst_x)
+	ZEND_ARG_INFO(0, dst_y)
+	ZEND_ARG_INFO(0, src_x)
+	ZEND_ARG_INFO(0, src_y)
+	ZEND_ARG_INFO(0, src_w)
+	ZEND_ARG_INFO(0, src_h)
+	ZEND_ARG_INFO(0, pct)
+ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_imagecopymergegray, 0)
 	ZEND_ARG_INFO(0, src_im)
 	ZEND_ARG_INFO(0, dst_im)
@@ -917,6 +913,7 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagecopy,								arginfo_imagecopy)
 #if HAVE_LIBGD15
 	PHP_FE(imagecopymerge,							arginfo_imagecopymerge)
+	PHP_FE(imagecopymergealpha,						arginfo_imagecopymergealpha)
 	PHP_FE(imagecopymergegray,						arginfo_imagecopymergegray)
 #endif
 	PHP_FE(imagecopyresized,						arginfo_imagecopyresized)
@@ -959,9 +956,6 @@ const zend_function_entry gd_functions[] = {
 #ifdef HAVE_GD_PNG
 	PHP_FE(imagecreatefrompng,						arginfo_imagecreatefrompng)
 #endif
-#ifdef HAVE_GD_WEBP
-	PHP_FE(imagecreatefromwebp,						arginfo_imagecreatefromwebp)
-#endif
 #ifdef HAVE_GD_GIF_READ
 	PHP_FE(imagecreatefromgif,						arginfo_imagecreatefromgif)
 #endif
@@ -984,9 +978,6 @@ const zend_function_entry gd_functions[] = {
 #endif
 #ifdef HAVE_GD_PNG
 	PHP_FE(imagepng,								arginfo_imagepng)
-#endif
-#ifdef HAVE_GD_WEBP
-	PHP_FE(imagewebp,								arginfo_imagewebp)
 #endif
 #ifdef HAVE_GD_GIF_CREATE
 	PHP_FE(imagegif,								arginfo_imagegif)
@@ -1490,7 +1481,7 @@ PHP_FUNCTION(imageloadfont)
 		return;
 	}
 
-	stream = php_stream_open_wrapper(file, "rb", IGNORE_PATH | IGNORE_URL_WIN | REPORT_ERRORS, NULL);
+	stream = php_stream_open_wrapper(file, "rb", ENFORCE_SAFE_MODE | IGNORE_PATH | IGNORE_URL_WIN | REPORT_ERRORS, NULL);
 	if (stream == NULL) {
 		RETURN_FALSE;
 	}
@@ -1579,7 +1570,7 @@ PHP_FUNCTION(imageloadfont)
 	 * that overlap with the old fonts (with indices 1-5).  The first
 	 * list index given out is always 1.
 	 */
-	ind = 5 + zend_list_insert(font, le_gd_font TSRMLS_CC);
+	ind = 5 + zend_list_insert(font, le_gd_font);
 
 	RETURN_LONG(ind);
 }
@@ -2442,7 +2433,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 	}
 
-	stream = php_stream_open_wrapper(file, "rb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
+	stream = php_stream_open_wrapper(file, "rb", ENFORCE_SAFE_MODE|REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
 	if (stream == NULL)	{
 		RETURN_FALSE;
 	}
@@ -2450,23 +2441,6 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 #ifndef USE_GD_IOCTX
 	ioctx_func_p = NULL; /* don't allow sockets without IOCtx */
 #endif
-
-	if (image_type == PHP_GDIMG_TYPE_WEBP) {
-		size_t buff_size;
-		char *buff;
-
-		/* needs to be malloc (persistent) - GD will free() it later */
-		buff_size = php_stream_copy_to_mem(stream, &buff, PHP_STREAM_COPY_ALL, 1);
-		if (!buff_size) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot read image data");
-			goto out_err;
-		}
-		im = (*ioctx_func_p)(buff_size, buff);
-		if (!im) {
-			goto out_err;
-		}
-		goto register_im;
-	}
 
 	/* try and avoid allocating a FILE* if the stream is not naturally a FILE* */
 	if (php_stream_is(stream, PHP_STREAM_IS_STDIO))	{
@@ -2545,7 +2519,6 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		fflush(fp);
 	}
 
-register_im:
 	if (im) {
 		ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
 		php_stream_close(stream);
@@ -2589,16 +2562,6 @@ PHP_FUNCTION(imagecreatefrompng)
 }
 /* }}} */
 #endif /* HAVE_GD_PNG */
-
-#ifdef HAVE_GD_WEBP
-/* {{{ proto resource imagecreatefrompng(string filename)
-   Create a new image from PNG file or URL */
-PHP_FUNCTION(imagecreatefromwebp)
-{
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageCreateFromWebpPtr, gdImageCreateFromWebpPtr);
-}
-/* }}} */
-#endif /* HAVE_GD_VPX */
 
 #ifdef HAVE_GD_XBM
 /* {{{ proto resource imagecreatefromxbm(string filename)
@@ -2673,7 +2636,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	/* When called from imagewbmp() the quality parameter stands for the foreground color. Default: black. */
 	/* The quality parameter for gd2 stands for chunk size */
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "r|pll", &imgind, &file, &file_len, &quality, &type) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "r|sll", &imgind, &file, &file_len, &quality, &type) == FAILURE) {
 		return;
 	}
 
@@ -2690,6 +2653,9 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	}
 
 	if (argc >= 2 && file_len) {
+		if (strlen(file) != file_len) {
+			RETURN_FALSE;
+		}
 		PHP_GD_CHECK_OPEN_BASEDIR(fn, "Invalid filename");
 
 		fp = VCWD_FOPEN(fn, "wb");
@@ -2821,7 +2787,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 #if HAVE_GD_BUNDLED
 PHP_FUNCTION(imagexbm)
 {
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "GIF", gdImageXbmCtx);
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_XBM, "XBM", gdImageXbmCtx);
 }
 #endif
 /* }}} */
@@ -2831,7 +2797,11 @@ PHP_FUNCTION(imagexbm)
    Output GIF image to browser or file */
 PHP_FUNCTION(imagegif)
 {
+#ifdef HAVE_GD_GIF_CTX
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageGifCtx);
+#else
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GIF, "GIF", gdImageGif);
+#endif
 }
 /* }}} */
 #endif /* HAVE_GD_GIF_CREATE */
@@ -2841,29 +2811,25 @@ PHP_FUNCTION(imagegif)
    Output PNG image to browser or file */
 PHP_FUNCTION(imagepng)
 {
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "GIF", gdImagePngCtxEx);
+#ifdef USE_GD_IOCTX
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImagePngCtxEx);
+#else
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_PNG, "PNG", gdImagePng);
+#endif
 }
 /* }}} */
 #endif /* HAVE_GD_PNG */
-
-
-#ifdef HAVE_GD_WEBP
-/* {{{ proto bool imagewebp(resource im [, string filename[, quality]] )
-   Output PNG image to browser or file */
-PHP_FUNCTION(imagewebp)
-{
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "GIF", gdImageWebpCtx);
-}
-/* }}} */
-#endif /* HAVE_GD_WEBP */
-
 
 #ifdef HAVE_GD_JPG
 /* {{{ proto bool imagejpeg(resource im [, string filename [, int quality]])
    Output JPEG image to browser or file */
 PHP_FUNCTION(imagejpeg)
 {
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "GIF", gdImageJpegCtx);
+#ifdef USE_GD_IOCTX
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageJpegCtx);
+#else
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_JPG, "JPEG", gdImageJpeg);
+#endif
 }
 /* }}} */
 #endif /* HAVE_GD_JPG */
@@ -2873,7 +2839,11 @@ PHP_FUNCTION(imagejpeg)
    Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
 {
-	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "GIF", gdImageWBMPCtx);
+#ifdef USE_GD_IOCTX
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageWBMPCtx);
+#else
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageWBMP);
+#endif
 }
 /* }}} */
 #endif /* HAVE_GD_WBMP */
@@ -3102,11 +3072,11 @@ PHP_FUNCTION(imagecolorexact)
 PHP_FUNCTION(imagecolorset)
 {
 	zval *IM;
-	long color, red, green, blue, alpha = 0;
+	long color, red, green, blue;
 	int col;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll|l", &IM, &color, &red, &green, &blue, &alpha) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rllll", &IM, &color, &red, &green, &blue) == FAILURE) {
 		return;
 	}
 
@@ -3118,7 +3088,6 @@ PHP_FUNCTION(imagecolorset)
 		im->red[col]   = red;
 		im->green[col] = green;
 		im->blue[col]  = blue;
-		im->alpha[col]  = alpha;
 	} else {
 		RETURN_FALSE;
 	}
@@ -3778,7 +3747,34 @@ PHP_FUNCTION(imagecopymerge)
 	RETURN_TRUE;
 }
 /* }}} */
+/* {{{ proto bool imagecopymergealpha(resource src_im, resource dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
+   Merge one part of an image with another -while preserving Alpha channel*/
+PHP_FUNCTION(imagecopymergealpha)
+{
+	zval *SIM, *DIM;
+	long SX, SY, SW, SH, DX, DY, PCT;
+	gdImagePtr im_dst, im_src;
+	int srcH, srcW, srcY, srcX, dstY, dstX, pct;
 
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rrlllllll", &DIM, &SIM, &DX, &DY, &SX, &SY, &SW, &SH, &PCT) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
+	ZEND_FETCH_RESOURCE(im_dst, gdImagePtr, &DIM, -1, "Image", le_gd);
+
+	srcX = SX;
+	srcY = SY;
+	srcH = SH;
+	srcW = SW;
+	dstX = DX;
+	dstY = DY;
+	pct  = PCT;
+
+	gdImageCopyMergeAlpha(im_dst, im_src, dstX, dstY, srcX, srcY, srcW, srcH, pct);
+	RETURN_TRUE;
+}
+/* }}} */
 /* {{{ proto bool imagecopymergegray(resource src_im, resource dst_im, int dst_x, int dst_y, int src_x, int src_y, int src_w, int src_h, int pct)
    Merge one part of an image with another */
 PHP_FUNCTION(imagecopymergegray)
@@ -4138,7 +4134,7 @@ PHP_FUNCTION(imagepscopyfont)
 	}
 
 	nf_ind->extend = 1;
-	l_ind = zend_list_insert(nf_ind, le_ps_font TSRMLS_CC);
+	l_ind = zend_list_insert(nf_ind, le_ps_font);
 	RETURN_LONG(l_ind);
 }
 */
@@ -4187,7 +4183,7 @@ PHP_FUNCTION(imagepsencodefont)
 		RETURN_FALSE;
 	}
 
-	zend_list_insert(enc_vector, le_ps_enc TSRMLS_CC);
+	zend_list_insert(enc_vector, le_ps_enc);
 
 	RETURN_TRUE;
 }
@@ -4592,7 +4588,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
     long ignore_warning;
 #endif
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pplll", &f_org, &f_org_len, &f_dest, &f_dest_len, &height, &width, &threshold) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sslll", &f_org, &f_org_len, &f_dest, &f_dest_len, &height, &width, &threshold) == FAILURE) {
 		return;
 	}
 
@@ -4601,6 +4597,14 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	dest_height = height;
 	dest_width = width;
 	int_threshold = threshold;
+
+	if (strlen(f_org) != f_org_len) {
+		RETURN_FALSE;
+	}
+
+	if (strlen(f_dest) != f_dest_len) {
+		RETURN_FALSE;
+	}
 
 	/* Check threshold value */
 	if (int_threshold < 0 || int_threshold > 8) {

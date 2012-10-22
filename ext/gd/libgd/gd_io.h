@@ -19,7 +19,6 @@ typedef struct gdIOCtx {
 
 	void	(*gd_free)(struct gdIOCtx*);
 
-	void	*data;
 } gdIOCtx;
 
 typedef struct gdIOCtx	*gdIOCtxPtr;
