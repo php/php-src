@@ -34,7 +34,7 @@ if ((!is_string($stat_def = mysql_stat())) || ('' === $stat_def))
 	printf("[003] Expecting non empty string, got %s/'%s', [%d] %s\n",
 		gettype($stat_def), $stat_def, mysql_errno(), mysql_error());
 
-assert($stat === $stat_def);
+assert(soundex($stat) === soundex($stat_def));
 
 mysql_close($link);
 

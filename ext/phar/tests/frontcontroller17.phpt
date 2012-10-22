@@ -2,6 +2,8 @@
 Phar front controller mime type unknown
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
+--INI--
+detect_unicode=0
 --ENV--
 SCRIPT_NAME=/frontcontroller17.php
 REQUEST_URI=/frontcontroller17.php/fronk.gronk

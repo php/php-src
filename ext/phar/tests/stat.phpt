@@ -5,6 +5,7 @@ Phar: test stat function interceptions
 --INI--
 phar.require_hash=1
 phar.readonly=0
+detect_unicode=0
 --FILE--
 <?php
 Phar::interceptFileFuncs();

@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2008 University of Cambridge
+           Copyright (c) 1997-2012 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -112,7 +112,7 @@ fprintf(f,
   "#endif\n\n"
   "#include \"pcre_internal.h\"\n\n");
 fprintf(f,
-  "const unsigned char _pcre_default_tables[] = {\n\n"
+  "const pcre_uint8 PRIV(default_tables)[] = {\n\n"
   "/* This table is a lower casing table. */\n\n");
 
 fprintf(f, "  ");

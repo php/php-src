@@ -41,7 +41,7 @@ AC_CONFIG_HEADER(main/php_config.h)
 
 PHP_MAJOR_VERSION=5
 PHP_MINOR_VERSION=3
-PHP_RELEASE_VERSION=16
+PHP_RELEASE_VERSION=19
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
 PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
@@ -1335,10 +1335,10 @@ PHP_CONFIGURE_PART(Configuring libtool)
 
 LDFLAGS="$LDFLAGS $PHP_AIX_LDFLAGS"
 
-dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5 and 10.6.
+dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5, 10.6, 10.7 and 10.8.
 dnl This hack works around it. Ugly.
 case $host_alias in
-*darwin9*|*darwin10*)
+*darwin9*|*darwin10*|*darwin11*|*darwin12*)
   ac_cv_exeext=
   ;;
 esac

@@ -11,6 +11,7 @@ if (version_compare(phpversion(), '5.2.6', '<')) die("skip zlib is buggy in PHP 
 --INI--
 phar.readonly=0
 phar.require_hash=0
+detect_unicode=0
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/phar_gzip.phar';

@@ -2,6 +2,7 @@
 Phar front controller $_SERVER munging failure 2 [cache_list]
 --INI--
 phar.cache_list={PWD}/frontcontroller19.php
+detect_unicode=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--

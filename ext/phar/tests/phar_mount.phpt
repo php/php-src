@@ -4,6 +4,7 @@ Phar: Phar::mount
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --INI--
 phar.readonly=0
+detect_unicode=0
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';

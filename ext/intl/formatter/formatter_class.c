@@ -24,6 +24,8 @@
 #include "formatter_main.h"
 #include "formatter_attr.h"
 
+#include <zend_exceptions.h>
+
 zend_class_entry *NumberFormatter_ce_ptr = NULL;
 static zend_object_handlers NumberFormatter_handlers;
 
@@ -82,18 +84,23 @@ zend_object_value NumberFormatter_object_clone(zval *object TSRMLS_DC)
 	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
 	NumberFormatter_object *nfo, *new_nfo;
 
-	FORMATTER_METHOD_FETCH_OBJECT;
-	new_obj_val = NumberFormatter_ce_ptr->create_object(NumberFormatter_ce_ptr TSRMLS_CC);
+	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK;
+	new_obj_val = NumberFormatter_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
 	new_nfo = (NumberFormatter_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
 	/* clone standard parts */	
 	zend_objects_clone_members(&new_nfo->zo, new_obj_val, &nfo->zo, handle TSRMLS_CC);
-	/* clone formatter object */
-	FORMATTER_OBJECT(new_nfo) = unum_clone(FORMATTER_OBJECT(nfo),  &INTL_DATA_ERROR_CODE(new_nfo));
-	if(U_FAILURE(INTL_DATA_ERROR_CODE(new_nfo))) {
-		/* set up error in case error handler is interested */
-		intl_error_set( NULL, INTL_DATA_ERROR_CODE(new_nfo), "Failed to clone NumberFormatter object", 0 TSRMLS_CC );
-		NumberFormatter_object_dtor(new_nfo, new_obj_val.handle TSRMLS_CC); /* free new object */
-		zend_error(E_ERROR, "Failed to clone NumberFormatter object");
+	/* clone formatter object. It may fail, the destruction code must handle this case */
+	if (FORMATTER_OBJECT(nfo) != NULL) {
+		FORMATTER_OBJECT(new_nfo) = unum_clone(FORMATTER_OBJECT(nfo),
+				&INTL_DATA_ERROR_CODE(nfo));
+		if (U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
+			/* set up error in case error handler is interested */
+			intl_errors_set(INTL_DATA_ERROR_P(nfo), INTL_DATA_ERROR_CODE(nfo),
+					"Failed to clone NumberFormatter object", 0 TSRMLS_CC);
+			zend_throw_exception(NULL, "Failed to clone NumberFormatter object", 0 TSRMLS_CC);
+		}
+	} else {
+		zend_throw_exception(NULL, "Cannot clone unconstructed NumberFormatter", 0 TSRMLS_CC);
 	}
 	return new_obj_val;
 }

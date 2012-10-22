@@ -3902,7 +3902,6 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				new_char_count--;
 			}
 			if (new_char_count > 0) {
-				char_count=new_char_count;
 				begin=new_begin;
 			}
 		}

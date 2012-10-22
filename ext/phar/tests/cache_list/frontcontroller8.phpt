@@ -2,6 +2,7 @@
 Phar front controller no index file 404 [cache_list]
 --INI--
 phar.cache_list={PWD}/frontcontroller8.php
+detect_unicode=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--
