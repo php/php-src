@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug #63240 (stream_get_line() return contains delimiter string).
     (Tjerk, Gustavo)
 
+- Phar:
+  . Fixed bug #63297 (Phar fails to write an openssl based signature).
+    (Anatoliy)
+
 18 Oct 2012, PHP 5.3.18
 
 - Core:
