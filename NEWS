@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.9
 
+- Core:
+  . Fixed bug #63305 (zend_mm_heap corrupted with traits). (Dmitry, Laruence)
+
 - Fileinfo:
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
     (Anatoliy)

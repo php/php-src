@@ -3885,7 +3885,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 					
 				/* if it is 0, no modifieres has been changed */
 				if (aliases[i]->modifiers) { 
-					fn_copy.common.fn_flags = aliases[i]->modifiers;
+					fn_copy.common.fn_flags = aliases[i]->modifiers | ZEND_ACC_ALIAS;
 					if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
 						fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
 					}
@@ -3926,7 +3926,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 					&& (!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
 					&& (aliases[i]->trait_method->mname_len == fnname_len)
 					&& (zend_binary_strcasecmp(aliases[i]->trait_method->method_name, aliases[i]->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
-					fn_copy.common.fn_flags = aliases[i]->modifiers;
+					fn_copy.common.fn_flags = aliases[i]->modifiers | ZEND_ACC_ALIAS;
 
 					if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
 						fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
