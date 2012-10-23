@@ -748,6 +748,9 @@ PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SO_SNDTIMEO",	SO_SNDTIMEO,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_RCVTIMEO",	SO_RCVTIMEO,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_TYPE",		SO_TYPE,		CONST_CS | CONST_PERSISTENT);
+#ifdef SO_FAMILY
+	REGISTER_LONG_CONSTANT("SO_FAMILY",		SO_FAMILY,		CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SO_ERROR",		SO_ERROR,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOL_SOCKET",	SOL_SOCKET,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOMAXCONN",		SOMAXCONN,		CONST_CS | CONST_PERSISTENT);
@@ -2436,6 +2439,10 @@ PHP_FUNCTION(socket_import_stream)
 #ifndef PHP_WIN32
 	int					 t;
 #endif
+#ifdef SO_DOMAIN
+	int					type;
+	socklen_t			type_len = sizeof(type);
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zstream) == FAILURE) {
 		return;
@@ -2452,6 +2459,11 @@ PHP_FUNCTION(socket_import_stream)
 	retsock->bsd_socket = socket;
 
 	/* determine family */
+#ifdef SO_DOMAIN
+	if (getsockopt(socket, SOL_SOCKET, SO_DOMAIN, &type, &type_len) == 0) {
+		retsock->type = type;
+	} else
+#endif
 	if (getsockname(socket, (struct sockaddr*)&addr, &addr_len) == 0) {
 		retsock->type = addr.ss_family;
 	} else {
