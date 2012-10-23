@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.9
 
+- Core:
+  . Fixed bug #63305 (zend_mm_heap corrupted with traits). (Dmitry, Laruence)
+
 - Fileinfo:
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
     (Anatoliy)
@@ -14,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #63055 (Segfault in zend_gc with SF2 testsuite).
     (Dmitry, Laruence)
   . Fixed bug #63284 (Upgrade PCRE to 8.31). (Anatoliy)
+
+- Phar:
+  . Fixed bug #63297 (Phar fails to write an openssl based signature).
+    (Anatoliy)
 
 18 Oct 2012, PHP 5.4.8
 
