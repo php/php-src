@@ -15,7 +15,9 @@ if (PHP_GD != "no") {
 		(CHECK_LIB("libiconv_a.lib;libiconv.lib", "gd", PHP_GD) || CHECK_LIB("iconv_a.lib;iconv.lib", "gd", PHP_GD)) &&
 		 CHECK_HEADER_ADD_INCLUDE("iconv.h", "CFLAGS_GD", PHP_GD) && 
 		(((PHP_ZLIB=="no") && (CHECK_LIB("zlib_a.lib;zlib.lib", "gd", PHP_GD) )) || 
-			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "gd", PHP_GD)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED)))
+			(PHP_ZLIB_SHARED && CHECK_LIB("zlib.lib", "gd", PHP_GD)) || (PHP_ZLIB == "yes" && (!PHP_ZLIB_SHARED))) &&
+		CHECK_LIB("libXpm_a.lib", "gd", PHP_GD) &&
+		CHECK_HEADER_ADD_INCLUDE("xpm.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\X11")
 		) {
 		if (PHP_T1LIB != "no") {
 			if (CHECK_LIB("T1_StaticMD.lib", "gd", PHP_GD) &&
@@ -56,6 +58,7 @@ if (PHP_GD != "no") {
 /D HAVE_GD_STRINGTTF=1  \
 /D HAVE_GD_WBMP  \
 /D HAVE_GD_XBM  \
+/D HAVE_GD_XPM  \
 /D HAVE_GD_WEBP \
 /D HAVE_LIBFREETYPE=1  \
 /D HAVE_LIBGD13=1  \
@@ -65,6 +68,7 @@ if (PHP_GD != "no") {
 /D HAVE_LIBJPEG  \
 /D HAVE_LIBVPX \
 /D HAVE_LIBPNG  \
+/D HAVE_XPM  \
 /D HAVE_COLORCLOSESTHWB  \
 /D USE_GD_IMGSTRTTF  \
 /D USE_GD_IOCTX \
