@@ -207,4 +207,7 @@ zval* add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *faul
 #define soap_error3(severity, format, param1, param2, param3) \
 	php_error(severity, "SOAP-ERROR: " format, param1, param2, param3)
 
+#define SOAP_CACHE_ENABLED() \
+	SOAP_GLOBAL(cache_enabled) ? SOAP_GLOBAL(cache_mode) : 0
+
 #endif
