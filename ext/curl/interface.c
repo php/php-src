@@ -1683,6 +1683,11 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 	CURLcode     error=CURLE_OK;
 
 	switch (option) {
+		/* Long options */
+		case CURLOPT_SSL_VERIFYHOST:
+			if(Z_TYPE_PP(zvalue)==IS_BOOL && Z_BVAL_PP(zvalue)) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "CURLOPT_SSL_VERIFYHOST set to true which disables common name validation (setting CURLOPT_SSL_VERIFYHOST to 2 enables common name validation)");
+			}
 		case CURLOPT_INFILESIZE:
 		case CURLOPT_VERBOSE:
 		case CURLOPT_HEADER:
@@ -1721,7 +1726,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #if LIBCURL_VERSION_NUM > 0x071002
 		case CURLOPT_CONNECTTIMEOUT_MS:
 #endif
-		case CURLOPT_SSL_VERIFYHOST:
 		case CURLOPT_SSL_VERIFYPEER:
 		case CURLOPT_DNS_USE_GLOBAL_CACHE:
 		case CURLOPT_NOSIGNAL:
