@@ -2157,7 +2157,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 				if (!EVP_SignUpdate(md_ctx, buf, sig_len)) {
 					efree(sigbuf);
 					if (error) {
-						spprintf(error, 0, "unable to to update the openssl signature for phar \"%s\"", phar->fname);
+						spprintf(error, 0, "unable to update the openssl signature for phar \"%s\"", phar->fname);
 					}
 					return FAILURE;
 				}
