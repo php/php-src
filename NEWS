@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #63305 (zend_mm_heap corrupted with traits). (Dmitry, Laruence)
 
+- Curl:
+  . Fixed bug #63363 (Curl silently accepts boolean true for SSL_VERIFYHOST).
+    Patch by John Jawed GitHub PR #221 (Anthony)
+
 - Fileinfo:
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
     (Anatoliy)
