@@ -2011,6 +2011,7 @@ PHP_FUNCTION(curl_copy_handle)
 static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	CURLcode     error=CURLE_OK;
+	long         opt_val_long = 0;
 
 	switch (option) {
 		/* Long options */
@@ -2049,6 +2050,9 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_RESUME_FROM:
 		case CURLOPT_SSLVERSION:
 		case CURLOPT_SSL_VERIFYHOST:
+			if(Z_TYPE_PP(zvalue)==IS_BOOL && Z_BVAL_PP(zvalue)) {
+				opt_val_long = 2L;
+			}
 		case CURLOPT_SSL_VERIFYPEER:
 		case CURLOPT_TIMECONDITION:
 		case CURLOPT_TIMEOUT:
@@ -2149,7 +2153,10 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #if CURLOPT_MUTE != 0
 		case CURLOPT_MUTE:
 #endif
-			convert_to_long_ex(zvalue);
+				if(!opt_val_long) {
+					convert_to_long_ex(zvalue);
+					opt_val_long = Z_LVAL_PP(zvalue);
+				}
 #if LIBCURL_VERSION_NUM >= 0x71304
 			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
 				(PG(open_basedir) && *PG(open_basedir)) && (Z_LVAL_PP(zvalue) & CURLPROTO_FILE)) {
@@ -2158,7 +2165,7 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 					return 1;
 			}
 #endif
-			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
+			error = curl_easy_setopt(ch->cp, option, opt_val_long);
 			break;
 
 		/* String options */
