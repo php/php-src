@@ -18,6 +18,10 @@ PHP                                                                        NEWS
     (Dmitry, Laruence)
   . Fixed bug #63284 (Upgrade PCRE to 8.31). (Anatoliy)
 
+- Phar:
+  . Fixed bug #63297 (Phar fails to write an openssl based signature).
+    (Anatoliy)
+
 18 Oct 2012, PHP 5.4.8
 
 - CLI server:
