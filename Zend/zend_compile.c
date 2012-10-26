@@ -1846,9 +1846,9 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 			Z_STRVAL(eval_php_code) = buffer;
 			Z_TYPE(eval_php_code) = IS_STRING;
 			if((Z_LVAL(modifiers->u.constant) & ZEND_ACC_STATIC)) {
-				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "return self::$%s != NULL;", Z_STRVAL(var_name->u.constant));
+				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "return self::$%s !== NULL;", Z_STRVAL(var_name->u.constant));
 			} else {
-				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "return $this->%s != NULL;", Z_STRVAL(var_name->u.constant));
+				Z_STRLEN(eval_php_code) = snprintf(Z_STRVAL(eval_php_code), bufsize, "return $this->%s !== NULL;", Z_STRVAL(var_name->u.constant));
 			}
 			zend_compile_string_inline(&eval_php_code, (char*)CG(active_op_array)->filename TSRMLS_CC);
 			efree(buffer);
