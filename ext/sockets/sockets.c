@@ -57,7 +57,7 @@
 # define h_errno		WSAGetLastError()
 # define set_errno(a)		WSASetLastError(a)
 # define close(a)		closesocket(a)
-# if _WIN32_WINNT >= 0x0600 && SOCKETS_ENABLE_VISTA_API
+# if _WIN32_WINNT >= 0x0600
 #  define HAVE_IF_NAMETOINDEX 1
 # endif
 #else

@@ -81,12 +81,16 @@ $tables = array(
 								array('label1', sprintf("'%s'", @date("Y-m-d H:i:s"))),
 								'label1' => array(
 										'timestamp',
-										'unsigned',
-										'zerofill',
 										'binary',
 										'not_null'),
 								),
 );
+
+if ($version < 560) {
+	$tables['label1 TIMESTAMP']['label1'][] = 'zerofill';
+	$tables['label1 TIMESTAMP']['label1'][] = 'unsigned';
+}
+
 
 foreach ($tables as $columns => $expected) {
 	if (!mysql_query("DROP TABLE IF EXISTS test", $link)) {
