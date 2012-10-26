@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #63305 (zend_mm_heap corrupted with traits). (Dmitry, Laruence)
+  . Fixed bug #63369 ((un)serialize() leaves dangling pointers, causes crashes).
+    (Tony, Andrew Sitnikov)
 
 - Curl:
   . Fixed bug #63363 (Curl silently accepts boolean true for SSL_VERIFYHOST).

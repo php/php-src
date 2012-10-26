@@ -3684,6 +3684,11 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 PHP_RINIT_FUNCTION(basic) /* {{{ */
 {
 	memset(BG(strtok_table), 0, 256);
+
+	BG(serialize_lock) = 0;
+	memset(&BG(serialize), 0, sizeof(BG(serialize)));
+	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
+
 	BG(strtok_string) = NULL;
 	BG(strtok_zval) = NULL;
 	BG(strtok_last) = NULL;
