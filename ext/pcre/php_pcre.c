@@ -248,6 +248,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 #endif
 	pcre_cache_entry	*pce;
 	pcre_cache_entry	 new_entry;
+	char                *tmp = NULL;
 
 	/* Try to lookup the cached regex entry, and if successful, just pass
 	   back the compiled pattern, otherwise go on and compile it. */
@@ -438,8 +439,25 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 	new_entry.locale = pestrdup(locale, 1);
 	new_entry.tables = tables;
 #endif
+
+	/*
+	 * Interned strings are not duplicated when stored in HashTable,
+	 * but all the interned strings created during HTTP request are removed
+	 * at end of request. However PCRE_G(pcre_cache) must be consistent
+	 * on the next request as well. So we disable usage of interned strings
+	 * as hash keys especually for this table.
+	 * See bug #63180 
+	 */
+	if (IS_INTERNED(regex)) {
+		regex = tmp = estrndup(regex, regex_len);
+	}
+
 	zend_hash_update(&PCRE_G(pcre_cache), regex, regex_len+1, (void *)&new_entry,
 						sizeof(pcre_cache_entry), (void**)&pce);
+
+	if (tmp) {
+		efree(tmp);
+	}
 
 	return pce;
 }
