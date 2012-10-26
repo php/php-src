@@ -20,6 +20,7 @@ PHP                                                                        NEWS
     (Chris Jones)
 
 - PCRE:
+  . Fixed bug #63180 (Corruption of hash tables). (Dmitry)
   . Fixed bug #63055 (Segfault in zend_gc with SF2 testsuite).
     (Dmitry, Laruence)
   . Fixed bug #63284 (Upgrade PCRE to 8.31). (Anatoliy)
