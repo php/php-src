@@ -47,6 +47,12 @@ ZEND_BEGIN_MODULE_GLOBALS(libxml)
 		zend_fcall_info			fci;
 		zend_fcall_info_cache	fcc;
 	} entity_loader;
+
+	xmlFreeFunc original_free;
+	xmlMallocFunc original_malloc;
+	xmlReallocFunc original_realloc;
+	xmlStrdupFunc original_strdup;
+	int use_emalloc;
 ZEND_END_MODULE_GLOBALS(libxml)
 
 typedef struct _libxml_doc_props {

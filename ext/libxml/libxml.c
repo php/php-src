@@ -42,8 +42,17 @@
 #include <libxml/uri.h>
 #include <libxml/xmlerror.h>
 #include <libxml/xmlsave.h>
+#include <libxml/dict.h>
+#include <libxml/nanohttp.h>
+#include <libxml/nanoftp.h>
+
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
+#include <libxml/xmlschemastypes.h>
+#endif
+
+#ifdef LIBXML_CATALOG_ENABLED
+#include <libxml/catalog.h>
 #endif
 
 #include "php_libxml.h"
@@ -56,6 +65,13 @@
 static int _php_libxml_initialized = 0;
 static int _php_libxml_per_request_initialization = 1;
 static xmlExternalEntityLoader _php_libxml_default_entity_loader;
+
+#ifndef LIBXML_THREAD_ALLOC_ENABLED
+static xmlFreeFunc _php_libxml_original_free;
+static xmlMallocFunc _php_libxml_original_malloc;
+static xmlReallocFunc _php_libxml_original_realloc;
+static xmlStrdupFunc _php_libxml_original_strdup;
+#endif
 
 typedef struct _php_libxml_func_handler {
 	php_libxml_export_node export_func;
@@ -259,6 +275,61 @@ static void php_libxml_node_free_list(xmlNodePtr node TSRMLS_DC)
 			php_libxml_node_free(node);
 		}
 	}
+}
+
+/* }}} */
+
+/** {{{ allocation hooks
+ *
+ * During xmlInitParser(), libxml allocates memory using xmlMalloc() etc., and
+ * stores the resulting pointers to true (thread-independent) global variables.
+ * Then in xmlCleanupParser(), this memory is freed using xmlFree(). The same
+ * functions are used for allocating memory to be stored in per-request state,
+ * such as document objects.
+ *
+ * We want memory allocated for the per-request state to be allocated from 
+ * PHP's per-request pool, so that memory_limit and memory_get_usage() will 
+ * work. So our approach is to use the time of call to distinguish between 
+ * memory that needs to persist between requests (allocated from MINIT), and
+ * per-request memory.
+ *
+ * This will work if:
+ *     1. libxml doesn't lazy-initialise any global variables
+ *     2. PHP doesn't explicitly initialise libxml global variables after RINIT
+ *
+ * The second one generally seems to be a safe assumption. The first requires
+ * some care.
+ */
+static inline int _php_libxml_persistent()
+{
+#ifdef LIBXML_THREAD_ALLOC_ENABLED
+	/* If the hook function is set in LIBXML_THREAD_ALLOC_ENABLED mode, then
+	 * we must be between RINIT and post_deactivate */
+	return 0;
+#else
+	TSRMLS_FETCH();
+	return !LIBXML(use_emalloc);
+#endif
+}
+
+static void _php_libxml_free_hook(void *mem)
+{
+	pefree(mem, _php_libxml_persistent());
+}
+
+static void *_php_libxml_malloc_hook(size_t size)
+{
+	return pemalloc(size, _php_libxml_persistent());
+}
+
+static void *_php_libxml_realloc_hook(void *mem, size_t size)
+{
+	return perealloc(mem, size, _php_libxml_persistent());
+}
+
+static char *_php_libxml_strdup_hook(const char *str)
+{
+	return pestrdup(str, _php_libxml_persistent());
 }
 
 /* }}} */
@@ -726,13 +797,38 @@ PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...)
 	va_end(args);
 }
 
-
 PHP_LIBXML_API void php_libxml_initialize(void)
 {
 	if (!_php_libxml_initialized) {
 		/* we should be the only one's to ever init!! */
 		xmlInitParser();
-		
+
+		/* We need to explicitly initialise some things to avoid them being
+		 * lazy-initialised the first time they are used, which would cause 
+		 * the memory to be allocated from the per-request pool. */
+#if defined(LIBXML_SCHEMAS_ENABLED)
+		xmlSchemaInitTypes();
+#endif
+		xmlRelaxNGInitTypes();
+
+#if defined(LIBXML_CATALOG_ENABLED)
+		xmlInitializeCatalog();
+		/* The catalog system is not request-local, and it would break our
+		 * memory management system if someone tried to use it, so we will
+		 * just disable it. */
+		xmlCatalogSetDefaults(XML_CATA_ALLOW_NONE);
+#endif
+		/* The initialisation function for the dict global mutex is static, so
+		 * we have to trigger lazy initialisation indirectly. */
+		xmlDictFree(xmlDictCreate());
+
+#ifdef LIBXML_HTTP_ENABLED
+		xmlNanoHTTPInit();
+#endif
+#ifdef LIBXML_FTP_ENABLED
+		xmlNanoFTPInit();
+#endif
+
 		_php_libxml_default_entity_loader = xmlGetExternalEntityLoader();
 		xmlSetExternalEntityLoader(_php_libxml_pre_ext_ent_loader);
 
@@ -748,7 +844,14 @@ PHP_LIBXML_API void php_libxml_shutdown(void)
 #if defined(LIBXML_SCHEMAS_ENABLED)
 		xmlRelaxNGCleanupTypes();
 #endif
+#ifdef LIBXML_HTTP_ENABLED
+		xmlNanoHTTPCleanup();
+#endif
+#ifdef LIBXML_FTP_ENABLED
+		xmlNanoFTPCleanup();
+#endif
 		xmlCleanupParser();
+
 		zend_hash_destroy(&php_libxml_exports);
 		
 		xmlSetExternalEntityLoader(_php_libxml_default_entity_loader);
@@ -839,6 +942,15 @@ static PHP_MINIT_FUNCTION(libxml)
 		xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
 		xmlOutputBufferCreateFilenameDefault(php_libxml_output_buffer_create_filename);
 	}
+
+	/* If LIBXML_THREAD_ALLOC_ENABLED is not defined, we need to set up the allocator
+	 * like a true global. */
+#ifndef LIBXML_THREAD_ALLOC_ENABLED
+	xmlMemGet(&_php_libxml_original_free, &_php_libxml_original_malloc,
+			&_php_libxml_original_realloc, &_php_libxml_original_strdup);
+	xmlMemSetup(_php_libxml_free_hook, _php_libxml_malloc_hook, 
+			_php_libxml_realloc_hook, _php_libxml_strdup_hook);
+#endif
 	
 	return SUCCESS;
 }
@@ -846,12 +958,24 @@ static PHP_MINIT_FUNCTION(libxml)
 
 static PHP_RINIT_FUNCTION(libxml)
 {
+	/* If LIBXML_THREAD_ALLOC_ENABLED is defined, then the allocator hooks are
+	 * stored in thread-specific state, so we need to initialise them here */
+#ifdef LIBXML_THREAD_ALLOC_ENABLED
+	xmlMemGet(&LIBXML(original_free), &LIBXML(original_malloc),
+			&LIBXML(original_realloc), &LIBXML(original_strdup));
+	xmlMemSetup(_php_libxml_free_hook, _php_libxml_malloc_hook, 
+			_php_libxml_realloc_hook, _php_libxml_strdup_hook);
+#else
+	LIBXML(use_emalloc) = 1;
+#endif
+
 	if (_php_libxml_per_request_initialization) {
 		/* report errors via handler rather than stderr */
 		xmlSetGenericErrorFunc(NULL, php_libxml_error_handler);
 		xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
 		xmlOutputBufferCreateFilenameDefault(php_libxml_output_buffer_create_filename);
 	}
+
 	return SUCCESS;
 }
 
@@ -865,6 +989,12 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
 		xmlParserInputBufferCreateFilenameDefault(NULL);
 		xmlOutputBufferCreateFilenameDefault(NULL);
 	}
+
+#ifndef LIBXML_THREAD_ALLOC_ENABLED
+	xmlMemSetup(_php_libxml_original_free, _php_libxml_original_malloc, 
+			_php_libxml_original_realloc, _php_libxml_original_strdup);
+#endif
+
 	php_libxml_shutdown();
 
 	return SUCCESS;
@@ -897,6 +1027,12 @@ static int php_libxml_post_deactivate()
 	
 	_php_libxml_destroy_fci(&LIBXML(entity_loader).fci);
 
+#ifdef LIBXML_THREAD_ALLOC_ENABLED
+	xmlMemSetup(LIBXML(original_free), LIBXML(original_malloc), 
+			LIBXML(original_realloc), LIBXML(original_strdup));
+#else
+	LIBXML(use_emalloc) = 0;
+#endif
 	return SUCCESS;
 }
 
