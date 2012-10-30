@@ -22,6 +22,10 @@ PHP                                                                        NEWS
   . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
     (Martin Osvald, Remi)
 
+- PDO_pgsql:
+  . Fixed bug #62593 (Emulate prepares behave strangely with PARAM_BOOL).
+    (Will Fitch)
+
 - Streams:
   . Fixed bug #63240 (stream_get_line() return contains delimiter string).
     (Tjerk, Gustavo)
