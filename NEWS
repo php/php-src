@@ -15,6 +15,10 @@ PHP                                                                        NEWS
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
     (Anatoliy)
 
+- Libxml
+  . Fixed bug #63389 (Missing context check on libxml_set_streams_context()
+    causes memleak). (Laruence)
+
 - OCI8:
   . Fixed bug #63265 (Add ORA-00028 to the PHP_OCI_HANDLE_ERROR macro)
     (Chris Jones)
