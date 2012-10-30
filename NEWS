@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.19
 
+- Libxml
+  . Fixed bug #63389 (Missing context check on libxml_set_streams_context()
+    causes memleak). (Laruence)
+
 - MySQL:
   . Fixed compilation failure on mixed 32/64 bit systems. (Andrey)
 
