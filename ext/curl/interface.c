@@ -2014,6 +2014,10 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 
 	switch (option) {
 		/* Long options */
+		case CURLOPT_SSL_VERIFYHOST:
+			if(Z_TYPE_PP(zvalue)==IS_BOOL && Z_BVAL_PP(zvalue)) {
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "CURLOPT_SSL_VERIFYHOST set to true which disables common name validation (setting CURLOPT_SSL_VERIFYHOST to 2 enables common name validation)");
+			}
 		case CURLOPT_AUTOREFERER:
 		case CURLOPT_BUFFERSIZE:
 		case CURLOPT_CLOSEPOLICY:
@@ -2048,7 +2052,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_PUT:
 		case CURLOPT_RESUME_FROM:
 		case CURLOPT_SSLVERSION:
-		case CURLOPT_SSL_VERIFYHOST:
 		case CURLOPT_SSL_VERIFYPEER:
 		case CURLOPT_TIMECONDITION:
 		case CURLOPT_TIMEOUT:

@@ -362,8 +362,20 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 				}
 				break;
 		}
+	} else {
+#endif
+	if (param->is_param) {
+        /* We need to manually convert to a pg native boolean value */
+        if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL &&
+            ((param->param_type & PDO_PARAM_INPUT_OUTPUT) != PDO_PARAM_INPUT_OUTPUT)) {
+            SEPARATE_ZVAL(&param->parameter);
+            param->param_type = PDO_PARAM_STR;
+            ZVAL_STRINGL(param->parameter, Z_BVAL_P(param->parameter) ? "t" : "f", 1, 1);
+        }
+    }
+#if HAVE_PQPREPARE
 	}
-#endif	
+#endif
 	return 1;
 }
 
