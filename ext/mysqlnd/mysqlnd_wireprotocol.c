@@ -1201,7 +1201,7 @@ php_mysqlnd_rset_field_read(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 	p += 2;
 	BAIL_IF_NO_MORE_DATA;
 
-	meta->decimals = uint2korr(p);
+	meta->decimals = uint1korr(p);
 	p += 1;
 	BAIL_IF_NO_MORE_DATA;
 
