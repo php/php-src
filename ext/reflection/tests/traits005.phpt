@@ -28,14 +28,14 @@ array(0) {
 class C3:
 array(1) {
   ["a1"]=>
-  string(10) "(null)::m1"
+  string(6) "T1::m1"
 }
 
 class C4:
 array(2) {
   ["a1"]=>
-  string(10) "(null)::m1"
+  string(6) "T1::m1"
   ["a2"]=>
-  string(10) "(null)::m2"
+  string(6) "T1::m2"
 }
 

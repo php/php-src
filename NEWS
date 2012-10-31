@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug #63297 (Phar fails to write an openssl based signature).
     (Anatoliy)
 
+- Reflection:
+  . Fixed bug #63399 (ReflectionClass::getTraitAliases() incorrectly resolves
+    traitnames). (Laruence)
+
 18 Oct 2012, PHP 5.4.8
 
 - CLI server:
