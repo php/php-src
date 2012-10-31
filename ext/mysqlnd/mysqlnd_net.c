@@ -978,6 +978,10 @@ MYSQLND_METHOD(mysqlnd_net, free_contents)(MYSQLND_NET * net TSRMLS_DC)
 		mnd_pefree(net->data->options.ssl_cipher, pers);
 		net->data->options.ssl_cipher = NULL;
 	}
+	if (net->data->options.sha256_server_public_key) {
+		mnd_pefree(net->data->options.sha256_server_public_key, pers);
+		net->data->options.sha256_server_public_key = NULL;
+	}
 
 	DBG_VOID_RETURN;
 }
