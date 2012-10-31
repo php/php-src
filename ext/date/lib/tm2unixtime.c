@@ -149,16 +149,6 @@ static void do_adjust_for_weekday(timelib_time* time)
 	current_dow = timelib_day_of_week(time->y, time->m, time->d);
 	if (time->relative.weekday_behavior == 2)
 	{
-		if (time->relative.weekday == 0) {
-                         /*
-			    这里不知道为什么 原始的代码是查看这个值等于0的情况，再把这个值赋值为7 。这个导致了
-			    Bug #63392	，5.13号  如果 加0的话 就不会产生bug,就是因为这个奇怪的赋值，导致了这个bug,不知道
-				原始的作者是怎么考虑的。
-
-
-			*/		
-			//time->relative.weekday = 7;
-		}
 		time->d -= current_dow;
 		time->d += time->relative.weekday;
 		return;
