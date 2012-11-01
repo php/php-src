@@ -85,6 +85,16 @@ ZEND_END_MODULE_GLOBALS(sockets)
 #define SOCKETS_G(v) (sockets_globals.v)
 #endif
 
+ZEND_EXTERN_MODULE_GLOBALS(sockets);
+
+char *sockets_strerror(int error TSRMLS_DC);
+
+#define PHP_SOCKET_ERROR(socket,msg,errn) \
+		socket->error = errn;	\
+		SOCKETS_G(last_error) = errn; \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s [%d]: %s", msg, errn, \
+				sockets_strerror(errn TSRMLS_CC))
+
 #else
 #define phpext_sockets_ptr NULL
 #endif
