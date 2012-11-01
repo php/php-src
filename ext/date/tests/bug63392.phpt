@@ -3,6 +3,9 @@ Bug #63392 (DateTime::modify() start of week inconsistency)
 Description:
 ------------
 
+
+--INI--
+date.timezone=UTC
 --FILE--
 <?php
 
