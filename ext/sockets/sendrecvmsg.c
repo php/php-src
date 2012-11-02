@@ -98,7 +98,7 @@ typedef struct {
 
 typedef struct {
 	int	cmsg_level;	/* originating protocol */
-	int	msg_type;	/* protocol-specific type */
+	int	cmsg_type;	/* protocol-specific type */
 } anc_reg_key;
 
 static struct {
@@ -1194,14 +1194,32 @@ static void init_ancillary_registry(void)
 
 	zend_hash_init(&ancillary_registry.ht, 32, NULL, NULL, 1);
 
-	/* struct in6_pktinfo *pktinfo; */
+#define PUT_ENTRY() \
+	zend_hash_update(&ancillary_registry.ht, (char*)&key, sizeof(key), \
+			(void*)&entry, sizeof(entry), NULL)
+
 	entry.size			= sizeof(struct in6_pktinfo);
 	entry.from_array	= from_zval_write_in6_pktinfo;
 	entry.to_array		= to_zval_read_in6_pktinfo;
 	key.cmsg_level		= IPPROTO_IPV6;
-	key.msg_type		= IPV6_PKTINFO;
-	zend_hash_update(&ancillary_registry.ht, (char*)&key, sizeof(key),
-			(void*)&entry, sizeof(entry), NULL);
+	key.cmsg_type		= IPV6_PKTINFO;
+	PUT_ENTRY();
+
+	entry.size			= sizeof(int);
+	entry.from_array	= from_zval_write_int;
+	entry.to_array		= to_zval_read_int;
+	key.cmsg_level		= IPPROTO_IPV6;
+	key.cmsg_type		= IPV6_HOPLIMIT;
+	PUT_ENTRY();
+
+	entry.size			= sizeof(int);
+	entry.from_array	= from_zval_write_int;
+	entry.to_array		= to_zval_read_int;
+	key.cmsg_level		= IPPROTO_IPV6;
+	key.cmsg_type		= IPV6_TCLASS;
+	PUT_ENTRY();
+
+
 }
 static ancillary_reg_entry *get_ancillary_reg_entry(int cmsg_level, int msg_type)
 {
@@ -1364,7 +1382,22 @@ PHP_FUNCTION(socket_cmsg_space)
 void _socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 {
 	REGISTER_LONG_CONSTANT("IPV6_RECVPKTINFO",		IPV6_RECVPKTINFO,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IPV6_RECVHOPLIMIT",		IPV6_RECVHOPLIMIT,	CONST_CS | CONST_PERSISTENT);
+	/* would require some effort:
+	REGISTER_LONG_CONSTANT("IPV6_RECVRTHDR",		IPV6_RECVRTHDR,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IPV6_RECVHOPOPTS",		IPV6_RECVHOPOPTS,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IPV6_RECVDSTOPTS",		IPV6_RECVDSTOPTS,	CONST_CS | CONST_PERSISTENT);
+	*/
+	REGISTER_LONG_CONSTANT("IPV6_RECVTCLASS",		IPV6_RECVTCLASS,	CONST_CS | CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("IPV6_PKTINFO",			IPV6_PKTINFO,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IPV6_HOPLIMIT",			IPV6_HOPLIMIT,		CONST_CS | CONST_PERSISTENT);
+	/*
+	REGISTER_LONG_CONSTANT("IPV6_RTHDR",			IPV6_RTHDR,			CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IPV6_HOPOPTS",			IPV6_HOPOPTS,		CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IPV6_DSTOPTS",			IPV6_DSTOPTS,		CONST_CS | CONST_PERSISTENT);
+	*/
+	REGISTER_LONG_CONSTANT("IPV6_TCLASS",			IPV6_TCLASS,		CONST_CS | CONST_PERSISTENT);
 
 #ifdef ZTS
 	ancillary_mutex = tsrm_mutex_alloc();
