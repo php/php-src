@@ -792,7 +792,7 @@ static void from_zval_write_control_array(const zval *arr, char *msghdr_c, ser_c
     }
 
     msg->msg_control = control_buf;
-    msg->msg_controllen = control_len;
+    msg->msg_controllen = cur_offset; /* not control_len, which may be larger */
 }
 static void to_zval_read_cmsg_data(const char *cmsghdr_c, zval *zv, res_context *ctx)
 {
