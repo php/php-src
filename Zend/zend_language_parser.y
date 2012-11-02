@@ -727,6 +727,8 @@ instance_call:
 		/* empty */ 		{ $$ = $0; }
 	|	{ zend_do_push_object(&$0 TSRMLS_CC); zend_do_begin_variable_parse(TSRMLS_C); }
 		chaining_instance_call	{ zend_do_pop_object(&$$ TSRMLS_CC); zend_do_end_variable_parse(&$2, BP_VAR_R, 0 TSRMLS_CC); }
+	|	{ zend_do_begin_dynamic_function_call(&$0, 0 TSRMLS_CC); }
+		function_call_parameter_list { zend_do_end_function_call(&$0, &$$, &$2, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); } instance_call { $$ = $4; }
 ;
 
 new_expr:
