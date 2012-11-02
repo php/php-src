@@ -6,8 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #63305 (zend_mm_heap corrupted with traits). (Dmitry, Laruence)
   . Fixed bug #63369 ((un)serialize() leaves dangling pointers, causes crashes).
     (Tony, Andrew Sitnikov)
-  . Fixed bug #63241 PHP fails to open Windows deduplicated files.
+  . Fixed bug #63241 (PHP fails to open Windows deduplicated files).
     (daniel dot stelter-gliese at innogames dot de)
+  . Fixed bug #62444 (Handle leak in is_readable on windows). 
+    (krazyest at seznam dot cz)
 
 - Curl:
   . Fixed bug #63363 (Curl silently accepts boolean true for SSL_VERIFYHOST).
