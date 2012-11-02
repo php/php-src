@@ -627,6 +627,7 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 		*sockaddr_len = sizeof(struct sockaddr_in);
 		if (fill_sockaddr) {
 			from_zval_write_sockaddr_in(container, (char*)*sockaddr_ptr, ctx);
+			(*sockaddr_ptr)->sa_family = AF_INET;
 		}
 		break;
 	case AF_INET6:
@@ -639,6 +640,7 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 		*sockaddr_len = sizeof(struct sockaddr_in6);
 		if (fill_sockaddr) {
 			from_zval_write_sockaddr_in6(container, (char*)*sockaddr_ptr, ctx);
+			(*sockaddr_ptr)->sa_family = AF_INET6;
 		}
 		break;
 	default:
