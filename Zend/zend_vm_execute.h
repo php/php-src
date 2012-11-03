@@ -459,7 +459,13 @@ ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_execute_data *execute_data = zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC);
+	zend_execute_data *execute_data;
+
+	if (EG(exception)) {
+		return;
+	}
+
+	execute_data = zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC);
 
 	execute_ex(execute_data TSRMLS_CC);
 }
