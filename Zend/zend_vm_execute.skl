@@ -82,10 +82,6 @@ ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	{%INTERNAL_LABELS%}
 
-	if (EG(exception)) {
-		return;
-	}
-
 	original_in_execution = EG(in_execution);
 	EG(in_execution) = 1;
 
@@ -110,9 +106,10 @@ ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 ZEND_API void {%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_execute_data *execute_data = zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC);
-
-	{%EXECUTOR_NAME%}_ex(execute_data TSRMLS_CC);
+	if (EG(exception)) {
+		return;
+	} 
+	{%EXECUTOR_NAME%}_ex(zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC) TSRMLS_CC);
 }
 
 {%EXTERNAL_EXECUTOR%}

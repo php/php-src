@@ -419,10 +419,6 @@ ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 
 
-	if (EG(exception)) {
-		return;
-	}
-
 	original_in_execution = EG(in_execution);
 	EG(in_execution) = 1;
 
@@ -459,9 +455,10 @@ ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 ZEND_API void execute(zend_op_array *op_array TSRMLS_DC)
 {
-	zend_execute_data *execute_data = zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC);
-
-	execute_ex(execute_data TSRMLS_CC);
+	if (EG(exception)) {
+		return;
+	} 
+	execute_ex(zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC) TSRMLS_CC);
 }
 
 static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
