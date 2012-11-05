@@ -918,6 +918,7 @@ static void from_zval_write_iov_array(const zval *arr, char *msghdr_c, ser_conte
 
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
 		do_from_zval_err(ctx, "%s", "expected an array here");
+		return;
 	}
 
 	num_elem = zend_hash_num_elements(Z_ARRVAL_P(arr));
@@ -964,6 +965,7 @@ static void from_zval_write_controllen(const zval *elem, char *msghdr_c, ser_con
 	from_zval_write_uint32(elem, (char*)&len, ctx);
 	if (!ctx->err.has_error && len == 0) {
 		do_from_zval_err(ctx, "controllen cannot be 0");
+		return;
 	}
 	msghdr->msg_control = accounted_emalloc(len, ctx);
 	msghdr->msg_controllen = len;
