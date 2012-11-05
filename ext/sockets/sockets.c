@@ -2426,6 +2426,53 @@ PHP_FUNCTION(socket_clear_error)
 }
 /* }}} */
 
+php_socket *socket_import_file_descriptor(PHP_SOCKET socket TSRMLS_DC)
+{
+#ifdef SO_DOMAIN
+	int						type;
+	socklen_t				type_len = sizeof(type);
+#endif
+	php_socket 				*retsock;
+	php_sockaddr_storage	addr;
+	socklen_t				addr_len = sizeof(addr);
+#ifndef PHP_WIN32
+	int					 t;
+#endif
+
+    retsock = php_create_socket();
+    retsock->bsd_socket = socket;
+
+    /* determine family */
+#ifdef SO_DOMAIN
+    if (getsockopt(socket, SOL_SOCKET, SO_DOMAIN, &type, &type_len) == 0) {
+		retsock->type = type;
+	} else
+#endif
+	if (getsockname(socket, (struct sockaddr*)&addr, &addr_len) == 0) {
+		retsock->type = addr.ss_family;
+	} else {
+		PHP_SOCKET_ERROR(retsock, "unable to obtain socket family", errno);
+		goto error;
+	}
+
+    /* determine blocking mode */
+#ifndef PHP_WIN32
+    t = fcntl(socket, F_GETFL);
+    if (t == -1) {
+		PHP_SOCKET_ERROR(retsock, "unable to obtain blocking state", errno);
+		goto error;
+    } else {
+    	retsock->blocking = !(t & O_NONBLOCK);
+    }
+#endif
+
+    return retsock;
+
+error:
+	efree(retsock);
+	return NULL;
+}
+
 /* {{{ proto void socket_import_stream(resource stream)
    Imports a stream that encapsulates a socket into a socket extension resource. */
 PHP_FUNCTION(socket_import_stream)
@@ -2434,15 +2481,6 @@ PHP_FUNCTION(socket_import_stream)
 	php_stream			 *stream;
 	php_socket			 *retsock = NULL;
 	PHP_SOCKET			 socket; /* fd */
-	php_sockaddr_storage addr;
-	socklen_t			 addr_len = sizeof(addr);
-#ifndef PHP_WIN32
-	int					 t;
-#endif
-#ifdef SO_DOMAIN
-	int					type;
-	socklen_t			type_len = sizeof(type);
-#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &zstream) == FAILURE) {
 		return;
@@ -2454,33 +2492,12 @@ PHP_FUNCTION(socket_import_stream)
 		RETURN_FALSE;
 	}
 
-	retsock = php_create_socket();
-
-	retsock->bsd_socket = socket;
-
-	/* determine family */
-#ifdef SO_DOMAIN
-	if (getsockopt(socket, SOL_SOCKET, SO_DOMAIN, &type, &type_len) == 0) {
-		retsock->type = type;
-	} else
-#endif
-	if (getsockname(socket, (struct sockaddr*)&addr, &addr_len) == 0) {
-		retsock->type = addr.ss_family;
-	} else {
-		PHP_SOCKET_ERROR(retsock, "unable to obtain socket family", errno);
-		goto error;
+	retsock = socket_import_file_descriptor(socket);
+	if (retsock == NULL) {
+		RETURN_FALSE;
 	}
 
-	/* determine blocking mode */
-#ifndef PHP_WIN32
-	t = fcntl(socket, F_GETFL);
-	if(t == -1) {
-		PHP_SOCKET_ERROR(retsock, "unable to obtain blocking state", errno);
-		goto error;
-	} else {
-		retsock->blocking = !(t & O_NONBLOCK);
-	}
-#else
+#ifdef PHP_WIN32
 	/* on windows, check if the stream is a socket stream and read its
 	 * private data; otherwise assume it's in non-blocking mode */
 	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {
@@ -2504,11 +2521,6 @@ PHP_FUNCTION(socket_import_stream)
 		PHP_STREAM_BUFFER_NONE, NULL);
 
 	ZEND_REGISTER_RESOURCE(return_value, retsock, le_socket);
-	return;
-error:
-	if (retsock != NULL)
-		efree(retsock);
-	RETURN_FALSE;
 }
 /* }}} */
 

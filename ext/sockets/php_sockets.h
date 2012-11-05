@@ -88,6 +88,7 @@ ZEND_END_MODULE_GLOBALS(sockets)
 ZEND_EXTERN_MODULE_GLOBALS(sockets);
 
 char *sockets_strerror(int error TSRMLS_DC);
+php_socket *socket_import_file_descriptor(PHP_SOCKET sock TSRMLS_DC);
 
 #define PHP_SOCKET_ERROR(socket,msg,errn) \
 		socket->error = errn;	\
