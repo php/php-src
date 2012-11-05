@@ -1387,7 +1387,12 @@ static void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 		fd = *((int *)data + i);
 
 		/* determine whether we have a socket */
-		fstat(fd, &statbuf);
+		if (fstat(fd, &statbuf) == -1) {
+			do_to_zval_err(ctx, "error creating resource for received file "
+					"descriptor %d: fstat() call failed with errno %d", fd, errno);
+			efree(elem);
+			return;
+		}
 		if (S_ISSOCK(statbuf.st_mode)) {
 			php_socket *sock = socket_import_file_descriptor(fd);
 			zend_register_resource(elem, sock, php_sockets_le_socket());
