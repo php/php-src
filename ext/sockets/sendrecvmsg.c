@@ -1252,6 +1252,7 @@ static void to_zval_read_msghdr(const char *msghdr_c, zval *zv, res_context *ctx
 
 
 /* CONVERSIONS for struct in6_pktinfo */
+#ifdef IPV6_PKTINFO
 static const field_descriptor descriptors_in6_pktinfo[] = {
 		{"addr", sizeof("addr"), 1, offsetof(struct in6_pktinfo, ipi6_addr), from_zval_write_sin6_addr, to_zval_read_sin6_addr},
 		{"ifindex", sizeof("ifindex"), 1, offsetof(struct in6_pktinfo, ipi6_ifindex), from_zval_write_unsigned, to_zval_read_unsigned},
@@ -1267,8 +1268,10 @@ static void to_zval_read_in6_pktinfo(const char *data, zval *zv, res_context *ct
 
 	to_zval_read_aggregation(data, zv, descriptors_in6_pktinfo, ctx);
 }
+#endif
 
 /* CONVERSIONS for struct ucred */
+#ifdef SO_PASSCRED
 static const field_descriptor descriptors_ucred[] = {
 		{"pid", sizeof("pid"), 1, offsetof(struct ucred, pid), from_zval_write_pid_t, to_zval_read_pid_t},
 		{"uid", sizeof("uid"), 1, offsetof(struct ucred, uid), from_zval_write_uid_t, to_zval_read_uid_t},
@@ -1286,8 +1289,10 @@ static void to_zval_read_ucred(const char *data, zval *zv, res_context *ctx)
 
 	to_zval_read_aggregation(data, zv, descriptors_ucred, ctx);
 }
+#endif
 
 /* CONVERSIONS for SCM_RIGHTS */
+#ifdef SCM_RIGHTS
 static size_t calculate_scm_rights_space(const zval *arr, ser_context *ctx)
 {
 	int num_elems;
@@ -1394,6 +1399,7 @@ static void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 		add_next_index_zval(zv, elem);
 	}
 }
+#endif
 
 /* ENTRY POINT for conversions */
 static void free_from_zval_allocation(void *alloc_ptr_ptr)
@@ -1506,20 +1512,28 @@ static void init_ancillary_registry(void)
 	zend_hash_update(&ancillary_registry.ht, (char*)&key, sizeof(key), \
 			(void*)&entry, sizeof(entry), NULL)
 
+#ifdef IPV6_PKTINFO
 	PUT_ENTRY(sizeof(struct in6_pktinfo), 0, 0, from_zval_write_in6_pktinfo,
 			to_zval_read_in6_pktinfo, IPPROTO_IPV6, IPV6_PKTINFO);
+#endif
 
+#ifdef IPV6_HOPLIMIT
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_HOPLIMIT);
+#endif
 
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_TCLASS);
 
+#ifdef SO_PASSCRED
 	PUT_ENTRY(sizeof(struct ucred), 0, 0, from_zval_write_ucred,
 			to_zval_read_ucred, SOL_SOCKET, SCM_CREDENTIALS);
+#endif
 
+#ifdef SCM_RIGHTS
 	PUT_ENTRY(0, sizeof(int), calculate_scm_rights_space, from_zval_write_fd_array,
 			to_zval_read_fd_array, SOL_SOCKET, SCM_RIGHTS);
+#endif
 
 }
 static ancillary_reg_entry *get_ancillary_reg_entry(int cmsg_level, int msg_type)
@@ -1702,8 +1716,14 @@ void _socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 	/* IPv6 ancillary data
 	 * Note that support for sticky options via setsockopt() is not implemented
 	 * yet (where special support is needed, i.e., the optval is not an int). */
+#ifdef IPV6_RECVPKTINFO
 	REGISTER_LONG_CONSTANT("IPV6_RECVPKTINFO",		IPV6_RECVPKTINFO,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IPV6_PKTINFO",          IPV6_PKTINFO,       CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IPV6_RECVHOPLIMIT
 	REGISTER_LONG_CONSTANT("IPV6_RECVHOPLIMIT",		IPV6_RECVHOPLIMIT,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IPV6_HOPLIMIT",         IPV6_HOPLIMIT,      CONST_CS | CONST_PERSISTENT);
+#endif
 	/* would require some effort:
 	REGISTER_LONG_CONSTANT("IPV6_RECVRTHDR",		IPV6_RECVRTHDR,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_RECVHOPOPTS",		IPV6_RECVHOPOPTS,	CONST_CS | CONST_PERSISTENT);
@@ -1711,8 +1731,6 @@ void _socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 	*/
 	REGISTER_LONG_CONSTANT("IPV6_RECVTCLASS",		IPV6_RECVTCLASS,	CONST_CS | CONST_PERSISTENT);
 
-	REGISTER_LONG_CONSTANT("IPV6_PKTINFO",			IPV6_PKTINFO,		CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IPV6_HOPLIMIT",			IPV6_HOPLIMIT,		CONST_CS | CONST_PERSISTENT);
 	/*
 	REGISTER_LONG_CONSTANT("IPV6_RTHDR",			IPV6_RTHDR,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_HOPOPTS",			IPV6_HOPOPTS,		CONST_CS | CONST_PERSISTENT);
@@ -1720,10 +1738,13 @@ void _socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 	*/
 	REGISTER_LONG_CONSTANT("IPV6_TCLASS",			IPV6_TCLASS,		CONST_CS | CONST_PERSISTENT);
 
-
+#ifdef SCM_RIGHTS
 	REGISTER_LONG_CONSTANT("SCM_RIGHTS",			SCM_RIGHTS,			CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef SO_PASSCRED
 	REGISTER_LONG_CONSTANT("SCM_CREDENTIALS",		SCM_CREDENTIALS,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_PASSCRED",			SO_PASSCRED,		CONST_CS | CONST_PERSISTENT);
+#endif
 
 #ifdef ZTS
 	ancillary_mutex = tsrm_mutex_alloc();
