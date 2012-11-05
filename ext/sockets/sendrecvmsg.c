@@ -719,7 +719,8 @@ static void to_zval_read_sun_path(const char *data, zval *zv, res_context *ctx) 
 }
 static const field_descriptor descriptors_sockaddr_un[] = {
 		{"family", sizeof("family"), 0, offsetof(struct sockaddr_un, sun_family), from_zval_write_sa_family, to_zval_read_sa_family},
-		{"path", sizeof("path"), 0, offsetof(struct sockaddr_un, sun_path), from_zval_write_sun_path, to_zval_read_sun_path},
+		{"path", sizeof("path"), 0, 0, from_zval_write_sun_path, to_zval_read_sun_path},
+		{0}
 };
 static void from_zval_write_sockaddr_un(const zval *container, char *sockaddr, ser_context *ctx)
 {
@@ -857,7 +858,8 @@ static void from_zval_write_control(const zval			*arr,
 	struct cmsghdr		*cmsghdr;
 	int					level,
 						type;
-	size_t				req_space,
+	size_t				data_len,
+						req_space,
 						space_left;
 	ancillary_reg_entry	*entry;
 
@@ -891,13 +893,14 @@ static void from_zval_write_control(const zval			*arr,
 	}
 
 	if (entry->calc_space) {
-		entry->calc_space(arr, ctx);
+		data_len = entry->calc_space(arr, ctx);
 		if (ctx->err.has_error) {
 			return;
 		}
 	} else {
-		req_space = CMSG_SPACE(entry->size);
+		data_len = entry->size;
 	}
+	req_space = CMSG_SPACE(data_len);
 	space_left = *control_len - *offset;
 	assert(*control_len >= *offset);
 
@@ -910,7 +913,7 @@ static void from_zval_write_control(const zval			*arr,
 	cmsghdr = (struct cmsghdr*)(((char*)*control_buf) + *offset);
 	cmsghdr->cmsg_level	= level;
 	cmsghdr->cmsg_type	= type;
-	cmsghdr->cmsg_len	= CMSG_LEN(entry->size);
+	cmsghdr->cmsg_len	= CMSG_LEN(data_len);
 
 	descriptor_data[0].from_zval = entry->from_array;
 	from_zval_write_aggregation(arr, (char*)CMSG_DATA(cmsghdr), descriptor_data, ctx);
@@ -1302,27 +1305,23 @@ static size_t calculate_scm_rights_space(const zval *arr, ser_context *ctx)
 
 	return zend_hash_num_elements(Z_ARRVAL_P(arr)) * sizeof(int);
 }
-static void from_zval_write_int_array_aux(zval **elem, unsigned i, void **args, ser_context *ctx)
+static void from_zval_write_fd_array_aux(zval **elem, unsigned i, void **args, ser_context *ctx)
 {
 	int *iarr = args[0];
 
-	if (Z_TYPE_PP(elem) == IS_LONG) {
-
-		from_zval_write_int(*elem, (char*)&iarr[i], ctx);
-
-	} else if (Z_TYPE_PP(elem) == IS_RESOURCE) {
+	if (Z_TYPE_PP(elem) == IS_RESOURCE) {
 		php_stream *stream;
 		php_socket *sock;
 
 		ZEND_FETCH_RESOURCE_NO_RETURN(sock, php_socket *, elem, -1,
-				php_sockets_le_socket_name, php_sockets_le_socket());
+				NULL, php_sockets_le_socket());
 		if (sock) {
 			iarr[i] = sock->bsd_socket;
 			return;
 		}
 
 		ZEND_FETCH_RESOURCE2_NO_RETURN(stream, php_stream *, elem, -1,
-				"stream", php_file_le_stream(), php_file_le_pstream());
+				NULL, php_file_le_stream(), php_file_le_pstream());
 		if (stream == NULL) {
 			do_from_zval_err(ctx, "resource is not a stream or a socket");
 			return;
@@ -1334,25 +1333,26 @@ static void from_zval_write_int_array_aux(zval **elem, unsigned i, void **args, 
 			return;
 		}
 	} else {
-		do_from_zval_err(ctx, "expected an integer or resource variable");
+		do_from_zval_err(ctx, "expected a resource variable");
 	}
 }
-static void from_zval_write_int_array(const zval *arr, char *int_arr, ser_context *ctx)
+static void from_zval_write_fd_array(const zval *arr, char *int_arr, ser_context *ctx)
 {
 	if (Z_TYPE_P(arr) != IS_ARRAY) {
 		do_from_zval_err(ctx, "%s", "expected an array here");
 		return;
 	}
 
-   from_array_iterate(arr, &from_zval_write_int_array_aux, (void**)&int_arr, ctx);
+   from_array_iterate(arr, &from_zval_write_fd_array_aux, (void**)&int_arr, ctx);
 }
-static void to_zval_read_int_array(const char *data, zval *zv, res_context *ctx)
+static void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 {
 	size_t			**cmsg_len;
 	int				num_elems,
 					i;
 	struct cmsghdr	*dummy_cmsg = 0;
 	size_t			data_offset;
+	TSRMLS_FETCH();
 
 	data_offset = (unsigned char *)CMSG_DATA(dummy_cmsg)
 			- (unsigned char *)dummy_cmsg;
@@ -1373,7 +1373,25 @@ static void to_zval_read_int_array(const char *data, zval *zv, res_context *ctx)
 	array_init_size(zv, num_elems);
 
 	for (i = 0; i < num_elems; i++) {
-		add_next_index_long(zv, (long)*((int *)data + i));
+		zval		*elem;
+		int			fd;
+		struct stat	statbuf;
+
+		MAKE_STD_ZVAL(elem);
+
+		fd = *((int *)data + i);
+
+		/* determine whether we have a socket */
+		fstat(fd, &statbuf);
+		if (S_ISSOCK(statbuf.st_mode)) {
+			php_socket *sock = socket_import_file_descriptor(fd);
+			zend_register_resource(elem, sock, php_sockets_le_socket());
+		} else {
+			php_stream *stream = php_stream_fopen_from_fd(fd, "rw", NULL);
+			php_stream_to_zval(stream, elem);
+		}
+
+		add_next_index_zval(zv, elem);
 	}
 }
 
@@ -1500,8 +1518,8 @@ static void init_ancillary_registry(void)
 	PUT_ENTRY(sizeof(struct ucred), 0, 0, from_zval_write_ucred,
 			to_zval_read_ucred, SOL_SOCKET, SCM_CREDENTIALS);
 
-	PUT_ENTRY(0, sizeof(int), calculate_scm_rights_space, from_zval_write_int_array,
-			to_zval_read_int_array, SOL_SOCKET, SCM_RIGHTS);
+	PUT_ENTRY(0, sizeof(int), calculate_scm_rights_space, from_zval_write_fd_array,
+			to_zval_read_fd_array, SOL_SOCKET, SCM_RIGHTS);
 
 }
 static ancillary_reg_entry *get_ancillary_reg_entry(int cmsg_level, int msg_type)
@@ -1676,7 +1694,7 @@ PHP_FUNCTION(socket_cmsg_space)
 		return;
 	}
 
-	RETURN_LONG((long)CMSG_SPACE(entry->size + n * entry->size));
+	RETURN_LONG((long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
 void _socket_sendrecvmsg_init(INIT_FUNC_ARGS)
