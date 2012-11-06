@@ -77,6 +77,7 @@ struct key_value {
 #define KEY_FILL_SOCKADDR "fill_sockaddr"
 #define KEY_RECVMSG_RET "recvmsg_ret"
 #define KEY_CMSG_LEN	"cmsg_len"
+static const struct key_value empty_key_value_list[] = {{0}};
 
 
 typedef void (from_zval_write_field)(const zval *arr_value, char *field, ser_context *ctx);
@@ -221,6 +222,12 @@ static void err_msg_dispose(struct err_s *err TSRMLS_DC)
 			efree(err->msg);
 		}
 	}
+}
+static void allocations_dispose(zend_llist **allocations)
+{
+	zend_llist_destroy(*allocations);
+	efree(*allocations);
+	*allocations = NULL;
 }
 
 static unsigned from_array_iterate(const zval *arr,
@@ -1660,8 +1667,7 @@ PHP_FUNCTION(socket_recvmsg)
 
 		/* we don;t need msghdr anymore; free it */
 		msghdr = NULL;
-		zend_llist_destroy(allocations);
-		efree(allocations);
+		allocations_dispose(&allocations);
 
 		zval_dtor(zmsg);
 		if (!err.has_error) {
@@ -1721,6 +1727,86 @@ PHP_FUNCTION(socket_cmsg_space)
 	}
 
 	RETURN_LONG((long)CMSG_SPACE(entry->size + n * entry->var_el_size));
+}
+
+int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval **arg4)
+{
+	struct err_s	err = {0};
+	zend_llist		*allocations = NULL;
+	void			*opt_ptr;
+	socklen_t		optlen;
+	int				retval;
+
+	assert(level == IPPROTO_IPV6);
+
+	switch (optname) {
+#ifdef IPV6_PKTINFO
+	case IPV6_PKTINFO:
+		opt_ptr = from_zval_run_conversions(*arg4, php_sock, from_zval_write_in6_pktinfo,
+				sizeof(struct in6_pktinfo),	"in6_pktinfo", &allocations, &err);
+		if (err.has_error) {
+			err_msg_dispose(&err TSRMLS_CC);
+			return FAILURE;
+		}
+
+		optlen = sizeof(struct in6_pktinfo);
+		goto dosockopt;
+#endif
+	}
+
+	/* we also support IPV6_TCLASS, but that can be handled by the default
+	 * integer optval handling in the caller */
+	return 1;
+
+dosockopt:
+	retval = setsockopt(php_sock->bsd_socket, level, optname, opt_ptr, optlen);
+	if (retval != 0) {
+		PHP_SOCKET_ERROR(php_sock, "unable to set socket option", errno);
+	}
+	allocations_dispose(&allocations);
+
+	return retval != 0 ? FAILURE : SUCCESS;
+}
+
+int php_do_getsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval *result)
+{
+	struct err_s		err = {0};
+	void				*buffer;
+	socklen_t			size;
+	int					res;
+	to_zval_read_field	*reader;
+
+	assert(level == IPPROTO_IPV6);
+
+	switch (optname) {
+#ifdef IPV6_PKTINFO
+	case IPV6_PKTINFO:
+		size = sizeof(struct in6_pktinfo);
+		reader = &to_zval_read_in6_pktinfo;
+		break;
+#endif
+	default:
+		return 1;
+	}
+
+	buffer = ecalloc(1, size);
+	res = getsockopt(php_sock->bsd_socket, level, optname, buffer, &size);
+	if (res != 0) {
+		PHP_SOCKET_ERROR(php_sock, "unable to get socket option", errno);
+	} else {
+		zval *zv = to_zval_run_conversions(buffer, reader, "in6_pktinfo",
+				empty_key_value_list, &err);
+		if (err.has_error) {
+			err_msg_dispose(&err);
+			res = -1;
+		} else {
+			ZVAL_COPY_VALUE(result, zv);
+			efree(zv);
+		}
+	}
+	efree(buffer);
+
+	return res == 0 ? SUCCESS : FAILURE;
 }
 
 void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)

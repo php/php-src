@@ -1877,6 +1877,13 @@ PHP_FUNCTION(socket_get_option)
 			}
 		}
 		}
+	} else if (level == IPPROTO_IPV6) {
+		int ret = php_do_getsockopt_ipv6_rfc3542(php_sock, level, optname, return_value);
+		if (ret == SUCCESS) {
+			return;
+		} else if (ret == FAILURE) {
+			RETURN_FALSE;
+		} /* else continue */
 	}
 
 	/* sol_socket options and general case */
@@ -1981,6 +1988,9 @@ PHP_FUNCTION(socket_set_option)
 #if HAVE_IPV6
 	else if (level == IPPROTO_IPV6) {
 		int res = php_do_setsockopt_ipv6_mcast(php_sock, level, optname, arg4);
+		if (res == 1) {
+			res = php_do_setsockopt_ipv6_rfc3542(php_sock, level, optname, arg4);
+		}
 		HANDLE_SUBCALL(res);
 	}
 #endif
