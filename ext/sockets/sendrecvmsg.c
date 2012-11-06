@@ -1541,6 +1541,13 @@ static void init_ancillary_registry(void)
 #endif
 
 }
+static void destroy_ancillary_registry(void)
+{
+	if (ancillary_registry.initialized) {
+		zend_hash_destroy(&ancillary_registry.ht);
+		ancillary_registry.initialized = 0;
+	}
+}
 static ancillary_reg_entry *get_ancillary_reg_entry(int cmsg_level, int msg_type)
 {
 	anc_reg_key			key = { cmsg_level, msg_type };
@@ -1761,4 +1768,6 @@ void _socket_sendrecvmsg_shutdown(SHUTDOWN_FUNC_ARGS)
 #ifdef ZTS
 	tsrm_mutex_free(ancillary_mutex);
 #endif
+
+	destroy_ancillary_registry();
 }
