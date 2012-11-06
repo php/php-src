@@ -1723,7 +1723,7 @@ PHP_FUNCTION(socket_cmsg_space)
 	RETURN_LONG((long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
-void _socket_sendrecvmsg_init(INIT_FUNC_ARGS)
+void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 {
 	/* IPv6 ancillary data
 	 * Note that support for sticky options via setsockopt() is not implemented
@@ -1763,7 +1763,7 @@ void _socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 #endif
 }
 
-void _socket_sendrecvmsg_shutdown(SHUTDOWN_FUNC_ARGS)
+void php_socket_sendrecvmsg_shutdown(SHUTDOWN_FUNC_ARGS)
 {
 #ifdef ZTS
 	tsrm_mutex_free(ancillary_mutex);
