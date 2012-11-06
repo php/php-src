@@ -1,5 +1,6 @@
-/-- This set of tests if for UTF-8 support, excluding Unicode properties. It is
-    compatible with all versions of Perl 5. --/
+/-- This set of tests is for UTF support, excluding Unicode properties. It is
+    compatible with all versions of Perl >= 5.10 and both the 8-bit and 16-bit
+    PCRE libraries. --/
    
 /a.b/8
     acb
@@ -125,31 +126,6 @@
     \x{256}XYZ 
     *** Failers
     XYZ 
-
-/X(\C{3})/8
-    X\x{1234}
-
-/X(\C{4})/8
-    X\x{1234}YZ
-    
-/X\C*/8
-    XYZabcdce
-    
-/X\C*?/8
-    XYZabcde
-    
-/X\C{3,5}/8
-    Xabcdefg   
-    X\x{1234} 
-    X\x{1234}YZ
-    X\x{1234}\x{512}  
-    X\x{1234}\x{512}YZ
-
-/X\C{3,5}?/8
-    Xabcdefg   
-    X\x{1234} 
-    X\x{1234}YZ
-    X\x{1234}\x{512}  
 
 /[^a]+/8g
     bcd
@@ -456,17 +432,6 @@
     \x{150}X
     \x{200}X   
 
-/a\Cb/
-    aXb
-    a\nb
-  
-/a\Cb/8
-    aXb
-    a\nb
-    
-/a\C\Cb/8 
-    a\x{100}b 
-
 /[z-\x{100}]/8i
     z
     Z 
@@ -643,5 +608,17 @@
 
 /A*/g8
     AAB\x{123}BAA
+
+/(abc)\1/8i
+   abc
+
+/(abc)\1/8
+   abc
+
+/a(*:a\x{1234}b)/8K
+    abc
+
+/a(*:a£b)/8K 
+    abc
 
 /-- End of testinput4 --/

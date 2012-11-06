@@ -2,6 +2,16 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.3.19
 
+- Core
+  . Fixed bug #63241 (PHP fails to open Windows deduplicated files).
+    (daniel dot stelter-gliese at innogames dot de)
+  . Fixed bug #62444 (Handle leak in is_readable on windows). 
+    (krazyest at seznam dot cz)
+
+- Libxml
+  . Fixed bug #63389 (Missing context check on libxml_set_streams_context()
+    causes memleak). (Laruence)
+
 - MySQL:
   . Fixed compilation failure on mixed 32/64 bit systems. (Andrey)
 
@@ -12,14 +22,23 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #63055 (Segfault in zend_gc with SF2 testsuite).
     (Dmitry, Laruence)
+  . Fixed bug #63284 (Upgrade PCRE to 8.31). (Anatoliy)
 
 - PDO:
   . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
     (Martin Osvald, Remi)
 
+- PDO_pgsql:
+  . Fixed bug #62593 (Emulate prepares behave strangely with PARAM_BOOL).
+    (Will Fitch)
+
 - Streams:
   . Fixed bug #63240 (stream_get_line() return contains delimiter string).
     (Tjerk, Gustavo)
+
+- Phar:
+  . Fixed bug #63297 (Phar fails to write an openssl based signature).
+    (Anatoliy)
 
 18 Oct 2012, PHP 5.3.18
 
