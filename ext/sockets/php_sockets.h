@@ -87,6 +87,12 @@ ZEND_END_MODULE_GLOBALS(sockets)
 
 ZEND_EXTERN_MODULE_GLOBALS(sockets);
 
+enum sockopt_return {
+	SOCKOPT_ERROR,
+	SOCKOPT_CONTINUE,
+	SOCKOPT_SUCCESS
+};
+
 char *sockets_strerror(int error TSRMLS_DC);
 php_socket *socket_import_file_descriptor(PHP_SOCKET sock TSRMLS_DC);
 
