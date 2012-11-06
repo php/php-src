@@ -1341,6 +1341,7 @@ PHP                                                                        NEWS
 - Gd:
   . Fixed bug #60160 (imagefill() doesn't work correctly
     for small images). (Florian)
+  . Fixed potential memory leak on a png error (Rasmus, Paul Saab)
 
 - Intl:
   . Fixed bug #60192 (SegFault when Collator not constructed
