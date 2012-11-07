@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #63389 (Missing context check on libxml_set_streams_context()
     causes memleak). (Laruence)
 
+- Mbstring:
+  . Fixed bug #63447 (max_input_vars doesn't filter variables when
+    mbstring.encoding_translation = On). (Laruence)
+
 - MySQL:
   . Fixed compilation failure on mixed 32/64 bit systems. (Andrey)
 
