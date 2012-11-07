@@ -1,6 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2ß12, PHP 5.3.20
+
 ?? ??? 2012, PHP 5.3.19
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ADD NEWS ONLY ABOVE IN 5.3.20 SECTION
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+RM will merge 5.3.19 entries when merging to release branch
 
 - Core
   . Fixed bug #63241 (PHP fails to open Windows deduplicated files).
