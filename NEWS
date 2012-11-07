@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.3.19
+08 Nov 2012, PHP 5.3.19RC1
 
 - Core
   . Fixed bug #63241 (PHP fails to open Windows deduplicated files).
