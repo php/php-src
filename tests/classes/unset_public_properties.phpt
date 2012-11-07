@@ -60,7 +60,6 @@ echo "\n";
 echo $o->testProperty;
 
 ?>
-====DONE====
 --EXPECTF--
 property set
 
