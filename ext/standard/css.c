@@ -27,7 +27,7 @@ PHPAPI void php_info_print_css(TSRMLS_D) /* {{{ */
 	PUTS("pre {margin: 0; font-family: monospace;}\n");
 	PUTS("a:link {color: #009; text-decoration: none; background-color: #fff;}\n");
 	PUTS("a:hover {text-decoration: underline;}\n");
-	PUTS("table {border-collapse: collapse; border: 0; width: 75%; min-width: 600px;}\n");
+	PUTS("table {border-collapse: collapse; border: 0; width: 934px;}\n");
 	PUTS(".center {text-align: center;}\n");
 	PUTS(".center table {margin: 0 auto; text-align: left;}\n");
 	PUTS(".center th {text-align: center !important;}\n");
@@ -35,12 +35,12 @@ PHPAPI void php_info_print_css(TSRMLS_D) /* {{{ */
 	PUTS("h1 {font-size: 150%;}\n");
 	PUTS("h2 {font-size: 125%;}\n");
 	PUTS(".p {text-align: left;}\n");
- 	PUTS(".e {background-color: #ccf; font-weight: bold;}\n");
- 	PUTS(".h {background-color: #99c; font-weight: bold;}\n");
- 	PUTS(".v {background-color: #ccc; max-width: 20em; overflow-y: scroll;}\n");
- 	PUTS(".v i {color: #999;}\n");
+	PUTS(".e {background-color: #ccf; width: 300px; font-weight: bold;}\n");
+	PUTS(".h {background-color: #99c; font-weight: bold;}\n");
+	PUTS(".v {background-color: #ccc; max-width: 300px; overflow-y: scroll;}\n");
+	PUTS(".v i {color: #999;}\n");
 	PUTS("img {float: right; border: 0;}\n");
-	PUTS("hr {width: 800px; background-color: #ccc; border: 0; height: 1px;}\n");
+	PUTS("hr {width: 934px; background-color: #ccc; border: 0; height: 1px;}\n");
 }
 /* }}} */
 
