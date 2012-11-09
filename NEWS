@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2ß12, PHP 5.3.20
 
+- Core:
+  . Fixed bug #63451 (config.guess file does not have AIX 7 defined, 
+    shared objects are not created). (kemcline at au1 dot ibm dot com)
+
 ?? ??? 2012, PHP 5.3.19
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
