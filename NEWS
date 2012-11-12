@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 201?, PHP 5.5.0
+13 Nov 2012, PHP 5.5.0 Alpha 1
 
 - General improvements:
   . Added support for generators. (Nikita Popov)
