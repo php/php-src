@@ -21,17 +21,17 @@ PHP                                                                        NEWS
 
 - Calendar:
   . Fixed bug #54254 (cal_from_jd returns month = 6 when there is only one Adar)
-    (Stas, Eitan Mosenkis).
+    (Stas, Eitan Mosenkis)
 
 - Core:
-  . Added boolval(). (Jille Timmermans).
+  . Added boolval(). (Jille Timmermans)
   . Added "Z" option to pack/unpack. (Gustavo)
   . Implemented FR #60738 (Allow 'set_error_handler' to handle NULL).
     (Laruence, Nikita Popov)
   . Added optional second argument for assert() to specify custom message. Patch
     by Lonny Kapelushnik (lonny@lonnylot.com). (Lars)
   . Fixed bug #18556 (Engine uses locale rules to handle class names). (Stas)
-  . Fixed bug #61681 (Malformed grammar). (Nikita Popov, Etienne, Laruence).
+  . Fixed bug #61681 (Malformed grammar). (Nikita Popov, Etienne, Laruence)
   . Fixed bug #61038 (unpack("a5", "str\0\0") does not work as expected).
     (srgoogleguy, Gustavo)
   . Return previous handler when passing NULL to set_error_handler and
