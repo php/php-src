@@ -200,7 +200,7 @@ engine = On
 
 ; This directive determines whether or not PHP will recognize code between
 ; <? and ?> tags as PHP source which should be processed as such. For several
-; years we recommended that you not use the short tag "short cut" and
+; years we recommended that you not use the short tag shortcut and
 ; instead to use the full <?php and ?> tag combination. With the widespread use
 ; of XML and use of these tags by other languages, the server can become easily
 ; confused and end up parsing the wrong code in the wrong context.
