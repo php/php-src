@@ -109,8 +109,10 @@
 	if (len < 1 && return_if_empty) { \
 		RETURN_VALIDATION_FAILED \
 	} \
-	while (p[len-1] == ' ' || p[len-1] == '\t' || p[len-1] == '\r' || p[len-1] == '\v' || p[len-1] == '\n') { \
-		len--; \
+	if (len > 0) { \
+		while (p[len-1] == ' ' || p[len-1] == '\t' || p[len-1] == '\r' || p[len-1] == '\v' || p[len-1] == '\n') { \
+			len--; \
+		} \
 	} \
 }
 

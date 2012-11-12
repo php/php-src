@@ -532,7 +532,7 @@ EOF
 		echo rs6000-ibm-aix3.2
 	fi
 	exit ;;
-    *:AIX:*:[456])
+    *:AIX:*:[4567])
 	IBM_CPU_ID=`/usr/sbin/lsdev -C -c processor -S available | sed 1q | awk '{ print $1 }'`
 	if /usr/sbin/lsattr -El ${IBM_CPU_ID} | grep ' POWER' >/dev/null 2>&1; then
 		IBM_ARCH=rs6000
