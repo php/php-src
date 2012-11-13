@@ -193,7 +193,7 @@ Finished:
 TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
 {
 	time_t t;
-	HANDLE thread_token;
+	HANDLE thread_token = NULL;
 	PSID token_sid;
 	SECURITY_INFORMATION sec_info = OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION;
 	GENERIC_MAPPING gen_map = { FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_GENERIC_EXECUTE, FILE_ALL_ACCESS };
@@ -363,6 +363,9 @@ Finished_Impersonate:
 		}
 
 Finished:
+		if(thread_token != NULL) {
+			CloseHandle(thread_token);
+		}
 		if(real_path != NULL) {
 			free(real_path);
 			real_path = NULL;

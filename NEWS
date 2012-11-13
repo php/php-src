@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #63305 (zend_mm_heap corrupted with traits). (Dmitry, Laruence)
   . Fixed bug #63369 ((un)serialize() leaves dangling pointers, causes crashes).
     (Tony, Andrew Sitnikov)
+  . Fixed bug #63241 (PHP fails to open Windows deduplicated files).
+    (daniel dot stelter-gliese at innogames dot de)
+  . Fixed bug #62444 (Handle leak in is_readable on windows). 
+    (krazyest at seznam dot cz)
 
 - Curl:
   . Fixed bug #63363 (Curl silently accepts boolean true for SSL_VERIFYHOST).
@@ -14,6 +18,14 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
     (Anatoliy)
+
+- Libxml
+  . Fixed bug #63389 (Missing context check on libxml_set_streams_context()
+    causes memleak). (Laruence)
+
+- Mbstring:
+  . Fixed bug #63447 (max_input_vars doesn't filter variables when
+    mbstring.encoding_translation = On). (Laruence)
 
 - OCI8:
   . Fixed bug #63265 (Add ORA-00028 to the PHP_OCI_HANDLE_ERROR macro)
@@ -28,6 +40,10 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #63297 (Phar fails to write an openssl based signature).
     (Anatoliy)
+
+- Reflection:
+  . Fixed bug #63399 (ReflectionClass::getTraitAliases() incorrectly resolves
+    traitnames). (Laruence)
 
 18 Oct 2012, PHP 5.4.8
 
@@ -1329,6 +1345,7 @@ PHP                                                                        NEWS
 - Gd:
   . Fixed bug #60160 (imagefill() doesn't work correctly
     for small images). (Florian)
+  . Fixed potential memory leak on a png error (Rasmus, Paul Saab)
 
 - Intl:
   . Fixed bug #60192 (SegFault when Collator not constructed

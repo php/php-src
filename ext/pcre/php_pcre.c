@@ -1866,7 +1866,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match, 0, 0, 2)
     ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match_all, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match_all, 0, 0, 2)
     ZEND_ARG_INFO(0, pattern)
     ZEND_ARG_INFO(0, subject)
     ZEND_ARG_INFO(1, subpatterns) /* array */
