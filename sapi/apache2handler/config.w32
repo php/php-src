@@ -38,21 +38,21 @@ if (PHP_APACHE2_2HANDLER != "no") {
 	}
 }
 
-ARG_ENABLE('apache2-3handler', 'Build Apache 2.3.x handler', 'no');
-if (PHP_APACHE2_3HANDLER != "no") {
+ARG_ENABLE('apache2-4handler', 'Build Apache 2.4.x handler', 'no');
+if (PHP_APACHE2_4HANDLER != "no") {
 	if (PHP_ZTS == "no") {
-		WARNING("Apache 2.3 module requires an --enable-zts build of PHP on windows");
-	} else if (CHECK_HEADER_ADD_INCLUDE("httpd.h", "CFLAGS_APACHE2_3HANDLER", PHP_PHP_BUILD + "\\include\\apache2_3") &&
-			CHECK_LIB("libhttpd.lib", "apache2_3handler", PHP_PHP_BUILD + "\\lib\\apache2_3") &&
-			CHECK_LIB("libapr-1.lib", "apache2_3handler", PHP_PHP_BUILD + "\\lib\\apache2_3") &&
-			CHECK_LIB("libaprutil-1.lib", "apache2_3handler", PHP_PHP_BUILD + "\\lib\\apache2_3")
+		WARNING("Apache 2.4 module requires an --enable-zts build of PHP on windows");
+	} else if (CHECK_HEADER_ADD_INCLUDE("httpd.h", "CFLAGS_APACHE2_4HANDLER", PHP_PHP_BUILD + "\\include\\apache2_4") &&
+			CHECK_LIB("libhttpd.lib", "apache2_4handler", PHP_PHP_BUILD + "\\lib\\apache2_4") &&
+			CHECK_LIB("libapr-1.lib", "apache2_4handler", PHP_PHP_BUILD + "\\lib\\apache2_4") &&
+			CHECK_LIB("libaprutil-1.lib", "apache2_4handler", PHP_PHP_BUILD + "\\lib\\apache2_4")
 			) {
-		SAPI('apache2_3handler', 'mod_php5.c sapi_apache2.c apache_config.c php_functions.c',
-				'php' + PHP_VERSION + 'apache2_3.dll',
+		SAPI('apache2_4handler', 'mod_php5.c sapi_apache2.c apache_config.c php_functions.c',
+				'php' + PHP_VERSION + 'apache2_4.dll',
 				'/D PHP_APACHE2_EXPORTS /I win32',
 				'sapi\\apache2handler');
 	} else {
-		WARNING("Could not find apache2.3 libraries/headers");
+		WARNING("Could not find apache 2.4 libraries/headers");
 	}
 }
 
