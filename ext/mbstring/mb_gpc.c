@@ -262,6 +262,12 @@ enum mbfl_no_encoding _php_mb_encoding_handler_ex(const php_mb_encoding_handler_
 		n++;
 		var = php_strtok_r(NULL, info->separator, &strtok_buf);
 	} 
+
+	if (n > (PG(max_input_vars) * 2)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+		goto out;
+	}
+
 	num = n; /* make sure to process initilized vars only */
 	
 	/* initialize converter */
