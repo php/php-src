@@ -73,6 +73,7 @@ timelib_time *timelib_parse_from_format(char *format, char *s, int len, timelib_
 void timelib_fill_holes(timelib_time *parsed, timelib_time *now, int options);
 char *timelib_timezone_id_from_abbr(const char *abbr, long gmtoffset, int isdst);
 const timelib_tz_lookup_table *timelib_timezone_abbreviations_list(void);
+long timelib_parse_tz_cor(char**);
 
 /* From parse_iso_intervals.re */
 void timelib_strtointerval(char *s, int len, 
