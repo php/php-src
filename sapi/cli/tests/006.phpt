@@ -69,7 +69,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version <no_version> ] {
       - Parameters [5] {
         Parameter #0 [ <required> $pattern ]
         Parameter #1 [ <required> $subject ]
-        Parameter #2 [ <required> &$subpatterns ]
+        Parameter #2 [ <optional> &$subpatterns ]
         Parameter #3 [ <optional> $flags ]
         Parameter #4 [ <optional> $offset ]
       }
