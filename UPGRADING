@@ -525,6 +525,8 @@ b. Extensions with changed behavior
   must be activated manually with the "extension = php_com_dotnet.dll" directive
   in php.ini.
 
+- Apache 2.4 handler is supported as of PHP 5.4.9
+
 ==================
 12. New in PHP 5.4
 ==================

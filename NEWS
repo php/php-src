@@ -45,6 +45,9 @@ PHP                                                                        NEWS
   . Fixed bug #63399 (ReflectionClass::getTraitAliases() incorrectly resolves
     traitnames). (Laruence)
 
+- Apache2 Handler SAPI:
+  . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
+
 18 Oct 2012, PHP 5.4.8
 
 - CLI server:
