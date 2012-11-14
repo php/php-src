@@ -13,7 +13,8 @@ PHP X.Y UPGRADE NOTES
 8. Other Changes to Extensions
 9. New Global Constants
 10. Changes to INI File Handling
-11. Other Changes
+11. Windows Support
+12. Other Changes
 
 
 ========================================
@@ -247,9 +248,15 @@ PHP X.Y UPGRADE NOTES
     APIs which use(are built) for mysqlnd. This allows ext/mysqli to be used
 	with the new auth protocol, although at coarser level.
 
+========================================
+11. Windows Support
+========================================
+
+- Apache 2.4 handler is supported as of PHP 5.5.0
+
 
 ========================================
-11. Other Changes
+12. Other Changes
 ========================================
 
 - Logo GUIDs will no longer work
