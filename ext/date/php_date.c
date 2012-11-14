@@ -2210,15 +2210,15 @@ static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC)
 			char *tmpstr = emalloc(sizeof("UTC+05:00"));
 
 			snprintf(tmpstr, sizeof("+05:00"), "%c%02d:%02d",
-			tzobj->tzi.z.utc_offset > 0 ? '-' : '+',
-			abs(tzobj->tzi.z.utc_offset / 60),
-			abs((tzobj->tzi.z.utc_offset % 60)));
+			tzobj->tzi.utc_offset > 0 ? '-' : '+',
+			abs(tzobj->tzi.utc_offset / 60),
+			abs((tzobj->tzi.utc_offset % 60)));
 
 			ZVAL_STRING(zv, tmpstr, 0);
 			}
 			break;
 		case TIMELIB_ZONETYPE_ABBR:
-			ZVAL_STRING(zv, tzobj->tzi.tz->timezone_abbr, 1);
+			ZVAL_STRING(zv, tzobj->tzi.z.abbr, 1);
 			break;
 	}
 	zend_hash_update(props, "timezone", 9, &zv, sizeof(zval), NULL);
@@ -3294,30 +3294,39 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 	zval            **z_timezone = NULL;
 	zval            **z_timezone_type = NULL;
 	timelib_tzinfo  *tzi;
+	char			**offset;
 
 	if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS) {
 		if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS) {
 			convert_to_long(*z_timezone_type);
 			switch (Z_LVAL_PP(z_timezone_type)) {
 				case TIMELIB_ZONETYPE_OFFSET:
+					offset = malloc(sizeof(char) * (Z_STRLEN_PP(z_timezone) + 1));
+					*offset = (Z_STRVAL_PP(z_timezone));
+					if(**offset == '+'){
+						++*offset;
+						(*tzobj)->tzi.utc_offset = -1 * timelib_parse_tz_cor((char **)offset);
+					} else {
+						++*offset;
+						(*tzobj)->tzi.utc_offset = timelib_parse_tz_cor((char **)offset);
+					}
+					free(offset);
 					(*tzobj)->type = TIMELIB_ZONETYPE_OFFSET;
-					(*tzobj)->tzi.utc_offset = Z_LVAL_PP(z_timezone);
+					(*tzobj)->initialized = 1;
+					return SUCCESS;
 					break;
 				case TIMELIB_ZONETYPE_ABBR:
-					(*tzobj)->type = TIMELIB_ZONETYPE_ABBR;
-					(*tzobj)->tzi.z.utc_offset = Z_LVAL_PP(z_timezone);
-					break;
 				case TIMELIB_ZONETYPE_ID:
 					if (SUCCESS == timezone_initialize(&tzi, Z_STRVAL_PP(z_timezone) TSRMLS_CC)) {
 						(*tzobj)->type = TIMELIB_ZONETYPE_ID;
 						(*tzobj)->tzi.tz = tzi;
 						(*tzobj)->initialized = 1;
-						return 1;
+						return SUCCESS;
 					}
 			}
 		}
 	}
-	return 0;
+	return FAILURE;
 }
 
 /* {{{ proto DateTimeZone::__set_state()
@@ -3351,7 +3360,7 @@ PHP_METHOD(DateTimeZone, __wakeup)
 	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
 
 	myht = Z_OBJPROP_P(object);
-
+	
 	php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht TSRMLS_CC);
 }
 /* }}} */
