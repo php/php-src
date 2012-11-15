@@ -38,6 +38,9 @@
 # define NTDDI_XP NTDDI_WINXP /* bug in SDK */
 # include <IPHlpApi.h>
 # undef NTDDI_XP
+# if _WIN32_WINNT >= 0x0600
+#  define HAVE_IF_NAMETOINDEX 1
+# endif
 #else
 #include <sys/socket.h>
 #include <sys/ioctl.h>
