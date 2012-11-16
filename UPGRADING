@@ -484,6 +484,8 @@ UPGRADE NOTES - PHP 5.3
   must be activated manually with the "extension = php_com_dotnet.dll" directive
   in php.ini.
 
+- Apache 2.4 handler is supported as of PHP 5.3.20
+
 =====================
 11.1 New in PHP 5.3.4
 =====================
