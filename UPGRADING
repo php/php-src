@@ -231,19 +231,23 @@ PHP X.Y UPGRADE NOTES
 
 - Intl:
   - This extension now requires ICU 4.0+.
-  - Added intl.use_exceptions INI directive, which controls what happens when
-    global errors are set together with intl.error_level.
 
 ========================================
 9. New Global Constants
 ========================================
-- mysqli
+
+- mysqli:
   - Added MYSQLI_SERVER_PUBLIC_KEY constant to be used with mysqli_options()
 
 ========================================
 10. Changes to INI File Handling
 ========================================
-- mysqlnd
+
+- Intl:
+  - Added intl.use_exceptions INI directive, which controls what happens when
+    global errors are set together with intl.error_level.
+
+- mysqlnd:
   - Added mysqlnd.sha256_server_public_key INI PERDIR setting that affects all
     APIs which use(are built) for mysqlnd. This allows ext/mysqli to be used
 	with the new auth protocol, although at coarser level.
