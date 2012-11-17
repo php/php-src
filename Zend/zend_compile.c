@@ -219,6 +219,7 @@ ZEND_API void file_handle_dtor(zend_file_handle *fh) /* {{{ */
 void init_compiler(TSRMLS_D) /* {{{ */
 {
 	CG(active_op_array) = NULL;
+	memset(&CG(context), 0, sizeof(CG(context)));
 	zend_init_compiler_data_structures(TSRMLS_C);
 	zend_init_rsrc_list(TSRMLS_C);
 	zend_hash_init(&CG(filenames_table), 5, NULL, (dtor_func_t) free_estring, 0);
@@ -3885,7 +3886,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 					
 				/* if it is 0, no modifieres has been changed */
 				if (aliases[i]->modifiers) { 
-					fn_copy.common.fn_flags = aliases[i]->modifiers;
+					fn_copy.common.fn_flags = aliases[i]->modifiers | ZEND_ACC_ALIAS;
 					if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
 						fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
 					}
@@ -3926,7 +3927,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 					&& (!aliases[i]->trait_method->ce || fn->common.scope == aliases[i]->trait_method->ce)
 					&& (aliases[i]->trait_method->mname_len == fnname_len)
 					&& (zend_binary_strcasecmp(aliases[i]->trait_method->method_name, aliases[i]->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
-					fn_copy.common.fn_flags = aliases[i]->modifiers;
+					fn_copy.common.fn_flags = aliases[i]->modifiers | ZEND_ACC_ALIAS;
 
 					if (!(aliases[i]->modifiers & ZEND_ACC_PPP_MASK)) {
 						fn_copy.common.fn_flags |= ZEND_ACC_PUBLIC;
