@@ -57,6 +57,7 @@
 # define h_errno		WSAGetLastError()
 # define set_errno(a)		WSASetLastError(a)
 # define close(a)		closesocket(a)
+# include <IPHlpApi.h>
 # if _WIN32_WINNT >= 0x0600
 #  define HAVE_IF_NAMETOINDEX 1
 # endif

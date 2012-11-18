@@ -40,6 +40,10 @@
 #  define IO_REPARSE_TAG_SYMLINK 0xA000000C
 # endif
 
+# ifndef IO_REPARSE_TAG_DEDUP
+#  define IO_REPARSE_TAG_DEDUP   0x80000013
+# endif
+
 # ifndef VOLUME_NAME_NT
 #  define VOLUME_NAME_NT 0x2
 # endif
@@ -945,6 +949,11 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					return -1;
 				};
 				substitutename[substitutename_len] = 0;
+			}
+			else if (pbuffer->ReparseTag == IO_REPARSE_TAG_DEDUP) {
+				isabsolute = 1;
+				memcpy(substitutename, path, len + 1);
+				substitutename_len = len;
 			} else {
 				tsrm_free_alloca(pbuffer, use_heap_large);
 				return -1;

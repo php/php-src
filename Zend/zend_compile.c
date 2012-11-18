@@ -220,6 +220,7 @@ ZEND_API void file_handle_dtor(zend_file_handle *fh) /* {{{ */
 void init_compiler(TSRMLS_D) /* {{{ */
 {
 	CG(active_op_array) = NULL;
+	memset(&CG(context), 0, sizeof(CG(context)));
 	zend_init_compiler_data_structures(TSRMLS_C);
 	zend_init_rsrc_list(TSRMLS_C);
 	zend_hash_init(&CG(filenames_table), 5, NULL, (dtor_func_t) free_estring, 0);

@@ -461,6 +461,10 @@ static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* 
 
 void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
+	if (EG(exception)) {
+		return;
+	}
+
 	/* The generator is already closed, thus can't resume */
 	if (!generator->execute_data) {
 		return;

@@ -29,6 +29,14 @@ require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
 		$expected['MYSQL_ATTR_READ_DEFAULT_GROUP']		= true;
 	}
 
+	if (extension_loaded('mysqli') && stristr(mysqli_get_client_info(), "mysqlnd")
+		|| MySQLPDOTest::getClientVersion(MySQLPDOTest::factory()) > 50605) {
+		/* XXX the MySQL client library version isn't exposed with any 
+		constants, the single possibility is to use the PDO::getAttribute().
+		This however will fail with no connection. */
+		$expected['MYSQL_ATTR_SERVER_PUBLIC_KEY']		= true;
+	}
+
 	/*
 	TODO
 

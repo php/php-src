@@ -387,52 +387,67 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name) {
 	// Updating code according to selected threading model
 	switch($kind) {
 		case ZEND_VM_KIND_CALL:
-			$code = preg_replace(
+			$code = preg_replace_callback(
 				array(
 					"/EXECUTE_DATA/m",
 					"/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m",
-					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*\)/me",
-					"/ZEND_VM_DISPATCH_TO_HELPER_EX\(\s*([A-Za-z_]*)\s*,\s*[A-Za-z_]*\s*,\s*(.*)\s*\);/me",
+					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*\)/m",
+					"/ZEND_VM_DISPATCH_TO_HELPER_EX\(\s*([A-Za-z_]*)\s*,\s*[A-Za-z_]*\s*,\s*(.*)\s*\);/m",
 				),
-				array(
-					"execute_data",
-					"return \\1".($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2]."_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)",
-					"'return '.helper_name('\\1',$spec,'$op1','$op2').'(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)'",
-					"'return '.helper_name('\\1',$spec,'$op1','$op2').'(\\2, ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);'",
-				),
+				function($matches) use ($spec, $prefix, $op1, $op2) {
+					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
+						return "execute_data";
+					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
+						return "return " . $matches[1] . ($spec?"_SPEC":"") . $prefix[$op1] . $prefix[$op2] . "_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)";
+					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HELPER_EX", strlen("ZEND_VM_DISPATCH_TO_HELPER_EX")) == 0) {
+						return "return " . helper_name($matches[1], $spec, $op1, $op2) . "(" . $matches[2]. ", ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);";
+					} else {
+						return "return " . helper_name($matches[1], $spec, $op1, $op2) . "(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU)";
+					}
+				},
 				$code);
 			break;
 		case ZEND_VM_KIND_SWITCH:
-			$code = preg_replace(
+			$code = preg_replace_callback(
 				array(
 					"/EXECUTE_DATA/m",
 					"/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m",
-					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*\)/me",
-					"/ZEND_VM_DISPATCH_TO_HELPER_EX\(\s*([A-Za-z_]*)\s*,\s*([A-Za-z_]*)\s*,\s*(.*)\s*\);/me",
+					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*\)/m",
+					"/ZEND_VM_DISPATCH_TO_HELPER_EX\(\s*([A-Za-z_]*)\s*,\s*([A-Za-z_]*)\s*,\s*(.*)\s*\);/m",
 				),
-				array(
-					"execute_data",
-					"goto \\1".($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2]."_LABEL",
-					"'goto '.helper_name('\\1',$spec,'$op1','$op2')",
-					"'\\2 = \\3; goto '.helper_name('\\1',$spec,'$op1','$op2').';'",
-				),
-				$code);
+				function($matches) use ($spec, $prefix, $op1, $op2) {
+					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
+						return "execute_data";
+					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
+						return "goto " . $matches[1] . ($spec?"_SPEC":"") . $prefix[$op1] . $prefix[$op2] . "_LABEL";
+					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HELPER_EX", strlen("ZEND_VM_DISPATCH_TO_HELPER_EX")) == 0) {
+						return $matches[2] . " = " . $matches[3] .  "; goto " . helper_name($matches[1], $spec, $op1, $op2) . ";";
+					} else {
+						return "goto " . helper_name($matches[1], $spec, $op1, $op2);
+					}
+				},
+					$code);
 			break;
 		case ZEND_VM_KIND_GOTO:
-			$code = preg_replace(
+			$code = preg_replace_callback(
 				array(
 					"/EXECUTE_DATA/m",
 					"/ZEND_VM_DISPATCH_TO_HANDLER\(\s*([A-Z_]*)\s*\)/m",
-					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*\)/me",
-					"/ZEND_VM_DISPATCH_TO_HELPER_EX\(\s*([A-Za-z_]*)\s*,\s*([A-Za-z_]*)\s*,\s*(.*)\s*\);/me",
+					"/ZEND_VM_DISPATCH_TO_HELPER\(\s*([A-Za-z_]*)\s*\)/m",
+					"/ZEND_VM_DISPATCH_TO_HELPER_EX\(\s*([A-Za-z_]*)\s*,\s*([A-Za-z_]*)\s*,\s*(.*)\s*\);/m",
 				),
-				array(
-					"execute_data",
-					"goto \\1".($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2]."_HANDLER",
-					"'goto '.helper_name('\\1',$spec,'$op1','$op2')",
-					"'\\2 = \\3; goto '.helper_name('\\1',$spec,'$op1','$op2').';'",
-				),
-				$code);
+				function($matches) use ($spec, $prefix, $op1, $op2) {
+					if (strncasecmp($matches[0], "EXECUTE_DATA", strlen("EXECUTE_DATA")) == 0) {
+						return "execute_data";
+					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HANDLER", strlen("ZEND_VM_DISPATCH_TO_HANDLER")) == 0) {
+						return "goto " . $matches[1] . ($spec?"_SPEC":"") . $prefix[$op1] . $prefix[$op2] . "_HANDLER";
+					} else if (strncasecmp($matches[0], "ZEND_VM_DISPATCH_TO_HELPER_EX", strlen("ZEND_VM_DISPATCH_TO_HELPER_EX")) == 0) {
+						return $matches[2] . " = " . $matches[3] .  "; goto " . helper_name($matches[1], $spec, $op1, $op2) . ";";
+					} else {
+						return "goto " . helper_name($matches[1], $spec, $op1, $op2);
+					}
+				},
+					$code);
 			break;
 	}
 

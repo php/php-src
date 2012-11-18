@@ -4623,7 +4623,7 @@ ZEND_METHOD(reflection_class, getTraitAliases)
 			zend_trait_method_reference *cur_ref = ce->trait_aliases[i]->trait_method;
 
 			if (ce->trait_aliases[i]->alias) {
-				method_name_len = spprintf(&method_name, 0, "%s::%s", cur_ref->class_name, cur_ref->method_name);
+				method_name_len = spprintf(&method_name, 0, "%s::%s", cur_ref->ce->name, cur_ref->method_name);
 				add_assoc_stringl_ex(return_value, ce->trait_aliases[i]->alias, ce->trait_aliases[i]->alias_len + 1, method_name, method_name_len, 0);
 			}
 			i++;
