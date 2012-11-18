@@ -1841,7 +1841,7 @@ void zend_do_end_accessor_declaration(znode *function_token, znode *var_name, zn
 
 		} else if(CG(active_op_array)->purpose == ZEND_FNP_PROP_ISSETTER) {
 			/* Equivalent to: return $this->Property != NULL; (via getter) */
-			zend_uint		bufsize = 14 + Z_STRLEN(var_name->u.constant) + 9 + 1;
+			zend_uint		bufsize = 14 + Z_STRLEN(var_name->u.constant) +10 + 1;
 			char			*buffer = emalloc(bufsize);
 
 			Z_STRVAL(eval_php_code) = buffer;
