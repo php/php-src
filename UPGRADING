@@ -56,6 +56,12 @@ PHP X.Y UPGRADE NOTES
 - The preg_replace /e modifier is now deprecated.  Use
   preg_replace_callback instead.
   (https://wiki.php.net/rfc/remove_preg_replace_eval_modifier)
+- IntlDateFormatter::setTimeZoneID() and datefmt_set_timezone_id() are
+  deprecated. Use IntlDateFormatter::setTimeZone() or datefmt_set_timezone()
+  instead.
+- mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb() now throw
+  E_DEPRECATED. Their use was already previously discouraged in the docs,
+  but that predated the existence of E_DEPRECATED.
 
 ========================================
 4. Changed Functions
@@ -98,14 +104,8 @@ PHP X.Y UPGRADE NOTES
 - IntlDateFormatter::setCalendar() and datefmt_set_calendar() now also accept
   an IntlCalendar object, in which case its time zone is taken. Passing a
   constant is still allowed, and still keeps the time zone.
-- IntlDateFormatter::setTimeZoneID() and datefmt_set_timezone_id() are
-  deprecated. Use IntlDateFormatter::setTimeZone() or datefmt_set_timezone()
-  instead.
 - IntlDateFormatter::format() and datefmt_format() now also accept an
   IntlCalendar object for formatting.
-- mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb() now throw
-  E_DEPRECATED. Their use was already previously discouraged in the docs,
-  but that predated the existence of E_DEPRECATED.
 - php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
   zend_logo_guid() have been removed
 - set_error_handler(NULL) can now be used to reset the error handler.
@@ -231,19 +231,23 @@ PHP X.Y UPGRADE NOTES
 
 - Intl:
   - This extension now requires ICU 4.0+.
-  - Added intl.use_exceptions INI directive, which controls what happens when
-    global errors are set together with intl.error_level.
 
 ========================================
 9. New Global Constants
 ========================================
-- mysqli
+
+- mysqli:
   - Added MYSQLI_SERVER_PUBLIC_KEY constant to be used with mysqli_options()
 
 ========================================
 10. Changes to INI File Handling
 ========================================
-- mysqlnd
+
+- Intl:
+  - Added intl.use_exceptions INI directive, which controls what happens when
+    global errors are set together with intl.error_level.
+
+- mysqlnd:
   - Added mysqlnd.sha256_server_public_key INI PERDIR setting that affects all
     APIs which use(are built) for mysqlnd. This allows ext/mysqli to be used
 	with the new auth protocol, although at coarser level.
