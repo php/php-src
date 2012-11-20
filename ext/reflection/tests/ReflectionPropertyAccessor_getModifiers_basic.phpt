@@ -5,10 +5,10 @@ Clint Priest <php-dev@zerocue.com>
 --FILE--
 <?php
 	class TimePeriod {
-		public read-only $a1 {
+		public $a1 {
 			get { return 1; }
 		}
-		public write-only $a2 {
+		public $a2 {
 			set { }
 		}
 		private $a3 {
@@ -24,7 +24,7 @@ Clint Priest <php-dev@zerocue.com>
 ?>
 ==DONE==
 --EXPECT--
-a1 = int(536871168)
-a2 = int(1073742080)
+a1 = int(256)
+a2 = int(256)
 a3 = int(1024)
 ==DONE==

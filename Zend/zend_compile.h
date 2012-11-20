@@ -231,8 +231,8 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
 #define ZEND_ACC_ALIAS					0x10000000
-#define ZEND_ACC_READONLY				0x20000000
-#define ZEND_ACC_WRITEONLY				0x40000000
+// #define ZEND_ACC_READONLY				0x20000000
+// #define ZEND_ACC_WRITEONLY				0x40000000
 
 /** Function Purposes **/
 

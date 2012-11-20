@@ -679,8 +679,6 @@ member_modifier:
 	|	T_STATIC				{ Z_LVAL($$.u.constant) = ZEND_ACC_STATIC; }
 	|	T_ABSTRACT				{ Z_LVAL($$.u.constant) = ZEND_ACC_ABSTRACT; }
 	|	T_FINAL					{ Z_LVAL($$.u.constant) = ZEND_ACC_FINAL; }
-	|	T_READONLY				{ Z_LVAL($$.u.constant) = ZEND_ACC_READONLY; }
-	|	T_WRITEONLY				{ Z_LVAL($$.u.constant) = ZEND_ACC_WRITEONLY; }
 ;
 
 accessors:

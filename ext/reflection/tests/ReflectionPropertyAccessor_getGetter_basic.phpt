@@ -5,10 +5,10 @@ Clint Priest <php-dev@zerocue.com>
 --FILE--
 <?php
 	class TimePeriod {
-		public read-only $a1 {
+		public $a1 {
 			get { return 1; }
 		}
-		public write-only $a2 {
+		public $a2 {
 			set { }
 		}
 		private $a3 {

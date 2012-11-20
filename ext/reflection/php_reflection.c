@@ -1005,11 +1005,6 @@ static void _property_accessor_string(string *str, zend_accessor_info *ai, char*
 		if(ai->flags & ZEND_ACC_STATIC) {
 			string_printf(str, "static ");
 		}
-		if(ai->flags & ZEND_ACC_READONLY) {
-			string_printf(str, "read-only ");
-		} else if(ai->flags & ZEND_ACC_WRITEONLY) {
-			string_printf(str, "write-only ");
-		}
 
 		string_printf(str, "$%s ] {\n", name);
 
@@ -5426,22 +5421,6 @@ ZEND_METHOD(reflection_property_accessor, isPublic)
 }
 /* }}} */
 
-/* {{{ proto public bool ReflectionPropertyAccessor::isReadOnly()
-   Returns whether this accessor is read-only */
-ZEND_METHOD(reflection_property_accessor, isReadOnly)
-{
-	_property_accessor_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_READONLY);
-}
-/* }}} */
-
-/* {{{ proto public bool ReflectionPropertyAccessor::isWriteOnly()
-   Returns whether this accessor is write-only */
-ZEND_METHOD(reflection_property_accessor, isWriteOnly)
-{
-	_property_accessor_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_WRITEONLY);
-}
-/* }}} */
-
 /* {{{ proto public bool ReflectionPropertyAccessor::isPrivate()
    Returns whether this accessor is private */
 ZEND_METHOD(reflection_property_accessor, isPrivate)
@@ -6502,8 +6481,6 @@ static const zend_function_entry reflection_property_accessor_functions[] = {
 	ZEND_ME(reflection_property_accessor, getValue, arginfo_reflection_property_getValue, 0)
 	ZEND_ME(reflection_property_accessor, setValue, arginfo_reflection_property_setValue, 0)
 	ZEND_ME(reflection_property_accessor, isPublic, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_property_accessor, isReadOnly, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_property_accessor, isWriteOnly, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property_accessor, isPrivate, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property_accessor, isProtected, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property_accessor, isStatic, arginfo_reflection__void, 0)
@@ -6708,8 +6685,6 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_PUBLIC", ZEND_ACC_PUBLIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_PROTECTED", ZEND_ACC_PROTECTED);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_PRIVATE", ZEND_ACC_PRIVATE);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_READONLY", ZEND_ACC_READONLY);
-	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_WRITEONLY", ZEND_ACC_WRITEONLY);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionExtension", reflection_extension_functions);
 	_reflection_entry.create_object = reflection_objects_new;

@@ -5,14 +5,14 @@ Clint Priest <php-dev@zerocue.com>
 --FILE--
 <?php
 	class TimePeriod {
-		/** Test Read-Only Comment for $a1 */
-		public read-only $a1 {
-			/** Test Getter Read-Only Comment for $a1 */
+		/** Test Comment for $a1 */
+		public $a1 {
+			/** Test Getter Comment for $a1 */
 			get { return 1; }
 		}
 		
-		/** Test Write-Only Comment for $a2 */
-		public write-only $a2 {
+		/** Test Comment for $a2 */
+		public  $a2 {
 			set { }
 		}
 		/** Test Comment for $a3 */
@@ -37,19 +37,19 @@ Clint Priest <php-dev@zerocue.com>
 	}
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 string(2) "a1"
-string(37) "/** Test Read-Only Comment for $a1 */"
+string(%d) "/** Test Comment for $a1 */"
 getter DocComment
-string(44) "/** Test Getter Read-Only Comment for $a1 */"
+string(%d) "/** Test Getter Comment for $a1 */"
 ******************
 string(2) "a2"
-string(38) "/** Test Write-Only Comment for $a2 */"
+string(%d) "/** Test Comment for $a2 */"
 setter DocComment
 bool(false)
 ******************
 string(2) "a3"
-string(27) "/** Test Comment for $a3 */"
+string(%d) "/** Test Comment for $a3 */"
 getter DocComment
 bool(false)
 setter DocComment

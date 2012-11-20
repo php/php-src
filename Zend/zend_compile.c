@@ -1643,16 +1643,6 @@ int zend_do_verify_access_types(const znode *current_access_type, const znode *n
 		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_FINAL)) {
 		zend_error(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
 	}
-	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_READONLY) && (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_READONLY)) {
-		zend_error(E_COMPILE_ERROR, "Multiple read-only modifiers are not allowed");
-	}
-	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_WRITEONLY) && (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_WRITEONLY)) {
-		zend_error(E_COMPILE_ERROR, "Multiple write-only modifiers are not allowed");
-	}
-	if ( 		((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_READONLY) 	&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_WRITEONLY))
-			|| 	((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_WRITEONLY) && (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_READONLY))	) {
-		zend_error(E_COMPILE_ERROR, "read-only and write-only modifiers are mutually exclusive");
-	}
 	if (((Z_LVAL(current_access_type->u.constant) | Z_LVAL(new_modifier->u.constant)) & (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) == (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) {
 		zend_error(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class member");
 	}
@@ -1667,20 +1657,6 @@ void zend_declare_accessor(znode *var_name TSRMLS_DC) { /* {{{ */
 
 	/* Locate or create accessor_info structure */
 	if(zend_hash_quick_find(&CG(active_class_entry)->accessors, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant)+1, hash_value, (void**) &aipp) != SUCCESS) {
-
-		/* Inheritence check for read-only & write-only */
-		if(CG(active_class_entry)->parent != NULL) {
-			zend_class_entry *parent = CG(active_class_entry)->parent;
-
-			if(zend_hash_quick_find(&parent->accessors, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant)+1, hash_value, (void**) &aipp) == SUCCESS) {
-				ai = *aipp;
-				if(ai->flags & ZEND_ACC_WRITEONLY && !(CG(access_type) & ZEND_ACC_WRITEONLY))
-					zend_error(E_COMPILE_ERROR, "$%s must be declared write-only as in parent class %s.", Z_STRVAL(var_name->u.constant), parent->name);
-				if(ai->flags & ZEND_ACC_READONLY && !(CG(access_type) & ZEND_ACC_READONLY))
-					zend_error(E_COMPILE_ERROR, "$%s must be declared read-only as in parent class %s.", Z_STRVAL(var_name->u.constant), parent->name);
-			}
-		}
-
 		ai = ecalloc(1, sizeof(zend_accessor_info));
 		ai->flags = CG(access_type);
 		ai->doc_comment = CG(doc_comment);
@@ -1758,24 +1734,12 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 	func = (zend_function*)CG(active_op_array);
 
 	if (func->common.purpose == ZEND_FNP_PROP_GETTER) {
-		if((ai->flags & ZEND_ACC_WRITEONLY)) {
-			zend_error(E_COMPILE_ERROR, "Cannot define getter for write-only property $%s", Z_STRVAL(var_name->u.constant));
-		}
 		ai->getter = func;
 	} else if(func->common.purpose == ZEND_FNP_PROP_SETTER) {
-		if((ai->flags & ZEND_ACC_READONLY)) {
-			zend_error(E_COMPILE_ERROR, "Cannot define setter for read-only property $%s", Z_STRVAL(var_name->u.constant));
-		}
 		ai->setter = func;
 	} else if(func->common.purpose == ZEND_FNP_PROP_ISSETTER) {
-		if((ai->flags & ZEND_ACC_WRITEONLY)) {
-			zend_error(E_COMPILE_ERROR, "Cannot define isset for write-only property $%s", Z_STRVAL(var_name->u.constant));
-		}
 		ai->isset = func;
 	} else if(func->common.purpose == ZEND_FNP_PROP_UNSETTER) {
-		if((ai->flags & ZEND_ACC_READONLY)) {
-			zend_error(E_COMPILE_ERROR, "Cannot define unset for read-only property $%s", Z_STRVAL(var_name->u.constant));
-		}
 		ai->unset = func;
 	}
 }
@@ -1938,13 +1902,6 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			Z_LVAL(fn_flags_znode->u.constant) |= ZEND_ACC_ABSTRACT; /* propagates to the rest of the parser */
 		}
 		fn_flags = Z_LVAL(fn_flags_znode->u.constant); /* must be done *after* the above check */
-
-		if((fn_flags & ZEND_ACC_READONLY) && !(IS_ACCESSOR(purpose))) {
-			zend_error(E_COMPILE_ERROR, "Method %s::%s() cannot be defined read-only, not permitted for methods.", CG(active_class_entry)->name, function_name->u.constant.value.str.val);
-		}
-		if((fn_flags & ZEND_ACC_WRITEONLY) && !(IS_ACCESSOR(purpose))) {
-			zend_error(E_COMPILE_ERROR, "Method %s::%s() cannot be defined write-only, not permitted for methods.", CG(active_class_entry)->name, function_name->u.constant.value.str.val);
-		}
 	} else {
 		fn_flags = 0;
 	}
@@ -5854,14 +5811,6 @@ void zend_do_declare_property(const znode *var_name, const znode *value, zend_ui
 		zend_error(E_COMPILE_ERROR, "Properties cannot be declared abstract");
 	}
 
-	if (access_type & ZEND_ACC_READONLY) {
-		zend_error(E_COMPILE_ERROR, "Properties cannot be declared read-only");
-	}
-
-	if (access_type & ZEND_ACC_WRITEONLY) {
-		zend_error(E_COMPILE_ERROR, "Properties cannot be declared write-only");
-	}
-
 	if (access_type & ZEND_ACC_FINAL) {
 		zend_error(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, the final modifier is allowed only for methods and classes",
 				   CG(active_class_entry)->name, var_name->u.constant.value.str.val);
@@ -6734,8 +6683,6 @@ void zend_do_unset(const znode *variable TSRMLS_DC) /* {{{ */
 
 							SET_UNUSED(opline->op2);
 							return;
-						} else if((ai->flags & ZEND_ACC_READONLY)) {
-							zend_error(E_COMPILE_ERROR, "Cannot call unset on read-only static property (%s::$%s).", context_name, ZEND_ACC_NAME_AI(ai));
 						} else if(!ai->setter) {
 							zend_error(E_COMPILE_ERROR, "Cannot unset property %s::$%s, no setter defined.", context_name, ZEND_ACC_NAME_AI(ai));
 						}
@@ -6806,8 +6753,6 @@ void zend_do_isset_or_isempty(int type, znode *result, znode *variable TSRMLS_DC
 							initop->op2.constant = zend_add_func_name_literal(CG(active_op_array), &zv_issetter TSRMLS_CC);
 							GET_CACHE_SLOT(initop->op2.constant);
 							return;
-						} else if((ai->flags & ZEND_ACC_WRITEONLY)) {
-							zend_error(E_COMPILE_ERROR, "Cannot call isset on write-only static property (%s::%s).", context_name, ZEND_ACC_NAME_AI(ai));
 						} else if(!ai->getter) {
 							zend_error(E_COMPILE_ERROR, "Cannot isset property %s::$%s, no getter defined.", context_name, ZEND_ACC_NAME_AI(ai));
 						}

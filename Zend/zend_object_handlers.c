@@ -413,9 +413,7 @@ zend_function inline *zend_locate_getter(zval *object, zval *member, const zend_
 	ulong hash_value = key ? key->hash_value : member && member->type == IS_STRING ? zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1) : 0;
 
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
-		if((*ai)->flags & ZEND_ACC_WRITEONLY) {
-			zend_error_noreturn(E_ERROR, "Cannot get write-only property %s::$%s.", zobj->ce->name, Z_STRVAL_P(member));
-		} else if((*ai)->getter) {
+		if((*ai)->getter) {
 			/* If public getter, no access check required */
 			if((*ai)->getter->common.fn_flags & ZEND_ACC_PUBLIC) {
 				return (*ai)->getter;
@@ -435,9 +433,7 @@ zend_function inline *zend_locate_setter(zval *object, zval *member, const zend_
 	ulong hash_value = key ? key->hash_value : member && member->type == IS_STRING ? zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1) : 0;
 
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
-		if((*ai)->flags & ZEND_ACC_READONLY) {
-			zend_error_noreturn(E_ERROR, "Cannot set read-only property %s::$%s.", zobj->ce->name, Z_STRVAL_P(member));
-		} else if((*ai)->setter) {
+		if((*ai)->setter) {
 			/* If public setter, no access check required */
 			if((*ai)->setter->common.fn_flags & ZEND_ACC_PUBLIC) {
 				return (*ai)->setter;
@@ -846,9 +842,7 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
  	hash_value  = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
 
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
-		if((*ai)->flags & ZEND_ACC_READONLY) {
-			zend_error_noreturn(E_ERROR, "Cannot unset read-only property %s::$%s.", zobj->ce->name, Z_STRVAL_P(member));
-		} else if((*ai)->unset) {
+		if((*ai)->unset) {
 			/* If public unsetter, no access check required */
 			if((*ai)->unset->common.fn_flags & ZEND_ACC_PUBLIC) {
 				unsetter = (*ai)->unset;
@@ -1486,9 +1480,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 	hash_value = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
 
 	if(zend_hash_quick_find(&zobj->ce->accessors, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1, hash_value, (void**) &ai) == SUCCESS) {
-		if((*ai)->flags & ZEND_ACC_WRITEONLY) {
-			zend_error_noreturn(E_ERROR, "Cannot isset write-only property %s::$%s.", zobj->ce->name, Z_STRVAL_P(member));
-		} else if((*ai)->isset) {
+		if((*ai)->isset) {
 			/* If public issetter, no access check required */
 			if((*ai)->isset->common.fn_flags & ZEND_ACC_PUBLIC) {
 				issetter = (*ai)->isset;

@@ -23,10 +23,6 @@ function reflectProperty($class, $property) {
     var_dump($propInfo->isProtected());
     echo "isStatic():\n";
     var_dump($propInfo->isStatic());
-    echo "isReadOnly():\n";
-    var_dump($propInfo->isReadOnly());
-    echo "isWriteOnly():\n";
-    var_dump($propInfo->isWriteOnly());
     echo "isDefault():\n";
     var_dump($propInfo->isDefault());
     
@@ -49,10 +45,10 @@ function reflectProperty($class, $property) {
 class TestClass {
 	private $_a1 = 'b1', $_a2 = 'b2', $_a3 = 'b3', $_a4 = 'b4';
 	
-	public read-only $a1 {
+	public $a1 {
 		get { return $this->_a1; }
 	}
-	public write-only $a2 {
+	public $a2 {
 		set { $this->_a2 = $value; }
 	}
 	public $a3 {
@@ -75,25 +71,25 @@ reflectProperty("TestClass", "a4");
 Reflecting on property TestClass::a1
 
 __toString():
-string(%d) "Accessor [ public read-only $a1 ] {
+string(%d) "Accessor [ public $a1 ] {
     Method [ <user> public method __geta1 ] {
-      @@ %s 50 - 50
+      @@ %s %d - %d
     }
 }
  ]
 "
 export():
-string(%d) "Accessor [ public read-only $a1 ] {
+string(%d) "Accessor [ public $a1 ] {
     Method [ <user> public method __geta1 ] {
-      @@ %s 50 - 50
+      @@ %s %d - %d
     }
 }
  ]
 "
 export():
-Accessor [ public read-only $a1 ] {
+Accessor [ public $a1 ] {
     Method [ <user> public method __geta1 ] {
-      @@ %s 50 - 50
+      @@ %s %d - %d
     }
 }
  ]
@@ -109,10 +105,6 @@ isProtected():
 bool(false)
 isStatic():
 bool(false)
-isReadOnly():
-bool(true)
-isWriteOnly():
-bool(false)
 isDefault():
 bool(true)
 getValue():
@@ -123,9 +115,9 @@ string(2) "b1"
 Reflecting on property TestClass::a2
 
 __toString():
-string(%d) "Accessor [ public write-only $a2 ] {
+string(%d) "Accessor [ public $a2 ] {
     Method [ <user> public method __seta2 ] {
-      @@ %s 53 - 53
+      @@ %s %d - %d
 
       - Parameters [1] {
         Parameter #0 [ <required> $value ]
@@ -135,9 +127,9 @@ string(%d) "Accessor [ public write-only $a2 ] {
  ]
 "
 export():
-string(%d) "Accessor [ public write-only $a2 ] {
+string(%d) "Accessor [ public $a2 ] {
     Method [ <user> public method __seta2 ] {
-      @@ %s 53 - 53
+      @@ %s %d - %d
 
       - Parameters [1] {
         Parameter #0 [ <required> $value ]
@@ -147,9 +139,9 @@ string(%d) "Accessor [ public write-only $a2 ] {
  ]
 "
 export():
-Accessor [ public write-only $a2 ] {
+Accessor [ public $a2 ] {
     Method [ <user> public method __seta2 ] {
-      @@ %s 53 - 53
+      @@ %s %d - %d
 
       - Parameters [1] {
         Parameter #0 [ <required> $value ]
@@ -169,10 +161,6 @@ isProtected():
 bool(false)
 isStatic():
 bool(false)
-isReadOnly():
-bool(false)
-isWriteOnly():
-bool(true)
 isDefault():
 bool(true)
 setValue("NewValue"):
@@ -184,10 +172,10 @@ Reflecting on property TestClass::a3
 __toString():
 string(%d) "Accessor [ public $a3 ] {
     Method [ <user> public method __geta3 ] {
-      @@ %s 56 - 56
+      @@ %s %d - %d
     }
     Method [ <user> public method __seta3 ] {
-      @@ %s 57 - 57
+      @@ %s %d - %d
 
       - Parameters [1] {
         Parameter #0 [ <required> $value ]
@@ -199,10 +187,10 @@ string(%d) "Accessor [ public $a3 ] {
 export():
 string(%d) "Accessor [ public $a3 ] {
     Method [ <user> public method __geta3 ] {
-      @@ %s 56 - 56
+      @@ %s %d - %d
     }
     Method [ <user> public method __seta3 ] {
-      @@ %s 57 - 57
+      @@ %s %d - %d
 
       - Parameters [1] {
         Parameter #0 [ <required> $value ]
@@ -214,10 +202,10 @@ string(%d) "Accessor [ public $a3 ] {
 export():
 Accessor [ public $a3 ] {
     Method [ <user> public method __geta3 ] {
-      @@ %s 56 - 56
+      @@ %s %d - %d
     }
     Method [ <user> public method __seta3 ] {
-      @@ %s 57 - 57
+      @@ %s %d - %d
 
       - Parameters [1] {
         Parameter #0 [ <required> $value ]
@@ -237,10 +225,6 @@ isProtected():
 bool(false)
 isStatic():
 bool(false)
-isReadOnly():
-bool(false)
-isWriteOnly():
-bool(false)
 isDefault():
 bool(true)
 getValue():
@@ -256,10 +240,10 @@ Reflecting on property TestClass::a4
 __toString():
 string(%d) "Accessor [ public static $a4 ] {
     Method [ <user> static protected method __geta4 ] {
-      @@ %s 60 - 60
+      @@ %s %d - %d
     }
     Method [ <user> static private method __seta4 ] {
-      @@ %s 61 - 61
+      @@ %s %d - %d
 
       - Parameters [1] {
         Parameter #0 [ <required> $value ]
@@ -271,10 +255,10 @@ string(%d) "Accessor [ public static $a4 ] {
 export():
 string(%d) "Accessor [ public static $a4 ] {
     Method [ <user> static protected method __geta4 ] {
-      @@ %s 60 - 60
+      @@ %s %d - %d
     }
     Method [ <user> static private method __seta4 ] {
-      @@ %s 61 - 61
+      @@ %s %d - %d
 
       - Parameters [1] {
         Parameter #0 [ <required> $value ]
@@ -286,10 +270,10 @@ string(%d) "Accessor [ public static $a4 ] {
 export():
 Accessor [ public static $a4 ] {
     Method [ <user> static protected method __geta4 ] {
-      @@ %s 60 - 60
+      @@ %s %d - %d
     }
     Method [ <user> static private method __seta4 ] {
-      @@ %s 61 - 61
+      @@ %s %d - %d
 
       - Parameters [1] {
         Parameter #0 [ <required> $value ]
@@ -309,10 +293,6 @@ isProtected():
 bool(false)
 isStatic():
 bool(true)
-isReadOnly():
-bool(false)
-isWriteOnly():
-bool(false)
 isDefault():
 bool(true)
 
