@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.9
 
 - Core:
+  . Fixed bug #63468 (wrong called method as callback with inheritance).
+    (Laruence)
   . Fixed bug #63305 (zend_mm_heap corrupted with traits). (Dmitry, Laruence)
   . Fixed bug #63369 ((un)serialize() leaves dangling pointers, causes crashes).
     (Tony, Andrew Sitnikov)
