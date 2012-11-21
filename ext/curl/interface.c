@@ -2236,10 +2236,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_MAIL_AUTH:
 #endif
 		{
-#if LIBCURL_VERSION_NUM < 0x071100
-			char *copystr = NULL;
-#endif
-
 			convert_to_string_ex(zvalue);
 			if (option == CURLOPT_URL) {
 				if (!php_curl_option_url(ch, Z_STRVAL_PP(zvalue), Z_STRLEN_PP(zvalue) TSRMLS_CC)) {
