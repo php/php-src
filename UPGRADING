@@ -119,6 +119,10 @@ PHP 5.5 UPGRADE NOTES
 
 - Core:
   - boolval()
+  - password_get_info()
+  - password_hash()
+  - password_needs_rehash()
+  - password_verify()
 
 - Hash:
   - hash_pbkdf2()
