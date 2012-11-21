@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2ß12, PHP 5.3.20
+?? ??? 2012, PHP 5.3.20
 
 - Zend Engine:
   . Fixed bug #63512 (parse_ini_file() with INI_SCANNER_RAW removes quotes 
@@ -14,12 +14,7 @@ PHP                                                                        NEWS
   . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
 
 
-?? ??? 2012, PHP 5.3.19
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-ADD NEWS ONLY ABOVE IN 5.3.20 SECTION
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-RM will merge 5.3.19 entries when merging to release branch
+22 Nov 2012, PHP 5.3.19
 
 - Core
   . Fixed bug #63241 (PHP fails to open Windows deduplicated files).
