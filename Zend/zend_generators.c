@@ -60,7 +60,6 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 				 * the resume. */
 				if (finally_op_num) {
 					execute_data->opline = &op_array->opcodes[finally_op_num];
-					execute_data->leaving = ZEND_RETURN;
 					generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
 					zend_generator_resume(generator TSRMLS_CC);
 					return;

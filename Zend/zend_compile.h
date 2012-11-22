@@ -387,8 +387,7 @@ struct _zend_execute_data {
 	zend_class_entry *current_called_scope;
 	zval *current_this;
 	zval *current_object;
-	zend_uint leaving;
-	zend_uint leaving_dest;
+	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
 };
 
 #define EX(element) execute_data.element
@@ -825,6 +824,9 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 
 #define ZEND_RETURNS_FUNCTION 1<<0
 #define ZEND_RETURNS_NEW      1<<1
+
+#define ZEND_FAST_RET_TO_CATCH		1
+#define ZEND_FAST_RET_TO_FINALLY	2
 
 END_EXTERN_C()
 

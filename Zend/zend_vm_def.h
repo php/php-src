@@ -1845,6 +1845,12 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	zend_bool nested;
 	zend_op_array *op_array = EX(op_array);
 
+	if (EXPECTED(EG(exception) == NULL) &&
+	    UNEXPECTED(EG(prev_exception) != NULL)) {
+		/* return from finally block called because of unhandled exception */
+		zend_exception_restore(TSRMLS_C);		
+	}
+	
 	/* Generators go throw a different cleanup process */
 	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
 		/* The generator object is stored in return_value_ptr_ptr */
@@ -2125,101 +2131,6 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HELPER_EX(zend_finally_handler_leaving, ANY, ANY, int type)
-{
-	USE_OPLINE
-	zend_uint i, op_num = opline - EX(op_array)->opcodes;
-	zend_uint catch_op_num = 0, finally_op_num = 0;
-
-	SAVE_OPLINE();
-
-	switch (type) {
-		case ZEND_THROW:
-		case ZEND_RETURN:
-		case ZEND_RETURN_BY_REF:
-		case ZEND_LEAVE:
-			{
-				if (EG(prev_exception) || (type == ZEND_LEAVE && EG(exception))) {
-					for (i=0; i<EX(op_array)->last_try_catch; i++) {
-						if (EX(op_array)->try_catch_array[i].try_op > op_num) {
-							break;
-						}
-						if (op_num < EX(op_array)->try_catch_array[i].finally_op) {
-							finally_op_num = EX(op_array)->try_catch_array[i].finally_op;
-						}
-						if (op_num < EX(op_array)->try_catch_array[i].catch_op) {
-							catch_op_num = EX(op_array)->try_catch_array[i].catch_op;
-						}
-					}
-				} else {
-					for (i=0; i<EX(op_array)->last_try_catch; i++) {
-						if (EX(op_array)->try_catch_array[i].try_op > op_num) {
-							break;
-						}
-						if (op_num < EX(op_array)->try_catch_array[i].finally_op) {
-							finally_op_num = EX(op_array)->try_catch_array[i].finally_op;
-						}
-					}
-				}
-
-				if (catch_op_num && finally_op_num) {
-					/* EG(exception) || EG(prev_exception) */
-					if (catch_op_num > finally_op_num) {
-						zend_exception_save(TSRMLS_C);
-						EX(leaving) = ZEND_THROW;
-						ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
-					} else {
-						EX(leaving) = 0;
-						ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
-					}
-				} else if (catch_op_num) {
-					EX(leaving) = 0;
-					ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
-				} else if (finally_op_num) {
-					zend_exception_save(TSRMLS_C);
-					if (type != ZEND_LEAVE) {
-						EX(leaving) = type;
-					}
-					ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
-				} else if (EX(leaving) && type != ZEND_LEAVE) {
-					/* leave it to ZEND_LEAVE */
-					EX(leaving) = type;
-					ZEND_VM_NEXT_OPCODE();
-				} else {
-					ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
-				}
-			}
-			break;
-		case ZEND_JMP:
-		case ZEND_BRK:
-		case ZEND_CONT:
-		case ZEND_GOTO:
-			{
-		  /* these can not occurred in exception context */
-		  for (i=0; i<EG(active_op_array)->last_try_catch; i++) {
-			  if (EG(active_op_array)->try_catch_array[i].try_op > op_num) {
-				  break;
-			  }
-			  if (op_num < EG(active_op_array)->try_catch_array[i].finally_op
-					  && (EX(leaving_dest) < EG(active_op_array)->try_catch_array[i].try_op
-						  || EX(leaving_dest) >= EG(active_op_array)->try_catch_array[i].finally_end)) {
-				  finally_op_num = EG(active_op_array)->try_catch_array[i].finally_op;
-			  }
-		  }
-
-		  if (finally_op_num) {
-			  EX(leaving) = type;
-			  ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
-		  } else {
-			  EX(leaving) = 0;
-			  ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[EX(leaving_dest)]);
-		  }
-	  }
-			break;
-	}
-	ZEND_VM_CONTINUE();
-}
-
 ZEND_VM_HANDLER(42, ZEND_JMP, ANY, ANY)
 {
 	USE_OPLINE
@@ -2227,12 +2138,8 @@ ZEND_VM_HANDLER(42, ZEND_JMP, ANY, ANY)
 #if DEBUG_ZEND>=2
 	printf("Jumping to %d\n", opline->op1.opline_num);
 #endif
-	if (EXPECTED(!EX(op_array)->has_finally_block)) {
-		ZEND_VM_SET_OPCODE(opline->op1.jmp_addr);
-		ZEND_VM_CONTINUE(); /* CHECK_ME */
-	}
-	EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_JMP);
+	ZEND_VM_SET_OPCODE(opline->op1.jmp_addr);
+	ZEND_VM_CONTINUE();
 }
 
 ZEND_VM_HANDLER(43, ZEND_JMPZ, CONST|TMP|VAR|CV, ANY)
@@ -2972,11 +2879,7 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 		*EG(return_value_ptr_ptr) = ret;
 	}
 	FREE_OP1_IF_VAR();
-
-	if (EXPECTED(!EX(op_array)->has_finally_block)) {
-		ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
-	}
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_RETURN);
+	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
 ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
@@ -3048,18 +2951,11 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 	} while (0);
 
 	FREE_OP1_IF_VAR();
-
-	if (EXPECTED(!EX(op_array)->has_finally_block)) {
-		ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
-	}
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_RETURN_BY_REF);
+	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
 ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, ANY, ANY)
 {
-	if (EX(op_array)->has_finally_block) {
-		ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_RETURN);
-	}
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
 }
 
@@ -3404,11 +3300,7 @@ ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST)
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), EX_Ts() TSRMLS_CC);
 	FREE_OP2();
-	if (EXPECTED(!EX(op_array)->has_finally_block)) {
-		ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
-	}
-	EX(leaving_dest) = el->brk;
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_BRK);
+	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
 }
 
 ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
@@ -3420,11 +3312,7 @@ ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), EX_Ts() TSRMLS_CC);
 	FREE_OP2();
-	if (EXPECTED(!EX(op_array)->has_finally_block)) {
-		ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
-	}
-	EX(leaving_dest) = el->cont;
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_CONT);
+	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
 }
 
 ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
@@ -3451,11 +3339,7 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 			}
 			break;
 	}
-	if (EXPECTED(!EX(op_array)->has_finally_block)) {
-		ZEND_VM_JMP(opline->op1.jmp_addr);
-	}
-	EX(leaving_dest) = opline->op1.jmp_addr - EX(op_array)->opcodes;
-	ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, ZEND_GOTO);
+	ZEND_VM_JMP(opline->op1.jmp_addr);
 }
 
 ZEND_VM_HANDLER(48, ZEND_CASE, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV)
@@ -5134,7 +5018,6 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	zend_uint op_num = EG(opline_before_exception)-EG(active_op_array)->opcodes;
 	int i;
 	zend_uint catch_op_num = 0, finally_op_num = 0;
-	int catched = 0, finally = 0;
 	void **stack_frame;
 
 	/* Figure out where the next stack frame (which maybe contains pushed
@@ -5167,11 +5050,9 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		}
 		if (op_num < EG(active_op_array)->try_catch_array[i].catch_op) {
 			catch_op_num = EX(op_array)->try_catch_array[i].catch_op;
-			catched = i + 1;
 		}
 		if (op_num < EG(active_op_array)->try_catch_array[i].finally_op) {
 			finally_op_num = EX(op_array)->try_catch_array[i].finally_op;
-			finally = i + 1;
 		}
 	}
 
@@ -5199,7 +5080,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 			/* further blocks will not be relevant... */
 			break;
 		} else if (op_num < EX(op_array)->brk_cont_array[i].brk) {
-			if (!catched ||
+			if (!catch_op_num ||
 			    catch_op_num >= EX(op_array)->brk_cont_array[i].brk) {
 				zend_op *brk_opline = &EX(op_array)->opcodes[EX(op_array)->brk_cont_array[i].brk];
 
@@ -5231,25 +5112,13 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	}
 	EX(old_error_reporting) = NULL;
 
-	if (catched && finally) {
-		if (finally_op_num > catch_op_num) {
-			EX(leaving) = 0;
-			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
-			ZEND_VM_CONTINUE();
-		} else {
-			zend_exception_save(TSRMLS_C);
-			EX(leaving) = ZEND_THROW;
-			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
-			ZEND_VM_CONTINUE();
-		}
-	} else if (catched) {
-		EX(leaving) = 0;
-		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
-		ZEND_VM_CONTINUE();
-	} else if (finally) {
+	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
 		zend_exception_save(TSRMLS_C);
-		EX(leaving) = ZEND_THROW;
+		EX(fast_ret) = NULL;
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[finally_op_num]);
+		ZEND_VM_CONTINUE();
+	} else if (catch_op_num) {
+		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
 		ZEND_VM_CONTINUE();
 	} else {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
@@ -5369,30 +5238,6 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 		EX_T(opline->op1.var).var.ptr = var_ptr;
 	}
 	ZEND_VM_NEXT_OPCODE();
-}
-
-ZEND_VM_HANDLER(159, ZEND_LEAVE, ANY, ANY)
-{
-	zend_exception_restore(TSRMLS_C);
-	if (!EX(leaving)) {
-		ZEND_VM_NEXT_OPCODE();
-	} else {
-		zend_uint leaving = EX(leaving);
-		switch (leaving) {
-			case ZEND_RETURN:
-			case ZEND_RETURN_BY_REF:
-			case ZEND_THROW:
-				leaving = ZEND_LEAVE;
-			case ZEND_JMP:
-			case ZEND_BRK:
-			case ZEND_CONT:
-			case ZEND_GOTO:
-				 ZEND_VM_DISPATCH_TO_HELPER_EX(zend_finally_handler_leaving, type, leaving);
-			break;
-		}
-	}
-
-	ZEND_VM_CONTINUE();
 }
 
 ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSED)
@@ -5550,6 +5395,44 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
+}
+
+ZEND_VM_HANDLER(162, ZEND_FAST_CALL, ANY, ANY)
+{
+	USE_OPLINE
+
+	if (opline->extended_value &&
+	    UNEXPECTED(EG(prev_exception) != NULL)) { 
+	    /* in case of unhandled exception jump to catch block instead of finally */
+		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
+		ZEND_VM_CONTINUE();
+	}
+	EX(fast_ret) = opline + 1;
+	ZEND_VM_SET_OPCODE(opline->op1.jmp_addr);
+	ZEND_VM_CONTINUE();
+}
+
+ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, ANY)
+{
+	if (EX(fast_ret)) {
+		ZEND_VM_SET_OPCODE(EX(fast_ret));
+		ZEND_VM_CONTINUE();
+	} else {
+		/* special case for unhandled exceptions */
+		USE_OPLINE
+
+		if (opline->extended_value == ZEND_FAST_RET_TO_FINALLY) {
+			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
+			ZEND_VM_CONTINUE();
+		} else if (opline->extended_value == ZEND_FAST_RET_TO_CATCH) {
+			zend_exception_restore(TSRMLS_C);
+			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
+			ZEND_VM_CONTINUE();
+		} else {
+			zend_exception_restore(TSRMLS_C);
+			ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+		}
+	}
 }
 
 ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)
