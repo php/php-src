@@ -2709,6 +2709,7 @@ static int zend_add_try_element(zend_uint try_op TSRMLS_DC) /* {{{ */
 
 	CG(active_op_array)->try_catch_array = erealloc(CG(active_op_array)->try_catch_array, sizeof(zend_try_catch_element)*CG(active_op_array)->last_try_catch);
 	CG(active_op_array)->try_catch_array[try_catch_offset].try_op = try_op;
+	CG(active_op_array)->try_catch_array[try_catch_offset].catch_op = 0;
 	CG(active_op_array)->try_catch_array[try_catch_offset].finally_op = 0;
 	CG(active_op_array)->try_catch_array[try_catch_offset].finally_end = 0;
 	return try_catch_offset;
@@ -2770,9 +2771,25 @@ void zend_do_try(znode *try_token TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_do_finally(znode *finally_token TSRMLS_DC) /* {{{ */ {
+void zend_do_finally(znode *finally_token TSRMLS_DC) /* {{{ */
+{
+	zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+
 	finally_token->u.op.opline_num = get_next_op_number(CG(active_op_array));
-} /* }}} */
+	/* call the the "finally" block */
+	opline->opcode = ZEND_FAST_CALL;
+	SET_UNUSED(opline->op1);
+	opline->op1.opline_num = finally_token->u.op.opline_num + 1;
+	SET_UNUSED(opline->op2);
+	/* jump to code after the "finally" block,
+	 * the actual jump address is going to be set in zend_do_end_finally()
+	 */
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->opcode = ZEND_JMP;
+	SET_UNUSED(opline->op1);
+	SET_UNUSED(opline->op2);
+}
+/* }}} */
 
 void zend_do_begin_catch(znode *catch_token, znode *class_name, znode *catch_var, znode *first_catch TSRMLS_DC) /* {{{ */
 {
@@ -2837,18 +2854,19 @@ void zend_do_end_finally(znode *try_token, znode* catch_token, znode *finally_to
 		zend_error(E_COMPILE_ERROR, "Cannot use try without catch or finally");
 	} 
 	if (finally_token->op_type != IS_UNUSED) {
-		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		CG(active_op_array)->try_catch_array[try_token->u.op.opline_num].finally_op = finally_token->u.op.opline_num;
+		zend_op *opline;
+		
+		CG(active_op_array)->try_catch_array[try_token->u.op.opline_num].finally_op = finally_token->u.op.opline_num + 1;
 		CG(active_op_array)->try_catch_array[try_token->u.op.opline_num].finally_end = get_next_op_number(CG(active_op_array));
 		CG(active_op_array)->has_finally_block = 1;
 
-		opline->opcode = ZEND_LEAVE;
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_FAST_RET;
 		SET_UNUSED(opline->op1);
 		SET_UNUSED(opline->op2);
+		
+		CG(active_op_array)->opcodes[finally_token->u.op.opline_num].op1.opline_num = get_next_op_number(CG(active_op_array));
 	} 
-	if (catch_token->op_type == IS_UNUSED) {
-		CG(active_op_array)->try_catch_array[try_token->u.op.opline_num].catch_op = 0;
-	}
 }
 /* }}} */
 
