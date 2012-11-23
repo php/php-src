@@ -12,6 +12,9 @@ PHP                                                                        NEWS
     shared objects are not created). (kemcline at au1 dot ibm dot com)
 - Apache2 Handler SAPI:
   . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
+- Fileinfo:
+  . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
+    (Anatoliy)
 
 
 22 Nov 2012, PHP 5.3.19
