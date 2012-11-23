@@ -46,7 +46,6 @@ zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_arra
 	EX(prev_execute_data) = EG(current_execute_data);
 	EG(current_execute_data) = execute_data;
 	EX(nested) = nested;
-    EX(leaving) = 0;
 
 	if (!op_array->run_time_cache && op_array->last_cache_slot) {
 		op_array->run_time_cache = ecalloc(op_array->last_cache_slot, sizeof(void*));
