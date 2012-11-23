@@ -1668,7 +1668,7 @@ void zend_declare_accessor(znode *var_name TSRMLS_DC) { /* {{{ */
 }
 /* }}} */
 
-void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, znode *modifiers, int return_reference TSRMLS_DC) /* {{{ */
+void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, znode *modifiers, int return_reference, int has_params TSRMLS_DC) /* {{{ */
 {
 	/* Generate Hash Value for Variable */
 	ulong hash_value = zend_hash_func(Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant)+1);
@@ -1691,6 +1691,10 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		efree(Z_STRVAL(function_token->u.constant));
 		ZVAL_STRINGL(&function_token->u.constant, tmp, 5 + Z_STRLEN(var_name->u.constant), 0);
 
+		if(has_params) {
+			zend_error(E_COMPILE_ERROR, "Getters do not accept parameters for variable %s::$%s", CG(active_class_entry)->name, Z_STRVAL(var_name->u.constant));
+		}
+
 		/* Declare Function */
 		zend_do_begin_function_declaration(function_token, function_token, 1, return_reference, modifiers, ZEND_FNP_PROP_GETTER TSRMLS_CC);
 	} else if(Z_TYPE(function_token->u.constant) == IS_STRING && strcasecmp("set", Z_STRVAL(function_token->u.constant)) == 0) {
@@ -1707,17 +1711,23 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		/* Declare Function */
 		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers, ZEND_FNP_PROP_SETTER TSRMLS_CC);
 
-		/* Add $value parameter to __setHours() */
-		unused_node.op_type = unused_node2.op_type = IS_UNUSED;
-		unused_node.u.op.num = unused_node2.u.op.num = 1;
+		if(!has_params) {
+			/* Add $value parameter to __setHours() */
+			unused_node.op_type = unused_node2.op_type = IS_UNUSED;
+			unused_node.u.op.num = unused_node2.u.op.num = 1;
 
-		ZVAL_STRINGL(&value_node.u.constant, "value", 5, 1);
+			ZVAL_STRINGL(&value_node.u.constant, "value", 5, 1);
 
-		zend_do_receive_arg(ZEND_RECV, &value_node, &unused_node, NULL, &unused_node2, 0 TSRMLS_CC);
+			zend_do_receive_arg(ZEND_RECV, &value_node, &unused_node, NULL, &unused_node2, 0 TSRMLS_CC);
+		}
 	} else if(Z_TYPE(function_token->u.constant) == IS_LONG && Z_LVAL(function_token->u.constant) == T_ISSET) {
 		/* Convert type and variable name to __issetHours() */
 		char *tmp = strcatalloc("__isset", 7, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant) TSRMLS_CC);
 		ZVAL_STRINGL(&function_token->u.constant, tmp, 7 + Z_STRLEN(var_name->u.constant), 0);
+
+		if(has_params) {
+			zend_error(E_COMPILE_ERROR, "Issetters do not accept parameters for variable %s::$%s", CG(active_class_entry)->name, Z_STRVAL(var_name->u.constant));
+		}
 
 		/* Declare Function */
 		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers, ZEND_FNP_PROP_ISSETTER TSRMLS_CC);
@@ -1725,6 +1735,10 @@ void zend_do_begin_accessor_declaration(znode *function_token, znode *var_name, 
 		/* Convert type and variable name to __unsetHours() */
 		char *tmp = strcatalloc("__unset", 7, Z_STRVAL(var_name->u.constant), Z_STRLEN(var_name->u.constant) TSRMLS_CC);
 		ZVAL_STRINGL(&function_token->u.constant, tmp, 7 + Z_STRLEN(var_name->u.constant), 0);
+
+		if(has_params) {
+			zend_error(E_COMPILE_ERROR, "Unsetters do not accept parameters for variable %s::$%s", CG(active_class_entry)->name, Z_STRVAL(var_name->u.constant));
+		}
 
 		/* Declare Function */
 		zend_do_begin_function_declaration(function_token, function_token, 1, ZEND_RETURN_VAL, modifiers, ZEND_FNP_PROP_UNSETTER TSRMLS_CC);
@@ -1863,7 +1877,7 @@ void zend_finalize_accessor(znode *var_name TSRMLS_DC) { /* {{{ */
 			INIT_ZNODE(zn_modifiers);
 			Z_LVAL(zn_modifiers.u.constant) = ai->flags;
 
-			zend_do_begin_accessor_declaration(&zn_fntoken, var_name, &zn_modifiers, 0 TSRMLS_CC);
+			zend_do_begin_accessor_declaration(&zn_fntoken, var_name, &zn_modifiers, 0, 0 TSRMLS_CC);
 			zend_do_end_accessor_declaration(&zn_fntoken, var_name, &zn_modifiers, NULL TSRMLS_CC);
 		}
 		if(!ai->unset && ai->setter) {
@@ -1875,7 +1889,7 @@ void zend_finalize_accessor(znode *var_name TSRMLS_DC) { /* {{{ */
 			INIT_ZNODE(zn_modifiers);
 			Z_LVAL(zn_modifiers.u.constant) = ai->flags;
 
-			zend_do_begin_accessor_declaration(&zn_fntoken, var_name, &zn_modifiers, 0 TSRMLS_CC);
+			zend_do_begin_accessor_declaration(&zn_fntoken, var_name, &zn_modifiers, 0, 0 TSRMLS_CC);
 			zend_do_end_accessor_declaration(&zn_fntoken, var_name, &zn_modifiers, NULL TSRMLS_CC);
 		}
 
@@ -7725,7 +7739,7 @@ void zend_do_end_compilation(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-const char *zend_get_accessor_name_from_function(zend_function *func TSRMLS_DC) /* {{{ */
+const char *zend_get_accessor_name_from_function(const zend_function *func TSRMLS_DC) /* {{{ */
 {
 	if(!func || !IS_ACCESSOR(func->common.purpose))
 		return "Not an accessor";
@@ -7742,7 +7756,7 @@ const char *zend_get_accessor_name_from_function(zend_function *func TSRMLS_DC) 
 }
 /* }}} */
 
-const char *zend_get_accessor_name_from_accessor_info(zend_accessor_info *ai TSRMLS_DC) /* {{{ */
+const char *zend_get_accessor_name_from_accessor_info(const zend_accessor_info *ai TSRMLS_DC) /* {{{ */
 {
 	if(!ai)
 		return "Not an accessor";
@@ -7763,7 +7777,7 @@ const char *zend_get_accessor_name_from_accessor_info(zend_accessor_info *ai TSR
 }
 /* }}} */
 
-zend_accessor_info *zend_get_accessor_info_from_function(zend_function *func TSRMLS_DC) /* {{{ */
+zend_accessor_info *zend_get_accessor_info_from_function(const zend_function *func TSRMLS_DC) /* {{{ */
 {
 	const char 	*member_name 	= NULL;
 	zend_uint	member_name_len = 0;
