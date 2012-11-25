@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - Imap:
   . Fixed Bug #63126 DISABLE_AUTHENTICATOR ignores array (Remi)
 
+- mysqli:
+  . Fixed bug #63361 missing header. (Remi)
+
 - Pdo_sqlite:
   . Fixed Bug #63149 getColumnMeta should return the table name
     when system SQLite used. (Remi)
