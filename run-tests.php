@@ -821,7 +821,7 @@ HELP;
 
 		junit_save_xml();
 
-		if (getenv('REPORT_EXIT_STATUS') == 1 and preg_match('/FAILED(?: |$)/', implode(' ', $test_results))) {
+		if (getenv('REPORT_EXIT_STATUS') == 1 and preg_match('/ FAILED(?: |$)/', implode(' ', $test_results))) {
 			exit(1);
 		}
 
