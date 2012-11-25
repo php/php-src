@@ -6,6 +6,13 @@ PHP                                                                        NEWS
   . Fixed bug #63468 (wrong called method as callback with inheritance).
     (Laruence)
 
+- Imap:
+  . Fixed Bug #63126 DISABLE_AUTHENTICATOR ignores array (Remi)
+
+- Pdo_sqlite:
+  . Fixed Bug #63149 getColumnMeta should return the table name
+    when system SQLite used. (Remi)
+
 - Apache2 Handler SAPI:
   . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
 
