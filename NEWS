@@ -2,11 +2,16 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.10
 
-?? ??? 2012, PHP 5.4.9
-
 - Core:
   . Fixed bug #63468 (wrong called method as callback with inheritance).
     (Laruence)
+
+- Apache2 Handler SAPI:
+  . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
+
+22 Nov 2012, PHP 5.4.9
+
+- Core:
   . Fixed bug #63305 (zend_mm_heap corrupted with traits). (Dmitry, Laruence)
   . Fixed bug #63369 ((un)serialize() leaves dangling pointers, causes crashes).
     (Tony, Andrew Sitnikov)
@@ -41,16 +46,25 @@ PHP                                                                        NEWS
     (Dmitry, Laruence)
   . Fixed bug #63284 (Upgrade PCRE to 8.31). (Anatoliy)
 
+- PDO:
+  . Fixed bug #63235 (buffer overflow in use of SQLGetDiagRec).
+    (Martin Osvald, Remi)
+
+- PDO_pgsql:
+  . Fixed bug #62593 (Emulate prepares behave strangely with PARAM_BOOL).
+    (Will Fitch)
+
 - Phar:
   . Fixed bug #63297 (Phar fails to write an openssl based signature).
     (Anatoliy)
 
+- Streams:
+  . Fixed bug #63240 (stream_get_line() return contains delimiter string).
+    (Tjerk, Gustavo)
+
 - Reflection:
   . Fixed bug #63399 (ReflectionClass::getTraitAliases() incorrectly resolves
     traitnames). (Laruence)
-
-- Apache2 Handler SAPI:
-  . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
 
 18 Oct 2012, PHP 5.4.8
 
