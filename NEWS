@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - Imap:
   . Fixed Bug #63126 DISABLE_AUTHENTICATOR ignores array (Remi)
 
+- Json:
+  . Fixed bug #63588 use php_next_utf8_char and remove duplicate
+    implementation. (Remi)
+
 - mysqli:
   . Fixed bug #63361 missing header. (Remi)
 
