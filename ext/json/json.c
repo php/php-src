@@ -349,12 +349,13 @@ static int json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{
 	size_t pos = 0, us;
 	int j, status;
 
-	for (j=0 ; pos < len ; j++) {
-		us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
-		if (status != SUCCESS) {
-			return -1;
-		}
-		if (utf16) {
+	if (utf16) {
+		/* really convert the utf8 string */
+		for (j=0 ; pos < len ; j++) {
+			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
+			if (status != SUCCESS) {
+				return -1;
+			}
 			/* From http://en.wikipedia.org/wiki/UTF16 */
 			if (us >= 0x10000) {
 				us -= 0x10000;
@@ -364,13 +365,22 @@ static int json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{
 				utf16[j] = (unsigned short)us;
 			}
 		}
+	} else {
+		/* Only check if utf8 string is valid, and compute utf16 lenght */
+		for (j=0 ; pos < len ; j++) {
+			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
+			if (status != SUCCESS) {
+				return -1;
+			}
+			if (us >= 0x10000) {
+				j++;
+			}
+		}
 	}
 	return j;
 }
 /* }}} */
 
-
-#define REVERSE16(us) (((us & 0xf) << 12) | (((us >> 4) & 0xf) << 8) | (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf))
 
 static void json_escape_string(smart_str *buf, char *s, int len, int options TSRMLS_DC) /* {{{ */
 {
@@ -516,15 +526,10 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 					smart_str_appendc(buf, (unsigned char) us);
 				} else {
 					smart_str_appendl(buf, "\\u", 2);
-					us = REVERSE16(us);
-
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-					us >>= 4;
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-					us >>= 4;
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-					us >>= 4;
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
+					smart_str_appendc(buf, digits[(us & 0xf000) >> 12]);
+					smart_str_appendc(buf, digits[(us & 0xf00)  >> 8]);
+					smart_str_appendc(buf, digits[(us & 0xf0)   >> 4]);
+					smart_str_appendc(buf, digits[(us & 0xf)]);
 				}
 				break;
 		}
