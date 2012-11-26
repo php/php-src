@@ -2732,7 +2732,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	} else if (zend_hash_find(ftable, lmname, mlen+1, (void**)&fcc->function_handler) == SUCCESS) {
 		retval = 1;
 		if ((fcc->function_handler->op_array.fn_flags & ZEND_ACC_CHANGED) &&
-		    EG(scope) &&
+		    !strict_class && EG(scope) &&
 		    instanceof_function(fcc->function_handler->common.scope, EG(scope) TSRMLS_CC)) {
 			zend_function *priv_fbc;
 

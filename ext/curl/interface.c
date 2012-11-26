@@ -1836,10 +1836,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 		case CURLOPT_SSH_PRIVATE_KEYFILE:
 #endif
 		{
-#if LIBCURL_VERSION_NUM < 0x071100
-			char *copystr = NULL;
-#endif
-
 			convert_to_string_ex(zvalue);
 #if LIBCURL_VERSION_NUM >= 0x071300
 			if (
