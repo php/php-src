@@ -23,6 +23,9 @@ PHP                                                                        NEWS
 - Apache2 Handler SAPI:
   . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
 
+- Reflection:
+  . Fixed Bug #63614 (Fatal error on Reflection). (Laruence)
+
 22 Nov 2012, PHP 5.4.9
 
 - Core:
