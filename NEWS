@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - mysqli:
   . Fixed bug #63361 missing header. (Remi)
 
+- Fileinfo:
+  . Fixed bug #63590 (Different results in TS and NTS under Windows).
+    (Anatoliy)
+
 - Pdo_sqlite:
   . Fixed Bug #63149 getColumnMeta should return the table name
     when system SQLite used. (Remi)
