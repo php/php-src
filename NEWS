@@ -180,6 +180,8 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
       (Anatoliy)
+  . Fixed bug #63590 (Different results in TS and NTS under Windows).
+  (Anatoliy)
 
 - Apache2 Handler SAPI:
   . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
