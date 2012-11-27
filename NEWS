@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
     (Anatoliy)
+  . Fixed bug #63590 (Different results in TS and NTS under Windows).
+    (Anatoliy)
 
 - Imap:
   . Fixed Bug #63126 DISABLE_AUTHENTICATOR ignores array (Remi)
