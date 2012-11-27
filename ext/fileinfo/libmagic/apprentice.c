@@ -2407,7 +2407,11 @@ mkdbname(struct magic_set *ms, const char *fn, int strip)
 	/* Compatibility with old code that looked in .mime */
 	if (ms->flags & MAGIC_MIME) {
 		spprintf(&buf, MAXPATHLEN, "%.*s.mime%s", (int)(q - fn), fn, ext);
+#ifdef PHP_WIN32
+		if (VCWD_ACCESS(buf, R_OK) == 0) {
+#else
 		if (VCWD_ACCESS(buf, R_OK) != -1) {
+#endif
 			ms->flags &= MAGIC_MIME_TYPE;
 			return buf;
 		}
