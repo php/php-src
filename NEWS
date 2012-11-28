@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #63468 (wrong called method as callback with inheritance).
     (Laruence)
+  . Fixed bug #61272 (ob_start callback gets passed empty string).
+    (Mike, casper at langemeijer dot eu)
 
 - Imap:
   . Fixed Bug #63126 DISABLE_AUTHENTICATOR ignores array (Remi)
