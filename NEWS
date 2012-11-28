@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Fixed bug #63590 (Different results in TS and NTS under Windows).
     (Anatoliy)
 
+- FPM:
+  . Fixed bug #63581 Possible null dereference and buffer overflow (Remi)
+
 - Pdo_sqlite:
   . Fixed Bug #63149 getColumnMeta should return the table name
     when system SQLite used. (Remi)
