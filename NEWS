@@ -27,6 +27,10 @@ PHP                                                                        NEWS
 - cURL:
   . Fixed bug #65458 (curl memory leak). (Adam)
 
+- Datetime:
+  . Fixed bug #65554 (createFromFormat broken when weekday name is followed 
+    by some delimiters). (Valentin Logvinskiy, Stas).
+
 - Openssl:
   . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in 
     some cases). (Mark Jones)
