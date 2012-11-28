@@ -7,16 +7,25 @@ PHP                                                                        NEWS
     from value). (Pierrick)
   . Fixed bug #63468 (wrong called method as callback with inheritance).
     (Laruence)
+
 - Core:
   . Fixed bug #63451 (config.guess file does not have AIX 7 defined, 
     shared objects are not created). (kemcline at au1 dot ibm dot com)
+
 - Apache2 Handler SAPI:
   . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
+
 - Fileinfo:
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
     (Anatoliy)
+  . Fixed bug #63590 (Different results in TS and NTS under Windows).
+    (Anatoliy)
+
 - Imap:
   . Fixed Bug #63126 DISABLE_AUTHENTICATOR ignores array (Remi)
+
+- Reflection:
+  . Fixed Bug #63614 (Fatal error on Reflection). (Laruence)
 
 
 22 Nov 2012, PHP 5.3.19
