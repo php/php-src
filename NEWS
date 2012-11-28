@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug #63590 (Different results in TS and NTS under Windows).
     (Anatoliy)
 
+- FPM:
+  . Fixed bug #63581 Possible null dereference and buffer overflow (Remi)
+
 - Imap:
   . Fixed Bug #63126 DISABLE_AUTHENTICATOR ignores array (Remi)
 
