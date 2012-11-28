@@ -1,6 +1,6 @@
-diff -u libmagic.origin/apprentice.c libmagic/apprentice.c
---- libmagic.origin/apprentice.c	Sat Dec 17 18:17:18 2011
-+++ libmagic/apprentice.c	Tue Oct 16 10:21:49 2012
+diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
+--- libmagic.orig/apprentice.c	Sat Dec 17 18:17:18 2011
++++ libmagic/apprentice.c	Tue Nov 27 16:35:47 2012
 @@ -29,6 +29,8 @@
   * apprentice - make one pass through /etc/magic, learning its secrets.
   */
@@ -269,11 +269,11 @@ diff -u libmagic.origin/apprentice.c libmagic/apprentice.c
 +	size_t lineno = 0;
 +
 +	php_stream *stream;
++
++	TSRMLS_FETCH();
  
 -	FILE *f = fopen(ms->file = fn, "r");
 -	if (f == NULL) {
-+	TSRMLS_FETCH();
-+
 +#if PHP_API_VERSION < 20100412
 +	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 +#else
@@ -765,14 +765,18 @@ diff -u libmagic.origin/apprentice.c libmagic/apprentice.c
  
  	if (strip) {
  		if ((p = strrchr(fn, '/')) != NULL)
-@@ -2370,14 +2406,14 @@
+@@ -2370,14 +2406,18 @@
  	q++;
  	/* Compatibility with old code that looked in .mime */
  	if (ms->flags & MAGIC_MIME) {
 -		asprintf(&buf, "%.*s.mime%s", (int)(q - fn), fn, ext);
 -		if (access(buf, R_OK) != -1) {
 +		spprintf(&buf, MAXPATHLEN, "%.*s.mime%s", (int)(q - fn), fn, ext);
++#ifdef PHP_WIN32
++		if (VCWD_ACCESS(buf, R_OK) == 0) {
++#else
 +		if (VCWD_ACCESS(buf, R_OK) != -1) {
++#endif
  			ms->flags &= MAGIC_MIME_TYPE;
  			return buf;
  		}
@@ -784,7 +788,7 @@ diff -u libmagic.origin/apprentice.c libmagic/apprentice.c
  
  	/* Compatibility with old code that looked in .mime */
  	if (strstr(p, ".mime") != NULL)
-@@ -2467,7 +2503,7 @@
+@@ -2467,7 +2507,7 @@
  	m->offset = swap4((uint32_t)m->offset);
  	m->in_offset = swap4((uint32_t)m->in_offset);
  	m->lineno = swap4((uint32_t)m->lineno);
@@ -793,8 +797,8 @@ diff -u libmagic.origin/apprentice.c libmagic/apprentice.c
  		m->str_range = swap4(m->str_range);
  		m->str_flags = swap4(m->str_flags);
  	}
-diff -u libmagic.origin/ascmagic.c libmagic/ascmagic.c
---- libmagic.origin/ascmagic.c	Sat Dec 17 18:17:18 2011
+diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
+--- libmagic.orig/ascmagic.c	Sat Dec 17 18:17:18 2011
 +++ libmagic/ascmagic.c	Tue Apr 10 09:46:33 2012
 @@ -139,10 +139,8 @@
  		/* malloc size is a conservative overestimate; could be
@@ -819,8 +823,8 @@ diff -u libmagic.origin/ascmagic.c libmagic/ascmagic.c
  
  	return rv;
  }
-diff -u libmagic.origin/cdf.c libmagic/cdf.c
---- libmagic.origin/cdf.c	Mon Feb 20 23:35:29 2012
+diff -u libmagic.orig/cdf.c libmagic/cdf.c
+--- libmagic.orig/cdf.c	Mon Feb 20 23:35:29 2012
 +++ libmagic/cdf.c	Tue Apr 10 09:46:33 2012
 @@ -43,7 +43,17 @@
  #include <err.h>
@@ -883,8 +887,8 @@ diff -u libmagic.origin/cdf.c libmagic/cdf.c
  				cdf_print_elapsed_time(buf, sizeof(buf), tp);
  				(void)fprintf(stderr, "timestamp %s\n", buf);
  			} else {
-diff -u libmagic.origin/cdf.h libmagic/cdf.h
---- libmagic.origin/cdf.h	Fri Feb 17 06:28:31 2012
+diff -u libmagic.orig/cdf.h libmagic/cdf.h
+--- libmagic.orig/cdf.h	Fri Feb 17 06:28:31 2012
 +++ libmagic/cdf.h	Tue Apr 10 09:46:34 2012
 @@ -35,7 +35,7 @@
  #ifndef _H_CDF_
@@ -921,8 +925,8 @@ diff -u libmagic.origin/cdf.h libmagic/cdf.h
  int cdf_read_header(const cdf_info_t *, cdf_header_t *);
  void cdf_swap_header(cdf_header_t *);
  void cdf_unpack_header(cdf_header_t *, char *);
-diff -u libmagic.origin/cdf_time.c libmagic/cdf_time.c
---- libmagic.origin/cdf_time.c	Tue Dec 13 14:48:41 2011
+diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
+--- libmagic.orig/cdf_time.c	Tue Dec 13 14:48:41 2011
 +++ libmagic/cdf_time.c	Tue Apr 10 09:46:34 2012
 @@ -96,7 +96,7 @@
  }
@@ -980,8 +984,8 @@ diff -u libmagic.origin/cdf_time.c libmagic/cdf_time.c
  	static const cdf_timestamp_t tst = 0x01A5E403C2D59C00ULL;
  	static const char *ref = "Sat Apr 23 01:30:00 1977";
  	char *p, *q;
-diff -u libmagic.origin/compress.c libmagic/compress.c
---- libmagic.origin/compress.c	Sat Dec 17 18:17:18 2011
+diff -u libmagic.orig/compress.c libmagic/compress.c
+--- libmagic.orig/compress.c	Sat Dec 17 18:17:18 2011
 +++ libmagic/compress.c	Tue Apr 10 09:46:34 2012
 @@ -32,6 +32,7 @@
   *	uncompress(method, old, n, newch) - uncompress old into new, 
@@ -1143,8 +1147,8 @@ diff -u libmagic.origin/compress.c libmagic/compress.c
  }
 -#endif
 +#endif /* if PHP_FILEINFO_UNCOMPRESS */
-diff -u libmagic.origin/file.h libmagic/file.h
---- libmagic.origin/file.h	Tue Sep 20 17:30:14 2011
+diff -u libmagic.orig/file.h libmagic/file.h
+--- libmagic.orig/file.h	Tue Sep 20 17:30:14 2011
 +++ libmagic/file.h	Mon Apr 23 17:58:54 2012
 @@ -33,11 +33,9 @@
  #ifndef __file_h__
@@ -1318,8 +1322,8 @@ diff -u libmagic.origin/file.h libmagic/file.h
  #endif
  
  #endif /* __file_h__ */
-diff -u libmagic.origin/fsmagic.c libmagic/fsmagic.c
---- libmagic.origin/fsmagic.c	Tue Aug 23 10:57:10 2011
+diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
+--- libmagic.orig/fsmagic.c	Tue Aug 23 10:57:10 2011
 +++ libmagic/fsmagic.c	Tue Apr 10 09:46:34 2012
 @@ -59,27 +59,21 @@
  # define minor(dev)  ((dev) & 0xff)
@@ -1643,8 +1647,8 @@ diff -u libmagic.origin/fsmagic.c libmagic/fsmagic.c
  	}
  
  	/*
-diff -u libmagic.origin/funcs.c libmagic/funcs.c
---- libmagic.origin/funcs.c	Sat Dec 17 18:17:18 2011
+diff -u libmagic.orig/funcs.c libmagic/funcs.c
+--- libmagic.orig/funcs.c	Sat Dec 17 18:17:18 2011
 +++ libmagic/funcs.c	Mon Apr 23 17:58:54 2012
 @@ -41,52 +41,42 @@
  #if defined(HAVE_WCTYPE_H)
@@ -1939,8 +1943,8 @@ diff -u libmagic.origin/funcs.c libmagic/funcs.c
 +	return rep_cnt;
  }
 +
-diff -u libmagic.origin/magic.c libmagic/magic.c
---- libmagic.origin/magic.c	Thu May 26 03:27:59 2011
+diff -u libmagic.orig/magic.c libmagic/magic.c
+--- libmagic.orig/magic.c	Thu May 26 03:27:59 2011
 +++ libmagic/magic.c	Tue Apr 10 09:46:34 2012
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
@@ -2317,8 +2321,8 @@ diff -u libmagic.origin/magic.c libmagic/magic.c
  
  public const char *
  magic_error(struct magic_set *ms)
-diff -u libmagic.origin/magic.h libmagic/magic.h
---- libmagic.origin/magic.h	Sun Dec 18 15:54:43 2011
+diff -u libmagic.orig/magic.h libmagic/magic.h
+--- libmagic.orig/magic.h	Sun Dec 18 15:54:43 2011
 +++ libmagic/magic.h	Tue Apr 10 09:46:34 2012
 @@ -85,6 +85,7 @@
  
@@ -2336,9 +2340,9 @@ diff -u libmagic.origin/magic.h libmagic/magic.h
  int magic_list(magic_t, const char *);
  int magic_errno(magic_t);
  
-diff -u libmagic.origin/print.c libmagic/print.c
---- libmagic.origin/print.c	Tue Sep 20 17:28:09 2011
-+++ libmagic/print.c	Tue Oct 16 10:13:39 2012
+diff -u libmagic.orig/print.c libmagic/print.c
+--- libmagic.orig/print.c	Tue Sep 20 17:28:09 2011
++++ libmagic/print.c	Tue Nov 27 16:34:56 2012
 @@ -29,12 +29,16 @@
   * print.c - debugging printout routines
   */
@@ -2538,8 +2542,8 @@ diff -u libmagic.origin/print.c libmagic/print.c
  }
  
  protected const char *
-diff -u libmagic.origin/readcdf.c libmagic/readcdf.c
---- libmagic.origin/readcdf.c	Mon Feb 20 21:04:58 2012
+diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
+--- libmagic.orig/readcdf.c	Mon Feb 20 21:04:58 2012
 +++ libmagic/readcdf.c	Tue Apr 10 09:46:34 2012
 @@ -30,7 +30,11 @@
  #endif
@@ -2586,8 +2590,8 @@ diff -u libmagic.origin/readcdf.c libmagic/readcdf.c
                                          c = cdf_ctime(&ts.tv_sec);
                                          if ((ec = strchr(c, '\n')) != NULL)
                                                  *ec = '\0';
-diff -u libmagic.origin/readelf.c libmagic/readelf.c
---- libmagic.origin/readelf.c	Tue Aug 23 10:57:10 2011
+diff -u libmagic.orig/readelf.c libmagic/readelf.c
+--- libmagic.orig/readelf.c	Tue Aug 23 10:57:10 2011
 +++ libmagic/readelf.c	Tue Apr 10 09:46:34 2012
 @@ -49,7 +49,7 @@
      off_t, int *, int);
@@ -2743,8 +2747,8 @@ diff -u libmagic.origin/readelf.c libmagic/readelf.c
  		fd = file_pipe2file(ms, fd, buf, nbytes);
  
  	if (fstat(fd, &st) == -1) {
-diff -u libmagic.origin/softmagic.c libmagic/softmagic.c
---- libmagic.origin/softmagic.c	Sat Dec 17 18:17:18 2011
+diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
+--- libmagic.orig/softmagic.c	Sat Dec 17 18:17:18 2011
 +++ libmagic/softmagic.c	Fri May 25 09:59:25 2012
 @@ -41,6 +41,11 @@
  #include <stdlib.h>
