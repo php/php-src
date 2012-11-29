@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #63635 (Segfault in gc_collect_cycles). (Dmitry)
   . Fixed bug #63468 (wrong called method as callback with inheritance).
     (Laruence)
+  . Fixed bug #61557 (Crasher in tt-rss backend.php).
+    (i dot am dot jack dot mail at gmail dot com)
   . Fixed bug #61272 (ob_start callback gets passed empty string).
     (Mike, casper at langemeijer dot eu)
 
