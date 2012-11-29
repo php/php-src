@@ -38,6 +38,10 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed Bug #63614 (Fatal error on Reflection). (Laruence)
 
+- SOAP
+  . Fixed bug #63271 (SOAP wsdl cache is not enabled after initial requests).
+    (John Jawed, Dmitry)
+
 22 Nov 2012, PHP 5.4.9
 
 - Core:
