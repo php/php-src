@@ -552,19 +552,6 @@ ZEND_GET_MODULE(soap)
 # define OnUpdateLong OnUpdateInt
 #endif
 
-ZEND_INI_MH(OnUpdateCacheEnabled)
-{
-	if (OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
-		return FAILURE;
-	}
-	if (SOAP_GLOBAL(cache_enabled)) {
-		SOAP_GLOBAL(cache) = SOAP_GLOBAL(cache_mode);
-	} else {
-		SOAP_GLOBAL(cache) = 0;
-	}
-	return SUCCESS;
-}
-
 ZEND_INI_MH(OnUpdateCacheMode)
 {
 	char *p;
@@ -578,16 +565,11 @@ ZEND_INI_MH(OnUpdateCacheMode)
 
 	*p = (char)atoi(new_value);
 
-	if (SOAP_GLOBAL(cache_enabled)) {
-		SOAP_GLOBAL(cache) = SOAP_GLOBAL(cache_mode);
-	} else {
-		SOAP_GLOBAL(cache) = 0;
-	}
 	return SUCCESS;
 }
 
 PHP_INI_BEGIN()
-STD_PHP_INI_ENTRY("soap.wsdl_cache_enabled",     "1", PHP_INI_ALL, OnUpdateCacheEnabled,
+STD_PHP_INI_ENTRY("soap.wsdl_cache_enabled",     "1", PHP_INI_ALL, OnUpdateBool,
                   cache_enabled, zend_soap_globals, soap_globals)
 STD_PHP_INI_ENTRY("soap.wsdl_cache_dir",         "/tmp", PHP_INI_ALL, OnUpdateString,
                   cache_dir, zend_soap_globals, soap_globals)
@@ -1220,7 +1202,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	memset(service, 0, sizeof(soapService));
 	service->send_errors = 1;
 
-	cache_wsdl = SOAP_GLOBAL(cache);
+	cache_wsdl = SOAP_GLOBAL(cache_enabled) ? SOAP_GLOBAL(cache_mode) : 0;
 
 	if (options != NULL) {
 		HashTable *ht = Z_ARRVAL_P(options);
@@ -2512,7 +2494,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "$wsdl must be string or null");
 	}
 
-	cache_wsdl = SOAP_GLOBAL(cache);
+	cache_wsdl = SOAP_GLOBAL(cache_enabled) ? SOAP_GLOBAL(cache_mode) : 0;
 
 	if (options != NULL) {
 		HashTable *ht = Z_ARRVAL_P(options);
