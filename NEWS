@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.3.20
 
 - Zend Engine:
+  . Fixed bug #63635 (Segfault in gc_collect_cycles). (Dmitry)
   . Fixed bug #63512 (parse_ini_file() with INI_SCANNER_RAW removes quotes 
     from value). (Pierrick)
   . Fixed bug #63468 (wrong called method as callback with inheritance).
