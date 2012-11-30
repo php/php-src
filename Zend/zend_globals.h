@@ -167,8 +167,6 @@ struct _zend_executor_globals {
 	zval error_zval;
 	zval *error_zval_ptr;
 
-	zend_ptr_stack arg_types_stack;
-
 	/* symbol table cache */
 	HashTable *symtable_cache[SYMTABLE_CACHE_SIZE];
 	HashTable **symtable_cache_limit;

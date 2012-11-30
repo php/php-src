@@ -28,6 +28,27 @@ PHP 5.5 UPGRADE NOTES
   zend_logo_guid() have been removed
 - Removal of Logo GUIDs
 
+- extensions can't override zend_execute() any more, they should override
+  zend_execute_ex() instead. The EG(current_execute_data) is already
+  initialized in zend_execute_ex(), so for compatibility extensions
+  may need to use EG(current_execute_data)->prev_execute_data instead.
+- removed EG(arg_types_stack), EX(fbc), EX(called_scope), EX(current_object)
+- added op_array->nested_calls. It's calculated at compile time.
+- added EX(call_slots). It is an array to store information about syntaticaly
+  nested calls (e.g. foo(bar())). It's preallocated together with execute_data.
+- added EX(call) - pointer to a current calling function. Actually an
+  element of EX(call_slots)
+- opcodes INIT_METHOD_CALL, ZEND_INIT_STATIC_METHOD_CALL,
+  ZEND_INIT_FCALL_BY_NAME, ZEND_INIT_NS_FCALL_BY_NAME use result.num as
+  an index in EX(call_slots)
+- opcode ZEND_NEW uses extended_vallue as an index in EX(call_slots)
+- opcoes ZEND_DO_FCALL and ZEND_DO_FCALL_BY_NAME use op2.num as
+  an index in EX(call_slots)
+- added op_array->used_stack. It's calculated at compile time and the
+  corresponding stack space is preallocated together with execute_data.
+  ZEND_SEND* and ZEND_DO_FCALL* don't need to check for stack overflow
+  anymore.
+
 ========================================
 2. New Features
 ========================================

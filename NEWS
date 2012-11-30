@@ -3,6 +3,11 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.5.0
 
 - General improvements:
+  . The VM stacks for passing function arguments and syntaticaly nested calls
+    were merged into a single stack. The stack size needed for op_array
+    execution is calculated at compile time and preallocated at once. As result
+    all the stack push operatins don't require checks for stack overflow
+    any more. (Dmitry)
   . Added support for generators. (Nikita Popov)
   . Add simplified password hashing API 
     (https://wiki.php.net/rfc/password_hash). (Anthony Ferrara)

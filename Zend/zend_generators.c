@@ -32,41 +32,7 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
 		zend_op_array *op_array = execute_data->op_array;
-
-		if (!finished_execution) {
-			if (op_array->has_finally_block) {
-				/* -1 required because we want the last run opcode, not the
-				 * next to-be-run one. */
-				zend_uint op_num = execute_data->opline - op_array->opcodes - 1;
-				zend_uint finally_op_num = 0;
-
-				/* Find next finally block */
-				int i;
-				for (i = 0; i < op_array->last_try_catch; i++) {
-					zend_try_catch_element *try_catch = &op_array->try_catch_array[i];
-
-					if (op_num < try_catch->try_op) {
-						break;
-					}
-
-					if (op_num < try_catch->finally_op) {
-						finally_op_num = try_catch->finally_op;
-					}
-				}
-
-				/* If a finally block was found we jump directly to it and
-				 * resume the generator. Furthermore we abort this close call
-				 * because the generator will already be closed somewhere in
-				 * the resume. */
-				if (finally_op_num) {
-					execute_data->opline = &op_array->opcodes[finally_op_num];
-					execute_data->fast_ret = NULL;
-					generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
-					zend_generator_resume(generator TSRMLS_CC);
-					return;
-				}
-			}
-		}
+		void **stack_frame;
 
 		if (!execute_data->symbol_table) {
 			zend_free_compiled_variables(execute_data->CVs, op_array->last_var);
@@ -76,10 +42,6 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 
 		if (execute_data->current_this) {
 			zval_ptr_dtor(&execute_data->current_this);
-		}
-
-		if (execute_data->object) {
-			zval_ptr_dtor(&execute_data->object);
 		}
 
 		/* If the generator is closed before it can finish execution (reach
@@ -120,32 +82,20 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 		}
 
 		/* Clear any backed up stack arguments */
-		if (generator->backed_up_stack) {
-			zval **zvals = (zval **) generator->backed_up_stack;
-			size_t zval_num = generator->backed_up_stack_size / sizeof(zval *);
-			int i;
-
-			for (i = 0; i < zval_num; i++) {
-				zval_ptr_dtor(&zvals[i]);
+		if (generator->stack != EG(argument_stack)) {
+			stack_frame = zend_vm_stack_frame_base(execute_data);
+			while (generator->stack->top != stack_frame) {
+				zval_ptr_dtor((zval**)stack_frame);
+				stack_frame++;
 			}
-
-			efree(generator->backed_up_stack);
 		}
 
-		if (generator->backed_up_arg_types_stack) {
-			/* The arg types stack contains three elements per call: fbc, object
-			 * and called_scope. Here we traverse the stack from top to bottom
-			 * and dtor the object. */
-			int i = generator->backed_up_arg_types_stack_count / 3;
-			while (i--) {
-				zval *object = (zval *) generator->backed_up_arg_types_stack[3*i + 1];
-				if (object) {
-					zval_ptr_dtor(&object);
-				}
+		while (execute_data->call >= execute_data->call_slots) {
+			if (execute_data->call->object) {
+				zval_ptr_dtor(&execute_data->call->object);
 			}
-
-			efree(generator->backed_up_arg_types_stack);
-		} 
+			execute_data->call--;
+		}
 
 		/* We have added an additional stack frame in prev_execute_data, so we
 		 * have to free it. It also contains the arguments passed to the
@@ -162,11 +112,7 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 				for (i = 0; i < arguments_count; ++i) {
 					zval_ptr_dtor(arguments_start + i);
 				}
-
-				efree(arguments_start);
 			}
-
-			efree(prev_execute_data);
 		}
 
 		/* Free a clone of closure */
@@ -175,7 +121,11 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 			efree(op_array);
 		}
 
-		efree(execute_data);
+		efree(generator->stack);
+		if (generator->stack == EG(argument_stack)) {
+			/* abnormal exit for running generator */
+			EG(argument_stack) = NULL;
+		}
 		generator->execute_data = NULL;
 	}
 
@@ -210,27 +160,39 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 		zend_execute_data *execute_data = orig->execute_data;
 		zend_op_array *op_array = execute_data->op_array;
 		HashTable *symbol_table = execute_data->symbol_table;
+		zend_execute_data *current_execute_data;
+		zend_op **opline_ptr;
+		HashTable *current_symbol_table;
+		zend_vm_stack current_stack;
+		zval *current_this;
+		void **stack_frame, **orig_stack_frame;
 
-		/* Alloc separate execution context, as well as separate sections for
-		 * compiled variables and temporary variables */
-		size_t execute_data_size = ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data));
-		size_t CVs_size = ZEND_MM_ALIGNED_SIZE(sizeof(zval **) * op_array->last_var * (symbol_table ? 1 : 2));
-		size_t Ts_size = ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T;
-		size_t total_size = execute_data_size + CVs_size + Ts_size;
+		/* Create new execution context. We have to back up and restore
+		 * EG(current_execute_data), EG(opline_ptr), EG(active_symbol_table)
+		 * and EG(This) here because the function modifies or uses them  */
+		current_execute_data = EG(current_execute_data);
+		EG(current_execute_data) = execute_data->prev_execute_data;
+		opline_ptr = EG(opline_ptr);
+		current_symbol_table = EG(active_symbol_table);
+		EG(active_symbol_table) = execute_data->symbol_table;
+		current_this = EG(This);
+		EG(This) = NULL;
+		current_stack = EG(argument_stack);
+		clone->execute_data = zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC);
+		clone->stack = EG(argument_stack);
+		EG(argument_stack) = current_stack;
+		EG(This) = current_this;
+		EG(active_symbol_table) = current_symbol_table;
+		EG(current_execute_data) = current_execute_data;
+		EG(opline_ptr) = opline_ptr;
 
-		clone->execute_data = emalloc(total_size);
-
-		/* Copy the zend_execute_data struct */
-		memcpy(clone->execute_data, execute_data, execute_data_size);
-
-		/* Set the pointers to the memory segments for the compiled and
-		 * temporary variables (which are located after the execute_data) */
-		clone->execute_data->CVs = (zval ***) ((char *) clone->execute_data + execute_data_size);
-		clone->execute_data->Ts = (temp_variable *) ((char *) clone->execute_data->CVs + CVs_size);
-
-		/* Zero out the compiled variables section */
-		memset(clone->execute_data->CVs, 0, sizeof(zval **) * op_array->last_var);
-
+		/* copy */
+		clone->execute_data->opline = execute_data->opline;
+		clone->execute_data->function_state = execute_data->function_state;
+		clone->execute_data->current_scope = execute_data->current_scope;
+		clone->execute_data->current_called_scope = execute_data->current_called_scope;
+		clone->execute_data->fast_ret = execute_data->fast_ret;
+		
 		if (!symbol_table) {
 			int i;
 
@@ -238,7 +200,7 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 			for (i = 0; i < op_array->last_var; i++) {
 				if (execute_data->CVs[i]) {
 					clone->execute_data->CVs[i] = (zval **) clone->execute_data->CVs + op_array->last_var + i;
-					*clone->execute_data->CVs[i] = (zval *) orig->execute_data->CVs[op_array->last_var + i];
+					*clone->execute_data->CVs[i] = (zval *) execute_data->CVs[op_array->last_var + i];
 					Z_ADDREF_PP(clone->execute_data->CVs[i]);
 				}
 			}
@@ -259,8 +221,39 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 			}
 		}
 
+		/* Copy nested-calls stack */
+		if (execute_data->call) {
+			clone->execute_data->call = clone->execute_data->call_slots +
+				(execute_data->call - execute_data->call_slots);
+		} else {
+			clone->execute_data->call = NULL;
+		}
+		memcpy(clone->execute_data->call_slots, execute_data->call_slots, sizeof(call_slot) * op_array->nested_calls);
+		if (clone->execute_data->call >= clone->execute_data->call_slots) {
+			call_slot *call = clone->execute_data->call;
+  
+			while (call >= clone->execute_data->call_slots) {
+				if (call->object) {
+					Z_ADDREF_P(call->object);
+				}
+				call--;
+			}
+		}
+
 		/* Copy the temporary variables */
-		memcpy(clone->execute_data->Ts, orig->execute_data->Ts, Ts_size);
+		memcpy(clone->execute_data->Ts, execute_data->Ts, sizeof(temp_variable) * op_array->T);
+
+		/* Copy arguments passed on stack */
+		stack_frame = zend_vm_stack_frame_base(clone->execute_data);
+		orig_stack_frame = zend_vm_stack_frame_base(execute_data);
+		clone->stack->top = stack_frame + (orig->stack->top - orig_stack_frame);
+		if (clone->stack->top != stack_frame) {
+			memcpy(stack_frame, orig_stack_frame, sizeof(zval*) * (orig->stack->top - orig_stack_frame));
+			while (clone->stack->top != stack_frame) {
+				Z_ADDREF_PP((zval**)stack_frame);
+				stack_frame++;
+			}
+		}
 
 		/* Add references to loop variables */
 		{
@@ -286,42 +279,6 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 			}
 		}
 
-		if (orig->backed_up_stack) {
-			/* Copy backed up stack */
-			clone->backed_up_stack = emalloc(orig->backed_up_stack_size);
-			memcpy(clone->backed_up_stack, orig->backed_up_stack, orig->backed_up_stack_size);
-
-			/* Add refs to stack variables */
-			{
-				zval **zvals = (zval **) orig->backed_up_stack;
-				size_t zval_num = orig->backed_up_stack_size / sizeof(zval *);
-				int i;
-
-				for (i = 0; i < zval_num; i++) {
-					Z_ADDREF_P(zvals[i]);
-				}
-			}
-		}
-
-		if (orig->backed_up_arg_types_stack) {
-			size_t stack_size = orig->backed_up_arg_types_stack_count * sizeof(void *);
-
-			clone->backed_up_arg_types_stack = emalloc(stack_size);
-			memcpy(clone->backed_up_arg_types_stack, orig->backed_up_arg_types_stack, stack_size);
-
-			/* We have to add refs to the objects in the arg types stack (the
-			 * object is always the second element of a three-pack. */
-			{
-				int i, stack_frames = clone->backed_up_arg_types_stack_count / 3;
-				for (i = 0; i < stack_frames; i++) {
-					zval *object = (zval *) clone->backed_up_arg_types_stack[3*i + 1];
-					if (object) {
-						Z_ADDREF_P(object);
-					}
-				}
-			}
-		}
-
 		/* Update the send_target to use the temporary variable with the same
 		 * offset as the original generator, but in our temporary variable
 		 * memory segment. */
@@ -334,23 +291,13 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 		}
 
 		if (execute_data->current_this) {
+			clone->execute_data->current_this = execute_data->current_this;
 			Z_ADDREF_P(execute_data->current_this);
 		}
 
 		if (execute_data->object) {
+			clone->execute_data->object = execute_data->object;
 			Z_ADDREF_P(execute_data->object);
-		}
-
-		/* Prev execute data contains an additional stack frame (for proper
-		 * backtraces) which has to be copied. */
-		clone->execute_data->prev_execute_data = emalloc(sizeof(zend_execute_data));
-		memcpy(clone->execute_data->prev_execute_data, execute_data->prev_execute_data, sizeof(zend_execute_data));
-
-		/* It also contains the arguments passed to the generator, which also
-		 * have to be copied */
-		if (execute_data->prev_execute_data->function_state.arguments) {
-			clone->execute_data->prev_execute_data->function_state.arguments
-				= zend_copy_arguments(execute_data->prev_execute_data->function_state.arguments);
 		}
 	}
 
@@ -399,7 +346,9 @@ zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	zend_generator *generator;
 	zend_execute_data *current_execute_data;
 	zend_op **opline_ptr;
+	HashTable *current_symbol_table;
 	zend_execute_data *execute_data;
+	zend_vm_stack current_stack = EG(argument_stack);
 
 	/* Create a clone of closure, because it may be destroyed */
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
@@ -410,11 +359,14 @@ zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	}
 	
 	/* Create new execution context. We have to back up and restore
-	 * EG(current_execute_data) and EG(opline_ptr) here because the function
-	 * modifies it. */
+	 * EG(current_execute_data), EG(opline_ptr) and EG(active_symbol_table)
+	 * here because the function modifies or uses them  */
 	current_execute_data = EG(current_execute_data);
 	opline_ptr = EG(opline_ptr);
+	current_symbol_table = EG(active_symbol_table);
+	EG(active_symbol_table) = NULL;
 	execute_data = zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC);
+	EG(active_symbol_table) = current_symbol_table;
 	EG(current_execute_data) = current_execute_data;
 	EG(opline_ptr) = opline_ptr;
 
@@ -434,18 +386,8 @@ zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	/* Save execution context in generator object. */
 	generator = (zend_generator *) zend_object_store_get_object(return_value TSRMLS_CC);
 	generator->execute_data = execute_data;
-
-	/* We have to add another stack frame so the generator function shows
-	 * up in backtraces and func_get_all() can access the function
-	 * arguments. */
-	execute_data->prev_execute_data = emalloc(sizeof(zend_execute_data));
-	memset(execute_data->prev_execute_data, 0, sizeof(zend_execute_data));
-	execute_data->prev_execute_data->function_state.function = (zend_function *) op_array;
-	if (EG(current_execute_data)) {
-		execute_data->prev_execute_data->function_state.arguments = zend_copy_arguments(EG(current_execute_data)->function_state.arguments);
-	} else {
-		execute_data->prev_execute_data->function_state.arguments = NULL;
-	}
+	generator->stack = EG(argument_stack);
+	EG(argument_stack) = current_stack;
 
 	return return_value;
 }
@@ -487,28 +429,7 @@ void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 		zval *original_This = EG(This);
 		zend_class_entry *original_scope = EG(scope);
 		zend_class_entry *original_called_scope = EG(called_scope);
-		int original_arg_types_stack_count = EG(arg_types_stack).top;
-
-		/* Remember the current stack position so we can back up pushed args */
-		generator->original_stack_top = zend_vm_stack_top(TSRMLS_C);
-
-		/* If there is a backed up stack copy it to the VM stack */
-		if (generator->backed_up_stack) {
-			void *stack = zend_vm_stack_alloc(generator->backed_up_stack_size TSRMLS_CC);
-			memcpy(stack, generator->backed_up_stack, generator->backed_up_stack_size);
-			efree(generator->backed_up_stack);
-			generator->backed_up_stack = NULL;
-		}
-
-		if (generator->backed_up_arg_types_stack) {
-			zend_ptr_stack_push_from_memory(
-				&EG(arg_types_stack),
-				generator->backed_up_arg_types_stack_count,
-				generator->backed_up_arg_types_stack
-			);
-			efree(generator->backed_up_arg_types_stack);
-			generator->backed_up_arg_types_stack = NULL;
-		}
+		zend_vm_stack original_stack = EG(argument_stack);
 
 		/* We (mis)use the return_value_ptr_ptr to provide the generator object
 		 * to the executor, so YIELD will be able to set the yielded value */
@@ -522,6 +443,7 @@ void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 		EG(This) = generator->execute_data->current_this;
 		EG(scope) = generator->execute_data->current_scope;
 		EG(called_scope) = generator->execute_data->current_called_scope;
+		EG(argument_stack) = generator->stack;
 
 		/* We want the backtrace to look as if the generator function was
 		 * called from whatever method we are current running (e.g. next()).
@@ -533,7 +455,7 @@ void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 
 		/* Resume execution */
 		generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
-		execute_ex(generator->execute_data TSRMLS_CC);
+		zend_execute_ex(generator->execute_data TSRMLS_CC);
 		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
 
 		/* Restore executor globals */
@@ -545,27 +467,7 @@ void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 		EG(This) = original_This;
 		EG(scope) = original_scope;
 		EG(called_scope) = original_called_scope;
-
-		/* The stack top before and after the execution differ, i.e. there are
-		 * arguments pushed to the stack. */
-		if (generator->original_stack_top != zend_vm_stack_top(TSRMLS_C)) {
-			generator->backed_up_stack_size = (zend_vm_stack_top(TSRMLS_C) - generator->original_stack_top) * sizeof(void *);
-			generator->backed_up_stack = emalloc(generator->backed_up_stack_size);
-			memcpy(generator->backed_up_stack, generator->original_stack_top, generator->backed_up_stack_size);
-			zend_vm_stack_free(generator->original_stack_top TSRMLS_CC);
-		}
-
-		if (original_arg_types_stack_count != EG(arg_types_stack).top) {
-			generator->backed_up_arg_types_stack_count =
-				EG(arg_types_stack).top - original_arg_types_stack_count;
-
-			generator->backed_up_arg_types_stack = emalloc(generator->backed_up_arg_types_stack_count * sizeof(void *));
-			zend_ptr_stack_pop_into_memory(
-				&EG(arg_types_stack),
-				generator->backed_up_arg_types_stack_count,
-				generator->backed_up_arg_types_stack
-			);
-		}
+		EG(argument_stack) = original_stack;
 
 		/* If an exception was thrown in the generator we have to internally
 		 * rethrow it in the parent scope. */
@@ -741,21 +643,11 @@ ZEND_METHOD(Generator, __wakeup)
 
 /* get_iterator implementation */
 
-typedef struct _zend_generator_iterator {
-	zend_object_iterator intern;
-
-	/* The generator object zval has to be stored, because the iterator is
-	 * holding a ref to it, which has to be dtored. */
-	zval *object;
-} zend_generator_iterator;
-
 static void zend_generator_iterator_dtor(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
 	zval *object = ((zend_generator_iterator *) iterator)->object;
 
 	zval_ptr_dtor(&object);
-
-	efree(iterator);
 }
 /* }}} */
 
@@ -854,7 +746,7 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 		return NULL;
 	}
 
-	iterator = emalloc(sizeof(zend_generator_iterator));
+	iterator = &generator->iterator;
 	iterator->intern.funcs = &zend_generator_iterator_functions;
 	iterator->intern.data = (void *) generator;
 
