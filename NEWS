@@ -28,6 +28,9 @@ PHP                                                                        NEWS
 - Imap:
   . Fixed Bug #63126 DISABLE_AUTHENTICATOR ignores array (Remi)
 
+- MySQLnd:
+  . Fixed bug #63398 (Segfault when polling closed link). (Laruence)
+
 - Reflection:
   . Fixed Bug #63614 (Fatal error on Reflection). (Laruence)
 
