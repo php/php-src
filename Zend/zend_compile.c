@@ -179,6 +179,8 @@ void zend_init_compiler_context(TSRMLS_D) /* {{{ */
 	CG(context).literals_size = 0;
 	CG(context).current_brk_cont = -1;
 	CG(context).backpatch_count = 0;
+	CG(context).nested_calls = 0;
+	CG(context).used_stack = 0;
 	CG(context).labels = NULL;
 }
 /* }}} */
@@ -1950,6 +1952,9 @@ int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace 
 	function_name->u.constant.value.str.val = lcname;
 	
 	zend_stack_push(&CG(function_call_stack), (void *) &function, sizeof(zend_function *));
+	if (CG(context).nested_calls + 1 > CG(active_op_array)->nested_calls) {
+		CG(active_op_array)->nested_calls = CG(context).nested_calls + 1;
+	}
 	zend_do_extended_fcall_begin(TSRMLS_C);
 	return 0;
 }
@@ -1988,11 +1993,13 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 			GET_POLYMORPHIC_CACHE_SLOT(last_op->op2.constant);
 		}
 		last_op->opcode = ZEND_INIT_METHOD_CALL;
-		SET_UNUSED(last_op->result);
+		last_op->result_type = IS_UNUSED;
+		last_op->result.num = CG(context).nested_calls;
 		Z_LVAL(left_bracket->u.constant) = ZEND_INIT_FCALL_BY_NAME;
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+		opline->result.num = CG(context).nested_calls;
 		SET_UNUSED(opline->op1);
 		if (left_bracket->op_type == IS_CONST) {
 			opline->op2_type = IS_CONST;
@@ -2004,6 +2011,9 @@ void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC) /* {{{ */
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
+	if (++CG(context).nested_calls > CG(active_op_array)->nested_calls) {
+		CG(active_op_array)->nested_calls = CG(context).nested_calls;
+	}
 	zend_do_extended_fcall_begin(TSRMLS_C);
 }
 /* }}} */
@@ -2031,12 +2041,14 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 		/* In run-time PHP will check for function with full name and
 		   internal function with short name */
 		opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
+		opline->result.num = CG(context).nested_calls;
 		SET_UNUSED(opline->op1);
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_ns_func_name_literal(CG(active_op_array), &function_name->u.constant TSRMLS_CC);
 		GET_CACHE_SLOT(opline->op2.constant);
 	} else {
 		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+		opline->result.num = CG(context).nested_calls;
 		SET_UNUSED(opline->op1);
 		if (function_name->op_type == IS_CONST) {
 			opline->op2_type = IS_CONST;
@@ -2048,6 +2060,9 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
+	if (++CG(context).nested_calls > CG(active_op_array)->nested_calls) {
+		CG(active_op_array)->nested_calls = CG(context).nested_calls;
+	}
 	zend_do_extended_fcall_begin(TSRMLS_C);
 }
 /* }}} */
@@ -2395,6 +2410,7 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 		opline->extended_value = class_node.EA	;
 	}
 	opline->opcode = ZEND_INIT_STATIC_METHOD_CALL;
+	opline->result.num = CG(context).nested_calls;
 	if (class_node.op_type == IS_CONST) {
 		opline->op1_type = IS_CONST;
 		opline->op1.constant =
@@ -2416,6 +2432,9 @@ int zend_do_begin_class_member_function_call(znode *class_name, znode *method_na
 	}
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(zend_function *));
+	if (++CG(context).nested_calls > CG(active_op_array)->nested_calls) {
+		CG(active_op_array)->nested_calls = CG(context).nested_calls;
+	}
 	zend_do_extended_fcall_begin(TSRMLS_C);
 	return 1; /* Dynamic */
 }
@@ -2436,21 +2455,29 @@ void zend_do_end_function_call(znode *function_name, znode *result, const znode 
 		if (!is_method && !is_dynamic_fcall && function_name->op_type==IS_CONST) {
 			opline->opcode = ZEND_DO_FCALL;
 			SET_NODE(opline->op1, function_name);
+			SET_UNUSED(opline->op2);
+			opline->op2.num = CG(context).nested_calls;
 			CALCULATE_LITERAL_HASH(opline->op1.constant);
 			GET_CACHE_SLOT(opline->op1.constant);
 		} else {
 			opline->opcode = ZEND_DO_FCALL_BY_NAME;
 			SET_UNUSED(opline->op1);
+			SET_UNUSED(opline->op2);
+			opline->op2.num = --CG(context).nested_calls;
 		}
 	}
 
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	opline->result_type = IS_VAR;
-	GET_NODE(result, opline->result)	;
-	SET_UNUSED(opline->op2);
+	GET_NODE(result, opline->result);
 
 	zend_stack_del_top(&CG(function_call_stack));
 	opline->extended_value = Z_LVAL(argument_list->u.constant);
+
+	if (CG(context).used_stack + 1 > CG(active_op_array)->used_stack) {
+		CG(active_op_array)->used_stack = CG(context).used_stack + 1;
+	}
+	CG(context).used_stack -= Z_LVAL(argument_list->u.constant);
 }
 /* }}} */
 
@@ -2558,6 +2585,10 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{
 	SET_NODE(opline->op1, param);
 	opline->op2.opline_num = offset;
 	SET_UNUSED(opline->op2);
+
+	if (++CG(context).used_stack > CG(active_op_array)->used_stack) {
+		CG(active_op_array)->used_stack = CG(context).used_stack;
+	}
 }
 /* }}} */
 
@@ -5547,12 +5578,16 @@ void zend_do_begin_new_object(znode *new_token, znode *class_type TSRMLS_DC) /* 
 	new_token->u.op.opline_num = get_next_op_number(CG(active_op_array));
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 	opline->opcode = ZEND_NEW;
+	opline->extended_value = CG(context).nested_calls;
 	opline->result_type = IS_VAR;
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	SET_NODE(opline->op1, class_type);
 	SET_UNUSED(opline->op2);
 
 	zend_stack_push(&CG(function_call_stack), (void *) &ptr, sizeof(unsigned char *));
+	if (++CG(context).nested_calls > CG(active_op_array)->nested_calls) {
+		CG(active_op_array)->nested_calls = CG(context).nested_calls;
+	}
 }
 /* }}} */
 
@@ -5765,6 +5800,13 @@ void zend_do_shell_exec(znode *result, const znode *cmd TSRMLS_DC) /* {{{ */
 	opline->extended_value = 1;
 	SET_UNUSED(opline->op2);
 	GET_NODE(result, opline->result);
+
+	if (CG(context).nested_calls + 1 > CG(active_op_array)->nested_calls) {
+		CG(active_op_array)->nested_calls = CG(context).nested_calls + 1;
+	}
+	if (CG(context).used_stack + 2 > CG(active_op_array)->used_stack) {
+		CG(active_op_array)->used_stack = CG(context).used_stack + 2;
+	}
 }
 /* }}} */
 

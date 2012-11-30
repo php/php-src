@@ -59,6 +59,8 @@ typedef struct _zend_compiler_context {
 	int        literals_size;
 	int        current_brk_cont;
 	int        backpatch_count;
+	int        nested_calls;
+	int        used_stack;
 	HashTable *labels;
 } zend_compiler_context;
 
@@ -279,6 +281,9 @@ struct _zend_op_array {
 
 	zend_uint T;
 
+	zend_uint nested_calls;
+	zend_uint used_stack;
+
 	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
 
@@ -369,11 +374,17 @@ typedef struct _list_llist_element {
 
 union _temp_variable;
 
+typedef struct _call_slot {
+	zend_function     *fbc;
+	zval              *object;
+	zend_class_entry  *called_scope;
+	zend_bool          is_ctor_call;
+	zend_bool          is_ctor_result_used;
+} call_slot;
+
 struct _zend_execute_data {
 	struct _zend_op *opline;
 	zend_function_state function_state;
-	zend_function *fbc; /* Function Being Called */
-	zend_class_entry *called_scope;
 	zend_op_array *op_array;
 	zval *object;
 	union _temp_variable *Ts;
@@ -386,8 +397,9 @@ struct _zend_execute_data {
 	zend_class_entry *current_scope;
 	zend_class_entry *current_called_scope;
 	zval *current_this;
-	zval *current_object;
 	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
+	call_slot *call_slots;
+	call_slot *call;
 };
 
 #define EX(element) execute_data.element

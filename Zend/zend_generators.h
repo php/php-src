@@ -25,25 +25,24 @@ BEGIN_EXTERN_C()
 extern ZEND_API zend_class_entry *zend_ce_generator;
 END_EXTERN_C()
 
+typedef struct _zend_generator_iterator {
+	zend_object_iterator intern;
+
+	/* The generator object zval has to be stored, because the iterator is
+	 * holding a ref to it, which has to be dtored. */
+	zval *object;
+} zend_generator_iterator;
+
 typedef struct _zend_generator {
 	zend_object std;
+
+	zend_generator_iterator iterator;
 
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;
 
-	/* If the execution is suspended during a function call there may be
-	 * arguments pushed to the stack, so it has to be backed up. */
-	void *backed_up_stack;
-	size_t backed_up_stack_size;
-
-	/* For method calls PHP also pushes various type information on a second
-	 * stack, which also needs to be backed up. */
-	void **backed_up_arg_types_stack;
-	int backed_up_arg_types_stack_count;
-
-	/* The original stack top before resuming the generator. This is required
-	 * for proper cleanup during exception handling. */
-	void **original_stack_top;
+	/* The separate stack used by generator */
+	zend_vm_stack stack;
 
 	/* Current value */
 	zval *value;
