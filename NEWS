@@ -23,10 +23,10 @@ PHP                                                                        NEWS
     (Anatoliy)
 
 - FPM:
-  . Fixed bug #63581 Possible null dereference and buffer overflow (Remi)
+  . Fixed bug #63581 (Possible null dereference and buffer overflow). (Remi)
 
 - Imap:
-  . Fixed Bug #63126 DISABLE_AUTHENTICATOR ignores array (Remi)
+  . Fixed bug #63126 (DISABLE_AUTHENTICATOR ignores array). (Remi)
 
 - MySQLnd:
   . Fixed bug #63398 (Segfault when polling closed link). (Laruence)
