@@ -12,14 +12,14 @@ PHP                                                                        NEWS
     (Mike, casper at langemeijer dot eu)
 
 - Imap:
-  . Fixed Bug #63126 DISABLE_AUTHENTICATOR ignores array (Remi)
+  . Fixed bug #63126 (DISABLE_AUTHENTICATOR ignores array). (Remi)
 
 - Json:
-  . Fixed bug #63588 use php_next_utf8_char and remove duplicate
-    implementation. (Remi)
+  . Fixed bug #63588 (use php_next_utf8_char and remove duplicate
+    implementation). (Remi)
 
-- mysqli:
-  . Fixed bug #63361 missing header. (Remi)
+- MySQLi:
+  . Fixed bug #63361 (missing header). (Remi)
 
 - MySQLnd:
   . Fixed bug #63398 (Segfault when polling closed link). (Laruence)
