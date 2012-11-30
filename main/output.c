@@ -607,7 +607,7 @@ PHPAPI int php_ob_handler_used(char *handler_name TSRMLS_DC)
 static inline void php_ob_append(const char *text, uint text_length TSRMLS_DC)
 {
 	char *target;
-	int original_ob_text_length;
+	uint original_ob_text_length;
 
 	original_ob_text_length=OG(active_ob_buffer).text_length;
 

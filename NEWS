@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #63451 (config.guess file does not have AIX 7 defined, 
     shared objects are not created). (kemcline at au1 dot ibm dot com)
+  . Fixed bug #63377 (Segfault on output buffer).
+    (miau dot jp at gmail dot com, Laruence)
 
 - Apache2 Handler SAPI:
   . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
