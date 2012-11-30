@@ -150,7 +150,7 @@ static void zend_generator_free_storage(zend_generator *generator TSRMLS_DC) /* 
 }
 /* }}} */
 
-static void zend_generator_clone_storage(zend_generator *orig, zend_generator **clone_ptr) /* {{{ */
+static void zend_generator_clone_storage(zend_generator *orig, zend_generator **clone_ptr TSRMLS_DC) /* {{{ */
 {
 	zend_generator *clone = emalloc(sizeof(zend_generator));
 	memcpy(clone, orig, sizeof(zend_generator));
