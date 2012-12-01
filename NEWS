@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - Apache2 Handler SAPI:
   . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
 
+- Date:
+  . Fixed bug #63435 (Datetime::format('u') sometimes wrong by 1 microsecon).
+    (Remi)
+
 - Fileinfo:
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
     (Anatoliy)
