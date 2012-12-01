@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #61272 (ob_start callback gets passed empty string).
     (Mike, casper at langemeijer dot eu)
 
+- Date:
+  . Fixed bug #63435 (Datetime::format('u') sometimes wrong by 1 microsecon).
+    (Remi)
+
 - Imap:
   . Fixed bug #63126 (DISABLE_AUTHENTICATOR ignores array). (Remi)
 
