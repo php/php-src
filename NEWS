@@ -49,6 +49,10 @@ PHP                                                                        NEWS
   . Fixed bug #63271 (SOAP wsdl cache is not enabled after initial requests).
     (John Jawed, Dmitry)
 
+- Sockets
+  . Fixed bug #49341 (Add SO_REUSEPORT support for socket_set_option()).
+    (Igor Wiedler, Lars)
+
 22 Nov 2012, PHP 5.4.9
 
 - Core:
