@@ -2932,6 +2932,9 @@ dnl Add providerdesc.o into global objects when needed
   *solaris*)
     PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
     ;;
+  *linux*)
+    PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
+    ;;
   esac
 
 dnl DTrace objects
