@@ -452,7 +452,7 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key TSRML
 		}
 	}
 	inifile_line_free(&ln);
-	return SUCCESS;
+	return ret;
 }
 /* }}} */
 
@@ -460,7 +460,7 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key TSRML
  */
 static int inifile_delete_replace_append(inifile *dba, const key_type *key, const val_type *value, int append TSRMLS_DC) 
 {
-	size_t pos_grp_start, pos_grp_next;
+	size_t pos_grp_start=0, pos_grp_next;
 	inifile *ini_tmp = NULL;
 	php_stream *fp_tmp = NULL;
 	int ret;
