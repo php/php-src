@@ -387,8 +387,6 @@ struct _zend_execute_data {
 	zend_function_state function_state;
 	zend_op_array *op_array;
 	zval *object;
-	union _temp_variable *Ts;
-	zval ***CVs;
 	HashTable *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 	zval *old_error_reporting;
@@ -403,6 +401,11 @@ struct _zend_execute_data {
 };
 
 #define EX(element) execute_data.element
+
+#define EX_TMP_VAR(ex, n)	   ((temp_variable*)(((char*)(ex)) + ((int)(n))))
+#define EX_TMP_VAR_NUM(ex, n)  (EX_TMP_VAR(ex, 0) - (1 + (n)))
+
+#define EX_CV_NUM(ex, n)       (((zval***)(((char*)(ex))+ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data))))+(n))
 
 
 #define IS_CONST	(1<<0)

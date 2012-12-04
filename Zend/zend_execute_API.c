@@ -1689,7 +1689,7 @@ ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC) /* {{{ */
 	for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
 		if (ex->op_array && ex->symbol_table == symbol_table) {
 			for (i = 0; i < ex->op_array->last_var; i++) {
-				ex->CVs[i] = NULL;
+				*EX_CV_NUM(ex, i) = NULL;
 			}
 		}
 	}
@@ -1708,7 +1708,7 @@ ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const c
 					if (ex->op_array->vars[i].hash_value == hash_value &&
 						ex->op_array->vars[i].name_len == name_len &&
 						!memcmp(ex->op_array->vars[i].name, name, name_len)) {
-						ex->CVs[i] = NULL;
+						*EX_CV_NUM(ex, i) = NULL;
 						break;
 					}
 				}
@@ -1732,7 +1732,7 @@ ZEND_API int zend_delete_global_variable_ex(const char *name, int name_len, ulon
 						ex->op_array->vars[i].name_len == name_len &&
 						!memcmp(ex->op_array->vars[i].name, name, name_len)
 					) {
-						ex->CVs[i] = NULL;
+						*EX_CV_NUM(ex, i) = NULL;
 						break;
 					}
 				}
@@ -1779,20 +1779,20 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 			ex->symbol_table = EG(active_symbol_table);
 
 			if (ex->op_array->this_var != -1 &&
-			    !ex->CVs[ex->op_array->this_var] &&
+			    !*EX_CV_NUM(ex, ex->op_array->this_var) &&
 			    EG(This)) {
-				ex->CVs[ex->op_array->this_var] = (zval**)ex->CVs + ex->op_array->last_var + ex->op_array->this_var;
-				*ex->CVs[ex->op_array->this_var] = EG(This);
+			    *EX_CV_NUM(ex, ex->op_array->this_var) = (zval**)EX_CV_NUM(ex, ex->op_array->last_var + ex->op_array->this_var);
+				**EX_CV_NUM(ex, ex->op_array->this_var) = EG(This);
  			}
 			for (i = 0; i < ex->op_array->last_var; i++) {
-				if (ex->CVs[i]) {
+				if (*EX_CV_NUM(ex, i)) {
 					zend_hash_quick_update(EG(active_symbol_table),
 						ex->op_array->vars[i].name,
 						ex->op_array->vars[i].name_len + 1,
 						ex->op_array->vars[i].hash_value,
-						(void**)ex->CVs[i],
+						(void**)*EX_CV_NUM(ex, i),
 						sizeof(zval*),
-						(void**)&ex->CVs[i]);
+						(void**)EX_CV_NUM(ex, i));
 				}
 			}
 		}

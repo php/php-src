@@ -394,13 +394,13 @@ typedef struct _zend_free_op {
 /*	int   is_var; */
 } zend_free_op;
 
-ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
-ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const temp_variable *Ts, zend_free_op *should_free, int type TSRMLS_DC);
+ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC);
+ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC);
 
 ZEND_API int zend_do_fcall(ZEND_OPCODE_HANDLER_ARGS);
 
 void zend_clean_and_cache_symbol_table(HashTable *symbol_table TSRMLS_DC);
-void zend_free_compiled_variables(zval ***CVs, int num);
+void zend_free_compiled_variables(zend_execute_data *execute_data);
 
 #define CACHED_PTR(num) \
 	EG(active_op_array)->run_time_cache[(num)]
