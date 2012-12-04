@@ -35,7 +35,7 @@ ZEND_API void (*zend_dtrace_execute)(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void (*zend_dtrace_execute_internal)(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 
 ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
-ZEND_API void dtrace_execute_ex(zend_op_array *op_array TSRMLS_DC);
+ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 #include <zend_dtrace_gen.h>
 
