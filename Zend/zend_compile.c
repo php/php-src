@@ -287,7 +287,7 @@ ZEND_API zend_bool zend_is_compiling(TSRMLS_D) /* {{{ */
 
 static zend_uint get_temporary_variable(zend_op_array *op_array) /* {{{ */
 {
-	return (op_array->T)++ * ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable));
+	return EX_TMP_VAR_NUM(0, (op_array->T)++);
 }
 /* }}} */
 

@@ -334,7 +334,7 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMP|VAR
 	zval **object_ptr = GET_OP1_OBJ_ZVAL_PTR_PTR(BP_VAR_RW);
 	zval *object;
 	zval *property = GET_OP2_ZVAL_PTR(BP_VAR_R);
-	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
+	zval *value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
 	int have_get_ptr = 0;
 
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
@@ -465,8 +465,8 @@ ZEND_VM_HELPER_EX(zend_binary_assign_op_helper, VAR|UNUSED|CV, CONST|TMP|VAR|UNU
 					zval *dim = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 					zend_fetch_dimension_address(&EX_T((opline+1)->op2.var), container, dim, OP2_TYPE, BP_VAR_RW TSRMLS_CC);
-					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, EX_Ts(), &free_op_data2 TSRMLS_CC);
+					value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+					var_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 				}
 			}
 			break;
@@ -1636,7 +1636,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	if (OP1_TYPE == IS_VAR && UNEXPECTED(object_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot use string offset as an array");
 	}
-	zend_assign_to_object(RETURN_VALUE_USED(opline)?&EX_T(opline->result.var).var.ptr:NULL, object_ptr, property_name, (opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), ZEND_ASSIGN_OBJ, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+	zend_assign_to_object(RETURN_VALUE_USED(opline)?&EX_T(opline->result.var).var.ptr:NULL, object_ptr, property_name, (opline+1)->op1_type, &(opline+1)->op1, execute_data, ZEND_ASSIGN_OBJ, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 	if (IS_OP2_TMP_FREE()) {
 		zval_ptr_dtor(&property_name);
 	} else {
@@ -1668,7 +1668,7 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 		if (IS_OP2_TMP_FREE()) {
 			MAKE_REAL_ZVAL_PTR(property_name);
 		}
-		zend_assign_to_object(RETURN_VALUE_USED(opline)?&EX_T(opline->result.var).var.ptr:NULL, object_ptr, property_name, (opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), ZEND_ASSIGN_DIM, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+		zend_assign_to_object(RETURN_VALUE_USED(opline)?&EX_T(opline->result.var).var.ptr:NULL, object_ptr, property_name, (opline+1)->op1_type, &(opline+1)->op1, execute_data, ZEND_ASSIGN_DIM, ((OP2_TYPE == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 		if (IS_OP2_TMP_FREE()) {
 			zval_ptr_dtor(&property_name);
 		} else {
@@ -1683,8 +1683,8 @@ ZEND_VM_HANDLER(147, ZEND_ASSIGN_DIM, VAR|CV, CONST|TMP|VAR|UNUSED|CV)
 		zend_fetch_dimension_address(&EX_T((opline+1)->op2.var), object_ptr, dim, OP2_TYPE, BP_VAR_W TSRMLS_CC);
 		FREE_OP2();
 
-		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, EX_Ts(), &free_op_data1, BP_VAR_R);
-		variable_ptr_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, EX_Ts(), &free_op_data2 TSRMLS_CC);
+		value = get_zval_ptr((opline+1)->op1_type, &(opline+1)->op1, execute_data, &free_op_data1, BP_VAR_R);
+		variable_ptr_ptr = _get_zval_ptr_ptr_var((opline+1)->op2.var, execute_data, &free_op_data2 TSRMLS_CC);
 		if (UNEXPECTED(variable_ptr_ptr == NULL)) {
 			if (zend_assign_to_string_offset(&EX_T((opline+1)->op2.var), value, (opline+1)->op1_type TSRMLS_CC)) {
 				if (RETURN_VALUE_USED(opline)) {
@@ -1866,7 +1866,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
 	if (!EG(active_symbol_table)) {
-		zend_free_compiled_variables(EX_CVs(), op_array->last_var);
+		zend_free_compiled_variables(execute_data);
 	}
 
 	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {
@@ -1875,7 +1875,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 
 	nested = EX(nested);
 
-	zend_vm_stack_free(execute_data TSRMLS_CC);
+	zend_vm_stack_free((char*)execute_data - (ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T) TSRMLS_CC);
 
 	if (nested) {
 		execute_data = EG(current_execute_data);
@@ -2029,7 +2029,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			/* saves one function call if zend_execute_internal is not used */
 			fbc->internal_function.handler(opline->extended_value, ret->var.ptr, (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) ? &ret->var.ptr : NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
 		} else {
-			zend_execute_internal(EXECUTE_DATA, NULL, RETURN_VALUE_USED(opline) TSRMLS_CC);
+			zend_execute_internal(execute_data, NULL, RETURN_VALUE_USED(opline) TSRMLS_CC);
 		}
 
 		if (!RETURN_VALUE_USED(opline)) {
@@ -3043,7 +3043,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 		if (EX_CV(opline->op2.var)) {
 			zval_ptr_dtor(EX_CV(opline->op2.var));
 		}
-		EX_CV(opline->op2.var) = (zval**)EX_CVs() + (EX(op_array)->last_var + opline->op2.var);
+		EX_CV(opline->op2.var) = (zval**)EX_CV_NUM(execute_data, EX(op_array)->last_var + opline->op2.var);
 		*EX_CV(opline->op2.var) = EG(exception);
 	} else {
 		zend_compiled_variable *cv = &CV_DEF_OF(opline->op2.var);
@@ -3245,7 +3245,7 @@ ZEND_VM_HANDLER(63, ZEND_RECV, ANY, ANY)
 		zval **var_ptr;
 
 		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, *param, opline->extended_value TSRMLS_CC);
-		var_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->result.var TSRMLS_CC);
+		var_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
 		Z_DELREF_PP(var_ptr);
 		*var_ptr = *param;
 		Z_ADDREF_PP(var_ptr);
@@ -3281,7 +3281,7 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 	}
 
 	zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value, opline->extended_value TSRMLS_CC);
-	var_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(EX_CVs(), opline->result.var TSRMLS_CC);
+	var_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
 	Z_DELREF_PP(var_ptr);
 	*var_ptr = assignment_value;
 
@@ -3311,7 +3311,7 @@ ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST)
 
 	SAVE_OPLINE();
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
-	                   EX(op_array), EX_Ts() TSRMLS_CC);
+	                   EX(op_array), execute_data TSRMLS_CC);
 	FREE_OP2();
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
 }
@@ -3323,7 +3323,7 @@ ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
 
 	SAVE_OPLINE();
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
-	                   EX(op_array), EX_Ts() TSRMLS_CC);
+	                   EX(op_array), execute_data TSRMLS_CC);
 	FREE_OP2();
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
 }
@@ -3336,7 +3336,7 @@ ZEND_VM_HANDLER(100, ZEND_GOTO, ANY, CONST)
 
 	SAVE_OPLINE();
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->extended_value,
- 	                   EX(op_array), EX_Ts() TSRMLS_CC);
+ 	                   EX(op_array), execute_data TSRMLS_CC);
 
 	brk_opline = EX(op_array)->opcodes + el->brk;
 
@@ -3953,7 +3953,7 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
-		zend_delete_variable(EXECUTE_DATA, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
+		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
 	}
 
 	if (OP1_TYPE != IS_CONST && varname == &tmp) {
@@ -5035,7 +5035,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 
 	/* Figure out where the next stack frame (which maybe contains pushed
 	 * arguments that have to be dtor'ed) starts */
-	stack_frame = zend_vm_stack_frame_base(EXECUTE_DATA);
+	stack_frame = zend_vm_stack_frame_base(execute_data);
 
 	/* If the exception was thrown during a function call there might be
 	 * arguments pushed to the stack that have to be dtor'ed. */

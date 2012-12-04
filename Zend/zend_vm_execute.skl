@@ -15,24 +15,24 @@
  *                             +========================================+    |
  *                                                                           |
  *                             +========================================+    |
+ *                             | TMP_VAR[op_arrat->T-1]                 |    |
+ *                             | ...                                    |    |
+ *     EX_TMP_VAR_NUM(0) ----> | TMP_VAR[0]                             |    |
+ *                             +----------------------------------------+    |
  * EG(current_execute_data) -> | zend_execute_data                      |    |
  *                             |     EX(prev_execute_data)              |----+
  *                             +----------------------------------------+
- *           EX(Ts) ---------> | EX(Ts)[0]                              |
- *                             | ...                                    |
- *                             | EX(Tx)[op_arrat->T]                    |
- *                             +----------------------------------------+
- *           EX(CVs) --------> | EX(CVs)[0]                             |--+
+ *     EX_CV_NUM(0) ---------> | CV[0]                                  |--+
  *                             | ...                                    |  |
- *                             | EX(CVs)[op_array->last_var]            |  |
+ *                             | CV[op_array->last_var-1]               |  |
  *                             +----------------------------------------+  |
  *                             | Optional slot for CV[0] zval*          |<-+
  *                             | ...                                    |
- *                             | ...  for CV [op_array->last_var] zval* |
+ *                             | ...for CV [op_array->last_var-1] zval* |
  *                             +----------------------------------------+
- *           EX(call_slots) -> | EX(call_slots)[0]                      |
+ *           EX(call_slots) -> | CALL_SLOT[0]                           |
  *                             | ...                                    |
- *                             | EX(call_slots)[op_array->nested_calls] |
+ *                             | CALL_SLOT[op_array->nested_calls-1]    |
  *                             +----------------------------------------+
  * zend_vm_stack_frame_base -> | ARGUMENTS STACK [0]                    |
  *                             | ...                                    |
@@ -82,7 +82,7 @@ zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_arra
 
 		EG(argument_stack) = zend_vm_stack_new_page((total_size + (sizeof(void*) - 1)) / sizeof(void*));
 		EG(argument_stack)->prev = NULL;
-		execute_data = (zend_execute_data*)((char*)ZEND_VM_STACK_ELEMETS(EG(argument_stack)) + args_size + execute_data_size);
+		execute_data = (zend_execute_data*)((char*)ZEND_VM_STACK_ELEMETS(EG(argument_stack)) + args_size + execute_data_size + Ts_size);
 
 		/* copy prev_execute_data */
 		EX(prev_execute_data) = (zend_execute_data*)((char*)ZEND_VM_STACK_ELEMETS(EG(argument_stack)) + args_size);
@@ -104,15 +104,13 @@ zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_arra
 		}
 	} else {
 		execute_data = zend_vm_stack_alloc(total_size TSRMLS_CC);
+		execute_data = (zend_execute_data*)((char*)execute_data + Ts_size);
 		EX(prev_execute_data) = EG(current_execute_data);
 	}
 
-	EX(Ts) = (temp_variable *) ((char *) execute_data + execute_data_size);
+	memset(EX_CV_NUM(execute_data, 0), 0, sizeof(zval **) * op_array->last_var);
 
-	EX(CVs) = (zval ***) ((char *) EX(Ts) + Ts_size);
-	memset(EX(CVs), 0, sizeof(zval **) * op_array->last_var);
-
-	EX(call_slots) = (call_slot*)((char *) EX(CVs) + CVs_size);
+	EX(call_slots) = (call_slot*)((char *)execute_data + execute_data_size + CVs_size);
 
 
 	EX(op_array) = op_array;
@@ -134,10 +132,10 @@ zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_arra
 	if (op_array->this_var != -1 && EG(This)) {
  		Z_ADDREF_P(EG(This)); /* For $this pointer */
 		if (!EG(active_symbol_table)) {
-			EX(CVs)[op_array->this_var] = (zval **) EX(CVs) + op_array->last_var + op_array->this_var;
-			*EX(CVs)[op_array->this_var] = EG(This);
+			EX_CV(op_array->this_var) = (zval **) EX_CV_NUM(execute_data, op_array->last_var + op_array->this_var);
+			*EX_CV(op_array->this_var) = EG(This);
 		} else {
-			if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), (void **) &EX(CVs)[op_array->this_var])==FAILURE) {
+			if (zend_hash_add(EG(active_symbol_table), "this", sizeof("this"), &EG(This), sizeof(zval *), (void **) EX_CV_NUM(execute_data, op_array->this_var))==FAILURE) {
 				Z_DELREF_P(EG(This));
 			}
 		}

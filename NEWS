@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.5.0
 
 - General improvements:
+  . Optimized access to temporary and compiled VM variables. 8% less memory
+    reads. (Dmitry)
   . The VM stacks for passing function arguments and syntaticaly nested calls
     were merged into a single stack. The stack size needed for op_array
     execution is calculated at compile time and preallocated at once. As result
