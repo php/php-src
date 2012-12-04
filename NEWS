@@ -25,6 +25,8 @@ PHP                                                                        NEWS
     (Nikita Popov)
   . Remove php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid(),
     zend_logo_guid(). (Adnrew Faulds)
+  . Add systemtap support by enabling systemtap compatible dtrace probes on
+    linux. (David Soria Parra)
 
 - Calendar:
   . Fixed bug #54254 (cal_from_jd returns month = 6 when there is only one Adar)
