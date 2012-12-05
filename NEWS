@@ -60,6 +60,9 @@ PHP                                                                        NEWS
   . Fixed bug #49341 (Add SO_REUSEPORT support for socket_set_option()).
     (Igor Wiedler, Lars)
 
+- SPL
+  . Fixed bug #63680 (Memleak in splfixedarray with cycle reference). (Laruence)
+
 22 Nov 2012, PHP 5.4.9
 
 - Core:
