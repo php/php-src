@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.10
 
 - Core:
+  . Fixed bug #63666 (Poor date() performance). (Paul Talborg).
   . Fixed bug #63635 (Segfault in gc_collect_cycles). (Dmitry)
   . Fixed bug #63468 (wrong called method as callback with inheritance).
     (Laruence)
