@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.4.10
+06 Dec 2012, PHP 5.4.10 RC1
 
 - Core:
   . Fixed bug #63635 (Segfault in gc_collect_cycles). (Dmitry)
