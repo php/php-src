@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2013, PHP 5.3.21
+
 ?? ??? 2012, PHP 5.3.20
+
+#### ADD NEWS TO 5.3.21 ONLY ####
 
 - Zend Engine:
   . Fixed bug #63635 (Segfault in gc_collect_cycles). (Dmitry)
