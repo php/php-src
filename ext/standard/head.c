@@ -80,7 +80,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	char *dt;
 	sapi_header_line ctr = {0};
 	int result;
-	
+
 	if (name && strpbrk(name, "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */
 		zend_error( E_WARNING, "Cookie names cannot contain any of the following '=,; \\t\\r\\n\\013\\014'" );
 		return FAILURE;
@@ -111,19 +111,19 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	cookie = emalloc(len + 100);
 
 	if (value && value_len == 0) {
-		/* 
+		/*
 		 * MSIE doesn't delete a cookie when you set it to a null value
 		 * so in order to force cookies to be deleted, even on MSIE, we
 		 * pick an expiry date in the past
 		 */
 		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, 1, 0 TSRMLS_CC);
-		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s", name, dt);
+		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; Expires=%s; Max-Age=0", name, dt);
 		efree(dt);
 	} else {
 		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (expires > 0) {
 			const char *p;
-			strlcat(cookie, "; expires=", len + 100);
+			strlcat(cookie, "; Expires=", len + 100);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
 			/* check to make sure that the year does not exceed 4 digits in length */
 			p = zend_memrchr(dt, '-', strlen(dt));
@@ -136,6 +136,8 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 			}
 			strlcat(cookie, dt, len + 100);
 			efree(dt);
+			strlcat(cookie, "; Max-Age=", len + 100);
+			strlcat(cookie, expires, len + 100);
 		}
 	}
 
@@ -144,18 +146,18 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	}
 
 	if (path && path_len > 0) {
-		strlcat(cookie, "; path=", len + 100);
+		strlcat(cookie, "; Path=", len + 100);
 		strlcat(cookie, path, len + 100);
 	}
 	if (domain && domain_len > 0) {
-		strlcat(cookie, "; domain=", len + 100);
+		strlcat(cookie, "; Domain=", len + 100);
 		strlcat(cookie, domain, len + 100);
 	}
 	if (secure) {
-		strlcat(cookie, "; secure", len + 100);
+		strlcat(cookie, "; Secure", len + 100);
 	}
 	if (httponly) {
-		strlcat(cookie, "; httponly", len + 100);
+		strlcat(cookie, "; HttpOnly", len + 100);
 	}
 
 	ctr.line = cookie;
