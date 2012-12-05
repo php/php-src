@@ -167,6 +167,9 @@ static zend_always_inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC)
 #define DECODE_CTOR(ce) \
 	((zend_class_entry*)(((zend_uintptr_t)(ce)) & ~(CTOR_CALL_BIT|CTOR_USED_BIT)))
 
+#undef EX
+#define EX(element) execute_data->element
+
 ZEND_API zval** zend_get_compiled_variable_value(const zend_execute_data *execute_data, zend_uint var)
 {
 	return EX_CV(var);
@@ -1488,62 +1491,6 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_i
 	}
 }
 
-#define ZEND_VM_NEXT_OPCODE() \
-	CHECK_SYMBOL_TABLES() \
-	ZEND_VM_INC_OPCODE(); \
-	ZEND_VM_CONTINUE()
-
-#define ZEND_VM_SET_OPCODE(new_op) \
-	CHECK_SYMBOL_TABLES() \
-	OPLINE = new_op
-
-#define ZEND_VM_JMP(new_op) \
-	if (EXPECTED(!EG(exception))) { \
-		ZEND_VM_SET_OPCODE(new_op); \
-	} else { \
-		LOAD_OPLINE(); \
-	} \
-	ZEND_VM_CONTINUE()
-
-#define ZEND_VM_INC_OPCODE() \
-	OPLINE++
-
-#ifdef __GNUC__
-# define ZEND_VM_GUARD(name) __asm__("#" #name)
-#else
-# define ZEND_VM_GUARD(name)
-#endif
-
-#include "zend_vm_execute.h"
-
-ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler)
-{
-	if (opcode != ZEND_USER_OPCODE) {
-		if (handler == NULL) {
-			/* restore the original handler */
-			zend_user_opcodes[opcode] = opcode;
-		} else {
-			zend_user_opcodes[opcode] = ZEND_USER_OPCODE;
-		}
-		zend_user_opcode_handlers[opcode] = handler;
-		return SUCCESS;
-	}
-	return FAILURE;
-}
-
-ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode)
-{
-	return zend_user_opcode_handlers[opcode];
-}
-
-ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC) {
-	return get_zval_ptr(op_type, node, execute_data, should_free, type);
-}
-
-ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC) {
-	return get_zval_ptr_ptr(op_type, node, execute_data, should_free, type);
-}
-
 void zend_clean_and_cache_symbol_table(HashTable *symbol_table TSRMLS_DC) /* {{{ */
 {
 	if (EG(symtable_cache_ptr) >= EG(symtable_cache_limit)) {
@@ -1558,14 +1505,22 @@ void zend_clean_and_cache_symbol_table(HashTable *symbol_table TSRMLS_DC) /* {{{
 }
 /* }}} */
 
+static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
+{
+	zval ***cv = EX_CV_NUM(execute_data, 0);
+	zval ***end = cv + EX(op_array)->last_var;
+	while (cv != end) {
+		if (*cv) {
+			zval_ptr_dtor(*cv);
+		}
+		cv++;
+ 	}
+}
+/* }}} */
+
 void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 {
-	int i;
-	for (i = 0; i < EX(op_array)->last_var; ++i) {
-		if (EX_CV(i)) {
-			zval_ptr_dtor(EX_CV(i));
-		}
-	}
+	i_free_compiled_variables(execute_data);
 }
 /* }}} */
 
@@ -1611,7 +1566,7 @@ void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
  *                             +----------------------------------------+
  */
 
-zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
+static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *execute_data;
 
@@ -1719,6 +1674,68 @@ zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_arra
 	return execute_data;
 }
 /* }}} */
+
+zend_execute_data *zend_create_execute_data_from_op_array(zend_op_array *op_array, zend_bool nested TSRMLS_DC) /* {{{ */
+{
+	return i_create_execute_data_from_op_array(op_array, nested TSRMLS_CC);
+}
+/* }}} */
+
+#define ZEND_VM_NEXT_OPCODE() \
+	CHECK_SYMBOL_TABLES() \
+	ZEND_VM_INC_OPCODE(); \
+	ZEND_VM_CONTINUE()
+
+#define ZEND_VM_SET_OPCODE(new_op) \
+	CHECK_SYMBOL_TABLES() \
+	OPLINE = new_op
+
+#define ZEND_VM_JMP(new_op) \
+	if (EXPECTED(!EG(exception))) { \
+		ZEND_VM_SET_OPCODE(new_op); \
+	} else { \
+		LOAD_OPLINE(); \
+	} \
+	ZEND_VM_CONTINUE()
+
+#define ZEND_VM_INC_OPCODE() \
+	OPLINE++
+
+#ifdef __GNUC__
+# define ZEND_VM_GUARD(name) __asm__("#" #name)
+#else
+# define ZEND_VM_GUARD(name)
+#endif
+
+#include "zend_vm_execute.h"
+
+ZEND_API int zend_set_user_opcode_handler(zend_uchar opcode, user_opcode_handler_t handler)
+{
+	if (opcode != ZEND_USER_OPCODE) {
+		if (handler == NULL) {
+			/* restore the original handler */
+			zend_user_opcodes[opcode] = opcode;
+		} else {
+			zend_user_opcodes[opcode] = ZEND_USER_OPCODE;
+		}
+		zend_user_opcode_handlers[opcode] = handler;
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+
+ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode)
+{
+	return zend_user_opcode_handlers[opcode];
+}
+
+ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC) {
+	return get_zval_ptr(op_type, node, execute_data, should_free, type);
+}
+
+ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type TSRMLS_DC) {
+	return get_zval_ptr_ptr(op_type, node, execute_data, should_free, type);
+}
 
 /*
  * Local variables:

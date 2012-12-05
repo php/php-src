@@ -1852,7 +1852,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	}
 	
 	/* Generators go throw a different cleanup process */
-	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+	if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
 		/* The generator object is stored in return_value_ptr_ptr */
 		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -1866,7 +1866,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
 	if (!EG(active_symbol_table)) {
-		zend_free_compiled_variables(execute_data);
+		i_free_compiled_variables(execute_data);
 	}
 
 	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {
