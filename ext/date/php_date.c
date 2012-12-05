@@ -563,7 +563,9 @@ static zend_object_value date_object_clone_interval(zval *this_ptr TSRMLS_DC);
 static zend_object_value date_object_clone_period(zval *this_ptr TSRMLS_DC);
 
 static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC);
+static HashTable *date_object_get_gc(zval *object, zval ***table, int *n TSRMLS_DC);
 static HashTable *date_object_get_properties(zval *object TSRMLS_DC);
+static HashTable *date_object_get_gc_interval(zval *object, zval ***table, int *n TSRMLS_DC);
 static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC);
 
 zval *date_interval_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC);
@@ -1887,6 +1889,7 @@ static void date_register_classes(TSRMLS_D)
 	date_object_handlers_date.clone_obj = date_object_clone_date;
 	date_object_handlers_date.compare_objects = date_object_compare_date;
 	date_object_handlers_date.get_properties = date_object_get_properties;
+	date_object_handlers_date.get_gc = date_object_get_gc;
 
 #define REGISTER_DATE_CLASS_CONST_STRING(const_name, value) \
 	zend_declare_class_constant_stringl(date_ce_date, const_name, sizeof(const_name)-1, value, sizeof(value)-1 TSRMLS_CC);
@@ -1937,6 +1940,7 @@ static void date_register_classes(TSRMLS_D)
 	date_object_handlers_interval.write_property = date_interval_write_property;
 	date_object_handlers_interval.get_properties = date_object_get_properties_interval;
 	date_object_handlers_interval.get_property_ptr_ptr = NULL;
+	date_object_handlers_interval.get_gc = date_object_get_gc_interval;
 
 	INIT_CLASS_ENTRY(ce_period, "DatePeriod", date_funcs_period);
 	ce_period.create_object = date_object_new_period;
@@ -2023,6 +2027,13 @@ static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC)
 	return 1;
 }
 
+static HashTable *date_object_get_gc(zval *object, zval ***table, int *n TSRMLS_DC)
+{
+	*table = NULL;
+	*n = 0;
+	return zend_std_get_properties(object TSRMLS_CC);
+}
+
 static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 {
 	HashTable *props;
@@ -2034,7 +2045,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 
 	props = zend_std_get_properties(object TSRMLS_CC);
 
-	if (!dateobj->time || GC_G(gc_active)) {
+	if (!dateobj->time) {
 		return props;
 	}
 
@@ -2168,6 +2179,14 @@ static zend_object_value date_object_clone_interval(zval *this_ptr TSRMLS_DC)
 	return new_ov;
 }
 
+static HashTable *date_object_get_gc_interval(zval *object, zval ***table, int *n TSRMLS_DC)
+{
+
+	*table = NULL;
+	*n = 0;
+	return zend_std_get_properties(object TSRMLS_CC);
+}
+
 static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 {
 	HashTable *props;
@@ -2179,7 +2198,7 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 
 	props = zend_std_get_properties(object TSRMLS_CC);
 
-	if (!intervalobj->initialized || GC_G(gc_active)) {
+	if (!intervalobj->initialized) {
 		return props;
 	}
 
