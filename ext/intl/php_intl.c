@@ -34,6 +34,8 @@
 #include "collator/collator_create.h"
 #include "collator/collator_error.h"
 
+#include "converter/converter.h"
+
 #include "formatter/formatter.h"
 #include "formatter/formatter_class.h"
 #include "formatter/formatter_attr.h"
@@ -985,6 +987,9 @@ PHP_MINIT_FUNCTION( intl )
 
 	/* Global error handling. */
 	intl_error_init( NULL TSRMLS_CC );
+
+	/* 'Converter' class for codepage conversions */
+	php_converter_minit(INIT_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
