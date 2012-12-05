@@ -952,6 +952,7 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 	timelib_time_offset *offset = NULL;
 	timelib_sll          isoweek, isoyear;
 	int                  rfc_colon;
+	int                  weekYearSet = 0;
 
 	if (!format_len) {
 		return estrdup("");
@@ -978,7 +979,6 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 			offset = timelib_get_time_zone_info(t->sse, t->tz_info);
 		}
 	}
-	timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear);
 
 	for (i = 0; i < format_len; i++) {
 		rfc_colon = 0;
@@ -994,8 +994,12 @@ static char *date_format(char *format, int format_len, timelib_time *t, int loca
 			case 'z': length = slprintf(buffer, 32, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
 
 			/* week */
-			case 'W': length = slprintf(buffer, 32, "%02d", (int) isoweek); break; /* iso weeknr */
-			case 'o': length = slprintf(buffer, 32, "%d", (int) isoyear); break; /* iso year */
+			case 'W':
+				if(!weekYearSet) { timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear); weekYearSet = 1; }
+				length = slprintf(buffer, 32, "%02d", (int) isoweek); break; /* iso weeknr */
+			case 'o':
+				if(!weekYearSet) { timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear); weekYearSet = 1; }
+				length = slprintf(buffer, 32, "%d", (int) isoyear); break; /* iso year */
 
 			/* month */
 			case 'F': length = slprintf(buffer, 32, "%s", mon_full_names[t->m - 1]); break;
