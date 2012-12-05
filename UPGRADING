@@ -54,7 +54,7 @@ PHP 5.5 UPGRADE NOTES
   stores new offsets in op_array->opcodes[*].op?.num. You can use macros
   EX_TMP_VAR() and EX_TMP_VAR_NUM() to access temp_variable by offset or
   number. You can convert number to offset using EX_TMP_VAR_NUM(0, num) or
-  offset to number (EX_TMP_VAR(0,offset)-EX_TMP_VAR_NUM(0,0)).
+  offset to number (EX_TMP_VAR_NUM(0,0)-EX_TMP_VAR(0,offset)).
 - Removed execute_data->CVs field. The VM compiled variables always allocated
   immediately after execute_data structure. Now they are accessed by offset
   from the execute_data base pointer (instead of execute_data->CVs). You can

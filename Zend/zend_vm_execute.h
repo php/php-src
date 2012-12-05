@@ -326,9 +326,6 @@ static opcode_handler_t zend_vm_get_opcode_handler(zend_uchar opcode, zend_op* o
 #define ZEND_VM_DISPATCH(opcode, opline) return zend_vm_get_opcode_handler(opcode, opline)(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 
 #define ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_INTERNAL execute_data TSRMLS_CC
-#undef EX
-#define EX(element) execute_data->element
-
 
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 {
@@ -339,6 +336,11 @@ ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 
 	original_in_execution = EG(in_execution);
 	EG(in_execution) = 1;
+
+	if (0) {
+zend_vm_enter:
+		execute_data = i_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);
+	}
 
 	LOAD_REGS();
 	LOAD_OPLINE();
@@ -357,7 +359,7 @@ ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 					EG(in_execution) = original_in_execution;
 					return;
 				case 2:
-					execute_data = zend_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);
+					goto zend_vm_enter;
 					break;
 				case 3:
 					execute_data = EG(current_execute_data);
@@ -376,7 +378,7 @@ ZEND_API void zend_execute(zend_op_array *op_array TSRMLS_DC)
 	if (EG(exception)) {
 		return;
 	} 
-	zend_execute_ex(zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC) TSRMLS_CC);
+	zend_execute_ex(i_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC) TSRMLS_CC);
 }
 
 static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
@@ -391,7 +393,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	}
 
 	/* Generators go throw a different cleanup process */
-	if (EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+	if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
 		/* The generator object is stored in return_value_ptr_ptr */
 		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
 
@@ -405,7 +407,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
 	if (!EG(active_symbol_table)) {
-		zend_free_compiled_variables(execute_data);
+		i_free_compiled_variables(execute_data);
 	}
 
 	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {

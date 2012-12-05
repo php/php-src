@@ -12,6 +12,11 @@ ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *execute_data TSRMLS_DC)
 	original_in_execution = EG(in_execution);
 	EG(in_execution) = 1;
 
+	if (0) {
+zend_vm_enter:
+		execute_data = i_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);
+	}
+
 	LOAD_REGS();
 	LOAD_OPLINE();
 
@@ -36,7 +41,7 @@ ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array TSRMLS_DC)
 	if (EG(exception)) {
 		return;
 	} 
-	zend_{%EXECUTOR_NAME%}_ex(zend_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC) TSRMLS_CC);
+	zend_{%EXECUTOR_NAME%}_ex(i_create_execute_data_from_op_array(op_array, 0 TSRMLS_CC) TSRMLS_CC);
 }
 
 {%EXTERNAL_EXECUTOR%}
