@@ -1572,12 +1572,14 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 
 	/*
 	 * When allocating the execute_data, memory for compiled variables and
-	 * temporary variables is also allocated after the actual zend_execute_data
-	 * struct. op_array->last_var specifies the number of compiled variables and
-	 * op_array->T is the number of temporary variables. If there is no symbol
-	 * table, then twice as much memory is allocated for compiled variables.
-	 * In that case the first half contains zval**s and the second half the
-	 * actual zval*s (which would otherwise be in the symbol table).
+	 * temporary variables is also allocated before and after the actual
+	 * zend_execute_data struct. In addition we also allocate space to store
+	 * information about syntactically nested called functions and actual
+	 * parameters. op_array->last_var specifies the number of compiled
+	 * variables and op_array->T is the number of temporary variables. If there
+	 * is no symbol table, then twice as much memory is allocated for compiled
+	 * variables. In that case the first half contains zval**s and the second
+	 * half the actual zval*s (which would otherwise be in the symbol table).
 	 */
 	size_t execute_data_size = ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data));
 	size_t CVs_size = ZEND_MM_ALIGNED_SIZE(sizeof(zval **) * op_array->last_var * (EG(active_symbol_table) ? 1 : 2));
@@ -1592,8 +1594,9 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 	 * though this behavior would be suboptimal, because the (rather large)
 	 * structure would have to be copied back and forth every time execution is
 	 * suspended or resumed. That's why for generators the execution context
-	 * is allocated using emalloc, thus allowing to save and restore it simply
-	 * by replacing a pointer.
+	 * is allocated using a separate VM stack, thus allowing to save and
+	 * restore it simply by replacing a pointer. The same segment also keeps
+	 * a copy of previous execute_data and passed parameters.
 	 */
 	if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 		/* Prepend the regular stack frame with copy on prev_execute_data
