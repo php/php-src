@@ -3,17 +3,21 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.10
 
 - Core:
-  . Fixed bug #63666 (Poor date() performance). (Paul Talborg).
   . Fixed bug #63635 (Segfault in gc_collect_cycles). (Dmitry)
+  . Fixed bug #63512 (parse_ini_file() with INI_SCANNER_RAW removes quotes
+    from value). (Pierrick)
   . Fixed bug #63468 (wrong called method as callback with inheritance).
     (Laruence)
+  . Fixed bug #63451 (config.guess file does not have AIX 7 defined,
+    shared objects are not created). (kemcline at au1 dot ibm dot com)
   . Fixed bug #61557 (Crasher in tt-rss backend.php).
     (i dot am dot jack dot mail at gmail dot com)
   . Fixed bug #61272 (ob_start callback gets passed empty string).
     (Mike, casper at langemeijer dot eu)
 
 - Date:
-  . Fixed bug #63435 (Datetime::format('u') sometimes wrong by 1 microsecon).
+  . Fixed bug #63666 (Poor date() performance). (Paul Talborg).
+  . Fixed bug #63435 (Datetime::format('u') sometimes wrong by 1 microsecond).
     (Remi)
 
 - Imap:
