@@ -141,7 +141,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 			tsdelta = expires - (long)time(NULL);
 			if (tsdelta && tsdelta > 0) {
 				strlcat(cookie, "; Max-Age=", len + 100);
-				strlcat(cookie, expires, len + 100);
+				strlcat(cookie, (char) tsdelta, len + 100);
 			}
 			efree(tsdelta);
 		}
