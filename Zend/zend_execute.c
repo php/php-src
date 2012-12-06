@@ -1598,7 +1598,7 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 	 * restore it simply by replacing a pointer. The same segment also keeps
 	 * a copy of previous execute_data and passed parameters.
 	 */
-	if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
+	if (UNEXPECTED((op_array->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
 		/* Prepend the regular stack frame with copy on prev_execute_data
 		 * and passed arguments
 		 */

@@ -2049,7 +2049,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 			ret->var.fcall_returned_reference = (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0;
 		}
 
-		if (EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) {
+		if (UNEXPECTED((EG(active_op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
 			if (RETURN_VALUE_USED(opline)) {
 				EX_T(opline->result.var).var.ptr = zend_generator_create_zval(EG(active_op_array) TSRMLS_CC);
 			}
