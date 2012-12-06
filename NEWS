@@ -3,6 +3,23 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.5.0
 
 - General improvements:
+  . Added generators and coroutines (https://wiki.php.net/rfc/generators).
+    (Nikita Popov)
+  . Added "finally" keyword (https://wiki.php.net/rfc/finally). (Laruence)
+  . Added simplified password hashing API
+    (https://wiki.php.net/rfc/password_hash). (Anthony Ferrara)
+  . Added systemtap support by enabling systemtap compatible dtrace probes on
+    linux. (David Soria Parra)
+  . Added support for list in foreach (https://wiki.php.net/rfc/foreachlist).
+    (Laruence)
+  . Added support for using empty() on the result of function calls and
+    other expressions (https://wiki.php.net/rfc/empty_isset_exprs).
+    (Nikita Popov)
+  . Added support for constant array/string dereferencing. (Laruence)
+  . Improved set_exception_handler while doing reset.(Laruence)
+  . Removed php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid(),
+    zend_logo_guid(). (Adnrew Faulds)
+  . Dropped support for Windows XP and 2003. (Pierre)
   . Optimized access to temporary and compiled VM variables. 8% less memory
     reads. (Dmitry)
   . The VM stacks for passing function arguments and syntaticaly nested calls
@@ -10,23 +27,6 @@ PHP                                                                        NEWS
     execution is calculated at compile time and preallocated at once. As result
     all the stack push operatins don't require checks for stack overflow
     any more. (Dmitry)
-  . Added support for generators. (Nikita Popov)
-  . Add simplified password hashing API 
-    (https://wiki.php.net/rfc/password_hash). (Anthony Ferrara)
-  . Add generators and coroutines (https://wiki.php.net/rfc/generators).
-    (Nikita Popov)
-  . Support list in foreach (https://wiki.php.net/rfc/foreachlist). (Laruence)
-  . Implemented 'finally' keyword (https://wiki.php.net/rfc/finally). (Laruence)
-  . Drop Windows XP and 2003 support. (Pierre)
-  . Improve set_exception_handler while doing reset.(Laruence)
-  . Support constant array/string dereferencing. (Laruence)
-  . Add support for using empty() on the result of function calls and
-    other expressions (https://wiki.php.net/rfc/empty_isset_exprs).
-    (Nikita Popov)
-  . Remove php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid(),
-    zend_logo_guid(). (Adnrew Faulds)
-  . Add systemtap support by enabling systemtap compatible dtrace probes on
-    linux. (David Soria Parra)
 
 - Calendar:
   . Fixed bug #54254 (cal_from_jd returns month = 6 when there is only one Adar)
