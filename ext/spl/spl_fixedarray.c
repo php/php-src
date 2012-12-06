@@ -147,13 +147,30 @@ static void spl_fixedarray_copy(spl_fixedarray *to, spl_fixedarray *from TSRMLS_
 }
 /* }}} */
 
+static HashTable* spl_fixedarray_object_get_gc(zval *obj, zval ***table, int *n TSRMLS_DC) /* {{{{ */
+{
+	spl_fixedarray_object *intern  = (spl_fixedarray_object*)zend_object_store_get_object(obj TSRMLS_CC);
+	HashTable *ht = zend_std_get_properties(obj TSRMLS_CC);
+
+	if (intern->array) {
+		*table = intern->array->elements;
+		*n = intern->array->size;
+	} else {
+		*table = NULL;
+		*n = 0;
+	}
+
+	return ht;
+}
+/* }}}} */
+
 static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {{{{ */
 {
 	spl_fixedarray_object *intern  = (spl_fixedarray_object*)zend_object_store_get_object(obj TSRMLS_CC);
 	HashTable *ht = zend_std_get_properties(obj TSRMLS_CC);
 	int  i = 0;
 
-	if (intern->array && !GC_G(gc_active)) {
+	if (intern->array) {
 		int j = zend_hash_num_elements(ht);
 
 		for (i = 0; i < intern->array->size; i++) {
@@ -1124,6 +1141,7 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_handler_SplFixedArray.has_dimension   = spl_fixedarray_object_has_dimension;
 	spl_handler_SplFixedArray.count_elements  = spl_fixedarray_object_count_elements;
 	spl_handler_SplFixedArray.get_properties  = spl_fixedarray_object_get_properties;
+	spl_handler_SplFixedArray.get_gc          = spl_fixedarray_object_get_gc;
 
 	REGISTER_SPL_IMPLEMENTS(SplFixedArray, Iterator);
 	REGISTER_SPL_IMPLEMENTS(SplFixedArray, ArrayAccess);

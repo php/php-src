@@ -188,7 +188,9 @@ static int fpm_event_queue_del(struct fpm_event_queue_s **queue, struct fpm_even
 			}
 			if (q == *queue) {
 				*queue = q->next;
-				(*queue)->prev = NULL;
+				if (*queue) {
+					(*queue)->prev = NULL;
+				}
 			}
 
 			/* ask the event module to remove the fd from its own queue */
@@ -432,7 +434,9 @@ void fpm_event_loop(int err) /* {{{ */
 						}
 						if (q == fpm_event_queue_timer) {
 							fpm_event_queue_timer = q->next;
-							fpm_event_queue_timer->prev = NULL;
+							if (fpm_event_queue_timer) {
+								fpm_event_queue_timer->prev = NULL;
+							}
 						}
 						q = q->next;
 						free(q2);

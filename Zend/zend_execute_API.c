@@ -38,7 +38,7 @@
 #include <sys/time.h>
 #endif
 
-ZEND_API void (*zend_execute)(zend_op_array *op_array TSRMLS_DC);
+ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data TSRMLS_DC);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 
 /* true globals */
@@ -137,7 +137,6 @@ void init_executor(TSRMLS_D) /* {{{ */
 	INIT_ZVAL(EG(error_zval));
 	EG(uninitialized_zval_ptr)=&EG(uninitialized_zval);
 	EG(error_zval_ptr)=&EG(error_zval);
-	zend_ptr_stack_init(&EG(arg_types_stack));
 /* destroys stack frame, therefore makes core dumps worthless */
 #if 0&&ZEND_DEBUG
 	original_sigsegv_handler = signal(SIGSEGV, zend_handle_sigsegv);
@@ -293,9 +292,9 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 	} zend_end_try();
 
 	zend_try {
-		zend_vm_stack_destroy(TSRMLS_C);
-
 		zend_objects_store_free_object_storage(&EG(objects_store) TSRMLS_CC);
+
+		zend_vm_stack_destroy(TSRMLS_C);
 
 		/* Destroy all op arrays */
 		if (EG(full_tables_cleanup)) {
@@ -324,7 +323,6 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 
 		zend_hash_destroy(&EG(included_files));
 
-		zend_ptr_stack_destroy(&EG(arg_types_stack));
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
 		zend_ptr_stack_destroy(&EG(user_error_handlers));
 		zend_ptr_stack_destroy(&EG(user_exception_handlers));
@@ -862,7 +860,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 				    !ARG_MAY_BE_SENT_BY_REF(EX(function_state).function, i + 1)) {
 					if (i || UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (EG(argument_stack)->top))) {
 						/* hack to clean up the stack */
-						zend_vm_stack_push_nocheck((void *) (zend_uintptr_t)i TSRMLS_CC);
+						zend_vm_stack_push((void *) (zend_uintptr_t)i TSRMLS_CC);
 						zend_vm_stack_clear_multiple(TSRMLS_C);
 					}
 
@@ -899,11 +897,11 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			*param = **(fci->params[i]);
 			INIT_PZVAL(param);
 		}
-		zend_vm_stack_push_nocheck(param TSRMLS_CC);
+		zend_vm_stack_push(param TSRMLS_CC);
 	}
 
 	EX(function_state).arguments = zend_vm_stack_top(TSRMLS_C);
-	zend_vm_stack_push_nocheck((void*)(zend_uintptr_t)fci->param_count TSRMLS_CC);
+	zend_vm_stack_push((void*)(zend_uintptr_t)fci->param_count TSRMLS_CC);
 
 	current_scope = EG(scope);
 	EG(scope) = calling_scope;
@@ -1721,7 +1719,7 @@ ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC) /* {{{ */
 	for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
 		if (ex->op_array && ex->symbol_table == symbol_table) {
 			for (i = 0; i < ex->op_array->last_var; i++) {
-				ex->CVs[i] = NULL;
+				*EX_CV_NUM(ex, i) = NULL;
 			}
 		}
 	}
@@ -1740,7 +1738,7 @@ ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const c
 					if (ex->op_array->vars[i].hash_value == hash_value &&
 						ex->op_array->vars[i].name_len == name_len &&
 						!memcmp(ex->op_array->vars[i].name, name, name_len)) {
-						ex->CVs[i] = NULL;
+						*EX_CV_NUM(ex, i) = NULL;
 						break;
 					}
 				}
@@ -1764,7 +1762,7 @@ ZEND_API int zend_delete_global_variable_ex(const char *name, int name_len, ulon
 						ex->op_array->vars[i].name_len == name_len &&
 						!memcmp(ex->op_array->vars[i].name, name, name_len)
 					) {
-						ex->CVs[i] = NULL;
+						*EX_CV_NUM(ex, i) = NULL;
 						break;
 					}
 				}
@@ -1811,20 +1809,20 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 			ex->symbol_table = EG(active_symbol_table);
 
 			if (ex->op_array->this_var != -1 &&
-			    !ex->CVs[ex->op_array->this_var] &&
+			    !*EX_CV_NUM(ex, ex->op_array->this_var) &&
 			    EG(This)) {
-				ex->CVs[ex->op_array->this_var] = (zval**)ex->CVs + ex->op_array->last_var + ex->op_array->this_var;
-				*ex->CVs[ex->op_array->this_var] = EG(This);
+			    *EX_CV_NUM(ex, ex->op_array->this_var) = (zval**)EX_CV_NUM(ex, ex->op_array->last_var + ex->op_array->this_var);
+				**EX_CV_NUM(ex, ex->op_array->this_var) = EG(This);
  			}
 			for (i = 0; i < ex->op_array->last_var; i++) {
-				if (ex->CVs[i]) {
+				if (*EX_CV_NUM(ex, i)) {
 					zend_hash_quick_update(EG(active_symbol_table),
 						ex->op_array->vars[i].name,
 						ex->op_array->vars[i].name_len + 1,
 						ex->op_array->vars[i].hash_value,
-						(void**)ex->CVs[i],
+						(void**)*EX_CV_NUM(ex, i),
 						sizeof(zval*),
-						(void**)&ex->CVs[i]);
+						(void**)EX_CV_NUM(ex, i));
 				}
 			}
 		}
