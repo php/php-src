@@ -1,20 +1,46 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2012, PHP 5.4.11
+
 ?? ??? 2012, PHP 5.4.10
 
 - Core:
+  . Fixed bug #63635 (Segfault in gc_collect_cycles). (Dmitry)
+  . Fixed bug #63512 (parse_ini_file() with INI_SCANNER_RAW removes quotes
+    from value). (Pierrick)
   . Fixed bug #63468 (wrong called method as callback with inheritance).
     (Laruence)
+  . Fixed bug #63451 (config.guess file does not have AIX 7 defined,
+    shared objects are not created). (kemcline at au1 dot ibm dot com)
+  . Fixed bug #61557 (Crasher in tt-rss backend.php).
+    (i dot am dot jack dot mail at gmail dot com)
+  . Fixed bug #61272 (ob_start callback gets passed empty string).
+    (Mike, casper at langemeijer dot eu)
+
+- Date:
+  . Fixed bug #63666 (Poor date() performance). (Paul Talborg).
+  . Fixed bug #63435 (Datetime::format('u') sometimes wrong by 1 microsecond).
+    (Remi)
 
 - Imap:
-  . Fixed Bug #63126 DISABLE_AUTHENTICATOR ignores array (Remi)
+  . Fixed bug #63126 (DISABLE_AUTHENTICATOR ignores array). (Remi)
 
 - Json:
-  . Fixed bug #63588 use php_next_utf8_char and remove duplicate
-    implementation. (Remi)
+  . Fixed bug #63588 (use php_next_utf8_char and remove duplicate
+    implementation). (Remi)
 
-- mysqli:
-  . Fixed bug #63361 missing header. (Remi)
+- MySQLi:
+  . Fixed bug #63361 (missing header). (Remi)
+
+- MySQLnd:
+  . Fixed bug #63398 (Segfault when polling closed link). (Laruence)
+
+- Fileinfo:
+  . Fixed bug #63590 (Different results in TS and NTS under Windows).
+    (Anatoliy)
+
+- FPM:
+  . Fixed bug #63581 Possible null dereference and buffer overflow (Remi)
 
 - Pdo_sqlite:
   . Fixed Bug #63149 getColumnMeta should return the table name
@@ -22,6 +48,20 @@ PHP                                                                        NEWS
 
 - Apache2 Handler SAPI:
   . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
+
+- Reflection:
+  . Fixed Bug #63614 (Fatal error on Reflection). (Laruence)
+
+- SOAP
+  . Fixed bug #63271 (SOAP wsdl cache is not enabled after initial requests).
+    (John Jawed, Dmitry)
+
+- Sockets
+  . Fixed bug #49341 (Add SO_REUSEPORT support for socket_set_option()).
+    (Igor Wiedler, Lars)
+
+- SPL
+  . Fixed bug #63680 (Memleak in splfixedarray with cycle reference). (Laruence)
 
 22 Nov 2012, PHP 5.4.9
 
