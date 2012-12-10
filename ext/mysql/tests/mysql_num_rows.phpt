@@ -79,6 +79,8 @@ print "done!";
 require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
 Warning: mysql_num_rows() expects parameter 1 to be resource, boolean given in %s on line %d
 
 Warning: mysql_free_result() expects parameter 1 to be resource, boolean given in %s on line %d
