@@ -23,7 +23,7 @@ PHP                                                                        NEWS
   . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
 
 - Date:
-  . Fixed bug #63435 (Datetime::format('u') sometimes wrong by 1 microsecon).
+  . Fixed bug #63435 (Datetime::format('u') sometimes wrong by 1 microsecond).
     (Remi)
 
 - Fileinfo:
