@@ -163,6 +163,11 @@ PHP                                                                        NEWS
   . mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb() now throw
     E_DEPRECATED. (GoogleGuy)
 
+- MySQL
+  . This extension is now deprecated, and deprecation warnings will be generated
+    when connections are established to databases via mysql_connect(),
+    mysql_pconnect(), or through implicit connection. (Adam)
+
 - MySQLi
   . Dropped support for LOAD DATA LOCAL INFILE handlers when using libmysql.
     Known for stability problems. (Andrey)

@@ -85,6 +85,10 @@ PHP 5.5 UPGRADE NOTES
 3. Deprecated Functionality
 ========================================
 
+- The original MySQL extension is now deprecated, and will generate deprecation
+  warnings when connecting to a database through mysql_connect(),
+  mysql_pconnect() or by establishing an implicit connection. Use MySQLi or PDO
+  instead.
 - The preg_replace /e modifier is now deprecated.  Use
   preg_replace_callback instead.
   (https://wiki.php.net/rfc/remove_preg_replace_eval_modifier)
