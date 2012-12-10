@@ -19,7 +19,7 @@ if (PHP_OS == 'Linux') {
     $infos[$index] = $value;
   }
   $freeMemory = $infos['memfree']+$infos['buffers']+$infos['cached'];
-  if ($freeMemory < 2100*1024*1024) {
+  if ($freeMemory < 3072*1024*1024) {
     die('skip Not enough memory.');
   }
 }
@@ -38,7 +38,7 @@ elseif (PHP_OS == 'FreeBSD') {
   $freeMemory = ($infos['vm.stats.vm.v_inactive_count']*$infos['hw.pagesize'])
                 +($infos['vm.stats.vm.v_cache_count']*$infos['hw.pagesize'])
                 +($infos['vm.stats.vm.v_free_count']*$infos['hw.pagesize']);
-  if ($freeMemory < 2100*1024*1024) {
+  if ($freeMemory < 3072*1024*1024) {
     die('skip Not enough memory.');
   }
 }
