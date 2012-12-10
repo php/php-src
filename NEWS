@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.10
 
 - Core:
+  . Fixed bug #63726 (Memleak with static properties and internal/user
+    classes). (Laruence)
   . Fixed bug #63635 (Segfault in gc_collect_cycles). (Dmitry)
   . Fixed bug #63512 (parse_ini_file() with INI_SCANNER_RAW removes quotes
     from value). (Pierrick)
