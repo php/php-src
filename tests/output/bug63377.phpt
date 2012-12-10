@@ -2,6 +2,10 @@
 Bug #63377 (Segfault on output buffer > 2GB)
 --SKIPF--
 <?php
+if (PHP_INT_SIZE == 4) {
+  die('skip Not for 32-bits OS');
+}
+
 $zend_mm_enabled = getenv("USE_ZEND_ALLOC");
 if ($zend_mm_enabled === "0") {
     die("skip Zend MM disabled");
