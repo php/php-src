@@ -437,6 +437,8 @@ static void zend_std_write_property(zval *object, zval *member, zval *value TSRM
 				(*variable_ptr)->value = value->value;
 				if (Z_REFCOUNT_P(value) > 0) {
 					zval_copy_ctor(*variable_ptr);
+				} else {
+					efree(value);
 				}
 				zval_dtor(&garbage);
 			} else {
