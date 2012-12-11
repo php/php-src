@@ -166,7 +166,8 @@ PHP                                                                        NEWS
 - MySQL
   . This extension is now deprecated, and deprecation warnings will be generated
     when connections are established to databases via mysql_connect(),
-    mysql_pconnect(), or through implicit connection. (Adam)
+    mysql_pconnect(), or through implicit connection: use MySQLi or PDO_MySQL
+    instead (https://wiki.php.net/rfc/mysql_deprecation). (Adam)
 
 - MySQLi
   . Dropped support for LOAD DATA LOCAL INFILE handlers when using libmysql.
