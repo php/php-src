@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.11
 
+- JSON:
+  . Fixed bug #63737 (json_decode does not properly decode with options
+    parameter). (Adam)
+
 ?? ??? 2012, PHP 5.4.10
 
 - Core:
