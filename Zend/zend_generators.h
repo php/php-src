@@ -43,11 +43,13 @@ typedef struct _zend_generator {
 
 	/* The separate stack used by generator */
 	zend_vm_stack stack;
-
+    
 	/* Current value */
 	zval *value;
 	/* Current key */
 	zval *key;
+    
+    zval *exception;
 	/* Variable to put sent value into */
 	temp_variable *send_target;
 	/* Largest used integer key for auto-incrementing keys */
@@ -60,6 +62,7 @@ typedef struct _zend_generator {
 static const zend_uchar ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;
 static const zend_uchar ZEND_GENERATOR_FORCED_CLOSE      = 0x2;
 static const zend_uchar ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
+static const zend_uchar ZEND_GENERATOR_RISE_EXCEPTION    = 0x8;
 
 void zend_register_generator_ce(TSRMLS_D);
 zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC);

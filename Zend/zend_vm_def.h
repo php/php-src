@@ -5395,21 +5395,30 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 		ZVAL_LONG(generator->key, generator->largest_used_integer_key);
 	}
 
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		//zval_ptr_dtor(&EX_T(opline->result.var).var.ptr);
+		HANDLE_EXCEPTION();
+		ZEND_VM_RETURN();
+	}
 	/* If a value is sent it should go into the result var */
 	generator->send_target = &EX_T(opline->result.var);
+	
 
 	/* Initialize the sent value to NULL */
 	Z_ADDREF(EG(uninitialized_zval));
 	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
 
+	CHECK_EXCEPTION();
+
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
 	ZEND_VM_INC_OPCODE();
+	//ZEND_VM_CONTINUE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
-
 	ZEND_VM_RETURN();
 }
 
