@@ -246,7 +246,7 @@ static php_cli_server_http_reponse_status_code_pair status_map[] = {
 
 static php_cli_server_http_reponse_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
-	{ 404, "<h1>%s</h1><p>The requested resource %s was not found on this server.</p>" },
+	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
 	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
 	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
 };
@@ -283,6 +283,7 @@ static const char php_cli_server_css[] = "<style>\n" \
 										"body { background-color: #FCFCFC; color: #333333; margin: 0; padding:0; }\n" \
 										"h1 { font-size: 1.5em; font-weight: normal; background-color: #9999CC; min-height:2em; line-height:2em; border-bottom: 1px inset black; margin: 0; }\n" \
 										"h1, p { padding-left: 10px; }\n" \
+										"code.url { background-color: #EEEEEE; font-family:monospace; padding:0 2px;}\n" \
 										"</style>\n";
 /* }}} */
 
