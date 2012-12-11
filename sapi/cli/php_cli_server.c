@@ -280,8 +280,9 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_server);
  * copied from ext/standard/info.c
  */
 static const char php_cli_server_css[] = "<style>\n" \
-										"body { background-color: #ffffff; color: #000000; }\n" \
-										"h1 { font-family: sans-serif; font-size: 150%; background-color: #9999cc; font-weight: bold; color: #000000; margin-top: 0;}\n" \
+										"body { background-color: #FCFCFC; color: #333333; margin: 0; padding:0; }\n" \
+										"h1 { font-size: 1.5em; font-weight: normal; background-color: #9999CC; min-height:2em; line-height:2em; border-bottom: 1px inset black; margin: 0; }\n" \
+										"h1, p { padding-left: 10px; }\n" \
 										"</style>\n";
 /* }}} */
 
