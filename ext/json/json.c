@@ -693,7 +693,7 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 	else
 	{
 		double d;
-		int type;
+		int type, overflow_info;
 		long p;
 
 		RETVAL_NULL();
@@ -709,11 +709,36 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 			RETVAL_BOOL(0);
 		}
 
-		if ((type = is_numeric_string(str, str_len, &p, &d, 0)) != 0) {
+		if ((type = is_numeric_string_ex(str, str_len, &p, &d, 0, &overflow_info)) != 0) {
 			if (type == IS_LONG) {
 				RETVAL_LONG(p);
 			} else if (type == IS_DOUBLE) {
-				RETVAL_DOUBLE(d);
+				if (options & PHP_JSON_BIGINT_AS_STRING && overflow_info) {
+					/* Within an object or array, a numeric literal is assumed
+					 * to be an integer if and only if it's entirely made up of
+					 * digits (exponent notation will result in the number
+					 * being treated as a double). We'll match that behaviour
+					 * here. */
+					int i;
+					zend_bool is_float = 0;
+
+					for (i = (str[0] == '-' ? 1 : 0); i < str_len; i++) {
+						/* Not using isdigit() because it's locale specific,
+						 * but we expect JSON input to always be UTF-8. */
+						if (str[i] < '0' || str[i] > '9') {
+							is_float = 1;
+							break;
+						}
+					}
+
+					if (is_float) {
+						RETVAL_DOUBLE(d);
+					} else {
+						RETVAL_STRINGL(str, str_len, 1);
+					}
+				} else {
+					RETVAL_DOUBLE(d);
+				}
 			}
 		}
 
