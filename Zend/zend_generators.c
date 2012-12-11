@@ -27,7 +27,7 @@
 ZEND_API zend_class_entry *zend_ce_generator;
 static zend_object_handlers zend_generator_handlers;
 
-void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC) /* {{{ */
+ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC) /* {{{ */
 {
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
@@ -338,7 +338,7 @@ static zend_object_value zend_generator_create(zend_class_entry *class_type TSRM
 
 /* Requires globals EG(scope), EG(current_scope), EG(This),
  * EG(active_symbol_table) and EG(current_execute_data). */
-zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+ZEND_API zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	zval *return_value;
 	zend_generator *generator;
@@ -399,7 +399,7 @@ static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* 
 }
 /* }}} */
 
-void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
+ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
 	if (EG(exception)) {
 		return;
