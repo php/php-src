@@ -729,8 +729,7 @@ PHP_FUNCTION(unpack)
 						size = len;
 
 						/* Remove everything after the first null */
-						s = 0;
-						while (s++ <= len) {
+						for (s=0 ; s < len ; s++) {
 							if (input[inputpos + s] == pad)
 								break;
 						}
