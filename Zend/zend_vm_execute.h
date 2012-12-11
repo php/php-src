@@ -392,18 +392,6 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		zend_exception_restore(TSRMLS_C);
 	}
 
-	/* Generators go throw a different cleanup process */
-	if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-		/* Close the generator to free up resources */
-		zend_generator_close(generator, 1 TSRMLS_CC);
-
-		/* Pass execution back to handling code */
-		ZEND_VM_RETURN();
-	}
-
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
 	if (!EG(active_symbol_table)) {
@@ -705,7 +693,20 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_BY_NAME_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 
 static int ZEND_FASTCALL  ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (EXPECTED(EG(exception) == NULL) &&
+	    UNEXPECTED(EG(prev_exception) != NULL)) {
+		/* return from finally block called because of unhandled exception */
+		zend_exception_restore(TSRMLS_C);
+	}
+
+	/* Close the generator to free up resources */
+	zend_generator_close(generator, 1 TSRMLS_CC);
+
+	/* Pass execution back to handling code */
+	ZEND_VM_RETURN();
 }
 
 static int ZEND_FASTCALL  ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -1086,7 +1087,11 @@ static int ZEND_FASTCALL  ZEND_HANDLE_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
 		ZEND_VM_CONTINUE();
 	} else {
-		return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+			return ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		} else {
+			return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+		}
 	}
 }
 
@@ -1113,7 +1118,11 @@ static int ZEND_FASTCALL  ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		case ZEND_USER_OPCODE_CONTINUE:
 			ZEND_VM_CONTINUE();
 		case ZEND_USER_OPCODE_RETURN:
-			return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+				return ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			} else {
+				return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			}
 		case ZEND_USER_OPCODE_ENTER:
 			ZEND_VM_ENTER();
 		case ZEND_USER_OPCODE_LEAVE:
@@ -1169,6 +1178,9 @@ static int ZEND_FASTCALL  ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 			zend_exception_restore(TSRMLS_C);
 			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
 			ZEND_VM_CONTINUE();
+		} else if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+			zend_exception_restore(TSRMLS_C);
+			return ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 		} else {
 			zend_exception_restore(TSRMLS_C);
 			return zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);

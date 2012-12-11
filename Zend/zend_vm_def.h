@@ -1850,18 +1850,6 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		/* return from finally block called because of unhandled exception */
 		zend_exception_restore(TSRMLS_C);		
 	}
-	
-	/* Generators go throw a different cleanup process */
-	if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
-		/* The generator object is stored in return_value_ptr_ptr */
-		zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-		/* Close the generator to free up resources */
-		zend_generator_close(generator, 1 TSRMLS_CC);
-
-		/* Pass execution back to handling code */
-		ZEND_VM_RETURN();
-	}
 
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
@@ -2969,7 +2957,20 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 
 ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, ANY, ANY)
 {
-	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+	/* The generator object is stored in return_value_ptr_ptr */
+	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
+
+	if (EXPECTED(EG(exception) == NULL) &&
+	    UNEXPECTED(EG(prev_exception) != NULL)) {
+		/* return from finally block called because of unhandled exception */
+		zend_exception_restore(TSRMLS_C);		
+	}
+
+	/* Close the generator to free up resources */
+	zend_generator_close(generator, 1 TSRMLS_CC);
+
+	/* Pass execution back to handling code */
+	ZEND_VM_RETURN();
 }
 
 ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
@@ -5124,7 +5125,11 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 		ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[catch_op_num]);
 		ZEND_VM_CONTINUE();
 	} else {
-		ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+		if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_GENERATOR_RETURN);
+		} else {
+			ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+		}
 	}
 }
 
@@ -5151,7 +5156,11 @@ ZEND_VM_HANDLER(150, ZEND_USER_OPCODE, ANY, ANY)
 		case ZEND_USER_OPCODE_CONTINUE:
 			ZEND_VM_CONTINUE();
 		case ZEND_USER_OPCODE_RETURN:
-			ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+			if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+				ZEND_VM_DISPATCH_TO_HANDLER(ZEND_GENERATOR_RETURN);
+			} else {
+				ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+			}
 		case ZEND_USER_OPCODE_ENTER:
 			ZEND_VM_ENTER();
 		case ZEND_USER_OPCODE_LEAVE:
@@ -5444,6 +5453,9 @@ ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, ANY)
 			zend_exception_restore(TSRMLS_C);
 			ZEND_VM_SET_OPCODE(&EX(op_array)->opcodes[opline->op2.opline_num]);
 			ZEND_VM_CONTINUE();
+		} else if (UNEXPECTED((EX(op_array)->fn_flags & ZEND_ACC_GENERATOR) != 0)) {
+			zend_exception_restore(TSRMLS_C);
+			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_GENERATOR_RETURN);
 		} else {
 			zend_exception_restore(TSRMLS_C);
 			ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
