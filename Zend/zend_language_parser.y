@@ -181,6 +181,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_HALT_COMPILER "__halt_compiler (T_HALT_COMPILER)"
 %token T_CLASS      "class (T_CLASS)"
 %token T_TRAIT      "trait (T_TRAIT)"
+%token T_READONLY      "read-only (T_READONLY)"
+%token T_WRITEONLY      "write-only (T_WRITEONLY)"
 %token T_INTERFACE  "interface (T_INTERFACE)"
 %token T_EXTENDS    "extends (T_EXTENDS)"
 %token T_IMPLEMENTS "implements (T_IMPLEMENTS)"
@@ -375,7 +377,7 @@ is_reference:
 
 
 unticked_function_declaration_statement:
-		function is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, NULL TSRMLS_CC); }
+		function is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, NULL, ZEND_FNP_UNDEFINED TSRMLS_CC); }
 		'(' parameter_list ')'
 		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 ;
@@ -585,10 +587,10 @@ class_statement_list:
 
 
 class_statement:
-		variable_modifiers { CG(access_type) = Z_LVAL($1.u.constant); } class_variable_declaration ';'
+		variable_modifiers { CG(access_type) = Z_LVAL($1.u.constant); } class_variable_accessor_declarations
 	|	class_constant_declaration ';'
 	|	trait_use_statement
-	|	method_modifiers function is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$4, 1, $3.op_type, &$1 TSRMLS_CC); }
+	|	method_modifiers function is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$4, 1, $3.op_type, &$1, ZEND_FNP_UNDEFINED TSRMLS_CC); }
 		'(' parameter_list ')'
 		method_body { zend_do_abstract_method(&$4, &$1, &$9 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
 ;
@@ -677,6 +679,113 @@ member_modifier:
 	|	T_STATIC				{ Z_LVAL($$.u.constant) = ZEND_ACC_STATIC; }
 	|	T_ABSTRACT				{ Z_LVAL($$.u.constant) = ZEND_ACC_ABSTRACT; }
 	|	T_FINAL					{ Z_LVAL($$.u.constant) = ZEND_ACC_FINAL; }
+;
+
+accessors:
+		/* empty */
+	|	non_empty_accessor	{ $$ = $1; }
+;
+
+non_empty_accessor:
+		accessor_function						{ $$ = $1; }
+	| 	non_empty_accessor accessor_function	{ $$ = $1; }
+;
+
+accessor_modifiers:
+		/* empty */						{ Z_LVAL($$.u.constant) = CG(access_type); }
+	|	non_empty_accessor_modifiers	{ $$ = $1; }
+;
+
+non_empty_accessor_modifiers:
+		accessor_modifier								{ $$ = $1; }
+	|	non_empty_accessor_modifiers accessor_modifier	{ Z_LVAL($$.u.constant) = zend_do_verify_access_types(&$1, &$2); }
+
+
+accessor_modifier:
+		T_PUBLIC				{ Z_LVAL($$.u.constant) = ZEND_ACC_PUBLIC; }
+	|	T_PROTECTED				{ Z_LVAL($$.u.constant) = ZEND_ACC_PROTECTED; }
+	|	T_PRIVATE				{ Z_LVAL($$.u.constant) = ZEND_ACC_PRIVATE; }
+	|	T_STATIC				{ Z_LVAL($$.u.constant) = ZEND_ACC_STATIC; }
+	|	T_FINAL					{ Z_LVAL($$.u.constant) = ZEND_ACC_FINAL; }
+;
+
+accessor_optional_parens:
+		/* empty */
+	| '(' ')'
+;
+
+accessor_function:
+		T_ISSET accessor_optional_parens
+			{ 	Z_LVAL($1.u.constant) = T_ISSET;
+				Z_LVAL($$.u.constant) = CG(access_type);
+				zend_do_begin_accessor_declaration(&$1, CG(accessor_node), &$$, 0, 0 TSRMLS_CC); }
+				'{' inner_statement_list '}'
+			{ zend_do_end_accessor_declaration(&$1, CG(accessor_node), &$$, &$4 TSRMLS_CC); }
+	|	T_ISSET accessor_optional_parens
+			{ 
+				Z_LVAL($1.u.constant) = T_ISSET;	
+				Z_LVAL($$.u.constant) = CG(access_type);
+				zend_do_begin_accessor_declaration(&$1, CG(accessor_node), &$$, 0, 0 TSRMLS_CC);
+				zend_do_end_accessor_declaration(&$1, CG(accessor_node), &$$, NULL TSRMLS_CC);
+			}
+		';'
+	|	T_UNSET accessor_optional_parens
+			{ 	Z_LVAL($1.u.constant) = T_UNSET;
+				Z_LVAL($$.u.constant) = CG(access_type);
+				zend_do_begin_accessor_declaration(&$1, CG(accessor_node), &$$, 0, 0 TSRMLS_CC); }
+				'{' inner_statement_list '}'
+			{ zend_do_end_accessor_declaration(&$1, CG(accessor_node), &$$, &$4 TSRMLS_CC); }
+	|	T_UNSET accessor_optional_parens
+			{ 
+				Z_LVAL($1.u.constant) = T_UNSET;	
+				Z_LVAL($$.u.constant) = CG(access_type);
+				zend_do_begin_accessor_declaration(&$1, CG(accessor_node), &$$, 0, 0 TSRMLS_CC);
+				zend_do_end_accessor_declaration(&$1, CG(accessor_node), &$$, NULL TSRMLS_CC);
+			}
+		';'
+
+		/* With Parenthesis, Body & Parameters - Disallow getter, allow setter w/ 1 parameter */
+	|	accessor_modifiers is_reference T_STRING '(' 
+			{ zend_do_begin_accessor_declaration(&$3, CG(accessor_node), &$1, $2.op_type, 1 TSRMLS_CC); }
+				non_empty_parameter_list ')' '{' inner_statement_list '}'
+			{ zend_do_end_accessor_declaration(&$3, CG(accessor_node), &$1, &$5 TSRMLS_CC); }
+			
+		/* With Parenthesis & Body, No Parameters, Getter Only */
+	|	accessor_modifiers is_reference T_STRING '(' ')'
+			{ zend_do_begin_accessor_declaration(&$3, CG(accessor_node), &$1, $2.op_type, 0 TSRMLS_CC); }
+				'{' inner_statement_list '}'
+			{ zend_do_end_accessor_declaration(&$3, CG(accessor_node), &$1, &$5 TSRMLS_CC); }
+
+		/* Without Parenthesis */
+	|	accessor_modifiers is_reference T_STRING
+			{ zend_do_begin_accessor_declaration(&$3, CG(accessor_node), &$1, $2.op_type, 0 TSRMLS_CC); }
+				'{' inner_statement_list '}'
+			{ zend_do_end_accessor_declaration(&$3, CG(accessor_node), &$1, &$5 TSRMLS_CC); }
+		
+		/* With Parethensis, No Body */
+	|	accessor_modifiers is_reference T_STRING '(' ')'
+		{
+			zend_do_begin_accessor_declaration(&$3, CG(accessor_node), &$1, $2.op_type, 0 TSRMLS_CC);
+			zend_do_end_accessor_declaration(&$3, CG(accessor_node), &$1, NULL TSRMLS_CC);
+		}
+		';'
+		
+		/* Without Parenthesis, No Body */
+	|	accessor_modifiers is_reference T_STRING
+		{
+			zend_do_begin_accessor_declaration(&$3, CG(accessor_node), &$1, $2.op_type, 0 TSRMLS_CC);
+			zend_do_end_accessor_declaration(&$3, CG(accessor_node), &$1, NULL TSRMLS_CC);
+		}
+		';'
+;
+
+class_variable_accessor_declarations:
+		T_VARIABLE '{'
+			{ zend_declare_accessor(&$1 TSRMLS_CC); CG(accessor_node) = &$1; }
+			accessors
+			{ zend_finalize_accessor(&$1 TSRMLS_CC); efree($1.u.constant.value.str.val); }
+		'}'
+	|	class_variable_declaration ';'
 ;
 
 class_variable_declaration:

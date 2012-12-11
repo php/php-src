@@ -582,6 +582,8 @@ ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend
 	const char *fname = zf->common.function_name;
 	char *fsep;
 	const char *fclass;
+	char *fsuffix = "()";
+	char *ftype = "";
 
 	if (zf->common.scope) {
 		fsep =  "::";
@@ -590,11 +592,17 @@ ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend
 		fsep =  "";
 		fclass = "";
 	}
+	if(IS_ACCESSOR_FN(zf)) {
+		fname = ZEND_ACC_NAME(zf);
+		fsep = "::$";
+		fsuffix = "";
+		ftype = "setter ";
+	}
 
 	if (ptr && ptr->op_array) {
-		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given, called in %s on line %d and defined", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind, ptr->op_array->filename, ptr->opline->lineno);
+		zend_error(error_type, "Argument %d passed to %s%s%s%s%s must %s%s, %s%s given, called in %s on line %d and defined", arg_num, ftype, fclass, fsep, fname, fsuffix, need_msg, need_kind, given_msg, given_kind, ptr->op_array->filename, ptr->opline->lineno);
 	} else {
-		zend_error(error_type, "Argument %d passed to %s%s%s() must %s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, given_msg, given_kind);
+		zend_error(error_type, "Argument %d passed to %s%s%s%s%s must %s%s, %s%s given", arg_num, ftype, fclass, fsep, fname, fsuffix, need_msg, need_kind, given_msg, given_kind);
 	}
 	return 0;
 }

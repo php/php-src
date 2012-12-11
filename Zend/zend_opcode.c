@@ -95,6 +95,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->this_var = -1;
 
 	op_array->fn_flags = CG(interactive)?ZEND_ACC_INTERACTIVE:0;
+	op_array->purpose = ZEND_FNP_UNDEFINED;
 
 	op_array->early_binding = -1;
 
@@ -126,6 +127,14 @@ ZEND_API void zend_function_dtor(zend_function *function)
 	TSRMLS_FETCH();
 
 	destroy_zend_function(function TSRMLS_CC);
+}
+
+ZEND_API void zend_accessor_dtor(zend_accessor_info **ai)
+{
+	if((*ai)->doc_comment) {
+		efree((void*)(*ai)->doc_comment);
+	}
+	efree(*ai);
 }
 
 static void zend_cleanup_op_array_data(zend_op_array *op_array)
@@ -310,6 +319,7 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				efree(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
+			zend_hash_destroy(&ce->accessors);
 			str_efree(ce->name);
 			if ((ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
 				TSRMLS_FETCH();
@@ -685,8 +695,14 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 {
 	zend_op *opline, *end;
+	zend_bool original_in_compilation = CG(in_compilation);
+	char *original_compiled_filename = CG(compiled_filename);
+	int original_zend_lineno = CG(zend_lineno);
 
-	if (op_array->type!=ZEND_USER_FUNCTION && op_array->type!=ZEND_EVAL_CODE) {
+	if( (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) ) {
+		return 0;
+	}
+	if (op_array->type != ZEND_USER_FUNCTION && op_array->type != ZEND_EVAL_CODE) {
 		return 0;
 	}
 	if (op_array->has_finally_block) {
@@ -712,9 +728,13 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 		CG(context).literals_size = op_array->last_literal;
 	}
 
+	CG(in_compilation) = 1;
+	CG(compiled_filename) = (char*)op_array->filename;
+
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
+		CG(zend_lineno) = opline->lineno;
 		if (opline->op1_type == IS_CONST) {
 			opline->op1.zv = &op_array->literals[opline->op1.constant].constant;
 		}
@@ -750,14 +770,38 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
+			case ZEND_INIT_STATIC_METHOD_CALL: {
+					/** Is this a call to a static getter, static setters are dependent on static getters (which get backpatched to setter calls), so during compilation
+					 * 		a static getter call may be in the op_array and if no zend_do_assign() has been called to backpatch it, then it's an illegal getter call, this
+					 * 		checks to see that by this point any getter that has not been backpatched, actually exists as a getter, or errors. */
+					const char *context_name;	/* Does not need to be free'd */
+
+					zend_accessor_info *ai = zend_get_accessor_from_init_static_method_call(op_array, opline, &context_name TSRMLS_CC);
+					if(ai) {
+						if(Z_STRVAL_P(opline->op2.zv)[2] == 'g') {
+							if(!ai->getter) {
+								zend_error_noreturn(E_ERROR, "Cannot get property %s::$%s, no getter defined.", context_name, Z_STRVAL_P(opline->op2.zv)+5);
+							}
+						} else if (Z_STRVAL_P(opline->op2.zv)[2] == 's') {
+							if(!ai->setter) {
+								zend_error_noreturn(E_ERROR, "Cannot set property %s::$%s, no setter defined.", context_name, Z_STRVAL_P(opline->op2.zv)+5);
+							}
+						}
+					}
+				}
+				break;
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
 
 	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;
+	CG(in_compilation) = original_in_compilation;
+	CG(compiled_filename) = original_compiled_filename;
+	CG(zend_lineno) = original_zend_lineno;
 	return 0;
 }
+
 
 int print_class(zend_class_entry *class_entry TSRMLS_DC)
 {

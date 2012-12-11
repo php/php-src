@@ -312,7 +312,7 @@ typedef struct _zend_object {
 	zend_class_entry *ce;
 	HashTable *properties;
 	zval **properties_table;
-	HashTable *guards; /* protects from __get/__set ... recursion */
+	HashTable *guards; /* protects from __get/__set/accessor ... recursion */
 } zend_object;
 
 #include "zend_object_handlers.h"
@@ -482,6 +482,8 @@ struct _zend_class_entry {
 
 	HashTable function_table;
 	HashTable properties_info;
+	HashTable accessors;
+
 	zval **default_properties_table;
 	zval **default_static_members_table;
 	zval **static_members_table;
@@ -683,6 +685,8 @@ END_EXTERN_C()
 #define ZEND_PUTS(str)					zend_write((str), strlen((str)))
 #define ZEND_PUTS_EX(str)				write_func((str), strlen((str)))
 #define ZEND_PUTC(c)					zend_write(&(c), 1), (c)
+
+extern char *strcatalloc(const char *a, size_t len_a, const char *b, size_t len_b TSRMLS_DC);
 
 BEGIN_EXTERN_C()
 extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);

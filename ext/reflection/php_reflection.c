@@ -40,6 +40,7 @@
 #include "zend_interfaces.h"
 #include "zend_closures.h"
 #include "zend_extensions.h"
+#include "zend_object_handlers.h"
 
 #define reflection_update_property(object, name, value) do { \
 		zval *member; \
@@ -61,6 +62,7 @@ PHPAPI zend_class_entry *reflection_class_ptr;
 PHPAPI zend_class_entry *reflection_object_ptr;
 PHPAPI zend_class_entry *reflection_method_ptr;
 PHPAPI zend_class_entry *reflection_property_ptr;
+PHPAPI zend_class_entry *reflection_property_accessor_ptr;
 PHPAPI zend_class_entry *reflection_extension_ptr;
 PHPAPI zend_class_entry *reflection_zend_extension_ptr;
 
@@ -186,6 +188,12 @@ typedef struct _property_reference {
 	zend_property_info prop;
 } property_reference;
 
+/* Struct for properties */
+typedef struct _property_accessor_reference {
+	zend_class_entry *ce;
+	zend_accessor_info ai;
+} property_accessor_reference;
+
 /* Struct for parameters */
 typedef struct _parameter_reference {
 	zend_uint offset;
@@ -199,6 +207,7 @@ typedef enum {
 	REF_TYPE_FUNCTION,
 	REF_TYPE_PARAMETER,
 	REF_TYPE_PROPERTY,
+	REF_TYPE_PROPERTY_ACCESSOR,
 	REF_TYPE_DYNAMIC_PROPERTY
 } reflection_type_t;
 
@@ -298,6 +307,7 @@ static void reflection_free_objects_storage(void *object TSRMLS_DC) /* {{{ */
 			_free_function(intern->ptr TSRMLS_CC);
 			break;
 		case REF_TYPE_PROPERTY:
+		case REF_TYPE_PROPERTY_ACCESSOR:
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_DYNAMIC_PROPERTY:
@@ -349,6 +359,7 @@ static zval * reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_
 static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC);
 static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char* indent TSRMLS_DC);
 static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC);
+static void _property_accessor_string(string *str, zend_accessor_info *ai, char* indent TSRMLS_DC);
 static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC);
 static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC);
 static void _zend_extension_string(string *str, zend_extension *extension, char *indent TSRMLS_DC);
@@ -963,6 +974,55 @@ static void _property_string(string *str, zend_property_info *prop, char *prop_n
 }
 /* }}} */
 
+
+/* {{{ _property_accessor_string */
+static void _property_accessor_string(string *str, zend_accessor_info *ai, char* indent TSRMLS_DC)
+{
+	const char *name = NULL;
+	string sub_indent;
+	string_init(&sub_indent);
+	string_printf(&sub_indent, "%s    ", indent);
+
+	string_printf(str, "%sAccessor [ ", indent);
+	if (ai) {
+		if(ai->getter) {
+			name = ZEND_ACC_NAME(ai->getter);
+		} else if(ai->setter) {
+			name = ZEND_ACC_NAME(ai->setter);
+		}
+		/* These are mutually exclusive */
+		switch (ai->flags & ZEND_ACC_PPP_MASK) {
+			case ZEND_ACC_PUBLIC:
+				string_printf(str, "public ");
+				break;
+			case ZEND_ACC_PRIVATE:
+				string_printf(str, "private ");
+				break;
+			case ZEND_ACC_PROTECTED:
+				string_printf(str, "protected ");
+				break;
+		}
+		if(ai->flags & ZEND_ACC_STATIC) {
+			string_printf(str, "static ");
+		}
+
+		string_printf(str, "$%s ] {\n", name);
+
+		if(ai->getter) {
+			_function_string(str, ai->getter, ai->getter->common.scope, sub_indent.string TSRMLS_CC);
+		}
+		if(ai->setter) {
+			_function_string(str, ai->setter, ai->setter->common.scope, sub_indent.string TSRMLS_CC);
+		}
+
+		string_printf(str, "%s}\n", indent);
+	}
+
+	string_printf(str, " ]\n");
+	string_free(&sub_indent);
+}
+/* }}} */
+
 static int _extension_ini_string(zend_ini_entry *ini_entry TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key) /* {{{ */
 {
 	string *str = va_arg(args, string *);
@@ -1351,6 +1411,43 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	reference->prop = *prop;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
+	intern->ce = ce;
+	intern->ignore_visibility = 0;
+	reflection_update_property(object, "name", name);
+	reflection_update_property(object, "class", classname);
+}
+/* }}} */
+
+/* {{{ reflection_property_accessor_factory */
+static void reflection_property_accessor_factory(zend_class_entry *ce, zend_accessor_info *ai, zval *object TSRMLS_DC)
+{
+	reflection_object *intern;
+	zval *name;
+	zval *classname;
+	property_accessor_reference *reference;
+	const char *prop_name = NULL;
+
+	zend_function *func;
+
+	if(ai->getter) {
+		func = ai->getter;
+	} else {
+		func = ai->setter;
+	}
+	prop_name = ZEND_ACC_NAME(func);
+
+	MAKE_STD_ZVAL(name);
+	MAKE_STD_ZVAL(classname);
+	ZVAL_STRING(name, prop_name, 1);
+	ZVAL_STRINGL(classname, ce->name, ce->name_length, 1);
+
+	reflection_instantiate(reflection_property_accessor_ptr, object TSRMLS_CC);
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	reference = (property_accessor_reference*) emalloc(sizeof(property_accessor_reference));
+	reference->ce = ce;
+	reference->ai = *ai;
+	intern->ptr = reference;
+	intern->ref_type = REF_TYPE_PROPERTY_ACCESSOR;
 	intern->ce = ce;
 	intern->ignore_visibility = 0;
 	reflection_update_property(object, "name", name);
@@ -3733,7 +3830,7 @@ static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, 
 	uint len = strlen(mptr->common.function_name);
 	zend_function *closure;
 
-	if (mptr->common.fn_flags & filter) {
+	if (mptr->common.fn_flags & filter && !(IS_ACCESSOR(mptr->common.purpose))) {
 		ALLOC_ZVAL(method);
 		if (ce == zend_ce_closure && obj && (len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
 			&& memcmp(mptr->common.function_name, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
@@ -3953,6 +4050,52 @@ static int _adddynproperty(zval **pptr TSRMLS_DC, int num_args, va_list args, ze
 }
 /* }}} */
 
+/* {{{ _addaccessors */
+static int _addaccessors(zend_accessor_info **pptr TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+{
+
+	/* If there is not already a property for the given name */
+
+	zend_class_entry *ce = *va_arg(args, zend_class_entry**);
+	zval *retval = va_arg(args, zval*);
+	zend_accessor_info *ai = *pptr;
+	zend_function *func = NULL;
+
+	if(ai->getter) {
+		func = ai->getter;
+	} else {
+		func = ai->setter;
+	}
+
+	if(func) {
+		HashPosition pos;
+		const char *name = ZEND_ACC_NAME(func);
+		zval member;
+		zval **entry, *result;
+		zval *property;
+
+		ZVAL_STRINGL(&member, "name", 4, 0);
+
+		/* Search existing values to ensure we don't already have a property defined by name */
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(retval), &pos);
+		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(retval), (void **)&entry, &pos) == SUCCESS) {
+			result = zend_std_read_property(*entry, &member, 0, (const zend_literal *)NULL TSRMLS_CC );
+			if(result != NULL && result->type == IS_STRING && strncmp(Z_STRVAL_P(result), name, strlen(name)) == 0)
+				return 0;	/* Already have property named name defined */
+
+			zend_hash_move_forward_ex(Z_ARRVAL_P(retval), &pos);
+		}
+
+		MAKE_STD_ZVAL(property);
+		reflection_property_accessor_factory(ce, ai, property TSRMLS_CC);
+
+		add_next_index_zval(retval, property);
+	}
+
+	return 0;
+}
+/* }}} */
+
 /* {{{ proto public ReflectionProperty[] ReflectionClass::getProperties([long $filter])
    Returns an array of this class' properties */
 ZEND_METHOD(reflection_class, getProperties)
@@ -3981,6 +4124,8 @@ ZEND_METHOD(reflection_class, getProperties)
 		HashTable *properties = Z_OBJ_HT_P(intern->obj)->get_properties(intern->obj TSRMLS_CC);
 		zend_hash_apply_with_arguments(properties TSRMLS_CC, (apply_func_args_t) _adddynproperty, 2, &ce, return_value);
 	}
+
+	zend_hash_apply_with_arguments(&ce->accessors TSRMLS_CC, (apply_func_args_t) _addaccessors, 2, &ce, return_value);
 }
 /* }}} */
 
@@ -5145,6 +5290,356 @@ ZEND_METHOD(reflection_property, setAccessible)
 }
 /* }}} */
 
+/*** ReflectionPropertyAccessor Functions */
+
+/* {{{ proto public void ReflectionPropertyAccessor::__construct(mixed class, string name)
+   Constructor. Throws an Exception in case the given accessor does not exist */
+ZEND_METHOD(reflection_property_accessor, __construct)
+{
+	zval *propname, *classname;
+	char *name_str;
+	int name_len;
+	zval *object;
+	reflection_object *intern;
+	zend_class_entry **pce;
+	zend_class_entry *ce;
+	zend_accessor_info *ai = NULL, **aipp;
+	property_accessor_reference *reference;
+	zend_function *func = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {
+		return;
+	}
+
+	object = getThis();
+	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
+	if (intern == NULL) {
+		return;
+	}
+
+	/* Find the class entry */
+	switch (Z_TYPE_P(classname)) {
+		case IS_STRING:
+			if (zend_lookup_class(Z_STRVAL_P(classname), Z_STRLEN_P(classname), &pce TSRMLS_CC) == FAILURE) {
+				zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+						"Class %s does not exist", Z_STRVAL_P(classname));
+				return;
+			}
+			ce = *pce;
+			break;
+
+		case IS_OBJECT:
+			ce = Z_OBJCE_P(classname);
+			break;
+
+		default:
+			_DO_THROW("The parameter class is expected to be either a string or an object");
+			/* returns out of this function */
+	}
+
+	if (zend_hash_find(&ce->accessors, name_str, name_len + 1, (void **) &aipp) == FAILURE) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Accessor %s::$%s does not exist", ce->name, name_str);
+		return;
+	}
+	ai = *aipp;
+
+	MAKE_STD_ZVAL(classname);
+	MAKE_STD_ZVAL(propname);
+
+	func = ai->getter ? ai->getter : ai->setter;
+
+	ZVAL_STRINGL(classname, func->common.scope->name, func->common.scope->name_length, 1);
+	ZVAL_STRING(propname, ZEND_ACC_NAME(func), 1);
+
+	reflection_update_property(object, "class", classname);
+	reflection_update_property(object, "name", propname);
+
+	reference = (property_accessor_reference*) emalloc(sizeof(property_accessor_reference));
+	reference->ai = *ai;
+	reference->ce = ce;
+	intern->ptr = reference;
+	intern->ref_type = REF_TYPE_PROPERTY_ACCESSOR;
+	intern->ce = ce;
+	intern->ignore_visibility = 0;
+}
+/* }}} */
+
+/* {{{ proto public void ReflectionPropertyAccessor::getGetter()
+   Gets the ReflectionMethod accessor for getting this property, returns false if there is no accessor */
+ZEND_METHOD(reflection_property_accessor, getGetter)
+{
+	reflection_object *intern;
+	property_accessor_reference *ref;
+
+	METHOD_NOTSTATIC(reflection_property_accessor_ptr);
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if(ref->ai.getter) {
+		reflection_method_factory(ref->ce, ref->ai.getter, NULL, return_value TSRMLS_CC);
+		return;
+	}
+	RETURN_FALSE
+}
+/* }}} */
+
+/* {{{ proto public void ReflectionPropertyAccessor::getSetter()
+   Gets the ReflectionMethod accessor for setting this property, returns false if there is no accessor */
+ZEND_METHOD(reflection_property_accessor, getSetter)
+{
+	reflection_object *intern;
+	property_accessor_reference *ref;
+
+	METHOD_NOTSTATIC(reflection_property_accessor_ptr);
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if(ref->ai.setter) {
+		reflection_method_factory(ref->ce, ref->ai.setter, NULL, return_value TSRMLS_CC);
+		return;
+	}
+	RETURN_FALSE
+}
+/* }}} */
+
+static void _property_accessor_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /* {{{ */
+{
+	reflection_object *intern;
+	property_accessor_reference *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+	RETURN_BOOL(ref->ai.flags & mask);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionPropertyAccessor::isPublic()
+   Returns whether this accessor is public */
+ZEND_METHOD(reflection_property_accessor, isPublic)
+{
+	_property_accessor_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionPropertyAccessor::isPrivate()
+   Returns whether this accessor is private */
+ZEND_METHOD(reflection_property_accessor, isPrivate)
+{
+	_property_accessor_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PRIVATE);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionPropertyAccessor::isProtected()
+   Returns whether this accessor is protected */
+ZEND_METHOD(reflection_property_accessor, isProtected)
+{
+	_property_accessor_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PROTECTED);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionPropertyAccessor::isStatic()
+   Returns whether this accessor is static */
+ZEND_METHOD(reflection_property_accessor, isStatic)
+{
+	_property_accessor_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_STATIC);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionPropertyAccessor::isDefault()
+   Returns whether this accessor is default (declared at compilation time). */
+ZEND_METHOD(reflection_property_accessor, isDefault)
+{
+	_property_accessor_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ~ZEND_ACC_IMPLICIT_PUBLIC);
+}
+/* }}} */
+
+/* {{{ proto public int ReflectionPropertyAccessor::getModifiers()
+   Returns a bitfield of the access modifiers for this accessor */
+ZEND_METHOD(reflection_property_accessor, getModifiers)
+{
+	reflection_object *intern;
+	property_accessor_reference *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	RETURN_LONG(ref->ai.flags);
+}
+/* }}} */
+
+/* {{{ proto public ReflectionClass ReflectionPropertyAccessor::getDeclaringClass()
+   Get the class which declared this accessor */
+ZEND_METHOD(reflection_property_accessor, getDeclaringClass)
+{
+	reflection_object *intern;
+	property_accessor_reference *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if(ref->ai.getter) {
+		zend_reflection_class_factory(ref->ai.getter->common.scope, return_value TSRMLS_CC);
+	} else if(ref->ai.setter) {
+		zend_reflection_class_factory(ref->ai.setter->common.scope, return_value TSRMLS_CC);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+
+/* {{{ proto public string ReflectionPropertyAccessor::getDocComment()
+   Returns the doc comment for this accessor */
+ZEND_METHOD(reflection_property_accessor, getDocComment)
+{
+	reflection_object *intern;
+	property_accessor_reference *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if(ref->ai.doc_comment) {
+		RETURN_STRINGL(ref->ai.doc_comment, ref->ai.doc_comment_len, 1);
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto public int ReflectionPropertyAccessor::setAccessible(bool visible)
+   Sets whether non-public properties can be requested */
+ZEND_METHOD(reflection_property_accessor, setAccessible)
+{
+	reflection_object *intern;
+	zend_bool visible;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &visible) == FAILURE) {
+		return;
+	}
+
+	intern = (reflection_object *) zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (intern == NULL) {
+		return;
+	}
+
+	intern->ignore_visibility = visible;
+}
+/* }}} */
+
+/* {{{ proto public mixed ReflectionPropertyAccessor::getValue([stdclass object])
+   Returns this property's value by calling the accessor */
+ZEND_METHOD(reflection_property_accessor, getValue)
+{
+	reflection_object *intern;
+	property_accessor_reference *ref;
+	zval *object, name;
+	zval *retval = NULL;
+
+	METHOD_NOTSTATIC(reflection_property_accessor_ptr);
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if(!ref->ai.getter) {
+		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "No getter defined for property accessor %s::%s", intern->ce->name, Z_STRVAL(name));
+		zval_dtor(&name);
+		return;
+	}
+
+	if (!(ref->ai.getter->common.fn_flags & (ZEND_ACC_PUBLIC | ZEND_ACC_IMPLICIT_PUBLIC)) && intern->ignore_visibility == 0) {
+		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC,
+			"Cannot access non-public getter %s::%s", intern->ce->name, Z_STRVAL(name));
+		zval_dtor(&name);
+		return;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &object) == FAILURE) {
+		return;
+	}
+
+	zend_call_method_with_0_params(&object, ref->ai.getter->common.scope, &ref->ai.getter, ref->ai.getter->common.function_name, &retval);
+	MAKE_COPY_ZVAL(&retval, return_value);
+	if (retval != EG(uninitialized_zval_ptr)) {
+		zval_ptr_dtor(&retval);
+	}
+}
+/* }}} */
+
+/* {{{ proto public void ReflectionPropertyAccessor::setValue([stdclass object,] mixed value)
+   Sets this property's value */
+ZEND_METHOD(reflection_property_accessor, setValue)
+{
+	reflection_object *intern;
+	property_accessor_reference *ref;
+	zval *object, name;
+	zval *value;
+	zval *retval = NULL;
+
+	METHOD_NOTSTATIC(reflection_property_accessor_ptr);
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if(!ref->ai.setter) {
+		_default_get_entry(getThis(), "name", sizeof("name"), &name TSRMLS_CC);
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "No setter defined for property accessor %s::%s", intern->ce->name, Z_STRVAL(name));
+		zval_dtor(&name);
+		return;
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "oz", &object, &value) == FAILURE) {
+		return;
+	}
+
+	zend_call_method_with_1_params(&object, ref->ai.setter->common.scope, &ref->ai.setter, ref->ai.setter->common.function_name, &retval, value);
+
+	if (retval) {
+		zval_ptr_dtor(&retval);
+	}
+}
+/* }}} */
+
+/* {{{ proto public string ReflectionPropertyAccessor::getName()
+   Returns the property name */
+ZEND_METHOD(reflection_property_accessor, getName)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	_default_get_entry(getThis(), "name", sizeof("name"), return_value TSRMLS_CC);
+}
+
+/* {{{ proto public string ReflectionPropertyAccessor::__toString()
+   Returns a string representation */
+ZEND_METHOD(reflection_property_accessor, __toString)
+{
+	reflection_object *intern;
+	property_accessor_reference *ref;
+	string str;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+	string_init(&str);
+	_property_accessor_string(&str, &ref->ai, "" TSRMLS_CC);
+	RETURN_STRINGL(str.string, str.len - 1, 0);
+}
+/* }}} */
+
+/* {{{ proto public static mixed ReflectionPropertyAccessor::export(mixed class, string name [, bool return]) throws ReflectionException
+   Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
+ZEND_METHOD(reflection_property_accessor, export)
+{
+	_reflection_export(INTERNAL_FUNCTION_PARAM_PASSTHRU, reflection_property_accessor_ptr, 2);
+}
+/* }}} */
+
+
 /* {{{ proto public static mixed ReflectionExtension::export(string name [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_extension, export)
@@ -5976,6 +6471,29 @@ static const zend_function_entry reflection_property_functions[] = {
 	PHP_FE_END
 };
 
+
+static const zend_function_entry reflection_property_accessor_functions[] = {
+	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(reflection_property_accessor, export, arginfo_reflection_property_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
+	ZEND_ME(reflection_property_accessor, __construct, arginfo_reflection_property___construct, 0)
+	ZEND_ME(reflection_property_accessor, __toString, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, getName, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, getValue, arginfo_reflection_property_getValue, 0)
+	ZEND_ME(reflection_property_accessor, setValue, arginfo_reflection_property_setValue, 0)
+	ZEND_ME(reflection_property_accessor, isPublic, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, isPrivate, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, isProtected, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, isStatic, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, isDefault, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, getGetter, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, getSetter, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, getModifiers, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, getDeclaringClass, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, getDocComment, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property_accessor, setAccessible, arginfo_reflection_property_setAccessible, 0)
+	PHP_FE_END
+};
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_parameter_export, 0, 0, 2)
 	ZEND_ARG_INFO(0, function)
 	ZEND_ARG_INFO(0, parameter)
@@ -6155,6 +6673,18 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PUBLIC", ZEND_ACC_PUBLIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PROTECTED", ZEND_ACC_PROTECTED);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PRIVATE", ZEND_ACC_PRIVATE);
+
+	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionPropertyAccessor", reflection_property_accessor_functions);
+	_reflection_entry.create_object = reflection_objects_new;
+	reflection_property_accessor_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
+	reflection_register_implement(reflection_property_accessor_ptr, reflector_ptr TSRMLS_CC);
+	zend_declare_property_string(reflection_property_accessor_ptr, "name", sizeof("name")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_string(reflection_property_accessor_ptr, "class", sizeof("class")-1, "", ZEND_ACC_PUBLIC TSRMLS_CC);
+
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_STATIC", ZEND_ACC_STATIC);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_PUBLIC", ZEND_ACC_PUBLIC);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_PROTECTED", ZEND_ACC_PROTECTED);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property_accessor, "IS_PRIVATE", ZEND_ACC_PRIVATE);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionExtension", reflection_extension_functions);
 	_reflection_entry.create_object = reflection_objects_new;

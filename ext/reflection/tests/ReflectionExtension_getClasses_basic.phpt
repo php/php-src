@@ -9,7 +9,7 @@ var_dump($ext->getClasses());
 ?>
 ==DONE==
 --EXPECT--
-array(12) {
+array(13) {
   ["ReflectionException"]=>
   &object(ReflectionClass)#2 (1) {
     ["name"]=>
@@ -60,13 +60,18 @@ array(12) {
     ["name"]=>
     string(18) "ReflectionProperty"
   }
-  ["ReflectionExtension"]=>
+  ["ReflectionPropertyAccessor"]=>
   &object(ReflectionClass)#12 (1) {
+    ["name"]=>
+    string(26) "ReflectionPropertyAccessor"
+  }
+  ["ReflectionExtension"]=>
+  &object(ReflectionClass)#13 (1) {
     ["name"]=>
     string(19) "ReflectionExtension"
   }
   ["ReflectionZendExtension"]=>
-  &object(ReflectionClass)#13 (1) {
+  &object(ReflectionClass)#14 (1) {
     ["name"]=>
     string(23) "ReflectionZendExtension"
   }
