@@ -1845,12 +1845,6 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	zend_bool nested;
 	zend_op_array *op_array = EX(op_array);
 
-	if (EXPECTED(EG(exception) == NULL) &&
-	    UNEXPECTED(EG(prev_exception) != NULL)) {
-		/* return from finally block called because of unhandled exception */
-		zend_exception_restore(TSRMLS_C);		
-	}
-
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
 	if (!EG(active_symbol_table)) {
@@ -2959,12 +2953,6 @@ ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, ANY, ANY)
 {
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-	if (EXPECTED(EG(exception) == NULL) &&
-	    UNEXPECTED(EG(prev_exception) != NULL)) {
-		/* return from finally block called because of unhandled exception */
-		zend_exception_restore(TSRMLS_C);		
-	}
 
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1 TSRMLS_CC);
@@ -5407,6 +5395,17 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
+}
+
+ZEND_VM_HANDLER(159, ZEND_DISCARD_EXCEPTION, ANY, ANY)
+{
+	if (EG(prev_exception) != NULL) {
+		/* discard the previously thrown exception */
+		zval_ptr_dtor(&EG(prev_exception));
+		EG(prev_exception) = NULL;
+	}
+
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HANDLER(162, ZEND_FAST_CALL, ANY, ANY)
