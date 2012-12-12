@@ -1,5 +1,5 @@
 --TEST--
-Use of finally in generator with return
+try { return } finally { return } in generator
 --FILE--
 <?php
 

@@ -542,17 +542,9 @@ static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num,
 		     dst_num > op_array->try_catch_array[i].finally_end)) {
 			/* we have a jump out of try block that needs executing finally */
 
-			/* generate a FAST_CALL to finaly block */
+			/* generate a FAST_CALL to finally block */
 		    start_op = get_next_op_number(op_array);
 
-			if (op_array->opcodes[op_num].opcode == ZEND_YIELD) {
-				/* Disable yield in finally block */
-				opline = get_next_op(op_array TSRMLS_CC);
-				opline->opcode = ZEND_GENERATOR_FLAG;
-				opline->extended_value = 1;
-				SET_UNUSED(opline->op1);
-				SET_UNUSED(opline->op2);
-			}
 			opline = get_next_op(op_array TSRMLS_CC);
 			opline->opcode = ZEND_FAST_CALL;
 			SET_UNUSED(opline->op1);
@@ -563,7 +555,7 @@ static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num,
 				opline->op2.opline_num = op_array->try_catch_array[i].catch_op;
 			}
 
-			/* generate a sequence of FAST_CALL to upward finaly block */
+			/* generate a sequence of FAST_CALL to upward finally block */
 			while (i > 0) {
 				i--;
 				if (op_array->try_catch_array[i].finally_op &&
@@ -578,14 +570,6 @@ static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num,
 					SET_UNUSED(opline->op2);
 					opline->op1.opline_num = op_array->try_catch_array[i].finally_op;
 				}
-			}
-			if (op_array->opcodes[op_num].opcode == ZEND_YIELD) {
-				/* Re-enable yield */
-				opline = get_next_op(op_array TSRMLS_CC);
-				opline->opcode = ZEND_GENERATOR_FLAG;
-				opline->extended_value = 0;
-				SET_UNUSED(opline->op1);
-				SET_UNUSED(opline->op2);
 			}
 
 			/* Finish the sequence with original opcode */
@@ -642,7 +626,7 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 		switch (opline->opcode) {
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
-			case ZEND_YIELD:
+			case ZEND_GENERATOR_RETURN:
 				zend_resolve_finally_call(op_array, i, (zend_uint)-1 TSRMLS_CC);
 				break;
 			case ZEND_BRK:

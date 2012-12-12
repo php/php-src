@@ -32,7 +32,41 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
 		zend_op_array *op_array = execute_data->op_array;
-		void **stack_frame;
+
+		if (!finished_execution) {
+			if (op_array->has_finally_block) {
+				/* -1 required because we want the last run opcode, not the
+  				 * next to-be-run one. */
+				zend_uint op_num = execute_data->opline - op_array->opcodes - 1;
+				zend_uint finally_op_num = 0;
+
+				/* Find next finally block */
+				int i;
+				for (i = 0; i < op_array->last_try_catch; i++) {
+					zend_try_catch_element *try_catch = &op_array->try_catch_array[i];
+
+					if (op_num < try_catch->try_op) {
+						break;
+					}
+
+					if (op_num < try_catch->finally_op) {
+						finally_op_num = try_catch->finally_op;
+					}
+				}
+
+				/* If a finally block was found we jump directly to it and
+				 * resume the generator. Furthermore we abort this close call
+				 * because the generator will already be closed somewhere in
+				 * the resume. */
+				if (finally_op_num) {
+					execute_data->opline = &op_array->opcodes[finally_op_num];
+					execute_data->fast_ret = NULL;
+					generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
+					zend_generator_resume(generator TSRMLS_CC);
+					return;
+				}
+			}
+		}
 
 		if (!execute_data->symbol_table) {
 			zend_free_compiled_variables(execute_data);
@@ -83,7 +117,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 
 		/* Clear any backed up stack arguments */
 		if (generator->stack != EG(argument_stack)) {
-			stack_frame = zend_vm_stack_frame_base(execute_data);
+			void **stack_frame = zend_vm_stack_frame_base(execute_data);
 			while (generator->stack->top != stack_frame) {
 				zval_ptr_dtor((zval**)stack_frame);
 				stack_frame++;
