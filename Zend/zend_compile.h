@@ -61,6 +61,7 @@ typedef struct _zend_compiler_context {
 	int        backpatch_count;
 	int        nested_calls;
 	int        used_stack;
+	int        in_finally;
 	HashTable *labels;
 } zend_compiler_context;
 
