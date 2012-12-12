@@ -5252,19 +5252,6 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(159, ZEND_GENERATOR_FLAG, ANY, ANY)
-{
-	USE_OPLINE
-	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-	if (opline->extended_value) {
-		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
-	} else {
-		generator->flags &= ~ZEND_GENERATOR_FORCED_CLOSE;
-	}
-	ZEND_VM_NEXT_OPCODE();
-}
-
 ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSED)
 {
 	USE_OPLINE
