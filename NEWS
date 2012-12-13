@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.11
 
+- Filter:
+  . Fixed bug #63757 (getenv() produces memory leak with CGI SAPI). (Dmitry)
+
 - JSON:
   . Fixed bug #63737 (json_decode does not properly decode with options
     parameter). (Adam)
