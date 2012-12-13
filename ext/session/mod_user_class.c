@@ -121,7 +121,6 @@ PHP_METHOD(SessionHandler, destroy)
 		return;
 	}
 	
-	PS(mod_user_is_open) = 0;
 	RETVAL_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key TSRMLS_CC));
 }
 /* }}} */
