@@ -421,15 +421,6 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				zend_throw_exception_internal(NULL TSRMLS_CC);
 				HANDLE_EXCEPTION_LEAVE();
-			} else if (RETURN_VALUE_USED(opline)) {
-				if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-					zval *retval;
-
-					ALLOC_ZVAL(retval);
-					ZVAL_BOOL(retval, 1);
-					INIT_PZVAL(retval);
-					EX_T(opline->result.var).var.ptr = retval;
-				}
 			}
 
 			ZEND_VM_INC_OPCODE();
@@ -2735,15 +2726,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
-		} else if (RETURN_VALUE_USED(opline)) {
-			if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-				zval *retval;
-
-				ALLOC_ZVAL(retval);
-				ZVAL_BOOL(retval, 1);
-				INIT_PZVAL(retval);
-				EX_T(opline->result.var).var.ptr = retval;
-			}
 		}
 
 	} else if (RETURN_VALUE_USED(opline)) {
@@ -8058,15 +8040,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
-		} else if (RETURN_VALUE_USED(opline)) {
-			if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-				zval *retval;
-
-				ALLOC_ZVAL(retval);
-				ZVAL_BOOL(retval, 1);
-				INIT_PZVAL(retval);
-				EX_T(opline->result.var).var.ptr = retval;
-			}
 		}
 
 	} else if (RETURN_VALUE_USED(opline)) {
@@ -13393,15 +13366,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
-		} else if (RETURN_VALUE_USED(opline)) {
-			if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-				zval *retval;
-
-				ALLOC_ZVAL(retval);
-				ZVAL_BOOL(retval, 1);
-				INIT_PZVAL(retval);
-				EX_T(opline->result.var).var.ptr = retval;
-			}
 		}
 
 	} else if (RETURN_VALUE_USED(opline)) {
@@ -30967,15 +30931,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
-		} else if (RETURN_VALUE_USED(opline)) {
-			if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-				zval *retval;
-
-				ALLOC_ZVAL(retval);
-				ZVAL_BOOL(retval, 1);
-				INIT_PZVAL(retval);
-				EX_T(opline->result.var).var.ptr = retval;
-			}
 		}
 
 	} else if (RETURN_VALUE_USED(opline)) {
