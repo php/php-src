@@ -61,15 +61,6 @@ ZEND_API void zend_execute(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op);
-#define safe_free_zval_ptr(p) safe_free_zval_ptr_rel(p ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-static zend_always_inline void safe_free_zval_ptr_rel(zval *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
-{
-	TSRMLS_FETCH();
-
-	if (p!=EG(uninitialized_zval_ptr)) {
-		FREE_ZVAL_REL(p);
-	}
-}
 ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
@@ -85,11 +76,10 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
 	if (!Z_DELREF_P(zval_ptr)) {
 		TSRMLS_FETCH();
 
-		if (zval_ptr != &EG(uninitialized_zval)) {
-			GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
-			zval_dtor(zval_ptr);
-			efree_rel(zval_ptr);
-		}
+		ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
+		GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
+		zval_dtor(zval_ptr);
+		efree_rel(zval_ptr);
 	} else {
 		TSRMLS_FETCH();
 

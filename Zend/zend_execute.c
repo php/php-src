@@ -86,11 +86,10 @@ static zend_always_inline void zend_pzval_unlock_func(zval *z, zend_free_op *sho
 static zend_always_inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC)
 {
 	if (!Z_DELREF_P(z)) {
-		if (z != &EG(uninitialized_zval)) {
-			GC_REMOVE_ZVAL_FROM_BUFFER(z);
-			zval_dtor(z);
-			efree(z);
-		}
+		ZEND_ASSERT(z != &EG(uninitialized_zval));
+		GC_REMOVE_ZVAL_FROM_BUFFER(z);
+		zval_dtor(z);
+		efree(z);
 	}
 }
 
