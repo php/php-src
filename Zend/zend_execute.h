@@ -287,17 +287,21 @@ static zend_always_inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
 	}
 }
 
-static zend_always_inline void zend_vm_stack_clear_multiple(TSRMLS_D)
+static zend_always_inline void zend_vm_stack_clear_multiple(int nested TSRMLS_DC)
 {
 	void **p = EG(argument_stack)->top - 1;
-	int delete_count = (int)(zend_uintptr_t) *p;
+ 	void **end = p - (int)(zend_uintptr_t)*p;
 
-	while (--delete_count>=0) {
+	while (p != end) {
 		zval *q = *(zval **)(--p);
 		*p = NULL;
 		i_zval_ptr_dtor(q ZEND_FILE_LINE_CC);
 	}
-	zend_vm_stack_free_int(p TSRMLS_CC);
+	if (nested) {
+		EG(argument_stack)->top = p;
+	} else {
+		zend_vm_stack_free_int(p TSRMLS_CC);
+	}
 }
 
 static zend_always_inline int zend_vm_stack_get_args_count_ex(zend_execute_data *ex)
