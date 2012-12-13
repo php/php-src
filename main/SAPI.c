@@ -1017,7 +1017,7 @@ SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC)
 			return NULL;
 		}
 		if (sapi_module.input_filter) {
-			sapi_module.input_filter(PARSE_ENV, name, &value, strlen(value), NULL TSRMLS_CC);
+			sapi_module.input_filter(PARSE_STRING, name, &value, strlen(value), NULL TSRMLS_CC);
 		}
 		return value;
 	}
