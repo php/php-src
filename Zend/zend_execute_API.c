@@ -841,7 +841,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					if (i || UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (EG(argument_stack)->top))) {
 						/* hack to clean up the stack */
 						zend_vm_stack_push((void *) (zend_uintptr_t)i TSRMLS_CC);
-						zend_vm_stack_clear_multiple(TSRMLS_C);
+						zend_vm_stack_clear_multiple(0 TSRMLS_CC);
 					}
 
 					zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
@@ -995,7 +995,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			*fci->retval_ptr_ptr = NULL;
 		}
 	}
-	zend_vm_stack_clear_multiple(TSRMLS_C);
+	zend_vm_stack_clear_multiple(0 TSRMLS_CC);
 
 	if (EG(This)) {
 		zval_ptr_dtor(&EG(This));
