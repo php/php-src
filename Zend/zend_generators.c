@@ -454,6 +454,7 @@ void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
         if(generator->exception) {
             EG(exception) = generator->exception;
             generator->exception = NULL;
+            zend_throw_exception_internal(NULL TSRMLS_CC);
         }
         
 		/* Resume execution */
@@ -628,9 +629,9 @@ ZEND_METHOD(Generator, send)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::rise()
- * Throws exceptions into the generator */
-ZEND_METHOD(Generator, rise)
+/* {{{ proto mixed Generator::raise()
+ * Throw exception into the generator */
+ZEND_METHOD(Generator, raise)
 {
     zval *exc;
     zend_generator *generator;
@@ -639,23 +640,23 @@ ZEND_METHOD(Generator, rise)
 	}
     
     generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
-    
+	
+	if(generator->exception) {
+		zval_ptr_dtor(&(generator->exception));
+	}
+	
+	ALLOC_INIT_ZVAL(generator->exception);
+	ZVAL_ZVAL(generator->exception, exc, 1, 0);
+    //generator->exception = exc;
     zend_generator_ensure_initialized(generator TSRMLS_CC); 
     
 	/* The generator is already closed, thus can't send anything */
 	if (!generator->execute_data) {
 		return;
 	}
-    
-    /* The sent value was initialized to NULL, so dtor that */
-	/*zval_ptr_dtor(&generator->send_target->var.ptr);
-    
-    Z_ADDREF_P(exc);
-    generator->send_target->var.ptr = exc;
-	generator->send_target->var.ptr_ptr = &exc;
-    generator->flags |= ZEND_GENERATOR_RISE_EXCEPTION;*/
-    Z_ADDREF_P(exc);
-    generator->exception = exc;
+	
+	/* The sent value was initialized to NULL, so dtor that */
+	zval_ptr_dtor(&generator->send_target->var.ptr);
     
     zend_generator_resume(generator TSRMLS_CC);
 
@@ -806,7 +807,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_send, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_rise, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_raise, 0, 0, 1)
 	ZEND_ARG_INFO(0, exception)
 ZEND_END_ARG_INFO()
 
@@ -817,7 +818,7 @@ static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, key,      arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, next,     arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, send,     arginfo_generator_send, ZEND_ACC_PUBLIC)
-    ZEND_ME(Generator, rise,     arginfo_generator_rise, ZEND_ACC_PUBLIC)
+    ZEND_ME(Generator, raise,    arginfo_generator_raise, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, __wakeup, arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
