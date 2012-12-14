@@ -1,25 +1,16 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 201?, PHP 5.5.0
+?? ??? 201?, PHP 5.5.0 Alpha 3
+
+
+18 Dec 2012, PHP 5.5.0 Alpha 2
 
 - General improvements:
-  . Added generators and coroutines (https://wiki.php.net/rfc/generators).
-    (Nikita Popov)
-  . Added "finally" keyword (https://wiki.php.net/rfc/finally). (Laruence)
-  . Added simplified password hashing API
-    (https://wiki.php.net/rfc/password_hash). (Anthony Ferrara)
   . Added systemtap support by enabling systemtap compatible dtrace probes on
     linux. (David Soria Parra)
-  . Added support for list in foreach (https://wiki.php.net/rfc/foreachlist).
-    (Laruence)
   . Added support for using empty() on the result of function calls and
     other expressions (https://wiki.php.net/rfc/empty_isset_exprs).
     (Nikita Popov)
-  . Added support for constant array/string dereferencing. (Laruence)
-  . Improved set_exception_handler while doing reset.(Laruence)
-  . Removed php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid(),
-    zend_logo_guid(). (Adnrew Faulds)
-  . Dropped support for Windows XP and 2003. (Pierre)
   . Optimized access to temporary and compiled VM variables. 8% less memory
     reads. (Dmitry)
   . The VM stacks for passing function arguments and syntaticaly nested calls
@@ -27,6 +18,38 @@ PHP                                                                        NEWS
     execution is calculated at compile time and preallocated at once. As result
     all the stack push operatins don't require checks for stack overflow
     any more. (Dmitry)
+
+- MySQL
+  . This extension is now deprecated, and deprecation warnings will be generated
+    when connections are established to databases via mysql_connect(),
+    mysql_pconnect(), or through implicit connection: use MySQLi or PDO_MySQL
+    instead (https://wiki.php.net/rfc/mysql_deprecation). (Adam)
+
+- Fileinfo:
+  . Fixed bug #63590 (Different results in TS and NTS under Windows).
+    (Anatoliy)
+
+- Apache2 Handler SAPI:
+  . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
+
+13 Nov 2012, PHP 5.5.0 Alpha 1
+
+- General improvements:
+  . Added generators and coroutines (https://wiki.php.net/rfc/generators).
+    (Nikita Popov)
+  . Added "finally" keyword (https://wiki.php.net/rfc/finally). (Laruence)
+  . Add simplified password hashing API
+    (https://wiki.php.net/rfc/password_hash). (Anthony Ferrara)
+  . Added support for list in foreach (https://wiki.php.net/rfc/foreachlist).
+    (Laruence)
+  . Added support for using empty() on the result of function calls and
+    other expressions (https://wiki.php.net/rfc/empty_isset_exprs).
+    (Nikita Popov)
+  . Added support for constant array/string dereferencing. (Laruence)
+  . Improve set_exception_handler while doing reset.(Laruence)
+  . Remove php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid(),
+    zend_logo_guid(). (Adnrew Faulds)
+  . Drop Windows XP and 2003 support. (Pierre)
 
 - Calendar:
   . Fixed bug #54254 (cal_from_jd returns month = 6 when there is only one Adar)
@@ -163,12 +186,6 @@ PHP                                                                        NEWS
   . mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb() now throw
     E_DEPRECATED. (GoogleGuy)
 
-- MySQL
-  . This extension is now deprecated, and deprecation warnings will be generated
-    when connections are established to databases via mysql_connect(),
-    mysql_pconnect(), or through implicit connection: use MySQLi or PDO_MySQL
-    instead (https://wiki.php.net/rfc/mysql_deprecation). (Adam)
-
 - MySQLi
   . Dropped support for LOAD DATA LOCAL INFILE handlers when using libmysql.
     Known for stability problems. (Andrey)
@@ -195,10 +212,5 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
       (Anatoliy)
-  . Fixed bug #63590 (Different results in TS and NTS under Windows).
-  (Anatoliy)
-
-- Apache2 Handler SAPI:
-  . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
