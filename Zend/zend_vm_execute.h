@@ -1218,6 +1218,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 		call->object = NULL;
+		call->called_scope = NULL;
 		call->is_ctor_call = 0;
 		EX(call) = call;
 		/*CHECK_EXCEPTION();*/
@@ -1245,6 +1246,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			efree(lcname);
 
 			call->object = NULL;
+			call->called_scope = NULL;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 			CHECK_EXCEPTION();
@@ -1364,6 +1366,7 @@ static int ZEND_FASTCALL  ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPC
 	}
 
 	call->object = NULL;
+	call->called_scope = NULL;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 	ZEND_VM_NEXT_OPCODE();
@@ -1535,6 +1538,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 		call->object = NULL;
+		call->called_scope = NULL;
 		call->is_ctor_call = 0;
 		EX(call) = call;
 		/*CHECK_EXCEPTION();*/
@@ -1562,6 +1566,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			efree(lcname);
 			zval_dtor(free_op2.var);
 			call->object = NULL;
+			call->called_scope = NULL;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 			CHECK_EXCEPTION();
@@ -1713,6 +1718,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 		call->object = NULL;
+		call->called_scope = NULL;
 		call->is_ctor_call = 0;
 		EX(call) = call;
 		/*CHECK_EXCEPTION();*/
@@ -1740,6 +1746,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			efree(lcname);
 			if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 			call->object = NULL;
+			call->called_scope = NULL;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 			CHECK_EXCEPTION();
@@ -1926,6 +1933,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 		call->object = NULL;
+		call->called_scope = NULL;
 		call->is_ctor_call = 0;
 		EX(call) = call;
 		/*CHECK_EXCEPTION();*/
@@ -1953,6 +1961,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			efree(lcname);
 
 			call->object = NULL;
+			call->called_scope = NULL;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 			CHECK_EXCEPTION();
@@ -2287,6 +2296,7 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	}
 	call->fbc = EX(function_state).function;
 	call->object = NULL;
+	call->called_scope = NULL;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 

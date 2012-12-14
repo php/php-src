@@ -2636,6 +2636,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 		call->object = NULL;
+		call->called_scope = NULL;
 		call->is_ctor_call = 0;
 		EX(call) = call;
 		/*CHECK_EXCEPTION();*/
@@ -2663,6 +2664,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			efree(lcname);
 			FREE_OP2();
 			call->object = NULL;
+			call->called_scope = NULL;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 			CHECK_EXCEPTION();
@@ -2782,6 +2784,7 @@ ZEND_VM_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST)
 	}
 
 	call->object = NULL;
+	call->called_scope = NULL;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 	ZEND_VM_NEXT_OPCODE();
@@ -2810,6 +2813,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, CONST, ANY)
 	}
 	call->fbc = EX(function_state).function;
 	call->object = NULL;
+	call->called_scope = NULL;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
