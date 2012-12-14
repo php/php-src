@@ -731,6 +731,7 @@ static int zend_generator_iterator_get_key(zend_object_iterator *iterator, char 
 	/* Waiting for Etienne's patch to allow arbitrary zval keys. Until then
 	 * error out on non-int and non-string keys. */
 	zend_error_noreturn(E_ERROR, "Currently only int and string keys can be yielded");
+	return HASH_KEY_NON_EXISTANT; /* Nerver reached */
 }
 /* }}} */
 
