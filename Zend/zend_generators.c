@@ -27,15 +27,49 @@
 ZEND_API zend_class_entry *zend_ce_generator;
 static zend_object_handlers zend_generator_handlers;
 
-void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC) /* {{{ */
+ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC) /* {{{ */
 {
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
 		zend_op_array *op_array = execute_data->op_array;
-		void **stack_frame;
+
+		if (!finished_execution) {
+			if (op_array->has_finally_block) {
+				/* -1 required because we want the last run opcode, not the
+  				 * next to-be-run one. */
+				zend_uint op_num = execute_data->opline - op_array->opcodes - 1;
+				zend_uint finally_op_num = 0;
+
+				/* Find next finally block */
+				int i;
+				for (i = 0; i < op_array->last_try_catch; i++) {
+					zend_try_catch_element *try_catch = &op_array->try_catch_array[i];
+
+					if (op_num < try_catch->try_op) {
+						break;
+					}
+
+					if (op_num < try_catch->finally_op) {
+						finally_op_num = try_catch->finally_op;
+					}
+				}
+
+				/* If a finally block was found we jump directly to it and
+				 * resume the generator. Furthermore we abort this close call
+				 * because the generator will already be closed somewhere in
+				 * the resume. */
+				if (finally_op_num) {
+					execute_data->opline = &op_array->opcodes[finally_op_num];
+					execute_data->fast_ret = NULL;
+					generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
+					zend_generator_resume(generator TSRMLS_CC);
+					return;
+				}
+			}
+		}
 
 		if (!execute_data->symbol_table) {
-			zend_free_compiled_variables(execute_data->CVs, op_array->last_var);
+			zend_free_compiled_variables(execute_data);
 		} else {
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table TSRMLS_CC);
 		}
@@ -66,13 +100,13 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 					switch (brk_opline->opcode) {
 						case ZEND_SWITCH_FREE:
 							{
-								temp_variable *var = (temp_variable *) ((char *) execute_data->Ts + brk_opline->op1.var);
+								temp_variable *var = EX_TMP_VAR(execute_data, brk_opline->op1.var);
 								zval_ptr_dtor(&var->var.ptr);
 							}
 							break;
 						case ZEND_FREE:
 							{
-								temp_variable *var = (temp_variable *) ((char *) execute_data->Ts + brk_opline->op1.var);
+								temp_variable *var = EX_TMP_VAR(execute_data, brk_opline->op1.var);
 								zval_dtor(&var->tmp_var);
 							}
 							break;
@@ -83,7 +117,7 @@ void zend_generator_close(zend_generator *generator, zend_bool finished_executio
 
 		/* Clear any backed up stack arguments */
 		if (generator->stack != EG(argument_stack)) {
-			stack_frame = zend_vm_stack_frame_base(execute_data);
+			void **stack_frame = zend_vm_stack_frame_base(execute_data);
 			while (generator->stack->top != stack_frame) {
 				zval_ptr_dtor((zval**)stack_frame);
 				stack_frame++;
@@ -198,10 +232,10 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 
 			/* Copy compiled variables */
 			for (i = 0; i < op_array->last_var; i++) {
-				if (execute_data->CVs[i]) {
-					clone->execute_data->CVs[i] = (zval **) clone->execute_data->CVs + op_array->last_var + i;
-					*clone->execute_data->CVs[i] = (zval *) execute_data->CVs[op_array->last_var + i];
-					Z_ADDREF_PP(clone->execute_data->CVs[i]);
+				if (*EX_CV_NUM(execute_data, i)) {
+					*EX_CV_NUM(clone->execute_data, i) = (zval **) EX_CV_NUM(clone->execute_data, op_array->last_var + i);
+					**EX_CV_NUM(clone->execute_data, i) = *(zval **) EX_CV_NUM(execute_data, op_array->last_var + i);
+					Z_ADDREF_PP(*EX_CV_NUM(clone->execute_data, i));
 				}
 			}
 		} else {
@@ -214,8 +248,8 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 			{
 				int i;
 				for (i = 0; i < op_array->last_var; i++) {
-					if (zend_hash_quick_find(clone->execute_data->symbol_table, op_array->vars[i].name, op_array->vars[i].name_len + 1, op_array->vars[i].hash_value, (void **) &clone->execute_data->CVs[i]) == FAILURE) {
-						clone->execute_data->CVs[i] = NULL;
+					if (zend_hash_quick_find(clone->execute_data->symbol_table, op_array->vars[i].name, op_array->vars[i].name_len + 1, op_array->vars[i].hash_value, (void **) EX_CV_NUM(clone->execute_data, i)) == FAILURE) {
+						*EX_CV_NUM(clone->execute_data, i) = NULL;
 					}
 				}
 			}
@@ -228,7 +262,7 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 		} else {
 			clone->execute_data->call = NULL;
 		}
-		memcpy(clone->execute_data->call_slots, execute_data->call_slots, sizeof(call_slot) * op_array->nested_calls);
+		memcpy(clone->execute_data->call_slots, execute_data->call_slots, ZEND_MM_ALIGNED_SIZE(sizeof(call_slot)) * op_array->nested_calls);
 		if (clone->execute_data->call >= clone->execute_data->call_slots) {
 			call_slot *call = clone->execute_data->call;
   
@@ -241,14 +275,14 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 		}
 
 		/* Copy the temporary variables */
-		memcpy(clone->execute_data->Ts, execute_data->Ts, sizeof(temp_variable) * op_array->T);
+		memcpy(EX_TMP_VAR_NUM(clone->execute_data, op_array->T-1), EX_TMP_VAR_NUM(execute_data, op_array->T-1), ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T);
 
 		/* Copy arguments passed on stack */
 		stack_frame = zend_vm_stack_frame_base(clone->execute_data);
 		orig_stack_frame = zend_vm_stack_frame_base(execute_data);
 		clone->stack->top = stack_frame + (orig->stack->top - orig_stack_frame);
 		if (clone->stack->top != stack_frame) {
-			memcpy(stack_frame, orig_stack_frame, sizeof(zval*) * (orig->stack->top - orig_stack_frame));
+			memcpy(stack_frame, orig_stack_frame, ZEND_MM_ALIGNED_SIZE(sizeof(zval*)) * (orig->stack->top - orig_stack_frame));
 			while (clone->stack->top != stack_frame) {
 				Z_ADDREF_PP((zval**)stack_frame);
 				stack_frame++;
@@ -271,7 +305,7 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 					zend_op *brk_opline = op_array->opcodes + brk_cont->brk;
 
 					if (brk_opline->opcode == ZEND_SWITCH_FREE) {
-						temp_variable *var = (temp_variable *) ((char *) execute_data->Ts + brk_opline->op1.var);
+						temp_variable *var = EX_TMP_VAR(execute_data, brk_opline->op1.var);
 
 						Z_ADDREF_P(var->var.ptr);
 					}
@@ -283,10 +317,8 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 		 * offset as the original generator, but in our temporary variable
 		 * memory segment. */
 		if (orig->send_target) {
-			size_t offset = (char *) orig->send_target - (char *) execute_data->Ts;
-			clone->send_target = (temp_variable *) (
-				(char *) clone->execute_data->Ts + offset
-			);
+			size_t offset = (char *) orig->send_target - (char *)execute_data;
+			clone->send_target = EX_TMP_VAR(clone->execute_data, offset);
 			Z_ADDREF_P(clone->send_target->var.ptr);
 		}
 
@@ -340,7 +372,7 @@ static zend_object_value zend_generator_create(zend_class_entry *class_type TSRM
 
 /* Requires globals EG(scope), EG(current_scope), EG(This),
  * EG(active_symbol_table) and EG(current_execute_data). */
-zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+ZEND_API zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	zval *return_value;
 	zend_generator *generator;
@@ -401,7 +433,7 @@ static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* 
 }
 /* }}} */
 
-void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
+ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
 	if (EG(exception)) {
 		return;
@@ -699,6 +731,7 @@ static int zend_generator_iterator_get_key(zend_object_iterator *iterator, char 
 	/* Waiting for Etienne's patch to allow arbitrary zval keys. Until then
 	 * error out on non-int and non-string keys. */
 	zend_error_noreturn(E_ERROR, "Currently only int and string keys can be yielded");
+	return HASH_KEY_NON_EXISTANT; /* Nerver reached */
 }
 /* }}} */
 

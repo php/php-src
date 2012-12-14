@@ -30,6 +30,7 @@ max_execution_time=12
 	print "done!";
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 array(1) {
   [%u|b%"SLEEP(6)"]=>
   %unicode|string%(1) "0"

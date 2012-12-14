@@ -181,6 +181,7 @@ void zend_init_compiler_context(TSRMLS_D) /* {{{ */
 	CG(context).backpatch_count = 0;
 	CG(context).nested_calls = 0;
 	CG(context).used_stack = 0;
+	CG(context).in_finally = 0;
 	CG(context).labels = NULL;
 }
 /* }}} */
@@ -287,7 +288,7 @@ ZEND_API zend_bool zend_is_compiling(TSRMLS_D) /* {{{ */
 
 static zend_uint get_temporary_variable(zend_op_array *op_array) /* {{{ */
 {
-	return (op_array->T)++ * ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable));
+	return (zend_uint)EX_TMP_VAR_NUM(0, (op_array->T)++);
 }
 /* }}} */
 
@@ -2671,6 +2672,13 @@ void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC) /* {{{ */
 		start_op_number++;
 	}
 
+	if (CG(context).in_finally) {
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_DISCARD_EXCEPTION;
+		SET_UNUSED(opline->op1);
+		SET_UNUSED(opline->op2);
+	}
+	
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
 	opline->opcode = returns_reference ? ZEND_RETURN_BY_REF : ZEND_RETURN;
@@ -2819,6 +2827,8 @@ void zend_do_finally(znode *finally_token TSRMLS_DC) /* {{{ */
 	opline->opcode = ZEND_JMP;
 	SET_UNUSED(opline->op1);
 	SET_UNUSED(opline->op2);
+
+	CG(context).in_finally++;
 }
 /* }}} */
 
@@ -2897,6 +2907,8 @@ void zend_do_end_finally(znode *try_token, znode* catch_token, znode *finally_to
 		SET_UNUSED(opline->op2);
 		
 		CG(active_op_array)->opcodes[finally_token->u.op.opline_num].op1.opline_num = get_next_op_number(CG(active_op_array));
+
+		CG(context).in_finally--;
 	} 
 }
 /* }}} */
@@ -3463,7 +3475,7 @@ static zend_bool do_inherit_property_access_check(HashTable *target_ht, zend_pro
 		if ((child_info->flags & ZEND_ACC_PPP_MASK) > (parent_info->flags & ZEND_ACC_PPP_MASK)) {
 			zend_error(E_COMPILE_ERROR, "Access level to %s::$%s must be %s (as in class %s)%s", ce->name, hash_key->arKey, zend_visibility_string(parent_info->flags), parent_ce->name, (parent_info->flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		} else if ((child_info->flags & ZEND_ACC_STATIC) == 0) {
-			Z_DELREF_P(ce->default_properties_table[parent_info->offset]);
+			zval_ptr_dtor(&(ce->default_properties_table[parent_info->offset]));
 			ce->default_properties_table[parent_info->offset] = ce->default_properties_table[child_info->offset];
 			ce->default_properties_table[child_info->offset] = NULL;
 			child_info->offset = parent_info->offset;

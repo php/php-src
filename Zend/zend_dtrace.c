@@ -44,7 +44,7 @@ ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int t
 }
 
 /* We wrap the execute function to have fire the execute-entry/return and function-entry/return probes */
-ZEND_API void dtrace_execute(zend_op_array *op_array TSRMLS_DC)
+ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 {
 	int lineno;
 	char *scope, *filename, *funcname, *classname;
@@ -72,7 +72,7 @@ ZEND_API void dtrace_execute(zend_op_array *op_array TSRMLS_DC)
 		DTRACE_FUNCTION_ENTRY(funcname, filename, lineno, classname, scope);
 	}
 
-	execute(op_array TSRMLS_CC);
+	execute_ex(execute_data TSRMLS_CC);
 
 	if (DTRACE_FUNCTION_RETURN_ENABLED() && funcname != NULL) {
 		DTRACE_FUNCTION_RETURN(funcname, filename, lineno, classname, scope);

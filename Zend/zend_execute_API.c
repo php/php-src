@@ -425,27 +425,7 @@ ZEND_API zend_bool zend_is_executing(TSRMLS_D) /* {{{ */
 
 ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 {
-#if DEBUG_ZEND>=2
-	printf("Reducing refcount for %x (%x): %d->%d\n", *zval_ptr, zval_ptr, Z_REFCOUNT_PP(zval_ptr), Z_REFCOUNT_PP(zval_ptr) - 1);
-#endif
-	Z_DELREF_PP(zval_ptr);
-	if (Z_REFCOUNT_PP(zval_ptr) == 0) {
-		TSRMLS_FETCH();
-
-		if (*zval_ptr != &EG(uninitialized_zval)) {
-			GC_REMOVE_ZVAL_FROM_BUFFER(*zval_ptr);
-			zval_dtor(*zval_ptr);
-			efree_rel(*zval_ptr);
-		}
-	} else {
-		TSRMLS_FETCH();
-
-		if (Z_REFCOUNT_PP(zval_ptr) == 1) {
-			Z_UNSET_ISREF_PP(zval_ptr);
-		}
-
-		GC_ZVAL_CHECK_POSSIBLE_ROOT(*zval_ptr);
-	}
+	i_zval_ptr_dtor(*zval_ptr ZEND_FILE_LINE_RELAY_CC);
 }
 /* }}} */
 
@@ -861,7 +841,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					if (i || UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (EG(argument_stack)->top))) {
 						/* hack to clean up the stack */
 						zend_vm_stack_push((void *) (zend_uintptr_t)i TSRMLS_CC);
-						zend_vm_stack_clear_multiple(TSRMLS_C);
+						zend_vm_stack_clear_multiple(0 TSRMLS_CC);
 					}
 
 					zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
@@ -1015,7 +995,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			*fci->retval_ptr_ptr = NULL;
 		}
 	}
-	zend_vm_stack_clear_multiple(TSRMLS_C);
+	zend_vm_stack_clear_multiple(0 TSRMLS_CC);
 
 	if (EG(This)) {
 		zval_ptr_dtor(&EG(This));
@@ -1689,7 +1669,7 @@ ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC) /* {{{ */
 	for (ex = EG(current_execute_data); ex; ex = ex->prev_execute_data) {
 		if (ex->op_array && ex->symbol_table == symbol_table) {
 			for (i = 0; i < ex->op_array->last_var; i++) {
-				ex->CVs[i] = NULL;
+				*EX_CV_NUM(ex, i) = NULL;
 			}
 		}
 	}
@@ -1708,7 +1688,7 @@ ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const c
 					if (ex->op_array->vars[i].hash_value == hash_value &&
 						ex->op_array->vars[i].name_len == name_len &&
 						!memcmp(ex->op_array->vars[i].name, name, name_len)) {
-						ex->CVs[i] = NULL;
+						*EX_CV_NUM(ex, i) = NULL;
 						break;
 					}
 				}
@@ -1732,7 +1712,7 @@ ZEND_API int zend_delete_global_variable_ex(const char *name, int name_len, ulon
 						ex->op_array->vars[i].name_len == name_len &&
 						!memcmp(ex->op_array->vars[i].name, name, name_len)
 					) {
-						ex->CVs[i] = NULL;
+						*EX_CV_NUM(ex, i) = NULL;
 						break;
 					}
 				}
@@ -1779,20 +1759,20 @@ ZEND_API void zend_rebuild_symbol_table(TSRMLS_D) /* {{{ */
 			ex->symbol_table = EG(active_symbol_table);
 
 			if (ex->op_array->this_var != -1 &&
-			    !ex->CVs[ex->op_array->this_var] &&
+			    !*EX_CV_NUM(ex, ex->op_array->this_var) &&
 			    EG(This)) {
-				ex->CVs[ex->op_array->this_var] = (zval**)ex->CVs + ex->op_array->last_var + ex->op_array->this_var;
-				*ex->CVs[ex->op_array->this_var] = EG(This);
+			    *EX_CV_NUM(ex, ex->op_array->this_var) = (zval**)EX_CV_NUM(ex, ex->op_array->last_var + ex->op_array->this_var);
+				**EX_CV_NUM(ex, ex->op_array->this_var) = EG(This);
  			}
 			for (i = 0; i < ex->op_array->last_var; i++) {
-				if (ex->CVs[i]) {
+				if (*EX_CV_NUM(ex, i)) {
 					zend_hash_quick_update(EG(active_symbol_table),
 						ex->op_array->vars[i].name,
 						ex->op_array->vars[i].name_len + 1,
 						ex->op_array->vars[i].hash_value,
-						(void**)ex->CVs[i],
+						(void**)*EX_CV_NUM(ex, i),
 						sizeof(zval*),
-						(void**)&ex->CVs[i]);
+						(void**)EX_CV_NUM(ex, i));
 				}
 			}
 		}

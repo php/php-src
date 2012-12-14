@@ -402,7 +402,7 @@ static int inifile_copy_to(inifile *dba, size_t pos_start, size_t pos_end, inifi
 		return FAILURE;
 	}
 	php_stream_seek(dba->fp, pos_start, SEEK_SET);
-	if (!php_stream_copy_to_stream(dba->fp, fp, pos_end - pos_start)) {
+	if (!php_stream_copy_to_stream_ex(dba->fp, fp, pos_end - pos_start, NULL)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy group [%zu - %zu] to temporary stream", pos_start, pos_end);
 		return FAILURE;
 	} 
@@ -427,7 +427,7 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key TSRML
 			pos_curr = php_stream_tell(from->fp);
 			if (pos_start != pos_next) {
 				php_stream_seek(from->fp, pos_start, SEEK_SET);
-				if (!php_stream_copy_to_stream(from->fp, dba->fp, pos_next - pos_start)) {
+				if (!php_stream_copy_to_stream_ex(from->fp, dba->fp, pos_next - pos_start, NULL)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy [%zu - %zu] from temporary stream", pos_next, pos_start);
 					ret = FAILURE;
 				}
@@ -446,13 +446,13 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key TSRML
 	}
 	if (pos_start != pos_next) {
 		php_stream_seek(from->fp, pos_start, SEEK_SET);
-		if (!php_stream_copy_to_stream(from->fp, dba->fp, pos_next - pos_start)) {
+		if (!php_stream_copy_to_stream_ex(from->fp, dba->fp, pos_next - pos_start, NULL)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy [%zu - %zu] from temporary stream", pos_next, pos_start);
 			ret = FAILURE;
 		}
 	}
 	inifile_line_free(&ln);
-	return SUCCESS;
+	return ret;
 }
 /* }}} */
 
@@ -460,7 +460,7 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key TSRML
  */
 static int inifile_delete_replace_append(inifile *dba, const key_type *key, const val_type *value, int append TSRMLS_DC) 
 {
-	size_t pos_grp_start, pos_grp_next;
+	size_t pos_grp_start=0, pos_grp_next;
 	inifile *ini_tmp = NULL;
 	php_stream *fp_tmp = NULL;
 	int ret;
@@ -497,7 +497,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 			php_stream_seek(dba->fp, 0, SEEK_END);
 			if (pos_grp_next != (size_t)php_stream_tell(dba->fp)) {
 				php_stream_seek(dba->fp, pos_grp_next, SEEK_SET);
-				if (!php_stream_copy_to_stream(dba->fp, fp_tmp, PHP_STREAM_COPY_ALL)) {
+				if (!php_stream_copy_to_stream_ex(dba->fp, fp_tmp, PHP_STREAM_COPY_ALL, NULL)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not copy remainder to temporary stream");
 					ret = FAILURE;
 				}
@@ -538,7 +538,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 		if (fp_tmp && php_stream_tell(fp_tmp)) {
 			php_stream_seek(fp_tmp, 0, SEEK_SET);
 			php_stream_seek(dba->fp, 0, SEEK_END);
-			if (!php_stream_copy_to_stream(fp_tmp, dba->fp, PHP_STREAM_COPY_ALL)) {
+			if (!php_stream_copy_to_stream_ex(fp_tmp, dba->fp, PHP_STREAM_COPY_ALL, NULL)) {
 				php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Could not copy from temporary stream - ini file truncated");
 				ret = FAILURE;
 			}

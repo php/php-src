@@ -10,7 +10,8 @@ if (!$IS_MYSQLND) {
 ?>
 --FILE--
 <?php
-$link = new mysqli('localhost', 'test', NULL, 'test');
+require 'connect.inc';
+$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 
 mysqli_close($link);
 

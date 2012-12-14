@@ -731,6 +731,10 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zend_bool free_host=0, new_link=0;
 	long connect_timeout;
 
+    php_error_docref(NULL TSRMLS_CC,
+                     E_DEPRECATED,
+                     "The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead");
+
 #if !defined(MYSQL_USE_MYSQLND)
 	if ((MYSQL_VERSION_ID / 100) != (mysql_get_client_version() / 100)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,

@@ -66,6 +66,7 @@ if (false !== ($tmp = mysql_select_db($db, $link)))
 print "done!\n";
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 %unicode|string%(%d) "%s"
 bool(false)
 
