@@ -1330,6 +1330,7 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMP|VAR|CV)
 	FREE_OP1_VAR_PTR();
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -2757,6 +2758,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			ZEND_VM_NEXT_OPCODE();
 		} else {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 	}
 }

@@ -1339,6 +1339,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			ZEND_VM_NEXT_OPCODE();
 		} else {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 	}
 }
@@ -1659,6 +1660,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			ZEND_VM_NEXT_OPCODE();
 		} else {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 	}
 }
@@ -1839,6 +1841,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			ZEND_VM_NEXT_OPCODE();
 		} else {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 	}
 }
@@ -2054,6 +2057,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			ZEND_VM_NEXT_OPCODE();
 		} else {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 	}
 }
@@ -14882,6 +14886,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_VAR_CONST_HANDLER(ZEND_OPCOD
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -17219,6 +17224,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -19470,6 +19476,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -22915,6 +22922,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_H
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -32299,6 +32307,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_CONST_HANDLER(ZEND_OPCODE
 
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -34411,6 +34420,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_H
 
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -36529,6 +36539,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_H
 
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -39697,6 +39708,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HA
 
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -40810,6 +40822,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_error_noreturn(E_ERROR, "Invalid opcode %d/%d/%d.", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);
+	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
 
