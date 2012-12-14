@@ -259,10 +259,13 @@ static php_cli_server_ext_mime_type_pair mime_type_map[] = {
 	{ "gif", "image/gif" },
 	{ "jpg", "image/jpeg" },
 	{ "jpeg", "image/jpeg" },
-	{ "png", "image/png" },
 	{ "jpe", "image/jpeg" },
+	{ "png", "image/png" },
 	{ "svg", "image/svg+xml" },
 	{ "txt", "text/plain" },
+	{ "webm", "video/webm" },
+	{ "ogv", "video/ogg" },
+	{ "ogg", "audio/ogg" },
 	{ NULL, NULL }
 };
 
