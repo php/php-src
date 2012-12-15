@@ -10,7 +10,8 @@ PHP                                                                        NEWS
     parameter). (Adam)
 
 - CLI server
-  . Update list of common mime types (Lars, pascalc at gmail dot com)
+  . Update list of common mime types. Added webm, ogv, ogg. (Lars,
+    pascalc at gmail dot com)
 
 ?? ??? 2012, PHP 5.4.10
 
