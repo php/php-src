@@ -51,7 +51,9 @@ PHP_METHOD(DateTime, __construct);
 PHP_METHOD(DateTime, __wakeup);
 PHP_METHOD(DateTime, __set_state);
 PHP_FUNCTION(date_create);
+PHP_FUNCTION(date_create_point);
 PHP_FUNCTION(date_create_from_format);
+PHP_FUNCTION(date_create_point_from_format);
 PHP_FUNCTION(date_parse);
 PHP_FUNCTION(date_parse_from_format);
 PHP_FUNCTION(date_get_last_errors);
@@ -69,6 +71,17 @@ PHP_FUNCTION(date_date_set);
 PHP_FUNCTION(date_isodate_set);
 PHP_FUNCTION(date_timestamp_set);
 PHP_FUNCTION(date_timestamp_get);
+
+PHP_METHOD(DateTimePoint, __construct);
+PHP_METHOD(DateTimePoint, __set_state);
+PHP_METHOD(DateTimePoint, modify);
+PHP_METHOD(DateTimePoint, add);
+PHP_METHOD(DateTimePoint, sub);
+PHP_METHOD(DateTimePoint, setTimezone);
+PHP_METHOD(DateTimePoint, setTime);
+PHP_METHOD(DateTimePoint, setDate);
+PHP_METHOD(DateTimePoint, setISODate);
+PHP_METHOD(DateTimePoint, setTimestamp);
 
 PHP_METHOD(DateTimeZone, __construct);
 PHP_FUNCTION(timezone_open);
