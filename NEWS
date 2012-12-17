@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - General improvements:
   . Fixed bug #63822 (Crash when using closures with ArrayAccess).
     (Nikita Popov)
+  . Add Generator::throw() method. (Nikita Popov)
 
 - cURL:
   . Added new functions curl_escape, curl_multi_setopt, curl_multi_strerror
