@@ -5375,8 +5375,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
