@@ -319,7 +319,7 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 		if (orig->send_target) {
 			size_t offset = (char *) orig->send_target - (char *)execute_data;
 			clone->send_target = EX_TMP_VAR(clone->execute_data, offset);
-			Z_ADDREF_P(clone->send_target->var.ptr);
+			zval_copy_ctor(&clone->send_target->tmp_var);
 		}
 
 		if (execute_data->current_this) {
@@ -641,13 +641,8 @@ ZEND_METHOD(Generator, send)
 		return;
 	}
 
-	/* The sent value was initialized to NULL, so dtor that */
-	zval_ptr_dtor(&generator->send_target->var.ptr);
-
-	/* Set new sent value */
-	Z_ADDREF_P(value);
-	generator->send_target->var.ptr = value;
-	generator->send_target->var.ptr_ptr = &value;
+	/* Put sent value into the TMP_VAR slot */
+	MAKE_COPY_ZVAL(&value, &generator->send_target->tmp_var);
 
 	zend_generator_resume(generator TSRMLS_CC);
 
