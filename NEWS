@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-06 Dec 2012, PHP 5.3.20RC1
+20 Dec 2012, PHP 5.3.20
 
 - Zend Engine:
   . Fixed bug #63635 (Segfault in gc_collect_cycles). (Dmitry)
@@ -19,7 +19,7 @@ PHP                                                                        NEWS
   . Enabled Apache 2.4 configure option for Windows (Pierre, Anatoliy)
 
 - Date:
-  . Fixed bug #63435 (Datetime::format('u') sometimes wrong by 1 microsecon).
+  . Fixed bug #63435 (Datetime::format('u') sometimes wrong by 1 microsecond).
     (Remi)
 
 - Fileinfo:
