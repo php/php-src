@@ -2736,7 +2736,7 @@ void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_v
 		SET_UNUSED(opline->op2);
 	}
 
-	opline->result_type = IS_VAR;
+	opline->result_type = IS_TMP_VAR;
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	GET_NODE(result, opline->result);
 }
