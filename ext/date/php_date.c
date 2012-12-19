@@ -2954,7 +2954,7 @@ PHP_FUNCTION(date_modify)
 
 	php_date_modify(object, modify, modify_len, return_value TSRMLS_CC);
 
-	RETURN_ZVAL(getThis(), 1, 0);
+	RETURN_ZVAL(object, 1, 0);
 }
 /* }}} */
 
