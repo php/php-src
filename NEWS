@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Update list of common mime types. Added webm, ogv, ogg. (Lars,
     pascalc at gmail dot com)
 
+- cURL extension:
+  . Fixed bug #55438 (Curlwapper is not sending http header randomly).
+    (phpnet@lostreality.org, Pierrick)
+
 ?? ??? 2012, PHP 5.4.10
 
 - Core:
