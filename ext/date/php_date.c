@@ -1847,7 +1847,7 @@ static void date_period_it_current_data(zend_object_iterator *iter, zval ***data
 
 	/* Create new object */
 	MAKE_STD_ZVAL(iterator->current);
-	php_date_instantiate(date_ce_date, iterator->current TSRMLS_CC);
+	php_date_instantiate(object->start_ce, iterator->current TSRMLS_CC);
 	newdateobj = (php_date_obj *) zend_object_store_get_object(iterator->current TSRMLS_CC);
 	newdateobj->time = timelib_time_ctor();
 	*newdateobj->time = *it_time;
@@ -4182,6 +4182,7 @@ PHP_METHOD(DatePeriod, __construct)
 		if (dpobj->end) {
 			timelib_update_ts(dpobj->end, NULL);
 		}
+		dpobj->start_ce = date_ce_date;
 	} else {
 		/* init */
 		intobj  = (php_interval_obj *) zend_object_store_get_object(interval TSRMLS_CC);
@@ -4197,6 +4198,7 @@ PHP_METHOD(DatePeriod, __construct)
 			clone->tz_info = dateobj->time->tz_info;
 		}
 		dpobj->start = clone;
+		dpobj->start_ce = Z_OBJCE_P(start);
 
 		/* interval */
 		dpobj->interval = timelib_rel_time_clone(intobj->diff);
