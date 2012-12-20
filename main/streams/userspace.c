@@ -458,7 +458,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filen
 	us->wrapper = uwrap;
 
 	us->object = user_stream_create_object(uwrap, context TSRMLS_CC);
-	if(us == NULL) {
+	if(us->object == NULL) {
 		FG(user_stream_current_filename) = NULL;
 		efree(us);
 		return NULL;
