@@ -210,6 +210,7 @@ typedef struct {
 	CURLMcode mcode;
 	int pending;
 	zval *headers;
+	struct curl_slist *headers_slist; /* holds custom headers sent out in the request */
 } php_curl_stream;
 
 
