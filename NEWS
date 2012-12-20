@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #63762 (Sigsegv when Exception::$trace is changed by user).
     (Johannes)
 
+- cURL extension:
+  . Fixed bug #55438 (Curlwapper is not sending http header randomly).
+    (phpnet@lostreality.org, Pierrick)
+
 20 Dec 2012, PHP 5.3.20
 
 - Zend Engine:
