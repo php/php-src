@@ -154,6 +154,7 @@ struct _php_interval_obj {
 struct _php_period_obj {
 	zend_object       std;
 	timelib_time     *start;
+	zend_class_entry *start_ce;
 	timelib_time     *current;
 	timelib_time     *end;
 	timelib_rel_time *interval;
