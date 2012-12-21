@@ -502,30 +502,12 @@ bad_url:
 void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	/*
-	 * The regex below is based on a regex by Michael Rushton.
-	 * However, it is not identical.  I changed it to only consider routeable
-	 * addresses as valid.  Michael's regex considers a@b a valid address
-	 * which conflicts with section 2.3.5 of RFC 5321 which states that:
-	 *
-	 *   Only resolvable, fully-qualified domain names (FQDNs) are permitted
-	 *   when domain names are used in SMTP.  In other words, names that can
-	 *   be resolved to MX RRs or address (i.e., A or AAAA) RRs (as discussed
-	 *   in Section 5) are permitted, as are CNAME RRs whose targets can be
-	 *   resolved, in turn, to MX or address RRs.  Local nicknames or
-	 *   unqualified names MUST NOT be used.
-	 *
-	 * This regex does not handle comments and folding whitespace.  While
-	 * this is technically valid in an email address, these parts aren't
-	 * actually part of the address itself.
-	 *
-	 * Michael's regex carries this copyright:
-	 *
-	 * Copyright © Michael Rushton 2009-10
+	 * Copyright © Michael Rushton 2009-12
 	 * http://squiloople.com/
-	 * Feel free to use and redistribute this code. But please keep this copyright notice.
+	 * Feel free to use and redistribute this code.
 	 *
 	 */
-	const char regexp[] = "/^(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){255,})(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){65,}@)(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F]|(?:\\x5C[\\x00-\\x7F]))*\\x22))(?:\\.(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F]|(?:\\x5C[\\x00-\\x7F]))*\\x22)))*@(?:(?:(?!.*[^.]{64,})(?:(?:(?:xn--)?[a-z0-9]+(?:-+[a-z0-9]+)*\\.){1,126}){1,}(?:(?:[a-z][a-z0-9]*)|(?:(?:xn--)[a-z0-9]+))(?:-+[a-z0-9]+)*)|(?:\\[(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|(?:(?!(?:.*[a-f0-9][:\\]]){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?)))|(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|(?:(?!(?:.*[a-f0-9]:){5,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}:)?)))?(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))(?:\\.(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))){3}))\\]))$/iD";
+	const char regexp[] = '/^(?!(?>"?(?>\\\[ -~]|[^"])"?){255,})(?!"?(?>\\\[ -~]|[^"]){65,}"?@)(?>([!#-\'*+\/-9=?^-~-]+)(?>\.(?1))*|"(?>[ !#-\[\]-~]|\\\[ -~])*")@(?!.*[^.]{64,})(?>([a-z0-9](?>[a-z0-9-]*[a-z0-9])?)(?>\.(?2)){0,126}|\[(?:(?>IPv6:(?>([a-f0-9]{1,4})(?>:(?3)){7}|(?!(?:.*[a-f0-9][:\]]){8,})((?3)(?>:(?3)){0,6})?::(?4)?))|(?>(?>IPv6:(?>(?3)(?>:(?3)){5}:|(?!(?:.*[a-f0-9]:){6,})(?5)?::(?>((?3)(?>:(?3)){0,4}):)?))?(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])(?>\.(?6)){3}))\])$/iD';
 
 	pcre       *re = NULL;
 	pcre_extra *pcre_extra = NULL;
@@ -534,8 +516,8 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int         matches;
 
 
-	/* The maximum length of an e-mail address is 320 octets, per RFC 2821. */
-	if (Z_STRLEN_P(value) > 320) {
+	/* The maximum length of an e-mail address is 254 octets, per RFC 3696 Errata 1690. */
+	if (Z_STRLEN_P(value) > 254) {
 		RETURN_VALIDATION_FAILED
 	}
 
