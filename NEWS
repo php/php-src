@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.5.0 Alpha 3
 
+- General improvements:
+  . Fixed bug #63822 (Crash when using closures with ArrayAccess).
+    (Nikita Popov)
 
 18 Dec 2012, PHP 5.5.0 Alpha 2
 
