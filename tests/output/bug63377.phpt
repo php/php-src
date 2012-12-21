@@ -1,6 +1,6 @@
 --TEST--
 Bug #63377 (Segfault on output buffer > 2GB)
---SKIPF--
+--SKIPIF--
 <?php
 if (PHP_INT_SIZE == 4) {
   die('skip Not for 32-bits OS');
