@@ -29,6 +29,16 @@ static zend_object_handlers zend_generator_handlers;
 
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC) /* {{{ */
 {
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+		generator->value = NULL;
+	}
+
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+		generator->key = NULL;
+	}
+
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
 		zend_op_array *op_array = execute_data->op_array;
@@ -161,16 +171,6 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			EG(argument_stack) = NULL;
 		}
 		generator->execute_data = NULL;
-	}
-
-	if (generator->value) {
-		zval_ptr_dtor(&generator->value);
-		generator->value = NULL;
-	}
-
-	if (generator->key) {
-		zval_ptr_dtor(&generator->key);
-		generator->key = NULL;
 	}
 }
 /* }}} */
