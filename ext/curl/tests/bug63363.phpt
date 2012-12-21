@@ -5,6 +5,11 @@ Bug #63363 (CURL silently accepts boolean value for SSL_VERIFYHOST)
 if (!extension_loaded("curl")) {
         exit("skip curl extension not loaded");
 }
+$curl_version = curl_version();
+if ($curl_version['version_number'] >= 0x071c01) {
+	    exit("skip: test valid for libcurl < 7.28.1");
+}
+
 
 ?>
 --FILE--
