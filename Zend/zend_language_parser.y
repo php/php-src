@@ -50,7 +50,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %}
 
 %pure_parser
-%expect 3
+%expect 6
 
 %token END 0 "end of file"
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
@@ -167,13 +167,14 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_USE        "use (T_USE)"
 %token T_INSTEADOF  "insteadof (T_INSTEADOF)"
 %token T_GLOBAL     "global (T_GLOBAL)"
-%right T_STATIC T_ABSTRACT T_FINAL T_PRIVATE T_PROTECTED T_PUBLIC
+%right T_STATIC T_ABSTRACT T_FINAL T_PRIVATE T_PROTECTED T_PUBLIC T_DEPRECATED
 %token T_STATIC     "static (T_STATIC)"
 %token T_ABSTRACT   "abstract (T_ABSTRACT)"
 %token T_FINAL      "final (T_FINAL)"
 %token T_PRIVATE    "private (T_PRIVATE)"
 %token T_PROTECTED  "protected (T_PROTECTED)"
 %token T_PUBLIC     "public (T_PUBLIC)"
+%token T_DEPRECATED "deprecated (T_DEPRECATED)"
 %token T_VAR        "var (T_VAR)"
 %token T_UNSET      "unset (T_UNSET)"
 %token T_ISSET      "isset (T_ISSET)"
@@ -375,7 +376,7 @@ is_reference:
 
 
 unticked_function_declaration_statement:
-		function is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, NULL TSRMLS_CC); }
+		function is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, &$1 TSRMLS_CC); }
 		'(' parameter_list ')'
 		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
 ;
@@ -677,6 +678,7 @@ member_modifier:
 	|	T_STATIC				{ Z_LVAL($$.u.constant) = ZEND_ACC_STATIC; }
 	|	T_ABSTRACT				{ Z_LVAL($$.u.constant) = ZEND_ACC_ABSTRACT; }
 	|	T_FINAL					{ Z_LVAL($$.u.constant) = ZEND_ACC_FINAL; }
+	|	T_DEPRECATED				{ Z_LVAL($$.u.constant) = ZEND_ACC_DEPRECATED; }
 ;
 
 class_variable_declaration:
@@ -832,7 +834,8 @@ combined_scalar:
     | '[' array_pair_list ']' { $$ = $2; }
 
 function:
-	T_FUNCTION { $$.u.op.opline_num = CG(zend_lineno); }
+		T_DEPRECATED T_FUNCTION { $$ = $2; $$.u.op.opline_num = CG(zend_lineno); Z_LVAL($$.u.constant) = ZEND_ACC_DEPRECATED; }
+	|	T_FUNCTION { $$.u.op.opline_num = CG(zend_lineno); }
 ;
 
 lexical_vars:

@@ -1516,6 +1516,10 @@ int zend_do_verify_access_types(const znode *current_access_type, const znode *n
 		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_FINAL)) {
 		zend_error(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
 	}
+	if ((Z_LVAL(current_access_type->u.constant) & ZEND_ACC_DEPRECATED)
+		&& (Z_LVAL(new_modifier->u.constant) & ZEND_ACC_DEPRECATED)) {
+		zend_error(E_COMPILE_ERROR, "Multiple deprecated modifiers are not allowed");
+	}
 	if (((Z_LVAL(current_access_type->u.constant) | Z_LVAL(new_modifier->u.constant)) & (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) == (ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL)) {
 		zend_error(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class member");
 	}
@@ -1529,7 +1533,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	char *name = function_name->u.constant.value.str.val;
 	int name_len = function_name->u.constant.value.str.len;
 	int function_begin_line = function_token->u.op.opline_num;
-	zend_uint fn_flags;
+	zend_uint fn_flags = 0;
 	const char *lcname;
 	zend_bool orig_interactive;
 	ALLOCA_FLAG(use_heap)
@@ -1541,10 +1545,13 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			}
 			Z_LVAL(fn_flags_znode->u.constant) |= ZEND_ACC_ABSTRACT; /* propagates to the rest of the parser */
 		}
-		fn_flags = Z_LVAL(fn_flags_znode->u.constant); /* must be done *after* the above check */
-	} else {
-		fn_flags = 0;
+		/*fn_flags = Z_LVAL(fn_flags_znode->u.constant); /* must be done *after* the above check */
 	}
+
+	if(fn_flags_znode) {
+		fn_flags = Z_LVAL(fn_flags_znode->u.constant);
+	}
+
 	if ((fn_flags & ZEND_ACC_STATIC) && (fn_flags & ZEND_ACC_ABSTRACT) && !(CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE)) {
 		zend_error(E_STRICT, "Static function %s%s%s() should not be abstract", is_method ? CG(active_class_entry)->name : "", is_method ? "::" : "", Z_STRVAL(function_name->u.constant));
 	}
@@ -5402,6 +5409,10 @@ void zend_do_declare_property(const znode *var_name, const znode *value, zend_ui
 	if (access_type & ZEND_ACC_FINAL) {
 		zend_error(E_COMPILE_ERROR, "Cannot declare property %s::$%s final, the final modifier is allowed only for methods and classes",
 				   CG(active_class_entry)->name, var_name->u.constant.value.str.val);
+	}
+
+	if (access_type & ZEND_ACC_DEPRECATED) {
+		zend_error(E_COMPILE_ERROR, "Properties cannot be declared deprecated");
 	}
 
 	if (zend_hash_find(&CG(active_class_entry)->properties_info, var_name->u.constant.value.str.val, var_name->u.constant.value.str.len+1, (void **) &existing_property_info)==SUCCESS) {

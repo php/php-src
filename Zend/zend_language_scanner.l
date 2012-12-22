@@ -1323,6 +1323,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_PUBLIC;
 }
 
+<ST_IN_SCRIPTING>"deprecated" {
+	return T_DEPRECATED;
+}
+
 <ST_IN_SCRIPTING>"unset" {
 	return T_UNSET;
 }
