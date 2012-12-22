@@ -1679,6 +1679,16 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 	CURLcode     error=CURLE_OK;
 
 	switch (option) {
+		case CURLOPT_SSL_VERIFYHOST:
+			if(Z_BVAL_PP(zvalue) == 1) {
+#if LIBCURL_VERSION_NUM <= 0x071c00 /* 7.28.0 */
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "CURLOPT_SSL_VERIFYHOST with value 1 is deprecated and will be removed as of libcurl 7.28.1. It is recommended to use value 2 instead");
+#else
+				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "CURLOPT_SSL_VERIFYHOST no longer accepts the value 1, value 2 will be used instead");
+				error = curl_easy_setopt(ch->cp, option, 2);
+				break;
+#endif
+			}
 		case CURLOPT_INFILESIZE:
 		case CURLOPT_VERBOSE:
 		case CURLOPT_HEADER:
@@ -1717,7 +1727,6 @@ static int _php_curl_setopt(php_curl *ch, long option, zval **zvalue, zval *retu
 #if LIBCURL_VERSION_NUM > 0x071002
 		case CURLOPT_CONNECTTIMEOUT_MS:
 #endif
-		case CURLOPT_SSL_VERIFYHOST:
 		case CURLOPT_SSL_VERIFYPEER:
 		case CURLOPT_DNS_USE_GLOBAL_CACHE:
 		case CURLOPT_NOSIGNAL:
