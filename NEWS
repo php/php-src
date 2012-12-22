@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     (Johannes)
 
 - cURL extension:
+  . Fixed bug #63795 (CURL >= 7.28.0 no longer support value 1 for
+    CURLOPT_SSL_VERIFYHOST). (Pierrick)
+  . Fixed bug #63352 (Can't enable hostname validation when using curl stream
+    wrappers). (Pierrick)
   . Fixed bug #55438 (Curlwapper is not sending http header randomly).
     (phpnet@lostreality.org, Pierrick)
 
