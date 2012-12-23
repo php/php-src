@@ -396,6 +396,13 @@ ZEND_BEGIN_ARG_INFO(arginfo_curl_share_setopt, 0)
 	ZEND_ARG_INFO(0, option)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
+
+#if LIBCURL_VERSION_NUM >= 0x071200 /* Available since 7.18.0 */
+ZEND_BEGIN_ARG_INFO(arginfo_curl_pause, 0)
+	ZEND_ARG_INFO(0, ch)
+	ZEND_ARG_INFO(0, bitmask)
+ZEND_END_ARG_INFO()
+#endif
 /* }}} */
 
 /* {{{ curl_functions[]
@@ -421,6 +428,9 @@ const zend_function_entry curl_functions[] = {
 #if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 	PHP_FE(curl_escape,              arginfo_curl_escape)
 	PHP_FE(curl_unescape,            arginfo_curl_unescape)
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
+	PHP_FE(curl_pause,               arginfo_curl_pause)
 #endif
 	PHP_FE(curl_multi_init,          arginfo_curl_multi_init)
 	PHP_FE(curl_multi_add_handle,    arginfo_curl_multi_add_handle)
@@ -999,6 +1009,14 @@ PHP_MINIT_FUNCTION(curl)
 
 #if LIBCURL_VERSION_NUM >= 0x071200 /* Available since 7.18.0 */
 	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_TRANSFER_MODE);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_ALL);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_CONT);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_RECV);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_RECV_CONT);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_SEND);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_SEND_CONT);
+	REGISTER_CURL_CONSTANT(CURL_READFUNC_PAUSE);
+	REGISTER_CURL_CONSTANT(CURL_WRITEFUNC_PAUSE);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071202 /* Available since 7.18.2 */
@@ -3417,8 +3435,29 @@ PHP_FUNCTION(curl_unescape)
 		RETURN_FALSE;
 	}
 }
-#endif
 /* }}} */
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
+/* {{{ proto void curl_pause(resource ch, int bitmask)
+       pause and unpause a connection */
+PHP_FUNCTION(curl_pause)
+{
+	long       bitmask;
+	zval       *zid;
+	php_curl   *ch;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zid, &bitmask) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
+
+	RETURN_LONG(curl_easy_pause(ch->cp, bitmask)); 
+}
+/* }}} */
+#endif
+
 #endif /* HAVE_CURL */
 
 /*
