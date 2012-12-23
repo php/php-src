@@ -971,6 +971,15 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 }
 /* }}} */
 
+/* {{{ curl_write_nothing
+ * Used as a work around. See _php_curl_close_ex
+ */
+static size_t curl_write_nothing(char *data, size_t size, size_t nmemb, void *ctx) 
+{
+	return size * nmemb;
+}
+/* }}} */
+
 /* {{{ curl_write
  */
 static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
@@ -2604,6 +2613,21 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 #endif
 
 	_php_curl_verify_handlers(ch, 0 TSRMLS_CC);
+
+	/* 
+	 * Libcurl is doing connection caching. When easy handle is cleaned up,
+	 * if the handle was previously used by the curl_multi_api, the connection 
+	 * remains open un the curl multi handle is cleaned up. Some protocols are
+	 * sending content like the FTP one, and libcurl try to use the 
+	 * WRITEFUNCTION or the HEADERFUNCTION. Since structures used in those
+	 * callback are freed, we need to use an other callback to which avoid
+	 * segfaults.
+	 *
+	 * Libcurl commit d021f2e8a00 fix this issue and should be part of 7.28.2 
+	 */
+	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION, curl_write_nothing);
+	curl_easy_setopt(ch->cp, CURLOPT_WRITEFUNCTION, curl_write_nothing);
+
 	curl_easy_cleanup(ch->cp);
 
 	/* cURL destructors should be invoked only by last curl handle */
