@@ -6,6 +6,11 @@ PHP                                                                        NEWS
   . Fixed bug #63822 (Crash when using closures with ArrayAccess).
     (Nikita Popov)
 
+- cURL:
+  . Added new functions curl_escape, curl_multi_setopt, curl_multi_strerror
+    curl_pause, curl_reset, curl_share_close, curl_share_init, 
+	curl_share_setopt curl_strerror and curl_unescape. (Pierrick)
+
 18 Dec 2012, PHP 5.5.0 Alpha 2
 
 - General improvements:
