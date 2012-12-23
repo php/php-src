@@ -91,6 +91,8 @@ PHP_FUNCTION(curl_reset);
 #if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 PHP_FUNCTION(curl_escape);
 PHP_FUNCTION(curl_unescape);
+
+PHP_FUNCTION(curl_multi_setopt);
 #endif
 
 void _php_curl_multi_close(zend_rsrc_list_entry * TSRMLS_DC);

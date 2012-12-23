@@ -330,6 +330,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_curl_unescape, 0)
 	ZEND_ARG_INFO(0, ch)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_setopt, 0)
+	ZEND_ARG_INFO(0, sh)
+	ZEND_ARG_INFO(0, option)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_init, 0)
@@ -410,6 +416,9 @@ const zend_function_entry curl_functions[] = {
 	PHP_FE(curl_multi_getcontent,    arginfo_curl_multi_getcontent)
 	PHP_FE(curl_multi_info_read,     arginfo_curl_multi_info_read)
 	PHP_FE(curl_multi_close,         arginfo_curl_multi_close)
+#if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
+	PHP_FE(curl_multi_setopt,        arginfo_curl_multi_setopt)
+#endif
 	PHP_FE(curl_share_init,          arginfo_curl_share_init)
 	PHP_FE(curl_share_close,         arginfo_curl_share_close)
 	PHP_FE(curl_share_setopt,        arginfo_curl_share_setopt)
@@ -928,6 +937,7 @@ PHP_MINIT_FUNCTION(curl)
 
 #if LIBCURL_VERSION_NUM >= 0x071000 /* Available since 7.16.0 */
 	REGISTER_CURL_CONSTANT(CURLOPT_SSL_SESSIONID_CACHE);
+	REGISTER_CURL_CONSTANT(CURLMOPT_PIPELINING);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1 */
@@ -946,6 +956,10 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTP_CONTENT_DECODING);
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTP_TRANSFER_DECODING);
 	REGISTER_CURL_CONSTANT(CURLOPT_TIMEOUT_MS);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x071003 /* Available since 7.16.3 */
+	REGISTER_CURL_CONSTANT(CURLMOPT_MAXCONNECTS);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071004 /* Available since 7.16.4 */
