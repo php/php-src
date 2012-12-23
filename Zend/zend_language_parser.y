@@ -835,7 +835,7 @@ combined_scalar:
 
 function:
 		T_DEPRECATED T_FUNCTION { $$ = $2; $$.u.op.opline_num = CG(zend_lineno); Z_LVAL($$.u.constant) = ZEND_ACC_DEPRECATED; }
-	|	T_FUNCTION { $$.u.op.opline_num = CG(zend_lineno); }
+	|	T_FUNCTION { $$.u.op.opline_num = CG(zend_lineno); Z_LVAL($$.u.constant) = 0; }
 ;
 
 lexical_vars:
