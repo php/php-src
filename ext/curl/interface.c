@@ -330,6 +330,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_curl_unescape, 0)
 	ZEND_ARG_INFO(0, ch)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_setopt, 0)
+	ZEND_ARG_INFO(0, sh)
+	ZEND_ARG_INFO(0, option)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_init, 0)
@@ -368,6 +374,16 @@ ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_close, 0)
 	ZEND_ARG_INFO(0, mh)
 ZEND_END_ARG_INFO()
 
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* Available since 7.12.0 */
+ZEND_BEGIN_ARG_INFO(arginfo_curl_strerror, 0)
+	ZEND_ARG_INFO(0, errornum)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_strerror, 0)
+	ZEND_ARG_INFO(0, errornum)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO(arginfo_curl_share_init, 0)
 ZEND_END_ARG_INFO()
 
@@ -380,6 +396,13 @@ ZEND_BEGIN_ARG_INFO(arginfo_curl_share_setopt, 0)
 	ZEND_ARG_INFO(0, option)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
+
+#if LIBCURL_VERSION_NUM >= 0x071200 /* Available since 7.18.0 */
+ZEND_BEGIN_ARG_INFO(arginfo_curl_pause, 0)
+	ZEND_ARG_INFO(0, ch)
+	ZEND_ARG_INFO(0, bitmask)
+ZEND_END_ARG_INFO()
+#endif
 /* }}} */
 
 /* {{{ curl_functions[]
@@ -395,12 +418,19 @@ const zend_function_entry curl_functions[] = {
 	PHP_FE(curl_error,               arginfo_curl_error)
 	PHP_FE(curl_errno,               arginfo_curl_errno)
 	PHP_FE(curl_close,               arginfo_curl_close)
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* 7.12.0 */
+	PHP_FE(curl_strerror,            arginfo_curl_strerror)
+	PHP_FE(curl_multi_strerror,      arginfo_curl_multi_strerror)
+#endif
 #if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
 	PHP_FE(curl_reset,               arginfo_curl_reset)
 #endif
 #if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 	PHP_FE(curl_escape,              arginfo_curl_escape)
 	PHP_FE(curl_unescape,            arginfo_curl_unescape)
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
+	PHP_FE(curl_pause,               arginfo_curl_pause)
 #endif
 	PHP_FE(curl_multi_init,          arginfo_curl_multi_init)
 	PHP_FE(curl_multi_add_handle,    arginfo_curl_multi_add_handle)
@@ -410,6 +440,9 @@ const zend_function_entry curl_functions[] = {
 	PHP_FE(curl_multi_getcontent,    arginfo_curl_multi_getcontent)
 	PHP_FE(curl_multi_info_read,     arginfo_curl_multi_info_read)
 	PHP_FE(curl_multi_close,         arginfo_curl_multi_close)
+#if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
+	PHP_FE(curl_multi_setopt,        arginfo_curl_multi_setopt)
+#endif
 	PHP_FE(curl_share_init,          arginfo_curl_share_init)
 	PHP_FE(curl_share_close,         arginfo_curl_share_close)
 	PHP_FE(curl_share_setopt,        arginfo_curl_share_setopt)
@@ -928,6 +961,7 @@ PHP_MINIT_FUNCTION(curl)
 
 #if LIBCURL_VERSION_NUM >= 0x071000 /* Available since 7.16.0 */
 	REGISTER_CURL_CONSTANT(CURLOPT_SSL_SESSIONID_CACHE);
+	REGISTER_CURL_CONSTANT(CURLMOPT_PIPELINING);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071001 /* Available since 7.16.1 */
@@ -946,6 +980,10 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTP_CONTENT_DECODING);
 	REGISTER_CURL_CONSTANT(CURLOPT_HTTP_TRANSFER_DECODING);
 	REGISTER_CURL_CONSTANT(CURLOPT_TIMEOUT_MS);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x071003 /* Available since 7.16.3 */
+	REGISTER_CURL_CONSTANT(CURLMOPT_MAXCONNECTS);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071004 /* Available since 7.16.4 */
@@ -971,6 +1009,14 @@ PHP_MINIT_FUNCTION(curl)
 
 #if LIBCURL_VERSION_NUM >= 0x071200 /* Available since 7.18.0 */
 	REGISTER_CURL_CONSTANT(CURLOPT_PROXY_TRANSFER_MODE);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_ALL);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_CONT);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_RECV);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_RECV_CONT);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_SEND);
+	REGISTER_CURL_CONSTANT(CURLPAUSE_SEND_CONT);
+	REGISTER_CURL_CONSTANT(CURL_READFUNC_PAUSE);
+	REGISTER_CURL_CONSTANT(CURL_WRITEFUNC_PAUSE);
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x071202 /* Available since 7.18.2 */
@@ -3242,6 +3288,28 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* Available since 7.12.0 */
+/* {{{ proto bool curl_strerror(int code)
+      return string describing error code */
+PHP_FUNCTION(curl_strerror)
+{
+	long code;
+	const char *str;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &code) == FAILURE) {
+		return;
+	}
+
+	str = curl_easy_strerror(code);
+	if (str) {
+		RETURN_STRING(str, 1);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+#endif
+
 #if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
 /* {{{ _php_curl_reset_handlers()
    Reset all handlers of a given php_curl */
@@ -3266,7 +3334,7 @@ static void _php_curl_reset_handlers(php_curl *ch)
 		ch->handlers->read->stream = NULL;
 	}
 	ch->handlers->read->fp = NULL;
-	ch->handlers->read->fd = NULL;
+	ch->handlers->read->fd = 0;
 	ch->handlers->read->method  = PHP_CURL_DIRECT;
 
 	if (ch->handlers->std_err) {
@@ -3367,8 +3435,29 @@ PHP_FUNCTION(curl_unescape)
 		RETURN_FALSE;
 	}
 }
-#endif
 /* }}} */
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
+/* {{{ proto void curl_pause(resource ch, int bitmask)
+       pause and unpause a connection */
+PHP_FUNCTION(curl_pause)
+{
+	long       bitmask;
+	zval       *zid;
+	php_curl   *ch;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zid, &bitmask) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(ch, php_curl *, &zid, -1, le_curl_name, le_curl);
+
+	RETURN_LONG(curl_easy_pause(ch->cp, bitmask)); 
+}
+/* }}} */
+#endif
+
 #endif /* HAVE_CURL */
 
 /*

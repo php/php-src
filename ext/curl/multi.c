@@ -359,6 +359,81 @@ void _php_curl_multi_close(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* Available since 7.12.0 */
+/* {{{ proto bool curl_multi_strerror(int code)
+         return string describing error code */
+PHP_FUNCTION(curl_multi_strerror)
+{
+	long code;
+	const char *str;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &code) == FAILURE) {
+		return;
+	}
+
+	str = curl_multi_strerror(code);
+	if (str) {
+		RETURN_STRING(str, 1);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
+static int _php_curl_multi_setopt(php_curlm *mh, long option, zval **zvalue, zval *return_value TSRMLS_DC) /* {{{ */
+{ 
+	CURLMcode error = CURLM_OK;
+
+	switch (option) {
+#if LIBCURL_VERSION_NUM >= 0x071000 /* 7.16.0 */
+		case CURLMOPT_PIPELINING:
+#endif
+#if LIBCURL_VERSION_NUM >= 0x071003 /* 7.16.3 */
+		case CURLMOPT_MAXCONNECTS:
+#endif
+			convert_to_long_ex(zvalue);
+			error = curl_multi_setopt(mh->multi, option, Z_LVAL_PP(zvalue));
+			break;
+
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid curl multi configuration option");
+			error = CURLM_UNKNOWN_OPTION;
+			break;
+	}
+
+	if (error != CURLM_OK) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+/* }}} */
+
+/* {{{ proto int curl_multi_setopt(resource mh, int option, mixed value)
+       Set an option for the curl multi handle */
+PHP_FUNCTION(curl_multi_setopt)
+{
+	zval       *z_mh, **zvalue;
+	long        options;
+	php_curlm *mh;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlZ", &z_mh, &options, &zvalue) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(mh, php_curlm *, &z_mh, -1, le_curl_multi_handle_name, le_curl_multi_handle);
+
+	if (!_php_curl_multi_setopt(mh, options, zvalue, return_value TSRMLS_CC)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+#endif
+
 #endif
 
 /*
