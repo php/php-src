@@ -374,6 +374,16 @@ ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_close, 0)
 	ZEND_ARG_INFO(0, mh)
 ZEND_END_ARG_INFO()
 
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* Available since 7.12.0 */
+ZEND_BEGIN_ARG_INFO(arginfo_curl_strerror, 0)
+	ZEND_ARG_INFO(0, errornum)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_curl_multi_strerror, 0)
+	ZEND_ARG_INFO(0, errornum)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO(arginfo_curl_share_init, 0)
 ZEND_END_ARG_INFO()
 
@@ -401,6 +411,10 @@ const zend_function_entry curl_functions[] = {
 	PHP_FE(curl_error,               arginfo_curl_error)
 	PHP_FE(curl_errno,               arginfo_curl_errno)
 	PHP_FE(curl_close,               arginfo_curl_close)
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* 7.12.0 */
+	PHP_FE(curl_strerror,            arginfo_curl_strerror)
+	PHP_FE(curl_multi_strerror,      arginfo_curl_multi_strerror)
+#endif
 #if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
 	PHP_FE(curl_reset,               arginfo_curl_reset)
 #endif
@@ -3256,6 +3270,28 @@ static void _php_curl_close(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 }
 /* }}} */
 
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* Available since 7.12.0 */
+/* {{{ proto bool curl_strerror(int code)
+      return string describing error code */
+PHP_FUNCTION(curl_strerror)
+{
+	long code;
+	const char *str;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &code) == FAILURE) {
+		return;
+	}
+
+	str = curl_easy_strerror(code);
+	if (str) {
+		RETURN_STRING(str, 1);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+#endif
+
 #if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
 /* {{{ _php_curl_reset_handlers()
    Reset all handlers of a given php_curl */
@@ -3280,7 +3316,7 @@ static void _php_curl_reset_handlers(php_curl *ch)
 		ch->handlers->read->stream = NULL;
 	}
 	ch->handlers->read->fp = NULL;
-	ch->handlers->read->fd = NULL;
+	ch->handlers->read->fd = 0;
 	ch->handlers->read->method  = PHP_CURL_DIRECT;
 
 	if (ch->handlers->std_err) {

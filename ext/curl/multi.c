@@ -359,6 +359,28 @@ void _php_curl_multi_close(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* Available since 7.12.0 */
+/* {{{ proto bool curl_multi_strerror(int code)
+         return string describing error code */
+PHP_FUNCTION(curl_multi_strerror)
+{
+	long code;
+	const char *str;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &code) == FAILURE) {
+		return;
+	}
+
+	str = curl_multi_strerror(code);
+	if (str) {
+		RETURN_STRING(str, 1);
+	} else {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+#endif
+
 #if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 static int _php_curl_multi_setopt(php_curlm *mh, long option, zval **zvalue, zval *return_value TSRMLS_DC) /* {{{ */
 { 
@@ -388,7 +410,6 @@ static int _php_curl_multi_setopt(php_curlm *mh, long option, zval **zvalue, zva
 	}
 }
 /* }}} */
-
 
 /* {{{ proto int curl_multi_setopt(resource mh, int option, mixed value)
        Set an option for the curl multi handle */

@@ -84,6 +84,11 @@ PHP_FUNCTION(curl_share_close);
 PHP_FUNCTION(curl_share_init);
 PHP_FUNCTION(curl_share_setopt);
 
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* 7.12.0 */
+PHP_FUNCTION(curl_strerror);
+PHP_FUNCTION(curl_multi_strerror);
+#endif
+
 #if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
 PHP_FUNCTION(curl_reset);
 #endif
