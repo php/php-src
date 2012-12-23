@@ -431,10 +431,6 @@ static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* 
 
 ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
-	if (EG(exception)) {
-		return;
-	}
-
 	/* The generator is already closed, thus can't resume */
 	if (!generator->execute_data) {
 		return;
@@ -617,7 +613,7 @@ ZEND_METHOD(Generator, next)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::send()
+/* {{{ proto mixed Generator::send(mixed $value)
  * Sends a value to the generator */
 ZEND_METHOD(Generator, send)
 {
@@ -644,6 +640,44 @@ ZEND_METHOD(Generator, send)
 
 	if (generator->value) {
 		RETURN_ZVAL(generator->value, 1, 0);
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed Generator::throw(Exception $exception)
+ * Throws an exception into the generator */
+ZEND_METHOD(Generator, throw)
+{
+	zval *exception, *exception_copy;
+	zend_generator *generator;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &exception) == FAILURE) {
+		return;
+	}
+
+	ALLOC_ZVAL(exception_copy);
+	MAKE_COPY_ZVAL(&exception, exception_copy);
+
+	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (generator->execute_data) {
+		/* Throw the exception in the context of the generator */
+		zend_execute_data *current_execute_data = EG(current_execute_data);
+		EG(current_execute_data) = generator->execute_data;
+
+		zend_throw_exception_object(exception_copy TSRMLS_CC);
+
+		EG(current_execute_data) = current_execute_data;
+
+		zend_generator_resume(generator TSRMLS_CC);
+
+		if (generator->value) {
+			RETURN_ZVAL(generator->value, 1, 0);
+		}
+	} else {
+		/* If the generator is already closed throw the exception in the
+		 * current context */
+		zend_throw_exception_object(exception_copy TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -790,6 +824,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_send, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_throw, 0, 0, 1)
+	ZEND_ARG_INFO(0, exception)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, rewind,   arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, valid,    arginfo_generator_void, ZEND_ACC_PUBLIC)
@@ -797,6 +835,7 @@ static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, key,      arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, next,     arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, send,     arginfo_generator_send, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, throw,    arginfo_generator_throw, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, __wakeup, arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
