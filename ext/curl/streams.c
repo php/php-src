@@ -218,6 +218,10 @@ static int php_curl_stream_close(php_stream *stream, int close_handle TSRMLS_DC)
 	curl_easy_cleanup(curlstream->curl);	
 	curl_multi_cleanup(curlstream->multi);	
 
+	if (curlstream->headers_slist) {
+		curl_slist_free_all(curlstream->headers_slist);
+	}
+	
 	/* we are not closing curlstream->readbuf here, because we export
 	 * it as a zval with the wrapperdata - the engine will garbage collect it */
 
@@ -268,7 +272,6 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	php_stream *stream;
 	php_curl_stream *curlstream;
 	zval *tmp, **ctx_opt = NULL;
-	struct curl_slist *slist = NULL;
 
 	curlstream = emalloc(sizeof(php_curl_stream));
 	memset(curlstream, 0, sizeof(php_curl_stream));
@@ -279,6 +282,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 	curlstream->curl = curl_easy_init();
 	curlstream->multi = curl_multi_init();
 	curlstream->pending = 1;
+	curlstream->headers_slist = NULL;
 
 	/* if opening for an include statement, ensure that the local storage will
 	 * have a FILE* associated with it.
@@ -327,7 +331,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 		}
 
 		if (SUCCESS == php_stream_context_get_option(context, "http", "curl_verify_ssl_host", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_BOOL && Z_LVAL_PP(ctx_opt) == 1) {
-			curl_easy_setopt(curlstream->curl, CURLOPT_SSL_VERIFYHOST, 1);
+			curl_easy_setopt(curlstream->curl, CURLOPT_SSL_VERIFYHOST, 2);
 		} else {
 			curl_easy_setopt(curlstream->curl, CURLOPT_SSL_VERIFYHOST, 0);
 		}
@@ -351,7 +355,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 					zend_hash_move_forward_ex(Z_ARRVAL_PP(ctx_opt), &pos)
 				) {
 					if (Z_TYPE_PP(header) == IS_STRING) {
-						slist = curl_slist_append(slist, Z_STRVAL_PP(header));
+						curlstream->headers_slist = curl_slist_append(curlstream->headers_slist, Z_STRVAL_PP(header));
 					}
 				}
 			} else if (Z_TYPE_PP(ctx_opt) == IS_STRING && Z_STRLEN_PP(ctx_opt)) {
@@ -361,14 +365,14 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 				p = php_strtok_r(copy_ctx_opt, "\r\n", &token);
 				while (p) {
 					trimmed = php_trim(p, strlen(p), NULL, 0, NULL, 3 TSRMLS_CC);
-					slist = curl_slist_append(slist, trimmed);
+					curlstream->headers_slist = curl_slist_append(curlstream->headers_slist, trimmed);
 					efree(trimmed);
 					p = php_strtok_r(NULL, "\r\n", &token);
 				}
 				efree(copy_ctx_opt);
 			}
-			if (slist) {
-				curl_easy_setopt(curlstream->curl, CURLOPT_HTTPHEADER, slist);
+			if (curlstream->headers_slist) {
+				curl_easy_setopt(curlstream->curl, CURLOPT_HTTPHEADER, curlstream->headers_slist);
 			}
 		}
 		if (SUCCESS == php_stream_context_get_option(context, "http", "method", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_STRING) {
@@ -416,7 +420,7 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 		}
 	} else if (context && !strncasecmp(filename, "ftps", sizeof("ftps")-1)) {
 		if (SUCCESS == php_stream_context_get_option(context, "ftp", "curl_verify_ssl_host", &ctx_opt) && Z_TYPE_PP(ctx_opt) == IS_BOOL && Z_LVAL_PP(ctx_opt) == 1) {
-			curl_easy_setopt(curlstream->curl, CURLOPT_SSL_VERIFYHOST, 1);
+			curl_easy_setopt(curlstream->curl, CURLOPT_SSL_VERIFYHOST, 2);
 		} else {
 			curl_easy_setopt(curlstream->curl, CURLOPT_SSL_VERIFYHOST, 0);
 		}
@@ -500,18 +504,10 @@ php_stream *php_curl_stream_opener(php_stream_wrapper *wrapper, char *filename, 
 		}
 	}
 
-	/* context headers are not needed anymore */
-	if (slist) {
-		curl_easy_setopt(curlstream->curl, CURLOPT_HTTPHEADER, NULL);
-		curl_slist_free_all(slist);
-	}
 	return stream;
 
 exit_fail:
 	php_stream_close(stream);
-	if (slist) {
-		curl_slist_free_all(slist);
-	}
 	return NULL;
 }
 

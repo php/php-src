@@ -1,13 +1,13 @@
 --TEST--
-Bug #63363 (CURL silently accepts boolean value for SSL_VERIFYHOST)
+Bug #63795 (CURL >= 7.28.0 no longer support value 1 for CURLOPT_SSL_VERIFYHOST)
 --SKIPIF--
 <?php
 if (!extension_loaded("curl")) {
         exit("skip curl extension not loaded");
 }
 $curl_version = curl_version();
-if ($curl_version['version_number'] >= 0x071c01) {
-        exit("skip: test valid for libcurl < 7.28.1");
+if ($curl_version['version_number'] < 0x071c01) {
+        exit("skip: test valid for libcurl >= 7.28.1");
 }
 ?>
 --FILE--
@@ -25,10 +25,10 @@ curl_close($ch);
 --EXPECTF--
 bool(true)
 
-Notice: curl_setopt(): CURLOPT_SSL_VERIFYHOST with value 1 is deprecated and will be removed as of libcurl 7.28.1. It is recommended to use value 2 instead in %s on line %d
+Notice: curl_setopt(): CURLOPT_SSL_VERIFYHOST no longer accepts the value 1, value 2 will be used instead in %s on line %d
 bool(true)
 bool(true)
 
-Notice: curl_setopt(): CURLOPT_SSL_VERIFYHOST with value 1 is deprecated and will be removed as of libcurl 7.28.1. It is recommended to use value 2 instead in %s on line %d
+Notice: curl_setopt(): CURLOPT_SSL_VERIFYHOST no longer accepts the value 1, value 2 will be used instead in %s on line %d
 bool(true)
 bool(true)

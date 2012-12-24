@@ -2,9 +2,31 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.11
 
+- Filter:
+  . Fixed bug #63757 (getenv() produces memory leak with CGI SAPI). (Dmitry)
+
+- JSON:
+  . Fixed bug #63737 (json_decode does not properly decode with options
+    parameter). (Adam)
+
+- CLI server
+  . Update list of common mime types. Added webm, ogv, ogg. (Lars,
+    pascalc at gmail dot com)
+
+- cURL extension:
+  . Fixed bug (segfault due to libcurl connection caching). (Pierrick)
+  . Fixed bug #63795 (CURL >= 7.28.0 no longer support value 1 for
+    CURLOPT_SSL_VERIFYHOST). (Pierrick)
+  . Fixed bug #63352 (Can't enable hostname validation when using curl stream
+    wrappers). (Pierrick)
+  . Fixed bug #55438 (Curlwapper is not sending http header randomly).
+    (phpnet@lostreality.org, Pierrick)
+
 ?? ??? 2012, PHP 5.4.10
 
 - Core:
+  . Fixed bug #63726 (Memleak with static properties and internal/user
+    classes). (Laruence)
   . Fixed bug #63635 (Segfault in gc_collect_cycles). (Dmitry)
   . Fixed bug #63512 (parse_ini_file() with INI_SCANNER_RAW removes quotes
     from value). (Pierrick)
