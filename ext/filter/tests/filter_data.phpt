@@ -10,6 +10,8 @@ precision=14
 /* Integer */
 $data = "-123";   var_dump(filter_var($data, FILTER_VALIDATE_INT));
 $data = "0";      var_dump(filter_var($data, FILTER_VALIDATE_INT));
+$data = "-0";     var_dump(filter_var($data, FILTER_VALIDATE_INT));
+$data = "+0";     var_dump(filter_var($data, FILTER_VALIDATE_INT));
 $data = "123";    var_dump(filter_var($data, FILTER_VALIDATE_INT));
 $data = -123;     var_dump(filter_var($data, FILTER_VALIDATE_INT));
 $data = 0;        var_dump(filter_var($data, FILTER_VALIDATE_INT));
@@ -45,6 +47,8 @@ $data = "";       var_dump(filter_var($data, FILTER_VALIDATE_BOOLEAN));
 ?>
 --EXPECT--
 int(-123)
+int(0)
+int(0)
 int(0)
 int(123)
 int(-123)
