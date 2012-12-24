@@ -80,6 +80,11 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 			break;
 	}
 
+	if (*str == '0' && str + 1 == end) {
+		/* Special cases: +0 and -0 */
+		return 1;
+	}
+
 	/* must start with 1..9*/
 	if (str < end && *str >= '1' && *str <= '9') {
 		ctx_value = ((sign)?-1:1) * ((*(str++)) - '0');
