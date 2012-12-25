@@ -3948,7 +3948,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				}
 
 				lcname = zend_str_tolower_dup(alias->alias, alias->alias_len);
-				zend_add_trait_method(ce, alias->alias, lcname, alias->alias_len+1, &fn_copy, overriden TSRMLS_DC);
+				zend_add_trait_method(ce, alias->alias, lcname, alias->alias_len+1, &fn_copy, overriden TSRMLS_CC);
 				efree(lcname);
 
 				/* Record the trait from which this alias was resolved. */
@@ -3990,7 +3990,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 			}
 		}
 
-		zend_add_trait_method(ce, fn->common.function_name, lcname, fnname_len+1, &fn_copy, overriden TSRMLS_DC);
+		zend_add_trait_method(ce, fn->common.function_name, lcname, fnname_len+1, &fn_copy, overriden TSRMLS_CC);
 	}
 
 	efree(lcname);
