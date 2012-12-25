@@ -3693,7 +3693,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 			if (*overriden) {
 				if (zend_hash_quick_find(*overriden, arKey, nKeyLength, h, (void**) &existing_fn) == SUCCESS) {
 					if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-						/* Make sure the trait method is compatible with previosly declared abstarct method */
+						/* Make sure the trait method is compatible with previosly declared abstract method */
 						if (!zend_traits_method_compatibility_check(fn, existing_fn TSRMLS_CC)) {
 							zend_error(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 								zend_get_function_declaration(fn TSRMLS_CC),
@@ -3716,7 +3716,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 			zend_hash_quick_update(*overriden, arKey, nKeyLength, h, fn, sizeof(zend_function), (void**)&fn);
 			return;
 		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			/* Make sure the trait method is compatible with previosly declared abstarct method */
+			/* Make sure the trait method is compatible with previosly declared abstract method */
 			if (!zend_traits_method_compatibility_check(fn, existing_fn TSRMLS_CC)) {
 				zend_error(E_COMPILE_ERROR, "Declaration of %s must be compatible with %s",
 					zend_get_function_declaration(fn TSRMLS_CC),
@@ -3731,7 +3731,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 			}
 			return;
 		} else if ((existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-			/* two trais can't define the same non-abstarct method */
+			/* two trais can't define the same non-abstract method */
 #if 1
 			zend_error(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",
 				name, ce->name);
@@ -4296,7 +4296,7 @@ void zend_add_trait_alias(znode *method_reference, znode *modifiers, znode *alia
 		zend_error(E_COMPILE_ERROR, "Cannot use 'static' as method modifier");
 		return;
 	} else if (Z_LVAL(modifiers->u.constant) == ZEND_ACC_ABSTRACT) {
-		zend_error(E_COMPILE_ERROR, "Cannot use 'abstarct' as method modifier");
+		zend_error(E_COMPILE_ERROR, "Cannot use 'abstract' as method modifier");
 		return;
 	} else if (Z_LVAL(modifiers->u.constant) == ZEND_ACC_FINAL) {
 		zend_error(E_COMPILE_ERROR, "Cannot use 'final' as method modifier");
