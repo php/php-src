@@ -4454,8 +4454,6 @@ void zend_add_trait_alias(znode *method_reference, znode *modifiers, znode *alia
 	} else {
 		trait_alias->alias = NULL;
 	}
-	trait_alias->function = NULL;
-
 	zend_add_to_list(&ce->trait_aliases, trait_alias TSRMLS_CC);
 }
 /* }}} */
@@ -4467,8 +4465,6 @@ void zend_add_trait_precedence(znode *method_reference, znode *trait_list TSRMLS
 
 	trait_precedence->trait_method = (zend_trait_method_reference*)method_reference->u.op.ptr;
 	trait_precedence->exclude_from_classes = (zend_class_entry**) trait_list->u.op.ptr;
-
-	trait_precedence->function = NULL;
 
 	zend_add_to_list(&ce->trait_precedences, trait_precedence TSRMLS_CC);
 }
