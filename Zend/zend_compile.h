@@ -213,8 +213,6 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
-#define ZEND_ACC_ALIAS					0x10000000
-
 char *zend_visibility_string(zend_uint fn_flags);
 
 
@@ -534,16 +532,13 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);
 
 /* Trait related functions */
-void zend_add_trait_precedence(znode *precedence_znode TSRMLS_DC);
-void zend_add_trait_alias(znode *alias_znode TSRMLS_DC);
+void zend_do_use_trait(znode *trait_znode TSRMLS_DC);
+void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC);
+void zend_add_trait_precedence(znode *method_reference, znode *trait_list TSRMLS_DC);
+void zend_add_trait_alias(znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC);
 
-
-void zend_do_implements_trait(znode *interface_znode /*, znode* aliases */ TSRMLS_DC);
 ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC);
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC);
-void zend_prepare_trait_precedence(znode *result, znode *method_reference, znode *trait_list TSRMLS_DC);
-void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC);
-void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC);
 
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
 void zend_do_early_binding(TSRMLS_D);
