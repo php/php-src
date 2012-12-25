@@ -452,7 +452,7 @@ struct _zend_trait_precedence {
 	
 	zend_class_entry** exclude_from_classes;
 	
-	union _zend_function* function;
+	union _zend_function* function; /* FIXME: kept in 5.4 for BC, not used */
 };
 typedef struct _zend_trait_precedence zend_trait_precedence;
 
@@ -470,7 +470,7 @@ struct _zend_trait_alias {
 	*/
 	zend_uint modifiers;
 	
-	union _zend_function* function;
+	union _zend_function* function; /* FIXME: kept in 5.4 for BC, not used */
 };
 typedef struct _zend_trait_alias zend_trait_alias;
 
