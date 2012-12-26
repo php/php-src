@@ -93,7 +93,7 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, long 
 /* {{{ proto void UConverter::toUCallback(long $reason,
                                           string $source, string $codeUnits,
                                           long &$error) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_toUCallback_arginfo, 0, ZEND_RETURN_VALUE, 5)
+ZEND_BEGIN_ARG_INFO_EX(php_converter_toUCallback_arginfo, 0, ZEND_RETURN_VALUE, 4)
 	ZEND_ARG_INFO(0, reason)
 	ZEND_ARG_INFO(0, source)
 	ZEND_ARG_INFO(0, codeUnits)
@@ -115,7 +115,7 @@ static PHP_METHOD(UConverter, toUCallback) {
 /* {{{ proto void UConverter::fromUCallback(long $reason,
                                             Array $source, long $codePoint,
                                             long &$error) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_fromUCallback_arginfo, 0, ZEND_RETURN_VALUE, 5)
+ZEND_BEGIN_ARG_INFO_EX(php_converter_fromUCallback_arginfo, 0, ZEND_RETURN_VALUE, 4)
 	ZEND_ARG_INFO(0, reason)
 	ZEND_ARG_INFO(0, source)
 	ZEND_ARG_INFO(0, codePoint)
