@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Added new functions curl_escape, curl_multi_setopt, curl_multi_strerror
     curl_pause, curl_reset, curl_share_close, curl_share_init, 
 	curl_share_setopt curl_strerror and curl_unescape. (Pierrick)
+  . Addes new curl options CURLOPT_TELNETOPTIONS, CURLOPT_GSSAPI_DELEGATION,
+    CURLOPT_ACCEPTTIMEOUT_MS, CURLOPT_SSL_OPTIONS, CURLOPT_TCP_KEEPALIVE,
+	CURLOPT_TCP_KEEPIDLE and CURLOPT_TCP_KEEPINTVL. (Pierrick)
 
 18 Dec 2012, PHP 5.5.0 Alpha 2
 
