@@ -799,12 +799,12 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		tokens = 3;
 		length = 4;
 		separator = '.';
-	} else if (17 == input_len && memchr(input + 2, '-', 1)) {
+	} else if (17 == input_len && input[2] == '-') {
 		/* IEEE 802 format: Six hexadecimal digits separated by hyphens. */
 		tokens = 6;
 		length = 2;
 		separator = '-';
-	} else if (17 == input_len && memchr(input + 2, ':', 1)) {
+	} else if (17 == input_len && input[2] == ':') {
 		/* IEEE 802 format: Six hexadecimal digits separated by colons. */
 		tokens = 6;
 		length = 2;
@@ -820,7 +820,7 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	for (i = 0; i < tokens; i++) {
 		offset = i * (length + 1);
 
-		if (i < tokens - 1 && !memchr(input + offset + length, separator, 1)) {
+		if (i < tokens - 1 && input[offset + length] != separator) {
 			/* The current token did not end with e.g. a "." */
 			RETURN_VALIDATION_FAILED
 		}
