@@ -40,11 +40,11 @@ PHP_FUNCTION(header)
 {
 	zend_bool rep = 1;
 	sapi_header_line ctr = {0};
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|bl", &ctr.line,
 				&ctr.line_len, &rep, &ctr.response_code) == FAILURE)
 		return;
-	
+
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr TSRMLS_CC);
 }
 /* }}} */
@@ -123,6 +123,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (expires > 0) {
 			const char *p;
+			char tsdelta[13];
 			strlcat(cookie, "; Expires=", len + 100);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
 			/* check to make sure that the year does not exceed 4 digits in length */
@@ -137,8 +138,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 			strlcat(cookie, dt, len + 100);
 			efree(dt);
 
-			char tsdelta[12];
-			sprintf(tsdelta, "%li", (long) difftime(expires, time(NULL)));
+			snprintf(tsdelta, sizeof(tsdelta), "%li", (long) difftime(expires, time(NULL)));
 			strlcat(cookie, "; Max-Age=", len + 100);
 			strlcat(cookie, tsdelta, len + 100);
 		}
@@ -242,11 +242,11 @@ PHP_FUNCTION(headers_sent)
 		ZVAL_LONG(arg2, line);
 	case 1:
 		zval_dtor(arg1);
-		if (file) { 
+		if (file) {
 			ZVAL_STRING(arg1, file, 1);
 		} else {
 			ZVAL_STRING(arg1, "", 1);
-		}	
+		}
 		break;
 	}
 

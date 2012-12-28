@@ -1203,10 +1203,8 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 			smart_str_appends(&ncookie, date_fmt);
 			efree(date_fmt);
 
-			char maxage[12];
-			sprintf(maxage, "%li", PS(cookie_lifetime));
 			smart_str_appends(&ncookie, COOKIE_MAX_AGE);
-			smart_str_appends(&ncookie, maxage);
+			smart_str_append_long(&ncookie, PS(cookie_lifetime));
 		}
 	}
 
