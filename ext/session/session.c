@@ -1153,11 +1153,11 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
    ********************* */
 
 #define COOKIE_SET_COOKIE "Set-Cookie: "
-#define COOKIE_EXPIRES	"; Expires="
+#define COOKIE_EXPIRES	"; expires="
 #define COOKIE_MAX_AGE	"; Max-Age="
-#define COOKIE_PATH		"; Path="
-#define COOKIE_DOMAIN	"; Domain="
-#define COOKIE_SECURE	"; Secure"
+#define COOKIE_PATH		"; path="
+#define COOKIE_DOMAIN	"; domain="
+#define COOKIE_SECURE	"; secure"
 #define COOKIE_HTTPONLY	"; HttpOnly"
 
 static void php_session_send_cookie(TSRMLS_D) /* {{{ */

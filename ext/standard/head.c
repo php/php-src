@@ -117,14 +117,14 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 		 * pick an expiry date in the past
 		 */
 		dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, 1, 0 TSRMLS_CC);
-		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; Expires=%s; Max-Age=0", name, dt);
+		snprintf(cookie, len + 100, "Set-Cookie: %s=deleted; expires=%s; Max-Age=0", name, dt);
 		efree(dt);
 	} else {
 		snprintf(cookie, len + 100, "Set-Cookie: %s=%s", name, value ? encoded_value : "");
 		if (expires > 0) {
 			const char *p;
 			char tsdelta[13];
-			strlcat(cookie, "; Expires=", len + 100);
+			strlcat(cookie, "; expires=", len + 100);
 			dt = php_format_date("D, d-M-Y H:i:s T", sizeof("D, d-M-Y H:i:s T")-1, expires, 0 TSRMLS_CC);
 			/* check to make sure that the year does not exceed 4 digits in length */
 			p = zend_memrchr(dt, '-', strlen(dt));
@@ -149,18 +149,18 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 	}
 
 	if (path && path_len > 0) {
-		strlcat(cookie, "; Path=", len + 100);
+		strlcat(cookie, "; path=", len + 100);
 		strlcat(cookie, path, len + 100);
 	}
 	if (domain && domain_len > 0) {
-		strlcat(cookie, "; Domain=", len + 100);
+		strlcat(cookie, "; domain=", len + 100);
 		strlcat(cookie, domain, len + 100);
 	}
 	if (secure) {
-		strlcat(cookie, "; Secure", len + 100);
+		strlcat(cookie, "; secure", len + 100);
 	}
 	if (httponly) {
-		strlcat(cookie, "; HttpOnly", len + 100);
+		strlcat(cookie, "; httponly", len + 100);
 	}
 
 	ctr.line = cookie;

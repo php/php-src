@@ -23,13 +23,13 @@ $expected = array(
 	'Set-Cookie: name=value',
 	'Set-Cookie: name=space+value',
 	'Set-Cookie: name=value',
-	'Set-Cookie: name=value; Expires='.date('D, d-M-Y H:i:s', $tsp).' GMT; Max-Age=5',
-	'Set-Cookie: name=value; Expires='.date('D, d-M-Y H:i:s', $tsn).' GMT; Max-Age=-6',
-	'Set-Cookie: name=value; Expires='.date('D, d-M-Y H:i:s', $tsc).' GMT; Max-Age=0',
-	'Set-Cookie: name=value; Path=/path/',
-	'Set-Cookie: name=value; Domain=domain.tld',
-	'Set-Cookie: name=value; Secure',
-	'Set-Cookie: name=value; HttpOnly'
+	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsp).' GMT; Max-Age=5',
+	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsn).' GMT; Max-Age=-6',
+	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsc).' GMT; Max-Age=0',
+	'Set-Cookie: name=value; path=/path/',
+	'Set-Cookie: name=value; domain=domain.tld',
+	'Set-Cookie: name=value; secure',
+	'Set-Cookie: name=value; httponly'
 );
 
 $headers = headers_list();
