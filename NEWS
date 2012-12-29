@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Filter:
   . Fixed bug #63757 (getenv() produces memory leak with CGI SAPI). (Dmitry)
+  . Fixed bug #54096 (FILTER_VALIDATE_INT does not accept +0 and -0).
+    (martin at divbyzero dot net, Lars)
 
 - JSON:
   . Fixed bug #63737 (json_decode does not properly decode with options
