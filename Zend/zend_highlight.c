@@ -186,7 +186,6 @@ ZEND_API void zend_strip(TSRMLS_D)
 			
 			case T_END_HEREDOC:
 				zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
-				efree(token.value.str.val);
 				/* read the following character, either newline or ; */
 				if (lex_scan(&token TSRMLS_CC) != T_WHITESPACE) {
 					zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));

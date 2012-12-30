@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.5.0 Alpha 3
 
 - General improvements:
+  . Fixed bug #63874 (Segfault if php_strip_whitespace has heredoc). (Pierrick)
   . Fixed bug #63822 (Crash when using closures with ArrayAccess).
     (Nikita Popov)
   . Add Generator::throw() method. (Nikita Popov)
