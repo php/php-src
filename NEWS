@@ -25,7 +25,7 @@ PHP                                                                        NEWS
   . Fixed bug #55438 (Curlwapper is not sending http header randomly).
     (phpnet@lostreality.org, Pierrick)
 
-?? ??? 2012, PHP 5.4.10
+20 Dec 2012, PHP 5.4.10
 
 - Core:
   . Fixed bug #63726 (Memleak with static properties and internal/user
@@ -43,7 +43,7 @@ PHP                                                                        NEWS
     (Mike, casper at langemeijer dot eu)
 
 - Date:
-  . Fixed bug #63666 (Poor date() performance). (Paul Talborg).
+  . Fixed bug #63666 (Poor date() performance). (Paul Taulborg).
   . Fixed bug #63435 (Datetime::format('u') sometimes wrong by 1 microsecond).
     (Remi)
 
