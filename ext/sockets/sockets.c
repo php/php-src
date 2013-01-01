@@ -1878,7 +1878,7 @@ PHP_FUNCTION(socket_get_option)
 		}
 		}
 	} else if (level == IPPROTO_IPV6) {
-		int ret = php_do_getsockopt_ipv6_rfc3542(php_sock, level, optname, return_value);
+		int ret = php_do_getsockopt_ipv6_rfc3542(php_sock, level, optname, return_value TSRMLS_CC);
 		if (ret == SUCCESS) {
 			return;
 		} else if (ret == FAILURE) {
@@ -1981,15 +1981,15 @@ PHP_FUNCTION(socket_set_option)
 
 
 	if (level == IPPROTO_IP) {
-		int res = php_do_setsockopt_ip_mcast(php_sock, level, optname, arg4);
+		int res = php_do_setsockopt_ip_mcast(php_sock, level, optname, arg4 TSRMLS_CC);
 		HANDLE_SUBCALL(res);
 	}
 
 #if HAVE_IPV6
 	else if (level == IPPROTO_IPV6) {
-		int res = php_do_setsockopt_ipv6_mcast(php_sock, level, optname, arg4);
+		int res = php_do_setsockopt_ipv6_mcast(php_sock, level, optname, arg4 TSRMLS_CC);
 		if (res == 1) {
-			res = php_do_setsockopt_ipv6_rfc3542(php_sock, level, optname, arg4);
+			res = php_do_setsockopt_ipv6_rfc3542(php_sock, level, optname, arg4 TSRMLS_CC);
 		}
 		HANDLE_SUBCALL(res);
 	}
@@ -2273,7 +2273,7 @@ PHP_FUNCTION(socket_import_stream)
 		RETURN_FALSE;
 	}
 
-	retsock = socket_import_file_descriptor(socket);
+	retsock = socket_import_file_descriptor(socket TSRMLS_CC);
 	if (retsock == NULL) {
 		RETURN_FALSE;
 	}

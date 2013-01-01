@@ -250,7 +250,7 @@ mcast_req_fun:
 int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 							   int level,
 							   int optname,
-							   zval **arg4)
+							   zval **arg4 TSRMLS_DC)
 {
 	unsigned int	if_index;
 	struct in_addr	if_addr;
@@ -319,7 +319,7 @@ dosockopt:
 int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 								 int level,
 								 int optname,
-								 zval **arg4)
+								 zval **arg4 TSRMLS_DC)
 {
 	unsigned int	if_index;
 	void			*opt_ptr;

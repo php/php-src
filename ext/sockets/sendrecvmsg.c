@@ -272,7 +272,7 @@ PHP_FUNCTION(socket_cmsg_space)
 	RETURN_LONG((long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
-int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval **arg4)
+int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval **arg4 TSRMLS_DC)
 {
 	struct err_s	err = {0};
 	zend_llist		*allocations = NULL;
@@ -311,7 +311,7 @@ dosockopt:
 	return retval != 0 ? FAILURE : SUCCESS;
 }
 
-int php_do_getsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval *result)
+int php_do_getsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval *result TSRMLS_DC)
 {
 	struct err_s		err = {0};
 	void				*buffer;
@@ -340,7 +340,7 @@ int php_do_getsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 		zval *zv = to_zval_run_conversions(buffer, reader, "in6_pktinfo",
 				empty_key_value_list, &err);
 		if (err.has_error) {
-			err_msg_dispose(&err);
+			err_msg_dispose(&err TSRMLS_CC);
 			res = -1;
 		} else {
 			ZVAL_COPY_VALUE(result, zv);
@@ -354,9 +354,7 @@ int php_do_getsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 
 void php_socket_sendrecvmsg_init(INIT_FUNC_ARGS)
 {
-	/* IPv6 ancillary data
-	 * Note that support for sticky options via setsockopt() is not implemented
-	 * yet (where special support is needed, i.e., the optval is not an int). */
+	/* IPv6 ancillary data */
 #ifdef IPV6_RECVPKTINFO
 	REGISTER_LONG_CONSTANT("IPV6_RECVPKTINFO",		IPV6_RECVPKTINFO,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IPV6_PKTINFO",          IPV6_PKTINFO,       CONST_CS | CONST_PERSISTENT);

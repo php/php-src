@@ -30,12 +30,12 @@
 int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 							   int level,
 							   int optname,
-							   zval **arg4);
+							   zval **arg4 TSRMLS_DC);
 
 int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 								 int level,
 								 int optname,
-								 zval **arg4);
+								 zval **arg4 TSRMLS_DC);
 
 int php_if_index_to_addr4(
         unsigned if_index,

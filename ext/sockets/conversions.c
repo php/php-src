@@ -12,6 +12,9 @@
 #include <netinet/in.h>
 #include <sys/un.h>
 
+#include <sys/ioctl.h>
+#include <net/if.h>
+
 #include <limits.h>
 #include <stdarg.h>
 #include <stddef.h>
@@ -52,6 +55,8 @@ typedef struct {
 #define KEY_FILL_SOCKADDR "fill_sockaddr"
 #define KEY_RECVMSG_RET "recvmsg_ret"
 #define KEY_CMSG_LEN	"cmsg_len"
+
+const struct key_value empty_key_value_list[] = {{0}};
 
 /* PARAMETERS */
 static int param_get_bool(void *ctx, const char *key, int def)
@@ -329,25 +334,6 @@ void from_zval_write_int(const zval *arr_value, char *field, ser_context *ctx)
 	}
 
 	ival = (int)lval;
-	memcpy(field, &ival, sizeof(ival));
-}
-static void from_zval_write_unsigned(const zval *arr_value, char *field, ser_context *ctx)
-{
-	long lval;
-	unsigned ival;
-
-	lval = from_zval_integer_common(arr_value, ctx);
-	if (ctx->err.has_error) {
-		return;
-	}
-
-	if (sizeof(long) > sizeof(ival) && (lval < 0 || lval > UINT_MAX)) {
-		do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
-				"for a native unsigned int");
-		return;
-	}
-
-	ival = (unsigned)lval;
 	memcpy(field, &ival, sizeof(ival));
 }
 static void from_zval_write_uint32(const zval *arr_value, char *field, ser_context *ctx)
@@ -1192,20 +1178,17 @@ void to_zval_read_msghdr(const char *msghdr_c, zval *zv, res_context *ctx)
 /* CONVERSIONS for if_index */
 static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context *ctx)
 {
-	zval *va; unsigned *out;
-	unsigned ret;
-	zval				lzval = zval_used_for_init;
+	unsigned	ret;
+	zval		lzval = zval_used_for_init;
 
 	if (Z_TYPE_P(zv) == IS_LONG) {
-		if (Z_LVAL_P(zv) < 0 || Z_LVAL_P(zv) > UINT_MAX) {
+		if (Z_LVAL_P(zv) < 0 || Z_LVAL_P(zv) > UINT_MAX) { /* allow 0 (unspecified interface) */
 			do_from_zval_err(ctx, "the interface index cannot be negative or "
 					"larger than %u; given %ld", UINT_MAX, Z_LVAL_P(zv));
 		} else {
 			ret = (unsigned)Z_LVAL_P(zv);
 		}
 	} else {
-#if HAVE_IF_NAMETOINDEX
-
 		if (Z_TYPE_P(zv) != IS_STRING) {
 			ZVAL_COPY_VALUE(&lzval, zv);
 			zval_copy_ctor(&lzval);
@@ -1213,10 +1196,31 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 			zv = &lzval;
 		}
 
+#if HAVE_IF_NAMETOINDEX
 		ret = if_nametoindex(Z_STRVAL_P(zv));
 		if (ret == 0) {
 			do_from_zval_err(ctx, "no interface with name \"%s\" could be "
 					"found", Z_STRVAL_P(zv));
+		}
+#elif defined(SIOCGIFINDEX)
+		{
+			struct ifreq ifr;
+			if (strlcpy(ifr.ifr_name, Z_STRVAL_P(zv), sizeof(ifr.ifr_name))
+					>= sizeof(ifr.ifr_name)) {
+				do_from_zval_err(ctx, "the interface name \"%s\" is too large ",
+						Z_STRVAL_P(zv));
+			} else if (ioctl(ctx->sock->bsd_socket, SIOCGIFINDEX, &ifr) < 0) {
+				if (errno == ENODEV) {
+					do_from_zval_err(ctx, "no interface with name \"%s\" could be "
+							"found", Z_STRVAL_P(zv));
+				} else {
+					do_from_zval_err(ctx, "error fetching interface index for "
+							"interface with name \"%s\" (errno %d)",
+							Z_STRVAL_P(zv), errno);
+				}
+			} else {
+				ret = (unsigned)ifr.ifr_ifindex;
+			}
 		}
 #else
 		do_from_zval_err(ctx,
@@ -1236,7 +1240,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 #ifdef IPV6_PKTINFO
 static const field_descriptor descriptors_in6_pktinfo[] = {
 		{"addr", sizeof("addr"), 1, offsetof(struct in6_pktinfo, ipi6_addr), from_zval_write_sin6_addr, to_zval_read_sin6_addr},
-		{"ifindex", sizeof("ifindex"), 1, offsetof(struct in6_pktinfo, ipi6_ifindex), from_zval_write_unsigned, to_zval_read_unsigned},
+		{"ifindex", sizeof("ifindex"), 1, offsetof(struct in6_pktinfo, ipi6_ifindex), from_zval_write_ifindex, to_zval_read_unsigned},
 		{0}
 };
 void from_zval_write_in6_pktinfo(const zval *container, char *in6_pktinfo_c, ser_context *ctx)
@@ -1294,6 +1298,7 @@ size_t calculate_scm_rights_space(const zval *arr, ser_context *ctx)
 static void from_zval_write_fd_array_aux(zval **elem, unsigned i, void **args, ser_context *ctx)
 {
 	int *iarr = args[0];
+	TSRMLS_FETCH();
 
 	if (Z_TYPE_PP(elem) == IS_RESOURCE) {
 		php_stream *stream;
@@ -1375,8 +1380,8 @@ void to_zval_read_fd_array(const char *data, zval *zv, res_context *ctx)
 			return;
 		}
 		if (S_ISSOCK(statbuf.st_mode)) {
-			php_socket *sock = socket_import_file_descriptor(fd);
-			zend_register_resource(elem, sock, php_sockets_le_socket());
+			php_socket *sock = socket_import_file_descriptor(fd TSRMLS_CC);
+			zend_register_resource(elem, sock, php_sockets_le_socket() TSRMLS_CC);
 		} else {
 			php_stream *stream = php_stream_fopen_from_fd(fd, "rw", NULL);
 			php_stream_to_zval(stream, elem);
