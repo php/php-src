@@ -2,8 +2,16 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.11
 
+- Core:
+  . Fixed bug #63762 (Sigsegv when Exception::$trace is changed by user).
+    (Johannes)
+  . Fixed bug #43177 (Errors in eval()'ed code produce status code 500). 
+    (Todd Ruth, Stas).
+
 - Filter:
   . Fixed bug #63757 (getenv() produces memory leak with CGI SAPI). (Dmitry)
+  . Fixed bug #54096 (FILTER_VALIDATE_INT does not accept +0 and -0).
+    (martin at divbyzero dot net, Lars)
 
 - JSON:
   . Fixed bug #63737 (json_decode does not properly decode with options
@@ -15,6 +23,7 @@ PHP                                                                        NEWS
 
 - cURL extension:
   . Fixed bug (segfault due to libcurl connection caching). (Pierrick)
+  . Fixed bug #63859 (Memory leak when reusing curl-handle). (Pierrick)
   . Fixed bug #63795 (CURL >= 7.28.0 no longer support value 1 for
     CURLOPT_SSL_VERIFYHOST). (Pierrick)
   . Fixed bug #63352 (Can't enable hostname validation when using curl stream
@@ -22,7 +31,7 @@ PHP                                                                        NEWS
   . Fixed bug #55438 (Curlwapper is not sending http header randomly).
     (phpnet@lostreality.org, Pierrick)
 
-?? ??? 2012, PHP 5.4.10
+20 Dec 2012, PHP 5.4.10
 
 - Core:
   . Fixed bug #63726 (Memleak with static properties and internal/user
@@ -40,7 +49,7 @@ PHP                                                                        NEWS
     (Mike, casper at langemeijer dot eu)
 
 - Date:
-  . Fixed bug #63666 (Poor date() performance). (Paul Talborg).
+  . Fixed bug #63666 (Poor date() performance). (Paul Taulborg).
   . Fixed bug #63435 (Datetime::format('u') sometimes wrong by 1 microsecond).
     (Remi)
 
