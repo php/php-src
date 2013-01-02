@@ -1238,7 +1238,13 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	va_end(args);
 
 	if (type == E_PARSE) {
-		EG(exit_status) = 255;
+		/* eval() errors do not affect exit_status */
+		if (!(EG(current_execute_data) &&
+			EG(current_execute_data)->opline &&
+			EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
+			EG(current_execute_data)->opline->extended_value == ZEND_EVAL)) {
+			EG(exit_status) = 255;
+		}
 		zend_init_compiler_data_structures(TSRMLS_C);
 	}
 }
