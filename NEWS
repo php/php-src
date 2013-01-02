@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug #64808 (FreeTDS PDO getColumnMeta on a prepared but not executed 
     statement crashes). (Stanley Sufficool)
 
+- PDO_mysql:
+  . Fixed bug #48724 (getColumnMeta() doesn't return native_type for BIT, 
+    TINYINT and YEAR). (Antony, Daniel Beardsley)
+
 - PDO_pgsql:
   . Fixed Bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
 
