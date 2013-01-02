@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.11
 
+- Core:
+  . Fixed bug #43177 (Errors in eval()'ed code produce status code 500). 
+    (Todd Ruth, Stas).
+
 - Filter:
   . Fixed bug #63757 (getenv() produces memory leak with CGI SAPI). (Dmitry)
   . Fixed bug #54096 (FILTER_VALIDATE_INT does not accept +0 and -0).
