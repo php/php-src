@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.11
 
 - Core:
+  . Fixed bug #63762 (Sigsegv when Exception::$trace is changed by user).
+    (Johannes)
   . Fixed bug #43177 (Errors in eval()'ed code produce status code 500). 
     (Todd Ruth, Stas).
 
