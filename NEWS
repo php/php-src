@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.3.21
+?? ??? 2013, PHP 5.3.23
+
+?? ??? 2013, PHP 5.3.22
 
 - Zend Engine:
   . Fixed bug #63762 (Sigsegv when Exception::$trace is changed by user).
