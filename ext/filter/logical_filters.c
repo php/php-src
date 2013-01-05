@@ -788,9 +788,18 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
 	char *input = Z_STRVAL_P(value);
 	int input_len = Z_STRLEN_P(value);
-	int tokens, length, i, offset;
+	int tokens, length, i, offset, exp_separator_set, exp_separator_len;
 	char separator;
+	char *exp_separator;
 	long ret = 0;
+	zval **option_val;
+
+	FETCH_STRING_OPTION(exp_separator, "separator");
+
+	if (exp_separator_set && exp_separator_len != 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Separator must be exactly one character long");
+		RETURN_VALIDATION_FAILED;
+	}
 
 	if (14 == input_len) {
 		/* EUI-64 format: Four hexadecimal digits separated by dots. Less
@@ -810,6 +819,10 @@ void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		length = 2;
 		separator = ':';
 	} else {
+		RETURN_VALIDATION_FAILED;
+	}
+
+	if (exp_separator_set && separator != exp_separator[0]) {
 		RETURN_VALIDATION_FAILED;
 	}
 
