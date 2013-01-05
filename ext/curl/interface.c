@@ -1952,8 +1952,6 @@ PHP_FUNCTION(curl_init)
 	ch->handlers->read->method  = PHP_CURL_DIRECT;
 	ch->handlers->write_header->method = PHP_CURL_IGNORE;
 
-	ch->uses = 0;
-
 	MAKE_STD_ZVAL(clone);
 	ch->clone = clone;
 
@@ -1995,8 +1993,7 @@ PHP_FUNCTION(curl_copy_handle)
 	TSRMLS_SET_CTX(dupch->thread_ctx);
 
 	dupch->cp = cp;
-	dupch->uses = 0;
-	ch->uses++;
+	zend_list_addref(Z_LVAL_P(zid));
 	if (ch->handlers->write->stream) {
 		Z_ADDREF_P(ch->handlers->write->stream);
 	}
@@ -3210,11 +3207,7 @@ PHP_FUNCTION(curl_close)
 		return;
 	}
 
-	if (ch->uses) {
-		ch->uses--;
-	} else {
-		zend_list_delete(Z_LVAL_P(zid));
-	}
+	zend_list_delete(Z_LVAL_P(zid));
 }
 /* }}} */
 
