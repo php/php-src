@@ -86,7 +86,6 @@ PHP_FUNCTION(curl_multi_add_handle)
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &z_ch, -1, le_curl_name, le_curl);
 
 	_php_curl_cleanup_handle(ch);
-	ch->uses++;
 
 	/* we want to create a copy of this zval that we store in the multihandle structure element "easyh" */
 	tmp_val = *z_ch;
@@ -113,11 +112,7 @@ void _php_curl_multi_cleanup_list(void *data) /* {{{ */
 		return;
 	}
 
-	if (ch->uses) {	
-		ch->uses--;
-	} else {
-		zend_list_delete(Z_LVAL_P(z_ch));
-	}
+	zend_list_delete(Z_LVAL_P(z_ch));
 }
 /* }}} */
 
@@ -146,12 +141,12 @@ PHP_FUNCTION(curl_multi_remove_handle)
 	ZEND_FETCH_RESOURCE(mh, php_curlm *, &z_mh, -1, le_curl_multi_handle_name, le_curl_multi_handle);
 	ZEND_FETCH_RESOURCE(ch, php_curl *, &z_ch, -1, le_curl_name, le_curl);
 
-	--ch->uses;
 
+
+	RETVAL_LONG((long) curl_multi_remove_handle(mh->multi, ch->cp));
 	zend_llist_del_element( &mh->easyh, &z_ch, 
 							(int (*)(void *, void *)) curl_compare_resources );
-	
-	RETURN_LONG((long) curl_multi_remove_handle(mh->multi, ch->cp));
+
 }
 /* }}} */
 

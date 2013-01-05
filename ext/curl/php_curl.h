@@ -169,7 +169,6 @@ typedef struct {
 	CURL                    *cp;
 	php_curl_handlers       *handlers;
 	long                     id;
-	unsigned int             uses;
 	zend_bool                in_callback;
 	zval                     *clone;
 } php_curl;
