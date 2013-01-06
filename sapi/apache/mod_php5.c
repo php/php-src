@@ -278,9 +278,6 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	/* If PATH_TRANSLATED doesn't exist, copy it from SCRIPT_FILENAME */
 	if (track_vars_array) {
 		symbol_table = track_vars_array->value.ht;
-	} else if (PG(register_globals)) {
-		/* should never happen nowadays */
-		symbol_table = EG(active_symbol_table);
 	} else {
 		symbol_table = NULL;
 	}
@@ -310,10 +307,8 @@ static int php_apache_startup(sapi_module_struct *sapi_module)
 
 /* {{{ php_apache_log_message
  */
-static void php_apache_log_message(char *message)
+static void php_apache_log_message(char *message TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (SG(server_context)) {
 #if MODULE_MAGIC_NUMBER >= 19970831
 		aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, ((request_rec *) SG(server_context))->server, "%s", message);
@@ -332,7 +327,7 @@ static void php_apache_request_shutdown(void *dummy)
 {
 	TSRMLS_FETCH();
 
-	php_output_set_status(0 TSRMLS_CC);
+	php_output_set_status(PHP_OUTPUT_DISABLED TSRMLS_CC);
 	if (AP(in_request)) {
 		AP(in_request) = 0;
 		php_request_shutdown(dummy);
@@ -443,9 +438,9 @@ static int sapi_apache_get_target_gid(gid_t *obj TSRMLS_DC)
 
 /* {{{ php_apache_get_request_time
  */
-static time_t php_apache_get_request_time(TSRMLS_D)
+static double php_apache_get_request_time(TSRMLS_D)
 {
-	return ((request_rec *)SG(server_context))->request_time;
+	return (double) ((request_rec *)SG(server_context))->request_time;
 }
 /* }}} */
 
@@ -504,6 +499,7 @@ static sapi_module_struct apache_sapi_module = {
 	NULL,							/* treat data */
 	NULL,							/* exe location */
 	0,								/* ini ignore */
+	0,								/* ini ignore cwd */
 	sapi_apache_get_fd,
 	sapi_apache_force_http_10,
 	sapi_apache_get_target_uid,
@@ -545,7 +541,7 @@ static void init_request_info(TSRMLS_D)
 	SG(request_info).auth_password = NULL;
 	SG(request_info).auth_digest = NULL;
 
-	if (authorization && (!PG(safe_mode) || (PG(safe_mode) && !auth_type(r)))) {
+	if (authorization) {
 		char *p = getword(r->pool, &authorization, ' ');
 		if (!strcasecmp(p, "Basic")) {
 			tmp = uudecode(r->pool, authorization);

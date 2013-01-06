@@ -75,7 +75,7 @@ PHP_FUNCTION(virtual)
 	int filename_len;
 	request_rec *rr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
@@ -91,7 +91,7 @@ PHP_FUNCTION(virtual)
 	}
 
 	/* Flush everything. */
-	php_end_ob_buffers(1 TSRMLS_CC);
+	php_output_end_all(TSRMLS_C);
 	php_header(TSRMLS_C);
 
 	/* Ensure that the ap_r* layer for the main request is flushed, to
@@ -121,7 +121,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	char *filename;
 	int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 

@@ -1,6 +1,7 @@
-EXTRA_DIST=mk_sb_tbl.awk
+EXTRA_DIST=Makefile.bcc32 mk_sb_tbl.awk
 noinst_LTLIBRARIES=libmbfl_filters.la
 INCLUDES=-I../mbfl
+PERL=perl
 libmbfl_filters_la_LDFLAGS=-version-info $(SHLIB_VERSION)
 libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_hz.c \
@@ -32,7 +33,10 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_uuencode.c \
 	mbfilter_base64.c \
 	mbfilter_sjis.c \
+	mbfilter_sjis_2004.c \
 	mbfilter_sjis_open.c \
+	mbfilter_sjis_mobile.c \
+	mbfilter_sjis_mac.c \
 	mbfilter_7bit.c \
 	mbfilter_qprint.c \
 	mbfilter_ucs4.c \
@@ -40,15 +44,20 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_utf32.c \
 	mbfilter_utf16.c \
 	mbfilter_utf8.c \
+	mbfilter_utf8_mobile.c \
 	mbfilter_utf7.c \
 	mbfilter_utf7imap.c \
 	mbfilter_euc_jp_win.c \
+	mbfilter_euc_jp_2004.c \
 	mbfilter_cp932.c \
 	mbfilter_cp51932.c \
 	mbfilter_euc_cn.c \
 	mbfilter_euc_kr.c \
 	mbfilter_uhc.c \
 	mbfilter_iso2022_jp_ms.c \
+	mbfilter_iso2022jp_2004.c \
+	mbfilter_iso2022jp_mobile.c \
+	mbfilter_gb18030.c \
 	mbfilter_iso2022_kr.c \
 	mbfilter_cp866.c \
 	mbfilter_koi8r.c \
@@ -72,14 +81,18 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_cp866.h \
 	mbfilter_cp932.h \
 	mbfilter_cp936.h \
+	mbfilter_gb18030.h \
 	mbfilter_euc_cn.h \
 	mbfilter_euc_jp.h \
+	mbfilter_euc_jp_2004.h \
 	mbfilter_euc_jp_win.h \
 	mbfilter_euc_kr.h \
 	mbfilter_euc_tw.h \
 	mbfilter_htmlent.h \
 	mbfilter_hz.h \
 	mbfilter_iso2022_jp_ms.h \
+	mbfilter_iso2022jp_2004.h \
+	mbfilter_iso2022jp_mobile.h \
 	mbfilter_iso2022_kr.h \
 	mbfilter_iso8859_1.h \
 	mbfilter_iso8859_10.h \
@@ -102,6 +115,8 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_qprint.h \
 	mbfilter_sjis.h \
 	mbfilter_sjis_open.h \
+	mbfilter_sjis_mobile.h \
+	mbfilter_sjis_mac.h \
 	mbfilter_ucs2.h \
 	mbfilter_ucs4.h \
 	mbfilter_uhc.h \
@@ -110,6 +125,7 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	mbfilter_utf7.h \
 	mbfilter_utf7imap.h \
 	mbfilter_utf8.h \
+	mbfilter_utf8_mobile.h \
 	mbfilter_uuencode.h \
 	mbfilter_cp5022x.h \
 	mbfilter_cp51932.h \
@@ -143,7 +159,9 @@ libmbfl_filters_la_SOURCES=mbfilter_cp936.c \
 	unicode_table_armscii8.h \
 	unicode_table_cp850.h \
 	unicode_table_uhc.h \
-	translit_kana_jisx0201_jisx0208.h
+	unicode_table_gb18030.h \
+	translit_kana_jisx0201_jisx0208.h \
+	emoji2uni.h
 
 mbfilter_iso8859_2.c: unicode_table_iso8859_2.h
 
@@ -238,8 +256,14 @@ unicode_table_iso8859_16.h: mk_sb_tbl.awk
 	$(AWK) -v TABLE_NAME=iso8859_16_ucs_table \
            -v IFNDEF_NAME=UNICODE_TABLEISO8859_16_H -f mk_sb_tbl.awk 8859-16.TXT > $@
 
+EmojiSources.txt :
+	$(FETCH_VIA_FTP) ftp://ftp.unicode.org/Public/UNIDATA/$@
+
+emoji2uni.h : mk_emoji_tbl.pl
+	$(PERL) mk_emoji_tbl.pl EmojiSources.txt
+
 unidata: 8859-1.TXT 8859-2.TXT 8859-3.TXT 8859-4.TXT 8859-5.TXT 8859-6.TXT \
 8859-7.TXT 8859-8.TXT 8859-9.TXT 8859-10.TXT 8859-11.TXT 8859-13.TXT \
-8859-14.TXT 8859-15.TXT 8859-16.TXT
+8859-14.TXT 8859-15.TXT 8859-16.TXT EmojiSources.txt
 
 .PHONY: unidata

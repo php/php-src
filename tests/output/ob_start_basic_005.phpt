@@ -25,7 +25,7 @@ checkAndClean();
 
 ?>
 --EXPECTF--
-Strict Standards: Non-static method C::h() should not be called statically in %s on line 20
+Warning: ob_start(): non-static method C::h() should not be called statically in %s on line 20
 bool(true)
 Array
 (

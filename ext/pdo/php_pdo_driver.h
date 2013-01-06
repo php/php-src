@@ -310,6 +310,7 @@ struct pdo_dbh_methods {
 	pdo_dbh_check_liveness_func	check_liveness;
 	pdo_dbh_get_driver_methods_func get_driver_methods;
 	pdo_dbh_request_shutdown	persistent_shutdown;
+	pdo_dbh_txn_func		in_transaction;
 };
 
 /* }}} */
@@ -430,10 +431,7 @@ struct _pdo_dbh_t {
        to allow the extending class to escape all the custom handlers
 	   that PDO declares.
     */
-	zend_class_entry *ce; 
-	HashTable *properties;
-	unsigned int in_get:1;
-	unsigned int in_set:1;
+	zend_object std;
 
 	/* driver specific methods */
 	struct pdo_dbh_methods *methods;
@@ -548,10 +546,7 @@ struct _pdo_stmt_t {
        to allow the extending class to escape all the custom handlers
 	   that PDO declares.
     */
-	zend_class_entry *ce; 
-	HashTable *properties;
-	unsigned int in_get:1;
-	unsigned int in_set:1;
+	zend_object std;
 
 	/* driver specifics */
 	struct pdo_stmt_methods *methods;

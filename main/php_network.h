@@ -194,10 +194,12 @@ PHPAPI void _php_emit_fd_setsize_warning(int max_fd);
 /* it is safe to FD_SET too many fd's under win32; the macro will simply ignore
  * descriptors that go beyond the default FD_SETSIZE */
 # define PHP_SAFE_FD_SET(fd, set)	FD_SET(fd, set)
+# define PHP_SAFE_FD_CLR(fd, set)	FD_CLR(fd, set)
 # define PHP_SAFE_FD_ISSET(fd, set)	FD_ISSET(fd, set)
 # define PHP_SAFE_MAX_FD(m, n)		do { if (n + 1 >= FD_SETSIZE) { _php_emit_fd_setsize_warning(n); }} while(0)
 #else
 # define PHP_SAFE_FD_SET(fd, set)	do { if (fd < FD_SETSIZE) FD_SET(fd, set); } while(0)
+# define PHP_SAFE_FD_CLR(fd, set)	do { if (fd < FD_SETSIZE) FD_CLR(fd, set); } while(0)
 # define PHP_SAFE_FD_ISSET(fd, set)	((fd < FD_SETSIZE) && FD_ISSET(fd, set))
 # define PHP_SAFE_MAX_FD(m, n)		do { if (m >= FD_SETSIZE) { _php_emit_fd_setsize_warning(m); m = FD_SETSIZE - 1; }} while(0)
 #endif
@@ -220,6 +222,9 @@ typedef struct {
 #endif
 
 BEGIN_EXTERN_C()
+PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, char **error_string TSRMLS_DC);
+PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
+
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, char **error_string,
 		int *error_code, char *bindto, unsigned short bindport 

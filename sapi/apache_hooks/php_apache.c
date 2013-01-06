@@ -44,7 +44,7 @@ extern module **ap_loaded_modules;
 static int le_apachereq;
 static zend_class_entry *apacherequest_class_entry;
 
-static void apache_table_to_zval(table *, int safe_mode, zval *return_value);
+static void apache_table_to_zval(table *, zval *return_value);
 
 PHP_FUNCTION(virtual);
 PHP_FUNCTION(apache_request_headers);
@@ -567,7 +567,7 @@ PHP_FUNCTION(apache_request_headers_in)
 	
 	APREQ_GET_REQUEST(id, r);
 
-	apache_table_to_zval(r->headers_in, 0, return_value);
+	apache_table_to_zval(r->headers_in, return_value);
 }
 /* }}} */
 
@@ -664,7 +664,7 @@ PHP_FUNCTION(apache_request_headers_out)
 		add_header_to_table(r->headers_out, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 
-	apache_table_to_zval(r->headers_out, 0, return_value);
+	apache_table_to_zval(r->headers_out, return_value);
 }
 /* }}} */
 
@@ -683,7 +683,7 @@ PHP_FUNCTION(apache_request_err_headers_out)
 		add_header_to_table(r->err_headers_out, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	}
 
-	apache_table_to_zval(r->err_headers_out, 0, return_value);
+	apache_table_to_zval(r->err_headers_out, return_value);
 }
 /* }}} */
 
@@ -1683,7 +1683,7 @@ PHP_MINFO_FUNCTION(apache)
 		env_arr = table_elts(r->headers_in);
 		env = (table_entry *)env_arr->elts;
 		for (i = 0; i < env_arr->nelts; ++i) {
-			if (env[i].key && (!PG(safe_mode) || (PG(safe_mode) && strncasecmp(env[i].key, "authorization", 13)))) {
+			if (env[i].key) {
 				php_info_print_table_row(2, env[i].key, env[i].val);
 			}
 		}
@@ -1734,7 +1734,7 @@ PHP_FUNCTION(virtual)
 		RETURN_FALSE;
 	}
 
-	php_end_ob_buffers(1 TSRMLS_CC);
+	php_output_end_all(TSRMLS_C);
 	php_header(TSRMLS_C);
 
 	if (run_sub_req(rr)) {
@@ -1751,9 +1751,9 @@ PHP_FUNCTION(virtual)
 /* }}} */
 
 
-/* {{{ apache_table_to_zval(table *, int safe_mode, zval *return_value)
+/* {{{ apache_table_to_zval(table *, zval *return_value)
    Fetch all HTTP request headers */
-static void apache_table_to_zval(table *t, int safe_mode, zval *return_value)
+static void apache_table_to_zval(table *t, zval *return_value)
 {
     array_header *env_arr;
     table_entry *tenv;
@@ -1763,8 +1763,7 @@ static void apache_table_to_zval(table *t, int safe_mode, zval *return_value)
     env_arr = table_elts(t);
     tenv = (table_entry *)env_arr->elts;
     for (i = 0; i < env_arr->nelts; ++i) {
-		if (!tenv[i].key ||
-			(safe_mode && !strncasecmp(tenv[i].key, "authorization", 13))) {
+		if (!tenv[i].key) {
 			continue;
 		}
 		if (add_assoc_string(return_value, tenv[i].key, (tenv[i].val==NULL) ? "" : tenv[i].val, 1)==FAILURE) {
@@ -1789,7 +1788,7 @@ PHP_FUNCTION(apache_request_headers)
  		return;
  	}
 
-	apache_table_to_zval(((request_rec *)SG(server_context))->headers_in, PG(safe_mode), return_value);
+	apache_table_to_zval(((request_rec *)SG(server_context))->headers_in, return_value);
 }
 /* }}} */
 
@@ -1801,7 +1800,7 @@ PHP_FUNCTION(apache_response_headers)
  		return;
  	}
 
-	apache_table_to_zval(((request_rec *) SG(server_context))->headers_out, 0, return_value);
+	apache_table_to_zval(((request_rec *) SG(server_context))->headers_out, return_value);
 }
 /* }}} */
 
@@ -1906,13 +1905,14 @@ PHP_FUNCTION(apache_lookup_uri)
 
 
 #if 0
+/*
 This function is most likely a bad idea.  Just playing with it for now.
+*/
 
 PHP_FUNCTION(apache_exec_uri)
 {
 	zval **filename;
 	request_rec *rr=NULL;
-	TSRMLS_FETCH();
 
 	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &filename) == FAILURE) {
 		WRONG_PARAM_COUNT;

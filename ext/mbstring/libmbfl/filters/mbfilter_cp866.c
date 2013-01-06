@@ -37,7 +37,7 @@
 
 static int mbfl_filt_ident_cp866(int c, mbfl_identify_filter *filter);
 
-static const char *mbfl_encoding_cp866_aliases[] = {"CP866", "CP-866", "IBM-866", NULL};
+static const char *mbfl_encoding_cp866_aliases[] = {"CP866", "CP-866", "IBM866", "IBM-866", NULL};
 
 const mbfl_encoding mbfl_encoding_cp866 = {
 	mbfl_no_encoding_cp866,

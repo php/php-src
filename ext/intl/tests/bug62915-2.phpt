@@ -16,8 +16,11 @@ class B extends NumberFormatter {
 class C extends MessageFormatter {
 		static $ARGS = array("en_US", "foo");
 }
+class D extends Spoofchecker {
+		static $ARGS = array();
+}
 
-foreach (range('A', 'C') as $subclass) {
+foreach (range('A', 'D') as $subclass) {
 		$rc = new ReflectionClass($subclass);
 			$obj = $rc->newInstanceArgs($subclass::$ARGS);
 				$clone = clone $obj;
@@ -27,3 +30,4 @@ foreach (range('A', 'C') as $subclass) {
 string(1) "A"
 string(1) "B"
 string(1) "C"
+string(1) "D"

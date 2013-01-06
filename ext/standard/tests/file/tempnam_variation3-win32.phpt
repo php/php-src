@@ -31,8 +31,8 @@ $names_arr = array(
 	NULL,
 	"",
 	" ",
-	/* Invalid args */ 
 	"\0",
+	/* Invalid args */ 
 	array(),
 
 	/* Valid args*/ 
@@ -102,8 +102,7 @@ OK
 Failed, not created in the correct directory %s vs %s
 0
 -- Iteration 6 --
-Failed, not created in the correct directory %s vs %s
-0
+OK
 -- Iteration 7 --
 
 Warning: tempnam() expects parameter 2 to be string, array given in %s\ext\standard\tests\file\tempnam_variation3-win32.php on line %d

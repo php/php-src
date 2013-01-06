@@ -28,8 +28,9 @@
 /*
  * Unicode table
  */
+#ifdef UNICODE_TABLE_UHC_DEF
 
-static const unsigned short uhc1_ucs_table[] = {
+const unsigned short uhc1_ucs_table[] = {
 0xac02,0xac03,0xac05,0xac06,0xac0b,0xac0c,0xac0d,0xac0e,
 0xac0f,0xac18,0xac1e,0xac1f,0xac21,0xac22,0xac23,0xac25,
 0xac26,0xac27,0xac28,0xac29,0xac2a,0xac2b,0xac2e,0xac32,
@@ -792,9 +793,9 @@ static const unsigned short uhc1_ucs_table[] = {
 0xc89a,0xc89b,0xc89c,0xc89e,0xc8a0,0xc8a2,0xc8a3,0xc8a4
 };
 
-static const int uhc1_ucs_table_size = (sizeof(uhc1_ucs_table)/sizeof(unsigned short));
+const int uhc1_ucs_table_size = (sizeof(uhc1_ucs_table)/sizeof(unsigned short));
 
-static const unsigned short uhc2_ucs_table[] = {
+const unsigned short uhc2_ucs_table[] = {
 0xc8a5,0xc8a6,0xc8a7,0xc8a9,0xc8aa,0xc8ab,0xc8ac,0xc8ad,
 0xc8ae,0xc8af,0xc8b0,0xc8b1,0xc8b2,0xc8b3,0xc8b4,0xc8b5,
 0xc8b6,0xc8b7,0xc8b8,0xc8b9,0xc8ba,0xc8bb,0xc8be,0xc8bf,
@@ -1699,9 +1700,9 @@ static const unsigned short uhc2_ucs_table[] = {
 0xd3d0,0xd3d8,0xd3e1,0xd3e3,0xd3ec,0xd3ed,0xd3f0,0xd3f4,
 0xd3fc,0xd3fd,0xd3ff,0xd401};
 
-static const int uhc2_ucs_table_size = (sizeof(uhc2_ucs_table)/sizeof(unsigned short));
+const int uhc2_ucs_table_size = (sizeof(uhc2_ucs_table)/sizeof(unsigned short));
 
-static const unsigned short uhc3_ucs_table[] = {
+const unsigned short uhc3_ucs_table[] = {
 0xd408,0xd41d,0xd440,0xd444,0xd45c,0xd460,0xd464,0xd46d,
 0xd46f,0xd478,0xd479,0xd47c,0xd47f,0xd480,0xd482,0xd488,
 0xd489,0xd48b,0xd48d,0xd494,0xd4a9,0xd4cc,0xd4d0,0xd4d4,
@@ -2350,10 +2351,10 @@ static const unsigned short uhc3_ucs_table[] = {
 0x665e,0x66e6,0x7199,0x71b9,0x71ba,0x72a7,0x79a7,0x7a00,
 0x7fb2,0x8a70};
 
-static const int uhc3_ucs_table_size = (sizeof(uhc3_ucs_table)/sizeof(unsigned short));
+const int uhc3_ucs_table_size = (sizeof(uhc3_ucs_table)/sizeof(unsigned short));
 
 /* UCS -> UHC */
-static const unsigned short ucs_a1_uhc_table[] = { 
+const unsigned short ucs_a1_uhc_table[] = { 
 0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,
 0x0008,0x0009,0x000a,0x000b,0x000c,0x000d,0x000e,0x000f,
 0x0010,0x0011,0x0012,0x0013,0x0014,0x0015,0x0016,0x0017,
@@ -2498,10 +2499,10 @@ static const unsigned short ucs_a1_uhc_table[] = {
 0xacea,0xaceb,0xacec,0xaced,0xacee,0xacef,0xacf0,0xacf1,
 0x0000,0xacd7};
 
-static const int ucs_a1_uhc_table_min = 0x0000;
-static const int ucs_a1_uhc_table_max = 0x0000 + (sizeof(ucs_a1_uhc_table)/sizeof(unsigned short));
+const int ucs_a1_uhc_table_min = 0x0000;
+const int ucs_a1_uhc_table_max = 0x0000 + (sizeof(ucs_a1_uhc_table)/sizeof(unsigned short));
 
-static const unsigned short ucs_a2_uhc_table[] = {
+const unsigned short ucs_a2_uhc_table[] = {
 /* 0x2000 */
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
@@ -2714,10 +2715,10 @@ static const unsigned short ucs_a2_uhc_table[] = {
 0xa2bc,0xa2bd,0x0000,0xa2c0,0xa2bb,0xa2be,0x0000,0xa2bf,
 0xa2cd,0xa2db,0xa2dc,0x0000,0xa2dd,0xa2da};
 
-static const int ucs_a2_uhc_table_min = 0x2000;
-static const int ucs_a2_uhc_table_max = 0x2000 + (sizeof(ucs_a2_uhc_table)/sizeof(unsigned short));
+const int ucs_a2_uhc_table_min = 0x2000;
+const int ucs_a2_uhc_table_max = 0x2000 + (sizeof(ucs_a2_uhc_table)/sizeof(unsigned short));
 
-static const unsigned short ucs_a3_uhc_table[] = {
+const unsigned short ucs_a3_uhc_table[] = {
 /* 0x2f00 */
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
@@ -2878,10 +2879,10 @@ static const unsigned short ucs_a3_uhc_table[] = {
 0xa7ea,0x0000,0x0000,0xa7eb,0x0000,0x0000,0xa7df,0x0000,
 0xa2e4,0x0000,0x0000,0xa7e4,0xa7ee,0xa7e9};
 
-static const int ucs_a3_uhc_table_min = 0x2f00;
-static const int ucs_a3_uhc_table_max = 0x2f00 + (sizeof(ucs_a3_uhc_table)/sizeof(unsigned short));
+const int ucs_a3_uhc_table_min = 0x2f00;
+const int ucs_a3_uhc_table_max = 0x2f00 + (sizeof(ucs_a3_uhc_table)/sizeof(unsigned short));
 
-static const unsigned short ucs_i_uhc_table[] = {
+const unsigned short ucs_i_uhc_table[] = {
 /* 0x4d00 */
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
@@ -5591,10 +5592,10 @@ static const unsigned short ucs_i_uhc_table[] = {
 0xdbc2,0x0000,0x0000,0x0000,0x0000,0xcafe,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0xcfcf};
 
-static const int ucs_i_uhc_table_min = 0x4d00;
-static const int ucs_i_uhc_table_max = 0x4d00 + (sizeof(ucs_i_uhc_table)/sizeof(unsigned short));
+const int ucs_i_uhc_table_min = 0x4d00;
+const int ucs_i_uhc_table_max = 0x4d00 + (sizeof(ucs_i_uhc_table)/sizeof(unsigned short));
 
-static const unsigned short ucs_s_uhc_table[] = {
+const unsigned short ucs_s_uhc_table[] = {
 /* 0xab00 */
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
@@ -7070,10 +7071,10 @@ static const unsigned short ucs_s_uhc_table[] = {
 0xc64f,0xc650,0xc651,0xc652};
 
 
-static const int ucs_s_uhc_table_min = 0xab00;
-static const int ucs_s_uhc_table_max = 0xab00 + (sizeof(ucs_s_uhc_table)/sizeof(unsigned short));
+const int ucs_s_uhc_table_min = 0xab00;
+const int ucs_s_uhc_table_max = 0xab00 + (sizeof(ucs_s_uhc_table)/sizeof(unsigned short));
 
-static const unsigned short ucs_r1_uhc_table[] = {
+const unsigned short ucs_r1_uhc_table[] = {
 /* 0xf800 */
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
@@ -7142,10 +7143,10 @@ static const unsigned short ucs_r1_uhc_table[] = {
 0xf4ee,0xf6f4,0xf6f6,0xf7b8,0xf7c8,0xf7d3,0xf8db,0xf8f0,
 0xfaa1,0xfaa2,0xfae6,0xfca9};
 
-static const int ucs_r1_uhc_table_min = 0xf800;
-static const int ucs_r1_uhc_table_max = 0xf800 + (sizeof(ucs_r1_uhc_table)/sizeof(unsigned short));
+const int ucs_r1_uhc_table_min = 0xf800;
+const int ucs_r1_uhc_table_max = 0xf800 + (sizeof(ucs_r1_uhc_table)/sizeof(unsigned short));
 
-static const unsigned short ucs_r2_uhc_table[] = {
+const unsigned short ucs_r2_uhc_table[] = {
 /* 0xff00 */
 0x0000,0xa3a1,0xa3a2,0xa3a3,0xa3a4,0xa3a5,0xa3a6,0xa3a7,
 0xa3a8,0xa3a9,0xa3aa,0xa3ab,0xa3ac,0xa3ad,0xa3ae,0xa3af,
@@ -7177,9 +7178,44 @@ static const unsigned short ucs_r2_uhc_table[] = {
 0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
 0xa1cb,0xa1cc,0xa1fe,0xa3fe,0x0000,0xa1cd,0xa3dc};
 
-static const int ucs_r2_uhc_table_min = 0xff00;
-static const int ucs_r2_uhc_table_max = 0xff00 + (sizeof (ucs_r2_uhc_table) / sizeof (unsigned short));
+const int ucs_r2_uhc_table_min = 0xff00;
+const int ucs_r2_uhc_table_max = 0xff00 + (sizeof (ucs_r2_uhc_table) / sizeof (unsigned short));
 
+#else
+
+extern const unsigned short uhc1_ucs_table[];
+extern const unsigned short uhc2_ucs_table[];
+extern const unsigned short uhc3_ucs_table[];
+extern const unsigned short ucs_a1_uhc_table[];
+extern const unsigned short ucs_a2_uhc_table[];
+extern const unsigned short ucs_a3_uhc_table[];
+extern const unsigned short ucs_i_uhc_table[];
+extern const unsigned short ucs_s_uhc_table[];
+extern const unsigned short ucs_r1_uhc_table[];
+extern const unsigned short ucs_r2_uhc_table[];
+
+extern const int uhc1_ucs_table_size;
+extern const int uhc2_ucs_table_size;
+extern const int uhc3_ucs_table_size;
+extern const int ucs_a1_uhc_table_min;
+extern const int ucs_a1_uhc_table_max;
+extern const int ucs_a2_uhc_table_min;
+extern const int ucs_a2_uhc_table_max;
+extern const int ucs_a3_uhc_table_min;
+extern const int ucs_a3_uhc_table_max;
+extern const int ucs_i_uhc_table_min;
+extern const int ucs_i_uhc_table_max;
+extern const int ucs_s_uhc_table_min;
+extern const int ucs_s_uhc_table_max;
+extern const int ucs_r1_uhc_table_min;
+extern const int ucs_r1_uhc_table_max;
+extern const int ucs_r2_uhc_table_min;
+extern const int ucs_r2_uhc_table_max;
+
+
+
+
+#endif
 
 
 

@@ -54,7 +54,7 @@ const mbfl_encoding mbfl_encoding_jis_ms = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const mbfl_encoding mbfl_encoding_cp50220 = {
@@ -63,7 +63,7 @@ const mbfl_encoding mbfl_encoding_cp50220 = {
 	"ISO-2022-JP",
 	(const char *(*)[])NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const mbfl_encoding mbfl_encoding_cp50220raw = {
@@ -72,7 +72,7 @@ const mbfl_encoding mbfl_encoding_cp50220raw = {
 	"ISO-2022-JP",
 	(const char *(*)[])NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const mbfl_encoding mbfl_encoding_cp50221 = {
@@ -81,7 +81,7 @@ const mbfl_encoding mbfl_encoding_cp50221 = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const mbfl_encoding mbfl_encoding_cp50222 = {
@@ -90,7 +90,7 @@ const mbfl_encoding mbfl_encoding_cp50222 = {
 	"ISO-2022-JP",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_jis_ms = {
@@ -250,7 +250,7 @@ retry:
 			CK((*filter->output_function)(0x203e, filter->data));
 		} else if (filter->status == 0x20 && c > 0x20 && c < 0x60) {		/* kana */
 			CK((*filter->output_function)(0xff40 + c, filter->data));
-		} else if ((filter->status == 0x80 || filter->status == 0x90) && c > 0x20 && c < 0x7f) {		/* kanji first char */
+		} else if ((filter->status == 0x80 || filter->status == 0x90) && c > 0x20 && c < 0x93) {		/* kanji first char */
 			filter->cache = c;
 			filter->status += 1;
 		} else if (c >= 0 && c < 0x80) {		/* latin, CTLs */
@@ -282,10 +282,7 @@ retry:
 					w = cp932ext3_ucs_table[s - cp932ext3_ucs_table_min];
 				} else if (s >= 94 * 94 && s < 114 * 94) {
 					/* user-defined => PUA (Microsoft extended) */
-					w = (s & 0xff) + ((s >> 8) - 94) * 94 + 0xe000;
-				} else if (s >= 212 * 94 && s < 222 * 94) {
-					/* user-defined => PUA (G3 85 - 94 Ku) */
-					w = (s & 0xff) + ((s >> 8) - 212) * 94 + 0xe000 + 10 * 94;
+					w = s - 94*94 + 0xe000;
 				} else {
 					w = 0;
 				}
@@ -462,7 +459,7 @@ mbfl_filt_conv_wchar_jis_ms(int c, mbfl_convert_filter *filter)
 			s = 0x224c;
 		}
 	}
-	if (s <= 0 || s >= 0x8080 && s < 0x10000) {
+	if (s <= 0 || (s >= 0x8080 && s < 0x10000)) {
 		int i;
 		s = -1;
 
@@ -693,7 +690,7 @@ mbfl_filt_conv_wchar_cp50221(int c, mbfl_convert_filter *filter)
 			s = 0x224c;
 		}
 	}
-	if (s <= 0 || s >= 0x8080 && s < 0x10000) {
+	if (s <= 0 || (s >= 0x8080 && s < 0x10000)) {
 		int i;
 		s = -1;
 
@@ -841,7 +838,7 @@ mbfl_filt_conv_wchar_cp50222(int c, mbfl_convert_filter *filter)
 			s = 0x224c;
 		}
 	}
-	if (s <= 0 || s >= 0x8080 && s < 0x10000) {
+	if (s <= 0 || (s >= 0x8080 && s < 0x10000)) {
 		int i;
 		s = -1;
 

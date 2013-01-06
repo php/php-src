@@ -79,7 +79,7 @@ foreach($newdirs as $newdir) {
 New include path is : %sparse_ini_file_variation3.dir1%sparse_ini_file_variation3.dir2%sparse_ini_file_variation3.dir3%S
 array(11) {
   ["error_reporting"]=>
-  string(5) "30719"
+  string(5) "32767"
   ["display_errors"]=>
   string(1) "1"
   ["display_startup_errors"]=>

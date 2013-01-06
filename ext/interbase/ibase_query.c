@@ -1325,12 +1325,7 @@ static int _php_ibase_var_zval(zval *val, void *data, int type, int len, /* {{{ 
 			data = ((IBVARY *) data)->vary_string;
 			/* no break */
 		case SQL_TEXT:
-			if (PG(magic_quotes_runtime)) {
-				Z_STRVAL_P(val) = php_addslashes(data, len, &Z_STRLEN_P(val), 0 TSRMLS_CC);
-				Z_TYPE_P(val) = IS_STRING;
-			} else {
-				ZVAL_STRINGL(val,(char *) data,len,1);
-			}
+			ZVAL_STRINGL(val,(char *) data,len,1);
 			break;
 		case SQL_SHORT:
 			n = *(short *) data;
@@ -1850,7 +1845,7 @@ PHP_FUNCTION(ibase_execute)
 			if (ib_query->statement_type == isc_info_sql_stmt_exec_procedure) {
 				result->stmt = NULL;
 			}
-			ib_query->result_res_id = zend_list_insert(result, le_result);
+			ib_query->result_res_id = zend_list_insert(result, le_result TSRMLS_CC);
 			RETVAL_RESOURCE(ib_query->result_res_id);
 		}
 	} while (0);

@@ -49,8 +49,8 @@ echo "Done\n";
 --EXPECTF--	
 string(%d) "No syntax errors detected in %s011.test.php
 "
-Could not open input file: some.unknown
-NULL
+string(40) "Could not open input file: some.unknown
+"
 string(%d) "
 Parse error: %s expecting %s{%s in %s on line %d
 Errors parsing %s011.test.php

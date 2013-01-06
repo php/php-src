@@ -34,10 +34,8 @@
 #include "zend_objects.h"
 #include "zend_objects_API.h"
 #include "zend_modules.h"
-
-#ifdef ZEND_MULTIBYTE
+#include "zend_float.h"
 #include "zend_multibyte.h"
-#endif /* ZEND_MULTIBYTE */
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -68,6 +66,8 @@ typedef struct _zend_declarables {
 } zend_declarables;
 
 typedef struct _zend_vm_stack *zend_vm_stack;
+typedef struct _zend_ini_entry zend_ini_entry;
+
 
 struct _zend_compiler_globals {
 	zend_stack bp_stack;
@@ -89,9 +89,6 @@ struct _zend_compiler_globals {
 
 	int zend_lineno;
 
-	char *heredoc;
-	int heredoc_len;
-
 	zend_op_array *active_op_array;
 
 	HashTable *function_table;	/* function symbol table */
@@ -101,10 +98,10 @@ struct _zend_compiler_globals {
 
 	HashTable *auto_globals;
 
+	zend_bool parse_error;
 	zend_bool in_compilation;
 	zend_bool short_tags;
 	zend_bool asp_tags;
-	zend_bool allow_call_time_pass_reference;
 
 	zend_declarables declarables;
 
@@ -137,25 +134,25 @@ struct _zend_compiler_globals {
 	zend_bool  in_namespace;
 	zend_bool  has_bracketed_namespaces;
 
-	HashTable *labels;
-	zend_stack labels_stack;
+	zend_compiler_context context;
+	zend_stack context_stack;
 
-#ifdef ZEND_MULTIBYTE
-	zend_encoding **script_encoding_list;
+	/* interned strings */
+	char *interned_strings_start;
+	char *interned_strings_end;
+	char *interned_strings_top;
+	char *interned_strings_snapshot_top;
+
+	HashTable interned_strings;
+
+	const zend_encoding **script_encoding_list;
 	size_t script_encoding_list_size;
+	zend_bool multibyte;
 	zend_bool detect_unicode;
 	zend_bool encoding_declared;
 
-	zend_encoding *internal_encoding;
-
-	/* multibyte utility functions */
-	zend_encoding_detector encoding_detector;
-	zend_encoding_converter encoding_converter;
-	zend_encoding_oddlen encoding_oddlen;
-#endif /* ZEND_MULTIBYTE */
-
 #ifdef ZTS
-	HashTable **static_members;
+	zval ***static_members_table;
 	int last_static_member;
 #endif
 };
@@ -169,8 +166,6 @@ struct _zend_executor_globals {
 
 	zval error_zval;
 	zval *error_zval_ptr;
-
-	zend_ptr_stack arg_types_stack;
 
 	/* symbol table cache */
 	HashTable *symtable_cache[SYMTABLE_CACHE_SIZE];
@@ -240,6 +235,7 @@ struct _zend_executor_globals {
 
 	HashTable *ini_directives;
 	HashTable *modified_ini_directives;
+	zend_ini_entry *error_reporting_ini_entry;	                
 
 	zend_objects_store objects_store;
 	zval *exception, *prev_exception;
@@ -254,7 +250,12 @@ struct _zend_executor_globals {
 
 	zend_bool active; 
 
-	void *saved_fpu_cw;
+	zend_op *start_op;
+
+	void *saved_fpu_cw_ptr;
+#if XPFPA_HAVE_CW
+	XPFPA_CW_DATATYPE saved_fpu_cw;
+#endif
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -291,8 +292,8 @@ struct _zend_php_scanner_globals {
 	unsigned char *yy_limit;
 	int yy_state;
 	zend_stack state_stack;
+	zend_ptr_stack heredoc_label_stack;
 	
-#ifdef ZEND_MULTIBYTE
 	/* original (unfiltered) script */
 	unsigned char *script_org;
 	size_t script_org_size;
@@ -304,9 +305,7 @@ struct _zend_php_scanner_globals {
 	/* input/ouput filters */
 	zend_encoding_filter input_filter;
 	zend_encoding_filter output_filter;
-	zend_encoding *script_encoding;
-	zend_encoding *internal_encoding;
-#endif /* ZEND_MULTIBYTE */
+	const zend_encoding *script_encoding;
 };
 
 #endif /* ZEND_GLOBALS_H */

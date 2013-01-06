@@ -24,7 +24,7 @@
 #include "common_error.h"
 
 /* {{{ proto int intl_get_error_code()
- * Get code of the last occured error.
+ * Get code of the last occurred error.
  */
 PHP_FUNCTION( intl_get_error_code )
 {
@@ -33,7 +33,7 @@ PHP_FUNCTION( intl_get_error_code )
 /* }}} */
 
 /* {{{ proto string intl_get_error_message()
- * Get text description of the last occured error.
+ * Get text description of the last occurred error.
  */
 PHP_FUNCTION( intl_get_error_message )
 {
@@ -232,7 +232,6 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	INTL_EXPOSE_CONST( U_REGEX_ERROR_LIMIT );
 
 	/* The error code in the range 0x10400-0x104ff are reserved for IDNA related error codes */
-#if defined(U_IDNA_PROHIBITED_ERROR)
 	INTL_EXPOSE_CONST( U_IDNA_PROHIBITED_ERROR );
 	INTL_EXPOSE_CONST( U_IDNA_ERROR_START );
 	INTL_EXPOSE_CONST( U_IDNA_UNASSIGNED_ERROR );
@@ -242,8 +241,10 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	INTL_EXPOSE_CONST( U_IDNA_VERIFICATION_ERROR );
 	INTL_EXPOSE_CONST( U_IDNA_LABEL_TOO_LONG_ERROR );
 	INTL_EXPOSE_CONST( U_IDNA_ZERO_LENGTH_LABEL_ERROR );
-	INTL_EXPOSE_CONST( U_IDNA_ERROR_LIMIT );
+#if U_ICU_VERSION_MAJOR_NUM > 3 || U_ICU_VERSION_MAJOR_NUM == 3 && U_ICU_VERSION_MINOR_NUM >= 8
+	INTL_EXPOSE_CONST( U_IDNA_DOMAIN_NAME_TOO_LONG_ERROR );
 #endif
+	INTL_EXPOSE_CONST( U_IDNA_ERROR_LIMIT );
 
 	/* Aliases for StringPrep */
 	INTL_EXPOSE_CONST( U_STRINGPREP_PROHIBITED_ERROR );

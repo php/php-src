@@ -23,6 +23,7 @@
 #ifndef MYSQLND_DEBUG_H
 #define MYSQLND_DEBUG_H
 
+#include "mysqlnd_alloc.h"
 #include "zend_stack.h"
 
 struct st_mysqlnd_debug_methods
@@ -59,11 +60,21 @@ struct st_mysqlnd_debug
 	const char ** skip_functions;
 };
 
-PHPAPI extern const char * mysqlnd_debug_std_no_trace_funcs[];
+struct st_mysqlnd_plugin_trace_log
+{
+	struct st_mysqlnd_plugin_header plugin_header;
+	struct
+	{
+		MYSQLND_DEBUG * (*trace_instance_init)(const char * skip_functions[] TSRMLS_DC);
+		char * (*get_backtrace)(uint max_levels, size_t * length TSRMLS_DC);
+	} methods;
+};
+
+void mysqlnd_debug_trace_plugin_register(TSRMLS_D);
 
 PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC);
 
-PHPAPI char *	mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
+PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 
 #if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400))
 #ifdef PHP_WIN32
@@ -85,52 +96,72 @@ PHPAPI char *	mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 #define DBG_PROFILE_END_TIME(duration)
 #endif
 
-#define DBG_INF_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
-#define DBG_ERR_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
-#define DBG_INF_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
-#define DBG_ERR_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "error: ", __VA_ARGS__); } while (0)
+#define DBG_INF_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE && (dbg_obj)) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "info : ", (msg)); } while (0)
+#define DBG_ERR_EX(dbg_obj, msg)		do { if (dbg_skip_trace == FALSE && (dbg_obj)) (dbg_obj)->m->log((dbg_obj), __LINE__, __FILE__, -1, "error: ", (msg)); } while (0)
+#define DBG_INF_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE && (dbg_obj)) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
+#define DBG_ERR_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE && (dbg_obj)) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "error: ", __VA_ARGS__); } while (0)
 
-#define DBG_BLOCK_ENTER_EX(dbg_obj, block_name) \
+#define DBG_BLOCK_ENTER_EX(dbg_obj, block_name) DBG_BLOCK_ENTER_EX2((dbg_obj), NULL, (block_name))
+#define DBG_BLOCK_LEAVE_EX(dbg_obj)				DBG_BLOCK_LEAVE_EX2((dbg_obj))
+
+#define DBG_BLOCK_ENTER_EX2(dbg_obj1, dbg_obj2, block_name) \
 		{ \
-			DBG_ENTER_EX(dbg_obj, (block_name));
+			DBG_ENTER_EX2((dbg_obj1), (db_obj2), (block_name));
 
-#define DBG_BLOCK_LEAVE_EX(dbg_obj) \
-			DBG_LEAVE_EX((dbg_obj), ;) \
+#define DBG_BLOCK_LEAVE_EX2(dbg_obj1, dbg_obj2) \
+			DBG_LEAVE_EX2((dbg_obj1), (dbg_obj2), ;) \
 		} \
 	
 
-#define DBG_ENTER_EX(dbg_obj, func_name) \
+#define DBG_ENTER_EX(dbg_obj, func_name)	DBG_ENTER_EX2((dbg_obj), (MYSQLND_DEBUG *) NULL, (func_name))
+#define DBG_LEAVE_EX(dbg_obj, leave)		DBG_LEAVE_EX2((dbg_obj), (MYSQLND_DEBUG *) NULL, leave)
+
+#define DBG_ENTER_EX2(dbg_obj1, dbg_obj2, func_name) \
 					struct timeval __dbg_prof_tp = {0}; \
 					uint64_t __dbg_prof_start = 0; /* initialization is needed */ \
 					zend_bool dbg_skip_trace = TRUE; \
-					if ((dbg_obj)) { \
-						dbg_skip_trace = !(dbg_obj)->m->func_enter((dbg_obj), __LINE__, __FILE__, func_name, strlen(func_name)); \
+					if ((dbg_obj1)) { \
+						dbg_skip_trace = !(dbg_obj1)->m->func_enter((dbg_obj1), __LINE__, __FILE__, func_name, strlen(func_name)); \
 					} \
+					if ((dbg_obj2)) { \
+						dbg_skip_trace |= !(dbg_obj2)->m->func_enter((dbg_obj2), __LINE__, __FILE__, func_name, strlen(func_name)); \
+					} \
+					if (dbg_skip_trace); /* shut compiler's mouth */\
 					do { \
-						if ((dbg_obj) && (dbg_obj)->flags & MYSQLND_DEBUG_PROFILE_CALLS) { \
+						if (((dbg_obj1) && (dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS) || \
+							((dbg_obj2) && (dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) \
+						{ \
 							DBG_PROFILE_START_TIME(); \
 						} \
 					} while (0); 
 
-#define DBG_LEAVE_EX(dbg_obj, leave)	\
+#define DBG_LEAVE_EX2(dbg_obj1, dbg_obj2, leave)	\
 			do {\
-				if ((dbg_obj)) { \
-					uint64_t this_call_duration = 0; \
-					if ((dbg_obj)->flags & MYSQLND_DEBUG_PROFILE_CALLS) { \
-						DBG_PROFILE_END_TIME(this_call_duration); \
-					} \
-					(dbg_obj)->m->func_leave((dbg_obj), __LINE__, __FILE__, this_call_duration); \
+				uint64_t this_call_duration = 0; \
+				if (((dbg_obj1) && (dbg_obj1)->flags & MYSQLND_DEBUG_PROFILE_CALLS) || \
+					((dbg_obj2) && (dbg_obj2)->flags & MYSQLND_DEBUG_PROFILE_CALLS)) \
+				{ \
+					DBG_PROFILE_END_TIME(this_call_duration); \
+				} \
+				if ((dbg_obj1)) { \
+					(dbg_obj1)->m->func_leave((dbg_obj1), __LINE__, __FILE__, this_call_duration); \
+				} \
+				if ((dbg_obj2)) { \
+					(dbg_obj2)->m->func_leave((dbg_obj2), __LINE__, __FILE__, this_call_duration); \
 				} \
 				leave \
 			} while (0);
 
-#define DBG_RETURN_EX(dbg_obj, value) DBG_LEAVE_EX(dbg_obj, return (value);)
 
-#define DBG_VOID_RETURN_EX(dbg_obj) DBG_LEAVE_EX(dbg_obj, return;)
+#define DBG_RETURN_EX(dbg_obj, value)		DBG_LEAVE_EX((dbg_obj), return (value);)
+#define DBG_VOID_RETURN_EX(dbg_obj)			DBG_LEAVE_EX((dbg_obj), return;)
+
+#define DBG_RETURN_EX2(dbg_obj1, dbg_obj2, value)	DBG_LEAVE_EX2((dbg_obj1), (dbg_obj2), return (value);)
+#define DBG_VOID_RETURN_EX2(dbg_obj1, dbg_obj2)		DBG_LEAVE_EX2((dbg_obj1), (dbg_obj2), return;)
 
 
 
-#else
+#else  /* defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400)) */
 static inline void DBG_INF_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
 static inline void DBG_ERR_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
 static inline void DBG_INF_FMT_EX(MYSQLND_DEBUG * dbg_obj, ...) {}
@@ -141,7 +172,7 @@ static inline void DBG_ENTER_EX(MYSQLND_DEBUG * dbg_obj, const char * const func
 #define DBG_VOID_RETURN_EX(dbg_obj)		return
 #define DBG_BLOCK_LEAVE_EX(dbg_obj)		}
 
-#endif /* defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1400)) */
+#endif
 
 #if MYSQLND_DBG_ENABLED == 1
 
@@ -156,9 +187,19 @@ static inline void DBG_ENTER_EX(MYSQLND_DEBUG * dbg_obj, const char * const func
 #define DBG_VOID_RETURN			DBG_VOID_RETURN_EX(MYSQLND_G(dbg))
 #define DBG_BLOCK_LEAVE			DBG_BLOCK_LEAVE_EX(MYSQLND_G(dbg))
 
+
+#define TRACE_ALLOC_INF(msg)			DBG_INF_EX(MYSQLND_G(trace_alloc), (msg))
+#define TRACE_ALLOC_ERR(msg)			DBG_ERR_EX(MYSQLND_G(trace_alloc), (msg))
+#define TRACE_ALLOC_INF_FMT(...)		DBG_INF_FMT_EX(MYSQLND_G(trace_alloc), __VA_ARGS__)
+#define TRACE_ALLOC_ERR_FMT(...)		DBG_ERR_FMT_EX(MYSQLND_G(trace_alloc), __VA_ARGS__)
+
+#define TRACE_ALLOC_ENTER(func_name)	DBG_ENTER_EX2(MYSQLND_G(dbg), MYSQLND_G(trace_alloc), (func_name))
+#define TRACE_ALLOC_BLOCK_ENTER(bname)	DBG_BLOCK_ENTER_EX2(MYSQLND_G(dbg), MYSQLND_G(trace_alloc), (bname))
+#define TRACE_ALLOC_RETURN(value)		DBG_RETURN_EX2(MYSQLND_G(dbg), MYSQLND_G(trace_alloc), (value))
+#define TRACE_ALLOC_VOID_RETURN			DBG_VOID_RETURN_EX2(MYSQLND_G(dbg), MYSQLND_G(trace_alloc))
+#define TRACE_ALLOC_BLOCK_LEAVE			DBG_BLOCK_LEAVE_EX2(MYSQLND_G(dbg), MYSQLND_G(trace_alloc))
+
 #elif MYSQLND_DBG_ENABLED == 0
-
-
 
 static inline void DBG_INF(const char * const msg) {}
 static inline void DBG_ERR(const char * const msg) {}
@@ -166,67 +207,22 @@ static inline void DBG_INF_FMT(const char * const format, ...) {}
 static inline void DBG_ERR_FMT(const char * const format, ...) {}
 static inline void DBG_ENTER(const char * const func_name) {}
 #define DBG_BLOCK_ENTER(bname)	{
-#define DBG_RETURN(value)		return (value)
-#define DBG_VOID_RETURN			return
+#define DBG_RETURN(value)			return (value)
+#define DBG_VOID_RETURN				return
 #define DBG_BLOCK_LEAVE			}
 
+
+static inline void TRACE_ALLOC_INF(const char * const msg) {}
+static inline void TRACE_ALLOC_ERR(const char * const msg) {}
+static inline void TRACE_ALLOC_INF_FMT(const char * const format, ...) {}
+static inline void TRACE_ALLOC_ERR_FMT(const char * const format, ...) {}
+static inline void TRACE_ALLOC_ENTER(const char * const func_name) {}
+#define TRACE_ALLOC_BLOCK_ENTER(bname)	{
+#define TRACE_ALLOC_RETURN(value)			return (value)
+#define TRACE_ALLOC_VOID_RETURN				return
+#define TRACE_ALLOC_BLOCK_LEAVE			}
+
 #endif
-
-
-#define MYSQLND_MEM_D	TSRMLS_DC ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC
-#define MYSQLND_MEM_C	TSRMLS_CC ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC
-
-struct st_mysqlnd_allocator_methods
-{
-	void *	(*m_emalloc)(size_t size MYSQLND_MEM_D);
-	void *	(*m_pemalloc)(size_t size, zend_bool persistent MYSQLND_MEM_D);
-	void *	(*m_ecalloc)(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-	void *	(*m_pecalloc)(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
-	void *	(*m_erealloc)(void *ptr, size_t new_size MYSQLND_MEM_D);
-	void *	(*m_perealloc)(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
-	void	(*m_efree)(void *ptr MYSQLND_MEM_D);
-	void	(*m_pefree)(void *ptr, zend_bool persistent MYSQLND_MEM_D);
-	void *	(*m_malloc)(size_t size MYSQLND_MEM_D);
-	void *	(*m_calloc)(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-	void *	(*m_realloc)(void *ptr, size_t new_size MYSQLND_MEM_D);
-	void	(*m_free)(void *ptr MYSQLND_MEM_D);
-	char *	(*m_pestrndup)(const char * const ptr, size_t size, zend_bool persistent MYSQLND_MEM_D);
-	char *	(*m_pestrdup)(const char * const ptr, zend_bool persistent MYSQLND_MEM_D);
-};
-
-PHPAPI extern struct st_mysqlnd_allocator_methods mysqlnd_allocator;
-
-
-PHPAPI void *	_mysqlnd_emalloc(size_t size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_pemalloc(size_t size, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_ecalloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_pecalloc(unsigned int nmemb, size_t size, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_erealloc(void *ptr, size_t new_size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_perealloc(void *ptr, size_t new_size, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI void		_mysqlnd_efree(void *ptr MYSQLND_MEM_D);
-PHPAPI void		_mysqlnd_pefree(void *ptr, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_malloc(size_t size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_calloc(unsigned int nmemb, size_t size MYSQLND_MEM_D);
-PHPAPI void *	_mysqlnd_realloc(void *ptr, size_t new_size MYSQLND_MEM_D);
-PHPAPI void		_mysqlnd_free(void *ptr MYSQLND_MEM_D);
-PHPAPI char *	_mysqlnd_pestrndup(const char * const ptr, size_t size, zend_bool persistent MYSQLND_MEM_D);
-PHPAPI char *	_mysqlnd_pestrdup(const char * const ptr, zend_bool persistent MYSQLND_MEM_D);
-
-
-#define mnd_emalloc(size)				mysqlnd_allocator.m_emalloc((size) MYSQLND_MEM_C)
-#define mnd_pemalloc(size, pers)		mysqlnd_allocator.m_pemalloc((size), (pers) MYSQLND_MEM_C)
-#define mnd_ecalloc(nmemb, size)		mysqlnd_allocator.m_ecalloc((nmemb), (size) MYSQLND_MEM_C)
-#define mnd_pecalloc(nmemb, size, p)	mysqlnd_allocator.m_pecalloc((nmemb), (size), (p) MYSQLND_MEM_C)
-#define mnd_erealloc(ptr, new_size)		mysqlnd_allocator.m_erealloc((ptr), (new_size) MYSQLND_MEM_C)
-#define mnd_perealloc(ptr, new_size, p)	mysqlnd_allocator.m_perealloc((ptr), (new_size), (p) MYSQLND_MEM_C)
-#define mnd_efree(ptr)					mysqlnd_allocator.m_efree((ptr) MYSQLND_MEM_C)
-#define mnd_pefree(ptr, pers)			mysqlnd_allocator.m_pefree((ptr), (pers) MYSQLND_MEM_C)
-#define mnd_malloc(size)				mysqlnd_allocator.m_malloc((size) MYSQLND_MEM_C)
-#define mnd_calloc(nmemb, size)			mysqlnd_allocator.m_calloc((nmemb), (size) MYSQLND_MEM_C)
-#define mnd_realloc(ptr, new_size)		mysqlnd_allocator.m_realloc((ptr), (new_size) MYSQLND_MEM_C)
-#define mnd_free(ptr)					mysqlnd_allocator.m_free((ptr) MYSQLND_MEM_C)
-#define mnd_pestrndup(ptr, size, pers)	mysqlnd_allocator.m_pestrndup((ptr), (size), (pers) MYSQLND_MEM_C)
-#define mnd_pestrdup(ptr, pers)			mysqlnd_allocator.m_pestrdup((ptr), (pers) MYSQLND_MEM_C)
 
 #endif /* MYSQLND_DEBUG_H */
 

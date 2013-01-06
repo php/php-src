@@ -34,9 +34,12 @@ Zend Extension Build => API%s
 PHP Extension Build => API%s
 Debug Build => %s
 Thread Safety => %s
+Zend Signal Handling => %s
 Zend Memory Manager => %s
 Zend Multibyte Support => %s
 IPv6 Support => %s
+DTrace Support => %s
+
 Registered PHP Streams => %s
 Registered Stream Socket Transports => %s
 Registered Stream Filters => %s

@@ -30,6 +30,7 @@
 #ifdef HAVE_DOM
 #include "ext/dom/xml_common.h"
 #endif
+#include <libxml/xmlreader.h>
 #include <libxml/uri.h>
 
 zend_class_entry *xmlreader_class_entry;
@@ -112,7 +113,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 /* }}} */
 
 /* {{{ xmlreader_get_property_ptr_ptr */
-zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC)
+zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member, const zend_literal *key TSRMLS_DC)
 {
 	xmlreader_object *obj;
 	zval tmp_member;
@@ -135,7 +136,7 @@ zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC)
 	}
 	if (ret == FAILURE) {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member TSRMLS_CC);
+		retval = std_hnd->get_property_ptr_ptr(object, member, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -146,7 +147,7 @@ zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC)
 /* }}} */
 
 /* {{{ xmlreader_read_property */
-zval *xmlreader_read_property(zval *object, zval *member, int type TSRMLS_DC)
+zval *xmlreader_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	xmlreader_object *obj;
 	zval tmp_member;
@@ -178,7 +179,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		}
 	} else {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type TSRMLS_CC);
+		retval = std_hnd->read_property(object, member, type, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -189,7 +190,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type TSRMLS_DC)
 /* }}} */
 
 /* {{{ xmlreader_write_property */
-void xmlreader_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+void xmlreader_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	xmlreader_object *obj;
 	zval tmp_member;
@@ -214,7 +215,7 @@ void xmlreader_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot write to read-only property");
 	} else {
 		std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value TSRMLS_CC);
+		std_hnd->write_property(object, member, value, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -391,7 +392,6 @@ zend_object_value xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 {
 	zend_object_value retval;
 	xmlreader_object *intern;
-	zval *tmp;
 
 	intern = emalloc(sizeof(xmlreader_object));
 	memset(&intern->std, 0, sizeof(zend_object));
@@ -401,7 +401,7 @@ zend_object_value xmlreader_objects_new(zend_class_entry *class_type TSRMLS_DC)
 	intern->prop_handler = &xmlreader_prop_handlers;
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
-	zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_property_ctor, (void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->std, class_type);
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) xmlreader_objects_free_storage, xmlreader_objects_clone TSRMLS_CC);
 	intern->handle = retval.handle;
 	retval.handlers = &xmlreader_object_handlers;
@@ -495,7 +495,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 	xmlRelaxNGPtr schema = NULL;
 	char *source;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &source, &source_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p!", &source, &source_len) == FAILURE) {
 		return;
 	}
 
@@ -872,7 +872,7 @@ PHP_METHOD(xmlreader, open)
 	char resolved_path[MAXPATHLEN + 1];
 	xmlTextReaderPtr reader = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
 		return;
 	}
 
@@ -958,7 +958,7 @@ PHP_METHOD(xmlreader, setSchema)
 	xmlreader_object *intern;
 	char *source;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!", &source, &source_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p!", &source, &source_len) == FAILURE) {
 		return;
 	}
 
@@ -1133,7 +1133,7 @@ Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(xmlreader, expand)
 {
 #ifdef HAVE_DOM
-	zval *id, *rv = NULL, *basenode = NULL;
+	zval *id, *basenode = NULL;
 	int ret;
 	xmlreader_object *intern;
 	xmlNode *node, *nodec;
@@ -1163,7 +1163,7 @@ PHP_METHOD(xmlreader, expand)
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Cannot expand this node type");
 				RETURN_FALSE;
 			} else {
-				DOM_RET_OBJ(rv, nodec, &ret, (dom_object *)domobj);
+				DOM_RET_OBJ(nodec, &ret, (dom_object *)domobj);
 			}
 		}
 	} else {

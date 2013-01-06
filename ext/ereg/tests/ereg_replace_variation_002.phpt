@@ -119,22 +119,27 @@ string(5) "ho%21"
 Arg value 0.5 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
+Error: 8 - Array to string conversion, %sereg_replace_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(5) "ho%21"
+Error: 8 - Array to string conversion, %sereg_replace_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%01o%21"
+Error: 8 - Array to string conversion, %sereg_replace_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%01o%21"
+Error: 8 - Array to string conversion, %sereg_replace_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)
 string(8) "h%01o%21"
+Error: 8 - Array to string conversion, %sereg_replace_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg_replace() is deprecated, %s(74)

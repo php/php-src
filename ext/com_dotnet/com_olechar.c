@@ -54,7 +54,7 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, uint strin
 	}
 
 	if (!ok) {
-		char *msg = php_win_err(GetLastError());
+		char *msg = php_win32_error_to_msg(GetLastError());
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"Could not convert string to unicode: `%s'", msg);
@@ -85,7 +85,7 @@ PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring, uint *s
 	}
 
 	if (!ok) {
-		char *msg = php_win_err(GetLastError());
+		char *msg = php_win32_error_to_msg(GetLastError());
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
 			"Could not convert string from unicode: `%s'", msg);

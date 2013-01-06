@@ -446,7 +446,7 @@ PHP_FUNCTION(com_variant_create_instance)
 			if (FAILED(res)) {
 				char *werr, *msg;
 
-				werr = php_win_err(res);
+				werr = php_win32_error_to_msg(res);
 				spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
 				LocalFree(werr);
 
@@ -1027,7 +1027,7 @@ PHP_FUNCTION(variant_set_type)
 	} else {
 		char *werr, *msg;
 
-		werr = php_win_err(res);
+		werr = php_win32_error_to_msg(res);
 		spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
 		LocalFree(werr);
 
@@ -1061,7 +1061,7 @@ PHP_FUNCTION(variant_cast)
 	} else {
 		char *werr, *msg;
 
-		werr = php_win_err(res);
+		werr = php_win32_error_to_msg(res);
 		spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
 		LocalFree(werr);
 

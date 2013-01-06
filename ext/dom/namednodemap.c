@@ -126,7 +126,7 @@ Since:
 */
 PHP_FUNCTION(dom_namednodemap_get_named_item)
 {
-	zval *id, *rv = NULL;
+	zval *id;
 	int ret, namedlen=0;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
@@ -166,7 +166,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 	}
 
 	if (itemnode) {
-		DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+		DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
 		return;
 	} else {
 		RETVAL_NULL();
@@ -200,7 +200,7 @@ Since:
 */
 PHP_FUNCTION(dom_namednodemap_item)
 {
-	zval *id, *rv = NULL;
+	zval *id;
 	long index;
 	int ret;
 	dom_object *intern;
@@ -243,7 +243,7 @@ PHP_FUNCTION(dom_namednodemap_item)
 		}
 
 		if (itemnode) {
-			DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+			DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
 			return;
 		}
 	}
@@ -258,7 +258,7 @@ Since: DOM Level 2
 */
 PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 {
-	zval *id, *rv = NULL;
+	zval *id;
 	int ret, namedlen=0, urilen=0;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
@@ -298,7 +298,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 	}
 
 	if (itemnode) {
-		DOM_RET_OBJ(rv, itemnode, &ret, objmap->baseobj);
+		DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
 		return;
 	} else {
 		RETVAL_NULL();

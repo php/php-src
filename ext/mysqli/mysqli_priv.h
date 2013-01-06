@@ -52,11 +52,11 @@ extern const mysqli_property_entry mysqli_stmt_property_entries[];
 extern const mysqli_property_entry mysqli_driver_property_entries[];
 extern const mysqli_property_entry mysqli_warning_property_entries[];
 
-extern zend_property_info mysqli_link_property_info_entries[];
-extern zend_property_info mysqli_result_property_info_entries[];
-extern zend_property_info mysqli_stmt_property_info_entries[];
-extern zend_property_info mysqli_driver_property_info_entries[];
-extern zend_property_info mysqli_warning_property_info_entries[];
+extern const zend_property_info mysqli_link_property_info_entries[];
+extern const zend_property_info mysqli_result_property_info_entries[];
+extern const zend_property_info mysqli_stmt_property_info_entries[];
+extern const zend_property_info mysqli_driver_property_info_entries[];
+extern const zend_property_info mysqli_warning_property_info_entries[];
 
 extern int php_le_pmysqli(void);
 extern void php_mysqli_dtor_p_elements(void *data);
@@ -66,24 +66,21 @@ extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_stat
 extern void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flag, int into_object);
 extern void php_clear_stmt_bind(MY_STMT *stmt TSRMLS_DC);
 extern void php_clear_mysql(MY_MYSQL *);
-extern MYSQLI_WARNING *php_get_warnings(MYSQL *mysql TSRMLS_DC);
+#ifdef MYSQLI_USE_MYSQLND
+extern MYSQLI_WARNING *php_get_warnings(MYSQLND_CONN_DATA * mysql TSRMLS_DC);
+#else
+extern MYSQLI_WARNING *php_get_warnings(MYSQL * mysql TSRMLS_DC);
+#endif
+
 extern void php_clear_warnings(MYSQLI_WARNING *w);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error TSRMLS_DC);
 extern void php_mysqli_report_index(const char *query, unsigned int status TSRMLS_DC);
-extern void php_set_local_infile_handler_default(MY_MYSQL *);
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...);
 
 #ifdef HAVE_SPL
 extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
 #endif
-
-#define REGISTER_MYSQLI_CLASS_ENTRY(name, mysqli_entry, class_functions) { \
-	zend_class_entry tmp_ce; \
-	INIT_CLASS_ENTRY(tmp_ce, name,class_functions); \
-	tmp_ce.create_object = mysqli_objects_new; \
-	mysqli_entry = zend_register_internal_class(&tmp_ce TSRMLS_CC); \
-} \
 
 #define PHP_MYSQLI_EXPORT(__type) PHP_MYSQLI_API __type
 

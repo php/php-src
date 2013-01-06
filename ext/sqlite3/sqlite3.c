@@ -103,7 +103,7 @@ PHP_METHOD(sqlite3, open)
 	db_obj = (php_sqlite3_db_object *)zend_object_store_get_object(object TSRMLS_CC);
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &filename, &filename_len, &flags, &encryption_key, &encryption_key_len)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|ls", &filename, &filename_len, &flags, &encryption_key, &encryption_key_len)) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
@@ -1097,7 +1097,7 @@ static int php_sqlite3_stream_close(php_stream *stream, int close_handle TSRMLS_
 	php_stream_sqlite3_data *sqlite3_stream = (php_stream_sqlite3_data *) stream->abstract;
 	
 	if (sqlite3_blob_close(sqlite3_stream->blob) != SQLITE_OK) {
-		/* Error occured, but it still closed */
+		/* Error occurred, but it still closed */
 	}
 
 	efree(sqlite3_stream);
@@ -2121,7 +2121,6 @@ static void php_sqlite3_result_object_free_storage(void *object TSRMLS_DC) /* {{
 
 static zend_object_value php_sqlite3_object_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
-	zval *tmp;
 	zend_object_value retval;
 	php_sqlite3_db_object *intern;
 
@@ -2134,7 +2133,7 @@ static zend_object_value php_sqlite3_object_new(zend_class_entry *class_type TSR
 	zend_llist_init(&(intern->free_list),   sizeof(php_sqlite3_free_list *), (llist_dtor_func_t)php_sqlite3_free_list_dtor, 0);
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_property_ctor,(void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->zo, class_type);
 
 	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) php_sqlite3_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = (zend_object_handlers *) &sqlite3_object_handlers;
@@ -2145,7 +2144,6 @@ static zend_object_value php_sqlite3_object_new(zend_class_entry *class_type TSR
 
 static zend_object_value php_sqlite3_stmt_object_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
-	zval *tmp;
 	zend_object_value retval;
 	php_sqlite3_stmt *intern;
 
@@ -2156,7 +2154,7 @@ static zend_object_value php_sqlite3_stmt_object_new(zend_class_entry *class_typ
 	intern->db_obj_zval = NULL;
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_property_ctor,(void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->zo, class_type);
 
 	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) php_sqlite3_stmt_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = (zend_object_handlers *) &sqlite3_stmt_object_handlers;
@@ -2167,7 +2165,6 @@ static zend_object_value php_sqlite3_stmt_object_new(zend_class_entry *class_typ
 
 static zend_object_value php_sqlite3_result_object_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
-	zval *tmp;
 	zend_object_value retval;
 	php_sqlite3_result *intern;
 
@@ -2180,7 +2177,7 @@ static zend_object_value php_sqlite3_result_object_new(zend_class_entry *class_t
 	intern->stmt_obj_zval = NULL;
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
-	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_property_ctor,(void *) &tmp, sizeof(zval *));
+	object_properties_init(&intern->zo, class_type);
 
 	retval.handle = zend_objects_store_put(intern, NULL, (zend_objects_free_object_storage_t) php_sqlite3_result_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = (zend_object_handlers *) &sqlite3_result_object_handlers;

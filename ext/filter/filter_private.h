@@ -99,12 +99,14 @@
 	}	\
 	return;	\
 
-#define PHP_FILTER_TRIM_DEFAULT(p, len) { \
+#define PHP_FILTER_TRIM_DEFAULT(p, len) PHP_FILTER_TRIM_DEFAULT_EX(p, len, 1);
+
+#define PHP_FILTER_TRIM_DEFAULT_EX(p, len, return_if_empty) { \
 	while ((len > 0)  && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\v' || *p == '\n')) { \
 		p++; \
 		len--; \
 	} \
-	if (len < 1) { \
+	if (len < 1 && return_if_empty) { \
 		RETURN_VALIDATION_FAILED \
 	} \
 	if (len > 0) { \

@@ -313,10 +313,9 @@ php_apache_sapi_flush(void *server_context)
 	}
 }
 
-static void php_apache_sapi_log_message(char *msg)
+static void php_apache_sapi_log_message(char *msg TSRMLS_DC)
 {
 	php_struct *ctx;
-	TSRMLS_FETCH();
 
 	ctx = SG(server_context);
 
@@ -327,19 +326,19 @@ static void php_apache_sapi_log_message(char *msg)
 	}
 }
 
-static void php_apache_sapi_log_message_ex(char *msg, request_rec *r)
+static void php_apache_sapi_log_message_ex(char *msg, request_rec *r TSRMLS_DC)
 {
 	if (r) {
 		ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, msg, r->filename);
 	} else {
-		php_apache_sapi_log_message(msg);
+		php_apache_sapi_log_message(msg TSRMLS_CC);
 	}
 }
 
-static time_t php_apache_sapi_get_request_time(TSRMLS_D)
+static double php_apache_sapi_get_request_time(TSRMLS_D)
 {
 	php_struct *ctx = SG(server_context);
-	return apr_time_sec(ctx->r->request_time);
+	return ((double) apr_time_as_msec(ctx->r->request_time)) / 1000.0;
 }
 
 extern zend_module_entry php_apache_module;
@@ -490,17 +489,16 @@ static int php_apache_request_ctor(request_rec *r, php_struct *ctx TSRMLS_DC)
 	apr_table_unset(r->headers_out, "Last-Modified");
 	apr_table_unset(r->headers_out, "Expires");
 	apr_table_unset(r->headers_out, "ETag");
-	if (!PG(safe_mode) || (PG(safe_mode) && !ap_auth_type(r))) {
-		auth = apr_table_get(r->headers_in, "Authorization");
-		php_handle_auth_data(auth TSRMLS_CC);
-		if (SG(request_info).auth_user == NULL && r->user) {
-			SG(request_info).auth_user = estrdup(r->user);
-		}
-		ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
-	} else {
-		SG(request_info).auth_user = NULL;
-		SG(request_info).auth_password = NULL;
+
+	auth = apr_table_get(r->headers_in, "Authorization");
+	php_handle_auth_data(auth TSRMLS_CC);
+
+	if (SG(request_info).auth_user == NULL && r->user) {
+		SG(request_info).auth_user = estrdup(r->user);
 	}
+
+	ctx->r->user = apr_pstrdup(ctx->r->pool, SG(request_info).auth_user);
+
 	return php_request_startup(TSRMLS_C);
 }
 
@@ -590,12 +588,12 @@ normal:
 	}
 
 	if (r->finfo.filetype == 0) {
-		php_apache_sapi_log_message_ex("script '%s' not found or unable to stat", r);
+		php_apache_sapi_log_message_ex("script '%s' not found or unable to stat", r TSRMLS_CC);
 		PHPAP_INI_OFF;
 		return HTTP_NOT_FOUND;
 	}
 	if (r->finfo.filetype == APR_DIR) {
-		php_apache_sapi_log_message_ex("attempt to invoke directory '%s' as script", r);
+		php_apache_sapi_log_message_ex("attempt to invoke directory '%s' as script", r TSRMLS_CC);
 		PHPAP_INI_OFF;
 		return HTTP_FORBIDDEN;
 	}
@@ -672,7 +670,7 @@ zend_first_try {
 		}
 
 		apr_table_set(r->notes, "mod_php_memory_usage",
-			apr_psprintf(ctx->r->pool, "%u", zend_memory_peak_usage(1 TSRMLS_CC)));
+			apr_psprintf(ctx->r->pool, "%zu", zend_memory_peak_usage(1 TSRMLS_CC)));
 	}
 
 } zend_end_try();

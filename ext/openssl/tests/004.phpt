@@ -28,7 +28,7 @@ NULL
 
 Warning: openssl_csr_new(): key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
 
-Warning: openssl_csr_new(): add1_attr_by_txt challengePassword_min -> 4 (failed) in %s on line %d
+Warning: openssl_csr_new(): add1_attr_by_txt challengePassword_min -> 4 (failed; check error queue and value of string_mask OpenSSL option if illegal characters are reported) in %s on line %d
 bool(false)
 resource(%d) of type (OpenSSL X.509 CSR)
 Done

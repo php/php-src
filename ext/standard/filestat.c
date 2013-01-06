@@ -19,7 +19,6 @@
 /* $Id$ */
 
 #include "php.h"
-#include "safe_mode.h"
 #include "fopen_wrappers.h"
 #include "php_globals.h"
 
@@ -236,7 +235,7 @@ PHP_FUNCTION(disk_total_space)
 	char *path;
 	int path_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &path_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &path, &path_len) == FAILURE) {
 		return;
 	}
 
@@ -371,15 +370,11 @@ PHP_FUNCTION(disk_free_space)
 	char *path;
 	int path_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &path, &path_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &path, &path_len) == FAILURE) {
 		return;
 	}
 
 	if (php_check_open_basedir(path TSRMLS_CC)) {
-		RETURN_FALSE;
-	}
-
-	if (strlen(path) != path_len) {
 		RETURN_FALSE;
 	}
 
@@ -391,25 +386,8 @@ PHP_FUNCTION(disk_free_space)
 /* }}} */
 
 #if !defined(WINDOWS) && !defined(NETWARE)
-static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
+PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid TSRMLS_DC)
 {
-	char *filename;
-	int filename_len;
-	zval *group;
-	gid_t gid;
-	int ret;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &group) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (strlen(filename) != filename_len) {
-		RETURN_FALSE;
-	}
-
-	if (Z_TYPE_P(group) == IS_LONG) {
-		gid = (gid_t)Z_LVAL_P(group);
-	} else if (Z_TYPE_P(group) == IS_STRING) {
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 		struct group gr;
 		struct group *retgrptr;
@@ -417,32 +395,85 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		char *grbuf;
 
 		if (grbuflen < 1) {
-			RETURN_FALSE;
+			return FAILURE;
 		}
 
 		grbuf = emalloc(grbuflen);
-		if (getgrnam_r(Z_STRVAL_P(group), &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
+		if (getgrnam_r(name, &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
 			efree(grbuf);
-			RETURN_FALSE;
+			return FAILURE;
 		}
 		efree(grbuf);
-		gid = gr.gr_gid;
+		*gid = gr.gr_gid;
 #else
-		struct group *gr = getgrnam(Z_STRVAL_P(group));
+		struct group *gr = getgrnam(name);
 
 		if (!gr) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
-			RETURN_FALSE;
+			return FAILURE;
 		}
-		gid = gr->gr_gid;
+		*gid = gr->gr_gid;
 #endif
-	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(group));
+		return SUCCESS;
+}
+#endif
+
+static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
+{
+	char *filename;
+	int filename_len;
+	zval *group;
+#if !defined(WINDOWS)
+	gid_t gid;
+	int ret;
+#endif
+	php_stream_wrapper *wrapper;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/", &filename, &filename_len, &group) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid(filename, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
+	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
+	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
+		if(wrapper && wrapper->wops->stream_metadata) {
+			int option;
+			void *value;
+			if (Z_TYPE_P(group) == IS_LONG) {
+				option = PHP_STREAM_META_GROUP;
+				value = &Z_LVAL_P(group);
+			} else if (Z_TYPE_P(group) == IS_STRING) {
+				option = PHP_STREAM_META_GROUP_NAME;
+				value = Z_STRVAL_P(group);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(group));
+				RETURN_FALSE;
+			}
+			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL TSRMLS_CC)) {
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+		} else {
+#if !defined(WINDOWS)
+/* On Windows, we expect regular chgrp to fail silently by default */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not call chgrp() for a non-standard stream");
+#endif
+			RETURN_FALSE;
+		}
+	}
+
+#if defined(WINDOWS)
+	/* We have no native chgrp on Windows, nothing left to do if stream doesn't have own implementation */
+	RETURN_FALSE;
+#else
+	if (Z_TYPE_P(group) == IS_LONG) {
+		gid = (gid_t)Z_LVAL_P(group);
+	} else if (Z_TYPE_P(group) == IS_STRING) {
+		if(php_get_gid_by_name(Z_STRVAL_P(group), &gid TSRMLS_CC) != SUCCESS) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find gid for %s", Z_STRVAL_P(group));
+			RETURN_FALSE;
+		}
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(group));
 		RETURN_FALSE;
 	}
 
@@ -463,20 +494,16 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
+#endif
 }
 /* }}} */
-#endif
 
 #ifndef NETWARE
 /* {{{ proto bool chgrp(string filename, mixed group)
    Change file group */
 PHP_FUNCTION(chgrp)
 {
-#if !defined(WINDOWS)
 	php_do_chgrp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-#else
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 
@@ -496,25 +523,8 @@ PHP_FUNCTION(lchgrp)
 #endif /* !NETWARE */
 
 #if !defined(WINDOWS) && !defined(NETWARE)
-static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
+PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid TSRMLS_DC)
 {
-	char *filename;
-	int filename_len;
-	zval *user;
-	uid_t uid;
-	int ret;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz/", &filename, &filename_len, &user) == FAILURE) {
-		return;
-	}
-
-	if (strlen(filename) != filename_len) {
-		RETURN_FALSE;
-	}
-
-	if (Z_TYPE_P(user) == IS_LONG) {
-		uid = (uid_t)Z_LVAL_P(user);
-	} else if (Z_TYPE_P(user) == IS_STRING) {
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 		struct passwd pw;
 		struct passwd *retpwptr = NULL;
@@ -522,32 +532,86 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		char *pwbuf;
 
 		if (pwbuflen < 1) {
-			RETURN_FALSE;
+			return FAILURE;
 		}
 
 		pwbuf = emalloc(pwbuflen);
-		if (getpwnam_r(Z_STRVAL_P(user), &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
+		if (getpwnam_r(name, &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
 			efree(pwbuf);
-			RETURN_FALSE;
+			return FAILURE;
 		}
 		efree(pwbuf);
-		uid = pw.pw_uid;
+		*uid = pw.pw_uid;
 #else
-		struct passwd *pw = getpwnam(Z_STRVAL_P(user));
+		struct passwd *pw = getpwnam(name);
 
 		if (!pw) {
+			return FAILURE;
+		}
+		*uid = pw->pw_uid;
+#endif
+		return SUCCESS;
+}
+#endif
+
+static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
+{
+	char *filename;
+	int filename_len;
+	zval *user;
+#if !defined(WINDOWS)
+	uid_t uid;
+	int ret;
+#endif
+	php_stream_wrapper *wrapper;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pz/", &filename, &filename_len, &user) == FAILURE) {
+		return;
+	}
+
+	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
+	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
+		if(wrapper && wrapper->wops->stream_metadata) {
+			int option;
+			void *value;
+			if (Z_TYPE_P(user) == IS_LONG) {
+				option = PHP_STREAM_META_OWNER;
+				value = &Z_LVAL_P(user);
+			} else if (Z_TYPE_P(user) == IS_STRING) {
+				option = PHP_STREAM_META_OWNER_NAME;
+				value = Z_STRVAL_P(user);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(user));
+				RETURN_FALSE;
+			}
+			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL TSRMLS_CC)) {
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+		} else {
+#if !defined(WINDOWS)
+/* On Windows, we expect regular chown to fail silently by default */
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not call chown() for a non-standard stream");
+#endif
+			RETURN_FALSE;
+		}
+	}
+
+#if defined(WINDOWS)
+	/* We have no native chown on Windows, nothing left to do if stream doesn't have own implementation */
+	RETURN_FALSE;
+#else
+
+	if (Z_TYPE_P(user) == IS_LONG) {
+		uid = (uid_t)Z_LVAL_P(user);
+	} else if (Z_TYPE_P(user) == IS_STRING) {
+		if(php_get_uid_by_name(Z_STRVAL_P(user), &uid TSRMLS_CC) != SUCCESS) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to find uid for %s", Z_STRVAL_P(user));
 			RETURN_FALSE;
 		}
-		uid = pw->pw_uid;
-#endif
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "parameter 2 should be string or integer, %s given", zend_zval_type_name(user));
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
 		RETURN_FALSE;
 	}
 
@@ -567,21 +631,18 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
+	RETURN_TRUE;
+#endif
 }
 /* }}} */
-#endif
+
 
 #ifndef NETWARE
 /* {{{ proto bool chown (string filename, mixed user)
    Change file owner */
 PHP_FUNCTION(chown)
 {
-#if !defined(WINDOWS)
-	RETVAL_TRUE;
 	php_do_chown(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-#else
-	RETURN_FALSE;
-#endif
 }
 /* }}} */
 
@@ -610,17 +671,24 @@ PHP_FUNCTION(chmod)
 	long mode;
 	int ret;
 	mode_t imode;
+	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &filename, &filename_len, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pl", &filename, &filename_len, &mode) == FAILURE) {
 		return;
 	}
 
-	if (PG(safe_mode) &&(!php_checkuid(filename, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS))) {
-		RETURN_FALSE;
-	}
-
-	if (strlen(filename) != filename_len) {
-		RETURN_FALSE;
+	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
+	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
+		if(wrapper && wrapper->wops->stream_metadata) {
+			if(wrapper->wops->stream_metadata(wrapper, filename, PHP_STREAM_META_ACCESS, &mode, NULL TSRMLS_CC)) {
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not call chmod() for a non-standard stream");
+			RETURN_FALSE;
+		}
 	}
 
 	/* Check the basedir */
@@ -629,26 +697,6 @@ PHP_FUNCTION(chmod)
 	}
 
 	imode = (mode_t) mode;
-	/* In safe mode, do not allow to setuid files.
-	 * Setuiding files could allow users to gain privileges
-	 * that safe mode doesn't give them. */
-
-	if (PG(safe_mode)) {
-		php_stream_statbuf ssb;
-		if (php_stream_stat_path_ex(filename, 0, &ssb, NULL)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "stat failed for %s", filename);
-			RETURN_FALSE;
-		}
-		if ((imode & 04000) != 0 && (ssb.sb.st_mode & 04000) == 0) {
-			imode ^= 04000;
-		}
-		if ((imode & 02000) != 0 && (ssb.sb.st_mode & 02000) == 0) {
-			imode ^= 02000;
-		}
-		if ((imode & 01000) != 0 && (ssb.sb.st_mode & 01000) == 0) {
-			imode ^= 01000;
-		}
-	}
 
 	ret = VCWD_CHMOD(filename, imode);
 	if (ret == -1) {
@@ -671,12 +719,13 @@ PHP_FUNCTION(touch)
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = &newtimebuf;
+	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "p|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
 		return;
 	}
 
-	if (strlen(filename) != filename_len) {
+	if (!filename_len) {
 		RETURN_FALSE;
 	}
 
@@ -700,9 +749,28 @@ PHP_FUNCTION(touch)
 			WRONG_PARAM_COUNT;
 	}
 
-	/* Safe-mode */
-	if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
+	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0 TSRMLS_CC);
+	if(wrapper != &php_plain_files_wrapper || strncasecmp("file://", filename, 7) == 0) {
+		if(wrapper && wrapper->wops->stream_metadata) {
+			if(wrapper->wops->stream_metadata(wrapper, filename, PHP_STREAM_META_TOUCH, newtime, NULL TSRMLS_CC)) {
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+		} else {
+			php_stream *stream;
+			if(argc > 1) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Can not call touch() for a non-standard stream");
+				RETURN_FALSE;
+			}
+			stream = php_stream_open_wrapper_ex(filename, "c", REPORT_ERRORS, NULL, NULL);
+			if(stream != NULL) {
+				php_stream_pclose(stream);
+				RETURN_TRUE;
+			} else {
+				RETURN_FALSE;
+			}
+		}
 	}
 
 	/* Check the basedir */
@@ -737,7 +805,6 @@ PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *fil
 	/* always clear CurrentStatFile and CurrentLStatFile even if filename is not NULL
 	 * as it may contain outdated data (e.g. "nlink" for a directory when deleting a file
 	 * in this directory, as shown by lstat_stat_variation9.phpt) */
-
 	if (BG(CurrentStatFile)) {
 		efree(BG(CurrentStatFile));
 		BG(CurrentStatFile) = NULL;
@@ -764,7 +831,7 @@ PHP_FUNCTION(clearstatcache)
 	char      *filename             = NULL;
 	int        filename_len         = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bs", &clear_realpath_cache, &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bp", &clear_realpath_cache, &filename, &filename_len) == FAILURE) {
 		return;
 	}
 
@@ -792,32 +859,13 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	};
 	char *local;
 	php_stream_wrapper *wrapper;
-	char safe_mode_buf[MAXPATHLEN];
 
 	if (!filename_length) {
 		RETURN_FALSE;
 	}
 
-	if (strlen(filename) != filename_length) {
+	if ((wrapper = php_stream_locate_url_wrapper(filename, &local, 0 TSRMLS_CC)) == &php_plain_files_wrapper && php_check_open_basedir(local TSRMLS_CC)) {
 		RETURN_FALSE;
-	}
-
-	if ((wrapper = php_stream_locate_url_wrapper(filename, &local, 0 TSRMLS_CC)) == &php_plain_files_wrapper) {
-		if (php_check_open_basedir(local TSRMLS_CC)) {
-			RETURN_FALSE;
-		} else if (PG(safe_mode)) {
-			if (type == FS_IS_X) {
-				if (strstr(local, "..")) {
-					RETURN_FALSE;
-				} else {
-					char *b = strrchr(local, PHP_DIR_SEPARATOR);
-					snprintf(safe_mode_buf, MAXPATHLEN, "%s%s%s", PG(safe_mode_exec_dir), (b ? "" : "/"), (b ? b : local));
-					local = (char *)&safe_mode_buf;
-				}
-			} else if (!php_checkuid_ex(local, NULL, CHECKUID_ALLOW_FILE_NOT_EXISTS, CHECKUID_NO_ERRORS)) {
-				RETURN_FALSE;
-			}
-		}
 	}
 
 	if (IS_ACCESS_CHECK(type)) {
@@ -1034,7 +1082,7 @@ void name(INTERNAL_FUNCTION_PARAMETERS) { \
 	char *filename; \
 	int filename_len; \
 	\
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) { \
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) { \
 		return; \
 	} \
 	\

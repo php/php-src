@@ -12,7 +12,7 @@ boolno = no
 string = asdadfsdjkslkj ¡@£$$ { }[ ]/%#¤
 sqstring = 'adsasdadasdasd'
 dqstring = "asdadfsdjkslkj ¡@£$$ { } !^~|¥¥{[()/)&/% ¤ # #"
-php_constant = E_ALL
+php_constant = E_WARNING
 user_constant = TEST_CONSTANT
 
 [basic with whitespace]
@@ -28,7 +28,7 @@ boolnone = 	 	 none
 boolno =	 	  no	 		 
 sqstring = 	 	 'adsasdadasdasd'	 	 
 dqstring = 	 	 		 "asdadfsdjkslkj ¡@£$$€¥¥{[()/)&/%#¤"	 	 	
-php_constant =  	 	 E_ALL	 		 
+php_constant =  	 	 E_WARNING	 		 
 
 [comments]
 ; some comment

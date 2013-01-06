@@ -750,11 +750,11 @@ private int
 apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
     const char *fn, int action)
 {
-	int errs = 0, mflen = 0;
+	int errs = 0; 
 	struct magic_entry *marray;
 	uint32_t marraycount, i, mentrycount = 0, starttest;
 	size_t files = 0, maxfiles = 0;
-	char **filearr = NULL, mfn[MAXPATHLEN];
+	char **filearr = NULL;
 	struct stat st;
 	php_stream *dir;
 	php_stream_dirent d;
@@ -775,19 +775,20 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
         /* FIXME: Read file names and sort them to prevent
            non-determinism. See Debian bug #488562. */
 	if (php_sys_stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
- 		int mflen;
- 		char mfn[MAXPATHLEN];
- 
- 		dir = php_stream_opendir(fn, REPORT_ERRORS, NULL);
+		int mflen;
+		char mfn[MAXPATHLEN];
+
+		dir = php_stream_opendir(fn, REPORT_ERRORS, NULL);
 		if (!dir) {
 			errs++;
 			goto out;
 		}
- 		while (php_stream_readdir(dir, &d)) {
- 			if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d.d_name)) < 0) {
-				file_oomem(ms, strlen(fn) + strlen(d.d_name) + 2);
+		while (php_stream_readdir(dir, &d)) {
+			if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d.d_name)) < 0) {
+				file_oomem(ms,
+				strlen(fn) + strlen(d.d_name) + 2);
 				errs++;
- 				php_stream_closedir(dir);
+				php_stream_closedir(dir);
 				goto out;
 			}
 			if (stat(mfn, &st) == -1 || !S_ISREG(st.st_mode)) {
@@ -800,14 +801,14 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 				if ((filearr = CAST(char **,
 				    realloc(filearr, mlen))) == NULL) {
 					file_oomem(ms, mlen);
- 					php_stream_closedir(dir);
+					php_stream_closedir(dir);
 					errs++;
 					goto out;
 				}
 			}
-			filearr[files++] = estrndup(mfn, mflen);
+			filearr[files++] = estrndup(mfn, (mflen > sizeof(mfn) - 1)? sizeof(mfn) - 1: mflen);
 		}
- 		php_stream_closedir(dir);
+		php_stream_closedir(dir);
 		qsort(filearr, files, sizeof(*filearr), cmpstrp);
 		for (i = 0; i < files; i++) {
 			load_1(ms, action, filearr[i], &errs, &marray,

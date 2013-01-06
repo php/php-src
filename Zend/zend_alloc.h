@@ -44,9 +44,9 @@
 typedef struct _zend_leak_info {
 	void *addr;
 	size_t size;
-	char *filename;
+	const char *filename;
 	uint lineno;
-	char *orig_filename;
+	const char *orig_filename;
 	uint orig_lineno;
 } zend_leak_info;
 
@@ -54,12 +54,12 @@ BEGIN_EXTERN_C()
 
 ZEND_API char *zend_strndup(const char *s, unsigned int length) ZEND_ATTRIBUTE_MALLOC;
 
-ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
+ZEND_API void *_emalloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE(1);
 ZEND_API void *_safe_emalloc(size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API void *_safe_malloc(size_t nmemb, size_t size, size_t offset) ZEND_ATTRIBUTE_MALLOC;
 ZEND_API void _efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
-ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE2(1,2);
+ZEND_API void *_erealloc(void *ptr, size_t size, int allow_failure ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(2);
 ZEND_API void *_safe_erealloc(void *ptr, size_t nmemb, size_t size, size_t offset ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 ZEND_API void *_safe_realloc(void *ptr, size_t nmemb, size_t size, size_t offset);
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
@@ -161,45 +161,31 @@ ZEND_API size_t zend_memory_peak_usage(int real_usage TSRMLS_DC);
 
 END_EXTERN_C()
 
-/* Macroses for zend_fast_cache.h compatibility */
-
-#define ZEND_FAST_ALLOC(p, type, fc_type)	\
-	(p) = (type *) emalloc(sizeof(type))
-
-#define ZEND_FAST_FREE(p, fc_type)	\
-	efree(p)
-
-#define ZEND_FAST_ALLOC_REL(p, type, fc_type)	\
-	(p) = (type *) emalloc_rel(sizeof(type))
-
-#define ZEND_FAST_FREE_REL(p, fc_type)	\
-	efree_rel(p)
-
 /* fast cache for zval's */
 #define ALLOC_ZVAL(z)	\
-	ZEND_FAST_ALLOC(z, zval, ZVAL_CACHE_LIST)
+	(z) = (zval *) emalloc(sizeof(zval))
 
 #define FREE_ZVAL(z)	\
-	ZEND_FAST_FREE(z, ZVAL_CACHE_LIST)
+	efree_rel(z)
 
 #define ALLOC_ZVAL_REL(z)	\
-	ZEND_FAST_ALLOC_REL(z, zval, ZVAL_CACHE_LIST)
+	(z) = (zval *) emalloc_rel(sizeof(zval))
 
 #define FREE_ZVAL_REL(z)	\
-	ZEND_FAST_FREE_REL(z, ZVAL_CACHE_LIST)
+	efree_rel(z)
 
 /* fast cache for HashTables */
 #define ALLOC_HASHTABLE(ht)	\
-	ZEND_FAST_ALLOC(ht, HashTable, HASHTABLE_CACHE_LIST)
+	(ht) = (HashTable *) emalloc(sizeof(HashTable))
 
 #define FREE_HASHTABLE(ht)	\
-	ZEND_FAST_FREE(ht, HASHTABLE_CACHE_LIST)
+	efree(ht)
 
 #define ALLOC_HASHTABLE_REL(ht)	\
-	ZEND_FAST_ALLOC_REL(ht, HashTable, HASHTABLE_CACHE_LIST)
+	(ht) = (HashTable *) emalloc_rel(sizeof(HashTable))
 
 #define FREE_HASHTABLE_REL(ht)	\
-	ZEND_FAST_FREE_REL(ht, HASHTABLE_CACHE_LIST)
+	efree_rel(ht)
 
 /* Heap functions */
 typedef struct _zend_mm_heap zend_mm_heap;

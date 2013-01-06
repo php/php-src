@@ -171,20 +171,14 @@ static void ps_files_open(ps_files *data, const char *key TSRMLS_DC)
 		if (data->fd != -1) {
 #ifndef PHP_WIN32
 			/* check to make sure that the opened file is not a symlink, linking to data outside of allowable dirs */
-			if (PG(safe_mode) || PG(open_basedir)) {
+			if (PG(open_basedir)) {
 				struct stat sbuf;
 
 				if (fstat(data->fd, &sbuf)) {
 					close(data->fd);
 					return;
 				}
-				if (
-					S_ISLNK(sbuf.st_mode) &&
-					(
-						php_check_open_basedir(buf TSRMLS_CC) ||
-						(PG(safe_mode) && !php_checkuid(buf, NULL, CHECKUID_CHECK_FILE_AND_DIR))
-					)
-				) {
+				if (S_ISLNK(sbuf.st_mode) && php_check_open_basedir(buf TSRMLS_CC)) {
 					close(data->fd);
 					return;
 				}
@@ -274,9 +268,6 @@ PS_OPEN_FUNC(files)
 		/* if save path is an empty string, determine the temporary dir */
 		save_path = php_get_temporary_directory();
 
-		if (PG(safe_mode) && (!php_checkuid(save_path, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			return FAILURE;
-		}
 		if (php_check_open_basedir(save_path TSRMLS_CC)) {
 			return FAILURE;
 		}
@@ -320,6 +311,9 @@ PS_OPEN_FUNC(files)
 	data->basedir_len = strlen(save_path);
 	data->basedir = estrndup(save_path, data->basedir_len);
 
+	if (PS_GET_MOD_DATA()) {
+		ps_close_files(mod_data TSRMLS_CC);
+	}
 	PS_SET_MOD_DATA(data);
 
 	return SUCCESS;
@@ -399,7 +393,7 @@ PS_WRITE_FUNC(files)
 	/* Truncate file if the amount of new data is smaller than the existing data set. */
 
 	if (vallen < (int)data->st_size) {
-		ftruncate(data->fd, 0);
+		php_ignore_value(ftruncate(data->fd, 0));
 	}
 
 #if defined(HAVE_PWRITE)

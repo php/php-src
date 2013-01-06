@@ -31,12 +31,12 @@ typedef struct _zend_lex_state {
 	unsigned char *yy_limit;
 	int yy_state;
 	zend_stack state_stack;
+	zend_ptr_stack heredoc_label_stack;
 
 	zend_file_handle *in;
 	uint lineno;
 	char *filename;
 
-#ifdef ZEND_MULTIBYTE
 	/* original (unfiltered) script */
 	unsigned char *script_org;
 	size_t script_org_size;
@@ -48,17 +48,21 @@ typedef struct _zend_lex_state {
 	/* input/ouput filters */
 	zend_encoding_filter input_filter;
 	zend_encoding_filter output_filter;
-	zend_encoding *script_encoding;
-	zend_encoding *internal_encoding;
-#endif /* ZEND_MULTIBYTE */
+	const zend_encoding *script_encoding;
 } zend_lex_state;
 
+typedef struct _zend_heredoc_label {
+	char *label;
+	int length;
+} zend_heredoc_label;
 
 BEGIN_EXTERN_C()
 int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC);
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC);
 ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_DC);
+ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter, const zend_encoding *old_encoding TSRMLS_DC);
+ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding TSRMLS_DC);
 
 END_EXTERN_C()
 

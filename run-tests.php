@@ -311,6 +311,7 @@ VALGRIND    : " . ($leak_check ? $valgrind_header : 'Not used') . "
 define('PHP_QA_EMAIL', 'qa-reports@lists.php.net');
 define('QA_SUBMISSION_PAGE', 'http://qa.php.net/buildtest-process.php');
 define('QA_REPORTS_PAGE', 'http://qa.php.net/reports');
+define('TRAVIS_CI' , (bool) getenv('TRAVIS_PHP_VERSION'));
 
 function save_or_mail_results()
 {
@@ -318,7 +319,7 @@ function save_or_mail_results()
 		   $PHP_FAILED_TESTS, $CUR_DIR, $php, $output_file, $compression;
 
 	/* We got failed Tests, offer the user to send an e-mail to QA team, unless NO_INTERACTION is set */
-	if (!getenv('NO_INTERACTION')) {
+	if (!getenv('NO_INTERACTION') && !TRAVIS_CI) {
 		$fp = fopen("php://stdin", "r+");
 		if ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['WARNED'] || $sum_results['LEAKED'] || $sum_results['XFAILED']) {
 			echo "\nYou may have found a problem in PHP.";
@@ -335,8 +336,8 @@ function save_or_mail_results()
 		$just_save_results = (strtolower($user_input[0]) == 's');
 	}
 
-	if ($just_save_results || !getenv('NO_INTERACTION')) {
-		if ($just_save_results || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
+	if ($just_save_results || !getenv('NO_INTERACTION') || TRAVIS_CI) {
+		if ($just_save_results || TRAVIS_CI || strlen(trim($user_input)) == 0 || strtolower($user_input[0]) == 'y') {
 			/*
 			 * Collect information about the host system for our report
 			 * Fetch phpinfo() output so that we can see the PHP enviroment
@@ -348,7 +349,9 @@ function save_or_mail_results()
 			}
 
 			/* Ask the user to provide an email address, so that QA team can contact the user */
-			if (!strncasecmp($user_input, 'y', 1) || strlen(trim($user_input)) == 0) {
+			if (TRAVIS_CI) {
+				$user_email = 'travis at php dot net';
+			} elseif (!strncasecmp($user_input, 'y', 1) || strlen(trim($user_input)) == 0) {
 				echo "\nPlease enter your email address.\n(Your address will be mangled so that it will not go out on any\nmailinglist in plain text): ";
 				flush();
 				$user_email = trim(fgets($fp, 1024));
@@ -424,7 +427,7 @@ function save_or_mail_results()
 			$failed_tests_data .= $sep . "PHPINFO" . $sep;
 			$failed_tests_data .= shell_exec($php . ' -ddisplay_errors=stderr -dhtml_errors=0 -i 2> /dev/null');
 
-			if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status)) {
+			if ($just_save_results || !mail_qa_team($failed_tests_data, $compression, $status) && !TRAVIS_CI) {
 				file_put_contents($output_file, $failed_tests_data);
 
 				if (!$just_save_results) {
@@ -432,7 +435,7 @@ function save_or_mail_results()
 				}
 
 				echo "Please send " . $output_file . " to " . PHP_QA_EMAIL . " manually, thank you.\n";
-			} else {
+			} elseif (!getenv('NO_INTERACTION') && !TRAVIS_CI) {
 				fwrite($fp, "\nThank you for helping to make PHP better.\n");
 				fclose($fp);
 			}
@@ -632,6 +635,9 @@ if (isset($argc) && $argc > 1) {
 				case 'x':
 					$environment['SKIP_SLOW_TESTS'] = 1;
 					break;
+				case '--offline':
+					$environment['SKIP_ONLINE_TESTS'] = 1;
+					break;
 				//case 'w'
 				case '-':
 					// repeat check with full switch
@@ -688,6 +694,8 @@ Options:
     -s <file>   Write output to <file>.
 
     -x          Sets 'SKIP_SLOW_TESTS' environmental variable.
+
+    --offline   Sets 'SKIP_ONLINE_TESTS' environmental variable.
 
     --verbose
     -v          Verbose mode.
@@ -794,14 +802,12 @@ HELP;
 			fclose($failed_tests_file);
 		}
 
-		if (count($test_files) || count($test_results)) {
-			compute_summary();
-			if ($html_output) {
-				fwrite($html_file, "<hr/>\n" . get_summary(false, true));
-			}
-			echo "=====================================================================";
-			echo get_summary(false, false);
+		compute_summary();
+		if ($html_output) {
+			fwrite($html_file, "<hr/>\n" . get_summary(false, true));
 		}
+		echo "=====================================================================";
+		echo get_summary(false, false);
 
 		if ($html_output) {
 			fclose($html_file);
@@ -813,7 +819,7 @@ HELP;
 
 		junit_save_xml();
 
-		if (getenv('REPORT_EXIT_STATUS') == 1 and preg_match('/FAILED(?: |$)/', implode(' ', $test_results))) {
+		if (getenv('REPORT_EXIT_STATUS') == 1 and $sum_results['FAILED']) {
 			exit(1);
 		}
 

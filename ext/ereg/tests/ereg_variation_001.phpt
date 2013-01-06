@@ -120,26 +120,31 @@ bool(false)
 Arg value 0.5 
 Error: 8192 - Function ereg() is deprecated, %s(75)
 bool(false)
+Error: 8 - Array to string conversion, %sereg_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg() is deprecated, %s(75)
 Error: 8 - Array to string conversion, %s(75)
 bool(false)
+Error: 8 - Array to string conversion, %sereg_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg() is deprecated, %s(75)
 Error: 8 - Array to string conversion, %s(75)
 bool(false)
+Error: 8 - Array to string conversion, %sereg_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg() is deprecated, %s(75)
 Error: 8 - Array to string conversion, %s(75)
 bool(false)
+Error: 8 - Array to string conversion, %sereg_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg() is deprecated, %s(75)
 Error: 8 - Array to string conversion, %s(75)
 bool(false)
+Error: 8 - Array to string conversion, %sereg_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function ereg() is deprecated, %s(75)

@@ -1073,6 +1073,7 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		s->time->is_localtime = 1;
 		s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
 		s->time->z = 0;
+		s->time->dst = 0;
 
 		TIMELIB_DEINIT;
 		return TIMELIB_RELATIVE;
@@ -2077,6 +2078,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 				s->time->is_localtime = 1;
 				s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
 				s->time->z = 0;
+				s->time->dst = 0;
 				break;
 
 			case 'e': /* timezone */

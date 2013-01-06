@@ -1,7 +1,5 @@
 --TEST--
 mhash() modifying algorithm parameter
---INI--
-magic_quotes_runtime=0
 --SKIPIF--
 <?php
 	include "skip_mhash.inc";

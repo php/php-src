@@ -24,6 +24,7 @@
 PHP_FUNCTION(intval);
 PHP_FUNCTION(floatval);
 PHP_FUNCTION(strval);
+PHP_FUNCTION(boolval);
 PHP_FUNCTION(gettype);
 PHP_FUNCTION(settype);
 PHP_FUNCTION(is_null);

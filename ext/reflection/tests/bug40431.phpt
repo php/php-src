@@ -4,7 +4,7 @@ Bug #40431 (dynamic properties may cause crash in ReflectionProperty methods)
 <?php
 
 echo "=== 1st test ===\n";
-
+$Obj = new stdClass;
 $Obj->value = 'value';
 $RefObj = new ReflectionObject($Obj);
 
@@ -78,8 +78,6 @@ echo "Done\n";
 ?>
 --EXPECTF--	
 === 1st test ===
-
-Strict Standards: Creating default object from empty value in %s on line %d
 array(1) {
   [0]=>
   &object(ReflectionProperty)#%d (2) {

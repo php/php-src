@@ -276,7 +276,7 @@ PHP_MINIT_FUNCTION(filter)
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_RES_RANGE", FILTER_FLAG_NO_RES_RANGE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("FILTER_FLAG_NO_PRIV_RANGE", FILTER_FLAG_NO_PRIV_RANGE, CONST_CS | CONST_PERSISTENT);
 
-	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init);
+	sapi_register_input_filter(php_sapi_filter, php_sapi_filter_init TSRMLS_CC);
 
 	return SUCCESS;
 }
@@ -406,7 +406,6 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 {
 	zval  new_var, raw_var;
 	zval *array_ptr = NULL, *orig_array_ptr = NULL;
-	char *orig_var = NULL;
 	int retval = 0;
 
 	assert(*val != NULL);
@@ -447,13 +446,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 	}
 
 	if (array_ptr) {
-		/* Make a copy of the variable name, as php_register_variable_ex seems to
-		 * modify it */
-		orig_var = estrdup(var);
-
 		/* Store the RAW variable internally */
-		/* FIXME: Should not use php_register_variable_ex as that also registers
-		 * globals when register_globals is turned on */
 		Z_STRLEN(raw_var) = val_len;
 		Z_STRVAL(raw_var) = estrndup(*val, val_len);
 		Z_TYPE(raw_var) = IS_STRING;
@@ -463,8 +456,6 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 
 	if (val_len) {
 		/* Register mangled variable */
-		/* FIXME: Should not use php_register_variable_ex as that also registers
-		 * globals when register_globals is turned on */
 		Z_STRLEN(new_var) = val_len;
 		Z_TYPE(new_var) = IS_STRING;
 
@@ -473,8 +464,6 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 			Z_STRVAL(new_var) = estrndup(*val, val_len);
 			INIT_PZVAL(tmp_new_var);
 			php_zval_filter(&tmp_new_var, IF_G(default_filter), IF_G(default_filter_flags), NULL, NULL/*charset*/, 0 TSRMLS_CC);
-		} else if (PG(magic_quotes_gpc) && !retval) { /* for PARSE_STRING php_register_variable_safe() will do the addslashes() */
-			Z_STRVAL(new_var) = php_addslashes(*val, Z_STRLEN(new_var), &Z_STRLEN(new_var), 0 TSRMLS_CC);
 		} else {
 			Z_STRVAL(new_var) = estrndup(*val, val_len);
 		}
@@ -483,10 +472,7 @@ static unsigned int php_sapi_filter(int arg, char *var, char **val, unsigned int
 	}
 
 	if (orig_array_ptr) {
-		php_register_variable_ex(orig_var, &new_var, orig_array_ptr TSRMLS_CC);
-	}
-	if (array_ptr) {
-		efree(orig_var);
+		php_register_variable_ex(var, &new_var, orig_array_ptr TSRMLS_CC);
 	}
 
 	if (retval) {
@@ -539,7 +525,6 @@ static zval *php_filter_get_storage(long arg TSRMLS_DC)/* {{{ */
 
 {
 	zval *array_ptr = NULL;
-	zend_bool jit_initialization = (PG(auto_globals_jit) && !PG(register_globals) && !PG(register_long_arrays));
 
 	switch (arg) {
 		case PARSE_GET:
@@ -552,13 +537,13 @@ static zval *php_filter_get_storage(long arg TSRMLS_DC)/* {{{ */
 			array_ptr = IF_G(cookie_array);
 			break;
 		case PARSE_SERVER:
-			if (jit_initialization) {
+			if (PG(auto_globals_jit)) {
 				zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
 			}
 			array_ptr = IF_G(server_array);
 			break;
 		case PARSE_ENV:
-			if (jit_initialization) {
+			if (PG(auto_globals_jit)) {
 				zend_is_auto_global("_ENV", sizeof("_ENV")-1 TSRMLS_CC);
 			}
 			array_ptr = IF_G(env_array) ? IF_G(env_array) : PG(http_globals)[TRACK_VARS_ENV];

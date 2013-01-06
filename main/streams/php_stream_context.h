@@ -33,10 +33,10 @@ typedef void (*php_stream_notification_func)(php_stream_context *context,
    If no context was passed, use the default context
    The default context has not yet been created, do it now. */
 #define php_stream_context_from_zval(zcontext, nocontext) ( \
-		(zcontext) ? zend_fetch_resource(&(zcontext) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context()) : \
+		(zcontext) ? zend_fetch_resource(&(zcontext) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context(TSRMLS_C)) : \
 		(nocontext) ? NULL : \
 		FG(default_context) ? FG(default_context) : \
-		(FG(default_context) = php_stream_context_alloc()) )
+		(FG(default_context) = php_stream_context_alloc(TSRMLS_C)) )
 
 #define php_stream_context_to_zval(context, zval) { ZVAL_RESOURCE(zval, (context)->rsrc_id); zend_list_addref((context)->rsrc_id); }
 
@@ -53,24 +53,16 @@ struct _php_stream_notifier {
 struct _php_stream_context {
 	php_stream_notifier *notifier;
 	zval *options;	/* hash keyed by wrapper family or specific wrapper */
-	zval *links;	/* hash keyed by hostent for connection pooling */
 	int rsrc_id;	/* used for auto-cleanup */
 };
 
 BEGIN_EXTERN_C()
 PHPAPI void php_stream_context_free(php_stream_context *context);
-PHPAPI php_stream_context *php_stream_context_alloc(void);
+PHPAPI php_stream_context *php_stream_context_alloc(TSRMLS_D);
 PHPAPI int php_stream_context_get_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval ***optionvalue);
 PHPAPI int php_stream_context_set_option(php_stream_context *context,
 		const char *wrappername, const char *optionname, zval *optionvalue);
-
-PHPAPI int php_stream_context_get_link(php_stream_context *context,
-		const char *hostent, php_stream **stream);
-PHPAPI int php_stream_context_set_link(php_stream_context *context,
-		const char *hostent, php_stream *stream);
-PHPAPI int php_stream_context_del_link(php_stream_context *context,
-		php_stream *stream);
 
 PHPAPI php_stream_notifier *php_stream_notification_alloc(void);
 PHPAPI void php_stream_notification_free(php_stream_notifier *notifier);

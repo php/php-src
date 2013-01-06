@@ -12,7 +12,7 @@ Class D2 extends C { function f(SomeClass $a) {} }
 ?>
 ==DONE==
 --EXPECTF--
-Strict Standards: Declaration of D2::f() should be compatible with that of C::f() in %s on line 8
+Strict Standards: Declaration of D2::f() should be compatible with C::f(array $a) in %s on line 8
 Compatible hint.
 Class hint, should be array.
 ==DONE==

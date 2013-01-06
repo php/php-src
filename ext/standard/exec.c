@@ -22,7 +22,6 @@
 #include "php.h"
 #include <ctype.h>
 #include "php_string.h"
-#include "safe_mode.h"
 #include "ext/standard/head.h"
 #include "ext/standard/file.h"
 #include "basic_functions.h"
@@ -61,53 +60,23 @@
 PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_DC)
 {
 	FILE *fp;
-	char *buf, *tmp=NULL;
+	char *buf;
 	int l = 0, pclose_return;
-	char *cmd_p, *b, *c, *d=NULL;
+	char *b, *d=NULL;
 	php_stream *stream;
 	size_t buflen, bufl = 0;
 #if PHP_SIGCHILD
 	void (*sig_handler)() = NULL;
 #endif
 
-	if (PG(safe_mode)) {
-		if ((c = strchr(cmd, ' '))) {
-			*c = '\0';
-			c++;
-		}
-		if (strstr(cmd, "..")) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "No '..' components allowed in path");
-			goto err;
-		}
-		
-		b = strrchr(cmd, PHP_DIR_SEPARATOR);
-
-#ifdef PHP_WIN32
-		if (b && *b == '\\' && b == cmd) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid absolute path.");
-			goto err;
-		}
-#endif
-
-		spprintf(&d, 0, "%s%s%s%s%s", PG(safe_mode_exec_dir), (b ? "" : "/"), (b ? b : cmd), (c ? " " : ""), (c ? c : ""));
-		if (c) {
-			*(c - 1) = ' ';
-		}
-		cmd_p = php_escape_shell_cmd(d);
-		efree(d);
-		d = cmd_p;
-	} else {
-		cmd_p = cmd;
-	}
-
 #if PHP_SIGCHILD
 	sig_handler = signal (SIGCHLD, SIG_DFL);
 #endif
 
 #ifdef PHP_WIN32
-	fp = VCWD_POPEN(cmd_p, "rb");
+	fp = VCWD_POPEN(cmd, "rb");
 #else
-	fp = VCWD_POPEN(cmd_p, "r");
+	fp = VCWD_POPEN(cmd, "r");
 #endif
 	if (!fp) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to fork [%s]", cmd);
@@ -140,7 +109,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 
 			if (type == 1) {
 				PHPWRITE(buf, bufl);
-				if (OG(ob_nesting_level) < 1) {
+				if (php_output_get_level(TSRMLS_C) < 1) {
 					sapi_flush(TSRMLS_C);
 				}
 			} else if (type == 2) {
@@ -170,14 +139,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 			}
 
 			/* Return last line from the shell command */
-			if (PG(magic_quotes_runtime)) {
-				int len;
-
-				tmp = php_addslashes(buf, bufl, &len, 0 TSRMLS_CC);
-				RETVAL_STRINGL(tmp, len, 0);
-			} else {
-				RETVAL_STRINGL(buf, bufl, 1);
-			}
+			RETVAL_STRINGL(buf, bufl, 1);
 		} else { /* should return NULL, but for BC we return "" */
 			RETVAL_EMPTY_STRING();
 		}
@@ -484,11 +446,6 @@ PHP_FUNCTION(shell_exec)
 		return;
 	}
 
-	if (PG(safe_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot execute using backquotes in Safe Mode");
-		RETURN_FALSE;
-	}
-
 #ifdef PHP_WIN32
 	if ((in=VCWD_POPEN(command, "rt"))==NULL) {
 #else
@@ -520,7 +477,7 @@ PHP_FUNCTION(proc_nice)
 	}
 
 	errno = 0;
-	nice(pri);
+	php_ignore_value(nice(pri));
 	if (errno) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Only a super user may attempt to increase the priority of a process");
 		RETURN_FALSE;

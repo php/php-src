@@ -1,7 +1,5 @@
 --TEST--
 Test array_values() function : usage variations - Referenced variables
---INI--
-allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array array_values(array $input)
@@ -29,10 +27,6 @@ echo "Change \$val2 and check result of array_values():\n";
 $val2 = 'deux';
 var_dump($result1);
 
-echo "\n-- Pass \$input argument by reference --\n";
-$array = array(1, 2, 3);
-var_dump($result2 = array_values(&$array));
-
 echo "Done";
 ?>
 
@@ -56,15 +50,5 @@ array(3) {
   &string(4) "deux"
   [2]=>
   &string(5) "three"
-}
-
--- Pass $input argument by reference --
-array(3) {
-  [0]=>
-  int(1)
-  [1]=>
-  int(2)
-  [2]=>
-  int(3)
 }
 Done

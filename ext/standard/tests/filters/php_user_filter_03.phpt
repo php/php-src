@@ -9,4 +9,4 @@ class foo extends php_user_filter {
 }
 ?>
 --EXPECTF--
-Strict Standards: Declaration of foo::onCreate() should be compatible with that of php_user_filter::onCreate() in %s on line %d
+Strict Standards: Declaration of foo::onCreate() should be compatible with php_user_filter::onCreate() in %s on line %d

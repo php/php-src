@@ -123,7 +123,7 @@
  * NDIG = 320
  * NUM_BUF_SIZE >= strlen("-") + Emax + strlrn(".") + NDIG + strlen("E+1023") + 1;
  */
-#define NUM_BUF_SIZE    2048
+#define NUM_BUF_SIZE		2048
 
 /*
  * The INS_CHAR macro inserts a character in the buffer.

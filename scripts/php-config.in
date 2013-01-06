@@ -2,6 +2,7 @@
 
 SED="@SED@"
 prefix="@prefix@"
+datarootdir="@datarootdir@"
 exec_prefix="@exec_prefix@"
 version="@PHP_VERSION@"
 vernum="@PHP_VERSION_ID@"

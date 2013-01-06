@@ -67,6 +67,7 @@ zend_object_value Collator_object_create(
 	intern = ecalloc( 1, sizeof(Collator_object) );
 	intl_error_init( COLLATOR_ERROR_P( intern ) TSRMLS_CC );
 	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
+	object_properties_init(&intern->zo, ce);
 
 	retval.handle = zend_objects_store_put(
 		intern,
@@ -112,7 +113,7 @@ ZEND_END_ARG_INFO()
  * Every 'Collator' class method has an entry in this table
  */
 
-function_entry Collator_class_functions[] = {
+zend_function_entry Collator_class_functions[] = {
 	PHP_ME( Collator, __construct, collator_1_arg, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_FENTRY( create, ZEND_FN( collator_create ), collator_1_arg, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( compare, ZEND_FN( collator_compare ), collator_2_args )

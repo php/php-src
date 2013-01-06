@@ -19,9 +19,7 @@ A simple implementation might look like the following.  This stores the
 original raw user data and adds a my_get_raw() function while the normal
 $_POST, $_GET and $_COOKIE arrays are only populated with stripped
 data.  In this simple example all I am doing is calling strip_tags() on
-the data.  If register_globals is turned on, the default globals that
-are created will be stripped ($foo) while a $RAW_foo is created with the
-original user input.
+the data.
 
 ZEND_BEGIN_MODULE_GLOBALS(my_input_filter)
         zval *post_array;
@@ -155,8 +153,6 @@ PHP_FUNCTION(my_get_raw)
     int var_len;
     zval **tmp;
     zval *array_ptr = NULL;
-    HashTable *hash_ptr;
-    char *raw_var;
 
     if(zend_parse_parameters(2 TSRMLS_CC, "ls", &arg, &var, &var_len) == FAILURE) {
         return;
@@ -174,23 +170,15 @@ PHP_FUNCTION(my_get_raw)
             break;
     }
 
-    if(!array_ptr) RETURN_FALSE;
+    if(!array_ptr) {
+        RETURN_FALSE;
+    }
 
-    /*
-     * I'm changing the variable name here because when running with register_globals on,
-     * the variable will end up in the global symbol table
-     */
-    raw_var = emalloc(var_len+5);  /* RAW_ and a \0 */
-    strcpy(raw_var, "RAW_");
-    strlcat(raw_var,var,var_len+5);
-    hash_ptr = HASH_OF(array_ptr);
-
-    if(zend_hash_find(hash_ptr, raw_var, var_len+5, (void **)&tmp) == SUCCESS) {
+    if(zend_hash_find(HASH_OF(array_ptr), var, var_len+5, (void **)&tmp) == SUCCESS) {
         *return_value = **tmp;
         zval_copy_ctor(return_value);
     } else {
         RETVAL_FALSE;
     }
-    efree(raw_var);
 }
 

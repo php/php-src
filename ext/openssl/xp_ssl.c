@@ -310,6 +310,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 		TSRMLS_DC)
 {
 	SSL_METHOD *method;
+	long ssl_ctx_options = SSL_OP_ALL;
 	
 	if (sslsock->ssl_handle) {
 		if (sslsock->s.is_blocked) {
@@ -377,7 +378,10 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 		return -1;
 	}
 
-	SSL_CTX_set_options(sslsock->ctx, SSL_OP_ALL);
+#if OPENSSL_VERSION_NUMBER >= 0x0090605fL
+	ssl_ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
+#endif
+	SSL_CTX_set_options(sslsock->ctx, ssl_ctx_options);
 
 #if OPENSSL_VERSION_NUMBER >= 0x0090806fL
 	{
@@ -406,8 +410,8 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	if (cparam->inputs.session) {
 		if (cparam->inputs.session->ops != &php_openssl_socket_ops) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied session stream must be an SSL enabled stream");
- 		} else if (((php_openssl_netstream_data_t*)cparam->inputs.session->abstract)->ssl_handle == NULL) {
- 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied SSL session stream is not initialized");
+		} else if (((php_openssl_netstream_data_t*)cparam->inputs.session->abstract)->ssl_handle == NULL) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "supplied SSL session stream is not initialized");
 		} else {
 			SSL_copy_session_id(sslsock->ssl_handle, ((php_openssl_netstream_data_t*)cparam->inputs.session->abstract)->ssl_handle);
 		}
@@ -532,7 +536,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 							zval_is_true(*val)) {
 						MAKE_STD_ZVAL(zcert);
 						ZVAL_RESOURCE(zcert, zend_list_insert(peer_cert, 
-									php_openssl_get_x509_list_id()));
+									php_openssl_get_x509_list_id() TSRMLS_CC));
 						php_stream_context_set_option(stream->context,
 								"ssl", "peer_certificate",
 								zcert);
@@ -561,7 +565,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 								MAKE_STD_ZVAL(zcert);
 								ZVAL_RESOURCE(zcert,
 										zend_list_insert(mycert,
-											php_openssl_get_x509_list_id()));
+											php_openssl_get_x509_list_id() TSRMLS_CC));
 								add_next_index_zval(arr, zcert);
 							}
 

@@ -12,7 +12,7 @@ $iv = str_repeat("\0", openssl_cipher_iv_length($method));
 
 $encrypted = openssl_encrypt($data, $method, $password);
 var_dump($encrypted); /* Not passing $iv should be the same as all-NULL iv, but with a warning */
-var_dump(openssl_encrypt($data, $method, $password, false, $iv)); 
+var_dump(openssl_encrypt($data, $method, $password, 0, $iv)); 
 var_dump(openssl_decrypt($encrypted, $method, $wrong));
 var_dump(openssl_decrypt($encrypted, $wrong, $password));
 var_dump(openssl_decrypt($wrong, $method, $password));

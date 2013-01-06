@@ -457,7 +457,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 /* OBJECTS_FIXME */
 	zval **ent, *fname, **varname;
 	zval *retval = NULL;
-	char *key;
+	const char *key;
 	ulong idx;
 	char tmp_buf[WDDX_BUF_LEN];
 	HashTable *objhash, *sleephash;
@@ -529,7 +529,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 			}
 
 			if (zend_hash_get_current_key_ex(objhash, &key, &key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {
-				char *class_name, *prop_name;
+				const char *class_name, *prop_name;
 				
 				zend_unmangle_property_name(key, key_len-1, &class_name, &prop_name);
 				php_wddx_serialize_var(packet, *ent, prop_name, strlen(prop_name)+1 TSRMLS_CC);

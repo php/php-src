@@ -401,7 +401,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, long sql
 	long l, pindex = -1;
 		
 	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
-	if (sql_len > SHORT_MAX) {
+	if (sql_len > 65536) {
 		strcpy(dbh->error_code, "01004");
 		return 0;
 	}

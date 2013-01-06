@@ -228,7 +228,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	path_copy = path;
 #endif  
 
-	if ((PG(safe_mode) && (!php_checkuid(path_copy, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(path_copy TSRMLS_CC)) {
+	if (php_check_open_basedir(path_copy TSRMLS_CC)) {
 		return NULL;
 	}
 	
@@ -242,7 +242,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 	
 	if (bz_file == NULL) {
 		/* that didn't work, so try and get something from the network/wrapper */
-		stream = php_stream_open_wrapper(path, mode, options | STREAM_WILL_CAST | ENFORCE_SAFE_MODE, opened_path);
+		stream = php_stream_open_wrapper(path, mode, options | STREAM_WILL_CAST, opened_path);
 	
 		if (stream) {
 			int fd;
@@ -352,13 +352,6 @@ static PHP_FUNCTION(bzread)
 	}
 	
 	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
-
-	if (PG(magic_quotes_runtime)) {
-		Z_STRVAL_P(return_value) = php_addslashes(	Z_STRVAL_P(return_value),
-													Z_STRLEN_P(return_value),
-													&Z_STRLEN_P(return_value), 1 TSRMLS_CC);
-	}
-
 	Z_TYPE_P(return_value) = IS_STRING;
 }
 /* }}} */
@@ -385,20 +378,19 @@ static PHP_FUNCTION(bzopen)
 
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_PP(file) == IS_STRING) {
-		convert_to_string_ex(file);
-
-		if (strlen(Z_STRVAL_PP(file)) != Z_STRLEN_PP(file)) {
-			RETURN_FALSE;
-		}
 		if (Z_STRLEN_PP(file) == 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "filename cannot be empty");
+			RETURN_FALSE;
+		}
+		
+		if (CHECK_ZVAL_NULL_PATH(*file)) {
 			RETURN_FALSE;
 		}
 
 		stream = php_stream_bz2open(NULL,
 									Z_STRVAL_PP(file), 
 									mode, 
-									ENFORCE_SAFE_MODE | REPORT_ERRORS, 
+									REPORT_ERRORS, 
 									NULL);
 	} else if (Z_TYPE_PP(file) == IS_RESOURCE) {
 		/* If it is a resource, than its a stream resource */

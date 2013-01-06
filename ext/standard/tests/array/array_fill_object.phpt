@@ -1,5 +1,7 @@
 --TEST--
 Test array_fill() function : usage variations - various object values for 'val' argument
+--SKIPIF--
+<?php if (version_compare(zend_version(), '2.4.0', '>=')) die('skip ZendEngine 2.3 or below needed'); ?>
 --FILE--
 <?php
 /* Prototype  : array array_fill(int $start_key, int $num, mixed $val)

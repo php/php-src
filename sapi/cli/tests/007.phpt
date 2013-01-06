@@ -45,8 +45,8 @@ string(81) "
 <?php
  class test { public $var = "test"; private $pri; function foo() { } } ?>
 "
-Could not open input file: wrong
-NULL
+string(33) "Could not open input file: wrong
+"
 string(43) "<?php  class test { function foo() {} } ?>
 "
 Done

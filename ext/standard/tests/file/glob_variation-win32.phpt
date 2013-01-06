@@ -325,12 +325,24 @@ array(0) {
 }
 
 -- Iteration 8 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+NULL
+
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+NULL
+
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+NULL
+
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+NULL
+
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+NULL
+
+Warning: glob() expects parameter 1 to be a valid path, string given %sglob_variation-win32.php on line %d
+NULL
 
 -- Iteration 9 --
 array(0) {
@@ -433,7 +445,9 @@ array(1) {
 array(0) {
 }
 -- Iteration 8 --
-bool(false)
+
+Warning: glob() expects parameter 1 to be a valid path, string given in %sglob_variation-win32.php on line %d
+NULL
 -- Iteration 9 --
 array(0) {
 }

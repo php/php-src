@@ -1,7 +1,5 @@
 --TEST--
 Bug #62680 (Function isset() throws fatal error on set array if non-existent key depth >= 3)
---XFAIL--
-see https://bugs.php.net/62680
 --FILE--
 <?php
 $array = array("");

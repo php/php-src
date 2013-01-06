@@ -192,7 +192,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	namelen = spprintf(&name, 0, "%s://%s:%d", (use_ssl && !*use_proxy)? "ssl" : "tcp", host, port);
 
 	stream = php_stream_xport_create(name, namelen,
-		ENFORCE_SAFE_MODE | REPORT_ERRORS,
+		REPORT_ERRORS,
 		STREAM_XPORT_CLIENT | STREAM_XPORT_CONNECT,
 		NULL /*persistent_id*/,
 		timeout,
@@ -336,7 +336,7 @@ int make_http_soap_request(zval  *this_ptr,
 	      n = 3;
 				ZVAL_STRING(&func, "gzencode", 0);
 				smart_str_append_const(&soap_headers_z,"Content-Encoding: gzip\r\n");
-				ZVAL_LONG(params[2], 1);
+				ZVAL_LONG(params[2], 0x1f);
 	    }
 			if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, n, params TSRMLS_CC) == SUCCESS &&
 			    Z_TYPE(retval) == IS_STRING) {
@@ -461,7 +461,7 @@ try_again:
 
 	if (stream) {
 		zval **cookies, **login, **password;
-	  int ret = zend_list_insert(phpurl, le_url);
+	  int ret = zend_list_insert(phpurl, le_url TSRMLS_CC);
 
 		add_property_resource(this_ptr, "httpurl", ret);
 		/*zend_list_addref(ret);*/
@@ -507,12 +507,14 @@ try_again:
 			smart_str_appendc(&soap_headers, ':');
 			smart_str_append_unsigned(&soap_headers, phpurl->port);
 		}
-		if (http_1_1) {
-			smart_str_append_const(&soap_headers, "\r\n"
-				"Connection: Keep-Alive\r\n");
-		} else {
+		if (!http_1_1 ||
+			(zend_hash_find(Z_OBJPROP_P(this_ptr), "_keep_alive", sizeof("_keep_alive"), (void **)&tmp) == SUCCESS &&
+			 Z_LVAL_PP(tmp) == 0)) {
 			smart_str_append_const(&soap_headers, "\r\n"
 				"Connection: close\r\n");
+		} else {
+			smart_str_append_const(&soap_headers, "\r\n"
+				"Connection: Keep-Alive\r\n");
 		}
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent"), (void **)&tmp) == SUCCESS &&
 		    Z_TYPE_PP(tmp) == IS_STRING) {
@@ -1401,7 +1403,7 @@ static int get_http_body(php_stream *stream, int close, char *headers,  char **r
 		if (header_length < 0 || header_length >= INT_MAX) {
 			return FALSE;
 		}
-		http_buf = emalloc(header_length + 1);
+		http_buf = safe_emalloc(1, header_length, 1);
 		while (http_buf_size < header_length) {
 			int len_read = php_stream_read(stream, http_buf + http_buf_size, header_length - http_buf_size);
 			if (len_read <= 0) {

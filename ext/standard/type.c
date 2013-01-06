@@ -72,8 +72,8 @@ PHP_FUNCTION(gettype)
 
 		case IS_RESOURCE:
 			{
-				char *type_name;
-				type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+				const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+
 				if (type_name) {
 					RETVAL_STRING("resource", 1);
 					break;
@@ -176,6 +176,20 @@ PHP_FUNCTION(floatval)
 }
 /* }}} */
 
+/* {{{ proto bool boolval(mixed var)
+   Get the boolean value of a variable */
+PHP_FUNCTION(boolval)
+{
+	zval **val;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &val) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(zend_is_true(*val));
+}
+/* }}} */
+
 /* {{{ proto string strval(mixed var)
    Get the string value of a variable */
 PHP_FUNCTION(strval)
@@ -219,8 +233,7 @@ static void php_is_type(INTERNAL_FUNCTION_PARAMETERS, int type)
 			}
 		}
 		if (type == IS_RESOURCE) {
-			char *type_name;
-			type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
+			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_LVAL_PP(arg) TSRMLS_CC);
 			if (!type_name) {
 				RETURN_FALSE;
 			}

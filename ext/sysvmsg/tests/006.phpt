@@ -10,7 +10,7 @@ $queue = msg_get_queue (ftok(__FILE__, 'r'), 0600);
 $tests = array('foo', 123, PHP_INT_MAX +1, true, 1.01, null, array('bar'));
 
 foreach ($tests as $elem) {
-    echo "Sending/receiving '$elem':\n";
+    echo @"Sending/receiving '$elem':\n";
     var_dump(msg_send($queue, 1, $elem, false));
 
     unset($msg);

@@ -108,9 +108,8 @@ array(2) {
   bool(true)
 }
 -- Iteration 4 --
-
-Warning: array_combine(): Both parameters should have at least 1 element in %s on line %d
-bool(false)
+array(0) {
+}
 -- Iteration 5 --
 array(1) {
   [""]=>

@@ -1,20 +1,20 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 5													      |
+   | PHP Version 5							  |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2013 The PHP Group								  |
+   | Copyright (c) 1997-2013 The PHP Group				  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
-   | that is bundled with this package in the file LICENSE, and is		  |
-   | available at through the world-wide-web at						      |
-   | http://www.php.net/license/3_01.txt 							      |
+   | that is bundled with this package in the file LICENSE, and is	  |
+   | available at through the world-wide-web at			          |
+   | http://www.php.net/license/3_01.txt 				  |
    | If you did not receive a copy of the PHP license and are unable to   |
-   | obtain it through the world-wide-web, please send a note to		  |
-   | license@php.net so we can mail you a copy immediately.			      |
+   | obtain it through the world-wide-web, please send a note to	  |
+   | license@php.net so we can mail you a copy immediately.		  |
    +----------------------------------------------------------------------+
-   | Authors: Rasmus Lerdorf <rasmus@php.net>							  |
-   | (with helpful hints from Dean Gaudet <dgaudet@arctic.org>			  |
-   | PHP 4.0 patches by Zeev Suraski <zeev@zend.com>					  |
+   | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
+   | (with helpful hints from Dean Gaudet <dgaudet@arctic.org>	          |
+   | PHP 4.0 patches by Zeev Suraski <zeev@zend.com>			  |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -403,9 +403,6 @@ static void sapi_apache_register_server_variables(zval *track_vars_array TSRMLS_
 	/* If PATH_TRANSLATED doesn't exist, copy it from SCRIPT_FILENAME */
 	if (track_vars_array) {
 		symbol_table = track_vars_array->value.ht;
-	} else if (PG(register_globals)) {
-		/* should never happen nowadays */
-		symbol_table = EG(active_symbol_table);
 	} else {
 		symbol_table = NULL;
 	}
@@ -433,10 +430,8 @@ static int php_apache_startup(sapi_module_struct *sapi_module)
 
 /* {{{ php_apache_log_message
  */
-static void php_apache_log_message(char *message)
+static void php_apache_log_message(char *message TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (SG(server_context)) {
 #if MODULE_MAGIC_NUMBER >= 19970831
 		aplog_error(NULL, 0, APLOG_ERR | APLOG_NOERRNO, ((request_rec *) SG(server_context))->server, "%s", message);
@@ -456,7 +451,7 @@ static void php_apache_request_shutdown(void *dummy)
 {
 	TSRMLS_FETCH();
 	AP(current_hook) = AP_CLEANUP;
-	php_output_set_status(0 TSRMLS_CC);
+	php_output_set_status(PHP_OUTPUT_DISABLED TSRMLS_CC);
 	SG(server_context) = NULL; /* The server context (request) is invalid by the time run_cleanups() is called */
 	if(SG(sapi_started)) {
 		php_request_shutdown(dummy);

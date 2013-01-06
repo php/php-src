@@ -2,7 +2,6 @@
 Phar front controller index.php relocate (no /) [cache_list]
 --INI--
 phar.cache_list={PWD}/frontcontroller4.php
-detect_unicode=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--

@@ -97,6 +97,9 @@ printf("stmt->errno = '%s'\n", $stmt->errno);
 assert(mysqli_stmt_error($stmt) === $stmt->error);
 printf("stmt->error = '%s'\n", $stmt->error);
 
+assert(mysqli_stmt_error_list($stmt) === $stmt->error_list);
+var_dump("stmt->error = ", $stmt->error_list);
+
 assert(mysqli_stmt_field_count($stmt) === $stmt->field_count);
 printf("stmt->field_count = '%s'\n", $stmt->field_count);
 
@@ -143,6 +146,7 @@ Class variables:
 affected_rows
 errno
 error
+error_list
 field_count
 id
 insert_id
@@ -158,6 +162,7 @@ param_count
 field_count
 errno
 error
+error_list
 sqlstate
 id
 
@@ -173,6 +178,9 @@ stmt->affected_rows = ''
 stmt->affected_rows = '1'
 stmt->errno = '0'
 stmt->error = ''
+string(14) "stmt->error = "
+array(0) {
+}
 stmt->field_count = '0'
 stmt->id = '%d'
 stmt->insert_id = '0'

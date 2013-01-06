@@ -19,6 +19,11 @@ if (!PHP_CL) {
 // Which version of the compiler do we have?
 VCVERS = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
 STDOUT.WriteLine("  Detected compiler " + VC_VERSIONS[VCVERS]);
+
+if (VCVERS < 1500) {
+	ERROR("Unsupported MS C++ Compiler, VC9 (2008) minimum is required");
+}
+
 AC_DEFINE('COMPILER', VC_VERSIONS[VCVERS], "Detected compiler version");
 DEFINE("PHP_COMPILER_SHORT", VC_VERSIONS_SHORT[VCVERS]);
 AC_DEFINE('PHP_COMPILER_ID', VC_VERSIONS_SHORT[VCVERS], "Compiler compatibility ID");
@@ -100,6 +105,19 @@ ARG_ENABLE('debug-pack', 'Release binaries with external debug symbols (--enable
 if (PHP_DEBUG == "yes" && PHP_DEBUG_PACK == "yes") {
 	ERROR("Use of both --enable-debug and --enable-debug-pack not allowed.");
 }
+
+ARG_ENABLE('pgi', 'Generate PGO instrumented binaries', 'no');
+ARG_WITH('pgo', 'Compile optimized binaries using training data from folder', 'no');
+if (PHP_PGI == "yes" || PHP_PGO != "no") {
+	PGOMGR = PATH_PROG('pgomgr', WshShell.Environment("Process").Item("PATH"));
+	if (!PGOMGR) {
+		ERROR("--enable-pgi and --with-pgo options can only be used if PGO capable compiler is present.");
+	}
+	if (PHP_PGI == "yes" && PHP_PGO != "no") {
+		ERROR("Use of both --enable-pgi and --with-pgo not allowed.");
+	}
+}
+
 ARG_ENABLE('zts', 'Thread safety', 'yes');
 // Configures the hard-coded installation dir
 ARG_WITH('prefix', 'where PHP will be installed', '');
@@ -163,8 +181,13 @@ if (VCVERS >= 1500 && PHP_MP != 'disable') {
 }
 
 // General link flags
-DEFINE("LDFLAGS", "/nologo /version:" +
-	PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION);
+
+if (VCVERS >= 1700) {
+	DEFINE("LDFLAGS", "/nologo ");
+} else {
+	DEFINE("LDFLAGS", "/nologo /version:" +
+			PHP_VERSION + "." + PHP_MINOR_VERSION + "." + PHP_RELEASE_VERSION);
+}
 
 // General DLL link flags
 DEFINE("DLL_LDFLAGS", "/dll ");
@@ -227,6 +250,19 @@ if (PHP_DEBUG == "yes" && PHP_ZTS == "yes") {
 	DEFINE("BUILD_DIR", PHP_OBJECT_OUT_DIR + "Release");
 	DEFINE("PHPDLL", "php" + PHP_VERSION + ".dll");
 	DEFINE("PHPLIB", "php" + PHP_VERSION + ".lib");
+}
+
+// CFLAGS, LDFLAGS and BUILD_DIR are defined
+// Add compiler and link flags if PGO options are selected
+if (PHP_DEBUG != "yes" && PHP_PGI == "yes") {
+	ADD_FLAG('CFLAGS', "/GL /O2");
+	ADD_FLAG('LDFLAGS', "/LTCG:PGINSTRUMENT");
+	DEFINE("PGOPGD_DIR", "$(BUILD_DIR)");
+}
+else if (PHP_DEBUG != "yes" && PHP_PGO != "no") {
+	ADD_FLAG('CFLAGS', "/GL /O2");
+	ADD_FLAG('LDFLAGS', "/LTCG:PGUPDATE");
+	DEFINE("PGOPGD_DIR", ((PHP_PGO.length == 0 || PHP_PGO == "yes") ? "$(BUILD_DIR)" : PHP_PGO));
 }
 
 // Find the php_build dir - it contains headers and libraries
@@ -328,16 +364,16 @@ ADD_SOURCES("Zend", "zend_language_parser.c zend_language_scanner.c \
 	zend_stream.c zend_iterators.c zend_interfaces.c zend_objects.c \
 	zend_object_handlers.c zend_objects_API.c \
 	zend_default_classes.c zend_execute.c zend_strtod.c zend_gc.c zend_closures.c \
-	zend_float.c");
+	zend_float.c zend_string.c zend_generators.c");
 
 if (VCVERS == 1200) {
 	AC_DEFINE('ZEND_DVAL_TO_LVAL_CAST_OK', 1);
 }
 
-ADD_SOURCES("main", "main.c snprintf.c spprintf.c safe_mode.c getopt.c fopen_wrappers.c \
+ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
-	php_open_temporary_file.c php_logos.c output.c internal_functions.c php_sprintf.c");
+	php_open_temporary_file.c output.c internal_functions.c php_sprintf.c");
 ADD_SOURCES("win32", "inet.c fnmatch.c sockets.c");
 
 // Newer versions have it
@@ -358,6 +394,7 @@ PHP_INSTALL_HEADERS("", "Zend/ TSRM/ main/ main/streams/ win32/");
 
 STDOUT.WriteBlankLines(1);
 
+
 /* Can we build with IPv6 support? */
 ARG_ENABLE("ipv6", "Disable IPv6 support (default is turn it on if available)", "yes");
 
@@ -377,12 +414,6 @@ AC_DEFINE('HAVE_IPV6', main_network_has_ipv6);
 ARG_ENABLE('fd-setsize', "Set maximum number of sockets for select(2)", "256");
 ADD_FLAG("CFLAGS", "/D FD_SETSIZE=" + parseInt(PHP_FD_SETSIZE));
 
-ARG_ENABLE("zend-multibyte", "Enable Zend multibyte encoding support", "no");
-if (PHP_ZEND_MULTIBYTE == "yes") {
-   STDOUT.WriteLine("Enabling Zend multibyte encoding support");
-   AC_DEFINE('ZEND_MULTIBYTE', 1);
-}
- 
 AC_DEFINE('HAVE_USLEEP', 1);
 AC_DEFINE('HAVE_STRCOLL', 1);
 
@@ -408,7 +439,7 @@ if (PHP_DSP != "no") {
 	FSO.CreateFolder("tmp");
 }
 
-ARG_ENABLE("security-flags", "Enable the compiler security flags", "no");
+ARG_ENABLE("security-flags", "Disable the compiler security flags", "yes");
 if (PHP_SECURITY_FLAGS == "yes") {
 	ADD_FLAG("LDFLAGS", "/NXCOMPAT /DYNAMICBASE ");
 }

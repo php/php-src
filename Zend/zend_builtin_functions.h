@@ -25,7 +25,7 @@
 int zend_startup_builtin_functions(TSRMLS_D);
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options TSRMLS_DC);
+ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit TSRMLS_DC);
 END_EXTERN_C()
 
 #endif /* ZEND_BUILTIN_FUNCTIONS_H */

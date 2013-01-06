@@ -303,7 +303,7 @@ static void dom_register_prop_handler(HashTable *prop_handler, char *name, dom_r
 }
 /* }}} */
 
-static zval **dom_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC) /* {{{ */
+static zval **dom_get_property_ptr_ptr(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	dom_object *obj;
 	zval tmp_member;
@@ -326,7 +326,7 @@ static zval **dom_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC) /* 
 	}
 	if (ret == FAILURE) {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member TSRMLS_CC);
+		retval = std_hnd->get_property_ptr_ptr(object, member, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -337,7 +337,7 @@ static zval **dom_get_property_ptr_ptr(zval *object, zval *member TSRMLS_DC) /* 
 /* }}} */
 
 /* {{{ dom_read_property */
-zval *dom_read_property(zval *object, zval *member, int type TSRMLS_DC)
+zval *dom_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	dom_object *obj;
 	zval tmp_member;
@@ -372,7 +372,7 @@ zval *dom_read_property(zval *object, zval *member, int type TSRMLS_DC)
 		}
 	} else {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type TSRMLS_CC);
+		retval = std_hnd->read_property(object, member, type, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -383,7 +383,7 @@ zval *dom_read_property(zval *object, zval *member, int type TSRMLS_DC)
 /* }}} */
 
 /* {{{ dom_write_property */
-void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+void dom_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	dom_object *obj;
 	zval tmp_member;
@@ -408,7 +408,7 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 		hnd->write_func(obj, value TSRMLS_CC);
 	} else {
 		std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value TSRMLS_CC);
+		std_hnd->write_property(object, member, value, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -418,7 +418,7 @@ void dom_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
 /* }}} */
 
 /* {{{ dom_property_exists */
-static int dom_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+static int dom_property_exists(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC)
 {
 	dom_object *obj;
 	zval tmp_member;
@@ -456,7 +456,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty TSRML
 		}
 	} else {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->has_property(object, member, check_empty TSRMLS_CC);
+		retval = std_hnd->has_property(object, member, check_empty, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -565,7 +565,6 @@ void *php_dom_export_node(zval *object TSRMLS_DC) /* {{{ */
    Get a simplexml_element object from dom to allow for processing */
 PHP_FUNCTION(dom_import_simplexml)
 {
-	zval *rv = NULL;
 	zval *node;
 	xmlNodePtr nodep = NULL;
 	php_libxml_node_object *nodeobj;
@@ -579,7 +578,7 @@ PHP_FUNCTION(dom_import_simplexml)
 	nodep = php_libxml_import_node(node TSRMLS_CC);
 
 	if (nodep && nodeobj && (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE)) {
-		DOM_RET_OBJ(rv, (xmlNodePtr) nodep, &ret, (dom_object *)nodeobj);
+		DOM_RET_OBJ((xmlNodePtr) nodep, &ret, (dom_object *)nodeobj);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Nodetype to import");
 		RETURN_NULL();
@@ -1135,7 +1134,6 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool hash_copy TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *base_class;
-	zval *tmp;
 	dom_object *intern;
 
 	if (instanceof_function(class_type, dom_xpath_class_entry TSRMLS_CC)) {
@@ -1157,7 +1155,7 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	if (hash_copy) {
-		zend_hash_copy(intern->std.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
+		object_properties_init(&intern->std, class_type);
 	}
 
 	return intern;
@@ -1316,7 +1314,7 @@ void php_dom_create_interator(zval *return_value, int ce_type TSRMLS_DC) /* {{{ 
 /* }}} */
 
 /* {{{ php_dom_create_object */
-PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *wrapper_in, zval *return_value, dom_object *domobj TSRMLS_DC)
+PHP_DOM_EXPORT zval *php_dom_create_object(xmlNodePtr obj, int *found, zval *return_value, dom_object *domobj TSRMLS_DC)
 {
 	zval *wrapper;
 	zend_class_entry *ce;

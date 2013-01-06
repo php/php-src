@@ -103,25 +103,35 @@ valid output
 Arg value 0.5 
 valid output
 
-Arg value Array 
-
-Warning: posix_getgrgid() expects parameter 1 to be long, array given in %s on line %d
-valid output
+Notice: Array to string conversion in %sposix_getgrgid_variation.php on line %d
 
 Arg value Array 
 
 Warning: posix_getgrgid() expects parameter 1 to be long, array given in %s on line %d
 valid output
 
-Arg value Array 
-
-Warning: posix_getgrgid() expects parameter 1 to be long, array given in %s on line %d
-valid output
+Notice: Array to string conversion in %sposix_getgrgid_variation.php on line %d
 
 Arg value Array 
 
 Warning: posix_getgrgid() expects parameter 1 to be long, array given in %s on line %d
 valid output
+
+Notice: Array to string conversion in %sposix_getgrgid_variation.php on line %d
+
+Arg value Array 
+
+Warning: posix_getgrgid() expects parameter 1 to be long, array given in %s on line %d
+valid output
+
+Notice: Array to string conversion in %sposix_getgrgid_variation.php on line %d
+
+Arg value Array 
+
+Warning: posix_getgrgid() expects parameter 1 to be long, array given in %s on line %d
+valid output
+
+Notice: Array to string conversion in %sposix_getgrgid_variation.php on line %d
 
 Arg value Array 
 

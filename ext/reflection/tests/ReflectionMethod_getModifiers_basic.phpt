@@ -9,7 +9,7 @@ function reflectMethodModifiers($class) {
 
     foreach ($methodArray as $method) {
         echo "Modifiers for method $method->class::$method->name():\n";
-        var_dump($method->getModifiers());
+        printf("0x%08x\n", $method->getModifiers());
         echo "\n\n";
     }
 }
@@ -82,161 +82,161 @@ $a->getModifiers(1);
 $a = new ReflectionMethod('ReflectionMethod::getModifiers');
 
 echo "\nReflectionMethod::getModifiers() modifiers:\n";
-var_dump($a->getModifiers());
+printf("0x%08x\n", $a->getModifiers());
 
 ?>
 --EXPECTF--
 Modifiers for method TestClass::foo():
-int(65792)
+0x08010100
 
 
 Modifiers for method TestClass::stat():
-int(257)
+0x08000101
 
 
 Modifiers for method TestClass::priv():
-int(66560)
+0x08010400
 
 
 Modifiers for method TestClass::prot():
-int(66048)
+0x08010200
 
 
 Modifiers for method TestClass::fin():
-int(65796)
+0x08010104
 
 
 Modifiers for method TestClass::__destruct():
-int(16640)
+0x08004100
 
 
 Modifiers for method TestClass::__call():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__clone():
-int(33024)
+0x08008100
 
 
 Modifiers for method TestClass::__get():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__set():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__unset():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__isset():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__tostring():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__sleep():
-int(65792)
+0x08010100
 
 
 Modifiers for method TestClass::__wakeup():
-int(65792)
+0x08010100
 
 
 Modifiers for method TestClass::__set_state():
-int(65792)
+0x08010100
 
 
 Modifiers for method TestClass::__autoload():
-int(65792)
+0x08010100
 
 
 Modifiers for method TestClass::foo():
-int(65792)
+0x08010100
 
 
 Modifiers for method TestClass::stat():
-int(257)
+0x08000101
 
 
 Modifiers for method TestClass::priv():
-int(66560)
+0x08010400
 
 
 Modifiers for method TestClass::prot():
-int(66048)
+0x08010200
 
 
 Modifiers for method TestClass::fin():
-int(65796)
+0x08010104
 
 
 Modifiers for method TestClass::__destruct():
-int(16640)
+0x08004100
 
 
 Modifiers for method TestClass::__call():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__clone():
-int(33024)
+0x08008100
 
 
 Modifiers for method TestClass::__get():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__set():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__unset():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__isset():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__tostring():
-int(256)
+0x08000100
 
 
 Modifiers for method TestClass::__sleep():
-int(65792)
+0x08010100
 
 
 Modifiers for method TestClass::__wakeup():
-int(65792)
+0x08010100
 
 
 Modifiers for method TestClass::__set_state():
-int(65792)
+0x08010100
 
 
 Modifiers for method TestClass::__autoload():
-int(65792)
+0x08010100
 
 
 Modifiers for method TestInterface::int():
-int(258)
+0x08000102
 
 
 Modifiers for method TestInterface::__clone():
-int(258)
+0x08000102
 
 
 Modifiers for method AbstractClass::foo():
-int(65794)
+0x08010102
 
 
 Wrong number of params:
 
-Warning: ReflectionMethod::getModifiers() expects exactly 0 parameters, 1 given in %s on line %d
+Warning: ReflectionMethod::getModifiers() expects exactly 0 parameters, 1 given in %sReflectionMethod_getModifiers_basic.php on line %d
 
 ReflectionMethod::getModifiers() modifiers:
-int(256)
+0x00000100

@@ -65,7 +65,7 @@ $values = array(
 // loop through each element of the array for obj
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo @"\nArg value $value \n";
       var_dump( get_object_vars($value) );
 };
 

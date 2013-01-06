@@ -67,12 +67,6 @@ require_once('skipifconnectfailure.inc');
 		$expected_methods['get_connection_stats']	= true;
 		$expected_methods['reap_async_query']	= true;
 		$expected_methods['poll'] = true;
-	} else {
-		// libmysql only
-		if (function_exists('mysqli_ssl_set'))
-			$expected_methods['ssl_set'] = true;
-		$expected_methods['set_local_infile_default']	= true;
-		$expected_methods['set_local_infile_handler']	= true;
 	}
 
 	/* we should add ruled when to expect them */
@@ -301,7 +295,7 @@ mysqli->insert_id = '0'/integer ('0'/integer)
 mysqli->sqlstate = '00000'/%unicode|string% ('00000'/%unicode|string%)
 mysqli->stat = 'Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string ('Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string)
 mysqli->host_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
-mysqli->info = ''/NULL (''/%unicode|string%)
+mysqli->info = ''/NULL (''/NULL)
 mysqli->thread_id = '%d'/integer ('%d'/integer)
 mysqli->protocol_version = '%d'/integer ('%d'/integer)
 mysqli->server_info = '%s'/%unicode|string% ('%s'/%unicode|string%)

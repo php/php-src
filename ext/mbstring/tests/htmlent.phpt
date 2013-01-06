@@ -15,6 +15,7 @@ mbstring.http_input=HTML-ENTITIES
 mbstring.internal_encoding=UTF-8
 mbstring.http_output=HTML-ENTITIES
 mbstring.encoding_translation=1
+filter.default=unsafe_raw
 --FILE--
 <?php
 // enable output encoding through output handler

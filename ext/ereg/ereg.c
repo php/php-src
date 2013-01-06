@@ -74,20 +74,32 @@ static int reg_magic = 0;
 /* }}} */
 
 ZEND_DECLARE_MODULE_GLOBALS(ereg)
+static PHP_GINIT_FUNCTION(ereg);
+static PHP_GSHUTDOWN_FUNCTION(ereg);
 
 /* {{{ Module entry */
 zend_module_entry ereg_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"ereg",
 	ereg_functions,
-	PHP_MINIT(ereg),
-	PHP_MSHUTDOWN(ereg),
+	NULL,
+	NULL,
 	NULL,
 	NULL,
 	PHP_MINFO(ereg),
 	NO_VERSION_YET,
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(ereg),
+	PHP_GINIT(ereg),
+	PHP_GSHUTDOWN(ereg),
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
+/* }}} */
+
+/* {{{ COMPILE_DL_EREG */
+#ifdef COMPILE_DL_EREG
+ZEND_GET_MODULE(ereg)
+#endif
 /* }}} */
 
 /* {{{ ereg_lru_cmp */
@@ -124,12 +136,11 @@ static int ereg_clean_cache(void *data, void *arg TSRMLS_DC)
 
 /* {{{ _php_regcomp
  */
-static int _php_regcomp(regex_t *preg, const char *pattern, int cflags)
+static int _php_regcomp(regex_t *preg, const char *pattern, int cflags TSRMLS_DC)
 {
 	int r = 0;
 	int patlen = strlen(pattern);
 	reg_cache *rc = NULL;
-	TSRMLS_FETCH();
 
 	if (zend_hash_num_elements(&EREG(ht_rc)) >= EREG_CACHE_SIZE) {
 		/* easier than dealing with overflow as it happens */
@@ -201,33 +212,24 @@ static void _free_ereg_cache(reg_cache *rc)
 #undef regfree
 #define regfree(a);
 #undef regcomp
-#define regcomp(a, b, c) _php_regcomp(a, b, c)
-	
-static void php_ereg_init_globals(zend_ereg_globals *ereg_globals TSRMLS_DC)
+#define regcomp(a, b, c) _php_regcomp(a, b, c TSRMLS_CC)
+
+/* {{{ PHP_GINIT_FUNCTION
+ */
+static PHP_GINIT_FUNCTION(ereg)
 {
 	zend_hash_init(&ereg_globals->ht_rc, 0, NULL, (void (*)(void *)) _free_ereg_cache, 1);
 	ereg_globals->lru_counter = 0;
 }
+/* }}} */
 
-static void php_ereg_destroy_globals(zend_ereg_globals *ereg_globals TSRMLS_DC)
+/* {{{ PHP_GSHUTDOWN_FUNCTION
+ */
+static PHP_GSHUTDOWN_FUNCTION(ereg)
 {
 	zend_hash_destroy(&ereg_globals->ht_rc);
 }
-
-PHP_MINIT_FUNCTION(ereg)
-{
-	ZEND_INIT_MODULE_GLOBALS(ereg, php_ereg_init_globals, php_ereg_destroy_globals);
-	return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(ereg)
-{
-#ifndef ZTS
-	php_ereg_destroy_globals(&ereg_globals TSRMLS_CC);
-#endif
-
-	return SUCCESS;
-}
+/* }}} */
 
 PHP_MINFO_FUNCTION(ereg)
 {
@@ -244,7 +246,7 @@ PHP_MINFO_FUNCTION(ereg)
 /* {{{ php_ereg_eprint
  * php_ereg_eprint - convert error number to name
  */
-static void php_ereg_eprint(int err, regex_t *re) {
+static void php_ereg_eprint(int err, regex_t *re TSRMLS_DC) {
 	char *buf = NULL, *message = NULL;
 	size_t len;
 	size_t buf_len;
@@ -263,8 +265,6 @@ static void php_ereg_eprint(int err, regex_t *re) {
 #endif
 	len = regerror(err, re, NULL, 0);
 	if (len) {
-		TSRMLS_FETCH();
-
 		message = (char *)safe_emalloc((buf_len + len + 2), sizeof(char), 0);
 		if (!message) {
 			return; /* fail silently */
@@ -328,7 +328,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (err) {
-		php_ereg_eprint(err, &re);
+		php_ereg_eprint(err, &re TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -341,7 +341,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	/* actually execute the regular expression */
 	err = regexec(&re, string, re.re_nsub+1, subs, 0);
 	if (err && err != REG_NOMATCH) {
-		php_ereg_eprint(err, &re);
+		php_ereg_eprint(err, &re TSRMLS_CC);
 		regfree(&re);
 		efree(subs);
 		RETURN_FALSE;
@@ -400,7 +400,7 @@ PHP_FUNCTION(eregi)
 
 /* {{{ php_ereg_replace
  * this is the meat and potatoes of regex replacement! */
-PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended)
+PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, const char *string, int icase, int extended TSRMLS_DC)
 {
 	regex_t re;
 	regmatch_t *subs;
@@ -424,7 +424,7 @@ PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const ch
 
 	err = regcomp(&re, pattern, copts);
 	if (err) {
-		php_ereg_eprint(err, &re);
+		php_ereg_eprint(err, &re TSRMLS_CC);
 		return ((char *) -1);
 	}
 
@@ -443,7 +443,7 @@ PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const ch
 		err = regexec(&re, &string[pos], re.re_nsub+1, subs, (pos ? REG_NOTBOL : 0));
 
 		if (err && err != REG_NOMATCH) {
-			php_ereg_eprint(err, &re);
+			php_ereg_eprint(err, &re TSRMLS_CC);
 			efree(subs);
 			efree(buf);
 			regfree(&re);
@@ -474,7 +474,7 @@ PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const ch
 			if (new_l + 1 > buf_len) {
 				buf_len = 1 + buf_len + 2 * new_l;
 				nbuf = emalloc(buf_len);
-				strncpy(nbuf, buf, buf_len-1);
+				strncpy(nbuf, buf, buf_len - 1);
 				nbuf[buf_len - 1] = '\0';
 				efree(buf);
 				buf = nbuf;
@@ -487,7 +487,7 @@ PHPAPI char *php_ereg_replace(const char *pattern, const char *replace, const ch
 			walkbuf = &buf[tmp + subs[0].rm_so];
 			walk = replace;
 			while (*walk) {
-				if ('\\' == *walk && isdigit((unsigned char)walk[1]) && ((unsigned char)walk[1]) - '0' <= (int)re.re_nsub) {
+				if ('\\' == *walk && isdigit((unsigned char)walk[1]) && (unsigned char)walk[1] - '0' <= (int)re.re_nsub) {
 					if (subs[walk[1] - '0'].rm_so > -1 && subs[walk[1] - '0'].rm_eo > -1
 						/* this next case shouldn't happen. it does. */
 						&& subs[walk[1] - '0'].rm_so <= subs[walk[1] - '0'].rm_eo) {
@@ -594,7 +594,7 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	/* do the actual work */
-	ret = php_ereg_replace(pattern, replace, string, icase, 1);
+	ret = php_ereg_replace(pattern, replace, string, icase, 1 TSRMLS_CC);
 	if (ret == (char *) -1) {
 		RETVAL_FALSE;
 	} else {
@@ -648,7 +648,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	err = regcomp(&re, spliton, REG_EXTENDED | copts);
 	if (err) {
-		php_ereg_eprint(err, &re);
+		php_ereg_eprint(err, &re TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -692,7 +692,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	/* see if we encountered an error */
 	if (err && err != REG_NOMATCH) {
-		php_ereg_eprint(err, &re);
+		php_ereg_eprint(err, &re TSRMLS_CC);
 		regfree(&re);
 		zend_hash_destroy(Z_ARRVAL_P(return_value));
 		efree(Z_ARRVAL_P(return_value));
@@ -728,7 +728,7 @@ PHP_FUNCTION(spliti)
 
 /* {{{ proto string sql_regcase(string string)
    Make regular expression for case insensitive match */
-PHPAPI PHP_FUNCTION(sql_regcase)
+PHP_EREG_API PHP_FUNCTION(sql_regcase)
 {
 	char *string, *tmp;
 	int string_len;

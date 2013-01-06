@@ -224,11 +224,11 @@ PHP_MSHUTDOWN_FUNCTION(birdstep)
 
 /* Some internal functions. Connections and result manupulate */
 
-static int birdstep_add_conn(HashTable *list,VConn *conn,HDBC hdbc)
+static int birdstep_add_conn(HashTable *list,VConn *conn,HDBC hdbc TSRMLS_DC)
 {
 	int ind;
 
-	ind = zend_list_insert(conn,php_birdstep_module.le_link);
+	ind = zend_list_insert(conn,php_birdstep_module.le_link TSRMLS_CC);
 	conn->hdbc = hdbc;
 	conn->index = ind;
 
@@ -314,7 +314,7 @@ PHP_FUNCTION(birdstep_connect)
 		RETURN_FALSE;
 	}
 	new = (VConn *)emalloc(sizeof(VConn));
-	ind = birdstep_add_conn(list,new,hdbc);
+	ind = birdstep_add_conn(list,new,hdbc TSRMLS_CC);
 	php_birdstep_module.num_links++;
 	RETURN_LONG(ind);
 }

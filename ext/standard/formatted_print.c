@@ -37,10 +37,7 @@
 #define ADJ_WIDTH 1
 #define ADJ_PRECISION 2
 #define NUM_BUF_SIZE 500
-#define	NDIG 80
-#define FLOAT_DIGITS 6
 #define FLOAT_PRECISION 6
-#define MAX_FLOAT_DIGITS 38
 #define MAX_FLOAT_PRECISION 53
 
 #if 0

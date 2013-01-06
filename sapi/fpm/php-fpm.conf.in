@@ -150,9 +150,9 @@ group = @php_fpm_group@
 ; Note: This value is mandatory.
 listen = 127.0.0.1:9000
 
-; Set listen(2) backlog. A value of '-1' means unlimited.
+; Set listen(2) backlog.
 ; Default Value: 128 (-1 on FreeBSD and OpenBSD)
-;listen.backlog = -1
+;listen.backlog = 128
 
 ; Set permissions for unix socket, if one is used. In Linux, read/write
 ; permissions must be set in order to allow connections from a web server. Many

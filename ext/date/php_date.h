@@ -150,10 +150,11 @@ struct _php_period_obj {
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(date)
-	char      *default_timezone;
-	char      *timezone;
-	HashTable *tzcache;
+	char                    *default_timezone;
+	char                    *timezone;
+	HashTable               *tzcache;
 	timelib_error_container *last_errors;
+	int                     timezone_valid;
 ZEND_END_MODULE_GLOBALS(date)
 
 #ifdef ZTS
@@ -165,7 +166,7 @@ ZEND_END_MODULE_GLOBALS(date)
 /* Backwards compability wrapper */
 PHPAPI signed long php_parse_date(char *string, signed long *now);
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
-PHPAPI int php_idate(char format, time_t ts, int localtime);
+PHPAPI int php_idate(char format, time_t ts, int localtime TSRMLS_DC);
 #if HAVE_STRFTIME
 #define _php_strftime php_strftime
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);

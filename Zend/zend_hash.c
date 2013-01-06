@@ -20,6 +20,7 @@
 /* $Id$ */
 
 #include "zend.h"
+#include "zend_globals.h"
 
 #define CONNECT_TO_BUCKET_DLLIST(element, list_head)		\
 	(element)->pNext = (list_head);							\
@@ -135,12 +136,18 @@ ZEND_API ulong zend_hash_func(const char *arKey, uint nKeyLength)
 		(p)->pDataPtr=NULL;												\
 	}
 
-
+#define CHECK_INIT(ht) do {												\
+	if (UNEXPECTED((ht)->nTableMask == 0)) {								\
+		(ht)->arBuckets = (Bucket **) pecalloc((ht)->nTableSize, sizeof(Bucket *), (ht)->persistent);	\
+		(ht)->nTableMask = (ht)->nTableSize - 1;						\
+	}																	\
+} while (0)
+ 
+static const Bucket *uninitialized_bucket = NULL;
 
 ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunction, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
 {
 	uint i = 3;
-	Bucket **tmp;
 
 	SET_INCONSISTENT(HT_OK);
 
@@ -154,9 +161,9 @@ ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunctio
 		ht->nTableSize = 1 << i;
 	}
 
-	ht->nTableMask = ht->nTableSize - 1;
+	ht->nTableMask = 0;	/* 0 means that ht->arBuckets is uninitialized */
 	ht->pDestructor = pDestructor;
-	ht->arBuckets = NULL;
+	ht->arBuckets = (Bucket**)&uninitialized_bucket;
 	ht->pListHead = NULL;
 	ht->pListTail = NULL;
 	ht->nNumOfElements = 0;
@@ -165,21 +172,6 @@ ZEND_API int _zend_hash_init(HashTable *ht, uint nSize, hash_func_t pHashFunctio
 	ht->persistent = persistent;
 	ht->nApplyCount = 0;
 	ht->bApplyProtection = 1;
-	
-	/* Uses ecalloc() so that Bucket* == NULL */
-	if (persistent) {
-		tmp = (Bucket **) calloc(ht->nTableSize, sizeof(Bucket *));
-		if (!tmp) {
-			return FAILURE;
-		}
-		ht->arBuckets = tmp;
-	} else {
-		tmp = (Bucket **) ecalloc_rel(ht->nTableSize, sizeof(Bucket *));
-		if (tmp) {
-			ht->arBuckets = tmp;
-		}
-	}
-	
 	return SUCCESS;
 }
 
@@ -205,6 +197,9 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
 	ulong h;
 	uint nIndex;
 	Bucket *p;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -215,13 +210,15 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
 		return FAILURE;
 	}
 
+	CHECK_INIT(ht);
+
 	h = zend_inline_hash_func(arKey, nKeyLength);
 	nIndex = h & ht->nTableMask;
 
 	p = ht->arBuckets[nIndex];
 	while (p != NULL) {
-		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
-			if (!memcmp(p->arKey, arKey, nKeyLength)) {
+		if (p->arKey == arKey ||
+			((p->h == h) && (p->nKeyLength == nKeyLength) && !memcmp(p->arKey, arKey, nKeyLength))) {
 				if (flag & HASH_ADD) {
 					return FAILURE;
 				}
@@ -242,16 +239,24 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, uint nKe
 				}
 				HANDLE_UNBLOCK_INTERRUPTIONS();
 				return SUCCESS;
-			}
 		}
 		p = p->pNext;
 	}
 	
-	p = (Bucket *) pemalloc(sizeof(Bucket) - 1 + nKeyLength, ht->persistent);
-	if (!p) {
-		return FAILURE;
+	if (IS_INTERNED(arKey)) {
+		p = (Bucket *) pemalloc(sizeof(Bucket), ht->persistent);
+		if (!p) {
+			return FAILURE;
+		}
+		p->arKey = arKey;
+	} else {
+		p = (Bucket *) pemalloc(sizeof(Bucket) + nKeyLength, ht->persistent);
+		if (!p) {
+			return FAILURE;
+		}
+		p->arKey = (const char*)(p + 1);
+		memcpy((char*)p->arKey, arKey, nKeyLength);
 	}
-	memcpy(p->arKey, arKey, nKeyLength);
 	p->nKeyLength = nKeyLength;
 	INIT_DATA(ht, p, pData, nDataSize);
 	p->h = h;
@@ -274,6 +279,9 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, ui
 {
 	uint nIndex;
 	Bucket *p;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -281,12 +289,13 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, ui
 		return zend_hash_index_update(ht, h, pData, nDataSize, pDest);
 	}
 
+	CHECK_INIT(ht);
 	nIndex = h & ht->nTableMask;
 	
 	p = ht->arBuckets[nIndex];
 	while (p != NULL) {
-		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
-			if (!memcmp(p->arKey, arKey, nKeyLength)) {
+		if (p->arKey == arKey ||
+			((p->h == h) && (p->nKeyLength == nKeyLength) && !memcmp(p->arKey, arKey, nKeyLength))) {
 				if (flag & HASH_ADD) {
 					return FAILURE;
 				}
@@ -307,17 +316,25 @@ ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, ui
 				}
 				HANDLE_UNBLOCK_INTERRUPTIONS();
 				return SUCCESS;
-			}
 		}
 		p = p->pNext;
 	}
 	
-	p = (Bucket *) pemalloc(sizeof(Bucket) - 1 + nKeyLength, ht->persistent);
-	if (!p) {
-		return FAILURE;
+	if (IS_INTERNED(arKey)) {
+		p = (Bucket *) pemalloc(sizeof(Bucket), ht->persistent);
+		if (!p) {
+			return FAILURE;
+		}
+		p->arKey = arKey;
+	} else {
+		p = (Bucket *) pemalloc(sizeof(Bucket) + nKeyLength, ht->persistent);
+		if (!p) {
+			return FAILURE;
+		}
+		p->arKey = (const char*)(p + 1);
+		memcpy((char*)p->arKey, arKey, nKeyLength);
 	}
 
-	memcpy(p->arKey, arKey, nKeyLength);
 	p->nKeyLength = nKeyLength;
 	INIT_DATA(ht, p, pData, nDataSize);
 	p->h = h;
@@ -351,8 +368,12 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 {
 	uint nIndex;
 	Bucket *p;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
+	CHECK_INIT(ht);
 
 	if (flag & HASH_NEXT_INSERT) {
 		h = ht->nNextFreeElement;
@@ -388,10 +409,11 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 		}
 		p = p->pNext;
 	}
-	p = (Bucket *) pemalloc_rel(sizeof(Bucket) - 1, ht->persistent);
+	p = (Bucket *) pemalloc_rel(sizeof(Bucket), ht->persistent);
 	if (!p) {
 		return FAILURE;
 	}
+	p->arKey = NULL;
 	p->nKeyLength = 0; /* Numeric indices are marked by making the nKeyLength == 0 */
 	p->h = h;
 	INIT_DATA(ht, p, pData, nDataSize);
@@ -418,6 +440,9 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void
 static int zend_hash_do_resize(HashTable *ht)
 {
 	Bucket **t;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -443,6 +468,9 @@ ZEND_API int zend_hash_rehash(HashTable *ht)
 	uint nIndex;
 
 	IS_CONSISTENT(ht);
+	if (UNEXPECTED(ht->nNumOfElements == 0)) {
+		return SUCCESS;
+	}
 
 	memset(ht->arBuckets, 0, ht->nTableSize * sizeof(Bucket *));
 	p = ht->pListHead;
@@ -459,6 +487,9 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, uint n
 {
 	uint nIndex;
 	Bucket *p;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	IS_CONSISTENT(ht);
 
@@ -533,7 +564,9 @@ ZEND_API void zend_hash_destroy(HashTable *ht)
 		}
 		pefree(q, ht->persistent);
 	}
-	pefree(ht->arBuckets, ht->persistent);
+	if (ht->nTableMask) {
+		pefree(ht->arBuckets, ht->persistent);
+	}
 
 	SET_INCONSISTENT(HT_DESTROYED);
 }
@@ -547,7 +580,9 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 
 	p = ht->pListHead;
 
-	memset(ht->arBuckets, 0, ht->nTableSize*sizeof(Bucket *));
+	if (ht->nTableMask) {
+		memset(ht->arBuckets, 0, ht->nTableSize*sizeof(Bucket *));
+	}
 	ht->pListHead = NULL;
 	ht->pListTail = NULL;
 	ht->nNumOfElements = 0;
@@ -575,6 +610,9 @@ ZEND_API void zend_hash_clean(HashTable *ht)
 static Bucket *zend_hash_apply_deleter(HashTable *ht, Bucket *p)
 {
 	Bucket *retval;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	HANDLE_BLOCK_INTERRUPTIONS();
 	if (p->pLast) {
@@ -631,7 +669,9 @@ ZEND_API void zend_hash_graceful_destroy(HashTable *ht)
 	while (p != NULL) {
 		p = zend_hash_apply_deleter(ht, p);
 	}
-	pefree(ht->arBuckets, ht->persistent);
+	if (ht->nTableMask) {
+		pefree(ht->arBuckets, ht->persistent);
+	}
 
 	SET_INCONSISTENT(HT_DESTROYED);
 }
@@ -648,7 +688,9 @@ ZEND_API void zend_hash_graceful_reverse_destroy(HashTable *ht)
 		p = ht->pListTail;
 	}
 
-	pefree(ht->arBuckets, ht->persistent);
+	if (ht->nTableMask) {
+		pefree(ht->arBuckets, ht->persistent);
+	}
 
 	SET_INCONSISTENT(HT_DESTROYED);
 }
@@ -881,11 +923,10 @@ ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, uint nKeyLen
 
 	p = ht->arBuckets[nIndex];
 	while (p != NULL) {
-		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
-			if (!memcmp(p->arKey, arKey, nKeyLength)) {
+		if (p->arKey == arKey ||
+			((p->h == h) && (p->nKeyLength == nKeyLength) && !memcmp(p->arKey, arKey, nKeyLength))) {
 				*pData = p->pData;
 				return SUCCESS;
-			}
 		}
 		p = p->pNext;
 	}
@@ -908,11 +949,10 @@ ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, uint n
 
 	p = ht->arBuckets[nIndex];
 	while (p != NULL) {
-		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
-			if (!memcmp(p->arKey, arKey, nKeyLength)) {
+		if (p->arKey == arKey ||
+			((p->h == h) && (p->nKeyLength == nKeyLength) && !memcmp(p->arKey, arKey, nKeyLength))) {
 				*pData = p->pData;
 				return SUCCESS;
-			}
 		}
 		p = p->pNext;
 	}
@@ -933,10 +973,9 @@ ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, uint nKeyL
 
 	p = ht->arBuckets[nIndex];
 	while (p != NULL) {
-		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
-			if (!memcmp(p->arKey, arKey, nKeyLength)) {
+		if (p->arKey == arKey ||
+			((p->h == h) && (p->nKeyLength == nKeyLength) && !memcmp(p->arKey, arKey, nKeyLength))) {
 				return 1;
-			}
 		}
 		p = p->pNext;
 	}
@@ -959,10 +998,9 @@ ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, uint
 
 	p = ht->arBuckets[nIndex];
 	while (p != NULL) {
-		if ((p->h == h) && (p->nKeyLength == nKeyLength)) {
-			if (!memcmp(p->arKey, arKey, nKeyLength)) {
+		if (p->arKey == arKey ||
+			((p->h == h) && (p->nKeyLength == nKeyLength) && !memcmp(p->arKey, arKey, nKeyLength))) {
 				return 1;
-			}
 		}
 		p = p->pNext;
 	}
@@ -1119,7 +1157,7 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index,
 			if (duplicate) {
 				*str_index = estrndup(p->arKey, p->nKeyLength - 1);
 			} else {
-				*str_index = p->arKey;
+				*str_index = (char*)p->arKey;
 			}
 			if (str_length) {
 				*str_length = p->nKeyLength;
@@ -1175,6 +1213,10 @@ ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosi
 ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, uint str_length, ulong num_index, int mode, HashPosition *pos)
 {
 	Bucket *p, *q;
+	ulong h;
+#ifdef ZEND_SIGNALS
+	TSRMLS_FETCH();
+#endif
 
 	p = pos ? (*pos) : ht->pInternalPointer;
 
@@ -1195,19 +1237,25 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 				q = q->pNext;
 			}
 		} else if (key_type == HASH_KEY_IS_STRING) {
-			ulong h;
+			if (IS_INTERNED(str_index)) {
+				h = INTERNED_HASH(str_index);
+			} else {
+				h = zend_inline_hash_func(str_index, str_length);
+			}
 
-			if (p->nKeyLength == str_length &&
-			    memcmp(p->arKey, str_index, str_length) == 0) {
+			if (p->arKey == str_index ||
+			    (p->nKeyLength == str_length &&
+			     p->h == h &&
+			     memcmp(p->arKey, str_index, str_length) == 0)) {
 				return SUCCESS;
 			}
 
-			h = zend_inline_hash_func(str_index, str_length);
 			q = ht->arBuckets[h & ht->nTableMask];
 
 			while (q != NULL) {
-				if (q->h == h && q->nKeyLength == str_length && 
-				           memcmp(q->arKey, str_index, str_length) == 0) {
+				if (q->arKey == str_index ||
+				    (q->h == h && q->nKeyLength == str_length &&
+				     memcmp(q->arKey, str_index, str_length) == 0)) {
 					break;
 				}
 				q = q->pNext;
@@ -1222,7 +1270,7 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 			if (mode != HASH_UPDATE_KEY_ANYWAY) {
 				Bucket *r = p->pListLast;
 				int found = HASH_UPDATE_KEY_IF_BEFORE;
-						
+
 				while (r) {
 					if (r == q) {
 						found = HASH_UPDATE_KEY_IF_AFTER;
@@ -1242,7 +1290,7 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 					}
 					if (p->pListLast != NULL) {
 						p->pListLast->pListNext = p->pListNext;
-					} else { 
+					} else {
 						/* Deleting the head of the list */
 						ht->pListHead = p->pListNext;
 					}
@@ -1277,7 +1325,7 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 			}
 			if (q->pListLast != NULL) {
 				q->pListLast->pListNext = q->pListNext;
-			} else { 
+			} else {
 				/* Deleting the head of the list */
 				ht->pListHead = q->pListNext;
 			}
@@ -1308,8 +1356,15 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 			ht->arBuckets[p->h & ht->nTableMask] = p->pNext;
 		}
 
-		if (p->nKeyLength != str_length) {
-			Bucket *q = (Bucket *) pemalloc(sizeof(Bucket) - 1 + str_length, ht->persistent);
+		if ((IS_INTERNED(p->arKey) != IS_INTERNED(str_index)) ||
+		    (!IS_INTERNED(p->arKey) && p->nKeyLength != str_length)) {
+			Bucket *q;
+
+			if (IS_INTERNED(str_index)) {
+				q = (Bucket *) pemalloc(sizeof(Bucket), ht->persistent);
+			} else {
+				q = (Bucket *) pemalloc(sizeof(Bucket) + str_length, ht->persistent);
+			}
 
 			q->nKeyLength = str_length;
 			if (p->pData == &p->pDataPtr) {
@@ -1343,8 +1398,14 @@ ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const 
 		if (key_type == HASH_KEY_IS_LONG) {
 			p->h = num_index;
 		} else {
-			memcpy(p->arKey, str_index, str_length);
-			p->h = zend_inline_hash_func(str_index, str_length);
+			p->h = h;
+			p->nKeyLength = str_length;
+			if (IS_INTERNED(str_index)) {
+				p->arKey = str_index;
+			} else {
+				p->arKey = (const char*)(p+1);
+				memcpy((char*)p->arKey, str_index, str_length);
+			}
 		}
 
 		CONNECT_TO_BUCKET_DLLIST(p, ht->arBuckets[p->h & ht->nTableMask]);
@@ -1559,6 +1620,10 @@ void zend_hash_display(const HashTable *ht)
 	Bucket *p;
 	uint i;
 
+	if (UNEXPECTED(ht->nNumOfElements == 0)) {
+		zend_output_debug_string(0, "The hash is empty");
+		return;
+	}
 	for (i = 0; i < ht->nTableSize; i++) {
 		p = ht->arBuckets[i];
 		while (p != NULL) {

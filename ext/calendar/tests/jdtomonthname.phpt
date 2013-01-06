@@ -52,7 +52,9 @@ string(0) ""
 string(0) ""
 string(0) ""
 
-=== Array
+=== 
+Notice: Array to string conversion in %sjdtomonthname.php on line %d
+Array
 
 Warning: jdmonthname() expects parameter 1 to be long, array given in %s on line %d
 bool(false)

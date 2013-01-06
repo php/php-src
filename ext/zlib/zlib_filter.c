@@ -62,10 +62,9 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 {
 	php_zlib_filter_data *data;
 	php_stream_bucket *bucket;
-	size_t consumed = 0, original_out, original_in;
+	size_t consumed = 0;
 	int status;
 	php_stream_filter_status_t exit_status = PSFS_FEED_ME;
-	z_stream *streamp;
 
 	if (!thisfilter || !thisfilter->abstract) {
 		/* Should never happen */
@@ -73,15 +72,15 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 	}
 
 	data = (php_zlib_filter_data *)(thisfilter->abstract);
-	streamp = &(data->strm);
-	original_in = data->strm.total_in;
-	original_out = data->strm.total_out;
 
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
 
+		bucket = buckets_in->head;
+
 		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
-		while (bin < bucket->buflen) {
+
+		while (bin < (unsigned int) bucket->buflen) {
 
 			if (data->finished) {
 				consumed += bucket->buflen;
@@ -110,7 +109,6 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 			desired -= data->strm.avail_in; /* desired becomes what we consumed this round through */
 			data->strm.next_in = data->inbuf;
 			data->strm.avail_in = 0;
-			consumed += desired;
 			bin += desired;
 
 			if (data->strm.avail_out < data->outbuf_len) {
@@ -126,7 +124,9 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				php_stream_bucket_delref(bucket TSRMLS_CC);
 				return PSFS_PASS_ON;
 			}
+
 		}
+		consumed += bucket->buflen;
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 
@@ -187,10 +187,9 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 {
 	php_zlib_filter_data *data;
 	php_stream_bucket *bucket;
-	size_t consumed = 0, original_out, original_in;
+	size_t consumed = 0;
 	int status;
 	php_stream_filter_status_t exit_status = PSFS_FEED_ME;
-	z_stream *streamp;
 
 	if (!thisfilter || !thisfilter->abstract) {
 		/* Should never happen */
@@ -198,16 +197,15 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 	}
 
 	data = (php_zlib_filter_data *)(thisfilter->abstract);
-	streamp = &(data->strm);
-	original_in = data->strm.total_in;
-	original_out = data->strm.total_out;
 
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
 
-		bucket = php_stream_bucket_make_writeable(buckets_in->head TSRMLS_CC);
+		bucket = buckets_in->head;
 
-		while (bin < bucket->buflen) {
+		bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
+
+		while (bin < (unsigned int) bucket->buflen) {
 			desired = bucket->buflen - bin;
 			if (desired > data->inbuf_len) {
 				desired = data->inbuf_len;
@@ -224,7 +222,6 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 			desired -= data->strm.avail_in; /* desired becomes what we consumed this round through */
 			data->strm.next_in = data->inbuf;
 			data->strm.avail_in = 0;
-			consumed += desired;
 			bin += desired;
 
 			if (data->strm.avail_out < data->outbuf_len) {
@@ -238,6 +235,7 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 				exit_status = PSFS_PASS_ON;
 			}
 		}
+		consumed += bucket->buflen;
 		php_stream_bucket_delref(bucket TSRMLS_CC);
 	}
 
@@ -261,6 +259,7 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 	if (bytes_consumed) {
 		*bytes_consumed = consumed;
 	}
+
 	return exit_status;
 }
 
@@ -294,7 +293,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_zlib_filter_data), persistent);
 	if (!data) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes.", sizeof(php_zlib_filter_data));
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes", sizeof(php_zlib_filter_data));
 		return NULL;
 	}
 
@@ -306,14 +305,14 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 	data->strm.avail_out = data->outbuf_len = data->inbuf_len = 2048;
 	data->strm.next_in = data->inbuf = (Bytef *) pemalloc(data->inbuf_len, persistent);
 	if (!data->inbuf) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes.", data->inbuf_len);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes", data->inbuf_len);
 		pefree(data, persistent);
 		return NULL;
 	}
 	data->strm.avail_in = 0;
 	data->strm.next_out = data->outbuf = (Bytef *) pemalloc(data->outbuf_len, persistent);
 	if (!data->outbuf) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes.", data->outbuf_len);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed allocating %zd bytes", data->outbuf_len);
 		pefree(data->inbuf, persistent);
 		pefree(data, persistent);
 		return NULL;
@@ -412,7 +411,7 @@ factory_setlevel:
 					}
 					break;
 				default:
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid filter parameter, ignored.");
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid filter parameter, ignored");
 			}
 		}
 		status = deflateInit2(&(data->strm), level, Z_DEFLATED, windowBits, memLevel, 0);

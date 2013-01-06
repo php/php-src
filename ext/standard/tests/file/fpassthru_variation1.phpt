@@ -77,7 +77,7 @@ $values = array(
 // loop through each element of the array for fp
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo @"\nArg value $value \n";
       var_dump( fpassthru($value) );
 };
 

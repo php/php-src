@@ -368,7 +368,6 @@ int php_init_config(TSRMLS_D)
 	char *php_ini_file_name = NULL;
 	char *php_ini_search_path = NULL;
 	int php_ini_scanned_path_len;
-	int safe_mode_state;
 	char *open_basedir;
 	int free_ini_search_path = 0;
 	zend_file_handle fh;
@@ -384,7 +383,6 @@ int php_init_config(TSRMLS_D)
 	zend_llist_init(&extension_lists.engine, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
 	zend_llist_init(&extension_lists.functions, sizeof(char *), (llist_dtor_func_t) free_estring, 1);
 
-	safe_mode_state = PG(safe_mode);
 	open_basedir = PG(open_basedir);
 
 	if (sapi_module.php_ini_path_override) {
@@ -395,7 +393,6 @@ int php_init_config(TSRMLS_D)
 		int search_path_size;
 		char *default_location;
 		char *env_location;
-		char *binary_location;
 		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
 #ifdef PHP_WIN32
 		char *reg_location;
@@ -423,7 +420,11 @@ int php_init_config(TSRMLS_D)
 					env_location = "";
 				} else {
 					size = GetEnvironmentVariableA("PHPRC", phprc_path, size);
-					env_location = phprc_path;
+					if (size == 0) {
+						env_location = "";
+					} else {
+						env_location = phprc_path;
+					}
 				}
 			}
 		}
@@ -463,58 +464,18 @@ int php_init_config(TSRMLS_D)
 #endif
 
 		/* Add cwd (not with CLI) */
-		if (strcmp(sapi_module.name, "cli") != 0) {
+		if (!sapi_module.php_ini_ignore_cwd) {
 			if (*php_ini_search_path) {
 				strlcat(php_ini_search_path, paths_separator, search_path_size);
 			}
 			strlcat(php_ini_search_path, ".", search_path_size);
 		}
 
-		/* Add binary directory */
-#ifdef PHP_WIN32
-		binary_location = (char *) emalloc(MAXPATHLEN);
-		if (GetModuleFileName(0, binary_location, MAXPATHLEN) == 0) {
-			efree(binary_location);
-			binary_location = NULL;
-		}
-#else
-		if (sapi_module.executable_location) {
-			binary_location = (char *)emalloc(MAXPATHLEN);
-			if (!strchr(sapi_module.executable_location, '/')) {
-				char *envpath, *path;
-				int found = 0;
+		if (PG(php_binary)) {
+			char *separator_location, *binary_location;
 
-				if ((envpath = getenv("PATH")) != NULL) {
-					char *search_dir, search_path[MAXPATHLEN];
-					char *last = NULL;
-
-					path = estrdup(envpath);
-					search_dir = php_strtok_r(path, ":", &last);
-
-					while (search_dir) {
-						snprintf(search_path, MAXPATHLEN, "%s/%s", search_dir, sapi_module.executable_location);
-						if (VCWD_REALPATH(search_path, binary_location) && !VCWD_ACCESS(binary_location, X_OK)) {
-							found = 1;
-							break;
-						}
-						search_dir = php_strtok_r(NULL, ":", &last);
-					}
-					efree(path);
-				}
-				if (!found) {
-					efree(binary_location);
-					binary_location = NULL;
-				}
-			} else if (!VCWD_REALPATH(sapi_module.executable_location, binary_location) || VCWD_ACCESS(binary_location, X_OK)) {
-				efree(binary_location);
-				binary_location = NULL;
-			}
-		} else {
-			binary_location = NULL;
-		}
-#endif
-		if (binary_location) {
-			char *separator_location = strrchr(binary_location, DEFAULT_SLASH);
+			binary_location = estrdup(PG(php_binary));
+			separator_location = strrchr(binary_location, DEFAULT_SLASH);
 
 			if (separator_location && separator_location != binary_location) {
 				*(separator_location) = 0;
@@ -557,7 +518,6 @@ int php_init_config(TSRMLS_D)
 #endif
 	}
 
-	PG(safe_mode) = 0;
 	PG(open_basedir) = NULL;
 
 	/*
@@ -610,7 +570,6 @@ int php_init_config(TSRMLS_D)
 		efree(php_ini_search_path);
 	}
 
-	PG(safe_mode) = safe_mode_state;
 	PG(open_basedir) = open_basedir;
 
 	if (fh.handle.fp) {

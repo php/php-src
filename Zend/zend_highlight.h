@@ -26,7 +26,6 @@
 #define HL_DEFAULT_COLOR     "#0000BB"    /* blue */
 #define HL_HTML_COLOR        "#000000"    /* black */
 #define HL_STRING_COLOR      "#DD0000"    /* red */
-#define HL_BG_COLOR          "#FFFFFF"    /* white */
 #define HL_KEYWORD_COLOR     "#007700"    /* green */
 
 

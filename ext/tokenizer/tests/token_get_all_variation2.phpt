@@ -1,5 +1,7 @@
 --TEST--
 Test token_get_all() function : usage variations - with different arithmetic operators
+--SKIPIF--
+<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
@@ -35,7 +37,7 @@ array(13) {
   [0]=>
   array(3) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -44,7 +46,7 @@ array(13) {
   [1]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -53,7 +55,7 @@ array(13) {
   [2]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -64,7 +66,7 @@ array(13) {
   [4]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -73,7 +75,7 @@ array(13) {
   [5]=>
   array(3) {
     [0]=>
-    int(305)
+    int(%d)
     [1]=>
     string(1) "1"
     [2]=>
@@ -82,7 +84,7 @@ array(13) {
   [6]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -93,7 +95,7 @@ array(13) {
   [8]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -102,7 +104,7 @@ array(13) {
   [9]=>
   array(3) {
     [0]=>
-    int(305)
+    int(%d)
     [1]=>
     string(1) "2"
     [2]=>
@@ -113,7 +115,7 @@ array(13) {
   [11]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -122,7 +124,7 @@ array(13) {
   [12]=>
   array(3) {
     [0]=>
-    int(370)
+    int(%d)
     [1]=>
     string(2) "?>"
     [2]=>
@@ -134,7 +136,7 @@ array(13) {
   [0]=>
   array(3) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -143,7 +145,7 @@ array(13) {
   [1]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$b"
     [2]=>
@@ -152,7 +154,7 @@ array(13) {
   [2]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -163,7 +165,7 @@ array(13) {
   [4]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -172,7 +174,7 @@ array(13) {
   [5]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$b"
     [2]=>
@@ -181,7 +183,7 @@ array(13) {
   [6]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -192,7 +194,7 @@ array(13) {
   [8]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -201,7 +203,7 @@ array(13) {
   [9]=>
   array(3) {
     [0]=>
-    int(305)
+    int(%d)
     [1]=>
     string(1) "2"
     [2]=>
@@ -212,7 +214,7 @@ array(13) {
   [11]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -221,7 +223,7 @@ array(13) {
   [12]=>
   array(3) {
     [0]=>
-    int(370)
+    int(%d)
     [1]=>
     string(2) "?>"
     [2]=>
@@ -233,7 +235,7 @@ array(13) {
   [0]=>
   array(3) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -242,7 +244,7 @@ array(13) {
   [1]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$c"
     [2]=>
@@ -251,7 +253,7 @@ array(13) {
   [2]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -262,7 +264,7 @@ array(13) {
   [4]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -271,7 +273,7 @@ array(13) {
   [5]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -280,7 +282,7 @@ array(13) {
   [6]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -291,7 +293,7 @@ array(13) {
   [8]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -300,7 +302,7 @@ array(13) {
   [9]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$b"
     [2]=>
@@ -311,7 +313,7 @@ array(13) {
   [11]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -320,7 +322,7 @@ array(13) {
   [12]=>
   array(3) {
     [0]=>
-    int(370)
+    int(%d)
     [1]=>
     string(2) "?>"
     [2]=>
@@ -332,7 +334,7 @@ array(13) {
   [0]=>
   array(3) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -341,7 +343,7 @@ array(13) {
   [1]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -350,7 +352,7 @@ array(13) {
   [2]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -361,7 +363,7 @@ array(13) {
   [4]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -370,7 +372,7 @@ array(13) {
   [5]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$b"
     [2]=>
@@ -379,7 +381,7 @@ array(13) {
   [6]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -390,7 +392,7 @@ array(13) {
   [8]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -399,7 +401,7 @@ array(13) {
   [9]=>
   array(3) {
     [0]=>
-    int(305)
+    int(%d)
     [1]=>
     string(1) "2"
     [2]=>
@@ -410,7 +412,7 @@ array(13) {
   [11]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -419,7 +421,7 @@ array(13) {
   [12]=>
   array(3) {
     [0]=>
-    int(370)
+    int(%d)
     [1]=>
     string(2) "?>"
     [2]=>

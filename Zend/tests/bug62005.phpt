@@ -8,7 +8,7 @@ function add_points($player, $points) {
 }
 add_points(NULL, 2);
 --EXPECTF--
-Strict Standards: Creating default object from empty value in %sbug62005.php on line %d
+Warning: Creating default object from empty value in %sbug62005.php on line %d
 stdClass Object
 (
     [energy] => 2

@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "2.3.0"
+#define ZEND_VERSION "2.6.0-dev"
 
 #define ZEND_ENGINE_2
 
@@ -133,6 +133,11 @@ char *alloca ();
 # endif
 #endif
 
+/* Compatibility with non-clang compilers */
+#ifndef __has_attribute
+# define __has_attribute(x) 0
+#endif
+
 /* GCC x.y.z supplies __GNUC__ = x and __GNUC_MINOR__ = y */
 #ifdef __GNUC__
 # define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
@@ -144,6 +149,14 @@ char *alloca ();
 # define ZEND_ATTRIBUTE_MALLOC __attribute__ ((__malloc__))
 #else
 # define ZEND_ATTRIBUTE_MALLOC
+#endif
+
+#if ZEND_GCC_VERSION >= 4003 || __has_attribute(alloc_size)
+# define ZEND_ATTRIBUTE_ALLOC_SIZE(X) __attribute__ ((alloc_size(X)))
+# define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y) __attribute__ ((alloc_size(X,Y)))
+#else
+# define ZEND_ATTRIBUTE_ALLOC_SIZE(X)
+# define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
 #endif
 
 #if ZEND_GCC_VERSION >= 2007
@@ -200,9 +213,9 @@ char *alloca ();
 #endif
 
 #if ZEND_DEBUG
-#define ZEND_FILE_LINE_D				char *__zend_filename, uint __zend_lineno
+#define ZEND_FILE_LINE_D				const char *__zend_filename, const uint __zend_lineno
 #define ZEND_FILE_LINE_DC				, ZEND_FILE_LINE_D
-#define ZEND_FILE_LINE_ORIG_D			char *__zend_orig_filename, uint __zend_orig_lineno
+#define ZEND_FILE_LINE_ORIG_D			const char *__zend_orig_filename, const uint __zend_orig_lineno
 #define ZEND_FILE_LINE_ORIG_DC			, ZEND_FILE_LINE_ORIG_D
 #define ZEND_FILE_LINE_RELAY_C			__zend_filename, __zend_lineno
 #define ZEND_FILE_LINE_RELAY_CC			, ZEND_FILE_LINE_RELAY_C
@@ -212,6 +225,7 @@ char *alloca ();
 #define ZEND_FILE_LINE_EMPTY_CC			, ZEND_FILE_LINE_EMPTY_C
 #define ZEND_FILE_LINE_ORIG_RELAY_C		__zend_orig_filename, __zend_orig_lineno
 #define ZEND_FILE_LINE_ORIG_RELAY_CC	, ZEND_FILE_LINE_ORIG_RELAY_C
+#define ZEND_ASSERT(c)					assert(c)
 #else
 #define ZEND_FILE_LINE_D
 #define ZEND_FILE_LINE_DC
@@ -225,6 +239,7 @@ char *alloca ();
 #define ZEND_FILE_LINE_EMPTY_CC
 #define ZEND_FILE_LINE_ORIG_RELAY_C
 #define ZEND_FILE_LINE_ORIG_RELAY_CC
+#define ZEND_ASSERT(c)
 #endif	/* ZEND_DEBUG */
 
 #ifdef ZTS
@@ -237,6 +252,7 @@ char *alloca ();
 #include "zend_alloc.h"
 
 #include "zend_types.h"
+#include "zend_string.h"
 
 #ifdef HAVE_LIMITS_H
 # include <limits.h>
@@ -262,10 +278,10 @@ static const char long_min_digits[] = "9223372036854775808";
 
 #define MAX_LENGTH_OF_DOUBLE 32
 
-#undef SUCCESS
-#undef FAILURE
-#define SUCCESS 0
-#define FAILURE -1				/* this MUST stay a negative number, or it may affect functions! */
+typedef enum {
+  SUCCESS =  0,
+  FAILURE = -1,		/* this MUST stay a negative number, or it may affect functions! */
+} ZEND_RESULT_CODE;
 
 #include "zend_hash.h"
 #include "zend_ts_hash.h"
@@ -297,6 +313,7 @@ typedef struct _zend_guard {
 typedef struct _zend_object {
 	zend_class_entry *ce;
 	HashTable *properties;
+	zval **properties_table;
 	HashTable *guards; /* protects from __get/__set ... recursion */
 } zend_object;
 
@@ -351,17 +368,21 @@ struct _zval_struct {
 #if defined(__GNUC__)
 #if __GNUC__ >= 3
 #define zend_always_inline inline __attribute__((always_inline))
+#define zend_never_inline __attribute__((noinline))
 #else
 #define zend_always_inline inline
+#define zend_never_inline
 #endif
 
 #elif defined(_MSC_VER)
 #define zend_always_inline __forceinline
+#define zend_never_inline
 #else
 #define zend_always_inline inline
+#define zend_never_inline
 #endif
 
-#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
+#if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
 # define EXPECTED(condition)   __builtin_expect(condition, 1)
 # define UNEXPECTED(condition) __builtin_expect(condition, 0)
 #else
@@ -415,22 +436,56 @@ struct _zend_unserialize_data;
 typedef struct _zend_serialize_data zend_serialize_data;
 typedef struct _zend_unserialize_data zend_unserialize_data;
 
+struct _zend_trait_method_reference {
+	const char* method_name;
+	unsigned int mname_len;
+	
+	zend_class_entry *ce;
+	
+	const char* class_name;
+	unsigned int cname_len;
+};
+typedef struct _zend_trait_method_reference	zend_trait_method_reference;
+
+struct _zend_trait_precedence {
+	zend_trait_method_reference *trait_method;
+	
+	zend_class_entry** exclude_from_classes;
+};
+typedef struct _zend_trait_precedence zend_trait_precedence;
+
+struct _zend_trait_alias {
+	zend_trait_method_reference *trait_method;
+	
+	/**
+	* name for method to be added
+	*/
+	const char* alias;
+	unsigned int alias_len;
+	
+	/**
+	* modifiers to be set on trait method
+	*/
+	zend_uint modifiers;
+};
+typedef struct _zend_trait_alias zend_trait_alias;
+
 struct _zend_class_entry {
 	char type;
-	char *name;
+	const char *name;
 	zend_uint name_length;
 	struct _zend_class_entry *parent;
 	int refcount;
-	zend_bool constants_updated;
 	zend_uint ce_flags;
 
 	HashTable function_table;
-	HashTable default_properties;
 	HashTable properties_info;
-	HashTable default_static_members;
-	HashTable *static_members;
+	zval **default_properties_table;
+	zval **default_static_members_table;
+	zval **static_members_table;
 	HashTable constants_table;
-	const struct _zend_function_entry *builtin_functions;
+	int default_properties_count;
+	int default_static_members_count;
 
 	union _zend_function *constructor;
 	union _zend_function *destructor;
@@ -459,14 +514,25 @@ struct _zend_class_entry {
 
 	zend_class_entry **interfaces;
 	zend_uint num_interfaces;
+	
+	zend_class_entry **traits;
+	zend_uint num_traits;
+	zend_trait_alias **trait_aliases;
+	zend_trait_precedence **trait_precedences;
 
-	char *filename;
-	zend_uint line_start;
-	zend_uint line_end;
-	char *doc_comment;
-	zend_uint doc_comment_len;
-
-	struct _zend_module_entry *module;
+	union {
+		struct {
+			const char *filename;
+			zend_uint line_start;
+			zend_uint line_end;
+			const char *doc_comment;
+			zend_uint doc_comment_len;
+		} user;
+		struct {
+			const struct _zend_function_entry *builtin_functions;
+			struct _zend_module_entry *module;
+		} internal;
+	} info;
 };
 
 #include "zend_stream.h"
@@ -475,7 +541,7 @@ typedef struct _zend_utility_functions {
 	int (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
 	int (*write_function)(const char *str, uint str_length);
 	FILE *(*fopen_function)(const char *filename, char **opened_path TSRMLS_DC);
-	void (*message_handler)(long message, void *data TSRMLS_DC);
+	void (*message_handler)(long message, const void *data TSRMLS_DC);
 	void (*block_interruptions)(void);
 	void (*unblock_interruptions)(void);
 	int (*get_configuration_directive)(const char *name, uint name_length, zval *contents);
@@ -518,13 +584,15 @@ typedef int (*zend_write_func_t)(const char *str, uint str_length);
 #define IS_RESOURCE	7
 #define IS_CONSTANT	8
 #define IS_CONSTANT_ARRAY	9
+#define IS_CALLABLE	10
 
 /* Ugly hack to support constants as static array indices */
-#define IS_CONSTANT_TYPE_MASK	0x0f
-#define IS_CONSTANT_UNQUALIFIED	0x10
-#define IS_CONSTANT_INDEX		0x80
-#define IS_LEXICAL_VAR			0x20
-#define IS_LEXICAL_REF			0x40
+#define IS_CONSTANT_TYPE_MASK		0x00f
+#define IS_CONSTANT_UNQUALIFIED		0x010
+#define IS_CONSTANT_INDEX			0x080
+#define IS_LEXICAL_VAR				0x020
+#define IS_LEXICAL_REF				0x040
+#define IS_CONSTANT_IN_NAMESPACE	0x100
 
 /* overloaded elements data types */
 #define OE_IS_ARRAY		(1<<0)
@@ -599,8 +667,8 @@ END_EXTERN_C()
 
 /* FIXME: Check if we can save if (ptr) too */
 
-#define STR_FREE(ptr) if (ptr) { efree(ptr); }
-#define STR_FREE_REL(ptr) if (ptr) { efree_rel(ptr); }
+#define STR_FREE(ptr) if (ptr && !IS_INTERNED(ptr)) { efree(ptr); }
+#define STR_FREE_REL(ptr) if (ptr && !IS_INTERNED(ptr)) { efree_rel(ptr); }
 
 #define STR_EMPTY_ALLOC() estrndup("", sizeof("")-1)
 
@@ -622,7 +690,7 @@ extern ZEND_API void (*zend_block_interruptions)(void);
 extern ZEND_API void (*zend_unblock_interruptions)(void);
 extern ZEND_API void (*zend_ticks_function)(int ticks);
 extern ZEND_API void (*zend_error_cb)(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 4, 0);
-extern void (*zend_on_timeout)(int seconds TSRMLS_DC);
+extern ZEND_API void (*zend_on_timeout)(int seconds TSRMLS_DC);
 extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file_handle *handle TSRMLS_DC);
 extern int (*zend_vspprintf)(char **pbuf, size_t max_len, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len TSRMLS_DC);
@@ -642,11 +710,18 @@ END_EXTERN_C()
 
 #define ZEND_UV(name) (zend_uv.name)
 
+#ifndef ZEND_SIGNALS
 #define HANDLE_BLOCK_INTERRUPTIONS()		if (zend_block_interruptions) { zend_block_interruptions(); }
 #define HANDLE_UNBLOCK_INTERRUPTIONS()		if (zend_unblock_interruptions) { zend_unblock_interruptions(); }
+#else
+#include "zend_signal.h"
+
+#define HANDLE_BLOCK_INTERRUPTIONS()		ZEND_SIGNAL_BLOCK_INTERRUPUTIONS()
+#define HANDLE_UNBLOCK_INTERRUPTIONS()		ZEND_SIGNAL_UNBLOCK_INTERRUPTIONS()
+#endif
 
 BEGIN_EXTERN_C()
-ZEND_API void zend_message_dispatcher(long message, void *data TSRMLS_DC);
+ZEND_API void zend_message_dispatcher(long message, const void *data TSRMLS_DC);
 
 ZEND_API int zend_get_configuration_directive(const char *name, uint name_length, zval *contents);
 END_EXTERN_C()
@@ -676,19 +751,30 @@ END_EXTERN_C()
 
 #define PZVAL_IS_REF(z)		Z_ISREF_P(z)
 
-#define SEPARATE_ZVAL(ppzv)									\
-	{														\
-		zval *orig_ptr = *(ppzv);							\
-															\
-		if (Z_REFCOUNT_P(orig_ptr) > 1) {					\
-			Z_DELREF_P(orig_ptr);							\
-			ALLOC_ZVAL(*(ppzv));							\
-			**(ppzv) = *orig_ptr;							\
-			zval_copy_ctor(*(ppzv));						\
-			Z_SET_REFCOUNT_PP(ppzv, 1);						\
-			Z_UNSET_ISREF_PP((ppzv));						\
-		}													\
-	}
+#define ZVAL_COPY_VALUE(z, v)					\
+	do {										\
+		(z)->value = (v)->value;				\
+		Z_TYPE_P(z) = Z_TYPE_P(v);				\
+	} while (0)
+
+#define INIT_PZVAL_COPY(z, v)					\
+	do {										\
+		ZVAL_COPY_VALUE(z, v);					\
+		Z_SET_REFCOUNT_P(z, 1);					\
+		Z_UNSET_ISREF_P(z);						\
+	} while (0)
+
+#define SEPARATE_ZVAL(ppzv)						\
+	do {										\
+		if (Z_REFCOUNT_PP((ppzv)) > 1) {		\
+			zval *new_zv;						\
+			Z_DELREF_PP(ppzv);					\
+			ALLOC_ZVAL(new_zv);					\
+			INIT_PZVAL_COPY(new_zv, *(ppzv));	\
+			*(ppzv) = new_zv;					\
+			zval_copy_ctor(new_zv);				\
+		}										\
+	} while (0)
 
 #define SEPARATE_ZVAL_IF_NOT_REF(ppzv)		\
 	if (!PZVAL_IS_REF(*ppzv)) {				\
@@ -711,10 +797,9 @@ END_EXTERN_C()
 	}										\
 	INIT_PZVAL(&(zv));
 	
-#define MAKE_COPY_ZVAL(ppzv, pzv) \
-	*(pzv) = **(ppzv);            \
-	zval_copy_ctor((pzv));        \
-	INIT_PZVAL((pzv));
+#define MAKE_COPY_ZVAL(ppzv, pzv) 	\
+	INIT_PZVAL_COPY(pzv, *(ppzv));	\
+	zval_copy_ctor((pzv));
 
 #define REPLACE_ZVAL_VALUE(ppzv_dest, pzv_src, copy) {	\
 	int is_ref, refcount;						\
@@ -723,7 +808,7 @@ END_EXTERN_C()
 	is_ref = Z_ISREF_PP(ppzv_dest);				\
 	refcount = Z_REFCOUNT_PP(ppzv_dest);		\
 	zval_dtor(*ppzv_dest);						\
-	**ppzv_dest = *pzv_src;						\
+	ZVAL_COPY_VALUE(*ppzv_dest, pzv_src);		\
 	if (copy) {                                 \
 		zval_copy_ctor(*ppzv_dest);				\
     }		                                    \
@@ -735,10 +820,7 @@ END_EXTERN_C()
 	if (PZVAL_IS_REF(varptr)) { \
 		zval *original_var = varptr; \
 		ALLOC_ZVAL(varptr); \
-		varptr->value = original_var->value; \
-		Z_TYPE_P(varptr) = Z_TYPE_P(original_var); \
-		Z_UNSET_ISREF_P(varptr); \
-		Z_SET_REFCOUNT_P(varptr, 1); \
+		INIT_PZVAL_COPY(varptr, original_var); \
 		zval_copy_ctor(varptr); \
 	} else { \
 		Z_ADDREF_P(varptr); \

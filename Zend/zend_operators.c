@@ -27,12 +27,9 @@
 #include "zend_globals.h"
 #include "zend_list.h"
 #include "zend_API.h"
-#include "zend_multiply.h"
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
-
-#define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
 #if ZEND_USE_TOLOWER_L
 #include <locale.h>
@@ -44,6 +41,43 @@ static _locale_t current_locale = NULL;
 #endif
 
 #define TYPE_PAIR(t1,t2) (((t1) << 4) | (t2))
+
+static const unsigned char tolower_map[256] = {
+0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,
+0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,
+0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x2a,0x2b,0x2c,0x2d,0x2e,0x2f,
+0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37,0x38,0x39,0x3a,0x3b,0x3c,0x3d,0x3e,0x3f,
+0x40,0x61,0x62,0x63,0x64,0x65,0x66,0x67,0x68,0x69,0x6a,0x6b,0x6c,0x6d,0x6e,0x6f,
+0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,0x78,0x79,0x7a,0x5b,0x5c,0x5d,0x5e,0x5f,
+0x60,0x61,0x62,0x63,0x64,0x65,0x66,0x67,0x68,0x69,0x6a,0x6b,0x6c,0x6d,0x6e,0x6f,
+0x70,0x71,0x72,0x73,0x74,0x75,0x76,0x77,0x78,0x79,0x7a,0x7b,0x7c,0x7d,0x7e,0x7f,
+0x80,0x81,0x82,0x83,0x84,0x85,0x86,0x87,0x88,0x89,0x8a,0x8b,0x8c,0x8d,0x8e,0x8f,
+0x90,0x91,0x92,0x93,0x94,0x95,0x96,0x97,0x98,0x99,0x9a,0x9b,0x9c,0x9d,0x9e,0x9f,
+0xa0,0xa1,0xa2,0xa3,0xa4,0xa5,0xa6,0xa7,0xa8,0xa9,0xaa,0xab,0xac,0xad,0xae,0xaf,
+0xb0,0xb1,0xb2,0xb3,0xb4,0xb5,0xb6,0xb7,0xb8,0xb9,0xba,0xbb,0xbc,0xbd,0xbe,0xbf,
+0xc0,0xc1,0xc2,0xc3,0xc4,0xc5,0xc6,0xc7,0xc8,0xc9,0xca,0xcb,0xcc,0xcd,0xce,0xcf,
+0xd0,0xd1,0xd2,0xd3,0xd4,0xd5,0xd6,0xd7,0xd8,0xd9,0xda,0xdb,0xdc,0xdd,0xde,0xdf,
+0xe0,0xe1,0xe2,0xe3,0xe4,0xe5,0xe6,0xe7,0xe8,0xe9,0xea,0xeb,0xec,0xed,0xee,0xef,
+0xf0,0xf1,0xf2,0xf3,0xf4,0xf5,0xf6,0xf7,0xf8,0xf9,0xfa,0xfb,0xfc,0xfd,0xfe,0xff
+};
+
+#define zend_tolower_ascii(c) (tolower_map[(unsigned char)(c)])
+
+/**
+ * Functions using locale lowercase:
+ 	 	zend_binary_strncasecmp_l
+ 	 	zend_binary_strcasecmp_l
+		zend_binary_zval_strcasecmp
+		zend_binary_zval_strncasecmp
+		string_compare_function_ex
+		string_case_compare_function
+ * Functions using ascii lowercase:
+  		zend_str_tolower_copy
+		zend_str_tolower_dup
+		zend_str_tolower
+		zend_binary_strcasecmp
+		zend_binary_strncasecmp
+ */
 
 ZEND_API int zend_atoi(const char *str, int str_len) /* {{{ */
 {
@@ -1199,11 +1233,18 @@ ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 /* must support result==op1 */
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
-	Z_STRLEN_P(result) = Z_STRLEN_P(op1) + 1;
-	Z_STRVAL_P(result) = (char *) erealloc(Z_STRVAL_P(op1), Z_STRLEN_P(result)+1);
-	Z_STRVAL_P(result)[Z_STRLEN_P(result) - 1] = (char) Z_LVAL_P(op2);
-	Z_STRVAL_P(result)[Z_STRLEN_P(result)] = 0;
-	Z_TYPE_P(result) = IS_STRING;
+	int length = Z_STRLEN_P(op1) + 1;
+	char *buf;
+
+	if (IS_INTERNED(Z_STRVAL_P(op1))) {
+		buf = (char *) emalloc(length + 1);
+		memcpy(buf, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
+	} else {
+		buf = (char *) erealloc(Z_STRVAL_P(op1), length + 1);
+	}
+	buf[length - 1] = (char) Z_LVAL_P(op2);
+	buf[length] = 0;
+	ZVAL_STRINGL(result, buf, length, 0);
 	return SUCCESS;
 }
 /* }}} */
@@ -1212,12 +1253,17 @@ ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2) 
 ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2) /* {{{ */
 {
 	int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
+	char *buf;
 
-	Z_STRVAL_P(result) = (char *) erealloc(Z_STRVAL_P(op1), length+1);
-	memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
-	Z_STRVAL_P(result)[length] = 0;
-	Z_STRLEN_P(result) = length;
-	Z_TYPE_P(result) = IS_STRING;
+	if (IS_INTERNED(Z_STRVAL_P(op1))) {
+		buf = (char *) emalloc(length+1);
+		memcpy(buf, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
+	} else {
+		buf = (char *) erealloc(Z_STRVAL_P(op1), length+1);
+	}
+	memcpy(buf + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+	buf[length] = 0;
+	ZVAL_STRINGL(result, buf, length, 0);
 	return SUCCESS;
 }
 /* }}} */
@@ -1246,7 +1292,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 	if (use_copy2) {
 		op2 = &op2_copy;
 	}
-	if (result==op1) {	/* special case, perform operations on result */
+	if (result==op1 && !IS_INTERNED(Z_STRVAL_P(op1))) {	/* special case, perform operations on result */
 		uint res_len = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
 
 		if (Z_STRLEN_P(result) < 0 || (int) (Z_STRLEN_P(op1) + Z_STRLEN_P(op2)) < 0) {
@@ -1261,12 +1307,13 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 		Z_STRVAL_P(result)[res_len]=0;
 		Z_STRLEN_P(result) = res_len;
 	} else {
-		Z_STRLEN_P(result) = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
-		Z_STRVAL_P(result) = (char *) emalloc(Z_STRLEN_P(result) + 1);
-		memcpy(Z_STRVAL_P(result), Z_STRVAL_P(op1), Z_STRLEN_P(op1));
-		memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
-		Z_STRVAL_P(result)[Z_STRLEN_P(result)] = 0;
-		Z_TYPE_P(result) = IS_STRING;
+		int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
+		char *buf = (char *) emalloc(length + 1);
+
+		memcpy(buf, Z_STRVAL_P(op1), Z_STRLEN_P(op1));
+		memcpy(buf + Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+		buf[length] = 0;
+		ZVAL_STRINGL(result, buf, length, 0);
 	}
 	if (use_copy1) {
 		zval_dtor(op1);
@@ -1278,7 +1325,7 @@ ZEND_API int concat_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{
 }
 /* }}} */
 
-ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;
 	int use_copy1 = 0, use_copy2 = 0;
@@ -1297,7 +1344,11 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_D
 		op2 = &op2_copy;
 	}
 
-	ZVAL_LONG(result, zend_binary_zval_strcmp(op1, op2));
+	if (case_insensitive) {
+		ZVAL_LONG(result, zend_binary_zval_strcasecmp(op1, op2));
+	} else {
+		ZVAL_LONG(result, zend_binary_zval_strcmp(op1, op2));
+	}
 
 	if (use_copy1) {
 		zval_dtor(op1);
@@ -1306,6 +1357,18 @@ ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_D
 		zval_dtor(op2);
 	}
 	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	return string_compare_function_ex(result, op1, op2, 0 TSRMLS_CC);
+}
+/* }}} */
+
+ZEND_API int string_case_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	return string_compare_function_ex(result, op1, op2, 1 TSRMLS_CC);
 }
 /* }}} */
 
@@ -1397,8 +1460,12 @@ ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_DOUBLE, IS_DOUBLE):
-				Z_DVAL_P(result) = Z_DVAL_P(op1) - Z_DVAL_P(op2);
-				ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL_P(result)));
+				if (Z_DVAL_P(op1) == Z_DVAL_P(op2)) {
+					ZVAL_LONG(result, 0);
+				} else {
+					Z_DVAL_P(result) = Z_DVAL_P(op1) - Z_DVAL_P(op2);
+					ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL_P(result)));
+				}
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_ARRAY, IS_ARRAY):
@@ -1694,6 +1761,12 @@ static void increment_string(zval *str) /* {{{ */
 		return;
 	}
 
+	if (IS_INTERNED(s)) {
+		s = (char*) emalloc(Z_STRLEN_P(str) + 1);
+		memcpy(s, Z_STRVAL_P(str), Z_STRLEN_P(str) + 1);
+		Z_STRVAL_P(str) = s;
+	}
+
 	while (pos >= 0) {
 		ch = s[pos];
 		if (ch >= 'a' && ch <= 'z') {
@@ -1779,7 +1852,7 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 
 				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 					case IS_LONG:
-						efree(Z_STRVAL_P(op1));
+						str_efree(Z_STRVAL_P(op1));
 						if (lval == LONG_MAX) {
 							/* switch to double */
 							double d = (double)lval;
@@ -1789,7 +1862,7 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 						}
 						break;
 					case IS_DOUBLE:
-						efree(Z_STRVAL_P(op1));
+						str_efree(Z_STRVAL_P(op1));
 						ZVAL_DOUBLE(op1, dval+1);
 						break;
 					default:
@@ -1875,7 +1948,7 @@ ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, unsigned in
 	register unsigned char *end = str + length;
 
 	while (str < end) {
-		*result++ = zend_tolower((int)*str++);
+		*result++ = zend_tolower_ascii(*str++);
 	}
 	*result = '\0';
 
@@ -1895,7 +1968,7 @@ ZEND_API void zend_str_tolower(char *str, unsigned int length) /* {{{ */
 	register unsigned char *end = p + length;
 
 	while (p < end) {
-		*p = zend_tolower((int)*p);
+		*p = zend_tolower_ascii(*p);
 		p++;
 	}
 }
@@ -1905,6 +1978,9 @@ ZEND_API int zend_binary_strcmp(const char *s1, uint len1, const char *s2, uint 
 {
 	int retval;
 
+	if (s1 == s2) {
+		return 0;
+	}
 	retval = memcmp(s1, s2, MIN(len1, len2));
 	if (!retval) {
 		return (len1 - len2);
@@ -1918,6 +1994,9 @@ ZEND_API int zend_binary_strncmp(const char *s1, uint len1, const char *s2, uint
 {
 	int retval;
 
+	if (s1 == s2) {
+		return 0;
+	}
 	retval = memcmp(s1, s2, MIN(length, MIN(len1, len2)));
 	if (!retval) {
 		return (MIN(length, len1) - MIN(length, len2));
@@ -1932,11 +2011,14 @@ ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, u
 	int len;
 	int c1, c2;
 
-	len = MIN(len1, len2);
+	if (s1 == s2) {
+		return 0;
+	}
 
+	len = MIN(len1, len2);
 	while (len--) {
-		c1 = zend_tolower((int)*(unsigned char *)s1++);
-		c2 = zend_tolower((int)*(unsigned char *)s2++);
+		c1 = zend_tolower_ascii(*(unsigned char *)s1++);
+		c2 = zend_tolower_ascii(*(unsigned char *)s2++);
 		if (c1 != c2) {
 			return c1 - c2;
 		}
@@ -1951,8 +2033,53 @@ ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, 
 	int len;
 	int c1, c2;
 
+	if (s1 == s2) {
+		return 0;
+	}
 	len = MIN(length, MIN(len1, len2));
+	while (len--) {
+		c1 = zend_tolower_ascii(*(unsigned char *)s1++);
+		c2 = zend_tolower_ascii(*(unsigned char *)s2++);
+		if (c1 != c2) {
+			return c1 - c2;
+		}
+	}
 
+	return MIN(length, len1) - MIN(length, len2);
+}
+/* }}} */
+
+ZEND_API int zend_binary_strcasecmp_l(const char *s1, uint len1, const char *s2, uint len2) /* {{{ */
+{
+	int len;
+	int c1, c2;
+
+	if (s1 == s2) {
+		return 0;
+	}
+
+	len = MIN(len1, len2);
+	while (len--) {
+		c1 = zend_tolower((int)*(unsigned char *)s1++);
+		c2 = zend_tolower((int)*(unsigned char *)s2++);
+		if (c1 != c2) {
+			return c1 - c2;
+		}
+	}
+
+	return len1 - len2;
+}
+/* }}} */
+
+ZEND_API int zend_binary_strncasecmp_l(const char *s1, uint len1, const char *s2, uint len2, uint length) /* {{{ */
+{
+	int len;
+	int c1, c2;
+
+	if (s1 == s2) {
+		return 0;
+	}
+	len = MIN(length, MIN(len1, len2));
 	while (len--) {
 		c1 = zend_tolower((int)*(unsigned char *)s1++);
 		c2 = zend_tolower((int)*(unsigned char *)s2++);
@@ -1979,28 +2106,49 @@ ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3) /* {{{ */
 
 ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2) /* {{{ */
 {
-	return zend_binary_strcasecmp(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2));
+	return zend_binary_strcasecmp_l(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2));
 }
 /* }}} */
 
 ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3) /* {{{ */
 {
-	return zend_binary_strncasecmp(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2), Z_LVAL_P(s3));
+	return zend_binary_strncasecmp_l(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2), Z_LVAL_P(s3));
 }
 /* }}} */
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
 {
 	int ret1, ret2;
+	int oflow1, oflow2;
 	long lval1, lval2;
 	double dval1, dval2;
 
-	if ((ret1=is_numeric_string(Z_STRVAL_P(s1), Z_STRLEN_P(s1), &lval1, &dval1, 0)) &&
-		(ret2=is_numeric_string(Z_STRVAL_P(s2), Z_STRLEN_P(s2), &lval2, &dval2, 0))) {
+	if ((ret1=is_numeric_string_ex(Z_STRVAL_P(s1), Z_STRLEN_P(s1), &lval1, &dval1, 0, &oflow1)) &&
+		(ret2=is_numeric_string_ex(Z_STRVAL_P(s2), Z_STRLEN_P(s2), &lval2, &dval2, 0, &oflow2))) {
+#if ULONG_MAX == 0xFFFFFFFF
+		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
+			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
+			|| (oflow1 == -1 && dval1 < -9007199254740991.))) {
+#else
+		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0.) {
+#endif
+			/* both values are integers overflown to the same side, and the
+			 * double comparison may have resulted in crucial accuracy lost */
+			goto string_cmp;
+		}
 		if ((ret1==IS_DOUBLE) || (ret2==IS_DOUBLE)) {
 			if (ret1!=IS_DOUBLE) {
+				if (oflow2) {
+					/* 2nd operand is integer > LONG_MAX (oflow2==1) or < LONG_MIN (-1) */
+					ZVAL_LONG(result, -1 * oflow2);
+					return;
+				}
 				dval1 = (double) lval1;
 			} else if (ret2!=IS_DOUBLE) {
+				if (oflow1) {
+					ZVAL_LONG(result, oflow1);
+					return;
+				}
 				dval2 = (double) lval2;
 			} else if (dval1 == dval2 && !zend_finite(dval1)) {
 				/* Both values overflowed and have the same sign,

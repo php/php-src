@@ -41,43 +41,71 @@ extern zend_module_entry curl_module_entry;
 #define curl_module_ptr &curl_module_entry
 
 #define CURLOPT_RETURNTRANSFER 19913
-#define CURLOPT_BINARYTRANSFER 19914
+#define CURLOPT_BINARYTRANSFER 19914 /* For Backward compatibility */
 #define PHP_CURL_STDOUT 0
 #define PHP_CURL_FILE   1
 #define PHP_CURL_USER   2
 #define PHP_CURL_DIRECT 3
 #define PHP_CURL_RETURN 4
-#define PHP_CURL_ASCII  5
-#define PHP_CURL_BINARY 6
 #define PHP_CURL_IGNORE 7
 
 extern int  le_curl;
 #define le_curl_name "cURL handle"
 extern int  le_curl_multi_handle;
 #define le_curl_multi_handle_name "cURL Multi Handle"
+extern int  le_curl_share_handle;
+#define le_curl_share_handle_name "cURL Share Handle"
 
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
-PHP_FUNCTION(curl_version);
-PHP_FUNCTION(curl_init);
+
+PHP_FUNCTION(curl_close);
 PHP_FUNCTION(curl_copy_handle);
-PHP_FUNCTION(curl_setopt);
-PHP_FUNCTION(curl_setopt_array);
+PHP_FUNCTION(curl_errno);
+PHP_FUNCTION(curl_error);
 PHP_FUNCTION(curl_exec);
 PHP_FUNCTION(curl_getinfo);
-PHP_FUNCTION(curl_error);
-PHP_FUNCTION(curl_errno);
-PHP_FUNCTION(curl_close);
-PHP_FUNCTION(curl_multi_init);
+PHP_FUNCTION(curl_init);
+PHP_FUNCTION(curl_setopt);
+PHP_FUNCTION(curl_setopt_array);
+PHP_FUNCTION(curl_version);
+
 PHP_FUNCTION(curl_multi_add_handle);
-PHP_FUNCTION(curl_multi_remove_handle);
-PHP_FUNCTION(curl_multi_select);
+PHP_FUNCTION(curl_multi_close);
 PHP_FUNCTION(curl_multi_exec);
 PHP_FUNCTION(curl_multi_getcontent);
 PHP_FUNCTION(curl_multi_info_read);
-PHP_FUNCTION(curl_multi_close);
+PHP_FUNCTION(curl_multi_init);
+PHP_FUNCTION(curl_multi_remove_handle);
+PHP_FUNCTION(curl_multi_select);
+
+PHP_FUNCTION(curl_share_close);
+PHP_FUNCTION(curl_share_init);
+PHP_FUNCTION(curl_share_setopt);
+
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* 7.12.0 */
+PHP_FUNCTION(curl_strerror);
+PHP_FUNCTION(curl_multi_strerror);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
+PHP_FUNCTION(curl_reset);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
+PHP_FUNCTION(curl_escape);
+PHP_FUNCTION(curl_unescape);
+
+PHP_FUNCTION(curl_multi_setopt);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
+PHP_FUNCTION(curl_pause);
+#endif
+
 void _php_curl_multi_close(zend_rsrc_list_entry * TSRMLS_DC);
+void _php_curl_share_close(zend_rsrc_list_entry * TSRMLS_DC);
 
 typedef struct {
 	zval            *func_name;
@@ -85,7 +113,6 @@ typedef struct {
 	FILE            *fp;
 	smart_str       buf;
 	int             method;
-	int             type;
 	zval		*stream;
 } php_curl_write;
 
@@ -102,15 +129,20 @@ typedef struct {
 	zval 		*func_name;
 	zend_fcall_info_cache fci_cache;
 	int    	        method;
-} php_curl_progress;
+} php_curl_progress, php_curl_fnmatch;
 
 typedef struct {
 	php_curl_write *write;
 	php_curl_write *write_header;
 	php_curl_read  *read;
+#if CURLOPT_PASSWDFUNCTION != 0
 	zval           *passwd;
+#endif
 	zval           *std_err;
 	php_curl_progress *progress;
+#if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
+	php_curl_fnmatch  *fnmatch;
+#endif
 } php_curl_handlers;
 
 struct _php_curl_error  {
@@ -137,7 +169,6 @@ typedef struct {
 	CURL                    *cp;
 	php_curl_handlers       *handlers;
 	long                     id;
-	unsigned int             uses;
 	zend_bool                in_callback;
 	zval                     *clone;
 } php_curl;
@@ -147,6 +178,10 @@ typedef struct {
 	CURLM *multi;
 	zend_llist easyh;
 } php_curlm;
+
+typedef struct {
+	CURLSH                   *share;
+} php_curlsh;
 
 void _php_curl_cleanup_handle(php_curl *);
 void _php_curl_multi_cleanup_list(void *data);

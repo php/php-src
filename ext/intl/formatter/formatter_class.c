@@ -64,6 +64,7 @@ zend_object_value NumberFormatter_object_create(zend_class_entry *ce TSRMLS_DC)
 	intern = ecalloc( 1, sizeof(NumberFormatter_object) );
 	formatter_data_init( &intern->nf_data TSRMLS_CC );
 	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
+	object_properties_init(&intern->zo, ce);
 
 	retval.handle = zend_objects_store_put(
 		intern,
@@ -168,7 +169,7 @@ ZEND_END_ARG_INFO()
 /* {{{ NumberFormatter_class_functions
  * Every 'NumberFormatter' class method has an entry in this table
  */
-static function_entry NumberFormatter_class_functions[] = {
+static zend_function_entry NumberFormatter_class_functions[] = {
 	PHP_ME( NumberFormatter, __construct, arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_FENTRY( create, ZEND_FN( numfmt_create ), arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( format, ZEND_FN( numfmt_format ), arginfo_numberformatter_format )

@@ -16,5 +16,6 @@ mbstring.internal_encoding=pass
 	setlocale( LC_CTYPE, "ja_JP.EUC-JP", "ja_JP.eucJP" );
 	var_dump(htmlentities("\xa1\xa2\xa1\xa3\xa1\xa4", ENT_QUOTES, ''));
 ?>
---EXPECT--
+--EXPECTF--
+Strict Standards: htmlentities(): Only basic entities substitution is supported for multi-byte encodings other than UTF-8; functionality is equivalent to htmlspecialchars in %s line %d
 string(6) "¡¢¡£¡¤"

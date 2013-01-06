@@ -26,12 +26,6 @@
 
 PHPAPI extern MYSQLND_STATS * mysqlnd_global_stats;
 
-typedef struct st_mysqlnd_string
-{
-	char	*s;
-	size_t	l;
-} MYSQLND_STRING;
-
 extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 
 #ifdef ZTS

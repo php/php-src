@@ -1317,18 +1317,12 @@ PHP_FUNCTION(odbc_execute)
 			if (Z_STRLEN_PP(tmp) > 2 &&
 				Z_STRVAL_PP(tmp)[0] == '\'' &&
 				Z_STRVAL_PP(tmp)[Z_STRLEN_PP(tmp) - 1] == '\'') {
-				if (strlen(tmp) != Z_STRLEN_PP(tmp)) {
+					
+				if (CHECK_ZVAL_NULL_PATH(*tmp)) {
 					RETURN_FALSE;
 				}
-
 				filename = estrndup(&Z_STRVAL_PP(tmp)[1], Z_STRLEN_PP(tmp) - 2);
-
-				/* Check for safe mode. */
-				if (PG(safe_mode) && (!php_checkuid(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-					efree(filename);
-					efree(params);
-					RETURN_FALSE;
-				}
+				filename[strlen(filename)] = '\0';
 
 				/* Check the basedir */
 				if (php_check_open_basedir(filename TSRMLS_CC)) {

@@ -2,8 +2,6 @@
 Phar::mapPhar truncated manifest (not enough for manifest length)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip");?>
---INI--
-detect_unicode=0
 --FILE--
 <?php
 $file = "<?php

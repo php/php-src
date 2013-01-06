@@ -118,6 +118,8 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 	REGISTER_LONG_CONSTANT("SORT_NUMERIC", PHP_SORT_NUMERIC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_STRING", PHP_SORT_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SORT_NATURAL", PHP_SORT_NATURAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SORT_FLAG_CASE", PHP_SORT_FLAG_CASE, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("CASE_LOWER", CASE_LOWER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CASE_UPPER", CASE_UPPER, CONST_CS | CONST_PERSISTENT);
@@ -141,13 +143,17 @@ PHP_MSHUTDOWN_FUNCTION(array) /* {{{ */
 
 static void php_set_compare_func(int sort_type TSRMLS_DC) /* {{{ */
 {
-	switch (sort_type) {
+	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
 		case PHP_SORT_NUMERIC:
 			ARRAYG(compare_func) = numeric_compare_function;
 			break;
 
 		case PHP_SORT_STRING:
-			ARRAYG(compare_func) = string_compare_function;
+			ARRAYG(compare_func) = sort_type & PHP_SORT_FLAG_CASE ? string_case_compare_function : string_compare_function;
+			break;
+
+		case PHP_SORT_NATURAL:
+			ARRAYG(compare_func) = sort_type & PHP_SORT_FLAG_CASE ? string_natural_case_compare_function : string_natural_compare_function;
 			break;
 
 #if HAVE_STRCOLL
@@ -180,7 +186,7 @@ static int php_array_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 		Z_LVAL(first) = f->h;
 	} else {
 		Z_TYPE(first) = IS_STRING;
-		Z_STRVAL(first) = f->arKey;
+		Z_STRVAL(first) = (char*)f->arKey;
 		Z_STRLEN(first) = f->nKeyLength - 1;
 	}
 
@@ -189,7 +195,7 @@ static int php_array_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 		Z_LVAL(second) = s->h;
 	} else {
 		Z_TYPE(second) = IS_STRING;
-		Z_STRVAL(second) = s->arKey;
+		Z_STRVAL(second) = (char*)s->arKey;
 		Z_STRLEN(second) = s->nKeyLength - 1;
 	}
 
@@ -629,7 +635,7 @@ static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 PHP_FUNCTION(usort)
 {
 	zval *array;
-	int refcount;
+	unsigned int refcount;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
@@ -672,7 +678,7 @@ PHP_FUNCTION(usort)
 PHP_FUNCTION(uasort)
 {
 	zval *array;
-	int refcount;
+	unsigned int refcount;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
@@ -768,7 +774,7 @@ static int php_array_user_key_compare(const void *a, const void *b TSRMLS_DC) /*
 PHP_FUNCTION(uksort)
 {
 	zval *array;
-	int refcount;
+	unsigned int refcount;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	PHP_ARRAY_CMP_FUNC_BACKUP();
@@ -1556,7 +1562,7 @@ PHP_FUNCTION(array_fill)
 
 	num--;
 	zend_hash_index_update(Z_ARRVAL_P(return_value), start_key, &val, sizeof(zval *), NULL);
-    zval_add_ref(&val);
+	zval_add_ref(&val);
 
 	while (num--) {
 		if (zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &val, sizeof(zval *), NULL) == SUCCESS) {
@@ -1665,24 +1671,28 @@ PHP_FUNCTION(range)
 		high = (unsigned char *)Z_STRVAL_P(zhigh);
 
 		if (*low > *high) {		/* Negative Steps */
+			unsigned char ch = *low;
+
 			if (lstep <= 0) {
 				err = 1;
 				goto err;
 			}
-			for (; *low >= *high; (*low) -= (unsigned int)lstep) {
-				add_next_index_stringl(return_value, (const char *)low, 1, 1);
-				if (((signed int)*low - lstep) < 0) {
+			for (; ch >= *high; ch -= (unsigned int)lstep) {
+				add_next_index_stringl(return_value, (const char *)&ch, 1, 1);
+				if (((signed int)ch - lstep) < 0) {
 					break;
 				}
 			}
 		} else if (*high > *low) {	/* Positive Steps */
+			unsigned char ch = *low;
+
 			if (lstep <= 0) {
 				err = 1;
 				goto err;
 			}
-			for (; *low <= *high; (*low) += (unsigned int)lstep) {
-				add_next_index_stringl(return_value, (const char *)low, 1, 1);
-				if (((signed int)*low + lstep) > 255) {
+			for (; ch <= *high; ch += (unsigned int)lstep) {
+				add_next_index_stringl(return_value, (const char *)&ch, 1, 1);
+				if (((signed int)ch + lstep) > 255) {
 					break;
 				}
 			}
@@ -3761,7 +3771,7 @@ PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC) /* {{{ 
 	efree(args);							\
 	RETURN_FALSE;
 
-/* {{{ proto bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING]], ...])
+/* {{{ proto bool array_multisort(array ar1 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]] [, array ar2 [, SORT_ASC|SORT_DESC [, SORT_REGULAR|SORT_NUMERIC|SORT_STRING|SORT_NATURAL|SORT_FLAG_CASE]], ...])
    Sort multiple arrays at once similar to how ORDER BY clause works in SQL */
 PHP_FUNCTION(array_multisort)
 {
@@ -3811,7 +3821,7 @@ PHP_FUNCTION(array_multisort)
 				parse_state[k] = 1;
 			}
 		} else if (Z_TYPE_PP(args[i]) == IS_LONG) {
-			switch (Z_LVAL_PP(args[i])) {
+			switch (Z_LVAL_PP(args[i]) & ~PHP_SORT_FLAG_CASE) {
 				case PHP_SORT_ASC:
 				case PHP_SORT_DESC:
 					/* flag allowed here */
@@ -3828,6 +3838,7 @@ PHP_FUNCTION(array_multisort)
 				case PHP_SORT_REGULAR:
 				case PHP_SORT_NUMERIC:
 				case PHP_SORT_STRING:
+				case PHP_SORT_NATURAL:
 #if HAVE_STRCOLL
 				case PHP_SORT_LOCALE_STRING:
 #endif
@@ -4484,12 +4495,11 @@ PHP_FUNCTION(array_combine)
 		RETURN_FALSE;
 	}
 
-	if (!num_keys) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Both parameters should have at least 1 element");
-		RETURN_FALSE;
-	}
-
 	array_init_size(return_value, num_keys);
+
+	if (!num_keys) {
+		return;
+	}
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(keys), &pos_keys);
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(values), &pos_values);

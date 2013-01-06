@@ -90,7 +90,7 @@ $values = array(
 // loop through each element of the array for value
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo @"\nArg value $value \n";
       var_dump( xml_parser_set_option($parser, $option, $value) );
 };
 

@@ -12,7 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Author: Georg Richter <georg@php.net>                                |
+  | Authors: Georg Richter <georg@php.net>                               |
+  |          Andrey Hristov <andrey@php.net>                             |
+  |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 
   $Id$
@@ -129,12 +131,6 @@ typedef struct {
 } MY_MYSQL;
 
 typedef struct {
-	int			mode;
-	int			socket;
-	FILE		*fp;
-} PROFILER;
-
-typedef struct {
 	void				*ptr;		/* resource: (mysql, result, stmt)   */
 	void				*info;		/* additional buffer				 */
 	enum mysqli_status	status;		/* object status */
@@ -162,12 +158,6 @@ typedef struct _mysqli_property_entry {
 	int (*w_func)(mysqli_object *obj, zval *value TSRMLS_DC);
 } mysqli_property_entry;
 
-#if !defined(MYSQLI_USE_MYSQLND)
-typedef struct {
-	char	error_msg[LOCAL_INFILE_ERROR_LEN];
-  	void	*userdata;
-} mysqli_local_infile;
-#endif
 
 typedef struct {
 	zend_ptr_stack free_links;
@@ -207,6 +197,36 @@ extern zend_class_entry *mysqli_result_class_entry;
 extern zend_class_entry *mysqli_driver_class_entry;
 extern zend_class_entry *mysqli_warning_class_entry;
 extern zend_class_entry *mysqli_exception_class_entry;
+extern int php_le_pmysqli(void);
+extern void php_mysqli_dtor_p_elements(void *data);
+
+extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status TSRMLS_DC);
+
+extern zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
+extern zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval *object, int by_ref TSRMLS_DC);
+
+extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, long fetchtype TSRMLS_DC);
+
+#ifdef HAVE_SPL
+extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
+#endif
+
+#define MYSQLI_DISABLE_MQ if (mysql->multi_query) { \
+	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF); \
+	mysql->multi_query = 0; \
+}
+
+#define MYSQLI_ENABLE_MQ if (!mysql->multi_query) { \
+	mysql_set_server_option(mysql->mysql, MYSQL_OPTION_MULTI_STATEMENTS_ON); \
+	mysql->multi_query = 1; \
+}
+
+#define REGISTER_MYSQLI_CLASS_ENTRY(name, mysqli_entry, class_functions) { \
+	zend_class_entry ce; \
+	INIT_CLASS_ENTRY(ce, name,class_functions); \
+	ce.create_object = mysqli_objects_new; \
+	mysqli_entry = zend_register_internal_class(&ce TSRMLS_CC); \
+} \
 
 #define MYSQLI_REGISTER_RESOURCE_EX(__ptr, __zval)  \
 	((mysqli_object *) zend_object_store_get_object(__zval TSRMLS_CC))->ptr = __ptr;
@@ -241,6 +261,21 @@ extern zend_class_entry *mysqli_exception_class_entry;
 		RETURN_NULL();\
 	}\
 }
+
+#define MYSQLI_FETCH_RESOURCE_BY_OBJ(__ptr, __type, __obj, __name, __check) \
+{ \
+	MYSQLI_RESOURCE *my_res; \
+	if (!(my_res = (MYSQLI_RESOURCE *)(__obj->ptr))) {\
+  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't fetch %s", intern->zo.ce->name);\
+  		return;\
+  	}\
+	__ptr = (__type)my_res->ptr; \
+	if (__check && my_res->status < __check) { \
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "invalid object or resource %s\n", intern->zo.ce->name); \
+		return;\
+	}\
+}
+
 
 #define MYSQLI_FETCH_RESOURCE_CONN(__ptr, __id, __check) \
 { \
@@ -285,7 +320,6 @@ ZEND_BEGIN_MODULE_GLOBALS(mysqli)
 	long 			num_inactive_persistent;
 	long			max_persistent;
 	long			allow_persistent;
-	long			cache_size;
 	unsigned long	default_port;
 	char			*default_host;
 	char			*default_user;

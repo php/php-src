@@ -27,7 +27,7 @@ int(-1)
 
 Warning: substr_compare(): The start position cannot exceed initial string length in %s on line %d
 bool(false)
-int(0)
+int(-1)
 
 Warning: substr_compare() expects parameter 5 to be boolean, object given in %s on line %d
 bool(false)

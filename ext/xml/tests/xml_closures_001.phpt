@@ -2,8 +2,6 @@
 XML parser test using closures as callbacks
 --SKIPIF--
 <?php include("skipif.inc"); ?>
---INI--
-magic_quotes_runtime=0
 --FILE--
 <?php
 chdir(dirname(__FILE__));

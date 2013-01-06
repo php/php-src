@@ -59,6 +59,8 @@ foreach ($codes as $key => $code) {
 
 echo "\nDone\n";
 ?>
+--XFAIL--
+https://bugs.php.net/bug.php?id=55496
 --EXPECTF--
 --------------
 Snippet no. 1:

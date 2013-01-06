@@ -226,7 +226,7 @@ PHP_FUNCTION(shmop_open)
 
 	shmop->size = shm.shm_segsz;
 
-	rsid = zend_list_insert(shmop, shm_type);
+	rsid = zend_list_insert(shmop, shm_type TSRMLS_CC);
 	RETURN_LONG(rsid);
 err:
 	efree(shmop);

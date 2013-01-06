@@ -1,7 +1,7 @@
 --TEST--
 Bug#48746 - Junction not working properly
 
---CREDIT--
+--CREDITS--
 Venkat Raman Don (don.raman@microsoft.com)
 
 --SKIPIF--

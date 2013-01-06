@@ -28,5 +28,5 @@ new Bar;
 var_dump(gc_collect_cycles());
 ?>
 --EXPECT--
-int(0)
+int(2)
 int(2)

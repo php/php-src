@@ -1,23 +1,65 @@
 $Id$
 
-UPGRADE NOTES - PHP 5.3.4
+UPGRADE NOTES - PHP X.Y
 
 1. Internal API changes
+  a. Streams pooling API
+  b. Lowercasing and locales
+
+2. Build system changes
+  a. Unix build system changes
+  b. Windows build system changes
+
 
 ========================
 1. Internal API changes
 ========================
 
-	a. stat/lstat support
+	a. Streams pooling API
 
-lstat is now available on all platforms. On unix-like platform
-php_sys_lstat is an alias to lstat (when avaible). On Windows it is now 
-available using php_sys_lstat. php_sys_stat and php_sys_lstat usage is recommended 
-instead of calling lstat directly, to ensure portability.
+The streams pooling API has been removed. The following functions no longer
+exist:
 
-	b. readlink support
+PHPAPI int php_stream_context_get_link(php_stream_context *context,
+		const char *hostent, php_stream **stream);
+PHPAPI int php_stream_context_set_link(php_stream_context *context,
+		const char *hostent, php_stream *stream);
+PHPAPI int php_stream_context_del_link(php_stream_context *context,
+		php_stream *stream);
 
-readlink is now available on all platforms. On unix-like platform
-php_sys_readlink is an alias to readlink (when avaible). On Windows it is now 
-available using php_sys_readlink. php_sys_readlink usage is recommended 
-instead of calling readlink directly, to ensure portability.
+	b. Lowercasing and locales
+
+The lowercasing functions in zend_operators.c were split into those that do 
+lowercasing according to locale rules and those that do ASCII lowercasing.
+ASCII:
+
+                zend_str_tolower_copy
+                zend_str_tolower_dup
+                zend_str_tolower
+                zend_binary_strcasecmp
+                zend_binary_strncasecmp
+
+Locale-based:
+                zend_binary_strncasecmp_l
+                zend_binary_strcasecmp_l
+                zend_binary_zval_strcasecmp
+                zend_binary_zval_strncasecmp
+                string_compare_function_ex
+                string_case_compare_function
+
+Internal engine lowercasing will be using ASCII-only rules. User-facing functions,
+such as strcasecmp, will be using locale rules. 
+
+Two new functions - zend_binary_strncasecmp_l and zend_binary_strcasecmp_l - added as 
+locale-based counterparts to zend_binary_strcasecmp and zend_binary_strncasecmp.
+
+========================
+2. Build system changes
+========================
+
+  a. Unix build system changes
+    - 
+
+  b. Windows build system changes
+    - Drop Windows XP and 2003 support.
+  

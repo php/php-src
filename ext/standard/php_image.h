@@ -23,6 +23,7 @@
 #define PHP_IMAGE_H
 
 PHP_FUNCTION(getimagesize);
+PHP_FUNCTION(getimagesizefromstring);
 
 PHP_FUNCTION(image_type_to_mime_type);
 PHP_FUNCTION(image_type_to_extension);

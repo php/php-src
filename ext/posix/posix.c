@@ -838,16 +838,11 @@ PHP_FUNCTION(posix_mkfifo)
 	long mode;
 	int     result;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl", &path, &path_len, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pl", &path, &path_len, &mode) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (strlen(path) != path_len) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
-			(PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR)))) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -876,17 +871,12 @@ PHP_FUNCTION(posix_mknod)
 
 	php_dev = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ll", &path, &path_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pl|ll", &path, &path_len,
 			&mode, &major, &minor) == FAILURE) {
 		RETURN_FALSE;
 	}
 
-	if (strlen(path) != path_len) {
-		RETURN_FALSE;
-	}
-
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
-			(PG(safe_mode) && (!php_checkuid(path, NULL, CHECKUID_ALLOW_ONLY_DIR)))) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 
@@ -961,11 +951,7 @@ PHP_FUNCTION(posix_access)
 	int filename_len, ret;
 	char *filename, *path;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &filename, &filename_len, &mode) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (strlen(filename) != filename_len) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|l", &filename, &filename_len, &mode) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -975,8 +961,7 @@ PHP_FUNCTION(posix_access)
 		RETURN_FALSE;
 	}
 
-	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC) ||
-			(PG(safe_mode) && (!php_checkuid_ex(filename, NULL, CHECKUID_CHECK_FILE_AND_DIR, CHECKUID_NO_ERRORS)))) {
+	if (php_check_open_basedir_ex(path, 0 TSRMLS_CC)) {
 		efree(path);
 		POSIX_G(last_error) = EPERM;
 		RETURN_FALSE;

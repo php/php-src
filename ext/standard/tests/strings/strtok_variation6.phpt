@@ -25,7 +25,7 @@ $token_array = array(
 		       "/ ",
 		       "/k",
 		       "\k",
-		       "\\\\\\\k\h\e\l\o\w\r\l\d" 
+		       "\\\\\\\k\h\\e\l\o\w\r\l\d" 
  		    );
 
 // loop through each element of the array and check the working of strtok()

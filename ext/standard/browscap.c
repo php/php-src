@@ -333,10 +333,10 @@ PHP_INI_MH(OnChangeBrowscap)
 PHP_MINIT_FUNCTION(browscap) /* {{{ */
 {
 	char *browscap = INI_STR("browscap");
-	
+
 #ifdef ZTS
 	ts_allocate_id(&browscap_globals_id, sizeof(browser_data),
-		(ts_allocate_ctor)browscap_globals_ctor, NULL);
+		browscap_globals_ctor, NULL);
 #endif
 	/* ctor call not really needed for non-ZTS */
 

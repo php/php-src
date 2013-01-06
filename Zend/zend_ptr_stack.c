@@ -27,9 +27,8 @@
 
 ZEND_API void zend_ptr_stack_init_ex(zend_ptr_stack *stack, zend_bool persistent)
 {
-	stack->top_element = stack->elements = (void **) pemalloc(sizeof(void *)*PTR_STACK_BLOCK_SIZE, persistent);
-	stack->max = PTR_STACK_BLOCK_SIZE;
-	stack->top = 0;
+	stack->top_element = stack->elements = NULL;
+	stack->top = stack->max = 0;
 	stack->persistent = persistent;
 }
 
@@ -111,7 +110,6 @@ ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack)
 {
 	return stack->top;
 }
-
 /*
  * Local variables:
  * tab-width: 4

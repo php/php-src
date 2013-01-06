@@ -1,7 +1,5 @@
 --TEST--
 Test rsort() function : usage variations - referenced variables
---INI--
-allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : bool rsort(array &$array_arg [, int $sort_flags])
@@ -35,11 +33,6 @@ $temp_array = &$unsorted_numerics;
 var_dump( rsort($temp_array, SORT_REGULAR) );
 var_dump( $temp_array);
 
-echo "\n-- 'flag' = SORT_NUMERIC --\n";
-$temp_array = $unsorted_numerics;
-var_dump( rsort(&$temp_array, SORT_NUMERIC) );
-var_dump( $temp_array);
-
 echo "Done";
 ?>
 --EXPECTF--
@@ -57,17 +50,6 @@ array(3) {
 }
 
 -- 'flag' = SORT_REGULAR --
-bool(true)
-array(3) {
-  [0]=>
-  &int(555)
-  [1]=>
-  &int(100)
-  [2]=>
-  &int(33)
-}
-
--- 'flag' = SORT_NUMERIC --
 bool(true)
 array(3) {
   [0]=>

@@ -26,6 +26,9 @@
 extern zend_module_entry openssl_module_entry;
 #define phpext_openssl_ptr &openssl_module_entry
 
+#define OPENSSL_RAW_DATA 1
+#define OPENSSL_ZERO_PADDING 2
+
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
 
 PHP_MINIT_FUNCTION(openssl);
@@ -48,6 +51,8 @@ PHP_FUNCTION(openssl_private_encrypt);
 PHP_FUNCTION(openssl_private_decrypt);
 PHP_FUNCTION(openssl_public_encrypt);
 PHP_FUNCTION(openssl_public_decrypt);
+
+PHP_FUNCTION(openssl_pbkdf2);
 
 PHP_FUNCTION(openssl_pkcs7_verify);
 PHP_FUNCTION(openssl_pkcs7_decrypt);

@@ -39,43 +39,43 @@ var_dump($c);
 ---( $c->boolFalse )---
   --> Attempting implicit conversion to object using increment...
 
-Strict Standards: Creating default object from empty value in %s on line 18
+Warning: Creating default object from empty value in %s on line 18
 
   --> Attempting implicit conversion to object using assignment...
 
-Strict Standards: Creating default object from empty value in %s on line 22
+Warning: Creating default object from empty value in %s on line 22
 
   --> Attempting implicit conversion to object using combined assignment...
 
-Strict Standards: Creating default object from empty value in %s on line 26
+Warning: Creating default object from empty value in %s on line 26
 
 
 ---( $c->emptyString )---
   --> Attempting implicit conversion to object using increment...
 
-Strict Standards: Creating default object from empty value in %s on line 18
+Warning: Creating default object from empty value in %s on line 18
 
   --> Attempting implicit conversion to object using assignment...
 
-Strict Standards: Creating default object from empty value in %s on line 22
+Warning: Creating default object from empty value in %s on line 22
 
   --> Attempting implicit conversion to object using combined assignment...
 
-Strict Standards: Creating default object from empty value in %s on line 26
+Warning: Creating default object from empty value in %s on line 26
 
 
 ---( $c->null )---
   --> Attempting implicit conversion to object using increment...
 
-Strict Standards: Creating default object from empty value in %s on line 18
+Warning: Creating default object from empty value in %s on line 18
 
   --> Attempting implicit conversion to object using assignment...
 
-Strict Standards: Creating default object from empty value in %s on line 22
+Warning: Creating default object from empty value in %s on line 22
 
   --> Attempting implicit conversion to object using combined assignment...
 
-Strict Standards: Creating default object from empty value in %s on line 26
+Warning: Creating default object from empty value in %s on line 26
 
 
 ---( $c->boolTrue )---

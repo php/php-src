@@ -15,15 +15,15 @@ array(3) {
   ["error_reporting values"]=>
   array(6) {
     ["foo"]=>
-    string(7) "30719 8"
+    string(7) "32767 8"
     ["error_reporting"]=>
-    string(5) "30719"
+    string(5) "32767"
     ["error_reporting1"]=>
     string(4) "4177"
     ["error_reporting2"]=>
-    string(5) "30711"
+    string(5) "32759"
     ["error_reporting3"]=>
-    string(5) "30711"
+    string(5) "32759"
     ["error_reporting4"]=>
     string(5) "32759"
   }

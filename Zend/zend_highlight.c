@@ -56,18 +56,15 @@ ZEND_API void zend_html_putc(char c)
 
 ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 {
-	const char *ptr=s, *end=s+len;
-
-#ifdef ZEND_MULTIBYTE
-	char *filtered;
-	int filtered_len;
+	const unsigned char *ptr = (const unsigned char*)s, *end = ptr + len;
+	unsigned char *filtered;
+	size_t filtered_len;
 
 	if (LANG_SCNG(output_filter)) {
-		LANG_SCNG(output_filter)(&filtered, &filtered_len, s, len TSRMLS_CC);
+		LANG_SCNG(output_filter)(&filtered, &filtered_len, ptr, len TSRMLS_CC);
 		ptr = filtered;
 		end = filtered + filtered_len;
 	}
-#endif /* ZEND_MULTIBYTE */
 
 	while (ptr<end) {
 		if (*ptr==' ') {
@@ -79,11 +76,9 @@ ZEND_API void zend_html_puts(const char *s, uint len TSRMLS_DC)
 		}
 	}
 
-#ifdef ZEND_MULTIBYTE
 	if (LANG_SCNG(output_filter)) {
 		efree(filtered);
 	}
-#endif /* ZEND_MULTIBYTE */
 }
 
 
@@ -120,7 +115,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				next_color = syntax_highlighter_ini->highlight_string;
 				break;
 			case T_WHITESPACE:
-				zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);  /* no color needed */
+				zend_html_puts((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);  /* no color needed */
 				token.type = 0;
 				continue;
 				break;
@@ -143,7 +138,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			}
 		}
 
-		zend_html_puts(LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
+		zend_html_puts((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
 
 		if (token.type == IS_STRING) {
 			switch (token_type) {
@@ -158,8 +153,6 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 					efree(token.value.str.val);
 					break;
 			}
-		} else if (token_type == T_END_HEREDOC) {
-			efree(token.value.str.val);
 		}
 		token.type = 0;
 	}
@@ -192,11 +185,10 @@ ZEND_API void zend_strip(TSRMLS_D)
 				continue;
 			
 			case T_END_HEREDOC:
-				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
-				efree(token.value.str.val);
+				zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				/* read the following character, either newline or ; */
 				if (lex_scan(&token TSRMLS_CC) != T_WHITESPACE) {
-					zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
+					zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				}
 				zend_write("\n", sizeof("\n") - 1);
 				prev_space = 1;
@@ -204,7 +196,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 				continue;
 
 			default:
-				zend_write(LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
+				zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				break;
 		}
 

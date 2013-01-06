@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 --- libmagic.orig/apprentice.c	Sat Dec 17 18:17:18 2011
-+++ libmagic/apprentice.c	Tue Nov 27 16:25:57 2012
++++ libmagic/apprentice.c	Tue Nov 27 16:35:47 2012
 @@ -29,6 +29,8 @@
   * apprentice - make one pass through /etc/magic, learning its secrets.
   */
@@ -269,11 +269,11 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 +	size_t lineno = 0;
 +
 +	php_stream *stream;
++
++	TSRMLS_FETCH();
  
 -	FILE *f = fopen(ms->file = fn, "r");
 -	if (f == NULL) {
-+	TSRMLS_FETCH();
-+
 +#if PHP_API_VERSION < 20100412
 +	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS|ENFORCE_SAFE_MODE, NULL);
 +#else
@@ -315,13 +315,13 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
      const char *fn, int action)
  {
 -	int errs = 0;
-+	int errs = 0, mflen = 0;
++	int errs = 0; 
  	struct magic_entry *marray;
  	uint32_t marraycount, i, mentrycount = 0, starttest;
 -	size_t slen, files = 0, maxfiles = 0;
 -	char **filearr = NULL, *mfn;
 +	size_t files = 0, maxfiles = 0;
-+	char **filearr = NULL, mfn[MAXPATHLEN];
++	char **filearr = NULL;
  	struct stat st;
 -	DIR *dir;
 -	struct dirent *d;
@@ -343,7 +343,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	marraycount = 0;
  
  	/* print silly verbose header for USG compat. */
-@@ -778,22 +772,25 @@
+@@ -778,22 +772,26 @@
  		(void)fprintf(stderr, "%s\n", usg_hdr);
  
  	/* load directory or file */
@@ -352,24 +352,24 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 +        /* FIXME: Read file names and sort them to prevent
 +           non-determinism. See Debian bug #488562. */
 +	if (php_sys_stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
-+ 		int mflen;
-+ 		char mfn[MAXPATHLEN];
-+ 
-+ 		dir = php_stream_opendir(fn, REPORT_ERRORS, NULL);
++		int mflen;
++		char mfn[MAXPATHLEN];
++
++		dir = php_stream_opendir(fn, REPORT_ERRORS, NULL);
  		if (!dir) {
  			errs++;
  			goto out;
  		}
 -		while ((d = readdir(dir)) != NULL) {
 -			if (asprintf(&mfn, "%s/%s", fn, d->d_name) < 0) {
--				file_oomem(ms,
++		while (php_stream_readdir(dir, &d)) {
++			if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d.d_name)) < 0) {
+ 				file_oomem(ms,
 -				    strlen(fn) + strlen(d->d_name) + 2);
-+ 		while (php_stream_readdir(dir, &d)) {
-+ 			if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d.d_name)) < 0) {
-+				file_oomem(ms, strlen(fn) + strlen(d.d_name) + 2);
++				strlen(fn) + strlen(d.d_name) + 2);
  				errs++;
 -				closedir(dir);
-+ 				php_stream_closedir(dir);
++				php_stream_closedir(dir);
  				goto out;
  			}
  			if (stat(mfn, &st) == -1 || !S_ISREG(st.st_mode)) {
@@ -377,22 +377,22 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  				continue;
  			}
  			if (files >= maxfiles) {
-@@ -803,20 +800,19 @@
+@@ -803,20 +801,19 @@
  				if ((filearr = CAST(char **,
  				    realloc(filearr, mlen))) == NULL) {
  					file_oomem(ms, mlen);
 -					free(mfn);
 -					closedir(dir);
-+ 					php_stream_closedir(dir);
++					php_stream_closedir(dir);
  					errs++;
  					goto out;
  				}
  			}
 -			filearr[files++] = mfn;
-+			filearr[files++] = estrndup(mfn, mflen);
++			filearr[files++] = estrndup(mfn, (mflen > sizeof(mfn) - 1)? sizeof(mfn) - 1: mflen);
  		}
 -		closedir(dir);
-+ 		php_stream_closedir(dir);
++		php_stream_closedir(dir);
  		qsort(filearr, files, sizeof(*filearr), cmpstrp);
  		for (i = 0; i < files; i++) {
  			load_1(ms, action, filearr[i], &errs, &marray,
@@ -402,7 +402,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		}
  		free(filearr);
  	} else
-@@ -882,12 +878,7 @@
+@@ -882,12 +879,7 @@
  	for (i = 0; i < marraycount; i++)
  		mentrycount += marray[i].cont_count;
  
@@ -416,7 +416,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  
  	mentrycount = 0;
  	for (i = 0; i < marraycount; i++) {
-@@ -896,9 +887,14 @@
+@@ -896,9 +888,14 @@
  		mentrycount += marray[i].cont_count;
  	}
  out:
@@ -434,7 +434,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	if (errs) {
  		*magicp = NULL;
  		*nmagicp = 0;
-@@ -1175,14 +1171,13 @@
+@@ -1175,14 +1172,13 @@
  			return -1;
  		}
  		me = &(*mentryp)[*nmentryp - 1];
@@ -453,7 +453,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  			me->mp = m = nm;
  			me->max_count = CAST(uint32_t, cnt);
  		}
-@@ -1194,23 +1189,13 @@
+@@ -1194,23 +1190,13 @@
  			struct magic_entry *mp;
  
  			maxmagic += ALLOC_INCR;
@@ -480,7 +480,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  			me->mp = m;
  			me->max_count = ALLOC_CHUNK;
  		} else
-@@ -1353,6 +1338,10 @@
+@@ -1353,6 +1339,10 @@
  	if (m->type == FILE_INVALID) {
  		if (ms->flags & MAGIC_CHECK)
  			file_magwarn(ms, "type `%s' invalid", l);
@@ -491,7 +491,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		return -1;
  	}
  
-@@ -1361,7 +1350,7 @@
+@@ -1361,7 +1351,7 @@
  
  	m->mask_op = 0;
  	if (*l == '~') {
@@ -500,7 +500,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  			m->mask_op |= FILE_OPINVERSE;
  		else if (ms->flags & MAGIC_CHECK)
  			file_magwarn(ms, "'~' invalid for string types");
-@@ -1370,7 +1359,7 @@
+@@ -1370,7 +1360,7 @@
  	m->str_range = 0;
  	m->str_flags = m->type == FILE_PSTRING ? PSTRING_1_LE : 0;
  	if ((op = get_op(*l)) != -1) {
@@ -509,7 +509,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  			uint64_t val;
  			++l;
  			m->mask_op |= op;
-@@ -1558,11 +1547,6 @@
+@@ -1558,11 +1548,6 @@
  		if (check_format(ms, m) == -1)
  			return -1;
  	}
@@ -521,7 +521,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	m->mimetype[0] = '\0';		/* initialise MIME type to none */
  	if (m->cont_level == 0)
  		++(*nmentryp);		/* make room for next */
-@@ -2195,56 +2179,79 @@
+@@ -2195,56 +2180,79 @@
  
  /*
   * handle a compiled file.
@@ -624,7 +624,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	ptr = (uint32_t *)(void *)*magicp;
  	if (*ptr != MAGICNO) {
  		if (swap4(*ptr) != MAGICNO) {
-@@ -2259,35 +2266,55 @@
+@@ -2259,35 +2267,55 @@
  	else
  		version = ptr[1];
  	if (version != VERSIONNO) {
@@ -696,7 +696,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	return -1;
  }
  
-@@ -2301,42 +2328,49 @@
+@@ -2301,42 +2329,49 @@
  apprentice_compile(struct magic_set *ms, struct magic **magicp,
      uint32_t *nmagicp, const char *fn)
  {
@@ -757,7 +757,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  	return rv;
  }
  
-@@ -2349,6 +2383,7 @@
+@@ -2349,6 +2384,7 @@
  {
  	const char *p, *q;
  	char *buf;
@@ -765,7 +765,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  
  	if (strip) {
  		if ((p = strrchr(fn, '/')) != NULL)
-@@ -2370,14 +2405,18 @@
+@@ -2370,14 +2406,18 @@
  	q++;
  	/* Compatibility with old code that looked in .mime */
  	if (ms->flags & MAGIC_MIME) {
@@ -788,7 +788,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  
  	/* Compatibility with old code that looked in .mime */
  	if (strstr(p, ".mime") != NULL)
-@@ -2467,7 +2506,7 @@
+@@ -2467,7 +2507,7 @@
  	m->offset = swap4((uint32_t)m->offset);
  	m->in_offset = swap4((uint32_t)m->in_offset);
  	m->lineno = swap4((uint32_t)m->lineno);
@@ -2342,18 +2342,25 @@ diff -u libmagic.orig/magic.h libmagic/magic.h
  
 diff -u libmagic.orig/print.c libmagic/print.c
 --- libmagic.orig/print.c	Tue Sep 20 17:28:09 2011
-+++ libmagic/print.c	Tue Nov 27 16:24:35 2012
-@@ -29,6 +29,9 @@
++++ libmagic/print.c	Tue Nov 27 16:34:56 2012
+@@ -29,12 +29,16 @@
   * print.c - debugging printout routines
   */
  
++#define _GNU_SOURCE
 +#include "php.h"
-+#include "main/snprintf.h"
 +
  #include "file.h"
  
  #ifndef lint
-@@ -45,174 +48,21 @@
+ FILE_RCSID("@(#)$File: print.c,v 1.71 2011/09/20 15:28:09 christos Exp $")
+ #endif  /* lint */
+ 
++#include <stdio.h>
+ #include <string.h>
+ #include <stdarg.h>
+ #include <stdlib.h>
+@@ -45,174 +49,21 @@
  
  #define SZOF(a)	(sizeof(a) / sizeof(a[0]))
  

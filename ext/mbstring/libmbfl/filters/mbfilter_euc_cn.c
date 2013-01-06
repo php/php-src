@@ -169,7 +169,15 @@ mbfl_filt_conv_wchar_euccn(int c, mbfl_convert_filter *filter)
 	} else if (c >= ucs_i_cp936_table_min && c < ucs_i_cp936_table_max) {
 		s = ucs_i_cp936_table[c - ucs_i_cp936_table_min];
 	} else if (c >= ucs_hff_cp936_table_min && c < ucs_hff_cp936_table_max) {
-		s = ucs_hff_cp936_table[c - ucs_hff_cp936_table_min];
+		if (c == 0xff04) {
+			s = 0xa1e7;
+		} else if (c == 0xff5e) {
+			s = 0xa1ab; 
+		} else if (c >= 0xff01 && c <= 0xff5d) {
+			s = c - 0xff01 + 0xa3a1;
+		} else if (c >= 0xffe0 && c <= 0xffe5) {
+			s = ucs_hff_s_cp936_table[c-0xffe0];
+		}
 	}
 	c1 = (s >> 8) & 0xff;
 	c2 = s & 0xff;

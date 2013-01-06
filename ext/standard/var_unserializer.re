@@ -33,22 +33,23 @@ typedef struct {
 
 static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 {
-	var_entries *var_hash = var_hashx->first, *prev = NULL;
+	var_entries *var_hash = (*var_hashx)->last;
+#if 0
+	fprintf(stderr, "var_push(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
+#endif
 
-	while (var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
-		prev = var_hash;
-		var_hash = var_hash->next;
-	}
-
-	if (!var_hash) {
+	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
 		var_hash = emalloc(sizeof(var_entries));
 		var_hash->used_slots = 0;
 		var_hash->next = 0;
 
-		if (!var_hashx->first)
-			var_hashx->first = var_hash;
-		else
-			prev->next = var_hash;
+		if (!(*var_hashx)->first) {
+			(*var_hashx)->first = var_hash;
+		} else {
+			((var_entries *) (*var_hashx)->last)->next = var_hash;
+		}
+
+		(*var_hashx)->last = var_hash;
 	}
 
 	var_hash->data[var_hash->used_slots++] = *rval;
@@ -56,22 +57,23 @@ static inline void var_push(php_unserialize_data_t *var_hashx, zval **rval)
 
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 {
-	var_entries *var_hash = var_hashx->first_dtor, *prev = NULL;
+	var_entries *var_hash = (*var_hashx)->last_dtor;
+#if 0
+	fprintf(stderr, "var_push_dtor(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(rval));
+#endif
 
-	while (var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
-		prev = var_hash;
-		var_hash = var_hash->next;
-	}
-
-	if (!var_hash) {
+	if (!var_hash || var_hash->used_slots == VAR_ENTRIES_MAX) {
 		var_hash = emalloc(sizeof(var_entries));
 		var_hash->used_slots = 0;
 		var_hash->next = 0;
 
-		if (!var_hashx->first_dtor)
-			var_hashx->first_dtor = var_hash;
-		else
-			prev->next = var_hash;
+		if (!(*var_hashx)->first_dtor) {
+			(*var_hashx)->first_dtor = var_hash;
+		} else {
+			((var_entries *) (*var_hashx)->last_dtor)->next = var_hash;
+		}
+
+		(*var_hashx)->last_dtor = var_hash;
 	}
 
 	Z_ADDREF_PP(rval);
@@ -81,7 +83,10 @@ PHPAPI void var_push_dtor(php_unserialize_data_t *var_hashx, zval **rval)
 PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **nzval)
 {
 	long i;
-	var_entries *var_hash = var_hashx->first;
+	var_entries *var_hash = (*var_hashx)->first;
+#if 0
+	fprintf(stderr, "var_replace(%ld): %d\n", var_hash?var_hash->used_slots:-1L, Z_TYPE_PP(nzval));
+#endif
 	
 	while (var_hash) {
 		for (i = 0; i < var_hash->used_slots; i++) {
@@ -96,8 +101,11 @@ PHPAPI void var_replace(php_unserialize_data_t *var_hashx, zval *ozval, zval **n
 
 static int var_access(php_unserialize_data_t *var_hashx, long id, zval ***store)
 {
-	var_entries *var_hash = var_hashx->first;
-	
+	var_entries *var_hash = (*var_hashx)->first;
+#if 0
+	fprintf(stderr, "var_access(%ld): %ld\n", var_hash?var_hash->used_slots:-1L, id);
+#endif
+		
 	while (id >= VAR_ENTRIES_MAX && var_hash && var_hash->used_slots == VAR_ENTRIES_MAX) {
 		var_hash = var_hash->next;
 		id -= VAR_ENTRIES_MAX;
@@ -116,7 +124,10 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 {
 	void *next;
 	long i;
-	var_entries *var_hash = var_hashx->first;
+	var_entries *var_hash = (*var_hashx)->first;
+#if 0
+	fprintf(stderr, "var_destroy(%ld)\n", var_hash?var_hash->used_slots:-1L);
+#endif
 	
 	while (var_hash) {
 		next = var_hash->next;
@@ -124,7 +135,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		var_hash = next;
 	}
 
-	var_hash = var_hashx->first_dtor;
+	var_hash = (*var_hashx)->first_dtor;
 	
 	while (var_hash) {
 		for (i = 0; i < var_hash->used_slots; i++) {
@@ -368,6 +379,9 @@ static inline long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *ce)
 	return elements;
 }
 
+#ifdef PHP_WIN32
+# pragma optimize("", off)
+#endif
 static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 {
 	zval *retval_ptr = NULL;
@@ -381,7 +395,9 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 		zend_hash_exists(&Z_OBJCE_PP(rval)->function_table, "__wakeup", sizeof("__wakeup"))) {
 		INIT_PZVAL(&fname);
 		ZVAL_STRINGL(&fname, "__wakeup", sizeof("__wakeup") - 1, 0);
+		BG(serialize_lock)++;
 		call_user_function_ex(CG(function_table), rval, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
+		BG(serialize_lock)--;
 	}
 
 	if (retval_ptr)
@@ -390,13 +406,21 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 	return finish_nested_data(UNSERIALIZE_PASSTHRU);
 
 }
+#ifdef PHP_WIN32
+# pragma optimize("", on)
+#endif
 
 PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 {
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval **rval_ref;
 
-	limit = cursor = *p;
+	limit = max;
+	cursor = *p;
+	
+	if (YYCURSOR >= YYLIMIT) {
+		return 0;
+	}
 	
 	if (var_hash && cursor[0] != 'R') {
 		var_push(var_hash, rval);

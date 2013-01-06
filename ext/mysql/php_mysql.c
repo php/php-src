@@ -252,7 +252,7 @@ static const zend_function_entry mysql_functions[] = {
 	PHP_FE(mysql_query,									arginfo_mysql_query)
 	PHP_FE(mysql_unbuffered_query,						arginfo_mysql_query)
 	PHP_DEP_FE(mysql_db_query,							arginfo_mysql_db_query)
-	PHP_FE(mysql_list_dbs,								arginfo__optional_mysql_link)
+	PHP_DEP_FE(mysql_list_dbs,							arginfo__optional_mysql_link)
 	PHP_DEP_FE(mysql_list_tables,						arginfo_mysql_select_db)
 	PHP_FE(mysql_list_fields,							arginfo_mysql_list_fields)
 	PHP_FE(mysql_list_processes,						arginfo__optional_mysql_link)
@@ -297,27 +297,27 @@ static const zend_function_entry mysql_functions[] = {
 	PHP_FE(mysql_set_charset,							arginfo_mysql_set_charset)
 #endif
 	/* for downwards compatability */
-	PHP_FALIAS(mysql,				mysql_db_query,		arginfo_mysql_db_query)
-	PHP_FALIAS(mysql_fieldname,		mysql_field_name,	arginfo_mysql_field_name)
-	PHP_FALIAS(mysql_fieldtable,	mysql_field_table,	arginfo_mysql_field_seek)
-	PHP_FALIAS(mysql_fieldlen,		mysql_field_len,	arginfo_mysql_field_seek)
-	PHP_FALIAS(mysql_fieldtype,		mysql_field_type,	arginfo_mysql_field_seek)
-	PHP_FALIAS(mysql_fieldflags,	mysql_field_flags,	arginfo_mysql_field_seek)
-	PHP_FALIAS(mysql_selectdb,		mysql_select_db,	arginfo_mysql_select_db)
+	PHP_DEP_FALIAS(mysql,				mysql_db_query,		arginfo_mysql_db_query)
+	PHP_DEP_FALIAS(mysql_fieldname,		mysql_field_name,	arginfo_mysql_field_name)
+	PHP_DEP_FALIAS(mysql_fieldtable,	mysql_field_table,	arginfo_mysql_field_seek)
+	PHP_DEP_FALIAS(mysql_fieldlen,		mysql_field_len,	arginfo_mysql_field_seek)
+	PHP_DEP_FALIAS(mysql_fieldtype,		mysql_field_type,	arginfo_mysql_field_seek)
+	PHP_DEP_FALIAS(mysql_fieldflags,	mysql_field_flags,	arginfo_mysql_field_seek)
+	PHP_DEP_FALIAS(mysql_selectdb,		mysql_select_db,	arginfo_mysql_select_db)
 #ifndef NETWARE		/* The below two functions not supported on NetWare */
 #if MYSQL_VERSION_ID < 40000
 	PHP_DEP_FALIAS(mysql_createdb,	mysql_create_db,	arginfo_mysql_select_db)
 	PHP_DEP_FALIAS(mysql_dropdb,	mysql_drop_db,		arginfo_mysql_select_db)
 #endif
 #endif	/* NETWARE */
-	PHP_FALIAS(mysql_freeresult,	mysql_free_result,	arginfo__result_mysql_arg)
-	PHP_FALIAS(mysql_numfields,		mysql_num_fields,	arginfo__result_mysql_arg)
-	PHP_FALIAS(mysql_numrows,		mysql_num_rows,		arginfo__result_mysql_arg)
-	PHP_FALIAS(mysql_listdbs,		mysql_list_dbs,		arginfo__optional_mysql_link)
+	PHP_DEP_FALIAS(mysql_freeresult,	mysql_free_result,	arginfo__result_mysql_arg)
+	PHP_DEP_FALIAS(mysql_numfields,		mysql_num_fields,	arginfo__result_mysql_arg)
+	PHP_DEP_FALIAS(mysql_numrows,		mysql_num_rows,		arginfo__result_mysql_arg)
+	PHP_DEP_FALIAS(mysql_listdbs,		mysql_list_dbs,		arginfo__optional_mysql_link)
 	PHP_DEP_FALIAS(mysql_listtables,mysql_list_tables,	arginfo_mysql_select_db)
-	PHP_FALIAS(mysql_listfields,	mysql_list_fields,	arginfo_mysql_list_fields)
+	PHP_DEP_FALIAS(mysql_listfields,	mysql_list_fields,	arginfo_mysql_list_fields)
 	PHP_FALIAS(mysql_db_name,		mysql_result,		arginfo_mysql_result)
-	PHP_FALIAS(mysql_dbname,		mysql_result,		arginfo_mysql_result)
+	PHP_DEP_FALIAS(mysql_dbname,		mysql_result,		arginfo_mysql_result)
 	PHP_FALIAS(mysql_tablename,		mysql_result,		arginfo_mysql_result)
 	PHP_FALIAS(mysql_table_name,	mysql_result,		arginfo_mysql_result)
 	PHP_FE_END
@@ -529,6 +529,32 @@ static PHP_GINIT_FUNCTION(mysql)
 }
 /* }}} */
 
+#ifdef MYSQL_USE_MYSQLND
+#include "ext/mysqlnd/mysqlnd_reverse_api.h"
+static MYSQLND * mysql_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
+{
+	php_mysql_conn *mysql;
+
+	if (Z_TYPE_P(zv) != IS_RESOURCE) {
+		/* Might be nicer to check resource type, too, but ext/mysql is the only one using resources so emitting an error is not to bad, while usually this hook should be silent */
+		return NULL;
+	}
+
+	mysql = (php_mysql_conn *)zend_fetch_resource(&zv TSRMLS_CC, -1, "MySQL-Link", NULL, 2, le_link, le_plink);
+
+	if (!mysql) {
+		return NULL;
+	}
+
+	return mysql->conn;
+}
+
+static MYSQLND_REVERSE_API mysql_reverse_api = {
+	&mysql_module_entry,
+	mysql_convert_zv_to_mysqlnd
+};
+#endif
+
 /* {{{ PHP_MINIT_FUNCTION
  */
 ZEND_MODULE_STARTUP_D(mysql)
@@ -555,6 +581,10 @@ ZEND_MODULE_STARTUP_D(mysql)
 		return FAILURE;
 	}
 #endif
+#endif
+
+#ifdef MYSQL_USE_MYSQLND
+	mysqlnd_reverse_api_register_api(&mysql_reverse_api TSRMLS_CC);
 #endif
 
 	return SUCCESS;
@@ -701,6 +731,10 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zend_bool free_host=0, new_link=0;
 	long connect_timeout;
 
+    php_error_docref(NULL TSRMLS_CC,
+                     E_DEPRECATED,
+                     "The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead");
+
 #if !defined(MYSQL_USE_MYSQLND)
 	if ((MYSQL_VERSION_ID / 100) != (mysql_get_client_version() / 100)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING,
@@ -735,7 +769,7 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "SQL safe mode in effect - ignoring host/user/password information");
 		}
 		host_and_port=passwd=NULL;
-		user=php_get_current_user();
+		user=php_get_current_user(TSRMLS_C);
 		hashed_details_length = spprintf(&hashed_details, 0, "mysql__%s_", user);
 		client_flags = CLIENT_INTERACTIVE;
 	} else {
@@ -1579,10 +1613,12 @@ PHP_FUNCTION(mysql_list_dbs)
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
 	}
+	php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "This function is deprecated; use mysql_query() with SHOW DATABASES instead");
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);
 
 	PHPMY_UNBUFFERED_QUERY_CHECK();
+
 
 	if ((mysql_result=mysql_list_dbs(mysql->conn, NULL))==NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to save MySQL query result");
@@ -1811,9 +1847,7 @@ PHP_FUNCTION(mysql_escape_string)
 	Z_STRLEN_P(return_value) = mysql_escape_string(Z_STRVAL_P(return_value), str, str_len);
 	Z_TYPE_P(return_value) = IS_STRING;
 
-	if (MySG(trace_mode)){
-		php_error_docref("function.mysql-real-escape-string" TSRMLS_CC, E_DEPRECATED, "This function is deprecated; use mysql_real_escape_string() instead.");
-	}
+	php_error_docref("function.mysql-real-escape-string" TSRMLS_CC, E_DEPRECATED, "This function is deprecated; use mysql_real_escape_string() instead.");
 }
 /* }}} */
 
@@ -1959,12 +1993,16 @@ Q: String or long first?
 	if (sql_row[field_offset]) {
 		Z_TYPE_P(return_value) = IS_STRING;
 
+#if PHP_API_VERSION < 20100412
 		if (PG(magic_quotes_runtime)) {
 			Z_STRVAL_P(return_value) = php_addslashes(sql_row[field_offset], sql_row_lengths[field_offset],&Z_STRLEN_P(return_value), 0 TSRMLS_CC);
 		} else {
+#endif
 			Z_STRLEN_P(return_value) = sql_row_lengths[field_offset];
 			Z_STRVAL_P(return_value) = (char *) safe_estrndup(sql_row[field_offset], Z_STRLEN_P(return_value));
+#if PHP_API_VERSION < 20100412
 		}
+#endif
 	} else {
 		Z_TYPE_P(return_value) = IS_NULL;
 	}
@@ -2082,12 +2120,16 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 
 			MAKE_STD_ZVAL(data);
 
+#if PHP_API_VERSION < 20100412
 			if (PG(magic_quotes_runtime)) {
 				Z_TYPE_P(data) = IS_STRING;
 				Z_STRVAL_P(data) = php_addslashes(mysql_row[i], mysql_row_lengths[i], &Z_STRLEN_P(data), 0 TSRMLS_CC);
 			} else {
+#endif
 				ZVAL_STRINGL(data, mysql_row[i], mysql_row_lengths[i], 1);
+#if PHP_API_VERSION < 20100412
 			}
+#endif
 
 			if (result_type & MYSQL_NUM) {
 				add_index_zval(return_value, i, data);
@@ -2378,8 +2420,8 @@ PHP_FUNCTION(mysql_fetch_field)
 	}
 	object_init(return_value);
 
-	add_property_string(return_value, "name", (char *) (mysql_field->name?mysql_field->name:""), 1);
-	add_property_string(return_value, "table",(char *) (mysql_field->table?mysql_field->table:""), 1);
+	add_property_string(return_value, "name",(mysql_field->name?mysql_field->name:""), 1);
+	add_property_string(return_value, "table",(mysql_field->table?mysql_field->table:""), 1);
 	add_property_string(return_value, "def",(mysql_field->def?mysql_field->def:""), 1);
 	add_property_long(return_value, "max_length", mysql_field->max_length);
 	add_property_long(return_value, "not_null", IS_NOT_NULL(mysql_field->flags)?1:0);

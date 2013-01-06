@@ -8,4 +8,5 @@ $string = "foobar";
 var_dump(isset($string{0}{0}[0][0]));
 ?>
 --EXPECTF--
-Fatal error: Cannot use string offset as an array in %s on line %d
+bool(true)
+

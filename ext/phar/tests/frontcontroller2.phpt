@@ -2,7 +2,6 @@
 Phar front controller PHP test
 --INI--
 default_charset=UTF-8
-detect_unicode=0
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --ENV--

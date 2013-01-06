@@ -1,7 +1,5 @@
 --TEST--
 Test each() function : usage variations - Referenced variables
---INI--
-allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array each(array $arr)
@@ -28,14 +26,6 @@ echo "-- Call each until at the end of the array: --\n";
 var_dump( each($arr1) );
 var_dump( each($arr1) );
 var_dump( each($arr1) );
-
-
-echo "\n-- Pass an array by reference to each(): --\n";
-$arr2 = array('zero', 'one', 'two');
-
-var_dump( each(&$arr2) );
-echo "-- Check original array: --\n";
-var_dump($arr2);
 
 echo "Done";
 ?>
@@ -66,25 +56,4 @@ array(4) {
   int(0)
 }
 bool(false)
-
--- Pass an array by reference to each(): --
-array(4) {
-  [1]=>
-  string(4) "zero"
-  ["value"]=>
-  string(4) "zero"
-  [0]=>
-  int(0)
-  ["key"]=>
-  int(0)
-}
--- Check original array: --
-array(3) {
-  [0]=>
-  string(4) "zero"
-  [1]=>
-  string(3) "one"
-  [2]=>
-  string(3) "two"
-}
 Done

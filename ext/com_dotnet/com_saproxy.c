@@ -71,7 +71,7 @@ static inline void clone_indices(php_com_saproxy *dest, php_com_saproxy *src, in
 	}
 }
 
-static zval *saproxy_property_read(zval *object, zval *member, int type TSRMLS_DC)
+static zval *saproxy_property_read(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	zval *return_value;
 	
@@ -83,7 +83,7 @@ static zval *saproxy_property_read(zval *object, zval *member, int type TSRMLS_D
 	return return_value;
 }
 
-static void saproxy_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
+static void saproxy_property_write(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	php_com_throw_exception(E_INVALIDARG, "safearray has no properties" TSRMLS_CC);
 }
@@ -293,7 +293,7 @@ static zval *saproxy_object_get(zval *property TSRMLS_DC)
 }
 #endif
 
-static int saproxy_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+static int saproxy_property_exists(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC)
 {
 	/* no properties */
 	return 0;
@@ -305,7 +305,7 @@ static int saproxy_dimension_exists(zval *object, zval *member, int check_empty 
 	return 0;
 }
 
-static void saproxy_property_delete(zval *object, zval *member TSRMLS_DC)
+static void saproxy_property_delete(zval *object, zval *member, const zend_literal *key TSRMLS_DC)
 {
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot delete properties from a COM object");
 }
@@ -321,13 +321,13 @@ static HashTable *saproxy_properties_get(zval *object TSRMLS_DC)
 	return NULL;
 }
 
-static union _zend_function *saproxy_method_get(zval **object, char *name, int len TSRMLS_DC)
+static union _zend_function *saproxy_method_get(zval **object, const char *name, int len, const zend_literal *key TSRMLS_DC)
 {
 	/* no methods */
 	return NULL;
 }
 
-static int saproxy_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
+static int saproxy_call_method(const char *method, INTERNAL_FUNCTION_PARAMETERS)
 {
 	return FAILURE;
 }
@@ -343,7 +343,7 @@ static zend_class_entry *saproxy_class_entry_get(const zval *object TSRMLS_DC)
 	return php_com_saproxy_class_entry;
 }
 
-static int saproxy_class_name_get(const zval *object, char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
+static int saproxy_class_name_get(const zval *object, const char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC)
 {
 	*class_name = estrndup(php_com_saproxy_class_entry->name, php_com_saproxy_class_entry->name_length);
 	*class_name_len = php_com_saproxy_class_entry->name_length;

@@ -129,6 +129,7 @@
 #define ZEND_THROW                           108
 #define ZEND_FETCH_CLASS                     109
 #define ZEND_CLONE                           110
+#define ZEND_RETURN_BY_REF                   111
 #define ZEND_INIT_METHOD_CALL                112
 #define ZEND_INIT_STATIC_METHOD_CALL         113
 #define ZEND_ISSET_ISEMPTY_VAR               114
@@ -153,3 +154,13 @@
 #define ZEND_USER_OPCODE                     150
 #define ZEND_JMP_SET                         152
 #define ZEND_DECLARE_LAMBDA_FUNCTION         153
+#define ZEND_ADD_TRAIT                       154
+#define ZEND_BIND_TRAITS                     155
+#define ZEND_SEPARATE                        156
+#define ZEND_QM_ASSIGN_VAR                   157
+#define ZEND_JMP_SET_VAR                     158
+#define ZEND_DISCARD_EXCEPTION               159
+#define ZEND_YIELD                           160
+#define ZEND_GENERATOR_RETURN                161
+#define ZEND_FAST_CALL                       162
+#define ZEND_FAST_RET                        163

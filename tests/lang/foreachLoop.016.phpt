@@ -150,12 +150,16 @@ array(1) {
 }
 
 $a->b
+
+Warning: Creating default object from empty value in %s on line %d
 array(1) {
   [0]=>
   string(8) "original"
 }
 
 $a->b->c
+
+Warning: Creating default object from empty value in %s on line %d
 array(1) {
   [0]=>
   string(8) "original"
@@ -174,6 +178,8 @@ array(1) {
 }
 
 $a->b[0]->c
+
+Warning: Creating default object from empty value in %s on line %d
 array(1) {
   [0]=>
   string(8) "original"
@@ -192,6 +198,8 @@ array(1) {
 }
 
 C::$a[0]->b
+
+Warning: Creating default object from empty value in %s on line %d
 array(1) {
   [0]=>
   string(8) "original"

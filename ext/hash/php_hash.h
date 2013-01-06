@@ -78,8 +78,9 @@ extern const php_hash_ops php_hash_gost_ops;
 extern const php_hash_ops php_hash_adler32_ops;
 extern const php_hash_ops php_hash_crc32_ops;
 extern const php_hash_ops php_hash_crc32b_ops;
-extern const php_hash_ops php_hash_salsa10_ops;
-extern const php_hash_ops php_hash_salsa20_ops;
+extern const php_hash_ops php_hash_fnv132_ops;
+extern const php_hash_ops php_hash_fnv164_ops;
+extern const php_hash_ops php_hash_joaat_ops;
 
 #define PHP_HASH_HAVAL_OPS(p,b)	extern const php_hash_ops php_hash_##p##haval##b##_ops;
 
@@ -126,6 +127,7 @@ PHP_FUNCTION(hash_update_stream);
 PHP_FUNCTION(hash_update_file);
 PHP_FUNCTION(hash_final);
 PHP_FUNCTION(hash_algos);
+PHP_FUNCTION(hash_pbkdf2);
 
 PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, int algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);

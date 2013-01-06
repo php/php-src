@@ -555,12 +555,12 @@ static int pdo_oci_check_liveness(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 	/* use good old OCIServerVersion() */
 	H->last_err = OCIServerVersion (H->svc, H->err, (text *)version, sizeof(version), OCI_HTYPE_SVCCTX);
 #endif
-	if (H->last_err == OCI_SUCCESS) { 
+	if (H->last_err == OCI_SUCCESS) {
 		return SUCCESS;
 	}
 
 	OCIErrorGet (H->err, (ub4)1, NULL, &error_code, NULL, 0, OCI_HTYPE_ERROR);
-
+	
 	if (error_code == 1010) {
 		return SUCCESS;
 	}

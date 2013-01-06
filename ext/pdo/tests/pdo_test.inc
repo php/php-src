@@ -11,7 +11,6 @@ if (getenv('PDOTEST_DSN') === false) {
 			$append = true;
 		}
 	}
-	if (ini_get('magic_quotes_runtime')) $common = stripslashes($common);
 	$conf = eval($common);
 	foreach($conf['ENV'] as $n=>$v) putenv("$n=$v");
 }

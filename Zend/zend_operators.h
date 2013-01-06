@@ -31,10 +31,13 @@
 #endif
 
 #include "zend_strtod.h"
+#include "zend_multiply.h"
 
 #if 0&&HAVE_BCMATH
 #include "ext/bcmath/libbcmath/src/bcmath.h"
 #endif
+
+#define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
 
 BEGIN_EXTERN_C()
 ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
@@ -97,9 +100,12 @@ static zend_always_inline long zend_dval_to_lval(double d)
  * if the number was out of long range or contained a decimal point/exponent.
  * The number's value is returned into the respective pointer, *lval or *dval,
  * if that pointer is not NULL.
+ *
+ * This variant also gives information if a string that represents an integer
+ * could not be represented as such due to overflow. It writes 1 to oflow_info
+ * if the integer is larger than LONG_MAX and -1 if it's smaller than LONG_MIN.
  */
-
-static inline zend_uchar is_numeric_string(const char *str, int length, long *lval, double *dval, int allow_errors)
+static inline zend_uchar is_numeric_string_ex(const char *str, int length, long *lval, double *dval, int allow_errors, int *oflow_info)
 {
 	const char *ptr;
 	int base = 10, digits = 0, dp_or_e = 0;
@@ -108,6 +114,10 @@ static inline zend_uchar is_numeric_string(const char *str, int length, long *lv
 
 	if (!length) {
 		return 0;
+	}
+
+	if (oflow_info != NULL) {
+		*oflow_info = 0;
 	}
 
 	/* Skip any whitespace
@@ -162,12 +172,18 @@ check_digits:
 
 		if (base == 10) {
 			if (digits >= MAX_LENGTH_OF_LONG) {
+				if (oflow_info != NULL) {
+					*oflow_info = *str == '-' ? -1 : 1;
+				}
 				dp_or_e = -1;
 				goto process_double;
 			}
 		} else if (!(digits < SIZEOF_LONG * 2 || (digits == SIZEOF_LONG * 2 && ptr[-digits] <= '7'))) {
 			if (dval) {
-				local_dval = zend_hex_strtod(str, (char **)&ptr);
+				local_dval = zend_hex_strtod(str, &ptr);
+			}
+			if (oflow_info != NULL) {
+				*oflow_info = 1;
 			}
 			type = IS_DOUBLE;
 		}
@@ -178,7 +194,7 @@ process_double:
 		/* If there's a dval, do the conversion; else continue checking
 		 * the digits if we need to check for a full match */
 		if (dval) {
-			local_dval = zend_strtod(str, (char **)&ptr);
+			local_dval = zend_strtod(str, &ptr);
 		} else if (allow_errors != 1 && dp_or_e != -1) {
 			dp_or_e = (*ptr++ == '.') ? 1 : 2;
 			goto check_digits;
@@ -204,6 +220,9 @@ process_double:
 				if (dval) {
 					*dval = zend_strtod(str, NULL);
 				}
+				if (oflow_info != NULL) {
+					*oflow_info = *str == '-' ? -1 : 1;
+				}
 
 				return IS_DOUBLE;
 			}
@@ -221,6 +240,10 @@ process_double:
 
 		return IS_DOUBLE;
 	}
+}
+
+static inline zend_uchar is_numeric_string(const char *str, int length, long *lval, double *dval, int allow_errors) {
+    return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
 static inline char *
@@ -256,17 +279,17 @@ zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
 	return NULL;
 }
 
-static inline void *zend_memrchr(const void *s, int c, size_t n)
+static inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
-	register unsigned char *e;
+	register const unsigned char *e;
 
 	if (n <= 0) {
 		return NULL;
 	}
 
-	for (e = (unsigned char *)s + n - 1; e >= (unsigned char *)s; e--) {
-		if (*e == (unsigned char)c) {
-			return (void *)e;
+	for (e = (const unsigned char *)s + n - 1; e >= (const unsigned char *)s; e--) {
+		if (*e == (const unsigned char)c) {
+			return (const void *)e;
 		}
 	}
 
@@ -298,7 +321,9 @@ ZEND_API double zend_string_to_double(const char *number, zend_uint length);
 ZEND_API int zval_is_true(zval *op);
 ZEND_API int compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int numeric_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+ZEND_API int string_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC);
 ZEND_API int string_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+ZEND_API int string_case_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 #if HAVE_STRCOLL
 ZEND_API int string_locale_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 #endif
@@ -315,6 +340,7 @@ ZEND_API int zend_binary_strcmp(const char *s1, uint len1, const char *s2, uint 
 ZEND_API int zend_binary_strncmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
 ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, uint len2);
 ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
+ZEND_API int zend_binary_strncasecmp_l(const char *s1, uint len1, const char *s2, uint len2, uint length);
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2 TSRMLS_DC);
@@ -447,6 +473,424 @@ ZEND_API void zend_update_current_locale(void);
 #else
 #define zend_update_current_locale()
 #endif
+
+static zend_always_inline int fast_increment_function(zval *op1)
+{
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+#if defined(__GNUC__) && defined(__i386__)
+		__asm__(
+			"incl (%0)\n\t"
+			"jno  0f\n\t"
+			"movl $0x0, (%0)\n\t"
+			"movl $0x41e00000, 0x4(%0)\n\t"
+			"movb $0x2,0xc(%0)\n"
+			"0:"
+			:
+			: "r"(op1));
+#elif defined(__GNUC__) && defined(__x86_64__)
+		__asm__(
+			"incq (%0)\n\t"
+			"jno  0f\n\t"
+			"movl $0x0, (%0)\n\t"
+			"movl $0x43e00000, 0x4(%0)\n\t"
+			"movb $0x2,0x14(%0)\n"
+			"0:"
+			:
+			: "r"(op1));
+#else
+		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MAX)) {
+			/* switch to double */
+			Z_DVAL_P(op1) = (double)LONG_MAX + 1.0;
+			Z_TYPE_P(op1) = IS_DOUBLE;
+		} else {
+			Z_LVAL_P(op1)++;
+		}
+#endif
+		return SUCCESS;
+	}
+	return increment_function(op1);
+}
+
+static zend_always_inline int fast_decrement_function(zval *op1)
+{
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+#if defined(__GNUC__) && defined(__i386__)
+		__asm__(
+			"decl (%0)\n\t"
+			"jno  0f\n\t"
+			"movl $0x00200000, (%0)\n\t"
+			"movl $0xc1e00000, 0x4(%0)\n\t"
+			"movb $0x2,0xc(%0)\n"
+			"0:"
+			:
+			: "r"(op1));
+#elif defined(__GNUC__) && defined(__x86_64__)
+		__asm__(
+			"decq (%0)\n\t"
+			"jno  0f\n\t"
+			"movl $0x00000000, (%0)\n\t"
+			"movl $0xc3e00000, 0x4(%0)\n\t"
+			"movb $0x2,0x14(%0)\n"
+			"0:"
+			:
+			: "r"(op1));
+#else
+		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MIN)) {
+			/* switch to double */
+			Z_DVAL_P(op1) = (double)LONG_MIN - 1.0;
+			Z_TYPE_P(op1) = IS_DOUBLE;
+		} else {
+			Z_LVAL_P(op1)--;
+		}
+#endif
+		return SUCCESS;
+	}
+	return decrement_function(op1);
+}
+
+static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+#if defined(__GNUC__) && defined(__i386__)
+		__asm__(
+			"movl	(%1), %%eax\n\t"
+			"addl   (%2), %%eax\n\t"
+			"jo     0f\n\t"     
+			"movl   %%eax, (%0)\n\t"
+			"movb   $0x1,0xc(%0)\n\t"
+			"jmp    1f\n"
+			"0:\n\t"
+			"fildl	(%1)\n\t"
+			"fildl	(%2)\n\t"
+			"faddp	%%st, %%st(1)\n\t"
+			"movb   $0x2,0xc(%0)\n\t"
+			"fstpl	(%0)\n"
+			"1:"
+			: 
+			: "r"(result),
+			  "r"(op1),
+			  "r"(op2)
+			: "eax");
+#elif defined(__GNUC__) && defined(__x86_64__)
+		__asm__(
+			"movq	(%1), %%rax\n\t"
+			"addq   (%2), %%rax\n\t"
+			"jo     0f\n\t"     
+			"movq   %%rax, (%0)\n\t"
+			"movb   $0x1,0x14(%0)\n\t"
+			"jmp    1f\n"
+			"0:\n\t"
+			"fildq	(%1)\n\t"
+			"fildq	(%2)\n\t"
+			"faddp	%%st, %%st(1)\n\t"
+			"movb   $0x2,0x14(%0)\n\t"
+			"fstpl	(%0)\n"
+			"1:"
+			: 
+			: "r"(result),
+			  "r"(op1),
+			  "r"(op2)
+			: "rax");
+#else
+			Z_LVAL_P(result) = Z_LVAL_P(op1) + Z_LVAL_P(op2);
+
+			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
+				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
+				Z_DVAL_P(result) = (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2);
+				Z_TYPE_P(result) = IS_DOUBLE;
+			} else {
+				Z_TYPE_P(result) = IS_LONG;
+			}
+#endif
+			return SUCCESS;
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			Z_DVAL_P(result) = ((double)Z_LVAL_P(op1)) + Z_DVAL_P(op2);
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			Z_DVAL_P(result) = Z_DVAL_P(op1) + Z_DVAL_P(op2);
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			Z_DVAL_P(result) = Z_DVAL_P(op1) + ((double)Z_LVAL_P(op2));
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		}
+	}
+	return add_function(result, op1, op2 TSRMLS_CC);
+}
+
+static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+#if defined(__GNUC__) && defined(__i386__)
+		__asm__(
+			"movl	(%1), %%eax\n\t"
+			"subl   (%2), %%eax\n\t"
+			"jo     0f\n\t"     
+			"movl   %%eax, (%0)\n\t"
+			"movb   $0x1,0xc(%0)\n\t"
+			"jmp    1f\n"
+			"0:\n\t"
+			"fildl	(%2)\n\t"
+			"fildl	(%1)\n\t"
+#if defined(__clang__) && (__clang_major__ < 2 || (__clang_major__ == 2 && __clang_minor__ < 10))
+			"fsubp  %%st(1), %%st\n\t"  /* LLVM bug #9164 */
+#else
+			"fsubp	%%st, %%st(1)\n\t"
+#endif
+			"movb   $0x2,0xc(%0)\n\t"
+			"fstpl	(%0)\n"
+			"1:"
+			: 
+			: "r"(result),
+			  "r"(op1),
+			  "r"(op2)
+			: "eax");
+#elif defined(__GNUC__) && defined(__x86_64__)
+		__asm__(
+			"movq	(%1), %%rax\n\t"
+			"subq   (%2), %%rax\n\t"
+			"jo     0f\n\t"     
+			"movq   %%rax, (%0)\n\t"
+			"movb   $0x1,0x14(%0)\n\t"
+			"jmp    1f\n"
+			"0:\n\t"
+			"fildq	(%2)\n\t"
+			"fildq	(%1)\n\t"
+#if defined(__clang__) && (__clang_major__ < 2 || (__clang_major__ == 2 && __clang_minor__ < 10))
+			"fsubp  %%st(1), %%st\n\t"  /* LLVM bug #9164 */
+#else
+			"fsubp	%%st, %%st(1)\n\t"
+#endif
+			"movb   $0x2,0x14(%0)\n\t"
+			"fstpl	(%0)\n"
+			"1:"
+			: 
+			: "r"(result),
+			  "r"(op1),
+			  "r"(op2)
+			: "rax");
+#else
+			Z_LVAL_P(result) = Z_LVAL_P(op1) - Z_LVAL_P(op2);
+
+			if (UNEXPECTED((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
+				&& (Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(result) & LONG_SIGN_MASK))) {
+				Z_DVAL_P(result) = (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2);
+				Z_TYPE_P(result) = IS_DOUBLE;
+			} else {
+				Z_TYPE_P(result) = IS_LONG;
+			}
+#endif
+			return SUCCESS;
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			Z_DVAL_P(result) = ((double)Z_LVAL_P(op1)) - Z_DVAL_P(op2);
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			Z_DVAL_P(result) = Z_DVAL_P(op1) - Z_DVAL_P(op2);
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			Z_DVAL_P(result) = Z_DVAL_P(op1) - ((double)Z_LVAL_P(op2));
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		}
+	}
+	return sub_function(result, op1, op2 TSRMLS_CC);
+}
+
+static zend_always_inline int fast_mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			long overflow;
+
+			ZEND_SIGNED_MULTIPLY_LONG(Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(result), Z_DVAL_P(result), overflow);
+			Z_TYPE_P(result) = overflow ? IS_DOUBLE : IS_LONG;
+			return SUCCESS;
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			Z_DVAL_P(result) = ((double)Z_LVAL_P(op1)) * Z_DVAL_P(op2);
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			Z_DVAL_P(result) = Z_DVAL_P(op1) * Z_DVAL_P(op2);
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			Z_DVAL_P(result) = Z_DVAL_P(op1) * ((double)Z_LVAL_P(op2));
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		}
+	}
+	return mul_function(result, op1, op2 TSRMLS_CC);
+}
+
+static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG) && 0) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				zend_error(E_WARNING, "Division by zero");
+				Z_LVAL_P(result) = 0;
+				Z_TYPE_P(result) = IS_BOOL;
+				return FAILURE;
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == LONG_MIN)) {
+				/* Prevent overflow error/crash */
+				Z_DVAL_P(result) = (double) LONG_MIN / -1;
+				Z_TYPE_P(result) = IS_DOUBLE;
+			} else if (EXPECTED(Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0)) {
+				/* integer */
+				Z_LVAL_P(result) = Z_LVAL_P(op1) / Z_LVAL_P(op2);
+				Z_TYPE_P(result) = IS_LONG;
+			} else {
+				Z_DVAL_P(result) = ((double) Z_LVAL_P(op1)) / ((double)Z_LVAL_P(op2));
+				Z_TYPE_P(result) = IS_DOUBLE;
+			}
+			return SUCCESS;
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			if (UNEXPECTED(Z_DVAL_P(op2) == 0)) {
+				zend_error(E_WARNING, "Division by zero");
+				Z_LVAL_P(result) = 0;
+				Z_TYPE_P(result) = IS_BOOL;
+				return FAILURE;
+			}
+			Z_DVAL_P(result) = ((double)Z_LVAL_P(op1)) / Z_DVAL_P(op2);
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE) && 0) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			if (UNEXPECTED(Z_DVAL_P(op2) == 0)) {
+				zend_error(E_WARNING, "Division by zero");
+				Z_LVAL_P(result) = 0;
+				Z_TYPE_P(result) = IS_BOOL;
+				return FAILURE;
+			}
+			Z_DVAL_P(result) = Z_DVAL_P(op1) / Z_DVAL_P(op2);
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				zend_error(E_WARNING, "Division by zero");
+				Z_LVAL_P(result) = 0;
+				Z_TYPE_P(result) = IS_BOOL;
+				return FAILURE;
+			}
+			Z_DVAL_P(result) = Z_DVAL_P(op1) / ((double)Z_LVAL_P(op2));
+			Z_TYPE_P(result) = IS_DOUBLE;
+			return SUCCESS;
+		}
+	}
+	return div_function(result, op1, op2 TSRMLS_CC);
+}
+
+static zend_always_inline int fast_mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
+				zend_error(E_WARNING, "Division by zero");
+				Z_LVAL_P(result) = 0;
+				Z_TYPE_P(result) = IS_BOOL;
+				return FAILURE;
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
+				/* Prevent overflow error/crash if op1==LONG_MIN */
+				Z_LVAL_P(result) = 0;
+				Z_TYPE_P(result) = IS_LONG;
+				return SUCCESS;
+			}
+			Z_LVAL_P(result) = Z_LVAL_P(op1) % Z_LVAL_P(op2);
+			Z_TYPE_P(result) = IS_LONG;
+			return SUCCESS;
+		}
+	}
+	return mod_function(result, op1, op2 TSRMLS_CC);
+}
+
+static zend_always_inline int fast_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			return Z_LVAL_P(op1) == Z_LVAL_P(op2);
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			return ((double)Z_LVAL_P(op1)) == Z_DVAL_P(op2);
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			return Z_DVAL_P(op1) == Z_DVAL_P(op2);
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			return Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2));
+		}
+	}
+	compare_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result) == 0;
+}
+
+static zend_always_inline int fast_not_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			return Z_LVAL_P(op1) != Z_LVAL_P(op2);
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			return ((double)Z_LVAL_P(op1)) != Z_DVAL_P(op2);
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			return Z_DVAL_P(op1) != Z_DVAL_P(op2);
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			return Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2));
+		}
+	}
+	compare_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result) != 0;
+}
+
+static zend_always_inline int fast_is_smaller_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			return Z_LVAL_P(op1) < Z_LVAL_P(op2);
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			return ((double)Z_LVAL_P(op1)) < Z_DVAL_P(op2);
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			return Z_DVAL_P(op1) < Z_DVAL_P(op2);
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			return Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2));
+		}
+	}
+	compare_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result) < 0;
+}
+
+static zend_always_inline int fast_is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
+{
+	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			return Z_LVAL_P(op1) <= Z_LVAL_P(op2);
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			return ((double)Z_LVAL_P(op1)) <= Z_DVAL_P(op2);
+		}
+	} else if (EXPECTED(Z_TYPE_P(op1) == IS_DOUBLE)) {
+		if (EXPECTED(Z_TYPE_P(op2) == IS_DOUBLE)) {
+			return Z_DVAL_P(op1) <= Z_DVAL_P(op2);
+		} else if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
+			return Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2));
+		}
+	}
+	compare_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result) <= 0;
+}
 
 #endif
 

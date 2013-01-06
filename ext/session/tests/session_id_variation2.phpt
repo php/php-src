@@ -4,6 +4,8 @@ Test session_id() function : variation
 <?php include('skipif.inc'); ?>
 --INI--
 session.hash_function=0
+session.entropy_file=
+session.entropy_length=0
 --FILE--
 <?php
 

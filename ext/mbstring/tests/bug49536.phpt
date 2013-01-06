@@ -16,5 +16,5 @@ var_dump(mb_detect_encoding("\xc0\x00", "UTF-8", true));
 --EXPECT--
 string(4) "SJIS"
 bool(false)
-string(5) "UTF-8"
+bool(false)
 bool(false)

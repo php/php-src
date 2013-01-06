@@ -107,14 +107,8 @@ Warning: filemtime(): stat failed for | in %s on line %d
 Warning: filectime(): stat failed for | in %s on line %d
 
 
-*** testing touch ***
-Warning: touch(): %s in %s on line %d
+*** testing touch ***bool(false)
 bool(false)
-
-Warning: touch(): %s in %s on line %d
-bool(false)
-
-Warning: touch(): %s in %s on line %d
 bool(false)
 
 Warning: touch(): %s in %s on line %d

@@ -5,7 +5,6 @@ FILTER_UNSAFE_RAW not applied when configured as default filter, even with flags
 --SKIPIF--
 <?php if (!extension_loaded("filter")) die("skip"); ?>
 --INI--
-magic_quotes_gpc=0
 filter.default=unsafe_raw
 filter.default_flags=4
 --GET--

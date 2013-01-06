@@ -22,6 +22,7 @@
 #include "mysqlnd.h"
 #include "mysqlnd_priv.h"
 #include "mysqlnd_debug.h"
+#include "mysqlnd_charset.h"
 
 /* {{{ utf8 functions */
 static unsigned int check_mb_utf8mb3_sequence(const char *start, const char *end)
@@ -325,7 +326,7 @@ static unsigned int mysqlnd_mbcharlen_gbk(unsigned int gbk)
 /* }}} */
 
 
-/* {{{  functions */
+/* {{{ sjis functions */
 #define valid_sjis_head(c)	((0x81 <= (c) && (c) <= 0x9F) || (0xE0 <= (c) && (c) <= 0xFC))
 #define valid_sjis_tail(c)	((0x40 <= (c) && (c) <= 0x7E) || (0x80 <= (c) && (c) <= 0xFC))
 
@@ -490,8 +491,8 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{  42, "latin7", "latin7_general_cs", 1, 1, "", NULL, NULL},
 	{  43, "macce", "macce_bin", 1, 1, "", NULL, NULL},
 	{  44, "cp1250", "cp1250_croatian_ci", 1, 1, "", NULL, NULL},
-	{  45, UTF8_MB4, UTF8_MB4"_general_ci", 1, 3, "UTF-8 Unicode", mysqlnd_mbcharlen_utf8,  check_mb_utf8_valid},
-	{  46, UTF8_MB4, UTF8_MB4"_bin", 1, 3, "UTF-8 Unicode", mysqlnd_mbcharlen_utf8,  check_mb_utf8_valid},
+	{  45, UTF8_MB4, UTF8_MB4"_general_ci", 1, 4, "UTF-8 Unicode", mysqlnd_mbcharlen_utf8,  check_mb_utf8_valid},
+	{  46, UTF8_MB4, UTF8_MB4"_bin", 1, 4, "UTF-8 Unicode", mysqlnd_mbcharlen_utf8,  check_mb_utf8_valid},
 	{  47, "latin1", "latin1_bin", 1, 1, "", NULL, NULL},
 	{  48, "latin1", "latin1_general_ci", 1, 1, "", NULL, NULL},
 	{  49, "latin1", "latin1_general_cs", 1, 1, "", NULL, NULL},
@@ -668,7 +669,7 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(unsigned int charsetnr)
 /* {{{ mysqlnd_find_charset_name */
 PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const name)
 {
-	const MYSQLND_CHARSET *c = mysqlnd_charsets;
+	const MYSQLND_CHARSET * c = mysqlnd_charsets;
 
 	do {
 		if (!strcasecmp(c->name, name)) {
@@ -813,6 +814,42 @@ PHPAPI ulong mysqlnd_cset_escape_slashes(const MYSQLND_CHARSET * const cset, cha
 	DBG_RETURN((ulong)(newstr - newstr_s));
 }
 /* }}} */
+
+
+static struct st_mysqlnd_plugin_charsets mysqlnd_plugin_charsets_plugin =
+{
+	{
+		MYSQLND_PLUGIN_API_VERSION,
+		"charsets",
+		MYSQLND_VERSION_ID,
+		MYSQLND_VERSION,
+		"PHP License 3.01",
+		"Andrey Hristov <andrey@mysql.com>,  Ulf Wendel <uwendel@mysql.com>, Georg Richter <georg@mysql.com>",
+		{
+			NULL, /* no statistics , will be filled later if there are some */
+			NULL, /* no statistics */
+		},
+		{
+			NULL /* plugin shutdown */
+		}
+	},
+	{/* methods */
+		mysqlnd_find_charset_nr,
+		mysqlnd_find_charset_name,
+		mysqlnd_cset_escape_quotes,
+		mysqlnd_cset_escape_slashes
+	}
+};
+
+
+/* {{{ mysqlnd_charsets_plugin_register */
+void
+mysqlnd_charsets_plugin_register(TSRMLS_D)
+{
+	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_charsets_plugin TSRMLS_CC);
+}
+/* }}} */
+
 
 /*
  * Local variables:

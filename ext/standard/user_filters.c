@@ -259,7 +259,7 @@ php_stream_filter_status_t userfilter_filter(
 	 * from being destroyed properly */
 	INIT_ZVAL(zpropname);
 	ZVAL_STRINGL(&zpropname, "stream", sizeof("stream")-1, 0);
-	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname TSRMLS_CC);
+	Z_OBJ_HANDLER_P(obj, unset_property)(obj, &zpropname, 0 TSRMLS_CC);
 
 	zval_ptr_dtor(&zclosing);
 	zval_ptr_dtor(&zconsumed);
@@ -544,7 +544,8 @@ PHP_FUNCTION(stream_bucket_new)
 PHP_FUNCTION(stream_get_filters)
 {
 	char *filter_name;
-	int key_flags, filter_name_len = 0;
+	int key_flags;
+	uint filter_name_len = 0;
 	HashTable *filters_hash;
 	ulong num_key;
 

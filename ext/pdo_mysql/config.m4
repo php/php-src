@@ -4,8 +4,8 @@ dnl vim: se ts=2 sw=2 et:
 
 PHP_ARG_WITH(pdo-mysql, for MySQL support for PDO,
 [  --with-pdo-mysql[=DIR]    PDO: MySQL support. DIR is the MySQL base directory
-                                 If mysqlnd is passed as DIR, the MySQL native
-                                 native driver will be used [/usr/local]])
+                                 If no value or mysqlnd is passed as DIR, the
+                                 MySQL native driver will be used])
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz,
@@ -28,30 +28,21 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     done
   ])
 
-  if test -f $PHP_PDO_MYSQL && test -x $PHP_PDO_MYSQL ; then
-    PDO_MYSQL_CONFIG=$PHP_PDO_MYSQL
-  elif test "$PHP_PDO_MYSQL" != "yes"; then
-    if test -d "$PHP_PDO_MYSQL" ; then
-      if test -x "$PHP_PDO_MYSQL/bin/mysql_config" ; then
-        PDO_MYSQL_CONFIG="$PHP_PDO_MYSQL/bin/mysql_config"
-      else
-        PDO_MYSQL_DIR="$PHP_PDO_MYSQL"
+  if test "$PHP_PDO_MYSQL" != "yes" && test "$PHP_PDO_MYSQL" != "mysqlnd"; then
+    if test -f $PHP_PDO_MYSQL && test -x $PHP_PDO_MYSQL ; then
+      PDO_MYSQL_CONFIG=$PHP_PDO_MYSQL
+    else
+      if test -d "$PHP_PDO_MYSQL" ; then
+        if test -x "$PHP_PDO_MYSQL/bin/mysql_config" ; then
+          PDO_MYSQL_CONFIG="$PHP_PDO_MYSQL/bin/mysql_config"
+        else
+          PDO_MYSQL_DIR="$PHP_PDO_MYSQL"
+        fi
       fi
     fi
-  else
-    for i in /usr/local /usr ; do
-      if test -x "$i/bin/mysql_config" ; then
-        PDO_MYSQL_CONFIG="$i/bin/mysql_config"
-        break;
-      fi
-      if test -r $i/include/mysql/mysql.h || test -r $i/include/mysql.h ; then
-        PDO_MYSQL_DIR="$i"
-        break;
-      fi
-    done
   fi
-
-  if test "$PHP_PDO_MYSQL" = "mysqlnd"; then
+  
+  if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     dnl enables build of mysqnd library
     PHP_MYSQLND_ENABLED=yes
     AC_DEFINE([PDO_USE_MYSQLND], 1, [Whether pdo_mysql uses mysqlnd])
@@ -100,15 +91,15 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       AC_MSG_ERROR([Unable to find your mysql installation])
     fi
 
-    PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_query,
+    PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_commit,
     [
       PHP_EVAL_INCLINE($PDO_MYSQL_INCLUDE)
       PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
     ],[
       if test "$PHP_ZLIB_DIR" != "no"; then
         PHP_ADD_LIBRARY_WITH_PATH(z, $PHP_ZLIB_DIR, PDO_MYSQL_SHARED_LIBADD)
-        PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_query, [], [
-          AC_MSG_ERROR([PDO_MYSQL configure failed. Please check config.log for more information.])
+        PHP_CHECK_LIBRARY($PDO_MYSQL_LIBNAME, mysql_commit, [], [
+          AC_MSG_ERROR([PDO_MYSQL configure failed, MySQL 4.1 needed. Please check config.log for more information.])
         ], [
           -L$PHP_ZLIB_DIR/$PHP_LIBDIR -L$PDO_MYSQL_LIB_DIR 
         ])  
@@ -128,11 +119,6 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     ],[
       $PDO_MYSQL_LIBS
     ])
-
-    _SAVE_LIBS=$LIBS
-    LIBS="$LIBS $PDO_MYSQL_LIBS"
-    AC_CHECK_FUNCS([mysql_commit mysql_stmt_prepare mysql_next_result mysql_sqlstate]) 
-    LIBS=$_SAVE_LIBS
   fi
 
   ifdef([PHP_CHECK_PDO_INCLUDES],
@@ -141,15 +127,15 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   ],[
     AC_MSG_CHECKING([for PDO includes])
     if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_inc_path=$abs_srcdir/ext
+      pdo_cv_inc_path=$abs_srcdir/ext
     elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
-      pdo_inc_path=$abs_srcdir/ext
+      pdo_cv_inc_path=$abs_srcdir/ext
     elif test -f $prefix/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_inc_path=$prefix/include/php/ext
+      pdo_cv_inc_path=$prefix/include/php/ext
     else
       AC_MSG_ERROR([Cannot find php_pdo_driver.h.])
     fi
-    AC_MSG_RESULT($pdo_inc_path)
+    AC_MSG_RESULT($pdo_cv_inc_path)
   ])
 
   if test -n "$PDO_MYSQL_CONFIG"; then
@@ -158,7 +144,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   fi
 
   dnl fix after renaming to pdo_mysql
-  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_inc_path -I)
+  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_cv_inc_path -I)
   ifdef([PHP_ADD_EXTENSION_DEP],
   [
     PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)

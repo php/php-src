@@ -94,21 +94,23 @@ File name is => %s%etempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
 -- Iteration 6 --
+
+Warning: tempnam() expects parameter 1 to be a valid path, string given in %s on line %d
 -- File is not created --
 
 Warning: unlink(): %s in %s on line %d
 -- Iteration 7 --
 
-Warning: tempnam() expects parameter 1 to be string, array given in %s on line %d
+Warning: tempnam() expects parameter 1 to be a valid path, array given in %s on line %d
 -- File is not created --
 
 Warning: unlink(): %s in %s on line %d
 -- Iteration 8 --
-File name is => %s%etempnam_variation3.tmp%s
+File name is => %s/tempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
 -- Iteration 9 --
-File name is => %s%etempnam_variation3.tmp%s
+File name is => %s/tempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
 

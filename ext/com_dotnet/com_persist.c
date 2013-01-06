@@ -45,24 +45,23 @@ typedef struct {
 } php_istream;
 
 static int le_istream;
-static void istream_destructor(php_istream *stm);
+static void istream_destructor(php_istream *stm TSRMLS_DC);
 
 static void istream_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_istream *stm = (php_istream *)rsrc->ptr;
-	istream_destructor(stm);
+	istream_destructor(stm TSRMLS_CC);
 }
 
-#ifdef ZTS
-# define TSRMLS_FIXED()	TSRMLS_FETCH();
-#else
-# define TSRMLS_FIXED()
-#endif
-
 #define FETCH_STM()	\
-	TSRMLS_FIXED() \
 	php_istream *stm = (php_istream*)This; \
+	TSRMLS_FETCH(); \
 	if (GetCurrentThreadId() != stm->engine_thread) \
+		return RPC_E_WRONG_THREAD;
+		
+#define FETCH_STM_EX()	\
+	php_istream *stm = (php_istream*)This;	\
+	if (GetCurrentThreadId() != stm->engine_thread)	\
 		return RPC_E_WRONG_THREAD;
 
 static HRESULT STDMETHODCALLTYPE stm_queryinterface(
@@ -70,7 +69,7 @@ static HRESULT STDMETHODCALLTYPE stm_queryinterface(
 	/* [in] */ REFIID riid,
 	/* [iid_is][out] */ void **ppvObject)
 {
-	FETCH_STM();
+	FETCH_STM_EX();
 
 	if (IsEqualGUID(&IID_IUnknown, riid) ||
 			IsEqualGUID(&IID_IStream, riid)) {
@@ -85,7 +84,7 @@ static HRESULT STDMETHODCALLTYPE stm_queryinterface(
 
 static ULONG STDMETHODCALLTYPE stm_addref(IStream *This)
 {
-	FETCH_STM();
+	FETCH_STM_EX();
 
 	return InterlockedIncrement(&stm->refcount);
 }
@@ -190,7 +189,7 @@ static HRESULT STDMETHODCALLTYPE stm_set_size(IStream *This, ULARGE_INTEGER libN
 static HRESULT STDMETHODCALLTYPE stm_copy_to(IStream *This, IStream *pstm, ULARGE_INTEGER cb,
 		ULARGE_INTEGER *pcbRead, ULARGE_INTEGER *pcbWritten)
 {
-	FETCH_STM();
+	FETCH_STM_EX();
 
 	return E_NOTIMPL;
 }
@@ -250,10 +249,8 @@ static struct IStreamVtbl php_istream_vtbl = {
 	stm_clone
 };
 
-static void istream_destructor(php_istream *stm)
+static void istream_destructor(php_istream *stm TSRMLS_DC)
 {
-	TSRMLS_FETCH();
-
 	if (stm->id) {
 		int id = stm->id;
 		stm->id = 0;
@@ -285,7 +282,7 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream TSR
 	stm->stream = stream;
 
 	zend_list_addref(stream->rsrc_id);
-	stm->id = zend_list_insert(stm, le_istream);
+	stm->id = zend_list_insert(stm, le_istream TSRMLS_CC);
 
 	return (IStream*)stm;
 }
@@ -382,23 +379,19 @@ CPH_METHOD(SaveToFile)
 
 	res = get_persist_file(helper);
 	if (helper->ipf) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!|b",
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p!|b",
 					&filename, &filename_len, &remember)) {
 			php_com_throw_exception(E_INVALIDARG, "Invalid arguments" TSRMLS_CC);
 			return;
 		}
 
 		if (filename) {
-			if (strlen(filename) != filename_len) {
-				RETURN_FALSE;
-			}
 			fullpath = expand_filepath(filename, NULL TSRMLS_CC);
 			if (!fullpath) {
 				RETURN_FALSE;
 			}
 	
-			if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || 
-					php_check_open_basedir(fullpath TSRMLS_CC)) {
+			if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 				efree(fullpath);
 				RETURN_FALSE;
 			}
@@ -450,22 +443,17 @@ CPH_METHOD(LoadFromFile)
 	res = get_persist_file(helper);
 	if (helper->ipf) {
 
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l",
+		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|l",
 					&filename, &filename_len, &flags)) {
 			php_com_throw_exception(E_INVALIDARG, "Invalid arguments" TSRMLS_CC);
 			return;
-		}
-
-		if (strlen(filename) != filename_len) {
-			RETURN_FALSE;
 		}
 
 		if (!(fullpath = expand_filepath(filename, NULL TSRMLS_CC))) {
 			RETURN_FALSE;
 		}
 
-		if ((PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) ||
-				php_check_open_basedir(fullpath TSRMLS_CC)) {
+		if (php_check_open_basedir(fullpath TSRMLS_CC)) {
 			efree(fullpath);
 			RETURN_FALSE;
 		}

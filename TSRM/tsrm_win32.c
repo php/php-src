@@ -190,7 +190,7 @@ Finished:
 	return NULL;
 }
 
-TSRM_API int tsrm_win32_access(const char *pathname, int mode)
+TSRM_API int tsrm_win32_access(const char *pathname, int mode TSRMLS_DC)
 {
 	time_t t;
 	HANDLE thread_token = NULL;
@@ -207,8 +207,6 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	BOOL bucket_key_alloc = FALSE;
 	realpath_cache_bucket * bucket = NULL;
 	char * real_path = NULL;
-
-	TSRMLS_FETCH();
 
 	if (mode == 1 /*X_OK*/) {
 		DWORD type;
@@ -451,10 +449,12 @@ static HANDLE dupHandle(HANDLE fh, BOOL inherit) {
 
 TSRM_API FILE *popen(const char *command, const char *type)
 {
-	return popen_ex(command, type, NULL, NULL);
+	TSRMLS_FETCH();
+
+	return popen_ex(command, type, NULL, NULL TSRMLS_CC);
 }
 
-TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env)
+TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env TSRMLS_DC)
 {
 	FILE *stream = NULL;
 	int fno, type_len = strlen(type), read, mode;
@@ -471,8 +471,6 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	HANDLE thread_token = NULL;
 	HANDLE token_user = NULL;
 	BOOL asuser = TRUE;
-
-	TSRMLS_FETCH();
 
 	if (!type) {
 		return NULL;

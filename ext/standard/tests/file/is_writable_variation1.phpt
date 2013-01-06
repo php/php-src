@@ -96,14 +96,26 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 7 --
-bool(false)
-bool(false)
+
+Warning: is_writable() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: is_writeable() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 -- Iteration 8 --
-bool(false)
-bool(false)
+
+Warning: is_writable() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: is_writeable() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 -- Iteration 9 --
-bool(false)
-bool(false)
+
+Warning: is_writable() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: is_writeable() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 -- Iteration 10 --
 bool(true)
 bool(true)

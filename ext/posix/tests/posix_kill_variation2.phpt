@@ -97,25 +97,35 @@ bool(false)
 Arg value 0.5 
 bool(false)
 
-Arg value Array 
-
-Warning: posix_kill() expects parameter 2 to be long, array given in %s on line %d
-bool(false)
+Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
 Arg value Array 
 
 Warning: posix_kill() expects parameter 2 to be long, array given in %s on line %d
 bool(false)
 
-Arg value Array 
-
-Warning: posix_kill() expects parameter 2 to be long, array given in %s on line %d
-bool(false)
+Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
 Arg value Array 
 
 Warning: posix_kill() expects parameter 2 to be long, array given in %s on line %d
 bool(false)
+
+Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
+
+Arg value Array 
+
+Warning: posix_kill() expects parameter 2 to be long, array given in %s on line %d
+bool(false)
+
+Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
+
+Arg value Array 
+
+Warning: posix_kill() expects parameter 2 to be long, array given in %s on line %d
+bool(false)
+
+Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
 Arg value Array 
 

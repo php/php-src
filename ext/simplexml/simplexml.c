@@ -389,7 +389,7 @@ static zval * sxe_prop_dim_read(zval *object, zval *member, zend_bool elements, 
 
 /* {{{ sxe_property_read()
  */
-static zval * sxe_property_read(zval *object, zval *member, int type TSRMLS_DC)
+static zval * sxe_property_read(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	return sxe_prop_dim_read(object, member, 1, 0, type TSRMLS_CC);
 }
@@ -680,7 +680,7 @@ next_iter:
 
 /* {{{ sxe_property_write()
  */
-static void sxe_property_write(zval *object, zval *member, zval *value TSRMLS_DC)
+static void sxe_property_write(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
 {
 	sxe_prop_dim_write(object, member, value, 1, 0, NULL TSRMLS_CC);
 }
@@ -694,7 +694,7 @@ static void sxe_dimension_write(zval *object, zval *offset, zval *value TSRMLS_D
 }
 /* }}} */
 
-static zval** sxe_property_get_adr(zval *object, zval *member TSRMLS_DC) /* {{{ */
+static zval** sxe_property_get_adr(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	php_sxe_object *sxe;
 	xmlNodePtr      node;
@@ -846,7 +846,7 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 
 /* {{{ sxe_property_exists()
  */
-static int sxe_property_exists(zval *object, zval *member, int check_empty TSRMLS_DC)
+static int sxe_property_exists(zval *object, zval *member, int check_empty, const zend_literal *key TSRMLS_DC)
 {
 	return sxe_prop_dim_exists(object, member, check_empty, 1, 0 TSRMLS_CC);
 }
@@ -971,7 +971,7 @@ next_iter:
 
 /* {{{ sxe_property_delete()
  */
-static void sxe_property_delete(zval *object, zval *member TSRMLS_DC)
+static void sxe_property_delete(zval *object, zval *member, const zend_literal *key TSRMLS_DC)
 {
 	sxe_prop_dim_delete(object, member, 1, 0 TSRMLS_CC);
 }
@@ -1069,6 +1069,10 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 	xmlAttrPtr       attr;
 	int              namelen;
 	int              test;
+	char 		 use_iter;
+	zval            *iter_data;
+
+	use_iter = 0;
 
 	sxe = php_sxe_fetch_object(object TSRMLS_CC);
 
@@ -1077,15 +1081,9 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 	else if (sxe->properties) {
-		if (GC_G(gc_active)) {
-			return sxe->properties;
-		}
 		zend_hash_clean(sxe->properties);
 		rv = sxe->properties;
 	} else {
-		if (GC_G(gc_active)) {
-			return NULL;
-		}
 		ALLOC_HASHTABLE(rv);
 		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
 		sxe->properties = rv;
@@ -1122,6 +1120,7 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 
 	GET_NODE(sxe, node);
 	node = php_sxe_get_first_node(sxe, node TSRMLS_CC);
+
 	if (node && sxe->iter.type != SXE_ITER_ATTRLIST) {
 		if (node->type == XML_ATTRIBUTE_NODE) {
 			MAKE_STD_ZVAL(value);
@@ -1129,7 +1128,17 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 			zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
 			node = NULL;
 		} else if (sxe->iter.type != SXE_ITER_CHILD) {
-			node = node->children;
+
+			if ( !node->children || !node->parent || node->children->next || node->children->children || node->parent->children == node->parent->last ) {
+				node = node->children;
+			} else {
+				iter_data = sxe->iter.data;
+				sxe->iter.data = NULL;
+
+				node = php_sxe_reset_iterator(sxe, 0 TSRMLS_CC);
+
+				use_iter = 1;
+			}
 		}
 
 		while (node) {
@@ -1161,13 +1170,38 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 
 			_get_base_node_value(sxe, node, &value, sxe->iter.nsprefix, sxe->iter.isprefix TSRMLS_CC);
 
-			sxe_properties_add(rv, name, namelen, value TSRMLS_CC);
+			if ( use_iter ) {
+				zend_hash_next_index_insert(rv, &value, sizeof(zval *), NULL);
+			} else {
+				sxe_properties_add(rv, name, namelen, value TSRMLS_CC);
+			}
 next_iter:
-			node = node->next;
+			if ( use_iter ) {
+				node = php_sxe_iterator_fetch(sxe, node->next, 0 TSRMLS_CC);
+			} else {
+				node = node->next;
+			}
 		}
 	}
 
+	if ( use_iter ) {
+		if (sxe->iter.data) {
+			zval_ptr_dtor(&sxe->iter.data);
+		}
+		sxe->iter.data = iter_data;
+	}
+
 	return rv;
+}
+/* }}} */
+
+static HashTable * sxe_get_gc(zval *object, zval ***table, int *n TSRMLS_DC) /* {{{ */ {
+	php_sxe_object  *sxe;
+	sxe = php_sxe_fetch_object(object TSRMLS_CC);
+	
+	*table = NULL;
+	*n = 0;
+	return sxe->properties;
 }
 /* }}} */
 
@@ -1335,7 +1369,7 @@ SXE_METHOD(asXML)
 	}
 
 	if (ZEND_NUM_ARGS() == 1) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 			RETURN_FALSE;
 		}
 
@@ -1487,22 +1521,28 @@ static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, 
 }
 /* }}} */
 
-/* {{{ proto string SimpleXMLElement::getDocNamespaces([bool recursive])
+/* {{{ proto string SimpleXMLElement::getDocNamespaces([bool recursive [, bool from_root])
    Return all namespaces registered with document */
 SXE_METHOD(getDocNamespaces)
 {
-	zend_bool           recursive = 0;
+	zend_bool           recursive = 0, from_root = 1;
 	php_sxe_object     *sxe;
+	xmlNodePtr          node;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &recursive) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bb", &recursive, &from_root) == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
 
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+	if(from_root){
+		node = xmlDocGetRootElement((xmlDocPtr)sxe->document->ptr);
+	}else{
+		GET_NODE(sxe, node);
+	}
 
-	sxe_add_registered_namespaces(sxe, xmlDocGetRootElement((xmlDocPtr)sxe->document->ptr), recursive, return_value TSRMLS_CC);
+	sxe_add_registered_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1930,7 +1970,9 @@ static zend_object_handlers sxe_object_handlers = { /* {{{ */
 	sxe_objects_compare,
 	sxe_object_cast,
 	sxe_count_elements,
-	sxe_get_debug_info
+	sxe_get_debug_info,
+	NULL,
+	sxe_get_gc
 };
 /* }}} */
 
@@ -2122,7 +2164,7 @@ PHP_FUNCTION(simplexml_load_file)
 	zend_class_entry *ce= sxe_class_entry;
 	zend_bool       isprefix = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|C!lsb", &filename, &filename_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|C!lsb", &filename, &filename_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
 		return;
 	}
 
@@ -2492,6 +2534,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_getnamespaces, 0, 0, 0)
 	ZEND_ARG_INFO(0, recursve)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_getdocnamespaces, 0, 0, 0)
+	ZEND_ARG_INFO(0, recursve)
+	ZEND_ARG_INFO(0, from_root)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_children, 0, 0, 0)
 	ZEND_ARG_INFO(0, ns)
 	ZEND_ARG_INFO(0, is_prefix)
@@ -2560,7 +2607,7 @@ static const zend_function_entry sxe_functions[] = { /* {{{ */
 	SXE_ME(attributes,             arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
 	SXE_ME(children,               arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
 	SXE_ME(getNamespaces,          arginfo_simplexmlelement_getnamespaces, ZEND_ACC_PUBLIC)
-	SXE_ME(getDocNamespaces,       arginfo_simplexmlelement_getnamespaces, ZEND_ACC_PUBLIC)
+	SXE_ME(getDocNamespaces,       arginfo_simplexmlelement_getdocnamespaces, ZEND_ACC_PUBLIC)
 	SXE_ME(getName,                arginfo_simplexmlelement__void, ZEND_ACC_PUBLIC)
 	SXE_ME(addChild,               arginfo_simplexmlelement_addchild, ZEND_ACC_PUBLIC)
 	SXE_ME(addAttribute,           arginfo_simplexmlelement_addchild, ZEND_ACC_PUBLIC)

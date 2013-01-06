@@ -48,7 +48,7 @@ static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	COLLATOR_METHOD_FETCH_OBJECT;
 
 	if(locale_len == 0) {
-		locale = INTL_G(default_locale);
+		locale = intl_locale_get_default(TSRMLS_C);
 	}
 
 	/* Open ICU collator. */

@@ -150,6 +150,35 @@ PHP_FUNCTION(class_implements)
 }
 /* }}} */
 
+/* {{{ proto array class_uses(mixed what [, bool autoload ])
+ Return all traits used by a class. */
+PHP_FUNCTION(class_uses)
+{
+	zval *obj;
+	zend_bool autoload = 1;
+	zend_class_entry *ce;
+	
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|b", &obj, &autoload) == FAILURE) {
+		RETURN_FALSE;
+	}
+	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "object or string expected");
+		RETURN_FALSE;
+	}
+	
+	if (Z_TYPE_P(obj) == IS_STRING) {
+		if (NULL == (ce = spl_find_ce_by_name(Z_STRVAL_P(obj), Z_STRLEN_P(obj), autoload TSRMLS_CC))) {
+			RETURN_FALSE;
+		}
+	} else {
+		ce = Z_OBJCE_P(obj);
+	}
+	
+	array_init(return_value);
+	spl_add_traits(return_value, ce, 1, ZEND_ACC_TRAIT TSRMLS_CC);
+}
+/* }}} */
+
 #define SPL_ADD_CLASS(class_name, z_list, sub, allow, ce_flags) \
 	spl_add_classes(spl_ce_ ## class_name, z_list, sub, allow, ce_flags TSRMLS_CC)
 
@@ -160,6 +189,7 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(BadFunctionCallException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(BadMethodCallException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(CachingIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(CallbackFilterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(Countable, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(DirectoryIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(DomainException, z_list, sub, allow, ce_flags); \
@@ -183,6 +213,7 @@ PHP_FUNCTION(class_implements)
 	SPL_ADD_CLASS(RangeException, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveArrayIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveCachingIterator, z_list, sub, allow, ce_flags); \
+	SPL_ADD_CLASS(RecursiveCallbackFilterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveDirectoryIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveFilterIterator, z_list, sub, allow, ce_flags); \
 	SPL_ADD_CLASS(RecursiveIterator, z_list, sub, allow, ce_flags); \
@@ -242,7 +273,7 @@ static int spl_autoload(const char *class_name, const char * lc_name, int class_
 	}
 #endif
 
-	ret = php_stream_open_for_zend_ex(class_file, &file_handle, ENFORCE_SAFE_MODE|USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
+	ret = php_stream_open_for_zend_ex(class_file, &file_handle, USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
 
 	if (ret == SUCCESS) {
 		if (!file_handle.opened_path) {
@@ -567,7 +598,14 @@ PHP_FUNCTION(spl_autoload_register)
 			}
 		}
 
-		zend_hash_add(SPL_G(autoload_functions), lc_name, func_name_len+1, &alfi.func_ptr, sizeof(autoload_func_info), NULL);
+		if (zend_hash_add(SPL_G(autoload_functions), lc_name, func_name_len+1, &alfi.func_ptr, sizeof(autoload_func_info), NULL) == FAILURE) {
+			if (obj_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
+				Z_DELREF_P(alfi.obj);
+			}				
+			if (alfi.closure) {
+				Z_DELREF_P(alfi.closure);
+			}
+		}
 		if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
 			/* Move the newly created element to the head of the hashtable */
 			HT_MOVE_TAIL_TO_HEAD(SPL_G(autoload_functions));
@@ -828,6 +866,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_implements, 0, 0, 1)
 	ZEND_ARG_INFO(0, autoload)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_uses, 0, 0, 1)
+	ZEND_ARG_INFO(0, what)
+	ZEND_ARG_INFO(0, autoload)
+ZEND_END_ARG_INFO()
+
+
 ZEND_BEGIN_ARG_INFO(arginfo_spl_classes, 0)
 ZEND_END_ARG_INFO()
 
@@ -872,6 +916,7 @@ const zend_function_entry spl_functions[] = {
 	PHP_FE(spl_autoload_call,       arginfo_spl_autoload_call)
 	PHP_FE(class_parents,           arginfo_class_parents)
 	PHP_FE(class_implements,        arginfo_class_implements)
+	PHP_FE(class_uses,              arginfo_class_uses)
 	PHP_FE(spl_object_hash,         arginfo_spl_object_hash)
 #ifdef SPL_ITERATORS_H
 	PHP_FE(iterator_to_array,       arginfo_iterator_to_array)

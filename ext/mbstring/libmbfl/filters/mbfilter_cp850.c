@@ -33,7 +33,7 @@
 
 static int mbfl_filt_ident_cp850(int c, mbfl_identify_filter *filter);
 
-static const char *mbfl_encoding_cp850_aliases[] = {"CP850", "CP-850", "IBM-850", NULL};
+static const char *mbfl_encoding_cp850_aliases[] = {"CP850", "CP-850", "IBM850", "IBM-850", NULL};
 
 const mbfl_encoding mbfl_encoding_cp850 = {
 	mbfl_no_encoding_cp850,

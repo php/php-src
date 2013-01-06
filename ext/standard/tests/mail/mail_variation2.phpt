@@ -1,8 +1,8 @@
 --TEST--
 Test mail() function : variation force extra parameters
 --INI--
-sendmail_path="sed > /tmp/php_test_mailVariation2.out"
-mail.force_extra_parameters="-e4a---forced-params"
+sendmail_path="cat > /tmp/php_test_mailVariation2.out"
+mail.force_extra_parameters="-n"
 mail.add_x_header = Off
 --SKIPIF--
 <?php
@@ -33,12 +33,11 @@ unlink($outFile);
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing mail() : basic functionality ***
 bool(true)
-To: user@company.com
-Subject: Test Subject
-
-A Message
----forced-params
+%w1%wTo: user@company.com
+%w2%wSubject: Test Subject
+%w3%w
+%w4%wA Message
 ===DONE===

@@ -24,7 +24,7 @@ function ut_main()
 
      foreach($http_acc as $http) {
 		$res = ut_loc_accept_http($http);
-		$res_str .= "Accepting $http: $res\n";
+		$res_str .= @"Accepting $http: $res\n";
 	}
 
     return $res_str;

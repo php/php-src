@@ -2,8 +2,6 @@
 Phar front controller alternate index file
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
---INI--
-detect_unicode=0
 --ENV--
 SCRIPT_NAME=/frontcontroller7.php
 REQUEST_URI=/frontcontroller7.php/

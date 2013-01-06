@@ -81,13 +81,13 @@ array(12) {
   [6]=>
   string(1) ""
   [7]=>
-  string(2) "\a"
+  string(1) ""
   [8]=>
-  string(3) "\cx"
+  string(2) "\a"
   [9]=>
-  string(4) "\ddd"
+  string(3) "\cx"
   [10]=>
-  string(2) "\e"
+  string(4) "\ddd"
   [11]=>
   string(4) "\xhh"
 }
@@ -110,13 +110,13 @@ array(12) {
   [6]=>
   string(1) ""
   [7]=>
-  string(2) "\a"
+  string(1) ""
   [8]=>
-  string(3) "\cx"
+  string(2) "\a"
   [9]=>
-  string(4) "\ddd"
+  string(3) "\cx"
   [10]=>
-  string(2) "\e"
+  string(4) "\ddd"
   [11]=>
   string(4) "\xhh"
 }
@@ -139,13 +139,13 @@ array(12) {
   [6]=>
   string(1) ""
   [7]=>
-  string(2) "\a"
+  string(1) ""
   [8]=>
-  string(3) "\cx"
+  string(2) "\a"
   [9]=>
-  string(4) "\ddd"
+  string(3) "\cx"
   [10]=>
-  string(2) "\e"
+  string(4) "\ddd"
   [11]=>
   string(4) "\xhh"
 }

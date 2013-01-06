@@ -36,13 +36,13 @@ echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing error conditions for fnmatch() ***
-Warning: fnmatch() expects parameter 1 to be string, array given in %s on line %d%d
+Warning: fnmatch() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be string, resource given in %s on line %d%d
+Warning: fnmatch() expects parameter 1 to be a valid path, resource given in %s on line %d
 NULL
 
-Warning: fnmatch() expects parameter 1 to be string, object given in %s on line %d%d
+Warning: fnmatch() expects parameter 1 to be a valid path, object given in %s on line %d
 NULL
 
 Warning: fnmatch() expects at least 2 parameters, 1 given in %s on line %d%d

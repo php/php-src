@@ -343,9 +343,8 @@ static void sapi_capi_register_server_variables(zval * track_vars_array TSRMLS_D
 
 }
 
-static void capi_log_message(char *message)
+static void capi_log_message(char *message TSRMLS_DC)
 {
-   TSRMLS_FETCH();
    capi_request_context *rc = (capi_request_context *) SG(server_context);
    logFmsg(0, "mod/php: %s", message);
 }

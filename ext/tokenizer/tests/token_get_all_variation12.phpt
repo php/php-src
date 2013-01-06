@@ -1,19 +1,22 @@
 --TEST--
 Test token_get_all() function : usage variations - with predefined language constants
+--SKIPIF--
+<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens
+ * Description: splits the given source into an array of PHP language tokens
  * Source code: ext/tokenizer/tokenizer.c
 */
 
 /*
  * Testing token_get_all() with following predefined language constants:
- *   __FILE__ - T_FILE(364)
- *   __CLASS__ - T_CLASS_C(360)
- *   __FUNCTION__ - T_FUNC_C(362)
- *   __LINE__ - T_LINE(363)
- *   __METHOD__ - T_METHOD_C(361)
+ *   __FILE__     - T_FILE
+ *   __CLASS__    - T_CLASS_C
+ *   __TRAIT__    - T_TRAIT_C
+ *   __FUNCTION__ - T_FUNC_C
+ *   __LINE__     - T_LINE
+ *   __METHOD__   - T_METHOD_C
 */
 
 echo "*** Testing token_get_all() : with language constants ***\n";
@@ -25,12 +28,13 @@ $source = "<?php
 ?>";
 var_dump( token_get_all($source));
 
-// parsing __CLASS__ and __FUNCTION__ tokens
-echo "-- with CLASS and FUNCTION --\n";
+// parsing __CLASS__, __TRAIT__ and __FUNCTION__ tokens
+echo "-- with CLASS, TRAIT and FUNCTION --\n";
 $source = '<?php
 class MyClass
 {
   echo  __CLASS__;
+  echo  __TRAIT__;
   function myFunction()
   {  echo  __FUNCTION__; }
 }
@@ -54,7 +58,7 @@ array(16) {
   [0]=>
   array(3) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -63,7 +67,7 @@ array(16) {
   [1]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -73,7 +77,7 @@ array(16) {
   [2]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(3) "$fp"
     [2]=>
@@ -82,7 +86,7 @@ array(16) {
   [3]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -93,7 +97,7 @@ array(16) {
   [5]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(2) "  "
     [2]=>
@@ -102,7 +106,7 @@ array(16) {
   [6]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(5) "fopen"
     [2]=>
@@ -113,7 +117,7 @@ array(16) {
   [8]=>
   array(3) {
     [0]=>
-    int(365)
+    int(%d)
     [1]=>
     string(8) "__FILE__"
     [2]=>
@@ -124,7 +128,7 @@ array(16) {
   [10]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -133,7 +137,7 @@ array(16) {
   [11]=>
   array(3) {
     [0]=>
-    int(315)
+    int(%d)
     [1]=>
     string(3) "'r'"
     [2]=>
@@ -146,7 +150,7 @@ array(16) {
   [14]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -156,19 +160,19 @@ array(16) {
   [15]=>
   array(3) {
     [0]=>
-    int(370)
+    int(%d)
     [1]=>
     string(2) "?>"
     [2]=>
-    int(3)
+    int(%d)
   }
 }
--- with CLASS and FUNCTION --
-array(30) {
+-- with CLASS, TRAIT and FUNCTION --
+array(35) {
   [0]=>
   array(3) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(6) "<?php
 "
@@ -178,7 +182,7 @@ array(30) {
   [1]=>
   array(3) {
     [0]=>
-    int(353)
+    int(%d)
     [1]=>
     string(5) "class"
     [2]=>
@@ -187,7 +191,7 @@ array(30) {
   [2]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -196,7 +200,7 @@ array(30) {
   [3]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(7) "MyClass"
     [2]=>
@@ -205,7 +209,7 @@ array(30) {
   [4]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -217,17 +221,17 @@ array(30) {
   [6]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
     [2]=>
-    int(3)
+    int(%d)
   }
   [7]=>
   array(3) {
     [0]=>
-    int(316)
+    int(%d)
     [1]=>
     string(4) "echo"
     [2]=>
@@ -236,7 +240,7 @@ array(30) {
   [8]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(2) "  "
     [2]=>
@@ -245,7 +249,7 @@ array(30) {
   [9]=>
   array(3) {
     [0]=>
-    int(361)
+    int(%d)
     [1]=>
     string(9) "__CLASS__"
     [2]=>
@@ -256,135 +260,174 @@ array(30) {
   [11]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
     [2]=>
-    int(4)
+    int(%d)
   }
   [12]=>
   array(3) {
     [0]=>
-    int(334)
+    int(%d)
     [1]=>
-    string(8) "function"
+    string(4) "echo"
     [2]=>
     int(5)
   }
   [13]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
-    string(1) " "
+    string(2) "  "
     [2]=>
     int(5)
   }
   [14]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
-    string(10) "myFunction"
+    string(9) "__TRAIT__"
     [2]=>
     int(5)
   }
   [15]=>
-  string(1) "("
+  string(1) ";"
   [16]=>
-  string(1) ")"
-  [17]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
     [2]=>
     int(5)
   }
+  [17]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(8) "function"
+    [2]=>
+    int(6)
+  }
   [18]=>
-  string(1) "{"
-  [19]=>
   array(3) {
     [0]=>
-    int(371)
-    [1]=>
-    string(2) "  "
-    [2]=>
-    int(6)
-  }
-  [20]=>
-  array(3) {
-    [0]=>
-    int(316)
-    [1]=>
-    string(4) "echo"
-    [2]=>
-    int(6)
-  }
-  [21]=>
-  array(3) {
-    [0]=>
-    int(371)
-    [1]=>
-    string(2) "  "
-    [2]=>
-    int(6)
-  }
-  [22]=>
-  array(3) {
-    [0]=>
-    int(363)
-    [1]=>
-    string(12) "__FUNCTION__"
-    [2]=>
-    int(6)
-  }
-  [23]=>
-  string(1) ";"
-  [24]=>
-  array(3) {
-    [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
     int(6)
   }
-  [25]=>
-  string(1) "}"
-  [26]=>
+  [19]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
-    string(1) "
-"
+    string(10) "myFunction"
     [2]=>
     int(6)
   }
-  [27]=>
-  string(1) "}"
-  [28]=>
+  [20]=>
+  string(1) "("
+  [21]=>
+  string(1) ")"
+  [22]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
+    [1]=>
+    string(3) "
+  "
+    [2]=>
+    int(6)
+  }
+  [23]=>
+  string(1) "{"
+  [24]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(2) "  "
+    [2]=>
+    int(7)
+  }
+  [25]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(4) "echo"
+    [2]=>
+    int(7)
+  }
+  [26]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(2) "  "
+    [2]=>
+    int(7)
+  }
+  [27]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(12) "__FUNCTION__"
+    [2]=>
+    int(7)
+  }
+  [28]=>
+  string(1) ";"
+  [29]=>
+  array(3) {
+    [0]=>
+    int(%d)
+    [1]=>
+    string(1) " "
+    [2]=>
+    int(7)
+  }
+  [30]=>
+  string(1) "}"
+  [31]=>
+  array(3) {
+    [0]=>
+    int(%d)
     [1]=>
     string(1) "
 "
     [2]=>
     int(7)
   }
-  [29]=>
+  [32]=>
+  string(1) "}"
+  [33]=>
   array(3) {
     [0]=>
-    int(370)
+    int(%d)
+    [1]=>
+    string(1) "
+"
+    [2]=>
+    int(8)
+  }
+  [34]=>
+  array(3) {
+    [0]=>
+    int(%d)
     [1]=>
     string(2) "?>"
     [2]=>
-    int(8)
+    int(9)
   }
 }
 -- with LINE and METHOD --
@@ -392,7 +435,7 @@ array(19) {
   [0]=>
   array(3) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(6) "<?php
 "
@@ -402,7 +445,7 @@ array(19) {
   [1]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(2) "  "
     [2]=>
@@ -411,7 +454,7 @@ array(19) {
   [2]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -420,7 +463,7 @@ array(19) {
   [3]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -431,7 +474,7 @@ array(19) {
   [5]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -440,7 +483,7 @@ array(19) {
   [6]=>
   array(3) {
     [0]=>
-    int(364)
+    int(%d)
     [1]=>
     string(8) "__LINE__"
     [2]=>
@@ -451,7 +494,7 @@ array(19) {
   [8]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
@@ -461,68 +504,68 @@ array(19) {
   [9]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$b"
     [2]=>
-    int(3)
+    int(%d)
   }
   [10]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
-    int(3)
+    int(%d)
   }
   [11]=>
   string(1) "="
   [12]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
-    int(3)
+    int(%d)
   }
   [13]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$b"
     [2]=>
-    int(3)
+    int(%d)
   }
   [14]=>
   string(1) "."
   [15]=>
   array(3) {
     [0]=>
-    int(362)
+    int(%d)
     [1]=>
     string(10) "__METHOD__"
     [2]=>
-    int(3)
+    int(%d)
   }
   [16]=>
   string(1) ";"
   [17]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
     [2]=>
-    int(3)
+    int(%d)
   }
   [18]=>
   array(3) {
     [0]=>
-    int(370)
+    int(%d)
     [1]=>
     string(2) "?>"
     [2]=>

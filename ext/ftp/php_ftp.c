@@ -41,7 +41,7 @@
 #include "php_ftp.h"
 #include "ftp.h"
 
-static int	le_ftpbuf;
+static int le_ftpbuf;
 #define le_ftpbuf_name "FTP Buffer"
 
 /* {{{ arginfo */
@@ -607,7 +607,7 @@ PHP_FUNCTION(ftp_chmod)
 	int		filename_len;
 	long		mode;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rls", &z_ftp, &mode, &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rlp", &z_ftp, &mode, &filename, &filename_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -660,7 +660,7 @@ PHP_FUNCTION(ftp_nlist)
 	char		**nlist, **ptr, *dir;
 	int		dir_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &dir, &dir_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp", &z_ftp, &dir, &dir_len) == FAILURE) {
 		return;
 	}
 
@@ -857,7 +857,7 @@ PHP_FUNCTION(ftp_get)
 	int		local_len, remote_len;
 	long		mode, resumepos=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssl|l", &z_ftp, &local, &local_len, &remote, &remote_len, &mode, &resumepos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rppl|l", &z_ftp, &local, &local_len, &remote, &remote_len, &mode, &resumepos) == FAILURE) {
 		return;
 	}
 
@@ -874,9 +874,9 @@ PHP_FUNCTION(ftp_get)
 #endif
 
 	if (ftp->autoseek && resumepos) {
-		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "rt+" : "rb+", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "rt+" : "rb+", REPORT_ERRORS, NULL);
 		if (outstream == NULL) {
-			outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+			outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
 		}
 		if (outstream != NULL) {
 			/* if autoresume is wanted seek to end */
@@ -888,7 +888,7 @@ PHP_FUNCTION(ftp_get)
 			}
 		}
 	} else {
-		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
 	}
 
 	if (outstream == NULL)	{
@@ -935,9 +935,9 @@ PHP_FUNCTION(ftp_nb_get)
 	mode = FTPTYPE_IMAGE;
 #endif
 	if (ftp->autoseek && resumepos) {
-		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "rt+" : "rb+", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "rt+" : "rb+", REPORT_ERRORS, NULL);
 		if (outstream == NULL) {
-			outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+			outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
 		}
 		if (outstream != NULL) {
 			/* if autoresume is wanted seek to end */
@@ -949,7 +949,7 @@ PHP_FUNCTION(ftp_nb_get)
 			}
 		}
 	} else {
-		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL);
+		outstream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "wt" : "wb", REPORT_ERRORS, NULL);
 	}
 
 	if (outstream == NULL)	{
@@ -1124,14 +1124,14 @@ PHP_FUNCTION(ftp_put)
 	long		mode, startpos=0;
 	php_stream 	*instream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssl|l", &z_ftp, &remote, &remote_len, &local, &local_len, &mode, &startpos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rppl|l", &z_ftp, &remote, &remote_len, &local, &local_len, &mode, &startpos) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 	XTYPE(xtype, mode);
 
-	if (!(instream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "rt" : "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL))) {
+	if (!(instream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "rt" : "rb", REPORT_ERRORS, NULL))) {
 		RETURN_FALSE;
 	}
 
@@ -1177,14 +1177,14 @@ PHP_FUNCTION(ftp_nb_put)
 	long		mode, startpos=0;
 	php_stream 	*instream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rssl|l", &z_ftp, &remote, &remote_len, &local, &local_len, &mode, &startpos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rppl|l", &z_ftp, &remote, &remote_len, &local, &local_len, &mode, &startpos) == FAILURE) {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(ftp, ftpbuf_t*, &z_ftp, -1, le_ftpbuf_name, le_ftpbuf);
 	XTYPE(xtype, mode);
 
-	if (!(instream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "rt" : "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL))) {
+	if (!(instream = php_stream_open_wrapper(local, mode == FTPTYPE_ASCII ? "rt" : "rb", REPORT_ERRORS, NULL))) {
 		RETURN_FALSE;
 	}
 
@@ -1233,7 +1233,7 @@ PHP_FUNCTION(ftp_size)
 	char		*file;
 	int		file_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp", &z_ftp, &file, &file_len) == FAILURE) {
 		return;
 	}
 
@@ -1253,7 +1253,7 @@ PHP_FUNCTION(ftp_mdtm)
 	char		*file;
 	int		file_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_ftp, &file, &file_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp", &z_ftp, &file, &file_len) == FAILURE) {
 		return;
 	}
 

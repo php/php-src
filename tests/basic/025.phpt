@@ -1,7 +1,6 @@
 --TEST--
 Test HTTP_RAW_POST_DATA with excessive post length
 --INI--
-magic_quotes_gpc=0
 always_populate_raw_post_data=1
 post_max_size=1K
 --POST--

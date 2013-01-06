@@ -1,28 +1,6 @@
 ## $Id$ -*- autoconf -*-
 dnl ## Process this file with autoconf to produce a configure script.
 
-divert(1)
-
-dnl ## Diversion 1 is the autoconf + automake setup phase. We also
-dnl ## set the PHP version, deal with platform-specific compile
-dnl ## options and check for the basic compile tools.
-
-dnl ## Diversion 2 is the initial checking of OS features, programs,
-dnl ## libraries and so on.
-
-dnl ## In diversion 3 we check for compile-time options to the PHP
-dnl ## core and how to deal with different system dependencies. 
-dnl ## This includes whether debugging or short tags are enabled
-dnl ## and the default behaviour of php.ini options.
-dnl ## This is also where an SAPI interface is selected (choosing between
-dnl ## Apache module, CGI etc.)
-
-dnl ## In diversion 4 we check user-configurable general settings.
-
-dnl ## In diversion 5 we check which extensions should be compiled.
-dnl ## All of these are normally in the extension directories.
-dnl ## Diversion 5 is the last one.  Here we generate files and clean up.
-
 dnl include Zend specific macro definitions first
 dnl -------------------------------------------------------------------------
 sinclude(Zend/acinclude.m4)
@@ -30,18 +8,118 @@ sinclude(Zend/acinclude.m4)
 dnl Basic autoconf + automake initialization, generation of config.nice.
 dnl -------------------------------------------------------------------------
 
-AC_PREREQ(2.13)
+AC_PREREQ(2.59)
 AC_INIT(README.GIT-RULES)
+ifdef([AC_PRESERVE_HELP_ORDER], [AC_PRESERVE_HELP_ORDER], [])
 
 PHP_CONFIG_NICE(config.nice)
 
 PHP_CANONICAL_HOST_TARGET
 
 AC_CONFIG_HEADER(main/php_config.h)
+AH_TOP([
+#if defined(__GNUC__) && __GNUC__ >= 4
+# define ZEND_API __attribute__ ((visibility("default")))
+# define ZEND_DLEXPORT __attribute__ ((visibility("default")))
+#else
+# define ZEND_API
+# define ZEND_DLEXPORT
+#endif
+
+#define ZEND_DLIMPORT
+
+#undef uint
+#undef ulong
+
+/* Define if you want to enable memory limit support */
+#define MEMORY_LIMIT 0
+])
+AH_BOTTOM([
+#ifndef ZEND_ACCONFIG_H_NO_C_PROTOS
+
+#ifdef HAVE_STDLIB_H
+# include <stdlib.h>
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+
+#ifdef HAVE_IEEEFP_H
+# include <ieeefp.h>
+#endif
+
+#ifdef HAVE_STRING_H
+# include <string.h>
+#else
+# include <strings.h>
+#endif
+
+#if ZEND_BROKEN_SPRINTF
+int zend_sprintf(char *buffer, const char *format, ...);
+#else
+# define zend_sprintf sprintf
+#endif
+
+#include <math.h>
+
+/* To enable the is_nan, is_infinite and is_finite PHP functions */
+#ifdef NETWARE
+	#define HAVE_ISNAN 1
+	#define HAVE_ISINF 1
+	#define HAVE_ISFINITE 1
+#endif
+
+#ifndef zend_isnan
+#ifdef HAVE_ISNAN
+#define zend_isnan(a) isnan(a)
+#elif defined(HAVE_FPCLASS)
+#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
+#else
+#define zend_isnan(a) 0
+#endif
+#endif
+
+#ifdef HAVE_ISINF
+#define zend_isinf(a) isinf(a)
+#elif defined(INFINITY)
+/* Might not work, but is required by ISO C99 */
+#define zend_isinf(a) (((a)==INFINITY)?1:0)
+#elif defined(HAVE_FPCLASS)
+#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
+#else
+#define zend_isinf(a) 0
+#endif
+
+#ifdef HAVE_FINITE
+#define zend_finite(a) finite(a)
+#elif defined(HAVE_ISFINITE) || defined(isfinite)
+#define zend_finite(a) isfinite(a)
+#elif defined(fpclassify)
+#define zend_finite(a) ((fpclassify((a))!=FP_INFINITE&&fpclassify((a))!=FP_NAN)?1:0)
+#else
+#define zend_finite(a) (zend_isnan(a) ? 0 : zend_isinf(a) ? 0 : 1)
+#endif
+
+#endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
+
+#ifdef NETWARE
+#ifdef USE_WINSOCK
+#/*This detection against winsock is of no use*/ undef HAVE_SOCKLEN_T
+#/*This detection against winsock is of no use*/ undef HAVE_SYS_SOCKET_H
+#endif
+#endif
+
+#undef PTHREADS
+])
 
 PHP_MAJOR_VERSION=5
-PHP_MINOR_VERSION=3
-PHP_RELEASE_VERSION=22
+PHP_MINOR_VERSION=6
+PHP_RELEASE_VERSION=0
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
 PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
@@ -289,23 +367,14 @@ sinclude(Zend/Zend.m4)
 sinclude(TSRM/threads.m4)
 sinclude(TSRM/tsrm.m4)
 
-
-divert(2)
-
-dnl ## Diversion 2 is where we set PHP-specific options and come up
-dnl ## with reasonable default values for them. We check for pthreads here
-dnl ## because the information is needed by the SAPI configuration.
-dnl ## This is also where an SAPI interface is selected (choosing between
-dnl ## Apache module, CGI etc.)
-
 dnl .
 dnl -------------------------------------------------------------------------
 
 PTHREADS_CHECK
 PHP_HELP_SEPARATOR([SAPI modules:])
 PHP_SHLIB_SUFFIX_NAMES
-PHP_SAPI=default
 PHP_BUILD_PROGRAM
+PHP_SAPI=none
 
 
 dnl SAPI configuration.
@@ -324,17 +393,24 @@ dnl Show which main SAPI was selected
 AC_MSG_CHECKING([for chosen SAPI module])
 AC_MSG_RESULT([$PHP_SAPI])
 
+dnl Show which binaries were selected
+AC_MSG_CHECKING([for executable SAPI binaries])
+if test "$PHP_BINARIES"; then
+  AC_MSG_RESULT([$PHP_BINARIES])
+else
+  AC_MSG_RESULT([none])
+fi
+
+dnl Exit early
+if test -z "$PHP_INSTALLED_SAPIS"; then
+  AC_MSG_ERROR([Nothing to build.])
+fi
+
+dnl force ZTS
 if test "$enable_maintainer_zts" = "yes"; then
   PTHREADS_ASSIGN_VARS
   PTHREADS_FLAGS
 fi
-
-divert(3)
-
-dnl ## In diversion 3 we check for compile-time options to the PHP
-dnl ## core and how to deal with different system dependencies. 
-dnl ## This includes whether debugging or short tags are enabled
-dnl ## and the default behaviour of php.ini options.
 
 dnl Starting system checks.
 dnl -------------------------------------------------------------------------
@@ -683,10 +759,6 @@ if test "x$php_crypt_r" = "x1"; then
   PHP_CRYPT_R_STYLE
 fi
 
-divert(4)
-
-dnl ## In diversion 4 we check user-configurable general settings.
-
 dnl General settings.
 dnl -------------------------------------------------------------------------
 PHP_CONFIGURE_PART(General settings)
@@ -712,7 +784,7 @@ if test "$PHP_GCOV" = "yes"; then
     AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
   fi
   
-  ltp_version_list="1.5 1.6 1.7"
+  ltp_version_list="1.5 1.6 1.7 1.9"
 
   AC_CHECK_PROG(LTP, lcov, lcov)
   AC_CHECK_PROG(LTP_GENHTML, genhtml, genhtml)
@@ -791,7 +863,7 @@ fi
 
 PHP_ARG_WITH(layout, layout of installed files,
 [  --with-layout=TYPE      Set how installed files will be laid out.  Type can
-                          be either PHP or GNU [PHP]], PHP, no)
+                          be either PHP or GNU @<:@PHP@:>@], PHP, no)
 
 case $PHP_LAYOUT in
   GNU)
@@ -804,7 +876,7 @@ esac
 
 PHP_ARG_WITH(config-file-path, path to configuration file,
 [  --with-config-file-path=PATH
-                          Set the path in which to look for php.ini [PREFIX/lib]], DEFAULT, no)
+                          Set the path in which to look for php.ini @<:@PREFIX/lib@:>@], DEFAULT, no)
 
 if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
   case $PHP_LAYOUT in
@@ -828,28 +900,6 @@ AC_MSG_RESULT([$PHP_CONFIG_FILE_SCAN_DIR])
 
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
-PHP_ARG_ENABLE(safe-mode, whether to enable safe mode by default,
-[  --enable-safe-mode      Enable safe mode by default], no, no)
-
-if test "$PHP_SAFE_MODE" = "yes"; then
-  AC_DEFINE(PHP_SAFE_MODE,1,[ ])
-else
-  AC_DEFINE(PHP_SAFE_MODE,0,[ ])
-fi
-
-AC_MSG_CHECKING([for safe mode exec dir])
-PHP_ARG_WITH(exec-dir,,
-[  --with-exec-dir[=DIR]   Only allow executables in DIR under safe-mode
-                          [/usr/local/php/bin]], no, no)
-
-if test "$PHP_EXEC_DIR" != "no" && test "$PHP_EXEC_DIR" != "yes" ; then
-  AC_DEFINE_UNQUOTED(PHP_SAFE_MODE_EXEC_DIR, "$PHP_EXEC_DIR", [ ])
-  AC_MSG_RESULT([$PHP_EXEC_DIR])
-else
-  AC_DEFINE(PHP_SAFE_MODE_EXEC_DIR, "/usr/local/php/bin", [ ])
-  AC_MSG_RESULT([/usr/local/php/bin])
-fi
-
 PHP_ARG_ENABLE(sigchild, whether to enable PHP's own SIGCHLD handler,
 [  --enable-sigchild       Enable PHP's own SIGCHLD handler], no, no)
 
@@ -857,15 +907,6 @@ if test "$PHP_SIGCHILD" = "yes"; then
   AC_DEFINE(PHP_SIGCHILD, 1, [ ])
 else
   AC_DEFINE(PHP_SIGCHILD, 0, [ ])
-fi
-
-PHP_ARG_ENABLE(magic-quotes, whether to enable magic quotes by default,
-[  --enable-magic-quotes   Enable magic quotes by default.], no, no)
-
-if test "$PHP_MAGIC_QUOTES" = "yes"; then
-  AC_DEFINE(MAGIC_QUOTES, 1, [ ])
-else
-  AC_DEFINE(MAGIC_QUOTES, 0, [ ])
 fi
 
 PHP_ARG_ENABLE(libgcc, whether to explicitly link against libgcc,
@@ -909,6 +950,25 @@ if test "$PHP_IPV6" != "no" && test "$ac_cv_ipv6_support" = yes; then
   AC_DEFINE(HAVE_IPV6, 1, [Whether to enable IPv6 support])
 fi
 
+dnl ##
+dnl ## DTRACE CHECKS
+dnl ## Note: this has to be done after SAPI configuration!
+dnl ##
+PHP_ARG_ENABLE(dtrace, whether to enable DTrace support,
+[  --enable-dtrace         Enable DTrace support], no, no)
+
+if test "$PHP_DTRACE" = "yes"; then
+  AC_CHECK_HEADERS([sys/sdt.h], [
+    PHP_INIT_DTRACE([Zend/zend_dtrace.d],[Zend/zend_dtrace_gen.h],[main/main.c Zend/zend_API.c \
+      Zend/zend_execute.c Zend/zend_exceptions.c \
+      Zend/zend_dtrace.c Zend/zend.c])
+    AC_DEFINE(HAVE_DTRACE, 1, [Whether to enable DTrace support])
+    PHP_SUBST(PHP_DTRACE_OBJS)
+  ], [
+    AC_MSG_ERROR([Cannot find sys/sdt.h which is required for DTrace support])
+  ])
+fi
+
 AC_MSG_CHECKING([how big to make fd sets])
 PHP_ARG_ENABLE(fd-setsize,,
 [  --enable-fd-setsize     Set size of descriptor sets], no, no)
@@ -923,11 +983,6 @@ if test "$PHP_FD_SETSIZE" != "no"; then
 else
   AC_MSG_RESULT([using system default])
 fi
-
-divert(5)
-
-dnl ## In diversion 5 we check which extensions should be compiled.
-dnl ## All of these are normally in the extension directories.
 
 dnl Extension configuration.
 dnl -------------------------------------------------------------------------
@@ -965,14 +1020,8 @@ dnl -------------------------------------------------------------------------
 enable_shared=yes
 enable_static=yes
 
-case $php_build_target in
-  program|static)
-    standard_libtool_flag='-prefer-non-pic -static'
-    if test -z "$PHP_MODULES" && test -z "$PHP_ZEND_EX"; then
-        enable_shared=no
-    fi
-    ;;
-  shared)
+case $php_sapi_module in
+  shared[)]
     enable_static=no
     case $with_pic in
       yes)
@@ -983,6 +1032,12 @@ case $php_build_target in
         ;;
     esac
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -avoid-version -module"
+    ;;
+  *[)]
+    standard_libtool_flag='-prefer-non-pic -static'
+    if test -z "$PHP_MODULES" && test -z "$PHP_ZEND_EX"; then
+      enable_shared=no
+    fi
     ;;
 esac
 
@@ -1013,7 +1068,7 @@ if test "$PHP_CLI" = "no"; then
 fi
 
 PHP_ARG_WITH(pear, [whether to install PEAR],
-[  --with-pear=DIR         Install PEAR in DIR [PREFIX/lib/php]
+[  --with-pear=DIR         Install PEAR in DIR @<:@PREFIX/lib/php@:>@
   --without-pear          Do not install PEAR], DEFAULT, yes)
 
 if test "$PHP_PEAR" != "no"; then
@@ -1221,24 +1276,15 @@ case $host_alias in
   ;;
 esac
 
-if test "$PHP_CLI" != "no"; then
-  PHP_CLI_TARGET="\$(SAPI_CLI_PATH)"
-  PHP_INSTALL_CLI_TARGET="install-cli"
-  PHP_ADD_SOURCES(sapi/cli, php_cli.c php_cli_readline.c,, cli)
-  PHP_INSTALLED_SAPIS="cli $PHP_SAPI"
-  PHP_EXECUTABLE="\$(top_builddir)/\$(SAPI_CLI_PATH)"
-else
-  PHP_INSTALLED_SAPIS="$PHP_SAPI"
-fi
-
 PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)
 
 PHP_SUBST(PHP_EXECUTABLE)
-PHP_SUBST(PHP_CLI_TARGET)
+
 PHP_SUBST(PHP_SAPI_OBJS)
-PHP_SUBST(PHP_CLI_OBJS)
+PHP_SUBST(PHP_BINARY_OBJS)
 PHP_SUBST(PHP_GLOBAL_OBJS)
 
+PHP_SUBST(PHP_BINARIES)
 PHP_SUBST(PHP_MODULES)
 PHP_SUBST(PHP_ZEND_EX)
 
@@ -1335,10 +1381,10 @@ PHP_CONFIGURE_PART(Configuring libtool)
 
 LDFLAGS="$LDFLAGS $PHP_AIX_LDFLAGS"
 
-dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5, 10.6, 10.7 and 10.8.
+dnl Autoconf 2.13's libtool checks go slightly nuts on Mac OS X 10.5 and 10.6.
 dnl This hack works around it. Ugly.
 case $host_alias in
-*darwin9*|*darwin10*|*darwin11*|*darwin12*)
+*darwin9*|*darwin10*)
   ac_cv_exeext=
   ;;
 esac
@@ -1382,30 +1428,22 @@ else
   pharcmd_install=
 fi;
 
-all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_CLI_TARGET) $pharcmd"
-install_targets="$install_modules install-build install-headers install-programs $install_pear $pharcmd_install"
-
-case $PHP_SAPI in
-  cli)
-    install_targets="$PHP_INSTALL_CLI_TARGET $install_targets"
-    ;;
-  *)
-    install_targets="install-sapi $PHP_INSTALL_CLI_TARGET $install_targets"
-    ;;
-esac
+all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
+install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
 
 PHP_SUBST(all_targets)
 PHP_SUBST(install_targets)
+PHP_SUBST(install_binary_targets)
 
 PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c tsrm_strtok_r.c tsrm_virtual_cwd.c)
 
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
-       safe_mode.c fopen_wrappers.c alloca.c  php_scandir.c \
+       fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
-       network.c php_open_temporary_file.c php_logos.c \
+       network.c php_open_temporary_file.c \
        output.c getopt.c)
 
 PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
@@ -1420,21 +1458,21 @@ case $host_alias in
     PHP_ADD_BUILD_DIR(netware)
     ;;
   *)
-    PHP_ADD_SOURCES(/main, internal_functions_cli.c,, cli)
+    PHP_ADD_SOURCES_X(/main, internal_functions_cli.c,, PHP_BINARY_OBJS)
     ;;
 esac
 
 PHP_ADD_SOURCES(Zend, \
     zend_language_parser.c zend_language_scanner.c \
     zend_ini_parser.c zend_ini_scanner.c \
-    zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c \
+    zend_alloc.c zend_compile.c zend_constants.c zend_dynamic_array.c zend_dtrace.c \
     zend_execute_API.c zend_highlight.c zend_llist.c \
     zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
     zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
     zend_list.c zend_indent.c zend_builtin_functions.c zend_sprintf.c \
     zend_ini.c zend_qsort.c zend_multibyte.c zend_ts_hash.c zend_stream.c \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
-    zend_closures.c zend_float.c)
+    zend_closures.c zend_float.c zend_string.c zend_signal.c zend_generators.c)
 
 if test -r "$abs_srcdir/Zend/zend_objects.c"; then
   PHP_ADD_SOURCES(Zend, zend_objects.c zend_object_handlers.c zend_objects_API.c zend_default_classes.c)
@@ -1451,7 +1489,6 @@ fi
 PHP_ADD_SOURCES_X(Zend, zend_execute.c,,PHP_GLOBAL_OBJS,,$flag)
 
 PHP_ADD_BUILD_DIR(main main/streams)
-PHP_ADD_BUILD_DIR(sapi/$PHP_SAPI sapi/cli)
 PHP_ADD_BUILD_DIR(TSRM)
 PHP_ADD_BUILD_DIR(Zend)
 
@@ -1550,9 +1587,9 @@ cat <<X
 X
   fi
 
-  if test "$PHP_SAPI" = "apache2handler" || test "$PHP_SAPI" = "apache2filter"; then
-    if test "$APACHE_VERSION" -ge 2004001; then
-      if test -z "$APACHE_THREADED_MPM"; then
+    if test "$PHP_SAPI" = "apache2handler" || test "$PHP_SAPI" = "apache2filter"; then
+      if test "$APACHE_VERSION" -ge 2004001; then
+        if test -z "$APACHE_THREADED_MPM"; then
 cat <<X
 +--------------------------------------------------------------------+
 |                        *** WARNING ***                             |
@@ -1561,9 +1598,9 @@ cat <<X
 | If you change Apache to use a threaded MPM you must reconfigure    |
 | PHP with --enable-maintainer-zts                                   |
 X
+        fi
       fi
     fi
-  fi
 
   # Warn about linking Apache with libpthread if oci8 extension is enabled on linux.
   if test "$PHP_OCI8" != "no"; then

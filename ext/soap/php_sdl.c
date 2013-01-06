@@ -2373,7 +2373,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		}
 	}
 
-	write(f, buf.c, buf.len);
+	php_ignore_value(write(f, buf.c, buf.len));
 	close(f);
 	smart_str_free(&buf);
 	zend_hash_destroy(&tmp_functions);
@@ -3228,7 +3228,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 		unsigned char digest[16];
 		int len = strlen(SOAP_GLOBAL(cache_dir));
 		time_t cached;
-		char *user = php_get_current_user();
+		char *user = php_get_current_user(TSRMLS_C);
 		int user_len = user ? strlen(user) + 1 : 0;
 
 		md5str[0] = '\0';
@@ -3258,7 +3258,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 			"_stream_context", sizeof("_stream_context"), (void**)&tmp)) {
 		context = php_stream_context_from_zval(*tmp, 0);
 	} else {
-		context = php_stream_context_alloc();
+		context = php_stream_context_alloc(TSRMLS_C);
 	}
 
 	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_user_agent", sizeof("_user_agent"), (void **) &tmp) == SUCCESS &&
@@ -3288,7 +3288,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 		smart_str_free(&proxy);
 		
 		if (!context) {
-			context = php_stream_context_alloc();
+			context = php_stream_context_alloc(TSRMLS_C);
 		}
 		php_stream_context_set_option(context, "http", "proxy", str_proxy);
 		zval_ptr_dtor(&str_proxy);
@@ -3320,7 +3320,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 		zval *str_headers;
 
 		if (!context) {
-			context = php_stream_context_alloc();
+			context = php_stream_context_alloc(TSRMLS_C);
 		} else {
 			http_context_headers(context, has_authorization, has_proxy_authorization, 0, &headers TSRMLS_CC);
 		}

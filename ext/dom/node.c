@@ -429,7 +429,7 @@ int dom_node_parent_node_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return SUCCESS;
 	}
 
-	if (NULL == (*retval = php_dom_create_object(nodeparent, &ret, NULL, *retval, obj TSRMLS_CC))) {
+	if (NULL == (*retval = php_dom_create_object(nodeparent, &ret, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -498,7 +498,7 @@ int dom_node_first_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return SUCCESS;
 	}
 
-	if (NULL == (*retval = php_dom_create_object(first, &ret, NULL, *retval, obj TSRMLS_CC))) {
+	if (NULL == (*retval = php_dom_create_object(first, &ret, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -535,7 +535,7 @@ int dom_node_last_child_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return SUCCESS;
 	}
 
-	if (NULL == (*retval = php_dom_create_object(last, &ret, NULL, *retval, obj TSRMLS_CC))) {
+	if (NULL == (*retval = php_dom_create_object(last, &ret, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -569,7 +569,7 @@ int dom_node_previous_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 		return SUCCESS;
 	}
 
-	if (NULL == (*retval = php_dom_create_object(prevsib, &ret, NULL, *retval, obj TSRMLS_CC))) {
+	if (NULL == (*retval = php_dom_create_object(prevsib, &ret, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -602,7 +602,7 @@ int dom_node_next_sibling_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 
-	if (NULL == (*retval = php_dom_create_object(nextsib, &ret, NULL, *retval, obj TSRMLS_CC))) {
+	if (NULL == (*retval = php_dom_create_object(nextsib, &ret, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -674,7 +674,7 @@ int dom_node_owner_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 
 	ALLOC_ZVAL(*retval);
 
-	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) docp, &ret, NULL, *retval, obj TSRMLS_CC))) {
+	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) docp, &ret, *retval, obj TSRMLS_CC))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
 	}
@@ -1087,7 +1087,7 @@ PHP_FUNCTION(dom_node_insert_before)
 					xmlUnlinkNode((xmlNodePtr) lastattr);
 					php_libxml_node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
 				} else {
-					DOM_RET_OBJ_EX(child, &ret, intern);
+					DOM_RET_OBJ(child, &ret, intern);
 					return;
 				}
 			}
@@ -1129,7 +1129,7 @@ PHP_FUNCTION(dom_node_insert_before)
 					xmlUnlinkNode((xmlNodePtr) lastattr);
 					php_libxml_node_free_resource((xmlNodePtr) lastattr TSRMLS_CC);
 				} else {
-					DOM_RET_OBJ_EX(child, &ret, intern);
+					DOM_RET_OBJ(child, &ret, intern);
 					return;
 				}
 			}
@@ -1148,7 +1148,7 @@ PHP_FUNCTION(dom_node_insert_before)
 
 	dom_reconcile_ns(parentp->doc, new_child);
 
-	DOM_RET_OBJ_EX(new_child, &ret, intern);
+	DOM_RET_OBJ(new_child, &ret, intern);
 
 }
 /* }}} end dom_node_insert_before */
@@ -1232,7 +1232,7 @@ PHP_FUNCTION(dom_node_replace_child)
 			xmlReplaceNode(oldchild, newchild);
 			dom_reconcile_ns(nodep->doc, newchild);
 		}
-		DOM_RET_OBJ_EX(oldchild, &ret, intern);
+		DOM_RET_OBJ(oldchild, &ret, intern);
 		return;
 	} else {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document) TSRMLS_CC);
@@ -1281,7 +1281,7 @@ PHP_FUNCTION(dom_node_remove_child)
 	while (children) {
 		if (children == child) {
 			xmlUnlinkNode(child);
-			DOM_RET_OBJ_EX(child, &ret, intern);
+			DOM_RET_OBJ(child, &ret, intern);
 			return;
 		}
 		children = children->next;
@@ -1389,7 +1389,7 @@ PHP_FUNCTION(dom_node_append_child)
 
 	dom_reconcile_ns(nodep->doc, new_child);
 
-	DOM_RET_OBJ_EX(new_child, &ret, intern);
+	DOM_RET_OBJ(new_child, &ret, intern);
 }
 /* }}} end dom_node_append_child */
 
@@ -1478,7 +1478,7 @@ PHP_FUNCTION(dom_node_clone_node)
 		intern = NULL;
 	}
 
-	DOM_RET_OBJ_EX(node, &ret, intern);
+	DOM_RET_OBJ(node, &ret, intern);
 }
 /* }}} end dom_node_clone_node */
 
@@ -1825,7 +1825,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 				if (Z_TYPE_PP(tmpns) == IS_STRING) {
 					char *prefix;
 					ulong idx;
-					int prefix_key_len;
+					uint prefix_key_len;
 
 					if (zend_hash_get_current_key_ex(Z_ARRVAL_PP(tmp), 
 						&prefix, &prefix_key_len, &idx, 0, NULL) == HASH_KEY_IS_STRING) {

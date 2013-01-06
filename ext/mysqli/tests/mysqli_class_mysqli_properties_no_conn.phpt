@@ -68,11 +68,6 @@ require_once('skipifconnectfailure.inc');
 			@$mysqli->sqlstate, gettype(@$mysqli->sqlstate),
 			@mysqli_sqlstate($mysqli), gettype(@mysqli_sqlstate($mysqli)));
 
-		assert(@mysqli_stat($mysqli) === @$mysqli->sstat);
-		printf("mysqli->stat = '%s'/%s ('%s'/%s)\n",
-			@$mysqli->stat, gettype(@$mysqli->stat),
-			@mysqli_stat($mysqli), gettype(@mysqli_stat($mysqli)));
-
 		assert(@mysqli_get_host_info($mysqli) === @$mysqli->host_info);
 		printf("mysqli->host_info = '%s'/%s ('%s'/%s)\n",
 			@$mysqli->host_info, gettype(@$mysqli->host_info),
@@ -151,11 +146,12 @@ Without RS
 Class variables:
 affected_rows = 'NULL'
 client_info = 'NULL'
-client_version = '%d'
-connect_errno = '%d'
-connect_error = '%s'
+client_version = '%s'
+connect_errno = '%s'
+connect_error = ''%s'
 errno = 'NULL'
 error = 'NULL'
+error_list = 'NULL'
 field_count = 'NULL'
 host_info = 'NULL'
 info = 'NULL'
@@ -171,11 +167,12 @@ warning_count = 'NULL'
 Object variables:
 affected_rows = 'NULL'
 client_info = 'NULL'
-client_version = '%d'
-connect_errno = '%d'
+client_version = '%s'
+connect_errno = '%s'
 connect_error = '%s'
 errno = 'NULL'
 error = 'NULL'
+error_list = 'NULL'
 field_count = 'NULL'
 host_info = 'NULL'
 info = 'NULL'
@@ -192,18 +189,17 @@ Magic, magic properties:
 mysqli->affected_rows = ''/NULL (''/NULL)
 
 Warning: assert(): Assertion failed in %s on line %d
-mysqli->client_info = ''/NULL ('%s'/string)
-mysqli->client_version =  '%d'/integer ('%d'/integer)
+mysqli->client_info = ''/NULL ('%s'/%s)
+mysqli->client_version =  '%s'/integer ('%s'/integer)
 mysqli->errno = ''/NULL (''/NULL)
 mysqli->error = ''/NULL (''/NULL)
 mysqli->field_count = ''/NULL (''/NULL)
 mysqli->insert_id = ''/NULL (''/NULL)
 mysqli->sqlstate = ''/NULL (''/NULL)
-mysqli->stat = ''/NULL (''/NULL)
 mysqli->host_info = ''/NULL (''/NULL)
 mysqli->info = ''/NULL (''/NULL)
 
-Warning: assert(): Assertion failed in %s on line 78
+Warning: assert(): Assertion failed in %s on line %d
 mysqli->thread_id = ''/NULL (''/NULL)
 mysqli->protocol_version = ''/NULL (''/NULL)
 mysqli->server_info = ''/NULL (''/NULL)
@@ -216,18 +212,19 @@ setting mysqli->unknown, @mysqli_unknown = '13'
 setting mysqli->unknown, @mysqli_unknown = 'friday'
 
 Access hidden properties for MYSLQI_STATUS_INITIALIZED (TODO documentation):
-mysqli->connect_error = '%s'/string ('%s'/string)
-mysqli->connect_errno = '%d'/integer ('%d'/integer)
+mysqli->connect_error = '%s'/%s)
+mysqli->connect_errno = '%s'/integer ('%s'/integer)
 With RS
 
 Class variables:
 affected_rows = 'NULL'
 client_info = 'NULL'
-client_version = '%d'
-connect_errno = '%d'
+client_version = '%s'
+connect_errno = '%s'
 connect_error = '%s'
 errno = 'NULL'
 error = 'NULL'
+error_list = 'NULL'
 field_count = 'NULL'
 host_info = 'NULL'
 info = 'NULL'
@@ -243,11 +240,12 @@ warning_count = 'NULL'
 Object variables:
 affected_rows = 'NULL'
 client_info = 'NULL'
-client_version = '%d'
-connect_errno = '%d'
+client_version = '%s'
+connect_errno = '%s'
 connect_error = '%s'
 errno = 'NULL'
 error = 'NULL'
+error_list = 'NULL'
 field_count = 'NULL'
 host_info = 'NULL'
 info = 'NULL'
@@ -263,15 +261,14 @@ warning_count = 'NULL'
 Magic, magic properties:
 mysqli->affected_rows = ''/NULL (''/NULL)
 
-Warning: assert(): Assertion failed in %s on line %s
-mysqli->client_info = ''/NULL ('%s'/string)
-mysqli->client_version =  '%d'/integer ('%d'/integer)
+Warning: assert(): Assertion failed in %s on line %d
+mysqli->client_info = ''/NULL ('%s'/%s)
+mysqli->client_version =  '%s'/integer ('%s'/integer)
 mysqli->errno = ''/NULL (''/NULL)
 mysqli->error = ''/NULL (''/NULL)
 mysqli->field_count = ''/NULL (''/NULL)
 mysqli->insert_id = ''/NULL (''/NULL)
 mysqli->sqlstate = ''/NULL (''/NULL)
-mysqli->stat = ''/NULL (''/NULL)
 mysqli->host_info = ''/NULL (''/NULL)
 mysqli->info = ''/NULL (''/NULL)
 
@@ -288,6 +285,6 @@ setting mysqli->unknown, @mysqli_unknown = '13'
 setting mysqli->unknown, @mysqli_unknown = 'friday'
 
 Access hidden properties for MYSLQI_STATUS_INITIALIZED (TODO documentation):
-mysqli->connect_error = '%s'/string ('%s'/string)
-mysqli->connect_errno = '%d'/integer ('%d'/integer)
+mysqli->connect_error = '%s'/%s)
+mysqli->connect_errno = '%s'/integer ('%s'/integer)
 done!

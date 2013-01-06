@@ -3,11 +3,6 @@ LOAD DATA INFILE - open_basedir
 --SKIPIF--
 <?php
 include_once('skipif.inc');
-
-if (!isset($db)) {
-  die("skip open_basedir setting prevents inclusing of required files");
-}
-
 include_once('skipifconnectfailure.inc');
 
 
@@ -30,12 +25,11 @@ if ($socket == "" && $host != NULL && $host != 'localhost' && $host != '.') {
 	}
 }
 ?>
---INI--
-open_basedir="."
 --FILE--
 <?php
 @include_once("connect.inc");
-
+ini_set("open_basedir", __DIR__);
+chdir(__DIR__);
 if (!isset($db)) {
 	// run-tests, I love you for not allowing me to set ini settings dynamically
 	print "[006] [1148] The used command is not allowed with this MySQL version
@@ -117,6 +111,9 @@ unlink("./simple.csv");
 print "done!";
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [006] [1148] %s
 [007] [0] ''
 [008] LOAD DATA not run?

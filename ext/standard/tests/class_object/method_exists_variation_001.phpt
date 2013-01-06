@@ -114,18 +114,23 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
+Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
 
 Arg value Array 
 bool(false)

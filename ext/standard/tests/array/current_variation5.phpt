@@ -1,5 +1,5 @@
 --TEST--
-Test current() function : usage variations - reference
+Test current() function : usage variations - reference & normal parameters
 --FILE--
 <?php
 /* Prototype  : mixed current(array $array_arg)

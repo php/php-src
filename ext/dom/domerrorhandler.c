@@ -29,7 +29,7 @@
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_domerrorhandler_handle_error, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, error, DOMError, 0)
+	ZEND_ARG_OBJ_INFO(0, error, DOMDomError, 0)
 ZEND_END_ARG_INFO();
 /* }}} */
 

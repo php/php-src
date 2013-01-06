@@ -1,5 +1,7 @@
 --TEST--
 Bug #45712 (NaN/INF comparison)
+--XFAIL--
+Bug 45712 not fixed yet.
 --FILE--
 <?php
 

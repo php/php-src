@@ -14,7 +14,7 @@ var_dump(
 	new IntlDateFormatter('', IntlDateFormatter::NONE, IntlDateFormatter::NONE, "Europe/Lisbon",
 		IntlDateFormatter::GREGORIAN, "\x80"));
 --EXPECTF--
-Warning: datefmt_create(): datefmt_create: error converting timezone_str to UTF-16 in %s on line %d
+Warning: datefmt_create(): datefmt_create: Time zone identifier given is not a valid UTF-8 string in %s on line %d
 NULL
 
 Warning: IntlDateFormatter::__construct(): datefmt_create: error converting pattern to UTF-16 in %s on line %d

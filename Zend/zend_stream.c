@@ -134,7 +134,7 @@ ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSR
 	handle->type = ZEND_HANDLE_FP;
 	handle->opened_path = NULL;
 	handle->handle.fp = zend_fopen(filename, &handle->opened_path TSRMLS_CC);
-	handle->filename = (char *)filename;
+	handle->filename = filename;
 	handle->free_filename = 0;
 	memset(&handle->handle.stream.mmap, 0, sizeof(zend_mmap));
 	
@@ -284,7 +284,6 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 	if (ZEND_MMAP_AHEAD) {
 		memset(file_handle->handle.stream.mmap.buf + file_handle->handle.stream.mmap.len, 0, ZEND_MMAP_AHEAD);
 	}
-
 #if HAVE_MMAP
 return_mapped:
 #endif
@@ -328,7 +327,7 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh TSRMLS_DC) /* {{{ */
 		fh->opened_path = NULL;
 	}
 	if (fh->free_filename && fh->filename) {
-		efree(fh->filename);
+		efree((char*)fh->filename);
 		fh->filename = NULL;
 	}
 }

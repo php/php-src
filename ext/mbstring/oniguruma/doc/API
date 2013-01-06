@@ -1,4 +1,4 @@
-Oniguruma API  Version 4.7.1  2007/07/04
+Oniguruma API  Version 5.9.2  2008/02/19
 
 #include <oniguruma.h>
 
@@ -105,10 +105,10 @@ Oniguruma API  Version 4.7.1  2007/07/04
       ONIG_ENCODING_EUC_KR        EUC-KR
       ONIG_ENCODING_EUC_CN        EUC-CN
       ONIG_ENCODING_SJIS          Shift_JIS
-      ONIG_ENCODING_KOI8          KOI8
       ONIG_ENCODING_KOI8_R        KOI8-R
+      ONIG_ENCODING_CP1251        CP1251
       ONIG_ENCODING_BIG5          Big5
-      ONIG_ENCODING_GB18030       GB 18030
+      ONIG_ENCODING_GB18030       GB18030
 
       or any OnigEncodingType data address defined by user.
 
@@ -134,6 +134,18 @@ Oniguruma API  Version 4.7.1  2007/07/04
 
 
 
+# int onig_new_without_alloc(regex_t* reg, const UChar* pattern,
+            const UChar* pattern_end,
+            OnigOptionType option, OnigEncoding enc, OnigSyntaxType* syntax,
+            OnigErrorInfo* err_info)
+
+  Create a regex object.
+  reg object area is not allocated in this function.
+
+  normal return: ONIG_NORMAL
+
+
+
 # int onig_new_deluxe(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
                       OnigCompileInfo* ci, OnigErrorInfo* einfo)
 
@@ -153,15 +165,12 @@ Oniguruma API  Version 4.7.1  2007/07/04
     ci->target_enc:      target string character encoding.
     ci->syntax:          address of pattern syntax definition.
     ci->option:          compile time option.
-    ci->ambig_flag:      character matching ambiguity bit flag for 
+    ci->case_fold_flag:  character matching case fold bit flag for 
                          ONIG_OPTION_IGNORECASE mode.
 
-       ONIGENC_AMBIGUOUS_MATCH_NONE:          exact
-       ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE:    ignore case for ASCII
-       ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE: ignore case for non-ASCII
-       ONIGENC_AMBIGUOUS_MATCH_FULL:          all ambiguity on
-       ONIGENC_AMBIGUOUS_MATCH_DEFAULT:       (ASCII | NONASCII)
-                                              onig_set_default_ambig_flag()
+       ONIGENC_CASE_FOLD_MIN:           minimum
+       ONIGENC_CASE_FOLD_DEFAULT:       minimum
+                                        onig_set_default_case_fold_flag()
 
   5 err_info:    address for return optional error info.
                  Use this value as 3rd argument of onig_error_code_to_str().
@@ -188,6 +197,14 @@ Oniguruma API  Version 4.7.1  2007/07/04
   1 reg: regex object.
 
 
+# void onig_free_body(regex_t* reg)
+
+  Free memory used by regex object. (Except reg oneself.)
+
+  arguments
+  1 reg: regex object.
+
+
 # int onig_search(regex_t* reg, const UChar* str, const UChar* end, const UChar* start,
                    const UChar* range, OnigRegion* region, OnigOptionType option)
 
@@ -202,8 +219,8 @@ Oniguruma API  Version 4.7.1  2007/07/04
   3 end:    terminate address of target string
   4 start:  search start address of target string
   5 range:  search terminate address of target string
-    in forward search  (start <= searched string head < range)
-    in backward search (range <= searched string head <= start)
+    in forward search  (start <= searched string < range)
+    in backward search (range <= searched string <= start)
   6 region: address for return group match range info (NULL is allowed)
   7 option: search time option
 
@@ -335,10 +352,10 @@ Oniguruma API  Version 4.7.1  2007/07/04
   1 reg:     regex object.
 
 
-# OnigEncoding    onig_get_encoding(regex_t* reg)
-# OnigOptionType  onig_get_options(regex_t* reg)
-# OnigAmbigType   onig_get_ambig_flag(regex_t* reg)
-# OnigSyntaxType* onig_get_syntax(regex_t* reg)
+# OnigEncoding     onig_get_encoding(regex_t* reg)
+# OnigOptionType   onig_get_options(regex_t* reg)
+# OnigCaseFoldType onig_get_case_fold_flag(regex_t* reg)
+# OnigSyntaxType*  onig_get_syntax(regex_t* reg)
 
   Return a value of the regex object.
 
@@ -518,7 +535,7 @@ Oniguruma API  Version 4.7.1  2007/07/04
   2 from: source address.
 
 
-# int onig_set_meta_char(OnigEncoding enc, unsigned int what,
+# int onig_set_meta_char(OnigSyntaxType* syntax, unsigned int what,
                          OnigCodePoint code)
 
   Set a variable meta character to the code point value.
@@ -529,8 +546,8 @@ Oniguruma API  Version 4.7.1  2007/07/04
   normal return: ONIG_NORMAL
 
   arguments
-  1 enc:  target encoding
-  2 what: specifies which meta character it is.
+  1 syntax: target syntax
+  2 what:   specifies which meta character it is.
 
           ONIG_META_CHAR_ESCAPE
           ONIG_META_CHAR_ANYCHAR
@@ -542,16 +559,16 @@ Oniguruma API  Version 4.7.1  2007/07/04
   3 code: meta character or ONIG_INEFFECTIVE_META_CHAR.
 
 
-# OnigAmbigType onig_get_default_ambig_flag()
+# OnigCaseFoldType onig_get_default_case_fold_flag()
 
-  Get default ambig flag.
+  Get default case fold flag.
 
 
-# int onig_set_default_ambig_flag(OnigAmbigType ambig_flag)
+# int onig_set_default_case_fold_flag(OnigCaseFoldType case_fold_flag)
 
-  Set default ambig flag.
+  Set default case fold flag.
 
-  1 ambig_flag: ambiguity flag
+  1 case_fold_flag: case fold flag
 
 
 # unsigned int onig_get_match_stack_limit_size(void)
@@ -580,6 +597,6 @@ Oniguruma API  Version 4.7.1  2007/07/04
 
 # const char* onig_version(void)
 
-  Return version string.  (ex. "2.2.8")
+  Return version string.  (ex. "5.0.3")
 
 // END

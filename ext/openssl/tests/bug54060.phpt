@@ -10,7 +10,7 @@ r7-89437 r892374 r894372 r894 7289r7 f  frwerfh i iurf iuryw uyrfouiwy ruy
 972439 8478942 yrhfjkdhls";
 $pass = "r23498rui324hjbnkj";
 
-openssl_encrypt($data, 'des3', $pass, false, '1qazxsw2');
+openssl_encrypt($data, 'des3', $pass, 0, '1qazxsw2');
 echo "Done";
 ?>
 --EXPECT--

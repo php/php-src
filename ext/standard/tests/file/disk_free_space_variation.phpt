@@ -105,19 +105,35 @@ float(%d)
 float(%d)
 
 -- Iteration 9 --
-bool(false)
-bool(false)
+
+Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 
 -- Iteration 10 --
-bool(false)
-bool(false)
+
+Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 
 -- Iteration 11 --
-bool(false)
-bool(false)
+
+Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 
 -- Iteration 12 --
-bool(false)
-bool(false)
+
+Warning: disk_free_space() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
+
+Warning: diskfreespace() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 
 --- Done ---

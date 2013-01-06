@@ -26,6 +26,7 @@
 
 #include "php.h"
 #include "php_readline.h"
+#include "readline_cli.h"
 
 #if HAVE_LIBREADLINE || HAVE_LIBEDIT
 
@@ -66,7 +67,9 @@ static zval *_readline_completion = NULL;
 static zval _readline_array;
 
 PHP_MINIT_FUNCTION(readline);
+PHP_MSHUTDOWN_FUNCTION(readline);
 PHP_RSHUTDOWN_FUNCTION(readline);
+PHP_MINFO_FUNCTION(readline);
 
 /* }}} */
 
@@ -141,6 +144,8 @@ static const zend_function_entry php_readline_functions[] = {
 	PHP_FE(readline_callback_read_char,			arginfo_readline_callback_read_char)
 	PHP_FE(readline_callback_handler_remove,	arginfo_readline_callback_handler_remove)
 	PHP_FE(readline_redisplay, arginfo_readline_redisplay)
+#endif
+#if HAVE_RL_ON_NEW_LINE
 	PHP_FE(readline_on_new_line, arginfo_readline_on_new_line)
 #endif
 	PHP_FE_END
@@ -151,11 +156,11 @@ zend_module_entry readline_module_entry = {
 	"readline", 
 	php_readline_functions, 
 	PHP_MINIT(readline), 
-	NULL,
+	PHP_MSHUTDOWN(readline),
 	NULL,
 	PHP_RSHUTDOWN(readline),
-	NULL, 
-	NO_VERSION_YET,
+	PHP_MINFO(readline), 
+	PHP_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
 
@@ -166,7 +171,12 @@ ZEND_GET_MODULE(readline)
 PHP_MINIT_FUNCTION(readline)
 {
     	using_history();
-    	return SUCCESS;
+    	return PHP_MINIT(cli_readline)(INIT_FUNC_ARGS_PASSTHRU);
+}
+
+PHP_MSHUTDOWN_FUNCTION(readline)
+{
+	return PHP_MSHUTDOWN(cli_readline)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 }
 
 PHP_RSHUTDOWN_FUNCTION(readline)
@@ -184,6 +194,11 @@ PHP_RSHUTDOWN_FUNCTION(readline)
 #endif
 
 	return SUCCESS;
+}
+
+PHP_MINFO_FUNCTION(readline)
+{
+	PHP_MINFO(cli_readline)(ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU);
 }
 
 /* }}} */
@@ -365,7 +380,7 @@ PHP_FUNCTION(readline_read_history)
 	char *arg = NULL;
 	int arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -389,7 +404,7 @@ PHP_FUNCTION(readline_write_history)
 	char *arg = NULL;
 	int arg_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|p", &arg, &arg_len) == FAILURE) {
 		return;
 	}
 
@@ -611,6 +626,9 @@ PHP_FUNCTION(readline_redisplay)
 }
 /* }}} */
 
+#endif
+
+#if HAVE_RL_ON_NEW_LINE
 /* {{{ proto void readline_on_new_line(void)
    Inform readline that the cursor has moved to a new line */
 PHP_FUNCTION(readline_on_new_line)

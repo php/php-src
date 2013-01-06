@@ -162,7 +162,10 @@ PHPAPI unsigned char *php_quot_print_encode(const unsigned char *str, size_t len
 			lp = 0;
 		} else {
 			if (iscntrl (c) || (c == 0x7f) || (c & 0x80) || (c == '=') || ((c == ' ') && (*str == '\015'))) {
-				if ((lp += 3) > PHP_QPRINT_MAXL) {
+				if ((((lp+= 3) > PHP_QPRINT_MAXL) && (c <= 0x7f)) 
+            || ((c > 0x7f) && (c <= 0xdf) && ((lp + 3) > PHP_QPRINT_MAXL)) 
+            || ((c > 0xdf) && (c <= 0xef) && ((lp + 6) > PHP_QPRINT_MAXL)) 
+            || ((c > 0xef) && (c <= 0xf4) && ((lp + 9) > PHP_QPRINT_MAXL))) {
 					*d++ = '=';
 					*d++ = '\015';
 					*d++ = '\012';

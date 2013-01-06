@@ -9,6 +9,7 @@ require_once('skipifconnectfailure.inc');
 --FILE--
 <?php
 	require_once("connect.inc");
+	set_error_handler('handle_catchable_fatal');
 
 	$tmp    = NULL;
 	$link   = NULL;
@@ -110,21 +111,24 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: Missing argument 1 for mysqli_fetch_object_construct::__construct() in %s on line %d
-
-Warning: Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
-
-Notice: Undefined variable: a in %s on line %d
-
-Notice: Undefined variable: b in %s on line %d
-
-Warning: Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
-
-Notice: Undefined variable: b in %s on line %d
+[E_WARNING] mysqli_result::__construct(): invalid object or resource mysql%s
+%s on line %d
+[E_WARNING] mysqli_result::fetch_object(): Couldn't fetch mysqli_result in %s on line %d
+[E_WARNING] mysqli_result::fetch_object() expects parameter 1 to be string, object given in %s on line %d
+[E_RECOVERABLE_ERROR] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
+[E_WARNING] mysqli_result::fetch_object() expects parameter 1 to be string, object given in %s on line %d
+[E_RECOVERABLE_ERROR] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, object given in %s on line %d
+[E_WARNING] mysqli_result::fetch_object() expects at most 2 parameters, 3 given in %s on line %d
+[E_RECOVERABLE_ERROR] Argument 2 passed to mysqli_result::fetch_object() must be of the type array, null given in %s on line %d
+[E_WARNING] Missing argument 1 for mysqli_fetch_object_construct::__construct() in %s on line %d
+[E_WARNING] Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
+[E_NOTICE] Undefined variable: a in %s on line %d
+[E_NOTICE] Undefined variable: b in %s on line %d
+[E_WARNING] Missing argument 2 for mysqli_fetch_object_construct::__construct() in %s on line %d
+[E_NOTICE] Undefined variable: b in %s on line %d
 NULL
 NULL
-
-Warning: mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
+[E_WARNING] mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
 NULL
 
 Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d

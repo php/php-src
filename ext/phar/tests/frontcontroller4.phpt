@@ -2,8 +2,6 @@
 Phar front controller index.php relocate (no /)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
---INI--
-detect_unicode=0
 --ENV--
 SCRIPT_NAME=/frontcontroller4.php
 REQUEST_URI=/frontcontroller4.php

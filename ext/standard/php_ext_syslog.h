@@ -35,7 +35,6 @@ PHP_MSHUTDOWN_FUNCTION(syslog);
 PHP_FUNCTION(openlog);
 PHP_FUNCTION(syslog);
 PHP_FUNCTION(closelog);
-PHP_FUNCTION(define_syslog_variables);
 
 #endif
 

@@ -3,7 +3,6 @@ if (function_exists("date_default_timezone_set")) {
 	date_default_timezone_set("UTC");
 }
 
-date_default_timezone_set('UTC');
 function simple() {
   $a = 0;
   for ($i = 0; $i < 1000000; $i++) 

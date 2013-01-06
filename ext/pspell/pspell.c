@@ -347,7 +347,7 @@ static PHP_FUNCTION(pspell_new)
 	}
 	
 	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
+	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */
@@ -374,7 +374,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	PspellManager *manager;
 	PspellConfig *config;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|sssl", &personal, &personal_len, &language, &language_len, 
+	if (zend_parse_parameters(argc TSRMLS_CC, "ps|sssl", &personal, &personal_len, &language, &language_len, 
 		&spelling, &spelling_len, &jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
 		return;
 	}
@@ -401,16 +401,6 @@ static PHP_FUNCTION(pspell_new_personal)
 		}
 	}
 #endif
-
-	if (strlen(personal) != personal_len) {
-		delete_pspell_config(config);
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && (!php_checkuid(personal, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		delete_pspell_config(config);
-		RETURN_FALSE;
-	}
 
 	if (php_check_open_basedir(personal TSRMLS_CC)) {
 		delete_pspell_config(config);
@@ -462,7 +452,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	}
 	
 	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
+	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */
@@ -492,7 +482,7 @@ static PHP_FUNCTION(pspell_new_config)
 	}
 	
 	manager = to_pspell_manager(ret);
-	ind = zend_list_insert(manager, le_pspell);
+	ind = zend_list_insert(manager, le_pspell TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */
@@ -752,7 +742,7 @@ static PHP_FUNCTION(pspell_config_create)
 	which is not what we want */
 	pspell_config_replace(config, "save-repl", "false");
 
-	ind = zend_list_insert(config, le_pspell_config);
+	ind = zend_list_insert(config, le_pspell_config TSRMLS_CC);
 	RETURN_LONG(ind);
 }
 /* }}} */
@@ -835,19 +825,11 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 	int value_len;
 	PspellConfig *config;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &conf, &value, &value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lp", &conf, &value, &value_len) == FAILURE) {
 		return;
 	}
 
-	if (strlen(value) != value_len) {
-		RETURN_FALSE;
-	}
-
 	PSPELL_FETCH_CONFIG;
-
-	if (PG(safe_mode) && (!php_checkuid(value, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
 
 	if (php_check_open_basedir(value TSRMLS_CC)) {
 		RETURN_FALSE;
@@ -892,21 +874,13 @@ static PHP_FUNCTION(pspell_config_repl)
 	int repl_len;
 	PspellConfig *config;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &conf, &repl, &repl_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lp", &conf, &repl, &repl_len) == FAILURE) {
 		return;
 	}
 
 	PSPELL_FETCH_CONFIG;
 
 	pspell_config_replace(config, "save-repl", "true");
-
-	if (strlen(repl) != repl_len) {
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && (!php_checkuid(repl, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
-	}
 
 	if (php_check_open_basedir(repl TSRMLS_CC)) {
 		RETURN_FALSE;

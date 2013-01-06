@@ -4,7 +4,6 @@ Phar::mapPhar too many manifest entries
 <?php if (!extension_loaded("phar")) die("skip");?>
 --INI--
 phar.require_hash=0
-detect_unicode=0
 --FILE--
 <?php
 $file = b"<?php

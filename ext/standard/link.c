@@ -47,7 +47,6 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "safe_mode.h"
 #include "php_link.h"
 #include "php_string.h"
 
@@ -62,14 +61,6 @@ PHP_FUNCTION(readlink)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &link, &link_len) == FAILURE) {
 		return;
-	}
-
-	if (strlen(link) != link_len) {
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && !php_checkuid(link, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
 	}
 
 	if (php_check_open_basedir(link TSRMLS_CC)) {
@@ -99,7 +90,7 @@ PHP_FUNCTION(linkinfo)
 	struct stat sb;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &link, &link_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &link, &link_len) == FAILURE) {
 		return;
 	}
 
@@ -135,16 +126,8 @@ PHP_FUNCTION(symlink)
 	char dirname[MAXPATHLEN];
 	size_t len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
-	}
-
-	if (strlen(topath) != topath_len) {
-		RETURN_FALSE;
-	}
-
-	if (strlen(frompath) != frompath_len) {
-		RETURN_FALSE;
 	}
 	
 	if (!expand_filepath(frompath, source_p TSRMLS_CC)) {
@@ -164,14 +147,6 @@ PHP_FUNCTION(symlink)
 		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
 	{
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to symlink to a URL");
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && !php_checkuid(dest_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && !php_checkuid(source_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
 
@@ -207,16 +182,8 @@ PHP_FUNCTION(link)
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
-	}
-
-	if (strlen(topath) != topath_len) {
-		RETURN_FALSE;
-	}
-
-	if (strlen(frompath) != frompath_len) {
-		RETURN_FALSE;
 	}
 
 	if (!expand_filepath(frompath, source_p TSRMLS_CC) || !expand_filepath(topath, dest_p TSRMLS_CC)) {
@@ -228,14 +195,6 @@ PHP_FUNCTION(link)
 		php_stream_locate_url_wrapper(dest_p, NULL, STREAM_LOCATE_WRAPPERS_ONLY TSRMLS_CC) ) 
 	{
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to link to a URL");
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && !php_checkuid(dest_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && !php_checkuid(source_p, NULL, CHECKUID_CHECK_FILE_AND_DIR)) {
 		RETURN_FALSE;
 	}
 

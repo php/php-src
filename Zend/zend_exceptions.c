@@ -27,9 +27,10 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_vm.h"
+#include "zend_dtrace.h"
 
-zend_class_entry *default_exception_ce;
-zend_class_entry *error_exception_ce;
+static zend_class_entry *default_exception_ce;
+static zend_class_entry *error_exception_ce;
 static zend_object_handlers default_exception_handlers;
 ZEND_API void (*zend_throw_exception_hook)(zval *ex TSRMLS_DC);
 
@@ -82,6 +83,20 @@ void zend_exception_restore(TSRMLS_D) /* {{{ */
 
 void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 {
+#ifdef HAVE_DTRACE
+	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
+		char *classname;
+		int name_len;
+
+		if (exception != NULL) {
+			zend_get_object_classname(exception, &classname, &name_len TSRMLS_CC);
+			DTRACE_EXCEPTION_THROWN(classname);
+		} else {
+			DTRACE_EXCEPTION_THROWN(NULL);
+		}
+	}
+#endif /* HAVE_DTRACE */
+
 	if (exception != NULL) {
 		zval *previous = EG(exception);
 		zend_exception_set_previous(exception, EG(exception) TSRMLS_CC);
@@ -131,21 +146,19 @@ ZEND_API void zend_clear_exception(TSRMLS_D) /* {{{ */
 
 static zend_object_value zend_default_exception_new_ex(zend_class_entry *class_type, int skip_top_traces TSRMLS_DC) /* {{{ */
 {
-	zval tmp, obj;
+	zval obj;
 	zend_object *object;
 	zval *trace;
 
 	Z_OBJVAL(obj) = zend_objects_new(&object, class_type TSRMLS_CC);
 	Z_OBJ_HT(obj) = &default_exception_handlers;
 
-	ALLOC_HASHTABLE(object->properties);
-	zend_hash_init(object->properties, 0, NULL, ZVAL_PTR_DTOR, 0);
-	zend_hash_copy(object->properties, &class_type->default_properties, zval_copy_property_ctor(class_type), (void *) &tmp, sizeof(zval *));
+	object_properties_init(object, class_type);
 
 	ALLOC_ZVAL(trace);
 	Z_UNSET_ISREF_P(trace);
 	Z_SET_REFCOUNT_P(trace, 0);
-	zend_fetch_debug_backtrace(trace, skip_top_traces, 0 TSRMLS_CC);
+	zend_fetch_debug_backtrace(trace, skip_top_traces, 0, 0 TSRMLS_CC);
 
 	zend_update_property_string(default_exception_ce, &obj, "file", sizeof("file")-1, zend_get_executed_filename(TSRMLS_C) TSRMLS_CC);
 	zend_update_property_long(default_exception_ce, &obj, "line", sizeof("line")-1, zend_get_executed_lineno(TSRMLS_C) TSRMLS_CC);
@@ -422,7 +435,7 @@ static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, z
 			TRACE_APPEND_STR("Array, ");
 			break;
 		case IS_OBJECT: {
-			char *class_name;
+			const char *class_name;
 			zend_uint class_name_len;
 			int dup;
 
@@ -432,7 +445,7 @@ static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, z
 
 			TRACE_APPEND_STRL(class_name, class_name_len);
 			if(!dup) {
-				efree(class_name);
+				efree((char*)class_name);
 			}
 
 			TRACE_APPEND_STR("), ");
@@ -624,6 +637,7 @@ ZEND_METHOD(exception, __toString)
 		if (trace) {
 			zval_ptr_dtor(&trace);
 		}
+
 	}
 	zval_dtor(&fname);
 
