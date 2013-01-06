@@ -847,7 +847,7 @@ timelib_tzinfo *php_date_parse_tzfile_wrapper(char *formal_tzname, const timelib
 }
 /* }}} */
 
-// created this callback method to check the date.timezone only when changed, to increase performance and error on an ini_set line
+/* Callback to check the date.timezone only when changed increases performance */
 /* {{{ static PHP_INI_MH(OnUpdate_date_timezone) */
 static PHP_INI_MH(OnUpdate_date_timezone)
 {
@@ -872,7 +872,7 @@ static PHP_INI_MH(OnUpdate_date_timezone)
 static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 {
 	/* Checking configure timezone */
-	if (DATEG(timezone) && strlen(DATEG(timezone)) > 0) {
+	if (DATEG(timezone) && (strlen(DATEG(timezone))) > 0) {
 		return DATEG(timezone);
 	}
 	/* Check config setting for default timezone */
@@ -880,11 +880,12 @@ static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 		/* Special case: ext/date wasn't initialized yet */
 		zval ztz;
 
-		if (SUCCESS == zend_get_configuration_directive("date.timezone", sizeof("date.timezone"), &ztz) && Z_TYPE(ztz) == IS_STRING && Z_STRLEN(ztz) > 0 && timelib_timezone_id_is_valid(Z_STRVAL(ztz), tzdb)) {
+		if (SUCCESS == zend_get_configuration_directive("date.timezone", sizeof("date.timezone"), &ztz)
+			&& Z_TYPE(ztz) == IS_STRING && Z_STRLEN(ztz) > 0 && timelib_timezone_id_is_valid(Z_STRVAL(ztz), tzdb)) {
 			return Z_STRVAL(ztz);
 		}
 	} else if (*DATEG(default_timezone)) {
-		if (DATEG(timezone_valid) == 1) { // timezone already checked and validated
+		if (DATEG(timezone_valid) == 1) {
 			return DATEG(default_timezone);
 		}
 
