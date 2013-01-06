@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #55438 (Curlwapper is not sending http header randomly).
     (phpnet@lostreality.org, Pierrick)
 
+- Date:
+  . Fixed bug #55397 (comparsion of incomplete DateTime causes SIGSEGV).
+    (Laruence, Derick)
+
 20 Dec 2012, PHP 5.3.20
 
 - Zend Engine:
