@@ -8,6 +8,7 @@ PHP                                                                        NEWS
     (Nikita Popov)
   . Add Generator::throw() method. (Nikita Popov)
   . Bug #23955: allow specifying Max-Age attribute in setcookie() (narfbg, Lars)
+  . Bug #52126: timestamp for mail.log (Martin Jansen, Lars)
 
 - cURL:
   . Added new functions curl_escape, curl_multi_setopt, curl_multi_strerror
