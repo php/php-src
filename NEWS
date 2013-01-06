@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug #55438 (Curlwapper is not sending http header randomly).
     (phpnet@lostreality.org, Pierrick)
 
+- Date:
+  . Fixed bug #63699 (Performance improvements for various ext/date functions).
+    (Lars, original patch by njaguar at gmail dot com)
+
 20 Dec 2012, PHP 5.4.10
 
 - Core:
