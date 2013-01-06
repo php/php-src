@@ -4798,7 +4798,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 		tmp.u.constant = *CG(current_namespace);
 		zval_copy_ctor(&tmp.u.constant);
 		zend_do_build_namespace_name(&tmp, &tmp, class_name TSRMLS_CC);
-		class_name = &tmp;
+		*class_name = tmp;
 		efree(lcname);
 		lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 	}

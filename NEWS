@@ -1,8 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2012, PHP 5.4.12
+
 ?? ??? 2012, PHP 5.4.11
 
 - Core:
+  . Fixed bug #63899 (Use after scope error in zend_compile). (Laruence)
   . Fixed bug #63762 (Sigsegv when Exception::$trace is changed by user).
     (Johannes)
   . Fixed bug #43177 (Errors in eval()'ed code produce status code 500). 
@@ -30,6 +33,10 @@ PHP                                                                        NEWS
     wrappers). (Pierrick)
   . Fixed bug #55438 (Curlwapper is not sending http header randomly).
     (phpnet@lostreality.org, Pierrick)
+
+- Date:
+  . Fixed bug #63699 (Performance improvements for various ext/date functions).
+    (Lars, original patch by njaguar at gmail dot com)
 
 20 Dec 2012, PHP 5.4.10
 
