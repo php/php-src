@@ -4164,15 +4164,18 @@ PHP_FUNCTION(array_reduce)
 }
 /* }}} */
 
-/* {{{ proto array array_filter(array input [, mixed callback])
+/* {{{ proto array array_filter(array input [, mixed callback, bool pass_key])
    Filters elements from the array via the callback. */
 PHP_FUNCTION(array_filter)
 {
 	zval *array;
 	zval **operand;
-	zval **args[1];
+        zval *key;
+	zval **args[2];
 	zval *retval = NULL;
+	zend_bool pass_key = 0;
 	zend_bool have_callback = 0;
+        int key_type;
 	char *string_key;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
@@ -4180,7 +4183,7 @@ PHP_FUNCTION(array_filter)
 	ulong num_key;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|f", &array, &fci, &fci_cache) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|fb", &array, &fci, &fci_cache, &pass_key) == FAILURE) {
 		return;
 	}
 
@@ -4193,18 +4196,46 @@ PHP_FUNCTION(array_filter)
 		have_callback = 1;
 		fci.no_separation = 0;
 		fci.retval_ptr_ptr = &retval;
-		fci.param_count = 1;
+
+                if (pass_key) {
+                    fci.param_count = 2;
+                } else {
+                    fci.param_count = 1;
+                }
 	}
 
 	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
 		zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&operand, &pos) == SUCCESS;
 		zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos)
 	) {
+		key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &string_key_len, &num_key, 0, &pos);
 		if (have_callback) {
 			args[0] = operand;
+
+                        if (pass_key) {
+                            ALLOC_INIT_ZVAL(key);
+                            switch (key_type) {
+                                case HASH_KEY_IS_STRING:
+                                    if (string_key_len > 1) { // protect against null keys
+                                        ZVAL_STRINGL(key, string_key, string_key_len - 1, 0);
+                                    }
+                                    break;
+
+                                case HASH_KEY_IS_LONG:
+                                    ZVAL_LONG(key, num_key);
+                                    break;
+                            }
+
+                            args[1] = &key;
+                        }
+
 			fci.params = args;
 
 			if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && retval) {
+                                if (key) {
+                                    zval_ptr_dtor(&key);
+                                }
+
 				if (!zend_is_true(retval)) {
 					zval_ptr_dtor(&retval);
 					continue;
@@ -4220,7 +4251,7 @@ PHP_FUNCTION(array_filter)
 		}
 
 		zval_add_ref(operand);
-		switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &string_key_len, &num_key, 0, &pos)) {
+		switch (key_type) {
 			case HASH_KEY_IS_STRING:
 				zend_hash_update(Z_ARRVAL_P(return_value), string_key, string_key_len, operand, sizeof(zval *), NULL);
 				break;
