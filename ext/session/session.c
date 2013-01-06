@@ -1154,6 +1154,7 @@ static int php_session_cache_limiter(TSRMLS_D) /* {{{ */
 
 #define COOKIE_SET_COOKIE "Set-Cookie: "
 #define COOKIE_EXPIRES	"; expires="
+#define COOKIE_MAX_AGE	"; Max-Age="
 #define COOKIE_PATH		"; path="
 #define COOKIE_DOMAIN	"; domain="
 #define COOKIE_SECURE	"; secure"
@@ -1201,6 +1202,9 @@ static void php_session_send_cookie(TSRMLS_D) /* {{{ */
 			smart_str_appends(&ncookie, COOKIE_EXPIRES);
 			smart_str_appends(&ncookie, date_fmt);
 			efree(date_fmt);
+
+			smart_str_appends(&ncookie, COOKIE_MAX_AGE);
+			smart_str_append_long(&ncookie, PS(cookie_lifetime));
 		}
 	}
 
