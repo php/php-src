@@ -1229,6 +1229,8 @@ PHP_MINIT_FUNCTION(curl)
 	}
 #endif
 
+	curlfile_register_class(TSRMLS_C);
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1275,7 +1277,7 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 /* {{{ curl_write_nothing
  * Used as a work around. See _php_curl_close_ex
  */
-static size_t curl_write_nothing(char *data, size_t size, size_t nmemb, void *ctx) 
+static size_t curl_write_nothing(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	return size * nmemb;
 }
@@ -1853,13 +1855,13 @@ static void split_certinfo(char *string, zval *hash)
 static void create_certinfo(struct curl_certinfo *ci, zval *listcode TSRMLS_DC)
 {
 	int i;
-			
+
 	if(ci) {
 		zval *certhash = NULL;
-		
+
 		for(i=0; i<ci->num_of_certs; i++) {
 			struct curl_slist *slist;
-			
+
 			MAKE_STD_ZVAL(certhash);
 			array_init(certhash);
 			for(slist = ci->certinfo[i]; slist; slist = slist->next) {
@@ -1876,14 +1878,14 @@ static void create_certinfo(struct curl_certinfo *ci, zval *listcode TSRMLS_DC)
 
 						MAKE_STD_ZVAL(hash);
 						array_init(hash);
-						
+
 						split_certinfo(&slist->data[len+1], hash);
 						add_assoc_zval(certhash, s, hash);
 					} else {
 						add_assoc_string(certhash, s, &slist->data[len+1], 1);
 					}
 				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not extract hash key from certificate info"); 
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not extract hash key from certificate info");
 				}
 			}
 			add_next_index_zval(listcode, certhash);
@@ -2342,8 +2344,8 @@ string_copy:
 #if LIBCURL_VERSION_NUM >= 0x071100
 					/* Strings passed to libcurl as ’char *’ arguments, are copied by the library... NOTE: before 7.17.0 strings were not copied. */
 					error = curl_easy_setopt(ch->cp, option, Z_STRVAL_PP(zvalue));
-#else				
-					goto string_copy;			
+#else
+					goto string_copy;
 #endif
 				}
 			}
@@ -2563,9 +2565,6 @@ string_copy:
 					ulong  num_key;
 					int    numeric_key;
 
-					SEPARATE_ZVAL(current);
-					convert_to_string_ex(current);
-
 					zend_hash_get_current_key_ex(postfields, &string_key, &string_key_len, &num_key, 0, NULL);
 
 					/* Pretend we have a string_key here */
@@ -2577,6 +2576,48 @@ string_copy:
 						numeric_key = 0;
 					}
 
+					if(Z_TYPE_PP(current) == IS_OBJECT && instanceof_function(Z_OBJCE_PP(current), curl_CURLFile_class TSRMLS_CC)) {
+						/* new-style file upload */
+						zval *prop;
+						char *type = NULL, *filename = NULL;
+
+						prop = zend_read_property(curl_CURLFile_class, *current, "name", sizeof("name")-1, 0 TSRMLS_CC);
+						if(Z_TYPE_P(prop) != IS_STRING) {
+							php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid filename for key %s", string_key);
+						} else {
+							postval = Z_STRVAL_P(prop);
+
+							if (php_check_open_basedir(postval TSRMLS_CC)) {
+								RETVAL_FALSE;
+								return 1;
+							}
+
+							prop = zend_read_property(curl_CURLFile_class, *current, "mime", sizeof("mime")-1, 0 TSRMLS_CC);
+							if(Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
+								type = Z_STRVAL_P(prop);
+							}
+							prop = zend_read_property(curl_CURLFile_class, *current, "postname", sizeof("postname")-1, 0 TSRMLS_CC);
+							if(Z_TYPE_P(prop) == IS_STRING && Z_STRLEN_P(prop) > 0) {
+								filename = Z_STRVAL_P(prop);
+							}
+							error = curl_formadd(&first, &last,
+											CURLFORM_COPYNAME, string_key,
+											CURLFORM_NAMELENGTH, (long)string_key_len - 1,
+											CURLFORM_FILENAME, filename ? filename : postval,
+											CURLFORM_CONTENTTYPE, type ? type : "application/octet-stream",
+											CURLFORM_FILE, postval,
+											CURLFORM_END);
+						}
+
+						if (numeric_key) {
+							efree(string_key);
+						}
+						continue;
+					}
+
+					SEPARATE_ZVAL(current);
+					convert_to_string_ex(current);
+
 					postval = Z_STRVAL_PP(current);
 
 					/* The arguments after _NAMELENGTH and _CONTENTSLENGTH
@@ -2585,6 +2626,8 @@ string_copy:
 					if (*postval == '@') {
 						char *type, *filename;
 						++postval;
+
+						php_error_docref("curl.curlfile" TSRMLS_CC, E_DEPRECATED, "Usage of @filename API for file uploading is deprecated. Please use CURLFile parameter instead");
 
 						if ((type = php_memnstr(postval, ";type=", sizeof(";type=") - 1, postval + Z_STRLEN_PP(current)))) {
 							*type = '\0';
@@ -3088,7 +3131,7 @@ PHP_FUNCTION(curl_getinfo)
 				struct curl_certinfo *ci = NULL;
 
 				array_init(return_value);
-				
+
 				if (curl_easy_getinfo(ch->cp, CURLINFO_CERTINFO, &ci) == CURLE_OK) {
 					create_certinfo(ci, return_value TSRMLS_CC);
 				} else {
@@ -3228,16 +3271,16 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 
 	_php_curl_verify_handlers(ch, 0 TSRMLS_CC);
 
-	/* 
+	/*
 	 * Libcurl is doing connection caching. When easy handle is cleaned up,
-	 * if the handle was previously used by the curl_multi_api, the connection 
+	 * if the handle was previously used by the curl_multi_api, the connection
 	 * remains open un the curl multi handle is cleaned up. Some protocols are
-	 * sending content like the FTP one, and libcurl try to use the 
+	 * sending content like the FTP one, and libcurl try to use the
 	 * WRITEFUNCTION or the HEADERFUNCTION. Since structures used in those
 	 * callback are freed, we need to use an other callback to which avoid
 	 * segfaults.
 	 *
-	 * Libcurl commit d021f2e8a00 fix this issue and should be part of 7.28.2 
+	 * Libcurl commit d021f2e8a00 fix this issue and should be part of 7.28.2
 	 */
 	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION, curl_write_nothing);
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEFUNCTION, curl_write_nothing);

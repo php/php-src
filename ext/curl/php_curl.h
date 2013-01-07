@@ -212,7 +212,7 @@ typedef struct {
 
 	fd_set readfds, writefds, excfds;
 	int maxfd;
-	
+
 	char errstr[CURL_ERROR_SIZE + 1];
 	CURLMcode mcode;
 	int pending;
@@ -220,6 +220,8 @@ typedef struct {
 	struct curl_slist *headers_slist; /* holds custom headers sent out in the request */
 } php_curl_stream;
 
+void curlfile_register_class(TSRMLS_D);
+extern zend_class_entry *curl_CURLFile_class;
 
 #else
 #define curl_module_ptr NULL
