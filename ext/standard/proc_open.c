@@ -438,6 +438,7 @@ PHP_FUNCTION(proc_open)
 	DWORD dwCreateFlags = 0;
 	char *command_with_cmd;
 	UINT old_error_mode;
+	char cur_cwd[MAXPATHLEN];
 #endif
 #ifdef NETWARE
 	char** child_argv = NULL;
@@ -676,13 +677,13 @@ PHP_FUNCTION(proc_open)
 
 #ifdef PHP_WIN32
 	if (cwd == NULL) {
-		char cur_cwd[MAXPATHLEN];
 		char *getcwd_result;
 		getcwd_result = VCWD_GETCWD(cur_cwd, MAXPATHLEN);
 		if (!getcwd_result) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot get current directory");
 			goto exit_fail;
 		}
+		cwd = cur_cwd;
 	}
 
 	memset(&si, 0, sizeof(si));
