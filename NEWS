@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Bug #23955: allow specifying Max-Age attribute in setcookie() (narfbg, Lars)
   . Bug #52126: timestamp for mail.log (Martin Jansen, Lars)
 
+- mysqlnd
+  . Fixed return value of mysqli_stmt_affected_rows() in the time after
+    prepare() and before execute(). (Andrey)
+
 - cURL:
   . Added new functions curl_escape, curl_multi_setopt, curl_multi_strerror
     curl_pause, curl_reset, curl_share_close, curl_share_init, 
