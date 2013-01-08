@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.12
 
+- Litespeed:
+  . Fixed bug #63228 (-Werror=format-security error in lsapi code). (George)
+
 ?? ??? 2012, PHP 5.4.11
 
 - Core:
