@@ -307,6 +307,7 @@ mysqlnd_stmt_read_prepare_response(MYSQLND_STMT * s TSRMLS_DC)
 	stmt->warning_count = stmt->conn->upsert_status->warning_count = prepare_resp->warning_count;
 	stmt->field_count = stmt->conn->field_count = prepare_resp->field_count;
 	stmt->param_count = prepare_resp->param_count;
+	stmt->upsert_status->affected_rows = 0; /* be like libmysql */
 done:
 	PACKET_FREE(prepare_resp);
 
