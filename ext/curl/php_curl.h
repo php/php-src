@@ -180,7 +180,10 @@ typedef struct {
 	unsigned int             uses;
 	zend_bool                in_callback;
 	zval                     *clone;
+	zend_bool                safe_upload;
 } php_curl;
+
+#define CURLOPT_SAFE_UPLOAD -1
 
 typedef struct {
 	int    still_running;
