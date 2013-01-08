@@ -492,9 +492,7 @@ PHP_FUNCTION(glob)
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
 no_results:
 		if (PG(open_basedir) && *PG(open_basedir)) {
-			struct stat s;
-
-			if (0 != VCWD_STAT(pattern, &s) || S_IFDIR != (s.st_mode & S_IFMT)) {
+			if (php_check_open_basedir_ex(pattern, 0 TSRMLS_CC)) {
 				RETURN_FALSE;
 			}
 		}

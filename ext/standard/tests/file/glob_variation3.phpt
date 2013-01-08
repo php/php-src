@@ -15,5 +15,6 @@ var_dump(glob("$path/*.none"));
 --EXPECT--
 array(0) {
 }
-bool(false)
+array(0) {
+}
 ==DONE==
