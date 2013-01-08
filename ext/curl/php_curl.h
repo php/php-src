@@ -34,6 +34,14 @@
 
 #define PHP_CURL_DEBUG 0
 
+#ifdef PHP_WIN32
+# define PHP_CURL_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_CURL_API __attribute__ ((visibility("default")))
+#else
+# define PHP_CURL_API
+#endif
+
 #include <curl/curl.h>
 #include <curl/multi.h>
 
@@ -221,7 +229,7 @@ typedef struct {
 } php_curl_stream;
 
 void curlfile_register_class(TSRMLS_D);
-extern zend_class_entry *curl_CURLFile_class;
+PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;
 
 #else
 #define curl_module_ptr NULL

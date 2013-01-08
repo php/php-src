@@ -23,9 +23,10 @@
 #endif
 
 #include "php.h"
+#include "php_curl.h"
 #if HAVE_CURL
 
-PHPAPI zend_class_entry *curl_CURLFile_class;
+PHP_CURL_API zend_class_entry *curl_CURLFile_class;
 
 /* {{{ proto string CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
    Create the CURLFile object */
@@ -74,7 +75,7 @@ static void curlfile_set_property(char *name, INTERNAL_FUNCTION_PARAMETERS)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg, &arg_len) == FAILURE) {
 		return;
 	}
-	zend_update_property_string(curl_CURLFile_class, getThis(), name, strlen(name), arg);
+	zend_update_property_string(curl_CURLFile_class, getThis(), name, strlen(name), arg TSRMLS_CC);
 }
 
 /* {{{ proto string CURLFile::getFilename()
