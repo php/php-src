@@ -2863,7 +2863,91 @@ static int php_strtr_compare_hash_suffix(const void *a, const void *b, void *ctx
 					hash_b = php_strtr_hash(&S(&pnr_b->pat)[res->m - res->B], res->B)
 								& res->hash->table_mask;
 	/* TODO: don't recalculate the hashes all the time */
-	return hash_a - hash_b;
+	if (hash_a > hash_b) {
+		return 1;
+	} else if (hash_a < hash_b) {
+		return -1;
+	} else {
+		/* longer patterns must be sorted first */
+		if (L(&pnr_a->pat) > L(&pnr_b->pat)) {
+			return -1;
+		} else if (L(&pnr_a->pat) < L(&pnr_b->pat)) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+}
+/* }}} */
+/* {{{ php_strtr_free_strp */
+static void php_strtr_free_strp(void *strp)
+{
+	STR_FREE(*(char**)strp);
+}
+/* }}} */
+/* {{{ php_strtr_array_prepare_repls */
+static PATNREPL *php_strtr_array_prepare_repls(int slen, HashTable *pats, zend_llist **allocs, int *outsize)
+{
+	PATNREPL		*patterns;
+	HashPosition	hpos;
+	zval			**entry;
+	int				num_pats = zend_hash_num_elements(pats),
+					i;
+
+	patterns = safe_emalloc(num_pats, sizeof(*patterns), 0);
+	*allocs = emalloc(sizeof **allocs);
+	zend_llist_init(*allocs, sizeof(void*), &php_strtr_free_strp, 0);
+
+	for (i = 0, zend_hash_internal_pointer_reset_ex(pats, &hpos);
+			zend_hash_get_current_data_ex(pats, (void **)&entry, &hpos) == SUCCESS;
+			zend_hash_move_forward_ex(pats, &hpos)) {
+		char	*string_key;
+		uint  	string_key_len;
+		ulong	num_key;
+		zval	*tzv = NULL;
+
+		switch (zend_hash_get_current_key_ex(pats, &string_key, &string_key_len, &num_key, 0, &hpos)) {
+		case HASH_KEY_IS_LONG:
+			string_key_len = 1 + zend_spprintf(&string_key, 0, "%ld", (long)num_key);
+			zend_llist_add_element(*allocs, &string_key);
+			/* break missing intentionally */
+
+		case HASH_KEY_IS_STRING:
+			string_key_len--; /* exclude final '\0' */
+			if (string_key_len == 0) { /* empty string given as pattern */
+				efree(patterns);
+				zend_llist_destroy(*allocs);
+				efree(*allocs);
+				*allocs = NULL;
+				return NULL;
+			}
+			if (string_key_len > slen) { /* this pattern can never match */
+				continue;
+			}
+
+			if (Z_TYPE_PP(entry) != IS_STRING) {
+				tzv = *entry;
+				zval_addref_p(tzv);
+				SEPARATE_ZVAL(&tzv);
+				convert_to_string(tzv);
+				entry = &tzv;
+				zend_llist_add_element(*allocs, &Z_STRVAL_PP(entry));
+			}
+
+			S(&patterns[i].pat) = string_key;
+			L(&patterns[i].pat) = string_key_len;
+			S(&patterns[i].repl) = Z_STRVAL_PP(entry);
+			L(&patterns[i].repl) = Z_STRLEN_PP(entry);
+			i++;
+
+			if (tzv) {
+				efree(tzv);
+			}
+		}
+	}
+
+	*outsize = i;
+	return patterns;
 }
 /* }}} */
 
@@ -2952,7 +3036,7 @@ static void php_strtr_array_do_repl(STR *text, PPRES *d, zval *return_value)
 		STRLEN	shift	= d->shift->entries[h];
 
 		if (shift > 0) {
-			smart_str_appendl(&result, &S(text)[pos], shift);
+			smart_str_appendl(&result, &S(text)[pos], MIN(shift, L(text) - pos));
 			pos += shift;
 		} else {
 			HASH	h2				= h & d->hash->table_mask,
@@ -2999,64 +3083,25 @@ end_outer_loop: ;
 /* {{{ php_strtr_array */
 static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *pats)
 {	
-	PPRES			*data;
-	STR				text;
-	PATNREPL		*patterns;
-	HashPosition	hpos;
-	zval			**entry;
-	int				num_pats = zend_hash_num_elements(pats),
-					i;
+	PPRES		*data;
+	STR			text;
+	PATNREPL	*patterns;
+	int			patterns_len;
+	zend_llist	*allocs;
 
 	S(&text) = str;
 	L(&text) = slen;
-	patterns = safe_emalloc(num_pats, sizeof(*patterns), 0);
 
-	for (i = 0, zend_hash_internal_pointer_reset_ex(pats, &hpos);
-			zend_hash_get_current_data_ex(pats, (void **)&entry, &hpos) == SUCCESS;
-			i++, zend_hash_move_forward_ex(pats, &hpos)) {
-		char	*string_key;
-		uint  	string_key_len;
-		ulong	num_key;
-		int		free_str = 0,
-				free_repl = 0;
-		zval	*tzv;
-
-		switch (zend_hash_get_current_key_ex(pats, &string_key, &string_key_len, &num_key, 0, &hpos)) {
-		case HASH_KEY_IS_LONG:
-			string_key_len = 1 + zend_spprintf(&string_key, 0, "%ld", (long)num_key);
-			free_str = 1;
-			/* break missing intentionally */
-
-		case HASH_KEY_IS_STRING:
-			string_key_len--; /* exclude final '\0' */
-			if (string_key_len == 0) { /* empty string given as pattern */
-				efree(patterns);
-				RETURN_FALSE;	
-			}
-			if (string_key_len > slen) { /* this pattern can never match */
-				continue;
-			}
-
-			if (Z_TYPE_PP(entry) != IS_STRING) {
-				tzv = *entry;
-				zval_addref_p(tzv);
-				SEPARATE_ZVAL(&tzv);
-				convert_to_string(tzv);
-				entry = &tzv;
-				free_repl = 1;
-			}
-
-			S(&patterns[i].pat) = string_key;
-			L(&patterns[i].pat) = string_key_len;
-			S(&patterns[i].repl) = Z_STRVAL_PP(entry);
-			L(&patterns[i].repl) = Z_STRLEN_PP(entry);
-		}
+	patterns = php_strtr_array_prepare_repls(slen, pats, &allocs, &patterns_len);
+	if (patterns == NULL) {
+		RETURN_FALSE;
 	}
-
-	data = php_strtr_array_prepare(&text, patterns, i, 2, 2);
+	data = php_strtr_array_prepare(&text, patterns, patterns_len, 2, 2);
 	efree(patterns);
 	php_strtr_array_do_repl(&text, data, return_value);
 	php_strtr_array_destroy_ppres(data);
+	zend_llist_destroy(allocs);
+	efree(allocs);
 }
 /* }}} */
 
