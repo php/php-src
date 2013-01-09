@@ -95,7 +95,9 @@
 #define CLIENT_MULTI_RESULTS		(1UL << 17) /* Enable/disable multi-results */
 #define CLIENT_PS_MULTI_RESULTS		(1UL << 18) /* Multi-results in PS-protocol */
 #define CLIENT_PLUGIN_AUTH			(1UL << 19) /* Client supports plugin authentication */
-
+#define CLIENT_CONNECT_ATTRS		(1UL << 20) /* Client supports connection attributes */
+#define CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA	(1UL << 21) /* Enable authentication response packet to be larger than 255 bytes. */
+#define CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS		(1UL << 22) /* Don't close the connection for a connection with expired password. */
 #define CLIENT_SSL_VERIFY_SERVER_CERT (1UL << 30)
 
 #define MYSQLND_CAPABILITIES (CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_TRANSACTIONS | \
@@ -164,6 +166,9 @@ typedef enum mysqlnd_option
 	MYSQL_OPT_SSL_VERIFY_SERVER_CERT,
 	MYSQL_PLUGIN_DIR,
 	MYSQL_DEFAULT_AUTH,
+	MYSQL_SERVER_PUBLIC_KEY,
+	MYSQL_ENABLE_CLEARTEXT_PLUGIN,
+	MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS,
 #if MYSQLND_UNICODE
 	MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE = 200,
 #endif
