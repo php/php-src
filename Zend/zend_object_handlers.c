@@ -35,6 +35,17 @@
 #define Z_OBJ_P(zval_p) \
 	((zend_object*)(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].bucket.obj.object))
 
+#define Z_OBJ_PROTECT_RECURSION(zval_p) \
+	do { \
+		if (EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].apply_count++ >= 3) { \
+			zend_error(E_ERROR, "Nesting level too deep - recursive dependency?"); \
+		} \
+	} while (0)
+
+
+#define Z_OBJ_UNPROTECT_RECURSION(zval_p) \
+	EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].apply_count--
+
 /*
   __X accessors explanation:
 
@@ -1319,28 +1330,43 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 	}
 	if (!zobj1->properties && !zobj2->properties) {
 		int i;
+
+		Z_OBJ_PROTECT_RECURSION(o1);
+		Z_OBJ_PROTECT_RECURSION(o2);
 		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
 			if (zobj1->properties_table[i]) {
 				if (zobj2->properties_table[i]) {
 					zval result;
 
 					if (compare_function(&result, zobj1->properties_table[i], zobj2->properties_table[i] TSRMLS_CC)==FAILURE) {
+						Z_OBJ_UNPROTECT_RECURSION(o1);
+						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return 1;
 					}
 					if (Z_LVAL(result) != 0) {
+						Z_OBJ_UNPROTECT_RECURSION(o1);
+						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return Z_LVAL(result);
 					}
 				} else {
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
 				}
 			} else {
 				if (zobj2->properties_table[i]) {
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
 				} else {
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 0;
 				}
 			}
 		}
+		Z_OBJ_UNPROTECT_RECURSION(o1);
+		Z_OBJ_UNPROTECT_RECURSION(o2);
 		return 0;
 	} else {
 		if (!zobj1->properties) {
