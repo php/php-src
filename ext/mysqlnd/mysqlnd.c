@@ -708,6 +708,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 	/* we allow load data local infile by default */
 	mysql_flags |= MYSQLND_CAPABILITIES;
 
+	mysql_flags |= conn->options.flags; /* use the flags from set_client_option() */
+
 	if (PG(open_basedir) && strlen(PG(open_basedir))) {
 		mysql_flags ^= CLIENT_LOCAL_FILES;
 	}
