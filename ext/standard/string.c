@@ -2790,11 +2790,6 @@ typedef struct {
 	const char	*s;
 	STRLEN		l;
 } STR;
-typedef struct _match_node MATCH_NODE;
-struct _match_node {
-	STRLEN		pos;
-	MATCH_NODE	*next;
-};
 typedef struct _pat_and_repl {
 	STR			pat;
 	STR			repl;
