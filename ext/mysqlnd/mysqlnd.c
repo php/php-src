@@ -691,6 +691,8 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn,
 	mysql_flags |= CLIENT_LOCAL_FILES | CLIENT_PS_MULTI_RESULTS;
 	mysql_flags |= MYSQLND_CAPABILITIES;
 
+	mysql_flags |= conn->options.flags; /* use the flags from set_client_option() */
+
 	if (db) {
 		mysql_flags |= CLIENT_CONNECT_WITH_DB;
 	}
