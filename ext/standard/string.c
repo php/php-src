@@ -3028,6 +3028,7 @@ static void php_strtr_array_destroy_ppres(PPRES *d)
 static void php_strtr_array_do_repl(STR *text, PPRES *d, zval *return_value)
 {
 	STRLEN		pos = 0,
+				nextwpos = 0,
 				lastpos	= L(text) - d->m;
 	smart_str	result = {0};
 
@@ -3036,7 +3037,6 @@ static void php_strtr_array_do_repl(STR *text, PPRES *d, zval *return_value)
 		STRLEN	shift	= d->shift->entries[h];
 
 		if (shift > 0) {
-			smart_str_appendl(&result, &S(text)[pos], MIN(shift, L(text) - pos));
 			pos += shift;
 		} else {
 			HASH	h2				= h & d->hash->table_mask,
@@ -3056,20 +3056,19 @@ static void php_strtr_array_do_repl(STR *text, PPRES *d, zval *return_value)
 						memcmp(S(&pnr->pat), &S(text)[pos], L(&pnr->pat)) != 0)
 					continue;
 				
-				smart_str_appendl(&result, S(&pnr->repl), (int)L(&pnr->repl));
+				smart_str_appendl(&result, &S(text)[nextwpos], pos - nextwpos);
+				smart_str_appendl(&result, S(&pnr->repl), L(&pnr->repl));
 				pos += L(&pnr->pat);
+				nextwpos = pos;
 				goto end_outer_loop;
 			}
 
-			smart_str_appendc(&result, S(text)[pos]);
 			pos++;
 end_outer_loop: ;
 		}
 	}
 
-	if (pos < L(text)) {
-		smart_str_appendl(&result, &S(text)[pos], (int)(L(text) - pos));
-	}
+	smart_str_appendl(&result, &S(text)[nextwpos], L(text) - nextwpos);
 
 	if (result.c != NULL) {
 		smart_str_0(&result);
