@@ -774,6 +774,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	/* we allow load data local infile by default */
 	mysql_flags |= MYSQLND_CAPABILITIES;
 
+	mysql_flags |= conn->options.flags; /* use the flags from set_client_option() */
+
 	if (db) {
 		mysql_flags |= CLIENT_CONNECT_WITH_DB;
 	}
