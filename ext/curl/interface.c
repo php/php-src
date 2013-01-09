@@ -2633,7 +2633,7 @@ string_copy:
 						char *type, *filename;
 						++postval;
 
-						php_error_docref("curl.curlfile" TSRMLS_CC, E_DEPRECATED, "Usage of @filename API for file uploading is deprecated. Please use CURLFile parameter instead");
+						php_error_docref("curl.curlfile" TSRMLS_CC, E_DEPRECATED, "The usage of the @filename API for file uploading is deprecated. Please use the CURLFile class instead");
 
 						if ((type = php_memnstr(postval, ";type=", sizeof(";type=") - 1, postval + Z_STRLEN_PP(current)))) {
 							*type = '\0';
