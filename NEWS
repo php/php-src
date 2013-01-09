@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #63762 (Sigsegv when Exception::$trace is changed by user).
     (Johannes)
 
+- Core
+  . Fixed bug #63943 (Bad warning text from strpos() on empty needle).
+    (Laruence)
+
 - cURL extension:
   . Fixed bug (segfault due to libcurl connection caching). (Pierrick)
   . Fixed bug #63795 (CURL >= 7.28.0 no longer support value 1 for
