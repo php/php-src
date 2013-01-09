@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.12
 
+- Core:
+  . Fixed bug #63943 (Bad warning text from strpos() on empty needle).
+    (Laruence)
+
 - Litespeed:
   . Fixed bug #63228 (-Werror=format-security error in lsapi code). (George)
 
