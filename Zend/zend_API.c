@@ -713,7 +713,7 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, const char **spe
 }
 /* }}} */
 
-int zend_parse_parameter(int flags, int arg_num TSRMLS_DC, zval **arg, const char *spec, ...)
+ZEND_API int zend_parse_parameter(int flags, int arg_num TSRMLS_DC, zval **arg, const char *spec, ...)
 {
 	va_list va;
 	int ret;
