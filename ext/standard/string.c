@@ -1811,7 +1811,7 @@ PHP_FUNCTION(strpos)
 
 	if (Z_TYPE_P(needle) == IS_STRING) {
 		if (!Z_STRLEN_P(needle)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty needle");
 			RETURN_FALSE;
 		}
 
