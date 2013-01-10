@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 201?, PHP 5.5.0 Alpha 3
+10 Jan 2012, PHP 5.5.0 Alpha 3
 
 - General improvements:
   . Fixed bug #63874 (Segfault if php_strip_whitespace has heredoc). (Pierrick)
