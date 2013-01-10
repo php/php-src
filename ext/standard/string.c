@@ -22,7 +22,6 @@
 
 /* Synced with php 3.0 revision 1.193 1999-06-16 [ssb] */
 
-#define _GNU_SOURCE 1
 #include <stdio.h>
 #include <stdint.h>
 #include "php.h"
@@ -135,7 +134,7 @@ static char *php_bin2hex(const unsigned char *old, const size_t oldlen, size_t *
 	size_t i, j;
 
 	result = (unsigned char *) safe_emalloc(oldlen, 2 * sizeof(char), 1);
-	
+
 	for (i = j = 0; i < oldlen; i++) {
 		result[j++] = hexconvtab[old[i] >> 4];
 		result[j++] = hexconvtab[old[i] & 15];
@@ -2841,7 +2840,7 @@ static inline void php_strtr_populate_shift(PATNREPL *patterns, int patnum, int 
 	for (i = 0; i < patnum; i++) {
 		for (j = 0; j < m - B + 1; j++) {
 			HASH h = php_strtr_hash(&S(&patterns[i].pat)[j], B) & shift->table_mask;
-			assert((long long) m - (long long) j - B >= 0); 
+			assert((long long) m - (long long) j - B >= 0);
 			shift->entries[h] = MIN(shift->entries[h], m - j - B);
 		}
 	}
@@ -2871,6 +2870,62 @@ static int php_strtr_compare_hash_suffix(const void *a, const void *b, void *ctx
 		} else {
 			return 0;
 		}
+	}
+}
+/* }}} */
+/* {{{ Sorting (no zend_qsort_r in this PHP version) */
+#define HS_LEFT(i)		((i) * 2 + 1)
+#define HS_RIGHT(i) 	((i) * 2 + 2)
+#define HS_PARENT(i)	(((i) - 1) / 2);
+#define HS_OFF(data, i)	((void *)(&((data)->arr)[i]))
+#define HS_CMP_CALL(data, i1, i2) \
+		(php_strtr_compare_hash_suffix(HS_OFF((data), (i1)), HS_OFF((data), (i2)), (data)->res))
+struct hs_data {
+	PATNREPL	*arr;
+	size_t		nel;
+	size_t		heapel;
+	PPRES		*res;
+};
+static inline void php_strtr_swap(PATNREPL *a, PATNREPL *b)
+{
+	PATNREPL tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+static inline void php_strtr_fix_heap(struct hs_data *data, size_t i)
+{
+	size_t	li =	HS_LEFT(i),
+			ri =	HS_RIGHT(i),
+			largei;
+	if (li < data->heapel && HS_CMP_CALL(data, li, i) > 0) {
+		largei = li;
+	} else {
+		largei = i;
+	}
+	if (ri < data->heapel && HS_CMP_CALL(data, ri, largei) > 0) {
+		largei = ri;
+	}
+	if (largei != i) {
+		php_strtr_swap(HS_OFF(data, i), HS_OFF(data, largei));
+		php_strtr_fix_heap(data, largei);
+	}
+}
+static inline void php_strtr_build_heap(struct hs_data *data)
+{
+	size_t i;
+	for (i = data->nel / 2; i > 0; i--) {
+		php_strtr_fix_heap(data, i - 1);
+	}
+}
+static inline void php_strtr_heapsort(PATNREPL *arr, size_t nel, PPRES *res)
+{
+	struct hs_data data = { arr, nel, nel, res };
+	size_t i;
+	php_strtr_build_heap(&data);
+	for (i = nel; i > 1; i--) {
+		php_strtr_swap(arr, HS_OFF(&data, i - 1));
+		data.heapel--;
+		php_strtr_fix_heap(&data, 0);
 	}
 }
 /* }}} */
@@ -2967,11 +3022,11 @@ static PPRES *php_strtr_array_prepare(STR *text, PATNREPL *patterns, int patnum,
 	php_strtr_populate_shift(patterns, patnum, B, res->m, res->shift);
 
 	res->hash = safe_emalloc(HASH_TAB_SIZE, sizeof(*res->hash->entries), sizeof(*res->shift));
-	res->hash->table_mask = HASH_TAB_SIZE - 1;	
+	res->hash->table_mask = HASH_TAB_SIZE - 1;
 
 	res->patterns = safe_emalloc(patnum, sizeof(*res->patterns), 0);
 	memcpy(res->patterns, patterns, sizeof(*patterns) * patnum);
-	qsort_r(res->patterns, patnum, sizeof(*res->patterns), php_strtr_compare_hash_suffix, res);
+	php_strtr_heapsort(res->patterns, patnum, res);
 
 	res->prefix = safe_emalloc(patnum, sizeof(*res->prefix), 0);
 	for (i = 0; i < patnum; i++) {
@@ -3050,7 +3105,7 @@ static void php_strtr_array_do_repl(STR *text, PPRES *d, zval *return_value)
 				if (L(&pnr->pat) > L(text) - pos ||
 						memcmp(S(&pnr->pat), &S(text)[pos], L(&pnr->pat)) != 0)
 					continue;
-				
+
 				smart_str_appendl(&result, &S(text)[nextwpos], pos - nextwpos);
 				smart_str_appendl(&result, S(&pnr->repl), L(&pnr->repl));
 				pos += L(&pnr->pat);
@@ -3076,7 +3131,7 @@ end_outer_loop: ;
 
 /* {{{ php_strtr_array */
 static void php_strtr_array(zval *return_value, char *str, int slen, HashTable *pats)
-{	
+{
 	PPRES		*data;
 	STR			text;
 	PATNREPL	*patterns;
