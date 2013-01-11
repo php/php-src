@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1330,6 +1330,7 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMP|VAR|CV)
 	FREE_OP1_VAR_PTR();
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -1842,14 +1843,8 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV)
 
 ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 {
-	zend_bool nested;
+	zend_bool nested = EX(nested);
 	zend_op_array *op_array = EX(op_array);
-
-	if (EXPECTED(EG(exception) == NULL) &&
-	    UNEXPECTED(EG(prev_exception) != NULL)) {
-		/* return from finally block called because of unhandled exception */
-		zend_exception_restore(TSRMLS_C);		
-	}
 
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
@@ -1857,13 +1852,11 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 		i_free_compiled_variables(execute_data);
 	}
 
+	zend_vm_stack_free((char*)execute_data - (ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T) TSRMLS_CC);
+
 	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {
 		zval_ptr_dtor((zval**)&op_array->prototype);
 	}
-
-	nested = EX(nested);
-
-	zend_vm_stack_free((char*)execute_data - (ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T) TSRMLS_CC);
 
 	if (nested) {
 		execute_data = EG(current_execute_data);
@@ -1886,15 +1879,6 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				zend_throw_exception_internal(NULL TSRMLS_CC);
 				HANDLE_EXCEPTION_LEAVE();
-			} else if (RETURN_VALUE_USED(opline)) {
-				if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-					zval *retval;
-
-					ALLOC_ZVAL(retval);
-					ZVAL_BOOL(retval, 1);
-					INIT_PZVAL(retval);
-					EX_T(opline->result.var).var.ptr = retval;
-				}
 			}
 
 			ZEND_VM_INC_OPCODE();
@@ -1928,7 +1912,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 
 			EX(call)--;
 
-			zend_vm_stack_clear_multiple(TSRMLS_C);
+			zend_vm_stack_clear_multiple(1 TSRMLS_CC);
 
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				zend_throw_exception_internal(NULL TSRMLS_CC);
@@ -1956,14 +1940,15 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
 			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name, fbc->common.function_name);
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
 			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
 				fbc->common.scope ? fbc->common.scope->name : "",
 				fbc->common.scope ? "::" : "",
 				fbc->common.function_name);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 	if (fbc->common.scope &&
@@ -1973,6 +1958,9 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 		if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 			/* FIXME: output identifiers properly */
 			zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically", fbc->common.scope->name, fbc->common.function_name);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 		} else {
 			/* FIXME: output identifiers properly */
 			/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
@@ -2104,7 +2092,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 	EX(call)--;
 
-	zend_vm_stack_clear_multiple(TSRMLS_C);
+	zend_vm_stack_clear_multiple(1 TSRMLS_CC);
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_throw_exception_internal(NULL TSRMLS_CC);
@@ -2651,6 +2639,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 		call->object = NULL;
+		call->called_scope = NULL;
 		call->is_ctor_call = 0;
 		EX(call) = call;
 		/*CHECK_EXCEPTION();*/
@@ -2678,6 +2667,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			efree(lcname);
 			FREE_OP2();
 			call->object = NULL;
+			call->called_scope = NULL;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 			CHECK_EXCEPTION();
@@ -2770,6 +2760,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			ZEND_VM_NEXT_OPCODE();
 		} else {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 	}
 }
@@ -2797,6 +2788,7 @@ ZEND_VM_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST)
 	}
 
 	call->object = NULL;
+	call->called_scope = NULL;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 	ZEND_VM_NEXT_OPCODE();
@@ -2825,6 +2817,7 @@ ZEND_VM_HANDLER(60, ZEND_DO_FCALL, CONST, ANY)
 	}
 	call->fbc = EX(function_state).function;
 	call->object = NULL;
+	call->called_scope = NULL;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -2959,12 +2952,6 @@ ZEND_VM_HANDLER(161, ZEND_GENERATOR_RETURN, ANY, ANY)
 {
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-	if (EXPECTED(EG(exception) == NULL) &&
-	    UNEXPECTED(EG(prev_exception) != NULL)) {
-		/* return from finally block called because of unhandled exception */
-		zend_exception_restore(TSRMLS_C);		
-	}
 
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1 TSRMLS_CC);
@@ -3869,15 +3856,6 @@ ZEND_VM_HANDLER(73, ZEND_INCLUDE_OR_EVAL, CONST|TMP|VAR|CV, ANY)
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
-		} else if (RETURN_VALUE_USED(opline)) {
-			if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-				zval *retval;
-
-				ALLOC_ZVAL(retval);
-				ZVAL_BOOL(retval, 1);
-				INIT_PZVAL(retval);
-				EX_T(opline->result.var).var.ptr = retval;
-			}
 		}
 
 	} else if (RETURN_VALUE_USED(opline)) {
@@ -5252,19 +5230,6 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(159, ZEND_GENERATOR_FLAG, ANY, ANY)
-{
-	USE_OPLINE
-	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-	if (opline->extended_value) {
-		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
-	} else {
-		generator->flags &= ~ZEND_GENERATOR_FORCED_CLOSE;
-	}
-	ZEND_VM_NEXT_OPCODE();
-}
-
 ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSED)
 {
 	USE_OPLINE
@@ -5408,8 +5373,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -5420,6 +5384,17 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
+}
+
+ZEND_VM_HANDLER(159, ZEND_DISCARD_EXCEPTION, ANY, ANY)
+{
+	if (EG(prev_exception) != NULL) {
+		/* discard the previously thrown exception */
+		zval_ptr_dtor(&EG(prev_exception));
+		EG(prev_exception) = NULL;
+	}
+
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HANDLER(162, ZEND_FAST_CALL, ANY, ANY)

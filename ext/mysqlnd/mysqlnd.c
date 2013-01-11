@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -707,6 +707,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 	DBG_ENTER("mysqlnd_conn_data::get_updated_connect_flags");
 	/* we allow load data local infile by default */
 	mysql_flags |= MYSQLND_CAPABILITIES;
+
+	mysql_flags |= conn->options->flags; /* use the flags from set_client_option() */
 
 	if (PG(open_basedir) && strlen(PG(open_basedir))) {
 		mysql_flags ^= CLIENT_LOCAL_FILES;
@@ -2282,7 +2284,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			break;
 #endif
 		case MYSQL_OPT_LOCAL_INFILE:
-			if (!value || (*(unsigned int*) value) ? 1 : 0) {
+			if (value && (*(unsigned int*) value) ? 1 : 0) {
 				conn->options->flags |= CLIENT_LOCAL_FILES;
 			} else {
 				conn->options->flags &= ~CLIENT_LOCAL_FILES;
@@ -2366,6 +2368,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			DBG_INF_FMT("auth_protocol=%s", conn->options->auth_protocol);
 			break;
 		}
+		case MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS:
+			if (value && (*(unsigned int*) value) ? 1 : 0) {
+				conn->options->flags |= CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS;
+			} else {
+				conn->options->flags &= ~CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS;
+			}
+			break;
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_SHARED_MEMORY_BASE_NAME:
 		case MYSQL_OPT_USE_RESULT:

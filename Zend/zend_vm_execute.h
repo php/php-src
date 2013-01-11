@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -383,14 +383,8 @@ ZEND_API void zend_execute(zend_op_array *op_array TSRMLS_DC)
 
 static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
-	zend_bool nested;
+	zend_bool nested = EX(nested);
 	zend_op_array *op_array = EX(op_array);
-
-	if (EXPECTED(EG(exception) == NULL) &&
-	    UNEXPECTED(EG(prev_exception) != NULL)) {
-		/* return from finally block called because of unhandled exception */
-		zend_exception_restore(TSRMLS_C);
-	}
 
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
@@ -398,13 +392,11 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 		i_free_compiled_variables(execute_data);
 	}
 
+	zend_vm_stack_free((char*)execute_data - (ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T) TSRMLS_CC);
+
 	if ((op_array->fn_flags & ZEND_ACC_CLOSURE) && op_array->prototype) {
 		zval_ptr_dtor((zval**)&op_array->prototype);
 	}
-
-	nested = EX(nested);
-
-	zend_vm_stack_free((char*)execute_data - (ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T) TSRMLS_CC);
 
 	if (nested) {
 		execute_data = EG(current_execute_data);
@@ -427,15 +419,6 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				zend_throw_exception_internal(NULL TSRMLS_CC);
 				HANDLE_EXCEPTION_LEAVE();
-			} else if (RETURN_VALUE_USED(opline)) {
-				if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-					zval *retval;
-
-					ALLOC_ZVAL(retval);
-					ZVAL_BOOL(retval, 1);
-					INIT_PZVAL(retval);
-					EX_T(opline->result.var).var.ptr = retval;
-				}
 			}
 
 			ZEND_VM_INC_OPCODE();
@@ -469,7 +452,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 
 			EX(call)--;
 
-			zend_vm_stack_clear_multiple(TSRMLS_C);
+			zend_vm_stack_clear_multiple(1 TSRMLS_CC);
 
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				zend_throw_exception_internal(NULL TSRMLS_CC);
@@ -497,14 +480,15 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
 			zend_error_noreturn(E_ERROR, "Cannot call abstract method %s::%s()", fbc->common.scope->name, fbc->common.function_name);
-			CHECK_EXCEPTION();
-			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
 			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
 				fbc->common.scope ? fbc->common.scope->name : "",
 				fbc->common.scope ? "::" : "",
 				fbc->common.function_name);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 	if (fbc->common.scope &&
@@ -514,6 +498,9 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 		if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
 			/* FIXME: output identifiers properly */
 			zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically", fbc->common.scope->name, fbc->common.function_name);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 		} else {
 			/* FIXME: output identifiers properly */
 			/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
@@ -645,7 +632,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 
 	EX(call)--;
 
-	zend_vm_stack_clear_multiple(TSRMLS_C);
+	zend_vm_stack_clear_multiple(1 TSRMLS_CC);
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_throw_exception_internal(NULL TSRMLS_CC);
@@ -695,12 +682,6 @@ static int ZEND_FASTCALL  ZEND_GENERATOR_RETURN_SPEC_HANDLER(ZEND_OPCODE_HANDLER
 {
 	/* The generator object is stored in return_value_ptr_ptr */
 	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-	if (EXPECTED(EG(exception) == NULL) &&
-	    UNEXPECTED(EG(prev_exception) != NULL)) {
-		/* return from finally block called because of unhandled exception */
-		zend_exception_restore(TSRMLS_C);
-	}
 
 	/* Close the generator to free up resources */
 	zend_generator_close(generator, 1 TSRMLS_CC);
@@ -1134,16 +1115,14 @@ static int ZEND_FASTCALL  ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	}
 }
 
-static int ZEND_FASTCALL  ZEND_GENERATOR_FLAG_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL  ZEND_DISCARD_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-	zend_generator *generator = (zend_generator *) EG(return_value_ptr_ptr);
-
-	if (opline->extended_value) {
-		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
-	} else {
-		generator->flags &= ~ZEND_GENERATOR_FORCED_CLOSE;
+	if (EG(prev_exception) != NULL) {
+		/* discard the previously thrown exception */
+		zval_ptr_dtor(&EG(prev_exception));
+		EG(prev_exception) = NULL;
 	}
+
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -1241,6 +1220,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 		call->object = NULL;
+		call->called_scope = NULL;
 		call->is_ctor_call = 0;
 		EX(call) = call;
 		/*CHECK_EXCEPTION();*/
@@ -1268,6 +1248,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			efree(lcname);
 
 			call->object = NULL;
+			call->called_scope = NULL;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 			CHECK_EXCEPTION();
@@ -1360,6 +1341,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			ZEND_VM_NEXT_OPCODE();
 		} else {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 	}
 }
@@ -1387,6 +1369,7 @@ static int ZEND_FASTCALL  ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPC
 	}
 
 	call->object = NULL;
+	call->called_scope = NULL;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 	ZEND_VM_NEXT_OPCODE();
@@ -1558,6 +1541,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 		call->object = NULL;
+		call->called_scope = NULL;
 		call->is_ctor_call = 0;
 		EX(call) = call;
 		/*CHECK_EXCEPTION();*/
@@ -1585,6 +1569,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			efree(lcname);
 			zval_dtor(free_op2.var);
 			call->object = NULL;
+			call->called_scope = NULL;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 			CHECK_EXCEPTION();
@@ -1677,6 +1662,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			ZEND_VM_NEXT_OPCODE();
 		} else {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 	}
 }
@@ -1736,6 +1722,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 		call->object = NULL;
+		call->called_scope = NULL;
 		call->is_ctor_call = 0;
 		EX(call) = call;
 		/*CHECK_EXCEPTION();*/
@@ -1763,6 +1750,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			efree(lcname);
 			if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 			call->object = NULL;
+			call->called_scope = NULL;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 			CHECK_EXCEPTION();
@@ -1855,6 +1843,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			ZEND_VM_NEXT_OPCODE();
 		} else {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 	}
 }
@@ -1949,6 +1938,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			CACHE_PTR(opline->op2.literal->cache_slot, call->fbc);
 		}
 		call->object = NULL;
+		call->called_scope = NULL;
 		call->is_ctor_call = 0;
 		EX(call) = call;
 		/*CHECK_EXCEPTION();*/
@@ -1976,6 +1966,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			efree(lcname);
 
 			call->object = NULL;
+			call->called_scope = NULL;
 			call->is_ctor_call = 0;
 			EX(call) = call;
 			CHECK_EXCEPTION();
@@ -2068,6 +2059,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			ZEND_VM_NEXT_OPCODE();
 		} else {
 			zend_error_noreturn(E_ERROR, "Function name must be a string");
+			ZEND_VM_NEXT_OPCODE(); /* Never reached */
 		}
 	}
 }
@@ -2310,6 +2302,7 @@ static int ZEND_FASTCALL  ZEND_DO_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	}
 	call->fbc = EX(function_state).function;
 	call->object = NULL;
+	call->called_scope = NULL;
 	call->is_ctor_call = 0;
 	EX(call) = call;
 
@@ -2749,15 +2742,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HA
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
-		} else if (RETURN_VALUE_USED(opline)) {
-			if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-				zval *retval;
-
-				ALLOC_ZVAL(retval);
-				ZVAL_BOOL(retval, 1);
-				INIT_PZVAL(retval);
-				EX_T(opline->result.var).var.ptr = retval;
-			}
 		}
 
 	} else if (RETURN_VALUE_USED(opline)) {
@@ -4201,8 +4185,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLE
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -4897,8 +4880,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -5919,8 +5901,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -6634,8 +6615,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDL
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -7389,8 +7369,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -8072,15 +8051,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_TMP_HANDLER(ZEND_OPCODE_HAND
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
-		} else if (RETURN_VALUE_USED(opline)) {
-			if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-				zval *retval;
-
-				ALLOC_ZVAL(retval);
-				ZVAL_BOOL(retval, 1);
-				INIT_PZVAL(retval);
-				EX_T(opline->result.var).var.ptr = retval;
-			}
 		}
 
 	} else if (RETURN_VALUE_USED(opline)) {
@@ -9444,8 +9414,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -10140,8 +10109,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -11162,8 +11130,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -11741,8 +11708,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -12434,8 +12400,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -13407,15 +13372,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_VAR_HANDLER(ZEND_OPCODE_HAND
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
-		} else if (RETURN_VALUE_USED(opline)) {
-			if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-				zval *retval;
-
-				ALLOC_ZVAL(retval);
-				ZVAL_BOOL(retval, 1);
-				INIT_PZVAL(retval);
-				EX_T(opline->result.var).var.ptr = retval;
-			}
 		}
 
 	} else if (RETURN_VALUE_USED(opline)) {
@@ -14922,6 +14878,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_VAR_CONST_HANDLER(ZEND_OPCOD
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -16350,8 +16307,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -17259,6 +17215,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -18437,8 +18394,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_AR
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -19510,6 +19466,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -20905,8 +20862,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_AR
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -22047,8 +22003,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -22955,6 +22910,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_H
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -24183,8 +24139,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -25674,8 +25629,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDL
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -26989,8 +26943,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -28305,8 +28258,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -28728,8 +28680,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER(ZEND_OPCODE_HAND
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -30040,8 +29991,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -30981,15 +30931,6 @@ static int ZEND_FASTCALL  ZEND_INCLUDE_OR_EVAL_SPEC_CV_HANDLER(ZEND_OPCODE_HANDL
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			zend_throw_exception_internal(NULL TSRMLS_CC);
 			HANDLE_EXCEPTION();
-		} else if (RETURN_VALUE_USED(opline)) {
-			if (!EX_T(opline->result.var).var.ptr) { /* there was no return statement */
-				zval *retval;
-
-				ALLOC_ZVAL(retval);
-				ZVAL_BOOL(retval, 1);
-				INIT_PZVAL(retval);
-				EX_T(opline->result.var).var.ptr = retval;
-			}
 		}
 
 	} else if (RETURN_VALUE_USED(opline)) {
@@ -32348,6 +32289,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_CONST_HANDLER(ZEND_OPCODE
 
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -33553,8 +33495,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -34460,6 +34401,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_H
 
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -35507,8 +35449,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -36578,6 +36519,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_H
 
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -37841,8 +37783,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -38840,8 +38781,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -39746,6 +39686,7 @@ static int ZEND_FASTCALL  ZEND_FETCH_DIM_UNSET_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HA
 
 	if (UNEXPECTED(EX_T(opline->result.var).var.ptr_ptr == NULL)) {
 		zend_error_noreturn(E_ERROR, "Cannot unset string offsets");
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		zend_free_op free_res;
 		zval **retval_ptr = EX_T(opline->result.var).var.ptr_ptr;
@@ -40842,8 +40783,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 	generator->send_target = &EX_T(opline->result.var);
 
 	/* Initialize the sent value to NULL */
-	Z_ADDREF(EG(uninitialized_zval));
-	AI_SET_PTR(&EX_T(opline->result.var), &EG(uninitialized_zval));
+	EX_T(opline->result.var).tmp_var = EG(uninitialized_zval);
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
@@ -40859,6 +40799,7 @@ static int ZEND_FASTCALL  ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 static int ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_error_noreturn(E_ERROR, "Invalid opcode %d/%d/%d.", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);
+	ZEND_VM_NEXT_OPCODE(); /* Never reached */
 }
 
 
@@ -44840,31 +44781,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_JMP_SET_VAR_SPEC_CV_HANDLER,
   	ZEND_JMP_SET_VAR_SPEC_CV_HANDLER,
   	ZEND_JMP_SET_VAR_SPEC_CV_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
-  	ZEND_GENERATOR_FLAG_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
+  	ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
   	ZEND_YIELD_SPEC_CONST_CONST_HANDLER,
   	ZEND_YIELD_SPEC_CONST_TMP_HANDLER,
   	ZEND_YIELD_SPEC_CONST_VAR_HANDLER,

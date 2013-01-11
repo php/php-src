@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -495,9 +495,11 @@ int php_date_global_timezone_db_enabled;
 /* on 90'35; common sunrise declaration (sun body disappeared) */
 #define DATE_SUNRISE_ZENITH "90.583333"
 
+static PHP_INI_MH(OnUpdate_date_timezone);
+
 /* {{{ INI Settings */
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("date.timezone", "", PHP_INI_ALL, OnUpdateString, default_timezone, zend_date_globals, date_globals)
+	STD_PHP_INI_ENTRY("date.timezone", "", PHP_INI_ALL, OnUpdate_date_timezone, default_timezone, zend_date_globals, date_globals)
 	PHP_INI_ENTRY("date.default_latitude",           DATE_DEFAULT_LATITUDE,        PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("date.default_longitude",          DATE_DEFAULT_LONGITUDE,       PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("date.sunset_zenith",              DATE_SUNSET_ZENITH,           PHP_INI_ALL, NULL)
@@ -599,6 +601,7 @@ static PHP_GINIT_FUNCTION(date)
 	date_globals->default_timezone = NULL;
 	date_globals->timezone = NULL;
 	date_globals->tzcache = NULL;
+	date_globals->timezone_valid = 0;
 }
 /* }}} */
 
@@ -843,35 +846,58 @@ timelib_tzinfo *php_date_parse_tzfile_wrapper(char *formal_tzname, const timelib
 }
 /* }}} */
 
+/* Callback to check the date.timezone only when changed increases performance */
+/* {{{ static PHP_INI_MH(OnUpdate_date_timezone) */
+static PHP_INI_MH(OnUpdate_date_timezone)
+{
+	if (OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
+		return FAILURE;
+	}
+
+	DATEG(timezone_valid) = 0;
+	if (stage == PHP_INI_STAGE_RUNTIME) {
+		if (!timelib_timezone_id_is_valid(DATEG(default_timezone), DATE_TIMEZONEDB)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG);
+		} else {
+			DATEG(timezone_valid) = 1;
+		}
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ Helper functions */
 static char* guess_timezone(const timelib_tzdb *tzdb TSRMLS_DC)
 {
 	/* Checking configure timezone */
-	if (DATEG(timezone) && (strlen(DATEG(timezone)) > 0)) {
+	if (DATEG(timezone) && (strlen(DATEG(timezone))) > 0) {
 		return DATEG(timezone);
 	}
 	/* Check config setting for default timezone */
 	if (!DATEG(default_timezone)) {
 		/* Special case: ext/date wasn't initialized yet */
 		zval ztz;
-		
-		if (SUCCESS == zend_get_configuration_directive("date.timezone", sizeof("date.timezone"), &ztz) &&
-		    Z_TYPE(ztz) == IS_STRING &&
-		    Z_STRLEN(ztz) > 0 &&
-		    timelib_timezone_id_is_valid(Z_STRVAL(ztz), tzdb)) {
+
+		if (SUCCESS == zend_get_configuration_directive("date.timezone", sizeof("date.timezone"), &ztz)
+			&& Z_TYPE(ztz) == IS_STRING && Z_STRLEN(ztz) > 0 && timelib_timezone_id_is_valid(Z_STRVAL(ztz), tzdb)) {
 			return Z_STRVAL(ztz);
 		}
 	} else if (*DATEG(default_timezone)) {
-		if (timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
+		if (DATEG(timezone_valid) == 1) {
 			return DATEG(default_timezone);
 		}
-		/* Invalid date.timezone value */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid date.timezone value '%s', we selected the timezone 'UTC' for now.", DATEG(default_timezone));
-	} else {
-		/* No date.timezone value */
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected the timezone 'UTC' for now, but please set date.timezone to select your timezone.");
+
+		if (!timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid date.timezone value '%s', we selected the timezone 'UTC' for now.", DATEG(default_timezone));
+			return "UTC";
+		}
+
+		DATEG(timezone_valid) = 1;
+		return DATEG(default_timezone);
 	}
 	/* Fallback to UTC */
+	php_error_docref(NULL TSRMLS_CC, E_WARNING, DATE_TZ_ERRMSG "We selected the timezone 'UTC' for now, but please set date.timezone to select your timezone.");
 	return "UTC";
 }
 
@@ -888,6 +914,7 @@ PHPAPI timelib_tzinfo *get_timezone_info(TSRMLS_D)
 	return tzi;
 }
 /* }}} */
+
 
 /* {{{ date() and gmdate() data */
 #include "ext/standard/php_smart_str.h"
@@ -2014,7 +2041,11 @@ static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC)
 		instanceof_function(Z_OBJCE_P(d2), date_ce_date TSRMLS_CC)) {
 		php_date_obj *o1 = zend_object_store_get_object(d1 TSRMLS_CC);
 		php_date_obj *o2 = zend_object_store_get_object(d2 TSRMLS_CC);
-		
+
+		if (!o1->time || !o2->time) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Trying to compare an incomplete DateTime object");
+			return 1;
+		}
 		if (!o1->time->sse_uptodate) {
 			timelib_update_ts(o1->time, o1->time->tz_info);
 		}

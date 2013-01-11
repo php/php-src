@@ -96,6 +96,8 @@ stamp-h.in
 scan_makefile_in.awk
 TSRM/tsrm_config.h
 Zend/zend_config.h
+Zend/zend_dtrace_gen.h
+Zend/zend_dtrace_gen.hbak
 Zend/zend_ini_parser.c
 Zend/zend_ini_parser.h
 Zend/zend_ini_parser.output

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -425,27 +425,7 @@ ZEND_API zend_bool zend_is_executing(TSRMLS_D) /* {{{ */
 
 ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 {
-#if DEBUG_ZEND>=2
-	printf("Reducing refcount for %x (%x): %d->%d\n", *zval_ptr, zval_ptr, Z_REFCOUNT_PP(zval_ptr), Z_REFCOUNT_PP(zval_ptr) - 1);
-#endif
-	Z_DELREF_PP(zval_ptr);
-	if (Z_REFCOUNT_PP(zval_ptr) == 0) {
-		TSRMLS_FETCH();
-
-		if (*zval_ptr != &EG(uninitialized_zval)) {
-			GC_REMOVE_ZVAL_FROM_BUFFER(*zval_ptr);
-			zval_dtor(*zval_ptr);
-			efree_rel(*zval_ptr);
-		}
-	} else {
-		TSRMLS_FETCH();
-
-		if (Z_REFCOUNT_PP(zval_ptr) == 1) {
-			Z_UNSET_ISREF_PP(zval_ptr);
-		}
-
-		GC_ZVAL_CHECK_POSSIBLE_ROOT(*zval_ptr);
-	}
+	i_zval_ptr_dtor(*zval_ptr ZEND_FILE_LINE_RELAY_CC);
 }
 /* }}} */
 
@@ -861,7 +841,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 					if (i || UNEXPECTED(ZEND_VM_STACK_ELEMETS(EG(argument_stack)) == (EG(argument_stack)->top))) {
 						/* hack to clean up the stack */
 						zend_vm_stack_push((void *) (zend_uintptr_t)i TSRMLS_CC);
-						zend_vm_stack_clear_multiple(TSRMLS_C);
+						zend_vm_stack_clear_multiple(0 TSRMLS_CC);
 					}
 
 					zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
@@ -1015,7 +995,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 			*fci->retval_ptr_ptr = NULL;
 		}
 	}
-	zend_vm_stack_clear_multiple(TSRMLS_C);
+	zend_vm_stack_clear_multiple(0 TSRMLS_CC);
 
 	if (EG(This)) {
 		zval_ptr_dtor(&EG(This));

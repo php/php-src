@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -225,6 +225,7 @@ char *alloca ();
 #define ZEND_FILE_LINE_EMPTY_CC			, ZEND_FILE_LINE_EMPTY_C
 #define ZEND_FILE_LINE_ORIG_RELAY_C		__zend_orig_filename, __zend_orig_lineno
 #define ZEND_FILE_LINE_ORIG_RELAY_CC	, ZEND_FILE_LINE_ORIG_RELAY_C
+#define ZEND_ASSERT(c)					assert(c)
 #else
 #define ZEND_FILE_LINE_D
 #define ZEND_FILE_LINE_DC
@@ -238,6 +239,7 @@ char *alloca ();
 #define ZEND_FILE_LINE_EMPTY_CC
 #define ZEND_FILE_LINE_ORIG_RELAY_C
 #define ZEND_FILE_LINE_ORIG_RELAY_CC
+#define ZEND_ASSERT(c)
 #endif	/* ZEND_DEBUG */
 
 #ifdef ZTS
@@ -449,8 +451,6 @@ struct _zend_trait_precedence {
 	zend_trait_method_reference *trait_method;
 	
 	zend_class_entry** exclude_from_classes;
-	
-	union _zend_function* function;
 };
 typedef struct _zend_trait_precedence zend_trait_precedence;
 
@@ -467,8 +467,6 @@ struct _zend_trait_alias {
 	* modifiers to be set on trait method
 	*/
 	zend_uint modifiers;
-	
-	union _zend_function* function;
 };
 typedef struct _zend_trait_alias zend_trait_alias;
 

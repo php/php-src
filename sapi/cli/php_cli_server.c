@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -259,10 +259,13 @@ static php_cli_server_ext_mime_type_pair mime_type_map[] = {
 	{ "gif", "image/gif" },
 	{ "jpg", "image/jpeg" },
 	{ "jpeg", "image/jpeg" },
-	{ "png", "image/png" },
 	{ "jpe", "image/jpeg" },
+	{ "png", "image/png" },
 	{ "svg", "image/svg+xml" },
 	{ "txt", "text/plain" },
+	{ "webm", "video/webm" },
+	{ "ogv", "video/ogg" },
+	{ "ogg", "audio/ogg" },
 	{ NULL, NULL }
 };
 

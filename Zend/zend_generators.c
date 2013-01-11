@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,10 +29,54 @@ static zend_object_handlers zend_generator_handlers;
 
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC) /* {{{ */
 {
+	if (generator->value) {
+		zval_ptr_dtor(&generator->value);
+		generator->value = NULL;
+	}
+
+	if (generator->key) {
+		zval_ptr_dtor(&generator->key);
+		generator->key = NULL;
+	}
+
 	if (generator->execute_data) {
 		zend_execute_data *execute_data = generator->execute_data;
 		zend_op_array *op_array = execute_data->op_array;
-		void **stack_frame;
+
+		if (!finished_execution) {
+			if (op_array->has_finally_block) {
+				/* -1 required because we want the last run opcode, not the
+  				 * next to-be-run one. */
+				zend_uint op_num = execute_data->opline - op_array->opcodes - 1;
+				zend_uint finally_op_num = 0;
+
+				/* Find next finally block */
+				int i;
+				for (i = 0; i < op_array->last_try_catch; i++) {
+					zend_try_catch_element *try_catch = &op_array->try_catch_array[i];
+
+					if (op_num < try_catch->try_op) {
+						break;
+					}
+
+					if (op_num < try_catch->finally_op) {
+						finally_op_num = try_catch->finally_op;
+					}
+				}
+
+				/* If a finally block was found we jump directly to it and
+				 * resume the generator. Furthermore we abort this close call
+				 * because the generator will already be closed somewhere in
+				 * the resume. */
+				if (finally_op_num) {
+					execute_data->opline = &op_array->opcodes[finally_op_num];
+					execute_data->fast_ret = NULL;
+					generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
+					zend_generator_resume(generator TSRMLS_CC);
+					return;
+				}
+			}
+		}
 
 		if (!execute_data->symbol_table) {
 			zend_free_compiled_variables(execute_data);
@@ -83,7 +127,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 
 		/* Clear any backed up stack arguments */
 		if (generator->stack != EG(argument_stack)) {
-			stack_frame = zend_vm_stack_frame_base(execute_data);
+			void **stack_frame = zend_vm_stack_frame_base(execute_data);
 			while (generator->stack->top != stack_frame) {
 				zval_ptr_dtor((zval**)stack_frame);
 				stack_frame++;
@@ -127,16 +171,6 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			EG(argument_stack) = NULL;
 		}
 		generator->execute_data = NULL;
-	}
-
-	if (generator->value) {
-		zval_ptr_dtor(&generator->value);
-		generator->value = NULL;
-	}
-
-	if (generator->key) {
-		zval_ptr_dtor(&generator->key);
-		generator->key = NULL;
 	}
 }
 /* }}} */
@@ -189,6 +223,7 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 		/* copy */
 		clone->execute_data->opline = execute_data->opline;
 		clone->execute_data->function_state = execute_data->function_state;
+		clone->execute_data->object = execute_data->object;
 		clone->execute_data->current_scope = execute_data->current_scope;
 		clone->execute_data->current_called_scope = execute_data->current_called_scope;
 		clone->execute_data->fast_ret = execute_data->fast_ret;
@@ -285,17 +320,12 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 		if (orig->send_target) {
 			size_t offset = (char *) orig->send_target - (char *)execute_data;
 			clone->send_target = EX_TMP_VAR(clone->execute_data, offset);
-			Z_ADDREF_P(clone->send_target->var.ptr);
+			zval_copy_ctor(&clone->send_target->tmp_var);
 		}
 
 		if (execute_data->current_this) {
 			clone->execute_data->current_this = execute_data->current_this;
 			Z_ADDREF_P(execute_data->current_this);
-		}
-
-		if (execute_data->object) {
-			clone->execute_data->object = execute_data->object;
-			Z_ADDREF_P(execute_data->object);
 		}
 	}
 
@@ -401,10 +431,6 @@ static zend_function *zend_generator_get_constructor(zval *object TSRMLS_DC) /* 
 
 ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC) /* {{{ */
 {
-	if (EG(exception)) {
-		return;
-	}
-
 	/* The generator is already closed, thus can't resume */
 	if (!generator->execute_data) {
 		return;
@@ -587,7 +613,7 @@ ZEND_METHOD(Generator, next)
 }
 /* }}} */
 
-/* {{{ proto mixed Generator::send()
+/* {{{ proto mixed Generator::send(mixed $value)
  * Sends a value to the generator */
 ZEND_METHOD(Generator, send)
 {
@@ -607,18 +633,51 @@ ZEND_METHOD(Generator, send)
 		return;
 	}
 
-	/* The sent value was initialized to NULL, so dtor that */
-	zval_ptr_dtor(&generator->send_target->var.ptr);
-
-	/* Set new sent value */
-	Z_ADDREF_P(value);
-	generator->send_target->var.ptr = value;
-	generator->send_target->var.ptr_ptr = &value;
+	/* Put sent value into the TMP_VAR slot */
+	MAKE_COPY_ZVAL(&value, &generator->send_target->tmp_var);
 
 	zend_generator_resume(generator TSRMLS_CC);
 
 	if (generator->value) {
 		RETURN_ZVAL(generator->value, 1, 0);
+	}
+}
+/* }}} */
+
+/* {{{ proto mixed Generator::throw(Exception $exception)
+ * Throws an exception into the generator */
+ZEND_METHOD(Generator, throw)
+{
+	zval *exception, *exception_copy;
+	zend_generator *generator;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &exception) == FAILURE) {
+		return;
+	}
+
+	ALLOC_ZVAL(exception_copy);
+	MAKE_COPY_ZVAL(&exception, exception_copy);
+
+	generator = (zend_generator *) zend_object_store_get_object(getThis() TSRMLS_CC);
+
+	if (generator->execute_data) {
+		/* Throw the exception in the context of the generator */
+		zend_execute_data *current_execute_data = EG(current_execute_data);
+		EG(current_execute_data) = generator->execute_data;
+
+		zend_throw_exception_object(exception_copy TSRMLS_CC);
+
+		EG(current_execute_data) = current_execute_data;
+
+		zend_generator_resume(generator TSRMLS_CC);
+
+		if (generator->value) {
+			RETURN_ZVAL(generator->value, 1, 0);
+		}
+	} else {
+		/* If the generator is already closed throw the exception in the
+		 * current context */
+		zend_throw_exception_object(exception_copy TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -697,6 +756,7 @@ static int zend_generator_iterator_get_key(zend_object_iterator *iterator, char 
 	/* Waiting for Etienne's patch to allow arbitrary zval keys. Until then
 	 * error out on non-int and non-string keys. */
 	zend_error_noreturn(E_ERROR, "Currently only int and string keys can be yielded");
+	return HASH_KEY_NON_EXISTANT; /* Nerver reached */
 }
 /* }}} */
 
@@ -764,6 +824,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_send, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_throw, 0, 0, 1)
+	ZEND_ARG_INFO(0, exception)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, rewind,   arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, valid,    arginfo_generator_void, ZEND_ACC_PUBLIC)
@@ -771,6 +835,7 @@ static const zend_function_entry generator_functions[] = {
 	ZEND_ME(Generator, key,      arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, next,     arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, send,     arginfo_generator_send, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, throw,    arginfo_generator_throw, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, __wakeup, arginfo_generator_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

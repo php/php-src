@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@ $header_text = <<< DATA
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -710,6 +710,7 @@ function gen_null_handler($f) {
 		out($f,"static int ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
 		out($f,"{\n");
 		out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
+		out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
 		out($f,"}\n\n");
 	}
 }
@@ -784,10 +785,12 @@ function gen_executor_code($f, $spec, $kind, $prolog) {
 		case ZEND_VM_KIND_SWITCH:
 			out($f,"default:\n");
 			out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
+			out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
 			break;
 		case ZEND_VM_KIND_GOTO:
 			out($f,"ZEND_NULL_HANDLER:\n");
 			out($f,"\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
+			out($f,"\tZEND_VM_NEXT_OPCODE(); /* Never reached */\n");
 			break;
 	}
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -62,10 +62,9 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 {
 	php_zlib_filter_data *data;
 	php_stream_bucket *bucket;
-	size_t consumed = 0, original_out, original_in;
+	size_t consumed = 0;
 	int status;
 	php_stream_filter_status_t exit_status = PSFS_FEED_ME;
-	z_stream *streamp;
 
 	if (!thisfilter || !thisfilter->abstract) {
 		/* Should never happen */
@@ -73,9 +72,6 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 	}
 
 	data = (php_zlib_filter_data *)(thisfilter->abstract);
-	streamp = &(data->strm);
-	original_in = data->strm.total_in;
-	original_out = data->strm.total_out;
 
 	while (buckets_in->head) {
 		size_t bin = 0, desired;
@@ -191,10 +187,9 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 {
 	php_zlib_filter_data *data;
 	php_stream_bucket *bucket;
-	size_t consumed = 0, original_out, original_in;
+	size_t consumed = 0;
 	int status;
 	php_stream_filter_status_t exit_status = PSFS_FEED_ME;
-	z_stream *streamp;
 
 	if (!thisfilter || !thisfilter->abstract) {
 		/* Should never happen */
@@ -202,9 +197,6 @@ static php_stream_filter_status_t php_zlib_deflate_filter(
 	}
 
 	data = (php_zlib_filter_data *)(thisfilter->abstract);
-	streamp = &(data->strm);
-	original_in = data->strm.total_in;
-	original_out = data->strm.total_out;
 
 	while (buckets_in->head) {
 		size_t bin = 0, desired;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -91,15 +91,13 @@ ZEND_API void zend_llist_prepend_element(zend_llist *l, void *element)
 ZEND_API void zend_llist_del_element(zend_llist *l, void *element, int (*compare)(void *element1, void *element2))
 {
 	zend_llist_element *current=l->head;
-	zend_llist_element *next;
 
 	while (current) {
-		next = current->next;
 		if (compare(current->data, element)) {
 			DEL_LLIST_ELEMENT(current, l);
 			break;
 		}
-		current = next;
+		current = current->next;
 	}
 }
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -186,7 +186,6 @@ ZEND_API void zend_strip(TSRMLS_D)
 			
 			case T_END_HEREDOC:
 				zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
-				efree(token.value.str.val);
 				/* read the following character, either newline or ; */
 				if (lex_scan(&token TSRMLS_CC) != T_WHITESPACE) {
 					zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));

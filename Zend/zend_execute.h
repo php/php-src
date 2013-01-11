@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,15 +61,6 @@ ZEND_API void zend_execute(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op);
-#define safe_free_zval_ptr(p) safe_free_zval_ptr_rel(p ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC)
-static zend_always_inline void safe_free_zval_ptr_rel(zval *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
-{
-	TSRMLS_FETCH();
-
-	if (p!=EG(uninitialized_zval_ptr)) {
-		FREE_ZVAL_REL(p);
-	}
-}
 ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
@@ -85,11 +76,10 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
 	if (!Z_DELREF_P(zval_ptr)) {
 		TSRMLS_FETCH();
 
-		if (zval_ptr != &EG(uninitialized_zval)) {
-			GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
-			zval_dtor(zval_ptr);
-			efree_rel(zval_ptr);
-		}
+		ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
+		GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
+		zval_dtor(zval_ptr);
+		efree_rel(zval_ptr);
 	} else {
 		TSRMLS_FETCH();
 
@@ -297,17 +287,21 @@ static zend_always_inline void zend_vm_stack_free(void *ptr TSRMLS_DC)
 	}
 }
 
-static zend_always_inline void zend_vm_stack_clear_multiple(TSRMLS_D)
+static zend_always_inline void zend_vm_stack_clear_multiple(int nested TSRMLS_DC)
 {
 	void **p = EG(argument_stack)->top - 1;
-	int delete_count = (int)(zend_uintptr_t) *p;
+ 	void **end = p - (int)(zend_uintptr_t)*p;
 
-	while (--delete_count>=0) {
+	while (p != end) {
 		zval *q = *(zval **)(--p);
 		*p = NULL;
 		i_zval_ptr_dtor(q ZEND_FILE_LINE_CC);
 	}
-	zend_vm_stack_free_int(p TSRMLS_CC);
+	if (nested) {
+		EG(argument_stack)->top = p;
+	} else {
+		zend_vm_stack_free_int(p TSRMLS_CC);
+	}
 }
 
 static zend_always_inline int zend_vm_stack_get_args_count_ex(zend_execute_data *ex)
