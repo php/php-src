@@ -3,7 +3,7 @@ Test array_column() function: basic functionality
 --FILE--
 <?php
 /* Prototype:
- *  array array_column(array $input, mixed $key);
+ *  array array_column(array $input, mixed $column_key[, mixed $index_key]);
  * Description:
  *  Returns an array containing all the values from
  *  the specified "column" in a two-dimensional array.
@@ -34,6 +34,12 @@ var_dump(array_column($records, 'first_name'));
 
 echo "-- id column from recordset --\n";
 var_dump(array_column($records, 'id'));
+
+echo "-- last_name column from recordset, keyed by value from id column --\n";
+var_dump(array_column($records, 'last_name', 'id'));
+
+echo "-- last_name column from recordset, keyed by value from first_name column --\n";
+var_dump(array_column($records, 'last_name', 'first_name'));
 
 echo "\n*** Testing multiple data types ***\n";
 $file = basename(__FILE__);
@@ -73,6 +79,7 @@ $values = array(
 	)
 );
 var_dump(array_column($values, 'value'));
+var_dump(array_column($values, 'value', 'id'));
 
 echo "\n*** Testing numeric column keys ***\n";
 $numericCols = array(
@@ -81,10 +88,12 @@ $numericCols = array(
 	array('ccc', '333')
 );
 var_dump(array_column($numericCols, 1));
+var_dump(array_column($numericCols, 1, 0));
 
 echo "\n*** Testing failure to find specified column ***\n";
 var_dump(array_column($numericCols, 2));
 var_dump(array_column($numericCols, 'foo'));
+var_dump(array_column($numericCols, 0, 'foo'));
 
 echo "\n*** Testing single dimensional array ***\n";
 $singleDimension = array('foo', 'bar', 'baz');
@@ -92,10 +101,16 @@ var_dump(array_column($singleDimension, 1));
 
 echo "\n*** Testing columns not present in all rows ***\n";
 $mismatchedColumns = array(
-    array('a' => 'foo', 'b' => 'bar'),
-    array('a' => 'baz', 'c' => 'qux'),
+    array('a' => 'foo', 'b' => 'bar', 'e' => 'bbb'),
+    array('a' => 'baz', 'c' => 'qux', 'd' => 'aaa'),
+    array('a' => 'eee', 'b' => 'fff', 'e' => 'ggg'),
 );
 var_dump(array_column($mismatchedColumns, 'c'));
+var_dump(array_column($mismatchedColumns, 'c', 'a'));
+var_dump(array_column($mismatchedColumns, 'a', 'd'));
+var_dump(array_column($mismatchedColumns, 'a', 'e'));
+var_dump(array_column($mismatchedColumns, 'b'));
+var_dump(array_column($mismatchedColumns, 'b', 'a'));
 
 echo "\n*** Testing use of object converted to string ***\n";
 class Foo
@@ -105,8 +120,17 @@ class Foo
         return 'last_name';
     }
 }
+class Bar
+{
+    public function __toString()
+    {
+        return 'first_name';
+    }
+}
 $f = new Foo();
+$b = new Bar();
 var_dump(array_column($records, $f));
+var_dump(array_column($records, $f, $b));
 
 echo "Done\n";
 ?>
@@ -130,6 +154,24 @@ array(3) {
   [2]=>
   int(3)
 }
+-- last_name column from recordset, keyed by value from id column --
+array(3) {
+  [1]=>
+  string(3) "Doe"
+  [2]=>
+  string(5) "Smith"
+  [3]=>
+  string(5) "Jones"
+}
+-- last_name column from recordset, keyed by value from first_name column --
+array(3) {
+  ["John"]=>
+  string(3) "Doe"
+  ["Sally"]=>
+  string(5) "Smith"
+  ["Jane"]=>
+  string(5) "Jones"
+}
 
 *** Testing multiple data types ***
 array(8) {
@@ -151,6 +193,25 @@ array(8) {
   [7]=>
   resource(5) of type (stream)
 }
+array(8) {
+  [1]=>
+  object(stdClass)#1 (0) {
+  }
+  [2]=>
+  float(34.2345)
+  [3]=>
+  bool(true)
+  [4]=>
+  bool(false)
+  [5]=>
+  NULL
+  [6]=>
+  int(1234)
+  [7]=>
+  string(3) "Foo"
+  [8]=>
+  resource(5) of type (stream)
+}
 
 *** Testing numeric column keys ***
 array(3) {
@@ -161,11 +222,27 @@ array(3) {
   [2]=>
   string(3) "333"
 }
+array(3) {
+  ["aaa"]=>
+  string(3) "111"
+  ["bbb"]=>
+  string(3) "222"
+  ["ccc"]=>
+  string(3) "333"
+}
 
 *** Testing failure to find specified column ***
 array(0) {
 }
 array(0) {
+}
+array(3) {
+  [0]=>
+  string(3) "aaa"
+  [1]=>
+  string(3) "bbb"
+  [2]=>
+  string(3) "ccc"
 }
 
 *** Testing single dimensional array ***
@@ -177,6 +254,38 @@ array(1) {
   [0]=>
   string(3) "qux"
 }
+array(1) {
+  ["baz"]=>
+  string(3) "qux"
+}
+array(3) {
+  [0]=>
+  string(3) "foo"
+  ["aaa"]=>
+  string(3) "baz"
+  [1]=>
+  string(3) "eee"
+}
+array(3) {
+  ["bbb"]=>
+  string(3) "foo"
+  [0]=>
+  string(3) "baz"
+  ["ggg"]=>
+  string(3) "eee"
+}
+array(2) {
+  [0]=>
+  string(3) "bar"
+  [1]=>
+  string(3) "fff"
+}
+array(2) {
+  ["foo"]=>
+  string(3) "bar"
+  ["eee"]=>
+  string(3) "fff"
+}
 
 *** Testing use of object converted to string ***
 array(3) {
@@ -185,6 +294,14 @@ array(3) {
   [1]=>
   string(5) "Smith"
   [2]=>
+  string(5) "Jones"
+}
+array(3) {
+  ["John"]=>
+  string(3) "Doe"
+  ["Sally"]=>
+  string(5) "Smith"
+  ["Jane"]=>
   string(5) "Jones"
 }
 Done

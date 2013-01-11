@@ -435,7 +435,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_column, 0, 0, 2)
 	ZEND_ARG_INFO(0, arg) /* ARRAY_INFO(0, arg, 0) */
-	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_INFO(0, column_key)
+	ZEND_ARG_INFO(0, index_key)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_reverse, 0, 0, 1)
