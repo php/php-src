@@ -28,13 +28,11 @@
 
 PHP_CURL_API zend_class_entry *curl_CURLFile_class;
 
-/* {{{ proto string CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
-   Create the CURLFile object */
-ZEND_METHOD(CURLFile, __construct)
+static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char *fname = NULL, *mime = NULL, *postname = NULL;
 	int fname_len, mime_len, postname_len;
-	zval *cf = getThis();
+	zval *cf = return_value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ss", &fname, &fname_len, &mime, &mime_len, &postname, &postname_len) == FAILURE) {
 		return;
@@ -53,6 +51,22 @@ ZEND_METHOD(CURLFile, __construct)
 	}
 }
 
+/* {{{ proto string CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
+   Create the CURLFile object */
+ZEND_METHOD(CURLFile, __construct)
+{
+	return_value = getThis();
+	curlfile_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+/* }}} */
+
+/* {{{ proto string curl_file_create(string $name, [string $mimetype [, string $postfilename]])
+   Create the CURLFile object */
+PHP_FUNCTION(curl_file_create)
+{
+    object_init_ex( return_value, curl_CURLFile_class );
+    curlfile_ctor(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
 /* }}} */
 
 static void curlfile_get_property(char *name, INTERNAL_FUNCTION_PARAMETERS)

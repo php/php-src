@@ -111,6 +111,8 @@ PHP_FUNCTION(curl_multi_setopt);
 #if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
 PHP_FUNCTION(curl_pause);
 #endif
+PHP_FUNCTION(curl_file_create);
+
 
 void _php_curl_multi_close(zend_rsrc_list_entry * TSRMLS_DC);
 void _php_curl_share_close(zend_rsrc_list_entry * TSRMLS_DC);

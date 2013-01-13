@@ -403,6 +403,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_curl_pause, 0)
 	ZEND_ARG_INFO(0, bitmask)
 ZEND_END_ARG_INFO()
 #endif
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_curlfile_create, 0, 0, 1)
+	ZEND_ARG_INFO(0, filename)
+	ZEND_ARG_INFO(0, mimetype)
+	ZEND_ARG_INFO(0, postname)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ curl_functions[]
@@ -446,6 +452,7 @@ const zend_function_entry curl_functions[] = {
 	PHP_FE(curl_share_init,          arginfo_curl_share_init)
 	PHP_FE(curl_share_close,         arginfo_curl_share_close)
 	PHP_FE(curl_share_setopt,        arginfo_curl_share_setopt)
+	PHP_FE(curl_file_create,         arginfo_curlfile_create)
 	PHP_FE_END
 };
 /* }}} */
