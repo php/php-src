@@ -3306,7 +3306,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(array_values,													arginfo_array_values)
 	PHP_FE(array_count_values,												arginfo_array_count_values)
 	PHP_FE(array_column,													arginfo_array_column)
-	PHP_FALIAS(array_pluck, array_column,									arginfo_array_column)
 	PHP_FE(array_reverse,													arginfo_array_reverse)
 	PHP_FE(array_reduce,													arginfo_array_reduce)
 	PHP_FE(array_pad,														arginfo_array_pad)
