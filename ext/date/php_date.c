@@ -572,6 +572,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC);
 static HashTable *date_object_get_gc_interval(zval *object, zval ***table, int *n TSRMLS_DC);
 static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC);
 static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC);
+static HashTable *date_object_get_gc_timezone(zval *object, zval ***table, int *n TSRMLS_DC);
 
 zval *date_interval_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC);
 void date_interval_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC);
@@ -1948,6 +1949,7 @@ static void date_register_classes(TSRMLS_D)
 	memcpy(&date_object_handlers_timezone, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	date_object_handlers_timezone.clone_obj = date_object_clone_timezone;
 	date_object_handlers_timezone.get_properties = date_object_get_properties_timezone;
+	date_object_handlers_timezone.get_gc = date_object_get_gc_timezone;
 
 #define REGISTER_TIMEZONE_CLASS_CONST_STRING(const_name, value) \
 	zend_declare_class_constant_long(date_ce_timezone, const_name, sizeof(const_name)-1, value TSRMLS_CC);
@@ -2074,6 +2076,14 @@ static HashTable *date_object_get_gc(zval *object, zval ***table, int *n TSRMLS_
 	return zend_std_get_properties(object TSRMLS_CC);
 }
 
+static HashTable *date_object_get_gc_timezone(zval *object, zval ***table, int *n TSRMLS_DC)
+{
+
+       *table = NULL;
+       *n = 0;
+       return zend_std_get_properties(object TSRMLS_CC);
+}
+
 static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 {
 	HashTable *props;
@@ -2193,7 +2203,7 @@ static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC)
 
 	props = zend_std_get_properties(object TSRMLS_CC);
 
-	if (!tzobj->initialized || GC_G(gc_active)) {
+	if (!tzobj->initialized) {
 		return props;
 	}
 
