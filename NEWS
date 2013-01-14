@@ -25,6 +25,10 @@ PHP                                                                        NEWS
     CURLOPT_ACCEPTTIMEOUT_MS, CURLOPT_SSL_OPTIONS, CURLOPT_TCP_KEEPALIVE,
 	CURLOPT_TCP_KEEPIDLE and CURLOPT_TCP_KEEPINTVL. (Pierrick)
 
+- DateTime
+  . Added DateTimeImmutable - a variant of DateTime that only returns the
+    modified state instead of changing itself. (Derick) 
+
 - pgsql:
   . Bug #46408: Locale number format settings can cause pg_query_params to
     break with numerics. (asmecher, Lars)
