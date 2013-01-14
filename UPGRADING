@@ -105,10 +105,11 @@ PHP 5.5 UPGRADE NOTES
 
 - pack()/unpack() had the following changes, which bring it more in line
   with Perl's behavior:
-  - Implemented format character "Z": NUL-padded string
-  - "a" now does not remove trailing NUL characters on unpack() anymore
-  - "A" will now strip all trailing ASCII whitespace on unpack() (it used to
-    remove only trailing spaces).
+  - Implemented format character "Z": NULL padded string, with trailing NULL
+    bytes removed.
+  - Changed format character "a": this no longer removes trailing NULL bytes.
+  - Changed format character "A": all trailing ASCII whitespace is now removed
+    (defined as spaces, tabs, \r, \n and NULL).
 - MessageFormatter::format() and related functions now accepted named arguments
   and mixed numeric/named arguments in ICU 4.8+.
 - MessageFormatter::format() and related functions now don't error out when
