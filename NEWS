@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     protected property). (Stas)
   . Fixed bug #63943 (Bad warning text from strpos() on empty needle).
     (Laruence)
+  . Fixed bug #63893 (poor efficiency of strtr() using array with keys of very
+    different length). (Gustavo)
   . Fixed bug #63882 (zend_std_compare_objects crash on recursion). (Dmitry)
 
 - Litespeed:
