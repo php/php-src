@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Litespeed:
   . Fixed bug #63228 (-Werror=format-security error in lsapi code). (George)
 
+- ext/sqlite3:
+  . Fixed bug #63921 (sqlite3::bindvalue and relative PHP functions aren't
+    using sqlite3_*_int64 API). (srgoogleguy, Lars)
+
 ?? ??? 2012, PHP 5.4.11
 
 - Core:
