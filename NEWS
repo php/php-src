@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - PDO_sqlite:
   . Fixed bug #63916 (PDO::PARAM_INT casts to 32bit int internally even
     on 64bit builds in pdo_sqlite). (srgoogleguy, Lars)
+  . Fixed bug #52958 (Segfault in PDO_OCI on cleanup after running a long
+    testsuite) (hswong3i, Lars)
 
 ?? ??? 2012, PHP 5.4.11
 
