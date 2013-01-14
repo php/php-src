@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -300,7 +300,7 @@ unticked_statement:
 	|	T_RETURN ';'						{ zend_do_return(NULL, 0 TSRMLS_CC); }
 	|	T_RETURN expr_without_variable ';'	{ zend_do_return(&$2, 0 TSRMLS_CC); }
 	|	T_RETURN variable ';'				{ zend_do_return(&$2, 1 TSRMLS_CC); }
-	|	yield_expr ';' { $$ = $1; }
+	|	yield_expr ';' { zend_do_free(&$1 TSRMLS_CC); }
 	|	T_GLOBAL global_var_list ';'
 	|	T_STATIC static_var_list ';'
 	|	T_ECHO echo_expr_list ';'
@@ -386,13 +386,13 @@ unticked_class_declaration_statement:
 			implements_list
 			'{'
 				class_statement_list
-			'}' { zend_do_end_class_declaration(&$1, &$2 TSRMLS_CC); }
+			'}' { zend_do_end_class_declaration(&$1, &$3 TSRMLS_CC); }
 	|	interface_entry T_STRING
 			{ zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); }
 			interface_extends_list
 			'{'
 				class_statement_list
-			'}' { zend_do_end_class_declaration(&$1, &$2 TSRMLS_CC); }
+			'}' { zend_do_end_class_declaration(&$1, NULL TSRMLS_CC); }
 ;
 
 
@@ -598,8 +598,8 @@ trait_use_statement:
 ;
 
 trait_list:
-		fully_qualified_class_name						{ zend_do_implements_trait(&$1 TSRMLS_CC); }
-	|	trait_list ',' fully_qualified_class_name		{ zend_do_implements_trait(&$3 TSRMLS_CC); }
+		fully_qualified_class_name						{ zend_do_use_trait(&$1 TSRMLS_CC); }
+	|	trait_list ',' fully_qualified_class_name		{ zend_do_use_trait(&$3 TSRMLS_CC); }
 ;
 
 trait_adaptations:
@@ -618,12 +618,12 @@ non_empty_trait_adaptation_list:
 ;
 
 trait_adaptation_statement:
-		trait_precedence ';'								{ zend_add_trait_precedence(&$1 TSRMLS_CC); }
-	|	trait_alias ';'										{ zend_add_trait_alias(&$1 TSRMLS_CC); }
+		trait_precedence ';'
+	|	trait_alias ';'
 ;
 
 trait_precedence:
-	trait_method_reference_fully_qualified T_INSTEADOF trait_reference_list	{ zend_prepare_trait_precedence(&$$, &$1, &$3 TSRMLS_CC); }
+	trait_method_reference_fully_qualified T_INSTEADOF trait_reference_list	{ zend_add_trait_precedence(&$1, &$3 TSRMLS_CC); }
 ;
 
 trait_reference_list:
@@ -641,8 +641,8 @@ trait_method_reference_fully_qualified:
 ;
 
 trait_alias:
-		trait_method_reference T_AS trait_modifiers T_STRING		{ zend_prepare_trait_alias(&$$, &$1, &$3, &$4 TSRMLS_CC); }
-	|	trait_method_reference T_AS member_modifier					{ zend_prepare_trait_alias(&$$, &$1, &$3, NULL TSRMLS_CC); }
+		trait_method_reference T_AS trait_modifiers T_STRING		{ zend_add_trait_alias(&$1, &$3, &$4 TSRMLS_CC); }
+	|	trait_method_reference T_AS member_modifier					{ zend_add_trait_alias(&$1, &$3, NULL TSRMLS_CC); }
 ;
 
 trait_modifiers:

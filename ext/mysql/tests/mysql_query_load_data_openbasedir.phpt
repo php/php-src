@@ -111,6 +111,9 @@ unlink("./simple.csv");
 print "done!";
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [006] [1148] %s
 [007] [0] ''
 [008] LOAD DATA not run?

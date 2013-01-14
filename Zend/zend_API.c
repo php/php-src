@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -3708,6 +3708,8 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 				(*property)->value = value->value;
 				if (Z_REFCOUNT_P(value) > 0) {
 					zval_copy_ctor(*property);
+				} else {
+					efree(value);
 				}
 			} else {
 				zval *garbage = *property;

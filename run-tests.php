@@ -802,14 +802,12 @@ HELP;
 			fclose($failed_tests_file);
 		}
 
-		if (count($test_files) || count($test_results)) {
-			compute_summary();
-			if ($html_output) {
-				fwrite($html_file, "<hr/>\n" . get_summary(false, true));
-			}
-			echo "=====================================================================";
-			echo get_summary(false, false);
+		compute_summary();
+		if ($html_output) {
+			fwrite($html_file, "<hr/>\n" . get_summary(false, true));
 		}
+		echo "=====================================================================";
+		echo get_summary(false, false);
 
 		if ($html_output) {
 			fclose($html_file);
@@ -821,7 +819,7 @@ HELP;
 
 		junit_save_xml();
 
-		if (getenv('REPORT_EXIT_STATUS') == 1 and preg_match('/FAILED(?: |$)/', implode(' ', $test_results))) {
+		if (getenv('REPORT_EXIT_STATUS') == 1 and $sum_results['FAILED']) {
 			exit(1);
 		}
 

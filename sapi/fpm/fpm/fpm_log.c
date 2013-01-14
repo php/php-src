@@ -96,7 +96,7 @@ int fpm_log_init_child(struct fpm_worker_pool_s *wp)  /* {{{ */
 int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 {
 	char *s, *b;
-	char buffer[FPM_LOG_BUFFER];
+	char buffer[FPM_LOG_BUFFER+1];
 	int token, test;
 	size_t len, len2;
 	struct fpm_scoreboard_proc_s proc, *proc_p;
@@ -146,9 +146,10 @@ int fpm_log_write(char *log_format TSRMLS_DC) /* {{{ */
 	s = log_format;
 
 	while (*s != '\0') {
-		if (len > FPM_LOG_BUFFER) {
+		/* Test is we have place for 1 more char. */
+		if (len >= FPM_LOG_BUFFER) {
 			zlog(ZLOG_NOTICE, "the log buffer is full (%d). The access log request has been truncated.", FPM_LOG_BUFFER);
-			len = FPM_LOG_BUFFER - 1;
+			len = FPM_LOG_BUFFER;
 			break;
 		}
 

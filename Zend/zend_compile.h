@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,6 +59,9 @@ typedef struct _zend_compiler_context {
 	int        literals_size;
 	int        current_brk_cont;
 	int        backpatch_count;
+	int        nested_calls;
+	int        used_stack;
+	int        in_finally;
 	HashTable *labels;
 } zend_compiler_context;
 
@@ -210,8 +213,6 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
-#define ZEND_ACC_ALIAS					0x10000000
-
 char *zend_visibility_string(zend_uint fn_flags);
 
 
@@ -278,6 +279,9 @@ struct _zend_op_array {
 	int last_var;
 
 	zend_uint T;
+
+	zend_uint nested_calls;
+	zend_uint used_stack;
 
 	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
@@ -369,15 +373,19 @@ typedef struct _list_llist_element {
 
 union _temp_variable;
 
+typedef struct _call_slot {
+	zend_function     *fbc;
+	zval              *object;
+	zend_class_entry  *called_scope;
+	zend_bool          is_ctor_call;
+	zend_bool          is_ctor_result_used;
+} call_slot;
+
 struct _zend_execute_data {
 	struct _zend_op *opline;
 	zend_function_state function_state;
-	zend_function *fbc; /* Function Being Called */
-	zend_class_entry *called_scope;
 	zend_op_array *op_array;
 	zval *object;
-	union _temp_variable *Ts;
-	zval ***CVs;
 	HashTable *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 	zval *old_error_reporting;
@@ -386,11 +394,17 @@ struct _zend_execute_data {
 	zend_class_entry *current_scope;
 	zend_class_entry *current_called_scope;
 	zval *current_this;
-	zval *current_object;
 	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
+	call_slot *call_slots;
+	call_slot *call;
 };
 
 #define EX(element) execute_data.element
+
+#define EX_TMP_VAR(ex, n)	   ((temp_variable*)(((char*)(ex)) + ((int)(n))))
+#define EX_TMP_VAR_NUM(ex, n)  (EX_TMP_VAR(ex, 0) - (1 + (n)))
+
+#define EX_CV_NUM(ex, n)       (((zval***)(((char*)(ex))+ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data))))+(n))
 
 
 #define IS_CONST	(1<<0)
@@ -518,16 +532,13 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);
 
 /* Trait related functions */
-void zend_add_trait_precedence(znode *precedence_znode TSRMLS_DC);
-void zend_add_trait_alias(znode *alias_znode TSRMLS_DC);
+void zend_do_use_trait(znode *trait_znode TSRMLS_DC);
+void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC);
+void zend_add_trait_precedence(znode *method_reference, znode *trait_list TSRMLS_DC);
+void zend_add_trait_alias(znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC);
 
-
-void zend_do_implements_trait(znode *interface_znode /*, znode* aliases */ TSRMLS_DC);
 ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC);
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC);
-void zend_prepare_trait_precedence(znode *result, znode *method_reference, znode *trait_list TSRMLS_DC);
-void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC);
-void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC);
 
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
 void zend_do_early_binding(TSRMLS_D);
@@ -660,7 +671,9 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
 
 ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, const char *src1, int src1_length, const char *src2, int src2_length, int internal);
-ZEND_API int zend_unmangle_property_name(const char *mangled_property, int mangled_property_len, const char **class_name, const char **prop_name);
+#define zend_unmangle_property_name(mangled_property, mangled_property_len, class_name, prop_name) \
+        zend_unmangle_property_name_ex(mangled_property, mangled_property_len, class_name, prop_name, NULL) 
+ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, int mangled_property_len, const char **class_name, const char **prop_name, int *prop_len);
 
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) zend_function_dtor
 #define ZEND_CLASS_DTOR (void (*)(void *)) destroy_zend_class

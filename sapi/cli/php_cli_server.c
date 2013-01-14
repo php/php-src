@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -246,7 +246,7 @@ static php_cli_server_http_reponse_status_code_pair status_map[] = {
 
 static php_cli_server_http_reponse_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
-	{ 404, "<h1>%s</h1><p>The requested resource %s was not found on this server.</p>" },
+	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
 	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
 	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
 };
@@ -259,10 +259,13 @@ static php_cli_server_ext_mime_type_pair mime_type_map[] = {
 	{ "gif", "image/gif" },
 	{ "jpg", "image/jpeg" },
 	{ "jpeg", "image/jpeg" },
-	{ "png", "image/png" },
 	{ "jpe", "image/jpeg" },
+	{ "png", "image/png" },
 	{ "svg", "image/svg+xml" },
 	{ "txt", "text/plain" },
+	{ "webm", "video/webm" },
+	{ "ogv", "video/ogg" },
+	{ "ogg", "audio/ogg" },
 	{ NULL, NULL }
 };
 
@@ -280,8 +283,10 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_server);
  * copied from ext/standard/info.c
  */
 static const char php_cli_server_css[] = "<style>\n" \
-										"body { background-color: #ffffff; color: #000000; }\n" \
-										"h1 { font-family: sans-serif; font-size: 150%; background-color: #9999cc; font-weight: bold; color: #000000; margin-top: 0;}\n" \
+										"body { background-color: #fcfcfc; color: #333333; margin: 0; padding:0; }\n" \
+										"h1 { font-size: 1.5em; font-weight: normal; background-color: #9999cc; min-height:2em; line-height:2em; border-bottom: 1px inset black; margin: 0; }\n" \
+										"h1, p { padding-left: 10px; }\n" \
+										"code.url { background-color: #eeeeee; font-family:monospace; padding:0 2px;}\n" \
 										"</style>\n";
 /* }}} */
 

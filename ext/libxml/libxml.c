@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -860,7 +860,6 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
 {
 	if (!_php_libxml_per_request_initialization) {
 		xmlSetGenericErrorFunc(NULL, NULL);
-		xmlSetStructuredErrorFunc(NULL, NULL);
 
 		xmlParserInputBufferCreateFilenameDefault(NULL);
 		xmlOutputBufferCreateFilenameDefault(NULL);
@@ -876,11 +875,11 @@ static int php_libxml_post_deactivate()
 	/* reset libxml generic error handling */
 	if (_php_libxml_per_request_initialization) {
 		xmlSetGenericErrorFunc(NULL, NULL);
-		xmlSetStructuredErrorFunc(NULL, NULL);
 
 		xmlParserInputBufferCreateFilenameDefault(NULL);
 		xmlOutputBufferCreateFilenameDefault(NULL);
 	}
+	xmlSetStructuredErrorFunc(NULL, NULL);
 
 	if (LIBXML(stream_context)) {
 		/* the steam_context resource will be released by resource list destructor */

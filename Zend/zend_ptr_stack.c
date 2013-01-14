@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -110,23 +110,6 @@ ZEND_API int zend_ptr_stack_num_elements(zend_ptr_stack *stack)
 {
 	return stack->top;
 }
-
-ZEND_API void zend_ptr_stack_push_from_memory(zend_ptr_stack *stack, int count, void **pointers)
-{
-	ZEND_PTR_STACK_RESIZE_IF_NEEDED(stack, count);
-
-	memcpy(stack->top_element, pointers, count * sizeof(void *));
-	stack->top_element += count;
-	stack->top += count;
-}
-
-ZEND_API void zend_ptr_stack_pop_into_memory(zend_ptr_stack *stack, int count, void **pointers)
-{
-	memcpy(pointers, stack->top_element - count, count * sizeof(void *));
-	stack->top_element -= count;
-	stack->top -= count;
-}
-
 /*
  * Local variables:
  * tab-width: 4

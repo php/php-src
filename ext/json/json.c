@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,8 +25,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/html.h"
 #include "ext/standard/php_smart_str.h"
-#include "utf8_to_utf16.h"
 #include "JSON_parser.h"
 #include "php_json.h"
 #include <zend_exceptions.h>
@@ -358,7 +358,43 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 }
 /* }}} */
 
-#define REVERSE16(us) (((us & 0xf) << 12) | (((us >> 4) & 0xf) << 8) | (((us >> 8) & 0xf) << 4) | ((us >> 12) & 0xf))
+static int json_utf8_to_utf16(unsigned short *utf16, char utf8[], int len) /* {{{ */
+{
+	size_t pos = 0, us;
+	int j, status;
+
+	if (utf16) {
+		/* really convert the utf8 string */
+		for (j=0 ; pos < len ; j++) {
+			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
+			if (status != SUCCESS) {
+				return -1;
+			}
+			/* From http://en.wikipedia.org/wiki/UTF16 */
+			if (us >= 0x10000) {
+				us -= 0x10000;
+				utf16[j++] = (unsigned short)((us >> 10) | 0xd800);
+				utf16[j] = (unsigned short)((us & 0x3ff) | 0xdc00);
+			} else {
+				utf16[j] = (unsigned short)us;
+			}
+		}
+	} else {
+		/* Only check if utf8 string is valid, and compute utf16 lenght */
+		for (j=0 ; pos < len ; j++) {
+			us = php_next_utf8_char((const unsigned char *)utf8, len, &pos, &status);
+			if (status != SUCCESS) {
+				return -1;
+			}
+			if (us >= 0x10000) {
+				j++;
+			}
+		}
+	}
+	return j;
+}
+/* }}} */
+
 
 static void json_escape_string(smart_str *buf, char *s, int len, int options TSRMLS_DC) /* {{{ */
 {
@@ -397,7 +433,7 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 	}
 
 	utf16 = (options & PHP_JSON_UNESCAPED_UNICODE) ? NULL : (unsigned short *) safe_emalloc(len, sizeof(unsigned short), 0);
-	ulen = utf8_to_utf16(utf16, s, len);
+	ulen = json_utf8_to_utf16(utf16, s, len);
 	if (ulen <= 0) {
 		if (utf16) {
 			efree(utf16);
@@ -501,15 +537,10 @@ static void json_escape_string(smart_str *buf, char *s, int len, int options TSR
 					smart_str_appendc(buf, (unsigned char) us);
 				} else {
 					smart_str_appendl(buf, "\\u", 2);
-					us = REVERSE16(us);
-
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-					us >>= 4;
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-					us >>= 4;
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
-					us >>= 4;
-					smart_str_appendc(buf, digits[us & ((1 << 4) - 1)]);
+					smart_str_appendc(buf, digits[(us & 0xf000) >> 12]);
+					smart_str_appendc(buf, digits[(us & 0xf00)  >> 8]);
+					smart_str_appendc(buf, digits[(us & 0xf0)   >> 4]);
+					smart_str_appendc(buf, digits[(us & 0xf)]);
 				}
 				break;
 		}
@@ -639,7 +670,7 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 
 	utf16 = (unsigned short *) safe_emalloc((str_len+1), sizeof(unsigned short), 1);
 
-	utf16_len = utf8_to_utf16(utf16, str, str_len);
+	utf16_len = json_utf8_to_utf16(utf16, str, str_len);
 	if (utf16_len <= 0) {
 		if (utf16) {
 			efree(utf16);
@@ -662,7 +693,7 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 	else
 	{
 		double d;
-		int type;
+		int type, overflow_info;
 		long p;
 
 		RETVAL_NULL();
@@ -678,11 +709,36 @@ PHP_JSON_API void php_json_decode_ex(zval *return_value, char *str, int str_len,
 			RETVAL_BOOL(0);
 		}
 
-		if ((type = is_numeric_string(str, str_len, &p, &d, 0)) != 0) {
+		if ((type = is_numeric_string_ex(str, str_len, &p, &d, 0, &overflow_info)) != 0) {
 			if (type == IS_LONG) {
 				RETVAL_LONG(p);
 			} else if (type == IS_DOUBLE) {
-				RETVAL_DOUBLE(d);
+				if (options & PHP_JSON_BIGINT_AS_STRING && overflow_info) {
+					/* Within an object or array, a numeric literal is assumed
+					 * to be an integer if and only if it's entirely made up of
+					 * digits (exponent notation will result in the number
+					 * being treated as a double). We'll match that behaviour
+					 * here. */
+					int i;
+					zend_bool is_float = 0;
+
+					for (i = (str[0] == '-' ? 1 : 0); i < str_len; i++) {
+						/* Not using isdigit() because it's locale specific,
+						 * but we expect JSON input to always be UTF-8. */
+						if (str[i] < '0' || str[i] > '9') {
+							is_float = 1;
+							break;
+						}
+					}
+
+					if (is_float) {
+						RETVAL_DOUBLE(d);
+					} else {
+						RETVAL_STRINGL(str, str_len, 1);
+					}
+				} else {
+					RETVAL_DOUBLE(d);
+				}
 			}
 		}
 

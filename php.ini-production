@@ -78,10 +78,12 @@
 ; compatibility with older or less security conscience applications. We
 ; recommending using the production ini in production and testing environments.
 
-; php.ini-development is very similar to its production variant, except it's
-; much more verbose when it comes to errors. We recommending using the
-; development version only in development environments as errors shown to
+; php.ini-development is very similar to its production variant, except it is
+; much more verbose when it comes to errors. We recommend using the
+; development version only in development environments, as errors shown to
 ; application users can inadvertently leak otherwise secure information.
+
+; This is php.ini-production INI file.
 
 ;;;;;;;;;;;;;;;;;;;
 ; Quick Reference ;
@@ -197,13 +199,14 @@
 engine = On
 
 ; This directive determines whether or not PHP will recognize code between
-; <? and ?> tags as PHP source which should be processed as such. It's been
-; recommended for several years that you not use the short tag "short cut" and
-; instead to use the full <?php and ?> tag combination. With the wide spread use
+; <? and ?> tags as PHP source which should be processed as such. For several
+; years we recommended that you not use the short tag shortcut and
+; instead to use the full <?php and ?> tag combination. With the widespread use
 ; of XML and use of these tags by other languages, the server can become easily
-; confused and end up parsing the wrong code in the wrong context. But because
-; this short cut has been a feature for such a long time, it's currently still
-; supported for backwards compatibility, but we recommend you don't use them.
+; confused and end up parsing the wrong code in the wrong context.
+; This shortcut is still supported for backwards compatibility, but we
+; recommend against its use.
+; Default Value: On
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
@@ -432,7 +435,7 @@ memory_limit = 128M
 ; E_NOTICE          - run-time notices (these are warnings which often result
 ;                     from a bug in your code, but it's possible that it was
 ;                     intentional (e.g., using an uninitialized variable and
-;                     relying on the fact it's automatically initialized to an
+;                     relying on the fact it is automatically initialized to an
 ;                     empty string)
 ; E_STRICT          - run-time notices, enable to have PHP suggest changes
 ;                     to your code which will ensure the best interoperability
@@ -465,8 +468,8 @@ error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT
 ; it could be very dangerous in production environments. Depending on the code
 ; which is triggering the error, sensitive information could potentially leak
 ; out of your application such as database usernames and passwords or worse.
-; It's recommended that errors be logged on production servers rather than
-; having the errors sent to STDOUT.
+; For production environments, we recommend logging errors rather than
+; sending them to STDOUT.
 ; Possible Values:
 ;   Off = Do not display any errors
 ;   stderr = Display errors to STDERR (affects only CGI/CLI binaries!)
@@ -480,8 +483,8 @@ display_errors = Off
 ; The display of errors which occur during PHP's startup sequence are handled
 ; separately from display_errors. PHP's default behavior is to suppress those
 ; errors from clients. Turning the display of startup errors on can be useful in
-; debugging configuration problems. But, it's strongly recommended that you
-; leave this setting off on production servers.
+; debugging configuration problems. We strongly recommend you
+; set this to 'off' for production servers.
 ; Default Value: Off
 ; Development Value: On
 ; Production Value: Off
@@ -775,8 +778,8 @@ enable_dl = Off
 ;fastcgi.logging = 0
 
 ; cgi.rfc2616_headers configuration option tells PHP what type of headers to
-; use when sending HTTP response code. If it's set 0 PHP sends Status: header that
-; is supported by Apache. When this option is set to 1 PHP will send
+; use when sending HTTP response code. If set to 0, PHP sends Status: header that
+; is supported by Apache. When this option is set to 1, PHP will send
 ; RFC2616 compliant header.
 ; Default is zero.
 ; http://php.net/cgi.rfc2616-headers
@@ -1376,9 +1379,9 @@ session.save_handler = files
 ;
 ; where N is an integer.  Instead of storing all the session files in
 ; /path, what this will do is use subdirectories N-levels deep, and
-; store the session data in those directories.  This is useful if you
-; or your OS have problems with lots of files in one directory, and is
-; a more efficient layout for servers that handle lots of sessions.
+; store the session data in those directories.  This is useful if
+; your OS has problems with many files in one directory, and is
+; a more efficient layout for servers that handle many sessions.
 ;
 ; NOTE 1: PHP will not create this directory structure automatically.
 ;         You can use the script in the ext/session dir for that purpose.
@@ -1405,7 +1408,7 @@ session.use_cookies = 1
 ; This option forces PHP to fetch and use a cookie for storing and maintaining
 ; the session id. We encourage this operation as it's very helpful in combating
 ; session hijacking when not specifying and managing your own session id. It is
-; not the end all be all of session hijacking defense, but it's a good start.
+; not the be-all and end-all of session hijacking defense, but it's a good start.
 ; http://php.net/session.use-only-cookies
 session.use_only_cookies = 1
 
@@ -1478,14 +1481,14 @@ session.gc_maxlifetime = 1440
 
 ; PHP 4.2 and less have an undocumented feature/bug that allows you to
 ; to initialize a session variable in the global scope.
-; PHP 4.3 and later will warn you, if this feature is used.
+; PHP 4.3 and later will warn you if this feature is used.
 ; You can disable the feature and the warning separately. At this time,
 ; the warning is only displayed, if bug_compat_42 is enabled. This feature
-; introduces some serious security problems if not handled correctly. It's
-; recommended that you do not use this feature on production servers. But you
+; introduces some serious security problems if not handled correctly. We
+; recommend you not use this feature on production servers. You
 ; should enable this on development servers and enable the warning as well. If you
 ; do not enable the feature on development servers, you won't be warned when it's
-; used and debugging errors caused by this can be difficult to track down.
+; used, so debugging errors caused by this can be difficult to track down.
 ; Default Value: On
 ; Development Value: On
 ; Production Value: Off
@@ -1530,7 +1533,7 @@ session.cache_limiter = nocache
 session.cache_expire = 180
 
 ; trans sid support is disabled by default.
-; Use of trans sid may risk your users security.
+; Use of trans sid may risk your users' security.
 ; Use this option with caution.
 ; - User may send URL contains active session ID
 ;   to other person via. email/irc/etc.

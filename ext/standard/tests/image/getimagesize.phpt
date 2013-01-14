@@ -23,7 +23,22 @@ GetImageSize()
 	var_dump($result);
 ?>
 --EXPECT--
-array(11) {
+array(12) {
+  ["test1bpix.bmp"]=>
+  array(6) {
+    [0]=>
+    int(500)
+    [1]=>
+    int(345)
+    [2]=>
+    int(6)
+    [3]=>
+    string(24) "width="500" height="345""
+    ["bits"]=>
+    int(32)
+    ["mime"]=>
+    string(14) "image/x-ms-bmp"
+  }
   ["test1pix.bmp"]=>
   array(6) {
     [0]=>

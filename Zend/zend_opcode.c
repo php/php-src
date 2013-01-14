@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -69,6 +69,9 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->vars = NULL;
 
 	op_array->T = 0;
+
+	op_array->nested_calls = 0;
+	op_array->used_stack = 0;
 
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
@@ -216,12 +219,6 @@ ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 void _destroy_zend_class_traits_info(zend_class_entry *ce)
 {
 	if (ce->num_traits > 0 && ce->traits) {
-		size_t i;
-		for (i = 0; i < ce->num_traits; i++) {
-			if (ce->traits[i]) {
-				destroy_zend_class(&ce->traits[i]);
-			}
-		}
 		efree(ce->traits);
 	}
 	
@@ -268,15 +265,6 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 	}
 }
 
-static int zend_clear_trait_method_name(zend_op_array *op_array TSRMLS_DC)
-{
-	if (op_array->function_name && (op_array->fn_flags & ZEND_ACC_ALIAS) == 0) {
-		efree(op_array->function_name);
-		op_array->function_name = NULL;
-	}
-	return 0;
-}
-
 ZEND_API void destroy_zend_class(zend_class_entry **pce)
 {
 	zend_class_entry *ce = *pce;
@@ -308,10 +296,6 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			}
 			zend_hash_destroy(&ce->properties_info);
 			str_efree(ce->name);
-			if ((ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-				TSRMLS_FETCH();
-				zend_hash_apply(&ce->function_table, (apply_func_t)zend_clear_trait_method_name TSRMLS_CC);
-			}
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
@@ -401,7 +385,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	}
 	efree(op_array->opcodes);
 
-	if (op_array->function_name && (op_array->fn_flags & ZEND_ACC_ALIAS) == 0) {
+	if (op_array->function_name) {
 		efree((char*)op_array->function_name);
 	}
 	if (op_array->doc_comment) {
@@ -539,8 +523,9 @@ static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num,
 		     dst_num > op_array->try_catch_array[i].finally_end)) {
 			/* we have a jump out of try block that needs executing finally */
 
-			/* generate a FAST_CALL to finaly block */
+			/* generate a FAST_CALL to finally block */
 		    start_op = get_next_op_number(op_array);
+
 			opline = get_next_op(op_array TSRMLS_CC);
 			opline->opcode = ZEND_FAST_CALL;
 			SET_UNUSED(opline->op1);
@@ -551,7 +536,7 @@ static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num,
 				opline->op2.opline_num = op_array->try_catch_array[i].catch_op;
 			}
 
-			/* generate a sequence of FAST_CALL to upward finaly block */
+			/* generate a sequence of FAST_CALL to upward finally block */
 			while (i > 0) {
 				i--;
 				if (op_array->try_catch_array[i].finally_op &&
@@ -622,6 +607,7 @@ static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
 		switch (opline->opcode) {
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
+			case ZEND_GENERATOR_RETURN:
 				zend_resolve_finally_call(op_array, i, (zend_uint)-1 TSRMLS_CC);
 				break;
 			case ZEND_BRK:

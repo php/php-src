@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -730,6 +730,10 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 #endif
 	zend_bool free_host=0, new_link=0;
 	long connect_timeout;
+
+    php_error_docref(NULL TSRMLS_CC,
+                     E_DEPRECATED,
+                     "The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead");
 
 #if !defined(MYSQL_USE_MYSQLND)
 	if ((MYSQL_VERSION_ID / 100) != (mysql_get_client_version() / 100)) {

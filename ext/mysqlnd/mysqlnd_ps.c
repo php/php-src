@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -307,6 +307,7 @@ mysqlnd_stmt_read_prepare_response(MYSQLND_STMT * s TSRMLS_DC)
 	stmt->warning_count = stmt->conn->upsert_status->warning_count = prepare_resp->warning_count;
 	stmt->field_count = stmt->conn->field_count = prepare_resp->field_count;
 	stmt->param_count = prepare_resp->param_count;
+	stmt->upsert_status->affected_rows = 0; /* be like libmysql */
 done:
 	PACKET_FREE(prepare_resp);
 
