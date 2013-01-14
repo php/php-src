@@ -159,7 +159,7 @@ static struct gfxinfo *php_handle_bmp (php_stream * stream TSRMLS_DC)
 		result->width    =  (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
 		result->height   =  (((unsigned int)dim[ 7]) << 8) + ((unsigned int) dim[ 6]);
 		result->bits     =  ((unsigned int)dim[11]);
-	} else if (size > 12 && (size <= 64 || size == 108)) {
+	} else if (size > 12 && (size <= 64 || size == 108 || size == 124)) {
 		result = (struct gfxinfo *) ecalloc (1, sizeof(struct gfxinfo));
 		result->width    =  (((unsigned int)dim[ 7]) << 24) + (((unsigned int)dim[ 6]) << 16) + (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
 		result->height   =  (((unsigned int)dim[11]) << 24) + (((unsigned int)dim[10]) << 16) + (((unsigned int)dim[ 9]) << 8) + ((unsigned int) dim[ 8]);
