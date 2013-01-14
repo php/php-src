@@ -4221,9 +4221,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 				prop_name_length = property_info->name_length;
 			} else {
 				/* for private and protected we need to unmangle the names */
-				zend_unmangle_property_name(property_info->name, property_info->name_length,
-											&class_name_unused, &prop_name);
-				prop_name_length = strlen(prop_name);
+				zend_unmangle_property_name_ex(property_info->name, property_info->name_length,
+											&class_name_unused, &prop_name, &prop_name_length);
 				prop_hash = zend_get_hash_value(prop_name, prop_name_length + 1);
 			}
 
