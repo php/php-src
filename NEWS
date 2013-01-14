@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #63921 (sqlite3::bindvalue and relative PHP functions aren't
     using sqlite3_*_int64 API). (srgoogleguy, Lars)
 
+- PDO_sqlite:
+  . Fixed bug #63916 (PDO::PARAM_INT casts to 32bit int internally even
+    on 64bit builds in pdo_sqlite). (srgoogleguy, Lars)
+
 ?? ??? 2012, PHP 5.4.11
 
 - Core:
