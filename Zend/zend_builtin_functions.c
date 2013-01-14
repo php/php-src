@@ -987,7 +987,7 @@ ZEND_FUNCTION(get_object_vars)
 	HashPosition pos;
 	char *key;
 	const char *prop_name, *class_name;
-	uint key_len;
+	uint key_len, prop_len;
 	ulong num_index;
 	zend_object *zobj;
 
@@ -1014,10 +1014,10 @@ ZEND_FUNCTION(get_object_vars)
 	while (zend_hash_get_current_data_ex(properties, (void **) &value, &pos) == SUCCESS) {
 		if (zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos) == HASH_KEY_IS_STRING) {
 			if (zend_check_property_access(zobj, key, key_len-1 TSRMLS_CC) == SUCCESS) {
-				zend_unmangle_property_name(key, key_len-1, &class_name, &prop_name);
+				zend_unmangle_property_name_ex(key, key_len - 1, &class_name, &prop_name, &prop_len);
 				/* Not separating references */
 				Z_ADDREF_PP(value);
-				add_assoc_zval_ex(return_value, prop_name, strlen(prop_name)+1, *value);
+				add_assoc_zval_ex(return_value, prop_name, prop_len + 1, *value);
 			}
 		}
 		zend_hash_move_forward_ex(properties, &pos);

@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.5.0 Alpha 3
 
+- Core:
+  . Fixed bug #63980 (object members get trimmed by zero bytes). (Laruence)
+
 - General improvements:
   . Fixed bug #63874 (Segfault if php_strip_whitespace has heredoc). (Pierrick)
   . Fixed bug #63822 (Crash when using closures with ArrayAccess).
