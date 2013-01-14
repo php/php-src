@@ -13569,8 +13569,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			          zend_check_property_access(zobj, str_key, str_key_len-1 TSRMLS_CC) != SUCCESS));
 			zend_hash_get_pointer(fe_ht, &EX_T(opline->op1.var).fe.fe_pos);
 			if (use_key && key_type != HASH_KEY_IS_LONG) {
-				zend_unmangle_property_name(str_key, str_key_len-1, &class_name, &prop_name);
-				str_key_len = strlen(prop_name);
+				zend_unmangle_property_name_ex(str_key, str_key_len-1, &class_name, &prop_name, &str_key_len);
 				str_key = estrndup(prop_name, str_key_len);
 				str_key_len++;
 			}

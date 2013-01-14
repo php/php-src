@@ -158,9 +158,10 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 			case HASH_KEY_IS_STRING:
 				if (is_object) {
 					const char *prop_name, *class_name;
-					int mangled = zend_unmangle_property_name(string_key, str_len - 1, &class_name, &prop_name);
+					int prop_len;
+					int mangled = zend_unmangle_property_name_ex(string_key, str_len - 1, &class_name, &prop_name, &prop_len);
 
-					ZEND_PUTS_EX(prop_name);
+					ZEND_WRITE_EX(prop_name, prop_len);
 					if (class_name && mangled == SUCCESS) {
 						if (class_name[0]=='*') {
 							ZEND_PUTS_EX(":protected");

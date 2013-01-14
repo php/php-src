@@ -5178,7 +5178,7 @@ static int zend_strnlen(const char* s, int maxlen) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_unmangle_property_name(const char *mangled_property, int len, const char **class_name, const char **prop_name) /* {{{ */
+ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, int len, const char **class_name, const char **prop_name, int *prop_len) /* {{{ */
 {
 	int class_name_len;
 
@@ -5186,22 +5186,34 @@ ZEND_API int zend_unmangle_property_name(const char *mangled_property, int len, 
 
 	if (mangled_property[0]!=0) {
 		*prop_name = mangled_property;
+		if (prop_len) {
+			*prop_len = len;
+		}
 		return SUCCESS;
 	}
 	if (len < 3 || mangled_property[1]==0) {
 		zend_error(E_NOTICE, "Illegal member variable name");
 		*prop_name = mangled_property;
+		if (prop_len) {
+			*prop_len = len;
+		}
 		return FAILURE;
 	}
 
-	class_name_len = zend_strnlen(mangled_property+1, --len - 1) + 1;
+	class_name_len = zend_strnlen(mangled_property + 1, --len - 1) + 1;
 	if (class_name_len >= len || mangled_property[class_name_len]!=0) {
 		zend_error(E_NOTICE, "Corrupt member variable name");
 		*prop_name = mangled_property;
+		if (prop_len) {
+			*prop_len = len + 1;
+		}
 		return FAILURE;
 	}
-	*class_name = mangled_property+1;
-	*prop_name = (*class_name)+class_name_len;
+	*class_name = mangled_property + 1;
+	*prop_name = (*class_name) + class_name_len;
+	if (prop_len) {
+		*prop_len = len - class_name_len;
+	}
 	return SUCCESS;
 }
 /* }}} */
