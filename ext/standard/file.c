@@ -1953,7 +1953,6 @@ PHP_FUNCTION(fputcsv)
 {
 	char delimiter = ',';	/* allow this to be set as parameter */
 	char enclosure = '"';	/* allow this to be set as parameter */
-	const char escape_char = '\\';
 	php_stream *stream;
 	int ret;
 	zval *fp = NULL, *fields = NULL, **field_tmp = NULL, field;
@@ -2008,24 +2007,19 @@ PHP_FUNCTION(fputcsv)
 		/* enclose a field that contains a delimiter, an enclosure character, or a newline */
 		if (FPUTCSV_FLD_CHK(delimiter) ||
 			FPUTCSV_FLD_CHK(enclosure) ||
-			FPUTCSV_FLD_CHK(escape_char) ||
 			FPUTCSV_FLD_CHK('\n') ||
 			FPUTCSV_FLD_CHK('\r') ||
 			FPUTCSV_FLD_CHK('\t') ||
+			FPUTCSV_FLD_CHK('\\') ||
 			FPUTCSV_FLD_CHK(' ')
 		) {
 			char *ch = Z_STRVAL(field);
 			char *end = ch + Z_STRLEN(field);
-			int escaped = 0;
 
 			smart_str_appendc(&csvline, enclosure);
 			while (ch < end) {
-				if (*ch == escape_char) {
-					escaped = 1;
-				} else if (!escaped && *ch == enclosure) {
+				if (*ch == enclosure) {
 					smart_str_appendc(&csvline, enclosure);
-				} else {
-					escaped = 0;
 				}
 				smart_str_appendc(&csvline, *ch);
 				ch++;
