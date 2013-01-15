@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -99,7 +99,7 @@ static int oci_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 				switch (S->cols[i].dtype) {
 					case SQLT_BLOB:
 					case SQLT_CLOB:
-						/* do nothing */
+						OCIDescriptorFree(S->cols[i].data, OCI_DTYPE_LOB);
 						break;
 					default:
 						efree(S->cols[i].data);
@@ -654,7 +654,6 @@ static int oci_blob_close(php_stream *stream, int close_handle TSRMLS_DC)
 
 	if (close_handle) {
 		OCILobClose(self->S->H->svc, self->S->err, self->lob);
-		OCIDescriptorFree(self->lob, OCI_DTYPE_LOB);
 		efree(self);
 	}
 

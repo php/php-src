@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -569,6 +569,24 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 			break;
 	}
 	Z_TYPE_P(op) = IS_BOOL;
+}
+/* }}} */
+
+ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
+{
+	double dval;
+	switch (Z_TYPE_P(op)) {
+		case IS_DOUBLE: {
+			TSRMLS_FETCH();
+			dval = Z_DVAL_P(op);
+			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%.*H", (int) EG(precision), dval);
+			/* %H already handles removing trailing zeros from the fractional part, yay */
+			break;
+		}
+		default:
+			_convert_to_string(op ZEND_FILE_LINE_CC);
+	}
+	Z_TYPE_P(op) = IS_STRING;
 }
 /* }}} */
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2265,7 +2265,9 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 	/* Deinitilaise module globals */
 	if (module->globals_size) {
 #ifdef ZTS
-		ts_free_id(*module->globals_id_ptr);
+		if (*module->globals_id_ptr) {
+			ts_free_id(*module->globals_id_ptr);
+		}
 #else
 		if (module->globals_dtor) {
 			module->globals_dtor(module->globals_ptr TSRMLS_CC);
@@ -2730,7 +2732,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	} else if (zend_hash_find(ftable, lmname, mlen+1, (void**)&fcc->function_handler) == SUCCESS) {
 		retval = 1;
 		if ((fcc->function_handler->op_array.fn_flags & ZEND_ACC_CHANGED) &&
-		    EG(scope) &&
+		    !strict_class && EG(scope) &&
 		    instanceof_function(fcc->function_handler->common.scope, EG(scope) TSRMLS_CC)) {
 			zend_function *priv_fbc;
 
@@ -2811,7 +2813,14 @@ get_function_via_handler:
 
 	if (retval) {
 		if (fcc->calling_scope && !call_via_handler) {
-			if (!fcc->object_ptr && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
+			if (!fcc->object_ptr && (fcc->function_handler->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+				if (error) {
+					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", fcc->calling_scope->name, fcc->function_handler->common.function_name);
+					retval = 0;
+				} else {
+					zend_error(E_ERROR, "Cannot call abstract method %s::%s()", fcc->calling_scope->name, fcc->function_handler->common.function_name);
+				}
+			} else if (!fcc->object_ptr && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
 				int severity;
 				char *verb;
 				if (fcc->function_handler->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
@@ -3699,6 +3708,8 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 				(*property)->value = value->value;
 				if (Z_REFCOUNT_P(value) > 0) {
 					zval_copy_ctor(*property);
+				} else {
+					efree(value);
 				}
 			} else {
 				zval *garbage = *property;

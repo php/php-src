@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -401,7 +401,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, long sql
 	long l, pindex = -1;
 		
 	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
-	if (sql_len > SHORT_MAX) {
+	if (sql_len > 65536) {
 		strcpy(dbh->error_code, "01004");
 		return 0;
 	}

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -172,7 +172,7 @@ typedef struct st_mysqlnd_options
 	  The ABI will be broken and the methods structure will be somewhere else
 	  in the memory which can crash external code. Feel free to reuse these.
 	*/
-	char		* unused2;
+	HashTable	* connect_attr;
 	char		* unused3;
 	char		* unused4;
 	char		* unused5;
@@ -183,7 +183,6 @@ typedef struct st_mysqlnd_options
 	/* maximum allowed packet size for communication */
 	ulong		max_allowed_packet;
 
-	zend_bool	numeric_and_datetime_as_unicode;
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	zend_bool	int_and_float_native;
 #endif
@@ -207,6 +206,13 @@ typedef struct st_mysqlnd_net_options
 	char		*ssl_passphrase;
 	zend_bool	ssl_verify_peer;
 	uint64_t	flags;
+
+	char *		sha256_server_public_key;
+
+	char *		unused1;
+	char *		unused2;
+	char *		unused3;
+	char *		unused4;
 } MYSQLND_NET_OPTIONS;
 
 
@@ -341,6 +347,8 @@ struct st_mysqlnd_packet_stats;
 struct st_mysqlnd_packet_prepare_response;
 struct st_mysqlnd_packet_chg_user_resp;
 struct st_mysqlnd_packet_auth_pam;
+struct st_mysqlnd_packet_sha256_pk_request;
+struct st_mysqlnd_packet_sha256_pk_request_response;
 
 typedef struct st_mysqlnd_packet_greet *		(*func_mysqlnd_protocol__get_greet_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 typedef struct st_mysqlnd_packet_auth *			(*func_mysqlnd_protocol__get_auth_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
@@ -355,6 +363,8 @@ typedef struct st_mysqlnd_packet_row *			(*func_mysqlnd_protocol__get_row_packet
 typedef struct st_mysqlnd_packet_stats *		(*func_mysqlnd_protocol__get_stats_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 typedef struct st_mysqlnd_packet_prepare_response *(*func_mysqlnd_protocol__get_prepare_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 typedef struct st_mysqlnd_packet_chg_user_resp*(*func_mysqlnd_protocol__get_change_user_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+typedef struct st_mysqlnd_packet_sha256_pk_request *(*func_mysqlnd_protocol__get_sha256_pk_request_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
+typedef struct st_mysqlnd_packet_sha256_pk_request_response *(*func_mysqlnd_protocol__get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL * const protocol, zend_bool persistent TSRMLS_DC);
 
 struct st_mysqlnd_protocol_methods
 {
@@ -371,12 +381,12 @@ struct st_mysqlnd_protocol_methods
 	func_mysqlnd_protocol__get_stats_packet get_stats_packet;
 	func_mysqlnd_protocol__get_prepare_response_packet get_prepare_response_packet;
 	func_mysqlnd_protocol__get_change_user_response_packet get_change_user_response_packet;
+	func_mysqlnd_protocol__get_sha256_pk_request_packet get_sha256_pk_request_packet;
+	func_mysqlnd_protocol__get_sha256_pk_request_response_packet get_sha256_pk_request_response_packet;
 
 	void * unused1;
 	void * unused2;
 	void * unused3;
-	void * unused4;
-	void * unused5;
 };
 
 
@@ -453,7 +463,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__query_read_result_set_header)
 
 typedef MYSQLND_CONN_DATA *	(*func_mysqlnd_conn_data__get_reference)(MYSQLND_CONN_DATA * const conn TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__free_reference)(MYSQLND_CONN_DATA * const conn TSRMLS_DC);
-typedef enum mysqlnd_connection_state (*func_mysqlnd_conn_data__get_state)(MYSQLND_CONN_DATA * const conn TSRMLS_DC);
+typedef enum mysqlnd_connection_state (*func_mysqlnd_conn_data__get_state)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC);
 typedef void				(*func_mysqlnd_conn_data__set_state)(MYSQLND_CONN_DATA * const conn, enum mysqlnd_connection_state new_state TSRMLS_DC);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__simple_command)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command, const zend_uchar * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
@@ -478,6 +488,8 @@ typedef unsigned int		(*func_mysqlnd_conn_data__get_updated_connect_flags)(MYSQL
 typedef enum_func_status	(*func_mysqlnd_conn_data__connect_handshake)(MYSQLND_CONN_DATA * conn, const char * const host, const char * const user, const char * const passwd, const unsigned int passwd_len, const char * const db, const unsigned int db_len, const unsigned int mysql_flags TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__simple_command_send_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command, const zend_uchar * const arg, size_t arg_len, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
 typedef struct st_mysqlnd_authentication_plugin * (*func_mysqlnd_conn_data__fetch_auth_plugin_by_name)(const char * const requested_protocol TSRMLS_DC);
+
+typedef enum_func_status	(*func_mysqlnd_conn_data__set_client_option_2d)(MYSQLND_CONN_DATA * const conn, enum mysqlnd_option option, const char * const key, const char * const value TSRMLS_DC);
 
 struct st_mysqlnd_conn_data_methods
 {
@@ -563,6 +575,8 @@ struct st_mysqlnd_conn_data_methods
 	func_mysqlnd_conn_data__connect_handshake connect_handshake;
 	func_mysqlnd_conn_data__simple_command_send_request simple_command_send_request;
 	func_mysqlnd_conn_data__fetch_auth_plugin_by_name fetch_auth_plugin_by_name;
+
+	func_mysqlnd_conn_data__set_client_option_2d set_client_option_2d;
 };
 
 
@@ -614,9 +628,8 @@ typedef void				(*func_mysqlnd_res__unbuffered_free_last_data)(MYSQLND_RES *resu
 
 	/* for decoding - binary or text protocol */
 typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-									unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-									zend_bool as_unicode, zend_bool as_int_or_float,
-									MYSQLND_STATS * stats TSRMLS_DC);
+									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+									zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC);
 
 typedef MYSQLND_RES_METADATA * (*func_mysqlnd_res__result_meta_init)(unsigned int field_count, zend_bool persistent TSRMLS_DC);
 
@@ -788,6 +801,7 @@ struct st_mysqlnd_net_data
 {
 	php_stream			*stream;
 	zend_bool			compressed;
+	zend_bool			ssl;
 #ifdef MYSQLND_DO_WIRE_CHECK_BEFORE_COMMAND
 	zend_uchar			last_command;
 #else
@@ -921,10 +935,6 @@ struct mysqlnd_field_hash_key
 {
 	zend_bool		is_numeric;
 	unsigned long	key;
-#if MYSQLND_UNICODE
-	zstr			ustr;
-	unsigned int	ulen;
-#endif
 };
 
 
@@ -1098,7 +1108,8 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 														size_t * auth_data_len,
 														MYSQLND_CONN_DATA * conn, const char * const user, const char * const passwd,
 														const size_t passwd_len, zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
-														const MYSQLND_OPTIONS * const options, unsigned long mysql_flags
+														const MYSQLND_OPTIONS * const options, 
+														const MYSQLND_NET_OPTIONS * const net_options, unsigned long mysql_flags
 														TSRMLS_DC);
 
 struct st_mysqlnd_authentication_plugin

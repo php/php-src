@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,6 +34,17 @@
 
 #define Z_OBJ_P(zval_p) \
 	((zend_object*)(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].bucket.obj.object))
+
+#define Z_OBJ_PROTECT_RECURSION(zval_p) \
+	do { \
+		if (EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].apply_count++ >= 3) { \
+			zend_error(E_ERROR, "Nesting level too deep - recursive dependency?"); \
+		} \
+	} while (0)
+
+
+#define Z_OBJ_UNPROTECT_RECURSION(zval_p) \
+	EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].apply_count--
 
 /*
   __X accessors explanation:
@@ -352,9 +363,10 @@ ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info
 	zend_property_info *property_info;
 	const char *class_name, *prop_name;
 	zval member;
+	int prop_name_len;
 
-	zend_unmangle_property_name(prop_info_name, prop_info_name_len, &class_name, &prop_name);
-	ZVAL_STRING(&member, prop_name, 0);
+	zend_unmangle_property_name_ex(prop_info_name, prop_info_name_len, &class_name, &prop_name, &prop_name_len);
+	ZVAL_STRINGL(&member, prop_name, prop_name_len, 0);
 	property_info = zend_get_property_info_quick(zobj->ce, &member, 1, NULL TSRMLS_CC);
 	if (!property_info) {
 		return FAILURE;
@@ -424,7 +436,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 #endif
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
-	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__get != NULL), key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, member, silent || (zobj->ce->__get != NULL), key TSRMLS_CC);
 
 	if (UNEXPECTED(!property_info) ||
 	    ((EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -539,6 +551,8 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 				(*variable_ptr)->value = value->value;
 				if (Z_REFCOUNT_P(value) > 0) {
 					zval_copy_ctor(*variable_ptr);
+				} else {
+					efree(value);
 				}
 				zval_dtor(&garbage);
 			} else {
@@ -1317,28 +1331,43 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 	}
 	if (!zobj1->properties && !zobj2->properties) {
 		int i;
+
+		Z_OBJ_PROTECT_RECURSION(o1);
+		Z_OBJ_PROTECT_RECURSION(o2);
 		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
 			if (zobj1->properties_table[i]) {
 				if (zobj2->properties_table[i]) {
 					zval result;
 
 					if (compare_function(&result, zobj1->properties_table[i], zobj2->properties_table[i] TSRMLS_CC)==FAILURE) {
+						Z_OBJ_UNPROTECT_RECURSION(o1);
+						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return 1;
 					}
 					if (Z_LVAL(result) != 0) {
+						Z_OBJ_UNPROTECT_RECURSION(o1);
+						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return Z_LVAL(result);
 					}
 				} else {
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
 				}
 			} else {
 				if (zobj2->properties_table[i]) {
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
 				} else {
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 0;
 				}
 			}
 		}
+		Z_OBJ_UNPROTECT_RECURSION(o1);
+		Z_OBJ_UNPROTECT_RECURSION(o2);
 		return 0;
 	} else {
 		if (!zobj1->properties) {

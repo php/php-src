@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1017,7 +1017,7 @@ SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC)
 			return NULL;
 		}
 		if (sapi_module.input_filter) {
-			sapi_module.input_filter(PARSE_ENV, name, &value, strlen(value), NULL TSRMLS_CC);
+			sapi_module.input_filter(PARSE_STRING, name, &value, strlen(value), NULL TSRMLS_CC);
 		}
 		return value;
 	}

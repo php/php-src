@@ -20,28 +20,11 @@ PHP X.Y UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- Drop Windows XP and 2003 support. (Pierre)
-- All internal case insensitivity handling for class, function and constant 
-  names is done according to ASCII rules, current locale settings are ignored. 
-- php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
-  zend_logo_guid() have been removed
-- Removal of Logo GUIDs
 
 ========================================
 2. New Features
 ========================================
 
-- Support list in foreach. (Laruence)
-  (wiki.php.net/rfc/foreachlist)
-- Support finally keyword. (Laruence)
-  (wiki.php.net/rfc/finally)
-- Support constant array/string dereferencing. (Laruence)
-  (https://wiki.php.net/rfc/constdereference)
-- Add support for using empty() on the result of function calls and
-  other expressions. Thus it is now possible to write empty(getArray()),
-  for example. (https://wiki.php.net/rfc/empty_isset_exprs)
-- Added generators.
-  (https://wiki.php.net/rfc/generators)
 
 ========================================
 2. Changes in SAPI modules
@@ -52,168 +35,21 @@ PHP X.Y UPGRADE NOTES
 3. Deprecated Functionality
 ========================================
 
-- The preg_replace /e modifier is now deprecated.  Use
-  preg_replace_callback instead.
-  (https://wiki.php.net/rfc/remove_preg_replace_eval_modifier)
 
 ========================================
 4. Changed Functions
 ========================================
 
-- pack()/unpack() had the following changes, which bring it more in line
-  with Perl's behavior:
-  - Implemented format character "Z": NUL-padded string
-  - "a" now does not remove trailing NUL characters on unpack() anymore
-  - "A" will now strip all trailing ASCII whitespace on unpack() (it used to
-    remove only trailing spaces).
-- MessageFormatter::format() and related functions now accepted named arguments
-  and mixed numeric/named arguments in ICU 4.8+.
-- MessageFormatter::format() and related functions now don't error out when
-  an insufficient argument count is provided. Instead, the placeholders will
-  remain unsubstituted.
-- MessageFormatter::parse() and MessageFormat::format() (and their static
-  equivalents) now don't throw away better than second precision in the
-  arguments.
-- IntlDateFormatter::__construct and datefmt_create() now accept for the
-  $timezone argument time zone identifiers, IntlTimeZone objects, DateTimeZone
-  objects and NULL. It used to accept only time zone identifiers and NULL.
-  Invalid time zone identifiers are no longer accepted. Emptry strings are
-  no longer accepted.
-- The default time zone used in IntlDateFormatter::__construct and
-  datefmt_create() (when the corresponding argument is not passed or NULL is
-  passed) is now the one given by date_default_timezone_get(), not the
-  default ICU time zone.
-- The time zone passed to the IntlDateFormatter is ignored if it is NULL and if
-  the calendar passed is an IntlCalendar object -- in this case, the
-  IntlCalendar's time zone will be used instead. Otherwise, the time zone
-  specified in the $timezone argument is used instead. This does not affect
-  old code, as IntlCalendar was introduced in this version.
-- IntlDateFormatter::__construct and datefmt_create() now accept for the
-  $calendar argument also IntlCalendar objects.
-- IntlDateFormatter::getCalendar() and datefmt_get_calendar() return false
-  if the IntlDateFormatter was set up with an IntlCalendar instead of the
-  constants IntlDateFormatter::GREGORIAN/TRADITIONAL. IntlCalendar did not
-  exist before this version.
-- IntlDateFormatter::setCalendar() and datefmt_set_calendar() now also accept
-  an IntlCalendar object, in which case its time zone is taken. Passing a
-  constant is still allowed, and still keeps the time zone.
-- IntlDateFormatter::setTimeZoneID() and datefmt_set_timezone_id() are
-  deprecated. Use IntlDateFormatter::setTimeZone() or datefmt_set_timezone()
-  instead.
-- IntlDateFormatter::format() and datefmt_format() now also accept an
-  IntlCalendar object for formatting.
-- mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb() now throw
-  E_DEPRECATED. Their use was already previously discouraged in the docs,
-  but that predated the existence of E_DEPRECATED.
-- php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
-  zend_logo_guid() have been removed
 
 ========================================
 5. New Functions
 ========================================
 
-- Core:
-  - boolval()
-
-- Hash:
-  - hash_pbkdf2()
-
-- Intl:
-  - datefmt_format_object()
-  - datefmt_get_calendar_object()
-  - datefmt_get_timezone()
-  - datefmt_set_timezone()
-  - datefmt_get_calendar_object()
-  - intlcal_create_instance()
-  - intlcal_get_keyword_values_for_locale()
-  - intlcal_get_now()
-  - intlcal_get_available_locales()
-  - intlcal_get()
-  - intlcal_get_time()
-  - intlcal_set_time()
-  - intlcal_add()
-  - intlcal_set_time_zone()
-  - intlcal_after()
-  - intlcal_before()
-  - intlcal_set()
-  - intlcal_roll()
-  - intlcal_clear()
-  - intlcal_field_difference()
-  - intlcal_get_actual_maximum()
-  - intlcal_get_actual_minimum()
-  - intlcal_get_day_of_week_type()
-  - intlcal_get_first_day_of_week()
-  - intlcal_get_greatest_minimum()
-  - intlcal_get_least_maximum()
-  - intlcal_get_locale()
-  - intlcal_get_maximum()
-  - intlcal_get_minimal_days_in_first_week()
-  - intlcal_get_minimum()
-  - intlcal_get_time_zone()
-  - intlcal_get_type()
-  - intlcal_get_weekend_transition()
-  - intlcal_in_daylight_time()
-  - intlcal_is_equivalent_to()
-  - intlcal_is_lenient()
-  - intlcal_is_set()
-  - intlcal_is_weekend()
-  - intlcal_set_first_day_of_week()
-  - intlcal_set_lenient()
-  - intlcal_equals()
-  - intlcal_get_repeated_wall_time_option()
-  - intlcal_get_skipped_wall_time_option()
-  - intlcal_set_repeated_wall_time_option()
-  - intlcal_set_skipped_wall_time_option()
-  - intlcal_from_date_time()
-  - intlcal_to_date_time()
-  - intlcal_get_error_code()
-  - intlcal_get_error_message()
-  - intlgregcal_create_instance()
-  - intlgregcal_set_gregorian_change()
-  - intlgregcal_get_gregorian_change()
-  - intlgregcal_is_leap_year()
-  - intltz_create_time_zone()
-  - intltz_create_default()
-  - intltz_get_id()
-  - intltz_get_gmt()
-  - intltz_get_unknown()
-  - intltz_create_enumeration()
-  - intltz_count_equivalent_ids()
-  - intltz_create_time_zone_id_enumeration()
-  - intltz_get_canonical_id()
-  - intltz_get_region()
-  - intltz_get_tz_data_version()
-  - intltz_get_equivalent_id()
-  - intltz_use_daylight_time()
-  - intltz_get_offset()
-  - intltz_get_raw_offset()
-  - intltz_has_same_rules()
-  - intltz_get_display_name()
-  - intltz_get_dst_savings()
-  - intltz_from_date_time_zone()
-  - intltz_to_date_time_zone()
-  - intltz_get_error_code()
-  - intltz_get_error_message()
-
-  - IntlDateFormatter::formatObject()
-  - IntlDateFormatter::getCalendarObject()
-  - IntlDateFormatter::getTimeZone()
-  - IntlDateFormatter::setTimeZone()
-
-- SPL:
-  - SplFixedArray::__wakeup()
 
 ========================================
 6. New Classes and Interfaces
 ========================================
 
-- Intl:
-  - IntlCalendar
-  - IntlGregorianCalendar
-  - IntlTimeZone
-  - IntlBreakIterator
-  - IntlRuleBasedBreakIterator
-  - IntlCodePointBreakIterator
 
 ========================================
 7. Removed Extensions
@@ -224,15 +60,10 @@ PHP X.Y UPGRADE NOTES
 8. Other Changes to Extensions
 ========================================
 
-- Intl:
-  - This extension now requires ICU 4.0+.
-  - Added intl.use_exceptions INI directive, which controls what happens when
-    global errors are set together with intl.error_level.
 
 ========================================
 9. New Global Constants
 ========================================
-
 
 ========================================
 10. Changes to INI File Handling
@@ -243,4 +74,3 @@ PHP X.Y UPGRADE NOTES
 11. Other Changes
 ========================================
 
-- Logo GUIDs will no longer work

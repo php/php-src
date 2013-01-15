@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -254,6 +254,12 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		n++;
 		var = php_strtok_r(NULL, info->separator, &strtok_buf);
 	} 
+
+	if (n > (PG(max_input_vars) * 2)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input variables exceeded %ld. To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+		goto out;
+	}
+
 	num = n; /* make sure to process initilized vars only */
 	
 	/* initialize converter */

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -227,8 +227,10 @@ static int oci_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 		H->server = NULL;
 	}
 
-	OCIHandleFree(H->err, OCI_HTYPE_ERROR);
-	H->err = NULL;
+	if (H->err) {
+		OCIHandleFree(H->err, OCI_HTYPE_ERROR);
+		H->err = NULL;
+	}
 
 	if (H->charset && H->env) {
 		OCIHandleFree(H->env, OCI_HTYPE_ENV);

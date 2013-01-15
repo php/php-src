@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -297,7 +297,6 @@ PHPAPI int php_output_clean(TSRMLS_D)
 	php_output_context context;
 
 	if (OG(active) && (OG(active)->flags & PHP_OUTPUT_HANDLER_CLEANABLE)) {
-		OG(active)->buffer.used = 0;
 		php_output_context_init(&context, PHP_OUTPUT_HANDLER_CLEAN TSRMLS_CC);
 		php_output_handler_op(OG(active), &context);
 		php_output_context_dtor(&context);
@@ -1226,7 +1225,6 @@ static inline int php_output_stack_pop(int flags TSRMLS_DC)
 			/* signal that we're cleaning up */
 			if (flags & PHP_OUTPUT_POP_DISCARD) {
 				context.op |= PHP_OUTPUT_HANDLER_CLEAN;
-				orphan->buffer.used = 0;
 			}
 			php_output_handler_op(orphan, &context);
 		}

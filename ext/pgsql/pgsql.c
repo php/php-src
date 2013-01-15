@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1736,7 +1736,7 @@ PHP_FUNCTION(pg_query_params)
 			} else {
 				zval tmp_val = **tmp;
 				zval_copy_ctor(&tmp_val);
-				convert_to_string(&tmp_val);
+				convert_to_cstring(&tmp_val);
 				if (Z_TYPE(tmp_val) != IS_STRING) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error converting parameter");
 					zval_dtor(&tmp_val);

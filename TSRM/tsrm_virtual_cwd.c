@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,6 +38,10 @@
 #include "tsrm_win32.h"
 # ifndef IO_REPARSE_TAG_SYMLINK
 #  define IO_REPARSE_TAG_SYMLINK 0xA000000C
+# endif
+
+# ifndef IO_REPARSE_TAG_DEDUP
+#  define IO_REPARSE_TAG_DEDUP   0x80000013
 # endif
 
 # ifndef VOLUME_NAME_NT
@@ -945,6 +949,11 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					return -1;
 				};
 				substitutename[substitutename_len] = 0;
+			}
+			else if (pbuffer->ReparseTag == IO_REPARSE_TAG_DEDUP) {
+				isabsolute = 1;
+				memcpy(substitutename, path, len + 1);
+				substitutename_len = len;
 			} else {
 				tsrm_free_alloca(pbuffer, use_heap_large);
 				return -1;

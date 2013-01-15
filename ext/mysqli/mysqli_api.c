@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -566,14 +566,17 @@ PHP_FUNCTION(mysqli_character_set_name)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
+	const char	*cs_name;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
 
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
-
-	RETURN_STRING((char *)mysql_character_set_name(mysql->mysql), 1);
+	cs_name = mysql_character_set_name(mysql->mysql);
+	if (cs_name) {
+		RETURN_STRING(cs_name, 1);
+	}
 }
 /* }}} */
 
@@ -732,12 +735,16 @@ PHP_FUNCTION(mysqli_error)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
+	const char	*err;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
-	RETURN_STRING((char *)mysql_error(mysql->mysql),1);
+	err = mysql_error(mysql->mysql);
+	if (err) {
+		RETURN_STRING(err, 1);
+	}
 }
 /* }}} */
 
@@ -1268,7 +1275,10 @@ PHP_FUNCTION(mysqli_free_result)
    Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_info)
 {
-	RETURN_STRING((char *)mysql_get_client_info(), 1);
+	const char * info = mysql_get_client_info();
+	if (info) {
+		RETURN_STRING(info, 1);
+	}
 }
 /* }}} */
 
@@ -1320,15 +1330,18 @@ PHP_FUNCTION(mysqli_get_server_info)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link = NULL;
+	const char	*info;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 
-	RETURN_STRING((char *)mysql_get_server_info(mysql->mysql), 1);
+	info = mysql_get_server_info(mysql->mysql);
+	if (info) {
+		RETURN_STRING(info, 1);
+	}
 }
-
 /* }}} */
 
 /* {{{ proto int mysqli_get_server_version(object link)
@@ -1361,7 +1374,9 @@ PHP_FUNCTION(mysqli_info)
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 
 	info = mysql_info(mysql->mysql);
-	RETURN_STRING((info) ? (char *)info : "", 1);
+	if (info) {
+		RETURN_STRING(info, 1);
+	}
 }
 /* }}} */
 
@@ -1587,10 +1602,10 @@ static int mysqli_options_get_option_zval_type(int option)
 #endif /* MYSQLI_USE_MYSQLND */
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 #ifdef MYSQL_REPORT_DATA_TRUNCATION
-                case MYSQL_REPORT_DATA_TRUNCATION:
+		case MYSQL_REPORT_DATA_TRUNCATION:
 #endif
-                case MYSQL_OPT_LOCAL_INFILE:
-                case MYSQL_OPT_NAMED_PIPE:
+		case MYSQL_OPT_LOCAL_INFILE:
+		case MYSQL_OPT_NAMED_PIPE:
 #ifdef MYSQL_OPT_PROTOCOL
                 case MYSQL_OPT_PROTOCOL:
 #endif /* MySQL 4.1.0 */
@@ -1606,7 +1621,7 @@ static int mysqli_options_get_option_zval_type(int option)
 		case MYSQL_OPT_RECONNECT:
 #endif /* MySQL 5.0.13 */
 #ifdef MYSQL_OPT_SSL_VERIFY_SERVER_CERT
-                case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
+		case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
 #endif /* MySQL 5.0.23 */
 #ifdef MYSQL_OPT_COMPRESS
 		case MYSQL_OPT_COMPRESS:
@@ -1614,6 +1629,9 @@ static int mysqli_options_get_option_zval_type(int option)
 #ifdef MYSQL_OPT_SSL_VERIFY_SERVER_CERT
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_SSL_VERIFY_SERVER_CERT", MYSQL_OPT_SSL_VERIFY_SERVER_CERT, CONST_CS | CONST_PERSISTENT);
 #endif /* MySQL 5.1.1., mysqlnd @ PHP 5.3.3 */
+#if MYSQL_VERSION_ID >= 50611 || defined(MYSQLI_USE_MYSQLND)
+		case MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS:
+#endif
 			return IS_LONG;
 
 #ifdef MYSQL_SHARED_MEMORY_BASE_NAME
@@ -1627,6 +1645,9 @@ static int mysqli_options_get_option_zval_type(int option)
 		case MYSQL_INIT_COMMAND:
 		case MYSQL_SET_CHARSET_NAME:
 		case MYSQL_SET_CHARSET_DIR:
+#if MYSQL_VERSION_ID > 50605 || defined(MYSQLI_USE_MYSQLND)
+		case MYSQL_SERVER_PUBLIC_KEY:
+#endif
 			return IS_STRING;
 
 		default:
@@ -2093,12 +2114,16 @@ PHP_FUNCTION(mysqli_sqlstate)
 {
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
+	const char	*state;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
-	RETURN_STRING((char *)mysql_sqlstate(mysql->mysql),1);
+	state = mysql_sqlstate(mysql->mysql);
+	if (state) {
+		RETURN_STRING(state, 1);
+	}
 }
 /* }}} */
 
@@ -2276,13 +2301,17 @@ PHP_FUNCTION(mysqli_stmt_error)
 {
 	MY_STMT	*stmt;
 	zval 	*mysql_stmt;
+	const char * err;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, &mysql_stmt, MYSQLI_STATUS_INITIALIZED);
 
-	RETURN_STRING((char *)mysql_stmt_error(stmt->stmt),1);
+	err = mysql_stmt_error(stmt->stmt);
+	if (err) {
+		RETURN_STRING(err, 1);
+	}
 }
 /* }}} */
 
@@ -2421,13 +2450,17 @@ PHP_FUNCTION(mysqli_stmt_sqlstate)
 {
 	MY_STMT	*stmt;
 	zval	*mysql_stmt;
+	const char * state;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_stmt, mysqli_stmt_class_entry) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, &mysql_stmt, MYSQLI_STATUS_VALID);
 
-	RETURN_STRING((char *)mysql_stmt_sqlstate(stmt->stmt),1);
+	state = mysql_stmt_sqlstate(stmt->stmt);
+	if (state) {
+		RETURN_STRING(state, 1);
+	}
 }
 /* }}} */
 

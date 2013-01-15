@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -58,6 +58,7 @@
 #include "php_versioning.h"
 #include "php_ftok.h"
 #include "php_type.h"
+#include "php_password.h"
 
 #define phpext_standard_ptr basic_functions_module_ptr
 PHP_MINIT_FUNCTION(standard_filters);

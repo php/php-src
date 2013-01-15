@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -78,6 +78,11 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 			str++;
 		default:
 			break;
+	}
+
+	if (*str == '0' && str + 1 == end) {
+		/* Special cases: +0 and -0 */
+		return 1;
 	}
 
 	/* must start with 1..9*/
