@@ -651,13 +651,15 @@ finish:
 		response_header = *rh;
 	}
 
+	/* need to declare this here to compare along with Location header */
+	int response_code;
+
 	if (!php_stream_eof(stream)) {
 		size_t tmp_line_len;
 		/* get response header */
 
 		if (php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
 			zval *http_response;
-			int response_code;
 
 			if (tmp_line_len > 9) {
 				response_code = atoi(tmp_line + 9);
@@ -731,8 +733,7 @@ finish:
 			http_header_line[http_header_line_length] = '\0';
 
 			if (!strncasecmp(http_header_line, "Location: ", 10)) {
-				if (context && php_stream_context_get_option(context, "http", "follow_location", &tmpzval) == SUCCESS
-						&& response_code >= 300 && response_code < 400) {
+				if (response_code >= 300 && response_code < 304 && context && php_stream_context_get_option(context, "http", "follow_location", &tmpzval) == SUCCESS) {
 					SEPARATE_ZVAL(tmpzval);
 					convert_to_long_ex(tmpzval);
 					follow_location = Z_LVAL_PP(tmpzval);
