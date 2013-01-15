@@ -27,11 +27,15 @@ PHP                                                                        NEWS
 
 - DateTime
   . Added DateTimeImmutable - a variant of DateTime that only returns the
-    modified state instead of changing itself. (Derick) 
+    modified state instead of changing itself. (Derick)
 
 - pgsql:
   . Bug #46408: Locale number format settings can cause pg_query_params to
     break with numerics. (asmecher, Lars)
+
+- dba:
+  . Bug #62489: dba_insert not working as expected.
+    (marc-bennewitz at arcor dot de, Lars)
 
 18 Dec 2012, PHP 5.5.0 Alpha 2
 
