@@ -113,6 +113,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	int redirected = ((flags & HTTP_WRAPPER_REDIRECTED) != 0);
 	int follow_location = 1;
 	php_stream_filter *transfer_encoding = NULL;
+	int response_code;
 
 	tmp_line[0] = '\0';
 
@@ -650,9 +651,6 @@ finish:
 		zend_hash_find(EG(active_symbol_table), "http_response_header", sizeof("http_response_header"), (void **) &rh);
 		response_header = *rh;
 	}
-
-	/* need to declare this here to compare along with Location header */
-	int response_code;
 
 	if (!php_stream_eof(stream)) {
 		size_t tmp_line_len;
