@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #63943 (Bad warning text from strpos() on empty needle).
     (Laruence)
   . Fixed bug #63882 (zend_std_compare_objects crash on recursion). (Dmitry)
+  . Fixed bug #43225 (fputcsv incorrectly handles cells ending in \ followed
+    by "). (Adam)
   . Support BITMAPV5HEADER in getimagesize(). (AsamK, Lars)
 
 - Litespeed:
