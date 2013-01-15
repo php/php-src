@@ -2,4 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.6.0
 
+- General improvements:
+  . Implemented FR #46487 (Dereferencing process-handles no longer waits on those processes). (Jille Timmermans)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

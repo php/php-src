@@ -208,6 +208,7 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	DWORD wstatus;
 #elif HAVE_SYS_WAIT_H
 	int wstatus;
+	int waitpid_options = 0;
 	pid_t wait_pid;
 #endif
 
@@ -220,18 +221,27 @@ static void proc_open_rsrc_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 	}
 
 #ifdef PHP_WIN32
-	WaitForSingleObject(proc->childHandle, INFINITE);
+	if (FG(pclose_wait)) {
+		WaitForSingleObject(proc->childHandle, INFINITE);
+	}
 	GetExitCodeProcess(proc->childHandle, &wstatus);
-	FG(pclose_ret) = wstatus;
+	if (wstatus == STILL_ACTIVE) {
+		FG(pclose_ret) = -1;
+	} else {
+		FG(pclose_ret) = wstatus;
+	}
 	CloseHandle(proc->childHandle);
 
 #elif HAVE_SYS_WAIT_H
 
+	if (!FG(pclose_wait)) {
+		waitpid_options = WNOHANG;
+	}
 	do {
-		wait_pid = waitpid(proc->child, &wstatus, 0);
+		wait_pid = waitpid(proc->child, &wstatus, waitpid_options);
 	} while (wait_pid == -1 && errno == EINTR);
 
-	if (wait_pid == -1) {
+	if (wait_pid <= 0) {
 		FG(pclose_ret) = -1;
 	} else {
 		if (WIFEXITED(wstatus))
@@ -300,7 +310,9 @@ PHP_FUNCTION(proc_close)
 
 	ZEND_FETCH_RESOURCE(proc, struct php_process_handle *, &zproc, -1, "process", le_proc_open);
 
+	FG(pclose_wait) = 1;
 	zend_list_delete(Z_LVAL_P(zproc));
+	FG(pclose_wait) = 0;
 	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */
