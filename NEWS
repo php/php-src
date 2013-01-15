@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-03 Jan 2013, PHP 5.4.11 RC1
+17 Jan 2013, PHP 5.4.11
 
 - Core:
   . Fixed bug #63762 (Sigsegv when Exception::$trace is changed by user).
