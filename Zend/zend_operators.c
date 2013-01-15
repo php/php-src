@@ -572,6 +572,24 @@ ZEND_API void convert_to_boolean(zval *op) /* {{{ */
 }
 /* }}} */
 
+ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
+{
+	double dval;
+	switch (Z_TYPE_P(op)) {
+		case IS_DOUBLE: {
+			TSRMLS_FETCH();
+			dval = Z_DVAL_P(op);
+			Z_STRLEN_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%.*H", (int) EG(precision), dval);
+			/* %H already handles removing trailing zeros from the fractional part, yay */
+			break;
+		}
+		default:
+			_convert_to_string(op ZEND_FILE_LINE_CC);
+	}
+	Z_TYPE_P(op) = IS_STRING;
+}
+/* }}} */
+
 ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
 	long lval;
