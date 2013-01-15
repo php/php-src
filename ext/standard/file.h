@@ -115,7 +115,7 @@ typedef struct _php_meta_tags_data {
 php_meta_tags_token php_next_meta_token(php_meta_tags_data * TSRMLS_DC);
 
 typedef struct {
-  	int pclose_ret;
+	int pclose_ret;
 	size_t def_chunk_size;
 	long auto_detect_line_endings;
 	long default_socket_timeout;
@@ -126,6 +126,7 @@ typedef struct {
 	HashTable *stream_wrappers;			/* per-request copy of url_stream_wrappers_hash */
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
 	HashTable *wrapper_errors;			/* key: wrapper address; value: linked list of char* */
+	int pclose_wait;
 } php_file_globals;
 
 #ifdef ZTS
