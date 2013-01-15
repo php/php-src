@@ -2418,14 +2418,28 @@ end:
 /* }}} */
 
 
-/* {{{ connect_attr_item_dtor */
+/* {{{ connect_attr_item_edtor */
 static void
-connect_attr_item_dtor(void * pDest)
+connect_attr_item_edtor(void * pDest)
 {
 #ifdef ZTS
 	TSRMLS_FETCH();
 #endif
-	DBG_ENTER("connect_attr_item_dtor");
+	DBG_ENTER("connect_attr_item_edtor");
+	mnd_efree(*(char **) pDest);
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ connect_attr_item_pdtor */
+static void
+connect_attr_item_pdtor(void * pDest)
+{
+#ifdef ZTS
+	TSRMLS_FETCH();
+#endif
+	DBG_ENTER("connect_attr_item_pdtor");
 	mnd_pefree(*(char **) pDest, 1);
 	DBG_VOID_RETURN;
 }
@@ -2456,11 +2470,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 				if (!conn->options->connect_attr) {
 					goto oom;
 				}
-				zend_hash_init(conn->options->connect_attr, 0, NULL, connect_attr_item_dtor, conn->persistent);
+				zend_hash_init(conn->options->connect_attr, 0, NULL, conn->persistent? connect_attr_item_pdtor:connect_attr_item_edtor, conn->persistent);
 			}
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
-				const char * copyv = mnd_pestrdup(value, 1);
+				const char * copyv = mnd_pestrdup(value, conn->persistent);
 				if (!copyv) {
 					goto oom;
 				}
