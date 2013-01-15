@@ -733,7 +733,9 @@ finish:
 			http_header_line[http_header_line_length] = '\0';
 
 			if (!strncasecmp(http_header_line, "Location: ", 10)) {
-				if (response_code >= 300 && response_code < 304 && context && php_stream_context_get_option(context, "http", "follow_location", &tmpzval) == SUCCESS) {
+				/* we only care about Location for 300, 301, 302, 303 and 307 */
+				/* see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1 */
+				if (response_code >= 300 && response_code < 304 || 307 == response_code && context && php_stream_context_get_option(context, "http", "follow_location", &tmpzval) == SUCCESS) {
 					SEPARATE_ZVAL(tmpzval);
 					convert_to_long_ex(tmpzval);
 					follow_location = Z_LVAL_PP(tmpzval);
