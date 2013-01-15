@@ -22,7 +22,9 @@
 #define ZEND_QSORT_H
 
 BEGIN_EXTERN_C()
+typedef int  (*compare_r_func_t)(const void *, const void * TSRMLS_DC, void *);
 ZEND_API void zend_qsort(void *base, size_t nmemb, size_t siz, compare_func_t compare TSRMLS_DC);
+ZEND_API void zend_qsort_r(void *base, size_t nmemb, size_t siz, compare_r_func_t compare, void *arg TSRMLS_DC);
 END_EXTERN_C()
 
 #endif       /* ZEND_QSORT_H */
