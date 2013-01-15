@@ -44,7 +44,7 @@ echo '$list = ';var_export($res);echo ";\n";
 
 $fp = fopen($file, "r");
 $res = array();
-while($l=fgetcsv($fp))
+while($l=fgetcsv($fp, 0, ',', '"', '"'))
 {
 	$res[] = join(',',$l);
 }
@@ -75,10 +75,10 @@ $list = array (
   13 => 'aaa,"""bbb   """',
   14 => '"aaa""aaa""","""bbb""bbb"',
   15 => '"aaa""aaa""""""",bbb',
-  16 => 'aaa,"""\\"bbb",ccc',
-  17 => '"aaa""\\"a""","""bbb"""',
-  18 => '"""\\"""","""aaa"""',
-  19 => '"""\\"""""",aaa',
+  16 => 'aaa,"""\\""bbb",ccc',
+  17 => '"aaa""\\""a""","""bbb"""',
+  18 => '"""\\""""","""aaa"""',
+  19 => '"""\\""""""",aaa',
 );
 $list = array (
   0 => 'aaa,bbb',
