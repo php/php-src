@@ -1103,6 +1103,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 }
 /* }}} */
 
+
 /* {{{ mysqlnd_connect */
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
 						 const char * host, const char * user,
@@ -2455,7 +2456,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 				if (!conn->options->connect_attr) {
 					goto oom;
 				}
-				zend_hash_init(conn->options->connect_attr, 0, NULL, NULL, conn->persistent);
+				zend_hash_init(conn->options->connect_attr, 0, NULL, connect_attr_item_dtor, conn->persistent);
 			}
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
