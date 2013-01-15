@@ -584,7 +584,7 @@ ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			break;
 		}
 		default:
-			return _convert_to_string(op);
+			_convert_to_string(op ZEND_FILE_LINE_CC);
 	}
 	Z_TYPE_P(op) = IS_STRING;
 }
