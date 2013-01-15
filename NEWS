@@ -7,8 +7,17 @@ PHP                                                                        NEWS
     protected property). (Stas)
   . Fixed bug #63943 (Bad warning text from strpos() on empty needle).
     (Laruence)
+  . Fixed bug #63899 (Use after scope error in zend_compile). (Laruence)
   . Fixed bug #63882 (zend_std_compare_objects crash on recursion). (Dmitry)
+  . Fixed bug #43225 (fputcsv incorrectly handles cells ending in \ followed
+    by "). (Adam)
   . Support BITMAPV5HEADER in getimagesize(). (AsamK, Lars)
+
+- Date:
+  . Fixed bug #63699 (Performance improvements for various ext/date functions).
+    (Lars, original patch by njaguar at gmail dot com)
+  . Fixed bug #55397: Comparsion of incomplete DateTime causes SIGSEGV. 
+    (Derick)
 
 - Litespeed:
   . Fixed bug #63228 (-Werror=format-security error in lsapi code). (George)
@@ -27,7 +36,6 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.11
 
 - Core:
-  . Fixed bug #63899 (Use after scope error in zend_compile). (Laruence)
   . Fixed bug #63762 (Sigsegv when Exception::$trace is changed by user).
     (Johannes)
   . Fixed bug #43177 (Errors in eval()'ed code produce status code 500).
@@ -55,10 +63,6 @@ PHP                                                                        NEWS
     wrappers). (Pierrick)
   . Fixed bug #55438 (Curlwapper is not sending http header randomly).
     (phpnet@lostreality.org, Pierrick)
-
-- Date:
-  . Fixed bug #63699 (Performance improvements for various ext/date functions).
-    (Lars, original patch by njaguar at gmail dot com)
 
 20 Dec 2012, PHP 5.4.10
 
