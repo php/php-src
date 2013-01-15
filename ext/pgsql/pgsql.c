@@ -1736,7 +1736,7 @@ PHP_FUNCTION(pg_query_params)
 			} else {
 				zval tmp_val = **tmp;
 				zval_copy_ctor(&tmp_val);
-				convert_to_string(&tmp_val);
+				convert_to_cstring(&tmp_val);
 				if (Z_TYPE(tmp_val) != IS_STRING) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error converting parameter");
 					zval_dtor(&tmp_val);
