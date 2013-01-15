@@ -817,7 +817,7 @@ PHP_FUNCTION(tempnam)
 	if (p_len > 64) {
 		p[63] = '\0';
 	}
-	
+
 	RETVAL_FALSE;
 
 	if ((fd = php_open_temporary_fd_ex(dir, p, &opened_path, 1 TSRMLS_CC)) >= 0) {
@@ -1377,13 +1377,13 @@ PHP_FUNCTION(umask)
 {
 	long arg1 = 0;
 	int oldumask;
-	
+
 	oldumask = umask(077);
 
 	if (BG(umask) == -1) {
 		BG(umask) = oldumask;
 	}
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1800,9 +1800,9 @@ quit_loop:
    Format line as CSV and write to file pointer */
 PHP_FUNCTION(fputcsv)
 {
-	char delimiter = ',';	/* allow this to be set as parameter */
-	char enclosure = '"';	/* allow this to be set as parameter */
-	char escape_char = '\\';
+	char delimiter = ',';	 /* allow this to be set as parameter */
+	char enclosure = '"';	 /* allow this to be set as parameter */
+	char escape_char = '\\'; /* allow this to be set as parameter */
 	php_stream *stream;
 	zval *fp = NULL, *fields = NULL;
 	int ret;
