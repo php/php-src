@@ -2965,7 +2965,7 @@ static PPRES *php_strtr_array_prepare(STR *text, PATNREPL *patterns, int patnum,
 	res->shift->table_mask = SHIFT_TAB_SIZE - 1;
 	php_strtr_populate_shift(patterns, patnum, B, res->m, res->shift);
 
-	res->hash = safe_emalloc(HASH_TAB_SIZE, sizeof(*res->hash->entries), sizeof(*res->shift));
+	res->hash = safe_emalloc(HASH_TAB_SIZE, sizeof(*res->hash->entries), sizeof(*res->hash));
 	res->hash->table_mask = HASH_TAB_SIZE - 1;
 
 	res->patterns = safe_emalloc(patnum, sizeof(*res->patterns), 0);
@@ -3001,7 +3001,7 @@ static PPRES *php_strtr_array_prepare(STR *text, PATNREPL *patterns, int patnum,
 			}
 		}
 	}
-	res->hash->entries[HASH_TAB_SIZE] = patnum;
+	res->hash->entries[HASH_TAB_SIZE] = patnum; /* OK, we effectively allocated SIZE+1 */
 	for (i = HASH_TAB_SIZE - 1; i >= 0; i--) {
 		if (res->hash->entries[i] == -1) {
 			res->hash->entries[i] = res->hash->entries[i + 1];
