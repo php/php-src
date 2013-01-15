@@ -247,4 +247,7 @@ PHP                                                                        NEWS
   . Fixed bug #63248 (Load multiple magic files from a directory under Windows).
       (Anatoliy)
 
+- General improvements:
+  . Implemented FR #46487 (Dereferencing process-handles no longer waits on those processes). (Jille Timmermans)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
