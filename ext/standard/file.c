@@ -1871,16 +1871,20 @@ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char en
 			FPUTCSV_FLD_CHK('\n') ||
 			FPUTCSV_FLD_CHK('\r') ||
 			FPUTCSV_FLD_CHK('\t') ||
-			FPUTCSV_FLD_CHK('\\') ||
 			FPUTCSV_FLD_CHK(' ')
 		) {
 			char *ch = Z_STRVAL(field);
 			char *end = ch + Z_STRLEN(field);
+			int escaped = 0;
 
 			smart_str_appendc(&csvline, enclosure);
 			while (ch < end) {
-				if (*ch == enclosure) {
+				if (*ch == escape_char) {
+					escaped = 1;
+				} else if (!escaped && *ch == enclosure) {
 					smart_str_appendc(&csvline, enclosure);
+				} else {
+					escaped = 0;
 				}
 				smart_str_appendc(&csvline, *ch);
 				ch++;

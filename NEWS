@@ -9,8 +9,6 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #63899 (Use after scope error in zend_compile). (Laruence)
   . Fixed bug #63882 (zend_std_compare_objects crash on recursion). (Dmitry)
-  . Fixed bug #43225 (fputcsv incorrectly handles cells ending in \ followed
-    by "). (Adam)
   . Support BITMAPV5HEADER in getimagesize(). (AsamK, Lars)
 
 - Date:
