@@ -2066,12 +2066,12 @@ static zend_object_value date_object_clone_date(zval *this_ptr TSRMLS_DC)
 	return new_ov;
 }
 
-static zval* date_clone_immutable(zval *object)
+static zval* date_clone_immutable(zval *object TSRMLS_DC)
 {
 	zval *new_object;
 
 	ALLOC_ZVAL(new_object);
-	Z_OBJVAL_P(new_object) = date_object_clone_date(object);
+	Z_OBJVAL_P(new_object) = date_object_clone_date(object TSRMLS_CC);
 	Z_SET_REFCOUNT_P(new_object, 1);
 	Z_SET_ISREF_P(new_object);
 	Z_TYPE_P(new_object) = IS_OBJECT;
@@ -2970,7 +2970,7 @@ PHP_METHOD(DateTimeImmutable, modify)
 		RETURN_FALSE;
 	}
 	
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_modify(new_object, modify, modify_len, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3037,7 +3037,7 @@ PHP_METHOD(DateTimeImmutable, add)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_add(new_object, interval, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3107,7 +3107,7 @@ PHP_METHOD(DateTimeImmutable, sub)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_sub(new_object, interval, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3197,7 +3197,7 @@ PHP_METHOD(DateTimeImmutable, setTimezone)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_timezone_set(new_object, timezone_object, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3280,7 +3280,7 @@ PHP_METHOD(DateTimeImmutable, setTime)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_time_set(new_object, h, i, s, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3328,7 +3328,7 @@ PHP_METHOD(DateTimeImmutable, setDate)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_date_set(new_object, y, m, d, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3380,7 +3380,7 @@ PHP_METHOD(DateTimeImmutable, setISODate)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_isodate_set(new_object, y, w, d, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3426,7 +3426,7 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_timestamp_set(new_object, timestamp, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
