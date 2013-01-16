@@ -29,6 +29,9 @@ PHP                                                                        NEWS
   . Added DateTimeImmutable - a variant of DateTime that only returns the
     modified state instead of changing itself. (Derick)
 
+- FPM:
+  . Fixed bug #63999 (php with fpm fails to build on Solaris 10 or 11). (Adam)
+
 - pgsql:
   . Bug #46408: Locale number format settings can cause pg_query_params to
     break with numerics. (asmecher, Lars)
