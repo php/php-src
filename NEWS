@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug #55397 (comparsion of incomplete DateTime causes SIGSEGV).
     (Laruence, Derick)
 
+- FPM:
+  . Fixed bug #63999 (php with fpm fails to build on Solaris 10 or 11). (Adam)
+
 20 Dec 2012, PHP 5.3.20
 
 - Zend Engine:
