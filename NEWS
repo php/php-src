@@ -1,17 +1,26 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.3.23
-
 ?? ??? 2013, PHP 5.3.22
 
 - Zend Engine:
   . Fixed bug #63899 (Use after scope error in zend_compile). (Laruence)
-  . Fixed bug #63762 (Sigsegv when Exception::$trace is changed by user).
-    (Johannes)
 
 - Core
   . Fixed bug #63943 (Bad warning text from strpos() on empty needle).
     (Laruence)
+
+- Date:
+  . Fixed bug #55397 (comparsion of incomplete DateTime causes SIGSEGV).
+    (Laruence, Derick)
+
+- FPM:
+  . Fixed bug #63999 (php with fpm fails to build on Solaris 10 or 11). (Adam)
+
+17 Jan 2013, PHP 5.3.21
+
+- Zend Engine:
+  . Fixed bug #63762 (Sigsegv when Exception::$trace is changed by user).
+    (Johannes)
 
 - cURL extension:
   . Fixed bug (segfault due to libcurl connection caching). (Pierrick)
@@ -21,13 +30,6 @@ PHP                                                                        NEWS
     wrappers). (Pierrick)
   . Fixed bug #55438 (Curlwapper is not sending http header randomly).
     (phpnet@lostreality.org, Pierrick)
-
-- Date:
-  . Fixed bug #55397 (comparsion of incomplete DateTime causes SIGSEGV).
-    (Laruence, Derick)
-
-- FPM:
-  . Fixed bug #63999 (php with fpm fails to build on Solaris 10 or 11). (Adam)
 
 20 Dec 2012, PHP 5.3.20
 
