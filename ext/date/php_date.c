@@ -2066,12 +2066,12 @@ static zend_object_value date_object_clone_date(zval *this_ptr TSRMLS_DC)
 	return new_ov;
 }
 
-static zval* date_clone_immutable(zval *object)
+static zval* date_clone_immutable(zval *object TSRMLS_DC)
 {
 	zval *new_object;
 
 	ALLOC_ZVAL(new_object);
-	Z_OBJVAL_P(new_object) = date_object_clone_date(object);
+	Z_OBJVAL_P(new_object) = date_object_clone_date(object TSRMLS_CC);
 	Z_SET_REFCOUNT_P(new_object, 1);
 	Z_SET_ISREF_P(new_object);
 	Z_TYPE_P(new_object) = IS_OBJECT;
@@ -2883,14 +2883,18 @@ PHP_FUNCTION(date_format)
 }
 /* }}} */
 
-static void php_date_modify(zval *object, char *modify, int modify_len, zval *return_value TSRMLS_DC)
+static int php_date_modify(zval *object, char *modify, int modify_len TSRMLS_DC)
 {
 	php_date_obj *dateobj;
 	timelib_time *tmp_time;
 	timelib_error_container *err = NULL;
 
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
+
+	if (!(dateobj->time)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The DateTime object has not been correctly initialized by its constructor");
+		return 0;
+	}
 
 	tmp_time = timelib_strtotime(modify, modify_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 
@@ -2901,7 +2905,7 @@ static void php_date_modify(zval *object, char *modify, int modify_len, zval *re
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", modify,
 			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
 		timelib_time_dtor(tmp_time);
-		RETURN_FALSE;
+		return 0;
 	}
 
 	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(struct timelib_rel_time));
@@ -2937,6 +2941,8 @@ static void php_date_modify(zval *object, char *modify, int modify_len, zval *re
 	timelib_update_ts(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
 	dateobj->time->have_relative = 0;
+	
+	return 1;
 }
 
 /* {{{ proto DateTime date_modify(DateTime object, string modify)
@@ -2952,9 +2958,11 @@ PHP_FUNCTION(date_modify)
 		RETURN_FALSE;
 	}
 
-	php_date_modify(object, modify, modify_len, return_value TSRMLS_CC);
+	if (php_date_modify(object, modify, modify_len TSRMLS_CC)) {
+		RETURN_ZVAL(object, 1, 0);
+	}
 
-	RETURN_ZVAL(object, 1, 0);
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -2970,10 +2978,12 @@ PHP_METHOD(DateTimeImmutable, modify)
 		RETURN_FALSE;
 	}
 	
-	new_object = date_clone_immutable(object);
-	php_date_modify(new_object, modify, modify_len, return_value TSRMLS_CC);
+	new_object = date_clone_immutable(object TSRMLS_CC);
+	if (php_date_modify(new_object, modify, modify_len TSRMLS_CC)) {
+		RETURN_ZVAL(new_object, 0, 1);
+	}
 
-	RETURN_ZVAL(new_object, 0, 1);
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -3037,7 +3047,7 @@ PHP_METHOD(DateTimeImmutable, add)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_add(new_object, interval, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3107,7 +3117,7 @@ PHP_METHOD(DateTimeImmutable, sub)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_sub(new_object, interval, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3197,7 +3207,7 @@ PHP_METHOD(DateTimeImmutable, setTimezone)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_timezone_set(new_object, timezone_object, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3280,7 +3290,7 @@ PHP_METHOD(DateTimeImmutable, setTime)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_time_set(new_object, h, i, s, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3328,7 +3338,7 @@ PHP_METHOD(DateTimeImmutable, setDate)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_date_set(new_object, y, m, d, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3380,7 +3390,7 @@ PHP_METHOD(DateTimeImmutable, setISODate)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_isodate_set(new_object, y, w, d, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);
@@ -3426,7 +3436,7 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 		RETURN_FALSE;
 	}
 
-	new_object = date_clone_immutable(object);
+	new_object = date_clone_immutable(object TSRMLS_CC);
 	php_date_timestamp_set(new_object, timestamp, return_value TSRMLS_CC);
 
 	RETURN_ZVAL(new_object, 0, 1);

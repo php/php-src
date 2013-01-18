@@ -172,7 +172,7 @@ typedef struct st_mysqlnd_options
 	  The ABI will be broken and the methods structure will be somewhere else
 	  in the memory which can crash external code. Feel free to reuse these.
 	*/
-	char		* unused2;
+	HashTable	* connect_attr;
 	char		* unused3;
 	char		* unused4;
 	char		* unused5;
@@ -489,6 +489,8 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__connect_handshake)(MYSQLND_CO
 typedef enum_func_status	(*func_mysqlnd_conn_data__simple_command_send_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command, const zend_uchar * const arg, size_t arg_len, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
 typedef struct st_mysqlnd_authentication_plugin * (*func_mysqlnd_conn_data__fetch_auth_plugin_by_name)(const char * const requested_protocol TSRMLS_DC);
 
+typedef enum_func_status	(*func_mysqlnd_conn_data__set_client_option_2d)(MYSQLND_CONN_DATA * const conn, enum mysqlnd_option option, const char * const key, const char * const value TSRMLS_DC);
+
 struct st_mysqlnd_conn_data_methods
 {
 	func_mysqlnd_conn_data__init init;
@@ -573,6 +575,8 @@ struct st_mysqlnd_conn_data_methods
 	func_mysqlnd_conn_data__connect_handshake connect_handshake;
 	func_mysqlnd_conn_data__simple_command_send_request simple_command_send_request;
 	func_mysqlnd_conn_data__fetch_auth_plugin_by_name fetch_auth_plugin_by_name;
+
+	func_mysqlnd_conn_data__set_client_option_2d set_client_option_2d;
 };
 
 

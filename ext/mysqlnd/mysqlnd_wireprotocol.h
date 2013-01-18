@@ -103,7 +103,7 @@ typedef struct st_mysqlnd_packet_auth {
 	zend_bool	send_auth_data;
 	zend_bool	is_change_user_packet;
 	zend_bool	silent;
-
+	HashTable	*connect_attr;
 } MYSQLND_PACKET_AUTH;
 
 /* Auth response packet */

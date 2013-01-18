@@ -5,6 +5,7 @@ UPGRADE NOTES - PHP X.Y
 1. Internal API changes
   a. Streams pooling API
   b. Lowercasing and locales
+  c. zend_qsort_r
 
 2. Build system changes
   a. Unix build system changes
@@ -52,6 +53,16 @@ such as strcasecmp, will be using locale rules.
 
 Two new functions - zend_binary_strncasecmp_l and zend_binary_strcasecmp_l - added as 
 locale-based counterparts to zend_binary_strcasecmp and zend_binary_strncasecmp.
+
+	c. zend_qsort_r
+
+Added the function zend_qsort_r():
+
+typedef int  (*compare_r_func_t)(const void *, const void * TSRMLS_DC, void *);
+void zend_qsort_r(void *base, size_t nmemb, size_t siz, compare_r_func_t compare, void *arg TSRMLS_DC);
+
+The extra argument it has (relatively to zend_qsort()) is passed to the
+comparison function.
 
 ========================
 2. Build system changes
