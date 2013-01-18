@@ -729,6 +729,10 @@ user_dir =
 ; On windows:
 ; extension_dir = "ext"
 
+; Directory where the temporary files should be placed.
+; Defaults to the system default (see sys_get_temp_dir)
+; sys_temp_dir = "/tmp"
+
 ; Whether or not to enable the dl() function.  The dl() function does NOT work
 ; properly in multithreaded servers, such as IIS or Zeus, and is automatically
 ; disabled on them.
