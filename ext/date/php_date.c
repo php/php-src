@@ -2883,14 +2883,18 @@ PHP_FUNCTION(date_format)
 }
 /* }}} */
 
-static void php_date_modify(zval *object, char *modify, int modify_len, zval *return_value TSRMLS_DC)
+static int php_date_modify(zval *object, char *modify, int modify_len TSRMLS_DC)
 {
 	php_date_obj *dateobj;
 	timelib_time *tmp_time;
 	timelib_error_container *err = NULL;
 
 	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
+
+	if (!(dateobj->time)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The DateTime object has not been correctly initialized by its constructor");
+		return 0;
+	}
 
 	tmp_time = timelib_strtotime(modify, modify_len, &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 
@@ -2901,7 +2905,7 @@ static void php_date_modify(zval *object, char *modify, int modify_len, zval *re
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", modify,
 			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
 		timelib_time_dtor(tmp_time);
-		RETURN_FALSE;
+		return 0;
 	}
 
 	memcpy(&dateobj->time->relative, &tmp_time->relative, sizeof(struct timelib_rel_time));
@@ -2937,6 +2941,8 @@ static void php_date_modify(zval *object, char *modify, int modify_len, zval *re
 	timelib_update_ts(dateobj->time, NULL);
 	timelib_update_from_sse(dateobj->time);
 	dateobj->time->have_relative = 0;
+	
+	return 1;
 }
 
 /* {{{ proto DateTime date_modify(DateTime object, string modify)
@@ -2952,9 +2958,11 @@ PHP_FUNCTION(date_modify)
 		RETURN_FALSE;
 	}
 
-	php_date_modify(object, modify, modify_len, return_value TSRMLS_CC);
+	if (php_date_modify(object, modify, modify_len TSRMLS_CC)) {
+		RETURN_ZVAL(object, 1, 0);
+	}
 
-	RETURN_ZVAL(object, 1, 0);
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -2971,9 +2979,11 @@ PHP_METHOD(DateTimeImmutable, modify)
 	}
 	
 	new_object = date_clone_immutable(object TSRMLS_CC);
-	php_date_modify(new_object, modify, modify_len, return_value TSRMLS_CC);
+	if (php_date_modify(new_object, modify, modify_len TSRMLS_CC)) {
+		RETURN_ZVAL(new_object, 0, 1);
+	}
 
-	RETURN_ZVAL(new_object, 0, 1);
+	RETURN_FALSE;
 }
 /* }}} */
 
