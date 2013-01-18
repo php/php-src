@@ -1,7 +1,7 @@
 --TEST--
 Zend signed multiply 64-bit
 --SKIPIF--
-<? if ((1 << 31) < 0) print "skip Running on 32-bit target"; ?>
+<?php if ((1 << 31) < 0) print "skip Running on 32-bit target"; ?>
 --FILE--
 <?php
 var_dump(0x80000000 * -0xffffffff);
