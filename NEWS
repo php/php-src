@@ -42,6 +42,10 @@ PHP                                                                        NEWS
   . Bug #62489: dba_insert not working as expected.
     (marc-bennewitz at arcor dot de, Lars)
 
+- Reflection:
+  . Fixed bug #64007 (There is an ability to create instance of Generator by hand).
+    (Laruence)
+
 18 Dec 2012, PHP 5.5.0 Alpha 2
 
 - General improvements:
