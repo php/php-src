@@ -2156,7 +2156,7 @@ void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static 
 			zend_do_fetch_constant(result, class_name, &constant_name, ZEND_RT, 1 TSRMLS_CC);
 			break;
 		case ZEND_FETCH_CLASS_DEFAULT:
-			zend_resolve_class_name(class_name, ZEND_FETCH_CLASS_GLOBAL, 1);
+			zend_resolve_class_name(class_name, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC);
 			*result = *class_name;
 			break;
 	}
