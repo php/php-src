@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #63980 (object members get trimmed by zero bytes). (Laruence)
+  . Implemented RFC for Class Name Resolution As Scalar Via "class" Keyword.
+    (Ralph Schindler, Nikita Popov, Lars)
 
 - General improvements:
   . Fixed bug #63874 (Segfault if php_strip_whitespace has heredoc). (Pierrick)
