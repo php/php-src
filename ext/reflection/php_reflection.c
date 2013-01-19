@@ -4192,13 +4192,21 @@ ZEND_METHOD(reflection_class, newInstance)
 {
 	zval *retval_ptr = NULL;
 	reflection_object *intern;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *old_scope;
+	zend_function *constructor;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
+	object_init_ex(return_value, ce);
+
+	old_scope = EG(scope);
+	EG(scope) = ce;
+	constructor = Z_OBJ_HT_P(return_value)->get_constructor(return_value TSRMLS_CC);
+	EG(scope) = old_scope;
+
 	/* Run the constructor if there is one */
-	if (ce->constructor) {
+	if (constructor) {
 		zval ***params = NULL;
 		int num_args = 0;
 		zend_fcall_info fci;
@@ -4206,17 +4214,17 @@ ZEND_METHOD(reflection_class, newInstance)
 
 		if (!(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Access to non-public constructor of class %s", ce->name);
-			return;
+			zval_dtor(return_value);
+			RETURN_NULL();
 		}
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &params, &num_args) == FAILURE) {
 			if (params) {
 				efree(params);
 			}
+			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
-
-		object_init_ex(return_value, ce);
 
 		fci.size = sizeof(fci);
 		fci.function_table = EG(function_table);
@@ -4242,6 +4250,7 @@ ZEND_METHOD(reflection_class, newInstance)
 				zval_ptr_dtor(&retval_ptr);
 			}
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invocation of %s's constructor failed", ce->name);
+			zval_dtor(return_value);
 			RETURN_NULL();
 		}
 		if (retval_ptr) {
@@ -4250,9 +4259,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		if (params) {
 			efree(params);
 		}
-	} else if (!ZEND_NUM_ARGS()) {
-		object_init_ex(return_value, ce);
-	} else {
+	} else if (ZEND_NUM_ARGS()) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name);
 	}
 }
