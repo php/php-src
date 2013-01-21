@@ -692,6 +692,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 	zend_execute_internal = NULL;
 #endif /* HAVE_SYS_SDT_H */
 	zend_compile_string = compile_string;
+	zend_compile_string_inline = compile_string_inline;
 	zend_throw_exception_hook = NULL;
 
 	zend_init_opcodes_handlers();

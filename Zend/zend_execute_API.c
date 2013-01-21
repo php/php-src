@@ -1606,6 +1606,7 @@ zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_na
 
 #define MAX_ABSTRACT_INFO_CNT 3
 #define MAX_ABSTRACT_INFO_FMT "%s%s%s%s"
+
 #define DISPLAY_ABSTRACT_FN(idx) \
 	ai.afn[idx] ? ZEND_FN_SCOPE_NAME(ai.afn[idx]) : "", \
 	ai.afn[idx] ? "::" : "", \
@@ -1639,13 +1640,26 @@ static int zend_verify_abstract_class_function(zend_function *fn, zend_abstract_
 }
 /* }}} */
 
+static int zend_verify_abstract_class_property(zend_property_info *prop, zend_abstract_info *ai TSRMLS_DC) /* {{{ */
+{
+	if (prop->accs) {
+		int i;
+		for (i = 0; i < ZEND_NUM_ACCESSORS; ++i) {
+			if (prop->accs[i]) {
+				zend_verify_abstract_class_function(prop->accs[i], ai TSRMLS_CC);
+			}
+		}
+	}
+	return 0;
+}
+/* }}} */
+
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	zend_abstract_info ai;
 
 	if ((ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) && !(ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 		memset(&ai, 0, sizeof(ai));
-
 		zend_hash_apply_with_argument(&ce->function_table, (apply_func_arg_t) zend_verify_abstract_class_function, &ai TSRMLS_CC);
 
 		if (ai.cnt) {
@@ -1656,6 +1670,19 @@ void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 				DISPLAY_ABSTRACT_FN(1),
 				DISPLAY_ABSTRACT_FN(2)
 				);
+		}
+
+		memset(&ai, 0, sizeof(ai));
+		zend_hash_apply_with_argument(&ce->properties_info, (apply_func_arg_t) zend_verify_abstract_class_property, &ai TSRMLS_CC);
+
+		if (ai.cnt) {
+			zend_error(E_ERROR, "Class %s contains %d abstract accessor%s and must be declared abstract or implement the remaining accessors (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+				ce->name, ai.cnt,
+				ai.cnt > 1 ? "s" : "",
+				DISPLAY_ABSTRACT_FN(0),
+				DISPLAY_ABSTRACT_FN(1),
+				DISPLAY_ABSTRACT_FN(2)
+			);
 		}
 	}
 }

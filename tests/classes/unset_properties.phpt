@@ -140,14 +140,14 @@ true
 new publicProperty value via public access
 
 protectedProperty set
-__isset "protectedProperty"__isset "protectedProperty"false
+__isset "protectedProperty"false
 __get "protectedProperty"
 __set "protectedProperty" to "new protectedProperty value via setter"
 __isset "protectedProperty"true
 new protectedProperty value via setter
 
 privateProperty set
-__isset "privateProperty"__isset "privateProperty"false
+__isset "privateProperty"false
 __get "privateProperty"
 __set "privateProperty" to "new privateProperty value via setter"
 __isset "privateProperty"true

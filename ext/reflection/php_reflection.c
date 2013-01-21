@@ -40,6 +40,7 @@
 #include "zend_interfaces.h"
 #include "zend_closures.h"
 #include "zend_extensions.h"
+#include "zend_object_handlers.h"
 
 #define reflection_update_property(object, name, value) do { \
 		zval *member; \
@@ -349,6 +350,7 @@ static zval * reflection_instantiate(zend_class_entry *pce, zval *object TSRMLS_
 static void _const_string(string *str, char *name, zval *value, char *indent TSRMLS_DC);
 static void _function_string(string *str, zend_function *fptr, zend_class_entry *scope, char* indent TSRMLS_DC);
 static void _property_string(string *str, zend_property_info *prop, char *prop_name, char* indent TSRMLS_DC);
+static void _property_accessor_string(string *str, zend_property_info *prop, char *indent TSRMLS_DC);
 static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *indent TSRMLS_DC);
 static void _extension_string(string *str, zend_module_entry *module, char *indent TSRMLS_DC);
 static void _zend_extension_string(string *str, zend_extension *extension, char *indent TSRMLS_DC);
@@ -927,6 +929,11 @@ static void _property_string(string *str, zend_property_info *prop, char *prop_n
 {
 	const char *class_name;
 
+	if (prop && prop->accs) {
+		_property_accessor_string(str, prop, indent TSRMLS_CC);
+		return;
+	}
+
 	string_printf(str, "%sProperty [ ", indent);
 	if (!prop) {
 		string_printf(str, "<dynamic> public $%s", prop_name);
@@ -960,6 +967,51 @@ static void _property_string(string *str, zend_property_info *prop, char *prop_n
 	}
 
 	string_printf(str, " ]\n");
+}
+/* }}} */
+
+
+/* {{{ _property_accessor_string */
+static void _property_accessor_string(string *str, zend_property_info *prop, char *indent TSRMLS_DC)
+{
+	zend_function **accs = prop->accs;
+	string sub_indent;
+	string_init(&sub_indent);
+	string_printf(&sub_indent, "%s    ", indent);
+
+	string_printf(str, "%sAccessor [ ", indent);
+	if (accs) {
+		int i;
+
+		/* These are mutually exclusive */
+		switch (prop->flags & ZEND_ACC_PPP_MASK) {
+			case ZEND_ACC_PUBLIC:
+				string_printf(str, "public ");
+				break;
+			case ZEND_ACC_PRIVATE:
+				string_printf(str, "private ");
+				break;
+			case ZEND_ACC_PROTECTED:
+				string_printf(str, "protected ");
+				break;
+		}
+		if (prop->flags & ZEND_ACC_STATIC) {
+			string_printf(str, "static ");
+		}
+
+		string_printf(str, "$%s ] {\n", prop->name);
+
+		for (i = 0; i < ZEND_NUM_ACCESSORS; ++i) {
+			if (accs[i]) {
+				_function_string(str, accs[i], accs[i]->common.scope, sub_indent.string TSRMLS_CC);
+			}
+		}	
+
+		string_printf(str, "%s}\n", indent);
+	}
+
+	string_printf(str, " ]\n");
+	string_free(&sub_indent);
 }
 /* }}} */
 
@@ -1322,20 +1374,24 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 
 	zend_unmangle_property_name(prop->name, prop->name_length, &class_name, &prop_name);
 
-	if (!(prop->flags & ZEND_ACC_PRIVATE)) {
-		/* we have to search the class hierarchy for this (implicit) public or protected property */
-		zend_class_entry *tmp_ce = ce, *store_ce = ce;
-		zend_property_info *tmp_info = NULL;
-
-		while (tmp_ce && zend_hash_find(&tmp_ce->properties_info, prop_name, strlen(prop_name) + 1, (void **) &tmp_info) != SUCCESS) {
-			ce = tmp_ce;
-			tmp_ce = tmp_ce->parent;
-		}
-
-		if (tmp_info && !(tmp_info->flags & ZEND_ACC_SHADOW)) { /* found something and it's not a parent's private */
-			prop = tmp_info;
-		} else { /* not found, use initial value */
-			ce = store_ce;
+	if (!prop->accs) {
+		/* Not sure what this code does, maybe dead code? Leaving it in place
+		 * just in case it's fixing some crazy, untested bugs. */
+		if (!(prop->flags & ZEND_ACC_PRIVATE)) {
+			/* we have to search the class hierarchy for this (implicit) public or protected property */
+			zend_class_entry *tmp_ce = ce, *store_ce = ce;
+			zend_property_info *tmp_info = NULL;
+	
+			while (tmp_ce && zend_hash_find(&tmp_ce->properties_info, prop_name, strlen(prop_name) + 1, (void **) &tmp_info) != SUCCESS) {
+				ce = tmp_ce;
+				tmp_ce = tmp_ce->parent;
+			}
+	
+			if (tmp_info && !(tmp_info->flags & ZEND_ACC_SHADOW)) { /* found something and it's not a parent's private */
+				prop = tmp_info;
+			} else { /* not found, use initial value */
+				ce = store_ce;
+			}
 		}
 	}
 
@@ -1344,7 +1400,10 @@ static void reflection_property_factory(zend_class_entry *ce, zend_property_info
 	ZVAL_STRING(name, prop_name, 1);
 	ZVAL_STRINGL(classname, prop->ce->name, prop->ce->name_length, 1);
 
-	reflection_instantiate(reflection_property_ptr, object TSRMLS_CC);
+	reflection_instantiate(
+		reflection_property_ptr,
+		object TSRMLS_CC
+	);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
 	reference = (property_reference*) emalloc(sizeof(property_reference));
 	reference->ce = ce;
@@ -3863,6 +3922,7 @@ ZEND_METHOD(reflection_class, getProperty)
 			property_info_tmp.name_length = name_len;
 			property_info_tmp.h = zend_get_hash_value(name, name_len+1);
 			property_info_tmp.doc_comment = NULL;
+			property_info_tmp.accs = NULL;
 			property_info_tmp.ce = ce;
 
 			reflection_property_factory(ce, &property_info_tmp, return_value TSRMLS_CC);
@@ -4849,6 +4909,7 @@ ZEND_METHOD(reflection_property, __construct)
 		reference->prop.h = zend_get_hash_value(name_str, name_len+1);
 		reference->prop.doc_comment = NULL;
 		reference->prop.ce = ce;
+		reference->prop.accs = NULL;
 	} else {
 		reference->prop = *property_info;
 	}
@@ -4994,7 +5055,7 @@ ZEND_METHOD(reflection_property, getValue)
 			return;
 		}
 		zend_unmangle_property_name(ref->prop.name, ref->prop.name_length, &class_name, &prop_name);
-		member_p = zend_read_property(ref->ce, object, prop_name, strlen(prop_name), 1 TSRMLS_CC);
+		member_p = zend_read_property(ref->ce, object, prop_name, strlen(prop_name), !ref->prop.accs TSRMLS_CC);
 		MAKE_COPY_ZVAL(&member_p, return_value);
 		if (member_p != EG(uninitialized_zval_ptr)) {
 			zval_add_ref(&member_p);
@@ -5152,6 +5213,69 @@ ZEND_METHOD(reflection_property, setAccessible)
 }
 /* }}} */
 
+static void get_accessor_function_impl(INTERNAL_FUNCTION_PARAMETERS, zend_acc_index acc) /* {{{ */
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	METHOD_NOTSTATIC(reflection_property_ptr);
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (ref->prop.accs[acc]) {
+		reflection_method_factory(ref->ce, ref->prop.accs[acc], NULL, return_value TSRMLS_CC);
+		return;
+	}
+	RETURN_FALSE
+}
+/* }}} */
+
+/* {{{ proto public ReflectionMethod ReflectionProperty::getGet()
+   Gets the ReflectionMethod get accessor for this property, returns false if there is no get accessor */
+ZEND_METHOD(reflection_property, getGet)
+{
+	get_accessor_function_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACCESSOR_GET);
+}
+/* }}} */
+
+/* {{{ proto public Method ReflectionProperty::getSet()
+   Gets the ReflectionMethod set accessor for this property, returns false if there is no set accessor */
+ZEND_METHOD(reflection_property, getSet)
+{
+	get_accessor_function_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACCESSOR_SET);
+}
+/* }}} */
+
+/* {{{ proto public Method ReflectionProperty::getIsset()
+   Gets the ReflectionMethod isset accessor for this property, returns false if there is no isset accessor */
+ZEND_METHOD(reflection_property, getIsset)
+{
+	get_accessor_function_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACCESSOR_ISSET);
+}
+/* }}} */
+
+/* {{{ proto public Method ReflectionProperty::getUnset()
+   Gets the ReflectionMethod unset accessor for this property, returns false if there is no unset accessor */
+ZEND_METHOD(reflection_property, getUnset)
+{
+	get_accessor_function_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACCESSOR_UNSET);
+}
+/* }}} */
+
+/* {{{ proto public Method ReflectionProperty::hasAccessors()
+   Returns true if the property has accessors, false otherwise */
+ZEND_METHOD(reflection_property, hasAccessors)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+	if (ref->prop.accs)
+		RETURN_TRUE;
+	RETURN_FALSE;
+}
+/* }}} */
+
+
 /* {{{ proto public static mixed ReflectionExtension::export(string name [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_extension, export)
@@ -5161,7 +5285,7 @@ ZEND_METHOD(reflection_extension, export)
 /* }}} */
 
 /* {{{ proto public void ReflectionExtension::__construct(string name)
-   Constructor. Throws an Exception in case the given extension does not exist */
+   Constructor. Throws an Exception in case the given exten sion does not exist */
 ZEND_METHOD(reflection_extension, __construct)
 {
 	zval *name;
@@ -5793,7 +5917,6 @@ static const zend_function_entry reflection_method_functions[] = {
 	PHP_FE_END
 };
 
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_class_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, argument)
 	ZEND_ARG_INFO(0, return)
@@ -5980,6 +6103,11 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, setAccessible, arginfo_reflection_property_setAccessible, 0)
+	ZEND_ME(reflection_property, getGet, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property, getSet, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property, getIsset, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property, getUnset, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property, hasAccessors, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 

@@ -34,6 +34,15 @@
 
 #define FREE_PNODE(znode)	zval_dtor(&znode->u.constant);
 
+#define IS_ACCESSOR_FN(fn) (((fn)->common.fn_flags & ZEND_ACC_ACCESSOR) != 0)
+
+#define INIT_ZNODE(zn) \
+	{															\
+		zn.op_type = IS_CONST;									\
+		INIT_PZVAL(&zn.u.constant);								\
+		zn.EA = 0;												\
+	}
+
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
 #define INC_BPC(op_array)	if (op_array->fn_flags & ZEND_ACC_INTERACTIVE) { (CG(context).backpatch_count++); }
@@ -213,8 +222,20 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
 
-char *zend_visibility_string(zend_uint fn_flags);
+/* fn_flag that declares that the function is an accessor zend_function.fn_flags */
+#define ZEND_ACC_ACCESSOR				0x10000000
+/* fn_flag that declares that the function is on the stack and is being guarded from recursive calls */
+#define ZEND_ACC_CALL_GUARD				0x20000000
 
+
+/* Offsets into zend_property_info->accs */
+typedef enum {
+	ZEND_ACCESSOR_GET,
+	ZEND_ACCESSOR_SET,
+	ZEND_ACCESSOR_ISSET,
+	ZEND_ACCESSOR_UNSET,
+} zend_acc_index;
+#define ZEND_NUM_ACCESSORS 4
 
 typedef struct _zend_property_info {
 	zend_uint flags;
@@ -225,6 +246,7 @@ typedef struct _zend_property_info {
 	const char *doc_comment;
 	int doc_comment_len;
 	zend_class_entry *ce;
+	union _zend_function **accs;
 } zend_property_info;
 
 
@@ -261,7 +283,7 @@ typedef struct _zend_compiled_variable {
 struct _zend_op_array {
 	/* Common elements */
 	zend_uchar type;
-	const char *function_name;		
+	const char *function_name;
 	zend_class_entry *scope;
 	zend_uint fn_flags;
 	union _zend_function *prototype;
@@ -334,10 +356,10 @@ typedef struct _zend_internal_function {
 #define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? (function)->common.scope->name : "")
 
 typedef union _zend_function {
-	zend_uchar type;	/* MUST be the first element of this struct! */
+	zend_uchar type; /* MUST be the first element of this struct! */
 
 	struct {
-		zend_uchar type;  /* never used */
+		zend_uchar type; /* never used */
 		const char *function_name;
 		zend_class_entry *scope;
 		zend_uint fn_flags;
@@ -350,7 +372,6 @@ typedef union _zend_function {
 	zend_op_array op_array;
 	zend_internal_function internal_function;
 } zend_function;
-
 
 typedef struct _zend_function_state {
 	zend_function *function;
@@ -426,6 +447,7 @@ void zend_init_compiler_context(TSRMLS_D);
 
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename TSRMLS_DC);
+extern ZEND_API void (*zend_compile_string_inline)(zval *source_string, char *filename TSRMLS_DC);
 
 ZEND_API int lex_scan(zval *zendlval TSRMLS_DC);
 void startup_scanner(TSRMLS_D);
@@ -512,6 +534,11 @@ void zend_do_end_function_call(znode *function_name, znode *result, const znode 
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
 void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_variable TSRMLS_DC);
 void zend_do_handle_exception(TSRMLS_D);
+
+void zend_declare_accessor(znode *var_name TSRMLS_DC);
+void zend_do_begin_accessor_declaration(znode *function_token, znode *modifiers, int return_reference, int has_params TSRMLS_DC);
+void zend_do_end_accessor_declaration(znode *function_token, const znode *body TSRMLS_DC);
+void zend_finalize_accessor(TSRMLS_D);
 
 void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC);
 void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC);
@@ -628,7 +655,7 @@ void zend_do_extended_fcall_end(TSRMLS_D);
 
 void zend_do_ticks(TSRMLS_D);
 
-void zend_do_abstract_method(const znode *function_name, znode *modifiers, const znode *body TSRMLS_DC);
+void zend_do_abstract_method(const znode *body TSRMLS_DC);
 
 void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC);
 void zend_do_build_namespace_name(znode *result, znode *prefix, znode *name TSRMLS_DC);
@@ -645,6 +672,9 @@ void zend_do_goto(const znode *label TSRMLS_DC);
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
 void zend_release_labels(TSRMLS_D);
 
+char *zend_visibility_string(zend_uint fn_flags);
+
+
 ZEND_API void function_add_ref(zend_function *function);
 
 #define INITIAL_OP_ARRAY_SIZE 64
@@ -654,6 +684,7 @@ ZEND_API void function_add_ref(zend_function *function);
 /* helper functions in zend_language_scanner.l */
 ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
 ZEND_API zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC);
+ZEND_API void compile_string_inline(zval *source_string, char *filename TSRMLS_DC);
 ZEND_API zend_op_array *compile_filename(int type, zval *filename TSRMLS_DC);
 ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_count, ...);
 ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC);
