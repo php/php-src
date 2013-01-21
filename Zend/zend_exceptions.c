@@ -502,6 +502,7 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 	} else {
 		TRACE_APPEND_STR("[internal function]: ");
 	}
+
 	TRACE_APPEND_KEY("class");
 	TRACE_APPEND_KEY("type");
 	TRACE_APPEND_KEY("function");

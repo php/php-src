@@ -314,7 +314,7 @@ typedef struct _zend_object {
 	zend_class_entry *ce;
 	HashTable *properties;
 	zval **properties_table;
-	HashTable *guards; /* protects from __get/__set ... recursion */
+	HashTable *guards; /* protects from __get/__set/accessor ... recursion */
 } zend_object;
 
 #include "zend_object_handlers.h"
@@ -480,6 +480,7 @@ struct _zend_class_entry {
 
 	HashTable function_table;
 	HashTable properties_info;
+
 	zval **default_properties_table;
 	zval **default_static_members_table;
 	zval **static_members_table;
