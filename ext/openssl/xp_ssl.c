@@ -240,7 +240,7 @@ static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size
         
         if( errno == EAGAIN && ( err == SSL_ERROR_WANT_READ || SSL_ERROR_WANT_WRITE ) ) retry = 1;
                 
-        if( retry ) {
+        if( retry && blocked ) {
           php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
               (POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);          
         }
@@ -249,9 +249,10 @@ static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size
           
         if( err == SSL_ERROR_NONE )         
           break;
-          
-        php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
-              (POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);          
+        if( blocked ) {
+          php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
+                (POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);          
+        }
       }
     } while(retry);
 
@@ -347,7 +348,7 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 
         stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
 
-        if( retry ) {
+        if( retry && blocked ) {
           php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
                 (POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
         }       
@@ -358,9 +359,10 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
 
         if( err == SSL_ERROR_NONE )         
           break;
-          
-        php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
-              (POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);       
+        if( blocked ) {  
+          php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
+                (POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);       
+        }
       }
     
     } while (retry);
@@ -373,9 +375,7 @@ static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t coun
       php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC);
       sslsock->s.is_blocked = 1;
     }
-  }
-  else
-  {
+  } else {
     nr_bytes = php_stream_socket_ops.read(stream, buf, count TSRMLS_CC);
   }
 
@@ -1103,4 +1103,5 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
+
 
