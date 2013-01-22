@@ -638,6 +638,8 @@ void zend_verify_namespace(TSRMLS_D);
 void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
 
+void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static TSRMLS_DC);
+
 void zend_do_label(znode *label TSRMLS_DC);
 void zend_do_goto(const znode *label TSRMLS_DC);
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
