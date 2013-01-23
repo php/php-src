@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -173,6 +173,20 @@ PHP_FUNCTION(floatval)
 
 	RETVAL_ZVAL(*num, 1, 0);
 	convert_to_double(return_value);
+}
+/* }}} */
+
+/* {{{ proto bool boolval(mixed var)
+   Get the boolean value of a variable */
+PHP_FUNCTION(boolval)
+{
+	zval **val;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z", &val) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(zend_is_true(*val));
 }
 /* }}} */
 

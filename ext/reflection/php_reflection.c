@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1457,6 +1457,49 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 }
 /* }}} */
 
+/* {{{ _reflection_param_get_default_param */
+static parameter_reference *_reflection_param_get_default_param(INTERNAL_FUNCTION_PARAMETERS)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	intern = (reflection_object *) zend_object_store_get_object(getThis() TSRMLS_CC);
+	if (intern == NULL || intern->ptr == NULL) {
+		if (EG(exception) && Z_OBJCE_P(EG(exception)) == reflection_exception_ptr) {
+			return NULL;
+		}
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Internal error: Failed to retrieve the reflection object");
+	}
+
+	param = intern->ptr;
+	if (param->fptr->type != ZEND_USER_FUNCTION) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Cannot determine default value for internal functions");
+		return NULL;
+	}
+
+	return param;
+}
+/* }}} */
+
+/* {{{ _reflection_param_get_default_precv */
+static zend_op *_reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAMETERS, parameter_reference *param)
+{
+	zend_op *precv;
+
+	if (param == NULL) {
+		return NULL;
+	}
+
+	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
+	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Internal error: Failed to retrieve the default value");
+		return NULL;
+	}
+
+	return precv;
+}
+/* }}} */
+
 /* {{{ Preventing __clone from being called */
 ZEND_METHOD(reflection, __clone)
 {
@@ -1841,7 +1884,7 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 	/* Return an empty array in case no static variables exist */
 	array_init(return_value);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.static_variables != NULL) {
-		zend_hash_apply_with_argument(fptr->op_array.static_variables, (apply_func_arg_t) zval_update_constant, (void*)1 TSRMLS_CC);
+		zend_hash_apply_with_argument(fptr->op_array.static_variables, (apply_func_arg_t) zval_update_constant_inline_change, fptr->common.scope TSRMLS_CC);
 		zend_hash_copy(Z_ARRVAL_P(return_value), fptr->op_array.static_variables, (copy_ctor_func_t) zval_add_ref, (void *) &tmp_copy, sizeof(zval *));
 	}
 }
@@ -2520,9 +2563,7 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 	{
 		RETURN_FALSE;
 	}
-	if (param->offset < param->required) {
-		RETURN_FALSE;
-	}
+
 	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
 	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
 		RETURN_FALSE;
@@ -2535,36 +2576,78 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
    Returns the default value of this parameter or throws an exception */
 ZEND_METHOD(reflection_parameter, getDefaultValue)
 {
-	reflection_object *intern;
 	parameter_reference *param;
 	zend_op *precv;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	GET_REFLECTION_OBJECT_PTR(param);
 
-	if (param->fptr->type != ZEND_USER_FUNCTION)
-	{
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Cannot determine default value for internal functions");
+	param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (!param) {
 		return;
 	}
-	if (param->offset < param->required) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Parameter is not optional");
-		return;
-	}
-	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
-	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Internal error");
+
+	precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
+	if (!precv) {
 		return;
 	}
 
 	*return_value = *precv->op2.zv;
 	INIT_PZVAL(return_value);
-	if (Z_TYPE_P(return_value) != IS_CONSTANT && Z_TYPE_P(return_value) != IS_CONSTANT_ARRAY) {
+	if ((Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT
+			&& (Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT_ARRAY) {
 		zval_copy_ctor(return_value);
 	}
 	zval_update_constant_ex(&return_value, (void*)0, param->fptr->common.scope TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionParameter::isDefaultValueConstant()
+   Returns whether the default value of this parameter is constant */
+ZEND_METHOD(reflection_parameter, isDefaultValueConstant)
+{
+	zend_op *precv;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (!param) {
+		RETURN_FALSE;
+	}
+
+	precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
+	if (precv && (Z_TYPE_P(precv->op2.zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
+		RETURN_TRUE;
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto public mixed ReflectionParameter::getDefaultValueConstantName()
+   Returns the default value's constant name if default value is constant or null */
+ZEND_METHOD(reflection_parameter, getDefaultValueConstantName)
+{
+	zend_op *precv;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (!param) {
+		return;
+	}
+
+	precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
+	if (precv && (Z_TYPE_P(precv->op2.zv) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
+		RETURN_STRINGL(Z_STRVAL_P(precv->op2.zv), Z_STRLEN_P(precv->op2.zv), 1);
+	}
 }
 /* }}} */
 
@@ -2922,6 +3005,14 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
 	fcc.object_ptr = object;
+	
+	/* 
+	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
+	 */
+	if (mptr->type == ZEND_INTERNAL_FUNCTION &&
+		(mptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_HANDLER) != 0) {
+		fcc.function_handler = _copy_function(mptr TSRMLS_CC);
+	}
 
 	result = zend_call_function(&fci, &fcc TSRMLS_CC);
 
@@ -2992,6 +3083,14 @@ ZEND_METHOD(reflection_method, isStatic)
 ZEND_METHOD(reflection_function, isDeprecated)
 {
 	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_DEPRECATED);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionFunction::isGenerator()
+   Returns whether this function is a generator */
+ZEND_METHOD(reflection_function, isGenerator)
+{
+	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_GENERATOR);
 }
 /* }}} */
 
@@ -4093,31 +4192,39 @@ ZEND_METHOD(reflection_class, newInstance)
 {
 	zval *retval_ptr = NULL;
 	reflection_object *intern;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *old_scope;
+	zend_function *constructor;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
 	GET_REFLECTION_OBJECT_PTR(ce);
 
+	object_init_ex(return_value, ce);
+
+	old_scope = EG(scope);
+	EG(scope) = ce;
+	constructor = Z_OBJ_HT_P(return_value)->get_constructor(return_value TSRMLS_CC);
+	EG(scope) = old_scope;
+
 	/* Run the constructor if there is one */
-	if (ce->constructor) {
+	if (constructor) {
 		zval ***params = NULL;
 		int num_args = 0;
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 
-		if (!(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Access to non-public constructor of class %s", ce->name);
-			return;
+			zval_dtor(return_value);
+			RETURN_NULL();
 		}
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "*", &params, &num_args) == FAILURE) {
 			if (params) {
 				efree(params);
 			}
+			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
-
-		object_init_ex(return_value, ce);
 
 		fci.size = sizeof(fci);
 		fci.function_table = EG(function_table);
@@ -4130,7 +4237,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		fci.no_separation = 1;
 
 		fcc.initialized = 1;
-		fcc.function_handler = ce->constructor;
+		fcc.function_handler = constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(return_value);
 		fcc.object_ptr = return_value;
@@ -4143,6 +4250,7 @@ ZEND_METHOD(reflection_class, newInstance)
 				zval_ptr_dtor(&retval_ptr);
 			}
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invocation of %s's constructor failed", ce->name);
+			zval_dtor(return_value);
 			RETURN_NULL();
 		}
 		if (retval_ptr) {
@@ -4151,9 +4259,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		if (params) {
 			efree(params);
 		}
-	} else if (!ZEND_NUM_ARGS()) {
-		object_init_ex(return_value, ce);
-	} else {
+	} else if (ZEND_NUM_ARGS()) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name);
 	}
 }
@@ -4183,9 +4289,10 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 {
 	zval *retval_ptr = NULL;
 	reflection_object *intern;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *old_scope;
 	int argc = 0;
 	HashTable *args;
+	zend_function *constructor;
 
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
@@ -4194,19 +4301,28 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|h", &args) == FAILURE) {
 		return;
 	}
+
 	if (ZEND_NUM_ARGS() > 0) {
 		argc = args->nNumOfElements;
 	}
 
+	object_init_ex(return_value, ce);
+
+	old_scope = EG(scope);
+	EG(scope) = ce;
+	constructor = Z_OBJ_HT_P(return_value)->get_constructor(return_value TSRMLS_CC);
+	EG(scope) = old_scope;
+
 	/* Run the constructor if there is one */
-	if (ce->constructor) {
+	if (constructor) {
 		zval ***params = NULL;
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;
 
-		if (!(ce->constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
+		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Access to non-public constructor of class %s", ce->name);
-			return;
+			zval_dtor(return_value);
+			RETURN_NULL();
 		}
 
 		if (argc) {
@@ -4214,8 +4330,6 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 			zend_hash_apply_with_argument(args, (apply_func_arg_t)_zval_array_to_c_array, &params TSRMLS_CC);
 			params -= argc;
 		}
-
-		object_init_ex(return_value, ce);
 
 		fci.size = sizeof(fci);
 		fci.function_table = EG(function_table);
@@ -4228,7 +4342,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fci.no_separation = 1;
 
 		fcc.initialized = 1;
-		fcc.function_handler = ce->constructor;
+		fcc.function_handler = constructor;
 		fcc.calling_scope = EG(scope);
 		fcc.called_scope = Z_OBJCE_P(return_value);
 		fcc.object_ptr = return_value;
@@ -4241,6 +4355,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 				zval_ptr_dtor(&retval_ptr);
 			}
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invocation of %s's constructor failed", ce->name);
+			zval_dtor(return_value);
 			RETURN_NULL();
 		}
 		if (retval_ptr) {
@@ -4249,9 +4364,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		if (params) {
 			efree(params);
 		}
-	} else if (!ZEND_NUM_ARGS() || !argc) {
-		object_init_ex(return_value, ce);
-	} else {
+	} else if (argc) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name);
 	}
 }
@@ -4373,8 +4486,10 @@ ZEND_METHOD(reflection_class, getTraitAliases)
 			int method_name_len;
 			zend_trait_method_reference *cur_ref = ce->trait_aliases[i]->trait_method;
 
-			method_name_len = spprintf(&method_name, 0, "%s::%s", cur_ref->class_name, cur_ref->method_name);
-			add_assoc_stringl_ex(return_value, ce->trait_aliases[i]->alias, ce->trait_aliases[i]->alias_len + 1, method_name, method_name_len, 0);
+			if (ce->trait_aliases[i]->alias) {
+				method_name_len = spprintf(&method_name, 0, "%s::%s", cur_ref->ce->name, cur_ref->method_name);
+				add_assoc_stringl_ex(return_value, ce->trait_aliases[i]->alias, ce->trait_aliases[i]->alias_len + 1, method_name, method_name_len, 0);
+			}
 			i++;
 		}
 	}
@@ -5603,6 +5718,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, isDeprecated, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isInternal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isUserDefined, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, isGenerator, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureScopeClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
@@ -5903,6 +6019,8 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, isOptional, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isDefaultValueAvailable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDefaultValue, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isDefaultValueConstant, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, getDefaultValueConstantName, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 

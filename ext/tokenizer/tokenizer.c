@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -138,11 +138,8 @@ static void tokenize(zval *return_value TSRMLS_DC)
 					token_line = ++CG(zend_lineno);
 					CG(increment_lineno) = 0;
 				}
-				add_next_index_stringl(keyword, Z_STRVAL(token), Z_STRLEN(token), 1);
-				efree(Z_STRVAL(token));
-			} else {
-				add_next_index_stringl(keyword, (char *)zendtext, zendleng, 1);
 			}
+			add_next_index_stringl(keyword, (char *)zendtext, zendleng, 1);
 			add_next_index_long(keyword, token_line);
 			add_next_index_zval(return_value, keyword);
 		} else {

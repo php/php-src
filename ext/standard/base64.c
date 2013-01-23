@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,14 +59,14 @@ PHPAPI unsigned char *php_base64_encode(const unsigned char *str, int length, in
 	unsigned char *p;
 	unsigned char *result;
 
-	if ((length + 2) < 0 || ((length + 2) / 3) >= (1 << (sizeof(int) * 8 - 2))) {
+	if (length < 0) {
 		if (ret_length != NULL) {
 			*ret_length = 0;
 		}
 		return NULL;
 	}
 
-	result = (unsigned char *)safe_emalloc(((length + 2) / 3) * 4, sizeof(char), 1);
+	result = (unsigned char *) safe_emalloc((length + 2) / 3, 4 * sizeof(char), 1);
 	p = result;
 
 	while (length > 2) { /* keep going until we have less than 24 bits */

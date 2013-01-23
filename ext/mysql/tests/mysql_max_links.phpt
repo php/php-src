@@ -54,8 +54,18 @@ mysql_close($links[1]);
 print "done!\n";
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
 Warning: mysql_connect(): Too many open links (2) in %s on line %s
 [030] Cannot connect using host '%s', user '%s', password '****', [0] 0
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 
 Warning: mysql_connect(): Too many open links (2) in %s on line %s
 [060] Cannot connect using host '%s', user '%s', password '****', [0] 0

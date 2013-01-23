@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -78,7 +78,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 
 /* {{{ proto Closure Closure::bind(Closure $old, object $to [, mixed $scope = "static" ] )
    Create a closure from another one and bind to another object and scope */
-ZEND_METHOD(Closure, bind) /* {{{ */
+ZEND_METHOD(Closure, bind)
 {
 	zval *newthis, *zclosure, *scope_arg = NULL;
 	zend_closure *closure;

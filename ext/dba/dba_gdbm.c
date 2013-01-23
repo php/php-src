@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -104,11 +104,18 @@ DBA_UPDATE_FUNC(gdbm)
 	gval.dptr = (char *) val;
 	gval.dsize = vallen;
 
-	if(gdbm_store(dba->dbf, gkey, gval, 
-				mode == 1 ? GDBM_INSERT : GDBM_REPLACE) == 0)
-		return SUCCESS;
-	php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
-	return FAILURE;
+	switch (gdbm_store(dba->dbf, gkey, gval, mode == 1 ? GDBM_INSERT : GDBM_REPLACE)) {
+		case 0:
+			return SUCCESS;
+		case 1:
+			return FAILURE;
+		case -1:
+			php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "%s", gdbm_strerror(gdbm_errno));
+			return FAILURE;
+		default:
+			php_error_docref2(NULL TSRMLS_CC, key, val, E_WARNING, "Unknown return value");
+			return FAILURE;
+	}
 }
 
 DBA_EXISTS_FUNC(gdbm)

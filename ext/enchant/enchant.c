@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -730,6 +730,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 
 	if (sugg) {
 		zval_dtor(sugg);
+		array_init(sugg);
 	}
 
 	PHP_ENCHANT_GET_DICT;
@@ -742,8 +743,6 @@ PHP_FUNCTION(enchant_dict_quick_check)
 		if (!sugg && ZEND_NUM_ARGS() == 2) {
 			RETURN_FALSE;
 		}
-
-		array_init(sugg);
 
 		suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, &n_sugg_st);
 		memcpy(&n_sugg, &n_sugg_st, sizeof(n_sugg));

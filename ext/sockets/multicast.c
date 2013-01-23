@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,6 +38,9 @@
 # define NTDDI_XP NTDDI_WINXP /* bug in SDK */
 # include <IPHlpApi.h>
 # undef NTDDI_XP
+# if _WIN32_WINNT >= 0x0600
+#  define HAVE_IF_NAMETOINDEX 1
+# endif
 #else
 #include <sys/socket.h>
 #include <sys/ioctl.h>

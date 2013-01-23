@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -168,7 +168,7 @@ ZEND_API const zend_encoding *zend_multibyte_get_script_encoding(TSRMLS_D)
 ZEND_API int zend_multibyte_set_script_encoding(const zend_encoding **encoding_list, size_t encoding_list_size TSRMLS_DC)
 {
 	if (CG(script_encoding_list)) {
-		efree(CG(script_encoding_list));
+		free(CG(script_encoding_list));
 	}
 	CG(script_encoding_list) = encoding_list;
 	CG(script_encoding_list_size) = encoding_list_size;

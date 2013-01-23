@@ -79,12 +79,19 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 					if ((type == REG_SZ) || (type == REG_EXPAND_SZ)) {
 						if (!ht) {
 							ht = (HashTable*)malloc(sizeof(HashTable));
+							if (!ht) {
+								return ret;
+							}
 							zend_hash_init(ht, 0, NULL, ZVAL_INTERNAL_PTR_DTOR, 1);
 						}
 						data = (zval*)malloc(sizeof(zval));
+						if (!data) {
+							return ret;
+						}
 						INIT_PZVAL(data);
 						Z_STRVAL_P(data) = zend_strndup(value, value_len-1);
 						Z_STRLEN_P(data) = value_len-1;
+						Z_TYPE_P(data) = IS_STRING;
 						zend_hash_update(ht, name, name_len+1, &data, sizeof(zval*), NULL);
 					}
 				}
@@ -174,6 +181,9 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 
 	if (!PW32G(registry_directories)) {
 		PW32G(registry_directories) = (HashTable*)malloc(sizeof(HashTable));
+		if (!PW32G(registry_directories)) {
+			return;
+		}
 		zend_hash_init(PW32G(registry_directories), 0, NULL, delete_internal_hashtable, 1);
 		if (!OpenPhpRegistryKey("\\Per Directory Values", &PW32G(registry_key))) {
 			PW32G(registry_key) = NULL;

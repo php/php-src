@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -140,7 +140,7 @@ const zend_function_entry calendar_functions[] = {
 	PHP_FE(frenchtojd, arginfo_frenchtojd)
 	PHP_FE(jddayofweek, arginfo_jddayofweek)
 	PHP_FE(jdmonthname, arginfo_jdmonthname)
-	PHP_FE(easter_date, arginfo_easter_date) 
+	PHP_FE(easter_date, arginfo_easter_date)
 	PHP_FE(easter_days, arginfo_easter_days)
 	PHP_FE(unixtojd, arginfo_unixtojd)
 	PHP_FE(jdtounix, arginfo_jdtounix)
@@ -199,10 +199,13 @@ static struct cal_entry_t cal_conversion_table[CAL_NUM_CALS] = {
 	{"Julian", "CAL_JULIAN", JulianToSdn, SdnToJulian, 12, 31,
 	 MonthNameShort, MonthNameLong},
 	{"Jewish", "CAL_JEWISH", JewishToSdn, SdnToJewish, 13, 30,
-	 JewishMonthName, JewishMonthName},
+	 JewishMonthNameLeap, JewishMonthNameLeap},
 	{"French", "CAL_FRENCH", FrenchToSdn, SdnToFrench, 13, 30,
 	 FrenchMonthName, FrenchMonthName}
 };
+
+#define JEWISH_MONTH_NAME(year) 	((monthsPerYear[((year)-1) % 19] == 13)?JewishMonthNameLeap:JewishMonthName)
+#define JEWISH_HEB_MONTH_NAME(year) ((monthsPerYear[((year)-1) % 19] == 13)?JewishMonthHebNameLeap:JewishMonthHebName)
 
 /* For jddayofweek */
 enum { CAL_DOW_DAYNO, CAL_DOW_SHORT, CAL_DOW_LONG };
@@ -288,7 +291,7 @@ static void _php_cal_info(int cal, zval **ret)
 PHP_FUNCTION(cal_info)
 {
 	long cal = -1;
-	
+
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &cal) == FAILURE) {
 		RETURN_FALSE;
@@ -418,8 +421,14 @@ PHP_FUNCTION(cal_from_jd)
 	add_assoc_string(return_value, "abbrevdayname", DayNameShort[dow], 1);
 	add_assoc_string(return_value, "dayname", DayNameLong[dow], 1);
 /* month name */
-	add_assoc_string(return_value, "abbrevmonth", calendar->month_name_short[month], 1);
-	add_assoc_string(return_value, "monthname", calendar->month_name_long[month], 1);
+	if(cal == CAL_JEWISH) {
+		/* special case for Jewish calendar */
+		add_assoc_string(return_value, "abbrevmonth", JEWISH_MONTH_NAME(year)[month], 1);
+		add_assoc_string(return_value, "monthname", JEWISH_MONTH_NAME(year)[month], 1);
+	} else {
+		add_assoc_string(return_value, "abbrevmonth", calendar->month_name_short[month], 1);
+		add_assoc_string(return_value, "monthname", calendar->month_name_long[month], 1);
+	}
 }
 /* }}} */
 
@@ -608,7 +617,7 @@ PHP_FUNCTION(jdtojewish)
 			RETURN_FALSE;
 		}
 
-		snprintf(hebdate, sizeof(hebdate), "%s %s %s", heb_number_to_chars(day, fl, &dayp), JewishMonthHebName[month], heb_number_to_chars(year, fl, &yearp));
+		snprintf(hebdate, sizeof(hebdate), "%s %s %s", heb_number_to_chars(day, fl, &dayp), JEWISH_HEB_MONTH_NAME(year)[month], heb_number_to_chars(year, fl, &yearp));
 
 		if (dayp) {
 			efree(dayp);
@@ -728,7 +737,7 @@ PHP_FUNCTION(jdmonthname)
 		break;
 	case CAL_MONTH_JEWISH:		/* jewish month */
 		SdnToJewish(julday, &year, &month, &day);
-		monthname = JewishMonthName[month];
+		monthname = JEWISH_MONTH_NAME(year)[month];
 		break;
 	case CAL_MONTH_FRENCH:		/* french month */
 		SdnToFrench(julday, &year, &month, &day);

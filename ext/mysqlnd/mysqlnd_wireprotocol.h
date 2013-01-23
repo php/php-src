@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -103,7 +103,7 @@ typedef struct st_mysqlnd_packet_auth {
 	zend_bool	send_auth_data;
 	zend_bool	is_change_user_packet;
 	zend_bool	silent;
-
+	HashTable	*connect_attr;
 } MYSQLND_PACKET_AUTH;
 
 /* Auth response packet */
@@ -286,6 +286,18 @@ typedef struct st_mysqlnd_packet_chg_user_resp {
 } MYSQLND_PACKET_CHG_USER_RESPONSE;
 
 
+/* Command packet */
+typedef struct st_mysqlnd_packet_sha256_pk_request {
+	MYSQLND_PACKET_HEADER			header;
+} MYSQLND_PACKET_SHA256_PK_REQUEST;
+
+typedef struct  st_mysqlnd_packet_sha256_pk_request_response {
+	MYSQLND_PACKET_HEADER	header;
+	zend_uchar 				*public_key;
+	size_t					public_key_len;
+} MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE;
+
+
 PHPAPI void php_mysqlnd_scramble(zend_uchar * const buffer, const zend_uchar * const scramble, const zend_uchar * const pass, size_t pass_len);
 
 unsigned long	php_mysqlnd_net_field_length(zend_uchar **packet);
@@ -295,15 +307,13 @@ PHPAPI const extern char * const mysqlnd_empty_string;
 
 
 enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-										 zend_bool as_unicode, zend_bool as_int_or_float,
-										 MYSQLND_STATS * stats TSRMLS_DC);
+										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+										 zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC);
 
 
 enum_func_status php_mysqlnd_rowp_read_text_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval ** fields,
-										 unsigned int field_count, MYSQLND_FIELD *fields_metadata,
-										 zend_bool as_unicode, zend_bool as_int_or_float,
-										 MYSQLND_STATS * stats TSRMLS_DC);
+										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
+										 zend_bool as_int_or_float, MYSQLND_STATS * stats TSRMLS_DC);
 
 
 PHPAPI MYSQLND_PROTOCOL * mysqlnd_protocol_init(zend_bool persistent TSRMLS_DC);

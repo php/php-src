@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -159,3 +159,8 @@
 #define ZEND_SEPARATE                        156
 #define ZEND_QM_ASSIGN_VAR                   157
 #define ZEND_JMP_SET_VAR                     158
+#define ZEND_DISCARD_EXCEPTION               159
+#define ZEND_YIELD                           160
+#define ZEND_GENERATOR_RETURN                161
+#define ZEND_FAST_CALL                       162
+#define ZEND_FAST_RET                        163

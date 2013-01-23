@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -92,60 +92,12 @@ mysqlnd_is_key_numeric(const char * key, size_t length, long *idx)
 /* }}} */
 
 
-#if MYSQLND_UNICODE
-/* {{{ mysqlnd_unicode_is_key_numeric */
-static zend_bool
-mysqlnd_unicode_is_key_numeric(UChar *key, size_t length, long *idx)
-{
-	register UChar * tmp=key;
-
-	if (*tmp==0x2D /*'-'*/) {
-		tmp++;
-	}
-	if ((*tmp>=0x30 /*'0'*/ && *tmp<=0x39 /*'9'*/)) { /* possibly a numeric index */
-		do {
-			UChar *end=key+length-1;
-
-			if (*tmp++==0x30 && length>2) { /* don't accept numbers with leading zeros */
-				break;
-			}
-			while (tmp<end) {
-				if (!(*tmp>=0x30 /*'0'*/ && *tmp<=0x39 /*'9'*/)) {
-					break;
-				}
-				tmp++;
-			}
-			if (tmp==end && *tmp==0) { /* a numeric index */
-				if (*key==0x2D /*'-'*/) {
-					*idx = zend_u_strtol(key, NULL, 10);
-					if (*idx!=LONG_MIN) {
-						return TRUE;
-					}
-				} else {
-					*idx = zend_u_strtol(key, NULL, 10);
-					if (*idx!=LONG_MAX) {
-						return TRUE;
-					}
-				}
-			}
-		} while (0);
-	}
-	return FALSE;
-}
-/* }}} */
-#endif
-
-
 /* {{{ mysqlnd_res_meta::read_metadata */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
 	unsigned int i = 0;
 	MYSQLND_PACKET_RES_FIELD * field_packet;
-#if MYSQLND_UNICODE
-	UChar *ustr;
-	int ulen;
-#endif
 
 	DBG_ENTER("mysqlnd_res_meta::read_metadata");
 
@@ -226,21 +178,6 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 			}
 		}
 
-#if MYSQLND_UNICODE
-		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen,
-							   meta->fields[i].name,
-							   meta->fields[i].name_length TSRMLS_CC);
-		if ((meta->zend_hash_keys[i].is_numeric =
-						mysqlnd_unicode_is_key_numeric(ustr, ulen + 1, &idx)))
-		{
-			meta->zend_hash_keys[i].key = idx;
-			mnd_efree(ustr);
-		} else {
-			meta->zend_hash_keys[i].ustr.u = ustr;
-			meta->zend_hash_keys[i].ulen = ulen;
-			meta->zend_hash_keys[i].key = zend_u_get_hash_value(IS_UNICODE, ZSTR(ustr), ulen + 1);
-		}
-#else
 		/* For BC we have to check whether the key is numeric and use it like this */
 		if ((meta->zend_hash_keys[i].is_numeric =
 					mysqlnd_is_key_numeric(field_packet->metadata->name,
@@ -253,7 +190,6 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 					zend_get_hash_value(field_packet->metadata->name,
 										field_packet->metadata->name_length + 1);
 		}
-#endif
 	}
 	PACKET_FREE(field_packet);
 
@@ -283,15 +219,6 @@ MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta TSRMLS_DC)
 
 	if (meta->zend_hash_keys) {
 		DBG_INF("Freeing zend_hash_keys");
-#if MYSQLND_UNICODE
-		if (UG(unicode)) {
-			for (i = 0; i < meta->field_count; i++) {
-				if (meta->zend_hash_keys[i].ustr.v) {
-					mnd_pefree(meta->zend_hash_keys[i].ustr.v, meta->persistent);
-				}
-			}
-		}
-#endif
 		mnd_pefree(meta->zend_hash_keys, meta->persistent);
 		meta->zend_hash_keys = NULL;
 	}
@@ -379,15 +306,6 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 			/* copy the trailing \0 too */
 			memcpy(new_fields[i].def, orig_fields[i].def, orig_fields[i].def_length + 1);
 		}
-#if MYSQLND_UNICODE
-		if (new_meta->zend_hash_keys[i].ustr.u) {
-			new_meta->zend_hash_keys[i].ustr.u =
-					eustrndup(new_meta->zend_hash_keys[i].ustr.u, new_meta->zend_hash_keys[i].ulen);
-			if (!new_meta->zend_hash_keys[i].ustr.u) {
-				goto oom;
-			}
-		}
-#endif
 	}
 	new_meta->current_field = 0;
 	new_meta->field_count = meta->field_count;

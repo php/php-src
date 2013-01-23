@@ -19,9 +19,13 @@
 #include "php_intl.h"
 #include "dateformat_data.h"
 #include "dateformat_format.h"
+#include "dateformat_format_object.h"
 #include "dateformat_parse.h"
 #include "dateformat.h"
 #include "dateformat_attr.h"
+#include "dateformat_attrcpp.h"
+
+#include <zend_exceptions.h>
 
 zend_class_entry *IntlDateFormatter_ce_ptr = NULL;
 static zend_object_handlers IntlDateFormatter_handlers;
@@ -44,11 +48,11 @@ void IntlDateFormatter_object_free( zend_object *object TSRMLS_DC )
 
 	zend_object_std_dtor( &dfo->zo TSRMLS_CC );
 
-	dateformat_data_free( &dfo->datef_data TSRMLS_CC );
-	
-	if( dfo->timezone_id ){
-		efree(dfo->timezone_id);
+	if (dfo->requested_locale) {
+		efree( dfo->requested_locale );
 	}
+
+	dateformat_data_free( &dfo->datef_data TSRMLS_CC );
 
 	efree( dfo );
 }
@@ -63,10 +67,11 @@ zend_object_value IntlDateFormatter_object_create(zend_class_entry *ce TSRMLS_DC
 	intern = ecalloc( 1, sizeof(IntlDateFormatter_object) );
 	dateformat_data_init( &intern->datef_data TSRMLS_CC );
 	zend_object_std_init( &intern->zo, ce TSRMLS_CC );
-	intern->date_type = 0;
-	intern->time_type = 0;
-	intern->calendar  = 1;		/* Gregorian calendar */
-	intern->timezone_id =  NULL;
+	object_properties_init(&intern->zo, ce);
+	intern->date_type			= 0;
+	intern->time_type			= 0;
+	intern->calendar			= -1;
+	intern->requested_locale	= NULL;
 
 	retval.handle = zend_objects_store_put(
 		intern,
@@ -87,18 +92,23 @@ zend_object_value IntlDateFormatter_object_clone(zval *object TSRMLS_DC)
 	zend_object_handle handle = Z_OBJ_HANDLE_P(object);
 	IntlDateFormatter_object *dfo, *new_dfo;
 
-	DATE_FORMAT_METHOD_FETCH_OBJECT;
-	new_obj_val = IntlDateFormatter_ce_ptr->create_object(IntlDateFormatter_ce_ptr TSRMLS_CC);
+	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
+
+	new_obj_val = IntlDateFormatter_ce_ptr->create_object(Z_OBJCE_P(object) TSRMLS_CC);
 	new_dfo = (IntlDateFormatter_object *)zend_object_store_get_object_by_handle(new_obj_val.handle TSRMLS_CC);
 	/* clone standard parts */	
 	zend_objects_clone_members(&new_dfo->zo, new_obj_val, &dfo->zo, handle TSRMLS_CC);
 	/* clone formatter object */
-	DATE_FORMAT_OBJECT(new_dfo) = udat_clone(DATE_FORMAT_OBJECT(dfo),  &INTL_DATA_ERROR_CODE(new_dfo));
-	if(U_FAILURE(INTL_DATA_ERROR_CODE(new_dfo))) {
-		/* set up error in case error handler is interested */
-		intl_error_set( NULL, INTL_DATA_ERROR_CODE(new_dfo), "Failed to clone IntlDateFormatter object", 0 TSRMLS_CC );
-		IntlDateFormatter_object_dtor(new_dfo, new_obj_val.handle TSRMLS_CC); /* free new object */
-		zend_error(E_ERROR, "Failed to clone IntlDateFormatter object");
+	if (dfo->datef_data.udatf != NULL) {
+		DATE_FORMAT_OBJECT(new_dfo) = udat_clone(DATE_FORMAT_OBJECT(dfo),  &INTL_DATA_ERROR_CODE(dfo));
+		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
+			/* set up error in case error handler is interested */
+			intl_errors_set(INTL_DATA_ERROR_P(dfo), INTL_DATA_ERROR_CODE(dfo),
+					"Failed to clone IntlDateFormatter object", 0 TSRMLS_CC );
+			zend_throw_exception(NULL, "Failed to clone IntlDateFormatter object", 0 TSRMLS_CC);
+		}
+	} else {
+		zend_throw_exception(NULL, "Cannot clone unconstructed IntlDateFormatter", 0 TSRMLS_CC);
 	}
 	return new_obj_val;
 }
@@ -117,6 +127,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_intldateformatter_format, 0, 0, 0)
 	ZEND_ARG_INFO(0, args)
 	ZEND_ARG_INFO(0, array)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_intldateformatter_format_object, 0, 0, 1)
+	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, locale)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_intldateformatter_getdatetype, 0)
@@ -157,15 +173,19 @@ static zend_function_entry IntlDateFormatter_class_functions[] = {
 	PHP_NAMED_FE( getDateType, ZEND_FN( datefmt_get_datetype ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( getTimeType, ZEND_FN( datefmt_get_timetype ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( getCalendar, ZEND_FN( datefmt_get_calendar ), arginfo_intldateformatter_getdatetype )
+	PHP_NAMED_FE( getCalendarObject, ZEND_FN( datefmt_get_calendar_object ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( setCalendar, ZEND_FN( datefmt_set_calendar ), arginfo_intldateformatter_setcalendar )
 	PHP_NAMED_FE( getTimeZoneId, ZEND_FN( datefmt_get_timezone_id ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( setTimeZoneId, ZEND_FN( datefmt_set_timezone_id ), arginfo_intldateformatter_settimezoneid )
+	PHP_NAMED_FE( getTimeZone, ZEND_FN( datefmt_get_timezone ), arginfo_intldateformatter_getdatetype )
+	PHP_NAMED_FE( setTimeZone, ZEND_FN( datefmt_set_timezone ), arginfo_intldateformatter_settimezoneid )
 	PHP_NAMED_FE( setPattern, ZEND_FN( datefmt_set_pattern ), arginfo_intldateformatter_setpattern )
 	PHP_NAMED_FE( getPattern, ZEND_FN( datefmt_get_pattern ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( getLocale, ZEND_FN( datefmt_get_locale ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( setLenient, ZEND_FN( datefmt_set_lenient ), arginfo_intldateformatter_setlenient )
 	PHP_NAMED_FE( isLenient, ZEND_FN( datefmt_is_lenient ), arginfo_intldateformatter_getdatetype )
 	PHP_NAMED_FE( format, ZEND_FN( datefmt_format ), arginfo_intldateformatter_format )
+	PHP_ME_MAPPING( formatObject, datefmt_format_object, arginfo_intldateformatter_format_object, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_NAMED_FE( parse, ZEND_FN( datefmt_parse), datefmt_parse_args )
 	PHP_NAMED_FE( localtime, ZEND_FN( datefmt_localtime ), datefmt_parse_args )
 	PHP_NAMED_FE( getErrorCode, ZEND_FN( datefmt_get_error_code ), arginfo_intldateformatter_getdatetype )

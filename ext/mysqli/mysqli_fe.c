@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -200,16 +200,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_kill, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_set_local_infile_handler, 0, 0, 2)
-	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
-	ZEND_ARG_INFO(0, read_callback)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_set_local_infile_handler, 0, 0, 1)
-	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
-	ZEND_ARG_INFO(0, read_callback)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_query, 0, 0, 2)
 	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
 	ZEND_ARG_INFO(0, query)
@@ -388,10 +378,6 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_info,									arginfo_mysqli_only_link)
 	PHP_FE(mysqli_insert_id,							arginfo_mysqli_only_link)
 	PHP_FE(mysqli_kill,									arginfo_mysqli_kill)
-#if !defined(MYSQLI_USE_MYSQLND)
-	PHP_FE(mysqli_set_local_infile_default,				arginfo_mysqli_only_link)
-	PHP_FE(mysqli_set_local_infile_handler,				arginfo_mysqli_set_local_infile_handler)
-#endif
 	PHP_FE(mysqli_more_results,							arginfo_mysqli_only_link)
 	PHP_FE(mysqli_multi_query, 							arginfo_mysqli_query)
 	PHP_FE(mysqli_next_result,							arginfo_mysqli_only_link)
@@ -490,10 +476,6 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(get_warnings, mysqli_get_warnings, arginfo_mysqli_no_params)
 	PHP_FALIAS(init,mysqli_init, arginfo_mysqli_no_params)
 	PHP_FALIAS(kill,mysqli_kill, arginfo_class_mysqli_kill)
-#if !defined(MYSQLI_USE_MYSQLND)
-	PHP_FALIAS(set_local_infile_default, mysqli_set_local_infile_default, arginfo_mysqli_no_params)
-	PHP_FALIAS(set_local_infile_handler, mysqli_set_local_infile_handler, arginfo_class_mysqli_set_local_infile_handler)
-#endif
 	PHP_FALIAS(multi_query, mysqli_multi_query, arginfo_class_mysqli_query)
 	PHP_FALIAS(mysqli, mysqli_link_construct, arginfo_mysqli_connect)
 	PHP_FALIAS(more_results, mysqli_more_results, arginfo_mysqli_no_params)

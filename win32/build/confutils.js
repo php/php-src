@@ -46,6 +46,7 @@ VC_VERSIONS[1310] = 'MSVC7.1 (Visual C++ 2003)';
 VC_VERSIONS[1400] = 'MSVC8 (Visual C++ 2005)';
 VC_VERSIONS[1500] = 'MSVC9 (Visual C++ 2008)';
 VC_VERSIONS[1600] = 'MSVC10 (Visual C++ 2010)';
+VC_VERSIONS[1700] = 'MSVC11 (Visual C++ 2012)';
 
 var VC_VERSIONS_SHORT = new Array();
 VC_VERSIONS_SHORT[1200] = 'VC6';
@@ -54,6 +55,7 @@ VC_VERSIONS_SHORT[1310] = 'VC7.1';
 VC_VERSIONS_SHORT[1400] = 'VC8';
 VC_VERSIONS_SHORT[1500] = 'VC9';
 VC_VERSIONS_SHORT[1600] = 'VC10';
+VC_VERSIONS_SHORT[1700] = 'VC11';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -65,7 +67,7 @@ if (MODE_PHPIZE) {
 		WScript.Quit(10);
 	}
 } else {
-	if (!FSO.FileExists("README.SVN-RULES")) {
+	if (!FSO.FileExists("README.GIT-RULES")) {
 		STDERR.WriteLine("Must be run from the root of the php source");
 		WScript.Quit(10);
 	}
@@ -74,7 +76,7 @@ if (MODE_PHPIZE) {
 var CWD = WshShell.CurrentDirectory;
 
 if (typeof(CWD) == "undefined") {
-	CWD = FSO.GetParentFolderName(FSO.GetAbsolutePathName("README.SVN-RULES"));
+	CWD = FSO.GetParentFolderName(FSO.GetAbsolutePathName("README.GIT-RULES"));
 }
 
 /* defaults; we pick up the precise versions from configure.in */

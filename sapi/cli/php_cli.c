@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -662,7 +662,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 	int php_optind = 1, orig_optind = 1;
 	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
 	char *arg_free=NULL, **arg_excp=&arg_free;
-	char *script_file=NULL;
+	char *script_file=NULL, *translated_path = NULL;
 	int interactive=0;
 	int lineno = 0;
 	const char *param_error=NULL;
@@ -687,7 +687,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2012 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) %s\nCopyright (c) 1997-2013 The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
 #if ZEND_DEBUG && defined(HAVE_GCOV)
 					"(DEBUG GCOV)",
@@ -927,8 +927,13 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 		if (script_file) {
 			if (cli_seek_file_begin(&file_handle, script_file, &lineno TSRMLS_CC) != SUCCESS) {
 				goto err;
+			} else {
+				char real_path[MAXPATHLEN];
+				if (VCWD_REALPATH(script_file, real_path)) {
+					translated_path = strdup(real_path);
+				}
+				script_filename = script_file;
 			}
-			script_filename = script_file;
 		} else {
 			/* We could handle PHP_MODE_PROCESS_STDIN in a different manner  */
 			/* here but this would make things only more complicated. And it */
@@ -947,7 +952,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 		SG(request_info).argc=argc-php_optind+1;
 		arg_excp = argv+php_optind-1;
 		arg_free = argv[php_optind-1];
-		SG(request_info).path_translated = (char*)file_handle.filename;
+		SG(request_info).path_translated = translated_path? translated_path: (char*)file_handle.filename;
 		argv[php_optind-1] = (char*)file_handle.filename;
 		SG(request_info).argv=argv+php_optind-1;
 
@@ -1162,11 +1167,14 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 	} zend_end_try();
 
 out:
-	if (exit_status == 0) {
-		exit_status = EG(exit_status);
-	}
 	if (request_started) {
 		php_request_shutdown((void *) 0);
+	}
+	if (translated_path) {
+		free(translated_path);
+	}
+	if (exit_status == 0) {
+		exit_status = EG(exit_status);
 	}
 	return exit_status;
 err:

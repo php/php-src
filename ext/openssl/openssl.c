@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,9 +71,8 @@
 #define OPENSSL_ALGO_SHA256 7
 #define OPENSSL_ALGO_SHA384 8
 #define OPENSSL_ALGO_SHA512 9
-#define OPENSSL_ALGO_RIPEMD160 10
+#define OPENSSL_ALGO_RMD160 10
 #endif
-
 #define DEBUG_SMIME	0
 
 /* FIXME: Use the openssl constants instead of
@@ -245,6 +244,16 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_get_details, 0)
     ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
+
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pbkdf2, 0, 0, 4)
+    ZEND_ARG_INFO(0, password)
+    ZEND_ARG_INFO(0, salt)
+    ZEND_ARG_INFO(0, key_length)
+    ZEND_ARG_INFO(0, iterations)
+    ZEND_ARG_INFO(0, digest_algorithm)
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_verify, 0, 0, 2)
     ZEND_ARG_INFO(0, filename)
@@ -455,6 +464,10 @@ const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_verify,				arginfo_openssl_verify)
 	PHP_FE(openssl_seal,				arginfo_openssl_seal)
 	PHP_FE(openssl_open,				arginfo_openssl_open)
+
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+	PHP_FE(openssl_pbkdf2,	arginfo_openssl_pbkdf2)
+#endif
 
 /* for S/MIME handling */
 	PHP_FE(openssl_pkcs7_verify,		arginfo_openssl_pkcs7_verify)
@@ -996,7 +1009,7 @@ static EVP_MD * php_openssl_get_evp_md_from_algo(long algo) { /* {{{ */
 		case OPENSSL_ALGO_SHA512:
 			mdtype = (EVP_MD *) EVP_sha512();
 			break;
-		case OPENSSL_ALGO_RIPEMD160:
+		case OPENSSL_ALGO_RMD160:
 			mdtype = (EVP_MD *) EVP_ripemd160();
 			break;
 #endif
@@ -1094,6 +1107,13 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD2", OPENSSL_ALGO_MD2, CONST_CS|CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_DSS1", OPENSSL_ALGO_DSS1, CONST_CS|CONST_PERSISTENT);
+#if OPENSSL_VERSION_NUMBER >= 0x0090708fL
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA224", OPENSSL_ALGO_SHA224, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA256", OPENSSL_ALGO_SHA256, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA384", OPENSSL_ALGO_SHA384, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA512", OPENSSL_ALGO_SHA512, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_RMD160", OPENSSL_ALGO_RMD160, CONST_CS|CONST_PERSISTENT);
+#endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x0090708fL
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA224", OPENSSL_ALGO_SHA224, CONST_CS|CONST_PERSISTENT);
@@ -3641,6 +3661,57 @@ PHP_FUNCTION(openssl_pkey_get_details)
 /* }}} */
 
 /* }}} */
+
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+
+/* {{{ proto string openssl_pbkdf2(string password, string salt, long key_length, long iterations [, string digest_method = "sha1"])
+   Generates a PKCS5 v2 PBKDF2 string, defaults to sha1 */
+PHP_FUNCTION(openssl_pbkdf2)
+{
+	long key_length = 0, iterations = 0;
+	char *password; int password_len;
+	char *salt; int salt_len;
+	char *method; int method_len = 0;
+	unsigned char *out_buffer;
+
+	const EVP_MD *digest;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssll|s",
+				&password, &password_len,
+				&salt, &salt_len,
+				&key_length, &iterations,
+				&method, &method_len) == FAILURE) {
+		return;
+	}
+
+	if (key_length <= 0) {
+		RETURN_FALSE;
+	}
+
+	if (method_len) {
+		digest = EVP_get_digestbyname(method);
+	} else {
+		digest = EVP_sha1();
+	}
+
+	if (!digest) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
+		RETURN_FALSE;
+	}
+
+	out_buffer = emalloc(key_length + 1);
+	out_buffer[key_length] = '\0';
+
+	if (PKCS5_PBKDF2_HMAC(password, password_len, (unsigned char *)salt, salt_len, iterations, digest, key_length, out_buffer) == 1) {
+		RETVAL_STRINGL((char *)out_buffer, key_length, 0);
+	} else {
+		efree(out_buffer);
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+#endif
 
 /* {{{ PKCS7 S/MIME functions */
 

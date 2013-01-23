@@ -5,6 +5,9 @@ openbase_dir runtime tightning
 if (substr(PHP_OS, 0, 3) == 'WIN') {
 	die('skip.. only for unix');
 }
+if (!is_dir("/usr/local/bin")) {
+	die('skip.. no /usr/local/bin on this machine');
+}
 --INI--
 open_basedir=/usr/local
 --FILE--

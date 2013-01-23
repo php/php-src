@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -172,7 +172,7 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zen
 	if (!(conn->options->flags & CLIENT_LOCAL_FILES)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "LOAD DATA LOCAL INFILE forbidden");
 		/* write empty packet to server */
-		ret = net->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info TSRMLS_CC);
+		ret = net->data->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info TSRMLS_CC);
 		*is_warning = TRUE;
 		goto infile_error;
 	}
@@ -188,17 +188,17 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zen
 		char tmp_buf[sizeof(conn->error_info->error)];
 		int tmp_error_no;
 		*is_warning = TRUE;
-		/* error occured */
+		/* error occurred */
 		tmp_error_no = infile.local_infile_error(info, tmp_buf, sizeof(tmp_buf) TSRMLS_CC);
 		SET_CLIENT_ERROR(*conn->error_info, tmp_error_no, UNKNOWN_SQLSTATE, tmp_buf);
 		/* write empty packet to server */
-		ret = net->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info TSRMLS_CC);
+		ret = net->data->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info TSRMLS_CC);
 		goto infile_error;
 	}
 
 	/* read data */
 	while ((bufsize = infile.local_infile_read (info, buf + MYSQLND_HEADER_SIZE, buflen - MYSQLND_HEADER_SIZE TSRMLS_CC)) > 0) {
-		if ((ret = net->m.send_ex(net, buf, bufsize, conn->stats, conn->error_info TSRMLS_CC)) == 0) {
+		if ((ret = net->data->m.send_ex(net, buf, bufsize, conn->stats, conn->error_info TSRMLS_CC)) == 0) {
 			DBG_ERR_FMT("Error during read : %d %s %s", CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 			goto infile_error;
@@ -206,12 +206,12 @@ mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zen
 	}
 
 	/* send empty packet for eof */
-	if ((ret = net->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info TSRMLS_CC)) == 0) {
+	if ((ret = net->data->m.send_ex(net, empty_packet, 0, conn->stats, conn->error_info TSRMLS_CC)) == 0) {
 		SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_LOST, UNKNOWN_SQLSTATE, lost_conn);
 		goto infile_error;
 	}
 
-	/* error during read occured */
+	/* error during read occurred */
 	if (bufsize < 0) {
 		char tmp_buf[sizeof(conn->error_info->error)];
 		int tmp_error_no;

@@ -14,6 +14,7 @@
 #include "zlog.h"
 #include "fpm_atomic.h"
 #include "fpm_conf.h"
+#include "fpm_php.h"
 #include <ext/standard/html.h>
 
 static char *fpm_status_uri = NULL;
@@ -125,13 +126,13 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 		}
 
 		/* full status ? */
-		full = SG(request_info).request_uri && strstr(SG(request_info).query_string, "full");
+		full = (fpm_php_get_string_from_table("_GET", "full" TSRMLS_CC) != NULL);
 		short_syntax = short_post = NULL;
 		full_separator = full_pre = full_syntax = full_post = NULL;
 		encode = 0;
 
 		/* HTML */
-		if (SG(request_info).query_string && strstr(SG(request_info).query_string, "html")) {
+		if (fpm_php_get_string_from_table("_GET", "html" TSRMLS_CC)) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/html"), 1, 1 TSRMLS_CC);
 			time_format = "%d/%b/%Y:%H:%M:%S %z";
 			encode = 1;
@@ -147,7 +148,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 					"<tr><th>start time</th><td>%s</td></tr>\n"
 					"<tr><th>start since</th><td>%lu</td></tr>\n"
 					"<tr><th>accepted conn</th><td>%lu</td></tr>\n"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 					"<tr><th>listen queue</th><td>%u</td></tr>\n"
 					"<tr><th>max listen queue</th><td>%u</td></tr>\n"
 					"<tr><th>listen queue len</th><td>%d</td></tr>\n"
@@ -157,6 +158,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 					"<tr><th>total processes</th><td>%d</td></tr>\n"
 					"<tr><th>max active processes</th><td>%d</td></tr>\n"
 					"<tr><th>max children reached</th><td>%u</td></tr>\n"
+					"<tr><th>slow requests</th><td>%lu</td></tr>\n"
 				"</table>\n";
 
 			if (!full) {
@@ -176,7 +178,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 						"<th>content length</th>"
 						"<th>user</th>"
 						"<th>script</th>"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 						"<th>last request cpu</th>"
 #endif
 						"<th>last request memory</th>"
@@ -195,7 +197,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 						"<td>%zu</td>"
 						"<td>%s</td>"
 						"<td>%s</td>"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 						"<td>%.2f</td>"
 #endif
 						"<td>%zu</td>"
@@ -205,7 +207,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 			}
 
 		/* XML */
-		} else if (SG(request_info).request_uri && strstr(SG(request_info).query_string, "xml")) {
+		} else if (fpm_php_get_string_from_table("_GET", "xml" TSRMLS_CC)) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: text/xml"), 1, 1 TSRMLS_CC);
 			time_format = "%s";
 			encode = 1;
@@ -218,7 +220,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"<start-time>%s</start-time>\n"
 				"<start-since>%lu</start-since>\n"
 				"<accepted-conn>%lu</accepted-conn>\n"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 				"<listen-queue>%u</listen-queue>\n"
 				"<max-listen-queue>%u</max-listen-queue>\n"
 				"<listen-queue-len>%d</listen-queue-len>\n"
@@ -227,7 +229,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"<active-processes>%d</active-processes>\n"
 				"<total-processes>%d</total-processes>\n"
 				"<max-active-processes>%d</max-active-processes>\n"
-				"<max-children-reached>%u</max-children-reached>\n";
+				"<max-children-reached>%u</max-children-reached>\n"
+				"<slow-requests>%lu</slow-requests>\n";
 
 				if (!full) {
 					short_post = "</status>";
@@ -246,7 +249,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 							"<content-length>%zu</content-length>"
 							"<user>%s</user>"
 							"<script>%s</script>"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 							"<last-request-cpu>%.2f</last-request-cpu>"
 #endif
 							"<last-request-memory>%zu</last-request-memory>"
@@ -256,7 +259,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				}
 
 			/* JSON */
-		} else if (SG(request_info).request_uri && strstr(SG(request_info).query_string, "json")) {
+		} else if (fpm_php_get_string_from_table("_GET", "json" TSRMLS_CC)) {
 			sapi_add_header_ex(ZEND_STRL("Content-Type: application/json"), 1, 1 TSRMLS_CC);
 			time_format = "%s";
 
@@ -267,7 +270,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"\"start time\":%s,"
 				"\"start since\":%lu,"
 				"\"accepted conn\":%lu,"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 				"\"listen queue\":%u,"
 				"\"max listen queue\":%u,"
 				"\"listen queue len\":%d,"
@@ -276,7 +279,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"\"active processes\":%d,"
 				"\"total processes\":%d,"
 				"\"max active processes\":%d,"
-				"\"max children reached\":%u";
+				"\"max children reached\":%u,"
+				"\"slow requests\":%lu";
 
 			if (!full) {
 				short_post = "}";
@@ -296,7 +300,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 					"\"content length\":%zu,"
 					"\"user\":\"%s\","
 					"\"script\":\"%s\","
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 					"\"last request cpu\":%.2f,"
 #endif
 					"\"last request memory\":%zu"
@@ -316,7 +320,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"start time:           %s\n"
 				"start since:          %lu\n"
 				"accepted conn:        %lu\n"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 				"listen queue:         %u\n"
 				"max listen queue:     %u\n"
 				"listen queue len:     %d\n"
@@ -325,7 +329,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"active processes:     %d\n"
 				"total processes:      %d\n"
 				"max active processes: %d\n"
-				"max children reached: %u\n";
+				"max children reached: %u\n"
+				"slow requests:        %lu\n";
 
 				if (full) {
 					full_syntax =
@@ -357,7 +362,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				time_buffer,
 				now_epoch - scoreboard.start_epoch,
 				scoreboard.requests,
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 				scoreboard.lq,
 				scoreboard.lq_max,
 				scoreboard.lq_len,
@@ -366,7 +371,8 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				scoreboard.active,
 				scoreboard.idle + scoreboard.active,
 				scoreboard.active_max,
-				scoreboard.max_children_reached);
+				scoreboard.max_children_reached,
+				scoreboard.slow_rq);
 
 		PUTS(buffer);
 		efree(buffer);

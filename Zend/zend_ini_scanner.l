@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -445,11 +445,39 @@ SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 	return '=';
 }
 
-<ST_RAW>{RAW_VALUE_CHARS}+ { /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
+<ST_RAW>{RAW_VALUE_CHARS} { /* Raw value, only used when SCNG(scanner_mode) == ZEND_INI_SCANNER_RAW. */
+	char *sc = NULL;
+	while (YYCURSOR < YYLIMIT) {
+		switch (*YYCURSOR) {
+			case '\n':
+			case '\r':
+				goto end_raw_value_chars;
+				break;
+			case ';':
+				if (sc == NULL) {
+					sc = YYCURSOR;
+				}
+				/* no break */
+			default:
+				YYCURSOR++;
+				break;
+		}
+	}
+end_raw_value_chars:
+	yyleng = YYCURSOR - SCNG(yy_text);
+
+	/* Eat trailing semicolons */
+	while (yytext[yyleng - 1] == ';') {
+		yyleng--;
+	}
+
 	/* Eat leading and trailing double quotes */
 	if (yytext[0] == '"' && yytext[yyleng - 1] == '"') {
 		SCNG(yy_text)++;
 		yyleng = yyleng - 2;
+	} else if (sc) {
+		YYCURSOR = sc;
+		yyleng = YYCURSOR - SCNG(yy_text);
 	}
 	RETURN_TOKEN(TC_RAW, yytext, yyleng);
 }

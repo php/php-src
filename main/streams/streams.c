@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1023,8 +1023,8 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 	char	*ret_buf,				/* returned buffer */
 			*found_delim = NULL;
 	size_t	buffered_len,
-			tent_ret_len;			/* tentative returned length*/
-	int		has_delim	 = delim_len > 0 && delim[0] != '\0';
+			tent_ret_len;			/* tentative returned length */
+	int		has_delim	 = delim_len > 0;
 
 	if (maxlen == 0) {
 		return NULL;
@@ -1055,9 +1055,17 @@ PHPAPI char *php_stream_get_record(php_stream *stream, size_t maxlen, size_t *re
 		if (has_delim) {
 			/* search for delimiter, but skip buffered_len (the number of bytes
 			 * buffered before this loop iteration), as they have already been
-			 * searched for the delimiter */
+			 * searched for the delimiter.
+			 * The left part of the delimiter may still remain in the buffer,
+			 * so subtract up to <delim_len - 1> from buffered_len, which is
+			 * the ammount of data we skip on this search  as an optimization
+			 */
 			found_delim = _php_stream_search_delim(
-				stream, maxlen, buffered_len, delim, delim_len TSRMLS_CC);
+				stream, maxlen,
+				buffered_len >= (delim_len - 1)
+						? buffered_len - (delim_len - 1)
+						: 0,
+				delim, delim_len TSRMLS_CC);
 			if (found_delim) {
 				break;
 			}
@@ -1432,7 +1440,12 @@ PHPAPI size_t _php_stream_copy_to_mem(php_stream *src, char **buf, size_t maxlen
 			len += ret;
 			ptr += ret;
 		}
-		*ptr = '\0';
+		if (len) {
+			*ptr = '\0';
+		} else {
+			pefree(*buf, persistent);
+			*buf = NULL;
+		}
 		return len;
 	}
 
@@ -2258,8 +2271,8 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 	php_stream *stream;
 	php_stream_dirent sdp;
 	char **vector = NULL;
-	int vector_size = 0;
-	int nfiles = 0;
+	unsigned int vector_size = 0;
+	unsigned int nfiles = 0;
 
 	if (!namelist) {
 		return FAILURE;
@@ -2275,14 +2288,24 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 			if (vector_size == 0) {
 				vector_size = 10;
 			} else {
+				if(vector_size*2 < vector_size) {
+					/* overflow */
+					efree(vector);
+					return FAILURE;
+				}
 				vector_size *= 2;
 			}
-			vector = (char **) erealloc(vector, vector_size * sizeof(char *));
+			vector = (char **) safe_erealloc(vector, vector_size, sizeof(char *), 0);
 		}
 
 		vector[nfiles] = estrdup(sdp.d_name);
 
 		nfiles++;
+		if(vector_size < 10 || nfiles == 0) {
+			/* overflow */
+			efree(vector);
+			return FAILURE;
+		}
 	}
 	php_stream_closedir(stream);
 

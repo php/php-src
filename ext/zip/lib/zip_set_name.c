@@ -41,12 +41,12 @@
 
 
 int
-_zip_set_name(struct zip *za, int idx, const char *name)
+_zip_set_name(struct zip *za, zip_uint64_t idx, const char *name)
 {
     char *s;
-    int i;
+    zip_int64_t i;
     
-    if (idx < 0 || idx >= za->nentry || name == NULL) {
+    if (idx >= za->nentry || name == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
     }

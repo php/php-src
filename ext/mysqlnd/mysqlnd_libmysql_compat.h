@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -106,7 +106,8 @@
 #define mysql_stmt_more_results(s)		mysqlnd_stmt_more_results((s))
 #define mysql_thread_safe()				mysqlnd_thread_safe()
 #define mysql_info(r)					mysqlnd_info((r))
-#define mysql_options(r,a,b)			mysqlnd_options((r), (a), (b))
+#define mysql_options(c,a,v)			mysqlnd_options((c), (a), (v))
+#define mysql_options4(c,a,k,v)			mysqlnd_options4((c), (a), (k), (v))
 #define mysql_stmt_init(r)				mysqlnd_stmt_init((r))
 #define mysql_free_result(r)			mysqlnd_free_result((r), FALSE)
 #define mysql_store_result(r)			mysqlnd_store_result((r))

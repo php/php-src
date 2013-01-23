@@ -125,6 +125,12 @@ require_once('skipifconnectfailure.inc');
 		$expected_constants['MYSQLI_SERVER_QUERY_WAS_SLOW'] = true;
 	}
 
+
+	/* First introduced in MySQL 6.0, backported to MySQL 5.5 */
+	if ($version >= 50606 || $IS_MYSQLND) {
+		$expected_constants['MYSQLI_SERVER_PUBLIC_KEY'] = true;
+	}
+
 	if ($version > 50002) {
 		$expected_constants = array_merge($expected_constants, array(
 			"MYSQLI_TYPE_NEWDECIMAL"	=> true,
@@ -176,6 +182,10 @@ require_once('skipifconnectfailure.inc');
 		}
 	}
 
+	if (($IS_MYSQLND && version_compare(PHP_VERSION, ' 5.4.12-dev', '>=')) || (!$IS_MYSQLND && ($version > 50610))) {
+		/* could be that MySQL/libmysql 5.6.9 had the flag already but it was no stable release */
+		$expected_constants["MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
+	}
 
 	$unexpected_constants = array();
 

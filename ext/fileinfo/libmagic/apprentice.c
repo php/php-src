@@ -63,9 +63,6 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.173 2011/12/08 12:38:24 rrt Exp $")
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
-#ifndef PHP_WIN32
-#include <dirent.h>
-#endif
 
 #define	EATAB {while (isascii((unsigned char) *l) && \
 		      isspace((unsigned char) *l))  ++l;}
@@ -753,14 +750,16 @@ private int
 apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
     const char *fn, int action)
 {
-	int errs = 0;
+	int errs = 0; 
 	struct magic_entry *marray;
 	uint32_t marraycount, i, mentrycount = 0, starttest;
 	size_t files = 0, maxfiles = 0;
-	char **filearr = NULL, mfn[MAXPATHLEN];
+	char **filearr = NULL;
 	struct stat st;
-	DIR *dir;
-	struct dirent *d;
+	php_stream *dir;
+	php_stream_dirent d;
+
+	TSRMLS_FETCH();
 
 	ms->flags |= MAGIC_CHECK;	/* Enable checks for parsed files */
 
@@ -776,17 +775,20 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
         /* FIXME: Read file names and sort them to prevent
            non-determinism. See Debian bug #488562. */
 	if (php_sys_stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
-		dir = opendir(fn);
+		int mflen;
+		char mfn[MAXPATHLEN];
+
+		dir = php_stream_opendir(fn, REPORT_ERRORS, NULL);
 		if (!dir) {
 			errs++;
 			goto out;
 		}
-		while ((d = readdir(dir)) != NULL) {
-			if (snprintf(mfn, sizeof(mfn), "%s/%s", fn, d->d_name) < 0) {
+		while (php_stream_readdir(dir, &d)) {
+			if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d.d_name)) < 0) {
 				file_oomem(ms,
-				    strlen(fn) + strlen(d->d_name) + 2);
+				strlen(fn) + strlen(d.d_name) + 2);
 				errs++;
-				closedir(dir);
+				php_stream_closedir(dir);
 				goto out;
 			}
 			if (stat(mfn, &st) == -1 || !S_ISREG(st.st_mode)) {
@@ -799,19 +801,19 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 				if ((filearr = CAST(char **,
 				    realloc(filearr, mlen))) == NULL) {
 					file_oomem(ms, mlen);
-					closedir(dir);
+					php_stream_closedir(dir);
 					errs++;
 					goto out;
 				}
 			}
-			filearr[files++] = mfn;
+			filearr[files++] = estrndup(mfn, (mflen > sizeof(mfn) - 1)? sizeof(mfn) - 1: mflen);
 		}
-		closedir(dir);
+		php_stream_closedir(dir);
 		qsort(filearr, files, sizeof(*filearr), cmpstrp);
 		for (i = 0; i < files; i++) {
 			load_1(ms, action, filearr[i], &errs, &marray,
 			    &marraycount);
-			free(filearr[i]);
+			efree(filearr[i]);
 		}
 		free(filearr);
 	} else
@@ -886,9 +888,14 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 		mentrycount += marray[i].cont_count;
 	}
 out:
-	for (i = 0; i < marraycount; i++)
-		efree(marray[i].mp);
-	efree(marray);
+	for (i = 0; i < marraycount; i++) {
+		if (marray[i].mp) {
+			efree(marray[i].mp);
+		}
+	}
+	if (marray) {
+		efree(marray);
+	}
 	if (errs) {
 		*magicp = NULL;
 		*nmagicp = 0;
@@ -1165,6 +1172,9 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 			return -1;
 		}
 		me = &(*mentryp)[*nmentryp - 1];
+		if (me->mp == NULL) {
+			return -1;
+		}
 		if (me->cont_count == me->max_count) {
 			struct magic *nm;
 			size_t cnt = me->max_count + ALLOC_CHUNK;
@@ -1329,6 +1339,10 @@ parse(struct magic_set *ms, struct magic_entry **mentryp, uint32_t *nmentryp,
 	if (m->type == FILE_INVALID) {
 		if (ms->flags & MAGIC_CHECK)
 			file_magwarn(ms, "type `%s' invalid", l);
+		if (me->mp) {
+			efree(me->mp);
+			me->mp = NULL;
+		}
 		return -1;
 	}
 
@@ -2192,6 +2206,16 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 		goto internal_loaded;
 	}
 
+#ifdef PHP_WIN32
+	/* Don't bother on windows with php_stream_open_wrapper,
+	return to give apprentice_load() a chance. */
+	if (php_stream_stat_path_ex(fn, 0, &st, NULL) == SUCCESS) {
+               if (st.sb.st_mode & S_IFDIR) {
+                       goto error2;
+               }
+       }
+#endif
+
 	dbname = mkdbname(ms, fn, 0);
 	if (dbname == NULL)
 		goto error2;
@@ -2219,6 +2243,7 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	mm = emalloc((size_t)st.sb.st_size);
 	if (php_stream_read(stream, mm, (size_t)st.sb.st_size) != (size_t)st.sb.st_size) {
 		file_badread(ms);
+		ret = 1;
 		goto error1;
 	}
 	ret = 1;
@@ -2382,7 +2407,11 @@ mkdbname(struct magic_set *ms, const char *fn, int strip)
 	/* Compatibility with old code that looked in .mime */
 	if (ms->flags & MAGIC_MIME) {
 		spprintf(&buf, MAXPATHLEN, "%.*s.mime%s", (int)(q - fn), fn, ext);
+#ifdef PHP_WIN32
+		if (VCWD_ACCESS(buf, R_OK) == 0) {
+#else
 		if (VCWD_ACCESS(buf, R_OK) != -1) {
+#endif
 			ms->flags &= MAGIC_MIME_TYPE;
 			return buf;
 		}

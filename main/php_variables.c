@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,6 @@
 #include "php_globals.h"
 #include "php_content_types.h"
 #include "SAPI.h"
-#include "php_logos.h"
 #include "zend_globals.h"
 
 /* for systems that need to override reading of environment variables */
@@ -529,22 +528,6 @@ static void php_build_argv(char *s, zval *track_vars_array TSRMLS_DC)
 	}
 	zval_ptr_dtor(&arr);
 	zval_ptr_dtor(&argc);
-}
-/* }}} */
-
-/* {{{ php_handle_special_queries
- */
-PHPAPI int php_handle_special_queries(TSRMLS_D)
-{
-	if (PG(expose_php) && SG(request_info).query_string && SG(request_info).query_string[0] == '=') {
-		if (php_info_logos(SG(request_info).query_string + 1 TSRMLS_CC)) {
-			return 1;
-		} else if (!strcmp(SG(request_info).query_string + 1, PHP_CREDITS_GUID)) {
-			php_print_credits(PHP_CREDITS_ALL TSRMLS_CC);
-			return 1;
-		}
-	}
-	return 0;
 }
 /* }}} */
 

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -259,9 +259,6 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 
 #if !defined(MYSQLI_USE_MYSQLND)
 	mysql->mysql->reconnect = MyG(reconnect);
-
-	/* set our own local_infile handler */
-	php_set_local_infile_handler_default(mysql);
 #endif
 
 	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&MyG(allow_local_infile));
@@ -683,7 +680,7 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 	MYSQLND **p = in_array;
 	HashTable *new_hash;
 	zval **elem, **dest_elem;
-	int ret = 0;
+	int ret = 0, i = 0;
 
 	ALLOC_HASHTABLE(new_hash);
 	zend_hash_init(new_hash, zend_hash_num_elements(Z_ARRVAL_P(out_array)), NULL, ZVAL_PTR_DTOR, 0);
@@ -692,13 +689,19 @@ static int mysqlnd_zval_array_from_mysqlnd_array(MYSQLND **in_array, zval *out_a
 		 zend_hash_get_current_data(Z_ARRVAL_P(out_array), (void **) &elem) == SUCCESS;
 		 zend_hash_move_forward(Z_ARRVAL_P(out_array)))
 	{
+		i++;
 		if (Z_TYPE_PP(elem) != IS_OBJECT || !instanceof_function(Z_OBJCE_PP(elem), mysqli_link_class_entry TSRMLS_CC)) {
 			continue;
 		}
 		{
 			MY_MYSQL *mysql;
+			MYSQLI_RESOURCE *my_res;
 			mysqli_object *intern = (mysqli_object *)zend_object_store_get_object(*elem TSRMLS_CC);
-			mysql = (MY_MYSQL *) ((MYSQLI_RESOURCE *)intern->ptr)->ptr;
+			if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {
+		  		php_error_docref(NULL TSRMLS_CC, E_WARNING, "[%d] Couldn't fetch %s", i, intern->zo.ce->name);
+				continue;
+		  	}
+			mysql = (MY_MYSQL *) my_res->ptr;
 			if (mysql->mysql == *p) {
 				zend_hash_next_index_insert(new_hash, (void *)elem, sizeof(zval *), (void **)&dest_elem);
 				if (dest_elem) {
@@ -731,7 +734,7 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 	int ret = 0;
 
 	ALLOC_HASHTABLE(new_hash);
-	zend_hash_init(new_hash, zend_hash_num_elements(Z_ARRVAL_P(in_zval_array)), NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_init(new_hash, in_zval_array? zend_hash_num_elements(Z_ARRVAL_P(in_zval_array)):0, NULL, ZVAL_PTR_DTOR, 0);
 	if (in_array) {
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(in_zval_array));
 			 zend_hash_get_current_data(Z_ARRVAL_P(in_zval_array), (void **) &elem) == SUCCESS;
@@ -778,6 +781,11 @@ PHP_FUNCTION(mysqli_poll)
 	}
 	if (sec < 0 || usec < 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Negative values passed for sec and/or usec");
+		RETURN_FALSE;
+	}
+
+	if (!r_array && !e_array) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "No stream arrays were passed");
 		RETURN_FALSE;
 	}
 

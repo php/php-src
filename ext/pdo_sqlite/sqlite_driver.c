@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -760,7 +760,7 @@ static struct pdo_dbh_methods sqlite_methods = {
 
 static char *make_filename_safe(const char *filename TSRMLS_DC)
 {
-	if (*filename && strncmp(filename, ":memory:", sizeof(":memory:")-1)) {
+	if (*filename && memcmp(filename, ":memory:", sizeof(":memory:"))) {
 		char *fullpath = expand_filepath(filename, NULL TSRMLS_CC);
 
 		if (!fullpath) {

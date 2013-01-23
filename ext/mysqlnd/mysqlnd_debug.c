@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -516,8 +516,10 @@ enum mysqlnd_debug_parser_state
 static void
 MYSQLND_METHOD(mysqlnd_debug, set_mode)(MYSQLND_DEBUG * self, const char * const mode)
 {
-	unsigned int mode_len = strlen(mode), i;
+	unsigned int mode_len, i;
 	enum mysqlnd_debug_parser_state state = PARSER_WAIT_MODIFIER;
+
+	mode_len = mode? strlen(mode) : 0;
 
 	self->flags = 0;
 	self->nest_level_limit = 0;
@@ -745,21 +747,26 @@ mysqlnd_debug_init(const char * skip_functions[] TSRMLS_DC)
 PHPAPI void _mysqlnd_debug(const char * mode TSRMLS_DC)
 {
 #if PHP_DEBUG
-	MYSQLND_DEBUG *dbg = MYSQLND_G(dbg);
+	MYSQLND_DEBUG * dbg = MYSQLND_G(dbg);
 	if (!dbg) {
-		MYSQLND_G(dbg) = dbg = mysqlnd_debug_init(mysqlnd_debug_std_no_trace_funcs TSRMLS_CC);
-		if (!dbg) {
-			return;
+		struct st_mysqlnd_plugin_trace_log * trace_log_plugin = mysqlnd_plugin_find("debug_trace");
+		if (trace_log_plugin) {
+			dbg = trace_log_plugin->methods.trace_instance_init(mysqlnd_debug_std_no_trace_funcs TSRMLS_CC);
+			if (!dbg) {
+				return;
+			}
+			MYSQLND_G(dbg) = dbg;
 		}
 	}
-
-	dbg->m->close(dbg);
-	dbg->m->set_mode(dbg, mode);
-	while (zend_stack_count(&dbg->call_stack)) {
-		zend_stack_del_top(&dbg->call_stack);
-	}
-	while (zend_stack_count(&dbg->call_time_stack)) {
-		zend_stack_del_top(&dbg->call_time_stack);
+	if (dbg) {
+		dbg->m->close(dbg);
+		dbg->m->set_mode(dbg, mode);
+		while (zend_stack_count(&dbg->call_stack)) {
+			zend_stack_del_top(&dbg->call_stack);
+		}
+		while (zend_stack_count(&dbg->call_time_stack)) {
+			zend_stack_del_top(&dbg->call_time_stack);
+		}
 	}
 #endif
 }

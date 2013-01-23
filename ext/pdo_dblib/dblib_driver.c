@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -315,7 +315,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	DBSETOPT(H->link, DBTEXTSIZE, "2147483647");
 
 	/* allow double quoted indentifiers */
-	DBSETOPT(H->link, DBQUOTEDIDENT, 1);
+	DBSETOPT(H->link, DBQUOTEDIDENT, NULL);
 
 	if (vars[3].optval && FAIL == dbuse(H->link, vars[3].optval)) {
 		goto cleanup;

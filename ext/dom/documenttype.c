@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -205,7 +205,11 @@ int dom_documenttype_internal_subset_read(dom_object *obj, zval **retval TSRMLS_
 		if (buff != NULL) {
 			xmlNodeDumpOutput (buff, NULL, (xmlNodePtr) intsubset, 0, 0, NULL);
 			xmlOutputBufferFlush(buff);
+#ifdef LIBXML2_NEW_BUFFER
+			ZVAL_STRINGL(*retval, xmlOutputBufferGetContent(buff), xmlOutputBufferGetSize(buff), 1);
+#else
 			ZVAL_STRINGL(*retval, buff->buffer->content, buff->buffer->use, 1);
+#endif
 			(void)xmlOutputBufferClose(buff);
 			return SUCCESS;
 		}

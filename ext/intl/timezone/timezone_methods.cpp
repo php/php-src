@@ -18,18 +18,31 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 #include <unicode/locid.h>
 #include <unicode/timezone.h>
 #include <unicode/ustring.h>
 #include "intl_convertcpp.h"
+
+#include "../common/common_date.h"
+
 extern "C" {
+#include "../php_intl.h"
 #define USE_TIMEZONE_POINTER 1
 #include "timezone_class.h"
 #include "intl_convert.h"
-#include "../locale/locale.h"
 #include <zend_exceptions.h>
+#include <ext/date/php_date.h>
 }
 #include "common/common_enum.h"
+
+U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
+{
+	zend_throw_exception( NULL,
+		"An object of this type cannot be created with the new operator",
+		0 TSRMLS_CC );
+}
 
 U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 {
@@ -54,6 +67,37 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 
 	//guaranteed non-null; GMT if timezone cannot be understood
 	TimeZone *tz = TimeZone::createTimeZone(id);
+	timezone_object_construct(tz, return_value, 1 TSRMLS_CC);
+}
+
+U_CFUNC PHP_FUNCTION(intltz_from_date_time_zone)
+{
+	zval				*zv_timezone;
+	TimeZone			*tz;
+	php_timezone_obj	*tzobj;
+	intl_error_reset(NULL TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O",
+			&zv_timezone, php_date_get_timezone_ce()) == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intltz_from_date_time_zone: bad arguments", 0 TSRMLS_CC);
+		RETURN_NULL();
+	}
+
+	tzobj = (php_timezone_obj *)zend_objects_get_address(zv_timezone TSRMLS_CC);
+	if (!tzobj->initialized) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intltz_from_date_time_zone: DateTimeZone object is unconstructed",
+			0 TSRMLS_CC);
+		RETURN_NULL();
+	}
+
+	tz = timezone_convert_datetimezone(tzobj->type, tzobj, FALSE, NULL,
+		"intltz_from_date_time_zone" TSRMLS_CC);
+	if (tz == NULL) {
+		RETURN_NULL();
+	}
+
 	timezone_object_construct(tz, return_value, 1 TSRMLS_CC);
 }
 
@@ -547,6 +591,29 @@ U_CFUNC PHP_FUNCTION(intltz_get_dst_savings)
 	TIMEZONE_METHOD_FETCH_OBJECT;
 
 	RETURN_LONG((long)to->utimezone->getDSTSavings());
+}
+
+U_CFUNC PHP_FUNCTION(intltz_to_date_time_zone)
+{
+	TIMEZONE_METHOD_INIT_VARS;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
+			"O", &object, TimeZone_ce_ptr) == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intltz_to_date_time_zone: bad arguments", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	TIMEZONE_METHOD_FETCH_OBJECT;
+
+	zval *ret = timezone_convert_to_datetimezone(to->utimezone,
+		&TIMEZONE_ERROR(to), "intltz_to_date_time_zone" TSRMLS_CC);
+
+	if (ret) {
+		RETURN_ZVAL(ret, 1, 1);
+	} else {
+		RETURN_FALSE;
+	}
 }
 
 U_CFUNC PHP_FUNCTION(intltz_get_error_code)

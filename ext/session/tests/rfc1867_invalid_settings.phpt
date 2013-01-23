@@ -4,7 +4,11 @@ session rfc1867 invalid settings
 session.upload_progress.freq=-1
 error_log=
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php 
+include('skipif.inc');
+if(substr(PHP_OS, 0, 3) == "WIN")
+        die("skip Not for Windows");
+?>
 --FILE--
 <?php
 var_dump(ini_get("session.upload_progress.freq"));

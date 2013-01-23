@@ -18,18 +18,25 @@
 #include "config.h"
 #endif
 
+#include "../intl_cppshims.h"
+
 #include <unicode/locid.h>
 #include <unicode/calendar.h>
 #include <unicode/ustring.h>
+
 #include "../intl_convertcpp.h"
+#include "../common/common_date.h"
+
 extern "C" {
+#include "../php_intl.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1
 #include "calendar_class.h"
 #include "../intl_convert.h"
-#include "../locale/locale.h"
 #include <zend_exceptions.h>
+#include <zend_interfaces.h>
+#include <ext/date/php_date.h>
 }
 #include "../common/common_enum.h"
 
@@ -56,7 +63,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 		RETURN_NULL();
 	}
 
-	timeZone = timezone_process_timezone_argument(zv_timezone,
+	timeZone = timezone_process_timezone_argument(zv_timezone, NULL,
 		"intlcal_create_instance" TSRMLS_CC);
 	if (timeZone == NULL) {
 		RETURN_NULL();
@@ -323,11 +330,10 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 {
 	zval			*zv_timezone;
 	TimeZone		*timeZone;
-	TimeZone_object	*tzo;
 	CALENDAR_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
-			"OO!", &object, Calendar_ce_ptr, &zv_timezone, TimeZone_ce_ptr) == FAILURE) {
+			"Oz!", &object, Calendar_ce_ptr, &zv_timezone) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_set_time_zone: bad arguments", 0 TSRMLS_CC);
 		RETURN_FALSE;
@@ -338,18 +344,10 @@ U_CFUNC PHP_FUNCTION(intlcal_set_time_zone)
 	if (zv_timezone == NULL) {
 		RETURN_TRUE; /* the method does nothing if passed null */
 	}
-
-	tzo = static_cast<TimeZone_object*>(
-		zend_object_store_get_object(zv_timezone TSRMLS_CC));
-	if (tzo->utimezone == NULL) {
-		intl_errors_set(&co->err, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set_time_zone: found unsconstructed IntlTimeZone", 0 TSRMLS_CC);
-		RETURN_FALSE;
-	}
-	timeZone = tzo->utimezone->clone();
+	
+	timeZone = timezone_process_timezone_argument(&zv_timezone,
+		CALENDAR_ERROR_P(co), "intlcal_set_time_zone" TSRMLS_CC);
 	if (timeZone == NULL) {
-		intl_errors_set(&co->err, U_MEMORY_ALLOCATION_ERROR,
-			"intlcal_set_time_zone: error cloning ICU TimeZone", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -1113,6 +1111,179 @@ U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 }
 
 #endif
+
+U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
+{
+	zval			**zv_arg,
+					*zv_datetime		= NULL,
+					*zv_timestamp		= NULL;
+	php_date_obj	*datetime;
+	char			*locale_str			= NULL;
+	int				locale_str_len;
+	TimeZone		*timeZone;
+	UErrorCode		status				= U_ZERO_ERROR;
+	Calendar        *cal;
+	intl_error_reset(NULL TSRMLS_CC);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|s!",
+			&zv_arg, &locale_str, &locale_str_len) == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_from_date_time: bad arguments", 0 TSRMLS_CC);
+		RETURN_NULL();
+	}
+
+	if (!(Z_TYPE_PP(zv_arg) == IS_OBJECT && instanceof_function(
+			Z_OBJCE_PP(zv_arg), php_date_get_date_ce() TSRMLS_CC))) {
+		ALLOC_INIT_ZVAL(zv_datetime);
+		object_init_ex(zv_datetime, php_date_get_date_ce());
+		zend_call_method_with_1_params(&zv_datetime, NULL, NULL, "__construct",
+			NULL, *zv_arg);
+		if (EG(exception)) {
+			zend_object_store_ctor_failed(zv_datetime TSRMLS_CC);
+			goto error;
+		}
+	} else {
+		zv_datetime = *zv_arg;
+	}
+
+	datetime = (php_date_obj*)zend_object_store_get_object(zv_datetime TSRMLS_CC);
+	if (!datetime->time) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_from_date_time: DateTime object is unconstructed",
+			0 TSRMLS_CC);
+		goto error;
+	}
+
+	zend_call_method_with_0_params(&zv_datetime, php_date_get_date_ce(),
+		NULL, "gettimestamp", &zv_timestamp);
+	if (!zv_timestamp || Z_TYPE_P(zv_timestamp) != IS_LONG) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_from_date_time: bad DateTime; call to "
+			"DateTime::getTimestamp() failed", 0 TSRMLS_CC);
+		goto error;
+	}
+
+	if (!datetime->time->is_localtime) {
+		timeZone = TimeZone::getGMT()->clone();
+	} else {
+		timeZone = timezone_convert_datetimezone(datetime->time->zone_type,
+			datetime, 1, NULL, "intlcal_from_date_time" TSRMLS_CC);
+		if (timeZone == NULL) {
+			goto error;
+		}
+	}
+
+	if (!locale_str) {
+		locale_str = const_cast<char*>(intl_locale_get_default(TSRMLS_C));
+	}
+
+	cal = Calendar::createInstance(timeZone,
+		Locale::createFromName(locale_str), status);
+	if (cal == NULL) {
+		delete timeZone;
+		intl_error_set(NULL, status, "intlcal_from_date_time: "
+				"error creating ICU Calendar object", 0 TSRMLS_CC);
+		goto error;
+	}
+	cal->setTime(((UDate)Z_LVAL_P(zv_timestamp)) * 1000., status);
+    if (U_FAILURE(status)) {
+		/* time zone was adopted by cal; should not be deleted here */
+		delete cal;
+		intl_error_set(NULL, status, "intlcal_from_date_time: "
+				"error creating ICU Calendar::setTime()", 0 TSRMLS_CC);
+        goto error;
+    }
+
+	calendar_object_create(return_value, cal TSRMLS_CC);
+
+error:
+	if (zv_datetime != *zv_arg) {
+		zval_ptr_dtor(&zv_datetime);
+	}
+	if (zv_timestamp) {
+		zval_ptr_dtor(&zv_timestamp);
+	}
+}
+
+U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
+{
+	zval *retval = NULL;
+	CALENDAR_METHOD_INIT_VARS;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O",
+			&object, Calendar_ce_ptr) == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_to_date_time: bad arguments", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+
+	CALENDAR_METHOD_FETCH_OBJECT;
+
+	/* There are no exported functions in ext/date to this
+	 * in a more native fashion */
+	double	date = co->ucal->getTime(CALENDAR_ERROR_CODE(co)) / 1000.;
+	int64_t	ts;
+	char	ts_str[sizeof("@-9223372036854775808")];
+	int		ts_str_len;
+	zval	ts_zval = zval_used_for_init;
+
+	INTL_METHOD_CHECK_STATUS(co, "Call to ICU method has failed");
+
+	if (date > (double)U_INT64_MAX || date < (double)U_INT64_MIN) {
+		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_to_date_time: The calendar date is out of the "
+			"range for a 64-bit integer", 0 TSRMLS_CC);
+		RETURN_FALSE;
+	}
+	
+	ts = (int64_t)date;
+
+	ts_str_len = slprintf(ts_str, sizeof(ts_str), "@%I64d", ts);
+	ZVAL_STRINGL(&ts_zval, ts_str, ts_str_len, 0);
+
+	/* Now get the time zone */
+	const TimeZone& tz = co->ucal->getTimeZone();
+	zval *timezone_zval = timezone_convert_to_datetimezone(
+		&tz, CALENDAR_ERROR_P(co), "intlcal_to_date_time" TSRMLS_CC);
+	if (timezone_zval == NULL) {
+		RETURN_FALSE;
+	}
+
+	/* resources allocated from now on */
+
+	/* Finally, instantiate object and call constructor */
+	object_init_ex(return_value, php_date_get_date_ce());
+	zend_call_method_with_2_params(&return_value, NULL, NULL, "__construct",
+			NULL, &ts_zval, timezone_zval);
+	if (EG(exception)) {
+		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_to_date_time: DateTime constructor has thrown exception",
+			1 TSRMLS_CC);
+		zend_object_store_ctor_failed(return_value TSRMLS_CC);
+		zval_ptr_dtor(&return_value);
+
+		RETVAL_FALSE;
+		goto error;
+	}
+
+	/* due to bug #40743, we have to set the time zone again */
+	zend_call_method_with_1_params(&return_value, NULL, NULL, "settimezone",
+			&retval, timezone_zval);
+	if (retval == NULL || Z_TYPE_P(retval) == IS_BOOL) {
+		intl_errors_set(CALENDAR_ERROR_P(co), U_ILLEGAL_ARGUMENT_ERROR,
+			"intlcal_to_date_time: call to DateTime::setTimeZone has failed",
+			1 TSRMLS_CC);
+		zval_ptr_dtor(&return_value);
+		RETVAL_FALSE;
+		goto error;
+	}
+
+error:
+	zval_ptr_dtor(&timezone_zval);
+	if (retval != NULL) {
+		zval_ptr_dtor(&retval);
+	}
+}
 
 U_CFUNC PHP_FUNCTION(intlcal_get_error_code)
 {

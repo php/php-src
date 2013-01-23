@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,7 +57,8 @@
 # define h_errno		WSAGetLastError()
 # define set_errno(a)		WSASetLastError(a)
 # define close(a)		closesocket(a)
-# if _WIN32_WINNT >= 0x0600 && SOCKETS_ENABLE_VISTA_API
+# include <IPHlpApi.h>
+# if _WIN32_WINNT >= 0x0600
 #  define HAVE_IF_NAMETOINDEX 1
 # endif
 #else
@@ -77,6 +78,9 @@
 # define IS_INVALID_SOCKET(a)	(a->bsd_socket < 0)
 # define set_errno(a) (errno = a)
 # include "php_sockets.h"
+# if defined(_AIX) && !defined(HAVE_SA_SS_FAMILY)
+# define ss_family __ss_family
+# endif
 # if HAVE_IF_NAMETOINDEX
 #  include <net/if.h>
 # endif
@@ -785,6 +789,9 @@ PHP_MINIT_FUNCTION(sockets)
 #endif
 	REGISTER_LONG_CONSTANT("SO_DEBUG",		SO_DEBUG,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_REUSEADDR",	SO_REUSEADDR,	CONST_CS | CONST_PERSISTENT);
+#ifdef SO_REUSEPORT
+	REGISTER_LONG_CONSTANT("SO_REUSEPORT",	SO_REUSEPORT,	CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SO_KEEPALIVE",	SO_KEEPALIVE,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_DONTROUTE",	SO_DONTROUTE,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SO_LINGER",		SO_LINGER,		CONST_CS | CONST_PERSISTENT);

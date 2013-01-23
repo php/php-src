@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -95,6 +95,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_options)(MYSQLND_CONN_DATA * conn TSRMLS_
 		mnd_pefree(conn->options->cfg_section, pers);
 		conn->options->cfg_section = NULL;
 	}
+	if (conn->options->connect_attr) {
+		zend_hash_destroy(conn->options->connect_attr);
+		mnd_pefree(conn->options->connect_attr, pers);
+		conn->options->connect_attr = NULL;
+	}
 }
 /* }}} */
 
@@ -114,7 +119,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn TSRMLS
 	}
 
 	if (conn->net) {
-		conn->net->m.free_contents(conn->net TSRMLS_CC);
+		conn->net->data->m.free_contents(conn->net TSRMLS_CC);
 	}
 
 	DBG_INF("Freeing memory of members");
@@ -303,17 +308,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command_handle_response)(MYSQLND_CONN_D
 /* }}} */
 
 
-/* {{{ mysqlnd_conn_data::simple_command */
+/* {{{ mysqlnd_conn_data::simple_command_send_request */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_conn_data, simple_command)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
-			   const zend_uchar * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent,
-			   zend_bool ignore_upsert_status TSRMLS_DC)
+MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
+			   const zend_uchar * const arg, size_t arg_len, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
 	MYSQLND_PACKET_COMMAND * cmd_packet;
 
-	DBG_ENTER("mysqlnd_conn_data::simple_command");
-	DBG_INF_FMT("command=%s ok_packet=%u silent=%u", mysqlnd_command_to_text[command], ok_packet, silent);
+	DBG_ENTER("mysqlnd_conn_data::simple_command_send_request");
+	DBG_INF_FMT("command=%s silent=%u", mysqlnd_command_to_text[command], silent);
 
 	switch (CONN_GET_STATE(conn)) {
 		case CONN_READY:
@@ -355,13 +359,30 @@ MYSQLND_METHOD(mysqlnd_conn_data, simple_command)(MYSQLND_CONN_DATA * conn, enum
 			php_error(E_WARNING, "Error while sending %s packet. PID=%d", mysqlnd_command_to_text[command], getpid());
 		}
 		CONN_SET_STATE(conn, CONN_QUIT_SENT);
+		conn->m->send_close(conn TSRMLS_CC);
 		DBG_ERR("Server is gone");
 		ret = FAIL;
-	} else if (ok_packet != PROT_LAST) {
+	}
+	PACKET_FREE(cmd_packet);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::simple_command */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, simple_command)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command,
+			   const zend_uchar * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent,
+			   zend_bool ignore_upsert_status TSRMLS_DC)
+{
+	enum_func_status ret;
+	DBG_ENTER("mysqlnd_conn_data::simple_command");
+
+	ret = conn->m->simple_command_send_request(conn, command, arg, arg_len, silent, ignore_upsert_status TSRMLS_CC);
+	if (PASS == ret && ok_packet != PROT_LAST) {
 		ret = conn->m->simple_command_handle_response(conn, ok_packet, silent, command, ignore_upsert_status TSRMLS_CC);
 	}
 
-	PACKET_FREE(cmd_packet);
 	DBG_INF(ret == PASS ? "PASS":"FAIL");
 	DBG_RETURN(ret);
 }
@@ -440,11 +461,7 @@ mysqlnd_switch_to_ssl_if_needed(
 	if (options->charset_name && (charset = mysqlnd_find_charset_name(options->charset_name))) {
 		auth_packet->charset_no	= charset->nr;
 	} else {
-#if MYSQLND_UNICODE
-		auth_packet->charset_no	= 200;/* utf8 - swedish collation, check mysqlnd_charset.c */
-#else
 		auth_packet->charset_no	= greet_packet->charset_no;
-#endif
 	}
 
 #ifdef MYSQLND_SSL_SUPPORTED
@@ -453,13 +470,14 @@ mysqlnd_switch_to_ssl_if_needed(
 		DBG_INF("Switching to SSL");
 		if (!PACKET_WRITE(auth_packet, conn)) {
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			conn->m->send_close(conn TSRMLS_CC);
 			SET_CLIENT_ERROR(*conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
 			goto end;
 		}
 
-		conn->net->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify TSRMLS_CC);
+		conn->net->data->m.set_client_option(conn->net, MYSQL_OPT_SSL_VERIFY_SERVER_CERT, (const char *) &verify TSRMLS_CC);
 
-		if (FAIL == conn->net->m.enable_ssl(conn->net TSRMLS_CC)) {
+		if (FAIL == conn->net->data->m.enable_ssl(conn->net TSRMLS_CC)) {
 			goto end;
 		}
 	}
@@ -467,6 +485,159 @@ mysqlnd_switch_to_ssl_if_needed(
 	ret = PASS;
 end:
 	PACKET_FREE(auth_packet);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::fetch_auth_plugin_by_name */
+static struct st_mysqlnd_authentication_plugin *
+MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name)(const char * const requested_protocol TSRMLS_DC)
+{
+	struct st_mysqlnd_authentication_plugin * auth_plugin;
+	char * plugin_name = NULL;
+	DBG_ENTER("mysqlnd_conn_data::fetch_auth_plugin_by_name");
+
+	mnd_sprintf(&plugin_name, 0, "auth_plugin_%s", requested_protocol);
+	DBG_INF_FMT("looking for %s auth plugin", plugin_name);
+	auth_plugin = mysqlnd_plugin_find(plugin_name);
+	mnd_sprintf_free(plugin_name);
+
+	DBG_RETURN(auth_plugin);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_run_authentication */
+static enum_func_status
+mysqlnd_run_authentication(
+			MYSQLND_CONN_DATA * conn,
+			const char * const user,
+			const char * const passwd,
+			const size_t passwd_len,
+			const char * const db,
+			const size_t db_len,
+			const zend_uchar * const auth_plugin_data,
+			const size_t auth_plugin_data_len,
+			const char * const auth_protocol,
+			unsigned int charset_no,
+			const MYSQLND_OPTIONS * const options,
+			unsigned long mysql_flags,
+			zend_bool silent,
+			zend_bool is_change_user
+			TSRMLS_DC)
+{
+	enum_func_status ret = FAIL;
+	zend_bool first_call = TRUE;
+
+	char * switch_to_auth_protocol = NULL;
+	size_t switch_to_auth_protocol_len = 0;
+	char * requested_protocol = NULL;
+	zend_uchar * plugin_data;
+	size_t plugin_data_len;
+
+	DBG_ENTER("mysqlnd_run_authentication");
+
+	plugin_data_len = auth_plugin_data_len;
+	plugin_data = mnd_emalloc(plugin_data_len + 1);
+	if (!plugin_data) {
+		goto end;
+	}
+	memcpy(plugin_data, auth_plugin_data, plugin_data_len);
+	plugin_data[plugin_data_len] = '\0';
+
+	requested_protocol = mnd_pestrdup(auth_protocol? auth_protocol : MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
+	if (!requested_protocol) {
+		goto end;
+	}
+
+	do {
+		struct st_mysqlnd_authentication_plugin * auth_plugin = conn->m->fetch_auth_plugin_by_name(requested_protocol TSRMLS_CC);
+
+		if (!auth_plugin) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
+			SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method umknown to the client");
+			goto end;
+		}
+		DBG_INF("plugin found");
+
+		{
+			zend_uchar * switch_to_auth_protocol_data = NULL;
+			size_t switch_to_auth_protocol_data_len = 0;
+			zend_uchar * scrambled_data = NULL;
+			size_t scrambled_data_len = 0;
+
+			switch_to_auth_protocol = NULL;
+			switch_to_auth_protocol_len = 0;
+
+			if (conn->auth_plugin_data) {
+				mnd_pefree(conn->auth_plugin_data, conn->persistent);
+				conn->auth_plugin_data = NULL;
+			}
+			conn->auth_plugin_data_len = plugin_data_len;
+			conn->auth_plugin_data = mnd_pemalloc(conn->auth_plugin_data_len, conn->persistent);
+			if (!conn->auth_plugin_data) {
+				SET_OOM_ERROR(*conn->error_info);
+				goto end;
+			}
+			memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
+
+			DBG_INF_FMT("salt(%d)=[%.*s]", plugin_data_len, plugin_data_len, plugin_data);
+			/* The data should be allocated with malloc() */
+			scrambled_data =
+				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
+												   plugin_data, plugin_data_len, options, &conn->net->data->options, mysql_flags TSRMLS_CC);
+			if (conn->error_info->error_no) {
+				goto end;	
+			}
+			if (FALSE == is_change_user) {
+				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, options, mysql_flags,
+											charset_no,
+											first_call,
+											requested_protocol,
+											scrambled_data, scrambled_data_len,
+											&switch_to_auth_protocol, &switch_to_auth_protocol_len,
+											&switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
+											TSRMLS_CC);
+			} else {
+				ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, passwd_len, db, db_len, silent,
+											   first_call,
+											   requested_protocol,
+											   scrambled_data, scrambled_data_len,
+											   &switch_to_auth_protocol, &switch_to_auth_protocol_len,
+											   &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
+											   TSRMLS_CC);				
+			}
+			first_call = FALSE;
+			free(scrambled_data);
+
+			DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
+			if (requested_protocol && switch_to_auth_protocol) {
+				mnd_efree(requested_protocol);
+				requested_protocol = switch_to_auth_protocol;
+			}
+
+			if (plugin_data) {
+				mnd_efree(plugin_data);
+			}
+			plugin_data_len = switch_to_auth_protocol_data_len;
+			plugin_data = switch_to_auth_protocol_data;
+		}
+		DBG_INF_FMT("conn->error_info->error_no = %d", conn->error_info->error_no);
+	} while (ret == FAIL && conn->error_info->error_no == 0 && switch_to_auth_protocol != NULL);
+		
+	if (ret == PASS) {
+		DBG_INF_FMT("saving requested_protocol=%s", requested_protocol);
+		conn->m->set_client_option(conn, MYSQLND_OPT_AUTH_PROTOCOL, requested_protocol TSRMLS_CC);
+	}
+end:
+	if (plugin_data) {
+		mnd_efree(plugin_data);
+	}
+	if (requested_protocol) {
+		mnd_efree(requested_protocol);
+	}
+
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -491,116 +662,165 @@ mysqlnd_connect_run_authentication(
 
 	ret = mysqlnd_switch_to_ssl_if_needed(conn, greet_packet, options, mysql_flags TSRMLS_CC);
 	if (PASS == ret) {
-		zend_bool first_call = TRUE;
+		ret = mysqlnd_run_authentication(conn, user, passwd, passwd_len, db, db_len,
+										 greet_packet->auth_plugin_data, greet_packet->auth_plugin_data_len, greet_packet->auth_protocol,
+										 greet_packet->charset_no, options, mysql_flags, FALSE /*silent*/, FALSE/*is_change*/ TSRMLS_CC);
+	}
+	DBG_RETURN(ret);
+}
+/* }}} */
 
-		char * switch_to_auth_protocol = NULL;
-		size_t switch_to_auth_protocol_len = 0;
-		char * requested_protocol = NULL;
-		zend_uchar * plugin_data;
-		size_t plugin_data_len;
 
-		plugin_data_len = greet_packet->auth_plugin_data_len;
-		plugin_data = mnd_emalloc(plugin_data_len + 1);
-		if (!plugin_data) {
-			ret = FAIL;
-			goto end;
-		}
-		memcpy(plugin_data, greet_packet->auth_plugin_data, plugin_data_len);
-		plugin_data[plugin_data_len] = '\0';
+/* {{{ mysqlnd_conn_data::execute_init_commands */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands)(MYSQLND_CONN_DATA * conn TSRMLS_DC)
+{
+	enum_func_status ret = PASS;
 
-		requested_protocol = mnd_pestrdup(greet_packet->auth_protocol? greet_packet->auth_protocol: "mysql_native_password", FALSE);
-		if (!requested_protocol) {
-			ret = FAIL;
-			goto end;
-		}
-
-		do {
-			struct st_mysqlnd_authentication_plugin * auth_plugin;
-			{
-				char * plugin_name = NULL;
-
-				mnd_sprintf(&plugin_name, 0, "auth_plugin_%s", requested_protocol);
-
-				DBG_INF_FMT("looking for %s auth plugin", plugin_name);
-				auth_plugin = mysqlnd_plugin_find(plugin_name);
-				mnd_sprintf_free(plugin_name);
-
-				if (!auth_plugin) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
-					SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method umknown to the client");
+	DBG_ENTER("mysqlnd_conn_data::execute_init_commands");
+	if (conn->options->init_commands) {
+		unsigned int current_command = 0;
+		for (; current_command < conn->options->num_commands; ++current_command) {
+			const char * const command = conn->options->init_commands[current_command];
+			if (command) {
+				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_INIT_COMMAND_EXECUTED_COUNT);
+				if (PASS != conn->m->query(conn, command, strlen(command) TSRMLS_CC)) {
+					MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_INIT_COMMAND_FAILED_COUNT);
+					ret = FAIL;
 					break;
 				}
+				if (conn->last_query_type == QUERY_SELECT) {
+					MYSQLND_RES * result = conn->m->use_result(conn TSRMLS_CC);
+					if (result) {
+						result->m.free_result(result, TRUE TSRMLS_CC);
+					}
+				}
 			}
-			DBG_INF("plugin found");
-
-			{
-				zend_uchar * switch_to_auth_protocol_data = NULL;
-				size_t switch_to_auth_protocol_data_len = 0;
-				zend_uchar * scrambled_data = NULL;
-				size_t scrambled_data_len = 0;
-
-				switch_to_auth_protocol = NULL;
-				switch_to_auth_protocol_len = 0;
-
-				if (conn->auth_plugin_data) {
-					mnd_pefree(conn->auth_plugin_data, conn->persistent);
-					conn->auth_plugin_data = NULL;
-				}
-				conn->auth_plugin_data_len = plugin_data_len;
-				conn->auth_plugin_data = mnd_pemalloc(conn->auth_plugin_data_len, conn->persistent);
-				if (!conn->auth_plugin_data) {
-					SET_OOM_ERROR(*conn->error_info);
-					goto end;
-				}
-				memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
-
-				DBG_INF_FMT("salt=[%*s]", plugin_data_len - 1, plugin_data);
-				/* The data should be allocated with malloc() */
-				scrambled_data =
-					auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
-													   plugin_data, plugin_data_len, options, mysql_flags TSRMLS_CC);
-
-
-				ret = mysqlnd_auth_handshake(conn, user, passwd, passwd_len, db, db_len, options, mysql_flags,
-											greet_packet->charset_no,
-											first_call,
-											requested_protocol,
-											scrambled_data, scrambled_data_len,
-											&switch_to_auth_protocol, &switch_to_auth_protocol_len,
-											&switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
-											TSRMLS_CC);
-				first_call = FALSE;
-				free(scrambled_data);
-
-				DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
-				if (requested_protocol && switch_to_auth_protocol) {
-					mnd_efree(requested_protocol);
-					requested_protocol = switch_to_auth_protocol;
-				}
-
-				if (plugin_data) {
-					mnd_efree(plugin_data);
-				}
-				plugin_data_len = switch_to_auth_protocol_data_len;
-				plugin_data = switch_to_auth_protocol_data;
-			}
-			DBG_INF_FMT("conn->error_info->error_no = %d", conn->error_info->error_no);
-		} while (ret == FAIL && conn->error_info->error_no == 0 && switch_to_auth_protocol != NULL);
-		if (plugin_data) {
-			mnd_efree(plugin_data);
-		}
-		
-		if (ret == PASS) {
-			DBG_INF_FMT("saving requested_protocol=%s", requested_protocol);
-			conn->m->set_client_option(conn, MYSQLND_OPT_AUTH_PROTOCOL, requested_protocol TSRMLS_CC);
-		}
-
-		if (requested_protocol) {
-			mnd_efree(requested_protocol);
 		}
 	}
-end:
 	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::get_updated_connect_flags */
+static unsigned int
+MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA * conn, unsigned int mysql_flags TSRMLS_DC)
+{
+	MYSQLND_NET * net = conn->net;
+
+	DBG_ENTER("mysqlnd_conn_data::get_updated_connect_flags");
+	/* we allow load data local infile by default */
+	mysql_flags |= MYSQLND_CAPABILITIES;
+
+	mysql_flags |= conn->options->flags; /* use the flags from set_client_option() */
+
+	if (PG(open_basedir) && strlen(PG(open_basedir))) {
+		mysql_flags ^= CLIENT_LOCAL_FILES;
+	}
+
+#ifndef MYSQLND_COMPRESSION_ENABLED
+	if (mysql_flags & CLIENT_COMPRESS) {
+		mysql_flags &= ~CLIENT_COMPRESS;
+	}
+#else
+	if (net && net->data->options.flags & MYSQLND_NET_FLAG_USE_COMPRESSION) {
+		mysql_flags |= CLIENT_COMPRESS;
+	}
+#endif
+#ifndef MYSQLND_SSL_SUPPORTED
+	if (mysql_flags & CLIENT_SSL) {
+		mysql_flags &= ~CLIENT_SSL;
+	}
+#else
+	if (net && (net->data->options.ssl_key || net->data->options.ssl_cert ||
+		net->data->options.ssl_ca || net->data->options.ssl_capath || net->data->options.ssl_cipher))
+	{
+		mysql_flags |= CLIENT_SSL;
+	}
+#endif
+
+	DBG_RETURN(mysql_flags);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::connect_handshake */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
+						const char * const host, const char * const user,
+						const char * const passwd, const unsigned int passwd_len,
+						const char * const db, const unsigned int db_len,
+						const unsigned int mysql_flags TSRMLS_DC)
+{
+	MYSQLND_PACKET_GREET * greet_packet;
+	MYSQLND_NET * net = conn->net;
+
+	DBG_ENTER("mysqlnd_conn_data::connect_handshake");
+
+	greet_packet = conn->protocol->m.get_greet_packet(conn->protocol, FALSE TSRMLS_CC);
+	if (!greet_packet) {
+		SET_OOM_ERROR(*conn->error_info);
+		DBG_RETURN(FAIL); /* OOM */
+	}
+
+	if (FAIL == net->data->m.connect_ex(conn->net, conn->scheme, conn->scheme_len, conn->persistent,
+										conn->stats, conn->error_info TSRMLS_CC))
+	{
+		goto err;
+	}
+
+	DBG_INF_FMT("stream=%p", net->data->m.get_stream(net TSRMLS_CC));
+
+	if (FAIL == PACKET_READ(greet_packet, conn)) {
+		DBG_ERR("Error while reading greeting packet");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading greeting packet. PID=%d", getpid());
+		goto err;
+	} else if (greet_packet->error_no) {
+		DBG_ERR_FMT("errorno=%u error=%s", greet_packet->error_no, greet_packet->error);
+		SET_CLIENT_ERROR(*conn->error_info, greet_packet->error_no, greet_packet->sqlstate, greet_packet->error);
+		goto err;
+	} else if (greet_packet->pre41) {
+		DBG_ERR_FMT("Connecting to 3.22, 3.23 & 4.0 is not supported. Server is %-.32s", greet_packet->server_version);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Connecting to 3.22, 3.23 & 4.0 "
+						" is not supported. Server is %-.32s", greet_packet->server_version);
+		SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
+						 "Connecting to 3.22, 3.23 & 4.0 servers is not supported");
+		goto err;
+	}
+
+	conn->thread_id			= greet_packet->thread_id;
+	conn->protocol_version	= greet_packet->protocol_version;
+	conn->server_version	= mnd_pestrdup(greet_packet->server_version, conn->persistent);
+
+	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet->charset_no);
+	if (!conn->greet_charset) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"Server sent charset (%d) unknown to the client. Please, report to the developers", greet_packet->charset_no);
+		SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
+			"Server sent charset unknown to the client. Please, report to the developers");
+		goto err;
+	}
+
+	conn->client_flag			= mysql_flags;
+	conn->server_capabilities 	= greet_packet->server_capabilities;
+
+	if (FAIL == mysqlnd_connect_run_authentication(conn, user, passwd, db, db_len, (size_t) passwd_len,
+												   greet_packet, conn->options, mysql_flags TSRMLS_CC))
+	{
+		goto err;
+	}
+	conn->upsert_status->warning_count = 0;
+	conn->upsert_status->server_status = greet_packet->server_status;
+	conn->upsert_status->affected_rows = 0;
+
+	PACKET_FREE(greet_packet);
+	DBG_RETURN(PASS);
+err:
+	conn->client_flag = 0;
+	conn->server_capabilities = 0;
+	PACKET_FREE(greet_packet);
+	DBG_RETURN(FAIL);
 }
 /* }}} */
 
@@ -623,10 +843,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 	zend_bool reconnect = FALSE;
 	zend_bool saved_compression = FALSE;
 	zend_bool local_tx_started = FALSE;
-
-	MYSQLND_PACKET_GREET * greet_packet = NULL;
+	MYSQLND_NET * net = conn->net;
 
 	DBG_ENTER("mysqlnd_conn_data::connect");
+	DBG_INF_FMT("conn=%p", conn);
 
 	if (PASS != conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		goto err;
@@ -655,14 +875,17 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_PERSISTENT_CONNECTIONS);
 		}
 		/* Now reconnect using the same handle */
-		if (conn->net->compressed) {
+		if (net->data->compressed) {
 			/*
 			  we need to save the state. As we will re-connect, net->compressed should be off, or
 			  we will look for a compression header as part of the greet message, but there will
 			  be none.
 			*/
 			saved_compression = TRUE;
-			conn->net->compressed = FALSE;
+			net->data->compressed = FALSE;
+		}
+		if (net->data->ssl) {
+			net->data->ssl = FALSE;
 		}
 	} else {
 		unsigned int max_allowed_size = MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
@@ -685,6 +908,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		DBG_INF_FMT("no db given, using empty string");
 		db = "";
 		db_len = 0;
+	} else {
+		mysql_flags |= CLIENT_CONNECT_WITH_DB;	
 	}
 
 	host_len = strlen(host);
@@ -728,77 +953,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		}
 	}
 
-	greet_packet = conn->protocol->m.get_greet_packet(conn->protocol, FALSE TSRMLS_CC);
-	if (!greet_packet) {
-		SET_OOM_ERROR(*conn->error_info);
-		goto err; /* OOM */
-	}
+	mysql_flags = conn->m->get_updated_connect_flags(conn, mysql_flags TSRMLS_CC);
 
-	if (FAIL == conn->net->m.connect_ex(conn->net, conn->scheme, conn->scheme_len, conn->persistent,
-										conn->stats, conn->error_info TSRMLS_CC))
-	{
-		goto err;
-	}
-
-	DBG_INF_FMT("stream=%p", conn->net->stream);
-
-	if (FAIL == PACKET_READ(greet_packet, conn)) {
-		DBG_ERR("Error while reading greeting packet");
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading greeting packet. PID=%d", getpid());
-		goto err;
-	} else if (greet_packet->error_no) {
-		DBG_ERR_FMT("errorno=%u error=%s", greet_packet->error_no, greet_packet->error);
-		SET_CLIENT_ERROR(*conn->error_info, greet_packet->error_no, greet_packet->sqlstate, greet_packet->error);
-		goto err;
-	} else if (greet_packet->pre41) {
-		DBG_ERR_FMT("Connecting to 3.22, 3.23 & 4.0 is not supported. Server is %-.32s", greet_packet->server_version);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Connecting to 3.22, 3.23 & 4.0 "
-						" is not supported. Server is %-.32s", greet_packet->server_version);
-		SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
-						 "Connecting to 3.22, 3.23 & 4.0 servers is not supported");
-		goto err;
-	}
-
-	conn->thread_id			= greet_packet->thread_id;
-	conn->protocol_version	= greet_packet->protocol_version;
-	conn->server_version	= mnd_pestrdup(greet_packet->server_version, conn->persistent);
-
-	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet->charset_no);
-	/* we allow load data local infile by default */
-	mysql_flags |= MYSQLND_CAPABILITIES;
-
-	if (db) {
-		mysql_flags |= CLIENT_CONNECT_WITH_DB;
-	}
-
-	if (PG(open_basedir) && strlen(PG(open_basedir))) {
-		mysql_flags ^= CLIENT_LOCAL_FILES;
-	}
-
-#ifndef MYSQLND_COMPRESSION_ENABLED
-	if (mysql_flags & CLIENT_COMPRESS) {
-		mysql_flags &= ~CLIENT_COMPRESS;
-	}
-#else
-	if (conn->net->options.flags & MYSQLND_NET_FLAG_USE_COMPRESSION) {
-		mysql_flags |= CLIENT_COMPRESS;
-	}
-#endif
-#ifndef MYSQLND_SSL_SUPPORTED
-	if (mysql_flags & CLIENT_SSL) {
-		mysql_flags &= ~CLIENT_SSL;
-	}
-#else
-	if (conn->net->options.ssl_key || conn->net->options.ssl_cert ||
-		conn->net->options.ssl_ca || conn->net->options.ssl_capath || conn->net->options.ssl_cipher)
-	{
-		mysql_flags |= CLIENT_SSL;
-	}
-#endif
-
-	if (FAIL == mysqlnd_connect_run_authentication(conn, user, passwd, db, db_len, (size_t) passwd_len,
-												   greet_packet, conn->options, mysql_flags TSRMLS_CC))
-	{
+	if (FAIL == conn->m->connect_handshake(conn, host, user, passwd, passwd_len, db, db_len, mysql_flags TSRMLS_CC)) {
 		goto err;
 	}
 
@@ -806,14 +963,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		CONN_SET_STATE(conn, CONN_READY);
 
 		if (saved_compression) {
-			conn->net->compressed = TRUE;
+			net->data->compressed = TRUE;
 		}
 		/*
 		  If a connect on a existing handle is performed and mysql_flags is
 		  passed which doesn't CLIENT_COMPRESS, then we need to overwrite the value
 		  which we set based on saved_compression.
 		*/
-		conn->net->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
+		net->data->compressed = mysql_flags & CLIENT_COMPRESS? TRUE:FALSE;
 
 		conn->user				= mnd_pestrdup(user, conn->persistent);
 		conn->user_len			= strlen(conn->user);
@@ -875,45 +1032,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			}
 			conn->unix_socket_len = strlen(conn->unix_socket);
 		}
-		conn->client_flag		= mysql_flags;
 		conn->max_packet_size	= MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
 		/* todo: check if charset is available */
-		conn->server_capabilities = greet_packet->server_capabilities;
-		conn->upsert_status->warning_count = 0;
-		conn->upsert_status->server_status = greet_packet->server_status;
-		conn->upsert_status->affected_rows = 0;
 
 		SET_EMPTY_ERROR(*conn->error_info);
 
 		mysqlnd_local_infile_default(conn);
 
-#if MYSQLND_UNICODE
-		{
-			unsigned int as_unicode = 1;
-			conn->m->set_client_option(conn, MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE, (char *)&as_unicode TSRMLS_CC);
-			DBG_INF("unicode set");
+		if (FAIL == conn->m->execute_init_commands(conn TSRMLS_CC)) {
+			goto err;
 		}
-#endif
-		if (conn->options->init_commands) {
-			unsigned int current_command = 0;
-			for (; current_command < conn->options->num_commands; ++current_command) {
-				const char * const command = conn->options->init_commands[current_command];
-				if (command) {
-					MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_INIT_COMMAND_EXECUTED_COUNT);
-					if (PASS != conn->m->query(conn, command, strlen(command) TSRMLS_CC)) {
-						MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_INIT_COMMAND_FAILED_COUNT);
-						goto err;
-					}
-					if (conn->last_query_type == QUERY_SELECT) {
-						MYSQLND_RES * result = conn->m->use_result(conn TSRMLS_CC);
-						if (result) {
-							result->m.free_result(result, TRUE TSRMLS_CC);
-						}
-					}
-				}
-			}
-		}
-
 
 		MYSQLND_INC_CONN_STATISTIC_W_VALUE2(conn->stats, STAT_CONNECT_SUCCESS, 1, STAT_OPENED_CONNECTIONS, 1);
 		if (reconnect) {
@@ -925,13 +1053,10 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 		DBG_INF_FMT("connection_id=%llu", conn->thread_id);
 
-		PACKET_FREE(greet_packet);
-
 		conn->m->local_tx_end(conn, this_func, PASS TSRMLS_CC);
 		DBG_RETURN(PASS);
 	}
 err:
-	PACKET_FREE(greet_packet);
 
 	DBG_ERR_FMT("[%u] %.128s (trying to connect via %s)", conn->error_info->error_no, conn->error_info->error, conn->scheme);
 	if (!conn->error_info->error_no) {
@@ -969,12 +1094,14 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 	DBG_ENTER("mysqlnd_conn::connect");
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
+		mysqlnd_options4(conn_handle, MYSQL_OPT_CONNECT_ATTR_ADD, "_client_name", "mysqlnd");
 		ret = conn->m->connect(conn, host, user, passwd, passwd_len, db, db_len, port, socket_or_pipe, mysql_flags TSRMLS_CC);
 
 		conn->m->local_tx_end(conn, this_func, FAIL TSRMLS_CC);
 	}
 	DBG_RETURN(ret);
 }
+/* }}} */
 
 
 /* {{{ mysqlnd_connect */
@@ -1029,7 +1156,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, query)(MYSQLND_CONN_DATA * conn, const char * 
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, query);
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::query");
-	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
+	DBG_INF_FMT("conn=%p conn=%llu query=%s", conn, conn->thread_id, query);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		if (PASS == conn->m->send_query(conn, query, query_len TSRMLS_CC) &&
@@ -1142,7 +1269,7 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 		 * when casting.  It is only used here so that the buffered data warning
 		 * is not displayed.
 		 * */
-		if (SUCCESS == php_stream_cast((*p)->data->net->stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+		if (SUCCESS == php_stream_cast((*p)->data->net->data->m.get_stream((*p)->data->net TSRMLS_CC), PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && this_fd >= 0) {
 
 			PHP_SAFE_FD_SET(this_fd, fds);
@@ -1167,7 +1294,7 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds 
 	MYSQLND **fwd = conn_array, **bckwd = conn_array;
 
 	while (*fwd) {
-		if (SUCCESS == php_stream_cast((*fwd)->data->net->stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+		if (SUCCESS == php_stream_cast((*fwd)->data->net->data->m.get_stream((*fwd)->data->net TSRMLS_CC), PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && this_fd >= 0) {
 			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
 				if (disproportion) {
@@ -1213,13 +1340,12 @@ _mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long s
 		DBG_RETURN(FAIL);
 	}
 
-	*dont_poll = mysqlnd_stream_array_check_for_readiness(r_array TSRMLS_CC);
-
 	FD_ZERO(&rfds);
 	FD_ZERO(&wfds);
 	FD_ZERO(&efds);
 
 	if (r_array != NULL) {
+		*dont_poll = mysqlnd_stream_array_check_for_readiness(r_array TSRMLS_CC);
 		set_count = mysqlnd_stream_array_to_fd_set(r_array, &rfds, &max_fd TSRMLS_CC);
 		if (set_count > max_set_count) {
 			max_set_count = set_count;
@@ -1438,14 +1564,15 @@ MYSQLND_METHOD(mysqlnd_conn_data, ssl_set)(MYSQLND_CONN_DATA * const conn, const
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, ssl_set);
 	enum_func_status ret = FAIL;
+	MYSQLND_NET * net = conn->net;
 	DBG_ENTER("mysqlnd_conn_data::ssl_set");
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
-		ret = (PASS == conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_KEY, key TSRMLS_CC) &&
-			PASS == conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CERT, cert TSRMLS_CC) &&
-			PASS == conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CA, ca TSRMLS_CC) &&
-			PASS == conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CAPATH, capath TSRMLS_CC) &&
-			PASS == conn->net->m.set_client_option(conn->net, MYSQLND_OPT_SSL_CIPHER, cipher TSRMLS_CC)) ? PASS : FAIL;
+		ret = (PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_KEY, key TSRMLS_CC) &&
+			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CERT, cert TSRMLS_CC) &&
+			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CA, ca TSRMLS_CC) &&
+			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CAPATH, capath TSRMLS_CC) &&
+			PASS == net->data->m.set_client_option(net, MYSQLND_OPT_SSL_CIPHER, cipher TSRMLS_CC)) ? PASS : FAIL;
 
 		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);
 	}
@@ -1620,6 +1747,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int p
 			SET_ERROR_AFF_ROWS(conn);
 		} else if (PASS == (ret = conn->m->simple_command(conn, COM_PROCESS_KILL, buff, 4, PROT_LAST, FALSE, TRUE TSRMLS_CC))) {
 			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			conn->m->send_close(conn TSRMLS_CC);
 		}
 
 		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);
@@ -1717,10 +1845,11 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
 	enum_func_status ret = PASS;
+	MYSQLND_NET * net = conn->net;
+	php_stream * net_stream = net->data->m.get_stream(net TSRMLS_CC);
 
 	DBG_ENTER("mysqlnd_send_close");
-	DBG_INF_FMT("conn=%llu conn->net->stream->abstract=%p",
-				conn->thread_id, conn->net->stream? conn->net->stream->abstract:NULL);
+	DBG_INF_FMT("conn=%llu net->data->stream->abstract=%p", conn->thread_id, net_stream? net_stream->abstract:NULL);
 
 	if (CONN_GET_STATE(conn) >= CONN_READY) {
 		MYSQLND_DEC_CONN_STATISTIC(conn->stats, STAT_OPENED_CONNECTIONS);
@@ -1731,10 +1860,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 	switch (CONN_GET_STATE(conn)) {
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
-			if (conn->net->stream) {
+			if (net_stream) {
 				ret = conn->m->simple_command(conn, COM_QUIT, NULL, 0, PROT_LAST, TRUE, TRUE TSRMLS_CC);
+				net->data->m.close_stream(net, conn->stats, conn->error_info TSRMLS_CC);
 			}
-			/* Do nothing */
+			CONN_SET_STATE(conn, CONN_QUIT_SENT);
 			break;
 		case CONN_SENDING_LOAD_DATA:
 			/*
@@ -1750,6 +1880,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 			  Do nothing, the connection will be brutally closed
 			  and the server will catch it and free close from its side.
 			*/
+			/* Fall-through */
 		case CONN_ALLOCED:
 			/*
 			  Allocated but not connected or there was failure when trying
@@ -1757,15 +1888,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn TSR
 
 			  Fall-through
 			*/
+			CONN_SET_STATE(conn, CONN_QUIT_SENT);
+			/* Fall-through */
 		case CONN_QUIT_SENT:
 			/* The user has killed its own connection */
+			net->data->m.close_stream(net, conn->stats, conn->error_info TSRMLS_CC);
 			break;
 	}
-	/*
-	  We hold one reference, and every other object which needs the
-	  connection does increase it by 1.
-	*/
-	CONN_SET_STATE(conn, CONN_QUIT_SENT);
 
 	DBG_RETURN(ret);
 }
@@ -1807,7 +1936,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, free_reference)(MYSQLND_CONN_DATA * co
 
 /* {{{ mysqlnd_conn_data::get_state */
 static enum mysqlnd_connection_state
-MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_state)(MYSQLND_CONN_DATA * const conn TSRMLS_DC)
+MYSQLND_METHOD_PRIVATE(mysqlnd_conn_data, get_state)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC)
 {
 	DBG_ENTER("mysqlnd_conn_data::get_state");
 	DBG_RETURN(conn->state);
@@ -2005,6 +2134,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, next_result)(MYSQLND_CONN_DATA * const conn TS
 					DBG_ERR_FMT("Serious error. %s::%u", __FILE__, __LINE__);
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Serious error. PID=%d", getpid());
 					CONN_SET_STATE(conn, CONN_QUIT_SENT);
+					conn->m->send_close(conn TSRMLS_CC);
 				} else {
 					DBG_INF_FMT("Error from the server : (%u) %s", conn->error_info->error_no, conn->error_info->error);
 				}
@@ -2084,13 +2214,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 										  TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, change_user);
-	/*
-	  User could be max 16 * 3 (utf8), pass is 20 usually, db is up to 64*3
-	  Stack space is not that expensive, so use a bit more to be protected against
-	  buffer overflows.
-	*/
 	enum_func_status ret = FAIL;
-	zend_bool local_tx_started = FALSE;
 
 	DBG_ENTER("mysqlnd_conn_data::change_user");
 	DBG_INF_FMT("conn=%llu user=%s passwd=%s db=%s silent=%u",
@@ -2099,7 +2223,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	if (PASS != conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		goto end;
 	}
-	local_tx_started = TRUE;
 
 	SET_EMPTY_ERROR(*conn->error_info);
 	SET_ERROR_AFF_ROWS(conn);
@@ -2112,122 +2235,20 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	}
 	if (!db) {
 		db = "";
+
 	}
 
-	{
-		zend_bool first_call = TRUE;
-		char * switch_to_auth_protocol = NULL;
-		size_t switch_to_auth_protocol_len = 0;
-		char * requested_protocol = NULL;
-		zend_uchar * plugin_data;
-		size_t plugin_data_len;
+	/* XXX: passwords that have \0 inside work during auth, but in this case won't work with change user */
+	ret = mysqlnd_run_authentication(conn, user, passwd, strlen(passwd), db, strlen(db),
+									conn->auth_plugin_data, conn->auth_plugin_data_len, conn->options->auth_protocol,
+									0 /*charset not used*/, conn->options, conn->server_capabilities, silent, TRUE/*is_change*/ TSRMLS_CC);
 
-		plugin_data_len = conn->auth_plugin_data_len;
-		plugin_data = mnd_emalloc(plugin_data_len);
-		if (!plugin_data) {
-			ret = FAIL;
-			goto end;
-		}
-		memcpy(plugin_data, conn->auth_plugin_data, plugin_data_len);
-
-		requested_protocol = mnd_pestrdup(conn->options->auth_protocol? conn->options->auth_protocol:"mysql_native_password", FALSE);
-		if (!requested_protocol) {
-			ret = FAIL;
-			goto end;
-		}
-
-		do {
-			struct st_mysqlnd_authentication_plugin * auth_plugin;
-			{
-				char * plugin_name = NULL;
-
-				mnd_sprintf(&plugin_name, 0, "auth_plugin_%s", requested_protocol);
-
-				DBG_INF_FMT("looking for %s auth plugin", plugin_name);
-				auth_plugin = mysqlnd_plugin_find(plugin_name);
-				mnd_sprintf_free(plugin_name);
-
-				if (!auth_plugin) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
-					SET_CLIENT_ERROR(*conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method umknown to the client");
-					break;
-				}
-			}
-			DBG_INF("plugin found");
-
-			{
-				zend_uchar * switch_to_auth_protocol_data = NULL;
-				size_t switch_to_auth_protocol_data_len = 0;
-				zend_uchar * scrambled_data = NULL;
-				size_t scrambled_data_len = 0;
-
-				switch_to_auth_protocol = NULL;
-				switch_to_auth_protocol_len = 0;
-
-				if (conn->auth_plugin_data) {
-					mnd_pefree(conn->auth_plugin_data, conn->persistent);
-					conn->auth_plugin_data = NULL;
-				}
-				conn->auth_plugin_data_len = plugin_data_len;
-				conn->auth_plugin_data = mnd_pemalloc(conn->auth_plugin_data_len, conn->persistent);
-				if (!conn->auth_plugin_data) {
-					SET_OOM_ERROR(*conn->error_info);
-					ret = FAIL;
-					goto end;
-				}
-				memcpy(conn->auth_plugin_data, plugin_data, plugin_data_len);
-
-				DBG_INF_FMT("salt=[%*s]", plugin_data_len - 1, plugin_data);
-
-				/* The data should be allocated with malloc() */
-				scrambled_data =
-						auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
-														   plugin_data, plugin_data_len, 0, conn->server_capabilities TSRMLS_CC);
-
-
-				ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, passwd_len, db, strlen(db), silent,
-											   first_call,
-											   requested_protocol,
-											   scrambled_data, scrambled_data_len,
-											   &switch_to_auth_protocol, &switch_to_auth_protocol_len,
-											   &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
-											   TSRMLS_CC);
-
-				first_call = FALSE;
-				free(scrambled_data);
-
-				DBG_INF_FMT("switch_to_auth_protocol=%s", switch_to_auth_protocol? switch_to_auth_protocol:"n/a");
-				if (requested_protocol) {
-					mnd_efree(requested_protocol);
-				}
-				requested_protocol = switch_to_auth_protocol;
-
-				if (plugin_data) {
-					mnd_efree(plugin_data);
-				}
-				plugin_data_len = switch_to_auth_protocol_data_len;
-				plugin_data = switch_to_auth_protocol_data;
-			}
-			DBG_INF_FMT("conn->error_info->error_no = %d", conn->error_info->error_no);
-		} while (ret == FAIL && conn->error_info->error_no == 0 && switch_to_auth_protocol != NULL);
-		if (plugin_data) {
-			mnd_efree(plugin_data);
-		}
-		if (ret == PASS) {
-			conn->m->set_client_option(conn, MYSQLND_OPT_AUTH_PROTOCOL, requested_protocol TSRMLS_CC);
-		}
-		if (requested_protocol) {
-			mnd_efree(requested_protocol);
-		}
-	}
 	/*
 	  Here we should close all statements. Unbuffered queries should not be a
 	  problem as we won't allow sending COM_CHANGE_USER.
 	*/
+	conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
 end:
-	if (TRUE == local_tx_started) {
-		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
-	}
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
 }
@@ -2264,20 +2285,16 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
-			ret = conn->net->m.set_client_option(conn->net, option, value TSRMLS_CC);
+		case MYSQL_SERVER_PUBLIC_KEY:
+			ret = conn->net->data->m.set_client_option(conn->net, option, value TSRMLS_CC);
 			break;
-#if MYSQLND_UNICODE
-		case MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE:
-			conn->options->numeric_and_datetime_as_unicode = *(unsigned int*) value;
-			break;
-#endif
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 		case MYSQLND_OPT_INT_AND_FLOAT_NATIVE:
 			conn->options->int_and_float_native = *(unsigned int*) value;
 			break;
 #endif
 		case MYSQL_OPT_LOCAL_INFILE:
-			if (!value || (*(unsigned int*) value) ? 1 : 0) {
+			if (value && (*(unsigned int*) value) ? 1 : 0) {
 				conn->options->flags |= CLIENT_LOCAL_FILES;
 			} else {
 				conn->options->flags &= ~CLIENT_LOCAL_FILES;
@@ -2361,12 +2378,109 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			DBG_INF_FMT("auth_protocol=%s", conn->options->auth_protocol);
 			break;
 		}
+		case MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS:
+			if (value && (*(unsigned int*) value) ? 1 : 0) {
+				conn->options->flags |= CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS;
+			} else {
+				conn->options->flags &= ~CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS;
+			}
+			break;
+		case MYSQL_OPT_CONNECT_ATTR_RESET:
+			if (conn->options->connect_attr) {
+				DBG_INF_FMT("Before reset %d attribute(s)", zend_hash_num_elements(conn->options->connect_attr));
+				zend_hash_clean(conn->options->connect_attr);
+			}
+			break;
+		case MYSQL_OPT_CONNECT_ATTR_DELETE:
+			if (conn->options->connect_attr && value) {
+				DBG_INF_FMT("Before delete %d attribute(s)", zend_hash_num_elements(conn->options->connect_attr));
+				zend_hash_del(conn->options->connect_attr, value, strlen(value));
+				DBG_INF_FMT("%d left", zend_hash_num_elements(conn->options->connect_attr));
+			}
+			break;
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_SHARED_MEMORY_BASE_NAME:
 		case MYSQL_OPT_USE_RESULT:
 		case MYSQL_SECURE_AUTH:
 			/* not sure, todo ? */
 #endif
+		default:
+			ret = FAIL;
+	}
+	conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
+	DBG_RETURN(ret);
+oom:
+	SET_OOM_ERROR(*conn->error_info);
+	conn->m->local_tx_end(conn, this_func, FAIL TSRMLS_CC);	
+end:
+	DBG_RETURN(FAIL);
+}
+/* }}} */
+
+
+/* {{{ connect_attr_item_edtor */
+static void
+connect_attr_item_edtor(void * pDest)
+{
+#ifdef ZTS
+	TSRMLS_FETCH();
+#endif
+	DBG_ENTER("connect_attr_item_edtor");
+	mnd_efree(*(char **) pDest);
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ connect_attr_item_pdtor */
+static void
+connect_attr_item_pdtor(void * pDest)
+{
+#ifdef ZTS
+	TSRMLS_FETCH();
+#endif
+	DBG_ENTER("connect_attr_item_pdtor");
+	mnd_pefree(*(char **) pDest, 1);
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::set_client_option_2d */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * const conn,
+														enum mysqlnd_option option,
+														const char * const key,
+														const char * const value
+														TSRMLS_DC)
+{
+	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, set_client_option_2d);
+	enum_func_status ret = PASS;
+	DBG_ENTER("mysqlnd_conn_data::set_client_option_2d");
+	DBG_INF_FMT("conn=%llu option=%u", conn->thread_id, option);
+
+	if (PASS != conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
+		goto end;
+	}
+	switch (option) {
+		case MYSQL_OPT_CONNECT_ATTR_ADD:
+			if (!conn->options->connect_attr) {
+				DBG_INF("Initializing connect_attr hash");
+				conn->options->connect_attr = mnd_pemalloc(sizeof(HashTable), conn->persistent);
+				if (!conn->options->connect_attr) {
+					goto oom;
+				}
+				zend_hash_init(conn->options->connect_attr, 0, NULL, conn->persistent? connect_attr_item_pdtor:connect_attr_item_edtor, conn->persistent);
+			}
+			DBG_INF_FMT("Adding [%s][%s]", key, value);
+			{
+				const char * copyv = mnd_pestrdup(value, conn->persistent);
+				if (!copyv) {
+					goto oom;
+				}
+				zend_hash_update(conn->options->connect_attr, key, strlen(key), &copyv, sizeof(char *), NULL);
+			}
+			break;
 		default:
 			ret = FAIL;
 	}
@@ -2431,7 +2545,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, store_result)(MYSQLND_CONN_DATA * const conn T
 	MYSQLND_RES * result = NULL;
 
 	DBG_ENTER("mysqlnd_conn_data::store_result");
-	DBG_INF_FMT("conn=%llu", conn->thread_id);
+	DBG_INF_FMT("conn=%llu conn=%p", conn->thread_id, conn);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
 		do {
@@ -2643,7 +2757,14 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD(mysqlnd_conn_data, tx_commit),
 	MYSQLND_METHOD(mysqlnd_conn_data, tx_rollback),
 	MYSQLND_METHOD(mysqlnd_conn_data, local_tx_start),
-	MYSQLND_METHOD(mysqlnd_conn_data, local_tx_end)
+	MYSQLND_METHOD(mysqlnd_conn_data, local_tx_end),
+	MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands),
+	MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags),
+	MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake),
+	MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request),
+	MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name),
+
+	MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)
 MYSQLND_CLASS_METHODS_END;
 
 

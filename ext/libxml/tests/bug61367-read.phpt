@@ -4,17 +4,19 @@ Bug #61367: open_basedir bypass in libxml RSHUTDOWN: read test
 <?php if(!extension_loaded('dom')) echo 'skip'; ?>
 --INI--
 open_basedir=.
-; Suppress spurious "Trying to get property of non-object" notices
 error_reporting=E_ALL & ~E_NOTICE
 --FILE--
 <?php
-
+/*
+ * Note: Using error_reporting=E_ALL & ~E_NOTICE to supress "Trying to get property of non-object" notices.
+ */
 class StreamExploiter {
 	public function stream_close (  ) {
 		$doc = new DOMDocument;
 		$doc->resolveExternals = true;
 		$doc->substituteEntities = true;
 		$dir = htmlspecialchars(dirname(getcwd()));
+		$dir = str_replace('\\', '/', $dir); // fix for windows
 		$doc->loadXML( <<<XML
 <!DOCTYPE doc [
 	<!ENTITY file SYSTEM "file:///$dir/bad">

@@ -89,7 +89,14 @@ yes
                          lib/zip_new.c lib/zip_source_file.c lib/zip_stat_index.c \
                          lib/zip_set_archive_comment.c lib/zip_set_file_comment.c \
                          lib/zip_unchange_archive.c lib/zip_memdup.c lib/zip_stat_init.c lib/zip_add_dir.c \
-                         lib/zip_error_clear.c lib/zip_file_error_clear.c"
+                         lib/zip_error_clear.c lib/zip_file_error_clear.c \
+						 lib/zip_fdopen.c lib/zip_fopen_encrypted.c lib/zip_fopen_index_encrypted.c \
+						 lib/zip_get_compression_implementation.c lib/zip_get_encryption_implementation.c \
+						 lib/zip_get_file_extra.c lib/zip_get_num_entries.c lib/zip_set_default_password.c \
+						 lib/zip_set_file_extra.c lib/zip_source_close.c lib/zip_source_crc.c \
+						 lib/zip_source_deflate.c lib/zip_source_error.c lib/zip_source_layered.c \
+						 lib/zip_source_open.c lib/zip_source_pkware.c lib/zip_source_pop.c \
+						 lib/zip_source_read.c lib/zip_source_stat.c"
 
   AC_DEFINE(HAVE_ZIP,1,[ ])
   PHP_NEW_EXTENSION(zip, php_zip.c zip_stream.c $PHP_ZIP_SOURCES, $ext_shared)

@@ -9,6 +9,9 @@ if (!in_array('SHA-256', $arr)) die("skip hash extension loaded shared"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
+--ENV--
+TEMP=.
+TMP=.
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
@@ -32,9 +35,11 @@ var_dump($p->getSignature());
 echo $e->getMessage();
 }
 try {
+$config = dirname(__FILE__) . '/../files/openssl.cnf';
+$config_arg = array('config' => $config);
 $private = openssl_get_privatekey(file_get_contents(dirname(dirname(__FILE__)) . '/files/private.pem'));
 $pkey = '';
-openssl_pkey_export($private, $pkey);
+openssl_pkey_export($private, $pkey, NULL, $config_arg);
 $p->setSignatureAlgorithm(Phar::OPENSSL, $pkey);
 var_dump($p->getSignature());
 } catch (Exception $e) {

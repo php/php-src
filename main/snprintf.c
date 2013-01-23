@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -94,7 +94,7 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, 
 			*decpt = 0;
 			c = *p;
 			zend_freedtoa(p);
-			return(c == 'I' ? "INF" : "NAN");
+			return strdup((c == 'I' ? "INF" : "NAN"));
 		}
 		/* Make a local copy and adjust rve to be in terms of s */
 		if (pad && fmode) {

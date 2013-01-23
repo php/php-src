@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | TAR archive support for Phar                                         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2012 The PHP Group                                |
+  | Copyright (c) 2005-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@ static php_uint32 phar_tar_number(char *buf, int len) /* {{{ */
 /* }}} */
 
 /* adapted from format_octal() in libarchive
- * 
+ *
  * Copyright (c) 2003-2009 Tim Kientzle
  * All rights reserved.
  *
@@ -161,7 +161,7 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp TSRM
 	size_t save = php_stream_tell(fp), read;
 	phar_entry_info *mentry;
 
-	metadata = (char *) emalloc(entry->uncompressed_filesize + 1);
+	metadata = (char *) safe_emalloc(1, entry->uncompressed_filesize, 1);
 
 	read = php_stream_read(fp, metadata, entry->uncompressed_filesize);
 	if (read != entry->uncompressed_filesize) {
@@ -337,6 +337,16 @@ bail:
 			last_was_longlink = 1;
 			/* support the ././@LongLink system for storing long filenames */
 			entry.filename_len = entry.uncompressed_filesize;
+
+			/* Check for overflow - bug 61065 */
+			if (entry.filename_len == UINT_MAX) {
+				if (error) {
+					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (invalid entry size)", fname);
+				}
+				php_stream_close(fp);
+				phar_destroy_phar_data(myphar TSRMLS_CC);
+				return FAILURE;
+			}
 			entry.filename = pemalloc(entry.filename_len+1, myphar->is_persistent);
 
 			read = php_stream_read(fp, entry.filename, entry.filename_len);
@@ -367,7 +377,7 @@ bail:
 			}
 
 			read = php_stream_read(fp, buf, sizeof(buf));
-	
+
 			if (read != sizeof(buf)) {
 				efree(entry.filename);
 				if (error) {
@@ -976,11 +986,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 				len = -len;
 			}
 			user_stub = 0;
-#if PHP_MAJOR_VERSION >= 6
-			if (!(len = php_stream_copy_to_mem(stubfile, (void **) &user_stub, len, 0)) || !user_stub) {
-#else
+
 			if (!(len = php_stream_copy_to_mem(stubfile, &user_stub, len, 0)) || !user_stub) {
-#endif
 				if (error) {
 					spprintf(error, 0, "unable to read resource to copy stub to new tar-based phar \"%s\"", phar->fname);
 				}

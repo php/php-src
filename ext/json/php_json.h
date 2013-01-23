@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -40,6 +40,7 @@ extern zend_module_entry json_module_entry;
 ZEND_BEGIN_MODULE_GLOBALS(json)
 	int encoder_depth;
 	int error_code;
+	int encode_max_depth;
 ZEND_END_MODULE_GLOBALS(json)
 
 #ifdef ZTS
@@ -63,6 +64,7 @@ extern zend_class_entry *php_json_serializable_ce;
 #define PHP_JSON_UNESCAPED_SLASHES	(1<<6)
 #define PHP_JSON_PRETTY_PRINT	(1<<7)
 #define PHP_JSON_UNESCAPED_UNICODE	(1<<8)
+#define PHP_JSON_PARTIAL_OUTPUT_ON_ERROR (1<<9)
 
 /* Internal flags */
 #define PHP_JSON_OUTPUT_ARRAY	0

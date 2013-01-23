@@ -34,9 +34,11 @@ var_dump($p->getSignature());
 echo $e->getMessage();
 }
 try {
+$config = dirname(__FILE__) . '/files/openssl.cnf';
+$config_arg = array('config' => $config);
 $private = openssl_get_privatekey(file_get_contents(dirname(__FILE__) . '/files/private.pem'));
 $pkey = '';
-openssl_pkey_export($private, $pkey);
+openssl_pkey_export($private, $pkey, NULL, $config_arg);
 $p->setSignatureAlgorithm(Phar::OPENSSL, $pkey);
 var_dump($p->getSignature());
 } catch (Exception $e) {

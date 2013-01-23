@@ -1,9 +1,12 @@
 --TEST--
-Bug #43073 (TrueType bounding box is wrong for angle<>0)
+Bug #43073 (TrueType bounding box is wrong for angle<>0) freetype < 2.4.10
 --SKIPIF--
 <?php
 	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
 	if(!function_exists('imagettftext')) die('skip imagettftext() not available');
+
+	include dirname(__FILE__) . '/func.inc';
+	if(version_compare(get_freetype_version(), '2.4.10') >= 0) die('skip for freetype < 2.4.10');
 ?>
 --FILE--
 <?php

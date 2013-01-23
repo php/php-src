@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,6 +35,17 @@
 #define Z_OBJ_P(zval_p) \
 	((zend_object*)(EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].bucket.obj.object))
 
+#define Z_OBJ_PROTECT_RECURSION(zval_p) \
+	do { \
+		if (EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].apply_count++ >= 3) { \
+			zend_error(E_ERROR, "Nesting level too deep - recursive dependency?"); \
+		} \
+	} while (0)
+
+
+#define Z_OBJ_UNPROTECT_RECURSION(zval_p) \
+	EG(objects_store).object_buckets[Z_OBJ_HANDLE_P(zval_p)].apply_count--
+
 /*
   __X accessors explanation:
 
@@ -66,11 +77,11 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 			     zend_hash_get_current_data_ex(&ce->properties_info, (void**)&prop_info, &pos) == SUCCESS;
 			     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
 				if (/*prop_info->ce == ce &&*/
-				    (prop_info->flags & ZEND_ACC_STATIC) == 0 && 
+				    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
 				    prop_info->offset >= 0 &&
 				    zobj->properties_table[prop_info->offset]) {
 					zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)&zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
-				}				
+				}
 			}
 			while (ce->parent && ce->parent->default_properties_count) {
 				ce = ce->parent;
@@ -78,12 +89,12 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 				     zend_hash_get_current_data_ex(&ce->properties_info, (void**)&prop_info, &pos) == SUCCESS;
 				     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
 					if (prop_info->ce == ce &&
-					    (prop_info->flags & ZEND_ACC_STATIC) == 0 && 
-					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0 && 
+					    (prop_info->flags & ZEND_ACC_STATIC) == 0 &&
+					    (prop_info->flags & ZEND_ACC_PRIVATE) != 0 &&
 					    prop_info->offset >= 0 &&
 						zobj->properties_table[prop_info->offset]) {
 						zend_hash_quick_add(zobj->properties, prop_info->name, prop_info->name_length+1, prop_info->h, (void**)&zobj->properties_table[prop_info->offset], sizeof(zval*), (void**)&zobj->properties_table[prop_info->offset]);
-					}				
+					}
 				}
 			}
 		}
@@ -352,9 +363,10 @@ ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info
 	zend_property_info *property_info;
 	const char *class_name, *prop_name;
 	zval member;
+	int prop_name_len;
 
-	zend_unmangle_property_name(prop_info_name, prop_info_name_len, &class_name, &prop_name);
-	ZVAL_STRING(&member, prop_name, 0);
+	zend_unmangle_property_name_ex(prop_info_name, prop_info_name_len, &class_name, &prop_name, &prop_name_len);
+	ZVAL_STRINGL(&member, prop_name, prop_name_len, 0);
 	property_info = zend_get_property_info_quick(zobj->ce, &member, 1, NULL TSRMLS_CC);
 	if (!property_info) {
 		return FAILURE;
@@ -382,6 +394,16 @@ static int zend_get_property_guard(zend_object *zobj, zend_property_info *proper
 		info.name = Z_STRVAL_P(member);
 		info.name_length = Z_STRLEN_P(member);
 		info.h = zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+	} else if(property_info->name[0] == '\0'){
+		const char *class_name = NULL, *prop_name = NULL;
+		zend_unmangle_property_name(property_info->name, property_info->name_length, &class_name, &prop_name);
+		if(class_name) {
+			/* use unmangled name for protected properties */
+			info.name = prop_name;
+			info.name_length = strlen(prop_name);
+			info.h = zend_get_hash_value(info.name, info.name_length+1);
+			property_info = &info;
+		}
 	}
 	if (!zobj->guards) {
 		ALLOC_HASHTABLE(zobj->guards);
@@ -424,7 +446,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 #endif
 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
-	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__get != NULL), key TSRMLS_CC);
+	property_info = zend_get_property_info_quick(zobj->ce, member, silent || (zobj->ce->__get != NULL), key TSRMLS_CC);
 
 	if (UNEXPECTED(!property_info) ||
 	    ((EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
@@ -539,6 +561,8 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 				(*variable_ptr)->value = value->value;
 				if (Z_REFCOUNT_P(value) > 0) {
 					zval_copy_ctor(*variable_ptr);
+				} else {
+					efree(value);
 				}
 				zval_dtor(&garbage);
 			} else {
@@ -783,7 +807,7 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 	property_info = zend_get_property_info_quick(zobj->ce, member, (zobj->ce->__unset != NULL), key TSRMLS_CC);
 
 	if (EXPECTED(property_info != NULL) &&
-	    EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) && 
+	    EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 	    !zobj->properties &&
 	    property_info->offset >= 0 &&
 	    EXPECTED(zobj->properties_table[property_info->offset] != NULL)) {
@@ -815,8 +839,8 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 				}
 			}
 		}
-	} else if (EXPECTED(property_info != NULL) && 
-	           EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) && 
+	} else if (EXPECTED(property_info != NULL) &&
+	           EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&
 	           property_info->offset >= 0) {
 		zobj->properties_table[property_info->offset] = NULL;
 	}
@@ -957,12 +981,6 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 		scope = scope->parent;
 	}
 	return 0;
-}
-/* }}} */
-
-static inline zend_class_entry * zend_get_function_root_class(zend_function *fbc) /* {{{ */
-{
-	return fbc->common.prototype ? fbc->common.prototype->common.scope : fbc->common.scope;
 }
 /* }}} */
 
@@ -1143,7 +1161,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 		zend_str_tolower_copy(lc_function_name, function_name_strval, function_name_strlen);
 		hash_value = zend_hash_func(lc_function_name, function_name_strlen+1);
 	}
-	
+
 	if (function_name_strlen == ce->name_length && ce->constructor) {
 		lc_class_name = zend_str_tolower_dup(ce->name, ce->name_length);
 		/* Only change the method to the constructor if the constructor isn't called __construct
@@ -1178,7 +1196,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 	if (UNEXPECTED(!(fbc->common.fn_flags & ZEND_ACC_STATIC))) {
 		zend_error_noreturn(E_ERROR, "Cannot call non static method %s::%s() without object", ZEND_FN_SCOPE_NAME(fbc), fbc->common.function_name);
 	}
-#endif 
+#endif
 	if (fbc->op_array.fn_flags & ZEND_ACC_PUBLIC) {
 		/* No further checks necessary, most common case */
 	} else if (fbc->op_array.fn_flags & ZEND_ACC_PRIVATE) {
@@ -1220,7 +1238,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *p
 {
 	zend_property_info *property_info;
 	ulong hash_value;
-	
+
 	if (UNEXPECTED(!key) ||
 	    (property_info = CACHED_POLYMORPHIC_PTR(key->cache_slot, ce)) == NULL) {
 		if (EXPECTED(key != NULL)) {
@@ -1323,28 +1341,43 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 	}
 	if (!zobj1->properties && !zobj2->properties) {
 		int i;
+
+		Z_OBJ_PROTECT_RECURSION(o1);
+		Z_OBJ_PROTECT_RECURSION(o2);
 		for (i = 0; i < zobj1->ce->default_properties_count; i++) {
 			if (zobj1->properties_table[i]) {
 				if (zobj2->properties_table[i]) {
 					zval result;
 
 					if (compare_function(&result, zobj1->properties_table[i], zobj2->properties_table[i] TSRMLS_CC)==FAILURE) {
+						Z_OBJ_UNPROTECT_RECURSION(o1);
+						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return 1;
 					}
 					if (Z_LVAL(result) != 0) {
+						Z_OBJ_UNPROTECT_RECURSION(o1);
+						Z_OBJ_UNPROTECT_RECURSION(o2);
 						return Z_LVAL(result);
 					}
 				} else {
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
 				}
 			} else {
 				if (zobj2->properties_table[i]) {
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 1;
 				} else {
+					Z_OBJ_UNPROTECT_RECURSION(o1);
+					Z_OBJ_UNPROTECT_RECURSION(o2);
 					return 0;
 				}
 			}
 		}
+		Z_OBJ_UNPROTECT_RECURSION(o1);
+		Z_OBJ_UNPROTECT_RECURSION(o2);
 		return 0;
 	} else {
 		if (!zobj1->properties) {
@@ -1496,6 +1529,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					if (retval) {
 						zval_ptr_dtor(&retval);
 					}
+					EG(exception) = NULL;
 					zend_error_noreturn(E_ERROR, "Method %s::__toString() must not throw an exception", ce->name);
 					return FAILURE;
 				}

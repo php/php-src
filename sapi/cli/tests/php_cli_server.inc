@@ -1,5 +1,7 @@
 <?php
-define ("PHP_CLI_SERVER_ADDRESS", "localhost:8964");
+define ("PHP_CLI_SERVER_HOSTNAME", "localhost");
+define ("PHP_CLI_SERVER_PORT", 8964);
+define ("PHP_CLI_SERVER_ADDRESS", PHP_CLI_SERVER_HOSTNAME.":".PHP_CLI_SERVER_PORT);
 
 function php_cli_server_start($code = 'echo "Hello world";', $no_router = FALSE) {
 	$php_executable = getenv('TEST_PHP_EXECUTABLE');
@@ -32,6 +34,17 @@ function php_cli_server_start($code = 'echo "Hello world";', $no_router = FALSE)
 
 		$handle = proc_open($cmd, $descriptorspec, $pipes, $doc_root);
 	}
+	
+	// note: even when server prints 'Listening on localhost:8964...Press Ctrl-C to quit.'
+	//       it might not be listening yet...need to wait until fsockopen() call returns
+    $i = 0;
+    while (($i++ < 30) && !($fp = @fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT))) {
+        usleep(10000);
+    }
+
+    if ($fp) {
+        fclose($fp);
+    }
 
 	register_shutdown_function(
 		function($handle) use($router) {
@@ -40,7 +53,10 @@ function php_cli_server_start($code = 'echo "Hello world";', $no_router = FALSE)
 		},
 			$handle
 		);
-	usleep(50000);
+	// don't bother sleeping, server is already up
+	// server can take a variable amount of time to be up, so just sleeping a guessed amount of time
+	// does not work. this is why tests sometimes pass and sometimes fail. to get a reliable pass
+	// sleeping doesn't work.
 }
 ?>
 

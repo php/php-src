@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -145,6 +145,9 @@ struct _zend_object_handlers {
 };
 
 extern ZEND_API zend_object_handlers std_object_handlers;
+
+#define zend_get_function_root_class(fbc) \
+	((fbc)->common.prototype ? (fbc)->common.prototype->common.scope : (fbc)->common.scope)
 
 BEGIN_EXTERN_C()
 ZEND_API union _zend_function *zend_std_get_static_method(zend_class_entry *ce, const char *function_name_strval, int function_name_strlen, const struct _zend_literal *key TSRMLS_DC);

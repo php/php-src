@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,7 +63,7 @@ static zval *ps_call_handler(zval *func, int argc, zval **argv TSRMLS_DC)
 }
 
 #define STDVARS								\
-	zval *retval;							\
+	zval *retval = NULL;					\
 	int ret = FAILURE
 
 #define PSF(a) PS(mod_user_names).name.ps_##a
@@ -99,6 +99,7 @@ PS_OPEN_FUNC(user)
 
 PS_CLOSE_FUNC(user)
 {
+	zend_bool bailout = 0;
 	STDVARS;
 
 	if (!PS(mod_user_implemented)) {
@@ -106,8 +107,20 @@ PS_CLOSE_FUNC(user)
 		return SUCCESS;
 	}
 
-	retval = ps_call_handler(PSF(close), 0, NULL TSRMLS_CC);
+	zend_try {
+		retval = ps_call_handler(PSF(close), 0, NULL TSRMLS_CC);
+	} zend_catch {
+		bailout = 1;
+	} zend_end_try();
+
 	PS(mod_user_implemented) = 0;
+
+	if (bailout) {
+		if (retval) {
+			zval_ptr_dtor(&retval);
+		}
+		zend_bailout();
+	}
 
 	FINISH;
 }

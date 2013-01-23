@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -67,16 +67,17 @@ MYSQLND_METHOD(mysqlnd_net, network_read_ex)(MYSQLND_NET * const net, zend_uchar
 											 MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC)
 {
 	enum_func_status return_value = PASS;
+	php_stream * net_stream = net->data->m.get_stream(net TSRMLS_CC);
+	size_t old_chunk_size = net_stream->chunk_size;
 	size_t to_read = count, ret;
-	size_t old_chunk_size = net->stream->chunk_size;
 	zend_uchar * p = buffer;
 
 	DBG_ENTER("mysqlnd_net::network_read_ex");
 	DBG_INF_FMT("count="MYSQLND_SZ_T_SPEC, count);
 
-	net->stream->chunk_size = MIN(to_read, net->options.net_read_buffer_size);
+	net_stream->chunk_size = MIN(to_read, net->data->options.net_read_buffer_size);
 	while (to_read) {
-		if (!(ret = php_stream_read(net->stream, (char *) p, to_read))) {
+		if (!(ret = php_stream_read(net_stream, (char *) p, to_read))) {
 			DBG_ERR_FMT("Error while reading header from socket");
 			return_value = FAIL;
 			break;
@@ -85,7 +86,7 @@ MYSQLND_METHOD(mysqlnd_net, network_read_ex)(MYSQLND_NET * const net, zend_uchar
 		to_read -= ret;
 	}
 	MYSQLND_INC_CONN_STATISTIC_W_VALUE(stats, STAT_BYTES_RECEIVED, count - to_read);
-	net->stream->chunk_size = old_chunk_size;
+	net_stream->chunk_size = old_chunk_size;
 	DBG_RETURN(return_value);
 }
 /* }}} */
@@ -98,13 +99,13 @@ MYSQLND_METHOD(mysqlnd_net, network_write_ex)(MYSQLND_NET * const net, const zen
 {
 	size_t ret;
 	DBG_ENTER("mysqlnd_net::network_write_ex");
-	ret = php_stream_write(net->stream, (char *)buffer, count);
+	ret = php_stream_write(net->data->m.get_stream(net TSRMLS_CC), (char *)buffer, count);
 	DBG_RETURN(ret);
 }
 /* }}} */
 
 /* {{{ mysqlnd_net::open_pipe */
-static enum_func_status
+static php_stream *
 MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len,
 									   const zend_bool persistent,
 									   MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC)
@@ -114,32 +115,35 @@ MYSQLND_METHOD(mysqlnd_net, open_pipe)(MYSQLND_NET * const net, const char * con
 #else
 	unsigned int streams_options = 0;
 #endif
+	php_stream * net_stream = NULL;
+
 	DBG_ENTER("mysqlnd_net::open_pipe");
 	if (persistent) {
 		streams_options |= STREAM_OPEN_PERSISTENT;
 	}
 	streams_options |= IGNORE_URL;
-	net->stream = php_stream_open_wrapper((char*) scheme + sizeof("pipe://") - 1, "r+", streams_options, NULL);
-	if (!net->stream) {
+	net_stream = php_stream_open_wrapper((char*) scheme + sizeof("pipe://") - 1, "r+", streams_options, NULL);
+	if (!net_stream) {
 		SET_CLIENT_ERROR(*error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown errror while connecting");
-		DBG_RETURN(FAIL);
+		DBG_RETURN(NULL);
 	}
 	/*
 	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
 	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
 	  unregistered yntil the script ends. So, we need to take care of that.
 	*/
-	net->stream->in_free = 1;
-	zend_hash_index_del(&EG(regular_list), net->stream->rsrc_id);
-	net->stream->in_free = 0;
+	net_stream->in_free = 1;
+	zend_hash_index_del(&EG(regular_list), net_stream->rsrc_id);
+	net_stream->in_free = 0;
 
-	DBG_RETURN(PASS);
+
+	DBG_RETURN(net_stream);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_net::open_tcp_or_unix */
-static enum_func_status
+static php_stream *
 MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len,
 											  const zend_bool persistent,
 											  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC)
@@ -155,24 +159,27 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	char * errstr = NULL;
 	int errcode = 0;
 	struct timeval tv;
+	php_stream * net_stream = NULL;
 
 	DBG_ENTER("mysqlnd_net::open_tcp_or_unix");
+
+	net->data->stream = NULL;
 
 	if (persistent) {
 		hashed_details_len = mnd_sprintf(&hashed_details, 0, "%p", net);
 		DBG_INF_FMT("hashed_details=%s", hashed_details);
 	}
 
-	if (net->options.timeout_connect) {
-		tv.tv_sec = net->options.timeout_connect;
+	if (net->data->options.timeout_connect) {
+		tv.tv_sec = net->data->options.timeout_connect;
 		tv.tv_usec = 0;
 	}
 
 	DBG_INF_FMT("calling php_stream_xport_create");
-	net->stream = php_stream_xport_create(scheme, scheme_len, streams_options, streams_flags,
-										  hashed_details, (net->options.timeout_connect) ? &tv : NULL,
+	net_stream = php_stream_xport_create(scheme, scheme_len, streams_options, streams_flags,
+										  hashed_details, (net->data->options.timeout_connect) ? &tv : NULL,
 										  NULL /*ctx*/, &errstr, &errcode);
-	if (errstr || !net->stream) {
+	if (errstr || !net_stream) {
 		DBG_ERR("Error");
 		if (hashed_details) {
 			mnd_sprintf_free(hashed_details);
@@ -183,7 +190,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 			/* no mnd_ since we don't allocate it */
 			efree(errstr);
 		}
-		DBG_RETURN(FAIL);
+		DBG_RETURN(NULL);
 	}
 	if (hashed_details) {
 		/*
@@ -199,13 +206,13 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 			  but STREAMS suck big time regarding persistent streams.
 			  Just not compatible for extensions that need persistency.
 			*/
-			net->stream->in_free = 1;
+			net_stream->in_free = 1;
 			zend_hash_del(&EG(persistent_list), hashed_details, hashed_details_len + 1);
-			net->stream->in_free = 0;
+			net_stream->in_free = 0;
 		}
 #if ZEND_DEBUG
 		/* Shut-up the streams, they don't know what they are doing */
-		net->stream->__exposed = 1;
+		net_stream->__exposed = 1;
 #endif
 		mnd_sprintf_free(hashed_details);
 	}
@@ -215,36 +222,64 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
 	  unregistered yntil the script ends. So, we need to take care of that.
 	*/
-	net->stream->in_free = 1;
-	zend_hash_index_del(&EG(regular_list), net->stream->rsrc_id);
-	net->stream->in_free = 0;
+	net_stream->in_free = 1;
+	zend_hash_index_del(&EG(regular_list), net_stream->rsrc_id);
+	net_stream->in_free = 0;
 
-	DBG_RETURN(PASS);
+	DBG_RETURN(net_stream);
 }
 /* }}} */
 
 
-/* {{{ mysqlnd_net::connect_ex */
+/* {{{ mysqlnd_net::post_connect_set_opt */
 static void
 MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt)(MYSQLND_NET * const net,
 												  const char * const scheme, const size_t scheme_len,
 												  MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC)
 {
+	php_stream * net_stream = net->data->m.get_stream(net TSRMLS_CC);
 	DBG_ENTER("mysqlnd_net::post_connect_set_opt");
-	if (net->options.timeout_read) {
-		struct timeval tv;
-		DBG_INF_FMT("setting %u as PHP_STREAM_OPTION_READ_TIMEOUT", net->options.timeout_read);
-		tv.tv_sec = net->options.timeout_read;
-		tv.tv_usec = 0;
-		php_stream_set_option(net->stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
-	}
+	if (net_stream) {
+		if (net->data->options.timeout_read) {
+			struct timeval tv;
+			DBG_INF_FMT("setting %u as PHP_STREAM_OPTION_READ_TIMEOUT", net->data->options.timeout_read);
+			tv.tv_sec = net->data->options.timeout_read;
+			tv.tv_usec = 0;
+			php_stream_set_option(net_stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+		}
 
-	if (!memcmp(scheme, "tcp://", sizeof("tcp://") - 1)) {
-		/* TCP -> Set TCP_NODELAY */
-		mysqlnd_set_sock_no_delay(net->stream TSRMLS_CC);
+		if (!memcmp(scheme, "tcp://", sizeof("tcp://") - 1)) {
+			/* TCP -> Set TCP_NODELAY */
+			mysqlnd_set_sock_no_delay(net_stream TSRMLS_CC);
+		}
 	}
 
 	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_net::get_open_stream */
+static func_mysqlnd_net__open_stream
+MYSQLND_METHOD(mysqlnd_net, get_open_stream)(MYSQLND_NET * const net, const char * const scheme, const size_t scheme_len,
+											 MYSQLND_ERROR_INFO * const error_info TSRMLS_DC)
+{
+	func_mysqlnd_net__open_stream ret = NULL;
+	DBG_ENTER("mysqlnd_net::get_open_stream");
+	if (scheme_len > (sizeof("pipe://") - 1) && !memcmp(scheme, "pipe://", sizeof("pipe://") - 1)) {
+		ret = net->data->m.open_pipe;
+	} else if ((scheme_len > (sizeof("tcp://") - 1) && !memcmp(scheme, "tcp://", sizeof("tcp://") - 1))
+				||
+				(scheme_len > (sizeof("unix://") - 1) && !memcmp(scheme, "unix://", sizeof("unix://") - 1)))
+	{
+		ret = net->data->m.open_tcp_or_unix;
+	}
+
+	if (!ret) {
+		SET_CLIENT_ERROR(*error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "No handler for this scheme");
+	}	
+	
+	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -261,13 +296,16 @@ MYSQLND_METHOD(mysqlnd_net, connect_ex)(MYSQLND_NET * const net, const char * co
 
 	net->packet_no = net->compressed_envelope_packet_no = 0;
 
-	net->m.close_stream(net, conn_stats, error_info TSRMLS_CC);
+	net->data->m.close_stream(net, conn_stats, error_info TSRMLS_CC);
 
-	open_stream = (scheme_len > (sizeof("pipe://") - 1) && !memcmp(scheme, "pipe://", sizeof("pipe://") - 1))? net->m.open_pipe:
-																											   net->m.open_tcp_or_unix;
-
-	if (PASS == (ret = open_stream(net, scheme, scheme_len, persistent, conn_stats, error_info TSRMLS_CC))) {
-		net->m.post_connect_set_opt(net, scheme, scheme_len, conn_stats, error_info TSRMLS_CC);
+	open_stream = net->data->m.get_open_stream(net, scheme, scheme_len, error_info TSRMLS_CC);
+	if (open_stream) {
+		php_stream * net_stream = open_stream(net, scheme, scheme_len, persistent, conn_stats, error_info TSRMLS_CC);
+		if (net_stream) {
+			(void) net->data->m.set_stream(net, net_stream TSRMLS_CC);
+			net->data->m.post_connect_set_opt(net, scheme, scheme_len, conn_stats, error_info TSRMLS_CC);
+			ret = PASS;
+		}
 	}
 
 	DBG_RETURN(ret);
@@ -309,9 +347,9 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 	size_t to_be_sent;
 
 	DBG_ENTER("mysqlnd_net::send_ex");
-	DBG_INF_FMT("count=" MYSQLND_SZ_T_SPEC " compression=%u", count, net->compressed);
+	DBG_INF_FMT("count=" MYSQLND_SZ_T_SPEC " compression=%u", count, net->data->compressed);
 
-	if (net->compressed == TRUE) {
+	if (net->data->compressed == TRUE) {
 		size_t comp_buf_size = MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE + MIN(left, MYSQLND_MAX_PACKET_SIZE);
 		DBG_INF_FMT("compress_buf_size="MYSQLND_SZ_T_SPEC, comp_buf_size);
 		compress_buf = mnd_emalloc(comp_buf_size);
@@ -320,7 +358,7 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 	do {
 		to_be_sent = MIN(left, MYSQLND_MAX_PACKET_SIZE);
 #ifdef MYSQLND_COMPRESSION_ENABLED
-		if (net->compressed == TRUE) {
+		if (net->data->compressed == TRUE) {
 			/* here we need to compress the data and then write it, first comes the compressed header */
 			size_t tmp_complen = to_be_sent;
 			size_t payload_size;
@@ -329,7 +367,7 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 			STORE_HEADER_SIZE(safe_storage, uncompressed_payload);
 			int3store(uncompressed_payload, to_be_sent);
 			int1store(uncompressed_payload + 3, net->packet_no);
-			if (PASS == net->m.encode((compress_buf + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE), &tmp_complen,
+			if (PASS == net->data->m.encode((compress_buf + COMPRESSED_HEADER_SIZE + MYSQLND_HEADER_SIZE), &tmp_complen,
 									   uncompressed_payload, to_be_sent + MYSQLND_HEADER_SIZE TSRMLS_CC))
 			{
 				int3store(compress_buf + MYSQLND_HEADER_SIZE, to_be_sent + MYSQLND_HEADER_SIZE);
@@ -344,14 +382,14 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 			int3store(compress_buf, payload_size);
 			int1store(compress_buf + 3, net->packet_no);
 			DBG_INF_FMT("writing "MYSQLND_SZ_T_SPEC" bytes to the network", payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE);
-			bytes_sent = net->m.network_write_ex(net, compress_buf, payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE,
+			bytes_sent = net->data->m.network_write_ex(net, compress_buf, payload_size + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE,
 												 conn_stats, error_info TSRMLS_CC);
 			net->compressed_envelope_packet_no++;
   #if WHEN_WE_NEED_TO_CHECK_WHETHER_COMPRESSION_WORKS_CORRECTLY
 			if (res == Z_OK) {
 				size_t decompressed_size = left + MYSQLND_HEADER_SIZE;
 				zend_uchar * decompressed_data = mnd_malloc(decompressed_size);
-				int error = net->m.decode(decompressed_data, decompressed_size,
+				int error = net->data->m.decode(decompressed_data, decompressed_size,
 										  compress_buf + MYSQLND_HEADER_SIZE + COMPRESSED_HEADER_SIZE, payload_size);
 				if (error == Z_OK) {
 					int i;
@@ -376,7 +414,7 @@ MYSQLND_METHOD(mysqlnd_net, send_ex)(MYSQLND_NET * const net, zend_uchar * const
 			STORE_HEADER_SIZE(safe_storage, p);
 			int3store(p, to_be_sent);
 			int1store(p + 3, net->packet_no);
-			bytes_sent = net->m.network_write_ex(net, p, to_be_sent + MYSQLND_HEADER_SIZE, conn_stats, error_info TSRMLS_CC);
+			bytes_sent = net->data->m.network_write_ex(net, p, to_be_sent + MYSQLND_HEADER_SIZE, conn_stats, error_info TSRMLS_CC);
 			RESTORE_HEADER_SIZE(p, safe_storage);
 			net->compressed_envelope_packet_no++;
 		}
@@ -486,13 +524,13 @@ MYSQLND_METHOD(mysqlnd_net, read_compressed_packet_from_stream_and_fill_read_buf
 		(MYSQLND_NET * net, size_t net_payload_size, MYSQLND_STATS * conn_stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC)
 {
 	size_t decompressed_size;
-	enum_func_status ret = PASS;
+	enum_func_status retval = PASS;
 	zend_uchar * compressed_data = NULL;
 	zend_uchar comp_header[COMPRESSED_HEADER_SIZE];
-	DBG_ENTER("mysqlnd_net::read_compressed_packet_from_stream_and_fill_read_buffe");
+	DBG_ENTER("mysqlnd_net::read_compressed_packet_from_stream_and_fill_read_buffer");
 
 	/* Read the compressed header */
-	if (FAIL == net->m.network_read_ex(net, comp_header, COMPRESSED_HEADER_SIZE, conn_stats, error_info TSRMLS_CC)) {
+	if (FAIL == net->data->m.network_read_ex(net, comp_header, COMPRESSED_HEADER_SIZE, conn_stats, error_info TSRMLS_CC)) {
 		DBG_RETURN(FAIL);
 	}
 	decompressed_size = uint3korr(comp_header);
@@ -502,20 +540,20 @@ MYSQLND_METHOD(mysqlnd_net, read_compressed_packet_from_stream_and_fill_read_buf
 
 	if (decompressed_size) {
 		compressed_data = mnd_emalloc(net_payload_size);
-		if (FAIL == net->m.network_read_ex(net, compressed_data, net_payload_size, conn_stats, error_info TSRMLS_CC)) {
-			ret = FAIL;
+		if (FAIL == net->data->m.network_read_ex(net, compressed_data, net_payload_size, conn_stats, error_info TSRMLS_CC)) {
+			retval = FAIL;
 			goto end;
 		}
 		net->uncompressed_data = mysqlnd_create_read_buffer(decompressed_size TSRMLS_CC);
-		ret = net->m.decode(net->uncompressed_data->data, decompressed_size, compressed_data, net_payload_size TSRMLS_CC);
-		if (ret == FAIL) {
+		retval = net->data->m.decode(net->uncompressed_data->data, decompressed_size, compressed_data, net_payload_size TSRMLS_CC);
+		if (FAIL == retval) {
 			goto end;
 		}
 	} else {
 		DBG_INF_FMT("The server decided not to compress the data. Our job is easy. Copying %u bytes", net_payload_size);
 		net->uncompressed_data = mysqlnd_create_read_buffer(net_payload_size TSRMLS_CC);
-		if (FAIL == net->m.network_read_ex(net, net->uncompressed_data->data, net_payload_size, conn_stats, error_info TSRMLS_CC)) {
-			ret = FAIL;
+		if (FAIL == net->data->m.network_read_ex(net, net->uncompressed_data->data, net_payload_size, conn_stats, error_info TSRMLS_CC)) {
+			retval = FAIL;
 			goto end;
 		}
 	}
@@ -523,7 +561,7 @@ end:
 	if (compressed_data) {
 		mnd_efree(compressed_data);
 	}
-	DBG_RETURN(ret);
+	DBG_RETURN(retval);
 }
 /* }}} */
 #endif /* MYSQLND_COMPRESSION_ENABLED */
@@ -590,16 +628,16 @@ MYSQLND_METHOD(mysqlnd_net, receive_ex)(MYSQLND_NET * const net, zend_uchar * co
 
 	DBG_ENTER("mysqlnd_net::receive_ex");
 #ifdef MYSQLND_COMPRESSION_ENABLED
-	if (net->compressed) {
+	if (net->data->compressed) {
 		if (net->uncompressed_data) {
 			size_t to_read_from_buffer = MIN(net->uncompressed_data->bytes_left(net->uncompressed_data), to_read);
-			DBG_INF_FMT("reading %u from uncompressed_data buffer", to_read_from_buffer);
+			DBG_INF_FMT("reading "MYSQLND_SZ_T_SPEC" from uncompressed_data buffer", to_read_from_buffer);
 			if (to_read_from_buffer) {
 				net->uncompressed_data->read(net->uncompressed_data, to_read_from_buffer, (zend_uchar *) p);
 				p += to_read_from_buffer;
 				to_read -= to_read_from_buffer;
 			}
-			DBG_INF_FMT("left %u to read", to_read);
+			DBG_INF_FMT("left "MYSQLND_SZ_T_SPEC" to read", to_read);
 			if (TRUE == net->uncompressed_data->is_empty(net->uncompressed_data)) {
 				/* Everything was consumed. This should never happen here, but for security */
 				net->uncompressed_data->free_buffer(&net->uncompressed_data TSRMLS_CC);
@@ -610,7 +648,7 @@ MYSQLND_METHOD(mysqlnd_net, receive_ex)(MYSQLND_NET * const net, zend_uchar * co
 			size_t net_payload_size;
 			zend_uchar packet_no;
 
-			if (FAIL == net->m.network_read_ex(net, net_header, MYSQLND_HEADER_SIZE, conn_stats, error_info TSRMLS_CC)) {
+			if (FAIL == net->data->m.network_read_ex(net, net_header, MYSQLND_HEADER_SIZE, conn_stats, error_info TSRMLS_CC)) {
 				DBG_RETURN(FAIL);
 			}
 			net_payload_size = uint3korr(net_header);
@@ -628,7 +666,7 @@ MYSQLND_METHOD(mysqlnd_net, receive_ex)(MYSQLND_NET * const net, zend_uchar * co
 			DBG_INF_FMT("HEADER: hwd_packet_no=%u size=%3u", packet_no, (unsigned long) net_payload_size);
 #endif
 			/* Now let's read from the wire, decompress it and fill the read buffer */
-			net->m.read_compressed_packet_from_stream_and_fill_read_buffer(net, net_payload_size, conn_stats, error_info TSRMLS_CC);
+			net->data->m.read_compressed_packet_from_stream_and_fill_read_buffer(net, net_payload_size, conn_stats, error_info TSRMLS_CC);
 
 			/*
 			  Now a bit of recursion - read from the read buffer,
@@ -636,12 +674,12 @@ MYSQLND_METHOD(mysqlnd_net, receive_ex)(MYSQLND_NET * const net, zend_uchar * co
 			  is not enough, then the recursive call will try to
 			  satisfy it until it is satisfied.
 			*/
-			DBG_RETURN(net->m.receive_ex(net, p, to_read, conn_stats, error_info TSRMLS_CC));
+			DBG_RETURN(net->data->m.receive_ex(net, p, to_read, conn_stats, error_info TSRMLS_CC));
 		}
 		DBG_RETURN(PASS);
 	}
 #endif /* MYSQLND_COMPRESSION_ENABLED */
-	DBG_RETURN(net->m.network_read_ex(net, p, to_read, conn_stats, error_info TSRMLS_CC));
+	DBG_RETURN(net->data->m.network_read_ex(net, p, to_read, conn_stats, error_info TSRMLS_CC));
 }
 /* }}} */
 
@@ -659,7 +697,7 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 				DBG_RETURN(FAIL);
 			}
 			net->cmd_buffer.length = *(unsigned int*) value;
-			DBG_INF_FMT("new_length=%u", net->cmd_buffer.length);
+			DBG_INF_FMT("new_length="MYSQLND_SZ_T_SPEC, net->cmd_buffer.length);
 			if (!net->cmd_buffer.buffer) {
 				net->cmd_buffer.buffer = mnd_pemalloc(net->cmd_buffer.length, net->persistent);
 			} else {
@@ -668,81 +706,90 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 			break;
 		case MYSQLND_OPT_NET_READ_BUFFER_SIZE:
 			DBG_INF("MYSQLND_OPT_NET_READ_BUFFER_SIZE");
-			net->options.net_read_buffer_size = *(unsigned int*) value;
-			DBG_INF_FMT("new_length=%u", net->options.net_read_buffer_size);
+			net->data->options.net_read_buffer_size = *(unsigned int*) value;
+			DBG_INF_FMT("new_length="MYSQLND_SZ_T_SPEC, net->data->options.net_read_buffer_size);
 			break;
 		case MYSQL_OPT_CONNECT_TIMEOUT:
 			DBG_INF("MYSQL_OPT_CONNECT_TIMEOUT");
-			net->options.timeout_connect = *(unsigned int*) value;
+			net->data->options.timeout_connect = *(unsigned int*) value;
 			break;
 		case MYSQLND_OPT_SSL_KEY:
 			{
 				zend_bool pers = net->persistent;
-				if (net->options.ssl_key) {
-					mnd_pefree(net->options.ssl_key, pers);
+				if (net->data->options.ssl_key) {
+					mnd_pefree(net->data->options.ssl_key, pers);
 				}
-				net->options.ssl_key = value? mnd_pestrdup(value, pers) : NULL;
+				net->data->options.ssl_key = value? mnd_pestrdup(value, pers) : NULL;
 				break;
 			}
 		case MYSQLND_OPT_SSL_CERT:
 			{
 				zend_bool pers = net->persistent;
-				if (net->options.ssl_cert) {
-					mnd_pefree(net->options.ssl_cert, pers);
+				if (net->data->options.ssl_cert) {
+					mnd_pefree(net->data->options.ssl_cert, pers);
 				}
-				net->options.ssl_cert = value? mnd_pestrdup(value, pers) : NULL;
+				net->data->options.ssl_cert = value? mnd_pestrdup(value, pers) : NULL;
 				break;
 			}
 		case MYSQLND_OPT_SSL_CA:
 			{
 				zend_bool pers = net->persistent;
-				if (net->options.ssl_ca) {
-					mnd_pefree(net->options.ssl_ca, pers);
+				if (net->data->options.ssl_ca) {
+					mnd_pefree(net->data->options.ssl_ca, pers);
 				}
-				net->options.ssl_ca = value? mnd_pestrdup(value, pers) : NULL;
+				net->data->options.ssl_ca = value? mnd_pestrdup(value, pers) : NULL;
 				break;
 			}
 		case MYSQLND_OPT_SSL_CAPATH:
 			{
 				zend_bool pers = net->persistent;
-				if (net->options.ssl_capath) {
-					mnd_pefree(net->options.ssl_capath, pers);
+				if (net->data->options.ssl_capath) {
+					mnd_pefree(net->data->options.ssl_capath, pers);
 				}
-				net->options.ssl_capath = value? mnd_pestrdup(value, pers) : NULL;
+				net->data->options.ssl_capath = value? mnd_pestrdup(value, pers) : NULL;
 				break;
 			}
 		case MYSQLND_OPT_SSL_CIPHER:
 			{
 				zend_bool pers = net->persistent;
-				if (net->options.ssl_cipher) {
-					mnd_pefree(net->options.ssl_cipher, pers);
+				if (net->data->options.ssl_cipher) {
+					mnd_pefree(net->data->options.ssl_cipher, pers);
 				}
-				net->options.ssl_cipher = value? mnd_pestrdup(value, pers) : NULL;
+				net->data->options.ssl_cipher = value? mnd_pestrdup(value, pers) : NULL;
 				break;
 			}
 		case MYSQLND_OPT_SSL_PASSPHRASE:
 			{
 				zend_bool pers = net->persistent;
-				if (net->options.ssl_passphrase) {
-					mnd_pefree(net->options.ssl_passphrase, pers);
+				if (net->data->options.ssl_passphrase) {
+					mnd_pefree(net->data->options.ssl_passphrase, pers);
 				}
-				net->options.ssl_passphrase = value? mnd_pestrdup(value, pers) : NULL;
+				net->data->options.ssl_passphrase = value? mnd_pestrdup(value, pers) : NULL;
 				break;
 			}
 		case MYSQL_OPT_SSL_VERIFY_SERVER_CERT:
-			net->options.ssl_verify_peer = value? ((*(zend_bool *)value)? TRUE:FALSE): FALSE;
+			net->data->options.ssl_verify_peer = value? ((*(zend_bool *)value)? TRUE:FALSE): FALSE;
 			break;
 		case MYSQL_OPT_READ_TIMEOUT:
-			net->options.timeout_read = *(unsigned int*) value;
+			net->data->options.timeout_read = *(unsigned int*) value;
 			break;
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_WRITE_TIMEOUT:
-			net->options.timeout_write = *(unsigned int*) value;
+			net->data->options.timeout_write = *(unsigned int*) value;
 			break;
 #endif
 		case MYSQL_OPT_COMPRESS:
-			net->options.flags |= MYSQLND_NET_FLAG_USE_COMPRESSION;
+			net->data->options.flags |= MYSQLND_NET_FLAG_USE_COMPRESSION;
 			break;
+		case MYSQL_SERVER_PUBLIC_KEY:
+			{
+				zend_bool pers = net->persistent;
+				if (net->data->options.sha256_server_public_key) {
+					mnd_pefree(net->data->options.sha256_server_public_key, pers);
+				}
+				net->data->options.sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
+				break;
+			}
 		default:
 			DBG_RETURN(FAIL);
 	}
@@ -765,7 +812,8 @@ MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data)(MYSQLND_NET * const net, enum 
 	char tmp_buf[256];
 	size_t skipped_bytes = 0;
 	int opt = PHP_STREAM_OPTION_BLOCKING;
-	int was_blocked = net->stream->ops->set_option(net->stream, opt, 0, NULL TSRMLS_CC);
+	php_stream * net_stream = net->data->get_stream(net TSRMLS_CC);
+	int was_blocked = net_stream->ops->set_option(net_stream, opt, 0, NULL TSRMLS_CC);
 
 	DBG_ENTER("mysqlnd_net::consume_uneaten_data");
 
@@ -774,11 +822,11 @@ MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data)(MYSQLND_NET * const net, enum 
 		int bytes_consumed;
 
 		do {
-			skipped_bytes += (bytes_consumed = php_stream_read(net->stream, tmp_buf, sizeof(tmp_buf)));
+			skipped_bytes += (bytes_consumed = php_stream_read(net_stream, tmp_buf, sizeof(tmp_buf)));
 		} while (bytes_consumed == sizeof(tmp_buf));
 
 		if (was_blocked) {
-			net->stream->ops->set_option(net->stream, opt, 1, NULL TSRMLS_CC);
+			net_stream->ops->set_option(net_stream, opt, 1, NULL TSRMLS_CC);
 		}
 
 		if (bytes_consumed) {
@@ -806,58 +854,61 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 {
 #ifdef MYSQLND_SSL_SUPPORTED
-	php_stream_context *context = php_stream_context_alloc(TSRMLS_C);
+	php_stream_context * context = php_stream_context_alloc(TSRMLS_C);
+	php_stream * net_stream = net->data->m.get_stream(net TSRMLS_CC);
+
 	DBG_ENTER("mysqlnd_net::enable_ssl");
 	if (!context) {
 		DBG_RETURN(FAIL);
 	}
 
-	if (net->options.ssl_key) {
+	if (net->data->options.ssl_key) {
 		zval key_zval;
-		ZVAL_STRING(&key_zval, net->options.ssl_key, 0);
+		ZVAL_STRING(&key_zval, net->data->options.ssl_key, 0);
 		php_stream_context_set_option(context, "ssl", "local_pk", &key_zval);
 	}
-	if (net->options.ssl_verify_peer) {
+	if (net->data->options.ssl_verify_peer) {
 		zval verify_peer_zval;
 		ZVAL_TRUE(&verify_peer_zval);
 		php_stream_context_set_option(context, "ssl", "verify_peer", &verify_peer_zval);
 	}
-	if (net->options.ssl_cert) {
+	if (net->data->options.ssl_cert) {
 		zval cert_zval;
-		ZVAL_STRING(&cert_zval, net->options.ssl_cert, 0);
+		ZVAL_STRING(&cert_zval, net->data->options.ssl_cert, 0);
 		php_stream_context_set_option(context, "ssl", "local_cert", &cert_zval);
-		if (!net->options.ssl_key) {
+		if (!net->data->options.ssl_key) {
 			php_stream_context_set_option(context, "ssl", "local_pk", &cert_zval);
 		}
 	}
-	if (net->options.ssl_ca) {
+	if (net->data->options.ssl_ca) {
 		zval cafile_zval;
-		ZVAL_STRING(&cafile_zval, net->options.ssl_ca, 0);
+		ZVAL_STRING(&cafile_zval, net->data->options.ssl_ca, 0);
 		php_stream_context_set_option(context, "ssl", "cafile", &cafile_zval);
 	}
-	if (net->options.ssl_capath) {
+	if (net->data->options.ssl_capath) {
 		zval capath_zval;
-		ZVAL_STRING(&capath_zval, net->options.ssl_capath, 0);
+		ZVAL_STRING(&capath_zval, net->data->options.ssl_capath, 0);
 		php_stream_context_set_option(context, "ssl", "cafile", &capath_zval);
 	}
-	if (net->options.ssl_passphrase) {
+	if (net->data->options.ssl_passphrase) {
 		zval passphrase_zval;
-		ZVAL_STRING(&passphrase_zval, net->options.ssl_passphrase, 0);
+		ZVAL_STRING(&passphrase_zval, net->data->options.ssl_passphrase, 0);
 		php_stream_context_set_option(context, "ssl", "passphrase", &passphrase_zval);
 	}
-	if (net->options.ssl_cipher) {
+	if (net->data->options.ssl_cipher) {
 		zval cipher_zval;
-		ZVAL_STRING(&cipher_zval, net->options.ssl_cipher, 0);
+		ZVAL_STRING(&cipher_zval, net->data->options.ssl_cipher, 0);
 		php_stream_context_set_option(context, "ssl", "ciphers", &cipher_zval);
 	}
-	php_stream_context_set(net->stream, context);
-	if (php_stream_xport_crypto_setup(net->stream, STREAM_CRYPTO_METHOD_TLS_CLIENT, NULL TSRMLS_CC) < 0 ||
-	    php_stream_xport_crypto_enable(net->stream, 1 TSRMLS_CC) < 0)
+	php_stream_context_set(net_stream, context);
+	if (php_stream_xport_crypto_setup(net_stream, STREAM_CRYPTO_METHOD_TLS_CLIENT, NULL TSRMLS_CC) < 0 ||
+	    php_stream_xport_crypto_enable(net_stream, 1 TSRMLS_CC) < 0)
 	{
 		DBG_ERR("Cannot connect to MySQL by using SSL");
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot connect to MySQL by using SSL");
 		DBG_RETURN(FAIL);
 	}
+	net->data->ssl = TRUE;
 	/*
 	  get rid of the context. we are persistent and if this is a real pconn used by mysql/mysqli,
 	  then the context would not survive cleaning of EG(regular_list), where it is registered, as a
@@ -865,19 +916,20 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net TSRMLS_DC)
 	  of the context, which means usage of already freed memory, bad. Actually we don't need this
 	  context anymore after we have enabled SSL on the connection. Thus it is very simple, we remove it.
 	*/
-	php_stream_context_set(net->stream, NULL);
+	php_stream_context_set(net_stream, NULL);
 
-	if (net->options.timeout_read) {
+	if (net->data->options.timeout_read) {
 		struct timeval tv;
-		DBG_INF_FMT("setting %u as PHP_STREAM_OPTION_READ_TIMEOUT", net->options.timeout_read);
-		tv.tv_sec = net->options.timeout_read;
+		DBG_INF_FMT("setting %u as PHP_STREAM_OPTION_READ_TIMEOUT", net->data->options.timeout_read);
+		tv.tv_sec = net->data->options.timeout_read;
 		tv.tv_usec = 0;
-		php_stream_set_option(net->stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
+		php_stream_set_option(net_stream, PHP_STREAM_OPTION_READ_TIMEOUT, 0, &tv);
 	}
 
 	DBG_RETURN(PASS);
 #else
 	DBG_ENTER("mysqlnd_net::enable_ssl");
+	DBG_INFO("MYSQLND_SSL_SUPPORTED is not defined");
 	DBG_RETURN(PASS);
 #endif
 }
@@ -906,25 +958,29 @@ MYSQLND_METHOD(mysqlnd_net, free_contents)(MYSQLND_NET * net TSRMLS_DC)
 		net->uncompressed_data->free_buffer(&net->uncompressed_data TSRMLS_CC);
 	}
 #endif
-	if (net->options.ssl_key) {
-		mnd_pefree(net->options.ssl_key, pers);
-		net->options.ssl_key = NULL;
+	if (net->data->options.ssl_key) {
+		mnd_pefree(net->data->options.ssl_key, pers);
+		net->data->options.ssl_key = NULL;
 	}
-	if (net->options.ssl_cert) {
-		mnd_pefree(net->options.ssl_cert, pers);
-		net->options.ssl_cert = NULL;
+	if (net->data->options.ssl_cert) {
+		mnd_pefree(net->data->options.ssl_cert, pers);
+		net->data->options.ssl_cert = NULL;
 	}
-	if (net->options.ssl_ca) {
-		mnd_pefree(net->options.ssl_ca, pers);
-		net->options.ssl_ca = NULL;
+	if (net->data->options.ssl_ca) {
+		mnd_pefree(net->data->options.ssl_ca, pers);
+		net->data->options.ssl_ca = NULL;
 	}
-	if (net->options.ssl_capath) {
-		mnd_pefree(net->options.ssl_capath, pers);
-		net->options.ssl_capath = NULL;
+	if (net->data->options.ssl_capath) {
+		mnd_pefree(net->data->options.ssl_capath, pers);
+		net->data->options.ssl_capath = NULL;
 	}
-	if (net->options.ssl_cipher) {
-		mnd_pefree(net->options.ssl_cipher, pers);
-		net->options.ssl_cipher = NULL;
+	if (net->data->options.ssl_cipher) {
+		mnd_pefree(net->data->options.ssl_cipher, pers);
+		net->data->options.ssl_cipher = NULL;
+	}
+	if (net->data->options.sha256_server_public_key) {
+		mnd_pefree(net->data->options.sha256_server_public_key, pers);
+		net->data->options.sha256_server_public_key = NULL;
 	}
 
 	DBG_VOID_RETURN;
@@ -936,24 +992,25 @@ MYSQLND_METHOD(mysqlnd_net, free_contents)(MYSQLND_NET * net TSRMLS_DC)
 static void
 MYSQLND_METHOD(mysqlnd_net, close_stream)(MYSQLND_NET * const net, MYSQLND_STATS * const stats, MYSQLND_ERROR_INFO * const error_info TSRMLS_DC)
 {
+	php_stream * net_stream;
 	DBG_ENTER("mysqlnd_net::close_stream");
-	if (net && net->stream) {
+	if (net && (net_stream = net->data->m.get_stream(net TSRMLS_CC))) {
 		zend_bool pers = net->persistent;
-		DBG_INF_FMT("Freeing stream. abstract=%p", net->stream->abstract);
+		DBG_INF_FMT("Freeing stream. abstract=%p", net_stream->abstract);
 		if (pers) {
 			if (EG(active)) {
-				php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE_PERSISTENT | PHP_STREAM_FREE_RSRC_DTOR);
+				php_stream_free(net_stream, PHP_STREAM_FREE_CLOSE_PERSISTENT | PHP_STREAM_FREE_RSRC_DTOR);
 			} else {
 				/*
 				  otherwise we will crash because the EG(persistent_list) has been freed already,
 				  before the modules are shut down
 				*/
-				php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
+				php_stream_free(net_stream, PHP_STREAM_FREE_CLOSE | PHP_STREAM_FREE_RSRC_DTOR);
 			}
 		} else {
-			php_stream_free(net->stream, PHP_STREAM_FREE_CLOSE);
+			php_stream_free(net_stream, PHP_STREAM_FREE_CLOSE);
 		}
-		net->stream = NULL;
+		(void) net->data->m.set_stream(net, NULL TSRMLS_CC);
 	}
 
 	DBG_VOID_RETURN;
@@ -969,13 +1026,13 @@ MYSQLND_METHOD(mysqlnd_net, init)(MYSQLND_NET * const net, MYSQLND_STATS * const
 	DBG_ENTER("mysqlnd_net::init");
 
 	buf_size = MYSQLND_G(net_cmd_buffer_size); /* this is long, cast to unsigned int*/
-	net->m.set_client_option(net, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *) &buf_size TSRMLS_CC);
+	net->data->m.set_client_option(net, MYSQLND_OPT_NET_CMD_BUFFER_SIZE, (char *) &buf_size TSRMLS_CC);
 
 	buf_size = MYSQLND_G(net_read_buffer_size); /* this is long, cast to unsigned int*/
-	net->m.set_client_option(net, MYSQLND_OPT_NET_READ_BUFFER_SIZE, (char *)&buf_size TSRMLS_CC);
+	net->data->m.set_client_option(net, MYSQLND_OPT_NET_READ_BUFFER_SIZE, (char *)&buf_size TSRMLS_CC);
 
 	buf_size = MYSQLND_G(net_read_timeout); /* this is long, cast to unsigned int*/
-	net->m.set_client_option(net, MYSQL_OPT_READ_TIMEOUT, (char *)&buf_size TSRMLS_CC);
+	net->data->m.set_client_option(net, MYSQL_OPT_READ_TIMEOUT, (char *)&buf_size TSRMLS_CC);
 
 	DBG_RETURN(PASS);
 }
@@ -988,18 +1045,45 @@ MYSQLND_METHOD(mysqlnd_net, dtor)(MYSQLND_NET * const net, MYSQLND_STATS * const
 {
 	DBG_ENTER("mysqlnd_net::dtor");
 	if (net) {
-		zend_bool pers = net->persistent;
-	
-		net->m.free_contents(net TSRMLS_CC);
-		net->m.close_stream(net, stats, error_info TSRMLS_CC);
+		net->data->m.free_contents(net TSRMLS_CC);
+		net->data->m.close_stream(net, stats, error_info TSRMLS_CC);
+
 		if (net->cmd_buffer.buffer) {
 			DBG_INF("Freeing cmd buffer");
-			mnd_pefree(net->cmd_buffer.buffer, pers);
+			mnd_pefree(net->cmd_buffer.buffer, net->persistent);
 			net->cmd_buffer.buffer = NULL;
 		}
-		mnd_pefree(net, pers);
+
+		mnd_pefree(net->data, net->data->persistent);
+		mnd_pefree(net, net->persistent);
 	}
 	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_net::get_stream */
+static php_stream *
+MYSQLND_METHOD(mysqlnd_net, get_stream)(const MYSQLND_NET * const net TSRMLS_DC)
+{
+	DBG_ENTER("mysqlnd_net::get_stream");
+	DBG_INF_FMT("%p", net? net->data->stream:NULL);
+	DBG_RETURN(net? net->data->stream:NULL);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_net::set_stream */
+static php_stream *
+MYSQLND_METHOD(mysqlnd_net, set_stream)(MYSQLND_NET * const net, php_stream * net_stream TSRMLS_DC)
+{
+	php_stream * ret = NULL;
+	DBG_ENTER("mysqlnd_net::set_stream");
+	if (net) {
+		net->data->stream = net_stream;
+		ret = net->data->stream;
+	}
+	DBG_RETURN(ret);
 }
 /* }}} */
 
@@ -1011,8 +1095,9 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_net)
 	MYSQLND_METHOD(mysqlnd_net, close_stream),
 	MYSQLND_METHOD(mysqlnd_net, open_pipe),
 	MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix),
-	NULL, /* unused 1 */
-	NULL, /* unused 2 */
+	MYSQLND_METHOD(mysqlnd_net, get_stream),
+	MYSQLND_METHOD(mysqlnd_net, set_stream),
+	MYSQLND_METHOD(mysqlnd_net, get_open_stream),
 	MYSQLND_METHOD(mysqlnd_net, post_connect_set_opt),
 	MYSQLND_METHOD(mysqlnd_net, set_client_option),
 	MYSQLND_METHOD(mysqlnd_net, decode),
@@ -1026,10 +1111,15 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_net)
 	MYSQLND_METHOD(mysqlnd_net, send_ex),
 	MYSQLND_METHOD(mysqlnd_net, receive_ex),
 #ifdef MYSQLND_COMPRESSION_ENABLED
-	MYSQLND_METHOD(mysqlnd_net, read_compressed_packet_from_stream_and_fill_read_buffer)
+	MYSQLND_METHOD(mysqlnd_net, read_compressed_packet_from_stream_and_fill_read_buffer),
 #else
-	NULL
+	NULL,
 #endif
+	NULL, /* unused 1 */
+	NULL, /* unused 2 */
+	NULL, /* unused 3 */
+	NULL, /* unused 4 */
+	NULL  /* unused 5 */
 MYSQLND_CLASS_METHODS_END;
 
 
@@ -1051,7 +1141,7 @@ mysqlnd_net_free(MYSQLND_NET * const net, MYSQLND_STATS * stats, MYSQLND_ERROR_I
 {
 	DBG_ENTER("mysqlnd_net_free");
 	if (net) {
-		net->m.dtor(net, stats, error_info TSRMLS_CC);
+		net->data->m.dtor(net, stats, error_info TSRMLS_CC);
 	}
 	DBG_VOID_RETURN;
 }

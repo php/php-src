@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "2.4.0"
+#define ZEND_VERSION "2.6.0-dev"
 
 #define ZEND_ENGINE_2
 
@@ -133,6 +133,11 @@ char *alloca ();
 # endif
 #endif
 
+/* Compatibility with non-clang compilers */
+#ifndef __has_attribute
+# define __has_attribute(x) 0
+#endif
+
 /* GCC x.y.z supplies __GNUC__ = x and __GNUC_MINOR__ = y */
 #ifdef __GNUC__
 # define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
@@ -144,6 +149,14 @@ char *alloca ();
 # define ZEND_ATTRIBUTE_MALLOC __attribute__ ((__malloc__))
 #else
 # define ZEND_ATTRIBUTE_MALLOC
+#endif
+
+#if ZEND_GCC_VERSION >= 4003 || __has_attribute(alloc_size)
+# define ZEND_ATTRIBUTE_ALLOC_SIZE(X) __attribute__ ((alloc_size(X)))
+# define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y) __attribute__ ((alloc_size(X,Y)))
+#else
+# define ZEND_ATTRIBUTE_ALLOC_SIZE(X)
+# define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
 #endif
 
 #if ZEND_GCC_VERSION >= 2007
@@ -212,6 +225,7 @@ char *alloca ();
 #define ZEND_FILE_LINE_EMPTY_CC			, ZEND_FILE_LINE_EMPTY_C
 #define ZEND_FILE_LINE_ORIG_RELAY_C		__zend_orig_filename, __zend_orig_lineno
 #define ZEND_FILE_LINE_ORIG_RELAY_CC	, ZEND_FILE_LINE_ORIG_RELAY_C
+#define ZEND_ASSERT(c)					assert(c)
 #else
 #define ZEND_FILE_LINE_D
 #define ZEND_FILE_LINE_DC
@@ -225,6 +239,7 @@ char *alloca ();
 #define ZEND_FILE_LINE_EMPTY_CC
 #define ZEND_FILE_LINE_ORIG_RELAY_C
 #define ZEND_FILE_LINE_ORIG_RELAY_CC
+#define ZEND_ASSERT(c)
 #endif	/* ZEND_DEBUG */
 
 #ifdef ZTS
@@ -263,10 +278,10 @@ static const char long_min_digits[] = "9223372036854775808";
 
 #define MAX_LENGTH_OF_DOUBLE 32
 
-#undef SUCCESS
-#undef FAILURE
-#define SUCCESS 0
-#define FAILURE -1				/* this MUST stay a negative number, or it may affect functions! */
+typedef enum {
+  SUCCESS =  0,
+  FAILURE = -1,		/* this MUST stay a negative number, or it may affect functions! */
+} ZEND_RESULT_CODE;
 
 #include "zend_hash.h"
 #include "zend_ts_hash.h"
@@ -436,8 +451,6 @@ struct _zend_trait_precedence {
 	zend_trait_method_reference *trait_method;
 	
 	zend_class_entry** exclude_from_classes;
-	
-	union _zend_function* function;
 };
 typedef struct _zend_trait_precedence zend_trait_precedence;
 
@@ -454,8 +467,6 @@ struct _zend_trait_alias {
 	* modifiers to be set on trait method
 	*/
 	zend_uint modifiers;
-	
-	union _zend_function* function;
 };
 typedef struct _zend_trait_alias zend_trait_alias;
 

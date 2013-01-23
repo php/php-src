@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -947,6 +947,11 @@ PHP_MINIT_FUNCTION(pgsql)
 	le_result = zend_register_list_destructors_ex(_free_result, NULL, "pgsql result", module_number);
 	le_lofp = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql large object", module_number);
 	le_string = zend_register_list_destructors_ex(_free_ptr, NULL, "pgsql string", module_number);
+#if HAVE_PG_CONFIG_H
+	/* PG_VERSION - libpq version */
+	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION", PG_VERSION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PGSQL_LIBPQ_VERSION_STR", PG_VERSION_STR, CONST_CS | CONST_PERSISTENT);
+#endif
 	/* For connection option */
 	REGISTER_LONG_CONSTANT("PGSQL_CONNECT_FORCE_NEW", PGSQL_CONNECT_FORCE_NEW, CONST_CS | CONST_PERSISTENT);
 	/* For pg_fetch_array() */
@@ -1061,6 +1066,7 @@ PHP_MINFO_FUNCTION(pgsql)
 	php_info_print_table_header(2, "PostgreSQL Support", "enabled");
 #if HAVE_PG_CONFIG_H
 	php_info_print_table_row(2, "PostgreSQL(libpq) Version", PG_VERSION);
+	php_info_print_table_row(2, "PostgreSQL(libpq) ", PG_VERSION_STR);
 #ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
 	php_info_print_table_row(2, "Multibyte character support", "enabled");
 #else
@@ -1730,7 +1736,7 @@ PHP_FUNCTION(pg_query_params)
 			} else {
 				zval tmp_val = **tmp;
 				zval_copy_ctor(&tmp_val);
-				convert_to_string(&tmp_val);
+				convert_to_cstring(&tmp_val);
 				if (Z_TYPE(tmp_val) != IS_STRING) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Error converting parameter");
 					zval_dtor(&tmp_val);

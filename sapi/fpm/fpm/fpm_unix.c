@@ -23,6 +23,7 @@
 #include "fpm_clock.h"
 #include "fpm_stdio.h"
 #include "fpm_unix.h"
+#include "fpm_signals.h"
 #include "zlog.h"
 
 size_t fpm_pagesize;
@@ -112,21 +113,24 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 			}
 		}
 
-#ifndef I_REALLY_WANT_ROOT_PHP
-		if (wp->set_uid == 0 || wp->set_gid == 0) {
-			zlog(ZLOG_ERROR, "[pool %s] please specify user and group other than root", wp->config->name);
-			return -1;
+		if (!fpm_globals.run_as_root) {
+			if (wp->set_uid == 0 || wp->set_gid == 0) {
+				zlog(ZLOG_ERROR, "[pool %s] please specify user and group other than root", wp->config->name);
+				return -1;
+			}
 		}
-#endif
 	} else { /* not root */
 		if (wp->config->user && *wp->config->user) {
-			zlog(ZLOG_WARNING, "[pool %s] 'user' directive is ignored when FPM is not running as root", wp->config->name);
+			zlog(ZLOG_NOTICE, "[pool %s] 'user' directive is ignored when FPM is not running as root", wp->config->name);
 		}
 		if (wp->config->group && *wp->config->group) {
-			zlog(ZLOG_WARNING, "[pool %s] 'group' directive is ignored when FPM is not running as root", wp->config->name);
+			zlog(ZLOG_NOTICE, "[pool %s] 'group' directive is ignored when FPM is not running as root", wp->config->name);
 		}
 		if (wp->config->chroot && *wp->config->chroot) {
-			zlog(ZLOG_WARNING, "[pool %s] 'chroot' directive is ignored when FPM is not running as root", wp->config->name);
+			zlog(ZLOG_NOTICE, "[pool %s] 'chroot' directive is ignored when FPM is not running as root", wp->config->name);
+		}
+		if (wp->config->process_priority != 64) {
+			zlog(ZLOG_NOTICE, "[pool %s] 'process.priority' directive is ignored when FPM is not running as root", wp->config->name);
 		}
 
 		/* set up HOME and USER anyway */
@@ -183,6 +187,14 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 
 	if (is_root) {
+
+		if (wp->config->process_priority != 64) {
+			if (setpriority(PRIO_PROCESS, 0, wp->config->process_priority) < 0) {
+				zlog(ZLOG_SYSERROR, "[pool %s] Unable to set priority for this new process", wp->config->name);
+				return -1;
+			}
+		}
+
 		if (wp->set_gid) {
 			if (0 > setgid(wp->set_gid)) {
 				zlog(ZLOG_SYSERROR, "[pool %s] failed to setgid(%d)", wp->config->name, wp->set_gid);
@@ -217,6 +229,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 int fpm_unix_init_main() /* {{{ */
 {
 	struct fpm_worker_pool_s *wp;
+	int is_root = !geteuid();
 
 	if (fpm_global_config.rlimit_files) {
 		struct rlimit r;
@@ -242,21 +255,103 @@ int fpm_unix_init_main() /* {{{ */
 
 	fpm_pagesize = getpagesize();
 	if (fpm_global_config.daemonize) {
-		switch (fork()) {
-			case -1 :
+		/*
+		 * If daemonize, the calling process will die soon
+		 * and the master process continues to initialize itself.
+		 *
+		 * The parent process has then to wait for the master
+		 * process to initialize to return a consistent exit
+		 * value. For this pupose, the master process will
+		 * send \"1\" into the pipe if everything went well 
+		 * and \"0\" otherwise.
+		 */
+
+
+		struct timeval tv;
+		fd_set rfds;
+		int ret;
+
+		if (pipe(fpm_globals.send_config_pipe) == -1) {
+			zlog(ZLOG_SYSERROR, "failed to create pipe");
+			return -1;
+		}
+
+		/* then fork */
+		pid_t pid = fork();
+		switch (pid) {
+
+			case -1 : /* error */
 				zlog(ZLOG_SYSERROR, "failed to daemonize");
 				return -1;
-			case 0 :
+
+			case 0 : /* children */
+				close(fpm_globals.send_config_pipe[0]); /* close the read side of the pipe */
 				break;
-			default :
-				fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT);
-				exit(0);
+
+			default : /* parent */
+				close(fpm_globals.send_config_pipe[1]); /* close the write side of the pipe */
+
+				/*
+				 * wait for 10s before exiting with error
+				 * the child is supposed to send 1 or 0 into the pipe to tell the parent
+				 * how it goes for it
+				 */
+				FD_ZERO(&rfds);
+				FD_SET(fpm_globals.send_config_pipe[0], &rfds);
+
+				tv.tv_sec = 10;
+				tv.tv_usec = 0;
+
+				zlog(ZLOG_DEBUG, "The calling process is waiting for the master process to ping via fd=%d", fpm_globals.send_config_pipe[0]);
+				ret = select(fpm_globals.send_config_pipe[0] + 1, &rfds, NULL, NULL, &tv);
+				if (ret == -1) {
+					zlog(ZLOG_SYSERROR, "failed to select");
+					exit(FPM_EXIT_SOFTWARE);
+				}
+				if (ret) { /* data available */
+					int readval;
+					ret = read(fpm_globals.send_config_pipe[0], &readval, sizeof(readval));
+					if (ret == -1) {
+						zlog(ZLOG_SYSERROR, "failed to read from pipe");
+						exit(FPM_EXIT_SOFTWARE);
+					}
+
+					if (ret == 0) {
+						zlog(ZLOG_ERROR, "no data have been read from pipe");
+						exit(FPM_EXIT_SOFTWARE);
+					} else {
+						if (readval == 1) {
+							zlog(ZLOG_DEBUG, "I received a valid acknoledge from the master process, I can exit without error");
+							fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT);
+							exit(FPM_EXIT_OK);
+						} else {
+							zlog(ZLOG_DEBUG, "The master process returned an error !");
+							exit(FPM_EXIT_SOFTWARE);
+						}
+					}
+				} else { /* no date sent ! */
+					zlog(ZLOG_ERROR, "the master process didn't send back its status (via the pipe to the calling process)");
+				  exit(FPM_EXIT_SOFTWARE);
+				}
+				exit(FPM_EXIT_SOFTWARE);
 		}
 	}
 
+	/* continue as a child */
 	setsid();
 	if (0 > fpm_clock_init()) {
 		return -1;
+	}
+
+	if (fpm_global_config.process_priority != 64) {
+		if (is_root) {
+			if (setpriority(PRIO_PROCESS, 0, fpm_global_config.process_priority) < 0) {
+				zlog(ZLOG_SYSERROR, "Unable to set priority for the master process");
+				return -1;
+			}
+		} else {
+			zlog(ZLOG_NOTICE, "'process.priority' directive is ignored when FPM is not running as root");
+		}
 	}
 
 	fpm_globals.parent_pid = getpid();

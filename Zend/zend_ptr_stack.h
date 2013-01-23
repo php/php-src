@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -109,6 +109,11 @@ static zend_always_inline void *zend_ptr_stack_pop(zend_ptr_stack *stack)
 {
 	stack->top--;
 	return *(--stack->top_element);
+}
+
+static inline void *zend_ptr_stack_top(zend_ptr_stack *stack)
+{
+    return stack->elements[stack->top - 1];
 }
 
 #endif /* ZEND_PTR_STACK_H */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -658,13 +658,13 @@ static unsigned int _mem_block_end_magic   = 0;
 
 #define ZEND_MM_LARGE_BUCKET_INDEX(S) zend_mm_high_bit(S)
 
-static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC;
+static void *_zend_mm_alloc_int(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_MALLOC ZEND_ATTRIBUTE_ALLOC_SIZE(2);
 static void _zend_mm_free_int(zend_mm_heap *heap, void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+static void *_zend_mm_realloc_int(zend_mm_heap *heap, void *p, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) ZEND_ATTRIBUTE_ALLOC_SIZE(3);
 
 static inline unsigned int zend_mm_high_bit(size_t _size)
 {
-#if defined(__GNUC__) && defined(i386)
+#if defined(__GNUC__) && (defined(__native_client__) || defined(i386))
 	unsigned int n;
 
 	__asm__("bsrl %1,%0\n\t" : "=r" (n) : "rm"  (_size));
@@ -690,7 +690,7 @@ static inline unsigned int zend_mm_high_bit(size_t _size)
 
 static inline unsigned int zend_mm_low_bit(size_t _size)
 {
-#if defined(__GNUC__) && defined(i386)
+#if defined(__GNUC__) && (defined(__native_client__) || defined(i386))
 	unsigned int n;
 
 	__asm__("bsfl %1,%0\n\t" : "=r" (n) : "rm"  (_size));
@@ -2454,7 +2454,7 @@ ZEND_API size_t _zend_mem_block_size(void *ptr TSRMLS_DC ZEND_FILE_LINE_DC ZEND_
 	return _zend_mm_block_size(AG(mm_heap), ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 }
 
-#if defined(__GNUC__) && defined(i386)
+#if defined(__GNUC__) && (defined(__native_client__) || defined(i386))
 
 static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 {

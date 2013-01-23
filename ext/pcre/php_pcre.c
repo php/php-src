@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -248,6 +248,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 #endif
 	pcre_cache_entry	*pce;
 	pcre_cache_entry	 new_entry;
+	char                *tmp = NULL;
 
 	/* Try to lookup the cached regex entry, and if successful, just pass
 	   back the compiled pattern, otherwise go on and compile it. */
@@ -275,7 +276,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 	   get to the end without encountering a delimiter. */
 	while (isspace((int)*(unsigned char *)p)) p++;
 	if (*p == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty regular expression");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, 
+						 p < regex + regex_len ? "Null byte in regex" : "Empty regular expression");
 		return NULL;
 	}
 	
@@ -292,20 +294,17 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 		delimiter = pp[5];
 	end_delimiter = delimiter;
 
+	pp = p;
+
 	if (start_delimiter == end_delimiter) {
 		/* We need to iterate through the pattern, searching for the ending delimiter,
 		   but skipping the backslashed delimiters.  If the ending delimiter is not
 		   found, display a warning. */
-		pp = p;
 		while (*pp != 0) {
 			if (*pp == '\\' && pp[1] != 0) pp++;
 			else if (*pp == delimiter)
 				break;
 			pp++;
-		}
-		if (*pp == 0) {
-			php_error_docref(NULL TSRMLS_CC,E_WARNING, "No ending delimiter '%c' found", delimiter);
-			return NULL;
 		}
 	} else {
 		/* We iterate through the pattern, searching for the matching ending
@@ -314,7 +313,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 		 * reach the end of the pattern without matching, display a warning.
 		 */
 		int brackets = 1; 	/* brackets nesting level */
-		pp = p;
 		while (*pp != 0) {
 			if (*pp == '\\' && pp[1] != 0) pp++;
 			else if (*pp == end_delimiter && --brackets <= 0)
@@ -323,10 +321,17 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 				brackets++;
 			pp++;
 		}
-		if (*pp == 0) {
-			php_error_docref(NULL TSRMLS_CC,E_WARNING, "No ending matching delimiter '%c' found", end_delimiter);
-			return NULL;
+	}
+
+	if (*pp == 0) {
+		if (pp < regex + regex_len) {
+			php_error_docref(NULL TSRMLS_CC,E_WARNING, "Null byte in regex");
+		} else if (start_delimiter == end_delimiter) {
+			php_error_docref(NULL TSRMLS_CC,E_WARNING, "No ending delimiter '%c' found", delimiter);
+		} else {
+			php_error_docref(NULL TSRMLS_CC,E_WARNING, "No ending matching delimiter '%c' found", delimiter);
 		}
+		return NULL;
 	}
 	
 	/* Make a copy of the actual pattern. */
@@ -337,7 +342,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 
 	/* Parse through the options, setting appropriate flags.  Display
 	   a warning if we encounter an unknown modifier. */	
-	while (*pp != 0) {
+	while (pp < regex + regex_len) {
 		switch (*pp++) {
 			/* Perl compatible options */
 			case 'i':	coptions |= PCRE_CASELESS;		break;
@@ -368,7 +373,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 				break;
 
 			default:
-				php_error_docref(NULL TSRMLS_CC,E_WARNING, "Unknown modifier '%c'", pp[-1]);
+				if (pp[-1]) {
+					php_error_docref(NULL TSRMLS_CC,E_WARNING, "Unknown modifier '%c'", pp[-1]);
+				} else {
+					php_error_docref(NULL TSRMLS_CC,E_WARNING, "Null byte in regex");
+				}
 				efree(pattern);
 				return NULL;
 		}
@@ -430,8 +439,25 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 	new_entry.locale = pestrdup(locale, 1);
 	new_entry.tables = tables;
 #endif
+
+	/*
+	 * Interned strings are not duplicated when stored in HashTable,
+	 * but all the interned strings created during HTTP request are removed
+	 * at end of request. However PCRE_G(pcre_cache) must be consistent
+	 * on the next request as well. So we disable usage of interned strings
+	 * as hash keys especually for this table.
+	 * See bug #63180 
+	 */
+	if (IS_INTERNED(regex)) {
+		regex = tmp = estrndup(regex, regex_len);
+	}
+
 	zend_hash_update(&PCRE_G(pcre_cache), regex, regex_len+1, (void *)&new_entry,
 						sizeof(pcre_cache_entry), (void**)&pce);
+
+	if (tmp) {
+		efree(tmp);
+	}
 
 	return pce;
 }
@@ -1844,7 +1870,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match, 0, 0, 2)
     ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match_all, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_preg_match_all, 0, 0, 2)
     ZEND_ARG_INFO(0, pattern)
     ZEND_ARG_INFO(0, subject)
     ZEND_ARG_INFO(1, subpatterns) /* array */

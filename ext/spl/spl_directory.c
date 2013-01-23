@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -433,7 +433,6 @@ static spl_filesystem_object * spl_filesystem_object_create_info(spl_filesystem_
 		if (file_path && !use_copy) {
 			efree(file_path);
 		}
-		use_copy = 1;
 		file_path_len = 1;
 		file_path = "/";
 #endif
@@ -1432,6 +1431,7 @@ SPL_METHOD(FilesystemIterator, __construct)
 SPL_METHOD(FilesystemIterator, rewind)
 {
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	int skip_dots = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_SKIPDOTS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -1443,7 +1443,7 @@ SPL_METHOD(FilesystemIterator, rewind)
 	}
 	do {
 		spl_filesystem_dir_read(intern TSRMLS_CC);
-	} while (spl_filesystem_is_dot(intern->u.dir.entry.d_name));
+	} while (skip_dots && spl_filesystem_is_dot(intern->u.dir.entry.d_name));
 }
 /* }}} */
 
@@ -1874,6 +1874,10 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type TS
 	spl_filesystem_object *intern = (spl_filesystem_object*)zend_object_store_get_object(readobj TSRMLS_CC);
 
 	if (type == IS_STRING) {
+		if (Z_OBJCE_P(readobj)->__tostring) {
+			return std_object_handlers.cast_object(readobj, writeobj, type TSRMLS_CC);
+		}
+
 		switch (intern->type) {
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -211,7 +211,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 
 	double fp_num;
 	wide_int i_num = (wide_int) 0;
-	u_wide_int ui_num;
+	u_wide_int ui_num = (u_wide_int) 0;
 
 	char num_buf[NUM_BUF_SIZE];
 	char char_buf[2];			/* for printing %% and %<unknown> */
@@ -560,7 +560,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 					s = ap_php_conv_p2(ui_num, 4, *fmt,
 								&num_buf[NUM_BUF_SIZE], &s_len);
 					FIX_PRECISION(adjust_precision, precision, s, s_len);
-					if (alternate_form && i_num != 0) {
+					if (alternate_form && ui_num != 0) {
 						*--s = *fmt;	/* 'x' or 'X' */
 						*--s = '0';
 						s_len += 2;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,9 @@
 
 #include <errno.h>
 #include "zend.h"
+#ifdef PHP_WIN32
+# include <Winuser.h>
+#endif
 #include "zend_alloc.h"
 #include <zend_language_parser.h>
 #include "zend_compile.h"
@@ -175,22 +178,23 @@ static void yy_scan_buffer(char *str, unsigned int len TSRMLS_DC)
 void startup_scanner(TSRMLS_D)
 {
 	CG(parse_error) = 0;
-	CG(heredoc) = NULL;
-	CG(heredoc_len) = 0;
 	CG(doc_comment) = NULL;
 	CG(doc_comment_len) = 0;
 	zend_stack_init(&SCNG(state_stack));
+	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
+}
+
+static void heredoc_label_dtor(zend_heredoc_label *heredoc_label) {
+    efree(heredoc_label->label);
 }
 
 void shutdown_scanner(TSRMLS_D)
 {
-	if (CG(heredoc)) {
-		efree(CG(heredoc));
-		CG(heredoc_len)=0;
-	}
 	CG(parse_error) = 0;
-	zend_stack_destroy(&SCNG(state_stack));
 	RESET_DOC_COMMENT();
+	zend_stack_destroy(&SCNG(state_stack));
+	zend_ptr_stack_clean(&SCNG(heredoc_label_stack), (void (*)(void *)) &heredoc_label_dtor, 1);
+	zend_ptr_stack_destroy(&SCNG(heredoc_label_stack));
 }
 
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
@@ -204,6 +208,9 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 
 	lex_state->state_stack = SCNG(state_stack);
 	zend_stack_init(&SCNG(state_stack));
+
+	lex_state->heredoc_label_stack = SCNG(heredoc_label_stack);
+	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
 
 	lex_state->in = SCNG(yy_in);
 	lex_state->yy_state = YYSTATE;
@@ -231,6 +238,10 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	zend_stack_destroy(&SCNG(state_stack));
 	SCNG(state_stack) = lex_state->state_stack;
 
+	zend_ptr_stack_clean(&SCNG(heredoc_label_stack), (void (*)(void *)) &heredoc_label_dtor, 1);
+	zend_ptr_stack_destroy(&SCNG(heredoc_label_stack));
+	SCNG(heredoc_label_stack) = lex_state->heredoc_label_stack;
+
 	SCNG(yy_in) = lex_state->in;
 	YYSETCONDITION(lex_state->yy_state);
 	CG(zend_lineno) = lex_state->lineno;
@@ -247,12 +258,6 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	SCNG(input_filter) = lex_state->input_filter;
 	SCNG(output_filter) = lex_state->output_filter;
 	SCNG(script_encoding) = lex_state->script_encoding;
-
-	if (CG(heredoc)) {
-		efree(CG(heredoc));
-		CG(heredoc) = NULL;
-		CG(heredoc_len) = 0;
-	}
 }
 
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC)
@@ -575,6 +580,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		init_op_array(op_array, ZEND_USER_FUNCTION, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 		CG(in_compilation) = 1;
 		CG(active_op_array) = op_array;
+		zend_stack_push(&CG(context_stack), (void *) &CG(context), sizeof(CG(context)));
 		zend_init_compiler_context(TSRMLS_C);
 		compiler_result = zendparse(TSRMLS_C);
 		zend_do_return(&retval_znode, 0 TSRMLS_CC);
@@ -744,6 +750,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 		init_op_array(op_array, ZEND_EVAL_CODE, INITIAL_OP_ARRAY_SIZE TSRMLS_CC);
 		CG(interactive) = orig_interactive;
 		CG(active_op_array) = op_array;
+		zend_stack_push(&CG(context_stack), (void *) &CG(context), sizeof(CG(context)));
 		zend_init_compiler_context(TSRMLS_C);
 		BEGIN(ST_IN_SCRIPTING);
 		compiler_result = zendparse(TSRMLS_C);
@@ -905,7 +912,11 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 					zendlval->value.str.len--;
 					break;
 				case 'e':
+#ifdef PHP_WIN32
+					*t++ = VK_ESCAPE;
+#else
 					*t++ = '\e';
+#endif
 					zendlval->value.str.len--;
 					break;
 				case '"':
@@ -1026,12 +1037,20 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_RETURN;
 }
 
+<ST_IN_SCRIPTING>"yield" {
+	return T_YIELD;
+}
+
 <ST_IN_SCRIPTING>"try" {
 	return T_TRY;
 }
 
 <ST_IN_SCRIPTING>"catch" {
 	return T_CATCH;
+}
+
+<ST_IN_SCRIPTING>"finally" {
+	return T_FINALLY;
 }
 
 <ST_IN_SCRIPTING>"throw" {
@@ -1454,7 +1473,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 
-<ST_LOOKING_FOR_VARNAME>{LABEL} {
+<ST_LOOKING_FOR_VARNAME>{LABEL}[[}] {
+	yyless(yyleng - 1);
 	zend_copy_value(zendlval, yytext, yyleng);
 	zendlval->type = IS_STRING;
 	yy_pop_state(TSRMLS_C);
@@ -2097,38 +2117,35 @@ inline_html:
 <ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}({LABEL}|([']{LABEL}['])|(["]{LABEL}["])){NEWLINE} {
 	char *s;
 	int bprefix = (yytext[0] != '<') ? 1 : 0;
-
-	/* save old heredoc label */
-	Z_STRVAL_P(zendlval) = CG(heredoc);
-	Z_STRLEN_P(zendlval) = CG(heredoc_len);
+	zend_heredoc_label *heredoc_label = emalloc(sizeof(zend_heredoc_label));
 
 	CG(zend_lineno)++;
-	CG(heredoc_len) = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
+	heredoc_label->length = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
 	s = yytext+bprefix+3;
 	while ((*s == ' ') || (*s == '\t')) {
 		s++;
-		CG(heredoc_len)--;
+		heredoc_label->length--;
 	}
 
 	if (*s == '\'') {
 		s++;
-		CG(heredoc_len) -= 2;
+		heredoc_label->length -= 2;
 
 		BEGIN(ST_NOWDOC);
 	} else {
 		if (*s == '"') {
 			s++;
-			CG(heredoc_len) -= 2;
+			heredoc_label->length -= 2;
 		}
 
 		BEGIN(ST_HEREDOC);
 	}
 
-	CG(heredoc) = estrndup(s, CG(heredoc_len));
+	heredoc_label->label = estrndup(s, heredoc_label->length);
 
 	/* Check for ending label on the next line */
-	if (CG(heredoc_len) < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, s, CG(heredoc_len))) {
-		YYCTYPE *end = YYCURSOR + CG(heredoc_len);
+	if (heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, s, heredoc_label->length)) {
+		YYCTYPE *end = YYCURSOR + heredoc_label->length;
 
 		if (*end == ';') {
 			end++;
@@ -2138,6 +2155,8 @@ inline_html:
 			BEGIN(ST_END_HEREDOC);
 		}
 	}
+
+	zend_ptr_stack_push(&SCNG(heredoc_label_stack), (void *) heredoc_label);
 
 	return T_START_HEREDOC;
 }
@@ -2150,13 +2169,14 @@ inline_html:
 
 
 <ST_END_HEREDOC>{ANY_CHAR} {
-	YYCURSOR += CG(heredoc_len) - 1;
-	yyleng = CG(heredoc_len);
+	zend_heredoc_label *heredoc_label = zend_ptr_stack_pop(&SCNG(heredoc_label_stack));
 
-	Z_STRVAL_P(zendlval) = CG(heredoc);
-	Z_STRLEN_P(zendlval) = CG(heredoc_len);
-	CG(heredoc) = NULL;
-	CG(heredoc_len) = 0;
+	YYCURSOR += heredoc_label->length - 1;
+	yyleng = heredoc_label->length;
+
+	heredoc_label_dtor(heredoc_label);
+	efree(heredoc_label);
+
 	BEGIN(ST_IN_SCRIPTING);
 	return T_END_HEREDOC;
 }
@@ -2276,6 +2296,8 @@ double_quotes_scan_done:
 <ST_HEREDOC>{ANY_CHAR} {
 	int newline = 0;
 
+	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
+
 	if (YYCURSOR > YYLIMIT) {
 		return 0;
 	}
@@ -2291,8 +2313,8 @@ double_quotes_scan_done:
 				/* fall through */
 			case '\n':
 				/* Check for ending label on the next line */
-				if (IS_LABEL_START(*YYCURSOR) && CG(heredoc_len) < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, CG(heredoc), CG(heredoc_len))) {
-					YYCTYPE *end = YYCURSOR + CG(heredoc_len);
+				if (IS_LABEL_START(*YYCURSOR) && heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, heredoc_label->label, heredoc_label->length)) {
+					YYCTYPE *end = YYCURSOR + heredoc_label->length;
 
 					if (*end == ';') {
 						end++;
@@ -2348,6 +2370,8 @@ heredoc_scan_done:
 <ST_NOWDOC>{ANY_CHAR} {
 	int newline = 0;
 
+	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
+
 	if (YYCURSOR > YYLIMIT) {
 		return 0;
 	}
@@ -2363,8 +2387,8 @@ heredoc_scan_done:
 				/* fall through */
 			case '\n':
 				/* Check for ending label on the next line */
-				if (IS_LABEL_START(*YYCURSOR) && CG(heredoc_len) < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, CG(heredoc), CG(heredoc_len))) {
-					YYCTYPE *end = YYCURSOR + CG(heredoc_len);
+				if (IS_LABEL_START(*YYCURSOR) && heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, heredoc_label->label, heredoc_label->length)) {
+					YYCTYPE *end = YYCURSOR + heredoc_label->length;
 
 					if (*end == ';') {
 						end++;

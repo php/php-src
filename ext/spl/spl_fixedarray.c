@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -147,13 +147,30 @@ static void spl_fixedarray_copy(spl_fixedarray *to, spl_fixedarray *from TSRMLS_
 }
 /* }}} */
 
+static HashTable* spl_fixedarray_object_get_gc(zval *obj, zval ***table, int *n TSRMLS_DC) /* {{{{ */
+{
+	spl_fixedarray_object *intern  = (spl_fixedarray_object*)zend_object_store_get_object(obj TSRMLS_CC);
+	HashTable *ht = zend_std_get_properties(obj TSRMLS_CC);
+
+	if (intern->array) {
+		*table = intern->array->elements;
+		*n = intern->array->size;
+	} else {
+		*table = NULL;
+		*n = 0;
+	}
+
+	return ht;
+}
+/* }}}} */
+
 static HashTable* spl_fixedarray_object_get_properties(zval *obj TSRMLS_DC) /* {{{{ */
 {
 	spl_fixedarray_object *intern  = (spl_fixedarray_object*)zend_object_store_get_object(obj TSRMLS_CC);
 	HashTable *ht = zend_std_get_properties(obj TSRMLS_CC);
 	int  i = 0;
 
-	if (intern->array && !GC_G(gc_active)) {
+	if (intern->array) {
 		int j = zend_hash_num_elements(ht);
 
 		for (i = 0; i < intern->array->size; i++) {
@@ -223,10 +240,14 @@ static zend_object_value spl_fixedarray_object_new_ex(zend_class_entry *class_ty
 	if (orig && clone_orig) {
 		spl_fixedarray_object *other = (spl_fixedarray_object*)zend_object_store_get_object(orig TSRMLS_CC);
 		intern->ce_get_iterator = other->ce_get_iterator;
-
-		intern->array = emalloc(sizeof(spl_fixedarray));
-		spl_fixedarray_init(intern->array, other->array->size TSRMLS_CC);
-		spl_fixedarray_copy(intern->array, other->array TSRMLS_CC);
+		if (!other->array) {
+			/* leave a empty object, will be dtor later by CLONE handler */
+			zend_throw_exception(spl_ce_RuntimeException, "The instance wasn't initialized properly", 0 TSRMLS_CC);
+		} else {
+			intern->array = emalloc(sizeof(spl_fixedarray));
+			spl_fixedarray_init(intern->array, other->array->size TSRMLS_CC);
+			spl_fixedarray_copy(intern->array, other->array TSRMLS_CC);
+		}
 	}
 
 	while (parent) {
@@ -1120,6 +1141,7 @@ PHP_MINIT_FUNCTION(spl_fixedarray)
 	spl_handler_SplFixedArray.has_dimension   = spl_fixedarray_object_has_dimension;
 	spl_handler_SplFixedArray.count_elements  = spl_fixedarray_object_count_elements;
 	spl_handler_SplFixedArray.get_properties  = spl_fixedarray_object_get_properties;
+	spl_handler_SplFixedArray.get_gc          = spl_fixedarray_object_get_gc;
 
 	REGISTER_SPL_IMPLEMENTS(SplFixedArray, Iterator);
 	REGISTER_SPL_IMPLEMENTS(SplFixedArray, ArrayAccess);

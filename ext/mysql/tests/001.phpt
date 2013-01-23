@@ -29,5 +29,8 @@ var_dump($test);
 print "done!";
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 %unicode|string%(2) "11"
 done!

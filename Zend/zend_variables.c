@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -40,6 +40,8 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 				TSRMLS_FETCH();
 
 				if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
+					/* break possible cycles */
+					Z_TYPE_P(zvalue) = IS_NULL;
 					zend_hash_destroy(zvalue->value.ht);
 					FREE_HASHTABLE(zvalue->value.ht);
 				}

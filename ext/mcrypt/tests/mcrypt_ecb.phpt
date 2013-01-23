@@ -18,4 +18,10 @@ echo trim(mcrypt_ecb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv)) . "\n";
 mcrypt_ecb($cipher, $key, $enc_data, MCRYPT_DECRYPT);
 
 --EXPECTF--
+
+Deprecated: Function mcrypt_ecb() is deprecated in %s on line %d
+
+Deprecated: Function mcrypt_ecb() is deprecated in %s on line %d
 PHP Testfest 2008
+
+Deprecated: Function mcrypt_ecb() is deprecated in %s on line %d

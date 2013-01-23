@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -268,7 +268,7 @@ static void istream_destructor(php_istream *stm TSRMLS_DC)
 }
 /* }}} */
 
-PHPAPI IStream *php_com_wrapper_export_stream(php_stream *stream TSRMLS_DC)
+PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream TSRMLS_DC)
 {
 	php_istream *stm = (php_istream*)CoTaskMemAlloc(sizeof(*stm));
 

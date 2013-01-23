@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1081,15 +1081,9 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 	else if (sxe->properties) {
-		if (GC_G(gc_active)) {
-			return sxe->properties;
-		}
 		zend_hash_clean(sxe->properties);
 		rv = sxe->properties;
 	} else {
-		if (GC_G(gc_active)) {
-			return NULL;
-		}
 		ALLOC_HASHTABLE(rv);
 		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
 		sxe->properties = rv;
@@ -1198,6 +1192,16 @@ next_iter:
 	}
 
 	return rv;
+}
+/* }}} */
+
+static HashTable * sxe_get_gc(zval *object, zval ***table, int *n TSRMLS_DC) /* {{{ */ {
+	php_sxe_object  *sxe;
+	sxe = php_sxe_fetch_object(object TSRMLS_CC);
+	
+	*table = NULL;
+	*n = 0;
+	return sxe->properties;
 }
 /* }}} */
 
@@ -1417,7 +1421,11 @@ SXE_METHOD(asXML)
 
 			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, ((xmlDocPtr) sxe->document->ptr)->encoding);
 			xmlOutputBufferFlush(outbuf);
+#ifdef LIBXML2_NEW_BUFFER
+			RETVAL_STRINGL((char *)xmlOutputBufferGetContent(outbuf), xmlOutputBufferGetSize(outbuf), 1);
+#else
 			RETVAL_STRINGL((char *)outbuf->buffer->content, outbuf->buffer->use, 1);
+#endif
 			xmlOutputBufferClose(outbuf);
 		}
 	} else {
@@ -1513,22 +1521,28 @@ static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, 
 }
 /* }}} */
 
-/* {{{ proto string SimpleXMLElement::getDocNamespaces([bool recursive])
+/* {{{ proto string SimpleXMLElement::getDocNamespaces([bool recursive [, bool from_root])
    Return all namespaces registered with document */
 SXE_METHOD(getDocNamespaces)
 {
-	zend_bool           recursive = 0;
+	zend_bool           recursive = 0, from_root = 1;
 	php_sxe_object     *sxe;
+	xmlNodePtr          node;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &recursive) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|bb", &recursive, &from_root) == FAILURE) {
 		return;
 	}
 
 	array_init(return_value);
 
 	sxe = php_sxe_fetch_object(getThis() TSRMLS_CC);
+	if(from_root){
+		node = xmlDocGetRootElement((xmlDocPtr)sxe->document->ptr);
+	}else{
+		GET_NODE(sxe, node);
+	}
 
-	sxe_add_registered_namespaces(sxe, xmlDocGetRootElement((xmlDocPtr)sxe->document->ptr), recursive, return_value TSRMLS_CC);
+	sxe_add_registered_namespaces(sxe, node, recursive, return_value TSRMLS_CC);
 }
 /* }}} */
 
@@ -1956,7 +1970,9 @@ static zend_object_handlers sxe_object_handlers = { /* {{{ */
 	sxe_objects_compare,
 	sxe_object_cast,
 	sxe_count_elements,
-	sxe_get_debug_info
+	sxe_get_debug_info,
+	NULL,
+	sxe_get_gc
 };
 /* }}} */
 
@@ -2518,6 +2534,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_getnamespaces, 0, 0, 0)
 	ZEND_ARG_INFO(0, recursve)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_getdocnamespaces, 0, 0, 0)
+	ZEND_ARG_INFO(0, recursve)
+	ZEND_ARG_INFO(0, from_root)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_children, 0, 0, 0)
 	ZEND_ARG_INFO(0, ns)
 	ZEND_ARG_INFO(0, is_prefix)
@@ -2586,7 +2607,7 @@ static const zend_function_entry sxe_functions[] = { /* {{{ */
 	SXE_ME(attributes,             arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
 	SXE_ME(children,               arginfo_simplexmlelement_children, ZEND_ACC_PUBLIC)
 	SXE_ME(getNamespaces,          arginfo_simplexmlelement_getnamespaces, ZEND_ACC_PUBLIC)
-	SXE_ME(getDocNamespaces,       arginfo_simplexmlelement_getnamespaces, ZEND_ACC_PUBLIC)
+	SXE_ME(getDocNamespaces,       arginfo_simplexmlelement_getdocnamespaces, ZEND_ACC_PUBLIC)
 	SXE_ME(getName,                arginfo_simplexmlelement__void, ZEND_ACC_PUBLIC)
 	SXE_ME(addChild,               arginfo_simplexmlelement_addchild, ZEND_ACC_PUBLIC)
 	SXE_ME(addAttribute,           arginfo_simplexmlelement_addchild, ZEND_ACC_PUBLIC)

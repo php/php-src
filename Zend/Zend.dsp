@@ -159,6 +159,10 @@ SOURCE=.\zend_float.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_generators.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\zend_hash.c
 # End Source File
 # Begin Source File

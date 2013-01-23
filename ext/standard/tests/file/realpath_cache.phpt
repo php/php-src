@@ -19,7 +19,7 @@ echo "Done\n";
 int(%d)
 array(4) {
   ["key"]=>
-  int(%i)
+  %s(%f)
   ["is_dir"]=>
   bool(true)
   ["realpath"]=>

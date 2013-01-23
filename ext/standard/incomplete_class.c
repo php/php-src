@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -108,6 +108,8 @@ static zend_object_value php_create_incomplete_object(zend_class_entry *class_ty
 	
 	value = zend_objects_new(&object, class_type TSRMLS_CC);
 	value.handlers = &php_incomplete_object_handlers;
+	
+	object_properties_init(object, class_type);
 	
 	return value;
 }

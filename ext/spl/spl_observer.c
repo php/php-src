@@ -2,9 +2,9 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
-   | This source file is SplSubject to version 3.01 of the PHP license,      |
+   | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.php.net/license/3_01.txt                                  |
@@ -361,9 +361,8 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 /* }}} */
 
 /* overriden for garbage collection
- * This is very hacky, but unfortunately the garbage collector can only query objects for
- * dependencies through get_properties */
-static HashTable *spl_object_storage_get_properties(zval *obj TSRMLS_DC) /* {{{ */
+ * This is very hacky */
+static HashTable *spl_object_storage_get_gc(zval *obj, zval ***table, int *n TSRMLS_DC) /* {{{ */
 {
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(obj TSRMLS_CC);
 	spl_SplObjectStorageElement *element;
@@ -374,14 +373,8 @@ static HashTable *spl_object_storage_get_properties(zval *obj TSRMLS_DC) /* {{{ 
 
 	props = std_object_handlers.get_properties(obj TSRMLS_CC);
 	
-	if (!GC_G(gc_active)) {
-		zend_hash_del(props, "\x00gcdata", sizeof("\x00gcdata"));
-		return props;
-	}
-
-	if (props->nApplyCount > 0) {
-		return props;
-	}
+	*table = NULL;
+	*n = 0;
 
 	/* clean \x00gcdata, as it may be out of date */
 	if (zend_hash_find(props, "\x00gcdata", sizeof("\x00gcdata"), (void**) &gcdata_arr_pp) == SUCCESS) {
@@ -1316,10 +1309,10 @@ PHP_MINIT_FUNCTION(spl_observer)
 	REGISTER_SPL_STD_CLASS_EX(SplObjectStorage, spl_SplObjectStorage_new, spl_funcs_SplObjectStorage);
 	memcpy(&spl_handler_SplObjectStorage, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 
-	spl_handler_SplObjectStorage.get_properties  = spl_object_storage_get_properties;
 	spl_handler_SplObjectStorage.get_debug_info  = spl_object_storage_debug_info;
 	spl_handler_SplObjectStorage.compare_objects = spl_object_storage_compare_objects;
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;
+	spl_handler_SplObjectStorage.get_gc          = spl_object_storage_get_gc;
 
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Countable);
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Iterator);

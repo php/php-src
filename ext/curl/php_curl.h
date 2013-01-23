@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,36 +59,35 @@ extern int  le_curl_share_handle;
 PHP_MINIT_FUNCTION(curl);
 PHP_MSHUTDOWN_FUNCTION(curl);
 PHP_MINFO_FUNCTION(curl);
-PHP_FUNCTION(curl_version);
-PHP_FUNCTION(curl_init);
+
+PHP_FUNCTION(curl_close);
 PHP_FUNCTION(curl_copy_handle);
-PHP_FUNCTION(curl_setopt);
-PHP_FUNCTION(curl_setopt_array);
+PHP_FUNCTION(curl_errno);
+PHP_FUNCTION(curl_error);
 PHP_FUNCTION(curl_exec);
 PHP_FUNCTION(curl_getinfo);
-PHP_FUNCTION(curl_error);
-PHP_FUNCTION(curl_errno);
-PHP_FUNCTION(curl_close);
+PHP_FUNCTION(curl_init);
+PHP_FUNCTION(curl_setopt);
+PHP_FUNCTION(curl_setopt_array);
+PHP_FUNCTION(curl_version);
 
-#if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
-PHP_FUNCTION(curl_reset);
-#endif
-#if LIBCURL_VERSION_NUM > 0x070f03 /* 7.15.4 */
-PHP_FUNCTION(curl_escape);
-PHP_FUNCTION(curl_unescape);
-#endif
-
-PHP_FUNCTION(curl_multi_init);
 PHP_FUNCTION(curl_multi_add_handle);
-PHP_FUNCTION(curl_multi_remove_handle);
-PHP_FUNCTION(curl_multi_select);
+PHP_FUNCTION(curl_multi_close);
 PHP_FUNCTION(curl_multi_exec);
 PHP_FUNCTION(curl_multi_getcontent);
 PHP_FUNCTION(curl_multi_info_read);
-PHP_FUNCTION(curl_multi_close);
-PHP_FUNCTION(curl_share_init);
+PHP_FUNCTION(curl_multi_init);
+PHP_FUNCTION(curl_multi_remove_handle);
+PHP_FUNCTION(curl_multi_select);
+
 PHP_FUNCTION(curl_share_close);
+PHP_FUNCTION(curl_share_init);
 PHP_FUNCTION(curl_share_setopt);
+
+#if LIBCURL_VERSION_NUM >= 0x070c00 /* 7.12.0 */
+PHP_FUNCTION(curl_strerror);
+PHP_FUNCTION(curl_multi_strerror);
+#endif
 
 #if LIBCURL_VERSION_NUM >= 0x070c01 /* 7.12.1 */
 PHP_FUNCTION(curl_reset);
@@ -97,6 +96,12 @@ PHP_FUNCTION(curl_reset);
 #if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 PHP_FUNCTION(curl_escape);
 PHP_FUNCTION(curl_unescape);
+
+PHP_FUNCTION(curl_multi_setopt);
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
+PHP_FUNCTION(curl_pause);
 #endif
 
 void _php_curl_multi_close(zend_rsrc_list_entry * TSRMLS_DC);
@@ -130,7 +135,9 @@ typedef struct {
 	php_curl_write *write;
 	php_curl_write *write_header;
 	php_curl_read  *read;
+#if CURLOPT_PASSWDFUNCTION != 0
 	zval           *passwd;
+#endif
 	zval           *std_err;
 	php_curl_progress *progress;
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */
@@ -162,7 +169,6 @@ typedef struct {
 	CURL                    *cp;
 	php_curl_handlers       *handlers;
 	long                     id;
-	unsigned int             uses;
 	zend_bool                in_callback;
 	zval                     *clone;
 } php_curl;
@@ -210,6 +216,7 @@ typedef struct {
 	CURLMcode mcode;
 	int pending;
 	zval *headers;
+	struct curl_slist *headers_slist; /* holds custom headers sent out in the request */
 } php_curl_stream;
 
 

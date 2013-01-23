@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -76,7 +76,6 @@ extern void php_clear_warnings(MYSQLI_WARNING *w);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error TSRMLS_DC);
 extern void php_mysqli_report_index(const char *query, unsigned int status TSRMLS_DC);
-extern void php_set_local_infile_handler_default(MY_MYSQL *);
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...);
 
 #ifdef HAVE_SPL

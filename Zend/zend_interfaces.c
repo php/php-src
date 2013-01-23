@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -127,7 +127,7 @@ ZEND_API zval *zend_user_it_new_iterator(zend_class_entry *ce, zval *object TSRM
 }
 /* }}} */
 
-/* {{{ zend_user_it_dtor */
+/* {{{ zend_user_it_invalidate_current */
 ZEND_API void zend_user_it_invalidate_current(zend_object_iterator *_iter TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;

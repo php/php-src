@@ -56,12 +56,15 @@ typedef struct {
 
 void calendar_object_create(zval *object, Calendar *calendar TSRMLS_DC);
 
+Calendar *calendar_fetch_native_calendar(zval *object TSRMLS_DC);
+
 void calendar_object_construct(zval *object, Calendar *calendar TSRMLS_DC);
 
 void calendar_register_IntlCalendar_class(TSRMLS_D);
 
 extern zend_class_entry *Calendar_ce_ptr,
 						*GregorianCalendar_ce_ptr;
+
 extern zend_object_handlers Calendar_handlers;
 
 #endif /* #ifndef CALENDAR_CLASS_H */

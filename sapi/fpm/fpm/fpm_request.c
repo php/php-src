@@ -54,7 +54,7 @@ void fpm_request_accepting() /* {{{ */
 	fpm_scoreboard_proc_release(proc);
 
 	/* idle++, active-- */
-	fpm_scoreboard_update(1, -1, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	fpm_scoreboard_update(1, -1, 0, 0, 0, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
 /* }}} */
 
@@ -98,7 +98,7 @@ void fpm_request_reading_headers() /* {{{ */
 	fpm_scoreboard_proc_release(proc);
 
 	/* idle--, active++, request++ */
-	fpm_scoreboard_update(-1, 1, 0, 0, 1, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
+	fpm_scoreboard_update(-1, 1, 0, 0, 1, 0, 0, FPM_SCOREBOARD_ACTION_INC, NULL);
 }
 /* }}} */
 

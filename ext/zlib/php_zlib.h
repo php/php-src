@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -54,6 +54,8 @@ ZEND_BEGIN_MODULE_GLOBALS(zlib)
 	long output_compression_level;
 	char *output_handler;
 	php_zlib_context *ob_gzhandler;
+	long output_compression_default;
+    zend_bool handler_registered;
 ZEND_END_MODULE_GLOBALS(zlib);
 
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);

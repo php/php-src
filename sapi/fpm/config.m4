@@ -16,6 +16,7 @@ AC_DEFUN([AC_FPM_STDLIBS],
   AC_CHECK_HEADERS([errno.h fcntl.h stdio.h stdlib.h unistd.h sys/uio.h])
   AC_CHECK_HEADERS([sys/select.h sys/socket.h sys/time.h])
   AC_CHECK_HEADERS([arpa/inet.h netinet/in.h])
+  AC_CHECK_HEADERS([sysexits.h])
 ])
 
 AC_DEFUN([AC_FPM_PRCTL],
@@ -192,6 +193,8 @@ AC_DEFUN([AC_FPM_TRACE],
       have_ptrace=no
       have_broken_ptrace=yes
       AC_MSG_RESULT([no])
+    ], [
+      AC_MSG_RESULT([skipped (cross compiling)])
     ])
   fi
 
@@ -264,6 +267,8 @@ AC_DEFUN([AC_FPM_TRACE],
     ], [
       proc_mem_file=""
       AC_MSG_RESULT([no])
+    ], [
+      AC_MSG_RESULT([skipped (cross compiling)])
     ])
   fi
   
@@ -584,7 +589,7 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_ADD_BUILD_DIR(sapi/fpm/fpm)
   PHP_ADD_BUILD_DIR(sapi/fpm/fpm/events)
-  PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.8 sapi/fpm/status.html)
+  PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html)
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag])
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm

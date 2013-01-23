@@ -183,7 +183,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	{
 		char *msg = NULL;
 		smart_str parse_error_str;
-		parse_error_str = transliterator_parse_error_to_string( &parse_error );
+		parse_error_str = intl_parse_error_to_string( &parse_error );
 		spprintf( &msg, 0, "transliterator_create_from_rules: unable to "
 			"create ICU transliterator from rules (%s)", parse_error_str.c );
 		smart_str_free( &parse_error_str );

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,7 +35,7 @@
  * b) a CLSID, major, minor e.g. "{00000200-0000-0010-8000-00AA006D2EA4},2,0"
  * c) a Type Library name e.g. "Microsoft OLE DB ActiveX Data Objects 1.0 Library"
  */
-PHPAPI ITypeLib *php_com_load_typelib(char *search_string, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codepage TSRMLS_DC)
 {
 	ITypeLib *TL = NULL;
 	char *strtok_buf, *major, *minor;
@@ -153,7 +153,7 @@ PHPAPI ITypeLib *php_com_load_typelib(char *search_string, int codepage TSRMLS_D
 }
 
 /* Given a type-library, merge it into the current engine state */
-PHPAPI int php_com_import_typelib(ITypeLib *TL, int mode, int codepage TSRMLS_DC)
+PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode, int codepage TSRMLS_DC)
 {
 	int i, j, interfaces;
 	TYPEKIND pTKind;
@@ -228,7 +228,7 @@ void php_com_typelibrary_dtor(void *pDest)
 	ITypeLib_Release(*Lib);
 }
 
-PHPAPI ITypeLib *php_com_load_typelib_via_cache(char *search_string,
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
 	int codepage, int *cached TSRMLS_DC)
 {
 	ITypeLib **TLp;

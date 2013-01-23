@@ -49,7 +49,7 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	INTL_CHECK_LOCALE_LEN_OBJ(locale_len, return_value);
-	MSG_FORMAT_METHOD_FETCH_OBJECT;
+	MSG_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;
 
 	/* Convert pattern (if specified) to UTF-16. */
 	if(pattern && pattern_len) {
@@ -61,11 +61,17 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if(locale_len == 0) {
-		locale = INTL_G(default_locale);
+		locale = intl_locale_get_default(TSRMLS_C);
 	}
 
+#ifdef MSG_FORMAT_QUOTE_APOS
 	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
 		INTL_CTOR_CHECK_STATUS(mfo, "msgfmt_create: error converting pattern to quote-friendly format");
+	}
+#endif
+
+	if ((mfo)->mf_data.orig_format) {
+		msgformat_data_free(&mfo->mf_data TSRMLS_CC);
 	}
 
 	(mfo)->mf_data.orig_format = estrndup(pattern, pattern_len);
