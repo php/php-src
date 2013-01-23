@@ -1,31 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 201?, PHP 5.5.0 Alpha 3
+?? ??? 201?, PHP 5.5.0 Beta 1
+
+
+24 Jan 2013, PHP 5.5.0 Alpha 4
 
 - Core:
   . Fixed bug #63980 (object members get trimmed by zero bytes). (Laruence)
   . Implemented RFC for Class Name Resolution As Scalar Via "class" Keyword.
     (Ralph Schindler, Nikita Popov, Lars)
-
-- General improvements:
-  . Fixed bug #63874 (Segfault if php_strip_whitespace has heredoc). (Pierrick)
-  . Fixed bug #63822 (Crash when using closures with ArrayAccess).
-    (Nikita Popov)
-  . Add Generator::throw() method. (Nikita Popov)
-  . Bug #23955: allow specifying Max-Age attribute in setcookie() (narfbg, Lars)
-  . Bug #52126: timestamp for mail.log (Martin Jansen, Lars)
-
-- mysqlnd
-  . Fixed return value of mysqli_stmt_affected_rows() in the time after
-    prepare() and before execute(). (Andrey)
-
-- cURL:
-  . Added new functions curl_escape, curl_multi_setopt, curl_multi_strerror
-    curl_pause, curl_reset, curl_share_close, curl_share_init,
-	curl_share_setopt curl_strerror and curl_unescape. (Pierrick)
-  . Addes new curl options CURLOPT_TELNETOPTIONS, CURLOPT_GSSAPI_DELEGATION,
-    CURLOPT_ACCEPTTIMEOUT_MS, CURLOPT_SSL_OPTIONS, CURLOPT_TCP_KEEPALIVE,
-	CURLOPT_TCP_KEEPIDLE and CURLOPT_TCP_KEEPINTVL. (Pierrick)
 
 - DateTime
   . Added DateTimeImmutable - a variant of DateTime that only returns the
@@ -45,6 +28,28 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #64007 (There is an ability to create instance of Generator by hand).
     (Laruence)
+
+10 Jan 2013, PHP 5.5.0 Alpha 3
+
+- General improvements:
+  . Fixed bug #63874 (Segfault if php_strip_whitespace has heredoc). (Pierrick)
+  . Fixed bug #63822 (Crash when using closures with ArrayAccess).
+    (Nikita Popov)
+  . Add Generator::throw() method. (Nikita Popov)
+  . Bug #23955: allow specifying Max-Age attribute in setcookie() (narfbg, Lars)
+  . Bug #52126: timestamp for mail.log (Martin Jansen, Lars)
+
+- mysqlnd
+  . Fixed return value of mysqli_stmt_affected_rows() in the time after
+    prepare() and before execute(). (Andrey)
+
+- cURL:
+  . Added new functions curl_escape, curl_multi_setopt, curl_multi_strerror
+    curl_pause, curl_reset, curl_share_close, curl_share_init, 
+    curl_share_setopt curl_strerror and curl_unescape. (Pierrick)
+  . Addes new curl options CURLOPT_TELNETOPTIONS, CURLOPT_GSSAPI_DELEGATION,
+    CURLOPT_ACCEPTTIMEOUT_MS, CURLOPT_SSL_OPTIONS, CURLOPT_TCP_KEEPALIVE,
+    CURLOPT_TCP_KEEPIDLE and CURLOPT_TCP_KEEPINTVL. (Pierrick)
 
 18 Dec 2012, PHP 5.5.0 Alpha 2
 
