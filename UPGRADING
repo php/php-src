@@ -77,6 +77,8 @@ PHP 5.5 UPGRADE NOTES
   for example. (https://wiki.php.net/rfc/empty_isset_exprs)
 - Added generators.
   (https://wiki.php.net/rfc/generators)
+- ClassName::class syntax returning full class name for a class as 
+  a string constant. (https://wiki.php.net/rfc/class_name_scalars)
 
 ========================================
 2. Changes in SAPI modules
@@ -151,6 +153,8 @@ PHP 5.5 UPGRADE NOTES
   Furthermore both set_error_handler(NULL) and set_exception_handler(NULL) will
   now return the previously defined error/exception handler. Previously
   bool(true) was returned.
+- setcookie(), setrawcookie() and ext/session now send Max-Age headers alongside
+  Expires headers. (see https://wiki.php.net/rfc/cookie_max-age)
 
 ========================================
 5. New Functions
