@@ -24,6 +24,8 @@ PHP 5.5 UPGRADE NOTES
 - Drop Windows XP and 2003 support. (Pierre)
 - All internal case insensitivity handling for class, function and constant 
   names is done according to ASCII rules, current locale settings are ignored. 
+- self, parent & static keywords now are always case-insensitive (see bug
+  #60833).
 - php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
   zend_logo_guid() have been removed
 - Removal of Logo GUIDs
