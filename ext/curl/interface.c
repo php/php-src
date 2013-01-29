@@ -1822,7 +1822,7 @@ static void alloc_curl_handle(php_curl **ch)
 	zend_llist_init(&(*ch)->to_free->str,   sizeof(char *),            (llist_dtor_func_t) curl_free_string, 0);
 	zend_llist_init(&(*ch)->to_free->slist, sizeof(struct curl_slist), (llist_dtor_func_t) curl_free_slist,  0);
 	zend_llist_init(&(*ch)->to_free->post,  sizeof(struct HttpPost),   (llist_dtor_func_t) curl_free_post,   0);
-	(*ch)->safe_upload = 0; /* for now, for BC reason we allow unsafe API */
+	(*ch)->safe_upload = 1; /* for now, for BC reason we allow unsafe API */
 }
 /* }}} */
 
