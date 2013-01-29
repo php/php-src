@@ -34,6 +34,14 @@
 
 #define PHP_CURL_DEBUG 0
 
+#ifdef PHP_WIN32
+# define PHP_CURL_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_CURL_API __attribute__ ((visibility("default")))
+#else
+# define PHP_CURL_API
+#endif
+
 #include <curl/curl.h>
 #include <curl/multi.h>
 
@@ -103,6 +111,8 @@ PHP_FUNCTION(curl_multi_setopt);
 #if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
 PHP_FUNCTION(curl_pause);
 #endif
+PHP_FUNCTION(curl_file_create);
+
 
 void _php_curl_multi_close(zend_rsrc_list_entry * TSRMLS_DC);
 void _php_curl_share_close(zend_rsrc_list_entry * TSRMLS_DC);
@@ -171,7 +181,10 @@ typedef struct {
 	long                     id;
 	zend_bool                in_callback;
 	zval                     *clone;
+	zend_bool                safe_upload;
 } php_curl;
+
+#define CURLOPT_SAFE_UPLOAD -1
 
 typedef struct {
 	int    still_running;
@@ -211,7 +224,7 @@ typedef struct {
 
 	fd_set readfds, writefds, excfds;
 	int maxfd;
-	
+
 	char errstr[CURL_ERROR_SIZE + 1];
 	CURLMcode mcode;
 	int pending;
@@ -219,6 +232,8 @@ typedef struct {
 	struct curl_slist *headers_slist; /* holds custom headers sent out in the request */
 } php_curl_stream;
 
+void curlfile_register_class(TSRMLS_D);
+PHP_CURL_API extern zend_class_entry *curl_CURLFile_class;
 
 #else
 #define curl_module_ptr NULL

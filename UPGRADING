@@ -24,6 +24,8 @@ PHP 5.5 UPGRADE NOTES
 - Drop Windows XP and 2003 support. (Pierre)
 - All internal case insensitivity handling for class, function and constant 
   names is done according to ASCII rules, current locale settings are ignored. 
+- self, parent & static keywords now are always case-insensitive (see bug
+  #60833).
 - php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
   zend_logo_guid() have been removed
 - Removal of Logo GUIDs
@@ -75,6 +77,8 @@ PHP 5.5 UPGRADE NOTES
   for example. (https://wiki.php.net/rfc/empty_isset_exprs)
 - Added generators.
   (https://wiki.php.net/rfc/generators)
+- ClassName::class syntax returning full class name for a class as 
+  a string constant. (https://wiki.php.net/rfc/class_name_scalars)
 
 ========================================
 2. Changes in SAPI modules
@@ -149,6 +153,10 @@ PHP 5.5 UPGRADE NOTES
   Furthermore both set_error_handler(NULL) and set_exception_handler(NULL) will
   now return the previously defined error/exception handler. Previously
   bool(true) was returned.
+- setcookie(), setrawcookie() and ext/session now send Max-Age headers alongside
+  Expires headers. (see https://wiki.php.net/rfc/cookie_max-age)
+- curl_setopt now accepts new option CURLOPT_SAFE_UPLOAD and CURLFile object for
+  safer file uploads (see https://wiki.php.net/rfc/curl-file-upload)
 
 ========================================
 5. New Functions
@@ -160,6 +168,9 @@ PHP 5.5 UPGRADE NOTES
   - password_hash()
   - password_needs_rehash()
   - password_verify()
+
+- cURL:
+  - curl_file_create
 
 - Hash:
   - hash_pbkdf2()
@@ -261,6 +272,9 @@ PHP 5.5 UPGRADE NOTES
   - IntlRuleBasedBreakIterator
   - IntlCodePointBreakIterator
 
+- cURL:
+  - CURLFile
+
 ========================================
 7. Removed Extensions
 ========================================
@@ -280,9 +294,15 @@ PHP 5.5 UPGRADE NOTES
 - mysqli:
   - Added MYSQLI_SERVER_PUBLIC_KEY constant to be used with mysqli_options()
 
+- cURL:
+  - Added CURLOPT_SAFE_UPLOAD to be used with curl_setopt().
+
 ========================================
 10. Changes to INI File Handling
 ========================================
+
+- Core:
+  - Added sys_temp_dir INI directive, for specifying temp firectory.
 
 - Intl:
   - Added intl.use_exceptions INI directive, which controls what happens when

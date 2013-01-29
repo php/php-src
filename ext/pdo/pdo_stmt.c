@@ -2733,6 +2733,7 @@ static union _zend_function *row_get_ctor(zval *object TSRMLS_DC)
 	ctor.function_name = "__construct";
 	ctor.scope = pdo_row_ce;
 	ctor.handler = ZEND_FN(dbstmt_constructor);
+	ctor.fn_flags = ZEND_ACC_PUBLIC;
 
 	return (union _zend_function*)&ctor;
 }
