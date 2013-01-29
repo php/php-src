@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.12
 
 - Core:
+  . Fixed bug #64099 (Wrong TSRM usage in zend_Register_class alias). (Johannes)
   . Fixed bug #64011 (get_html_translation_table() output incomplete with
     HTML_ENTITIES and ISO-8859-1). (Gustavo)
   . Fixed bug #63982 (isset() inconsistently produces a fatal error on
