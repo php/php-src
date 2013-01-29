@@ -746,7 +746,7 @@ static PHP_METHOD(UConverter, convert) {
 	int str_len, dest_len;
 	zend_bool reverse = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b",
 	                          &str, &str_len, &reverse) == FAILURE) {
 		return;
 	}
