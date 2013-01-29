@@ -93,7 +93,7 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, long 
 /* {{{ proto void UConverter::toUCallback(long $reason,
                                           string $source, string $codeUnits,
                                           long &$error) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_toUCallback_arginfo, 0, ZEND_RETURN_VALUE, 5)
+ZEND_BEGIN_ARG_INFO_EX(php_converter_toUCallback_arginfo, 0, ZEND_RETURN_VALUE, 4)
 	ZEND_ARG_INFO(0, reason)
 	ZEND_ARG_INFO(0, source)
 	ZEND_ARG_INFO(0, codeUnits)
@@ -115,7 +115,7 @@ static PHP_METHOD(UConverter, toUCallback) {
 /* {{{ proto void UConverter::fromUCallback(long $reason,
                                             Array $source, long $codePoint,
                                             long &$error) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_fromUCallback_arginfo, 0, ZEND_RETURN_VALUE, 5)
+ZEND_BEGIN_ARG_INFO_EX(php_converter_fromUCallback_arginfo, 0, ZEND_RETURN_VALUE, 4)
 	ZEND_ARG_INFO(0, reason)
 	ZEND_ARG_INFO(0, source)
 	ZEND_ARG_INFO(0, codePoint)
@@ -673,9 +673,11 @@ static zend_bool php_converter_do_convert(UConverter *dest_cnv, char **pdest, in
                                           UConverter *src_cnv,  const char *src, int32_t src_len,
                                           php_converter_object *objval
                                           TSRMLS_DC) {
-	UErrorCode error = U_ZERO_ERROR;
-	int32_t dest_len;
-	char *dest;
+	UErrorCode	error = U_ZERO_ERROR;
+	int32_t		dest_len,
+				temp_len;
+	char		*dest;
+	UChar		*temp;
 
 	if (!src_cnv || !dest_cnv) {
 		php_converter_throw_failure(objval, U_INVALID_STATE_ERROR TSRMLS_CC,
@@ -684,12 +686,12 @@ static zend_bool php_converter_do_convert(UConverter *dest_cnv, char **pdest, in
 	}
 
 	/* Get necessary buffer size first */
-	int32_t temp_len = 1 + ucnv_toUChars(src_cnv, NULL, 0, src, src_len, &error);
+	temp_len = 1 + ucnv_toUChars(src_cnv, NULL, 0, src, src_len, &error);
 	if (U_FAILURE(error) && error != U_BUFFER_OVERFLOW_ERROR) {
 		THROW_UFAILURE(objval, "ucnv_toUChars", error);
 		return 0;
 	}
-	UChar *temp = safe_emalloc(sizeof(UChar), temp_len, sizeof(UChar));
+	temp = safe_emalloc(sizeof(UChar), temp_len, sizeof(UChar));
 
 	/* Convert to intermediate UChar* array */
 	error = U_ZERO_ERROR;
@@ -941,8 +943,10 @@ static PHP_METHOD(UConverter, getAliases) {
 
 	array_init(return_value);
 	for(i = 0; i < count; i++) {
+		const char *alias;
+
 		error = U_ZERO_ERROR;
-		const char *alias = ucnv_getAlias(name, i, &error);
+		alias = ucnv_getAlias(name, i, &error);
 		if (U_FAILURE(error)) {
 			THROW_UFAILURE(NULL, "ucnv_getAlias", error);
 			zval_dtor(return_value);
