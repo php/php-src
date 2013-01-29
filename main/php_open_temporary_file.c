@@ -196,6 +196,21 @@ PHPAPI const char* php_get_temporary_directory(void)
 		return temporary_directory;
 	}
 
+	/* Is there a temporary directory "sys_temp_dir" in .ini defined? */
+	{
+		char *sys_temp_dir = PG(sys_temp_dir);
+		if (sys_temp_dir) {
+			int len = strlen(sys_temp_dir);
+			if (len >= 2 && sys_temp_dir[len - 1] == DEFAULT_SLASH) {
+				temporary_directory = zend_strndup(sys_temp_dir, len - 1);
+				return temporary_directory;
+			} else if (len >= 1 && sys_temp_dir[len - 1] != DEFAULT_SLASH) {
+				temporary_directory = zend_strndup(sys_temp_dir, len);
+				return temporary_directory;
+			}
+		}
+	}
+
 #ifdef PHP_WIN32
 	/* We can't count on the environment variables TEMP or TMP,
 	 * and so must make the Win32 API call to get the default
