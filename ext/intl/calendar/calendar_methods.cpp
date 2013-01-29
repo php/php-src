@@ -782,7 +782,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_time_zone)
 
 	TimeZone *tz = co->ucal->getTimeZone().clone();
 	if (tz == NULL) {
-		intl_error_set(NULL, U_MEMORY_ALLOCATION_ERROR,
+		intl_errors_set(CALENDAR_ERROR_P(co), U_MEMORY_ALLOCATION_ERROR,
 			"intlcal_get_time_zone: could not clone TimeZone", 0 TSRMLS_CC);
 		RETURN_FALSE;
 	}
