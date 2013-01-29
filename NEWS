@@ -2,8 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.5.0 Beta 1
 - Core:
-  . Fixed bug # 60833 (self, parent, static behave inconsistently 
+  . Fixed bug #60833 (self, parent, static behave inconsistently 
     case-sensitive). (Stas, mario at include-once dot org)
+  . Implemented FR #60524 (specify temp dir by php.ini). (ALeX Kazik).
 
 - cURL:
   . Implemented FR #46439 - added CURLFile for safer file uploads.

@@ -301,6 +301,9 @@ PHP 5.5 UPGRADE NOTES
 10. Changes to INI File Handling
 ========================================
 
+- Core:
+  - Added sys_temp_dir INI directive, for specifying temp firectory.
+
 - Intl:
   - Added intl.use_exceptions INI directive, which controls what happens when
     global errors are set together with intl.error_level.
