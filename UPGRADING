@@ -155,6 +155,8 @@ PHP 5.5 UPGRADE NOTES
   bool(true) was returned.
 - setcookie(), setrawcookie() and ext/session now send Max-Age headers alongside
   Expires headers. (see https://wiki.php.net/rfc/cookie_max-age)
+- curl_setopt now accepts new option CURLOPT_SAFE_UPLOAD and CURLFile object for
+  safer file uploads (see https://wiki.php.net/rfc/curl-file-upload)
 
 ========================================
 5. New Functions
@@ -166,6 +168,9 @@ PHP 5.5 UPGRADE NOTES
   - password_hash()
   - password_needs_rehash()
   - password_verify()
+
+- cURL:
+  - curl_file_create
 
 - Hash:
   - hash_pbkdf2()
@@ -267,6 +272,9 @@ PHP 5.5 UPGRADE NOTES
   - IntlRuleBasedBreakIterator
   - IntlCodePointBreakIterator
 
+- cURL:
+  - CURLFile
+
 ========================================
 7. Removed Extensions
 ========================================
@@ -285,6 +293,9 @@ PHP 5.5 UPGRADE NOTES
 
 - mysqli:
   - Added MYSQLI_SERVER_PUBLIC_KEY constant to be used with mysqli_options()
+
+- cURL:
+  - Added CURLOPT_SAFE_UPLOAD to be used with curl_setopt().
 
 ========================================
 10. Changes to INI File Handling

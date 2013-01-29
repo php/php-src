@@ -5,6 +5,10 @@ PHP                                                                        NEWS
   . Fixed bug # 60833 (self, parent, static behave inconsistently 
     case-sensitive). (Stas, mario at include-once dot org)
 
+- cURL:
+  . Implemented FR #46439 - added CURLFile for safer file uploads.
+    (Stas)
+
 24 Jan 2013, PHP 5.5.0 Alpha 4
 
 - Core:
