@@ -195,7 +195,7 @@ typedef struct st_mysqlnd_net_options
 	unsigned int timeout_read;
 	unsigned int timeout_write;
 
-	unsigned int net_read_buffer_size;
+	size_t		net_read_buffer_size;
 
 	/* SSL information */
 	char		*ssl_key;

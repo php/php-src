@@ -2095,27 +2095,15 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
-	zval z_copy;
 	zval *z;
 
 	SAVE_OPLINE();
 	z = opline->op1.zv;
 
-	if (IS_CONST != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) &&
-	    Z_OBJ_HT_P(z)->get_method != NULL) {
-	    if (IS_CONST == IS_TMP_VAR) {
-	    	INIT_PZVAL(z);
-	    }
-		if (zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-			zend_print_variable(&z_copy);
-			zval_dtor(&z_copy);
-		} else {
-			zend_print_variable(z);
-		}
-	} else {
-		zend_print_variable(z);
+	if (IS_CONST == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
+		INIT_PZVAL(z);
 	}
+	zend_print_variable(z);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();
@@ -3735,6 +3723,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 			}
 			ZVAL_COPY_VALUE(&EX_T(opline->result.var).tmp_var, *value);
 			zval_copy_ctor(&EX_T(opline->result.var).tmp_var);
+		} else if (Z_STRLEN_P(opline->op2.zv) == sizeof("class")-1 && strcmp(Z_STRVAL_P(opline->op2.zv), "class") == 0) {
+			/* "class" is assigned as a case-sensitive keyword from zend_do_resolve_class_name */
+			ZVAL_STRINGL(&EX_T(opline->result.var).tmp_var, ce->name, ce->name_length, 1);
 		} else {
 			zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(opline->op2.zv));
 		}
@@ -7412,27 +7403,15 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval z_copy;
 	zval *z;
 
 	SAVE_OPLINE();
 	z = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	if (IS_TMP_VAR != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) &&
-	    Z_OBJ_HT_P(z)->get_method != NULL) {
-	    if (IS_TMP_VAR == IS_TMP_VAR) {
-	    	INIT_PZVAL(z);
-	    }
-		if (zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-			zend_print_variable(&z_copy);
-			zval_dtor(&z_copy);
-		} else {
-			zend_print_variable(z);
-		}
-	} else {
-		zend_print_variable(z);
+	if (IS_TMP_VAR == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
+		INIT_PZVAL(z);
 	}
+	zend_print_variable(z);
 
 	zval_dtor(free_op1.var);
 	CHECK_EXCEPTION();
@@ -12623,27 +12602,15 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval z_copy;
 	zval *z;
 
 	SAVE_OPLINE();
 	z = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
-	if (IS_VAR != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) &&
-	    Z_OBJ_HT_P(z)->get_method != NULL) {
-	    if (IS_VAR == IS_TMP_VAR) {
-	    	INIT_PZVAL(z);
-	    }
-		if (zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-			zend_print_variable(&z_copy);
-			zval_dtor(&z_copy);
-		} else {
-			zend_print_variable(z);
-		}
-	} else {
-		zend_print_variable(z);
+	if (IS_VAR == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
+		INIT_PZVAL(z);
 	}
+	zend_print_variable(z);
 
 	if (free_op1.var) {zval_ptr_dtor(&free_op1.var);};
 	CHECK_EXCEPTION();
@@ -15599,6 +15566,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 			}
 			ZVAL_COPY_VALUE(&EX_T(opline->result.var).tmp_var, *value);
 			zval_copy_ctor(&EX_T(opline->result.var).tmp_var);
+		} else if (Z_STRLEN_P(opline->op2.zv) == sizeof("class")-1 && strcmp(Z_STRVAL_P(opline->op2.zv), "class") == 0) {
+			/* "class" is assigned as a case-sensitive keyword from zend_do_resolve_class_name */
+			ZVAL_STRINGL(&EX_T(opline->result.var).tmp_var, ce->name, ce->name_length, 1);
 		} else {
 			zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(opline->op2.zv));
 		}
@@ -25174,6 +25144,9 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 			}
 			ZVAL_COPY_VALUE(&EX_T(opline->result.var).tmp_var, *value);
 			zval_copy_ctor(&EX_T(opline->result.var).tmp_var);
+		} else if (Z_STRLEN_P(opline->op2.zv) == sizeof("class")-1 && strcmp(Z_STRVAL_P(opline->op2.zv), "class") == 0) {
+			/* "class" is assigned as a case-sensitive keyword from zend_do_resolve_class_name */
+			ZVAL_STRINGL(&EX_T(opline->result.var).tmp_var, ce->name, ce->name_length, 1);
 		} else {
 			zend_error_noreturn(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(opline->op2.zv));
 		}
@@ -30209,27 +30182,15 @@ static int ZEND_FASTCALL  ZEND_ECHO_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
-	zval z_copy;
 	zval *z;
 
 	SAVE_OPLINE();
 	z = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
 
-	if (IS_CV != IS_CONST &&
-	    UNEXPECTED(Z_TYPE_P(z) == IS_OBJECT) &&
-	    Z_OBJ_HT_P(z)->get_method != NULL) {
-	    if (IS_CV == IS_TMP_VAR) {
-	    	INIT_PZVAL(z);
-	    }
-		if (zend_std_cast_object_tostring(z, &z_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-			zend_print_variable(&z_copy);
-			zval_dtor(&z_copy);
-		} else {
-			zend_print_variable(z);
-		}
-	} else {
-		zend_print_variable(z);
+	if (IS_CV == IS_TMP_VAR && Z_TYPE_P(z) == IS_OBJECT) {
+		INIT_PZVAL(z);
 	}
+	zend_print_variable(z);
 
 	CHECK_EXCEPTION();
 	ZEND_VM_NEXT_OPCODE();

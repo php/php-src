@@ -306,16 +306,14 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 {
 	const char *spec_walk = *spec;
 	char c = *spec_walk++;
-	int return_null = 0;
+	int check_null = 0;
 
 	/* scan through modifiers */
 	while (1) {
 		if (*spec_walk == '/') {
 			SEPARATE_ZVAL_IF_NOT_REF(arg);
 		} else if (*spec_walk == '!') {
-			if (Z_TYPE_PP(arg) == IS_NULL) {
-				return_null = 1;
-			}
+			check_null = 1;
 		} else {
 			break;
 		}
@@ -327,6 +325,12 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		case 'L':
 			{
 				long *p = va_arg(*va, long *);
+
+				if (check_null) {
+					zend_bool *p = va_arg(*va, zend_bool *);
+					*p = (Z_TYPE_PP(arg) == IS_NULL);
+				}
+
 				switch (Z_TYPE_PP(arg)) {
 					case IS_STRING:
 						{
@@ -380,6 +384,12 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		case 'd':
 			{
 				double *p = va_arg(*va, double *);
+
+				if (check_null) {
+					zend_bool *p = va_arg(*va, zend_bool *);
+					*p = (Z_TYPE_PP(arg) == IS_NULL);
+				}
+
 				switch (Z_TYPE_PP(arg)) {
 					case IS_STRING:
 						{
@@ -418,7 +428,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 				int *pl = va_arg(*va, int *);
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
-						if (return_null) {
+						if (check_null) {
 							*p = NULL;
 							*pl = 0;
 							break;
@@ -462,6 +472,12 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		case 'b':
 			{
 				zend_bool *p = va_arg(*va, zend_bool *);
+
+				if (check_null) {
+					zend_bool *p = va_arg(*va, zend_bool *);
+					*p = (Z_TYPE_PP(arg) == IS_NULL);
+				}
+
 				switch (Z_TYPE_PP(arg)) {
 					case IS_NULL:
 					case IS_STRING:
@@ -484,7 +500,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		case 'r':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (return_null) {
+				if (check_null && Z_TYPE_PP(arg) == IS_NULL) {
 					*p = NULL;
 					break;
 				}
@@ -499,7 +515,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		case 'a':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (return_null) {
+				if (check_null && Z_TYPE_PP(arg) == IS_NULL) {
 					*p = NULL;
 					break;
 				}
@@ -514,7 +530,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		case 'h':
 			{
 				HashTable **p = va_arg(*va, HashTable **);
-				if (return_null) {
+				if (check_null && Z_TYPE_PP(arg) == IS_NULL) {
 					*p = NULL;
 					break;
 				}
@@ -534,7 +550,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		case 'o':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (return_null) {
+				if (check_null && Z_TYPE_PP(arg) == IS_NULL) {
 					*p = NULL;
 					break;
 				}
@@ -551,7 +567,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 				zval **p = va_arg(*va, zval **);
 				zend_class_entry *ce = va_arg(*va, zend_class_entry *);
 
-				if (return_null) {
+				if (check_null && Z_TYPE_PP(arg) == IS_NULL) {
 					*p = NULL;
 					break;
 				}
@@ -573,7 +589,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 				zend_class_entry **lookup, **pce = va_arg(*va, zend_class_entry **);
 				zend_class_entry *ce_base = *pce;
 
-				if (return_null) {
+				if (check_null && Z_TYPE_PP(arg) == IS_NULL) {
 					*pce = NULL;
 					break;
 				}
@@ -607,7 +623,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 				zend_fcall_info_cache *fcc = va_arg(*va, zend_fcall_info_cache *);
 				char *is_callable_error = NULL;
 
-				if (return_null) {
+				if (check_null && Z_TYPE_PP(arg) == IS_NULL) {
 					fci->size = 0;
 					fcc->initialized = 0;
 					break;
@@ -637,7 +653,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		case 'z':
 			{
 				zval **p = va_arg(*va, zval **);
-				if (return_null) {
+				if (check_null && Z_TYPE_PP(arg) == IS_NULL) {
 					*p = NULL;
 				} else {
 					*p = *arg;
@@ -648,7 +664,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		case 'Z':
 			{
 				zval ***p = va_arg(*va, zval ***);
-				if (return_null) {
+				if (check_null && Z_TYPE_PP(arg) == IS_NULL) {
 					*p = NULL;
 				} else {
 					*p = arg;
@@ -696,6 +712,19 @@ static int zend_parse_arg(int arg_num, zval **arg, va_list *va, const char **spe
 	return SUCCESS;
 }
 /* }}} */
+
+ZEND_API int zend_parse_parameter(int flags, int arg_num TSRMLS_DC, zval **arg, const char *spec, ...)
+{
+	va_list va;
+	int ret;
+	int quiet = flags & ZEND_PARSE_PARAMS_QUIET;
+
+	va_start(va, spec);
+	ret = zend_parse_arg(arg_num, arg, &va, &spec, quiet TSRMLS_CC);
+	va_end(va);
+
+	return ret;
+}
 
 static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, int flags TSRMLS_DC) /* {{{ */
 {
