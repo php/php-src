@@ -279,9 +279,9 @@ ZEND_API void zend_class_implements(zend_class_entry *class_entry TSRMLS_DC, int
 ZEND_API int zend_register_class_alias_ex(const char *name, int name_len, zend_class_entry *ce TSRMLS_DC);
 
 #define zend_register_class_alias(name, ce) \
-	zend_register_class_alias_ex(name, sizeof(name)-1, ce TSRMLS_DC)
+	zend_register_class_alias_ex(name, sizeof(name)-1, ce TSRMLS_CC)
 #define zend_register_ns_class_alias(ns, name, ce) \
-	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce TSRMLS_DC)
+	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce TSRMLS_CC)
 
 ZEND_API int zend_disable_function(char *function_name, uint function_name_length TSRMLS_DC);
 ZEND_API int zend_disable_class(char *class_name, uint class_name_length TSRMLS_DC);
