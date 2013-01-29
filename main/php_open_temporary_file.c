@@ -189,7 +189,7 @@ PHPAPI void php_shutdown_temporary_directory(void)
 /*
  *  Determine where to place temporary files.
  */
-PHPAPI const char* php_get_temporary_directory(void)
+PHPAPI const char* php_get_temporary_directory(TSRMLS_D)
 {
 	/* Did we determine the temporary directory already? */
 	if (temporary_directory) {
@@ -278,7 +278,7 @@ PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, char **ope
 
 	if (!dir || *dir == '\0') {
 def_tmp:
-		temp_dir = php_get_temporary_directory();
+		temp_dir = php_get_temporary_directory(TSRMLS_C);
 
 		if (temp_dir && *temp_dir != '\0' && (!open_basedir_check || !php_check_open_basedir(temp_dir TSRMLS_CC))) {
 			return php_do_open_temporary_file(temp_dir, pfx, opened_path_p TSRMLS_CC);
@@ -309,12 +309,12 @@ PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **op
 	if (fd == -1) {
 		return NULL;
 	}
-	
+
 	fp = fdopen(fd, "r+b");
 	if (fp == NULL) {
 		close(fd);
 	}
-	
+
 	return fp;
 }
 /* }}} */
