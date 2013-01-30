@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.4.12
+31 Jan 2012, PHP 5.4.12 RC1
 
 - Core:
   . Fixed bug #64099 (Wrong TSRM usage in zend_Register_class alias). (Johannes)
