@@ -398,7 +398,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
 	{
 		zval **val;
-		
+
 		if (stream->context && SUCCESS == php_stream_context_get_option(
 					stream->context, "ssl", "disable_compression", &val) &&
 				zval_is_true(*val)) {
