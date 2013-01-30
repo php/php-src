@@ -297,7 +297,7 @@ double_case:
 		case IS_LONG:
 			zval_dtor(&lzval);
 			Z_TYPE(lzval) = IS_LONG;
-			Z_DVAL(lzval) = lval;
+			Z_LVAL(lzval) = lval;
 			goto long_case;
 		}
 
