@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.3.22
+31 Jan 2013, PHP 5.3.22RC1
 
 - Zend Engine:
   . Fixed bug #64099 (Wrong TSRM usage in zend_Register_class alias). (Johannes)
