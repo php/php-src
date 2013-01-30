@@ -361,7 +361,11 @@ static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, in
 
 	if (intern->fptr_offset_get) {
 		zval *rv;
-		SEPARATE_ARG_IF_REF(offset);
+		if (!offset) {
+			ALLOC_INIT_ZVAL(offset);
+		} else {
+			SEPARATE_ARG_IF_REF(offset);
+		}
 		zend_call_method_with_1_params(&object, intern->std.ce, &intern->fptr_offset_get, "offsetGet", &rv, offset);
 		zval_ptr_dtor(&offset);
 		if (rv) {
