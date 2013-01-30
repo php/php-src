@@ -73,12 +73,14 @@ static void init_ancillary_registry(void)
 #endif
 
 #ifdef IPV6_HOPLIMIT
-	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
-			to_zval_read_int, IPPROTO_IPV6, IPV6_HOPLIMIT);
+	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_uint8,
+			to_zval_read_uint8, IPPROTO_IPV6, IPV6_HOPLIMIT);
 #endif
 
-	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
-			to_zval_read_int, IPPROTO_IPV6, IPV6_TCLASS);
+#ifdef IPV6_TCLASS
+	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_uint8,
+			to_zval_read_uint8, IPPROTO_IPV6, IPV6_TCLASS);
+#endif
 
 #ifdef SO_PASSCRED
 	PUT_ENTRY(sizeof(struct ucred), 0, 0, from_zval_write_ucred,

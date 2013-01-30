@@ -317,7 +317,7 @@ double_case:
 
 	return ret;
 }
-void from_zval_write_int(const zval *arr_value, char *field, ser_context *ctx)
+static void from_zval_write_int(const zval *arr_value, char *field, ser_context *ctx)
 {
 	long lval;
 	int ival;
@@ -353,6 +353,25 @@ static void from_zval_write_uint32(const zval *arr_value, char *field, ser_conte
 	}
 
 	ival = (uint32_t)lval;
+	memcpy(field, &ival, sizeof(ival));
+}
+void from_zval_write_uint8(const zval *arr_value, char *field, ser_context *ctx)
+{
+	long lval;
+	uint8_t ival;
+
+	lval = from_zval_integer_common(arr_value, ctx);
+	if (ctx->err.has_error) {
+		return;
+	}
+
+	if (lval < 0 || lval > 0xFF) {
+		do_from_zval_err(ctx, "%s", "given PHP integer is out of bounds "
+				"for an unsigned 8-bit integer");
+		return;
+	}
+
+	ival = (uint8_t)lval;
 	memcpy(field, &ival, sizeof(ival));
 }
 static void from_zval_write_net_uint16(const zval *arr_value, char *field, ser_context *ctx)
@@ -441,7 +460,7 @@ static void from_zval_write_uid_t(const zval *arr_value, char *field, ser_contex
 	memcpy(field, &ival, sizeof(ival));
 }
 
-void to_zval_read_int(const char *data, zval *zv, res_context *ctx)
+static void to_zval_read_int(const char *data, zval *zv, res_context *ctx)
 {
 	int ival;
 	memcpy(&ival, data, sizeof(ival));
@@ -451,6 +470,13 @@ void to_zval_read_int(const char *data, zval *zv, res_context *ctx)
 static void to_zval_read_unsigned(const char *data, zval *zv, res_context *ctx)
 {
 	unsigned ival;
+	memcpy(&ival, data, sizeof(ival));
+
+	ZVAL_LONG(zv, (long)ival);
+}
+void to_zval_read_uint8(const char *data, zval *zv, res_context *ctx)
+{
+	uint8_t ival;
 	memcpy(&ival, data, sizeof(ival));
 
 	ZVAL_LONG(zv, (long)ival);
