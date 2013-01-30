@@ -395,6 +395,18 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	}
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+	{
+		zval **val;
+
+		if (stream->context && SUCCESS == php_stream_context_get_option(
+					stream->context, "ssl", "disable_compression", &val) &&
+				zval_is_true(*val)) {
+			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_COMPRESSION);
+		}
+	}
+#endif
+
 	sslsock->ssl_handle = php_SSL_new_from_context(sslsock->ctx, stream TSRMLS_CC);
 	if (sslsock->ssl_handle == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create an SSL handle");
