@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,6 +52,8 @@ PHP_FUNCTION(openssl_private_decrypt);
 PHP_FUNCTION(openssl_public_encrypt);
 PHP_FUNCTION(openssl_public_decrypt);
 
+PHP_FUNCTION(openssl_pbkdf2);
+
 PHP_FUNCTION(openssl_pkcs7_verify);
 PHP_FUNCTION(openssl_pkcs7_decrypt);
 PHP_FUNCTION(openssl_pkcs7_sign);
@@ -77,6 +79,11 @@ PHP_FUNCTION(openssl_csr_export_to_file);
 PHP_FUNCTION(openssl_csr_sign);
 PHP_FUNCTION(openssl_csr_get_subject);
 PHP_FUNCTION(openssl_csr_get_public_key);
+
+PHP_FUNCTION(openssl_spki_new);
+PHP_FUNCTION(openssl_spki_verify);
+PHP_FUNCTION(openssl_spki_export);
+PHP_FUNCTION(openssl_spki_export_challenge);
 #else
 
 #define phpext_openssl_ptr NULL

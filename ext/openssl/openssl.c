@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,10 +36,6 @@
 #include "ext/standard/md5.h"
 #include "ext/standard/base64.h"
 
-#if PHP_WIN32
-# include "win32/winutil.h"
-#endif
-
 /* OpenSSL includes */
 #include <openssl/evp.h>
 #include <openssl/x509.h>
@@ -70,6 +66,13 @@
 #endif
 #define OPENSSL_ALGO_DSS1	5
 
+#if OPENSSL_VERSION_NUMBER >= 0x0090708fL
+#define OPENSSL_ALGO_SHA224 6
+#define OPENSSL_ALGO_SHA256 7
+#define OPENSSL_ALGO_SHA384 8
+#define OPENSSL_ALGO_SHA512 9
+#define OPENSSL_ALGO_RMD160 10
+#endif
 #define DEBUG_SMIME	0
 
 /* FIXME: Use the openssl constants instead of
@@ -242,6 +245,16 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_get_details, 0)
     ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pbkdf2, 0, 0, 4)
+    ZEND_ARG_INFO(0, password)
+    ZEND_ARG_INFO(0, salt)
+    ZEND_ARG_INFO(0, key_length)
+    ZEND_ARG_INFO(0, iterations)
+    ZEND_ARG_INFO(0, digest_algorithm)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_verify, 0, 0, 2)
     ZEND_ARG_INFO(0, filename)
     ZEND_ARG_INFO(0, flags)
@@ -379,11 +392,35 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_random_pseudo_bytes, 0, 0, 1)
     ZEND_ARG_INFO(0, length)
     ZEND_ARG_INFO(1, result_is_strong)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_spki_new, 0, 0, 2)
+    ZEND_ARG_INFO(0, privkey)
+    ZEND_ARG_INFO(0, challenge)
+    ZEND_ARG_INFO(0, algo)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_verify, 0)
+    ZEND_ARG_INFO(0, spki)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_export, 0)
+    ZEND_ARG_INFO(0, spki)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_export_challenge, 0)
+    ZEND_ARG_INFO(0, spki)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ openssl_functions[]
  */
 const zend_function_entry openssl_functions[] = {
+/* spki functions */
+	PHP_FE(openssl_spki_new, arginfo_openssl_spki_new)
+	PHP_FE(openssl_spki_verify, arginfo_openssl_spki_verify)
+	PHP_FE(openssl_spki_export, arginfo_openssl_spki_export)
+	PHP_FE(openssl_spki_export_challenge, arginfo_openssl_spki_export_challenge)
+
 /* public/private key functions */
 	PHP_FE(openssl_pkey_free,			arginfo_openssl_pkey_free)
 	PHP_FE(openssl_pkey_new,			arginfo_openssl_pkey_new)
@@ -427,6 +464,10 @@ const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_verify,				arginfo_openssl_verify)
 	PHP_FE(openssl_seal,				arginfo_openssl_seal)
 	PHP_FE(openssl_open,				arginfo_openssl_open)
+
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+	PHP_FE(openssl_pbkdf2,	arginfo_openssl_pbkdf2)
+#endif
 
 /* for S/MIME handling */
 	PHP_FE(openssl_pkcs7_verify,		arginfo_openssl_pkcs7_verify)
@@ -774,6 +815,7 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 
 static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo);
 
+int openssl_spki_cleanup(const char *src, char *dest);
 
 static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args TSRMLS_DC) /* {{{ */
 {
@@ -954,6 +996,23 @@ static EVP_MD * php_openssl_get_evp_md_from_algo(long algo) { /* {{{ */
 		case OPENSSL_ALGO_DSS1:
 			mdtype = (EVP_MD *) EVP_dss1();
 			break;
+#if OPENSSL_VERSION_NUMBER >= 0x0090708fL
+		case OPENSSL_ALGO_SHA224:
+			mdtype = (EVP_MD *) EVP_sha224();
+			break;
+		case OPENSSL_ALGO_SHA256:
+			mdtype = (EVP_MD *) EVP_sha256();
+			break;
+		case OPENSSL_ALGO_SHA384:
+			mdtype = (EVP_MD *) EVP_sha384();
+			break;
+		case OPENSSL_ALGO_SHA512:
+			mdtype = (EVP_MD *) EVP_sha512();
+			break;
+		case OPENSSL_ALGO_RMD160:
+			mdtype = (EVP_MD *) EVP_ripemd160();
+			break;
+#endif
 		default:
 			return NULL;
 			break;
@@ -1048,6 +1107,13 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD2", OPENSSL_ALGO_MD2, CONST_CS|CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_DSS1", OPENSSL_ALGO_DSS1, CONST_CS|CONST_PERSISTENT);
+#if OPENSSL_VERSION_NUMBER >= 0x0090708fL
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA224", OPENSSL_ALGO_SHA224, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA256", OPENSSL_ALGO_SHA256, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA384", OPENSSL_ALGO_SHA384, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA512", OPENSSL_ALGO_SHA512, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_RMD160", OPENSSL_ALGO_RMD160, CONST_CS|CONST_PERSISTENT);
+#endif
 
 	/* flags for S/MIME */
 	REGISTER_LONG_CONSTANT("PKCS7_DETACHED", PKCS7_DETACHED, CONST_CS|CONST_PERSISTENT);
@@ -1291,6 +1357,300 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 		X509_free(cert);
 	}
 	BIO_free(bio_out);
+}
+/* }}} */
+
+/* {{{ proto string openssl_spki_new(mixed zpkey, string challenge [, mixed method])
+   Creates new private key (or uses existing) and creates a new spki cert
+   outputting results to var */
+PHP_FUNCTION(openssl_spki_new)
+{
+	int challenge_len;
+	char * challenge, * spkstr, * s;
+	long keyresource = -1;
+	const char *spkac = "SPKAC=";
+	long algo = OPENSSL_ALGO_MD5;
+
+	zval *method = NULL;
+	zval * zpkey = NULL;
+	EVP_PKEY * pkey = NULL;
+	NETSCAPE_SPKI *spki=NULL;
+	const EVP_MD *mdtype;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|z", &zpkey, &challenge, &challenge_len, &method) == FAILURE) {
+		return;
+	}
+	RETVAL_FALSE;
+
+	pkey = php_openssl_evp_from_zval(&zpkey, 0, challenge, 1, &keyresource TSRMLS_CC);
+
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to use supplied private key");
+		goto cleanup;
+	}
+
+	if (method != NULL) {
+		if (Z_TYPE_P(method) == IS_LONG) {
+			algo = Z_LVAL_P(method);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Algorithm must be of supported type");
+			goto cleanup;
+		}
+	}
+	mdtype = php_openssl_get_evp_md_from_algo(algo);
+
+	if (!mdtype) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
+		goto cleanup;
+	}
+
+	if ((spki = NETSCAPE_SPKI_new()) == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create new SPKAC");
+		goto cleanup;
+	}
+
+	if (challenge) {
+		ASN1_STRING_set(spki->spkac->challenge, challenge, (int)strlen(challenge));
+	}
+
+	if (!NETSCAPE_SPKI_set_pubkey(spki, pkey)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to embed public key");
+		goto cleanup;
+	}
+
+	if (!NETSCAPE_SPKI_sign(spki, pkey, mdtype)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to sign with specified algorithm");
+		goto cleanup;
+	}
+
+	spkstr = NETSCAPE_SPKI_b64_encode(spki);
+	if (!spkstr){
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to encode SPKAC");
+		goto cleanup;
+	}
+
+	s = emalloc(strlen(spkac) + strlen(spkstr) + 1);
+	sprintf(s, "%s%s", spkac, spkstr);
+
+	RETVAL_STRINGL(s, strlen(s), 0);
+	goto cleanup;
+
+cleanup:
+
+	if (keyresource == -1 && spki != NULL) {
+		NETSCAPE_SPKI_free(spki);
+	}
+	if (keyresource == -1 && pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+	if (keyresource == -1 && spkstr != NULL) {
+		efree(spkstr);
+	}
+
+	if (strlen(s) <= 0) {
+		RETVAL_FALSE;
+	}
+
+	if (keyresource == -1 && s != NULL) {
+		efree(s);
+	}
+}
+/* }}} */
+
+/* {{{ proto bool openssl_spki_verify(string spki)
+   Verifies spki returns boolean */
+PHP_FUNCTION(openssl_spki_verify)
+{
+	int spkstr_len, i;
+	char *spkstr = NULL, * spkstr_cleaned;
+
+	EVP_PKEY *pkey = NULL;
+	NETSCAPE_SPKI *spki = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+		return;
+	}
+	RETVAL_FALSE;
+
+	if (spkstr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to use supplied SPKAC");
+		goto cleanup;
+	}
+
+	spkstr_cleaned = emalloc(spkstr_len + 1);
+	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+
+	if (strlen(spkstr_cleaned)<=0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate memory for SPKAC");
+		goto cleanup;
+	}
+
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spki == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to decode supplied SPKAC");
+		goto cleanup;
+	}
+
+	pkey = X509_PUBKEY_get(spki->spkac->pubkey);
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to aquire signed public key");
+		goto cleanup;
+	}
+
+	i = NETSCAPE_SPKI_verify(spki, pkey);
+	goto cleanup;
+
+cleanup:
+	if (spki != NULL) {
+		NETSCAPE_SPKI_free(spki);
+	}
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+	if (spkstr_cleaned != NULL) {
+		efree(spkstr_cleaned);
+	}
+
+	if (i > 0) {
+		RETVAL_TRUE;
+	}
+}
+/* }}} */
+
+/* {{{ proto string openssl_spki_export(string spki)
+   Exports public key from existing spki to var */
+PHP_FUNCTION(openssl_spki_export)
+{
+	int spkstr_len;
+	char *spkstr, * spkstr_cleaned, * s;
+
+	EVP_PKEY *pkey = NULL;
+	NETSCAPE_SPKI *spki = NULL;
+	BIO *out = BIO_new(BIO_s_mem());
+	BUF_MEM *bio_buf;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+		return;
+	}
+	RETVAL_FALSE;
+
+	if (spkstr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied SPKAC");
+		goto cleanup;
+	}
+
+	spkstr_cleaned = emalloc(spkstr_len + 1);
+	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spki == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to decode supplied SPKAC");
+		goto cleanup;
+	}
+
+	pkey = X509_PUBKEY_get(spki->spkac->pubkey);
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to aquire signed public key");
+		goto cleanup;
+	}
+
+	out = BIO_new_fp(stdout, BIO_NOCLOSE);
+	PEM_write_bio_PUBKEY(out, pkey);
+/*
+	BIO_get_mem_ptr(out, &bio_buf);
+
+	if ((!bio_buf->data) && (bio_buf->length <= 0)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate memory for public key");
+		goto cleanup;
+	}
+
+	s = emalloc(bio_buf->length);
+	BIO_read(out, s, bio_buf->length);
+
+	if (strlen(s) <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Key length 0");
+		goto cleanup;
+	}
+
+	RETVAL_STRINGL(s, strlen(s) - 1, 1);
+*/
+	goto cleanup;
+
+cleanup:
+
+	if (spki != NULL) {
+		NETSCAPE_SPKI_free(spki);
+	}
+	if (out != NULL) {
+		BIO_free_all(out);
+	}
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+	if (spkstr_cleaned != NULL) {
+		efree(spkstr_cleaned);
+	}
+	if (s != NULL) {
+		efree(s);
+	}
+}
+/* }}} */
+
+/* {{{ proto string openssl_spki_export_challenge(string spki)
+   Exports spkac challenge from existing spki to var */
+PHP_FUNCTION(openssl_spki_export_challenge)
+{
+	int spkstr_len;
+	char *spkstr, * spkstr_cleaned;
+
+	NETSCAPE_SPKI *spki = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+		return;
+	}
+	RETVAL_FALSE;
+
+	if (spkstr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied SPKAC");
+		goto cleanup;
+	}
+
+	spkstr_cleaned = emalloc(spkstr_len + 1);
+	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spki == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate memory for public key");
+		goto cleanup;
+	}
+
+	RETVAL_STRING(ASN1_STRING_data(spki->spkac->challenge), 1);
+	goto cleanup;
+
+cleanup:
+	if (spkstr_cleaned != NULL) {
+		efree(spkstr_cleaned);
+	}
+}
+/* }}} */
+
+/* {{{ proto int openssl_spki_cleanup(const char *src, char *results)
+  This will help remove new line chars in the SPKAC sent from the
+  browser */
+int openssl_spki_cleanup(const char *src, char *dest)
+{
+    int removed=0;
+
+    while (*src) {
+        if (*src!='\n'&&*src!='\r') {
+            *dest++=*src;
+        } else {
+            ++removed;
+        }
+        ++src;
+    }
+    *dest=0;
+    return removed;
 }
 /* }}} */
 
@@ -3317,6 +3677,57 @@ PHP_FUNCTION(openssl_pkey_get_details)
 
 /* }}} */
 
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+
+/* {{{ proto string openssl_pbkdf2(string password, string salt, long key_length, long iterations [, string digest_method = "sha1"])
+   Generates a PKCS5 v2 PBKDF2 string, defaults to sha1 */
+PHP_FUNCTION(openssl_pbkdf2)
+{
+	long key_length = 0, iterations = 0;
+	char *password; int password_len;
+	char *salt; int salt_len;
+	char *method; int method_len = 0;
+	unsigned char *out_buffer;
+
+	const EVP_MD *digest;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssll|s",
+				&password, &password_len,
+				&salt, &salt_len,
+				&key_length, &iterations,
+				&method, &method_len) == FAILURE) {
+		return;
+	}
+
+	if (key_length <= 0) {
+		RETURN_FALSE;
+	}
+
+	if (method_len) {
+		digest = EVP_get_digestbyname(method);
+	} else {
+		digest = EVP_sha1();
+	}
+
+	if (!digest) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
+		RETURN_FALSE;
+	}
+
+	out_buffer = emalloc(key_length + 1);
+	out_buffer[key_length] = '\0';
+
+	if (PKCS5_PBKDF2_HMAC(password, password_len, (unsigned char *)salt, salt_len, iterations, digest, key_length, out_buffer) == 1) {
+		RETVAL_STRINGL((char *)out_buffer, key_length, 0);
+	} else {
+		efree(out_buffer);
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+#endif
+
 /* {{{ PKCS7 S/MIME functions */
 
 /* {{{ proto bool openssl_pkcs7_verify(string filename, long flags [, string signerscerts [, array cainfo [, string extracerts [, string content]]]])
@@ -4947,7 +5358,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 #ifdef PHP_WIN32
 	strong_result = 1;
 	/* random/urandom equivalent on Windows */
-	if (php_win32_get_random_bytes(buffer, (size_t) buffer_length) == FAILURE) {
+	if (php_win32_get_random_bytes(buffer, (size_t) buffer_length) == FAILURE){
 		efree(buffer);
 		if (zstrong_result_returned) {
 			ZVAL_BOOL(zstrong_result_returned, 0);
