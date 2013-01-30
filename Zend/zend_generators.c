@@ -43,41 +43,6 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		zend_execute_data *execute_data = generator->execute_data;
 		zend_op_array *op_array = execute_data->op_array;
 
-		if (!finished_execution) {
-			if (op_array->has_finally_block) {
-				/* -1 required because we want the last run opcode, not the
-  				 * next to-be-run one. */
-				zend_uint op_num = execute_data->opline - op_array->opcodes - 1;
-				zend_uint finally_op_num = 0;
-
-				/* Find next finally block */
-				int i;
-				for (i = 0; i < op_array->last_try_catch; i++) {
-					zend_try_catch_element *try_catch = &op_array->try_catch_array[i];
-
-					if (op_num < try_catch->try_op) {
-						break;
-					}
-
-					if (op_num < try_catch->finally_op) {
-						finally_op_num = try_catch->finally_op;
-					}
-				}
-
-				/* If a finally block was found we jump directly to it and
-				 * resume the generator. Furthermore we abort this close call
-				 * because the generator will already be closed somewhere in
-				 * the resume. */
-				if (finally_op_num) {
-					execute_data->opline = &op_array->opcodes[finally_op_num];
-					execute_data->fast_ret = NULL;
-					generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
-					zend_generator_resume(generator TSRMLS_CC);
-					return;
-				}
-			}
-		}
-
 		if (!execute_data->symbol_table) {
 			zend_free_compiled_variables(execute_data);
 		} else {
@@ -171,6 +136,45 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			EG(argument_stack) = NULL;
 		}
 		generator->execute_data = NULL;
+	}
+}
+/* }}} */
+
+static void zend_generator_dtor_storage(zend_generator *generator, zend_object_handle handle TSRMLS_DC) /* {{{ */
+{
+	zend_execute_data *ex = generator->execute_data;
+	zend_uint op_num, finally_op_num;
+	int i;
+
+	if (!ex || !ex->op_array->has_finally_block) {
+		return;
+	}
+
+	/* -1 required because we want the last run opcode, not the
+	 * next to-be-run one. */
+	op_num = ex->opline - ex->op_array->opcodes - 1;
+
+	/* Find next finally block */
+	finally_op_num = 0;
+	for (i = 0; i < ex->op_array->last_try_catch; i++) {
+		zend_try_catch_element *try_catch = &ex->op_array->try_catch_array[i];
+
+		if (op_num < try_catch->try_op) {
+			break;
+		}
+
+		if (op_num < try_catch->finally_op) {
+			finally_op_num = try_catch->finally_op;
+		}
+	}
+
+	/* If a finally block was found we jump directly to it and
+	 * resume the generator. */
+	if (finally_op_num) {
+		ex->opline = &ex->op_array->opcodes[finally_op_num];
+		ex->fast_ret = NULL;
+		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
+		zend_generator_resume(generator TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -355,7 +359,8 @@ static zend_object_value zend_generator_create(zend_class_entry *class_type TSRM
 
 	zend_object_std_init(&generator->std, class_type TSRMLS_CC);
 
-	object.handle = zend_objects_store_put(generator, NULL,
+	object.handle = zend_objects_store_put(generator,
+		(zend_objects_store_dtor_t)          zend_generator_dtor_storage,
 		(zend_objects_free_object_storage_t) zend_generator_free_storage,
 		(zend_objects_store_clone_t)         zend_generator_clone_storage
 		TSRMLS_CC
