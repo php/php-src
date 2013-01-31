@@ -2,8 +2,14 @@
 #define PHP_SOCK_CONVERSIONS_H 1
 
 #include <php.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
+
+#ifndef PHP_WIN32
+# include <netinet/in.h>
+# include <sys/socket.h>
+#else
+# include <Ws2tcpip.h>
+#endif
+
 #include "php_sockets.h"
 
 /* TYPE DEFINITIONS */

@@ -30,6 +30,44 @@
 #define DEFAULT_BUFF_SIZE 8192
 #define MAX_ARRAY_KEY_SIZE 128
 
+#ifdef PHP_WIN32
+#include "windows_common.h"
+#include <Mswsock.h>
+#define IPV6_RECVPKTINFO	IPV6_PKTINFO
+#define IPV6_RECVHOPLIMIT	IPV6_HOPLIMIT
+#define msghdr _WSAMSG
+
+static GUID WSARecvMsg_GUID = WSAID_WSARECVMSG;
+static __declspec(thread) LPFN_WSARECVMSG WSARecvMsg = NULL;
+inline ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags)
+{
+	DWORD	recvd = 0,
+			bytesReturned;
+	
+	if (WSARecvMsg == NULL)	{
+		int res = WSAIoctl((SOCKET) sockfd, SIO_GET_EXTENSION_FUNCTION_POINTER,
+			&WSARecvMsg_GUID, sizeof(WSARecvMsg_GUID),
+			&WSARecvMsg, sizeof(WSARecvMsg),
+			&bytesReturned, NULL, NULL);
+		if (res != 0) {
+			return -1;
+		}
+	}
+
+	msg->dwFlags = (DWORD)flags;
+	return WSARecvMsg((SOCKET)sockfd, msg, &recvd, NULL, NULL) == 0
+		? (ssize_t)recvd
+		: -1;
+}
+inline ssize_t sendmsg(int sockfd, const struct msghdr *msg, int flags)
+{
+	DWORD sent = 0;
+	return WSASendMsg((SOCKET)sockfd, (struct msghdr*)msg, (DWORD)flags, &sent, NULL, NULL) == 0
+		? (ssize_t)sent
+		: -1;
+}
+#endif
+
 #define LONG_CHECK_VALID_INT(l) \
 	do { \
 		if ((l) < INT_MIN && (l) > INT_MAX) { \
@@ -158,9 +196,7 @@ PHP_FUNCTION(socket_sendmsg)
 
 		RETURN_LONG((long)res);
 	} else {
-		SOCKETS_G(last_error) = errno;
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "error in sendmsg [%d]: %s",
-				errno, sockets_strerror(errno TSRMLS_CC));
+		PHP_SOCKET_ERROR(php_sock, "error in sendmsg", errno);
 		RETURN_FALSE;
 	}
 }
@@ -285,6 +321,18 @@ int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname,
 	switch (optname) {
 #ifdef IPV6_PKTINFO
 	case IPV6_PKTINFO:
+#ifdef PHP_WIN32
+		if (Z_TYPE_PP(arg4) == IS_ARRAY) {
+			php_error_docref0(NULL TSRMLS_CC, E_WARNING, "Windows does not "
+					"support sticky IPV6_PKTINFO");
+			return FAILURE;
+		} else {
+			/* windows has no IPV6_RECVPKTINFO, and uses IPV6_PKTINFO
+			 * for the same effect. We define IPV6_RECVPKTINFO to be
+			 * IPV6_PKTINFO, so assume the assume user used IPV6_RECVPKTINFO */
+			return 1;
+		}
+#endif
 		opt_ptr = from_zval_run_conversions(*arg4, php_sock, from_zval_write_in6_pktinfo,
 				sizeof(struct in6_pktinfo),	"in6_pktinfo", &allocations, &err);
 		if (err.has_error) {

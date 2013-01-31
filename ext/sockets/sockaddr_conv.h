@@ -1,8 +1,16 @@
 #ifndef PHP_SOCKADR_CONV_H
 #define PHP_SOCKADR_CONV_H
 
+#define HAVE_SOCKETS 1
 #include <php_network.h>
-#include "php_sockets.h"
+#include "php_sockets.h" /* php_socket */
+
+#ifndef PHP_WIN32
+# include <netinet/in.h>
+#else
+# include <Winsock2.h>
+#endif
+
 
 /*
  * Convert an IPv6 literal or a hostname info a sockaddr_in6.

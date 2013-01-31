@@ -35,32 +35,12 @@
 #include "ext/standard/info.h"
 #include "php_ini.h"
 #ifdef PHP_WIN32
-# include "win32/inet.h"
-# include <winsock2.h>
+# include "windows_common.h"
+# include <win32/inet.h>
 # include <windows.h>
 # include <Ws2tcpip.h>
 # include "php_sockets.h"
-# include "win32/sockets.h"
-# define IS_INVALID_SOCKET(a)	(a->bsd_socket == INVALID_SOCKET)
-# ifdef EPROTONOSUPPORT
-#  undef EPROTONOSUPPORT
-# endif
-# ifdef ECONNRESET
-#  undef ECONNRESET
-# endif
-# define EPROTONOSUPPORT	WSAEPROTONOSUPPORT
-# define ECONNRESET		WSAECONNRESET
-# ifdef errno
-#  undef errno
-# endif
-# define errno			WSAGetLastError()
-# define h_errno		WSAGetLastError()
-# define set_errno(a)		WSASetLastError(a)
-# define close(a)		closesocket(a)
-# include <IPHlpApi.h>
-# if _WIN32_WINNT >= 0x0600
-#  define HAVE_IF_NAMETOINDEX 1
-# endif
+# include <win32/sockets.h>
 #else
 # include <sys/types.h>
 # include <sys/socket.h>
@@ -650,8 +630,12 @@ PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("MSG_TRUNC",		MSG_TRUNC,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MSG_PEEK",		MSG_PEEK,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MSG_DONTROUTE", MSG_DONTROUTE,	CONST_CS | CONST_PERSISTENT);
+#ifdef MSG_EOR
 	REGISTER_LONG_CONSTANT("MSG_EOR",		MSG_EOR,		CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef MSG_EOF
 	REGISTER_LONG_CONSTANT("MSG_EOF",		MSG_EOF,		CONST_CS | CONST_PERSISTENT);
+#endif
 
 #ifdef MSG_CONFIRM
 	REGISTER_LONG_CONSTANT("MSG_CONFIRM",	MSG_CONFIRM,	CONST_CS | CONST_PERSISTENT);

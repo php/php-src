@@ -1,23 +1,66 @@
-#include "conversions.h"
 #include "sockaddr_conv.h"
 #include "conversions.h"
 #include "sendrecvmsg.h" /* for ancillary registry */
+#include "windows_common.h"
 
 #include <Zend/zend_llist.h>
 #include <ext/standard/php_smart_str.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <sys/un.h>
-
-#include <sys/ioctl.h>
-#include <net/if.h>
+#ifndef PHP_WIN32
+# include <sys/types.h>
+# include <sys/socket.h>
+# include <arpa/inet.h>
+# include <netinet/in.h>
+# include <sys/un.h>
+# include <sys/ioctl.h>
+# include <net/if.h>
+#else
+# include <win32/php_stdint.h>
+#endif
 
 #include <limits.h>
 #include <stdarg.h>
 #include <stddef.h>
+
+#ifdef PHP_WIN32
+typedef unsigned short sa_family_t;
+# define msghdr			_WSAMSG
+/*
+struct _WSAMSG {
+    LPSOCKADDR       name;				//void *msg_name
+    INT              namelen;			//socklen_t msg_namelen
+    LPWSABUF         lpBuffers;			//struct iovec *msg_iov
+    ULONG            dwBufferCount;		//size_t msg_iovlen
+    WSABUF           Control;			//void *msg_control, size_t msg_controllen
+    DWORD            dwFlags;			//int msg_flags
+}
+struct __WSABUF {
+  u_long   			len;				//size_t iov_len (2nd member)
+  char FAR			*buf;				//void *iov_base (1st member)
+}
+struct _WSACMSGHDR {
+  UINT        cmsg_len;					//socklen_t cmsg_len
+  INT         cmsg_level;				//int       cmsg_level
+  INT         cmsg_type;				//int       cmsg_type;
+  followed by UCHAR cmsg_data[]
+}
+*/
+# define msg_name		name
+# define msg_namelen	namelen
+# define msg_iov		lpBuffers
+# define msg_iovlen		dwBufferCount
+# define msg_control	Control.buf
+# define msg_controllen	Control.len
+# define msg_flags		dwFlags
+# define iov_base		buf
+# define iov_len		len
+
+# define cmsghdr		_WSACMSGHDR
+# ifdef CMSG_DATA
+#  undef CMSG_DATA
+# endif
+# define CMSG_DATA		WSA_CMSG_DATA
+#endif
 
 #define MAX_USER_BUFF_SIZE ((size_t)(100*1024*1024))
 #define DEFAULT_BUFF_SIZE 8192
@@ -132,7 +175,7 @@ static void do_from_to_zval_err(struct err_s *err,
 	efree(user_msg);
 	smart_str_free_ex(&path, 0);
 }
-__attribute__ ((format (printf, 2, 3)))
+ZEND_ATTRIBUTE_FORMAT(printf, 2 ,3)
 static void do_from_zval_err(ser_context *ctx, const char *fmt, ...)
 {
 	va_list ap;
@@ -141,7 +184,7 @@ static void do_from_zval_err(ser_context *ctx, const char *fmt, ...)
 	do_from_to_zval_err(&ctx->err, &ctx->keys, "user", fmt, ap);
 	va_end(ap);
 }
-__attribute__ ((format (printf, 2, 3)))
+ZEND_ATTRIBUTE_FORMAT(printf, 2 ,3)
 static void do_to_zval_err(res_context *ctx, const char *fmt, ...)
 {
 	va_list ap;
@@ -958,7 +1001,7 @@ static void to_zval_read_control_array(const char *msghdr_c, zval *zv, res_conte
 
 	for (cmsg = CMSG_FIRSTHDR(msg);
 			cmsg != NULL && !ctx->err.has_error;
-			cmsg = CMSG_NXTHDR(msg,cmsg)) {
+			cmsg = CMSG_NXTHDR(msg, cmsg)) {
 		zval *elem;
 
 		ALLOC_INIT_ZVAL(elem);
@@ -1149,7 +1192,7 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 
 	for (i = 0; bytes_left > 0 && i < (uint)iovlen; i++) {
 		zval	*elem;
-		size_t	len		= MIN(msghdr->msg_iov[i].iov_len, bytes_left);
+		size_t	len		= MIN(msghdr->msg_iov[i].iov_len, (size_t)bytes_left);
 		char	*buf	= safe_emalloc(1, len, 1);
 
 		MAKE_STD_ZVAL(elem);

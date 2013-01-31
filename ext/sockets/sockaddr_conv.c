@@ -3,7 +3,7 @@
 #include "php_sockets.h"
 
 #ifdef PHP_WIN32
-#include <Ws2tcpip.h>
+#include "windows_common.h"
 #else
 #include <netdb.h>
 #include <arpa/inet.h>
