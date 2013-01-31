@@ -1,7 +1,9 @@
 #include "sockaddr_conv.h"
 #include "conversions.h"
 #include "sendrecvmsg.h" /* for ancillary registry */
-#include "windows_common.h"
+#ifdef PHP_WIN32
+# include "windows_common.h"
+#endif
 
 #include <Zend/zend_llist.h>
 #include <ext/standard/php_smart_str.h>
