@@ -37,8 +37,8 @@ void err_msg_dispose(struct err_s *err TSRMLS_DC);
 void allocations_dispose(zend_llist **allocations);
 
 /* CONVERSION FUNCTIONS */
-void from_zval_write_uint8(const zval *arr_value, char *field, ser_context *ctx);
-void to_zval_read_uint8(const char *data, zval *zv, res_context *ctx);
+void from_zval_write_int(const zval *arr_value, char *field, ser_context *ctx);
+void to_zval_read_int(const char *data, zval *zv, res_context *ctx);
 
 #ifdef IPV6_PKTINFO
 void from_zval_write_in6_pktinfo(const zval *container, char *in6_pktinfo_c, ser_context *ctx);
