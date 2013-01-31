@@ -1,5 +1,4 @@
-#! /bin/sh
-
+#!/bin/sh
 if test "$2" = ""; then
 	echo "usage: $0 basedir depth"
 	exit 1
@@ -12,18 +11,20 @@ fi
 if test -z "$3"; then
         param3=0
 
-	echo "Are you sure to create sessions tree dirs
+	#Test of interactive shell terminl
+	if tty -s; then
+		echo "Are you sure to create sessions tree dirs
 in $1 root path with $2 depth? (Y|N)" 
-	read input
-	if test "$input" != "Y"; then
-		echo "\nexit without process"
-		exit 0
+		read input
+		if test "$input" != "Y"; then
+			echo "Exit without process"
+			exit 0
+		fi
 	fi
-	echo "\nProcessing..."
+	echo "$0: Processing $1 with $2 depth...."
 else
         param3=$3
 fi
-
 
 hash_chars="0 1 2 3 4 5 6 7 8 9 a b c d e f"
 if test "$param3" -a "$param3" -ge "5"; then
@@ -35,8 +36,10 @@ fi
 
 for i in $hash_chars; do
 	newpath="$1/$i"
-	mkdir $newpath || exit 1
+	mkdir -p $newpath || exit 1
 	sh $0 $newpath `expr $2 - 1` $param3
 done
 
-echo "\nDone..."
+if test -z "$3"; then
+	echo "$0: Done"
+fi
