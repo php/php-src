@@ -1,7 +1,6 @@
 #ifndef PHP_SOCKADR_CONV_H
 #define PHP_SOCKADR_CONV_H
 
-#define HAVE_SOCKETS 1
 #include <php_network.h>
 #include "php_sockets.h" /* php_socket */
 

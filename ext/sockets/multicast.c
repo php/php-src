@@ -28,19 +28,7 @@
 
 #include "php_network.h"
 #ifdef PHP_WIN32
-# include "win32/inet.h"
-# include <winsock2.h>
-# include <windows.h>
-# include <Ws2tcpip.h>
-# include <Ws2ipdef.h>
-# include "php_sockets.h"
-# include "win32/sockets.h"
-# define NTDDI_XP NTDDI_WINXP /* bug in SDK */
-# include <IPHlpApi.h>
-# undef NTDDI_XP
-# if _WIN32_WINNT >= 0x0600
-#  define HAVE_IF_NAMETOINDEX 1
-# endif
+# include "windows_common.h"
 #else
 #include <sys/socket.h>
 #include <sys/ioctl.h>

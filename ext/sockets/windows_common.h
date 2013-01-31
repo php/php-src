@@ -17,7 +17,9 @@
 #define WINDOWS_COMMON_H
 
 #include <Winsock2.h>
+#define NTDDI_XP NTDDI_WINXP /* bug in SDK */
 #include <IPHlpApi.h> /* conflicting definition of CMSG_DATA */
+#undef NTDDI_XP
 
 #define HAVE_IF_NAMETOINDEX 1
 
