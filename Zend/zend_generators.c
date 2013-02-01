@@ -94,10 +94,16 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 
 		/* Clear any backed up stack arguments */
 		if (generator->stack != EG(argument_stack)) {
-			void **stack_frame = zend_vm_stack_frame_base(execute_data);
-			while (generator->stack->top != stack_frame) {
-				zval_ptr_dtor((zval**)stack_frame);
-				stack_frame++;
+			void **ptr = generator->stack->top - 1;
+			void **end = zend_vm_stack_frame_base(execute_data);
+
+			/* If the top stack element is the argument count, skip it */
+			if (execute_data->function_state.arguments) {
+				ptr--;
+			}
+
+			for (; ptr >= end; --ptr) {
+				zval_ptr_dtor((zval**) ptr);
 			}
 		}
 
