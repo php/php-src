@@ -1126,7 +1126,7 @@ PHP_FUNCTION(socket_set_nonblock)
 		if (stream != NULL) {
 			if (php_stream_set_option(stream, PHP_STREAM_OPTION_BLOCKING, 0,
 					NULL) != -1) {
-				php_sock->blocking = 1;
+				php_sock->blocking = 0;
 				RETURN_TRUE;
 			}
 		}
