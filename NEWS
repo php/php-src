@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2012, PHP 5.4.13
 
+- CLI server:
+  . Fixed bug #64128 (buit-in web server is broken on ppc64). (Remi)
+
 ?? ??? 2012, PHP 5.4.12
 
 - Core:
