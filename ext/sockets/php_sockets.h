@@ -37,41 +37,6 @@ extern zend_module_entry sockets_module_entry;
 #endif
 #endif
 
-PHP_MINIT_FUNCTION(sockets);
-PHP_MINFO_FUNCTION(sockets);
-PHP_RSHUTDOWN_FUNCTION(sockets);
-
-PHP_FUNCTION(socket_select);
-PHP_FUNCTION(socket_create_listen);
-#ifdef HAVE_SOCKETPAIR
-PHP_FUNCTION(socket_create_pair);
-#endif
-PHP_FUNCTION(socket_accept);
-PHP_FUNCTION(socket_set_nonblock);
-PHP_FUNCTION(socket_set_block);
-PHP_FUNCTION(socket_listen);
-PHP_FUNCTION(socket_close);
-PHP_FUNCTION(socket_write);
-PHP_FUNCTION(socket_read);
-PHP_FUNCTION(socket_getsockname);
-PHP_FUNCTION(socket_getpeername);
-PHP_FUNCTION(socket_create);
-PHP_FUNCTION(socket_connect);
-PHP_FUNCTION(socket_strerror);
-PHP_FUNCTION(socket_bind);
-PHP_FUNCTION(socket_recv);
-PHP_FUNCTION(socket_send);
-PHP_FUNCTION(socket_recvfrom);
-PHP_FUNCTION(socket_sendto);
-PHP_FUNCTION(socket_get_option);
-PHP_FUNCTION(socket_set_option);
-#ifdef HAVE_SHUTDOWN
-PHP_FUNCTION(socket_shutdown);
-#endif
-PHP_FUNCTION(socket_last_error);
-PHP_FUNCTION(socket_clear_error);
-PHP_FUNCTION(socket_import_stream);
-
 #ifndef PHP_WIN32
 typedef int PHP_SOCKET;
 # define PHP_SOCKETS_API PHPAPI
