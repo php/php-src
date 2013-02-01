@@ -23,10 +23,10 @@
 #include "config.h"
 #endif
 
-#include <enchant.h>
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include <enchant.h>
 #include "php_enchant.h"
 
 typedef EnchantBroker * EnchantBrokerPtr;
