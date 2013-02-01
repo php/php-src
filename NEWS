@@ -1,10 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.5.0 Beta 1
+
 - Core:
   . Fixed bug #60833 (self, parent, static behave inconsistently 
     case-sensitive). (Stas, mario at include-once dot org)
   . Implemented FR #60524 (specify temp dir by php.ini). (ALeX Kazik).
+
+- CLI server:
+  . Fixed bug #64128 (buit-in web server is broken on ppc64). (Remi)
 
 - cURL:
   . Implemented FR #46439 - added CURLFile for safer file uploads.
