@@ -117,10 +117,6 @@ static char *php_strerror(int error TSRMLS_DC);
 #define PHP_NORMAL_READ 0x0001
 #define PHP_BINARY_READ 0x0002
 
-#define PHP_SOCKET_ERROR(socket,msg,errn)	socket->error = errn;	\
-						SOCKETS_G(last_error) = errn; \
-						php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s [%d]: %s", msg, errn, php_strerror(errn TSRMLS_CC))
-
 static int le_socket;
 #define le_socket_name php_sockets_le_socket_name
 
