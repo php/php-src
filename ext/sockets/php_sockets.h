@@ -72,7 +72,7 @@ PHP_SOCKETS_API int php_sockets_le_socket(void);
 			(socket)->error = _err; \
 			SOCKETS_G(last_error) = _err; \
 			if (_err != EAGAIN && _err != EWOULDBLOCK && _err != EINPROGRESS) { \
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s [%d]: %s", msg, _err, php_strerror(_err TSRMLS_CC)); \
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s [%d]: %s", msg, _err, sockets_strerror(_err TSRMLS_CC)); \
 			} \
 		} while (0)
 
