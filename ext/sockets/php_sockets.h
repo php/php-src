@@ -26,11 +26,13 @@
 
 #if HAVE_SOCKETS
 
+#include <php.h>
+
 extern zend_module_entry sockets_module_entry;
 #define phpext_sockets_ptr &sockets_module_entry
 
 #ifdef PHP_WIN32
-#include <winsock.h>
+#include <Winsock2.h>
 #else
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -84,6 +86,17 @@ ZEND_END_MODULE_GLOBALS(sockets)
 #else
 #define SOCKETS_G(v) (sockets_globals.v)
 #endif
+
+ZEND_EXTERN_MODULE_GLOBALS(sockets);
+
+enum sockopt_return {
+	SOCKOPT_ERROR,
+	SOCKOPT_CONTINUE,
+	SOCKOPT_SUCCESS
+};
+
+char *sockets_strerror(int error TSRMLS_DC);
+php_socket *socket_import_file_descriptor(PHP_SOCKET sock TSRMLS_DC);
 
 #else
 #define phpext_sockets_ptr NULL
