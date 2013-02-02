@@ -14,7 +14,7 @@ if (!extension_loaded('sockets')) {
     if (!socket_set_nonblock($socket)) {
         die('Unable to set nonblocking mode for socket');
     }
-    socket_recvfrom($socket, $buf, 12, 0, $from, $port); // cause warning
+    var_dump(socket_recvfrom($socket, $buf, 12, 0, $from, $port)); //false (EAGAIN - no warning)
     $address = '127.0.0.1';
     socket_sendto($socket, '', 1, 0, $address); // cause warning
     if (!socket_bind($socket, $address, 1223)) {
@@ -44,7 +44,7 @@ if (!extension_loaded('sockets')) {
 
     socket_close($socket);
 --EXPECTF--
-Warning: socket_recvfrom(): unable to recvfrom [%d]: %a in %s on line %d
+bool(false)
 
 Warning: Wrong parameter count for socket_sendto() in %s on line %d
 
