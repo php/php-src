@@ -114,6 +114,14 @@ static PHP_GINIT_FUNCTION(sockets);
 
 static char *php_strerror(int error TSRMLS_DC);
 
+#define PHP_SOCKET_ERROR(socket, msg, errn) \
+		do { \
+			int _err = (errn); /* save value to avoid repeated calls to WSAGetLastError() on Windows */ \
+			(socket)->error = _err; \
+			SOCKETS_G(last_error) = _err; \
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s [%d]: %s", msg, _err, php_strerror(_err TSRMLS_CC)); \
+		} while (0)
+
 #define PHP_NORMAL_READ 0x0001
 #define PHP_BINARY_READ 0x0002
 

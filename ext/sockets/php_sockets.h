@@ -64,14 +64,6 @@ PHP_SOCKETS_API int php_sockets_le_socket(void);
 
 #define php_sockets_le_socket_name "Socket"
 
-#define PHP_SOCKET_ERROR(socket, msg, errn) \
-		do { \
-			int _err = (errn); /* save value to avoid repeated calls to WSAGetLastError() on Windows */ \
-			(socket)->error = _err; \
-			SOCKETS_G(last_error) = _err; \
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s [%d]: %s", msg, _err, php_strerror(_err TSRMLS_CC)); \
-		} while (0)
-
 ZEND_BEGIN_MODULE_GLOBALS(sockets)
 	int last_error;
 	char *strerror_buf;
