@@ -157,6 +157,8 @@ PHP 5.5 UPGRADE NOTES
   Expires headers. (see https://wiki.php.net/rfc/cookie_max-age)
 - curl_setopt now accepts new option CURLOPT_SAFE_UPLOAD and CURLFile object for
   safer file uploads (see https://wiki.php.net/rfc/curl-file-upload)
+- Functions in the socket extension now do not emit warnings when the errno is
+  EAGAIN, EWOULDBLOCK or EINPROGRESS.
 
 ========================================
 5. New Functions
@@ -257,6 +259,11 @@ PHP 5.5 UPGRADE NOTES
   - IntlDateFormatter::getTimeZone()
   - IntlDateFormatter::setTimeZone()
 
+- Sockets:
+  - socket_sendmsg()
+  - socket_recvmsg()
+  - socket_cmsg_space()
+
 - SPL:
   - SplFixedArray::__wakeup()
 
@@ -271,6 +278,7 @@ PHP 5.5 UPGRADE NOTES
   - IntlBreakIterator
   - IntlRuleBasedBreakIterator
   - IntlCodePointBreakIterator
+  - UConverter
 
 - cURL:
   - CURLFile

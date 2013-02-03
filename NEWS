@@ -16,6 +16,14 @@ PHP                                                                        NEWS
   . Implemented FR #46439 - added CURLFile for safer file uploads.
     (Stas)
 
+- Intl:
+  . Cherry-picked UConverter wrapper, which had accidentaly been committed only
+    to master.
+
+- Sockets:
+  . Added recvmsg() and sendmsg() wrappers. (Gustavo)
+    See https://wiki.php.net/rfc/sendrecvmsg
+
 24 Jan 2013, PHP 5.5.0 Alpha 4
 
 - Core:
