@@ -27,6 +27,9 @@
 #if HAVE_SOCKETS
 
 #include <php.h>
+#ifdef PHP_WIN32
+# include "windows_common.h"
+#endif
 
 extern zend_module_entry sockets_module_entry;
 #define phpext_sockets_ptr &sockets_module_entry
