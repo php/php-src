@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Added recvmsg() and sendmsg() wrappers. (Gustavo)
     See https://wiki.php.net/rfc/sendrecvmsg
 
+- Filter:
+  . Implemented FR #49180 - added MAC address validation. (Martin)
+
 24 Jan 2013, PHP 5.5.0 Alpha 4
 
 - Core:
