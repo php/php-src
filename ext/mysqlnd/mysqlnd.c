@@ -2321,7 +2321,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			break;
 		case MYSQL_SET_CHARSET_NAME:
 		{
-			char * new_charset_name = mnd_pestrdup(value, conn->persistent);
+			char * new_charset_name;
+			if (!mysqlnd_find_charset_name(value)) {
+				SET_CLIENT_ERROR(*conn->error_info, CR_CANT_FIND_CHARSET, UNKNOWN_SQLSTATE, "Unknown character set");
+				ret = FAIL;
+				break;
+			}
+				
+			new_charset_name = mnd_pestrdup(value, conn->persistent);
 			if (!new_charset_name) {
 				goto oom;
 			}
