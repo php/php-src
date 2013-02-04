@@ -27,6 +27,8 @@
 ZEND_API zend_class_entry *zend_ce_generator;
 static zend_object_handlers zend_generator_handlers;
 
+static zend_object_value zend_generator_create(zend_class_entry *class_type TSRMLS_DC);
+
 ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC) /* {{{ */
 {
 	if (generator->value) {
@@ -92,10 +94,16 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 
 		/* Clear any backed up stack arguments */
 		if (generator->stack != EG(argument_stack)) {
-			void **stack_frame = zend_vm_stack_frame_base(execute_data);
-			while (generator->stack->top != stack_frame) {
-				zval_ptr_dtor((zval**)stack_frame);
-				stack_frame++;
+			void **ptr = generator->stack->top - 1;
+			void **end = zend_vm_stack_frame_base(execute_data);
+
+			/* If the top stack element is the argument count, skip it */
+			if (execute_data->function_state.arguments) {
+				ptr--;
+			}
+
+			for (; ptr >= end; --ptr) {
+				zval_ptr_dtor((zval**) ptr);
 			}
 		}
 
@@ -188,10 +196,19 @@ static void zend_generator_free_storage(zend_generator *generator TSRMLS_DC) /* 
 }
 /* }}} */
 
-static void zend_generator_clone_storage(zend_generator *orig, zend_generator **clone_ptr TSRMLS_DC) /* {{{ */
+static zend_object_value zend_generator_clone(zval *object TSRMLS_DC) /* {{{ */
 {
-	zend_generator *clone = emalloc(sizeof(zend_generator));
-	memcpy(clone, orig, sizeof(zend_generator));
+	zend_generator *orig = zend_object_store_get_object(object TSRMLS_CC);
+	zend_object_value clone_val = zend_generator_create(Z_OBJCE_P(object) TSRMLS_CC);
+	zend_generator *clone = zend_object_store_get_object_by_handle(clone_val.handle TSRMLS_CC);
+
+	zend_objects_clone_members(
+		&clone->std, clone_val, &orig->std, Z_OBJ_HANDLE_P(object) TSRMLS_CC
+	);
+
+	clone->execute_data = orig->execute_data;
+	clone->largest_used_integer_key = orig->largest_used_integer_key;
+	clone->flags = orig->flags;
 
 	if (orig->execute_data) {
 		/* Create a few shorter aliases to the old execution data */
@@ -335,14 +352,16 @@ static void zend_generator_clone_storage(zend_generator *orig, zend_generator **
 
 	/* The value and key are known not to be references, so simply add refs */
 	if (orig->value) {
+		clone->value = orig->value;
 		Z_ADDREF_P(orig->value);
 	}
 
 	if (orig->key) {
+		clone->key = orig->key;
 		Z_ADDREF_P(orig->key);
 	}
 
-	*clone_ptr = clone;
+	return clone_val;
 }
 /* }}} */
 
@@ -362,8 +381,7 @@ static zend_object_value zend_generator_create(zend_class_entry *class_type TSRM
 	object.handle = zend_objects_store_put(generator,
 		(zend_objects_store_dtor_t)          zend_generator_dtor_storage,
 		(zend_objects_free_object_storage_t) zend_generator_free_storage,
-		(zend_objects_store_clone_t)         zend_generator_clone_storage
-		TSRMLS_CC
+		NULL TSRMLS_CC
 	);
 	object.handlers = &zend_generator_handlers;
 
@@ -863,7 +881,7 @@ void zend_register_generator_ce(TSRMLS_D) /* {{{ */
 
 	memcpy(&zend_generator_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_generator_handlers.get_constructor = zend_generator_get_constructor;
-	zend_generator_handlers.clone_obj = zend_objects_store_clone_obj;
+	zend_generator_handlers.clone_obj = zend_generator_clone;
 }
 /* }}} */
 
