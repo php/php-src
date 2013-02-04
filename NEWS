@@ -1,14 +1,31 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.5.0 Beta 1
+
 - Core:
   . Fixed bug #60833 (self, parent, static behave inconsistently 
     case-sensitive). (Stas, mario at include-once dot org)
   . Implemented FR #60524 (specify temp dir by php.ini). (ALeX Kazik).
+  . Fixed bug #63830 (Segfault on undefined function call in nested generator).
+    (Nikita Popov)
+
+- CLI server:
+  . Fixed bug #64128 (buit-in web server is broken on ppc64). (Remi)
 
 - cURL:
   . Implemented FR #46439 - added CURLFile for safer file uploads.
     (Stas)
+
+- Intl:
+  . Cherry-picked UConverter wrapper, which had accidentaly been committed only
+    to master.
+
+- Sockets:
+  . Added recvmsg() and sendmsg() wrappers. (Gustavo)
+    See https://wiki.php.net/rfc/sendrecvmsg
+
+- Filter:
+  . Implemented FR #49180 - added MAC address validation. (Martin)
 
 24 Jan 2013, PHP 5.5.0 Alpha 4
 
