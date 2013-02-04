@@ -9,14 +9,14 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 
-define("MODE_MASK", 07777);
+define("MODE_MASK", 0777);
 
 $filename = __FILE__ . ".tmp";
 
 $fd = fopen($filename, "w+");
 fclose($fd);
 
-for ($perms_to_set = 07777; $perms_to_set >= 0; $perms_to_set--) {
+for ($perms_to_set = 0777; $perms_to_set >= 0; $perms_to_set--) {
 	chmod($filename, $perms_to_set);
 	$set_perms = (fileperms($filename) & MODE_MASK);
 	clearstatcache();
