@@ -1,12 +1,12 @@
 --TEST--
-Test if socket_recvfrom() receives data sent by socket_sendto() via IPv6 UDP
+Test if socket_recvfrom() receives data sent by socket_sendto() via IPv6 UDP (Win32)
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets')) {
     die('SKIP The sockets extension is not loaded.');
 }
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-	die('skip Not valid for Windows');
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+	die('skip only for Windows');
 }
 require 'ipv6_skipif.inc';
 --FILE--
@@ -48,7 +48,8 @@ require 'ipv6_skipif.inc';
 
     socket_close($socket);
 --EXPECTF--
-Warning: socket_recvfrom(): unable to recvfrom [11]: Resource temporarily unavailable in %s on line %d
+Warning: socket_recvfrom(): unable to recvfrom [10022]: An invalid argument was supplied.
+ in %s on line %d
 
 Warning: Wrong parameter count for socket_sendto() in %s on line %d
 
