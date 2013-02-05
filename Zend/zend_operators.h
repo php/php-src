@@ -79,7 +79,7 @@ static zend_always_inline long zend_dval_to_lval(double d)
 #else
 static zend_always_inline long zend_dval_to_lval(double d)
 {
-	if (d >= LONG_MAX) {
+	if (d > LONG_MAX) {
 		return (long)(unsigned long) d;
 	}
 	return (long) d;
