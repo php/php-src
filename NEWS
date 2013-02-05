@@ -5,9 +5,6 @@ PHP                                                                        NEWS
 - CLI server:
   . Fixed bug #64128 (buit-in web server is broken on ppc64). (Remi)
 
-- Core:
-  . Fixed bug #64142 (dval to lval different behavior on ppc64). (Remi)
-
 ?? ??? 2012, PHP 5.4.12
 
 - Core:
