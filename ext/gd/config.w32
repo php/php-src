@@ -3,10 +3,10 @@
 
 ARG_WITH("gd", "Bundled GD support", "yes,shared");
 ARG_WITH("t1lib", "t1lib support", "yes");
+ARG_WITH("libvpx", "vpx support", "yes");
 
 if (PHP_GD != "no") {
 	if (
-		CHECK_LIB("vpxmt.lib", "gd", PHP_GD) &&
 		CHECK_LIB("libjpeg_a.lib;libjpeg.lib", "gd", PHP_GD) &&
 		CHECK_LIB("freetype_a.lib;freetype.lib", "gd", PHP_GD) &&
 		CHECK_LIB("libpng_a.lib;libpng.lib", "gd", PHP_GD) &&
@@ -30,6 +30,14 @@ if (PHP_GD != "no") {
 			}
 		}
 
+		if (PHP_LIBVPX != "no") {
+			if (CHECK_LIB("vpxmt.lib", "gd", PHP_GD) &&
+				CHECK_HEADER_ADD_INCLUDE("vp8.h", "CFLAGS_GD", PHP_GD + ";" + PHP_PHP_BUILD + "\\include\\vpx")) {
+				ADD_FLAG("CFLAGS_GD", "/D HAVE_LIBVPX /D HAVE_GD_WEBP");
+			} else {
+				WARNING("libvpx not enabled; libraries and headers not found");
+			}
+		}
 		CHECK_LIB("User32.lib", "gd", PHP_GD);
 		CHECK_LIB("Gdi32.lib", "gd", PHP_GD);
 
@@ -60,14 +68,12 @@ if (PHP_GD != "no") {
 /D HAVE_GD_WBMP  \
 /D HAVE_GD_XBM  \
 /D HAVE_GD_XPM  \
-/D HAVE_GD_WEBP \
 /D HAVE_LIBFREETYPE=1  \
 /D HAVE_LIBGD13=1  \
 /D HAVE_LIBGD15=1  \
 /D HAVE_LIBGD20=1  \
 /D HAVE_LIBGD204=1 \
 /D HAVE_LIBJPEG  \
-/D HAVE_LIBVPX \
 /D HAVE_LIBPNG  \
 /D HAVE_XPM  \
 /D HAVE_COLORCLOSESTHWB  \
