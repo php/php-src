@@ -3,11 +3,13 @@ PHP                                                                        NEWS
 ?? ??? 201?, PHP 5.5.0 Beta 1
 
 - Core:
+  . Fixed bug #64135 (Exceptions from set_error_handler are not always
+    propagated). (Laruence)
+  . Fixed bug #63830 (Segfault on undefined function call in nested generator).
+    (Nikita Popov)
   . Fixed bug #60833 (self, parent, static behave inconsistently 
     case-sensitive). (Stas, mario at include-once dot org)
   . Implemented FR #60524 (specify temp dir by php.ini). (ALeX Kazik).
-  . Fixed bug #63830 (Segfault on undefined function call in nested generator).
-    (Nikita Popov)
 
 - CLI server:
   . Fixed bug #64128 (buit-in web server is broken on ppc64). (Remi)
