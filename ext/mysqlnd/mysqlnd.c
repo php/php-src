@@ -2678,8 +2678,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 			smart_str_0(&tmp_str);
 
 			{
+				char * commented_name = NULL;
+				unsigned int commented_name_len = name? mnd_sprintf(&commented_name, 0, " /*%s*/", name):0;
 				char * query;
-				unsigned int query_len = mnd_sprintf(&query, 0, (commit? "COMMIT %s":"ROLLBACK %s"), tmp_str.c? tmp_str.c:"");
+				unsigned int query_len = mnd_sprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
+													 commented_name? commented_name:"", tmp_str.c? tmp_str.c:"");
 				smart_str_free(&tmp_str);
 
 				if (!query) {
@@ -2688,6 +2691,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * con
 				}
 				ret = conn->m->query(conn, query, query_len TSRMLS_CC);
 				mnd_sprintf_free(query);
+				if (commented_name) {
+					mnd_sprintf_free(commented_name);
+				}
 			}
 		} while (0);
 		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
