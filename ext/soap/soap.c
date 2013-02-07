@@ -479,10 +479,40 @@ ZEND_INI_MH(OnUpdateCacheMode)
 	return SUCCESS;
 }
 
+static PHP_INI_MH(OnUpdateCacheDir)
+{
+	/* Only do the open_basedir check at runtime */
+	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
+		char *p;
+
+		if (memchr(new_value, '\0', new_value_length) != NULL) {
+			return FAILURE;
+		}
+
+		/* we do not use zend_memrchr() since path can contain ; itself */
+		if ((p = strchr(new_value, ';'))) {
+			char *p2;
+			p++;
+			if ((p2 = strchr(p, ';'))) {
+				p = p2 + 1;
+			}
+		} else {
+			p = new_value;
+		}
+
+		if (PG(open_basedir) && *p && php_check_open_basedir(p TSRMLS_CC)) {
+			return FAILURE;
+		}
+	}
+
+	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return SUCCESS;
+}
+
 PHP_INI_BEGIN()
 STD_PHP_INI_ENTRY("soap.wsdl_cache_enabled",     "1", PHP_INI_ALL, OnUpdateBool,
                   cache_enabled, zend_soap_globals, soap_globals)
-STD_PHP_INI_ENTRY("soap.wsdl_cache_dir",         "/tmp", PHP_INI_ALL, OnUpdateString,
+STD_PHP_INI_ENTRY("soap.wsdl_cache_dir",         "/tmp", PHP_INI_ALL, OnUpdateCacheDir,
                   cache_dir, zend_soap_globals, soap_globals)
 STD_PHP_INI_ENTRY("soap.wsdl_cache_ttl",         "86400", PHP_INI_ALL, OnUpdateLong,
                   cache_ttl, zend_soap_globals, soap_globals)
