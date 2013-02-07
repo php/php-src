@@ -92,6 +92,7 @@ xmlDocPtr soap_xmlParseFile(const char *filename TSRMLS_DC)
 	PG(allow_url_fopen) = old_allow_url_fopen;
 	if (ctxt) {
 		ctxt->keepBlanks = 0;
+		ctxt->options -= XML_PARSE_DTDLOAD;
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
 		ctxt->sax->comment = soap_Comment;
 		ctxt->sax->warning = NULL;
@@ -133,6 +134,7 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 */
 	ctxt = xmlCreateMemoryParserCtxt(buf, buf_size);
 	if (ctxt) {
+		ctxt->options -= XML_PARSE_DTDLOAD;
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
 		ctxt->sax->comment = soap_Comment;
 		ctxt->sax->warning = NULL;
