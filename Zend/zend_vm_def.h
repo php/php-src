@@ -2462,6 +2462,10 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 			}
 		}
 	} else {
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			FREE_OP2();
+			HANDLE_EXCEPTION();
+		}
 		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
 	}
 
