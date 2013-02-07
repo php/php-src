@@ -791,6 +791,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	unsigned int line_ccnt;
 	unsigned int lb_ptr;
 	unsigned int lb_cnt;
+	unsigned int prev_ws;
 	int opts;
 	static char qp_digits[] = "0123456789ABCDEF";
 
@@ -807,6 +808,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	icnt = *in_left_p;
 	pd = (unsigned char *)(*out_pp);
 	ocnt = *out_left_p;
+	prev_ws = 0;
 
 	for (;;) {
 		if (!(opts & PHP_CONV_QPRINT_OPT_BINARY) && inst->lbchars != NULL && inst->lbchars_len > 0) {
@@ -823,6 +825,14 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 						lb_cnt--;
 						err = PHP_CONV_ERR_TOO_BIG;
 						break;
+					}
+
+					/* If the character(s) immediately before the line break
+					 * is whitespace, need to convert to soft linebreak to
+					 * preserve that data. */
+					if (prev_ws > 0) {
+						*(pd++) = '=';
+						ocnt--;
 					}
 
 					for (i = 0; i < lb_cnt; i++) {
@@ -842,6 +852,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 		} 
 
 		c = NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, inst->lbchars);
+		prev_ws = 0;
 
 		if (!(opts & PHP_CONV_QPRINT_OPT_BINARY) && (c == '\t' || c == ' ')) {
 			if (line_ccnt < 2 && inst->lbchars != NULL) {
@@ -866,6 +877,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 				*(pd++) = c;
 				ocnt--;
 				line_ccnt--;
+				prev_ws = 1;
 				CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
 			}
 		} else if ((!(opts & PHP_CONV_QPRINT_OPT_FORCE_ENCODE_FIRST) || line_ccnt < inst->line_len) && ((c >= 33 && c <= 60) || (c >= 62 && c <= 126))) { 
