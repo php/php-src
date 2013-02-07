@@ -2761,9 +2761,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 /* }}} */
 
 
-typedef enum_func_status	(*func_mysqlnd_conn_data__)(MYSQLND_CONN_DATA * conn, const unsigned int flags, const char * const name TSRMLS_DC);
-
-
 /* {{{ mysqlnd_conn_data::local_tx_start */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, local_tx_start)(MYSQLND_CONN_DATA * conn, size_t this_func TSRMLS_DC)
