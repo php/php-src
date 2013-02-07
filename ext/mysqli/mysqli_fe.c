@@ -86,6 +86,38 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_autocommit, 0, 0, 1)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_begin_transaction, 0, 0, 1)
+	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
+	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_begin_transaction, 0, 0, 0)
+	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_commit, 0, 0, 1)
+	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
+	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_commit, 0, 0, 0)
+	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_rollback, 0, 0, 1)
+	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
+	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_rollback, 0, 0, 0)
+	ZEND_ARG_INFO(0, flags)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_change_user, 0, 0, 4)
 	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
@@ -326,10 +358,11 @@ ZEND_END_ARG_INFO()
 const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_affected_rows,						arginfo_mysqli_only_link)
 	PHP_FE(mysqli_autocommit,							arginfo_mysqli_autocommit)
+	PHP_FE(mysqli_begin_transaction,					arginfo_mysqli_begin_transaction)
 	PHP_FE(mysqli_change_user,							arginfo_mysqli_change_user)
 	PHP_FE(mysqli_character_set_name,					arginfo_mysqli_only_link)
 	PHP_FE(mysqli_close,								arginfo_mysqli_only_link)
-	PHP_FE(mysqli_commit,								arginfo_mysqli_only_link)
+	PHP_FE(mysqli_commit,								arginfo_mysqli_commit)
 	PHP_FE(mysqli_connect, 								arginfo_mysqli_connect)
 	PHP_FE(mysqli_connect_errno,						arginfo_mysqli_no_params)
 	PHP_FE(mysqli_connect_error,						arginfo_mysqli_no_params)
@@ -397,7 +430,7 @@ const zend_function_entry mysqli_functions[] = {
 #if defined(MYSQLI_USE_MYSQLND)
 	PHP_FE(mysqli_reap_async_query,						arginfo_mysqli_only_link)
 #endif
-	PHP_FE(mysqli_rollback,								arginfo_mysqli_only_link)
+	PHP_FE(mysqli_rollback,								arginfo_mysqli_rollback)
 	PHP_FE(mysqli_select_db,							arginfo_mysqli_select_db)
 #ifdef HAVE_MYSQLI_SET_CHARSET
 	PHP_FE(mysqli_set_charset,							arginfo_mysqli_set_charset)
@@ -458,10 +491,11 @@ const zend_function_entry mysqli_functions[] = {
  */
 const zend_function_entry mysqli_link_methods[] = {
 	PHP_FALIAS(autocommit, mysqli_autocommit, arginfo_class_mysqli_autocommit)
+	PHP_FALIAS(begin_transaction, mysqli_begin_transaction, arginfo_class_mysqli_begin_transaction)
 	PHP_FALIAS(change_user,mysqli_change_user, arginfo_class_mysqli_change_user)
 	PHP_FALIAS(character_set_name, mysqli_character_set_name, arginfo_mysqli_no_params)
 	PHP_FALIAS(close, mysqli_close, arginfo_mysqli_no_params)
-	PHP_FALIAS(commit, mysqli_commit, arginfo_mysqli_no_params)
+	PHP_FALIAS(commit, mysqli_commit, arginfo_class_mysqli_commit)
 	PHP_FALIAS(connect, mysqli_connect, arginfo_mysqli_connect)
 	PHP_FALIAS(dump_debug_info, mysqli_dump_debug_info, arginfo_mysqli_no_params)
 	PHP_FALIAS(debug, mysqli_debug, arginfo_mysqli_debug)
@@ -494,7 +528,7 @@ const zend_function_entry mysqli_link_methods[] = {
 #endif
 	PHP_FALIAS(escape_string, mysqli_real_escape_string, arginfo_class_mysqli_real_escape_string)
 	PHP_FALIAS(real_query, mysqli_real_query, arginfo_class_mysqli_query)
-	PHP_FALIAS(rollback,mysqli_rollback, arginfo_mysqli_no_params)
+	PHP_FALIAS(rollback, mysqli_rollback, arginfo_class_mysqli_rollback)
 	PHP_FALIAS(select_db,mysqli_select_db, arginfo_class_mysqli_select_db)
 #ifdef HAVE_MYSQLI_SET_CHARSET
 	PHP_FALIAS(set_charset, mysqli_set_charset, arginfo_class_mysqli_set_charset)

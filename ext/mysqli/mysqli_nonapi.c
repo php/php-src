@@ -29,6 +29,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_smart_str.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 
@@ -1044,6 +1045,81 @@ PHP_FUNCTION(mysqli_get_charset)
 }
 /* }}} */
 #endif
+
+
+#if !defined(MYSQLI_USE_MYSQLND)
+/* {{{ proto bool mysqli_begin_transaction_libmysql */
+static int mysqli_begin_transaction_libmysql(MYSQL * conn, const unsigned int mode, const char * const name)
+{
+	int ret;
+	smart_str tmp_str = {0, 0, 0};
+	if (mode & TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
+		if (tmp_str.len) {
+			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
+	}
+	if (mode & TRANS_START_READ_WRITE) {
+		if (tmp_str.len) {
+			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
+	}
+	if (mode & TRANS_START_READ_ONLY) {
+		if (tmp_str.len) {
+			smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
+	}
+	smart_str_0(&tmp_str);
+
+	{
+		char * commented_name = NULL;
+		unsigned int commented_name_len = name? spprintf(&commented_name, 0, " /*%s*/", name):0;
+		char * query;
+		unsigned int query_len = spprintf(&query, 0, "START TRANSACTION%s %s",
+										  commented_name? commented_name:"", tmp_str.c? tmp_str.c:"");
+		smart_str_free(&tmp_str);
+
+		ret = mysql_real_query(conn, query, query_len);
+		efree(query);
+		if (commented_name) {
+			efree(commented_name);
+		}
+	}
+	return ret;
+}
+/* }}} */
+#endif
+
+/* {{{ proto bool mysqli_begin_transaction(object link, [int flags [, string name]])
+   Starts a transaction */
+PHP_FUNCTION(mysqli_begin_transaction)
+{
+	MY_MYSQL	*mysql;
+	zval		*mysql_link;
+	long		flags = TRANS_START_NO_OPT;
+	char *		name = NULL;
+	int			name_len = 0;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|ls", &mysql_link, mysqli_link_class_entry, &flags, &name, &name_len) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
+
+#if !defined(MYSQLI_USE_MYSQLND)
+	if (mysqli_begin_transaction_libmysql(mysql->mysql, flags, name)) {
+		RETURN_FALSE;
+	}
+#else
+	if (mysqlnd_begin_transaction(mysql->mysql, flags, name)) {
+		RETURN_FALSE;
+	}
+#endif
+	RETURN_TRUE;
+}
+/* }}} */
+
 
 /*
  * Local variables:
