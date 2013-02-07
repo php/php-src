@@ -23,6 +23,8 @@
 #ifndef MYSQLND_STRUCTS_H
 #define MYSQLND_STRUCTS_H
 
+#include "ext/standard/php_smart_str.h"
+
 #define MYSQLND_TYPEDEFED_METHODS
 
 #define MYSQLND_CLASS_METHOD_TABLE_NAME(class) mysqlnd_##class##_methods
@@ -30,6 +32,7 @@
 
 #define MYSQLND_CLASS_METHODS_START(class)	MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) = {
 #define MYSQLND_CLASS_METHODS_END			}
+
 
 typedef struct st_mysqlnd_memory_pool MYSQLND_MEMORY_POOL;
 typedef struct st_mysqlnd_memory_pool_chunk MYSQLND_MEMORY_POOL_CHUNK;
@@ -480,6 +483,9 @@ typedef MYSQLND_RES * 		(*func_mysqlnd_conn_data__result_init)(unsigned int fiel
 typedef enum_func_status	(*func_mysqlnd_conn_data__set_autocommit)(MYSQLND_CONN_DATA * conn, unsigned int mode TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit)(MYSQLND_CONN_DATA * conn TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_rollback)(MYSQLND_CONN_DATA * conn TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__tx_begin)(MYSQLND_CONN_DATA * conn, const unsigned int mode, const char * const name TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const unsigned int flags, const char * const name TSRMLS_DC);
+typedef void				(*func_mysqlnd_conn_data__tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * tmp_str, const unsigned int mode TSRMLS_DC);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__local_tx_start)(MYSQLND_CONN_DATA * conn, size_t this_func TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__local_tx_end)(MYSQLND_CONN_DATA * conn, size_t this_func, enum_func_status status TSRMLS_DC);
@@ -566,6 +572,9 @@ struct st_mysqlnd_conn_data_methods
 	func_mysqlnd_conn_data__set_autocommit set_autocommit;
 	func_mysqlnd_conn_data__tx_commit tx_commit;
 	func_mysqlnd_conn_data__tx_rollback tx_rollback;
+	func_mysqlnd_conn_data__tx_begin tx_begin;
+	func_mysqlnd_conn_data__tx_commit_or_rollback tx_commit_or_rollback;
+	func_mysqlnd_conn_data__tx_cor_options_to_string tx_cor_options_to_string;
 
 	func_mysqlnd_conn_data__local_tx_start local_tx_start;
 	func_mysqlnd_conn_data__local_tx_end local_tx_end;
