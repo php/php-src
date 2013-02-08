@@ -12,38 +12,28 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Moriyoshi Koizumi <moriyoshi@php.net>                        |
+   | Authors: Keyur Govande <kgovande@gmail.com>                          |
    +----------------------------------------------------------------------+
-*/
-
-/* $Id: php_cli.c 306938 2011-01-01 02:17:06Z felipe $ */
-
-#ifndef PHP_CLI_SERVER_H
-#define PHP_CLI_SERVER_H
-
-#include "SAPI.h"
-
-extern const zend_function_entry server_additional_functions[];
-extern sapi_module_struct cli_server_sapi_module;
-extern int do_cli_server(int argc, char **argv TSRMLS_DC);
-
-ZEND_BEGIN_MODULE_GLOBALS(cli_server)
-	short color;
-ZEND_END_MODULE_GLOBALS(cli_server)
-
-#ifdef ZTS
-#define CLI_SERVER_G(v) TSRMG(cli_server_globals_id, zend_cli_server_globals *, v)
-#else
-#define CLI_SERVER_G(v) (cli_server_globals.v)
-#endif
-
-#endif /* PHP_CLI_SERVER_H */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
  */
+
+/* $Id$ */
+
+#ifndef	PS_TITLE_HEADER
+#define	PS_TITLE_HEADER
+
+#define PS_TITLE_SUCCESS 0
+#define PS_TITLE_NOT_AVAILABLE 1
+#define PS_TITLE_NOT_INITIALIZED 2
+#define PS_TITLE_BUFFER_NOT_AVAILABLE 3
+
+extern char** save_ps_args(int argc, char** argv);
+
+extern int set_ps_title(const char* new_str);
+
+extern int get_ps_title(int* displen, const char** string);
+
+extern const char* ps_title_errno(int rc);
+
+extern int is_ps_title_available();
+
+#endif // PS_TITLE_HEADER
