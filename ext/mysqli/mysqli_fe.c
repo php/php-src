@@ -97,6 +97,24 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_begin_transaction, 0, 0, 0)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_savepoint, 0, 0, 2)
+	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_savepoint, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_release_savepoint, 0, 0, 2)
+	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_release_savepoint, 0, 0, 1)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_commit, 0, 0, 1)
 	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
 	ZEND_ARG_INFO(0, flags)
@@ -430,7 +448,9 @@ const zend_function_entry mysqli_functions[] = {
 #if defined(MYSQLI_USE_MYSQLND)
 	PHP_FE(mysqli_reap_async_query,						arginfo_mysqli_only_link)
 #endif
+	PHP_FE(mysqli_release_savepoint,					arginfo_mysqli_release_savepoint)
 	PHP_FE(mysqli_rollback,								arginfo_mysqli_rollback)
+	PHP_FE(mysqli_savepoint,							arginfo_mysqli_savepoint)
 	PHP_FE(mysqli_select_db,							arginfo_mysqli_select_db)
 #ifdef HAVE_MYSQLI_SET_CHARSET
 	PHP_FE(mysqli_set_charset,							arginfo_mysqli_set_charset)
@@ -528,7 +548,9 @@ const zend_function_entry mysqli_link_methods[] = {
 #endif
 	PHP_FALIAS(escape_string, mysqli_real_escape_string, arginfo_class_mysqli_real_escape_string)
 	PHP_FALIAS(real_query, mysqli_real_query, arginfo_class_mysqli_query)
+	PHP_FALIAS(release_savepoint, mysqli_release_savepoint, arginfo_class_mysqli_release_savepoint)
 	PHP_FALIAS(rollback, mysqli_rollback, arginfo_class_mysqli_rollback)
+	PHP_FALIAS(savepoint, mysqli_savepoint, arginfo_class_mysqli_savepoint)
 	PHP_FALIAS(select_db,mysqli_select_db, arginfo_class_mysqli_select_db)
 #ifdef HAVE_MYSQLI_SET_CHARSET
 	PHP_FALIAS(set_charset, mysqli_set_charset, arginfo_class_mysqli_set_charset)

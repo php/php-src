@@ -714,7 +714,7 @@ PHP_FUNCTION(mysqli_commit)
 #if !defined(MYSQLI_USE_MYSQLND)
 	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, TRUE, flags, name)) {
 #else
-	if (mysqlnd_commit(mysql->mysql, flags, name)) {
+	if (FAIL == mysqlnd_commit(mysql->mysql, flags, name)) {
 #endif
 		RETURN_FALSE;
 	}
@@ -1960,7 +1960,7 @@ PHP_FUNCTION(mysqli_rollback)
 #if !defined(MYSQLI_USE_MYSQLND)
 	if (mysqli_commit_or_rollback_libmysql(mysql->mysql, FALSE, flags, name)) {
 #else
-	if (mysqlnd_rollback(mysql->mysql, flags, name)) {
+	if (FAIL == mysqlnd_rollback(mysql->mysql, flags, name)) {
 #endif
 		RETURN_FALSE;
 	}
