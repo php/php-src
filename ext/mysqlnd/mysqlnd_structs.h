@@ -486,6 +486,8 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__tx_rollback)(MYSQLND_CONN_DAT
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_begin)(MYSQLND_CONN_DATA * conn, const unsigned int mode, const char * const name TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const unsigned int flags, const char * const name TSRMLS_DC);
 typedef void				(*func_mysqlnd_conn_data__tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * tmp_str, const unsigned int mode TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__tx_savepoint)(MYSQLND_CONN_DATA * conn, const char * const name TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__tx_savepoint_release)(MYSQLND_CONN_DATA * conn, const char * const name TSRMLS_DC);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__local_tx_start)(MYSQLND_CONN_DATA * conn, size_t this_func TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__local_tx_end)(MYSQLND_CONN_DATA * conn, size_t this_func, enum_func_status status TSRMLS_DC);
@@ -575,6 +577,8 @@ struct st_mysqlnd_conn_data_methods
 	func_mysqlnd_conn_data__tx_begin tx_begin;
 	func_mysqlnd_conn_data__tx_commit_or_rollback tx_commit_or_rollback;
 	func_mysqlnd_conn_data__tx_cor_options_to_string tx_cor_options_to_string;
+	func_mysqlnd_conn_data__tx_savepoint tx_savepoint;
+	func_mysqlnd_conn_data__tx_savepoint_release tx_savepoint_release;
 
 	func_mysqlnd_conn_data__local_tx_start local_tx_start;
 	func_mysqlnd_conn_data__local_tx_end local_tx_end;

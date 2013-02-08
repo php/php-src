@@ -2761,6 +2761,70 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsi
 /* }}} */
 
 
+/* {{{ mysqlnd_conn_data::tx_savepoint */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint)(MYSQLND_CONN_DATA * conn, const char * const name TSRMLS_DC)
+{
+	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, tx_savepoint);
+	enum_func_status ret = FAIL;
+	DBG_ENTER("mysqlnd_conn_data::tx_savepoint");
+
+	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
+		do {
+			char * query;
+			unsigned int query_len;
+			if (!name) {
+				SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Savepoint name not provided");
+				break;
+			}
+			query_len = mnd_sprintf(&query, 0, "SAVEPOINT `%s`", name);
+			if (!query) {
+				SET_OOM_ERROR(*conn->error_info);
+				break;
+			}
+			ret = conn->m->query(conn, query, query_len TSRMLS_CC);
+			mnd_sprintf_free(query);
+		} while (0);
+		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::tx_savepoint_release */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint_release)(MYSQLND_CONN_DATA * conn, const char * const name TSRMLS_DC)
+{
+	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, tx_savepoint_release);
+	enum_func_status ret = FAIL;
+	DBG_ENTER("mysqlnd_conn_data::tx_savepoint_release");
+
+	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
+		do {
+			char * query;
+			unsigned int query_len;
+			if (!name) {
+				SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Savepoint name not provided");
+				break;
+			}
+			query_len = mnd_sprintf(&query, 0, "RELEASE SAVEPOINT `%s`", name);
+			if (!query) {
+				SET_OOM_ERROR(*conn->error_info);
+				break;
+			}
+			ret = conn->m->query(conn, query, query_len TSRMLS_CC);
+			mnd_sprintf_free(query);
+		} while (0);
+		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
 /* {{{ mysqlnd_conn_data::local_tx_start */
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, local_tx_start)(MYSQLND_CONN_DATA * conn, size_t this_func TSRMLS_DC)
@@ -2878,6 +2942,8 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD(mysqlnd_conn_data, tx_begin),
 	MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback),
 	MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string),
+	MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint),
+	MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint_release),
 
 	MYSQLND_METHOD(mysqlnd_conn_data, local_tx_start),
 	MYSQLND_METHOD(mysqlnd_conn_data, local_tx_end),
