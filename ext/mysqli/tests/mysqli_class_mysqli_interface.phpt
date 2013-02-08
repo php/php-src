@@ -47,6 +47,8 @@ require_once('skipifconnectfailure.inc');
 		'real_query'			=> true,
 		'refresh'				=> true,
 		'rollback'				=> true,
+		'release_savepoint'		=> true,
+		'savepoint'				=> true,
 		'select_db'				=> true,
 		'set_charset'			=> true,
 		'set_opt'				=> true,

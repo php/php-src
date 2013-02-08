@@ -1112,10 +1112,79 @@ PHP_FUNCTION(mysqli_begin_transaction)
 		RETURN_FALSE;
 	}
 #else
-	if (mysqlnd_begin_transaction(mysql->mysql, flags, name)) {
+	if (FAIL == mysqlnd_begin_transaction(mysql->mysql, flags, name)) {
 		RETURN_FALSE;
 	}
 #endif
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+#if !defined(MYSQLI_USE_MYSQLND)
+/* {{{ proto bool mysqli_savepoint_libmysql */
+static int mysqli_savepoint_libmysql(MYSQL * conn, const char * const name, zend_bool release)
+{
+	int ret;
+	char * query;
+	unsigned int query_len = spprintf(&query, 0, release? "RELEASE SAVEPOINT `%s`":"SAVEPOINT `%s`", name);
+	ret = mysql_real_query(conn, query, query_len);
+	efree(query);
+	return ret;
+}
+/* }}} */
+#endif
+
+
+/* {{{ proto bool mysqli_savepoint(object link, string name)
+   Starts a transaction */
+PHP_FUNCTION(mysqli_savepoint)
+{
+	MY_MYSQL	*mysql;
+	zval		*mysql_link;
+	char *		name = NULL;
+	int			name_len = 0;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &name, &name_len) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
+
+#if !defined(MYSQLI_USE_MYSQLND)
+	if (mysqli_savepoint_libmysql(mysql->mysql, name, FALSE)) {
+#else
+	if (FAIL == mysqlnd_savepoint(mysql->mysql, name)) {
+#endif
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto bool mysqli_release_savepoint(object link, string name)
+   Starts a transaction */
+PHP_FUNCTION(mysqli_release_savepoint)
+{
+	MY_MYSQL	*mysql;
+	zval		*mysql_link;
+	char *		name = NULL;
+	int			name_len = 0;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &name, &name_len) == FAILURE) {
+		return;
+	}
+	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
+	if (!name || !name_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Savepoint name not provided");	
+	}
+#if !defined(MYSQLI_USE_MYSQLND)
+	if (mysqli_savepoint_libmysql(mysql->mysql, name, TRUE)) {
+#else
+	if (FAIL == mysqlnd_savepoint(mysql->mysql, name)) {
+#endif
+		RETURN_FALSE;
+	}
 	RETURN_TRUE;
 }
 /* }}} */
