@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2012, PHP 5.4.13
 
 - Core:
+  . Implemented FR #64175 (Added HTTP codes as of RFC 6585). (Jonh Wendell)
   . Fixed bug #64142 (dval to lval different behavior on ppc64). (Remi)
 
 - CLI server:
