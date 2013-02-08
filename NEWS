@@ -22,6 +22,17 @@ PHP                                                                        NEWS
   . Cherry-picked UConverter wrapper, which had accidentaly been committed only
     to master.
 
+- mysqli
+  . Add mysqli_begin_transaction()/mysqli::begin_transaction(). Implemented all
+    options, per MySQL 5.6, which can be used with START TRANSACTION, COMMIT
+	and ROLLBACK through options to mysqli_commit()/mysqli_rollback() and their
+	respective OO counterparts. They work in libmysql and mysqlnd mode. (Andrey)
+
+- mysqlnd
+  . Add new begin_transaction() call to the connection object. Implemented all
+    options, per MySQL 5.6, which can be used with START TRANSACTION, COMMIT
+	and ROLLBACK. (Andrey)
+
 - Sockets:
   . Added recvmsg() and sendmsg() wrappers. (Gustavo)
     See https://wiki.php.net/rfc/sendrecvmsg
