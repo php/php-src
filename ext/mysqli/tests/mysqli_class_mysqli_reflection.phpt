@@ -892,6 +892,29 @@ isPassedByReference: no
 isOptional: no
 isDefaultValueAvailable: no
 
+Inspecting method 'release_savepoint'
+isFinal: no
+isAbstract: no
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isConstructor: no
+isDestructor: no
+isInternal: yes
+isUserDefined: no
+returnsReference: no
+Modifiers: 256
+Number of Parameters: 1
+Number of Required Parameters: 1
+
+Inspecting parameter 'name' of method 'release_savepoint'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: no
+isDefaultValueAvailable: no
+
 Inspecting method 'rollback'
 isFinal: no
 isAbstract: no
@@ -920,6 +943,29 @@ isArray: no
 allowsNull: no
 isPassedByReference: no
 isOptional: yes
+isDefaultValueAvailable: no
+
+Inspecting method 'savepoint'
+isFinal: no
+isAbstract: no
+isPublic: yes
+isPrivate: no
+isProtected: no
+isStatic: no
+isConstructor: no
+isDestructor: no
+isInternal: yes
+isUserDefined: no
+returnsReference: no
+Modifiers: 256
+Number of Parameters: 1
+Number of Required Parameters: 1
+
+Inspecting parameter 'name' of method 'savepoint'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: no
 isDefaultValueAvailable: no
 
 Inspecting method 'select_db'
