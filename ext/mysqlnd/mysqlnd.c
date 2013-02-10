@@ -917,13 +917,21 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 		char * transport = NULL;
 		int transport_len;
 #ifndef PHP_WIN32
+		char * localhost_override = MYSQLND_G(localhost_override);
 		if (host_len == sizeof("localhost") - 1 && !strncasecmp(host, "localhost", host_len)) {
-			DBG_INF_FMT("socket=%s", socket_or_pipe? socket_or_pipe:"n/a");
-			if (!socket_or_pipe) {
-				socket_or_pipe = "/tmp/mysql.sock";
+			DBG_INF_FMT("localhost_override=%s", localhost_override ? localhost_override:"n/a");
+			if (localhost_override) {
+				transport_len = mnd_sprintf(&transport, 0, "%s", localhost_override);
+			} else {
+				if (!socket_or_pipe) {
+					DBG_INF_FMT("socket=%s", socket_or_pipe ? socket_or_pipe:"n/a");
+					socket_or_pipe = "/tmp/mysql.sock";
+				}
+				transport_len = mnd_sprintf(&transport, 0, "unix://%s", socket_or_pipe);
 			}
-			transport_len = mnd_sprintf(&transport, 0, "unix://%s", socket_or_pipe);
-			unix_socket = TRUE;
+			if (transport_len >= sizeof("unix://") && !strncasecmp(transport, "unix://", sizeof("unix://"))) {
+				unix_socket = TRUE;
+			}
 #else
 		if (host_len == sizeof(".") - 1 && host[0] == '.') {
 			/* named pipe in socket */
