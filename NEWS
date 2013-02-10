@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - CLI server:
   . Fixed bug #64128 (buit-in web server is broken on ppc64). (Remi)
 
+- Mbstring:
+  . mb_split() can now handle empty matches like preg_split() does. (Moriyoshi)
+
 ?? ??? 2012, PHP 5.4.12
 
 - Core:
