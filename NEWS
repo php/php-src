@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - Mbstring:
   . mb_split() can now handle empty matches like preg_split() does. (Moriyoshi)
 
+- SPL:
+  . Fixed bug #64106 (Segfault on SplFixedArray[][x] = y when extended). 
+    (Nikita Popov)
+
 ?? ??? 2012, PHP 5.4.12
 
 - Core:
