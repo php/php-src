@@ -1,5 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+14 Feb 2012, PHP 5.4.12 RC2
+
+- SOAP
+  . Added check that soap.wsdl_cache_dir conforms to open_basedir. (Dmitry)
+  . Disabled external entities loading. (Dmitry)
+
 31 Jan 2012, PHP 5.4.12 RC1
 
 - Core:
