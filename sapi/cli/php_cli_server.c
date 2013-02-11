@@ -103,6 +103,8 @@
 #include "php_http_parser.h"
 #include "php_cli_server.h"
 
+#include "php_cli_process_title.h"
+
 #define OUTPUT_NOT_CHECKED -1
 #define OUTPUT_IS_TTY 1
 #define OUTPUT_NOT_TTY 0
@@ -422,6 +424,12 @@ zend_module_entry cli_server_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
+
+const zend_function_entry server_additional_functions[] = {
+	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
+	PHP_FE(cli_get_process_title,        NULL)
+	{NULL, NULL, NULL}
+};
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 {
