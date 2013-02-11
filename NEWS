@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug #60833 (self, parent, static behave inconsistently 
     case-sensitive). (Stas, mario at include-once dot org)
   . Implemented FR #60524 (specify temp dir by php.ini). (ALeX Kazik).
+  . Fixed bug #64142 (dval to lval different behavior on ppc64). (Remi)
 
 - CLI server:
   . Fixed bug #64128 (buit-in web server is broken on ppc64). (Remi)
