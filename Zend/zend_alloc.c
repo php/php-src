@@ -667,12 +667,12 @@ static inline unsigned int zend_mm_high_bit(size_t _size)
 #if defined(__GNUC__) && (defined(__native_client__) || defined(i386))
 	unsigned int n;
 
-	__asm__("bsrl %1,%0\n\t" : "=r" (n) : "rm"  (_size));
+	__asm__("bsrl %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
 	return n;
 #elif defined(__GNUC__) && defined(__x86_64__)
 	unsigned long n;
 
-        __asm__("bsrq %1,%0\n\t" : "=r" (n) : "rm"  (_size));
+        __asm__("bsrq %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
         return (unsigned int)n;
 #elif defined(_MSC_VER) && defined(_M_IX86)
 	__asm {
@@ -693,17 +693,17 @@ static inline unsigned int zend_mm_low_bit(size_t _size)
 #if defined(__GNUC__) && (defined(__native_client__) || defined(i386))
 	unsigned int n;
 
-	__asm__("bsfl %1,%0\n\t" : "=r" (n) : "rm"  (_size));
+	__asm__("bsfl %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
 	return n;
 #elif defined(__GNUC__) && defined(__x86_64__)
         unsigned long n;
 
-        __asm__("bsfq %1,%0\n\t" : "=r" (n) : "rm"  (_size));
+        __asm__("bsfq %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
         return (unsigned int)n;
 #elif defined(_MSC_VER) && defined(_M_IX86)
 	__asm {
 		bsf eax, _size
-   }
+	}
 #else
 	static const int offset[16] = {4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0};
 	unsigned int n;
