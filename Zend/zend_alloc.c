@@ -667,17 +667,19 @@ static inline unsigned int zend_mm_high_bit(size_t _size)
 #if defined(__GNUC__) && (defined(__native_client__) || defined(i386))
 	unsigned int n;
 
-	__asm__("bsrl %1,%0\n\t" : "=r" (n) : "rm"  (_size));
+	__asm__("bsrl %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
 	return n;
 #elif defined(__GNUC__) && defined(__x86_64__)
 	unsigned long n;
 
-        __asm__("bsrq %1,%0\n\t" : "=r" (n) : "rm"  (_size));
+        __asm__("bsrq %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
         return (unsigned int)n;
 #elif defined(_MSC_VER) && defined(_M_IX86)
 	__asm {
 		bsr eax, _size
 	}
+#elif defined(__GNUC__) && (defined(__arm__) ||  defined(__aarch64__))
+	return (8 * SIZEOF_SIZE_T - 1) - __builtin_clzl(_size);
 #else
 	unsigned int n = 0;
 	while (_size != 0) {
@@ -693,17 +695,19 @@ static inline unsigned int zend_mm_low_bit(size_t _size)
 #if defined(__GNUC__) && (defined(__native_client__) || defined(i386))
 	unsigned int n;
 
-	__asm__("bsfl %1,%0\n\t" : "=r" (n) : "rm"  (_size));
+	__asm__("bsfl %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
 	return n;
 #elif defined(__GNUC__) && defined(__x86_64__)
         unsigned long n;
 
-        __asm__("bsfq %1,%0\n\t" : "=r" (n) : "rm"  (_size));
+        __asm__("bsfq %1,%0\n\t" : "=r" (n) : "rm"  (_size) : "cc");
         return (unsigned int)n;
 #elif defined(_MSC_VER) && defined(_M_IX86)
 	__asm {
 		bsf eax, _size
-   }
+	}
+#elif defined(__GNUC__) && (defined(__arm__) || defined(__aarch64__))
+	return __builtin_ctzl(_size);
 #else
 	static const int offset[16] = {4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0};
 	unsigned int n;
@@ -2501,11 +2505,12 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
         size_t res;
         unsigned long overflow;
 
-        __asm__ ("umull %0,%1,%2,%3\n\tadds %0,%4\n\tadc %1,%1"
-             : "=&r"(res), "=&r"(overflow)
+        __asm__ ("umlal %0,%1,%2,%3"
+             : "=r"(res), "=r"(overflow)
              : "r"(nmemb),
                "r"(size),
-               "r"(offset));
+               "0"(offset),
+               "1"(0));
 
         if (UNEXPECTED(overflow)) {
                 zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
