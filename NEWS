@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     case-sensitive). (Stas, mario at include-once dot org)
   . Implemented FR #60524 (specify temp dir by php.ini). (ALeX Kazik).
   . Fixed bug #64142 (dval to lval different behavior on ppc64). (Remi)
+  . Added ARMv7/v8 versions of various Zend arithmetic functions that are
+    implemented using inline assembler (Ard Biesheuvel)
 
 - CLI server:
   . Fixed bug #64128 (buit-in web server is broken on ppc64). (Remi)
