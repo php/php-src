@@ -101,12 +101,12 @@ PHPAPI char * mysqlnd_get_backtrace(uint max_levels, size_t * length TSRMLS_DC);
 #define DBG_INF_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE && (dbg_obj)) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "info : ", __VA_ARGS__); } while (0)
 #define DBG_ERR_FMT_EX(dbg_obj, ...)	do { if (dbg_skip_trace == FALSE && (dbg_obj)) (dbg_obj)->m->log_va((dbg_obj), __LINE__, __FILE__, -1, "error: ", __VA_ARGS__); } while (0)
 
-#define DBG_BLOCK_ENTER_EX(dbg_obj, block_name) DBG_BLOCK_ENTER_EX2((dbg_obj), NULL, (block_name))
-#define DBG_BLOCK_LEAVE_EX(dbg_obj)				DBG_BLOCK_LEAVE_EX2((dbg_obj))
+#define DBG_BLOCK_ENTER_EX(dbg_obj, block_name) DBG_BLOCK_ENTER_EX2((dbg_obj), (MYSQLND_DEBUG *) NULL, (block_name))
+#define DBG_BLOCK_LEAVE_EX(dbg_obj)				DBG_BLOCK_LEAVE_EX2((dbg_obj), (MYSQLND_DEBUG *) NULL)
 
 #define DBG_BLOCK_ENTER_EX2(dbg_obj1, dbg_obj2, block_name) \
 		{ \
-			DBG_ENTER_EX2((dbg_obj1), (db_obj2), (block_name));
+			DBG_ENTER_EX2((dbg_obj1), (dbg_obj2), (block_name));
 
 #define DBG_BLOCK_LEAVE_EX2(dbg_obj1, dbg_obj2) \
 			DBG_LEAVE_EX2((dbg_obj1), (dbg_obj2), ;) \
