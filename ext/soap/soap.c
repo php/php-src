@@ -481,7 +481,7 @@ ZEND_INI_MH(OnUpdateCacheMode)
 
 static PHP_INI_MH(OnUpdateCacheDir)
 {
-	/* Only do the safemode/open_basedir check at runtime */
+	/* Only do the open_basedir check at runtime */
 	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
 		char *p;
 
@@ -498,10 +498,6 @@ static PHP_INI_MH(OnUpdateCacheDir)
 			}
 		} else {
 			p = new_value;
-		}
-
-		if (PG(safe_mode) && *p && (!php_checkuid(p, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			return FAILURE;
 		}
 
 		if (PG(open_basedir) && *p && php_check_open_basedir(p TSRMLS_CC)) {
