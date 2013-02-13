@@ -4,7 +4,7 @@ The Zend Optimizer+
 The Zend Optimizer+ provides faster PHP execution through opcode caching and
 optimization. It improves PHP performance by storing precompiled script
 bytecode in the shared memory. This eliminates the stages of reading code from
-the disk and compiling it on future access. In addition it applies a few
+the disk and compiling it on future access. In addition, it applies a few
 bytecode optimization patterns that make code execution faster.
 
 Compatibility
@@ -35,10 +35,10 @@ zend_extension=/...full path.../ZendOptimizerPlus.so
 
 - Restart PHP
 
-Speed Tunning
+Speed Tuning
 -------------
 
-We reccomend the following configuration options for best performance.
+We recommend the following configuration options for best performance.
 
 zend_optimizerplus.memory_consumption=128
 zend_optimizerplus.interned_strings_buffer=8
@@ -73,19 +73,19 @@ zend_optimizerplus.max_accelerated_files (default "2000")
 	are allowed.
 
 zend_optimizerplus.max_wasted_percentage (default "5")
-	The maximum percentage of "wasted" memory until a restart is scheduled
+	The maximum percentage of "wasted" memory until a restart is scheduled.
 
 zend_optimizerplus.use_cwd (default "1")
 	When this directive is enabled, the Optimizer+ appends the current working
-	directory to the script key, thus elminating possible collisions between
-	files with the same name (basename). Disablingthe directive improves
+	directory to the script key, thus eliminating possible collisions between
+	files with the same name (basename). Disabling the directive improves
 	performance, but may break existing applications.
 
 zend_optimizerplus.validate_timestamps (default "1")
 	When disabled, you must reset the Optimizer+ manually or restart the
 	webserver for changes to the filesystem to take effect.
-	The frequancy of the check is controlled by the directive
-	"zend_optimizerplus.revalidate_freq"
+	The frequency of the check is controlled by the directive
+	"zend_optimizerplus.revalidate_freq".
 
 zend_optimizerplus.revalidate_freq (default "2")
 	How often (in seconds) to check file timestamps for changes to the shared
@@ -110,7 +110,7 @@ zend_optimizerplus.fast_shutdown (default "0")
 	the Zend Engine Memory Manager do the work.
 
 zend_optimizerplus.enable_file_override (default "0")
-	Allow file existance override (file_exists, etc.) performance feature
+	Allow file existence override (file_exists, etc.) performance feature.
 
 zend_optimizerplus.optimization_level (default "0xffffffff")
 	A bitmask, where each bit enables or disables the appropriate Optimizer+
@@ -130,10 +130,10 @@ zend_optimizerplus.inherited_hack (default "1")
 	anymore and this setting has no effect.
 
 zend_optimizerplus.dups_fix (default "0")
-	Enable this hack as a workaround for "duplicate definition" errors
+	Enable this hack as a workaround for "duplicate definition" errors.
 
 zend_optimizerplus.blacklist_filename
-	The location of the Optimizer+ blacklist file
+	The location of the Optimizer+ blacklist file.
 	The Optimizer+ blacklist file is a text file that holds the names of files
 	that should not be accelerated. The file format is to add each filename
 	to a new line. The filename may be a full path or just a file prefix
@@ -162,10 +162,10 @@ zend_optimizerplus.force_restart_timeout (default "180")
 	in the Apache logs when this happens.
 
 zend_optimizerplus.error_log
-	Optimizer+ error_log file name. Empty string assumes "stderr"
+	Optimizer+ error_log file name. Empty string assumes "stderr".
 
 zend_optimizerplus.log_verbosity_level (default "1")
-	Alll Optimizer+ errors go to the Web server log.
+	All Optimizer+ errors go to the Web server log.
 	By default, only fatal errors (level 0) or errors (level 1) are logged.
 	You can also enable warnings (level 2), info messages (level 3) or
-	debug messesges (level 4).
+	debug messages (level 4).
