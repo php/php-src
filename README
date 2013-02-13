@@ -31,7 +31,7 @@ cp .libs/ZendOptimizerPlus.so $PHP_DIR/lib/ZendOptimizerPlus.so
 
 - Edit php.ini
 
-zend_extensin=/...full path.../ZendOptimizerPlus.so
+zend_extension=/...full path.../ZendOptimizerPlus.so
 
 - Restart PHP
 
