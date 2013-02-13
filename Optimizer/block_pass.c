@@ -228,7 +228,7 @@ static zend_code_block *find_code_blocks(zend_op_array *op_array)
 	cur_block->next = &blocks[op_array->last+1];
 	print_block(cur_block, op_array->opcodes, "");
 
-	/* The op_array desn't have BRK, CONT, GOTO opcodes anyway */
+	/* The op_array doesn't have BRK, CONT, GOTO opcodes anyway */
 	if(op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
 	}
