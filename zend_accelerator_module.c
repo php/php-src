@@ -291,6 +291,10 @@ static void accel_file_in_cache(int type, INTERNAL_FUNCTION_PARAMETERS)
 	convert_to_string_ex(zfilename);
 	filename = Z_STRVAL_PP(zfilename);
 	filename_len = Z_STRLEN_PP(zfilename);
+#elif ZEND_EXTENSION_API_NO == PHP_5_3_X_API_NO
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+		return;
+	}
 #else
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
 		return;
