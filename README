@@ -67,7 +67,7 @@ zend_optimizerplus.interned_strings_buffer (default "4")
 
 zend_optimizerplus.max_accelerated_files (default "2000")
 	The maximum number of keys (scripts) in the Optimizer+ hash table.
-	The number is actually the the first one in the following set of prime
+	The number is actually the first one in the following set of prime
 	numbers that is bigger than the one supplied: { 223, 463, 983, 1979, 3907,
 	7963, 16229, 32531, 65407, 130987 }. Only numbers between 200 and 100000
 	are allowed.
