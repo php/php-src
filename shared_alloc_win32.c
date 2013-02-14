@@ -40,7 +40,6 @@ static void *mapping_base;
 static void zend_win_error_message(int type, char *msg, int err)
 {
 	LPVOID lpMsgBuf;
-	FILE *fp;
 	HANDLE h;
 	char *ev_msgs[2];
 
