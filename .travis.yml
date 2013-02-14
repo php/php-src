@@ -1,0 +1,14 @@
+language: php
+php:
+  - 5.2
+  - 5.3
+  - 5.4
+  - 5.5
+
+before_script:
+  - phpize
+  - ./configure --enable-optimizer-plus
+  - make
+
+script:
+  - php -d zend_extension=`pwd`/modules/ZendOptimizerPlus.so -m | grep "Zend Optimizer+"
