@@ -180,3 +180,9 @@ zend_optimizerplus.log_verbosity_level (default "1")
 	By default, only fatal errors (level 0) or errors (level 1) are logged.
 	You can also enable warnings (level 2), info messages (level 3) or
 	debug messages (level 4).
+
+zend_optimizerplus.preferred_memory_model
+	(default "")
+
+zend_optimizerplus.protect_memory
+	(default 0)
