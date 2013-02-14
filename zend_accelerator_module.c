@@ -470,7 +470,7 @@ static ZEND_FUNCTION(accelerator_get_status)
 	array_init(return_value);
 
 	/* Trivia */
-	add_assoc_long(return_value, "accelerator_enabled", ZCG(startup_ok) && ZCSG(accelerator_enabled));
+	add_assoc_bool(return_value, "accelerator_enabled", 1);
 	add_assoc_bool(return_value, "cache_full", ZSMMG(memory_exhausted));
 
 	/* Memory usage statistics */
