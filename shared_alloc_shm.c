@@ -19,6 +19,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend_shared_alloc.h"
+
+#ifdef USE_SHM
+
 #if defined(__FreeBSD__)
 # include <machine/param.h>
 #endif
@@ -34,8 +38,6 @@
 
 #include <sys/stat.h>
 #include <fcntl.h>
-
-#include "zend_shared_alloc.h"
 
 #ifndef MIN
 # define MIN(x, y) ((x) > (y)? (y) : (x))
@@ -135,3 +137,5 @@ zend_shared_memory_handlers zend_alloc_shm_handlers = {
 	(detach_segment_t)detach_segment,
 	segment_type_size
 };
+
+#endif /* USE_SHM */

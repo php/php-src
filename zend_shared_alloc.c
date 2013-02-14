@@ -58,13 +58,13 @@ static char lockfile_name[sizeof(TMP_DIR)+sizeof(SEM_FILENAME_PREFIX)+8];
 #endif
 
 static const zend_shared_memory_handler_entry handler_table[] = {
-#if USE_MMAP
+#ifdef USE_MMAP
 	{ "mmap", &zend_alloc_mmap_handlers },
 #endif
-#if USE_SHM
+#ifdef USE_SHM
 	{ "shm", &zend_alloc_shm_handlers },
 #endif
-#if USE_SHM_OPEN
+#ifdef USE_SHM_OPEN
 	{ "posix", &zend_alloc_posix_handlers },
 #endif
 #ifdef ZEND_WIN32

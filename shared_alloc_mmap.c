@@ -19,13 +19,15 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend_shared_alloc.h"
+
+#ifdef USE_MMAP
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
-
-#include "zend_shared_alloc.h"
 
 #if defined(MAP_ANON) && !defined(MAP_ANONYMOUS)
 # define MAP_ANONYMOUS MAP_ANON
@@ -68,3 +70,5 @@ zend_shared_memory_handlers zend_alloc_mmap_handlers = {
 	detach_segment,
 	segment_type_size
 };
+
+#endif /* USE_MMAP */

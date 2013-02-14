@@ -23,22 +23,43 @@
 #define ZEND_SHARED_ALLOC_H
 
 #include "zend.h"
+#include "ZendAccelerator.h"
 
 #if defined(__APPLE__) && defined(__MACH__) /* darwin */
-# define USE_SHM_OPEN   1
-# define USE_MMAP       1
-#elif defined(__linux__) || defined(_AIX)
-# define USE_SHM        1
-# define USE_MMAP       1
-#elif defined(__FreeBSD__)
-# define USE_SHM_OPEN   1
-# define USE_MMAP       1
-# define USE_SHM        1
-#elif defined(__sparc) || defined(__sun)
-# define USE_SHM_OPEN   1
-# define USE_SHM        1
-# if defined(__i386)
+# ifdef HAVE_SHM_MMAP_POSIX
+#  define USE_SHM_OPEN  1
+# endif
+# ifdef HAVE_SHM_MMAP_ANON
 #  define USE_MMAP      1
+# endif
+#elif defined(__linux__) || defined(_AIX)
+# ifdef HAVE_SHM_IPC
+#  define USE_SHM       1
+# endif
+# ifdef HAVE_SHM_MMAP_ANON
+#  define USE_MMAP      1
+# endif
+#elif defined(__sparc) || defined(__sun)
+# ifdef HAVE_SHM_MMAP_POSIX
+#  define USE_SHM_OPEN  1
+# endif
+# ifdef HAVE_SHM_IPC
+#  define USE_SHM       1
+# endif
+# if defined(__i386)
+#  ifdef HAVE_SHM_MMAP_ANON
+#   define USE_MMAP     1
+#  endif
+# endif
+#else
+# ifdef HAVE_SHM_MMAP_POSIX
+#  define USE_SHM_OPEN  1
+# endif
+# ifdef HAVE_SHM_MMAP_ANON
+#  define USE_MMAP      1
+# endif
+# ifdef HAVE_SHM_IPC
+#  define USE_SHM       1
 # endif
 #endif
 

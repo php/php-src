@@ -19,6 +19,10 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend_shared_alloc.h"
+
+#ifdef USE_SHM_OPEN
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -26,8 +30,6 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <stdlib.h>
-
-#include "zend_shared_alloc.h"
 
 typedef struct  {
     zend_shared_segment common;
@@ -88,3 +90,5 @@ zend_shared_memory_handlers zend_alloc_posix_handlers = {
 	(detach_segment_t)detach_segment,
 	segment_type_size
 };
+
+#endif /* USE_SHM_OPEN */
