@@ -2,27 +2,27 @@ ARG_ENABLE("optimizer-plus", "whether to enable Zend OptimizerPlus support", "ye
 
 if (PHP_OPTIMIZER_PLUS != "no") {
 
-  PHP_PGI = "no"; // workaround
-  PHP_PGO = "no"; // workaround
+	PHP_PGI = "no"; // workaround
+	PHP_PGO = "no"; // workaround
 
-  EXTENSION('ZendOptimizerPlus', "\
-    ZendAccelerator.c \
-	zend_accelerator_blacklist.c \
-	zend_accelerator_debug.c \
-	zend_accelerator_hash.c \
-	zend_accelerator_module.c \
-	zend_accelerator_util_funcs.c \
-	zend_persist.c \
-	zend_persist_calc.c \
-	zend_shared_alloc.c \
-	shared_alloc_win32.c", true);
+	EXTENSION('ZendOptimizerPlus', "\
+		ZendAccelerator.c \
+		zend_accelerator_blacklist.c \
+		zend_accelerator_debug.c \
+		zend_accelerator_hash.c \
+		zend_accelerator_module.c \
+		zend_accelerator_util_funcs.c \
+		zend_persist.c \
+		zend_persist_calc.c \
+		zend_shared_alloc.c \
+		shared_alloc_win32.c", true);
 
-  ADD_SOURCES("Optimizer", "zend_optimizer.c", "ZendOptimizerPlus", "OptimizerObj");
+	ADD_SOURCES(configure_module_dirname + "/Optimizer", "zend_optimizer.c", "ZendOptimizerPlus", "OptimizerObj");
 
   
-  ADD_FLAG('CFLAGS_ZENDOPTIMIZERPLUS', "/I .");
-  ADD_FLAG('CFLAGS_ZENDOPTIMIZERPLUS', "/D HAVE_OPTIMIZER_PLUS=1");
+	ADD_FLAG('CFLAGS_ZENDOPTIMIZERPLUS', "/I " + configure_module_dirname);
+	ADD_FLAG('CFLAGS_ZENDOPTIMIZERPLUS', "/D HAVE_OPTIMIZER_PLUS=1");
 
-  ADD_FLAG('CFLAGS_ZENDOPTIMIZERPLUS', "/Dregexec=php_regexec /Dregerror=php_regerror /Dregfree=php_regfree /Dregcomp=php_regcomp /Iext/ereg/regex");
+	ADD_FLAG('CFLAGS_ZENDOPTIMIZERPLUS', "/Dregexec=php_regexec /Dregerror=php_regerror /Dregfree=php_regfree /Dregcomp=php_regcomp /Iext/ereg/regex");
 
 }
