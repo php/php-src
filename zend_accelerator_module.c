@@ -373,7 +373,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	} else {
 		php_info_print_table_row(2, "Opcode Caching", "Disabled");
 	}
-	if (ZCG(enabled) && ZCG(accel_directives).optimization_level) {
+	if (ZCG(enabled) && ZCG(startup_ok) && ZCSG(accelerator_enabled) && ZCG(accel_directives).optimization_level) {
 		php_info_print_table_row(2, "Optimization", "Enabled");
 	} else {
 		php_info_print_table_row(2, "Optimization", "Disabled");

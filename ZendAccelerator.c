@@ -2255,7 +2255,12 @@ static int accel_startup(zend_extension *extension)
 	/* no supported SAPI found - disable acceleration and stop initalization */
 	if( accel_find_sapi(TSRMLS_C) == FAILURE ){
 		ZCG(startup_ok) = 0;
-		zps_startup_failure("Opcode Caching is only supported in Apache, ISAPI and FastCGI SAPIs", NULL, accelerator_remove_cb TSRMLS_CC);
+		if (!ZCG(accel_directives).enable_cli &&
+		    strcmp(sapi_module.name, "cli")==0) {
+			zps_startup_failure("Opcode Caching is disabled for CLI", NULL, accelerator_remove_cb TSRMLS_CC);
+		} else {
+			zps_startup_failure("Opcode Caching is only supported in Apache, ISAPI, FPM and FastCGI SAPIs", NULL, accelerator_remove_cb TSRMLS_CC);
+		}
 		return SUCCESS;
 	}
 
