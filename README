@@ -18,6 +18,7 @@ Quick Install
 
 - Compile
 
+phpize
 export PHP_DIR=/usr/local/php5.5
 PHP_AUTOCONF=autoconf $PHP_DIR/bin/phpize
 ./configure \
