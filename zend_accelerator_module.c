@@ -525,6 +525,7 @@ static ZEND_FUNCTION(accelerator_get_configuration)
 	MAKE_STD_ZVAL(directives);
 	array_init(directives);
 	add_assoc_bool(directives, "zend_optimizerplus.enable",              ZCG(enabled));
+	add_assoc_bool(directives, "zend_optimizerplus.enable_cli",          ZCG(accel_directives).enable_cli);
 	add_assoc_bool(directives, "zend_optimizerplus.use_cwd",             ZCG(accel_directives).use_cwd);
 	add_assoc_bool(directives, "zend_optimizerplus.validate_timestamps", ZCG(accel_directives).validate_timestamps);
 	add_assoc_bool(directives, "zend_optimizerplus.inherited_hack",      ZCG(accel_directives).inherited_hack);
@@ -533,6 +534,7 @@ static ZEND_FUNCTION(accelerator_get_configuration)
 
 	add_assoc_long(directives,   "zend_optimizerplus.log_verbosity_level",    ZCG(accel_directives).log_verbosity_level);
 	add_assoc_long(directives,	 "zend_optimizerplus.memory_consumption",     ZCG(accel_directives).memory_consumption);
+	add_assoc_long(directives,	 "zend_optimizerplus.interned_strings_buffer",ZCG(accel_directives).interned_strings_buffer);
 	add_assoc_long(directives, 	 "zend_optimizerplus.max_accelerated_files",  ZCG(accel_directives).max_accelerated_files);
 	add_assoc_double(directives, "zend_optimizerplus.max_wasted_percentage",  ZCG(accel_directives).max_wasted_percentage);
 	add_assoc_long(directives, 	 "zend_optimizerplus.consistency_checks",     ZCG(accel_directives).consistency_checks);
@@ -540,11 +542,13 @@ static ZEND_FUNCTION(accelerator_get_configuration)
 	add_assoc_long(directives, 	 "zend_optimizerplus.revalidate_freq",        ZCG(accel_directives).revalidate_freq);
 	add_assoc_string(directives, "zend_optimizerplus.preferred_memory_model", STRING_NOT_NULL(ZCG(accel_directives).memory_model), 1);
 	add_assoc_string(directives, "zend_optimizerplus.blacklist_filename",     STRING_NOT_NULL(ZCG(accel_directives).user_blacklist_filename), 1);
+	add_assoc_string(directives, "zend_optimizerplus.error_log",              STRING_NOT_NULL(ZCG(accel_directives).error_log), 1);
 
 	add_assoc_bool(directives,   "zend_optimizerplus.protect_memory",         ZCG(accel_directives).protect_memory);
 	add_assoc_bool(directives,   "zend_optimizerplus.save_comments",          ZCG(accel_directives).save_comments);
+	add_assoc_bool(directives,   "zend_optimizerplus.load_comments",          ZCG(accel_directives).save_comments);
 	add_assoc_bool(directives,   "zend_optimizerplus.fast_shutdown",          ZCG(accel_directives).fast_shutdown);
-
+	add_assoc_bool(directives,   "zend_optimizerplus.enable_file_override",   ZCG(accel_directives).file_override_enabled);
 	add_assoc_long(directives, 	 "zend_optimizerplus.optimization_level",         ZCG(accel_directives).optimization_level);
 
 	add_assoc_zval(return_value,"directives",directives);
