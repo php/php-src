@@ -45,6 +45,9 @@ PHP                                                                        NEWS
 - Filter:
   . Implemented FR #49180 - added MAC address validation. (Martin)
 
+- SNMP:
+  . Fixed bug #64124 (IPv6 malformed). (Boris Lytochkin)
+
 24 Jan 2013, PHP 5.5.0 Alpha 4
 
 - Core:
