@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #64106 (Segfault on SplFixedArray[][x] = y when extended). 
     (Nikita Popov)
 
+- SNMP:
+  . Fixed bug #64124 (IPv6 malformed). (Boris Lytochkin)
+
 ?? ??? 2012, PHP 5.4.12
 
 - Core:
