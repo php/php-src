@@ -520,7 +520,11 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		/* Copy constructor */
 		prop_info->name = interned_estrndup(prop_info->name, prop_info->name_length);
 		if(prop_info->doc_comment) {
-			prop_info->doc_comment = estrndup(prop_info->doc_comment, prop_info->doc_comment_len);
+			if (ZCG(accel_directives).load_comments) {
+				prop_info->doc_comment = estrndup(prop_info->doc_comment, prop_info->doc_comment_len);
+			} else {
+				prop_info->doc_comment = NULL;
+			}
 		}
 		if(prop_info->ce == old_ce) {
 			prop_info->ce = ce;
@@ -637,7 +641,11 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		ce->interfaces = NULL;
 	}
 	if (ZEND_CE_DOC_COMMENT(ce)) {
-		ZEND_CE_DOC_COMMENT(ce) = estrndup(ZEND_CE_DOC_COMMENT(ce), ZEND_CE_DOC_COMMENT_LEN(ce));
+		if (ZCG(accel_directives).load_comments) {
+			ZEND_CE_DOC_COMMENT(ce) = estrndup(ZEND_CE_DOC_COMMENT(ce), ZEND_CE_DOC_COMMENT_LEN(ce));
+		} else {
+			ZEND_CE_DOC_COMMENT(ce) =  NULL;
+		}
 	}
 
 	if(ce->parent) {

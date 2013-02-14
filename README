@@ -44,10 +44,15 @@ zend_optimizerplus.memory_consumption=128
 zend_optimizerplus.interned_strings_buffer=8
 zend_optimizerplus.max_accelerated_files=4000
 zend_optimizerplus.revalidate_freq=60
-zend_optimizerplus.save_comments=0
 zend_optimizerplus.fast_shutdown=1
-zend_optimizerplus.enable_file_override=1
 zend_optimizerplus.enable_cli=1
+
+You also may add the following, but it may break some applications and
+frameworks. Please, read description of these directives and add them on your
+own risk.
+
+zend_optimizerplus.save_comments=0
+zend_optimizerplus.enable_file_override=1
 
 In some cases you may like to prefer enabling/disabling some features
 to avoid incompatibilities at the cost of some performance degradation.
@@ -102,7 +107,13 @@ zend_optimizerplus.revalidate_path (default "0")
 
 zend_optimizerplus.save_comments (default "1")
 	If disabled, all PHPDoc comments are dropped from the code to reduce the
-	size of the optimized code.
+	size of the optimized code. Disabling "Doc Comments" may break some
+	existing applications and frameworks (e.g. Doctrine, ZF2, PHPUnit)
+
+zend_optimizerplus.load_comments (default "1")
+	If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"
+	may be always stored (save_comments=1), but not loaded by applications
+	that don't need them anyway.
 
 zend_optimizerplus.fast_shutdown (default "0")
 	If enabled, a fast shutdown sequence is used for the accelerated code

@@ -221,6 +221,7 @@ ZEND_INI_BEGIN()
 
 	STD_PHP_INI_ENTRY("zend_optimizerplus.protect_memory"        , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.protect_memory,            zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("zend_optimizerplus.save_comments"         , "1"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.save_comments,             zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("zend_optimizerplus.load_comments"         , "1"  , PHP_INI_ALL,    OnUpdateBool,                  accel_directives.load_comments,             zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("zend_optimizerplus.fast_shutdown"         , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.fast_shutdown,             zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_ENTRY("zend_optimizerplus.optimization_level"    , DEFAULT_OPTIMIZATION_LEVEL , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.optimization_level,   zend_accel_globals, accel_globals)
