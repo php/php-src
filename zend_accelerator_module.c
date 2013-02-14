@@ -534,7 +534,9 @@ static ZEND_FUNCTION(accelerator_get_configuration)
 
 	add_assoc_long(directives,   "zend_optimizerplus.log_verbosity_level",    ZCG(accel_directives).log_verbosity_level);
 	add_assoc_long(directives,	 "zend_optimizerplus.memory_consumption",     ZCG(accel_directives).memory_consumption);
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	add_assoc_long(directives,	 "zend_optimizerplus.interned_strings_buffer",ZCG(accel_directives).interned_strings_buffer);
+#endif
 	add_assoc_long(directives, 	 "zend_optimizerplus.max_accelerated_files",  ZCG(accel_directives).max_accelerated_files);
 	add_assoc_double(directives, "zend_optimizerplus.max_wasted_percentage",  ZCG(accel_directives).max_wasted_percentage);
 	add_assoc_long(directives, 	 "zend_optimizerplus.consistency_checks",     ZCG(accel_directives).consistency_checks);
