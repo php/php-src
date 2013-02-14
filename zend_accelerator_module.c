@@ -546,6 +546,7 @@ static ZEND_FUNCTION(accelerator_get_configuration)
 
 	add_assoc_bool(directives,   "zend_optimizerplus.protect_memory",         ZCG(accel_directives).protect_memory);
 	add_assoc_bool(directives,   "zend_optimizerplus.save_comments",          ZCG(accel_directives).save_comments);
+	add_assoc_bool(directives,   "zend_optimizerplus.load_comments",          ZCG(accel_directives).save_comments);
 	add_assoc_bool(directives,   "zend_optimizerplus.fast_shutdown",          ZCG(accel_directives).fast_shutdown);
 	add_assoc_bool(directives,   "zend_optimizerplus.enable_file_override",   ZCG(accel_directives).file_override_enabled);
 	add_assoc_long(directives, 	 "zend_optimizerplus.optimization_level",         ZCG(accel_directives).optimization_level);
