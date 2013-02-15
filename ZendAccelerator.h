@@ -240,7 +240,6 @@ typedef struct _zend_accel_globals {
 	int                     include_path_len; /* "include_path" string lenght */
 	int                     include_path_check;
 	time_t                  request_time;
-	zend_bool               startup_ok;
 	/* preallocated shared-memory block to save current script */
 	void                   *mem;
 	/* cache to save hash lookup on the same INCLUDE opcode */
@@ -285,6 +284,8 @@ typedef struct _zend_accel_shared_globals {
 	} interned_strings_saved_state;
 #endif
 } zend_accel_shared_globals;
+
+extern zend_bool accel_startup_ok;
 
 extern zend_accel_shared_globals *accel_shared_globals;
 #define ZCSG(element)   (accel_shared_globals->element)
