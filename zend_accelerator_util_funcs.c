@@ -166,7 +166,7 @@ static void zend_destroy_property_info(zend_property_info *property_info)
 
 static inline zval* zend_clone_zval(zval *src, int bind TSRMLS_DC)
 {
-	zval *ret, **ret_ptr;
+	zval *ret, **ret_ptr = NULL;
 
 	if (!bind) {
 		ALLOC_ZVAL(ret);
