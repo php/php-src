@@ -34,7 +34,7 @@ cp .libs/ZendOptimizerPlus.so $PHP_DIR/lib/ZendOptimizerPlus.so
 zend_extension=/...full path.../ZendOptimizerPlus.so
 
 NOTE: In case you are going to use Zend Optimizer+ together with Xdebug,
-be sure that Xdebug is loaded afer Optimizer+. "php -v" must show Xdebug
+be sure that Xdebug is loaded after Optimizer+. "php -v" must show Xdebug
 after Optimizer+.
 
 - Restart PHP
