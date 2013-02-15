@@ -43,7 +43,6 @@
 #define S_H(s) g_shared_alloc_handler->s
 
 /* True globals */
-static zend_bool locked;
 /* old/new mapping. We can use true global even for ZTS because its usage
    is wrapped with exclusive lock anyway */
 static HashTable xlat_table;
@@ -214,7 +213,7 @@ int zend_shared_alloc_startup(int requested_size)
 	shared_segments_array_size = ZSMMG(shared_segments_count)*S_H(segment_type_size)();
 
 	/* move shared_segments and shared_free to shared memory */
-	locked = 1; /* no need to perform a real lock at this point */
+	ZCG(locked) = 1; /* no need to perform a real lock at this point */
 	p_tmp_shared_globals = (zend_smm_shared_globals *) zend_shared_alloc(sizeof(zend_smm_shared_globals));
 
 	tmp_shared_segments = zend_shared_alloc(shared_segments_array_size+ZSMMG(shared_segments_count)*sizeof(void *));
@@ -227,7 +226,7 @@ int zend_shared_alloc_startup(int requested_size)
 	ZSMMG(shared_segments) = tmp_shared_segments;
 
 	ZSMMG(shared_memory_state).positions = (int *) zend_shared_alloc(sizeof(int)*ZSMMG(shared_segments_count));
-	locked = 0;
+	ZCG(locked) = 0;
 
 	return res;
 }
@@ -255,7 +254,6 @@ void zend_shared_alloc_shutdown(void)
 #ifndef ZEND_WIN32
 	close(lock_file);
 #endif
-	locked = 0;
 }
 
 #define SHARED_ALLOC_FAILED() {		\
@@ -270,9 +268,10 @@ void *zend_shared_alloc(size_t size)
 {
 	int i;
 	unsigned int block_size = size+sizeof(zend_shared_memory_block_header);
+	TSRMLS_FETCH();
 
 #if 1
-	if (!locked) {
+	if (!ZCG(locked)) {
 		zend_accel_error(ACCEL_LOG_ERROR, "Shared memory lock not obtained");
 	}
 #endif
@@ -334,7 +333,7 @@ void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source TSRML
 
 void zend_shared_alloc_safe_unlock(TSRMLS_D)
 {
-	if (locked) {
+	if (ZCG(locked)) {
 		zend_shared_alloc_unlock(TSRMLS_C);
 	}
 }
@@ -373,7 +372,7 @@ void zend_shared_alloc_lock(TSRMLS_D)
 	zend_shared_alloc_lock_win32();
 #endif
 
-	locked=1;
+	ZCG(locked) = 1;
 
 	/* Prepare translation table
 	 *
@@ -389,7 +388,7 @@ void zend_shared_alloc_unlock(TSRMLS_D)
 	/* Destroy translation table */
 	zend_hash_destroy(&xlat_table);
 
-	locked=0;
+	ZCG(locked) = 0;
 
 #ifndef ZEND_WIN32
 	if (fcntl(lock_file, F_SETLK, &mem_write_unlock) == -1) {
