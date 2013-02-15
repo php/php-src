@@ -231,7 +231,7 @@ static void (*orig_interned_strings_restore)(TSRMLS_D);
 
 /* O+ disables creation of interned strings by regular PHP compiler, instead,
  * it creates interned strings in shared memory when saves a script.
- * Such interned strings are shatred across all PHP processes
+ * Such interned strings are shared across all PHP processes
  */
 static const char *accel_new_interned_string_for_php(const char *str, int len, int free_src TSRMLS_DC)
 {
