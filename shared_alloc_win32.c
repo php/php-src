@@ -138,6 +138,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		err = GetLastError();
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to read base address", err);
 		*error_in="read mapping base";
+		fclose(fp);
 		return ALLOC_FAILURE;
 	}
 	fclose(fp);
@@ -280,6 +281,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		if(!fp) {
 			zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
 			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to write base address", err);
+			return ALLOC_FAILURE;
 		}
 		fprintf(fp, "%p\n", mapping_base);
 		fclose(fp);
