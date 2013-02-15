@@ -53,6 +53,9 @@ static const char *g_shared_model;
 zend_smm_shared_globals *smm_shared_globals;
 
 #ifndef ZEND_WIN32
+#ifdef ZTS
+static MUTEX_T zts_lock;
+#endif
 int lock_file;
 static char lockfile_name[sizeof(TMP_DIR)+sizeof(SEM_FILENAME_PREFIX)+8];
 #endif
@@ -77,6 +80,10 @@ static const zend_shared_memory_handler_entry handler_table[] = {
 void zend_shared_alloc_create_lock(void)
 {
 	int val;
+
+#ifdef ZTS
+    zts_lock = tsrm_mutex_alloc();
+#endif
 
 	sprintf(lockfile_name, "%s/%sXXXXXX", TMP_DIR, SEM_FILENAME_PREFIX);
 	lock_file = mkstemp(lockfile_name);
@@ -341,6 +348,11 @@ static FLOCK_STRUCTURE(mem_write_unlock, F_UNLCK, SEEK_SET, 0, 1);
 void zend_shared_alloc_lock(TSRMLS_D)
 {
 #ifndef ZEND_WIN32
+
+#ifdef ZTS
+	tsrm_mutex_lock(zts_lock);
+#endif
+
 #if 0
 	/* this will happen once per process, and will un-globalize mem_write_lock */
 	if (mem_write_lock.l_pid == -1) {
@@ -383,6 +395,9 @@ void zend_shared_alloc_unlock(TSRMLS_D)
 	if (fcntl(lock_file, F_SETLK, &mem_write_unlock) == -1) {
 		zend_accel_error(ACCEL_LOG_ERROR, "Cannot remove lock - %s (%d)", strerror(errno), errno);
 	}
+#ifdef ZTS
+	tsrm_mutex_unlock(zts_lock);
+#endif
 #else
 	zend_shared_alloc_unlock_win32();
 #endif
