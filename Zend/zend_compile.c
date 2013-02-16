@@ -6360,7 +6360,7 @@ void zend_do_foreach_cont(znode *foreach_token, const znode *open_brackets_token
 		znode key_node;
 
 		opline = &CG(active_op_array)->opcodes[as_token->u.op.opline_num+1];
-		opline->result_type = IS_TMP_VAR;
+		opline->result_type = IS_VAR;
 		opline->result.opline_num = get_temporary_variable(CG(active_op_array));
 		GET_NODE(&key_node, opline->result);
 

@@ -157,21 +157,21 @@ static void php_dom_iterator_current_data(zend_object_iterator *iter, zval ***da
 }
 /* }}} */
 
-static int php_dom_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static zval *php_dom_iterator_current_key(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
 	zval *curobj;
 	xmlNodePtr curnode = NULL;
 	dom_object *intern;
-	zval *object;
-	int namelen;
+	zval *object, *key;
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
 	object = (zval *)iterator->intern.data;
 
+	MAKE_STD_ZVAL(key);
 	if (instanceof_function(Z_OBJCE_P(object), dom_nodelist_class_entry TSRMLS_CC)) {
-		*int_key = iter->index;
-		return HASH_KEY_IS_LONG;
+		ZVAL_LONG(key, iter->index);
+		return key;
 	} else {
 		curobj = iterator->curobj;
 
@@ -179,13 +179,11 @@ static int php_dom_iterator_current_key(zend_object_iterator *iter, char **str_k
 		if (intern != NULL && intern->ptr != NULL) {
 			curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
 		} else {
-			return HASH_KEY_NON_EXISTANT;
+			return NULL;
 		}
 
-		namelen = xmlStrlen(curnode->name);
-		*str_key = estrndup(curnode->name, namelen);
-		*str_key_len = namelen + 1;
-		return HASH_KEY_IS_STRING;
+		ZVAL_STRINGL(key, (char *) curnode->name, xmlStrlen(curnode->name), 1);
+		return key;
 	}
 }
 /* }}} */

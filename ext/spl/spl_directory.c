@@ -1621,7 +1621,7 @@ SPL_METHOD(GlobIterator, count)
 static void spl_filesystem_dir_it_dtor(zend_object_iterator *iter TSRMLS_DC);
 static int spl_filesystem_dir_it_valid(zend_object_iterator *iter TSRMLS_DC);
 static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
-static int spl_filesystem_dir_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
+static zval *spl_filesystem_dir_it_current_key(zend_object_iterator *iter TSRMLS_DC);
 static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter TSRMLS_DC);
 static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter TSRMLS_DC);
 
@@ -1698,12 +1698,13 @@ static void spl_filesystem_dir_it_current_data(zend_object_iterator *iter, zval 
 /* }}} */
 
 /* {{{ spl_filesystem_dir_it_current_key */
-static int spl_filesystem_dir_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static zval *spl_filesystem_dir_it_current_key(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
-	
-	*int_key = object->u.dir.index;
-	return HASH_KEY_IS_LONG;
+	zval *key;
+	MAKE_STD_ZVAL(key);
+	ZVAL_LONG(key, object->u.dir.index);
+	return key;
 }
 /* }}} */
 
@@ -1777,19 +1778,18 @@ static void spl_filesystem_tree_it_current_data(zend_object_iterator *iter, zval
 /* }}} */
 
 /* {{{ spl_filesystem_tree_it_current_key */
-static int spl_filesystem_tree_it_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static zval *spl_filesystem_tree_it_current_key(zend_object_iterator *iter TSRMLS_DC)
 {
 	spl_filesystem_object *object = spl_filesystem_iterator_to_object((spl_filesystem_iterator *)iter);
-	
+	zval *key;
+	MAKE_STD_ZVAL(key);
 	if (SPL_FILE_DIR_KEY(object, SPL_FILE_DIR_KEY_AS_FILENAME)) {
-		*str_key_len = strlen(object->u.dir.entry.d_name) + 1;
-		*str_key = estrndup(object->u.dir.entry.d_name, *str_key_len - 1);
+		ZVAL_STRING(key, object->u.dir.entry.d_name, 1);
 	} else {
 		spl_filesystem_object_get_file_name(object TSRMLS_CC);
-		*str_key_len = object->file_name_len + 1;
-		*str_key = estrndup(object->file_name, object->file_name_len);
+		ZVAL_STRINGL(key, object->file_name, object->file_name_len, 1);
 	}
-	return HASH_KEY_IS_STRING;
+	return key;
 }
 /* }}} */
 

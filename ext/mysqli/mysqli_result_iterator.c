@@ -150,12 +150,14 @@ static void php_mysqli_result_iterator_rewind(zend_object_iterator *iter TSRMLS_
 
 
 /* {{{ php_mysqli_result_iterator_current_key */
-static int php_mysqli_result_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+static zval *php_mysqli_result_iterator_current_key(zend_object_iterator *iter TSRMLS_DC)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
+	zval *key;
 
-	*int_key = (ulong) iterator->row_num;
-	return HASH_KEY_IS_LONG;
+	MAKE_STD_ZVAL(key);
+	ZVAL_LONG(key, iterator->row_num);
+	return key;
 }
 /* }}} */
 
