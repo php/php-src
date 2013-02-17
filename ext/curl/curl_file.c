@@ -52,7 +52,7 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-/* {{{ proto string CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
+/* {{{ proto void CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
    Create the CURLFile object */
 ZEND_METHOD(CURLFile, __construct)
 {
@@ -61,7 +61,7 @@ ZEND_METHOD(CURLFile, __construct)
 }
 /* }}} */
 
-/* {{{ proto string curl_file_create(string $name, [string $mimetype [, string $postfilename]])
+/* {{{ proto CURLFile curl_file_create(string $name, [string $mimetype [, string $postfilename]])
    Create the CURLFile object */
 PHP_FUNCTION(curl_file_create)
 {
@@ -117,7 +117,7 @@ ZEND_METHOD(CURLFile, getPostFilename)
 }
 /* }}} */
 
-/* {{{ proto string CURLFile::setMimeType(string $mime)
+/* {{{ proto void CURLFile::setMimeType(string $mime)
    Set MIME type */
 ZEND_METHOD(CURLFile, setMimeType)
 {
@@ -125,7 +125,7 @@ ZEND_METHOD(CURLFile, setMimeType)
 }
 /* }}} */
 
-/* {{{ proto string CURLFile::setPostFilename(string $name)
+/* {{{ proto void CURLFile::setPostFilename(string $name)
    Set file name for POST */
 ZEND_METHOD(CURLFile, setPostFilename)
 {
@@ -133,7 +133,7 @@ ZEND_METHOD(CURLFile, setPostFilename)
 }
 /* }}} */
 
-/* {{{ proto string CURLFile::__wakeup()
+/* {{{ proto void CURLFile::__wakeup()
    Unserialization handler */
 ZEND_METHOD(CURLFile, __wakeup)
 {
