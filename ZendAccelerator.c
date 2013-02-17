@@ -2137,6 +2137,7 @@ static inline int accel_find_sapi(TSRMLS_D)
 	static const char *supported_sapis[] = {
 		"apache",
 		"fastcgi",
+		"cli-server",
 		"cgi-fcgi",
 		"fpm-fcgi",
 		"isapi",
