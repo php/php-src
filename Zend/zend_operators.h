@@ -68,22 +68,36 @@ END_EXTERN_C()
 
 #if ZEND_DVAL_TO_LVAL_CAST_OK
 # define zend_dval_to_lval(d) ((long) (d))
-#elif SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
+#elif SIZEOF_LONG == 4
 static zend_always_inline long zend_dval_to_lval(double d)
 {
 	if (d > LONG_MAX || d < LONG_MIN) {
-		return (long)(unsigned long)(zend_long64) d;
+		double	two_pow_32 = pow(2., 32.),
+				dmod;
+
+		dmod = fmod(d, two_pow_32);
+		if (dmod < 0) {
+			dmod += two_pow_32;
+		}
+		return (long)(unsigned long)dmod;
 	}
-	return (long) d;
+	return (long)d;
 }
 #else
 static zend_always_inline long zend_dval_to_lval(double d)
 {
 	/* >= as (double)LONG_MAX is outside signed range */
-	if (d >= LONG_MAX) {
-		return (long)(unsigned long) d;
+	if (d >= LONG_MAX || d < LONG_MIN) {
+		double	two_pow_64 = pow(2., 64.),
+				dmod;
+
+		dmod = fmod(d, two_pow_64);
+		if (dmod < 0) {
+			dmod += two_pow_64;
+		}
+		return (long)(unsigned long)dmod;
 	}
-	return (long) d;
+	return (long)d;
 }
 #endif
 /* }}} */
