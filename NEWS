@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . mb_split() can now handle empty matches like preg_split() does. (Moriyoshi)
 
 - SPL:
+  . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
+    (patch by kriss@krizalys.com, Laruence)
   . Fixed bug #64106 (Segfault on SplFixedArray[][x] = y when extended). 
     (Nikita Popov)
 
