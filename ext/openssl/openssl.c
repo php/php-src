@@ -3204,6 +3204,7 @@ PHP_FUNCTION(openssl_pkey_get_public)
 	if (pkey == NULL) {
 		RETURN_FALSE;
 	}
+	zend_list_addref(Z_LVAL_P(return_value));
 }
 /* }}} */
 
@@ -3240,6 +3241,7 @@ PHP_FUNCTION(openssl_pkey_get_private)
 	if (pkey == NULL) {
 		RETURN_FALSE;
 	}
+	zend_list_addref(Z_LVAL_P(return_value));
 }
 
 /* }}} */

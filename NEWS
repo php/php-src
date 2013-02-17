@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Mbstring:
   . mb_split() can now handle empty matches like preg_split() does. (Moriyoshi)
 
+- OpenSSL:
+  . Fixed bug #61930 (openssl corrupts ssl key resource when using 
+    openssl_get_publickey()). (Stas)
+
 - SPL:
   . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
     (patch by kriss@krizalys.com, Laruence)
