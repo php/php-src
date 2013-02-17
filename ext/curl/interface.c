@@ -3490,7 +3490,7 @@ PHP_FUNCTION(curl_escape)
 
 	if ((res = curl_easy_escape(ch->cp, str, str_len))) {
 		RETVAL_STRING(res, 1);
-		free(res);
+		curl_free(res);
 	} else {
 		RETURN_FALSE;
 	}
@@ -3514,7 +3514,7 @@ PHP_FUNCTION(curl_unescape)
 
 	if ((out = curl_easy_unescape(ch->cp, str, str_len, &out_len))) {
 		RETVAL_STRINGL(out, out_len, 1);
-		free(out);
+		curl_free(out);
 	} else {
 		RETURN_FALSE;
 	}
