@@ -152,10 +152,10 @@ static int php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval *
 #endif
 
 	switch (optname) {
-	case MCAST_JOIN_GROUP:
+	case PHP_MCAST_JOIN_GROUP:
 		mcast_req_fun = &php_mcast_join;
 		goto mcast_req_fun;
-	case MCAST_LEAVE_GROUP:
+	case PHP_MCAST_LEAVE_GROUP:
 		{
 			php_sockaddr_storage	group = {0};
 			socklen_t				glen;
@@ -180,16 +180,16 @@ mcast_req_fun:
 		}
 
 #ifdef HAS_MCAST_EXT
-	case MCAST_BLOCK_SOURCE:
+	case PHP_MCAST_BLOCK_SOURCE:
 		mcast_sreq_fun = &php_mcast_block_source;
 		goto mcast_sreq_fun;
-	case MCAST_UNBLOCK_SOURCE:
+	case PHP_MCAST_UNBLOCK_SOURCE:
 		mcast_sreq_fun = &php_mcast_unblock_source;
 		goto mcast_sreq_fun;
-	case MCAST_JOIN_SOURCE_GROUP:
+	case PHP_MCAST_JOIN_SOURCE_GROUP:
 		mcast_sreq_fun = &php_mcast_join_source;
 		goto mcast_sreq_fun;
-	case MCAST_LEAVE_SOURCE_GROUP:
+	case PHP_MCAST_LEAVE_SOURCE_GROUP:
 		{
 			php_sockaddr_storage	group = {0},
 									source = {0};
@@ -248,13 +248,13 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 	int				retval;
 
 	switch (optname) {
-	case MCAST_JOIN_GROUP:
-	case MCAST_LEAVE_GROUP:
+	case PHP_MCAST_JOIN_GROUP:
+	case PHP_MCAST_LEAVE_GROUP:
 #ifdef HAS_MCAST_EXT
-	case MCAST_BLOCK_SOURCE:
-	case MCAST_UNBLOCK_SOURCE:
-	case MCAST_JOIN_SOURCE_GROUP:
-	case MCAST_LEAVE_SOURCE_GROUP:
+	case PHP_MCAST_BLOCK_SOURCE:
+	case PHP_MCAST_UNBLOCK_SOURCE:
+	case PHP_MCAST_JOIN_SOURCE_GROUP:
+	case PHP_MCAST_LEAVE_SOURCE_GROUP:
 #endif
 		if (php_do_mcast_opt(php_sock, level, optname, arg4 TSRMLS_CC) == FAILURE) {
 			return FAILURE;
@@ -316,13 +316,13 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 	int				retval;
 
 	switch (optname) {
-	case MCAST_JOIN_GROUP:
-	case MCAST_LEAVE_GROUP:
+	case PHP_MCAST_JOIN_GROUP:
+	case PHP_MCAST_LEAVE_GROUP:
 #ifdef HAS_MCAST_EXT
-	case MCAST_BLOCK_SOURCE:
-	case MCAST_UNBLOCK_SOURCE:
-	case MCAST_JOIN_SOURCE_GROUP:
-	case MCAST_LEAVE_SOURCE_GROUP:
+	case PHP_MCAST_BLOCK_SOURCE:
+	case PHP_MCAST_UNBLOCK_SOURCE:
+	case PHP_MCAST_JOIN_SOURCE_GROUP:
+	case PHP_MCAST_LEAVE_SOURCE_GROUP:
 #endif
 		if (php_do_mcast_opt(php_sock, level, optname, arg4 TSRMLS_CC) == FAILURE) {
 			return FAILURE;
