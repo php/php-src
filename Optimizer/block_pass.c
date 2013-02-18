@@ -1182,7 +1182,7 @@ static void assemble_code_blocks(zend_code_block *blocks, zend_op_array *op_arra
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	/* adjust early binding list */
-	if (op_array->early_binding != -1) {
+	if (op_array->early_binding != (zend_uint)-1) {
 		zend_uint *opline_num = &op_array->early_binding;
 		zend_op *end;
 

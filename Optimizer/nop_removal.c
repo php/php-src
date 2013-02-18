@@ -92,10 +92,10 @@ static void nop_removal(zend_op_array *op_array)
 		}
 
 		/* update brk/cont array */
-		for (i=0; i<op_array->last_brk_cont; i++) {
-			op_array->brk_cont_array[i].brk -= shiftlist[op_array->brk_cont_array[i].brk];
-			op_array->brk_cont_array[i].cont -= shiftlist[op_array->brk_cont_array[i].cont];
-			op_array->brk_cont_array[i].start -= shiftlist[op_array->brk_cont_array[i].start];
+		for (j=0; j<op_array->last_brk_cont; j++) {
+			op_array->brk_cont_array[j].brk -= shiftlist[op_array->brk_cont_array[j].brk];
+			op_array->brk_cont_array[j].cont -= shiftlist[op_array->brk_cont_array[j].cont];
+			op_array->brk_cont_array[j].start -= shiftlist[op_array->brk_cont_array[j].start];
 		}
 
 		/* update try/catch array */
@@ -112,13 +112,13 @@ static void nop_removal(zend_op_array *op_array)
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 		/* update early binding list */
-		if (op_array->early_binding != -1) {
+		if (op_array->early_binding != (zend_uint)-1) {
 			zend_uint *opline_num = &op_array->early_binding;
 
 			do {
 				*opline_num -= shiftlist[*opline_num];
 				opline_num = &ZEND_RESULT(&op_array->opcodes[*opline_num]).opline_num;
-			} while (*opline_num != -1);
+			} while (*opline_num != (zend_uint)-1);
 		}
 #endif
 	}
