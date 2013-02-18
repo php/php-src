@@ -755,31 +755,20 @@ static void zend_generator_iterator_get_data(zend_object_iterator *iterator, zva
 }
 /* }}} */
 
-static int zend_generator_iterator_get_key(zend_object_iterator *iterator, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static zval *zend_generator_iterator_get_key(zend_object_iterator *iterator TSRMLS_DC) /* {{{ */
 {
 	zend_generator *generator = (zend_generator *) iterator->data;
 
 	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
-	if (!generator->key) {
-		return HASH_KEY_NON_EXISTANT;
+	if (generator->key) {
+		Z_ADDREF_P(generator->key);
+		return generator->key;
+	} else {
+		zval *key;
+		MAKE_STD_ZVAL(key);
+		return key;
 	}
-
-	if (Z_TYPE_P(generator->key) == IS_LONG) {
-		*int_key = Z_LVAL_P(generator->key);
-		return HASH_KEY_IS_LONG;
-	}
-
-	if (Z_TYPE_P(generator->key) == IS_STRING) {
-		*str_key = estrndup(Z_STRVAL_P(generator->key), Z_STRLEN_P(generator->key));
-		*str_key_len = Z_STRLEN_P(generator->key) + 1;
-		return HASH_KEY_IS_STRING;
-	}
-
-	/* Waiting for Etienne's patch to allow arbitrary zval keys. Until then
-	 * error out on non-int and non-string keys. */
-	zend_error_noreturn(E_ERROR, "Currently only int and string keys can be yielded");
-	return HASH_KEY_NON_EXISTANT; /* Nerver reached */
 }
 /* }}} */
 

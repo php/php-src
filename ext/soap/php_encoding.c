@@ -2345,19 +2345,22 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 				goto iterator_done;
 			}
 			if (iter->funcs->get_current_key) {
-				key_type = iter->funcs->get_current_key(iter, &str_key, &str_key_len, &int_key TSRMLS_CC);
+				zval *key = iter->funcs->get_current_key(iter TSRMLS_CC);
 				if (EG(exception)) {
 					goto iterator_done;
 				}
-				switch(key_type) {
-					case HASH_KEY_IS_STRING:
-						add_assoc_zval_ex(array_copy, str_key, str_key_len, *val);
-						efree(str_key);
+				switch (Z_TYPE_P(key)) {
+					case IS_STRING:
+						add_assoc_zval_ex(array_copy, Z_STRVAL_P(key), Z_STRLEN_P(key)+1, *val);
 						break;
-					case HASH_KEY_IS_LONG:
-						add_index_zval(array_copy, int_key, *val);
+					case IS_LONG:
+						add_index_zval(array_copy, Z_LVAL_P(key), *val);
+						break;
+					default:
+						/* TODO */
 						break;
 				}
+				zval_ptr_dtor(&key);
 			} else {
 				add_next_index_zval(array_copy, *val);
 			}

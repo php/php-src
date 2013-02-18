@@ -177,6 +177,7 @@ ZEND_API ulong zend_hash_next_free_element(const HashTable *ht);
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos);
+ZEND_API struct _zval_struct *zend_hash_get_current_key_zval_ex(const HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
@@ -199,6 +200,8 @@ ZEND_API int zend_hash_set_pointer(HashTable *ht, const HashPointer *ptr);
 	zend_hash_move_backwards_ex(ht, NULL)
 #define zend_hash_get_current_key(ht, str_index, num_index, duplicate) \
 	zend_hash_get_current_key_ex(ht, str_index, NULL, num_index, duplicate, NULL)
+#define zend_hash_get_current_key_zval(ht) \
+	zend_hash_get_current_key_zval_ex(ht, NULL)
 #define zend_hash_get_current_key_type(ht) \
 	zend_hash_get_current_key_type_ex(ht, NULL)
 #define zend_hash_get_current_data(ht, pData) \

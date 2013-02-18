@@ -1023,12 +1023,13 @@ static void spl_dllist_it_get_current_data(zend_object_iterator *iter, zval ***d
 }
 /* }}} */
 
-static int spl_dllist_it_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static zval *spl_dllist_it_get_current_key(zend_object_iterator *iter TSRMLS_DC) /* {{{ */
 {
 	spl_dllist_it *iterator = (spl_dllist_it *)iter;
-
-	*int_key = (ulong) iterator->traverse_position;
-	return HASH_KEY_IS_LONG;
+	zval *key;
+	MAKE_STD_ZVAL(key);
+	ZVAL_LONG(key, iterator->traverse_position);
+	return key;
 }
 /* }}} */
 

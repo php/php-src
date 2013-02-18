@@ -519,16 +519,18 @@ static void saproxy_iter_get_data(zend_object_iterator *iter, zval ***data TSRML
 	*data = ptr_ptr;
 }
 
-static int saproxy_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
-	ulong *int_key TSRMLS_DC)
+static zval *saproxy_iter_get_key(zend_object_iterator *iter TSRMLS_DC)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)iter->data;
+	zval *key;
 
+	MAKE_STD_ZVAL(key);
 	if (I->key == -1) {
-		return HASH_KEY_NON_EXISTANT;
+		ZVAL_NULL(key);
+	} else {
+		ZVAL_LONG(key, I->key);
 	}
-	*int_key = (ulong)I->key;
-	return HASH_KEY_IS_LONG;
+	return key;
 }
 
 static int saproxy_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)

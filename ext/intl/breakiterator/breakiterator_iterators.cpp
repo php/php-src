@@ -139,14 +139,13 @@ static void _breakiterator_parts_destroy_it(zend_object_iterator *iter TSRMLS_DC
 	zval_ptr_dtor(reinterpret_cast<zval**>(&iter->data));
 }
 
-static int _breakiterator_parts_get_current_key(zend_object_iterator *iter,
-										  char **str_key,
-										  uint *str_key_len,
-										  ulong *int_key TSRMLS_DC)
+static zval *_breakiterator_parts_get_current_key(zend_object_iterator *iter TSRMLS_DC)
 {
 	/* the actual work is done in move_forward and rewind */
-	*int_key = iter->index;
-	return HASH_KEY_IS_LONG;
+	zval *key;
+	MAKE_STD_ZVAL(key);
+	ZVAL_LONG(key, iter->index);
+	return key;
 }
 
 static void _breakiterator_parts_move_forward(zend_object_iterator *iter TSRMLS_DC)

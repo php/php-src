@@ -251,19 +251,8 @@ static PHP_METHOD(IntlIterator, key)
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 
 	if (ii->iterator->funcs->get_current_key) {
-		char *str_key;
-		uint str_key_len;
-		ulong int_key;
-
-		switch (ii->iterator->funcs->get_current_key(
-				ii->iterator, &str_key, &str_key_len, &int_key TSRMLS_CC)) {
-		case HASH_KEY_IS_LONG:
-			RETURN_LONG(int_key);
-			break;
-		case HASH_KEY_IS_STRING:
-			RETURN_STRINGL(str_key, str_key_len-1, 0);
-			break;
-		}
+		zval *key = ii->iterator->funcs->get_current_key(ii->iterator TSRMLS_CC);
+		RETURN_ZVAL(key, 1, 1);
 	} else {
 		RETURN_LONG(ii->iterator->index);
 	}
