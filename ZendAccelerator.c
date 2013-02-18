@@ -1847,7 +1847,8 @@ static void accel_activate(void)
 	}
 
 	SHM_UNPROTECT();
-	ZCG(request_time) = sapi_get_request_time(TSRMLS_C);
+	/* PHP-5.4 and above return "double", but we use 1 sec precision */
+	ZCG(request_time) = (time_t)sapi_get_request_time(TSRMLS_C);
 	ZCG(cache_opline) = NULL;
 	ZCG(cache_persistent_script) = NULL;
 	ZCG(include_path_check) = !ZCG(include_path_key);
