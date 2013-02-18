@@ -56,13 +56,11 @@ void zend_accel_error(int type, const char *format, ...)
 		}
 	}
 
-    fprintf(fLog, "%s (%d): ", time_string,
 #ifdef ZTS
-		tsrm_thread_id()
+    fprintf(fLog, "%s (%lu): ", time_string, (unsigned long)tsrm_thread_id());
 #else
-		getpid()
+    fprintf(fLog, "%s (%d): ", time_string, getpid());
 #endif
-		);
 
 	switch (type) {
 		case ACCEL_LOG_FATAL:
