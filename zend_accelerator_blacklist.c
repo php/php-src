@@ -63,7 +63,10 @@ static void blacklist_report_regexp_error(regex_t *comp_regex, int reg_err)
 	char *errbuf;
 	int errsize = regerror(reg_err, comp_regex, NULL, 0);
 	errbuf = malloc(errsize);
-
+	if (!errbuf) {
+		zend_accel_error(ACCEL_LOG_ERROR, "Blacklist compilation: no memory\n");
+		return;
+	}
 	regerror(reg_err, comp_regex, errbuf, errsize);
 	zend_accel_error(ACCEL_LOG_ERROR, "Blacklist compilation: %s\n", errbuf);
 	free(errbuf);
@@ -87,6 +90,10 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 		/* don't create a regexp buffer bigger than 12K)*/
 		if((i+1 == blacklist->pos) || ((rlen+blacklist->entries[i+1].path_length*2+2)>(12*1024) ) ) {
 			regexp = (char *)malloc(rlen);
+			if (!regexp) {
+				zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed\n");
+				return;
+			}
 			regexp[0] = '^';
 			regexp[1] = '(';
 
@@ -109,6 +116,10 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			regexp[clen] = '\0';
 
 			(*regexp_list_it) = malloc(sizeof(zend_regexp_list));
+			if (!*regexp_list_it) {
+				zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed\n");
+				return;
+			}
 			(*regexp_list_it)->next = NULL;
 
 			if ((reg_err = regcomp(&((*regexp_list_it)->comp_regex), regexp, REGEX_MODE)) != 0) {
@@ -205,6 +216,10 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 		zend_accel_blacklist_allocate(blacklist);
 		blacklist->entries[blacklist->pos].path_length = path_length;
 		blacklist->entries[blacklist->pos].path = (char *) malloc(path_length+1);
+		if (!blacklist->entries[blacklist->pos].path) {
+			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed\n");
+			return;
+		}
 		blacklist->entries[blacklist->pos].id = blacklist->pos;
 		memcpy(blacklist->entries[blacklist->pos].path, real_path, path_length+1);
 		blacklist->pos++;

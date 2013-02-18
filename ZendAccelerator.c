@@ -1475,6 +1475,10 @@ static char *accel_tsrm_realpath(const char *path, int path_len TSRMLS_DC)
 	/* realpath("") returns CWD */
 	if (!*path) {
 		new_state.cwd = (char*)malloc(1);
+		if (!new_state.cwd) {
+			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed");
+			return NULL;
+		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	    if ((cwd = accel_getcwd(&cwd_len TSRMLS_CC)) != NULL) {
@@ -1483,9 +1487,17 @@ static char *accel_tsrm_realpath(const char *path, int path_len TSRMLS_DC)
 	} else if (!IS_ABSOLUTE_PATH(path, path_len) &&
 	    (cwd = accel_getcwd(&cwd_len TSRMLS_CC)) != NULL) {
 		new_state.cwd = zend_strndup(cwd, cwd_len);
+		if (!new_state.cwd) {
+			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed");
+			return NULL;
+		}
 		new_state.cwd_length = cwd_len;
 	} else {
 		new_state.cwd = (char*)malloc(1);
+		if (!new_state.cwd) {
+			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed");
+			return NULL;
+		}
 		new_state.cwd[0] = '\0';
 		new_state.cwd_length = 0;
 	}
