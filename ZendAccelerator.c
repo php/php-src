@@ -460,12 +460,13 @@ static inline void accel_restart_enter(TSRMLS_D)
 
 static inline void accel_restart_leave(TSRMLS_D)
 {
-	ZCSG(restart_in_progress) = 0;
 #ifdef ZEND_WIN32
+	ZCSG(restart_in_progress) = 0;
 	DECREMENT(restart_in);
 #else
 	static const FLOCK_STRUCTURE(restart_finished, F_UNLCK, SEEK_SET, 2, 1);
 
+	ZCSG(restart_in_progress) = 0;
 	if (fcntl(lock_file, F_SETLK, &restart_finished)==-1) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "RestartC(-1):  %s (%d)", strerror(errno), errno);
 	}
