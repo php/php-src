@@ -3975,7 +3975,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 	overriden     = va_arg(args, HashTable**);
 	exclude_table = va_arg(args, HashTable*);
 
-	fnname_len = strlen(fn->common.function_name);
+	fnname_len = hash_key->nKeyLength - 1;
 
 	/* apply aliases which are qualified with a class name, there should not be any ambiguity */
 	if (ce->trait_aliases) {
@@ -3986,7 +3986,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 			if (alias->alias != NULL
 				&& (!alias->trait_method->ce || fn->common.scope == alias->trait_method->ce)
 				&& alias->trait_method->mname_len == fnname_len
-				&& (zend_binary_strcasecmp(alias->trait_method->method_name, alias->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
+				&& (zend_binary_strcasecmp(alias->trait_method->method_name, alias->trait_method->mname_len, hash_key->arKey, fnname_len) == 0)) {
 				fn_copy = *fn;
 
 				/* if it is 0, no modifieres has been changed */
@@ -4008,7 +4008,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 		}
 	}
 
-	lcname = zend_str_tolower_dup(fn->common.function_name, fnname_len);
+	lcname = hash_key->arKey;
 
 	if (exclude_table == NULL || zend_hash_find(exclude_table, lcname, fnname_len, &dummy) == FAILURE) {
 		/* is not in hashtable, thus, function is not to be excluded */
@@ -4023,7 +4023,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				if (alias->alias == NULL && alias->modifiers != 0
 					&& (!alias->trait_method->ce || fn->common.scope == alias->trait_method->ce)
 					&& (alias->trait_method->mname_len == fnname_len)
-					&& (zend_binary_strcasecmp(alias->trait_method->method_name, alias->trait_method->mname_len, fn->common.function_name, fnname_len) == 0)) {
+					&& (zend_binary_strcasecmp(alias->trait_method->method_name, alias->trait_method->mname_len, lcname, fnname_len) == 0)) {
 
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK));
 
@@ -4039,8 +4039,6 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 
 		zend_add_trait_method(ce, fn->common.function_name, lcname, fnname_len+1, &fn_copy, overriden TSRMLS_CC);
 	}
-
-	efree(lcname);
 
 	return ZEND_HASH_APPLY_KEEP;
 }
