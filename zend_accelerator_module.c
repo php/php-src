@@ -402,7 +402,7 @@ static zend_module_entry accel_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-int start_accel_module()
+int start_accel_module(void)
 {
 	return zend_startup_module(&accel_module_entry);
 }
