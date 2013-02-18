@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Implemented FR #64175 (Added HTTP codes as of RFC 6585). (Jonh Wendell)
   . Fixed bug #64142 (dval to lval different behavior on ppc64). (Remi)
+  . Fixed bug #64070 (Inheritance with Traits failed with error). (Dmitry)
 
 - CLI server:
   . Fixed bug #64128 (buit-in web server is broken on ppc64). (Remi)
