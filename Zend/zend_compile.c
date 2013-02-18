@@ -3990,10 +3990,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				fn_copy = *fn;
 				
 				/* Switch the name of the aliased function to the alias so that derived classes will get alias and not original name */
-				int alias_len = strlen(alias->alias);
-				char *alias_func_name = malloc(alias_len);
-				memcpy(alias_func_name, alias->alias, alias_len);
-				fn_copy.common.function_name = alias_func_name;
+				fn_copy.common.function_name = estrdup(alias->alias);
 
 				/* if it is 0, no modifieres has been changed */
 				if (alias->modifiers) {
