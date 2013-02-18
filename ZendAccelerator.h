@@ -165,7 +165,7 @@ typedef time_t accel_time_t;
 typedef struct _zend_persistent_script {
 	ulong          hash_value;
 	char          *full_path;              /* full real path with resolved symlinks */
-	int            full_path_len;
+	unsigned int   full_path_len;
 	zend_op_array  main_op_array;
 	HashTable      function_table;
 	HashTable      class_table;
