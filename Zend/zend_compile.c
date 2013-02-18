@@ -3988,6 +3988,9 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 				&& alias->trait_method->mname_len == fnname_len
 				&& (zend_binary_strcasecmp(alias->trait_method->method_name, alias->trait_method->mname_len, hash_key->arKey, fnname_len) == 0)) {
 				fn_copy = *fn;
+				
+				/* Switch the name of the aliased function to the alias so that derived classes will get alias and not original name */
+				fn_copy.common.function_name = estrndup(alias->alias, alias->alias_len);
 
 				/* if it is 0, no modifieres has been changed */
 				if (alias->modifiers) {
