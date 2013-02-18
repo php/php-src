@@ -2548,6 +2548,7 @@ string_copy:
 					Z_DELREF_PP(zvalue);
 					ch->handlers->write_header->func_name = NULL;
 					ch->handlers->write_header->method = PHP_CURL_IGNORE;
+					break;
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "set CURLOPT_HEADERFUNCTION to NULL after it was something other than a callable");
 				}
