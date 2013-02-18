@@ -2542,6 +2542,16 @@ string_copy:
 			break;
 
 		case CURLOPT_HEADERFUNCTION:
+			/* check if we're setting to NULL = we're restoring php default handler */
+			if(Z_TYPE_PP(zvalue) == IS_NULL && ch->handlers->write_header->method != PHP_CURL_IGNORE) {
+				if(ch->handlers->write_header->method == PHP_CURL_USER) {
+					Z_DELREF_PP(zvalue);
+					ch->handlers->write_header->func_name = NULL;
+					ch->handlers->write_header->method = PHP_CURL_IGNORE;
+				} else {
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "set CURLOPT_HEADERFUNCTION to NULL after it was something other than a callable");
+				}
+			}
 			if (ch->handlers->write_header->func_name) {
 				zval_ptr_dtor(&ch->handlers->write_header->func_name);
 				ch->handlers->write_header->fci_cache = empty_fcall_info_cache;
