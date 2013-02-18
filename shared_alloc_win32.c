@@ -102,6 +102,10 @@ static char *get_mmap_base_file()
 void zend_shared_alloc_create_lock(void)
 {
 	memory_mutex = CreateMutex(NULL, FALSE, create_name_with_username(ACCEL_MUTEX_NAME));
+	if (!memory_mutex) {
+		zend_accel_error(ACCEL_LOG_FATAL, "Cannot create mutex");
+		return;
+	}
 	ReleaseMutex(memory_mutex);
 }
 
