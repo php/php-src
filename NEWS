@@ -1,13 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-14 Feb 2012, PHP 5.4.12 RC2
-
-- SOAP
-  . Added check that soap.wsdl_cache_dir conforms to open_basedir 
-    (CVE-2013-1635). (Dmitry)
-  . Disabled external entities loading (CVE-2013-1643). (Dmitry)
-
-31 Jan 2012, PHP 5.4.12 RC1
+21 Feb 2012, PHP 5.4.12
 
 - Core:
   . Fixed bug #64099 (Wrong TSRM usage in zend_Register_class alias). (Johannes)
@@ -39,7 +32,12 @@ PHP                                                                        NEWS
 - Litespeed:
   . Fixed bug #63228 (-Werror=format-security error in lsapi code). (George)
 
-- ext/sqlite3:
+- SOAP
+  . Added check that soap.wsdl_cache_dir conforms to open_basedir 
+    (CVE-2013-1635). (Dmitry)
+  . Disabled external entities loading (CVE-2013-1643). (Dmitry)
+
+- sqlite3:
   . Fixed bug #63921 (sqlite3::bindvalue and relative PHP functions aren't
     using sqlite3_*_int64 API). (srgoogleguy, Lars)
 
