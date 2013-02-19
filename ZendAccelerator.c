@@ -2183,6 +2183,7 @@ static void zend_accel_init_shm(TSRMLS_D)
 	accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals));
 	if (!accel_shared_globals) {
 		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
+		return;
 	}
 	ZSMMG(app_shared_globals) = accel_shared_globals;
 
