@@ -183,9 +183,9 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	while (fgets(buf, MAXPATHLEN, fp)!=NULL) {
 		char *path_dup, *pbuf;
 		path_length = strlen(buf);
-		if (buf[path_length-1]=='\n') {
+		if (path_length > 0 && buf[path_length-1]=='\n') {
 			buf[--path_length] = 0;
-			if (buf[path_length-1]=='\r') {
+			if (path_length > 0 && buf[path_length-1]=='\r') {
 				buf[--path_length] = 0;
 			}
 		}
