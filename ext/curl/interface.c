@@ -2374,11 +2374,7 @@ string_copy:
 			//If a NULL was supplied together with INFILE, reset the default if we're still at direct i/o and don't have a user-function for read
 			if(Z_TYPE_PP(zvalue) == IS_NULL && option == CURLOPT_INFILE && ch->handlers->read->method == PHP_CURL_DIRECT) {
 				if(ch->handlers->read->stream != NULL) {
-					//Manually free if rc=0; if we don't do this, memory allocator will complain about leak
-					if(Z_REFCOUNT_P(ch->handlers->read->stream)==1)
-						zval_ptr_dtor(&ch->handlers->read->stream);
-					else
-						Z_DELREF_P(ch->handlers->read->stream);
+					zval_ptr_dtor(&ch->handlers->read->stream);
 				}
 				ch->handlers->read->fd = 0;
 				ch->handlers->read->fp = 0;
