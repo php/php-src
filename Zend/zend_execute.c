@@ -1384,7 +1384,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 	}
 
 	if (Z_OBJ_HT_P(container)->get_property_ptr_ptr) {
-		zval **ptr_ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr, key TSRMLS_CC);
+		zval **ptr_ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr, type, key TSRMLS_CC);
 		if (NULL == ptr_ptr) {
 			zval *ptr;
 
@@ -1523,9 +1523,9 @@ void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 }
 /* }}} */
 
-/*  
+/*
  * Stack Frame Layout (the whole stack frame is allocated at once)
- * ================== 
+ * ==================
  *
  *                             +========================================+
  *                             | zend_execute_data                      |<---+
