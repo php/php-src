@@ -2543,12 +2543,14 @@ string_copy:
 
 		case CURLOPT_HEADERFUNCTION:
 			/* check if we're setting to NULL = we're restoring php default handler */
-			if(Z_TYPE_PP(zvalue) == IS_NULL && ch->handlers->write_header->method != PHP_CURL_IGNORE) {
+			if(Z_TYPE_PP(zvalue) == IS_NULL) {
 				if(ch->handlers->write_header->method == PHP_CURL_USER) {
 					Z_DELREF_PP(zvalue);
 					ch->handlers->write_header->func_name = NULL;
 					ch->handlers->write_header->method = PHP_CURL_IGNORE;
 					break;
+				} else if(ch->handlers->write_header->method == PHP_CURL_IGNORE) {
+					break; //prevent the assign-code later on if user passed NULL and the handler was IGNORE already
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "set CURLOPT_HEADERFUNCTION to NULL after it was something other than a callable");
 				}
