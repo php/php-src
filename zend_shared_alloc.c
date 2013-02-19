@@ -256,13 +256,11 @@ void zend_shared_alloc_shutdown(void)
 #endif
 }
 
-#define SHARED_ALLOC_FAILED() {		\
-	TSRMLS_FETCH();					\
-									\
-	zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate %ld bytes (%ld bytes free)", (long)size, (long)ZSMMG(shared_free)); \
-	ZSMMG(memory_exhausted) = 1;			\
-	zend_accel_schedule_restart(TSRMLS_C);	\
-}
+#define SHARED_ALLOC_FAILED() do {		\
+		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate %ld bytes (%ld bytes free)", (long)size, (long)ZSMMG(shared_free)); \
+		ZSMMG(memory_exhausted) = 1;			\
+		zend_accel_schedule_restart(TSRMLS_C);	\
+	} while (0)
 
 void *zend_shared_alloc(size_t size)
 {
