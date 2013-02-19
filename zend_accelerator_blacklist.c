@@ -76,7 +76,7 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 {
 	int i, end=0, j, rlen=6, clen, reg_err;
 	char *regexp;
-	zend_regexp_list **regexp_list_it;
+	zend_regexp_list **regexp_list_it, *it;
 
 	if (blacklist->pos == 0) {
 		/* we have no blacklist to talk about */
@@ -115,21 +115,22 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			regexp[clen++] = ')';
 			regexp[clen] = '\0';
 
-			(*regexp_list_it) = malloc(sizeof(zend_regexp_list));
-			if (!*regexp_list_it) {
+			it = (zend_regexp_list*)malloc(sizeof(zend_regexp_list));
+			if (!it) {
 				zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed\n");
 				return;
 			}
-			(*regexp_list_it)->next = NULL;
+			it->next = NULL;
 
-			if ((reg_err = regcomp(&((*regexp_list_it)->comp_regex), regexp, REGEX_MODE)) != 0) {
-				blacklist_report_regexp_error(&((*regexp_list_it)->comp_regex), reg_err);
+			if ((reg_err = regcomp(&it->comp_regex, regexp, REGEX_MODE)) != 0) {
+				blacklist_report_regexp_error(&it->comp_regex, reg_err);
 			}
 			/* prepare for the next iteration */
 			free(regexp);
 			end = i+1;
 			rlen = 6;
-			regexp_list_it = &((*regexp_list_it)->next);
+			*regexp_list_it = it;
+			regexp_list_it = &it->next;
 		}
 	}
 }
