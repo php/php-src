@@ -212,7 +212,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	*shared_segments_count = 1;
 	*shared_segments_p = (zend_shared_segment **) calloc(1, sizeof(zend_shared_segment)+sizeof(void *));
 	if (!*shared_segments_p) {
-		zend_win_error_message(ACCEL_LOG_FATAL, "calloc() failed");
+		zend_win_error_message(ACCEL_LOG_FATAL, "calloc() failed", GetLastError());
 		*error_in = "calloc";
 		return ALLOC_FAILURE;
 	}
