@@ -6,10 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
     (patch by kriss@krizalys.com, Laruence)
 
-
-?? ??? 2013, PHP 5.3.22
-
-## DON'T ADD ENTRIES TO THIS SECTION - TALK TO RM FOR MERGES
+21 Feb 2013, PHP 5.3.22
 
 - Zend Engine:
   . Fixed bug #64099 (Wrong TSRM usage in zend_Register_class alias). (Johannes)
@@ -25,6 +22,11 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed bug #63999 (php with fpm fails to build on Solaris 10 or 11). (Adam)
+
+- SOAP
+  . Added check that soap.wsdl_cache_dir conforms to open_basedir
+    (CVE-2013-1635). (Dmitry)
+  . Disabled external entities loading (CVE-2013-1643). (Dmitry)
 
 - SPL:
   . Fixed bug #64106 (Segfault on SplFixedArray[][x] = y when extended). (Nikita Popov)
