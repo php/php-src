@@ -2545,7 +2545,10 @@ string_copy:
 			/* check if we're setting to NULL = we're restoring php default handler */
 			if(Z_TYPE_PP(zvalue) == IS_NULL) {
 				if(ch->handlers->write_header->method == PHP_CURL_USER) {
-					Z_DELREF_PP(zvalue);
+					if(ch->handlers->write_header->func_name) {
+						zval_ptr_dtor(&ch->handlers->write_header->func_name);
+						ch->handlers->write_header->fci_cache = empty_fcall_info_cache;
+					}
 					ch->handlers->write_header->func_name = NULL;
 					ch->handlers->write_header->method = PHP_CURL_IGNORE;
 					break;
