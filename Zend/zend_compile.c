@@ -3859,6 +3859,12 @@ static void zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *trait
 {
 	zend_uint i;
 
+	/* Trait checking for 5.4 only which keep for BC, only trait is allowed 5.5+ */
+	if (!(trait->ce_flags & ZEND_ACC_TRAIT)) {
+		zend_error(E_DEPRECATED, "Using class as trait is deprecated, class: %s is not a trait", trait->name);
+		return;
+	}
+
 	for (i = 0; i < ce->num_traits; i++) {
 		if (ce->traits[i] == trait) {
 			return;
