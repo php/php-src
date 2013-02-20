@@ -1366,7 +1366,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 PHP_FUNCTION(openssl_spki_new)
 {
 	int challenge_len;
-	char * challenge, * spkstr, * s;
+	char * challenge = NULL, * spkstr = NULL, * s = NULL;
 	long keyresource = -1;
 	const char *spkac = "SPKAC=";
 	long algo = OPENSSL_ALGO_MD5;
@@ -1385,7 +1385,7 @@ PHP_FUNCTION(openssl_spki_new)
 	pkey = php_openssl_evp_from_zval(&zpkey, 0, challenge, 1, &keyresource TSRMLS_CC);
 
 	if (pkey == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to use supplied private key");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied private key");
 		goto cleanup;
 	}
 
@@ -1425,7 +1425,7 @@ PHP_FUNCTION(openssl_spki_new)
 
 	spkstr = NETSCAPE_SPKI_b64_encode(spki);
 	if (!spkstr){
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to encode SPKAC");
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to encode SPKAC");
 		goto cleanup;
 	}
 
@@ -1461,8 +1461,8 @@ cleanup:
    Verifies spki returns boolean */
 PHP_FUNCTION(openssl_spki_verify)
 {
-	int spkstr_len, i;
-	char *spkstr = NULL, * spkstr_cleaned;
+	int spkstr_len, i = 0;
+	char *spkstr = NULL, * spkstr_cleaned = NULL;
 
 	EVP_PKEY *pkey = NULL;
 	NETSCAPE_SPKI *spki = NULL;
@@ -1473,7 +1473,7 @@ PHP_FUNCTION(openssl_spki_verify)
 	RETVAL_FALSE;
 
 	if (spkstr == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to use supplied SPKAC");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied SPKAC");
 		goto cleanup;
 	}
 
@@ -1481,7 +1481,7 @@ PHP_FUNCTION(openssl_spki_verify)
 	openssl_spki_cleanup(spkstr, spkstr_cleaned);
 
 	if (strlen(spkstr_cleaned)<=0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate memory for SPKAC");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid SPKAC");
 		goto cleanup;
 	}
 
@@ -1522,7 +1522,7 @@ cleanup:
 PHP_FUNCTION(openssl_spki_export)
 {
 	int spkstr_len;
-	char *spkstr, * spkstr_cleaned, * s;
+	char *spkstr = NULL, * spkstr_cleaned = NULL, * s = NULL;
 
 	EVP_PKEY *pkey = NULL;
 	NETSCAPE_SPKI *spki = NULL;
@@ -1556,24 +1556,6 @@ PHP_FUNCTION(openssl_spki_export)
 
 	out = BIO_new_fp(stdout, BIO_NOCLOSE);
 	PEM_write_bio_PUBKEY(out, pkey);
-/*
-	BIO_get_mem_ptr(out, &bio_buf);
-
-	if ((!bio_buf->data) && (bio_buf->length <= 0)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate memory for public key");
-		goto cleanup;
-	}
-
-	s = emalloc(bio_buf->length);
-	BIO_read(out, s, bio_buf->length);
-
-	if (strlen(s) <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Key length 0");
-		goto cleanup;
-	}
-
-	RETVAL_STRINGL(s, strlen(s) - 1, 1);
-*/
 	goto cleanup;
 
 cleanup:
@@ -1601,7 +1583,7 @@ cleanup:
 PHP_FUNCTION(openssl_spki_export_challenge)
 {
 	int spkstr_len;
-	char *spkstr, * spkstr_cleaned;
+	char *spkstr = NULL, * spkstr_cleaned = NULL;
 
 	NETSCAPE_SPKI *spki = NULL;
 
@@ -1620,7 +1602,7 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 
 	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
 	if (spki == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to allocate memory for public key");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to decode SPKAC");
 		goto cleanup;
 	}
 
@@ -1634,9 +1616,7 @@ cleanup:
 }
 /* }}} */
 
-/* {{{ proto int openssl_spki_cleanup(const char *src, char *results)
-  This will help remove new line chars in the SPKAC sent from the
-  browser */
+/* {{{ strip line endings from spkac */
 int openssl_spki_cleanup(const char *src, char *dest)
 {
     int removed=0;

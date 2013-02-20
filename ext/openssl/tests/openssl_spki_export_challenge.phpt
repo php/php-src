@@ -1,6 +1,8 @@
 --TEST--
 Testing openssl_spki_export_challenge()
 Creates SPKAC for all available key sizes & signature algorithms and exports challenge
+--INI--
+error_reporting=0
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl")) die("skip");
@@ -37,6 +39,7 @@ foreach($ksize as $k => $v) {
 	foreach($algo as $key => $value) {
 		$spkac = openssl_spki_new($pkey, _uuid(), $value);
 		var_dump(openssl_spki_export_challenge(preg_replace('/SPKAC=/', '', $spkac)));
+		var_dump(openssl_spki_export_challenge($spkac.'Make it fail'));
 	}
 	openssl_free_key($pkey);
 }
@@ -53,26 +56,50 @@ function _uuid()
 ?>
 --EXPECTREGEX--
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)
 string\(36\) \"[0-9a-f]{8}\-([0-9a-f]{4}\-){3}[0-9a-f]{12}\"
+bool\(false\)

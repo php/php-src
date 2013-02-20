@@ -1,6 +1,8 @@
 --TEST--
 Testing openssl_spki_verify()
 Creates SPKAC for all available key sizes & signature algorithms and tests for valid signature
+--INI--
+error_reporting=0
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl")) die("skip");
@@ -11,7 +13,7 @@ if (!@openssl_pkey_new()) die("skip cannot create private key");
 
 /* array of private key sizes to test */
 $ksize = array('1024'=>1024,
-			   '2048'=>2048,
+               '2048'=>2048,
 			   '4096'=>4096);
 
 /* array of available hashings to test */
@@ -37,6 +39,7 @@ foreach($ksize as $k => $v) {
 	foreach($algo as $key => $value) {
 		$spkac = openssl_spki_new($pkey, _uuid(), $value);
 		var_dump(openssl_spki_verify(preg_replace('/SPKAC=/', '', $spkac)));
+		var_dump(openssl_spki_verify($spkac.'Make it fail'));
 	}
 	openssl_free_key($pkey);
 }
@@ -53,26 +56,50 @@ function _uuid()
 ?>
 --EXPECT--
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
 bool(true)
+bool(false)
