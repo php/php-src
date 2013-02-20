@@ -618,6 +618,7 @@ static int zend_get_stream_timestamp(const char *filename, struct stat *statbuf 
 {
 	php_stream_wrapper *wrapper;
 	php_stream_statbuf stream_statbuf;
+	int ret, er;
 
 	if(!filename) {
 		return FAILURE;
@@ -634,9 +635,20 @@ static int zend_get_stream_timestamp(const char *filename, struct stat *statbuf 
 		return SUCCESS; /* anything other than 0 is considered to be a valid timestamp */
 	}
 
-	if(wrapper->wops->url_stat(wrapper, (char*)filename, PHP_STREAM_URL_STAT_QUIET, &stream_statbuf, NULL TSRMLS_CC) != 0) {
+	
+	er = EG(error_reporting);
+	EG(error_reporting) = 0;
+	zend_try {
+		ret = wrapper->wops->url_stat(wrapper, (char*)filename, PHP_STREAM_URL_STAT_QUIET, &stream_statbuf, NULL TSRMLS_CC);
+	} zend_catch {
+		ret = -1;
+	} zend_end_try();
+	EG(error_reporting) = er;
+
+	if (ret != 0) {
 		return FAILURE;
 	}
+
 	*statbuf = stream_statbuf.sb;
 	return SUCCESS;
 }
@@ -735,17 +747,26 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 			{
 				php_stream *stream = (php_stream *)file_handle->handle.stream.handle;
 				php_stream_statbuf sb;
-				int er = EG(error_reporting);
+				int ret, er;
 
-				EG(error_reporting) = 0;
 				if (!stream ||
 				    !stream->ops ||
-				    !stream->ops->stat ||
-				    stream->ops->stat(stream, &sb TSRMLS_CC) != 0) {
-					EG(error_reporting) = er;
+				    !stream->ops->stat) {
 					return 0;
 				}
+
+				er = EG(error_reporting);
+				EG(error_reporting) = 0;
+				zend_try {
+					ret = stream->ops->stat(stream, &sb TSRMLS_CC);
+				} zend_catch {
+					ret = -1;
+				} zend_end_try();
 				EG(error_reporting) = er;
+				if (ret != 0) {
+					return 0;
+				}
+
 				statbuf = sb.sb;
 			}
 			break;
