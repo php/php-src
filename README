@@ -98,7 +98,8 @@ zend_optimizerplus.validate_timestamps (default "1")
 
 zend_optimizerplus.revalidate_freq (default "2")
 	How often (in seconds) to check file timestamps for changes to the shared
-	memory storage allocation.
+	memory storage allocation. ("1" means validate once per second, but only
+	once per request. "0" means always validate)
 
 zend_optimizerplus.revalidate_path (default "0")
 	Enables or disables file search in include_path optimization

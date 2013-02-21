@@ -828,7 +828,8 @@ static void zend_accel_schedule_restart_if_necessary(TSRMLS_D)
 
 static inline int validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle TSRMLS_DC)
 {
-	if (persistent_script->dynamic_members.revalidate >= ZCSG(revalidate_at)) {
+	if (ZCG(accel_directives).revalidate_freq &&
+	    (persistent_script->dynamic_members.revalidate >= ZCSG(revalidate_at))) {
 		return SUCCESS;
 	} else if (do_validate_timestamps(persistent_script, file_handle TSRMLS_CC)==FAILURE) {
 		return FAILURE;
