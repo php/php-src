@@ -4048,12 +4048,16 @@ static void zend_check_trait_usage(zend_class_entry *ce, zend_class_entry *trait
 {
 	zend_uint i;
 
+	if ((trait->ce_flags & ZEND_ACC_TRAIT) != ZEND_ACC_TRAIT) {
+		zend_error(E_COMPILE_ERROR, "Class %s is not a trait, Only traits may be used in 'as' and 'insteadof' statements", trait->name);
+	}
+
 	for (i = 0; i < ce->num_traits; i++) {
 		if (ce->traits[i] == trait) {
 			return;
 		}
 	}
-	zend_error(E_COMPILE_ERROR, "Trait %s is not used", trait->name);
+	zend_error(E_COMPILE_ERROR, "Required Trait %s wasn't added to %s", trait->name, ce->name);
 }
 /* }}} */
 
