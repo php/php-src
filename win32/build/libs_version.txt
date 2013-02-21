@@ -1,17 +1,17 @@
 bz2-1.0.6
 cclient-2007e
-freetype-2.4.3
+freetype-2.4.10
 icu-49.1.2
-jpeglib-6b
-libcurl-7.27.0
+jpeglib-8
+libcurl-7.29.0
 libiconv-1.14
 libmcrypt-2.5.8
 libmpir-1.3.1
-libpng-1.2.46
+libpng-1.2.50
 libpq-8.3.6
 libssh2-1.4.2
 libtidy-20090325
 libxslt-1.1.27
 libxml-2.7.8
-openssl-0.9.8x
+openssl-0.9.8y
 
