@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug #61930 (openssl corrupts ssl key resource when using 
     openssl_get_publickey()). (Stas)
 
+- PDO_mysql:
+  . Fixed bug #60840 (undefined symbol: mysqlnd_debug_std_no_trace_funcs).
+    (Johannes)
+
 - SPL:
   . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
     (patch by kriss@krizalys.com, Laruence)
