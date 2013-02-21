@@ -50,7 +50,7 @@ typedef void (*zend_object_write_dimension_t)(zval *object, zval *offset, zval *
 
 
 /* Used to create pointer to the property of the object, for future direct r/w access */
-typedef zval **(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member, const struct _zend_literal *key TSRMLS_DC);
+typedef zval **(*zend_object_get_property_ptr_ptr_t)(zval *object, zval *member, int type, const struct _zend_literal *key TSRMLS_DC);
 
 /* Used to set object value. Can be used to override assignments and scalar
    write ops (like ++, +=) on the object */
