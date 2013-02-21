@@ -100,9 +100,9 @@ xmlDocPtr soap_xmlParseFile(const char *filename TSRMLS_DC)
 		ctxt->sax->warning = NULL;
 		ctxt->sax->error = NULL;
 		/*ctxt->sax->fatalError = NULL;*/
-		old = php_libxml_disable_entity_loader(1);
+		old = php_libxml_disable_entity_loader(1 TSRMLS_CC);
 		xmlParseDocument(ctxt);
-		php_libxml_disable_entity_loader(old);
+		php_libxml_disable_entity_loader(old TSRMLS_CC);
 		if (ctxt->wellFormed) {
 			ret = ctxt->myDoc;
 			if (ret->URL == NULL && ctxt->directory != NULL) {
@@ -133,6 +133,8 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 	xmlParserCtxtPtr ctxt = NULL;
 	xmlDocPtr ret;
 
+	TSRMLS_FETCH();
+
 /*
 	xmlInitParser();
 */
@@ -148,9 +150,9 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 #if LIBXML_VERSION >= 20703
 		ctxt->options |= XML_PARSE_HUGE;
 #endif
-		old = php_libxml_disable_entity_loader(1);
+		old = php_libxml_disable_entity_loader(1 TSRMLS_CC);
 		xmlParseDocument(ctxt);
-		php_libxml_disable_entity_loader(old);
+		php_libxml_disable_entity_loader(old TSRMLS_CC);
 		if (ctxt->wellFormed) {
 			ret = ctxt->myDoc;
 			if (ret->URL == NULL && ctxt->directory != NULL) {
