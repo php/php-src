@@ -114,6 +114,10 @@ static zend_code_block *find_code_blocks(zend_op_array *op_array)
 				/* would not optimize non-optimized BRK/CONTs - we cannot
 				 really know where it jumps, so these optimizations are
 				too dangerous */
+				if (op_array->last_try_catch) {
+					efree(blocks->try);
+					efree(blocks->catch);
+				}
 				efree(blocks);
 				return NULL;
 #if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
