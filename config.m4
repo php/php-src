@@ -341,5 +341,5 @@ int main() {
 	shared_alloc_mmap.c \
 	shared_alloc_posix.c \
 	Optimizer/zend_optimizer.c,
-	$ext_shared)
+	$ext_shared,,,,yes)
 fi
