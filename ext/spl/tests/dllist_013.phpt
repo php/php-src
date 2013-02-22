@@ -5,14 +5,14 @@ SPL: DoublyLinkedList: insert operations
 $dll = new SplDoublyLinkedList();
 // errors
 try {
-    $dll->insertBeforeOffset(1,5);
+	$dll->insertBeforeOffset(1,5);
 } catch (OutOfRangeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+	echo "Exception: ".$e->getMessage()."\n";
 }
 try {
-    $dll->insertBeforeOffset(2,1);
+	$dll->insertBeforeOffset(2,1);
 } catch (OutOfRangeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+	echo "Exception: ".$e->getMessage()."\n";
 }
 
 $dll->push(3);

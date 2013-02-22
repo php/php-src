@@ -794,7 +794,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
-    if (index < 0 || index >= intern->llist->count) {
+	if (index < 0 || index >= intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
 		return;
 	}
@@ -881,9 +881,9 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 
 	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	index  = (int)spl_offset_convert_to_long(zindex TSRMLS_CC);
-    llist  = intern->llist;
+	llist  = intern->llist;
 
-    if (index < 0 || index >= intern->llist->count) {
+	if (index < 0 || index >= intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset out of range", 0 TSRMLS_CC);
 		return;
 	}
@@ -1139,7 +1139,7 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 	spl_dllist_object     *intern   = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	smart_str              buf      = {0};
 	spl_ptr_llist_element *current  = intern->llist->head, *next;
-    zval                   *flags;
+	zval                   *flags;
 	php_serialize_data_t   var_hash;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1252,15 +1252,15 @@ SPL_METHOD(SplDoublyLinkedList, insertBeforeOffset)
 	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	index  = (int)spl_offset_convert_to_long(zindex TSRMLS_CC);
 
-    if (index < 0 || index >= intern->llist->count) {
+	if (index < 0 || index >= intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
 		return;
 	}
 
-    // Get the element we want to insert before
+	/* Get the element we want to insert before */
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
-    // Create the new element we want to insert
+	/* Create the new element we want to insert */
 	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
 
 	elem->data = value;
@@ -1270,7 +1270,7 @@ SPL_METHOD(SplDoublyLinkedList, insertBeforeOffset)
 	elem->prev = element->prev;
 
 	/* connect the neighbours to this new element */
-    if (elem->prev == NULL) {
+	if (elem->prev == NULL) {
 		intern->llist->head = elem;
 	} else {
 		element->prev->next = elem;
@@ -1301,15 +1301,15 @@ SPL_METHOD(SplDoublyLinkedList, insertAfterOffset)
 	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	index  = (int)spl_offset_convert_to_long(zindex TSRMLS_CC);
 
-    if (index < 0 || index >= intern->llist->count) {
+	if (index < 0 || index >= intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
 		return;
 	}
 
-    // Get the element we want to insert after
+	/* Get the element we want to insert after */
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
-    // Create the new element we want to insert
+	/* Create the new element we want to insert */
 	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
 
 	elem->data = value;
@@ -1319,7 +1319,7 @@ SPL_METHOD(SplDoublyLinkedList, insertAfterOffset)
 	elem->next = element->next;
 
 	/* connect the neighbours to this new element */
-    if (elem->next == NULL) {
+	if (elem->next == NULL) {
 		intern->llist->tail = elem;
 	} else {
 		element->next->prev = elem;
