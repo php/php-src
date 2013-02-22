@@ -77,7 +77,9 @@ static zend_always_inline long zend_dval_to_lval(double d)
 
 		dmod = fmod(d, two_pow_32);
 		if (dmod < 0) {
-			dmod += two_pow_32;
+			/* we're going to make this number positive; call ceil()
+			 * to simulate rounding towards 0 of the negative number */
+			dmod = ceil(dmod) + two_pow_32;
 		}
 		return (long)(unsigned long)dmod;
 	}
@@ -93,6 +95,8 @@ static zend_always_inline long zend_dval_to_lval(double d)
 
 		dmod = fmod(d, two_pow_64);
 		if (dmod < 0) {
+			/* no need to call ceil; original double must have had no
+			 * fractional part, hence dmod does not have one either */
 			dmod += two_pow_64;
 		}
 		return (long)(unsigned long)dmod;

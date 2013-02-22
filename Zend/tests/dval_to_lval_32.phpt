@@ -15,6 +15,8 @@ if (PHP_INT_SIZE != 4)
 		-3999999999999999475712.,
 		-3999999999999998951424.,
 	];
+	/* see if we're rounding negative numbers right */
+	$values[] = -2147483649.8;
 
 	foreach ($values as $v) {
 		var_dump((int)$v);
@@ -27,3 +29,4 @@ int(-2055733248)
 int(-2055208960)
 int(-2054684672)
 int(-2054160384)
+int(2147483647)
