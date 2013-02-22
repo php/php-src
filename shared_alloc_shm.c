@@ -54,8 +54,8 @@ typedef struct  {
 static int create_segments(size_t requested_size, zend_shared_segment_shm ***shared_segments_p, int *shared_segments_count, char **error_in)
 {
 	int i;
-	unsigned int allocate_size=0, remaining_bytes=requested_size, seg_allocate_size;
-	int first_segment_id=-1;
+	unsigned int allocate_size = 0, remaining_bytes = requested_size, seg_allocate_size;
+	int first_segment_id = -1;
 	key_t first_segment_key = -1;
 	struct shmid_ds sds;
 	int shmget_flags;
@@ -65,7 +65,7 @@ static int create_segments(size_t requested_size, zend_shared_segment_shm ***sha
     /* determine segment size we _really_ need:
      * no more than to include requested_size
      */
-    while (requested_size*2 <= seg_allocate_size && seg_allocate_size > SEG_ALLOC_SIZE_MIN) {
+    while (requested_size * 2 <= seg_allocate_size && seg_allocate_size > SEG_ALLOC_SIZE_MIN) {
         seg_allocate_size >>= 1;
     }
 
@@ -86,15 +86,15 @@ static int create_segments(size_t requested_size, zend_shared_segment_shm ***sha
 		return ALLOC_FAILURE;
 	}
 
-	*shared_segments_count = ((requested_size-1)/seg_allocate_size) + 1;
-	*shared_segments_p = (zend_shared_segment_shm **) calloc(1, (*shared_segments_count)*sizeof(zend_shared_segment_shm)+sizeof(void *)*(*shared_segments_count));
-	shared_segments = (zend_shared_segment_shm *)((char *)(*shared_segments_p) + sizeof(void *)*(*shared_segments_count));
-	for(i=0; i<*shared_segments_count; i++) {
-		(*shared_segments_p)[i] = shared_segments+i;
+	*shared_segments_count = ((requested_size - 1) / seg_allocate_size) + 1;
+	*shared_segments_p = (zend_shared_segment_shm **) calloc(1, (*shared_segments_count) * sizeof(zend_shared_segment_shm) + sizeof(void *) * (*shared_segments_count));
+	shared_segments = (zend_shared_segment_shm *)((char *)(*shared_segments_p) + sizeof(void *) * (*shared_segments_count));
+	for (i = 0; i < *shared_segments_count; i++) {
+		(*shared_segments_p)[i] = shared_segments + i;
 	}
 
 	remaining_bytes = requested_size;
-	for (i=0; i<*shared_segments_count; i++) {
+	for (i = 0; i < *shared_segments_count; i++) {
 		allocate_size = MIN(remaining_bytes, seg_allocate_size);
 		if (i != 0) {
 			shared_segments[i].shm_id = shmget(IPC_PRIVATE, allocate_size, shmget_flags);
@@ -102,7 +102,7 @@ static int create_segments(size_t requested_size, zend_shared_segment_shm ***sha
 			shared_segments[i].shm_id = first_segment_id;
 		}
 
-		if (shared_segments[i].shm_id==-1) {
+		if (shared_segments[i].shm_id == -1) {
 			return ALLOC_FAILURE;
 		}
 

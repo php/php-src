@@ -60,7 +60,7 @@ static const char op_const_means_class[256]  = {
 #endif
 
 #define GET_AVAILABLE_T()		\
-	for (i=0; i<T; i++) {		\
+	for (i = 0; i < T; i++) {	\
 		if (!taken_T[i]) {		\
 			break;				\
 		}						\
@@ -129,7 +129,7 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 		}
 
 		/* Skip OP_DATA */
-		if (opline->opcode == ZEND_OP_DATA && 
+		if (opline->opcode == ZEND_OP_DATA &&
 		    (opline-1)->opcode == ZEND_ASSIGN_DIM) {
 		    opline--;
 		    continue;
@@ -218,5 +218,5 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 	efree(start_of_T);
 	efree(valid_T);
 	efree(map_T);
-	op_array->T = max+1;
+	op_array->T = max + 1;
 }

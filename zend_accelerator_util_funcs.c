@@ -125,7 +125,7 @@ static int move_user_function(zend_function *function TSRMLS_DC, int num_args, v
 	HashTable *function_table = va_arg(args, HashTable *);
 	(void)num_args; /* keep the compiler happy */
 
-	if (function->type==ZEND_USER_FUNCTION) {
+	if (function->type == ZEND_USER_FUNCTION) {
 		zend_hash_quick_update(function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, function, sizeof(zend_function), NULL);
 		return 1;
 	} else {
@@ -144,8 +144,8 @@ void zend_accel_move_user_functions(HashTable *src, HashTable *dst TSRMLS_DC)
 
 static int copy_internal_function(zend_function *function, HashTable *function_table TSRMLS_DC)
 {
-	if (function->type==ZEND_INTERNAL_FUNCTION) {
-		zend_hash_update(function_table, function->common.function_name, strlen(function->common.function_name)+1, function, sizeof(zend_function), NULL);
+	if (function->type == ZEND_INTERNAL_FUNCTION) {
+		zend_hash_update(function_table, function->common.function_name, strlen(function->common.function_name) + 1, function, sizeof(zend_function), NULL);
 	}
 	return 0;
 }
@@ -159,7 +159,7 @@ void zend_accel_copy_internal_functions(TSRMLS_D)
 static void zend_destroy_property_info(zend_property_info *property_info)
 {
 	interned_efree((char*)property_info->name);
-	if(property_info->doc_comment){
+	if (property_info->doc_comment) {
 		efree((char*)property_info->doc_comment);
 	}
 }
@@ -404,7 +404,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		q->pData = (void *) emalloc(sizeof(zend_function));
 		new_entry = (zend_op_array*)q->pData;
 		*new_entry = *(zend_op_array*)p->pData;
-		q->pDataPtr=NULL;
+		q->pDataPtr = NULL;
 
 		/* Copy constructor */
 		/* we use refcount to show that op_array is referenced from several places */
@@ -414,10 +414,10 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 
 		zend_prepare_function_for_execution(new_entry);
 
-		if(old_ce == new_entry->scope) {
+		if (old_ce == new_entry->scope) {
 			new_entry->scope = ce;
 		} else {
-			if(accel_xlat_get(new_entry->scope, new_ce) == SUCCESS) {
+			if (accel_xlat_get(new_entry->scope, new_ce) == SUCCESS) {
 				new_entry->scope = *new_ce;
 			} else {
 				zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s, function %s. Please call Zend Support", ce->name, new_entry->function_name);
@@ -425,8 +425,8 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 		}
 
 		/* update prototype */
-		if (new_entry->prototype ){
-			if(accel_xlat_get(new_entry->prototype, new_prototype)==SUCCESS) {
+		if (new_entry->prototype) {
+			if (accel_xlat_get(new_entry->prototype, new_prototype) == SUCCESS) {
 				new_entry->prototype = *new_prototype;
 			} else {
 				zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s, function %s. Please call Zend Support", ce->name, new_entry->function_name);
@@ -515,20 +515,20 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 		q->pData = (void *) emalloc(sizeof(zend_property_info));
 		prop_info = q->pData;
 		*prop_info = *(zend_property_info*)p->pData;
-		q->pDataPtr=NULL;
+		q->pDataPtr = NULL;
 
 		/* Copy constructor */
 		prop_info->name = interned_estrndup(prop_info->name, prop_info->name_length);
-		if(prop_info->doc_comment) {
+		if (prop_info->doc_comment) {
 			if (ZCG(accel_directives).load_comments) {
 				prop_info->doc_comment = estrndup(prop_info->doc_comment, prop_info->doc_comment_len);
 			} else {
 				prop_info->doc_comment = NULL;
 			}
 		}
-		if(prop_info->ce == old_ce) {
+		if (prop_info->ce == old_ce) {
 			prop_info->ce = ce;
-		} else if(accel_xlat_get(prop_info->ce, new_ce) == SUCCESS) {
+		} else if (accel_xlat_get(prop_info->ce, new_ce) == SUCCESS) {
 			prop_info->ce = *new_ce;
 		} else {
 			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME" class loading error, class %s, property %s. Please call Zend Support", ce->name, prop_info->name);
@@ -559,8 +559,8 @@ static int zend_prepare_function_for_execution(zend_op_array *op_array)
 
 #define zend_update_inherited_handler(handler) \
 { \
-	if(ce->handler != NULL) { \
-		if(accel_xlat_get(ce->handler, new_func)==SUCCESS) { \
+	if (ce->handler != NULL) { \
+		if (accel_xlat_get(ce->handler, new_func) == SUCCESS) { \
 			ce->handler = *new_func; \
 		} else { \
 			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " class loading error, class %s. Please call Zend Support", ce->name); \
@@ -634,7 +634,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	ce->name = interned_estrndup(ce->name, ce->name_length);
 
 	/* interfaces aren't really implemented, so we create a new table */
-	if(ce->num_interfaces) {
+	if (ce->num_interfaces) {
 		ce->interfaces = emalloc(sizeof(zend_class_entry *) * ce->num_interfaces);
 		memset(ce->interfaces, 0, sizeof(zend_class_entry *) * ce->num_interfaces);
 	} else {
@@ -648,8 +648,8 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		}
 	}
 
-	if(ce->parent) {
-		if(accel_xlat_get(ce->parent, new_ce)==SUCCESS) {
+	if (ce->parent) {
+		if (accel_xlat_get(ce->parent, new_ce) == SUCCESS) {
 			ce->parent = *new_ce;
 		} else {
 			zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME" class loading error, class %s. Please call Zend Support", ce->name);
@@ -684,7 +684,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		while (ce->trait_aliases[i]) {
 			i++;
 		}
-		trait_aliases = emalloc(sizeof(zend_trait_alias*) * (i+1));
+		trait_aliases = emalloc(sizeof(zend_trait_alias*) * (i + 1));
 		i = 0;
 		while (ce->trait_aliases[i]) {
 			trait_aliases[i] = emalloc(sizeof(zend_trait_alias));
@@ -722,7 +722,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		while (ce->trait_precedences[i]) {
 			i++;
 		}
-		trait_precedences = emalloc(sizeof(zend_trait_precedence*) * (i+1));
+		trait_precedences = emalloc(sizeof(zend_trait_precedence*) * (i + 1));
 		i = 0;
 		while (ce->trait_precedences[i]) {
 			trait_precedences[i] = emalloc(sizeof(zend_trait_precedence));
@@ -744,7 +744,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 				while (trait_precedences[i]->exclude_from_classes[j]) {
 					j++;
 				}
-				exclude_from_classes = emalloc(sizeof(zend_class_entry*) * (j+1));
+				exclude_from_classes = emalloc(sizeof(zend_class_entry*) * (j + 1));
 				j = 0;
 				while (trait_precedences[i]->exclude_from_classes[j]) {
 					exclude_from_classes[j] = (zend_class_entry*)estrndup(
@@ -769,25 +769,25 @@ static int zend_accel_same_function(void *f1, void *f2)
 	zend_op_array *op1 =  (zend_op_array *)func1;
 	zend_op_array *op2 =  (zend_op_array *)func2;
 
-	if(func1->type != ZEND_USER_FUNCTION || func2->type != ZEND_USER_FUNCTION) {
+	if (func1->type != ZEND_USER_FUNCTION || func2->type != ZEND_USER_FUNCTION) {
 		return 0;
 	}
 
-	if(func1 == func2) {
+	if (func1 == func2) {
 		return 1;
 	}
 
-	if(op1->function_name != op2->function_name && (!op1->function_name || !op2->function_name || strcmp(op1->function_name, op2->function_name))) {
+	if (op1->function_name != op2->function_name && (!op1->function_name || !op2->function_name || strcmp(op1->function_name, op2->function_name))) {
 		/* compare filenames */
 		return 0;
 	}
 
-	if(op1->filename != op2->filename && (!op1->filename || !op2->filename || strcmp(op1->filename, op2->filename))) {
+	if (op1->filename != op2->filename && (!op1->filename || !op2->filename || strcmp(op1->filename, op2->filename))) {
 		/* compare filenames */
 		return 0;
 	}
 
-	if(!op1->opcodes || !op2->opcodes || op1->opcodes[0].lineno != op2->opcodes[0].lineno) {
+	if (!op1->opcodes || !op2->opcodes || op1->opcodes[0].lineno != op2->opcodes[0].lineno) {
 		/* compare first lines */
 		return 0;
 	}
@@ -801,15 +801,15 @@ static int zend_accel_same_class(void *f1, void *f2)
 	zend_class_entry *ce1 = *(zend_class_entry **)f1;
 	zend_class_entry *ce2 = *(zend_class_entry **)f2;
 
-	if(ce1->type != ZEND_USER_CLASS || ce2->type != ZEND_USER_CLASS) {
+	if (ce1->type != ZEND_USER_CLASS || ce2->type != ZEND_USER_CLASS) {
 		return 0;
 	}
 
-	if(ce1 == ce2) {
+	if (ce1 == ce2) {
 		return 1;
 	}
 
-	if(!ce1->name || !ce2->name || zend_binary_strcmp(ce1->name, ce1->name_length, ce2->name, ce2->name_length)) {
+	if (!ce1->name || !ce2->name || zend_binary_strcmp(ce1->name, ce1->name_length, ce2->name, ce2->name_length)) {
 		return 0;
 	}
 
@@ -822,7 +822,7 @@ static int zend_accel_same_class(void *f1, void *f2)
 		return 0;
 	}
 
-	if(zend_hash_num_elements(&ce1->function_table)) {
+	if (zend_hash_num_elements(&ce1->function_table)) {
 		HashPosition pos;
 		zend_function *func1, *func2;
 
@@ -830,7 +830,7 @@ static int zend_accel_same_class(void *f1, void *f2)
 		zend_hash_get_current_data_ex(&ce1->function_table, (void **)&func1, &pos);
 		zend_hash_internal_pointer_reset_ex(&ce2->function_table, &pos);
 		zend_hash_get_current_data_ex(&ce2->function_table, (void **)&func2, &pos);
-		if(!zend_accel_same_function(func1, func2)) {
+		if (!zend_accel_same_function(func1, func2)) {
 			return 0;
 		}
 	}
@@ -843,24 +843,24 @@ static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_co
 	Bucket *p;
 	void *t;
 
-    p = source->pListHead;
+	p = source->pListHead;
 	while (p) {
-		if (p->nKeyLength>0) {
-			if (zend_hash_quick_add(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &t) ==SUCCESS) {
-				if(pCopyConstructor) {
+		if (p->nKeyLength > 0) {
+			if (zend_hash_quick_add(target, p->arKey, p->nKeyLength, p->h, p->pData, size, &t) == SUCCESS) {
+				if (pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			} else {
-				if(p->nKeyLength>0 && p->arKey[0]==0) {
+				if (p->nKeyLength > 0 && p->arKey[0] == 0) {
 					/* Mangled key, ignore and wait for runtime */
-				} else if(zend_hash_quick_find(target, p->arKey, p->nKeyLength, p->h, &t) == SUCCESS &&
+				} else if (zend_hash_quick_find(target, p->arKey, p->nKeyLength, p->h, &t) == SUCCESS &&
 						  (!pIdFunc || pIdFunc(p->pData, t))) {
 					/* same one, ignore it */
 				} else {
-					if(key_fail) {
+					if (key_fail) {
 						*key_fail = p->arKey;
 					}
-					if(key_fail_l) {
+					if (key_fail_l) {
 						*key_fail_l = p->nKeyLength;
 					}
 					return FAILURE;
@@ -868,14 +868,14 @@ static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_co
 			}
 		} else {
 			if (!zend_hash_index_exists(target, p->h) && zend_hash_index_update(target, p->h, p->pData, size, &t) == SUCCESS) {
-					if(pCopyConstructor) {
+					if (pCopyConstructor) {
 						pCopyConstructor(t);
 					}
 			} else {
-				if(key_fail) {
+				if (key_fail) {
 					*key_fail = NULL;
 				}
-				if(key_fail_l) {
+				if (key_fail_l) {
 					*key_fail_l = p->h;
 				}
 				return FAILURE;
@@ -894,10 +894,10 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source, 
 	zend_function *function;
 	TSRMLS_FETCH();
 
-	if(zend_hash_unique_copy(target, source, pCopyConstructor, sizeof(zend_function), &name, &name_len, ZCG(accel_directives).ignore_dups?NULL:zend_accel_same_function) != SUCCESS) {
-		if (zend_hash_find(target, name, name_len, (void *) &function)==SUCCESS
-			&& function->type==ZEND_USER_FUNCTION
-			&& ((zend_op_array *) function)->last>0) {
+	if (zend_hash_unique_copy(target, source, pCopyConstructor, sizeof(zend_function), &name, &name_len, ZCG(accel_directives).ignore_dups?NULL:zend_accel_same_function) != SUCCESS) {
+		if (zend_hash_find(target, name, name_len, (void *) &function) == SUCCESS
+			&& function->type == ZEND_USER_FUNCTION
+			&& ((zend_op_array *) function)->last > 0) {
 			zend_error(E_ERROR, "Cannot redeclare function %.*s() (previously declared in %s:%d). If this code worked without the " ACCELERATOR_PRODUCT_NAME ", please set zend_optimizerplus.dups_fix=1 in your ini file",
 					   (int)name_len, name,
 					   ((zend_op_array *) function)->filename,
@@ -915,7 +915,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 	uint size;
 
 	size = sizeof(zend_class_entry*);
-	if(zend_hash_unique_copy(target, source, pCopyConstructor, size, &name, &name_len, ZCG(accel_directives).ignore_dups?NULL:zend_accel_same_class) != SUCCESS) {
+	if (zend_hash_unique_copy(target, source, pCopyConstructor, size, &name, &name_len, ZCG(accel_directives).ignore_dups? NULL : zend_accel_same_class) != SUCCESS) {
 		zend_error(E_ERROR, "Cannot redeclare class %.*s. If this code worked without the " ACCELERATOR_PRODUCT_NAME ", please set zend_optimizerplus.dups_fix=1 in your php.ini", (int)name_len, name);
 	}
 }
@@ -932,7 +932,7 @@ static void zend_do_delayed_early_binding(zend_op_array *op_array, zend_uint ear
 
 		CG(in_compilation) = 1;
 		while ((int)opline_num != -1) {
-			if (zend_lookup_class(Z_STRVAL(op_array->opcodes[opline_num-1].op2.u.constant), Z_STRLEN(op_array->opcodes[opline_num-1].op2.u.constant), &pce TSRMLS_CC) == SUCCESS) {
+			if (zend_lookup_class(Z_STRVAL(op_array->opcodes[opline_num - 1].op2.u.constant), Z_STRLEN(op_array->opcodes[opline_num - 1].op2.u.constant), &pce TSRMLS_CC) == SUCCESS) {
 				do_bind_inherited_class(&op_array->opcodes[opline_num], EG(class_table), *pce, 1 TSRMLS_CC);
 			}
 			opline_num = op_array->opcodes[opline_num].result.u.opline_num;
@@ -975,8 +975,8 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			cfilename = persistent_script->full_path;
 			clen = strlen(cfilename);
 			zend_mangle_property_name(&name, &len, haltoff, sizeof(haltoff) - 1, cfilename, clen, 0);
-			if (!zend_hash_exists(EG(zend_constants), name, len+1)) {
-				zend_register_long_constant(name, len+1, persistent_script->compiler_halt_offset, CONST_CS, 0 TSRMLS_CC);
+			if (!zend_hash_exists(EG(zend_constants), name, len + 1)) {
+				zend_register_long_constant(name, len + 1, persistent_script->compiler_halt_offset, CONST_CS, 0 TSRMLS_CC);
 			}
 			efree(name);
 		}
@@ -1040,11 +1040,11 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 #define ADLER32_NMAX 5552
 /* NMAX is the largest n such that 255n(n+1)/2 + (n+1)(BASE-1) <= 2^32-1 */
 
-#define ADLER32_DO1(buf)    {s1 += *(buf); s2 += s1;}
-#define ADLER32_DO2(buf,i)  ADLER32_DO1(buf+i); ADLER32_DO1(buf+i+1);
-#define ADLER32_DO4(buf,i)  ADLER32_DO2(buf,i); ADLER32_DO2(buf,i+2);
-#define ADLER32_DO8(buf,i)  ADLER32_DO4(buf,i); ADLER32_DO4(buf,i+4);
-#define ADLER32_DO16(buf)   ADLER32_DO8(buf,0); ADLER32_DO8(buf,8);
+#define ADLER32_DO1(buf)        {s1 += *(buf); s2 += s1;}
+#define ADLER32_DO2(buf, i)     ADLER32_DO1(buf + i); ADLER32_DO1(buf + i + 1);
+#define ADLER32_DO4(buf, i)     ADLER32_DO2(buf, i); ADLER32_DO2(buf, i + 2);
+#define ADLER32_DO8(buf, i)     ADLER32_DO4(buf, i); ADLER32_DO4(buf, i + 4);
+#define ADLER32_DO16(buf)       ADLER32_DO8(buf, 0); ADLER32_DO8(buf, 8);
 
 unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint len)
 {
@@ -1081,7 +1081,7 @@ unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint len)
 		}
 		s1 %= ADLER32_BASE;
 		s2 %= ADLER32_BASE;
-    }
+	}
 
 	return (s2 << 16) | s1;
 }

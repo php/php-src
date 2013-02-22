@@ -74,13 +74,13 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 		zend_ini_entry *ini_entry;
 
 		memsize = 8;
-		zend_accel_error(ACCEL_LOG_WARNING,"zend_optimizerplus.memory_consumption is set below the required 8MB.\n" );
+		zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.memory_consumption is set below the required 8MB.\n" );
 		zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the minimal 8MB cofiguration.\n" );
 
 		if (zend_hash_find(EG(ini_directives),
 					"zend_optimizerplus.memory_consumption",
 					sizeof("zend_optimizerplus.memory_consumption"),
-					(void *) &ini_entry)==FAILURE) {
+					(void *) &ini_entry) == FAILURE) {
 			return FAILURE;
 		}
 
@@ -112,22 +112,22 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 		const char *new_new_value;
 		zend_ini_entry *ini_entry;
 
-		if(size < MIN_ACCEL_FILES){
+		if (size < MIN_ACCEL_FILES) {
 			size = MIN_ACCEL_FILES;
 			new_new_value = TOKENTOSTR(MIN_ACCEL_FILES);
-			zend_accel_error(ACCEL_LOG_WARNING,"zend_optimizerplus.max_accelerated_files is set below the required minimum (%d).\n", MIN_ACCEL_FILES );
+			zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_accelerated_files is set below the required minimum (%d).\n", MIN_ACCEL_FILES );
 			zend_accel_error(ACCEL_LOG_WARNING,ACCELERATOR_PRODUCT_NAME " will use the minimal cofiguration.\n" );
 		}
-		if(size > MAX_ACCEL_FILES){
+		if (size > MAX_ACCEL_FILES) {
 			size = MAX_ACCEL_FILES;
 			new_new_value = TOKENTOSTR(MAX_ACCEL_FILES);
-			zend_accel_error(ACCEL_LOG_WARNING,"zend_optimizerplus.max_accelerated_files is set above the limit (%d).\n", MAX_ACCEL_FILES );
+			zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_accelerated_files is set above the limit (%d).\n", MAX_ACCEL_FILES );
 			zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the maximal cofiguration.\n" );
 		}
 		if (zend_hash_find(EG(ini_directives),
 					"zend_optimizerplus.max_accelerated_files",
 					sizeof("zend_optimizerplus.max_accelerated_files"),
-					(void *) &ini_entry)==FAILURE) {
+					(void *) &ini_entry) == FAILURE) {
 			return FAILURE;
 		}
 		ini_entry->value = strdup(new_new_value);
@@ -158,12 +158,12 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 		zend_ini_entry *ini_entry;
 
 		percentage = 5;
-		zend_accel_error(ACCEL_LOG_WARNING,"zend_optimizerplus.max_wasted_percentage must be ser netweeb 1 and 50.\n");
+		zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_wasted_percentage must be ser netweeb 1 and 50.\n");
 		zend_accel_error(ACCEL_LOG_WARNING,ACCELERATOR_PRODUCT_NAME " will use 5%.\n" );
 		if (zend_hash_find(EG(ini_directives),
 					"zend_optimizerplus.max_wasted_percentage",
 					sizeof("zend_optimizerplus.max_wasted_percentage"),
-					(void *) &ini_entry)==FAILURE) {
+					(void *) &ini_entry) == FAILURE) {
 			return FAILURE;
 		}
 		ini_entry->value = strdup(new_new_value);
@@ -199,12 +199,12 @@ static ZEND_INI_MH(OnUpdateAccelBlacklist)
 }
 
 ZEND_INI_BEGIN()
-    STD_PHP_INI_BOOLEAN("zend_optimizerplus.enable"             ,"1", PHP_INI_SYSTEM, OnUpdateBool, enabled                             , zend_accel_globals, accel_globals)
-	STD_PHP_INI_BOOLEAN("zend_optimizerplus.use_cwd"            ,"1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.use_cwd            , zend_accel_globals, accel_globals)
-	STD_PHP_INI_BOOLEAN("zend_optimizerplus.validate_timestamps","1", PHP_INI_ALL   , OnUpdateBool, accel_directives.validate_timestamps, zend_accel_globals, accel_globals)
-	STD_PHP_INI_BOOLEAN("zend_optimizerplus.inherited_hack"     ,"1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.inherited_hack     , zend_accel_globals, accel_globals)
-	STD_PHP_INI_BOOLEAN("zend_optimizerplus.dups_fix"           ,"0", PHP_INI_ALL   , OnUpdateBool, accel_directives.ignore_dups        , zend_accel_globals, accel_globals)
-	STD_PHP_INI_BOOLEAN("zend_optimizerplus.revalidate_path"    ,"0", PHP_INI_ALL   , OnUpdateBool, accel_directives.revalidate_path    , zend_accel_globals, accel_globals)
+    STD_PHP_INI_BOOLEAN("zend_optimizerplus.enable"             , "1", PHP_INI_SYSTEM, OnUpdateBool, enabled                             , zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("zend_optimizerplus.use_cwd"            , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.use_cwd            , zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("zend_optimizerplus.validate_timestamps", "1", PHP_INI_ALL   , OnUpdateBool, accel_directives.validate_timestamps, zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("zend_optimizerplus.inherited_hack"     , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.inherited_hack     , zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("zend_optimizerplus.dups_fix"           , "0", PHP_INI_ALL   , OnUpdateBool, accel_directives.ignore_dups        , zend_accel_globals, accel_globals)
+	STD_PHP_INI_BOOLEAN("zend_optimizerplus.revalidate_path"    , "0", PHP_INI_ALL   , OnUpdateBool, accel_directives.revalidate_path    , zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_ENTRY("zend_optimizerplus.log_verbosity_level"   , "1"   , PHP_INI_SYSTEM, OnUpdateLong, accel_directives.log_verbosity_level,       zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("zend_optimizerplus.memory_consumption"    , "64"  , PHP_INI_SYSTEM, OnUpdateMemoryConsumption,    accel_directives.memory_consumption,        zend_accel_globals, accel_globals)
@@ -271,7 +271,7 @@ static int filename_is_in_cache(char *filename, int filename_len TSRMLS_DC)
 		}
 	}
 
-	if((key = accel_make_persistent_key_ex(&handle, filename_len, &key_length TSRMLS_CC)) != NULL) {
+	if ((key = accel_make_persistent_key_ex(&handle, filename_len, &key_length TSRMLS_CC)) != NULL) {
 		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length+1);
 		return persistent_script && !persistent_script->corrupted;
 	}
@@ -301,8 +301,8 @@ static void accel_file_in_cache(int type, INTERNAL_FUNCTION_PARAMETERS)
 		return;
 	}
 #endif
-	if(filename_len > 0) {
-		if(filename_is_in_cache(filename, filename_len TSRMLS_CC)) {
+	if (filename_len > 0) {
+		if (filename_is_in_cache(filename, filename_len TSRMLS_CC)) {
 			RETURN_TRUE;
 		}
 	}
@@ -342,15 +342,15 @@ static ZEND_MINIT_FUNCTION(zend_accelerator)
 void zend_accel_override_file_functions(TSRMLS_D)
 {
 	zend_function *old_function;
-	if(accel_startup_ok && ZCG(accel_directives).file_override_enabled) {
+	if (accel_startup_ok && ZCG(accel_directives).file_override_enabled) {
 		/* override file_exists */
-		if(zend_hash_find(CG(function_table), "file_exists", sizeof("file_exists"), (void **)&old_function) == SUCCESS) {
+		if (zend_hash_find(CG(function_table), "file_exists", sizeof("file_exists"), (void **)&old_function) == SUCCESS) {
 			old_function->internal_function.handler = accel_file_exists;
 		}
-		if(zend_hash_find(CG(function_table), "is_file", sizeof("is_file"), (void **)&old_function) == SUCCESS) {
+		if (zend_hash_find(CG(function_table), "is_file", sizeof("is_file"), (void **)&old_function) == SUCCESS) {
 			old_function->internal_function.handler = accel_is_file;
 		}
-		if(zend_hash_find(CG(function_table), "is_readable", sizeof("is_readable"), (void **)&old_function) == SUCCESS) {
+		if (zend_hash_find(CG(function_table), "is_readable", sizeof("is_readable"), (void **)&old_function) == SUCCESS) {
 			old_function->internal_function.handler = accel_is_readable;
 		}
 	}
@@ -424,8 +424,8 @@ static zval* accelerator_get_scripts(TSRMLS_D)
 
 	MAKE_STD_ZVAL(return_value);
 	array_init(return_value);
-	for (i=0; i<ZCSG(hash).max_num_entries; i++) {
-		for (cache_entry=ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
+	for (i = 0; i<ZCSG(hash).max_num_entries; i++) {
+		for (cache_entry = ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
 			zend_persistent_script *script;
 
 			if (cache_entry->indirect) continue;
@@ -498,8 +498,8 @@ static ZEND_FUNCTION(accelerator_get_status)
 	add_assoc_zval(return_value, "accelerator_statistics",statistics);
 
 	/* acceleratred scripts */
-	scripts=accelerator_get_scripts(TSRMLS_C);
-	if( scripts ){
+	scripts = accelerator_get_scripts(TSRMLS_C);
+	if (scripts) {
 		add_assoc_zval(return_value, "scripts",scripts);
 	}
 }
@@ -553,20 +553,20 @@ static ZEND_FUNCTION(accelerator_get_configuration)
 	add_assoc_bool(directives,   "zend_optimizerplus.enable_file_override",   ZCG(accel_directives).file_override_enabled);
 	add_assoc_long(directives, 	 "zend_optimizerplus.optimization_level",         ZCG(accel_directives).optimization_level);
 
-	add_assoc_zval(return_value,"directives",directives);
+	add_assoc_zval(return_value, "directives",directives);
 
 	/*version */
 	MAKE_STD_ZVAL(version);
 	array_init(version);
 	add_assoc_string(version, "version", ACCELERATOR_VERSION, 1);
 	add_assoc_string(version, "accelerator_product_name", ACCELERATOR_PRODUCT_NAME, 1);
-	add_assoc_zval(return_value,"version",version);
+	add_assoc_zval(return_value, "version",version);
 
 	/* blacklist */
 	MAKE_STD_ZVAL(blacklist);
 	array_init(blacklist);
 	zend_accel_blacklist_apply(&accel_blacklist, (apply_func_arg_t) add_blacklist_path, blacklist TSRMLS_CC);
-	add_assoc_zval(return_value,"blacklist",blacklist);
+	add_assoc_zval(return_value, "blacklist",blacklist);
 }
 
 /* {{{ proto void accelerator_reset()

@@ -6,10 +6,10 @@
 
 if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 	zend_op *opline;
-	zend_op *end = op_array->opcodes+op_array->last;
+	zend_op *end = op_array->opcodes + op_array->last;
 
 	opline = op_array->opcodes;
-	while (opline<end) {
+	while (opline < end) {
 		switch (opline->opcode) {
 			case ZEND_ADD:
 			case ZEND_SUB:
@@ -25,7 +25,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_ASSIGN_SUB:
 			case ZEND_ASSIGN_MUL:
 			case ZEND_ASSIGN_DIV:
-				if(opline->extended_value != 0) {
+				if (opline->extended_value != 0) {
 					/* object tristate op - don't attempt to optimize it! */
 					break;
 				}
@@ -48,7 +48,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_ASSIGN_MOD:
 			case ZEND_ASSIGN_SL:
 			case ZEND_ASSIGN_SR:
-				if(opline->extended_value != 0) {
+				if (opline->extended_value != 0) {
 					/* object tristate op - don't attempt to optimize it! */
 					break;
 				}
@@ -58,7 +58,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					}
 				}
 				break;
-			
+
 			case ZEND_CONCAT:
 				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 					if (ZEND_OP1_LITERAL(opline).type != IS_STRING) {
@@ -67,7 +67,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 				}
 				/* break missing *intentionally - the assign_op's may only optimize op2 */
 			case ZEND_ASSIGN_CONCAT:
-				if(opline->extended_value != 0) {
+				if (opline->extended_value != 0) {
 					/* object tristate op - don't attempt to optimize it! */
 					break;
 				}
@@ -77,7 +77,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					}
 				}
 				break;
-			
+
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
 				/* convert Ti = JMPZ_EX(Ti, L) to JMPZ(Ti, L) */
@@ -118,18 +118,18 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					}
 					break;
 				}
-				if ((opline+1)->opcode == ZEND_JMP) {
+				if ((opline + 1)->opcode == ZEND_JMP) {
 					/* JMPZ(X, L1), JMP(L2) => JMPZNZ(X, L1, L2) */
 					/* JMPNZ(X, L1), JMP(L2) => JMPZNZ(X, L2, L1) */
-					if (ZEND_OP2(opline).opline_num == ZEND_OP1(opline+1).opline_num) {
+					if (ZEND_OP2(opline).opline_num == ZEND_OP1(opline + 1).opline_num) {
 						/* JMPZ(X, L1), JMP(L1) => NOP, JMP(L1) */
 						MAKE_NOP(opline);
 					} else {
 						if (opline->opcode == ZEND_JMPZ) {
-							opline->extended_value = ZEND_OP1(opline+1).opline_num;
+							opline->extended_value = ZEND_OP1(opline + 1).opline_num;
 						} else {
 							opline->extended_value = ZEND_OP2(opline).opline_num;
-							COPY_NODE(opline->op2, (opline+1)->op1);
+							COPY_NODE(opline->op2, (opline + 1)->op1);
 						}
 						opline->opcode = ZEND_JMPZNZ;
 					}
@@ -151,14 +151,14 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					opline->opcode = ZEND_JMP;
 				}
 				break;
-		
+
 			case ZEND_BRK:
 			case ZEND_CONT:
 				{
 				    zend_brk_cont_element *jmp_to;
 					int array_offset;
 					int nest_levels;
-					int dont_optimize=0;
+					int dont_optimize = 0;
 
 					if (ZEND_OP2_TYPE(opline) != IS_CONST) {
 						break;
@@ -168,8 +168,8 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 
 					array_offset = ZEND_OP1(opline).opline_num;
 					while (1) {
-						if (array_offset==-1) {
-							dont_optimize=1; /* don't optimize this bogus break/continue, let the executor shout */
+						if (array_offset == -1) {
+							dont_optimize = 1; /* don't optimize this bogus break/continue, let the executor shout */
 							break;
 						}
 						jmp_to = &op_array->brk_cont_array[array_offset];
@@ -178,7 +178,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 							if (opline->opcode == ZEND_BRK &&
 							    (op_array->opcodes[jmp_to->brk].opcode == ZEND_FREE ||
 							     op_array->opcodes[jmp_to->brk].opcode == ZEND_SWITCH_FREE)) {
-								dont_optimize=1;
+								dont_optimize = 1;
 								break;
 							}
 						} else {
@@ -189,7 +189,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 					if (dont_optimize) {
 						break;
 					}
-	
+
 					/* optimize - convert to a JMP */
 					switch (opline->opcode) {
 						case ZEND_BRK:

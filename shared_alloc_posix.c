@@ -39,28 +39,28 @@ typedef struct  {
 static int create_segments(size_t requested_size, zend_shared_segment_posix ***shared_segments_p, int *shared_segments_count, char **error_in)
 {
 	zend_shared_segment_posix *shared_segment;
-	char shared_segment_name[sizeof("/ZendAccelerator.")+20];
+	char shared_segment_name[sizeof("/ZendAccelerator.") + 20];
 
 	*shared_segments_count = 1;
-	*shared_segments_p = (zend_shared_segment_posix **) calloc(1, sizeof(zend_shared_segment_posix)+sizeof(void *));
+	*shared_segments_p = (zend_shared_segment_posix **) calloc(1, sizeof(zend_shared_segment_posix) + sizeof(void *));
 	shared_segment = (zend_shared_segment_posix *)((char *)(*shared_segments_p) + sizeof(void *));
 	(*shared_segments_p)[0] = shared_segment;
 
 	sprintf(shared_segment_name, "/ZendAccelerator.%d", getpid());
 	shared_segment->shm_fd = shm_open(shared_segment_name, O_RDWR|O_CREAT|O_TRUNC, 0600);
-	if(shared_segment->shm_fd == -1) {
+	if (shared_segment->shm_fd == -1) {
 		*error_in = "shm_open";
 		return ALLOC_FAILURE;
 	}
 
-	if(ftruncate(shared_segment->shm_fd, requested_size) != 0) {
+	if (ftruncate(shared_segment->shm_fd, requested_size) != 0) {
 		*error_in = "ftruncate";
 		shm_unlink(shared_segment_name);
 		return ALLOC_FAILURE;
 	}
 
 	shared_segment->common.p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED, shared_segment->shm_fd, 0);
-	if(shared_segment->common.p == MAP_FAILED) {
+	if (shared_segment->common.p == MAP_FAILED) {
 		*error_in = "mmap";
 		shm_unlink(shared_segment_name);
 		return ALLOC_FAILURE;

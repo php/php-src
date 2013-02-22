@@ -38,12 +38,12 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	zend_shared_segment *shared_segment;
 
 	*shared_segments_count = 1;
-	*shared_segments_p = (zend_shared_segment **) calloc(1, sizeof(zend_shared_segment)+sizeof(void *));
+	*shared_segments_p = (zend_shared_segment **) calloc(1, sizeof(zend_shared_segment) + sizeof(void *));
 	shared_segment = (zend_shared_segment *)((char *)(*shared_segments_p) + sizeof(void *));
 	(*shared_segments_p)[0] = shared_segment;
 
 	shared_segment->p = mmap(0, requested_size, PROT_READ | PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
-	if(shared_segment->p == MAP_FAILED) {
+	if (shared_segment->p == MAP_FAILED) {
 		*error_in = "mmap";
 		return ALLOC_FAILURE;
 	}

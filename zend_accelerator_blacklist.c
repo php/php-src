@@ -50,7 +50,7 @@ void zend_accel_blacklist_init(zend_blacklist *blacklist)
 	blacklist->pos = 0;
 	blacklist->size = ZEND_BLACKLIST_BLOCK_SIZE;
 
-	if( blacklist->entries != NULL ){
+	if (blacklist->entries != NULL) {
 		zend_accel_blacklist_shutdown(blacklist);
 	}
 
@@ -74,8 +74,8 @@ static void blacklist_report_regexp_error(regex_t *comp_regex, int reg_err)
 
 static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 {
-	int i, end=0, j, rlen=6, clen, reg_err;
 	char *regexp;
+	int i, j, clen, reg_err, end = 0, rlen = 6;
 	zend_regexp_list **regexp_list_it, *it;
 
 	if (blacklist->pos == 0) {
@@ -84,11 +84,11 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 	}
 
 	regexp_list_it = &(blacklist->regexp_list);
-	for (i=0; i<blacklist->pos; i++) {
-		rlen += blacklist->entries[i].path_length*2+2;
+	for (i = 0; i < blacklist->pos; i++) {
+		rlen += blacklist->entries[i].path_length * 2 + 2;
 
 		/* don't create a regexp buffer bigger than 12K)*/
-		if((i+1 == blacklist->pos) || ((rlen+blacklist->entries[i+1].path_length*2+2)>(12*1024) ) ) {
+		if ((i + 1 == blacklist->pos) || ((rlen + blacklist->entries[i + 1].path_length * 2 + 2) > (12 * 1024))) {
 			regexp = (char *)malloc(rlen);
 			if (!regexp) {
 				zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed\n");
@@ -97,16 +97,16 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			regexp[0] = '^';
 			regexp[1] = '(';
 
-			clen=2;
-			for (j=end; j<=i ;j++) {
+			clen = 2;
+			for (j = end; j <= i ;j++) {
 
 				int c;
-				if (j!=end) {
+				if (j != end) {
 					regexp[clen++] = '|';
 				}
 				/* copy mangled filename */
-				for(c=0; c<blacklist->entries[j].path_length; c++) {
-					if(strchr("^.[]$()|*+?{}\\", blacklist->entries[j].path[c])) {
+				for (c = 0; c < blacklist->entries[j].path_length; c++) {
+					if (strchr("^.[]$()|*+?{}\\", blacklist->entries[j].path[c])) {
 						regexp[clen++] = '\\';
 					}
 					regexp[clen++] = blacklist->entries[j].path[c];
@@ -127,7 +127,7 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			}
 			/* prepare for the next iteration */
 			free(regexp);
-			end = i+1;
+			end = i + 1;
 			rlen = 6;
 			*regexp_list_it = it;
 			regexp_list_it = &it->next;
@@ -147,7 +147,7 @@ void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 	blacklist->entries = NULL;
 	if (blacklist->regexp_list) {
 		zend_regexp_list *temp, *it = blacklist->regexp_list;
-		while( it ){
+		while (it) {
 			regfree(&it->comp_regex);
 			temp = it;
 			it = it->next;
@@ -158,7 +158,7 @@ void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 
 static inline void zend_accel_blacklist_allocate(zend_blacklist *blacklist)
 {
-	if (blacklist->pos==blacklist->size) {
+	if (blacklist->pos == blacklist->size) {
 		blacklist->size += ZEND_BLACKLIST_BLOCK_SIZE;
 		blacklist->entries = (zend_blacklist_entry *) realloc(blacklist->entries, sizeof(zend_blacklist_entry)*blacklist->size);
 	}
@@ -166,12 +166,12 @@ static inline void zend_accel_blacklist_allocate(zend_blacklist *blacklist)
 
 void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 {
-	char buf[MAXPATHLEN+1], real_path[MAXPATHLEN+1];
+	char buf[MAXPATHLEN + 1], real_path[MAXPATHLEN + 1];
 	FILE *fp;
 	int path_length;
 	TSRMLS_FETCH();
 
-	if ((fp=fopen(filename, "r"))==NULL) {
+	if ((fp = fopen(filename, "r")) == NULL) {
 		zend_accel_error(ACCEL_LOG_WARNING, "Cannot load blacklist file: %s\n", filename);
 		return;
 	}
@@ -181,30 +181,30 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	memset(buf, 0, sizeof(buf));
 	memset(real_path, 0, sizeof(real_path));
 
-	while (fgets(buf, MAXPATHLEN, fp)!=NULL) {
+	while (fgets(buf, MAXPATHLEN, fp) != NULL) {
 		char *path_dup, *pbuf;
 		path_length = strlen(buf);
-		if (path_length > 0 && buf[path_length-1]=='\n') {
+		if (path_length > 0 && buf[path_length - 1] == '\n') {
 			buf[--path_length] = 0;
-			if (path_length > 0 && buf[path_length-1]=='\r') {
+			if (path_length > 0 && buf[path_length - 1] == '\r') {
 				buf[--path_length] = 0;
 			}
 		}
 
 		/* Strip ctrl-m prefix */
 		pbuf = &buf[0];
-		while(*pbuf == '\r') {
+		while (*pbuf == '\r') {
 			*pbuf++ = 0;
 			path_length--;
 		}
 
 		/* strip \" */
-		if( pbuf[0] == '\"' && pbuf[path_length-1]== '\"' ){
+		if (pbuf[0] == '\"' && pbuf[path_length - 1]== '\"') {
 			*pbuf++ = 0;
-			path_length-=2;
+			path_length -= 2;
 		}
 
-		if (path_length==0) {
+		if (path_length == 0) {
 			continue;
 		}
 
@@ -216,13 +216,13 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 
 		zend_accel_blacklist_allocate(blacklist);
 		blacklist->entries[blacklist->pos].path_length = path_length;
-		blacklist->entries[blacklist->pos].path = (char *) malloc(path_length+1);
+		blacklist->entries[blacklist->pos].path = (char *)malloc(path_length + 1);
 		if (!blacklist->entries[blacklist->pos].path) {
 			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed\n");
 			return;
 		}
 		blacklist->entries[blacklist->pos].id = blacklist->pos;
-		memcpy(blacklist->entries[blacklist->pos].path, real_path, path_length+1);
+		memcpy(blacklist->entries[blacklist->pos].path, real_path, path_length + 1);
 		blacklist->pos++;
 	}
 	fclose(fp);
@@ -251,7 +251,7 @@ void zend_accel_blacklist_apply(zend_blacklist *blacklist, apply_func_arg_t func
 {
 	int i;
 
-	for(i=0; i<blacklist->pos; i++) {
+	for (i = 0; i < blacklist->pos; i++) {
 		func(&blacklist->entries[i], argument TSRMLS_CC);
 	}
 }

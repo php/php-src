@@ -152,14 +152,14 @@ static uint zend_persist_op_array_calc(zend_op_array *op_array TSRMLS_DC)
 	if (!zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
 #if ZEND_EXTENSION_API_NO <= PHP_5_3_X_API_NO
 		zend_op *opline = op_array->opcodes;
-		zend_op *end = op_array->opcodes+op_array->last;
+		zend_op *end = op_array->opcodes + op_array->last;
 
 		ADD_DUP_SIZE(op_array->opcodes, sizeof(zend_op) * op_array->last);
 		while (opline<end) {
-			if (opline->op1.op_type==IS_CONST) {
+			if (opline->op1.op_type == IS_CONST) {
 				ADD_SIZE(zend_persist_zval_calc(&opline->op1.u.constant TSRMLS_CC));
 			}
-			if (opline->op2.op_type==IS_CONST) {
+			if (opline->op2.op_type == IS_CONST) {
 				ADD_SIZE(zend_persist_zval_calc(&opline->op2.u.constant TSRMLS_CC));
 			}
 			opline++;
@@ -178,11 +178,11 @@ static uint zend_persist_op_array_calc(zend_op_array *op_array TSRMLS_DC)
 		zend_uint i;
 
 		ADD_DUP_SIZE(op_array->arg_info, sizeof(zend_arg_info) * op_array->num_args);
-		for(i=0;i<op_array->num_args;i++) {
-			if(op_array->arg_info[i].name) {
+		for (i = 0;i < op_array->num_args; i++) {
+			if (op_array->arg_info[i].name) {
 				ADD_INTERNED_STRING(op_array->arg_info[i].name, op_array->arg_info[i].name_len + 1);
 			}
-			if(op_array->arg_info[i].class_name) {
+			if (op_array->arg_info[i].class_name) {
 				ADD_INTERNED_STRING(op_array->arg_info[i].class_name, op_array->arg_info[i].class_name_len + 1);
 			}
 
@@ -198,19 +198,19 @@ static uint zend_persist_op_array_calc(zend_op_array *op_array TSRMLS_DC)
 		ADD_SIZE(zend_hash_persist_calc(op_array->static_variables, (int (*)(void* TSRMLS_DC)) zend_persist_zval_ptr_calc, sizeof(zval**) TSRMLS_CC));
 	}
 
-	if(ZCG(accel_directives).save_comments && op_array->doc_comment) {
+	if (ZCG(accel_directives).save_comments && op_array->doc_comment) {
 		ADD_DUP_SIZE(op_array->doc_comment, op_array->doc_comment_len + 1);
 	}
 
-	if(op_array->try_catch_array) {
+	if (op_array->try_catch_array) {
 		ADD_DUP_SIZE(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
 	}
 
-	if(op_array->vars && !zend_shared_alloc_get_xlat_entry(op_array->vars)) {
+	if (op_array->vars && !zend_shared_alloc_get_xlat_entry(op_array->vars)) {
 		int i;
 
 		ADD_DUP_SIZE(op_array->vars, sizeof(zend_compiled_variable) * op_array->last_var);
-		for(i=0; i<op_array->last_var; i++) {
+		for (i = 0; i < op_array->last_var; i++) {
 			ADD_INTERNED_STRING(op_array->vars[i].name, op_array->vars[i].name_len + 1);
 		}
 	}
@@ -222,7 +222,7 @@ static uint zend_persist_property_info_calc(zend_property_info *prop TSRMLS_DC)
 {
 	START_SIZE();
 	ADD_INTERNED_STRING(prop->name, prop->name_length + 1);
-	if(ZCG(accel_directives).save_comments && prop->doc_comment) {
+	if (ZCG(accel_directives).save_comments && prop->doc_comment) {
 		ADD_DUP_SIZE(prop->doc_comment, prop->doc_comment_len + 1);
 	}
 	RETURN_SIZE();
@@ -267,7 +267,7 @@ static uint zend_persist_class_entry_calc(zend_class_entry **pce TSRMLS_DC)
 		if (ZEND_CE_FILENAME(ce)) {
 			ADD_DUP_SIZE(ZEND_CE_FILENAME(ce), strlen(ZEND_CE_FILENAME(ce)) + 1);
 		}
-		if(ZCG(accel_directives).save_comments && ZEND_CE_DOC_COMMENT(ce)) {
+		if (ZCG(accel_directives).save_comments && ZEND_CE_DOC_COMMENT(ce)) {
 			ADD_DUP_SIZE(ZEND_CE_DOC_COMMENT(ce), ZEND_CE_DOC_COMMENT_LEN(ce) + 1);
 		}
 
@@ -279,16 +279,16 @@ static uint zend_persist_class_entry_calc(zend_class_entry **pce TSRMLS_DC)
 			while (ce->trait_aliases[i]) {
 				if (ce->trait_aliases[i]->trait_method) {
 					if (ce->trait_aliases[i]->trait_method->method_name) {
-						ADD_SIZE(ce->trait_aliases[i]->trait_method->mname_len+1);
+						ADD_SIZE(ce->trait_aliases[i]->trait_method->mname_len + 1);
 					}
 					if (ce->trait_aliases[i]->trait_method->class_name) {
-						ADD_SIZE(ce->trait_aliases[i]->trait_method->cname_len+1);
+						ADD_SIZE(ce->trait_aliases[i]->trait_method->cname_len + 1);
 					}
 					ADD_SIZE(sizeof(zend_trait_method_reference));
 				}
 
 				if (ce->trait_aliases[i]->alias) {
-					ADD_SIZE(ce->trait_aliases[i]->alias_len+1);
+					ADD_SIZE(ce->trait_aliases[i]->alias_len + 1);
 				}
 				ADD_SIZE(sizeof(zend_trait_alias));
 				i++;
@@ -300,8 +300,8 @@ static uint zend_persist_class_entry_calc(zend_class_entry **pce TSRMLS_DC)
 			int i = 0;
 
 			while (ce->trait_precedences[i]) {
-				ADD_SIZE(ce->trait_precedences[i]->trait_method->mname_len+1);
-				ADD_SIZE(ce->trait_precedences[i]->trait_method->cname_len+1);
+				ADD_SIZE(ce->trait_precedences[i]->trait_method->mname_len + 1);
+				ADD_SIZE(ce->trait_precedences[i]->trait_method->cname_len + 1);
 				ADD_SIZE(sizeof(zend_trait_method_reference));
 
 				if (ce->trait_precedences[i]->exclude_from_classes) {
@@ -311,12 +311,12 @@ static uint zend_persist_class_entry_calc(zend_class_entry **pce TSRMLS_DC)
 						ADD_SIZE(strlen((char*)ce->trait_precedences[i]->exclude_from_classes[j]) + 1);
 						j++;
 					}
-					ADD_SIZE(sizeof(zend_class_entry*) * (j+1));
+					ADD_SIZE(sizeof(zend_class_entry*) * (j + 1));
 				}
 				ADD_SIZE(sizeof(zend_trait_precedence));
 				i++;
 			}
-			ADD_SIZE(sizeof(zend_trait_precedence*) * (i+1));
+			ADD_SIZE(sizeof(zend_trait_precedence*) * (i + 1));
 		}
 #endif
 	}

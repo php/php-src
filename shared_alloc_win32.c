@@ -113,7 +113,7 @@ void zend_shared_alloc_lock_win32()
 {
 	DWORD waitRes = WaitForSingleObject(memory_mutex, INFINITE);
 
-	if(waitRes == WAIT_FAILED) {
+	if (waitRes == WAIT_FAILED) {
 		zend_accel_error(ACCEL_LOG_ERROR, "Cannot lock mutex");
 	}
 }
@@ -132,13 +132,13 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 	MEMORY_BASIC_INFORMATION info;
 
 	err = GetLastError();
-	if(!fp) {
+	if (!fp) {
 		zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to open base address file", err);
 		*error_in="fopen";
 		return ALLOC_FAILURE;
 	}
-	if(!fscanf(fp, "%p", &wanted_mapping_base)) {
+	if (!fscanf(fp, "%p", &wanted_mapping_base)) {
 		err = GetLastError();
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to read base address", err);
 		*error_in="read mapping base";
@@ -159,7 +159,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 	mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, wanted_mapping_base);
 	err = GetLastError();
 
-	if(mapping_base == NULL) {
+	if (mapping_base == NULL) {
 		if (err == ERROR_INVALID_ADDRESS) {
 			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to base address", err);
 			return ALLOC_FAILURE;
@@ -200,9 +200,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		} else {
 			return ret;
 		}
-	} while(++map_retries < MAX_MAP_RETRIES);
+	} while (++map_retries < MAX_MAP_RETRIES);
 
-	if(map_retries == MAX_MAP_RETRIES) {
+	if (map_retries == MAX_MAP_RETRIES) {
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to open file mapping", err);
 		*error_in = "OpenFileMapping";
 		return ALLOC_FAILURE;
@@ -222,7 +222,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	memfile	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, requested_size,
 								create_name_with_username(ACCEL_FILEMAP_NAME));
 	err = GetLastError();
-	if(memfile == NULL) {
+	if (memfile == NULL) {
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to create file mapping", err);
 		*error_in = "CreateFileMapping";
 		return ALLOC_FAILURE;
@@ -250,9 +250,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 			GetSystemInfo(&si);
 
 			/* Are we running Vista ? */
-			if(osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 6 ) {
+			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 6) {
 				/* Assert that platform is 32 bit (for 64 bit we need to test a different set */
-				if(si.wProcessorArchitecture != PROCESSOR_ARCHITECTURE_INTEL)
+				if (si.wProcessorArchitecture != PROCESSOR_ARCHITECTURE_INTEL)
 					DebugBreak();
 
 				wanted_mapping_base = vista_mapping_base_set;
@@ -273,13 +273,13 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 
 	do {
 		shared_segment->p = mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, *wanted_mapping_base);
-		if(*wanted_mapping_base == NULL) /* Auto address (NULL) is the last option on the array */
+		if (*wanted_mapping_base == NULL) /* Auto address (NULL) is the last option on the array */
 			break;
 		wanted_mapping_base++;
 	} while (!mapping_base);
 
 	err = GetLastError();
-	if(mapping_base == NULL) {
+	if (mapping_base == NULL) {
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to create view for file mapping", err);
 		*error_in = "MapViewOfFile";
 		return ALLOC_FAILURE;
@@ -287,7 +287,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		char *mmap_base_file = get_mmap_base_file();
 		FILE *fp = fopen(mmap_base_file, "w");
 		err = GetLastError();
-		if(!fp) {
+		if (!fp) {
 			zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
 			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to write base address", err);
 			return ALLOC_FAILURE;
@@ -304,7 +304,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 
 static int detach_segment(zend_shared_segment *shared_segment)
 {
-	if(mapping_base) {
+	if (mapping_base) {
 		UnmapViewOfFile(mapping_base);
 	}
 	CloseHandle(memfile);

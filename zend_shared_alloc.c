@@ -56,7 +56,7 @@ zend_smm_shared_globals *smm_shared_globals;
 static MUTEX_T zts_lock;
 #endif
 int lock_file;
-static char lockfile_name[sizeof(TMP_DIR)+sizeof(SEM_FILENAME_PREFIX)+8];
+static char lockfile_name[sizeof(TMP_DIR) + sizeof(SEM_FILENAME_PREFIX) + 8];
 #endif
 
 static const zend_shared_memory_handler_entry handler_table[] = {
@@ -111,7 +111,7 @@ static void copy_shared_segments(void *to, void *from, int count, int size)
 	void *shared_segments_from_p = from;
 	int i;
 
-	for(i=0;i<count;i++) {
+	for (i = 0; i < count; i++) {
 		shared_segments_v[i] = 	shared_segments_to_p;
 		memcpy(shared_segments_to_p, shared_segments_from_p, size);
 		shared_segments_to_p = ((char *)shared_segments_to_p + size);
@@ -129,15 +129,15 @@ static int zend_shared_alloc_try(const zend_shared_memory_handler_entry *he, int
 
 	res = S_H(create_segments)(requested_size, shared_segments_p, shared_segments_count, error_in);
 
-	if( res ) {
+	if (res) {
 		/* this model works! */
 		return res;
 	}
-	if(*shared_segments_p) {
+	if (*shared_segments_p) {
 		int i;
 		/* cleanup */
-		for(i=0;i<*shared_segments_count;i++) {
-			if((*shared_segments_p)[i]->p && (int)(*shared_segments_p)[i]->p != -1) {
+		for (i = 0; i < *shared_segments_count; i++) {
+			if ((*shared_segments_p)[i]->p && (int)(*shared_segments_p)[i]->p != -1) {
 				S_H(detach_segment)((*shared_segments_p)[i]);
 			}
 		}
@@ -167,17 +167,17 @@ int zend_shared_alloc_startup(int requested_size)
 
 	zend_shared_alloc_create_lock();
 
-	if(ZCG(accel_directives).memory_model && ZCG(accel_directives).memory_model[0]) {
-		char* model = ZCG(accel_directives).memory_model;
+	if (ZCG(accel_directives).memory_model && ZCG(accel_directives).memory_model[0]) {
+		char *model = ZCG(accel_directives).memory_model;
 		/* "cgi" is really "shm"... */
-		if( strncmp(ZCG(accel_directives).memory_model,"cgi",4) == 0 ){
+		if (strncmp(ZCG(accel_directives).memory_model, "cgi", sizeof("cgi")) == 0) {
 			model = "shm";
 		}
 
-		for(he = handler_table; he->name; he++) {
-			if(strcmp(model, he->name) == 0) {
-				res=zend_shared_alloc_try(he, requested_size, &ZSMMG(shared_segments), &ZSMMG(shared_segments_count), &error_in);
-				if( res ) {
+		for (he = handler_table; he->name; he++) {
+			if (strcmp(model, he->name) == 0) {
+				res = zend_shared_alloc_try(he, requested_size, &ZSMMG(shared_segments), &ZSMMG(shared_segments_count), &error_in);
+				if (res) {
 					/* this model works! */
 				}
 				break;
@@ -185,38 +185,38 @@ int zend_shared_alloc_startup(int requested_size)
 		}
 	}
 
-	if( res == FAILED_REATTACHED ){
+	if (res == FAILED_REATTACHED) {
 		smm_shared_globals = NULL;
 		return res;
 	}
 
-	if(!g_shared_alloc_handler) {
+	if (!g_shared_alloc_handler) {
 		/* try memory handlers in order */
-		for(he = handler_table; he->name; he++) {
-			res=zend_shared_alloc_try(he, requested_size, &ZSMMG(shared_segments), &ZSMMG(shared_segments_count), &error_in);
-			if( res ) {
+		for (he = handler_table; he->name; he++) {
+			res = zend_shared_alloc_try(he, requested_size, &ZSMMG(shared_segments), &ZSMMG(shared_segments_count), &error_in);
+			if (res) {
 				/* this model works! */
 				break;
 			}
 		}
 	}
 
-	if(!g_shared_alloc_handler) {
+	if (!g_shared_alloc_handler) {
 		no_memory_bailout(requested_size, error_in);
 		return ALLOC_FAILURE;
 	}
 
-	if( res == SUCCESSFULLY_REATTACHED ){
+	if (res == SUCCESSFULLY_REATTACHED) {
 		return res;
 	}
 
-	shared_segments_array_size = ZSMMG(shared_segments_count)*S_H(segment_type_size)();
+	shared_segments_array_size = ZSMMG(shared_segments_count) * S_H(segment_type_size)();
 
 	/* move shared_segments and shared_free to shared memory */
 	ZCG(locked) = 1; /* no need to perform a real lock at this point */
 	p_tmp_shared_globals = (zend_smm_shared_globals *) zend_shared_alloc(sizeof(zend_smm_shared_globals));
 
-	tmp_shared_segments = zend_shared_alloc(shared_segments_array_size+ZSMMG(shared_segments_count)*sizeof(void *));
+	tmp_shared_segments = zend_shared_alloc(shared_segments_array_size + ZSMMG(shared_segments_count) * sizeof(void *));
 	copy_shared_segments(tmp_shared_segments, ZSMMG(shared_segments)[0], ZSMMG(shared_segments_count), S_H(segment_type_size)());
 
 	*p_tmp_shared_globals = tmp_shared_globals;
@@ -225,7 +225,7 @@ int zend_shared_alloc_startup(int requested_size)
 	free(ZSMMG(shared_segments));
 	ZSMMG(shared_segments) = tmp_shared_segments;
 
-	ZSMMG(shared_memory_state).positions = (int *) zend_shared_alloc(sizeof(int)*ZSMMG(shared_segments_count));
+	ZSMMG(shared_memory_state).positions = (int *)zend_shared_alloc(sizeof(int) * ZSMMG(shared_segments_count));
 	ZCG(locked) = 0;
 
 	return res;
@@ -240,12 +240,12 @@ void zend_shared_alloc_shutdown(void)
 
 	tmp_shared_globals = *smm_shared_globals;
 	smm_shared_globals = &tmp_shared_globals;
-	shared_segments_array_size = ZSMMG(shared_segments_count)*(S_H(segment_type_size)()+sizeof(void *));
+	shared_segments_array_size = ZSMMG(shared_segments_count) * (S_H(segment_type_size)() + sizeof(void *));
 	tmp_shared_segments = emalloc(shared_segments_array_size);
 	copy_shared_segments(tmp_shared_segments, ZSMMG(shared_segments)[0], ZSMMG(shared_segments_count), S_H(segment_type_size)());
 	ZSMMG(shared_segments) = tmp_shared_segments;
 
-	for(i=0; i<ZSMMG(shared_segments_count); i++) {
+	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		S_H(detach_segment)(ZSMMG(shared_segments)[i]);
 	}
 	efree(ZSMMG(shared_segments));
@@ -265,7 +265,7 @@ void zend_shared_alloc_shutdown(void)
 void *zend_shared_alloc(size_t size)
 {
 	int i;
-	unsigned int block_size = size+sizeof(zend_shared_memory_block_header);
+	unsigned int block_size = size + sizeof(zend_shared_memory_block_header);
 	TSRMLS_FETCH();
 
 #if 1
@@ -277,20 +277,20 @@ void *zend_shared_alloc(size_t size)
 		SHARED_ALLOC_FAILED();
 		return NULL;
 	}
-	for (i=0; i<ZSMMG(shared_segments_count); i++) {
-		if (ZSMMG(shared_segments)[i]->size-ZSMMG(shared_segments)[i]->pos >= block_size) { /* found a valid block */
-			zend_shared_memory_block_header *p = (zend_shared_memory_block_header *) (((char *) ZSMMG(shared_segments)[i]->p)+ZSMMG(shared_segments)[i]->pos);
+	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
+		if (ZSMMG(shared_segments)[i]->size - ZSMMG(shared_segments)[i]->pos >= block_size) { /* found a valid block */
+			zend_shared_memory_block_header *p = (zend_shared_memory_block_header *) (((char *) ZSMMG(shared_segments)[i]->p) + ZSMMG(shared_segments)[i]->pos);
 			int remainder = block_size % PLATFORM_ALIGNMENT;
 			void *retval;
 
-			if (remainder!=0) {
-				size += PLATFORM_ALIGNMENT-remainder;
-				block_size += PLATFORM_ALIGNMENT-remainder;
+			if (remainder != 0) {
+				size += PLATFORM_ALIGNMENT - remainder;
+				block_size += PLATFORM_ALIGNMENT - remainder;
 			}
 			ZSMMG(shared_segments)[i]->pos += block_size;
 			ZSMMG(shared_free) -= block_size;
 			p->size = size;
-			retval = ((char *) p)+sizeof(zend_shared_memory_block_header);
+			retval = ((char *) p) + sizeof(zend_shared_memory_block_header);
 			memset(retval, 0, size);
 			return retval;
 		}
@@ -303,7 +303,7 @@ int zend_shared_memdup_size(void *source, size_t size)
 {
 	void **old_p;
 
-	if (zend_hash_index_find(&xlat_table, (ulong) source, (void **) &old_p)==SUCCESS) {
+	if (zend_hash_index_find(&xlat_table, (ulong)source, (void **)&old_p) == SUCCESS) {
 		/* we already duplicated this pointer */
 		return 0;
 	}
@@ -315,7 +315,7 @@ void *_zend_shared_memdup(void *source, size_t size, zend_bool free_source TSRML
 {
 	void **old_p, *retval;
 
-	if (zend_hash_index_find(&xlat_table, (ulong) source, (void **) &old_p)==SUCCESS) {
+	if (zend_hash_index_find(&xlat_table, (ulong)source, (void **)&old_p) == SUCCESS) {
 		/* we already duplicated this pointer */
 		return *old_p;
 	}
@@ -407,14 +407,14 @@ void zend_shared_alloc_clear_xlat_table(void)
 
 void zend_shared_alloc_register_xlat_entry(const void *old, const void *new)
 {
-	zend_hash_index_update(&xlat_table, (ulong) old, (void*)&new, sizeof(void *), NULL);
+	zend_hash_index_update(&xlat_table, (ulong)old, (void*)&new, sizeof(void *), NULL);
 }
 
 void *zend_shared_alloc_get_xlat_entry(const void *old)
 {
 	void **retval;
 
-	if (zend_hash_index_find(&xlat_table, (ulong) old, (void **) &retval)==FAILURE) {
+	if (zend_hash_index_find(&xlat_table, (ulong)old, (void **)&retval) == FAILURE) {
 		return NULL;
 	}
 	return *retval;
@@ -428,9 +428,9 @@ size_t zend_shared_alloc_get_free_memory(void)
 size_t zend_shared_alloc_get_largest_free_block(void)
 {
 	int i;
-	size_t largest_block_size=0;
+	size_t largest_block_size = 0;
 
-	for (i=0; i<ZSMMG(shared_segments_count); i++) {
+	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		size_t block_size = ZSMMG(shared_segments)[i]->size - ZSMMG(shared_segments)[i]->pos;
 
 		if (block_size>largest_block_size) {
@@ -444,7 +444,7 @@ void zend_shared_alloc_save_state(void)
 {
 	int i;
 
-	for (i=0; i<ZSMMG(shared_segments_count); i++) {
+	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		ZSMMG(shared_memory_state).positions[i] = ZSMMG(shared_segments)[i]->pos;
 	}
 	ZSMMG(shared_memory_state).shared_free = ZSMMG(shared_free);
@@ -454,7 +454,7 @@ void zend_shared_alloc_restore_state(void)
 {
 	int i;
 
-	for (i=0; i<ZSMMG(shared_segments_count); i++) {
+	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		ZSMMG(shared_segments)[i]->pos = ZSMMG(shared_memory_state).positions[i];
 	}
 	ZSMMG(shared_free) = ZSMMG(shared_memory_state).shared_free;
@@ -478,7 +478,7 @@ void zend_accel_shared_protect(int mode TSRMLS_DC)
 		mode = PROT_READ|PROT_WRITE;
 	}
 
-	for(i=0; i < ZSMMG(shared_segments_count); i++) {
+	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		mprotect(ZSMMG(shared_segments)[i]->p, ZSMMG(shared_segments)[i]->size, mode);
 	}
 #endif

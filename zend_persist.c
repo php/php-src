@@ -210,7 +210,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 #endif
 		EG(in_execution) = 1;
 		EG(active_op_array) = op_array;
-		if (zend_get_constant("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1, &offset TSRMLS_CC)) {
+		if (zend_get_constant("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1, &offset TSRMLS_CC)) {
 			main_persistent_script->compiler_halt_offset = Z_LVAL(offset);
 		}
 		EG(active_op_array) = orig_op_array;
@@ -246,7 +246,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		int offset = 0;
 
 		for (;opline<end;opline++, offset++) {
-			if (ZEND_OP1_TYPE(opline)==IS_CONST) {
+			if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 				opline->op1.zv = (zval*)((char*)opline->op1.zv + ((char*)op_array->literals - (char*)orig_literals));
 #else
@@ -254,7 +254,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				zend_protect_zval(&opline->op1.u.constant TSRMLS_CC);
 #endif
 			}
-			if (ZEND_OP2_TYPE(opline)==IS_CONST) {
+			if (ZEND_OP2_TYPE(opline) == IS_CONST) {
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 				opline->op2.zv = (zval*)((char*)opline->op2.zv + ((char*)op_array->literals - (char*)orig_literals));
 #else
@@ -288,9 +288,9 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 				case ZEND_DECLARE_INHERITED_CLASS:
 					if (main_persistent_script && ZCG(accel_directives).inherited_hack) {
 					if (!has_jmp &&
-					   ((opline+2) >= end ||
-					    (opline+1)->opcode != ZEND_FETCH_CLASS ||
-					    (opline+2)->opcode != ZEND_ADD_INTERFACE)) {
+					   ((opline + 2) >= end ||
+					    (opline + 1)->opcode != ZEND_FETCH_CLASS ||
+					    (opline + 2)->opcode != ZEND_ADD_INTERFACE)) {
 
 						zend_uint *opline_num = &main_persistent_script->early_binding;
 
@@ -331,7 +331,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 						break;
 				}
 			}
-#endif /* if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO */ 
+#endif /* if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO */
 		}
 
 		efree(op_array->opcodes);
@@ -350,23 +350,23 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		if ((new_name = zend_shared_alloc_get_xlat_entry(op_array->function_name))) {
 			op_array->function_name = new_name;
 		} else {
-			zend_accel_store(op_array->function_name, strlen(op_array->function_name)+1);
+			zend_accel_store(op_array->function_name, strlen(op_array->function_name) + 1);
 		}
 	}
 
 	if (op_array->arg_info) {
 		zend_arg_info *new_ptr;
-		if((new_ptr = zend_shared_alloc_get_xlat_entry(op_array->arg_info))) {
+		if ((new_ptr = zend_shared_alloc_get_xlat_entry(op_array->arg_info))) {
 			op_array->arg_info = new_ptr;
 		} else {
 			zend_uint i;
 
 			zend_accel_store(op_array->arg_info, sizeof(zend_arg_info) * op_array->num_args);
-			for(i=0;i<op_array->num_args;i++) {
-				if(op_array->arg_info[i].name) {
+			for (i = 0; i < op_array->num_args; i++) {
+				if (op_array->arg_info[i].name) {
 					zend_accel_store_interned_string(op_array->arg_info[i].name, op_array->arg_info[i].name_len + 1);
 				}
-				if(op_array->arg_info[i].class_name) {
+				if (op_array->arg_info[i].class_name) {
 					zend_accel_store_interned_string(op_array->arg_info[i].class_name, op_array->arg_info[i].class_name_len + 1);
 				}
 			}
@@ -382,15 +382,15 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		zend_accel_store(op_array->static_variables, sizeof(HashTable));
 	}
 
-	if(op_array->scope) {
+	if (op_array->scope) {
 		op_array->scope = zend_shared_alloc_get_xlat_entry(op_array->scope);
 	}
 
-	if(op_array->doc_comment) {
+	if (op_array->doc_comment) {
 		if (ZCG(accel_directives).save_comments) {
 			zend_accel_store(op_array->doc_comment, op_array->doc_comment_len + 1);
 		} else {
-			if(!zend_shared_alloc_get_xlat_entry(op_array->doc_comment)) {
+			if (!zend_shared_alloc_get_xlat_entry(op_array->doc_comment)) {
 				zend_shared_alloc_register_xlat_entry(op_array->doc_comment, op_array->doc_comment);
 				efree((char*)op_array->doc_comment);
 			}
@@ -399,24 +399,24 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		}
 	}
 
-	if(op_array->try_catch_array) {
+	if (op_array->try_catch_array) {
 		zend_accel_store(op_array->try_catch_array, sizeof(zend_try_catch_element) * op_array->last_try_catch);
 	}
 
-	if(op_array->vars) {
+	if (op_array->vars) {
 		if ((persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->vars))) {
 			op_array->vars = (zend_compiled_variable*)persist_ptr;
 		} else {
 			int i;
 			zend_accel_store(op_array->vars, sizeof(zend_compiled_variable) * op_array->last_var);
-			for(i=0; i<op_array->last_var; i++) {
+			for (i = 0; i < op_array->last_var; i++) {
 				zend_accel_store_interned_string(op_array->vars[i].name, op_array->vars[i].name_len + 1);
 			}
 		}
 	}
 
 	/* "prototype" may be undefined if "scope" isn't set */
-	if(op_array->scope && op_array->prototype) {
+	if (op_array->scope && op_array->prototype) {
 		if ((persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->prototype))) {
 			op_array->prototype = (union _zend_function*)persist_ptr;
 			/* we use refcount to show that op_array is referenced from several places */
@@ -435,11 +435,11 @@ static void zend_persist_op_array(zend_op_array *op_array TSRMLS_DC)
 static void zend_persist_property_info(zend_property_info *prop TSRMLS_DC)
 {
 	zend_accel_store_interned_string(prop->name, prop->name_length + 1);
-	if(prop->doc_comment) {
+	if (prop->doc_comment) {
 		if (ZCG(accel_directives).save_comments) {
 			zend_accel_store(prop->doc_comment, prop->doc_comment_len + 1);
 		} else {
-			if(!zend_shared_alloc_get_xlat_entry(prop->doc_comment)) {
+			if (!zend_shared_alloc_get_xlat_entry(prop->doc_comment)) {
 				zend_shared_alloc_register_xlat_entry(prop->doc_comment, prop->doc_comment);
 				efree((char*)prop->doc_comment);
 			}
@@ -486,15 +486,15 @@ static void zend_persist_class_entry(zend_class_entry **pce TSRMLS_DC)
 #endif
 		zend_hash_persist(&ce->constants_table, (zend_persist_func_t) zend_persist_zval_ptr, sizeof(zval**) TSRMLS_CC);
 
-		if(ZEND_CE_FILENAME(ce)) {
+		if (ZEND_CE_FILENAME(ce)) {
 			/* do not free! PHP has centralized filename storage, compiler will free it */
 			ZEND_CE_FILENAME(ce) = zend_accel_memdup(ZEND_CE_FILENAME(ce), strlen(ZEND_CE_FILENAME(ce)) + 1);
 		}
-		if(ZEND_CE_DOC_COMMENT(ce)) {
+		if (ZEND_CE_DOC_COMMENT(ce)) {
 			if (ZCG(accel_directives).save_comments) {
 				zend_accel_store(ZEND_CE_DOC_COMMENT(ce), ZEND_CE_DOC_COMMENT_LEN(ce) + 1);
 			} else {
-				if(!zend_shared_alloc_get_xlat_entry(ZEND_CE_DOC_COMMENT(ce))) {
+				if (!zend_shared_alloc_get_xlat_entry(ZEND_CE_DOC_COMMENT(ce))) {
 					zend_shared_alloc_register_xlat_entry(ZEND_CE_DOC_COMMENT(ce), ZEND_CE_DOC_COMMENT(ce));
 					efree((char*)ZEND_CE_DOC_COMMENT(ce));
 				}
@@ -503,7 +503,7 @@ static void zend_persist_class_entry(zend_class_entry **pce TSRMLS_DC)
 			}
 		}
 		zend_hash_persist(&ce->properties_info, (zend_persist_func_t) zend_persist_property_info, sizeof(zend_property_info) TSRMLS_CC);
-		if(ce->num_interfaces && ce->interfaces) {
+		if (ce->num_interfaces && ce->interfaces) {
 			efree(ce->interfaces);
 		}
 		ce->interfaces = NULL; /* will be filled in on fetch */
@@ -520,11 +520,11 @@ static void zend_persist_class_entry(zend_class_entry **pce TSRMLS_DC)
 				if (ce->trait_aliases[i]->trait_method) {
 					if (ce->trait_aliases[i]->trait_method->method_name) {
 						zend_accel_store(ce->trait_aliases[i]->trait_method->method_name,
-							ce->trait_aliases[i]->trait_method->mname_len+1);
+							ce->trait_aliases[i]->trait_method->mname_len + 1);
 					}
 					if (ce->trait_aliases[i]->trait_method->class_name) {
 						zend_accel_store(ce->trait_aliases[i]->trait_method->class_name,
-							ce->trait_aliases[i]->trait_method->cname_len+1);
+							ce->trait_aliases[i]->trait_method->cname_len + 1);
 					}
 					ce->trait_aliases[i]->trait_method->ce = NULL;
 					zend_accel_store(ce->trait_aliases[i]->trait_method,
@@ -533,7 +533,7 @@ static void zend_persist_class_entry(zend_class_entry **pce TSRMLS_DC)
 
 				if (ce->trait_aliases[i]->alias) {
 					zend_accel_store(ce->trait_aliases[i]->alias,
-						ce->trait_aliases[i]->alias_len+1);
+						ce->trait_aliases[i]->alias_len + 1);
 				}
 
 #if ZEND_EXTENSION_API_NO <= PHP_5_4_X_API_NO
@@ -551,9 +551,9 @@ static void zend_persist_class_entry(zend_class_entry **pce TSRMLS_DC)
 
 			while (ce->trait_precedences[i]) {
 				zend_accel_store(ce->trait_precedences[i]->trait_method->method_name,
-					ce->trait_precedences[i]->trait_method->mname_len+1);
+					ce->trait_precedences[i]->trait_method->mname_len + 1);
 				zend_accel_store(ce->trait_precedences[i]->trait_method->class_name,
-					ce->trait_precedences[i]->trait_method->cname_len+1);
+					ce->trait_precedences[i]->trait_method->cname_len + 1);
 				ce->trait_precedences[i]->trait_method->ce = NULL;
 				zend_accel_store(ce->trait_precedences[i]->trait_method,
 					sizeof(zend_trait_method_reference));
@@ -567,7 +567,7 @@ static void zend_persist_class_entry(zend_class_entry **pce TSRMLS_DC)
 						j++;
 					}
 					zend_accel_store(ce->trait_precedences[i]->exclude_from_classes,
-						sizeof(zend_class_entry*) * (j+1));
+						sizeof(zend_class_entry*) * (j + 1));
 				}
 
 #if ZEND_EXTENSION_API_NO <= PHP_5_4_X_API_NO
@@ -577,7 +577,7 @@ static void zend_persist_class_entry(zend_class_entry **pce TSRMLS_DC)
 				i++;
 			}
 			zend_accel_store(
-				ce->trait_precedences, sizeof(zend_trait_precedence*) * (i+1));
+				ce->trait_precedences, sizeof(zend_trait_precedence*) * (i + 1));
 		}
 #endif
 	}
@@ -600,53 +600,53 @@ static int zend_update_parent_ce(zend_class_entry **pce TSRMLS_DC)
 	}
 
 	/* update methods */
-	if(ce->constructor) {
+	if (ce->constructor) {
 		ce->constructor = zend_shared_alloc_get_xlat_entry(ce->constructor);
 		/* we use refcount to show that op_array is referenced from several places */
 		ce->constructor->op_array.refcount++;
 	}
-	if(ce->destructor) {
+	if (ce->destructor) {
 		ce->destructor = zend_shared_alloc_get_xlat_entry(ce->destructor);
 		ce->destructor->op_array.refcount++;
 	}
-	if(ce->clone) {
+	if (ce->clone) {
 		ce->clone = zend_shared_alloc_get_xlat_entry(ce->clone);
 		ce->clone->op_array.refcount++;
 	}
-	if(ce->__get) {
+	if (ce->__get) {
 		ce->__get = zend_shared_alloc_get_xlat_entry(ce->__get);
 		ce->__get->op_array.refcount++;
 	}
-	if(ce->__set) {
+	if (ce->__set) {
 		ce->__set = zend_shared_alloc_get_xlat_entry(ce->__set);
 		ce->__set->op_array.refcount++;
 	}
-	if(ce->__call) {
+	if (ce->__call) {
 		ce->__call = zend_shared_alloc_get_xlat_entry(ce->__call);
 		ce->__call->op_array.refcount++;
 	}
-	if(ce->serialize_func) {
+	if (ce->serialize_func) {
 		ce->serialize_func = zend_shared_alloc_get_xlat_entry(ce->serialize_func);
 		ce->serialize_func->op_array.refcount++;
 	}
-	if(ce->unserialize_func) {
+	if (ce->unserialize_func) {
 		ce->unserialize_func = zend_shared_alloc_get_xlat_entry(ce->unserialize_func);
 		ce->unserialize_func->op_array.refcount++;
 	}
-	if(ce->__isset) {
+	if (ce->__isset) {
 		ce->__isset = zend_shared_alloc_get_xlat_entry(ce->__isset);
 		ce->__isset->op_array.refcount++;
 	}
-	if(ce->__unset) {
+	if (ce->__unset) {
 		ce->__unset = zend_shared_alloc_get_xlat_entry(ce->__unset);
 		ce->__unset->op_array.refcount++;
 	}
-	if(ce->__tostring) {
+	if (ce->__tostring) {
 		ce->__tostring = zend_shared_alloc_get_xlat_entry(ce->__tostring);
 		ce->__tostring->op_array.refcount++;
 	}
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-	if(ce->__callstatic) {
+	if (ce->__callstatic) {
 		ce->__callstatic = zend_shared_alloc_get_xlat_entry(ce->__callstatic);
 		ce->__callstatic->op_array.refcount++;
 	}
