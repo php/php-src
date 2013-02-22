@@ -146,6 +146,9 @@ static ZEND_FUNCTION(accel_chdir)
 
 	orig_chdir(INTERNAL_FUNCTION_PARAM_PASSTHRU);
     if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
+    	if (ZCG(cwd)) {
+    		efree(ZCG(cwd));
+		}
     	ZCG(cwd_len) = strlen(cwd);
     	ZCG(cwd) = estrndup(cwd, ZCG(cwd_len));
     } else {
