@@ -35,7 +35,7 @@ PHP_FUNCTION(cli_set_process_title)
     int rc;
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &title, &title_len) == FAILURE) {
-        RETURN_FALSE;
+        return;
     }
 
     rc = set_ps_title(title);
@@ -48,7 +48,7 @@ PHP_FUNCTION(cli_set_process_title)
 }
 /* }}} */
 
-/* {{{ proto string cli_get_process_title(string arg)
+/* {{{ proto string cli_get_process_title()
    Return a string with the current process title. NULL if error. */
 PHP_FUNCTION(cli_get_process_title)
 {
