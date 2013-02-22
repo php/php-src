@@ -252,6 +252,8 @@ clobber_error:
      * if we ever get here, argv still points to originally passed
      * in argument
      */
+    save_argv = NULL;
+    save_argc = 0;
     ps_buffer = NULL;
     ps_buffer_size = 0;
     return argv;
