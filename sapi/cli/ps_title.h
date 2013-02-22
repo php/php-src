@@ -36,4 +36,6 @@ extern const char* ps_title_errno(int rc);
 
 extern int is_ps_title_available();
 
+extern void cleanup_ps_args(char **argv);
+
 #endif // PS_TITLE_HEADER

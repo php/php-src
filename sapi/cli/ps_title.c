@@ -122,14 +122,11 @@ static char** save_argv;
 
 
 /*
- * Call this early in startup to save the original argc/argv values.
- * If needed, we make a copy of the original argv[] array to preserve it
- * from being clobbered by subsequent ps_display actions.
- *
- * (The original argv[] will not be overwritten by this routine.
- * Also, the physical location of the environment strings may be moved,
- * so this should be called before any code that might try to hang onto a
- * getenv() result.)
+ * Call this method early, before any code has used the original argv passed in
+ * from main().
+ * If needed, this code will make deep copies of argv and environ and return
+ * these to the caller for further use. The original argv is then 'clobbered'
+ * to store the process title.
  */
 char** save_ps_args(int argc, char** argv)
 {
@@ -388,3 +385,41 @@ int get_ps_title(int *displen, const char** string)
     return PS_TITLE_SUCCESS;
 }
 
+/*
+ * Clean up the allocated argv and environ if applicable. Only call
+ * this right before exiting.
+ * This isn't needed per-se because the OS will clean-up anyway, but
+ * having and calling this will ensure Valgrind doesn't output 'false
+ * positives'.
+ */
+void cleanup_ps_args(char **argv)
+{
+#ifndef PS_USE_NONE
+    if (save_argv)
+    {
+        save_argv = NULL;
+        save_argc = 0;
+
+#ifdef PS_USE_CLOBBER_ARGV
+        {
+            // clean up environ
+            int i;
+            for (i = 0; environ[i] != NULL; i++)
+                free(environ[i]);
+            free(environ);
+        }
+#endif /* PS_USE_CLOBBER_ARGV */
+
+#if defined(PS_USE_CHANGE_ARGV) || defined(PS_USE_CLOBBER_ARGV)
+        {
+            int i;
+            for (i=0; argv[i] != NULL; i++)
+                free(argv[i]);
+            free(argv);
+        }
+#endif /* PS_USE_CHANGE_ARGV or PS_USE_CLOBBER_ARGV */
+    }
+#endif /* PS_USE_NONE */
+
+    return;
+}

@@ -1398,6 +1398,11 @@ out:
 	tsrm_shutdown();
 #endif
 
+	/*
+	 * Do not move this de-initialization. It needs to happen right before
+	 * exiting.
+	 */
+        cleanup_ps_args(argv);
 	exit(exit_status);
 }
 /* }}} */
