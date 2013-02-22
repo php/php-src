@@ -145,18 +145,18 @@ static ZEND_FUNCTION(accel_chdir)
 	char cwd[MAXPATHLEN];
 
 	orig_chdir(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-    if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
-    	if (ZCG(cwd)) {
-    		efree(ZCG(cwd));
+	if (VCWD_GETCWD(cwd, MAXPATHLEN)) {
+		if (ZCG(cwd)) {
+			efree(ZCG(cwd));
 		}
-    	ZCG(cwd_len) = strlen(cwd);
-    	ZCG(cwd) = estrndup(cwd, ZCG(cwd_len));
-    } else {
-    	if (ZCG(cwd)) {
-    		efree(ZCG(cwd));
-    		ZCG(cwd) = NULL;
-    	}
-    }
+		ZCG(cwd_len) = strlen(cwd);
+		ZCG(cwd) = estrndup(cwd, ZCG(cwd_len));
+	} else {
+		if (ZCG(cwd)) {
+			efree(ZCG(cwd));
+			ZCG(cwd) = NULL;
+		}
+	}
 }
 
 static inline char* accel_getcwd(int *cwd_len TSRMLS_DC)
@@ -165,12 +165,12 @@ static inline char* accel_getcwd(int *cwd_len TSRMLS_DC)
 		*cwd_len = ZCG(cwd_len);
 		return ZCG(cwd);
 	} else {
-        char cwd[MAXPATHLEN + 1];
+		char cwd[MAXPATHLEN + 1];
 
 		if (!VCWD_GETCWD(cwd, MAXPATHLEN)) {
 			return NULL;
 		}
-    	*cwd_len = ZCG(cwd_len) = strlen(cwd);
+		*cwd_len = ZCG(cwd_len) = strlen(cwd);
 		ZCG(cwd) = estrndup(cwd, ZCG(cwd_len));
 		return ZCG(cwd);
 	}
