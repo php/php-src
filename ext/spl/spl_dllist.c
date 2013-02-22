@@ -502,7 +502,7 @@ static int spl_dllist_object_count_elements(zval *object, long *count TSRMLS_DC)
 
 	*count = spl_ptr_llist_count(intern->llist);
 	return SUCCESS;
-} 
+}
 /* }}} */
 
 static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /* {{{{ */
@@ -573,7 +573,7 @@ SPL_METHOD(SplDoublyLinkedList, push)
 	spl_ptr_llist_push(intern->llist, value TSRMLS_CC);
 
 	RETURN_TRUE;
-} 
+}
 /* }}} */
 
 /* {{{ proto bool SplDoublyLinkedList::unshift(mixed $value) U
@@ -616,7 +616,7 @@ SPL_METHOD(SplDoublyLinkedList, pop)
 	}
 
 	RETURN_ZVAL(value, 1, 1);
-} 
+}
 /* }}} */
 
 /* {{{ proto mixed SplDoublyLinkedList::shift() U
@@ -639,7 +639,7 @@ SPL_METHOD(SplDoublyLinkedList, shift)
 	}
 
 	RETURN_ZVAL(value, 1, 1);
-} 
+}
 /* }}} */
 
 /* {{{ proto mixed SplDoublyLinkedList::top() U
@@ -1048,7 +1048,7 @@ static void spl_dllist_it_move_forward(zend_object_iterator *iter TSRMLS_DC) /* 
 SPL_METHOD(SplDoublyLinkedList, key)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1062,7 +1062,7 @@ SPL_METHOD(SplDoublyLinkedList, key)
 SPL_METHOD(SplDoublyLinkedList, prev)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1076,7 +1076,7 @@ SPL_METHOD(SplDoublyLinkedList, prev)
 SPL_METHOD(SplDoublyLinkedList, next)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1090,7 +1090,7 @@ SPL_METHOD(SplDoublyLinkedList, next)
 SPL_METHOD(SplDoublyLinkedList, valid)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1104,7 +1104,7 @@ SPL_METHOD(SplDoublyLinkedList, valid)
 SPL_METHOD(SplDoublyLinkedList, rewind)
 {
 	spl_dllist_object *intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1119,7 +1119,7 @@ SPL_METHOD(SplDoublyLinkedList, current)
 {
 	spl_dllist_object     *intern  = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	spl_ptr_llist_element *element = intern->traverse_pointer;
-	
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
@@ -1174,7 +1174,7 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 	} else {
 		RETURN_NULL();
 	}
-	
+
 } /* }}} */
 
 /* {{{ proto void SplDoublyLinkedList::unserialize(string serialized)
@@ -1187,7 +1187,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	int buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
 		return;
 	}
@@ -1233,6 +1233,104 @@ error:
 	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
 	return;
 
+} /* }}} */
+
+/* {{{ proto void SplDoublyLinkedList::insertBeforeOffset(mixed $index, mixed $newval) U
+ Inserts a new entry before the specified $index consisting of $newval. */
+SPL_METHOD(SplDoublyLinkedList, insertBeforeOffset)
+{
+	zval                  *zindex, *value;
+	spl_dllist_object     *intern;
+	spl_ptr_llist_element *element;
+	long                  index;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zindex, &value) == FAILURE) {
+		return;
+	}
+	SEPARATE_ARG_IF_REF(value);
+
+	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	index  = (int)spl_offset_convert_to_long(zindex TSRMLS_CC);
+
+    if (index < 0 || index >= intern->llist->count) {
+		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
+		return;
+	}
+
+    // Get the element we want to insert before
+	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
+
+    // Create the new element we want to insert
+	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
+
+	elem->data = value;
+	elem->rc   = 1;
+	/* connect to the neighbours */
+	elem->next = element;
+	elem->prev = element->prev;
+
+	/* connect the neighbours to this new element */
+    if (elem->prev == NULL) {
+		intern->llist->head = elem;
+	} else {
+		element->prev->next = elem;
+	}
+	element->prev = elem;
+
+	intern->llist->count++;
+
+	if (intern->llist->ctor) {
+		intern->llist->ctor(elem TSRMLS_CC);
+	}
+} /* }}} */
+
+/* {{{ proto void SplDoublyLinkedList::insertBeforeOffset(mixed $index, mixed $newval) U
+ Inserts a new entry before the specified $index consisting of $newval. */
+SPL_METHOD(SplDoublyLinkedList, insertAfterOffset)
+{
+	zval                  *zindex, *value;
+	spl_dllist_object     *intern;
+	spl_ptr_llist_element *element;
+	long                  index;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zindex, &value) == FAILURE) {
+		return;
+	}
+	SEPARATE_ARG_IF_REF(value);
+
+	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	index  = (int)spl_offset_convert_to_long(zindex TSRMLS_CC);
+
+    if (index < 0 || index >= intern->llist->count) {
+		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
+		return;
+	}
+
+    // Get the element we want to insert after
+	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
+
+    // Create the new element we want to insert
+	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
+
+	elem->data = value;
+	elem->rc   = 1;
+	/* connect to the neighbours */
+	elem->prev = element;
+	elem->next = element->next;
+
+	/* connect the neighbours to this new element */
+    if (elem->next == NULL) {
+		intern->llist->tail = elem;
+	} else {
+		element->next->prev = elem;
+	}
+	element->next = elem;
+
+	intern->llist->count++;
+
+	if (intern->llist->ctor) {
+		intern->llist->ctor(elem TSRMLS_CC);
+	}
 } /* }}} */
 
 /* iterator handler table */
@@ -1322,6 +1420,10 @@ static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
 	SPL_ME(SplDoublyLinkedList, offsetGet,       arginfo_dllist_offsetGet,       ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, offsetSet,       arginfo_dllist_offsetSet,       ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, offsetUnset,     arginfo_dllist_offsetGet,       ZEND_ACC_PUBLIC)
+
+	SPL_ME(SplDoublyLinkedList, insertBeforeOffset, arginfo_dllist_offsetSet,    ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, insertAfterOffset,  arginfo_dllist_offsetSet,    ZEND_ACC_PUBLIC)
+
 	/* Iterator */
 	SPL_ME(SplDoublyLinkedList, rewind,          arginfo_dllist_void,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, current,         arginfo_dllist_void,            ZEND_ACC_PUBLIC)
