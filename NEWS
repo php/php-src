@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #64264 (SPLFixedArray toArray problem). (Laruence)
   . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
     (patch by kriss@krizalys.com, Laruence)
+  . Fixed bug #52861 (unset fails with ArrayObject and deep arrays). 
+    (Mike Willbanks)
 
 21 Feb 2013, PHP 5.3.22
 
