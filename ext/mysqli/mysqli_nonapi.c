@@ -1111,7 +1111,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for parameter flags (%ld)", flags);
 		err = TRUE;
 	}
-	if (!name || !name_len) {
+	if (!name_len) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Savepoint name cannot be empty");
 		err = TRUE;
 	}
