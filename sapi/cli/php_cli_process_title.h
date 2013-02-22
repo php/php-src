@@ -25,6 +25,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_cli_set_process_title, 0)
     ZEND_ARG_INFO(0, title)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_cli_get_process_title, 0)
+ZEND_END_ARG_INFO()
+
 PHP_FUNCTION(cli_set_process_title);
 PHP_FUNCTION(cli_get_process_title);
 

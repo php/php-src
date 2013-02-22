@@ -433,7 +433,7 @@ zend_module_entry cli_server_module_entry = {
 
 const zend_function_entry server_additional_functions[] = {
 	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
-	PHP_FE(cli_get_process_title,        NULL)
+	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
 	{NULL, NULL, NULL}
 };
 

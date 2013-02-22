@@ -48,10 +48,10 @@ extern char** environ;
 #endif
 
 #ifdef HAVE_SYS_PSTAT_H
-#include <sys/pstat.h> // for HP-UX
+#include <sys/pstat.h> /* for HP-UX */
 #endif
 #ifdef HAVE_PS_STRINGS
-#include <machine/vmparam.h> // for old BSD
+#include <machine/vmparam.h> /* for old BSD */
 #include <sys/exec.h>
 #endif
 #if defined(DARWIN)
@@ -237,7 +237,7 @@ char** save_ps_args(int argc, char** argv)
 #endif /* PS_USE_CLOBBER_ARGV */
 
 #ifdef PS_USE_CHANGE_ARGV
-    save_argv[0] = ps_buffer; // ps_buffer here is a static const array of size PS_BUFFER_SIZE
+    save_argv[0] = ps_buffer; /* ps_buffer here is a static const array of size PS_BUFFER_SIZE */
     save_argv[1] = NULL;
 #endif /* PS_USE_CHANGE_ARGV */
 
@@ -265,7 +265,7 @@ clobber_error:
 int is_ps_title_available()
 {
 #ifdef PS_USE_NONE
-    return PS_TITLE_NOT_AVAILABLE; // disabled functionality
+    return PS_TITLE_NOT_AVAILABLE; /* disabled functionality */
 #endif
 
     if (!save_argv)
@@ -402,7 +402,6 @@ void cleanup_ps_args(char **argv)
 
 #ifdef PS_USE_CLOBBER_ARGV
         {
-            // clean up environ
             int i;
             for (i = 0; environ[i] != NULL; i++)
                 free(environ[i]);

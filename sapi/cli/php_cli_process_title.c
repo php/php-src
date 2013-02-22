@@ -56,6 +56,10 @@ PHP_FUNCTION(cli_get_process_title)
         const char* title = NULL;
         int rc;
 
+        if (zend_parse_parameters_none() == FAILURE) {
+            return;
+        }
+
         rc = get_ps_title(&length, &title);
         if (rc != PS_TITLE_SUCCESS) {
                 php_error_docref(NULL TSRMLS_CC, E_WARNING, "cli_get_process_title had an error: %s", ps_title_errno(rc));
