@@ -177,6 +177,8 @@ char** save_ps_args(int argc, char** argv)
          * move the environment out of the way
          */
         new_environ = (char **) malloc((i + 1) * sizeof(char *));
+        if (!new_environ)
+            goto clobber_error;
         for (i = 0; environ[i] != NULL; i++)
         {
             new_environ[i] = strdup(environ[i]);
@@ -205,6 +207,8 @@ char** save_ps_args(int argc, char** argv)
         int i;
 
         new_argv = (char **) malloc((argc + 1) * sizeof(char *));
+        if (!new_argv)
+            goto clobber_error;
         for (i = 0; i < argc; i++)
         {
             new_argv[i] = strdup(argv[i]);
