@@ -28,8 +28,6 @@
 
 #include "php.h"
 
-#if HAVE_SOCKETS
-
 #include "php_network.h"
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
@@ -2277,8 +2275,6 @@ PHP_FUNCTION(socket_import_stream)
 	ZEND_REGISTER_RESOURCE(return_value, retsock, le_socket);
 }
 /* }}} */
-
-#endif
 
 /*
  * Local variables:
