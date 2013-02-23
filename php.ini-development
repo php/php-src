@@ -383,6 +383,11 @@ expose_php = On
 ; Note: This directive is hardcoded to 0 for the CLI SAPI
 max_execution_time = 30
 
+; Maximum nesting level of magic functions
+; http://php.net/max-magic-calls
+; Note: If you set it too high, PHP may crash
+;max_magic_calls = 100
+
 ; Maximum amount of time each script may spend parsing request data. It's a good
 ; idea to limit this time on productions servers in order to eliminate unexpectedly
 ; long running scripts.

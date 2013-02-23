@@ -938,6 +938,10 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		EG(This) = NULL;
 	}
 
+	if (EG(magic_call_count)++ >= EG(max_magic_calls)) {
+		zend_error_noreturn(E_ERROR, "Magic method or function too often called recursively");
+	}
+
 	EX(prev_execute_data) = EG(current_execute_data);
 	EG(current_execute_data) = &execute_data;
 
@@ -1022,6 +1026,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 	EG(scope) = current_scope;
 	EG(This) = current_this;
 	EG(current_execute_data) = EX(prev_execute_data);
+	--EG(magic_call_count);
 
 	if (EG(exception)) {
 		zend_throw_exception_internal(NULL TSRMLS_CC);

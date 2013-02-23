@@ -5,7 +5,7 @@
    | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -236,11 +236,14 @@ struct _zend_executor_globals {
 	/* timeout support */
 	int timeout_seconds;
 
+	long magic_call_count;
+	long max_magic_calls;
+
 	int lambda_count;
 
 	HashTable *ini_directives;
 	HashTable *modified_ini_directives;
-	zend_ini_entry *error_reporting_ini_entry;	                
+	zend_ini_entry *error_reporting_ini_entry;
 
 	zend_objects_store objects_store;
 	zval *exception, *prev_exception;
@@ -253,7 +256,7 @@ struct _zend_executor_globals {
 
 	zend_property_info std_property_info;
 
-	zend_bool active; 
+	zend_bool active;
 
 	zend_op *start_op;
 
@@ -297,7 +300,7 @@ struct _zend_php_scanner_globals {
 	unsigned char *yy_limit;
 	int yy_state;
 	zend_stack state_stack;
-	
+
 	/* original (unfiltered) script */
 	unsigned char *script_org;
 	size_t script_org_size;

@@ -453,6 +453,23 @@ static PHP_INI_MH(OnChangeMailForceExtra)
 }
 /* }}} */
 
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnChangeMagicMaximumCalls)
+{
+	int intval = atoi(new_value);
+	/* strict minimum of 2, otherwise "normal" non recursive magic function calls may fail */
+	if (intval > 1) {
+		if (!entry->orig_value || intval <= atoi(entry->orig_value)) {
+			OnUpdateLong(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+			return SUCCESS;
+		}
+	}
+	zend_error(E_WARNING, "max_magic_calls ini-value has to be equal or less than php.ini value and greater than 1");
+	return FAILURE;
+}
+/* }}} */
+
 /* defined in browscap.c */
 PHP_INI_MH(OnChangeBrowscap);
 
@@ -509,6 +526,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("short_open_tag",	DEFAULT_SHORT_OPEN_TAG,	PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateBool,			short_tags,				zend_compiler_globals,	compiler_globals)
 	STD_PHP_INI_BOOLEAN("sql.safe_mode",		"0",		PHP_INI_SYSTEM,		OnUpdateBool,			sql_safe_mode,			php_core_globals,	core_globals)
 	STD_PHP_INI_BOOLEAN("track_errors",			"0",		PHP_INI_ALL,		OnUpdateBool,			track_errors,			php_core_globals,	core_globals)
+	STD_PHP_INI_ENTRY("max_magic_calls", 			"100", 		PHP_INI_ALL,		OnChangeMagicMaximumCalls,		max_magic_calls,		zend_executor_globals,		executor_globals)
 
 	STD_PHP_INI_ENTRY("unserialize_callback_func",	NULL,	PHP_INI_ALL,		OnUpdateString,			unserialize_callback_func,	php_core_globals,	core_globals)
 	STD_PHP_INI_ENTRY("serialize_precision",	"17",	PHP_INI_ALL,		OnUpdateLongGEZero,			serialize_precision,	php_core_globals,	core_globals)
