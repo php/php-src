@@ -18,20 +18,19 @@ Quick Install
 
 - Compile
 
-export PHP_DIR=/usr/local/php5.5
-PHP_AUTOCONF=autoconf $PHP_DIR/bin/phpize
-./configure \
+ $PHP_DIR/phpize
+ ./configure \
       --enable-optimizer-plus \
       --with-php-config=$PHP_DIR/bin/php-config
-make
+ make
 
 - Install
 
-cp .libs/ZendOptimizerPlus.so $PHP_DIR/lib/ZendOptimizerPlus.so
+ make install 
 
 - Edit php.ini
 
-zend_extension=/...full path.../ZendOptimizerPlus.so
+ zend_extension=/...full path.../ZendOptimizerPlus.so
 
 NOTE: In case you are going to use Zend Optimizer+ together with Xdebug,
 be sure that Xdebug is loaded after Optimizer+. "php -v" must show Xdebug
