@@ -2371,7 +2371,8 @@ string_copy:
 			int type;
 			void * what;
 
-			//If a NULL was supplied together with INFILE, reset the default if we're still at direct i/o and don't have a user-function for read
+			/* If a NULL was supplied together with INFILE, reset the default if we're still at direct i/o and don't have a user-function for read */
+			/* TODO: Allow setting to NULL for other combinations */
 			if(Z_TYPE_PP(zvalue) == IS_NULL && option == CURLOPT_INFILE && ch->handlers->read->method == PHP_CURL_DIRECT) {
 				if(ch->handlers->read->stream != NULL) {
 					zval_ptr_dtor(&ch->handlers->read->stream);
