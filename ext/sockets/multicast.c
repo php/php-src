@@ -24,8 +24,6 @@
 
 #include "php.h"
 
-#if HAVE_SOCKETS
-
 #include "php_network.h"
 #ifdef PHP_WIN32
 # include "windows_common.h"
@@ -836,5 +834,3 @@ err:
 	return FAILURE;
 }
 #endif
-
-#endif /* HAVE_SOCKETS */
