@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Fixed bug #64142 (dval to lval different behavior on ppc64). (Remi)
   . Added ARMv7/v8 versions of various Zend arithmetic functions that are
     implemented using inline assembler (Ard Biesheuvel)
+  . Fix undefined behavior when converting double variables to integers.
+    The double is now always rounded towards zero, the remainder of its division
+	by 2^32 or 2^64 (depending on sizeof(long)) is calculated and it's made
+	signed assuming a two's complement representation. (Gustavo)
 
 - CLI server:
   . Fixed bug #64128 (buit-in web server is broken on ppc64). (Remi)
