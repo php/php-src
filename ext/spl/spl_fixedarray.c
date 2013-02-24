@@ -611,8 +611,6 @@ SPL_METHOD(SplFixedArray, count)
 SPL_METHOD(SplFixedArray, toArray)
 {
 	spl_fixedarray_object *intern;
-	zval *ret, *tmp;
-	HashTable *ret_ht, *obj_ht;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")) {
 		return;
@@ -620,15 +618,19 @@ SPL_METHOD(SplFixedArray, toArray)
 
 	intern = (spl_fixedarray_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	ALLOC_HASHTABLE(ret_ht);
-	zend_hash_init(ret_ht, 0, NULL, ZVAL_PTR_DTOR, 0);
-	ALLOC_INIT_ZVAL(ret);
-	Z_TYPE_P(ret) = IS_ARRAY;
-	obj_ht = spl_fixedarray_object_get_properties(getThis() TSRMLS_CC);
-	zend_hash_copy(ret_ht, obj_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-	Z_ARRVAL_P(ret) = ret_ht;
-
-	RETURN_ZVAL(ret, 1, 1);
+	array_init(return_value);
+	if (intern->array) {
+		int i = 0;
+		for (; i < intern->array->size; i++) {
+			if (intern->array->elements[i]) {
+				zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *)&intern->array->elements[i], sizeof(zval *), NULL);
+				Z_ADDREF_P(intern->array->elements[i]);
+			} else {
+				zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *)&EG(uninitialized_zval_ptr), sizeof(zval *), NULL);
+				Z_ADDREF_P(EG(uninitialized_zval_ptr));
+			}
+		}
+	}
 }
 /* }}} */
 

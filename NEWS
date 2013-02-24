@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.3.23
 
 - SPL:
+  . Fixed bug #64264 (SPLFixedArray toArray problem). (Laruence)
   . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
     (patch by kriss@krizalys.com, Laruence)
 
