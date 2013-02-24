@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #49348 (Uninitialized ++$foo->bar; does not cause a notice).
     (Stas)
 
+- Sockets:
+  . Fixed bug #64287 (sendmsg/recvmsg shutdown handler causes segfault).
+    (Gustavo)
+
 21 Feb 2013, PHP 5.5.0 Alpha 5
 
 - Core:
