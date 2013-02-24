@@ -24,6 +24,7 @@ PHP                                                                        NEWS
     (Johannes)
 
 - SPL:
+  . Fixed bug #64264 (SPLFixedArray toArray problem). (Laruence)
   . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
     (patch by kriss@krizalys.com, Laruence)
   . Fixed bug #64106 (Segfault on SplFixedArray[][x] = y when extended). 
