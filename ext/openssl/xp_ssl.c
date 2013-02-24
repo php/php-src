@@ -47,7 +47,7 @@ int php_openssl_get_x509_list_id(void);
  * */
 
 typedef struct _php_openssl_netstream_data_t {
-  php_netstream_data_t s;
+	php_netstream_data_t s;
 	SSL *ssl_handle;
 	SSL_CTX *ctx;
 	struct timeval connect_timeout;
@@ -172,218 +172,190 @@ static int handle_ssl_error(php_stream *stream, int nr_bytes, zend_bool is_init 
 }
 
 
-static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
-{
-	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-	int didwrite;
-	
-	if (sslsock->ssl_active) {
-		int retry = 1;
-		struct timeval start_time,
-                       *timeout;
-		int blocked = sslsock->s.is_blocked,
-            has_timeout = 0;
-    
-		if (SUCCESS == php_set_sock_blocking(sslsock->s.socket, 0 TSRMLS_CC)) {
-			sslsock->s.is_blocked = 0;
-		}
-    
-		timeout = sslsock->is_client ? &sslsock->connect_timeout : &sslsock->s.timeout;
-		has_timeout = !sslsock->s.is_blocked && (timeout->tv_sec || timeout->tv_usec);
-    
-		/* gettimeofday is not monotonic; using it here is not strictly correct */
-		if (has_timeout) {
-			gettimeofday(&start_time, NULL);
-		}
-
-		do {
-			struct timeval cur_time,
-                           elapsed_time;   
-                      
-			if (has_timeout) {
-				gettimeofday(&cur_time, NULL);
-				elapsed_time.tv_sec  = cur_time.tv_sec  - start_time.tv_sec;
-				elapsed_time.tv_usec = cur_time.tv_usec - start_time.tv_usec;
-				if (cur_time.tv_usec < start_time.tv_usec) {
-					elapsed_time.tv_sec  -= 1L;
-					elapsed_time.tv_usec += 1000000L;
-				}
-      
-				if (elapsed_time.tv_sec > timeout->tv_sec ||
-					(elapsed_time.tv_sec == timeout->tv_sec &&
-				     elapsed_time.tv_usec > timeout->tv_usec)) {
-					if( blocked ) {
-						php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC);
-						sslsock->s.is_blocked = 1;
-					}
-          
-					return -1;
-				}
-			}                     
-                      
-			didwrite = SSL_write(sslsock->ssl_handle, buf, count);
-
-			struct timeval left_time;
-          
-			if (has_timeout) {
-				left_time.tv_sec  = timeout->tv_sec  - elapsed_time.tv_sec;
-				left_time.tv_usec = timeout->tv_usec - elapsed_time.tv_usec;
-				if (timeout->tv_usec < elapsed_time.tv_usec) {
-					left_time.tv_sec  -= 1L;
-					left_time.tv_usec += 1000000L;
-				}
-			}
-          
-			if (didwrite <= 0) {
-				int err = SSL_get_error(sslsock->ssl_handle, didwrite );
-				retry = handle_ssl_error(stream, didwrite, 0 TSRMLS_CC);
-        
-				if( errno == EAGAIN && ( err == SSL_ERROR_WANT_READ || SSL_ERROR_WANT_WRITE ) ) retry = 1;
-                
-				if( retry && blocked ) {
-					php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
-                                   (POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);          
-				}
-			} else {
-				int err = SSL_get_error(sslsock->ssl_handle, didwrite );
-          
-				if( err == SSL_ERROR_NONE )         
-					break;
-				if( blocked ) {
-					php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
-				                   (POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);          
-				}
-			}
-		} while(retry);
-
-		if( blocked ) {
-			php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC);
-			sslsock->s.is_blocked = 1;
-		}
-
-		if (didwrite > 0) {
-			php_stream_notify_progress_increment(stream->context, didwrite, 0);
-		}
-	} else {
-		didwrite = php_stream_socket_ops.write(stream, buf, count TSRMLS_CC);
-	}
-
-	if (didwrite < 0) {
-		didwrite = 0;
-	}
-	
-	return didwrite;
-}
-
 static size_t php_openssl_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
 {
-	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-	int nr_bytes = 0;
+	return php_openssl_sockop_io( true, stream, buf, count );
+}
 
-	if (sslsock->ssl_active) {
-		int retry = 1;
-		struct timeval start_time,
-		               *timeout;
-		int	blocked = sslsock->s.is_blocked,
-		    has_timeout = 0;
-    
+static size_t php_openssl_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+{
+	return php_openssl_sockop_io( false, stream, buf, count );
+}
+
+/**
+ * Factored out common functionality (blocking, timeout, loop management) for read and write.
+ * Perform IO (read or write) to an SSL socket. If we have a timeout, we switch to non-blocking mode
+ * for the duration of the operation, using select to do our waits. If we time out, or we have an error
+ * report that back to PHP
+ *
+ */
+static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count TSRMLS_DC)
+{
+    php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
+    int nr_bytes = 0;
+
+    /* Only do this if SSL is active. */
+    if (sslsock->ssl_active) {
+        int retry = 1;
+        struct timeval  start_time,
+                        *timeout;
+        int             blocked   = sslsock->s.is_blocked,
+                        has_timeout = 0;
+
+		/* Begin by making the socket non-blocking. This allows us to check the timeout. */
 		if (SUCCESS == php_set_sock_blocking(sslsock->s.socket, 0 TSRMLS_CC)) {
 			sslsock->s.is_blocked = 0;
 		}
-    
+
+		/* Get the timeout value (and make sure we are to check it. */
 		timeout = sslsock->is_client ? &sslsock->connect_timeout : &sslsock->s.timeout;
 		has_timeout = !sslsock->s.is_blocked && (timeout->tv_sec || timeout->tv_usec);
-    
+
 		/* gettimeofday is not monotonic; using it here is not strictly correct */
 		if (has_timeout) {
 			gettimeofday(&start_time, NULL);
 		}
 
+		/* Main IO loop. */
 		do {
-			struct timeval cur_time,
-			               elapsed_time;
-              
+			struct timeval  cur_time,
+							elapsed_time;
+
+			/* If we have a timeout to check, figure out how much time has elapsed since we started. */
 			if (has_timeout) {
 				gettimeofday(&cur_time, NULL);
-				elapsed_time.tv_sec  = cur_time.tv_sec  - start_time.tv_sec;
-				elapsed_time.tv_usec = cur_time.tv_usec - start_time.tv_usec;
-				if (cur_time.tv_usec < start_time.tv_usec) {
-					elapsed_time.tv_sec  -= 1L;
-					elapsed_time.tv_usec += 1000000L;
-				}
-      
-				if (elapsed_time.tv_sec > timeout->tv_sec ||
-				    (elapsed_time.tv_sec == timeout->tv_sec &&
-				     elapsed_time.tv_usec > timeout->tv_usec)) {
-					if( blocked ) {
+
+				/* Determine how much time we've taken so far. */
+				elapsed_time = subtractTimeval( curr_time, start_time );
+
+				/* and return an error if we've taken too long. */
+				if (compareTimeval( elapsed_time, timeout) > 0 ) {
+					/* If the socket was originally blocking, set it back. */
+					if (blocked) {
 						php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC);
 						sslsock->s.is_blocked = 1;
 					}
-          
 					return -1;
 				}
 			}
-      
-			nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);
 
-			struct timeval left_time;
-          
-			if (has_timeout) {
-				left_time.tv_sec  = timeout->tv_sec  - elapsed_time.tv_sec;
-				left_time.tv_usec = timeout->tv_usec - elapsed_time.tv_usec;
-				if (timeout->tv_usec < elapsed_time.tv_usec) {
-					left_time.tv_sec  -= 1L;
-					left_time.tv_usec += 1000000L;
-				}
+			/* Now, do the IO operation. Don't block if we can't complete... */
+			if (read) {
+				nr_bytes = SSL_read(sslsock->ssl_handle, buf, count);
+			} else {
+				nr_bytes = SSL_write(sslsock->ssl_handle, buf, count);
 			}
-                
+
+			/* Now, how much time until we time out? */
+			struct timeval left_time;
+			if (has_timeout) {
+				left_time = subtractTimeval( timeout, elapsed_time );
+			}
+
+			/* If we didn't do anything on the last loop (or an error) check to see if we should retry or exit. */
 			if (nr_bytes <= 0) {
 
-				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes );                
-        
+				/* Get the error code from SSL, and check to see if it's an error or not. */
+				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes );
 				retry = handle_ssl_error(stream, nr_bytes, 0 TSRMLS_CC);
 
-				if( errno == EAGAIN && ( err == SSL_ERROR_WANT_READ || SSL_ERROR_WANT_WRITE ) ) retry = 1;
+				/* If we get this (the above doesn't check) then we'll retry as well. */
+				if (errno == EAGAIN && ( err == SSL_ERROR_WANT_READ || SSL_ERROR_WANT_WRITE ) ) {
+					retry = 1;
+				}
 
-				stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
-				
-				if( retry && blocked ) {
-					php_pollfd_for( sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
-					                (POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
-				}       
-        
+				/* Also, on reads, we may get this condition on an EOF. We should check properly. */
+				if (read) {
+					stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
+				}
+
+				/* Now, if we have to wait some time, and we're supposed to be blocking, wait for the socket to become
+				 * available. Now, php_pollfd_for uses select to wait up to our time_left value only...
+				 */
+				if (retry && blocked) {
+					if (read) {
+						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
+							(POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
+					} else {
+						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
+							(POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);
+					}
+				}
 			} else {
-				/* we got the data */
+				/* Else, if we got bytes back, check for possible errors. */
 				int err = SSL_get_error(sslsock->ssl_handle, nr_bytes );
 
-				if( err == SSL_ERROR_NONE )         
+				/* If we didn't get any error, then let's return it to PHP. */
+				if (err == SSL_ERROR_NONE)
 					break;
-				if( blocked ) {  
-					php_pollfd_for( sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
-					                (POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);       
-				}
+
+				/* Otherwise, we need to wait again (up to time_left or we get an error) */
+				if (blocked)
+					if (read) {
+						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_WRITE) ?
+							(POLLOUT|POLLPRI) : (POLLIN|POLLPRI), has_timeout ? &left_time : NULL);
+					} else {
+						php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
+							(POLLIN|POLLPRI) : (POLLOUT|POLLPRI), has_timeout ? &left_time : NULL);
+					}
 			}
+		/* Finally, we keep going until we got data, and an SSL_ERROR_NONE, unless we had an error. */
 		} while (retry);
 
+		/* Tell PHP if we read / wrote bytes. */
 		if (nr_bytes > 0) {
 			php_stream_notify_progress_increment(stream->context, nr_bytes, 0);
 		}
-    
-		if( blocked ) {
-			php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC);
-			sslsock->s.is_blocked = 1;
+
+		/* And if we were originally supposed to be blocking, let's reset the socket to that. */
+		if (blocked) {
+		  php_set_sock_blocking(sslsock->s.socket, 1 TSRMLS_CC);
+		  sslsock->s.is_blocked = 1;
 		}
-	} else {
-		nr_bytes = php_stream_socket_ops.read(stream, buf, count TSRMLS_CC);
-	}
+    } else {
+	    /*
+	     * This block is if we had no timeout... We will just sit and wait forever on the IO operation.
+	     */
+        if (read) {
+            nr_bytes = php_stream_socket_ops.read(stream, buf, count TSRMLS_CC);
+        } else {
+            nr_bytes = php_stream_socket_ops.write(stream, buf, count TSRMLS_CC);
+        }
+    }
 
-	if (nr_bytes < 0) {
-		nr_bytes = 0;
-	}
+    /* PHP doesn't expect a negative return. */
+    if (nr_bytes < 0) {
+        nr_bytes = 0;
+    }
 
-	return nr_bytes;
+    return nr_bytes;
 }
 
+struct timeval subtractTimeval( struct timeval a, struct timeval b )
+{
+	timeval difference;
+
+	difference.tv_sec  = a.tv_sec  - b.tv_sec;
+	difference.tv_usec = a.tv_usec - b.tv_usec;
+
+	if (a.tv_usec < b.tv_usec) {
+	  	b.tv_sec  -= 1L;
+	   	b.tv_usec += 1000000L;
+	}
+
+	return difference;
+}
+
+int compareTimeval( struct timeval a, struct timeval b )
+{
+	if (a.tv_sec > b.tv_sec || (a.tv_sec == b.tv_sec && a.tv_usec > b.tv_usec) ) {
+		return 1;
+	} else if( a.tv_sec == b.tv_sec && a.tv_usec == b.tv_usec ) {
+		return 0;
+	} else {
+		return -1;
+	}
+}
 
 static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_DC)
 {
@@ -538,6 +510,18 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 	}
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+	{
+		zval **val;
+
+		if (stream->context && SUCCESS == php_stream_context_get_option(
+					stream->context, "ssl", "disable_compression", &val) &&
+				zval_is_true(*val)) {
+			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_COMPRESSION);
+		}
+	}
+#endif
+
 	sslsock->ssl_handle = php_SSL_new_from_context(sslsock->ctx, stream TSRMLS_CC);
 	if (sslsock->ssl_handle == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "failed to create an SSL handle");
@@ -613,16 +597,9 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 
 			if (has_timeout) {
 				gettimeofday(&cur_time, NULL);
-				elapsed_time.tv_sec  = cur_time.tv_sec  - start_time.tv_sec;
-				elapsed_time.tv_usec = cur_time.tv_usec - start_time.tv_usec;
-				if (cur_time.tv_usec < start_time.tv_usec) {
-					elapsed_time.tv_sec  -= 1L;
-					elapsed_time.tv_usec += 1000000L;
-				}
+				elapsed_time = subtractTimeval( cur_time, start_time );
 			
-				if (elapsed_time.tv_sec > timeout->tv_sec ||
-						(elapsed_time.tv_sec == timeout->tv_sec &&
-						elapsed_time.tv_usec > timeout->tv_usec)) {
+				if (compareTimeval( elapsed_time, timeout) > 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL: crypto enabling timeout");
 					return -1;
 				}
@@ -638,12 +615,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 					struct timeval left_time;
 					
 					if (has_timeout) {
-						left_time.tv_sec  = timeout->tv_sec  - elapsed_time.tv_sec;
-						left_time.tv_usec =	timeout->tv_usec - elapsed_time.tv_usec;
-						if (timeout->tv_usec < elapsed_time.tv_usec) {
-							left_time.tv_sec  -= 1L;
-							left_time.tv_usec += 1000000L;
-						}
+						left_time = subtractTimeval( timeout, elapsed_time );
 					}
 					php_pollfd_for(sslsock->s.socket, (err == SSL_ERROR_WANT_READ) ?
 						(POLLIN|POLLPRI) : POLLOUT, has_timeout ? &left_time : NULL);
@@ -1100,4 +1072,3 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
-
