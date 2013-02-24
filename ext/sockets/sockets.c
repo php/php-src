@@ -69,7 +69,6 @@
 #include "sendrecvmsg.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(sockets)
-static PHP_GINIT_FUNCTION(sockets);
 
 #ifndef MSG_WAITALL
 #ifdef LINUX
@@ -271,9 +270,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_cmsg_space, 0, 0, 2)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-PHP_MINIT_FUNCTION(sockets);
-PHP_MINFO_FUNCTION(sockets);
-PHP_RSHUTDOWN_FUNCTION(sockets);
+static PHP_GINIT_FUNCTION(sockets);
+static PHP_MINIT_FUNCTION(sockets);
+static PHP_MSHUTDOWN_FUNCTION(sockets);
+static PHP_MINFO_FUNCTION(sockets);
+static PHP_RSHUTDOWN_FUNCTION(sockets);
 
 PHP_FUNCTION(socket_select);
 PHP_FUNCTION(socket_create_listen);
@@ -356,7 +357,7 @@ zend_module_entry sockets_module_entry = {
 	"sockets",
 	sockets_functions,
 	PHP_MINIT(sockets),
-	NULL,
+	PHP_MSHUTDOWN(sockets),
 	NULL,
 	PHP_RSHUTDOWN(sockets),
 	PHP_MINFO(sockets),
@@ -607,7 +608,7 @@ static PHP_GINIT_FUNCTION(sockets)
 
 /* {{{ PHP_MINIT_FUNCTION
  */
-PHP_MINIT_FUNCTION(sockets)
+static PHP_MINIT_FUNCTION(sockets)
 {
 	le_socket = zend_register_list_destructors_ex(php_destroy_socket, NULL, le_socket_name, module_number);
 
@@ -728,9 +729,19 @@ PHP_MINIT_FUNCTION(sockets)
 }
 /* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION
+ */
+static PHP_MSHUTDOWN_FUNCTION(sockets)
+{
+	php_socket_sendrecvmsg_shutdown(SHUTDOWN_FUNC_ARGS_PASSTHRU);
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ PHP_MINFO_FUNCTION
  */
-PHP_MINFO_FUNCTION(sockets)
+static PHP_MINFO_FUNCTION(sockets)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Sockets Support", "enabled");
@@ -739,13 +750,12 @@ PHP_MINFO_FUNCTION(sockets)
 /* }}} */
 
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
-PHP_RSHUTDOWN_FUNCTION(sockets)
+static PHP_RSHUTDOWN_FUNCTION(sockets)
 {
 	if (SOCKETS_G(strerror_buf)) {
 		efree(SOCKETS_G(strerror_buf));
 		SOCKETS_G(strerror_buf) = NULL;
 	}
-	php_socket_sendrecvmsg_shutdown(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 
 	return SUCCESS;
 }
