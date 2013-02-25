@@ -791,7 +791,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	unsigned int line_ccnt;
 	unsigned int lb_ptr;
 	unsigned int lb_cnt;
-	unsigned int prev_ws;
+	unsigned int trail_ws;
 	int opts;
 	static char qp_digits[] = "0123456789ABCDEF";
 
@@ -808,7 +808,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	icnt = *in_left_p;
 	pd = (unsigned char *)(*out_pp);
 	ocnt = *out_left_p;
-	prev_ws = 0;
+	trail_ws = 0;
 
 	for (;;) {
 		if (!(opts & PHP_CONV_QPRINT_OPT_BINARY) && inst->lbchars != NULL && inst->lbchars_len > 0) {
@@ -825,14 +825,6 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 						lb_cnt--;
 						err = PHP_CONV_ERR_TOO_BIG;
 						break;
-					}
-
-					/* If the character(s) immediately before the line break
-					 * is whitespace, need to convert to soft linebreak to
-					 * preserve that data. */
-					if (prev_ws > 0) {
-						*(pd++) = '=';
-						ocnt--;
 					}
 
 					for (i = 0; i < lb_cnt; i++) {
@@ -852,9 +844,10 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 		} 
 
 		c = NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, inst->lbchars);
-		prev_ws = 0;
 
-		if (!(opts & PHP_CONV_QPRINT_OPT_BINARY) && (c == '\t' || c == ' ')) {
+		if (!(opts & PHP_CONV_QPRINT_OPT_BINARY) &&
+			(trail_ws == 0) &&
+			(c == '\t' || c == ' ')) {
 			if (line_ccnt < 2 && inst->lbchars != NULL) {
 				if (ocnt < inst->lbchars_len + 1) {
 					err = PHP_CONV_ERR_TOO_BIG;
@@ -874,11 +867,41 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 					err = PHP_CONV_ERR_TOO_BIG;
 					break;
 				}
-				*(pd++) = c;
-				ocnt--;
-				line_ccnt--;
-				prev_ws = 1;
-				CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
+
+				/* Check to see if this is EOL whitespace. */
+				if (inst->lbchars != NULL) {
+					unsigned int j, lb_cnt2;
+					lb_cnt2 = 0;
+					unsigned char *ps2;
+					ps2 = ps;
+					trail_ws = 1;
+
+					for (j = icnt - 1; j > 0; j--, ps2++) {
+						if (*ps2 == inst->lbchars[lb_cnt2]) {
+							lb_cnt2++;
+							if (lb_cnt2 >= inst->lbchars_len) {
+								/* Found trailing ws. Reset to top of main
+								 * for loop to allow for code to do necessary
+								 * wrapping/encoding. */
+								break;
+							}
+						} else if (lb_cnt2 != 0 || (*ps2 != '\t' && *ps2 != ' ')) {
+							/* At least one non-EOL character following, so
+							 * don't need to encode ws. */
+							trail_ws = 0;
+							break;
+						} else {
+							trail_ws++;
+						}
+					}
+				}
+
+				if (trail_ws == 0) {
+					*(pd++) = c;
+					ocnt--;
+					line_ccnt--;
+					CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
+				}
 			}
 		} else if ((!(opts & PHP_CONV_QPRINT_OPT_FORCE_ENCODE_FIRST) || line_ccnt < inst->line_len) && ((c >= 33 && c <= 60) || (c >= 62 && c <= 126))) { 
 			if (line_ccnt < 2 && inst->lbchars != NULL) {
@@ -927,6 +950,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 			*(pd++) = qp_digits[(c & 0x0f)]; 
 			ocnt -= 3;
 			line_ccnt -= 3;
+			trail_ws--;
 			CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
 		}
 	}
