@@ -630,7 +630,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 						literal_dtor(arg);
 						MAKE_NOP(sv);
 						MAKE_NOP(fcall);
-						ZEND_OP1_LITERAL(opline) = zend_add_literal(op_array, &c TSRMLS_CC);
+						ZEND_OP1_LITERAL(opline) = zend_optimizer_add_literal(op_array, &c TSRMLS_CC);
 						/* no copy ctor - get already copied it */
 						ZEND_OP1_TYPE(opline) = IS_CONST;
 					}
