@@ -2554,13 +2554,9 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern TSRMLS_DC)
 			MAKE_STD_ZVAL(zcacheval);
 			ZVAL_ZVAL(zcacheval, intern->current.data, 1, 0);
 
-			if (Z_TYPE_P(key) == IS_LONG) {
-				add_index_zval(intern->u.caching.zcache, Z_LVAL_P(key), zcacheval);
-			} else if (Z_TYPE_P(key) == IS_STRING) {
-				zend_symtable_update(HASH_OF(intern->u.caching.zcache), Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &zcacheval, sizeof(void*), NULL);
-			} else {
-				/* TODO */
-			}
+			array_set_zval_key(HASH_OF(intern->u.caching.zcache), key, zcacheval);
+
+			zval_ptr_dtor(&zcacheval);
 		}
 		/* Recursion ? */
 		if (intern->dit_type == DIT_RecursiveCachingIterator) {
@@ -3464,18 +3460,7 @@ static int spl_iterator_to_array_apply(zend_object_iterator *iter, void *puser T
 		if (EG(exception)) {
 			return ZEND_HASH_APPLY_STOP;
 		}
-		Z_ADDREF_PP(data);
-		switch (Z_TYPE_P(key)) {
-			case IS_STRING:
-				add_assoc_zval_ex(return_value, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, *data);
-				break;
-			case IS_LONG:
-				add_index_zval(return_value, Z_LVAL_P(key), *data);
-				break;
-			default:
-				/* TODO */
-				break;
-		}
+		array_set_zval_key(Z_ARRVAL_P(return_value), key, *data);
 		zval_ptr_dtor(&key);
 	} else {
 		Z_ADDREF_PP(data);
