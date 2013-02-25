@@ -191,7 +191,7 @@ static ZEND_INI_MH(accel_include_path_on_modify)
 		if (ZCG(include_path) && *ZCG(include_path)) {
 			ZCG(include_path_len) = new_value_length;
 
-			if (accel_startup_ok &&
+			if (ZCG(enabled) && accel_startup_ok &&
 			    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
 			    !zend_accel_hash_is_full(&ZCSG(include_paths))) {
 
@@ -900,7 +900,7 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
 	        include_path = ZCG(include_path);
     	    include_path_len = ZCG(include_path_len);
 			if (ZCG(include_path_check) &&
-			    accel_startup_ok &&
+			    ZCG(enabled) && accel_startup_ok &&
 			    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
 			    !zend_accel_hash_is_full(&ZCSG(include_paths))) {
 
@@ -1291,7 +1291,7 @@ static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int
 	int from_shared_memory; /* if the script we've got is stored in SHM */
 
 	if (!file_handle->filename ||
-		!accel_startup_ok ||
+		!ZCG(enabled) || !accel_startup_ok ||
 		(!ZCG(counted) && !ZCSG(accelerator_enabled)) ||
 	    CG(interactive) ||
 	    (ZCSG(restart_in_progress) && accel_restart_is_active(TSRMLS_C))) {
@@ -1597,7 +1597,7 @@ static char *accel_php_resolve_path(const char *filename, int filename_length, c
 /* zend_stream_open_function() replacement for PHP 5.2 */
 static int persistent_stream_open_function(const char *filename, zend_file_handle *handle TSRMLS_DC)
 {
-	if (accel_startup_ok &&
+	if (ZCG(enabled) && accel_startup_ok &&
 	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
 	    !CG(interactive) &&
 	    !ZCSG(restart_in_progress)) {
@@ -1693,7 +1693,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 /* zend_stream_open_function() replacement for PHP 5.3 and above */
 static int persistent_stream_open_function(const char *filename, zend_file_handle *handle TSRMLS_DC)
 {
-	if (accel_startup_ok &&
+	if (ZCG(enabled) && accel_startup_ok &&
 	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
 	    !CG(interactive) &&
 	    !ZCSG(restart_in_progress)) {
@@ -1758,7 +1758,7 @@ static int persistent_stream_open_function(const char *filename, zend_file_handl
 /* zend_resolve_path() replacement for PHP 5.3 and above */
 static char* persistent_zend_resolve_path(const char *filename, int filename_len TSRMLS_DC)
 {
-	if (accel_startup_ok &&
+	if (ZCG(enabled) && accel_startup_ok &&
 	    (ZCG(counted) || ZCSG(accelerator_enabled)) &&
 	    !CG(interactive) &&
 	    !ZCSG(restart_in_progress)) {
@@ -1864,7 +1864,7 @@ static void accel_activate(void)
 {
 	TSRMLS_FETCH();
 
-	if (!accel_startup_ok) {
+	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
 	}
 
@@ -2116,7 +2116,7 @@ static void accel_deactivate(void)
 	 */
 	TSRMLS_FETCH();
 
-	if (!accel_startup_ok) {
+	if (!ZCG(enabled) || !accel_startup_ok) {
 		return;
 	}
 
@@ -2442,7 +2442,7 @@ static void accel_shutdown(zend_extension *extension)
 
 	zend_accel_blacklist_shutdown(&accel_blacklist);
 
-	if (!accel_startup_ok) {
+	if (!ZCG(enabled) || !accel_startup_ok) {
 		accel_free_ts_resources();
 		return;
 	}
@@ -2528,7 +2528,7 @@ static void accel_op_array_handler(zend_op_array *op_array)
 {
 	TSRMLS_FETCH();
 
-	if (accel_startup_ok && ZCSG(accelerator_enabled)) {
+	if (ZCG(enabled) && accel_startup_ok && ZCSG(accelerator_enabled)) {
 		zend_optimizer(op_array TSRMLS_CC);
 	}
 }

@@ -342,7 +342,7 @@ static ZEND_MINIT_FUNCTION(zend_accelerator)
 void zend_accel_override_file_functions(TSRMLS_D)
 {
 	zend_function *old_function;
-	if (accel_startup_ok && ZCG(accel_directives).file_override_enabled) {
+	if (ZCG(enabled) && accel_startup_ok && ZCG(accel_directives).file_override_enabled) {
 		/* override file_exists */
 		if (zend_hash_find(CG(function_table), "file_exists", sizeof("file_exists"), (void **)&old_function) == SUCCESS) {
 			old_function->internal_function.handler = accel_file_exists;
@@ -368,7 +368,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	php_info_print_table_start();
 
-	if (accel_startup_ok && ZCSG(accelerator_enabled)) {
+	if (ZCG(enabled) && accel_startup_ok && ZCSG(accelerator_enabled)) {
 		php_info_print_table_row(2, "Opcode Caching", "Up and Running");
 	} else {
 		php_info_print_table_row(2, "Opcode Caching", "Disabled");
@@ -378,11 +378,13 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	} else {
 		php_info_print_table_row(2, "Optimization", "Disabled");
 	}
-	if (!accel_startup_ok || zps_api_failure_reason) {
-		php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
-	} else {
-		php_info_print_table_row(2, "Startup", "OK");
-		php_info_print_table_row(2, "Shared memory model", zend_accel_get_shared_model());
+	if (ZCG(enabled)) {
+		if (!accel_startup_ok || zps_api_failure_reason) {
+			php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
+		} else {
+			php_info_print_table_row(2, "Startup", "OK");
+			php_info_print_table_row(2, "Shared memory model", zend_accel_get_shared_model());
+		}
 	}
 
 	php_info_print_table_end();
@@ -418,7 +420,7 @@ static zval* accelerator_get_scripts(TSRMLS_D)
 	struct timeval exec_time;
 	struct timeval fetch_time;
 
-	if (!accel_startup_ok || !ZCSG(accelerator_enabled) || accelerator_shm_read_lock(TSRMLS_C) != SUCCESS) {
+	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled) || accelerator_shm_read_lock(TSRMLS_C) != SUCCESS) {
 		return 0;
 	}
 
@@ -464,14 +466,14 @@ static ZEND_FUNCTION(accelerator_get_status)
 	/* keep the compiler happy */
 	(void)ht; (void)return_value_ptr; (void)this_ptr; (void)return_value_used;
 
-	if (!accel_startup_ok || !ZCSG(accelerator_enabled)) {
+	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 
 	/* Trivia */
-	add_assoc_bool(return_value, "accelerator_enabled", 1 /*accel_startup_ok && ZCSG(accelerator_enabled)*/);
+	add_assoc_bool(return_value, "accelerator_enabled", 1 /*ZCG(enabled) && accel_startup_ok && ZCSG(accelerator_enabled)*/);
 	add_assoc_bool(return_value, "cache_full", ZSMMG(memory_exhausted));
 
 	/* Memory usage statistics */
@@ -576,7 +578,7 @@ static ZEND_FUNCTION(accelerator_reset)
 	/* keep the compiler happy */
 	(void)ht; (void)return_value_ptr; (void)this_ptr; (void)return_value_used;
 
-	if (!accel_startup_ok || !ZCSG(accelerator_enabled)) {
+	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
 		RETURN_FALSE;
 	}
 
