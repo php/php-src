@@ -763,82 +763,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 #endif
 }
 
-static int zend_accel_same_function(void *f1, void *f2)
-{
-	zend_function *func1 = (zend_function *)f1, *func2 = (zend_function *)f2;
-	zend_op_array *op1 =  (zend_op_array *)func1;
-	zend_op_array *op2 =  (zend_op_array *)func2;
-
-	if (func1->type != ZEND_USER_FUNCTION || func2->type != ZEND_USER_FUNCTION) {
-		return 0;
-	}
-
-	if (func1 == func2) {
-		return 1;
-	}
-
-	if (op1->function_name != op2->function_name && (!op1->function_name || !op2->function_name || strcmp(op1->function_name, op2->function_name))) {
-		/* compare filenames */
-		return 0;
-	}
-
-	if (op1->filename != op2->filename && (!op1->filename || !op2->filename || strcmp(op1->filename, op2->filename))) {
-		/* compare filenames */
-		return 0;
-	}
-
-	if (!op1->opcodes || !op2->opcodes || op1->opcodes[0].lineno != op2->opcodes[0].lineno) {
-		/* compare first lines */
-		return 0;
-	}
-
-	/* if everything matches - we are OK */
-	return 1;
-}
-
-static int zend_accel_same_class(void *f1, void *f2)
-{
-	zend_class_entry *ce1 = *(zend_class_entry **)f1;
-	zend_class_entry *ce2 = *(zend_class_entry **)f2;
-
-	if (ce1->type != ZEND_USER_CLASS || ce2->type != ZEND_USER_CLASS) {
-		return 0;
-	}
-
-	if (ce1 == ce2) {
-		return 1;
-	}
-
-	if (!ce1->name || !ce2->name || zend_binary_strcmp(ce1->name, ce1->name_length, ce2->name, ce2->name_length)) {
-		return 0;
-	}
-
-	if (zend_hash_num_elements(&ce1->function_table) != zend_hash_num_elements(&ce2->function_table)
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-	 || ce1->default_properties_count != ce2->default_properties_count) {
-#else
-	 || zend_hash_num_elements(&ce1->default_properties) != zend_hash_num_elements(&ce2->default_properties)) {
-#endif
-		return 0;
-	}
-
-	if (zend_hash_num_elements(&ce1->function_table)) {
-		HashPosition pos;
-		zend_function *func1, *func2;
-
-		zend_hash_internal_pointer_reset_ex(&ce1->function_table, &pos);
-		zend_hash_get_current_data_ex(&ce1->function_table, (void **)&func1, &pos);
-		zend_hash_internal_pointer_reset_ex(&ce2->function_table, &pos);
-		zend_hash_get_current_data_ex(&ce2->function_table, (void **)&func2, &pos);
-		if (!zend_accel_same_function(func1, func2)) {
-			return 0;
-		}
-	}
-
-	return 1;
-}
-
-static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor, uint size, const char **key_fail, ulong *key_fail_l, id_function_t pIdFunc)
+static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor, uint size, int ignore_dups, void **fail_data, void **conflict_data)
 {
 	Bucket *p;
 	void *t;
@@ -853,31 +778,20 @@ static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_co
 			} else {
 				if (p->nKeyLength > 0 && p->arKey[0] == 0) {
 					/* Mangled key, ignore and wait for runtime */
-				} else if (zend_hash_quick_find(target, p->arKey, p->nKeyLength, p->h, &t) == SUCCESS &&
-						  (!pIdFunc || pIdFunc(p->pData, t))) {
-					/* same one, ignore it */
-				} else {
-					if (key_fail) {
-						*key_fail = p->arKey;
-					}
-					if (key_fail_l) {
-						*key_fail_l = p->nKeyLength;
-					}
+				} else if (!ignore_dups && zend_hash_quick_find(target, p->arKey, p->nKeyLength, p->h, &t) == SUCCESS) {
+					*fail_data = p->pData;
+					*conflict_data = t;
 					return FAILURE;
 				}
 			}
 		} else {
 			if (!zend_hash_index_exists(target, p->h) && zend_hash_index_update(target, p->h, p->pData, size, &t) == SUCCESS) {
-					if (pCopyConstructor) {
-						pCopyConstructor(t);
-					}
-			} else {
-				if (key_fail) {
-					*key_fail = NULL;
+				if (pCopyConstructor) {
+					pCopyConstructor(t);
 				}
-				if (key_fail_l) {
-					*key_fail_l = p->h;
-				}
+			} else if (!ignore_dups && zend_hash_index_find(target,p->h, &t) == SUCCESS) {
+				*fail_data = p->pData;
+				*conflict_data = t;
 				return FAILURE;
 			}
 		}
@@ -888,35 +802,41 @@ static int zend_hash_unique_copy(HashTable *target, HashTable *source, unique_co
 	return SUCCESS;
 }
 
-static void zend_accel_function_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor) {
-	const char *name;
-	ulong name_len;
-	zend_function *function;
+static void zend_accel_function_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor)
+{
+	zend_function *function1, *function2;
 	TSRMLS_FETCH();
 
-	if (zend_hash_unique_copy(target, source, pCopyConstructor, sizeof(zend_function), &name, &name_len, ZCG(accel_directives).ignore_dups?NULL:zend_accel_same_function) != SUCCESS) {
-		if (zend_hash_find(target, name, name_len, (void *) &function) == SUCCESS
-			&& function->type == ZEND_USER_FUNCTION
-			&& ((zend_op_array *) function)->last > 0) {
-			zend_error(E_ERROR, "Cannot redeclare function %.*s() (previously declared in %s:%d). If this code worked without the " ACCELERATOR_PRODUCT_NAME ", please set zend_optimizerplus.dups_fix=1 in your ini file",
-					   (int)name_len, name,
-					   ((zend_op_array *) function)->filename,
-					   (int)((zend_op_array *) function)->opcodes[0].lineno);
+	if (zend_hash_unique_copy(target, source, pCopyConstructor, sizeof(zend_function), 0, (void**)&function1, (void**)&function2) != SUCCESS) {
+		CG(in_compilation) = 1;
+		zend_set_compiled_filename(function1->op_array.filename TSRMLS_CC);
+		CG(zend_lineno) = function1->op_array.opcodes[0].lineno;
+		if (function2->type == ZEND_USER_FUNCTION
+			&& function2->op_array.last > 0) {
+			zend_error(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
+					   function1->common.function_name,
+					   function2->op_array.filename,
+					   (int)function2->op_array.opcodes[0].lineno);
 		} else {
-
-			zend_error(E_ERROR, "Cannot redeclare function %.*s(). If this code worked without the " ACCELERATOR_PRODUCT_NAME ", please set zend_optimizerplus.dups_fix=1 in your ini file", (int)name_len, name);
+			zend_error(E_ERROR, "Cannot redeclare %s()", function1->common.function_name);
 		}
 	}
 }
 
-static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor TSRMLS_DC) {
-	const char *name;
-	ulong name_len;
-	uint size;
+static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, unique_copy_ctor_func_t pCopyConstructor TSRMLS_DC)
+{
+	zend_class_entry **pce1, **pce2;
 
-	size = sizeof(zend_class_entry*);
-	if (zend_hash_unique_copy(target, source, pCopyConstructor, size, &name, &name_len, ZCG(accel_directives).ignore_dups? NULL : zend_accel_same_class) != SUCCESS) {
-		zend_error(E_ERROR, "Cannot redeclare class %.*s. If this code worked without the " ACCELERATOR_PRODUCT_NAME ", please set zend_optimizerplus.dups_fix=1 in your php.ini", (int)name_len, name);
+	if (zend_hash_unique_copy(target, source, pCopyConstructor, sizeof(zend_class_entry*), ZCG(accel_directives).ignore_dups, (void**)&pce1, (void**)&pce2) != SUCCESS) {
+		CG(in_compilation) = 1;
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+		zend_set_compiled_filename((*pce1)->info.user.filename TSRMLS_CC);
+		CG(zend_lineno) = (*pce1)->info.user.line_start;
+#else
+		zend_set_compiled_filename((*pce1)->filename TSRMLS_CC);
+		CG(zend_lineno) = (*pce1)->line_start;
+#endif
+		zend_error(E_ERROR, "Cannot redeclare class %s", (*pce1)->name);
 	}
 }
 
