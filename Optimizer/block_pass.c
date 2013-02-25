@@ -1988,6 +1988,8 @@ static void zend_block_optimization(zend_op_array *op_array TSRMLS_DC)
 		zend_rebuild_access_path(&cfg, op_array, 1);
 	}
 
+	memset(usage, 0, op_array->T);
+	zend_t_usage(cfg.blocks, op_array, usage);
 	assemble_code_blocks(&cfg, op_array);
 	efree(usage);
 
