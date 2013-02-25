@@ -20,13 +20,12 @@ Quick Install
 
  $PHP_DIR/phpize
  ./configure \
-      --enable-optimizer-plus \
       --with-php-config=$PHP_DIR/bin/php-config
  make
 
 - Install
 
- make install 
+ make install # this will copy ZendOptimizerPlus.so into PHP extension directory
 
 - Edit php.ini
 
