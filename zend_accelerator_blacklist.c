@@ -98,7 +98,7 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			regexp[1] = '(';
 
 			clen = 2;
-			for (j = end; j <= i ;j++) {
+			for (j = end; j <= i; j++) {
 
 				int c;
 				if (j != end) {

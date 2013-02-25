@@ -26,7 +26,7 @@
 
 if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 	zend_op *opline;
-	zend_op *end = op_array->opcodes+op_array->last;
+	zend_op *end = op_array->opcodes + op_array->last;
 	zend_uint *jmp_hitlist;
 	int jmp_hitlist_count;
 	int i;
@@ -204,7 +204,7 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 						/* JMPZ(X,L1), L1: JMPZ(X,L2) => JMPZ(X,L2), L1: JMPZ(X,L2) */
 						CHECK_JMP2(target, done_jmp_optimization);
 						ZEND_OP2(opline).opline_num = ZEND_OP2(&op_array->opcodes[target]).opline_num;
-					} else if (op_array->opcodes[target].opcode == opline->opcode+3 &&
+					} else if (op_array->opcodes[target].opcode == opline->opcode + 3 &&
 					           SAME_VAR(opline->op1, op_array->opcodes[target].op1)) {
 						/* convert JMPZ(X,L1), L1: T JMPZ_EX(X,L2) to
 						   T = JMPZ_EX(X, L2) */
@@ -215,13 +215,13 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 					           SAME_VAR(opline->op1, op_array->opcodes[target].op1)) {
 						/* convert JMPZ(X,L1), L1: JMPNZ(X,L2) to
 						   JMPZ(X,L1+1) */
-						ZEND_OP2(opline).opline_num = target+1;
+						ZEND_OP2(opline).opline_num = target + 1;
 						break;
 					} else if (op_array->opcodes[target].opcode == INV_COND_EX(opline->opcode) &&
 					           SAME_VAR(opline->op1, op_array->opcodes[target].op1)) {
 						/* convert JMPZ(X,L1), L1: T = JMPNZ_EX(X,L2) to
 						   T = JMPZ_EX(X,L1+1) */
-						ZEND_OP2(opline).opline_num = target+1;
+						ZEND_OP2(opline).opline_num = target + 1;
 						opline->opcode += 3;
 						COPY_NODE(opline->result, op_array->opcodes[target].result);
 						break;
@@ -284,7 +284,7 @@ if (ZEND_OPTIMIZER_PASS_3 & OPTIMIZATION_LEVEL) {
 									SAME_VAR(opline->op1, op_array->opcodes[target].op1)) {
 						   /* convert JMPZ_EX(X,L1), L1: JMPNZ_EX(X,L2) to
 							  JMPZ_EX(X,L1+1) */
-						   ZEND_OP2(opline).opline_num = target+1;
+						   ZEND_OP2(opline).opline_num = target + 1;
 						   break;
 						} else {
 							break;

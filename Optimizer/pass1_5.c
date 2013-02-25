@@ -274,8 +274,8 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					break;
 				}
 				last_op = next_op;
-				final_length += (requires_conversion ? 1 : ZEND_OP2_LITERAL(opline).value.str.len);
-				ptr = (char *)emalloc(final_length+1);
+				final_length += (requires_conversion? 1 : ZEND_OP2_LITERAL(opline).value.str.len);
+				ptr = (char *)emalloc(final_length + 1);
 				ptr[final_length] = '\0';
 				if (requires_conversion) { /* ZEND_ADD_CHAR */
 					char chval = (char)ZEND_OP2_LITERAL(opline).value.lval;
@@ -321,8 +321,8 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			if (ZEND_OP1_TYPE(opline) == IS_UNUSED &&
 				ZEND_OP2_TYPE(opline) == IS_CONST &&
 				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING &&
-				Z_STRLEN(ZEND_OP2_LITERAL(opline)) == sizeof("__COMPILER_HALT_OFFSET__")-1 &&
-				memcmp(Z_STRVAL(ZEND_OP2_LITERAL(opline)), "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1) == 0) {
+				Z_STRLEN(ZEND_OP2_LITERAL(opline)) == sizeof("__COMPILER_HALT_OFFSET__") - 1 &&
+				memcmp(Z_STRVAL(ZEND_OP2_LITERAL(opline)), "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1) == 0) {
 				/* substitute __COMPILER_HALT_OFFSET__ constant */
 				zend_bool orig_in_execution = EG(in_execution);
 				zend_op_array *orig_op_array = EG(active_op_array);
@@ -330,7 +330,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 
 				EG(in_execution) = 1;
 				EG(active_op_array) = op_array;
-				if (zend_get_constant("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1, &offset TSRMLS_CC)) {
+				if (zend_get_constant("__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__") - 1, &offset TSRMLS_CC)) {
 					literal_dtor(&ZEND_OP2_LITERAL(opline));
 					ZEND_OP1_TYPE(opline) = IS_CONST;
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO

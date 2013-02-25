@@ -84,12 +84,12 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 	int var_to_free = -1;
 
 	taken_T = (char *) emalloc(T);
-	start_of_T = (zend_op **) emalloc(T*sizeof(zend_op *));
+	start_of_T = (zend_op **) emalloc(T * sizeof(zend_op *));
 	valid_T = (char *) emalloc(T);
-	map_T = (int *) emalloc(T*sizeof(int));
+	map_T = (int *) emalloc(T * sizeof(int));
 
     end = op_array->opcodes;
-    opline = &op_array->opcodes[op_array->last-1];
+    opline = &op_array->opcodes[op_array->last - 1];
 
     /* Find T definition points */
     while (opline >= end) {
@@ -111,7 +111,7 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 	memset(taken_T, 0, T);
 
     end = op_array->opcodes;
-    opline = &op_array->opcodes[op_array->last-1];
+    opline = &op_array->opcodes[op_array->last - 1];
 
     while (opline >= end) {
 		if ((ZEND_OP1_TYPE(opline) & (IS_VAR | IS_TMP_VAR))
@@ -166,14 +166,14 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 
 		/* Allocate OP_DATA->op2 after "opernds", but before "result" */
 		if (opline->opcode == ZEND_ASSIGN_DIM &&
-		    (opline+1)->opcode == ZEND_OP_DATA &&
-		    ZEND_OP2_TYPE(opline+1) & (IS_VAR | IS_TMP_VAR)) {
-			currT = VAR_NUM(ZEND_OP2(opline+1).var);
+		    (opline + 1)->opcode == ZEND_OP_DATA &&
+		    ZEND_OP2_TYPE(opline + 1) & (IS_VAR | IS_TMP_VAR)) {
+			currT = VAR_NUM(ZEND_OP2(opline + 1).var);
 			GET_AVAILABLE_T();
 			map_T[currT] = i;
 			valid_T[currT] = 1;
 			taken_T[i] = 0;
-			ZEND_OP2(opline+1).var = NUM_VAR(i);
+			ZEND_OP2(opline + 1).var = NUM_VAR(i);
 			var_to_free = i;
 		}
 

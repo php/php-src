@@ -76,26 +76,26 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 static char *create_name_with_username(char *name)
 {
-	static char newname[MAXPATHLEN+UNLEN+4];
-	char uname[UNLEN+1];
+	static char newname[MAXPATHLEN + UNLEN + 4];
+	char uname[UNLEN + 1];
 	DWORD unsize = UNLEN;
 
 	GetUserName(uname, &unsize);
-	snprintf(newname, sizeof(newname)-1, "%s@%s", name, uname);
+	snprintf(newname, sizeof(newname) - 1, "%s@%s", name, uname);
 	return newname;
 }
 
 static char *get_mmap_base_file()
 {
-	static char windir[MAXPATHLEN+UNLEN+3+sizeof("\\\\@")];
-	char uname[UNLEN+1];
+	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@")];
+	char uname[UNLEN + 1];
 	DWORD unsize = UNLEN;
 	int l;
 
 	GetTempPath(MAXPATHLEN, windir);
 	GetUserName(uname, &unsize);
 	l = strlen(windir);
-	snprintf(windir+l, sizeof(windir)-l-1, "\\%s@%s", ACCEL_FILEMAP_BASE, uname);
+	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s", ACCEL_FILEMAP_BASE, uname);
 	return windir;
 }
 
@@ -187,8 +187,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	do {
 		memfile = OpenFileMapping(FILE_MAP_WRITE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
 		err = GetLastError();
-		if (memfile == NULL)
+		if (memfile == NULL) {
 			break;
+		}
 
 		ret =  zend_shared_alloc_reattach(requested_size, error_in);
 		err = GetLastError();
@@ -196,7 +197,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 			/* Mapping failed, wait for mapping object to get freed and retry */
             CloseHandle(memfile);
 			memfile = NULL;
-			Sleep(1000*(map_retries+1));
+			Sleep(1000 * (map_retries + 1));
 		} else {
 			return ret;
 		}
@@ -242,9 +243,10 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 			osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
 
 			if (! GetVersionEx ((OSVERSIONINFO *) &osvi)) {
-				osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
-				if (! GetVersionEx ( (OSVERSIONINFO *) &osvi) )
+				osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+				if (!GetVersionEx((OSVERSIONINFO *)&osvi)) {
 					break;
+				}
 			}
 
 			GetSystemInfo(&si);
@@ -252,8 +254,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 			/* Are we running Vista ? */
 			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 6) {
 				/* Assert that platform is 32 bit (for 64 bit we need to test a different set */
-				if (si.wProcessorArchitecture != PROCESSOR_ARCHITECTURE_INTEL)
+				if (si.wProcessorArchitecture != PROCESSOR_ARCHITECTURE_INTEL) {
 					DebugBreak();
+				}
 
 				wanted_mapping_base = vista_mapping_base_set;
 			}
@@ -262,7 +265,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		char *s = ZCG(accel_directives).mmap_base;
 
 		/* skip leading 0x, %p assumes hexdeciaml format anyway */
-		if (*s == '0' && *(s+1) == 'x') {
+		if (*s == '0' && *(s + 1) == 'x') {
 			s += 2;
 		}
 		if (sscanf(s, "%p", &default_mapping_base_set[0]) != 1) {
@@ -273,8 +276,9 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 
 	do {
 		shared_segment->p = mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, *wanted_mapping_base);
-		if (*wanted_mapping_base == NULL) /* Auto address (NULL) is the last option on the array */
+		if (*wanted_mapping_base == NULL) { /* Auto address (NULL) is the last option on the array */
 			break;
+		}
 		wanted_mapping_base++;
 	} while (!mapping_base);
 

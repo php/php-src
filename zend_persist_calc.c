@@ -178,7 +178,7 @@ static uint zend_persist_op_array_calc(zend_op_array *op_array TSRMLS_DC)
 		zend_uint i;
 
 		ADD_DUP_SIZE(op_array->arg_info, sizeof(zend_arg_info) * op_array->num_args);
-		for (i = 0;i < op_array->num_args; i++) {
+		for (i = 0; i < op_array->num_args; i++) {
 			if (op_array->arg_info[i].name) {
 				ADD_INTERNED_STRING(op_array->arg_info[i].name, op_array->arg_info[i].name_len + 1);
 			}
