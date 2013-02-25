@@ -236,8 +236,8 @@ struct _zend_executor_globals {
 	/* timeout support */
 	int timeout_seconds;
 
-	long magic_call_count;
-	long max_magic_calls;
+	long implicit_fcall_count;
+	long max_implicit_fcalls;
 
 	int lambda_count;
 

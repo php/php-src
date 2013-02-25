@@ -19,7 +19,7 @@ function f() {
 }
 f();
 --EXPECTF--
-Warning: max_magic_calls ini-value has to be equal or less than php.ini value and greater than 1 in %s on line %d
+Warning: max_implicit_function_calls ini-value has to be equal or less than php.ini value and greater than 1 in %s on line %d
 1
 2
 3
@@ -31,4 +31,4 @@ Warning: max_magic_calls ini-value has to be equal or less than php.ini value an
 9
 10
 
-Fatal error: Magic method or function too often called recursively in %s on line %d
+Fatal error: Method or function too often called recursively by implicit call in %s on line %d
