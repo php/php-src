@@ -63,10 +63,17 @@ struct _zend_code_block {
 	zend_code_block    *follow_to;
 	zend_code_block    *next;
 	zend_block_source  *sources;
+	zend_bool           protected; /* don't merge this block with others */
+};
+
+typedef struct _zend_cfg {
+	zend_code_block    *blocks;
 	zend_code_block   **try;
 	zend_code_block   **catch;
-	zend_bool           is_try;
-};
+	zend_code_block   **loop_start;
+	zend_code_block   **loop_cont;
+	zend_code_block   **loop_brk;
+} zend_cfg;
 
 struct _zend_block_source {
 	zend_code_block    *from;
