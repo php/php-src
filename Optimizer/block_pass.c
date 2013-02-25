@@ -42,7 +42,7 @@ static int zend_get_persistent_constant(char *name, uint name_len, zval *result,
 
 static inline void print_block(zend_code_block *block, zend_op *opcodes, char *txt)
 {
-	fprintf(stderr, "%sBlock: %d-%d (%d)", txt, block->start_opline - opcodes, block->start_opline - opcodes+block->len-1, block->len);
+	fprintf(stderr, "%sBlock: %d-%d (%d)", txt, block->start_opline - opcodes, block->start_opline - opcodes + block->len - 1, block->len);
 	if (!block->access) {
 		fprintf(stderr, " unused");
 	}
@@ -278,7 +278,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 		}
 	}
 	cur_block->len = end - cur_block->start_opline;
-	cur_block->next = &blocks[op_array->last+1];
+	cur_block->next = &blocks[op_array->last + 1];
 	print_block(cur_block, op_array->opcodes, "");
 
 	return 1;
@@ -830,7 +830,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 				memcpy(tmp, Z_STRVAL(ZEND_OP1_LITERAL(last_op)), l + 1);
 				Z_STRVAL(ZEND_OP1_LITERAL(last_op)) = tmp;
 			} else {
-				Z_STRVAL(ZEND_OP1_LITERAL(last_op)) = erealloc(Z_STRVAL(ZEND_OP1_LITERAL(last_op)), l+1);
+				Z_STRVAL(ZEND_OP1_LITERAL(last_op)) = erealloc(Z_STRVAL(ZEND_OP1_LITERAL(last_op)), l + 1);
 			}
 			memcpy(Z_STRVAL(ZEND_OP1_LITERAL(last_op))+Z_STRLEN(ZEND_OP1_LITERAL(last_op)), Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)));
 			Z_STRVAL(ZEND_OP1_LITERAL(last_op))[l] = '\0';
@@ -1101,7 +1101,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 
 	/* strip the inside NOPs */
 	opline = block->start_opline;
-	end = opline+block->len;
+	end = opline + block->len;
 	while (opline < end) {
 		if (opline->opcode == ZEND_NOP) {
 			zend_op *nop = opline + 1;
@@ -1131,17 +1131,17 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 {
 	zend_code_block *blocks = cfg->blocks;
-	zend_op *new_opcodes = emalloc(op_array->last*sizeof(zend_op));
+	zend_op *new_opcodes = emalloc(op_array->last * sizeof(zend_op));
 	zend_op *opline = new_opcodes;
 	zend_code_block *cur_block = blocks;
 
 	/* Copy code of reachable blocks into a single buffer */
 	while (cur_block) {
 		if (cur_block->access) {
-			memcpy(opline, cur_block->start_opline, cur_block->len*sizeof(zend_op));
+			memcpy(opline, cur_block->start_opline, cur_block->len * sizeof(zend_op));
 			cur_block->start_opline = opline;
 			opline += cur_block->len;
-			if ((opline-1)->opcode == ZEND_JMP) {
+			if ((opline - 1)->opcode == ZEND_JMP) {
 				zend_code_block *next;
 				next = cur_block->next;
 				while (next && !next->access) {
@@ -1151,7 +1151,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 					/* JMP to the next block - strip it */
 					cur_block->follow_to = cur_block->op1_to;
 					cur_block->op1_to = NULL;
-					MAKE_NOP((opline-1));
+					MAKE_NOP((opline - 1));
 					opline--;
 					cur_block->len--;
 				}
@@ -1159,7 +1159,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		} else {
 			/* this block will not be used, delete all constants there */
 			zend_op *_opl;
-			zend_op *end = cur_block->start_opline+cur_block->len;
+			zend_op *end = cur_block->start_opline + cur_block->len;
 			for (_opl = cur_block->start_opline; _opl && _opl < end; _opl++) {
 				if (ZEND_OP1_TYPE(_opl) == IS_CONST) {
 					literal_dtor(&ZEND_OP1_LITERAL(_opl));
@@ -1217,18 +1217,18 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 			continue;
 		}
 		if (cur_block->op1_to) {
-			ZEND_OP1(&cur_block->start_opline[cur_block->len-1]).opline_num = cur_block->op1_to->start_opline - new_opcodes;
+			ZEND_OP1(&cur_block->start_opline[cur_block->len - 1]).opline_num = cur_block->op1_to->start_opline - new_opcodes;
 		}
 		if (cur_block->op2_to) {
-			ZEND_OP2(&cur_block->start_opline[cur_block->len-1]).opline_num = cur_block->op2_to->start_opline - new_opcodes;
+			ZEND_OP2(&cur_block->start_opline[cur_block->len - 1]).opline_num = cur_block->op2_to->start_opline - new_opcodes;
 		}
 		if (cur_block->ext_to) {
-			cur_block->start_opline[cur_block->len-1].extended_value = cur_block->ext_to->start_opline - new_opcodes;
+			cur_block->start_opline[cur_block->len - 1].extended_value = cur_block->ext_to->start_opline - new_opcodes;
 		}
 		print_block(cur_block, new_opcodes, "Out ");
 	}
 	efree(op_array->opcodes);
-	op_array->opcodes = erealloc(new_opcodes, op_array->last*sizeof(zend_op));
+	op_array->opcodes = erealloc(new_opcodes, op_array->last * sizeof(zend_op));
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	/* adjust early binding list */
@@ -1795,7 +1795,7 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 
 	while (next_block) {
 		zend_op *opline = next_block->start_opline;
-		zend_op *end = opline+next_block->len;
+		zend_op *end = opline + next_block->len;
 
 		if (!next_block->access) {
 			next_block = next_block->next;
@@ -1825,14 +1825,14 @@ static void zend_t_usage(zend_code_block *block, zend_op_array *op_array, char *
 #if DEBUG_BLOCKPASS
 	{
 		int i;
-		for (i=0; i< op_array->T; i++) {
+		for (i = 0; i< op_array->T; i++) {
 			fprintf(stderr, "T%d: %c\n", i, used_ext[i] + '0');
 		}
 	}
 #endif
 
 	while (block) {
-		zend_op *opline = block->start_opline+block->len - 1;
+		zend_op *opline = block->start_opline + block->len - 1;
 
 		if (!block->access) {
 			block = block->next;

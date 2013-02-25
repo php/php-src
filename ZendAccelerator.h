@@ -143,16 +143,16 @@ extern int lock_file;
 
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
 # ifdef ALLOCA_FLAG
-	#define DO_ALLOCA(x)	do_alloca_with_limit(x,use_heap)
-	#define FREE_ALLOCA(x)	free_alloca_with_limit(x,use_heap)
+	#define DO_ALLOCA(x)	do_alloca_with_limit(x, use_heap)
+	#define FREE_ALLOCA(x)	free_alloca_with_limit(x, use_heap)
 # else
 	#define ALLOCA_FLAG(x)
 	#define DO_ALLOCA(x)	do_alloca(x)
 	#define FREE_ALLOCA(x)	free_alloca(x)
 # endif
 #else
-	#define DO_ALLOCA(x)	do_alloca(x,use_heap)
-	#define FREE_ALLOCA(x)	free_alloca(x,use_heap)
+	#define DO_ALLOCA(x)	do_alloca(x, use_heap)
+	#define FREE_ALLOCA(x)	free_alloca(x, use_heap)
 #endif
 
 

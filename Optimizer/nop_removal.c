@@ -12,7 +12,7 @@ static void nop_removal(zend_op_array *op_array)
 
 	shiftlist = (zend_uint *)DO_ALLOCA(sizeof(zend_uint) * op_array->last);
 	i = new_count = shift = 0;
-	end = op_array->opcodes+op_array->last;
+	end = op_array->opcodes + op_array->last;
 	for (opline = op_array->opcodes; opline < end; opline++) {
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO

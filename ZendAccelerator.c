@@ -682,8 +682,9 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 	if (GetFileAttributesEx(file_handle->opened_path, GetFileExInfoStandard, &fdata) != 0) {
 		unsigned __int64 ftime;
 
-		if (CompareFileTime (&fdata.ftLastWriteTime, &utc_base_ft) < 0)
+		if (CompareFileTime (&fdata.ftLastWriteTime, &utc_base_ft) < 0) {
 			return 0;
+		}
 
 		ftime = (((unsigned __int64)fdata.ftLastWriteTime.dwHighDateTime) << 32) + fdata.ftLastWriteTime.dwLowDateTime - utc_base;
 		ftime /= 10000000L;
@@ -943,7 +944,7 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
         }
 
         /* Calculate key length */
-        key_length = cwd_len + path_length+include_path_len + 2;
+        key_length = cwd_len + path_length + include_path_len + 2;
         if (parent_script_len) {
             key_length += parent_script_len + 1;
         }

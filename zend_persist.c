@@ -169,7 +169,7 @@ static void zend_persist_zval_ptr(zval **zp TSRMLS_DC)
 static void zend_protect_zval(zval *z TSRMLS_DC)
 {
 	PZ_SET_ISREF_P(z);
-	PZ_SET_REFCOUNT_P(z,2);
+	PZ_SET_REFCOUNT_P(z, 2);
 }
 
 static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_script* main_persistent_script TSRMLS_DC)
@@ -245,7 +245,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		zend_op *end = new_opcodes + op_array->last;
 		int offset = 0;
 
-		for (;opline<end;opline++, offset++) {
+		for (; opline < end ; opline++, offset++) {
 			if (ZEND_OP1_TYPE(opline) == IS_CONST) {
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 				opline->op1.zv = (zval*)((char*)opline->op1.zv + ((char*)op_array->literals - (char*)orig_literals));

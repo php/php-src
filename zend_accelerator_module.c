@@ -66,7 +66,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 	/* keep the compiler happy */
 	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
-	p = (long *) (base+(size_t) mh_arg1);
+	p = (long *) (base + (size_t)mh_arg1);
 	memsize = atoi(new_value);
 	/* sanity check we must use at least 8 MB */
 	if (memsize < 8) {
@@ -74,8 +74,8 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 		zend_ini_entry *ini_entry;
 
 		memsize = 8;
-		zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.memory_consumption is set below the required 8MB.\n" );
-		zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the minimal 8MB cofiguration.\n" );
+		zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.memory_consumption is set below the required 8MB.\n");
+		zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the minimal 8MB cofiguration.\n");
 
 		if (zend_hash_find(EG(ini_directives),
 					"zend_optimizerplus.memory_consumption",
@@ -104,7 +104,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 	/* keep the compiler happy */
 	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
-	p = (long *) (base+(size_t) mh_arg1);
+	p = (long *) (base + (size_t)mh_arg1);
 	size = atoi(new_value);
 	/* sanity check we must use a value between MIN_ACCEL_FILES and MAX_ACCEL_FILES */
 
@@ -115,14 +115,14 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 		if (size < MIN_ACCEL_FILES) {
 			size = MIN_ACCEL_FILES;
 			new_new_value = TOKENTOSTR(MIN_ACCEL_FILES);
-			zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_accelerated_files is set below the required minimum (%d).\n", MIN_ACCEL_FILES );
-			zend_accel_error(ACCEL_LOG_WARNING,ACCELERATOR_PRODUCT_NAME " will use the minimal cofiguration.\n" );
+			zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_accelerated_files is set below the required minimum (%d).\n", MIN_ACCEL_FILES);
+			zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the minimal cofiguration.\n");
 		}
 		if (size > MAX_ACCEL_FILES) {
 			size = MAX_ACCEL_FILES;
 			new_new_value = TOKENTOSTR(MAX_ACCEL_FILES);
-			zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_accelerated_files is set above the limit (%d).\n", MAX_ACCEL_FILES );
-			zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the maximal cofiguration.\n" );
+			zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_accelerated_files is set above the limit (%d).\n", MAX_ACCEL_FILES);
+			zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the maximal cofiguration.\n");
 		}
 		if (zend_hash_find(EG(ini_directives),
 					"zend_optimizerplus.max_accelerated_files",
@@ -150,7 +150,7 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 	/* keep the compiler happy */
 	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
 
-	p = (double *) (base+(size_t) mh_arg1);
+	p = (double *) (base + (size_t)mh_arg1);
 	percentage = atoi(new_value);
 
 	if (percentage <= 0 || percentage > 50) {
@@ -159,7 +159,7 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 
 		percentage = 5;
 		zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_wasted_percentage must be ser netweeb 1 and 50.\n");
-		zend_accel_error(ACCEL_LOG_WARNING,ACCELERATOR_PRODUCT_NAME " will use 5%.\n" );
+		zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use 5%.\n");
 		if (zend_hash_find(EG(ini_directives),
 					"zend_optimizerplus.max_wasted_percentage",
 					sizeof("zend_optimizerplus.max_wasted_percentage"),
@@ -189,7 +189,7 @@ static ZEND_INI_MH(OnUpdateAccelBlacklist)
 		return FAILURE;
 	}
 
-	p = (char **) (base+(size_t) mh_arg1);
+	p = (char **) (base + (size_t)mh_arg1);
 	*p = new_value;
 
 	zend_accel_blacklist_init(&accel_blacklist);
@@ -244,7 +244,7 @@ static int ZEND_DECLARE_INHERITED_CLASS_DELAYED_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 {
 	zend_class_entry **pce, **pce_orig;
 
-	if (zend_hash_find(EG(class_table), Z_STRVAL(EX(opline)->op2.u.constant), Z_STRLEN(EX(opline)->op2.u.constant)+1, (void **)&pce) == FAILURE ||
+	if (zend_hash_find(EG(class_table), Z_STRVAL(EX(opline)->op2.u.constant), Z_STRLEN(EX(opline)->op2.u.constant) + 1, (void **)&pce) == FAILURE ||
 	    (zend_hash_find(EG(class_table), Z_STRVAL(EX(opline)->op1.u.constant), Z_STRLEN(EX(opline)->op1.u.constant), (void**)&pce_orig) == SUCCESS &&
 	     *pce != *pce_orig)) {
 		do_bind_inherited_class(EX(opline), EG(class_table), EX_T(EX(opline)->extended_value).class_entry, 0 TSRMLS_CC);
@@ -265,14 +265,14 @@ static int filename_is_in_cache(char *filename, int filename_len TSRMLS_DC)
 	handle.type = ZEND_HANDLE_FILENAME;
 
 	if (IS_ABSOLUTE_PATH(filename, filename_len)) {
-		persistent_script = zend_accel_hash_find(&ZCSG(hash), filename, filename_len+1);
+		persistent_script = zend_accel_hash_find(&ZCSG(hash), filename, filename_len + 1);
 		if (persistent_script) {
 			return !persistent_script->corrupted;
 		}
 	}
 
 	if ((key = accel_make_persistent_key_ex(&handle, filename_len, &key_length TSRMLS_CC)) != NULL) {
-		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length+1);
+		persistent_script = zend_accel_hash_find(&ZCSG(hash), key, key_length + 1);
 		return persistent_script && !persistent_script->corrupted;
 	}
 
@@ -483,7 +483,7 @@ static ZEND_FUNCTION(accelerator_get_status)
 	add_assoc_long(memory_usage, "free_memory", zend_shared_alloc_get_free_memory());
 	add_assoc_long(memory_usage, "wasted_memory", ZSMMG(wasted_shared_memory));
 	add_assoc_double(memory_usage, "current_wasted_percentage", (((double) ZSMMG(wasted_shared_memory))/ZCG(accel_directives).memory_consumption)*100.0);
-	add_assoc_zval(return_value, "memory_usage",memory_usage);
+	add_assoc_zval(return_value, "memory_usage", memory_usage);
 
 	/* Accelerator statistics */
 	MAKE_STD_ZVAL(statistics);
@@ -497,12 +497,12 @@ static ZEND_FUNCTION(accelerator_get_status)
 	reqs = ZCSG(hits)+ZCSG(misses);
 	add_assoc_double(statistics, "blacklist_miss_ratio", reqs?(((double) ZCSG(blacklist_misses))/reqs)*100.0:0);
 	add_assoc_double(statistics, "accelerator_hit_rate", reqs?(((double) ZCSG(hits))/reqs)*100.0:0);
-	add_assoc_zval(return_value, "accelerator_statistics",statistics);
+	add_assoc_zval(return_value, "accelerator_statistics", statistics);
 
 	/* acceleratred scripts */
 	scripts = accelerator_get_scripts(TSRMLS_C);
 	if (scripts) {
-		add_assoc_zval(return_value, "scripts",scripts);
+		add_assoc_zval(return_value, "scripts", scripts);
 	}
 }
 
@@ -555,20 +555,20 @@ static ZEND_FUNCTION(accelerator_get_configuration)
 	add_assoc_bool(directives,   "zend_optimizerplus.enable_file_override",   ZCG(accel_directives).file_override_enabled);
 	add_assoc_long(directives, 	 "zend_optimizerplus.optimization_level",         ZCG(accel_directives).optimization_level);
 
-	add_assoc_zval(return_value, "directives",directives);
+	add_assoc_zval(return_value, "directives", directives);
 
 	/*version */
 	MAKE_STD_ZVAL(version);
 	array_init(version);
 	add_assoc_string(version, "version", ACCELERATOR_VERSION, 1);
 	add_assoc_string(version, "accelerator_product_name", ACCELERATOR_PRODUCT_NAME, 1);
-	add_assoc_zval(return_value, "version",version);
+	add_assoc_zval(return_value, "version", version);
 
 	/* blacklist */
 	MAKE_STD_ZVAL(blacklist);
 	array_init(blacklist);
 	zend_accel_blacklist_apply(&accel_blacklist, (apply_func_arg_t) add_blacklist_path, blacklist TSRMLS_CC);
-	add_assoc_zval(return_value, "blacklist",blacklist);
+	add_assoc_zval(return_value, "blacklist", blacklist);
 }
 
 /* {{{ proto void accelerator_reset()
