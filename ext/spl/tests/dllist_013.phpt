@@ -15,13 +15,15 @@ try {
 	echo "Exception: ".$e->getMessage()."\n";
 }
 
-$dll->push(3);
-$dll->push(6);
-$dll->insertBeforeOffset(1,4);
-$dll->insertAfterOffset(1,5);
-$dll->unshift(2);
-$dll->insertBeforeOffset(0,1);
-$dll->insertAfterOffset(5,7);
+$dll->push(3);						//	3
+$dll->push(6);						//	3 6
+// Insert in the middle of the DLL
+$dll->insertBeforeOffset(1,4);		//	3 4 6
+$dll->insertAfterOffset(1,5);		//	3 4 5 6
+$dll->unshift(2);					//	2 3 4 5 6
+// Insert at the beginning and end of the DLL
+$dll->insertBeforeOffset(0,1);		//	1 2 3 4 5 6
+$dll->insertAfterOffset(5,7);		//	1 2 3 4 5 6 7
 
 echo count($dll)."\n";
 
