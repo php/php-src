@@ -462,7 +462,7 @@ void zend_shared_alloc_restore_state(void)
 	ZSMMG(wasted_shared_memory) = 0;
 }
 
-const char *zend_accel_get_shared_model()
+const char *zend_accel_get_shared_model(void)
 {
 	return g_shared_model;
 }

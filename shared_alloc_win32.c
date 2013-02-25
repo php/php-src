@@ -85,7 +85,7 @@ static char *create_name_with_username(char *name)
 	return newname;
 }
 
-static char *get_mmap_base_file()
+static char *get_mmap_base_file(void)
 {
 	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@")];
 	char uname[UNLEN + 1];
@@ -109,7 +109,7 @@ void zend_shared_alloc_create_lock(void)
 	ReleaseMutex(memory_mutex);
 }
 
-void zend_shared_alloc_lock_win32()
+void zend_shared_alloc_lock_win32(void)
 {
 	DWORD waitRes = WaitForSingleObject(memory_mutex, INFINITE);
 
@@ -118,7 +118,7 @@ void zend_shared_alloc_lock_win32()
 	}
 }
 
-void zend_shared_alloc_unlock_win32(TSRMLS_D)
+void zend_shared_alloc_unlock_win32(void)
 {
 	ReleaseMutex(memory_mutex);
 }

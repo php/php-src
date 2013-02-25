@@ -160,7 +160,7 @@ size_t zend_shared_alloc_get_free_memory(void);
 void zend_shared_alloc_save_state(void);
 void zend_shared_alloc_restore_state(void);
 size_t zend_shared_alloc_get_largest_free_block(void);
-const char *zend_accel_get_shared_model();
+const char *zend_accel_get_shared_model(void);
 
 /* memory write protection */
 void zend_accel_shared_protect(int mode TSRMLS_DC);
@@ -179,9 +179,9 @@ extern zend_shared_memory_handlers zend_alloc_posix_handlers;
 
 #ifdef ZEND_WIN32
 extern zend_shared_memory_handlers zend_alloc_win32_handlers;
-void zend_shared_alloc_create_lock();
-void zend_shared_alloc_lock_win32();
-void zend_shared_alloc_unlock_win32();
+void zend_shared_alloc_create_lock(void);
+void zend_shared_alloc_lock_win32(void);
+void zend_shared_alloc_unlock_win32(void);
 #endif
 
 #endif /* ZEND_SHARED_ALLOC_H */
