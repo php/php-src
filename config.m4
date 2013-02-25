@@ -342,4 +342,6 @@ int main() {
 	shared_alloc_posix.c \
 	Optimizer/zend_optimizer.c,
 	$ext_shared,,,,yes)
+
+  PHP_ADD_BUILD_DIR([$ext_builddir/Optimizer], 1)
 fi
