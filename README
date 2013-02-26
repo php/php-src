@@ -144,7 +144,7 @@ zend_optimizerplus.inherited_hack (default "1")
 	anymore and this setting has no effect.
 
 zend_optimizerplus.dups_fix (default "0")
-	Enable this hack as a workaround for "Cannot redecalre class" errors.
+	Enable this hack as a workaround for "Cannot redeclare class" errors.
 
 zend_optimizerplus.blacklist_filename
 	The location of the Optimizer+ blacklist file.
