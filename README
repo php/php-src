@@ -18,7 +18,7 @@ Quick Install
 
 - Compile
 
- $PHP_DIR/phpize
+ $PHP_DIR/bin/phpize
  ./configure \
       --with-php-config=$PHP_DIR/bin/php-config
  make
