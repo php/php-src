@@ -109,7 +109,7 @@ extern char** environ;
 static char windows_error_details[64];
 static char ps_buffer[MAX_PATH];
 static const size_t ps_buffer_size = MAX_PATH;
-#elif PS_USE_CLOBBER_ARGV
+#elif defined(PS_USE_CLOBBER_ARGV)
 static char *ps_buffer;         /* will point to argv area */
 static size_t ps_buffer_size;   /* space determined at run time */
 #else
@@ -372,7 +372,7 @@ int set_ps_title(const char* title)
  * length into *displen.
  * The return code indicates the error.
  */
-int get_ps_title(size_t *displen, const char** string)
+int get_ps_title(int *displen, const char** string)
 {
     int rc = is_ps_title_available();
     if (rc != PS_TITLE_SUCCESS)
@@ -382,7 +382,7 @@ int get_ps_title(size_t *displen, const char** string)
     if (!(ps_buffer_cur_len = GetConsoleTitle(ps_buffer, ps_buffer_size)))
         return PS_TITLE_WINDOWS_ERROR;
 #endif
-    *displen = ps_buffer_cur_len;
+    *displen = (int)ps_buffer_cur_len;
     *string = ps_buffer;
     return PS_TITLE_SUCCESS;
 }
