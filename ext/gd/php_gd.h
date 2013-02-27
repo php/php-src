@@ -124,6 +124,7 @@ PHP_FUNCTION(imagerotate);
 
 #ifdef HAVE_GD_BUNDLED
 PHP_FUNCTION(imageantialias);
+PHP_FUNCTION(imageflip);
 #endif
 
 PHP_FUNCTION(imagesetthickness);
