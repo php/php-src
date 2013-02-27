@@ -467,7 +467,7 @@ static ZEND_FUNCTION(accelerator_get_status)
 	(void)ht; (void)return_value_ptr; (void)this_ptr; (void)return_value_used;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 	
 	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
@@ -526,7 +526,7 @@ static ZEND_FUNCTION(accelerator_get_configuration)
 	(void)ht; (void)return_value_ptr; (void)this_ptr; (void)return_value_used;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	array_init(return_value);
@@ -587,7 +587,7 @@ static ZEND_FUNCTION(accelerator_reset)
 	(void)ht; (void)return_value_ptr; (void)this_ptr; (void)return_value_used;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_FALSE;
 	}
 
 	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
