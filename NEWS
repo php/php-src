@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.4.13
+28 Feb 2012, PHP 5.4.13 RC1
 
 - Core:
   . Fixed bug #64235 (Insteadof not work for class method in 5.4.11).
@@ -40,7 +40,7 @@ PHP                                                                        NEWS
 - SNMP:
   . Fixed bug #64124 (IPv6 malformed). (Boris Lytochkin)
 
-?? ??? 2012, PHP 5.4.12
+21 Feb 2012, PHP 5.4.12
 
 - Core:
   . Fixed bug #64099 (Wrong TSRM usage in zend_Register_class alias). (Johannes)
