@@ -43,6 +43,10 @@ static int create_segments(size_t requested_size, zend_shared_segment_posix ***s
 
 	*shared_segments_count = 1;
 	*shared_segments_p = (zend_shared_segment_posix **) calloc(1, sizeof(zend_shared_segment_posix) + sizeof(void *));
+	if (!*shared_segments_p) {
+		*error_in = "calloc";
+		rerurn ALLOC_FAILURE;
+	}
 	shared_segment = (zend_shared_segment_posix *)((char *)(*shared_segments_p) + sizeof(void *));
 	(*shared_segments_p)[0] = shared_segment;
 
