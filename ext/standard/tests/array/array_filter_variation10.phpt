@@ -61,9 +61,9 @@ array(3) {
 }
 *** Testing array_filter() : usage variations - 'callback' expecting second argument ***
 
-Warning: Missing argument 2 for dump() in /home/tjerk/work/php/php-src/ext/standard/tests/array/array_filter_variation10.php on line %d
+Warning: Missing argument 2 for dump() in %s on line %d
 
-Notice: Undefined variable: key in /home/tjerk/work/php/php-src/ext/standard/tests/array/array_filter_variation10.php on line %d
+Notice: Undefined variable: key in %s on line %d
  = 123
 array(0) {
 }
