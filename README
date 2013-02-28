@@ -185,7 +185,7 @@ zend_optimizerplus.log_verbosity_level (default "1")
 	debug messages (level 4).
 
 zend_optimizerplus.preferred_memory_model
-	Preffered Shared Memory back-end. Leave empty and let the system decide.
+	Preferred Shared Memory back-end. Leave empty and let the system decide.
 
 zend_optimizerplus.protect_memory (default "0")
 	Protect the shared memory from unexpected writing during script execution.
