@@ -209,6 +209,31 @@ typedef struct {
 /* Text functions take these. */
 typedef gdFont *gdFontPtr;
 
+
+/**
+ * Group: Types
+ *
+ * typedef: gdRect
+ *  Defines a rectilinear region.
+ *
+ *  x - left position
+ *  y - right position
+ *  width - Rectangle width
+ *  height - Rectangle height
+ *
+ * typedef: gdRectPtr
+ *  Pointer to a <gdRect>
+ *
+ * See also:
+ *  <gdSetInterpolationMethod>
+ **/
+typedef struct
+{
+	int x, y;
+	int width, height;
+}
+gdRect, *gdRectPtr;
+
 /* For backwards compatibility only. Use gdImageSetStyle()
 	for MUCH more flexible line drawing. Also see
 	gdImageSetBrush(). */
@@ -689,6 +714,31 @@ void gdImageFlipBoth(gdImagePtr im);
 #define GD_FLIP_HORINZONTAL 1
 #define GD_FLIP_VERTICAL 2
 #define GD_FLIP_BOTH 3
+
+/**
+ * Group: Crop
+ *
+ * Constants: gdCropMode
+ *  GD_CROP_DEFAULT - Default crop mode (4 corners or background)
+ *  GD_CROP_TRANSPARENT - Crop using the transparent color
+ *  GD_CROP_BLACK - Crop black borders
+ *  GD_CROP_WHITE - Crop white borders
+ *  GD_CROP_SIDES - Crop using colors of the 4 corners
+ *
+ * See also:
+ *  <gdImageAutoCrop>
+ **/
+enum gdCropMode {
+	GD_CROP_DEFAULT = 0,
+	GD_CROP_TRANSPARENT,
+	GD_CROP_BLACK,
+	GD_CROP_WHITE,
+	GD_CROP_SIDES
+};
+
+gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop);
+gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode);
+gdImagePtr gdImageCropThreshold(gdImagePtr im, const unsigned int color, const float threshold);
 
 #define GD_CMP_IMAGE		1	/* Actual image IS different */
 #define GD_CMP_NUM_COLORS	2	/* Number of Colours in pallette differ */

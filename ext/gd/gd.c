@@ -890,6 +890,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageflip, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_imagecropauto, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
 #endif
 
 /* }}} */
@@ -950,6 +955,7 @@ const zend_function_entry gd_functions[] = {
 #ifdef HAVE_GD_BUNDLED
 	PHP_FE(imageantialias,							arginfo_imageantialias)
 	PHP_FE(imageflip,								arginfo_imageflip)
+	PHP_FE(imagecropauto,							arginfo_imagecropauto)
 #endif
 
 #if HAVE_GD_IMAGESETTILE
@@ -1204,6 +1210,12 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_FLIP_HORIZONTAL", GD_FLIP_HORINZONTAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FLIP_VERTICAL", GD_FLIP_VERTICAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FLIP_BOTH", GD_FLIP_BOTH, CONST_CS | CONST_PERSISTENT);
+	
+	REGISTER_LONG_CONSTANT("IMG_CROP_DEFAULT", GD_CROP_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_CROP_TRANSPARENT", GD_CROP_TRANSPARENT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_CROP_BLACK", GD_CROP_BLACK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_CROP_WHITE", GD_CROP_WHITE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_CROP_SIDES", GD_CROP_SIDES, CONST_CS | CONST_PERSISTENT);
 #else
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -5123,6 +5135,44 @@ PHP_FUNCTION(imageflip)
 	}
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+
+/* {{{ proto void imageflip(resource im, int mode)
+   Flip an image (in place) horizontally, vertically or both directions. */
+PHP_FUNCTION(imagecropauto)
+{
+	zval *IM;
+	long mode = -1;
+	gdImagePtr im;
+	gdImagePtr im_crop;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &IM, &mode) == FAILURE)  {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
+
+	switch (mode) {
+		case -1:
+			mode = GD_CROP_DEFAULT;
+		case GD_CROP_DEFAULT:
+		case GD_CROP_TRANSPARENT:
+		case GD_CROP_BLACK:
+		case GD_CROP_WHITE:
+		case GD_CROP_SIDES:
+			im_crop = gdImageCropAuto(im, mode);
+			break;
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown flip mode");
+			RETURN_FALSE;
+	}
+	if (im_crop == NULL) {
+		RETURN_FALSE;
+	} else {
+		ZEND_REGISTER_RESOURCE(return_value, im_crop, le_gd);
+	}
 }
 /* }}} */
 #endif
