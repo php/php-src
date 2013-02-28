@@ -8,10 +8,10 @@ if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN')
 --FILE--
 <?php
 
-// On Windows 8, this test does not work the same way. When the PowerShell command
-// "get-process" is executed using shell_exec, it overwrites the ConsoleTitle with
-// "Windows PowerShell" and this title ONLY clears away when the php.exe
-// process exits i.e. the test finishes.
+// On Windows 8 and Server 2012, this test does not work the same way. When the PowerShell
+// command "get-process" is executed using shell_exec, it overwrites the ConsoleTitle with
+// "Windows PowerShell" and this title ONLY clears away when the php.exe process exits
+// i.e. the test finishes.
 // On older versions like Windows 7 though, running the command appends
 // "Windows PowerShell" to the ConsoleTitle temporarily and the title reverts
 // back to the original once shell_exec is done.
@@ -28,7 +28,7 @@ if ($ps_output === null)
 }
 
 $ps_output = trim($ps_output);
-if ($ps_output == "Windows PowerShell")
+if (($ps_output == "Windows PowerShell") || ($ps_output == "Administrator: Windows PowerShell"))
   $is_windows8 = true;
 
 echo "*** Testing setting the process title ***\n";
@@ -59,13 +59,8 @@ else
   // I couldn't figure out a good way to navigate this, so we're "grep'ing" all possible
   // console windows for our very unique title. It should occur exactly once in the grep
   // output.
-  $pos = strpos($loaded_title, $original_title, 0);
-  if ($pos !== false)
-  {
-    $pos = strpos($loaded_title, $original_title, $pos + strlen($original_title));
-    if ($pos === false)
-      $loaded_title = $original_title;
-  }
+  if (substr_count($loaded_title, $original_title, 0) == 1)
+    $loaded_title = $original_title;
 }
 
 if ($loaded_title == $original_title)
@@ -74,7 +69,7 @@ else
   echo "Actually loaded from get-process: $loaded_title\n";
 
 $read_title = cli_get_process_title();
-if ($read_title == $original_title)
+if (substr_count($read_title, $original_title, 0) == 1)
   echo "Successfully verified title using get\n";
 else
   echo "Actually loaded from get: $read_title\n";
