@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -208,6 +208,24 @@ php_mysqlnd_net_store_length(zend_uchar *packet, uint64_t length)
 	*packet++ = 254;
 	int8store(packet, length);
 	return packet + 8;
+}
+/* }}} */
+
+
+/* {{{ php_mysqlnd_net_store_length_size */
+size_t 
+php_mysqlnd_net_store_length_size(uint64_t length)
+{
+	if (length < (uint64_t) L64(251)) {
+		return 1;
+	}
+	if (length < (uint64_t) L64(65536)) {
+		return 3;
+	}
+	if (length < (uint64_t) L64(16777216)) {
+		return 4;
+	}
+	return 8;
 }
 /* }}} */
 
@@ -459,7 +477,7 @@ void php_mysqlnd_greet_free_mem(void * _packet, zend_bool stack_allocation TSRML
 /* }}} */
 
 
-#define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 1024)
+#define AUTH_WRITE_BUFFER_LEN (MYSQLND_HEADER_SIZE + MYSQLND_MAX_ALLOWED_USER_LEN + SCRAMBLE_LENGTH + MYSQLND_MAX_ALLOWED_DB_LEN + 1 + 4096)
 
 /* {{{ php_mysqlnd_auth_write */
 static
@@ -539,6 +557,52 @@ size_t php_mysqlnd_auth_write(void * _packet, MYSQLND_CONN_DATA * conn TSRMLS_DC
 			memcpy(p, packet->auth_plugin_name, len);
 			p+= len;
 			*p++= '\0';
+		}
+
+		if (packet->connect_attr && zend_hash_num_elements(packet->connect_attr)) {
+			HashPosition pos_value;
+			const char ** entry_value;
+			size_t ca_payload_len = 0;
+			zend_hash_internal_pointer_reset_ex(packet->connect_attr, &pos_value);
+			while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
+				char *s_key;
+				unsigned int s_len;
+				unsigned long num_key;
+				size_t value_len = strlen(*entry_value);
+				
+				if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, 0, &pos_value)) {
+					ca_payload_len += php_mysqlnd_net_store_length_size(s_len);
+					ca_payload_len += s_len;
+					ca_payload_len += php_mysqlnd_net_store_length_size(value_len);
+					ca_payload_len += value_len;
+				}
+				zend_hash_move_forward_ex(conn->options->connect_attr, &pos_value);
+			}
+
+			if ((sizeof(buffer) - (p - buffer)) >= (ca_payload_len + php_mysqlnd_net_store_length_size(ca_payload_len))) {
+				p = php_mysqlnd_net_store_length(p, ca_payload_len);
+
+				zend_hash_internal_pointer_reset_ex(packet->connect_attr, &pos_value);
+				while (SUCCESS == zend_hash_get_current_data_ex(packet->connect_attr, (void **)&entry_value, &pos_value)) {
+					char *s_key;
+					unsigned int s_len;
+					unsigned long num_key;
+					size_t value_len = strlen(*entry_value);
+					if (HASH_KEY_IS_STRING == zend_hash_get_current_key_ex(packet->connect_attr, &s_key, &s_len, &num_key, 0, &pos_value)) {
+						/* copy key */
+						p = php_mysqlnd_net_store_length(p, s_len);
+						memcpy(p, s_key, s_len);
+						p+= s_len;
+						/* copy value */
+						p = php_mysqlnd_net_store_length(p, value_len);
+						memcpy(p, *entry_value, value_len);
+						p+= value_len;
+					}
+					zend_hash_move_forward_ex(conn->options->connect_attr, &pos_value);
+				}
+			} else {
+				/* cannot put the data - skip */
+			}
 		}
 	}
 	if (packet->is_change_user_packet) {

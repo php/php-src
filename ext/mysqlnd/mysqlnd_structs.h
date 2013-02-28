@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,8 @@
 #ifndef MYSQLND_STRUCTS_H
 #define MYSQLND_STRUCTS_H
 
+#include "ext/standard/php_smart_str.h"
+
 #define MYSQLND_TYPEDEFED_METHODS
 
 #define MYSQLND_CLASS_METHOD_TABLE_NAME(class) mysqlnd_##class##_methods
@@ -30,6 +32,7 @@
 
 #define MYSQLND_CLASS_METHODS_START(class)	MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(class) = {
 #define MYSQLND_CLASS_METHODS_END			}
+
 
 typedef struct st_mysqlnd_memory_pool MYSQLND_MEMORY_POOL;
 typedef struct st_mysqlnd_memory_pool_chunk MYSQLND_MEMORY_POOL_CHUNK;
@@ -172,7 +175,7 @@ typedef struct st_mysqlnd_options
 	  The ABI will be broken and the methods structure will be somewhere else
 	  in the memory which can crash external code. Feel free to reuse these.
 	*/
-	char		* unused2;
+	HashTable	* connect_attr;
 	char		* unused3;
 	char		* unused4;
 	char		* unused5;
@@ -195,7 +198,7 @@ typedef struct st_mysqlnd_net_options
 	unsigned int timeout_read;
 	unsigned int timeout_write;
 
-	unsigned int net_read_buffer_size;
+	size_t		net_read_buffer_size;
 
 	/* SSL information */
 	char		*ssl_key;
@@ -480,6 +483,11 @@ typedef MYSQLND_RES * 		(*func_mysqlnd_conn_data__result_init)(unsigned int fiel
 typedef enum_func_status	(*func_mysqlnd_conn_data__set_autocommit)(MYSQLND_CONN_DATA * conn, unsigned int mode TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit)(MYSQLND_CONN_DATA * conn TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_rollback)(MYSQLND_CONN_DATA * conn TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__tx_begin)(MYSQLND_CONN_DATA * conn, const unsigned int mode, const char * const name TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const unsigned int flags, const char * const name TSRMLS_DC);
+typedef void				(*func_mysqlnd_conn_data__tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * tmp_str, const unsigned int mode TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__tx_savepoint)(MYSQLND_CONN_DATA * conn, const char * const name TSRMLS_DC);
+typedef enum_func_status	(*func_mysqlnd_conn_data__tx_savepoint_release)(MYSQLND_CONN_DATA * conn, const char * const name TSRMLS_DC);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__local_tx_start)(MYSQLND_CONN_DATA * conn, size_t this_func TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__local_tx_end)(MYSQLND_CONN_DATA * conn, size_t this_func, enum_func_status status TSRMLS_DC);
@@ -488,6 +496,8 @@ typedef unsigned int		(*func_mysqlnd_conn_data__get_updated_connect_flags)(MYSQL
 typedef enum_func_status	(*func_mysqlnd_conn_data__connect_handshake)(MYSQLND_CONN_DATA * conn, const char * const host, const char * const user, const char * const passwd, const unsigned int passwd_len, const char * const db, const unsigned int db_len, const unsigned int mysql_flags TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__simple_command_send_request)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command, const zend_uchar * const arg, size_t arg_len, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
 typedef struct st_mysqlnd_authentication_plugin * (*func_mysqlnd_conn_data__fetch_auth_plugin_by_name)(const char * const requested_protocol TSRMLS_DC);
+
+typedef enum_func_status	(*func_mysqlnd_conn_data__set_client_option_2d)(MYSQLND_CONN_DATA * const conn, enum mysqlnd_option option, const char * const key, const char * const value TSRMLS_DC);
 
 struct st_mysqlnd_conn_data_methods
 {
@@ -564,6 +574,11 @@ struct st_mysqlnd_conn_data_methods
 	func_mysqlnd_conn_data__set_autocommit set_autocommit;
 	func_mysqlnd_conn_data__tx_commit tx_commit;
 	func_mysqlnd_conn_data__tx_rollback tx_rollback;
+	func_mysqlnd_conn_data__tx_begin tx_begin;
+	func_mysqlnd_conn_data__tx_commit_or_rollback tx_commit_or_rollback;
+	func_mysqlnd_conn_data__tx_cor_options_to_string tx_cor_options_to_string;
+	func_mysqlnd_conn_data__tx_savepoint tx_savepoint;
+	func_mysqlnd_conn_data__tx_savepoint_release tx_savepoint_release;
 
 	func_mysqlnd_conn_data__local_tx_start local_tx_start;
 	func_mysqlnd_conn_data__local_tx_end local_tx_end;
@@ -573,6 +588,8 @@ struct st_mysqlnd_conn_data_methods
 	func_mysqlnd_conn_data__connect_handshake connect_handshake;
 	func_mysqlnd_conn_data__simple_command_send_request simple_command_send_request;
 	func_mysqlnd_conn_data__fetch_auth_plugin_by_name fetch_auth_plugin_by_name;
+
+	func_mysqlnd_conn_data__set_client_option_2d set_client_option_2d;
 };
 
 

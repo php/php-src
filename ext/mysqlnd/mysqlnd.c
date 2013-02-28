@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -94,6 +94,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_options)(MYSQLND_CONN_DATA * conn TSRMLS_
 	if (conn->options->cfg_section) {
 		mnd_pefree(conn->options->cfg_section, pers);
 		conn->options->cfg_section = NULL;
+	}
+	if (conn->options->connect_attr) {
+		zend_hash_destroy(conn->options->connect_attr);
+		mnd_pefree(conn->options->connect_attr, pers);
+		conn->options->connect_attr = NULL;
 	}
 }
 /* }}} */
@@ -708,6 +713,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags)(MYSQLND_CONN_DATA *
 	/* we allow load data local infile by default */
 	mysql_flags |= MYSQLND_CAPABILITIES;
 
+	mysql_flags |= conn->options->flags; /* use the flags from set_client_option() */
+
 	if (PG(open_basedir) && strlen(PG(open_basedir))) {
 		mysql_flags ^= CLIENT_LOCAL_FILES;
 	}
@@ -795,13 +802,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 		goto err;
 	}
 
+	conn->client_flag			= mysql_flags;
+	conn->server_capabilities 	= greet_packet->server_capabilities;
+
 	if (FAIL == mysqlnd_connect_run_authentication(conn, user, passwd, db, db_len, (size_t) passwd_len,
 												   greet_packet, conn->options, mysql_flags TSRMLS_CC))
 	{
 		goto err;
 	}
-	conn->client_flag			= mysql_flags;
-	conn->server_capabilities 	= greet_packet->server_capabilities;
 	conn->upsert_status->warning_count = 0;
 	conn->upsert_status->server_status = greet_packet->server_status;
 	conn->upsert_status->affected_rows = 0;
@@ -809,6 +817,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 	PACKET_FREE(greet_packet);
 	DBG_RETURN(PASS);
 err:
+	conn->client_flag = 0;
+	conn->server_capabilities = 0;
 	PACKET_FREE(greet_packet);
 	DBG_RETURN(FAIL);
 }
@@ -1084,6 +1094,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 	DBG_ENTER("mysqlnd_conn::connect");
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
+		mysqlnd_options4(conn_handle, MYSQL_OPT_CONNECT_ATTR_ADD, "_client_name", "mysqlnd");
 		ret = conn->m->connect(conn, host, user, passwd, passwd_len, db, db_len, port, socket_or_pipe, mysql_flags TSRMLS_CC);
 
 		conn->m->local_tx_end(conn, this_func, FAIL TSRMLS_CC);
@@ -1091,6 +1102,7 @@ MYSQLND_METHOD(mysqlnd_conn, connect)(MYSQLND * conn_handle,
 	DBG_RETURN(ret);
 }
 /* }}} */
+
 
 /* {{{ mysqlnd_connect */
 PHPAPI MYSQLND * mysqlnd_connect(MYSQLND * conn_handle,
@@ -2282,7 +2294,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			break;
 #endif
 		case MYSQL_OPT_LOCAL_INFILE:
-			if (!value || (*(unsigned int*) value) ? 1 : 0) {
+			if (value && (*(unsigned int*) value) ? 1 : 0) {
 				conn->options->flags |= CLIENT_LOCAL_FILES;
 			} else {
 				conn->options->flags &= ~CLIENT_LOCAL_FILES;
@@ -2317,7 +2329,14 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			break;
 		case MYSQL_SET_CHARSET_NAME:
 		{
-			char * new_charset_name = mnd_pestrdup(value, conn->persistent);
+			char * new_charset_name;
+			if (!mysqlnd_find_charset_name(value)) {
+				SET_CLIENT_ERROR(*conn->error_info, CR_CANT_FIND_CHARSET, UNKNOWN_SQLSTATE, "Unknown character set");
+				ret = FAIL;
+				break;
+			}
+				
+			new_charset_name = mnd_pestrdup(value, conn->persistent);
 			if (!new_charset_name) {
 				goto oom;
 			}
@@ -2366,12 +2385,109 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			DBG_INF_FMT("auth_protocol=%s", conn->options->auth_protocol);
 			break;
 		}
+		case MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS:
+			if (value && (*(unsigned int*) value) ? 1 : 0) {
+				conn->options->flags |= CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS;
+			} else {
+				conn->options->flags &= ~CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS;
+			}
+			break;
+		case MYSQL_OPT_CONNECT_ATTR_RESET:
+			if (conn->options->connect_attr) {
+				DBG_INF_FMT("Before reset %d attribute(s)", zend_hash_num_elements(conn->options->connect_attr));
+				zend_hash_clean(conn->options->connect_attr);
+			}
+			break;
+		case MYSQL_OPT_CONNECT_ATTR_DELETE:
+			if (conn->options->connect_attr && value) {
+				DBG_INF_FMT("Before delete %d attribute(s)", zend_hash_num_elements(conn->options->connect_attr));
+				zend_hash_del(conn->options->connect_attr, value, strlen(value));
+				DBG_INF_FMT("%d left", zend_hash_num_elements(conn->options->connect_attr));
+			}
+			break;
 #ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_SHARED_MEMORY_BASE_NAME:
 		case MYSQL_OPT_USE_RESULT:
 		case MYSQL_SECURE_AUTH:
 			/* not sure, todo ? */
 #endif
+		default:
+			ret = FAIL;
+	}
+	conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
+	DBG_RETURN(ret);
+oom:
+	SET_OOM_ERROR(*conn->error_info);
+	conn->m->local_tx_end(conn, this_func, FAIL TSRMLS_CC);	
+end:
+	DBG_RETURN(FAIL);
+}
+/* }}} */
+
+
+/* {{{ connect_attr_item_edtor */
+static void
+connect_attr_item_edtor(void * pDest)
+{
+#ifdef ZTS
+	TSRMLS_FETCH();
+#endif
+	DBG_ENTER("connect_attr_item_edtor");
+	mnd_efree(*(char **) pDest);
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ connect_attr_item_pdtor */
+static void
+connect_attr_item_pdtor(void * pDest)
+{
+#ifdef ZTS
+	TSRMLS_FETCH();
+#endif
+	DBG_ENTER("connect_attr_item_pdtor");
+	mnd_pefree(*(char **) pDest, 1);
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::set_client_option_2d */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * const conn,
+														enum mysqlnd_option option,
+														const char * const key,
+														const char * const value
+														TSRMLS_DC)
+{
+	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, set_client_option_2d);
+	enum_func_status ret = PASS;
+	DBG_ENTER("mysqlnd_conn_data::set_client_option_2d");
+	DBG_INF_FMT("conn=%llu option=%u", conn->thread_id, option);
+
+	if (PASS != conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
+		goto end;
+	}
+	switch (option) {
+		case MYSQL_OPT_CONNECT_ATTR_ADD:
+			if (!conn->options->connect_attr) {
+				DBG_INF("Initializing connect_attr hash");
+				conn->options->connect_attr = mnd_pemalloc(sizeof(HashTable), conn->persistent);
+				if (!conn->options->connect_attr) {
+					goto oom;
+				}
+				zend_hash_init(conn->options->connect_attr, 0, NULL, conn->persistent? connect_attr_item_pdtor:connect_attr_item_edtor, conn->persistent);
+			}
+			DBG_INF_FMT("Adding [%s][%s]", key, value);
+			{
+				const char * copyv = mnd_pestrdup(value, conn->persistent);
+				if (!copyv) {
+					goto oom;
+				}
+				zend_hash_update(conn->options->connect_attr, key, strlen(key), &copyv, sizeof(char *), NULL);
+			}
+			break;
 		default:
 			ret = FAIL;
 	}
@@ -2501,16 +2617,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_autocommit)(MYSQLND_CONN_DATA * conn, unsi
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, tx_commit)(MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
-	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, tx_commit);
-	enum_func_status ret = FAIL;
-	DBG_ENTER("mysqlnd_conn_data::tx_commit");
-
-	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
-		ret = conn->m->query(conn, "COMMIT", sizeof("COMMIT") - 1 TSRMLS_CC);
-		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
-	}
-
-	DBG_RETURN(ret);
+	return conn->m->tx_commit_or_rollback(conn, TRUE, TRANS_COR_NO_OPT, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -2519,12 +2626,197 @@ MYSQLND_METHOD(mysqlnd_conn_data, tx_commit)(MYSQLND_CONN_DATA * conn TSRMLS_DC)
 static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, tx_rollback)(MYSQLND_CONN_DATA * conn TSRMLS_DC)
 {
-	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, tx_rollback);
+	return conn->m->tx_commit_or_rollback(conn, FALSE, TRANS_COR_NO_OPT, NULL TSRMLS_CC);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_tx_cor_options_to_string */
+static void
+MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string)(const MYSQLND_CONN_DATA * const conn, smart_str * str, const unsigned int mode TSRMLS_DC)
+{
+	if (mode & TRANS_COR_AND_CHAIN && !(mode & TRANS_COR_AND_NO_CHAIN)) {
+		if (str->len) {
+			smart_str_appendl(str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(str, "AND CHAIN", sizeof("AND CHAIN") - 1);
+	} else if (mode & TRANS_COR_AND_NO_CHAIN && !(mode & TRANS_COR_AND_CHAIN)) {
+		if (str->len) {
+			smart_str_appendl(str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(str, "AND NO CHAIN", sizeof("AND NO CHAIN") - 1);
+	}
+
+	if (mode & TRANS_COR_RELEASE && !(mode & TRANS_COR_NO_RELEASE)) {
+		if (str->len) {
+			smart_str_appendl(str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(str, "RELEASE", sizeof("RELEASE") - 1);
+	} else if (mode & TRANS_COR_NO_RELEASE && !(mode & TRANS_COR_RELEASE)) {
+		if (str->len) {
+			smart_str_appendl(str, ", ", sizeof(", ") - 1);
+		}
+		smart_str_appendl(str, "NO RELEASE", sizeof("NO RELEASE") - 1);
+	}
+	smart_str_0(str);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::tx_commit_ex */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback)(MYSQLND_CONN_DATA * conn, const zend_bool commit, const unsigned int flags, const char * const name TSRMLS_DC)
+{
+	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, tx_commit_or_rollback);
 	enum_func_status ret = FAIL;
-	DBG_ENTER("mysqlnd_conn_data::tx_rollback");
+	DBG_ENTER("mysqlnd_conn_data::tx_commit_or_rollback");
 
 	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
-		ret = conn->m->query(conn, "ROLLBACK", sizeof("ROLLBACK") - 1 TSRMLS_CC);
+		do {
+			smart_str tmp_str = {0, 0, 0};
+			conn->m->tx_cor_options_to_string(conn, &tmp_str, flags TSRMLS_CC);
+			smart_str_0(&tmp_str);
+
+			{
+				char * commented_name = NULL;
+				unsigned int commented_name_len = name? mnd_sprintf(&commented_name, 0, " /*%s*/", name):0;
+				char * query;
+				unsigned int query_len = mnd_sprintf(&query, 0, (commit? "COMMIT%s %s":"ROLLBACK%s %s"),
+													 commented_name? commented_name:"", tmp_str.c? tmp_str.c:"");
+				smart_str_free(&tmp_str);
+
+				if (!query) {
+					SET_OOM_ERROR(*conn->error_info);
+					break;
+				}
+				ret = conn->m->query(conn, query, query_len TSRMLS_CC);
+				mnd_sprintf_free(query);
+				if (commented_name) {
+					mnd_sprintf_free(commented_name);
+				}
+			}
+		} while (0);
+		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::tx_begin */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, tx_begin)(MYSQLND_CONN_DATA * conn, const unsigned int mode, const char * const name TSRMLS_DC)
+{
+	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, tx_begin);
+	enum_func_status ret = FAIL;
+	DBG_ENTER("mysqlnd_conn_data::tx_begin");
+
+	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
+		do {
+			smart_str tmp_str = {0, 0, 0};
+			if (mode & TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
+				if (tmp_str.len) {
+					smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+				}
+				smart_str_appendl(&tmp_str, "WITH CONSISTENT SNAPSHOT", sizeof("WITH CONSISTENT SNAPSHOT") - 1);
+			}
+			if (mode & TRANS_START_READ_WRITE) {
+				if (tmp_str.len) {
+					smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+				}
+				smart_str_appendl(&tmp_str, "READ WRITE", sizeof("READ WRITE") - 1);
+			}
+			if (mode & TRANS_START_READ_ONLY) {
+				if (tmp_str.len) {
+					smart_str_appendl(&tmp_str, ", ", sizeof(", ") - 1);
+				}
+				smart_str_appendl(&tmp_str, "READ ONLY", sizeof("READ ONLY") - 1);
+			}
+			smart_str_0(&tmp_str);
+
+			{
+				char * commented_name = NULL;
+				unsigned int commented_name_len = name? mnd_sprintf(&commented_name, 0, " /*%s*/", name):0;
+				char * query;
+				unsigned int query_len = mnd_sprintf(&query, 0, "START TRANSACTION%s %s", commented_name? commented_name:"", tmp_str.c? tmp_str.c:"");
+				smart_str_free(&tmp_str);
+
+				if (!query) {
+					SET_OOM_ERROR(*conn->error_info);
+					break;
+				}
+				ret = conn->m->query(conn, query, query_len TSRMLS_CC);
+				mnd_sprintf_free(query);
+				if (commented_name) {
+					mnd_sprintf_free(commented_name);
+				}
+			}
+		} while (0);
+		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::tx_savepoint */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint)(MYSQLND_CONN_DATA * conn, const char * const name TSRMLS_DC)
+{
+	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, tx_savepoint);
+	enum_func_status ret = FAIL;
+	DBG_ENTER("mysqlnd_conn_data::tx_savepoint");
+
+	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
+		do {
+			char * query;
+			unsigned int query_len;
+			if (!name) {
+				SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Savepoint name not provided");
+				break;
+			}
+			query_len = mnd_sprintf(&query, 0, "SAVEPOINT `%s`", name);
+			if (!query) {
+				SET_OOM_ERROR(*conn->error_info);
+				break;
+			}
+			ret = conn->m->query(conn, query, query_len TSRMLS_CC);
+			mnd_sprintf_free(query);
+		} while (0);
+		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
+	}
+
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+
+/* {{{ mysqlnd_conn_data::tx_savepoint_release */
+static enum_func_status
+MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint_release)(MYSQLND_CONN_DATA * conn, const char * const name TSRMLS_DC)
+{
+	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, tx_savepoint_release);
+	enum_func_status ret = FAIL;
+	DBG_ENTER("mysqlnd_conn_data::tx_savepoint_release");
+
+	if (PASS == conn->m->local_tx_start(conn, this_func TSRMLS_CC)) {
+		do {
+			char * query;
+			unsigned int query_len;
+			if (!name) {
+				SET_CLIENT_ERROR(*conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Savepoint name not provided");
+				break;
+			}
+			query_len = mnd_sprintf(&query, 0, "RELEASE SAVEPOINT `%s`", name);
+			if (!query) {
+				SET_OOM_ERROR(*conn->error_info);
+				break;
+			}
+			ret = conn->m->query(conn, query, query_len TSRMLS_CC);
+			mnd_sprintf_free(query);
+		} while (0);
 		conn->m->local_tx_end(conn, this_func, ret TSRMLS_CC);	
 	}
 
@@ -2647,13 +2939,21 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_conn_data)
 	MYSQLND_METHOD(mysqlnd_conn_data, set_autocommit),
 	MYSQLND_METHOD(mysqlnd_conn_data, tx_commit),
 	MYSQLND_METHOD(mysqlnd_conn_data, tx_rollback),
+	MYSQLND_METHOD(mysqlnd_conn_data, tx_begin),
+	MYSQLND_METHOD(mysqlnd_conn_data, tx_commit_or_rollback),
+	MYSQLND_METHOD(mysqlnd_conn_data, tx_cor_options_to_string),
+	MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint),
+	MYSQLND_METHOD(mysqlnd_conn_data, tx_savepoint_release),
+
 	MYSQLND_METHOD(mysqlnd_conn_data, local_tx_start),
 	MYSQLND_METHOD(mysqlnd_conn_data, local_tx_end),
 	MYSQLND_METHOD(mysqlnd_conn_data, execute_init_commands),
 	MYSQLND_METHOD(mysqlnd_conn_data, get_updated_connect_flags),
 	MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake),
 	MYSQLND_METHOD(mysqlnd_conn_data, simple_command_send_request),
-	MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name)	
+	MYSQLND_METHOD(mysqlnd_conn_data, fetch_auth_plugin_by_name),
+
+	MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)
 MYSQLND_CLASS_METHODS_END;
 
 

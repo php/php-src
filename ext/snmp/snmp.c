@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1111,8 +1111,7 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 static int netsnmp_session_init(php_snmp_session **session_p, int version, char *hostname, char *community, int timeout, int retries TSRMLS_DC)
 {
 	php_snmp_session *session;
-	char *pptr;
-	char buf[MAX_NAME_LEN];
+	char *pptr, *host_ptr;
 	int force_ipv6 = FALSE;
 	int n;
 	struct sockaddr **psal;
@@ -1126,8 +1125,6 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	}
 	memset(session, 0, sizeof(php_snmp_session));
 
-	strlcpy(buf, hostname, sizeof(buf));
-
 	snmp_sess_init(session);
 
 	session->version = version;
@@ -1138,23 +1135,25 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "emalloc() failed while copying hostname");
 		return (-1);
 	}
-	*(session->peername) = '\0';
+	/* we copy original hostname for further processing */
+	strlcpy(session->peername, hostname, MAX_NAME_LEN);
+	host_ptr = session->peername;
 
 	/* Reading the hostname and its optional non-default port number */
-	if (*hostname == '[') { /* IPv6 address */
+	if (*host_ptr == '[') { /* IPv6 address */
 		force_ipv6 = TRUE;
-		hostname++;
-		if ((pptr = strchr(hostname, ']'))) {
+		host_ptr++;
+		if ((pptr = strchr(host_ptr, ']'))) {
 			if (pptr[1] == ':') {
 				session->remote_port = atoi(pptr + 2);
 			}
 			*pptr = '\0';
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mailformed IPv6 address, closing square bracket missing");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "malformed IPv6 address, closing square bracket missing");
 			return (-1);
 		}
 	} else { /* IPv4 address */
-		if ((pptr = strchr(hostname, ':'))) {
+		if ((pptr = strchr(host_ptr, ':'))) {
 			session->remote_port = atoi(pptr + 1);
 			*pptr = '\0';
 		}
@@ -1162,11 +1161,13 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 
 	/* since Net-SNMP library requires 'udp6:' prefix for all IPv6 addresses (in FQDN form too) we need to
 	   perform possible name resolution before running any SNMP queries */
-	if ((n = php_network_getaddresses(hostname, SOCK_DGRAM, &psal, NULL TSRMLS_CC)) == 0) { /* some resover error */
+	if ((n = php_network_getaddresses(host_ptr, SOCK_DGRAM, &psal, NULL TSRMLS_CC)) == 0) { /* some resolver error */
 		/* warnings sent, bailing out */
 		return (-1);
 	}
 
+	/* we have everything we need in psal, flush peername and fill it properly */
+	*(session->peername) = '\0';
 	res = psal;
 	while (n-- > 0) {
 		pptr = session->peername;
@@ -1196,7 +1197,7 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	}
 
 	if (strlen(session->peername) == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown failure while resolving '%s'", buf);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown failure while resolving '%s'", hostname);
 		return (-1);
 	}
 	/* XXX FIXME

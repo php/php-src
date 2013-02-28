@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -42,7 +42,7 @@ static const char mysqlnd_free_name[]		= "_mysqlnd_free";
 static const char mysqlnd_pestrndup_name[]	= "_mysqlnd_pestrndup";
 static const char mysqlnd_pestrdup_name[]	= "_mysqlnd_pestrdup";
 
-const char * mysqlnd_debug_std_no_trace_funcs[] =
+PHPAPI const char * mysqlnd_debug_std_no_trace_funcs[] =
 {
 	mysqlnd_emalloc_name,
 	mysqlnd_ecalloc_name,

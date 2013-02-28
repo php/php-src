@@ -14,12 +14,14 @@ if (!extension_loaded('sockets')) {
     if (!socket_set_nonblock($socket)) {
         die('Unable to set nonblocking mode for socket');
     }
-    socket_recvfrom($socket, $buf, 12, 0, $from, $port); // cause warning
+    
     $address = '127.0.0.1';
     socket_sendto($socket, '', 1, 0, $address); // cause warning
     if (!socket_bind($socket, $address, 1223)) {
         die("Unable to bind to $address:1223");
     }
+	
+	var_dump(socket_recvfrom($socket, $buf, 12, 0, $from, $port)); //false (EAGAIN - no warning)
 
     $msg = "Ping!";
     $len = strlen($msg);
@@ -44,9 +46,9 @@ if (!extension_loaded('sockets')) {
 
     socket_close($socket);
 --EXPECTF--
-Warning: socket_recvfrom(): unable to recvfrom [%d]: %a in %s on line %d
 
 Warning: Wrong parameter count for socket_sendto() in %s on line %d
+bool(false)
 
 Warning: socket_recvfrom() expects at least 5 parameters, 4 given in %s on line %d
 

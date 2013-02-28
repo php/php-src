@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -40,6 +40,18 @@
 #define mysqli_stmt_close(c, implicit)		mysql_stmt_close((c))
 #define mysqli_free_result(r, is_forced)	mysql_free_result((r))
 #define mysqli_change_user_silent(c, u, p, d, p_len)   mysql_change_user((c), (u), (p), (d))
+
+
+#define TRANS_START_NO_OPT						0
+#define TRANS_START_WITH_CONSISTENT_SNAPSHOT	1
+#define TRANS_START_READ_WRITE					2
+#define TRANS_START_READ_ONLY					4
+
+#define TRANS_COR_NO_OPT		0
+#define TRANS_COR_AND_CHAIN		1
+#define TRANS_COR_AND_NO_CHAIN	2
+#define TRANS_COR_RELEASE		4
+#define TRANS_COR_NO_RELEASE	8
 
 
 /*

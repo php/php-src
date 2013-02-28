@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -885,6 +885,11 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageantialias, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, on)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_imageflip, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
 #endif
 
 /* }}} */
@@ -944,6 +949,7 @@ const zend_function_entry gd_functions[] = {
 
 #ifdef HAVE_GD_BUNDLED
 	PHP_FE(imageantialias,							arginfo_imageantialias)
+	PHP_FE(imageflip,								arginfo_imageflip)
 #endif
 
 #if HAVE_GD_IMAGESETTILE
@@ -1194,6 +1200,10 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_EFFECT_NORMAL", gdEffectNormal, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_EFFECT_OVERLAY", gdEffectOverlay, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 1, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("IMG_FLIP_HORIZONTAL", GD_FLIP_HORINZONTAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FLIP_VERTICAL", GD_FLIP_VERTICAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FLIP_BOTH", GD_FLIP_BOTH, CONST_CS | CONST_PERSISTENT);
 #else
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -5041,7 +5051,7 @@ PHP_FUNCTION(imageconvolution)
 				if (zend_hash_index_find(Z_ARRVAL_PP(var), (j), (void **) &var2) == SUCCESS) {
 					SEPARATE_ZVAL(var2);
 					convert_to_double(*var2);
-					matrix[i][j] = Z_DVAL_PP(var2);
+					matrix[i][j] = (float)Z_DVAL_PP(var2);
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "You must have a 3x3 matrix");
 					RETURN_FALSE;
@@ -5049,7 +5059,7 @@ PHP_FUNCTION(imageconvolution)
 			}
 		}
 	}
-	res = gdImageConvolution(im_src, matrix, div, offset);
+	res = gdImageConvolution(im_src, matrix, (float)div, (float)offset);
 
 	if (res) {
 		RETURN_TRUE;
@@ -5078,7 +5088,45 @@ PHP_FUNCTION(imageantialias)
 	RETURN_TRUE;
 }
 /* }}} */
+
+
+/* {{{ proto void imageflip(resource im, int mode)
+   Flip an image (in place) horizontally, vertically or both directions. */
+PHP_FUNCTION(imageflip)
+{
+	zval *IM;
+	long mode;
+	gdImagePtr im;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &IM, &mode) == FAILURE)  {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
+
+	switch (mode) {
+		case GD_FLIP_VERTICAL:
+			gdImageFlipHorizontal(im);
+			break;
+
+		case GD_FLIP_HORINZONTAL:
+			gdImageFlipVertical(im);
+			break;
+
+		case GD_FLIP_BOTH:
+			gdImageFlipBoth(im);
+			break;
+
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown flip mode");
+			RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+/* }}} */
 #endif
+
 
 /*
  * Local variables:

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -678,10 +678,13 @@ object ":" uiv ":" ["]	{
 
 	do {
 		/* Try to find class directly */
+		BG(serialize_lock) = 1;
 		if (zend_lookup_class(class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
+			BG(serialize_lock) = 0;
 			ce = *pce;
 			break;
 		}
+		BG(serialize_lock) = 0;
 		
 		/* Check for unserialize callback */
 		if ((PG(unserialize_callback_func) == NULL) || (PG(unserialize_callback_func)[0] == '\0')) {
@@ -696,7 +699,9 @@ object ":" uiv ":" ["]	{
 		args[0] = &arg_func_name;
 		MAKE_STD_ZVAL(arg_func_name);
 		ZVAL_STRING(arg_func_name, class_name, 1);
+		BG(serialize_lock) = 1;
 		if (call_user_function_ex(CG(function_table), NULL, user_func, &retval_ptr, 1, args, 0, NULL TSRMLS_CC) != SUCCESS) {
+			BG(serialize_lock) = 0;
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "defined (%s) but not found", user_func->value.str.val);
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
@@ -704,6 +709,7 @@ object ":" uiv ":" ["]	{
 			zval_ptr_dtor(&arg_func_name);
 			break;
 		}
+		BG(serialize_lock) = 0;
 		if (retval_ptr) {
 			zval_ptr_dtor(&retval_ptr);
 		}

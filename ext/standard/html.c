@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1628,8 +1628,8 @@ PHP_FUNCTION(get_html_translation_table)
 			unsigned i, j, k,
 					 max_i, max_j, max_k;
 			/* no mapping to unicode required */
-			if (CHARSET_SINGLE_BYTE(charset)) {
-				max_i = 1; max_j = 1; max_k = 64;
+			if (CHARSET_SINGLE_BYTE(charset)) { /* ISO-8859-1 */
+				max_i = 1; max_j = 4; max_k = 64;
 			} else {
 				max_i = 0x1E; max_j = 64; max_k = 64;
 			}

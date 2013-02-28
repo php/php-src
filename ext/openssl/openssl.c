@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -3214,6 +3214,7 @@ PHP_FUNCTION(openssl_pkey_get_public)
 	if (pkey == NULL) {
 		RETURN_FALSE;
 	}
+	zend_list_addref(Z_LVAL_P(return_value));
 }
 /* }}} */
 
@@ -3250,6 +3251,7 @@ PHP_FUNCTION(openssl_pkey_get_private)
 	if (pkey == NULL) {
 		RETURN_FALSE;
 	}
+	zend_list_addref(Z_LVAL_P(return_value));
 }
 
 /* }}} */

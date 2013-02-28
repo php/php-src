@@ -64,9 +64,9 @@ Do not use abbreviations for alpha and beta.
 ``git push --tags origin HEAD``
 
 8. run: ``./makedist 5.4.2RC2``, this will export the tree, create configure
-and build two tarballs (one gz and one bz2).
+and build three tarballs (gz,bz2 and xz).
 
-9. Copy those two tarballs to www.php.net, in your homedir there should be a
+9. Copy those three tarballs to www.php.net, in your homedir there should be a
 directory "downloads/". Copy them into there, so that the system can generate
 MD5 sums. If you do not have this directory, talk to Derick.
 

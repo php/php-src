@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -378,7 +378,11 @@ static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, in
 
 	if (intern->fptr_offset_get) {
 		zval *rv;
-		SEPARATE_ARG_IF_REF(offset);
+		if (!offset) {
+			ALLOC_INIT_ZVAL(offset);
+		} else {
+			SEPARATE_ARG_IF_REF(offset);
+		}
 		zend_call_method_with_1_params(&object, intern->std.ce, &intern->fptr_offset_get, "offsetGet", &rv, offset);
 		zval_ptr_dtor(&offset);
 		if (rv) {
@@ -655,22 +659,27 @@ SPL_METHOD(SplFixedArray, count)
 */
 SPL_METHOD(SplFixedArray, toArray)
 {
-	zval *ret, *tmp;
-	HashTable *ret_ht, *obj_ht;
+	spl_fixedarray_object *intern;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")) {
 		return;
 	}
 
-	ALLOC_HASHTABLE(ret_ht);
-	zend_hash_init(ret_ht, 0, NULL, ZVAL_PTR_DTOR, 0);
-	ALLOC_INIT_ZVAL(ret);
-	Z_TYPE_P(ret) = IS_ARRAY;
-	obj_ht = spl_fixedarray_object_get_properties(getThis() TSRMLS_CC);
-	zend_hash_copy(ret_ht, obj_ht, (copy_ctor_func_t) zval_add_ref, (void *) &tmp, sizeof(zval *));
-	Z_ARRVAL_P(ret) = ret_ht;
+	intern = (spl_fixedarray_object *)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	RETURN_ZVAL(ret, 1, 1);
+	array_init(return_value);
+	if (intern->array) {
+		int i = 0;
+		for (; i < intern->array->size; i++) {
+			if (intern->array->elements[i]) {
+				zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *)&intern->array->elements[i], sizeof(zval *), NULL);
+				Z_ADDREF_P(intern->array->elements[i]);
+			} else {
+				zend_hash_index_update(Z_ARRVAL_P(return_value), i, (void *)&EG(uninitialized_zval_ptr), sizeof(zval *), NULL);
+				Z_ADDREF_P(EG(uninitialized_zval_ptr));
+			}
+		}
+	}
 }
 /* }}} */
 

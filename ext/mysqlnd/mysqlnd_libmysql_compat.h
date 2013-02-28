@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -44,7 +44,7 @@
 #define mysql_change_user(r,a,b,c)		mysqlnd_change_user((r), (a), (b), (c), FALSE)
 #define mysql_character_set_name(c)		mysqlnd_character_set_name((c))
 #define mysql_close(r)					mysqlnd_close((r), MYSQLND_CLOSE_EXPLICIT)
-#define mysql_commit(r)					mysqlnd_commit((r))
+#define mysql_commit(r)					mysqlnd_commit((r), TRANS_COR_NO_OPT, NULL)
 #define mysql_data_seek(r,o)			mysqlnd_data_seek((r),(o))
 #define mysql_debug(x)					mysqlnd_debug((x))
 #define mysql_dump_debug_info(r)		mysqlnd_dump_debug_info((r))
@@ -74,7 +74,7 @@
 #define mysql_real_escape_string(r,a,b,c) mysqlnd_real_escape_string((r), (a), (b), (c))
 #define mysql_real_query(r,a,b)			mysqlnd_query((r), (a), (b))
 #define mysql_refresh(conn, options)	mysqlnd_refresh((conn), (options))
-#define mysql_rollback(r)				mysqlnd_rollback((r))
+#define mysql_rollback(r)				mysqlnd_rollback((r), TRANS_COR_NO_OPT, NULL)
 #define mysql_select_db(r,a)			mysqlnd_select_db((r), (a) ,strlen((a)))
 #define mysql_set_server_option(r,o)	mysqlnd_set_server_option((r), (o))
 #define mysql_set_character_set(r,a)	mysqlnd_set_character_set((r), (a))
@@ -106,7 +106,8 @@
 #define mysql_stmt_more_results(s)		mysqlnd_stmt_more_results((s))
 #define mysql_thread_safe()				mysqlnd_thread_safe()
 #define mysql_info(r)					mysqlnd_info((r))
-#define mysql_options(r,a,b)			mysqlnd_options((r), (a), (b))
+#define mysql_options(c,a,v)			mysqlnd_options((c), (a), (v))
+#define mysql_options4(c,a,k,v)			mysqlnd_options4((c), (a), (k), (v))
 #define mysql_stmt_init(r)				mysqlnd_stmt_init((r))
 #define mysql_free_result(r)			mysqlnd_free_result((r), FALSE)
 #define mysql_store_result(r)			mysqlnd_store_result((r))

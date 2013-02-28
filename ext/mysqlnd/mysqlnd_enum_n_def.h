@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -97,7 +97,9 @@
 #define CLIENT_MULTI_RESULTS		(1UL << 17) /* Enable/disable multi-results */
 #define CLIENT_PS_MULTI_RESULTS		(1UL << 18) /* Multi-results in PS-protocol */
 #define CLIENT_PLUGIN_AUTH			(1UL << 19) /* Client supports plugin authentication */
-
+#define CLIENT_CONNECT_ATTRS		(1UL << 20) /* Client supports connection attributes */
+#define CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA	(1UL << 21) /* Enable authentication response packet to be larger than 255 bytes. */
+#define CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS		(1UL << 22) /* Don't close the connection for a connection with expired password. */
 #define CLIENT_SSL_VERIFY_SERVER_CERT (1UL << 30)
 
 #define MYSQLND_CAPABILITIES (CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_TRANSACTIONS | \
@@ -105,6 +107,18 @@
 				CLIENT_MULTI_RESULTS | CLIENT_PS_MULTI_RESULTS | CLIENT_LOCAL_FILES | CLIENT_PLUGIN_AUTH)
 
 #define MYSQLND_NET_FLAG_USE_COMPRESSION 1
+
+
+#define TRANS_START_NO_OPT						0
+#define TRANS_START_WITH_CONSISTENT_SNAPSHOT	1
+#define TRANS_START_READ_WRITE					2
+#define TRANS_START_READ_ONLY					4
+
+#define TRANS_COR_NO_OPT		0
+#define TRANS_COR_AND_CHAIN		1
+#define TRANS_COR_AND_NO_CHAIN	2
+#define TRANS_COR_RELEASE		4
+#define TRANS_COR_NO_RELEASE	8
 
 typedef enum mysqlnd_extension
 {
@@ -166,7 +180,12 @@ typedef enum mysqlnd_option
 	MYSQL_OPT_SSL_VERIFY_SERVER_CERT,
 	MYSQL_PLUGIN_DIR,
 	MYSQL_DEFAULT_AUTH,
+	MYSQL_OPT_CONNECT_ATTR_RESET,
+	MYSQL_OPT_CONNECT_ATTR_ADD,
+	MYSQL_OPT_CONNECT_ATTR_DELETE,
 	MYSQL_SERVER_PUBLIC_KEY,
+	MYSQL_ENABLE_CLEARTEXT_PLUGIN,
+	MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS,
 	MYSQLND_DEPRECATED_ENUM1 = 200,
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	MYSQLND_OPT_INT_AND_FLOAT_NATIVE = 201,

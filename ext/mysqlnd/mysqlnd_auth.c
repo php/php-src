@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,6 @@
 #include "mysqlnd_result.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
-
 
 /* {{{ mysqlnd_auth_handshake */
 enum_func_status
@@ -99,6 +98,10 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 		auth_packet->auth_data = auth_plugin_data;
 		auth_packet->auth_data_len = auth_plugin_data_len;
 		auth_packet->auth_plugin_name = auth_protocol;
+		
+		if (conn->server_capabilities & CLIENT_CONNECT_ATTRS) {
+			auth_packet->connect_attr = conn->options->connect_attr;
+		}
 
 		if (!PACKET_WRITE(auth_packet, conn)) {
 			goto end;

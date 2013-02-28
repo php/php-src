@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -504,12 +504,14 @@ const MYSQLND_CHARSET mysqlnd_charsets[] =
 	{  53, "macroman", "macroman_bin", 1, 1, "", NULL, NULL},
 	{  54, "utf16", "utf16_general_ci", 2, 4, "UTF-16 Unicode", mysqlnd_mbcharlen_utf16, check_mb_utf16},
 	{  55, "utf16", "utf16_bin", 2, 4, "UTF-16 Unicode", mysqlnd_mbcharlen_utf16, check_mb_utf16},
+	{  56, "utf16le", "utf16le_general_ci", 2, 4, "UTF-16LE Unicode", mysqlnd_mbcharlen_utf16, check_mb_utf16},
 	{  58, "cp1257", "cp1257_bin", 1, 1, "", NULL, NULL},
 #ifdef USED_TO_BE_SO_BEFORE_MYSQL_5_5
 	{  60, "armascii8", "armascii8_bin", 1, 1, "", NULL, NULL},
 #endif
 /*55*/{  60, "utf32", "utf32_general_ci", 4, 4, "UTF-32 Unicode", mysqlnd_mbcharlen_utf32, check_mb_utf32},
 /*55*/{  61, "utf32", "utf32_bin", 4, 4, "UTF-32 Unicode", mysqlnd_mbcharlen_utf32, check_mb_utf32},
+	{  62, "utf16le", "utf16le_bin", 2, 4, "UTF-16LE Unicode", mysqlnd_mbcharlen_utf16, check_mb_utf16},
 	{  65, "ascii", "ascii_bin", 1, 1, "", NULL, NULL},
 	{  66, "cp1250", "cp1250_bin", 1, 1, "", NULL, NULL},
 	{  67, "cp1256", "cp1256_bin", 1, 1, "", NULL, NULL},
@@ -669,14 +671,15 @@ PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_nr(unsigned int charsetnr)
 /* {{{ mysqlnd_find_charset_name */
 PHPAPI const MYSQLND_CHARSET * mysqlnd_find_charset_name(const char * const name)
 {
-	const MYSQLND_CHARSET * c = mysqlnd_charsets;
-
-	do {
-		if (!strcasecmp(c->name, name)) {
-			return c;
-		}
-		++c;
-	} while (c[0].nr != 0);
+	if (name) {
+		const MYSQLND_CHARSET * c = mysqlnd_charsets;
+		do {
+			if (!strcasecmp(c->name, name)) {
+				return c;
+			}
+			++c;
+		} while (c[0].nr != 0);
+	}
 	return NULL;
 }
 /* }}} */
