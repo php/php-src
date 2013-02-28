@@ -64,7 +64,9 @@ static ZEND_FUNCTION(get_included_files);
 static ZEND_FUNCTION(is_subclass_of);
 static ZEND_FUNCTION(is_a);
 static ZEND_FUNCTION(get_class_vars);
+static ZEND_FUNCTION(get_object_constants);
 static ZEND_FUNCTION(get_object_vars);
+static ZEND_FUNCTION(get_class_constants);
 static ZEND_FUNCTION(get_class_methods);
 static ZEND_FUNCTION(trigger_error);
 static ZEND_FUNCTION(set_error_handler);
@@ -150,8 +152,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class_vars, 0, 0, 1)
 	ZEND_ARG_INFO(0, class_name)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_object_constants, 0, 0, 1)
+	ZEND_ARG_INFO(0, obj)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_object_vars, 0, 0, 1)
 	ZEND_ARG_INFO(0, obj)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class_constants, 0, 0, 1)
+	ZEND_ARG_INFO(0, class)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class_methods, 0, 0, 1)
@@ -276,7 +286,9 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(is_subclass_of,		arginfo_is_subclass_of)
 	ZEND_FE(is_a,				arginfo_is_subclass_of)
 	ZEND_FE(get_class_vars,		arginfo_get_class_vars)
+	ZEND_FE(get_object_constants, arginfo_get_object_constants)
 	ZEND_FE(get_object_vars,	arginfo_get_object_vars)
+	ZEND_FE(get_class_constants, arginfo_get_class_constants)
 	ZEND_FE(get_class_methods,	arginfo_get_class_methods)
 	ZEND_FE(trigger_error,		arginfo_trigger_error)
 	ZEND_FALIAS(user_error,		trigger_error,		arginfo_trigger_error)
@@ -976,6 +988,23 @@ ZEND_FUNCTION(get_class_vars)
 }
 /* }}} */
 
+/* {{{ proto array get_object_constants(object obj)
+   Returns an array of object constants */
+ZEND_FUNCTION(get_object_constants)
+{
+	zval *obj;
+	zend_class_entry *ce;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
+		return;
+	}
+
+	ce = Z_OBJCE_P(obj);
+	array_init(return_value);
+	zend_hash_copy(Z_ARRVAL_P(return_value), &(ce->constants_table),
+					(copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval*));
+}
+/* }}} */
 
 /* {{{ proto array get_object_vars(object obj)
    Returns an array of object properties */
@@ -1025,6 +1054,37 @@ ZEND_FUNCTION(get_object_vars)
 }
 /* }}} */
 
+/* {{{ proto array get_class_constants(mixed class)
+   Returns an array of class constants. */
+ZEND_FUNCTION(get_class_constants)
+{
+	zval *klass;
+	zend_class_entry *ce = NULL, **pce;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &klass) == FAILURE) {
+		return;
+	}
+
+	if (Z_TYPE_P(klass) == IS_OBJECT) {
+		if (!HAS_CLASS_ENTRY(*klass)) {
+			RETURN_FALSE;
+		}
+		ce = Z_OBJCE_P(klass);
+	} else if (Z_TYPE_P(klass) == IS_STRING) {
+		if (zend_lookup_class(Z_STRVAL_P(klass), Z_STRLEN_P(klass), &pce TSRMLS_CC) == SUCCESS) {
+			ce = *pce;
+		}
+	}
+
+	if (!ce) {
+		RETURN_NULL();
+	}
+
+	array_init(return_value);
+	zend_hash_copy(Z_ARRVAL_P(return_value), &(ce->constants_table),
+					(copy_ctor_func_t) zval_add_ref, NULL, sizeof(zval*));
+
+}
 
 /* {{{ proto array get_class_methods(mixed class)
    Returns an array of method names for class or class instance. */
