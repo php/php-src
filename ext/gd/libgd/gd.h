@@ -733,7 +733,8 @@ enum gdCropMode {
 	GD_CROP_TRANSPARENT,
 	GD_CROP_BLACK,
 	GD_CROP_WHITE,
-	GD_CROP_SIDES
+	GD_CROP_SIDES,
+	GD_CROP_THRESHOLD
 };
 
 gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop);

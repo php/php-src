@@ -894,6 +894,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_imagecropauto, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, threshold)
+	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -1216,6 +1218,7 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_CROP_BLACK", GD_CROP_BLACK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_CROP_WHITE", GD_CROP_WHITE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_CROP_SIDES", GD_CROP_SIDES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_CROP_THRESHOLD", GD_CROP_THRESHOLD, CONST_CS | CONST_PERSISTENT);
 #else
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -5145,10 +5148,12 @@ PHP_FUNCTION(imagecropauto)
 {
 	zval *IM;
 	long mode = -1;
+	long color = -1;
+	double threshold = 0.5f;
 	gdImagePtr im;
 	gdImagePtr im_crop;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &IM, &mode) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ldl", &IM, &mode, &threshold, &color) == FAILURE)  {
 		return;
 	}
 
@@ -5164,6 +5169,15 @@ PHP_FUNCTION(imagecropauto)
 		case GD_CROP_SIDES:
 			im_crop = gdImageCropAuto(im, mode);
 			break;
+
+		case GD_CROP_THRESHOLD:
+			if (color < 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Color argument missing with threshold mode");
+				RETURN_FALSE;
+			}
+			im_crop = gdImageCropThreshold(im, color, (float) threshold);
+			break;
+
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown flip mode");
 			RETURN_FALSE;

@@ -58,7 +58,7 @@ gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop)
 	if (src->sy < (crop->y + crop->height -1)) {
 		crop->height = src->sy - crop->y + 1;
 	}
-#ifdef 0
+#if 0
 printf("rect->x: %i\nrect->y: %i\nrect->width: %i\nrect->height: %i\n", crop->x, crop->y, crop->width, crop->height);
 #endif
 	if (dst == NULL) {
