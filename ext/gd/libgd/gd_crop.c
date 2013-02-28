@@ -193,7 +193,7 @@ gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode)
 	}
 	return gdImageCrop(im, &crop);
 }
-
+/*TODOs: Implement DeltaE instead, way better perceptual differences */
 /**
  * Function: gdImageThresholdCrop
  *  Crop an image using a given color. The threshold argument defines
