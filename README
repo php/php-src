@@ -190,3 +190,9 @@ zend_optimizerplus.preferred_memory_model
 zend_optimizerplus.protect_memory (default "0")
 	Protect the shared memory from unexpected writing during script execution.
 	Useful for internal debugging only.
+
+zend_optimizerplus.mmap_base
+	Mapping base of shared memory segments (for Windows only). All the PHP
+	processes have to map shared memory into the same address space. This
+	directive allows to manually fix the "Unable to reattach to base address"
+	errors.
