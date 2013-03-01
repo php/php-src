@@ -4,6 +4,9 @@ PHP                                                                        NEWS
 
 28 Feb 2013, PHP 5.3.23RC1
 
+- Phar:
+  . Fixed timestamp update on Phar contents modification. (Dmitry)
+
 - SPL:
   . Fixed bug #64264 (SPLFixedArray toArray problem). (Laruence)
   . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
