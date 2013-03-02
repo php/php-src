@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug #60840 (undefined symbol: mysqlnd_debug_std_no_trace_funcs).
     (Johannes)
 
+- Phar:
+  . Fixed timestamp update on Phar contents modification. (Dmitry)
+
 - SOAP
   . Added check that soap.wsdl_cache_dir conforms to open_basedir
     (CVE-2013-1635). (Dmitry)
