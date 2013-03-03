@@ -1,5 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2012, PHP 5.4.14
+
 ?? ??? 2012, PHP 5.4.13
 
 - Core:
@@ -23,17 +25,27 @@ PHP                                                                        NEWS
   . Fixed bug #60840 (undefined symbol: mysqlnd_debug_std_no_trace_funcs).
     (Johannes)
 
+- Phar:
+  . Fixed timestamp update on Phar contents modification. (Dmitry)
+
+- SOAP
+  . Added check that soap.wsdl_cache_dir conforms to open_basedir
+    (CVE-2013-1635). (Dmitry)
+  . Disabled external entities loading (CVE-2013-1643). (Dmitry)
+
 - SPL:
   . Fixed bug #64264 (SPLFixedArray toArray problem). (Laruence)
   . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
     (patch by kriss@krizalys.com, Laruence)
   . Fixed bug #64106 (Segfault on SplFixedArray[][x] = y when extended). 
     (Nikita Popov)
+  . Fixed bug #52861 (unset fails with ArrayObject and deep arrays).
+    (Mike Willbanks)
 
 - SNMP:
   . Fixed bug #64124 (IPv6 malformed). (Boris Lytochkin)
 
-?? ??? 2012, PHP 5.4.12
+21 Feb 2012, PHP 5.4.12
 
 - Core:
   . Fixed bug #64099 (Wrong TSRM usage in zend_Register_class alias). (Johannes)
