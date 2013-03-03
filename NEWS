@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #64287 (sendmsg/recvmsg shutdown handler causes segfault).
     (Gustavo)
 
+- PCRE:
+  . Merged PCRE 8.32. (Anatol)
+
 21 Feb 2013, PHP 5.5.0 Alpha 5
 
 - Core:
