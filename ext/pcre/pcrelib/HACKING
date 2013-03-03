@@ -49,16 +49,17 @@ complexity in Perl regular expressions, I couldn't do this. In any case, a
 first pass through the pattern is helpful for other reasons. 
 
 
-Support for 16-bit data strings
--------------------------------
+Support for 16-bit and 32-bit data strings
+-------------------------------------------
 
-From release 8.30, PCRE supports 16-bit as well as 8-bit data strings, by being 
-compilable in either 8-bit or 16-bit modes, or both. Thus, two different 
-libraries can be created. In the description that follows, the word "short" is 
+From release 8.30, PCRE supports 16-bit as well as 8-bit data strings; and from
+release 8.32, PCRE supports 32-bit data strings. The library can be compiled
+in any combination of 8-bit, 16-bit or 32-bit modes, creating different
+libraries. In the description that follows, the word "short" is 
 used for a 16-bit data quantity, and the word "unit" is used for a quantity
-that is a byte in 8-bit mode and a short in 16-bit mode. However, so as not to
-over-complicate the text, the names of PCRE functions are given in 8-bit form
-only.
+that is a byte in 8-bit mode, a short in 16-bit mode and a 32-bit unsigned
+integer in 32-bit mode. However, so as not to over-complicate the text, the
+names of PCRE functions are given in 8-bit form only.
 
 
 Computing the memory requirement: how it was
@@ -138,9 +139,10 @@ Format of compiled patterns
 ---------------------------
 
 The compiled form of a pattern is a vector of units (bytes in 8-bit mode, or
-shorts in 16-bit mode), containing items of variable length. The first unit in
-an item contains an opcode, and the length of the item is either implicit in
-the opcode or contained in the data that follows it.
+shorts in 16-bit mode, 32-bit unsigned integers in 32-bit mode), containing
+items of variable length. The first unit in an item contains an opcode, and
+the length of the item is either implicit in the opcode or contained in the
+data that follows it.
 
 In many cases listed below, LINK_SIZE data values are specified for offsets
 within the compiled pattern. LINK_SIZE always specifies a number of bytes. The
@@ -207,7 +209,8 @@ Matching literal characters
 
 The OP_CHAR opcode is followed by a single character that is to be matched 
 casefully. For caseless matching, OP_CHARI is used. In UTF-8 or UTF-16 modes,
-the character may be more than one unit long.
+the character may be more than one unit long. In UTF-32 mode, characters
+are always exactly one unit long.
 
 
 Repeating single characters
@@ -228,7 +231,8 @@ following opcodes, which come in caseful and caseless versions:
   OP_POSQUERY     OP_POSQUERYI  
 
 Each opcode is followed by the character that is to be repeated. In ASCII mode,
-these are two-unit items; in UTF-8 or UTF-16 modes, the length is variable.
+these are two-unit items; in UTF-8 or UTF-16 modes, the length is variable; in
+UTF-32 mode these are one-unit items.
 Those with "MIN" in their names are the minimizing versions. Those with "POS"
 in their names are possessive versions. Other repeats make use of these
 opcodes:
@@ -299,7 +303,7 @@ bit map containing a 1 bit for every character that is acceptable. The bits are
 counted from the least significant end of each unit. In caseless mode, bits for
 both cases are set.
 
-The reason for having both OP_CLASS and OP_NCLASS is so that, in UTF-8/16 mode,
+The reason for having both OP_CLASS and OP_NCLASS is so that, in UTF-8/16/32 mode,
 subject characters with values greater than 255 can be handled correctly. For
 OP_CLASS they do not match, whereas for OP_NCLASS they do.
 
@@ -412,7 +416,8 @@ OP_ASSERTBACK and OP_ASSERTBACK_NOT, and the first opcode inside the assertion
 is OP_REVERSE, followed by a two byte (one short) count of the number of
 characters to move back the pointer in the subject string. In ASCII mode, the 
 count is a number of units, but in UTF-8/16 mode each character may occupy more
-than one unit. A separate count is present in each alternative of a lookbehind
+than one unit; in UTF-32 mode each character occupies exactly one unit.
+A separate count is present in each alternative of a lookbehind
 assertion, allowing them to have different fixed lengths.
 
 
