@@ -89,7 +89,7 @@
 /(\p{Yi}{0,3}+\277)*/
 
 /\p{Zl}{2,3}+/8BZ
-    \xe2\x80\xa8\xe2\x80\xa8
+      
     \x{2028}\x{2028}\x{2028}
     
 /\p{Zl}/8BZ
@@ -195,15 +195,6 @@ of case for anything other than the ASCII letters. --/
     \x{c0}
     \x{e0} 
 
-/-- This should be Perl-compatible but Perl 5.11 gets \x{300} wrong. --/8
-    
-/^\X/8
-    A
-    A\x{300}BC 
-    A\x{300}\x{301}\x{302}BC 
-    *** Failers
-    \x{300}  
-    
 /-- These are PCRE's extra properties to help with Unicodizing \d etc. --/
 
 /^\p{Xan}/8
@@ -621,5 +612,61 @@ of case for anything other than the ASCII letters. --/
 /^\X+?Z/8
     AA\P
     AA\P\P 
+
+/A\x{3a3}B/8iDZ
+
+/\x{3a3}B/8iDZ
+
+/[\x{3a3}]/8iBZ
+
+/[^\x{3a3}]/8iBZ
+
+/[\x{3a3}]+/8iBZ
+
+/[^\x{3a3}]+/8iBZ
+
+/a*\x{3a3}/8iBZ
+
+/\x{3a3}+a/8iBZ
+
+/\x{3a3}*\x{3c2}/8iBZ
+
+/\x{3a3}{3}/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}{2,4}/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}{2,4}?/8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}+./8i+
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}++./8i+
+    ** Failers
+    \x{3a3}\x{3c3}\x{3c2}\x{3a3}\x{3c3}\x{3c2}
+
+/\x{3a3}*\x{3c2}/8iBZ
+
+/[^\x{3a3}]*\x{3c2}/8iBZ
+
+/[^a]*\x{3c2}/8iBZ
+
+/ist/8iBZ
+    ikt
+
+/is+t/8i
+    iSs\x{17f}t
+    ikt
+
+/is+?t/8i
+    ikt
+
+/is?t/8i
+    ikt
+
+/is{2}t/8i
+    iskt
 
 /-- End of testinput7 --/

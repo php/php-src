@@ -8733,4 +8733,66 @@ No match
  0: aac
  1: 
 
+/(?>.*?a)(?<=ba)/
+    aba
+ 0: ba
+
+/(?:.*?a)(?<=ba)/
+    aba
+ 0: aba
+
+/.*?a(*PRUNE)b/
+    aab
+ 0: ab
+
+/.*?a(*PRUNE)b/s
+    aab
+ 0: ab
+
+/^a(*PRUNE)b/s
+    aab
+No match
+
+/.*?a(*SKIP)b/
+    aab
+ 0: ab
+
+/(?>.*?a)b/s
+    aab
+ 0: ab
+
+/(?>.*?a)b/
+    aab
+ 0: ab
+
+/(?>^a)b/s
+    aab
+No match
+
+/(?>.*?)(?<=(abcd)|(wxyz))/
+    alphabetabcd
+ 0: 
+ 1: abcd
+    endingwxyz 
+ 0: 
+ 1: <unset>
+ 2: wxyz
+
+/(?>.*)(?<=(abcd)|(wxyz))/
+    alphabetabcd
+ 0: alphabetabcd
+ 1: abcd
+    endingwxyz 
+ 0: endingwxyz
+ 1: <unset>
+ 2: wxyz
+
+"(?>.*)foo"
+    abcdfooxyz
+No match
+    
+"(?>.*?)foo"
+    abcdfooxyz
+ 0: foo
+
 /-- End of testinput1 --/
