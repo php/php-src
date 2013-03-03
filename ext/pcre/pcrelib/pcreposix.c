@@ -42,7 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 functions. */
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 
 /* Ensure that the PCREPOSIX_EXP_xxx macros are set appropriately for
@@ -155,11 +157,12 @@ static const int eint[] = {
   REG_BADPAT,  /* internal error: unknown opcode in find_fixedlength() */
   REG_BADPAT,  /* \N is not supported in a class */
   REG_BADPAT,  /* too many forward references */
-  REG_BADPAT,  /* disallowed UTF-8/16 code point (>= 0xd800 && <= 0xdfff) */
+  REG_BADPAT,  /* disallowed UTF-8/16/32 code point (>= 0xd800 && <= 0xdfff) */
   REG_BADPAT,  /* invalid UTF-16 string (should not occur) */
   /* 75 */
   REG_BADPAT,  /* overlong MARK name */
-  REG_BADPAT   /* character value in \u.... sequence is too large */
+  REG_BADPAT,  /* character value in \u.... sequence is too large */
+  REG_BADPAT   /* invalid UTF-32 string (should not occur) */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -257,6 +260,7 @@ const char *errorptr;
 int erroffset;
 int errorcode;
 int options = 0;
+int re_nsub = 0;
 
 if ((cflags & REG_ICASE) != 0)    options |= PCRE_CASELESS;
 if ((cflags & REG_NEWLINE) != 0)  options |= PCRE_MULTILINE;
@@ -280,7 +284,8 @@ if (preg->re_pcre == NULL)
   }
 
 (void)pcre_fullinfo((const pcre *)preg->re_pcre, NULL, PCRE_INFO_CAPTURECOUNT,
-  &(preg->re_nsub));
+  &re_nsub);
+preg->re_nsub = (size_t)re_nsub;
 return 0;
 }
 
@@ -312,7 +317,7 @@ int *ovector = NULL;
 int small_ovector[POSIX_MALLOC_THRESHOLD * 3];
 BOOL allocated_ovector = FALSE;
 BOOL nosub =
-  (((const pcre *)preg->re_pcre)->options & PCRE_NO_AUTO_CAPTURE) != 0;
+  (REAL_PCRE_OPTIONS((const pcre *)preg->re_pcre) & PCRE_NO_AUTO_CAPTURE) != 0;
 
 if ((eflags & REG_NOTBOL) != 0) options |= PCRE_NOTBOL;
 if ((eflags & REG_NOTEOL) != 0) options |= PCRE_NOTEOL;
