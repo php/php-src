@@ -22,6 +22,7 @@
 #include <gd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 static int gdGuessBackgroundColorFromCorners(gdImagePtr im, int *color);
 static int gdColorMatch(gdImagePtr im, int col1, int col2, float threshold);
@@ -65,7 +66,6 @@ printf("rect->x: %i\nrect->y: %i\nrect->width: %i\nrect->height: %i\n", crop->x,
 		return NULL;
 	} else {
 		int y = crop->y;
-		unsigned int dst_y = 0;
 		if (src->trueColor) {
 			unsigned int dst_y = 0;
 			while (y < (crop->y + (crop->height - 1))) {
@@ -336,9 +336,10 @@ static int gdColorMatch(gdImagePtr im, int col1, int col2, float threshold)
 	const int dg = gdImageGreen(im, col1) - gdImageGreen(im, col2);
 	const int db = gdImageBlue(im, col1) - gdImageBlue(im, col2);
 	const int da = gdImageAlpha(im, col1) - gdImageAlpha(im, col2);
-	const int dist = dr * dr + dg * dg + db * db + da * da;
-
-	return (100.0 * dist / 195075) < threshold;
+	const double dist = sqrt(dr * dr + dg * dg + db * db + da * da);
+	const double dist_perc = sqrt(dist / (255^2 + 255^2 + 255^2));
+	return (dist_perc <= threshold);
+	//return (100.0 * dist / 195075) < threshold;
 }
 
 /*

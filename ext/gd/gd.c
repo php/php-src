@@ -1224,10 +1224,7 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_CROP_BLACK", GD_CROP_BLACK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_CROP_WHITE", GD_CROP_WHITE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_CROP_SIDES", GD_CROP_SIDES, CONST_CS | CONST_PERSISTENT);
-#ifdef GD_ENABLE_CROP_THRESHOLD
 	REGISTER_LONG_CONSTANT("IMG_CROP_THRESHOLD", GD_CROP_THRESHOLD, CONST_CS | CONST_PERSISTENT);
-#endif
-
 #else
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -5160,48 +5157,45 @@ PHP_FUNCTION(imagecrop)
 	double threshold = 0.5f;
 	gdImagePtr im;
 	gdImagePtr im_crop;
-	HashTable rect_hash;
 	gdRect rect;
+	zval *z_rect;
 	zval **tmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|h", &IM, &rect_hash) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|a", &IM, &z_rect) == FAILURE)  {
 		return;
 	}
 
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
-	if (zend_hash_find(&rect_hash, "x", strlen("x"), (void **)&tmp) != FAILURE) {
+	if (zend_hash_find(HASH_OF(z_rect), "x", sizeof("x"), (void **)&tmp) != FAILURE) {
 		rect.x = Z_LVAL_PP(tmp);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing x position");
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_find(&rect_hash, "y", strlen("x"), (void **)&tmp) != FAILURE) {
+	if (zend_hash_find(HASH_OF(z_rect), "y", sizeof("x"), (void **)&tmp) != FAILURE) {
 		rect.y = Z_LVAL_PP(tmp);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing y position");
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_find(&rect_hash, "width", strlen("x"), (void **)&tmp) != FAILURE) {
+	if (zend_hash_find(HASH_OF(z_rect), "width", sizeof("width"), (void **)&tmp) != FAILURE) {
 		rect.width = Z_LVAL_PP(tmp);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing width");
 		RETURN_FALSE;
 	}
 
-	if (zend_hash_find(&rect_hash, "height", strlen("x"), (void **)&tmp) != FAILURE) {
-		rect.width = Z_LVAL_PP(tmp);
+	if (zend_hash_find(HASH_OF(z_rect), "height", sizeof("height"), (void **)&tmp) != FAILURE) {
+		rect.height = Z_LVAL_PP(tmp);
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing height");
 		RETURN_FALSE;
 	}
 
 	im_crop = gdImageCrop(im, &rect);
-
-	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown flip mode");
-	RETURN_FALSE;
 
 	if (im_crop == NULL) {
 		RETURN_FALSE;
@@ -5238,7 +5232,7 @@ PHP_FUNCTION(imagecropauto)
 		case GD_CROP_SIDES:
 			im_crop = gdImageCropAuto(im, mode);
 			break;
-#ifdef GD_ENABLE_CROP_THRESHOLD
+
 		case GD_CROP_THRESHOLD:
 			if (color < 0) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Color argument missing with threshold mode");
@@ -5246,7 +5240,7 @@ PHP_FUNCTION(imagecropauto)
 			}
 			im_crop = gdImageCropThreshold(im, color, (float) threshold);
 			break;
-#endif
+
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown flip mode");
 			RETURN_FALSE;
