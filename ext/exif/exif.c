@@ -2709,7 +2709,7 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
 			ByteCount,
 			zend_multibyte_fetch_encoding(ImageInfo->encode_unicode TSRMLS_CC),
 			zend_multibyte_fetch_encoding(ImageInfo->motorola_intel ? ImageInfo->decode_unicode_be : ImageInfo->decode_unicode_le TSRMLS_CC)
-			TSRMLS_CC) < 0) {
+			TSRMLS_CC) == (size_t)-1) {
 		xp_field->size = exif_process_string_raw(&xp_field->value, szValuePtr, ByteCount);
 	}
 	return xp_field->size;
