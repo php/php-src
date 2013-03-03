@@ -60,6 +60,18 @@ PHP                                                                        NEWS
 - Filter:
   . Implemented FR #49180 - added MAC address validation. (Martin)
 
+- Phar:
+  . Fixed timestamp update on Phar contents modification. (Dmitry)
+
+- SPL:
+  . Fixed bug #64264 (SPLFixedArray toArray problem). (Laruence)
+  . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
+    (patch by kriss@krizalys.com, Laruence)
+  . Fixed bug #64106 (Segfault on SplFixedArray[][x] = y when extended). 
+    (Nikita Popov)
+  . Fixed bug #52861 (unset fails with ArrayObject and deep arrays).
+    (Mike Willbanks)
+
 - SNMP:
   . Fixed bug #64124 (IPv6 malformed). (Boris Lytochkin)
 
