@@ -890,6 +890,18 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageflip, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_imagecrop, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, rect)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_imagecropauto, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, mode)
+	ZEND_ARG_INFO(0, threshold)
+	ZEND_ARG_INFO(0, color)
+ZEND_END_ARG_INFO()
 #endif
 
 /* }}} */
@@ -950,6 +962,8 @@ const zend_function_entry gd_functions[] = {
 #ifdef HAVE_GD_BUNDLED
 	PHP_FE(imageantialias,							arginfo_imageantialias)
 	PHP_FE(imageflip,								arginfo_imageflip)
+	PHP_FE(imagecrop,								arginfo_imagecrop)
+	PHP_FE(imagecropauto,							arginfo_imagecropauto)
 #endif
 
 #if HAVE_GD_IMAGESETTILE
@@ -1204,6 +1218,13 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_FLIP_HORIZONTAL", GD_FLIP_HORINZONTAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FLIP_VERTICAL", GD_FLIP_VERTICAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FLIP_BOTH", GD_FLIP_BOTH, CONST_CS | CONST_PERSISTENT);
+	
+	REGISTER_LONG_CONSTANT("IMG_CROP_DEFAULT", GD_CROP_DEFAULT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_CROP_TRANSPARENT", GD_CROP_TRANSPARENT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_CROP_BLACK", GD_CROP_BLACK, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_CROP_WHITE", GD_CROP_WHITE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_CROP_SIDES", GD_CROP_SIDES, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_CROP_THRESHOLD", GD_CROP_THRESHOLD, CONST_CS | CONST_PERSISTENT);
 #else
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -5123,6 +5144,112 @@ PHP_FUNCTION(imageflip)
 	}
 
 	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto void imagecrop(resource im, array rect)
+   Crop an image using the given coordinates and size, x, y, width and height. */
+PHP_FUNCTION(imagecrop)
+{
+	zval *IM;
+	long mode = -1;
+	long color = -1;
+	double threshold = 0.5f;
+	gdImagePtr im;
+	gdImagePtr im_crop;
+	gdRect rect;
+	zval *z_rect;
+	zval **tmp;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|a", &IM, &z_rect) == FAILURE)  {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
+
+	if (zend_hash_find(HASH_OF(z_rect), "x", sizeof("x"), (void **)&tmp) != FAILURE) {
+		rect.x = Z_LVAL_PP(tmp);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing x position");
+		RETURN_FALSE;
+	}
+
+	if (zend_hash_find(HASH_OF(z_rect), "y", sizeof("x"), (void **)&tmp) != FAILURE) {
+		rect.y = Z_LVAL_PP(tmp);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing y position");
+		RETURN_FALSE;
+	}
+
+	if (zend_hash_find(HASH_OF(z_rect), "width", sizeof("width"), (void **)&tmp) != FAILURE) {
+		rect.width = Z_LVAL_PP(tmp);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing width");
+		RETURN_FALSE;
+	}
+
+	if (zend_hash_find(HASH_OF(z_rect), "height", sizeof("height"), (void **)&tmp) != FAILURE) {
+		rect.height = Z_LVAL_PP(tmp);
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing height");
+		RETURN_FALSE;
+	}
+
+	im_crop = gdImageCrop(im, &rect);
+
+	if (im_crop == NULL) {
+		RETURN_FALSE;
+	} else {
+		ZEND_REGISTER_RESOURCE(return_value, im_crop, le_gd);
+	}
+}
+/* }}} */
+
+/* {{{ proto void imagecropauto(resource im [, int mode [, threshold [, color]]])
+   Crop an image automatically using one of the available modes. */
+PHP_FUNCTION(imagecropauto)
+{
+	zval *IM;
+	long mode = -1;
+	long color = -1;
+	double threshold = 0.5f;
+	gdImagePtr im;
+	gdImagePtr im_crop;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ldl", &IM, &mode, &threshold, &color) == FAILURE)  {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
+
+	switch (mode) {
+		case -1:
+			mode = GD_CROP_DEFAULT;
+		case GD_CROP_DEFAULT:
+		case GD_CROP_TRANSPARENT:
+		case GD_CROP_BLACK:
+		case GD_CROP_WHITE:
+		case GD_CROP_SIDES:
+			im_crop = gdImageCropAuto(im, mode);
+			break;
+
+		case GD_CROP_THRESHOLD:
+			if (color < 0) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Color argument missing with threshold mode");
+				RETURN_FALSE;
+			}
+			im_crop = gdImageCropThreshold(im, color, (float) threshold);
+			break;
+
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown flip mode");
+			RETURN_FALSE;
+	}
+	if (im_crop == NULL) {
+		RETURN_FALSE;
+	} else {
+		ZEND_REGISTER_RESOURCE(return_value, im_crop, le_gd);
+	}
 }
 /* }}} */
 #endif
