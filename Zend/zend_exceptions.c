@@ -106,9 +106,9 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 		}
 	}
 
-  if (zend_throw_exception_hook) {
-    zend_throw_exception_hook(exception TSRMLS_CC);
-  }
+	if (zend_throw_exception_hook) {
+		zend_throw_exception_hook(exception TSRMLS_CC);
+	}
 
 	if (!EG(current_execute_data)) {
 		if(EG(exception)) {
