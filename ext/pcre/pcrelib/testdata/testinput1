@@ -5262,4 +5262,45 @@ name were given. ---/
 /((?>a?)*)*c/
   aac   
 
+/(?>.*?a)(?<=ba)/
+    aba
+
+/(?:.*?a)(?<=ba)/
+    aba
+
+/.*?a(*PRUNE)b/
+    aab
+
+/.*?a(*PRUNE)b/s
+    aab
+
+/^a(*PRUNE)b/s
+    aab
+
+/.*?a(*SKIP)b/
+    aab
+
+/(?>.*?a)b/s
+    aab
+
+/(?>.*?a)b/
+    aab
+
+/(?>^a)b/s
+    aab
+
+/(?>.*?)(?<=(abcd)|(wxyz))/
+    alphabetabcd
+    endingwxyz 
+
+/(?>.*)(?<=(abcd)|(wxyz))/
+    alphabetabcd
+    endingwxyz 
+
+"(?>.*)foo"
+    abcdfooxyz
+    
+"(?>.*?)foo"
+    abcdfooxyz
+
 /-- End of testinput1 --/

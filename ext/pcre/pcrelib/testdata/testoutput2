@@ -768,7 +768,7 @@ Max lookbehind = 3
 /(?>.*)(?<=(abcd)|(xyz))/I
 Capturing subpattern count = 2
 No options
-First char at start or follows newline
+No first char
 No need char
 Max lookbehind = 4
     alphabetabcd
@@ -10110,7 +10110,7 @@ No set of starting bytes
 "(?>.*/)foo"SI
 Capturing subpattern count = 0
 No options
-First char at start or follows newline
+No first char
 Need char = 'o'
 Subject length lower bound = 4
 No set of starting bytes
@@ -12360,5 +12360,125 @@ assertion, and therefore fails the entire subroutine call. --/
 /((?=a(*COMMIT)b)ab|ac){0}(?:(?1)|a(c))/
     ac 
  0: ac
+    
+/-- These are all run as real matches in test 1; here we are just checking the
+settings of the anchored and startline bits. --/ 
+
+/(?>.*?a)(?<=ba)/I
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'a'
+Max lookbehind = 2
+
+/(?:.*?a)(?<=ba)/I
+Capturing subpattern count = 0
+No options
+First char at start or follows newline
+Need char = 'a'
+Max lookbehind = 2
+
+/.*?a(*PRUNE)b/I
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'b'
+
+/.*?a(*PRUNE)b/sI
+Capturing subpattern count = 0
+Options: dotall
+No first char
+Need char = 'b'
+
+/^a(*PRUNE)b/sI
+Capturing subpattern count = 0
+Options: anchored dotall
+No first char
+No need char
+
+/.*?a(*SKIP)b/I
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'b'
+
+/(?>.*?a)b/sI
+Capturing subpattern count = 0
+Options: dotall
+No first char
+Need char = 'b'
+
+/(?>.*?a)b/I
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'b'
+
+/(?>^a)b/sI
+Capturing subpattern count = 0
+Options: anchored dotall
+No first char
+No need char
+
+/(?>.*?)(?<=(abcd)|(wxyz))/I
+Capturing subpattern count = 2
+No options
+No first char
+No need char
+Max lookbehind = 4
+
+/(?>.*)(?<=(abcd)|(wxyz))/I
+Capturing subpattern count = 2
+No options
+No first char
+No need char
+Max lookbehind = 4
+
+"(?>.*)foo"I
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'o'
+
+"(?>.*?)foo"I
+Capturing subpattern count = 0
+No options
+No first char
+Need char = 'o'
+
+/(?>^abc)/mI
+Capturing subpattern count = 0
+Options: multiline
+First char at start or follows newline
+Need char = 'c'
+
+/(?>.*abc)/mI
+Capturing subpattern count = 0
+Options: multiline
+No first char
+Need char = 'c'
+
+/(?:.*abc)/mI
+Capturing subpattern count = 0
+Options: multiline
+First char at start or follows newline
+Need char = 'c'
+
+/-- Check PCRE_STUDY_EXTRA_NEEDED --/
+
+/.?/S-I
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Study returned NULL
+
+/.?/S!I
+Capturing subpattern count = 0
+No options
+No first char
+No need char
+Subject length lower bound = -1
+No set of starting bytes
 
 /-- End of testinput2 --/

@@ -59,7 +59,8 @@ PHP_ARG_WITH(pcre-regex,,
     				 pcrelib/pcre_ord2utf8.c pcrelib/pcre_refcount.c pcrelib/pcre_study.c \
     				 pcrelib/pcre_tables.c pcrelib/pcre_valid_utf8.c \
     				 pcrelib/pcre_version.c pcrelib/pcre_xclass.c"
-    PHP_NEW_EXTENSION(pcre, $pcrelib_sources php_pcre.c, no,,-I@ext_srcdir@/pcrelib)
+    PHP_PCRE_CFLAGS="-DHAVE_CONFIG_H -I@ext_srcdir@/pcrelib"
+    PHP_NEW_EXTENSION(pcre, $pcrelib_sources php_pcre.c, no,,$PHP_PCRE_CFLAGS)
     PHP_ADD_BUILD_DIR($ext_builddir/pcrelib)
     PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcrelib/])
     AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
