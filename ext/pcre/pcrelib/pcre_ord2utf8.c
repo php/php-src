@@ -41,17 +41,20 @@ POSSIBILITY OF SUCH DAMAGE.
 /* This file contains a private PCRE function that converts an ordinal
 character value into a UTF8 string. */
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#define COMPILE_PCRE8
 
 #include "pcre_internal.h"
-
 
 /*************************************************
 *       Convert character value to UTF-8         *
 *************************************************/
 
 /* This function takes an integer value in the range 0 - 0x10ffff
-and encodes it as a UTF-8 character in 1 to 6 pcre_uchars.
+and encodes it as a UTF-8 character in 1 to 4 pcre_uchars.
 
 Arguments:
   cvalue     the character value
@@ -60,17 +63,13 @@ Arguments:
 Returns:     number of characters placed in the buffer
 */
 
+unsigned
 int
 PRIV(ord2utf)(pcre_uint32 cvalue, pcre_uchar *buffer)
 {
 #ifdef SUPPORT_UTF
 
 register int i, j;
-
-/* Checking invalid cvalue character, encoded as invalid UTF-16 character.
-Should never happen in practice. */
-if ((cvalue & 0xf800) == 0xd800 || cvalue >= 0x110000)
-  cvalue = 0xfffe;
 
 for (i = 0; i < PRIV(utf8_table1_size); i++)
   if ((int)cvalue <= PRIV(utf8_table1)[i]) break;

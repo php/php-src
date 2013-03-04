@@ -42,7 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 class. It is used by both pcre_exec() and pcre_def_exec(). */
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "pcre_internal.h"
 
@@ -62,9 +64,9 @@ Returns:      TRUE if character matches, else FALSE
 */
 
 BOOL
-PRIV(xclass)(int c, const pcre_uchar *data, BOOL utf)
+PRIV(xclass)(pcre_uint32 c, const pcre_uchar *data, BOOL utf)
 {
-int t;
+pcre_uchar t;
 BOOL negated = (*data & XCL_NOT) != 0;
 
 (void)utf;
@@ -92,7 +94,7 @@ if ((*data++ & XCL_MAP) != 0) data += 32 / sizeof(pcre_uchar);
 
 while ((t = *data++) != XCL_END)
   {
-  int x, y;
+  pcre_uint32 x, y;
   if (t == XCL_SINGLE)
     {
 #ifdef SUPPORT_UTF
