@@ -52,7 +52,7 @@ var_dump(imagesx($im_crop));
 var_dump(imagesy($im_crop));
 
 echo "IMG_CROP_THRESHOLD\n";
-$im = imagecreatefrompng("logo_noise.png");
+$im = imagecreatefrompng(__DIR__ . "/logo_noise.png");
 $im_crop = imagecropauto($im, IMG_CROP_THRESHOLD, 0.1, 0x0);
 imagepng($im_crop, __DIR__ . "/crop_threshold.png");
 var_dump(imagesx($im_crop));
