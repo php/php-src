@@ -1425,7 +1425,7 @@ PHP_FUNCTION(openssl_spki_new)
 
 	spkstr = NETSCAPE_SPKI_b64_encode(spki);
 	if (!spkstr){
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Unable to encode SPKAC");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to encode SPKAC");
 		goto cleanup;
 	}
 
