@@ -68,28 +68,7 @@ PHP X.Y UPGRADE NOTES
 9. New Global Constants
 ========================================
 
-<<<<<<< HEAD
-=======
-- mysqli:
-  - Added MYSQLI_SERVER_PUBLIC_KEY constant to be used with mysqli_options()
 
-- cURL:
-  - Added CURLOPT_SAFE_UPLOAD to be used with curl_setopt().
-
-- GD
-  - Added constants for imageflip:
-    . IMG_FLIP_HORIZONTAL
-	. IMG_FLIP_VERTICAL
-    . IMG_FLIP_BOTH
-  - Added constants for imagecrop
-    . IMG_CROP_DEFAULT
-    . IMG_CROP_TRANSPARENT
-    . IMG_CROP_BLACK
-    . IMG_CROP_WHITE
-    . IMG_CROP_SIDES
-    . IMG_CROP_THRESHOLD
-
->>>>>>> PHP-5.5
 ========================================
 10. Changes to INI File Handling
 ========================================
