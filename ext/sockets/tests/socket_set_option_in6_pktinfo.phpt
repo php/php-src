@@ -5,6 +5,9 @@ socket_set_option() with IPV6_PKTINFO
 if (!extension_loaded('sockets')) {
     die('skip sockets extension not available.');
 }
+
+require 'ipv6_skipif.inc';
+
 if (!defined('IPPROTO_IPV6')) {
     die('skip IPv6 not available.');
 }
