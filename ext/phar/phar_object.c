@@ -2004,7 +2004,8 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 	char *oldpath = NULL;
 	char *basename = NULL, *basepath = NULL;
 	char *newname = NULL, *newpath = NULL;
-	zval ret, arg1;
+	char *oldname_ext = NULL;
+	zval *ret, arg1;
 	zend_class_entry *ce;
 	char *error;
 	const char *pcr_error;
@@ -2074,18 +2075,29 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 	}
 
 	oldpath = estrndup(phar->fname, phar->fname_len);
-	if ((oldname = zend_memrchr(phar->fname, '/', phar->fname_len))) {
-		++oldname;
-	} else {
-		oldname = phar->fname;
-	}
+	oldname = zend_memrchr(phar->fname, '/', phar->fname_len);
+	++oldname;
 	oldname_len = strlen(oldname);
 
 	basename = estrndup(oldname, oldname_len);
-	spprintf(&newname, 0, "%s.%s", strtok(basename, "."), ext);
+	
+	/* find extension name, .phar for executable phars, .zip* and .tar* for data only phars */
+	oldname_ext = strstr(basename, ".phar");
+	if (oldname_ext == NULL && phar->is_data) {
+		oldname_ext = strstr(basename, ".tar");
+		if (oldname_ext == NULL) {
+			oldname_ext = strstr(basename, ".zip");
+		}
+	}
+
+	if (oldname_ext == NULL) {
+		/* old behavior for BC, take anything after first . */
+		oldname_ext = strstr(basename, ".");
+	}
+
+	newname = strndup(basename, (oldname_ext - basename));
+	spprintf(&newname, 0, "%s.%s", newname, ext);
 	efree(basename);
-
-
 
 	basepath = estrndup(oldpath, (strlen(oldpath) - oldname_len));
 	phar->fname_len = spprintf(&newpath, 0, "%s%s", basepath, newname);
