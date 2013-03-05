@@ -1207,6 +1207,20 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		return NULL;
 	}
 
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
+	if (file_handle->type == ZEND_HANDLE_STREAM) {
+		char *buf;
+		size_t size, offset = 0;
+
+		/* Stream callbacks needs to be called in context of original
+		 * function and class tables (see: https://bugs.php.net/bug.php?id=64353)
+		 */
+		if (zend_stream_fixup(file_handle, &buf, &size TSRMLS_CC) == FAILURE) {
+			return NULL;
+		}
+	}
+#endif
+
 	new_persistent_script = create_persistent_script();
 
 	/* Save the original values for the op_array, function table and class table */
