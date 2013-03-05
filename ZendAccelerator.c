@@ -1216,6 +1216,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		 * function and class tables (see: https://bugs.php.net/bug.php?id=64353)
 		 */
 		if (zend_stream_fixup(file_handle, &buf, &size TSRMLS_CC) == FAILURE) {
+			*op_array_p = NULL;
 			return NULL;
 		}
 	}
