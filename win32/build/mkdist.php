@@ -443,7 +443,7 @@ function make_phar_dot_phar($dist_dir)
 	$phar->setStub(implode('', $stub));
 
 	echo "Creating phar.phar.bat\n";
-	file_put_contents($dist_dir . '/phar.phar.bat', "%~dp0php.exe %~dp0pharcommand.phar %*\r\n");
+	file_put_contents($dist_dir . '/phar.phar.bat', "\"%~dp0php.exe\" \"%~dp0pharcommand.phar\" %*\r\n");
 }
 
 if (!is_dir($test_dir)) {
