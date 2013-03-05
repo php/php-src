@@ -698,6 +698,9 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle TSRMLS_DC)
 {
 	struct stat statbuf;
+#ifdef ZEND_WIN32
+	accel_time_t res;
+#endif
 
 	if (sapi_module.get_stat &&
 	    !EG(opline_ptr) &&
@@ -711,8 +714,6 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 	}
 
 #ifdef ZEND_WIN32
-	accel_time_t res;
-
 	res = zend_get_file_handle_timestamp_win(file_handle);
 	if (res) {
 		return res;
