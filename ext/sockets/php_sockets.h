@@ -28,10 +28,6 @@
 # include "config.h"
 #endif
 
-#ifdef __APPLE__
-#define __APPLE_USE_RFC_3542
-#endif
-
 #if HAVE_SOCKETS
 
 #include <php.h>
