@@ -2643,7 +2643,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			} else {
 				decode = ImageInfo->decode_unicode_le;
 			}
-			/* XXX this will fail again if encoding_converter delivers a real length and doesn't fill len  */
+			/* XXX this will fail again if encoding_converter returns on error something different than SIZE_MAX   */
 			if (zend_multibyte_encoding_converter(
 					(unsigned char**)pszInfoPtr, 
 					&len, 
@@ -2664,7 +2664,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
-			/* XXX this will fail again if encoding_converter delivers a real length and doesn't fill len  */
+			/* XXX this will fail again if encoding_converter returns on error something different than SIZE_MAX   */
 			if (zend_multibyte_encoding_converter(
 					(unsigned char**)pszInfoPtr, 
 					&len, 
@@ -2703,7 +2703,7 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
 {
 	xp_field->tag = tag;	
 	
-	/* XXX this will fail again if encoding_converter delivers a real length and doesn't fill len  */
+	/* XXX this will fail again if encoding_converter returns on error something different than SIZE_MAX   */
 	if (zend_multibyte_encoding_converter(
 			(unsigned char**)&xp_field->value, 
 			&xp_field->size, 
