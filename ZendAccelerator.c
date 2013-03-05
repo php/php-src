@@ -699,6 +699,17 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 {
 	struct stat statbuf;
 
+	if (sapi_module.get_stat &&
+	    !EG(opline_ptr) &&
+	    file_handle->filename == SG(request_info).path_translated) {
+
+		struct stat *tmpbuf = sapi_module.get_stat(TSRMLS_C);
+
+		if (tmpbuf) {
+			return tmpbuf->st_mtime;
+		}
+	}
+
 #ifdef ZEND_WIN32
 	accel_time_t res;
 
@@ -782,6 +793,8 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 static inline int do_validate_timestamps(zend_persistent_script *persistent_script, zend_file_handle *file_handle TSRMLS_DC)
 {
 	zend_file_handle ps_handle;
+	char actualpath [MAXPATHLEN + 1];
+	char *full_path_ptr = NULL;
 
 	/** check that the persistant script is indeed the same file we cached
 	 * (if part of the path is a symlink than it possible that the user will change it)
@@ -792,21 +805,28 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 			return FAILURE;
 		}
 	} else {
-		char actualpath [MAXPATHLEN + 1];
-		char *full_path_ptr;
-
 		full_path_ptr = VCWD_REALPATH(file_handle->filename, actualpath);
 		if (full_path_ptr && strcmp(persistent_script->full_path, full_path_ptr) != 0) {
 			return FAILURE;
 		}
+		file_handle->opened_path = full_path_ptr;
 	}
 
 	if (persistent_script->timestamp == 0) {
+		if (full_path_ptr) {
+			file_handle->opened_path = NULL;
+		}
 		return FAILURE;
 	}
 
 	if (zend_get_file_handle_timestamp(file_handle TSRMLS_CC) == persistent_script->timestamp) {
+		if (full_path_ptr) {
+			file_handle->opened_path = NULL;
+		}
 		return SUCCESS;
+	}
+	if (full_path_ptr) {
+		file_handle->opened_path = NULL;
 	}
 
 	ps_handle.type = ZEND_HANDLE_FILENAME;
