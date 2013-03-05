@@ -93,7 +93,7 @@
   </required>
  </dependencies>
  <providesextension>zendoptimizerplus</providesextension>
- <extsrcrelease />
+ <zendextsrcrelease />
  <changelog>
   <release>
    <version>
