@@ -28,6 +28,7 @@
 #include "zend_objects.h"
 #include "zend_objects_API.h"
 #include "zend_globals.h"
+#include "zend_compile.h"
 
 #define ZEND_CLOSURE_PRINT_NAME "Closure object"
 
