@@ -1574,7 +1574,17 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 	long                 timestamp = 0;
 	struct tm            ta;
 	int                  max_reallocs = 5;
-	size_t               buf_len = 64, real_len;
+#ifdef PHP_WIN32
+	/* VS2012 has a bug where strftime crash with %z and %Z format when the
+	   initial buffer is too small. Increasing the buffer size helps in a
+	   workaround to fixs longer format strings for this VS version.
+	   http://connect.microsoft.com/VisualStudio/feedback/details/759720/vs2012-strftime-crash-with-z-formatting-code
+	*/
+	size_t               buf_len = 256;
+#else
+	size_t               buf_len = 64;
+#endif
+	size_t               real_len;
 	timelib_time        *ts;
 	timelib_tzinfo      *tzi;
 	timelib_time_offset *offset = NULL;
