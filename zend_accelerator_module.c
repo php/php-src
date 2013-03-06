@@ -467,9 +467,11 @@ static ZEND_FUNCTION(accelerator_get_status)
 	/* keep the compiler happy */
 	(void)ht; (void)return_value_ptr; (void)this_ptr; (void)return_value_used;
 
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_FALSE;
 	}
+#endif
 	
 	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
 		RETURN_FALSE;
@@ -526,9 +528,11 @@ static ZEND_FUNCTION(accelerator_get_configuration)
 	/* keep the compiler happy */
 	(void)ht; (void)return_value_ptr; (void)this_ptr; (void)return_value_used;
 
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_FALSE;
 	}
+#endif
 
 	array_init(return_value);
 
@@ -588,9 +592,11 @@ static ZEND_FUNCTION(accelerator_reset)
 	/* keep the compiler happy */
 	(void)ht; (void)return_value_ptr; (void)this_ptr; (void)return_value_used;
 
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_FALSE;
 	}
+#endif
 
 	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
 		RETURN_FALSE;
