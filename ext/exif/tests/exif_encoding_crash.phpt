@@ -12,4 +12,3 @@ echo "*** no core dump ***\n";
 --EXPECT--
 *** no core dump ***
 ===DONE===
-
