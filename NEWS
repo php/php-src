@@ -13,6 +13,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Merged PCRE 8.32. (Anatol)
 
+- DateTime:
+  . Fixed bug #64359 (strftime crash with VS2012). (Anatol)
+
 21 Feb 2013, PHP 5.5.0 Alpha 5
 
 - Core:
