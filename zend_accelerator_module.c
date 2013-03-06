@@ -218,6 +218,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("zend_optimizerplus.revalidate_freq"       , "2"   , PHP_INI_ALL   , OnUpdateLong,	             accel_directives.revalidate_freq,           zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("zend_optimizerplus.preferred_memory_model", ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,        accel_directives.memory_model,              zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("zend_optimizerplus.blacklist_filename"    , ""    , PHP_INI_SYSTEM, OnUpdateAccelBlacklist,	     accel_directives.user_blacklist_filename,   zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("zend_optimizerplus.max_file_size"         , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	             accel_directives.max_file_size,             zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_ENTRY("zend_optimizerplus.protect_memory"        , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.protect_memory,            zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("zend_optimizerplus.save_comments"         , "1"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.save_comments,             zend_accel_globals, accel_globals)
@@ -554,6 +555,7 @@ static ZEND_FUNCTION(accelerator_get_configuration)
 	add_assoc_long(directives, 	 "zend_optimizerplus.revalidate_freq",        ZCG(accel_directives).revalidate_freq);
 	add_assoc_string(directives, "zend_optimizerplus.preferred_memory_model", STRING_NOT_NULL(ZCG(accel_directives).memory_model), 1);
 	add_assoc_string(directives, "zend_optimizerplus.blacklist_filename",     STRING_NOT_NULL(ZCG(accel_directives).user_blacklist_filename), 1);
+	add_assoc_long(directives,   "zend_optimizerplus.max_file_size",          ZCG(accel_directives).max_file_size);
 	add_assoc_string(directives, "zend_optimizerplus.error_log",              STRING_NOT_NULL(ZCG(accel_directives).error_log), 1);
 
 	add_assoc_bool(directives,   "zend_optimizerplus.protect_memory",         ZCG(accel_directives).protect_memory);

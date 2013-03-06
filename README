@@ -159,6 +159,10 @@ zend_optimizerplus.blacklist_filename
 	   compile time evaluation.
 	3) Code that triggers an Optimizer+ bug.
 
+zend_optimizerplus.max_file_size (default "0")
+	Allows exclusion of large files from being cached. By default all files
+	are cached.
+
 zend_optimizerplus.consistency_checks (default "0")
 	Check the cache checksum each N requests.
 	The default value of "0" means that the checks are disabled.

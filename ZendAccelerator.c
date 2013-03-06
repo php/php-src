@@ -654,7 +654,7 @@ static int zend_get_stream_timestamp(const char *filename, struct stat *statbuf 
 }
 
 #if ZEND_WIN32
-static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_handle)
+static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_handle, size_t *size)
 {
 	static unsigned __int64 utc_base = 0;
 	static FILETIME utc_base_ft;
@@ -689,13 +689,16 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 		ftime = (((unsigned __int64)fdata.ftLastWriteTime.dwHighDateTime) << 32) + fdata.ftLastWriteTime.dwLowDateTime - utc_base;
 		ftime /= 10000000L;
 
+		if (size) {
+			*size = (size_t)(((unsigned __int64)fdata.nFileSizeHigh) << 32 + (unsigned __int64)fdata.nFileSizeLow);
+		}
 		return (accel_time_t)ftime;
 	}
 	return 0;
 }
 #endif
 
-static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle TSRMLS_DC)
+static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size TSRMLS_DC)
 {
 	struct stat statbuf;
 #ifdef ZEND_WIN32
@@ -709,12 +712,15 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 		struct stat *tmpbuf = sapi_module.get_stat(TSRMLS_C);
 
 		if (tmpbuf) {
+			if (size) {
+				*size = tmpbuf->st_size;
+			}
 			return tmpbuf->st_mtime;
 		}
 	}
 
 #ifdef ZEND_WIN32
-	res = zend_get_file_handle_timestamp_win(file_handle);
+	res = zend_get_file_handle_timestamp_win(file_handle, size);
 	if (res) {
 		return res;
 	}
@@ -788,6 +794,9 @@ static accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle
 			return 0;
 	}
 
+	if (size) {
+		*size = statbuf.st_size;
+	}
 	return statbuf.st_mtime;
 }
 
@@ -820,7 +829,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 		return FAILURE;
 	}
 
-	if (zend_get_file_handle_timestamp(file_handle TSRMLS_CC) == persistent_script->timestamp) {
+	if (zend_get_file_handle_timestamp(file_handle, NULL TSRMLS_CC) == persistent_script->timestamp) {
 		if (full_path_ptr) {
 			file_handle->opened_path = NULL;
 		}
@@ -834,7 +843,7 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 	ps_handle.filename = persistent_script->full_path;
 	ps_handle.opened_path = persistent_script->full_path;
 
-	if (zend_get_file_handle_timestamp(&ps_handle TSRMLS_CC) == persistent_script->timestamp) {
+	if (zend_get_file_handle_timestamp(&ps_handle, NULL TSRMLS_CC) == persistent_script->timestamp) {
 		return SUCCESS;
 	}
 
@@ -1178,6 +1187,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 	zval *orig_user_error_handler;
 	zend_op_array *op_array;
 	int do_bailout = 0;
+	accel_time_t timestamp = 0;
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	zend_uint orig_compiler_options = 0;
 #endif
@@ -1211,7 +1221,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 	if (file_handle->type == ZEND_HANDLE_STREAM) {
 		char *buf;
-		size_t size, offset = 0;
+		size_t size;
 
 		/* Stream callbacks needs to be called in context of original
 		 * function and class tables (see: https://bugs.php.net/bug.php?id=64353)
@@ -1222,6 +1232,29 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		}
 	}
 #endif
+
+	if (ZCG(accel_directives).validate_timestamps || ZCG(accel_directives).max_file_size > 0) {
+		size_t size = 0;
+
+		/* Obtain the file timestamps, *before* actually compiling them,
+		 * otherwise we have a race-condition.
+		 */
+		timestamp = zend_get_file_handle_timestamp(file_handle, ZCG(accel_directives).max_file_size > 0 ? &size : NULL TSRMLS_CC);
+
+		/* If we can't obtain a timestamp (that means file is possibly socket)
+		 *  we won't cache it
+		 */
+		if (timestamp == 0) {
+			*op_array_p = accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
+			return NULL;
+		}
+
+		if (ZCG(accel_directives).max_file_size > 0 && size > (size_t)ZCG(accel_directives).max_file_size) {
+			ZCSG(blacklist_misses)++;
+			*op_array_p = accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
+			return NULL;
+		}
+	}
 
 	new_persistent_script = create_persistent_script();
 
@@ -1295,14 +1328,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 		/* Obtain the file timestamps, *before* actually compiling them,
 		 * otherwise we have a race-condition.
 		 */
-		new_persistent_script->timestamp = zend_get_file_handle_timestamp(file_handle TSRMLS_CC);
-
-		/* If we can't obtain a timestamp (that means file is possibly socket)
-		 *  we return it but do not persist it
-		 */
-		if (new_persistent_script->timestamp == 0) {
-			return new_persistent_script;
-		}
+		new_persistent_script->timestamp = timestamp;
 		new_persistent_script->dynamic_members.revalidate = ZCSG(revalidate_at);
 	}
 
