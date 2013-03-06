@@ -180,7 +180,10 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 			if (op_array->brk_cont_array[i].start >= 0) {
 				int parent = op_array->brk_cont_array[i].parent;
 
-				while (parent >= 0 && op_array->brk_cont_array[parent].start < 0) {
+				while (parent >= 0 &&
+				       op_array->brk_cont_array[parent].start < 0 &&
+				       op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_FREE &&
+				       op_array->opcodes[op_array->brk_cont_array[parent].brk].opcode != ZEND_SWITCH_FREE) {
 					parent = op_array->brk_cont_array[parent].parent;
 				}
 				op_array->brk_cont_array[i].parent = parent;
@@ -190,7 +193,9 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 		if (j) {
 			j = 0;
 			for (i = 0; i< op_array->last_brk_cont; i++) {
-				if (op_array->brk_cont_array[i].start >= 0) {
+				if (op_array->brk_cont_array[i].start >= 0 &&
+				    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
+				     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_SWITCH_FREE)) {
 					if (i != j) {
 						op_array->brk_cont_array[j] = op_array->brk_cont_array[i];
 					}
@@ -398,6 +403,9 @@ static inline void del_source(zend_code_block *from, zend_code_block *to)
 
 static void delete_code_block(zend_code_block *block)
 {
+	if (block->protected) {
+		return;
+	}
 	if (block->follow_to) {
 		zend_block_source *bs = block->sources;
 		while (bs) {
@@ -478,6 +486,16 @@ static void zend_rebuild_access_path(zend_cfg *cfg, zend_op_array *op_array, int
 	/* Walk thorough all pathes */
 	zend_access_path(start);
 
+	/* Add brk/cont pathes */
+	if (op_array->last_brk_cont) {
+		int i;
+		for (i=0; i< op_array->last_brk_cont; i++) {
+			zend_access_path(cfg->loop_start[i]);
+			zend_access_path(cfg->loop_cont[i]);
+			zend_access_path(cfg->loop_brk[i]);
+		}
+	}
+
 	/* Add exception pathes */
 	if (op_array->last_try_catch) {
 		int i;
@@ -527,7 +545,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 	print_block(block, op_array->opcodes, "Opt ");
 
 	/* remove leading NOPs */
-	while (block->start_opline->opcode == ZEND_NOP) {
+	while (block->len > 0 && block->start_opline->opcode == ZEND_NOP) {
 		if (block->len == 1) {
 			/* this block is all NOPs, join with following block */
 			if (block->follow_to) {
@@ -1083,7 +1101,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 	}
 
 	/* remove leading NOPs */
-	while (block->start_opline->opcode == ZEND_NOP) {
+	while (block->len > 0 && block->start_opline->opcode == ZEND_NOP) {
 		if (block->len == 1) {
 			/* this block is all NOPs, join with following block */
 			if (block->follow_to) {
@@ -1255,6 +1273,9 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 	/* last_op is the last opcode of the current block */
 	zend_op *last_op = (block->start_opline + block->len - 1);
 
+	if (!block->len) {
+		return;
+	}
 	switch (last_op->opcode) {
 		case ZEND_JMP:
 			{
