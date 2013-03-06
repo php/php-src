@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #64235 (Insteadof not work for class method in 5.4.11).
     (Laruence)
+  . Fixed bug #64197 (_Offsetof() macro used but not defined on ARM/Clang). 
+    (Ard Biesheuvel)
   . Implemented FR #64175 (Added HTTP codes as of RFC 6585). (Jonh Wendell)
   . Fixed bug #64142 (dval to lval different behavior on ppc64). (Remi)
   . Fixed bug #64070 (Inheritance with Traits failed with error). (Dmitry)
@@ -20,6 +22,8 @@ PHP                                                                        NEWS
   . mb_split() can now handle empty matches like preg_split() does. (Moriyoshi)
 
 - OpenSSL:
+  . New SSL stream context option to prevent CRIME attack vector. (Daniel Lowrey,
+	Lars)
   . Fixed bug #61930 (openssl corrupts ssl key resource when using 
     openssl_get_publickey()). (Stas)
 
@@ -94,10 +98,6 @@ PHP                                                                        NEWS
 - PDO_sqlite:
   . Fixed bug #63916 (PDO::PARAM_INT casts to 32bit int internally even
     on 64bit builds in pdo_sqlite). (srgoogleguy, Lars)
-
-- OpenSSL:
-  . New SSL stream context option to prevent CRIME attack vector. (Daniel Lowrey,
-    Lars)
 
 17 Jan 2012, PHP 5.4.11
 
