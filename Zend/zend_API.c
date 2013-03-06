@@ -3100,6 +3100,17 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 		case IS_OBJECT:
 			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(callable, &fcc->calling_scope, &fcc->function_handler, &fcc->object_ptr TSRMLS_CC) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
+				if (!(fcc->function_handler->common.fn_flags & (ZEND_ACC_PUBLIC | ZEND_ACC_CLOSURE))) {
+					if (fcc->function_handler->common.fn_flags & ZEND_ACC_PRIVATE) {
+						if (UNEXPECTED(fcc->called_scope != EG(scope))) {
+							return 0;
+						}
+					} else if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PROTECTED)) {
+						if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(fcc->function_handler), EG(scope)))) {
+							return 0;
+						}
+					}
+				}
 				if (callable_name) {
 					zend_class_entry *ce = Z_OBJCE_P(callable); /* TBFixed: what if it's overloaded? */
 
