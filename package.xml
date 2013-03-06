@@ -21,6 +21,24 @@
   <email>dmitry@zend.com</email>
   <active>yes</active>
  </lead>
+ <lead>
+  <name>Zeev Suraski</name>
+  <user>zeev</user>
+  <email>zeev@zend.com</email>
+  <active>yes</active>
+ </lead>
+ <lead>
+  <name>Hannes Magnusson</name>
+  <user>bjori</user>
+  <email>bjori@php.net</email>
+  <active>yes</active>
+ </lead>
+ <lead>
+  <name>Xinchen Hui</name>
+  <user>laruence</user>
+  <email>laruence@php.net</email>
+  <active>yes</active>
+ </lead>
  <date>2013-03-04</date>
  <time>19:40:00</time>
  <version>
