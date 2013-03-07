@@ -86,6 +86,9 @@
 #include "php_cli_server.h"
 #endif
 
+#include "ps_title.h"
+#include "php_cli_process_title.h"
+
 #ifndef PHP_WIN32
 # define php_select(m, r, w, e, t)	select(m, r, w, e, t)
 #else
@@ -478,6 +481,8 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
+	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
+	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
 	{NULL, NULL, NULL}
 };
 
@@ -1200,6 +1205,7 @@ int main(int argc, char *argv[])
 	int argc = __argc;
 	char **argv = __argv;
 #endif
+
 	int c;
 	int exit_status = SUCCESS;
 	int module_started = 0, sapi_started = 0;
@@ -1210,6 +1216,12 @@ int main(int argc, char *argv[])
 	int ini_entries_len = 0;
 	int ini_ignore = 0;
 	sapi_module_struct *sapi_module = &cli_sapi_module;
+
+	/*
+	 * Do not move this initialization. It needs to happen before argv is used
+	 * in any way.
+	 */
+	argv = save_ps_args(argc, argv);
 
 	cli_sapi_module.additional_functions = additional_functions;
 
@@ -1299,6 +1311,7 @@ int main(int argc, char *argv[])
 #ifndef PHP_CLI_WIN32_NO_CONSOLE
 			case 'S':
 				sapi_module = &cli_server_sapi_module;
+				cli_server_sapi_module.additional_functions = server_additional_functions;
 				break;
 #endif
 			case 'h': /* help & quit */
@@ -1385,6 +1398,11 @@ out:
 	tsrm_shutdown();
 #endif
 
+	/*
+	 * Do not move this de-initialization. It needs to happen right before
+	 * exiting.
+	 */
+        cleanup_ps_args(argv);
 	exit(exit_status);
 }
 /* }}} */
