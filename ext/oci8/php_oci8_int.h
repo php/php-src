@@ -191,7 +191,7 @@ typedef struct { /* php_oci_statement {{{ */
 	sword				 errcode;				/* last errcode*/
 	OCIError			*err;					/* private error handle */
 	OCIStmt				*stmt;					/* statement handle */
-	char				*last_query;			/* last query issued. also used to determine if this is a statement or a refcursor recieved from Oracle */
+	char				*last_query;			/* last query issued. also used to determine if this is a statement or a refcursor received from Oracle */
 	long				 last_query_len;		/* last query length */
 	HashTable			*columns;				/* hash containing all the result columns */
 	HashTable			*binds;					/* binds hash */
