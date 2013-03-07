@@ -172,12 +172,12 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 	 * exception handling */
 	if (op_array->last_brk_cont) {
 		int i, j;
-		cfg->loop_start = ecalloc(op_array->last_brk_cont, sizeof(zend_code_block *));
-		cfg->loop_cont  = ecalloc(op_array->last_brk_cont, sizeof(zend_code_block *));
-		cfg->loop_brk   = ecalloc(op_array->last_brk_cont, sizeof(zend_code_block *));
+
 		j = 0;
 		for (i = 0; i< op_array->last_brk_cont; i++) {
-			if (op_array->brk_cont_array[i].start >= 0) {
+			if (op_array->brk_cont_array[i].start >= 0 &&
+			    (op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_FREE ||
+			     op_array->opcodes[op_array->brk_cont_array[i].brk].opcode == ZEND_SWITCH_FREE)) {
 				int parent = op_array->brk_cont_array[i].parent;
 
 				while (parent >= 0 &&
@@ -191,6 +191,9 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 			}
 		}
 		if (j) {
+			cfg->loop_start = ecalloc(op_array->last_brk_cont, sizeof(zend_code_block *));
+			cfg->loop_cont  = ecalloc(op_array->last_brk_cont, sizeof(zend_code_block *));
+			cfg->loop_brk   = ecalloc(op_array->last_brk_cont, sizeof(zend_code_block *));
 			j = 0;
 			for (i = 0; i< op_array->last_brk_cont; i++) {
 				if (op_array->brk_cont_array[i].start >= 0 &&
@@ -212,13 +215,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 			}
 			op_array->last_brk_cont = j;
 		} else {
-			efree(cfg->loop_start);
-			efree(cfg->loop_cont);
-			efree(cfg->loop_brk);
 			efree(op_array->brk_cont_array);
-			cfg->loop_start = NULL;
-			cfg->loop_cont = NULL;
-			cfg->loop_brk = NULL;
 			op_array->brk_cont_array = NULL;
 			op_array->last_brk_cont = 0;
 		}
