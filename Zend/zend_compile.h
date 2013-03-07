@@ -856,6 +856,7 @@ END_EXTERN_C()
 #define ZEND_CALLSTATIC_FUNC_NAME   "__callstatic"
 #define ZEND_TOSTRING_FUNC_NAME     "__tostring"
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
+#define ZEND_INVOKE_FUNC_NAME		"__invoke"
 
 /* The following constants may be combined in CG(compiler_options)
  * to change the default compiler behavior */

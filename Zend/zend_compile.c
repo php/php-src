@@ -29,6 +29,7 @@
 #include "tsrm_virtual_cwd.h"
 #include "zend_multibyte.h"
 #include "zend_language_scanner.h"
+#include "zend_closures.h"
 
 #define CONSTANT_EX(op_array, op) \
 	(op_array)->literals[op].constant
@@ -1621,6 +1622,10 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
 					zend_error(E_WARNING, "The magic method __toString() must have public visibility and cannot be static");
 				}
+			} else if ((name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1))) {
+				if (fn_flags & ZEND_ACC_STATIC) {
+					zend_error(E_WARNING, "The magic method __invoke() cannot be static");
+				}
 			}
 		} else {
 			char *class_lcname;
@@ -1677,6 +1682,10 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 					zend_error(E_WARNING, "The magic method __toString() must have public visibility and cannot be static");
 				}
 				CG(active_class_entry)->__tostring = (zend_function *) CG(active_op_array);
+			} else if ((name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1))) {
+				if (fn_flags & ZEND_ACC_STATIC) {
+					zend_error(E_WARNING, "The magic method __invoke() cannot be static");
+				}
 			} else if (!(fn_flags & ZEND_ACC_STATIC)) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}

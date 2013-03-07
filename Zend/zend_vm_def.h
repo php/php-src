@@ -2673,6 +2673,17 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 		    EXPECTED(Z_TYPE_P(function_name) == IS_OBJECT) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
+			if (!(call->fbc->common.fn_flags & (ZEND_ACC_PUBLIC | ZEND_ACC_CLOSURE))) {
+				if (call->fbc->common.fn_flags & ZEND_ACC_PRIVATE) {
+					if (UNEXPECTED(call->called_scope != EG(scope))) {
+						zend_error_noreturn(E_ERROR, "Call to private %s::__invoke() from context '%s'", Z_OBJCE_P(function_name)->name, EG(scope) ? EG(scope)->name : "");
+					}
+				} else if ((call->fbc->common.fn_flags & ZEND_ACC_PROTECTED)) {
+					if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(call->fbc), EG(scope)))) {
+						zend_error_noreturn(E_ERROR, "Call to protected %s::__invoke() from context '%s'", Z_OBJCE_P(function_name)->name, EG(scope) ? EG(scope)->name : "");
+					}
+				}
+			}
 			if (call->object) {
 				Z_ADDREF_P(call->object);
 			}
