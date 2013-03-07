@@ -97,6 +97,8 @@
    <dir name="tests">
     <file role="src" name="001_cli.phpt"/>
     <file role="src" name="skipif.inc"/>
+    <file role="src" name="bug64353.phpt"/>
+    <file role="src" name="issue0057.phpt"/>
    </dir> <!-- tests -->
   </dir> <!-- / -->
  </contents>
