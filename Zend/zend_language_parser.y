@@ -733,6 +733,15 @@ new_expr:
 		T_NEW class_name_reference { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 ;
 
+lambda_function:
+		function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, 0 TSRMLS_CC); }
+		'(' parameter_list ')' lexical_vars
+		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $3; }
+	|	T_STATIC function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
+		'(' parameter_list ')' lexical_vars
+		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); $$ = $4; }
+
+
 expr_without_variable:
 		T_LIST '(' { zend_do_list_init(TSRMLS_C); } assignment_list ')' '=' expr { zend_do_list_end(&$$, &$7 TSRMLS_CC); }
 	|	variable '=' expr		{ zend_check_writable_variable(&$1); zend_do_assign(&$$, &$1, &$3 TSRMLS_CC); }
@@ -806,12 +815,7 @@ expr_without_variable:
 	|	'`' backticks_expr '`' { zend_do_shell_exec(&$$, &$2 TSRMLS_CC); }
 	|	T_PRINT expr  { zend_do_print(&$$, &$2 TSRMLS_CC); }
 	|	T_YIELD { zend_do_yield(&$$, NULL, NULL, 0 TSRMLS_CC); }
-	|	function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$1, $2.op_type, 0 TSRMLS_CC); }
-		'(' parameter_list ')' lexical_vars
-		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); $$ = $3; }
-	|	T_STATIC function is_reference { zend_do_begin_lambda_function_declaration(&$$, &$2, $3.op_type, 1 TSRMLS_CC); }
-		'(' parameter_list ')' lexical_vars
-		'{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); $$ = $4; }
+	| 	lambda_function { $$ = $1; }
 ;
 
 yield_expr:
@@ -863,6 +867,8 @@ function_call:
 		function_call_parameter_list { zend_do_end_function_call(NULL, &$$, &$5, 1, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
 	|	variable_without_objects { zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); zend_do_begin_dynamic_function_call(&$1, 0 TSRMLS_CC); }
 		function_call_parameter_list { zend_do_end_function_call(&$1, &$$, &$3, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
+	|	parenthesis_expr { zend_do_begin_variable_parse(TSRMLS_C); zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); zend_do_begin_dynamic_function_call(&$1, 0 TSRMLS_CC); }
+		function_call_parameter_list { zend_do_end_function_call(&$1, &$$, &$3, 0, 1 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); }
 ;
 
 class_name:
