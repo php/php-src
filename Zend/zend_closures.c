@@ -291,7 +291,6 @@ static zend_object_value zend_closure_clone(zval *zobject TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-
 int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr TSRMLS_DC) /* {{{ */
 {
 	zend_closure *closure;
