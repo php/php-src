@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 07 Mar 2013, PHP 5.5.0 Alpha 6
 
 - Core:
+  . Fixed bug #61025 (__invoke() visibility not honored). (Laruence)
   . Fixed bug #49348 (Uninitialized ++$foo->bar; does not cause a notice).
     (Stas)
 
