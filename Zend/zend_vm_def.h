@@ -2680,12 +2680,9 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			Z_OBJ_HANDLER_P(function_name, get_closure) &&
 			Z_OBJ_HANDLER_P(function_name, get_closure)(function_name, &call->called_scope, &call->fbc, &call->object TSRMLS_CC) == SUCCESS) {
 			if (call->object) {
-				if (OP2_TYPE == IS_TMP_VAR &&
+				if (IS_OP2_TMP_FREE() &&
 						call->object == function_name) {
-					zval *obj;
-					ALLOC_ZVAL(obj);
-					INIT_PZVAL_COPY(obj, call->object);
-					call->object = obj;
+					MAKE_REAL_ZVAL_PTR(call->object);
 				} else {
 					Z_ADDREF_P(call->object);
 				}
@@ -2694,7 +2691,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 			    call->fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
 				call->fbc->common.prototype = (zend_function*)function_name;
-			} else if (OP2_TYPE != IS_TMP_VAR) {
+			} else if (!IS_OP2_TMP_FREE()) {
 				FREE_OP2();
 			}
 			call->is_ctor_call = 0;
