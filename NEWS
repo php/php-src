@@ -1,10 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2012, PHP 5.4.14
+?? ??? 2013, PHP 5.4.14
 - PCRE:
   . Merged PCRE 8.32. (Anatol)
 
-?? ??? 2012, PHP 5.4.13
+?? ??? 2013, PHP 5.4.13
 
 - Core:
   . Fixed bug #64235 (Insteadof not work for class method in 5.4.11).
@@ -54,7 +54,7 @@ PHP                                                                        NEWS
 - SNMP:
   . Fixed bug #64124 (IPv6 malformed). (Boris Lytochkin)
 
-21 Feb 2012, PHP 5.4.12
+21 Feb 2013, PHP 5.4.12
 
 - Core:
   . Fixed bug #64099 (Wrong TSRM usage in zend_Register_class alias). (Johannes)
@@ -99,7 +99,7 @@ PHP                                                                        NEWS
   . Fixed bug #63916 (PDO::PARAM_INT casts to 32bit int internally even
     on 64bit builds in pdo_sqlite). (srgoogleguy, Lars)
 
-17 Jan 2012, PHP 5.4.11
+17 Jan 2013, PHP 5.4.11
 
 - Core:
   . Fixed bug #63762 (Sigsegv when Exception::$trace is changed by user).
