@@ -3735,7 +3735,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CONST_CONST_HANDLER(ZEND_OP
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -4910,7 +4912,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZEND_OPCO
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -5955,7 +5959,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZEND_OPCO
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -7715,7 +7721,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCOD
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -9887,7 +9895,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CONST_HANDLER(ZEND_OPCO
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (1) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -10853,7 +10863,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (1) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -11824,7 +11836,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (1) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -13370,7 +13384,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (1) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -16609,7 +16625,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZEND_OPCO
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -18960,7 +18978,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -21276,7 +21296,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -24730,7 +24752,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -26369,7 +26393,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CONST_HANDLER(ZEND_O
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -27784,7 +27810,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_TMP_HANDLER(ZEND_OPC
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -29105,7 +29133,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_VAR_HANDLER(ZEND_OPC
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -30847,7 +30877,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_UNUSED_CV_HANDLER(ZEND_OPCO
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -34089,7 +34121,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CONST_HANDLER(ZEND_OPCOD
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -36209,7 +36243,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -38388,7 +38424,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
@@ -41559,7 +41597,9 @@ static int ZEND_FASTCALL  ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_H
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (0) {
+			MAKE_REAL_ZVAL_PTR(call->object);
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;

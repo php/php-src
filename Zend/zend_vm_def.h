@@ -2482,7 +2482,9 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMP|VAR|UNUSED|CV, CONST|TMP|V
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
 		call->object = NULL;
 	} else {
-		if (!PZVAL_IS_REF(call->object)) {
+		if (IS_OP1_TMP_FREE()) {
+			MAKE_REAL_ZVAL_PTR(call->object); 
+		} else if (!PZVAL_IS_REF(call->object)) {
 			Z_ADDREF_P(call->object); /* For $this pointer */
 		} else {
 			zval *this_ptr;
