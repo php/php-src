@@ -694,7 +694,7 @@ static void sxe_dimension_write(zval *object, zval *offset, zval *value TSRMLS_D
 }
 /* }}} */
 
-static zval** sxe_property_get_adr(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval** sxe_property_get_adr(zval *object, zval *member, int fetch_type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	php_sxe_object *sxe;
 	xmlNodePtr      node;
