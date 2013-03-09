@@ -7,6 +7,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.4.13
 
 - Core:
+  . Fixed bug #64354 (Unserialize array of objects whose class can't
+    be autoloaded fail). (Laruence)
   . Fixed bug #64235 (Insteadof not work for class method in 5.4.11).
     (Laruence)
   . Fixed bug #64197 (_Offsetof() macro used but not defined on ARM/Clang). 
