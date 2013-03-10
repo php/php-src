@@ -1235,9 +1235,9 @@ error:
 
 } /* }}} */
 
-/* {{{ proto void SplDoublyLinkedList::insertBeforeOffset(mixed $index, mixed $newval) U
+/* {{{ proto void SplDoublyLinkedList::add(mixed $index, mixed $newval) U
  Inserts a new entry before the specified $index consisting of $newval. */
-SPL_METHOD(SplDoublyLinkedList, insertBeforeOffset)
+SPL_METHOD(SplDoublyLinkedList, add)
 {
 	zval                  *zindex, *value;
 	spl_dllist_object     *intern;
@@ -1252,86 +1252,43 @@ SPL_METHOD(SplDoublyLinkedList, insertBeforeOffset)
 	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	index  = (int)spl_offset_convert_to_long(zindex TSRMLS_CC);
 
-	if (index < 0 || index >= intern->llist->count) {
+	if (index < 0 || index > intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
 		return;
 	}
 
-	/* Get the element we want to insert before */
-	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
-
-	/* Create the new element we want to insert */
-	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
-
-	elem->data = value;
-	elem->rc   = 1;
-	/* connect to the neighbours */
-	elem->next = element;
-	elem->prev = element->prev;
-
-	/* connect the neighbours to this new element */
-	if (elem->prev == NULL) {
-		intern->llist->head = elem;
+	if (index == intern->llist->count) {
+		/* If index is the last entry+1 then we do a push because we're not inserting before any entry */
+		spl_ptr_llist_push(intern->llist, value TSRMLS_CC);
 	} else {
-		element->prev->next = elem;
-	}
-	element->prev = elem;
+		/* Get the element we want to insert before */
+		element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
-	intern->llist->count++;
+		/* Create the new element we want to insert */
+		spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
 
-	if (intern->llist->ctor) {
-		intern->llist->ctor(elem TSRMLS_CC);
+		elem->data = value;
+		elem->rc   = 1;
+		/* connect to the neighbours */
+		elem->next = element;
+		elem->prev = element->prev;
+
+		/* connect the neighbours to this new element */
+		if (elem->prev == NULL) {
+			intern->llist->head = elem;
+		} else {
+			element->prev->next = elem;
+		}
+		element->prev = elem;
+
+		intern->llist->count++;
+
+		if (intern->llist->ctor) {
+			intern->llist->ctor(elem TSRMLS_CC);
+		}
 	}
 } /* }}} */
 
-/* {{{ proto void SplDoublyLinkedList::insertBeforeOffset(mixed $index, mixed $newval) U
- Inserts a new entry before the specified $index consisting of $newval. */
-SPL_METHOD(SplDoublyLinkedList, insertAfterOffset)
-{
-	zval                  *zindex, *value;
-	spl_dllist_object     *intern;
-	spl_ptr_llist_element *element;
-	long                  index;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zindex, &value) == FAILURE) {
-		return;
-	}
-	SEPARATE_ARG_IF_REF(value);
-
-	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	index  = (int)spl_offset_convert_to_long(zindex TSRMLS_CC);
-
-	if (index < 0 || index >= intern->llist->count) {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
-		return;
-	}
-
-	/* Get the element we want to insert after */
-	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
-
-	/* Create the new element we want to insert */
-	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
-
-	elem->data = value;
-	elem->rc   = 1;
-	/* connect to the neighbours */
-	elem->prev = element;
-	elem->next = element->next;
-
-	/* connect the neighbours to this new element */
-	if (elem->next == NULL) {
-		intern->llist->tail = elem;
-	} else {
-		element->next->prev = elem;
-	}
-	element->next = elem;
-
-	intern->llist->count++;
-
-	if (intern->llist->ctor) {
-		intern->llist->ctor(elem TSRMLS_CC);
-	}
-} /* }}} */
 
 /* iterator handler table */
 zend_object_iterator_funcs spl_dllist_it_funcs = {
@@ -1421,8 +1378,7 @@ static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
 	SPL_ME(SplDoublyLinkedList, offsetSet,       arginfo_dllist_offsetSet,       ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, offsetUnset,     arginfo_dllist_offsetGet,       ZEND_ACC_PUBLIC)
 
-	SPL_ME(SplDoublyLinkedList, insertBeforeOffset, arginfo_dllist_offsetSet,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, insertAfterOffset,  arginfo_dllist_offsetSet,    ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, add,             arginfo_dllist_offsetSet,       ZEND_ACC_PUBLIC)
 
 	/* Iterator */
 	SPL_ME(SplDoublyLinkedList, rewind,          arginfo_dllist_void,            ZEND_ACC_PUBLIC)
