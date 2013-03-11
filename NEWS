@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Added support for changing the process's title in CLI/CLI-Server SAPIs.
     The implementation is more robust that the proctitle PECL module. More
     details here: https://wiki.php.net/rfc/cli_process_title. (Keyur)
+  . Fixed bug #64370 (microtime(true) less than $_SERVER['REQUEST_TIME_FLOAT']).
+    (Anatol)
 
 
 07 Mar 2013, PHP 5.5.0 Alpha 6
