@@ -38,10 +38,6 @@ struct _php_win32_core_globals {
 	char *log_header;
 	HANDLE log_source;
 
-	/* time */
-	struct timeval starttime;
-	__int64			lasttime, freq;
-
 	HKEY       registry_key;
 	HANDLE     registry_event;
 	HashTable *registry_directories;
