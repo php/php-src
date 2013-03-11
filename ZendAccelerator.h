@@ -33,7 +33,7 @@
 /* 4 - works with the new Optimizer, that supports the file format with licenses */
 /* 5 - API 4 didn't really work with the license-enabled file format.  v5 does. */
 /* 6 - Monitor was removed from ZendPlatform.so, to a module of its own */
-/* 7 - Optimizer was embeded into Accelerator */
+/* 7 - Optimizer was embedded into Accelerator */
 /* 8 - Standalone Open Source OptimizerPlus */
 #define ACCELERATOR_API_NO 8
 
@@ -226,20 +226,20 @@ typedef struct _zend_accel_directives {
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {
-    /* copy of CG(function_table) used for compilation scripts into cashe */
-    /* imitially it contains only internal functions */
+    /* copy of CG(function_table) used for compilation scripts into cache */
+    /* initially it contains only internal functions */
 	HashTable               function_table;
 	int                     internal_functions_count;
-	int                     counted;   /* the process uses shatred memory */
+	int                     counted;   /* the process uses shared memory */
 	zend_bool               enabled;
 	zend_bool               locked;    /* thread obtained exclusive lock */
 	HashTable               bind_hash; /* prototype and zval lookup table */
 	zend_accel_directives   accel_directives;
 	char                   *cwd;              /* current working directory or NULL */
-	int                     cwd_len;          /* "cwd" string lenght */
+	int                     cwd_len;          /* "cwd" string length */
 	char                   *include_path_key; /* one letter key of current "include_path" */
-	char                   *include_path;     /* current settion of "include_path" directive */
-	int                     include_path_len; /* "include_path" string lenght */
+	char                   *include_path;     /* current section of "include_path" directive */
+	int                     include_path_len; /* "include_path" string length */
 	int                     include_path_check;
 	time_t                  request_time;
 	/* preallocated shared-memory block to save current script */

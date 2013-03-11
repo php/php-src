@@ -81,7 +81,7 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
 				/* convert Ti = JMPZ_EX(Ti, L) to JMPZ(Ti, L) */
-				if (0 && /* FIXME: temorary disable unsafe pattern */
+				if (0 && /* FIXME: temporary disable unsafe pattern */
 				    ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
 				    ZEND_RESULT_TYPE(opline) == IS_TMP_VAR &&
 				    ZEND_OP1(opline).var == ZEND_RESULT(opline).var) {

@@ -75,7 +75,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 
 		memsize = 8;
 		zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.memory_consumption is set below the required 8MB.\n");
-		zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the minimal 8MB cofiguration.\n");
+		zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the minimal 8MB configuration.\n");
 
 		if (zend_hash_find(EG(ini_directives),
 					"zend_optimizerplus.memory_consumption",
@@ -116,13 +116,13 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 			size = MIN_ACCEL_FILES;
 			new_new_value = TOKENTOSTR(MIN_ACCEL_FILES);
 			zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_accelerated_files is set below the required minimum (%d).\n", MIN_ACCEL_FILES);
-			zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the minimal cofiguration.\n");
+			zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the minimal configuration.\n");
 		}
 		if (size > MAX_ACCEL_FILES) {
 			size = MAX_ACCEL_FILES;
 			new_new_value = TOKENTOSTR(MAX_ACCEL_FILES);
 			zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_accelerated_files is set above the limit (%d).\n", MAX_ACCEL_FILES);
-			zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the maximal cofiguration.\n");
+			zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use the maximal configuration.\n");
 		}
 		if (zend_hash_find(EG(ini_directives),
 					"zend_optimizerplus.max_accelerated_files",
@@ -158,7 +158,7 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 		zend_ini_entry *ini_entry;
 
 		percentage = 5;
-		zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_wasted_percentage must be ser netweeb 1 and 50.\n");
+		zend_accel_error(ACCEL_LOG_WARNING, "zend_optimizerplus.max_wasted_percentage must be set between 1 and 50.\n");
 		zend_accel_error(ACCEL_LOG_WARNING, ACCELERATOR_PRODUCT_NAME " will use 5%.\n");
 		if (zend_hash_find(EG(ini_directives),
 					"zend_optimizerplus.max_wasted_percentage",
@@ -506,7 +506,7 @@ static ZEND_FUNCTION(accelerator_get_status)
 	add_assoc_double(statistics, "accelerator_hit_rate", reqs?(((double) ZCSG(hits))/reqs)*100.0:0);
 	add_assoc_zval(return_value, "accelerator_statistics", statistics);
 
-	/* acceleratred scripts */
+	/* accelerated scripts */
 	scripts = accelerator_get_scripts(TSRMLS_C);
 	if (scripts) {
 		add_assoc_zval(return_value, "scripts", scripts);

@@ -308,7 +308,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 					next_op++;
 				}
 				if (!((ZEND_OPTIMIZER_PASS_5|ZEND_OPTIMIZER_PASS_10) & OPTIMIZATION_LEVEL)) {
-					/* NOP removel is disabled => insert JMP over NOPs */
+					/* NOP removal is disabled => insert JMP over NOPs */
 					if (last_op-opline >= 3) { /* If we have more than 2 NOPS then JMP over them */
 						(opline + 1)->opcode = ZEND_JMP;
 						ZEND_OP1(opline + 1).opline_num = last_op - op_array->opcodes; /* that's OK even for ZE2, since opline_num's are resolved in pass 2 later */

@@ -26,7 +26,7 @@
 #include "zend_compile.h"
 
 #define ZEND_OPTIMIZER_PASS_1		(1<<0)   /* CSE, STRING construction     */
-#define ZEND_OPTIMIZER_PASS_2		(1<<1)   /* Constant conversion and jums */
+#define ZEND_OPTIMIZER_PASS_2		(1<<1)   /* Constant conversion and jumps */
 #define ZEND_OPTIMIZER_PASS_3		(1<<2)   /* ++, +=, series of jumps      */
 #define ZEND_OPTIMIZER_PASS_4		(1<<3)
 #define ZEND_OPTIMIZER_PASS_5		(1<<4)   /* CFG based optimization       */

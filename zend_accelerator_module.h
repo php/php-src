@@ -19,7 +19,7 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef ZEND_ACCELERAROR_MODULE_H
+#ifndef ZEND_ACCELERATOR_MODULE_H
 #define ZEND_ACCELERATOR_MODULE_H
 
 int start_accel_module(void);

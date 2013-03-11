@@ -36,7 +36,7 @@
 	however, entries are still taken from the same 'hash_entries' array.
 	'key' and 'data' passed to zend_accel_hash_update() must be already
 	allocated in shared memory. Few keys may be resolved to the same data.
-	using 'indirect' emtries, that point to other entries ('data' is actually
+	using 'indirect' entries, that point to other entries ('data' is actually
 	a pointer to another zend_accel_hash_entry).
 	zend_accel_hash_update() requires exclusive lock, however,
 	zend_accel_hash_find() does not.

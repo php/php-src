@@ -164,7 +164,7 @@ static void optimize_temporary_variables(zend_op_array *op_array)
 			opline->extended_value = NUM_VAR(map_T[currT]);
 		}
 
-		/* Allocate OP_DATA->op2 after "opernds", but before "result" */
+		/* Allocate OP_DATA->op2 after "operands", but before "result" */
 		if (opline->opcode == ZEND_ASSIGN_DIM &&
 		    (opline + 1)->opcode == ZEND_OP_DATA &&
 		    ZEND_OP2_TYPE(opline + 1) & (IS_VAR | IS_TMP_VAR)) {
