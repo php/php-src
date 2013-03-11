@@ -365,6 +365,10 @@ struct _zval_struct {
 #define Z_UNSET_ISREF(z)		Z_UNSET_ISREF_P(&(z))
 #define Z_SET_ISREF_TO(z, isref)	Z_SET_ISREF_TO_P(&(z), isref)
 
+#if ZEND_DEBUG
+#define zend_always_inline inline
+#define zend_never_inline
+#else
 #if defined(__GNUC__)
 #if __GNUC__ >= 3
 #define zend_always_inline inline __attribute__((always_inline))
@@ -373,7 +377,6 @@ struct _zval_struct {
 #define zend_always_inline inline
 #define zend_never_inline
 #endif
-
 #elif defined(_MSC_VER)
 #define zend_always_inline __forceinline
 #define zend_never_inline
@@ -381,6 +384,7 @@ struct _zval_struct {
 #define zend_always_inline inline
 #define zend_never_inline
 #endif
+#endif /* ZEND_DEBUG */
 
 #if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
 # define EXPECTED(condition)   __builtin_expect(condition, 1)
