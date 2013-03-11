@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #64354 (Unserialize array of objects whose class can't
     be autoloaded fail). (Laruence)
+  . Added support for changing the process's title in CLI/CLI-Server SAPIs.
+    The implementation is more robust that the proctitle PECL module. More
+    details here: https://wiki.php.net/rfc/cli_process_title. (Keyur)
 
 
 07 Mar 2013, PHP 5.5.0 Alpha 6

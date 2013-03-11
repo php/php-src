@@ -79,6 +79,8 @@ PHP 5.5 UPGRADE NOTES
   (https://wiki.php.net/rfc/generators)
 - ClassName::class syntax returning full class name for a class as 
   a string constant. (https://wiki.php.net/rfc/class_name_scalars)
+- Support for changing the process's title in CLI/CLI-Server SAPIs. (Keyur)
+  (https://wiki.php.net/rfc/cli_process_title)
 
 ========================================
 2. Changes in SAPI modules
