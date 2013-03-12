@@ -1547,9 +1547,6 @@ SPL_METHOD(Array, key)
 void spl_array_iterator_key(zval *object, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
-	char *string_key;
-	uint string_length;
-	ulong num_key;
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 
 	if (spl_array_object_verify_pos(intern, aht TSRMLS_CC) == FAILURE) {
