@@ -927,9 +927,6 @@ PHP_FUNCTION(current)
 PHP_FUNCTION(key)
 {
 	HashTable *array;
-	char *string_key;
-	uint string_length;
-	ulong num_key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &array) == FAILURE) {
 		return;
@@ -1183,9 +1180,6 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ 
 		  res;					/* comparison result */
 	HashPosition pos;			/* hash iterator */
 	zend_bool strict = 0;		/* strict comparison or not */
-	ulong num_key;
-	uint str_key_len;
-	char *string_key;
 	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za|b", &value, &array, &strict) == FAILURE) {
@@ -2418,9 +2412,6 @@ PHP_FUNCTION(array_keys)
 	       res,					/* Result of comparison */
 	      *new_val;				/* New value */
 	int    add_key;				/* Flag to indicate whether a key should be added */
-	char  *string_key;			/* String key */
-	uint   string_key_len;
-	ulong  num_key;				/* Numeric key */
 	zend_bool strict = 0;		/* do strict comparison */
 	HashPosition pos;
 	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
@@ -2651,9 +2642,6 @@ PHP_FUNCTION(array_pad)
 PHP_FUNCTION(array_flip)
 {
 	zval *array, **entry, *data;
-	char *string_key;
-	uint str_key_len;
-	ulong num_key;
 	HashPosition pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
