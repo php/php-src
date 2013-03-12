@@ -299,7 +299,6 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 /*
  * zval
  */
-typedef struct _zval_struct zval;
 typedef struct _zend_class_entry zend_class_entry;
 
 typedef struct _zend_guard {
