@@ -343,7 +343,6 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
 	long row_count;
-	int ret;
 	PDO_DBG_ENTER("pdo_mysql_stmt_next_rowset");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 
@@ -412,25 +411,20 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		S->result = NULL;
 	}
 
-	ret = mysql_next_result(H->server);
+	if (!mysql_more_results(H->server)) {
+		/* No more results */
+		PDO_DBG_RETURN(0);	
+	}
 #if PDO_USE_MYSQLND
-	/* for whatever reason mysqlnd breaks with libmysql compatibility at the C level, no -1 */
-	if (PASS != ret) {
+	if (mysql_next_result(H->server) == FAIL) {
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
-	}
-	if (mysql_more_results(H->server)) {
-		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt TSRMLS_CC));
 	} else {
-		/* No more results */
-		PDO_DBG_RETURN(0);
+		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt TSRMLS_CC));
 	}
 #else
-	if (ret > 0) {
+	if (mysql_next_result(H->server) > 0) {
 		pdo_mysql_error_stmt(stmt);
-		PDO_DBG_RETURN(0);
-	} else if (ret < 0) {
-		/* No more results */
 		PDO_DBG_RETURN(0);
 	} else {
 		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt TSRMLS_CC));
