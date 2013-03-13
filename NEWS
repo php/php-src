@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Merged PCRE 8.32). (Anatol)
 
+- mysqlnd
+  . Fixed bug #63530 (mysqlnd_stmt::bind_one_parameter crashes, uses wrong alloc
+    for stmt->param_bind). (Andrey)
+
 
 28 Feb 2013, PHP 5.3.23RC1
 
