@@ -2839,17 +2839,17 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 		if (OP1_TYPE == IS_TMP_VAR) {
 			FREE_OP1();
 		}
-	} else if (!IS_OP1_TMP_FREE()) { /* Not a temp var */
-		if (*EG(return_value_ptr_ptr)) {
-			zval_ptr_dtor(EG(return_value_ptr_ptr));
-		}
+	} else {
 		if (OP1_TYPE == IS_CONST ||
-		    (PZVAL_IS_REF(retval_ptr) && Z_REFCOUNT_P(retval_ptr) > 0)) {
+		    OP1_TYPE == IS_TMP_VAR ||
+		    PZVAL_IS_REF(retval_ptr)) {
 			zval *ret;
 
 			ALLOC_ZVAL(ret);
 			INIT_PZVAL_COPY(ret, retval_ptr);
-			zval_copy_ctor(ret);
+			if (OP1_TYPE != IS_TMP_VAR) {
+				zval_copy_ctor(ret);
+			}
 			*EG(return_value_ptr_ptr) = ret;
 		} else if ((OP1_TYPE == IS_CV || OP1_TYPE == IS_VAR) &&
 		           retval_ptr == &EG(uninitialized_zval)) {
@@ -2861,16 +2861,6 @@ ZEND_VM_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 			*EG(return_value_ptr_ptr) = retval_ptr;
 			Z_ADDREF_P(retval_ptr);
 		}
-	} else {
-		zval *ret;
-
-		if (*EG(return_value_ptr_ptr)) {
-			zval_ptr_dtor(EG(return_value_ptr_ptr));
-		}
-
-		ALLOC_ZVAL(ret);
-		INIT_PZVAL_COPY(ret, retval_ptr);
-		*EG(return_value_ptr_ptr) = ret;
 	}
 	FREE_OP1_IF_VAR();
 	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
@@ -2886,10 +2876,6 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 	SAVE_OPLINE();
 
 	do {
-		if (EG(return_value_ptr_ptr) && *EG(return_value_ptr_ptr)) {
-			zval_ptr_dtor(EG(return_value_ptr_ptr));
-		}
-
 		if (OP1_TYPE == IS_CONST || OP1_TYPE == IS_TMP_VAR) {
 			/* Not supposed to happen, but we'll allow it */
 			zend_error(E_NOTICE, "Only variable references should be returned by reference");
