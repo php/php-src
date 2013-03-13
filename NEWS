@@ -23,6 +23,10 @@ PHP                                                                        NEWS
 - Mbstring:
   . mb_split() can now handle empty matches like preg_split() does. (Moriyoshi)
 
+- mysqlnd
+  . Fixed bug #63530 (mysqlnd_stmt::bind_one_parameter crashes, uses wrong alloc
+    for stmt->param_bind). (Andrey)
+
 - OpenSSL:
   . New SSL stream context option to prevent CRIME attack vector. (Daniel Lowrey,
 	Lars)
