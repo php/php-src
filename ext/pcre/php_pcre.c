@@ -250,7 +250,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 	pcre_cache_entry	 new_entry;
 
 #if HAVE_SETLOCALE
-# ifdef PHP_WIN32 && ZTS
+# if defined(PHP_WIN32) && defined(ZTS)
 	_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
 # endif
 	locale = setlocale(LC_CTYPE, NULL);
