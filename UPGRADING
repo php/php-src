@@ -81,6 +81,8 @@ PHP 5.5 UPGRADE NOTES
   a string constant. (https://wiki.php.net/rfc/class_name_scalars)
 - Support for changing the process's title in CLI/CLI-Server SAPIs. (Keyur)
   (https://wiki.php.net/rfc/cli_process_title)
+- Added support for non-scalar Iterator keys in foreach.
+  (https://wiki.php.net/rfc/foreach-non-scalar-keys).
 
 ========================================
 2. Changes in SAPI modules

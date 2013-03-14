@@ -1018,20 +1018,20 @@ static void spl_array_it_get_current_data(zend_object_iterator *iter, zval ***da
 }
 /* }}} */
 
-static int spl_array_it_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static void spl_array_it_get_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC) /* {{{ */
 {
 	spl_array_it       *iterator = (spl_array_it *)iter;
 	spl_array_object   *object   = iterator->object;
 	HashTable          *aht      = spl_array_get_hash_table(object, 0 TSRMLS_CC);
 
 	if (object->ar_flags & SPL_ARRAY_OVERLOADED_KEY) {
-		return zend_user_it_get_current_key(iter, str_key, str_key_len, int_key TSRMLS_CC);
+		zend_user_it_get_current_key(iter, key TSRMLS_CC);
 	} else {
 		if (spl_array_object_verify_pos_ex(object, aht, "ArrayIterator::current(): " TSRMLS_CC) == FAILURE) {
-			return HASH_KEY_NON_EXISTANT;
+			ZVAL_NULL(key);
+		} else {
+			zend_hash_get_current_key_zval_ex(aht, key, &object->pos);
 		}
-
-		return zend_hash_get_current_key_ex(aht, str_key, str_key_len, int_key, 1, &object->pos);
 	}
 }
 /* }}} */
@@ -1547,25 +1547,13 @@ SPL_METHOD(Array, key)
 void spl_array_iterator_key(zval *object, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
-	char *string_key;
-	uint string_length;
-	ulong num_key;
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
 
 	if (spl_array_object_verify_pos(intern, aht TSRMLS_CC) == FAILURE) {
 		return;
 	}
 
-	switch (zend_hash_get_current_key_ex(aht, &string_key, &string_length, &num_key, 1, &intern->pos)) {
-		case HASH_KEY_IS_STRING:
-			RETVAL_STRINGL(string_key, string_length - 1, 0);
-			break;
-		case HASH_KEY_IS_LONG:
-			RETVAL_LONG(num_key);
-			break;
-		case HASH_KEY_NON_EXISTANT:
-			return;
-	}
+	zend_hash_get_current_key_zval_ex(aht, return_value, &intern->pos);
 }
 /* }}} */
 

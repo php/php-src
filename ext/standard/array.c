@@ -927,24 +927,12 @@ PHP_FUNCTION(current)
 PHP_FUNCTION(key)
 {
 	HashTable *array;
-	char *string_key;
-	uint string_length;
-	ulong num_key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &array) == FAILURE) {
 		return;
 	}
 
-	switch (zend_hash_get_current_key_ex(array, &string_key, &string_length, &num_key, 0, NULL)) {
-		case HASH_KEY_IS_STRING:
-			RETVAL_STRINGL(string_key, string_length - 1, 1);
-			break;
-		case HASH_KEY_IS_LONG:
-			RETVAL_LONG(num_key);
-			break;
-		case HASH_KEY_NON_EXISTANT:
-			return;
-	}
+	zend_hash_get_current_key_zval(array, return_value);
 }
 /* }}} */
 
@@ -1055,9 +1043,6 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 	zval **args[3],			/* Arguments to userland function */
 		  *retval_ptr,		/* Return value - unused */
 		  *key=NULL;		/* Entry key */
-	char  *string_key;
-	uint   string_key_len;
-	ulong  num_key;
 
 	/* Set up known arguments */
 	args[1] = &key;
@@ -1103,17 +1088,7 @@ static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive 
 		} else {
 			/* Allocate space for key */
 			MAKE_STD_ZVAL(key);
-
-			/* Set up the key */
-			switch (zend_hash_get_current_key_ex(target_hash, &string_key, &string_key_len, &num_key, 0, NULL)) {
-				case HASH_KEY_IS_LONG:
-					Z_TYPE_P(key) = IS_LONG;
-					Z_LVAL_P(key) = num_key;
-					break;
-				case HASH_KEY_IS_STRING:
-					ZVAL_STRINGL(key, string_key, string_key_len - 1, 1);
-					break;
-			}
+			zend_hash_get_current_key_zval(target_hash, key);
 
 			/* Call the userland function */
 			if (zend_call_function(&BG(array_walk_fci), &BG(array_walk_fci_cache) TSRMLS_CC) == SUCCESS) {
@@ -1205,9 +1180,6 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ 
 		  res;					/* comparison result */
 	HashPosition pos;			/* hash iterator */
 	zend_bool strict = 0;		/* strict comparison or not */
-	ulong num_key;
-	uint str_key_len;
-	char *string_key;
 	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "za|b", &value, &array, &strict) == FAILURE) {
@@ -1225,15 +1197,8 @@ static void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ 
 			if (behavior == 0) {
 				RETURN_TRUE;
 			} else {
-				/* Return current key */
-				switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &str_key_len, &num_key, 0, &pos)) {
-					case HASH_KEY_IS_STRING:
-						RETURN_STRINGL(string_key, str_key_len - 1, 1);
-						break;
-					case HASH_KEY_IS_LONG:
-						RETURN_LONG(num_key);
-						break;
-				}
+				zend_hash_get_current_key_zval_ex(Z_ARRVAL_P(array), return_value, &pos);
+				return;
 			}
 		}
 		zend_hash_move_forward_ex(Z_ARRVAL_P(array), &pos);
@@ -2447,9 +2412,6 @@ PHP_FUNCTION(array_keys)
 	       res,					/* Result of comparison */
 	      *new_val;				/* New value */
 	int    add_key;				/* Flag to indicate whether a key should be added */
-	char  *string_key;			/* String key */
-	uint   string_key_len;
-	ulong  num_key;				/* Numeric key */
 	zend_bool strict = 0;		/* do strict comparison */
 	HashPosition pos;
 	int (*is_equal_func)(zval *, zval *, zval * TSRMLS_DC) = is_equal_function;
@@ -2480,19 +2442,8 @@ PHP_FUNCTION(array_keys)
 
 		if (add_key) {
 			MAKE_STD_ZVAL(new_val);
-
-			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 1, &pos)) {
-				case HASH_KEY_IS_STRING:
-					ZVAL_STRINGL(new_val, string_key, string_key_len - 1, 0);
-					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &new_val, sizeof(zval *), NULL);
-					break;
-
-				case HASH_KEY_IS_LONG:
-					Z_TYPE_P(new_val) = IS_LONG;
-					Z_LVAL_P(new_val) = num_key;
-					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &new_val, sizeof(zval *), NULL);
-					break;
-			}
+			zend_hash_get_current_key_zval_ex(Z_ARRVAL_P(input), new_val, &pos);
+			zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &new_val, sizeof(zval *), NULL);
 		}
 
 		zend_hash_move_forward_ex(Z_ARRVAL_P(input), &pos);
@@ -2691,9 +2642,6 @@ PHP_FUNCTION(array_pad)
 PHP_FUNCTION(array_flip)
 {
 	zval *array, **entry, *data;
-	char *string_key;
-	uint str_key_len;
-	ulong num_key;
 	HashPosition pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
@@ -2705,15 +2653,7 @@ PHP_FUNCTION(array_flip)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(array), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(array), (void **)&entry, &pos) == SUCCESS) {
 		MAKE_STD_ZVAL(data);
-		switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &str_key_len, &num_key, 1, &pos)) {
-			case HASH_KEY_IS_STRING:
-				ZVAL_STRINGL(data, string_key, str_key_len - 1, 0);
-				break;
-			case HASH_KEY_IS_LONG:
-				Z_TYPE_P(data) = IS_LONG;
-				Z_LVAL_P(data) = num_key;
-				break;
-		}
+		zend_hash_get_current_key_zval_ex(Z_ARRVAL_P(array), data, &pos);
 
 		if (Z_TYPE_PP(entry) == IS_LONG) {
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_PP(entry), &data, sizeof(data), NULL);
