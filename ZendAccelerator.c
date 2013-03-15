@@ -1154,17 +1154,26 @@ static int zend_accel_get_auto_globals(TSRMLS_D)
 {
 	int i, ag_size = (sizeof(jit_auto_globals_info) / sizeof(jit_auto_globals_info[0]));
 	int n = 1;
-	zval **res;
 	int mask = 0;
 
 	for (i = 0; i < ag_size ; i++) {
-		if (zend_hash_find(&EG(symbol_table), jit_auto_globals_info[i].name, jit_auto_globals_info[i].len, (void *)&res) == SUCCESS) {
+		if (zend_hash_exists(&EG(symbol_table), jit_auto_globals_info[i].name, jit_auto_globals_info[i].len)) {
 			mask |= n;
 		}
 		n += n;
 	}
 	return mask;
 }
+
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+static int zend_accel_get_auto_globals_no_jit(TSRMLS_D)
+{
+	if (zend_hash_exists(&EG(symbol_table), jit_auto_globals_info[3].name, jit_auto_globals_info[3].len)) {
+		return 8;
+	}
+	return 0;
+}
+#endif
 
 static void zend_accel_set_auto_globals(int mask TSRMLS_DC)
 {
@@ -1318,11 +1327,15 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
        will have to ping the used auto global variables before execution */
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	if (PG(auto_globals_jit)) {
+		new_persistent_script->ping_auto_globals_mask = zend_accel_get_auto_globals(TSRMLS_C);
+	} else {
+		new_persistent_script->ping_auto_globals_mask = zend_accel_get_auto_globals_no_jit(TSRMLS_C);
+	}
 #else
 	if ((PG(auto_globals_jit) && !PG(register_globals) && !PG(register_long_arrays))) {
-#endif
 		new_persistent_script->ping_auto_globals_mask = zend_accel_get_auto_globals(TSRMLS_C);
-    }
+	}
+#endif
 
 	if (ZCG(accel_directives).validate_timestamps) {
 		/* Obtain the file timestamps, *before* actually compiling them,
