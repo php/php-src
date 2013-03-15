@@ -154,7 +154,15 @@ origin <branch>``".
 11. run: ``./makedist php 5.4.1``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
 
-12. Commit those two tarballs to Git (php-distributions.git)
+12. Commit those two tarballs to web/php-distributions.git, then update the git
+    submodule reference in web/php.git: 
+    git submodule init;
+    git submodule update;
+    cd distributions;
+    git pull origin master;
+    cd ..;
+    git commit distributions;
+    git push;
 
 13. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once
