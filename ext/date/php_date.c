@@ -2674,13 +2674,15 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 					case TIMELIB_ZONETYPE_OFFSET:
 					case TIMELIB_ZONETYPE_ABBR: {
 						char *tmp = emalloc(Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 2);
+						int ret;
 						snprintf(tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 2, "%s %s", Z_STRVAL_PP(z_date), Z_STRVAL_PP(z_timezone));
-						php_date_initialize(*dateobj, tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 1, NULL, NULL, 0 TSRMLS_CC);
+						ret = php_date_initialize(*dateobj, tmp, Z_STRLEN_PP(z_date) + Z_STRLEN_PP(z_timezone) + 1, NULL, NULL, 0 TSRMLS_CC);
 						efree(tmp);
-						return 1;
+						return 1 == ret;
 					}
 
-					case TIMELIB_ZONETYPE_ID:
+					case TIMELIB_ZONETYPE_ID: {
+						int ret;
 						convert_to_string(*z_timezone);
 
 						tzi = php_date_parse_tzfile(Z_STRVAL_PP(z_timezone), DATE_TIMEZONEDB TSRMLS_CC);
@@ -2691,9 +2693,10 @@ static int php_date_initialize_from_hash(zval **return_value, php_date_obj **dat
 						tzobj->tzi.tz = tzi;
 						tzobj->initialized = 1;
 
-						php_date_initialize(*dateobj, Z_STRVAL_PP(z_date), Z_STRLEN_PP(z_date), NULL, tmp_obj, 0 TSRMLS_CC);
+						ret = php_date_initialize(*dateobj, Z_STRVAL_PP(z_date), Z_STRLEN_PP(z_date), NULL, tmp_obj, 0 TSRMLS_CC);
 						zval_ptr_dtor(&tmp_obj);
-						return 1;
+						return 1 == ret;
+					}
 				}
 			}
 		}
@@ -2717,7 +2720,9 @@ PHP_METHOD(DateTime, __set_state)
 
 	php_date_instantiate(date_ce_date, return_value TSRMLS_CC);
 	dateobj = (php_date_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
-	php_date_initialize_from_hash(&return_value, &dateobj, myht TSRMLS_CC);
+	if (!php_date_initialize_from_hash(&return_value, &dateobj, myht TSRMLS_CC)) {
+		php_error(E_ERROR, "Invalid serialization data for DateTime object");
+	}
 }
 /* }}} */
 
@@ -2737,7 +2742,9 @@ PHP_METHOD(DateTimeImmutable, __set_state)
 
 	php_date_instantiate(date_ce_immutable, return_value TSRMLS_CC);
 	dateobj = (php_date_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
-	php_date_initialize_from_hash(&return_value, &dateobj, myht TSRMLS_CC);
+	if (!php_date_initialize_from_hash(&return_value, &dateobj, myht TSRMLS_CC)) {
+		php_error(E_ERROR, "Invalid serialization data for DateTimeImmutable object");
+	}
 }
 /* }}} */
 
@@ -2753,7 +2760,9 @@ PHP_METHOD(DateTime, __wakeup)
 
 	myht = Z_OBJPROP_P(object);
 
-	php_date_initialize_from_hash(&return_value, &dateobj, myht TSRMLS_CC);
+	if (!php_date_initialize_from_hash(&return_value, &dateobj, myht TSRMLS_CC)) {
+		php_error(E_ERROR, "Invalid serialization data for DateTime object");
+	}
 }
 /* }}} */
 

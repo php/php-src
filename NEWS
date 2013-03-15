@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 - DateTime
   . Fixed bug #53437 (Crash when using unserialized DatePeriod instance).
     (Gustavo, Derick, Anatol)
+  . Fixed bug #62852 (Unserialize Invalid Date causes crash). (Anatol)
 
 07 Mar 2013, PHP 5.5.0 Alpha 6
 
