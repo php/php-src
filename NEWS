@@ -1,9 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.15
+- Core:
+  . Fixed bug #64433 (follow_location parameter of context is ignored for most 
+    response codes). (Sergey Akbarov)
 
 ?? ??? 2013, PHP 5.4.14
-- Core
+- Core:
   . Fixed bug #64529 (Ran out of opcode space). (Dmitry)
   . Fixed bug #64515 (Memoryleak when using the same variablename two times in
     function declaration). (Laruence)
