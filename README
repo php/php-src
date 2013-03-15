@@ -25,11 +25,11 @@ Quick Install
 
 - Install
 
- make install # this will copy ZendOptimizerPlus.so into PHP extension directory
+ make install # this will copy opcache.so into PHP extension directory
 
 - Edit php.ini
 
- zend_extension=/...full path.../ZendOptimizerPlus.so
+ zend_extension=/...full path.../opcache.so
 
 NOTE: In case you are going to use Zend Optimizer+ together with Xdebug,
 be sure that Xdebug is loaded after Optimizer+. "php -v" must show Xdebug
