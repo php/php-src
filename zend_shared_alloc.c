@@ -256,10 +256,29 @@ void zend_shared_alloc_shutdown(void)
 #endif
 }
 
+static size_t zend_shared_alloc_get_largest_free_block(void)
+{
+	int i;
+	size_t largest_block_size = 0;
+
+	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
+		size_t block_size = ZSMMG(shared_segments)[i]->size - ZSMMG(shared_segments)[i]->pos;
+
+		if (block_size>largest_block_size) {
+			largest_block_size = block_size;
+		}
+	}
+	return largest_block_size;
+}
+
+#define MIN_FREE_MEMORY 64*1024
+
 #define SHARED_ALLOC_FAILED() do {		\
 		zend_accel_error(ACCEL_LOG_WARNING, "Not enough free shared space to allocate %ld bytes (%ld bytes free)", (long)size, (long)ZSMMG(shared_free)); \
-		ZSMMG(memory_exhausted) = 1;			\
-		zend_accel_schedule_restart(TSRMLS_C);	\
+		if (zend_shared_alloc_get_largest_free_block() < MIN_FREE_MEMORY) { \
+			ZSMMG(memory_exhausted) = 1;			\
+			zend_accel_schedule_restart(TSRMLS_C);	\
+		} \
 	} while (0)
 
 void *zend_shared_alloc(size_t size)
@@ -423,21 +442,6 @@ void *zend_shared_alloc_get_xlat_entry(const void *old)
 size_t zend_shared_alloc_get_free_memory(void)
 {
 	return ZSMMG(shared_free);
-}
-
-size_t zend_shared_alloc_get_largest_free_block(void)
-{
-	int i;
-	size_t largest_block_size = 0;
-
-	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
-		size_t block_size = ZSMMG(shared_segments)[i]->size - ZSMMG(shared_segments)[i]->pos;
-
-		if (block_size>largest_block_size) {
-			largest_block_size = block_size;
-		}
-	}
-	return largest_block_size;
 }
 
 void zend_shared_alloc_save_state(void)

@@ -496,7 +496,8 @@ static ZEND_FUNCTION(accelerator_get_status)
 	MAKE_STD_ZVAL(statistics);
 	array_init(statistics);
 	add_assoc_long(statistics, "num_cached_scripts", ZCSG(hash).num_direct_entries);
-	add_assoc_long(statistics, "max_cached_scripts", ZCSG(hash).max_num_entries);
+	add_assoc_long(statistics, "num_cached_keys",    ZCSG(hash).num_entries);
+	add_assoc_long(statistics, "max_cached_keys",    ZCSG(hash).max_num_entries);
 	add_assoc_long(statistics, "hits", ZCSG(hits));
 	add_assoc_long(statistics, "last_restart_time", ZCSG(last_restart_time));
 	add_assoc_long(statistics, "misses", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));

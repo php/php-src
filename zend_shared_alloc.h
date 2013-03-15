@@ -159,7 +159,6 @@ void *zend_shared_alloc_get_xlat_entry(const void *old);
 size_t zend_shared_alloc_get_free_memory(void);
 void zend_shared_alloc_save_state(void);
 void zend_shared_alloc_restore_state(void);
-size_t zend_shared_alloc_get_largest_free_block(void);
 const char *zend_accel_get_shared_model(void);
 
 /* memory write protection */
