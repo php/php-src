@@ -913,7 +913,7 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
 
         if ((cwd = accel_getcwd(&cwd_len TSRMLS_CC)) == NULL) {
             /* we don't handle this well for now. */
-            zend_accel_error(ACCEL_LOG_INFO, "getcwd() failed for '%s' (%d), please try to set zend_optimizerplus.use_cwd to 0 in ini file", file_handle->filename, errno);
+            zend_accel_error(ACCEL_LOG_INFO, "getcwd() failed for '%s' (%d), please try to set opcache.use_cwd to 0 in ini file", file_handle->filename, errno);
             if (file_handle->opened_path) {
                 cwd = file_handle->opened_path;
 		        cwd_len = strlen(cwd);

@@ -275,7 +275,7 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		}
 		if (sscanf(s, "%p", &default_mapping_base_set[0]) != 1) {
 			zend_shared_alloc_unlock_win32();
-			zend_win_error_message(ACCEL_LOG_FATAL, "Bad mapping address specified in zend_optimizerplus.mmap_base", err);
+			zend_win_error_message(ACCEL_LOG_FATAL, "Bad mapping address specified in opcache.mmap_base", err);
 			return ALLOC_FAILURE;
 		}
 	}

@@ -1,11 +1,11 @@
-ARG_ENABLE("optimizer-plus", "whether to enable Zend OptimizerPlus support", "yes");
+ARG_ENABLE("opcache", "whether to enable Zend Optimizer+ support", "yes");
 
-if (PHP_OPTIMIZER_PLUS != "no") {
+if (PHP_OPCACHE != "no") {
 
 	PHP_PGI = "no"; // workaround
 	PHP_PGO = "no"; // workaround
 
-	EXTENSION('ZendOptimizerPlus', "\
+	EXTENSION('opcache', "\
 		ZendAccelerator.c \
 		zend_accelerator_blacklist.c \
 		zend_accelerator_debug.c \
@@ -17,12 +17,11 @@ if (PHP_OPTIMIZER_PLUS != "no") {
 		zend_shared_alloc.c \
 		shared_alloc_win32.c", true);
 
-	ADD_SOURCES(configure_module_dirname + "/Optimizer", "zend_optimizer.c", "ZendOptimizerPlus", "OptimizerObj");
+	ADD_SOURCES(configure_module_dirname + "/Optimizer", "zend_optimizer.c", "opcache", "OptimizerObj");
 
   
-	ADD_FLAG('CFLAGS_ZENDOPTIMIZERPLUS', "/I " + configure_module_dirname);
-	ADD_FLAG('CFLAGS_ZENDOPTIMIZERPLUS', "/D HAVE_OPTIMIZER_PLUS=1");
+	ADD_FLAG('CFLAGS_OPCACHE', "/I " + configure_module_dirname);
 
-	ADD_FLAG('CFLAGS_ZENDOPTIMIZERPLUS', "/Dregexec=php_regexec /Dregerror=php_regerror /Dregfree=php_regfree /Dregcomp=php_regcomp /Iext/ereg/regex");
+	ADD_FLAG('CFLAGS_OPCACHE', "/Dregexec=php_regexec /Dregerror=php_regerror /Dregfree=php_regfree /Dregcomp=php_regcomp /Iext/ereg/regex");
 
 }

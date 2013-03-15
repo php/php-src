@@ -2,11 +2,10 @@ dnl
 dnl $Id$
 dnl
 
-PHP_ARG_ENABLE(optimizer-plus, whether to enable Zend OptimizerPlus support,
-[  --enable-optimizer-plus Enable Zend OptimizerPlus support])
+PHP_ARG_ENABLE(opcache, whether to enable Zend Optimizer+ support,
+[  --enable-opcache Enable Zend Optimizer+ support])
 
-if test "$PHP_OPTIMIZER_PLUS" != "no"; then
-  AC_DEFINE(HAVE_OPTIMIZER_PLUS, 1, [ ])
+if test "$PHP_OPCACHE" != "no"; then
 
   AC_CHECK_FUNC(mprotect,[
     AC_DEFINE(HAVE_MPROTECT, 1, [Define if you have mprotect() function])
@@ -327,7 +326,7 @@ int main() {
     msg=yes,msg=no,msg=no)
   AC_MSG_RESULT([$msg])
   
-  PHP_NEW_EXTENSION(ZendOptimizerPlus,
+  PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
 	zend_accelerator_blacklist.c \
 	zend_accelerator_debug.c \
