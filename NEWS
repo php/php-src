@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     details here: https://wiki.php.net/rfc/cli_process_title. (Keyur)
   . Fixed bug #64370 (microtime(true) less than $_SERVER['REQUEST_TIME_FLOAT']).
     (Anatol)
+  . Added support for non-scalar Iterator keys in foreach
+    (https://wiki.php.net/rfc/foreach-non-scalar-keys). (Nikita Popov)
 
 - mysqlnd
   . Fixed bug #63530 (mysqlnd_stmt::bind_one_parameter crashes, uses wrong alloc
