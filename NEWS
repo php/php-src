@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #63530 (mysqlnd_stmt::bind_one_parameter crashes, uses wrong alloc
     for stmt->param_bind). (Andrey)
 
+- DateTime
+  . Fixed bug #53437 (Crash when using unserialized DatePeriod instance).
+    (Gustavo, Derick, Anatol)
+
 07 Mar 2013, PHP 5.5.0 Alpha 6
 
 - Core:
