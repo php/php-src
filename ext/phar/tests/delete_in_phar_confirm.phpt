@@ -15,6 +15,15 @@ $files = array();
 $files['a.php'] = '<?php echo "This is a\n"; ?>';
 $files['b.php'] = '<?php echo "This is b\n"; ?>';
 $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
+
+if (function_exists("opcache_get_status")) {
+	$status = opcache_get_status();
+	if ($status["opcache_enabled"]) {
+		ini_set("opcache.revalidate_freq", "0");
+		sleep(2);
+	}
+}
+
 include 'files/phar_test.inc';
 
 include $pname . '/a.php';
