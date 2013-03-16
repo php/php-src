@@ -1,9 +1,9 @@
 --TEST--
 ISSUE #57 (segfaults in drupal7)
 --INI--
-zend_optimizerplus.enable=1
-zend_optimizerplus.enable_cli=1
-zend_optimizerplus.optimization_level=-1
+opcache.enable=1
+opcache.enable_cli=1
+opcache.optimization_level=-1
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

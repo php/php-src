@@ -1,17 +1,17 @@
 --TEST--
 001: O+ works in CLI
 --INI--
-zend_optimizerplus.enable=1
-zend_optimizerplus.enable_cli=1
+opcache.enable=1
+opcache.enable_cli=1
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-$config = accelerator_get_configuration();
-$status = accelerator_get_status();
-var_dump($config["directives"]["zend_optimizerplus.enable"]);
-var_dump($config["directives"]["zend_optimizerplus.enable_cli"]);
-var_dump($status["accelerator_enabled"]);
+$config = opcache_get_configuration();
+$status = opcache_get_status();
+var_dump($config["directives"]["opcache.enable"]);
+var_dump($config["directives"]["opcache.enable_cli"]);
+var_dump($status["opcache_enabled"]);
 ?>
 --EXPECT--
 bool(true)
