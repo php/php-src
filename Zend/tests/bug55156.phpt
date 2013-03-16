@@ -1,5 +1,8 @@
 --TEST--
 Bug #55156 (ReflectionClass::getDocComment() returns comment even though the class has none)
+--INI--
+opcache.save_comments=1
+opcache.load_comments=1
 --FILE--
 <?php
 
