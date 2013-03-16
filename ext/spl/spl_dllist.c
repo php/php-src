@@ -1250,7 +1250,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 	SEPARATE_ARG_IF_REF(value);
 
 	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	index  = (int)spl_offset_convert_to_long(zindex TSRMLS_CC);
+	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
 
 	if (index < 0 || index > intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
