@@ -189,13 +189,13 @@ object(DateInterval)#8 (15) {
   ["days"]=>
   string(4) "2400"
   ["special_type"]=>
-  int(-1)
+  int(0)
   ["special_amount"]=>
   string(2) "-1"
   ["have_weekday_relative"]=>
-  int(-1)
+  int(0)
   ["have_special_relative"]=>
-  int(-1)
+  int(0)
 }
 object(DatePeriod)#9 (6) {
   ["start"]=>
