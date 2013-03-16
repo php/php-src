@@ -1221,7 +1221,9 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 	}
 
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-	if (file_handle->type == ZEND_HANDLE_STREAM) {
+	if (file_handle->type == ZEND_HANDLE_STREAM &&
+	    (!strstr(file_handle->filename, ".phar") ||
+	     strstr(file_handle->filename, "://"))) {
 		char *buf;
 		size_t size;
 
