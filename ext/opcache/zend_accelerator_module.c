@@ -37,6 +37,10 @@
 #define MAX_ACCEL_FILES 100000
 #define TOKENTOSTR(X) #X
 
+static void (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
+static void (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
+static void (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
+
 /* User functions */
 static ZEND_FUNCTION(opcache_reset);
 
@@ -280,50 +284,44 @@ static int filename_is_in_cache(char *filename, int filename_len TSRMLS_DC)
 	return 0;
 }
 
-static void accel_file_in_cache(int type, INTERNAL_FUNCTION_PARAMETERS)
+static int accel_file_in_cache(INTERNAL_FUNCTION_PARAMETERS)
 {
-	char *filename;
-	int filename_len;
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
 	zval **zfilename;
 
-	if (ZEND_NUM_ARGS() != 1 || zend_get_parameters_ex(1, &zfilename) == FAILURE) {
-		WRONG_PARAM_COUNT;
+	if (ZEND_NUM_ARGS() != 1 ||
+	    zend_get_parameters_array_ex(1, &zfilename) == FAILURE ||
+	    Z_TYPE_PP(zfilename) != IS_STRING ||
+	    Z_STRLEN_PP(zfilename) == 0) {
+		return 0;
 	}
-	convert_to_string_ex(zfilename);
-	filename = Z_STRVAL_PP(zfilename);
-	filename_len = Z_STRLEN_PP(zfilename);
-#elif ZEND_EXTENSION_API_NO == PHP_5_3_X_API_NO
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
-		return;
-	}
-#else
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
-		return;
-	}
-#endif
-	if (filename_len > 0) {
-		if (filename_is_in_cache(filename, filename_len TSRMLS_CC)) {
-			RETURN_TRUE;
-		}
-	}
-
-	php_stat(filename, filename_len, type, return_value TSRMLS_CC);
+	return filename_is_in_cache(Z_STRVAL_PP(zfilename), Z_STRLEN_PP(zfilename) TSRMLS_CC);
 }
 
 static void accel_file_exists(INTERNAL_FUNCTION_PARAMETERS)
 {
-	accel_file_in_cache(FS_EXISTS, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (accel_file_in_cache(INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
+		RETURN_TRUE;
+	} else {
+		orig_file_exists(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	}
 }
 
 static void accel_is_file(INTERNAL_FUNCTION_PARAMETERS)
 {
-	accel_file_in_cache(FS_IS_FILE, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (accel_file_in_cache(INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
+		RETURN_TRUE;
+	} else {
+		orig_is_file(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	}
 }
 
 static void accel_is_readable(INTERNAL_FUNCTION_PARAMETERS)
 {
-	accel_file_in_cache(FS_IS_R, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	if (accel_file_in_cache(INTERNAL_FUNCTION_PARAM_PASSTHRU)) {
+		RETURN_TRUE;
+	} else {
+		orig_is_readable(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	}
 }
 
 static ZEND_MINIT_FUNCTION(zend_accelerator)
@@ -346,12 +344,15 @@ void zend_accel_override_file_functions(TSRMLS_D)
 	if (ZCG(enabled) && accel_startup_ok && ZCG(accel_directives).file_override_enabled) {
 		/* override file_exists */
 		if (zend_hash_find(CG(function_table), "file_exists", sizeof("file_exists"), (void **)&old_function) == SUCCESS) {
+			orig_file_exists = old_function->internal_function.handler;
 			old_function->internal_function.handler = accel_file_exists;
 		}
 		if (zend_hash_find(CG(function_table), "is_file", sizeof("is_file"), (void **)&old_function) == SUCCESS) {
+			orig_is_file = old_function->internal_function.handler;
 			old_function->internal_function.handler = accel_is_file;
 		}
 		if (zend_hash_find(CG(function_table), "is_readable", sizeof("is_readable"), (void **)&old_function) == SUCCESS) {
+			orig_is_readable = old_function->internal_function.handler;
 			old_function->internal_function.handler = accel_is_readable;
 		}
 	}
