@@ -1304,9 +1304,11 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 					/* JMP L, L: JMP L1 -> JMP L1 */
 					/* JMP L, L: JMPZNZ L1,L2 -> JMPZNZ L1,L2 */
 					*last_op = *target;
+#if ZEND_EXTENSION_API_NO < PHP_5_4_X_API_NO
 					if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
 						zval_copy_ctor(&ZEND_OP1_LITERAL(last_op));
 					}
+#endif
 					del_source(block, block->op1_to);
 					if (block->op1_to->op2_to) {
 						block->op2_to = block->op1_to->op2_to;
@@ -1332,9 +1334,11 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 			    	      target->opcode == ZEND_EXIT) {
 					/* JMP L, L: RETURN to immediate RETURN */
 					*last_op = *target;
+#if ZEND_EXTENSION_API_NO < PHP_5_4_X_API_NO
 					if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
 						zval_copy_ctor(&ZEND_OP1_LITERAL(last_op));
 					}
+#endif
 					del_source(block, block->op1_to);
 					block->op1_to = NULL;
 #if 0
