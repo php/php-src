@@ -847,9 +847,9 @@ retry:
 							}
 						} else if (st & SNMP_USE_SUFFIX_AS_KEYS && st & SNMP_CMD_WALK) {
 							snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
-							if (objid_query->vars[0].name_length <= vars->name_length && snmp_oid_compare(objid_query->vars[0].name, objid_query->vars[0].name_length, vars->name, objid_query->vars[0].name_length) == 0) {
+							if (rootlen <= vars->name_length && snmp_oid_compare(root, rootlen, vars->name, rootlen) == 0) {
 								buf2[0] = '\0';
-								count = objid_query->vars[0].name_length;
+								count = rootlen;
 								while(count < vars->name_length){
 									sprintf(buf, "%lu.", vars->name[count]);
 									strcat(buf2, buf);
