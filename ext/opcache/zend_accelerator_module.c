@@ -177,31 +177,6 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 	return SUCCESS;
 }
 
-static ZEND_INI_MH(OnUpdateAccelBlacklist)
-{
-	char **p;
-#ifndef ZTS
-	char *base = (char *) mh_arg2;
-#else
-	char *base = (char *) ts_resource(*((int *) mh_arg2));
-#endif
-
-	/* keep the compiler happy */
-	(void)entry; (void)new_value_length; (void)mh_arg2; (void)mh_arg3; (void)stage;
-
-	if (new_value && !new_value[0]) {
-		return FAILURE;
-	}
-
-	p = (char **) (base + (size_t)mh_arg1);
-	*p = new_value;
-
-	zend_accel_blacklist_init(&accel_blacklist);
-	zend_accel_blacklist_load(&accel_blacklist, *p);
-
-	return SUCCESS;
-}
-
 ZEND_INI_BEGIN()
     STD_PHP_INI_BOOLEAN("opcache.enable"             , "1", PHP_INI_SYSTEM, OnUpdateBool, enabled                             , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.use_cwd"            , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.use_cwd            , zend_accel_globals, accel_globals)
@@ -221,7 +196,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.force_restart_timeout" , "180" , PHP_INI_SYSTEM, OnUpdateLong,	             accel_directives.force_restart_timeout,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.revalidate_freq"       , "2"   , PHP_INI_ALL   , OnUpdateLong,	             accel_directives.revalidate_freq,           zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.preferred_memory_model", ""    , PHP_INI_SYSTEM, OnUpdateStringUnempty,        accel_directives.memory_model,              zend_accel_globals, accel_globals)
-	STD_PHP_INI_ENTRY("opcache.blacklist_filename"    , ""    , PHP_INI_SYSTEM, OnUpdateAccelBlacklist,	     accel_directives.user_blacklist_filename,   zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.blacklist_filename"    , ""    , PHP_INI_SYSTEM, OnUpdateString,	             accel_directives.user_blacklist_filename,   zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.max_file_size"         , "0"   , PHP_INI_SYSTEM, OnUpdateLong,	             accel_directives.max_file_size,             zend_accel_globals, accel_globals)
 
 	STD_PHP_INI_ENTRY("opcache.protect_memory"        , "0"  , PHP_INI_SYSTEM, OnUpdateBool,                  accel_directives.protect_memory,            zend_accel_globals, accel_globals)
@@ -327,9 +302,6 @@ static void accel_is_readable(INTERNAL_FUNCTION_PARAMETERS)
 static ZEND_MINIT_FUNCTION(zend_accelerator)
 {
 	(void)type; /* keep the compiler happy */
-
-	/* must be 0 before the ini entry OnUpdate function is called */
-	accel_blacklist.entries = NULL;
 
 	REGISTER_INI_ENTRIES();
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO

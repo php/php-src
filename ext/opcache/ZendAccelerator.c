@@ -2489,6 +2489,15 @@ static int accel_startup(zend_extension *extension)
 	/* Override file_exists(), is_file() and is_readable() */
 	zend_accel_override_file_functions(TSRMLS_C);
 
+	/* Load black list */
+	accel_blacklist.entries = NULL;
+	if (ZCG(enabled) && accel_startup_ok &&
+	    ZCG(accel_directives).user_blacklist_filename && 
+	    *ZCG(accel_directives.user_blacklist_filename)) {
+		zend_accel_blacklist_init(&accel_blacklist);
+		zend_accel_blacklist_load(&accel_blacklist, ZCG(accel_directives.user_blacklist_filename));
+	}
+	
 #if 0
 	/* FIXME: We probably don't need it here */
 	zend_accel_copy_internal_functions(TSRMLS_C);
