@@ -45,11 +45,11 @@ float(4.523561956)
 float(4.551516018)
 float(4.551516018)
 
-Warning: log2() expects parameter 1 to be double, string given in /home/mabe/workspace/php-src/ext/standard/tests/math/log2_variation.php on line 27
+Warning: log2() expects parameter 1 to be double, string given in %s on line %d
 NULL
 float(9.965784285)
 
-Notice: A non well formed numeric value encountered in /home/mabe/workspace/php-src/ext/standard/tests/math/log2_variation.php on line 27
+Notice: A non well formed numeric value encountered in %s on line %d
 float(9.965784285)
 float(-INF)
 float(0)
