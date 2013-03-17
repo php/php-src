@@ -39,6 +39,10 @@ PHP                                                                        NEWS
 - DateTime:
   . Fixed bug #64359 (strftime crash with VS2012). (Anatol)
 
+- SNMP:
+  . Fixed bug #61981 (OO API, walk: $suffix_as_key is not working correctly).
+	(Boris Lytochkin)
+
 21 Feb 2013, PHP 5.5.0 Alpha 5
 
 - Core:
