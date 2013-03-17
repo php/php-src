@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Merged PCRE 8.32. (Anatol)
 
+- SNMP:
+  . Fixed bug #61981 (OO API, walk: $suffix_as_key is not working correctly).
+	(Boris Lytochkin)
+
 ?? ??? 2013, PHP 5.4.13
 
 - Core:
