@@ -474,14 +474,14 @@ static ZEND_FUNCTION(opcache_get_status)
 	}
 #endif
 	
-	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
+	if (!accel_startup_ok) {
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 
 	/* Trivia */
-	add_assoc_bool(return_value, "opcache_enabled", 1 /*ZCG(enabled) && accel_startup_ok && ZCSG(accelerator_enabled)*/);
+	add_assoc_bool(return_value, "opcache_enabled", ZCG(enabled) && ZCSG(accelerator_enabled));
 	add_assoc_bool(return_value, "cache_full", ZSMMG(memory_exhausted));
 
 	/* Memory usage statistics */
