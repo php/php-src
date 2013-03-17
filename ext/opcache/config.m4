@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(opcache, whether to enable Zend Optimizer+ support,
-[  --enable-opcache Enable Zend Optimizer+ support])
+[  --enable-opcache Enable Zend Optimizer+ support], yes)
 
 if test "$PHP_OPCACHE" != "no"; then
 
