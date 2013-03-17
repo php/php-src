@@ -357,7 +357,24 @@ static void php_load_php_extension_cb(void *arg TSRMLS_DC)
  */
 static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 {
-	zend_load_extension(*((char **) arg));
+	char *filename = *((char **) arg);
+	int length = strlen(filename);
+
+	if (IS_ABSOLUTE_PATH(filename, length)) {
+		zend_load_extension(filename);
+	} else {
+	    char *libpath;
+		char *extension_dir = INI_STR("extension_dir");
+		int extension_dir_len = strlen(extension_dir);
+
+		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
+			spprintf(&libpath, 0, "%s%s", extension_dir, filename);
+		} else {
+			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename);
+		}
+		zend_load_extension(libpath);
+		efree(libpath);
+	}
 }
 /* }}} */
 
