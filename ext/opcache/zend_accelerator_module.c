@@ -403,6 +403,8 @@ static zval* accelerator_get_scripts(TSRMLS_D)
 	for (i = 0; i<ZCSG(hash).max_num_entries; i++) {
 		for (cache_entry = ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
 			zend_persistent_script *script;
+			char *str;
+			int len;
 
 			if (cache_entry->indirect) continue;
 
@@ -414,7 +416,10 @@ static zval* accelerator_get_scripts(TSRMLS_D)
 			add_assoc_long(persistent_script_report, "hits", script->dynamic_members.hits);
 			add_assoc_long(persistent_script_report, "memory_consumption", script->dynamic_members.memory_consumption);
 			ta = localtime(&script->dynamic_members.last_used);
-			add_assoc_string(persistent_script_report, "last_used", asctime(ta), 1);
+			str = asctime(ta);
+			len = strlen(str);
+			if (len > 0 && str[len - 1] == '\n') len--;
+			add_assoc_stringl(persistent_script_report, "last_used", str, len, 1);
 			add_assoc_long(persistent_script_report, "last_used_timestamp", script->dynamic_members.last_used);
 			if (ZCG(accel_directives).validate_timestamps) {
 				add_assoc_long(persistent_script_report, "timestamp", (long)script->timestamp);
