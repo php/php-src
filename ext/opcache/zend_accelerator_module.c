@@ -430,21 +430,20 @@ static zval* accelerator_get_scripts(TSRMLS_D)
 	return return_value;
 }
 
-/* {{{ proto array accelerator_get_status()
-   Obtain statistics information regarding code acceleration in the Zend Performance Suite */
+/* {{{ proto array accelerator_get_status([bool fetch_scripts])
+   Obtain statistics information regarding code acceleration */
 static ZEND_FUNCTION(opcache_get_status)
 {
 	long reqs;
 	zval *memory_usage,*statistics,*scripts;
+	zend_bool fetch_scripts = 1;
 
 	/* keep the compiler happy */
 	(void)ht; (void)return_value_ptr; (void)this_ptr; (void)return_value_used;
 
-#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &fetch_scripts) == FAILURE) {
+		return;
 	}
-#endif
 	
 	if (!accel_startup_ok) {
 		RETURN_FALSE;
@@ -480,10 +479,12 @@ static ZEND_FUNCTION(opcache_get_status)
 	add_assoc_double(statistics, "opcache_hit_rate", reqs?(((double) ZCSG(hits))/reqs)*100.0:0);
 	add_assoc_zval(return_value, "opcache_statistics", statistics);
 
-	/* accelerated scripts */
-	scripts = accelerator_get_scripts(TSRMLS_C);
-	if (scripts) {
-		add_assoc_zval(return_value, "scripts", scripts);
+	if (fetch_scripts) {
+		/* accelerated scripts */
+		scripts = accelerator_get_scripts(TSRMLS_C);
+		if (scripts) {
+			add_assoc_zval(return_value, "scripts", scripts);
+		}
 	}
 }
 
@@ -494,7 +495,7 @@ static int add_blacklist_path(zend_blacklist_entry *p, zval *return_value TSRMLS
 }
 
 /* {{{ proto array accelerator_get_configuration()
-   Obtain configuration information for the Zend Performance Suite */
+   Obtain configuration information */
 static ZEND_FUNCTION(opcache_get_configuration)
 {
 	zval *directives,*version,*blacklist;
