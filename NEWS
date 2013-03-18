@@ -12,7 +12,7 @@ PHP                                                                        NEWS
   . Fixed bug #61981 (OO API, walk: $suffix_as_key is not working correctly).
 	(Boris Lytochkin)
 
-?? ??? 2013, PHP 5.4.13
+14 Mar 2013, PHP 5.4.13
 
 - Core:
   . Fixed bug #64354 (Unserialize array of objects whose class can't
