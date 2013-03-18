@@ -852,7 +852,7 @@ static void zend_accel_schedule_restart_if_necessary(TSRMLS_D)
 {
 	if ((((double) ZSMMG(wasted_shared_memory)) / ZCG(accel_directives).memory_consumption) >= ZCG(accel_directives).max_wasted_percentage) {
 	    ZSMMG(memory_exhausted) = 1;
- 		zend_accel_schedule_restart(TSRMLS_C);
+ 		zend_accel_schedule_restart(ACCEL_RESTART_WASTED TSRMLS_CC);
 	}
 }
 
@@ -1030,7 +1030,7 @@ static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_ha
 		if (zend_accel_hash_is_full(&ZCSG(hash))) {
 			zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
 			ZSMMG(memory_exhausted) = 1;
-			zend_accel_schedule_restart(TSRMLS_C);
+			zend_accel_schedule_restart(ACCEL_RESTART_HASH TSRMLS_CC);
 		} else {
 			char *new_key = zend_shared_alloc(key_length + 1);
 			if (new_key) {
@@ -1057,7 +1057,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	if (zend_accel_hash_is_full(&ZCSG(hash))) {
 		zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
 		ZSMMG(memory_exhausted) = 1;
-		zend_accel_schedule_restart(TSRMLS_C);
+		zend_accel_schedule_restart(ACCEL_RESTART_HASH TSRMLS_CC);
 		zend_shared_alloc_unlock(TSRMLS_C);
 		return new_persistent_script;
 	}
@@ -1118,7 +1118,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		if (!zend_accel_hash_update(&ZCSG(hash), key, key_length + 1, 1, bucket)) {
 			zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
 			ZSMMG(memory_exhausted) = 1;
-			zend_accel_schedule_restart(TSRMLS_C);
+			zend_accel_schedule_restart(ACCEL_RESTART_HASH TSRMLS_CC);
 		}
 	}
 
@@ -1500,7 +1500,7 @@ static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int
 		ZCSG(misses)++;
 
 		/* No memory left. Behave like without the Accelerator */
-		if (ZSMMG(memory_exhausted)) {
+		if (ZSMMG(memory_exhausted) || ZCSG(restart_pending)) {
 			SHM_PROTECT();
 			return accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
 		}
@@ -1964,6 +1964,20 @@ static void accel_activate(void)
 			if (accel_is_inactive(TSRMLS_C) == SUCCESS) {
 				zend_accel_error(ACCEL_LOG_DEBUG, "Restarting!");
 				ZCSG(restart_pending) = 0;
+				switch ZCSG(restart_reason) {
+					case ACCEL_RESTART_OOM:
+						ZCSG(oom_restarts)++;
+						break;
+					case ACCEL_RESTART_WASTED:
+						ZCSG(wasted_restarts)++;
+						break;
+					case ACCEL_RESTART_HASH:
+						ZCSG(hash_restarts)++;
+						break;
+					case ACCEL_RESTART_USER:
+						ZCSG(manual_restarts)++;
+						break;
+				}
 				accel_restart_enter(TSRMLS_C);
 
 				zend_reset_cache_vars(TSRMLS_C);
@@ -2322,8 +2336,13 @@ static void zend_accel_init_shm(TSRMLS_D)
 
 	zend_reset_cache_vars(TSRMLS_C);
 
+	ZCSG(oom_restarts) = 0;
+	ZCSG(wasted_restarts) = 0;
+	ZCSG(hash_restarts) = 0;
+	ZCSG(manual_restarts) = 0;
+
 	ZCSG(accelerator_enabled) = 1;
-	ZCSG(last_restart_time) = 0;
+	ZCSG(last_restart_time) = zend_accel_get_time();
 	ZCSG(restart_in_progress) = 0;
 
 	zend_shared_alloc_unlock(TSRMLS_C);
@@ -2547,7 +2566,7 @@ static void accel_shutdown(zend_extension *extension)
 
 }
 
-void zend_accel_schedule_restart(TSRMLS_D)
+void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC)
 {
 	if (ZCSG(restart_pending)) {
 		/* don't schedule twice */
@@ -2556,6 +2575,7 @@ void zend_accel_schedule_restart(TSRMLS_D)
 	zend_accel_error(ACCEL_LOG_DEBUG, "Restart Scheduled!");
 
 	ZCSG(restart_pending) = 1;
+	ZCSG(restart_reason) = reason;
 	ZCSG(cache_status_before_restart) = ZCSG(accelerator_enabled);
 	ZCSG(accelerator_enabled) = 0;
 

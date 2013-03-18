@@ -164,6 +164,13 @@ typedef unsigned __int64 accel_time_t;
 typedef time_t accel_time_t;
 #endif
 
+typedef enum _zend_accel_restart_reason {
+	ACCEL_RESTART_OOM,    /* restart because of out of memory */
+	ACCEL_RESTART_WASTED, /* restart because of wasted memory */
+	ACCEL_RESTART_HASH,   /* restart because of hash overflow */
+	ACCEL_RESTART_USER    /* restart sheduled by opcache_reset() */
+} zend_accel_restart_reason;
+
 typedef struct _zend_persistent_script {
 	ulong          hash_value;
 	char          *full_path;              /* full real path with resolved symlinks */
@@ -259,6 +266,10 @@ typedef struct _zend_accel_shared_globals {
 	unsigned long   hits;
 	unsigned long   misses;
 	unsigned long   blacklist_misses;
+	unsigned long   oom_restarts;     /* number of restarts because of out of memory */
+	unsigned long   wasted_restarts;  /* number of restarts because of wasted memory */
+	unsigned long   hash_restarts;    /* number of restarts because of hash overflow */
+	unsigned long   manual_restarts;  /* number of restarts sheduled by opcache_reset() */
 	zend_accel_hash hash;             /* hash table for cached scripts */
 	zend_accel_hash include_paths;    /* used "include_path" values    */
 
@@ -267,6 +278,7 @@ typedef struct _zend_accel_shared_globals {
 	time_t          force_restart_time;
 	zend_bool       accelerator_enabled;
 	zend_bool       restart_pending;
+	zend_accel_restart_reason restart_reason;
 	zend_bool       cache_status_before_restart;
 #ifdef ZEND_WIN32
     unsigned long   mem_usage;
@@ -304,7 +316,7 @@ extern zend_accel_globals accel_globals;
 
 extern char *zps_api_failure_reason;
 
-void zend_accel_schedule_restart(TSRMLS_D);
+void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC);
 int  accelerator_shm_read_lock(TSRMLS_D);
 void accelerator_shm_read_unlock(TSRMLS_D);
 

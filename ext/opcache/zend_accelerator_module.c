@@ -342,7 +342,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 {
 	php_info_print_table_start();
 
-	if (ZCG(enabled) && accel_startup_ok && ZCSG(accelerator_enabled)) {
+	if (ZCG(enabled) && accel_startup_ok && (ZCG(counted) || ZCSG(accelerator_enabled))) {
 		php_info_print_table_row(2, "Opcode Caching", "Up and Running");
 	} else {
 		php_info_print_table_row(2, "Opcode Caching", "Disabled");
@@ -452,8 +452,10 @@ static ZEND_FUNCTION(opcache_get_status)
 	array_init(return_value);
 
 	/* Trivia */
-	add_assoc_bool(return_value, "opcache_enabled", ZCG(enabled) && ZCSG(accelerator_enabled));
+	add_assoc_bool(return_value, "opcache_enabled", ZCG(enabled) && (ZCG(counted) || ZCSG(accelerator_enabled)));
 	add_assoc_bool(return_value, "cache_full", ZSMMG(memory_exhausted));
+	add_assoc_bool(return_value, "restart_pending", ZCSG(restart_pending));
+	add_assoc_bool(return_value, "restart_in_progress", ZCSG(restart_in_progress));
 
 	/* Memory usage statistics */
 	MAKE_STD_ZVAL(memory_usage);
@@ -472,6 +474,10 @@ static ZEND_FUNCTION(opcache_get_status)
 	add_assoc_long(statistics, "max_cached_keys",    ZCSG(hash).max_num_entries);
 	add_assoc_long(statistics, "hits", ZCSG(hits));
 	add_assoc_long(statistics, "last_restart_time", ZCSG(last_restart_time));
+	add_assoc_long(statistics, "oom_restarts", ZCSG(oom_restarts));
+	add_assoc_long(statistics, "wasted_restarts", ZCSG(wasted_restarts));
+	add_assoc_long(statistics, "hash_restarts", ZCSG(hash_restarts));
+	add_assoc_long(statistics, "manual_restarts", ZCSG(manual_restarts));
 	add_assoc_long(statistics, "misses", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
 	add_assoc_long(statistics, "blacklist_misses", ZCSG(blacklist_misses));
 	reqs = ZCSG(hits)+ZCSG(misses);
@@ -561,7 +567,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 }
 
 /* {{{ proto void accelerator_reset()
-   Request that the contents of the Accelerator module in the ZPS be reset */
+   Request that the contents of the opcode cache to be reset */
 static ZEND_FUNCTION(opcache_reset)
 {
 	/* keep the compiler happy */
@@ -577,6 +583,6 @@ static ZEND_FUNCTION(opcache_reset)
 		RETURN_FALSE;
 	}
 
-	zend_accel_schedule_restart(TSRMLS_C);
+	zend_accel_schedule_restart(ACCEL_RESTART_USER TSRMLS_CC);
 	RETURN_TRUE;
 }
