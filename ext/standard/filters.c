@@ -870,9 +870,10 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 
 				/* Check to see if this is EOL whitespace. */
 				if (inst->lbchars != NULL) {
-					unsigned int j, lb_cnt2;
-					lb_cnt2 = 0;
 					unsigned char *ps2;
+					unsigned int j, lb_cnt2;
+
+					lb_cnt2 = 0;
 					ps2 = ps;
 					trail_ws = 1;
 
