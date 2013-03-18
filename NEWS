@@ -14,7 +14,7 @@ PHP                                                                        NEWS
     for stmt->param_bind). (Andrey)
 
 
-28 Feb 2013, PHP 5.3.23RC1
+14 Mar 2013, PHP 5.3.23
 
 - Phar:
   . Fixed timestamp update on Phar contents modification. (Dmitry)
