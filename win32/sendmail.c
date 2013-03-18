@@ -229,9 +229,9 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 	} else if (strlen(host) >= HOST_NAME_LEN) {
 		*error = BAD_MAIL_HOST;
 		return FAILURE;
-	} else {
-		strcpy(MailHost, host);
 	}
+
+	strcpy(MailHost, host);
 
 	if (headers) {
 		char *pos = NULL;
@@ -301,22 +301,26 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 			"and \"smtp_port\" setting in php.ini or use ini_set()",
 			MailHost, !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
-	} else {
-		ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc, error_message TSRMLS_CC);
-		TSMClose();
-		if (RPath) {
-			efree(RPath);
-		}
-		if (headers) {
-			efree(headers);
-			efree(headers_lc);
-		}
-		if (ret != SUCCESS) {
-			*error = ret;
-			return FAILURE;
-		}
-		return SUCCESS;
 	}
+
+	ret = SendText(RPath, Subject, mailTo, mailCc, mailBcc, data, headers, headers_lc, error_message TSRMLS_CC);
+	TSMClose();
+
+	if (RPath) {
+		efree(RPath);
+	}
+
+	if (headers) {
+		efree(headers);
+		efree(headers_lc);
+	}
+
+	if (ret != SUCCESS) {
+		*error = ret;
+		return FAILURE;
+	}
+
+	return SUCCESS;
 }
 
 //********************************************************************
@@ -354,10 +358,9 @@ PHPAPI char *GetSMErrorText(int index)
 	if (MIN_ERROR_INDEX <= index && index < MAX_ERROR_INDEX) {
 		return (ErrorMessages[index]);
 
-	} else {
-		return (ErrorMessages[UNKNOWN_ERROR]);
-
 	}
+
+	return (ErrorMessages[UNKNOWN_ERROR]);
 }
 
 

@@ -35,18 +35,15 @@ PHPAPI char *php_win32_error_to_msg(int error)
 }
 
 int php_win32_check_trailing_space(const char * path, const int path_len) {
-	if (path_len < 1) {
-		return 1;
-	}
-	if (path) {
-		if (path[0] == ' ' || path[path_len - 1] == ' ') {
-			return 0;
-		} else {
-			return 1;
-		}
-	} else {
+	if(!path) {
 		return 0;
 	}
+
+	if ((path_len < 1) || (path[0] != ' ') || (path[path_len - 1] != ' ')) {
+		return 1;
+	}
+
+	return 0;
 }
 
 HCRYPTPROV   hCryptProv;
