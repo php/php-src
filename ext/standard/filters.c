@@ -771,7 +771,7 @@ static void php_conv_qprint_encode_dtor(php_conv_qprint_encode *inst)
 }
 
 #define NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, lbchars) \
-	((lb_ptr) < (lb_cnt) ? (lbchars)[(lb_ptr)] : *(ps)) 
+	((lb_ptr) < (lb_cnt) ? (lbchars)[(lb_ptr)] : *(ps))
 
 #define CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt) \
 	if ((lb_ptr) < (lb_cnt)) { \
@@ -841,7 +841,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 
 		if (lb_ptr >= lb_cnt && icnt <= 0) {
 			break;
-		} 
+		}
 
 		c = NEXT_CHAR(ps, icnt, lb_ptr, lb_cnt, inst->lbchars);
 
@@ -903,7 +903,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 					CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
 				}
 			}
-		} else if ((!(opts & PHP_CONV_QPRINT_OPT_FORCE_ENCODE_FIRST) || line_ccnt < inst->line_len) && ((c >= 33 && c <= 60) || (c >= 62 && c <= 126))) { 
+		} else if ((!(opts & PHP_CONV_QPRINT_OPT_FORCE_ENCODE_FIRST) || line_ccnt < inst->line_len) && ((c >= 33 && c <= 60) || (c >= 62 && c <= 126))) {
 			if (line_ccnt < 2 && inst->lbchars != NULL) {
 				if (ocnt < inst->lbchars_len + 1) {
 					err = PHP_CONV_ERR_TOO_BIG;
@@ -947,7 +947,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 			}
 			*(pd++) = '=';
 			*(pd++) = qp_digits[(c >> 4)];
-			*(pd++) = qp_digits[(c & 0x0f)]; 
+			*(pd++) = qp_digits[(c & 0x0f)];
 			ocnt -= 3;
 			line_ccnt -= 3;
 			trail_ws--;
@@ -958,7 +958,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 	*in_pp = (const char *)ps;
 	*in_left_p = icnt;
 	*out_pp = (char *)pd;
-	*out_left_p = ocnt; 
+	*out_left_p = ocnt;
 	inst->line_ccnt = line_ccnt;
 	inst->lb_ptr = lb_ptr;
 	inst->lb_cnt = lb_cnt;
