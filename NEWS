@@ -22,6 +22,10 @@ PHP                                                                        NEWS
     (Gustavo, Derick, Anatol)
   . Fixed bug #62852 (Unserialize Invalid Date causes crash). (Anatol)
 
+- SPL:
+  . Implement FR #48358 (Add SplDoublyLinkedList::add() to insert an element
+    at a given offset). (Mark Baker, David Soria Parra)
+
 07 Mar 2013, PHP 5.5.0 Alpha 6
 
 - Core:
