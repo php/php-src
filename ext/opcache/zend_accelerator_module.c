@@ -356,8 +356,33 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 		if (!accel_startup_ok || zps_api_failure_reason) {
 			php_info_print_table_row(2, "Startup Failed", zps_api_failure_reason);
 		} else {
+			char buf[32];
 			php_info_print_table_row(2, "Startup", "OK");
 			php_info_print_table_row(2, "Shared memory model", zend_accel_get_shared_model());
+			snprintf(buf, sizeof(buf), "%ld", ZCSG(hits));
+			php_info_print_table_row(2, "Cache hits", buf);
+			snprintf(buf, sizeof(buf), "%ld", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
+			php_info_print_table_row(2, "Cache misses", buf);
+			snprintf(buf, sizeof(buf), "%ld", ZCG(accel_directives).memory_consumption-zend_shared_alloc_get_free_memory()-ZSMMG(wasted_shared_memory));
+			php_info_print_table_row(2, "Used memory", buf);
+			snprintf(buf, sizeof(buf), "%ld", zend_shared_alloc_get_free_memory());
+			php_info_print_table_row(2, "Free memory", buf);
+			snprintf(buf, sizeof(buf), "%ld", ZSMMG(wasted_shared_memory));
+			php_info_print_table_row(2, "Wasted memory", buf);
+			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_direct_entries);
+			php_info_print_table_row(2, "Cached scripts", buf);
+			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).num_entries);
+			php_info_print_table_row(2, "Cached keys", buf);
+			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash).max_num_entries);
+			php_info_print_table_row(2, "Max keys", buf);
+			snprintf(buf, sizeof(buf), "%ld", ZCSG(oom_restarts));
+			php_info_print_table_row(2, "OOM restarts", buf);
+			snprintf(buf, sizeof(buf), "%ld", ZCSG(wasted_restarts));
+			php_info_print_table_row(2, "Wasted memory restarts", buf);
+			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash_restarts));
+			php_info_print_table_row(2, "Hash keys restarts", buf);
+			snprintf(buf, sizeof(buf), "%ld", ZCSG(manual_restarts));
+			php_info_print_table_row(2, "Manual restarts", buf);
 		}
 	}
 
