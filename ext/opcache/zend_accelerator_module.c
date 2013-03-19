@@ -429,7 +429,7 @@ static zval* accelerator_get_scripts(TSRMLS_D)
 		for (cache_entry = ZCSG(hash).hash_table[i]; cache_entry; cache_entry = cache_entry->next) {
 			zend_persistent_script *script;
 			char *str;
-			int len;
+			size_t len;
 
 			if (cache_entry->indirect) continue;
 
