@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Zend Optimizer+                                                      |
+   | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
    | Copyright (c) 1998-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -26,11 +26,11 @@
 #include <process.h>
 #include <LMCONS.H>
 
-#define ACCEL_FILEMAP_NAME "ZendOptimizer+.SharedMemoryArea"
-#define ACCEL_MUTEX_NAME "ZendOptimizer+.SharedMemoryMutex"
+#define ACCEL_FILEMAP_NAME "ZendOPcache.SharedMemoryArea"
+#define ACCEL_MUTEX_NAME "ZendOPcache.SharedMemoryMutex"
 #define ACCEL_FILEMAP_BASE_DEFAULT 0x01000000
-#define ACCEL_FILEMAP_BASE "ZendOptimizer+.MemoryBase"
-#define ACCEL_EVENT_SOURCE "Zend Optimizer+"
+#define ACCEL_FILEMAP_BASE "ZendOPcache.MemoryBase"
+#define ACCEL_EVENT_SOURCE "Zend OPcache"
 
 static HANDLE memfile = NULL, memory_mutex = NULL;
 static void *mapping_base;

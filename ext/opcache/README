@@ -1,7 +1,7 @@
-The Zend Optimizer+
-===================
+The Zend OPcache
+================
 
-The Zend Optimizer+ provides faster PHP execution through opcode caching and
+The Zend OPcache provides faster PHP execution through opcode caching and
 optimization. It improves PHP performance by storing precompiled script
 bytecode in the shared memory. This eliminates the stages of reading code from
 the disk and compiling it on future access. In addition, it applies a few
@@ -10,7 +10,7 @@ bytecode optimization patterns that make code execution faster.
 Compatibility
 -------------
 
-This version of Zend Optimizer+ is compatible with PHP 5.2.*, 5.3.*, 5.4.*
+This version of Zend OPcache is compatible with PHP 5.2.*, 5.3.*, 5.4.*
 and PHP-5.5 development branch.  PHP 5.2 support may be removed in the future.
 
 Quick Install
@@ -31,9 +31,9 @@ Quick Install
 
  zend_extension=/...full path.../opcache.so
 
-NOTE: In case you are going to use Zend Optimizer+ together with Xdebug,
-be sure that Xdebug is loaded after Optimizer+. "php -v" must show Xdebug
-after Optimizer+.
+NOTE: In case you are going to use Zend OPcache together with Xdebug,
+be sure that Xdebug is loaded after OPcache. "php -v" must show Xdebug
+after OPcache.
 
 - Restart PHP
 
@@ -63,17 +63,17 @@ Configuration Directives
 ------------------------
 
 opcache.enable (default "1")
-	Optimizer+ On/Off switch. When set to Off, code is not optimized.
+	OPcache On/Off switch. When set to Off, code is not optimized.
 
 opcache.memory_consumption (default "64")
-	The Optimizer+ shared memory storage size. The amount of memory for storing
+	The OPcache shared memory storage size. The amount of memory for storing
 	precompiled PHP code in Mbytes.
 
 opcache.interned_strings_buffer (default "4")
 	The amount of memory for interned strings in Mbytes.
 
 opcache.max_accelerated_files (default "2000")
-	The maximum number of keys (scripts) in the Optimizer+ hash table.
+	The maximum number of keys (scripts) in the OPcache hash table.
 	The number is actually the first one in the following set of prime
 	numbers that is bigger than the one supplied: { 223, 463, 983, 1979, 3907,
 	7963, 16229, 32531, 65407, 130987 }. Only numbers between 200 and 100000
@@ -83,13 +83,13 @@ opcache.max_wasted_percentage (default "5")
 	The maximum percentage of "wasted" memory until a restart is scheduled.
 
 opcache.use_cwd (default "1")
-	When this directive is enabled, the Optimizer+ appends the current working
+	When this directive is enabled, the OPcache appends the current working
 	directory to the script key, thus eliminating possible collisions between
 	files with the same name (basename). Disabling the directive improves
 	performance, but may break existing applications.
 
 opcache.validate_timestamps (default "1")
-	When disabled, you must reset the Optimizer+ manually or restart the
+	When disabled, you must reset the OPcache manually or restart the
 	webserver for changes to the filesystem to take effect.
 	The frequency of the check is controlled by the directive
 	"opcache.revalidate_freq".
@@ -127,15 +127,15 @@ opcache.enable_file_override (default "0")
 	Allow file existence override (file_exists, etc.) performance feature.
 
 opcache.optimization_level (default "0xffffffff")
-	A bitmask, where each bit enables or disables the appropriate Optimizer+
+	A bitmask, where each bit enables or disables the appropriate OPcache
 	passes
 
 opcache.inherited_hack (default "1")
 	Enable this hack as a workaround for "can't redeclare class" errors.
-	The Optimizer+ stores the places where DECLARE_CLASS opcodes use
+	The OPcache stores the places where DECLARE_CLASS opcodes use
 	inheritance (These are the only opcodes that can be executed by PHP,
 	but which may not be executed because the parent class is missing due to
-	optimization). When the file is loaded, Optimizer+ tries to bind the
+	optimization). When the file is loaded, OPcache tries to bind the
 	inherited classes by using the current environment. The problem with this
 	scenario is that, while the DECLARE_CLASS opcode may not be needed for the
 	current script, if the script requires that the opcode at least be defined,
@@ -147,8 +147,8 @@ opcache.dups_fix (default "0")
 	Enable this hack as a workaround for "Cannot redeclare class" errors.
 
 opcache.blacklist_filename
-	The location of the Optimizer+ blacklist file.
-	The Optimizer+ blacklist file is a text file that holds the names of files
+	The location of the OPcache blacklist file.
+	The OPcache blacklist file is a text file that holds the names of files
 	that should not be accelerated. The file format is to add each filename
 	to a new line. The filename may be a full path or just a file prefix
 	(i.e., /var/www/x  blacklists all the files and directories in /var/www
@@ -157,7 +157,7 @@ opcache.blacklist_filename
 	1) Directories that contain auto generated code, like Smarty or ZFW cache.
 	2) Code that does not work well when accelerated, due to some delayed
 	   compile time evaluation.
-	3) Code that triggers an Optimizer+ bug.
+	3) Code that triggers an OPcache bug.
 
 opcache.max_file_size (default "0")
 	Allows exclusion of large files from being cached. By default all files
@@ -172,18 +172,18 @@ opcache.consistency_checks (default "0")
 opcache.force_restart_timeout (default "180")
 	How long to wait (in seconds) for a scheduled restart to begin if the cache
 	is not being accessed.
-	The Optimizer+ uses this directive to identify a situation where there may
+	The OPcache uses this directive to identify a situation where there may
 	be a problem with a process. After this time period has passed, the
-	Optimizer+ assumes that something has happened and starts killing the
+	OPcache assumes that something has happened and starts killing the
 	processes that still hold the locks that are preventing a restart.
 	If the log level is 3 or above, a "killed locker" error is recorded
 	in the Apache logs when this happens.
 
 opcache.error_log
-	Optimizer+ error_log file name. Empty string assumes "stderr".
+	OPcache error_log file name. Empty string assumes "stderr".
 
 opcache.log_verbosity_level (default "1")
-	All Optimizer+ errors go to the Web server log.
+	All OPcache errors go to the Web server log.
 	By default, only fatal errors (level 0) or errors (level 1) are logged.
 	You can also enable warnings (level 2), info messages (level 3) or
 	debug messages (level 4).
