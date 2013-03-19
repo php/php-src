@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #63530 (mysqlnd_stmt::bind_one_parameter crashes, uses wrong alloc
     for stmt->param_bind). (Andrey)
 
+- DateTime
+  . Fixed bug #62852 (Unserialize Invalid Date causes crash). (Anatol)
+
 
 14 Mar 2013, PHP 5.3.23
 
