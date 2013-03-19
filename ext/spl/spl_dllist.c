@@ -1260,11 +1260,11 @@ SPL_METHOD(SplDoublyLinkedList, add)
 		/* If index is the last entry+1 then we do a push because we're not inserting before any entry */
 		spl_ptr_llist_push(intern->llist, value TSRMLS_CC);
 	} else {
-		/* Get the element we want to insert before */
-		element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
-
 		/* Create the new element we want to insert */
 		spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
+
+		/* Get the element we want to insert before */
+		element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
 		elem->data = value;
 		elem->rc   = 1;
