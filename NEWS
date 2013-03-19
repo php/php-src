@@ -6,6 +6,8 @@ PHP                                                                        NEWS
     (Dmitry)
   . Fixed bug #64370 (microtime(true) less than $_SERVER['REQUEST_TIME_FLOAT']).
     (Anatol)
+  . Fixed bug #63976 (Parent class incorrectly using child constant in class
+    property). (Dmitry)
   . Fixed bug #62343 (Show class_alias In get_declared_classes()) (Dmitry)
 
 - PCRE:
