@@ -1051,6 +1051,40 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 }
 /* }}} */
 
+static int zval_update_class_constant(zval **pp, int is_static, int offset TSRMLS_DC) /* {{{ */
+{
+	if ((Z_TYPE_PP(pp) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT ||
+	    (Z_TYPE_PP(pp) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT_ARRAY) {	    
+		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
+
+		if ((*scope)->parent) {
+			zend_class_entry *ce = *scope;
+			HashPosition pos;
+			zend_property_info *prop_info;
+
+			do {
+				for (zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
+				     zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop_info, &pos) == SUCCESS;
+				     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
+					if (is_static == ((prop_info->flags & ZEND_ACC_STATIC) != 0) &&
+					    offset == prop_info->offset) {
+						zend_class_entry *old_scope = *scope;
+						*scope = prop_info->ce;
+						int ret = zval_update_constant(pp, (void*)1 TSRMLS_CC);
+						*scope = old_scope;
+						return ret;
+					}
+				}				
+				ce = ce->parent;
+			} while (ce);
+			
+		}
+		return zval_update_constant(pp, (void*)1 TSRMLS_CC);
+	}
+	return 0;
+}
+/* }}} */
+
 ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
 	if ((class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) == 0 || (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count)) {
@@ -1063,7 +1097,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 
 		for (i = 0; i < class_type->default_properties_count; i++) {
 			if (class_type->default_properties_table[i]) {
-				zval_update_constant(&class_type->default_properties_table[i], (void**)1 TSRMLS_CC);
+				zval_update_class_constant(&class_type->default_properties_table[i], 0, i TSRMLS_CC);
 			}
 		}
 
@@ -1104,7 +1138,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 		}
 
 		for (i = 0; i < class_type->default_static_members_count; i++) {
-			zval_update_constant(&CE_STATIC_MEMBERS(class_type)[i], (void**)1 TSRMLS_CC);
+			zval_update_class_constant(&CE_STATIC_MEMBERS(class_type)[i], 1, i TSRMLS_CC);
 		}
 
 		*scope = old_scope;
