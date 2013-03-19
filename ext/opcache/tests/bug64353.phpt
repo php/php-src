@@ -1,5 +1,5 @@
 --TEST--
-Bug #64353 (Built-in classes can be unavailable with dynamic includes and Optimizer+)
+Bug #64353 (Built-in classes can be unavailable with dynamic includes and OPcache)
 --INI--
 allow_url_include=1
 opcache.enable=1
