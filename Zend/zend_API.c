@@ -1039,9 +1039,10 @@ static int zval_update_class_constant(zval **pp, int is_static, int offset TSRML
 				     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
 					if (is_static == ((prop_info->flags & ZEND_ACC_STATIC) != 0) &&
 					    offset == prop_info->offset) {
+						int ret;
 						zend_class_entry *old_scope = *scope;
 						*scope = prop_info->ce;
-						int ret = zval_update_constant(pp, (void*)1 TSRMLS_CC);
+						ret = zval_update_constant(pp, (void*)1 TSRMLS_CC);
 						*scope = old_scope;
 						return ret;
 					}
