@@ -159,6 +159,7 @@ void tokenizer_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("T_DIR", T_DIR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_NS_SEPARATOR", T_NS_SEPARATOR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_DOUBLE_COLON", T_PAAMAYIM_NEKUDOTAYIM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_DEPRECATED", T_DEPRECATED, CONST_CS | CONST_PERSISTENT);
 }
 
 char *get_token_type_name(int token_type)
@@ -294,7 +295,7 @@ char *get_token_type_name(int token_type)
 		case T_NS_C: return "T_NS_C";
 		case T_DIR: return "T_DIR";
 		case T_NS_SEPARATOR: return "T_NS_SEPARATOR";
-
+		case T_DEPRECATED: return "T_DEPRECATED";
 	}
 	return "UNKNOWN";
 }
