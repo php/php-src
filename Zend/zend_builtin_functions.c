@@ -1541,6 +1541,13 @@ ZEND_FUNCTION(restore_exception_handler)
 }
 /* }}} */
 
+static int same_name(const char *key, const char *name, zend_uint name_len)
+{
+	char *lcname = zend_str_tolower_dup(name, name_len);
+	int ret = memcmp(lcname, key, name_len) == 0;
+	efree(lcname);
+	return ret;
+}
 
 static int copy_class_or_interface_name(zend_class_entry **pce TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
 {
@@ -1552,7 +1559,13 @@ static int copy_class_or_interface_name(zend_class_entry **pce TSRMLS_DC, int nu
 
 	if ((hash_key->nKeyLength==0 || hash_key->arKey[0]!=0)
 		&& (comply_mask == (ce->ce_flags & mask))) {
-		add_next_index_stringl(array, ce->name, ce->name_length, 1);
+		if (ce->refcount > 1 && 
+		    (ce->name_length != hash_key->nKeyLength - 1 || 
+		     !same_name(hash_key->arKey, ce->name, ce->name_length))) {
+			add_next_index_stringl(array, hash_key->arKey, hash_key->nKeyLength - 1, 1);
+		} else {
+			add_next_index_stringl(array, ce->name, ce->name_length, 1);
+		}
 	}
 	return ZEND_HASH_APPLY_KEEP;
 }
