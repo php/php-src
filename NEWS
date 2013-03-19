@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 5.5.0 Beta 1
 
 - Core:
-  . Added Zend Optimizer+ extension and enable it by default. More details here:
+  . Added Zend Opcache extension and enable it by default. More details here:
     https://wiki.php.net/rfc/optimizerplus. (Dmitry)
   . Fixed bug #64354 (Unserialize array of objects whose class can't
     be autoloaded fail). (Laruence)
