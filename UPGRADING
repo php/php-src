@@ -169,6 +169,7 @@ PHP 5.5 UPGRADE NOTES
 ========================================
 
 - Core:
+  - array_column()
   - boolval()
   - password_get_info()
   - password_hash()
