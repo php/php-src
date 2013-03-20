@@ -182,6 +182,12 @@ PHP 5.5 UPGRADE NOTES
   - imageflip
   - imagecrop
   - imagecropauto
+  - imagescale
+  - imageaffine
+  - imageaffinematrixget
+  - imageaffinematrixconcat
+  - imagesetinterpolation
+  - imagepalettetotruecolor
 
 - Hash:
   - hash_pbkdf2()
@@ -326,6 +332,33 @@ PHP 5.5 UPGRADE NOTES
     . IMG_CROP_WHITE
     . IMG_CROP_SIDES
     . IMG_CROP_THRESHOLD
+ - Added constants for the interpolation function (scale, affine, rotation)
+    . IMG_BELL
+    . IMG_BESSEL
+    . IMG_BILINEAR_FIXED
+    . IMG_BICUBIC
+    . IMG_BICUBIC_FIXED
+    . IMG_BLACKMAN
+    . IMG_BOX
+    . IMG_BSPLINE
+    . IMG_CATMULLROM
+    . IMG_GAUSSIAN
+    . IMG_GENERALIZED_CUBIC
+    . IMG_HERMITE
+    . IMG_HAMMING
+    . IMG_HANNING
+    . IMG_MITCHELL
+    . IMG_POWER
+    . IMG_QUADRATIC
+    . IMG_SINC
+    . IMG_NEAREST_NEIGHBOUR
+    . IMG_WEIGHTED4
+    . IMG_TRIANGLE
+    . IMG_AFFINE_TRANSLATE
+    . IMG_AFFINE_SCALE
+    . IMG_AFFINE_ROTATE
+    . IMG_AFFINE_SHEAR_HORIZONTAL
+    . IMG_AFFINE_SHEAR_VERTICAL
 
 ========================================
 10. Changes to INI File Handling
