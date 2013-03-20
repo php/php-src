@@ -2571,9 +2571,9 @@ PHP_FUNCTION(array_column)
 	zval *zarray, *zcolumn, *zkey = NULL, **data, **zcolval, **zkeyval;
 	HashTable *arr_hash;
 	HashPosition pointer;
-	ulong column_idx = 0, key_idx = 0, keyval_idx = 0;
+	ulong column_idx = 0, key_idx = 0;
 	char *column = NULL, *key = NULL, *keyval = NULL;
-	int column_len = 0, key_len = 0;
+	int column_len = 0, key_len = 0, keyval_idx = -1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "az|z", &zarray, &zcolumn, &zkey) == FAILURE) {
 		return;
@@ -2640,13 +2640,13 @@ PHP_FUNCTION(array_column)
 			Z_ADDREF_PP(zcolval);
 
 			keyval = NULL;
-			keyval_idx = NULL;
+			keyval_idx = -1;
 
 			if (zkey) {
 				if (key && zend_hash_find(Z_ARRVAL_PP(data), key, key_len + 1, (void**)&zkeyval) == FAILURE) {
-					keyval_idx = NULL;
+					keyval_idx = -1;
 				} else if (!key && zend_hash_index_find(Z_ARRVAL_PP(data), key_idx, (void**)&zkeyval) == FAILURE) {
-					keyval_idx = NULL;
+					keyval_idx = -1;
 				} else {
 					switch (Z_TYPE_PP(zkeyval)) {
 						case IS_LONG:
@@ -2660,14 +2660,14 @@ PHP_FUNCTION(array_column)
 							keyval = Z_STRVAL_PP(zkeyval);
 							break;
 						default:
-							keyval_idx = NULL;
+							keyval_idx = -1;
 					}
 				}
 			}
 
 			if (keyval) {
 				add_assoc_zval(return_value, keyval, *zcolval);
-			} else if (keyval_idx != NULL) {
+			} else if (keyval_idx != -1) {
 				add_index_zval(return_value, keyval_idx, *zcolval);
 			} else {
 				add_next_index_zval(return_value, *zcolval);
