@@ -845,6 +845,16 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const int bgColor);
 gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor);
 
+
+
+typedef enum {
+	GD_AFFINE_TRANSLATE = 0,
+	GD_AFFINE_SCALE,
+	GD_AFFINE_ROTATE,
+	GD_AFFINE_SHEAR_HORIZONTAL,
+	GD_AFFINE_SHEAR_VERTICAL,
+} gdAffineStandardMatrix;
+
 int gdAffineApplyToPointF (gdPointFPtr dst, const gdPointFPtr src, const double affine[6]);
 int gdAffineInvert (double dst[6], const double src[6]);
 int gdAffineFlip (double dst_affine[6], const double src_affine[6], const int flip_h, const int flip_v);

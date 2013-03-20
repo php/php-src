@@ -918,6 +918,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageaffine, 0)
 	ZEND_ARG_INFO(0, affine)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_imageaffinegetmatrix, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, matrox)
+	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_imagesetinterpolation, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, method)
@@ -988,6 +994,7 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagecropauto,							arginfo_imagecropauto)
 	PHP_FE(imagescale,								arginfo_imagescale)
 	PHP_FE(imageaffine,								arginfo_imageaffine)
+	PHP_FE(imageaffinegetmatrix,					arginfo_imageaffinegetmatrix)
 	PHP_FE(imagesetinterpolation,                   arginfo_imagesetinterpolation)
 #endif
 
@@ -5394,6 +5401,7 @@ PHP_FUNCTION(imageaffine)
 	double affine[6];
 	int i, nelems;
 	zval **zval_affine_elem = NULL;
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|a", &IM, &z_affine, &z_rect) == FAILURE)  {
 		return;
 	}
@@ -5427,6 +5435,7 @@ PHP_FUNCTION(imageaffine)
 
 	if (z_rect != NULL) {
 		if (zend_hash_find(HASH_OF(z_rect), "x", sizeof("x"), (void **)&tmp) != FAILURE) {
+			convert_to_long_ex(tmp);
 			rect.x = Z_LVAL_PP(tmp);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing x position");
@@ -5434,6 +5443,7 @@ PHP_FUNCTION(imageaffine)
 		}
 
 		if (zend_hash_find(HASH_OF(z_rect), "y", sizeof("x"), (void **)&tmp) != FAILURE) {
+			convert_to_long_ex(tmp);
 			rect.y = Z_LVAL_PP(tmp);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing y position");
@@ -5441,6 +5451,7 @@ PHP_FUNCTION(imageaffine)
 		}
 
 		if (zend_hash_find(HASH_OF(z_rect), "width", sizeof("width"), (void **)&tmp) != FAILURE) {
+			convert_to_long_ex(tmp);
 			rect.width = Z_LVAL_PP(tmp);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing width");
@@ -5448,6 +5459,7 @@ PHP_FUNCTION(imageaffine)
 		}
 
 		if (zend_hash_find(HASH_OF(z_rect), "height", sizeof("height"), (void **)&tmp) != FAILURE) {
+			convert_to_long_ex(tmp);
 			rect.height = Z_LVAL_PP(tmp);
 		} else {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing height");
@@ -5475,6 +5487,77 @@ PHP_FUNCTION(imageaffine)
 	}
 }
 /* }}} */
+
+/* {{{ proto array imageaffinegetmatrix(type[, options])
+   Return an image containing the affine tramsformed src image, using an optional clipping area */
+PHP_FUNCTION(imageaffinegetmatrix)
+{
+	double affine[6];
+	gdAffineStandardMatrix type;
+	zval *options;
+	zval **tmp;
+	int args_required;
+	int res;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z", &type, &options) == FAILURE)  {
+		return;
+	}
+	
+	switch(type) {
+		case GD_AFFINE_TRANSLATE:
+		case GD_AFFINE_SCALE: {
+			double x, y;
+			args_required = 2;
+			if (Z_TYPE_P(options) != IS_ARRAY) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array expected as options");
+			}
+			if (zend_hash_find(HASH_OF(options), "x", sizeof("x"), (void **)&tmp) != FAILURE) {
+				convert_to_double_ex(tmp);
+				x = Z_DVAL_PP(tmp);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing x position");
+				RETURN_FALSE;
+			}
+
+			if (zend_hash_find(HASH_OF(options), "y", sizeof("y"), (void **)&tmp) != FAILURE) {
+				convert_to_double_ex(tmp);
+				y = Z_DVAL_PP(tmp);
+			} else {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Missing y position");
+				RETURN_FALSE;
+			}
+			
+			if (type == GD_AFFINE_TRANSLATE) {
+				res = gdAffineTranslate(affine, x, y);
+			} else {
+				res = gdAffineScale(affine, x, y);
+			}
+			break;
+		}
+
+		case GD_AFFINE_ROTATE:
+		case GD_AFFINE_SHEAR_HORIZONTAL:
+		case GD_AFFINE_SHEAR_VERTICAL: {
+			double angle;
+
+			convert_to_double_ex(&options);
+			angle = Z_DVAL_P(options);
+
+			if (type == GD_AFFINE_SHEAR_HORIZONTAL) {
+				res = gdAffineShearHorizontal(affine, angle);
+			} else if (type == GD_AFFINE_SHEAR_VERTICAL) {
+				res = gdAffineShearVertical(affine, angle);
+			} else {
+				res = gdAffineRotate(affine, angle);
+			}
+			break;
+		}
+
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type for element %i", type);
+			RETURN_FALSE;
+	}
+}
 
 /* {{{ proto resource imagesetinterpolation(resource im, [, method]])
    Set the default interpolation method, passing -1 or 0 sets it to the libgd default (bilinear). */
