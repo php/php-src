@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - DateTime
   . Fixed bug #62852 (Unserialize Invalid Date causes crash). (Anatol)
 
+- Zip:
+  . Bug #64452 (Zip crash intermittently). (Anatol)
+
 
 14 Mar 2013, PHP 5.3.23
 
