@@ -1,4 +1,5 @@
 /*
+ * The two pass scaling function is based on:
  * Filtered Image Rescaling
  * Based on Gems III
  *  - Schumacher general filtered image rescaling
@@ -13,6 +14,7 @@
  *
  * 	Initial sources code is avaibable in the Gems Source Code Packages:
  * 	http://www.acm.org/pubs/tog/GraphicsGems/GGemsIII.tar.gz
+ *
  */
 
 /*
@@ -32,6 +34,17 @@
 		  being casted to ILubyte (usually an int or char). Otherwise,
 		  artifacting occurs.
 
+*/
+
+/*
+	Additional functions are available for simple rotation or up/downscaling.
+	downscaling using the fixed point implementations are usually much faster
+	than the existing gdImageCopyResampled while having a similar or better
+	quality.
+	
+	For image rotations, the optimized versions have a lazy antialiasing for 
+	the edges of the images. For a much better antialiased result, the affine
+	function is recommended.
 */
 
 /*
