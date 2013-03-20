@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug #61981 (OO API, walk: $suffix_as_key is not working correctly).
 	(Boris Lytochkin)
 
+- Zip:
+  . Bug #64452 (Zip crash intermittently). (Anatol)
+
 14 Mar 2013, PHP 5.4.13
 
 - Core:
