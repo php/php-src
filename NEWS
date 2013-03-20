@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Implement FR #48358 (Add SplDoublyLinkedList::add() to insert an element
     at a given offset). (Mark Baker, David Soria Parra)
 
+- Zip:
+  . Bug #64452 (Zip crash intermittently). (Anatol)
+
 07 Mar 2013, PHP 5.5.0 Alpha 6
 
 - Core:
