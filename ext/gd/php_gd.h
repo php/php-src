@@ -104,6 +104,7 @@ PHP_FUNCTION(imagefttext);
 
 PHP_FUNCTION(imagecreatetruecolor);
 PHP_FUNCTION(imagetruecolortopalette);
+PHP_FUNCTION(imagepalettetotruecolor);
 PHP_FUNCTION(imagesetthickness);
 PHP_FUNCTION(imagefilledellipse);
 PHP_FUNCTION(imagefilledarc);
@@ -127,6 +128,11 @@ PHP_FUNCTION(imageantialias);
 PHP_FUNCTION(imageflip);
 PHP_FUNCTION(imagecrop);
 PHP_FUNCTION(imagecropauto);
+PHP_FUNCTION(imagescale);
+PHP_FUNCTION(imageaffine);
+PHP_FUNCTION(imageaffinematrixget);
+PHP_FUNCTION(imageaffinematrixconcat);
+PHP_FUNCTION(imagesetinterpolation);
 #endif
 
 PHP_FUNCTION(imagesetthickness);
