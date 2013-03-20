@@ -130,7 +130,8 @@ PHP_FUNCTION(imagecrop);
 PHP_FUNCTION(imagecropauto);
 PHP_FUNCTION(imagescale);
 PHP_FUNCTION(imageaffine);
-PHP_FUNCTION(imageaffinegetmatrix);
+PHP_FUNCTION(imageaffinematrixget);
+PHP_FUNCTION(imageaffinematrixconcat);
 PHP_FUNCTION(imagesetinterpolation);
 #endif
 

@@ -918,10 +918,15 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageaffine, 0)
 	ZEND_ARG_INFO(0, affine)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_imageaffinegetmatrix, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_imageaffinematrixget, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, matrox)
 	ZEND_ARG_INFO(0, options)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_imageaffinematrixconcat, 0)
+	ZEND_ARG_INFO(0, m1)
+	ZEND_ARG_INFO(0, m2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_imagesetinterpolation, 0)
@@ -994,7 +999,8 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagecropauto,							arginfo_imagecropauto)
 	PHP_FE(imagescale,								arginfo_imagescale)
 	PHP_FE(imageaffine,								arginfo_imageaffine)
-	PHP_FE(imageaffinegetmatrix,					arginfo_imageaffinegetmatrix)
+	PHP_FE(imageaffinematrixconcat,					arginfo_imageaffinematrixconcat)
+	PHP_FE(imageaffinematrixget,					arginfo_imageaffinematrixget)
 	PHP_FE(imagesetinterpolation,                   arginfo_imagesetinterpolation)
 #endif
 
@@ -1280,7 +1286,13 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_NEAREST_NEIGHBOUR", GD_NEAREST_NEIGHBOUR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_WEIGHTED4", GD_WEIGHTED4, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_TRIANGLE", GD_TRIANGLE, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_DEFAULT",  GD_BICUBIC_FIXED, CONST_CS | CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("IMG_AFFINE_TRANSLATE", GD_AFFINE_TRANSLATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_AFFINE_SCALE", GD_AFFINE_SCALE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_AFFINE_ROTATE", GD_AFFINE_ROTATE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_AFFINE_SHEAR_HORIZONTAL", GD_AFFINE_SHEAR_HORIZONTAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_AFFINE_SHEAR_VERTICAL", GD_AFFINE_SHEAR_VERTICAL, CONST_CS | CONST_PERSISTENT);
+
 #else
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 0, CONST_CS | CONST_PERSISTENT);
 #endif
@@ -5488,26 +5500,24 @@ PHP_FUNCTION(imageaffine)
 }
 /* }}} */
 
-/* {{{ proto array imageaffinegetmatrix(type[, options])
+/* {{{ proto array imageaffinematrixget(type[, options])
    Return an image containing the affine tramsformed src image, using an optional clipping area */
-PHP_FUNCTION(imageaffinegetmatrix)
+PHP_FUNCTION(imageaffinematrixget)
 {
 	double affine[6];
 	gdAffineStandardMatrix type;
 	zval *options;
 	zval **tmp;
-	int args_required;
-	int res;
+	int res, i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z", &type, &options) == FAILURE)  {
 		return;
 	}
-	
+
 	switch(type) {
 		case GD_AFFINE_TRANSLATE:
 		case GD_AFFINE_SCALE: {
 			double x, y;
-			args_required = 2;
 			if (Z_TYPE_P(options) != IS_ARRAY) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array expected as options");
 			}
@@ -5556,6 +5566,81 @@ PHP_FUNCTION(imageaffinegetmatrix)
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type for element %i", type);
 			RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	for (i = 0; i < 6; i++) {
+		add_index_double(return_value, i, affine[i]);
+	}
+}
+
+
+/* {{{ proto array imageaffineconcat(array m1, array m2)
+   Concat two matrices (as in doing many ops in one go) */
+PHP_FUNCTION(imageaffinematrixconcat)
+{
+	double m1[6];
+	double m2[6];
+	double mr[6];
+
+	zval **tmp;
+	zval *z_m1;
+	zval *z_m2;
+	int i, nelems;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aa", &z_m1, &z_m2) == FAILURE)  {
+		return;
+	}
+
+	if (((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m1))) != 6) || (nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m2))) != 6) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Affine arrays must have six elements");
+		RETURN_FALSE;
+	}
+
+	for (i = 0; i < 6; i++) {
+		if (zend_hash_index_find(Z_ARRVAL_P(z_m1), i, (void **) &tmp) == SUCCESS) {
+			switch (Z_TYPE_PP(tmp)) {
+				case IS_LONG:
+					m1[i]  = Z_LVAL_PP(tmp);
+					break;
+				case IS_DOUBLE:
+					m1[i] = Z_DVAL_PP(tmp);
+					break;
+				case IS_STRING:
+					convert_to_double_ex(tmp);
+					m1[i] = Z_DVAL_PP(tmp);
+					break;
+				default:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type for element %i", i);
+					RETURN_FALSE;
+			}
+		}
+		if (zend_hash_index_find(Z_ARRVAL_P(z_m2), i, (void **) &tmp) == SUCCESS) {
+			switch (Z_TYPE_PP(tmp)) {
+				case IS_LONG:
+					m2[i]  = Z_LVAL_PP(tmp);
+					break;
+				case IS_DOUBLE:
+					m2[i] = Z_DVAL_PP(tmp);
+					break;
+				case IS_STRING:
+					convert_to_double_ex(tmp);
+					m2[i] = Z_DVAL_PP(tmp);
+					break;
+				default:
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type for element %i", i);
+					RETURN_FALSE;
+			}
+		}
+	}
+
+	if (gdAffineConcat (mr, m1, m2) != GD_TRUE) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	for (i = 0; i < 6; i++) {
+		add_index_double(return_value, i, mr[i]);
 	}
 }
 

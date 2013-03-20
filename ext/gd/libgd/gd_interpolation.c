@@ -2363,11 +2363,6 @@ int gdTransformAffineCopy(gdImagePtr dst,
 	gdInterpolationMethod interpolotion_id_bak;
 	interpolation_method interpolation_bak;
 
-/*
-	gdInterpolationMethod interpolation_id;
-	interpolation_method interpolation;
-*/
-
 	/* These methods use special implementations */
 	if (src->interpolation_id == GD_BILINEAR_FIXED || src->interpolation_id == GD_BICUBIC_FIXED || src->interpolation_id == GD_NEAREST_NEIGHBOUR) {
 		interpolotion_id_bak = src->interpolation_id;
