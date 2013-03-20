@@ -1246,7 +1246,6 @@ SPL_METHOD(SplDoublyLinkedList, add)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zz", &zindex, &value) == FAILURE) {
 		return;
 	}
-	SEPARATE_ARG_IF_REF(value);
 
 	intern = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	index  = spl_offset_convert_to_long(zindex TSRMLS_CC);
@@ -1255,6 +1254,8 @@ SPL_METHOD(SplDoublyLinkedList, add)
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0 TSRMLS_CC);
 		return;
 	}
+
+	SEPARATE_ARG_IF_REF(value);
 
 	if (index == intern->llist->count) {
 		/* If index is the last entry+1 then we do a push because we're not inserting before any entry */
