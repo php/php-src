@@ -88,6 +88,9 @@ zip_close(struct zip *za)
     if (za == NULL)
 	return -1;
 
+    if (za->zp == NULL)
+        return -1;
+
     if (!_zip_changed(za, &survivors)) {
 	_zip_free(za);
 	return 0;
@@ -164,9 +167,10 @@ zip_close(struct zip *za)
     for (j=0; j<survivors; j++) {
 	i = filelist[j].idx;
 
+	_zip_dirent_init(&de);
+
 	/* create new local directory entry */
 	if (ZIP_ENTRY_DATA_CHANGED(za->entry+i) || new_torrentzip) {
-	    _zip_dirent_init(&de);
 
 	    if (zip_get_archive_flag(za, ZIP_AFL_TORRENT, 0))
 		_zip_dirent_torrent_normalize(&de);
