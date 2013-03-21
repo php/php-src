@@ -2,6 +2,7 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.14
 - Core
+  . Fixed bug #64432 (more empty delimiter warning in strX methods). (Laruence)
   . Fixed bug #64417 (ArrayAccess::&offsetGet() in a trait causes fatal error).
     (Dmitry)
   . Fixed bug #64370 (microtime(true) less than $_SERVER['REQUEST_TIME_FLOAT']).
