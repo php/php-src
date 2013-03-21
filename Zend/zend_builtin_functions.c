@@ -1092,7 +1092,7 @@ ZEND_FUNCTION(get_class_methods)
 			    	(len != key_len - 1 ||
 			    	 !same_name(key, mptr->common.function_name, len))) {
 					MAKE_STD_ZVAL(method_name);
-					ZVAL_STRINGL(method_name, key, key_len - 1, 1);
+					ZVAL_STRINGL(method_name, zend_find_alias_name(mptr->common.scope, key, key_len - 1), key_len - 1, 1);
 					zend_hash_next_index_insert(return_value->value.ht, &method_name, sizeof(zval *), NULL);
 				} else {
 					MAKE_STD_ZVAL(method_name);
@@ -2118,7 +2118,14 @@ ZEND_FUNCTION(debug_print_backtrace)
 			lineno = 0;
 		}
 
-		function_name = ptr->function_state.function->common.function_name;
+		function_name = (ptr->function_state.function->common.scope &&
+			ptr->function_state.function->common.scope->trait_aliases) ?
+				zend_resolve_method_name(
+					ptr->object ?
+						Z_OBJCE_P(ptr->object) : 
+						ptr->function_state.function->common.scope,
+					ptr->function_state.function) :
+				ptr->function_state.function->common.function_name;
 
 		if (function_name) {
 			if (ptr->object) {
@@ -2299,7 +2306,14 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			filename = NULL;
 		}
 
-		function_name = ptr->function_state.function->common.function_name;
+		function_name = (ptr->function_state.function->common.scope &&
+			ptr->function_state.function->common.scope->trait_aliases) ?
+				zend_resolve_method_name(
+					ptr->object ?
+						Z_OBJCE_P(ptr->object) : 
+						ptr->function_state.function->common.scope,
+					ptr->function_state.function) :
+				ptr->function_state.function->common.function_name;
 
 		if (function_name) {
 			add_assoc_string_ex(stack_frame, "function", sizeof("function"), (char*)function_name, 1);
