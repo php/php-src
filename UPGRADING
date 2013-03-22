@@ -29,7 +29,6 @@ PHP 5.5 UPGRADE NOTES
 - php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
   zend_logo_guid() have been removed
 - Removal of Logo GUIDs
-
 - extensions can't override zend_execute() any more, they should override
   zend_execute_ex() instead. The EG(current_execute_data) is already
   initialized in zend_execute_ex(), so for compatibility extensions
@@ -79,15 +78,17 @@ PHP 5.5 UPGRADE NOTES
   (https://wiki.php.net/rfc/generators)
 - ClassName::class syntax returning full class name for a class as 
   a string constant. (https://wiki.php.net/rfc/class_name_scalars)
-- Support for changing the process's title in CLI/CLI-Server SAPIs. (Keyur)
-  (https://wiki.php.net/rfc/cli_process_title)
 - Added support for non-scalar Iterator keys in foreach.
   (https://wiki.php.net/rfc/foreach-non-scalar-keys).
+- Bundled Zend OPcache extension
+ (https://wiki.php.net/rfc/optimizerplus)
 
 ========================================
 2. Changes in SAPI modules
 ========================================
 
+- Support for changing the process's title in CLI/CLI-Server SAPIs. (Keyur)
+  (https://wiki.php.net/rfc/cli_process_title)
 
 ========================================
 3. Deprecated Functionality
@@ -277,6 +278,11 @@ PHP 5.5 UPGRADE NOTES
 - SPL:
   - SplFixedArray::__wakeup()
 
+- Zend OPcache
+ - opcache_get_configuration()
+ - opcache_get_status()
+ - opcache_reset()
+
 ========================================
 6. New Classes and Interfaces
 ========================================
@@ -333,7 +339,7 @@ PHP 5.5 UPGRADE NOTES
 ========================================
 
 - Core:
-  - Added sys_temp_dir INI directive, for specifying temp firectory.
+  - Added sys_temp_dir INI directive, for specifying temp directory.
 
 - Intl:
   - Added intl.use_exceptions INI directive, which controls what happens when
@@ -343,6 +349,33 @@ PHP 5.5 UPGRADE NOTES
   - Added mysqlnd.sha256_server_public_key INI PERDIR setting that affects all
     APIs which use(are built) for mysqlnd. This allows ext/mysqli to be used
 	with the new auth protocol, although at coarser level.
+
+- Zend OPcache (See ext/opcache/README for more details)
+  - Added the following directives:
+    - opcache.enable (default "1")
+    - opcache.memory_consumption (default "64")
+    - opcache.interned_strings_buffer (default "4")
+    - opcache.max_accelerated_files (default "2000")
+    - opcache.max_wasted_percentage (default "5")
+    - opcache.use_cwd (default "1")
+    - opcache.validate_timestamps (default "1")
+    - opcache.revalidate_freq (default "2")
+    - opcache.revalidate_path (default "0")
+    - opcache.save_comments (default "1")
+    - opcache.load_comments (default "1")
+    - opcache.fast_shutdown (default "0")
+    - opcache.enable_file_override (default "0")
+    - opcache.optimization_level (default "0xffffffff")
+    - opcache.inherited_hack (default "1")
+    - opcache.blacklist_filename (default "")
+    - opcache.max_file_size (default "0")
+    - opcache.consistency_checks (default "0")
+    - opcache.force_restart_timeout (default "180")
+    - opcache.error_log (default "" which means stderr)
+    - opcache.log_verbosity_level (default "1")
+    - opcache.preferred_memory_model (default "")
+    - opcache.protect_memory (default "0")
+    - opcache.mmap_base (Windows-only)
 
 ========================================
 11. Windows Support
