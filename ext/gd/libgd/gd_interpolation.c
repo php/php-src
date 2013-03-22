@@ -1750,6 +1750,10 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 							f_slop_x > f_slop_y ? gd_divfx(f_slop_y, f_slop_x) : gd_divfx(f_slop_x, f_slop_y)
 						: 0;
 
+	if (bgColor < 0) {
+		return NULL;
+	}
+
 	/* impact perf a bit, but not that much. Implementation for palette
 	   images can be done at a later point.
 	*/
