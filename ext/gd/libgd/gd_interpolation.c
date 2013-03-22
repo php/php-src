@@ -1729,6 +1729,7 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor)
 {
 	float _angle = ((float) (-degrees / 180.0f) * (float)M_PI);
+	const int angle_rounded = (int)floor(degrees * 100);
 	const int src_w  = gdImageSX(src);
 	const int src_h = gdImageSY(src);
 	const unsigned int new_width = (unsigned int)(abs((int)(src_w * cos(_angle))) + abs((int)(src_h * sin(_angle))) + 0.5f);
@@ -2194,6 +2195,16 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 
 gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor)
 {
+	const int angle_rounded = (int)floor(angle * 100);
+
+	switch (angle_rounded) {
+		case 9000:
+			return gdImageRotate90(src, 0);
+		case 18000:
+			return gdImageRotate180(src, 0);
+		case 27000:
+			return gdImageRotate270(src, 0);
+	}
 
 	if (src == NULL || src->interpolation_id < 1 || src->interpolation_id > GD_METHOD_COUNT) {
 		return NULL;
@@ -2208,47 +2219,12 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 			return gdImageRotateBilinear(src, angle, bgcolor);
 			break;
 
-		case GD_BICUBIC:
+		case GD_BICUBIC_FIXED:
 			return gdImageRotateBicubicFixed(src, angle, bgcolor);
 			break;
 
-		case GD_BICUBIC_FIXED:
-			return gdImageRotateNearestNeighbour(src, angle, bgcolor);
-			break;
-
-		case GD_WEIGHTED4:
-			return gdImageRotateNearestNeighbour(src, angle, bgcolor);
-			break;
-
-		case GD_BSPLINE:
-			return gdImageRotateNearestNeighbour(src, angle, bgcolor);
-			break;
-
-		case GD_BOX:
-			return gdImageRotateNearestNeighbour(src, angle, bgcolor);
-			break;
-
-		case GD_HERMITE:
-			return gdImageRotateNearestNeighbour(src, angle, bgcolor);
-			break;
-
-		case GD_HAMMING:
-		break;
-		case GD_SINC:
-		break;
-		case GD_BLACKMAN:
-		break;
-
-		case GD_GAUSSIAN:
-		break;
-		case GD_QUADRATIC:
-		break;
-		case GD_MITCHELL:
-		break;
-		case GD_CATMULLROM:
-		break;
-		case GD_POWER:
-		break;
+		default:
+			gdImageRotateGeneric(src, angle, bgcolor);
 	}
 	return NULL;
 }

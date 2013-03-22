@@ -2271,7 +2271,7 @@ PHP_FUNCTION(imagerotate)
 
 	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
 
-	im_dst = gdImageRotateGeneric(im_src, (float)degrees, color);
+	im_dst = gdImageRotateInterpolated(im_src, (const float)degrees, color);
 
 	if (im_dst != NULL) {
 		ZEND_REGISTER_RESOURCE(return_value, im_dst, le_gd);
