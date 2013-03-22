@@ -83,6 +83,10 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 # endif
 #endif
 
+#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
+# include "X11/xpm.h"
+#endif
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -123,6 +127,10 @@ int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
 #ifndef HAVE_GD_DYNAMIC_CTX_EX
 #define gdNewDynamicCtxEx(len, data, val) gdNewDynamicCtx(len, data)
 #endif
+
+/* as it is not really public, duplicate declaration here to avoid 
+   pointless warnings */
+int overflow2(int a, int b);
 
 /* Section Filters Declarations */
 /* IMPORTANT NOTE FOR NEW FILTER
