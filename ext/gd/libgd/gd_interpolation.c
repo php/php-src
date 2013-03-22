@@ -825,10 +825,6 @@ int getPixelInterpolated(gdImagePtr im, const double x, const double y, const in
 		return -1;
 	}
 
-	/* Default to full alpha */
-	if (bgColor == -1) {
-	}
-
 	if (im->interpolation_id == GD_WEIGHTED4) {
 		return getPixelInterpolateWeight(im, x, y, bgColor);
 	}
