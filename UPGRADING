@@ -277,6 +277,7 @@ PHP 5.5 UPGRADE NOTES
 
 - SPL:
   - SplFixedArray::__wakeup()
+  - SplDoublyLinkedList::add()
 
 - Zend OPcache
  - opcache_get_configuration()
