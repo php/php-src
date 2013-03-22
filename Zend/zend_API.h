@@ -521,6 +521,9 @@ ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC);
 
 ZEND_API void zend_rebuild_symbol_table(TSRMLS_D);
 
+ZEND_API const char* zend_find_alias_name(zend_class_entry *ce, const char *name, zend_uint len);
+ZEND_API const char* zend_resolve_method_name(zend_class_entry *ce, zend_function *f);
+
 #define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
 
 ZEND_API ZEND_FUNCTION(display_disabled_function);
