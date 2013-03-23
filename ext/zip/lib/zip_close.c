@@ -88,9 +88,6 @@ zip_close(struct zip *za)
     if (za == NULL)
 	return -1;
 
-    if (za->zp == NULL)
-        return -1;
-
     if (!_zip_changed(za, &survivors)) {
 	_zip_free(za);
 	return 0;
@@ -196,7 +193,7 @@ zip_close(struct zip *za)
 	}
 	else {
 	    /* copy existing directory entries */
-	    if (fseeko(za->zp, za->cdir->entry[i].offset, SEEK_SET) != 0) {
+	    if ((NULL == za->zp) || (fseeko(za->zp, za->cdir->entry[i].offset, SEEK_SET) != 0)) {
 		_zip_error_set(&za->error, ZIP_ER_SEEK, errno);
 		error = 1;
 		break;
