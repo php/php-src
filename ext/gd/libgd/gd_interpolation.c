@@ -2193,6 +2193,7 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 {
 	const int angle_rounded = (int)floor(angle * 100);
 
+	/* no interpolation needed here */
 	switch (angle_rounded) {
 		case 9000:
 			return gdImageRotate90(src, 0);
@@ -2221,6 +2222,7 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 
 		default:
 			gdImageRotateGeneric(src, angle, bgcolor);
+			return gdImageRotateGeneric(src, angle, bgcolor);
 	}
 	return NULL;
 }
