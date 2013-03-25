@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     (Dmitry, Laruence)
   . Fixed bug #63976 (Parent class incorrectly using child constant in class
     property). (Dmitry)
+  . Fixed bug #63914 (zend_do_fcall_common_helper_SPEC does not handle
+    exceptions properly). (Jeff Welch)
   . Fixed bug #62343 (Show class_alias In get_declared_classes()) (Dmitry)
 
 - PCRE:
