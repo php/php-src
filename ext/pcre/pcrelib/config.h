@@ -31,16 +31,17 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
 
-/* On Unix-like systems config.h.in is converted by "configure" into config.h.
-Some other environments also support the use of "configure". PCRE is written in
-Standard C, but there are a few non-standard things it can cope with, allowing
-it to run on SunOS4 and other "close to standard" systems.
+/* PCRE is written in Standard C, but there are a few non-standard things it
+can cope with, allowing it to run on SunOS4 and other "close to standard"
+systems.
 
-If you are going to build PCRE "by hand" on a system without "configure" you
-should copy the distributed config.h.generic to config.h, and then set up the
-macro definitions the way you need them. You must then add -DHAVE_CONFIG_H to
-all of your compile commands, so that config.h is included at the start of
-every source.
+In environments that support the facilities, config.h.in is converted by
+"configure", or config-cmake.h.in is converted by CMake, into config.h. If you
+are going to build PCRE "by hand" without using "configure" or CMake, you
+should copy the distributed config.h.generic to config.h, and then edit the
+macro definitions to be the way you need them. You must then add
+-DHAVE_CONFIG_H to all of your compile commands, so that config.h is included
+at the start of every source.
 
 Alternatively, you can avoid editing by using -D on the compiler command line
 to set the macro values. In this case, you do not have to set -DHAVE_CONFIG_H.
@@ -50,19 +51,27 @@ HAVE_BCOPY is set to 1. If your system has neither bcopy() nor memmove(), set
 them both to 0; an emulation function will be used. */
 
 /* By default, the \R escape sequence matches any Unicode line ending
-   character or sequence of characters. If BSR_ANYCRLF is defined, this is
-   changed so that backslash-R matches only CR, LF, or CRLF. The build- time
-   default can be overridden by the user of PCRE at runtime. On systems that
-   support it, "configure" can be used to override the default. */
-/* #undef BSR_ANYCRLF */
+   character or sequence of characters. If BSR_ANYCRLF is defined (to any
+   value), this is changed so that backslash-R matches only CR, LF, or CRLF.
+   The build-time default can be overridden by the user of PCRE at runtime. */
+#undef BSR_ANYCRLF
 
 /* If you are compiling for a system that uses EBCDIC instead of ASCII
-   character codes, define this macro as 1. On systems that can use
-   "configure", this can be done via --enable-ebcdic. PCRE will then assume
-   that all input strings are in EBCDIC. If you do not define this macro, PCRE
-   will assume input strings are ASCII or UTF-8 Unicode. It is not possible to
-   build a version of PCRE that supports both EBCDIC and UTF-8. */
-/* #undef EBCDIC */
+   character codes, define this macro to any value. You must also edit the
+   NEWLINE macro below to set a suitable EBCDIC newline, commonly 21 (0x15).
+   On systems that can use "configure" or CMake to set EBCDIC, NEWLINE is
+   automatically adjusted. When EBCDIC is set, PCRE assumes that all input
+   strings are in EBCDIC. If you do not define this macro, PCRE will assume
+   input strings are ASCII or UTF-8/16/32 Unicode. It is not possible to build
+   a version of PCRE that supports both EBCDIC and UTF-8/16/32. */
+#undef EBCDIC
+
+/* In an EBCDIC environment, define this macro to any value to arrange for the
+   NL character to be 0x25 instead of the default 0x15. NL plays the role that
+   LF does in an ASCII/Unicode environment. The value must also be set in the
+   NEWLINE macro below. On systems that can use "configure" or CMake to set
+   EBCDIC_NL25, the adjustment of NEWLINE is automatic. */
+#undef EBCDIC_NL25
 
 /* Define to 1 if you have the `bcopy' function. */
 #ifndef HAVE_BCOPY
@@ -86,6 +95,12 @@ them both to 0; an emulation function will be used. */
 #ifndef HAVE_DLFCN_H
 #define HAVE_DLFCN_H 1
 #endif
+
+/* Define to 1 if you have the <editline/readline.h> header file. */
+/*#undef HAVE_EDITLINE_READLINE_H*/
+
+/* Define to 1 if you have the <edit/readline/readline.h> header file. */
+/* #undef HAVE_EDIT_READLINE_READLINE_H */
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #ifndef HAVE_INTTYPES_H
@@ -112,6 +127,11 @@ them both to 0; an emulation function will be used. */
 #define HAVE_MEMORY_H 1
 #endif
 
+/* Define if you have POSIX threads libraries and header files. */
+#undef HAVE_PTHREAD
+
+/* Have PTHREAD_PRIO_INHERIT. */
+#undef HAVE_PTHREAD_PRIO_INHERIT
 /* Define to 1 if you have the <readline/history.h> header file. */
 #ifndef HAVE_READLINE_HISTORY_H
 #define HAVE_READLINE_HISTORY_H 1
@@ -186,6 +206,10 @@ them both to 0; an emulation function will be used. */
 #define HAVE_UNSIGNED_LONG_LONG 1
 #endif
 
+/* Define to 1 or 0, depending whether the compiler supports simple visibility
+   declarations. */
+/* #undef HAVE_VISIBILITY */
+
 /* Define to 1 if you have the <windows.h> header file. */
 /* #undef HAVE_WINDOWS_H */
 
@@ -254,22 +278,28 @@ them both to 0; an emulation function will be used. */
 #define MAX_NAME_SIZE 32
 #endif
 
-/* The value of NEWLINE determines the newline character sequence. On systems
-   that support it, "configure" can be used to override the default, which is
-   10. The possible values are 10 (LF), 13 (CR), 3338 (CRLF), -1 (ANY), or -2
-   (ANYCRLF). */
+/* The value of NEWLINE determines the default newline character sequence.
+   PCRE client programs can override this by selecting other values at run
+   time. In ASCII environments, the value can be 10 (LF), 13 (CR), or 3338
+   (CRLF); in EBCDIC environments the value can be 21 or 37 (LF), 13 (CR), or
+   3349 or 3365 (CRLF) because there are two alternative codepoints (0x15 and
+   0x25) that are used as the NL line terminator that is equivalent to ASCII
+   LF. In both ASCII and EBCDIC environments the value can also be -1 (ANY),
+   or -2 (ANYCRLF). */
 #ifndef NEWLINE
 #define NEWLINE 10
 #endif
 
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+/* #undef NO_MINUS_C_MINUS_O */
+
 /* PCRE uses recursive function calls to handle backtracking while matching.
    This can sometimes be a problem on systems that have stacks of limited
-   size. Define NO_RECURSE to get a version that doesn't use recursion in the
-   match() function; instead it creates its own stack by steam using
-   pcre_recurse_malloc() to obtain memory from the heap. For more detail, see
-   the comments and other stuff just above the match() function. On systems
-   that support it, "configure" can be used to set this in the Makefile (use
-   --disable-stack-for-recursion). */
+   size. Define NO_RECURSE to any value to get a version that doesn't use
+   recursion in the match() function; instead it creates its own stack by
+   steam using pcre_recurse_malloc() to obtain memory from the heap. For more
+   detail, see the comments and other stuff just above the match() function.
+   */
 /* #undef NO_RECURSE */
 
 /* Name of package */
@@ -282,7 +312,7 @@ them both to 0; an emulation function will be used. */
 #define PACKAGE_NAME "PCRE"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "PCRE 8.12"
+#define PACKAGE_STRING "PCRE 8.32"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "pcre"
@@ -291,21 +321,46 @@ them both to 0; an emulation function will be used. */
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "8.12"
+#define PACKAGE_VERSION "8.32"
+
+/* to make a symbol visible */
+/* #undef PCRECPP_EXP_DECL */
+
+/* to make a symbol visible */
+/* #undef PCRECPP_EXP_DEFN */
+
+/* The value of PCREGREP_BUFSIZE determines the size of buffer used by
+   pcregrep to hold parts of the file it is searching. This is also the
+   minimum value. The actual amount of memory used by pcregrep is three times
+   this number, because it allows for the buffering of "before" and "after"
+   lines. */
+/* #undef PCREGREP_BUFSIZE */
+
+/* to make a symbol visible */
+/* #undef PCREPOSIX_EXP_DECL */
+
+/* to make a symbol visible */
+/* #undef PCREPOSIX_EXP_DEFN */
+
+/* to make a symbol visible */
+/* #undef PCRE_EXP_DATA_DEFN */
+
+/* to make a symbol visible */
+/* #undef PCRE_EXP_DECL */
 
 
 /* If you are compiling for a system other than a Unix-like system or
    Win32, and it needs some magic to be inserted before the definition
    of a function that is exported by the library, define this macro to
-   contain the relevant magic. If you do not define this macro, it
-   defaults to "extern" for a C compiler and "extern C" for a C++
-   compiler on non-Win32 systems. This macro apears at the start of
-   every exported function that is part of the external API. It does
-   not appear on functions that are "external" in the C sense, but
-   which are internal to the library. */
+   contain the relevant magic. If you do not define this macro, a suitable
+    __declspec value is used for Windows systems; in other environments
+   "extern" is used for a C compiler and "extern C" for a C++ compiler.
+   This macro apears at the start of every exported function that is part
+   of the external API. It does not appear on functions that are "external"
+   in the C sense, but which are internal to the library. */
 /* #undef PCRE_EXP_DEFN */
 
-/* Define if linking statically (TODO: make nice with Libtool) */
+/* Define to any value if linking statically (TODO: make nice with Libtool) */
 /* #undef PCRE_STATIC */
 
 /* When calling PCRE via the POSIX interface, additional working storage is
@@ -314,40 +369,68 @@ them both to 0; an emulation function will be used. */
    only two. If the number of expected substrings is small, the wrapper
    function uses space on the stack, because this is faster than using
    malloc() for each call. The threshold above which the stack is no longer
-   used is defined by POSIX_MALLOC_THRESHOLD. On systems that support it,
-   "configure" can be used to override this default. */
+   used is defined by POSIX_MALLOC_THRESHOLD. */
 #ifndef POSIX_MALLOC_THRESHOLD
 #define POSIX_MALLOC_THRESHOLD 10
 #endif
+
+/* Define to necessary symbol if this constant uses a non-standard name on
+   your system. */
+/* #undef PTHREAD_CREATE_JOINABLE */
 
 /* Define to 1 if you have the ANSI C header files. */
 #ifndef STDC_HEADERS
 #define STDC_HEADERS 1
 #endif
 
-/* Define to allow pcregrep to be linked with libbz2, so that it is able to
-   handle .bz2 files. */
+/* Define to allow pcretest and pcregrep to be linked with gcov, so that they
+   are able to generate code coverage reports. */
+#undef SUPPORT_GCOV
+
+/* Define to any value to enable support for Just-In-Time compiling. */
+#undef SUPPORT_JIT
+
+/* Define to any value to allow pcregrep to be linked with libbz2, so that it
+   is able to handle .bz2 files. */
 /* #undef SUPPORT_LIBBZ2 */
 
-/* Define to allow pcretest to be linked with libreadline. */
+/* Define to any value to allow pcretest to be linked with libedit. */
+#undef SUPPORT_LIBEDIT
+
+/* Define to any value to allow pcretest to be linked with libreadline. */
 /* #undef SUPPORT_LIBREADLINE */
 
-/* Define to allow pcregrep to be linked with libz, so that it is able to
-   handle .gz files. */
+/* Define to any value to allow pcregrep to be linked with libz, so that it is
+   able to handle .gz files. */
 /* #undef SUPPORT_LIBZ */
+
+/* Define to any value to enable the 16 bit PCRE library. */
+/* #undef SUPPORT_PCRE16 */
+
+/* Define to any value to enable the 32 bit PCRE library. */
+/* #undef SUPPORT_PCRE32 */
+
+/* Define to any value to enable the 8 bit PCRE library. */
+/* #undef SUPPORT_PCRE8 */
+
+/* Define to any value to enable JIT support in pcregrep. */
+/* #undef SUPPORT_PCREGREP_JIT */
 
 /* Define to enable support for Unicode properties */
 /* #undef SUPPORT_UCP */
 
-/* Define to enable support for the UTF-8 Unicode encoding. This will work
-   even in an EBCDIC environment, but it is incompatible with the EBCDIC
-   macro. That is, PCRE can support *either* EBCDIC code *or* ASCII/UTF-8, but
-   not both at once. */
+/* Define to any value to enable support for the UTF-8/16/32 Unicode encoding.
+   This will work even in an EBCDIC environment, but it is incompatible with
+   the EBCDIC macro. That is, PCRE can support *either* EBCDIC code *or*
+   ASCII/UTF-8/16/32, but not both at once. */
 /* #undef SUPPORT_UTF8 */
+
+/* Valgrind support to find invalid memory reads. */
+/* #undef SUPPORT_VALGRIND */
 
 /* Version number of package */
 #ifndef VERSION
-#define VERSION "8.12"
+#define VERSION "8.32"
 #endif
 
 /* Define to empty if `const' does not conform to ANSI C. */

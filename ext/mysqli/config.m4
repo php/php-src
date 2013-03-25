@@ -81,5 +81,8 @@ if test "$PHP_MYSQLI" != "no"; then
   if test "$PHP_MYSQLI" = "yes" || test "$PHP_MYSQLI" = "mysqlnd"; then
     PHP_ADD_EXTENSION_DEP(mysqli, mysqlnd)
     AC_DEFINE([MYSQLI_USE_MYSQLND], 1, [Whether mysqlnd is enabled])
+    PHP_INSTALL_HEADERS([ext/mysqli/mysqli_mysqlnd.h])
+  else
+    PHP_INSTALL_HEADERS([ext/mysqli/mysqli_libmysql.h])
   fi
 fi

@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2009 University of Cambridge
+           Copyright (c) 1997-2012 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,12 @@ POSSIBILITY OF SUCH DAMAGE.
 /* This module contains the external function pcre_config(). */
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+/* Keep the original link size. */
+static int real_link_size = LINK_SIZE;
 
 #include "pcre_internal.h"
 
@@ -60,24 +65,79 @@ Arguments:
 Returns:           0 if data returned, negative on error
 */
 
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_config(int what, void *where)
+#elif defined COMPILE_PCRE16
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre16_config(int what, void *where)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre32_config(int what, void *where)
+#endif
 {
 switch (what)
   {
   case PCRE_CONFIG_UTF8:
-#ifdef SUPPORT_UTF8
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+  *((int *)where) = 0;
+  return PCRE_ERROR_BADOPTION;
+#else
+#if defined SUPPORT_UTF
   *((int *)where) = 1;
 #else
   *((int *)where) = 0;
 #endif
   break;
+#endif
+
+  case PCRE_CONFIG_UTF16:
+#if defined COMPILE_PCRE8 || defined COMPILE_PCRE32
+  *((int *)where) = 0;
+  return PCRE_ERROR_BADOPTION;
+#else
+#if defined SUPPORT_UTF
+  *((int *)where) = 1;
+#else
+  *((int *)where) = 0;
+#endif
+  break;
+#endif
+
+  case PCRE_CONFIG_UTF32:
+#if defined COMPILE_PCRE8 || defined COMPILE_PCRE16
+  *((int *)where) = 0;
+  return PCRE_ERROR_BADOPTION;
+#else
+#if defined SUPPORT_UTF
+  *((int *)where) = 1;
+#else
+  *((int *)where) = 0;
+#endif
+  break;
+#endif
 
   case PCRE_CONFIG_UNICODE_PROPERTIES:
 #ifdef SUPPORT_UCP
   *((int *)where) = 1;
 #else
   *((int *)where) = 0;
+#endif
+  break;
+
+  case PCRE_CONFIG_JIT:
+#ifdef SUPPORT_JIT
+  *((int *)where) = 1;
+#else
+  *((int *)where) = 0;
+#endif
+  break;
+
+  case PCRE_CONFIG_JITTARGET:
+#ifdef SUPPORT_JIT
+  *((const char **)where) = PRIV(jit_get_target)();
+#else
+  *((const char **)where) = NULL;
 #endif
   break;
 
@@ -94,7 +154,7 @@ switch (what)
   break;
 
   case PCRE_CONFIG_LINK_SIZE:
-  *((int *)where) = LINK_SIZE;
+  *((int *)where) = real_link_size;
   break;
 
   case PCRE_CONFIG_POSIX_MALLOC_THRESHOLD:

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -69,6 +69,9 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->vars = NULL;
 
 	op_array->T = 0;
+
+	op_array->nested_calls = 0;
+	op_array->used_stack = 0;
 
 	op_array->function_name = NULL;
 	op_array->filename = zend_get_compiled_filename(TSRMLS_C);
@@ -216,12 +219,6 @@ ZEND_API int zend_cleanup_class_data(zend_class_entry **pce TSRMLS_DC)
 void _destroy_zend_class_traits_info(zend_class_entry *ce)
 {
 	if (ce->num_traits > 0 && ce->traits) {
-		size_t i;
-		for (i = 0; i < ce->num_traits; i++) {
-			if (ce->traits[i]) {
-				destroy_zend_class(&ce->traits[i]);
-			}
-		}
 		efree(ce->traits);
 	}
 	
@@ -268,15 +265,6 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 	}
 }
 
-static int zend_clear_trait_method_name(zend_op_array *op_array TSRMLS_DC)
-{
-	if (op_array->function_name && (op_array->fn_flags & ZEND_ACC_ALIAS) == 0) {
-		efree(op_array->function_name);
-		op_array->function_name = NULL;
-	}
-	return 0;
-}
-
 ZEND_API void destroy_zend_class(zend_class_entry **pce)
 {
 	zend_class_entry *ce = *pce;
@@ -308,10 +296,6 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			}
 			zend_hash_destroy(&ce->properties_info);
 			str_efree(ce->name);
-			if ((ce->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) {
-				TSRMLS_FETCH();
-				zend_hash_apply(&ce->function_table, (apply_func_t)zend_clear_trait_method_name TSRMLS_CC);
-			}
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {
@@ -401,7 +385,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	}
 	efree(op_array->opcodes);
 
-	if (op_array->function_name && (op_array->fn_flags & ZEND_ACC_ALIAS) == 0) {
+	if (op_array->function_name) {
 		efree((char*)op_array->function_name);
 	}
 	if (op_array->doc_comment) {
@@ -499,22 +483,168 @@ static void zend_extension_op_array_handler(zend_extension *extension, zend_op_a
 	}
 }
 
-static void zend_check_finally_breakout(zend_op_array *op_array, zend_op *opline, zend_uint dst_num TSRMLS_DC) {
-	zend_uint i, op_num = opline - op_array->opcodes;
-	for (i=0; i < op_array->last_try_catch; i++) {
+static void zend_check_finally_breakout(zend_op_array *op_array, zend_uint op_num, zend_uint dst_num TSRMLS_DC)
+{
+	zend_uint i;
+
+	for (i = 0; i < op_array->last_try_catch; i++) {
 		if (op_array->try_catch_array[i].try_op > op_num) {
 			break;
 		}
 		if ((op_num >= op_array->try_catch_array[i].finally_op 
-					&& op_num < op_array->try_catch_array[i].finally_end)
-				&& (dst_num >= op_array->try_catch_array[i].finally_end 
+					&& op_num <= op_array->try_catch_array[i].finally_end)
+				&& (dst_num > op_array->try_catch_array[i].finally_end 
 					|| dst_num < op_array->try_catch_array[i].finally_op)) {
 			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
-			CG(zend_lineno) = opline->lineno;
+			CG(zend_lineno) = op_array->opcodes[op_num].lineno;
 			zend_error(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
 		}
 	} 
+}
+
+static void zend_resolve_finally_call(zend_op_array *op_array, zend_uint op_num, zend_uint dst_num TSRMLS_DC)
+{
+	zend_uint start_op;
+	zend_op *opline;
+	zend_uint i = op_array->last_try_catch;
+
+	if (dst_num != (zend_uint)-1) {
+		zend_check_finally_breakout(op_array, op_num, dst_num TSRMLS_CC);
+	}
+
+	/* the backward order is mater */
+	while (i > 0) {
+		i--;
+		if (op_array->try_catch_array[i].finally_op &&
+		    op_num >= op_array->try_catch_array[i].try_op &&
+		    op_num < op_array->try_catch_array[i].finally_op - 1 &&
+		    (dst_num < op_array->try_catch_array[i].try_op ||
+		     dst_num > op_array->try_catch_array[i].finally_end)) {
+			/* we have a jump out of try block that needs executing finally */
+
+			/* generate a FAST_CALL to finally block */
+		    start_op = get_next_op_number(op_array);
+
+			opline = get_next_op(op_array TSRMLS_CC);
+			opline->opcode = ZEND_FAST_CALL;
+			SET_UNUSED(opline->op1);
+			SET_UNUSED(opline->op2);
+			opline->op1.opline_num = op_array->try_catch_array[i].finally_op;
+			if (op_array->try_catch_array[i].catch_op) {
+				opline->extended_value = 1;
+				opline->op2.opline_num = op_array->try_catch_array[i].catch_op;
+			}
+
+			/* generate a sequence of FAST_CALL to upward finally block */
+			while (i > 0) {
+				i--;
+				if (op_array->try_catch_array[i].finally_op &&
+				    op_num >= op_array->try_catch_array[i].try_op &&
+				    op_num < op_array->try_catch_array[i].finally_op - 1 &&
+				    (dst_num < op_array->try_catch_array[i].try_op ||
+				     dst_num > op_array->try_catch_array[i].finally_end)) {
+					
+					opline = get_next_op(op_array TSRMLS_CC);
+					opline->opcode = ZEND_FAST_CALL;
+					SET_UNUSED(opline->op1);
+					SET_UNUSED(opline->op2);
+					opline->op1.opline_num = op_array->try_catch_array[i].finally_op;
+				}
+			}
+
+			/* Finish the sequence with original opcode */
+			opline = get_next_op(op_array TSRMLS_CC);
+			*opline = op_array->opcodes[op_num];
+
+			/* Replace original opcode with jump to this sequence */
+			opline = op_array->opcodes + op_num;
+			opline->opcode = ZEND_JMP;
+			SET_UNUSED(opline->op1);
+			SET_UNUSED(opline->op2);
+			opline->op1.opline_num = start_op;
+
+		    break;
+		}
+	}	
+}
+
+static void zend_resolve_finally_ret(zend_op_array *op_array, zend_uint op_num TSRMLS_DC)
+{
+	int i;
+	zend_uint catch_op_num = 0, finally_op_num = 0;
+
+	for (i = 0; i < op_array->last_try_catch; i++) {
+		if (op_array->try_catch_array[i].try_op > op_num) {
+			break;
+		}
+		if (op_num < op_array->try_catch_array[i].finally_op) {
+			finally_op_num = op_array->try_catch_array[i].finally_op;
+		}
+		if (op_num < op_array->try_catch_array[i].catch_op) {
+			catch_op_num = op_array->try_catch_array[i].catch_op;
+		}
+	}
+
+	if (finally_op_num && (!catch_op_num || catch_op_num >= finally_op_num)) {
+		/* in case of unhandled exception return to upward finally block */
+		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_FINALLY;
+		op_array->opcodes[op_num].op2.opline_num = finally_op_num;
+	} else if (catch_op_num) {
+		/* in case of unhandled exception return to upward catch block */
+		op_array->opcodes[op_num].extended_value = ZEND_FAST_RET_TO_CATCH;
+		op_array->opcodes[op_num].op2.opline_num = catch_op_num;
+	}
+}
+
+static void zend_resolve_finally_calls(zend_op_array *op_array TSRMLS_DC)
+{
+	zend_uint i;
+	zend_op *opline;
+
+	for (i = 0; i < op_array->last; i++) {
+		opline = op_array->opcodes + i;
+		switch (opline->opcode) {
+			case ZEND_RETURN:
+			case ZEND_RETURN_BY_REF:
+			case ZEND_GENERATOR_RETURN:
+				zend_resolve_finally_call(op_array, i, (zend_uint)-1 TSRMLS_CC);
+				break;
+			case ZEND_BRK:
+			case ZEND_CONT:
+			{
+				int nest_levels, array_offset;
+				zend_brk_cont_element *jmp_to;
+
+				nest_levels = Z_LVAL(op_array->literals[opline->op2.constant].constant);
+				array_offset = opline->op1.opline_num;
+				do {
+					jmp_to = &op_array->brk_cont_array[array_offset];
+					if (nest_levels > 1) {
+						array_offset = jmp_to->parent;
+					}
+				} while (--nest_levels > 0);
+				zend_resolve_finally_call(op_array, i, opline->opcode == ZEND_BRK ? jmp_to->brk : jmp_to->cont TSRMLS_CC);
+				break;
+			}
+			case ZEND_GOTO:
+				if (Z_TYPE(op_array->literals[opline->op2.constant].constant) != IS_LONG) {
+					zend_uint num = opline->op2.constant;
+					opline->op2.zv = &op_array->literals[opline->op2.constant].constant;
+					zend_resolve_goto_label(op_array, opline, 1 TSRMLS_CC);
+					opline->op2.constant = num;					
+				}
+				/* break omitted intentionally */
+			case ZEND_JMP:
+				zend_resolve_finally_call(op_array, i, opline->op1.opline_num TSRMLS_CC);
+				break;
+			case ZEND_FAST_RET:
+				zend_resolve_finally_ret(op_array, i TSRMLS_CC);
+				break;
+			default:
+				break;
+		}
+	}
 }
 
 ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
@@ -523,6 +653,9 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 
 	if (op_array->type!=ZEND_USER_FUNCTION && op_array->type!=ZEND_EVAL_CODE) {
 		return 0;
+	}
+	if (op_array->has_finally_block) {
+		zend_resolve_finally_calls(op_array TSRMLS_CC);
 	}
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
 		zend_update_extended_info(op_array TSRMLS_CC);
@@ -560,29 +693,8 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 				}
 				/* break omitted intentionally */
 			case ZEND_JMP:
-				if (op_array->last_try_catch) {
-					zend_check_finally_breakout(op_array, opline, opline->op1.opline_num TSRMLS_CC);
-				}
+			case ZEND_FAST_CALL:
 				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.opline_num];
-				break;
-			case ZEND_BRK:
-			case ZEND_CONT:
-				if (op_array->last_try_catch) {
-					int nest_levels, array_offset;
-					zend_brk_cont_element *jmp_to;
-
-					nest_levels = Z_LVAL_P(opline->op2.zv);
-					array_offset = opline->op1.opline_num;
-					do {
-						jmp_to = &op_array->brk_cont_array[array_offset];
-						if (nest_levels > 1) {
-							array_offset = jmp_to->parent;
-						}
-					} while (--nest_levels > 0);
-					if (op_array->last_try_catch) {
-						zend_check_finally_breakout(op_array, opline, jmp_to->brk TSRMLS_CC);
-					}
-				}
 				break;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:

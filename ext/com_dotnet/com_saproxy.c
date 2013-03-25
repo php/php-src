@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -519,16 +519,15 @@ static void saproxy_iter_get_data(zend_object_iterator *iter, zval ***data TSRML
 	*data = ptr_ptr;
 }
 
-static int saproxy_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
-	ulong *int_key TSRMLS_DC)
+static void saproxy_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 {
 	php_com_saproxy_iter *I = (php_com_saproxy_iter*)iter->data;
 
 	if (I->key == -1) {
-		return HASH_KEY_NON_EXISTANT;
+		ZVAL_NULL(key);
+	} else {
+		ZVAL_LONG(key, I->key);
 	}
-	*int_key = (ulong)I->key;
-	return HASH_KEY_IS_LONG;
 }
 
 static int saproxy_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)

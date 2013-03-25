@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar:// stream wrapper support                                       |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2012 The PHP Group                                |
+  | Copyright (c) 2005-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -458,8 +458,11 @@ static int phar_stream_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	char *error;
 	int ret;
-	if (stream->mode[0] == 'w' || (stream->mode[0] == 'r' && stream->mode[1] == '+')) {
-		ret = phar_flush(((phar_entry_data *)stream->abstract)->phar, 0, 0, 0, &error TSRMLS_CC);
+	phar_entry_data *data = (phar_entry_data *) stream->abstract;
+	
+	if (data->internal_file->is_modified) {
+		data->internal_file->timestamp = time(0);
+		ret = phar_flush(data->phar, 0, 0, 0, &error TSRMLS_CC);
 		if (error) {
 			php_stream_wrapper_log_error(stream->wrapper, REPORT_ERRORS TSRMLS_CC, "%s", error);
 			efree(error);

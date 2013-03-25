@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,20 +25,24 @@ BEGIN_EXTERN_C()
 extern ZEND_API zend_class_entry *zend_ce_generator;
 END_EXTERN_C()
 
+typedef struct _zend_generator_iterator {
+	zend_object_iterator intern;
+
+	/* The generator object zval has to be stored, because the iterator is
+	 * holding a ref to it, which has to be dtored. */
+	zval *object;
+} zend_generator_iterator;
+
 typedef struct _zend_generator {
 	zend_object std;
+
+	zend_generator_iterator iterator;
 
 	/* The suspended execution context. */
 	zend_execute_data *execute_data;
 
-	/* If the execution is suspended during a function call there may be
-	 * arguments pushed to the stack, so it has to be backed up. */
-	void *backed_up_stack;
-	size_t backed_up_stack_size;
-
-	/* The original stack top before resuming the generator. This is required
-	 * for proper cleanup during exception handling. */
-	void **original_stack_top;
+	/* The separate stack used by generator */
+	zend_vm_stack stack;
 
 	/* Current value */
 	zval *value;
@@ -58,9 +62,9 @@ static const zend_uchar ZEND_GENERATOR_FORCED_CLOSE      = 0x2;
 static const zend_uchar ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
 
 void zend_register_generator_ce(TSRMLS_D);
-zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC);
-void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC);
-void zend_generator_resume(zend_generator *generator TSRMLS_DC);
+ZEND_API zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC);
+ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished_execution TSRMLS_DC);
+ZEND_API void zend_generator_resume(zend_generator *generator TSRMLS_DC);
 
 #endif
 

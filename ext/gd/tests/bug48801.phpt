@@ -1,9 +1,12 @@
 --TEST--
-Bug #48801 (Problem with imagettfbbox)
+Bug #48801 (Problem with imagettfbbox) freetype < 2.4.10
 --SKIPIF--
 <?php
 	if(!extension_loaded('gd')){ die('skip gd extension not available'); }
 	if(!function_exists('imageftbbox')) die('skip imageftbbox() not available');
+
+	include dirname(__FILE__) . '/func.inc';
+	if(version_compare(get_freetype_version(), '2.4.10') >= 0) die('skip for freetype < 2.4.10');
 ?>
 --FILE--
 <?php

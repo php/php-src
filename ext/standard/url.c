@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -201,6 +201,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 			STR_FREE(ret->scheme);
 			efree(ret);
 			return NULL;
+		} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+			s += 2;
 		} else {
 			goto just_path;
 		}

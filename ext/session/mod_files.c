@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -266,7 +266,7 @@ PS_OPEN_FUNC(files)
 
 	if (*save_path == '\0') {
 		/* if save path is an empty string, determine the temporary dir */
-		save_path = php_get_temporary_directory();
+		save_path = php_get_temporary_directory(TSRMLS_C);
 
 		if (php_check_open_basedir(save_path TSRMLS_CC)) {
 			return FAILURE;

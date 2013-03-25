@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,12 +40,12 @@ static void incomplete_class_message(zval *object, int error_type TSRMLS_DC)
 	zend_bool class_name_alloced = 1;
 
 	class_name = php_lookup_class_name(object, NULL);
-	
+
 	if (!class_name) {
 		class_name_alloced = 0;
 		class_name = "unknown";
 	}
-	
+
 	php_error_docref(NULL TSRMLS_CC, error_type, INCOMPLETE_CLASS_MSG, class_name);
 
 	if (class_name_alloced) {
@@ -57,7 +57,7 @@ static void incomplete_class_message(zval *object, int error_type TSRMLS_DC)
 static zval *incomplete_class_get_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
-	
+
 	if (type == BP_VAR_W || type == BP_VAR_RW) {
 		return EG(error_zval_ptr);
 	} else {
@@ -71,8 +71,8 @@ static void incomplete_class_write_property(zval *object, zval *member, zval *va
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 }
 /* }}} */
-	
-static zval **incomplete_class_get_property_ptr_ptr(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
+
+static zval **incomplete_class_get_property_ptr_ptr(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	incomplete_class_message(object, E_NOTICE TSRMLS_CC);
 	return &EG(error_zval_ptr);
@@ -105,12 +105,12 @@ static zend_object_value php_create_incomplete_object(zend_class_entry *class_ty
 {
 	zend_object *object;
 	zend_object_value value;
-	
+
 	value = zend_objects_new(&object, class_type TSRMLS_CC);
 	value.handlers = &php_incomplete_object_handlers;
-	
+
 	object_properties_init(object, class_type);
-	
+
 	return value;
 }
 
@@ -128,7 +128,7 @@ PHPAPI zend_class_entry *php_create_incomplete_class(TSRMLS_D)
 	php_incomplete_object_handlers.write_property = incomplete_class_write_property;
 	php_incomplete_object_handlers.get_property_ptr_ptr = incomplete_class_get_property_ptr_ptr;
     php_incomplete_object_handlers.get_method = incomplete_class_get_method;
-	
+
 	return zend_register_internal_class(&incomplete_class TSRMLS_CC);
 }
 /* }}} */

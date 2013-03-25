@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -1171,6 +1171,24 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index,
 	return HASH_KEY_NON_EXISTANT;
 }
 
+ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos) {
+	Bucket *p;
+
+	IS_CONSISTENT(ht);
+
+	p = pos ? (*pos) : ht->pInternalPointer;
+
+	if (!p) {
+		Z_TYPE_P(key) = IS_NULL;
+	} else if (p->nKeyLength) {
+		Z_TYPE_P(key) = IS_STRING;
+		Z_STRVAL_P(key) = IS_INTERNED(p->arKey) ? (char *) p->arKey : estrndup(p->arKey, p->nKeyLength - 1);
+		Z_STRLEN_P(key) = p->nKeyLength - 1;
+	} else {
+		Z_TYPE_P(key) = IS_LONG;
+		Z_LVAL_P(key) = p->h;
+	}
+}
 
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 {

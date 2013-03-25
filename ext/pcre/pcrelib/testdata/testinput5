@@ -1,71 +1,35 @@
-/-- This set of tests checks the API, internals, and non-Perl stuff for UTF-8
-    support, excluding Unicode properties. --/
+/-- This set of tests checks the API, internals, and non-Perl stuff for UTF
+    support, excluding Unicode properties. However, tests that give different
+    results in 8-bit and 16-bit modes are excluded (see tests 16 and 17). --/
 
-/\x{100}/8DZ
-
-/\x{1000}/8DZ
-
-/\x{10000}/8DZ
-
-/\x{100000}/8DZ
-
-/\x{1000000}/8DZ
-
-/\x{4000000}/8DZ
-
-/\x{7fffFFFF}/8DZ
-
-/[\x{ff}]/8DZ
-
-/[\x{100}]/8DZ
+/\x{110000}/8DZ
 
 /\x{ffffffff}/8
 
 /\x{100000000}/8
 
+/\x{d800}/8
+
+/\x{dfff}/8
+
+/\x{d7ff}/8
+
+/\x{e000}/8
+
 /^\x{100}a\x{1234}/8
     \x{100}a\x{1234}bcd
-
-/\x80/8DZ
-
-/\xff/8DZ
 
 /\x{0041}\x{2262}\x{0391}\x{002e}/DZ8
     \x{0041}\x{2262}\x{0391}\x{002e}
     
-/\x{D55c}\x{ad6d}\x{C5B4}/DZ8 
-    \x{D55c}\x{ad6d}\x{C5B4} 
-
-/\x{65e5}\x{672c}\x{8a9e}/DZ8
-    \x{65e5}\x{672c}\x{8a9e}
-
-/\x{80}/DZ8
-
-/\x{084}/DZ8
-
-/\x{104}/DZ8
-
-/\x{861}/DZ8
-
-/\x{212ab}/DZ8
-
 /.{3,5}X/DZ8
     \x{212ab}\x{212ab}\x{212ab}\x{861}X
-
 
 /.{3,5}?/DZ8
     \x{212ab}\x{212ab}\x{212ab}\x{861}
 
 /(?<=\C)X/8
     Should produce an error diagnostic
-    
-/-- This one is here not because it's different to Perl, but because the way
-the captured single-byte is displayed. (In Perl it becomes a character, and you
-can't tell the difference.) --/
-    
-/X(\C)(.*)/8
-    X\x{1234}
-    X\nabc 
     
 /^[ab]/8DZ
     bar
@@ -81,26 +45,6 @@ can't tell the difference.) --/
     *** Failers 
     aaa
   
-/[^ab\xC0-\xF0]/8SDZ
-    \x{f1}
-    \x{bf}
-    \x{100}
-    \x{1000}   
-    *** Failers
-    \x{c0} 
-    \x{f0} 
-
-/Ä€{3,4}/8SDZ
-  \x{100}\x{100}\x{100}\x{100\x{100}
-
-/(\x{100}+|x)/8SDZ
-
-/(\x{100}*a|x)/8SDZ
-
-/(\x{100}{0,2}a|x)/8SDZ
-
-/(\x{100}{1,2}a|x)/8SDZ
-
 /\x{100}*(\d+|"(?1)")/8
     1234
     "1234" 
@@ -111,32 +55,16 @@ can't tell the difference.) --/
     *** Failers 
     \x{100}\x{100}abcd
 
-/\x{100}/8DZ
-
 /\x{100}*/8DZ
 
 /a\x{100}*/8DZ
 
 /ab\x{100}*/8DZ
 
-/a\x{100}\x{101}*/8DZ
-
-/a\x{100}\x{101}+/8DZ
-
 /\x{100}*A/8DZ
     A
 
 /\x{100}*\d(?R)/8DZ
-
-/[^\x{c4}]/DZ
-
-/[^\x{c4}]/8DZ
-
-/[\x{100}]/8DZ
-    \x{100}
-    Z\x{100}
-    \x{100}Z
-    *** Failers 
 
 /[Z\x{100}]/8DZ
     Z\x{100}
@@ -162,12 +90,7 @@ can't tell the difference.) --/
 /[\xFF]/DZ
     >\xff<
 
-/[\xff]/DZ8
-    >\x{ff}<
-
 /[^\xFF]/DZ
-
-/[^\xff]/8DZ
 
 /[Ã„-Ãœ]/8
     Ã– # Matches without Study
@@ -184,45 +107,6 @@ can't tell the difference.) --/
 /[\x{c4}-\x{dc}]/8S
     Ã– <-- Same with Study
     \x{d6} 
-
-/[Ã]/8
-
-/Ã/8
-
-/ÃÃÃxxx/8
-
-/ÃÃÃxxx/8?DZ
-
-/abc/8
-    Ã]
-    Ã
-    ÃÃÃ
-    ÃÃÃ\?
-
-/anything/8
-    \xc0\x80
-    \xc1\x8f 
-    \xe0\x9f\x80
-    \xf0\x8f\x80\x80 
-    \xf8\x87\x80\x80\x80  
-    \xfc\x83\x80\x80\x80\x80
-    \xfe\x80\x80\x80\x80\x80  
-    \xff\x80\x80\x80\x80\x80  
-    \xc3\x8f
-    \xe0\xaf\x80
-    \xe1\x80\x80
-    \xf0\x9f\x80\x80 
-    \xf1\x8f\x80\x80 
-    \xf8\x88\x80\x80\x80  
-    \xf9\x87\x80\x80\x80  
-    \xfc\x84\x80\x80\x80\x80
-    \xfd\x83\x80\x80\x80\x80
-    \?\xf8\x88\x80\x80\x80  
-    \?\xf9\x87\x80\x80\x80  
-    \?\xfc\x84\x80\x80\x80\x80
-    \?\xfd\x83\x80\x80\x80\x80
-
-/\x{100}abc(xyz(?1))/8DZ
 
 /[^\x{100}]abc(xyz(?1))/8DZ
 
@@ -243,17 +127,8 @@ can't tell the difference.) --/
 /\w/8
     \x{100}X   
 
-/a\x{1234}b/P8
-    a\x{1234}b
-
 /^\áˆ´/8DZ
 
-/\777/I
-
-/\777/8I
-  \x{1ff}
-  \777 
-  
 /\x{100}*\d/8DZ
 
 /\x{100}*\s/8DZ
@@ -266,12 +141,6 @@ can't tell the difference.) --/
 
 /\x{100}*\W/8DZ
 
-/\x{100}+\x{200}/8DZ
-
-/\x{100}+X/8DZ
-
-/X+\x{200}/8DZ
-
 /()()()()()()()()()()
  ()()()()()()()()()()
  ()()()()()()()()()()
@@ -282,8 +151,6 @@ can't tell the difference.) --/
 /^[\x{100}\E-\Q\E\x{150}]/BZ8
 
 /^[\QÄ€\E-\QÅ\E]/BZ8
-
-/^[\QÄ€\E-\QÅ\E/BZ8
 
 /^abc./mgx8<any>
     abc1 \x0aabc2 \x0babc3xx \x0cabc4 \x0dabc5xx \x0d\x0aabc6 \x{0085}abc7 \x{2028}abc8 \x{2029}abc9 JUNK
@@ -379,23 +246,6 @@ can't tell the difference.) --/
 /.*$/8<any>
     \x{1ec5} 
     
-/-- This tests the stricter UTF-8 check according to RFC 3629. --/ 
-    
-/X/8
-    \x{0}\x{d7ff}\x{e000}\x{10ffff}
-    \x{d800}
-    \x{d800}\?
-    \x{da00}
-    \x{da00}\?
-    \x{dfff}
-    \x{dfff}\?
-    \x{110000}    
-    \x{110000}\?    
-    \x{2000000} 
-    \x{2000000}\? 
-    \x{7fffffff} 
-    \x{7fffffff}\? 
-
 /a\Rb/I8<bsr_anycrlf>
     a\rb
     a\nb
@@ -454,15 +304,9 @@ can't tell the difference.) --/
 
 /(\x{de})\1/
     \x{de}\x{de}
-    \x{123} 
 
 /X/8f<any> 
     A\x{1ec5}ABCXYZ
-
-/(*UTF8)\x{1234}/
-  abcd\x{1234}pqr
-
-/(*CRLF)(*UTF8)(*BSR_UNICODE)a\Rb/I
 
 /Xa{2,4}b/8
     X\P
@@ -745,53 +589,184 @@ can't tell the difference.) --/
 /X\W{3}X/8
     \PX
 
-/\h/SI
-
-/\h/SI8
-    ABC\x{09}
-    ABC\x{20}
-    ABC\x{a0}
-    ABC\x{1680}
-    ABC\x{180e}
-    ABC\x{2000}
-    ABC\x{202f} 
-    ABC\x{205f} 
-    ABC\x{3000} 
-
-/\v/SI
-
-/\v/SI8
-    ABC\x{0a}
-    ABC\x{0b}
-    ABC\x{0c}
-    ABC\x{0d}
-    ABC\x{85}
-    ABC\x{2028}
-
-/\R/SI
-
-/\R/SI8
-
-/\h*A/SI8
-    CDBABC
-    
-/\v+A/SI8
-
-/\s?xxx\s/8SI
-
 /\sxxx\s/8T1
-    AB\x{85}xxx\x{a0}XYZ
-    AB\x{a0}xxx\x{85}XYZ
-
-/\sxxx\s/I8ST1
     AB\x{85}xxx\x{a0}XYZ
     AB\x{a0}xxx\x{85}XYZ
 
 /\S \S/8T1
     \x{a2} \x{84} 
 
-/\S \S/I8ST1
-    \x{a2} \x{84} 
-    A Z 
+'A#Ñ…Ñ†'8x<any>BZ
+
+'A#Ñ…Ñ†
+  PQ'8x<any>BZ
+  
+/a+#Ñ…aa
+  z#XX?/8x<any>BZ 
+
+/a+#Ñ…aa
+  z#Ñ…?/8x<any>BZ 
+
+/\g{A}xxx#bXX(?'A'123)(?'A'456)/8x<any>BZ
+
+/\g{A}xxx#bÑ…(?'A'123)(?'A'456)/8x<any>BZ
+
+/^\cÄ£/8
+
+/(\R*)(.)/s8
+    \r\n
+    \r\r\n\n\r 
+    \r\r\n\n\r\n 
+
+/(\R)*(.)/s8
+    \r\n
+    \r\r\n\n\r 
+    \r\r\n\n\r\n 
+
+/[^\x{1234}]+/iS8I   
+
+/[^\x{1234}]+?/iS8I   
+
+/[^\x{1234}]++/iS8I   
+
+/[^\x{1234}]{2}/iS8I
+
+//<bsr_anycrlf><bsr_unicode>
+
+/f.*/
+    \P\Pfor
+
+/f.*/s
+    \P\Pfor
+
+/f.*/8
+    \P\Pfor
+
+/f.*/8s
+    \P\Pfor
+    
+/\x{d7ff}\x{e000}/8
+
+/\x{d800}/8
+
+/\x{dfff}/8 
+
+/\h+/8
+    \x{1681}\x{200b}\x{1680}\x{2000}\x{202f}\x{3000}
+    \x{3001}\x{2fff}\x{200a}\x{a0}\x{2000}
+
+/[\h\x{e000}]+/8BZ
+    \x{1681}\x{200b}\x{1680}\x{2000}\x{202f}\x{3000}
+    \x{3001}\x{2fff}\x{200a}\x{a0}\x{2000}
+
+/\H+/8
+    \x{1680}\x{180e}\x{167f}\x{1681}\x{180d}\x{180f}
+    \x{2000}\x{200a}\x{1fff}\x{200b}
+    \x{202f}\x{205f}\x{202e}\x{2030}\x{205e}\x{2060}
+    \x{a0}\x{3000}\x{9f}\x{a1}\x{2fff}\x{3001}
+
+/[\H\x{d7ff}]+/8BZ
+    \x{1680}\x{180e}\x{167f}\x{1681}\x{180d}\x{180f}
+    \x{2000}\x{200a}\x{1fff}\x{200b}
+    \x{202f}\x{205f}\x{202e}\x{2030}\x{205e}\x{2060}
+    \x{a0}\x{3000}\x{9f}\x{a1}\x{2fff}\x{3001}
+
+/\v+/8
+    \x{2027}\x{2030}\x{2028}\x{2029}
+    \x09\x0e\x{84}\x{86}\x{85}\x0a\x0b\x0c\x0d
+
+/[\v\x{e000}]+/8BZ
+    \x{2027}\x{2030}\x{2028}\x{2029}
+    \x09\x0e\x{84}\x{86}\x{85}\x0a\x0b\x0c\x0d
+
+/\V+/8
+    \x{2028}\x{2029}\x{2027}\x{2030}
+    \x{85}\x0a\x0b\x0c\x0d\x09\x0e\x{84}\x{86}
+
+/[\V\x{d7ff}]+/8BZ
+    \x{2028}\x{2029}\x{2027}\x{2030}
+    \x{85}\x0a\x0b\x0c\x0d\x09\x0e\x{84}\x{86}
+
+/\R+/8<bsr_unicode>
+    \x{2027}\x{2030}\x{2028}\x{2029}
+    \x09\x0e\x{84}\x{86}\x{85}\x0a\x0b\x0c\x0d
+
+/(..)\1/8
+    ab\P
+    aba\P
+    abab\P
+
+/(..)\1/8i
+    ab\P
+    abA\P
+    aBAb\P
+
+/(..)\1{2,}/8
+    ab\P
+    aba\P
+    abab\P
+    ababa\P
+    ababab\P
+    ababab\P\P
+    abababa\P
+    abababa\P\P
+
+/(..)\1{2,}/8i
+    ab\P
+    aBa\P
+    aBAb\P
+    AbaBA\P
+    abABAb\P
+    aBAbaB\P\P
+    abABabA\P
+    abaBABa\P\P
+
+/(..)\1{2,}?x/8i
+    ab\P
+    abA\P
+    aBAb\P
+    abaBA\P
+    abAbaB\P
+    abaBabA\P
+    abAbABaBx\P
+
+/./8<CRLF>
+    \r\P
+    \r\P\P 
+  
+/.{2,3}/8<CRLF>
+    \r\P 
+    \r\P\P
+    \r\r\P
+    \r\r\P\P
+    \r\r\r\P
+    \r\r\r\P\P     
+
+/.{2,3}?/8<CRLF>
+    \r\P 
+    \r\P\P
+    \r\r\P
+    \r\r\P\P
+    \r\r\r\P
+    \r\r\r\P\P     
+
+/[^\x{100}][^\x{1234}][^\x{ffff}][^\x{10000}][^\x{10ffff}]/8BZ
+
+/[^\x{100}][^\x{1234}][^\x{ffff}][^\x{10000}][^\x{10ffff}]/8BZi
+
+/[^\x{100}]*[^\x{10000}]+[^\x{10ffff}]??[^\x{8000}]{4,}[^\x{7fff}]{2,9}?[^\x{fffff}]{5,6}+/8BZ
+
+/[^\x{100}]*[^\x{10000}]+[^\x{10ffff}]??[^\x{8000}]{4,}[^\x{7fff}]{2,9}?[^\x{fffff}]{5,6}+/8BZi
+
+/(?<=\x{1234}\x{1234})\bxy/I8
+
+/(?<!^)ETA/8
+    ETA
+
+/\u0100/<JS>8BZ
+
+/[\u0100-\u0200]/<JS>8BZ
+
+/\ud800/<JS>8
 
 /-- End of testinput5 --/

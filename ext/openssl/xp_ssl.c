@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -391,6 +391,18 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 					stream->context, "ssl", "no_ticket", &val) && 
 				zval_is_true(*val)) {
 			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_TICKET);
+		}
+	}
+#endif
+
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+	{
+		zval **val;
+
+		if (stream->context && SUCCESS == php_stream_context_get_option(
+					stream->context, "ssl", "disable_compression", &val) &&
+				zval_is_true(*val)) {
+			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_COMPRESSION);
 		}
 	}
 #endif

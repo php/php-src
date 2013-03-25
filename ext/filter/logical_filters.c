@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -78,6 +78,11 @@ static int php_filter_parse_int(const char *str, unsigned int str_len, long *ret
 			str++;
 		default:
 			break;
+	}
+
+	if (*str == '0' && str + 1 == end) {
+		/* Special cases: +0 and -0 */
+		return 1;
 	}
 
 	/* must start with 1..9*/
@@ -775,6 +780,67 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 				}
 			}
 			break;
+	}
+}
+/* }}} */
+
+void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
+{
+	char *input = Z_STRVAL_P(value);
+	int input_len = Z_STRLEN_P(value);
+	int tokens, length, i, offset, exp_separator_set, exp_separator_len;
+	char separator;
+	char *exp_separator;
+	long ret = 0;
+	zval **option_val;
+
+	FETCH_STRING_OPTION(exp_separator, "separator");
+
+	if (exp_separator_set && exp_separator_len != 1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Separator must be exactly one character long");
+		RETURN_VALIDATION_FAILED;
+	}
+
+	if (14 == input_len) {
+		/* EUI-64 format: Four hexadecimal digits separated by dots. Less
+		 * commonly used but valid nonetheless.
+		 */
+		tokens = 3;
+		length = 4;
+		separator = '.';
+	} else if (17 == input_len && input[2] == '-') {
+		/* IEEE 802 format: Six hexadecimal digits separated by hyphens. */
+		tokens = 6;
+		length = 2;
+		separator = '-';
+	} else if (17 == input_len && input[2] == ':') {
+		/* IEEE 802 format: Six hexadecimal digits separated by colons. */
+		tokens = 6;
+		length = 2;
+		separator = ':';
+	} else {
+		RETURN_VALIDATION_FAILED;
+	}
+
+	if (exp_separator_set && separator != exp_separator[0]) {
+		RETURN_VALIDATION_FAILED;
+	}
+
+	/* Essentially what we now have is a set of tokens each consisting of
+	 * a hexadecimal number followed by a separator character. (With the
+	 * exception of the last token which does not have the separator.)
+	 */
+	for (i = 0; i < tokens; i++) {
+		offset = i * (length + 1);
+
+		if (i < tokens - 1 && input[offset + length] != separator) {
+			/* The current token did not end with e.g. a "." */
+			RETURN_VALIDATION_FAILED
+		}
+		if (php_filter_parse_hex(input + offset, length, &ret TSRMLS_CC) < 0) {
+			/* The current token is no valid hexadecimal digit */
+			RETURN_VALIDATION_FAILED
+		}
 	}
 }
 /* }}} */

@@ -23,7 +23,7 @@ $db = MySQLPDOTest::factory();
 		printf("[002] Wonderful, I can change the client version!\n");
 
 	$new_info = $db->getAttribute(PDO::ATTR_SERVER_INFO);
-	if ($new_info !== $info)
+	if (soundex($new_info) != soundex($info))
 		printf("[003] Did we change it from '%s' to '%s'?\n", $info, $info);
 
 	// lets hope we always run this in the same second as we did run the server info request...

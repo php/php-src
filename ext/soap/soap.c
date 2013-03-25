@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -463,19 +463,6 @@ zend_module_entry soap_module_entry = {
 ZEND_GET_MODULE(soap)
 #endif
 
-ZEND_INI_MH(OnUpdateCacheEnabled)
-{
-	if (OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC) == FAILURE) {
-		return FAILURE;
-	}
-	if (SOAP_GLOBAL(cache_enabled)) {
-		SOAP_GLOBAL(cache) = SOAP_GLOBAL(cache_mode);
-	} else {
-		SOAP_GLOBAL(cache) = 0;
-	}
-	return SUCCESS;
-}
-
 ZEND_INI_MH(OnUpdateCacheMode)
 {
 	char *p;
@@ -489,18 +476,43 @@ ZEND_INI_MH(OnUpdateCacheMode)
 
 	*p = (char)atoi(new_value);
 
-	if (SOAP_GLOBAL(cache_enabled)) {
-		SOAP_GLOBAL(cache) = SOAP_GLOBAL(cache_mode);
-	} else {
-		SOAP_GLOBAL(cache) = 0;
+	return SUCCESS;
+}
+
+static PHP_INI_MH(OnUpdateCacheDir)
+{
+	/* Only do the open_basedir check at runtime */
+	if (stage == PHP_INI_STAGE_RUNTIME || stage == PHP_INI_STAGE_HTACCESS) {
+		char *p;
+
+		if (memchr(new_value, '\0', new_value_length) != NULL) {
+			return FAILURE;
+		}
+
+		/* we do not use zend_memrchr() since path can contain ; itself */
+		if ((p = strchr(new_value, ';'))) {
+			char *p2;
+			p++;
+			if ((p2 = strchr(p, ';'))) {
+				p = p2 + 1;
+			}
+		} else {
+			p = new_value;
+		}
+
+		if (PG(open_basedir) && *p && php_check_open_basedir(p TSRMLS_CC)) {
+			return FAILURE;
+		}
 	}
+
+	OnUpdateString(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	return SUCCESS;
 }
 
 PHP_INI_BEGIN()
-STD_PHP_INI_ENTRY("soap.wsdl_cache_enabled",     "1", PHP_INI_ALL, OnUpdateCacheEnabled,
+STD_PHP_INI_ENTRY("soap.wsdl_cache_enabled",     "1", PHP_INI_ALL, OnUpdateBool,
                   cache_enabled, zend_soap_globals, soap_globals)
-STD_PHP_INI_ENTRY("soap.wsdl_cache_dir",         "/tmp", PHP_INI_ALL, OnUpdateString,
+STD_PHP_INI_ENTRY("soap.wsdl_cache_dir",         "/tmp", PHP_INI_ALL, OnUpdateCacheDir,
                   cache_dir, zend_soap_globals, soap_globals)
 STD_PHP_INI_ENTRY("soap.wsdl_cache_ttl",         "86400", PHP_INI_ALL, OnUpdateLong,
                   cache_ttl, zend_soap_globals, soap_globals)
@@ -1102,7 +1114,7 @@ PHP_METHOD(SoapServer, SoapServer)
 	memset(service, 0, sizeof(soapService));
 	service->send_errors = 1;
 
-	cache_wsdl = SOAP_GLOBAL(cache);
+	cache_wsdl = SOAP_GLOBAL(cache_enabled) ? SOAP_GLOBAL(cache_mode) : 0;
 
 	if (options != NULL) {
 		HashTable *ht = Z_ARRVAL_P(options);
@@ -2318,7 +2330,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "$wsdl must be string or null");
 	}
 
-	cache_wsdl = SOAP_GLOBAL(cache);
+	cache_wsdl = SOAP_GLOBAL(cache_enabled) ? SOAP_GLOBAL(cache_mode) : 0;
 
 	if (options != NULL) {
 		HashTable *ht = Z_ARRVAL_P(options);

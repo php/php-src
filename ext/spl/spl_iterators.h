@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -133,10 +133,7 @@ typedef struct _spl_dual_it_object {
 	} inner;
 	struct {
 		zval                 *data;
-		char                 *str_key;
-		uint                 str_key_len;
-		ulong                int_key;
-		int                  key_type; /* HASH_KEY_IS_STRING or HASH_KEY_IS_LONG */
+		zval                 *key;
 		int                  pos;
 	} current;
 	dual_it_type             dit_type;

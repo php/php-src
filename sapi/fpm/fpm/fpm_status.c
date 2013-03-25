@@ -148,7 +148,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 					"<tr><th>start time</th><td>%s</td></tr>\n"
 					"<tr><th>start since</th><td>%lu</td></tr>\n"
 					"<tr><th>accepted conn</th><td>%lu</td></tr>\n"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 					"<tr><th>listen queue</th><td>%u</td></tr>\n"
 					"<tr><th>max listen queue</th><td>%u</td></tr>\n"
 					"<tr><th>listen queue len</th><td>%d</td></tr>\n"
@@ -178,7 +178,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 						"<th>content length</th>"
 						"<th>user</th>"
 						"<th>script</th>"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 						"<th>last request cpu</th>"
 #endif
 						"<th>last request memory</th>"
@@ -197,7 +197,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 						"<td>%zu</td>"
 						"<td>%s</td>"
 						"<td>%s</td>"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 						"<td>%.2f</td>"
 #endif
 						"<td>%zu</td>"
@@ -220,7 +220,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"<start-time>%s</start-time>\n"
 				"<start-since>%lu</start-since>\n"
 				"<accepted-conn>%lu</accepted-conn>\n"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 				"<listen-queue>%u</listen-queue>\n"
 				"<max-listen-queue>%u</max-listen-queue>\n"
 				"<listen-queue-len>%d</listen-queue-len>\n"
@@ -249,7 +249,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 							"<content-length>%zu</content-length>"
 							"<user>%s</user>"
 							"<script>%s</script>"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 							"<last-request-cpu>%.2f</last-request-cpu>"
 #endif
 							"<last-request-memory>%zu</last-request-memory>"
@@ -270,7 +270,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"\"start time\":%s,"
 				"\"start since\":%lu,"
 				"\"accepted conn\":%lu,"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 				"\"listen queue\":%u,"
 				"\"max listen queue\":%u,"
 				"\"listen queue len\":%d,"
@@ -300,7 +300,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 					"\"content length\":%zu,"
 					"\"user\":\"%s\","
 					"\"script\":\"%s\","
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 					"\"last request cpu\":%.2f,"
 #endif
 					"\"last request memory\":%zu"
@@ -320,7 +320,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				"start time:           %s\n"
 				"start since:          %lu\n"
 				"accepted conn:        %lu\n"
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 				"listen queue:         %u\n"
 				"max listen queue:     %u\n"
 				"listen queue len:     %d\n"
@@ -362,7 +362,7 @@ int fpm_status_handle_request(TSRMLS_D) /* {{{ */
 				time_buffer,
 				now_epoch - scoreboard.start_epoch,
 				scoreboard.requests,
-#if HAVE_FPM_LQ
+#ifdef HAVE_FPM_LQ
 				scoreboard.lq,
 				scoreboard.lq_max,
 				scoreboard.lq_len,

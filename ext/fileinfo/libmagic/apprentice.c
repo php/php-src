@@ -63,9 +63,6 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.173 2011/12/08 12:38:24 rrt Exp $")
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
-#ifndef PHP_WIN32
-#include <dirent.h>
-#endif
 
 #define	EATAB {while (isascii((unsigned char) *l) && \
 		      isspace((unsigned char) *l))  ++l;}
@@ -759,8 +756,10 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 	size_t files = 0, maxfiles = 0;
 	char **filearr = NULL;
 	struct stat st;
-	DIR *dir;
-	struct dirent *d;
+	php_stream *dir;
+	php_stream_dirent d;
+
+	TSRMLS_FETCH();
 
 	ms->flags |= MAGIC_CHECK;	/* Enable checks for parsed files */
 
@@ -776,19 +775,20 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
         /* FIXME: Read file names and sort them to prevent
            non-determinism. See Debian bug #488562. */
 	if (php_sys_stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
-        int mflen;
-        char mfn[MAXPATHLEN];
-		dir = opendir(fn);
+		int mflen;
+		char mfn[MAXPATHLEN];
+
+		dir = php_stream_opendir(fn, REPORT_ERRORS, NULL);
 		if (!dir) {
 			errs++;
 			goto out;
 		}
-		while ((d = readdir(dir)) != NULL) {
-			if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d->d_name)) < 0) {
+		while (php_stream_readdir(dir, &d)) {
+			if ((mflen = snprintf(mfn, sizeof(mfn), "%s/%s", fn, d.d_name)) < 0) {
 				file_oomem(ms,
-				    strlen(fn) + strlen(d->d_name) + 2);
+				strlen(fn) + strlen(d.d_name) + 2);
 				errs++;
-				closedir(dir);
+				php_stream_closedir(dir);
 				goto out;
 			}
 			if (stat(mfn, &st) == -1 || !S_ISREG(st.st_mode)) {
@@ -801,14 +801,14 @@ apprentice_load(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 				if ((filearr = CAST(char **,
 				    realloc(filearr, mlen))) == NULL) {
 					file_oomem(ms, mlen);
-					closedir(dir);
+					php_stream_closedir(dir);
 					errs++;
 					goto out;
 				}
 			}
 			filearr[files++] = estrndup(mfn, (mflen > sizeof(mfn) - 1)? sizeof(mfn) - 1: mflen);
 		}
-		closedir(dir);
+		php_stream_closedir(dir);
 		qsort(filearr, files, sizeof(*filearr), cmpstrp);
 		for (i = 0; i < files; i++) {
 			load_1(ms, action, filearr[i], &errs, &marray,
@@ -2206,6 +2206,16 @@ apprentice_map(struct magic_set *ms, struct magic **magicp, uint32_t *nmagicp,
 		goto internal_loaded;
 	}
 
+#ifdef PHP_WIN32
+	/* Don't bother on windows with php_stream_open_wrapper,
+	return to give apprentice_load() a chance. */
+	if (php_stream_stat_path_ex(fn, 0, &st, NULL) == SUCCESS) {
+               if (st.sb.st_mode & S_IFDIR) {
+                       goto error2;
+               }
+       }
+#endif
+
 	dbname = mkdbname(ms, fn, 0);
 	if (dbname == NULL)
 		goto error2;
@@ -2397,7 +2407,11 @@ mkdbname(struct magic_set *ms, const char *fn, int strip)
 	/* Compatibility with old code that looked in .mime */
 	if (ms->flags & MAGIC_MIME) {
 		spprintf(&buf, MAXPATHLEN, "%.*s.mime%s", (int)(q - fn), fn, ext);
+#ifdef PHP_WIN32
+		if (VCWD_ACCESS(buf, R_OK) == 0) {
+#else
 		if (VCWD_ACCESS(buf, R_OK) != -1) {
+#endif
 			ms->flags &= MAGIC_MIME_TYPE;
 			return buf;
 		}

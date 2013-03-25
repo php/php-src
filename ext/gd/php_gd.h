@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -104,6 +104,7 @@ PHP_FUNCTION(imagefttext);
 
 PHP_FUNCTION(imagecreatetruecolor);
 PHP_FUNCTION(imagetruecolortopalette);
+PHP_FUNCTION(imagepalettetotruecolor);
 PHP_FUNCTION(imagesetthickness);
 PHP_FUNCTION(imagefilledellipse);
 PHP_FUNCTION(imagefilledarc);
@@ -124,6 +125,14 @@ PHP_FUNCTION(imagerotate);
 
 #ifdef HAVE_GD_BUNDLED
 PHP_FUNCTION(imageantialias);
+PHP_FUNCTION(imageflip);
+PHP_FUNCTION(imagecrop);
+PHP_FUNCTION(imagecropauto);
+PHP_FUNCTION(imagescale);
+PHP_FUNCTION(imageaffine);
+PHP_FUNCTION(imageaffinematrixget);
+PHP_FUNCTION(imageaffinematrixconcat);
+PHP_FUNCTION(imagesetinterpolation);
 #endif
 
 PHP_FUNCTION(imagesetthickness);

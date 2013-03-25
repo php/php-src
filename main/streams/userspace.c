@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -458,7 +458,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filen
 	us->wrapper = uwrap;
 
 	us->object = user_stream_create_object(uwrap, context TSRMLS_CC);
-	if(us == NULL) {
+	if(us->object == NULL) {
 		FG(user_stream_current_filename) = NULL;
 		efree(us);
 		return NULL;

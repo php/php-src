@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -195,7 +195,7 @@ static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, cha
 /* }}} */
 
 /* {{{ zend_user_it_get_current_key */
-ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC)
+ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *key TSRMLS_DC)
 {
 	zend_user_iterator *iter = (zend_user_iterator*)_iter;
 	zval *object = (zval*)iter->it.data;
@@ -203,42 +203,16 @@ ZEND_API int zend_user_it_get_current_key(zend_object_iterator *_iter, char **st
 
 	zend_call_method_with_0_params(&object, iter->ce, &iter->ce->iterator_funcs.zf_key, "key", &retval);
 
-	if (!retval) {
-		*int_key = 0;
-		if (!EG(exception))
-		{
+	if (retval) {
+		ZVAL_ZVAL(key, retval, 1, 1);
+	} else {
+		if (!EG(exception)) {
 			zend_error(E_WARNING, "Nothing returned from %s::key()", iter->ce->name);
 		}
-		return HASH_KEY_IS_LONG;
-	}
-	switch (Z_TYPE_P(retval)) {
-		default:
-			zend_error(E_WARNING, "Illegal type returned from %s::key()", iter->ce->name);
-		case IS_NULL:
-			*int_key = 0;
-			zval_ptr_dtor(&retval);
-			return HASH_KEY_IS_LONG;
 
-		case IS_STRING:
-			*str_key = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-			*str_key_len = Z_STRLEN_P(retval)+1;
-			zval_ptr_dtor(&retval);
-			return HASH_KEY_IS_STRING;
-
-		case IS_DOUBLE:
-			*int_key = (long)Z_DVAL_P(retval);
-			zval_ptr_dtor(&retval);
-			return HASH_KEY_IS_LONG;
-
-		case IS_RESOURCE:
-		case IS_BOOL:
-		case IS_LONG:
-			*int_key = (long)Z_LVAL_P(retval);
-			zval_ptr_dtor(&retval);
-			return HASH_KEY_IS_LONG;
+		ZVAL_LONG(key, 0);
 	}
 }
-/* }}} */
 
 /* {{{ zend_user_it_move_forward */
 ZEND_API void zend_user_it_move_forward(zend_object_iterator *_iter TSRMLS_DC)
@@ -452,7 +426,7 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint
 		zval_ptr_dtor(&retval);
 	}
 
-	if (result == FAILURE) {
+	if (result == FAILURE && !EG(exception)) {
 		zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "%s::serialize() must return a string or NULL", ce->name);
 	}
 	return result;

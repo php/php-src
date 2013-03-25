@@ -240,6 +240,7 @@ $ini_overwrites = array(
 		'ignore_repeated_errors=0',
 		'precision=14',
 		'memory_limit=128M',
+		'opcache.fast_shutdown=0',
 	);
 
 function write_information($show_html)
@@ -635,6 +636,9 @@ if (isset($argc) && $argc > 1) {
 				case 'x':
 					$environment['SKIP_SLOW_TESTS'] = 1;
 					break;
+				case '--offline':
+					$environment['SKIP_ONLINE_TESTS'] = 1;
+					break;
 				//case 'w'
 				case '-':
 					// repeat check with full switch
@@ -691,6 +695,8 @@ Options:
     -s <file>   Write output to <file>.
 
     -x          Sets 'SKIP_SLOW_TESTS' environmental variable.
+
+    --offline   Sets 'SKIP_ONLINE_TESTS' environmental variable.
 
     --verbose
     -v          Verbose mode.
@@ -797,14 +803,12 @@ HELP;
 			fclose($failed_tests_file);
 		}
 
-		if (count($test_files) || count($test_results)) {
-			compute_summary();
-			if ($html_output) {
-				fwrite($html_file, "<hr/>\n" . get_summary(false, true));
-			}
-			echo "=====================================================================";
-			echo get_summary(false, false);
+		compute_summary();
+		if ($html_output) {
+			fwrite($html_file, "<hr/>\n" . get_summary(false, true));
 		}
+		echo "=====================================================================";
+		echo get_summary(false, false);
 
 		if ($html_output) {
 			fclose($html_file);
@@ -816,7 +820,7 @@ HELP;
 
 		junit_save_xml();
 
-		if (getenv('REPORT_EXIT_STATUS') == 1 and preg_match('/FAILED(?: |$)/', implode(' ', $test_results))) {
+		if (getenv('REPORT_EXIT_STATUS') == 1 and $sum_results['FAILED']) {
 			exit(1);
 		}
 

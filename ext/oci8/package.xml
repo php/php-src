@@ -33,12 +33,12 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2011-11-18</date>
+ <date>2012-10-21</date>
  <time>12:00:00</time>
 
  <version>
-  <release>1.4.7</release>
-  <api>1.4.7</api>
+  <release>1.4.9</release>
+  <api>1.4.9</api>
  </version>
  <stability>
   <release>stable</release>
@@ -46,11 +46,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-  Fixed bug #59985 (show normal warning text for OCI_NO_DATA)
-  Fixed OCI8 part of bug #55748 (CVE-2011-4153: multiple NULL pointer dereferences with zend_strndup)
-  Fixed OCI8 part of bug #55301 (multiple null pointer dereferences with calloc)
-  Increased maximum Oracle error message buffer length for new Oracle 11.2.0.3 size
-  Improve internal initalization failure error messages
+   Re-fixed bug #60901 (Improve "tail" syntax for AIX installation)
  </notes>
  <contents>
   <dir name="/">
@@ -413,6 +409,42 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+ <version>
+  <release>1.4.8</release>
+  <api>1.4.8</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+   Fixed bug #63307 (Unused variable in oci8.c)
+   Fixed bug #63265 (Add ORA-00028 to the PHP_OCI_HANDLE_ERROR macro)
+   Fixed bug #60901 (Improve "tail" syntax for AIX installation)
+ </notes>
+</release>
+
+<release>
+ <version>
+  <release>1.4.7</release>
+  <api>1.4.7</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+  Fixed bug #59985 (show normal warning text for OCI_NO_DATA)
+  Fixed OCI8 part of bug #55748 (CVE-2011-4153: multiple NULL pointer dereferences with zend_strndup)
+  Fixed OCI8 part of bug #55301 (multiple null pointer dereferences with calloc)
+  Increased maximum Oracle error message buffer length for new Oracle 11.2.0.3 size
+  Improve internal initalization failure error messages
+ </notes>
+</release>
 
 <release>
  <version>

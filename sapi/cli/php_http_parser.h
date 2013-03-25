@@ -80,6 +80,7 @@ enum php_http_method
   , PHP_HTTP_HEAD
   , PHP_HTTP_POST
   , PHP_HTTP_PUT
+  , PHP_HTTP_PATCH
   /* pathological */
   , PHP_HTTP_CONNECT
   , PHP_HTTP_OPTIONS
@@ -102,6 +103,8 @@ enum php_http_method
   , PHP_HTTP_NOTIFY
   , PHP_HTTP_SUBSCRIBE
   , PHP_HTTP_UNSUBSCRIBE
+  /* unknown, not implemented */
+  , PHP_HTTP_NOT_IMPLEMENTED
   };
 
 
