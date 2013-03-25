@@ -356,7 +356,7 @@ extern int lock_file;
 #  error "Don't know how to define struct flock"
 # endif
 #endif
-void main() {}
+void main() { return 0; }
 ], [], [AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])], [])
   
   PHP_NEW_EXTENSION(opcache,
