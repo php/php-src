@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #64239 (Debug backtrace changed behavior since 5.4.10 or 5.4.11).
     (Dmitry, Laruence)
 
+- Opcache:
+  . Fixed bug # 64490 (struct flock undefined on FreeBSD). (Joe Watkins)
+
 21 Mar 2013, PHP 5.5.0 Beta 1
 
 - Core:

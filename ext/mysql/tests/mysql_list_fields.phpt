@@ -74,7 +74,7 @@ mysql_field_name(): id
 mysql_field_type(): int
 Field Offset 1
 mysql_field_flags()%s
-mysql_field_len(): 1
+mysql_field_len(): %s
 mysql_field_name(): label
 mysql_field_type(): string
 done!
