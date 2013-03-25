@@ -857,7 +857,7 @@ static void zend_do_delayed_early_binding(zend_op_array *op_array, zend_uint ear
 			}
 			opline_num = op_array->opcodes[opline_num].result.u.opline_num;
 		}
-		zend_restore_compiled_filename(orig_compiled_filename);
+		zend_restore_compiled_filename(orig_compiled_filename TSRMLS_CC);
 		CG(in_compilation) = orig_in_compilation;
 	}
 }

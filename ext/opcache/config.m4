@@ -325,6 +325,39 @@ int main() {
     AC_DEFINE(HAVE_SHM_MMAP_FILE, 1, [Define if you have mmap() SHM support])
     msg=yes,msg=no,msg=no)
   AC_MSG_RESULT([$msg])
+
+  AC_MSG_CHECKING(for known struct flock definition)
+  dnl Copied from ZendAccelerator.h
+  AC_TRY_RUN([
+#include <fcntl.h>
+#include <stdlib.h>
+
+#ifndef ZEND_WIN32
+extern int lock_file;
+
+# if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || (defined(__APPLE__) && defined(__MACH__)/* Darwin */) || defined(__OpenBSD__) || defined(__NetBSD__)
+#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
+                struct flock name = {start, len, -1, type, whence}
+# elif defined(__svr4__)
+#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
+                struct flock name = {type, whence, start, len}
+# elif defined(__linux__) || defined(__hpux)
+#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
+                struct flock name = {type, whence, start, len, 0}
+# elif defined(_AIX)
+#  if defined(_LARGE_FILES) || defined(__64BIT__)
+#   define FLOCK_STRUCTURE(name, type, whence, start, len) \
+                struct flock name = {type, whence, 0, 0, 0, start, len }
+#  else
+#   define FLOCK_STRUCTURE(name, type, whence, start, len) \
+                struct flock name = {type, whence, start, len}
+#  endif
+# else
+#  error "Don't know how to define struct flock"
+# endif
+#endif
+int main() { return 0; }
+], [], [AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])], [])
   
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
