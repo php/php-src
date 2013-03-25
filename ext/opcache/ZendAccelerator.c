@@ -2362,7 +2362,8 @@ static void zend_accel_init_shm(TSRMLS_D)
 	ZCSG(manual_restarts) = 0;
 
 	ZCSG(accelerator_enabled) = 1;
-	ZCSG(last_restart_time) = zend_accel_get_time();
+	ZCSG(start_time) = zend_accel_get_time();
+	ZCSG(last_restart_time) = 0;
 	ZCSG(restart_in_progress) = 0;
 
 	zend_shared_alloc_unlock(TSRMLS_C);
