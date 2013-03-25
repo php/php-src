@@ -1204,10 +1204,18 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
         } else {
 			*op_array_p = NULL;
 			if (type == ZEND_REQUIRE) {
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+#else
 				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename TSRMLS_CC);
+#endif
 				zend_bailout();
 			} else {
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+#else
 				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename TSRMLS_CC);
+#endif
 			}
 			return NULL;
     	}
@@ -1422,10 +1430,18 @@ static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int
 		        zend_stream_open(file_handle->filename, file_handle TSRMLS_CC) == FAILURE) {
 #endif
 				if (type == ZEND_REQUIRE) {
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+					zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+#else
 					zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename TSRMLS_CC);
+#endif
 					zend_bailout();
 				} else {
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+					zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+#else
 					zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename TSRMLS_CC);
+#endif
 				}
 				return NULL;
 		    }
@@ -1542,7 +1558,11 @@ static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int
 				zend_hash_quick_add(&EG(included_files), persistent_script->full_path, persistent_script->full_path_len + 1, persistent_script->hash_value, &dummy, sizeof(void *), NULL);
 			}
 		}
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+		zend_file_handle_dtor(file_handle);
+#else
 		zend_file_handle_dtor(file_handle TSRMLS_CC);
+#endif
 		from_shared_memory = 1;
 	}
 
