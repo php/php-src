@@ -93,7 +93,7 @@
 #ifndef ZEND_WIN32
 extern int lock_file;
 
-# if defined(__FreeBSD__) || (defined(__APPLE__) && defined(__MACH__)/* Darwin */) || defined(__OpenBSD__) || defined(__NetBSD__)
+# if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || (defined(__APPLE__) && defined(__MACH__)/* Darwin */) || defined(__OpenBSD__) || defined(__NetBSD__)
 #  define FLOCK_STRUCTURE(name, type, whence, start, len) \
 		struct flock name = {start, len, -1, type, whence}
 # elif defined(__svr4__)
