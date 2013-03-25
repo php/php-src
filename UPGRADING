@@ -308,7 +308,7 @@ PHP 5.5 UPGRADE NOTES
     . IMG_CROP_WHITE
     . IMG_CROP_SIDES
     . IMG_CROP_THRESHOLD
-  - Added constants for imagesetinterpolation, used bz imagescale
+  - Added constants for imagesetinterpolation, used by imagescale
     imagerotate and imageaffine:
     . IMG_BELL
     . IMG_BESSEL
@@ -331,12 +331,12 @@ PHP 5.5 UPGRADE NOTES
     . IMG_NEAREST_NEIGHBOUR
     . IMG_WEIGHTED4
     . IMG_TRIANGLE
-
-IMG_AFFINE_TRANSLATE
-IMG_AFFINE_SCALE
-IMG_AFFINE_ROTATE
-IMG_AFFINE_SHEAR_HORIZONTAL
-IMG_AFFINE_SHEAR_VERTICAL
+  - Added constants for imageaffinematrixget
+    . IMG_AFFINE_TRANSLATE
+    . IMG_AFFINE_SCALE
+    . IMG_AFFINE_ROTATE
+    . IMG_AFFINE_SHEAR_HORIZONTAL
+    . IMG_AFFINE_SHEAR_VERTICAL
 
 ========================================
 10. Changes to INI File Handling
