@@ -134,6 +134,12 @@ static inline int is_stream_path(const char *filename)
 	return ((*p == ':') && (p - filename > 1) && (p[1] == '/') && (p[2] == '/'));
 }
 
+static inline int is_cachable_stream_path(const char *filename)
+{
+	return memcmp(filename, "file://", sizeof("file://") - 1) == 0 ||
+	       memcmp(filename, "phar://", sizeof("file://") - 1) == 0;
+}
+
 /* O+ overrides PHP chdir() function and remembers the current working directory
  * in ZCG(cwd) and ZCG(cwd_len). Later accel_getcwd() can use stored value and
  * avoid getcwd() call.
@@ -1204,10 +1210,18 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
         } else {
 			*op_array_p = NULL;
 			if (type == ZEND_REQUIRE) {
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+#else
 				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename TSRMLS_CC);
+#endif
 				zend_bailout();
 			} else {
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+#else
 				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename TSRMLS_CC);
+#endif
 			}
 			return NULL;
     	}
@@ -1365,7 +1379,9 @@ static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int
 		!ZCG(enabled) || !accel_startup_ok ||
 		(!ZCG(counted) && !ZCSG(accelerator_enabled)) ||
 	    CG(interactive) ||
-	    (ZCSG(restart_in_progress) && accel_restart_is_active(TSRMLS_C))) {
+	    (ZCSG(restart_in_progress) && accel_restart_is_active(TSRMLS_C)) ||
+	    (is_stream_path(file_handle->filename) && 
+	     !is_cachable_stream_path(file_handle->filename))) {
 		/* The Accelerator is disabled, act as if without the Accelerator */
 		return accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
 	}
@@ -1422,10 +1438,18 @@ static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int
 		        zend_stream_open(file_handle->filename, file_handle TSRMLS_CC) == FAILURE) {
 #endif
 				if (type == ZEND_REQUIRE) {
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+					zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+#else
 					zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename TSRMLS_CC);
+#endif
 					zend_bailout();
 				} else {
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+					zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+#else
 					zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename TSRMLS_CC);
+#endif
 				}
 				return NULL;
 		    }
@@ -1542,7 +1566,11 @@ static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int
 				zend_hash_quick_add(&EG(included_files), persistent_script->full_path, persistent_script->full_path_len + 1, persistent_script->hash_value, &dummy, sizeof(void *), NULL);
 			}
 		}
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+		zend_file_handle_dtor(file_handle);
+#else
 		zend_file_handle_dtor(file_handle TSRMLS_CC);
+#endif
 		from_shared_memory = 1;
 	}
 
@@ -2342,7 +2370,8 @@ static void zend_accel_init_shm(TSRMLS_D)
 	ZCSG(manual_restarts) = 0;
 
 	ZCSG(accelerator_enabled) = 1;
-	ZCSG(last_restart_time) = zend_accel_get_time();
+	ZCSG(start_time) = zend_accel_get_time();
+	ZCSG(last_restart_time) = 0;
 	ZCSG(restart_in_progress) = 0;
 
 	zend_shared_alloc_unlock(TSRMLS_C);

@@ -275,6 +275,7 @@ typedef struct _zend_accel_shared_globals {
 	zend_accel_hash include_paths;    /* used "include_path" values    */
 
 	/* Directives & Maintenance */
+	time_t          start_time;
 	time_t          last_restart_time;
 	time_t          force_restart_time;
 	zend_bool       accelerator_enabled;

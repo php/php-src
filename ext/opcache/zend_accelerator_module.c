@@ -503,6 +503,7 @@ static ZEND_FUNCTION(opcache_get_status)
 	add_assoc_long(statistics, "num_cached_keys",    ZCSG(hash).num_entries);
 	add_assoc_long(statistics, "max_cached_keys",    ZCSG(hash).max_num_entries);
 	add_assoc_long(statistics, "hits", ZCSG(hits));
+	add_assoc_long(statistics, "start_time", ZCSG(start_time));
 	add_assoc_long(statistics, "last_restart_time", ZCSG(last_restart_time));
 	add_assoc_long(statistics, "oom_restarts", ZCSG(oom_restarts));
 	add_assoc_long(statistics, "wasted_restarts", ZCSG(wasted_restarts));
