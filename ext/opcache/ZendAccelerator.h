@@ -88,6 +88,7 @@
 #define PHP_5_2_X_API_NO		220060519
 #define PHP_5_3_X_API_NO		220090626
 #define PHP_5_4_X_API_NO		220100525
+#define PHP_5_5_X_API_NO		220121212
 
 /*** file locking ***/
 #ifndef ZEND_WIN32
