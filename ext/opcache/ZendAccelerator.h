@@ -27,7 +27,7 @@
 #endif
 
 #define ACCELERATOR_PRODUCT_NAME	"Zend OPcache"
-#define ACCELERATOR_VERSION "7.0.1-dev"
+#define ACCELERATOR_VERSION "7.0.1"
 /* 2 - added Profiler support, on 20010712 */
 /* 3 - added support for Optimizer's encoded-only-files mode */
 /* 4 - works with the new Optimizer, that supports the file format with licenses */
@@ -88,6 +88,7 @@
 #define PHP_5_2_X_API_NO		220060519
 #define PHP_5_3_X_API_NO		220090626
 #define PHP_5_4_X_API_NO		220100525
+#define PHP_5_5_X_API_NO		220121212
 
 /*** file locking ***/
 #ifndef ZEND_WIN32
@@ -274,6 +275,7 @@ typedef struct _zend_accel_shared_globals {
 	zend_accel_hash include_paths;    /* used "include_path" values    */
 
 	/* Directives & Maintenance */
+	time_t          start_time;
 	time_t          last_restart_time;
 	time_t          force_restart_time;
 	zend_bool       accelerator_enabled;

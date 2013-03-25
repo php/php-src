@@ -972,7 +972,11 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			zval result;
 
 			if (unary_op) {
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+				unary_op(&result, &ZEND_OP1_LITERAL(opline));
+#else
 				unary_op(&result, &ZEND_OP1_LITERAL(opline) TSRMLS_CC);
+#endif
 				literal_dtor(&ZEND_OP1_LITERAL(opline));
 			} else {
 				/* BOOL */

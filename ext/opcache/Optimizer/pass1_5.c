@@ -203,7 +203,11 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 
 				er = EG(error_reporting);
 				EG(error_reporting) = 0;
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+				if (unary_op(&result, &ZEND_OP1_LITERAL(opline)) != SUCCESS) {
+#else
 				if (unary_op(&result, &ZEND_OP1_LITERAL(opline) TSRMLS_CC) != SUCCESS) {
+#endif
 					EG(error_reporting) = er;
 					break;
 				}
