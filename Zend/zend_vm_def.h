@@ -2301,10 +2301,6 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 	EX(function_state).arguments = zend_vm_stack_push_args(opline->extended_value TSRMLS_CC);
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
-		ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
-		EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
-		EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
-
 		if (EX(function_state).function->common.arg_info) {
 			zend_uint i=0;
 			zval **p = (zval**)EX(function_state).arguments;
@@ -2315,15 +2311,22 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 				arg_count--;
 			}
 		}
-		if (!zend_execute_internal) {
-			/* saves one function call if zend_execute_internal is not used */
-			((zend_internal_function *) EX(function_state).function)->handler(opline->extended_value, EX_T(opline->result.u.var).var.ptr, EX(function_state).function->common.return_reference?&EX_T(opline->result.u.var).var.ptr:NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
-		} else {
-			zend_execute_internal(EXECUTE_DATA, RETURN_VALUE_USED(opline) TSRMLS_CC);
-		}
 
-		if (!RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
+		if (EXPECTED(EG(exception) == NULL)) {
+			ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
+			EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
+			EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
+
+			if (!zend_execute_internal) {
+				/* saves one function call if zend_execute_internal is not used */
+				((zend_internal_function *) EX(function_state).function)->handler(opline->extended_value, EX_T(opline->result.u.var).var.ptr, EX(function_state).function->common.return_reference?&EX_T(opline->result.u.var).var.ptr:NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+			} else {
+				zend_execute_internal(EXECUTE_DATA, RETURN_VALUE_USED(opline) TSRMLS_CC);
+			}
+
+			if (!RETURN_VALUE_USED(opline)) {
+				zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
+			}
 		}
 	} else if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		EX(original_return_value) = EG(return_value_ptr_ptr);
