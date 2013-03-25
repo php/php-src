@@ -19,7 +19,7 @@
 
 /* $Id$ */
 
-#if defined(__i386__) && defined(__GNUC__)
+#if (defined(__i386__) || defined(__native_client__)) && defined(__GNUC__)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	long __tmpvar; 													\

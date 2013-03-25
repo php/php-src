@@ -90,6 +90,10 @@ int main() {
   case $host_alias in
   *netware*)
     pthreads_working=yes
+    ;;
+  *nacl*)
+    pthreads_working=yes
+    ;;
   esac
 ]
 ) ] )dnl
