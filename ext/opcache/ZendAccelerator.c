@@ -134,6 +134,12 @@ static inline int is_stream_path(const char *filename)
 	return ((*p == ':') && (p - filename > 1) && (p[1] == '/') && (p[2] == '/'));
 }
 
+static inline int is_cachable_stream_path(const char *filename)
+{
+	return memcmp(filename, "file://", sizeof("file://") - 1) == 0 ||
+	       memcmp(filename, "phar://", sizeof("file://") - 1) == 0;
+}
+
 /* O+ overrides PHP chdir() function and remembers the current working directory
  * in ZCG(cwd) and ZCG(cwd_len). Later accel_getcwd() can use stored value and
  * avoid getcwd() call.
@@ -1373,7 +1379,9 @@ static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int
 		!ZCG(enabled) || !accel_startup_ok ||
 		(!ZCG(counted) && !ZCSG(accelerator_enabled)) ||
 	    CG(interactive) ||
-	    (ZCSG(restart_in_progress) && accel_restart_is_active(TSRMLS_C))) {
+	    (ZCSG(restart_in_progress) && accel_restart_is_active(TSRMLS_C)) ||
+	    (is_stream_path(file_handle->filename) && 
+	     !is_cachable_stream_path(file_handle->filename))) {
 		/* The Accelerator is disabled, act as if without the Accelerator */
 		return accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
 	}
