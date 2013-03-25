@@ -642,7 +642,7 @@ static inline int getPixelOverflowTC(gdImagePtr im, const int x, const int y, co
 		register int border;
 
 		if (y < im->cy1) {
-3			border = im->tpixels[0][im->cx1];
+			border = im->tpixels[0][im->cx1];
 			goto processborder;
 		}
 
