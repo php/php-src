@@ -46,7 +46,6 @@ TODO:
 #include <math.h>
 
 #include <gd.h>
-//#include "gd_resize.h"
 #include "gdhelpers.h"
 
 #ifdef _MSC_VER
@@ -300,7 +299,6 @@ static double filter_bessel(const double x)
 
 static double filter_blackman(const double x)
 {
-	//if (fabs(x)>1) return 0.0f;
 	return (0.42f+0.5f*(double)cos(M_PI*x)+0.08f*(double)cos(2.0f*M_PI*x));
 }
 
@@ -644,20 +642,17 @@ static inline int getPixelOverflowTC(gdImagePtr im, const int x, const int y, co
 		register int border;
 
 		if (y < im->cy1) {
-			//border = gdImageGetPixel(im, im->cx1, 0);
-			border = im->tpixels[0][im->cx1];
+3			border = im->tpixels[0][im->cx1];
 			goto processborder;
 		}
 
 		if (y < im->cy1) {
-			//border = gdImageGetPixel(im, im->cx1, 0);
 			border = im->tpixels[0][im->cx1];
 			goto processborder;
 		}
 
 		if (y > im->cy2) {
 			if (x >= im->cx1 && x <= im->cx1) {
-				//border = gdImageGetPixel(im, x,  im->cy2);
 				border = im->tpixels[im->cy2][x];
 				goto processborder;
 			} else {
@@ -667,13 +662,11 @@ static inline int getPixelOverflowTC(gdImagePtr im, const int x, const int y, co
 
 		/* y is bound safe at this point */
 		if (x < im->cx1) {
-			//border = gdImageGetPixel(im, im->cx1, y);
 			border = im->tpixels[y][im->cx1];
 			goto processborder;
 		}
 
 		if (x > im->cx2) {
-			//border = gdImageGetPixel(im, im->cx2, y);
 			border = im->tpixels[y][im->cx2];
 		}
 
@@ -1158,20 +1151,17 @@ static inline int getPixelOverflowColorTC(gdImagePtr im, const int x, const int 
 	} else {
 		register int border;
 		if (y < im->cy1) {
-			//border = gdImageGetPixel(im, im->cx1, 0);
 			border = im->tpixels[0][im->cx1];
 			goto processborder;
 		}
 
 		if (y < im->cy1) {
-			//border = gdImageGetPixel(im, im->cx1, 0);
 			border = im->tpixels[0][im->cx1];
 			goto processborder;
 		}
 
 		if (y > im->cy2) {
 			if (x >= im->cx1 && x <= im->cx1) {
-				//border = gdImageGetPixel(im, x,  im->cy2);
 				border = im->tpixels[im->cy2][x];
 				goto processborder;
 			} else {
@@ -1181,13 +1171,11 @@ static inline int getPixelOverflowColorTC(gdImagePtr im, const int x, const int 
 
 		/* y is bound safe at this point */
 		if (x < im->cx1) {
-			//border = gdImageGetPixel(im, im->cx1, y);
 			border = im->tpixels[y][im->cx1];
 			goto processborder;
 		}
 
 		if (x > im->cx2) {
-			//border = gdImageGetPixel(im, im->cx2, y);
 			border = im->tpixels[y][im->cx2];
 		}
 
