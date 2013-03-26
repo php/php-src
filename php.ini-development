@@ -47,7 +47,6 @@
 
 ; Expressions in the INI file are limited to bitwise operators and parentheses:
 ; |  bitwise OR
-; ^  bitwise XOR
 ; &  bitwise AND
 ; ~  bitwise NOT
 ; !  boolean NOT
