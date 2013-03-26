@@ -3262,7 +3262,7 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 
 	zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, assignment_value, opline->extended_value TSRMLS_CC);
 	var_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
-	Z_DELREF_PP(var_ptr);
+	zval_ptr_dtor(var_ptr);
 	*var_ptr = assignment_value;
 
 	CHECK_EXCEPTION();

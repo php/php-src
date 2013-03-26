@@ -3,6 +3,10 @@ PHP                                                                        NEWS
 ?? ??? 20??, PHP 5.5.0 Beta 2
 
 - Core:
+  . Fixed bug #64515 (Memoryleak when using the same variablename 2times in
+    function declaration). (Laruence)
+  . Fixed bug #64503 (Compilation fails with error: conflicting types for
+    'zendparse'). (Laruence)
   . Fixed bug #64239 (Debug backtrace changed behavior since 5.4.10 or 5.4.11).
     (Dmitry, Laruence)
 
