@@ -2213,7 +2213,6 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 			break;
 
 		default:
-			gdImageRotateGeneric(src, angle, bgcolor);
 			return gdImageRotateGeneric(src, angle, bgcolor);
 	}
 	return NULL;
