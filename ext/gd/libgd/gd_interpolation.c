@@ -2166,6 +2166,10 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor)
 {
 	const int angle_rounded = (int)floor(angle * 100);
+	
+	if (bgcolor < 0) {
+		return NULL;
+	}
 
 	/* no interpolation needed here */
 	switch (angle_rounded) {
