@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.14
 - Core
+  . Fixed bug #64515 (Memoryleak when using the same variablename 2times in
+    function declaration). (Laruence)
   . Fixed bug #64432 (more empty delimiter warning in strX methods). (Laruence)
   . Fixed bug #64417 (ArrayAccess::&offsetGet() in a trait causes fatal error).
     (Dmitry)
