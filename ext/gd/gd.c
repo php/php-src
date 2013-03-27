@@ -1439,6 +1439,9 @@ PHP_MINFO_FUNCTION(gd)
 #if defined(USE_GD_JISX0208) && defined(HAVE_GD_BUNDLED)
 	php_info_print_table_row(2, "JIS-mapped Japanese Font Support", "enabled");
 #endif
+#ifdef HAVE_GD_WEBP
+	php_info_print_table_row(2, "WebP Support", "enabled");
+#endif
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
