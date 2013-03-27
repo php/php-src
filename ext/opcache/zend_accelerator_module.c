@@ -177,8 +177,37 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 	return SUCCESS;
 }
 
+static ZEND_INI_MH(OnEnable)
+{
+	if (stage == ZEND_INI_STAGE_STARTUP ||
+	    stage == ZEND_INI_STAGE_SHUTDOWN ||
+	    stage == ZEND_INI_STAGE_DEACTIVATE) {
+		return OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	} else {
+		/* It may be only temporary disabled */
+		zend_bool *p;
+#ifndef ZTS
+		char *base = (char *) mh_arg2;
+#else
+		char *base = (char *) ts_resource(*((int *) mh_arg2));
+#endif
+
+		p = (zend_bool *) (base+(size_t) mh_arg1);
+		if ((new_value_length == 2 && strcasecmp("on", new_value) == 0) ||
+		    (new_value_length == 3 && strcasecmp("yes", new_value) == 0) ||
+		    (new_value_length == 4 && strcasecmp("true", new_value) == 0) ||
+			atoi(new_value) != 0) {
+			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporary enabled (it may be only disabled till the end of request)");
+			return FAILURE;
+		} else {
+			*p = 0;
+			return SUCCESS;
+		}
+	}
+}
+
 ZEND_INI_BEGIN()
-    STD_PHP_INI_BOOLEAN("opcache.enable"             , "1", PHP_INI_SYSTEM, OnUpdateBool, enabled                             , zend_accel_globals, accel_globals)
+    STD_PHP_INI_BOOLEAN("opcache.enable"             , "1", PHP_INI_ALL,    OnEnable,     enabled                             , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.use_cwd"            , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.use_cwd            , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.validate_timestamps", "1", PHP_INI_ALL   , OnUpdateBool, accel_directives.validate_timestamps, zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.inherited_hack"     , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.inherited_hack     , zend_accel_globals, accel_globals)
