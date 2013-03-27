@@ -284,7 +284,7 @@ static size_t zend_shared_alloc_get_largest_free_block(void)
 void *zend_shared_alloc(size_t size)
 {
 	int i;
-	unsigned int block_size = size + sizeof(zend_shared_memory_block_header);
+	unsigned int block_size = ZEND_ALIGNED_SIZE(size);
 	TSRMLS_FETCH();
 
 #if 1
@@ -298,19 +298,11 @@ void *zend_shared_alloc(size_t size)
 	}
 	for (i = 0; i < ZSMMG(shared_segments_count); i++) {
 		if (ZSMMG(shared_segments)[i]->size - ZSMMG(shared_segments)[i]->pos >= block_size) { /* found a valid block */
-			zend_shared_memory_block_header *p = (zend_shared_memory_block_header *) (((char *) ZSMMG(shared_segments)[i]->p) + ZSMMG(shared_segments)[i]->pos);
-			int remainder = block_size % PLATFORM_ALIGNMENT;
-			void *retval;
+			void *retval = (void *) (((char *) ZSMMG(shared_segments)[i]->p) + ZSMMG(shared_segments)[i]->pos);
 
-			if (remainder != 0) {
-				size += PLATFORM_ALIGNMENT - remainder;
-				block_size += PLATFORM_ALIGNMENT - remainder;
-			}
 			ZSMMG(shared_segments)[i]->pos += block_size;
 			ZSMMG(shared_free) -= block_size;
-			p->size = size;
-			retval = ((char *) p) + sizeof(zend_shared_memory_block_header);
-			memset(retval, 0, size);
+			memset(retval, 0, block_size);
 			return retval;
 		}
 	}
