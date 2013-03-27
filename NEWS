@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 5.5.0 Beta 2
+?? ??? 20??, PHP 5.5.0 Beta 3
+
+
+28 Mar 2013, PHP 5.5.0 Beta 2
 
 - Core:
   . Fixed bug #64515 (Memoryleak when using the same variablename 2times in
