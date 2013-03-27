@@ -1814,7 +1814,7 @@ PHP_FUNCTION(imagepalettetotruecolor)
 	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
 
 	if (gdImagePaletteToTrueColor(im) == 0) {
-		RETURN_TRUE;
+		RETURN_FALSE;
 	}
 
 	RETURN_TRUE;
