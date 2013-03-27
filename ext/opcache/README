@@ -63,7 +63,11 @@ Configuration Directives
 ------------------------
 
 opcache.enable (default "1")
-	OPcache On/Off switch. When set to Off, code is not optimized.
+	OPcache On/Off switch. When set to Off, code is not optimized and cached.
+
+opcache.enable_cli (default "0")
+	Enables the OPcache for the CLI version of PHP. It's mostly for testing
+	and debugging.
 
 opcache.memory_consumption (default "64")
 	The OPcache shared memory storage size. The amount of memory for storing
