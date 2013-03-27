@@ -1809,7 +1809,7 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 	zend_do_return(NULL, 0 TSRMLS_CC);
 
 	pass_two(CG(active_op_array) TSRMLS_CC);
-	zend_release_labels(TSRMLS_C);
+	zend_release_labels(0 TSRMLS_CC);
 
 	if (CG(active_class_entry)) {
 		zend_check_magic_method_implementation(CG(active_class_entry), (zend_function*)CG(active_op_array), E_COMPILE_ERROR TSRMLS_CC);
@@ -2391,13 +2391,14 @@ void zend_do_goto(const znode *label TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_release_labels(TSRMLS_D) /* {{{ */
+void zend_release_labels(int temporary TSRMLS_DC) /* {{{ */
 {
 	if (CG(context).labels) {
 		zend_hash_destroy(CG(context).labels);
 		FREE_HASHTABLE(CG(context).labels);
+		CG(context).labels = NULL;
 	}
-	if (!zend_stack_is_empty(&CG(context_stack))) {
+	if (!temporary && !zend_stack_is_empty(&CG(context_stack))) {
 		zend_compiler_context *ctx;
 
 		zend_stack_top(&CG(context_stack), (void**)&ctx);
