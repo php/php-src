@@ -1,6 +1,14 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2013, PHP 5.3.25
+
+
+
 ?? ??? 2013, PHP 5.3.24
+
+##
+## Add NEWS entries to 5.3.25 above, RM will merge and update NEWS if needed
+##
 
 - Core
   . Fixed bug #64370 (microtime(true) less than $_SERVER['REQUEST_TIME_FLOAT']).
