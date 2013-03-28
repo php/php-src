@@ -616,7 +616,7 @@ void zend_do_end_compilation(TSRMLS_D);
 void zend_do_label(znode *label TSRMLS_DC);
 void zend_do_goto(const znode *label TSRMLS_DC);
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
-void zend_release_labels(TSRMLS_D);
+void zend_release_labels(int temporary TSRMLS_DC);
 
 ZEND_API void function_add_ref(zend_function *function);
 

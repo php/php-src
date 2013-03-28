@@ -1,8 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2013, PHP 5.4.15
+
 ?? ??? 2013, PHP 5.4.14
 - Core
-  . Fixed bug #64515 (Memoryleak when using the same variablename 2times in
+  . Fixed bug #64529 (Ran out of opcode space). (Dmitry)
+  . Fixed bug #64515 (Memoryleak when using the same variablename two times in
     function declaration). (Laruence)
   . Fixed bug #64432 (more empty delimiter warning in strX methods). (Laruence)
   . Fixed bug #64417 (ArrayAccess::&offsetGet() in a trait causes fatal error).
@@ -66,7 +69,8 @@ PHP                                                                        NEWS
 - SOAP
   . Added check that soap.wsdl_cache_dir conforms to open_basedir
     (CVE-2013-1635). (Dmitry)
-  . Disabled external entities loading (CVE-2013-1643). (Dmitry)
+  . Disabled external entities loading (CVE-2013-1643, CVE-2013-1824). 
+    (Dmitry)
 
 - Phar:
   . Fixed timestamp update on Phar contents modification. (Dmitry)
