@@ -59,4 +59,4 @@ spawn %sphp -n -a
 Interactive %s
 
 %secho 'hello world';
-hello worl%s
+%sello worl%s
