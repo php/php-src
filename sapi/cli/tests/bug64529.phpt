@@ -2,8 +2,13 @@
 Bug #64529 (Ran out of opcode space)
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == "WIN") die("skip non windows test");
-if (!trim(`which expect`)) die "skip no expect installed";
+if (substr(PHP_OS, 0, 3) == "WIN") {
+	die("skip non windows test");
+}
+exec('which expect', $output, $ret);
+if ($ret) {
+	die "skip no expect installed";
+}
 ?>
 --FILE--
 <?php
