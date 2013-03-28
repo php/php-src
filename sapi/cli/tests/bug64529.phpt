@@ -7,7 +7,7 @@ if (substr(PHP_OS, 0, 3) == "WIN") {
 }
 exec('which expect', $output, $ret);
 if ($ret) {
-	die "skip no expect installed";
+	die("skip no expect installed");
 }
 ?>
 --FILE--
