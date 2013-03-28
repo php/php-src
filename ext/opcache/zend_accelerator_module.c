@@ -406,8 +406,6 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Max keys", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(oom_restarts));
 			php_info_print_table_row(2, "OOM restarts", buf);
-			snprintf(buf, sizeof(buf), "%ld", ZCSG(wasted_restarts));
-			php_info_print_table_row(2, "Wasted memory restarts", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(hash_restarts));
 			php_info_print_table_row(2, "Hash keys restarts", buf);
 			snprintf(buf, sizeof(buf), "%ld", ZCSG(manual_restarts));
@@ -535,7 +533,6 @@ static ZEND_FUNCTION(opcache_get_status)
 	add_assoc_long(statistics, "start_time", ZCSG(start_time));
 	add_assoc_long(statistics, "last_restart_time", ZCSG(last_restart_time));
 	add_assoc_long(statistics, "oom_restarts", ZCSG(oom_restarts));
-	add_assoc_long(statistics, "wasted_restarts", ZCSG(wasted_restarts));
 	add_assoc_long(statistics, "hash_restarts", ZCSG(hash_restarts));
 	add_assoc_long(statistics, "manual_restarts", ZCSG(manual_restarts));
 	add_assoc_long(statistics, "misses", ZSMMG(memory_exhausted)?ZCSG(misses):ZCSG(misses)-ZCSG(blacklist_misses));
