@@ -124,6 +124,11 @@ static size_t ps_buffer_cur_len; /* actual string length in ps_buffer */
 static int save_argc;
 static char** save_argv;
 
+/* 
+ * This holds the 'locally' allocated environ from the save_ps_args method.
+ * This is subsequently free'd at exit.
+ */
+static char** new_environ;
 
 /*
  * Call this method early, before any code has used the original argv passed in
@@ -145,7 +150,6 @@ char** save_ps_args(int argc, char** argv)
     {
         char* end_of_area = NULL;
         int non_contiguous_area = 0;
-        char** new_environ;
         int i;
 
         /*
@@ -405,9 +409,9 @@ void cleanup_ps_args(char **argv)
 #ifdef PS_USE_CLOBBER_ARGV
         {
             int i;
-            for (i = 0; environ[i] != NULL; i++)
-                free(environ[i]);
-            free(environ);
+            for (i = 0; new_environ[i] != NULL; i++)
+                free(new_environ[i]);
+            free(new_environ);
         }
 #endif /* PS_USE_CLOBBER_ARGV */
 
