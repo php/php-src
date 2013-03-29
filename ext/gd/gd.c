@@ -83,6 +83,10 @@ static void php_free_ps_enc(zend_rsrc_list_entry *rsrc TSRMLS_DC);
 # endif
 #endif
 
+#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
+# include "X11/xpm.h"
+#endif
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -123,6 +127,10 @@ int gdImageColorClosestHWB(gdImagePtr im, int r, int g, int b);
 #ifndef HAVE_GD_DYNAMIC_CTX_EX
 #define gdNewDynamicCtxEx(len, data, val) gdNewDynamicCtx(len, data)
 #endif
+
+/* as it is not really public, duplicate declaration here to avoid 
+   pointless warnings */
+int overflow2(int a, int b);
 
 /* Section Filters Declarations */
 /* IMPORTANT NOTE FOR NEW FILTER
@@ -1265,7 +1273,7 @@ PHP_MINIT_FUNCTION(gd)
 	REGISTER_LONG_CONSTANT("IMG_CROP_THRESHOLD", GD_CROP_THRESHOLD, CONST_CS | CONST_PERSISTENT);
 
 	
-	REGISTER_LONG_CONSTANT("IMG_BELL", GD_BILINEAR_FIXED, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_BELL", GD_BELL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_BESSEL", GD_BESSEL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_BILINEAR_FIXED", GD_BILINEAR_FIXED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_BICUBIC", GD_BICUBIC, CONST_CS | CONST_PERSISTENT);
@@ -2266,7 +2274,7 @@ PHP_FUNCTION(imagerotate)
 
 	ZEND_FETCH_RESOURCE(im_src, gdImagePtr, &SIM, -1, "Image", le_gd);
 
-	im_dst = gdImageRotateInterpolated(im_src, (float)degrees, color);
+	im_dst = gdImageRotateInterpolated(im_src, (const float)degrees, color);
 
 	if (im_dst != NULL) {
 		ZEND_REGISTER_RESOURCE(return_value, im_dst, le_gd);
@@ -5489,8 +5497,6 @@ PHP_FUNCTION(imageaffine)
 		pRect = NULL;
 	}
 
-
-	//int gdTransformAffineGetImage(gdImagePtr *dst, const gdImagePtr src, gdRectPtr src_area, const double affine[6]);
 	if (gdTransformAffineGetImage(&dst, src, pRect, affine) != GD_TRUE) {
 		RETURN_FALSE;
 	}

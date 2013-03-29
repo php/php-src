@@ -1,4 +1,5 @@
 /*
+ * The two pass scaling function is based on:
  * Filtered Image Rescaling
  * Based on Gems III
  *  - Schumacher general filtered image rescaling
@@ -13,6 +14,7 @@
  *
  * 	Initial sources code is avaibable in the Gems Source Code Packages:
  * 	http://www.acm.org/pubs/tog/GraphicsGems/GGemsIII.tar.gz
+ *
  */
 
 /*
@@ -32,6 +34,17 @@
 		  being casted to ILubyte (usually an int or char). Otherwise,
 		  artifacting occurs.
 
+*/
+
+/*
+	Additional functions are available for simple rotation or up/downscaling.
+	downscaling using the fixed point implementations are usually much faster
+	than the existing gdImageCopyResampled while having a similar or better
+	quality.
+	
+	For image rotations, the optimized versions have a lazy antialiasing for 
+	the edges of the images. For a much better antialiased result, the affine
+	function is recommended.
 */
 
 /*
@@ -803,10 +816,6 @@ int getPixelInterpolated(gdImagePtr im, const double x, const double y, const in
 	/* These methods use special implementations */
 	if (im->interpolation_id == GD_BILINEAR_FIXED || im->interpolation_id == GD_BICUBIC_FIXED || im->interpolation_id == GD_NEAREST_NEIGHBOUR) {
 		return -1;
-	}
-
-	/* Default to full alpha */
-	if (bgColor == -1) {
 	}
 
 	if (im->interpolation_id == GD_WEIGHTED4) {
@@ -1704,6 +1713,7 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor)
 {
 	float _angle = ((float) (-degrees / 180.0f) * (float)M_PI);
+	const int angle_rounded = (int)floor(degrees * 100);
 	const int src_w  = gdImageSX(src);
 	const int src_h = gdImageSY(src);
 	const unsigned int new_width = (unsigned int)(abs((int)(src_w * cos(_angle))) + abs((int)(src_h * sin(_angle))) + 0.5f);
@@ -1724,6 +1734,10 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 	const gdFixed f_slop = f_slop_x > 0 && f_slop_x > 0 ?
 							f_slop_x > f_slop_y ? gd_divfx(f_slop_y, f_slop_x) : gd_divfx(f_slop_x, f_slop_y)
 						: 0;
+
+	if (bgColor < 0) {
+		return NULL;
+	}
 
 	/* impact perf a bit, but not that much. Implementation for palette
 	   images can be done at a later point.
