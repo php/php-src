@@ -414,6 +414,7 @@ void cleanup_ps_args(char **argv)
             for (i = 0; frozen_environ[i] != NULL; i++)
                 free(frozen_environ[i]);
             free(frozen_environ);
+            free(new_environ);
         }
 #endif /* PS_USE_CLOBBER_ARGV */
 
