@@ -643,7 +643,7 @@ void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static 
 void zend_do_label(znode *label TSRMLS_DC);
 void zend_do_goto(const znode *label TSRMLS_DC);
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
-void zend_release_labels(TSRMLS_D);
+void zend_release_labels(int temporary TSRMLS_DC);
 
 ZEND_API void function_add_ref(zend_function *function);
 
@@ -856,6 +856,7 @@ END_EXTERN_C()
 #define ZEND_CALLSTATIC_FUNC_NAME   "__callstatic"
 #define ZEND_TOSTRING_FUNC_NAME     "__tostring"
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
+#define ZEND_INVOKE_FUNC_NAME       "__invoke"
 
 /* The following constants may be combined in CG(compiler_options)
  * to change the default compiler behavior */

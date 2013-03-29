@@ -1621,6 +1621,10 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
 					zend_error(E_WARNING, "The magic method __toString() must have public visibility and cannot be static");
 				}
+			} else if ((name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1))) {
+				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
+					zend_error(E_WARNING, "The magic method __invoke() must have public visibility and cannot be static");
+				}
 			}
 		} else {
 			char *class_lcname;
@@ -1677,6 +1681,10 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 					zend_error(E_WARNING, "The magic method __toString() must have public visibility and cannot be static");
 				}
 				CG(active_class_entry)->__tostring = (zend_function *) CG(active_op_array);
+			} else if ((name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1) && (!memcmp(lcname, ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1))) {
+				if (fn_flags & ((ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC) ^ ZEND_ACC_PUBLIC)) {
+					zend_error(E_WARNING, "The magic method __invoke() must have public visibility and cannot be static");
+				}
 			} else if (!(fn_flags & ZEND_ACC_STATIC)) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_ALLOW_STATIC;
 			}
@@ -1801,7 +1809,7 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 	zend_do_return(NULL, 0 TSRMLS_CC);
 
 	pass_two(CG(active_op_array) TSRMLS_CC);
-	zend_release_labels(TSRMLS_C);
+	zend_release_labels(0 TSRMLS_CC);
 
 	if (CG(active_class_entry)) {
 		zend_check_magic_method_implementation(CG(active_class_entry), (zend_function*)CG(active_op_array), E_COMPILE_ERROR TSRMLS_CC);
@@ -2383,13 +2391,14 @@ void zend_do_goto(const znode *label TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-void zend_release_labels(TSRMLS_D) /* {{{ */
+void zend_release_labels(int temporary TSRMLS_DC) /* {{{ */
 {
 	if (CG(context).labels) {
 		zend_hash_destroy(CG(context).labels);
 		FREE_HASHTABLE(CG(context).labels);
+		CG(context).labels = NULL;
 	}
-	if (!zend_stack_is_empty(&CG(context_stack))) {
+	if (!temporary && !zend_stack_is_empty(&CG(context_stack))) {
 		zend_compiler_context *ctx;
 
 		zend_stack_top(&CG(context_stack), (void**)&ctx);
@@ -3823,7 +3832,7 @@ static zend_bool zend_traits_method_compatibility_check(zend_function *fn, zend_
 	zend_uint other_flags = other_fn->common.scope->ce_flags;
 
 	return zend_do_perform_implementation_check(fn, other_fn TSRMLS_CC)
-		&& zend_do_perform_implementation_check(other_fn, fn TSRMLS_CC)
+		&& ((other_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) || zend_do_perform_implementation_check(other_fn, fn TSRMLS_CC))
 		&& ((fn_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC)) ==
 		    (other_flags & (ZEND_ACC_FINAL|ZEND_ACC_STATIC))); /* equal final and static qualifier */
 }

@@ -316,7 +316,7 @@ char* php_get_windows_name()
 	}
 
 	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion > 4 ) {
-		if (osvi.dwMajorVersion == 6)	{
+		if (osvi.dwMajorVersion == 6) {
 			if( osvi.dwMinorVersion == 0 ) {
 				if( osvi.wProductType == VER_NT_WORKSTATION ) {
 					major = "Windows Vista";
@@ -329,6 +329,12 @@ char* php_get_windows_name()
 					major = "Windows 7";
 				} else {
 					major = "Windows Server 2008 R2";
+				}
+			} else if ( osvi.dwMinorVersion == 2 ) {
+				if( osvi.wProductType == VER_NT_WORKSTATION )  {
+					major = "Windows 8";
+				} else {
+					major = "Windows Server 2012";
 				}
 			} else {
 				major = "Unknown Windows version";
