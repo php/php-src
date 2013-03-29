@@ -1295,7 +1295,7 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 		opline++;
 	}
 
-	zend_release_labels(TSRMLS_C);
+	zend_release_labels(1 TSRMLS_CC);
 
 	EG(return_value_ptr_ptr) = NULL;
 	EG(active_op_array) = CG(active_op_array);

@@ -1,14 +1,54 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 5.5.0 Beta 1
+?? ??? 20??, PHP 5.5.0 Beta 3
+
+
+28 Mar 2013, PHP 5.5.0 Beta 2
 
 - Core:
+  . Fixed bug #64515 (Memoryleak when using the same variablename 2times in
+    function declaration). (Laruence)
+  . Fixed bug #64503 (Compilation fails with error: conflicting types for
+    'zendparse'). (Laruence)
+  . Fixed bug #64239 (Debug backtrace changed behavior since 5.4.10 or 5.4.11).
+    (Dmitry, Laruence)
+  . Fixed bug #64523, allow XOR in php.ini. (Dejan Marjanovic, Lars)
+
+- Opcache:
+  . Fixed bug # 64490 (struct flock undefined on FreeBSD). (Joe Watkins)
+
+21 Mar 2013, PHP 5.5.0 Beta 1
+
+- Core:
+  . Added Zend Opcache extension and enable building it by default. 
+    More details here: https://wiki.php.net/rfc/optimizerplus. (Dmitry)
+  . Added array_column function which returns a column in a multidimensional
+    array. https://wiki.php.net/rfc/array_column. (Ben Ramsey)
   . Fixed bug #64354 (Unserialize array of objects whose class can't
     be autoloaded fail). (Laruence)
   . Added support for changing the process's title in CLI/CLI-Server SAPIs.
     The implementation is more robust that the proctitle PECL module. More
     details here: https://wiki.php.net/rfc/cli_process_title. (Keyur)
+  . Fixed bug #64370 (microtime(true) less than $_SERVER['REQUEST_TIME_FLOAT']).
+    (Anatol)
+  . Added support for non-scalar Iterator keys in foreach
+    (https://wiki.php.net/rfc/foreach-non-scalar-keys). (Nikita Popov)
 
+- mysqlnd
+  . Fixed bug #63530 (mysqlnd_stmt::bind_one_parameter crashes, uses wrong alloc
+    for stmt->param_bind). (Andrey)
+
+- DateTime
+  . Fixed bug #53437 (Crash when using unserialized DatePeriod instance).
+    (Gustavo, Derick, Anatol)
+  . Fixed bug #62852 (Unserialize Invalid Date causes crash). (Anatol)
+
+- SPL:
+  . Implement FR #48358 (Add SplDoublyLinkedList::add() to insert an element
+    at a given offset). (Mark Baker, David Soria Parra)
+
+- Zip:
+  . Bug #64452 (Zip crash intermittently). (Anatol)
 
 07 Mar 2013, PHP 5.5.0 Alpha 6
 
@@ -26,6 +66,10 @@ PHP                                                                        NEWS
 
 - DateTime:
   . Fixed bug #64359 (strftime crash with VS2012). (Anatol)
+
+- SNMP:
+  . Fixed bug #61981 (OO API, walk: $suffix_as_key is not working correctly).
+	(Boris Lytochkin)
 
 21 Feb 2013, PHP 5.5.0 Alpha 5
 

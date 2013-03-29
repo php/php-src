@@ -898,13 +898,10 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 			} else if (EXPECTED(!PZVAL_IS_REF(value))) {
 				Z_ADDREF_P(value);
 				*variable_ptr_ptr = value;
-				if (EXPECTED(variable_ptr != &EG(uninitialized_zval))) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(variable_ptr);
-					zval_dtor(variable_ptr);
-					efree(variable_ptr);
-				} else {
-					Z_DELREF_P(variable_ptr);
-				}
+				ZEND_ASSERT(variable_ptr != &EG(uninitialized_zval));
+				GC_REMOVE_ZVAL_FROM_BUFFER(variable_ptr);
+				zval_dtor(variable_ptr);
+				efree(variable_ptr);
 				return value;
 			} else {
 				goto copy_value;

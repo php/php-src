@@ -948,18 +948,16 @@ static void spl_fixedarray_it_get_current_data(zend_object_iterator *iter, zval 
 }
 /* }}} */
 
-static int spl_fixedarray_it_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static void spl_fixedarray_it_get_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC) /* {{{ */
 {
 	spl_fixedarray_it     *iterator = (spl_fixedarray_it *)iter;
 	spl_fixedarray_object *intern   = iterator->object;
 
 	if (intern->flags & SPL_FIXEDARRAY_OVERLOADED_KEY) {
-		return zend_user_it_get_current_key(iter, str_key, str_key_len, int_key TSRMLS_CC);
+		zend_user_it_get_current_key(iter, key TSRMLS_CC);
 	} else {
-		*int_key = (ulong) iterator->object->current;
-		return HASH_KEY_IS_LONG;
+		ZVAL_LONG(key, iterator->object->current);
 	}
-
 }
 /* }}} */
 
