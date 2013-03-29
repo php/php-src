@@ -128,7 +128,7 @@ static char** save_argv;
  * This holds the 'locally' allocated environ from the save_ps_args method.
  * This is subsequently free'd at exit.
  */
-static char** new_environ;
+static char** frozen_environ, **new_environ;
 
 /*
  * Call this method early, before any code has used the original argv passed in
@@ -182,7 +182,8 @@ char** save_ps_args(int argc, char** argv)
          * move the environment out of the way
          */
         new_environ = (char **) malloc((i + 1) * sizeof(char *));
-        if (!new_environ)
+        frozen_environ = (char **) malloc((i + 1) * sizeof(char *));
+        if (!new_environ || !frozen_environ)
             goto clobber_error;
         for (i = 0; environ[i] != NULL; i++)
         {
@@ -192,6 +193,7 @@ char** save_ps_args(int argc, char** argv)
         }
         new_environ[i] = NULL;
         environ = new_environ;
+        memcpy((char *)frozen_environ, (char *)new_environ, sizeof(char *) * (i + 1));
 
     }
 #endif /* PS_USE_CLOBBER_ARGV */
@@ -409,9 +411,9 @@ void cleanup_ps_args(char **argv)
 #ifdef PS_USE_CLOBBER_ARGV
         {
             int i;
-            for (i = 0; new_environ[i] != NULL; i++)
-                free(new_environ[i]);
-            free(new_environ);
+            for (i = 0; frozen_environ[i] != NULL; i++)
+                free(frozen_environ[i]);
+            free(frozen_environ);
         }
 #endif /* PS_USE_CLOBBER_ARGV */
 
