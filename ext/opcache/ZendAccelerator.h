@@ -111,6 +111,12 @@ extern int lock_file;
 #   define FLOCK_STRUCTURE(name, type, whence, start, len) \
 		struct flock name = {type, whence, start, len}
 #  endif
+# elif defined(HAVE_FLOCK_BSD)
+#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
+		struct flock name = {start, len, -1, type, whence}
+# elif defined(HAVE_FLOCK_LINUX)
+#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
+		struct flock name = {type, whence, start, len}
 # else
 #  error "Don't know how to define struct flock"
 # endif
