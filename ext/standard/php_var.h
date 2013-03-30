@@ -45,6 +45,7 @@ struct php_unserialize_data {
 	void *last;
 	void *first_dtor;
 	void *last_dtor;
+	HashTable *classes;
 };
 
 typedef struct php_unserialize_data* php_unserialize_data_t;

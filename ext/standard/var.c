@@ -945,7 +945,7 @@ PHP_FUNCTION(serialize)
 }
 /* }}} */
 
-/* {{{ proto mixed unserialize(string variable_representation)
+/* {{{ proto mixed unserialize(string variable_representation[, bool|array allowed_classes])
    Takes a string representation of variable and recreates it */
 PHP_FUNCTION(unserialize)
 {
@@ -953,8 +953,10 @@ PHP_FUNCTION(unserialize)
 	int buf_len;
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
+	zval *classes = NULL;
+	int all_allowed = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &buf, &buf_len, &classes) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -964,6 +966,34 @@ PHP_FUNCTION(unserialize)
 
 	p = (const unsigned char*) buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
+	if(classes != NULL) {
+		if(Z_TYPE_P(classes) == IS_ARRAY || !zend_is_true(classes)) {
+			all_allowed = 0;
+		}
+		if(!all_allowed) {
+			ALLOC_HASHTABLE(var_hash->classes);
+			zend_hash_init(var_hash->classes, (Z_TYPE_P(classes) == IS_ARRAY)?zend_hash_num_elements(Z_ARRVAL_P(classes)):0, NULL, NULL, 0);
+			if(Z_TYPE_P(classes) == IS_ARRAY) {
+				HashPosition pos;
+				HashTable *ht = Z_ARRVAL_P(classes);
+				zval **data;
+				ALLOCA_FLAG(use_heap)
+
+				zend_hash_internal_pointer_reset_ex(ht, &pos);
+				while(zend_hash_get_current_data_ex(ht, (void **)&data, &pos) == SUCCESS) {
+					char *lc_name;
+					convert_to_string_ex(data);
+	                lc_name = do_alloca(Z_STRLEN_PP(data) + 1, use_heap);
+	                zend_str_tolower_copy(lc_name, Z_STRVAL_PP(data), Z_STRLEN_PP(data));
+					zend_hash_add_empty_element(var_hash->classes, lc_name, Z_STRLEN_PP(data));
+	                free_alloca(lc_name, use_heap);
+					zend_hash_move_forward_ex(ht, &pos);
+				}
+
+			}
+		}
+	}
+
 	if (!php_var_unserialize(&return_value, &p, p + buf_len, &var_hash TSRMLS_CC)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		zval_dtor(return_value);

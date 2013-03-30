@@ -145,6 +145,10 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		efree(var_hash);
 		var_hash = next;
 	}
+	if((*var_hashx)->classes != NULL) {
+		zend_hash_destroy((*var_hashx)->classes);
+		(*var_hashx)->classes = NULL;
+	}
 }
 
 /* }}} */
@@ -190,6 +194,25 @@ static char *unserialize_str(const unsigned char **p, size_t *len, size_t maxlen
 	str[i] = 0;
 	*len = i;
 	return str;
+}
+
+static inline int unserialize_allowed_class(const char *class_name, int len, php_unserialize_data_t *var_hashx)
+{
+	char *lc_name;
+	int res;
+	ALLOCA_FLAG(use_heap)
+
+	if((*var_hashx)->classes == NULL) {
+		return 1;
+	}
+	if(!zend_hash_num_elements((*var_hashx)->classes)) {
+		return 0;
+	}
+	lc_name = do_alloca(len + 1, use_heap);
+	zend_str_tolower_copy(lc_name, class_name, len);
+	res = zend_hash_exists((*var_hashx)->classes, lc_name, len);
+	free_alloca(lc_name, use_heap);
+	return res;
 }
 
 #define YYFILL(n) do { } while (0)
@@ -682,6 +705,12 @@ object ":" uiv ":" ["]	{
 	class_name = estrndup(class_name, len);
 
 	do {
+		if(!unserialize_allowed_class(class_name, len, var_hash)) {
+			incomplete_class = 1;
+			ce = PHP_IC_ENTRY;
+			break;			
+		} 
+
 		/* Try to find class directly */
 		BG(serialize_lock) = 1;
 		if (zend_lookup_class(class_name, len2, &pce TSRMLS_CC) == SUCCESS) {
