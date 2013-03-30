@@ -145,10 +145,6 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 		efree(var_hash);
 		var_hash = next;
 	}
-	if((*var_hashx)->classes != NULL) {
-		zend_hash_destroy((*var_hashx)->classes);
-		(*var_hashx)->classes = NULL;
-	}
 }
 
 /* }}} */
@@ -196,21 +192,21 @@ static char *unserialize_str(const unsigned char **p, size_t *len, size_t maxlen
 	return str;
 }
 
-static inline int unserialize_allowed_class(const char *class_name, int len, php_unserialize_data_t *var_hashx)
+static inline int unserialize_allowed_class(const char *class_name, int len, HashTable *classes)
 {
 	char *lc_name;
 	int res;
 	ALLOCA_FLAG(use_heap)
 
-	if((*var_hashx)->classes == NULL) {
+	if(classes == NULL) {
 		return 1;
 	}
-	if(!zend_hash_num_elements((*var_hashx)->classes)) {
+	if(!zend_hash_num_elements(classes)) {
 		return 0;
 	}
 	lc_name = do_alloca(len + 1, use_heap);
 	zend_str_tolower_copy(lc_name, class_name, len);
-	res = zend_hash_exists((*var_hashx)->classes, lc_name, len);
+	res = zend_hash_exists(classes, lc_name, len);
 	free_alloca(lc_name, use_heap);
 	return res;
 }
@@ -288,8 +284,8 @@ static inline size_t parse_uiv(const unsigned char *p)
 	return result;
 }
 
-#define UNSERIALIZE_PARAMETER zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC
-#define UNSERIALIZE_PASSTHRU rval, p, max, var_hash TSRMLS_CC
+#define UNSERIALIZE_PARAMETER zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash, HashTable *classes TSRMLS_DC
+#define UNSERIALIZE_PASSTHRU rval, p, max, var_hash, classes TSRMLS_CC
 
 static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long elements, int objprops)
 {
@@ -298,7 +294,7 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 
 		ALLOC_INIT_ZVAL(key);
 
-		if (!php_var_unserialize(&key, p, max, NULL TSRMLS_CC)) {
+		if (!php_var_unserialize_ex(&key, p, max, NULL, classes TSRMLS_CC)) {
 			zval_dtor(key);
 			FREE_ZVAL(key);
 			return 0;
@@ -312,7 +308,7 @@ static inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, long
 
 		ALLOC_INIT_ZVAL(data);
 
-		if (!php_var_unserialize(&data, p, max, var_hash TSRMLS_CC)) {
+		if (!php_var_unserialize_ex(&data, p, max, var_hash, classes TSRMLS_CC)) {
 			zval_dtor(key);
 			FREE_ZVAL(key);
 			zval_dtor(data);
@@ -438,7 +434,14 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, long elements)
 # pragma optimize("", on)
 #endif
 
-PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
+PHPAPI int php_var_unserialize(zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC)
+{
+	HashTable *classes = NULL;
+	return php_var_unserialize_ex(UNSERIALIZE_PASSTHRU);
+}
+
+
+PHPAPI int php_var_unserialize_ex(UNSERIALIZE_PARAMETER)
 {
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval **rval_ref;
@@ -705,7 +708,7 @@ object ":" uiv ":" ["]	{
 	class_name = estrndup(class_name, len);
 
 	do {
-		if(!unserialize_allowed_class(class_name, len, var_hash)) {
+		if(!unserialize_allowed_class(class_name, len, classes)) {
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 			break;			
