@@ -2842,7 +2842,7 @@ PHP_METHOD(DateTime, __wakeup)
 	myht = Z_OBJPROP_P(object);
 
 	if (!php_date_initialize_from_hash(&return_value, &dateobj, myht TSRMLS_CC)) {
-		php_error(E_ERROR, "Invalid serialization data for DateTimeInterface object");
+		php_error(E_ERROR, "Invalid serialization data for DateTime object");
 	}
 }
 /* }}} */
