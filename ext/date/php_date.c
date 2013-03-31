@@ -500,6 +500,8 @@ const zend_function_entry date_funcs_immutable[] = {
 
 const zend_function_entry date_funcs_timezone[] = {
 	PHP_ME(DateTimeZone,              __construct,                 arginfo_timezone_open, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+	PHP_ME(DateTimeZone,              __wakeup,                    NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(DateTimeZone,              __set_state,                 NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getName,           timezone_name_get,           arginfo_timezone_method_name_get, 0)
 	PHP_ME_MAPPING(getOffset,         timezone_offset_get,         arginfo_timezone_method_offset_get, 0)
 	PHP_ME_MAPPING(getTransitions,    timezone_transitions_get,    arginfo_timezone_method_transitions_get, 0)
@@ -630,6 +632,8 @@ static HashTable *date_object_get_gc_interval(zval *object, zval ***table, int *
 static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC);
 static HashTable *date_object_get_gc_period(zval *object, zval ***table, int *n TSRMLS_DC);
 static HashTable *date_object_get_properties_period(zval *object TSRMLS_DC);
+static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC);
+static HashTable *date_object_get_gc_timezone(zval *object, zval ***table, int *n TSRMLS_DC);
 
 zval *date_interval_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC);
 void date_interval_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC);
@@ -2017,6 +2021,8 @@ static void date_register_classes(TSRMLS_D)
 	date_ce_timezone = zend_register_internal_class_ex(&ce_timezone, NULL, NULL TSRMLS_CC);
 	memcpy(&date_object_handlers_timezone, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	date_object_handlers_timezone.clone_obj = date_object_clone_timezone;
+	date_object_handlers_timezone.get_properties = date_object_get_properties_timezone;
+	date_object_handlers_timezone.get_gc = date_object_get_gc_timezone;
 
 #define REGISTER_TIMEZONE_CLASS_CONST_STRING(const_name, value) \
 	zend_declare_class_constant_long(date_ce_timezone, const_name, sizeof(const_name)-1, value TSRMLS_CC);
@@ -2161,6 +2167,14 @@ static HashTable *date_object_get_gc(zval *object, zval ***table, int *n TSRMLS_
 	return zend_std_get_properties(object TSRMLS_CC);
 }
 
+static HashTable *date_object_get_gc_timezone(zval *object, zval ***table, int *n TSRMLS_DC)
+{
+
+       *table = NULL;
+       *n = 0;
+       return zend_std_get_properties(object TSRMLS_CC);
+}
+
 static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 {
 	HashTable *props;
@@ -2267,6 +2281,50 @@ static zend_object_value date_object_clone_timezone(zval *this_ptr TSRMLS_DC)
 	}
 	
 	return new_ov;
+}
+
+static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC)
+{
+	HashTable *props;
+	zval *zv;
+	php_timezone_obj     *tzobj;
+
+
+	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
+
+	props = zend_std_get_properties(object TSRMLS_CC);
+
+	if (!tzobj->initialized) {
+		return props;
+	}
+
+	MAKE_STD_ZVAL(zv);
+	ZVAL_LONG(zv, tzobj->type);
+	zend_hash_update(props, "timezone_type", 14, &zv, sizeof(zval), NULL);
+
+	MAKE_STD_ZVAL(zv);
+	switch (tzobj->type) {
+		case TIMELIB_ZONETYPE_ID:
+			ZVAL_STRING(zv, tzobj->tzi.tz->name, 1);
+			break;
+		case TIMELIB_ZONETYPE_OFFSET: {
+			char *tmpstr = emalloc(sizeof("UTC+05:00"));
+
+			snprintf(tmpstr, sizeof("+05:00"), "%c%02d:%02d",
+			tzobj->tzi.utc_offset > 0 ? '-' : '+',
+			abs(tzobj->tzi.utc_offset / 60),
+			abs((tzobj->tzi.utc_offset % 60)));
+
+			ZVAL_STRING(zv, tmpstr, 0);
+			}
+			break;
+		case TIMELIB_ZONETYPE_ABBR:
+			ZVAL_STRING(zv, tzobj->tzi.z.abbr, 1);
+			break;
+	}
+	zend_hash_update(props, "timezone", 9, &zv, sizeof(zval), NULL);
+
+	return props;
 }
 
 static inline zend_object_value date_object_new_interval_ex(zend_class_entry *class_type, php_interval_obj **ptr TSRMLS_DC)
@@ -3640,6 +3698,82 @@ PHP_METHOD(DateTimeZone, __construct)
 		}
 	}
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+}
+/* }}} */
+
+static int php_date_timezone_initialize_from_hash(zval **return_value, php_timezone_obj **tzobj, HashTable *myht TSRMLS_DC)
+{
+	zval            **z_timezone = NULL;
+	zval            **z_timezone_type = NULL;
+	timelib_tzinfo  *tzi;
+	char			**offset;
+
+	if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS) {
+		if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS) {
+			convert_to_long(*z_timezone_type);
+			switch (Z_LVAL_PP(z_timezone_type)) {
+				case TIMELIB_ZONETYPE_OFFSET:
+					offset = malloc(sizeof(char) * (Z_STRLEN_PP(z_timezone) + 1));
+					*offset = (Z_STRVAL_PP(z_timezone));
+					if(**offset == '+'){
+						++*offset;
+						(*tzobj)->tzi.utc_offset = -1 * timelib_parse_tz_cor((char **)offset);
+					} else {
+						++*offset;
+						(*tzobj)->tzi.utc_offset = timelib_parse_tz_cor((char **)offset);
+					}
+					free(offset);
+					(*tzobj)->type = TIMELIB_ZONETYPE_OFFSET;
+					(*tzobj)->initialized = 1;
+					return SUCCESS;
+					break;
+				case TIMELIB_ZONETYPE_ABBR:
+				case TIMELIB_ZONETYPE_ID:
+					if (SUCCESS == timezone_initialize(&tzi, Z_STRVAL_PP(z_timezone) TSRMLS_CC)) {
+						(*tzobj)->type = TIMELIB_ZONETYPE_ID;
+						(*tzobj)->tzi.tz = tzi;
+						(*tzobj)->initialized = 1;
+						return SUCCESS;
+					}
+			}
+		}
+	}
+	return FAILURE;
+}
+
+/* {{{ proto DateTimeZone::__set_state()
+ *  */
+PHP_METHOD(DateTimeZone, __set_state)
+{
+	php_timezone_obj *tzobj;
+	zval             *array;
+	HashTable        *myht;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &array) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	myht = HASH_OF(array);
+
+	php_date_instantiate(date_ce_timezone, return_value TSRMLS_CC);
+	tzobj = (php_timezone_obj *) zend_object_store_get_object(return_value TSRMLS_CC);
+	php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht TSRMLS_CC);
+}
+/* }}} */
+
+/* {{{ proto DateTimeZone::__wakeup()
+ *  */
+PHP_METHOD(DateTimeZone, __wakeup)
+{
+	zval             *object = getThis();
+	php_timezone_obj *tzobj;
+	HashTable        *myht;
+
+	tzobj = (php_timezone_obj *) zend_object_store_get_object(object TSRMLS_CC);
+
+	myht = Z_OBJPROP_P(object);
+	
+	php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht TSRMLS_CC);
 }
 /* }}} */
 
