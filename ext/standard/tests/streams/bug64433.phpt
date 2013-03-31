@@ -2,10 +2,18 @@
 Bug #60180 ($_SERVER["PHP_SELF"] incorrect)
 --SKIPIF--
 <?php
-if(!file_exists(dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc")) die("skip");
+if(!file_exists(dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc")) 
+	die("skip could not found cli server script");
 $res = @include dirname(__FILE__)."/../../../../sapi/cli/tests/php_cli_server.inc";
 if(!$res) {
-	die("skip");
+	die("skip could not open cli server script");
+}
+
+ob_start();
+phpinfo();
+$curlwrappers = preg_match("/with-curlwrappers/", ob_get_clean());
+if ($curlwrappers) {
+	die("skip curl wrappers used");
 }
 ?>
 --FILE--
