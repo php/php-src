@@ -2529,13 +2529,13 @@ PHP_FUNCTION(array_count_values)
    value_key and optionally indexed by the index_key */
 PHP_FUNCTION(array_column)
 {
-	zval *zarray, *zcolumn, *zkey = NULL, **data, **zcolval, **zkeyval;
+	zval *zarray, *zcolumn, *zkey = NULL, *zcolumn_copy = NULL, *zkey_copy = NULL, **data, **zcolval, **zkeyval;
 	HashTable *arr_hash;
 	HashPosition pointer;
 	ulong column_idx = 0, key_idx = 0;
 	char *column = NULL, *key = NULL, *keyval = NULL;
 	int column_len = 0, key_len = 0, keyval_idx = -1;
-
+	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "az|z", &zarray, &zcolumn, &zkey) == FAILURE) {
 		return;
 	}
@@ -2552,9 +2552,11 @@ PHP_FUNCTION(array_column)
 			column_len = Z_STRLEN_P(zcolumn);
 			break;
 		case IS_OBJECT:
-			convert_to_string(zcolumn);
-			column = Z_STRVAL_P(zcolumn);
-			column_len = Z_STRLEN_P(zcolumn);
+			MAKE_STD_ZVAL(zcolumn_copy);
+			ZVAL_ZVAL(zcolumn_copy, zcolumn, 1, 0);
+			convert_to_string(zcolumn_copy);
+			column = Z_STRVAL_P(zcolumn_copy);
+			column_len = Z_STRLEN_P(zcolumn_copy);
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The column key should be either a string or an integer");
@@ -2574,9 +2576,11 @@ PHP_FUNCTION(array_column)
 				key_len = Z_STRLEN_P(zkey);
 				break;
 			case IS_OBJECT:
-				convert_to_string(zkey);
-				key = Z_STRVAL_P(zkey);
-				key_len = Z_STRLEN_P(zkey);
+				MAKE_STD_ZVAL(zkey_copy);
+				ZVAL_ZVAL(zkey_copy, zkey, 1, 0);
+				convert_to_string(zkey_copy);
+				key = Z_STRVAL_P(zkey_copy);
+				key_len = Z_STRLEN_P(zkey_copy);
 				break;
 			default:
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "The index key should be either a string or an integer");
@@ -2635,6 +2639,14 @@ PHP_FUNCTION(array_column)
 			}
 		}
 
+	}
+	if (zcolumn_copy) {
+		zval_dtor(zcolumn_copy);
+		FREE_ZVAL(zcolumn_copy);
+	}
+	if (zkey_copy) {
+		zval_dtor(zkey_copy);
+		FREE_ZVAL(zkey_copy);
 	}
 }
 /* }}} */
