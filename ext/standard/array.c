@@ -2529,7 +2529,7 @@ PHP_FUNCTION(array_count_values)
    value_key and optionally indexed by the index_key */
 PHP_FUNCTION(array_column)
 {
-	zval *zarray, *zcolumn, *zkey = NULL, *zcolumn_copy = NULL, *zkey_copy = NULL, **data, **zcolval, **zkeyval;
+	zval *zarray, *zcolumn, *zkey = NULL, **data, **zcolval, **zkeyval, *zcolumn_copy = NULL, *zkey_copy = NULL, *zkeyval_copy = NULL;
 	HashTable *arr_hash;
 	HashPosition pointer;
 	ulong column_idx = 0, key_idx = 0;
@@ -2621,8 +2621,14 @@ PHP_FUNCTION(array_column)
 							keyval = Z_STRVAL_PP(zkeyval);
 							break;
 						case IS_OBJECT:
-							convert_to_string(*zkeyval);
-							keyval = Z_STRVAL_PP(zkeyval);
+							if (!zkeyval_copy) {
+								MAKE_STD_ZVAL(zkeyval_copy);
+							} else {
+								zval_dtor(zkeyval_copy);
+							}
+							ZVAL_ZVAL(zkeyval_copy, *zkeyval, 1, 0)
+							convert_to_string(zkeyval_copy);
+							keyval = Z_STRVAL_P(zkeyval_copy);
 							break;
 						default:
 							keyval_idx = -1;
@@ -2647,6 +2653,10 @@ PHP_FUNCTION(array_column)
 	if (zkey_copy) {
 		zval_dtor(zkey_copy);
 		FREE_ZVAL(zkey_copy);
+	}
+	if (zkeyval_copy) {
+		zval_dtor(zkeyval_copy);
+		FREE_ZVAL(zkeyval_copy);
 	}
 }
 /* }}} */
