@@ -2,6 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.5.0 Beta 3
 
+- DateTime
+  . Fixed bug #54567 (DateTimeZone serialize/unserialize) (Lonny
+    Kapelushnik, Derick)
+  . Fixed bug #60774 (DateInterval::format("%a") is always zero when an
+    interval is created using the createFromDateString method) (Lonny
+    Kapelushnik, Derick)
 
 28 Mar 2013, PHP 5.5.0 Beta 2
 
