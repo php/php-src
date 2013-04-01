@@ -1312,6 +1312,12 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 					if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
 						zval_copy_ctor(&ZEND_OP1_LITERAL(last_op));
 					}
+#else
+					if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+						zval zv = ZEND_OP1_LITERAL(last_op);
+						zval_copy_ctor(&zv);
+						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv TSRMLS_CC);
+					}
 #endif
 					del_source(block, block->op1_to);
 					if (block->op1_to->op2_to) {
@@ -1341,6 +1347,12 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 #if ZEND_EXTENSION_API_NO < PHP_5_4_X_API_NO
 					if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
 						zval_copy_ctor(&ZEND_OP1_LITERAL(last_op));
+					}
+#else
+					if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+						zval zv = ZEND_OP1_LITERAL(last_op);
+						zval_copy_ctor(&zv);
+						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv TSRMLS_CC);
 					}
 #endif
 					del_source(block, block->op1_to);
