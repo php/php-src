@@ -1269,7 +1269,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 #endif
 }
 
-static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_array, zend_code_block *blocks)
+static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_array, zend_code_block *blocks TSRMLS_DC)
 {
 	/* last_op is the last opcode of the current block */
 	zend_op *last_op = (block->start_opline + block->len - 1);
@@ -2019,7 +2019,7 @@ static void zend_block_optimization(zend_op_array *op_array TSRMLS_DC)
 			if (!cur_block->access) {
 				continue;
 			}
-			zend_jmp_optimization(cur_block, op_array, cfg.blocks);
+			zend_jmp_optimization(cur_block, op_array, cfg.blocks TSRMLS_CC);
 		}
 
 		/* Eliminate unreachable basic blocks */
