@@ -1535,8 +1535,10 @@ PHPAPI int _php_stream_copy_to_stream_ex(php_stream *src, php_stream *dest, size
 
 			*len = didwrite;
 
-			/* read bytes match written */
-			if (mapped == didwrite) {
+			/* we've got at least 1 byte to read
+			 * less than 1 is an error
+			 * AND read bytes match written */
+			if (mapped > 0 && mapped == didwrite) {
 				return SUCCESS;
 			}
 			return FAILURE;
