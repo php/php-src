@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #64433 (follow_location parameter of context is ignored for most 
     response codes). (Sergey Akbarov)
+  . Fixed bug #64565 (copy doesn't report failure on partial copy). (Remi)
 
 ?? ??? 2013, PHP 5.4.14
 - Core:
