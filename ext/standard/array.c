@@ -2534,7 +2534,8 @@ PHP_FUNCTION(array_column)
 	HashPosition pointer;
 	ulong column_idx = 0, key_idx = 0;
 	char *column = NULL, *key = NULL, *keyval = NULL;
-	int column_len = 0, key_len = 0, keyval_idx = -1;
+	zend_bool use_keyval = 0;
+	int column_len = 0, key_len = 0, keyval_len = 0, keyval_idx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aZ|Z", &zarray, &zcolumn, &zkey) == FAILURE) {
 		return;
@@ -2602,21 +2603,19 @@ PHP_FUNCTION(array_column)
 
 			Z_ADDREF_PP(zcolval);
 
+			use_keyval = 0;
 			keyval = NULL;
-			keyval_idx = -1;
 
-			if (zkey) {
-				if (key && zend_hash_find(Z_ARRVAL_PP(data), key, key_len + 1, (void**)&zkeyval) == FAILURE) {
-					keyval_idx = -1;
-				} else if (!key && zend_hash_index_find(Z_ARRVAL_PP(data), key_idx, (void**)&zkeyval) == FAILURE) {
-					keyval_idx = -1;
-				} else {
-					switch (Z_TYPE_PP(zkeyval)) {
+			if (zkey && ((key && zend_hash_find(Z_ARRVAL_PP(data), key, key_len + 1, (void**)&zkeyval) != FAILURE) ||
+						 (!key && zend_hash_index_find(Z_ARRVAL_PP(data), key_idx, (void**)&zkeyval) != FAILURE))) {
+				use_keyval = 1;
+				switch (Z_TYPE_PP(zkeyval)) {
 						case IS_LONG:
 							keyval_idx = Z_LVAL_PP(zkeyval);
 							break;
 						case IS_STRING:
 							keyval = Z_STRVAL_PP(zkeyval);
+							keyval_len = Z_STRLEN_PP(zkeyval);
 							break;
 						case IS_OBJECT:
 							{
@@ -2624,26 +2623,29 @@ PHP_FUNCTION(array_column)
 								MAKE_COPY_ZVAL(zkeyval, strkey);
 								convert_to_string(strkey);
 								keyval = Z_STRVAL_P(strkey);
+								keyval_len = Z_STRLEN_P(strkey);
 							}
 							break;
 						default:
-							keyval_idx = -1;
-					}
+							use_keyval = 0;
 				}
 			}
-
-			if (keyval) {
-				add_assoc_zval(return_value, keyval, *zcolval);
-				if (strkey) {
-					zval_ptr_dtor(&strkey);
+			
+			if (use_keyval) {
+				if (keyval) {
+					add_assoc_zval_ex(return_value, keyval, keyval_len+1, *zcolval);
+					if (strkey) {
+						zval_ptr_dtor(&strkey);
+					}
 				}
-			} else if (keyval_idx != -1) {
-				add_index_zval(return_value, keyval_idx, *zcolval);
+				else {
+					add_index_zval(return_value, keyval_idx, *zcolval);
+				}
 			} else {
 				add_next_index_zval(return_value, *zcolval);
 			}
 		}
-
+		
 	}
 }
 /* }}} */
