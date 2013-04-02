@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.5.0 Beta 3
 
+- Core:
+  . Fixed bug #64565 (copy doesn't report failure on partial copy). (Remi)
+
 - DateTime
   . Fixed bug #54567 (DateTimeZone serialize/unserialize) (Lonny
     Kapelushnik, Derick)
