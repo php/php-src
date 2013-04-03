@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #64565 (copy doesn't report failure on partial copy). (Remi)
+  . Fixed bug #64555 (foreach no longer copies keys if they are interned).
+    (Nikita Popov)
 
 - CURL:
   . Added CURL_WRAPPERS_ENABLE constant. (Laruence)
