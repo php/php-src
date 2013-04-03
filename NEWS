@@ -5,7 +5,7 @@ PHP                                                                        NEWS
   . Fixed bug #64433 (follow_location parameter of context is ignored for most 
     response codes). (Sergey Akbarov)
 
-- CURL
+- CURL:
   . Add CURL_WRAPPERS_ENABLE constant. (Laruence)
 
 ?? ??? 2013, PHP 5.4.14
