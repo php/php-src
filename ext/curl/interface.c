@@ -914,6 +914,7 @@ PHP_MINIT_FUNCTION(curl)
 	}
 
 #ifdef PHP_CURL_URL_WRAPPERS
+	REGISTER_LONG_CONSTANT("CURL_WRAPPERS_ENABLE", 1, CONST_CS | CONST_PERSISTENT);
 # if HAVE_CURL_VERSION_INFO
 	{
 		curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
@@ -940,6 +941,8 @@ PHP_MINIT_FUNCTION(curl)
 	php_unregister_url_stream_wrapper("ldap");
 	php_register_url_stream_wrapper("ldap", &php_curl_wrapper TSRMLS_CC);
 # endif
+#else
+	REGISTER_LONG_CONSTANT("CURL_WRAPPERS_ENABLE", 0, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	return SUCCESS;
