@@ -2594,6 +2594,14 @@ PHP_FUNCTION(array_column)
 		if (Z_TYPE_PP(data) == IS_ARRAY) {
 			zval *strkey = NULL;
 
+			/* Find the current key/index of the array */
+			char *current_key;
+			uint current_key_len, hash_key_is_string = 0;
+			ulong current_index;
+			if (zend_hash_get_current_key_ex(arr_hash, &current_key, &current_key_len, &current_index, 0, &pointer) == HASH_KEY_IS_STRING) {
+				hash_key_is_string = 1;
+			}
+
 			if (column && zend_hash_find(Z_ARRVAL_PP(data), column, column_len + 1, (void**)&zcolval) == FAILURE) {
 				continue;
 			} else if (!column && zend_hash_index_find(Z_ARRVAL_PP(data), column_idx, (void**)&zcolval) == FAILURE) {
@@ -2639,8 +2647,12 @@ PHP_FUNCTION(array_column)
 				}
 			} else if (keyval_idx != -1) {
 				add_index_zval(return_value, keyval_idx, *zcolval);
-			} else {
+			} else if (zkey) {
 				add_next_index_zval(return_value, *zcolval);
+			} else if (hash_key_is_string) {
+				add_assoc_zval(return_value, current_key, *zcolval);
+			} else {
+				add_index_zval(return_value, current_index, *zcolval);
 			}
 		}
 
