@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #64565 (copy doesn't report failure on partial copy). (Remi)
 
+- CURL:
+  . Add CURL_WRAPPERS_ENABLE constant. (Laruence)
+
 - DateTime
   . Fixed bug #54567 (DateTimeZone serialize/unserialize) (Lonny
     Kapelushnik, Derick)

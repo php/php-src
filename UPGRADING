@@ -295,6 +295,7 @@ PHP 5.5 UPGRADE NOTES
 
 - cURL:
   - Added CURLOPT_SAFE_UPLOAD to be used with curl_setopt().
+  - Added CURL_WRAPPERS_ENABLE to reflect --with-curlwrappers
 
 - GD
   - Added constants for imageflip:
