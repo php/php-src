@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.15
 - Core:
+  . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
+	segfault). (Laruence)
   . Fixed bug #64433 (follow_location parameter of context is ignored for most 
     response codes). (Sergey Akbarov)
 
