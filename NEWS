@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
-	segfault). (Laruence)
+    segfault). (Laruence)
   . Fixed bug #64565 (copy doesn't report failure on partial copy). (Remi)
   . Fixed bug #64555 (foreach no longer copies keys if they are interned).
     (Nikita Popov)
