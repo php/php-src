@@ -2532,7 +2532,7 @@ PHP_FUNCTION(array_column)
 	zval *zarray, **zcolumn, **zkey = NULL, **data, **zcolval, **zkeyval;
 	HashTable *arr_hash;
 	HashPosition pointer;
-	ulong column_idx = 0, key_idx = 0;
+	ulong column_idx = 0, key_idx = 0, column_is_null = 0;
 	char *column = NULL, *key = NULL, *keyval = NULL;
 	int column_len = 0, key_len = 0, keyval_idx = -1;
 
@@ -2542,7 +2542,7 @@ PHP_FUNCTION(array_column)
 
 	switch (Z_TYPE_PP(zcolumn)) {
 		case IS_NULL:
-			column_idx = 0;
+			column_is_null = 1;
 			break;
 		case IS_LONG:
 			column_idx = Z_LVAL_PP(zcolumn);
@@ -2602,7 +2602,9 @@ PHP_FUNCTION(array_column)
 				hash_key_is_string = 1;
 			}
 
-			if (column && zend_hash_find(Z_ARRVAL_PP(data), column, column_len + 1, (void**)&zcolval) == FAILURE) {
+			if (column_is_null) {
+				zcolval = data;
+			} else if (column && zend_hash_find(Z_ARRVAL_PP(data), column, column_len + 1, (void**)&zcolval) == FAILURE) {
 				continue;
 			} else if (!column && zend_hash_index_find(Z_ARRVAL_PP(data), column_idx, (void**)&zcolval) == FAILURE) {
 				continue;
