@@ -9,7 +9,7 @@ if(!$res) {
 	die("skip could not open cli server script");
 }
 
-if (CURL_WRAPPERS_ENABLE) {
+if (CURL_WRAPPERS_ENABLED) {
 	die("skip curl wrappers used");
 }
 ?>
