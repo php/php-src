@@ -11,7 +11,7 @@ PHP                                                                        NEWS
   . Fixed bugs #47675 and #64577 (fd leak on Solaris)
 
 - CURL:
-  . Added CURL_WRAPPERS_ENABLE constant. (Laruence)
+  . Added CURL_WRAPPERS_ENABLED constant. (Laruence)
 
 - DateTime
   . Fixed bug #54567 (DateTimeZone serialize/unserialize) (Lonny
