@@ -6,6 +6,7 @@ PHP                                                                        NEWS
     segfault). (Laruence)
   . Fixed bug #64433 (follow_location parameter of context is ignored for most 
     response codes). (Sergey Akbarov)
+  . Fixed bugs #47675 and #64577 (fd leak on Solaris)
 
 - CURL:
   . Add CURL_WRAPPERS_ENABLE constant. (Laruence)
