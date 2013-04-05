@@ -5,7 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
     segfault). (Laruence)
-
+  . Fixed bugs #47675 and #64577 (fd leak on Solaris)
 
 ?? ??? 2013, PHP 5.3.24
 
