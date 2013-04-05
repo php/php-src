@@ -9,7 +9,7 @@ PHP                                                                        NEWS
   . Fixed bugs #47675 and #64577 (fd leak on Solaris)
 
 - CURL:
-  . Add CURL_WRAPPERS_ENABLE constant. (Laruence)
+  . Add CURL_WRAPPERS_ENABLED constant. (Laruence)
 
 ?? ??? 2013, PHP 5.4.14
 - Core:
