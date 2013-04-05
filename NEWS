@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug #64565 (copy doesn't report failure on partial copy). (Remi)
   . Fixed bug #64555 (foreach no longer copies keys if they are interned).
     (Nikita Popov)
+  . Fixed bugs #47675 and #64577 (fd leak on Solaris)
 
 - CURL:
   . Added CURL_WRAPPERS_ENABLE constant. (Laruence)
