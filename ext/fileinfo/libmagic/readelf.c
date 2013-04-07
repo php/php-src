@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readelf.c,v 1.90 2011/08/23 08:01:12 christos Exp $")
+FILE_RCSID("@(#)$File: readelf.c,v 1.97 2013/03/06 03:35:30 christos Exp $")
 #endif
 
 #ifdef BUILTIN_ELF
@@ -139,9 +139,9 @@ getu64(int swap, uint64_t value)
 			 ? (void *) &sh32			\
 			 : (void *) &sh64)
 #define xsh_sizeof	(clazz == ELFCLASS32			\
-			 ? sizeof sh32				\
-			 : sizeof sh64)
-#define xsh_size	(clazz == ELFCLASS32			\
+			 ? sizeof(sh32)				\
+			 : sizeof(sh64))
+#define xsh_size	(size_t)(clazz == ELFCLASS32		\
 			 ? elf_getu32(swap, sh32.sh_size)	\
 			 : elf_getu64(swap, sh64.sh_size))
 #define xsh_offset	(off_t)(clazz == ELFCLASS32		\
@@ -150,12 +150,15 @@ getu64(int swap, uint64_t value)
 #define xsh_type	(clazz == ELFCLASS32			\
 			 ? elf_getu32(swap, sh32.sh_type)	\
 			 : elf_getu32(swap, sh64.sh_type))
+#define xsh_name    	(clazz == ELFCLASS32			\
+			 ? elf_getu32(swap, sh32.sh_name)	\
+			 : elf_getu32(swap, sh64.sh_name))
 #define xph_addr	(clazz == ELFCLASS32			\
 			 ? (void *) &ph32			\
 			 : (void *) &ph64)
 #define xph_sizeof	(clazz == ELFCLASS32			\
-			 ? sizeof ph32				\
-			 : sizeof ph64)
+			 ? sizeof(ph32)				\
+			 : sizeof(ph64))
 #define xph_type	(clazz == ELFCLASS32			\
 			 ? elf_getu32(swap, ph32.p_type)	\
 			 : elf_getu32(swap, ph64.p_type))
@@ -357,7 +360,7 @@ dophn_core(struct magic_set *ms, int clazz, int swap, int fd, off_t off,
 #endif
 
 private size_t
-donote(struct magic_set *ms, unsigned char *nbuf, size_t offset, size_t size,
+donote(struct magic_set *ms, void *vbuf, size_t offset, size_t size,
     int clazz, int swap, size_t align, int *flags)
 {
 	Elf32_Nhdr nh32;
@@ -367,6 +370,7 @@ donote(struct magic_set *ms, unsigned char *nbuf, size_t offset, size_t size,
 	int os_style = -1;
 #endif
 	uint32_t namesz, descsz;
+	unsigned char *nbuf = CAST(unsigned char *, vbuf);
 
 	(void)memcpy(xnh_addr, &nbuf[offset], xnh_sizeof);
 	offset += xnh_sizeof;
@@ -415,6 +419,10 @@ donote(struct magic_set *ms, unsigned char *nbuf, size_t offset, size_t size,
 	    (FLAGS_DID_NOTE|FLAGS_DID_BUILD_ID))
 		goto core;
 
+	if (namesz == 5 && strcmp((char *)&nbuf[noff], "SuSE") == 0 &&
+	    xnh_type == NT_GNU_VERSION && descsz == 2) {
+	    file_printf(ms, ", for SuSE %d.%d", nbuf[doff], nbuf[doff + 1]);
+	}
 	if (namesz == 4 && strcmp((char *)&nbuf[noff], "GNU") == 0 &&
 	    xnh_type == NT_GNU_VERSION && descsz == 16) {
 		uint32_t desc[4];
@@ -456,13 +464,14 @@ donote(struct magic_set *ms, unsigned char *nbuf, size_t offset, size_t size,
 
 	if (namesz == 4 && strcmp((char *)&nbuf[noff], "GNU") == 0 &&
 	    xnh_type == NT_GNU_BUILD_ID && (descsz == 16 || descsz == 20)) {
-	    uint32_t desc[5], i;
-	    if (file_printf(ms, ", BuildID[%s]=0x", descsz == 16 ? "md5/uuid" :
+	    uint8_t desc[20];
+	    uint32_t i;
+	    if (file_printf(ms, ", BuildID[%s]=", descsz == 16 ? "md5/uuid" :
 		"sha1") == -1)
 		    return size;
 	    (void)memcpy(desc, &nbuf[doff], descsz);
-	    for (i = 0; i < descsz >> 2; i++)
-		if (file_printf(ms, "%.8x", desc[i]) == -1)
+	    for (i = 0; i < descsz; i++)
+		if (file_printf(ms, "%02x", desc[i]) == -1)
 		    return size;
 	    *flags |= FLAGS_DID_BUILD_ID;
 	}
@@ -841,15 +850,16 @@ static const cap_desc_t cap_desc_386[] = {
 
 private int
 doshn(struct magic_set *ms, int clazz, int swap, int fd, off_t off, int num,
-    size_t size, off_t fsize, int *flags, int mach)
+    size_t size, off_t fsize, int *flags, int mach, int strtab)
 {
 	Elf32_Shdr sh32;
 	Elf64_Shdr sh64;
 	int stripped = 1;
 	void *nbuf;
-	off_t noff, coff;
+	off_t noff, coff, name_off;
 	uint64_t cap_hw1 = 0;	/* SunOS 5.x hardware capabilites */
 	uint64_t cap_sf1 = 0;	/* SunOS 5.x software capabilites */
+	char name[50];
 
 	if (size != xsh_sizeof) {
 		if (file_printf(ms, ", corrupted section header size") == -1)
