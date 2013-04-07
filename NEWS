@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Drop support for bison < 2.4 when building PHP from GIT source. 
     (Laruence)
 
+- Fileinfo:
+  . Upgraded libmagic to 5.14. (Anatol)
+
 28 Mar 2013, PHP 5.5.0 Beta 2
 
 - Core:
