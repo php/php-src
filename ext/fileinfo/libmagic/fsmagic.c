@@ -32,7 +32,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: fsmagic.c,v 1.64 2011/08/14 09:03:12 christos Exp $")
+FILE_RCSID("@(#)$File: fsmagic.c,v 1.67 2013/03/17 15:43:20 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -92,15 +92,18 @@ handle_mime(struct magic_set *ms, int mime, const char *str)
 protected int
 file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *stream)
 {
+	int ret, did = 0;
 	int mime = ms->flags & MAGIC_MIME;
 	TSRMLS_FETCH();
 
 	if (ms->flags & MAGIC_APPLE)
 		return 0;
 
-	if (!fn && !stream) {
+	if (fn == NULL && !stream) {
 		return 0;
 	}
+
+#define COMMA	(did++ ? ", " : "")
 
 	if (stream) {
 		php_stream_statbuf ssb;
@@ -122,20 +125,21 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 		}
 	}
 
+	ret = 1;
 	if (!mime) {
 #ifdef S_ISUID
 		if (sb->st_mode & S_ISUID) 
-			if (file_printf(ms, "setuid ") == -1)
+			if (file_printf(ms, "%ssetuid", COMMA) == -1)
 				return -1;
 #endif
 #ifdef S_ISGID
 		if (sb->st_mode & S_ISGID) 
-			if (file_printf(ms, "setgid ") == -1)
+			if (file_printf(ms, "%ssetgid", COMMA) == -1)
 				return -1;
 #endif
 #ifdef S_ISVTX
 		if (sb->st_mode & S_ISVTX) 
-			if (file_printf(ms, "sticky ") == -1)
+			if (file_printf(ms, "%ssticky", COMMA) == -1)
 				return -1;
 #endif
 	}
@@ -150,6 +154,7 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 			 * are block special files and go on to the next file.
 			 */
 			if ((ms->flags & MAGIC_DEVICES) != 0) {
+				ret = 0;
 				break;
 			}
 			if (mime) {
@@ -158,18 +163,18 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 			} else {
 #  ifdef HAVE_STAT_ST_RDEV
 #   ifdef dv_unit
-				if (file_printf(ms, "character special (%d/%d/%d)",
-				    major(sb->st_rdev), dv_unit(sb->st_rdev),
+			if (file_printf(ms, "%scharacter special (%d/%d/%d)",
+			    COMMA, major(sb->st_rdev), dv_unit(sb->st_rdev),
 						dv_subunit(sb->st_rdev)) == -1)
 					return -1;
 #   else
-				if (file_printf(ms, "character special (%ld/%ld)",
-				    (long)major(sb->st_rdev), (long)minor(sb->st_rdev))
-				    == -1)
+			if (file_printf(ms, "%scharacter special (%ld/%ld)",
+			    COMMA, (long)major(sb->st_rdev),
+			    (long)minor(sb->st_rdev)) == -1)
 					return -1;
 #   endif
 #  else
-				if (file_printf(ms, "character special") == -1)
+			if (file_printf(ms, "%scharacter special", COMMA) == -1)
 					return -1;
 #  endif
 			}
@@ -184,18 +189,18 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 		if (mime) {
 			if (handle_mime(ms, mime, "fifo") == -1)
 				return -1;
-		} else if (file_printf(ms, "fifo (named pipe)") == -1)
+		} else if (file_printf(ms, "%sfifo (named pipe)", COMMA) == -1)
 			return -1;
-		return 1;
+		break;
 #endif
 #ifdef	S_IFDOOR
 	case S_IFDOOR:
 		if (mime) {
 			if (handle_mime(ms, mime, "door") == -1)
 				return -1;
-		} else if (file_printf(ms, "door") == -1)
+		} else if (file_printf(ms, "%sdoor", COMMA) == -1)
 			return -1;
-		return 1;
+		break;
 #endif
 #ifdef	S_IFLNK
 	case S_IFLNK:
@@ -213,40 +218,40 @@ file_fsmagic(struct magic_set *ms, const char *fn, struct stat *sb, php_stream *
 		if (mime) {
 			if (handle_mime(ms, mime, "socket") == -1)
 				return -1;
-		} else if (file_printf(ms, "socket") == -1)
+		} else if (file_printf(ms, "%ssocket", COMMA) == -1)
 			return -1;
-		return 1;
+		break;
 #endif
 #endif
-
 		case S_IFREG:
-			break;
-
-		default:
-			file_error(ms, 0, "invalid mode 0%o", sb->st_mode);
-			return -1;
-			/*NOTREACHED*/
-	}
-
 	/*
 	 * regular file, check next possibility
 	 *
 	 * If stat() tells us the file has zero length, report here that
 	 * the file is empty, so we can skip all the work of opening and 
 	 * reading the file.
-	 * But if the -s option has been given, we skip this optimization,
-	 * since on some systems, stat() reports zero size for raw disk
-	 * partitions.  (If the block special device really has zero length,
-	 * the fact that it is empty will be detected and reported correctly
-	 * when we read the file.)
+		 * But if the -s option has been given, we skip this
+		 * optimization, since on some systems, stat() reports zero
+		 * size for raw disk partitions. (If the block special device
+		 * really has zero length, the fact that it is empty will be
+		 * detected and reported correctly when we read the file.)
 	 */
 	if ((ms->flags & MAGIC_DEVICES) == 0 && sb->st_size == 0) {
 		if (mime) {
 			if (handle_mime(ms, mime, "x-empty") == -1)
 				return -1;
-		} else if (file_printf(ms, "empty") == -1)
+			} else if (file_printf(ms, "%sempty", COMMA) == -1)
 			return -1;
-		return 1;
+			break;
 	}
-	return 0;
+		ret = 0;
+		break;
+
+	default:
+		file_error(ms, 0, "invalid mode 0%o", sb->st_mode);
+		return -1;
+		/*NOTREACHED*/
+	}
+
+	return ret;
 }
