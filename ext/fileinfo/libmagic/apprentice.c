@@ -1147,8 +1147,8 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 
 	{
 		/* XXX the maxmagic has to be reset each time we load some new magic file.
-				Where file commando is used it's not essential as the CLI process
-				ends, multiple loading within the same process wouldn't work. */
+		Where file commando is used it's not essential as the CLI process
+		ends, multiple loading within the same process wouldn't work. */
 		int k;
 		for (k = 0; k < MAGIC_SETS; k++) {
 			maxmagic[k] = 0;
