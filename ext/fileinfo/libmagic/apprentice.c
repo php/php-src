@@ -1163,8 +1163,8 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 	}
 
 	/* load directory or file */
-        /* FIXME: Read file names and sort them to prevent
-           non-determinism. See Debian bug #488562. */
+	/* FIXME: Read file names and sort them to prevent
+	   non-determinism. See Debian bug #488562. */
 	if (php_sys_stat(fn, &st) == 0 && S_ISDIR(st.st_mode)) {
 		int mflen;
 		char mfn[MAXPATHLEN];
@@ -1213,21 +1213,21 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 		goto out;
 
 	for (j = 0; j < MAGIC_SETS; j++) {
-	/* Set types of tests */
+		/* Set types of tests */
 		for (i = 0; i < mentrycount[j]; ) {
 			if (mentry[j][i].mp->cont_level != 0) {
-			i++;
-			continue;
-		}
-			i = set_text_binary(ms, mentry[j], mentrycount[j], i);
+				i++;
+				continue;
 			}
+			i = set_text_binary(ms, mentry[j], mentrycount[j], i);
+		}
 		qsort(mentry[j], mentrycount[j], sizeof(*mentry[j]),
 		    apprentice_sort);
 
-	/*
+		/*
 		 * Make sure that any level 0 "default" line is last
 		 * (if one exists).
-	 */
+		 */
 		set_last_default(ms, mentry[j], mentrycount[j]);
 
 		/* coalesce per file arrays into a single one */
