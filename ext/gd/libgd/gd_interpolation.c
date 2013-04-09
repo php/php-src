@@ -639,7 +639,7 @@ static inline int getPixelOverflowTC(gdImagePtr im, const int x, const int y, co
 		}
 		return c;
 	} else {
-		register int border;
+		register int border = 0;
 
 		if (y < im->cy1) {
 			border = im->tpixels[0][im->cx1];
@@ -690,7 +690,7 @@ static inline int getPixelOverflowPalette(gdImagePtr im, const int x, const int 
 		}
 		return colorIndex2RGBA(c);
 	} else {
-		register int border;
+		register int border = 0;
 		if (y < im->cy1) {
 			border = gdImageGetPixel(im, im->cx1, 0);
 			goto processborder;
@@ -886,7 +886,7 @@ static inline LineContribType * _gdContributionsAlloc(unsigned int line_length, 
     return res;
 }
 
-static inline _gdContributionsFree(LineContribType * p)
+static inline void _gdContributionsFree(LineContribType * p)
 {
 	unsigned int u;
 	for (u = 0; u < p->LineLength; u++)  {
@@ -1001,7 +1001,7 @@ static inline void _gdScaleHoriz(gdImagePtr pSrc, unsigned int src_width, unsign
 	_gdContributionsFree (contrib);
 }
 
-static inline _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImagePtr pRes, unsigned int dst_width, unsigned int dst_height, unsigned int uCol, LineContribType *contrib)
+static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImagePtr pRes, unsigned int dst_width, unsigned int dst_height, unsigned int uCol, LineContribType *contrib)
 {
 	unsigned int y;
     for (y = 0; y < dst_height - 1; y++) {
@@ -1024,7 +1024,7 @@ static inline _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImagePtr 
     }
 }
 
-static inline _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_width, const unsigned int src_height, const gdImagePtr pDst, const unsigned int dst_width, const unsigned int dst_height)
+static inline void _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_width, const unsigned int src_height, const gdImagePtr pDst, const unsigned int dst_width, const unsigned int dst_height)
 {
 	unsigned int u;
 	LineContribType * contrib;
@@ -1058,6 +1058,7 @@ gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_widt
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (dst == NULL) {
+		gdFree(tmp_im);
 		return NULL;
 	}
 	_gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
@@ -1149,7 +1150,7 @@ static inline int getPixelOverflowColorTC(gdImagePtr im, const int x, const int 
 		}
 		return c;
 	} else {
-		register int border;
+		register int border = 0;
 		if (y < im->cy1) {
 			border = im->tpixels[0][im->cx1];
 			goto processborder;
@@ -2328,12 +2329,12 @@ int gdTransformAffineCopy(gdImagePtr dst,
 	gdPointF pt, src_pt;
 	gdRect bbox;
 	int end_x, end_y;
-	gdInterpolationMethod interpolotion_id_bak;
+	gdInterpolationMethod interpolation_id_bak = GD_DEFAULT;
 	interpolation_method interpolation_bak;
 
 	/* These methods use special implementations */
 	if (src->interpolation_id == GD_BILINEAR_FIXED || src->interpolation_id == GD_BICUBIC_FIXED || src->interpolation_id == GD_NEAREST_NEIGHBOUR) {
-		interpolotion_id_bak = src->interpolation_id;
+		interpolation_id_bak = src->interpolation_id;
 		interpolation_bak = src->interpolation;
 		
 		gdImageSetInterpolationMethod(src, GD_BICUBIC);
@@ -2360,7 +2361,7 @@ int gdTransformAffineCopy(gdImagePtr dst,
 			gdImageSetClip(src, backup_clipx1, backup_clipy1,
 					backup_clipx2, backup_clipy2);
 		}
-		gdImageSetInterpolationMethod(src, interpolotion_id_bak);
+		gdImageSetInterpolationMethod(src, interpolation_id_bak);
 		return GD_FALSE;
 	}
 
@@ -2410,7 +2411,7 @@ int gdTransformAffineCopy(gdImagePtr dst,
 				backup_clipx2, backup_clipy2);
 	}
 
-	gdImageSetInterpolationMethod(src, interpolotion_id_bak);
+	gdImageSetInterpolationMethod(src, interpolation_id_bak);
 	return GD_TRUE;
 }
 
