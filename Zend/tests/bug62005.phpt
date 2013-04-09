@@ -10,7 +10,7 @@ add_points(NULL, 2);
 --EXPECTF--
 Warning: Creating default object from empty value in %sbug62005.php on line %d
 
-Notice: Undefined property: energy in %sbug62005.php on line 3
+Notice: Undefined property: stdClass::$energy in %sbug62005.php on line 3
 stdClass Object
 (
     [energy] => 2
