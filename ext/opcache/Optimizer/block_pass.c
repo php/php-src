@@ -107,6 +107,16 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 #if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 			case ZEND_FAST_CALL:
 				START_BLOCK_OP(ZEND_OP1(opline).opline_num);
+				if (opline->extended_value) {
+					START_BLOCK_OP(ZEND_OP2(opline).opline_num);
+				}
+				START_BLOCK_OP(opno + 1);
+				break;
+			case ZEND_FAST_RET:
+				if (opline->extended_value) {
+					START_BLOCK_OP(ZEND_OP2(opline).opline_num);
+				}
+				START_BLOCK_OP(opno + 1);
 				break;
 #endif
 			case ZEND_JMP:
@@ -117,7 +127,7 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 			case ZEND_RETURN_BY_REF:
 #endif
 #if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
-			case ZEND_FAST_RET:
+			case ZEND_GENERATOR_RETURN:
 #endif
 			case ZEND_EXIT:
 			case ZEND_THROW:
@@ -136,7 +146,6 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 			case ZEND_JMPNZ:
 			case ZEND_JMPZ_EX:
 			case ZEND_JMPNZ_EX:
-			case ZEND_FE_FETCH:
 			case ZEND_FE_RESET:
 			case ZEND_NEW:
 #if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
@@ -148,7 +157,10 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 				START_BLOCK_OP(ZEND_OP2(opline).opline_num);
 				START_BLOCK_OP(opno + 1);
 				break;
-
+			case ZEND_FE_FETCH:
+				START_BLOCK_OP(ZEND_OP2(opline).opline_num);
+				START_BLOCK_OP(opno + 2);
+				break;
 		}
 		opno++;
 		opline++;
@@ -230,19 +242,32 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 			cur_block->next = &blocks[opno];
 			/* what is the last OP of previous block? */
 			opline = blocks[opno].start_opline - 1;
+			if (opline->opcode == ZEND_OP_DATA) {
+				opline--;
+			}
 			switch((unsigned)opline->opcode) {
 				case ZEND_RETURN:
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 				case ZEND_RETURN_BY_REF:
 #endif
 #if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
-				case ZEND_FAST_RET:
+				case ZEND_GENERATOR_RETURN:
 #endif
 				case ZEND_EXIT:
 				case ZEND_THROW:
 					break;
 #if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 				case ZEND_FAST_CALL:
+					if (opline->extended_value) {
+						cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
+					}
+					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
+					break;
+				case ZEND_FAST_RET:
+					if (opline->extended_value) {
+						cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
+					}
+					break;
 #endif
 				case ZEND_JMP:
 					cur_block->op1_to = &blocks[ZEND_OP1(opline).opline_num];
@@ -270,8 +295,8 @@ static int find_code_blocks(zend_op_array *op_array, zend_cfg *cfg)
 				case ZEND_FE_FETCH:
 					cur_block->op2_to = &blocks[ZEND_OP2(opline).opline_num];
 					/* break missing intentionally */
-			  default:
-				  /* next block follows this */
+				default:
+					/* next block follows this */
 					cur_block->follow_to = &blocks[opno];
 					break;
 			}
@@ -1235,14 +1260,18 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		if (!cur_block->access) {
 			continue;
 		}
+		opline = cur_block->start_opline + cur_block->len - 1;
+		if (opline->opcode == ZEND_OP_DATA) {
+			opline--;
+		}
 		if (cur_block->op1_to) {
-			ZEND_OP1(&cur_block->start_opline[cur_block->len - 1]).opline_num = cur_block->op1_to->start_opline - new_opcodes;
+			ZEND_OP1(opline).opline_num = cur_block->op1_to->start_opline - new_opcodes;
 		}
 		if (cur_block->op2_to) {
-			ZEND_OP2(&cur_block->start_opline[cur_block->len - 1]).opline_num = cur_block->op2_to->start_opline - new_opcodes;
+			ZEND_OP2(opline).opline_num = cur_block->op2_to->start_opline - new_opcodes;
 		}
 		if (cur_block->ext_to) {
-			cur_block->start_opline[cur_block->len - 1].extended_value = cur_block->ext_to->start_opline - new_opcodes;
+			opline->extended_value = cur_block->ext_to->start_opline - new_opcodes;
 		}
 		print_block(cur_block, new_opcodes, "Out ");
 	}
