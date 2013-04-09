@@ -34,7 +34,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: print.c,v 1.71 2011/09/20 15:28:09 christos Exp $")
+FILE_RCSID("@(#)$File: print.c,v 1.76 2013/02/26 18:25:00 christos Exp $")
 #endif  /* lint */
 
 #include <stdio.h>
@@ -45,6 +45,11 @@ FILE_RCSID("@(#)$File: print.c,v 1.71 2011/09/20 15:28:09 christos Exp $")
 #include <unistd.h>
 #endif
 #include <time.h>
+
+#ifdef PHP_WIN32
+# define asctime_r php_asctime_r
+# define ctime_r php_ctime_r
+#endif
 
 #define SZOF(a)	(sizeof(a) / sizeof(a[0]))
 
@@ -66,14 +71,20 @@ file_magwarn(struct magic_set *ms, const char *f, ...)
 }
 
 protected const char *
-file_fmttime(uint32_t v, int local)
+file_fmttime(uint64_t v, int flags, char *buf)
 {
 	char *pp;
 	time_t t = (time_t)v;
 	struct tm *tm;
 
-	if (local) {
-		pp = ctime(&t);
+	if (flags & FILE_T_WINDOWS) {
+		struct timeval ts;
+		cdf_timestamp_to_timespec(&ts, t);
+		t = ts.tv_sec;
+	}
+
+	if (flags & FILE_T_LOCAL) {
+		pp = ctime_r(&t, buf);
 	} else {
 #ifndef HAVE_DAYLIGHT
 		private int daylight = 0;
@@ -95,7 +106,7 @@ file_fmttime(uint32_t v, int local)
 		tm = gmtime(&t);
 		if (tm == NULL)
 			goto out;
-		pp = asctime(tm);
+		pp = asctime_r(tm, buf);
 	}
 
 	if (pp == NULL)
@@ -103,5 +114,5 @@ file_fmttime(uint32_t v, int local)
 	pp[strcspn(pp, "\n")] = '\0';
 	return pp;
 out:
-	return "*Invalid time*";
+	return strcpy(buf, "*Invalid time*");
 }
