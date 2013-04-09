@@ -1,14 +1,43 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 5.5.0 Beta 2
+?? ??? 20??, PHP 5.5.0 Beta 3
 
 - Core:
+  . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
+    segfault). (Laruence)
+  . Fixed bug #64565 (copy doesn't report failure on partial copy). (Remi)
+  . Fixed bug #64555 (foreach no longer copies keys if they are interned).
+    (Nikita Popov)
+  . Fixed bugs #47675 and #64577 (fd leak on Solaris)
+
+- CURL:
+  . Added CURL_WRAPPERS_ENABLED constant. (Laruence)
+
+- DateTime
+  . Fixed bug #54567 (DateTimeZone serialize/unserialize) (Lonny
+    Kapelushnik, Derick)
+  . Fixed bug #60774 (DateInterval::format("%a") is always zero when an
+    interval is created using the createFromDateString method) (Lonny
+    Kapelushnik, Derick)
+
+- General improvements:
+  . Drop support for bison < 2.4 when building PHP from GIT source. 
+    (Laruence)
+
+- Fileinfo:
+  . Upgraded libmagic to 5.14. (Anatol)
+
+28 Mar 2013, PHP 5.5.0 Beta 2
+
+- Core:
+  . Fixed bug #64544 (Valgrind warnings after using putenv). (Laruence)
   . Fixed bug #64515 (Memoryleak when using the same variablename 2times in
     function declaration). (Laruence)
   . Fixed bug #64503 (Compilation fails with error: conflicting types for
     'zendparse'). (Laruence)
   . Fixed bug #64239 (Debug backtrace changed behavior since 5.4.10 or 5.4.11).
     (Dmitry, Laruence)
+  . Fixed bug #64523, allow XOR in php.ini. (Dejan Marjanovic, Lars)
 
 - Opcache:
   . Fixed bug # 64490 (struct flock undefined on FreeBSD). (Joe Watkins)

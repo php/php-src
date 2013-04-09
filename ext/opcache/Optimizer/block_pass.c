@@ -1269,7 +1269,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 #endif
 }
 
-static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_array, zend_code_block *blocks)
+static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_array, zend_code_block *blocks TSRMLS_DC)
 {
 	/* last_op is the last opcode of the current block */
 	zend_op *last_op = (block->start_opline + block->len - 1);
@@ -1312,6 +1312,12 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 					if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
 						zval_copy_ctor(&ZEND_OP1_LITERAL(last_op));
 					}
+#else
+					if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+						zval zv = ZEND_OP1_LITERAL(last_op);
+						zval_copy_ctor(&zv);
+						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv TSRMLS_CC);
+					}
 #endif
 					del_source(block, block->op1_to);
 					if (block->op1_to->op2_to) {
@@ -1341,6 +1347,12 @@ static void zend_jmp_optimization(zend_code_block *block, zend_op_array *op_arra
 #if ZEND_EXTENSION_API_NO < PHP_5_4_X_API_NO
 					if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
 						zval_copy_ctor(&ZEND_OP1_LITERAL(last_op));
+					}
+#else
+					if (ZEND_OP1_TYPE(last_op) == IS_CONST) {
+						zval zv = ZEND_OP1_LITERAL(last_op);
+						zval_copy_ctor(&zv);
+						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv TSRMLS_CC);
 					}
 #endif
 					del_source(block, block->op1_to);
@@ -2007,7 +2019,7 @@ static void zend_block_optimization(zend_op_array *op_array TSRMLS_DC)
 			if (!cur_block->access) {
 				continue;
 			}
-			zend_jmp_optimization(cur_block, op_array, cfg.blocks);
+			zend_jmp_optimization(cur_block, op_array, cfg.blocks TSRMLS_CC);
 		}
 
 		/* Eliminate unreachable basic blocks */

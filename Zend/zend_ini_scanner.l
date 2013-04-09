@@ -340,9 +340,9 @@ NEWLINE	("\r"|"\n"|"\r\n")
 TABS_AND_SPACES [ \t]
 WHITESPACE [ \t]+
 CONSTANT [a-zA-Z_][a-zA-Z0-9_]*
-LABEL [^=\n\r\t;|&$~(){}!"\[]+
-TOKENS [:,.\[\]"'()|^&+-/*=%$!~<>?@{}]
-OPERATORS [&|~()!]
+LABEL [^=\n\r\t;&|^$~(){}!"\[]+
+TOKENS [:,.\[\]"'()&|^+-/*=%$!~<>?@{}]
+OPERATORS [&|^~()!]
 DOLLAR_CURLY "${"
 
 SECTION_RAW_CHARS [^\]\n\r]
@@ -350,7 +350,7 @@ SINGLE_QUOTED_CHARS [^']
 RAW_VALUE_CHARS [^\n\r;\000]
 
 LITERAL_DOLLAR ("$"([^{\000]|("\\"{ANY_CHAR})))
-VALUE_CHARS         ([^$= \t\n\r;&|~()!"'\000]|{LITERAL_DOLLAR})
+VALUE_CHARS         ([^$= \t\n\r;&|^~()!"'\000]|{LITERAL_DOLLAR})
 SECTION_VALUE_CHARS ([^$\n\r;"'\]\\]|("\\"{ANY_CHAR})|{LITERAL_DOLLAR})
 
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);

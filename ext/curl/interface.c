@@ -1222,6 +1222,7 @@ PHP_MINIT_FUNCTION(curl)
 	}
 
 #ifdef PHP_CURL_URL_WRAPPERS
+	REGISTER_LONG_CONSTANT("CURL_WRAPPERS_ENABLED", 1, CONST_CS | CONST_PERSISTENT);
 	{
 		curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
 		char **p = (char **)info->protocols;
@@ -1235,6 +1236,8 @@ PHP_MINIT_FUNCTION(curl)
 			(void) *p++;
 		}
 	}
+#else
+	REGISTER_LONG_CONSTANT("CURL_WRAPPERS_ENABLED", 0, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	curlfile_register_class(TSRMLS_C);

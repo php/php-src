@@ -26,5 +26,5 @@ var_dump( finfo_file( $finfo, $magicFile ) );
 *** Testing finfo_file() : basic functionality ***
 string(28) "text/x-php; charset=us-ascii"
 string(22) "PHP script, ASCII text"
-string(32) "text/plain; charset=unknown-8bit"
+string(25) "text/plain; charset=utf-8"
 ===DONE===

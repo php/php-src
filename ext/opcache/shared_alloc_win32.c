@@ -166,7 +166,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 		}
 		return ALLOC_FAIL_MAPPING;
 	}
-	smm_shared_globals = (zend_smm_shared_globals *) (((char *) mapping_base) + sizeof(zend_shared_memory_block_header));
+	smm_shared_globals = (zend_smm_shared_globals *) mapping_base;
 
 	return SUCCESSFULLY_REATTACHED;
 }
