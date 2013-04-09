@@ -216,11 +216,12 @@ gdImagePtr gdImageRotate90 (gdImagePtr src, int ignoretransparent)
 		f = gdImageGetPixel;
 	}
 	dst = gdImageCreateTrueColor(src->sy, src->sx);
-	dst->transparent = src->transparent;
 
 	if (dst != NULL) {
 		int old_blendmode = dst->alphaBlendingFlag;
 		dst->alphaBlendingFlag = 0;
+
+		dst->transparent = src->transparent;
 
 		gdImagePaletteCopy (dst, src);
 
@@ -310,11 +311,12 @@ gdImagePtr gdImageRotate270 (gdImagePtr src, int ignoretransparent)
 		f = gdImageGetPixel;
 	}
 	dst = gdImageCreateTrueColor (src->sy, src->sx);
-	dst->transparent = src->transparent;
 
 	if (dst != NULL) {
 		int old_blendmode = dst->alphaBlendingFlag;
 		dst->alphaBlendingFlag = 0;
+
+		dst->transparent = src->transparent;
 
 		gdImagePaletteCopy (dst, src);
 
