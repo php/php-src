@@ -212,6 +212,11 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 			continue;
 		}
 
+		/* skip comments */
+		if (pbuf[0]==';') {
+			continue;
+		}
+
 		path_dup = zend_strndup(pbuf, path_length);
 		expand_filepath(path_dup, real_path TSRMLS_CC);
 		path_length = strlen(real_path);
