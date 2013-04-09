@@ -1047,6 +1047,55 @@ static inline char *accel_make_persistent_key(zend_file_handle *file_handle, int
 	return accel_make_persistent_key_ex(file_handle, strlen(file_handle->filename), key_len TSRMLS_CC);
 }
 
+int zend_accel_invalidate(const char *filename, int filename_len, zend_bool force TSRMLS_DC)
+{
+	char *realpath;
+	zend_persistent_script *persistent_script;
+
+	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled) || accelerator_shm_read_lock(TSRMLS_C) != SUCCESS) {
+		return FAILURE;
+	}
+
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+	realpath = accel_php_resolve_path(filename, filename_len, ZCG(include_path) TSRMLS_CC);
+#else
+	realpath = accelerator_orig_zend_resolve_path(filename, filename_len TSRMLS_CC);
+#endif
+
+	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath, strlen(realpath) + 1);
+	if (persistent_script && !persistent_script->corrupted) {
+		zend_file_handle file_handle;
+
+		file_handle.type = ZEND_HANDLE_FILENAME;
+		file_handle.filename = realpath;
+		file_handle.opened_path = realpath;
+
+		if (force ||
+			!ZCG(accel_directives).validate_timestamps ||
+			do_validate_timestamps(persistent_script, &file_handle TSRMLS_CC) == FAILURE) {
+			SHM_UNPROTECT();
+			zend_shared_alloc_lock(TSRMLS_C);
+			if (!persistent_script->corrupted) {
+				persistent_script->corrupted = 1;
+				persistent_script->timestamp = 0;
+				ZSMMG(wasted_shared_memory) += persistent_script->dynamic_members.memory_consumption;
+				if (ZSMMG(memory_exhausted)) {
+					zend_accel_restart_reason reason =
+						zend_accel_hash_is_full(&ZCSG(hash)) ? ACCEL_RESTART_HASH : ACCEL_RESTART_OOM;
+					zend_accel_schedule_restart_if_necessary(reason TSRMLS_CC);
+				}
+			}
+			zend_shared_alloc_unlock(TSRMLS_C);
+			SHM_PROTECT();
+		}
+	}
+
+	accelerator_shm_read_unlock(TSRMLS_C);
+	efree(realpath);
+	
+	return SUCCESS;
+}
+
 /* Adds another key for existing cached script */
 static void zend_accel_add_key(char *key, unsigned int key_length, zend_accel_hash_entry *bucket TSRMLS_DC)
 {
