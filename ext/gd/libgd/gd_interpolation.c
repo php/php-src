@@ -1013,24 +1013,24 @@ static inline void _gdScaleHoriz(gdImagePtr pSrc, unsigned int src_width, unsign
 static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImagePtr pRes, unsigned int dst_width, unsigned int dst_height, unsigned int uCol, LineContribType *contrib)
 {
 	unsigned int y;
-    for (y = 0; y < dst_height - 1; y++) {
-        register unsigned char r = 0, g = 0, b = 0, a = 0;
-        const int iLeft = contrib->ContribRow[y].Left;
-        const int iRight = contrib->ContribRow[y].Right;
+	for (y = 0; y < dst_height - 1; y++) {
+		register unsigned char r = 0, g = 0, b = 0, a = 0;
+		const int iLeft = contrib->ContribRow[y].Left;
+		const int iRight = contrib->ContribRow[y].Right;
 		int i;
 		int *row = pRes->tpixels[y];
 
 		/* Accumulate each channel */
-        for (i = iLeft; i <= iRight; i++) {
-            const int pCurSrc = pSrc->tpixels[i][uCol];
+		for (i = iLeft; i <= iRight; i++) {
+			const int pCurSrc = pSrc->tpixels[i][uCol];
 			const int i_iLeft = i - iLeft;
-            r += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetRed(pCurSrc)));
-            g += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetGreen(pCurSrc)));
-            b += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetBlue(pCurSrc)));
+			r += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetRed(pCurSrc)));
+			g += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetGreen(pCurSrc)));
+			b += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetBlue(pCurSrc)));
 			a += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetAlpha(pCurSrc)));
-        }
+		}
 		pRes->tpixels[y][uCol] = gdTrueColorAlpha(r, g, b, a);
-    }
+	}
 }
 
 static inline void _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_width, const unsigned int src_height, const gdImagePtr pDst, const unsigned int dst_width, const unsigned int dst_height)
@@ -1039,12 +1039,12 @@ static inline void _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_w
 	LineContribType * contrib;
 
 	/* same height, copy it */
-    if (src_height == dst_height) {
+	if (src_height == dst_height) {
 		unsigned int y;
 		for (y = 0; y < src_height - 1; ++y) {
 			memcpy(pDst->tpixels[y], pSrc->tpixels[y], src_width);
 		}
-    }
+	}
 
 	contrib = _gdContributionsCalc(dst_height, src_height, (double)(dst_height) / (double)(src_height), pSrc->interpolation);
 	/* scale each column */
@@ -1056,14 +1056,14 @@ static inline void _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_w
 
 gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_width, const unsigned int src_height, const unsigned int new_width, const unsigned int new_height)
 {
-    gdImagePtr tmp_im;
+	gdImagePtr tmp_im;
 	gdImagePtr dst;
 
 	tmp_im = gdImageCreateTrueColor(new_width, src_height);
 	if (tmp_im == NULL) {
 		return NULL;
 	}
-	_gdScaleHoriz (src,  src_width, src_height, tmp_im, new_width, src_height);
+	_gdScaleHoriz(src, src_width, src_height, tmp_im, new_width, src_height);
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (dst == NULL) {
@@ -1073,24 +1073,23 @@ gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_widt
 	_gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
 	gdFree(tmp_im);
 
-
-    return dst;
+	return dst;
 }
 
 gdImagePtr Scale(const gdImagePtr src, const unsigned int src_width, const unsigned int src_height, const gdImagePtr dst, const unsigned int new_width, const unsigned int new_height)
 {
-    gdImagePtr tmp_im;
+	gdImagePtr tmp_im;
 
 	tmp_im = gdImageCreateTrueColor(new_width, src_height);
 	if (tmp_im == NULL) {
 		return NULL;
 	}
-    _gdScaleHoriz(src, src_width, src_height, tmp_im, new_width, src_height);
+	_gdScaleHoriz(src, src_width, src_height, tmp_im, new_width, src_height);
 
-    _gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
+	_gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
 
 	gdFree(tmp_im);
-    return dst;
+	return dst;
 }
 
 /*
