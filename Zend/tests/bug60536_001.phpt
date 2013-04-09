@@ -23,5 +23,5 @@ echo "DONE";
 ?>
 --EXPECTF--
 
-Notice: Undefined property: x in %s on line 14
+Notice: Undefined property: Z::$x in %s on line 14
 DONE
