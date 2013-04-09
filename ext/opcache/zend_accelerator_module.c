@@ -658,7 +658,7 @@ static ZEND_FUNCTION(opcache_invalidate)
 		return;
 	}
 
-	if (zend_accel_invalidate(script_name, script_name_len, force) == SUCCESS) {
+	if (zend_accel_invalidate(script_name, script_name_len, force TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
