@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.5.0 Beta 4
 
+- Zip:
+  . Fixed bug #64342 (ZipArchive::addFile() has to check for file existence).
+    (Anatol)
+
 11 Apr 2013, PHP 5.5.0 Beta 3
 
 - Core:
