@@ -613,6 +613,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 			COPY_NODE(opline->op2, src->op1);
 			MAKE_NOP(src);
 
+#if ZEND_EXTENSION_API_NO >= PHP_5_4_X_API_NO
 			/* numeric string constants used as array indeces have to be
 			   converted to long at compile time */
 			if (opline->opcode == ZEND_ADD_ARRAY_ELEMENT ||
@@ -652,6 +653,7 @@ static void zend_optimize_block(zend_code_block *block, zend_op_array *op_array,
 		        	}
 				}
 			}
+#endif
 		}
 
 		/* T = PRINT(X), F(T) => ECHO(X), F(1) */
