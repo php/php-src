@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     segfault). (Laruence)
   . Fixed bugs #47675 and #64577 (fd leak on Solaris)
 
+- Zip:
+  . Fixed bug #64342 (ZipArchive::addFile() has to check for file existence).
+  (Anatol)
+
 11 Apr 2013, PHP 5.3.24
 
 - Core
