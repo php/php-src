@@ -29,6 +29,20 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Upgraded libmagic to 5.14. (Anatol)
 
+- OPcache
+  . Added opcache_invalidate() function. (Dmitry)
+  . Added ability to disable opcode cahing for current request by setting
+    opcache.enable=0. (Dmitry)
+  . Allowed comments in blacklist files started from ';'. (Remi)
+  . Allowed wilcards in opcache.blacklist_filename. (Remi)
+  . Fixed opcache reload condition. Now OPcache is not reloaded if it's full,
+    but wasted memory is less than opcache.max_wasted_percentage. (Dmitry)
+  . Fixed incorrect file path validation. (Dmitry).
+  . Optimizer: Fixed Control Flow Graph construction. (Dmitry)
+  . Optimizer: numeric string constants used as array indeces have to be
+    converted to long at compile time. (Dmitry)
+  . Optimizer: Fixed deltion of used literal. (Laruence, Dmitry)
+
 28 Mar 2013, PHP 5.5.0 Beta 2
 
 - Core:
