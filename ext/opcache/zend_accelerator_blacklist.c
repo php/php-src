@@ -36,6 +36,14 @@
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB)
 #endif
 
+#ifdef HAVE_GLOB
+#ifdef PHP_WIN32
+#include "win32/glob.h"
+#else
+#include <glob.h>
+#endif
+#endif
+
 #define ZEND_BLACKLIST_BLOCK_SIZE	32
 
 struct _zend_regexp_list {
@@ -168,7 +176,11 @@ static inline void zend_accel_blacklist_allocate(zend_blacklist *blacklist)
 	}
 }
 
+#ifdef HAVE_GLOB
+static void zend_accel_blacklist_loadone(zend_blacklist *blacklist, char *filename)
+#else
 void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
+#endif
 {
 	char buf[MAXPATHLEN + 1], real_path[MAXPATHLEN + 1];
 	FILE *fp;
@@ -237,6 +249,30 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	fclose(fp);
 	zend_accel_blacklist_update_regexp(blacklist);
 }
+
+#ifdef HAVE_GLOB
+void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
+{
+	glob_t globbuf;
+	int    ret, i;
+
+	memset(&globbuf, 0, sizeof(glob_t));
+
+	ret = glob(filename, 0, NULL, &globbuf);
+#ifdef GLOB_NOMATCH
+	if (ret == GLOB_NOMATCH || !globbuf.gl_pathc) {
+#else
+	if (!globbuf.gl_pathc) {
+#endif
+		zend_accel_error(ACCEL_LOG_WARNING, "No blacklist file found matching: %s\n", filename);
+	} else {
+		for(i=0 ; i<globbuf.gl_pathc; i++) {
+			zend_accel_blacklist_loadone(blacklist, globbuf.gl_pathv[i]);
+		}
+		globfree(&globbuf);
+	}
+}
+#endif
 
 zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path)
 {
