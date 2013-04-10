@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-28 Mar 2013, PHP 5.4.14 RC1
+11 Apr 2013, PHP 5.4.14
 - Core
   . Fixed bug #64529 (Ran out of opcode space). (Dmitry)
   . Fixed bug #64515 (Memoryleak when using the same variablename two times in
