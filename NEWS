@@ -7,11 +7,7 @@ PHP                                                                        NEWS
     segfault). (Laruence)
   . Fixed bugs #47675 and #64577 (fd leak on Solaris)
 
-?? ??? 2013, PHP 5.3.24
-
-##
-## Add NEWS entries to 5.3.25 above, RM will merge and update NEWS if needed
-##
+11 Apr 2013, PHP 5.3.24
 
 - Core
   . Fixed bug #64370 (microtime(true) less than $_SERVER['REQUEST_TIME_FLOAT']).
