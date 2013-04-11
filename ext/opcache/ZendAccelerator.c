@@ -1126,6 +1126,10 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		return new_persistent_script;
 	}
 
+	if (!zend_accel_script_optimize(new_persistent_script TSRMLS_CC)) {
+		return new_persistent_script;
+	}
+
 	/* exclusive lock */
 	zend_shared_alloc_lock(TSRMLS_C);
 
@@ -2731,19 +2735,6 @@ void accelerator_shm_read_unlock(TSRMLS_D)
 	}
 }
 
-static void accel_op_array_handler(zend_op_array *op_array)
-{
-	TSRMLS_FETCH();
-
-	if (ZCG(enabled) &&
-	    accel_startup_ok &&
-	    ZCSG(accelerator_enabled) &&
-	    !ZSMMG(memory_exhausted) &&
-	    !ZCSG(restart_pending)) {
-		zend_optimizer(op_array TSRMLS_CC);
-	}
-}
-
 ZEND_EXT_API zend_extension zend_extension_entry = {
 	ACCELERATOR_PRODUCT_NAME,               /* name */
 	ACCELERATOR_VERSION,					/* version */
@@ -2755,7 +2746,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	accel_activate,							/* per-script activation */
 	accel_deactivate,						/* per-script deactivation */
 	NULL,									/* message handler */
-	accel_op_array_handler,					/* op_array handler */
+	NULL,									/* op_array handler */
 	NULL,									/* extended statement handler */
 	NULL,									/* extended fcall begin handler */
 	NULL,									/* extended fcall end handler */
