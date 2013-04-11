@@ -1447,7 +1447,7 @@ static int ZEND_FASTCALL  ZEND_ADD_INTERFACE_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 			CHECK_EXCEPTION();
 			ZEND_VM_NEXT_OPCODE();
 		}
-		CACHE_PTR(opline->op2.literal->cache_slot, ce);
+		CACHE_PTR(opline->op2.literal->cache_slot, iface);
 	}
 
 	if (UNEXPECTED((iface->ce_flags & ZEND_ACC_INTERFACE) == 0)) {
