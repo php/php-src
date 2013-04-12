@@ -25,7 +25,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 {
 	timelib_rel_time *rt;
 	timelib_time *swp;
-	timelib_sll dst_h_corr = 0, dst_m_corr = 0;
+	timelib_sll dst_corr = 0 ,dst_h_corr = 0, dst_m_corr = 0;
 	timelib_time one_backup, two_backup;
 
 	rt = timelib_rel_time_ctor();
@@ -43,8 +43,9 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 		&& (strcmp(one->tz_info->name, two->tz_info->name) == 0)
 		&& (one->z != two->z))
 	{
-		dst_h_corr = (two->z - one->z) / 3600;
-		dst_m_corr = ((two->z - one->z) % 3600) / 60;
+		dst_corr = two->z - one->z;
+		dst_h_corr = dst_corr / 3600;
+		dst_m_corr = (dst_corr % 3600) / 60;
 	}
 
 	/* Save old TZ info */
@@ -57,9 +58,13 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	rt->y = two->y - one->y;
 	rt->m = two->m - one->m;
 	rt->d = two->d - one->d;
-	rt->h = two->h - one->h + dst_h_corr;
-	rt->i = two->i - one->i + dst_m_corr;
+	rt->h = two->h - one->h;
+	rt->i = two->i - one->i;
 	rt->s = two->s - one->s;
+	if (one_backup.dst == 0 && two_backup.dst == 1 && two->sse >= one->sse + 86400 - dst_corr) {
+		rt->h += dst_h_corr;
+		rt->i += dst_m_corr;
+	}
 	rt->days = abs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
 
 	timelib_do_rel_normalize(rt->invert ? one : two, rt);
