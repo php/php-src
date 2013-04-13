@@ -65,9 +65,21 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 		rt->h += dst_h_corr;
 		rt->i += dst_m_corr;
 	}
+
 	rt->days = abs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
 
 	timelib_do_rel_normalize(rt->invert ? one : two, rt);
+
+	/* We need to do this after normalisation otherwise we can't get "24H" */
+	if (one_backup.dst == 1 && two_backup.dst == 0 && two->sse >= one->sse + 86400) {
+		if (two->sse < one->sse + 86400 - dst_corr) {
+			rt->d--;
+			rt->h = 24;
+		} else {
+			rt->h += dst_h_corr;
+			rt->i += dst_m_corr;
+		}
+	}
 
 	/* Restore old TZ info */
 	memcpy(one, &one_backup, sizeof(one_backup));
