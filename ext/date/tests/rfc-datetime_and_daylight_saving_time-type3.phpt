@@ -2,8 +2,6 @@
 RFC: DateTime and Daylight Saving Time Transitions (zone type 3)
 --CREDITS--
 Daniel Convissor <danielc@php.net>
---XFAIL--
-RFC not implemented yet
 --FILE--
 <?php
 
@@ -155,11 +153,10 @@ $tz = new DateTimeZone('America/New_York');
  * Backward Transitions, diff().
  */
 
-$end   = new DateTime('2010-11-07 01:00:00 EST');
-$end->setTimeZone($tz);
-$start = new DateTime('2010-11-07 01:59:59');
+$end   = new DateTime('2010-11-07 05:30:00');
+$start = new DateTime('2010-11-06 04:30:00');
 echo 'bd1 ' . $end->format($date_format) . ' - ' . $start->format($date_format)
-	. ' = ' . $start->diff($end)->format('PT%hH%iM%sS') . "\n";
+	. ' = ' . $start->diff($end)->format($interval_format) . "\n";
 
 $end   = new DateTime('2010-11-07 04:30:00');
 $start = new DateTime('2010-11-06 04:30:00');
@@ -176,6 +173,19 @@ $start = new DateTime('2010-11-06 04:30:00');
 echo 'bd4 ' . $end->format($date_format) . ' - ' . $start->format($date_format)
 	. ' = ' . $start->diff($end)->format($interval_format) . "\n";
 
+$end   = new DateTime('2010-11-07 01:30:00');
+$start = new DateTime('2010-11-06 01:30:00');
+echo 'bd7 ' . $end->format($date_format) . ' - ' . $start->format($date_format)
+	. ' = ' . $start->diff($end)->format($interval_format) . "\n";
+
+echo "\n";
+
+$end   = new DateTime('2010-11-07 05:30:00');
+$end->setTimeZone($tz);
+$start = new DateTime('2010-11-06 04:30:59');
+echo 'bd0 ' . $end->format($date_format) . ' - ' . $start->format($date_format)
+	. ' = ' . $start->diff($end)->format('PT%hH%iM%sS') . "\n";
+
 $end   = new DateTime('2010-11-07 01:30:00 EST');
 $end->setTimeZone($tz);
 $start = new DateTime('2010-11-06 04:30:00');
@@ -186,11 +196,6 @@ $end   = new DateTime('2010-11-07 01:30:00 EDT');
 $end->setTimeZone($tz);
 $start = new DateTime('2010-11-06 04:30:00');
 echo 'bd6 ' . $end->format($date_format) . ' - ' . $start->format($date_format)
-	. ' = ' . $start->diff($end)->format($interval_format) . "\n";
-
-$end   = new DateTime('2010-11-07 01:30:00');
-$start = new DateTime('2010-11-06 01:30:00');
-echo 'bd7 ' . $end->format($date_format) . ' - ' . $start->format($date_format)
 	. ' = ' . $start->diff($end)->format($interval_format) . "\n";
 
 $end   = new DateTime('2010-11-07 01:30:00 EST');
@@ -366,13 +371,15 @@ fs5 2010-03-14 01:30:00 EST America/New_York - P1D = 2010-03-13 01:30:00 EST Ame
 fs6 2010-03-15 03:30:00 EDT America/New_York - P1D = 2010-03-14 03:30:00 EDT America/New_York
 fs7 2010-03-15 03:30:00 EDT America/New_York - P1D = 2010-03-14 03:30:00 EDT America/New_York
 
-bd1 2010-11-07 01:00:00 EST America/New_York - 2010-11-07 01:59:59 EDT America/New_York = PT0H0M1S
+bd1 2010-11-07 05:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P1DT1H
 bd2 2010-11-07 04:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P1DT0H
 bd3 2010-11-07 03:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P0DT24H
 bd4 2010-11-07 02:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P0DT23H
+bd7 2010-11-07 01:30:00 EDT America/New_York - 2010-11-06 01:30:00 EDT America/New_York = P1DT0H
+
+bd0 2010-11-07 01:00:00 EST America/New_York - 2010-11-07 01:59:59 EDT America/New_York = PT0H0M1S
 bd5 2010-11-07 01:30:00 EST America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P0DT22H
 bd6 2010-11-07 01:30:00 EDT America/New_York - 2010-11-06 04:30:00 EDT America/New_York = P0DT21H
-bd7 2010-11-07 01:30:00 EDT America/New_York - 2010-11-06 01:30:00 EDT America/New_York = P1DT0H
 bd8 2010-11-07 01:30:00 EST America/New_York - 2010-11-06 01:30:00 EDT America/New_York = P1DT1H
 
 ba1 2010-11-07 01:59:59 EDT America/New_York + PT1S = 2010-11-07 01:00:00 EST America/New_York
