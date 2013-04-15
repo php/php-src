@@ -25,7 +25,7 @@
 #include "zend_variables.h"
 #include "zend_operators.h"
 #include "zend_globals.h"
-
+#include "zend_API.h"
 
 void free_zend_constant(zend_constant *c)
 {
@@ -126,33 +126,29 @@ void zend_register_standard_constants(TSRMLS_D)
 
 		c.name = zend_strndup(ZEND_STRL("TRUE"));
 		c.name_len = sizeof("TRUE");
-		Z_LVAL(c.value) = 1;
-		Z_TYPE(c.value) = IS_BOOL;
+		ZVAL_BOOL(&c.value, 1);
 		zend_register_constant(&c TSRMLS_CC);
 		
 		c.name = zend_strndup(ZEND_STRL("FALSE"));
 		c.name_len = sizeof("FALSE");
-		Z_LVAL(c.value) = 0;
-		Z_TYPE(c.value) = IS_BOOL;
+		ZVAL_BOOL(&c.value, 0);
 		zend_register_constant(&c TSRMLS_CC);
 
 		c.name = zend_strndup(ZEND_STRL("NULL"));
 		c.name_len = sizeof("NULL");
-		Z_TYPE(c.value) = IS_NULL;
+		ZVAL_NULL(&c.value);
 		zend_register_constant(&c TSRMLS_CC);
 
 		c.flags = CONST_PERSISTENT | CONST_CS;
 
 		c.name = zend_strndup(ZEND_STRL("ZEND_THREAD_SAFE"));
 		c.name_len = sizeof("ZEND_THREAD_SAFE");
-		Z_LVAL(c.value) = ZTS_V;
-		Z_TYPE(c.value) = IS_BOOL;
+		ZVAL_BOOL(&c.value, ZTS_V);
 		zend_register_constant(&c TSRMLS_CC);
 
 		c.name = zend_strndup(ZEND_STRL("ZEND_DEBUG_BUILD"));
 		c.name_len = sizeof("ZEND_DEBUG_BUILD");
-		Z_LVAL(c.value) = ZEND_DEBUG;
-		Z_TYPE(c.value) = IS_BOOL;
+		ZVAL_BOOL(&c.value, ZEND_DEBUG);
 		zend_register_constant(&c TSRMLS_CC);
 	}
 }
@@ -179,8 +175,7 @@ ZEND_API void zend_register_bool_constant(const char *name, uint name_len, zend_
 {
 	zend_constant c;
 	
-	Z_TYPE(c.value) = IS_BOOL;
-	Z_LVAL(c.value) = bval;
+	ZVAL_BOOL(&c.value, bval);
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
@@ -192,8 +187,7 @@ ZEND_API void zend_register_long_constant(const char *name, uint name_len, long 
 {
 	zend_constant c;
 	
-	Z_TYPE(c.value) = IS_LONG;
-	Z_LVAL(c.value) = lval;
+	ZVAL_LONG(&c.value, lval);
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
@@ -206,8 +200,7 @@ ZEND_API void zend_register_double_constant(const char *name, uint name_len, dou
 {
 	zend_constant c;
 	
-	Z_TYPE(c.value) = IS_DOUBLE;
-	Z_DVAL(c.value) = dval;
+	ZVAL_DOUBLE(&c.value, dval);
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
@@ -220,9 +213,7 @@ ZEND_API void zend_register_stringl_constant(const char *name, uint name_len, ch
 {
 	zend_constant c;
 	
-	Z_TYPE(c.value) = IS_STRING;
-	Z_STRVAL(c.value) = strval;
-	Z_STRLEN(c.value) = strlen;
+	ZVAL_STRINGL(&c.value, strval, strlen, 0);
 	c.flags = flags;
 	c.name = zend_strndup(name, name_len-1);
 	c.name_len = name_len;
