@@ -119,38 +119,12 @@ void zend_register_standard_constants(TSRMLS_D)
 	REGISTER_MAIN_LONG_CONSTANT("DEBUG_BACKTRACE_IGNORE_ARGS", DEBUG_BACKTRACE_IGNORE_ARGS, CONST_PERSISTENT | CONST_CS);
 	/* true/false constants */
 	{
-		zend_constant c;
-	
-		c.flags = CONST_PERSISTENT | CONST_CT_SUBST;
-		c.module_number = 0;
-
-		c.name = zend_strndup(ZEND_STRL("TRUE"));
-		c.name_len = sizeof("TRUE");
-		ZVAL_BOOL(&c.value, 1);
-		zend_register_constant(&c TSRMLS_CC);
-		
-		c.name = zend_strndup(ZEND_STRL("FALSE"));
-		c.name_len = sizeof("FALSE");
-		ZVAL_BOOL(&c.value, 0);
-		zend_register_constant(&c TSRMLS_CC);
-
-		c.name = zend_strndup(ZEND_STRL("NULL"));
-		c.name_len = sizeof("NULL");
-		ZVAL_NULL(&c.value);
-		zend_register_constant(&c TSRMLS_CC);
-
-		c.flags = CONST_PERSISTENT | CONST_CS;
-
-		c.name = zend_strndup(ZEND_STRL("ZEND_THREAD_SAFE"));
-		c.name_len = sizeof("ZEND_THREAD_SAFE");
-		ZVAL_BOOL(&c.value, ZTS_V);
-		zend_register_constant(&c TSRMLS_CC);
-
-		c.name = zend_strndup(ZEND_STRL("ZEND_DEBUG_BUILD"));
-		c.name_len = sizeof("ZEND_DEBUG_BUILD");
-		ZVAL_BOOL(&c.value, ZEND_DEBUG);
-		zend_register_constant(&c TSRMLS_CC);
+		REGISTER_MAIN_BOOL_CONSTANT("TRUE", 1, CONST_PERSISTENT | CONST_CT_SUBST);
+		REGISTER_MAIN_BOOL_CONSTANT("FALSE", 0, CONST_PERSISTENT | CONST_CT_SUBST);
+		REGISTER_MAIN_BOOL_CONSTANT("ZEND_THREAD_SAFE", ZTS_V, CONST_PERSISTENT | CONST_CS);
+		REGISTER_MAIN_BOOL_CONSTANT("ZEND_DEBUG_BUILD", ZEND_DEBUG, CONST_PERSISTENT | CONST_CS);
 	}
+	REGISTER_MAIN_NULL_CONSTANT("NULL", CONST_PERSISTENT | CONST_CT_SUBST);
 }
 
 
@@ -169,6 +143,18 @@ void clean_non_persistent_constants(TSRMLS_D)
 	} else {
 		zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant TSRMLS_CC);
 	}
+}
+
+ZEND_API void zend_register_null_constant(const char *name, uint name_len, int flags, int module_number TSRMLS_DC)
+{
+	zend_constant c;
+	
+	ZVAL_NULL(&c.value);
+	c.flags = flags;
+	c.name = zend_strndup(name, name_len-1);
+	c.name_len = name_len;
+	c.module_number = module_number;
+	zend_register_constant(&c TSRMLS_CC);
 }
 
 ZEND_API void zend_register_bool_constant(const char *name, uint name_len, zend_bool bval, int flags, int module_number TSRMLS_DC)
