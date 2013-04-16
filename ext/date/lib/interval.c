@@ -87,3 +87,59 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 
 	return rt;
 }
+
+timelib_time *timelib_add(timelib_time *old_time, timelib_rel_time *interval)
+{
+	int bias = 1;
+	timelib_time *t = timelib_time_clone(old_time);
+
+	if (interval->have_weekday_relative || interval->have_special_relative) {
+		memcpy(&t->relative, interval, sizeof(struct timelib_rel_time));
+	} else {
+		if (interval->invert) {
+			bias = -1;
+		}
+		memset(&t->relative, 0, sizeof(struct timelib_rel_time));
+		t->relative.y = interval->y * bias;
+		t->relative.m = interval->m * bias;
+		t->relative.d = interval->d * bias;
+		t->relative.h = interval->h * bias;
+		t->relative.i = interval->i * bias;
+		t->relative.s = interval->s * bias;
+	}
+	t->have_relative = 1;
+	t->sse_uptodate = 0;
+
+	timelib_update_ts(t, NULL);
+	timelib_update_from_sse(t);
+	t->have_relative = 0;
+
+	return t;
+}
+
+timelib_time *timelib_sub(timelib_time *old_time, timelib_rel_time *interval)
+{
+	int bias = 1;
+	timelib_time *t = timelib_time_clone(old_time);
+
+	if (interval->invert) {
+		bias = -1;
+	}
+
+	memset(&t->relative, 0, sizeof(struct timelib_rel_time));
+	t->relative.y = 0 - (interval->y * bias);
+	t->relative.m = 0 - (interval->m * bias);
+	t->relative.d = 0 - (interval->d * bias);
+	t->relative.h = 0 - (interval->h * bias);
+	t->relative.i = 0 - (interval->i * bias);
+	t->relative.s = 0 - (interval->s * bias);
+	t->have_relative = 1;
+	t->sse_uptodate = 0;
+
+	timelib_update_ts(t, NULL);
+	timelib_update_from_sse(t);
+
+	t->have_relative = 0;
+
+	return t;
+}

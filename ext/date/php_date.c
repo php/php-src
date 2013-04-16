@@ -2889,7 +2889,7 @@ PHP_FUNCTION(date_add)
 	zval         *object, *interval;
 	php_date_obj *dateobj;
 	php_interval_obj *intobj;
-	int               bias = 1;
+	timelib_time     *new_time;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO", &object, date_ce_date, &interval, date_ce_interval) == FAILURE) {
 		RETURN_FALSE;
@@ -2899,27 +2899,9 @@ PHP_FUNCTION(date_add)
 	intobj = (php_interval_obj *) zend_object_store_get_object(interval TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(intobj->initialized, DateInterval);
 
-
-	if (intobj->diff->have_weekday_relative || intobj->diff->have_special_relative) {
-		memcpy(&dateobj->time->relative, intobj->diff, sizeof(struct timelib_rel_time));
-	} else {
-		if (intobj->diff->invert) {
-			bias = -1;
-		}
-		memset(&dateobj->time->relative, 0, sizeof(struct timelib_rel_time));
-		dateobj->time->relative.y = intobj->diff->y * bias;
-		dateobj->time->relative.m = intobj->diff->m * bias;
-		dateobj->time->relative.d = intobj->diff->d * bias;
-		dateobj->time->relative.h = intobj->diff->h * bias;
-		dateobj->time->relative.i = intobj->diff->i * bias;
-		dateobj->time->relative.s = intobj->diff->s * bias;
-	}
-	dateobj->time->have_relative = 1;
-	dateobj->time->sse_uptodate = 0;
-
-	timelib_update_ts(dateobj->time, NULL);
-	timelib_update_from_sse(dateobj->time);
-	dateobj->time->have_relative = 0;
+	new_time = timelib_add(dateobj->time, intobj->diff);
+	timelib_time_dtor(dateobj->time);
+	dateobj->time = new_time;
 
 	RETURN_ZVAL(object, 1, 0);
 }
@@ -2933,7 +2915,7 @@ PHP_FUNCTION(date_sub)
 	zval         *object, *interval;
 	php_date_obj *dateobj;
 	php_interval_obj *intobj;
-	int               bias = 1;
+	timelib_time     *new_time;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO", &object, date_ce_date, &interval, date_ce_interval) == FAILURE) {
 		RETURN_FALSE;
@@ -2948,24 +2930,9 @@ PHP_FUNCTION(date_sub)
 		return;
 	}
 
-	if (intobj->diff->invert) {
-		bias = -1;
-	}
-
-	memset(&dateobj->time->relative, 0, sizeof(struct timelib_rel_time));
-	dateobj->time->relative.y = 0 - (intobj->diff->y * bias);
-	dateobj->time->relative.m = 0 - (intobj->diff->m * bias);
-	dateobj->time->relative.d = 0 - (intobj->diff->d * bias);
-	dateobj->time->relative.h = 0 - (intobj->diff->h * bias);
-	dateobj->time->relative.i = 0 - (intobj->diff->i * bias);
-	dateobj->time->relative.s = 0 - (intobj->diff->s * bias);
-	dateobj->time->have_relative = 1;
-	dateobj->time->sse_uptodate = 0;
-
-	timelib_update_ts(dateobj->time, NULL);
-	timelib_update_from_sse(dateobj->time);
-
-	dateobj->time->have_relative = 0;
+	new_time = timelib_sub(dateobj->time, intobj->diff);
+	timelib_time_dtor(dateobj->time);
+	dateobj->time = new_time;
 
 	RETURN_ZVAL(object, 1, 0);
 }
