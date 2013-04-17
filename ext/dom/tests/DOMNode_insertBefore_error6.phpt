@@ -22,7 +22,7 @@ assert('!is_null($parent_node)');
 $ref_node = $parent_node;
 
 $new_node = $dom->createElement('newnode');
-assert('$doc !== false');
+assert('$new_node !== false');
 
 try {
     $parent_node->insertBefore($new_node, $ref_node);

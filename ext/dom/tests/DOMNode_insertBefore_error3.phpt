@@ -21,7 +21,7 @@ $parent_node = $dom->getElementsByTagName("book")->item(0);
 assert('!is_null($parent_node)');
 
 $new_node = $dom->createElement('newnode');
-assert('$doc !== false');
+assert('$new_node !== false');
 
 // getting the parent node as reference node to insert
 
