@@ -14,7 +14,7 @@ assert.bail=true
 <?php
 $dom = new DOMDocument();
 
-$doc = $dom->load("book.xml", LIBXML_NOBLANKS);
+$doc = $dom->load(dirname(__FILE__) . "/book.xml", LIBXML_NOBLANKS);
 assert('$doc === true');
 
 $parent_node = $dom->getElementsByTagName("book")->item(0);
