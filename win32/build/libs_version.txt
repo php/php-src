@@ -6,8 +6,7 @@ icu-49.1.2
 icu-50.1.2
 jpeglib-8
 jpeglib-9
-libcurl-7.27.0
-libcurl-7.29.0
+libcurl-7.30.0
 libiconv-1.14
 libmcrypt-2.5.8
 libmpir-2.5.1
