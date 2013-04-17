@@ -66,6 +66,8 @@ int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC
 	op_array->last_literal++;
 	op_array->literals = (zend_literal*)erealloc(op_array->literals, op_array->last_literal * sizeof(zend_literal));
 	op_array->literals[i].constant = *zv;
+	op_array->literals[i].hash_value = 0;
+	op_array->literals[i].cache_slot = -1;
 	Z_SET_REFCOUNT(op_array->literals[i].constant, 2);
 	Z_SET_ISREF(op_array->literals[i].constant);
 	return i;
