@@ -3,7 +3,6 @@
  * - perform compile-time evaluation of constant binary and unary operations
  * - optimize series of ADD_STRING and/or ADD_CHAR
  * - convert CAST(IS_BOOL,x) into BOOL(x)
- * - convert INTI_FCALL_BY_NAME, DO_FCALL_BY_NAME into DO_FCALL
  */
 
 if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
@@ -374,23 +373,6 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			}
 			break;
 
-		case ZEND_INIT_FCALL_BY_NAME:
-			if (opline->extended_value == 0 /* not method */ &&
-				ZEND_OP1_TYPE(opline) == IS_UNUSED &&
-				ZEND_OP2_TYPE(opline) == IS_CONST) {
-				if ((opline + 1)->opcode == ZEND_DO_FCALL_BY_NAME &&
-					(opline + 1)->extended_value == 0) {
-					(opline + 1)->opcode = ZEND_DO_FCALL;
-					COPY_NODE((opline + 1)->op1, opline->op2);
-					zend_str_tolower(Z_STRVAL(ZEND_OP1_LITERAL(opline + 1)), Z_STRLEN(ZEND_OP1_LITERAL(opline + 1)));
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-					Z_HASH_P(&ZEND_OP1_LITERAL(opline + 1)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline + 1)), Z_STRLEN(ZEND_OP1_LITERAL(opline + 1)) + 1);
-					op_array->literals[(opline + 1)->op1.constant].cache_slot = op_array->last_cache_slot++;
-#endif
-					MAKE_NOP(opline);
-				}
-			}
-			break;
 		case ZEND_DO_FCALL:
 			/* define("name", scalar); */
 			if (collect_constants &&
