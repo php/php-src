@@ -112,6 +112,7 @@ int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC
 #include "Optimizer/nop_removal.c"
 #include "Optimizer/block_pass.c"
 #include "Optimizer/optimize_temp_vars_5.c"
+#include "Optimizer/compact_literals.c"
 
 static void zend_optimize(zend_op_array           *op_array,
                           zend_persistent_script  *script,
@@ -150,7 +151,7 @@ static void zend_optimize(zend_op_array           *op_array,
 	 */
 #include "Optimizer/pass5.c"
 
-	 /* pass 9:
+	/* pass 9:
 	 * - Optimize temp variables usage
 	 */
 #include "Optimizer/pass9.c"
@@ -159,6 +160,15 @@ static void zend_optimize(zend_op_array           *op_array,
 	 * - remove NOPs
 	 */
 #include "Optimizer/pass10.c"
+
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+	/* pass 11:
+	 * - Compact literals table 
+	 */
+	if (ZEND_OPTIMIZER_PASS_11 & OPTIMIZATION_LEVEL) {
+		optimizer_compact_literals(op_array TSRMLS_CC);
+	}
+#endif
 }
 
 static void zend_accel_optimize(zend_op_array           *op_array,
