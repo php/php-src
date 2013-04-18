@@ -8,7 +8,7 @@ typedef struct _optimizer_call_info {
 	zend_op       *opline;
 } optimizer_call_info;
 
-static void optimize_func_calls(zend_op_array *op_array, zend_persistent_script *script TSRMLS_CC) {
+static void optimize_func_calls(zend_op_array *op_array, zend_persistent_script *script TSRMLS_DC) {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
 	int call = 0;
