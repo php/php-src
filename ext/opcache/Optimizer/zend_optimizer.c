@@ -113,6 +113,7 @@ int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC
 #include "Optimizer/block_pass.c"
 #include "Optimizer/optimize_temp_vars_5.c"
 #include "Optimizer/compact_literals.c"
+#include "Optimizer/optimize_func_calls.c"
 
 static void zend_optimize(zend_op_array           *op_array,
                           zend_persistent_script  *script,
@@ -128,7 +129,6 @@ static void zend_optimize(zend_op_array           *op_array,
 	 * - perform compile-time evaluation of constant binary and unary operations
 	 * - optimize series of ADD_STRING and/or ADD_CHAR
 	 * - convert CAST(IS_BOOL,x) into BOOL(x)
-	 * - convert INTI_FCALL_BY_NAME + DO_FCALL_BY_NAME into DO_FCALL
 	 */
 #include "Optimizer/pass1_5.c"
 
@@ -145,6 +145,13 @@ static void zend_optimize(zend_op_array           *op_array,
 	 * - change $i++ to ++$i where possible
 	 */
 #include "Optimizer/pass3.c"
+
+	/* pass 4:
+	 * - INIT_FCALL_BY_NAME -> DO_FCALL
+	 */
+	if (ZEND_OPTIMIZER_PASS_4 & OPTIMIZATION_LEVEL) {
+		optimize_func_calls(op_array, script TSRMLS_CC);
+	}
 
 	/* pass 5:
 	 * - CFG optimization
