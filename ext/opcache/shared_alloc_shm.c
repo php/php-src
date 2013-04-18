@@ -111,7 +111,7 @@ static int create_segments(size_t requested_size, zend_shared_segment_shm ***sha
 		}
 
 		shared_segments[i].common.p = shmat(shared_segments[i].shm_id, NULL, 0);
-		if (((int) shared_segments[i].common.p) == -1) {
+		if (shared_segments[i].common.p == (void *)-1) {
 			*error_in = "shmat";
 			shmctl(shared_segments[i].shm_id, IPC_RMID, &sds);
 			return ALLOC_FAILURE;
