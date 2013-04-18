@@ -146,12 +146,14 @@ static void zend_optimize(zend_op_array           *op_array,
 	 */
 #include "Optimizer/pass3.c"
 
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	/* pass 4:
 	 * - INIT_FCALL_BY_NAME -> DO_FCALL
 	 */
 	if (ZEND_OPTIMIZER_PASS_4 & OPTIMIZATION_LEVEL) {
 		optimize_func_calls(op_array, script TSRMLS_CC);
 	}
+#endif
 
 	/* pass 5:
 	 * - CFG optimization
