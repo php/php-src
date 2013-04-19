@@ -1584,8 +1584,8 @@ ZEND_API int zend_std_cast_object(zval *readobj, zval *writeobj, int type TSRMLS
 		        zend_object *zobj = zend_object_store_get_object(readobj TSRMLS_CC);
 		        
 		        if (zobj) {
-		            HashPosition position;
 		            HashTable *properties = Z_OBJPROP_P(readobj);
+		            HashPosition position;
 		            zval **property;
 		            
 		            for (zend_hash_internal_pointer_reset_ex(properties, &position);
@@ -1597,11 +1597,16 @@ ZEND_API int zend_std_cast_object(zval *readobj, zval *writeobj, int type TSRMLS
 		                
 		                switch (zend_hash_get_current_key_ex(properties, &mangled, &mlength, &idx, 0, &position)) {
 		                    case HASH_KEY_IS_STRING: {
-		                        if (zend_check_property_access(zobj, mangled, mlength TSRMLS_CC) != FAILURE) {
-		                            zend_hash_update(
-		                                Z_ARRVAL_P(writeobj), mangled, mlength, (void**) &property, sizeof(zval*), NULL);
-		                        }
+		                        const char *cname;
+		                        const char *pname;
+		                        int plength;
 		                        
+		                        if (zend_unmangle_property_name_ex(mangled, mlength, &cname, &pname, &plength) == SUCCESS) {
+		                            if (zend_check_property_access(zobj, mangled, mlength TSRMLS_CC) != FAILURE) {
+		                                zend_hash_update(
+		                                    Z_ARRVAL_P(writeobj), pname, plength, (void**) &property, sizeof(zval*), NULL);
+		                            }
+		                        }
 		                    } break;
 		                }
 		            }
