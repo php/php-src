@@ -1581,54 +1581,27 @@ ZEND_API int zend_std_cast_object(zval *readobj, zval *writeobj, int type TSRMLS
 			return SUCCESS;
 		case IS_ARRAY:
 		    if (Z_OBJ_HT_P(readobj)->get_properties) {
-		        HashTable *props = Z_OBJPROP_P(readobj);
+		        zend_object *zobj = zend_object_store_get_object(readobj);
 		        
-		        if (props) {
+		        if (zobj) {
 		            HashPosition position;
+		            HashTable *properties = Z_OBJPROP_P(readobj);
 		            zval **property;
 		            
-		            for (zend_hash_internal_pointer_reset_ex(props, &position);
-		                zend_hash_get_current_data_ex(props, (void**) &property, &position) == SUCCESS;
-		                zend_hash_move_forward_ex(props, &position)) {
+		            for (zend_hash_internal_pointer_reset_ex(properties, &position);
+		                zend_hash_get_current_data_ex(properties, (void**) &property, &position) == SUCCESS;
+		                zend_hash_move_forward_ex(properties, &position)) {
 		                char *mangled = NULL;
 		                uint  mlength;
 		                ulong idx;
 		                
-		                switch (zend_hash_get_current_key_ex(props, &mangled, &mlength, &idx, 0, &position)) {
+		                switch (zend_hash_get_current_key_ex(properties, &mangled, &mlength, &idx, 0, &position)) {
 		                    case HASH_KEY_IS_STRING: {
-		                        const char *cname;
-		                        const char *pname;
-		                        int plength;
-		                        
-		                        if (zend_unmangle_property_name_ex(mangled, mlength, &cname, &pname, &plength) == SUCCESS) {
-		                            zend_property_info *info = NULL;
-		                            char *rname = NULL;
-		                            
-		                            if (zend_hash_find(&Z_OBJCE_P(readobj)->properties_info, pname, plength, (void**)&info) == SUCCESS) {
-		                                switch (info->flags) {
-		                                    case ZEND_ACC_PROTECTED: {
-		                                        if((plength = asprintf(&rname, "protected:%s:%s", cname, pname))) {
-		                                            pname = rname;
-		                                            plength++;
-		                                         }
-		                                    }
-		                                    case ZEND_ACC_PRIVATE: {
-		                                         if((plength = asprintf(&rname, "private:%s:%s", cname, pname))) {
-		                                            pname = rname;
-		                                            plength++;
-		                                         }
-		                                    }
-		                                    
-		                                    default: {
-		                                        zend_hash_update(
-		                                            Z_ARRVAL_P(writeobj), pname, plength, (void**) &property, sizeof(zval*), NULL);
-		                                        if (rname)
-		                                            free(rname);
-		                                        zval_copy_ctor(*property);
-		                                    }
-		                                }
-		                            }
+		                        if (zend_check_property_access(zobj, mangled, mlength TSRMLS_CC) != FAILURE) {
+		                            zend_hash_update(
+		                                Z_ARRVAL_P(writeobj), mangled, mlength, (void**) &property, sizeof(zval*), NULL);
 		                        }
+		                        
 		                    } break;
 		                }
 		            }
