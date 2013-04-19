@@ -62,7 +62,7 @@ static void optimize_func_calls(zend_op_array *op_array, zend_persistent_script 
 					MAKE_NOP(fcall);
 				} else if (opline->extended_value == 0 &&
 				           call_stack[call].opline &&
-				           call_stack[call].opline == ZEND_INIT_FCALL_BY_NAME &&
+				           call_stack[call].opline->opcode == ZEND_INIT_FCALL_BY_NAME &&
 				           ZEND_OP2_TYPE(call_stack[call].opline) == IS_CONST) {
 
 					zend_op *fcall = call_stack[call].opline;
