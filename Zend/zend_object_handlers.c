@@ -1581,7 +1581,7 @@ ZEND_API int zend_std_cast_object(zval *readobj, zval *writeobj, int type TSRMLS
 			return SUCCESS;
 		case IS_ARRAY:
 		    if (Z_OBJ_HT_P(readobj)->get_properties) {
-		        zend_object *zobj = zend_object_store_get_object(readobj);
+		        zend_object *zobj = zend_object_store_get_object(readobj TSRMLS_CC);
 		        
 		        if (zobj) {
 		            HashPosition position;
