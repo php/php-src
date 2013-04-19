@@ -1517,7 +1517,7 @@ int zend_std_object_get_class_name(const zval *object, const char **class_name, 
 }
 /* }}} */
 
-ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC) /* {{{ */
+ZEND_API int zend_std_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC) /* {{{ */
 {
 	zval *retval;
 	zend_class_entry *ce;
@@ -1579,6 +1579,63 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 			}
 			ZVAL_DOUBLE(writeobj, 1);
 			return SUCCESS;
+		case IS_ARRAY:
+		    if (Z_OBJ_HT_P(readobj)->get_properties) {
+		        HashTable *props = Z_OBJPROP_P(readobj);
+		        
+		        if (props) {
+		            HashPosition position;
+		            zval **property;
+		            
+		            for (zend_hash_internal_pointer_reset_ex(props, &position);
+		                zend_hash_get_current_data_ex(props, (void**) &property, &position) == SUCCESS;
+		                zend_hash_move_forward_ex(props, &position)) {
+		                char *mangled = NULL;
+		                uint  mlength;
+		                ulong idx;
+		                
+		                switch (zend_hash_get_current_key_ex(props, &mangled, &mlength, &idx, 0, &position)) {
+		                    case HASH_KEY_IS_STRING: {
+		                        const char *cname;
+		                        const char *pname;
+		                        int plength;
+		                        
+		                        if (zend_unmangle_property_name_ex(mangled, mlength, &cname, &pname, &plength) == SUCCESS) {
+		                            zend_property_info *info = NULL;
+		                            char *rname = NULL;
+		                            
+		                            if (zend_hash_find(&Z_OBJCE_P(readobj)->properties_info, pname, plength, (void**)&info) == SUCCESS) {
+		                                switch (info->flags) {
+		                                    case ZEND_ACC_PROTECTED: {
+		                                        if((plength = asprintf(&rname, "protected:%s:%s", cname, pname))) {
+		                                            pname = rname;
+		                                            plength++;
+		                                         }
+		                                    }
+		                                    case ZEND_ACC_PRIVATE: {
+		                                         if((plength = asprintf(&rname, "private:%s:%s", cname, pname))) {
+		                                            pname = rname;
+		                                            plength++;
+		                                         }
+		                                    }
+		                                    
+		                                    default: {
+		                                        zend_hash_update(
+		                                            Z_ARRVAL_P(writeobj), pname, plength, (void**) &property, sizeof(zval*), NULL);
+		                                        if (rname)
+		                                            free(rname);
+		                                        zval_copy_ctor(*property);
+		                                    }
+		                                }
+		                            }
+		                        }
+		                    } break;
+		                }
+		            }
+		            return SUCCESS;
+		        }
+		    }
+		    return FAILURE;
 		default:
 			INIT_PZVAL(writeobj);
 			Z_TYPE_P(writeobj) = IS_NULL;
@@ -1638,7 +1695,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_object_get_class,				/* get_class_entry */
 	zend_std_object_get_class_name,			/* get_class_name */
 	zend_std_compare_objects,				/* compare_objects */
-	zend_std_cast_object_tostring,			/* cast_object */
+	zend_std_cast_object,			        /* cast_object */
 	NULL,									/* count_elements */
 	NULL,									/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
