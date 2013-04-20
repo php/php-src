@@ -177,7 +177,16 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	zend_shared_segment *shared_segment;
 	int map_retries = 0;
 	void *default_mapping_base_set[] = { 0, 0 };
-	void *vista_mapping_base_set[] = { (void *)0x20000000, (void *)0x21000000, (void *)0x30000000, (void *)0x31000000, (void *)0x50000000, 0 };
+	/* TODO: 
+	  improve fixed addresses on x64. It still makes no sense to do it as Windows addresses are virtual per se and can or should be randomized anyway 
+	  through Address Space Layout Radomization (ASLR). We can still let the OS do its job and be sure that each process gets the same address if
+	  desired. Not done yet, @zend refused but did not remember the exact reason, pls add info here if one of you know why :)
+	*/
+#if defined(_WIN64)
+	void *vista_mapping_base_set[] = { (void *) 0x0000100000000000, (void *) 0x0000200000000000, (void *) 0x0000300000000000, (void *) 0x0000700000000000, 0 };
+#else
+	void *vista_mapping_base_set[] = { (void *) 0x20000000, (void *) 0x21000000, (void *) 0x30000000, (void *) 0x31000000, (void *) 0x50000000, 0 };
+#endif
 	void **wanted_mapping_base = default_mapping_base_set;
 	TSRMLS_FETCH();
 
@@ -258,11 +267,6 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 
 			/* Are we running Vista ? */
 			if (osvi.dwPlatformId == VER_PLATFORM_WIN32_NT && osvi.dwMajorVersion == 6) {
-				/* Assert that platform is 32 bit (for 64 bit we need to test a different set */
-				if (si.wProcessorArchitecture != PROCESSOR_ARCHITECTURE_INTEL) {
-					DebugBreak();
-				}
-
 				wanted_mapping_base = vista_mapping_base_set;
 			}
 		} while (0);
