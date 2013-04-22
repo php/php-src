@@ -2411,6 +2411,8 @@ static int _php_image_type (char data[8])
 	} else if (!memcmp(data, php_sig_gif, 3)) {
 		return PHP_GDIMG_TYPE_GIF;
 	}
+/* Temporary disabled, as gdGetC, getmbi and skipheader not exported in system libgd */
+#if HAVE_GD_BUNDLED
 #ifdef HAVE_GD_WBMP
 	else {
 		gdIOCtx *io_ctx;
@@ -2432,6 +2434,7 @@ static int _php_image_type (char data[8])
 			}
 		}
 	}
+#endif
 #endif
 	return -1;
 #endif
