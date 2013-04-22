@@ -461,7 +461,7 @@ ZEND_API extern const zend_fcall_info_cache empty_fcall_info_cache;
  */
 ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, char **callable_name, char **error TSRMLS_DC);
 
-/** Clear argumens connected with zend_fcall_info *fci
+/** Clear arguments connected with zend_fcall_info *fci
  * If free_mem is not zero then the params array gets free'd as well
  */
 ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem);
@@ -499,7 +499,7 @@ ZEND_API int zend_fcall_info_argv(zend_fcall_info *fci TSRMLS_DC, int argc, va_l
 ZEND_API int zend_fcall_info_argn(zend_fcall_info *fci TSRMLS_DC, int argc, ...);
 
 /** Call a function using information created by zend_fcall_info_init()/args().
- * If args is given then those replace the arguement info in fci is temporarily.
+ * If args is given then those replace the argument info in fci is temporarily.
  */
 ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval **retval, zval *args TSRMLS_DC);
 
