@@ -25,7 +25,7 @@ function test_alter(&$item, $key, $prefix)
   // with proper type
   var_dump($item); // value
   var_dump($key);  // key
-  var_dump($prefix); // additional agument passed to callback function
+  var_dump($prefix); // additional argument passed to callback function
   echo "\n"; // new line to separate the output between each element
 }
 
