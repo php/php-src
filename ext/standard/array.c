@@ -2547,6 +2547,9 @@ PHP_FUNCTION(array_column)
 		case IS_LONG:
 			column_idx = Z_LVAL_PP(zcolumn);
 			break;
+		case IS_DOUBLE:
+			column_idx = (long)Z_DVAL_PP(zcolumn);
+			break;
 		case IS_STRING:
 			column = Z_STRVAL_PP(zcolumn);
 			column_len = Z_STRLEN_PP(zcolumn);
@@ -2568,6 +2571,9 @@ PHP_FUNCTION(array_column)
 				break;
 			case IS_LONG:
 				key_idx = Z_LVAL_PP(zkey);
+				break;
+			case IS_DOUBLE:
+				key_idx = (long)Z_DVAL_PP(zkey);
 				break;
 			case IS_STRING:
 				key = Z_STRVAL_PP(zkey);
