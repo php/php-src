@@ -761,9 +761,9 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 		while (SUCCESS == zend_hash_get_current_data(params, (void**)&param)) {
 			if(param->parameter) {
 				convert_to_string(param->parameter);
-				/* accomodate a string that needs to be fully quoted
+				/* accommodate a string that needs to be fully quoted
                    bind placeholders are at least 2 characters, so
-                   the accomodate their own "'s
+                   the accommodate their own "'s
                 */
 				newbuffer_len += padding * Z_STRLEN_P(param->parameter);
 			}
