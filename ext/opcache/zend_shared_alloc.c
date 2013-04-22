@@ -137,7 +137,7 @@ static int zend_shared_alloc_try(const zend_shared_memory_handler_entry *he, int
 		int i;
 		/* cleanup */
 		for (i = 0; i < *shared_segments_count; i++) {
-			if ((*shared_segments_p)[i]->p && (int)(*shared_segments_p)[i]->p != -1) {
+			if ((*shared_segments_p)[i]->p && (*shared_segments_p)[i]->p != (void *)-1) {
 				S_H(detach_segment)((*shared_segments_p)[i]);
 			}
 		}

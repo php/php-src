@@ -5702,6 +5702,7 @@ void zend_do_shell_exec(znode *result, const znode *cmd TSRMLS_DC) /* {{{ */
 	GET_CACHE_SLOT(opline->op1.constant);
 	opline->extended_value = 1;
 	SET_UNUSED(opline->op2);
+	opline->op2.num = CG(context).nested_calls;
 	GET_NODE(result, opline->result);
 
 	if (CG(context).nested_calls + 1 > CG(active_op_array)->nested_calls) {
