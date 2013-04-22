@@ -84,11 +84,12 @@ echo "\n*** Testing numeric column keys ***\n";
 $numericCols = array(
 	array('aaa', '111'),
 	array('bbb', '222'),
-	array('ccc', '333')
+	array('ccc', '333', -1 => 'ddd')
 );
 var_dump(array_column($numericCols, 1));
 var_dump(array_column($numericCols, 1, 0));
 var_dump(array_column($numericCols, 1, 0.123));
+var_dump(array_column($numericCols, 1, -1));
 
 echo "\n*** Testing failure to find specified column ***\n";
 var_dump(array_column($numericCols, 2));
@@ -237,6 +238,14 @@ array(3) {
   ["bbb"]=>
   string(3) "222"
   ["ccc"]=>
+  string(3) "333"
+}
+array(3) {
+  [0]=>
+  string(3) "111"
+  [1]=>
+  string(3) "222"
+  ["ddd"]=>
   string(3) "333"
 }
 
