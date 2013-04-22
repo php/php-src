@@ -755,7 +755,7 @@ static zval **zend_std_get_property_ptr_ptr(zval *object, zval *member, int type
 			new_zval = &EG(uninitialized_zval);
 
 			if(UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
-				zend_error(E_NOTICE, "Undefined property: %s", Z_STRVAL_P(member));
+				zend_error(E_NOTICE, "Undefined property: %s::$%s", zobj->ce->name, Z_STRVAL_P(member));
 			}
 			Z_ADDREF_P(new_zval);
 			if (EXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0) &&

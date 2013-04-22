@@ -3,13 +3,13 @@
  * - perform compile-time evaluation of constant binary and unary operations
  * - optimize series of ADD_STRING and/or ADD_CHAR
  * - convert CAST(IS_BOOL,x) into BOOL(x)
- * - convert INTI_FCALL_BY_NAME, DO_FCALL_BY_NAME into DO_FCALL
  */
 
 if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 	int i = 0;
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
+	zend_bool collect_constants = (op_array == &script->main_op_array);
 
 	while (opline < end) {
 		switch (opline->opcode) {
@@ -357,7 +357,9 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 				zval c;
 
 				if (!zend_get_persistent_constant(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), &c, 1 TSRMLS_CC)) {
-					break;
+					if (!*constants || !zend_optimizer_get_collected_constant(*constants, &ZEND_OP2_LITERAL(opline), &c)) {
+						break;
+					}
 				}
 				literal_dtor(&ZEND_OP2_LITERAL(opline));
 				ZEND_OP1_TYPE(opline) = IS_CONST;
@@ -371,22 +373,70 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			}
 			break;
 
-		case ZEND_INIT_FCALL_BY_NAME:
-			if (opline->extended_value == 0 /* not method */ &&
-				ZEND_OP1_TYPE(opline) == IS_UNUSED &&
-				ZEND_OP2_TYPE(opline) == IS_CONST) {
-				if ((opline + 1)->opcode == ZEND_DO_FCALL_BY_NAME &&
-					(opline + 1)->extended_value == 0) {
-					(opline + 1)->opcode = ZEND_DO_FCALL;
-					COPY_NODE((opline + 1)->op1, opline->op2);
-					zend_str_tolower(Z_STRVAL(ZEND_OP1_LITERAL(opline + 1)), Z_STRLEN(ZEND_OP1_LITERAL(opline + 1)));
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-					Z_HASH_P(&ZEND_OP1_LITERAL(opline + 1)) = zend_hash_func(Z_STRVAL(ZEND_OP1_LITERAL(opline + 1)), Z_STRLEN(ZEND_OP1_LITERAL(opline + 1)) + 1);
-					op_array->literals[(opline + 1)->op1.constant].cache_slot = op_array->last_cache_slot++;
-#endif
-					MAKE_NOP(opline);
-				}
+		case ZEND_DO_FCALL:
+			/* define("name", scalar); */
+			if (collect_constants &&
+			    opline->extended_value == 2 &&
+			    ZEND_OP1_TYPE(opline) == IS_CONST &&
+			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
+			    Z_STRLEN(ZEND_OP1_LITERAL(opline)) == sizeof("define")-1 &&
+			    zend_binary_strcasecmp(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)), "define", sizeof("define")-1) == 0 &&
+			    (opline-1)->opcode == ZEND_SEND_VAL &&
+			    ZEND_OP1_TYPE(opline-1) == IS_CONST &&
+			    (Z_TYPE(ZEND_OP1_LITERAL(opline-1)) <= IS_BOOL ||
+			     Z_TYPE(ZEND_OP1_LITERAL(opline-1)) == IS_STRING) &&
+			    (opline-2)->opcode == ZEND_SEND_VAL &&
+			    ZEND_OP1_TYPE(opline-2) == IS_CONST &&
+			    Z_TYPE(ZEND_OP1_LITERAL(opline-2)) == IS_STRING) {
+				zend_optimizer_collect_constant(constants, &ZEND_OP1_LITERAL(opline-2), &ZEND_OP1_LITERAL(opline-1));
 			}
+			break;
+#if ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
+		case ZEND_DECLARE_CONST:
+			if (collect_constants &&
+			    Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING &&
+			    (Z_TYPE(ZEND_OP2_LITERAL(opline)) <= IS_BOOL ||
+			     Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING)) {
+				zend_optimizer_collect_constant(constants, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline));
+			}
+			break;
+#endif
+
+		case ZEND_RETURN:
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+		case ZEND_RETURN_BY_REF:
+#endif
+#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
+		case ZEND_GENERATOR_RETURN:
+#endif
+		case ZEND_EXIT:
+		case ZEND_THROW:
+		case ZEND_CATCH:
+		case ZEND_BRK:
+		case ZEND_CONT:
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
+		case ZEND_GOTO:
+#endif
+#if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
+		case ZEND_FAST_CALL:
+		case ZEND_FAST_RET:
+#endif
+		case ZEND_JMP:
+		case ZEND_JMPZNZ:
+		case ZEND_JMPZ:
+		case ZEND_JMPNZ:
+		case ZEND_JMPZ_EX:
+		case ZEND_JMPNZ_EX:
+		case ZEND_FE_RESET:
+		case ZEND_FE_FETCH:
+		case ZEND_NEW:
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
+		case ZEND_JMP_SET:
+#endif
+#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+		case ZEND_JMP_SET_VAR:
+#endif
+			collect_constants = 0;
 			break;
 		}
 		opline++;

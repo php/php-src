@@ -652,7 +652,7 @@ static inline int getPixelOverflowTC(gdImagePtr im, const int x, const int y, co
 		}
 		return c;
 	} else {
-		register int border;
+		register int border = 0;
 
 		if (y < im->cy1) {
 			border = im->tpixels[0][im->cx1];
@@ -703,7 +703,7 @@ static inline int getPixelOverflowPalette(gdImagePtr im, const int x, const int 
 		}
 		return colorIndex2RGBA(c);
 	} else {
-		register int border;
+		register int border = 0;
 		if (y < im->cy1) {
 			border = gdImageGetPixel(im, im->cx1, 0);
 			goto processborder;
@@ -895,7 +895,7 @@ static inline LineContribType * _gdContributionsAlloc(unsigned int line_length, 
     return res;
 }
 
-static inline _gdContributionsFree(LineContribType * p)
+static inline void _gdContributionsFree(LineContribType * p)
 {
 	unsigned int u;
 	for (u = 0; u < p->LineLength; u++)  {
@@ -1010,41 +1010,41 @@ static inline void _gdScaleHoriz(gdImagePtr pSrc, unsigned int src_width, unsign
 	_gdContributionsFree (contrib);
 }
 
-static inline _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImagePtr pRes, unsigned int dst_width, unsigned int dst_height, unsigned int uCol, LineContribType *contrib)
+static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImagePtr pRes, unsigned int dst_width, unsigned int dst_height, unsigned int uCol, LineContribType *contrib)
 {
 	unsigned int y;
-    for (y = 0; y < dst_height - 1; y++) {
-        register unsigned char r = 0, g = 0, b = 0, a = 0;
-        const int iLeft = contrib->ContribRow[y].Left;
-        const int iRight = contrib->ContribRow[y].Right;
+	for (y = 0; y < dst_height - 1; y++) {
+		register unsigned char r = 0, g = 0, b = 0, a = 0;
+		const int iLeft = contrib->ContribRow[y].Left;
+		const int iRight = contrib->ContribRow[y].Right;
 		int i;
 		int *row = pRes->tpixels[y];
 
 		/* Accumulate each channel */
-        for (i = iLeft; i <= iRight; i++) {
-            const int pCurSrc = pSrc->tpixels[i][uCol];
+		for (i = iLeft; i <= iRight; i++) {
+			const int pCurSrc = pSrc->tpixels[i][uCol];
 			const int i_iLeft = i - iLeft;
-            r += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetRed(pCurSrc)));
-            g += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetGreen(pCurSrc)));
-            b += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetBlue(pCurSrc)));
+			r += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetRed(pCurSrc)));
+			g += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetGreen(pCurSrc)));
+			b += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetBlue(pCurSrc)));
 			a += (unsigned char)(contrib->ContribRow[y].Weights[i_iLeft] * (double)(gdTrueColorGetAlpha(pCurSrc)));
-        }
+		}
 		pRes->tpixels[y][uCol] = gdTrueColorAlpha(r, g, b, a);
-    }
+	}
 }
 
-static inline _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_width, const unsigned int src_height, const gdImagePtr pDst, const unsigned int dst_width, const unsigned int dst_height)
+static inline void _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_width, const unsigned int src_height, const gdImagePtr pDst, const unsigned int dst_width, const unsigned int dst_height)
 {
 	unsigned int u;
 	LineContribType * contrib;
 
 	/* same height, copy it */
-    if (src_height == dst_height) {
+	if (src_height == dst_height) {
 		unsigned int y;
 		for (y = 0; y < src_height - 1; ++y) {
 			memcpy(pDst->tpixels[y], pSrc->tpixels[y], src_width);
 		}
-    }
+	}
 
 	contrib = _gdContributionsCalc(dst_height, src_height, (double)(dst_height) / (double)(src_height), pSrc->interpolation);
 	/* scale each column */
@@ -1056,40 +1056,40 @@ static inline _gdScaleVert (const gdImagePtr pSrc, const unsigned int src_width,
 
 gdImagePtr gdImageScaleTwoPass(const gdImagePtr src, const unsigned int src_width, const unsigned int src_height, const unsigned int new_width, const unsigned int new_height)
 {
-    gdImagePtr tmp_im;
+	gdImagePtr tmp_im;
 	gdImagePtr dst;
 
 	tmp_im = gdImageCreateTrueColor(new_width, src_height);
 	if (tmp_im == NULL) {
 		return NULL;
 	}
-	_gdScaleHoriz (src,  src_width, src_height, tmp_im, new_width, src_height);
+	_gdScaleHoriz(src, src_width, src_height, tmp_im, new_width, src_height);
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (dst == NULL) {
+		gdFree(tmp_im);
 		return NULL;
 	}
 	_gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
 	gdFree(tmp_im);
 
-
-    return dst;
+	return dst;
 }
 
 gdImagePtr Scale(const gdImagePtr src, const unsigned int src_width, const unsigned int src_height, const gdImagePtr dst, const unsigned int new_width, const unsigned int new_height)
 {
-    gdImagePtr tmp_im;
+	gdImagePtr tmp_im;
 
 	tmp_im = gdImageCreateTrueColor(new_width, src_height);
 	if (tmp_im == NULL) {
 		return NULL;
 	}
-    _gdScaleHoriz(src, src_width, src_height, tmp_im, new_width, src_height);
+	_gdScaleHoriz(src, src_width, src_height, tmp_im, new_width, src_height);
 
-    _gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
+	_gdScaleVert(tmp_im, new_width, src_height, dst, new_width, new_height);
 
 	gdFree(tmp_im);
-    return dst;
+	return dst;
 }
 
 /*
@@ -1158,7 +1158,7 @@ static inline int getPixelOverflowColorTC(gdImagePtr im, const int x, const int 
 		}
 		return c;
 	} else {
-		register int border;
+		register int border = 0;
 		if (y < im->cy1) {
 			border = im->tpixels[0][im->cx1];
 			goto processborder;
@@ -2342,12 +2342,12 @@ int gdTransformAffineCopy(gdImagePtr dst,
 	gdPointF pt, src_pt;
 	gdRect bbox;
 	int end_x, end_y;
-	gdInterpolationMethod interpolotion_id_bak;
+	gdInterpolationMethod interpolation_id_bak = GD_DEFAULT;
 	interpolation_method interpolation_bak;
 
 	/* These methods use special implementations */
 	if (src->interpolation_id == GD_BILINEAR_FIXED || src->interpolation_id == GD_BICUBIC_FIXED || src->interpolation_id == GD_NEAREST_NEIGHBOUR) {
-		interpolotion_id_bak = src->interpolation_id;
+		interpolation_id_bak = src->interpolation_id;
 		interpolation_bak = src->interpolation;
 		
 		gdImageSetInterpolationMethod(src, GD_BICUBIC);
@@ -2374,7 +2374,7 @@ int gdTransformAffineCopy(gdImagePtr dst,
 			gdImageSetClip(src, backup_clipx1, backup_clipy1,
 					backup_clipx2, backup_clipy2);
 		}
-		gdImageSetInterpolationMethod(src, interpolotion_id_bak);
+		gdImageSetInterpolationMethod(src, interpolation_id_bak);
 		return GD_FALSE;
 	}
 
@@ -2424,7 +2424,7 @@ int gdTransformAffineCopy(gdImagePtr dst,
 				backup_clipx2, backup_clipy2);
 	}
 
-	gdImageSetInterpolationMethod(src, interpolotion_id_bak);
+	gdImageSetInterpolationMethod(src, interpolation_id_bak);
 	return GD_TRUE;
 }
 
