@@ -2531,7 +2531,6 @@ static inline
 zend_bool array_column_param_helper(zval **param,
                                     const char *name TSRMLS_DC) {
 	switch (Z_TYPE_PP(param)) {
-		case IS_NULL:
 		case IS_DOUBLE:
 			convert_to_long_ex(param);
 			/* fallthrough */
@@ -2555,15 +2554,15 @@ zend_bool array_column_param_helper(zval **param,
    value_key and optionally indexed by the index_key */
 PHP_FUNCTION(array_column)
 {
-	zval **zcolumn, **zkey = NULL, **data;
+	zval **zcolumn = NULL, **zkey = NULL, **data;
 	HashTable *arr_hash;
 	HashPosition pointer;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "hZ|Z!", &arr_hash, &zcolumn, &zkey) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "hZ!|Z!", &arr_hash, &zcolumn, &zkey) == FAILURE) {
 		return;
 	}
 
-	if (!array_column_param_helper(zcolumn, "column" TSRMLS_CC) ||
+	if ((zcolumn && !array_column_param_helper(zcolumn, "column" TSRMLS_CC)) ||
 	    (zkey && !array_column_param_helper(zkey, "index" TSRMLS_CC))) {
 		RETURN_FALSE;
 	}
@@ -2581,8 +2580,12 @@ PHP_FUNCTION(array_column)
 		}
 		ht = Z_ARRVAL_PP(data);
 
-		/* Skip if the value doesn't exist in our subarray */
-		if ((Z_TYPE_PP(zcolumn) == IS_STRING) &&
+		if (!zcolumn) {
+			/* NULL column ID means use entire subarray as data */
+			zcolval = data;
+
+			/* Otherwise, skip if the value doesn't exist in our subarray */
+		} else if ((Z_TYPE_PP(zcolumn) == IS_STRING) &&
 		    (zend_hash_find(ht, Z_STRVAL_PP(zcolumn), Z_STRLEN_PP(zcolumn) + 1, (void**)&zcolval) == FAILURE)) {
 			continue;
 		} else if ((Z_TYPE_PP(zcolumn) == IS_LONG) &&
