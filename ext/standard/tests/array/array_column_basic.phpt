@@ -192,7 +192,7 @@ array(8) {
   [6]=>
   string(3) "Foo"
   [7]=>
-  resource(5) of type (stream)
+  resource(%d) of type (stream)
 }
 array(8) {
   [1]=>
@@ -211,7 +211,7 @@ array(8) {
   [7]=>
   string(3) "Foo"
   [8]=>
-  resource(5) of type (stream)
+  resource(%d) of type (stream)
 }
 
 *** Testing numeric column keys ***
