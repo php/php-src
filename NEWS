@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #64342 (ZipArchive::addFile() has to check for file existence).
   (Anatol)
 
+- Streams:
+  . Fixed Windows x64 version of stream_socket_pair() and improved error handling
+  (Anatol Belski)
+
 11 Apr 2013, PHP 5.3.24
 
 - Core

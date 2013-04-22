@@ -51,7 +51,7 @@ PHP_FUNCTION(stream_socket_pair)
 {
 	long domain, type, protocol;
 	php_stream *s1, *s2;
-	int pair[2];
+	php_socket_t pair[2];
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll",
 			&domain, &type, &protocol)) {
