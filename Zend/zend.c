@@ -567,6 +567,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 	zend_copy_constants(EG(zend_constants), GLOBAL_CONSTANTS_TABLE);
 	zend_init_rsrc_plist(TSRMLS_C);
 	zend_init_exception_op(TSRMLS_C);
+	zend_init_error_handlers(TSRMLS_C);
 	EG(lambda_count) = 0;
 	EG(user_error_handler) = NULL;
 	EG(user_exception_handler) = NULL;
@@ -593,6 +594,7 @@ static void executor_globals_dtor(zend_executor_globals *executor_globals TSRMLS
 		zend_hash_destroy(executor_globals->zend_constants);
 		free(executor_globals->zend_constants);
 	}
+	zend_shutdown_error_handlers(TSRMLS_C);
 }
 /* }}} */
 
@@ -753,6 +755,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 #ifndef ZTS
 	zend_init_rsrc_plist(TSRMLS_C);
 	zend_init_exception_op(TSRMLS_C);
+	zend_init_error_handlers(TSRMLS_C);
 #endif
 
 	zend_ini_startup(TSRMLS_C);
@@ -1006,16 +1009,11 @@ ZEND_API int zend_get_configuration_directive(const char *name, uint name_length
 			memcpy(&CG(stack), &stack, sizeof(zend_stack)); \
 		} \
 	} while (0)
-
-ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
-{
-	va_list args;
-	va_list usr_copy;
+	
+void zend_default_error_handler(zend_error_t* error TSRMLS_DC) {
 	zval ***params;
 	zval *retval;
 	zval *z_error_type, *z_error_message, *z_error_filename, *z_error_lineno, *z_context;
-	const char *error_filename;
-	uint error_lineno;
 	zval *orig_user_error_handler;
 	zend_bool in_compilation;
 	zend_class_entry *saved_class_entry;
@@ -1027,8 +1025,197 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	zend_stack declare_stack;
 	zend_stack list_stack;
 	zend_stack context_stack;
-	TSRMLS_FETCH();
+	
+	/* don't output errors twice */
+	if (error->handled)
+	    return;
+	
+	/* incase of any hackery */
+	error->handled = 1;
+	
+    /* if we don't have a user defined error handler */
+	if (!EG(user_error_handler)
+		|| !(EG(user_error_handler_error_reporting) & error->level)
+		|| EG(error_handling) != EH_NORMAL) {
+		zend_error_cb(error->level, error->file, error->line, error->format, error->args);
+	} else switch (error->level) {
+		case E_ERROR:
+		case E_PARSE:
+		case E_CORE_ERROR:
+		case E_CORE_WARNING:
+		case E_COMPILE_ERROR:
+		case E_COMPILE_WARNING:
+			/* The error may not be safe to handle in user-space */
+			zend_error_cb(error->level, error->file, error->line, error->format, error->args);
+			break;
+		default:
+			/* Handle the error in user space */
+			ALLOC_INIT_ZVAL(z_error_message);
+			ALLOC_INIT_ZVAL(z_error_type);
+			ALLOC_INIT_ZVAL(z_error_filename);
+			ALLOC_INIT_ZVAL(z_error_lineno);
+			ALLOC_INIT_ZVAL(z_context);
+            
+            Z_STRLEN_P(z_error_message) = zend_vspprintf(
+                &Z_STRVAL_P(z_error_message), 0, error->format, error->args);
+            Z_TYPE_P(z_error_message) = IS_STRING;
+            
+			ZVAL_LONG(z_error_type, error->level);
+			
+			if (error->file) {
+				ZVAL_STRING(z_error_filename, error->file, 1);
+			}
+			
+            ZVAL_LONG(z_error_lineno, error->line);
+            
+			if (!EG(active_symbol_table)) {
+				zend_rebuild_symbol_table(TSRMLS_C);
+			}
 
+			/* during shutdown the symbol table table can be still null */
+			if (!EG(active_symbol_table)) {
+				Z_TYPE_P(z_context) = IS_NULL;
+			} else {
+				Z_ARRVAL_P(z_context) = EG(active_symbol_table);
+				Z_TYPE_P(z_context) = IS_ARRAY;
+				
+				zval_copy_ctor(z_context);
+			}
+
+			params = (zval ***) emalloc(sizeof(zval **)*5);
+			params[0] = &z_error_type;
+			params[1] = &z_error_message;
+			params[2] = &z_error_filename;
+			params[3] = &z_error_lineno;
+			params[4] = &z_context;
+
+			orig_user_error_handler = EG(user_error_handler);
+			EG(user_error_handler) = NULL;
+
+			/* User error handler may include() additinal PHP files.
+			 * If an error was generated during comilation PHP will compile
+			 * such scripts recursivly, but some CG() variables may be
+			 * inconsistent. */
+
+			in_compilation = zend_is_compiling(TSRMLS_C);
+			if (in_compilation) {
+				saved_class_entry = CG(active_class_entry);
+				CG(active_class_entry) = NULL;
+				SAVE_STACK(bp_stack);
+				SAVE_STACK(function_call_stack);
+				SAVE_STACK(switch_cond_stack);
+				SAVE_STACK(foreach_copy_stack);
+				SAVE_STACK(object_stack);
+				SAVE_STACK(declare_stack);
+				SAVE_STACK(list_stack);
+				SAVE_STACK(context_stack);
+			}
+
+			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC) == SUCCESS) {
+				if (retval) {
+					if (Z_TYPE_P(retval) == IS_BOOL && Z_LVAL_P(retval) == 0) {
+						zend_error_cb(error->level, error->file, error->line, error->format, error->args);
+					}
+					zval_ptr_dtor(&retval);
+				}
+			} else if (!EG(exception)) {
+				/* The user error handler failed, use built-in error handler */
+				zend_error_cb(error->level, error->file, error->line, error->format, error->args);
+			}
+
+			if (in_compilation) {
+				CG(active_class_entry) = saved_class_entry;
+				RESTORE_STACK(bp_stack);
+				RESTORE_STACK(function_call_stack);
+				RESTORE_STACK(switch_cond_stack);
+				RESTORE_STACK(foreach_copy_stack);
+				RESTORE_STACK(object_stack);
+				RESTORE_STACK(declare_stack);
+				RESTORE_STACK(list_stack);
+				RESTORE_STACK(context_stack);
+			}
+
+			if (!EG(user_error_handler)) {
+				EG(user_error_handler) = orig_user_error_handler;
+			}
+			else {
+				zval_ptr_dtor(&orig_user_error_handler);
+			}
+
+			efree(params);
+			zval_ptr_dtor(&z_error_message);
+			zval_ptr_dtor(&z_error_type);
+			zval_ptr_dtor(&z_error_filename);
+			zval_ptr_dtor(&z_error_lineno);
+			zval_ptr_dtor(&z_context);
+			break;
+	}
+}
+
+/* {{{ zend_init_error_handlers */
+ZEND_API void zend_init_error_handlers(TSRMLS_D)
+{
+    zend_llist_init(&EG(error_handlers), sizeof(zend_error_handler_t), NULL, 1);
+    zend_register_error_handler(
+        zend_default_error_handler TSRMLS_CC);
+} /* }}} */
+
+/* {{{ zend_register_error_handler */
+ZEND_API void zend_register_error_handler(zend_error_handler_t handler TSRMLS_DC)
+{
+    if (zend_llist_count(&EG(error_handlers)))
+        zend_llist_prepend_element(&EG(error_handlers), &handler);
+    else zend_llist_add_element(&EG(error_handlers), &handler);
+} /* }}} */
+
+/* {{{ zend_error_call_handler */
+static inline void zend_call_error_handler(void *data, void *arg TSRMLS_DC) 
+{
+    (*(zend_error_handler_t*) data)(*(zend_error_t**) arg);
+} /* }}} */
+
+/* {{{ zend_call_error_handlers */
+ZEND_API void zend_call_error_handlers(zend_error_t* error TSRMLS_DC)
+{
+    zend_llist_apply_with_argument(
+        &EG(error_handlers), 
+        zend_call_error_handler, &error TSRMLS_CC);
+} /* }}} */
+
+/* {{{ zend_call_error_handlers */
+ZEND_API void zend_call_error_handlers_ex(int level, const char* format, const char* file, zend_uint line, va_list* args TSRMLS_DC)
+{   
+    zend_error_t *error = (zend_error_t*) emalloc(sizeof(zend_error_t));
+       
+    error->handled = 0; 
+    error->level = level;
+    error->file = file;
+    error->line = line;
+    error->format = estrdup(format);
+    
+    memcpy(
+        &error->args, args, sizeof(va_list));
+    
+    zend_call_error_handlers(error TSRMLS_CC);
+        
+    efree(error->format);
+    efree(error);
+} /* }}} */
+
+/* {{{ zend_shutdown_error_handlers */
+ZEND_API void zend_shutdown_error_handlers(TSRMLS_D)
+{
+    zend_llist_destroy(&EG(error_handlers));
+} /* }}} */
+
+
+ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
+{
+    zend_uint error_lineno;
+    const char* error_filename;
+    va_list args;
+	TSRMLS_FETCH();
+    
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
 		switch (type) {
@@ -1102,140 +1289,10 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 		efree(dtrace_error_buffer);
 	}
 #endif /* HAVE_DTRACE */
-
-	/* if we don't have a user defined error handler */
-	if (!EG(user_error_handler)
-		|| !(EG(user_error_handler_error_reporting) & type)
-		|| EG(error_handling) != EH_NORMAL) {
-		zend_error_cb(type, error_filename, error_lineno, format, args);
-	} else switch (type) {
-		case E_ERROR:
-		case E_PARSE:
-		case E_CORE_ERROR:
-		case E_CORE_WARNING:
-		case E_COMPILE_ERROR:
-		case E_COMPILE_WARNING:
-			/* The error may not be safe to handle in user-space */
-			zend_error_cb(type, error_filename, error_lineno, format, args);
-			break;
-		default:
-			/* Handle the error in user space */
-			ALLOC_INIT_ZVAL(z_error_message);
-			ALLOC_INIT_ZVAL(z_error_type);
-			ALLOC_INIT_ZVAL(z_error_filename);
-			ALLOC_INIT_ZVAL(z_error_lineno);
-			ALLOC_INIT_ZVAL(z_context);
-
-/* va_copy() is __va_copy() in old gcc versions.
- * According to the autoconf manual, using
- * memcpy(&dst, &src, sizeof(va_list))
- * gives maximum portability. */
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(dest, src)	__va_copy((dest), (src))
-# else
-#  define va_copy(dest, src)	memcpy(&(dest), &(src), sizeof(va_list))
-# endif
-#endif
-			va_copy(usr_copy, args);
-			Z_STRLEN_P(z_error_message) = zend_vspprintf(&Z_STRVAL_P(z_error_message), 0, format, usr_copy);
-#ifdef va_copy
-			va_end(usr_copy);
-#endif
-			Z_TYPE_P(z_error_message) = IS_STRING;
-
-			Z_LVAL_P(z_error_type) = type;
-			Z_TYPE_P(z_error_type) = IS_LONG;
-
-			if (error_filename) {
-				ZVAL_STRING(z_error_filename, error_filename, 1);
-			}
-
-			Z_LVAL_P(z_error_lineno) = error_lineno;
-			Z_TYPE_P(z_error_lineno) = IS_LONG;
-
-			if (!EG(active_symbol_table)) {
-				zend_rebuild_symbol_table(TSRMLS_C);
-			}
-
-			/* during shutdown the symbol table table can be still null */
-			if (!EG(active_symbol_table)) {
-				Z_TYPE_P(z_context) = IS_NULL;
-			} else {
-				Z_ARRVAL_P(z_context) = EG(active_symbol_table);
-				Z_TYPE_P(z_context) = IS_ARRAY;
-				zval_copy_ctor(z_context);
-			}
-
-			params = (zval ***) emalloc(sizeof(zval **)*5);
-			params[0] = &z_error_type;
-			params[1] = &z_error_message;
-			params[2] = &z_error_filename;
-			params[3] = &z_error_lineno;
-			params[4] = &z_context;
-
-			orig_user_error_handler = EG(user_error_handler);
-			EG(user_error_handler) = NULL;
-
-			/* User error handler may include() additinal PHP files.
-			 * If an error was generated during comilation PHP will compile
-			 * such scripts recursivly, but some CG() variables may be
-			 * inconsistent. */
-
-			in_compilation = zend_is_compiling(TSRMLS_C);
-			if (in_compilation) {
-				saved_class_entry = CG(active_class_entry);
-				CG(active_class_entry) = NULL;
-				SAVE_STACK(bp_stack);
-				SAVE_STACK(function_call_stack);
-				SAVE_STACK(switch_cond_stack);
-				SAVE_STACK(foreach_copy_stack);
-				SAVE_STACK(object_stack);
-				SAVE_STACK(declare_stack);
-				SAVE_STACK(list_stack);
-				SAVE_STACK(context_stack);
-			}
-
-			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC) == SUCCESS) {
-				if (retval) {
-					if (Z_TYPE_P(retval) == IS_BOOL && Z_LVAL_P(retval) == 0) {
-						zend_error_cb(type, error_filename, error_lineno, format, args);
-					}
-					zval_ptr_dtor(&retval);
-				}
-			} else if (!EG(exception)) {
-				/* The user error handler failed, use built-in error handler */
-				zend_error_cb(type, error_filename, error_lineno, format, args);
-			}
-
-			if (in_compilation) {
-				CG(active_class_entry) = saved_class_entry;
-				RESTORE_STACK(bp_stack);
-				RESTORE_STACK(function_call_stack);
-				RESTORE_STACK(switch_cond_stack);
-				RESTORE_STACK(foreach_copy_stack);
-				RESTORE_STACK(object_stack);
-				RESTORE_STACK(declare_stack);
-				RESTORE_STACK(list_stack);
-				RESTORE_STACK(context_stack);
-			}
-
-			if (!EG(user_error_handler)) {
-				EG(user_error_handler) = orig_user_error_handler;
-			}
-			else {
-				zval_ptr_dtor(&orig_user_error_handler);
-			}
-
-			efree(params);
-			zval_ptr_dtor(&z_error_message);
-			zval_ptr_dtor(&z_error_type);
-			zval_ptr_dtor(&z_error_filename);
-			zval_ptr_dtor(&z_error_lineno);
-			zval_ptr_dtor(&z_context);
-			break;
-	}
-
+    
+    /* call error handlers */
+    zend_call_error_handlers_ex(type, format, error_filename, error_lineno, &args TSRMLS_CC);
+    
 	va_end(args);
 
 	if (type == E_PARSE) {
