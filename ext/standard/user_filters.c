@@ -474,7 +474,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	} else {
 		php_stream_bucket_prepend(brigade, bucket TSRMLS_CC);
 	}
-	/* This is a hack necessary to accomodate situations where bucket is appended to the stream
+	/* This is a hack necessary to accommodate situations where bucket is appended to the stream
  	 * multiple times. See bug35916.phpt for reference.
 	 */
 	if (bucket->refcount == 1) {
