@@ -2532,9 +2532,14 @@ PHP_FUNCTION(array_column)
 	zval *zarray, **zcolumn, **zkey = NULL, **data, **zcolval, **zkeyval;
 	HashTable *arr_hash;
 	HashPosition pointer;
-	ulong column_idx = 0, key_idx = 0;
+	ulong column_idx = 0, key_idx = 0, column_is_null = 0;
 	char *column = NULL, *key = NULL, *keyval = NULL;
 	int column_len = 0, key_len = 0, keyval_idx = -1;
+
+	zval *column_arr = NULL, **column_data, **zcolval2;
+	HashTable *column_hash;
+	HashPosition column_pointer;
+	int column_is_array = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aZ|Z", &zarray, &zcolumn, &zkey) == FAILURE) {
 		return;
@@ -2542,7 +2547,7 @@ PHP_FUNCTION(array_column)
 
 	switch (Z_TYPE_PP(zcolumn)) {
 		case IS_NULL:
-			column_idx = 0;
+			column_is_null = 1;
 			break;
 		case IS_LONG:
 			column_idx = Z_LVAL_PP(zcolumn);
@@ -2556,8 +2561,12 @@ PHP_FUNCTION(array_column)
 			column = Z_STRVAL_PP(zcolumn);
 			column_len = Z_STRLEN_PP(zcolumn);
 			break;
+		case IS_ARRAY:
+			column_is_array = 1;
+			column_hash = Z_ARRVAL_PP(zcolumn);
+			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The column key should be either a string or an integer");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The column key should be a string, an integer, or an array");
 			RETURN_FALSE;
 	}
 
@@ -2594,13 +2603,79 @@ PHP_FUNCTION(array_column)
 		if (Z_TYPE_PP(data) == IS_ARRAY) {
 			zval *strkey = NULL;
 
-			if (column && zend_hash_find(Z_ARRVAL_PP(data), column, column_len + 1, (void**)&zcolval) == FAILURE) {
+			/* Find the current key/index of the array */
+			char *current_key;
+			uint current_key_len, hash_key_is_string = 0;
+			ulong current_index;
+			if (zend_hash_get_current_key_ex(arr_hash, &current_key, &current_key_len, &current_index, 0, &pointer) == HASH_KEY_IS_STRING) {
+				hash_key_is_string = 1;
+			}
+
+			if (column_is_null) {
+				zcolval = data;
+			} else if (column_is_array) {
+
+				MAKE_STD_ZVAL(column_arr);
+				array_init(column_arr);
+
+				for (zend_hash_internal_pointer_reset_ex(column_hash, &column_pointer);
+						zend_hash_get_current_data_ex(column_hash, (void**)&column_data, &column_pointer) == SUCCESS;
+						zend_hash_move_forward_ex(column_hash, &column_pointer)) {
+
+					zval *strobj = NULL;
+					column = NULL;
+
+					switch (Z_TYPE_PP(column_data)) {
+						case IS_LONG:
+							column_idx = Z_LVAL_PP(column_data);
+							break;
+						case IS_STRING:
+							column = Z_STRVAL_PP(column_data);
+							column_len = Z_STRLEN_PP(column_data);
+							break;
+						case IS_OBJECT:
+							{
+								MAKE_STD_ZVAL(strobj);
+								MAKE_COPY_ZVAL(column_data, strobj);
+								convert_to_string(strobj);
+								column = Z_STRVAL_P(strobj);
+								column_len = Z_STRLEN_P(strobj);
+							}
+							break;
+						default:
+							continue;
+					}
+
+					if (column && zend_hash_find(Z_ARRVAL_PP(data), column, column_len + 1, (void**)&zcolval2) == FAILURE) {
+						continue;
+					} else if (!column && zend_hash_index_find(Z_ARRVAL_PP(data), column_idx, (void**)&zcolval2) == FAILURE) {
+						continue;
+					}
+
+					Z_ADDREF_PP(zcolval2);
+
+					if (column) {
+						add_assoc_zval(column_arr, column, *zcolval2);
+						if (strobj) {
+							zval_ptr_dtor(&strobj);
+						}
+					} else {
+						add_index_zval(column_arr, column_idx, *zcolval2);
+					}
+
+				}
+
+				zcolval = &column_arr;
+
+			} else if (column && zend_hash_find(Z_ARRVAL_PP(data), column, column_len + 1, (void**)&zcolval) == FAILURE) {
 				continue;
 			} else if (!column && zend_hash_index_find(Z_ARRVAL_PP(data), column_idx, (void**)&zcolval) == FAILURE) {
 				continue;
 			}
 
-			Z_ADDREF_PP(zcolval);
+			if (column_arr == NULL) {
+				Z_ADDREF_PP(zcolval);
+			}
 
 			keyval = NULL;
 			keyval_idx = -1;
@@ -2639,8 +2714,12 @@ PHP_FUNCTION(array_column)
 				}
 			} else if (keyval_idx != -1) {
 				add_index_zval(return_value, keyval_idx, *zcolval);
-			} else {
+			} else if (zkey) {
 				add_next_index_zval(return_value, *zcolval);
+			} else if (hash_key_is_string) {
+				add_assoc_zval(return_value, current_key, *zcolval);
+			} else {
+				add_index_zval(return_value, current_index, *zcolval);
 			}
 		}
 

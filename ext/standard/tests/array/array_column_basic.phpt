@@ -251,7 +251,7 @@ array(0) {
 
 *** Testing columns not present in all rows ***
 array(1) {
-  [0]=>
+  [1]=>
   string(3) "qux"
 }
 array(1) {
@@ -277,7 +277,7 @@ array(3) {
 array(2) {
   [0]=>
   string(3) "bar"
-  [1]=>
+  [2]=>
   string(3) "fff"
 }
 array(2) {
