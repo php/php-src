@@ -296,6 +296,34 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 #  define zend_error_noreturn zend_error
 #endif
 
+/* {{{ zend_error_t */
+typedef struct zend_error_t {
+    zend_bool         handled;
+    zend_ushort       level;
+    zend_uint         line;
+    const char*       file;
+    char*             format;
+    va_list           args;
+} zend_error_t; /* }}} */
+
+/* {{{ zend_error_handler_t */
+typedef void (*zend_error_handler_t) (zend_error_t *error TSRMLS_DC); /* }}} */
+
+/* {{{ zend_init_error_handlers */
+ZEND_API void zend_init_error_handlers(TSRMLS_D); /* }}} */
+
+/* {{{ zend_register_error_handler */
+ZEND_API void zend_register_error_handler(zend_error_handler_t handler TSRMLS_DC); /* }}} */
+
+/* {{{ zend_call_error_handlers */
+ZEND_API void zend_call_error_handlers(zend_error_t* error TSRMLS_DC); /* }}} */
+
+/* {{{ zend_call_error_handlers_ex */
+ZEND_API void zend_call_error_handlers_ex(int level, const char* format, const char* filename, zend_uint line, va_list* args TSRMLS_DC); /* }}} */
+
+/* {{{ zend_shutdown_error_handlers */
+ZEND_API void zend_shutdown_error_handlers(TSRMLS_D); /* }}} */
+
 /*
  * zval
  */
