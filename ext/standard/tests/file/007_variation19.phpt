@@ -48,7 +48,7 @@ clearstatcache();
 
 unlink($file);  //Deleting the file
 fclose( fopen($file, "wb") );  //Opening the non-existing file in "wb" mode, which will be created
-var_dump( file_exists($file) );  //Check for the existance of file
+var_dump( file_exists($file) );  //Check for the existence of file
 echo "*** Done ***\n"; 
 --CLEAN--
 <?php
