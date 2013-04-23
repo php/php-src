@@ -5340,7 +5340,7 @@ PHP_FUNCTION(imagecropauto)
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown flip mode");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown crop mode");
 			RETURN_FALSE;
 	}
 	if (im_crop == NULL) {
