@@ -376,11 +376,11 @@ while [ $# -gt 0 ]; do
             eval "opt_${opt_OPT}=yes"
             ;;
         ':' )
-            #   option with argument (multiple occurances override)
+            #   option with argument (multiple occurrences override)
             eval "opt_${opt_OPT}=\"\$opt_ARG\""
             ;;
         '+' )
-            #   option with argument (multiple occurances append)
+            #   option with argument (multiple occurrences append)
             eval "opt_${opt_OPT}=\"\$opt_${opt_OPT}\${ASC_NL}\$opt_ARG\""
             ;;
         * )
