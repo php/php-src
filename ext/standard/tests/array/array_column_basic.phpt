@@ -42,8 +42,7 @@ echo "-- last_name column from recordset, keyed by value from first_name column 
 var_dump(array_column($records, 'last_name', 'first_name'));
 
 echo "\n*** Testing multiple data types ***\n";
-$file = basename(__FILE__);
-$fh = fopen($file, 'r', true);
+$fh = fopen(__FILE__, 'r', true);
 $values = array(
 	array(
 		'id' => 1,
@@ -85,15 +84,18 @@ echo "\n*** Testing numeric column keys ***\n";
 $numericCols = array(
 	array('aaa', '111'),
 	array('bbb', '222'),
-	array('ccc', '333')
+	array('ccc', '333', -1 => 'ddd')
 );
 var_dump(array_column($numericCols, 1));
 var_dump(array_column($numericCols, 1, 0));
+var_dump(array_column($numericCols, 1, 0.123));
+var_dump(array_column($numericCols, 1, -1));
 
 echo "\n*** Testing failure to find specified column ***\n";
 var_dump(array_column($numericCols, 2));
 var_dump(array_column($numericCols, 'foo'));
 var_dump(array_column($numericCols, 0, 'foo'));
+var_dump(array_column($numericCols, 3.14));
 
 echo "\n*** Testing single dimensional array ***\n";
 $singleDimension = array('foo', 'bar', 'baz');
@@ -191,7 +193,7 @@ array(8) {
   [6]=>
   string(3) "Foo"
   [7]=>
-  resource(5) of type (stream)
+  resource(%d) of type (stream)
 }
 array(8) {
   [1]=>
@@ -210,7 +212,7 @@ array(8) {
   [7]=>
   string(3) "Foo"
   [8]=>
-  resource(5) of type (stream)
+  resource(%d) of type (stream)
 }
 
 *** Testing numeric column keys ***
@@ -230,6 +232,22 @@ array(3) {
   ["ccc"]=>
   string(3) "333"
 }
+array(3) {
+  ["aaa"]=>
+  string(3) "111"
+  ["bbb"]=>
+  string(3) "222"
+  ["ccc"]=>
+  string(3) "333"
+}
+array(3) {
+  [0]=>
+  string(3) "111"
+  [1]=>
+  string(3) "222"
+  ["ddd"]=>
+  string(3) "333"
+}
 
 *** Testing failure to find specified column ***
 array(0) {
@@ -243,6 +261,8 @@ array(3) {
   string(3) "bbb"
   [2]=>
   string(3) "ccc"
+}
+array(0) {
 }
 
 *** Testing single dimensional array ***

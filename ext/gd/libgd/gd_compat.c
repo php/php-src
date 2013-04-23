@@ -33,3 +33,14 @@ const char * gdPngGetVersionString()
 }
 #endif
 
+int overflow2(int a, int b)
+{
+	if(a <= 0 || b <= 0) {
+		return 1;
+	}
+	if(a > INT_MAX / b) {
+		return 1;
+	}
+	return 0;
+}
+
