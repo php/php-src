@@ -7176,7 +7176,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	}
 #elif defined(NETWARE)
 	/*
-	 * Find the first occurence of : from the left
+	 * Find the first occurrence of : from the left
 	 * move the path pointer to the position just after :
 	 * increment the len_adjust to the length of path till colon character(inclusive)
 	 * If there is no character beyond : simple return len
