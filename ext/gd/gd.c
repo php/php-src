@@ -2403,14 +2403,12 @@ static int _php_image_type (char data[8])
 	} else if (!memcmp(data, php_sig_gif, 3)) {
 		return PHP_GDIMG_TYPE_GIF;
 	}
-/* Temporary disabled, as gdGetC, getmbi and skipheader not exported in system libgd */
-#if HAVE_GD_BUNDLED
 #ifdef HAVE_GD_WBMP
 	else {
 		gdIOCtx *io_ctx;
 		io_ctx = gdNewDynamicCtxEx(8, data, 0);
 		if (io_ctx) {
-			if (getmbi((int(*)(void *)) gdGetC, io_ctx) == 0 && skipheader((int(*)(void *)) gdGetC, io_ctx) == 0 ) {
+			if (getmbi((int(*)(void *)) io_ctx->getC, io_ctx) == 0 && skipheader((int(*)(void *)) io_ctx->getC, io_ctx) == 0 ) {
 #if HAVE_LIBGD204
 				io_ctx->gd_free(io_ctx);
 #else
@@ -2426,7 +2424,6 @@ static int _php_image_type (char data[8])
 			}
 		}
 	}
-#endif
 #endif
 	return -1;
 #endif
