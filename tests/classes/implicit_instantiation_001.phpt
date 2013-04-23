@@ -41,7 +41,7 @@ var_dump($c);
 
 Warning: Creating default object from empty value in %s on line 18
 
-Notice: Undefined property: prop in %s on line 18
+Notice: Undefined property: stdClass::$prop in %s on line 18
 
   --> Attempting implicit conversion to object using assignment...
 
@@ -51,7 +51,7 @@ Warning: Creating default object from empty value in %s on line 22
 
 Warning: Creating default object from empty value in %s on line 26
 
-Notice: Undefined property: prop in %s on line 26
+Notice: Undefined property: stdClass::$prop in %s on line 26
 
 
 ---( $c->emptyString )---
@@ -59,7 +59,7 @@ Notice: Undefined property: prop in %s on line 26
 
 Warning: Creating default object from empty value in %s on line 18
 
-Notice: Undefined property: prop in %s on line 18
+Notice: Undefined property: stdClass::$prop in %s on line 18
 
   --> Attempting implicit conversion to object using assignment...
 
@@ -69,7 +69,7 @@ Warning: Creating default object from empty value in %s on line 22
 
 Warning: Creating default object from empty value in %s on line 26
 
-Notice: Undefined property: prop in %s on line 26
+Notice: Undefined property: stdClass::$prop in %s on line 26
 
 
 ---( $c->null )---
@@ -77,7 +77,7 @@ Notice: Undefined property: prop in %s on line 26
 
 Warning: Creating default object from empty value in %s on line 18
 
-Notice: Undefined property: prop in %s on line 18
+Notice: Undefined property: stdClass::$prop in %s on line 18
 
   --> Attempting implicit conversion to object using assignment...
 
@@ -87,7 +87,7 @@ Warning: Creating default object from empty value in %s on line 22
 
 Warning: Creating default object from empty value in %s on line 26
 
-Notice: Undefined property: prop in %s on line 26
+Notice: Undefined property: stdClass::$prop in %s on line 26
 
 
 ---( $c->boolTrue )---

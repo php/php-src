@@ -9,10 +9,7 @@ if(!$res) {
 	die("skip could not open cli server script");
 }
 
-ob_start();
-phpinfo();
-$curlwrappers = preg_match("/with-curlwrappers/", ob_get_clean());
-if ($curlwrappers) {
+if (CURL_WRAPPERS_ENABLED) {
 	die("skip curl wrappers used");
 }
 ?>

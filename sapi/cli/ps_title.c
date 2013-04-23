@@ -112,6 +112,7 @@ static const size_t ps_buffer_size = MAX_PATH;
 #elif defined(PS_USE_CLOBBER_ARGV)
 static char *ps_buffer;         /* will point to argv area */
 static size_t ps_buffer_size;   /* space determined at run time */
+static char *empty_environ[] = {0}; /* empty environment */
 #else
 #define PS_BUFFER_SIZE 256
 static char ps_buffer[PS_BUFFER_SIZE];
@@ -415,6 +416,9 @@ void cleanup_ps_args(char **argv)
                 free(frozen_environ[i]);
             free(frozen_environ);
             free(new_environ);
+            /* leave a sane environment behind since some atexit() handlers
+                call getenv(). */
+            environ = empty_environ;
         }
 #endif /* PS_USE_CLOBBER_ARGV */
 

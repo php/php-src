@@ -151,13 +151,13 @@ opcache.dups_fix (default "0")
 	Enable this hack as a workaround for "Cannot redeclare class" errors.
 
 opcache.blacklist_filename
-	The location of the OPcache blacklist file.
-	The OPcache blacklist file is a text file that holds the names of files
+	The location of the OPcache blacklist file (wildcards allowed).
+	Each OPcache blacklist file is a text file that holds the names of files
 	that should not be accelerated. The file format is to add each filename
 	to a new line. The filename may be a full path or just a file prefix
 	(i.e., /var/www/x  blacklists all the files and directories in /var/www
-	that start with 'x'). Files are usually triggered by one of the following
-	three reasons:
+	that start with 'x'). Line starting with a ; are ignored (comments).
+	Files are usually triggered by one of the following three reasons:
 	1) Directories that contain auto generated code, like Smarty or ZFW cache.
 	2) Code that does not work well when accelerated, due to some delayed
 	   compile time evaluation.

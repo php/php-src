@@ -26,17 +26,11 @@ var_dump(array_column(1, 'foo'));
 echo "\n-- Testing array_column() column key parameter should be a string or an integer (testing bool) --\n";
 var_dump(array_column(array(), true));
 
-echo "\n-- Testing array_column() column key parameter should be a string or integer (testing float) --\n";
-var_dump(array_column(array(), 2.3));
-
 echo "\n-- Testing array_column() column key parameter should be a string or integer (testing array) --\n";
 var_dump(array_column(array(), array()));
 
 echo "\n-- Testing array_column() index key parameter should be a string or an integer (testing bool) --\n";
 var_dump(array_column(array(), 'foo', true));
-
-echo "\n-- Testing array_column() index key parameter should be a string or integer (testing float) --\n";
-var_dump(array_column(array(), 'foo', 2.3));
 
 echo "\n-- Testing array_column() index key parameter should be a string or integer (testing array) --\n";
 var_dump(array_column(array(), 'foo', array()));
@@ -71,22 +65,12 @@ NULL
 Warning: array_column(): The column key should be either a string or an integer in %s on line %d
 bool(false)
 
--- Testing array_column() column key parameter should be a string or integer (testing float) --
-
-Warning: array_column(): The column key should be either a string or an integer in %s on line %d
-bool(false)
-
 -- Testing array_column() column key parameter should be a string or integer (testing array) --
 
 Warning: array_column(): The column key should be either a string or an integer in %s on line %d
 bool(false)
 
 -- Testing array_column() index key parameter should be a string or an integer (testing bool) --
-
-Warning: array_column(): The index key should be either a string or an integer in %s on line %d
-bool(false)
-
--- Testing array_column() index key parameter should be a string or integer (testing float) --
 
 Warning: array_column(): The index key should be either a string or an integer in %s on line %d
 bool(false)

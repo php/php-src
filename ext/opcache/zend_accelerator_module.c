@@ -41,8 +41,21 @@ static void (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
 static void (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
 static void (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
 
+ZEND_BEGIN_ARG_INFO(arginfo_opcache_none, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_get_status, 0, 0, 0)
+	ZEND_ARG_INFO(0, fetch_scripts)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_invalidate, 0, 0, 1)
+	ZEND_ARG_INFO(0, script)
+	ZEND_ARG_INFO(0, force)
+ZEND_END_ARG_INFO()
+
 /* User functions */
 static ZEND_FUNCTION(opcache_reset);
+static ZEND_FUNCTION(opcache_invalidate);
 
 /* Private functions */
 static ZEND_FUNCTION(opcache_get_status);
@@ -50,10 +63,11 @@ static ZEND_FUNCTION(opcache_get_configuration);
 
 static zend_function_entry accel_functions[] = {
 	/* User functions */
-	ZEND_FE(opcache_reset,					NULL)
+	ZEND_FE(opcache_reset,					arginfo_opcache_none)
+	ZEND_FE(opcache_invalidate,				arginfo_opcache_invalidate)
 	/* Private functions */
-	ZEND_FE(opcache_get_configuration,		NULL)
-	ZEND_FE(opcache_get_status,				NULL)
+	ZEND_FE(opcache_get_configuration,		arginfo_opcache_none)
+	ZEND_FE(opcache_get_status,				arginfo_opcache_get_status)
 	{ NULL, NULL, NULL, 0, 0 }
 };
 
@@ -642,4 +656,23 @@ static ZEND_FUNCTION(opcache_reset)
 
 	zend_accel_schedule_restart(ACCEL_RESTART_USER TSRMLS_CC);
 	RETURN_TRUE;
+}
+
+/* {{{ proto void opcache_invalidate(string $script [, bool $force = false])
+   Invalidates cached script (in necessary or forced) */
+static ZEND_FUNCTION(opcache_invalidate)
+{
+	char *script_name;
+	int script_name_len;
+	zend_bool force = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &script_name, &script_name_len, &force) == FAILURE) {
+		return;
+	}
+
+	if (zend_accel_invalidate(script_name, script_name_len, force TSRMLS_CC) == SUCCESS) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
 }
