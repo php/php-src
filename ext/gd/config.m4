@@ -286,6 +286,7 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_CHECK_LIBRARY(gd, gdNewDynamicCtxEx,      [AC_DEFINE(HAVE_GD_DYNAMIC_CTX_EX,   1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageConvolution,     [AC_DEFINE(HAVE_GD_IMAGE_CONVOLUTION,      1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImagePixelate,        [AC_DEFINE(HAVE_GD_IMAGE_PIXELATE,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageFlipBoth,        [AC_DEFINE(HAVE_GD_IMAGE_FLIP,       1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
 ])
 
 dnl
@@ -342,6 +343,7 @@ dnl These are always available with bundled library
   AC_DEFINE(HAVE_GD_FONTMUTEX,        1, [ ])
   AC_DEFINE(HAVE_GD_DYNAMIC_CTX_EX,   1, [ ])
   AC_DEFINE(HAVE_GD_GIF_CTX,          1, [ ])
+  AC_DEFINE(HAVE_GD_IMAGE_FLIP,       1, [ ])
 
 dnl Make sure the libgd/ is first in the include path
   GDLIB_CFLAGS="-DHAVE_LIBPNG"
