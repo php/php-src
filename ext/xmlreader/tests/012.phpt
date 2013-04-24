@@ -38,7 +38,7 @@ $reader->close();
 
 echo "\nUsing URI:\n";
 $reader = new XMLReader();
-$file = dirname(__FILE__) . '/012.xml';
+$file = dirname(__FILE__) . '/_012.xml';
 if (DIRECTORY_SEPARATOR == '\\') {
 	$file = str_replace('\\',"/", $file);
 }
@@ -52,7 +52,7 @@ var_dump($reader->getAttribute('baz'));
 $reader->close();
 
 $reader = new XMLReader();
-$reader->open(dirname(__FILE__) . '/012.xml');
+$reader->open(dirname(__FILE__) . '/_012.xml');
 $reader->setParserProperty(XMLReader::DEFAULTATTRS, true);
 while($reader->read() && $reader->nodeType != XMLReader::ELEMENT);
 var_dump($reader->getAttribute('bar'));
