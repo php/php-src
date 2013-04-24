@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 5.5.0 Beta 4
+25 Apr 2013, PHP 5.5.0 Beta 4
 
 - Core:
   . Fixed bug #64677 (execution operator `` stealing surrounding arguments). 
