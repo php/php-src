@@ -287,6 +287,7 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_CHECK_LIBRARY(gd, gdImageConvolution,     [AC_DEFINE(HAVE_GD_IMAGE_CONVOLUTION,      1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImagePixelate,        [AC_DEFINE(HAVE_GD_IMAGE_PIXELATE,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageFlipBoth,        [AC_DEFINE(HAVE_GD_IMAGE_FLIP,       1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpegEx,[AC_DEFINE(HAVE_GD_JPGEX,            1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
 ])
 
 dnl
@@ -358,6 +359,7 @@ dnl enable the support in bundled GD library
 
   if test -n "$GD_JPEG_DIR"; then
     AC_DEFINE(HAVE_GD_JPG, 1, [ ])
+    AC_DEFINE(HAVE_GD_JPGEX, 1, [ ])
     GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBJPEG"
   fi
 
