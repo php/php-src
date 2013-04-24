@@ -5360,7 +5360,7 @@ PHP_FUNCTION(imagecropauto)
 /* }}} */
 
 /* {{{ proto resource imagescale(resource im, new_width[, new_height[, method]])
-   Crop an image using the given coordinates and size, x, y, width and height. */
+   Scale an image using the given new width and height. */
 PHP_FUNCTION(imagescale)
 {
 	zval *IM;
