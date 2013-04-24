@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug #64677 (execution operator `` stealing surrounding arguments). 
     (Laruence)
 
+- CURL:
+  . Remove curl stream wrappers. (Pierrick)
+
 - Zip:
   . Fixed bug #64342 (ZipArchive::addFile() has to check for file existence).
     (Anatol)
