@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
     segfault). (Laruence)
+  . Fixed bug #64458 (dns_get_record result with string of length -1). (Stas)
   . Fixed bug #64433 (follow_location parameter of context is ignored for most 
     response codes). (Sergey Akbarov)
   . Fixed bugs #47675 and #64577 (fd leak on Solaris)
