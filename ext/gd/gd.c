@@ -2565,7 +2565,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	gdImagePtr im = NULL;
 	php_stream *stream;
 	FILE * fp = NULL;
-#ifdef HAVE_GD_JPG
+#ifdef HAVE_GD_JPGEX
 	long ignore_warning;
 #endif
 	if (image_type == PHP_GDIMG_TYPE_GD2PART) {
@@ -2668,8 +2668,8 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 
 #ifdef HAVE_GD_JPG
 			case PHP_GDIMG_TYPE_JPG:
+#ifdef HAVE_GD_JPGEX
 				ignore_warning = INI_INT("gd.jpeg_ignore_warning");
-#ifdef HAVE_GD_BUNDLED
 				im = gdImageCreateFromJpegEx(fp, ignore_warning);
 #else
 				im = gdImageCreateFromJpeg(fp);
@@ -4728,7 +4728,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	int int_threshold;
 	int x, y;
 	float x_ratio, y_ratio;
-#ifdef HAVE_GD_JPG
+#ifdef HAVE_GD_JPGEX
     long ignore_warning;
 #endif
 	
@@ -4781,8 +4781,8 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 
 #ifdef HAVE_GD_JPG
 		case PHP_GDIMG_TYPE_JPG:
+#ifdef HAVE_GD_JPGEX
 			ignore_warning = INI_INT("gd.jpeg_ignore_warning");
-#ifdef HAVE_GD_BUNDLED
 			im_org = gdImageCreateFromJpegEx(org, ignore_warning);
 #else
 			im_org = gdImageCreateFromJpeg(org);
