@@ -10,6 +10,8 @@
 const char * gdPngGetVersionString();
 const char * gdJpegGetVersionString();
 int gdJpegGetVersionInt();
+
+#if !defined(HAVE_LIBGD21)
 int overflow2(int a, int b);
 int getmbi (int (*getin) (void *in), void *in);
 int skipheader (int (*getin) (void *in), void *in);
@@ -65,5 +67,6 @@ gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack, int ignore
 
 int gdImageColorMatch (gdImagePtr im1, gdImagePtr im2);
 
-#endif
+#endif /* !HAVE_LIBGD21 */
 
+#endif /* GD_COMPAT_H */

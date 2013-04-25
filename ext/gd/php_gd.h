@@ -129,6 +129,9 @@ PHP_FUNCTION(imageflip);
 
 #ifdef HAVE_GD_BUNDLED
 PHP_FUNCTION(imageantialias);
+#endif
+
+#if defined(HAVE_GD_BUNDLED) || defined(HAVE_LIBGD21)
 PHP_FUNCTION(imagecrop);
 PHP_FUNCTION(imagecropauto);
 PHP_FUNCTION(imagescale);
@@ -154,7 +157,7 @@ PHP_FUNCTION(imagecreatefromwbmp);
 PHP_FUNCTION(imagecreatefromgd);
 PHP_FUNCTION(imagecreatefromgd2);
 PHP_FUNCTION(imagecreatefromgd2part);
-#if defined(HAVE_GD_XPM) && defined(HAVE_GD_BUNDLED)
+#if defined(HAVE_GD_XPM) && (defined(HAVE_GD_BUNDLED) || defined(HAVE_LIBGD21))
 PHP_FUNCTION(imagecreatefromxpm);
 #endif
 
@@ -205,7 +208,7 @@ PHP_FUNCTION(image2wbmp);
 
 PHP_FUNCTION(imagecolormatch);
 
-#if HAVE_GD_BUNDLED
+#if defined(HAVE_GD_BUNDLED) || defined(HAVE_LIBGD21)
 PHP_FUNCTION(imagelayereffect);
 PHP_FUNCTION(imagexbm);
 #endif
