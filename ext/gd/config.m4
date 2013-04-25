@@ -288,6 +288,7 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_CHECK_LIBRARY(gd, gdImagePixelate,        [AC_DEFINE(HAVE_GD_IMAGE_PIXELATE,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageFlipBoth,        [AC_DEFINE(HAVE_GD_IMAGE_FLIP,       1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpegEx,[AC_DEFINE(HAVE_GD_JPGEX,            1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdSetErrorMethod,       [AC_DEFINE(HAVE_LIBGD21,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
 ])
 
 dnl
@@ -328,6 +329,7 @@ dnl These are always available with bundled library
   AC_DEFINE(HAVE_LIBGD15,             1, [ ])
   AC_DEFINE(HAVE_LIBGD20,             1, [ ])
   AC_DEFINE(HAVE_LIBGD204,            1, [ ])
+  AC_DEFINE(HAVE_LIBGD21,             1, [ ])
   AC_DEFINE(HAVE_GD_IMAGESETTILE,     1, [ ])
   AC_DEFINE(HAVE_GD_IMAGESETBRUSH,    1, [ ])
   AC_DEFINE(HAVE_GDIMAGECOLORRESOLVE, 1, [ ])
@@ -384,8 +386,12 @@ else
 
  if test "$PHP_GD" != "no"; then
   GD_MODULE_TYPE=external
-  extra_sources="gdcache.c libgd/gd_compat.c libgd/gd_filter.c libgd/gd_pixelate.c libgd/gd_arc.c \
-                 libgd/gd_rotate.c libgd/gd_color.c"
+  if test -n "$HAVE_LIBGD21"; then
+    extra_sources="libgd/gd_compat.c"
+  else
+    extra_sources="gdcache.c libgd/gd_compat.c libgd/gd_filter.c libgd/gd_pixelate.c libgd/gd_arc.c \
+                   libgd/gd_rotate.c libgd/gd_color.c"
+  fi
 
 dnl Various checks for GD features
   PHP_GD_ZLIB
@@ -419,22 +425,26 @@ dnl Library path
 
   PHP_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
 
-  dnl
-  dnl Check for gd 2.0.4 greater availability
-  dnl
-  old_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS=-I$GD_INCLUDE
-  AC_TRY_COMPILE([
+  if test -n "$HAVE_LIBGD21"; then
+    AC_DEFINE(HAVE_LIBGD204, 1, [ ])
+  else
+    dnl
+    dnl Check for gd 2.0.4 greater availability
+    dnl
+    old_CPPFLAGS=$CPPFLAGS
+    CPPFLAGS=-I$GD_INCLUDE
+    AC_TRY_COMPILE([
 #include <gd.h>
 #include <stdlib.h>
   ], [
 gdIOCtx *ctx;
 ctx = malloc(sizeof(gdIOCtx));
 ctx->gd_free = 1;
-  ], [
-    AC_DEFINE(HAVE_LIBGD204, 1, [ ])
-  ])
-  CPPFLAGS=$old_CPPFLAGS
+    ], [
+      AC_DEFINE(HAVE_LIBGD204, 1, [ ])
+    ])
+    CPPFLAGS=$old_CPPFLAGS
+  fi
 
  fi
 fi
@@ -445,9 +455,8 @@ dnl
 if test "$PHP_GD" != "no"; then
   PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, \\$(GDLIB_CFLAGS))
 
-  PHP_ADD_BUILD_DIR($ext_builddir/libgd)
-
-  if test "$GD_MODULE_TYPE" = "builtin"; then
+  if test "$GD_MODULE_TYPE" = "builtin"; then 
+    PHP_ADD_BUILD_DIR($ext_builddir/libgd)
     GDLIB_CFLAGS="-I$ext_srcdir/libgd $GDLIB_CFLAGS"
     GD_HEADER_DIRS="ext/gd/ ext/gd/libgd/"
 
@@ -455,6 +464,9 @@ if test "$PHP_GD" != "no"; then
       AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
     ], [ $GD_SHARED_LIBADD ], [char foobar () {}])
   else
+    if test "$HAVE_LIBGD21" = "no"; then
+      PHP_ADD_BUILD_DIR($ext_builddir/libgd)
+    fi
     GD_HEADER_DIRS="ext/gd/"
     GDLIB_CFLAGS="-I$GD_INCLUDE $GDLIB_CFLAGS"
     PHP_ADD_INCLUDE($GD_INCLUDE)
