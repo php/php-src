@@ -366,6 +366,8 @@ gdImagePtr gdImageCreateFromJpeg(FILE *infile);
 gdImagePtr gdImageCreateFromJpegEx(FILE *infile, int ignore_warning);
 gdImagePtr gdImageCreateFromJpegCtx(gdIOCtx *infile);
 gdImagePtr gdImageCreateFromJpegCtxEx(gdIOCtx *infile, int ignore_warning);
+gdImagePtr gdImageCreateFromJpegPtr (int size, void *data);
+gdImagePtr gdImageCreateFromJpegPtrEx (int size, void *data, int ignore_warning);
 gdImagePtr gdImageCreateFromWebp(FILE *fd);
 gdImagePtr gdImageCreateFromWebpCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromWebpPtr (int size, void *data);
