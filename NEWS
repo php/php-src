@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2013, PHP 5.3.26
+
 ?? ??? 2013, PHP 5.3.25
+
+### ADD ENTRIES ABOVE FOR 5.3.26. 5.3.25 NEWS WILL BE UPDATED BY RM ON MERGE ###
 
 - Core:
   . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
