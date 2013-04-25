@@ -6,15 +6,15 @@ PHP                                                                        NEWS
   . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
     segfault). (Laruence)
   . Fixed bug #64458 (dns_get_record result with string of length -1). (Stas)
-  . Fixed bugs #47675 and #64577 (fd leak on Solaris)
+  . Fixed bugs #47675 and #64577 (fd leak on Solaris). (Rasmus)
+
+- Streams:
+  . Fixed Windows x64 version of stream_socket_pair() and improved error
+    handling. (Anatol Belski)
 
 - Zip:
   . Fixed bug #64342 (ZipArchive::addFile() has to check for file existence).
-  (Anatol)
-
-- Streams:
-  . Fixed Windows x64 version of stream_socket_pair() and improved error handling
-  (Anatol Belski)
+    (Anatol)
 
 11 Apr 2013, PHP 5.3.24
 
