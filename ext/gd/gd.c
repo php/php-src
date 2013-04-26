@@ -56,6 +56,8 @@
 #if HAVE_LIBGD
 #if !HAVE_GD_BUNDLED
 # include "libgd/gd_compat.h"
+#else
+extern int overflow2(int a, int b);
 #endif
 
 static int le_gd, le_gd_font;
@@ -5266,9 +5268,6 @@ PHP_FUNCTION(imageantialias)
 PHP_FUNCTION(imagecrop)
 {
 	zval *IM;
-	long mode = -1;
-	long color = -1;
-	double threshold = 0.5f;
 	gdImagePtr im;
 	gdImagePtr im_crop;
 	gdRect rect;
@@ -5372,9 +5371,6 @@ PHP_FUNCTION(imagecropauto)
 PHP_FUNCTION(imagescale)
 {
 	zval *IM;
-	long mode = -1;
-	long color = -1;
-	double threshold = 0.5f;
 	gdImagePtr im;
 	gdImagePtr im_scaled;
 	int new_width, new_height = -1;
@@ -5423,9 +5419,6 @@ finish:
 PHP_FUNCTION(imageaffine)
 {
 	zval *IM;
-	long mode = -1;
-	long color = -1;
-	double threshold = 0.5f;
 	gdImagePtr src;
 	gdImagePtr dst;
 	gdRect rect;
@@ -5529,7 +5522,7 @@ PHP_FUNCTION(imageaffinematrixget)
 	gdAffineStandardMatrix type;
 	zval *options;
 	zval **tmp;
-	int res, i;
+	int res = GD_FALSE, i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z", &type, &options) == FAILURE)  {
 		return;
@@ -5589,9 +5582,13 @@ PHP_FUNCTION(imageaffinematrixget)
 			RETURN_FALSE;
 	}
 
-	array_init(return_value);
-	for (i = 0; i < 6; i++) {
-		add_index_double(return_value, i, affine[i]);
+	if (res = GD_FALSE) {
+		RETURN_FALSE;
+	} else {
+		array_init(return_value);
+		for (i = 0; i < 6; i++) {
+			add_index_double(return_value, i, affine[i]);
+		}
 	}
 }
 
