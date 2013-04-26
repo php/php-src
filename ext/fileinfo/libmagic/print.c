@@ -32,6 +32,7 @@
 #include "php.h"
 
 #include "file.h"
+#include "cdf.h"
 
 #ifndef lint
 FILE_RCSID("@(#)$File: print.c,v 1.76 2013/02/26 18:25:00 christos Exp $")
