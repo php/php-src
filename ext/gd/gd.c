@@ -5516,7 +5516,7 @@ PHP_FUNCTION(imageaffinematrixget)
 	gdAffineStandardMatrix type;
 	zval *options;
 	zval **tmp;
-	int res, i;
+	int res = GD_FALSE, i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|z", &type, &options) == FAILURE)  {
 		return;
@@ -5576,9 +5576,13 @@ PHP_FUNCTION(imageaffinematrixget)
 			RETURN_FALSE;
 	}
 
-	array_init(return_value);
-	for (i = 0; i < 6; i++) {
-		add_index_double(return_value, i, affine[i]);
+	if (res = GD_FALSE) {
+		RETURN_FALSE;
+	} else {
+		array_init(return_value);
+		for (i = 0; i < 6; i++) {
+			add_index_double(return_value, i, affine[i]);
+		}
 	}
 }
 
