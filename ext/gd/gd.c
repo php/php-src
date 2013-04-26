@@ -56,6 +56,8 @@
 #if HAVE_LIBGD
 #if !HAVE_GD_BUNDLED
 # include "libgd/gd_compat.h"
+#else
+extern int overflow2(int a, int b);
 #endif
 
 static int le_gd, le_gd_font;
