@@ -5363,9 +5363,6 @@ PHP_FUNCTION(imagecropauto)
 PHP_FUNCTION(imagescale)
 {
 	zval *IM;
-	long mode = -1;
-	long color = -1;
-	double threshold = 0.5f;
 	gdImagePtr im;
 	gdImagePtr im_scaled;
 	int new_width, new_height = -1;
