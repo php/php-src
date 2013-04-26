@@ -5411,9 +5411,6 @@ finish:
 PHP_FUNCTION(imageaffine)
 {
 	zval *IM;
-	long mode = -1;
-	long color = -1;
-	double threshold = 0.5f;
 	gdImagePtr src;
 	gdImagePtr dst;
 	gdRect rect;
