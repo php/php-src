@@ -265,6 +265,7 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromGif,   [AC_DEFINE(HAVE_GD_GIF_READ,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageGif,             [AC_DEFINE(HAVE_GD_GIF_CREATE,       1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageWBMP,            [AC_DEFINE(HAVE_GD_WBMP,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromWebp,  [AC_DEFINE(HAVE_GD_WEBP,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromGd2,   [AC_DEFINE(HAVE_GD_GD2,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
@@ -285,6 +286,8 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_CHECK_LIBRARY(gd, gdNewDynamicCtxEx,      [AC_DEFINE(HAVE_GD_DYNAMIC_CTX_EX,   1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageConvolution,     [AC_DEFINE(HAVE_GD_IMAGE_CONVOLUTION,      1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImagePixelate,        [AC_DEFINE(HAVE_GD_IMAGE_PIXELATE,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageFlipBoth,        [AC_DEFINE(HAVE_GD_IMAGE_FLIP,       1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpegEx,[AC_DEFINE(HAVE_GD_JPGEX,            1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
 ])
 
 dnl
@@ -341,6 +344,7 @@ dnl These are always available with bundled library
   AC_DEFINE(HAVE_GD_FONTMUTEX,        1, [ ])
   AC_DEFINE(HAVE_GD_DYNAMIC_CTX_EX,   1, [ ])
   AC_DEFINE(HAVE_GD_GIF_CTX,          1, [ ])
+  AC_DEFINE(HAVE_GD_IMAGE_FLIP,       1, [ ])
 
 dnl Make sure the libgd/ is first in the include path
   GDLIB_CFLAGS="-DHAVE_LIBPNG"
@@ -355,6 +359,7 @@ dnl enable the support in bundled GD library
 
   if test -n "$GD_JPEG_DIR"; then
     AC_DEFINE(HAVE_GD_JPG, 1, [ ])
+    AC_DEFINE(HAVE_GD_JPGEX, 1, [ ])
     GDLIB_CFLAGS="$GDLIB_CFLAGS -DHAVE_LIBJPEG"
   fi
 

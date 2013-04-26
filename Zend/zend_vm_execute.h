@@ -13093,7 +13093,9 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		ZEND_VM_NEXT_OPCODE();
 	}
 
-	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
+	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME &&
+	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION &&
+	    !ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
 		return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 
@@ -30714,7 +30716,9 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		ZEND_VM_NEXT_OPCODE();
 	}
 
-	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
+	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME &&
+	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION &&
+	    !ARG_SHOULD_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
 		return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 

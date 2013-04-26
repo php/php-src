@@ -11,6 +11,9 @@ const char * gdPngGetVersionString();
 const char * gdJpegGetVersionString();
 int gdJpegGetVersionInt();
 int overflow2(int a, int b);
+int getmbi (int (*getin) (void *in), void *in);
+int skipheader (int (*getin) (void *in), void *in);
+
 
 /* filters section
  *

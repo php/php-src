@@ -891,15 +891,17 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageconvolution, 0)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
+#ifdef HAVE_GD_IMAGE_FLIP
+ZEND_BEGIN_ARG_INFO(arginfo_imageflip, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, mode)
+ZEND_END_ARG_INFO()
+#endif
+
 #ifdef HAVE_GD_BUNDLED
 ZEND_BEGIN_ARG_INFO(arginfo_imageantialias, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, on)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_imageflip, 0)
-	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_imagecrop, 0)
@@ -1000,9 +1002,12 @@ const zend_function_entry gd_functions[] = {
 
 	PHP_FE(imagerotate,     						arginfo_imagerotate)
 
+#ifdef HAVE_GD_IMAGE_FLIP
+	PHP_FE(imageflip,								arginfo_imageflip)
+#endif
+
 #ifdef HAVE_GD_BUNDLED
 	PHP_FE(imageantialias,							arginfo_imageantialias)
-	PHP_FE(imageflip,								arginfo_imageflip)
 	PHP_FE(imagecrop,								arginfo_imagecrop)
 	PHP_FE(imagecropauto,							arginfo_imagecropauto)
 	PHP_FE(imagescale,								arginfo_imagescale)
@@ -1254,16 +1259,17 @@ PHP_MINIT_FUNCTION(gd)
 #ifdef GD2_FMT_COMPRESSED
 	REGISTER_LONG_CONSTANT("IMG_GD2_COMPRESSED", GD2_FMT_COMPRESSED, CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef HAVE_GD_IMAGE_FLIP
+	REGISTER_LONG_CONSTANT("IMG_FLIP_HORIZONTAL", GD_FLIP_HORINZONTAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FLIP_VERTICAL", GD_FLIP_VERTICAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_FLIP_BOTH", GD_FLIP_BOTH, CONST_CS | CONST_PERSISTENT);
+#endif
 #if HAVE_GD_BUNDLED
 	REGISTER_LONG_CONSTANT("IMG_EFFECT_REPLACE", gdEffectReplace, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_EFFECT_ALPHABLEND", gdEffectAlphaBlend, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_EFFECT_NORMAL", gdEffectNormal, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_EFFECT_OVERLAY", gdEffectOverlay, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GD_BUNDLED", 1, CONST_CS | CONST_PERSISTENT);
-
-	REGISTER_LONG_CONSTANT("IMG_FLIP_HORIZONTAL", GD_FLIP_HORINZONTAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FLIP_VERTICAL", GD_FLIP_VERTICAL, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_FLIP_BOTH", GD_FLIP_BOTH, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("IMG_CROP_DEFAULT", GD_CROP_DEFAULT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_CROP_TRANSPARENT", GD_CROP_TRANSPARENT, CONST_CS | CONST_PERSISTENT);
@@ -2416,7 +2422,7 @@ static int _php_image_type (char data[8])
 		gdIOCtx *io_ctx;
 		io_ctx = gdNewDynamicCtxEx(8, data, 0);
 		if (io_ctx) {
-			if (getmbi((int(*)(void *)) gdGetC, io_ctx) == 0 && skipheader((int(*)(void *)) gdGetC, io_ctx) == 0 ) {
+			if (getmbi((int(*)(void *)) io_ctx->getC, io_ctx) == 0 && skipheader((int(*)(void *)) io_ctx->getC, io_ctx) == 0 ) {
 #if HAVE_LIBGD204
 				io_ctx->gd_free(io_ctx);
 #else
@@ -2567,7 +2573,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 	gdImagePtr im = NULL;
 	php_stream *stream;
 	FILE * fp = NULL;
-#ifdef HAVE_GD_JPG
+#ifdef HAVE_GD_JPGEX
 	long ignore_warning;
 #endif
 	if (image_type == PHP_GDIMG_TYPE_GD2PART) {
@@ -2670,9 +2676,9 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 
 #ifdef HAVE_GD_JPG
 			case PHP_GDIMG_TYPE_JPG:
+#ifdef HAVE_GD_JPGEX
 				ignore_warning = INI_INT("gd.jpeg_ignore_warning");
-#ifdef HAVE_GD_BUNDLED
-				im = gdImageCreateFromJpeg(fp, ignore_warning);
+				im = gdImageCreateFromJpegEx(fp, ignore_warning);
 #else
 				im = gdImageCreateFromJpeg(fp);
 #endif
@@ -4730,7 +4736,7 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 	int int_threshold;
 	int x, y;
 	float x_ratio, y_ratio;
-#ifdef HAVE_GD_JPG
+#ifdef HAVE_GD_JPGEX
     long ignore_warning;
 #endif
 	
@@ -4783,9 +4789,9 @@ static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type )
 
 #ifdef HAVE_GD_JPG
 		case PHP_GDIMG_TYPE_JPG:
+#ifdef HAVE_GD_JPGEX
 			ignore_warning = INI_INT("gd.jpeg_ignore_warning");
-#ifdef HAVE_GD_BUNDLED
-			im_org = gdImageCreateFromJpeg(org, ignore_warning);
+			im_org = gdImageCreateFromJpegEx(org, ignore_warning);
 #else
 			im_org = gdImageCreateFromJpeg(org);
 #endif
@@ -5197,26 +5203,7 @@ PHP_FUNCTION(imageconvolution)
 /* }}} */
 /* End section: Filters */
 
-#ifdef HAVE_GD_BUNDLED
-/* {{{ proto bool imageantialias(resource im, bool on)
-   Should antialiased functions used or not*/
-PHP_FUNCTION(imageantialias)
-{
-	zval *IM;
-	zend_bool alias;
-	gdImagePtr im;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &IM, &alias) == FAILURE) {
-		return;
-	}
-
-	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
-	gdImageAntialias(im, alias);
-	RETURN_TRUE;
-}
-/* }}} */
-
-
+#ifdef HAVE_GD_IMAGE_FLIP
 /* {{{ proto void imageflip(resource im, int mode)
    Flip an image (in place) horizontally, vertically or both directions. */
 PHP_FUNCTION(imageflip)
@@ -5252,6 +5239,27 @@ PHP_FUNCTION(imageflip)
 	RETURN_TRUE;
 }
 /* }}} */
+#endif
+
+#ifdef HAVE_GD_BUNDLED
+/* {{{ proto bool imageantialias(resource im, bool on)
+   Should antialiased functions used or not*/
+PHP_FUNCTION(imageantialias)
+{
+	zval *IM;
+	zend_bool alias;
+	gdImagePtr im;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &IM, &alias) == FAILURE) {
+		return;
+	}
+
+	ZEND_FETCH_RESOURCE(im, gdImagePtr, &IM, -1, "Image", le_gd);
+	gdImageAntialias(im, alias);
+	RETURN_TRUE;
+}
+/* }}} */
+
 
 /* {{{ proto void imagecrop(resource im, array rect)
    Crop an image using the given coordinates and size, x, y, width and height. */
@@ -5348,7 +5356,7 @@ PHP_FUNCTION(imagecropauto)
 			break;
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown flip mode");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown crop mode");
 			RETURN_FALSE;
 	}
 	if (im_crop == NULL) {
@@ -5360,7 +5368,7 @@ PHP_FUNCTION(imagecropauto)
 /* }}} */
 
 /* {{{ proto resource imagescale(resource im, new_width[, new_height[, method]])
-   Crop an image using the given coordinates and size, x, y, width and height. */
+   Scale an image using the given new width and height. */
 PHP_FUNCTION(imagescale)
 {
 	zval *IM;
