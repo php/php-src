@@ -5260,9 +5260,6 @@ PHP_FUNCTION(imageantialias)
 PHP_FUNCTION(imagecrop)
 {
 	zval *IM;
-	long mode = -1;
-	long color = -1;
-	double threshold = 0.5f;
 	gdImagePtr im;
 	gdImagePtr im_crop;
 	gdRect rect;
