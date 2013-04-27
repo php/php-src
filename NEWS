@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.3.26
 
+- MySQLi:
+  . Fixed bug #64726 (Segfault when calling fetch_object on a use_result and DB
+    pointer has closed). (Laruence)
+
 ?? ??? 2013, PHP 5.3.25
 
 ### ADD ENTRIES ABOVE FOR 5.3.26. 5.3.25 NEWS WILL BE UPDATED BY RM ON MERGE ###

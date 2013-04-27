@@ -16,8 +16,8 @@ $db = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 
 $result = $db->query('SELECT 1', MYSQLI_USE_RESULT);
 $db->close();
-var_dump($result->fetch_array());
+var_dump($result->fetch_object());
 ?>
 --EXPECTF--
-Warning: mysqli_result::fetch_array(): Error while reading a row in %sbug64726.php on line %d
+Warning: mysqli_result::fetch_object(): Error while reading a row in %sbug64726.php on line %d
 bool(false)
