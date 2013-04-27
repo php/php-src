@@ -1133,7 +1133,7 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 	uint32_t mentrycount[MAGIC_SETS] = { 0 };
 	uint32_t i, j;
 	size_t files = 0, maxfiles = 0;
-	char **filearr = NULL, *mfn;
+	char **filearr = NULL;
 	struct stat st;
 	struct magic_map *map;
 	php_stream *dir;
@@ -1169,7 +1169,7 @@ apprentice_load(struct magic_set *ms, const char *fn, int action)
 		int mflen;
 		char mfn[MAXPATHLEN];
 
-		dir = php_stream_opendir(fn, REPORT_ERRORS, NULL);
+		dir = php_stream_opendir((char *)fn, REPORT_ERRORS, NULL);
 		if (!dir) {
 			errs++;
 			goto out;
@@ -2613,7 +2613,7 @@ apprentice_map(struct magic_set *ms, const char *fn)
 #ifdef PHP_WIN32
 	/* Don't bother on windows with php_stream_open_wrapper,
 	return to give apprentice_load() a chance. */
-	if (php_stream_stat_path_ex(fn, 0, &st, NULL) == SUCCESS) {
+	if (php_stream_stat_path_ex((char *)fn, 0, &st, NULL) == SUCCESS) {
                if (st.sb.st_mode & S_IFDIR) {
                        goto error;
                }
@@ -2778,7 +2778,7 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 		goto out;
 	}
 
-	if (php_stream_write(stream, map->nmagic, nm) != (ssize_t)nm) {
+	if (php_stream_write(stream, (const char *)map->nmagic, nm) != (ssize_t)nm) {
 		file_error(ms, errno, "error writing `%s'", dbname);
 		goto out;
 	}
@@ -2792,7 +2792,7 @@ apprentice_compile(struct magic_set *ms, struct magic_map *map, const char *fn)
 
 	for (i = 0; i < MAGIC_SETS; i++) {
 		len = m * map->nmagic[i];
-		if (php_stream_write(stream, map->magic[i], len) != (ssize_t)len) {
+		if (php_stream_write(stream, (const char *)map->magic[i], len) != (ssize_t)len) {
 			file_error(ms, errno, "error writing `%s'", dbname);
 			goto out;
 		}
