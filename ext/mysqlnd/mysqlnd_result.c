@@ -1510,6 +1510,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, unsigned int flags
 	mysqlnd_array_init(return_value, mysqlnd_num_fields(result) * 2);
 	if (FAIL == result->m.fetch_row(result, (void *)return_value, flags, &fetched_anything TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error while reading a row");
+		zval_dtor(return_value);
 		RETVAL_FALSE;
 	} else if (fetched_anything == FALSE) {
 		zval_dtor(return_value);
