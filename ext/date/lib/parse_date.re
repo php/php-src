@@ -2096,7 +2096,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 				break;
 
 			case '\\': /* escaped char */
-				*fptr++;
+				++fptr;
 				if (*ptr == *fptr) {
 					++ptr;
 				} else {
