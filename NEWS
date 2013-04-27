@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Upgraded libmagic to 5.14. (Anatol)
 
+- MySQLi:
+  . Fixed bug #64726 (Segfault when calling fetch_object on a use_result and DB
+    pointer has closed). (Laruence)
+
 - Zip:
   . Fixed bug #64342 (ZipArchive::addFile() has to check for file existence).
     (Anatol)

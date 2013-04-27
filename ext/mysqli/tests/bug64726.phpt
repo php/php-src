@@ -1,5 +1,5 @@
 --TEST--
-Bug #63398 (Memleak when calling fetch_object on a use_result and DB pointer has closed)
+Bug #63398 (Segfault when calling fetch_object on a use_result and DB pointer has closed)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
