@@ -5582,7 +5582,7 @@ PHP_FUNCTION(imageaffinematrixget)
 			RETURN_FALSE;
 	}
 
-	if (res = GD_FALSE) {
+	if (res == GD_FALSE) {
 		RETURN_FALSE;
 	} else {
 		array_init(return_value);
