@@ -9,9 +9,6 @@ PHP                                                                        NEWS
     response codes). (Sergey Akbarov)
   . Fixed bugs #47675 and #64577 (fd leak on Solaris)
 
-- CURL:
-  . Add CURL_WRAPPERS_ENABLED constant. (Laruence)
-
 - Fileinfo:
   . Upgraded libmagic to 5.14. (Anatol)
 
