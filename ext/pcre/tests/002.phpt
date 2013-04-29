@@ -20,7 +20,7 @@ var_dump(preg_replace('/(.)/e', 'for ($', 'abc'));
 Warning: preg_match() expects at least 2 parameters, 0 given in %s002.php on line 3
 bool(false)
 
-Warning: preg_match_all() expects at least 3 parameters, 0 given in %s002.php on line 4
+Warning: preg_match_all() expects at least 2 parameters, 0 given in %s002.php on line 4
 bool(false)
 
 Warning: preg_match_all(): Invalid flags specified in %s002.php on line 5
@@ -33,6 +33,8 @@ string(12) "a${1b${1c${1"
 
 Warning: preg_replace(): Compilation failed: missing terminating ] for character class at offset 8 in %s002.php on line 11
 NULL
+
+Deprecated: preg_replace(): The /e modifier is deprecated, use preg_replace_callback instead in %s on line 12
 
 Parse error: %s in %s002.php(12) : regexp code on line 1
 

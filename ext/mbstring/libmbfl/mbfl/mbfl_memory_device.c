@@ -218,7 +218,7 @@ mbfl_memory_device_strcat(mbfl_memory_device *device, const char *psrc)
 	const unsigned char *p;
 
 	len = 0;
-	p = psrc;
+	p = (const unsigned char*)psrc;
 	while (*p) {
 		p++;
 		len++;
@@ -235,7 +235,7 @@ mbfl_memory_device_strcat(mbfl_memory_device *device, const char *psrc)
 		device->buffer = tmp;
 	}
 
-	p = psrc;
+	p = (const unsigned char*)psrc;
 	w = &device->buffer[device->pos];
 	device->pos += len;
 	while (len > 0) {

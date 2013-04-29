@@ -1,5 +1,11 @@
 --TEST--
 Test scandir() function : usage variations - different data types as $dir arg
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip.. Not valid for Windows');
+}
+?>
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
@@ -205,7 +211,7 @@ bool(false)
 
 -- Iteration 18 --
 
-Warning: scandir() expects parameter 1 to be string, array given in %s on line %d
+Warning: scandir() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 
 -- Iteration 19 --
@@ -248,6 +254,6 @@ bool(false)
 
 -- Iteration 25 --
 
-Warning: scandir() expects parameter 1 to be string, resource given in %s on line %d
+Warning: scandir() expects parameter 1 to be a valid path, resource given in %s on line %d
 NULL
 ===DONE===

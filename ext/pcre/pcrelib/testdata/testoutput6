@@ -1114,6 +1114,8 @@ No match
  0: A\x80
 
 /^[\p{Arabic}]/8
+    \x{604}
+ 0: \x{604}
     \x{60e} 
  0: \x{60e}
     \x{656} 
@@ -1143,8 +1145,6 @@ No match
     \x{6fa}  
  0: \x{6fa}
     ** Failers
-No match
-    \x{600}
 No match
     \x{650}
 No match
@@ -1176,8 +1176,6 @@ No match
  0: \x{964}
     \x{965}  
  0: \x{965}
-    \x{970}  
- 0: \x{970}
 
 /^\p{Inherited}/8
     \x{64b}
@@ -1352,5 +1350,27 @@ No match
 No match
     a\xFCb   
 No match
+
+/ⱥ/8i
+    ⱥ
+ 0: \x{2c65}
+    Ⱥx 
+ 0: \x{23a}
+    Ⱥ 
+ 0: \x{23a}
+
+/[ⱥ]/8i
+    ⱥ
+ 0: \x{2c65}
+    Ⱥx 
+ 0: \x{23a}
+    Ⱥ 
+ 0: \x{23a}
+
+/Ⱥ/8i
+    Ⱥ
+ 0: \x{23a}
+    ⱥ
+ 0: \x{2c65}
 
 /-- End of testinput6 --/

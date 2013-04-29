@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -61,7 +61,7 @@ typedef struct _zend_stream {
 
 typedef struct _zend_file_handle {
 	zend_stream_type  type;
-	char              *filename;
+	const char        *filename;
 	char              *opened_path;
 	union {
 		int           fd;

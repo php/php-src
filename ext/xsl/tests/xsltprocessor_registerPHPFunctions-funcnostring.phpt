@@ -25,12 +25,6 @@ var_dump($proc->transformToXml($dom));
 NULL
 
 Warning: XSLTProcessor::transformToXml(): Handler name must be a string in %s on line %d
-
-Warning: XSLTProcessor::transformToXml(): xmlXPathCompiledEval: evaluation failed in %s on line %d
-
-Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %d element value-of in %s on line %d
-
-Warning: XSLTProcessor::transformToXml(): XPath evaluation returned no result. in %s on line %d
 NULL
 --CREDITS--
 Christian Weiske, cweiske@php.net

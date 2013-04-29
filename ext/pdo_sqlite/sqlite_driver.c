@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -760,15 +760,10 @@ static struct pdo_dbh_methods sqlite_methods = {
 
 static char *make_filename_safe(const char *filename TSRMLS_DC)
 {
-	if (*filename && strncmp(filename, ":memory:", sizeof(":memory:")-1)) {
+	if (*filename && memcmp(filename, ":memory:", sizeof(":memory:"))) {
 		char *fullpath = expand_filepath(filename, NULL TSRMLS_CC);
 
 		if (!fullpath) {
-			return NULL;
-		}
-
-		if (PG(safe_mode) && (!php_checkuid(fullpath, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-			efree(fullpath);
 			return NULL;
 		}
 
@@ -829,7 +824,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS
 
 	if (!filename) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0 TSRMLS_CC,
-			"safe_mode/open_basedir prohibits opening %s",
+			"open_basedir prohibits opening %s",
 			dbh->data_source);
 		goto cleanup;
 	}
@@ -842,7 +837,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS
 		goto cleanup;
 	}
 
-	if (PG(safe_mode) || (PG(open_basedir) && *PG(open_basedir))) {
+	if (PG(open_basedir) && *PG(open_basedir)) {
 		sqlite3_set_authorizer(H->db, authorizer, NULL);
 	}
 

@@ -23,7 +23,6 @@ $m = $R->getMethods();
 print_r($m);
 
 ?>
---CLEAN--
 --EXPECT--
 Array
 (

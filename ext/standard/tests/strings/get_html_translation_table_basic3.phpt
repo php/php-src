@@ -15,15 +15,21 @@ echo "*** Testing get_html_translation_table() : basic functionality ***\n";
 echo "-- with table = HTML_SPECIALCHARS & quote_style = ENT_COMPAT --\n";
 $table = HTML_SPECIALCHARS;
 $quote_style = ENT_COMPAT;
-var_dump( get_html_translation_table($table, $quote_style, "UTF-8") );
+$tt = get_html_translation_table($table, $quote_style, "UTF-8");
+asort( $tt );
+var_dump( $tt );
 
 echo "-- with table = HTML_SPECIALCHARS & quote_style = ENT_QUOTES --\n";
 $quote_style = ENT_QUOTES;
-var_dump( get_html_translation_table($table, $quote_style, "UTF-8") );
+$tt = get_html_translation_table($table, $quote_style, "UTF-8");
+asort( $tt );
+var_dump( $tt );
 
 echo "-- with table = HTML_SPECIALCHARS & quote_style = ENT_NOQUOTES --\n";
 $quote_style = ENT_NOQUOTES;
-var_dump( get_html_translation_table($table, $quote_style, "UTF-8") );
+$tt = get_html_translation_table($table, $quote_style, "UTF-8");
+asort( $tt );
+var_dump( $tt );
 
 echo "Done\n";
 ?>
@@ -33,33 +39,33 @@ echo "Done\n";
 array(4) {
   ["&"]=>
   string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 -- with table = HTML_SPECIALCHARS & quote_style = ENT_QUOTES --
 array(5) {
-  ["&"]=>
-  string(5) "&amp;"
-  ["""]=>
-  string(6) "&quot;"
   ["'"]=>
   string(6) "&#039;"
-  ["<"]=>
-  string(4) "&lt;"
+  ["&"]=>
+  string(5) "&amp;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
+  ["""]=>
+  string(6) "&quot;"
 }
 -- with table = HTML_SPECIALCHARS & quote_style = ENT_NOQUOTES --
 array(3) {
   ["&"]=>
   string(5) "&amp;"
-  ["<"]=>
-  string(4) "&lt;"
   [">"]=>
   string(4) "&gt;"
+  ["<"]=>
+  string(4) "&lt;"
 }
 Done

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-
+#define _GNU_SOURCE
 #include "php.h"
 
 #include <zend_strtod.h>
@@ -94,7 +94,7 @@ static char * __cvt(double value, int ndigit, int *decpt, int *sign, int fmode, 
 			*decpt = 0;
 			c = *p;
 			zend_freedtoa(p);
-			return(c == 'I' ? "INF" : "NAN");
+			return strdup((c == 'I' ? "INF" : "NAN"));
 		}
 		/* Make a local copy and adjust rve to be in terms of s */
 		if (pad && fmode) {
@@ -1222,7 +1222,7 @@ static void strx_printv(int *ccp, char *buf, size_t len, const char *format, va_
 
 PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{ */
 {
-	int cc;
+	unsigned int cc;
 	va_list ap;
 
 	va_start(ap, format);
@@ -1238,7 +1238,7 @@ PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) /* {{{
 
 PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
 {
-	int cc;
+	unsigned int cc;
 
 	strx_printv(&cc, buf, len, format, ap);
 	if (cc >= len) {

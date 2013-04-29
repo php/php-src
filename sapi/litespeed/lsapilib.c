@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2007 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -86,7 +86,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static int g_inited = 0;
 static int g_running = 1;
 static int s_ppid;
-static int s_slow_req_msecs = 0;
 LSAPI_Request g_req = { -1, -1 };
 
 void Flush_RespBuf_r( LSAPI_Request * pReq );
@@ -508,13 +507,11 @@ static int parseRequest( LSAPI_Request * pReq, int totalLen )
     return 0;
 }
 
-static int s_accept_notify = 0;
-
 static struct lsapi_packet_header ack = {'L', 'S',
                 LSAPI_REQ_RECEIVED, LSAPI_ENDIAN, {LSAPI_PACKET_HEADER_LEN} };
-static inline int notify_req_received( int fd )
+static inline int notify_req_received( LSAPI_Request * pReq )
 {
-    if ( write( fd, &ack, LSAPI_PACKET_HEADER_LEN )
+    if ( write( pReq->m_fd, &ack, LSAPI_PACKET_HEADER_LEN )
          < LSAPI_PACKET_HEADER_LEN ) {
         return -1;
     }
@@ -570,10 +567,7 @@ static int readReq( LSAPI_Request * pReq )
     pReq->m_bufProcessed = packetLen;
     pReq->m_reqState = LSAPI_ST_REQ_BODY | LSAPI_ST_RESP_HEADER;
 
-    if ( !s_accept_notify )
-        return notify_req_received( pReq->m_fd );
-    else
-        return 0;
+    return notify_req_received( pReq );
 }
 
 
@@ -683,10 +677,6 @@ int LSAPI_Accept_r( LSAPI_Request * pReq )
                         setsockopt(pReq->m_fd, IPPROTO_TCP, TCP_NODELAY,
                                 (char *)&nodelay, sizeof(nodelay));
                     }
-
-                    if ( s_accept_notify )
-                        return notify_req_received( pReq->m_fd );
-
                 }
             } else {
                 return -1;
@@ -1249,13 +1239,12 @@ int LSAPI_ForeachHeader_r( LSAPI_Request * pReq,
         while( pCur < pEnd ) {
             pKey = pReq->m_pHttpHeader + pCur->nameOff;
             keyLen = pCur->nameLen;
-            if ( keyLen > 250 ) {
-                keyLen = 250;
-            }
-
             pKeyEnd = pKey + keyLen;
             memcpy( achHeaderName, "HTTP_", 5 );
             p = &achHeaderName[5];
+            if ( keyLen > 250 ) {
+                keyLen = 250;
+            }
 
             while( pKey < pKeyEnd ) {
                 char ch = *pKey++;
@@ -1640,9 +1629,6 @@ static int lsapi_accept( int fdListen )
             setsockopt( fd, IPPROTO_TCP, TCP_NODELAY,
                     (char *)&nodelay, sizeof(nodelay));
         }
-
-        if ( s_accept_notify )
-            notify_req_received( fd );
     }
     return fd;
 
@@ -2087,15 +2073,6 @@ void LSAPI_Set_Server_Max_Idle_Secs( int serverMaxIdle )
     }
 }
 
-void LSAPI_Set_Slow_Req_Msecs( int msecs )
-{
-	s_slow_req_msecs = msecs;
-}
-
-int  LSAPI_Get_Slow_Req_Msecs()
-{
-	return s_slow_req_msecs;
-}
 
 void LSAPI_No_Check_ppid()
 {
@@ -2148,18 +2125,6 @@ void LSAPI_Init_Env_Parameters( fn_select_t fp )
     if ( p ) {
         avoidFork = atoi( p );
     }    
-
-    p = getenv( "LSAPI_ACCEPT_NOTIFY" );
-    if ( p ) {
-        s_accept_notify = atoi( p );
-    }    
-
-    p = getenv( "LSAPI_SLOW_REQ_MSECS" );
-    if ( p ) {
-        n = atoi( p );
-        LSAPI_Set_Slow_Req_Msecs( n );
-    }    
-
 
 #if defined( RLIMIT_CORE )
     p = getenv( "LSAPI_ALLOW_CORE_DUMP" );

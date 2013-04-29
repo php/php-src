@@ -1,5 +1,7 @@
 --TEST--
 Test token_get_all() function : usage variations - invalid token values
+--SKIPIF--
+<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
@@ -44,7 +46,7 @@ array(29) {
   [0]=>
   array(3) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -53,7 +55,7 @@ array(29) {
   [1]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -63,7 +65,7 @@ array(29) {
   [2]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(6) "struct"
     [2]=>
@@ -72,7 +74,7 @@ array(29) {
   [3]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -81,7 +83,7 @@ array(29) {
   [4]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(8) "myStruct"
     [2]=>
@@ -90,7 +92,7 @@ array(29) {
   [5]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -101,7 +103,7 @@ array(29) {
   [7]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
@@ -111,46 +113,46 @@ array(29) {
   [8]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(8) "variable"
     [2]=>
-    int(3)
+    int(%d)
   }
   [9]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
-    int(3)
+    int(%d)
   }
   [10]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
-    int(3)
+    int(%d)
   }
   [11]=>
   string(1) ";"
   [12]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
     [2]=>
-    int(3)
+    int(%d)
   }
   [13]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(6) "method"
     [2]=>
@@ -163,7 +165,7 @@ array(29) {
   [16]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -174,7 +176,7 @@ array(29) {
   [18]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -183,7 +185,7 @@ array(29) {
   [19]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(7) "display"
     [2]=>
@@ -192,7 +194,7 @@ array(29) {
   [20]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -201,7 +203,7 @@ array(29) {
   [21]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -212,7 +214,7 @@ array(29) {
   [23]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -223,7 +225,7 @@ array(29) {
   [25]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -235,7 +237,7 @@ array(29) {
   [27]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -245,7 +247,7 @@ array(29) {
   [28]=>
   array(3) {
     [0]=>
-    int(370)
+    int(%d)
     [1]=>
     string(2) "?>"
     [2]=>
@@ -257,7 +259,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(28) "<pli 
 echo "hello world"; ?>"
@@ -270,7 +272,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(19) "<PDP display  $a; <"
     [2]=>

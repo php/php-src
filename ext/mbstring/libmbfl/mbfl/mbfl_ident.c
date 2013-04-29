@@ -51,10 +51,15 @@
 #include "filters/mbfilter_iso2022_kr.h"
 #include "filters/mbfilter_sjis.h"
 #include "filters/mbfilter_sjis_open.h"
+#include "filters/mbfilter_sjis_mobile.h"
 #include "filters/mbfilter_jis.h"
 #include "filters/mbfilter_iso2022_jp_ms.h"
+#include "filters/mbfilter_iso2022jp_2004.h"
+#include "filters/mbfilter_iso2022jp_mobile.h"
 #include "filters/mbfilter_euc_jp.h"
 #include "filters/mbfilter_euc_jp_win.h"
+#include "filters/mbfilter_euc_jp_2004.h"
+#include "filters/mbfilter_utf8_mobile.h"
 #include "filters/mbfilter_ascii.h"
 #include "filters/mbfilter_koi8r.h"
 #include "filters/mbfilter_koi8u.h"
@@ -66,6 +71,7 @@
 #include "filters/mbfilter_cp1254.h"
 #include "filters/mbfilter_cp51932.h"
 #include "filters/mbfilter_cp5022x.h"
+#include "filters/mbfilter_gb18030.h"
 #include "filters/mbfilter_iso8859_1.h"
 #include "filters/mbfilter_iso8859_2.h"
 #include "filters/mbfilter_iso8859_3.h"
@@ -111,16 +117,27 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_sjis,
 	&vtbl_identify_sjis_open,
 	&vtbl_identify_eucjpwin,
+	&vtbl_identify_eucjp2004,
 	&vtbl_identify_cp932,
 	&vtbl_identify_jis,
 	&vtbl_identify_2022jp,
 	&vtbl_identify_2022jpms,
+	&vtbl_identify_2022jp_2004,
+	&vtbl_identify_2022jp_kddi,
 	&vtbl_identify_cp51932,
+	&vtbl_identify_sjis_docomo,
+	&vtbl_identify_sjis_kddi,
+	&vtbl_identify_sjis_sb,
+	&vtbl_identify_utf8_docomo,
+	&vtbl_identify_utf8_kddi_a,
+	&vtbl_identify_utf8_kddi_b,
+	&vtbl_identify_utf8_sb,
 	&vtbl_identify_euccn,
 	&vtbl_identify_cp936,
 	&vtbl_identify_hz,
 	&vtbl_identify_euctw,
 	&vtbl_identify_big5,
+	&vtbl_identify_cp950,
 	&vtbl_identify_euckr,
 	&vtbl_identify_uhc,
 	&vtbl_identify_2022kr,
@@ -149,6 +166,7 @@ static const struct mbfl_identify_vtbl *mbfl_identify_filter_list[] = {
 	&vtbl_identify_cp50220,
 	&vtbl_identify_cp50221,
 	&vtbl_identify_cp50222,
+	&vtbl_identify_gb18030,
 	&vtbl_identify_false,
 	NULL
 };
@@ -191,15 +209,37 @@ mbfl_identify_filter *mbfl_identify_filter_new(enum mbfl_no_encoding encoding)
 	return filter;
 }
 
+mbfl_identify_filter *mbfl_identify_filter_new2(const mbfl_encoding *encoding)
+{
+	mbfl_identify_filter *filter;
+
+	/* allocate */
+	filter = (mbfl_identify_filter *)mbfl_malloc(sizeof(mbfl_identify_filter));
+	if (filter == NULL) {
+		return NULL;
+	}
+
+	if (mbfl_identify_filter_init2(filter, encoding)) {
+		mbfl_free(filter);
+		return NULL;
+	}
+
+	return filter;
+}
+
+
 int mbfl_identify_filter_init(mbfl_identify_filter *filter, enum mbfl_no_encoding encoding)
+{
+	const mbfl_encoding *enc = mbfl_no2encoding(encoding);
+	return mbfl_identify_filter_init2(filter, enc ? enc: &mbfl_encoding_pass);
+}
+
+int mbfl_identify_filter_init2(mbfl_identify_filter *filter, const mbfl_encoding *encoding)
 {
 	const struct mbfl_identify_vtbl *vtbl;
 
 	/* encoding structure */
-	filter->encoding = mbfl_no2encoding(encoding);
-	if (filter->encoding == NULL) {
-		filter->encoding = &mbfl_encoding_pass;
-	}
+	filter->encoding = encoding;
 
 	filter->status = 0;
 	filter->flag = 0;

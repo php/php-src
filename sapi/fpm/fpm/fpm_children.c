@@ -156,7 +156,7 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 	    0 > fpm_php_init_child(wp)) {
 
 		zlog(ZLOG_ERROR, "[pool %s] child failed to initialize", wp->config->name);
-		exit(255);
+		exit(FPM_EXIT_SOFTWARE);
 	}
 }
 /* }}} */
@@ -198,7 +198,7 @@ void fpm_children_bury() /* {{{ */
 				restart_child = 0;
 			}
 
-			if (WEXITSTATUS(status) != 0) {
+			if (WEXITSTATUS(status) != FPM_EXIT_OK) {
 				severity = ZLOG_WARNING;
 			}
 

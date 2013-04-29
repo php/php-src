@@ -4,7 +4,6 @@ Test whitespace following end of nowdoc
 highlight.string  = #DD0000
 highlight.comment = #FF8000
 highlight.keyword = #007700
-highlight.bg      = #FFFFFF
 highlight.default = #0000BB
 highlight.html    = #000000
 --FILE--

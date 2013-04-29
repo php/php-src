@@ -941,7 +941,6 @@ Changes since 2.0.0b1: addition of phar.cache_list, many performance improvement
     <file name="zf_test.phpt" role="test" />
    </dir> <!-- /tests -->
    <file name="build_precommand.php" role="php" />
-   <file name="cgidebug" role="data" />
    <file name="config.m4" role="src" />
    <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />

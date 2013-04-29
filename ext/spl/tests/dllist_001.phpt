@@ -1,7 +1,5 @@
 --TEST--
 SPL: DoublyLinkedList: std operations
---INI--
-allow_call_time_pass_reference=1
 --FILE--
 <?php
 $dll = new SplDoublyLinkedList();
@@ -20,18 +18,10 @@ try {
 // data consistency
 $a = 2;
 $dll->push($a);
-$a = 3;
-$dll->push(&$a);
-$a = 4;
-echo $dll->pop()."\n";
 echo $dll->pop()."\n";
 
 $a = 2;
 $dll->unshift($a);
-$a = 3;
-$dll->unshift(&$a);
-$a = 4;
-echo $dll->shift()."\n";
 echo $dll->shift()."\n";
 
 // peakable
@@ -61,9 +51,7 @@ echo count($dll)."\n";
 --EXPECTF--
 Exception: Can't pop from an empty datastructure
 Exception: Can't shift from an empty datastructure
-3
 2
-3
 2
 2
 1

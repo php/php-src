@@ -64,8 +64,6 @@ mysql.max_persistent=2
 
 	mysql_close($plink);
 
-	/* mysql_pconnect cound generate a warning when linked against mysqlnd 
-       PHP Warning:  mysql_pconnect(): MySQL server has gone away */  
 	if (!($plink = @mysql_pconnect($myhost, $user, $passwd)))
 		printf("[009] Cannot create new persistent connection, [%d] %s\n", mysql_errno(), mysql_error());
 	mysql_select_db($db, $plink);
@@ -108,5 +106,12 @@ mysql.max_persistent=2
 require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 bool(true)
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 done!

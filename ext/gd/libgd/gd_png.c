@@ -127,8 +127,8 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	png_color_16p trans_gray_rgb;
 	png_color_16p trans_color_rgb;
 	png_bytep trans;
-	png_bytep image_data = NULL;
-	png_bytepp row_pointers = NULL;
+	volatile png_bytep image_data = NULL;
+	volatile png_bytepp row_pointers = NULL;
 	gdImagePtr im = NULL;
 	int i, j, *open = NULL;
 	volatile int transparent = -1;

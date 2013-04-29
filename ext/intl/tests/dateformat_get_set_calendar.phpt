@@ -1,60 +1,55 @@
 --TEST--
-datefmt_get_calendar_code() datefmt_set_calendar_code()
+IntlDateFormatter: setCalendar()/getCalendar()/getCalendarObject()
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+<?php
+if (!extension_loaded('intl'))
+	die('skip intl extension not enabled');
 --FILE--
 <?php
+ini_set("intl.error_level", E_WARNING);
+ini_set("intl.default_locale", "pt_PT");
+ini_set("date.timezone", 'Atlantic/Azores');
 
-/*
- * Test for the datefmt_get_calendar  and datefmt_set_calendar functions
- */
+$ts = strtotime('2012-01-01 00:00:00 UTC');
 
-
-function ut_main()
-{
-	$calendar_arr = array (
-		IntlDateFormatter::GREGORIAN,
-		IntlDateFormatter::TRADITIONAL,
-		3
-	);
-	
-	$res_str = '';
-
-	$start_calendar = IntlDateFormatter::GREGORIAN;
-	$res_str .= "\nCreating IntlDateFormatter with calendar = $start_calendar";
-	$fmt = ut_datefmt_create( "de-DE",  IntlDateFormatter::SHORT, IntlDateFormatter::SHORT ,'America/Los_Angeles', IntlDateFormatter::GREGORIAN);
-	$calendar = ut_datefmt_get_calendar( $fmt);
-	$res_str .= "\nAfter call to get_calendar :  calendar= $calendar";
-	$res_str .= "\n-------------------";
-
-	foreach( $calendar_arr as $calendar_entry )
-	{
-		$res_str .= "\nSetting IntlDateFormatter with calendar = $calendar_entry";
-		ut_datefmt_set_calendar( $fmt, $calendar_entry);
-		$calendar = ut_datefmt_get_calendar( $fmt);
-		$res_str .= "\nAfter call to get_calendar :  calendar= $calendar";
-		$res_str .= "\n-------------------";
-	}
-
-	return $res_str;
-
+function d(IntlDateFormatter $df) {
+global $ts;
+echo $df->format($ts), "\n";
+var_dump($df->getCalendar(),
+$df->getCalendarObject()->getType(),
+$df->getCalendarObject()->getTimeZone()->getId());
+echo "\n";
 }
 
-include_once( 'ut_common.inc' );
+$df = new IntlDateFormatter('fr@calendar=islamic', 0, 0, 'Europe/Minsk');
+d($df);
 
-// Run the test
-ut_run();
+
+//changing the calendar with a cal type should not change tz
+$df->setCalendar(IntlDateFormatter::TRADITIONAL);
+d($df);
+
+//but changing with an actual calendar should
+$cal = IntlCalendar::createInstance("UTC");
+$df->setCalendar($cal);
+d($df);
+
 ?>
+==DONE==
 --EXPECT--
-Creating IntlDateFormatter with calendar = 1
-After call to get_calendar :  calendar= 1
--------------------
-Setting IntlDateFormatter with calendar = 1
-After call to get_calendar :  calendar= 1
--------------------
-Setting IntlDateFormatter with calendar = 0
-After call to get_calendar :  calendar= 0
--------------------
-Setting IntlDateFormatter with calendar = 3
-After call to get_calendar :  calendar= 0
--------------------
+dimanche 1 janvier 2012 ap. J.-C. 03:00:00 UTC+03:00
+int(1)
+string(9) "gregorian"
+string(12) "Europe/Minsk"
+
+dimanche 8 Safar 1433 AH 03:00:00 UTC+03:00
+int(0)
+string(7) "islamic"
+string(12) "Europe/Minsk"
+
+dimanche 1 janvier 2012 ap. J.-C. 00:00:00 UTC
+bool(false)
+string(9) "gregorian"
+string(3) "UTC"
+
+==DONE==

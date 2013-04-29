@@ -52,7 +52,7 @@ include $pname . '/foo';
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php rmdir(dirname(__FILE__) . '/poo');
 --EXPECTF--
-Warning: opendir() expects parameter 1 to be %string, array given in %sopendir_edgecases.php on line %d
+Warning: opendir() expects parameter 1 to be a valid path, array given in %sopendir_edgecases.php on line %d
 .
 ..
 foo

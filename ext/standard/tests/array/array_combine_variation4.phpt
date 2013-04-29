@@ -100,9 +100,8 @@ Warning: Illegal offset type in %s on line %d
 
 Warning: Illegal offset type in %s on line %d
 -- Iteration 1 --
-
-Warning: array_combine(): Both parameters should have at least 1 element in %s on line %d
-bool(false)
+array(0) {
+}
 -- Iteration 2 --
 array(1) {
   [0]=>

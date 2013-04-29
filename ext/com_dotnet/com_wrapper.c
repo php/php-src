@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,12 +52,12 @@ typedef struct {
 
 static int le_dispatch;
 
-static void disp_destructor(php_dispatchex *disp);
+static void disp_destructor(php_dispatchex *disp TSRMLS_DC);
 
 static void dispatch_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC)
 {
 	php_dispatchex *disp = (php_dispatchex *)rsrc->ptr;
-	disp_destructor(disp);
+	disp_destructor(disp TSRMLS_CC);
 }
 
 int php_com_wrapper_minit(INIT_FUNC_ARGS)
@@ -86,15 +86,9 @@ static inline void trace(char *fmt, ...)
 }
 /* }}} */
 
-#ifdef ZTS
-# define TSRMLS_FIXED()	TSRMLS_FETCH();
-#else
-# define TSRMLS_FIXED()
-#endif
-
 #define FETCH_DISP(methname)																			\
-	TSRMLS_FIXED() 																						\
 	php_dispatchex *disp = (php_dispatchex*)This; 														\
+	TSRMLS_FETCH();																						\
 	if (COMG(rshutdown_started)) {																		\
 		trace(" PHP Object:%p (name:unknown) %s\n", disp->object,  methname); 							\
 	} else {																							\
@@ -554,15 +548,13 @@ static php_dispatchex *disp_constructor(zval *object TSRMLS_DC)
 		Z_ADDREF_P(object);
 	disp->object = object;
 
-	disp->id = zend_list_insert(disp, le_dispatch);
+	disp->id = zend_list_insert(disp, le_dispatch TSRMLS_CC);
 	
 	return disp;
 }
 
-static void disp_destructor(php_dispatchex *disp)
-{
-	TSRMLS_FETCH();
-	
+static void disp_destructor(php_dispatchex *disp TSRMLS_DC)
+{	
 	/* Object store not available during request shutdown */
 	if (COMG(rshutdown_started)) {
 		trace("destroying COM wrapper for PHP object %p (name:unknown)\n", disp->object);
@@ -586,7 +578,7 @@ static void disp_destructor(php_dispatchex *disp)
 	CoTaskMemFree(disp);
 }
 
-PHPAPI IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid,
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid,
 	   HashTable *id_to_name TSRMLS_DC)
 {
 	php_dispatchex *disp = disp_constructor(val TSRMLS_CC);
@@ -625,7 +617,7 @@ PHPAPI IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid,
 	return (IDispatch*)disp;
 }
 
-PHPAPI IDispatch *php_com_wrapper_export(zval *val TSRMLS_DC)
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val TSRMLS_DC)
 {
 	php_dispatchex *disp = NULL;
 

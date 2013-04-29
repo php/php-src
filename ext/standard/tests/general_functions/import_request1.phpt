@@ -1,5 +1,7 @@
 --TEST--
 import_request_variables() test (overwrite super-globals)
+--SKIPIF--
+<?php if(PHP_VERSION_ID >= 50399){ die('skip not needed anymore without register_globals'); } ?>
 --GET--
 GET=0&POST=1&COOKIE=2&FILES=3&REQUEST=4
 --POST--

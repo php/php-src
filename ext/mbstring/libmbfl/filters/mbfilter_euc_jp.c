@@ -37,9 +37,9 @@
 #include "unicode_table_cp932_ext.h"
 #include "unicode_table_jis.h"
 
-static int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter);
+int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter);
 
-static const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
+const unsigned char mblen_table_eucjp[] = { /* 0xA1-0xFE */
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -275,7 +275,7 @@ mbfl_filt_conv_wchar_eucjp(int c, mbfl_convert_filter *filter)
 	return c;
 }
 
-static int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter)
+int mbfl_filt_ident_eucjp(int c, mbfl_identify_filter *filter)
 {
 	switch (filter->status) {
 	case  0:	/* latin */

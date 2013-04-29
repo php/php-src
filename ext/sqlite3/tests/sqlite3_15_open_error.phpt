@@ -2,14 +2,17 @@
 SQLite3::open error test
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . '/skipif.inc');
+if(substr(PHP_OS, 0, 3) == 'WIN' ) {
+	die('skip non windows test');
+}
+require_once(__DIR__ . '/skipif.inc');
 if (posix_geteuid() == 0) {
     die('SKIP Cannot run test as root.');
 }
 ?>
 --FILE--
 <?php
-$unreadable = dirname(__FILE__) . '/unreadable.db';
+$unreadable = __DIR__ . '/unreadable.db';
 touch($unreadable);
 chmod($unreadable,  0200);
 try {

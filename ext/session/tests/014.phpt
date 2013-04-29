@@ -6,9 +6,6 @@ a script should not be able to modify session.use_trans_sid
 session.use_trans_sid=0
 session.use_cookies=0
 session.cache_limiter=
-register_globals=1
-session.bug_compat_42=1
-session.bug_compat_warn=0
 session.name=PHPSESSID
 session.serialize_handler=php
 session.save_handler=files
@@ -33,7 +30,6 @@ ini_set("session.use_trans_sid","0");
 session_destroy();
 ?>
 --EXPECTF--
-Deprecated: Directive 'register_globals' is deprecated in PHP 5.3 and greater in Unknown on line 0
 <a href="/link">
 
 Warning: ini_set(): A session is active. You cannot change the session module's ini settings at this time in %s on line %d

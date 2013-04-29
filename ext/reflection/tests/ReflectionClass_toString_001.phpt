@@ -34,7 +34,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Property [ <default> public $name ]
   }
 
-  - Methods [43] {
+  - Methods [49] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -73,6 +73,12 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method isInstantiable ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method isCloneable ] {
 
       - Parameters [0] {
       }
@@ -188,6 +194,30 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
       }
     }
 
+    Method [ <internal:Reflection> public method getTraits ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method getTraitNames ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method getTraitAliases ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method isTrait ] {
+
+      - Parameters [0] {
+      }
+    }
+
     Method [ <internal:Reflection> public method isAbstract ] {
 
       - Parameters [0] {
@@ -217,6 +247,12 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
       - Parameters [1] {
         Parameter #0 [ <required> $args ]
+      }
+    }
+
+    Method [ <internal:Reflection> public method newInstanceWithoutConstructor ] {
+
+      - Parameters [0] {
       }
     }
 

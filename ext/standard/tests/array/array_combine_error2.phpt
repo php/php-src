@@ -32,9 +32,8 @@ echo "Done";
 *** Testing array_combine() : error conditions specific to array_combine() ***
 
 -- Testing array_combine() function with empty arrays --
-
-Warning: array_combine(): Both parameters should have at least 1 element in %s on line %d
-bool(false)
+array(0) {
+}
 
 -- Testing array_combine() function with empty array for $keys argument --
 

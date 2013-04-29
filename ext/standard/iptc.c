@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -181,21 +181,14 @@ PHP_FUNCTION(iptcembed)
 	int iptcdata_len, jpeg_file_len;
 	long spool = 0;
 	FILE *fp;
-	unsigned int marker, done = 0, inx;
+	unsigned int marker, done = 0;
+	int inx;
 	unsigned char *spoolbuf = NULL, *poi = NULL;
 	struct stat sb;
 	zend_bool written = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
 		return;
-	}
-
-	if (strlen(jpeg_file) != jpeg_file_len) {
-		RETURN_FALSE;
-	}
-
-	if (PG(safe_mode) && (!php_checkuid(jpeg_file, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		RETURN_FALSE;
 	}
 
 	if (php_check_open_basedir(jpeg_file TSRMLS_CC)) {
@@ -303,7 +296,8 @@ PHP_FUNCTION(iptcembed)
    Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {
-	unsigned int inx = 0, len, tagsfound = 0;
+	int inx = 0, len;
+	unsigned int tagsfound = 0;
 	unsigned char *buffer, recnum, dataset, key[ 16 ];
 	char *str;
 	int str_len;
@@ -342,12 +336,12 @@ PHP_FUNCTION(iptcparse)
 			len = (((unsigned short) buffer[ inx ])<<8) | (unsigned short)buffer[ inx+1 ];
 			inx += 2;
 		}
-
-		snprintf(key, sizeof(key), "%d#%03d", (unsigned int) dataset, (unsigned int) recnum);
-
-		if ((len > str_len) || (inx + len) > str_len) {
+		
+		if ((len < 0) || (len > str_len) || (inx + len) > str_len) {
 			break;
 		}
+
+		snprintf(key, sizeof(key), "%d#%03d", (unsigned int) dataset, (unsigned int) recnum);
 
 		if (tagsfound == 0) { /* found the 1st tag - initialize the return array */
 			array_init(return_value);

@@ -26,5 +26,7 @@ var_dump( ob_get_flush() );
 
 Warning: ob_get_flush() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
+
+Notice: ob_get_flush(): failed to delete and flush buffer. No buffer to delete or flush in %s on line %d
 bool(false)
 ===DONE===

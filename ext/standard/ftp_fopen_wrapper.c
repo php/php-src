@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -269,9 +269,8 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, char *path
 		} else {
 			/* if the user has configured who they are,
 			   send that as the password */
-			char *from_address = php_ini_string("from", sizeof("from"), 0);
-			if (from_address[0] != '\0') {
-				php_stream_printf(stream TSRMLS_CC, "PASS %s\r\n", from_address);
+			if (FG(from_address)) {
+				php_stream_printf(stream TSRMLS_CC, "PASS %s\r\n", FG(from_address));
 			} else {
 				php_stream_write_string(stream, "PASS anonymous\r\n");
 			}

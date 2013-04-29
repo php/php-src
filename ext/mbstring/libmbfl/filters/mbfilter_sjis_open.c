@@ -66,7 +66,7 @@ const mbfl_encoding mbfl_encoding_sjis_open = {
 	"Shift_JIS",
 	(const char *(*)[])&mbfl_encoding_sjis_open_aliases,
 	mblen_table_sjis,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_sjis_open = {
@@ -138,7 +138,6 @@ const struct mbfl_convert_vtbl vtbl_wchar_sjis_open = {
 				s2 -= 0x7e;			\
 			}						\
 		} while (0)
-
 
 /*
  * SJIS-win => wchar
@@ -308,6 +307,7 @@ mbfl_filt_conv_wchar_sjis_open(int c, mbfl_convert_filter *filter)
 			s1 = -1;
 		}
 	}
+
 	if (s1 >= 0) {
 		if (s1 < 0x100) { /* latin or kana */
 			CK((*filter->output_function)(s1, filter->data));

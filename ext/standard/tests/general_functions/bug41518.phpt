@@ -7,6 +7,7 @@ mkdir($tmp_dir);
 if (!is_dir($tmp_dir)) {
 	die("skip");
 }
+@unlink($tmp_dir);
 ?>
 --INI--
 open_basedir=.
@@ -14,6 +15,7 @@ open_basedir=.
 <?php
 
 $tmp_dir = __DIR__ . "/bug41518/";
+@mkdir($tmp_dir);
 $tmp_file = $tmp_dir."/bug41418.tmp";
 
 touch($tmp_file);
@@ -23,6 +25,11 @@ var_dump(file_exists($tmp_file."nosuchfile")); //doesn't exist
 @unlink($tmp_file);
 @rmdir($tmp_dir);
 echo "Done\n";
+?>
+--CLEAN--
+<?php
+$tmp_dir = __DIR__ . "/bug41518/";
+@unlink($tmp_dir);
 ?>
 --EXPECT--
 bool(true)

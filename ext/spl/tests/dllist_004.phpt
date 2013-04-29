@@ -1,7 +1,5 @@
 --TEST--
 SPL: DoublyLinkedList: Stacks
---INI--
-allow_call_time_pass_reference=1
 --FILE--
 <?php
 $stack = new SplStack();
@@ -20,10 +18,6 @@ try {
 // data consistency
 $a = 2;
 $stack->push($a);
-$a = 3;
-$stack->push(&$a);
-$a = 4;
-echo $stack->pop()."\n";
 echo $stack->pop()."\n";
 
 // peakable
@@ -55,7 +49,6 @@ echo count($stack)."\n";
 --EXPECTF--
 Exception: Can't pop from an empty datastructure
 Exception: Can't shift from an empty datastructure
-3
 2
 2
 [2]

@@ -6,20 +6,23 @@ if(!function_exists('proc_nice')) die("skip. proc_nice not available ");
 ?>
 --FILE--
 <?php
+echo "*** Test by calling method or function with incorrect numbers of arguments ***\n";
 
+$priority = 1;
 
-echo "*** Test by calling method or function with incorrect numbers of arguments ***\n"
+$extra_arg = 1;
 
-$priority = 
-
-
-$extra_arg = 
-
-var_dump(proc_nice( $priority, $extra_arg ) );
+var_dump(proc_nice( $priority, $extra_arg) );
 
 var_dump(proc_nice(  ) );
 
 
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected T_VARIABLE, expecting ',' or ';' in %s on line %d
+*** Test by calling method or function with incorrect numbers of arguments ***
+
+Warning: proc_nice() expects exactly 1 parameter, 2 given in %s line %d
+bool(false)
+
+Warning: proc_nice() expects exactly 1 parameter, 0 given in %s line %d
+bool(false)

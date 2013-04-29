@@ -7,5 +7,6 @@ preg_match('//', '', $data->info);
 var_dump($data);
 ?>
 --EXPECTF--
+
 Warning: Attempt to modify property of non-object in %sbug52237.php on line 3
 string(4) "test"

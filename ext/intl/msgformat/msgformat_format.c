@@ -32,51 +32,34 @@
 #endif
 
 /* {{{ */
-static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *return_value TSRMLS_DC) 
+static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *return_value TSRMLS_DC)
 {
-	zval **fargs;
 	int count;
 	UChar* formatted = NULL;
 	int formatted_len = 0;
-	HashPosition pos;
-	int i;
+	HashTable *args_copy;
 
 	count = zend_hash_num_elements(Z_ARRVAL_P(args));
 
-	if(count < umsg_format_arg_count(MSG_FORMAT_OBJECT(mfo))) {
-		/* Not enough aguments for format! */
-		intl_error_set( INTL_DATA_ERROR_P(mfo), U_ILLEGAL_ARGUMENT_ERROR,
-			"msgfmt_format: not enough parameters", 0 TSRMLS_CC );
-		RETVAL_FALSE;
-		return;
-	}
+	ALLOC_HASHTABLE(args_copy);
+	zend_hash_init(args_copy, count, NULL, ZVAL_PTR_DTOR, 0);
+	zend_hash_copy(args_copy, Z_ARRVAL_P(args), (copy_ctor_func_t)zval_add_ref,
+		NULL, sizeof(zval*));
 
-	fargs = safe_emalloc(count, sizeof(zval *), 0);
+	umsg_format_helper(mfo, args_copy, &formatted, &formatted_len TSRMLS_CC);
 
-	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(args), &pos);
-	for(i=0;i<count;i++) {
-		zval **val;
-		zend_hash_get_current_data_ex(Z_ARRVAL_P(args), (void **)&val, &pos);
-		fargs[i] = *val;
-		Z_ADDREF_P(fargs[i]);
-		/* TODO: needs refcount increase here? */
-		zend_hash_move_forward_ex(Z_ARRVAL_P(args), &pos);
-	}
+	zend_hash_destroy(args_copy);
+	efree(args_copy);
 
-	umsg_format_helper(MSG_FORMAT_OBJECT(mfo), count, fargs, &formatted, &formatted_len, &INTL_DATA_ERROR_CODE(mfo) TSRMLS_CC);
-
-	for(i=0;i<count;i++) {
-		zval_ptr_dtor(&fargs[i]);
-	}
-
-	efree(fargs);
-
-	if (formatted && U_FAILURE( INTL_DATA_ERROR_CODE(mfo) ) ) {
+	if (formatted && U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
 			efree(formatted);
 	}
 
-	INTL_METHOD_CHECK_STATUS( mfo, "Number formatting failed" );
-	INTL_METHOD_RETVAL_UTF8( mfo, formatted, formatted_len, 1 );
+	if (U_FAILURE(INTL_DATA_ERROR_CODE(mfo))) {
+		RETURN_FALSE;
+	} else {
+		INTL_METHOD_RETVAL_UTF8(mfo, formatted, formatted_len, 1);
+	}
 }
 /* }}} */
 
@@ -151,14 +134,16 @@ PHP_FUNCTION( msgfmt_format_message )
 	}
 
 	if(slocale_len == 0) {
-		slocale = INTL_G(default_locale);
+		slocale = intl_locale_get_default(TSRMLS_C);
 	}
 
+#ifdef MSG_FORMAT_QUOTE_APOS
 	if(msgformat_fix_quotes(&spattern, &spattern_len, &INTL_DATA_ERROR_CODE(mfo)) != SUCCESS) {
 		intl_error_set( NULL, U_INVALID_FORMAT_ERROR,
 			"msgfmt_format_message: error converting pattern to quote-friendly format", 0 TSRMLS_CC );
 		RETURN_FALSE;
 	}
+#endif
 
 	/* Create an ICU message formatter. */
 	MSG_FORMAT_OBJECT(mfo) = umsg_open(spattern, spattern_len, slocale, NULL, &INTL_DATA_ERROR_CODE(mfo));

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,9 +63,6 @@ PHPAPI PHP_FUNCTION(dl)
 	if (!PG(enable_dl)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't enabled");
 		RETURN_FALSE;
-	} else if (PG(safe_mode)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Dynamically loaded extensions aren't allowed when running in Safe Mode");
-		RETURN_FALSE;
 	}
 
 	if (filename_len >= MAXPATHLEN) {
@@ -100,9 +97,9 @@ PHPAPI PHP_FUNCTION(dl)
 #define USING_ZTS 0
 #endif
 
-/* {{{ php_dl
+/* {{{ php_load_extension
  */
-PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC) /* {{{ */
+PHPAPI int php_load_extension(char *filename, int type, int start_now TSRMLS_DC)
 {
 	void *handle;
 	char *libpath;

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -227,8 +227,10 @@ static int oci_handle_closer(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 		H->server = NULL;
 	}
 
-	OCIHandleFree(H->err, OCI_HTYPE_ERROR);
-	H->err = NULL;
+	if (H->err) {
+		OCIHandleFree(H->err, OCI_HTYPE_ERROR);
+		H->err = NULL;
+	}
 
 	if (H->charset && H->env) {
 		OCIHandleFree(H->env, OCI_HTYPE_ENV);
@@ -555,12 +557,12 @@ static int pdo_oci_check_liveness(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 	/* use good old OCIServerVersion() */
 	H->last_err = OCIServerVersion (H->svc, H->err, (text *)version, sizeof(version), OCI_HTYPE_SVCCTX);
 #endif
-	if (H->last_err == OCI_SUCCESS) { 
+	if (H->last_err == OCI_SUCCESS) {
 		return SUCCESS;
 	}
 
 	OCIErrorGet (H->err, (ub4)1, NULL, &error_code, NULL, 0, OCI_HTYPE_ERROR);
-
+	
 	if (error_code == 1010) {
 		return SUCCESS;
 	}

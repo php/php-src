@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -43,6 +43,10 @@ ZEND_BEGIN_MODULE_GLOBALS(libxml)
 	zval *stream_context;
 	smart_str error_buffer;
 	zend_llist *error_list;
+	struct _php_libxml_entity_resolver {
+		zend_fcall_info			fci;
+		zend_fcall_info_cache	fcc;
+	} entity_loader;
 ZEND_END_MODULE_GLOBALS(libxml)
 
 typedef struct _libxml_doc_props {

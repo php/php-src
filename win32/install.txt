@@ -947,14 +947,6 @@ CGI environment and recommended modifications in php.ini
      the web server not from the administration server. Use the command
      line as root user and start it manually - you will see there are no
      CGI-like environment variables.
-
-   Simply change your scripts to get CGI variables in the correct way for
-   PHP 5.x by using the superglobal $_SERVER. If you have older scripts
-   which use $HTTP_HOST, etc., you should turn on register_globals in
-   php.ini and change the variable order too (important: remove "E" from
-   it, because you do not need the environment here):
-variables_order = "GPCS"
-register_globals = On
      __________________________________________________________________
 
 Special use for error pages or self-made directory listings (PHP >= 4.3.3)
@@ -1436,7 +1428,7 @@ The configuration file
 ; Boolean values can be set to either:
 ;    true, on, yes
 ; or false, off, no, none
-register_globals = off
+html_errors = off
 track_errors = yes
 
 ; you can enclose strings in double-quotes
@@ -1496,7 +1488,7 @@ Running PHP as an Apache module
    Example 5-2. Apache configuration example
 <IfModule mod_php5.c>
   php_value include_path ".:/usr/local/lib/php"
-  php_admin_flag safe_mode on
+  php_admin_flag engine on
 </IfModule>
 
    Caution

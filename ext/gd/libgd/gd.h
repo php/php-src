@@ -249,6 +249,9 @@ gdImagePtr gdImageCreateFromWBMP(FILE *inFile);
 gdImagePtr gdImageCreateFromWBMPCtx(gdIOCtx *infile);
 gdImagePtr gdImageCreateFromJpeg(FILE *infile, int ignore_warning);
 gdImagePtr gdImageCreateFromJpegCtx(gdIOCtx *infile, int ignore_warning);
+gdImagePtr gdImageCreateFromWebp(FILE *fd);
+gdImagePtr gdImageCreateFromWebpCtx(gdIOCtxPtr in);
+gdImagePtr gdImageCreateFromWebpPtr (int size, void *data);
 
 int gdJpegGetVersionInt();
 const char * gdPngGetVersionString();
@@ -486,6 +489,8 @@ void *gdImageWBMPPtr(gdImagePtr im, int *size, int fg);
        0 is lowest. 10 is about the lowest useful setting. */
 void gdImageJpeg(gdImagePtr im, FILE *out, int quality);
 void gdImageJpegCtx(gdImagePtr im, gdIOCtx *out, int quality);
+
+void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization);
 
 /* Best to free this memory with gdFree(), not free() */
 void *gdImageJpegPtr(gdImagePtr im, int *size, int quality);

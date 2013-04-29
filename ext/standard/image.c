@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -159,7 +159,7 @@ static struct gfxinfo *php_handle_bmp (php_stream * stream TSRMLS_DC)
 		result->width    =  (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
 		result->height   =  (((unsigned int)dim[ 7]) << 8) + ((unsigned int) dim[ 6]);
 		result->bits     =  ((unsigned int)dim[11]);
-	} else if (size > 12 && (size <= 64 || size == 108)) {
+	} else if (size > 12 && (size <= 64 || size == 108 || size == 124)) {
 		result = (struct gfxinfo *) ecalloc (1, sizeof(struct gfxinfo));
 		result->width    =  (((unsigned int)dim[ 7]) << 24) + (((unsigned int)dim[ 6]) << 16) + (((unsigned int)dim[ 5]) << 8) + ((unsigned int) dim[ 4]);
 		result->height   =  (((unsigned int)dim[11]) << 24) + (((unsigned int)dim[10]) << 16) + (((unsigned int)dim[ 9]) << 8) + ((unsigned int) dim[ 8]);
@@ -1289,26 +1289,11 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype TSRMLS_DC)
 }
 /* }}} */
 
-/* {{{ proto array getimagesize(string imagefile [, array info])
-   Get the size of an image as 4-element array */
-PHP_FUNCTION(getimagesize)
+static void php_getimagesize_from_stream(php_stream *stream, zval **info, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
-	zval **info = NULL;
-	char *arg1, *temp;
-	int arg1_len, itype = 0, argc = ZEND_NUM_ARGS();
+	char *temp;
+	int itype = 0;
 	struct gfxinfo *result = NULL;
-	php_stream * stream = NULL;
-
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|Z", &arg1, &arg1_len, &info) == FAILURE) {
-		return;
-	}
-	
-	if (argc == 2) {
-		zval_dtor(*info);
-		array_init(*info);
-	}
-
-	stream = php_stream_open_wrapper(arg1, "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH|ENFORCE_SAFE_MODE, NULL);
 
 	if (!stream) {
 		RETURN_FALSE;
@@ -1374,8 +1359,6 @@ PHP_FUNCTION(getimagesize)
 			break;
 	}
 
-	php_stream_close(stream);
-
 	if (result) {
 		array_init(return_value);
 		add_index_long(return_value, 0, result->width);
@@ -1397,6 +1380,56 @@ PHP_FUNCTION(getimagesize)
 	}
 }
 /* }}} */
+
+#define FROM_DATA 0
+#define FROM_PATH 1
+
+static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) {  /* {{{ */
+	zval **info = NULL;
+	php_stream *stream = NULL;
+	char *input;
+	int input_len;
+	const int argc = ZEND_NUM_ARGS();
+
+	if (zend_parse_parameters(argc TSRMLS_CC, "s|Z", &input, &input_len, &info) == FAILURE) {
+			return;
+	}
+
+	if (argc == 2) {
+			zval_dtor(*info);
+			array_init(*info);
+	}
+
+
+	if (mode == FROM_PATH) {
+		stream = php_stream_open_wrapper(input, "rb", STREAM_MUST_SEEK|REPORT_ERRORS|IGNORE_PATH, NULL);
+	} else {
+		stream = php_stream_memory_open(TEMP_STREAM_READONLY, input, input_len);
+	}
+
+	if (!stream) {
+		   RETURN_FALSE;
+	}
+
+	php_getimagesize_from_stream(stream, info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_stream_close(stream);
+}
+/* }}} */
+
+/* {{{ proto array getimagesize(string imagefile [, array info])
+   Get the size of an image as 4-element array */
+PHP_FUNCTION(getimagesize)
+{
+	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_PATH);
+}
+/* }}} */
+
+/* {{{ proto array getimagesizefromstring(string data [, array info])
+   Get the size of an image as 4-element array */
+PHP_FUNCTION(getimagesizefromstring)
+{
+	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_DATA);
+}
 
 /*
  * Local variables:

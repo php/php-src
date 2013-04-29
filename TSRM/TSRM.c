@@ -710,6 +710,22 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 #endif
 }
 
+/*
+  Changes the signal mask of the calling thread
+*/
+#ifdef HAVE_SIGPROCMASK
+TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset)
+{
+	TSRM_ERROR((TSRM_ERROR_LEVEL_INFO, "Changed sigmask in thread: %ld", tsrm_thread_id()));
+	/* TODO: add support for other APIs */
+#ifdef PTHREADS
+	return pthread_sigmask(how, set, oldset);
+#else
+	return sigprocmask(how, set, oldset);
+#endif
+}
+#endif
+
 
 TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler)
 {

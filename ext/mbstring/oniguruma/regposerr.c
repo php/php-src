@@ -2,7 +2,7 @@
   regposerr.c - Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,12 @@
 # include <strings.h>
 #endif
 
+#if defined(__GNUC__)
+#  define ARG_UNUSED  __attribute__ ((unused))
+#else
+#  define ARG_UNUSED
+#endif
+
 static char* ESTRING[] = {
   NULL,
   "failed to match",                         /* REG_NOMATCH    */
@@ -63,13 +69,15 @@ static char* ESTRING[] = {
 
 
 extern size_t
-regerror(int posix_ecode, const regex_t* reg, char* buf, size_t size)
+regerror(int posix_ecode, const regex_t* reg ARG_UNUSED, char* buf,
+	 size_t size)
 {
   char* s;
   char tbuf[35];
   size_t len;
 
-  if (posix_ecode > 0 && posix_ecode < sizeof(ESTRING) / sizeof(ESTRING[0])) {
+  if (posix_ecode > 0
+      && posix_ecode < (int )(sizeof(ESTRING) / sizeof(ESTRING[0]))) {
     s = ESTRING[posix_ecode];
   }
   else if (posix_ecode == 0) {

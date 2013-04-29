@@ -153,7 +153,19 @@ enum {
   ucp_Old_Turkic,
   ucp_Samaritan,
   ucp_Tai_Tham,
-  ucp_Tai_Viet
+  ucp_Tai_Viet,
+  /* New for Unicode 6.0.0: */
+  ucp_Batak,
+  ucp_Brahmi,
+  ucp_Mandaic,
+  /* New for Unicode 6.1.0: */
+  ucp_Chakma,
+  ucp_Meroitic_Cursive,
+  ucp_Meroitic_Hieroglyphs,
+  ucp_Miao,
+  ucp_Sharada,
+  ucp_Sora_Sompeng,
+  ucp_Takri
 };
 
 #endif

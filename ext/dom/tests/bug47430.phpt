@@ -21,9 +21,9 @@ print_r($arr);
 
 ?>
 --EXPECTF--
-Strict Standards: Creating default object from empty value in %s on line %d
+Warning: Creating default object from empty value in %s on line %d
 
-Strict Standards: Creating default object from empty value in %s on line %d
+Warning: Creating default object from empty value in %s on line %d
 Array
 (
     [0] => Value

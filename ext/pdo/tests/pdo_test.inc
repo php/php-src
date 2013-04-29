@@ -11,7 +11,6 @@ if (getenv('PDOTEST_DSN') === false) {
 			$append = true;
 		}
 	}
-	if (ini_get('magic_quotes_runtime')) $common = stripslashes($common);
 	$conf = eval($common);
 	foreach($conf['ENV'] as $n=>$v) putenv("$n=$v");
 }
@@ -67,13 +66,19 @@ class PDOTest {
 	}
 
 	static function test_factory($file) {
-		$data = file_get_contents($file);
-		$data = preg_replace('/^.*--REDIRECTTEST--/s', '', $data);
-		$config = eval($data);
+		$config = self::get_config($file);
 		foreach ($config['ENV'] as $k => $v) {
 			putenv("$k=$v");
 		}
 		return self::factory();
+	}
+
+	static function get_config($file) {
+		$data = file_get_contents($file);
+		$data = preg_replace('/^.*--REDIRECTTEST--/s', '', $data);
+		$config = eval($data);
+
+		return $config;
 	}
 }
 ?>

@@ -33,6 +33,7 @@
 
 #include "mbfilter.h"
 #include "mbfilter_uhc.h"
+#define UNICODE_TABLE_UHC_DEF
 #include "unicode_table_uhc.h"
 
 static int mbfl_filt_ident_uhc(int c, mbfl_identify_filter *filter);

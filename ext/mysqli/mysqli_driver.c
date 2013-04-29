@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -151,14 +151,14 @@ const mysqli_property_entry mysqli_driver_property_entries[] = {
 };
 
 /* {{{ mysqli_warning_property_info_entries */
-zend_property_info mysqli_driver_property_info_entries[] = {
-	{ZEND_ACC_PUBLIC, "client_info",	sizeof("client_info") - 1,		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "client_version",	sizeof("client_version") - 1,	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "driver_version",	sizeof("driver_version") - 1,	0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "embedded",		sizeof("embedded") - 1,			0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "reconnect",		sizeof("reconnect") - 1,		0, NULL, 0, NULL},
-	{ZEND_ACC_PUBLIC, "report_mode",	sizeof("report_mode") - 1,		0, NULL, 0, NULL},
-	{0,					NULL, 			0,								0, NULL, 0, NULL},
+const zend_property_info mysqli_driver_property_info_entries[] = {
+	{ZEND_ACC_PUBLIC, "client_info",	sizeof("client_info") - 1,		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "client_version",	sizeof("client_version") - 1,	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "driver_version",	sizeof("driver_version") - 1,	-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "embedded",		sizeof("embedded") - 1,			-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "reconnect",		sizeof("reconnect") - 1,		-1, 0, NULL, 0, NULL},
+	{ZEND_ACC_PUBLIC, "report_mode",	sizeof("report_mode") - 1,		-1, 0, NULL, 0, NULL},
+	{0,					NULL, 			0,								-1, 0, NULL, 0, NULL},
 };
 /* }}} */
 

@@ -50,7 +50,7 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
   PHP_ADD_LIBRARY_WITH_PATH($FIREBIRD_LIBNAME, $FIREBIRD_LIBDIR, PDO_FIREBIRD_SHARED_LIBADD)
   PHP_ADD_INCLUDE($FIREBIRD_INCDIR)
   AC_DEFINE(HAVE_PDO_FIREBIRD,1,[ ])
-  PHP_NEW_EXTENSION(pdo_firebird, pdo_firebird.c firebird_driver.c firebird_statement.c, $ext_shared,,-I$pdo_inc_path)
+  PHP_NEW_EXTENSION(pdo_firebird, pdo_firebird.c firebird_driver.c firebird_statement.c, $ext_shared,,-I$pdo_cv_inc_path)
   PHP_SUBST(PDO_FIREBIRD_SHARED_LIBADD)
   PHP_ADD_EXTENSION_DEP(pdo_firebird, pdo)
 fi

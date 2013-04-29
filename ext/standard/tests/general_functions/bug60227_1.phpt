@@ -10,7 +10,7 @@ header("X-Foo5: e\rSet-Cookie: ID=123");
 echo 'foo';
 ?>
 --EXPECTF--
-Warning: Header may not contain more than a single header, new line detected. in %s on line %d
+Warning: Header may not contain more than a single header, new line detected in %s on line %d
 foo
 --EXPECTHEADERS--
 X-Foo1: a

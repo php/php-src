@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,12 +25,6 @@
 
 
 PHPAPI extern MYSQLND_STATS * mysqlnd_global_stats;
-
-typedef struct st_mysqlnd_string
-{
-	char	*s;
-	size_t	l;
-} MYSQLND_STRING;
 
 extern const MYSQLND_STRING mysqlnd_stats_values_names[];
 

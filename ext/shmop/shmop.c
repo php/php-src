@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -226,7 +226,7 @@ PHP_FUNCTION(shmop_open)
 
 	shmop->size = shm.shm_segsz;
 
-	rsid = zend_list_insert(shmop, shm_type);
+	rsid = zend_list_insert(shmop, shm_type TSRMLS_CC);
 	RETURN_LONG(rsid);
 err:
 	efree(shmop);

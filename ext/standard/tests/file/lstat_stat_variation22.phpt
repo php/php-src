@@ -2,6 +2,11 @@
 Test lstat() and stat() functions: usage variations - invalid filenames
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip ... not for Windows');
+}
 --FILE--
 <?php
 /* Prototype: array lstat ( string $filename );

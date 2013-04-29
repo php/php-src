@@ -19,7 +19,7 @@ var_dump(unserialize($ss));
 ?>
 ===DONE===
 --EXPECTF--
-C:16:"SplObjectStorage":113:{x:i:2;O:8:"stdClass":0:{},a:2:{s:4:"prev";i:2;s:4:"next";O:8:"stdClass":0:{}};r:4;,a:1:{s:4:"prev";r:1;};m:a:0:{}}
+C:16:"SplObjectStorage":113:{x:i:2;O:8:"stdClass":0:{},a:2:{s:4:"prev";i:2;s:4:"next";O:8:"stdClass":0:{}};r:6;,a:1:{s:4:"prev";r:3;};m:a:0:{}}
 object(SplObjectStorage)#2 (1) {
   ["storage":"SplObjectStorage":private]=>
   array(2) {

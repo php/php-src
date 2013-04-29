@@ -1,11 +1,11 @@
 --TEST--
 import_request_variables() tests
+--SKIPIF--
+<?php if(PHP_VERSION_ID >= 50399){ die('skip not needed anymore without register_globals'); } ?>
 --GET--
 a=1&b=heh&c=3&d[]=5&GLOBALS=test&1=hm
 --POST--
 ap=25&bp=test&cp=blah3&dp[]=ar
---INI--
-register_globals=0
 --FILE--
 <?php
 

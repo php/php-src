@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -36,6 +36,7 @@ extern zend_module_entry tidy_module_entry;
 
 ZEND_BEGIN_MODULE_GLOBALS(tidy)
 	char *default_config;
+	zend_bool clean_output;
 ZEND_END_MODULE_GLOBALS(tidy)
 
 #ifdef ZTS

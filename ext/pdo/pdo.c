@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -277,7 +277,7 @@ PDO_API int php_pdo_parse_data_source(const char *data_source,
 					parsed[j].optval = estrndup(data_source + valstart, semi - valstart - n_semicolumns);
 				} else {
 					int vlen = semi - valstart;
-					char *orig_val = data_source + valstart;
+					const char *orig_val = data_source + valstart;
 					char *new_val  = (char *) emalloc(vlen - n_semicolumns + 1);
 				
 					parsed[j].optval = new_val;

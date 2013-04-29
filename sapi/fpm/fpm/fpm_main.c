@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2009 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -154,6 +154,9 @@ static const opt_struct OPTIONS[] = {
 	{'t', 0, "test"},
 	{'p', 1, "prefix"},
 	{'g', 1, "pid"},
+	{'R', 0, "allow-to-run-as-root"},
+	{'D', 0, "daemonize"},
+	{'F', 0, "nodaemonize"},
 	{'-', 0, NULL} /* end of args */
 };
 
@@ -558,7 +561,6 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 {
 	fcgi_request *request;
 	HashPosition pos;
-	int magic_quotes_gpc;;
 	char *var, **val;
 	uint var_len;
 	ulong idx;
@@ -591,13 +593,8 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 	php_php_import_environment_variables(array_ptr TSRMLS_CC);
 
 	request = (fcgi_request*) SG(server_context);
-	magic_quotes_gpc = PG(magic_quotes_gpc);
 	filter_arg = (array_ptr == PG(http_globals)[TRACK_VARS_ENV])?PARSE_ENV:PARSE_SERVER;
 
-	/* turn off magic_quotes while importing environment variables */
-	if (magic_quotes_gpc) {
-		zend_alter_ini_entry_ex("magic_quotes_gpc", sizeof("magic_quotes_gpc"), "0", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_ACTIVATE, 1 TSRMLS_CC);
-	}
 	for (zend_hash_internal_pointer_reset_ex(request->env, &pos);
 	     zend_hash_get_current_key_ex(request->env, &var, &var_len, &idx, 0, &pos) == HASH_KEY_IS_STRING &&
 	     zend_hash_get_current_data_ex(request->env, (void **) &val, &pos) == SUCCESS;
@@ -608,9 +605,6 @@ void cgi_php_import_environment_variables(zval *array_ptr TSRMLS_DC)
 		if (sapi_module.input_filter(filter_arg, var, val, strlen(*val), &new_val_len TSRMLS_CC)) {
 			php_register_variable_safe(var, *val, new_val_len, array_ptr TSRMLS_CC);
 		}
-	}
-	if (magic_quotes_gpc) {
-		zend_alter_ini_entry_ex("magic_quotes_gpc", sizeof("magic_quotes_gpc"), "1", 1, ZEND_INI_SYSTEM, ZEND_INI_STAGE_ACTIVATE, 1 TSRMLS_CC);
 	}
 }
 
@@ -655,14 +649,38 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 	}
 }
 
-static void sapi_cgi_log_message(char *message)
+/* {{{ sapi_cgi_log_fastcgi
+ *
+ * Ignore level, we want to send all messages through fastcgi
+ */
+void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 {
 	TSRMLS_FETCH();
 
-	if (CGIG(fcgi_logging)) {
-		zlog(ZLOG_NOTICE, "PHP message: %s", message);
+	fcgi_request *request = (fcgi_request*) SG(server_context);
+
+	/* ensure we want:
+	 * - to log (fastcgi.logging in php.ini)
+	 * - we are currently dealing with a request
+	 * - the message is not empty
+	 */
+	if (CGIG(fcgi_logging) && request && message && len > 0) {
+		char *buf = malloc(len + 2);
+		memcpy(buf, message, len);
+		memcpy(buf + len, "\n", sizeof("\n"));
+		fcgi_write(request, FCGI_STDERR, buf, len+1);
+		free(buf);
 	}
 }
+/* }}} */
+
+/* {{{ sapi_cgi_log_message
+ */
+static void sapi_cgi_log_message(char *message)
+{
+	zlog(ZLOG_NOTICE, "PHP message: %s", message);
+}
+/* }}} */
 
 /* {{{ php_cgi_ini_activate_user_config
  */
@@ -896,7 +914,7 @@ static void php_cgi_usage(char *argv0)
 		prog = "php";
 	}
 
-	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-t] [-p <prefix>] [-g <pid>] [-c <file>] [-d foo[=bar]] [-y <file>]\n"
+	php_printf(	"Usage: %s [-n] [-e] [-h] [-i] [-m] [-v] [-t] [-p <prefix>] [-g <pid>] [-c <file>] [-d foo[=bar]] [-y <file>] [-D] [-F]\n"
 				"  -c <path>|<file> Look for php.ini file in this directory\n"
 				"  -n               No php.ini file will be used\n"
 				"  -d foo[=bar]     Define INI entry foo with value 'bar'\n"
@@ -911,7 +929,12 @@ static void php_cgi_usage(char *argv0)
 				"                   Specify the PID file location.\n"
 				"  -y, --fpm-config <file>\n"
 				"                   Specify alternative path to FastCGI process manager config file.\n"
-				"  -t, --test       Test FPM configuration and exit\n",
+				"  -t, --test       Test FPM configuration and exit\n"
+				"  -D, --daemonize  force to run in background, and ignore daemonize option from config file\n"
+				"  -F, --nodaemonize\n"
+				"                   force to stay in foreground, and ignore daemonize option from config file\n"
+				"  -R, --allow-to-run-as-root\n"
+				"                   Allow pool to run as root (disabled by default)\n",
 				prog, PHP_PREFIX);
 }
 /* }}} */
@@ -1475,7 +1498,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 
 	if (request->fd >= 0) {
 
-		php_end_ob_buffers(1 TSRMLS_CC);
+		php_output_end_all(TSRMLS_C);
 		php_header(TSRMLS_C);
 
 		fcgi_flush(request, 1);
@@ -1510,8 +1533,8 @@ static zend_module_entry cgi_module_entry = {
  */
 int main(int argc, char *argv[])
 {
-	int exit_status = SUCCESS;
-	int cgi = 0, c;
+	int exit_status = FPM_EXIT_OK;
+	int cgi = 0, c, use_extended_info = 0;
 	zend_file_handle file_handle;
 
 	/* temporary locals */
@@ -1532,9 +1555,9 @@ int main(int argc, char *argv[])
 	char *fpm_prefix = NULL;
 	char *fpm_pid = NULL;
 	int test_conf = 0;
+	int force_daemon = -1;
 	int php_information = 0;
-
-	fcgi_init();
+	int php_allow_to_run_as_root = 0;
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -1554,6 +1577,9 @@ int main(int argc, char *argv[])
 
 	sapi_startup(&cgi_sapi_module);
 	cgi_sapi_module.php_ini_path_override = NULL;
+	cgi_sapi_module.php_ini_ignore_cwd = 1;
+	
+	fcgi_init();
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY; /* sets default for file streams to binary */
@@ -1620,7 +1646,7 @@ int main(int argc, char *argv[])
 				break;
 
 			case 'e': /* enable extended info output */
-				CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
+				use_extended_info = 1;
 				break;
 
 			case 't': 
@@ -1629,7 +1655,6 @@ int main(int argc, char *argv[])
 
 			case 'm': /* list compiled in modules */
 				cgi_sapi_module.startup(&cgi_sapi_module);
-				php_output_startup();
 				php_output_activate(TSRMLS_C);
 				SG(headers_sent) = 1;
 				php_printf("[PHP Modules]\n");
@@ -1637,26 +1662,39 @@ int main(int argc, char *argv[])
 				php_printf("\n[Zend Modules]\n");
 				print_extensions(TSRMLS_C);
 				php_printf("\n");
-				php_end_ob_buffers(1 TSRMLS_CC);
+				php_output_end_all(TSRMLS_C);
+				php_output_deactivate(TSRMLS_C);
 				fcgi_shutdown();
-				exit_status = 0;
+				exit_status = FPM_EXIT_OK;
 				goto out;
 
 			case 'i': /* php info & quit */
 				php_information = 1;
 				break;
 
+			case 'R': /* allow to run as root */
+				php_allow_to_run_as_root = 1;
+				break;
+
+			case 'D': /* daemonize */
+				force_daemon = 1;
+				break;
+
+			case 'F': /* nodaemonize */
+				force_daemon = 0;
+				break;
+
 			default:
 			case 'h':
 			case '?':
 				cgi_sapi_module.startup(&cgi_sapi_module);
-				php_output_startup();
 				php_output_activate(TSRMLS_C);
 				SG(headers_sent) = 1;
 				php_cgi_usage(argv[0]);
-				php_end_ob_buffers(1 TSRMLS_CC);
+				php_output_end_all(TSRMLS_C);
+				php_output_deactivate(TSRMLS_C);
 				fcgi_shutdown();
-				exit_status = 0;
+				exit_status = (c == 'h') ? FPM_EXIT_OK : FPM_EXIT_USAGE;
 				goto out;
 
 			case 'v': /* show php version & quit */
@@ -1664,19 +1702,19 @@ int main(int argc, char *argv[])
 				if (php_request_startup(TSRMLS_C) == FAILURE) {
 					SG(server_context) = NULL;
 					php_module_shutdown(TSRMLS_C);
-					return FAILURE;
+					return FPM_EXIT_SOFTWARE;
 				}
 				SG(headers_sent) = 1;
 				SG(request_info).no_headers = 1;
 
 #if ZEND_DEBUG
-				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2009 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__,        __TIME__, get_zend_version());
 #else
-				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2009 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
+				php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2013 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__,      get_zend_version());
 #endif
 				php_request_shutdown((void *) 0);
 				fcgi_shutdown();
-				exit_status = 0;
+				exit_status = FPM_EXIT_OK;
 				goto out;
 		}
 	}
@@ -1687,27 +1725,27 @@ int main(int argc, char *argv[])
 		if (php_request_startup(TSRMLS_C) == FAILURE) {
 			SG(server_context) = NULL;
 			php_module_shutdown(TSRMLS_C);
-			return FAILURE;
+			return FPM_EXIT_SOFTWARE;
 		}
 		SG(headers_sent) = 1;
 		SG(request_info).no_headers = 1;
 		php_print_info(0xFFFFFFFF TSRMLS_CC);
 		php_request_shutdown((void *) 0);
 		fcgi_shutdown();
-		exit_status = 0;
+		exit_status = FPM_EXIT_OK;
 		goto out;
 	}
 
-	/* No other args are permitted here as there is not interactive mode */
+	/* No other args are permitted here as there is no interactive mode */
 	if (argc != php_optind) {
 		cgi_sapi_module.startup(&cgi_sapi_module);
-		php_output_startup();
 		php_output_activate(TSRMLS_C);
 		SG(headers_sent) = 1;
 		php_cgi_usage(argv[0]);
-		php_end_ob_buffers(1 TSRMLS_CC);
-		exit_status = 0;
+		php_output_end_all(TSRMLS_C);
+		php_output_deactivate(TSRMLS_C);
 		fcgi_shutdown();
+		exit_status = FPM_EXIT_USAGE;
 		goto out;
 	}
 
@@ -1726,7 +1764,11 @@ int main(int argc, char *argv[])
 #ifdef ZTS
 		tsrm_shutdown();
 #endif
-		return FAILURE;
+		return FPM_EXIT_SOFTWARE;
+	}
+	
+	if (use_extended_info) {
+		CG(compiler_options) |= ZEND_COMPILE_EXTENDED_INFO;
 	}
 
 	/* check force_cgi after startup, so we have proper output */
@@ -1765,18 +1807,34 @@ consult the installation file that came with this distribution, or visit \n\
 			 */
 			tsrm_shutdown();
 #endif
-			return FAILURE;
+			return FPM_EXIT_SOFTWARE;
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf)) {
-		return FAILURE;
+	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon)) {
+
+		if (fpm_globals.send_config_pipe[1]) {
+			int writeval = 0;
+			zlog(ZLOG_DEBUG, "Sending \"0\" (error) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
+			write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
+			close(fpm_globals.send_config_pipe[1]);
+		}
+		return FPM_EXIT_CONFIG;
 	}
 
+	if (fpm_globals.send_config_pipe[1]) {
+		int writeval = 1;
+		zlog(ZLOG_DEBUG, "Sending \"1\" (OK) to parent via fd=%d", fpm_globals.send_config_pipe[1]);
+		write(fpm_globals.send_config_pipe[1], &writeval, sizeof(writeval));
+		close(fpm_globals.send_config_pipe[1]);
+	}
 	fpm_is_running = 1;
 
 	fcgi_fd = fpm_run(&max_requests);
 	parent = 0;
+
+	/* onced forked tell zlog to also send messages through sapi_cgi_log_fastcgi() */
+	zlog_set_external_logger(sapi_cgi_log_fastcgi);
 
 	/* make php call us to get _ENV vars */
 	php_php_import_environment_variables = php_import_environment_variables;
@@ -1801,7 +1859,7 @@ consult the installation file that came with this distribution, or visit \n\
 				fcgi_finish_request(&request, 1);
 				SG(server_context) = NULL;
 				php_module_shutdown(TSRMLS_C);
-				return FAILURE;
+				return FPM_EXIT_SOFTWARE;
 			}
 
 			/* check if request_method has been sent.
@@ -1889,17 +1947,9 @@ fastcgi_request_done:
 
 			php_request_shutdown((void *) 0);
 
-			if (exit_status == 0) {
-				exit_status = EG(exit_status);
-			}
-
 			requests++;
 			if (max_requests && (requests == max_requests)) {
 				fcgi_finish_request(&request, 1);
-				if (max_requests != 1) {
-					/* no need to return exit_status of the last request */
-					exit_status = 0;
-				}
 				break;
 			}
 			/* end of fastcgi loop */
@@ -1913,7 +1963,7 @@ fastcgi_request_done:
 			free(cgi_sapi_module.ini_entries);
 		}
 	} zend_catch {
-		exit_status = 255;
+		exit_status = FPM_EXIT_SOFTWARE;
 	} zend_end_try();
 
 out:

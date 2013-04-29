@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -289,6 +289,7 @@ typedef struct { /* php_oci_out_column {{{ */
 				zend_bailout();					  \
 				break;							  \
 			case	22:							  \
+			case	28:							  \
 			case   378:							  \
 			case   602:							  \
 			case   603:							  \

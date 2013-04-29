@@ -119,26 +119,31 @@ int(1)
 Arg value 0.5 
 Error: 8192 - Function eregi() is deprecated, %s(74)
 bool(false)
+Error: 8 - Array to string conversion, %seregi_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function eregi() is deprecated, %s(74)
 Error: 2 - eregi() expects parameter 2 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %seregi_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function eregi() is deprecated, %s(74)
 Error: 2 - eregi() expects parameter 2 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %seregi_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function eregi() is deprecated, %s(74)
 Error: 2 - eregi() expects parameter 2 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %seregi_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function eregi() is deprecated, %s(74)
 Error: 2 - eregi() expects parameter 2 to be string, array given, %s(74)
 NULL
+Error: 8 - Array to string conversion, %seregi_variation_002.php(%d)
 
 Arg value Array 
 Error: 8192 - Function eregi() is deprecated, %s(74)

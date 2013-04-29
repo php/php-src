@@ -1,5 +1,7 @@
 --TEST--
 Test token_get_all() function : usage variations - with different types of comments
+--SKIPIF--
+<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
@@ -47,7 +49,7 @@ array(51) {
   [0]=>
   array(3) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(6) "<?php "
     [2]=>
@@ -56,7 +58,7 @@ array(51) {
   [1]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -66,7 +68,7 @@ array(51) {
   [2]=>
   array(3) {
     [0]=>
-    int(367)
+    int(%d)
     [1]=>
     string(65) "/** Performing addition operation on given values :
   * a, b
@@ -77,7 +79,7 @@ array(51) {
   [3]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(2) "
 
@@ -88,7 +90,7 @@ array(51) {
   [4]=>
   array(3) {
     [0]=>
-    int(366)
+    int(%d)
     [1]=>
     string(13) "// int value
 "
@@ -98,7 +100,7 @@ array(51) {
   [5]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -107,7 +109,7 @@ array(51) {
   [6]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -118,7 +120,7 @@ array(51) {
   [8]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -127,7 +129,7 @@ array(51) {
   [9]=>
   array(3) {
     [0]=>
-    int(305)
+    int(%d)
     [1]=>
     string(2) "10"
     [2]=>
@@ -138,7 +140,7 @@ array(51) {
   [11]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -148,7 +150,7 @@ array(51) {
   [12]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$b"
     [2]=>
@@ -157,7 +159,7 @@ array(51) {
   [13]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -168,7 +170,7 @@ array(51) {
   [15]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -177,7 +179,7 @@ array(51) {
   [16]=>
   array(3) {
     [0]=>
-    int(305)
+    int(%d)
     [1]=>
     string(2) "20"
     [2]=>
@@ -188,7 +190,7 @@ array(51) {
   [18]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -198,7 +200,7 @@ array(51) {
   [19]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$c"
     [2]=>
@@ -207,7 +209,7 @@ array(51) {
   [20]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -218,7 +220,7 @@ array(51) {
   [22]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -227,7 +229,7 @@ array(51) {
   [23]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(4) "true"
     [2]=>
@@ -238,7 +240,7 @@ array(51) {
   [25]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -247,7 +249,7 @@ array(51) {
   [26]=>
   array(3) {
     [0]=>
-    int(366)
+    int(%d)
     [1]=>
     string(14) "// bool value
 "
@@ -257,7 +259,7 @@ array(51) {
   [27]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -267,7 +269,7 @@ array(51) {
   [28]=>
   array(3) {
     [0]=>
-    int(366)
+    int(%d)
     [1]=>
     string(59) "/* 
  * Performing operation on $a,$b 
@@ -279,7 +281,7 @@ array(51) {
   [29]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -289,7 +291,7 @@ array(51) {
   [30]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$c"
     [2]=>
@@ -298,7 +300,7 @@ array(51) {
   [31]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -309,7 +311,7 @@ array(51) {
   [33]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -318,7 +320,7 @@ array(51) {
   [34]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -327,7 +329,7 @@ array(51) {
   [35]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -338,7 +340,7 @@ array(51) {
   [37]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -347,7 +349,7 @@ array(51) {
   [38]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$b"
     [2]=>
@@ -358,7 +360,7 @@ array(51) {
   [40]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -368,7 +370,7 @@ array(51) {
   [41]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(8) "var_dump"
     [2]=>
@@ -379,7 +381,7 @@ array(51) {
   [43]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$c"
     [2]=>
@@ -392,7 +394,7 @@ array(51) {
   [46]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -401,9 +403,9 @@ array(51) {
   [47]=>
   array(3) {
     [0]=>
-    int(366)
+    int(%d)
     [1]=>
-    string(20) "# expected: int(30)
+    string(20) "# expected: int(%d)
 "
     [2]=>
     int(16)
@@ -411,7 +413,7 @@ array(51) {
   [48]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -421,7 +423,7 @@ array(51) {
   [49]=>
   array(3) {
     [0]=>
-    int(366)
+    int(%d)
     [1]=>
     string(17) "# end of program
 "
@@ -431,7 +433,7 @@ array(51) {
   [50]=>
   array(3) {
     [0]=>
-    int(370)
+    int(%d)
     [1]=>
     string(2) "?>"
     [2]=>

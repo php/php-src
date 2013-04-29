@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -102,6 +102,18 @@ void spl_add_interfaces(zval *list, zend_class_entry * pce, int allow, int ce_fl
 	}
 }
 /* }}} */
+
+/* {{{ spl_add_traits */
+void spl_add_traits(zval *list, zend_class_entry * pce, int allow, int ce_flags TSRMLS_DC)
+{
+	zend_uint num_traits;
+  
+	for (num_traits = 0; num_traits < pce->num_traits; num_traits++) {
+		spl_add_class_name(list, pce->traits[num_traits], allow, ce_flags TSRMLS_CC);
+	}
+}
+/* }}} */
+
 
 /* {{{ spl_add_classes */
 int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int ce_flags TSRMLS_DC)

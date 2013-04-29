@@ -1,7 +1,5 @@
 --TEST--
 Test array_merge() function : usage variations - referenced variables
---INI--
-allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
@@ -32,9 +30,6 @@ $val2 = 'hello world';
 echo "\n-- Change \$val2 --\n";
 var_dump(array_merge($arr1, $arr2));
 var_dump(array_merge($arr2, $arr1));
-
-echo "\n-- Merge an array and a reference to the first array --\n";
-var_dump(array_merge($arr2, &$arr2));
 
 echo "Done";
 ?>
@@ -100,15 +95,5 @@ array(6) {
   &string(11) "hello world"
   [2]=>
   &string(3) "baz"
-}
-
--- Merge an array and a reference to the first array --
-array(3) {
-  ["key1"]=>
-  string(4) "val1"
-  ["key2"]=>
-  string(4) "val2"
-  ["key3"]=>
-  string(4) "val3"
 }
 Done

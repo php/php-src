@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,6 +52,8 @@ extern PHPAPI zend_class_entry *spl_ce_AppendIterator;
 extern PHPAPI zend_class_entry *spl_ce_RegexIterator;
 extern PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
 extern PHPAPI zend_class_entry *spl_ce_Countable;
+extern PHPAPI zend_class_entry *spl_ce_CallbackFilterIterator;
+extern PHPAPI zend_class_entry *spl_ce_RecursiveCallbackFilterIterator;
 
 PHP_MINIT_FUNCTION(spl_iterators);
 
@@ -75,6 +77,8 @@ typedef enum {
 	DIT_RegexIterator,
 	DIT_RecursiveRegexIterator,
 #endif
+	DIT_CallbackFilterIterator,
+	DIT_RecursiveCallbackFilterIterator,
 	DIT_Unknown = ~0
 } dual_it_type;
 
@@ -113,6 +117,11 @@ typedef enum {
 	REGIT_MODE_REPLACE,
 	REGIT_MODE_MAX
 } regex_mode;
+
+typedef struct _spl_cbfilter_it_intern {
+	zend_fcall_info       fci;
+	zend_fcall_info_cache fcc;
+} _spl_cbfilter_it_intern;
 
 typedef struct _spl_dual_it_object {
 	zend_object              std;
@@ -154,8 +163,10 @@ typedef struct _spl_dual_it_object {
 			long             preg_flags;
 			pcre_cache_entry *pce;
 			char             *regex;
+			uint             regex_len;
 		} regex;
 #endif
+		_spl_cbfilter_it_intern *cbfilter;
 	} u;
 } spl_dual_it_object;
 

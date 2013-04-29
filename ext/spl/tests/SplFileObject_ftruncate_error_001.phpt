@@ -12,6 +12,9 @@ class VariableStream {
     {
         return true;
     }
+
+    function url_stat() {
+    }
 }
 stream_wrapper_register("SPLtest", "VariableStream");
 $ftruncate_test = "";

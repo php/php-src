@@ -116,22 +116,27 @@ string(4) "http"
 
 Arg value 0.5 
 string(4) "http"
+Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
 NULL
+Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
 NULL
+Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
 NULL
+Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)
 NULL
+Error: 8 - Array to string conversion, %sparse_url_variation_002_64bit.php(%d)
 
 Arg value Array 
 Error: 2 - parse_url() expects parameter 2 to be long, array given, %s(71)

@@ -1,7 +1,6 @@
 --TEST--
 Bug #22414 (passthru() does not read data correctly)
 --INI--
-safe_mode=
 output_handler=
 --FILE--
 <?php

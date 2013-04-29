@@ -117,26 +117,31 @@ string(16) "1.07654321[Ee]-9"
 Arg value 0.5 
 Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 string(3) "0.5"
+Error: 8 - Array to string conversion, %ssql_regcase_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s(72)
 NULL
+Error: 8 - Array to string conversion, %ssql_regcase_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s(72)
 NULL
+Error: 8 - Array to string conversion, %ssql_regcase_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s(72)
 NULL
+Error: 8 - Array to string conversion, %ssql_regcase_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function sql_regcase() is deprecated, %s(72)
 Error: 2 - sql_regcase() expects parameter 1 to be string, array given, %s(72)
 NULL
+Error: 8 - Array to string conversion, %ssql_regcase_variation_001.php(%d)
 
 Arg value Array 
 Error: 8192 - Function sql_regcase() is deprecated, %s(72)

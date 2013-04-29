@@ -10,9 +10,6 @@ if (PHP_SNMP != "no") {
 			CHECK_LIB("libeay32.lib", "snmp", PHP_SNMP)
 			AC_DEFINE('HAVE_SNMP', 1);
 			AC_DEFINE("HAVE_NET_SNMP", 1);
-		} else if (CHECK_LIB("libsnmp.lib", "snmp", PHP_SNMP)) {
-			EXTENSION('snmp', 'snmp.c');
-			AC_DEFINE('HAVE_SNMP', 1);
 		} else {
 			WARNING("snmp not enabled; libraries and headers not found");
 		}

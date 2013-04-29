@@ -4,8 +4,9 @@ Test file_get_contents() function : variation - obscure filenames
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
 <?php
-if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip Do not run on Windows");
+if (substr(PHP_OS, 0, 3) == 'WIN') {
+    die('skip.. Not valid for Windows');
+}
 ?>
 --FILE--
 <?php
@@ -68,14 +69,16 @@ bool(false)
 Warning: file_get_contents( ): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 6 --
-bool(false)
+
+Warning: file_get_contents() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 -- Iteration 7 --
 
-Warning: file_get_contents() expects parameter 1 to be string, array given in %s on line %d
+Warning: file_get_contents() expects parameter 1 to be a valid path, array given in %s on line %d
 NULL
 -- Iteration 8 --
 
-Warning: file_get_contents(/no/such/file/dir): failed to open stream: %s in %s on line %d
+Warning: file_get_contents(/no/such/file/dir): failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 9 --
 

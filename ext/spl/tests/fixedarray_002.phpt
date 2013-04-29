@@ -1,7 +1,5 @@
 --TEST--
 SPL: FixedArray: overloading
---INI--
-allow_call_time_pass_reference=1
 --FILE--
 <?php
 class A extends SplFixedArray {

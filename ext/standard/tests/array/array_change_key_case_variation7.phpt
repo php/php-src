@@ -1,7 +1,5 @@
 --TEST--
 Test array_change_key_case() function : usage variations - referenced variables
---INI--
-allow_call_time_pass_reference=on
 --FILE--
 <?php
 /* Prototype  : array array_change_key_case(array $input [, int $case])
@@ -27,12 +25,6 @@ echo "Original:\n";
 var_dump($input);
 echo "Referenced:\n";
 var_dump($new_input);
-
-echo "\n-- \$input is an array passed by reference --\n";
-echo "Result:\n";
-var_dump(array_change_key_case(&$input, CASE_UPPER));
-echo "Original:\n";
-var_dump($input);
 
 echo "Done";
 ?>
@@ -60,26 +52,6 @@ array(3) {
   string(3) "xyz"
 }
 Referenced:
-array(3) {
-  ["one"]=>
-  int(1)
-  ["two"]=>
-  int(2)
-  ["ABC"]=>
-  string(3) "xyz"
-}
-
--- $input is an array passed by reference --
-Result:
-array(3) {
-  ["ONE"]=>
-  int(1)
-  ["TWO"]=>
-  int(2)
-  ["ABC"]=>
-  string(3) "xyz"
-}
-Original:
 array(3) {
   ["one"]=>
   int(1)

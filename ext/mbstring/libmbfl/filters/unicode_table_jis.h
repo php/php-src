@@ -27,10 +27,12 @@
 #ifndef UNICODE_TABLE_JIS_H
 #define UNICODE_TABLE_JIS_H
 
+#ifdef UNICODE_TABLE_JIS_DEF
+
 /*
  * Unicode table
  */
-static const unsigned short jisx0208_ucs_table[] = {
+const unsigned short jisx0208_ucs_table[] = {
  /* ku 1 */
  0x3000,0x3001,0x3002,0xFF0C,0xFF0E,0x30FB,0xFF1A,0xFF1B,
  0xFF1F,0xFF01,0x309B,0x309C,0x00B4,0xFF40,0x00A8,0xFF3E,
@@ -1197,9 +1199,9 @@ static const unsigned short jisx0208_ucs_table[] = {
  0x582F,0x69C7,0x9059,0x7464,0x51DC,0x7199
 };
 
-static const int jisx0208_ucs_table_size = (sizeof (jisx0208_ucs_table) / sizeof (unsigned short));
+const int jisx0208_ucs_table_size = (sizeof (jisx0208_ucs_table) / sizeof (unsigned short));
 
-static const unsigned short jisx0212_ucs_table[] = {
+const unsigned short jisx0212_ucs_table[] = {
  /* ku 1 */
  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
@@ -2276,9 +2278,9 @@ static const unsigned short jisx0212_ucs_table[] = {
  0x9FA2,0x9FA3,0x9FA5
 };
 
-static const int jisx0212_ucs_table_size = (sizeof (jisx0212_ucs_table) / sizeof (unsigned short));
+const int jisx0212_ucs_table_size = (sizeof (jisx0212_ucs_table) / sizeof (unsigned short));
 
-static const unsigned short ucs_a1_jis_table[] = {
+const unsigned short ucs_a1_jis_table[] = {
  /* 0000h */
  0x0000,0x0001,0x0002,0x0003,0x0004,0x0005,0x0006,0x0007,
  0x0008,0x0009,0x000A,0x000B,0x000C,0x000D,0x000E,0x000F,
@@ -2429,11 +2431,11 @@ static const unsigned short ucs_a1_jis_table[] = {
  0x0000,0x2757,0xA7F2,0xA7F3,0xA7F4,0xA7F5,0xA7F6,0xA7F7,
  0xA7F8,0xA7F9,0xA7FA,0xA7FB,0xA7FC,0x0000,0xA7FD,0xA7FE
 };
-static const int ucs_a1_jis_table_min = 0x0000;
-static const int ucs_a1_jis_table_max = 0x0000 + (sizeof (ucs_a1_jis_table) / sizeof (unsigned short));
+const int ucs_a1_jis_table_min = 0x0000;
+const int ucs_a1_jis_table_max = 0x0000 + (sizeof (ucs_a1_jis_table) / sizeof (unsigned short));
 
 
-static const unsigned short ucs_a2_jis_table[] = {
+const unsigned short ucs_a2_jis_table[] = {
  /* 2000h */
  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
@@ -3012,11 +3014,11 @@ static const unsigned short ucs_a2_jis_table[] = {
  0x2570,0x2571,0x2572,0x2573,0x2574,0x2575,0x2576,0x0000,
  0x0000,0x0000,0x0000,0x2126,0x213C,0x2133,0x2134,0x0000
 };
-static const int ucs_a2_jis_table_min = 0x2000;
-static const int ucs_a2_jis_table_max = 0x2000 + (sizeof (ucs_a2_jis_table) / sizeof (unsigned short));
+const int ucs_a2_jis_table_min = 0x2000;
+const int ucs_a2_jis_table_max = 0x2000 + (sizeof (ucs_a2_jis_table) / sizeof (unsigned short));
 
 
-static const unsigned short ucs_i_jis_table[] = {
+const unsigned short ucs_i_jis_table[] = {
  /* 4E00h */
  0x306C,0x437A,0xB0A1,0x3C37,0xB0A2,0xB0A3,0x0000,0x4B7C,
  0x3E66,0x3B30,0x3E65,0x323C,0xB0A4,0x4954,0x4D3F,0x0000,
@@ -5805,11 +5807,11 @@ static const unsigned short ucs_i_jis_table[] = {
  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000
 };
-static const int ucs_i_jis_table_min = 0x4E00;
-static const int ucs_i_jis_table_max = 0x4E00 + (sizeof (ucs_i_jis_table) / sizeof (unsigned short));
+const int ucs_i_jis_table_min = 0x4E00;
+const int ucs_i_jis_table_max = 0x4E00 + (sizeof (ucs_i_jis_table) / sizeof (unsigned short));
 
 
-static const unsigned short ucs_r_jis_table[] = {
+const unsigned short ucs_r_jis_table[] = {
  /* FF00h */
  0x0000,0x212A,0x0000,0x2174,0x2170,0x2173,0x2175,0x0000,
  0x214A,0x214B,0x2176,0x215C,0x2124,0x0000,0x2125,0x213F,
@@ -5818,7 +5820,7 @@ static const unsigned short ucs_r_jis_table[] = {
  0x2177,0x2341,0x2342,0x2343,0x2344,0x2345,0x2346,0x2347,
  0x2348,0x2349,0x234A,0x234B,0x234C,0x234D,0x234E,0x234F,
  0x2350,0x2351,0x2352,0x2353,0x2354,0x2355,0x2356,0x2357,
- 0x2358,0x2359,0x235A,0x214E,0x2140,0x214F,0x2130,0x2132,
+ 0x2358,0x2359,0x235A,0x214E,0x0000,0x214F,0x2130,0x2132,
  0x212E,0x2361,0x2362,0x2363,0x2364,0x2365,0x2366,0x2367,
  0x2368,0x2369,0x236A,0x236B,0x236C,0x236D,0x236E,0x236F,
  0x2370,0x2371,0x2372,0x2373,0x2374,0x2375,0x2376,0x2377,
@@ -5841,7 +5843,30 @@ static const unsigned short ucs_r_jis_table[] = {
  0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,
  0x0000,0x0000,0x0000,0x2131,0x0000,0x216F
 };
-static const int ucs_r_jis_table_min = 0xFF00;
-static const int ucs_r_jis_table_max = 0xFF00 + (sizeof (ucs_r_jis_table) / sizeof (unsigned short));
+int ucs_r_jis_table_min = 0xFF00;
+int ucs_r_jis_table_max = 0xFF00 + (sizeof (ucs_r_jis_table) / sizeof (unsigned short));
+
+#else
+
+extern const unsigned short jisx0208_ucs_table[];
+extern const unsigned short jisx0212_ucs_table[];
+extern const unsigned short ucs_a1_jis_table[];
+extern const unsigned short ucs_a2_jis_table[];
+extern const unsigned short ucs_i_jis_table[];
+extern const unsigned short ucs_r_jis_table[];
+
+extern const int jisx0208_ucs_table_size;
+extern const int jisx0212_ucs_table_size;
+extern const int ucs_a1_jis_table_min;
+extern const int ucs_a1_jis_table_max;
+extern const int ucs_a2_jis_table_min;
+extern const int ucs_a2_jis_table_max;
+extern const int ucs_i_jis_table_min;
+extern const int ucs_i_jis_table_max;
+extern int ucs_r_jis_table_min;
+extern int ucs_r_jis_table_max;
+
+#endif
+
 
 #endif /* UNICODE_TABLE_JIS_H */

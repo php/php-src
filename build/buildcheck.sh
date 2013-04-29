@@ -28,37 +28,22 @@ if test -z "$PHP_AUTOCONF"; then
   PHP_AUTOCONF='autoconf'
 fi
 
-# autoconf 2.13 or newer
+# autoconf 2.59 or newer
 ac_version=`$PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$ac_version"; then
 echo "buildconf: autoconf not found."
-echo "           You need autoconf version 2.13 or newer installed"
+echo "           You need autoconf version 2.59 or newer installed"
 echo "           to build PHP from SVN."
 exit 1
 fi
 IFS=.; set $ac_version; IFS=' '
-if test "$1" = "2" -a "$2" -lt "13" || test "$1" -lt "2"; then
+if test "$1" = "2" -a "$2" -lt "59" || test "$1" -lt "2"; then
 echo "buildconf: autoconf version $ac_version found."
-echo "           You need autoconf version 2.13 or newer installed"
+echo "           You need autoconf version 2.59 or newer installed"
 echo "           to build PHP from SVN."
 exit 1
-fi
-
-if test "$1" = "2" -a "$2" -gt "59"; then
-  echo "buildconf: You need autoconf 2.59 or lower to build this version of PHP."
-  echo "           You are currently trying to use $ac_version"
-  echo "           Most distros have separate autoconf 2.13 or 2.59 packages."
-  echo "           On Debian/Ubuntu both autoconf2.13 and autoconf2.59 packages exist."
-  echo "           Install autoconf2.13 and set the PHP_AUTOCONF env var to "
-  echo "           autoconf2.13 and try again."
-  exit 1
 else
-  echo "buildconf: autoconf version $ac_version (ok)"
-fi
-
-if test "$1" = "2" -a "$2" -ge "50"; then
-  ./vcsclean
-  stamp=
+echo "buildconf: autoconf version $ac_version (ok)"
 fi
 
 test -n "$stamp" && touch $stamp

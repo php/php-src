@@ -1,8 +1,8 @@
 --TEST--
 Cookies test#2
 --INI--
-magic_quotes_gpc=0
 max_input_vars=1000
+filter.default=unsafe_raw
 --COOKIE--
 c o o k i e=value; c o o k i e= v a l u e ;;c%20o+o k+i%20e=v;name="value","value",UEhQIQ==;UEhQIQ==foo
 --FILE--

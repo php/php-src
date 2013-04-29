@@ -67,6 +67,8 @@ print "done!\n";
 require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
 Warning: mysql_data_seek(): Offset 4 is invalid for MySQL result index %d (or the query data is unbuffered) in %s on line %d
 
 Warning: mysql_data_seek(): Offset -1 is invalid for MySQL result index %d (or the query data is unbuffered) in %s on line %d

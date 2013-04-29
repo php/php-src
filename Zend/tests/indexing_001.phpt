@@ -71,6 +71,8 @@ array(1) {
   }
 }
 
+Warning: Illegal string offset 'foo' in %s on line %d
+
 Notice: Array to string conversion in %s on line %d
 string(1) "A"
 

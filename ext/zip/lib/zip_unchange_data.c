@@ -43,8 +43,7 @@ void
 _zip_unchange_data(struct zip_entry *ze)
 {
     if (ze->source) {
-	(void)ze->source->f(ze->source->ud, NULL, 0, ZIP_SOURCE_FREE);
-	free(ze->source);
+	zip_source_free(ze->source);
 	ze->source = NULL;
     }
     

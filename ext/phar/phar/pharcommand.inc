@@ -91,7 +91,7 @@ class PharCommand extends CLICommand
 			'h' => array(
 				'typ' => 'select',
 				'val' => NULL,
-				'inf' => '<method> Selects the hash algorithmn.',
+				'inf' => '<method> Selects the hash algorithm.',
 				'select' => array('md5' => 'MD5','sha1' => 'SHA1')
 			),
 			'i' => array(
@@ -107,7 +107,7 @@ class PharCommand extends CLICommand
 			'l' => array(
 				'typ' => 'int',
 				'val' => 0,
-				'inf' => '<level>  Number of preceeding subdirectories to strip from file entries',
+				'inf' => '<level>  Number of preceding subdirectories to strip from file entries',
 			),
 			'm' => array(
 				'typ' => 'any',
@@ -461,7 +461,7 @@ class PharCommand extends CLICommand
 			'typ'     => 'any',
 			'val'      => NULL,
 			'required' => 1,
-			'inf'      => '         Any number of input files and directories. If -i is in use then ONLY files and matching thegiven regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.',
+			'inf'      => '         Any number of input files and directories. If -i is in use then ONLY files and matching the given regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.',
 		);
 
 		return $args;
@@ -981,7 +981,7 @@ class PharCommand extends CLICommand
 			'type'     => 'any',
 			'val'      => NULL,
 			'required' => 1,
-			'inf'      => '         Any number of input files and directories. If -i is in use then ONLY files and matching thegiven regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.',
+			'inf'      => '         Any number of input files and directories. If -i is in use then ONLY files and matching the given regular expression are being packed. If -x is given then files matching that regular expression are NOT being packed.',
 		);
 		return $args;
 	}

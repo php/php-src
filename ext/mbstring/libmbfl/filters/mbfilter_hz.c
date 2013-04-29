@@ -44,7 +44,7 @@ const mbfl_encoding mbfl_encoding_hz = {
 	"HZ-GB-2312",
 	NULL,
 	NULL,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_SHFTCODE | MBFL_ENCTYPE_GL_UNSAFE
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_hz = {
@@ -165,7 +165,15 @@ mbfl_filt_conv_wchar_hz(int c, mbfl_convert_filter *filter)
 	} else if (c >= ucs_i_cp936_table_min && c < ucs_i_cp936_table_max) {
 		s = ucs_i_cp936_table[c - ucs_i_cp936_table_min];
 	} else if (c >= ucs_hff_cp936_table_min && c < ucs_hff_cp936_table_max) {
-		s = ucs_hff_cp936_table[c - ucs_hff_cp936_table_min];
+		if (c == 0xff04) {
+			s = 0xa1e7;
+		} else if (c == 0xff5e) {
+			s = 0xa1ab; 
+		} else if (c >= 0xff01 && c <= 0xff5d) {
+			s = c - 0xff01 + 0xa3a1;
+		} else if (c >= 0xffe0 && c <= 0xffe5) {
+			s = ucs_hff_s_cp936_table[c-0xffe0];
+		}
 	}
 	if (s & 0x8000) {
 		s -= 0x8080;

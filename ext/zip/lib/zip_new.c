@@ -65,6 +65,7 @@ _zip_new(struct zip_error *error)
     za->nfile = za->nfile_alloc = 0;
     za->file = NULL;
     za->flags = za->ch_flags = 0;
+    za->default_password = NULL;
     
     return za;
 }

@@ -15,4 +15,3 @@ echo "ok\n";
 ?>
 --EXPECTF--
 ok
-

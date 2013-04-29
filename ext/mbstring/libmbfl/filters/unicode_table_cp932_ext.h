@@ -25,7 +25,9 @@
 #ifndef UNICODE_TABLE_CP932_EXT_H
 #define UNICODE_TABLE_CP932_EXT_H
 
-static const unsigned short cp932ext1_ucs_table[] = {
+#ifdef UNICODE_TABLE_CP932_DEF
+
+const unsigned short cp932ext1_ucs_table[] = {
  /* ku 13 */
  0x2460,0x2461,0x2462,0x2463,0x2464,0x2465,0x2466,0x2467,
  0x2468,0x2469,0x246A,0x246B,0x246C,0x246D,0x246E,0x246F,
@@ -40,10 +42,10 @@ static const unsigned short cp932ext1_ucs_table[] = {
  0x2261,0x222B,0x222E,0x2211,0x221A,0x22A5,0x2220,0x221F,
  0x22BF,0x2235,0x2229,0x222A,0x0000,0x0000
 };
-static const int cp932ext1_ucs_table_min = (13 - 1)*94;
-static const int cp932ext1_ucs_table_max = (13 - 1)*94 + (sizeof (cp932ext1_ucs_table) / sizeof (unsigned short));
+const int cp932ext1_ucs_table_min = (13 - 1)*94;
+const int cp932ext1_ucs_table_max = (13 - 1)*94 + (sizeof (cp932ext1_ucs_table) / sizeof (unsigned short));
 
-static const unsigned short cp932ext2_ucs_table[] = {
+const unsigned short cp932ext2_ucs_table[] = {
  /* ku 89 */
  0x7E8A,0x891C,0x9348,0x9288,0x84DC,0x4FC9,0x70BB,0x6631,
  0x68C8,0x92F9,0x66FB,0x5F45,0x4E28,0x4EE1,0x4EFC,0x4F00,
@@ -100,10 +102,10 @@ static const unsigned short cp932ext2_ucs_table[] = {
  0x2170,0x2171,0x2172,0x2173,0x2174,0x2175,0x2176,0x2177,
  0x2178,0x2179,0xFFE2,0xFFE4,0xFF07,0xFF02
 };
-static const int cp932ext2_ucs_table_min = (89 - 1)*94;
-static const int cp932ext2_ucs_table_max = (89 - 1)*94 + (sizeof (cp932ext2_ucs_table) / sizeof (unsigned short));
+const int cp932ext2_ucs_table_min = (89 - 1)*94;
+const int cp932ext2_ucs_table_max = (89 - 1)*94 + (sizeof (cp932ext2_ucs_table) / sizeof (unsigned short));
 
-static const unsigned short cp932ext3_ucs_table[] = {
+const unsigned short cp932ext3_ucs_table[] = {
  /* ku 115 */
  0x2170,0x2171,0x2172,0x2173,0x2174,0x2175,0x2176,0x2177,
  0x2178,0x2179,0x2160,0x2161,0x2162,0x2163,0x2164,0x2165,
@@ -164,7 +166,22 @@ static const unsigned short cp932ext3_ucs_table[] = {
  0x9ADC,0x9B75,0x9B72,0x9B8F,0x9BB1,0x9BBB,0x9C00,0x9D70,
  0x9D6B,0xFA2D,0x9E19,0x9ED1
 };
-static const int cp932ext3_ucs_table_min = (115 - 1)*94;
-static const int cp932ext3_ucs_table_max = (115 - 1)*94 + (sizeof (cp932ext3_ucs_table) / sizeof (unsigned short));
+const int cp932ext3_ucs_table_min = (115 - 1)*94;
+const int cp932ext3_ucs_table_max = (115 - 1)*94 + (sizeof (cp932ext3_ucs_table) / sizeof (unsigned short));
+
+#else
+
+extern const unsigned short cp932ext1_ucs_table[];
+extern const unsigned short cp932ext2_ucs_table[];
+extern const unsigned short cp932ext3_ucs_table[];
+
+extern const int cp932ext1_ucs_table_min;
+extern const int cp932ext1_ucs_table_max;
+extern const int cp932ext2_ucs_table_min;
+extern const int cp932ext2_ucs_table_max;
+extern const int cp932ext3_ucs_table_min;
+extern const int cp932ext3_ucs_table_max;
+
+#endif
 
 #endif /* UNICODE_TABLE_CP932_EXT_H */

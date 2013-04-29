@@ -103,10 +103,10 @@ bool(true)
 array(3) {
   [45]=>
   int(45)
-  [10]=>
-  int(10)
   [2]=>
   int(2)
+  [10]=>
+  int(10)
 }
 -- Iteration 3 --
 bool(true)

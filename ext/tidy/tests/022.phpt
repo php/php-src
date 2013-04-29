@@ -38,5 +38,5 @@ Warning: tidy_repair_file(): Filename cannot be empty in %s on line %d
 
 Warning: tidy_repair_file(): Filename cannot be empty in %s on line %d
 
-Warning: tidy_repair_file() expects parameter 1 to be string, array given in %s on line %d
+Warning: tidy_repair_file() expects parameter 1 to be a valid path, array given in %s on line %d
 Done

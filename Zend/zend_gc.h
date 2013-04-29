@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,7 +84,7 @@ typedef struct _gc_root_buffer {
 	zend_object_handle        handle;	/* must be 0 for zval               */
 	union {
 		zval                 *pz;
-		zend_object_handlers *handlers;
+		const zend_object_handlers *handlers;
 	} u;
 } gc_root_buffer;
 

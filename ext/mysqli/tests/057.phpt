@@ -35,8 +35,8 @@ require_once('skipifconnectfailure.inc');
 	var_dump(mysqli_stmt_reset($stmt));
 
 	var_dump($stmt = mysqli_prepare($link, "SELECT * FROM test_store_result"));
-	if ($IS_MYSQLND && $stmt->affected_rows !== -1)
-			printf("[001] Expecting -1, got %d\n", $stmt->affected_rows);
+	if ($stmt->affected_rows !== 0)
+			printf("[001] Expecting 0, got %d\n", $stmt->affected_rows);
 
 	var_dump(mysqli_stmt_execute($stmt));
 	var_dump($stmt = @mysqli_prepare($link, "SELECT * FROM test_store_result"), mysqli_error($link));
@@ -91,6 +91,9 @@ object(mysqli_stmt)#%d (%d) {
   int(0)
   [%u|b%"error"]=>
   %unicode|string%(0) ""
+  [%u|b%"error_list"]=>
+  array(0) {
+  }
   [%u|b%"sqlstate"]=>
   %unicode|string%(5) "00000"
   [%u|b%"id"]=>

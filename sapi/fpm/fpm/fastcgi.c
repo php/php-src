@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2009 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -399,7 +399,7 @@ static inline int fcgi_param_get_eff_len( unsigned char *p, unsigned char *end, 
 {
 	int ret = 1;
 	int zero_found = 0;
-        *eff_len = 0;
+	*eff_len = 0;
 	for (; p != end; ++p) {
 		if (*p == '\0') {
 			zero_found = 1;
@@ -427,7 +427,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 	char *tmp = buf;
 	size_t buf_size = sizeof(buf);
 	int name_len, val_len;
-	uint eff_name_len, eff_val_len;
+	uint eff_name_len;
 	char *s;
 	int ret = 1;
 	size_t bytes_consumed;
@@ -453,8 +453,12 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 			ret = 0;
 			break;
 		}
-		if (!fcgi_param_get_eff_len(p, p+name_len, &eff_name_len) ||
-		    !fcgi_param_get_eff_len(p+name_len, p+name_len+val_len, &eff_val_len)) {
+
+		/*
+		 * get the effective length of the name in case it's not a valid string
+		 * don't do this on the value because it can be binary data
+		 */
+		if (!fcgi_param_get_eff_len(p, p+name_len, &eff_name_len)){
 			/* Malicious request */
 			ret = 0;
 			break;
@@ -473,7 +477,7 @@ static int fcgi_get_params(fcgi_request *req, unsigned char *p, unsigned char *e
 		}
 		memcpy(tmp, p, eff_name_len);
 		tmp[eff_name_len] = 0;
-		s = estrndup((char*)p + name_len, eff_val_len);
+		s = estrndup((char*)p + name_len, val_len);
 		if (s == NULL) {
 			ret = 0;
 			break;

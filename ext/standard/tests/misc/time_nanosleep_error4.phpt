@@ -14,4 +14,4 @@ $nano = time_nanosleep(0, -10);
 
 ?>
 --EXPECTF--
-Warning: time_nanosleep(): nanoseconds was not in the range 0 to 999 999 999 or seconds was negative in %s.php on line %d
+Warning: time_nanosleep(): The nanoseconds value must be greater than 0 in %stime_nanosleep_error4.php on line %d

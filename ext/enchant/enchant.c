@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -124,7 +124,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in enchant_functions[].
  */
-function_entry enchant_functions[] = {
+zend_function_entry enchant_functions[] = {
 	PHP_FE(enchant_broker_init, 			arginfo_enchant_broker_init)
 	PHP_FE(enchant_broker_free, 			arginfo_enchant_broker_free)
 	PHP_FE(enchant_broker_get_error, 		arginfo_enchant_broker_free)
@@ -244,8 +244,8 @@ static void php_enchant_broker_free(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{
 			if (broker->pbroker) {
 				if (broker->dictcnt && broker->dict) {
 					if (broker->dict) {
-						int total, tofree;
-						tofree = total = broker->dictcnt-1;
+						int total;
+						total = broker->dictcnt-1;
 						do {
 							zend_list_delete(broker->dict[total]->rsrc_id);
 							efree(broker->dict[total]);
@@ -357,8 +357,8 @@ PHP_FUNCTION(enchant_broker_init)
 	enchant_broker *broker;
 	EnchantBroker *pbroker;
 
-	if (ZEND_NUM_ARGS()) {
-		ZEND_WRONG_PARAM_COUNT();
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
 	}
 
 	pbroker = enchant_broker_init();
@@ -542,6 +542,11 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	}
 
 	PHP_ENCHANT_GET_BROKER;
+	
+	if (taglen == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tag cannot be empty");
+		RETURN_FALSE;
+	}
 
 	d = enchant_broker_request_dict(pbroker->pbroker, (const char *)tag);
 	if (d) {
@@ -586,11 +591,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 	int pwllen;
 	int pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &broker, &pwl, &pwllen) == FAILURE) {
-		RETURN_FALSE;
-	}
-
-	if (strlen(pwl) != pwllen) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rp", &broker, &pwl, &pwllen) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -729,6 +730,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 
 	if (sugg) {
 		zval_dtor(sugg);
+		array_init(sugg);
 	}
 
 	PHP_ENCHANT_GET_DICT;
@@ -741,8 +743,6 @@ PHP_FUNCTION(enchant_dict_quick_check)
 		if (!sugg && ZEND_NUM_ARGS() == 2) {
 			RETURN_FALSE;
 		}
-
-		array_init(sugg);
 
 		suggs = enchant_dict_suggest(pdict->pdict, word, wordlen, &n_sugg_st);
 		memcpy(&n_sugg, &n_sugg_st, sizeof(n_sugg));

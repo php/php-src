@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -69,12 +69,12 @@ PHP_FUNCTION(getopt);
 PHP_FUNCTION(get_current_user);
 PHP_FUNCTION(set_time_limit);
 
+PHP_FUNCTION(header_register_callback);
+
 PHP_FUNCTION(get_cfg_var);
 PHP_FUNCTION(set_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_runtime);
 PHP_FUNCTION(get_magic_quotes_gpc);
-
-PHP_FUNCTION(import_request_variables);
 
 PHP_FUNCTION(error_log);
 PHP_FUNCTION(error_get_last);
@@ -178,9 +178,6 @@ typedef struct _php_basic_globals {
 	zend_llist *user_tick_functions;
 
 	zval *active_ini_file_section;
-
-	HashTable sm_protected_env_vars;
-	char *sm_allowed_env_vars;
 	
 	/* pageinfo.c */
 	long page_uid;
@@ -203,11 +200,19 @@ typedef struct _php_basic_globals {
 	zend_bool mt_rand_is_seeded; /* Whether mt_rand() has been seeded */
     
 	/* syslog.c */
-	int syslog_started;
 	char *syslog_device;
 
 	/* var.c */
 	zend_class_entry *incomplete_class;
+	unsigned serialize_lock; /* whether to use the locally supplied var_hash instead (__sleep/__wakeup) */
+	struct {
+		void *var_hash;
+		unsigned level;
+	} serialize;
+	struct {
+		void *var_hash;
+		unsigned level;
+	} unserialize;
 
 	/* url_scanner_ex.re */
 	url_adapt_state_ex_t url_adapt_state_ex;
@@ -244,12 +249,16 @@ typedef struct {
 } putenv_entry;
 #endif
 
-/* Values are comma-delimited
- */
-#define SAFE_MODE_PROTECTED_ENV_VARS	"LD_LIBRARY_PATH"
-#define SAFE_MODE_ALLOWED_ENV_VARS		"PHP_"
-
 PHPAPI double php_get_nan(void);
 PHPAPI double php_get_inf(void);
+
+typedef struct _php_shutdown_function_entry {
+	zval **arguments;
+	int arg_count;
+} php_shutdown_function_entry;
+
+PHPAPI extern zend_bool register_user_shutdown_function(char *function_name, size_t function_len, php_shutdown_function_entry *shutdown_function_entry TSRMLS_DC);
+PHPAPI extern zend_bool remove_user_shutdown_function(char *function_name, size_t function_len TSRMLS_DC);
+PHPAPI extern zend_bool append_user_shutdown_function(php_shutdown_function_entry shutdown_function_entry TSRMLS_DC);
 
 #endif /* BASIC_FUNCTIONS_H */

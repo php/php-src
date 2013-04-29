@@ -1,6 +1,6 @@
 /*
   zip_set_archive_comment.c -- set archive comment
-  Copyright (C) 2006-2007 Dieter Baron and Thomas Klausner
+  Copyright (C) 2006-2009 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -47,6 +47,11 @@ zip_set_archive_comment(struct zip *za, const char *comment, int len)
     if (len < 0 || len > MAXCOMLEN
 	|| (len > 0 && comment == NULL)) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return -1;
+    }
+
+    if (ZIP_IS_RDONLY(za)) {
+	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
 	return -1;
     }
 

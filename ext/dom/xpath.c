@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -164,7 +164,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 								node->parent = nsparent;
 								node->ns = curns;
 							}
-							child = php_dom_create_object(node, &ret, NULL, child, (dom_object *)intern TSRMLS_CC);
+							child = php_dom_create_object(node, &ret, child, (dom_object *)intern TSRMLS_CC);
 							add_next_index_zval(args[i], child);
 						}
 					}
@@ -216,7 +216,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 			if (Z_TYPE(handler) == IS_STRING) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to call handler %s()", Z_STRVAL_P(&handler));
 			}
-		/* retval is == NULL, when an exception occured, don't report anything, because PHP itself will handle that */
+		/* retval is == NULL, when an exception occurred, don't report anything, because PHP itself will handle that */
 		} else if (retval == NULL) {
 		} else {
 			if (retval->type == IS_OBJECT && instanceof_function( Z_OBJCE_P(retval), dom_node_class_entry TSRMLS_CC)) {
@@ -321,6 +321,7 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 	xmlDoc *docp = NULL;
 	xmlXPathContextPtr ctx;
 	int ret;
+	zval *tmp;
 
 	ctx = (xmlXPathContextPtr) obj->ptr;
 
@@ -329,9 +330,15 @@ int dom_xpath_document_read(dom_object *obj, zval **retval TSRMLS_DC)
 	}
 
 	ALLOC_ZVAL(*retval);
-	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) docp, &ret, NULL, *retval, obj TSRMLS_CC))) {
+	tmp = *retval;
+
+	if (NULL == (*retval = php_dom_create_object((xmlNodePtr) docp, &ret, *retval, obj TSRMLS_CC))) {
+		FREE_ZVAL(tmp);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot create required DOM object");
 		return FAILURE;
+	}
+	if (tmp != *retval) {
+		FREE_ZVAL(tmp);
 	}
 	return SUCCESS;
 }
@@ -492,7 +499,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 						node->parent = nsparent;
 						node->ns = curns;
 					}
-					child = php_dom_create_object(node, &ret, NULL, child, (dom_object *)intern TSRMLS_CC);
+					child = php_dom_create_object(node, &ret, child, (dom_object *)intern TSRMLS_CC);
 					add_next_index_zval(retval, child);
 				}
 			}

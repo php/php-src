@@ -91,7 +91,7 @@ $values = array(
 // loop through each element of the array for encoding
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo @"\nArg value $value \n";
       $res = xml_parser_create_ns($value); 
       var_dump($res);
       if ($res !== false) {

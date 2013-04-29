@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,7 +48,7 @@ static void php_dba_db4_errcall_fcn(
 /* Bug 51086, Berkeley DB 4.8.26 */
 /* This code suppresses a BDB 4.8+ error message, thus keeping PHP test compatibility */
 	{
-		char *function = get_active_function_name(TSRMLS_C);
+		const char *function = get_active_function_name(TSRMLS_C);
 		if (function && (!strcmp(function,"dba_popen") || !strcmp(function,"dba_open"))
 			&& (!strncmp(msg, "fop_read_meta", sizeof("fop_read_meta")-1)
 				|| !strncmp(msg, "BDB0004 fop_read_meta", sizeof("BDB0004 fop_read_meta")-1))) {

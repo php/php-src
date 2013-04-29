@@ -10,7 +10,7 @@ $a['z'] = '';
 $a[''] = '';
 
 foreach ($a as $key => $value) {
- echo $key . ': ' . (is_null($value) ? 'null' : $value) . 
+ echo $key . ': ' . (is_null($value) ? 'null' : @"$value") .
     ' array_key_exists: ' . (array_key_exists($key, $a) ? 'true' : 'false') . 
     ' property_exists: ' . (property_exists($o, $key) ? 'true' : 'false'),"\n";
 }

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -201,9 +201,13 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 			STR_FREE(ret->scheme);
 			efree(ret);
 			return NULL;
+		} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+			s += 2;
 		} else {
 			goto just_path;
 		}
+	} else if (*s == '/' && *(s+1) == '/') { /* relative-scheme URL */
+		s += 2;
 	} else {
 		just_path:
 		ue = s + length;
@@ -220,14 +224,14 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 
 		if (query && fragment) {
 			if (query > fragment) {
-				p = e = fragment;
+				e = fragment;
 			} else {
-				p = e = query;
+				e = query;
 			}
 		} else if (query) {
-			p = e = query;
+			e = query;
 		} else if (fragment) {
-			p = e = fragment;
+			e = fragment;
 		}
 	} else {
 		e = p;
@@ -706,7 +710,7 @@ PHP_FUNCTION(get_headers)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &url, &url_len, &format) == FAILURE) {
 		return;
 	}
-	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc());
+	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc(TSRMLS_C));
 
 	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
 		RETURN_FALSE;

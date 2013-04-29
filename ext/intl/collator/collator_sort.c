@@ -78,6 +78,7 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 			intl_errors_set_custom_msg( COLLATOR_ERROR_P( co ),
 				"Object not initialized", 0 TSRMLS_CC );
 			php_error_docref(NULL TSRMLS_CC, E_RECOVERABLE_ERROR, "Object not initialized");
+
 		}
 
 		/* Compare the strings using ICU. */
@@ -594,6 +595,8 @@ PHP_FUNCTION( collator_get_sort_key )
 		RETURN_FALSE;
 	}
 
+	/* ucol_getSortKey is exception in that the key length includes the 
+	 * NUL terminator*/
 	key_len = ucol_getSortKey(co->ucoll, ustr, ustr_len, key, 0);
 	if(!key_len) {
 		efree( ustr );
@@ -605,7 +608,7 @@ PHP_FUNCTION( collator_get_sort_key )
 	if(!key_len) {
 		RETURN_FALSE;
 	}
-	RETURN_STRINGL((char *)key, key_len, 0);
+	RETURN_STRINGL((char *)key, key_len - 1, 0);
 }
 /* }}} */
 

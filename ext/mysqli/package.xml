@@ -43,7 +43,6 @@ package.xml added to support installation using pear installer
    <file role="src" name="mysqli_prop.c"/>
    <file role="src" name="mysqli_repl.c"/>
    <file role="src" name="mysqli_report.c"/>
-   <file role="src" name="mysqli_report.h"/>
    <file role="src" name="php_mysqli.h"/>
    <file role="doc" name="CREDITS"/>
    <file role="test" name="tests/001.phpt"/>

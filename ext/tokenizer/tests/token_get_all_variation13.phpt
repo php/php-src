@@ -1,5 +1,7 @@
 --TEST--
 Test token_get_all() function : usage variations - with class/object constructs
+--SKIPIF--
+<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
@@ -59,7 +61,7 @@ array(145) {
   [0]=>
   array(3) {
     [0]=>
-    int(368)
+    int(%d)
     [1]=>
     string(6) "<?php
 "
@@ -69,7 +71,7 @@ array(145) {
   [1]=>
   array(3) {
     [0]=>
-    int(354)
+    int(%d)
     [1]=>
     string(9) "interface"
     [2]=>
@@ -78,7 +80,7 @@ array(145) {
   [2]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -87,7 +89,7 @@ array(145) {
   [3]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(11) "MyInterface"
     [2]=>
@@ -96,7 +98,7 @@ array(145) {
   [4]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -108,17 +110,17 @@ array(145) {
   [6]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
     [2]=>
-    int(3)
+    int(%d)
   }
   [7]=>
   array(3) {
     [0]=>
-    int(342)
+    int(%d)
     [1]=>
     string(6) "public"
     [2]=>
@@ -127,7 +129,7 @@ array(145) {
   [8]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -136,7 +138,7 @@ array(145) {
   [9]=>
   array(3) {
     [0]=>
-    int(335)
+    int(%d)
     [1]=>
     string(5) "const"
     [2]=>
@@ -145,7 +147,7 @@ array(145) {
   [10]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -154,7 +156,7 @@ array(145) {
   [11]=>
   array(3) {
     [0]=>
-    int(348)
+    int(%d)
     [1]=>
     string(3) "var"
     [2]=>
@@ -163,7 +165,7 @@ array(145) {
   [12]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -172,7 +174,7 @@ array(145) {
   [13]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(4) "$var"
     [2]=>
@@ -181,7 +183,7 @@ array(145) {
   [14]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -192,7 +194,7 @@ array(145) {
   [16]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -201,7 +203,7 @@ array(145) {
   [17]=>
   array(3) {
     [0]=>
-    int(305)
+    int(%d)
     [1]=>
     string(2) "10"
     [2]=>
@@ -212,7 +214,7 @@ array(145) {
   [19]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -224,7 +226,7 @@ array(145) {
   [21]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -234,7 +236,7 @@ array(145) {
   [22]=>
   array(3) {
     [0]=>
-    int(346)
+    int(%d)
     [1]=>
     string(8) "abstract"
     [2]=>
@@ -243,7 +245,7 @@ array(145) {
   [23]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -252,7 +254,7 @@ array(145) {
   [24]=>
   array(3) {
     [0]=>
-    int(353)
+    int(%d)
     [1]=>
     string(5) "class"
     [2]=>
@@ -261,7 +263,7 @@ array(145) {
   [25]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -270,7 +272,7 @@ array(145) {
   [26]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(7) "MyClass"
     [2]=>
@@ -279,7 +281,7 @@ array(145) {
   [27]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -291,7 +293,7 @@ array(145) {
   [29]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
@@ -301,7 +303,7 @@ array(145) {
   [30]=>
   array(3) {
     [0]=>
-    int(344)
+    int(%d)
     [1]=>
     string(7) "private"
     [2]=>
@@ -310,7 +312,7 @@ array(145) {
   [31]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -319,7 +321,7 @@ array(145) {
   [32]=>
   array(3) {
     [0]=>
-    int(348)
+    int(%d)
     [1]=>
     string(3) "var"
     [2]=>
@@ -328,7 +330,7 @@ array(145) {
   [33]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -337,7 +339,7 @@ array(145) {
   [34]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -348,7 +350,7 @@ array(145) {
   [36]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
@@ -358,7 +360,7 @@ array(145) {
   [37]=>
   array(3) {
     [0]=>
-    int(342)
+    int(%d)
     [1]=>
     string(6) "public"
     [2]=>
@@ -367,7 +369,7 @@ array(145) {
   [38]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -376,7 +378,7 @@ array(145) {
   [39]=>
   array(3) {
     [0]=>
-    int(348)
+    int(%d)
     [1]=>
     string(3) "var"
     [2]=>
@@ -385,7 +387,7 @@ array(145) {
   [40]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -394,7 +396,7 @@ array(145) {
   [41]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$b"
     [2]=>
@@ -405,7 +407,7 @@ array(145) {
   [43]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
@@ -415,7 +417,7 @@ array(145) {
   [44]=>
   array(3) {
     [0]=>
-    int(343)
+    int(%d)
     [1]=>
     string(9) "protected"
     [2]=>
@@ -424,7 +426,7 @@ array(145) {
   [45]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -433,7 +435,7 @@ array(145) {
   [46]=>
   array(3) {
     [0]=>
-    int(348)
+    int(%d)
     [1]=>
     string(3) "var"
     [2]=>
@@ -442,7 +444,7 @@ array(145) {
   [47]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -451,7 +453,7 @@ array(145) {
   [48]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$c"
     [2]=>
@@ -462,7 +464,7 @@ array(145) {
   [50]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
@@ -472,7 +474,7 @@ array(145) {
   [51]=>
   array(3) {
     [0]=>
-    int(347)
+    int(%d)
     [1]=>
     string(6) "static"
     [2]=>
@@ -481,7 +483,7 @@ array(145) {
   [52]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -490,7 +492,7 @@ array(145) {
   [53]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$d"
     [2]=>
@@ -501,7 +503,7 @@ array(145) {
   [55]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
@@ -511,7 +513,7 @@ array(145) {
   [56]=>
   array(3) {
     [0]=>
-    int(345)
+    int(%d)
     [1]=>
     string(5) "final"
     [2]=>
@@ -520,7 +522,7 @@ array(145) {
   [57]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -529,7 +531,7 @@ array(145) {
   [58]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$e"
     [2]=>
@@ -538,7 +540,7 @@ array(145) {
   [59]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -549,7 +551,7 @@ array(145) {
   [61]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -558,7 +560,7 @@ array(145) {
   [62]=>
   array(3) {
     [0]=>
-    int(305)
+    int(%d)
     [1]=>
     string(2) "10"
     [2]=>
@@ -569,7 +571,7 @@ array(145) {
   [64]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(6) "
   
@@ -580,7 +582,7 @@ array(145) {
   [65]=>
   array(3) {
     [0]=>
-    int(346)
+    int(%d)
     [1]=>
     string(8) "abstract"
     [2]=>
@@ -589,7 +591,7 @@ array(145) {
   [66]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -598,7 +600,7 @@ array(145) {
   [67]=>
   array(3) {
     [0]=>
-    int(342)
+    int(%d)
     [1]=>
     string(6) "public"
     [2]=>
@@ -607,7 +609,7 @@ array(145) {
   [68]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -616,7 +618,7 @@ array(145) {
   [69]=>
   array(3) {
     [0]=>
-    int(334)
+    int(%d)
     [1]=>
     string(8) "function"
     [2]=>
@@ -625,7 +627,7 @@ array(145) {
   [70]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -634,7 +636,7 @@ array(145) {
   [71]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(10) "myFunction"
     [2]=>
@@ -645,7 +647,7 @@ array(145) {
   [73]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -658,7 +660,7 @@ array(145) {
   [76]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -670,7 +672,7 @@ array(145) {
   [78]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -680,7 +682,7 @@ array(145) {
   [79]=>
   array(3) {
     [0]=>
-    int(353)
+    int(%d)
     [1]=>
     string(5) "class"
     [2]=>
@@ -689,7 +691,7 @@ array(145) {
   [80]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -698,7 +700,7 @@ array(145) {
   [81]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(10) "ChildClass"
     [2]=>
@@ -707,7 +709,7 @@ array(145) {
   [82]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -716,7 +718,7 @@ array(145) {
   [83]=>
   array(3) {
     [0]=>
-    int(355)
+    int(%d)
     [1]=>
     string(7) "extends"
     [2]=>
@@ -725,7 +727,7 @@ array(145) {
   [84]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -734,7 +736,7 @@ array(145) {
   [85]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(7) "MyClass"
     [2]=>
@@ -743,7 +745,7 @@ array(145) {
   [86]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -752,7 +754,7 @@ array(145) {
   [87]=>
   array(3) {
     [0]=>
-    int(356)
+    int(%d)
     [1]=>
     string(10) "implements"
     [2]=>
@@ -761,7 +763,7 @@ array(145) {
   [88]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -770,7 +772,7 @@ array(145) {
   [89]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(11) "MyInterface"
     [2]=>
@@ -779,7 +781,7 @@ array(145) {
   [90]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -791,7 +793,7 @@ array(145) {
   [92]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
@@ -801,7 +803,7 @@ array(145) {
   [93]=>
   array(3) {
     [0]=>
-    int(341)
+    int(%d)
     [1]=>
     string(6) "global"
     [2]=>
@@ -810,7 +812,7 @@ array(145) {
   [94]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -819,7 +821,7 @@ array(145) {
   [95]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(6) "$value"
     [2]=>
@@ -830,7 +832,7 @@ array(145) {
   [97]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
@@ -840,7 +842,7 @@ array(145) {
   [98]=>
   array(3) {
     [0]=>
-    int(334)
+    int(%d)
     [1]=>
     string(8) "function"
     [2]=>
@@ -849,7 +851,7 @@ array(145) {
   [99]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -858,7 +860,7 @@ array(145) {
   [100]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(10) "myFunction"
     [2]=>
@@ -869,7 +871,7 @@ array(145) {
   [102]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -880,7 +882,7 @@ array(145) {
   [104]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
@@ -892,7 +894,7 @@ array(145) {
   [106]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(5) "
     "
@@ -902,7 +904,7 @@ array(145) {
   [107]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -911,7 +913,7 @@ array(145) {
   [108]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -922,7 +924,7 @@ array(145) {
   [110]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -931,7 +933,7 @@ array(145) {
   [111]=>
   array(3) {
     [0]=>
-    int(299)
+    int(%d)
     [1]=>
     string(3) "new"
     [2]=>
@@ -940,7 +942,7 @@ array(145) {
   [112]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -949,7 +951,7 @@ array(145) {
   [113]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(10) "ChildClass"
     [2]=>
@@ -964,7 +966,7 @@ array(145) {
   [117]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(5) "
     "
@@ -974,7 +976,7 @@ array(145) {
   [118]=>
   array(3) {
     [0]=>
-    int(301)
+    int(%d)
     [1]=>
     string(2) "if"
     [2]=>
@@ -985,7 +987,7 @@ array(145) {
   [120]=>
   array(3) {
     [0]=>
-    int(309)
+    int(%d)
     [1]=>
     string(2) "$a"
     [2]=>
@@ -994,7 +996,7 @@ array(145) {
   [121]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -1003,7 +1005,7 @@ array(145) {
   [122]=>
   array(3) {
     [0]=>
-    int(288)
+    int(%d)
     [1]=>
     string(10) "instanceof"
     [2]=>
@@ -1012,7 +1014,7 @@ array(145) {
   [123]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -1021,7 +1023,7 @@ array(145) {
   [124]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(7) "MyClass"
     [2]=>
@@ -1032,7 +1034,7 @@ array(145) {
   [126]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(7) "
       "
@@ -1042,7 +1044,7 @@ array(145) {
   [127]=>
   array(3) {
     [0]=>
-    int(316)
+    int(%d)
     [1]=>
     string(4) "echo"
     [2]=>
@@ -1051,7 +1053,7 @@ array(145) {
   [128]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) " "
     [2]=>
@@ -1060,7 +1062,7 @@ array(145) {
   [129]=>
   array(3) {
     [0]=>
-    int(315)
+    int(%d)
     [1]=>
     string(16) ""object created""
     [2]=>
@@ -1071,7 +1073,7 @@ array(145) {
   [131]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(3) "
   "
@@ -1083,7 +1085,7 @@ array(145) {
   [133]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -1095,7 +1097,7 @@ array(145) {
   [135]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -1105,7 +1107,7 @@ array(145) {
   [136]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(10) "ChildClass"
     [2]=>
@@ -1114,7 +1116,7 @@ array(145) {
   [137]=>
   array(3) {
     [0]=>
-    int(376)
+    int(%d)
     [1]=>
     string(2) "::"
     [2]=>
@@ -1123,7 +1125,7 @@ array(145) {
   [138]=>
   array(3) {
     [0]=>
-    int(307)
+    int(%d)
     [1]=>
     string(10) "myFunction"
     [2]=>
@@ -1134,7 +1136,7 @@ array(145) {
   [140]=>
   array(3) {
     [0]=>
-    int(305)
+    int(%d)
     [1]=>
     string(2) "10"
     [2]=>
@@ -1147,7 +1149,7 @@ array(145) {
   [143]=>
   array(3) {
     [0]=>
-    int(371)
+    int(%d)
     [1]=>
     string(1) "
 "
@@ -1157,7 +1159,7 @@ array(145) {
   [144]=>
   array(3) {
     [0]=>
-    int(370)
+    int(%d)
     [1]=>
     string(2) "?>"
     [2]=>

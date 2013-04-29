@@ -17,4 +17,5 @@ class a
 }
 new a();
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: preg_replace(): The /e modifier is deprecated, use preg_replace_callback instead in %s on line %d

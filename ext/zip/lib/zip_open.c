@@ -1,6 +1,6 @@
 /*
-  zip_open.c -- open zip archive
-  Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
+  zip_open.c -- open zip archive by name
+  Copyright (C) 1999-2011 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -52,7 +52,7 @@ static int _zip_headercomp(struct zip_dirent *, int,
 			   struct zip_dirent *, int);
 static unsigned char *_zip_memmem(const unsigned char *, int,
 				  const unsigned char *, int);
-static struct zip_cdir *_zip_readcdir(FILE *, unsigned char *, unsigned char *,
+static struct zip_cdir *_zip_readcdir(FILE *, off_t, unsigned char *, unsigned char *,
 				 int, int, struct zip_error *);
 
 
@@ -61,10 +61,6 @@ ZIP_EXTERN(struct zip *)
 zip_open(const char *fn, int flags, int *zep)
 {
     FILE *fp;
-    struct zip *za;
-    struct zip_cdir *cdir;
-    int i;
-    off_t len;
 
     if (flags & ZIP_OVERWRITE) {
 	return _zip_allocate_new(fn, zep);
@@ -75,10 +71,8 @@ zip_open(const char *fn, int flags, int *zep)
 			if (!(flags & ZIP_OVERWRITE)) {
 				return NULL;
 			}
-
     case 0:
 	return _zip_allocate_new(fn, zep);
-
     default:
 	break;
     }
@@ -88,7 +82,23 @@ zip_open(const char *fn, int flags, int *zep)
 	return NULL;
     }
 
-    fseeko(fp, 0, SEEK_END);
+    return _zip_open(fn, fp, flags, 0, zep);
+}
+
+
+
+struct zip *
+_zip_open(const char *fn, FILE *fp, int flags, int aflags, int *zep)
+{
+    struct zip *za;
+    struct zip_cdir *cdir;
+    int i;
+    off_t len;
+
+    if (fseeko(fp, 0, SEEK_END) < 0) {
+	*zep = ZIP_ER_SEEK;
+	return NULL;
+    }
     len = ftello(fp);
 
     /* treat empty files as empty archives */
@@ -156,13 +166,13 @@ set_error(int *zep, struct zip_error *err, int ze)
    entries, or NULL if unsuccessful. */
 
 static struct zip_cdir *
-_zip_readcdir(FILE *fp, unsigned char *buf, unsigned char *eocd, int buflen,
+_zip_readcdir(FILE *fp, off_t buf_offset, unsigned char *buf, unsigned char *eocd, int buflen,
 	      int flags, struct zip_error *error)
 {
     struct zip_cdir *cd;
     unsigned char *cdp, **bufp;
     int i, comlen, nentry;
-    unsigned int left;
+    zip_uint32_t left;
 
     comlen = buf + buflen - eocd - EOCDLEN;
     if (comlen < 0) {
@@ -196,14 +206,24 @@ _zip_readcdir(FILE *fp, unsigned char *buf, unsigned char *eocd, int buflen,
     cd->comment = NULL;
     cd->comment_len = _zip_read2(&cdp);
 
+    if (((zip_uint64_t)cd->offset)+cd->size > buf_offset + (eocd-buf)) {
+	/* cdir spans past EOCD record */
+	_zip_error_set(error, ZIP_ER_INCONS, 0);
+	cd->nentry = 0;
+	_zip_cdir_free(cd);
+	return NULL;
+    }
+
     if ((comlen < cd->comment_len) || (cd->nentry != i)) {
 	_zip_error_set(error, ZIP_ER_NOZIP, 0);
-	free(cd);
+	cd->nentry = 0;
+	_zip_cdir_free(cd);
 	return NULL;
     }
     if ((flags & ZIP_CHECKCONS) && comlen != cd->comment_len) {
 	_zip_error_set(error, ZIP_ER_INCONS, 0);
-	free(cd);
+	cd->nentry = 0;
+	_zip_cdir_free(cd);
 	return NULL;
     }
 
@@ -211,14 +231,15 @@ _zip_readcdir(FILE *fp, unsigned char *buf, unsigned char *eocd, int buflen,
 	if ((cd->comment=(char *)_zip_memdup(eocd+EOCDLEN,
 					     cd->comment_len, error))
 	    == NULL) {
-	    free(cd);
+	    cd->nentry = 0;
+	    _zip_cdir_free(cd);
 	    return NULL;
 	}
     }
 
-    if (cd->size < (unsigned int)(eocd-buf)) {
+    if (cd->offset >= buf_offset) {
 	/* if buffer already read in, use it */
-	cdp = eocd - cd->size;
+	cdp = buf + (cd->offset - buf_offset);
 	bufp = &cdp;
     }
     else {
@@ -234,20 +255,15 @@ _zip_readcdir(FILE *fp, unsigned char *buf, unsigned char *eocd, int buflen,
 		_zip_error_set(error, ZIP_ER_SEEK, errno);
 	    else
 		_zip_error_set(error, ZIP_ER_NOZIP, 0);
-	    free(cd);
+	    cd->nentry = 0;
+	    _zip_cdir_free(cd);
 	    return NULL;
 	}
     }
 
     left = cd->size;
     i=0;
-    do {
-	if (i == cd->nentry && left > 0) {
-	    /* Infozip extension for more than 64k entries:
-	       nentries wraps around, size indicates correct EOCD */
-	    _zip_cdir_grow(cd, cd->nentry+0x10000, error);
-	}
-
+    while (i<cd->nentry && left > 0) {
 	if ((_zip_dirent_read(cd->entry+i, fp, bufp, &left, 0, error)) < 0) {
 	    cd->nentry = i;
 	    _zip_cdir_free(cd);
@@ -255,7 +271,18 @@ _zip_readcdir(FILE *fp, unsigned char *buf, unsigned char *eocd, int buflen,
 	}
 	i++;
 	
-    } while (i<cd->nentry);
+	if (i == cd->nentry && left > 0) {
+	    /* Infozip extension for more than 64k entries:
+	       nentries wraps around, size indicates correct EOCD */
+	    if (_zip_cdir_grow(cd, cd->nentry+ZIP_UINT16_MAX, error) < 0) {
+		cd->nentry = i;
+		_zip_cdir_free(cd);
+		return NULL;
+	    }
+	}
+    }
+
+    cd->nentry = i;
     
     return cd;
 }
@@ -336,17 +363,17 @@ _zip_check_torrentzip(struct zip *za)
     if (za->cdir->comment_len != TORRENT_SIG_LEN+8
 	|| strncmp(za->cdir->comment, TORRENT_SIG, TORRENT_SIG_LEN) != 0)
 	return;
-    
+
     memcpy(buf, za->cdir->comment+TORRENT_SIG_LEN, 8);
     buf[8] = '\0';
     errno = 0;
     crc_should = strtoul(buf, &end, 16);
     if ((crc_should == UINT_MAX && errno != 0) || (end && *end))
 	return;
-    
+
     if (_zip_filerange_crc(za->zp, za->cdir->offset, za->cdir->size,
 			   &crc_got, NULL) < 0)
-	    return;
+	return;
 
     if (crc_got == crc_should)
 	za->flags |= ZIP_AFL_TORRENT;
@@ -434,12 +461,16 @@ _zip_allocate_new(const char *fn, int *zep)
 	set_error(zep, &error, 0);
 	return NULL;
     }
-	
-    za->zn = strdup(fn);
-    if (!za->zn) {
-	_zip_free(za);
-	set_error(zep, NULL, ZIP_ER_MEMORY);
-	return NULL;
+
+    if (fn == NULL)
+	za->zn = NULL;
+    else {
+	za->zn = strdup(fn);
+	if (!za->zn) {
+	    _zip_free(za);
+	    set_error(zep, NULL, ZIP_ER_MEMORY);
+	    return NULL;
+	}
     }
     return za;
 }
@@ -481,6 +512,7 @@ _zip_find_central_dir(FILE *fp, int flags, int *zep, off_t len)
 {
     struct zip_cdir *cdir, *cdirnew;
     unsigned char *buf, *match;
+    off_t buf_offset;
     int a, best, buflen, i;
     struct zip_error zerr;
 
@@ -490,7 +522,8 @@ _zip_find_central_dir(FILE *fp, int flags, int *zep, off_t len)
 	set_error(zep, NULL, ZIP_ER_SEEK);
 	return NULL;
     }
-
+    buf_offset = ftello(fp);
+    
     /* 64k is too much for stack */
     if ((buf=(unsigned char *)malloc(CDBUFSIZE)) == NULL) {
 	set_error(zep, NULL, ZIP_ER_MEMORY);
@@ -516,7 +549,7 @@ _zip_find_central_dir(FILE *fp, int flags, int *zep, off_t len)
 	/* found match -- check, if good */
 	/* to avoid finding the same match all over again */
 	match++;
-	if ((cdirnew=_zip_readcdir(fp, buf, match-1, buflen, flags,
+	if ((cdirnew=_zip_readcdir(fp, buf_offset, buf, match-1, buflen, flags,
 				   &zerr)) == NULL)
 	    continue;
 

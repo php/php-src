@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -243,6 +243,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 {
 #if HAVE_OPENSSL_EXT
 	SSL_CTX	*ctx = NULL;
+	long ssl_ctx_options = SSL_OP_ALL;
 #endif
 	if (ftp == NULL) {
 		return 0;
@@ -279,7 +280,10 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 			return 0;
 		}
 
-		SSL_CTX_set_options(ctx, SSL_OP_ALL);
+#if OPENSSL_VERSION_NUMBER >= 0x0090605fL
+		ssl_ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
+#endif
+		SSL_CTX_set_options(ctx, ssl_ctx_options);
 
 		ftp->ssl_handle = SSL_new(ctx);
 		if (ftp->ssl_handle == NULL) {
@@ -1495,6 +1499,7 @@ data_accept(databuf_t *data, ftpbuf_t *ftp TSRMLS_DC)
 
 #if HAVE_OPENSSL_EXT
 	SSL_CTX		*ctx;
+	long ssl_ctx_options = SSL_OP_ALL;
 #endif
 
 	if (data->fd != -1) {
@@ -1521,7 +1526,10 @@ data_accepted:
 			return 0;
 		}
 
-		SSL_CTX_set_options(ctx, SSL_OP_ALL);
+#if OPENSSL_VERSION_NUMBER >= 0x0090605fL
+		ssl_ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
+#endif
+		SSL_CTX_set_options(ctx, ssl_ctx_options);
 
 		data->ssl_handle = SSL_new(ctx);
 		if (data->ssl_handle == NULL) {

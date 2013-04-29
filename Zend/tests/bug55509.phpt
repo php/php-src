@@ -5,6 +5,12 @@ Bug #55509 (segfault on x86_64 using more than 2G memory)
 if (PHP_INT_SIZE == 4) {
   die('skip Not for 32-bits OS');
 }
+
+$zend_mm_enabled = getenv("USE_ZEND_ALLOC");
+if ($zend_mm_enabled === "0") {
+    die("skip Zend MM disabled");
+}
+
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 // check the available memory
 if (PHP_OS == 'Linux') {

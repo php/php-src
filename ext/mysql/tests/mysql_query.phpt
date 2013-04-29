@@ -113,6 +113,7 @@ if (!mysql_query('DROP TABLE IF EXISTS test', $link)) {
 mysql_close($link);
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 array(1) {
   [%u|b%"valid"]=>
   %unicode|string%(30) "this is sql but with semicolon"

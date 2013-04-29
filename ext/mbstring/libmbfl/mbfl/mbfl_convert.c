@@ -52,11 +52,18 @@
 #include "filters/mbfilter_iso2022_kr.h"
 #include "filters/mbfilter_sjis.h"
 #include "filters/mbfilter_sjis_open.h"
+#include "filters/mbfilter_sjis_2004.h"
+#include "filters/mbfilter_sjis_mobile.h"
+#include "filters/mbfilter_sjis_mac.h"
 #include "filters/mbfilter_cp51932.h"
 #include "filters/mbfilter_jis.h"
 #include "filters/mbfilter_iso2022_jp_ms.h"
+#include "filters/mbfilter_iso2022jp_2004.h"
+#include "filters/mbfilter_iso2022jp_mobile.h"
 #include "filters/mbfilter_euc_jp.h"
+#include "filters/mbfilter_euc_jp_2004.h"
 #include "filters/mbfilter_euc_jp_win.h"
+#include "filters/mbfilter_gb18030.h"
 #include "filters/mbfilter_ascii.h"
 #include "filters/mbfilter_koi8r.h"
 #include "filters/mbfilter_koi8u.h"
@@ -87,6 +94,7 @@
 #include "filters/mbfilter_utf7.h"
 #include "filters/mbfilter_utf7imap.h"
 #include "filters/mbfilter_utf8.h"
+#include "filters/mbfilter_utf8_mobile.h"
 #include "filters/mbfilter_utf16.h"
 #include "filters/mbfilter_utf32.h"
 #include "filters/mbfilter_byte2.h"
@@ -111,6 +119,8 @@ const struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_wchar_sjis,
 	&vtbl_sjis_open_wchar,
 	&vtbl_wchar_sjis_open,
+	&vtbl_sjis2004_wchar,
+	&vtbl_wchar_sjis2004,
 	&vtbl_cp51932_wchar,
 	&vtbl_wchar_cp51932,
 	&vtbl_jis_wchar,
@@ -121,20 +131,46 @@ const struct mbfl_convert_vtbl *mbfl_convert_filter_list[] = {
 	&vtbl_wchar_2022jp,
 	&vtbl_2022jpms_wchar,
 	&vtbl_wchar_2022jpms,
+	&vtbl_2022jp_2004_wchar,
+	&vtbl_wchar_2022jp_2004,
+	&vtbl_2022jp_kddi_wchar,
+	&vtbl_wchar_2022jp_kddi,
 	&vtbl_eucjpwin_wchar,
 	&vtbl_wchar_eucjpwin,
+	&vtbl_eucjp2004_wchar,
+	&vtbl_wchar_eucjp2004,
 	&vtbl_cp932_wchar,
 	&vtbl_wchar_cp932,
+ 	&vtbl_sjis_docomo_wchar,
+ 	&vtbl_wchar_sjis_docomo,
+ 	&vtbl_sjis_kddi_wchar,
+ 	&vtbl_wchar_sjis_kddi,
+ 	&vtbl_sjis_sb_wchar,
+ 	&vtbl_wchar_sjis_sb,
+ 	&vtbl_sjis_mac_wchar,
+ 	&vtbl_wchar_sjis_mac,
+	&vtbl_utf8_docomo_wchar,
+	&vtbl_wchar_utf8_docomo,
+	&vtbl_utf8_kddi_a_wchar,
+	&vtbl_wchar_utf8_kddi_a,
+	&vtbl_utf8_kddi_b_wchar,
+	&vtbl_wchar_utf8_kddi_b,
+	&vtbl_utf8_sb_wchar,
+	&vtbl_wchar_utf8_sb,
 	&vtbl_euccn_wchar,
 	&vtbl_wchar_euccn,
 	&vtbl_cp936_wchar,
 	&vtbl_wchar_cp936,
+	&vtbl_gb18030_wchar,
+	&vtbl_wchar_gb18030,
 	&vtbl_hz_wchar,
 	&vtbl_wchar_hz,
 	&vtbl_euctw_wchar,
 	&vtbl_wchar_euctw,
 	&vtbl_big5_wchar,
 	&vtbl_wchar_big5,
+	&vtbl_cp950_wchar,
+	&vtbl_wchar_cp950,
 	&vtbl_euckr_wchar,
 	&vtbl_wchar_euckr,
 	&vtbl_uhc_wchar,
@@ -454,8 +490,14 @@ mbfl_filt_conv_illegal_output(int c, mbfl_convert_filter *filter)
 					case MBFL_WCSPLANE_JIS0212:
 						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS2+");
 						break;
+					case MBFL_WCSPLANE_JIS0213:
+						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"JIS3+");
+						break;
 					case MBFL_WCSPLANE_WINCP932:
 						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"W932+");
+						break;
+					case MBFL_WCSPLANE_GB18030:
+						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"GB+");
 						break;
 					case MBFL_WCSPLANE_8859_1:
 						ret = mbfl_convert_filter_strcat(filter, (const unsigned char *)"I8859_1+");

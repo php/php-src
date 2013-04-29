@@ -38,7 +38,7 @@
 
 
 ZIP_EXTERN(const char *)
-zip_get_name(struct zip *za, int idx, int flags)
+zip_get_name(struct zip *za, zip_uint64_t idx, int flags)
 {
     return _zip_get_name(za, idx, flags, &za->error);
 }
@@ -46,9 +46,10 @@ zip_get_name(struct zip *za, int idx, int flags)
 
 
 const char *
-_zip_get_name(struct zip *za, int idx, int flags, struct zip_error *error)
+_zip_get_name(struct zip *za, zip_uint64_t idx, int flags,
+	      struct zip_error *error)
 {
-    if (idx < 0 || idx >= za->nentry) {
+    if (idx >= za->nentry) {
 	_zip_error_set(error, ZIP_ER_INVAL, 0);
 	return NULL;
     }

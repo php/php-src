@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -12,9 +12,9 @@
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
-  | Authors: Georg Richter <georg@mysql.com>                             |
-  |          Andrey Hristov <andrey@mysql.com>                           |
+  | Authors: Andrey Hristov <andrey@mysql.com>                           |
   |          Ulf Wendel <uwendel@mysql.com>                              |
+  |          Georg Richter <georg@mysql.com>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -34,6 +34,10 @@
 #define MYSQLND_MIN_COMPRESS_LEN 0
 
 #define MYSQLND_MAX_PACKET_SIZE (256L*256L*256L-1)
+
+#define MYSQLND_ASSEMBLED_PACKET_MAX_SIZE 3UL*1024UL*1024UL*1024UL
+
+#define MYSQLND_DEFAULT_AUTH_PROTOCOL "mysql_native_password"
 
 #define MYSQLND_ERRMSG_SIZE			512
 #define MYSQLND_SQLSTATE_LENGTH		5
@@ -93,9 +97,14 @@
 #define CLIENT_MULTI_RESULTS		(1UL << 17) /* Enable/disable multi-results */
 #define CLIENT_PS_MULTI_RESULTS		(1UL << 18) /* Multi-results in PS-protocol */
 #define CLIENT_PLUGIN_AUTH			(1UL << 19) /* Client supports plugin authentication */
-
+#define CLIENT_CONNECT_ATTRS		(1UL << 20) /* Client supports connection attributes */
+#define CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA	(1UL << 21) /* Enable authentication response packet to be larger than 255 bytes. */
+#define CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS		(1UL << 22) /* Don't close the connection for a connection with expired password. */
 #define CLIENT_SSL_VERIFY_SERVER_CERT (1UL << 30)
 
+#define MYSQLND_CAPABILITIES (CLIENT_LONG_PASSWORD | CLIENT_LONG_FLAG | CLIENT_TRANSACTIONS | \
+				CLIENT_PROTOCOL_41 | CLIENT_SECURE_CONNECTION | \
+				CLIENT_MULTI_RESULTS | CLIENT_PS_MULTI_RESULTS | CLIENT_LOCAL_FILES | CLIENT_PLUGIN_AUTH)
 
 #define MYSQLND_NET_FLAG_USE_COMPRESSION 1
 
@@ -159,9 +168,13 @@ typedef enum mysqlnd_option
 	MYSQL_OPT_SSL_VERIFY_SERVER_CERT,
 	MYSQL_PLUGIN_DIR,
 	MYSQL_DEFAULT_AUTH,
-#if MYSQLND_UNICODE
-	MYSQLND_OPT_NUMERIC_AND_DATETIME_AS_UNICODE = 200,
-#endif
+	MYSQL_OPT_CONNECT_ATTR_RESET,
+	MYSQL_OPT_CONNECT_ATTR_ADD,
+	MYSQL_OPT_CONNECT_ATTR_DELETE,
+	MYSQL_SERVER_PUBLIC_KEY,
+	MYSQL_ENABLE_CLEARTEXT_PLUGIN,
+	MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS,
+	MYSQLND_DEPRECATED_ENUM1 = 200,
 #ifdef MYSQLND_STRING_TO_INT_CONVERSION
 	MYSQLND_OPT_INT_AND_FLOAT_NATIVE = 201,
 #endif
@@ -172,7 +185,9 @@ typedef enum mysqlnd_option
 	MYSQLND_OPT_SSL_CA = 206,
 	MYSQLND_OPT_SSL_CAPATH = 207,
 	MYSQLND_OPT_SSL_CIPHER = 208,
-	MYSQLND_OPT_SSL_PASSPHRASE = 209
+	MYSQLND_OPT_SSL_PASSPHRASE = 209,
+	MYSQLND_OPT_MAX_ALLOWED_PACKET = 210,
+	MYSQLND_OPT_AUTH_PROTOCOL = 211
 } enum_mysqlnd_option;
 
 typedef enum mysqlnd_protocol_type
@@ -517,6 +532,8 @@ enum mysqlnd_packet_type
 {
 	PROT_GREET_PACKET= 0,
 	PROT_AUTH_PACKET,
+	PROT_AUTH_RESP_PACKET,
+	PROT_CHANGE_AUTH_RESP_PACKET,
 	PROT_OK_PACKET,
 	PROT_EOF_PACKET,
 	PROT_CMD_PACKET,
@@ -526,6 +543,8 @@ enum mysqlnd_packet_type
 	PROT_STATS_PACKET,
 	PROT_PREPARE_RESP_PACKET,
 	PROT_CHG_USER_RESP_PACKET,
+	PROT_SHA256_PK_REQUEST_PACKET,
+	PROT_SHA256_PK_REQUEST_RESPONSE_PACKET,
 	PROT_LAST /* should always be last */
 };
 

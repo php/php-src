@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.example.org/service2/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="service2" targetNamespace="http://www.example.org/service2/">
+      <wsdl:types>
+        <xsd:schema targetNamespace="http://www.example.org/service2/">
+          <xsd:element name="NewOperation">
+            <xsd:complexType>
+              <xsd:choice>
+                                  <xsd:sequence>
+                                    <xsd:element name="firstName" type="xsd:string"> </xsd:element>
+                                    <xsd:element name="surName" type="xsd:string"/>
+                                  </xsd:sequence>
+                                  <xsd:element name="code" type="xsd:string"/>
+                                </xsd:choice>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="NewOperationResponse">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="out" type="xsd:string"/>
+              </xsd:sequence>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:schema>
+      </wsdl:types>
+      <wsdl:message name="NewOperationRequest">
+        <wsdl:part element="tns:NewOperation" name="parameters"/>
+      </wsdl:message>
+      <wsdl:message name="NewOperationResponse">
+        <wsdl:part element="tns:NewOperationResponse" name="parameters"/>
+      </wsdl:message>
+      <wsdl:portType name="service2">
+        <wsdl:operation name="NewOperation">
+          <wsdl:input message="tns:NewOperationRequest"/>
+          <wsdl:output message="tns:NewOperationResponse"/>
+        </wsdl:operation>
+      </wsdl:portType>
+      <wsdl:binding name="service2SOAP" type="tns:service2">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="NewOperation">
+          <soap:operation soapAction="http://www.example.org/service2/NewOperation"/>
+          <wsdl:input>
+            <soap:body use="literal"/>
+          </wsdl:input>
+          <wsdl:output>
+            <soap:body use="literal"/>
+          </wsdl:output>
+        </wsdl:operation>
+      </wsdl:binding>
+      <wsdl:service name="service2">
+        <wsdl:port binding="tns:service2SOAP" name="service2SOAP">
+          <soap:address location="test://"/>
+        </wsdl:port>
+      </wsdl:service>
+    </wsdl:definitions>

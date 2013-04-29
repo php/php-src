@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -219,17 +219,12 @@ char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 
 	memcpy(passwd, MD5_MAGIC, MD5_MAGIC_LEN);
 
-#if _MSC_VER >= 1500
 	if (strncpy_s(passwd + MD5_MAGIC_LEN, MD5_HASH_MAX_LEN - MD5_MAGIC_LEN, sp, sl + 1) != 0) {
 		goto _destroyCtx1;
 	}
 	passwd[MD5_MAGIC_LEN + sl] = '\0';
 	strcat_s(passwd, MD5_HASH_MAX_LEN, "$");
-#else
-	/* VC6 version doesn't have strcat_s or strncpy_s */
-	strncpy(passwd + MD5_MAGIC_LEN, sp, sl + 1);
-	strcat(passwd, "$");
-#endif
+
 	dwHashLen = 16;
 
 	/* Fetch the ctx hash value */

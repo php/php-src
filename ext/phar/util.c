@@ -3,7 +3,7 @@
   | phar php single-file executable PHP extension                        |
   | utility functions                                                    |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2012 The PHP Group                                |
+  | Copyright (c) 2005-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -156,7 +156,6 @@ int phar_seek_efp(phar_entry_info *entry, off_t offset, int whence, off_t positi
 			break;
 		default:
 			temp = 0;
-			break;
 	}
 
 	if (temp > eoffset + (off_t) entry->uncompressed_filesize) {
@@ -211,8 +210,6 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		return FAILURE;
 	}
 #endif
-
-	filename_len = strlen(entry.tmp);
 	filename = entry.tmp;
 
 	/* only check openbasedir for files, not for phar streams */
@@ -274,7 +271,7 @@ char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_d
 		return phar_save_resolve_path(filename, filename_len TSRMLS_CC);
 	}
 
-	fname = zend_get_executed_filename(TSRMLS_C);
+	fname = (char*)zend_get_executed_filename(TSRMLS_C);
 	fname_len = strlen(fname);
 
 	if (PHAR_G(last_phar) && !memcmp(fname, "phar://", 7) && fname_len - 7 >= PHAR_G(last_phar_name_len) && !memcmp(fname + 7, PHAR_G(last_phar_name), PHAR_G(last_phar_name_len))) {
@@ -366,7 +363,7 @@ splitted:
 		goto doit;
 	}
 
-	fname = zend_get_executed_filename(TSRMLS_C);
+	fname = (char*)zend_get_executed_filename(TSRMLS_C);
 
 	if (SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
 		goto doit;
@@ -524,7 +521,7 @@ not_stream:
 
 	/* check in calling scripts' current working directory as a fall back case */
 	if (zend_is_executing(TSRMLS_C)) {
-		char *exec_fname = zend_get_executed_filename(TSRMLS_C);
+		char *exec_fname = (char*)zend_get_executed_filename(TSRMLS_C);
 		int exec_fname_length = strlen(exec_fname);
 		const char *p;
 		int n = 0;
@@ -2121,8 +2118,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 #ifdef PHAR_HAVE_OPENSSL
 			BIO *in;
 			EVP_PKEY *key;
-			EVP_MD *mdtype = (EVP_MD *) EVP_sha1();
-			EVP_MD_CTX md_ctx;
+			EVP_MD_CTX *md_ctx;
 
 			in = BIO_new_mem_buf(PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len));
 
@@ -2143,15 +2139,30 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 				return FAILURE;
 			}
 
+			md_ctx = EVP_MD_CTX_create();
+
 			siglen = EVP_PKEY_size(key);
 			sigbuf = emalloc(siglen + 1);
-			EVP_SignInit(&md_ctx, mdtype);
 
-			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
-				EVP_SignUpdate(&md_ctx, buf, sig_len);
+			if (!EVP_SignInit(md_ctx, EVP_sha1())) {
+				efree(sigbuf);
+				if (error) {
+					spprintf(error, 0, "unable to initialize openssl signature for phar \"%s\"", phar->fname);
+				}
+				return FAILURE;
 			}
 
-			if (!EVP_SignFinal (&md_ctx, sigbuf,(unsigned int *)&siglen, key)) {
+			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
+				if (!EVP_SignUpdate(md_ctx, buf, sig_len)) {
+					efree(sigbuf);
+					if (error) {
+						spprintf(error, 0, "unable to update the openssl signature for phar \"%s\"", phar->fname);
+					}
+					return FAILURE;
+				}
+			}
+
+			if (!EVP_SignFinal (md_ctx, sigbuf,(unsigned int *)&siglen, key)) {
 				efree(sigbuf);
 				if (error) {
 					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
@@ -2160,7 +2171,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			}
 
 			sigbuf[siglen] = '\0';
-			EVP_MD_CTX_cleanup(&md_ctx);
+			EVP_MD_CTX_destroy(md_ctx);
 #else
 			sigbuf = NULL;
 			siglen = 0;
@@ -2218,7 +2229,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len TSRMLS_DC) /* {{{ */
 {
-	char *s;
+	const char *s;
 
 	while ((s = zend_memrchr(filename, '/', filename_len))) {
 		filename_len = s - filename;

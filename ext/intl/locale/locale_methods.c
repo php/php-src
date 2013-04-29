@@ -208,10 +208,7 @@ static int getSingletonPos(char* str)
    Get default locale */
 PHP_NAMED_FUNCTION(zif_locale_get_default)
 {
-	if( INTL_G(default_locale) == NULL ) {
-		INTL_G(default_locale) = pestrdup( uloc_getDefault(), 1);
- 	}
-	RETURN_STRING( INTL_G(default_locale), TRUE );
+	RETURN_STRING( intl_locale_get_default( TSRMLS_C ), TRUE );
 }
 
 /* }}} */
@@ -393,7 +390,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
     }
 
 	if(loc_name_len == 0) {
-		loc_name = INTL_G(default_locale);
+		loc_name = intl_locale_get_default(TSRMLS_C);
 	}
 
 	/* Call ICU get */
@@ -499,7 +496,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	}
 
 	if(loc_name_len == 0) {
-	loc_name = INTL_G(default_locale);
+		loc_name = intl_locale_get_default(TSRMLS_C);
 	}
 
 	if( strcmp(tag_name, DISP_NAME) != 0 ){
@@ -521,13 +518,13 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 	
 	/* Check if disp_loc_name passed , if not use default locale */
 	if( !disp_loc_name){
-		disp_loc_name = estrdup(INTL_G(default_locale));
+		disp_loc_name = estrdup(intl_locale_get_default(TSRMLS_C));
 		free_loc_name = 1;
 	}
 
     /* Get the disp_value for the given locale */
     do{
-        disp_name = erealloc( disp_name , buflen  );
+        disp_name = erealloc( disp_name , buflen * sizeof(UChar)  );
         disp_name_len = buflen;
 
 		if( strcmp(tag_name , LOC_LANG_TAG)==0 ){
@@ -542,6 +539,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 			buflen = uloc_getDisplayName ( mod_loc_name , disp_loc_name , disp_name , disp_name_len , &status);
 		}
 
+		/* U_STRING_NOT_TERMINATED_WARNING is admissible here; don't look for it */
 		if( U_FAILURE( status ) )
 		{
 			if( status == U_BUFFER_OVERFLOW_ERROR )
@@ -692,7 +690,7 @@ PHP_FUNCTION( locale_get_keywords )
     }
 
     if(loc_name_len == 0) {
-        loc_name = INTL_G(default_locale);
+        loc_name = intl_locale_get_default(TSRMLS_C);
     }
 
 	/* Get the keywords */
@@ -1099,7 +1097,7 @@ PHP_FUNCTION(locale_parse)
     }
 
     if(loc_name_len == 0) {
-        loc_name = INTL_G(default_locale);
+        loc_name = intl_locale_get_default(TSRMLS_C);
     }
 
 	array_init( return_value );
@@ -1147,7 +1145,7 @@ PHP_FUNCTION(locale_get_all_variants)
 	}
 
 	if(loc_name_len == 0) {
-		loc_name = INTL_G(default_locale);
+		loc_name = intl_locale_get_default(TSRMLS_C);
 	}
 
 
@@ -1253,7 +1251,7 @@ PHP_FUNCTION(locale_filter_matches)
 	}
 
 	if(loc_range_len == 0) {
-		loc_range = INTL_G(default_locale);
+		loc_range = intl_locale_get_default(TSRMLS_C);
 	}
 
 	if( strcmp(loc_range,"*")==0){
@@ -1539,7 +1537,7 @@ PHP_FUNCTION(locale_lookup)
 	}
 
 	if(loc_range_len == 0) {
-		loc_range = INTL_G(default_locale);
+		loc_range = intl_locale_get_default(TSRMLS_C);
 	}
 
 	hash_arr = HASH_OF(arr);
@@ -1562,11 +1560,11 @@ PHP_FUNCTION(locale_lookup)
 /* }}} */
 
 /* {{{ proto string Locale::acceptFromHttp(string $http_accept)
-* Tries to find out best available locale based on HTTP “Accept-Language” header
+* Tries to find out best available locale based on HTTP ï¿½Accept-Languageï¿½ header
 */
 /* }}} */
 /* {{{ proto string locale_accept_from_http(string $http_accept)
-* Tries to find out best available locale based on HTTP “Accept-Language” header
+* Tries to find out best available locale based on HTTP ï¿½Accept-Languageï¿½ header
 */
 PHP_FUNCTION(locale_accept_from_http)
 {

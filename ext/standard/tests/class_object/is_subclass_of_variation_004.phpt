@@ -115,18 +115,23 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
+Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
 
 Arg value Array 
 bool(false)
+Error: 8 - Array to string conversion, %sis_subclass_of_variation_004.php(%d)
 
 Arg value Array 
 bool(false)

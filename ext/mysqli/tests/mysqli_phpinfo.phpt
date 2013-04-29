@@ -46,7 +46,7 @@ require_once('skipifconnectfailure.inc');
 
 	if ($IS_MYSQLND) {
 		$expected = array(
-			'client statistics',
+			'mysqlnd statistics',
 			'bytes_sent', 'bytes_received', 'packets_sent', 'packets_received',
 			'protocol_overhead_in', 'protocol_overhead_out', 'result_set_queries',
 			'non_result_set_queries', 'no_index_used', 'bad_index_used',

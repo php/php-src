@@ -44,19 +44,23 @@
 struct read_file {
     char *fname;	/* name of file to copy from */
     FILE *f;		/* file to copy from */
-    off_t off;		/* start offset of */
-    off_t len;		/* lengt of data to copy */
-    off_t remain;	/* bytes remaining to be copied */
+    int closep;		/* close f */
+    struct zip_stat st;	/* stat information passed in */
+
+    zip_uint64_t off;	/* start offset of */
+    zip_int64_t len;	/* length of data to copy */
+    zip_int64_t remain;	/* bytes remaining to be copied */
     int e[2];		/* error codes */
 };
 
-static ssize_t read_file(void *state, void *data, size_t len,
+static zip_int64_t read_file(void *state, void *data, zip_uint64_t len,
 		     enum zip_source_cmd cmd);
 
 
 
 ZIP_EXTERN(struct zip_source *)
-zip_source_filep(struct zip *za, FILE *file, off_t start, off_t len)
+zip_source_filep(struct zip *za, FILE *file, zip_uint64_t start,
+		 zip_int64_t len)
 {
     if (za == NULL)
 	return NULL;
@@ -66,14 +70,15 @@ zip_source_filep(struct zip *za, FILE *file, off_t start, off_t len)
 	return NULL;
     }
 
-    return _zip_source_file_or_p(za, NULL, file, start, len);
+    return _zip_source_file_or_p(za, NULL, file, start, len, 1, NULL);
 }
 
 
 
 struct zip_source *
 _zip_source_file_or_p(struct zip *za, const char *fname, FILE *file,
-		      off_t start, off_t len)
+		      zip_uint64_t start, zip_int64_t len, int closep,
+		      const struct zip_stat *st)
 {
     struct read_file *f;
     struct zip_source *zs;
@@ -99,7 +104,12 @@ _zip_source_file_or_p(struct zip *za, const char *fname, FILE *file,
     f->f = file;
     f->off = start;
     f->len = (len ? len : -1);
-    
+    f->closep = f->fname ? 1 : closep;
+    if (st)
+	memcpy(&f->st, st, sizeof(f->st));
+    else
+	zip_stat_init(&f->st);
+
     if ((zs=zip_source_function(za, read_file, f)) == NULL) {
 	free(f);
 	return NULL;
@@ -110,8 +120,8 @@ _zip_source_file_or_p(struct zip *za, const char *fname, FILE *file,
 
 
 
-static ssize_t
-read_file(void *state, void *data, size_t len, enum zip_source_cmd cmd)
+static zip_int64_t
+read_file(void *state, void *data, zip_uint64_t len, enum zip_source_cmd cmd)
 {
     struct read_file *z;
     char *buf;
@@ -130,20 +140,33 @@ read_file(void *state, void *data, size_t len, enum zip_source_cmd cmd)
 	    }
 	}
 
-	if (fseeko(z->f, z->off, SEEK_SET) < 0) {
-	    z->e[0] = ZIP_ER_SEEK;
-	    z->e[1] = errno;
-	    return -1;
+	if (z->closep) {
+	    if (fseeko(z->f, (off_t)z->off, SEEK_SET) < 0) {
+		z->e[0] = ZIP_ER_SEEK;
+		z->e[1] = errno;
+		return -1;
+	    }
 	}
 	z->remain = z->len;
 	return 0;
 	
     case ZIP_SOURCE_READ:
+	/* XXX: return INVAL if len > size_t max */
 	if (z->remain != -1)
 	    n = len > z->remain ? z->remain : len;
 	else
 	    n = len;
-	
+
+	if (!z->closep) {
+	    /* we might share this file with others, so let's be safe */
+	    if (fseeko(z->f, (off_t)(z->off + z->len-z->remain),
+		       SEEK_SET) < 0) {
+		z->e[0] = ZIP_ER_SEEK;
+		z->e[1] = errno;
+		return -1;
+	    }
+	}
+
 	if ((i=fread(buf, 1, n, z->f)) < 0) {
 	    z->e[0] = ZIP_ER_READ;
 	    z->e[1] = errno;
@@ -164,34 +187,42 @@ read_file(void *state, void *data, size_t len, enum zip_source_cmd cmd)
 
     case ZIP_SOURCE_STAT:
         {
-	    struct zip_stat *st;
-	    struct stat fst;
-	    int err;
+	    if (len < sizeof(z->st))
+		return -1;
+
+	    if (z->st.valid != 0)
+		memcpy(data, &z->st, sizeof(z->st));
+	    else {
+		struct zip_stat *st;
+		struct stat fst;
+		int err;
 	    
-	    if (len < sizeof(*st))
-		return -1;
+		if (z->f)
+		    err = fstat(fileno(z->f), &fst);
+		else
+		    err = stat(z->fname, &fst);
 
-	    if (z->f)
-		err = fstat(fileno(z->f), &fst);
-	    else
-		err = stat(z->fname, &fst);
+		if (err != 0) {
+		    z->e[0] = ZIP_ER_READ; /* best match */
+		    z->e[1] = errno;
+		    return -1;
+		}
 
-	    if (err != 0) {
-		z->e[0] = ZIP_ER_READ; /* best match */
-		z->e[1] = errno;
-		return -1;
+		st = (struct zip_stat *)data;
+		
+		zip_stat_init(st);
+		st->mtime = fst.st_mtime;
+		st->valid |= ZIP_STAT_MTIME;
+		if (z->len != -1) {
+		    st->size = z->len;
+		    st->valid |= ZIP_STAT_SIZE;
+		}
+		else if ((fst.st_mode&S_IFMT) == S_IFREG) {
+		    st->size = fst.st_size;
+		    st->valid |= ZIP_STAT_SIZE;
+		}
 	    }
-
-	    st = (struct zip_stat *)data;
-
-	    zip_stat_init(st);
-	    st->mtime = fst.st_mtime;
-	    if (z->len != -1)
-		st->size = z->len;
-	    else if ((fst.st_mode&S_IFMT) == S_IFREG)
-		st->size = fst.st_size;
-
-	    return sizeof(*st);
+	    return sizeof(z->st);
 	}
 
     case ZIP_SOURCE_ERROR:
@@ -203,8 +234,8 @@ read_file(void *state, void *data, size_t len, enum zip_source_cmd cmd)
 
     case ZIP_SOURCE_FREE:
 	free(z->fname);
-	if (z->f)
-	fclose(z->f);
+	if (z->closep && z->f)
+	    fclose(z->f);
 	free(z);
 	return 0;
 

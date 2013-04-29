@@ -158,6 +158,13 @@ class RegexIterator extends FilterIterator
 	{
 		$this->preg_flags = $preg_flags;
 	}
+
+	/** @return current regular expression
+	*/
+	function getRegex()
+	{
+		return $this->regex;
+	}
 }
 
 ?>

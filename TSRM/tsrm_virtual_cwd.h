@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -131,8 +131,8 @@ typedef unsigned short mode_t;
 
 #ifdef TSRM_WIN32
 CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat);
-CWD_API int php_sys_stat(const char *path, struct stat *buf);
-CWD_API int php_sys_lstat(const char *path, struct stat *buf);
+# define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
+# define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
 CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len);
 #else
 # define php_sys_stat stat
@@ -201,7 +201,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 #define CWD_FILEPATH 1 /* resolve symlinks if file is exist otherwise expand */
 #define CWD_REALPATH 2 /* call realpath(), resolve symlinks. File must exist */
 
-CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath);
+CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath TSRMLS_DC);
 
 CWD_API char *tsrm_realpath(const char *path, char *real_path TSRMLS_DC);
 
@@ -267,7 +267,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(TSRMLS_D);
 #define VCWD_REALPATH(path, real_path) virtual_realpath(path, real_path TSRMLS_CC)
 #define VCWD_RENAME(oldname, newname) virtual_rename(oldname, newname TSRMLS_CC)
 #define VCWD_STAT(path, buff) virtual_stat(path, buff TSRMLS_CC)
-#define VCWD_LSTAT(path, buff) virtual_lstat(path, buff TSRMLS_CC)
+# define VCWD_LSTAT(path, buff) virtual_lstat(path, buff TSRMLS_CC)
 #define VCWD_UNLINK(path) virtual_unlink(path TSRMLS_CC)
 #define VCWD_MKDIR(pathname, mode) virtual_mkdir(pathname, mode TSRMLS_CC)
 #define VCWD_RMDIR(pathname) virtual_rmdir(pathname TSRMLS_CC)
@@ -310,7 +310,7 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(TSRMLS_D);
 #define VCWD_OPENDIR(pathname) opendir(pathname)
 #define VCWD_POPEN(command, type) popen(command, type)
 #if defined(TSRM_WIN32)
-#define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode)
+#define VCWD_ACCESS(pathname, mode) tsrm_win32_access(pathname, mode TSRMLS_CC)
 #else
 #define VCWD_ACCESS(pathname, mode) access(pathname, mode)
 #endif

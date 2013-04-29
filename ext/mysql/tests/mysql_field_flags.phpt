@@ -81,12 +81,16 @@ $tables = array(
 								array('label1', sprintf("'%s'", @date("Y-m-d H:i:s"))),
 								'label1' => array(
 										'timestamp',
-										'unsigned',
-										'zerofill',
 										'binary',
 										'not_null'),
 								),
 );
+
+if ($version < 560) {
+	$tables['label1 TIMESTAMP']['label1'][] = 'zerofill';
+	$tables['label1 TIMESTAMP']['label1'][] = 'unsigned';
+}
+
 
 foreach ($tables as $columns => $expected) {
 	if (!mysql_query("DROP TABLE IF EXISTS test", $link)) {
@@ -140,6 +144,8 @@ print "done!";
 require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
 Warning: mysql_field_flags() expects exactly 2 parameters, 1 given in %s on line %d
 
 Warning: mysql_field_flags(): Field -1 is invalid for MySQL result index %d in %s on line %d

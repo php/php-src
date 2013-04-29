@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2008 University of Cambridge
+           Copyright (c) 1997-2012 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -63,14 +63,20 @@ Returns:      the number of the named parentheses, or a negative number
                 (PCRE_ERROR_NOSUBSTRING) if not found
 */
 
+#ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_get_stringnumber(const pcre *code, const char *stringname)
+#else
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre16_get_stringnumber(const pcre16 *code, PCRE_SPTR16 stringname)
+#endif
 {
 int rc;
 int entrysize;
 int top, bot;
-uschar *nametable;
+pcre_uchar *nametable;
 
+#ifdef COMPILE_PCRE8
 if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMECOUNT, &top)) != 0)
   return rc;
 if (top <= 0) return PCRE_ERROR_NOSUBSTRING;
@@ -79,14 +85,26 @@ if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMEENTRYSIZE, &entrysize)) != 0)
   return rc;
 if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMETABLE, &nametable)) != 0)
   return rc;
+#endif
+#ifdef COMPILE_PCRE16
+if ((rc = pcre16_fullinfo(code, NULL, PCRE_INFO_NAMECOUNT, &top)) != 0)
+  return rc;
+if (top <= 0) return PCRE_ERROR_NOSUBSTRING;
+
+if ((rc = pcre16_fullinfo(code, NULL, PCRE_INFO_NAMEENTRYSIZE, &entrysize)) != 0)
+  return rc;
+if ((rc = pcre16_fullinfo(code, NULL, PCRE_INFO_NAMETABLE, &nametable)) != 0)
+  return rc;
+#endif
 
 bot = 0;
 while (top > bot)
   {
   int mid = (top + bot) / 2;
-  uschar *entry = nametable + entrysize*mid;
-  int c = strcmp(stringname, (char *)(entry + 2));
-  if (c == 0) return (entry[0] << 8) + entry[1];
+  pcre_uchar *entry = nametable + entrysize*mid;
+  int c = STRCMP_UC_UC((pcre_uchar *)stringname,
+    (pcre_uchar *)(entry + IMM2_SIZE));
+  if (c == 0) return GET2(entry, 0);
   if (c > 0) bot = mid + 1; else top = mid;
   }
 
@@ -112,15 +130,22 @@ Returns:      the length of each entry, or a negative number
                 (PCRE_ERROR_NOSUBSTRING) if not found
 */
 
+#ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_get_stringtable_entries(const pcre *code, const char *stringname,
   char **firstptr, char **lastptr)
+#else
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre16_get_stringtable_entries(const pcre16 *code, PCRE_SPTR16 stringname,
+  PCRE_UCHAR16 **firstptr, PCRE_UCHAR16 **lastptr)
+#endif
 {
 int rc;
 int entrysize;
 int top, bot;
-uschar *nametable, *lastentry;
+pcre_uchar *nametable, *lastentry;
 
+#ifdef COMPILE_PCRE8
 if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMECOUNT, &top)) != 0)
   return rc;
 if (top <= 0) return PCRE_ERROR_NOSUBSTRING;
@@ -129,30 +154,49 @@ if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMEENTRYSIZE, &entrysize)) != 0)
   return rc;
 if ((rc = pcre_fullinfo(code, NULL, PCRE_INFO_NAMETABLE, &nametable)) != 0)
   return rc;
+#endif
+#ifdef COMPILE_PCRE16
+if ((rc = pcre16_fullinfo(code, NULL, PCRE_INFO_NAMECOUNT, &top)) != 0)
+  return rc;
+if (top <= 0) return PCRE_ERROR_NOSUBSTRING;
+
+if ((rc = pcre16_fullinfo(code, NULL, PCRE_INFO_NAMEENTRYSIZE, &entrysize)) != 0)
+  return rc;
+if ((rc = pcre16_fullinfo(code, NULL, PCRE_INFO_NAMETABLE, &nametable)) != 0)
+  return rc;
+#endif
 
 lastentry = nametable + entrysize * (top - 1);
 bot = 0;
 while (top > bot)
   {
   int mid = (top + bot) / 2;
-  uschar *entry = nametable + entrysize*mid;
-  int c = strcmp(stringname, (char *)(entry + 2));
+  pcre_uchar *entry = nametable + entrysize*mid;
+  int c = STRCMP_UC_UC((pcre_uchar *)stringname,
+    (pcre_uchar *)(entry + IMM2_SIZE));
   if (c == 0)
     {
-    uschar *first = entry;
-    uschar *last = entry;
+    pcre_uchar *first = entry;
+    pcre_uchar *last = entry;
     while (first > nametable)
       {
-      if (strcmp(stringname, (char *)(first - entrysize + 2)) != 0) break;
+      if (STRCMP_UC_UC((pcre_uchar *)stringname,
+        (pcre_uchar *)(first - entrysize + IMM2_SIZE)) != 0) break;
       first -= entrysize;
       }
     while (last < lastentry)
       {
-      if (strcmp(stringname, (char *)(last + entrysize + 2)) != 0) break;
+      if (STRCMP_UC_UC((pcre_uchar *)stringname,
+        (pcre_uchar *)(last + entrysize + IMM2_SIZE)) != 0) break;
       last += entrysize;
       }
+#ifdef COMPILE_PCRE8
     *firstptr = (char *)first;
     *lastptr = (char *)last;
+#else
+    *firstptr = (PCRE_UCHAR16 *)first;
+    *lastptr = (PCRE_UCHAR16 *)last;
+#endif
     return entrysize;
     }
   if (c > 0) bot = mid + 1; else top = mid;
@@ -180,23 +224,39 @@ Returns:       the number of the first that is set,
                or a negative number on error
 */
 
+#ifdef COMPILE_PCRE8
 static int
 get_first_set(const pcre *code, const char *stringname, int *ovector)
+#else
+static int
+get_first_set(const pcre16 *code, PCRE_SPTR16 stringname, int *ovector)
+#endif
 {
-const real_pcre *re = (const real_pcre *)code;
+const REAL_PCRE *re = (const REAL_PCRE *)code;
 int entrysize;
+pcre_uchar *entry;
+#ifdef COMPILE_PCRE8
 char *first, *last;
-uschar *entry;
+#else
+PCRE_UCHAR16 *first, *last;
+#endif
+
+#ifdef COMPILE_PCRE8
 if ((re->options & PCRE_DUPNAMES) == 0 && (re->flags & PCRE_JCHANGED) == 0)
   return pcre_get_stringnumber(code, stringname);
 entrysize = pcre_get_stringtable_entries(code, stringname, &first, &last);
+#else
+if ((re->options & PCRE_DUPNAMES) == 0 && (re->flags & PCRE_JCHANGED) == 0)
+  return pcre16_get_stringnumber(code, stringname);
+entrysize = pcre16_get_stringtable_entries(code, stringname, &first, &last);
+#endif
 if (entrysize <= 0) return entrysize;
-for (entry = (uschar *)first; entry <= (uschar *)last; entry += entrysize)
+for (entry = (pcre_uchar *)first; entry <= (pcre_uchar *)last; entry += entrysize)
   {
-  int n = (entry[0] << 8) + entry[1];
+  int n = GET2(entry, 0);
   if (ovector[n*2] >= 0) return n;
   }
-return (first[0] << 8) + first[1];
+return GET2(entry, 0);
 }
 
 
@@ -229,9 +289,15 @@ Returns:         if successful:
                    PCRE_ERROR_NOSUBSTRING (-7) no such captured substring
 */
 
+#ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_copy_substring(const char *subject, int *ovector, int stringcount,
   int stringnumber, char *buffer, int size)
+#else
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre16_copy_substring(PCRE_SPTR16 subject, int *ovector, int stringcount,
+  int stringnumber, PCRE_UCHAR16 *buffer, int size)
+#endif
 {
 int yield;
 if (stringnumber < 0 || stringnumber >= stringcount)
@@ -239,7 +305,7 @@ if (stringnumber < 0 || stringnumber >= stringcount)
 stringnumber *= 2;
 yield = ovector[stringnumber+1] - ovector[stringnumber];
 if (size < yield + 1) return PCRE_ERROR_NOMEMORY;
-memcpy(buffer, subject + ovector[stringnumber], yield);
+memcpy(buffer, subject + ovector[stringnumber], IN_UCHARS(yield));
 buffer[yield] = 0;
 return yield;
 }
@@ -274,13 +340,25 @@ Returns:         if successful:
                    PCRE_ERROR_NOSUBSTRING (-7) no such captured substring
 */
 
+#ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre_copy_named_substring(const pcre *code, const char *subject, int *ovector,
-  int stringcount, const char *stringname, char *buffer, int size)
+pcre_copy_named_substring(const pcre *code, const char *subject,
+  int *ovector, int stringcount, const char *stringname,
+  char *buffer, int size)
+#else
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre16_copy_named_substring(const pcre16 *code, PCRE_SPTR16 subject,
+  int *ovector, int stringcount, PCRE_SPTR16 stringname,
+  PCRE_UCHAR16 *buffer, int size)
+#endif
 {
 int n = get_first_set(code, stringname, ovector);
 if (n <= 0) return n;
+#ifdef COMPILE_PCRE8
 return pcre_copy_substring(subject, ovector, stringcount, n, buffer, size);
+#else
+return pcre16_copy_substring(subject, ovector, stringcount, n, buffer, size);
+#endif
 }
 
 
@@ -306,29 +384,39 @@ Returns:         if successful: 0
                    PCRE_ERROR_NOMEMORY (-6) failed to get store
 */
 
+#ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_get_substring_list(const char *subject, int *ovector, int stringcount,
   const char ***listptr)
+#else
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre16_get_substring_list(PCRE_SPTR16 subject, int *ovector, int stringcount,
+  PCRE_SPTR16 **listptr)
+#endif
 {
 int i;
-int size = sizeof(char *);
+int size = sizeof(pcre_uchar *);
 int double_count = stringcount * 2;
-char **stringlist;
-char *p;
+pcre_uchar **stringlist;
+pcre_uchar *p;
 
 for (i = 0; i < double_count; i += 2)
-  size += sizeof(char *) + ovector[i+1] - ovector[i] + 1;
+  size += sizeof(pcre_uchar *) + IN_UCHARS(ovector[i+1] - ovector[i] + 1);
 
-stringlist = (char **)(pcre_malloc)(size);
+stringlist = (pcre_uchar **)(PUBL(malloc))(size);
 if (stringlist == NULL) return PCRE_ERROR_NOMEMORY;
 
+#ifdef COMPILE_PCRE8
 *listptr = (const char **)stringlist;
-p = (char *)(stringlist + stringcount + 1);
+#else
+*listptr = (PCRE_SPTR16 *)stringlist;
+#endif
+p = (pcre_uchar *)(stringlist + stringcount + 1);
 
 for (i = 0; i < double_count; i += 2)
   {
   int len = ovector[i+1] - ovector[i];
-  memcpy(p, subject + ovector[i], len);
+  memcpy(p, subject + ovector[i], IN_UCHARS(len));
   *stringlist++ = p;
   p += len;
   *p++ = 0;
@@ -345,16 +433,22 @@ return 0;
 *************************************************/
 
 /* This function exists for the benefit of people calling PCRE from non-C
-programs that can call its functions, but not free() or (pcre_free)() directly.
+programs that can call its functions, but not free() or (PUBL(free))()
+directly.
 
 Argument:   the result of a previous pcre_get_substring_list()
 Returns:    nothing
 */
 
+#ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN void PCRE_CALL_CONVENTION
 pcre_free_substring_list(const char **pointer)
+#else
+PCRE_EXP_DEFN void PCRE_CALL_CONVENTION
+pcre16_free_substring_list(PCRE_SPTR16 *pointer)
+#endif
 {
-(pcre_free)((void *)pointer);
+(PUBL(free))((void *)pointer);
 }
 
 
@@ -384,21 +478,31 @@ Returns:         if successful:
                    PCRE_ERROR_NOSUBSTRING (-7) substring not present
 */
 
+#ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_get_substring(const char *subject, int *ovector, int stringcount,
   int stringnumber, const char **stringptr)
+#else
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre16_get_substring(PCRE_SPTR16 subject, int *ovector, int stringcount,
+  int stringnumber, PCRE_SPTR16 *stringptr)
+#endif
 {
 int yield;
-char *substring;
+pcre_uchar *substring;
 if (stringnumber < 0 || stringnumber >= stringcount)
   return PCRE_ERROR_NOSUBSTRING;
 stringnumber *= 2;
 yield = ovector[stringnumber+1] - ovector[stringnumber];
-substring = (char *)(pcre_malloc)(yield + 1);
+substring = (pcre_uchar *)(PUBL(malloc))(IN_UCHARS(yield + 1));
 if (substring == NULL) return PCRE_ERROR_NOMEMORY;
-memcpy(substring, subject + ovector[stringnumber], yield);
+memcpy(substring, subject + ovector[stringnumber], IN_UCHARS(yield));
 substring[yield] = 0;
-*stringptr = substring;
+#ifdef COMPILE_PCRE8
+*stringptr = (const char *)substring;
+#else
+*stringptr = (PCRE_SPTR16)substring;
+#endif
 return yield;
 }
 
@@ -431,13 +535,25 @@ Returns:         if successful:
                    PCRE_ERROR_NOSUBSTRING (-7) no such captured substring
 */
 
+#ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
-pcre_get_named_substring(const pcre *code, const char *subject, int *ovector,
-  int stringcount, const char *stringname, const char **stringptr)
+pcre_get_named_substring(const pcre *code, const char *subject,
+  int *ovector, int stringcount, const char *stringname,
+  const char **stringptr)
+#else
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre16_get_named_substring(const pcre16 *code, PCRE_SPTR16 subject,
+  int *ovector, int stringcount, PCRE_SPTR16 stringname,
+  PCRE_SPTR16 *stringptr)
+#endif
 {
 int n = get_first_set(code, stringname, ovector);
 if (n <= 0) return n;
+#ifdef COMPILE_PCRE8
 return pcre_get_substring(subject, ovector, stringcount, n, stringptr);
+#else
+return pcre16_get_substring(subject, ovector, stringcount, n, stringptr);
+#endif
 }
 
 
@@ -448,16 +564,22 @@ return pcre_get_substring(subject, ovector, stringcount, n, stringptr);
 *************************************************/
 
 /* This function exists for the benefit of people calling PCRE from non-C
-programs that can call its functions, but not free() or (pcre_free)() directly.
+programs that can call its functions, but not free() or (PUBL(free))()
+directly.
 
 Argument:   the result of a previous pcre_get_substring()
 Returns:    nothing
 */
 
+#ifdef COMPILE_PCRE8
 PCRE_EXP_DEFN void PCRE_CALL_CONVENTION
 pcre_free_substring(const char *pointer)
+#else
+PCRE_EXP_DEFN void PCRE_CALL_CONVENTION
+pcre16_free_substring(PCRE_SPTR16 pointer)
+#endif
 {
-(pcre_free)((void *)pointer);
+(PUBL(free))((void *)pointer);
 }
 
 /* End of pcre_get.c */

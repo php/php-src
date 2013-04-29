@@ -1,5 +1,5 @@
 --TEST--
-Bug #52238 - Crash when an Exception occured in iterator_to_array
+Bug #52238 - Crash when an Exception occurred in iterator_to_array
 --FILE--
 <?php
 class Foo implements IteratorAggregate

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@
 		free_class_name = 1; \
 		incomplete_class = 1; \
 	} else { \
-		free_class_name = !zend_get_object_classname(struc, &class_name, &name_len TSRMLS_CC);\
+		free_class_name = !zend_get_object_classname(struc, (const char **)&class_name, &name_len TSRMLS_CC);\
 	}
 
 #define PHP_CLEANUP_CLASS_ATTRIBUTES()	\

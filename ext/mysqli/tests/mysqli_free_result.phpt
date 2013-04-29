@@ -10,7 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$db = 'test';
 	$tmp    = NULL;
 	$link   = NULL;
 

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -59,12 +59,10 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		pefree(S->einfo.errmsg, stmt->dbh->is_persistent);
 		S->einfo.errmsg = NULL;
 	}
-#if HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND
 	if (S->stmt) {
 		pdo_mysql_stmt_close(S->stmt);
 		S->stmt = NULL;
 	}
-#endif /* HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND */
 
 #ifndef PDO_USE_MYSQLND
 	if (S->params) {
@@ -77,38 +75,34 @@ static int pdo_mysql_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		efree(S->in_length);
 	}
 
-#endif /* PDO_USE_MYSQLND */
-
-#ifdef HAVE_MYSQL_STMT_PREPARE
-	if (S->bound_result) 
+	if (S->bound_result)
 	{
 		int i;
 		for (i = 0; i < stmt->column_count; i++) {
 			pdo_free_bound_result(S->bound_result[i]);
 		}
-	
+
 		efree(S->bound_result);
 		efree(S->out_null);
 		efree(S->out_length);
 	}
-#endif /* HAVE_MYSQL_STMT_PREPARE */
+#endif
 
 
-#if HAVE_MYSQL_NEXT_RESULT || PDO_USE_MYSQLND
 	if (S->H->server) {
 		while (mysql_more_results(S->H->server)) {
 			MYSQL_RES *res;
 			if (mysql_next_result(S->H->server) != 0) {
 				break;
 			}
-			
+
 			res = mysql_store_result(S->H->server);
 			if (res) {
 				mysql_free_result(res);
 			}
 		}
-	}	
-#endif /* HAVE_MYSQL_NEXT_RESULT || PDO_USE_MYSQLND */
+	}
+
 #if PDO_USE_MYSQLND
 	if (!S->stmt && S->current_data) {
 		mnd_free(S->current_data);
@@ -140,7 +134,7 @@ static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 	row_count = mysql_affected_rows(H->server);
 	if (row_count == (my_ulonglong)-1) {
-		/* we either have a query that returned a result set or an error occured
+		/* we either have a query that returned a result set or an error occurred
 		   lets see if we have access to a result set */
 		if (!H->buffered) {
 			S->result = mysql_use_result(H->server);
@@ -164,7 +158,7 @@ static int pdo_mysql_fill_stmt_from_result(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-#ifdef HAVE_MYSQL_STMT_PREPARE
+#ifndef PDO_USE_MYSQLND
 static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_mysql_stmt *S = stmt->driver_data;
@@ -186,23 +180,23 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt TSRMLS_DC) 
 	}
 
 	if (!S->result) {
-		int i; 
+		int i;
 
-		/* figure out the result set format, if any */ 
-		S->result = mysql_stmt_result_metadata(S->stmt); 
-		if (S->result) { 
-			int calc_max_length = H->buffered && S->max_length == 1; 
-			S->fields = mysql_fetch_fields(S->result); 
-			if (S->bound_result) { 
-				int i; 
-				for (i = 0; i < stmt->column_count; i++) { 
-					efree(S->bound_result[i].buffer);  
-				} 
-				efree(S->bound_result); 
-				efree(S->out_null); 
-				efree(S->out_length); 
+		/* figure out the result set format, if any */
+		S->result = mysql_stmt_result_metadata(S->stmt);
+		if (S->result) {
+			int calc_max_length = H->buffered && S->max_length == 1;
+			S->fields = mysql_fetch_fields(S->result);
+			if (S->bound_result) {
+				int i;
+				for (i = 0; i < stmt->column_count; i++) {
+					efree(S->bound_result[i].buffer);
+				}
+				efree(S->bound_result);
+				efree(S->out_null);
+				efree(S->out_length);
 			}
-			
+
 			stmt->column_count = (int)mysql_num_fields(S->result);
 			S->bound_result = ecalloc(stmt->column_count, sizeof(MYSQL_BIND));
 			S->out_null = ecalloc(stmt->column_count, sizeof(my_bool));
@@ -268,7 +262,7 @@ static int pdo_mysql_stmt_execute_prepared_libmysql(pdo_stmt_t *stmt TSRMLS_DC) 
 			}
 		}
 	}
-	
+
 	pdo_mysql_stmt_set_row_count(stmt TSRMLS_CC);
 	PDO_DBG_RETURN(1);
 }
@@ -281,9 +275,9 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt TSRMLS_DC) /
 	pdo_mysql_stmt *S = stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
 	int i;
-	
+
 	PDO_DBG_ENTER("pdo_mysql_stmt_execute_prepared_mysqlnd");
-	
+
 	if (mysql_stmt_execute(S->stmt)) {
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
@@ -311,7 +305,7 @@ static int pdo_mysql_stmt_execute_prepared_mysqlnd(pdo_stmt_t *stmt TSRMLS_DC) /
 			}
 		}
 	}
-	
+
 	pdo_mysql_stmt_set_row_count(stmt TSRMLS_CC);
 	PDO_DBG_RETURN(1);
 }
@@ -325,12 +319,10 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	PDO_DBG_ENTER("pdo_mysql_stmt_execute");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 
-#if HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND
 	if (S->stmt) {
 		PDO_DBG_RETURN(pdo_mysql_stmt_execute_prepared(stmt));
 	}
-#endif
-	
+
 	/* ensure that we free any previous unfetched results */
 	if (S->result) {
 		mysql_free_result(S->result);
@@ -348,7 +340,6 @@ static int pdo_mysql_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 
 static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
-#if HAVE_MYSQL_NEXT_RESULT || PDO_USE_MYSQLND
 	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 	pdo_mysql_db_handle *H = S->H;
 	long row_count;
@@ -366,8 +357,8 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		}
 
 		if (!mysqlnd_stmt_more_results(S->stmt)) {
-			/* 
-			MySQL gives us n + 1 result sets for 
+			/*
+			MySQL gives us n + 1 result sets for
 			CALL proc() and n result sets returned by the proc itself.
 			Result set n + 1 is about the procedure call itself.
 			As the PDO emulation does not return it, we skip it as well
@@ -410,7 +401,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 #endif
 
 /* ensure that we free any previous unfetched results */
-#if HAVE_MYSQL_STMT_PREPARE
+#ifndef PDO_USE_MYSQLND
 	if (S->stmt) {
 		stmt->column_count = (int)mysql_num_fields(S->result);
 		mysql_stmt_free_result(S->stmt);
@@ -422,7 +413,19 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	}
 
 	ret = mysql_next_result(H->server);
-
+#if PDO_USE_MYSQLND
+	/* for whatever reason mysqlnd breaks with libmysql compatibility at the C level, no -1 */
+	if (PASS != ret) {
+		pdo_mysql_error_stmt(stmt);
+		PDO_DBG_RETURN(0);
+	}
+	if (mysql_more_results(H->server)) {
+		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt TSRMLS_CC));
+	} else {
+		/* No more results */
+		PDO_DBG_RETURN(0);
+	}
+#else
 	if (ret > 0) {
 		pdo_mysql_error_stmt(stmt);
 		PDO_DBG_RETURN(0);
@@ -432,10 +435,7 @@ static int pdo_mysql_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 	} else {
 		PDO_DBG_RETURN(pdo_mysql_fill_stmt_from_result(stmt TSRMLS_CC));
 	}
-#else
-	strcpy(stmt->error_code, "HYC00");
-	PDO_DBG_RETURN(0);
-#endif /* HAVE_MYSQL_STMT_PREPARE */
+#endif
 }
 /* }}} */
 
@@ -457,8 +457,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 #ifndef PDO_USE_MYSQLND
 	PDO_MYSQL_PARAM_BIND *b;
 #endif
-#if HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND
-	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;	
+	pdo_mysql_stmt *S = (pdo_mysql_stmt*)stmt->driver_data;
 
 	PDO_DBG_ENTER("pdo_mysql_stmt_param_hook");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
@@ -498,18 +497,18 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 				}
 #else
 				b = (PDO_MYSQL_PARAM_BIND*)param->driver_data;
-				*b->is_null = 0; 
-				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||  
-						Z_TYPE_P(param->parameter) == IS_NULL) { 
-					*b->is_null = 1; 
-					b->buffer_type = MYSQL_TYPE_STRING; 
-					b->buffer = NULL; 
-					b->buffer_length = 0; 
-					*b->length = 0; 
+				*b->is_null = 0;
+				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||
+						Z_TYPE_P(param->parameter) == IS_NULL) {
+					*b->is_null = 1;
+					b->buffer_type = MYSQL_TYPE_STRING;
+					b->buffer = NULL;
+					b->buffer_length = 0;
+					*b->length = 0;
 					PDO_DBG_RETURN(1);
-				} 
+				}
 #endif /* PDO_USE_MYSQLND */
-	
+
 				switch (PDO_PARAM_TYPE(param->param_type)) {
 					case PDO_PARAM_STMT:
 						PDO_DBG_RETURN(0);
@@ -533,7 +532,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 					default:
 						;
 				}
-		
+
 #if PDO_USE_MYSQLND
 				/* Is it really correct to check the zval's type? - But well, that's what the old code below does, too */
 				PDO_DBG_INF_FMT("param->parameter->type=%d", Z_TYPE_P(param->parameter));
@@ -554,9 +553,9 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 					default:
 						PDO_DBG_RETURN(0);
 				}
-				
+
 				PDO_DBG_RETURN(1);
-#else	
+#else
 				PDO_DBG_INF_FMT("param->parameter->type=%d", Z_TYPE_P(param->parameter));
 				switch (Z_TYPE_P(param->parameter)) {
 					case IS_STRING:
@@ -589,7 +588,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 			break;
 		}
 	}
-#endif /* HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND */
+
 	PDO_DBG_RETURN(1);
 }
 /* }}} */
@@ -610,9 +609,8 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 		PDO_DBG_RETURN(1);
 	}
 #else
-#	if HAVE_MYSQL_STMT_PREPARE
 	int ret;
-	
+
 	if (S->stmt) {
 		ret = mysql_stmt_fetch(S->stmt);
 
@@ -631,9 +629,8 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 
 		PDO_DBG_RETURN(1);
 	}
-#	endif /* HAVE_MYSQL_STMT_PREPARE */
 #endif /* PDO_USE_MYSQLND */
-	
+
 	if (!S->result) {
 		strcpy(stmt->error_code, "HY000");
 		PDO_DBG_RETURN(0);
@@ -653,7 +650,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 			pdo_mysql_error_stmt(stmt);
 		}
 		PDO_DBG_RETURN(0);
-	} 
+	}
 
 	S->current_lengths = mysql_fetch_lengths(S->result);
 	PDO_DBG_RETURN(1);
@@ -677,8 +674,8 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{
 		PDO_DBG_RETURN(0);
 	}
 
-	/* fetch all on demand, this seems easiest 
-	** if we've been here before bail out 
+	/* fetch all on demand, this seems easiest
+	** if we've been here before bail out
 	*/
 	if (cols[0].name) {
 		PDO_DBG_RETURN(1);
@@ -694,10 +691,10 @@ static int pdo_mysql_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC) /* {{{
 			cols[i].namelen = namelen;
 			cols[i].name = estrndup(S->fields[i].name, namelen);
 		}
-		
+
 		cols[i].precision = S->fields[i].decimals;
 		cols[i].maxlen = S->fields[i].length;
-		
+
 #ifdef PDO_USE_MYSQLND
 		if (S->stmt) {
 			cols[i].param_type = PDO_PARAM_ZVAL;
@@ -722,15 +719,12 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 	}
 
 	/* With mysqlnd data is stored inside mysqlnd, not S->current_data */
-#if HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND
 	if (!S->stmt) {
-#endif
 		if (S->current_data == NULL || !S->result) {
 			PDO_DBG_RETURN(0);
 		}
-#if HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND
 	}
-#endif
+
 	if (colno >= stmt->column_count) {
 		/* error invalid column */
 		PDO_DBG_RETURN(0);
@@ -742,7 +736,7 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 		*len = sizeof(zval);
 		PDO_DBG_RETURN(1);
 	}
-#elif HAVE_MYSQL_STMT_PREPARE
+#else
 	if (S->stmt) {
 		if (S->out_null[colno]) {
 			*ptr = NULL;
@@ -760,7 +754,7 @@ static int pdo_mysql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsig
 		*len = S->out_length[colno];
 		PDO_DBG_RETURN(1);
 	}
-#endif /* PDO_USE_MYSQLND else HAVE_MYSQL_STMT_PREPARE */
+#endif
 	*ptr = S->current_data[colno];
 	*len = S->current_lengths[colno];
 	PDO_DBG_RETURN(1);
@@ -818,7 +812,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 	const MYSQL_FIELD *F;
 	zval *flags;
 	char *str;
-	
+
 	PDO_DBG_ENTER("pdo_mysql_stmt_col_meta");
 	PDO_DBG_INF_FMT("stmt=%p", S->stmt);
 	if (!S->result) {
@@ -876,9 +870,9 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, long colno, zval *return_va
 			break;
 	}
 #endif
-	
+
 	add_assoc_zval(return_value, "flags", flags);
-	add_assoc_string(return_value, "table",(char *) (F->table?F->table:""), 1);
+	add_assoc_string(return_value, "table", (char *) (F->table?F->table:""), 1);
 	PDO_DBG_RETURN(SUCCESS);
 } /* }}} */
 
@@ -892,15 +886,12 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 		mysql_free_result(S->result);
 		S->result = NULL;
 	}
-#if HAVE_MYSQL_STMT_PREPARE || PDO_USE_MYSQLND
 	if (S->stmt) {
 		int retval;
 		retval = mysql_stmt_free_result(S->stmt);
 		PDO_DBG_RETURN(retval ? 0 : 1);
 	}
-#endif
 
-#if HAVE_MYSQL_NEXT_RESULT || PDO_USE_MYSQLND
 	while (mysql_more_results(S->H->server)) {
 		MYSQL_RES *res;
 		if (mysql_next_result(S->H->server) != 0) {
@@ -911,7 +902,6 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 			mysql_free_result(res);
 		}
 	}
-#endif
 	PDO_DBG_RETURN(1);
 }
 /* }}} */

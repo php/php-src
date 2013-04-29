@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,7 +55,7 @@ typedef struct _zend_object_handlers zend_object_handlers;
 
 typedef struct _zend_object_value {
 	zend_object_handle handle;
-	zend_object_handlers *handlers;
+	const zend_object_handlers *handlers;
 } zend_object_value;
 
 #endif /* ZEND_TYPES_H */

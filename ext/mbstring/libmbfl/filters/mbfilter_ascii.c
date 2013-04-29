@@ -37,7 +37,7 @@
 
 static int mbfl_filt_ident_ascii(int c, mbfl_identify_filter *filter);
 
-static const char *mbfl_encoding_ascii_aliases[] = {"ANSI_X3.4-1968", "iso-ir-6", "ANSI_X3.4-1986", "ISO_646.irv:1991", "US-ASCII", "ISO646-US", "us", "IBM367", "cp367", "csASCII", NULL};
+static const char *mbfl_encoding_ascii_aliases[] = {"ANSI_X3.4-1968", "iso-ir-6", "ANSI_X3.4-1986", "ISO_646.irv:1991", "US-ASCII", "ISO646-US", "us", "IBM367", "IBM-367", "cp367", "csASCII", NULL};
 
 const mbfl_encoding mbfl_encoding_ascii = {
 	mbfl_no_encoding_ascii,

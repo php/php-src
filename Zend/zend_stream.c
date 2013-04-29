@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,7 +79,7 @@ static size_t zend_stream_stdio_fsizer(void *handle TSRMLS_DC) /* {{{ */
 static void zend_stream_unmap(zend_stream *stream TSRMLS_DC) { /* {{{ */
 #if HAVE_MMAP
 	if (stream->mmap.map) {
-		munmap(stream->mmap.map, stream->mmap.len);
+		munmap(stream->mmap.map, stream->mmap.len + ZEND_MMAP_AHEAD);
 	} else
 #endif
 	if (stream->mmap.buf) {
@@ -134,7 +134,7 @@ ZEND_API int zend_stream_open(const char *filename, zend_file_handle *handle TSR
 	handle->type = ZEND_HANDLE_FP;
 	handle->opened_path = NULL;
 	handle->handle.fp = zend_fopen(filename, &handle->opened_path TSRMLS_CC);
-	handle->filename = (char *)filename;
+	handle->filename = filename;
 	handle->free_filename = 0;
 	memset(&handle->handle.stream.mmap, 0, sizeof(zend_mmap));
 	
@@ -284,7 +284,6 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 	if (ZEND_MMAP_AHEAD) {
 		memset(file_handle->handle.stream.mmap.buf + file_handle->handle.stream.mmap.len, 0, ZEND_MMAP_AHEAD);
 	}
-
 #if HAVE_MMAP
 return_mapped:
 #endif
@@ -328,7 +327,7 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh TSRMLS_DC) /* {{{ */
 		fh->opened_path = NULL;
 	}
 	if (fh->free_filename && fh->filename) {
-		efree(fh->filename);
+		efree((char*)fh->filename);
 		fh->filename = NULL;
 	}
 }

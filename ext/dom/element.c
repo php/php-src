@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -371,7 +371,7 @@ Since:
 */
 PHP_FUNCTION(dom_element_set_attribute)
 {
-	zval *id, *rv = NULL;
+	zval *id;
 	xmlNode *nodep;
 	xmlNodePtr attr = NULL;
 	int ret, name_len, value_len, name_valid;
@@ -426,7 +426,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 		RETURN_FALSE;
 	}
 
-	DOM_RET_OBJ(rv, attr, &ret, intern);
+	DOM_RET_OBJ(attr, &ret, intern);
 
 }
 /* }}} end dom_element_set_attribute */
@@ -485,7 +485,7 @@ Since:
 */
 PHP_FUNCTION(dom_element_get_attribute_node)
 {
-	zval *id, *rv = NULL;
+	zval *id;
 	xmlNodePtr nodep, attrp;
 	int name_len, ret;
 	dom_object *intern;
@@ -521,7 +521,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 		attrp->ns = curns;
 	}
 
-	DOM_RET_OBJ(rv, (xmlNodePtr) attrp, &ret, intern);
+	DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
 }
 /* }}} end dom_element_get_attribute_node */
 
@@ -531,7 +531,7 @@ Since:
 */
 PHP_FUNCTION(dom_element_set_attribute_node)
 {
-	zval *id, *node, *rv = NULL;
+	zval *id, *node;
 	xmlNode *nodep;
 	xmlAttr *attrp, *existattrp = NULL;
 	dom_object *intern, *attrobj, *oldobj;
@@ -583,7 +583,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {
-		DOM_RET_OBJ(rv, (xmlNodePtr) existattrp, &ret, intern);
+		DOM_RET_OBJ((xmlNodePtr) existattrp, &ret, intern);
 	} else {
 		RETVAL_NULL();
 	}
@@ -597,7 +597,7 @@ Since:
 */
 PHP_FUNCTION(dom_element_remove_attribute_node)
 {
-	zval *id, *node, *rv = NULL;
+	zval *id, *node;
 	xmlNode *nodep;
 	xmlAttr *attrp;
 	dom_object *intern, *attrobj;
@@ -623,7 +623,7 @@ PHP_FUNCTION(dom_element_remove_attribute_node)
 
 	xmlUnlinkNode((xmlNodePtr) attrp);
 
-	DOM_RET_OBJ(rv, (xmlNodePtr) attrp, &ret, intern);
+	DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
 
 }
 /* }}} end dom_element_remove_attribute_node */
@@ -832,7 +832,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 			}
 
 			if (errorcode == 0 && is_xmlns == 0) {
-				attr = xmlSetNsProp(elemp, nsptr, (xmlChar *)localname, (xmlChar *)value);
+				xmlSetNsProp(elemp, nsptr, (xmlChar *)localname, (xmlChar *)value);
 			}
 		} else {
 			name_valid = xmlValidateName((xmlChar *) localname, 0);
@@ -844,7 +844,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 				if (attr != NULL && attr->type != XML_ATTRIBUTE_DECL) {
 					node_list_unlink(attr->children TSRMLS_CC);
 				}
-				attr = xmlSetProp(elemp, (xmlChar *)localname, (xmlChar *)value);
+				xmlSetProp(elemp, (xmlChar *)localname, (xmlChar *)value);
 			}
 		}
 	}
@@ -925,7 +925,7 @@ Since: DOM Level 2
 */
 PHP_FUNCTION(dom_element_get_attribute_node_ns)
 {
-	zval *id, *rv = NULL;
+	zval *id;
 	xmlNodePtr elemp;
 	xmlAttrPtr attrp;
 	dom_object *intern;
@@ -944,7 +944,7 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 		RETURN_NULL();
 	}
 
-	DOM_RET_OBJ(rv, (xmlNodePtr) attrp, &ret, intern);
+	DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
 
 }
 /* }}} end dom_element_get_attribute_node_ns */
@@ -955,7 +955,7 @@ Since: DOM Level 2
 */
 PHP_FUNCTION(dom_element_set_attribute_node_ns)
 {
-	zval *id, *node, *rv = NULL;
+	zval *id, *node;
 	xmlNode *nodep;
 	xmlNs *nsp;
 	xmlAttr *attrp, *existattrp = NULL;
@@ -1014,7 +1014,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {
-		DOM_RET_OBJ(rv, (xmlNodePtr) existattrp, &ret, intern);
+		DOM_RET_OBJ((xmlNodePtr) existattrp, &ret, intern);
 	} else {
 		RETVAL_NULL();
 	}

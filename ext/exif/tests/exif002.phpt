@@ -3,7 +3,6 @@ Check for exif_thumbnail
 --SKIPIF--
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
-magic_quotes_runtime=0
 output_handler=
 zlib.output_compression=0 
 --FILE--

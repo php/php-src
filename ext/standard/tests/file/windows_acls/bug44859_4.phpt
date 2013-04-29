@@ -10,6 +10,7 @@ skipif();
 --FILE--
 <?php
 include_once __DIR__ . '/common.inc';
+fix_acls();
 
 $iteration = array(
 	PHPT_ACL_READ => true,

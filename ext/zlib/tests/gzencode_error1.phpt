@@ -71,12 +71,12 @@ NULL
 
 -- Testing with incorrect compression level --
 
-Warning: gzencode(): compression level(99) must be within -1..9 in %s on line %d
+Warning: gzencode(): compression level (99) must be within -1..9 in %s on line %d
 bool(false)
 
 -- Testing with incorrect encoding_mode --
 
-Warning: gzencode(): encoding mode must be FORCE_GZIP or FORCE_DEFLATE in %s on line %d
+Warning: gzencode(): encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
 bool(false)
 
 -- Testing with incorrect parameters --
@@ -87,7 +87,7 @@ NULL
 Warning: gzencode() expects parameter 2 to be long, object given in %s on line %d
 NULL
 
-Warning: gzencode(): encoding mode must be FORCE_GZIP or FORCE_DEFLATE in %s on line %d
+Warning: gzencode(): encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
 bool(false)
 
 Warning: gzencode() expects parameter 3 to be long, object given in %s on line %d

@@ -76,6 +76,14 @@
 ; Default Value: 0
 ; process.max = 128
 
+; Specify the nice(2) priority to apply to the master process (only if set)
+; The value can vary from -19 (highest priority) to 20 (lower priority)
+; Note: - It will only work if the FPM master process is launched as root
+;       - The pool process will inherit the master process priority
+;         unless it specified otherwise
+; Default Value: no set
+; process.priority = -19
+
 ; Send FPM to background. Set to 'no' to keep FPM in foreground for debugging.
 ; Default Value: yes
 ;daemonize = yes
@@ -142,9 +150,9 @@ group = @php_fpm_group@
 ; Note: This value is mandatory.
 listen = 127.0.0.1:9000
 
-; Set listen(2) backlog. A value of '-1' means unlimited.
+; Set listen(2) backlog.
 ; Default Value: 128 (-1 on FreeBSD and OpenBSD)
-;listen.backlog = -1
+;listen.backlog = 128
 
 ; Set permissions for unix socket, if one is used. In Linux, read/write
 ; permissions must be set in order to allow connections from a web server. Many
@@ -162,6 +170,14 @@ listen = 127.0.0.1:9000
 ; accepted from any ip address.
 ; Default Value: any
 ;listen.allowed_clients = 127.0.0.1
+
+; Specify the nice(2) priority to apply to the pool processes (only if set)
+; The value can vary from -19 (highest priority) to 20 (lower priority)
+; Note: - It will only work if the FPM master process is launched as root
+;       - The pool processes will inherit the master process priority
+;         unless it specified otherwise
+; Default Value: no set
+; priority = -19
 
 ; Choose how the process manager will control the number of child processes.
 ; Possible Values:

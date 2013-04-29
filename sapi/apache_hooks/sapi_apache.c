@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,13 +78,9 @@ int apache_php_module_hook(request_rec *r, php_handler *handler, zval **ret TSRM
             return FAILURE;
     }
 
-	req = php_apache_request_new(r);
-    if(PG(register_globals)) {
-        php_register_variable_ex("request", req, NULL TSRMLS_CC);
-    }
-    else {
-        php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
-    }
+    req = php_apache_request_new(r);
+    php_register_variable_ex("request", req, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);
+
     switch(handler->type) {
         case AP_HANDLER_TYPE_FILE:
             php_register_variable("PHP_SELF_HOOK", handler->name, PG(http_globals)[TRACK_VARS_SERVER] TSRMLS_CC);

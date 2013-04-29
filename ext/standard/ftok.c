@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,12 +35,8 @@ PHP_FUNCTION(ftok)
 	int pathname_len, proj_len;
 	key_t k;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &pathname, &pathname_len, &proj, &proj_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ps", &pathname, &pathname_len, &proj, &proj_len) == FAILURE) {
 		return;
-	}
-
-	if (strlen(pathname) != pathname_len) {
-		RETURN_FALSE;
 	}
 
 	if (pathname_len == 0){
@@ -51,9 +47,9 @@ PHP_FUNCTION(ftok)
 	if (proj_len != 1){
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Project identifier is invalid");
 		RETURN_LONG(-1);
-    }
+	}
 
-	if ((PG(safe_mode) && (!php_checkuid(pathname, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(pathname TSRMLS_CC)) {
+	if (php_check_open_basedir(pathname TSRMLS_CC)) {
 		RETURN_LONG(-1);
 	}
 

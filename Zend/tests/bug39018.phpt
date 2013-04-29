@@ -6,7 +6,7 @@ Bug #39018 (Error control operator '@' fails to suppress "Uninitialized string o
 error_reporting(E_ALL);
 
 $a = 'foo';
-$a[11111111111];
+$a[111111111111111111111];
 
 $a = '';
 
@@ -62,21 +62,42 @@ print "\nDone\n";
 
 ?>
 --EXPECTF--
+Notice: String offset cast occurred in %s on line %d
 
-Notice: Uninitialized string offset: 0 in %s on line 12
+Notice: Uninitialized string offset: 0 in %s on line %d
 
-Notice: Uninitialized string offset: %i in %s on line 16
+Notice: Uninitialized string offset: 0 in %s on line %d
 
-Notice: Uninitialized string offset: 4 in %s on line 28
+Notice: String offset cast occurred in %s on line %d
 
-Notice: Uninitialized string offset: 4 in %s on line 34
+Notice: Uninitialized string offset: %i in %s on line %d
 
-Notice: Uninitialized string offset: 4 in %s on line 38
+Notice: String offset cast occurred in %s on line %d
 
-Notice: Uninitialized string offset: 4 in %s on line 42
+Notice: Uninitialized string offset: %i in %s on line %d
 
-Notice: Uninitialized string offset: 4 in %s on line 46
+Notice: Uninitialized string offset: 0 in %s on line %d
 
-Notice: Uninitialized string offset: 12 in %s on line 52
+Notice: Uninitialized string offset: 4 in %s on line %d
+
+Notice: Uninitialized string offset: 4 in %s on line %d
+
+Notice: Uninitialized string offset: 4 in %s on line %d
+
+Notice: Uninitialized string offset: 4 in %s on line %d
+
+Notice: Uninitialized string offset: 4 in %s on line %d
+
+Notice: String offset cast occurred in %s on line %d
+
+Notice: Uninitialized string offset: 12 in %s on line %d
+
+Notice: String offset cast occurred in %s on line %d
+
+Notice: Uninitialized string offset: 12 in %s on line %d
+
+Notice: String offset cast occurred in %s on line %d
+
+Notice: String offset cast occurred in %s on line %d
 b
 Done

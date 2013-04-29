@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -83,6 +83,7 @@ extern zend_spl_globals spl_globals;
 PHP_FUNCTION(spl_classes);
 PHP_FUNCTION(class_parents);
 PHP_FUNCTION(class_implements);
+PHP_FUNCTION(class_uses);
 
 PHPAPI void php_spl_object_hash(zval *obj, char* md5str TSRMLS_DC);
 

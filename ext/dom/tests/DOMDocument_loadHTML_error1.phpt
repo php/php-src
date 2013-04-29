@@ -12,4 +12,4 @@ $doc = new DOMDocument();
 $doc->loadHTML();
 ?>
 --EXPECTF--
-Warning: DOMDocument::loadHTML() expects exactly 1 parameter, 0 given in %s on line %d
+Warning: DOMDocument::loadHTML() expects at least 1 parameter, 0 given in %s on line %d

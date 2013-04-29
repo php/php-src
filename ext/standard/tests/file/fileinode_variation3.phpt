@@ -75,8 +75,12 @@ bool(false)
 Warning: fileinode(): stat failed for %s/fileinode_variation3/fileinode*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-bool(false)
+
+Warning: fileinode() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 - Iteration 8 -
-bool(false)
+
+Warning: fileinode() expects parameter 1 to be a valid path, string given in %s on line %d
+NULL
 
 *** Done ***

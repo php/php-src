@@ -1,8 +1,8 @@
 --TEST--
 Test if socket_set_option() works, option:SO_SEOLINGER
 --DESCRIPTION--
--wrong params 
--set/get params comparison 
+-wrong params
+-set/get params comparison
 -l_linger not given
 --SKIPIF--
 <?php
@@ -30,7 +30,9 @@ $options_2 = array("l_onoff" => 1);
 var_dump(socket_set_option( $socket, SOL_SOCKET, SO_LINGER, $options_2));
 
 var_dump($retval_2);
-var_dump($retval_3 === $options);
+var_dump($retval_3["l_linger"] === $options["l_linger"]);
+// value of l_onoff is not always 1, Darwin returns 128
+var_dump((bool)$retval_3["l_onoff"] === (bool)$options["l_onoff"]);
 
 socket_close($socket);
 ?>
@@ -40,6 +42,7 @@ Warning: socket_set_option(): no key "l_onoff" passed in optval in %s on line %d
 
 Warning: socket_set_option(): no key "l_linger" passed in optval in %s on line %d
 bool(false)
+bool(true)
 bool(true)
 bool(true)
 --CREDITS--

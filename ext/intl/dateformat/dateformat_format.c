@@ -21,13 +21,13 @@
 #include <unicode/ustring.h>
 #include <unicode/ucal.h>
 
-#include "php_intl.h"
-#include "intl_convert.h"
+#include "../php_intl.h"
+#include "../intl_convert.h"
+#include "../common/common_date.h"
 #include "dateformat.h"
 #include "dateformat_class.h"
 #include "dateformat_format.h"
 #include "dateformat_data.h"
-#include "ext/date/php_date.h"
 
 /* {{{ 
  * Internal function which calls the udat_format
@@ -59,20 +59,38 @@ static void internal_format(IntlDateFormatter_object *dfo, UDate timestamp, zval
 /* {{{ 
  * Internal function which fetches an element from the passed array for the key_name passed 
 */
-static double internal_get_arr_ele(IntlDateFormatter_object *dfo, HashTable* hash_arr, char* key_name TSRMLS_DC)
+static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
+		HashTable* hash_arr, char* key_name, intl_error *err TSRMLS_DC)
 {
-	zval**  ele_value       = NULL;
-	UDate result = -1;
+	zval	**ele_value	= NULL;
+	int32_t	result		= 0;
+	char	*message;
 
-        if( zend_hash_find( hash_arr, key_name, strlen(key_name) + 1, (void **)&ele_value ) == SUCCESS ){
-                if( Z_TYPE_PP(ele_value)!= IS_LONG ){
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"datefmt_format: parameter array does not contain a long element.", 0 TSRMLS_CC );
-                }else{
-			result =  Z_LVAL_PP(ele_value);
+	if (U_FAILURE(err->code)) {
+		return result;
+	}
+
+	if (zend_hash_find(hash_arr, key_name, strlen(key_name) + 1,
+			(void **)&ele_value) == SUCCESS) {
+		if(Z_TYPE_PP(ele_value) != IS_LONG) {
+			spprintf(&message, 0, "datefmt_format: parameter array contains "
+					"a non-integer element for key '%s'", key_name);
+			intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
+			efree(message);
+		} else {
+			if (Z_LVAL_PP(ele_value) > INT32_MAX ||
+					Z_LVAL_PP(ele_value) < INT32_MIN) {
+				spprintf(&message, 0, "datefmt_format: value %ld is out of "
+						"bounds for a 32-bit integer in key '%s'",
+						Z_LVAL_PP(ele_value), key_name);
+				intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message, 1 TSRMLS_CC);
+				efree(message);
+			} else {
+				result = Z_LVAL_PP(ele_value);
+			}
 		}
 	}
-	/* printf("\n Inside internal_get_arr_ele key_name= %s, result = %g \n", key_name, result); */
+
 	return result;
 }
 /* }}} */
@@ -80,41 +98,51 @@ static double internal_get_arr_ele(IntlDateFormatter_object *dfo, HashTable* has
 /* {{{ 
  * Internal function which sets UCalendar  from the passed array and retrieves timestamp
 */
-static UDate internal_get_timestamp(IntlDateFormatter_object *dfo, HashTable* hash_arr  TSRMLS_DC)
+static UDate internal_get_timestamp(IntlDateFormatter_object *dfo,
+		HashTable *hash_arr TSRMLS_DC)
 {
-	long year =0;
-	long month =0;
-	long hour =0;
-	long minute =0;
-	long second =0;
-	long wday =0;
-	long yday =0;
-	long mday =0;
-	UBool isInDST = FALSE;
-	UCalendar *pcal;
+	int32_t		year,
+				month,
+				hour,
+				minute,
+				second,
+				mday;
+	UCalendar	*pcal;
+	UDate		result;
+	intl_error	*err = &dfo->datef_data.error;
+
+#define INTL_GET_ELEM(elem) \
+	internal_get_arr_ele(dfo, hash_arr, (elem), err TSRMLS_CC)
 
 	/* Fetch  values from the incoming array */
-	year = internal_get_arr_ele( dfo, hash_arr, CALENDAR_YEAR TSRMLS_CC) + 1900; /* tm_year is years since 1900 */
+	year	= INTL_GET_ELEM(CALENDAR_YEAR) + 1900; /* tm_year is years since 1900 */
 	/* Month in ICU and PHP starts from January =0 */
-	month = internal_get_arr_ele( dfo, hash_arr, CALENDAR_MON TSRMLS_CC);
-	hour = internal_get_arr_ele( dfo, hash_arr, CALENDAR_HOUR TSRMLS_CC);
-	minute = internal_get_arr_ele( dfo, hash_arr, CALENDAR_MIN TSRMLS_CC);
-	second = internal_get_arr_ele( dfo, hash_arr, CALENDAR_SEC TSRMLS_CC);
-	wday = internal_get_arr_ele( dfo, hash_arr, CALENDAR_WDAY TSRMLS_CC);
-	yday = internal_get_arr_ele( dfo, hash_arr, CALENDAR_YDAY TSRMLS_CC);
-	isInDST = internal_get_arr_ele( dfo, hash_arr, CALENDAR_ISDST TSRMLS_CC);
+	month	= INTL_GET_ELEM(CALENDAR_MON);
+	hour	= INTL_GET_ELEM(CALENDAR_HOUR);
+	minute	= INTL_GET_ELEM(CALENDAR_MIN);
+	second	= INTL_GET_ELEM(CALENDAR_SEC);
 	/* For the ucal_setDateTime() function, this is the 'date'  value */
-	mday = internal_get_arr_ele( dfo, hash_arr, CALENDAR_MDAY TSRMLS_CC);
+	mday	= INTL_GET_ELEM(CALENDAR_MDAY);
 
-	pcal = udat_getCalendar(DATE_FORMAT_OBJECT(dfo));
-	/* set the incoming values for the calendar */
-	ucal_setDateTime( pcal, year, month, mday, hour, minute, second, &INTL_DATA_ERROR_CODE(dfo));
-	if( INTL_DATA_ERROR_CODE(dfo) != U_ZERO_ERROR){
+#undef INTL_GET_ELEM
+
+	pcal = ucal_clone(udat_getCalendar(DATE_FORMAT_OBJECT(dfo)),
+			&INTL_DATA_ERROR_CODE(dfo));
+
+	if (INTL_DATA_ERROR_CODE(dfo) != U_ZERO_ERROR) {
+		intl_errors_set(err, INTL_DATA_ERROR_CODE(dfo), "datefmt_format: "
+				"error cloning calendar", 0 TSRMLS_CC);
 		return 0;
 	}
-	
+
+	/* set the incoming values for the calendar */
+	ucal_setDateTime(pcal, year, month, mday, hour, minute, second, &INTL_DATA_ERROR_CODE(dfo));
+	/* actually, ucal_setDateTime cannot fail */
+
 	/* Fetch the timestamp from the UCalendar */
-	return ucal_getMillis(pcal, &INTL_DATA_ERROR_CODE(dfo) );
+	result = ucal_getMillis(pcal, &INTL_DATA_ERROR_CODE(dfo));
+	ucal_close(pcal);
+	return result;
 }
 
 
@@ -124,70 +152,39 @@ static UDate internal_get_timestamp(IntlDateFormatter_object *dfo, HashTable* ha
  * Format the time value as a string. }}}*/
 PHP_FUNCTION(datefmt_format) 
 {
-	UDate 		timestamp =0;
-	UDate 		p_timestamp =0;
-	HashTable*      hash_arr        = NULL;
-	zval*		zarg	= NULL;
+	UDate 		timestamp	= 0;
+	HashTable	*hash_arr	= NULL;
+	zval		*zarg		= NULL;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz", &object, IntlDateFormatter_ce_ptr,&zarg ) == FAILURE )
-	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_format: unable to parse input params", 0 TSRMLS_CC );
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oz",
+			&object, IntlDateFormatter_ce_ptr, &zarg) == FAILURE) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_format: unable "
+				"to parse input params", 0 TSRMLS_CC );
 		RETURN_FALSE;
 	}
 
-	/* Fetch the object. */
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
-	switch(Z_TYPE_P(zarg) ){
-		case IS_LONG:
-			p_timestamp = Z_LVAL_P(zarg) ;
-			timestamp = p_timestamp * 1000;
-			break;
-		case IS_DOUBLE:
-			/* timestamp*1000 since ICU expects it in milliseconds */
-			p_timestamp = Z_DVAL_P(zarg) ;
-			timestamp = p_timestamp * 1000;
-			break;
-		case IS_ARRAY:
-			hash_arr = Z_ARRVAL_P(zarg);
-			if( !hash_arr || zend_hash_num_elements( hash_arr ) == 0 )
-				RETURN_FALSE;
-
-			timestamp = internal_get_timestamp(dfo, hash_arr TSRMLS_CC);
-			INTL_METHOD_CHECK_STATUS( dfo, "datefmt_format: Date formatting failed" )
-			break;
-		case IS_OBJECT: {
-			zend_class_entry *date_ce = php_date_get_date_ce();
-			zval retval;
-			zval *zfuncname;
-			if(!instanceof_function(Z_OBJCE_P(zarg), date_ce TSRMLS_CC)) {
-				intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR, "datefmt_format: object must be an instance of DateTime", 0 TSRMLS_CC );
-				RETURN_FALSE;
-			}
-			INIT_ZVAL(retval);
-			MAKE_STD_ZVAL(zfuncname);
-			ZVAL_STRING(zfuncname, "getTimestamp", 1);
-			if(call_user_function(NULL, &zarg, zfuncname, &retval, 0, NULL TSRMLS_CC) != SUCCESS || Z_TYPE(retval) != IS_LONG) {
-				intl_errors_set(INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR, "datefmt_format: cannot get timestamp", 0 TSRMLS_CC );
-				zval_ptr_dtor(&zfuncname);
-				RETURN_FALSE;
-			}
-			zval_ptr_dtor(&zfuncname);
-			p_timestamp = Z_LVAL(retval);
-			timestamp = p_timestamp*1000;
-		}
-			break;
-		default:
-			intl_errors_set( INTL_DATA_ERROR_P(dfo), U_ILLEGAL_ARGUMENT_ERROR,
-				"datefmt_format: takes either an array or an integer timestamp value or a DateTime object", 0 TSRMLS_CC );
+	if (Z_TYPE_P(zarg) == IS_ARRAY) {
+		hash_arr = Z_ARRVAL_P(zarg);
+		if (!hash_arr || zend_hash_num_elements(hash_arr) == 0) {
 			RETURN_FALSE;
-	}
+		}
 
-	internal_format( dfo, timestamp, return_value TSRMLS_CC);
+		timestamp = internal_get_timestamp(dfo, hash_arr TSRMLS_CC);
+		INTL_METHOD_CHECK_STATUS(dfo, "datefmt_format: date formatting failed")
+	} else {
+		timestamp = intl_zval_to_millis(zarg, INTL_DATA_ERROR_P(dfo),
+				"datefmt_format" TSRMLS_CC);
+		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
+			RETURN_FALSE;
+		}
+	}
 	
+	internal_format( dfo, timestamp, return_value TSRMLS_CC);
 }
 
 /* }}} */

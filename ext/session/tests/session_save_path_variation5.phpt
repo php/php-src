@@ -6,15 +6,14 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 	die("skip Not for Windows");
 ?>
 --INI--
-open_basedir=.
 session.save_handler=files
 session.save_path=
 session.name=PHPSESSID
+open_basedir=.
 --FILE--
 <?php
 
 ob_start();
-
 /* 
  * Prototype : string session_save_path([string $path])
  * Description : Get and/or set the current session save path

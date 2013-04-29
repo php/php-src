@@ -1,5 +1,7 @@
 --TEST--
 Test token_get_all() function : usage variations - unexpected values for 'source' argument
+--SKIPIF--
+<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
@@ -95,7 +97,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(1) "0"
     [2]=>
@@ -107,7 +109,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(1) "1"
     [2]=>
@@ -119,7 +121,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(5) "12345"
     [2]=>
@@ -131,7 +133,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(5) "-2345"
     [2]=>
@@ -143,7 +145,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(4) "10.5"
     [2]=>
@@ -155,7 +157,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(5) "-10.5"
     [2]=>
@@ -167,7 +169,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(10) "1012345670"
     [2]=>
@@ -179,7 +181,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(13) "1.07654321E-7"
     [2]=>
@@ -191,7 +193,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(3) "0.5"
     [2]=>
@@ -229,7 +231,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(1) "1"
     [2]=>
@@ -244,7 +246,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(1) "1"
     [2]=>
@@ -265,7 +267,7 @@ array(1) {
   [0]=>
   array(3) {
     [0]=>
-    int(311)
+    int(%d)
     [1]=>
     string(6) "object"
     [2]=>
