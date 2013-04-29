@@ -65,10 +65,6 @@
 #define OPENSSL_ALGO_MD2	4
 #endif
 #define OPENSSL_ALGO_DSS1	5
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/master
 #if OPENSSL_VERSION_NUMBER >= 0x0090708fL
 #define OPENSSL_ALGO_SHA224 6
 #define OPENSSL_ALGO_SHA256 7
