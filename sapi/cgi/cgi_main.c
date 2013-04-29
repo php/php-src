@@ -1818,7 +1818,7 @@ int main(int argc, char *argv[])
 
 	if((query_string = getenv("QUERY_STRING")) != NULL && strchr(query_string, '=') == NULL) {
 		/* we've got query string that has no = - apache CGI will pass it to command line */
-		char *p;
+		unsigned char *p;
 		decoded_query_string = strdup(query_string);
 		php_url_decode(decoded_query_string, strlen(decoded_query_string));
 		for (p = decoded_query_string; *p &&  *p <= ' '; p++) {
