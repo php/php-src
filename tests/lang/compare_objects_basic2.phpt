@@ -20,9 +20,5 @@ var_dump($obj1 == $obj2);
 ===DONE===
 --EXPECTF--
 Simple test comparing two objects with different compare callback handler
-
-Notice: Object of class X could not be converted to int in %s on line %d
-
-Notice: Object of class DateTime could not be converted to int in %s on line %d
-bool(true)
+bool(false)
 ===DONE===

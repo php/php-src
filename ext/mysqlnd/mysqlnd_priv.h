@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,12 +33,6 @@
 #define Z_DELREF_PP(ppz)			Z_DELREF_P(*(ppz))
 #endif
 
-#if PHP_MAJOR_VERSION >= 6
-#define MYSQLND_UNICODE 1
-#else
-#define MYSQLND_UNICODE 0
-#endif
-
 #ifdef ZTS
 #include "TSRM.h"
 #endif
@@ -47,21 +41,12 @@
 #define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
 #endif
 
-#if MYSQLND_UNICODE
-#define mysqlnd_array_init(arg, field_count) \
-{ \
-	ALLOC_HASHTABLE_REL(Z_ARRVAL_P(arg));\
-	zend_u_hash_init(Z_ARRVAL_P(arg), (field_count), NULL, ZVAL_PTR_DTOR, 0, 0);\
-	Z_TYPE_P(arg) = IS_ARRAY;\
-}
-#else
 #define mysqlnd_array_init(arg, field_count) \
 { \
 	ALLOC_HASHTABLE_REL(Z_ARRVAL_P(arg));\
 	zend_hash_init(Z_ARRVAL_P(arg), (field_count), NULL, ZVAL_PTR_DTOR, 0); \
 	Z_TYPE_P(arg) = IS_ARRAY;\
 }
-#endif
 
 #define MYSQLND_STR_W_LEN(str)  str, (sizeof(str) - 1)
 
@@ -174,9 +159,7 @@
 #define CONN_SET_STATE(c, s)	(c)->m->set_state((c), (s) TSRMLS_CC)
 
 /* PS stuff */
-typedef void (*ps_field_fetch_func)(zval *zv, const MYSQLND_FIELD * const field,
-									unsigned int pack_len, zend_uchar **row,
-									zend_bool everything_as_unicode TSRMLS_DC);
+typedef void (*ps_field_fetch_func)(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row TSRMLS_DC);
 struct st_mysqlnd_perm_bind {
 	ps_field_fetch_func func;
 	/* should be signed int */
@@ -193,23 +176,21 @@ PHPAPI extern const char * const mysqlnd_out_of_sync;
 PHPAPI extern const char * const mysqlnd_server_gone;
 PHPAPI extern const char * const mysqlnd_out_of_memory;
 
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_object_factory);
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn);
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn_data);
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_res);
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_protocol);
-extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_net);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_object_factory);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_conn_data);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_res);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_protocol);
+PHPAPI extern MYSQLND_CLASS_METHOD_TABLE_NAME_FORWARD(mysqlnd_net);
 
-enum_func_status mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char *filename, zend_bool *is_warning TSRMLS_DC);
+enum_func_status mysqlnd_handle_local_infile(MYSQLND_CONN_DATA * conn, const char * filename, zend_bool * is_warning TSRMLS_DC);
 
 
 
 void _mysqlnd_init_ps_subsystem();/* This one is private, mysqlnd_library_init() will call it */
 void _mysqlnd_init_ps_fetch_subsystem();
 
-void ps_fetch_from_1_to_8_bytes(zval *zv, const MYSQLND_FIELD * const field,
-								unsigned int pack_len, zend_uchar **row, zend_bool as_unicode,
-								unsigned int byte_count TSRMLS_DC);
+void ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_len, zend_uchar ** row, unsigned int byte_count TSRMLS_DC);
 
 void mysqlnd_plugin_subsystem_init(TSRMLS_D);
 void mysqlnd_plugin_subsystem_end(TSRMLS_D);

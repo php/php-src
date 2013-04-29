@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -89,9 +89,6 @@ struct _zend_compiler_globals {
 
 	int zend_lineno;
 
-	char *heredoc;
-	int heredoc_len;
-
 	zend_op_array *active_op_array;
 
 	HashTable *function_table;	/* function symbol table */
@@ -169,8 +166,6 @@ struct _zend_executor_globals {
 
 	zval error_zval;
 	zval *error_zval_ptr;
-
-	zend_ptr_stack arg_types_stack;
 
 	/* symbol table cache */
 	HashTable *symtable_cache[SYMTABLE_CACHE_SIZE];
@@ -297,6 +292,7 @@ struct _zend_php_scanner_globals {
 	unsigned char *yy_limit;
 	int yy_state;
 	zend_stack state_stack;
+	zend_ptr_stack heredoc_label_stack;
 	
 	/* original (unfiltered) script */
 	unsigned char *script_org;

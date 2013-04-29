@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,10 @@
 
 #include <stddef.h>
 
+
+
 #ifdef PHP_WIN32
+# include <Ws2tcpip.h>
 # include "win32/inet.h"
 # define O_RDONLY _O_RDONLY
 # include "win32/param.h"
@@ -869,7 +872,7 @@ skip_bind:
 					efree(local_address);
 				}
 			}
-			/* free error string recieved during previous iteration (if any) */
+			/* free error string received during previous iteration (if any) */
 			if (error_string && *error_string) {
 				efree(*error_string);
 				*error_string = NULL;
@@ -1076,11 +1079,6 @@ PHPAPI int php_set_sock_blocking(int socketd, int block TSRMLS_DC)
 	/* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
 	flags = !block;
 	if (ioctlsocket(socketd, FIONBIO, &flags) == SOCKET_ERROR) {
-		char *error_string;
-
-		error_string = php_socket_strerror(WSAGetLastError(), NULL, 0);
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s", error_string);
-		efree(error_string);
 		ret = FAILURE;
 	}
 #else

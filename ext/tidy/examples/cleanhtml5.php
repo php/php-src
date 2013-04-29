@@ -25,7 +25,7 @@
     
     if(!empty($tidy->errorBuffer)) {
         
-        echo "\n\nThe following errors or warnings occured:\n";
+        echo "\n\nThe following errors or warnings occurred:\n";
         echo "{$tidy->errorBuffer}\n";
         
     }

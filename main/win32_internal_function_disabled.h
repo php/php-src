@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,12 +23,14 @@
 /*
 Windows Server 2008     6.0
 Windows Vista           6.0
+
+Verssions below are not supported anymore, php won't even load:
 Windows Server 2003 R2  5.2
 Windows Server 2003     5.2
 Windows XP              5.1
 Windows 2000            5.0
 */
-static const char *function_name_5[] = {"link", NULL};
-const int function_name_cnt_5 = 1;
+static const char *function_name_5[] = {NULL};
+const int function_name_cnt_5 = 0;
 static const char *function_name_6[] = {"readlink", "symlink", NULL};
 const int function_name_cnt_6 = 2;

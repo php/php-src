@@ -58,15 +58,16 @@ Do not use abbreviations for alpha and beta.
 5. Commit these changes to the branch with ``git commit -a``.
 
 6. Tag the repository with the version, e.g.: 
-``git tag -u YOURKEYID PHP-5.4.2-RC2``
+``git tag -u YOURKEYID php-5.4.2RC2``
 
 7. Push the changes to the main repo:
 ``git push --tags origin HEAD``
 
-8. run: ``./makedist 5.4.2-RC2``, this will export the tree, create configure
-and build two tarballs (one gz and one bz2).
+8. run: ``./makedist 5.4.2RC2``, this will export the tree, create configure
+and build three tarballs (gz,bz2 and xz). Make sure you use the same GNU Bison
+version as snaps. Recent bison version are known to break ZTS.
 
-9. Copy those two tarballs to www.php.net, in your homedir there should be a
+9. Copy those three tarballs to www.php.net, in your homedir there should be a
 directory "downloads/". Copy them into there, so that the system can generate
 MD5 sums. If you do not have this directory, talk to Derick.
 
@@ -127,33 +128,42 @@ Rolling a stable release
 
 2. Bump the version numbers in ``main/php_version.h``, ``configure.in`` and possibly ``NEWS``.
 
-3. **Merge** all related sections in NEWS (f.e. merge the 4.4.1RC1 and 4.4.0 sections)
+3. **Merge** all related sections in NEWS (f.e. merge the 5.4.1RC1 and 5.4.0 sections)
 
 4. Commit those changes
 
 5. run the "scripts/dev/credits" script in php-src and commit the changes in the
 credits files in ext/standard.
 
-6. tag the repository with the version f.e. "``cvs tag php_4_4_1``"
+6. tag the repository with the version f.e. "``git tag -s php-5.4.1``"
 (of course, you need to change that to the version you're rolling an RC for).
 When making 5.X release, you need to tag the Zend directory separately!!
 
 7. Bump up the version numbers in ``main/php_version.h``, ``configure.in`` and
 possibly ``NEWS`` again, to the **next** version. F.e. if the release candidate
-was "4.4.1RC1" then the new one should be "4.4.1RC2-dev" - regardless if we get
+was "5.4.1RC1" then the new one should be "5.4.1RC2-dev" - regardless if we get
 a new RC or not. This is to make sure ``version_compare()`` can correctly work.
 
 8. Commit those changes
 
-9. Log in onto the snaps box and go into the correct tree (f.e. the PHP_4_4
-branch if you're rolling 4.4.x releases).
+9. Log in onto the snaps box and go into the correct tree (f.e. the PHP-5.4
+branch if you're rolling 5.5.x releases).
 
-10. You do not have to update the tree, but of course you can with "``cvs up -dP``".
+10. You do not have to update the tree, but of course you can with "``git pull
+origin <branch>``".
 
-11. run: ``./makedist php 4.4.1``, this will export the tree, create configure
+11. run: ``./makedist php 5.4.1``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
 
-12. Commit those two tarballs to CVS (phpweb/distributions)
+12. Commit those two tarballs to web/php-distributions.git, then update the git
+    submodule reference in web/php.git: 
+    git submodule init;
+    git submodule update;
+    cd distributions;
+    git pull origin master;
+    cd ..;
+    git commit distributions;
+    git push;
 
 13. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once
@@ -171,6 +181,9 @@ Getting the stable release announced
 
  a. ``php bin/bumpRelease 5`` (or ``php bin/bumpRelease 4`` for PHP4)
 
+ b. In case multiple PHP minor versions are in active development you have
+    to manually copy the old information to include/releases.inc
+
 2. Edit ``phpweb/include/version.inc`` and change (X=major release number):
 
  a. ``$PHP_X_VERSION`` to the correct version
@@ -187,7 +200,7 @@ Getting the stable release announced
  f. if the windows builds aren't ready yet prefix the "windows" key with a dot (".windows")
 
 3. Update the ChangeLog file for the given major version
-f.e. ``ChangeLog-4.php`` from the NEWS file
+f.e. ``ChangeLog-5.php`` from the NEWS file
 
  a. go over the list and put every element on one line
 
@@ -207,9 +220,9 @@ f.e. ``ChangeLog-4.php`` from the NEWS file
 
   V. ``s/FR #\([0-9]\+\)/FR <?php bugl(\1); ?>/``
 
-4. ``cp releases/4_4_0.php releases/4_4_1.php``
+4. ``cp releases/5_4_0.php releases/5_4_1.php``
 
-5. ``cvs add releases/4_4_1.php``
+5. ``git add releases/5_4_1.php``
 
 6. Update the ``releases/*.php`` file with relevant data. The release
 announcement file should list in detail:
@@ -231,17 +244,6 @@ to upgrade.
 9. Wait an hour or two, then send a mail to php-announce@lists.php.net,
 php-general@lists.php.net and internals@lists.php.net with a text similar to
 http://news.php.net/php.internals/17222.
-
-10. Update ``php-bugs-web/include/functions.php`` to include the new version
-number, and remove the RC from there.
-
-11. Update ``qaweb/include/release-qa.php``
-
- - Update $QA_RELEASES with the appropriate information, which means bumping
-   the version number to an upcoming version. 
-
-   Example: If PHP 5.3.7 is being released, then PHP 5.3.8 is the next QA version,
-   so replace 5.3.7 with 5.3.8 within $QA_RELEASES.
 
 Re-releasing the same version (or -pl)
 --------------------------------------

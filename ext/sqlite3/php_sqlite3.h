@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,7 @@
 #ifndef PHP_SQLITE3_H
 #define PHP_SQLITE3_H
 
-#define PHP_SQLITE3_VERSION	 "0.7"
+#define PHP_SQLITE3_VERSION	 "0.7-dev"
 
 extern zend_module_entry sqlite3_module_entry;
 #define phpext_sqlite3_ptr &sqlite3_module_entry

@@ -43,29 +43,29 @@ echo "\nDone.\n";
 temp stream (close after):
 About to rewind!
 * About to connect() to 127.0.0.1 port 37349%r.*%r
-*   Trying 127.0.0.1... * Connection refused
-* couldn't connect to host
+*   Trying 127.0.0.1...%A* Connection refused
+* couldn't connect to host%S
 * Closing connection #0
 
 memory stream (close after):
 About to rewind!
 * About to connect() to 127.0.0.1 port 37349%r.*%r
-*   Trying 127.0.0.1... * Connection refused
-* couldn't connect to host
+*   Trying 127.0.0.1...%A* Connection refused
+* couldn't connect to host%S
 * Closing connection #0
 
 temp stream (leak):
 About to rewind!
 * About to connect() to 127.0.0.1 port 37349%r.*%r
-*   Trying 127.0.0.1... * Connection refused
-* couldn't connect to host
+*   Trying 127.0.0.1...%A* Connection refused
+* couldn't connect to host%S
 * Closing connection #0
 
 memory stream (leak):
 About to rewind!
 * About to connect() to 127.0.0.1 port 37349%r.*%r
-*   Trying 127.0.0.1... * Connection refused
-* couldn't connect to host
+*   Trying 127.0.0.1...%A* Connection refused
+* couldn't connect to host%S
 * Closing connection #0
 
 Done.

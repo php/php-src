@@ -49,8 +49,10 @@ var_dump($p->getSignature());
 echo $e->getMessage();
 }
 try {
-$keys=openssl_pkey_new();
-openssl_pkey_export($keys, $privkey);
+$config = dirname(__FILE__) . '/../files/openssl.cnf';
+$config_arg = array('config' => $config);
+$keys=openssl_pkey_new($config_arg);
+openssl_pkey_export($keys, $privkey, NULL, $config_arg);
 $pubkey=openssl_pkey_get_details($keys);
 $p->setSignatureAlgorithm(Phar::OPENSSL, $privkey);
 

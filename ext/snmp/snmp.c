@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -79,6 +79,14 @@
 
 #include <net-snmp/net-snmp-config.h>
 #include <net-snmp/net-snmp-includes.h>
+
+#if PHP_VERSION_ID < 50300
+#define Z_ADDREF_P(pz) pz->refcount++
+#define Z_ISREF_PP(oid) (PZVAL_IS_REF(*(oid)))
+#define Z_REFCOUNT_P(pz) pz->refcount
+#define Z_SET_REFCOUNT_P(pz, rc) pz->refcount = rc
+#define zend_parse_parameters_none() zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "")
+#endif
 
 /* For net-snmp prior to 5.4 */
 #ifndef HAVE_SHUTDOWN_SNMP_LOGGING
@@ -489,6 +497,9 @@ static void php_snmp_object_free_storage(void *object TSRMLS_DC)
 
 static zend_object_value php_snmp_object_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
+#if PHP_VERSION_ID < 50399
+	zval *tmp;
+#endif
 	zend_object_value retval;
 	php_snmp_object *intern;
 
@@ -497,7 +508,11 @@ static zend_object_value php_snmp_object_new(zend_class_entry *class_type TSRMLS
 	memset(&intern->zo, 0, sizeof(php_snmp_object));
 
 	zend_object_std_init(&intern->zo, class_type TSRMLS_CC);
+#if PHP_VERSION_ID < 50399
+	zend_hash_copy(intern->zo.properties, &class_type->default_properties, (copy_ctor_func_t) zval_add_ref,(void *) &tmp, sizeof(zval *));
+#else
 	object_properties_init(&intern->zo, class_type);
+#endif
 
 	retval.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) php_snmp_object_free_storage, NULL TSRMLS_CC);
 	retval.handlers = (zend_object_handlers *) &php_snmp_object_handlers;
@@ -832,9 +847,9 @@ retry:
 							}
 						} else if (st & SNMP_USE_SUFFIX_AS_KEYS && st & SNMP_CMD_WALK) {
 							snprint_objid(buf2, sizeof(buf2), vars->name, vars->name_length);
-							if (objid_query->vars[0].name_length <= vars->name_length && snmp_oid_compare(objid_query->vars[0].name, objid_query->vars[0].name_length, vars->name, objid_query->vars[0].name_length) == 0) {
+							if (rootlen <= vars->name_length && snmp_oid_compare(root, rootlen, vars->name, rootlen) == 0) {
 								buf2[0] = '\0';
-								count = objid_query->vars[0].name_length;
+								count = rootlen;
 								while(count < vars->name_length){
 									sprintf(buf, "%lu.", vars->name[count]);
 									strcat(buf2, buf);
@@ -1096,8 +1111,7 @@ static int php_snmp_parse_oid(zval *object, int st, struct objid_query *objid_qu
 static int netsnmp_session_init(php_snmp_session **session_p, int version, char *hostname, char *community, int timeout, int retries TSRMLS_DC)
 {
 	php_snmp_session *session;
-	char *pptr;
-	char buf[MAX_NAME_LEN];
+	char *pptr, *host_ptr;
 	int force_ipv6 = FALSE;
 	int n;
 	struct sockaddr **psal;
@@ -1111,8 +1125,6 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	}
 	memset(session, 0, sizeof(php_snmp_session));
 
-	strlcpy(buf, hostname, sizeof(buf));
-
 	snmp_sess_init(session);
 
 	session->version = version;
@@ -1123,23 +1135,25 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "emalloc() failed while copying hostname");
 		return (-1);
 	}
-	*(session->peername) = '\0';
+	/* we copy original hostname for further processing */
+	strlcpy(session->peername, hostname, MAX_NAME_LEN);
+	host_ptr = session->peername;
 
 	/* Reading the hostname and its optional non-default port number */
-	if (*hostname == '[') { /* IPv6 address */
+	if (*host_ptr == '[') { /* IPv6 address */
 		force_ipv6 = TRUE;
-		hostname++;
-		if ((pptr = strchr(hostname, ']'))) {
+		host_ptr++;
+		if ((pptr = strchr(host_ptr, ']'))) {
 			if (pptr[1] == ':') {
 				session->remote_port = atoi(pptr + 2);
 			}
 			*pptr = '\0';
 		} else {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mailformed IPv6 address, closing square bracket missing");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "malformed IPv6 address, closing square bracket missing");
 			return (-1);
 		}
 	} else { /* IPv4 address */
-		if ((pptr = strchr(hostname, ':'))) {
+		if ((pptr = strchr(host_ptr, ':'))) {
 			session->remote_port = atoi(pptr + 1);
 			*pptr = '\0';
 		}
@@ -1147,11 +1161,13 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 
 	/* since Net-SNMP library requires 'udp6:' prefix for all IPv6 addresses (in FQDN form too) we need to
 	   perform possible name resolution before running any SNMP queries */
-	if ((n = php_network_getaddresses(hostname, SOCK_DGRAM, &psal, NULL TSRMLS_CC)) == 0) { /* some resover error */
+	if ((n = php_network_getaddresses(host_ptr, SOCK_DGRAM, &psal, NULL TSRMLS_CC)) == 0) { /* some resolver error */
 		/* warnings sent, bailing out */
 		return (-1);
 	}
 
+	/* we have everything we need in psal, flush peername and fill it properly */
+	*(session->peername) = '\0';
 	res = psal;
 	while (n-- > 0) {
 		pptr = session->peername;
@@ -1181,7 +1197,7 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 	}
 
 	if (strlen(session->peername) == 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown failure while resolving '%s'", buf);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown failure while resolving '%s'", hostname);
 		return (-1);
 	}
 	/* XXX FIXME
@@ -1759,7 +1775,11 @@ PHP_FUNCTION(snmp_read_mib)
 	char *filename;
 	int filename_len;
 
+#if PHP_VERSION_ID < 50399
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+#else
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &filename, &filename_len) == FAILURE) {
+#endif
 		RETURN_FALSE;
 	}
 
@@ -1784,17 +1804,31 @@ PHP_METHOD(snmp, __construct)
 	long retries = SNMP_DEFAULT_RETRIES;
 	long version = SNMP_DEFAULT_VERSION;
 	int argc = ZEND_NUM_ARGS();
+#if PHP_VERSION_ID > 50300
 	zend_error_handling error_handling;
+#endif
 
 	snmp_object = (php_snmp_object *)zend_object_store_get_object(object TSRMLS_CC);
+#if PHP_VERSION_ID > 50300
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
+#else
+	php_set_error_handling(EH_THROW, zend_exception_get_default(TSRMLS_C) TSRMLS_CC);
+#endif
 	
 	if (zend_parse_parameters(argc TSRMLS_CC, "lss|ll", &version, &a1, &a1_len, &a2, &a2_len, &timeout, &retries) == FAILURE) {
+#if PHP_VERSION_ID > 50300
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
+#else
+		php_std_error_handling();
+#endif
 		return;
 	}
 
+#if PHP_VERSION_ID > 50300
 	zend_restore_error_handling(&error_handling TSRMLS_CC);
+#else
+	php_std_error_handling();
+#endif
 
 	switch(version) {
 		case SNMP_VERSION_1:
@@ -1942,7 +1976,11 @@ void php_snmp_add_property(HashTable *h, const char *name, size_t name_length, p
 
 /* {{{ php_snmp_read_property(zval *object, zval *member, int type[, const zend_literal *key])
    Generic object property reader */
+#if PHP_VERSION_ID < 50399
+zval *php_snmp_read_property(zval *object, zval *member, int type TSRMLS_DC)
+#else
 zval *php_snmp_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
+#endif
 {
 	zval tmp_member;
 	zval *retval;
@@ -1972,7 +2010,11 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, const zend_li
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
+#if PHP_VERSION_ID < 50399
+		retval = std_hnd->read_property(object, member, type TSRMLS_CC);
+#else
 		retval = std_hnd->read_property(object, member, type, key TSRMLS_CC);
+#endif
 	}
 
 	if (member == &tmp_member) {
@@ -1984,7 +2026,11 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, const zend_li
 
 /* {{{ php_snmp_write_property(zval *object, zval *member, zval *value[, const zend_literal *key])
    Generic object property writer */
+#if PHP_VERSION_ID < 50399
+void php_snmp_write_property(zval *object, zval *member, zval *value TSRMLS_DC)
+#else
 void php_snmp_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
+#endif
 {
 	zval tmp_member;
 	php_snmp_object *obj;
@@ -2011,7 +2057,11 @@ void php_snmp_write_property(zval *object, zval *member, zval *value, const zend
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
+#if PHP_VERSION_ID < 50399
+		std_hnd->write_property(object, member, value TSRMLS_CC);
+#else
 		std_hnd->write_property(object, member, value, key TSRMLS_CC);
+#endif
 	}
 
 	if (member == &tmp_member) {
@@ -2022,7 +2072,11 @@ void php_snmp_write_property(zval *object, zval *member, zval *value, const zend
 
 /* {{{ php_snmp_has_property(zval *object, zval *member, int has_set_exists[, const zend_literal *key])
    Generic object property checker */
+#if PHP_VERSION_ID < 50399
+static int php_snmp_has_property(zval *object, zval *member, int has_set_exists TSRMLS_DC)
+#else
 static int php_snmp_has_property(zval *object, zval *member, int has_set_exists, const zend_literal *key TSRMLS_DC)
+#endif
 {
 	php_snmp_prop_handler *hnd;
 	int ret = 0;
@@ -2033,7 +2087,11 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 				ret = 1;
 				break;
 			case 0: {
+#if PHP_VERSION_ID < 50399
+				zval *value = php_snmp_read_property(object, member, BP_VAR_IS TSRMLS_CC);
+#else
 				zval *value = php_snmp_read_property(object, member, BP_VAR_IS, key TSRMLS_CC);
+#endif
 				if (value != EG(uninitialized_zval_ptr)) {
 					ret = Z_TYPE_P(value) != IS_NULL? 1:0;
 					/* refcount is 0 */
@@ -2043,7 +2101,11 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 				break;
 			}
 			default: {
+#if PHP_VERSION_ID < 50399
+				zval *value = php_snmp_read_property(object, member, BP_VAR_IS TSRMLS_CC);
+#else
 				zval *value = php_snmp_read_property(object, member, BP_VAR_IS, key TSRMLS_CC);
+#endif
 				if (value != EG(uninitialized_zval_ptr)) {
 					convert_to_boolean(value);
 					ret = Z_BVAL_P(value)? 1:0;
@@ -2056,7 +2118,11 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 		}
 	} else {
 		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
+#if PHP_VERSION_ID < 50399
+		ret = std_hnd->has_property(object, member, has_set_exists TSRMLS_CC);
+#else
 		ret = std_hnd->has_property(object, member, has_set_exists, key TSRMLS_CC);
+#endif
 	}
 	return ret;
 }
@@ -2076,7 +2142,11 @@ static HashTable *php_snmp_get_properties(zval *object TSRMLS_DC)
 	ulong num_key;
 
 	obj = (php_snmp_object *)zend_objects_get_address(object TSRMLS_CC);
+#if PHP_VERSION_ID < 50399
+	props = obj->zo.properties;
+#else
 	props = zend_std_get_properties(object TSRMLS_CC);
+#endif
 
 	zend_hash_internal_pointer_reset_ex(&php_snmp_properties, &pos);
 
@@ -2455,20 +2525,26 @@ PHP_MINFO_FUNCTION(snmp)
 
 /* {{{ snmp_module_deps[]
  */
+#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep snmp_module_deps[] = {
 #ifdef HAVE_SPL
 	ZEND_MOD_REQUIRED("spl")
 #endif
 	ZEND_MOD_END
 };
+#endif
 /* }}} */
 
 /* {{{ snmp_module_entry
  */
 zend_module_entry snmp_module_entry = {
+#if ZEND_MODULE_API_NO >= 20050922
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
 	snmp_module_deps,
+#else
+	STANDARD_MODULE_HEADER,
+#endif
 	"snmp",
 	snmp_functions,
 	PHP_MINIT(snmp),

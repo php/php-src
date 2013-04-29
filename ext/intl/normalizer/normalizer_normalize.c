@@ -110,7 +110,7 @@ PHP_FUNCTION( normalizer_normalize )
 	/* normalize */
 	size_needed = unorm_normalize( uinput, uinput_len, form, (int32_t) 0 /* options */, uret_buf, uret_len, &status);
 	
-	/* Bail out if an unexpected error occured.
+	/* Bail out if an unexpected error occurred.
 	 * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
 	 * (U_STRING_NOT_TERMINATED_WARNING usually means that the input string is empty).
 	 */	
@@ -133,7 +133,7 @@ PHP_FUNCTION( normalizer_normalize )
 		/* try normalize again */
 		size_needed = unorm_normalize( uinput, uinput_len, form, (int32_t) 0 /* options */, uret_buf, uret_len, &status);
 
-		/* Bail out if an unexpected error occured. */
+		/* Bail out if an unexpected error occurred. */
 		if( U_FAILURE(status)  ) {
 			/* Set error messages. */
 			intl_error_set_custom_msg( NULL,"Error normalizing string", 0 TSRMLS_CC );
@@ -234,7 +234,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 	
 	efree( uinput );
 
-	/* Bail out if an unexpected error occured. */
+	/* Bail out if an unexpected error occurred. */
 	if( U_FAILURE(status)  ) {
 		/* Set error messages. */
 		intl_error_set_custom_msg( NULL,"Error testing if string is the given normalization form.", 0 TSRMLS_CC );

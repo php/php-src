@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -113,6 +113,7 @@ php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path,
 	int redirected = ((flags & HTTP_WRAPPER_REDIRECTED) != 0);
 	int follow_location = 1;
 	php_stream_filter *transfer_encoding = NULL;
+	int response_code;
 
 	tmp_line[0] = '\0';
 
@@ -657,7 +658,6 @@ finish:
 
 		if (php_stream_get_line(stream, tmp_line, sizeof(tmp_line) - 1, &tmp_line_len) != NULL) {
 			zval *http_response;
-			int response_code;
 
 			if (tmp_line_len > 9) {
 				response_code = atoi(tmp_line + 9);
@@ -735,6 +735,11 @@ finish:
 					SEPARATE_ZVAL(tmpzval);
 					convert_to_long_ex(tmpzval);
 					follow_location = Z_LVAL_PP(tmpzval);
+				} else if (!(response_code >= 300 && response_code < 304 || 307 == response_code)) { 
+					/* we shouldn't redirect automatically
+					if follow_location isn't set and response_code not in (300, 301, 302, 303 and 307) 
+					see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1 */
+					follow_location = 0;
 				}
 				strlcpy(location, http_header_line + 10, sizeof(location));
 			} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {

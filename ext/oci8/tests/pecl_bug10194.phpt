@@ -5,6 +5,9 @@ PECL Bug #10194 (segfault in Instant Client when memory_limit is reached inside 
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
+if (getenv("USE_ZEND_ALLOC") === "0") {
+    die("skip Zend MM disabled");
+}
 ?> 
 --INI--
 memory_limit=10M

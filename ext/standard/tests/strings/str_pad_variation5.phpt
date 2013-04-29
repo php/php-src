@@ -5,6 +5,9 @@ memory_limit=128M
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
+if (getenv("USE_ZEND_ALLOC") === "0") {
+    die("skip Zend MM disabled");
+}
 ?>
 --FILE--
 <?php

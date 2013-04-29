@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -203,22 +203,10 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 
 	mysqlnd_array_init(return_value, stats->count);
 	for (i = 0; i < stats->count; i++) {
-#if MYSQLND_UNICODE
-		UChar *ustr, *tstr;
-		int ulen, tlen;
-#endif
 		char tmp[25];
 
 		sprintf((char *)&tmp, MYSQLND_LLU_SPEC, stats->values[i]);
-#if MYSQLND_UNICODE
-		zend_string_to_unicode(UG(utf8_conv), &ustr, &ulen, names[i].s, names[i].l + 1 TSRMLS_CC);
-		zend_string_to_unicode(UG(utf8_conv), &tstr, &tlen, tmp, strlen(tmp) + 1 TSRMLS_CC);
-		add_u_assoc_unicode_ex(return_value, IS_UNICODE, ZSTR(ustr), ulen, tstr, 1);
-		efree(ustr);
-		efree(tstr);
-#else
 		add_assoc_string_ex(return_value, names[i].s, names[i].l + 1, tmp, 1);
-#endif
 	}
 }
 /* }}} */

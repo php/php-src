@@ -6,7 +6,7 @@ tidy_diagnose()
 <?php 
 $a = tidy_parse_string('<HTML></HTML>');
 var_dump(tidy_diagnose($a));
-echo tidy_get_error_buffer($a);
+echo str_replace("\r", "", tidy_get_error_buffer($a));
 
 $html = <<< HTML
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">

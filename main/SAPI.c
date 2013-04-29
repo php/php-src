@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -587,10 +587,36 @@ static void sapi_update_response_code(int ncode TSRMLS_DC)
 	SG(sapi_headers).http_response_code = ncode;
 }
 
-static int sapi_find_matching_header(void *element1, void *element2)
-{
-	int len = strlen((char*)element2);
-	return strncasecmp(((sapi_header_struct*)element1)->header, (char*)element2, len) == 0 && ((sapi_header_struct*)element1)->header[len] == ':';
+/* 
+ * since zend_llist_del_element only remove one matched item once,
+ * we should remove them by ourself
+ */
+static void sapi_remove_header(zend_llist *l, char *name, uint len) {
+	sapi_header_struct *header;
+	zend_llist_element *next;
+	zend_llist_element *current=l->head;
+
+	while (current) {
+		header = (sapi_header_struct *)(current->data);
+		next = current->next;
+		if (header->header_len > len && header->header[len] == ':'
+				&& !strncasecmp(header->header, name, len)) {
+			if (current->prev) {
+				current->prev->next = next;
+			} else {
+				l->head = next;
+			}
+			if (next) {
+				next->prev = current->prev;
+			} else {
+				l->tail = current->prev;
+			}
+			sapi_free_header(header);
+			efree(current);
+			--l->count;
+		}
+		current = next;
+	}
 }
 
 SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bool duplicate, zend_bool replace TSRMLS_DC)
@@ -621,7 +647,7 @@ static void sapi_header_add_op(sapi_header_op_enum op, sapi_header_struct *sapi_
 				char sav = *colon_offset;
 
 				*colon_offset = 0;
-				zend_llist_del_element(&SG(sapi_headers).headers, sapi_header->header, (int(*)(void*, void*))sapi_find_matching_header);
+		        sapi_remove_header(&SG(sapi_headers).headers, sapi_header->header, strlen(sapi_header->header));
 				*colon_offset = sav;
 			}
 		}
@@ -703,7 +729,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg TSRMLS_DC)
 			sapi_header.header_len = header_line_len;
 			sapi_module.header_handler(&sapi_header, op, &SG(sapi_headers) TSRMLS_CC);
 		}
-		zend_llist_del_element(&SG(sapi_headers).headers, header_line, (int(*)(void*, void*))sapi_find_matching_header);
+		sapi_remove_header(&SG(sapi_headers).headers, header_line, header_line_len);
 		efree(header_line);
 		return SUCCESS;
 	} else {
@@ -990,7 +1016,9 @@ SAPI_API char *sapi_getenv(char *name, size_t name_len TSRMLS_DC)
 		} else {
 			return NULL;
 		}
-		sapi_module.input_filter(PARSE_ENV, name, &value, strlen(value), NULL TSRMLS_CC);
+		if (sapi_module.input_filter) {
+			sapi_module.input_filter(PARSE_STRING, name, &value, strlen(value), NULL TSRMLS_CC);
+		}
 		return value;
 	}
 	return NULL;

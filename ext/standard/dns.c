@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -524,7 +524,7 @@ static u_char *php_parserr(u_char *cp, querybuf *answer, int type_to_fetch, int 
 				tp[dlen] = '\0';
 				cp += dlen;
 
-				add_assoc_stringl(*subarray, "txt", tp, dlen - 1, 0);
+				add_assoc_stringl(*subarray, "txt", tp, (dlen>0)?dlen - 1:0, 0);
 				add_assoc_zval(*subarray, "entries", entries);
 			}
 			break;

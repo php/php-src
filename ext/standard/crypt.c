@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -145,14 +145,121 @@ static void php_to64(char *s, long v, int n) /* {{{ */
 }
 /* }}} */
 
+PHPAPI int php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, char **result)
+{
+	char *crypt_res;
+/* Windows (win32/crypt) has a stripped down version of libxcrypt and 
+	a CryptoApi md5_crypt implementation */
+#if PHP_USE_PHP_CRYPT_R
+	{
+		struct php_crypt_extended_data buffer;
+
+		if (salt[0]=='$' && salt[1]=='1' && salt[2]=='$') {
+			char output[MD5_HASH_MAX_LEN], *out;
+
+			out = php_md5_crypt_r(password, salt, output);
+			if (out) {
+				*result = estrdup(out);
+				return SUCCESS;
+			}
+			return FAILURE;
+		} else if (salt[0]=='$' && salt[1]=='6' && salt[2]=='$') {
+			char *output;
+			output = emalloc(PHP_MAX_SALT_LEN);
+
+			crypt_res = php_sha512_crypt_r(password, salt, output, PHP_MAX_SALT_LEN);
+			if (!crypt_res) {
+				memset(output, 0, PHP_MAX_SALT_LEN);
+				efree(output);
+				return FAILURE;
+			} else {
+				*result = estrdup(output);
+				memset(output, 0, PHP_MAX_SALT_LEN);
+				efree(output);
+				return SUCCESS;
+			}
+		} else if (salt[0]=='$' && salt[1]=='5' && salt[2]=='$') {
+			char *output;
+			output = emalloc(PHP_MAX_SALT_LEN);
+
+			crypt_res = php_sha256_crypt_r(password, salt, output, PHP_MAX_SALT_LEN);
+			if (!crypt_res) {
+				memset(output, 0, PHP_MAX_SALT_LEN);
+				efree(output);
+				return FAILURE;
+			} else {
+				*result = estrdup(output);
+				memset(output, 0, PHP_MAX_SALT_LEN);
+				efree(output);
+				return SUCCESS;
+			}
+		} else if (
+				salt[0] == '$' &&
+				salt[1] == '2' &&
+				salt[2] >= 'a' && salt[2] <= 'z' &&
+				salt[3] == '$' &&
+				salt[4] >= '0' && salt[4] <= '3' &&
+				salt[5] >= '0' && salt[5] <= '9' &&
+				salt[6] == '$') {
+			char output[PHP_MAX_SALT_LEN + 1];
+
+			memset(output, 0, PHP_MAX_SALT_LEN + 1);
+
+			crypt_res = php_crypt_blowfish_rn(password, salt, output, sizeof(output));
+			if (!crypt_res) {
+				memset(output, 0, PHP_MAX_SALT_LEN + 1);
+				return FAILURE;
+			} else {
+				*result = estrdup(output);
+				memset(output, 0, PHP_MAX_SALT_LEN + 1);
+				return SUCCESS;
+			}
+		} else {
+			memset(&buffer, 0, sizeof(buffer));
+			_crypt_extended_init_r();
+
+			crypt_res = _crypt_extended_r(password, salt, &buffer);
+			if (!crypt_res) {
+				return FAILURE;
+			} else {
+				*result = estrdup(crypt_res);
+				return SUCCESS;
+			}
+		}
+	}
+#else
+
+# if defined(HAVE_CRYPT_R) && (defined(_REENTRANT) || defined(_THREAD_SAFE))
+	{
+#  if defined(CRYPT_R_STRUCT_CRYPT_DATA)
+		struct crypt_data buffer;
+		memset(&buffer, 0, sizeof(buffer));
+#  elif defined(CRYPT_R_CRYPTD)
+		CRYPTD buffer;
+#  else
+#    error Data struct used by crypt_r() is unknown. Please report.
+#  endif
+		crypt_res = crypt_r(password, salt, &buffer);
+		if (!crypt_res) {
+			return FAILURE;
+		} else {
+			*result = estrdup(crypt_res);
+			return SUCCESS;
+		}
+	}
+# endif
+#endif
+}
+/* }}} */
+
+
 /* {{{ proto string crypt(string str [, string salt])
    Hash a string */
 PHP_FUNCTION(crypt)
 {
 	char salt[PHP_MAX_SALT_LEN + 1];
-	char *str, *salt_in = NULL;
+	char *str, *salt_in = NULL, *result = NULL;
 	int str_len, salt_in_len = 0;
-	char *crypt_res;
 	salt[0] = salt[PHP_MAX_SALT_LEN] = '\0';
 
 	/* This will produce suitable results if people depend on DES-encryption
@@ -182,128 +289,16 @@ PHP_FUNCTION(crypt)
 	} else {
 		salt_in_len = MIN(PHP_MAX_SALT_LEN, salt_in_len);
 	}
+	salt[salt_in_len] = '\0';
 
-/* Windows (win32/crypt) has a stripped down version of libxcrypt and 
-	a CryptoApi md5_crypt implementation */
-#if PHP_USE_PHP_CRYPT_R
-	{
-		struct php_crypt_extended_data buffer;
-
-		if (salt[0]=='$' && salt[1]=='1' && salt[2]=='$') {
-			char output[MD5_HASH_MAX_LEN];
-
-			RETURN_STRING(php_md5_crypt_r(str, salt, output), 1);
-		} else if (salt[0]=='$' && salt[1]=='6' && salt[2]=='$') {
-			const char sha512_salt_prefix[] = "$6$";
-			const char sha512_rounds_prefix[] = "rounds=";
-			char *output;
-			int needed = (sizeof(sha512_salt_prefix) - 1
-						+ sizeof(sha512_rounds_prefix) + 9 + 1
-						+ strlen(salt) + 1 + 43 + 1);
-			output = emalloc(needed);
-			salt[salt_in_len] = '\0';
-
-			crypt_res = php_sha512_crypt_r(str, salt, output, needed);
-			if (!crypt_res) {
-				if (salt[0]=='*' && salt[1]=='0') {
-					RETVAL_STRING("*1", 1);
-				} else {
-					RETVAL_STRING("*0", 1);
-				}
-			} else {
-				RETVAL_STRING(output, 1);
-			}
-
-			memset(output, 0, PHP_MAX_SALT_LEN + 1);
-			efree(output);
-		} else if (salt[0]=='$' && salt[1]=='5' && salt[2]=='$') {
-			const char sha256_salt_prefix[] = "$5$";
-			const char sha256_rounds_prefix[] = "rounds=";
-			char *output;
-			int needed = (sizeof(sha256_salt_prefix) - 1
-						+ sizeof(sha256_rounds_prefix) + 9 + 1
-						+ strlen(salt) + 1 + 43 + 1);
-			output = emalloc(needed);
-			salt[salt_in_len] = '\0';
-
-			crypt_res = php_sha256_crypt_r(str, salt, output, needed);
-			if (!crypt_res) {
-				if (salt[0]=='*' && salt[1]=='0') {
-					RETVAL_STRING("*1", 1);
-				} else {
-					RETVAL_STRING("*0", 1);
-				}
-			} else {
-				RETVAL_STRING(output, 1);
-			}
-
-			memset(output, 0, PHP_MAX_SALT_LEN + 1);
-			efree(output);
-		} else if (
-				salt[0] == '$' &&
-				salt[1] == '2' &&
-				salt[2] >= 'a' && salt[2] <= 'z' &&
-				salt[3] == '$' &&
-				salt[4] >= '0' && salt[4] <= '3' &&
-				salt[5] >= '0' && salt[5] <= '9' &&
-				salt[6] == '$') {
-			char output[PHP_MAX_SALT_LEN + 1];
-
-			memset(output, 0, PHP_MAX_SALT_LEN + 1);
-
-			crypt_res = php_crypt_blowfish_rn(str, salt, output, sizeof(output));
-			if (!crypt_res) {
-				if (salt[0]=='*' && salt[1]=='0') {
-					RETVAL_STRING("*1", 1);
-				} else {
-					RETVAL_STRING("*0", 1);
-				}
-			} else {
-				RETVAL_STRING(output, 1);
-			}
-
-			memset(output, 0, PHP_MAX_SALT_LEN + 1);
+	if (php_crypt(str, str_len, salt, salt_in_len, &result) == FAILURE) {
+		if (salt[0] == '*' && salt[1] == '0') {
+			RETURN_STRING("*1", 1);
 		} else {
-			memset(&buffer, 0, sizeof(buffer));
-			_crypt_extended_init_r();
-
-			crypt_res = _crypt_extended_r(str, salt, &buffer);
-			if (!crypt_res) {
-				if (salt[0]=='*' && salt[1]=='0') {
-					RETURN_STRING("*1", 1);
-				} else {
-					RETURN_STRING("*0", 1);
-				}
-			} else {
-				RETURN_STRING(crypt_res, 1);
-			}
+			RETURN_STRING("*0", 1);
 		}
 	}
-#else
-
-# if defined(HAVE_CRYPT_R) && (defined(_REENTRANT) || defined(_THREAD_SAFE))
-	{
-#  if defined(CRYPT_R_STRUCT_CRYPT_DATA)
-		struct crypt_data buffer;
-		memset(&buffer, 0, sizeof(buffer));
-#  elif defined(CRYPT_R_CRYPTD)
-		CRYPTD buffer;
-#  else
-#    error Data struct used by crypt_r() is unknown. Please report.
-#  endif
-		crypt_res = crypt_r(str, salt, &buffer);
-		if (!crypt_res) {
-				if (salt[0]=='*' && salt[1]=='0') {
-					RETURN_STRING("*1", 1);
-				} else {
-					RETURN_STRING("*0", 1);
-				}
-		} else {
-			RETURN_STRING(crypt_res, 1);
-		}
-	}
-# endif
-#endif
+	RETURN_STRING(result, 0);
 }
 /* }}} */
 #endif

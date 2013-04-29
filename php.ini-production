@@ -19,7 +19,7 @@
 ; See the PHP docs for more specific information.
 ; http://php.net/configuration.file
 
-; The syntax of the file is extremely simple.  Whitespace and Lines
+; The syntax of the file is extremely simple.  Whitespace and lines
 ; beginning with a semicolon are silently ignored (as you probably guessed).
 ; Section headers (e.g. [Foo]) are also silently ignored, even though
 ; they might mean something in the future.
@@ -78,10 +78,12 @@
 ; compatibility with older or less security conscience applications. We
 ; recommending using the production ini in production and testing environments.
 
-; php.ini-development is very similar to its production variant, except it's
-; much more verbose when it comes to errors. We recommending using the
-; development version only in development environments as errors shown to
+; php.ini-development is very similar to its production variant, except it is
+; much more verbose when it comes to errors. We recommend using the
+; development version only in development environments, as errors shown to
 ; application users can inadvertently leak otherwise secure information.
+
+; This is php.ini-production INI file.
 
 ;;;;;;;;;;;;;;;;;;;
 ; Quick Reference ;
@@ -197,13 +199,14 @@
 engine = On
 
 ; This directive determines whether or not PHP will recognize code between
-; <? and ?> tags as PHP source which should be processed as such. It's been
-; recommended for several years that you not use the short tag "short cut" and
-; instead to use the full <?php and ?> tag combination. With the wide spread use
+; <? and ?> tags as PHP source which should be processed as such. For several
+; years we recommended that you not use the short tag shortcut and
+; instead to use the full <?php and ?> tag combination. With the widespread use
 ; of XML and use of these tags by other languages, the server can become easily
-; confused and end up parsing the wrong code in the wrong context. But because
-; this short cut has been a feature for such a long time, it's currently still
-; supported for backwards compatibility, but we recommend you don't use them.
+; confused and end up parsing the wrong code in the wrong context.
+; This shortcut is still supported for backwards compatibility, but we
+; recommend against its use.
+; Default Value: On
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
@@ -432,7 +435,7 @@ memory_limit = 128M
 ; E_NOTICE          - run-time notices (these are warnings which often result
 ;                     from a bug in your code, but it's possible that it was
 ;                     intentional (e.g., using an uninitialized variable and
-;                     relying on the fact it's automatically initialized to an
+;                     relying on the fact it is automatically initialized to an
 ;                     empty string)
 ; E_STRICT          - run-time notices, enable to have PHP suggest changes
 ;                     to your code which will ensure the best interoperability
@@ -465,8 +468,8 @@ error_reporting = E_ALL & ~E_DEPRECATED & ~E_STRICT
 ; it could be very dangerous in production environments. Depending on the code
 ; which is triggering the error, sensitive information could potentially leak
 ; out of your application such as database usernames and passwords or worse.
-; It's recommended that errors be logged on production servers rather than
-; having the errors sent to STDOUT.
+; For production environments, we recommend logging errors rather than
+; sending them to STDOUT.
 ; Possible Values:
 ;   Off = Do not display any errors
 ;   stderr = Display errors to STDERR (affects only CGI/CLI binaries!)
@@ -480,8 +483,8 @@ display_errors = Off
 ; The display of errors which occur during PHP's startup sequence are handled
 ; separately from display_errors. PHP's default behavior is to suppress those
 ; errors from clients. Turning the display of startup errors on can be useful in
-; debugging configuration problems. But, it's strongly recommended that you
-; leave this setting off on production servers.
+; debugging configuration problems. We strongly recommend you
+; set this to 'off' for production servers.
 ; Default Value: Off
 ; Development Value: On
 ; Production Value: Off
@@ -729,6 +732,10 @@ user_dir =
 ; On windows:
 ; extension_dir = "ext"
 
+; Directory where the temporary files should be placed.
+; Defaults to the system default (see sys_get_temp_dir)
+; sys_temp_dir = "/tmp"
+
 ; Whether or not to enable the dl() function.  The dl() function does NOT work
 ; properly in multithreaded servers, such as IIS or Zeus, and is automatically
 ; disabled on them.
@@ -751,7 +758,7 @@ enable_dl = Off
 ; will look for to know it is OK to continue execution.  Setting this variable MAY
 ; cause security issues, KNOW WHAT YOU ARE DOING FIRST.
 ; http://php.net/cgi.redirect-status-env
-;cgi.redirect_status_env = ;
+;cgi.redirect_status_env =
 
 ; cgi.fix_pathinfo provides *real* PATH_INFO/PATH_TRANSLATED support for CGI.  PHP's
 ; previous behaviour was to set PATH_TRANSLATED to SCRIPT_FILENAME, and to not grok
@@ -768,15 +775,15 @@ enable_dl = Off
 ; does not currently support this feature (03/17/2002)
 ; Set to 1 if running under IIS.  Default is zero.
 ; http://php.net/fastcgi.impersonate
-;fastcgi.impersonate = 1;
+;fastcgi.impersonate = 1
 
 ; Disable logging through FastCGI connection. PHP's default behavior is to enable
 ; this feature.
 ;fastcgi.logging = 0
 
 ; cgi.rfc2616_headers configuration option tells PHP what type of headers to
-; use when sending HTTP response code. If it's set 0 PHP sends Status: header that
-; is supported by Apache. When this option is set to 1 PHP will send
+; use when sending HTTP response code. If set to 0, PHP sends Status: header that
+; is supported by Apache. When this option is set to 1, PHP will send
 ; RFC2616 compliant header.
 ; Default is zero.
 ; http://php.net/cgi.rfc2616-headers
@@ -1020,6 +1027,8 @@ mail.add_x_header = On
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
 ;mail.log =
+; Log mail to syslog (Event Log on NT, not valid in Windows 95).
+;mail.log = syslog
 
 [SQL]
 ; http://php.net/sql.safe-mode
@@ -1374,9 +1383,9 @@ session.save_handler = files
 ;
 ; where N is an integer.  Instead of storing all the session files in
 ; /path, what this will do is use subdirectories N-levels deep, and
-; store the session data in those directories.  This is useful if you
-; or your OS have problems with lots of files in one directory, and is
-; a more efficient layout for servers that handle lots of sessions.
+; store the session data in those directories.  This is useful if
+; your OS has problems with many files in one directory, and is
+; a more efficient layout for servers that handle many sessions.
 ;
 ; NOTE 1: PHP will not create this directory structure automatically.
 ;         You can use the script in the ext/session dir for that purpose.
@@ -1403,7 +1412,7 @@ session.use_cookies = 1
 ; This option forces PHP to fetch and use a cookie for storing and maintaining
 ; the session id. We encourage this operation as it's very helpful in combating
 ; session hijacking when not specifying and managing your own session id. It is
-; not the end all be all of session hijacking defense, but it's a good start.
+; not the be-all and end-all of session hijacking defense, but it's a good start.
 ; http://php.net/session.use-only-cookies
 session.use_only_cookies = 1
 
@@ -1476,14 +1485,14 @@ session.gc_maxlifetime = 1440
 
 ; PHP 4.2 and less have an undocumented feature/bug that allows you to
 ; to initialize a session variable in the global scope.
-; PHP 4.3 and later will warn you, if this feature is used.
+; PHP 4.3 and later will warn you if this feature is used.
 ; You can disable the feature and the warning separately. At this time,
 ; the warning is only displayed, if bug_compat_42 is enabled. This feature
-; introduces some serious security problems if not handled correctly. It's
-; recommended that you do not use this feature on production servers. But you
+; introduces some serious security problems if not handled correctly. We
+; recommend you not use this feature on production servers. You
 ; should enable this on development servers and enable the warning as well. If you
 ; do not enable the feature on development servers, you won't be warned when it's
-; used and debugging errors caused by this can be difficult to track down.
+; used, so debugging errors caused by this can be difficult to track down.
 ; Default Value: On
 ; Development Value: On
 ; Production Value: Off
@@ -1528,7 +1537,7 @@ session.cache_limiter = nocache
 session.cache_expire = 180
 
 ; trans sid support is disabled by default.
-; Use of trans sid may risk your users security.
+; Use of trans sid may risk your users' security.
 ; Use this option with caution.
 ; - User may send URL contains active session ID
 ;   to other person via. email/irc/etc.
@@ -1725,16 +1734,16 @@ mssql.secure_connection = Off
 ; Some encoding cannot work as internal encoding.
 ; (e.g. SJIS, BIG5, ISO-2022-*)
 ; http://php.net/mbstring.internal-encoding
-;mbstring.internal_encoding = EUC-JP
+;mbstring.internal_encoding = UTF-8
 
 ; http input encoding.
 ; http://php.net/mbstring.http-input
-;mbstring.http_input = auto
+;mbstring.http_input = UTF-8
 
 ; http output encoding. mb_output_handler must be
 ; registered as output buffer to function
 ; http://php.net/mbstring.http-output
-;mbstring.http_output = SJIS
+;mbstring.http_output = pass
 
 ; enable automatic encoding translation according to
 ; mbstring.internal_encoding setting. Input chars are
@@ -1752,7 +1761,7 @@ mssql.secure_connection = Off
 ; substitute_character used when character cannot be converted
 ; one from another
 ; http://php.net/mbstring.substitute-character
-;mbstring.substitute_character = none;
+;mbstring.substitute_character = none
 
 ; overload(replace) single byte functions by mbstring functions.
 ; mail(), ereg(), etc are overloaded by mb_send_mail(), mb_ereg(),
@@ -1766,7 +1775,7 @@ mssql.secure_connection = Off
 ;mbstring.func_overload = 0
 
 ; enable strict encoding detection.
-;mbstring.strict_detection = Off
+;mbstring.strict_detection = On
 
 ; This directive specifies the regex pattern of content types for which mb_output_handler()
 ; is activated.
@@ -1853,6 +1862,102 @@ ldap.max_links = -1
 
 [dba]
 ;dba.default_handler=
+
+[opcache]
+; Determines if Zend OPCache is enabled
+;opcache.enable=0
+
+; Determines if Zend OPCache is enabled for the CLI version of PHP
+;opcache.enable_cli=0
+
+; The OPcache shared memory storage size.
+;opcache.memory_consumption=64
+
+; The amount of memory for interned strings in Mbytes.
+;opcache.interned_strings_buffer=4
+
+; The maximum number of keys (scripts) in the OPcache hash table.
+; Only numbers between 200 and 100000 are allowed.
+;opcache.max_accelerated_files=2000
+
+; The maximum percentage of "wasted" memory until a restart is scheduled.
+;opcache.max_wasted_percentage=5
+
+; When this directive is enabled, the OPcache appends the current working
+; directory to the script key, thus eliminating possible collisions between
+; files with the same name (basename). Disabling the directive improves
+; performance, but may break existing applications.
+;opcache.use_cwd=1
+
+; When disabled, you must reset the OPcache manually or restart the
+; webserver for changes to the filesystem to take effect.
+;opcache.validate_timestamps=1
+
+; How often (in seconds) to check file timestamps for changes to the shared
+; memory storage allocation. ("1" means validate once per second, but only
+; once per request. "0" means always validate)
+;opcache.revalidate_freq=2
+
+; Enables or disables file search in include_path optimization
+;opcache.revalidate_path=0
+
+; If disabled, all PHPDoc comments are dropped from the code to reduce the
+ ;size of the optimized code.
+;opcache.save_comments=1
+
+; If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"
+; may be always stored (save_comments=1), but not loaded by applications
+; that don't need them anyway.
+;opcache.load_comments=1
+
+; If enabled, a fast shutdown sequence is used for the accelerated code
+;opcache.fast_shutdown=0
+
+; Allow file existence override (file_exists, etc.) performance feature.
+;opcache.enable_file_override=0
+
+; A bitmask, where each bit enables or disables the appropriate OPcache
+; passes
+;opcache.optimization_level=0xffffffff
+
+;opcache.inherited_hack=1
+;opcache.dups_fix=0
+
+; The location of the OPcache blacklist file (wildcards allowed).
+; Each OPcache blacklist file is a text file that holds the names of files
+; that should not be accelerated. The file format is to add each filename
+; to a new line. The filename may be a full path or just a file prefix
+; (i.e., /var/www/x  blacklists all the files and directories in /var/www
+; that start with 'x'). Line starting with a ; are ignored (comments).
+;opcache.blacklist_filename=
+
+; Allows exclusion of large files from being cached. By default all files
+; are cached.
+;opcache.max_file_size=0
+
+; Check the cache checksum each N requests.
+; The default value of "0" means that the checks are disabled.
+;opcache.consistency_checks=0
+
+; How long to wait (in seconds) for a scheduled restart to begin if the cache
+; is not being accessed.
+;opcache.force_restart_timeout=180
+
+; OPcache error_log file name. Empty string assumes "stderr".
+;opcache.error_log=
+
+; All OPcache errors go to the Web server log.
+; By default, only fatal errors (level 0) or errors (level 1) are logged.
+; You can also enable warnings (level 2), info messages (level 3) or
+; debug messages (level 4).
+;opcache.log_verbosity_level=1
+
+; Preferred Shared Memory back-end. Leave empty and let the system decide.
+;opcache.preferred_memory_model=
+
+; Protect the shared memory from unexpected writing during script execution.
+; Useful for internal debugging only.
+;opcache.protect_memory=0
 
 ; Local Variables:
 ; tab-width: 4

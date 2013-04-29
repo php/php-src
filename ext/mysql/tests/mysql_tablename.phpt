@@ -42,6 +42,8 @@ mysql_close($link);
 print "done!";
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
 Warning: mysql_tablename() expects at least 2 parameters, 1 given in %s on line %d
 
 Warning: mysql_tablename(): Unable to jump to row -1 on MySQL result index %d in %s on line %d

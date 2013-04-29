@@ -100,8 +100,8 @@ Array
                     [3] => Kislev
                     [4] => Tevet
                     [5] => Shevat
-                    [6] => AdarI
-                    [7] => AdarII
+                    [6] => Adar I
+                    [7] => Adar II
                     [8] => Nisan
                     [9] => Iyyar
                     [10] => Sivan
@@ -117,8 +117,8 @@ Array
                     [3] => Kislev
                     [4] => Tevet
                     [5] => Shevat
-                    [6] => AdarI
-                    [7] => AdarII
+                    [6] => Adar I
+                    [7] => Adar II
                     [8] => Nisan
                     [9] => Iyyar
                     [10] => Sivan

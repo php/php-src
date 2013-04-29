@@ -63,34 +63,34 @@ foreach ($pq3 as $k=>$v) {
 <?php exit(0); ?>
 --EXPECTF--
 Exception: Can't extract from an empty heap
-3=>b
-2=>a
-1=>c
+2=>b
+1=>a
+0=>c
 EXTR_BOTH
-3=>Array
+2=>Array
 (
     [data] => b
     [priority] => 2
 )
 
-2=>Array
+1=>Array
 (
     [data] => a
     [priority] => 1
 )
 
-1=>Array
+0=>Array
 (
     [data] => c
     [priority] => 0
 )
 
 EXTR_DATA
-3=>b
-2=>a
-1=>c
+2=>b
+1=>a
+0=>c
 EXTR_PRIORITY
-3=>2
-2=>1
-1=>0
+2=>2
+1=>1
+0=>0
 ===DONE===

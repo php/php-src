@@ -116,7 +116,7 @@ class Collator {
     /**
      * Return error text for the last ICU operation.
      *
-     * @return string Description of an error occured in the last
+     * @return string Description of an error occurred in the last
      *                Collator method call.
      */
     public function getErrorMessage() {}
@@ -236,7 +236,7 @@ class Collator {
      *
      * @return string        Real locale name from which the
      *                       collation data comes. If the collator
-     *                       was instantiated from rules or an error occured,
+     *                       was instantiated from rules or an error occurred,
      *                       returns false.
      */
     public function getLocale( $type ) {}
@@ -331,7 +331,7 @@ function collator_sort_with_sort_keys( $coll, $arr ) {}
  *
  * @return string  Real locale name from which the
  *                 collation data comes. If the collator
- *                 was instantiated from rules or an error occured,
+ *                 was instantiated from rules or an error occurred,
  *                 returns false.
  */
 function collator_get_locale( $coll, $type ) {}
@@ -391,7 +391,7 @@ function collator_get_error_code( $coll ) {}
  *
  * @param Collator $coll    Collator object.
  *
- * @return string  Description of an error occured in the last
+ * @return string  Description of an error occurred in the last
  *                 Collator API function call.
  */
 function collator_get_error_message( $coll ) {}

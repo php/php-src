@@ -61,11 +61,11 @@ bool(true)
 bool(true)
   - Unset:
 
-Notice: Undefined index:  prop in %s on line 39
+Notice: Undefined index: prop in %s on line 39
 
-Notice: Undefined index:  prop in %s on line 40
+Notice: Undefined index: prop in %s on line 40
 
-Notice: Undefined index:  prop in %s on line 40
+Notice: Undefined index: prop in %s on line 40
 NULL
 NULL
   - After:
@@ -91,9 +91,9 @@ bool(true)
 bool(true)
   - Unset:
 
-Notice: Undefined index:  prop in %s on line 40
+Notice: Undefined index: prop in %s on line 40
 
-Notice: Undefined index:  prop in %s on line 40
+Notice: Undefined index: prop in %s on line 40
 NULL
 NULL
   - After:

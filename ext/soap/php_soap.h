@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -148,6 +148,13 @@ struct _soapService {
 #define WSDL_CACHE_DISK     0x1
 #define WSDL_CACHE_MEMORY   0x2
 #define WSDL_CACHE_BOTH     0x3
+
+/* New SOAP SSL Method Constants */
+#define SOAP_SSL_METHOD_TLS     0
+#define SOAP_SSL_METHOD_SSLv2   1
+#define SOAP_SSL_METHOD_SSLv3   2
+#define SOAP_SSL_METHOD_SSLv23  3
+
 
 ZEND_BEGIN_MODULE_GLOBALS(soap)
 	HashTable  defEncNs;     /* mapping of default namespaces to prefixes */

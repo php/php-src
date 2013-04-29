@@ -7,8 +7,37 @@
 
 #include <unistd.h>
 
+#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#endif
+
+#ifdef EX_OK
+#define FPM_EXIT_OK EX_OK
+#else
+#define FPM_EXIT_OK 0
+#endif
+
+#ifdef EX_USAGE
+#define FPM_EXIT_USAGE EX_USAGE
+#else
+#define FPM_EXIT_USAGE 64
+#endif
+
+#ifdef EX_SOFTWARE
+#define FPM_EXIT_SOFTWARE EX_SOFTWARE
+#else
+#define FPM_EXIT_SOFTWARE 70
+#endif
+
+#ifdef EX_CONFIG
+#define FPM_EXIT_CONFIG EX_CONFIG
+#else
+#define FPM_EXIT_CONFIG 78
+#endif
+
+
 int fpm_run(int *max_requests);
-int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf);
+int fpm_init(int argc, char **argv, char *config, char *prefix, char *pid, int test_conf, int run_as_root, int force_daemon);
 
 struct fpm_globals_s {
 	pid_t parent_pid;
@@ -25,6 +54,8 @@ struct fpm_globals_s {
 	int is_child;
 	int test_successful;
 	int heartbeat;
+	int run_as_root;
+	int send_config_pipe[2];
 };
 
 extern struct fpm_globals_s fpm_globals;

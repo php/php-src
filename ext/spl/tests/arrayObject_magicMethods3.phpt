@@ -102,7 +102,7 @@ object(ArrayObject)#2 (1) {
 --> Read existent, non-existent and dynamic:
 string(7) "changed"
 
-Notice: Undefined index:  nonexistent in %s on line 42
+Notice: Undefined index: nonexistent in %s on line 42
 NULL
 string(11) "new.changed"
   Original wrapped object:
@@ -171,7 +171,7 @@ object(ArrayObject)#2 (1) {
 
 --> Unset existent, non-existent and dynamic:
 
-Notice: Undefined index:  nonexistent in %s on line 60
+Notice: Undefined index: nonexistent in %s on line 60
   Original wrapped object:
 object(UsesMagic)#1 (3) {
   ["b"]=>

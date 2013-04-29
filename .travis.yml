@@ -1,0 +1,24 @@
+language: php
+
+php:
+    # We only specify one version so we only get one worker
+    - 5.4
+
+notifications:
+    email: false
+
+env:
+    - REPORT_EXIT_STATUS=1
+
+before_script:
+    # Compile PHP
+    - ./travis/compile.sh
+    # Setup Extensions 
+    - . ./travis/ext/mysql/setup.sh
+    - . ./travis/ext/mysqli/setup.sh
+    - . ./travis/ext/pdo_mysql/setup.sh
+    - . ./travis/ext/pgsql/setup.sh
+    - . ./travis/ext/pdo_pgsql/setup.sh
+
+# Run PHPs run-tests.php 
+script: ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --show-diff

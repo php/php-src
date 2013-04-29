@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -253,8 +253,8 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(link_thread_id_read, mysql_thread_id, MYSQLI_GET_M
 MYSQLI_MAP_PROPERTY_FUNC_LONG(link_warning_count_read, mysql_warning_count, MYSQLI_GET_MYSQL(MYSQLI_STATUS_VALID), ulong, "%lu")
 
 /* {{{ property link_stat_read */
-static int link_stat_read(mysqli_object *obj, zval **retval TSRMLS_DC)\
-{\
+static int link_stat_read(mysqli_object *obj, zval **retval TSRMLS_DC)
+{
 	MY_MYSQL *mysql;
 
 	MAKE_STD_ZVAL(*retval);

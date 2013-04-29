@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -832,7 +832,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 			}
 
 			if (errorcode == 0 && is_xmlns == 0) {
-				attr = xmlSetNsProp(elemp, nsptr, (xmlChar *)localname, (xmlChar *)value);
+				xmlSetNsProp(elemp, nsptr, (xmlChar *)localname, (xmlChar *)value);
 			}
 		} else {
 			name_valid = xmlValidateName((xmlChar *) localname, 0);
@@ -844,7 +844,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 				if (attr != NULL && attr->type != XML_ATTRIBUTE_DECL) {
 					node_list_unlink(attr->children TSRMLS_CC);
 				}
-				attr = xmlSetProp(elemp, (xmlChar *)localname, (xmlChar *)value);
+				xmlSetProp(elemp, (xmlChar *)localname, (xmlChar *)value);
 			}
 		}
 	}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,6 +26,14 @@ extern zend_module_entry com_dotnet_module_entry;
 
 #ifdef ZTS
 #include "TSRM.h"
+#endif
+
+#ifdef PHP_WIN32
+# define PHP_COM_DOTNET_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_COM_DOTNET_API __attribute__ ((visibility("default")))
+#else
+# define PHP_COM_DOTNET_API
 #endif
 
 PHP_MINIT_FUNCTION(com_dotnet);

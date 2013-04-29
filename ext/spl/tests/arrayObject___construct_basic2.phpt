@@ -63,7 +63,7 @@ bool(true)
 
 Notice: Undefined property: ArrayObject::$prop in %s on line 40
 
-Notice: Undefined index:  prop in %s on line 40
+Notice: Undefined index: prop in %s on line 40
 NULL
 NULL
   - After:
@@ -91,7 +91,7 @@ bool(true)
 
 Notice: Undefined property: MyArrayObject::$prop in %s on line 40
 
-Notice: Undefined index:  prop in %s on line 40
+Notice: Undefined index: prop in %s on line 40
 NULL
 NULL
   - After:

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 #include "mysqlnd_debug.h"
 
 /*--------------------------------------------------------------------*/
-
+#if defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1
 static enum_func_status mysqlnd_example_plugin_end(void * p TSRMLS_DC);
 
 static MYSQLND_STATS * mysqlnd_plugin_example_stats = NULL;
@@ -65,7 +65,7 @@ static struct st_mysqlnd_typeii_plugin_example mysqlnd_example_plugin =
 };
 
 
-/* {{{ mysqlnd_plugin_subsystem_init */
+/* {{{ mysqlnd_example_plugin_end */
 static 
 enum_func_status mysqlnd_example_plugin_end(void * p TSRMLS_DC)
 {
@@ -78,7 +78,7 @@ enum_func_status mysqlnd_example_plugin_end(void * p TSRMLS_DC)
 /* }}} */
 
 
-/* {{{ mysqlnd_plugin_subsystem_init */
+/* {{{ mysqlnd_example_plugin_register */
 void
 mysqlnd_example_plugin_register(TSRMLS_D)
 {
@@ -87,7 +87,7 @@ mysqlnd_example_plugin_register(TSRMLS_D)
 	mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_example_plugin TSRMLS_CC);
 }
 /* }}} */
-
+#endif /* defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1 */
 /*--------------------------------------------------------------------*/
 
 static HashTable mysqlnd_registered_plugins;
@@ -104,7 +104,7 @@ mysqlnd_plugin_subsystem_init(TSRMLS_D)
 /* }}} */
 
 
-/* {{{ mysqlnd_plugin_subsystem_init */
+/* {{{ mysqlnd_plugin_end_apply_func */
 int
 mysqlnd_plugin_end_apply_func(void *pDest TSRMLS_DC)
 {
@@ -136,7 +136,7 @@ PHPAPI unsigned int mysqlnd_plugin_register()
 /* }}} */
 
 
-/* {{{ mysqlnd_plugin_register */
+/* {{{ mysqlnd_plugin_register_ex */
 PHPAPI unsigned int mysqlnd_plugin_register_ex(struct st_mysqlnd_plugin_header * plugin TSRMLS_DC)
 {
 	if (plugin) {
@@ -169,7 +169,24 @@ PHPAPI void * _mysqlnd_plugin_find(const char * const name TSRMLS_DC)
 /* {{{ _mysqlnd_plugin_apply_with_argument */
 PHPAPI void _mysqlnd_plugin_apply_with_argument(apply_func_arg_t apply_func, void * argument TSRMLS_DC)
 {
-	zend_hash_apply_with_argument(&mysqlnd_registered_plugins, apply_func, argument TSRMLS_CC);
+	/* Note: We want to be thread-safe (read-only), so we can use neither
+	 * zend_hash_apply_with_argument nor zend_hash_internal_pointer_reset and
+	 * friends
+	 */
+	Bucket *p;
+
+	p = mysqlnd_registered_plugins.pListHead;
+	while (p != NULL) {
+		int result = apply_func(p->pData, argument TSRMLS_CC);
+
+		if (result & ZEND_HASH_APPLY_REMOVE) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "mysqlnd_plugin_apply_with_argument must not remove table entries");
+		}
+		p = p->pListNext;
+		if (result & ZEND_HASH_APPLY_STOP) {
+			break;
+		}
+	}
 }
 /* }}} */
 

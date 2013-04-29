@@ -27,13 +27,13 @@ var_dump($str[$arr]);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECTF--	
 string(1) "i"
 
-Notice: String offset cast occured in %s on line %d
+Notice: String offset cast occurred in %s on line %d
 string(1) "S"
 
-Notice: String offset cast occured in %s on line %d
+Notice: String offset cast occurred in %s on line %d
 string(1) "S"
 
 Warning: Illegal string offset 'run away' in %s on line %d
@@ -46,10 +46,10 @@ string(1) "o"
 Notice: A non well formed numeric value encountered in %s on line %d
 string(1) "r"
 
-Notice: String offset cast occured in %s on line %d
+Notice: String offset cast occurred in %s on line %d
 string(1) "i"
 
-Notice: String offset cast occured in %s on line %d
+Notice: String offset cast occurred in %s on line %d
 string(1) "S"
 
 Warning: Illegal offset type in %s on line %d

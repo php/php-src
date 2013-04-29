@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -633,58 +633,49 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned l
 		}
 
 		if (rc == SQL_SUCCESS_WITH_INFO) {
-			/* promote up to a bigger buffer */
+			/* this is a 'long column'
+			
+			 read the column in 255 byte blocks until the end of the column is reached, reassembling those blocks
+			 in order into the output buffer
+			
+			 this loop has to work whether or not SQLGetData() provides the total column length.
+			 calling SQLDescribeCol() or other, specifically to get the column length, then doing a single read
+			 for that size would be slower except maybe for extremely long columns.*/
+			char *buf2;
 
-			if (C->fetched_len != SQL_NO_TOTAL) {
-				/* use size suggested by the driver, if it knows it */
-				buf = emalloc(C->fetched_len + 1);
-				memcpy(buf, C->data, C->fetched_len);
-				buf[C->fetched_len] = 0;
-				used = C->fetched_len;
-			} else {
-				buf = estrndup(C->data, 256);
-				used = 255; /* not 256; the driver NUL terminated the buffer */
-			}
-
+			buf2 = emalloc(256);
+			buf = estrndup(C->data, 256);
+			used = 255; /* not 256; the driver NUL terminated the buffer */
+			
 			do {
 				C->fetched_len = 0;
-				rc = SQLGetData(S->stmt, colno+1, SQL_C_CHAR,
-					buf + used, alloced - used,
-					&C->fetched_len);
-
-				if (rc == SQL_NO_DATA) {
-					/* we got the lot */
-					break;
-				} else if (rc != SQL_SUCCESS) {
-					pdo_odbc_stmt_error("SQLGetData");
-					if (rc != SQL_SUCCESS_WITH_INFO) {
-						break;
-					}
-				}
-
-				if (C->fetched_len == SQL_NO_TOTAL) {
-					used += alloced - used;
+				/* read block. 256 bytes => 255 bytes are actually read, the last 1 is NULL */
+				rc = SQLGetData(S->stmt, colno+1, SQL_C_CHAR, buf2, 256, &C->fetched_len);
+				
+				/* resize output buffer and reassemble block */
+				if (rc==SQL_SUCCESS_WITH_INFO) {
+					/* point 5, in section "Retrieving Data with SQLGetData" in http://msdn.microsoft.com/en-us/library/windows/desktop/ms715441(v=vs.85).aspx
+					 states that if SQL_SUCCESS_WITH_INFO, fetched_len will be > 255 (greater than buf2's size)
+					 (if a driver fails to follow that and wrote less than 255 bytes to buf2, this will AV or read garbage into buf) */
+					buf = erealloc(buf, used + 255+1);
+					memcpy(buf + used, buf2, 255);
+					used = used + 255;
+				} else if (rc==SQL_SUCCESS) {
+					buf = erealloc(buf, used + C->fetched_len+1);
+					memcpy(buf + used, buf2, C->fetched_len);
+					used = used + C->fetched_len;
 				} else {
-					used += C->fetched_len;
-				}
-
-				if (rc == SQL_SUCCESS) {
-					/* this was the final fetch */
+					/* includes SQL_NO_DATA */
 					break;
 				}
-
-				/* we need to fetch another chunk; resize the
-				 * buffer */
-				alloced *= 2;
-				buf = erealloc(buf, alloced);
+				
 			} while (1);
-
-			/* size down */
-			if (used < alloced - 1024) {
-				alloced = used+1;
-				buf = erealloc(buf, used+1);
-			}
+			
+			efree(buf2);
+			
+			/* NULL terminate the buffer once, when finished, for use with the rest of PHP */
 			buf[used] = '\0';
+
 			*ptr = buf;
 			*caller_frees = 1;
 			*len = used;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,7 @@
 
 ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce TSRMLS_DC)
 {
-	object->ce = ce;	
+	object->ce = ce;
 	object->properties = NULL;
 	object->properties_table = NULL;
 	object->guards = NULL;
@@ -38,7 +38,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object TSRMLS_DC)
 {
 	if (object->guards) {
 		zend_hash_destroy(object->guards);
-		FREE_HASHTABLE(object->guards);		
+		FREE_HASHTABLE(object->guards);
 	}
 	if (object->properties) {
 		zend_hash_destroy(object->properties);
@@ -74,23 +74,23 @@ ZEND_API void zend_objects_destroy_object(zend_object *object, zend_object_handl
 				if (object->ce != EG(scope)) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
-						"Call to private %s::__destruct() from context '%s'%s", 
-						ce->name, 
-						EG(scope) ? EG(scope)->name : "", 
+					zend_error(EG(in_execution) ? E_ERROR : E_WARNING,
+						"Call to private %s::__destruct() from context '%s'%s",
+						ce->name,
+						EG(scope) ? EG(scope)->name : "",
 						EG(in_execution) ? "" : " during shutdown ignored");
 					return;
 				}
 			} else {
 				/* Ensure that if we're calling a protected function, we're allowed to do so.
 				 */
-				if (!zend_check_protected(destructor->common.scope, EG(scope))) {
+				if (!zend_check_protected(zend_get_function_root_class(destructor), EG(scope))) {
 					zend_class_entry *ce = object->ce;
 
-					zend_error(EG(in_execution) ? E_ERROR : E_WARNING, 
-						"Call to protected %s::__destruct() from context '%s'%s", 
-						ce->name, 
-						EG(scope) ? EG(scope)->name : "", 
+					zend_error(EG(in_execution) ? E_ERROR : E_WARNING,
+						"Call to protected %s::__destruct() from context '%s'%s",
+						ce->name,
+						EG(scope) ? EG(scope)->name : "",
 						EG(in_execution) ? "" : " during shutdown ignored");
 					return;
 				}
@@ -139,7 +139,7 @@ ZEND_API void zend_objects_free_object_storage(zend_object *object TSRMLS_DC)
 }
 
 ZEND_API zend_object_value zend_objects_new(zend_object **object, zend_class_entry *class_type TSRMLS_DC)
-{	
+{
 	zend_object_value retval;
 
 	*object = emalloc(sizeof(zend_object));
@@ -222,7 +222,7 @@ ZEND_API zend_object_value zend_objects_clone_obj(zval *zobject TSRMLS_DC)
 	zend_object *new_object;
 	zend_object_handle handle = Z_OBJ_HANDLE_P(zobject);
 
-	/* assume that create isn't overwritten, so when clone depends on the 
+	/* assume that create isn't overwritten, so when clone depends on the
 	 * overwritten one then it must itself be overwritten */
 	old_object = zend_objects_get_address(zobject TSRMLS_CC);
 	new_obj_val = zend_objects_new(&new_object, old_object->ce TSRMLS_CC);

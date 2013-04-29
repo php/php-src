@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -213,7 +213,6 @@ mysqlnd_net_set_methods(struct st_mysqlnd_net_methods * methods)
 	MYSQLND_CLASS_METHOD_TABLE_NAME(mysqlnd_net) = *methods;
 }
 /* }}} */
-
 
 
 /*

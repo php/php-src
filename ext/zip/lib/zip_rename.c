@@ -40,13 +40,18 @@
 
 
 ZIP_EXTERN(int)
-zip_rename(struct zip *za, int idx, const char *name)
+zip_rename(struct zip *za, zip_uint64_t idx, const char *name)
 {
     const char *old_name;
     int old_is_dir, new_is_dir;
     
-    if (idx >= za->nentry || idx < 0 || name[0] == '\0') {
+    if (idx >= za->nentry || name[0] == '\0') {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return -1;
+    }
+
+    if (ZIP_IS_RDONLY(za)) {
+	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
 	return -1;
     }
 

@@ -44,28 +44,20 @@ zip_fclose(struct zip_file *zf)
 {
     int i, ret;
     
-    if (zf->zstr)
-	inflateEnd(zf->zstr);
-    free(zf->buffer);
-    free(zf->zstr);
-	if (zf->za) {
-		for (i=0; i<zf->za->nfile; i++) {
-			if (zf->za->file[i] == zf) {
-				zf->za->file[i] = zf->za->file[zf->za->nfile-1];
-				zf->za->nfile--;
-				break;
-			}
-		}
+    if (zf->src)
+	zip_source_free(zf->src);
+
+    for (i=0; i<zf->za->nfile; i++) {
+	if (zf->za->file[i] == zf) {
+	    zf->za->file[i] = zf->za->file[zf->za->nfile-1];
+	    zf->za->nfile--;
+	    break;
 	}
+    }
 
     ret = 0;
     if (zf->error.zip_err)
 	ret = zf->error.zip_err;
-    else if ((zf->flags & ZIP_ZF_CRC) && (zf->flags & ZIP_ZF_EOF)) {
-	/* if EOF, compare CRC */
-	if (zf->crc_orig != zf->crc)
-	    ret = ZIP_ER_CRC;
-    }
 
     free(zf);
     return ret;

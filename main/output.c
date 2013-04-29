@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -214,7 +214,7 @@ PHPAPI void php_output_register_constants(TSRMLS_D)
  * Used by SAPIs to disable output */
 PHPAPI void php_output_set_status(int status TSRMLS_DC)
 {
-	OG(flags) = status & 0xf;
+	OG(flags) = (OG(flags) & ~0xf) | (status & 0xf);
 }
 /* }}} */
 
@@ -297,7 +297,6 @@ PHPAPI int php_output_clean(TSRMLS_D)
 	php_output_context context;
 
 	if (OG(active) && (OG(active)->flags & PHP_OUTPUT_HANDLER_CLEANABLE)) {
-		OG(active)->buffer.used = 0;
 		php_output_context_init(&context, PHP_OUTPUT_HANDLER_CLEAN TSRMLS_CC);
 		php_output_handler_op(OG(active), &context);
 		php_output_context_dtor(&context);
@@ -1025,6 +1024,7 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 		case PHP_OUTPUT_HANDLER_SUCCESS:
 			/* no more buffered data */
 			handler->buffer.used = 0;
+			handler->flags |= PHP_OUTPUT_HANDLER_PROCESSED;
 			break;
 	}
 
@@ -1225,7 +1225,6 @@ static inline int php_output_stack_pop(int flags TSRMLS_DC)
 			/* signal that we're cleaning up */
 			if (flags & PHP_OUTPUT_POP_DISCARD) {
 				context.op |= PHP_OUTPUT_HANDLER_CLEAN;
-				orphan->buffer.used = 0;
 			}
 			php_output_handler_op(orphan, &context);
 		}
@@ -1509,7 +1508,7 @@ PHP_FUNCTION(ob_get_status)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &full_status) == FAILURE) {
 		return;
 	}
-
+	
 	array_init(return_value);
 
 	if (!OG(active)) {

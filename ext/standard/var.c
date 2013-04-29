@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -453,6 +453,11 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
+		if(myht && myht->nApplyCount > 0){
+			smart_str_appendl(buf, "NULL", 4);
+			zend_error(E_WARNING, "var_export does not handle circular references");
+			return;
+		}
 		if (level > 1) {
 			smart_str_appendc(buf, '\n');
 			buffer_append_spaces(buf, level - 1);
@@ -469,6 +474,11 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 
 	case IS_OBJECT:
 		myht = Z_OBJPROP_PP(struc);
+		if(myht && myht->nApplyCount > 0){
+			smart_str_appendl(buf, "NULL", 4);
+			zend_error(E_WARNING, "var_export does not handle circular references");
+			return;
+		}
 		if (level > 1) {
 			smart_str_appendc(buf, '\n');
 			buffer_append_spaces(buf, level - 1);
@@ -541,12 +551,9 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 
 	/* relies on "(long)" being a perfect hash function for data pointers,
 	 * however the actual identity of an object has had to be determined
-	 * by its object handle and the class entry since 5.0. */
+	 * by its object handle since 5.0. */
 	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
-		p = smart_str_print_long(id + sizeof(id) - 1,
-				(((size_t)Z_OBJCE_P(var) << 5)
-				| ((size_t)Z_OBJCE_P(var) >> (sizeof(long) * 8 - 5)))
-				+ (long) Z_OBJ_HANDLE_P(var));
+		p = smart_str_print_long(id + sizeof(id) - 1, (long) Z_OBJ_HANDLE_P(var));
 		*(--p) = 'O';
 		len = id + sizeof(id) - 1 - p;
 	} else {
@@ -632,6 +639,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		HashPosition pos;
 		int i;
 		zval nval, *nvalp;
+		HashTable *propers;
 
 		ZVAL_NULL(&nval);
 		nvalp = &nval;
@@ -657,7 +665,8 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 				smart_str_appendl(buf,"N;", 2);
 				continue;
 			}
-			if (zend_hash_find(Z_OBJPROP_P(struc), Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, (void *) &d) == SUCCESS) {
+			propers = Z_OBJPROP_P(struc);
+			if (zend_hash_find(propers, Z_STRVAL_PP(name), Z_STRLEN_PP(name) + 1, (void *) &d) == SUCCESS) {
 				php_var_serialize_string(buf, Z_STRVAL_PP(name), Z_STRLEN_PP(name));
 				php_var_serialize_intern(buf, *d, var_hash TSRMLS_CC);
 			} else {
@@ -669,7 +678,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 
 					do {
 						zend_mangle_property_name(&priv_name, &prop_name_length, ce->name, ce->name_length, Z_STRVAL_PP(name), Z_STRLEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
-						if (zend_hash_find(Z_OBJPROP_P(struc), priv_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
+						if (zend_hash_find(propers, priv_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
 							php_var_serialize_string(buf, priv_name, prop_name_length);
 							pefree(priv_name, ce->type & ZEND_INTERNAL_CLASS);
 							php_var_serialize_intern(buf, *d, var_hash TSRMLS_CC);
@@ -677,7 +686,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 						}
 						pefree(priv_name, ce->type & ZEND_INTERNAL_CLASS);
 						zend_mangle_property_name(&prot_name, &prop_name_length, "*", 1, Z_STRVAL_PP(name), Z_STRLEN_PP(name), ce->type & ZEND_INTERNAL_CLASS);
-						if (zend_hash_find(Z_OBJPROP_P(struc), prot_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
+						if (zend_hash_find(propers, prot_name, prop_name_length + 1, (void *) &d) == SUCCESS) {
 							php_var_serialize_string(buf, prot_name, prop_name_length);
 							pefree(prot_name, ce->type & ZEND_INTERNAL_CLASS);
 							php_var_serialize_intern(buf, *d, var_hash TSRMLS_CC);
@@ -704,6 +713,10 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 	int i;
 	ulong *var_already;
 	HashTable *myht;
+
+	if (EG(exception)) {
+		return;
+	}
 
 	if (var_hash && php_add_var_hash(var_hash, struc, (void *) &var_already TSRMLS_CC) == FAILURE) {
 		if (Z_ISREF_P(struc)) {
@@ -791,8 +804,15 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 					BG(serialize_lock)++;
 					res = call_user_function_ex(CG(function_table), &struc, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
 					BG(serialize_lock)--;
+                    
+					if (EG(exception)) {
+						if (retval_ptr) {
+							zval_ptr_dtor(&retval_ptr);
+						}
+						return;
+					}
 
-					if (res == SUCCESS && !EG(exception)) {
+					if (res == SUCCESS) {
 						if (retval_ptr) {
 							if (HASH_OF(retval_ptr)) {
 								php_var_serialize_class(buf, struc, retval_ptr, var_hash TSRMLS_CC);
@@ -912,6 +932,11 @@ PHP_FUNCTION(serialize)
 	php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
+	if (EG(exception)) {
+		smart_str_free(&buf);
+		RETURN_FALSE;
+	}
+
 	if (buf.c) {
 		RETURN_STRINGL(buf.c, buf.len, 0);
 	} else {
@@ -942,7 +967,9 @@ PHP_FUNCTION(unserialize)
 	if (!php_var_unserialize(&return_value, &p, p + buf_len, &var_hash TSRMLS_CC)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		zval_dtor(return_value);
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+		if (!EG(exception)) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+		}
 		RETURN_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -131,7 +131,7 @@ ZEND_API zval zval_used_for_init; /* True global variable */
 /* version information */
 static char *zend_version_info;
 static uint zend_version_info_length;
-#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2012 Zend Technologies\n"
+#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2013 Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
 
 static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, zend_bool is_object TSRMLS_DC) /* {{{ */
@@ -158,9 +158,10 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 			case HASH_KEY_IS_STRING:
 				if (is_object) {
 					const char *prop_name, *class_name;
-					int mangled = zend_unmangle_property_name(string_key, str_len - 1, &class_name, &prop_name);
+					int prop_len;
+					int mangled = zend_unmangle_property_name_ex(string_key, str_len - 1, &class_name, &prop_name, &prop_len);
 
-					ZEND_PUTS_EX(prop_name);
+					ZEND_WRITE_EX(prop_name, prop_len);
 					if (class_name && mangled == SUCCESS) {
 						if (class_name[0]=='*') {
 							ZEND_PUTS_EX(":protected");
@@ -258,6 +259,9 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 			{
 				TSRMLS_FETCH();
 
+				if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
+					break;
+				}
 				if (Z_OBJ_HANDLER_P(expr, cast_object)) {
 					zval *val;
 
@@ -269,12 +273,6 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 						break;
 					}
 					zval_ptr_dtor(&val);
-				}
-				/* Standard PHP objects */
-				if (Z_OBJ_HT_P(expr) == &std_object_handlers || !Z_OBJ_HANDLER_P(expr, cast_object)) {
-					if (zend_std_cast_object_tostring(expr, expr_copy, IS_STRING TSRMLS_CC) == SUCCESS) {
-						break;
-					}
 				}
 				if (!Z_OBJ_HANDLER_P(expr, cast_object) && Z_OBJ_HANDLER_P(expr, get)) {
 					zval *z = Z_OBJ_HANDLER_P(expr, get)(expr TSRMLS_CC);
@@ -686,11 +684,11 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 #if HAVE_DTRACE
 /* build with dtrace support */
 	zend_compile_file = dtrace_compile_file;
-	zend_execute = dtrace_execute;
+	zend_execute_ex = dtrace_execute_ex;
 	zend_execute_internal = dtrace_execute_internal;
 #else
 	zend_compile_file = compile_file;
-	zend_execute = execute;
+	zend_execute_ex = execute_ex;
 	zend_execute_internal = NULL;
 #endif /* HAVE_SYS_SDT_H */
 	zend_compile_string = compile_string;
@@ -781,6 +779,8 @@ void zend_register_standard_ini_entries(TSRMLS_D) /* {{{ */
 void zend_post_startup(TSRMLS_D) /* {{{ */
 {
 #ifdef ZTS
+	zend_encoding **script_encoding_list;
+
 	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id);
 	zend_executor_globals *executor_globals = ts_resource(executor_globals_id);
 
@@ -795,7 +795,12 @@ void zend_post_startup(TSRMLS_D) /* {{{ */
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	free(compiler_globals->function_table);
 	free(compiler_globals->class_table);
-	compiler_globals_ctor(compiler_globals, tsrm_ls);
+	if ((script_encoding_list = (zend_encoding **)compiler_globals->script_encoding_list)) {
+		compiler_globals_ctor(compiler_globals, tsrm_ls);
+		compiler_globals->script_encoding_list = (const zend_encoding **)script_encoding_list;
+	} else {
+		compiler_globals_ctor(compiler_globals, tsrm_ls);
+	}
 	free(EG(zend_constants));
 	executor_globals_ctor(executor_globals, tsrm_ls);
 	global_persistent_list = &EG(persistent_list);
@@ -1024,6 +1029,29 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	zend_stack context_stack;
 	TSRMLS_FETCH();
 
+	/* Report about uncaught exception in case of fatal errors */
+	if (EG(exception)) {
+		switch (type) {
+			case E_CORE_ERROR:
+			case E_ERROR:
+			case E_RECOVERABLE_ERROR:
+			case E_PARSE:
+			case E_COMPILE_ERROR:
+			case E_USER_ERROR:
+				if (zend_is_executing(TSRMLS_C)) {
+					error_lineno = zend_get_executed_lineno(TSRMLS_C);
+				}
+				zend_exception_error(EG(exception), E_WARNING TSRMLS_CC);
+				EG(exception) = NULL;
+				if (zend_is_executing(TSRMLS_C) && EG(opline_ptr)) {
+					active_opline->lineno = error_lineno;
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
 	/* Obtain relevant filename and lineno */
 	switch (type) {
 		case E_CORE_ERROR:
@@ -1211,7 +1239,13 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 	va_end(args);
 
 	if (type == E_PARSE) {
-		EG(exit_status) = 255;
+		/* eval() errors do not affect exit_status */
+		if (!(EG(current_execute_data) &&
+			EG(current_execute_data)->opline &&
+			EG(current_execute_data)->opline->opcode == ZEND_INCLUDE_OR_EVAL &&
+			EG(current_execute_data)->opline->extended_value == ZEND_EVAL)) {
+			EG(exit_status) = 255;
+		}
 		zend_init_compiler_data_structures(TSRMLS_C);
 	}
 }
@@ -1254,6 +1288,7 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 	zend_file_handle *file_handle;
 	zend_op_array *orig_op_array = EG(active_op_array);
 	zval **orig_retval_ptr_ptr = EG(return_value_ptr_ptr);
+    long orig_interactive = CG(interactive);
 
 	va_start(files, file_count);
 	for (i = 0; i < file_count; i++) {
@@ -1261,6 +1296,15 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 		if (!file_handle) {
 			continue;
 		}
+
+        if (orig_interactive) {
+            if (file_handle->filename[0] != '-' || file_handle->filename[1]) {
+                CG(interactive) = 0;
+            } else {
+                CG(interactive) = 1;
+            }
+        }
+       
 		EG(active_op_array) = zend_compile_file(file_handle, type TSRMLS_CC);
 		if (file_handle->opened_path) {
 			int dummy = 1;
@@ -1302,12 +1346,14 @@ ZEND_API int zend_execute_scripts(int type TSRMLS_DC, zval **retval, int file_co
 			va_end(files);
 			EG(active_op_array) = orig_op_array;
 			EG(return_value_ptr_ptr) = orig_retval_ptr_ptr;
+            CG(interactive) = orig_interactive;
 			return FAILURE;
 		}
 	}
 	va_end(files);
 	EG(active_op_array) = orig_op_array;
 	EG(return_value_ptr_ptr) = orig_retval_ptr_ptr;
+    CG(interactive) = orig_interactive;
 
 	return SUCCESS;
 }

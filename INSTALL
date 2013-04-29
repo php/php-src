@@ -24,6 +24,7 @@ Installing PHP
           + Installing a PHP extension on Windows
           + Compiling shared PECL extensions with the pecl command
           + Compiling shared PECL extensions with phpize
+          + php-config
           + Compiling PECL extensions statically into PHP
      * Problems?
           + Read the FAQ
@@ -83,7 +84,7 @@ General Installation Considerations
    With  PHP you can also write desktop GUI applications using the PHP-GTK
    extension.  This  is  a  completely different approach than writing web
    pages,  as  you  do not output any HTML, but manage windows and objects
-   within  them.  For  more information about PHP-GTK, please » visit the
+   within  them.  For  more  information about PHP-GTK, please » visit the
    site  dedicated  to  this  extension.  PHP-GTK  is  not included in the
    official PHP distribution.
 
@@ -92,9 +93,9 @@ General Installation Considerations
    will  also  find  information  on  the  command  line executable in the
    following sections.
 
-   PHP source code and binary distributions for Windows can be found at »
-   http://www.php.net/downloads.php. We recommend you to choose a » mirror
-   nearest to you for downloading the distributions.
+   PHP  source  code  and binary distributions for Windows can be found at
+   » http://www.php.net/downloads.php.   We  recommend  you  to  choose  a
+   » mirror nearest to you for downloading the distributions.
      __________________________________________________________________
      __________________________________________________________________
 
@@ -140,9 +141,9 @@ Table of Contents
      * A web server
      * Any module specific components (such as GD, PDF libs, etc.)
 
-   When  building  directly from SVN sources or after custom modifications
+   When  building  directly from Git sources or after custom modifications
    you might also need:
-     * autoconf: 2.13
+     * autoconf: 2.13+ (for PHP < 5.4.0), 2.59+ (for PHP >= 5.4.0)
      * automake: 1.4+
      * libtool: 1.4.x+ (except 1.4.2)
      * re2c: Version 0.13.4 or newer
@@ -375,12 +376,12 @@ Apache 2.x on Unix systems
    For  information  on  why,  read the related FAQ entry on using Apache2
    with a threaded MPM
 
-   The  »  Apache  Documentation  is  the  most  authoritative  source of
+   The   » Apache  Documentation  is  the  most  authoritative  source  of
    information   on   the   Apache  2.x  server.  More  information  about
    installation options for Apache may be found there.
 
-   The  most  recent version of Apache HTTP Server may be obtained from »
-   Apache  download  site,  and  a  fitting  PHP  version  from  the above
+   The  most  recent  version  of  Apache HTTP Server may be obtained from
+   » Apache  download  site,  and  a  fitting  PHP  version from the above
    mentioned  places.  This  quick  guide  covers  only  the basics to get
    started with Apache 2.x and PHP. For more information read the » Apache
    Documentation.  The  version  numbers have been omitted here, to ensure
@@ -498,7 +499,7 @@ service httpd restart
 
    This  should  not be undertaken without being aware of the consequences
    of  this  decision,  and  having  at  least a fair understanding of the
-   implications.   The   Apache  documentation  regarding  »  MPM-Modules
+   implications.   The   Apache   documentation   regarding  » MPM-Modules
    discusses MPMs in a great deal more detail.
 
      Note:
@@ -520,7 +521,7 @@ Lighttpd 1.4 on Unix systems
    This section contains notes and hints specific to Lighttpd 1.4 installs
    of PHP on Unix systems.
 
-   Please  use  the  »  Lighttpd  trac  to  learn how to install Lighttpd
+   Please  use  the  » Lighttpd  trac  to  learn  how  to install Lighttpd
    properly before continuing.
 
    Fastcgi  is  the preferred SAPI to connect PHP and Lighttpd. Fastcgi is
@@ -627,15 +628,15 @@ Sun, iPlanet and Netscape servers on Sun Solaris
    current web servers read the note about subrequests.
 
    You  can  find  more  information about setting up PHP for the Netscape
-   Enterprise Server (NES) here: »
-   http://benoit.noss.free.fr/php/install-php4.html
+   Enterprise Server (NES) here:
+   » http://benoit.noss.free.fr/php/install-php4.html
 
    To  build  PHP  with  Sun JSWS/Sun ONE WS/iPlanet/Netscape web servers,
    enter  the  proper install directory for the --with-nsapi=[DIR] option.
    The  default directory is usually /opt/netscape/suitespot/. Please also
    read /php-xxx-version/sapi/nsapi/nsapi-readme.txt.
 
-    1. Install  the following packages from » http://www.sunfreeware.com/
+    1. Install  the following packages from »  http://www.sunfreeware.com/
        or another download site:
           + autoconf-2.13
           + automake-1.4
@@ -837,7 +838,7 @@ Testing
 Using Variables
 
    Some  server  supplied  environment  variables  are  not defined in the
-   current  »  CGI/1.1  specification.  Only  the following variables are
+   current  » CGI/1.1  specification.  Only  the  following  variables are
    defined     there:     AUTH_TYPE,     CONTENT_LENGTH,     CONTENT_TYPE,
    GATEWAY_INTERFACE,     PATH_INFO,     PATH_TRANSLATED,    QUERY_STRING,
    REMOTE_ADDR,  REMOTE_HOST,  REMOTE_IDENT,  REMOTE_USER, REQUEST_METHOD,
@@ -855,20 +856,20 @@ HP-UX specific installation notes
    There  are two main options for installing PHP on HP-UX systems. Either
    compile it, or install a pre-compiled binary.
 
-   Official     pre-compiled     packages    are    located    here:    »
-   http://software.hp.com/
+   Official      pre-compiled      packages      are     located     here:
+   » http://software.hp.com/
 
    Until  this  manual  section  is  rewritten,  the  documentation  about
    compiling  PHP  (and  related  extensions)  on  HP-UX  systems has been
-   removed.  For now, consider reading the following external resource: »
-   Building Apache and PHP on HP-UX 11.11
+   removed.  For  now,  consider  reading the following external resource:
+   » Building Apache and PHP on HP-UX 11.11
      __________________________________________________________________
      __________________________________________________________________
 
 OpenBSD installation notes
 
-   This  section contains notes and hints specific to installing PHP on »
-   OpenBSD 3.6.
+   This  section  contains  notes  and hints specific to installing PHP on
+   » OpenBSD 3.6.
 
 Using Binary Packages
 
@@ -900,12 +901,12 @@ Using Binary Packages
   (install the PEAR libraries)
 # pkg_add php4-pear-4.3.8.tgz
 
-   Read  the  » packages(7) manual page for more information about binary
+   Read  the  » packages(7)  manual page for more information about binary
    packages on OpenBSD.
 
 Using Ports
 
-   You  can  also  compile  up  PHP  from  source using the » ports tree.
+   You  can  also  compile  up  PHP  from  source  using the » ports tree.
    However,  this is only recommended for users familiar with OpenBSD. The
    PHP  4 port is split into two sub-directories: core and extensions. The
    extensions  directory  generates  sub-packages for all of the supported
@@ -926,7 +927,7 @@ Common Problems
        automatically  installs  into the correct chroot directories, so no
        special  modification  is  needed  there.  More  information on the
        OpenBSD Apache is available in the » OpenBSD FAQ.
-     * The OpenBSD 3.6 package for the » gd extension requires XFree86 to
+     * The  OpenBSD 3.6 package for the » gd extension requires XFree86 to
        be  installed.  If you do not wish to use some of the font features
        that  require  X11,  install  the  php4-gd-4.3.8-no_x11.tgz package
        instead.
@@ -951,18 +952,26 @@ Required software
 
    Solaris  installs  often lack C compilers and their related tools. Read
    this  FAQ  for  information on why using GNU versions for some of these
-   tools is necessary. The required software is as follows:
+   tools is necessary.
+
+   For unpacking the PHP distribution you need
+     * tar
+     * gzip or
+     * bzip2
+
+   For compiling PHP you need
      * gcc (recommended, other C compilers may work)
      * make
-     * flex
+     * GNU sed
+
+   For building extra extensions or hacking the code of PHP you might also
+   need
+     * flex (up to PHP 5.2)
+     * re2c
      * bison
      * m4
      * autoconf
      * automake
-     * perl
-     * gzip
-     * tar
-     * GNU sed
 
    In  addition,  you  will  need  to  install  (and possibly compile) any
    additional  software  specific to your configuration, such as Oracle or
@@ -971,14 +980,16 @@ Required software
 Using Packages
 
    You can simplify the Solaris install process by using pkgadd to install
-   most of your needed components.
+   most  of  your  needed components. The Image Packaging System (IPS) for
+   Solaris  11  Express  also contains most of the required components for
+   installation using the pkg command.
      __________________________________________________________________
      __________________________________________________________________
 
 Debian GNU/Linux installation notes
 
-   This  section contains notes and hints specific to installing PHP on »
-   Debian GNU/Linux.
+   This  section  contains  notes  and hints specific to installing PHP on
+   » Debian GNU/Linux.
    Warning
 
    Unofficial  builds  from third-parties are not supported here. Any bugs
@@ -1205,6 +1216,7 @@ Table of Contents
      * Installing a PHP extension on Windows
      * Compiling shared PECL extensions with the pecl command
      * Compiling shared PECL extensions with phpize
+     * php-config
      * Compiling PECL extensions statically into PHP
      __________________________________________________________________
 
@@ -1227,8 +1239,8 @@ Introduction to PECL Installations
    To this php.ini file, or through the use of the dl() function.
 
    When  building  PHP modules, it's important to have known-good versions
-   of  the  required  tools (autoconf, automake, libtool, etc.) See the »
-   Anonymous  SVN  Instructions  for  details  on  the required tools, and
+   of  the  required  tools  (autoconf,  automake,  libtool, etc.) See the
+   » Anonymous  Git  Instructions  for  details on the required tools, and
    required versions.
      __________________________________________________________________
      __________________________________________________________________
@@ -1247,7 +1259,7 @@ Downloading PECL extensions
        the PECL web site are available for download and installation using
        the » pecl command. Specific revisions may also be specified.
      * SVN  Most  PECL extensions also reside in SVN. A web-based view may
-       be seen at » http://svn.php.net/viewvc/pecl/. To download straight
+       be  seen at » http://svn.php.net/viewvc/pecl/. To download straight
        from SVN, the following sequence of commands may be used:
        $   svn  checkout  http://svn.php.net/repository/pecl/extname/trunk
        extname
@@ -1279,7 +1291,7 @@ Where to find an extension?
 
    PHP   extensions   are  usually  called  "php_*.dll"  (where  the  star
    represents  the  name  of the extension) and they are located under the
-   "PHP\ext" ("PHP\extensions" in PHP4) folder.
+   "PHP\ext" ("PHP\extensions" in PHP 4) folder.
 
    PHP   ships  with  the  extensions  most  useful  to  the  majority  of
    developers. They are called "core" extensions.
@@ -1365,7 +1377,7 @@ Resolving problems
 
 Compiling shared PECL extensions with the pecl command
 
-   PECL  makes  it easy to create shared PHP extensions. Using the » pecl
+   PECL  makes  it  easy to create shared PHP extensions. Using the » pecl
    command, do the following:
 
    $ pecl install extname
@@ -1421,6 +1433,51 @@ $ make
    extensions.
 
    Execute phpize --help to display additional usage information.
+     __________________________________________________________________
+     __________________________________________________________________
+
+php-config
+
+   php-config is a simple shell script for obtaining information about the
+   installed PHP configuration.
+
+   When compiling extensions, if you have multiple PHP versions installed,
+   you may specify for which installation you'd like to build by using the
+   --with-php-config  option  during configuration, specifying the path of
+   the respective php-config script.
+
+   The  list of command line options provided by the php-config script can
+   be queried anytime by running php-config with the -h switch:
+Usage: /usr/local/bin/php-config [OPTION]
+Options:
+  --prefix            [...]
+  --includes          [...]
+  --ldflags           [...]
+  --libs              [...]
+  --extension-dir     [...]
+  --include-dir       [...]
+  --php-binary        [...]
+  --php-sapis         [...]
+  --configure-options [...]
+  --version           [...]
+  --vernum            [...]
+
+   CAPTION: Command line options
+
+   Option Description
+   --prefix Directory prefix where PHP is installed, e.g. /usr/local
+   --includes List of -I options with all include files
+   --ldflags LD Flags which PHP was compiled with
+   --libs Extra libraries which PHP was compiled with
+   --extension-dir Directory where extensions are searched by default
+   --include-dir Directory prefix where header files are installed by
+   default
+   --php-binary Full path to php CLI or CGI binary
+   --php-sapis Show all SAPI modules available
+   --configure-options  Configure  options  to  recreate  configuration of
+   current PHP installation
+   --version PHP version
+   --vernum PHP version as integer
      __________________________________________________________________
      __________________________________________________________________
 
@@ -1485,11 +1542,11 @@ Other problems
    If  you  are  still stuck, someone on the PHP installation mailing list
    may  be  able  to  help you. You should check out the archive first, in
    case  someone already answered someone else who had the same problem as
-   you.   The   archives  are  available  from  the  support  page  on  »
-   http://www.php.net/support.php.  To  subscribe  to the PHP installation
-   mailing list, send an empty mail to »
-   php-install-subscribe@lists.php.net.  The  mailing  list  address is »
-   php-install@lists.php.net.
+   you.   The   archives   are   available   from   the  support  page  on
+   » http://www.php.net/support.php.  To subscribe to the PHP installation
+   mailing list, send an empty mail to
+   » php-install-subscribe@lists.php.net.  The  mailing  list  address  is
+   » php-install@lists.php.net.
 
    If  you  want to get help on the mailing list, please try to be precise
    and  give the necessary details about your environment (which operating
@@ -1504,11 +1561,11 @@ Bug reports
    If  you  think  you  have found a bug in PHP, please report it. The PHP
    developers  probably  don't  know  about  it, and unless you report it,
    chances  are  it  won't  be  fixed.  You  can  report  bugs  using  the
-   bug-tracking  system at » http://bugs.php.net/. Please do not send bug
+   bug-tracking  system  at » http://bugs.php.net/. Please do not send bug
    reports  in  mailing  list  or personal letters. The bug system is also
    suitable to submit feature requests.
 
-   Read  the  »  How  to  report a bug document before submitting any bug
+   Read  the  » How  to  report  a  bug document before submitting any bug
    reports!
      __________________________________________________________________
      __________________________________________________________________
@@ -1528,14 +1585,14 @@ The configuration file
 
    The  configuration  file  (php.ini) is read when PHP starts up. For the
    server  module  versions  of  PHP,  this happens only once when the web
-   server  is  started.  For  the CGI and CLI version, it happens on every
+   server  is  started.  For the CGI and CLI versions, it happens on every
    invocation.
 
-   php.ini is searched in these locations (in order):
+   php.ini is searched for in these locations (in order):
      * SAPI  module specific location (PHPIniDir directive in Apache 2, -c
        command  line  option  in  CGI and CLI, php_ini parameter in NSAPI,
        PHP_INI_PATH environment variable in THTTPD)
-     * The  PHPRC  environment variable. Before PHP 5.2.0 this was checked
+     * The  PHPRC environment variable. Before PHP 5.2.0, this was checked
        after the registry key mentioned below.
      * As  of  PHP  5.2.0, the location of the php.ini file can be set for
        different versions of PHP. The following registry keys are examined
@@ -1543,33 +1600,33 @@ The configuration file
        [HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x.y] and
        [HKEY_LOCAL_MACHINE\SOFTWARE\PHP\x],  where x, y and z mean the PHP
        major,  minor  and  release  versions.  If  there  is  a  value for
-       IniFilePath in these keys, then the first one found will be used as
-       the location of the php.ini (Windows only).
+       IniFilePath  in any of these keys, the first one found will be used
+       as the location of the php.ini (Windows only).
      * [HKEY_LOCAL_MACHINE\SOFTWARE\PHP],  value  of  IniFilePath (Windows
        only).
-     * Current working directory (except CLI)
+     * Current working directory (except CLI).
      * The  web server's directory (for SAPI modules), or directory of PHP
-       (otherwise in Windows)
+       (otherwise in Windows).
      * Windows  directory  (C:\windows  or  C:\winnt)  (for  Windows),  or
-       --with-config-file-path compile time option
+       --with-config-file-path compile time option.
 
-   If  php-SAPI.ini  exists  (where  SAPI is used SAPI, so the filename is
-   e.g. php-cli.ini or php-apache.ini), it's used instead of php.ini. SAPI
-   name can be determined by php_sapi_name().
+   If php-SAPI.ini exists (where SAPI is the SAPI in use, so, for example,
+   php-cli.ini or php-apache.ini), it is used instead of php.ini. The SAPI
+   name can be determined with php_sapi_name().
 
      Note:
 
-     The  Apache  web  server  changes  the  directory to root at startup
+     The  Apache  web  server  changes  the directory to root at startup,
      causing  PHP  to attempt to read php.ini from the root filesystem if
      it exists.
 
-   The   php.ini   directives   handled   by   extensions  are  documented
-   respectively on the pages of the extensions themselves. The list of the
-   core  directives  is  available  in  the appendix. Probably not all PHP
-   directives  are documented in the manual though. For a complete list of
+   The  php.ini  directives  handled  by  extensions are documented on the
+   respective  pages  of  the  extensions  themselves.  A list of the core
+   directives  is  available  in  the appendix. Not all PHP directives are
+   necessarily   documented  in  this  manual:  for  a  complete  list  of
    directives  available  in  your  PHP  version,  please  read  your well
-   commented  php.ini  file. Alternatively, you may find the » the latest
-   php.ini from SVN helpful too.
+   commented  php.ini  file.  Alternatively,  you  may  find  » the latest
+   php.ini from Git helpful too.
 
    Example #1 php.ini example
 ; any text on a line after an unquoted semicolon (;) is ignored
@@ -1635,12 +1692,13 @@ Where a configuration setting may be set
 
    CAPTION: Definition of PHP_INI_* modes
 
-        Mode      Value                        Meaning
-   PHP_INI_USER   1     Entry can be set in user scripts (like with ini_set())
-                        or in the Windows registry
-   PHP_INI_PERDIR 6     Entry can be set in php.ini, .htaccess or httpd.conf
-   PHP_INI_SYSTEM 4     Entry can be set in php.ini or httpd.conf
-   PHP_INI_ALL    7     Entry can be set anywhere
+   Mode Meaning
+   PHP_INI_USER Entry can be set in user scripts (like with ini_set()) or
+   in the Windows registry. Since PHP 5.3, entry can be set in .user.ini
+   PHP_INI_PERDIR  Entry  can  be set in php.ini, .htaccess, httpd.conf or
+   .user.ini (since PHP 5.3)
+   PHP_INI_SYSTEM Entry can be set in php.ini or httpd.conf
+   PHP_INI_ALL Entry can be set anywhere
      __________________________________________________________________
      __________________________________________________________________
 
@@ -1788,12 +1846,8 @@ Installation
           each  request to play in, further weaknesses are introduced into
           PHP's system.
 
-          If  you  feel  you have to use a threaded MPM, look at a FastCGI
+          If   you  want  to  use  a  threaded  MPM,  look  at  a  FastCGI
           configuration where PHP is running in its own memory space.
-
-          And finally, this warning against using a threaded MPM is not as
-          strong  for  Windows  systems  because  most  libraries  on that
-          platform tend to be threadsafe.
 
    Unix/Windows: Where should my php.ini file be located?
           By  default  on  Unix  it  should  be in /usr/local/lib which is

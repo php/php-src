@@ -17,5 +17,11 @@ echo trim(mcrypt_ofb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv)) . "\n";
 // a warning must be issued if we don't use a IV on a AES cipher, that usually requires an IV
 mcrypt_ofb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv);
 
---EXPECT--
+--EXPECTF--
+
+Deprecated: Function mcrypt_ofb() is deprecated in %s on line %d
+
+Deprecated: Function mcrypt_ofb() is deprecated in %s on line %d
 PHP Testfest 2008
+
+Deprecated: Function mcrypt_ofb() is deprecated in %s on line %d

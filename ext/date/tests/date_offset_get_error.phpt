@@ -3,10 +3,10 @@ Test date_offset_get() function : error conditions
 --FILE--
 <?php
 
-/* Prototype  : int date_offset_get  ( DateTime $object  )
+/* Prototype  : int date_offset_get  ( DateTimeInterface $object  )
  * Description: Returns the daylight saving time offset
  * Source code: ext/date/php_date.c
- * Alias to functions:  DateTime::getOffset
+ * Alias to functions:  DateTimeInterface::getOffset
  */
  
  //Set the default time zone 
@@ -46,12 +46,12 @@ bool(false)
 
 -- Testing date_offset_get() function with an invalid values for $object argument --
 
-Warning: date_offset_get() expects parameter 1 to be DateTime, object given in %s on line %d
+Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, object given in %s on line %d
 bool(false)
 
-Warning: date_offset_get() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
-Warning: date_offset_get() expects parameter 1 to be DateTime, null given in %s on line %d
+Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 ===DONE===

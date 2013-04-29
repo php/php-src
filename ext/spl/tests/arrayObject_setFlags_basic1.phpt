@@ -44,8 +44,8 @@ string(21) "array element.changed"
 --> Remove the array element and try access again:
 bool(false)
 
-Notice: Undefined index:  p in %s on line 10
+Notice: Undefined index: p in %s on line 10
 NULL
 
-Notice: Undefined index:  p in %s on line 12
+Notice: Undefined index: p in %s on line 12
 string(8) ".changed"

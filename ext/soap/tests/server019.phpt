@@ -8,7 +8,7 @@ SOAP Server 19: compressed request (gzip)
 ?>
 --INI--
 precision=14
---POST--
+--GZIP_POST--
 <SOAP-ENV:Envelope
   SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
@@ -19,8 +19,6 @@ precision=14
     <ns1:test xmlns:ns1="http://testuri.org" />
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
---GZIP_POST--
-1
 --FILE--
 <?php
 function test() {

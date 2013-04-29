@@ -11,7 +11,7 @@ if (!$result || preg_match('/koi8/i', setlocale(LC_CTYPE, 0)) == 0) {
 	die("skip setlocale() failed\n");
 }
 ?>
---COMMENT--
+--DESCRIPTION--
 As of PHP 5.4, htmlentities() no longer makes replacements with numerical
 entities. Hence, for this input there's no substitution.
 --FILE--

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -578,7 +578,7 @@ static void disp_destructor(php_dispatchex *disp TSRMLS_DC)
 	CoTaskMemFree(disp);
 }
 
-PHPAPI IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid,
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid,
 	   HashTable *id_to_name TSRMLS_DC)
 {
 	php_dispatchex *disp = disp_constructor(val TSRMLS_CC);
@@ -617,7 +617,7 @@ PHPAPI IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid,
 	return (IDispatch*)disp;
 }
 
-PHPAPI IDispatch *php_com_wrapper_export(zval *val TSRMLS_DC)
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val TSRMLS_DC)
 {
 	php_dispatchex *disp = NULL;
 

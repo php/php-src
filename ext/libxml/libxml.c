@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -270,6 +270,7 @@ static PHP_GINIT_FUNCTION(libxml)
 	libxml_globals->error_buffer.c = NULL;
 	libxml_globals->error_list = NULL;
 	libxml_globals->entity_loader.fci.size = 0;
+	libxml_globals->entity_loader_disabled = 0;
 }
 
 static void _php_libxml_destroy_fci(zend_fcall_info *fci)
@@ -369,16 +370,15 @@ static int php_libxml_streams_IO_close(void *context)
 }
 
 static xmlParserInputBufferPtr
-php_libxml_input_buffer_noload(const char *URI, xmlCharEncoding enc)
-{
-	return NULL;
-}
-
-static xmlParserInputBufferPtr
 php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 {
 	xmlParserInputBufferPtr ret;
 	void *context = NULL;
+	TSRMLS_FETCH();
+
+	if (LIBXML(entity_loader_disabled)) {
+		return NULL;
+	}
 
 	if (URI == NULL)
 		return(NULL);
@@ -677,9 +677,18 @@ is_string:
 static xmlParserInputPtr _php_libxml_pre_ext_ent_loader(const char *URL,
 		const char *ID, xmlParserCtxtPtr context)
 {
+	TSRMLS_FETCH();
+
 	/* Check whether we're running in a PHP context, since the entity loader
-	 * we've defined is an application level (true global) setting */
-	if (xmlGenericError == php_libxml_error_handler) {
+	 * we've defined is an application level (true global) setting.
+	 * If we are, we also want to check whether we've finished activating
+	 * the modules (RINIT phase). Using our external entity loader during a
+	 * RINIT should not be problem per se (though during MINIT it is, because
+	 * we don't even have a resource list by then), but then whether one
+	 * extension would be using the custom external entity loader or not
+	 * could depend on extension loading order
+	 * (if _php_libxml_per_request_initialization */
+	if (xmlGenericError == php_libxml_error_handler && PG(modules_activated)) {
 		return _php_libxml_external_entity_loader(URL, ID, context);
 	} else {
 		return _php_libxml_default_entity_loader(URL, ID, context);
@@ -851,7 +860,6 @@ static PHP_MSHUTDOWN_FUNCTION(libxml)
 {
 	if (!_php_libxml_per_request_initialization) {
 		xmlSetGenericErrorFunc(NULL, NULL);
-		xmlSetStructuredErrorFunc(NULL, NULL);
 
 		xmlParserInputBufferCreateFilenameDefault(NULL);
 		xmlOutputBufferCreateFilenameDefault(NULL);
@@ -867,14 +875,15 @@ static int php_libxml_post_deactivate()
 	/* reset libxml generic error handling */
 	if (_php_libxml_per_request_initialization) {
 		xmlSetGenericErrorFunc(NULL, NULL);
-		xmlSetStructuredErrorFunc(NULL, NULL);
 
 		xmlParserInputBufferCreateFilenameDefault(NULL);
 		xmlOutputBufferCreateFilenameDefault(NULL);
 	}
+	xmlSetStructuredErrorFunc(NULL, NULL);
 
 	if (LIBXML(stream_context)) {
-		zval_ptr_dtor(&LIBXML(stream_context));
+		/* the steam_context resource will be released by resource list destructor */
+		efree(LIBXML(stream_context));
 		LIBXML(stream_context) = NULL;
 	}
 	smart_str_free(&LIBXML(error_buffer));
@@ -908,7 +917,7 @@ static PHP_FUNCTION(libxml_set_streams_context)
 {
 	zval *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &arg) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &arg) == FAILURE) {
 		return;
 	}
 	if (LIBXML(stream_context)) {
@@ -1043,28 +1052,25 @@ static PHP_FUNCTION(libxml_clear_errors)
 }
 /* }}} */
 
+PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable TSRMLS_DC)
+{
+	zend_bool old = LIBXML(entity_loader_disabled);
+
+	LIBXML(entity_loader_disabled) = disable;
+	return old;
+}
+
 /* {{{ proto bool libxml_disable_entity_loader([boolean disable]) 
    Disable/Enable ability to load external entities */
 static PHP_FUNCTION(libxml_disable_entity_loader)
 {
 	zend_bool disable = 1;
-	xmlParserInputBufferCreateFilenameFunc old;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &disable) == FAILURE) {
 		return;
 	}
 
-	if (disable == 0) {
-		old = xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
-	} else {
-		old = xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_noload);
-	}
-
-	if (old == php_libxml_input_buffer_noload) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(php_libxml_disable_entity_loader(disable TSRMLS_CC));
 }
 /* }}} */
 

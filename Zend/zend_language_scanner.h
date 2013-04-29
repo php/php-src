@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -31,6 +31,7 @@ typedef struct _zend_lex_state {
 	unsigned char *yy_limit;
 	int yy_state;
 	zend_stack state_stack;
+	zend_ptr_stack heredoc_label_stack;
 
 	zend_file_handle *in;
 	uint lineno;
@@ -50,6 +51,10 @@ typedef struct _zend_lex_state {
 	const zend_encoding *script_encoding;
 } zend_lex_state;
 
+typedef struct _zend_heredoc_label {
+	char *label;
+	int length;
+} zend_heredoc_label;
 
 BEGIN_EXTERN_C()
 int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);

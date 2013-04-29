@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,9 +84,9 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 int php_com_saproxy_create(zval *com_object, zval *proxy_out, zval *index TSRMLS_DC);
 
 /* com_olechar.c */
-PHPAPI char *php_com_olestring_to_string(OLECHAR *olestring,
+PHP_COM_DOTNET_API char *php_com_olestring_to_string(OLECHAR *olestring,
 		uint *string_len, int codepage TSRMLS_DC);
-PHPAPI OLECHAR *php_com_string_to_olestring(char *string,
+PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string,
 		uint string_len, int codepage TSRMLS_DC);
 
 
@@ -112,8 +112,8 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, char *name, int namelen,
 
 /* com_wrapper.c */
 int php_com_wrapper_minit(INIT_FUNC_ARGS);
-PHPAPI IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid, HashTable *id_to_name TSRMLS_DC);
-PHPAPI IDispatch *php_com_wrapper_export(zval *val TSRMLS_DC);
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *sinkid, HashTable *id_to_name TSRMLS_DC);
+PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val TSRMLS_DC);
 
 /* com_persist.c */
 int php_com_persist_minit(INIT_FUNC_ARGS);
@@ -147,10 +147,10 @@ PHP_FUNCTION(variant_get_type);
 PHP_FUNCTION(variant_set_type);
 PHP_FUNCTION(variant_cast);
 
-PHPAPI void php_com_variant_from_zval_with_type(VARIANT *v, zval *z, VARTYPE type, int codepage TSRMLS_DC);
-PHPAPI void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC);
-PHPAPI int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC);
-PHPAPI int php_com_copy_variant(VARIANT *dst, VARIANT *src TSRMLS_DC);
+PHP_COM_DOTNET_API void php_com_variant_from_zval_with_type(VARIANT *v, zval *z, VARTYPE type, int codepage TSRMLS_DC);
+PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codepage TSRMLS_DC);
+PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepage TSRMLS_DC);
+PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dst, VARIANT *src TSRMLS_DC);
 
 /* com_dotnet.c */
 PHP_FUNCTION(com_dotnet_create_instance);
@@ -159,17 +159,17 @@ void php_com_dotnet_mshutdown(TSRMLS_D);
 
 /* com_misc.c */
 void php_com_throw_exception(HRESULT code, char *message TSRMLS_DC);
-PHPAPI void php_com_wrap_dispatch(zval *z, IDispatch *disp,
+PHP_COM_DOTNET_API void php_com_wrap_dispatch(zval *z, IDispatch *disp,
 		int codepage TSRMLS_DC);
-PHPAPI void php_com_wrap_variant(zval *z, VARIANT *v,
+PHP_COM_DOTNET_API void php_com_wrap_variant(zval *z, VARIANT *v,
 		int codepage TSRMLS_DC);
-PHPAPI int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1 TSRMLS_DC);
+PHP_COM_DOTNET_API int php_com_safearray_get_elem(VARIANT *array, VARIANT *dest, LONG dim1 TSRMLS_DC);
 
 /* com_typeinfo.c */
-PHPAPI ITypeLib *php_com_load_typelib_via_cache(char *search_string,
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib_via_cache(char *search_string,
 		int codepage, int *cached TSRMLS_DC);
-PHPAPI ITypeLib *php_com_load_typelib(char *search_string, int codepage TSRMLS_DC);
-PHPAPI int php_com_import_typelib(ITypeLib *TL, int mode,
+PHP_COM_DOTNET_API ITypeLib *php_com_load_typelib(char *search_string, int codepage TSRMLS_DC);
+PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode,
 		int codepage TSRMLS_DC);
 void php_com_typelibrary_dtor(void *pDest);
 ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj, char *dispname, int sink TSRMLS_DC);

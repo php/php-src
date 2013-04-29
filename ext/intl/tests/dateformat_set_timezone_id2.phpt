@@ -1,10 +1,15 @@
 --TEST--
 datefmt_set_timezone_id_code() icu >= 4.8
+--INI--
+date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
 --FILE--
 <?php
+
+ini_set("intl.error_level", E_WARNING);
+ini_set("error_reporting", ~E_DEPRECATED);
 
 /*
  * Test for the datefmt_set_timezone_id  function
@@ -23,7 +28,7 @@ function ut_main()
 
 	$res_str = '';
 
-	$fmt = ut_datefmt_create( "en_US",  IntlDateFormatter::FULL, IntlDateFormatter::FULL, 'America/San_Francisco' , IntlDateFormatter::GREGORIAN  );
+	$fmt = ut_datefmt_create( "en_US",  IntlDateFormatter::FULL, IntlDateFormatter::FULL, 'US/Pacific' , IntlDateFormatter::GREGORIAN  );
 	$timezone_id = ut_datefmt_get_timezone_id( $fmt );
 	$res_str .= "\nAfter creation of the dateformatter :  timezone_id= $timezone_id\n";
 
@@ -52,8 +57,13 @@ include_once( 'ut_common.inc' );
 // Run the test
 ut_run();
 ?>
---EXPECT--
-After creation of the dateformatter :  timezone_id= America/San_Francisco
+--EXPECTF--
+
+Warning: IntlDateFormatter::setTimeZoneId(): datefmt_set_timezone: no such time zone: 'CN' in %s on line %d
+
+Warning: datefmt_set_timezone_id(): datefmt_set_timezone: no such time zone: 'CN' in %s on line %d
+
+After creation of the dateformatter :  timezone_id= US/Pacific
 -----------
 Trying to set timezone_id= America/New_York
 After call to set_timezone_id :  timezone_id= America/New_York
@@ -71,6 +81,6 @@ Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 6:00:00 PM Cent
 Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 7:00:00 PM Central Standard Time
 -----------
 Trying to set timezone_id= CN
-After call to set_timezone_id :  timezone_id= CN
-Formatting timestamp=0 resulted in  Thursday, January 1, 1970 12:00:00 AM GMT
-Formatting timestamp=3600 resulted in  Thursday, January 1, 1970 1:00:00 AM GMT
+After call to set_timezone_id :  timezone_id= America/Chicago
+Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 6:00:00 PM Central Standard Time
+Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 7:00:00 PM Central Standard Time

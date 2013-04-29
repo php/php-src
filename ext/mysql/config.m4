@@ -97,6 +97,13 @@ Note that the MySQL client library is not bundled anymore!])
   done
 
   if test -z "$MYSQL_LIB_DIR"; then
+    MYSQL_LIB_CHK(lib/x86_64-linux-gnu)
+  fi
+  if test -z "$MYSQL_LIB_DIR"; then
+    MYSQL_LIB_CHK(lib/i386-linux-gnu)
+  fi
+
+  if test -z "$MYSQL_LIB_DIR"; then
     AC_MSG_ERROR([Cannot find lib$MYSQL_LIBNAME under $MYSQL_DIR.
 Note that the MySQL client library is not bundled anymore!])
   fi

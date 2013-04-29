@@ -38,9 +38,9 @@
 
 
 ZIP_EXTERN(const char *)
-zip_get_file_comment(struct zip *za, int idx, int *lenp, int flags)
+zip_get_file_comment(struct zip *za, zip_uint64_t idx, int *lenp, int flags)
 {
-    if (idx < 0 || idx >= za->nentry) {
+    if (idx >= za->nentry) {
 	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return NULL;
     }

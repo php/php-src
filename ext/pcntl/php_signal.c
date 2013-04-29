@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -32,7 +32,6 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 	TSRMLS_FETCH();
 #endif
 	act.sa_handler = func;
-
 	if (mask_all) {
 		sigfillset(&act.sa_mask);
 	} else {
@@ -56,7 +55,7 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 	{
 		return SIG_ERR;
 	}
-
+ 
 	return oact.sa_handler;
 }
 

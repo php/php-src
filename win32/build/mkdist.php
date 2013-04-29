@@ -401,7 +401,7 @@ function copy_test_dir($directory, $dest)
 	while (FALSE !== ($file = readdir($directory_list))) {
 		$full_path = $directory . '/' . $file;
 		if($file != '.' && $file != '..' && $file != '.svn' && is_dir($full_path)) {
-			if ($file == 'tests') {
+			if ($file == 'tests' || $file == 'examples') {
 				if (!is_dir($dest . '/' . $full_path)) {
 					mkdir($dest . '/' . $full_path , 0775, true);
 				}
@@ -443,7 +443,7 @@ function make_phar_dot_phar($dist_dir)
 	$phar->setStub(implode('', $stub));
 
 	echo "Creating phar.phar.bat\n";
-	file_put_contents($dist_dir . '/phar.phar.bat', "%~dp0php.exe %~dp0pharcommand.phar %*\r\n");
+	file_put_contents($dist_dir . '/phar.phar.bat', "\"%~dp0php.exe\" \"%~dp0pharcommand.phar\" %*\r\n");
 }
 
 if (!is_dir($test_dir)) {

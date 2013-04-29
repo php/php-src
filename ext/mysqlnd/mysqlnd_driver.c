@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -81,7 +81,9 @@ PHPAPI void mysqlnd_library_init(TSRMLS_D)
 			mysqlnd_plugin_core.plugin_header.plugin_stats.values = mysqlnd_global_stats;
 			mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_core TSRMLS_CC);
 		}
+#if defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1
 		mysqlnd_example_plugin_register(TSRMLS_C);
+#endif
 		mysqlnd_debug_trace_plugin_register(TSRMLS_C);
 		mysqlnd_register_builtin_authentication_plugins(TSRMLS_C);
 
@@ -91,12 +93,15 @@ PHPAPI void mysqlnd_library_init(TSRMLS_D)
 /* }}} */
 
 
+
 /* {{{ mysqlnd_error_list_pdtor */
 static void
 mysqlnd_error_list_pdtor(void * pDest)
 {
 	MYSQLND_ERROR_LIST_ELEMENT * element = (MYSQLND_ERROR_LIST_ELEMENT *) pDest;
+#ifdef ZTS
 	TSRMLS_FETCH();
+#endif
 	DBG_ENTER("mysqlnd_error_list_pdtor");
 	if (element->error) {
 		mnd_pefree(element->error, TRUE);
@@ -248,17 +253,29 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 PHPAPI MYSQLND_NET *
 MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info TSRMLS_DC)
 {
-	size_t alloc_size = sizeof(MYSQLND_NET) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_NET * net = mnd_pecalloc(1, alloc_size, persistent);
+	size_t net_alloc_size = sizeof(MYSQLND_NET) + mysqlnd_plugin_count() * sizeof(void *);
+	size_t net_data_alloc_size = sizeof(MYSQLND_NET_DATA) + mysqlnd_plugin_count() * sizeof(void *);
+	MYSQLND_NET * net = mnd_pecalloc(1, net_alloc_size, persistent);
+	MYSQLND_NET_DATA * net_data = mnd_pecalloc(1, net_data_alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_object_factory::get_io_channel");
 	DBG_INF_FMT("persistent=%u", persistent);
-	if (net) {
-		net->persistent = persistent;
-		net->m = *mysqlnd_net_get_methods();
+	if (net && net_data) {
+		net->data = net_data;
+		net->persistent = net->data->persistent = persistent;
+		net->data->m = *mysqlnd_net_get_methods();
 
-		if (PASS != net->m.init(net, stats, error_info TSRMLS_CC)) {
-			net->m.dtor(net, stats, error_info TSRMLS_CC);
+		if (PASS != net->data->m.init(net, stats, error_info TSRMLS_CC)) {
+			net->data->m.dtor(net, stats, error_info TSRMLS_CC);
+			net = NULL;
+		}
+	} else {
+		if (net_data) {
+			mnd_pefree(net_data, persistent);
+			net_data = NULL;
+		}
+		if (net) {
+			mnd_pefree(net, persistent);
 			net = NULL;
 		}
 	}
@@ -268,7 +285,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_io_channel)(zend_bool persistent, MYS
 
 
 /* {{{ mysqlnd_object_factory::get_protocol_decoder */
-PHPAPI MYSQLND_PROTOCOL *
+static MYSQLND_PROTOCOL *
 MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)(zend_bool persistent TSRMLS_DC)
 {
 	size_t alloc_size = sizeof(MYSQLND_PROTOCOL) + mysqlnd_plugin_count() * sizeof(void *);
@@ -286,7 +303,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_protocol_decoder)(zend_bool persisten
 /* }}} */
 
 
-MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
+PHPAPI MYSQLND_CLASS_METHODS_START(mysqlnd_object_factory)
 	MYSQLND_METHOD(mysqlnd_object_factory, get_connection),
 	MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object),
 	MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement),

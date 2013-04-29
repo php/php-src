@@ -1,5 +1,5 @@
 --TEST--
-Bug #55473 (mysql_pconnect leaks file descriptors on reconnect)
+Bug #5547 (mysql_pconnect leaks file descriptors on reconnect)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -8,7 +8,7 @@ if (defined('PHP_WINDOWS_VERSION_MAJOR')) {
 	die("skip Test doesn't work on Windows");
 }
 
-if (!($output = @exec("lsof -nwp " . getmypid())))
+if (!($output = @exec("lsof -np " . getmypid())))
 	die("skip Test can't find command line tool lsof");
 ?>
 --INI--
@@ -56,9 +56,9 @@ mysql.allow_persistent=1
 
 
 		if ($opened_files == -1) {
-			$opened_files = trim(exec("lsof -nwp " . getmypid() . " | wc -l"));
+			$opened_files = trim(exec("lsof -np " . getmypid() . " | wc -l"));
 			printf("[005] Setting openened files...\n");
-		} else if (($tmp = trim(exec("lsof -nwp " . getmypid() . " | wc -l"))) != $opened_files) {
+		} else if (($tmp = trim(exec("lsof -np " . getmypid() . " | wc -l"))) != $opened_files) {
 			printf("[006] [%d] different number of opened_files : expected %d, got %d", $i, $opened_files, $tmp);
 		} else {
 			printf("[007] Opened files as expected\n");
@@ -68,12 +68,21 @@ mysql.allow_persistent=1
 	print "done!";
 ?>
 --EXPECTF--
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [003] reconnect 0
+
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [005] Setting openened files...
 [003] reconnect 1
+
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [007] Opened files as expected
 [003] reconnect 2
+
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [007] Opened files as expected
 [003] reconnect 3
+
+Deprecated: mysql_pconnect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [007] Opened files as expected
 done!

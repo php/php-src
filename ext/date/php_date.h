@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -51,7 +51,9 @@ PHP_METHOD(DateTime, __construct);
 PHP_METHOD(DateTime, __wakeup);
 PHP_METHOD(DateTime, __set_state);
 PHP_FUNCTION(date_create);
+PHP_FUNCTION(date_create_immutable);
 PHP_FUNCTION(date_create_from_format);
+PHP_FUNCTION(date_create_immutable_from_format);
 PHP_FUNCTION(date_parse);
 PHP_FUNCTION(date_parse_from_format);
 PHP_FUNCTION(date_get_last_errors);
@@ -70,7 +72,20 @@ PHP_FUNCTION(date_isodate_set);
 PHP_FUNCTION(date_timestamp_set);
 PHP_FUNCTION(date_timestamp_get);
 
+PHP_METHOD(DateTimeImmutable, __construct);
+PHP_METHOD(DateTimeImmutable, __set_state);
+PHP_METHOD(DateTimeImmutable, modify);
+PHP_METHOD(DateTimeImmutable, add);
+PHP_METHOD(DateTimeImmutable, sub);
+PHP_METHOD(DateTimeImmutable, setTimezone);
+PHP_METHOD(DateTimeImmutable, setTime);
+PHP_METHOD(DateTimeImmutable, setDate);
+PHP_METHOD(DateTimeImmutable, setISODate);
+PHP_METHOD(DateTimeImmutable, setTimestamp);
+
 PHP_METHOD(DateTimeZone, __construct);
+PHP_METHOD(DateTimeZone, __wakeup);
+PHP_METHOD(DateTimeZone, __set_state);
 PHP_FUNCTION(timezone_open);
 PHP_FUNCTION(timezone_name_get);
 PHP_FUNCTION(timezone_name_from_abbr);
@@ -88,6 +103,8 @@ PHP_FUNCTION(date_interval_format);
 PHP_FUNCTION(date_interval_create_from_date_string);
 
 PHP_METHOD(DatePeriod, __construct);
+PHP_METHOD(DatePeriod, __wakeup);
+PHP_METHOD(DatePeriod, __set_state);
 
 /* Options and Configuration */
 PHP_FUNCTION(date_default_timezone_set);
@@ -129,6 +146,7 @@ struct _php_timezone_obj {
 			int          dst;
 		} z;
 	} tzi;
+	HashTable *props;
 };
 
 struct _php_interval_obj {
@@ -141,6 +159,7 @@ struct _php_interval_obj {
 struct _php_period_obj {
 	zend_object       std;
 	timelib_time     *start;
+	zend_class_entry *start_ce;
 	timelib_time     *current;
 	timelib_time     *end;
 	timelib_rel_time *interval;
@@ -150,10 +169,11 @@ struct _php_period_obj {
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(date)
-	char      *default_timezone;
-	char      *timezone;
-	HashTable *tzcache;
+	char                    *default_timezone;
+	char                    *timezone;
+	HashTable               *tzcache;
 	timelib_error_container *last_errors;
+	int                     timezone_valid;
 ZEND_END_MODULE_GLOBALS(date)
 
 #ifdef ZTS

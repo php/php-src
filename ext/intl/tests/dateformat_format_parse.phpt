@@ -12,7 +12,7 @@ datefmt_format_code() and datefmt_parse_code()
 
 function ut_main()
 {
-	$timezone = 'GMT+5'; 
+	$timezone = 'GMT+05:00'; 
 
 	$locale_arr = array (
 		'en_US'

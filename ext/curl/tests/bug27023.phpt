@@ -1,5 +1,7 @@
 --TEST--
 Bug #27023 (CURLOPT_POSTFIELDS does not parse content types for files)
+--INI--
+error_reporting = E_ALL & ~E_DEPRECATED
 --SKIPIF--
 <?php 
 if (!extension_loaded("curl")) {

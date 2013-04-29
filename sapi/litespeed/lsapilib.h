@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2007 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -342,11 +342,6 @@ void LSAPI_Set_Server_Max_Idle_Secs( int serverMaxIdle );
 void LSAPI_Set_Max_Process_Time( int secs );
 
 void LSAPI_Init_Env_Parameters( fn_select_t fp );
-
-void LSAPI_Set_Slow_Req_Msecs( int msecs );
-
-int  LSAPI_Get_Slow_Req_Msecs( );
-
 
 #if defined (c_plusplus) || defined (__cplusplus)
 }

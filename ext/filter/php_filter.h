@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -78,6 +78,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL);
+void php_filter_validate_mac(PHP_INPUT_FILTER_PARAM_DECL);
 
 void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL);
 void php_filter_encoded(PHP_INPUT_FILTER_PARAM_DECL);

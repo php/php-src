@@ -22,6 +22,7 @@
 static int zlog_fd = -1;
 static int zlog_level = ZLOG_NOTICE;
 static int launched = 0;
+static void (*external_logger)(int, char *, size_t) = NULL;
 
 static const char *level_names[] = {
 	[ZLOG_DEBUG]   = "DEBUG",
@@ -40,6 +41,12 @@ const int syslog_priorities[] = {
 	[ZLOG_ALERT]   = LOG_ALERT,
 };
 #endif
+
+void zlog_set_external_logger(void (*logger)(int, char *, size_t)) /* {{{ */
+{
+	external_logger = logger;
+}
+/* }}} */
 
 const char *zlog_get_level_name(int log_level) /* {{{ */
 {
@@ -100,6 +107,19 @@ void zlog_ex(const char *function, int line, int flags, const char *fmt, ...) /*
 	size_t len = 0;
 	int truncated = 0;
 	int saved_errno;
+
+	if (external_logger) {
+		va_start(args, fmt);
+		len = vsnprintf(buf, buf_size, fmt, args);
+		va_end(args);
+		if (len >= buf_size) {
+			memcpy(buf + buf_size - sizeof("..."), "...", sizeof("...") - 1);
+			len = buf_size - 1;
+		}
+		external_logger(flags & ZLOG_LEVEL_MASK, buf, len);
+		len = 0;
+		memset(buf, '\0', buf_size);
+	}
 
 	if ((flags & ZLOG_LEVEL_MASK) < zlog_level) {
 		return;

@@ -44,6 +44,7 @@ void fpm_php_soft_quit();
 int fpm_php_init_main();
 int fpm_php_apply_defines_ex(struct key_value_s *kv, int mode);
 int fpm_php_limit_extensions(char *path);
+char* fpm_php_get_string_from_table(char *table, char *key TSRMLS_DC);
 
 #endif
 

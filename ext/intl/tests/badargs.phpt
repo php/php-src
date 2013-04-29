@@ -13,7 +13,10 @@ foreach($funcs as $func) {
         if($rfunc->getNumberOfRequiredParameters() == 0) {
                 continue;
         }
-        $res = $func($arg);
+		
+		try {
+			$res = $func($arg);
+		} catch (Exception $e) { continue; }
         if($res != false) {
                 echo "$func: ";
                 var_dump($res);

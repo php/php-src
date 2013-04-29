@@ -127,12 +127,13 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 	png_color_16p trans_gray_rgb;
 	png_color_16p trans_color_rgb;
 	png_bytep trans;
-	png_bytep image_data = NULL;
-	png_bytepp row_pointers = NULL;
+	volatile png_bytep image_data = NULL;
+	volatile png_bytepp row_pointers = NULL;
 	gdImagePtr im = NULL;
 	int i, j, *open = NULL;
 	volatile int transparent = -1;
 	volatile int palette_allocated = FALSE;
+
 
 	/* Make sure the signature can't match by dumb luck -- TBB */
 	/* GRR: isn't sizeof(infile) equal to the size of the pointer? */
@@ -345,6 +346,7 @@ gdImagePtr gdImageCreateFromPngCtx (gdIOCtx * infile)
 			open[i] = 1;
 		}
 	}
+
 	/* 2.0.12: Slaven Rezic: palette images are not the only images
 	 * with a simple transparent color setting.
 	 */

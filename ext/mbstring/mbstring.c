@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -473,7 +473,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_ereg_replace_callback, 0, 0, 3)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
- 
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mb_split, 0, 0, 2)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, string)
@@ -1688,12 +1688,12 @@ PHP_MINFO_FUNCTION(mbstring)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "Multibyte Support", "enabled");
 	php_info_print_table_row(2, "Multibyte string engine", "libmbfl");
-	php_info_print_table_row(2, "HTTP input encoding translation", MBSTRG(encoding_translation) ? "enabled": "disabled");
- 	{
- 		char tmp[256];
- 		snprintf(tmp, sizeof(tmp), "%d.%d.%d", MBFL_VERSION_MAJOR, MBFL_VERSION_MINOR, MBFL_VERSION_TEENY);
- 		php_info_print_table_row(2, "libmbfl version", tmp);
- 	}	
+	php_info_print_table_row(2, "HTTP input encoding translation", MBSTRG(encoding_translation) ? "enabled": "disabled");	
+	{
+		char tmp[256];
+		snprintf(tmp, sizeof(tmp), "%d.%d.%d", MBFL_VERSION_MAJOR, MBFL_VERSION_MINOR, MBFL_VERSION_TEENY);
+		php_info_print_table_row(2, "libmbfl version", tmp);
+	}
 	php_info_print_table_end();
 
 	php_info_print_table_start();
@@ -2715,9 +2715,10 @@ PHP_FUNCTION(mb_substr)
 	char *str, *encoding;
 	long from, len;
 	int mblen, str_len, encoding_len;
+	zval **z_len = NULL;
 	mbfl_string string, result, *ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ls", &str, &str_len, &from, &len, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|Zs", &str, &str_len, &from, &z_len, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 
@@ -2736,8 +2737,11 @@ PHP_FUNCTION(mb_substr)
 	string.val = (unsigned char *)str;
 	string.len = str_len;
 
-	if (argc < 3) {
+	if (argc < 3 || Z_TYPE_PP(z_len) == IS_NULL) {
 		len = str_len;
+	} else {
+		convert_to_long_ex(z_len);
+		len = Z_LVAL_PP(z_len);
 	}
 
 	/* measures length */
@@ -2788,13 +2792,14 @@ PHP_FUNCTION(mb_strcut)
 	char *encoding;
 	long from, len;
 	int encoding_len;
+	zval **z_len = NULL;
 	mbfl_string string, result, *ret;
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(language);
 	string.no_encoding = MBSTRG(current_internal_encoding)->no_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|ls", (char **)&string.val, (int **)&string.len, &from, &len, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|Zs", (char **)&string.val, (int **)&string.len, &from, &z_len, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 
@@ -2806,8 +2811,11 @@ PHP_FUNCTION(mb_strcut)
 		}
 	}
 
-	if (argc < 3) {
+	if (argc < 3 || Z_TYPE_PP(z_len) == IS_NULL) {
 		len = string.len;
+	} else {
+		convert_to_long_ex(z_len);
+		len = Z_LVAL_PP(z_len);
 	}
 
 	/* if "from" position is negative, count start position from the end

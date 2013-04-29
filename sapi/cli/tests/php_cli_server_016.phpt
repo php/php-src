@@ -1,7 +1,7 @@
 --TEST--
 Bug #60591 (Memory leak when access a non-exists file)
 --DESCRIPTION--
-this is a indirect test for bug 50691, since mem leak is reproted in the server side
+this is an indirect test for bug 60591, since mem leak is reproted in the server side
 and require php compiled with --enable-debug
 --SKIPIF--
 <?php

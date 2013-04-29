@@ -1,6 +1,6 @@
 /*
   zip_source_function.c -- create zip data source from callback function
-  Copyright (C) 1999-2007 Dieter Baron and Thomas Klausner
+  Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -47,13 +47,32 @@ zip_source_function(struct zip *za, zip_source_callback zcb, void *ud)
     if (za == NULL)
 	return NULL;
 
-    if ((zs=(struct zip_source *)malloc(sizeof(*zs))) == NULL) {
+    if ((zs=_zip_source_new(za)) == NULL)
+	return NULL;
+
+    zs->cb.f = zcb;
+    zs->ud = ud;
+    
+    return zs;
+}
+
+
+
+struct zip_source *
+_zip_source_new(struct zip *za)
+{
+    struct zip_source *src;
+
+    if ((src=(struct zip_source *)malloc(sizeof(*src))) == NULL) {
 	_zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
 	return NULL;
     }
 
-    zs->f = zcb;
-    zs->ud = ud;
-    
-    return zs;
+    src->src = NULL;
+    src->cb.f = NULL;
+    src->ud = NULL;
+    src->error_source = ZIP_LES_NONE;
+    src->is_open = 0;
+
+    return src;
 }

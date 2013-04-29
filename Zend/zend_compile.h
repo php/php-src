@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,6 +59,9 @@ typedef struct _zend_compiler_context {
 	int        literals_size;
 	int        current_brk_cont;
 	int        backpatch_count;
+	int        nested_calls;
+	int        used_stack;
+	int        in_finally;
 	HashTable *labels;
 } zend_compiler_context;
 
@@ -80,7 +83,7 @@ typedef union _znode_op {
 	zend_op       *jmp_addr;
 	zval          *zv;
 	zend_literal  *literal;
-  void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
+	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */ 
@@ -132,6 +135,8 @@ typedef struct _zend_label {
 typedef struct _zend_try_catch_element {
 	zend_uint try_op;
 	zend_uint catch_op;  /* ketchup! */
+	zend_uint finally_op;
+	zend_uint finally_end;
 } zend_try_catch_element;
 
 #if SIZEOF_LONG == 8
@@ -194,6 +199,7 @@ typedef struct _zend_try_catch_element {
 
 
 #define ZEND_ACC_CLOSURE              0x100000
+#define ZEND_ACC_GENERATOR            0x800000
 
 /* function flag for internal user call handlers __call, __callstatic */
 #define ZEND_ACC_CALL_VIA_HANDLER     0x200000
@@ -274,11 +280,15 @@ struct _zend_op_array {
 
 	zend_uint T;
 
+	zend_uint nested_calls;
+	zend_uint used_stack;
+
 	zend_brk_cont_element *brk_cont_array;
 	int last_brk_cont;
 
 	zend_try_catch_element *try_catch_array;
 	int last_try_catch;
+	zend_bool has_finally_block;
 
 	/* static variables support */
 	HashTable *static_variables;
@@ -363,15 +373,19 @@ typedef struct _list_llist_element {
 
 union _temp_variable;
 
+typedef struct _call_slot {
+	zend_function     *fbc;
+	zval              *object;
+	zend_class_entry  *called_scope;
+	zend_bool          is_ctor_call;
+	zend_bool          is_ctor_result_used;
+} call_slot;
+
 struct _zend_execute_data {
 	struct _zend_op *opline;
 	zend_function_state function_state;
-	zend_function *fbc; /* Function Being Called */
-	zend_class_entry *called_scope;
 	zend_op_array *op_array;
 	zval *object;
-	union _temp_variable *Ts;
-	zval ***CVs;
 	HashTable *symbol_table;
 	struct _zend_execute_data *prev_execute_data;
 	zval *old_error_reporting;
@@ -380,10 +394,17 @@ struct _zend_execute_data {
 	zend_class_entry *current_scope;
 	zend_class_entry *current_called_scope;
 	zval *current_this;
-	zval *current_object;
+	struct _zend_op *fast_ret; /* used by FAST_CALL/FAST_RET (finally keyword) */
+	call_slot *call_slots;
+	call_slot *call;
 };
 
 #define EX(element) execute_data.element
+
+#define EX_TMP_VAR(ex, n)	   ((temp_variable*)(((char*)(ex)) + ((int)(n))))
+#define EX_TMP_VAR_NUM(ex, n)  (EX_TMP_VAR(ex, 0) - (1 + (n)))
+
+#define EX_CV_NUM(ex, n)       (((zval***)(((char*)(ex))+ZEND_MM_ALIGNED_SIZE(sizeof(zend_execute_data))))+(n))
 
 
 #define IS_CONST	(1<<0)
@@ -489,6 +510,7 @@ void zend_do_build_full_name(znode *result, znode *prefix, znode *name, int is_c
 int zend_do_begin_class_member_function_call(znode *class_name, znode *method_name TSRMLS_DC);
 void zend_do_end_function_call(znode *function_name, znode *result, const znode *argument_list, int is_method, int is_dynamic_fcall TSRMLS_DC);
 void zend_do_return(znode *expr, int do_end_vparse TSRMLS_DC);
+void zend_do_yield(znode *result, znode *value, const znode *key, zend_bool is_variable TSRMLS_DC);
 void zend_do_handle_exception(TSRMLS_D);
 
 void zend_do_begin_lambda_function_declaration(znode *result, znode *function_token, int return_reference, int is_static TSRMLS_DC);
@@ -496,7 +518,10 @@ void zend_do_fetch_lexical_variable(znode *varname, zend_bool is_ref TSRMLS_DC);
 
 void zend_do_try(znode *try_token TSRMLS_DC);
 void zend_do_begin_catch(znode *try_token, znode *catch_class, znode *catch_var, znode *first_catch TSRMLS_DC);
-void zend_do_end_catch(const znode *try_token TSRMLS_DC);
+void zend_do_bind_catch(znode *try_token, znode *catch_token TSRMLS_DC);
+void zend_do_end_catch(znode *catch_token TSRMLS_DC);
+void zend_do_finally(znode *finally_token TSRMLS_DC);
+void zend_do_end_finally(znode *try_token, znode* catch_token, znode *finally_token TSRMLS_DC);
 void zend_do_throw(const znode *expr TSRMLS_DC);
 
 ZEND_API int do_bind_function(const zend_op_array *op_array, zend_op *opline, HashTable *function_table, zend_bool compile_time);
@@ -507,20 +532,13 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 void zend_do_implements_interface(znode *interface_znode TSRMLS_DC);
 
 /* Trait related functions */
-void zend_add_trait_precedence(znode *precedence_znode TSRMLS_DC);
-void zend_add_trait_alias(znode *alias_znode TSRMLS_DC);
+void zend_do_use_trait(znode *trait_znode TSRMLS_DC);
+void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC);
+void zend_add_trait_precedence(znode *method_reference, znode *trait_list TSRMLS_DC);
+void zend_add_trait_alias(znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC);
 
-
-void zend_do_implements_trait(znode *interface_znode /*, znode* aliases */ TSRMLS_DC);
 ZEND_API void zend_do_implement_trait(zend_class_entry *ce, zend_class_entry *trait TSRMLS_DC);
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce TSRMLS_DC);
-void zend_prepare_trait_precedence(znode *result, znode *method_reference, znode *trait_list TSRMLS_DC);
-void zend_prepare_reference(znode *result, znode *class_name, znode *method_name TSRMLS_DC);
-void zend_prepare_trait_alias(znode *result, znode *method_reference, znode *modifiers, znode *alias TSRMLS_DC);
-
-void init_trait_alias_list(znode* result, const znode* trait_alias TSRMLS_DC);
-void add_trait_alias(znode* result, const znode* trait_alias TSRMLS_DC);
-void init_trait_alias(znode* result, const znode* method_name, const znode* alias, const znode* modifiers TSRMLS_DC);
 
 ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent_ce TSRMLS_DC);
 void zend_do_early_binding(TSRMLS_D);
@@ -620,10 +638,12 @@ void zend_verify_namespace(TSRMLS_D);
 void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
 
+void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static TSRMLS_DC);
+
 void zend_do_label(znode *label TSRMLS_DC);
 void zend_do_goto(const znode *label TSRMLS_DC);
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
-void zend_release_labels(TSRMLS_D);
+void zend_release_labels(int temporary TSRMLS_DC);
 
 ZEND_API void function_add_ref(zend_function *function);
 
@@ -653,7 +673,9 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce);
 void zend_class_add_ref(zend_class_entry **ce);
 
 ZEND_API void zend_mangle_property_name(char **dest, int *dest_length, const char *src1, int src1_length, const char *src2, int src2_length, int internal);
-ZEND_API int zend_unmangle_property_name(const char *mangled_property, int mangled_property_len, const char **class_name, const char **prop_name);
+#define zend_unmangle_property_name(mangled_property, mangled_property_len, class_name, prop_name) \
+        zend_unmangle_property_name_ex(mangled_property, mangled_property_len, class_name, prop_name, NULL) 
+ZEND_API int zend_unmangle_property_name_ex(const char *mangled_property, int mangled_property_len, const char **class_name, const char **prop_name, int *prop_len);
 
 #define ZEND_FUNCTION_DTOR (void (*)(void *)) zend_function_dtor
 #define ZEND_CLASS_DTOR (void (*)(void *)) destroy_zend_class
@@ -666,7 +688,7 @@ void print_op_array(zend_op_array *op_array, int optimizations);
 ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC);
 zend_brk_cont_element *get_next_brk_cont_element(zend_op_array *op_array);
 void zend_do_first_catch(znode *open_parentheses TSRMLS_DC);
-void zend_initialize_try_catch_element(const znode *try_token TSRMLS_DC);
+void zend_initialize_try_catch_element(znode *catch_token TSRMLS_DC);
 void zend_do_mark_last_catch(const znode *first_catch, const znode *last_additional_catch TSRMLS_DC);
 ZEND_API zend_bool zend_is_compiling(TSRMLS_D);
 ZEND_API char *zend_make_compiled_string_description(const char *name TSRMLS_DC);
@@ -722,6 +744,7 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 #define ZEND_PARSED_VARIABLE			(1<<4)
 #define ZEND_PARSED_REFERENCE_VARIABLE	(1<<5)
 #define ZEND_PARSED_NEW					(1<<6)
+#define ZEND_PARSED_LIST_EXPR			(1<<7)
 
 
 /* unset types */
@@ -817,6 +840,9 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 #define ZEND_RETURNS_FUNCTION 1<<0
 #define ZEND_RETURNS_NEW      1<<1
 
+#define ZEND_FAST_RET_TO_CATCH		1
+#define ZEND_FAST_RET_TO_FINALLY	2
+
 END_EXTERN_C()
 
 #define ZEND_CLONE_FUNC_NAME		"__clone"
@@ -830,6 +856,7 @@ END_EXTERN_C()
 #define ZEND_CALLSTATIC_FUNC_NAME   "__callstatic"
 #define ZEND_TOSTRING_FUNC_NAME     "__tostring"
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
+#define ZEND_INVOKE_FUNC_NAME       "__invoke"
 
 /* The following constants may be combined in CG(compiler_options)
  * to change the default compiler behavior */

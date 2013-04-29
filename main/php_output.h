@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,6 +45,7 @@
 /* handler status flags */
 #define PHP_OUTPUT_HANDLER_STARTED		0x1000
 #define PHP_OUTPUT_HANDLER_DISABLED		0x2000
+#define PHP_OUTPUT_HANDLER_PROCESSED	0x4000
 
 /* handler op return values */
 typedef enum _php_output_handler_status_t {
@@ -82,7 +83,7 @@ typedef enum _php_output_handler_hook_t {
 } php_output_handler_hook_t;
 
 #define PHP_OUTPUT_HANDLER_INITBUF_SIZE(s) \
-( (s) ? \
+( ((s) > 1) ? \
 	(s) + PHP_OUTPUT_HANDLER_ALIGNTO_SIZE - ((s) % (PHP_OUTPUT_HANDLER_ALIGNTO_SIZE)) : \
 	PHP_OUTPUT_HANDLER_DEFAULT_SIZE \
 )
