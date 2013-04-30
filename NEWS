@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.0 Release Candidate 1
 
+- FPM:
+  . Ignore QUERY_STRING when sent in SCRIPT_FILENAME. (Remi)
+
 25 Apr 2013, PHP 5.5.0 Beta 4
 
 - Core:
