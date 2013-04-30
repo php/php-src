@@ -1257,14 +1257,15 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		}
 		cur_block = cur_block->next;
 	}
-#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
-	if (opline[-1].opcode == ZEND_THROW) {
+
+	if ((opline-1)->opcode == ZEND_THROW) {
 		/* if we finished with THROW, we need to add space between THROW and HANDLE to not confuse
 		   zend_throw_internal */
 		MAKE_NOP(opline);
 		opline->lineno = opline[-1].lineno;
 		opline++;
 	}
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
 	MAKE_NOP(opline);
 	opline->opcode = ZEND_HANDLE_EXCEPTION;
 	opline->lineno = opline[-1].lineno;
