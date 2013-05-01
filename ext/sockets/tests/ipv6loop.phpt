@@ -21,7 +21,7 @@ IPv6 Loopback test
 			break;
 		}
 	}
-	if (!$bound)
+	if (!$bound) {
 		die("Unable to bind to [::1]:$port");
 	}
 	if (!socket_listen($server, 2)) {
