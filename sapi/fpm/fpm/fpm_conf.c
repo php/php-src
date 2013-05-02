@@ -1024,8 +1024,8 @@ static int fpm_conf_process_all_pools() /* {{{ */
 				nb_ext = 0;
 
 				/* parse the string and save the extension in the array */
-				while ((ext = strtok(security_limit_extensions, " \t"))) {
-					security_limit_extensions = NULL;
+				while ((ext = strtok(limit_extensions, " \t"))) {
+					limit_extensions = NULL;
 					wp->limit_extensions[nb_ext++] = strdup(ext);
 				}
 
