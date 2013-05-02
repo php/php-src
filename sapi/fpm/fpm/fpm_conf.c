@@ -1002,7 +1002,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			nb_ext = 0;
 
 			/* find the number of extensions */
-			while ((ext = strtok(limit_extensions, " \t"))) {
+			while (strtok(limit_extensions, " \t")) {
 				limit_extensions = NULL;
 				nb_ext++;
 			}
