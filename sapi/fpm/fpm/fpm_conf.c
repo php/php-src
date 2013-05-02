@@ -540,12 +540,17 @@ static char *fpm_conf_set_array(zval *key, zval *value, void **config, int conve
 	kv->key = strdup(Z_STRVAL_P(key));
 
 	if (!kv->key) {
+		free(kv);
 		return "fpm_conf_set_array: strdup(key) failed";
 	}
 
 	if (convert_to_bool) {
 		char *err = fpm_conf_set_boolean(value, &subconf, 0);
-		if (err) return err;
+		if (err) {
+			free(kv->key);
+			free(kv);
+			return err;
+		}
 		kv->value = strdup(b ? "1" : "0");
 	} else {
 		kv->value = strdup(Z_STRVAL_P(value));
@@ -556,6 +561,7 @@ static char *fpm_conf_set_array(zval *key, zval *value, void **config, int conve
 
 	if (!kv->value) {
 		free(kv->key);
+		free(kv);
 		return "fpm_conf_set_array: strdup(value) failed";
 	}
 
@@ -578,6 +584,7 @@ static void *fpm_worker_pool_config_alloc() /* {{{ */
 	wp->config = malloc(sizeof(struct fpm_worker_pool_config_s));
 
 	if (!wp->config) { 
+		fpm_worker_pool_free(wp);
 		return 0;
 	}
 
@@ -1107,6 +1114,7 @@ int fpm_conf_write_pid() /* {{{ */
 
 		if (len != write(fd, buf, len)) {
 			zlog(ZLOG_SYSERROR, "Unable to write to the PID file.");
+			close(fd);
 			return -1;
 		}
 		close(fd);
@@ -1460,6 +1468,7 @@ int fpm_conf_load_ini_file(char *filename TSRMLS_DC) /* {{{ */
 
 	if (ini_recursion++ > 4) {
 		zlog(ZLOG_ERROR, "failed to include more than 5 files recusively");
+		close(fd);
 		return -1;
 	}
 
