@@ -39,6 +39,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed Windows x64 version of stream_socket_pair() and improved error
     handling. (Anatol Belski)
+  . Fixed bug #64770 (stream_select() fails with pipes returned by proc_open()
+    on Windows x64). (Anatol)
 
 11 Apr 2013, PHP 5.4.14
 
