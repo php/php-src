@@ -1162,9 +1162,10 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 			continue;
 		}
 		if ((*res)->sa_family == AF_INET6) {
-			strcpy(session->peername, "udp6:");
+			strcpy(session->peername, "udp6:[");
 			pptr = session->peername + strlen(session->peername);
 			inet_ntop((*res)->sa_family, &(((struct sockaddr_in6*)(*res))->sin6_addr), pptr, MAX_NAME_LEN);
+			strcat(pptr, "]");
 		} else if ((*res)->sa_family == AF_INET) {
 			inet_ntop((*res)->sa_family, &(((struct sockaddr_in*)(*res))->sin_addr), pptr, MAX_NAME_LEN);
 		} else {
