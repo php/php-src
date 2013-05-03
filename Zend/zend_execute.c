@@ -1145,6 +1145,10 @@ convert_to_array:
 					zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
 				}
 
+				if (type != BP_VAR_UNSET) {
+					SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
+				}
+
 				if (Z_TYPE_P(dim) != IS_LONG) {
 
 					switch(Z_TYPE_P(dim)) {
@@ -1172,9 +1176,6 @@ convert_to_array:
 					zval_copy_ctor(&tmp);
 					convert_to_long(&tmp);
 					dim = &tmp;
-				}
-				if (type != BP_VAR_UNSET) {
-					SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
 				}
 				container = *container_ptr;
 				result->str_offset.str = container;

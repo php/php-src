@@ -672,7 +672,7 @@ static inline unsigned int zend_mm_high_bit(size_t _size)
 #elif defined(__GNUC__) && defined(__x86_64__)
 	unsigned long n;
 
-        __asm__("bsrq %1,%0\n\t" : "=r" (n) : "rm"  (_size));
+        __asm__("bsr %1,%0\n\t" : "=r" (n) : "rm"  (_size));
         return (unsigned int)n;
 #elif defined(_MSC_VER) && defined(_M_IX86)
 	__asm {
@@ -698,12 +698,12 @@ static inline unsigned int zend_mm_low_bit(size_t _size)
 #elif defined(__GNUC__) && defined(__x86_64__)
         unsigned long n;
 
-        __asm__("bsfq %1,%0\n\t" : "=r" (n) : "rm"  (_size));
+        __asm__("bsf %1,%0\n\t" : "=r" (n) : "rm"  (_size));
         return (unsigned int)n;
 #elif defined(_MSC_VER) && defined(_M_IX86)
 	__asm {
 		bsf eax, _size
-   }
+	}
 #else
 	static const int offset[16] = {4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0};
 	unsigned int n;
@@ -2481,11 +2481,21 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
         size_t res = nmemb;
         unsigned long overflow = 0;
 
-        __asm__ ("mulq %3\n\taddq %4,%0\n\tadcq %1,%1"
+#ifdef __ILP32__ /* x32 */
+# define LP_SUFF "l"
+#else /* amd64 */
+# define LP_SUFF "q"
+#endif
+
+        __asm__ ("mul" LP_SUFF  " %3\n\t"
+                 "add %4,%0\n\t"
+                 "adc %1,%1"
              : "=&a"(res), "=&d" (overflow)
              : "%0"(res),
                "rm"(size),
                "rm"(offset));
+
+#undef LP_SUFF
 
         if (UNEXPECTED(overflow)) {
                 zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu * %zu + %zu)", nmemb, size, offset);
