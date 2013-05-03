@@ -159,18 +159,11 @@ AC_DEFUN([PHP_GD_XPM],[
   if test "$PHP_XPM_DIR" != "no"; then
 
     for i in $PHP_XPM_DIR /usr/local /usr/X11R6 /usr; do
-      test -f $i/$PHP_LIBDIR/libXpm.$SHLIB_SUFFIX_NAME || test -f $i/$PHP_LIBDIR/libXpm.a && GD_XPM_DIR=$i && break
+      test -f $i/include/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i && break
+      test -f $i/include/X11/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i/X11 && break
     done
 
     if test -z "$GD_XPM_DIR"; then
-      AC_MSG_ERROR([libXpm.(a|so) not found.])
-    fi
-
-    for i in include include/X11; do
-      test -f $GD_XPM_DIR/$i/xpm.h && GD_XPM_INC=$GD_XPM_DIR/include
-    done
-
-    if test -z "$GD_XPM_INC"; then
       AC_MSG_ERROR([xpm.h not found.])
     fi
 
