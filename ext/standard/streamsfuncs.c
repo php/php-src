@@ -601,7 +601,7 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 {
 	zval **elem;
 	php_stream *stream;
-	php_socket_t this_fd;
+	php_socket_t this_fd = 0;
 	int cnt = 0;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
@@ -638,7 +638,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 	zval **elem, **dest_elem;
 	php_stream *stream;
 	HashTable *new_hash;
-	php_socket_t this_fd;
+	php_socket_t this_fd = 0;
 	int ret = 0;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
