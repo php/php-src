@@ -26,10 +26,7 @@ $g2 = gen(new B);
 $g2->current();
 
 $g1->next();
-
-$g3 = clone $g2;
-unset($g2);
-$g3->next();
+$g2->next();
 
 ?>
 --EXPECT--

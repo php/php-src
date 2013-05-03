@@ -597,7 +597,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		CG(active_op_array) = original_active_op_array;
 		if (compilation_successful) {
 			pass_two(op_array TSRMLS_CC);
-			zend_release_labels(TSRMLS_C);
+			zend_release_labels(0 TSRMLS_CC);
 		} else {
 			efree(op_array);
 			retval = NULL;
@@ -772,7 +772,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 			zend_do_return(NULL, 0 TSRMLS_CC);
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array TSRMLS_CC);
-			zend_release_labels(TSRMLS_C);
+			zend_release_labels(0 TSRMLS_CC);
 			retval = op_array;
 		}
 	}

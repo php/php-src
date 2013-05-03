@@ -24,11 +24,12 @@
 #include <assert.h>
 
 #ifdef PHP_WIN32
-#include <process.h>
-#include <io.h>
-#include "win32/time.h"
-#include "win32/signal.h"
-#include "win32/php_registry.h"
+# include <process.h>
+# include <io.h>
+# include "win32/time.h"
+# include "win32/signal.h"
+# include "win32/php_registry.h"
+# include <sys/timeb.h>
 #else
 # include "php_config.h"
 #endif
@@ -295,6 +296,36 @@ static const char php_cli_server_css[] = "<style>\n" \
 										"code.url { background-color: #eeeeee; font-family:monospace; padding:0 2px;}\n" \
 										"</style>\n";
 /* }}} */
+
+#ifdef PHP_WIN32
+int php_cli_server_get_system_time(char *buf) {
+	struct _timeb system_time;
+	errno_t err;
+
+	if (buf == NULL) {
+		return -1;
+	}
+
+	_ftime(&system_time);
+	err = ctime_s(buf, 52, &(system_time.time) );
+	if (err) {
+		return -1;
+	}
+	return 0;
+}
+#else
+int php_cli_server_get_system_time(char *buf) {
+	struct timeval tv;
+	struct tm tm;
+
+	gettimeofday(&tv, NULL);
+
+	/* TODO: should be checked for NULL tm/return vaue */
+	php_localtime_r(&tv.tv_sec, &tm);
+	php_asctime_r(&tm, buf);
+	return 0;
+}
+#endif
 
 static void char_ptr_dtor_p(char **p) /* {{{ */
 {
@@ -640,13 +671,11 @@ static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC)
 
 static void sapi_cli_server_log_message(char *msg TSRMLS_DC) /* {{{ */
 {
-	struct timeval tv;
-	struct tm tm;
 	char buf[52];
-	gettimeofday(&tv, NULL);
-	php_localtime_r(&tv.tv_sec, &tm);
-	php_asctime_r(&tm, buf);
-	{
+
+	if (php_cli_server_get_system_time(buf) != 0) {
+		memmove(buf, "unknown time, can't be fetched", sizeof("unknown time, can't be fetched"));
+	} else {
 		size_t l = strlen(buf);
 		if (l > 0) {
 			buf[l - 1] = '\0';
@@ -2402,12 +2431,12 @@ int do_cli_server(int argc, char **argv TSRMLS_DC) /* {{{ */
 	sapi_module.phpinfo_as_text = 0;
 
 	{
-		struct timeval tv;
-		struct tm tm;
 		char buf[52];
-		gettimeofday(&tv, NULL);
-		php_localtime_r(&tv.tv_sec, &tm);
-		php_asctime_r(&tm, buf);
+
+		if (php_cli_server_get_system_time(buf) != 0) {
+			memmove(buf, "unknown time, can't be fetched", sizeof("unknown time, can't be fetched"));
+		}
+
 		printf("PHP %s Development Server started at %s"
 				"Listening on http://%s\n"
 				"Document root is %s\n"

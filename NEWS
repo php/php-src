@@ -1,8 +1,102 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 20??, PHP 5.5.0 Beta 1
+?? ??? 2013, PHP 5.5.0 Release Candidate 1
+
+- FPM:
+  . Ignore QUERY_STRING when sent in SCRIPT_FILENAME. (Remi)
+  . Fixed some possible memory or resource leaks and possible null dereference
+    detected by code coverity scan. (Remi)
+  . Log a warning when a syscall fails. (Remi)
+
+
+25 Apr 2013, PHP 5.5.0 Beta 4
 
 - Core:
+  . Fixed bug #64677 (execution operator `` stealing surrounding arguments). 
+    (Laruence)
+
+- CURL:
+  . Remove curl stream wrappers. (Pierrick)
+
+- MySQLi:
+  . Fixed bug #64726 (Segfault when calling fetch_object on a use_result and DB
+    pointer has closed). (Laruence)
+
+- Zip:
+  . Fixed bug #64342 (ZipArchive::addFile() has to check for file existence).
+    (Anatol)
+
+- SOAP:
+  . Added SoapClient constructor option 'ssl_method' to specify ssl method.
+    (Eric Iversen)
+
+- Streams:
+  . Fixed Windows x64 version of stream_socket_pair() and improved error handling
+    (Anatol Belski)
+
+11 Apr 2013, PHP 5.5.0 Beta 3
+
+- Core:
+  . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
+    segfault). (Laruence)
+  . Fixed bug #64565 (copy doesn't report failure on partial copy). (Remi)
+  . Fixed bug #64555 (foreach no longer copies keys if they are interned).
+    (Nikita Popov)
+  . Fixed bugs #47675 and #64577 (fd leak on Solaris)
+
+- CURL:
+  . Added CURL_WRAPPERS_ENABLED constant. (Laruence)
+
+- DateTime
+  . Fixed bug #54567 (DateTimeZone serialize/unserialize) (Lonny
+    Kapelushnik, Derick)
+  . Fixed bug #60774 (DateInterval::format("%a") is always zero when an
+    interval is created using the createFromDateString method) (Lonny
+    Kapelushnik, Derick)
+
+- General improvements:
+  . Drop support for bison < 2.4 when building PHP from GIT source. 
+    (Laruence)
+
+- Fileinfo:
+  . Upgraded libmagic to 5.14. (Anatol)
+
+- OPcache
+  . Added opcache_invalidate() function. (Dmitry)
+  . Added ability to disable opcode cahing for current request by setting
+    opcache.enable=0. (Dmitry)
+  . Allowed comments in blacklist files started from ';'. (Remi)
+  . Allowed wilcards in opcache.blacklist_filename. (Remi)
+  . Fixed opcache reload condition. Now OPcache is not reloaded if it's full,
+    but wasted memory is less than opcache.max_wasted_percentage. (Dmitry)
+  . Fixed incorrect file path validation. (Dmitry).
+  . Optimizer: Fixed Control Flow Graph construction. (Dmitry)
+  . Optimizer: numeric string constants used as array indeces have to be
+    converted to long at compile time. (Dmitry)
+  . Optimizer: Fixed deltion of used literal. (Laruence, Dmitry)
+
+28 Mar 2013, PHP 5.5.0 Beta 2
+
+- Core:
+  . Fixed bug #64544 (Valgrind warnings after using putenv). (Laruence)
+  . Fixed bug #64515 (Memoryleak when using the same variablename 2times in
+    function declaration). (Laruence)
+  . Fixed bug #64503 (Compilation fails with error: conflicting types for
+    'zendparse'). (Laruence)
+  . Fixed bug #64239 (Debug backtrace changed behavior since 5.4.10 or 5.4.11).
+    (Dmitry, Laruence)
+  . Fixed bug #64523, allow XOR in php.ini. (Dejan Marjanovic, Lars)
+
+- Opcache:
+  . Fixed bug # 64490 (struct flock undefined on FreeBSD). (Joe Watkins)
+
+21 Mar 2013, PHP 5.5.0 Beta 1
+
+- Core:
+  . Added Zend Opcache extension and enable building it by default. 
+    More details here: https://wiki.php.net/rfc/optimizerplus. (Dmitry)
+  . Added array_column function which returns a column in a multidimensional
+    array. https://wiki.php.net/rfc/array_column. (Ben Ramsey)
   . Fixed bug #64354 (Unserialize array of objects whose class can't
     be autoloaded fail). (Laruence)
   . Added support for changing the process's title in CLI/CLI-Server SAPIs.
@@ -21,6 +115,13 @@ PHP                                                                        NEWS
   . Fixed bug #53437 (Crash when using unserialized DatePeriod instance).
     (Gustavo, Derick, Anatol)
   . Fixed bug #62852 (Unserialize Invalid Date causes crash). (Anatol)
+
+- SPL:
+  . Implement FR #48358 (Add SplDoublyLinkedList::add() to insert an element
+    at a given offset). (Mark Baker, David Soria Parra)
+
+- Zip:
+  . Bug #64452 (Zip crash intermittently). (Anatol)
 
 07 Mar 2013, PHP 5.5.0 Alpha 6
 

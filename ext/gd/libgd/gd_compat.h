@@ -11,6 +11,9 @@ const char * gdPngGetVersionString();
 const char * gdJpegGetVersionString();
 int gdJpegGetVersionInt();
 int overflow2(int a, int b);
+int getmbi (int (*getin) (void *in), void *in);
+int skipheader (int (*getin) (void *in), void *in);
+
 
 /* filters section
  *
@@ -32,6 +35,7 @@ int gdImageContrast(gdImagePtr src, double contrast);
 /* Simply adds or substracts respectively red, green or blue to a pixel */
 int gdImageColor(gdImagePtr src, const int red, const int green, const int blue, const int alpha);
 
+#if !defined(HAVE_GD_IMAGE_CONVOLUTION)
 /* Image convolution by a 3x3 custom matrix */
 int gdImageConvolution(gdImagePtr src, float ft[3][3], float filter_div, float offset);
 int gdImageEdgeDetectQuick(gdImagePtr src);
@@ -40,10 +44,16 @@ int gdImageSelectiveBlur( gdImagePtr src);
 int gdImageEmboss(gdImagePtr im);
 int gdImageMeanRemoval(gdImagePtr im);
 int gdImageSmooth(gdImagePtr im, float weight);
+#endif
+
+#if !defined(HAVE_GD_IMAGE_PIXELATE)
 enum gdPixelateMode {
 	GD_PIXELATE_UPPERLEFT,
 	GD_PIXELATE_AVERAGE
 };
+
+int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode);
+#endif
 
 int gdImagePixelate(gdImagePtr im, int block_size, const unsigned int mode);
 

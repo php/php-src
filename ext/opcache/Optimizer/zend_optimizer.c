@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Zend Optimizer+                                                      |
+   | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
    | Copyright (c) 1998-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -33,20 +33,13 @@ int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC
 {
 	int i = op_array->last_literal;
 	op_array->last_literal++;
-#if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
-	{
-		if (i >= CG(context).literals_size) {
-			CG(context).literals_size += 16; /* FIXME */
-			op_array->literals = (zend_literal*)erealloc(op_array->literals, CG(context).literals_size * sizeof(zend_literal));
-		}
+	if (i >= CG(context).literals_size) {
+		CG(context).literals_size += 16; /* FIXME */
+		op_array->literals = (zend_literal*)erealloc(op_array->literals, CG(context).literals_size * sizeof(zend_literal));
 	}
-#else
-	if (i >= op_array->size_literal) {
-		op_array->size_literal += 16; /* FIXME */
-		op_array->literals = (zend_literal*)erealloc(op_array->literals, op_array->size_literal * sizeof(zend_literal));
-	}
-#endif
 	op_array->literals[i].constant = *zv;
+	op_array->literals[i].hash_value = 0;
+	op_array->literals[i].cache_slot = -1;
 	Z_SET_REFCOUNT(op_array->literals[i].constant, 2);
 	Z_SET_ISREF(op_array->literals[i].constant);
 	return i;
