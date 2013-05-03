@@ -29,6 +29,14 @@
 #include "config.h"
 #endif
 
+#ifdef HAVE_GD_PNG
+#include <png.h>
+#endif
+
+#ifdef HAVE_GD_JPG
+# include <jpeglib.h>
+#endif
+
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/head.h"
@@ -52,6 +60,42 @@
 # include <Winuser.h>
 # include <Wingdi.h>
 #endif
+
+#ifndef HAVE_GD_BUNDLED
+#ifdef HAVE_GD_PNG
+const char * gdPngGetVersionString()
+{
+	return PNG_LIBPNG_VER_STRING;
+}
+#endif /* HAVE_GD_PNG */
+
+#ifdef HAVE_GD_JPG
+int gdJpegGetVersionInt()
+{
+	return JPEG_LIB_VERSION;
+}
+
+const char * gdJpegGetVersionString()
+{
+	switch(JPEG_LIB_VERSION) {
+		case 62:
+			return "6b";
+			break;
+
+		case 70:
+			return "7";
+			break;
+
+		case 80:
+			return "8";
+			break;
+
+		default:
+			return "unknown";
+	}
+}
+#endif /* HAVE_GD_JPG */
+#endif /* HAVE_GD_BUNDLED */
 
 static int le_gd, le_gd_font;
 #if HAVE_LIBT1
@@ -1310,6 +1354,7 @@ PHP_MINFO_FUNCTION(gd)
 		php_info_print_table_row(2, "libJPEG Version", gdJpegGetVersionString());
 	}
 #endif
+
 #ifdef HAVE_GD_PNG
 	php_info_print_table_row(2, "PNG Support", "enabled");
 	php_info_print_table_row(2, "libPNG Version", gdPngGetVersionString());

@@ -337,7 +337,6 @@ else
 
  if test "$PHP_GD" != "no"; then
   GD_MODULE_TYPE=external
-  extra_sources="libgd/gd_compat.c"
 
 dnl Various checks for GD features
   PHP_GD_ZLIB
