@@ -295,7 +295,9 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 			zlog_set_fd(fpm_globals.error_log_fd);
 		}
 	}
-	fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
+	if (0 > fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC)) {
+		zlog(ZLOG_WARNING, "failed to change attribute of error_log");
+	}
 	return 0;
 }
 /* }}} */
