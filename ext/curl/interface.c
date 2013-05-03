@@ -1221,22 +1221,6 @@ PHP_MINIT_FUNCTION(curl)
 		return FAILURE;
 	}
 
-#ifdef PHP_CURL_URL_WRAPPERS
-	{
-		curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
-		char **p = (char **)info->protocols;
-
-		while (*p != NULL) {
-			/* Do not enable cURL "file" protocol and make sure cURL is always used when --with-curlwrappers is enabled */
-			if (strncasecmp(*p, "file", sizeof("file")-1) != 0) {
-				php_unregister_url_stream_wrapper(*p TSRMLS_CC);
-				php_register_url_stream_wrapper(*p, &php_curl_wrapper TSRMLS_CC);
-			}
-			(void) *p++;
-		}
-	}
-#endif
-
 	curlfile_register_class(TSRMLS_C);
 
 	return SUCCESS;
@@ -1247,20 +1231,6 @@ PHP_MINIT_FUNCTION(curl)
  */
 PHP_MSHUTDOWN_FUNCTION(curl)
 {
-#ifdef PHP_CURL_URL_WRAPPERS
-	{
-		curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
-		char **p = (char **)info->protocols;
-
-		while (*p != NULL) {
-			/* Do not enable cURL "file" protocol and make sure cURL is always used when --with-curlwrappers is enabled */
-			if (strncasecmp(*p, "file", sizeof("file")-1) != 0) {
-				php_unregister_url_stream_wrapper(*p TSRMLS_CC);
-			}
-			(void) *p++;
-		}
-	}
-#endif
 	curl_global_cleanup();
 #ifdef PHP_CURL_NEED_OPENSSL_TSL
 	if (php_curl_openssl_tsl) {

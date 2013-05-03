@@ -1715,7 +1715,7 @@ PHP_FUNCTION(stristr)
 	if (Z_TYPE_P(needle) == IS_STRING) {
 		char *orig_needle;
 		if (!Z_STRLEN_P(needle)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty needle");
 			efree(haystack_dup);
 			RETURN_FALSE;
 		}
@@ -1765,7 +1765,7 @@ PHP_FUNCTION(strstr)
 
 	if (Z_TYPE_P(needle) == IS_STRING) {
 		if (!Z_STRLEN_P(needle)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty delimiter");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty needle");
 			RETURN_FALSE;
 		}
 

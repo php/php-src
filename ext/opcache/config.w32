@@ -1,4 +1,4 @@
-ARG_ENABLE("opcache", "whether to enable Zend Optimizer+ support", "yes");
+ARG_ENABLE("opcache", "whether to enable Zend OPcache support", "yes");
 
 if (PHP_OPCACHE != "no") {
 

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Zend Optimizer+                                                      |
+   | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
    | Copyright (c) 1998-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -26,7 +26,7 @@
 
 #if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 # define VAR_NUM(v) ((zend_uint)(EX_TMP_VAR_NUM(0, 0) - EX_TMP_VAR(0, v)))
-# define NUM_VAR(v) ((zend_uint)EX_TMP_VAR_NUM(0, v))
+# define NUM_VAR(v) ((zend_uint)(zend_uintptr_t)EX_TMP_VAR_NUM(0, v))
 #else
 # define VAR_NUM(v) ((v)/(sizeof(temp_variable)))
 # define NUM_VAR(v) ((v)*(sizeof(temp_variable)))

@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Zend Optimizer+                                                      |
+   | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
    | Copyright (c) 1998-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -88,10 +88,6 @@ typedef struct _handler_entry {
 	const char                  *name;
 	zend_shared_memory_handlers *handler;
 } zend_shared_memory_handler_entry;
-
-typedef struct _zend_shared_memory_block_header {
-	int size;
-} zend_shared_memory_block_header;
 
 typedef struct _zend_shared_memory_state {
 	int *positions;   /* current positions for each segment */

@@ -1402,7 +1402,7 @@ out:
 	 * Do not move this de-initialization. It needs to happen right before
 	 * exiting.
 	 */
-        cleanup_ps_args(argv);
+	cleanup_ps_args(argv);
 	exit(exit_status);
 }
 /* }}} */

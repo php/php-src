@@ -164,9 +164,10 @@ zip_close(struct zip *za)
     for (j=0; j<survivors; j++) {
 	i = filelist[j].idx;
 
+	_zip_dirent_init(&de);
+
 	/* create new local directory entry */
 	if (ZIP_ENTRY_DATA_CHANGED(za->entry+i) || new_torrentzip) {
-	    _zip_dirent_init(&de);
 
 	    if (zip_get_archive_flag(za, ZIP_AFL_TORRENT, 0))
 		_zip_dirent_torrent_normalize(&de);
@@ -192,7 +193,7 @@ zip_close(struct zip *za)
 	}
 	else {
 	    /* copy existing directory entries */
-	    if (fseeko(za->zp, za->cdir->entry[i].offset, SEEK_SET) != 0) {
+	    if ((NULL == za->zp) || (fseeko(za->zp, za->cdir->entry[i].offset, SEEK_SET) != 0)) {
 		_zip_error_set(&za->error, ZIP_ER_SEEK, errno);
 		error = 1;
 		break;

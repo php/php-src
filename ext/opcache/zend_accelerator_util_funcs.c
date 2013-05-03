@@ -1,6 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | Zend Optimizer+                                                      |
+   | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
    | Copyright (c) 1998-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
@@ -120,10 +120,17 @@ void zend_accel_free_user_functions(HashTable *ht TSRMLS_DC)
 	ht->pDestructor = orig_dtor;
 }
 
-static int move_user_function(zend_function *function TSRMLS_DC, int num_args, va_list args, zend_hash_key *hash_key)
+static int move_user_function(zend_function *function
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
+	TSRMLS_DC 
+#endif
+	, int num_args, va_list args, zend_hash_key *hash_key) 
 {
 	HashTable *function_table = va_arg(args, HashTable *);
 	(void)num_args; /* keep the compiler happy */
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+	TSRMLS_FETCH();
+#endif 
 
 	if (function->type == ZEND_USER_FUNCTION) {
 		zend_hash_quick_update(function_table, hash_key->arKey, hash_key->nKeyLength, hash_key->h, function, sizeof(zend_function), NULL);
@@ -138,7 +145,11 @@ void zend_accel_move_user_functions(HashTable *src, HashTable *dst TSRMLS_DC)
 	dtor_func_t orig_dtor = src->pDestructor;
 
 	src->pDestructor = NULL;
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+	zend_hash_apply_with_arguments(src, (apply_func_args_t)move_user_function, 1, dst);
+#else
 	zend_hash_apply_with_arguments(src TSRMLS_CC, (apply_func_args_t)move_user_function, 1, dst);
+#endif 
 	src->pDestructor = orig_dtor;
 }
 
@@ -857,7 +868,7 @@ static void zend_do_delayed_early_binding(zend_op_array *op_array, zend_uint ear
 			}
 			opline_num = op_array->opcodes[opline_num].result.u.opline_num;
 		}
-		zend_restore_compiled_filename(orig_compiled_filename);
+		zend_restore_compiled_filename(orig_compiled_filename TSRMLS_CC);
 		CG(in_compilation) = orig_in_compilation;
 	}
 }
