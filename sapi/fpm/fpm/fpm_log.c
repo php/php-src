@@ -57,7 +57,9 @@ int fpm_log_open(int reopen) /* {{{ */
 			wp->log_fd = fd;
 		}
 
-		fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC);
+		if (0 > fcntl(fd, F_SETFD, fcntl(fd, F_GETFD) | FD_CLOEXEC)) {
+			zlog(ZLOG_WARNING, "failed to change attribute of access_log");
+		}
 	}
 
 	return ret;
