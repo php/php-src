@@ -301,10 +301,6 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 	EX(function_state).arguments = zend_vm_stack_push_args(opline->extended_value TSRMLS_CC);
 
 	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION) {
-		ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
-		EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
-		EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
-
 		if (EX(function_state).function->common.arg_info) {
 			zend_uint i=0;
 			zval **p = (zval**)EX(function_state).arguments;
@@ -315,15 +311,22 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 				arg_count--;
 			}
 		}
-		if (!zend_execute_internal) {
-			/* saves one function call if zend_execute_internal is not used */
-			((zend_internal_function *) EX(function_state).function)->handler(opline->extended_value, EX_T(opline->result.u.var).var.ptr, EX(function_state).function->common.return_reference?&EX_T(opline->result.u.var).var.ptr:NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
-		} else {
-			zend_execute_internal(execute_data, RETURN_VALUE_USED(opline) TSRMLS_CC);
-		}
 
-		if (!RETURN_VALUE_USED(opline)) {
-			zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
+		if (EXPECTED(EG(exception) == NULL)) {
+			ALLOC_INIT_ZVAL(EX_T(opline->result.u.var).var.ptr);
+			EX_T(opline->result.u.var).var.ptr_ptr = &EX_T(opline->result.u.var).var.ptr;
+			EX_T(opline->result.u.var).var.fcall_returned_reference = EX(function_state).function->common.return_reference;
+
+			if (!zend_execute_internal) {
+				/* saves one function call if zend_execute_internal is not used */
+				((zend_internal_function *) EX(function_state).function)->handler(opline->extended_value, EX_T(opline->result.u.var).var.ptr, EX(function_state).function->common.return_reference?&EX_T(opline->result.u.var).var.ptr:NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+			} else {
+				zend_execute_internal(execute_data, RETURN_VALUE_USED(opline) TSRMLS_CC);
+			}
+
+			if (!RETURN_VALUE_USED(opline)) {
+				zval_ptr_dtor(&EX_T(opline->result.u.var).var.ptr);
+			}
 		}
 	} else if (EX(function_state).function->type == ZEND_USER_FUNCTION) {
 		EX(original_return_value) = EG(return_value_ptr_ptr);
@@ -8396,7 +8399,9 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 		ZEND_VM_NEXT_OPCODE();
 	}
 
-	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
+	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME &&
+	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION &&
+	    !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
 		return zend_send_by_var_helper_SPEC_VAR(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 
@@ -22309,7 +22314,9 @@ static int ZEND_FASTCALL  ZEND_SEND_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 		ZEND_VM_NEXT_OPCODE();
 	}
 
-	if (EX(function_state).function->type == ZEND_INTERNAL_FUNCTION && !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
+	if (opline->extended_value == ZEND_DO_FCALL_BY_NAME &&
+	    EX(function_state).function->type == ZEND_INTERNAL_FUNCTION &&
+	    !ARG_SHOULD_BE_SENT_BY_REF(EX(fbc), opline->op2.u.opline_num)) {
 		return zend_send_by_var_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 	}
 

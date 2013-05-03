@@ -1,10 +1,42 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.3.24
+?? ??? 2013, PHP 5.3.26
+
+- FPM:
+  . Fixed some possible memory or resource leaks and possible null dereference
+    detected by code coverity scan. (Remi)
+  . Log a warning when a syscall fails. (Remi)
+
+- MySQLi:
+  . Fixed bug #64726 (Segfault when calling fetch_object on a use_result and DB
+    pointer has closed). (Laruence)
+
+?? ??? 2013, PHP 5.3.25
+
+### ADD ENTRIES ABOVE FOR 5.3.26. 5.3.25 NEWS WILL BE UPDATED BY RM ON MERGE ###
+
+- Core:
+  . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
+    segfault). (Laruence)
+  . Fixed bug #64458 (dns_get_record result with string of length -1). (Stas)
+  . Fixed bugs #47675 and #64577 (fd leak on Solaris). (Rasmus)
+
+- Streams:
+  . Fixed Windows x64 version of stream_socket_pair() and improved error
+    handling. (Anatol Belski)
+
+- Zip:
+  . Fixed bug #64342 (ZipArchive::addFile() has to check for file existence).
+    (Anatol)
+
+11 Apr 2013, PHP 5.3.24
 
 - Core
   . Fixed bug #64370 (microtime(true) less than $_SERVER['REQUEST_TIME_FLOAT']).
     (Anatol)
+  . Fixed bug #63914 (zend_do_fcall_common_helper_SPEC does not handle
+    exceptions properly). (Jeff Welch)
+  . Fixed bug #62343 (Show class_alias In get_declared_classes()) (Dmitry)
 
 - PCRE:
   . Merged PCRE 8.32). (Anatol)
@@ -13,8 +45,14 @@ PHP                                                                        NEWS
   . Fixed bug #63530 (mysqlnd_stmt::bind_one_parameter crashes, uses wrong alloc
     for stmt->param_bind). (Andrey)
 
+- DateTime
+  . Fixed bug #62852 (Unserialize Invalid Date causes crash). (Anatol)
 
-28 Feb 2013, PHP 5.3.23RC1
+- Zip:
+  . Bug #64452 (Zip crash intermittently). (Anatol)
+
+
+14 Mar 2013, PHP 5.3.23
 
 - Phar:
   . Fixed timestamp update on Phar contents modification. (Dmitry)

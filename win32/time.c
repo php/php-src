@@ -50,6 +50,7 @@ int getfilesystemtime(struct timeval *tv)
 	FILETIME ft;
 	unsigned __int64 ff = 0;
 	MyGetSystemTimeAsFileTime timefunc;
+	ULARGE_INTEGER fft;
 
 	timefunc = get_time_func();
 	if (timefunc) {
@@ -58,14 +59,20 @@ int getfilesystemtime(struct timeval *tv)
 		GetSystemTimeAsFileTime(&ft);
 	}
 
-	ff |= ft.dwHighDateTime;
-	ff <<= 32;
-	ff |= ft.dwLowDateTime;
-	ff /= 10; /* convert to microseconds */
+        /*
+	 * Do not cast a pointer to a FILETIME structure to either a 
+	 * ULARGE_INTEGER* or __int64* value because it can cause alignment faults on 64-bit Windows.
+	 * via  http://technet.microsoft.com/en-us/library/ms724284(v=vs.85).aspx
+	 */
+	fft.HighPart = ft.dwHighDateTime;
+	fft.LowPart = ft.dwLowDateTime;
+	ff = fft.QuadPart;
+
+	ff /= 10Ui64; /* convert to microseconds */
 	ff -= 11644473600000000Ui64; /* convert to unix epoch */
 
-	tv->tv_sec = (long)(ff / 1000000UL);
-	tv->tv_usec = (long)(ff % 1000000UL);
+	tv->tv_sec = (long)(ff / 1000000Ui64);
+	tv->tv_usec = (long)(ff % 1000000Ui64);
 
 	return 0;
 }

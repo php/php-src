@@ -145,7 +145,9 @@ static void sig_soft_quit(int signo) /* {{{ */
 
 	/* closing fastcgi listening socket will force fcgi_accept() exit immediately */
 	close(0);
-	socket(AF_UNIX, SOCK_STREAM, 0);
+	if (0 > socket(AF_UNIX, SOCK_STREAM, 0)) {
+		zlog(ZLOG_WARNING, "failed to create a new socket");
+	}
 	fpm_php_soft_quit();
 	errno = saved_errno;
 }
