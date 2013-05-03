@@ -176,7 +176,9 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 		return -1;
 	}
 
-	setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &flags, sizeof(flags));
+	if (0 > setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &flags, sizeof(flags))) {
+		zlog(ZLOG_WARNING, "failed to change socket attribute");
+	}
 
 	if (wp->listen_address_domain == FPM_AF_UNIX) {
 		if (fpm_socket_unix_test_connect((struct sockaddr_un *)sa, socklen) == 0) {
