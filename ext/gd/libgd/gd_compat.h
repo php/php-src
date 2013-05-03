@@ -12,10 +12,6 @@ const char * gdJpegGetVersionString();
 int gdJpegGetVersionInt();
 
 #if !defined(HAVE_LIBGD21)
-int overflow2(int a, int b);
-int getmbi (int (*getin) (void *in), void *in);
-int skipheader (int (*getin) (void *in), void *in);
-
 
 /* filters section
  *
