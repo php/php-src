@@ -288,6 +288,7 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_CHECK_LIBRARY(gd, gdImagePixelate,        [AC_DEFINE(HAVE_GD_IMAGE_PIXELATE,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageFlipBoth,        [AC_DEFINE(HAVE_GD_IMAGE_FLIP,       1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpegEx,[AC_DEFINE(HAVE_GD_JPGEX,            1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromXbm,   [AC_DEFINE(HAVE_GD_XBM,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdSetErrorMethod,       [AC_DEFINE(HAVE_LIBGD21,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
 ])
 

@@ -53,13 +53,6 @@
 # include <Wingdi.h>
 #endif
 
-#if HAVE_LIBGD
-#if !HAVE_GD_BUNDLED
-# include "libgd/gd_compat.h"
-#else
-extern int overflow2(int a, int b);
-#endif
-
 static int le_gd, le_gd_font;
 #if HAVE_LIBT1
 #include <t1lib.h>
@@ -2396,17 +2389,19 @@ PHP_FUNCTION(imagetypes)
 /* {{{ _php_ctx_getmbi
  */
 
-static _php_ctx_getmbi(gdIOCtx *ctx)
+static int _php_ctx_getmbi(gdIOCtx *ctx)
 {
 	int i, mbi = 0;
 
 	do {
 		i = (ctx->getC)(ctx);
 		if (i < 0) {
-			break;
+			return -1;
 		}
 		mbi = (mbi << 7) | (i & 0x7f);
 	} while (i & 0x80);
+
+	return mbi;
 }
 /* }}} */
 
