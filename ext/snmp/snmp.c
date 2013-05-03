@@ -551,11 +551,7 @@ static void php_snmp_error(zval *object, const char *docref TSRMLS_DC, int type,
 static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_DC, int valueretrieval)
 {
 	zval *val;
-#ifdef BUGGY_SNMPRINT_VALUE
-	char sbuf[2048];
-#else
-	char sbuf[64];
-#endif
+	char sbuf[512];
 	char *buf = &(sbuf[0]);
 	char *dbuf = (char *)NULL;
 	int buflen = sizeof(sbuf) - 1;
@@ -569,6 +565,10 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval TSRMLS_D
 	while ((valueretrieval & SNMP_VALUE_PLAIN) == 0) {
 		*buf = '\0';
 		if (snprint_value(buf, buflen, vars->name, vars->name_length, vars) == -1) {
+			if (val_len > 512*1024) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "snprint_value() asks for a buffer more than 512k, Net-SNMP bug?");
+				break;
+			}
 			 /* buffer is not long enough to hold full output, double it */
 			val_len *= 2;
 		} else {
