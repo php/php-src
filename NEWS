@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 
 - FPM:
   . Ignore QUERY_STRING when sent in SCRIPT_FILENAME. (Remi)
+  . Fixed some possible memory or resource leaks and possible null dereference
+    detected by code coverity scan. (Remi)
+  . Log a warning when a syscall fails. (Remi)
+
 
 25 Apr 2013, PHP 5.5.0 Beta 4
 
