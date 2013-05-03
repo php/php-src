@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - SNMP:
   . Fixed bug #64765 (Some IPv6 addresses get interpreted wrong).
 	(Boris Lytochkin)
+  . Fixed bug #64159 (Truncated snmpget). (Boris Lytochkin)
 
 ?? ??? 2013, PHP 5.4.15
 - Core:
