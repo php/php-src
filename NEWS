@@ -2,6 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.3.26
 
+- FPM:
+  . Fixed some possible memory or resource leaks and possible null dereference
+    detected by code coverity scan. (Remi)
+  . Log a warning when a syscall fails. (Remi)
+
 - MySQLi:
   . Fixed bug #64726 (Segfault when calling fetch_object on a use_result and DB
     pointer has closed). (Laruence)
