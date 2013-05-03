@@ -13,6 +13,10 @@ PHP                                                                        NEWS
     (Boris Lytochkin)
   . Fixed bug #64159 (Truncated snmpget). (Boris Lytochkin)
 
+- Streams:
+  . Fixed bug #64770 (stream_select() fails with pipes returned by proc_open()
+    on Windows x64). (Anatol)
+
 25 Apr 2013, PHP 5.5.0 Beta 4
 
 - Core:
