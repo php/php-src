@@ -11,6 +11,9 @@ PHP                                                                        NEWS
     detected by code coverity scan. (Remi)
   . Log a warning when a syscall fails. (Remi)
 
+- SNMP:
+  . Fixed bug #64765 (Some IPv6 addresses get interpreted wrong).
+	(Boris Lytochkin)
 
 ?? ??? 2013, PHP 5.4.15
 - Core:
