@@ -8,6 +8,11 @@ PHP                                                                        NEWS
     detected by code coverity scan. (Remi)
   . Log a warning when a syscall fails. (Remi)
 
+- GD:
+  . Fix build with system libgd >= 2.1 which is now the minimal
+    version required (as build with previous version is broken).
+    No change when bundled libgd is used.  (Ondrej Sury, Remi)
+
 - SNMP:
   . Fixed bug #64765 (Some IPv6 addresses get interpreted wrong).
     (Boris Lytochkin)
