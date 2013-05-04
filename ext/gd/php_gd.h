@@ -28,7 +28,7 @@
 # endif
 #endif
 
-#if HAVE_LIBGD
+#if defined(HAVE_LIBGD) || defined(HAVE_GD_BUNDLED)
 
 /* open_basedir and safe_mode checks */
 #define PHP_GD_CHECK_OPEN_BASEDIR(filename, errormsg)                       \

@@ -29,14 +29,6 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_GD_PNG
-#include <png.h>
-#endif
-
-#ifdef HAVE_GD_JPG
-# include <jpeglib.h>
-#endif
-
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/head.h"
@@ -59,6 +51,18 @@
 # include <windows.h>
 # include <Winuser.h>
 # include <Wingdi.h>
+#endif
+
+#ifdef HAVE_GD_PNG
+# include <png.h>
+#endif
+
+#ifdef HAVE_GD_JPG
+# include <jpeglib.h>
+#endif
+
+#ifdef HAVE_GD_XPM
+# include <X11/xpm.h>
 #endif
 
 #ifndef HAVE_GD_BUNDLED
