@@ -252,11 +252,11 @@ AC_DEFUN([PHP_GD_JISX0208],[
 ])
 
 AC_DEFUN([PHP_GD_CHECK_VERSION],[
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromPng,   [AC_DEFINE(HAVE_GD_PNG,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromWebp,  [AC_DEFINE(HAVE_GD_WEBP,             1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM,              1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageStringFT,        [AC_DEFINE(HAVE_GD_FREETYPE,         1, [ ])], [], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromPng,   [AC_DEFINE(HAVE_GD_PNG,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromWebp,  [AC_DEFINE(HAVE_GD_WEBP,             1, [ ])], [], [ $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromJpeg,  [AC_DEFINE(HAVE_GD_JPG,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageCreateFromXpm,   [AC_DEFINE(HAVE_GD_XPM,              1, [ ])], [], [ $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY(gd, gdImageStringFT,        [AC_DEFINE(HAVE_GD_FREETYPE,         1, [ ])], [], [ $GD_SHARED_LIBADD ])
 ])
 
 dnl
@@ -366,9 +366,8 @@ dnl Library path
   ],[
     AC_MSG_ERROR([Unable to find libgd.(a|so) >= 2.1.0 anywhere under $PHP_GD])
   ],[
-    -L$GD_PHP/$PHP_LIBDIR
+    -L$PHP_GD/$PHP_LIBDIR
   ])
-
   PHP_GD_CHECK_VERSION
 
   PHP_EXPAND_PATH($GD_INCLUDE, GD_INCLUDE)
@@ -395,7 +394,7 @@ if test "$PHP_GD" != "no"; then
     PHP_ADD_INCLUDE($GD_INCLUDE)
     PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
       AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
-    ], [ -L$GD_LIB $GD_SHARED_LIBADD ])
+    ], [ $GD_SHARED_LIBADD ])
   fi
 
   PHP_INSTALL_HEADERS([$GD_HEADER_DIRS])
