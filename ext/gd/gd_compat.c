@@ -9,7 +9,7 @@
 # include <jpeglib.h>
 #endif
 
-#include "gd_compat.c"
+#include "gd_compat.h"
 
 #ifdef HAVE_GD_JPG
 int gdJpegGetVersionInt()
