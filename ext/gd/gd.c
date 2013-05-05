@@ -53,41 +53,12 @@
 # include <Wingdi.h>
 #endif
 
-#ifdef HAVE_GD_JPG
-# include <jpeglib.h>
-#endif
-
 #ifdef HAVE_GD_XPM
 # include <X11/xpm.h>
 #endif
 
 #ifndef HAVE_GD_BUNDLED
-#ifdef HAVE_GD_JPG
-int gdJpegGetVersionInt()
-{
-	return JPEG_LIB_VERSION;
-}
-
-const char * gdJpegGetVersionString()
-{
-	switch(JPEG_LIB_VERSION) {
-		case 62:
-			return "6b";
-			break;
-
-		case 70:
-			return "7";
-			break;
-
-		case 80:
-			return "8";
-			break;
-
-		default:
-			return "unknown";
-	}
-}
-#endif /* HAVE_GD_JPG */
+# include "gd_compat.h"
 #endif /* HAVE_GD_BUNDLED */
 
 static int le_gd, le_gd_font;
@@ -1350,9 +1321,7 @@ PHP_MINFO_FUNCTION(gd)
 
 #ifdef HAVE_GD_PNG
 	php_info_print_table_row(2, "PNG Support", "enabled");
-#ifndef HAVE_GD_BUNDLED
 	php_info_print_table_row(2, "libPNG Version", gdPngGetVersionString());
-#endif
 #endif
 	php_info_print_table_row(2, "WBMP Support", "enabled");
 #if defined(HAVE_GD_XPM)
