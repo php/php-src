@@ -9,7 +9,6 @@ dnl
 PHP_ARG_WITH(gd, for GD support,
 [  --with-gd[=DIR]         Include GD support.  DIR is the GD library base
                           install directory [BUNDLED]])
-
 if test -z "$PHP_VPX_DIR"; then
   PHP_ARG_WITH(vpx-dir, for the location of libvpx,
   [  --with-vpx-dir[=DIR]     GD: Set the path to libvpx install prefix], no, no)
@@ -299,7 +298,7 @@ dnl PNG is required by GD library
 dnl These are always available with bundled library
   AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
   AC_DEFINE(HAVE_GD_PNG,              1, [ ])
-  AC_DEFINE(HAVE_GD_CACHE_CREATE      1, [ ])
+  AC_DEFINE(HAVE_GD_CACHE_CREATE,     1, [ ])
 
 dnl Make sure the libgd/ is first in the include path
   GDLIB_CFLAGS="-DHAVE_LIBPNG"
