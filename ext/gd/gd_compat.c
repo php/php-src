@@ -10,7 +10,7 @@
 #endif
 
 #include "gd_compat.h"
-#include <TSRM.h>
+#include "php.h"
 
 #ifdef HAVE_GD_JPG
 int gdJpegGetVersionInt()
