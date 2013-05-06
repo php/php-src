@@ -2208,6 +2208,31 @@ AC_DEFUN([PHP_SETUP_ICU],[
     PHP_ICU_DIR=DEFAULT
   fi
 
+  dnl First try to find pkg-config
+  if test -z "$PKG_CONFIG"; then
+    AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+  fi
+
+  dnl If pkg-config is found try using it
+  if test "$PHP_ICU_DIR" = "DEFAULT" && test -x "$PKG_CONFIG" && $PKG_CONFIG --exists icu-io; then
+    AC_MSG_CHECKING([for ICU 3.4 or greater])
+    if $PKG_CONFIG --atleast-version=3.4.0 icu-io; then
+      icu_version_full=`$PKG_CONFIG --modversion icu-io`
+      ICU_LIBS=`$PKG_CONFIG --libs icu-io`
+      ICU_INCS=`$PKG_CONFIG --cflags icu-io`
+      AC_MSG_RESULT([found $icu_version_full])
+    else
+      AC_MSG_ERROR([ICU version 3.4 or later is required])
+    fi
+
+    if test -n "$ICU_LIBS" && test -n "$ICU_INCS"; then
+      PHP_EVAL_INCLINE($ICU_INCS)
+      PHP_EVAL_LIBLINE($ICU_LIBS, $1)
+      return
+    fi
+  fi
+
+  dnl If pkg-config fails for some reason, revert to the old method
   if test "$PHP_ICU_DIR" = "DEFAULT"; then
     dnl Try to find icu-config
     AC_PATH_PROG(ICU_CONFIG, icu-config, no, [$PATH:/usr/local/bin])
