@@ -57,9 +57,8 @@
 # include <X11/xpm.h>
 #endif
 
-#ifndef HAVE_GD_BUNDLED
 # include "gd_compat.h"
-#endif /* HAVE_GD_BUNDLED */
+
 
 static int le_gd, le_gd_font;
 #if HAVE_LIBT1
@@ -1468,9 +1467,7 @@ PHP_FUNCTION(imageloadfont)
 		body_size = font->w * font->h * font->nchars;
 	}
 
-	if ((font->nchars <= 0 || font->h <= 0 || font->w <= 0 ) || \
-		(font->nchars > INT_MAX / font->h) || \
-		(font->nchars * font->h > INT_MAX / font->w)) {
+	if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w )) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error reading font, invalid font header");
 		efree(font);
 		php_stream_close(stream);
