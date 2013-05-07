@@ -1409,7 +1409,7 @@ PHP_FUNCTION(openssl_spki_new)
 	}
 
 	if (challenge) {
-		ASN1_STRING_set(spki->spkac->challenge, challenge, (int)strlen(challenge));
+		ASN1_STRING_set(spki->spkac->challenge, challenge, challenge_len);
 	}
 
 	if (!NETSCAPE_SPKI_set_pubkey(spki, pkey)) {
