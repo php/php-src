@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-25 Apr 2013, PHP 5.3.25RC1
+09 May 2013, PHP 5.3.25
 
 - Core:
   . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
