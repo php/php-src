@@ -266,6 +266,10 @@ dnl
 dnl Common for both builtin and external GD
 dnl
 if test "$PHP_GD" != "no"; then
+
+dnl PNG is required by GD library
+  test "$PHP_PNG_DIR" = "no" && PHP_PNG_DIR=yes
+
 dnl Various checks for GD features
   PHP_GD_ZLIB
   PHP_GD_TTSTR
@@ -291,9 +295,6 @@ if test "$PHP_GD" = "yes"; then
 
 dnl check for fabsf and floorf which are available since C99
   AC_CHECK_FUNCS(fabsf floorf)
-
-dnl PNG is required by GD library
-  test "$PHP_PNG_DIR" = "no" && PHP_PNG_DIR=yes
 
 dnl These are always available with bundled library
   AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
