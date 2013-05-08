@@ -24,6 +24,9 @@ PHP                                                                        NEWS
     (Boris Lytochkin)
   . Fixed bug #64159 (Truncated snmpget). (Boris Lytochkin)
 
+- Sockets:
+  . Fixed bug #64506 (Fails to build with --disable-ipv6). (Gustavo)
+
 - Streams:
   . Fixed bug #64770 (stream_select() fails with pipes returned by proc_open()
     on Windows x64). (Anatol)
@@ -31,7 +34,7 @@ PHP                                                                        NEWS
 25 Apr 2013, PHP 5.5.0 Beta 4
 
 - Core:
-  . Fixed bug #64677 (execution operator `` stealing surrounding arguments). 
+  . Fixed bug #64677 (execution operator `` stealing surrounding arguments).
     (Laruence)
 
 - CURL:
@@ -50,13 +53,13 @@ PHP                                                                        NEWS
     (Eric Iversen)
 
 - Streams:
-  . Fixed Windows x64 version of stream_socket_pair() and improved error handling
-    (Anatol Belski)
+  . Fixed Windows x64 version of stream_socket_pair() and improved error
+    handling. (Anatol Belski)
 
 11 Apr 2013, PHP 5.5.0 Beta 3
 
 - Core:
-  . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
+  . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap:
     segfault). (Laruence)
   . Fixed bug #64565 (copy doesn't report failure on partial copy). (Remi)
   . Fixed bug #64555 (foreach no longer copies keys if they are interned).
@@ -74,7 +77,7 @@ PHP                                                                        NEWS
     Kapelushnik, Derick)
 
 - General improvements:
-  . Drop support for bison < 2.4 when building PHP from GIT source. 
+  . Drop support for bison < 2.4 when building PHP from GIT source.
     (Laruence)
 
 - Fileinfo:
@@ -112,7 +115,7 @@ PHP                                                                        NEWS
 21 Mar 2013, PHP 5.5.0 Beta 1
 
 - Core:
-  . Added Zend Opcache extension and enable building it by default. 
+  . Added Zend Opcache extension and enable building it by default.
     More details here: https://wiki.php.net/rfc/optimizerplus. (Dmitry)
   . Added array_column function which returns a column in a multidimensional
     array. https://wiki.php.net/rfc/array_column. (Ben Ramsey)
@@ -220,7 +223,7 @@ PHP                                                                        NEWS
   . Fixed bug #64264 (SPLFixedArray toArray problem). (Laruence)
   . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
     (patch by kriss@krizalys.com, Laruence)
-  . Fixed bug #64106 (Segfault on SplFixedArray[][x] = y when extended). 
+  . Fixed bug #64106 (Segfault on SplFixedArray[][x] = y when extended).
     (Nikita Popov)
   . Fixed bug #52861 (unset fails with ArrayObject and deep arrays).
     (Mike Willbanks)
