@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - mbstring:
   . Fixed bug #64769 (mbstring PHPTs crash on Windows x64). (Anatol)
 
+- Sockets:
+  . Fixed bug #64508 (Fails to build with --disable-ipv6). (Gustavo)
+
 
 09 May 2013, PHP 5.5.0 Release Candidate 1
 
@@ -23,9 +26,6 @@ PHP                                                                        NEWS
   . Fixed bug #64765 (Some IPv6 addresses get interpreted wrong).
     (Boris Lytochkin)
   . Fixed bug #64159 (Truncated snmpget). (Boris Lytochkin)
-
-- Sockets:
-  . Fixed bug #64506 (Fails to build with --disable-ipv6). (Gustavo)
 
 - Streams:
   . Fixed bug #64770 (stream_select() fails with pipes returned by proc_open()
