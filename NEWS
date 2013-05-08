@@ -25,6 +25,9 @@ PHP                                                                        NEWS
   . Fixed bug #64770 (stream_select() fails with pipes returned by proc_open()
     on Windows x64). (Anatol)
 
+- mbstring:
+  . Fixed bug #64769 (mbstring PHPTs crash on Windows x64). (Anatol)
+
 25 Apr 2013, PHP 5.5.0 Beta 4
 
 - Core:
