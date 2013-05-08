@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.0 Release Candidate 2
 
+- mbstring:
+  . Fixed bug #64769 (mbstring PHPTs crash on Windows x64). (Anatol)
+
 
 09 May 2013, PHP 5.5.0 Release Candidate 1
 
@@ -24,9 +27,6 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #64770 (stream_select() fails with pipes returned by proc_open()
     on Windows x64). (Anatol)
-
-- mbstring:
-  . Fixed bug #64769 (mbstring PHPTs crash on Windows x64). (Anatol)
 
 25 Apr 2013, PHP 5.5.0 Beta 4
 
