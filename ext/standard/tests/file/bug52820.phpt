@@ -1,5 +1,5 @@
 --TEST--
-Bug #52820 (writes to fopencookie FILE* not commited when seeking the stream)
+Bug #52820 (writes to fopencookie FILE* not committed when seeking the stream)
 --SKIPIF--
 <?php
 if (!function_exists('leak_variable'))

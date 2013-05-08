@@ -3941,7 +3941,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 #endif
 		} else {
 			/* inherited members are overridden by members inserted by traits */
-			/* check whether the trait method fullfills the inheritance requirements */
+			/* check whether the trait method fulfills the inheritance requirements */
 			do_inheritance_check_on_method(fn, existing_fn TSRMLS_CC);
 		}
 	}
@@ -7176,7 +7176,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	}
 #elif defined(NETWARE)
 	/*
-	 * Find the first occurence of : from the left
+	 * Find the first occurrence of : from the left
 	 * move the path pointer to the position just after :
 	 * increment the len_adjust to the length of path till colon character(inclusive)
 	 * If there is no character beyond : simple return len
