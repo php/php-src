@@ -805,7 +805,7 @@ PHP_METHOD(xmlreader, read)
 	if (intern != NULL && intern->ptr != NULL) {
 		retval = xmlTextReaderRead(intern->ptr);
 		if (retval == -1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while reading");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occurred while reading");
 			RETURN_FALSE;
 		} else {
 			RETURN_BOOL(retval);
@@ -847,7 +847,7 @@ PHP_METHOD(xmlreader, next)
 			retval = xmlTextReaderNext(intern->ptr);
 		}
 		if (retval == -1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while reading");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occurred while reading");
 			RETURN_FALSE;
 		} else {
 			RETURN_BOOL(retval);
@@ -1155,7 +1155,7 @@ PHP_METHOD(xmlreader, expand)
 		node = xmlTextReaderExpand(intern->ptr);
 
 		if (node == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while expanding ");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occurred while expanding ");
 			RETURN_FALSE;
 		} else {
 			nodec = xmlDocCopyNode(node, docp, 1);
