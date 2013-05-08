@@ -15,9 +15,7 @@ PHP                                                                        NEWS
   . Fixed bug #64770 (stream_select() fails with pipes returned by proc_open()
     on Windows x64). (Anatol)
 
-?? ??? 2013, PHP 5.3.25
-
-### ADD ENTRIES ABOVE FOR 5.3.26. 5.3.25 NEWS WILL BE UPDATED BY RM ON MERGE ###
+09 May 2013, PHP 5.3.25
 
 - Core:
   . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
