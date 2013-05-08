@@ -897,7 +897,7 @@ const char *XMLRPC_SetValueID_Case(XMLRPC_VALUE value, const char* id, int len, 
          (len > 0) ? simplestring_addn(&value->id, id, len) :
                      simplestring_add(&value->id, id);
 
-         /* upper or lower case string in place if required. could be a seperate func. */
+         /* upper or lower case string in place if required. could be a separate func. */
          if(id_case == xmlrpc_case_lower || id_case == xmlrpc_case_upper) {
             int i;
             for(i = 0; i < value->id.len; i++) {
@@ -1609,7 +1609,7 @@ XMLRPC_VALUE XMLRPC_CopyValue(XMLRPC_VALUE value) {
  *   XMLRPC_CopyValue ()
  * NOTES
  *   Use this when function when you need to modify the contents of
- *   the copied value seperately from the original.
+ *   the copied value separately from the original.
  *   
  *   this function is recursive, thus the value and all of its children
  *   (if any) will be duplicated.

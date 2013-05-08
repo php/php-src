@@ -484,7 +484,7 @@
 									</attribute>
 									<attribute name="to" type="tms:date" use="optional">
 										<annotation>
-											<documentation xml:lang="en">Date untill which the mapping is valid, within the validity period of the whole XTVD document. @IMPORTANT : The change will occur at midnight.</documentation>
+											<documentation xml:lang="en">Date until which the mapping is valid, within the validity period of the whole XTVD document. @IMPORTANT : The change will occur at midnight.</documentation>
 										</annotation>
 									</attribute>
 								</complexType>

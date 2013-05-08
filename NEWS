@@ -184,7 +184,7 @@ PHP                                                                        NEWS
     (Stas)
 
 - Intl:
-  . Cherry-picked UConverter wrapper, which had accidentaly been committed only
+  . Cherry-picked UConverter wrapper, which had accidentally been committed only
     to master.
 
 - mysqli

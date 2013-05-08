@@ -719,7 +719,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	zval *snmpval = NULL;
 	int snmp_errno;
 
-	/* we start with retval=FALSE. If any actual data is aquired, retval will be set to appropriate type */
+	/* we start with retval=FALSE. If any actual data is acquired, retval will be set to appropriate type */
 	RETVAL_FALSE;
 	
 	/* reset errno and errstr */

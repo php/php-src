@@ -5168,7 +5168,7 @@ for (;; ptr++)
 
         /* If the maximum is greater than 1 and limited, we have to replicate
         in a nested fashion, sticking OP_BRAZERO before each set of brackets.
-        The first one has to be handled carefully because it's the original
+        The first one has to be handled carefuly because it's the original
         copy, which has to be moved up. The remainder can be handled by code
         that is common with the non-zero minimum case below. We have to
         adjust the value or repeat_max, since one less copy is required. Once
@@ -8139,7 +8139,7 @@ if (code - codestart > length) errorcode = ERR23;
 
 #ifdef SUPPORT_VALGRIND
 /* If the estimated length exceeds the really used length, mark the extra
-allocated memory as unadressable, so that any out-of-bound reads can be
+allocated memory as unaddressable, so that any out-of-bound reads can be
 detected. */
 VALGRIND_MAKE_MEM_NOACCESS(code, (length - (code - codestart)) * sizeof(pcre_uchar));
 #endif

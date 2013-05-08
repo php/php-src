@@ -831,7 +831,7 @@ Fixed bug #36820 (Privileged connection with an Oracle password file fails)
    <date>2006-03-16</date>
    <license uri="http://www.php.net/license">PHP</license>
    <notes>Changed OCI8 code to use OCIServerVersion() instead of OCIPing(), which may crash Oracle server of version &lt; 10.2
-Fixed bug #36235 (ocicolumnname returns false before a succesfull fetch)
+Fixed bug #36235 (ocicolumnname returns false before a successfull fetch)
 Fixed bug #36096 (oci_result() returns garbage after oci_fetch() failed)
 Fixed bug #36055 (possible OCI8 crash in multithreaded environment)
 Fixed bug #36010 (Segfault when re-creating and re-executing statements with bound parameters)

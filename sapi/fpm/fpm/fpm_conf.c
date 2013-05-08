@@ -686,7 +686,7 @@ static int fpm_evaluate_full_path(char **path, struct fpm_worker_pool_s *wp, cha
 		if (tmp != NULL) {
 
 			if (tmp != *path) {
-				zlog(ZLOG_ERROR, "'$prefix' must be use at the begining of the value");
+				zlog(ZLOG_ERROR, "'$prefix' must be use at the beginning of the value");
 				return -1;
 			}
 

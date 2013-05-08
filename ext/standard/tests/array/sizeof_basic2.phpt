@@ -19,7 +19,7 @@ echo "*** Testing sizeof() : basic functionality ***\n";
 
 $int_array = array(1, 2, 3, 4);
 $string_array = array("Saffron", "White", "Green");
-$indexed_array = array("Agression" => "Saffron", "Peace" => "White", "Growth" => "Green");
+$indexed_array = array("Aggression" => "Saffron", "Peace" => "White", "Growth" => "Green");
 $mixed_array = array(1, 2, "Aggression" => "Saffron", 10 => "Ten", "Ten" => 10);
 
 echo "-- Testing sizeof() with integer array in default, COUNT_NORMAL, COUNT_RECURSIVE modes --\n";
