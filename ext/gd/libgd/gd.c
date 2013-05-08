@@ -1958,7 +1958,6 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 {
 	int i, l, x1, x2, dy;
 	int oc;   /* old pixel value */
-	int tiled;
 	int wx2,wy2;
 	/* stack of filled segments */
 	struct seg *stack;
@@ -1970,7 +1969,6 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 	}
 
 	wx2=im->sx;wy2=im->sy;
-	tiled = nc==gdTiled;
 
 	nc =  gdImageTileGet(im,x,y);
 
@@ -2035,7 +2033,6 @@ void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 {
 	int x1h = x1, x1v = x1, y1h = y1, y1v = y1, x2h = x2, x2v = x2, y2h = y2, y2v = y2;
 	int thick = im->thick;
-	int half1 = 1;
 	int t;
 
 	if (x1 == x2 && y1 == y2 && thick == 1) {
@@ -2057,7 +2054,7 @@ void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 	if (thick > 1) {
 		int cx, cy, x1ul, y1ul, x2lr, y2lr;
 		int half = thick >> 1;
-		half1 = thick - half;
+
 		x1ul = x1 - half;
 		y1ul = y1 - half;
 		
@@ -2355,8 +2352,6 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 	int colorMap[gdMaxColors];
 	/* Stretch vectors */
 	int *stx, *sty;
-	/* We only need to use floating point to determine the correct stretch vector for one line's worth. */
-	double accum;
 	
 	if (overflow2(sizeof(int), srcW)) {
 		return;
@@ -2367,7 +2362,6 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 
 	stx = (int *) gdMalloc (sizeof (int) * srcW);
 	sty = (int *) gdMalloc (sizeof (int) * srcH);
-	accum = 0;
 
 	/* Fixed by Mao Morimoto 2.0.16 */
 	for (i = 0; (i < srcW); i++) {
@@ -3017,7 +3011,7 @@ void gdImageGetClip (gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P)
 int gdImagePaletteToTrueColor(gdImagePtr src)
 {
 	unsigned int y;
-	unsigned char alloc_y = 0, alloc_aa = 0;
+	unsigned char alloc_y = 0;
 	unsigned int yy;
 
 	if (src == NULL) {

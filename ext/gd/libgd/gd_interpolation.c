@@ -976,7 +976,7 @@ static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImage
 
 		/* Accumulate each channel */
         for (i = left; i <= right; i++) {
-			const left_channel = i - left;
+			const int left_channel = i - left;
             r += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetRed(p_src_row[i])));
             g += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetGreen(p_src_row[i])));
             b += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetBlue(p_src_row[i])));

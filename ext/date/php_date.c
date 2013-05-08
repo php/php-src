@@ -614,13 +614,11 @@ static void date_object_free_storage_interval(void *object TSRMLS_DC);
 static void date_object_free_storage_period(void *object TSRMLS_DC);
 
 static zend_object_value date_object_new_date(zend_class_entry *class_type TSRMLS_DC);
-static zend_object_value date_object_new_immutable(zend_class_entry *class_type TSRMLS_DC);
 static zend_object_value date_object_new_timezone(zend_class_entry *class_type TSRMLS_DC);
 static zend_object_value date_object_new_interval(zend_class_entry *class_type TSRMLS_DC);
 static zend_object_value date_object_new_period(zend_class_entry *class_type TSRMLS_DC);
 
 static zend_object_value date_object_clone_date(zval *this_ptr TSRMLS_DC);
-static zend_object_value date_object_clone_immutable(zval *this_ptr TSRMLS_DC);
 static zend_object_value date_object_clone_timezone(zval *this_ptr TSRMLS_DC);
 static zend_object_value date_object_clone_interval(zval *this_ptr TSRMLS_DC);
 static zend_object_value date_object_clone_period(zval *this_ptr TSRMLS_DC);
