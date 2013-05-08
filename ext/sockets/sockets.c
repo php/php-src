@@ -1858,7 +1858,9 @@ PHP_FUNCTION(socket_get_option)
 			}
 		}
 		}
-	} else if (level == IPPROTO_IPV6) {
+	}
+#if HAVE_IPV6
+	else if (level == IPPROTO_IPV6) {
 		int ret = php_do_getsockopt_ipv6_rfc3542(php_sock, level, optname, return_value TSRMLS_CC);
 		if (ret == SUCCESS) {
 			return;
@@ -1866,6 +1868,7 @@ PHP_FUNCTION(socket_get_option)
 			RETURN_FALSE;
 		} /* else continue */
 	}
+#endif
 
 	/* sol_socket options and general case */
 	switch(optname) {
