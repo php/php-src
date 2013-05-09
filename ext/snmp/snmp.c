@@ -1871,7 +1871,7 @@ PHP_METHOD(snmp, close)
 /* }}} */
 
 /* {{{ proto mixed SNMP::get(mixed object_id [, bool preserve_keys])
-   Fetch a SNMP object returing scalar for single OID and array of oid->value pairs for multi OID request */
+   Fetch a SNMP object returning scalar for single OID and array of oid->value pairs for multi OID request */
 PHP_METHOD(snmp, get)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GET, (-1));
@@ -1879,7 +1879,7 @@ PHP_METHOD(snmp, get)
 /* }}} */
 
 /* {{{ proto mixed SNMP::getnext(mixed object_id)
-   Fetch a SNMP object returing scalar for single OID and array of oid->value pairs for multi OID request */
+   Fetch a SNMP object returning scalar for single OID and array of oid->value pairs for multi OID request */
 PHP_METHOD(snmp, getnext)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GETNEXT, (-1));

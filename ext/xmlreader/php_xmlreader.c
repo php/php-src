@@ -708,7 +708,7 @@ PHP_METHOD(xmlreader, moveToAttribute)
 /* }}} */
 
 /* {{{ proto boolean XMLReader::moveToAttributeNo(int index)
-Positions reader at attribute at spcecified index.
+Positions reader at attribute at specified index.
 Returns TRUE on success and FALSE on failure */
 PHP_METHOD(xmlreader, moveToAttributeNo)
 {
