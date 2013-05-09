@@ -4957,7 +4957,7 @@
 >>>>0	ubelong			=0		\b, next free block index %lu
 >>>>0	ubelong			!0		\b, next free block index %lu
 >>>512	default			x		dBase IV DBT
-# DBF file name without extention 
+# DBF file name without extension 
 >>>>8	string			>\0		\b of %-.8s.DBF
 # size of blocks  ; not reliable 0x2020204C
 #>>>>4	ulelong			=0		\b, blocks size %lu
