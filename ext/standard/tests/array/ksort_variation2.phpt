@@ -69,7 +69,7 @@ $unexpected_values = array (
 );
 
 // loop though each element of the array and check the working of ksort()
-// when 'sort_flags' arugment is supplied with different values
+// when 'sort_flags' argument is supplied with different values
 echo "\n-- Testing ksort() by supplying different unexpected values for 'sort_flags' argument --\n";
 
 $counter = 1;

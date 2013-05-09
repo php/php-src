@@ -1455,7 +1455,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, list_fields)(MYSQLND_CONN_DATA * conn, const c
 			}
 
 			if (FAIL == result->m.read_result_metadata(result, conn TSRMLS_CC)) {
-				DBG_ERR("Error ocurred while reading metadata");
+				DBG_ERR("Error occurred while reading metadata");
 				result->m.free_result(result, TRUE TSRMLS_CC);
 				result = NULL;
 				break;

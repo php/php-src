@@ -73,7 +73,7 @@ $values =  array (
 
 
 // loop though each element of the array and check the working of wordwrap()
-// when $width arugment is supplied with different values
+// when $width argument is supplied with different values
 echo "\n--- Testing wordwrap() by supplying different values for 'width' argument ---\n";
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {
