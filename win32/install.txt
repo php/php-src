@@ -242,7 +242,7 @@ Windows Installer (PHP 5.1.0 and earlier)
 
    Be aware, that this setup of PHP is not secure. If you would like to
    have a secure PHP setup, you'd better go on the manual way, and set
-   every option carefuly. This automatically working setup gives you an
+   every option carefully. This automatically working setup gives you an
    instantly working PHP installation, but it is not meant to be used on
    online servers.
      __________________________________________________________________
@@ -407,7 +407,7 @@ c:\php
    There are two ini files distributed in the zip file, php.ini-development
    and php.ini-production. We advise you to use php.ini-production, 
    because we optimized the default settings in this file for performance, 
-   and security. Read this well documented file carefuly because it has
+   and security. Read this well documented file carefully because it has
    changes from php.ini-production that will drastically affect your setup.
    Some examples are display_errors being off and magic_quotes_gpc being off.
    In addition to reading these, study the ini settings and set every

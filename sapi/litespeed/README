@@ -18,7 +18,7 @@ server's virtual host configuration. In shared hosting environment,
 each hosting account will has its own "open_basedir" overridden in 
 server configuration to enhance server security when mod_php is used.
 usually, FastCGI PHP is not an option in shared hosting environment 
-due to lacking of this flexibility. LiteSpeed SAPI is carefuly designed
+due to lacking of this flexibility. LiteSpeed SAPI is carefully designed
 to address this issue. PHP configurations can be modified the same way 
 as that in mod_php with the same configuration directives. 
 

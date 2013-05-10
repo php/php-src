@@ -2994,7 +2994,7 @@ PHP_FUNCTION(odbc_errormsg)
 
 /* {{{ proto bool odbc_setoption(resource conn_id|result_id, int which, int option, int value)
    Sets connection or statement options */
-/* This one has to be used carefuly. We can't allow to set connection options for
+/* This one has to be used carefully. We can't allow to set connection options for
    persistent connections. I think that SetStmtOption is of little use, since most
    of those can only be specified before preparing/executing statements.
    On the other hand, they can be made connection wide default through SetConnectOption
