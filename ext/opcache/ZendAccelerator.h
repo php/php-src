@@ -168,7 +168,7 @@ typedef time_t accel_time_t;
 typedef enum _zend_accel_restart_reason {
 	ACCEL_RESTART_OOM,    /* restart because of out of memory */
 	ACCEL_RESTART_HASH,   /* restart because of hash overflow */
-	ACCEL_RESTART_USER    /* restart sheduled by opcache_reset() */
+	ACCEL_RESTART_USER    /* restart scheduled by opcache_reset() */
 } zend_accel_restart_reason;
 
 typedef struct _zend_persistent_script {
@@ -268,7 +268,7 @@ typedef struct _zend_accel_shared_globals {
 	unsigned long   blacklist_misses;
 	unsigned long   oom_restarts;     /* number of restarts because of out of memory */
 	unsigned long   hash_restarts;    /* number of restarts because of hash overflow */
-	unsigned long   manual_restarts;  /* number of restarts sheduled by opcache_reset() */
+	unsigned long   manual_restarts;  /* number of restarts scheduled by opcache_reset() */
 	zend_accel_hash hash;             /* hash table for cached scripts */
 	zend_accel_hash include_paths;    /* used "include_path" values    */
 

@@ -1,5 +1,5 @@
 --TEST--
-Test function fstat() by substituting agument 1 with array values.
+Test function fstat() by substituting argument 1 with array values.
 --FILE--
 <?php
 $index_array = array(1, 2, 3);
