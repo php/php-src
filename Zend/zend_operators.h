@@ -884,8 +884,8 @@ static zend_always_inline int fast_equal_function(zval *result, zval *op1, zval 
 			return Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2));
 		}
 	}
-	compare_function(result, op1, op2 TSRMLS_CC);
-	return Z_LVAL_P(result) == 0;
+	is_equal_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result);
 }
 
 static zend_always_inline int fast_not_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
@@ -903,8 +903,8 @@ static zend_always_inline int fast_not_equal_function(zval *result, zval *op1, z
 			return Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2));
 		}
 	}
-	compare_function(result, op1, op2 TSRMLS_CC);
-	return Z_LVAL_P(result) != 0;
+	is_not_equal_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result);
 }
 
 static zend_always_inline int fast_is_smaller_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
@@ -922,8 +922,8 @@ static zend_always_inline int fast_is_smaller_function(zval *result, zval *op1, 
 			return Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2));
 		}
 	}
-	compare_function(result, op1, op2 TSRMLS_CC);
-	return Z_LVAL_P(result) < 0;
+	is_smaller_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result);
 }
 
 static zend_always_inline int fast_is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
@@ -941,9 +941,21 @@ static zend_always_inline int fast_is_smaller_or_equal_function(zval *result, zv
 			return Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2));
 		}
 	}
-	compare_function(result, op1, op2 TSRMLS_CC);
-	return Z_LVAL_P(result) <= 0;
+	is_smaller_or_equal_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result);
 }
+
+static inline int zend_object_do_operation(int opcode, zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, do_operation)) {
+		return Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, op2 TSRMLS_CC);
+	} else if (op2 != NULL && Z_TYPE_P(op2) == IS_OBJECT && Z_OBJ_HANDLER_P(op2, do_operation)) {
+		return Z_OBJ_HANDLER_P(op2, do_operation)(opcode, result, op1, op2 TSRMLS_CC);
+	} else {
+		return FAILURE;
+	}
+}
+/* }}} */
 
 #endif
 

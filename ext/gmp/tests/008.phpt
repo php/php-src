@@ -65,7 +65,7 @@ string(3) "113"
 int(10)
 string(2) "10"
 
-Warning: gmp_div_r(): supplied resource is not a valid GMP integer resource in %s on line %d
+Warning: gmp_div_r(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
 
 Warning: gmp_div_r(): Unable to convert variable to GMP - wrong type in %s on line %d

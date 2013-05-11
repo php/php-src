@@ -113,6 +113,8 @@ typedef int (*zend_object_get_closure_t)(zval *obj, zend_class_entry **ce_ptr, u
 
 typedef HashTable *(*zend_object_get_gc_t)(zval *object, zval ***table, int *n TSRMLS_DC);
 
+typedef int (*zend_object_do_operation_t)(zend_uchar opcode, zval *result, zval *op1, zval *op2 TSRMLS_DC);
+
 struct _zend_object_handlers {
 	/* general object functions */
 	zend_object_add_ref_t					add_ref;
@@ -142,6 +144,7 @@ struct _zend_object_handlers {
 	zend_object_get_debug_info_t			get_debug_info;
 	zend_object_get_closure_t				get_closure;
 	zend_object_get_gc_t					get_gc;
+	zend_object_do_operation_t				do_operation;
 };
 
 extern ZEND_API zend_object_handlers std_object_handlers;
@@ -172,7 +175,6 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info_name, int prop_info_name_len TSRMLS_DC);
 
 ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS);
-END_EXTERN_C()
 
 #endif
 

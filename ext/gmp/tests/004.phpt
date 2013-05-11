@@ -38,8 +38,6 @@ int(2342344)
 Notice: Object of class stdClass could not be converted to int in %s on line %d
 int(1)
 int(0)
-
-Warning: gmp_intval(): supplied resource is not a valid GMP integer resource in %s on line %d
-bool(false)
+int(%d)
 int(12345678)
 Done
