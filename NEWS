@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - Sockets:
   . Fixed bug #64508 (Fails to build with --disable-ipv6). (Gustavo)
 
+- Zend Engine:
+  . Fixed bug #64821 (Custom Exceptions crash when internal properties overridden).
+      (Anatol)
 
 09 May 2013, PHP 5.5.0 Release Candidate 1
 
