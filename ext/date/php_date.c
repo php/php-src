@@ -3704,27 +3704,30 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 	zval            **z_timezone = NULL;
 	zval            **z_timezone_type = NULL;
 	timelib_tzinfo  *tzi;
-	char			**offset;
 
 	if (zend_hash_find(myht, "timezone_type", 14, (void**) &z_timezone_type) == SUCCESS) {
 		if (zend_hash_find(myht, "timezone", 9, (void**) &z_timezone) == SUCCESS) {
 			convert_to_long(*z_timezone_type);
 			switch (Z_LVAL_PP(z_timezone_type)) {
-				case TIMELIB_ZONETYPE_OFFSET:
-					offset = malloc(sizeof(char) * (Z_STRLEN_PP(z_timezone) + 1));
-					*offset = (Z_STRVAL_PP(z_timezone));
-					if(**offset == '+'){
-						++*offset;
-						(*tzobj)->tzi.utc_offset = -1 * timelib_parse_tz_cor((char **)offset);
+				case TIMELIB_ZONETYPE_OFFSET: {
+					char *offset, *offset_start;
+
+					offset = emalloc(sizeof(char) * (Z_STRLEN_PP(z_timezone) + 1));
+					memmove(offset, Z_STRVAL_PP(z_timezone), Z_STRLEN_PP(z_timezone)+1);
+					offset_start = offset;
+
+					++offset;
+					if(*offset_start == '+'){
+						(*tzobj)->tzi.utc_offset = -1 * timelib_parse_tz_cor(&offset);
 					} else {
-						++*offset;
-						(*tzobj)->tzi.utc_offset = timelib_parse_tz_cor((char **)offset);
+						(*tzobj)->tzi.utc_offset = timelib_parse_tz_cor(&offset);
 					}
-					free(offset);
+					efree(offset_start);
 					(*tzobj)->type = TIMELIB_ZONETYPE_OFFSET;
 					(*tzobj)->initialized = 1;
 					return SUCCESS;
 					break;
+				}
 				case TIMELIB_ZONETYPE_ABBR:
 				case TIMELIB_ZONETYPE_ID:
 					if (SUCCESS == timezone_initialize(&tzi, Z_STRVAL_PP(z_timezone) TSRMLS_CC)) {
