@@ -392,10 +392,8 @@ if (IS_GMP_PP(zval)) {                                              \
 #define INIT_GMP_NUM(gmpnumber) { gmpnumber = emalloc(sizeof(mpz_t)); mpz_init(*gmpnumber); }
 #define FREE_GMP_NUM(gmpnumber) { mpz_clear(*gmpnumber); efree(gmpnumber); }
 
-#define RETVAL_GMP(gmpnumber) do {                \
-	zval *_r = gmp_create((gmpnumber) TSRMLS_CC); \
-	RETVAL_ZVAL(_r, 1, 1)                         \
-} while (0);
+#define RETVAL_GMP(gmpnumber) \
+	gmp_create_ex(return_value, (gmpnumber) TSRMLS_CC)
 
 #define ADD_INDEX_GMP(array, index, gmpnumber) do { \
 	zval *_r = gmp_create((gmpnumber) TSRMLS_CC);   \
@@ -446,16 +444,19 @@ static void gmp_free_object_storage(gmp_object *intern TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static zend_object_value gmp_create_object(zend_class_entry *ce TSRMLS_DC) /* {{{ */
+static zend_object_value gmp_create_object_ex(zend_class_entry *ce, mpz_t *init_num TSRMLS_DC) /* {{{ */
 {
 	zend_object_value retval;
 	gmp_object *intern = emalloc(sizeof(gmp_object));
-	memset(intern, 0, sizeof(gmp_object));
 
 	zend_object_std_init(&intern->std, ce TSRMLS_CC);
 	object_properties_init(&intern->std, ce);
 
-	INIT_GMP_NUM(intern->num);
+	if (init_num) {
+		intern->num = init_num;
+	} else {
+		INIT_GMP_NUM(intern->num);
+	}
 
 	retval.handle = zend_objects_store_put(
 		intern, (zend_objects_store_dtor_t) zend_objects_destroy_object,
@@ -468,18 +469,24 @@ static zend_object_value gmp_create_object(zend_class_entry *ce TSRMLS_DC) /* {{
 }
 /* }}} */
 
+static zend_object_value gmp_create_object(zend_class_entry *ce TSRMLS_DC) /* {{{ */
+{
+	return gmp_create_object_ex(ce, NULL TSRMLS_DC);
+}
+/* }}} */
+
+static inline void gmp_create_ex(zval *target, mpz_t *gmpnumber TSRMLS_DC) /* {{{ */
+{
+	Z_TYPE_P(target) = IS_OBJECT;
+	Z_OBJVAL_P(target) = gmp_create_object_ex(gmp_ce, gmpnumber TSRMLS_CC);
+}
+/* }}} */
+
 static zval *gmp_create(mpz_t *gmpnumber TSRMLS_DC) /* {{{ */
 {
 	zval *obj;
-	gmp_object *intern;
 	MAKE_STD_ZVAL(obj);
-
-	object_init_ex(obj, gmp_ce);
-	intern = (gmp_object *) zend_object_store_get_object(obj TSRMLS_CC);
-
-	FREE_GMP_NUM(intern->num);
-	intern->num = gmpnumber;
-
+	gmp_create_ex(obj, gmpnumber TSRMLS_DC);
 	return obj;
 }
 /* }}} */

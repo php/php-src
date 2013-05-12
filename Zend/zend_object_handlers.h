@@ -175,6 +175,7 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info_name, int prop_info_name_len TSRMLS_DC);
 
 ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS);
+END_EXTERN_C()
 
 #endif
 
