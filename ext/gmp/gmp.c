@@ -444,7 +444,7 @@ static void gmp_free_object_storage(gmp_object *intern TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static zend_object_value gmp_create_object_ex(zend_class_entry *ce, mpz_t *init_num TSRMLS_DC) /* {{{ */
+static inline zend_object_value gmp_create_object_ex(zend_class_entry *ce, mpz_t *init_num TSRMLS_DC) /* {{{ */
 {
 	zend_object_value retval;
 	gmp_object *intern = emalloc(sizeof(gmp_object));
