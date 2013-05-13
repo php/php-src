@@ -884,8 +884,8 @@ static zend_always_inline int fast_equal_function(zval *result, zval *op1, zval 
 			return Z_DVAL_P(op1) == ((double)Z_LVAL_P(op2));
 		}
 	}
-	is_equal_function(result, op1, op2 TSRMLS_CC);
-	return Z_LVAL_P(result);
+	compare_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result) == 0;
 }
 
 static zend_always_inline int fast_not_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
@@ -903,8 +903,8 @@ static zend_always_inline int fast_not_equal_function(zval *result, zval *op1, z
 			return Z_DVAL_P(op1) != ((double)Z_LVAL_P(op2));
 		}
 	}
-	is_not_equal_function(result, op1, op2 TSRMLS_CC);
-	return Z_LVAL_P(result);
+	compare_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result) != 0;
 }
 
 static zend_always_inline int fast_is_smaller_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
@@ -922,8 +922,8 @@ static zend_always_inline int fast_is_smaller_function(zval *result, zval *op1, 
 			return Z_DVAL_P(op1) < ((double)Z_LVAL_P(op2));
 		}
 	}
-	is_smaller_function(result, op1, op2 TSRMLS_CC);
-	return Z_LVAL_P(result);
+	compare_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result) < 0;
 }
 
 static zend_always_inline int fast_is_smaller_or_equal_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
@@ -941,8 +941,8 @@ static zend_always_inline int fast_is_smaller_or_equal_function(zval *result, zv
 			return Z_DVAL_P(op1) <= ((double)Z_LVAL_P(op2));
 		}
 	}
-	is_smaller_or_equal_function(result, op1, op2 TSRMLS_CC);
-	return Z_LVAL_P(result);
+	compare_function(result, op1, op2 TSRMLS_CC);
+	return Z_LVAL_P(result) <= 0;
 }
 
 static inline int zend_object_do_operation(int opcode, zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */

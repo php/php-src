@@ -471,7 +471,7 @@ static inline zend_object_value gmp_create_object_ex(zend_class_entry *ce, mpz_t
 
 static zend_object_value gmp_create_object(zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
-	return gmp_create_object_ex(ce, NULL TSRMLS_DC);
+	return gmp_create_object_ex(ce, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -486,7 +486,7 @@ static zval *gmp_create(mpz_t *gmpnumber TSRMLS_DC) /* {{{ */
 {
 	zval *obj;
 	MAKE_STD_ZVAL(obj);
-	gmp_create_ex(obj, gmpnumber TSRMLS_DC);
+	gmp_create_ex(obj, gmpnumber TSRMLS_CC);
 	return obj;
 }
 /* }}} */
@@ -603,26 +603,17 @@ static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op
 		DO_BINARY_OP(mpz_xor);
 	case ZEND_BW_NOT:
 		DO_UNARY_OP(mpz_com);
-	case ZEND_IS_EQUAL:
-		gmp_cmp(result, &op1, &op2 TSRMLS_CC);
-		ZVAL_BOOL(result, Z_LVAL_P(result) == 0);
-		return SUCCESS;
-	case ZEND_IS_NOT_EQUAL:
-		gmp_cmp(result, &op1, &op2 TSRMLS_CC);
-		ZVAL_BOOL(result, Z_LVAL_P(result) != 0);
-		return SUCCESS;
-	case ZEND_IS_SMALLER:
-		gmp_cmp(result, &op1, &op2 TSRMLS_CC);
-		ZVAL_BOOL(result, Z_LVAL_P(result) < 0);
-		return SUCCESS;
-	case ZEND_IS_SMALLER_OR_EQUAL:
-		gmp_cmp(result, &op1, &op2 TSRMLS_CC);
-		ZVAL_BOOL(result, Z_LVAL_P(result) <= 0);
-		return SUCCESS;
 
 	default:
 		return FAILURE;
 	}
+}
+/* }}} */
+
+static int gmp_compare(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	gmp_cmp(result, &op1, &op2 TSRMLS_CC);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -685,6 +676,7 @@ ZEND_MINIT_FUNCTION(gmp)
 	gmp_object_handlers.get_properties = gmp_get_properties;
 	gmp_object_handlers.clone_obj = gmp_clone_obj;
 	gmp_object_handlers.do_operation = gmp_do_operation;
+	gmp_object_handlers.compare = gmp_compare;
 
 	REGISTER_LONG_CONSTANT("GMP_ROUND_ZERO", GMP_ROUND_ZERO, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("GMP_ROUND_PLUSINF", GMP_ROUND_PLUSINF, CONST_CS | CONST_PERSISTENT);
