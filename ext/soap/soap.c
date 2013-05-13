@@ -3909,7 +3909,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 
 		if (version == SOAP_1_1) {
 			if (zend_hash_find(prop, "faultcode", sizeof("faultcode"), (void**)&tmp) == SUCCESS) {
-				int new_len;
+				size_t new_len;
 				xmlNodePtr node = xmlNewNode(NULL, BAD_CAST("faultcode"));
 				char *str = php_escape_html_entities((unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
 				xmlAddChild(param, node);
@@ -3919,7 +3919,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					xmlNodeSetContent(node, code);
 					xmlFree(code);
 				} else {	
-					xmlNodeSetContentLen(node, BAD_CAST(str), new_len);
+					xmlNodeSetContentLen(node, BAD_CAST(str), (int)new_len);
 				}
 				efree(str);
 			}
@@ -3934,7 +3934,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 			detail_name = "detail";
 		} else {
 			if (zend_hash_find(prop, "faultcode", sizeof("faultcode"), (void**)&tmp) == SUCCESS) {
-				int new_len;
+				size_t new_len;
 				xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Code"), NULL);
 				char *str = php_escape_html_entities((unsigned char*)Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp), &new_len, 0, 0, NULL TSRMLS_CC);
 				node = xmlNewChild(node, ns, BAD_CAST("Value"), NULL);
@@ -3944,7 +3944,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					xmlNodeSetContent(node, code);
 					xmlFree(code);
 				} else {	
-					xmlNodeSetContentLen(node, BAD_CAST(str), new_len);
+					xmlNodeSetContentLen(node, BAD_CAST(str), (int)new_len);
 				}
 				efree(str);
 			}
