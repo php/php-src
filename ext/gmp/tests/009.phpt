@@ -43,7 +43,9 @@ object(GMP)#%d (1) {
   ["num"]=>
   string(1) "0"
 }
-NULL
+
+Warning: gmp_div_q(): Invalid rounding mode %s on line %d
+bool(false)
 object(GMP)#%d (1) {
   ["num"]=>
   string(4) "9131"

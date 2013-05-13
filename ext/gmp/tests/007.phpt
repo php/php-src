@@ -59,7 +59,9 @@ array(2) {
     string(5) "12653"
   }
 }
-NULL
+
+Warning: gmp_div_qr(): Invalid rounding mode in %s on line %d
+bool(false)
 array(2) {
   [0]=>
   object(GMP)#%d (1) {

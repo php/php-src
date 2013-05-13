@@ -331,12 +331,11 @@ typedef void (*gmp_binary_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, mpz_srcptr);
 typedef unsigned long (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, unsigned long);
 /* }}} */
 
-#define gmp_zval_binary_ui_op(r, a, b, o, u) gmp_zval_binary_ui_op_ex(r, a, b, o, u, 0, 0, 0 TSRMLS_CC)
-#define gmp_zval_binary_ui_op2(r, a, b, o, u) gmp_zval_binary_ui_op2_ex(r, a, b, o, u, 0, 0, 0 TSRMLS_CC)
-
-#define gmp_binary_ui_op(op, uop) _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, uop)
-#define gmp_binary_op(op)         _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, NULL)
+#define gmp_binary_ui_op(op, uop) _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, uop, 0)
+#define gmp_binary_op(op)         _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, NULL, 0)
 #define gmp_binary_opl(op) _gmp_binary_opl(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
+#define gmp_binary_ui_op_no_zero(op, uop) \
+	_gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, uop, 1)
 
 /* Unary operations */
 #define gmp_unary_op(op)         _gmp_unary_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
@@ -408,7 +407,7 @@ static void gmp_strval(zval *result, mpz_t *gmpnum, long base);
 static int convert_to_gmp(mpz_t **gmpnumber, zval **val, int base TSRMLS_DC);
 static void gmp_cmp(zval *return_value, zval **a_arg, zval **b_arg TSRMLS_DC);
 
-static inline void gmp_zval_binary_ui_op_ex(zval *return_value, zval **a_arg, zval **b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int allow_ui_return, int check_b_zero, int use_sign TSRMLS_DC);
+static inline void gmp_zval_binary_ui_op(zval *return_value, zval **a_arg, zval **b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero TSRMLS_DC);
 static inline void gmp_zval_unary_op(zval *return_value, zval **a_arg, gmp_unary_op_t gmp_op TSRMLS_DC);
 
 /* {{{ gmp_emalloc
@@ -551,15 +550,15 @@ static zend_object_value gmp_clone_obj(zval *obj TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-#define DO_BINARY_UI_OP_EX(op, uop, check_b_zero, use_sign)     \
-	gmp_zval_binary_ui_op_ex(                                   \
+#define DO_BINARY_UI_OP_EX(op, uop, check_b_zero)         \
+	gmp_zval_binary_ui_op(                                \
 		result, &op1, &op2, op, (gmp_binary_ui_op_t) uop, \
-		0, check_b_zero, use_sign TSRMLS_CC                     \
-	);                                                          \
-	return SUCCESS; /* Not sure if this should be FAILURE on bool(false) */
+		check_b_zero TSRMLS_CC                            \
+	);                                                    \
+	return SUCCESS;
 
-#define DO_BINARY_UI_OP(op) DO_BINARY_UI_OP_EX(op, op ## _ui, 0, 0)
-#define DO_BINARY_OP(op) DO_BINARY_UI_OP_EX(op, NULL, 0, 0)
+#define DO_BINARY_UI_OP(op) DO_BINARY_UI_OP_EX(op, op ## _ui, 0)
+#define DO_BINARY_OP(op) DO_BINARY_UI_OP_EX(op, NULL, 0)
 
 #define DO_UNARY_OP(op) \
 	gmp_zval_unary_op(result, &op1, op TSRMLS_CC); \
@@ -575,9 +574,9 @@ static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op
 	case ZEND_MUL:
 		DO_BINARY_UI_OP(mpz_mul);
 	case ZEND_DIV:
-		DO_BINARY_UI_OP_EX(mpz_tdiv_q, mpz_tdiv_q_ui, 1, 1);
+		DO_BINARY_UI_OP_EX(mpz_tdiv_q, mpz_tdiv_q_ui, 1);
 	case ZEND_MOD:
-		DO_BINARY_UI_OP_EX(mpz_mod, mpz_mod_ui, 1, 0);
+		DO_BINARY_UI_OP_EX(mpz_mod, mpz_mod_ui, 1);
 	case ZEND_SL:
 		/*convert_to_long_ex(&op2);
 		if (Z_LVAL_P(op2) < 0) {
@@ -824,14 +823,13 @@ static void gmp_cmp(zval *return_value, zval **a_arg, zval **b_arg TSRMLS_DC) /*
 }
 /* }}} */
 
-/* {{{ gmp_zval_binary_ui_op_ex
+/* {{{ gmp_zval_binary_ui_op
    Execute GMP binary operation.
    May return GMP resource or long if operation allows this
 */
-static inline void gmp_zval_binary_ui_op_ex(zval *return_value, zval **a_arg, zval **b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int allow_ui_return, int check_b_zero, int use_sign TSRMLS_DC) 
+static inline void gmp_zval_binary_ui_op(zval *return_value, zval **a_arg, zval **b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero TSRMLS_DC) 
 {
 	mpz_t *gmpnum_a, *gmpnum_b, *gmpnum_result;
-	unsigned long long_result = 0;
 	int use_ui = 0;
 	gmp_temp_t temp_a, temp_b;
 
@@ -844,15 +842,15 @@ static inline void gmp_zval_binary_ui_op_ex(zval *return_value, zval **a_arg, zv
 		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
 	}
 
-	if(check_b_zero) {
+	if (check_b_zero) {
 		int b_is_zero = 0;
-		if(use_ui) {
+		if (use_ui) {
 			b_is_zero = (Z_LVAL_PP(b_arg) == 0);
 		} else {
 			b_is_zero = !mpz_cmp_ui(*gmpnum_b, 0);
 		}
 
-		if(b_is_zero) {
+		if (b_is_zero) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Zero operand not allowed");
 			FREE_GMP_TEMP(temp_a);
 			FREE_GMP_TEMP(temp_b);
@@ -862,15 +860,8 @@ static inline void gmp_zval_binary_ui_op_ex(zval *return_value, zval **a_arg, zv
 
 	INIT_GMP_NUM(gmpnum_result);
 
-	if (use_ui && gmp_ui_op) {
-		if (allow_ui_return) {
-			long_result = gmp_ui_op(*gmpnum_result, *gmpnum_a, (unsigned long)Z_LVAL_PP(b_arg));
-			if (use_sign && mpz_sgn(*gmpnum_a) == -1) {
-				long_result = -long_result;
-			}
-		} else {
-			gmp_ui_op(*gmpnum_result, *gmpnum_a, (unsigned long)Z_LVAL_PP(b_arg));
-		}
+	if (use_ui) {
+		gmp_ui_op(*gmpnum_result, *gmpnum_a, (unsigned long) Z_LVAL_PP(b_arg));
 	} else {
 		gmp_op(*gmpnum_result, *gmpnum_a, *gmpnum_b);
 	}
@@ -878,24 +869,18 @@ static inline void gmp_zval_binary_ui_op_ex(zval *return_value, zval **a_arg, zv
 	FREE_GMP_TEMP(temp_a);
 	FREE_GMP_TEMP(temp_b);
 
-	if (use_ui && allow_ui_return) {
-		FREE_GMP_NUM(gmpnum_result);
-		RETURN_LONG((long)long_result);
-	} else {
-		RETVAL_GMP(gmpnum_result);
-	}
+	RETVAL_GMP(gmpnum_result);
 }
 /* }}} */
 
-/* {{{ gmp_zval_binary_ui_op2_ex
+/* {{{ gmp_zval_binary_ui_op2
    Execute GMP binary operation which returns 2 values.
    May return GMP resources or longs if operation allows this.
 */
-static inline void gmp_zval_binary_ui_op2_ex(zval *return_value, zval **a_arg, zval **b_arg, gmp_binary_op2_t gmp_op, gmp_binary_ui_op2_t gmp_ui_op, int allow_ui_return, int check_b_zero TSRMLS_DC)
+static inline void gmp_zval_binary_ui_op2(zval *return_value, zval **a_arg, zval **b_arg, gmp_binary_op2_t gmp_op, gmp_binary_ui_op2_t gmp_ui_op, int check_b_zero TSRMLS_DC)
 {
 	mpz_t *gmpnum_a, *gmpnum_b, *gmpnum_result1, *gmpnum_result2;
 	int use_ui = 0;
-	unsigned long long_result = 0;
 	gmp_temp_t temp_a, temp_b;
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -927,12 +912,8 @@ static inline void gmp_zval_binary_ui_op2_ex(zval *return_value, zval **a_arg, z
 	INIT_GMP_NUM(gmpnum_result1);
 	INIT_GMP_NUM(gmpnum_result2);
 
-	if (use_ui && gmp_ui_op) {
-		if (allow_ui_return) {
-			long_result = gmp_ui_op(*gmpnum_result1, *gmpnum_result2, *gmpnum_a, (unsigned long)Z_LVAL_PP(b_arg));
-		} else {
-			gmp_ui_op(*gmpnum_result1, *gmpnum_result2, *gmpnum_a, (unsigned long)Z_LVAL_PP(b_arg));
-		}
+	if (use_ui) {
+		gmp_ui_op(*gmpnum_result1, *gmpnum_result2, *gmpnum_a, (unsigned long)Z_LVAL_PP(b_arg));
 	} else {
 		gmp_op(*gmpnum_result1, *gmpnum_result2, *gmpnum_a, *gmpnum_b);
 	}
@@ -942,18 +923,13 @@ static inline void gmp_zval_binary_ui_op2_ex(zval *return_value, zval **a_arg, z
 
 	array_init(return_value);
 	ADD_INDEX_GMP(return_value, 0, gmpnum_result1);
-	if (use_ui && allow_ui_return) {
-		mpz_clear(*gmpnum_result2);
-		add_index_long(return_value, 1, long_result);
-	} else {
-		ADD_INDEX_GMP(return_value, 1, gmpnum_result2);
-	}
+	ADD_INDEX_GMP(return_value, 1, gmpnum_result2);
 }
 /* }}} */
 
 /* {{{ _gmp_binary_ui_op
  */
-static inline void _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op)
+static inline void _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero)
 {
 	zval **a_arg, **b_arg;
 
@@ -961,7 +937,7 @@ static inline void _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_op
 		return;
 	}
 	
-	gmp_zval_binary_ui_op(return_value, a_arg, b_arg, gmp_op, gmp_ui_op);
+	gmp_zval_binary_ui_op(return_value, a_arg, b_arg, gmp_op, gmp_ui_op, check_b_zero TSRMLS_CC);
 }
 /* }}} */
 
@@ -1089,7 +1065,6 @@ ZEND_FUNCTION(gmp_init)
 		RETURN_FALSE;
 	}
 
-	/* Write your own code here to handle argument number. */
 	RETVAL_GMP(gmpnumber);
 }
 /* }}} */
@@ -1185,14 +1160,17 @@ ZEND_FUNCTION(gmp_div_qr)
 
 	switch (round) {
 	case GMP_ROUND_ZERO:
-		gmp_zval_binary_ui_op2_ex(return_value, a_arg, b_arg, mpz_tdiv_qr, (gmp_binary_ui_op2_t)mpz_tdiv_qr_ui, 0, 1 TSRMLS_CC);
+		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_tdiv_qr, (gmp_binary_ui_op2_t)mpz_tdiv_qr_ui, 1 TSRMLS_CC);
 		break;
 	case GMP_ROUND_PLUSINF:
-		gmp_zval_binary_ui_op2_ex(return_value, a_arg, b_arg, mpz_cdiv_qr, (gmp_binary_ui_op2_t)mpz_cdiv_qr_ui, 0, 1 TSRMLS_CC);
+		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_cdiv_qr, (gmp_binary_ui_op2_t)mpz_cdiv_qr_ui, 1 TSRMLS_CC);
 		break;
 	case GMP_ROUND_MINUSINF:
-		gmp_zval_binary_ui_op2_ex(return_value, a_arg, b_arg, mpz_fdiv_qr, (gmp_binary_ui_op2_t)mpz_fdiv_qr_ui, 0, 1 TSRMLS_CC);
+		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_fdiv_qr, (gmp_binary_ui_op2_t)mpz_fdiv_qr_ui, 1 TSRMLS_CC);
 		break;
+	default:
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid rounding mode");
+		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -1210,14 +1188,17 @@ ZEND_FUNCTION(gmp_div_r)
 
 	switch (round) {
 	case GMP_ROUND_ZERO:
-		gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_tdiv_r, (gmp_binary_ui_op_t)mpz_tdiv_r_ui, 1, 1, 1 TSRMLS_CC);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_tdiv_r, (gmp_binary_ui_op_t)mpz_tdiv_r_ui, 1 TSRMLS_CC);
 		break;
 	case GMP_ROUND_PLUSINF:
-		gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_cdiv_r, (gmp_binary_ui_op_t)mpz_cdiv_r_ui, 1, 1, 1 TSRMLS_CC);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_cdiv_r, (gmp_binary_ui_op_t)mpz_cdiv_r_ui, 1 TSRMLS_CC);
 		break;
 	case GMP_ROUND_MINUSINF:
-		gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_fdiv_r, (gmp_binary_ui_op_t)mpz_fdiv_r_ui, 1, 1, 1 TSRMLS_CC);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_fdiv_r, (gmp_binary_ui_op_t)mpz_fdiv_r_ui, 1 TSRMLS_CC);
 		break;
+	default:
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid rounding mode");
+		RETURN_FALSE;
 	}
 }
 /* }}} */
@@ -1235,14 +1216,17 @@ ZEND_FUNCTION(gmp_div_q)
 
 	switch (round) {
 	case GMP_ROUND_ZERO:
-		gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_tdiv_q, (gmp_binary_ui_op_t)mpz_tdiv_q_ui, 0, 1, 1 TSRMLS_CC);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_tdiv_q, (gmp_binary_ui_op_t)mpz_tdiv_q_ui, 1 TSRMLS_CC);
 		break;
 	case GMP_ROUND_PLUSINF:
-		gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_cdiv_q, (gmp_binary_ui_op_t)mpz_cdiv_q_ui, 0, 1, 1 TSRMLS_CC);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_cdiv_q, (gmp_binary_ui_op_t)mpz_cdiv_q_ui, 1 TSRMLS_CC);
 		break;
 	case GMP_ROUND_MINUSINF:
-		gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_fdiv_q, (gmp_binary_ui_op_t)mpz_fdiv_q_ui, 0, 1, 1 TSRMLS_CC);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_fdiv_q, (gmp_binary_ui_op_t)mpz_fdiv_q_ui, 1 TSRMLS_CC);
 		break;
+	default:
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid rounding mode");
+		RETURN_FALSE;
 	}
 							   
 }
@@ -1252,13 +1236,7 @@ ZEND_FUNCTION(gmp_div_q)
    Computes a modulo b */
 ZEND_FUNCTION(gmp_mod)
 {
-	zval **a_arg, **b_arg;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &a_arg, &b_arg) == FAILURE){
-		return;
-	}	
-
-	gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_mod, (gmp_binary_ui_op_t)mpz_mod_ui, 1, 1, 0 TSRMLS_CC);
+	gmp_binary_ui_op_no_zero(mpz_mod, (gmp_binary_ui_op_t)mpz_mod_ui);
 }
 /* }}} */
 
@@ -1266,13 +1244,7 @@ ZEND_FUNCTION(gmp_mod)
    Divide a by b using exact division algorithm */
 ZEND_FUNCTION(gmp_divexact)
 {
-	zval **a_arg, **b_arg;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &a_arg, &b_arg) == FAILURE){
-		return;
-	}
-	
-	gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_divexact, NULL, 0, 1, 1 TSRMLS_CC);
+	gmp_binary_ui_op_no_zero(mpz_divexact, NULL);
 }
 /* }}} */
 
@@ -1517,13 +1489,7 @@ ZEND_FUNCTION(gmp_prob_prime)
    Computes greatest common denominator (gcd) of a and b */
 ZEND_FUNCTION(gmp_gcd)
 {
-	zval **a_arg, **b_arg;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZ", &a_arg, &b_arg) == FAILURE){
-		return;
-	}
-
-	gmp_zval_binary_ui_op_ex(return_value, a_arg, b_arg, mpz_gcd, (gmp_binary_ui_op_t)mpz_gcd_ui, 0, 0, 1 TSRMLS_CC);
+	gmp_binary_ui_op(mpz_gcd, (gmp_binary_ui_op_t)mpz_gcd_ui);
 }
 /* }}} */
 

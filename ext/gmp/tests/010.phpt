@@ -28,7 +28,10 @@ NULL
 Warning: gmp_mod() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 bool(false)
-int(0)
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(1) "0"
+}
 object(GMP)#%d (1) {
   ["num"]=>
   string(1) "0"
