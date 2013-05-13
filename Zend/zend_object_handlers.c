@@ -1393,77 +1393,6 @@ static int zend_std_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static inline void zend_free_obj_get_result(zval *op TSRMLS_DC) /* {{{ */
-{
-    if (Z_REFCOUNT_P(op) == 0) {
-        GC_REMOVE_ZVAL_FROM_BUFFER(op);
-        zval_dtor(op);
-        FREE_ZVAL(op);
-    } else {
-        zval_ptr_dtor(&op);
-    }
-}
-/* }}} */
-
-ZEND_API int zend_std_compare(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
-{
-	int ret; 
-	zval *op_free;
-
-	if (Z_TYPE_P(op1) == IS_OBJECT && Z_TYPE_P(op2) == IS_OBJECT) {
-		if (Z_OBJ_HANDLE_P(op1) == Z_OBJ_HANDLE_P(op2)) {
-			ZVAL_LONG(result, 0);
-			return SUCCESS;
-		}
-	    if (Z_OBJ_HANDLER_P(op1, compare_objects) == Z_OBJ_HANDLER_P(op2, compare_objects)) {
-			ZVAL_LONG(result, Z_OBJ_HANDLER_P(op1, compare_objects)(op1, op2 TSRMLS_CC));
-			return SUCCESS;
-		}
-	}
-
-	if (Z_TYPE_P(op1) == IS_OBJECT) {
-		if (Z_OBJ_HT_P(op1)->get) {
-			op_free = Z_OBJ_HT_P(op1)->get(op1 TSRMLS_CC);
-			ret = compare_function(result, op_free, op2 TSRMLS_CC);
-			zend_free_obj_get_result(op_free TSRMLS_CC);
-			return ret;
-		} else if (Z_TYPE_P(op2) != IS_OBJECT && Z_OBJ_HT_P(op1)->cast_object) {
-			ALLOC_INIT_ZVAL(op_free);
-			if (Z_OBJ_HT_P(op1)->cast_object(op1, op_free, Z_TYPE_P(op2) TSRMLS_CC) == FAILURE) {
-				ZVAL_LONG(result, 1);
-				zend_free_obj_get_result(op_free TSRMLS_CC);
-				return SUCCESS;
-			}
-			ret = compare_function(result, op_free, op2 TSRMLS_CC);
-			zend_free_obj_get_result(op_free TSRMLS_CC);
-			return ret;
-		}
-	}
-
-	if (Z_TYPE_P(op2) == IS_OBJECT) {
-		if (Z_OBJ_HT_P(op2)->get) {
-			op_free = Z_OBJ_HT_P(op2)->get(op2 TSRMLS_CC);
-			ret = compare_function(result, op1, op_free TSRMLS_CC);
-			zend_free_obj_get_result(op_free TSRMLS_CC);
-			return ret;
-		} else if (Z_TYPE_P(op1) != IS_OBJECT && Z_OBJ_HT_P(op2)->cast_object) {
-			ALLOC_INIT_ZVAL(op_free);
-			if (Z_OBJ_HT_P(op2)->cast_object(op2, op_free, Z_TYPE_P(op1) TSRMLS_CC) == FAILURE) {
-				ZVAL_LONG(result, -1);
-				zend_free_obj_get_result(op_free TSRMLS_CC);
-				return SUCCESS;
-			}
-			ret = compare_function(result, op1, op_free TSRMLS_CC);
-			zend_free_obj_get_result(op_free TSRMLS_CC);
-			return ret;
-		}
-	}
-
-	ZVAL_LONG(result, 1);
-	return SUCCESS;
-}
-/* }}} */
-
 static int zend_std_has_property(zval *object, zval *member, int has_set_exists, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
@@ -1715,6 +1644,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
 	NULL,									/* do_operation */
+	NULL,									/* compare */
 };
 
 /*
