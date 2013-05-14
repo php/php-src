@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #64729 (compilation failure on x32). (Gustavo)
 
+- Fileinfo:
+  . Fixed bug #64830 (mimetype detection segfaults on mp3 file). (Anatol)
+
 - FPM:
   . Ignore QUERY_STRING when sent in SCRIPT_FILENAME. (Remi)
   . Fixed some possible memory or resource leaks and possible null dereference
