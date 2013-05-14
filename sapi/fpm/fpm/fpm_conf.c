@@ -138,6 +138,9 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "chdir",                     &fpm_conf_set_string,      WPO(chdir) },
 	{ "catch_workers_output",      &fpm_conf_set_boolean,     WPO(catch_workers_output) },
 	{ "security.limit_extensions", &fpm_conf_set_string,      WPO(security_limit_extensions) },
+#ifdef HAVE_APPARMOR
+        { "apparmor_hat",              &fpm_conf_set_string,      WPO(apparmor_hat) },
+#endif
 	{ 0, 0, 0 }
 };
 
@@ -633,6 +636,9 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	free(wpc->chroot);
 	free(wpc->chdir);
 	free(wpc->security_limit_extensions);
+#ifdef HAVE_APPARMOR
+        free(wpc->apparmor_hat);
+#endif
 
 	for (kv = wpc->php_values; kv; kv = kv_next) {
 		kv_next = kv->next;

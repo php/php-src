@@ -17,6 +17,10 @@
 #include <sys/prctl.h>
 #endif
 
+#ifdef HAVE_APPARMOR
+#include <sys/apparmor.h>
+#endif
+
 #include "fpm.h"
 #include "fpm_conf.h"
 #include "fpm_cleanup.h"
@@ -212,6 +216,14 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 			}
 		}
 	}
+
+#ifdef HAVE_APPARMOR
+        if (wp->config->apparmor_hat) {
+            if (0 > change_hat(wp->config->apparmor_hat, 0)) {
+                zlog(ZLOG_SYSERROR, "[pool %s] failed to change_hat(%s)", wp->config->name, wp->config->apparmor_hat);
+            }
+        }
+#endif
 
 #ifdef HAVE_PRCTL
 	if (0 > prctl(PR_SET_DUMPABLE, 1, 0, 0, 0)) {
