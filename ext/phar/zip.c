@@ -1122,6 +1122,10 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		entry.fp = php_stream_fopen_tmpfile();
 		entry.fp_type = PHAR_MOD;
 		entry.is_modified = 1;
+		if (entry.fp == NULL) {
+			spprintf(pass->error, 0, "phar error: unable to create temporary file for signature");
+			return FAILURE;
+		}
 
 		PHAR_SET_32(sigbuf, phar->sig_flags);
 		PHAR_SET_32(sigbuf + 4, signature_length);
