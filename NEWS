@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - mbstring:
   . Fixed bug #64769 (mbstring PHPTs crash on Windows x64). (Anatol)
 
+- mysqli:
+  . Fixed bug #64394 (MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS undeclared when
+    using Connector/C). (Andrey)
+
 - Sockets:
   . Fixed bug #64508 (Fails to build with --disable-ipv6). (Gustavo)
 
