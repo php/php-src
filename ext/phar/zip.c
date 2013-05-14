@@ -1095,6 +1095,10 @@ static int phar_zip_applysignature(phar_archive_data *phar, struct _phar_zip_pas
 		off_t tell, st;
 
 		newfile = php_stream_fopen_tmpfile();
+		if (newfile == NULL) {
+			spprintf(pass->error, 0, "phar error: unable to create temporary file for the signature file");
+			return FAILURE;
+		}
 		st = tell = php_stream_tell(pass->filefp);
 		/* copy the local files, central directory, and the zip comment to generate the hash */
 		php_stream_seek(pass->filefp, 0, SEEK_SET);
@@ -1196,7 +1200,10 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 	/* set alias */
 	if (!phar->is_temporary_alias && phar->alias_len) {
 		entry.fp = php_stream_fopen_tmpfile();
-
+		if (entry.fp == NULL) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+			return EOF;
+		}
 		if (phar->alias_len != (int)php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
 			if (error) {
 				spprintf(error, 0, "unable to set alias in zip-based phar \"%s\"", phar->fname);
@@ -1271,6 +1278,10 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 
 		len = pos - user_stub + 18;
 		entry.fp = php_stream_fopen_tmpfile();
+		if (entry.fp == NULL) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+			return EOF;
+		}
 		entry.uncompressed_filesize = len + 5;
 
 		if ((size_t)len != php_stream_write(entry.fp, user_stub, len)
@@ -1304,7 +1315,10 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 	} else {
 		/* Either this is a brand new phar (add the stub), or the default stub is required (overwrite the stub) */
 		entry.fp = php_stream_fopen_tmpfile();
-
+		if (entry.fp == NULL) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+			return EOF;
+		}
 		if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
 			php_stream_close(entry.fp);
 			if (error) {
