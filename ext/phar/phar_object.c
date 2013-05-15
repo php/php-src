@@ -1877,6 +1877,10 @@ PHP_METHOD(Phar, buildFromDirectory)
 	pass.count = 0;
 	pass.ret = return_value;
 	pass.fp = php_stream_fopen_tmpfile();
+	if (pass.fp == NULL) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar \"%s\" unable to create temporary file", phar_obj->arc.archive->fname);
+		return;
+	}
 
 	if (phar_obj->arc.archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->arc.archive) TSRMLS_CC)) {
 		zval_ptr_dtor(&iteriter);
@@ -1957,6 +1961,10 @@ PHP_METHOD(Phar, buildFromIterator)
 	pass.ret = return_value;
 	pass.count = 0;
 	pass.fp = php_stream_fopen_tmpfile();
+	if (pass.fp == NULL) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar \"%s\": unable to create temporary file", phar_obj->arc.archive->fname);
+		return;
+	}
 
 	if (SUCCESS == spl_iterator_apply(obj, (spl_iterator_apply_func_t) phar_build, (void *) &pass TSRMLS_CC)) {
 		phar_obj->arc.archive->ufp = pass.fp;
@@ -2289,6 +2297,10 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 		zend_get_hash_value, NULL, 0);
 
 	phar->fp = php_stream_fopen_tmpfile();
+	if (phar->fp == NULL) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "unable to create temporary file");
+		return NULL;
+	}
 	phar->fname = source->fname;
 	phar->fname_len = source->fname_len;
 	phar->is_temporary_alias = source->is_temporary_alias;

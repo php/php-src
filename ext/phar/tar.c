@@ -847,7 +847,10 @@ int phar_tar_setmetadata(zval *metadata, phar_entry_info *entry, char **error TS
 	entry->is_modified = 1;
 	entry->fp = php_stream_fopen_tmpfile();
 	entry->offset = entry->offset_abs = 0;
-
+	if (entry->fp == NULL) {
+		spprintf(error, 0, "phar error: unable to create temporary file");
+		return -1;
+	}
 	if (entry->metadata_str.len != php_stream_write(entry->fp, entry->metadata_str.c, entry->metadata_str.len)) {
 		spprintf(error, 0, "phar tar error: unable to write metadata to magic metadata file \"%s\"", entry->filename);
 		zend_hash_del(&(entry->phar->manifest), entry->filename, entry->filename_len);
@@ -949,7 +952,10 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 		entry.filename = estrndup(".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 		entry.filename_len = sizeof(".phar/alias.txt")-1;
 		entry.fp = php_stream_fopen_tmpfile();
-
+		if (entry.fp == NULL) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+			return -1;
+		}
 		if (phar->alias_len != (int)php_stream_write(entry.fp, phar->alias, phar->alias_len)) {
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
@@ -1014,6 +1020,10 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 
 		len = pos - user_stub + 18;
 		entry.fp = php_stream_fopen_tmpfile();
+		if (entry.fp == NULL) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+			return EOF;
+		}
 		entry.uncompressed_filesize = len + 5;
 
 		if ((size_t)len != php_stream_write(entry.fp, user_stub, len)
@@ -1038,7 +1048,10 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, long len, int defau
 	} else {
 		/* Either this is a brand new phar (add the stub), or the default stub is required (overwrite the stub) */
 		entry.fp = php_stream_fopen_tmpfile();
-
+		if (entry.fp == NULL) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+			return EOF;
+		}
 		if (sizeof(newstub)-1 != php_stream_write(entry.fp, newstub, sizeof(newstub)-1)) {
 			php_stream_close(entry.fp);
 			if (error) {
@@ -1087,7 +1100,6 @@ nostub:
 	}
 
 	newfile = php_stream_fopen_tmpfile();
-
 	if (!newfile) {
 		if (error) {
 			spprintf(error, 0, "unable to create temporary file");
@@ -1174,7 +1186,10 @@ nostub:
 		entry.filename = ".phar/signature.bin";
 		entry.filename_len = sizeof(".phar/signature.bin")-1;
 		entry.fp = php_stream_fopen_tmpfile();
-
+		if (entry.fp == NULL) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+			return EOF;
+		}
 #ifdef WORDS_BIGENDIAN
 # define PHAR_SET_32(var, buffer) \
 	*(php_uint32 *)(var) = (((((unsigned char*)&(buffer))[3]) << 24) \
