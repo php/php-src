@@ -836,28 +836,28 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecrop, 0)
 	ZEND_ARG_INFO(0, rect)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_imagecropauto, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecropauto, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, threshold)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_imagescale, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagescale, 0, 0, 2)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, new_width)
 	ZEND_ARG_INFO(0, new_height)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_imageaffine, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imageaffine, 0, 0, 2)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, affine)
+	ZEND_ARG_INFO(0, clip)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_imageaffinematrixget, 0)
-	ZEND_ARG_INFO(0, im)
-	ZEND_ARG_INFO(0, matrox)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imageaffinematrixget, 0, 0, 1)
+	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
@@ -5105,7 +5105,7 @@ finish:
 }
 /* }}} */
 
-/* {{{ proto resource imageaffine(resource dst, resource src, array affine, array clip)
+/* {{{ proto resource imageaffine(resource src, array affine[, array clip])
    Return an image containing the affine tramsformed src image, using an optional clipping area */
 PHP_FUNCTION(imageaffine)
 {
