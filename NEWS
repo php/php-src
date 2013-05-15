@@ -2,8 +2,15 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.0 Release Candidate 2
 
+- Fileinfo:
+  . Fixed bug #64830 (mimetype detection segfaults on mp3 file). (Anatol)
+
 - mbstring:
   . Fixed bug #64769 (mbstring PHPTs crash on Windows x64). (Anatol)
+
+- mysqli:
+  . Fixed bug #64394 (MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS undeclared when
+    using Connector/C). (Andrey)
 
 - Sockets:
   . Fixed bug #64508 (Fails to build with --disable-ipv6). (Gustavo)
