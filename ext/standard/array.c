@@ -2608,11 +2608,9 @@ PHP_FUNCTION(array_column)
 		} else if (zkeyval && Z_TYPE_PP(zkeyval) == IS_LONG) {
 			add_index_zval(return_value, Z_LVAL_PP(zkeyval), *zcolval);
 		} else if (zkeyval && Z_TYPE_PP(zkeyval) == IS_OBJECT) {
-			zval copyval;
-			ZVAL_ZVAL(&copyval, *zkeyval, 1, 0);
-			convert_to_string(&copyval);
-			add_assoc_zval(return_value, Z_STRVAL(copyval), *zcolval);
-			zval_dtor(&copyval);
+			SEPARATE_ZVAL(zkeyval);
+			convert_to_string(*zkeyval);
+			add_assoc_zval(return_value, Z_STRVAL_PP(zkeyval), *zcolval);
 		} else {
 			add_next_index_zval(return_value, *zcolval);
 		}
