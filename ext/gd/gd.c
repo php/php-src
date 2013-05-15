@@ -4965,7 +4965,7 @@ PHP_FUNCTION(imagecrop)
 	zval *z_rect;
 	zval **tmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|a", &IM, &z_rect) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra", &IM, &z_rect) == FAILURE)  {
 		return;
 	}
 
