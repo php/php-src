@@ -2978,7 +2978,7 @@ diff -u libmagic.orig/readelf.h libmagic/readelf.h
  typedef uint8_t		Elf64_Char;
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2013-03-21 18:45:14.000000000 +0100
-+++ libmagic/softmagic.c	2013-04-08 15:42:57.328298809 +0200
++++ libmagic/softmagic.c	2013-05-14 11:00:07.044745939 +0200
 @@ -41,6 +41,11 @@
  #include <stdlib.h>
  #include <time.h>
@@ -3123,7 +3123,7 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
  		}
  	}
  
-@@ -1717,9 +1694,9 @@
+@@ -1717,12 +1694,12 @@
  		ms->o.buf = sbuf;
  		ms->offset = soffset;
  		if (rv == 1) {
@@ -3134,7 +3134,11 @@ diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 +			return -1;
  			if (file_printf(ms, "%s", rbuf) == -1)
  				return -1;
- 			free(rbuf);
+-			free(rbuf);
++			efree(rbuf);
+ 		}
+ 		return rv;
+ 
 @@ -1837,6 +1814,42 @@
  	return file_strncmp(a, b, len, flags);
  }
