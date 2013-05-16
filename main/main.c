@@ -2070,6 +2070,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	EG(exception_class) = NULL;
 	PG(disable_functions) = NULL;
 	PG(disable_classes) = NULL;
+	EG(exception) = NULL;
+	EG(objects_store).object_buckets = NULL;
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");
