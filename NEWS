@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 
 - FPM:
   . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
+  . Implemented FR #64764 (add support for FPM init.d script). (Lior Kaplan)
 
 - PDO:
   . Fixed bug #63176 (Segmentation fault when instantiate 2 persistent PDO to 
