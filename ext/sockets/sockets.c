@@ -1822,8 +1822,8 @@ PHP_FUNCTION(socket_recvfrom)
 			retval = recvfrom(php_sock->bsd_socket, recv_buf, arg3, arg4, (struct sockaddr *)&s_un, (socklen_t *)&slen);
 
 			if (retval < 0) {
-				efree(recv_buf);
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
+				efree(recv_buf);
 				RETURN_FALSE;
 			}
 
@@ -1847,8 +1847,8 @@ PHP_FUNCTION(socket_recvfrom)
 			retval = recvfrom(php_sock->bsd_socket, recv_buf, arg3, arg4, (struct sockaddr *)&sin, (socklen_t *)&slen);
 
 			if (retval < 0) {
-				efree(recv_buf);
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
+				efree(recv_buf);
 				RETURN_FALSE;
 			}
 
@@ -1876,8 +1876,8 @@ PHP_FUNCTION(socket_recvfrom)
 			retval = recvfrom(php_sock->bsd_socket, recv_buf, arg3, arg4, (struct sockaddr *)&sin6, (socklen_t *)&slen);
 
 			if (retval < 0) {
-				efree(recv_buf);
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
+				efree(recv_buf);
 				RETURN_FALSE;
 			}
 
