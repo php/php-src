@@ -183,8 +183,7 @@ static zend_always_inline zval *_get_zval_ptr_var(zend_uint var, const zend_exec
 {
 	zval *ptr = EX_T(var).var.ptr;
 
-	PZVAL_UNLOCK(ptr, should_free);
-	return ptr;
+	return should_free->var = ptr;
 }
 
 static zend_never_inline zval **_get_zval_cv_lookup(zval ***ptr, zend_uint var, int type TSRMLS_DC)
@@ -382,6 +381,19 @@ static zend_always_inline zval **_get_zval_ptr_ptr_var(zend_uint var, const zend
 	} else {
 		/* string offset */
 		PZVAL_UNLOCK(EX_T(var).str_offset.str, should_free);
+	}
+	return ptr_ptr;
+}
+
+static zend_always_inline zval **_get_zval_ptr_ptr_var_fast(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
+{
+	zval** ptr_ptr = EX_T(var).var.ptr_ptr;
+
+	if (EXPECTED(ptr_ptr != NULL)) {
+		should_free->var = *ptr_ptr;
+	} else {
+		/* string offset */
+		should_free->var = EX_T(var).str_offset.str;
 	}
 	return ptr_ptr;
 }
@@ -909,7 +921,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 		} else { /* we need to split */
 			Z_DELREF_P(variable_ptr);
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
-			if (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0) {
+			if (PZVAL_IS_REF(value)) {
 				ALLOC_ZVAL(variable_ptr);
 				*variable_ptr_ptr = variable_ptr;
 				INIT_PZVAL_COPY(variable_ptr, value);
@@ -918,7 +930,6 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 			} else {
 				*variable_ptr_ptr = value;
 				Z_ADDREF_P(value);
-				Z_UNSET_ISREF_P(value);
 				return value;
 			}
 		}
