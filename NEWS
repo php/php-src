@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug #64821 (Custom Exception crash when internal properties overridden).
     (Anatol)
 
+- Phar
+  . Fixed bug #64214 (PHAR PHPTs intermittently crash when run on DFS, SMB or with
+    non std tmp dir). (Pierre)
+
 09 May 2013, PHP 5.3.25
 
 - Core:
