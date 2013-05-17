@@ -2,4 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.6.0
 
+- Core:
+  . Improved IS_VAR operands fetching. (Laruence, Dmitry)
+
+- OPcache:
+  . Added an optimization pass to convert FCALL_BY_NAME into DO_FCALL.
+    (Laruence, Dmitry)
+  . Added an optimization pass to merged identical constants (and related
+    cache_slots) in op_array->literals table. (Laruence, Dmitry)
+  . Added script level constant replacement optimization pass. (Dmitry)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
