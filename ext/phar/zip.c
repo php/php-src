@@ -937,10 +937,11 @@ is_compressed:
 		PHAR_SET_32(local.uncompsize, entry->uncompressed_filesize);
 		PHAR_SET_32(central.compsize, entry->compressed_filesize);
 		PHAR_SET_32(local.compsize, entry->compressed_filesize);
-
-		if (-1 == php_stream_seek(p->old, entry->offset_abs, SEEK_SET)) {
-			spprintf(p->error, 0, "unable to seek to start of file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
-			return ZEND_HASH_APPLY_STOP;
+		if (p->old) {
+			if (-1 == php_stream_seek(p->old, entry->offset_abs, SEEK_SET)) {
+				spprintf(p->error, 0, "unable to seek to start of file \"%s\" while creating zip-based phar \"%s\"", entry->filename, entry->phar->fname);
+				return ZEND_HASH_APPLY_STOP;
+			}
 		}
 	}
 not_compressed:
