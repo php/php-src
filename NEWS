@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #64729 (compilation failure on x32). (Gustavo)
+  . Fixed bug #64853 (Use of no longer available ini directives causes crash on
+    TS build). (Anatol)
 
 - Fileinfo:
   . Fixed bug #64830 (mimetype detection segfaults on mp3 file). (Anatol)
