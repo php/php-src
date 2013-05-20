@@ -3,12 +3,14 @@ PHP                                                                        NEWS
 23 May 2013, PHP 5.4.16 RC1
 
 - Core:
-  . Fixed bug #64720 (SegFault on zend_deactivate). (Dmitry)
-  . Fixed bug #64729 (compilation failure on x32). (Gustavo)
-  . Fixed bug #64660 (Segfault on memory exhaustion within function definition).
-    (Stas, reported by Juha Kylmänen)
+  . Fixed bug #64879 (Heap based buffer overflow in quoted_printable_encode, 
+    CVE 2013-2110). (Stas)
   . Fixed bug #64853 (Use of no longer available ini directives causes crash on
     TS build). (Anatol)
+  . Fixed bug #64729 (compilation failure on x32). (Gustavo)
+  . Fixed bug #64720 (SegFault on zend_deactivate). (Dmitry)
+  . Fixed bug #64660 (Segfault on memory exhaustion within function definition).
+    (Stas, reported by Juha Kylmänen)
 
 - Calendar:
   . Fixed bug #64895 (Integer overflow in SndToJewish). (Remi)
