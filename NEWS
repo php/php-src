@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 
 ### DO NOT ADD ENTRIES HERE, ADD THEM ABOVE FOR 5.3.27 ###
 
+- Core:
+  . Fixed bug #64879 (Heap based buffer overflow in quoted_printable_encode,
+    CVE 2013-2110). (Stas)
+
 - Calendar:
   . Fixed bug #64895 (Integer overflow in SndToJewish). (Remi)
 
