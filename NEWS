@@ -25,7 +25,7 @@ PHP                                                                        NEWS
   . Fixed bug #64821 (Custom Exceptions crash when internal properties overridden).
       (Anatol)
 
-?? ??? 2013, PHP 5.4.15
+09 May 2013, PHP 5.4.15
 - Core:
   . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap:
     segfault). (Laruence)
