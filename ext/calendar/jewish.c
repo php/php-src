@@ -272,6 +272,7 @@
 #define HALAKIM_PER_METONIC_CYCLE (HALAKIM_PER_LUNAR_CYCLE * (12 * 19 + 7))
 
 #define JEWISH_SDN_OFFSET 347997
+#define JEWISH_SDN_MAX 38245310 /* year 103759, 100000 A.D. */
 #define NEW_MOON_OF_CREATION 31524
 
 #define SUNDAY    0
@@ -559,7 +560,7 @@ void SdnToJewish(
 	int tishri1After;
 	int yearLength;
 
-	if (sdn <= JEWISH_SDN_OFFSET) {
+	if (sdn <= JEWISH_SDN_OFFSET || sdn > JEWISH_SDN_MAX) {
 		*pYear = 0;
 		*pMonth = 0;
 		*pDay = 0;
