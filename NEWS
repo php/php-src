@@ -12,6 +12,11 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Fixed bug #64830 (mimetype detection segfaults on mp3 file). (Anatol)
 
+- FPM:
+  . Add --with-fpm-systemd option to report health to systemd, and
+    systemd_interval option to configure this. The service can now use
+    Type=notify in the systemd unit file. (Remi)
+
 - mbstring:
   . Fixed bug #64769 (mbstring PHPTs crash on Windows x64). (Anatol)
 
