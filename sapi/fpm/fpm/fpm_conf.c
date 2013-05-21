@@ -45,6 +45,10 @@
 #include "fpm_log.h"
 #include "fpm_events.h"
 #include "zlog.h"
+#ifdef HAVE_SYSTEMD
+#include "fpm_systemd.h"
+#endif
+
 
 #define STR2STR(a) (a ? a : "undefined")
 #define BOOL2STR(a) (a ? "yes" : "no")
@@ -73,6 +77,10 @@ struct fpm_global_config_s fpm_global_config = {
 #endif
 	.process_max = 0,
 	.process_priority = 64, /* 64 means unset */
+#ifdef HAVE_SYSTEMD
+	.systemd_watchdog = 0,
+	.systemd_interval = -1, /* -1 means not set */
+#endif
 };
 static struct fpm_worker_pool_s *current_wp = NULL;
 static int ini_recursion = 0;
@@ -100,6 +108,9 @@ static struct ini_value_parser_s ini_fpm_global_options[] = {
 	{ "rlimit_files",                &fpm_conf_set_integer,         GO(rlimit_files) },
 	{ "rlimit_core",                 &fpm_conf_set_rlimit_core,     GO(rlimit_core) },
 	{ "events.mechanism",            &fpm_conf_set_string,          GO(events_mechanism) },
+#ifdef HAVE_SYSTEMD
+	{ "systemd_interval",            &fpm_conf_set_time,            GO(systemd_interval) },
+#endif
 	{ 0, 0, 0 }
 };
 
@@ -1152,6 +1163,12 @@ static int fpm_conf_post_process(int force_daemon TSRMLS_DC) /* {{{ */
 		fpm_global_config.error_log = strdup("log/php-fpm.log");
 	}
 
+#ifdef HAVE_SYSTEMD
+	if (0 > fpm_systemd_conf()) {
+		return -1;
+	}
+#endif
+
 #ifdef HAVE_SYSLOG_H
 	if (!fpm_global_config.syslog_ident) {
 		fpm_global_config.syslog_ident = strdup("php-fpm");
@@ -1540,6 +1557,9 @@ static void fpm_conf_dump() /* {{{ */
 	zlog(ZLOG_NOTICE, "\trlimit_files = %d",                fpm_global_config.rlimit_files);
 	zlog(ZLOG_NOTICE, "\trlimit_core = %d",                 fpm_global_config.rlimit_core);
 	zlog(ZLOG_NOTICE, "\tevents.mechanism = %s",            fpm_event_machanism_name());
+#ifdef HAVE_SYSTEMD
+	zlog(ZLOG_NOTICE, "\tsystemd_interval = %ds",           fpm_global_config.systemd_interval/1000);
+#endif
 	zlog(ZLOG_NOTICE, " ");
 
 	for (wp = fpm_worker_all_pools; wp; wp = wp->next) {
