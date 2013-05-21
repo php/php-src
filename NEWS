@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed some possible memory or resource leaks and possible null dereference
     detected by code coverity scan. (Remi)
   . Log a warning when a syscall fails. (Remi)
+  . Add --with-fpm-systemd option to report health to systemd, and
+    systemd_interval option to configure this. The service can now use
+    Type=notify in the systemd unit file. (Remi)
 
 - SNMP:
   . Fixed bug #64765 (Some IPv6 addresses get interpreted wrong).
