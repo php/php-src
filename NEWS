@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.4.16
 
 - Core:
+  . Fixed bug #64720 (SegFault on zend_deactivate). (Dmitry)
   . Fixed bug #64729 (compilation failure on x32). (Gustavo)
   . Fixed bug #64660 (Segfault on memory exhaustion within function definition).
     (Stas, reported by Juha Kylmänen)
