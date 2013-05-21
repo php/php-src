@@ -58,6 +58,10 @@ PHP 5.5 UPGRADE NOTES
 
 - Support for changing the process's title in CLI/CLI-Server SAPIs. (Keyur)
   (https://wiki.php.net/rfc/cli_process_title)
+- Support for systemd in php-fpm:
+  Add --with-fpm-systemd option to report health to systemd, and
+  systemd_interval option to configure this. The service can now use
+  Type=notify in the systemd unit file. (Remi)
 
 ========================================
 3. Deprecated Functionality
