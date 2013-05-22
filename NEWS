@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #64726 (Segfault when calling fetch_object on a use_result and DB
     pointer has closed). (Laruence)
 
+- Phar
+  . Fixed bug #64214 (PHAR PHPTs intermittently crash when run on DFS, SMB or with
+    non std tmp dir). (Pierre)
+
 - Streams:
   . Fixed bug #64770 (stream_select() fails with pipes returned by proc_open()
     on Windows x64). (Anatol)
@@ -18,10 +22,6 @@ PHP                                                                        NEWS
 - Zend Engine:
   . Fixed bug #64821 (Custom Exception crash when internal properties overridden).
     (Anatol)
-
-- Phar
-  . Fixed bug #64214 (PHAR PHPTs intermittently crash when run on DFS, SMB or with
-    non std tmp dir). (Pierre)
 
 09 May 2013, PHP 5.3.25
 
