@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.3.26
+23 May 2013, PHP 5.3.26RC1
 
 - Calendar:
   . Fixed bug #64895 (Integer overflow in SndToJewish). (Remi)
@@ -15,16 +15,16 @@ PHP                                                                        NEWS
     pointer has closed). (Laruence)
 
 - Phar
-  . Fixed bug #64214 (PHAR PHPTs intermittently crash when run on DFS, SMB or with
-    non std tmp dir). (Pierre)
+  . Fixed bug #64214 (PHAR PHPTs intermittently crash when run on DFS, SMB or 
+    with non std tmp dir). (Pierre)
 
 - Streams:
   . Fixed bug #64770 (stream_select() fails with pipes returned by proc_open()
     on Windows x64). (Anatol)
 
 - Zend Engine:
-  . Fixed bug #64821 (Custom Exception crash when internal properties overridden).
-    (Anatol)
+  . Fixed bug #64821 (Custom Exception crash when internal properties
+    overridden). (Anatol)
 
 09 May 2013, PHP 5.3.25
 
