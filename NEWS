@@ -22,14 +22,26 @@ PHP                                                                        NEWS
     systemd_interval option to configure this. The service can now use
     Type=notify in the systemd unit file. (Remi)
 
+- MySQLi
+ . Fixed bug #64726 (Segfault when calling fetch_object on a use_result and DB
+    pointer has closed). (Laruence)
+
+- Phar
+  . Fixed bug #64214 (PHAR PHPTs intermittently crash when run on DFS, SMB or 
+    with non std tmp dir). (Pierre)
+
 - SNMP:
   . Fixed bug #64765 (Some IPv6 addresses get interpreted wrong).
     (Boris Lytochkin)
   . Fixed bug #64159 (Truncated snmpget). (Boris Lytochkin)
 
+- Streams:
+  . Fixed bug #64770 (stream_select() fails with pipes returned by proc_open()
+    on Windows x64). (Anatol)
+
 - Zend Engine:
-  . Fixed bug #64821 (Custom Exceptions crash when internal properties overridden).
-    (Anatol)
+  . Fixed bug #64821 (Custom Exceptions crash when internal properties 
+    overridden). (Anatol)
 
 09 May 2013, PHP 5.4.15
 - Core:
