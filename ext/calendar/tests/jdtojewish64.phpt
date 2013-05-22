@@ -1,5 +1,5 @@
 --TEST--
-Integer overflow in SndToJewish leads to php hang 
+Bug #64895: Integer overflow in SndToJewish
 --SKIPIF--
 <?php 
 include 'skipif.inc';
@@ -9,10 +9,11 @@ if (PHP_INT_SIZE == 4) {
 ?>
 --FILE--
 <?php
-$a = array(38245310, 38245311, 9223372036854743639);
+$a = array(38245310, 324542846, 324542847, 9223372036854743639);
 
 foreach ($a as $x) var_dump(jdtojewish($x));
 --EXPECTF--
 string(11) "2/22/103759"
+string(12) "12/13/887605"
 string(5) "0/0/0"
 string(5) "0/0/0"
