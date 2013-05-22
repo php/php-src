@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #64853 (Use of no longer available ini directives causes crash
     on TS build). (Anatol)
 
+- Calendar:
+  . Fixed bug #64895 (Integer overflow in SndToJewish). (Remi)
+
 - Fileinfo:
   . Fixed bug #64830 (mimetype detection segfaults on mp3 file). (Anatol)
 
