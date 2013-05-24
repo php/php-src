@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.0 Release Candidate 3
 
+-FPM:
+  . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
+
 23 May 2013, PHP 5.5.0 Release Candidate 2
 
 - Core:
