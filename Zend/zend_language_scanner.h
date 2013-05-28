@@ -49,6 +49,9 @@ typedef struct _zend_lex_state {
 	zend_encoding_filter input_filter;
 	zend_encoding_filter output_filter;
 	const zend_encoding *script_encoding;
+
+	char *doc_comment;
+	int doc_comment_len;
 } zend_lex_state;
 
 typedef struct _zend_heredoc_label {
