@@ -35,6 +35,10 @@ PHP                                                                        NEWS
 - PDO_pgsql:
   . Fixed Bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
 
+- Readline:
+  . Implement FR #55694 (Expose additional readline variable to prevent 
+    default filename completion). (Hartmel)
+
 - SPL:
   . Fixed bug #64997 (Segfault while using RecursiveIteratorIterator on
     64-bits systems). (Laruence)
