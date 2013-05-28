@@ -12,10 +12,12 @@ var_dump(readline_info('line_buffer'));
 var_dump(readline_info('readline_name'));
 var_dump(readline_info('readline_name', 1));
 var_dump(readline_info('readline_name'));
+var_dump(readline_info('attempted_completion_over',1));
+var_dump(readline_info('attempted_completion_over'));
 
 ?>
 --EXPECTF--
-array(10) {
+array(11) {
   ["line_buffer"]=>
   string(0) ""
   ["point"]=>
@@ -36,6 +38,8 @@ array(10) {
   string(%d) "%s"
   ["readline_name"]=>
   string(5) "other"
+  ["attempted_completion_over"]=>
+  int(0)
 }
 NULL
 NULL
@@ -43,3 +47,5 @@ string(0) ""
 string(5) "other"
 string(5) "other"
 string(1) "1"
+int(0)
+int(1)
