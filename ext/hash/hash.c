@@ -659,6 +659,9 @@ PHP_FUNCTION(hash_pbkdf2)
 	/* Setup Main Loop to build a long enough result */
 	if (length == 0) {
 		length = ops->digest_size;
+		if (!raw_output) {
+			length = length * 2;
+		}
 	}
 	digest_length = length;
 	if (!raw_output) {
