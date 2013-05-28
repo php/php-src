@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 -FPM:
   . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
 
+- Hash:
+  . Fixed Bug #64745 (hash_pbkdf2() truncates data when using default length
+    and hex output). (Anthony Ferrara)
+
 23 May 2013, PHP 5.5.0 Release Candidate 2
 
 - Core:
