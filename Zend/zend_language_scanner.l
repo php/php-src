@@ -225,8 +225,11 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	lex_state->output_filter = SCNG(output_filter);
 	lex_state->script_encoding = SCNG(script_encoding);
 
-	lex_state->doc_comment = CG(doc_comment);
+	lex_state->doc_comment = NULL;
 	lex_state->doc_comment_len = CG(doc_comment_len);
+	if (CG(doc_comment)) {
+		lex_state->doc_comment = estrndup(CG(doc_comment), lex_state->doc_comment_len);
+	}
 }
 
 ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
