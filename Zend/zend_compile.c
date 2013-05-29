@@ -4019,7 +4019,7 @@ void zend_do_shell_exec(znode *result, const znode *cmd TSRMLS_DC) /* {{{ */
 			break;
 	}
 	opline->op1 = *cmd;
-	opline->op2.u.opline_num = 0;
+	opline->op2.u.opline_num = 1;
 	opline->extended_value = ZEND_DO_FCALL;
 	SET_UNUSED(opline->op2);
 
