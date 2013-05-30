@@ -82,12 +82,6 @@ static char *pdo_dblib_get_field_name(int type)
 
 static int dblib_dblib_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 {
-	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
-	pdo_dblib_db_handle *H = S->H;
-
-	/* Cancel any pending results */
-	dbcancel(H->link);
-
 	efree(stmt->columns);
 	stmt->columns = NULL;
 	
