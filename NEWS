@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
 
+- PDO_pgsql:
+  . Fixed Bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
+
+
 ?? ??? 2013, PHP 5.4.16
 
 - Core:
