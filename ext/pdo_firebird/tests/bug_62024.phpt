@@ -21,8 +21,8 @@ $dbh->commit();
 $sql = "insert into test_insert (id, text) values (?, ?)";
 $sttmt = $dbh->prepare($sql);
 
-$args_ok = [1, "test1"];
-$args_err = [2, null];
+$args_ok = array(1, "test1");
+$args_err = array(2, null);
 
 $res = $sttmt->execute($args_ok);
 var_dump($res);
