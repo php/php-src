@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.3.27
 
+- PDO_pgsql:
+  . Fixed Bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
+
 ?? ??? 2013, PHP 5.3.26
 
 ### DO NOT ADD ENTRIES HERE, ADD THEM ABOVE FOR 5.3.27 ###
