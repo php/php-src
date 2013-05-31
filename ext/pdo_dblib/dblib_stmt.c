@@ -87,7 +87,6 @@ static int dblib_dblib_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 
 	/* Cancel any pending results */
 	dbcancel(H->link);
-
 	efree(stmt->columns);
 	stmt->columns = NULL;
 	
@@ -97,8 +96,6 @@ static int dblib_dblib_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
-
-	dblib_dblib_stmt_cursor_closer(stmt TSRMLS_CC);
 
 	efree(S);
 		
@@ -130,6 +127,8 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	RETCODE ret;
 	
 	dbsetuserdata(H->link, (BYTE*) &S->err);
+	
+	dblib_dblib_stmt_cursor_closer(stmt TSRMLS_CC);
 	
 	if (FAIL == dbcmd(H->link, stmt->active_query_string)) {
 		return 0;
