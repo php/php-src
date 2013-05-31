@@ -2,8 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.3.27
 
+- PDO_firebird:
+  . Fixed bug #64037 (Firebird return wrong value for numeric field).
+    (Matheus Degiovani, Matteo)
+  . Fixed bug #62024 (Cannot insert second row with null using parametrized
+    query). (patch by james@kenjim.com, Matheus Degiovani, Matteo)
+
 - PDO_pgsql:
-  . Fixed Bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
+  . Fixed bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
 
 ?? ??? 2013, PHP 5.3.26
 
