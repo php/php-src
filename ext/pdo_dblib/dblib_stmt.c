@@ -146,10 +146,6 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	
 	ret = pdo_dblib_stmt_next_rowset(stmt TSRMLS_CC);
 	
-	if (ret == 0) {
-		return 0;
-	}
-	
 	stmt->row_count = DBCOUNT(H->link);
 	stmt->column_count = dbnumcols(H->link);
 	
