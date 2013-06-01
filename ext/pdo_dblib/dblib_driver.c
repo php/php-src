@@ -297,10 +297,8 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	DBSETLAPP(H->login, vars[1].optval);
 
-#if PHP_DBLIB_IS_MSSQL
-	dbprocerrhandle(H->login, (EHANDLEFUNC) error_handler);
-	dbprocmsghandle(H->login, (MHANDLEFUNC) msg_handler);
-#endif
+	DBERRHANDLE(H->login, (EHANDLEFUNC) error_handler);
+	DBMSGHANDLE(H->login, (MHANDLEFUNC) msg_handler);
 
 	H->link = dbopen(H->login, vars[2].optval);
 
