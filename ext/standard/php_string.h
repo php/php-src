@@ -93,6 +93,7 @@ PHP_FUNCTION(str_word_count);
 PHP_FUNCTION(str_split);
 PHP_FUNCTION(strpbrk);
 PHP_FUNCTION(substr_compare);
+PHP_FUNCTION(str_is_ascii);
 #ifdef HAVE_STRCOLL
 PHP_FUNCTION(strcoll);
 #endif
@@ -146,6 +147,8 @@ PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end);
 PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive TSRMLS_DC);
 PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
+
+PHPAPI zend_bool string_is_ascii(const unsigned char *str, size_t len);
 
 #ifndef HAVE_STRERROR
 PHPAPI char *php_strerror(int errnum);

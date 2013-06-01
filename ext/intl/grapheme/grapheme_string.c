@@ -69,10 +69,8 @@ PHP_FUNCTION(grapheme_strlen)
 		RETURN_FALSE;
 	}
 
-	ret_len = grapheme_ascii_check(string, string_len);
-
-	if ( ret_len >= 0 )
-		RETURN_LONG(ret_len);
+	if (string_is_ascii(string, string_len))
+		RETURN_LONG(string_len);
 
 	/* convert the string to UTF-16. */
 	status = U_ZERO_ERROR;
@@ -154,7 +152,7 @@ PHP_FUNCTION(grapheme_strpos)
 	}
 
 	/* if it is there, and if the haystack is ascii, we are all done */
-	if ( grapheme_ascii_check(haystack, haystack_len) >= 0 ) {
+	if ( string_is_ascii(haystack, haystack_len) ) {
 
 		RETURN_LONG(found - haystack);
 	}
@@ -211,7 +209,7 @@ PHP_FUNCTION(grapheme_stripos)
 	}
 
 
-	is_ascii = ( grapheme_ascii_check(haystack, haystack_len) >= 0 );
+	is_ascii = ( string_is_ascii(haystack, haystack_len) );
 
 	if ( is_ascii ) {
 		needle_dup = (unsigned char *)estrndup((char *)needle, needle_len);
@@ -229,7 +227,7 @@ PHP_FUNCTION(grapheme_stripos)
 		}
 
 		/* if needle was ascii too, we are all done, otherwise we need to try using Unicode to see what we get */
-		if ( grapheme_ascii_check(needle, needle_len) >= 0 ) {
+		if ( string_is_ascii(needle, needle_len) ) {
 			RETURN_FALSE;
 		}
 	}
@@ -284,7 +282,7 @@ PHP_FUNCTION(grapheme_strrpos)
 		RETURN_FALSE;
 	}
 
-	is_ascii = grapheme_ascii_check(haystack, haystack_len) >= 0;
+	is_ascii = string_is_ascii(haystack, haystack_len);
 
 	if ( is_ascii ) {
 
@@ -297,7 +295,7 @@ PHP_FUNCTION(grapheme_strrpos)
 
 		/* if the needle was ascii too, we are done */
 
-		if (  grapheme_ascii_check(needle, needle_len) >= 0 ) {
+		if (  string_is_ascii(needle, needle_len) ) {
 			RETURN_FALSE;
 		}
 
@@ -354,7 +352,7 @@ PHP_FUNCTION(grapheme_strripos)
 		RETURN_FALSE;
 	}
 
-	is_ascii = grapheme_ascii_check(haystack, haystack_len) >= 0;
+	is_ascii = string_is_ascii(haystack, haystack_len);
 
 	if ( is_ascii ) {
 		unsigned char *needle_dup, *haystack_dup;
@@ -375,7 +373,7 @@ PHP_FUNCTION(grapheme_strripos)
 
 		/* if the needle was ascii too, we are done */
 
-		if (  grapheme_ascii_check(needle, needle_len) >= 0 ) {
+		if (  string_is_ascii(needle, needle_len) ) {
 			RETURN_FALSE;
 		}
 
@@ -430,7 +428,7 @@ PHP_FUNCTION(grapheme_substr)
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
-	if ( grapheme_ascii_check(str, str_len) >= 0 ) {
+	if ( string_is_ascii(str, str_len) ) {
 		grapheme_substr_ascii((char *)str, str_len, start, length, ZEND_NUM_ARGS(), (char **) &sub_str, &sub_str_len);
 
 		if ( NULL == sub_str ) {
@@ -630,7 +628,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 		}
 
 		/* if it is there, and if the haystack is ascii, we are all done */
-		if ( grapheme_ascii_check(haystack, haystack_len) >= 0 ) {
+		if ( string_is_ascii(haystack, haystack_len) ) {
 			size_t found_offset = found - haystack;
 
 			if (part) {
@@ -874,7 +872,7 @@ PHP_FUNCTION(grapheme_extract)
 		(size + 1 because the size-th character might be the beginning of a grapheme cluster)
 	 */
 
-	if ( -1 != grapheme_ascii_check(pstr, size + 1 < str_len ? size + 1 : str_len ) ) {
+	if ( string_is_ascii(pstr, size + 1 < str_len ? size + 1 : str_len ) ) {
         long nsize = ( size < str_len ? size : str_len );
 		if ( NULL != next ) {
 			ZVAL_LONG(next, start+nsize);
