@@ -262,17 +262,19 @@ static struct pdo_dbh_methods dblib_methods = {
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H;
-	int i, ret = 0;
+	int i, nvars, ret = 0;
 	struct pdo_data_src_parser vars[] = {
-		{ "charset",	NULL,	0 },
-		{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 },
-		{ "host",		"127.0.0.1", 0 },
-		{ "dbname",		NULL,	0 },
-		{ "secure",		NULL,	0 }, /* DBSETLSECURE */
-		/* TODO: DBSETLVERSION ? */
+		{ "charset",	NULL,	0 }
+		,{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 }
+		,{ "host",		"127.0.0.1", 0 }
+		,{ "dbname",	NULL,	0 }
+		,{ "secure",	NULL,	0 } /* DBSETLSECURE */
+		/* TODO: DBSETLVERSION */
 	};
-
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 5);
+	
+	nvars = sizeof(vars)/sizeof(vars[0]);
+	
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 	H->login = dblogin();
@@ -283,10 +285,20 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	if (dbh->username) {
-		DBSETLUSER(H->login, dbh->username);
+		if(FAIL == DBSETLUSER(H->login, dbh->username)) {
+			goto cleanup;
+		}
 	}
+
+	/* 
+	 * FreeTDS will not return FAIL but will segfault on passwords longer than 30 chars
+	 */
+	if(strlen(dbh->password) > 30) dbh->password[30] = 0;
+	
 	if (dbh->password) {
-		DBSETLPWD(H->login, dbh->password);
+		if(FAIL == DBSETLPWD(H->login, dbh->password)) {
+			goto cleanup;
+		}
 	}
 	
 #if !PHP_DBLIB_IS_MSSQL
@@ -302,7 +314,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	H->link = dbopen(H->login, vars[2].optval);
 
-	if (H->link == NULL) {
+	if (!H->link) {
 		goto cleanup;
 	}
 
@@ -324,7 +336,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	dbh->alloc_own_columns = 1;
 
 cleanup:
-	for (i = 0; i < sizeof(vars)/sizeof(vars[0]); i++) {
+	for (i = 0; i < nvars; i++) {
 		if (vars[i].freeme) {
 			efree(vars[i].optval);
 		}
