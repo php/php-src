@@ -290,11 +290,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		}
 	}
 
-	/* 
-	 * FreeTDS will not return FAIL but will segfault on passwords longer than 30 chars
-	 */
-	if(strlen(dbh->password) > 30) dbh->password[30] = 0;
-	
 	if (dbh->password) {
 		if(FAIL == DBSETLPWD(H->login, dbh->password)) {
 			goto cleanup;
