@@ -27,6 +27,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "main/php_network.h"
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
 #include "pdo/php_pdo_error.h"
@@ -1006,6 +1007,84 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 }
 /* }}} */
 
+/* {{{ proto mixed PDO::pgsqlGetNotify([ int $result_type = PDO::FETCH_USE_DEFAULT] [, int $ms_timeout = 0 ]])
+   Get asyncronous notification */
+static PHP_METHOD(PDO, pgsqlGetNotify)
+{
+	pdo_dbh_t *dbh;
+	pdo_pgsql_db_handle *H;
+	long result_type = PDO_FETCH_USE_DEFAULT;
+	long ms_timeout = 0;
+	PGnotify *pgsql_notify;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll",
+				&result_type, &ms_timeout)) {
+		RETURN_FALSE;
+	}
+
+	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
+
+	if (result_type == PDO_FETCH_USE_DEFAULT) {
+		result_type = dbh->default_fetch_type;
+	}
+
+	if (result_type != PDO_FETCH_BOTH && result_type != PDO_FETCH_ASSOC && result_type != PDO_FETCH_NUM) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid result type");
+ 		RETURN_FALSE;
+	}
+
+	if (ms_timeout < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid timeout");
+ 		RETURN_FALSE;
+	}
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	PQconsumeInput(H->server);
+	pgsql_notify = PQnotifies(H->server);
+
+	if (ms_timeout && !pgsql_notify) {
+		php_pollfd_for_ms(PQsocket(H->server), PHP_POLLREADABLE, ms_timeout);
+
+		PQconsumeInput(H->server);
+		pgsql_notify = PQnotifies(H->server);
+	}
+
+	if (!pgsql_notify) {
+		RETURN_FALSE;
+	}
+
+	array_init(return_value);
+	if (result_type == PDO_FETCH_NUM || result_type == PDO_FETCH_BOTH) {
+		add_index_string(return_value, 0, pgsql_notify->relname, 1);
+		add_index_long(return_value, 1, pgsql_notify->be_pid);
+	}
+	if (result_type == PDO_FETCH_ASSOC || result_type == PDO_FETCH_BOTH) {
+		add_assoc_string(return_value, "message", pgsql_notify->relname, 1);
+		add_assoc_long(return_value, "pid", pgsql_notify->be_pid);
+	}
+
+	PQfreemem(pgsql_notify);
+}
+/* }}} */
+
+/* {{{ proto int PDO::pgsqlGetPid()
+   Get backend(server) pid */
+static PHP_METHOD(PDO, pgsqlGetPid)
+{
+	pdo_dbh_t *dbh;
+	pdo_pgsql_db_handle *H;
+
+	dbh = zend_object_store_get_object(getThis() TSRMLS_CC);
+	PDO_CONSTRUCT_CHECK;
+
+	H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	RETURN_LONG(PQbackendPID(H->server));
+}
+/* }}} */
+
 
 static const zend_function_entry dbh_methods[] = {
 	PHP_ME(PDO, pgsqlLOBCreate, NULL, ZEND_ACC_PUBLIC)
@@ -1015,6 +1094,8 @@ static const zend_function_entry dbh_methods[] = {
 	PHP_ME(PDO, pgsqlCopyFromFile, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, pgsqlCopyToArray, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(PDO, pgsqlCopyToFile, NULL, ZEND_ACC_PUBLIC)
+        PHP_ME(PDO, pgsqlGetNotify, NULL, ZEND_ACC_PUBLIC)
+        PHP_ME(PDO, pgsqlGetPid, NULL, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
