@@ -17,8 +17,15 @@ class Database_SQL extends PDO
 {
 	function __construct()
 	{
+                $dsn = getenv('PDOTEST_DSN');
+                $user = getenv('PDOTEST_USER');
+                $pass = getenv('PDOTEST_PASS');
+
+                if ($user === false) $user = NULL;
+                if ($pass === false) $pass = NULL;
 		$options = array(PDO::ATTR_PERSISTENT => TRUE);
-		parent::__construct(getenv("PDOTEST_DSN"), getenv("PDOTEST_USER"), getenv("PDOTEST_PASS"), $options);
+
+		parent::__construct($dsn, $user, $pass, $options);
 	}
 
 	var $bar = array();
