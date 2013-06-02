@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - PDO_pgsql:
   . Fixed bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
 
+- pgsql:
+  - Fixed bug #64609 (pg_convert enum type support). (Matteo)
+
 ?? ??? 2013, PHP 5.3.26
 
 ### DO NOT ADD ENTRIES HERE, ADD THEM ABOVE FOR 5.3.27 ###
