@@ -110,8 +110,10 @@ $db->rollback();
 	echo "Exception! at line ", $e->getLine(), "\n";
 	var_dump($e->getMessage());
 }
-if(isset($filename)) {
-	@unlink($filename);
+
+// Clean up 
+foreach (array($filename, $filenameWithDifferentNullValues, $filenameWithDifferentNullValuesAndSelectedFields) as $f) {
+	@unlink($f);
 }
 ?>
 --EXPECT--
