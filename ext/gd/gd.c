@@ -5212,7 +5212,7 @@ PHP_FUNCTION(imageaffine)
 PHP_FUNCTION(imageaffinematrixget)
 {
 	double affine[6];
-	gdAffineStandardMatrix type;
+	long type;
 	zval *options;
 	zval **tmp;
 	int res = GD_FALSE, i;
@@ -5221,7 +5221,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		return;
 	}
 
-	switch(type) {
+	switch((gdAffineStandardMatrix)type) {
 		case GD_AFFINE_TRANSLATE:
 		case GD_AFFINE_SCALE: {
 			double x, y;
@@ -5271,7 +5271,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		}
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type for element %i", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type for element %li", type);
 			RETURN_FALSE;
 	}
 
@@ -5361,7 +5361,7 @@ PHP_FUNCTION(imagesetinterpolation)
 {
 	zval *IM;
 	gdImagePtr im;
-	gdInterpolationMethod method = GD_BILINEAR_FIXED;
+	long method = GD_BILINEAR_FIXED;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &IM, &method) == FAILURE)  {
 		return;
