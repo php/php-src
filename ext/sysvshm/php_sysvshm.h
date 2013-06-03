@@ -26,9 +26,11 @@
 extern zend_module_entry sysvshm_module_entry;
 #define sysvshm_module_ptr &sysvshm_module_entry
 
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <grp.h>
 
 #define PHP_SHM_RSRC_NAME "sysvshm"
 
@@ -57,6 +59,13 @@ typedef struct {
 	long id;                 /* returned by shmget */
 	sysvshm_chunk_head *ptr; /* memory address of shared memory */
 } sysvshm_shm;
+
+typedef struct {
+	char *gr_name;			/* group name */
+	char *gr_passwd;		/* group password */
+	gid_t gr_gid;			/* group ID */
+	char **gr_mem;			/* group members */
+} group;
 
 PHP_MINIT_FUNCTION(sysvshm);
 PHP_FUNCTION(shm_attach);
