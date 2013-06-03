@@ -8,7 +8,7 @@ shm_attach() tests
 $key = ftok(__FILE__, 't');
 
 var_dump(shm_attach());
-var_dump(shm_attach(1,2,3,4));
+var_dump(shm_attach(1,2,3,4,5));
 
 var_dump(shm_attach(-1, 0));
 var_dump(shm_attach(0, -1));
@@ -36,7 +36,7 @@ echo "Done\n";
 Warning: shm_attach() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: shm_attach() expects at most 3 parameters, 4 given in %s on line %d
+Warning: shm_attach() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 
 Warning: shm_attach(): Segment size must be greater than zero in %s on line %d
