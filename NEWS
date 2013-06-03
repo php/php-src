@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed Bug #64961 (segfault in imagesetinterpolation). (Remi)
+  . Fixed Bug #64962 (imagerotate produces corrupted image). (Remi)
 
 - Hash:
   . Fixed Bug #64745 (hash_pbkdf2() truncates data when using default length

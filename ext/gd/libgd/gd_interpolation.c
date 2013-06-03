@@ -1690,8 +1690,8 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 		unsigned int j;
 		dst_offset_x = 0;
 		for (j = 0; j < new_width; j++) {
-			gdFixed f_i = gd_itofx(i - new_height/2);
-			gdFixed f_j = gd_itofx(j-new_width/2);
+			gdFixed f_i = gd_itofx((int)i - (int)new_height/2);
+			gdFixed f_j = gd_itofx((int)j - (int)new_width/2);
 			gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
 			gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
 			long m = gd_fxtoi(f_m);
@@ -1753,8 +1753,8 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 		unsigned int j;
 		dst_offset_x = 0;
 		for (j = 0; j < new_width; j++) {
-			gdFixed f_i = gd_itofx(i - new_height/ 2);
-			gdFixed f_j = gd_itofx(j  -new_width / 2);
+			gdFixed f_i = gd_itofx((int)i - (int)new_height/ 2);
+			gdFixed f_j = gd_itofx((int)j - (int)new_width / 2);
 			gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
 			gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
 			long m = gd_fxtoi(f_m);
@@ -1814,8 +1814,8 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 		dst_offset_x = 0;
 
 		for (j=0; j < new_width; j++) {
-			const gdFixed f_i = gd_itofx(i-new_height/2);
-			const gdFixed f_j = gd_itofx(j-new_width/2);
+			const gdFixed f_i = gd_itofx((int)i - (int)new_height/2);
+			const gdFixed f_j = gd_itofx((int)j - (int)new_width/2);
 			const gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
 			const gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
 			const unsigned int m = gd_fxtoi(f_m);
@@ -1941,8 +1941,8 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 		dst_offset_x = 0;
 
 		for (j=0; j < new_width; j++) {
-			const gdFixed f_i = gd_itofx(i-new_height/2);
-			const gdFixed f_j = gd_itofx(j-new_width/2);
+			const gdFixed f_i = gd_itofx((int)i - (int)new_height/2);
+			const gdFixed f_j = gd_itofx((int)j - (int)new_width/2);
 			const gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
 			const gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
 			const int m = gd_fxtoi(f_m);
