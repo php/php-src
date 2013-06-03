@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 -FPM:
   . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
 
+- GD:
+  . Fixed Bug #64961 (segfault in imagesetinterpolation). (Remi)
+
 - Hash:
   . Fixed Bug #64745 (hash_pbkdf2() truncates data when using default length
     and hex output). (Anthony Ferrara)
