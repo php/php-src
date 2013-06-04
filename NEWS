@@ -5,6 +5,14 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
 
+- PDO_DBlib:
+  . Fixed bug #63638 (Cannot connect to SQL Server 2008 with PDO dblib). 
+    (Stanley Sufficool)
+  . Fixed bug #64338 (pdo_dblib can't connect to Azure SQL). (Stanley 
+    Sufficool)
+  . Fixed bug #64808 (FreeTDS PDO getColumnMeta on a prepared but not executed 
+    statement crashes). (Stanley Sufficool)
+
 - PDO_pgsql:
   . Fixed Bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
 
