@@ -32,6 +32,9 @@
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
 
+/* Cache of the server supported datatypes, initialized in handle_factory */
+zval* pdo_dblib_datatypes;
+
 static int dblib_fetch_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *info TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
@@ -262,14 +265,32 @@ static struct pdo_dbh_methods dblib_methods = {
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H;
-	int i, nvars, ret = 0;
+	int i, nvars, nvers, ret = 0;
+	int *val;
+	
+	const pdo_dblib_keyval tdsver[] = {
+		 {"4.2",DBVERSION_42}
+		,{"4.6",DBVERSION_46}
+		,{"5.0",DBVERSION_70} /* FIXME: This does not work with Sybase, but environ will */
+		,{"6.0",DBVERSION_70}
+		,{"7.0",DBVERSION_70}
+		,{"7.1",DBVERSION_71}
+		,{"7.2",DBVERSION_72}
+		,{"8.0",DBVERSION_72}
+		,{"10.0",DBVERSION_100}
+		,{"auto",0} /* Only works with FreeTDS. Other drivers will bork */
+		
+	};
+	
+	nvers = sizeof(tdsver)/sizeof(tdsver[0]);
+	
 	struct pdo_data_src_parser vars[] = {
 		{ "charset",	NULL,	0 }
 		,{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 }
 		,{ "host",		"127.0.0.1", 0 }
 		,{ "dbname",	NULL,	0 }
 		,{ "secure",	NULL,	0 } /* DBSETLSECURE */
-		/* TODO: DBSETLVERSION */
+		,{ "version",	NULL,	0 } /* DBSETLVERSION */
 	};
 	
 	nvars = sizeof(vars)/sizeof(vars[0]);
@@ -282,6 +303,27 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	if (!H->login) {
 		goto cleanup;
+	}
+
+	DBERRHANDLE(H->login, (EHANDLEFUNC) error_handler);
+	DBMSGHANDLE(H->login, (MHANDLEFUNC) msg_handler);
+	
+	if(vars[5].optval) {
+		for(i=0;i<nvers;i++) {
+			if(strcmp(vars[5].optval,tdsver[i].key) == 0) {
+				if(FAIL==dbsetlversion(H->login, tdsver[i].value)) {
+					pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Failed to set version specified in connection string." TSRMLS_CC);		
+					goto cleanup;
+				}
+				break;
+			}
+		}
+		
+		if (i==nvers) {
+			printf("Invalid version '%s'\n", vars[5].optval);
+			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: Invalid version specified in connection string." TSRMLS_CC);		
+			goto cleanup; /* unknown version specified */
+		}
 	}
 
 	if (dbh->username) {
@@ -303,9 +345,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 #endif
 
 	DBSETLAPP(H->login, vars[1].optval);
-
-	DBERRHANDLE(H->login, (EHANDLEFUNC) error_handler);
-	DBMSGHANDLE(H->login, (MHANDLEFUNC) msg_handler);
 
 	H->link = dbopen(H->login, vars[2].optval);
 
@@ -329,6 +368,23 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	ret = 1;
 	dbh->max_escaped_char_length = 2;
 	dbh->alloc_own_columns = 1;
+
+#if 0
+	/* Cache the supported data types from the servers systypes table */
+	if(dbcmd(H->link, "select usertype, name from systypes order by usertype") != FAIL) {
+		if(dbsqlexec(H->link) != FAIL) {
+			dbresults(H->link);
+			while (dbnextrow(H->link) == SUCCESS) {
+				val = dbdata(H->link, 1);					
+				add_index_string(pdo_dblib_datatypes, *val, dbdata(H->link, 2), 1);
+			}
+		}
+		/* Throw out any remaining resultsets */
+		dbcancel(H-link);
+	}
+#endif
+	
+
 
 cleanup:
 	for (i = 0; i < nvars; i++) {
