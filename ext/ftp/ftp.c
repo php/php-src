@@ -69,6 +69,10 @@
 #include <openssl/ssl.h>
 #endif
 
+#ifdef PHP_WIN32
+#include "win32/time.h"
+#endif
+
 #include "ftp.h"
 #include "ext/standard/fsock.h"
 
@@ -117,6 +121,17 @@ union ipbox {
 	unsigned short	s[4];
 	unsigned char	c[8];
 };
+
+#define FTP_TIME_DIFF(start, end, diff)              \
+    diff.tv_sec = end.tv_sec - start.tv_sec;         \
+    diff.tv_usec = end.tv_usec - start.tv_usec;      \
+    if(end.tv_usec < start.tv_usec) {                \
+        diff.tv_usec += 1000000L;                    \
+        --diff.tv_usec;                              \
+    }
+
+#define FTP_TIME_PASSED(time,timeout) \
+	((time.tv_sec > timeout.tv_sec) || (time.tv_sec == timeout.tv_sec && time.tv_usec >= timeout.tv_usec))
 
 /* {{{ ftp_open
  */
@@ -244,6 +259,9 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 #if HAVE_OPENSSL_EXT
 	SSL_CTX	*ctx = NULL;
 	long ssl_ctx_options = SSL_OP_ALL;
+	int retry;
+	struct timeval start_time,timeout = {FTP_DEFAULT_TIMEOUT,0};
+	struct timeval left_time = timeout;
 #endif
 	if (ftp == NULL) {
 		return 0;
@@ -294,11 +312,35 @@ ftp_login(ftpbuf_t *ftp, const char *user, const char *pass TSRMLS_DC)
 
 		SSL_set_fd(ftp->ssl_handle, ftp->fd);
 
-		if (SSL_connect(ftp->ssl_handle) <= 0) {
+		gettimeofday(&start_time,NULL);
+		do {
+			int poll_flag = POLLOUT;
+			struct timeval current_time,elapsed_time;
+			int n = SSL_connect(ftp->ssl_handle);
+			int err;
+			if(n > 0) {
+				break;
+			}
+			/* in case of SSL_ERROR_WANT_READ/WRITE, do not retry in non-blocking mode */
+			err = SSL_get_error(ftp->ssl_handle, n);
+			switch(err) {
+				case SSL_ERROR_WANT_READ:
+				poll_flag = POLLIN|POLLPRI;
+				case SSL_ERROR_WANT_WRITE:
+				err = php_pollfd_for(ftp->fd, poll_flag, &left_time );
+				if(err > 0) {
+					gettimeofday(&current_time,NULL);
+					FTP_TIME_DIFF(start_time,current_time,elapsed_time);
+					if(!FTP_TIME_PASSED(elapsed_time,timeout)) { /* Just in case */
+							FTP_TIME_DIFF(timeout,elapsed_time,left_time);
+							continue;
+					}
+				}
+			}
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL/TLS handshake failed");
 			SSL_shutdown(ftp->ssl_handle);
 			return 0;
-		}
+		} while (1);
 
 		ftp->ssl_active = 1;
 
@@ -1520,6 +1562,8 @@ data_accepted:
 	
 	/* now enable ssl if we need to */
 	if (ftp->use_ssl && ftp->use_ssl_for_data) {
+		struct timeval start_time,timeout = {FTP_DEFAULT_TIMEOUT,0};
+		struct timeval left_time = timeout;
 		ctx = SSL_CTX_new(SSLv23_client_method());
 		if (ctx == NULL) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_accept: failed to create the SSL context");
@@ -1545,11 +1589,35 @@ data_accepted:
 			SSL_copy_session_id(data->ssl_handle, ftp->ssl_handle);
 		}
 			
-		if (SSL_connect(data->ssl_handle) <= 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "data_accept: SSL/TLS handshake failed");
+		gettimeofday(&start_time,NULL);
+		do {
+			int poll_flag = POLLOUT;
+			struct timeval current_time,elapsed_time;
+			int n = SSL_connect(data->ssl_handle);
+			int err;
+			if(n > 0) {
+				break;
+			}
+			/* in case of SSL_ERROR_WANT_READ/WRITE, do not retry in non-blocking mode */
+			err = SSL_get_error(data->ssl_handle, n);
+			switch(err) {
+				case SSL_ERROR_WANT_READ:
+				poll_flag = POLLIN|POLLPRI;
+				case SSL_ERROR_WANT_WRITE:
+				err = php_pollfd_for(data->fd, poll_flag, &left_time );
+				if(err > 0) {
+					gettimeofday(&current_time,NULL);
+					FTP_TIME_DIFF(start_time,current_time,elapsed_time);
+					if(!FTP_TIME_PASSED(elapsed_time,timeout)) { /* Just in case */
+							FTP_TIME_DIFF(timeout,elapsed_time,left_time);
+							continue;
+					}
+				}
+			}
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSL/TLS handshake failed");
 			SSL_shutdown(data->ssl_handle);
 			return 0;
-		}
+		} while (1);
 			
 		data->ssl_active = 1;
 	}	
