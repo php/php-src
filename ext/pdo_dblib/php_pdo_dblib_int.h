@@ -120,6 +120,12 @@ typedef struct {
 	pdo_dblib_err err;
 } pdo_dblib_stmt;
 
+typedef struct {
+	const char* key;
+	int value;
+} pdo_dblib_keyval;
+
+
 ZEND_BEGIN_MODULE_GLOBALS(dblib)
 	pdo_dblib_err err;
 	char sqlstate[6];
