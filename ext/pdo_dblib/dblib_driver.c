@@ -262,17 +262,19 @@ static struct pdo_dbh_methods dblib_methods = {
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_DC)
 {
 	pdo_dblib_db_handle *H;
-	int i, ret = 0;
+	int i, nvars, ret = 0;
 	struct pdo_data_src_parser vars[] = {
-		{ "charset",	NULL,	0 },
-		{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 },
-		{ "host",		"127.0.0.1", 0 },
-		{ "dbname",		NULL,	0 },
-		{ "secure",		NULL,	0 }, /* DBSETLSECURE */
-		/* TODO: DBSETLVERSION ? */
+		{ "charset",	NULL,	0 }
+		,{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 }
+		,{ "host",		"127.0.0.1", 0 }
+		,{ "dbname",	NULL,	0 }
+		,{ "secure",	NULL,	0 } /* DBSETLSECURE */
+		/* TODO: DBSETLVERSION */
 	};
-
-	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, 5);
+	
+	nvars = sizeof(vars)/sizeof(vars[0]);
+	
+	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 	H->login = dblogin();
@@ -283,10 +285,15 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	}
 
 	if (dbh->username) {
-		DBSETLUSER(H->login, dbh->username);
+		if(FAIL == DBSETLUSER(H->login, dbh->username)) {
+			goto cleanup;
+		}
 	}
+
 	if (dbh->password) {
-		DBSETLPWD(H->login, dbh->password);
+		if(FAIL == DBSETLPWD(H->login, dbh->password)) {
+			goto cleanup;
+		}
 	}
 	
 #if !PHP_DBLIB_IS_MSSQL
@@ -297,14 +304,12 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	DBSETLAPP(H->login, vars[1].optval);
 
-#if PHP_DBLIB_IS_MSSQL
-	dbprocerrhandle(H->login, (EHANDLEFUNC) error_handler);
-	dbprocmsghandle(H->login, (MHANDLEFUNC) msg_handler);
-#endif
+	DBERRHANDLE(H->login, (EHANDLEFUNC) error_handler);
+	DBMSGHANDLE(H->login, (MHANDLEFUNC) msg_handler);
 
 	H->link = dbopen(H->login, vars[2].optval);
 
-	if (H->link == NULL) {
+	if (!H->link) {
 		goto cleanup;
 	}
 
@@ -315,10 +320,10 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	DBSETOPT(H->link, DBTEXTSIZE, "2147483647");
 
 	/* allow double quoted indentifiers */
-	DBSETOPT(H->link, DBQUOTEDIDENT, NULL);
+	DBSETOPT(H->link, DBQUOTEDIDENT, "1");
 
-	if (vars[3].optval && FAIL == dbuse(H->link, vars[3].optval)) {
-		goto cleanup;
+	if (vars[3].optval) {
+		DBSETLDBNAME(H->login, vars[3].optval);
 	}
 
 	ret = 1;
@@ -326,7 +331,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	dbh->alloc_own_columns = 1;
 
 cleanup:
-	for (i = 0; i < sizeof(vars)/sizeof(vars[0]); i++) {
+	for (i = 0; i < nvars; i++) {
 		if (vars[i].freeme) {
 			efree(vars[i].optval);
 		}

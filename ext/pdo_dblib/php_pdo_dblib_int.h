@@ -71,6 +71,8 @@
 # define SQLVARBINARY	SYBVARBINARY
 # ifdef SYBUNIQUE
 #  define SQLUNIQUE		SYBUNIQUE
+#else 
+#  define SQLUNIQUE		36 /* FreeTDS Hack */
 # endif
 
 # define DBERRHANDLE(a, b)	dberrhandle(b)

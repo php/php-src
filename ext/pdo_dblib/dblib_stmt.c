@@ -87,8 +87,8 @@ static int dblib_dblib_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 
 	/* Cancel any pending results */
 	dbcancel(H->link);
-
-	efree(stmt->columns);
+	
+	efree(stmt->columns); 
 	stmt->columns = NULL;
 	
 	return 1;
@@ -97,8 +97,6 @@ static int dblib_dblib_stmt_cursor_closer(pdo_stmt_t *stmt TSRMLS_DC)
 static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt TSRMLS_DC)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
-
-	dblib_dblib_stmt_cursor_closer(stmt TSRMLS_CC);
 
 	efree(S);
 		
@@ -113,7 +111,12 @@ static int pdo_dblib_stmt_next_rowset(pdo_stmt_t *stmt TSRMLS_DC)
 	
 	ret = dbresults(H->link);
 	
-	if (ret == FAIL || ret == NO_MORE_RESULTS) {
+	if (FAIL == ret) {
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "DBLIB: dbresults() returned FAIL" TSRMLS_CC);		
+		return 0;
+	}
+		
+	if(NO_MORE_RESULTS == ret) {
 		return 0;
 	}
 	
@@ -131,6 +134,8 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	
 	dbsetuserdata(H->link, (BYTE*) &S->err);
 	
+	dblib_dblib_stmt_cursor_closer(stmt TSRMLS_CC);
+	
 	if (FAIL == dbcmd(H->link, stmt->active_query_string)) {
 		return 0;
 	}
@@ -140,10 +145,6 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt TSRMLS_DC)
 	}
 	
 	ret = pdo_dblib_stmt_next_rowset(stmt TSRMLS_CC);
-	
-	if (ret == 0) {
-		return 0;
-	}
 	
 	stmt->row_count = DBCOUNT(H->link);
 	stmt->column_count = dbnumcols(H->link);
@@ -162,7 +163,12 @@ static int pdo_dblib_stmt_fetch(pdo_stmt_t *stmt,
 	
 	ret = dbnextrow(H->link);
 	
-	if (ret == FAIL || ret == NO_MORE_ROWS) {
+	if (FAIL == ret) {
+		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "DBLIB: dbnextrow() returned FAIL" TSRMLS_CC);
+		return 0;
+	}
+		
+	if(NO_MORE_ROWS == ret) {
 		return 0;
 	}
 	
@@ -173,6 +179,10 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
+	
+	if(colno >= stmt->column_count || colno < 0)  {
+		return FAILURE;
+	}
 	
 	struct pdo_column_data *col = &stmt->columns[colno];
 	
@@ -225,20 +235,12 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 			*ptr = tmp_ptr;
 			break;
 		}
-#ifdef SQLUNIQUE
 		case SQLUNIQUE: {
-#else
-		case 36: { /* FreeTDS hack, also used by ext/mssql */
-#endif
 			*len = 36+1;
 			tmp_ptr = emalloc(*len + 1);
 
 			/* uniqueidentifier is a 16-byte binary number, convert to 32 char hex string */
-#ifdef SQLUNIQUE
 			*len = dbconvert(NULL, SQLUNIQUE, *ptr, *len, SQLCHAR, tmp_ptr, *len);
-#else
-			*len = dbconvert(NULL, 36, *ptr, *len, SQLCHAR, tmp_ptr, *len);
-#endif
 			php_strtoupper(tmp_ptr, *len);
 			*ptr = tmp_ptr;
 			break;
@@ -270,11 +272,17 @@ static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *re
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
-	
+	DBTYPEINFO* dbtypeinfo;
+
+	if(colno >= stmt->column_count || colno < 0)  {
+		return FAILURE;
+	}
+
 	array_init(return_value);
 
-	DBTYPEINFO* dbtypeinfo;
 	dbtypeinfo = dbcoltypeinfo(H->link, colno+1);
+	
+	if(!dbtypeinfo) return FAILURE;
 		
 	add_assoc_long(return_value, "max_length", dbcollen(H->link, colno+1) );
 	add_assoc_long(return_value, "precision", (int) dbtypeinfo->precision );
