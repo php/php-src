@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.0 Release Candidate 3
 
 - Core:
+  . Fixed bug #64960 (Segfault in gc_zval_possible_root). (Laruence)
   . Fixed bug #64879 (Heap based buffer overflow in quoted_printable_encode,
     CVE 2013-2110). (Stas)
 
@@ -10,8 +11,8 @@ PHP                                                                        NEWS
   . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
 
 - GD:
-  . Fixed Bug #64961 (segfault in imagesetinterpolation). (Remi)
   . Fixed Bug #64962 (imagerotate produces corrupted image). (Remi)
+  . Fixed Bug #64961 (segfault in imagesetinterpolation). (Remi)
 
 - Hash:
   . Fixed Bug #64745 (hash_pbkdf2() truncates data when using default length
