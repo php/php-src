@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.0 Release Candidate 3
+06 Jun 2013, PHP 5.5.0 Release Candidate 3
 
 - Core:
   . Fixed bug #64960 (Segfault in gc_zval_possible_root). (Laruence)
