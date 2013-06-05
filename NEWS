@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.17
 
+- Core:
+  . Fixed bug #64960 (Segfault in gc_zval_possible_root). (Laruence)
+
 - FPM:
   . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
 
