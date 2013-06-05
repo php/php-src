@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-23 May 2013, PHP 5.3.26RC1
+06 Jun 2013, PHP 5.3.26
+
+- Core:
+  . Fixed bug #64879 (Heap based buffer overflow in quoted_printable_encode,
+    CVE 2013-2110). (Stas)
 
 - Calendar:
   . Fixed bug #64895 (Integer overflow in SndToJewish). (Remi)
