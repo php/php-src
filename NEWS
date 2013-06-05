@@ -2,7 +2,11 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.0 Release Candidate 3
 
--FPM:
+- Core:
+  . Fixed bug #64879 (Heap based buffer overflow in quoted_printable_encode,
+    CVE 2013-2110). (Stas)
+
+- FPM:
   . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
 
 - GD:
