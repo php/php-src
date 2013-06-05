@@ -16,9 +16,7 @@ PHP                                                                        NEWS
 - pgsql:
   - Fixed bug #64609 (pg_convert enum type support). (Matteo)
 
-?? ??? 2013, PHP 5.3.26
-
-### DO NOT ADD ENTRIES HERE, ADD THEM ABOVE FOR 5.3.27 ###
+06 Jun 2013, PHP 5.3.26
 
 - Core:
   . Fixed bug #64879 (Heap based buffer overflow in quoted_printable_encode,
