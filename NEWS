@@ -21,7 +21,7 @@ PHP                                                                        NEWS
   . Fixed Bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
 
 
-?? ??? 2013, PHP 5.4.16
+06 Jun 2013, PHP 5.4.16
 
 - Core:
   . Fixed bug #64879 (Heap based buffer overflow in quoted_printable_encode,
