@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.0 Release Candidate 4
+- Core:
+  . Fixed bug #64934 (Apache2 TS crash with get_browser()). (Anatol)
 
 06 Jun 2013, PHP 5.5.0 Release Candidate 3
 
@@ -8,7 +10,6 @@ PHP                                                                        NEWS
   . Fixed bug #64960 (Segfault in gc_zval_possible_root). (Laruence)
   . Fixed bug #64879 (Heap based buffer overflow in quoted_printable_encode,
     CVE 2013-2110). (Stas)
-  . Fixed bug #64934 (Apache2 TS crash with get_browser()). (Anatol)
 
 - FPM:
   . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
