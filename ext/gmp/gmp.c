@@ -597,6 +597,29 @@ static zend_object_value gmp_clone_obj(zval *obj TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zval *op1, zval *op2 TSRMLS_DC) {
+	zval op2_copy;
+	if (Z_TYPE_P(op2) != IS_LONG) {
+		op2_copy = *op2;
+		zval_copy_ctor(&op2_copy);
+		convert_to_long(&op2_copy);
+		op2 = &op2_copy;
+	}
+
+	if (Z_LVAL_P(op2) < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Shift cannot be negative");
+		RETVAL_FALSE;
+	} else {
+		mpz_ptr gmpnum_op, gmpnum_result;
+		gmp_temp_t temp;
+
+		FETCH_GMP_ZVAL(gmpnum_op, op1, temp);
+		INIT_GMP_RETVAL(gmpnum_result);
+		op(gmpnum_result, gmpnum_op, (unsigned long) Z_LVAL_P(op2));
+		FREE_GMP_TEMP(temp);
+	}
+}
+
 #define DO_BINARY_UI_OP_EX(op, uop, check_b_zero)       \
 	gmp_zval_binary_ui_op(                              \
 		result, op1, op2, op, (gmp_binary_ui_op_t) uop, \
@@ -625,22 +648,11 @@ static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op
 	case ZEND_MOD:
 		DO_BINARY_UI_OP_EX(mpz_mod, mpz_mod_ui, 1);
 	case ZEND_SL:
-		/*convert_to_long_ex(&op2);
-		if (Z_LVAL_P(op2) < 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Shift cannot be negative");
-			ZVAL_FALSE(return_value);
-		} else {
-			mpz_t *gmpnum, *resultnum;
-			gmp_temp_t temp;
-			zval *result_tmp;
-			FETCH_GMP_ZVAL(gmpnum, &op1, temp);
-			mpz_mul_2exp(resultnum, gmpnum, (unsigned long) Z_LVAL_P(op2))
-			FREE_GMP_TEMP(temp);
-			RETVAL_GMP(resultnum);
-		}
-		return SUCCESS;*/
+		shift_operator_helper(mpz_mul_2exp, result, op1, op2 TSRMLS_CC);
+		return SUCCESS;
 	case ZEND_SR:
-		return FAILURE;
+		shift_operator_helper(mpz_fdiv_q_2exp, result, op1, op2 TSRMLS_CC);
+		return SUCCESS;
 	case ZEND_BW_OR:
 		DO_BINARY_OP(mpz_ior);
 	case ZEND_BW_AND:

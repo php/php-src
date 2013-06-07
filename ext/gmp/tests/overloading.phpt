@@ -38,6 +38,13 @@ var_dump($a ^ $b);
 var_dump($a ^ 17);
 var_dump(42 ^ $b);
 
+var_dump($a << $b);
+var_dump($a << 17);
+var_dump(42 << $b);
+
+var_dump($a >> 2);
+var_dump(-$a >> 2);
+
 var_dump(~$a);
 var_dump(-$a);
 var_dump(+$a);
@@ -163,6 +170,26 @@ object(GMP)#%d (1) {
 object(GMP)#%d (1) {
   ["num"]=>
   string(2) "59"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(7) "5505024"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(7) "5505024"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(7) "5505024"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(2) "10"
+}
+object(GMP)#%d (1) {
+  ["num"]=>
+  string(3) "-11"
 }
 object(GMP)#%d (1) {
   ["num"]=>
