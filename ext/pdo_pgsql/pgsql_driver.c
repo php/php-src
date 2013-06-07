@@ -320,7 +320,7 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 		case PDO_PARAM_LOB:
 			/* escapedlen returned by PQescapeBytea() accounts for trailing 0 */
 #ifdef HAVE_PQESCAPE_BYTEA_CONN
-			escaped = PQescapeByteaConn(H->server, unquoted, unquotedlen, &tmp_len);
+			escaped = PQescapeByteaConn(H->server, (unsigned char *)unquoted, unquotedlen, &tmp_len);
 #else
 			escaped = PQescapeBytea(unquoted, unquotedlen, &tmp_len);
 #endif
