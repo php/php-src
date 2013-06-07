@@ -12,4 +12,7 @@ PHP                                                                        NEWS
     cache_slots) in op_array->literals table. (Laruence, Dmitry)
   . Added script level constant replacement optimization pass. (Dmitry)
 
+- PDO_pgsql
+  . Fixed Bug #42614 (PDO_pgsql: add pg_get_notify support). (Matteo)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
