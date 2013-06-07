@@ -66,6 +66,8 @@ var_dump($a <= 42);
 var_dump($a > 42);
 var_dump($a >= 42);
 
+var_dump($a == new stdClass);
+
 $a += 1;
 var_dump($a);
 $a -= 1;
@@ -217,6 +219,9 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
+
+Warning: main(): Unable to convert variable to GMP - wrong type in %s on line %d
+bool(false)
 object(GMP)#%d (1) {
   ["num"]=>
   string(2) "43"

@@ -671,6 +671,9 @@ static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op
 static int gmp_compare(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	gmp_cmp(result, op1, op2 TSRMLS_CC);
+	if (Z_TYPE_P(result) == IS_BOOL) {
+		ZVAL_LONG(result, 1);
+	}
 	return SUCCESS;
 }
 /* }}} */
