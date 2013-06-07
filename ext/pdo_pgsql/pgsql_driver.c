@@ -542,10 +542,11 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
 
+	/* using pre-9.0 syntax as PDO_pgsql is 7.4+ compatible */
 	if (pg_fields) {
-		spprintf(&query, 0, "COPY %s (%s) FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+		spprintf(&query, 0, "COPY %s (%s) FROM STDIN WITH DELIMITER E'%c' NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
 	} else {
-		spprintf(&query, 0, "COPY %s FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+		spprintf(&query, 0, "COPY %s FROM STDIN WITH DELIMITER E'%c' NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
 	}
 
 	/* Obtain db Handle */
@@ -656,10 +657,11 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 		RETURN_FALSE;
 	}
 
+	/* using pre-9.0 syntax as PDO_pgsql is 7.4+ compatible */
 	if (pg_fields) {
-		spprintf(&query, 0, "COPY %s (%s) FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+		spprintf(&query, 0, "COPY %s (%s) FROM STDIN WITH DELIMITER E'%c' NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
 	} else {
-		spprintf(&query, 0, "COPY %s FROM STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+		spprintf(&query, 0, "COPY %s FROM STDIN WITH DELIMITER E'%c' NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
 	}
 
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
@@ -761,10 +763,11 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 		PQclear(pgsql_result);
 	}
 
+	/* using pre-9.0 syntax as PDO_pgsql is 7.4+ compatible */
 	if (pg_fields) {
-		spprintf(&query, 0, "COPY %s (%s) TO STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+		spprintf(&query, 0, "COPY %s (%s) TO STDIN WITH DELIMITER E'%c' NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
 	} else {
-		spprintf(&query, 0, "COPY %s TO STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+		spprintf(&query, 0, "COPY %s TO STDIN WITH DELIMITER E'%c' NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
 	}
 	pgsql_result = PQexec(H->server, query);
 	efree(query);
@@ -846,10 +849,11 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 		PQclear(pgsql_result);
 	}
 
+	/* using pre-9.0 syntax as PDO_pgsql is 7.4+ compatible */
 	if (pg_fields) {
-		spprintf(&query, 0, "COPY %s (%s) TO STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+		spprintf(&query, 0, "COPY %s (%s) TO STDIN WITH DELIMITER E'%c' NULL AS E'%s'", table_name, pg_fields, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
 	} else {
-		spprintf(&query, 0, "COPY %s TO STDIN DELIMITERS E'%c' WITH NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
+		spprintf(&query, 0, "COPY %s TO STDIN WITH DELIMITER E'%c' NULL AS E'%s'", table_name, (pg_delim_len ? *pg_delim : '\t'), (pg_null_as_len ? pg_null_as : "\\\\N"));
 	}
 	pgsql_result = PQexec(H->server, query);
 	efree(query);
