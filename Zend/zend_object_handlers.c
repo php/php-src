@@ -1651,6 +1651,8 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	NULL,									/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
+	NULL,									/* do_operation */
+	NULL,									/* compare */
 };
 
 /*
