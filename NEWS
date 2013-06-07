@@ -14,5 +14,7 @@ PHP                                                                        NEWS
 
 - PDO_pgsql
   . Fixed Bug #42614 (PDO_pgsql: add pg_get_notify support). (Matteo)
+  . Fixed Bug #63657 (pgsqlCopyFromFile, pgsqlCopyToArray use Postgres < 7.3
+    syntax). (Matteo)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
