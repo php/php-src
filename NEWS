@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #64966 (segfault in zend_do_fcall_common_helper_SPEC). (Laruence)
   . Fixed bug #64934 (Apache2 TS crash with get_browser()). (Anatol)
 
+- SPL:
+  . Fixed bug #64997 (Segfault while using RecursiveIteratorIterator on
+    64-bits systems). (Laruence)
+
 06 Jun 2013, PHP 5.5.0 Release Candidate 3
 
 - Core:
