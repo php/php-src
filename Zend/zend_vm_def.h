@@ -2685,7 +2685,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 				zval_ptr_dtor(&ret->var.ptr);
 			}
 		} else if (RETURN_VALUE_USED(opline)) {
-			EX_T(opline->result.u.var).var.ptr = NULL;
+			EX_T(opline->result.var).var.ptr = NULL;
 		}
 	} else if (fbc->type == ZEND_USER_FUNCTION) {
 		EX(original_return_value) = EG(return_value_ptr_ptr);
