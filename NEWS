@@ -17,7 +17,11 @@ PHP                                                                        NEWS
   . Fixed bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
 
 - pgsql:
-  - Fixed bug #64609 (pg_convert enum type support). (Matteo)
+  . Fixed bug #64609 (pg_convert enum type support). (Matteo)
+
+- SPL:
+  . Fixed bug #64997 (Segfault while using RecursiveIteratorIterator on 
+    64-bits systems). (Laruence)
 
 06 Jun 2013, PHP 5.3.26
 
