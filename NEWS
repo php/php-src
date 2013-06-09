@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 - PDO_pgsql:
   . Fixed Bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
 
+- SPL:
+  . Fixed bug #64997 (Segfault while using RecursiveIteratorIterator on
+    64-bits systems). (Laruence)
 
 06 Jun 2013, PHP 5.4.16
 
