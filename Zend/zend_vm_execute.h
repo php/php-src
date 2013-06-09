@@ -552,6 +552,8 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 			if (!RETURN_VALUE_USED(opline)) {
 				zval_ptr_dtor(&ret->var.ptr);
 			}
+		} else if (RETURN_VALUE_USED(opline)) {
+			EX_T(opline->result.var).var.ptr = NULL;
 		}
 	} else if (fbc->type == ZEND_USER_FUNCTION) {
 		EX(original_return_value) = EG(return_value_ptr_ptr);
