@@ -32,11 +32,11 @@ object(DateInterval)#1 (15) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  string(1) "0"
+  int(0)
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
-  string(19) "9223372036854775807"
+  int(-1)
   ["have_weekday_relative"]=>
   int(9)
   ["have_special_relative"]=>

@@ -34,7 +34,7 @@ object(DateInterval)#1 (15) {
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
-  string(1) "0"
+  int(0)
   ["have_weekday_relative"]=>
   int(0)
   ["have_special_relative"]=>
