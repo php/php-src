@@ -2384,18 +2384,9 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 		return props;
 	}
 
-#define PHP_DATE_INTERVAL_ADD_PROPERTY_I64(n, f) \
-	do { \
-		char i64_buf[DATE_I64_BUF_LEN]; \
-		MAKE_STD_ZVAL(zv); \
-		DATE_I64A(intervalobj->diff->f, i64_buf, DATE_I64_BUF_LEN); \
-		ZVAL_STRING(zv, i64_buf, 1); \
-		zend_hash_update(props, n, strlen(n) + 1, &zv, sizeof(zval), NULL); \
-	} while(0);
-
 #define PHP_DATE_INTERVAL_ADD_PROPERTY(n,f) \
 	MAKE_STD_ZVAL(zv); \
-	ZVAL_LONG(zv, intervalobj->diff->f); \
+	ZVAL_LONG(zv, (long)intervalobj->diff->f); \
 	zend_hash_update(props, n, strlen(n) + 1, &zv, sizeof(zval), NULL);
 
 	PHP_DATE_INTERVAL_ADD_PROPERTY("y", y);
@@ -2409,14 +2400,14 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 	PHP_DATE_INTERVAL_ADD_PROPERTY("first_last_day_of", first_last_day_of);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("invert", invert);
 	if (intervalobj->diff->days != -99999) {
-		PHP_DATE_INTERVAL_ADD_PROPERTY_I64("days", days);
+		PHP_DATE_INTERVAL_ADD_PROPERTY("days", days);
 	} else {
 		MAKE_STD_ZVAL(zv);
 		ZVAL_FALSE(zv);
 		zend_hash_update(props, "days", 5, &zv, sizeof(zval), NULL);
 	}
 	PHP_DATE_INTERVAL_ADD_PROPERTY("special_type", special.type);
-	PHP_DATE_INTERVAL_ADD_PROPERTY_I64("special_amount", special.amount);
+	PHP_DATE_INTERVAL_ADD_PROPERTY("special_amount", special.amount);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("have_weekday_relative", have_weekday_relative);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("have_special_relative", have_special_relative);
 
