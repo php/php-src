@@ -2583,7 +2583,9 @@ static int accel_startup(zend_extension *extension)
 		ZCG(include_path_key) = NULL;
 		if (ZCG(include_path) && *ZCG(include_path)) {
 			ZCG(include_path_len) = strlen(ZCG(include_path));
-			if (!zend_accel_hash_is_full(&ZCSG(include_paths))) {
+			ZCG(include_path_key) = zend_accel_hash_find(&ZCSG(include_paths), ZCG(include_path), ZCG(include_path_len) + 1);
+			if (!ZCG(include_path_key) &&
+			    !zend_accel_hash_is_full(&ZCSG(include_paths))) {
 				char *key;
 
 				zend_shared_alloc_lock(TSRMLS_C);
