@@ -22,7 +22,7 @@ $a->b();
 --EXPECTF--
 Fatal error: Uncaught exception 'Exception' in %sbug64966.php:3
 Stack trace:
-#0 [internal function]: {closure}(4096, 'Argument 1 pass...', '/home/huixinche...', 6, Array)
+#0 [internal function]: {closure}(4096, 'Argument 1 pass...', '%s', 6, Array)
 #1 %sbug64966.php(6): iterator_apply('')
 #2 %sbug64966.php(12): test('iterator_apply')
 #3 %sbug64966.php(17): A->b()
