@@ -7,7 +7,7 @@ PHP                                                                        NEWS
   . Fixed bug #64960 (Segfault in gc_zval_possible_root). (Laruence)
   . Fixed bug #64934 (Apache2 TS crash with get_browser()). (Anatol)
 
-- DateTime
+- DateTime:
   . Fixed bug #53437 (Crash when using unserialized DatePeriod instance).
     (Gustavo, Derick, Anatol)
 
