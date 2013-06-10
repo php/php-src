@@ -62,7 +62,7 @@ static void safe_php_register_variable(char *var, char *strval, int val_len, zva
 #define MAX_SIZE_ANONNAME 33
 
 /* Errors */
-#define UPLOAD_ERROR_OK   0  /* File upload succesful */
+#define UPLOAD_ERROR_OK   0  /* File upload successful */
 #define UPLOAD_ERROR_A    1  /* Uploaded file exceeded upload_max_filesize */
 #define UPLOAD_ERROR_B    2  /* Uploaded file exceeded MAX_FILE_SIZE */
 #define UPLOAD_ERROR_C    3  /* Partially uploaded */

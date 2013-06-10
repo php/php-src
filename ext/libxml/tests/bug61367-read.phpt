@@ -8,7 +8,7 @@ error_reporting=E_ALL & ~E_NOTICE
 --FILE--
 <?php
 /*
- * Note: Using error_reporting=E_ALL & ~E_NOTICE to supress "Trying to get property of non-object" notices.
+ * Note: Using error_reporting=E_ALL & ~E_NOTICE to suppress "Trying to get property of non-object" notices.
  */
 class StreamExploiter {
 	public function stream_close (  ) {

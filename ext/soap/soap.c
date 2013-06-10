@@ -1669,7 +1669,7 @@ PHP_METHOD(SoapServer, handle)
 			}
 		}
 #endif
-		/* If new session or something wierd happned */
+		/* If new session or something weird happned */
 		if (soap_obj == NULL) {
 			zval *tmp_soap;
 
