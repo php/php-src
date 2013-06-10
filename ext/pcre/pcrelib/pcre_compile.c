@@ -8139,7 +8139,7 @@ if (code - codestart > length) errorcode = ERR23;
 
 #ifdef SUPPORT_VALGRIND
 /* If the estimated length exceeds the really used length, mark the extra
-allocated memory as unadressable, so that any out-of-bound reads can be
+allocated memory as unaddressable, so that any out-of-bound reads can be
 detected. */
 VALGRIND_MAKE_MEM_NOACCESS(code, (length - (code - codestart)) * sizeof(pcre_uchar));
 #endif
