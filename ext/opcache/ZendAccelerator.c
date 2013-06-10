@@ -1126,6 +1126,10 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		return new_persistent_script;
 	}
 
+	if (!compact_persistent_script(new_persistent_script)) {
+		return new_persistent_script;
+	}
+
 	/* exclusive lock */
 	zend_shared_alloc_lock(TSRMLS_C);
 
