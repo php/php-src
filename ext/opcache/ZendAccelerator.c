@@ -1617,10 +1617,12 @@ static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int
        	from_shared_memory = 0;
 		persistent_script = compile_and_cache_file(file_handle, type, key, key_length, &op_array, &from_shared_memory TSRMLS_CC);
 
-		/* Something went wrong during compilation, returning NULL */
+		/* Caching is disabled, returning op_array;
+		 * or something went wrong during compilation, returning NULL
+		 */
 		if (!persistent_script) {
 			SHM_PROTECT();
-			return op_array; /* Presently always NULL, but not necessary in the future */
+			return op_array;
 		}
 	} else {
 
