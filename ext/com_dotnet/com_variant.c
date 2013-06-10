@@ -429,7 +429,7 @@ PHP_FUNCTION(com_variant_create_instance)
 		/* If already an array and VT_ARRAY is passed then:
 			- if only VT_ARRAY passed then do not perform a conversion
 			- if VT_ARRAY plus other type passed then perform conversion 
-			  but will probably fail (origional behavior)
+			  but will probably fail (original behavior)
 		*/
 		if ((vt & VT_ARRAY) && (V_VT(&obj->v) & VT_ARRAY)) {
 			long orig_vt = vt;

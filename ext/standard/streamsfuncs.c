@@ -1591,7 +1591,7 @@ PHP_FUNCTION(stream_is_local)
 /* }}} */
 
 /* {{{ proto bool stream_supports_lock(resource stream)
-   Tells wether the stream supports locking through flock(). */
+   Tells whether the stream supports locking through flock(). */
 PHP_FUNCTION(stream_supports_lock)
 {
 	php_stream *stream;

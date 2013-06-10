@@ -1812,7 +1812,7 @@ History
 2003/01/31: [impl] rename TTRANS() to TOLOWER().
 2003/01/30: [bug]  .c.o --> .c.obj in win32\Makefile.
 2003/01/30: [impl] add -DNOT_RUBY to Makefile.in.
-                   NOT_RUBY is refered in regint.h for escape double
+                   NOT_RUBY is referred in regint.h for escape double
                    including config.h.
 2003/01/30: [impl] when string hasn't case ambiguity, don't compile
                    to ignore case opcode.

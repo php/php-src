@@ -683,7 +683,7 @@ Options:
     -d foo=bar  Pass -d option to the php binary (Define INI entry foo
                 with value 'bar').
 
-    -g          Comma seperated list of groups to show during test run
+    -g          Comma separated list of groups to show during test run
                 (possible values: PASS, FAIL, XFAIL, SKIP, BORK, WARN, LEAK, REDIRECT).
 
     -m          Test for memory leaks with Valgrind.

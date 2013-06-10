@@ -98,7 +98,7 @@ function set_attr($conn,$attr,$sufix)
 	else if (!strcmp($attr,'CLIENT_IDENTIFIER')) 
         $r = oci_set_client_identifier($conn,'ID00'.$sufix);
 	else
-		echo "Pass one of the above four attibutes!!!\n";
+		echo "Pass one of the above four attributes!!!\n";
 	if ($r) {
 		echo "Value of $attr has been set successfully\n";
     }

@@ -62,7 +62,7 @@ foreach($values_array as $val ) {
 	oci_set_client_info($c1,$val);
 	$r = oci_set_action($c1,$val);	
 	if ($r) {
-		echo "Values set succesfully to $val\n";
+		echo "Values set successfully to $val\n";
 		foreach($attr_array as $attr) {
             get_attr($c1,$attr);
         }
@@ -98,12 +98,12 @@ bool(true)
 The value of ACTION is ACTION1
 
 Setting to different values 
-Values set succesfully to 1000
+Values set successfully to 1000
 The value of MODULE is 1000
 The value of ACTION is 1000
 The value of CLIENT_INFO is 1000
 The value of CLIENT_IDENTIFIER is 1000
-Values set succesfully to 
+Values set successfully to 
 The value of MODULE is 
 The value of ACTION is 
 The value of CLIENT_INFO is 

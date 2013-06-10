@@ -440,7 +440,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		if (strchr(mode, 'a')) {
 			read_write = 3; /* Open for Appending */
 		} else {
-			read_write = 2; /* Open for writting */
+			read_write = 2; /* Open for writing */
 		}
 	}
 	if (!read_write) {
@@ -500,7 +500,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, char *path, ch
 		}
 		if (result <= 299 && result >= 200) {
 			if (allow_overwrite) {
-				/* Context permits overwritting file, 
+				/* Context permits overwriting file, 
 				   so we just delete whatever's there in preparation */
 				php_stream_printf(stream TSRMLS_CC, "DELE %s\r\n", resource->path);
 				result = GET_FTP_RESULT(stream);

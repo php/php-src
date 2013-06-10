@@ -275,7 +275,7 @@ static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 
 	/*
 	 * This handles the situation where the browser sends a Expect: 100-continue header
-	 * and needs to recieve confirmation from the server on whether or not it can send
+	 * and needs to receive confirmation from the server on whether or not it can send
 	 * the rest of the request. RFC 2616
 	 *
 	 */
