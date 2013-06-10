@@ -10,7 +10,7 @@
 ; files from a glob(3) pattern. This directive can be used everywhere in the
 ; file.
 ; Relative path can also be used. They will be prefixed by:
-;  - the global prefix if it's been set (-p arguement)
+;  - the global prefix if it's been set (-p argument)
 ;  - @prefix@ otherwise
 ;include=etc/fpm.d/*.conf
 
