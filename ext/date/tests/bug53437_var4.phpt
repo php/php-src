@@ -1,5 +1,7 @@
 --TEST--
 Bug #53437 (Check that var_dump out is the same using the whole object or it's single properties), variation 4
+--INI--
+date.timezone = Europe/Berlin
 --FILE--
 <?php
 $dt = new DateTime('2009-10-11');
