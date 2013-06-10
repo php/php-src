@@ -1,9 +1,9 @@
 --TEST--
-Bug #53437 DateInterval unserialize bad data, 32 bit
+Bug #53437 DateInterval unserialize bad data, 64 bit
 --SKIPIF--
 <?php
-	if (PHP_INT_SIZE != 4) {
-		die('skip 32 bit only');
+	if (PHP_INT_SIZE != 8) {
+		die('skip true 64 bit only');
 	}
 --FILE--
 <?php
@@ -41,7 +41,7 @@ object(DateInterval)#1 (15) {
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
-  int(-1)
+  int(9223372036854775807)
   ["have_weekday_relative"]=>
   int(9)
   ["have_special_relative"]=>
