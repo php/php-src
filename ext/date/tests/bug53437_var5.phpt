@@ -11,8 +11,8 @@ var_dump($di);
 
 ?>
 ==DONE==
---EXPECT--
-object(DateInterval)#1 (15) {
+--EXPECTF--
+object(DateInterval)#%d (15) {
   ["y"]=>
   int(2)
   ["m"]=>
