@@ -1172,7 +1172,7 @@ ZEND_API void object_properties_init(zend_object *object, zend_class_entry *clas
 
 /* This function requires 'properties' to contain all props declared in the
  * class and all props being public. If only a subset is given or the class
- * has protected members then you need to merge the properties seperately by
+ * has protected members then you need to merge the properties separately by
  * calling zend_merge_properties(). */
 ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties ZEND_FILE_LINE_DC TSRMLS_DC) /* {{{ */
 {

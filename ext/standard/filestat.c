@@ -904,7 +904,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	}
 
 	if (php_stream_stat_path_ex((char *)filename, flags, &ssb, NULL)) {
-		/* Error Occured */
+		/* Error Occurred */
 		if (!IS_EXISTS_CHECK(type)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);
 		}

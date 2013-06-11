@@ -651,7 +651,7 @@ PHP_FUNCTION(enchant_broker_free_dict)
 /* }}} */
 
 /* {{{ proto bool enchant_broker_dict_exists(resource broker, string tag)
-   Wether a dictionary exists or not. Using non-empty tag */
+   Whether a dictionary exists or not. Using non-empty tag */
 PHP_FUNCTION(enchant_broker_dict_exists)
 {
 	zval *broker;

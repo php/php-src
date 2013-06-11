@@ -37,7 +37,7 @@ struct _WSAMSG {
     DWORD            dwFlags;			//int msg_flags
 }
 struct __WSABUF {
-  u_long   			len;				//size_t iov_len (2nd member)
+  u_long			len;				//size_t iov_len (2nd member)
   char FAR			*buf;				//void *iov_base (1st member)
 }
 struct _WSACMSGHDR {
@@ -593,6 +593,7 @@ static void to_zval_read_sockaddr_in(const char *data, zval *zv, res_context *ct
 {
 	to_zval_read_aggregation(data, zv, descriptors_sockaddr_in, ctx);
 }
+#if HAVE_IPV6
 static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_context *ctx)
 {
 	int					res;
@@ -652,6 +653,7 @@ static void to_zval_read_sockaddr_in6(const char *data, zval *zv, res_context *c
 {
 	to_zval_read_aggregation(data, zv, descriptors_sockaddr_in6, ctx);
 }
+#endif /* HAVE_IPV6 */
 static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_context *ctx)
 {
 	zval				lzval = zval_used_for_init;
@@ -742,6 +744,7 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 		}
 		break;
 
+#if HAVE_IPV6
 	case AF_INET6:
 		if (ctx->sock->type != AF_INET6) {
 			do_from_zval_err(ctx, "the specified family (AF_INET6) is not "
@@ -755,6 +758,7 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 			(*sockaddr_ptr)->sa_family = AF_INET6;
 		}
 		break;
+#endif /* HAVE_IPV6 */
 
 	case AF_UNIX:
 		if (ctx->sock->type != AF_UNIX) {
@@ -792,9 +796,11 @@ static void to_zval_read_sockaddr_aux(const char *sockaddr_c, zval *zv, res_cont
 		to_zval_read_sockaddr_in(sockaddr_c, zv, ctx);
 		break;
 
+#if HAVE_IPV6
 	case AF_INET6:
 		to_zval_read_sockaddr_in6(sockaddr_c, zv, ctx);
 		break;
+#endif /* HAVE_IPV6 */
 
 	case AF_UNIX:
 		to_zval_read_sockaddr_un(sockaddr_c, zv, ctx);
@@ -1283,7 +1289,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 }
 
 /* CONVERSIONS for struct in6_pktinfo */
-#ifdef IPV6_PKTINFO
+#if defined(IPV6_PKTINFO) && HAVE_IPV6
 static const field_descriptor descriptors_in6_pktinfo[] = {
 		{"addr", sizeof("addr"), 1, offsetof(struct in6_pktinfo, ipi6_addr), from_zval_write_sin6_addr, to_zval_read_sin6_addr},
 		{"ifindex", sizeof("ifindex"), 1, offsetof(struct in6_pktinfo, ipi6_ifindex), from_zval_write_ifindex, to_zval_read_unsigned},

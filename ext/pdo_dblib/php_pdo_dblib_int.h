@@ -71,6 +71,8 @@
 # define SQLVARBINARY	SYBVARBINARY
 # ifdef SYBUNIQUE
 #  define SQLUNIQUE		SYBUNIQUE
+#else 
+#  define SQLUNIQUE		36 /* FreeTDS Hack */
 # endif
 
 # define DBERRHANDLE(a, b)	dberrhandle(b)
@@ -117,6 +119,12 @@ typedef struct {
 	pdo_dblib_db_handle *H;
 	pdo_dblib_err err;
 } pdo_dblib_stmt;
+
+typedef struct {
+	const char* key;
+	int value;
+} pdo_dblib_keyval;
+
 
 ZEND_BEGIN_MODULE_GLOBALS(dblib)
 	pdo_dblib_err err;

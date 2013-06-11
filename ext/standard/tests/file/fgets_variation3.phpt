@@ -36,7 +36,7 @@ foreach($file_modes as $file_mode) {
     }
 
     echo "-- fgets() with default length, file pointer at 0 --\n";
-    // get the file pointer to begining of the file
+    // get the file pointer to beginning of the file
     rewind($file_handle);
 
     var_dump( ftell($file_handle) );
@@ -45,7 +45,7 @@ foreach($file_modes as $file_mode) {
     var_dump( feof($file_handle) );  // enusre if eof set
 
     echo "-- fgets() with length = 23, Expected: 22 chars, file pointer at 0 --\n";
-    // get the file pointer to begining of the file
+    // get the file pointer to beginning of the file
     rewind($file_handle);
 
     var_dump( ftell($file_handle) );

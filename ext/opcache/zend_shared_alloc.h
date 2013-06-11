@@ -117,7 +117,7 @@ extern zend_smm_shared_globals *smm_shared_globals;
 
 #define SHARED_ALLOC_REATTACHED		(SUCCESS+1)
 
-int zend_shared_alloc_startup(int requested_size);
+int zend_shared_alloc_startup(size_t requested_size);
 void zend_shared_alloc_shutdown(void);
 
 /* allocate shared memory block */

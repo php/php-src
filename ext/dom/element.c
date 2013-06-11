@@ -177,7 +177,7 @@ PHP_METHOD(domelement, __construct)
 		RETURN_FALSE;
 	}
 
-	/* Namespace logic is seperate and only when uri passed in to insure no BC breakage */
+	/* Namespace logic is separate and only when uri passed in to insure no BC breakage */
 	if (uri_len > 0) {
 		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 		if (errorcode == 0) {

@@ -4643,7 +4643,7 @@ static const int ucs_r2_jisx0213_min = 0xFA0F;
 static const int ucs_r2_jisx0213_max = 0xFA6A;
 
 /* 
-   CJK Compatibility Ideographs: U+F900 - U+FAFF (seperate mapping for U+F9XX)
+   CJK Compatibility Ideographs: U+F900 - U+FAFF (separate mapping for U+F9XX)
 */
 static const unsigned short ucs_r2b_jisx0213_cmap_key[] = {
 	0xf91d,0xf928,0xf929,0xf936,0xf970,0xf9d0,0xf9dc};
