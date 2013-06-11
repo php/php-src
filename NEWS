@@ -175,9 +175,6 @@ PHP                                                                        NEWS
   . Disabled external entities loading (CVE-2013-1643, CVE-2013-1824).
     (Dmitry)
 
-- Phar:
-  . Fixed timestamp update on Phar contents modification. (Dmitry)
-
 - SPL:
   . Fixed bug #64264 (SPLFixedArray toArray problem). (Laruence)
   . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
