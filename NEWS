@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #64966 (segfault in zend_do_fcall_common_helper_SPEC). (Laruence)
   . Fixed bug #64960 (Segfault in gc_zval_possible_root). (Laruence)
   . Fixed bug #64934 (Apache2 TS crash with get_browser()). (Anatol)
+  . Fixed bug #63186 (compile failure on netbsd). (Matteo)
 
 - DateTime:
   . Fixed bug #53437 (Crash when using unserialized DatePeriod instance).
