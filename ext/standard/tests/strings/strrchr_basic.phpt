@@ -30,7 +30,7 @@ var_dump( strrchr("Hello, World", "Hello, World") ); //needle as haystack
 //needle string containing one existing and one non-existing char
 var_dump( strrchr("Hello, World", "Hi") );
 
-//multiple existance of needle in haystack
+//multiple existence of needle in haystack
 var_dump( strrchr("Hello, World", "o") );
 var_dump( strrchr("Hello, World", "ooo") );
 

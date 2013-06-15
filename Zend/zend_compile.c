@@ -3267,11 +3267,11 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 	if (child->common.prototype && (child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 		if (!zend_do_perform_implementation_check(child, child->common.prototype TSRMLS_CC)) {
-			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_get_function_declaration(child->common.prototype? child->common.prototype : parent TSRMLS_CC)); 
+			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_get_function_declaration(child->common.prototype TSRMLS_CC)); 
 		}
 	} else if (EG(error_reporting) & E_STRICT || EG(user_error_handler)) { /* Check E_STRICT (or custom error handler) before the check so that we save some time */
 		if (!zend_do_perform_implementation_check(child, parent TSRMLS_CC)) {
-			char *method_prototype = zend_get_function_declaration(child->common.prototype? child->common.prototype : parent TSRMLS_CC);
+			char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
 			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype); 
 			efree(method_prototype);
 		}
@@ -3744,7 +3744,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 #endif
 		} else {
 			/* inherited members are overridden by members inserted by traits */
-			/* check whether the trait method fullfills the inheritance requirements */
+			/* check whether the trait method fulfills the inheritance requirements */
 			do_inheritance_check_on_method(fn, existing_fn TSRMLS_CC);
 		}
 	}
@@ -5479,7 +5479,7 @@ void zend_do_shell_exec(znode *result, const znode *cmd TSRMLS_DC) /* {{{ */
 			break;
 	}
 	SET_NODE(opline->op1, cmd);
-	opline->op2.opline_num = 0;
+	opline->op2.opline_num = 1;
 	opline->extended_value = ZEND_DO_FCALL;
 	SET_UNUSED(opline->op2);
 
@@ -6943,7 +6943,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	}
 #elif defined(NETWARE)
 	/*
-	 * Find the first occurence of : from the left 
+	 * Find the first occurrence of : from the left
 	 * move the path pointer to the position just after :
 	 * increment the len_adjust to the length of path till colon character(inclusive)
 	 * If there is no character beyond : simple return len

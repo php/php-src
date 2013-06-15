@@ -32,7 +32,7 @@ resources cannot be auto-converted.
 Type specifiers
 ---------------
  The following list shows the type specifier, its meaning and the parameter 
- types that need to be passed by address. All passed paramaters are set
+ types that need to be passed by address. All passed parameters are set
  if the PHP parameter is non optional and untouched if optional and the 
  parameter is not present. The only exception is O where the zend_class_entry*
  has to be provided on input and is used to verify the PHP parameter is an 

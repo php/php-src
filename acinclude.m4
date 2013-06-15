@@ -1832,7 +1832,7 @@ AC_TRY_COMPILE([
 ])
 
 dnl -------------------------------------------------------------------------
-dnl Library/function existance and build sanity checks
+dnl Library/function existence and build sanity checks
 dnl -------------------------------------------------------------------------
 
 dnl

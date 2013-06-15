@@ -70,7 +70,7 @@ PHPAPI int php_uuencode(char *src, int src_len, char **dest) /* {{{ */
 	int len = 45;
 	char *p, *s, *e, *ee;
 
-	/* encoded length is ~ 38% greater then the original */
+	/* encoded length is ~ 38% greater than the original */
 	p = *dest = safe_emalloc((size_t) ceil(src_len * 1.38), 1, 46);
 	s = src;
 	e = src + src_len;

@@ -355,7 +355,7 @@ c:\php
    packages have the server modules in the sapi folder, PHP 5
    distributions have no such directory and instead they're in the PHP
    folder root. The supporting DLLs for the PHP 5 extensions are also not
-   in a seperate directory.
+   in a separate directory.
 
      Note: In PHP 4, you should move all files located in the dll and
      sapi folders to the main folder (e.g. C:\php).

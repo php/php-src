@@ -1,22 +1,84 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.4.16
+?? ??? 2013, PHP 5.4.17
 
 - Core:
+  . Fixed bug #64988 (Class loading order affects E_STRICT warning). (Laruence)
+  . Fixed bug #64966 (segfault in zend_do_fcall_common_helper_SPEC). (Laruence)
+  . Fixed bug #64960 (Segfault in gc_zval_possible_root). (Laruence)
+  . Fixed bug #64934 (Apache2 TS crash with get_browser()). (Anatol)
+
+- DateTime:
+  . Fixed bug #53437 (Crash when using unserialized DatePeriod instance).
+    (Gustavo, Derick, Anatol)
+
+- FPM:
+  . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
+
+- PDO_DBlib:
+  . Fixed bug #63638 (Cannot connect to SQL Server 2008 with PDO dblib). 
+    (Stanley Sufficool)
+  . Fixed bug #64338 (pdo_dblib can't connect to Azure SQL). (Stanley 
+    Sufficool)
+  . Fixed bug #64808 (FreeTDS PDO getColumnMeta on a prepared but not executed 
+    statement crashes). (Stanley Sufficool)
+
+- PDO_pgsql:
+  . Fixed Bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
+
+- SPL:
+  . Fixed bug #64997 (Segfault while using RecursiveIteratorIterator on
+    64-bits systems). (Laruence)
+
+06 Jun 2013, PHP 5.4.16
+
+- Core:
+  . Fixed bug #64879 (Heap based buffer overflow in quoted_printable_encode,
+    CVE 2013-2110). (Stas)
+  . Fixed bug #64853 (Use of no longer available ini directives causes crash on
+    TS build). (Anatol)
   . Fixed bug #64729 (compilation failure on x32). (Gustavo)
+  . Fixed bug #64720 (SegFault on zend_deactivate). (Dmitry)
+  . Fixed bug #64660 (Segfault on memory exhaustion within function definition).
+    (Stas, reported by Juha Kylmänen)
+
+- Calendar:
+  . Fixed bug #64895 (Integer overflow in SndToJewish). (Remi)
+
+- Fileinfo:
+  . Fixed bug #64830 (mimetype detection segfaults on mp3 file). (Anatol)
 
 - FPM:
   . Ignore QUERY_STRING when sent in SCRIPT_FILENAME. (Remi)
   . Fixed some possible memory or resource leaks and possible null dereference
     detected by code coverity scan. (Remi)
   . Log a warning when a syscall fails. (Remi)
+  . Add --with-fpm-systemd option to report health to systemd, and
+    systemd_interval option to configure this. The service can now use
+    Type=notify in the systemd unit file. (Remi)
+
+- MySQLi
+ . Fixed bug #64726 (Segfault when calling fetch_object on a use_result and DB
+    pointer has closed). (Laruence)
+
+- Phar
+  . Fixed bug #64214 (PHAR PHPTs intermittently crash when run on DFS, SMB or 
+    with non std tmp dir). (Pierre)
 
 - SNMP:
   . Fixed bug #64765 (Some IPv6 addresses get interpreted wrong).
-	(Boris Lytochkin)
+    (Boris Lytochkin)
   . Fixed bug #64159 (Truncated snmpget). (Boris Lytochkin)
 
-?? ??? 2013, PHP 5.4.15
+- Streams:
+  . Fixed bug #64770 (stream_select() fails with pipes returned by proc_open()
+    on Windows x64). (Anatol)
+
+- Zend Engine:
+  . Fixed bug #64821 (Custom Exceptions crash when internal properties 
+    overridden). (Anatol)
+
+09 May 2013, PHP 5.4.15
 - Core:
   . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap:
     segfault). (Laruence)
@@ -112,9 +174,6 @@ PHP                                                                        NEWS
     (CVE-2013-1635). (Dmitry)
   . Disabled external entities loading (CVE-2013-1643, CVE-2013-1824).
     (Dmitry)
-
-- Phar:
-  . Fixed timestamp update on Phar contents modification. (Dmitry)
 
 - SPL:
   . Fixed bug #64264 (SPLFixedArray toArray problem). (Laruence)

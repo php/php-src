@@ -11,7 +11,8 @@ $descs = array(
 
 $other_opts = array('suppress_errors' => false, 'binary_pipes' => true);
 
-$p = proc_open('dir', $descs, $pipes, '.', NULL, $other_opts);
+$cmd = (substr(PHP_OS, 0, 3) == 'WIN') ? 'dir' : 'ls';
+$p = proc_open($cmd, $descs, $pipes, '.', NULL, $other_opts);
 
 if (is_resource($p)) {
 	$data = '';

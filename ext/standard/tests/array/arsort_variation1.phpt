@@ -74,7 +74,7 @@ $unexpected_values = array (
 );
 
 // loop though each element of the array and check the working of arsort()
-// when $array arugment is supplied with different values from $unexpected_values
+// when $array argument is supplied with different values from $unexpected_values
 echo "\n-- Testing arsort() by supplying different unexpected values for 'array' argument --\n";
 echo "\n-- Flag values are defualt, SORT_REGULAR, SORT_NUMERIC, SORT_STRING --\n"; 
 

@@ -497,7 +497,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
 						mnd_efree(conn->current_result);
 						conn->current_result = NULL;
 					}
-					DBG_ERR("Error ocurred while reading metadata");
+					DBG_ERR("Error occurred while reading metadata");
 					break;
 				}
 
@@ -509,7 +509,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s 
 					break;
 				}
 				if (FAIL == (ret = PACKET_READ(fields_eof, conn))) {
-					DBG_ERR("Error ocurred while reading the EOF packet");
+					DBG_ERR("Error occurred while reading the EOF packet");
 					result->m.free_result_contents(result TSRMLS_CC);
 					mnd_efree(result);
 					if (!stmt) {

@@ -1,5 +1,5 @@
 --TEST--
-Test function fstat() by substituting agument 1 with string values.
+Test function fstat() by substituting argument 1 with string values.
 --FILE--
 <?php
 $heredoc = <<<EOT
