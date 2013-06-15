@@ -24,7 +24,7 @@ $supported_hash_al = array(
 "CRC32"     => 4,
 "CRC32B"    => 4,
 "ADLER32"   => 4,
-"NA_XYZ"    => 0   /* verify that the algorythm works */
+"NA_XYZ"    => 0   /* verify that the algorithm works */
 );
 
 $hc = mhash_count() + 1;

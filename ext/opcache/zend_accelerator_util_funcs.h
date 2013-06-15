@@ -28,6 +28,7 @@
 void zend_accel_copy_internal_functions(TSRMLS_D);
 
 zend_persistent_script* create_persistent_script(void);
+int compact_persistent_script(zend_persistent_script *script);
 void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements);
 
 void zend_accel_free_user_functions(HashTable *ht TSRMLS_DC);

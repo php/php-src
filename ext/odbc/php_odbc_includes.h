@@ -161,7 +161,7 @@ PHP_FUNCTION(solid_fetch_prev);
 #define UNIX
 /*
  * Extended Fetch in the Birdstep ODBC API is incapable of returning long varchar (memo) fields.
- * So the following line has been commented-out to accomadate. - KNS
+ * So the following line has been commented-out to accommodate. - KNS
  *
  * #define HAVE_SQL_EXTENDED_FETCH 1
  */

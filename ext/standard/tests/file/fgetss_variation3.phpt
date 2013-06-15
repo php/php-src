@@ -51,7 +51,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
     exit();
   }
   
-  // rewind the file pointer to begining of the file
+  // rewind the file pointer to beginning of the file
   rewind($file_handle);
   var_dump( ftell($file_handle) );
   var_dump( filesize($filename) );

@@ -518,7 +518,7 @@ static PHP_FUNCTION(bzcompress)
 		efree(dest);
 		RETURN_LONG(error);
 	} else {
-		/* Copy the buffer, we have perhaps allocate alot more than we need,
+		/* Copy the buffer, we have perhaps allocate a lot more than we need,
 		   so we erealloc() the buffer to the proper size */
 		dest = erealloc(dest, dest_len + 1);
 		dest[dest_len] = 0;

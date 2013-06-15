@@ -228,7 +228,7 @@ PHP_FUNCTION(msg_stat_queue)
 
 
 /* {{{ proto bool msg_queue_exists(int key)
-   Check wether a message queue exists */
+   Check whether a message queue exists */
 PHP_FUNCTION(msg_queue_exists)
 {
 	long key;
