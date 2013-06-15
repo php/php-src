@@ -435,7 +435,7 @@ Changes in the Zend Engine 2.0
       that of other object-oriented languages, such as Java: When the
       last reference to an object is destroyed the object's
       destructor, which is a class method name __destruct() that
-      recieves no parameters, is called before the object is freed
+      receives no parameters, is called before the object is freed
       from memory.
 
       Example:

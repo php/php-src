@@ -606,7 +606,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 
 	/* JPEG 2000 components can be vastly different from one another.
 	   Each component can be sampled at a different resolution, use
-	   a different colour space, have a seperate colour depth, and
+	   a different colour space, have a separate colour depth, and
 	   be compressed totally differently! This makes giving a single
 	   "bit depth" answer somewhat problematic. For this implementation
 	   we'll use the highest depth encountered. */

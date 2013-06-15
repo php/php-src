@@ -26,6 +26,10 @@
 #include <math.h>
 #include <assert.h>
 
+#ifdef __GNUC__
+#include <stddef.h>
+#endif
+
 #ifdef HAVE_IEEEFP_H
 #include <ieeefp.h>
 #endif
@@ -497,7 +501,7 @@ ZEND_API void zend_update_current_locale(void);
 
 /* The offset in bytes between the value and type fields of a zval */
 #define ZVAL_OFFSETOF_TYPE	\
-	(__builtin_offsetof(zval,type) - __builtin_offsetof(zval,value))
+	(offsetof(zval,type) - offsetof(zval,value))
 
 static zend_always_inline int fast_increment_function(zval *op1)
 {

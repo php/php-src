@@ -291,7 +291,11 @@ int fpm_stdio_open_error_log(int reopen) /* {{{ */
 		fd = fpm_globals.error_log_fd; /* for FD_CLOSEXEC to work */
 	} else {
 		fpm_globals.error_log_fd = fd;
+#if HAVE_UNISTD_H
+		if (fpm_global_config.daemonize || !isatty(STDERR_FILENO)) {
+#else
 		if (fpm_global_config.daemonize) {
+#endif
 			zlog_set_fd(fpm_globals.error_log_fd);
 		}
 	}

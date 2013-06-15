@@ -1,12 +1,96 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.0 Release Candidate 1
+?? ??? 2013, PHP 5.5.0 Release Candidate 4
+
+- Core:
+  . Fixed bug #64988 (Class loading order affects E_STRICT warning). (Laruence)
+  . Fixed bug #64966 (segfault in zend_do_fcall_common_helper_SPEC). (Laruence)
+  . Fixed bug #64934 (Apache2 TS crash with get_browser()). (Anatol)
+
+- SPL:
+  . Fixed bug #64997 (Segfault while using RecursiveIteratorIterator on
+    64-bits systems). (Laruence)
+
+06 Jun 2013, PHP 5.5.0 Release Candidate 3
+
+- Core:
+  . Fixed bug #64960 (Segfault in gc_zval_possible_root). (Laruence)
+  . Fixed bug #64879 (Heap based buffer overflow in quoted_printable_encode,
+    CVE 2013-2110). (Stas)
+
+- FPM:
+  . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
+
+- GD:
+  . Fixed Bug #64962 (imagerotate produces corrupted image). (Remi)
+  . Fixed Bug #64961 (segfault in imagesetinterpolation). (Remi)
+
+- Hash:
+  . Fixed Bug #64745 (hash_pbkdf2() truncates data when using default length
+    and hex output). (Anthony Ferrara)
+
+- PDO_DBlib:
+  . Fixed bug #63638 (Cannot connect to SQL Server 2008 with PDO dblib).
+    (Stanley Sufficool)
+  . Fixed bug #64338 (pdo_dblib can't connect to Azure SQL). (Stanley
+    Sufficool)
+  . Fixed bug #64808 (FreeTDS PDO getColumnMeta on a prepared but not executed
+    statement crashes). (Stanley Sufficool)
+
+- PDO_pgsql:
+  . Fixed Bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
+
+
+23 May 2013, PHP 5.5.0 Release Candidate 2
+
+- Core:
+  . Fixed bug #64660 (Segfault on memory exhaustion within function definition).
+    (Stas, reported by Juha Kylmänen)
+  . Fixed bug #64720 (SegFault on zend_deactivate). (Dmitry)
+  . Fixed bug #64853 (Use of no longer available ini directives causes crash
+    on TS build). (Anatol)
+
+- Calendar:
+  . Fixed bug #64895 (Integer overflow in SndToJewish). (Remi)
+
+- Fileinfo:
+  . Fixed bug #64830 (mimetype detection segfaults on mp3 file). (Anatol)
+
+- FPM:
+  . Add --with-fpm-systemd option to report health to systemd, and
+    systemd_interval option to configure this. The service can now use
+    Type=notify in the systemd unit file. (Remi)
+
+- mbstring:
+  . Fixed bug #64769 (mbstring PHPTs crash on Windows x64). (Anatol)
+
+- mysqli:
+  . Fixed bug #64394 (MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS undeclared when
+    using Connector/C). (Andrey)
+
+- Sockets:
+  . Fixed bug #64508 (Fails to build with --disable-ipv6). (Gustavo)
+
+- Zend Engine:
+  . Fixed bug #64821 (Custom Exceptions crash when internal properties overridden).
+      (Anatol)
+
+- DateTime
+  . Fixed bug #64825 (Invalid free when unserializing DateTimeZone).
+    (Anatol)
+
+09 May 2013, PHP 5.5.0 Release Candidate 1
 
 - FPM:
   . Ignore QUERY_STRING when sent in SCRIPT_FILENAME. (Remi)
   . Fixed some possible memory or resource leaks and possible null dereference
     detected by code coverity scan. (Remi)
   . Log a warning when a syscall fails. (Remi)
+
+- GD:
+  . Fix build with system libgd >= 2.1 which is now the minimal
+    version required (as build with previous version is broken).
+    No change when bundled libgd is used.  (Ondrej Sury, Remi)
 
 - SNMP:
   . Fixed bug #64765 (Some IPv6 addresses get interpreted wrong).
@@ -20,7 +104,7 @@ PHP                                                                        NEWS
 25 Apr 2013, PHP 5.5.0 Beta 4
 
 - Core:
-  . Fixed bug #64677 (execution operator `` stealing surrounding arguments). 
+  . Fixed bug #64677 (execution operator `` stealing surrounding arguments).
     (Laruence)
 
 - CURL:
@@ -39,13 +123,13 @@ PHP                                                                        NEWS
     (Eric Iversen)
 
 - Streams:
-  . Fixed Windows x64 version of stream_socket_pair() and improved error handling
-    (Anatol Belski)
+  . Fixed Windows x64 version of stream_socket_pair() and improved error
+    handling. (Anatol Belski)
 
 11 Apr 2013, PHP 5.5.0 Beta 3
 
 - Core:
-  . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap: 
+  . Fixed bug #64578 (debug_backtrace in set_error_handler corrupts zend heap:
     segfault). (Laruence)
   . Fixed bug #64565 (copy doesn't report failure on partial copy). (Remi)
   . Fixed bug #64555 (foreach no longer copies keys if they are interned).
@@ -63,7 +147,7 @@ PHP                                                                        NEWS
     Kapelushnik, Derick)
 
 - General improvements:
-  . Drop support for bison < 2.4 when building PHP from GIT source. 
+  . Drop support for bison < 2.4 when building PHP from GIT source.
     (Laruence)
 
 - Fileinfo:
@@ -101,7 +185,7 @@ PHP                                                                        NEWS
 21 Mar 2013, PHP 5.5.0 Beta 1
 
 - Core:
-  . Added Zend Opcache extension and enable building it by default. 
+  . Added Zend Opcache extension and enable building it by default.
     More details here: https://wiki.php.net/rfc/optimizerplus. (Dmitry)
   . Added array_column function which returns a column in a multidimensional
     array. https://wiki.php.net/rfc/array_column. (Ben Ramsey)
@@ -209,7 +293,7 @@ PHP                                                                        NEWS
   . Fixed bug #64264 (SPLFixedArray toArray problem). (Laruence)
   . Fixed bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS).
     (patch by kriss@krizalys.com, Laruence)
-  . Fixed bug #64106 (Segfault on SplFixedArray[][x] = y when extended). 
+  . Fixed bug #64106 (Segfault on SplFixedArray[][x] = y when extended).
     (Nikita Popov)
   . Fixed bug #52861 (unset fails with ArrayObject and deep arrays).
     (Mike Willbanks)

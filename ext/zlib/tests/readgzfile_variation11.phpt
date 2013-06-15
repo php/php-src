@@ -1,5 +1,5 @@
 --TEST--
-Test function readgzfile() by substituting agument 2 with float values.
+Test function readgzfile() by substituting argument 2 with float values.
 --SKIPIF--
 <?php
 if (!extension_loaded('zlib')) die ('skip zlib extension not available in this build');

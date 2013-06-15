@@ -1,4 +1,5 @@
-#include "php_config.h" 
+#include "php_config.h"
+
 #ifdef HAVE_GD_PNG
 /* needs to be first */
 # include <png.h>
@@ -7,6 +8,9 @@
 #ifdef HAVE_GD_JPG
 # include <jpeglib.h>
 #endif
+
+#include "gd_compat.h"
+#include "php.h"
 
 #ifdef HAVE_GD_JPG
 int gdJpegGetVersionInt()
@@ -20,6 +24,15 @@ const char * gdJpegGetVersionString()
 		case 62:
 			return "6b";
 			break;
+
+		case 70:
+			return "7";
+			break;
+
+		case 80:
+			return "8";
+			break;
+
 		default:
 			return "unknown";
 	}
@@ -33,50 +46,18 @@ const char * gdPngGetVersionString()
 }
 #endif
 
-/* Not exported by libgd, copied from gdhelpers.h */
 int overflow2(int a, int b)
 {
+	TSRMLS_FETCH();
+
 	if(a <= 0 || b <= 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "gd warning: one parameter to a memory allocation multiplication is negative or zero, failing operation gracefully\n");
 		return 1;
 	}
 	if(a > INT_MAX / b) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "gd warning: product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully\n");
 		return 1;
 	}
 	return 0;
-}
-
-/* Not exported by libgd, copied from wbmp.c */
-int
-getmbi (int (*getin) (void *in), void *in)
-{
-  int i, mbi = 0;
-
-  do
-    {
-      i = getin (in);
-      if (i < 0)
-	return (-1);
-      mbi = (mbi << 7) | (i & 0x7f);
-    }
-  while (i & 0x80);
-
-  return (mbi);
-}
-
-/* Not exported by libgd, copied from wbmp.c */
-int
-skipheader (int (*getin) (void *in), void *in)
-{
-  int i;
-
-  do
-    {
-      i = getin (in);
-      if (i < 0)
-	return (-1);
-    }
-  while (i & 0x80);
-
-  return (0);
 }
 

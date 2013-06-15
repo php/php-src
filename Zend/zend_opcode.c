@@ -166,8 +166,9 @@ static inline void cleanup_user_class_data(zend_class_entry *ce TSRMLS_DC)
 
 		for (i = 0; i < ce->default_static_members_count; i++) {
 			if (ce->static_members_table[i]) {
-				zval_ptr_dtor(&ce->static_members_table[i]);
+				zval *p = ce->static_members_table[i];
 				ce->static_members_table[i] = NULL;
+				zval_ptr_dtor(&p);
 			}
 		}
 		ce->static_members_table = NULL;

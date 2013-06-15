@@ -733,7 +733,7 @@ notfound:
 				PHAR_G(cwd_len) = save_len;
 				efree(entry);
 				efree(arch);
-				/* Error Occured */
+				/* Error Occurred */
 				if (!IS_EXISTS_CHECK(type)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);
 				}

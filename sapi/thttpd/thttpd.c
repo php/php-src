@@ -579,7 +579,7 @@ static void queue_request(httpd_conn *hc)
 	m->next = NULL;
 	
 	tsrm_mutex_lock(qr_lock);
-	/* Create new threads when reaching a certain threshhold */
+	/* Create new threads when reaching a certain threshold */
 	if (nr_threads < max_threads && nr_free_threads < 2) {
 		nr_threads++; /* protected by qr_lock */
 		
