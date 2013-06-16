@@ -258,6 +258,8 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	SCNG(input_filter) = lex_state->input_filter;
 	SCNG(output_filter) = lex_state->output_filter;
 	SCNG(script_encoding) = lex_state->script_encoding;
+
+	RESET_DOC_COMMENT();
 }
 
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC)
@@ -541,6 +543,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 		CG(zend_lineno) = 1;
 	}
 
+	RESET_DOC_COMMENT();
 	CG(increment_lineno) = 0;
 	return SUCCESS;
 }
@@ -691,6 +694,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 	zend_set_compiled_filename(filename TSRMLS_CC);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
+	RESET_DOC_COMMENT();
 	return SUCCESS;
 }
 
