@@ -12,4 +12,4 @@ Bug #36306 (crc32() 64bit)
 echo dechex(crc32("platform independent")) . "\n";
 ?>
 --EXPECT--
-ccd9fe66
+cbd056ba
