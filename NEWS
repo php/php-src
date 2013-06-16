@@ -5,7 +5,11 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #64988 (Class loading order affects E_STRICT warning). (Laruence)
   . Fixed bug #64966 (segfault in zend_do_fcall_common_helper_SPEC). (Laruence)
+  . Fixed bug #64936 (doc comments picked up from previous scanner run). (Stas,
+    Jonathan Oddy)
   . Fixed bug #64934 (Apache2 TS crash with get_browser()). (Anatol)
+  . Fixed bug #64166 (quoted-printable-encode stream filter incorrectly
+    discarding whitespace). (Michael M Slusarz)
 
 - PDO:
   . Fixed bug #63176 (Segmentation fault when instantiate 2 persistent PDO to 
