@@ -338,6 +338,9 @@ static PHP_METHOD(PDO, dbh_constructor)
 			if (pdbh->std.properties) {
 				zend_hash_destroy(dbh->std.properties);	
 				efree(dbh->std.properties);
+				if (dbh->std.properties_table) {
+					efree(dbh->std.properties_table);
+				}
 			} else {
 				pdbh->std.ce = dbh->std.ce;
 				pdbh->def_stmt_ce = dbh->def_stmt_ce;
@@ -1575,6 +1578,7 @@ static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 	}
 	zend_object_std_dtor(&dbh->std TSRMLS_CC);
 	dbh->std.properties = NULL;
+	dbh->std.properties_table = NULL;
 	dbh_free(dbh TSRMLS_CC);
 }
 

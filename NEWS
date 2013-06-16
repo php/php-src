@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed Bug #64915 (error_log ignored when daemonize=0). (Remi)
 
+- PDO:
+  . Fixed bug #63176 (Segmentation fault when instantiate 2 persistent PDO to 
+    the same db server). (Laruence)
+
 - PDO_DBlib:
   . Fixed bug #63638 (Cannot connect to SQL Server 2008 with PDO dblib). 
     (Stanley Sufficool)
