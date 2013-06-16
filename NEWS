@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #64166 (quoted-printable-encode stream filter incorrectly
     discarding whitespace). (Michael M Slusarz)
 
+- FPM:
+  . Implemented FR #64764 (add support for FPM init.d script). (Lior Kaplan)
+
 - PDO:
   . Fixed bug #63176 (Segmentation fault when instantiate 2 persistent PDO to 
     the same db server). (Laruence)
