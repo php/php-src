@@ -62,7 +62,7 @@ PHP                                                                        NEWS
     Type=notify in the systemd unit file. (Remi)
 
 - MySQLi
- . Fixed bug #64726 (Segfault when calling fetch_object on a use_result and DB
+  . Fixed bug #64726 (Segfault when calling fetch_object on a use_result and DB
     pointer has closed). (Laruence)
 
 - Phar
