@@ -24,7 +24,7 @@ class ModelA {
 		if ($h) {
 			$this->db = new PDO2(PDO_MYSQL_TEST_DSN, PDO_MYSQL_TEST_USER, PDO_MYSQL_TEST_PASS, array(PDO::ATTR_PERSISTENT => true));
 		} else {
-			$this->db = new PDO2(PDO_MYSQL_TEST_DSN, PDO_MYSQL_TEST_USER, PDO_MYSQL_TEST_PASS, array(PDO::ATTR_PERSISTENT => true));
+			$this->db = new PDO3(PDO_MYSQL_TEST_DSN, PDO_MYSQL_TEST_USER, PDO_MYSQL_TEST_PASS, array(PDO::ATTR_PERSISTENT => true));
 		}
 		$this->db->query('SELECT 1')->fetchAll();
 	}
