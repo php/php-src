@@ -945,6 +945,24 @@ static zend_always_inline int fast_is_smaller_or_equal_function(zval *result, zv
 	return Z_LVAL_P(result) <= 0;
 }
 
+#define ZEND_TRY_BINARY_OBJECT_OPERATION(opcode)                                                  \
+	if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, do_operation)) {                       \
+		if (SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, op2 TSRMLS_CC)) {  \
+			return SUCCESS;                                                                       \
+		}                                                                                         \
+	} else if (Z_TYPE_P(op2) == IS_OBJECT && Z_OBJ_HANDLER_P(op2, do_operation)) {                \
+		if (SUCCESS == Z_OBJ_HANDLER_P(op2, do_operation)(opcode, result, op1, op2 TSRMLS_CC)) {  \
+			return SUCCESS;                                                                       \
+		}                                                                                         \
+	}
+
+#define ZEND_TRY_UNARY_OBJECT_OPERATION(opcode)                                                   \
+	if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, do_operation)                          \
+	 && SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, NULL TSRMLS_CC)        \
+	) {                                                                                           \
+		return SUCCESS;                                                                           \
+	}
+
 #endif
 
 /*
