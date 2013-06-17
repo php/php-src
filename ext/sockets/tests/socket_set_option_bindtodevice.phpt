@@ -11,6 +11,9 @@ if (!extension_loaded('sockets')) {
 if (!defined("SO_BINDTODEVICE")) {
 	die('SKIP SO_BINDTODEVICE not supported on this platform.');
 }
+if (!function_exists("posix_getuid") || posix_getuid() != 0) {
+	die('SKIP SO_BINDTODEVICE requires root permissions.');
+}
 ?>
 --FILE--
 <?php
