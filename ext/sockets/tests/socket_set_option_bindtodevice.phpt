@@ -31,7 +31,7 @@ socket_close($socket);
 --EXPECTF--
 bool(true)
 
-Warning: socket_set_option(): unable to set socket option [19]: No such device in /root/zobo/php-sockets/php-src/ext/sockets/tests/socket_set_option_bindtodevice.php on line 10
+Warning: socket_set_option(): unable to set socket option [19]: No such device in %s on line %d
 bool(false)
 --CREDITS--
 Damjan Cvetko, foreach.org
