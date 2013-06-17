@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #63176 (Segmentation fault when instantiate 2 persistent PDO to 
     the same db server). (Laruence)
 
+- Readline:
+  . Implement FR #55694 (Expose additional readline variable to prevent
+    default filename completion). (Hartmel)
+
 - SPL:
   . Fixed bug #64997 (Segfault while using RecursiveIteratorIterator on
     64-bits systems). (Laruence)
