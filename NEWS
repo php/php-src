@@ -18,6 +18,10 @@ PHP                                                                        NEWS
   . Fixed bug #63176 (Segmentation fault when instantiate 2 persistent PDO to 
     the same db server). (Laruence)
 
+- PDO_mysql:
+  . Fixed bug #48724 (getColumnMeta() doesn't return native_type for BIT,
+    TINYINT and YEAR). (Antony, Daniel Beardsley)
+
 - Readline:
   . Implement FR #55694 (Expose additional readline variable to prevent
     default filename completion). (Hartmel)
