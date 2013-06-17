@@ -63,6 +63,11 @@ PHP X.Y UPGRADE NOTES
 8. Other Changes to Extensions
 ========================================
 
+- GMP:
+  The GMP extension now uses objects as the underlying data structure, rather
+  than resources. GMP instances now support dumping, serialization, cloning,
+  casts to primitive types and have overloaded operators.
+  (RFC: https://wiki.php.net/rfc/operator_overloading_gmp)
 
 ========================================
 9. New Global Constants
