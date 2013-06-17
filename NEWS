@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug #64934 (Apache2 TS crash with get_browser()). (Anatol)
   . Fixed bug #64166 (quoted-printable-encode stream filter incorrectly
     discarding whitespace). (Michael M Slusarz)
+  . Fixed bug #65051 (count() off by one inside unset()). (Nikita)
 
 - FPM:
   . Implemented FR #64764 (add support for FPM init.d script). (Lior Kaplan)
