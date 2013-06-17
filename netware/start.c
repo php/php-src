@@ -24,7 +24,7 @@
 void		*gLibHandle = (void *) NULL;
 rtag_t		gAllocTag = (rtag_t) NULL;
 NXMutex_t	*gLibLock = (NXMutex_t *) NULL;
-int			gLibId = 0;
+int		gLibId = 0;
 
 
 int DisposeLibraryData(	void	*data)
