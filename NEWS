@@ -34,12 +34,21 @@ PHP                                                                        NEWS
   . Fixed bug #64808 (FreeTDS PDO getColumnMeta on a prepared but not executed 
     statement crashes). (Stanley Sufficool)
 
+- PDO_firebird:
+  . Fixed bug #64037 (Firebird return wrong value for numeric field).
+    (Matheus Degiovani, Matteo)
+  . Fixed bug #62024 (Cannot insert second row with null using parametrized
+    query). (patch by james@kenjim.com, Matheus Degiovani, Matteo)
+
 - PDO_mysql:
   . Fixed bug #48724 (getColumnMeta() doesn't return native_type for BIT, 
     TINYINT and YEAR). (Antony, Daniel Beardsley)
 
 - PDO_pgsql:
   . Fixed Bug #64949 (Buffer overflow in _pdo_pgsql_error). (Remi)
+
+- pgsql:
+  . Fixed bug #64609 (pg_convert enum type support). (Matteo)
 
 - Readline:
   . Implement FR #55694 (Expose additional readline variable to prevent 
