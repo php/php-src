@@ -23,6 +23,23 @@ function skip_server_version($version, $op = '<')
 	if (version_compare($pg, $version, $op)) {
 		die("skip Server version {$pg} is {$op} {$version}\n");
 	}
+	return $pg;
+}
+
+function skip_bytea_not_hex()
+{
+	$out = pg_escape_bytea("\xFF");
+	if (strpos($out, '377') !== false) {
+		die("skip libpq or backend < 9.0\n");
+	}
+}
+
+function skip_bytea_not_escape()
+{
+	$out = pg_escape_bytea("\xFF");
+	if (strpos($out, '377') === false) {
+		die("skip libpq or backend >= 9.0\n");
+	}
 }
 
 ?>

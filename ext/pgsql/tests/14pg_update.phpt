@@ -3,7 +3,7 @@ PostgreSQL pg_update()
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_server_version('8.5dev', '>=');
+skip_bytea_not_escape();
 ?>
 --FILE--
 <?php

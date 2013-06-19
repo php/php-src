@@ -1,9 +1,9 @@
 --TEST--
-PostgreSQL pg_insert() (8.5+)
+PostgreSQL pg_insert() (9.0+)
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_server_version('8.5dev', '<');
+skip_bytea_not_hex();
 ?>
 --FILE--
 <?php
