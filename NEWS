@@ -1,6 +1,13 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2013, PHP 5.3.28
+
 ?? ??? 2013, PHP 5.3.27
+
+###
+### DO NOT ADD ENTRIES HERE
+### All entries go to 5.3.28
+###
 
 - Core:
   . Fixed bug #64966 (segfault in zend_do_fcall_common_helper_SPEC). (Laruence)
