@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.4.17
+20 Jun 2013, PHP 5.4.17 RC1
 
 - Core:
   . Fixed bug #64988 (Class loading order affects E_STRICT warning). (Laruence)
