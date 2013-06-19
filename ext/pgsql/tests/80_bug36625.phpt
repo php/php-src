@@ -37,6 +37,8 @@ array_walk($trace, 'search_trace_file');
 var_dump($found > 0);
 var_dump(file_exists($tracefile));
 
+@unlink($tracefile);
+
 ?>
 ===DONE===
 --CLEAN--
