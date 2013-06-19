@@ -15,7 +15,7 @@ $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
 try {
-        $db->query("SET bytea_output = 'escape'");
+        @$db->query("SET bytea_output = 'escape'");
 } catch (Exception $e) {
 }
 
