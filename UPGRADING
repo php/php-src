@@ -385,6 +385,10 @@ PHP 5.5 UPGRADE NOTES
     - opcache.preferred_memory_model (default "")
     - opcache.protect_memory (default "0")
     - opcache.mmap_base (Windows-only)
+ - If APC or WinCache was used before, the user cache APIs can be replaced by:
+    - APCu, all supported OSes (http://pecl.php.net/package/APCu, Windows: http://windows.php.net/downloads/pecl/releases/apcu/)
+	- WinCache, windows only (http://pecl.php.net/package/WinCache), a version with the ability to use only the user
+	  cache will be released shortly after 5.5.0 final
 
 ========================================
 11. Windows Support
@@ -392,6 +396,18 @@ PHP 5.5 UPGRADE NOTES
 
 - Apache 2.4 handler is supported as of PHP 5.5.0
 
+- OpCache
+  Error like 'unable to reattach to base address' could happen in many common setups.
+  It is due to some technical and design restriction in the engine and cannot be fixed 
+  easily before 5.5.0 final was released.
+  
+  A possible fix is to tweak the opcache.mmap_base INI setting by forcing the 1st address 
+  to be tried.
+  
+  For x86 version, the following addreses can be tried:
+	.  0x20000000, 0x21000000, 0x30000000, 0x31000000, 0x50000000
+  and for x64 (still expiremental):
+  	. 0x0000100000000000, 0x0000200000000000, 0x0000300000000000, 0x0000700000000000
 
 ========================================
 12. Other Changes
