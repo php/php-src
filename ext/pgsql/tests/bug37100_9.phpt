@@ -1,9 +1,9 @@
 --TEST--
-Bug #37100 (data is returned truncated with BINARY CURSOR) (8.5+)
+Bug #37100 (data is returned truncated with BINARY CURSOR) (9.0+)
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_server_version('8.5dev', '<');
+skip_bytea_not_hex();
 ?>
 --FILE--
 <?php

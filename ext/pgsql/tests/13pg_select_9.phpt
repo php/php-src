@@ -1,9 +1,9 @@
 --TEST--
-PostgreSQL pg_select() (8.5+)
+PostgreSQL pg_select() (9.0+)
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_server_version('8.5dev', '<');
+skip_server_version('9.0', '<');
 ?>
 --FILE--
 <?php
@@ -12,6 +12,8 @@ error_reporting(E_ALL);
 include 'config.inc';
 
 $db = pg_connect($conn_str);
+pg_query("SET bytea_output = 'hex'");
+
 $fields = array('num'=>'1234', 'str'=>'ABC', 'bin'=>'XYZ');
 $ids = array('num'=>'1234');
 
