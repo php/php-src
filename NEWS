@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.18
 
+- CLI server:
+  . Fixed bug #65066 (Cli server not responsive when responding with 422 http
+    status code). (Adam)
+
 ?? ??? 2013, PHP 5.4.17
 
 - Core:
