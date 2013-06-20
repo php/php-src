@@ -6,6 +6,7 @@ Daniel Convissor <danielc@php.net>
 <?php
 
 date_default_timezone_set('America/New_York');
+$tz = new DateTimeZone('America/New_York');
 $date_format = 'Y-m-d H:i:s T e';
 $interval_format = 'P%dDT%hH';
 

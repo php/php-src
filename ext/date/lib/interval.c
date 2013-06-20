@@ -111,6 +111,14 @@ timelib_time *timelib_add(timelib_time *old_time, timelib_rel_time *interval)
 	t->sse_uptodate = 0;
 
 	timelib_update_ts(t, NULL);
+
+//	printf("%lld %lld %d\n", old_time->dst, t->dst, (t->sse - old_time->sse));
+	/* Adjust for backwards DST changeover */
+	if (old_time->dst == 1 && t->dst == 0 && !interval->y && !interval->m && !interval->d) {
+		t->sse -= old_time->z;
+		t->sse += t->z;
+	}
+
 	timelib_update_from_sse(t);
 	t->have_relative = 0;
 
@@ -137,6 +145,18 @@ timelib_time *timelib_sub(timelib_time *old_time, timelib_rel_time *interval)
 	t->sse_uptodate = 0;
 
 	timelib_update_ts(t, NULL);
+
+	/* Adjust for backwards DST changeover */
+	if (old_time->dst == 1 && t->dst == 0 && !interval->y && !interval->m && !interval->d) {
+		t->sse -= old_time->z;
+		t->sse += t->z;
+	}
+	/* Adjust for forwards DST changeover */
+	if (old_time->dst == 0 && t->dst == 1 && !interval->y && !interval->m && !interval->d ) {
+		t->sse -= old_time->z;
+		t->sse += t->z;
+	}
+
 	timelib_update_from_sse(t);
 
 	t->have_relative = 0;

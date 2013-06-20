@@ -25,7 +25,7 @@ $end   = new DateTime('2010-11-07 05:30:00');
 $end->setTimeZone($tz);
 $start = new DateTime('2010-11-06 04:30:59');
 echo 'bd0 ' . $end->format($date_format) . ' - ' . $start->format($date_format)
-	. ' = ' . $start->diff($end)->format('PT%hH%iM%sS') . "\n";
+	. ' = ' . $start->diff($end)->format('P%dDT%hH%iM%sS') . "\n";
 
 $end   = new DateTime('2010-11-07 01:30:00 EST');
 $end->setTimeZone($tz);
