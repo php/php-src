@@ -3299,7 +3299,6 @@ ZEND_VM_HANDLER(50, ZEND_BRK, ANY, CONST)
 	SAVE_OPLINE();
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), execute_data TSRMLS_CC);
-	FREE_OP2();
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
 }
 
@@ -3311,7 +3310,6 @@ ZEND_VM_HANDLER(51, ZEND_CONT, ANY, CONST)
 	SAVE_OPLINE();
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), execute_data TSRMLS_CC);
-	FREE_OP2();
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
 }
 
