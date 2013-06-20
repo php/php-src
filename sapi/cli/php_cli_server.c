@@ -20,6 +20,7 @@
 /* $Id: php_cli.c 306938 2011-01-01 02:17:06Z felipe $ */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <assert.h>
 
@@ -194,17 +195,17 @@ typedef struct php_cli_server {
 	HashTable clients;
 } php_cli_server;
 
-typedef struct php_cli_server_http_reponse_status_code_pair {
+typedef struct php_cli_server_http_response_status_code_pair {
 	int code;
 	const char *str;
-} php_cli_server_http_reponse_status_code_pair;
+} php_cli_server_http_response_status_code_pair;
 
 typedef struct php_cli_server_ext_mime_type_pair {
 	const char *ext;
 	const char *mime_type;
 } php_cli_server_ext_mime_type_pair;
 
-static php_cli_server_http_reponse_status_code_pair status_map[] = {
+static php_cli_server_http_response_status_code_pair status_map[] = {
 	{ 100, "Continue" },
 	{ 101, "Switching Protocols" },
 	{ 200, "OK" },
@@ -251,7 +252,7 @@ static php_cli_server_http_reponse_status_code_pair status_map[] = {
 	{ 511, "Network Authentication Required" },
 };
 
-static php_cli_server_http_reponse_status_code_pair template_map[] = {
+static php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
 	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
 	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
@@ -337,28 +338,43 @@ static char *get_last_error() /* {{{ */
 	return pestrdup(strerror(errno), 1);
 } /* }}} */
 
+static int status_comp(const void *a, const void *b) /* {{{ */
+{
+	const php_cli_server_http_response_status_code_pair *pa = (const php_cli_server_http_response_status_code_pair *) a;
+	const php_cli_server_http_response_status_code_pair *pb = (const php_cli_server_http_response_status_code_pair *) b;
+
+	if (pa->code < pb->code) {
+		return -1;
+	} else if (pa->code > pb->code) {
+		return 1;
+	}
+
+	return 0;
+} /* }}} */
+
 static const char *get_status_string(int code) /* {{{ */
 {
-	size_t e = (sizeof(status_map) / sizeof(php_cli_server_http_reponse_status_code_pair));
-	size_t s = 0;
+	php_cli_server_http_response_status_code_pair needle, *result = NULL;
 
-	while (e != s) {
-		size_t c = MIN((e + s + 1) / 2, e - 1);
-		int d = status_map[c].code;
-		if (d > code) {
-			e = c;
-		} else if (d < code) {
-			s = c;
-		} else {
-			return status_map[c].str;
-		}
+	needle.code = code;
+	needle.str = NULL;
+
+	result = bsearch(&needle, status_map, sizeof(status_map) / sizeof(needle), sizeof(needle), status_comp);
+
+	if (result) {
+		return result->str;
 	}
-	return NULL;
+
+	/* Returning NULL would require complicating append_http_status_line() to
+	 * not segfault in that case, so let's just return a placeholder, since RFC
+	 * 2616 requires a reason phrase. This is basically what a lot of other Web
+	 * servers do in this case anyway. */
+	return "Unknown Status Code";
 } /* }}} */
 
 static const char *get_template_string(int code) /* {{{ */
 {
-	size_t e = (sizeof(template_map) / sizeof(php_cli_server_http_reponse_status_code_pair));
+	size_t e = (sizeof(template_map) / sizeof(php_cli_server_http_response_status_code_pair));
 	size_t s = 0;
 
 	while (e != s) {
