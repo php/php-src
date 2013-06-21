@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - GD
   . Fixed #65070 (bgcolor does not use the same format as the input image with
     imagerotate). (Pierre)
+  . Fixed Bug #65060 (imagecreatefrom... crashes with user streams). (Remi)
+  . Fixed Bug #65084 (imagecreatefromjpeg fails with URL). (Remi)
 
 20 Jun 2013, PHP 5.5.0
 
