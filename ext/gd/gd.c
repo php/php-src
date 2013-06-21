@@ -2369,12 +2369,11 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 	}
 
+
 	stream = php_stream_open_wrapper(file, "rb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
 	if (stream == NULL)	{
 		RETURN_FALSE;
 	}
-
-	ioctx_func_p = NULL; /* don't allow sockets without IOCtx */
 
 	if (image_type == PHP_GDIMG_TYPE_WEBP) {
 		size_t buff_size;
@@ -2427,7 +2426,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		io_ctx->gd_free(io_ctx);
 		pefree(buff, 1);
 	}
-	else {
+	else if (php_stream_can_cast(stream, PHP_STREAM_AS_STDIO)) {
 		/* try and force the stream to be FILE* */
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO | PHP_STREAM_CAST_TRY_HARD, (void **) &fp, REPORT_ERRORS)) {
 			goto out_err;
