@@ -2,9 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.1
 
+- Core:
+  . Fixed bug #65088 (Generated configure script is malformed on OpenBSD).
+    (Adam)
+
 - CLI server:
   . Fixed bug #65066 (Cli server not responsive when responding with 422 http
     status code). (Adam)
+
 - GD
   . Fixed #65070 (bgcolor does not use the same format as the input image with
     imagerotate). (Pierre)
