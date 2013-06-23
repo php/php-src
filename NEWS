@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.18
 
+- Core:
+  . Fixed bug #65088 (Generated configure script is malformed on OpenBSD).
+    (Adam)
+
 - CLI server:
   . Fixed bug #65066 (Cli server not responsive when responding with 422 http
     status code). (Adam)
