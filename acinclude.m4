@@ -66,10 +66,10 @@ AC_DEFUN([PHP_EXPAND_PATH],[
     $2=$1
   else
     changequote({,})
-    ep_dir="`echo $1|$SED 's%/*[^/][^/]*/*$%%'`"
+    ep_dir=`echo $1|$SED 's%/*[^/][^/]*/*$%%'`
     changequote([,])
-    ep_realdir="`(cd \"$ep_dir\" && pwd)`"
-    $2="$ep_realdir/`basename \"$1\"`"
+    ep_realdir=`(cd "$ep_dir" && pwd)`
+    $2="$ep_realdir"/`basename "$1"`
   fi
 ])
 
