@@ -679,6 +679,9 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SO_FAMILY",		SO_FAMILY,		CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SO_ERROR",		SO_ERROR,		CONST_CS | CONST_PERSISTENT);
+#ifdef SO_BINDTODEVICE
+	REGISTER_LONG_CONSTANT("SO_BINDTODEVICE",       SO_BINDTODEVICE,        CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SOL_SOCKET",	SOL_SOCKET,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOMAXCONN",		SOMAXCONN,		CONST_CS | CONST_PERSISTENT);
 #ifdef TCP_NODELAY
@@ -2038,6 +2041,18 @@ PHP_FUNCTION(socket_set_option)
 #endif
 			break;
 		}
+#ifdef SO_BINDTODEVICE
+		case SO_BINDTODEVICE: {
+			if (Z_TYPE_PP(arg4) == IS_STRING) {
+				opt_ptr = Z_STRVAL_PP(arg4);
+				optlen = Z_STRLEN_PP(arg4);
+			} else {
+				opt_ptr = "";
+				optlen = 0;
+			}
+			break;
+		}
+#endif
 
 		default:
 default_case:

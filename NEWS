@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed Bug #65060 (imagecreatefrom... crashes with user streams). (Remi)
   . Fixed Bug #65084 (imagecreatefromjpeg fails with URL). (Remi)
 
+- Sockets:
+  . Implemented FR #63472 (Setting SO_BINDTODEVICE with socket_set_option).
+    (Damjan Cvetko)
+
 20 Jun 2013, PHP 5.5.0
 
 - Core:
