@@ -14,6 +14,10 @@ PHP                                                                        NEWS
 
 - Intl: 
   . Fixed bug #62759: Buggy grapheme_substr() on edge case. (Stas)
+  
+- ODBC:
+  . Fixed bug #61387 (NULL valued anonymous column causes segfault in 
+    odbc_fetch_array). (Brandon Kirsch)
 
 - Sockets:
   . Implemented FR #63472 (Setting SO_BINDTODEVICE with socket_set_option). 
