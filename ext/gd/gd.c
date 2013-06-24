@@ -2375,23 +2375,6 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		RETURN_FALSE;
 	}
 
-	if (image_type == PHP_GDIMG_TYPE_WEBP) {
-		size_t buff_size;
-		char *buff;
-
-		/* needs to be malloc (persistent) - GD will free() it later */
-		buff_size = php_stream_copy_to_mem(stream, &buff, PHP_STREAM_COPY_ALL, 1);
-		if (!buff_size) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot read image data");
-			goto out_err;
-		}
-		im = (*ioctx_func_p)(buff_size, buff);
-		if (!im) {
-			goto out_err;
-		}
-		goto register_im;
-	}
-
 	/* try and avoid allocating a FILE* if the stream is not naturally a FILE* */
 	if (php_stream_is(stream, PHP_STREAM_IS_STDIO))	{
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void**)&fp, REPORT_ERRORS)) {
@@ -2507,7 +2490,7 @@ PHP_FUNCTION(imagecreatefrompng)
    Create a new image from PNG file or URL */
 PHP_FUNCTION(imagecreatefromwebp)
 {
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageCreateFromWebpPtr, gdImageCreateFromWebpPtr);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageCreateFromWebp, gdImageCreateFromWebpCtx);
 }
 /* }}} */
 #endif /* HAVE_GD_VPX */
