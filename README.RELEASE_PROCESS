@@ -78,6 +78,9 @@ f.e. http://downloads.php.net/derick/
 (internals-win@lists.php.net) so that Windows binaries can be created. Once
 those are made, they should be placed into the same directory as the source snapshots.
 
+12. Notify the documentation team if documentations for new features are
+not yet available but a stable release is imminent.
+
 Getting the non stable release (alpha/beta/RC) announced
 --------------------------------------------------------
 
@@ -173,6 +176,9 @@ those are made, they should be committed to SVN too.
 
 15. When making a final release, also remind the PHP Windows development team
 (internals-win@lists.php.net) to prepare the installer packages for Win32.
+
+16. Make sure proper documentation exists for all new features/changes.
+Coordinate the release with the PHP Documentation team.
 
 Getting the stable release announced
 ------------------------------------
