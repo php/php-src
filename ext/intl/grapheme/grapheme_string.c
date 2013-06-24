@@ -434,6 +434,7 @@ PHP_FUNCTION(grapheme_substr)
 		grapheme_substr_ascii((char *)str, str_len, start, length, ZEND_NUM_ARGS(), (char **) &sub_str, &sub_str_len);
 
 		if ( NULL == sub_str ) {
+			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: invalid parameters", 1 TSRMLS_CC );
 			RETURN_FALSE;
 		}
 
@@ -530,6 +531,15 @@ PHP_FUNCTION(grapheme_substr)
 		RETURN_STRINGL(((char *)sub_str), sub_str_len, 0);
 	}
 
+	if(length == 0) {
+		/* empty length - we've validated start, we can return "" now */
+		if (ustr) {
+			efree(ustr);
+		}
+		ubrk_close(bi);
+		RETURN_EMPTY_STRING();		
+	}
+
 	/* find the end point of the string to return */
 
 	if ( length < 0 ) {
@@ -554,17 +564,24 @@ PHP_FUNCTION(grapheme_substr)
 		length += iter_val;
 	}
 
+	ubrk_close(bi);
+
 	if ( UBRK_DONE == sub_str_end_pos) {
 		if(length < 0) {
-
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: length not contained in string", 1 TSRMLS_CC );
 
 			efree(ustr);
-			ubrk_close(bi);
 			RETURN_FALSE;
 		} else {
 			sub_str_end_pos = ustr_len;
 		}
+	}
+	
+	if(sub_str_start_pos > sub_str_end_pos) {
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: length is beyond start", 1 TSRMLS_CC );
+
+		efree(ustr);
+		RETURN_FALSE;
 	}
 
 	sub_str = NULL;
@@ -572,7 +589,6 @@ PHP_FUNCTION(grapheme_substr)
 	intl_convert_utf16_to_utf8((char **)&sub_str, &sub_str_len, ustr + sub_str_start_pos, ( sub_str_end_pos - sub_str_start_pos ), &status);
 
 	efree( ustr );
-	ubrk_close( bi );
 
 	if ( U_FAILURE( status ) ) {
 		/* Set global error code. */
