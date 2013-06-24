@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #65088 (Generated configure script is malformed on OpenBSD).
     (Adam)
+  . Fixed bug #65108 (is_callable() triggers Fatal Error). (David Soria Parra)
 
 OPcache
   . OPcache must be compatible with LiteSpeed SAPI (Dmitry)
