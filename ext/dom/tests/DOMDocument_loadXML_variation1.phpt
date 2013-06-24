@@ -13,7 +13,7 @@ assert.bail=true
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --ENV--
-XML_FILE=/book_with_dtd.xml
+XML_FILE=/book_with_dtd2.xml
 LOAD_OPTIONS=LIBXML_DTDLOAD
 EXPECTED_RESULT=1
 --FILE_EXTERNAL--

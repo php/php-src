@@ -14,12 +14,12 @@ assert.bail=true
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --ENV--
-XML_FILE=/book_with_dtd.xml
+XML_FILE=/book_with_dtd2.xml
 LOAD_OPTIONS=LIBXML_DTDATTR|LIBXML_NOCDATA|LIBXML_NOENT|LIBXML_NOBLANKS
 EXPECTED_RESULT=1
 --FILE_EXTERNAL--
 domdocumentloadxml_test_method_savexml.php
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE books SYSTEM "books.dtd">
+<!DOCTYPE books SYSTEM "ext/dom/tests/books.dtd">
 <books><book><title default="default title">The Grapes of Wrath</title><author>John Steinbeck</author></book><book><title default="default title">The Pearl</title><author>John Steinbeck</author></book><book><title default="default title">entity is only for test purposes</title><author>data for test</author></book></books>
