@@ -18,6 +18,8 @@ OPcache
     imagerotate). (Pierre)
   . Fixed Bug #65060 (imagecreatefrom... crashes with user streams). (Remi)
   . Fixed Bug #65084 (imagecreatefromjpeg fails with URL). (Remi)
+  . Fix gdImageCreateFromWebpCtx and use same logic to load WebP image
+    that other formats. (Remi)
 
 - Intl:
   . Fixed bug #62759: Buggy grapheme_substr() on edge case. (Stas)
