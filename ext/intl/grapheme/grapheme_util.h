@@ -37,7 +37,7 @@ int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t stri
 
 inline void *grapheme_memrchr_grapheme(const void *s, int c, int32_t n);
 
-int grapheme_get_haystack_offset(UBreakIterator* bi, UChar *uhaystack, int32_t uhaystack_len, int32_t offset);
+int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset);
 
 int32_t grapheme_strrpos_ascii(unsigned char *haystack, int32_t haystack_len, unsigned char *needle, int32_t needle_len, int32_t offset);
 

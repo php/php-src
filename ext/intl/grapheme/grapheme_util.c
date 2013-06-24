@@ -155,6 +155,9 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 	status = U_ZERO_ERROR;
 	bi = grapheme_get_break_iterator(u_break_iterator_buffer, &status TSRMLS_CC );
 	STRPOS_CHECK_STATUS(status, "Failed to get iterator");
+	status = U_ZERO_ERROR;
+	ubrk_setText(bi, uhaystack, uhaystack_len, &status);
+	STRPOS_CHECK_STATUS(status, "Failed to set up iterator");
 
 	status = U_ZERO_ERROR;
 	src = usearch_open(uneedle, uneedle_len, uhaystack, uhaystack_len, "", bi, &status);
@@ -169,7 +172,7 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 	}
 
 	if(offset != 0) {
-		offset_pos = grapheme_get_haystack_offset(bi, uhaystack, uhaystack_len, offset);
+		offset_pos = grapheme_get_haystack_offset(bi, offset);
 		if(offset_pos == -1) {
 			status = U_ILLEGAL_ARGUMENT_ERROR;
 			STRPOS_CHECK_STATUS(status, "Invalid search offset");	
@@ -191,7 +194,7 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 	}
 	STRPOS_CHECK_STATUS(status, "Error looking up string");
 	if(char_pos != USEARCH_DONE && ubrk_isBoundary(bi, char_pos)) {
-		ret_pos = grapheme_count_graphemes(bi, uhaystack, char_pos);
+		ret_pos = grapheme_count_graphemes(bi, uhaystack,char_pos);
 		if(puchar_pos) {
 			*puchar_pos = char_pos;
 		}
@@ -290,17 +293,11 @@ int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t stri
 
 
 /* {{{ 	grapheme_get_haystack_offset - bump the haystack pointer based on the grapheme count offset */
-int grapheme_get_haystack_offset(UBreakIterator* bi, UChar *uhaystack, int32_t uhaystack_len, int32_t offset)
+int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 {
-	UErrorCode		status;
 	int32_t pos;
 	int32_t (*iter_op)(UBreakIterator* bi);
 	int iter_incr;
-
-	if ( NULL != bi ) {
-		status = U_ZERO_ERROR;
-		ubrk_setText (bi, uhaystack, uhaystack_len, &status);
-	}
 
 	if ( 0 == offset ) {
 		return 0;
