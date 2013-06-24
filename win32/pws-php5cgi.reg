@@ -1,6 +1,1 @@
-REGEDIT4
-
-[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\w3svc\parameters\Script Map]
-".php"="[PUT PATH HERE]\\php.exe"
-
-
+<---- DEBUG CODE HERE ---->
