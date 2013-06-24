@@ -2486,8 +2486,8 @@ PHP_FUNCTION(imagecreatefrompng)
 #endif /* HAVE_GD_PNG */
 
 #ifdef HAVE_GD_WEBP
-/* {{{ proto resource imagecreatefrompng(string filename)
-   Create a new image from PNG file or URL */
+/* {{{ proto resource imagecreatefromwebp(string filename)
+   Create a new image from WEBP file or URL */
 PHP_FUNCTION(imagecreatefromwebp)
 {
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageCreateFromWebp, gdImageCreateFromWebpCtx);
@@ -2726,7 +2726,7 @@ PHP_FUNCTION(imagepng)
 
 #ifdef HAVE_GD_WEBP
 /* {{{ proto bool imagewebp(resource im [, string filename[, quality]] )
-   Output PNG image to browser or file */
+   Output WEBP image to browser or file */
 PHP_FUNCTION(imagewebp)
 {
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageWebpCtx);
