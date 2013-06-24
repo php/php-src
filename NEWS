@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #65088 (Generated configure script is malformed on OpenBSD).
     (Adam)
 
+OPcache
+  . OPcache must be compatible with LiteSpeed SAPI (Dmitry)
+
 - CLI server:
   . Fixed bug #65066 (Cli server not responsive when responding with 422 http
     status code). (Adam)

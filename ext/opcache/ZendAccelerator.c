@@ -2375,6 +2375,7 @@ static inline int accel_find_sapi(TSRMLS_D)
 		"isapi",
 		"apache2filter",
 		"apache2handler",
+		"litespeed",
 		NULL
 	};
 	const char **sapi_name;
@@ -2499,7 +2500,7 @@ static int accel_startup(zend_extension *extension)
 		    strcmp(sapi_module.name, "cli") == 0) {
 			zps_startup_failure("Opcode Caching is disabled for CLI", NULL, accelerator_remove_cb TSRMLS_CC);
 		} else {
-			zps_startup_failure("Opcode Caching is only supported in Apache, ISAPI, FPM and FastCGI SAPIs", NULL, accelerator_remove_cb TSRMLS_CC);
+			zps_startup_failure("Opcode Caching is only supported in Apache, ISAPI, FPM, FastCGI and LiteSpeed SAPIs", NULL, accelerator_remove_cb TSRMLS_CC);
 		}
 		return SUCCESS;
 	}
