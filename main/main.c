@@ -784,6 +784,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	/* no docref given but function is known (the default) */
 	if (!docref && is_function) {
 		int doclen;
+		while (*function == '_') {
+			function++;
+		}
 		if (space[0] == '\0') {
 			doclen = spprintf(&docref_buf, 0, "function.%s", function);
 		} else {
