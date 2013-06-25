@@ -477,9 +477,22 @@ PS_GC_FUNC(mm)
 PS_CREATE_SID_FUNC(mm)
 {
 	char *sid;
+	int maxfail = 3;
 	PS_MM_DATA;
 
-	sid = php_session_create_id((void **)&data, newlen TSRMLS_CC);
+	do {
+		sid = php_session_create_id((void **)&data, newlen TSRMLS_CC);
+		/* Check collision */
+		if (ps_mm_key_exists(data, sid TSRMLS_CC) == SUCCESS) {
+			if (sid) {
+				efree(sid);
+				sid = NULL;
+			}
+			if (!(maxfail--)) {
+				return NULL;
+			}
+		}
+	} while(!sid);
 
 	return sid;
 }
