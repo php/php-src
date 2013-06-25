@@ -8,7 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug #65108 (is_callable() triggers Fatal Error). 
     (David Soria Parra, Laruence)
 
-OPcache
+- OPcache
   . OPcache must be compatible with LiteSpeed SAPI (Dmitry)
 
 - CLI server:
@@ -29,6 +29,10 @@ OPcache
 - Sockets:
   . Implemented FR #63472 (Setting SO_BINDTODEVICE with socket_set_option).
     (Damjan Cvetko)
+
+- SPL:
+  . Fixed bug #61828 (Memleak when calling Directory(Recursive)Iterator
+    /Spl(Temp)FileObject ctor twice). (Laruence)
 
 20 Jun 2013, PHP 5.5.0
 
