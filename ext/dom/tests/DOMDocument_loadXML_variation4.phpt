@@ -21,5 +21,12 @@ EXPECTED_RESULT=1
 domdocumentloadxml_test_method_savexml.php
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE books SYSTEM "ext/dom/tests/books.dtd">
+<!DOCTYPE books [
+<!ENTITY entitest "entity is only for test purposes">
+<!ATTLIST title default CDATA "default title">
+<!ELEMENT books (book)*>
+<!ELEMENT book (title , author)>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT author (#PCDATA)>
+]>
 <books><book><title default="default title">The Grapes of Wrath</title><author>John Steinbeck</author></book><book><title default="default title">The Pearl</title><author>John Steinbeck</author></book><book><title default="default title">entity is only for test purposes</title><author>data for test</author></book></books>

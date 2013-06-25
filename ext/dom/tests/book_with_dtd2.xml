@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE books SYSTEM "ext/dom/tests/books.dtd">
+<!DOCTYPE books [
+<!ENTITY entitest "entity is only for test purposes">
+<!ATTLIST title default CDATA "default title">
+<!ELEMENT books (book*)>
+<!ELEMENT book (title, author)>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT author (#PCDATA)>
+]>
 <books>
     <book>
     <title>The Grapes of Wrath</title>
