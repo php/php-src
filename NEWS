@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Implemented FR #63472 (Setting SO_BINDTODEVICE with socket_set_option). 
     (Damjan Cvetko)
 
+- SPL:
+  . Fixed bug #61828 (Memleak when calling Directory(Recursive)Iterator
+    /Spl(Temp)FileObject ctor twice). (Laruence)
+
 ?? ??? 2013, PHP 5.4.17
 
 - Core:
