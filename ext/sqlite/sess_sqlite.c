@@ -252,8 +252,21 @@ PS_CREATE_SID_FUNC(sqlite)
 {
 	PS_SQLITE_DATA;
 	char *sid;
+	int maxfail = 3;
 
-	sid = php_session_create_id((void **)&db, newlen TSRMLS_CC);
+	do {
+		sid = php_session_create_id((void **)&db, newlen TSRMLS_CC);
+		/* Check collision */
+		if (ps_sqlite_key_exists(db, sid TSRMLS_CC) == SUCCESS) {
+			if (sid) {
+				efree(sid);
+				sid = NULL;
+			}
+			if (!(maxfail--)) {
+				return NULL;
+			}
+		}
+	} while(!sid);
 
 	return sid;
 }
