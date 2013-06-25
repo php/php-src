@@ -710,6 +710,12 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, long ctor_fla
 	}
 
 	intern = (spl_filesystem_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	if (intern->_path) {
+		/* object is alreay initialized */
+		zend_restore_error_handling(&error_handling TSRMLS_CC);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Directory object is already initialized");
+		return;
+	}
 	intern->flags = flags;
 #ifdef HAVE_GLOB
 	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_GLOB) && strstr(path, "glob://") != path) {
