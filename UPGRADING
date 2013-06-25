@@ -2,16 +2,16 @@ $Id$
 
 PHP 5.5 UPGRADE NOTES
 
-1. Backward Incompatible Changes
-2. New Features
-2. Changes in SAPI modules
-3. Deprecated Functionality
-4. Changed Functions
-5. New Functions
-6. New Classes and Interfaces
-7. Removed Extensions
-8. Other Changes to Extensions
-9. New Global Constants
+1.  Backward Incompatible Changes
+2.  New Features
+2.  Changes in SAPI modules
+3.  Deprecated Functionality
+4.  Changed Functions
+5.  New Functions
+6.  New Classes and Interfaces
+7.  Removed Extensions
+8.  Other Changes to Extensions
+9.  New Global Constants
 10. Changes to INI File Handling
 11. Windows Support
 12. Other Changes
@@ -21,122 +21,158 @@ PHP 5.5 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- Drop Windows XP and 2003 support. (Pierre)
-- All internal case insensitivity handling for class, function and constant 
-  names is done according to ASCII rules, current locale settings are ignored. 
+- Dropped Windows XP and 2003 support. (Pierre)
+
+- All internal case insensitivity handling for class, function and constant
+  names is done according to ASCII rules.  Current locale settings are ignored.
+
 - self, parent & static keywords now are always case-insensitive (see bug
   #60833).
-- php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
-  zend_logo_guid() have been removed
-- Removal of Logo GUIDs
+
+- Removed Logo GUIDs: php_logo_guid(), php_egg_logo_guid(),
+  php_real_logo_guid() and zend_logo_guid()
 
 ========================================
 2. New Features
 ========================================
 
 - Support list in foreach. (Laruence)
-  (wiki.php.net/rfc/foreachlist)
+  (http://php.net/foreach#control-structures.foreach.list,
+  http://wiki.php.net/rfc/foreachlist)
+
 - Support finally keyword. (Laruence)
-  (wiki.php.net/rfc/finally)
+  (http://php.net/exceptions, http://wiki.php.net/rfc/finally)
+
 - Support constant array/string dereferencing. (Laruence)
   (https://wiki.php.net/rfc/constdereference)
+
 - Add support for using empty() on the result of function calls and
   other expressions. Thus it is now possible to write empty(getArray()),
   for example. (https://wiki.php.net/rfc/empty_isset_exprs)
+
 - Added generators.
-  (https://wiki.php.net/rfc/generators)
-- ClassName::class syntax returning full class name for a class as 
-  a string constant. (https://wiki.php.net/rfc/class_name_scalars)
+  (http://php.net/generators, https://wiki.php.net/rfc/generators)
+
+- ClassName::class syntax returning full class name for a class as a
+  string constant.
+  (http://php.net/oop5.basic#language.oop5.basic.class.class,
+  https://wiki.php.net/rfc/class_name_scalars)
+
 - Added support for non-scalar Iterator keys in foreach.
   (https://wiki.php.net/rfc/foreach-non-scalar-keys).
-- Bundled Zend OPcache extension
- (https://wiki.php.net/rfc/optimizerplus)
+
+- Bundled Zend OPcache extension to improve performance
+  (http://php.net/manual/en/book.opcache.php,
+  https://wiki.php.net/rfc/optimizerplus)
+
+- Added a simplified password hashing API
+  (http://php.net/password)
 
 ========================================
 2. Changes in SAPI modules
 ========================================
 
-- Support for changing the process's title in CLI/CLI-Server SAPIs. (Keyur)
-  (https://wiki.php.net/rfc/cli_process_title)
-- Support for systemd in php-fpm:
-  Add --with-fpm-systemd option to report health to systemd, and
-  systemd_interval option to configure this. The service can now use
-  Type=notify in the systemd unit file. (Remi)
+- Support for changing the process's title in CLI/CLI-Server
+  SAPIs. (Keyur) (https://wiki.php.net/rfc/cli_process_title)
+
+- Support for systemd in php-fpm: Add --with-fpm-systemd option to
+  report health to systemd, and add systemd_interval option to
+  configure this. The service can now use Type=notify in the systemd
+  unit file. (Remi)
 
 ========================================
 3. Deprecated Functionality
 ========================================
 
-- The original MySQL extension is now deprecated, and will generate deprecation
-  warnings when connecting to a database through mysql_connect(),
-  mysql_pconnect() or by establishing an implicit connection. Use MySQLi or PDO
-  instead.
+- The original MySQL extension is now deprecated and will generate
+  deprecation warnings when connecting to a database through
+  mysql_connect(), mysql_pconnect() or by establishing an implicit
+  connection. Use MySQLi or PDO instead.
+
 - The preg_replace /e modifier is now deprecated.  Use
   preg_replace_callback instead.
   (https://wiki.php.net/rfc/remove_preg_replace_eval_modifier)
+
 - IntlDateFormatter::setTimeZoneID() and datefmt_set_timezone_id() are
-  deprecated. Use IntlDateFormatter::setTimeZone() or datefmt_set_timezone()
-  instead.
+  deprecated. Use IntlDateFormatter::setTimeZone() or
+  datefmt_set_timezone() instead.
+
 - mcrypt_ecb(), mcrypt_cbc(), mcrypt_cfb() and mcrypt_ofb() now throw
-  E_DEPRECATED. Their use was already previously discouraged in the docs,
-  but that predated the existence of E_DEPRECATED.
+  E_DEPRECATED. Their use was already previously discouraged in the
+  documentation, but that predated the existence of E_DEPRECATED.
 
 ========================================
 4. Changed Functions
 ========================================
 
-- pack()/unpack() had the following changes, which bring it more in line
-  with Perl's behavior:
-  - Implemented format character "Z": NULL padded string, with trailing NULL
-    bytes removed.
-  - Changed format character "a": this no longer removes trailing NULL bytes.
-  - Changed format character "A": all trailing ASCII whitespace is now removed
-    (defined as spaces, tabs, \r, \n and NULL).
-- MessageFormatter::format() and related functions now accepted named arguments
-  and mixed numeric/named arguments in ICU 4.8+.
-- MessageFormatter::format() and related functions now don't error out when
-  an insufficient argument count is provided. Instead, the placeholders will
-  remain unsubstituted.
-- MessageFormatter::parse() and MessageFormat::format() (and their static
-  equivalents) now don't throw away better than second precision in the
-  arguments.
-- IntlDateFormatter::__construct and datefmt_create() now accept for the
-  $timezone argument time zone identifiers, IntlTimeZone objects, DateTimeZone
-  objects and NULL. It used to accept only time zone identifiers and NULL.
-  Invalid time zone identifiers are no longer accepted. Emptry strings are
-  no longer accepted.
+- pack()/unpack() had the following changes, which bring it more in
+  line with Perl's behavior: - Implemented format character "Z": NULL
+  padded string, with trailing NULL bytes removed.  - Changed format
+  character "a": this no longer removes trailing NULL bytes.  -
+  Changed format character "A": all trailing ASCII whitespace is now
+  removed (defined as spaces, tabs, \r, \n and NULL).
+
+- MessageFormatter::format() and related functions now accepted named
+  arguments and mixed numeric/named arguments in ICU 4.8+.
+
+- MessageFormatter::format() and related functions now don't error out
+  when an insufficient argument count is provided. Instead, the
+  placeholders will remain unsubstituted.
+
+- MessageFormatter::parse() and MessageFormat::format() (and their
+  static equivalents) now don't throw away better than second
+  precision in the arguments.
+
+- IntlDateFormatter::__construct and datefmt_create() now accept for
+  the $timezone argument time zone identifiers, IntlTimeZone objects,
+  DateTimeZone objects and NULL. It used to accept only time zone
+  identifiers and NULL.  Invalid time zone identifiers are no longer
+  accepted. Empty strings are no longer accepted.
+
 - The default time zone used in IntlDateFormatter::__construct and
-  datefmt_create() (when the corresponding argument is not passed or NULL is
-  passed) is now the one given by date_default_timezone_get(), not the
-  default ICU time zone.
-- The time zone passed to the IntlDateFormatter is ignored if it is NULL and if
-  the calendar passed is an IntlCalendar object -- in this case, the
-  IntlCalendar's time zone will be used instead. Otherwise, the time zone
-  specified in the $timezone argument is used instead. This does not affect
-  old code, as IntlCalendar was introduced in this version.
-- IntlDateFormatter::__construct and datefmt_create() now accept for the
-  $calendar argument also IntlCalendar objects.
-- IntlDateFormatter::getCalendar() and datefmt_get_calendar() return false
-  if the IntlDateFormatter was set up with an IntlCalendar instead of the
-  constants IntlDateFormatter::GREGORIAN/TRADITIONAL. IntlCalendar did not
-  exist before this version.
-- IntlDateFormatter::setCalendar() and datefmt_set_calendar() now also accept
-  an IntlCalendar object, in which case its time zone is taken. Passing a
-  constant is still allowed, and still keeps the time zone.
+  datefmt_create() (when the corresponding argument is not passed or
+  NULL is passed) is now the one given by date_default_timezone_get(),
+  not the default ICU time zone.
+
+- The time zone passed to the IntlDateFormatter is ignored if it is
+  NULL and if the calendar passed is an IntlCalendar object -- in this
+  case, the IntlCalendar's time zone will be used instead. Otherwise,
+  the time zone specified in the $timezone argument is used
+  instead. This does not affect old code, as IntlCalendar was
+  introduced in this version.
+
+- IntlDateFormatter::__construct and datefmt_create() now accept for
+  the $calendar argument also IntlCalendar objects.
+
+- IntlDateFormatter::getCalendar() and datefmt_get_calendar() return
+  false if the IntlDateFormatter was set up with an IntlCalendar
+  instead of the constants
+  IntlDateFormatter::GREGORIAN/TRADITIONAL. IntlCalendar did not exist
+  before this version.
+
+- IntlDateFormatter::setCalendar() and datefmt_set_calendar() now also
+  accept an IntlCalendar object, in which case its time zone is
+  taken. Passing a constant is still allowed, and still keeps the time
+  zone.
+
 - IntlDateFormatter::format() and datefmt_format() now also accept an
   IntlCalendar object for formatting.
-- php_logo_guid(), php_egg_logo_guid(), php_real_logo_guid() and 
-  zend_logo_guid() have been removed
+
 - set_error_handler(NULL) can now be used to reset the error handler.
-  Furthermore both set_error_handler(NULL) and set_exception_handler(NULL) will
-  now return the previously defined error/exception handler. Previously
-  bool(true) was returned.
-- setcookie(), setrawcookie() and ext/session now send Max-Age headers alongside
-  Expires headers. (see https://wiki.php.net/rfc/cookie_max-age)
-- curl_setopt now accepts new option CURLOPT_SAFE_UPLOAD and CURLFile object for
-  safer file uploads (see https://wiki.php.net/rfc/curl-file-upload)
-- Functions in the socket extension now do not emit warnings when the errno is
-  EAGAIN, EWOULDBLOCK or EINPROGRESS.
+  Furthermore both set_error_handler(NULL) and
+  set_exception_handler(NULL) will now return the previously defined
+  error/exception handler. Previously bool(true) was returned.
+
+- setcookie(), setrawcookie() and ext/session now send Max-Age headers
+  alongside Expires headers. (see
+  https://wiki.php.net/rfc/cookie_max-age)
+
+- curl_setopt now accepts new option CURLOPT_SAFE_UPLOAD and CURLFile
+  object for safer file uploads (see
+  https://wiki.php.net/rfc/curl-file-upload)
+
+- Functions in the socket extension now do not emit warnings when the
+  errno is EAGAIN, EWOULDBLOCK or EINPROGRESS.
 
 ========================================
 5. New Functions
@@ -257,7 +293,7 @@ PHP 5.5 UPGRADE NOTES
   - SplFixedArray::__wakeup()
   - SplDoublyLinkedList::add()
 
-- Zend OPcache
+- Zend OPcache:
  - opcache_get_configuration()
  - opcache_get_status()
  - opcache_reset()
@@ -282,6 +318,7 @@ PHP 5.5 UPGRADE NOTES
 7. Removed Extensions
 ========================================
 
+None
 
 ========================================
 8. Other Changes to Extensions
@@ -304,7 +341,7 @@ PHP 5.5 UPGRADE NOTES
 - GD
   - Added constants for imageflip:
     . IMG_FLIP_HORIZONTAL
-	. IMG_FLIP_VERTICAL
+    . IMG_FLIP_VERTICAL
     . IMG_FLIP_BOTH
   - Added constants for imagecrop
     . IMG_CROP_DEFAULT
@@ -348,18 +385,20 @@ PHP 5.5 UPGRADE NOTES
 ========================================
 
 - Core:
-  - Added sys_temp_dir INI directive, for specifying temp directory.
+  - Added sys_temp_dir INI directive, for specifying temporary
+    directory.
 
 - Intl:
-  - Added intl.use_exceptions INI directive, which controls what happens when
-    global errors are set together with intl.error_level.
+  - Added intl.use_exceptions INI directive, which controls what
+    happens when global errors are set together with intl.error_level.
 
 - mysqlnd:
-  - Added mysqlnd.sha256_server_public_key INI PERDIR setting that affects all
-    APIs which use(are built) for mysqlnd. This allows ext/mysqli to be used
-	with the new auth protocol, although at coarser level.
+  - Added mysqlnd.sha256_server_public_key INI PERDIR setting that
+    affects all APIs which use(are built) for mysqlnd. This allows
+    ext/mysqli to be used with the new auth protocol, although at
+    coarser level.
 
-- Zend OPcache (See ext/opcache/README for more details)
+- Zend OPcache (See http://php.net/manual/en/book.opcache.php)
   - Added the following directives:
     - opcache.enable (default "1")
     - opcache.memory_consumption (default "64")
@@ -385,32 +424,35 @@ PHP 5.5 UPGRADE NOTES
     - opcache.preferred_memory_model (default "")
     - opcache.protect_memory (default "0")
     - opcache.mmap_base (Windows-only)
- - If APC or WinCache was used before, the user cache APIs can be replaced by:
-    - APCu, all supported OSes (http://pecl.php.net/package/APCu, Windows: http://windows.php.net/downloads/pecl/releases/apcu/)
-	- WinCache, windows only (http://pecl.php.net/package/WinCache), a version with the ability to use only the user
-	  cache will be released shortly after 5.5.0 final
 
 ========================================
 11. Windows Support
 ========================================
 
-- Apache 2.4 handler is supported as of PHP 5.5.0
+- The Apache 2.4 handler is supported as of PHP 5.5.0
 
-- OpCache
-  Error like 'unable to reattach to base address' could happen in many common setups.
-  It is due to some technical and design restriction in the engine and cannot be fixed 
-  easily before 5.5.0 final was released.
-  
-  A possible fix is to tweak the opcache.mmap_base INI setting by forcing the 1st address 
-  to be tried.
-  
+- OPcache: Errors like 'unable to reattach to base address' could
+  happen in many common setups.  It is due to some technical and
+  design restriction in the engine and could not be fixed easily
+  before 5.5.0 was released.
+
+  A possible fix is to tweak the opcache.mmap_base INI setting by
+  forcing the first address to be tried.
+
   For x86 version, the following addreses can be tried:
-	.  0x20000000, 0x21000000, 0x30000000, 0x31000000, 0x50000000
-  and for x64 (still expiremental):
-  	. 0x0000100000000000, 0x0000200000000000, 0x0000300000000000, 0x0000700000000000
+        .  0x20000000, 0x21000000, 0x30000000, 0x31000000, 0x50000000
+  and for x64 (still experimental):
+        . 0x0000100000000000, 0x0000200000000000, 0x0000300000000000, 0x0000700000000000
 
 ========================================
 12. Other Changes
 ========================================
 
-- Logo GUIDs will no longer work
+- If the APC or WinCache user cache APIs were used before, consider
+   these alternatives for PHP 5.5:
+
+  - APCu
+      - all supported OSes: http://pecl.php.net/package/APCu
+      - Windows: http://windows.php.net/downloads/pecl/releases/apcu/
+
+  - WinCache, Windows only: http://pecl.php.net/package/WinCache
