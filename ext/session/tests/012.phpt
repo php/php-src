@@ -4,6 +4,7 @@ registering $_SESSION should not segfault
 <?php include('skipif.inc'); ?>
 --INI--
 session.use_cookies=0
+session.use_strict_mode=0
 session.cache_limiter=
 register_globals=1
 session.bug_compat_42=1

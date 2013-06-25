@@ -1,7 +1,5 @@
 --TEST--
 Bug #60634 (Segmentation fault when trying to die() in SessionHandler::write()) - fatal error in close during exec
---XFAIL--
-Long term low priority bug, working on it
 --INI--
 session.save_path=
 session.name=PHPSESSID
@@ -44,6 +42,9 @@ echo "um, hi\n";
 
 ?>
 --EXPECTF--
+close: goodbye cruel world
+
+Fatal error: Call to undefined function undefined_function() in %s on line %d
 close: goodbye cruel world
 
 Fatal error: Call to undefined function undefined_function() in %s on line %d

@@ -5,6 +5,7 @@ unset($_SESSION["name"]); should work with register_globals=off
 --INI--
 register_long_arrays=1
 session.use_cookies=0
+session.use_strict_mode=0
 session.cache_limiter=
 register_globals=0
 session.bug_compat_42=1

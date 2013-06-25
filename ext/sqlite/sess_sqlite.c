@@ -34,7 +34,7 @@ extern int sqlite_decode_binary(const unsigned char *in, unsigned char *out);
 PS_FUNCS(sqlite);
 
 ps_module ps_mod_sqlite = {
-	PS_MOD(sqlite)
+	PS_MOD_SID(sqlite)
 };
 
 PS_OPEN_FUNC(sqlite) 
@@ -80,6 +80,45 @@ PS_CLOSE_FUNC(sqlite)
 	return SUCCESS;
 }
 
+static int ps_sqlite_key_exists(sqlite *db, const char *key TSRMLS_DC)
+{
+	char *query;
+	const char *tail;
+	sqlite_vm *vm;
+	int colcount, result;
+	const char **rowdata, **colnames;
+	char *error;
+	int ret = SUCCESS;
+
+	query = sqlite_mprintf("SELECT value FROM session_data WHERE sess_id='%q' LIMIT 1", key);
+	if (query == NULL) {
+		/* no memory */
+		return FAILURE;
+	}
+
+	if (sqlite_compile(db, query, &tail, &vm, &error) != SQLITE_OK) {
+		sqlite_freemem(error);
+		sqlite_freemem(query);
+		return FAILURE;
+	}
+	sqlite_freemem(query);
+
+	switch ((result = sqlite_step(vm, &colcount, &rowdata, &colnames))) {
+		case SQLITE_ROW:
+			break;
+		default:
+			ret = FAILURE;
+	}
+	
+	if (SQLITE_OK != sqlite_finalize(vm, &error)) {
+		sqlite_freemem(error);
+		ret = FAILURE;
+	}
+
+	return ret;
+}
+
+
 PS_READ_FUNC(sqlite) 
 {
 	PS_SQLITE_DATA;
@@ -92,7 +131,24 @@ PS_READ_FUNC(sqlite)
 
 	*val = NULL;
 	*vallen = 0;
-	
+
+	/* If there is an ID and strict mode, verify it */
+	if (PS(use_strict_mode)
+		&& ps_sqlite_key_exists(db, key TSRMLS_CC) == FAILURE) {
+		if (key) {
+			efree(PS(id));
+			PS(id) = NULL;
+		}
+		PS(id) = PS(mod)->s_create_sid((void **)&db, NULL TSRMLS_CC);
+		if (!PS(id)) {
+			return FAILURE;
+		}
+		php_session_reset_id(TSRMLS_C);
+		if (PS(use_cookies)) {
+			PS(send_cookie) = 1;
+		}
+	}
+
 	query = sqlite_mprintf("SELECT value FROM session_data WHERE sess_id='%q' LIMIT 1", key);
 	if (query == NULL) {
 		/* no memory */
@@ -112,7 +168,7 @@ PS_READ_FUNC(sqlite)
 				*vallen = strlen(rowdata[0]);
 				if (*vallen) {
 					*val = emalloc(*vallen);
-					*vallen = sqlite_decode_binary(rowdata[0], *val);
+					*vallen = sqlite_decode_binary((unsigned char *)rowdata[0], (unsigned char *)*val);
 					(*val)[*vallen] = '\0';
 				} else {
 					*val = STR_EMPTY_ALLOC();
@@ -120,14 +176,17 @@ PS_READ_FUNC(sqlite)
 			}
 			break;
 		default:
+			*val = STR_EMPTY_ALLOC();
 			sqlite_freemem(error);
 			error = NULL;
 	}
 	
 	if (SQLITE_OK != sqlite_finalize(vm, &error)) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLite: session read: error %s", error);
+		efree(*val);
+		*val = NULL;
 		sqlite_freemem(error);
 		error = NULL;
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SQLite: session read: error %s", error);
 	}
 
 	sqlite_freemem(query);
@@ -147,7 +206,7 @@ PS_WRITE_FUNC(sqlite)
 	t = time(NULL);
 
 	binary = safe_emalloc(1 + vallen / 254, 257, 3);
-	binlen = sqlite_encode_binary((const unsigned char*)val, vallen, binary);
+	binlen = sqlite_encode_binary((const unsigned char*)val, vallen, (unsigned char *)binary);
 	
 	rv = sqlite_exec_printf(db, "REPLACE INTO session_data VALUES('%q', '%q', %d)", NULL, NULL, &error, key, binary, t);
 	if (rv != SQLITE_OK) {
@@ -187,6 +246,16 @@ PS_GC_FUNC(sqlite)
 		rv = sqlite_exec_printf(db, "VACUUM", NULL, NULL, NULL);
 	}
 	return SQLITE_RETVAL(rv);
+}
+
+PS_CREATE_SID_FUNC(sqlite)
+{
+	PS_SQLITE_DATA;
+	char *sid;
+
+	sid = php_session_create_id((void **)&db, newlen TSRMLS_CC);
+
+	return sid;
 }
 
 #endif /* HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION) */

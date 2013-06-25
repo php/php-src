@@ -5,6 +5,7 @@ Mats Lindh <mats at lindh.no>
 #Testfest php.no
 --INI--
 session.save_handler = sqlite
+session.use_strict_mode=0
 --SKIPIF--
 if (!extension_loaded("session"))
 {
