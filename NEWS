@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     (David Soria Parra, Laruence)
 
 - OPcache
+  . Fixed bug #64827 (Segfault in zval_mark_grey (zend_gc.c)). (Laruence)
   . OPcache must be compatible with LiteSpeed SAPI (Dmitry)
 
 - CLI server:
