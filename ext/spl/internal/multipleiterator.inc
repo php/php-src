@@ -205,7 +205,7 @@ class MultipleIterator implements Iterator
 		$retval = array();
 		foreach($this->iterators as $iter)
 		{
-			if ($it->valid())
+			if ($iter->valid())
 			{
 				$retval[] = $iter->key();
 			}
