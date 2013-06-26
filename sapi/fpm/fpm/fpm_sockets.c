@@ -405,7 +405,19 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 		zlog(ZLOG_SYSERROR, "failed to retrieve TCP_INFO for socket");
 		return -1;
 	}
+#if defined(__FreeBSD__)
+	if (info.__tcpi_sacked == 0) {
+		return -1;
+	}
 
+	if (cur_lq) {
+		*cur_lq = info.__tcpi_unacked;
+	}
+
+	if (max_lq) {
+		*max_lq = info.__tcpi_sacked;
+	}
+#else
 	/* kernel >= 2.6.24 return non-zero here, that means operation is supported */
 	if (info.tcpi_sacked == 0) {
 		return -1;
@@ -418,6 +430,7 @@ int fpm_socket_get_listening_queue(int sock, unsigned *cur_lq, unsigned *max_lq)
 	if (max_lq) {
 		*max_lq = info.tcpi_sacked;
 	}
+#endif
 
 	return 0;
 }
