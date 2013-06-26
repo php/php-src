@@ -7,6 +7,10 @@ PHP                                                                        NEWS
     (David Soria Parra, Laruence)
   . Fixed bug #65088 (Generated configure script is malformed on OpenBSD).
     (Adam)
+  . Fixed bug #62964 (Possible XSS on "Registered stream filters" info).
+    (david at nnucomputerwhiz dot com)
+  . Fixed bug #62672 (Error on serialize of ArrayObject).
+    (lior dot k at zend dot com)
   . Fixed bug #60732 (php_error_docref links to invalid pages). (Jakub Vrana)
 
 - CLI server:
