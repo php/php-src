@@ -219,7 +219,7 @@ array(2) {
   [1]=>
   array(4) {
     ["file"]=>
-    string(69) "%s"
+    string(%d) "%s"
     ["line"]=>
     int(%d)
     ["function"]=>
