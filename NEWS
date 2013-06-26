@@ -7,8 +7,6 @@ PHP                                                                        NEWS
     (David Soria Parra, Laruence)
   . Fixed bug #65088 (Generated configure script is malformed on OpenBSD).
     (Adam)
-  . Fixed bug #63983 (enabling FPM borks compile on FreeBSD).
-    (chibisuke at web dot de, Felipe)
   . Fixed bug #62964 (Possible XSS on "Registered stream filters" info).
     (david at nnucomputerwhiz dot com)
   . Fixed bug #62672 (Error on serialize of ArrayObject). (Lior Kaplan)
@@ -19,6 +17,10 @@ PHP                                                                        NEWS
 - CLI server:
   . Fixed bug #65066 (Cli server not responsive when responding with 422 http
     status code). (Adam)
+    
+- FPM:
+  . Fixed bug #63983 (enabling FPM borks compile on FreeBSD).
+    (chibisuke at web dot de, Felipe)
 
 - Intl: 
   . Fixed bug #62759: Buggy grapheme_substr() on edge case. (Stas)
