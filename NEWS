@@ -21,6 +21,10 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #63983 (enabling FPM borks compile on FreeBSD).
     (chibisuke at web dot de, Felipe)
+    
+- Imap:
+  . Fixed bug #64467 (Segmentation fault after imap_reopen failure).
+    (askalski at gmail dot com)
 
 - Intl: 
   . Fixed bug #62759: Buggy grapheme_substr() on edge case. (Stas)
