@@ -85,6 +85,8 @@ PHP                                                                        NEWS
 
 - pgsql:
   . Fixed bug #64609 (pg_convert enum type support). (Matteo)
+  . Fixed bug #65015 (pg_send_query does not flush send buffer)
+       patch submitted by: adam at vektah dot net (Yasuo)
 
 - Readline:
   . Implement FR #55694 (Expose additional readline variable to prevent 
