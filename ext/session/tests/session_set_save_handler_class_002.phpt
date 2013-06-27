@@ -53,10 +53,6 @@ class MySession2 extends SessionHandler {
 		}
 		return true;
 	}
-	
-	public function create_sid() {
-		return parent::create_sid();
-	}
 }
 
 $handler = new MySession2;

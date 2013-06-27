@@ -278,6 +278,9 @@ extern zend_class_entry *php_session_class_entry;
 #define PS_IFACE_NAME "SessionHandlerInterface"
 extern zend_class_entry *php_session_iface_entry;
 
+#define PS_SID_IFACE_NAME "SessionIdInterface"
+extern zend_class_entry *php_session_id_iface_entry;
+
 extern PHP_METHOD(SessionHandler, open);
 extern PHP_METHOD(SessionHandler, close);
 extern PHP_METHOD(SessionHandler, read);
