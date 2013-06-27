@@ -1,5 +1,5 @@
 --TEST--
-Test session_set_save_handler() function: interface
+Test session_set_save_handler() function: create_sid
 --INI--
 session.save_handler=files
 session.name=PHPSESSID
@@ -10,15 +10,9 @@ session.name=PHPSESSID
 
 ob_start();
 
-/* 
- * Prototype : bool session_set_save_handler(SessionHandlerInterface $handler [, bool $register_shutdown_function = true])
- * Description : Sets user-level session storage functions
- * Source code : ext/session/session.c 
- */
+echo "*** Testing session_set_save_handler() function: create_sid ***\n";
 
-echo "*** Testing session_set_save_handler() function: interface ***\n";
-
-class MySession2 implements SessionHandlerInterface {
+class MySession2 {
 	public $path;
 
 	public function open($path, $name) {
@@ -53,27 +47,15 @@ class MySession2 implements SessionHandlerInterface {
 		}
 		return true;
 	}
+
+	public function create_sid() {
+		return null;
+	}
 }
 
 $handler = new MySession2;
 session_set_save_handler(array($handler, 'open'), array($handler, 'close'),
-	array($handler, 'read'), array($handler, 'write'), array($handler, 'destroy'), array($handler, 'gc'));
-session_start();
-
-$_SESSION['foo'] = "hello";
-
-var_dump(session_id(), ini_get('session.save_handler'), $_SESSION);
-
-session_write_close();
-session_unset();
-
-session_start();
-var_dump($_SESSION);
-
-session_write_close();
-session_unset();
-
-session_set_save_handler($handler);
+	array($handler, 'read'), array($handler, 'write'), array($handler, 'destroy'), array($handler, 'gc'), array($handler, 'create_sid'));
 session_start();
 
 $_SESSION['foo'] = "hello";
@@ -90,24 +72,6 @@ session_write_close();
 session_unset();
 
 --EXPECTF--
-*** Testing session_set_save_handler() function: interface ***
-string(%d) "%s"
-string(4) "user"
-array(1) {
-  ["foo"]=>
-  string(5) "hello"
-}
-array(1) {
-  ["foo"]=>
-  string(5) "hello"
-}
-string(%d) "%s"
-string(4) "user"
-array(1) {
-  ["foo"]=>
-  string(5) "hello"
-}
-array(1) {
-  ["foo"]=>
-  string(5) "hello"
-}
+*** Testing session_set_save_handler() function: create_sid ***
+
+Fatal error: session_start(): Session id must be a string in %s on line %d
