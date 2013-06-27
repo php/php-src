@@ -42,6 +42,7 @@ PHP                                                                        NEWS
     (Damjan Cvetko)
 
 - SPL:
+  . Fixed bug #65136 (RecursiveDirectoryIterator segfault). (Laruence)
   . Fixed bug #61828 (Memleak when calling Directory(Recursive)Iterator
     /Spl(Temp)FileObject ctor twice). (Laruence)
 
