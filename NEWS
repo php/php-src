@@ -31,11 +31,16 @@ PHP                                                                        NEWS
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
     (Chris Jones)
 
+- Session:
+  . Added optional create_sid() argument to session_set_save_handler(),
+    SessionHandler and new SessionIdInterface. (Leigh, Arpad)
+
 - Sockets:
   . Implemented FR #63472 (Setting SO_BINDTODEVICE with socket_set_option).
     (Damjan Cvetko)
 
 - SPL:
+  . Fixed bug #65136 (RecursiveDirectoryIterator segfault). (Laruence)
   . Fixed bug #61828 (Memleak when calling Directory(Recursive)Iterator
     /Spl(Temp)FileObject ctor twice). (Laruence)
 
