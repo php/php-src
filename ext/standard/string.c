@@ -273,12 +273,14 @@ PHP_FUNCTION(hex2bin)
 	}
 
 	if (datalen % 2 != 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Hexadecimal input string must have an even length");
 		RETURN_FALSE;
 	}
 
 	result = php_hex2bin((unsigned char *)data, datalen, &newlen);
 
 	if (!result) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input string must be hexadecimal string");
 		RETURN_FALSE;
 	}
 
