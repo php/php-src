@@ -138,7 +138,7 @@ typedef struct _php_ps_globals {
 	int module_number;
 	long cache_expire;
 	union {
-		zval *names[6];
+		zval *names[7];
 		struct {
 			zval *ps_open;
 			zval *ps_close;
@@ -146,6 +146,7 @@ typedef struct _php_ps_globals {
 			zval *ps_write;
 			zval *ps_destroy;
 			zval *ps_gc;
+			zval *ps_create_sid;
 		} name;
 	} mod_user_names;
 	int mod_user_implemented;
@@ -283,5 +284,6 @@ extern PHP_METHOD(SessionHandler, read);
 extern PHP_METHOD(SessionHandler, write);
 extern PHP_METHOD(SessionHandler, destroy);
 extern PHP_METHOD(SessionHandler, gc);
+extern PHP_METHOD(SessionHandler, create_sid);
 
 #endif

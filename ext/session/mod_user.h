@@ -24,6 +24,6 @@
 extern ps_module ps_mod_user;
 #define ps_user_ptr &ps_mod_user
 
-PS_FUNCS(user);
+PS_FUNCS_SID(user);
 
 #endif
