@@ -2414,7 +2414,7 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 	php_session_initialize(TSRMLS_C);
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
-		progress->cancel_upload = php_check_cancel_upload(progress TSRMLS_CC);
+		progress->cancel_upload |= php_check_cancel_upload(progress TSRMLS_CC);
 		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(PS(http_session_vars)), progress->key.c, progress->key.len+1, progress->data, 2, 0);
 	}
 	php_session_flush(TSRMLS_C);
