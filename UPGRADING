@@ -640,6 +640,9 @@ c. New functions
   - SPL
     - class_uses()
 
+  - SplFixedArray
+    - SplFixedArray::__wakeup() (5.4.18)
+
 d. New global constants
 
   - CURLOPT_MAX_RECV_SPEED_LARGE
