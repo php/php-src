@@ -25,7 +25,9 @@ PHP                                                                        NEWS
     that other formats. (Remi)
 
 - Intl:
-  . Fixed bug #62759: Buggy grapheme_substr() on edge case. (Stas)
+  . Fixed bug #62759 (Buggy grapheme_substr() on edge case). (Stas)
+  . Fixed bug #61860 (Offsets may be wrong for grapheme_stri* functions).
+    (Stas)
 
 - PDO:
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
