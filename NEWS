@@ -42,6 +42,10 @@ PHP                                                                        NEWS
 - Session
   . Fixed bug #62535 ($_SESSION[$key]["cancel_upload"] doesn't work as
     documented). (Arpad)
+  . Fixed bug #35703 (when session_name("123") consist only digits, 
+    should warning). (Yasuo)
+  . Fixed bug #49175 (mod_files.sh does not support hash bits). Patch by
+    oorza2k5 at gmail dot com (Yasuo)
 
 - Sockets:
   . Implemented FR #63472 (Setting SO_BINDTODEVICE with socket_set_option). 
