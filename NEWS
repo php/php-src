@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Adam)
   . Fixed bug #65108 (is_callable() triggers Fatal Error). 
     (David Soria Parra, Laruence)
+  . Fixed bug #65035 (yield / exit segfault). (Nikita)
+  . Fixed bug #65161 (Generator + autoload + syntax error = segfault). (Nikita)
 
 - OPcache
   . Fixed bug #64827 (Segfault in zval_mark_grey (zend_gc.c)). (Laruence)
