@@ -46,6 +46,10 @@ PHP                                                                        NEWS
   . Fixed bug #61828 (Memleak when calling Directory(Recursive)Iterator
     /Spl(Temp)FileObject ctor twice). (Laruence)
 
+- CGI/FastCGI SAPI:
+  . Added PHP_FCGI_BACKLOG, overrides the default listen backlog. (Arnaud Le
+    Blanc)
+
 20 Jun 2013, PHP 5.5.0
 
 - Core:
