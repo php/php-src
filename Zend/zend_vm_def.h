@@ -2421,7 +2421,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	USE_OPLINE
 	zval *function_name;
 	char *function_name_strval;
-	int function_name_strlen;
+	zend_str_size function_name_strlen;
 	zend_free_op free_op1, free_op2;
 	call_slot *call = EX(call_slots) + opline->result.num;
 
@@ -2541,7 +2541,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 		/* do nothing */
 	} else if (OP2_TYPE != IS_UNUSED) {
 		char *function_name_strval = NULL;
-		int function_name_strlen = 0;
+		zend_str_size function_name_strlen = 0;
 		zend_free_op free_op2;
 
 		if (OP2_TYPE == IS_CONST) {
@@ -2644,7 +2644,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		char *function_name_strval, *lcname;
-		int function_name_strlen;
+		zend_str_size function_name_strlen;
 		zend_free_op free_op2;
 
 		SAVE_OPLINE();
@@ -4241,7 +4241,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET, CONST|TMP|VAR|CV, ANY)
 			zend_object *zobj = zend_objects_get_address(array_ptr TSRMLS_CC);
 			while (zend_hash_has_more_elements(fe_ht) == SUCCESS) {
 				char *str_key;
-				uint str_key_len;
+				zend_str_size str_key_len;
 				ulong int_key;
 				zend_uchar key_type;
 
@@ -4298,7 +4298,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 			zend_object *zobj = zend_objects_get_address(array TSRMLS_CC);
 			int key_type;
 			char *str_key;
-			zend_uint str_key_len;
+			zend_str_size str_key_len;
 			zend_ulong int_key;
 
 			fe_ht = Z_OBJPROP_P(array);
@@ -4319,7 +4319,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH, VAR, ANY)
 					ZVAL_LONG(key, int_key);
 				} else {
 					const char *class_name, *prop_name;
-					int prop_name_len;
+					zend_str_size prop_name_len;
 					zend_unmangle_property_name_ex(
 						str_key, str_key_len - 1, &class_name, &prop_name, &prop_name_len
 					);
