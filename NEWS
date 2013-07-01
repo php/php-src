@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Adam)
   . Fixed bug #65108 (is_callable() triggers Fatal Error). 
     (David Soria Parra, Laruence)
+  . Fixed bug #65035 (yield / exit segfault). (Nikita)
+  . Fixed bug #65161 (Generator + autoload + syntax error = segfault). (Nikita)
 
 - OPcache
   . Fixed bug #64827 (Segfault in zval_mark_grey (zend_gc.c)). (Laruence)
@@ -25,7 +27,9 @@ PHP                                                                        NEWS
     that other formats. (Remi)
 
 - Intl:
-  . Fixed bug #62759: Buggy grapheme_substr() on edge case. (Stas)
+  . Fixed bug #62759 (Buggy grapheme_substr() on edge case). (Stas)
+  . Fixed bug #61860 (Offsets may be wrong for grapheme_stri* functions).
+    (Stas)
 
 - PDO:
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
@@ -43,6 +47,10 @@ PHP                                                                        NEWS
   . Fixed bug #65136 (RecursiveDirectoryIterator segfault). (Laruence)
   . Fixed bug #61828 (Memleak when calling Directory(Recursive)Iterator
     /Spl(Temp)FileObject ctor twice). (Laruence)
+
+- CGI/FastCGI SAPI:
+  . Added PHP_FCGI_BACKLOG, overrides the default listen backlog. (Arnaud Le
+    Blanc)
 
 20 Jun 2013, PHP 5.5.0
 
