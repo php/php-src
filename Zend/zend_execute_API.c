@@ -401,7 +401,7 @@ ZEND_API const char *zend_get_executed_filename(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-ZEND_API uint zend_get_executed_lineno(TSRMLS_D) /* {{{ */
+ZEND_API zend_str_size_uint zend_get_executed_lineno(TSRMLS_D) /* {{{ */
 {
 	if(EG(exception) && EG(opline_ptr) && active_opline->opcode == ZEND_HANDLE_EXCEPTION &&
 		active_opline->lineno == 0 && EG(opline_before_exception)) {
@@ -504,7 +504,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				}
 			} else {
 				char *save = actual, *slash;
-				int actual_len = Z_STRLEN_P(p);
+				zend_str_size actual_len = Z_STRLEN_P(p);
 				if ((Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
 					actual = slash + 1;
 					actual_len -= (actual - Z_STRVAL_P(p));
@@ -561,7 +561,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 	} else if (Z_TYPE_P(p) == IS_CONSTANT_ARRAY) {
 		zval **element, *new_val;
 		char *str_index;
-		uint str_index_len;
+		zend_str_size str_index_len;
 		ulong num_index;
 		int ret;
 
@@ -1010,13 +1010,14 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 }
 /* }}} */
 
-ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
+ZEND_API int zend_lookup_class_ex(const char *name, zend_str_size_int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
 {
 	zval **args[1];
 	zval autoload_function;
 	zval *class_name_ptr;
 	zval *retval_ptr = NULL;
-	int retval, lc_length;
+	int retval;
+	zend_str_size lc_length;
 	char *lc_name;
 	char *lc_free;
 	zend_fcall_info fcall_info;
@@ -1127,13 +1128,13 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_
 }
 /* }}} */
 
-ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
+ZEND_API int zend_lookup_class(const char *name, zend_str_size_int name_length, zend_class_entry ***ce TSRMLS_DC) /* {{{ */
 {
 	return zend_lookup_class_ex(name, name_length, NULL, 1, ce TSRMLS_CC);
 }
 /* }}} */
 
-ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC) /* {{{ */
+ZEND_API int zend_eval_stringl(char *str, zend_str_size_int str_len, zval *retval_ptr, char *string_name TSRMLS_DC) /* {{{ */
 {
 	zval pv;
 	zend_op_array *new_op_array;
@@ -1219,7 +1220,7 @@ ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSR
 }
 /* }}} */
 
-ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
+ZEND_API int zend_eval_stringl_ex(char *str, zend_str_size_int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC) /* {{{ */
 {
 	int result;
 
@@ -1524,7 +1525,7 @@ void zend_unset_timeout(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-zend_class_entry *zend_fetch_class(const char *class_name, uint class_name_len, int fetch_type TSRMLS_DC) /* {{{ */
+zend_class_entry *zend_fetch_class(const char *class_name, zend_str_size_uint class_name_len, int fetch_type TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry **pce;
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
@@ -1579,7 +1580,7 @@ check_fetch_type:
 }
 /* }}} */
 
-zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC) /* {{{ */
+zend_class_entry *zend_fetch_class_by_name(const char *class_name, zend_str_size_uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry **pce;
 	int use_autoload = (fetch_type & ZEND_FETCH_CLASS_NO_AUTOLOAD) == 0;
@@ -1674,7 +1675,7 @@ ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const char *name, int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
+ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const char *name, zend_str_size_int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
 {
 	if (zend_hash_quick_del(ht, name, name_len, hash_value) == SUCCESS) {
 		name_len--;
@@ -1697,7 +1698,7 @@ ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const c
 }
 /* }}} */
 
-ZEND_API int zend_delete_global_variable_ex(const char *name, int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
+ZEND_API int zend_delete_global_variable_ex(const char *name, zend_str_size_int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *ex;
 
@@ -1722,7 +1723,7 @@ ZEND_API int zend_delete_global_variable_ex(const char *name, int name_len, ulon
 }
 /* }}} */
 
-ZEND_API int zend_delete_global_variable(const char *name, int name_len TSRMLS_DC) /* {{{ */
+ZEND_API int zend_delete_global_variable(const char *name, zend_str_size_int name_len TSRMLS_DC) /* {{{ */
 {
 	return zend_delete_global_variable_ex(name, name_len, zend_inline_hash_func(name, name_len + 1) TSRMLS_CC);
 }

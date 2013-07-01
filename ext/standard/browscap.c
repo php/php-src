@@ -87,14 +87,14 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 	int i, j=0;
 	char *t;
 
-	php_strtolower(Z_STRVAL_P(pattern), Z_STRLEN_P(pattern));
+	php_strtolower(Z_STRVAL_P(pattern), Z_STRSIZE_P(pattern));
 
-	t = (char *) safe_pemalloc(Z_STRLEN_P(pattern), 2, 5, persistent);
+	t = (char *) safe_pemalloc(Z_STRSIZE_P(pattern), 2, 5, persistent);
 
 	t[j++] = '\xA7'; /* section sign */
 	t[j++] = '^';
 
-	for (i=0; i<Z_STRLEN_P(pattern); i++, j++) {
+	for (i=0; i<Z_STRSIZE_P(pattern); i++, j++) {
 		switch (Z_STRVAL_P(pattern)[i]) {
 			case '?':
 				t[j] = '.';
@@ -134,7 +134,7 @@ static void convert_browscap_pattern(zval *pattern, int persistent) /* {{{ */
 
 	t[j]=0;
 	Z_STRVAL_P(pattern) = t;
-	Z_STRLEN_P(pattern) = j;
+	Z_STRSIZE_P(pattern) = j;
 }
 /* }}} */
 
@@ -169,28 +169,28 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 				Z_TYPE_P(new_property) = IS_STRING;
 
 				/* Set proper value for true/false settings */
-				if ((Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "on", sizeof("on") - 1)) ||
-					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
-					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
+				if ((Z_STRSIZE_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "on", sizeof("on") - 1)) ||
+					(Z_STRSIZE_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
+					(Z_STRSIZE_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
 				) {
 					Z_STRVAL_P(new_property) = pestrndup("1", 1, persistent);
-					Z_STRLEN_P(new_property) = 1;
+					Z_STRSIZE_P(new_property) = 1;
 				} else if (
-					(Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
-					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
-					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "none", sizeof("none") - 1)) ||
-					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
+					(Z_STRSIZE_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
+					(Z_STRSIZE_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
+					(Z_STRSIZE_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "none", sizeof("none") - 1)) ||
+					(Z_STRSIZE_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
 				) {
 					Z_STRVAL_P(new_property) = pestrndup("", 0, persistent);
-					Z_STRLEN_P(new_property) = 0;
+					Z_STRSIZE_P(new_property) = 0;
 				} else { /* Other than true/false setting */
 					Z_STRVAL_P(new_property) = pestrndup(Z_STRVAL_P(arg2),
-							Z_STRLEN_P(arg2), persistent);
-					Z_STRLEN_P(new_property) = Z_STRLEN_P(arg2);
+							Z_STRSIZE_P(arg2), persistent);
+					Z_STRSIZE_P(new_property) = Z_STRSIZE_P(arg2);
 				}
-				new_key = pestrndup(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), persistent);
-				zend_str_tolower(new_key, Z_STRLEN_P(arg1));
-				zend_hash_update(Z_ARRVAL_P(bdata->current_section), new_key, Z_STRLEN_P(arg1) + 1, &new_property, sizeof(zval *), NULL);
+				new_key = pestrndup(Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1), persistent);
+				zend_str_tolower(new_key, Z_STRSIZE_P(arg1));
+				zend_hash_update(Z_ARRVAL_P(bdata->current_section), new_key, Z_STRSIZE_P(arg1) + 1, &new_property, sizeof(zval *), NULL);
 				pefree(new_key, persistent);
 			}
 			break;
@@ -218,17 +218,17 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					pefree(bdata->current_section_name, persistent);
 				}
 				bdata->current_section_name = pestrndup(Z_STRVAL_P(arg1),
-						Z_STRLEN_P(arg1), persistent);
+						Z_STRSIZE_P(arg1), persistent);
 
-				zend_hash_update(bdata->htab, Z_STRVAL_P(arg1), Z_STRLEN_P(arg1) + 1, (void *) &bdata->current_section, sizeof(zval *), NULL);
+				zend_hash_update(bdata->htab, Z_STRVAL_P(arg1), Z_STRSIZE_P(arg1) + 1, (void *) &bdata->current_section, sizeof(zval *), NULL);
 
 				Z_STRVAL_P(processed) = Z_STRVAL_P(arg1);
-				Z_STRLEN_P(processed) = Z_STRLEN_P(arg1);
+				Z_STRSIZE_P(processed) = Z_STRSIZE_P(arg1);
 				Z_TYPE_P(processed) = IS_STRING;
 				Z_STRVAL_P(unprocessed) = Z_STRVAL_P(arg1);
-				Z_STRLEN_P(unprocessed) = Z_STRLEN_P(arg1);
+				Z_STRSIZE_P(unprocessed) = Z_STRSIZE_P(arg1);
 				Z_TYPE_P(unprocessed) = IS_STRING;
-				Z_STRVAL_P(unprocessed) = pestrndup(Z_STRVAL_P(unprocessed), Z_STRLEN_P(unprocessed), persistent);
+				Z_STRVAL_P(unprocessed) = pestrndup(Z_STRVAL_P(unprocessed), Z_STRSIZE_P(unprocessed), persistent);
 
 				convert_browscap_pattern(processed, persistent);
 				zend_hash_update(section_properties, "browser_name_regex", sizeof("browser_name_regex"), (void *) &processed, sizeof(zval *), NULL);
@@ -412,7 +412,7 @@ static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list a
 
 			ua_len = lookup_browser_length;
 
-			for (i = 0; i < Z_STRLEN_PP(previous_match); i++) {
+			for (i = 0; i < Z_STRSIZE_PP(previous_match); i++) {
 				switch (Z_STRVAL_PP(previous_match)[i]) {
 					case '?':
 					case '*':
@@ -424,7 +424,7 @@ static int browser_reg_compare(zval **browser TSRMLS_DC, int num_args, va_list a
 				}
 			}
 
-			for (i = 0; i < Z_STRLEN_PP(current_match); i++) {
+			for (i = 0; i < Z_STRSIZE_PP(current_match); i++) {
 				switch (Z_STRVAL_PP(current_match)[i]) {
 					case '?':
 					case '*':
@@ -469,7 +469,7 @@ static void browscap_zval_copy_ctor(zval **p) /* {{{ */
 PHP_FUNCTION(get_browser)
 {
 	char *agent_name = NULL;
-	int agent_name_len = 0;
+	zend_str_size agent_name_len = 0;
 	zend_bool return_array = 0;
 	zval **agent, **z_agent_name, **http_user_agent;
 	zval *found_browser_entry, *tmp_copy;
@@ -504,7 +504,7 @@ PHP_FUNCTION(get_browser)
 			RETURN_FALSE;
 		}
 		agent_name = Z_STRVAL_PP(http_user_agent);
-		agent_name_len = Z_STRLEN_PP(http_user_agent);
+		agent_name_len = Z_STRSIZE_PP(http_user_agent);
 	}
 
 	lookup_browser_name = estrndup(agent_name, agent_name_len);
@@ -532,7 +532,7 @@ PHP_FUNCTION(get_browser)
 	}
 
 	while (zend_hash_find(Z_ARRVAL_PP(agent), "parent", sizeof("parent"), (void **) &z_agent_name) == SUCCESS) {
-		if (zend_hash_find(bdata->htab, Z_STRVAL_PP(z_agent_name), Z_STRLEN_PP(z_agent_name) + 1, (void **)&agent) == FAILURE) {
+		if (zend_hash_find(bdata->htab, Z_STRVAL_PP(z_agent_name), Z_STRSIZE_PP(z_agent_name) + 1, (void **)&agent) == FAILURE) {
 			break;
 		}
 
