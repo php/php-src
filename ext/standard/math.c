@@ -803,7 +803,7 @@ PHPAPI long _php_math_basetolong(zval *arg, int base)
 
 	s = Z_STRVAL_P(arg);
 
-	for (i = Z_STRLEN_P(arg); i > 0; i--) {
+	for (i = Z_STRSIZE_P(arg); i > 0; i--) {
 		c = *s++;
 		
 		digit = (c >= '0' && c <= '9') ? c - '0'
@@ -855,7 +855,7 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 	cutoff = LONG_MAX / base;
 	cutlim = LONG_MAX % base;
 	
-	for (i = Z_STRLEN_P(arg); i > 0; i--) {
+	for (i = Z_STRSIZE_P(arg); i > 0; i--) {
 		c = *s++;
 
 		/* might not work for EBCDIC */
@@ -1098,7 +1098,7 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 }
 
 static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
-		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len,
+		zend_str_size_size_t dec_point_len, char *thousand_sep, zend_str_size_size_t thousand_sep_len,
 		int *result_len)
 {
 	char *tmpbuf = NULL, *resbuf;
@@ -1219,7 +1219,7 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 }
 
 PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point,
-		size_t dec_point_len, char *thousand_sep, size_t thousand_sep_len)
+		zend_str_size_size_t dec_point_len, char *thousand_sep, zend_str_size_size_t thousand_sep_len)
 {
 	return _php_math_number_format_ex_len(d, dec, dec_point, dec_point_len,
 			thousand_sep, thousand_sep_len, NULL);
@@ -1234,9 +1234,9 @@ PHP_FUNCTION(number_format)
 	long dec = 0;
 	char *thousand_sep = NULL, *dec_point = NULL;
 	char thousand_sep_chr = ',', dec_point_chr = '.';
-	int thousand_sep_len = 0, dec_point_len = 0;
+	zend_str_size thousand_sep_len = 0, dec_point_len = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|ls!s!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|lS!S!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
 		return;
 	}
 
@@ -1261,7 +1261,7 @@ PHP_FUNCTION(number_format)
 		Z_TYPE_P(return_value) = IS_STRING;
 		Z_STRVAL_P(return_value) = _php_math_number_format_ex_len(num, dec,
 				dec_point, dec_point_len, thousand_sep, thousand_sep_len,
-				&Z_STRLEN_P(return_value));
+				&Z_STRSIZE_P(return_value));
 		break;
 	default:
 		WRONG_PARAM_COUNT;
