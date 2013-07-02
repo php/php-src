@@ -587,12 +587,40 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, zend_ulon
 	return 1;
 }
 
+static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, PGconn *conn)
+{
+	char *table_name = NULL;
+	PGresult *tmp_res;
+	char *querystr = NULL;
+
+	spprintf(&querystr, 0, "SELECT RELNAME FROM PG_CLASS WHERE OID=%d", oid);
+
+	if ((tmp_res = PQexec(conn, querystr)) == NULL || PQresultStatus(tmp_res) != PGRES_TUPLES_OK) {
+		if (tmp_res) {
+			PQclear(tmp_res);
+		}
+		efree(querystr);
+		return 0;
+	}
+	efree(querystr);
+
+	if ((table_name = PQgetvalue(tmp_res, 0, 0)) == NULL) {
+		PQclear(tmp_res);
+		return 0;
+	}
+
+	PQclear(tmp_res);
+	return table_name;
+}
+
 static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	PGresult *res;
 	char *q=NULL;
 	ExecStatusType status;
+	Oid table_oid;
+	char *table_name=NULL;
 
 	if (!S->result) {
 		return FAILURE;
@@ -604,6 +632,13 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 
 	array_init(return_value);
 	add_assoc_long(return_value, "pgsql:oid", S->cols[colno].pgsql_type);
+
+	table_oid = PQftable(S->result, colno);
+	add_assoc_long(return_value, "pgsql:table_oid", table_oid);
+	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H->server);
+	if (table_name) {
+		add_assoc_string(return_value, "table", table_name, 1);
+	}
 
 	switch (S->cols[colno].pgsql_type) {
 		case BOOLOID:
