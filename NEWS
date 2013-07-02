@@ -14,6 +14,9 @@ PHP                                                                        NEWS
     argument). (Felipe)
   . Fixed bug #60732 (php_error_docref links to invalid pages). (Jakub Vrana)
 
+- CGI:
+  . Fixed Bug #65143 (Missing php-cgi man page). (Remi)
+
 - CLI server:
   . Fixed bug #65066 (Cli server not responsive when responding with 422 http
     status code). (Adam)
