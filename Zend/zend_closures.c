@@ -107,13 +107,13 @@ ZEND_METHOD(Closure, bind)
 
 			if (Z_TYPE_P(scope_arg) == IS_STRING) {
 				class_name = Z_STRVAL_P(scope_arg);
-				class_name_len = Z_STRLEN_P(scope_arg);
+				class_name_len = Z_STRSIZE_P(scope_arg);
 			} else {
 				tmp_zval = *scope_arg;
 				zval_copy_ctor(&tmp_zval);
 				convert_to_string(&tmp_zval);
 				class_name = Z_STRVAL(tmp_zval);
-				class_name_len = Z_STRLEN(tmp_zval);
+				class_name_len = Z_STRSIZE(tmp_zval);
 			}
 
 			if ((class_name_len == sizeof("static") - 1) &&

@@ -418,7 +418,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 
 	currarg = 1;
 
-	while (inpos<Z_STRLEN_PP(args[format_offset])) {
+	while (inpos<Z_STRSIZE_PP(args[format_offset])) {
 		int expprec = 0, multiuse = 0;
 		zval *tmp;
 
@@ -562,7 +562,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 											 Z_STRVAL_P(var),
 											 width, precision, padding,
 											 alignment,
-											 Z_STRLEN_P(var),
+											 Z_STRSIZE_P(var),
 											 0, expprec, 0);
 					if (use_copy) {
 						zval_dtor(&var_copy);

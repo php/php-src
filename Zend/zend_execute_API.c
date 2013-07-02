@@ -492,11 +492,11 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		if (!zend_get_constant_ex(p->value.str.val, p->value.str.len, &const_value, scope, Z_REAL_TYPE_P(p) TSRMLS_CC)) {
 			char *actual = Z_STRVAL_P(p);
 
-			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
+			if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRSIZE_P(p)))) {
 				zend_error(E_ERROR, "Undefined class constant '%s'", Z_STRVAL_P(p));
-				Z_STRLEN_P(p) -= ((colon - Z_STRVAL_P(p)) + 1);
+				Z_STRSIZE_P(p) -= ((colon - Z_STRVAL_P(p)) + 1);
 				if (inline_change) {
-					colon = estrndup(colon, Z_STRLEN_P(p));
+					colon = estrndup(colon, Z_STRSIZE_P(p));
 					str_efree(Z_STRVAL_P(p));
 					Z_STRVAL_P(p) = colon;
 				} else {
@@ -504,20 +504,20 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				}
 			} else {
 				char *save = actual, *slash;
-				zend_str_size actual_len = Z_STRLEN_P(p);
+				zend_str_size actual_len = Z_STRSIZE_P(p);
 				if ((Z_TYPE_P(p) & IS_CONSTANT_UNQUALIFIED) && (slash = (char *)zend_memrchr(actual, '\\', actual_len))) {
 					actual = slash + 1;
 					actual_len -= (actual - Z_STRVAL_P(p));
 					if (inline_change) {
 						actual = estrndup(actual, actual_len);
 						Z_STRVAL_P(p) = actual;
-						Z_STRLEN_P(p) = actual_len;
+						Z_STRSIZE_P(p) = actual_len;
 					}
 				}
 				if (actual[0] == '\\') {
 					if (inline_change) {
-						memmove(Z_STRVAL_P(p), Z_STRVAL_P(p)+1, Z_STRLEN_P(p));
-						--Z_STRLEN_P(p);
+						memmove(Z_STRVAL_P(p), Z_STRVAL_P(p)+1, Z_STRSIZE_P(p));
+						--Z_STRSIZE_P(p);
 					} else {
 						++actual;
 					}
@@ -545,7 +545,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 				p->type = IS_STRING;
 				if (!inline_change) {
 					Z_STRVAL_P(p) = actual;
-					Z_STRLEN_P(p) = actual_len;
+					Z_STRSIZE_P(p) = actual_len;
 					zval_copy_ctor(p);
 				}
 			}
@@ -636,7 +636,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 
 			switch (Z_TYPE(const_value)) {
 				case IS_STRING:
-					ret = zend_symtable_update_current_key(Z_ARRVAL_P(p), Z_STRVAL(const_value), Z_STRLEN(const_value) + 1, HASH_UPDATE_KEY_IF_BEFORE);
+					ret = zend_symtable_update_current_key(Z_ARRVAL_P(p), Z_STRVAL(const_value), Z_STRSIZE(const_value) + 1, HASH_UPDATE_KEY_IF_BEFORE);
 					break;
 				case IS_BOOL:
 				case IS_LONG:
@@ -1028,7 +1028,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, zend_str_size_int name_lengt
 
 	if (key) {
 		lc_name = Z_STRVAL(key->constant);
-		lc_length = Z_STRLEN(key->constant) + 1;
+		lc_length = Z_STRSIZE(key->constant) + 1;
 		hash = key->hash_value;
 	} else {
 		if (name == NULL || !name_length) {
@@ -1143,14 +1143,14 @@ ZEND_API int zend_eval_stringl(char *str, zend_str_size_int str_len, zval *retva
 	int retval;
 
 	if (retval_ptr) {
-		Z_STRLEN(pv) = str_len + sizeof("return ;") - 1;
-		Z_STRVAL(pv) = emalloc(Z_STRLEN(pv) + 1);
+		Z_STRSIZE(pv) = str_len + sizeof("return ;") - 1;
+		Z_STRVAL(pv) = emalloc(Z_STRSIZE(pv) + 1);
 		memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, str, str_len);
-		Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';
-		Z_STRVAL(pv)[Z_STRLEN(pv)] = '\0';
+		Z_STRVAL(pv)[Z_STRSIZE(pv) - 1] = ';';
+		Z_STRVAL(pv)[Z_STRSIZE(pv)] = '\0';
 	} else {
-		Z_STRLEN(pv) = str_len;
+		Z_STRSIZE(pv) = str_len;
 		Z_STRVAL(pv) = str;
 	}
 	Z_TYPE(pv) = IS_STRING;

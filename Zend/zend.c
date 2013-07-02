@@ -234,26 +234,26 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 	}
 	switch (Z_TYPE_P(expr)) {
 		case IS_NULL:
-			Z_STRLEN_P(expr_copy) = 0;
+			Z_STRSIZE_P(expr_copy) = 0;
 			Z_STRVAL_P(expr_copy) = STR_EMPTY_ALLOC();
 			break;
 		case IS_BOOL:
 			if (Z_LVAL_P(expr)) {
-				Z_STRLEN_P(expr_copy) = 1;
+				Z_STRSIZE_P(expr_copy) = 1;
 				Z_STRVAL_P(expr_copy) = estrndup("1", 1);
 			} else {
-				Z_STRLEN_P(expr_copy) = 0;
+				Z_STRSIZE_P(expr_copy) = 0;
 				Z_STRVAL_P(expr_copy) = STR_EMPTY_ALLOC();
 			}
 			break;
 		case IS_RESOURCE:
 			Z_STRVAL_P(expr_copy) = (char *) emalloc(sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG);
-			Z_STRLEN_P(expr_copy) = snprintf(Z_STRVAL_P(expr_copy), sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG, "Resource id #%ld", Z_LVAL_P(expr));
+			Z_STRSIZE_P(expr_copy) = snprintf(Z_STRVAL_P(expr_copy), sizeof("Resource id #") - 1 + MAX_LENGTH_OF_LONG, "Resource id #%ld", Z_LVAL_P(expr));
 			break;
 		case IS_ARRAY:
 			zend_error(E_NOTICE, "Array to string conversion");
-			Z_STRLEN_P(expr_copy) = sizeof("Array") - 1;
-			Z_STRVAL_P(expr_copy) = estrndup("Array", Z_STRLEN_P(expr_copy));
+			Z_STRSIZE_P(expr_copy) = sizeof("Array") - 1;
+			Z_STRVAL_P(expr_copy) = estrndup("Array", Z_STRSIZE_P(expr_copy));
 			break;
 		case IS_OBJECT:
 			{
@@ -291,7 +291,7 @@ ZEND_API void zend_make_printable_zval(zval *expr, zval *expr_copy, int *use_cop
 					zval_ptr_dtor(&z);
 				}
 				zend_error(EG(exception) ? E_ERROR : E_RECOVERABLE_ERROR, "Object of class %s could not be converted to string", Z_OBJCE_P(expr)->name);
-				Z_STRLEN_P(expr_copy) = 0;
+				Z_STRSIZE_P(expr_copy) = 0;
 				Z_STRVAL_P(expr_copy) = STR_EMPTY_ALLOC();
 			}
 			break;
@@ -326,17 +326,17 @@ ZEND_API int zend_print_zval_ex(zend_write_func_t write_func, zval *expr, int in
 	if (use_copy) {
 		expr = &expr_copy;
 	}
-	if (Z_STRLEN_P(expr) == 0) { /* optimize away empty strings */
+	if (Z_STRSIZE_P(expr) == 0) { /* optimize away empty strings */
 		if (use_copy) {
 			zval_dtor(expr);
 		}
 		return 0;
 	}
-	write_func(Z_STRVAL_P(expr), Z_STRLEN_P(expr));
+	write_func(Z_STRVAL_P(expr), Z_STRSIZE_P(expr));
 	if (use_copy) {
 		zval_dtor(expr);
 	}
-	return Z_STRLEN_P(expr);
+	return Z_STRSIZE_P(expr);
 }
 /* }}} */
 
@@ -1138,7 +1138,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 # endif
 #endif
 			va_copy(usr_copy, args);
-			Z_STRLEN_P(z_error_message) = zend_vspprintf(&Z_STRVAL_P(z_error_message), 0, format, usr_copy);
+			Z_STRSIZE_P(z_error_message) = zend_vspprintf(&Z_STRVAL_P(z_error_message), 0, format, usr_copy);
 #ifdef va_copy
 			va_end(usr_copy);
 #endif

@@ -266,7 +266,7 @@ static int parse_arg_object_to_string(zval **arg, char **p, zend_str_size_int *p
 		if (Z_OBJ_HANDLER_P(*arg, cast_object)(*arg, obj, type TSRMLS_CC) == SUCCESS) {
 			zval_ptr_dtor(arg);
 			*arg = obj;
-			*pl = Z_STRLEN_PP(arg);
+			*pl = Z_STRSIZE_PP(arg);
 			*p = Z_STRVAL_PP(arg);
 			return SUCCESS;
 		}
@@ -276,7 +276,7 @@ static int parse_arg_object_to_string(zval **arg, char **p, zend_str_size_int *p
 	if (Z_OBJ_HT_PP(arg) == &std_object_handlers || !Z_OBJ_HANDLER_PP(arg, cast_object)) {
 		SEPARATE_ZVAL_IF_NOT_REF(arg);
 		if (zend_std_cast_object_tostring(*arg, *arg, type TSRMLS_CC) == SUCCESS) {
-			*pl = Z_STRLEN_PP(arg);
+			*pl = Z_STRSIZE_PP(arg);
 			*p = Z_STRVAL_PP(arg);
 			return SUCCESS;
 		}
@@ -292,7 +292,7 @@ static int parse_arg_object_to_string(zval **arg, char **p, zend_str_size_int *p
 			if (!use_copy) {
 				ZVAL_ZVAL(*arg, z, 1, 1);
 			}
-			*pl = Z_STRLEN_PP(arg);
+			*pl = Z_STRSIZE_PP(arg);
 			*p = Z_STRVAL_PP(arg);
 			return SUCCESS;
 		}
@@ -337,7 +337,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 							double d;
 							int type;
 
-							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), p, &d, -1)) == 0) {
+							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRSIZE_PP(arg), p, &d, -1)) == 0) {
 								return "long";
 							} else if (type == IS_DOUBLE) {
 								if (c == 'L') {
@@ -396,7 +396,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 							long l;
 							int type;
 
-							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &l, p, -1)) == 0) {
+							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRSIZE_PP(arg), &l, p, -1)) == 0) {
 								return "double";
 							} else if (type == IS_LONG) {
 								*p = (double) l;
@@ -458,7 +458,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 							SEPARATE_ZVAL(arg);
 						}
 						*p = Z_STRVAL_PP(arg);
-						pl = Z_STRLEN_PP(arg);
+						pl = Z_STRSIZE_PP(arg);
 						if ((c == 'p' || c == 'P') && CHECK_ZVAL_NULL_PATH(*arg)) {
 							return "a valid path";
 						}
@@ -610,7 +610,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 					break;
 				}
 				convert_to_string_ex(arg);
-				if (zend_lookup_class(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &lookup TSRMLS_CC) == FAILURE) {
+				if (zend_lookup_class(Z_STRVAL_PP(arg), Z_STRSIZE_PP(arg), &lookup TSRMLS_CC) == FAILURE) {
 					*pce = NULL;
 				} else {
 					*pce = *lookup;
@@ -1560,7 +1560,7 @@ ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
 
 	switch (Z_TYPE_P(key)) {
 		case IS_STRING:
-			result = zend_symtable_update(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &value, sizeof(zval *), NULL);
+			result = zend_symtable_update(ht, Z_STRVAL_P(key), Z_STRSIZE_P(key) + 1, &value, sizeof(zval *), NULL);
 			break;
 		case IS_NULL:
 			result = zend_symtable_update(ht, "", 1, &value, sizeof(zval *), NULL);
@@ -2773,10 +2773,10 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	if (!ce_org) {
 		/* Skip leading \ */
 		if (Z_STRVAL_P(callable)[0] == '\\') {
-			mlen = Z_STRLEN_P(callable) - 1;
+			mlen = Z_STRSIZE_P(callable) - 1;
 			lmname = zend_str_tolower_dup(Z_STRVAL_P(callable) + 1, mlen);
 		} else {
-			mlen = Z_STRLEN_P(callable);
+			mlen = Z_STRSIZE_P(callable);
 			lmname = zend_str_tolower_dup(Z_STRVAL_P(callable), mlen);
 		}
 		/* Check if function with given name exists.
@@ -2789,13 +2789,13 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	}
 
 	/* Split name into class/namespace and method/function names */
-	if ((colon = zend_memrchr(Z_STRVAL_P(callable), ':', Z_STRLEN_P(callable))) != NULL &&
+	if ((colon = zend_memrchr(Z_STRVAL_P(callable), ':', Z_STRSIZE_P(callable))) != NULL &&
 		colon > Z_STRVAL_P(callable) &&
 		*(colon-1) == ':'
 	) {
 		colon--;
 		clen = colon - Z_STRVAL_P(callable);
-		mlen = Z_STRLEN_P(callable) - clen - 2;
+		mlen = Z_STRSIZE_P(callable) - clen - 2;
 
 		if (colon == Z_STRVAL_P(callable)) {
 			if (error) zend_spprintf(error, 0, "invalid function name");
@@ -2823,7 +2823,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		mname = Z_STRVAL_P(callable) + clen + 2;
 	} else if (ce_org) {
 		/* Try to fetch find static method of given class. */
-		mlen = Z_STRLEN_P(callable);
+		mlen = Z_STRSIZE_P(callable);
 		mname = Z_STRVAL_P(callable);
 		ftable = &ce_org->function_table;
 		fcc->calling_scope = ce_org;
@@ -3056,17 +3056,17 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 				if (callable_name) {
 					char *ptr;
 
-					*callable_name_len = fcc->calling_scope->name_length + Z_STRLEN_P(callable) + sizeof("::") - 1;
+					*callable_name_len = fcc->calling_scope->name_length + Z_STRSIZE_P(callable) + sizeof("::") - 1;
 					ptr = *callable_name = emalloc(*callable_name_len + 1);
 					memcpy(ptr, fcc->calling_scope->name, fcc->calling_scope->name_length);
 					ptr += fcc->calling_scope->name_length;
 					memcpy(ptr, "::", sizeof("::") - 1);
 					ptr += sizeof("::") - 1;
-					memcpy(ptr, Z_STRVAL_P(callable), Z_STRLEN_P(callable) + 1);
+					memcpy(ptr, Z_STRVAL_P(callable), Z_STRSIZE_P(callable) + 1);
 				}
 			} else if (callable_name) {
-				*callable_name = estrndup(Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-				*callable_name_len = Z_STRLEN_P(callable);
+				*callable_name = estrndup(Z_STRVAL_P(callable), Z_STRSIZE_P(callable));
+				*callable_name_len = Z_STRSIZE_P(callable);
 			}
 			if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
 				fcc->called_scope = fcc->calling_scope;
@@ -3106,20 +3106,20 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 						if (callable_name) {
 							char *ptr;
 
-							*callable_name_len = Z_STRLEN_PP(obj) + Z_STRLEN_PP(method) + sizeof("::") - 1;
+							*callable_name_len = Z_STRSIZE_PP(obj) + Z_STRSIZE_PP(method) + sizeof("::") - 1;
 							ptr = *callable_name = emalloc(*callable_name_len + 1);
-							memcpy(ptr, Z_STRVAL_PP(obj), Z_STRLEN_PP(obj));
-							ptr += Z_STRLEN_PP(obj);
+							memcpy(ptr, Z_STRVAL_PP(obj), Z_STRSIZE_PP(obj));
+							ptr += Z_STRSIZE_PP(obj);
 							memcpy(ptr, "::", sizeof("::") - 1);
 							ptr += sizeof("::") - 1;
-							memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
+							memcpy(ptr, Z_STRVAL_PP(method), Z_STRSIZE_PP(method) + 1);
 						}
 
 						if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
 							return 1;
 						}
 
-						if (!zend_is_callable_check_class(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), fcc, &strict_class, error TSRMLS_CC)) {
+						if (!zend_is_callable_check_class(Z_STRVAL_PP(obj), Z_STRSIZE_PP(obj), fcc, &strict_class, error TSRMLS_CC)) {
 							return 0;
 						}
 
@@ -3136,13 +3136,13 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 						if (callable_name) {
 							char *ptr;
 
-							*callable_name_len = fcc->calling_scope->name_length + Z_STRLEN_PP(method) + sizeof("::") - 1;
+							*callable_name_len = fcc->calling_scope->name_length + Z_STRSIZE_PP(method) + sizeof("::") - 1;
 							ptr = *callable_name = emalloc(*callable_name_len + 1);
 							memcpy(ptr, fcc->calling_scope->name, fcc->calling_scope->name_length);
 							ptr += fcc->calling_scope->name_length;
 							memcpy(ptr, "::", sizeof("::") - 1);
 							ptr += sizeof("::") - 1;
-							memcpy(ptr, Z_STRVAL_PP(method), Z_STRLEN_PP(method) + 1);
+							memcpy(ptr, Z_STRVAL_PP(method), Z_STRSIZE_PP(method) + 1);
 						}
 
 						if (check_flags & IS_CALLABLE_CHECK_SYNTAX_ONLY) {
@@ -3204,8 +3204,8 @@ ZEND_API zend_bool zend_is_callable_ex(zval *callable, zval *object_ptr, uint ch
 				int use_copy;
 
 				zend_make_printable_zval(callable, &expr_copy, &use_copy);
-				*callable_name = estrndup(Z_STRVAL(expr_copy), Z_STRLEN(expr_copy));
-				*callable_name_len = Z_STRLEN(expr_copy);
+				*callable_name = estrndup(Z_STRVAL(expr_copy), Z_STRSIZE(expr_copy));
+				*callable_name_len = Z_STRSIZE(expr_copy);
 				zval_dtor(&expr_copy);
 			}
 			if (error) zend_spprintf(error, 0, "no array or string given");

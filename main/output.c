@@ -480,8 +480,8 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 			handler = php_output_handler_create_internal(ZEND_STRL(php_output_default_handler_name), php_output_handler_default_func, chunk_size, flags TSRMLS_CC);
 			break;
 		case IS_STRING:
-			if (Z_STRLEN_P(output_handler) && (alias = php_output_handler_alias(Z_STRVAL_P(output_handler), Z_STRLEN_P(output_handler) TSRMLS_CC))) {
-				handler = (*alias)(Z_STRVAL_P(output_handler), Z_STRLEN_P(output_handler), chunk_size, flags TSRMLS_CC);
+			if (Z_STRSIZE_P(output_handler) && (alias = php_output_handler_alias(Z_STRVAL_P(output_handler), Z_STRSIZE_P(output_handler) TSRMLS_CC))) {
+				handler = (*alias)(Z_STRVAL_P(output_handler), Z_STRSIZE_P(output_handler), chunk_size, flags TSRMLS_CC);
 				break;
 			}
 		default:
@@ -964,9 +964,9 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 				status = PHP_OUTPUT_HANDLER_NO_DATA;
 				if (Z_TYPE_P(retval) != IS_BOOL) {
 					convert_to_string_ex(&retval);
-					if (Z_STRLEN_P(retval)) {
-						context->out.data = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-						context->out.used = Z_STRLEN_P(retval);
+					if (Z_STRSIZE_P(retval)) {
+						context->out.data = estrndup(Z_STRVAL_P(retval), Z_STRSIZE_P(retval));
+						context->out.used = Z_STRSIZE_P(retval);
 						context->out.free = 1;
 						status = PHP_OUTPUT_HANDLER_SUCCESS;
 					}

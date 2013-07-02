@@ -171,9 +171,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			switch (Z_TYPE_PP(zdata)) {
 				case IS_STRING:
 					if (enc_type == PHP_QUERY_RFC3986) {
-						ekey = php_raw_url_encode(Z_STRVAL_PP(zdata), Z_STRLEN_PP(zdata), &ekey_len);
+						ekey = php_raw_url_encode(Z_STRVAL_PP(zdata), Z_STRSIZE_PP(zdata), &ekey_len);
 					} else {
-						ekey = php_url_encode(Z_STRVAL_PP(zdata), Z_STRLEN_PP(zdata), &ekey_len);						
+						ekey = php_url_encode(Z_STRVAL_PP(zdata), Z_STRSIZE_PP(zdata), &ekey_len);						
 					}
 					break;
 				case IS_LONG:
@@ -190,9 +190,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					zval_copy_ctor(copyzval);
 					convert_to_string_ex(&copyzval);
 					if (enc_type == PHP_QUERY_RFC3986) {
-						ekey = php_raw_url_encode(Z_STRVAL_P(copyzval), Z_STRLEN_P(copyzval), &ekey_len);
+						ekey = php_raw_url_encode(Z_STRVAL_P(copyzval), Z_STRSIZE_P(copyzval), &ekey_len);
 					} else {
-						ekey = php_url_encode(Z_STRVAL_P(copyzval), Z_STRLEN_P(copyzval), &ekey_len);
+						ekey = php_url_encode(Z_STRVAL_P(copyzval), Z_STRSIZE_P(copyzval), &ekey_len);
 					}
 					zval_ptr_dtor(&copyzval);
 			}

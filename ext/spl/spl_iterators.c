@@ -1130,16 +1130,16 @@ SPL_METHOD(RecursiveTreeIterator, current)
 	}
 	spl_recursive_tree_iterator_get_postfix(object, &postfix TSRMLS_CC);
 
-	str_len = Z_STRLEN(prefix) + Z_STRLEN(entry) + Z_STRLEN(postfix);
+	str_len = Z_STRSIZE(prefix) + Z_STRSIZE(entry) + Z_STRSIZE(postfix);
 	str = (char *) emalloc(str_len + 1U);
 	ptr = str;
 
-	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
-	ptr += Z_STRLEN(prefix);
-	memcpy(ptr, Z_STRVAL(entry), Z_STRLEN(entry));
-	ptr += Z_STRLEN(entry);
-	memcpy(ptr, Z_STRVAL(postfix), Z_STRLEN(postfix));
-	ptr += Z_STRLEN(postfix);
+	memcpy(ptr, Z_STRVAL(prefix), Z_STRSIZE(prefix));
+	ptr += Z_STRSIZE(prefix);
+	memcpy(ptr, Z_STRVAL(entry), Z_STRSIZE(entry));
+	ptr += Z_STRSIZE(entry);
+	memcpy(ptr, Z_STRVAL(postfix), Z_STRSIZE(postfix));
+	ptr += Z_STRSIZE(postfix);
 	*ptr = 0;
 
 	zval_dtor(&prefix);
@@ -1187,16 +1187,16 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	spl_recursive_tree_iterator_get_prefix(object, &prefix TSRMLS_CC);
 	spl_recursive_tree_iterator_get_postfix(object, &postfix TSRMLS_CC);
 
-	str_len = Z_STRLEN(prefix) + Z_STRLEN(key) + Z_STRLEN(postfix);
+	str_len = Z_STRSIZE(prefix) + Z_STRSIZE(key) + Z_STRSIZE(postfix);
 	str = (char *) emalloc(str_len + 1U);
 	ptr = str;
 
-	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
-	ptr += Z_STRLEN(prefix);
-	memcpy(ptr, Z_STRVAL(key), Z_STRLEN(key));
-	ptr += Z_STRLEN(key);
-	memcpy(ptr, Z_STRVAL(postfix), Z_STRLEN(postfix));
-	ptr += Z_STRLEN(postfix);
+	memcpy(ptr, Z_STRVAL(prefix), Z_STRSIZE(prefix));
+	ptr += Z_STRSIZE(prefix);
+	memcpy(ptr, Z_STRVAL(key), Z_STRSIZE(key));
+	ptr += Z_STRSIZE(key);
+	memcpy(ptr, Z_STRVAL(postfix), Z_STRSIZE(postfix));
+	ptr += Z_STRSIZE(postfix);
 	*ptr = 0;
 
 	zval_dtor(&prefix);
@@ -1966,10 +1966,10 @@ SPL_METHOD(RegexIterator, accept)
 	zend_make_printable_zval(subject_ptr, &subject_copy, &use_copy);
 	if (use_copy) {
 		subject = Z_STRVAL(subject_copy);
-		subject_len = Z_STRLEN(subject_copy);
+		subject_len = Z_STRSIZE(subject_copy);
 	} else {
 		subject = Z_STRVAL_P(subject_ptr);
-		subject_len = Z_STRLEN_P(subject_ptr);
+		subject_len = Z_STRSIZE_P(subject_ptr);
 	}
 
 	switch (intern->u.regex.mode)
@@ -2727,7 +2727,7 @@ SPL_METHOD(CachingIterator, __toString)
 		return;
 	}
 	if (intern->u.caching.zstr) {
-		RETURN_STRINGL(Z_STRVAL_P(intern->u.caching.zstr), Z_STRLEN_P(intern->u.caching.zstr), 1);
+		RETURN_STRINGL(Z_STRVAL_P(intern->u.caching.zstr), Z_STRSIZE_P(intern->u.caching.zstr), 1);
 	} else {
 		RETURN_NULL();
 	}

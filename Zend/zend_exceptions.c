@@ -356,7 +356,7 @@ ZEND_METHOD(error_exception, getSeverity)
 			zend_error(E_WARNING, "Value for %s is no string", key); \
 			TRACE_APPEND_STR("[unknown]");                          \
 		} else {                                                        \
-			TRACE_APPEND_STRL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));  \
+			TRACE_APPEND_STRL(Z_STRVAL_PP(tmp), Z_STRSIZE_PP(tmp));  \
 		}                                                               \
 	}
 
@@ -383,12 +383,12 @@ static int _build_trace_args(zval **arg TSRMLS_DC, int num_args, va_list args, z
 		case IS_STRING: {
 			int l_added;
 			TRACE_APPEND_CHR('\'');
-			if (Z_STRLEN_PP(arg) > 15) {
+			if (Z_STRSIZE_PP(arg) > 15) {
 				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), 15);
 				TRACE_APPEND_STR("...', ");
 				l_added = 15 + 6 + 1; /* +1 because of while (--l_added) */
 			} else {
-				l_added = Z_STRLEN_PP(arg);
+				l_added = Z_STRSIZE_PP(arg);
 				TRACE_APPEND_STRL(Z_STRVAL_PP(arg), l_added);
 				TRACE_APPEND_STR("', ");
 				l_added += 3 + 1;
@@ -494,7 +494,7 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 			} else {
 				line = 0;
 			}
-			s_tmp = emalloc(Z_STRLEN_PP(file) + MAX_LENGTH_OF_LONG + 4 + 1);
+			s_tmp = emalloc(Z_STRSIZE_PP(file) + MAX_LENGTH_OF_LONG + 4 + 1);
 			sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_PP(file), line);
 			TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 			efree(s_tmp);
@@ -616,15 +616,15 @@ ZEND_METHOD(exception, __toString)
 			trace = NULL;
 		}
 
-		if (Z_STRLEN(message) > 0) {
+		if (Z_STRSIZE(message) > 0) {
 			len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s%s%s",
 								Z_OBJCE_P(exception)->name, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line),
-								(trace && Z_STRLEN_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
+								(trace && Z_STRSIZE_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
 								len ? "\n\nNext " : "", prev_str);
 		} else {
 			len = zend_spprintf(&str, 0, "exception '%s' in %s:%ld\nStack trace:\n%s%s%s",
 								Z_OBJCE_P(exception)->name, Z_STRVAL(file), Z_LVAL(line),
-								(trace && Z_STRLEN_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
+								(trace && Z_STRSIZE_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
 								len ? "\n\nNext " : "", prev_str);
 		}
 		efree(prev_str);
@@ -819,7 +819,7 @@ ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC) /* {
 				line = zend_read_property(default_exception_ce, EG(exception), "line", sizeof("line")-1, 1 TSRMLS_CC);
 
 				convert_to_string(file);
-				file = (Z_STRLEN_P(file) > 0) ? file : NULL;
+				file = (Z_STRSIZE_P(file) > 0) ? file : NULL;
 				line = (Z_TYPE_P(line) == IS_LONG) ? line : NULL;
 			} else {
 				file = NULL;
@@ -836,7 +836,7 @@ ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC) /* {
 		convert_to_string(file);
 		convert_to_long(line);
 
-		zend_error_va(severity, (Z_STRLEN_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
+		zend_error_va(severity, (Z_STRSIZE_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ce_exception->name);
 	}

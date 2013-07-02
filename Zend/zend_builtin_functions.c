@@ -626,10 +626,10 @@ ZEND_FUNCTION(each)
 ZEND_FUNCTION(error_reporting)
 {
 	char *err;
-	int err_len;
+	zend_str_size err_len;
 	int old_error_reporting;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &err, &err_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &err, &err_len) == FAILURE) {
 		return;
 	}
 
@@ -822,7 +822,7 @@ ZEND_FUNCTION(get_parent_class)
 	} else if (Z_TYPE_P(arg) == IS_STRING) {
 		zend_class_entry **pce;
 		
-		if (zend_lookup_class(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &pce TSRMLS_CC) == SUCCESS) {
+		if (zend_lookup_class(Z_STRVAL_P(arg), Z_STRSIZE_P(arg), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		}
 	}
@@ -858,7 +858,7 @@ static void is_a_impl(INTERNAL_FUNCTION_PARAMETERS, zend_bool only_subclass)
 
 	if (allow_string && Z_TYPE_P(obj) == IS_STRING) {
 		zend_class_entry **the_ce;
-		if (zend_lookup_class(Z_STRVAL_P(obj), Z_STRLEN_P(obj), &the_ce TSRMLS_CC) == FAILURE) {
+		if (zend_lookup_class(Z_STRVAL_P(obj), Z_STRSIZE_P(obj), &the_ce TSRMLS_CC) == FAILURE) {
 			RETURN_FALSE;
 		}
 		instance_ce = *the_ce;
@@ -1054,7 +1054,7 @@ ZEND_FUNCTION(get_class_methods)
 		}
 		ce = Z_OBJCE_P(klass);
 	} else if (Z_TYPE_P(klass) == IS_STRING) {
-		if (zend_lookup_class(Z_STRVAL_P(klass), Z_STRLEN_P(klass), &pce TSRMLS_CC) == SUCCESS) {
+		if (zend_lookup_class(Z_STRVAL_P(klass), Z_STRSIZE_P(klass), &pce TSRMLS_CC) == SUCCESS) {
 			ce = *pce;
 		}
 	}
@@ -1123,7 +1123,7 @@ ZEND_FUNCTION(method_exists)
 	if (Z_TYPE_P(klass) == IS_OBJECT) {
 		ce = Z_OBJCE_P(klass);
 	} else if (Z_TYPE_P(klass) == IS_STRING) {
-		if (zend_lookup_class(Z_STRVAL_P(klass), Z_STRLEN_P(klass), &pce TSRMLS_CC) == FAILURE) {
+		if (zend_lookup_class(Z_STRVAL_P(klass), Z_STRSIZE_P(klass), &pce TSRMLS_CC) == FAILURE) {
 			RETURN_FALSE;
 		}
 		ce = *pce;
@@ -1185,7 +1185,7 @@ ZEND_FUNCTION(property_exists)
 	}
 
 	if (Z_TYPE_P(object) == IS_STRING) {
-		if (zend_lookup_class(Z_STRVAL_P(object), Z_STRLEN_P(object), &pce TSRMLS_CC) == FAILURE) {
+		if (zend_lookup_class(Z_STRVAL_P(object), Z_STRSIZE_P(object), &pce TSRMLS_CC) == FAILURE) {
 			RETURN_FALSE;
 		}
 		ce = *pce;
@@ -1349,12 +1349,12 @@ ZEND_FUNCTION(trait_exists)
 ZEND_FUNCTION(function_exists)
 {
 	char *name;
-	int name_len;
+	zend_str_size name_len;
 	zend_function *func;
 	char *lcname;
 	zend_bool retval;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name, &name_len) == FAILURE) {
 		return;
 	}
 

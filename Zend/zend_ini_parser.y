@@ -81,10 +81,10 @@ static void zend_ini_do_op(char type, zval *result, zval *op1, zval *op2)
 			break;
 	}
 
-	Z_STRLEN_P(result) = zend_sprintf(str_result, "%d", i_result);
-	Z_STRVAL_P(result) = (char *) malloc(Z_STRLEN_P(result)+1);
-	memcpy(Z_STRVAL_P(result), str_result, Z_STRLEN_P(result));
-	Z_STRVAL_P(result)[Z_STRLEN_P(result)] = 0;
+	Z_STRSIZE_P(result) = zend_sprintf(str_result, "%d", i_result);
+	Z_STRVAL_P(result) = (char *) malloc(Z_STRSIZE_P(result)+1);
+	memcpy(Z_STRVAL_P(result), str_result, Z_STRSIZE_P(result));
+	Z_STRVAL_P(result)[Z_STRSIZE_P(result)] = 0;
 	Z_TYPE_P(result) = IS_STRING;
 }
 /* }}} */
@@ -95,7 +95,7 @@ static void zend_ini_init_string(zval *result)
 {
 	Z_STRVAL_P(result) = malloc(1);
 	Z_STRVAL_P(result)[0] = 0;
-	Z_STRLEN_P(result) = 0;
+	Z_STRSIZE_P(result) = 0;
 	Z_TYPE_P(result) = IS_STRING;
 }
 /* }}} */
@@ -104,12 +104,12 @@ static void zend_ini_init_string(zval *result)
 */
 static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 {
-	int length = Z_STRLEN_P(op1) + Z_STRLEN_P(op2);
+	zend_str_size length = Z_STRSIZE_P(op1) + Z_STRSIZE_P(op2);
 
 	Z_STRVAL_P(result) = (char *) realloc(Z_STRVAL_P(op1), length+1);
-	memcpy(Z_STRVAL_P(result)+Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
+	memcpy(Z_STRVAL_P(result)+Z_STRSIZE_P(op1), Z_STRVAL_P(op2), Z_STRSIZE_P(op2));
 	Z_STRVAL_P(result)[length] = 0;
-	Z_STRLEN_P(result) = length;
+	Z_STRSIZE_P(result) = length;
 	Z_TYPE_P(result) = IS_STRING;
 }
 /* }}} */
@@ -121,12 +121,12 @@ static void zend_ini_get_constant(zval *result, zval *name TSRMLS_DC)
 	zval z_constant;
 
 	/* If name contains ':' it is not a constant. Bug #26893. */
-	if (!memchr(Z_STRVAL_P(name), ':', Z_STRLEN_P(name))
-		   	&& zend_get_constant(Z_STRVAL_P(name), Z_STRLEN_P(name), &z_constant TSRMLS_CC)) {
+	if (!memchr(Z_STRVAL_P(name), ':', Z_STRSIZE_P(name))
+		   	&& zend_get_constant(Z_STRVAL_P(name), Z_STRSIZE_P(name), &z_constant TSRMLS_CC)) {
 		/* z_constant is emalloc()'d */
 		convert_to_string(&z_constant);
-		Z_STRVAL_P(result) = zend_strndup(Z_STRVAL(z_constant), Z_STRLEN(z_constant));
-		Z_STRLEN_P(result) = Z_STRLEN(z_constant);
+		Z_STRVAL_P(result) = zend_strndup(Z_STRVAL(z_constant), Z_STRSIZE(z_constant));
+		Z_STRSIZE_P(result) = Z_STRSIZE(z_constant);
 		Z_TYPE_P(result) = Z_TYPE(z_constant);
 		zval_dtor(&z_constant);
 		free(Z_STRVAL_P(name));
@@ -144,14 +144,14 @@ static void zend_ini_get_var(zval *result, zval *name TSRMLS_DC)
 	char *envvar;
 
 	/* Fetch configuration option value */
-	if (zend_get_configuration_directive(Z_STRVAL_P(name), Z_STRLEN_P(name)+1, &curval) == SUCCESS) {
-		Z_STRVAL_P(result) = zend_strndup(Z_STRVAL(curval), Z_STRLEN(curval));
-		Z_STRLEN_P(result) = Z_STRLEN(curval);
+	if (zend_get_configuration_directive(Z_STRVAL_P(name), Z_STRSIZE_P(name)+1, &curval) == SUCCESS) {
+		Z_STRVAL_P(result) = zend_strndup(Z_STRVAL(curval), Z_STRSIZE(curval));
+		Z_STRSIZE_P(result) = Z_STRSIZE(curval);
 	/* ..or if not found, try ENV */
-	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRLEN_P(name) TSRMLS_CC)) != NULL ||
+	} else if ((envvar = zend_getenv(Z_STRVAL_P(name), Z_STRSIZE_P(name) TSRMLS_CC)) != NULL ||
 			   (envvar = getenv(Z_STRVAL_P(name))) != NULL) {
 		Z_STRVAL_P(result) = strdup(envvar);
-		Z_STRLEN_P(result) = strlen(envvar);
+		Z_STRSIZE_P(result) = strlen(envvar);
 	} else {
 		zend_ini_init_string(result);
 	}
@@ -163,7 +163,7 @@ static void zend_ini_get_var(zval *result, zval *name TSRMLS_DC)
 static void ini_error(char *msg)
 {
 	char *error_buf;
-	int error_buf_len;
+	zend_str_size error_buf_len;
 	char *currently_parsed_filename;
 	TSRMLS_FETCH();
 
