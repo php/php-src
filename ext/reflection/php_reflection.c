@@ -114,8 +114,8 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 /* {{{ Smart string functions */
 typedef struct _string {
 	char *string;
-	int len;
-	int alloced;
+	zend_str_size_int len;
+	zend_str_size_int alloced;
 } string;
 
 static void string_init(string *str)
@@ -128,14 +128,14 @@ static void string_init(string *str)
 
 static string *string_printf(string *str, const char *format, ...)
 {
-	int len;
+	zend_str_size len;
 	va_list arg;
 	char *s_tmp;
 
 	va_start(arg, format);
 	len = zend_vspprintf(&s_tmp, 0, format, arg);
 	if (len) {
-		register int nlen = (str->len + len + (1024 - 1)) & ~(1024 - 1);
+		register zend_str_size nlen = (str->len + len + (1024 - 1)) & ~(1024 - 1);
 		if (str->alloced < nlen) {
 			str->alloced = nlen;
 			str->string = erealloc(str->string, str->alloced);
@@ -148,9 +148,9 @@ static string *string_printf(string *str, const char *format, ...)
 	return str;
 }
 
-static string *string_write(string *str, char *buf, int len)
+static string *string_write(string *str, char *buf, zend_str_size_int len)
 {
-	register int nlen = (str->len + len + (1024 - 1)) & ~(1024 - 1);
+	register zend_str_size nlen = (str->len + len + (1024 - 1)) & ~(1024 - 1);
 	if (str->alloced < nlen) {
 		str->alloced = nlen;
 		str->string = erealloc(str->string, str->alloced);
@@ -188,8 +188,8 @@ typedef struct _property_reference {
 
 /* Struct for parameters */
 typedef struct _parameter_reference {
-	zend_uint offset;
-	zend_uint required;
+	zend_str_size_uint offset;
+	zend_str_size_uint required;
 	struct _zend_arg_info *arg_info;
 	zend_function *fptr;
 } parameter_reference;
@@ -216,7 +216,7 @@ typedef struct {
 
 static zend_object_handlers reflection_object_handlers;
 
-static void _default_get_entry(zval *object, char *name, int name_len, zval *return_value TSRMLS_DC) /* {{{ */
+static void _default_get_entry(zval *object, char *name, zend_str_size_int name_len, zval *return_value TSRMLS_DC) /* {{{ */
 {
 	zval **value;
 
@@ -229,7 +229,7 @@ static void _default_get_entry(zval *object, char *name, int name_len, zval *ret
 /* }}} */
 
 #ifdef ilia_0
-static void _default_lookup_entry(zval *object, char *name, int name_len, zval **return_value TSRMLS_DC) /* {{{ */
+static void _default_lookup_entry(zval *object, char *name, zend_str_size_int name_len, zval **return_value TSRMLS_DC) /* {{{ */
 {
 	zval **value;
 
@@ -435,7 +435,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			HashPosition pos;
 			zval **value;
 			char *key;
-			uint key_len;
+			zend_str_size key_len;
 			ulong num_index;
 
 			zend_hash_internal_pointer_reset_ex(&ce->constants_table, &pos);
@@ -566,7 +566,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 
 			while (zend_hash_get_current_data_ex(properties, (void **) &prop, &pos) == SUCCESS) {
 				char  *prop_name;
-				uint  prop_name_size;
+				zend_str_size  prop_name_size;
 				ulong index;
 
 				if (zend_hash_get_current_key_ex(properties, &prop_name, &prop_name_size, &index, 1, &pos) == HASH_KEY_IS_STRING) {
@@ -605,9 +605,9 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 					&& ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) == 0 || mptr->common.scope == ce))
 				{
 					char *key;
-					uint key_len;
+					zend_str_size key_len;
 					ulong num_index;
-					uint len = strlen(mptr->common.function_name);
+					zend_str_size len = strlen(mptr->common.function_name);
 
 					/* Do not display old-style inherited constructors */
 					if ((mptr->common.fn_flags & ZEND_ACC_CTOR) == 0
@@ -793,7 +793,7 @@ static void _function_closure_string(string *str, zend_function *fptr, char* ind
 	zend_uint i, count;
 	ulong num_index;
 	char *key;
-	uint key_len;
+	zend_str_size key_len;
 	HashTable *static_variables;
 	HashPosition pos;
 
@@ -827,7 +827,7 @@ static void _function_string(string *str, zend_function *fptr, zend_class_entry 
 	string param_indent;
 	zend_function *overwrites;
 	char *lc_name;
-	unsigned int lc_name_len;
+	zend_str_size lc_name_len;
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?)
 	 * What's "wrong" is that any whitespace before the doc comment start is
@@ -1116,7 +1116,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 
 		/* Is there a better way of doing this? */
 		while (func->fname) {
-			int fname_len = strlen(func->fname);
+			zend_str_size fname_len = strlen(func->fname);
 			char *lc_name = zend_str_tolower_dup(func->fname, fname_len);
 		
 			if (zend_hash_find(EG(function_table), lc_name, fname_len + 1, (void**) &fptr) == FAILURE) {
@@ -1212,7 +1212,7 @@ static void reflection_extension_factory(zval *object, const char *name_str TSRM
 {
 	reflection_object *intern;
 	zval *name;
-	int name_len = strlen(name_str);
+	zend_str_size name_len = strlen(name_str);
 	char *lcname;
 	struct _zend_module_entry *module;
 	ALLOCA_FLAG(use_heap)
@@ -1610,7 +1610,7 @@ ZEND_METHOD(reflection_function, __construct)
 	reflection_object *intern;
 	zend_function *fptr;
 	char *name_str;
-	int name_len;
+	zend_str_size name_len;
 
 	object = getThis();
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
@@ -1621,7 +1621,7 @@ ZEND_METHOD(reflection_function, __construct)
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "O", &closure, zend_ce_closure) == SUCCESS) {
 		fptr = (zend_function*)zend_get_closure_method_def(closure TSRMLS_CC);
 		Z_ADDREF_P(closure);
-	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == SUCCESS) {
+	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name_str, &name_len) == SUCCESS) {
 		char *nsname;
 
 		lcname = zend_str_tolower_dup(name_str, name_len);
@@ -2165,7 +2165,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	/* First, find the function */
 	switch (Z_TYPE_P(reference)) {
 		case IS_STRING: {
-				unsigned int lcname_len;
+				zend_str_size lcname_len;
 				char *lcname;
 
 				lcname_len = Z_STRSIZE_P(reference);
@@ -2185,7 +2185,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				zval **classref;
 				zval **method;
 				zend_class_entry **pce;
-				unsigned int lcname_len;
+				zend_str_size lcname_len;
 				char *lcname;
 
 				if ((zend_hash_index_find(Z_ARRVAL_P(reference), 0, (void **) &classref) == FAILURE)
@@ -2691,11 +2691,11 @@ ZEND_METHOD(reflection_method, __construct)
 	zend_class_entry *ce;
 	zend_function *mptr;
 	char *name_str, *tmp;
-	int name_len, tmp_len;
+	zend_str_size name_len, tmp_len;
 	zval ztmp;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "zS", &classname, &name_str, &name_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name_str, &name_len) == FAILURE) {
 			return;
 		}
 		if ((tmp = strstr(name_str, "::")) == NULL) {
@@ -3379,7 +3379,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 	zend_property_info *prop_info;
 	zval *prop, *prop_copy;
 	char *key;
-	uint key_len;
+	zend_str_size key_len;
 	ulong num_index;
 
 	zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
@@ -3450,10 +3450,10 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 	reflection_object *intern;
 	zend_class_entry *ce;
 	char *name;
-	int name_len;
+	zend_str_size name_len;
 	zval **prop, *def_value = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &name, &name_len, &def_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|z", &name, &name_len, &def_value) == FAILURE) {
 		return;
 	}
 
@@ -3482,12 +3482,12 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	reflection_object *intern;
 	zend_class_entry *ce;
 	char *name;
-	int name_len;
+	zend_str_size name_len;
 	zval **variable_ptr, *value;
 	int refcount;
 	zend_uchar is_ref;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &name, &name_len, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz", &name, &name_len, &value) == FAILURE) {
 		return;
 	}
 
@@ -3687,10 +3687,10 @@ ZEND_METHOD(reflection_class, hasMethod)
 	reflection_object *intern;
 	zend_class_entry *ce;
 	char *name, *lc_name;
-	int name_len;
+	zend_str_size name_len;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -3717,10 +3717,10 @@ ZEND_METHOD(reflection_class, getMethod)
 	zend_function *mptr;
 	zval obj_tmp;
 	char *name, *lc_name;
-	int name_len;
+	zend_str_size name_len;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -3758,7 +3758,7 @@ ZEND_METHOD(reflection_class, getMethod)
 static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, long filter, zval *obj TSRMLS_DC)
 {
 	zval *method;
-	uint len = strlen(mptr->common.function_name);
+	zend_str_size len = strlen(mptr->common.function_name);
 	zend_function *closure;
 
 	if (mptr->common.fn_flags & filter) {
@@ -3832,11 +3832,11 @@ ZEND_METHOD(reflection_class, hasProperty)
 	zend_property_info *property_info;
 	zend_class_entry *ce;
 	char *name;
-	int name_len;
+	zend_str_size name_len;
 	zval *property;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -3869,10 +3869,10 @@ ZEND_METHOD(reflection_class, getProperty)
 	zend_class_entry *ce, **pce;
 	zend_property_info *property_info;
 	char *name, *tmp, *classname;
-	int name_len, classname_len;
+	zend_str_size name_len, classname_len;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -4019,10 +4019,10 @@ ZEND_METHOD(reflection_class, hasConstant)
 	reflection_object *intern;
 	zend_class_entry *ce;
 	char *name;
-	int name_len;
+	zend_str_size name_len;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -4061,10 +4061,10 @@ ZEND_METHOD(reflection_class, getConstant)
 	zend_class_entry *ce;
 	zval **value;
 	char *name;
-	int name_len;
+	zend_str_size name_len;
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -4799,7 +4799,8 @@ ZEND_METHOD(reflection_property, __construct)
 	zval *propname, *classname;
 	char *name_str;
 	const char *class_name, *prop_name;
-	int name_len, dynam_prop = 0;
+	zend_str_size name_len;
+	int dynam_prop = 0;
 	zval *object;
 	reflection_object *intern;
 	zend_class_entry **pce;
@@ -4807,7 +4808,7 @@ ZEND_METHOD(reflection_property, __construct)
 	zend_property_info *property_info = NULL;
 	property_reference *reference;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &classname, &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zS", &classname, &name_str, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -5118,7 +5119,7 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 	zend_class_entry *tmp_ce, *ce;
 	zend_property_info *tmp_info;
 	const char *prop_name, *class_name;
-	int prop_name_len;
+	zend_str_size prop_name_len;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -5205,10 +5206,10 @@ ZEND_METHOD(reflection_extension, __construct)
 	reflection_object *intern;
 	zend_module_entry *module;
 	char *name_str;
-	int name_len;
+	zend_str_size name_len;
 	ALLOCA_FLAG(use_heap)
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name_str, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -5305,7 +5306,7 @@ ZEND_METHOD(reflection_extension, getFunctions)
 
 		/* Is there a better way of doing this? */
 		while (func->fname) {
-			int fname_len = strlen(func->fname);
+			zend_str_size fname_len = strlen(func->fname);
 			char *lc_name = zend_str_tolower_dup(func->fname, fname_len);
 			
 			if (zend_hash_find(EG(function_table), lc_name, fname_len + 1, (void**) &fptr) == FAILURE) {
@@ -5472,7 +5473,7 @@ ZEND_METHOD(reflection_extension, getDependencies)
 	while(dep->name) {
 		char *relation;
 		char *rel_type;
-		int len;
+		zend_str_size len;
 
 		switch(dep->type) {
 		case MODULE_DEP_REQUIRED:
@@ -5566,9 +5567,9 @@ ZEND_METHOD(reflection_zend_extension, __construct)
 	reflection_object *intern;
 	zend_extension *extension;
 	char *name_str;
-	int name_len;
+	zend_str_size name_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &name_str, &name_len) == FAILURE) {
 		return;
 	}
 

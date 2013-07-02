@@ -33,11 +33,13 @@ typedef unsigned short zend_ushort;
 #define zend_str_size_int int
 #define zend_str_size_uint unsigned int
 #define zend_str_size_size_t size_t
+#define zend_str_size_long long
 typedef int zend_str_size;
 #else
 #define zend_str_size_int zend_str_size
 #define zend_str_size_uint zend_str_size
 #define zend_str_size_size_t zend_str_size
+#define zend_str_size_long zend_str_size
 typedef size_t zend_str_size;
 #endif
 

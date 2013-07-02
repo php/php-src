@@ -51,10 +51,10 @@ php_stream_ops php_stream_unixdg_socket_ops;
 static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, void *ptrparam TSRMLS_DC);
 
 /* {{{ Generic socket stream operations */
-static size_t php_sockop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static zend_str_size_size_t php_sockop_write(php_stream *stream, const char *buf, zend_str_size_size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	int didwrite;
+	zend_str_size didwrite;
 	struct timeval *ptimeout;
 
 	if (sock->socket == -1) {
@@ -141,10 +141,10 @@ static void php_sock_stream_wait_for_data(php_stream *stream, php_netstream_data
 	}
 }
 
-static size_t php_sockop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static zend_str_size_size_t php_sockop_read(php_stream *stream, char *buf, zend_str_size_size_t count TSRMLS_DC)
 {
 	php_netstream_data_t *sock = (php_netstream_data_t*)stream->abstract;
-	int nr_bytes = 0;
+	zend_str_size nr_bytes = 0;
 
 	if (sock->socket == -1) {
 		return 0;

@@ -499,7 +499,7 @@ bound:
 }
 /* }}} */
 
-PHPAPI int php_network_parse_network_address_with_port(const char *addr, long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC)
+PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_str_size_long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC)
 {
 	char *colon;
 	char *tmp;
@@ -590,7 +590,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 		/* input address */
 		struct sockaddr *sa, socklen_t sl,
 		/* output readable address */
-		char **textaddr, long *textaddrlen,
+		char **textaddr, zend_str_size_long *textaddrlen,
 		/* output address */
 		struct sockaddr **addr,
 		socklen_t *addrlen
@@ -655,7 +655,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 }
 
 PHPAPI int php_network_get_peer_name(php_socket_t sock,
-		char **textaddr, long *textaddrlen,
+		char **textaddr, zend_str_size_long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen
 		TSRMLS_DC)
@@ -675,7 +675,7 @@ PHPAPI int php_network_get_peer_name(php_socket_t sock,
 }
 
 PHPAPI int php_network_get_sock_name(php_socket_t sock,
-		char **textaddr, long *textaddrlen,
+		char **textaddr, zend_str_size_long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen
 		TSRMLS_DC)
@@ -706,7 +706,7 @@ PHPAPI int php_network_get_sock_name(php_socket_t sock,
 
 /* {{{ php_network_accept_incoming */
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
-		char **textaddr, long *textaddrlen,
+		char **textaddr, zend_str_size_long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen,
 		struct timeval *timeout,
@@ -833,7 +833,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 
 			if (bindto) {
 				struct sockaddr *local_address = NULL;
-				int local_address_len = 0;
+				zend_str_size local_address_len = 0;
 
 				if (sa->sa_family == AF_INET) {
 					struct sockaddr_in *in4 = emalloc(sizeof(struct sockaddr_in));

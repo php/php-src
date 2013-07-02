@@ -576,13 +576,13 @@ END_EXTERN_C()
 #define ZVAL_STRING(z, s, duplicate) do {	\
 		const char *__s=(s);				\
 		zval *__z = (z);					\
-		Z_STRSIZE_P(__z) = strlen(__s);		\
+		Z_STRSIZE_P(__z) = (zend_str_size) strlen(__s);		\
 		Z_STRVAL_P(__z) = (duplicate?estrndup(__s, Z_STRSIZE_P(__z)):(char*)__s);\
 		Z_TYPE_P(__z) = IS_STRING;			\
 	} while (0)
 
 #define ZVAL_STRINGL(z, s, l, duplicate) do {	\
-		const char *__s=(s); zend_str_size __l=l;			\
+		const char *__s=(s); zend_str_size __l= (zend_str_size) (l);			\
 		zval *__z = (z);						\
 		Z_STRSIZE_P(__z) = __l;					\
 		Z_STRVAL_P(__z) = (duplicate?estrndup(__s, __l):(char*)__s);\
