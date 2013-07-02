@@ -2,7 +2,7 @@
 .SH NAME
 php \- PHP Command Line Interface 'CLI'
 .P
-php-cgi \- PHP Command Gateway Interface 'CGI'
+php-cgi \- PHP Common Gateway Interface 'CGI' command
 .SH SYNOPSIS
 .B php
 [options] [
