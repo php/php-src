@@ -415,8 +415,8 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint
 			zval_ptr_dtor(&retval);
 			return FAILURE;
 		case IS_STRING:
-			*buffer = (unsigned char*)estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-			*buf_len = Z_STRLEN_P(retval);
+			*buffer = (unsigned char*)estrndup(Z_STRVAL_P(retval), Z_STRSIZE_P(retval));
+			*buf_len = Z_STRSIZE_P(retval);
 			result = SUCCESS;
 			break;
 		default: /* failure */

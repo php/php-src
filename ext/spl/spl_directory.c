@@ -2205,8 +2205,8 @@ static int spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_obje
 			}
 			spl_filesystem_file_free_line(intern TSRMLS_CC);
 			if (Z_TYPE_P(retval) == IS_STRING) {
-				intern->u.file.current_line = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-				intern->u.file.current_line_len = Z_STRLEN_P(retval);
+				intern->u.file.current_line = estrndup(Z_STRVAL_P(retval), Z_STRSIZE_P(retval));
+				intern->u.file.current_line_len = Z_STRSIZE_P(retval);
 			} else {
 				MAKE_STD_ZVAL(intern->u.file.current_zval);
 				ZVAL_ZVAL(intern->u.file.current_zval, retval, 1, 0);
@@ -2228,13 +2228,13 @@ static int spl_filesystem_file_is_empty_line(spl_filesystem_object *intern TSRML
 	} else if (intern->u.file.current_zval) {
 		switch(Z_TYPE_P(intern->u.file.current_zval)) {
 		case IS_STRING:
-			return Z_STRLEN_P(intern->u.file.current_zval) == 0;
+			return Z_STRSIZE_P(intern->u.file.current_zval) == 0;
 		case IS_ARRAY:
 			if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)
 			&& zend_hash_num_elements(Z_ARRVAL_P(intern->u.file.current_zval)) == 1) {
 				zval ** first = Z_ARRVAL_P(intern->u.file.current_zval)->pListHead->pData;
 					
-				return Z_TYPE_PP(first) == IS_STRING && Z_STRLEN_PP(first) == 0;
+				return Z_TYPE_PP(first) == IS_STRING && Z_STRSIZE_PP(first) == 0;
 			}
 			return zend_hash_num_elements(Z_ARRVAL_P(intern->u.file.current_zval)) == 0;
 		case IS_NULL:

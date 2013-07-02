@@ -875,8 +875,8 @@ static int preg_do_repl_func(zval *function, char *subject, int *offsets, char *
 
 	if (call_user_function_ex(EG(function_table), NULL, function, &retval_ptr, 1, args, 0, NULL TSRMLS_CC) == SUCCESS && retval_ptr) {
 		convert_to_string_ex(&retval_ptr);
-		*result = estrndup(Z_STRVAL_P(retval_ptr), Z_STRLEN_P(retval_ptr));
-		result_len = Z_STRLEN_P(retval_ptr);
+		*result = estrndup(Z_STRVAL_P(retval_ptr), Z_STRSIZE_P(retval_ptr));
+		result_len = Z_STRSIZE_P(retval_ptr);
 		zval_ptr_dtor(&retval_ptr);
 	} else {
 		if (!EG(exception)) {
@@ -969,8 +969,8 @@ static int preg_do_eval(char *eval_str, int eval_str_len, char *subject,
 	convert_to_string(&retval);
 	
 	/* Save the return value and its length */
-	*result = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
-	result_len = Z_STRLEN(retval);
+	*result = estrndup(Z_STRVAL(retval), Z_STRSIZE(retval));
+	result_len = Z_STRSIZE(retval);
 	
 	/* Clean up */
 	zval_dtor(&retval);
@@ -1048,7 +1048,7 @@ PHPAPI char *php_pcre_replace_impl(pcre_cache_entry *pce, char *subject, int sub
 		}
 	} else {
 		replace = Z_STRVAL_P(replace_val);
-		replace_len = Z_STRLEN_P(replace_val);
+		replace_len = Z_STRSIZE_P(replace_val);
 		replace_end = replace + replace_len;
 	}
 
@@ -1261,8 +1261,8 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 	/* If regex is an array */
 	if (Z_TYPE_P(regex) == IS_ARRAY) {
 		/* Duplicate subject string for repeated replacement */
-		subject_value = estrndup(Z_STRVAL_PP(subject), Z_STRLEN_PP(subject));
-		subject_len = Z_STRLEN_PP(subject);
+		subject_value = estrndup(Z_STRVAL_PP(subject), Z_STRSIZE_PP(subject));
+		subject_len = Z_STRSIZE_PP(subject);
 		*result_len = subject_len;
 		
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(regex));
@@ -1294,7 +1294,7 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 			/* Do the actual replacement and put the result back into subject_value
 			   for further replacements. */
 			if ((result = php_pcre_replace(Z_STRVAL_PP(regex_entry),
-										   Z_STRLEN_PP(regex_entry),
+										   Z_STRSIZE_PP(regex_entry),
 										   subject_value,
 										   subject_len,
 										   replace_value,
@@ -1316,9 +1316,9 @@ static char *php_replace_in_subject(zval *regex, zval *replace, zval **subject, 
 		return subject_value;
 	} else {
 		result = php_pcre_replace(Z_STRVAL_P(regex),
-								  Z_STRLEN_P(regex),
+								  Z_STRSIZE_P(regex),
 								  Z_STRVAL_PP(subject),
-								  Z_STRLEN_PP(subject),
+								  Z_STRSIZE_PP(subject),
 								  replace,
 								  is_callable_replace,
 								  result_len,
@@ -1810,7 +1810,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 		/* Perform the match */
 		count = pcre_exec(pce->re, extra, Z_STRVAL(subject),
-						  Z_STRLEN(subject), 0,
+						  Z_STRSIZE(subject), 0,
 						  0, offsets, size_offsets);
 
 		/* Check for too many substrings condition. */

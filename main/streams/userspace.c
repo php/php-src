@@ -407,7 +407,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 
 		/* if the opened path is set, copy it out */
 		if (Z_TYPE_P(zopened) == IS_STRING && opened_path) {
-			*opened_path = estrndup(Z_STRVAL_P(zopened), Z_STRLEN_P(zopened));
+			*opened_path = estrndup(Z_STRVAL_P(zopened), Z_STRSIZE_P(zopened));
 		}
 
 		/* set wrapper data to be a reference to our object */
@@ -695,7 +695,7 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 
 	if (call_result == SUCCESS && retval != NULL) {
 		convert_to_string(retval);
-		didread = Z_STRLEN_P(retval);
+		didread = Z_STRSIZE_P(retval);
 		if (didread > count) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %ld bytes more data than requested (%ld read, %ld max) - excess data will be lost",
 					us->wrapper->classname, (long)(didread - count), (long)didread, (long)count);
@@ -1532,7 +1532,7 @@ static size_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t cou
 
 	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) != IS_BOOL) {
 		convert_to_string(retval);
-		PHP_STRLCPY(ent->d_name, Z_STRVAL_P(retval), sizeof(ent->d_name), Z_STRLEN_P(retval));
+		PHP_STRLCPY(ent->d_name, Z_STRVAL_P(retval), sizeof(ent->d_name), Z_STRSIZE_P(retval));
 
 		didread = sizeof(php_stream_dirent);
 	} else if (call_result == FAILURE) {

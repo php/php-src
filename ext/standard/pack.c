@@ -126,7 +126,7 @@ PHP_FUNCTION(pack)
 	convert_to_string_ex(argv[0]);
 
 	format = Z_STRVAL_PP(argv[0]);
-	formatlen = Z_STRLEN_PP(argv[0]);
+	formatlen = Z_STRSIZE_PP(argv[0]);
 
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
@@ -186,7 +186,7 @@ PHP_FUNCTION(pack)
 						SEPARATE_ZVAL(argv[currentarg]);
 					}
 					convert_to_string_ex(argv[currentarg]);
-					arg = Z_STRLEN_PP(argv[currentarg]);
+					arg = Z_STRSIZE_PP(argv[currentarg]);
 					if (code == 'Z') {
 						/* add one because Z is always NUL-terminated:
 						 * pack("Z*", "aa") === "aa\0"
@@ -332,7 +332,7 @@ PHP_FUNCTION(pack)
 				}
 				convert_to_string_ex(val);
 				memcpy(&output[outputpos], Z_STRVAL_PP(val),
-					   (Z_STRLEN_PP(val) < arg_cp) ? Z_STRLEN_PP(val) : arg_cp);
+					   (Z_STRSIZE_PP(val) < arg_cp) ? Z_STRSIZE_PP(val) : arg_cp);
 				outputpos += arg;
 				break;
 			}
@@ -350,9 +350,9 @@ PHP_FUNCTION(pack)
 				convert_to_string_ex(val);
 				v = Z_STRVAL_PP(val);
 				outputpos--;
-				if(arg > Z_STRLEN_PP(val)) {
+				if(arg > Z_STRSIZE_PP(val)) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Type %c: not enough characters in string", code);
-					arg = Z_STRLEN_PP(val);
+					arg = Z_STRSIZE_PP(val);
 				}
 
 				while (arg-- > 0) {

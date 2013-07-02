@@ -30,11 +30,11 @@
 #endif
 
 
-extern PHP_CLI_API size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS_DC);
+extern PHP_CLI_API size_t sapi_cli_single_write(const char *str, zend_str_size_uint str_length TSRMLS_DC);
 
 typedef struct  {
-	size_t (*cli_shell_write)(const char *str, uint str_length TSRMLS_DC);
-	int (*cli_shell_ub_write)(const char *str, uint str_length TSRMLS_DC);
+	zend_str_size_size_t (*cli_shell_write)(const char *str, zend_str_size_uint str_length TSRMLS_DC);
+	zend_str_size_int (*cli_shell_ub_write)(const char *str, zend_str_size_uint str_length TSRMLS_DC);
 	int (*cli_shell_run)(TSRMLS_D);
 } cli_shell_callbacks_t;
 

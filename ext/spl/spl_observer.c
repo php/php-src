@@ -116,7 +116,7 @@ static char *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zval *thi
 		zend_call_method_with_1_params(&this, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, obj);
 		if (rv) {
 			if (Z_TYPE_P(rv) == IS_STRING) {
-				int hash_len = Z_STRLEN_P(rv);
+				int hash_len = Z_STRSIZE_P(rv);
 				char *hash = emalloc((hash_len+1)*sizeof(char));
 				strncpy(hash, Z_STRVAL_P(rv), hash_len);
 				hash[hash_len] = 0;
@@ -1220,7 +1220,7 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 					add_index_zval(return_value, Z_LVAL_P(element->inf), retval);
 					break;
 				case IS_STRING:
-					add_assoc_zval_ex(return_value, Z_STRVAL_P(element->inf), Z_STRLEN_P(element->inf)+1U, retval);
+					add_assoc_zval_ex(return_value, Z_STRVAL_P(element->inf), Z_STRSIZE_P(element->inf)+1U, retval);
 					break;
 				default:
 					zval_ptr_dtor(&retval);

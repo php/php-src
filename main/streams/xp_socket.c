@@ -661,7 +661,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 			efree(host);
 			return -1;
 		}
-		bindto = parse_ip_address_ex(Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval), &bindport, xparam->want_errortext, &xparam->outputs.error_text TSRMLS_CC);
+		bindto = parse_ip_address_ex(Z_STRVAL_PP(tmpzval), Z_STRSIZE_PP(tmpzval), &bindport, xparam->want_errortext, &xparam->outputs.error_text TSRMLS_CC);
 	}
 
 	/* Note: the test here for php_stream_udp_socket_ops is important, because we

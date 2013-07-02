@@ -743,7 +743,7 @@ PHP_FUNCTION(get_headers)
 		}
 		if (!format) {
 no_name_header:
-			add_next_index_stringl(return_value, Z_STRVAL_PP(hdr), Z_STRLEN_PP(hdr), 1);
+			add_next_index_stringl(return_value, Z_STRVAL_PP(hdr), Z_STRSIZE_PP(hdr), 1);
 		} else {
 			char c;
 			char *s, *p;
@@ -757,10 +757,10 @@ no_name_header:
 				}
 
 				if (zend_hash_find(HASH_OF(return_value), Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), (void **) &prev_val) == FAILURE) {
-					add_assoc_stringl_ex(return_value, Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
+					add_assoc_stringl_ex(return_value, Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), s, (Z_STRSIZE_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
 				} else { /* some headers may occur more then once, therefor we need to remake the string into an array */
 					convert_to_array(*prev_val);
-					add_next_index_stringl(*prev_val, s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
+					add_next_index_stringl(*prev_val, s, (Z_STRSIZE_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
 				}
 
 				*p = c;

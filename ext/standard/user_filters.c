@@ -462,9 +462,9 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		if (!bucket->own_buf) {
 			bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
 		}
-		if ((int)bucket->buflen != Z_STRLEN_PP(pzdata)) {
-			bucket->buf = perealloc(bucket->buf, Z_STRLEN_PP(pzdata), bucket->is_persistent);
-			bucket->buflen = Z_STRLEN_PP(pzdata);
+		if ((int)bucket->buflen != Z_STRSIZE_PP(pzdata)) {
+			bucket->buf = perealloc(bucket->buf, Z_STRSIZE_PP(pzdata), bucket->is_persistent);
+			bucket->buflen = Z_STRSIZE_PP(pzdata);
 		}
 		memcpy(bucket->buf, Z_STRVAL_PP(pzdata), bucket->buflen);
 	}

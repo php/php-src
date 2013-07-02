@@ -248,10 +248,10 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 				}
 
 				if (!sapi_module.phpinfo_as_text) {
-					if (Z_STRLEN(tmp2) == 0) {
+					if (Z_STRSIZE(tmp2) == 0) {
 						php_info_print("<i>no value</i>");
 					} else {
-						php_info_print_html_esc(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
+						php_info_print_html_esc(Z_STRVAL(tmp2), Z_STRSIZE(tmp2));
 					}
 				} else {
 					php_info_print(Z_STRVAL(tmp2));

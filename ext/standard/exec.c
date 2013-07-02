@@ -61,10 +61,11 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 {
 	FILE *fp;
 	char *buf;
-	int l = 0, pclose_return;
+	zend_str_size l = 0;
+	int pclose_return;
 	char *b, *d=NULL;
 	php_stream *stream;
-	size_t buflen, bufl = 0;
+	zend_str_size buflen, bufl = 0;
 #if PHP_SIGCHILD
 	void (*sig_handler)() = NULL;
 #endif
@@ -116,7 +117,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 				/* strip trailing whitespaces */
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
-				if (l != (int)(bufl - 1)) {
+				if (l != (bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
 				}
@@ -129,7 +130,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value TSRMLS_
 			if ((type == 2 && buf != b) || type != 2) {
 				l = bufl;
 				while (l-- && isspace(((unsigned char *)buf)[l]));
-				if (l != (int)(bufl - 1)) {
+				if (l != (bufl - 1)) {
 					bufl = l + 1;
 					buf[bufl] = '\0';
 				}
@@ -171,16 +172,16 @@ err:
 static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 {
 	char *cmd;
-	int cmd_len;
+	zend_str_size cmd_len;
 	zval *ret_code=NULL, *ret_array=NULL;
 	int ret;
 
 	if (mode) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/", &cmd, &cmd_len, &ret_code) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|z/", &cmd, &cmd_len, &ret_code) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z/z/", &cmd, &cmd_len, &ret_array, &ret_code) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|z/z/", &cmd, &cmd_len, &ret_array, &ret_code) == FAILURE) {
 			RETURN_FALSE;
 		}
 	}
@@ -240,10 +241,10 @@ PHP_FUNCTION(passthru)
 */
 PHPAPI char *php_escape_shell_cmd(char *str)
 {
-	register int x, y, l = strlen(str);
+	register zend_str_size x, y, l = strlen(str);
 	char *cmd;
 	char *p = NULL;
-	size_t estimate = (2 * l) + 1;
+	zend_str_size estimate = (2 * l) + 1;
 
 	TSRMLS_FETCH();
 
@@ -331,9 +332,9 @@ PHPAPI char *php_escape_shell_cmd(char *str)
  */
 PHPAPI char *php_escape_shell_arg(char *str)
 {
-	int x, y = 0, l = strlen(str);
+	zend_str_size x, y = 0, l = strlen(str);
 	char *cmd;
-	size_t estimate = (4 * l) + 3;
+	zend_str_size estimate = (4 * l) + 3;
 
 	TSRMLS_FETCH();
 
@@ -346,7 +347,7 @@ PHPAPI char *php_escape_shell_arg(char *str)
 #endif
 
 	for (x = 0; x < l; x++) {
-		int mb_len = php_mblen(str + x, (l - x));
+		zend_str_size mb_len = php_mblen(str + x, (l - x));
 
 		/* skip non-valid multibyte characters */
 		if (mb_len < 0) {
@@ -396,10 +397,10 @@ PHPAPI char *php_escape_shell_arg(char *str)
 PHP_FUNCTION(escapeshellcmd)
 {
 	char *command;
-	int command_len;
+	zend_str_size command_len;
 	char *cmd = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &command, &command_len) == FAILURE) {
 		return;
 	}
 
@@ -417,10 +418,10 @@ PHP_FUNCTION(escapeshellcmd)
 PHP_FUNCTION(escapeshellarg)
 {
 	char *argument;
-	int argument_len;
+	zend_str_size argument_len;
 	char *cmd = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &argument, &argument_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &argument, &argument_len) == FAILURE) {
 		return;
 	}
 
@@ -438,11 +439,11 @@ PHP_FUNCTION(shell_exec)
 	FILE *in;
 	size_t total_readbytes;
 	char *command;
-	int command_len;
+	zend_str_size command_len;
 	char *ret;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &command, &command_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &command, &command_len) == FAILURE) {
 		return;
 	}
 

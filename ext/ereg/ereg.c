@@ -562,8 +562,8 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (Z_TYPE_PP(arg_pattern) == IS_STRING) {
-		if (Z_STRVAL_PP(arg_pattern) && Z_STRLEN_PP(arg_pattern)) {
-			pattern = estrndup(Z_STRVAL_PP(arg_pattern), Z_STRLEN_PP(arg_pattern));
+		if (Z_STRVAL_PP(arg_pattern) && Z_STRSIZE_PP(arg_pattern)) {
+			pattern = estrndup(Z_STRVAL_PP(arg_pattern), Z_STRSIZE_PP(arg_pattern));
 		} else {
 			pattern = STR_EMPTY_ALLOC();
 		}
@@ -575,8 +575,8 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (Z_TYPE_PP(arg_replace) == IS_STRING) {
-		if (Z_STRVAL_PP(arg_replace) && Z_STRLEN_PP(arg_replace)) {
-			replace = estrndup(Z_STRVAL_PP(arg_replace), Z_STRLEN_PP(arg_replace));
+		if (Z_STRVAL_PP(arg_replace) && Z_STRSIZE_PP(arg_replace)) {
+			replace = estrndup(Z_STRVAL_PP(arg_replace), Z_STRSIZE_PP(arg_replace));
 		} else {
 			replace = STR_EMPTY_ALLOC();
 		}

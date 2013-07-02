@@ -113,7 +113,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 			zend_hash_move_forward_ex(target_hash, &pos)) {
 
 		convert_to_string_ex(element);
-		el_len = Z_STRLEN_PP(element);
+		el_len = Z_STRSIZE_PP(element);
 		if (el_len == 0) {
 			continue;
 		}
@@ -140,7 +140,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 			zend_hash_move_forward_ex(target_hash, &pos)) {
 
 		convert_to_string_ex(element);
-		el_len = Z_STRLEN_PP(element);
+		el_len = Z_STRSIZE_PP(element);
 
 		if (el_len == 0) {
 			continue;
@@ -602,7 +602,7 @@ PHP_FUNCTION(proc_open)
 #endif
 				descriptors[ndesc].mode_flags = descriptors[ndesc].mode & DESC_PARENT_MODE_WRITE ? O_WRONLY : O_RDONLY;
 #ifdef PHP_WIN32
-				if (Z_STRLEN_PP(zmode) >= 2 && Z_STRVAL_PP(zmode)[1] == 'b')
+				if (Z_STRSIZE_PP(zmode) >= 2 && Z_STRVAL_PP(zmode)[1] == 'b')
 					descriptors[ndesc].mode_flags |= O_BINARY;
 #endif
 

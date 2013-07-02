@@ -326,7 +326,7 @@ PHP_FUNCTION(is_numeric)
 			break;
 
 		case IS_STRING:
-			if (is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), NULL, NULL, 0)) {
+			if (is_numeric_string(Z_STRVAL_PP(arg), Z_STRSIZE_PP(arg), NULL, NULL, 0)) {
 				RETURN_TRUE;
 			} else {
 				RETURN_FALSE;

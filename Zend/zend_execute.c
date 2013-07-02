@@ -566,7 +566,7 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 {
 	if (Z_TYPE_PP(object_ptr) == IS_NULL
 		|| (Z_TYPE_PP(object_ptr) == IS_BOOL && Z_LVAL_PP(object_ptr) == 0)
-		|| (Z_TYPE_PP(object_ptr) == IS_STRING && Z_STRLEN_PP(object_ptr) == 0)
+		|| (Z_TYPE_PP(object_ptr) == IS_STRING && Z_STRSIZE_PP(object_ptr) == 0)
 	) {
 		SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
 		zval_dtor(*object_ptr);
@@ -689,7 +689,7 @@ static inline void zend_assign_to_object(zval **retval, zval **object_ptr, zval 
 		}
 		if (Z_TYPE_P(object) == IS_NULL ||
 		    (Z_TYPE_P(object) == IS_BOOL && Z_LVAL_P(object) == 0) ||
-		    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0)) {
+		    (Z_TYPE_P(object) == IS_STRING && Z_STRSIZE_P(object) == 0)) {
 			SEPARATE_ZVAL_IF_NOT_REF(object_ptr);
 			object = *object_ptr;
 			Z_ADDREF_P(object);
@@ -780,13 +780,13 @@ static inline int zend_assign_to_string_offset(const temp_variable *T, const zva
 			return 0;
 		}
 
-		if (offset >= Z_STRLEN_P(str)) {
-			Z_STRVAL_P(str) = str_erealloc(Z_STRVAL_P(str), offset+1+1);
-			memset(Z_STRVAL_P(str) + Z_STRLEN_P(str), ' ', offset - Z_STRLEN_P(str));
+		if (offset >= Z_STRSIZE_P(str)) {
+			Z_STRVAL_P(str) = str_erealloc(Z_STRSIZE_P(str), offset+1+1);
+			memset(Z_STRVAL_P(str) + Z_STRSIZE_P(str), ' ', offset - Z_STRSIZE_P(str));
 			Z_STRVAL_P(str)[offset+1] = 0;
-			Z_STRLEN_P(str) = offset+1;
+			Z_STRSIZE_P(str) = offset+1;
 		} else if (IS_INTERNED(Z_STRVAL_P(str))) {
-			Z_STRVAL_P(str) = estrndup(Z_STRVAL_P(str), Z_STRLEN_P(str));
+			Z_STRVAL_P(str) = estrndup(Z_STRVAL_P(str), Z_STRSIZE_P(str));
 		}
 
 		if (Z_TYPE_P(value) != IS_STRING) {
@@ -1138,7 +1138,7 @@ convert_to_array:
 		case IS_STRING: {
 				zval tmp;
 
-				if (type != BP_VAR_UNSET && Z_STRLEN_P(container)==0) {
+				if (type != BP_VAR_UNSET && Z_STRSIZE_P(container)==0) {
 					goto convert_to_array;
 				}
 				if (dim == NULL) {
@@ -1154,7 +1154,7 @@ convert_to_array:
 					switch(Z_TYPE_P(dim)) {
 						/* case IS_LONG: */
 						case IS_STRING:
-							if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+							if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRSIZE_P(dim), NULL, NULL, -1)) {
 								break;
 							}
 							if (type != BP_VAR_UNSET) {
@@ -1274,7 +1274,7 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 					switch(Z_TYPE_P(dim)) {
 						/* case IS_LONG: */
 						case IS_STRING:
-							if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRLEN_P(dim), NULL, NULL, -1)) {
+							if (IS_LONG == is_numeric_string(Z_STRVAL_P(dim), Z_STRSIZE_P(dim), NULL, NULL, -1)) {
 								break;
 							}
 							if (type != BP_VAR_IS) {
@@ -1303,17 +1303,17 @@ static void zend_fetch_dimension_address_read(temp_variable *result, zval **cont
 				INIT_PZVAL(ptr);
 				Z_TYPE_P(ptr) = IS_STRING;
 
-				if (Z_LVAL_P(dim) < 0 || Z_STRLEN_P(container) <= Z_LVAL_P(dim)) {
+				if (Z_LVAL_P(dim) < 0 || Z_STRSIZE_P(container) <= Z_LVAL_P(dim)) {
 					if (type != BP_VAR_IS) {
 						zend_error(E_NOTICE, "Uninitialized string offset: %ld", Z_LVAL_P(dim));
 					}
 					Z_STRVAL_P(ptr) = STR_EMPTY_ALLOC();
-					Z_STRLEN_P(ptr) = 0;
+					Z_STRSIZE_P(ptr) = 0;
 				} else {
 					Z_STRVAL_P(ptr) = (char*)emalloc(2);
 					Z_STRVAL_P(ptr)[0] = Z_STRVAL_P(container)[Z_LVAL_P(dim)];
 					Z_STRVAL_P(ptr)[1] = 0;
-					Z_STRLEN_P(ptr) = 1;
+					Z_STRSIZE_P(ptr) = 1;
 				}
 				AI_SET_PTR(result, ptr);
 				return;
@@ -1368,7 +1368,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 		if (type != BP_VAR_UNSET &&
 		    ((Z_TYPE_P(container) == IS_NULL ||
 		     (Z_TYPE_P(container) == IS_BOOL && Z_LVAL_P(container)==0) ||
-		     (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0)))) {
+		     (Z_TYPE_P(container) == IS_STRING && Z_STRSIZE_P(container)==0)))) {
 			if (!PZVAL_IS_REF(container)) {
 				SEPARATE_ZVAL(container_ptr);
 				container = *container_ptr;

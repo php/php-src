@@ -358,8 +358,8 @@ PHP_FUNCTION(password_hash)
 		size_t buffer_len;
 		switch (Z_TYPE_PP(option_buffer)) {
 			case IS_STRING:
-				buffer = estrndup(Z_STRVAL_PP(option_buffer), Z_STRLEN_PP(option_buffer));
-				buffer_len_int = Z_STRLEN_PP(option_buffer);
+				buffer = estrndup(Z_STRVAL_PP(option_buffer), Z_STRSIZE_PP(option_buffer));
+				buffer_len_int = Z_STRSIZE_PP(option_buffer);
 				break;
 			case IS_LONG:
 			case IS_DOUBLE:
@@ -368,8 +368,8 @@ PHP_FUNCTION(password_hash)
 				MAKE_COPY_ZVAL(option_buffer, &cast_option_buffer);
 				convert_to_string(&cast_option_buffer);
 				if (Z_TYPE(cast_option_buffer) == IS_STRING) {
-					buffer = estrndup(Z_STRVAL(cast_option_buffer), Z_STRLEN(cast_option_buffer));
-					buffer_len_int = Z_STRLEN(cast_option_buffer);
+					buffer = estrndup(Z_STRVAL(cast_option_buffer), Z_STRSIZE(cast_option_buffer));
+					buffer_len_int = Z_STRSIZE(cast_option_buffer);
 					zval_dtor(&cast_option_buffer);
 					break;
 				}
