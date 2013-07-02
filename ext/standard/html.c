@@ -89,11 +89,11 @@
 static inline unsigned int get_next_char(
 		enum entity_charset charset,
 		const unsigned char *str,
-		size_t str_len,
-		size_t *cursor,
+		zend_str_size_size_t str_len,
+		zend_str_size_size_t *cursor,
 		int *status)
 {
-	size_t pos = *cursor;
+	zend_str_size pos = *cursor;
 	unsigned int this_char = 0;
 
 	*status = SUCCESS;
@@ -350,8 +350,8 @@ static inline unsigned int get_next_char(
  * Public interface for get_next_char used with UTF-8 */
  PHPAPI unsigned int php_next_utf8_char(
 		const unsigned char *str,
-		size_t str_len,
-		size_t *cursor,
+		zend_str_size_size_t str_len,
+		zend_str_size_size_t *cursor,
 		int *status)
 {
 	return get_next_char(cs_utf_8, str, str_len, cursor, status);
@@ -365,7 +365,7 @@ static enum entity_charset determine_charset(char *charset_hint TSRMLS_DC)
 {
 	int i;
 	enum entity_charset charset = cs_utf_8;
-	int len = 0;
+	zend_str_size len = 0;
 	const zend_encoding *zenc;
 
 	/* Default is now UTF-8 */
@@ -456,9 +456,9 @@ det_charset:
 /* }}} */
 
 /* {{{ php_utf32_utf8 */
-static inline size_t php_utf32_utf8(unsigned char *buf, unsigned k)
+static inline zend_str_size_size_t php_utf32_utf8(unsigned char *buf, unsigned k)
 {
-	size_t retval = 0;
+	zend_str_size retval = 0;
 
 	/* assert(0x0 <= k <= 0x10FFFF); */
 
@@ -533,7 +533,7 @@ static inline size_t php_mb3_int_to_char(unsigned char *buf, unsigned k)
  * Returns the code point in the target charset (whose mapping table was given) or 0 if
  * the unicode code point is not in the table.
  */
-static inline unsigned char unimap_bsearch(const uni_to_enc *table, unsigned code_key_a, size_t num)
+static inline unsigned char unimap_bsearch(const uni_to_enc *table, unsigned code_key_a, zend_str_size_size_t num)
 {
 	const uni_to_enc *l = table,
 					 *h = &table[num-1],
@@ -812,7 +812,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 /* }}} */
 
 /* {{{ process_named_entity */
-static inline int process_named_entity_html(const char **buf, const char **start, size_t *length)
+static inline int process_named_entity_html(const char **buf, const char **start, zend_str_size_size_t *length)
 {
 	*start = *buf;
 
@@ -841,7 +841,7 @@ static inline int process_named_entity_html(const char **buf, const char **start
 /* }}} */
 
 /* {{{ resolve_named_entity_html */
-static inline int resolve_named_entity_html(const char *start, size_t length, const entity_ht *ht, unsigned *uni_cp1, unsigned *uni_cp2)
+static inline int resolve_named_entity_html(const char *start, zend_str_size_size_t length, const entity_ht *ht, unsigned *uni_cp1, unsigned *uni_cp2)
 {
 	const entity_cp_map *s;
 	ulong hash = zend_inline_hash_func(start, length);
@@ -923,9 +923,9 @@ static inline size_t write_octet_sequence(unsigned char *buf, enum entity_charse
 #define TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(oldlen) ((oldlen) + (oldlen) / 5 + 2)
 static void traverse_for_entities(
 	const char *old,
-	size_t oldlen,
+	zend_str_size_size_t oldlen,
 	char *ret, /* should have allocated TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(olden) */
-	size_t *retlen,
+	zend_str_size_size_t *retlen,
 	int all,
 	int flags,
 	const entity_ht *inv_map,
@@ -977,7 +977,7 @@ static void traverse_for_entities(
 				goto invalid_code;
 		} else {
 			const char *start;
-			size_t ent_len;
+			zend_str_size ent_len;
 
 			next = &p[1];
 			start = next;
@@ -1083,13 +1083,13 @@ static entity_table_opt determine_entity_table(int all, int doctype)
  * only the basic ones, i.e., those in basic_entities_ex + the numeric entities
  * that correspond to quotes.
  */
-PHPAPI char *php_unescape_html_entities(unsigned char *old, size_t oldlen, size_t *newlen, int all, int flags, char *hint_charset TSRMLS_DC)
+PHPAPI char *php_unescape_html_entities(unsigned char *old, zend_str_size_size_t oldlen, zend_str_size_size_t *newlen, int all, int flags, char *hint_charset TSRMLS_DC)
 {
-	size_t retlen;
+	zend_str_size retlen;
 	char *ret;
 	enum entity_charset charset;
 	const entity_ht *inverse_map = NULL;
-	size_t new_size = TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(oldlen);
+	zend_str_size new_size = TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(oldlen);
 
 	if (all) {
 		charset = determine_charset(hint_charset TSRMLS_CC);
@@ -1123,7 +1123,7 @@ empty_source:
 }
 /* }}} */
 
-PHPAPI char *php_escape_html_entities(unsigned char *old, size_t oldlen, size_t *newlen, int all, int flags, char *hint_charset TSRMLS_DC)
+PHPAPI char *php_escape_html_entities(unsigned char *old, zend_str_size_size_t oldlen, zend_str_size_size_t *newlen, int all, int flags, char *hint_charset TSRMLS_DC)
 {
 	return php_escape_html_entities_ex(old, oldlen, newlen, all, flags, hint_charset, 1 TSRMLS_CC);
 }
@@ -1134,10 +1134,10 @@ static inline void find_entity_for_char(
 	enum entity_charset charset,
 	const entity_stage1_row *table,
 	const unsigned char **entity,
-	size_t *entity_len,
+	zend_str_size_size_t *entity_len,
 	unsigned char *old,
-	size_t oldlen,
-	size_t *cursor)
+	zend_str_size_size_t oldlen,
+	zend_str_size_size_t *cursor)
 {
 	unsigned stage1_idx = ENT_STAGE1_INDEX(k);
 	const entity_stage3_row *c;
@@ -1155,7 +1155,7 @@ static inline void find_entity_for_char(
 		*entity_len = c->data.ent.entity_len;
 	} else {
 		/* peek at next char */
-		size_t	 cursor_before	= *cursor;
+		zend_str_size	 cursor_before	= *cursor;
 		int		 status			= SUCCESS;
 		unsigned next_char;
 
@@ -1196,7 +1196,7 @@ static inline void find_entity_for_char_basic(
 	unsigned int k,
 	const entity_stage3_row *table,
 	const unsigned char **entity,
-	size_t *entity_len)
+	zend_str_size_size_t *entity_len)
 {
 	if (k >= 64U) {
 		*entity     = NULL;
@@ -1211,9 +1211,9 @@ static inline void find_entity_for_char_basic(
 
 /* {{{ php_escape_html_entities
  */
-PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size_t *newlen, int all, int flags, char *hint_charset, zend_bool double_encode TSRMLS_DC)
+PHPAPI char *php_escape_html_entities_ex(unsigned char *old, zend_str_size_size_t oldlen, zend_str_size_size_t *newlen, int all, int flags, char *hint_charset, zend_bool double_encode TSRMLS_DC)
 {
-	size_t cursor, maxlen, len;
+	zend_str_size cursor, maxlen, len;
 	char *replaced;
 	enum entity_charset charset = determine_charset(hint_charset TSRMLS_CC);
 	int doctype = flags & ENT_HTML_DOC_TYPE_MASK;
@@ -1269,7 +1269,7 @@ PHPAPI char *php_escape_html_entities_ex(unsigned char *old, size_t oldlen, size
 	cursor = 0;
 	while (cursor < oldlen) {
 		const unsigned char *mbsequence = NULL;
-		size_t mbseqlen					= 0,
+		zend_str_size mbseqlen					= 0,
 		       cursor_before			= cursor;
 		int status						= SUCCESS;
 		unsigned int this_char			= get_next_char(charset, old, oldlen, &cursor, &status);
@@ -1374,7 +1374,7 @@ encode_amp:
 				len += sizeof("&amp;") - 1;
 			} else { /* no double encode */
 				/* check if entity is valid */
-				size_t ent_len; /* not counting & or ; */
+				zend_str_size ent_len; /* not counting & or ; */
 				/* peek at next char */
 				if (old[cursor] == '#') { /* numeric entity */
 					unsigned code_point;
@@ -1433,13 +1433,13 @@ encode_amp:
 static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 {
 	char *str, *hint_charset = NULL;
-	int str_len, hint_charset_len = 0;
+	zend_str_size str_len, hint_charset_len = 0;
 	size_t new_len;
 	long flags = ENT_COMPAT;
 	char *replaced;
 	zend_bool double_encode = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls!b", &str, &str_len, &flags, &hint_charset, &hint_charset_len, &double_encode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|lS!b", &str, &str_len, &flags, &hint_charset, &hint_charset_len, &double_encode) == FAILURE) {
 		return;
 	}
 
@@ -1483,18 +1483,18 @@ PHP_FUNCTION(htmlspecialchars)
 PHP_FUNCTION(htmlspecialchars_decode)
 {
 	char *str;
-	int str_len;
-	size_t new_len = 0;
+	zend_str_size str_len;
+	zend_str_size new_len = 0;
 	long quote_style = ENT_COMPAT;
 	char *replaced;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &str, &str_len, &quote_style) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|l", &str, &str_len, &quote_style) == FAILURE) {
 		return;
 	}
 
 	replaced = php_unescape_html_entities(str, str_len, &new_len, 0 /*!all*/, quote_style, NULL TSRMLS_CC);
 	if (replaced) {
-		RETURN_STRINGL(replaced, (int)new_len, 0);
+		RETURN_STRINGL(replaced, new_len, 0);
 	}
 	RETURN_FALSE;
 }
@@ -1505,19 +1505,19 @@ PHP_FUNCTION(htmlspecialchars_decode)
 PHP_FUNCTION(html_entity_decode)
 {
 	char *str, *hint_charset = NULL;
-	int str_len, hint_charset_len = 0;
-	size_t new_len = 0;
+	zend_str_size str_len, hint_charset_len = 0;
+	zend_str_size new_len = 0;
 	long quote_style = ENT_COMPAT;
 	char *replaced;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &str, &str_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|lS", &str, &str_len,
 							  &quote_style, &hint_charset, &hint_charset_len) == FAILURE) {
 		return;
 	}
 
 	replaced = php_unescape_html_entities(str, str_len, &new_len, 1 /*all*/, quote_style, hint_charset TSRMLS_CC);
 	if (replaced) {
-		RETURN_STRINGL(replaced, (int)new_len, 0);
+		RETURN_STRINGL(replaced, new_len, 0);
 	}
 	RETURN_FALSE;
 }
@@ -1541,12 +1541,12 @@ static inline void write_s3row_data(
 {
 	char key[9] = ""; /* two unicode code points in UTF-8 */
 	char entity[LONGEST_ENTITY_LENGTH + 2] = {'&'};
-	size_t written_k1;
+	zend_str_size written_k1;
 
 	written_k1 = write_octet_sequence(key, charset, orig_cp);
 
 	if (!r->ambiguous) {
-		size_t l = r->data.ent.entity_len;
+		zend_str_size l = r->data.ent.entity_len;
 		memcpy(&entity[1], r->data.ent.entity, l);
 		entity[l + 1] = ';';
 		add_assoc_stringl_ex(arr, key, written_k1 + 1, entity, l + 2, 1);
@@ -1563,7 +1563,7 @@ static inline void write_s3row_data(
 		}
 		num_entries = mcpr[0].leading_entry.size;
 		for (i = 1; i <= num_entries; i++) {
-			size_t   l,
+			zend_str_size   l,
 				     written_k2;
 			unsigned uni_cp,
 					 spe_cp;
@@ -1598,14 +1598,14 @@ PHP_FUNCTION(get_html_translation_table)
 	entity_table_opt entity_table;
 	const enc_to_uni *to_uni_table;
 	char *charset_hint = NULL;
-	int charset_hint_len;
+	zend_str_size charset_hint_len;
 	enum entity_charset charset;
 
 	/* in this function we have to jump through some loops because we're
 	 * getting the translated table from data structures that are optimized for
 	 * random access, not traversal */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lls",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|llS",
 			&all, &flags, &charset_hint, &charset_hint_len) == FAILURE) {
 		return;
 	}
