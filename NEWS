@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #64827 (Segfault in zval_mark_grey (zend_gc.c)). (Laruence)
   . OPcache must be compatible with LiteSpeed SAPI (Dmitry)
 
+- CGI:
+  . Fixed Bug #65143 (Missing php-cgi man page). (Remi)
+
 - CLI server:
   . Fixed bug #65066 (Cli server not responsive when responding with 422 http
     status code). (Adam)
@@ -34,6 +37,9 @@ PHP                                                                        NEWS
 - PDO:
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
     (Chris Jones)
+
+- Phar:
+  . Fixed Bug #65142 (Missing phar man page). (Remi)
 
 - Session:
   . Added optional create_sid() argument to session_set_save_handler(),
