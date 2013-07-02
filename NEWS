@@ -42,6 +42,9 @@ PHP                                                                        NEWS
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
     (Chris Jones)
 
+- Phar:
+  . Fixed Bug #65142 (Missing phar man page). (Remi)
+
 - Session
   . Fixed bug #62535 ($_SESSION[$key]["cancel_upload"] doesn't work as
     documented). (Arpad)
