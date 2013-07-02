@@ -2233,7 +2233,7 @@ PHP_FUNCTION(substr)
 		l = str_len;
 	}
 
-	if (f > str_len) {
+	if (f > 0 && f > str_len) {
 		RETURN_FALSE;
 	} else if (f < 0 && -f > str_len) {
 		f = 0;
