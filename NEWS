@@ -30,6 +30,9 @@ PHP                                                                        NEWS
     that other formats. (Remi)
 
 - Intl:
+  . Add IntlCalendar::setMinimalDaysInFirstWeek()/
+    intlcal_set_minimal_days_in_first_week().
+  . Fixed trailing space in the name of constant IntlCalendar::FIELD_FIELD_COUNT.
   . Fixed bug #62759 (Buggy grapheme_substr() on edge case). (Stas)
   . Fixed bug #61860 (Offsets may be wrong for grapheme_stri* functions).
     (Stas)
