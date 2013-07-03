@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #65066 (Cli server not responsive when responding with 422 http
     status code). (Adam)
 
+- DateTime
+  . Fixed fug #65184 (strftime() returns insufficient-length string under
+    multibyte locales). (Anatol)
+
 - GD
   . Fixed #65070 (bgcolor does not use the same format as the input image with
     imagerotate). (Pierre)
