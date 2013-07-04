@@ -2535,7 +2535,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
         size_t res;
         unsigned long overflow;
 
-        __asm__ ("mul %0,%2,%3\n\tumulh %1,%2,%3\n\tadds %0,%0,%4\n\tadc %1,%1,%1"
+        __asm__ ("mul %0,%2,%3\n\tumulh %1,%2,%3\n\tadds %0,%0,%4\n\tadc %1,%1,xzr"
              : "=&r"(res), "=&r"(overflow)
              : "r"(nmemb),
                "r"(size),
