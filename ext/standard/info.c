@@ -102,7 +102,7 @@ static int php_info_print(const char *str) /* {{{ */
 static void php_info_print_stream_hash(const char *name, HashTable *ht TSRMLS_DC) /* {{{ */
 {
 	char *key;
-	uint len;
+	zend_str_size_uint len;
 	
 	if (ht) {
 		if (zend_hash_num_elements(ht)) {
@@ -196,7 +196,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 {
 	zval **data, **tmp, tmp2;
 	char *string_key;
-	uint string_len;
+	zend_str_size_uint string_len;
 	ulong num_key;
 
 	zend_is_auto_global(name, name_length TSRMLS_CC);
