@@ -318,7 +318,7 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp TSRMLS_D
 	HashPosition pos;
 	zval *tmp, *storage;
 	char md5str[33];
-	int name_len;
+	zend_str_size_int name_len;
 	char *zname;
 
 	*is_temp = 0;

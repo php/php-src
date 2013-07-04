@@ -627,7 +627,7 @@ skip:
 PHP_FUNCTION(spl_autoload_unregister)
 {
 	char *func_name, *error = NULL;
-	int func_name_len;
+	zend_str_size_int func_name_len;
 	char *lc_name = NULL;
 	zval *zcallable;
 	int success = FAILURE;

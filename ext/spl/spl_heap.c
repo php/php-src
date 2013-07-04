@@ -523,7 +523,7 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 	spl_heap_object *intern  = (spl_heap_object*)zend_object_store_get_object(obj TSRMLS_CC);
 	zval *tmp, zrv, *heap_array;
 	char *pnstr;
-	int  pnlen;
+	zend_str_size_int pnlen;
 	int  i;
 
 	*is_temp = 0;
