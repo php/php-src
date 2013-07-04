@@ -511,7 +511,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 	spl_ptr_llist_element *current = intern->llist->head, *next;
 	zval *tmp, zrv, *dllist_array;
 	char *pnstr;
-	int  pnlen;
+	zend_str_size_int pnlen;
 	int  i = 0;
 
 	*is_temp = 0;
