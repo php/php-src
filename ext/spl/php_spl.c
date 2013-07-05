@@ -415,7 +415,7 @@ PHP_FUNCTION(spl_autoload_call)
 	zval *class_name, *retval = NULL;
 	int class_name_len;
 	char *func_name, *lc_name;
-	uint func_name_len;
+	zend_str_size_uint func_name_len;
 	ulong dummy;
 	HashPosition function_pos;
 	autoload_func_info *alfi;
@@ -466,7 +466,7 @@ PHP_FUNCTION(spl_autoload_call)
 PHP_FUNCTION(spl_autoload_register)
 {
 	char *func_name, *error = NULL;
-	int  func_name_len;
+	zend_str_size_int func_name_len;
 	char *lc_name = NULL;
 	zval *zcallable = NULL;
 	zend_bool do_throw = 1;
@@ -627,7 +627,7 @@ skip:
 PHP_FUNCTION(spl_autoload_unregister)
 {
 	char *func_name, *error = NULL;
-	int func_name_len;
+	zend_str_size_int func_name_len;
 	char *lc_name = NULL;
 	zval *zcallable;
 	int success = FAILURE;

@@ -183,7 +183,7 @@ static zend_object_value spl_filesystem_object_new_check(zend_class_entry *class
 /* }}} */
 
 
-PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, int *len TSRMLS_DC) /* {{{ */
+PHPAPI char* spl_filesystem_object_get_path(spl_filesystem_object *intern, zend_str_size_int *len TSRMLS_DC) /* {{{ */
 {
 #ifdef HAVE_GLOB
 	if (intern->type == SPL_FS_DIR) {
@@ -589,7 +589,7 @@ static HashTable* spl_filesystem_object_get_debug_info(zval *obj, int *is_temp T
 	HashTable *rv;
 	zval *tmp, zrv;
 	char *pnstr, *path;
-	int  pnlen, path_len;
+	zend_str_size_int  pnlen, path_len;
 	char stmp[2];
 
 	*is_temp = 1;

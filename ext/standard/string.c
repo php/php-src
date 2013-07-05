@@ -1413,7 +1413,7 @@ PHP_FUNCTION(strtolower)
 PHPAPI void php_basename(const char *s, zend_str_size_size_t len, char *suffix, zend_str_size_size_t sufflen, char **p_ret, zend_str_size_size_t *p_len TSRMLS_DC)
 {
 	char *ret = NULL, *c, *comp, *cend;
-	zend_str_size inc_len, cnt;
+	zend_str_size_size_t inc_len, cnt;
 	int state;
 
 	c = comp = cend = (char*)s;

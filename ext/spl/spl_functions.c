@@ -133,7 +133,7 @@ int spl_add_classes(zend_class_entry *pce, zval *list, int sub, int allow, int c
 }
 /* }}} */
 
-char * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, int prop_len, int *name_len TSRMLS_DC) /* {{{ */
+char * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, zend_str_size_int prop_len, zend_str_size_int *name_len TSRMLS_DC) /* {{{ */
 {
 	char *rv;
 
