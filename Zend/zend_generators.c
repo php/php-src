@@ -55,7 +55,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			zval_ptr_dtor(&execute_data->current_this);
 		}
 
-		/* A fatal error / die occured during the generator execution. Trying to clean
+		/* A fatal error / die occurred during the generator execution. Trying to clean
 		 * up the stack may not be safe in this case. */
 		if (CG(unclean_shutdown)) {
 			return;
