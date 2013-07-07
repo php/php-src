@@ -1672,13 +1672,6 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 	unsigned int i;
 	gdImagePtr dst;
 
-	/* impact perf a bit, but not that much. Implementation for palette
-	   images can be done at a later point.
-	*/
-	if (src->trueColor == 0) {
-		gdImagePaletteToTrueColor(src);
-	}
-
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (!dst) {
 		return NULL;
@@ -1735,15 +1728,9 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 							f_slop_x > f_slop_y ? gd_divfx(f_slop_y, f_slop_x) : gd_divfx(f_slop_x, f_slop_y)
 						: 0;
 
+
 	if (bgColor < 0) {
 		return NULL;
-	}
-
-	/* impact perf a bit, but not that much. Implementation for palette
-	   images can be done at a later point.
-	*/
-	if (src->trueColor == 0) {
-		gdImagePaletteToTrueColor(src);
 	}
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
@@ -1798,13 +1785,6 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 	unsigned int dst_offset_y = 0;
 	unsigned int src_offset_x, src_offset_y;
 	gdImagePtr dst;
-
-	/* impact perf a bit, but not that much. Implementation for palette
-	   images can be done at a later point.
-	*/
-	if (src->trueColor == 0) {
-		gdImagePaletteToTrueColor(src);
-	}
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (dst == NULL) {
@@ -1924,13 +1904,6 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 	unsigned int dst_offset_y = 0;
 	unsigned int i;
 	gdImagePtr dst;
-
-	/* impact perf a bit, but not that much. Implementation for palette
-	   images can be done at a later point.
-	*/
-	if (src->trueColor == 0) {
-		gdImagePaletteToTrueColor(src);
-	}
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 
@@ -2180,9 +2153,19 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor)
 {
 	const int angle_rounded = (int)floor(angle * 100);
-	
+
 	if (bgcolor < 0) {
 		return NULL;
+	}
+
+	/* impact perf a bit, but not that much. Implementation for palette
+	   images can be done at a later point.
+	*/
+	if (src->trueColor == 0) {
+		if (bgcolor >= 0) {
+			bgcolor =  gdTrueColorAlpha(src->red[bgcolor], src->green[bgcolor], src->blue[bgcolor], src->alpha[bgcolor]);
+		}
+		gdImagePaletteToTrueColor(src);
 	}
 
 	/* no interpolation needed here */

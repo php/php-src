@@ -1,6 +1,8 @@
 .TH PHP 1 "2013" "The PHP Group" "Scripting Language"
 .SH NAME
 php \- PHP Command Line Interface 'CLI'
+.P
+php-cgi \- PHP Common Gateway Interface 'CGI' command
 .SH SYNOPSIS
 .B php
 [options] [

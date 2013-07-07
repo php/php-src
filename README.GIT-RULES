@@ -45,14 +45,15 @@ Currently we have the following branches in use::
 
   master    The active development branch. 
 
-  PHP-5.5   Is used to release the PHP 5.5.x series. It allows for larger
-            enhancements.
-
-  PHP-5.4   Is used to release the PHP 5.4.x series. This is current
+  PHP-5.5   Is used to release the PHP 5.5.x series. This is a current
             stable version and is open for bugfixes only.
 
-  PHP-5.3   Is used to release the PHP 5.3.x series. This is current 
+  PHP-5.4   Is used to release the PHP 5.4.x series. This is a current
             stable version and is open for bugfixes only.
+
+  PHP-5.3   Is used to release the PHP 5.3.x series. This is currently 
+            in extended support and open forsecurity fixes only. Triaged
+            via security@php.net
 
   PHP-5.2   This branch is closed.
 

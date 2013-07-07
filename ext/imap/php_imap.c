@@ -1270,7 +1270,6 @@ PHP_FUNCTION(imap_reopen)
 	int mailbox_len;
 	long options = 0, retries = 0;
 	pils *imap_le_struct;
-	MAILSTREAM *imap_stream;
 	long flags=NIL;
 	long cl_flags=NIL;
 
@@ -1298,12 +1297,12 @@ PHP_FUNCTION(imap_reopen)
 		RETURN_FALSE;
 	}
 
-	imap_stream = mail_open(imap_le_struct->imap_stream, mailbox, flags);
-	if (imap_stream == NIL) {
+	imap_le_struct->imap_stream = mail_open(imap_le_struct->imap_stream, mailbox, flags);
+	if (imap_le_struct->imap_stream == NIL) {
+		zend_list_delete(Z_RESVAL_P(streamind));
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Couldn't re-open stream");
 		RETURN_FALSE;
 	}
-	imap_le_struct->imap_stream = imap_stream;
 	RETURN_TRUE;
 }
 /* }}} */

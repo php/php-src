@@ -271,6 +271,8 @@ PHP_MINIT_FUNCTION(ps_mm)
 	}
 
 	if (!(euid_len = slprintf(euid, sizeof(euid), "%d", geteuid()))) {
+		free(ps_mm_instance);
+		ps_mm_instance = NULL;
 		return FAILURE;
 	}
 

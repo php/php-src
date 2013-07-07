@@ -2842,8 +2842,8 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		}
 		if ((check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0 &&
 		    (fcc->calling_scope &&
-		     (fcc->calling_scope->__call ||
-		      fcc->calling_scope->__callstatic))) {
+		     ((fcc->object_ptr && fcc->calling_scope->__call) ||
+		      (!fcc->object_ptr && fcc->calling_scope->__callstatic)))) {
 			if (fcc->function_handler->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 				if (!zend_check_private(fcc->function_handler, fcc->object_ptr ? Z_OBJCE_P(fcc->object_ptr) : EG(scope), lmname, mlen TSRMLS_CC)) {
 					retval = 0;

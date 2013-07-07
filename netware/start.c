@@ -24,7 +24,7 @@
 void		*gLibHandle = (void *) NULL;
 rtag_t		gAllocTag = (rtag_t) NULL;
 NXMutex_t	*gLibLock = (NXMutex_t *) NULL;
-int			gLibId = 0;
+int		gLibId = 0;
 
 
 int DisposeLibraryData(	void	*data)
@@ -35,17 +35,17 @@ int DisposeLibraryData(	void	*data)
 
 int _NonAppStart
 (
-	void			*NLMHandle,
-	void			*errorScreen,
+	void		*NLMHandle,
+	void		*errorScreen,
 	const char	*cmdLine,
 	const char	*loadDirPath,
 	size_t		uninitializedDataLength,
-	void			*NLMFileHandle,
-	int			(*readRoutineP)( int conn, void *fileHandle, size_t offset,
-								size_t nbytes, size_t *bytesRead, void *buffer ),
+	void		*NLMFileHandle,
+	int		(*readRoutineP)( int conn, void *fileHandle, size_t offset,
+			size_t nbytes, size_t *bytesRead, void *buffer ),
 	size_t		customDataOffset,
 	size_t		customDataSize,
-	int			messageCount,
+	int		messageCount,
 	const char	**messages
 )
 {
