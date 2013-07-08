@@ -42,6 +42,9 @@ PHP                                                                        NEWS
   . Fixed bug #61860 (Offsets may be wrong for grapheme_stri* functions).
     (Stas)
 
+- OCI8:
+  . Bump PECL package info version check to allow PECL installs with PHP 5.5+
+
 - PDO:
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
     (Chris Jones)
