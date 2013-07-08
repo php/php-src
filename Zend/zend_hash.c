@@ -1168,7 +1168,7 @@ ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index,
 			return HASH_KEY_IS_LONG;
 		}
 	}
-	return HASH_KEY_NON_EXISTANT;
+	return HASH_KEY_NON_EXISTENT;
 }
 
 ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos) {
@@ -1205,7 +1205,7 @@ ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos)
 			return HASH_KEY_IS_LONG;
 		}
 	}
-	return HASH_KEY_NON_EXISTANT;
+	return HASH_KEY_NON_EXISTENT;
 }
 
 

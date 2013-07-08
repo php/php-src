@@ -1554,7 +1554,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 
 		zend_hash_internal_pointer_reset(&phar->mounted_dirs);
 		while (FAILURE != zend_hash_has_more_elements(&phar->mounted_dirs)) {
-			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
+			if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
 				break;
 			}
 
