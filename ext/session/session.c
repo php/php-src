@@ -615,6 +615,31 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 }
 /* }}} */
 
+static PHP_INI_MH(OnUpdateName) /* {{{ */
+{
+	/* Numeric session.name won't work at all */
+	if (PG(modules_activated) &&
+		(!new_value_length || is_numeric_string(new_value, new_value_length, NULL, NULL, 0))) {
+		int err_type;
+
+		if (stage == ZEND_INI_STAGE_RUNTIME) {
+			err_type = E_WARNING;
+		} else {
+			err_type = E_ERROR;
+		}
+
+		/* Do not output error when restoring ini options. */
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			php_error_docref(NULL TSRMLS_CC, err_type, "session.name cannot be a numeric or empty '%s'", new_value);
+		}
+		return FAILURE;
+	}
+
+	OnUpdateStringUnempty(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return SUCCESS;
+}
+/* }}} */
+
 static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 {
 	long val;
@@ -706,7 +731,7 @@ static ZEND_INI_MH(OnUpdateSmartStr) /* {{{ */
  */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.save_path",          "",          PHP_INI_ALL, OnUpdateSaveDir,save_path,          php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateString, session_name,       php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateName, session_name,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)
 	STD_PHP_INI_BOOLEAN("session.auto_start",       "0",         PHP_INI_ALL, OnUpdateBool,   auto_start,         php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_probability",     "1",         PHP_INI_ALL, OnUpdateLong,   gc_probability,     php_ps_globals,    ps_globals)
@@ -2366,7 +2391,7 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 	php_session_initialize(TSRMLS_C);
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
-		progress->cancel_upload = php_check_cancel_upload(progress TSRMLS_CC);
+		progress->cancel_upload |= php_check_cancel_upload(progress TSRMLS_CC);
 		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(PS(http_session_vars)), progress->key.c, progress->key.len+1, progress->data, 2, 0);
 	}
 	php_session_flush(TSRMLS_C);
