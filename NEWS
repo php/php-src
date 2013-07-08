@@ -9,6 +9,7 @@ PHP                                                                        NEWS
     (David Soria Parra, Laruence)
   . Fixed bug #65035 (yield / exit segfault). (Nikita)
   . Fixed bug #65161 (Generator + autoload + syntax error = segfault). (Nikita)
+  . hex2bin() raises E_WARNING for invalid hex string. (Yasuo)
 
 - OPcache
   . Fixed bug #64827 (Segfault in zval_mark_grey (zend_gc.c)). (Laruence)
@@ -46,7 +47,7 @@ PHP                                                                        NEWS
     (Chris Jones)
 
 - Pgsql
-  . pg_unescape_bytea() raise E_WARNING for invalid inputs. (Yasuo)
+  . pg_unescape_bytea() raises E_WARNING for invalid inputs. (Yasuo)
 
 - Phar:
   . Fixed Bug #65142 (Missing phar man page). (Remi)
