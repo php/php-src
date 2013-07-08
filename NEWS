@@ -33,6 +33,9 @@ PHP                                                                        NEWS
   . Fixed bug #62759 (Buggy grapheme_substr() on edge case). (Stas)
   . Fixed bug #61860 (Offsets may be wrong for grapheme_stri* functions).
     (Stas)
+
+- mysqlnd: 
+  . Fixed segfault in mysqlnd when doing long prepare. (Andrey)
   
 - ODBC:
   . Fixed bug #61387 (NULL valued anonymous column causes segfault in 
