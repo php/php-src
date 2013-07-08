@@ -2465,7 +2465,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 	size_t res = nmemb;
 	unsigned long overflow = 0;
 
-	__asm__ ("mull %3\n\taddl %4,%0\n\tadcl %1,%1"
+	__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
 	     : "=&a"(res), "=&d" (overflow)
 	     : "%0"(res),
 	       "rm"(size),
@@ -2493,7 +2493,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
 
         __asm__ ("mul" LP_SUFF  " %3\n\t"
                  "add %4,%0\n\t"
-                 "adc %1,%1"
+                 "adc $0,%1"
              : "=&a"(res), "=&d" (overflow)
              : "%0"(res),
                "rm"(size),
@@ -2535,7 +2535,7 @@ static inline size_t safe_address(size_t nmemb, size_t size, size_t offset)
         size_t res;
         unsigned long overflow;
 
-        __asm__ ("mul %0,%2,%3\n\tumulh %1,%2,%3\n\tadds %0,%0,%4\n\tadc %1,%1,%1"
+        __asm__ ("mul %0,%2,%3\n\tumulh %1,%2,%3\n\tadds %0,%0,%4\n\tadc %1,%1,xzr"
              : "=&r"(res), "=&r"(overflow)
              : "r"(nmemb),
                "r"(size),
