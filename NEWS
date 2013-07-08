@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.19
 
+- Core.
+  . Improve fix for bug #63186 (compile failure on netbsd). (Matteo)
+
 - Session:
   . Fixed bug #62129 (rfc1867 crashes php even though turned off). (gxd305 at
     gmail dot com)

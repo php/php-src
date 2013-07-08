@@ -33,7 +33,7 @@
 #if defined(HAVE_FUNOPEN) && !defined(HAVE_FOPENCOOKIE)
 
 /* NetBSD 6.0+ uses off_t instead of fpos_t in funopen */
-# if defined(__NetBSD__) && (__NetBSD_Version__ > 600000000)
+# if defined(__NetBSD__) && (__NetBSD_Version__ >= 600000000)
 #  define PHP_FPOS_T off_t
 # else
 #  define PHP_FPOS_T fpos_t
