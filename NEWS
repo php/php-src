@@ -7,14 +7,24 @@ PHP                                                                        NEWS
     (Adam)
   . Fixed bug #65108 (is_callable() triggers Fatal Error). 
     (David Soria Parra, Laruence)
+  . Fixed bug #65035 (yield / exit segfault). (Nikita)
+  . Fixed bug #65161 (Generator + autoload + syntax error = segfault). (Nikita)
+  . hex2bin() raises E_WARNING for invalid hex string. (Yasuo)
 
 - OPcache
   . Fixed bug #64827 (Segfault in zval_mark_grey (zend_gc.c)). (Laruence)
   . OPcache must be compatible with LiteSpeed SAPI (Dmitry)
 
+- CGI:
+  . Fixed Bug #65143 (Missing php-cgi man page). (Remi)
+
 - CLI server:
   . Fixed bug #65066 (Cli server not responsive when responding with 422 http
     status code). (Adam)
+
+- DateTime
+  . Fixed fug #65184 (strftime() returns insufficient-length string under
+    multibyte locales). (Anatol)
 
 - GD
   . Fixed #65070 (bgcolor does not use the same format as the input image with
@@ -25,19 +35,39 @@ PHP                                                                        NEWS
     that other formats. (Remi)
 
 - Intl:
-  . Fixed bug #62759: Buggy grapheme_substr() on edge case. (Stas)
+  . Add IntlCalendar::setMinimalDaysInFirstWeek()/
+    intlcal_set_minimal_days_in_first_week().
+  . Fixed trailing space in the name of constant IntlCalendar::FIELD_FIELD_COUNT.
+  . Fixed bug #62759 (Buggy grapheme_substr() on edge case). (Stas)
+  . Fixed bug #61860 (Offsets may be wrong for grapheme_stri* functions).
+    (Stas)
 
 - PDO:
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
     (Chris Jones)
+
+- Pgsql
+  . pg_unescape_bytea() raises E_WARNING for invalid inputs. (Yasuo)
+
+- Phar:
+  . Fixed Bug #65142 (Missing phar man page). (Remi)
+
+- Session:
+  . Added optional create_sid() argument to session_set_save_handler(),
+    SessionHandler and new SessionIdInterface. (Leigh, Arpad)
 
 - Sockets:
   . Implemented FR #63472 (Setting SO_BINDTODEVICE with socket_set_option).
     (Damjan Cvetko)
 
 - SPL:
+  . Fixed bug #65136 (RecursiveDirectoryIterator segfault). (Laruence)
   . Fixed bug #61828 (Memleak when calling Directory(Recursive)Iterator
     /Spl(Temp)FileObject ctor twice). (Laruence)
+
+- CGI/FastCGI SAPI:
+  . Added PHP_FCGI_BACKLOG, overrides the default listen backlog. (Arnaud Le
+    Blanc)
 
 20 Jun 2013, PHP 5.5.0
 
