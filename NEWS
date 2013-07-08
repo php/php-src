@@ -45,6 +45,9 @@ PHP                                                                        NEWS
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
     (Chris Jones)
 
+- Pgsql
+  . pg_unescape_bytea() raise E_WARNING for invalid inputs. (Yasuo)
+
 - Phar:
   . Fixed Bug #65142 (Missing phar man page). (Remi)
 
