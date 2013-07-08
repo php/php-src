@@ -2906,7 +2906,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
-				if (key_type != HASH_KEY_NON_EXISTANT &&
+				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key, str_key_len-1 TSRMLS_CC) == SUCCESS)) {
 					break;
@@ -8214,7 +8214,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
-				if (key_type != HASH_KEY_NON_EXISTANT &&
+				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key, str_key_len-1 TSRMLS_CC) == SUCCESS)) {
 					break;
@@ -13544,7 +13544,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
-				if (key_type != HASH_KEY_NON_EXISTANT &&
+				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key, str_key_len-1 TSRMLS_CC) == SUCCESS)) {
 					break;
@@ -31167,7 +31167,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
-				if (key_type != HASH_KEY_NON_EXISTANT &&
+				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key, str_key_len-1 TSRMLS_CC) == SUCCESS)) {
 					break;
