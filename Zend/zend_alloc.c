@@ -433,7 +433,7 @@ struct _zend_mm_heap {
 	int                 overflow;
 	int                 internal;
 #if ZEND_MM_CACHE
-	unsigned int        cached;
+	size_t              cached;
 	zend_mm_free_block *cache[ZEND_MM_NUM_BUCKETS];
 #endif
 	zend_mm_free_block *free_buckets[ZEND_MM_NUM_BUCKETS*2];
@@ -615,11 +615,11 @@ static unsigned int _zend_mm_cookie = 0;
 # define END_MAGIC_SIZE sizeof(unsigned int)
 
 # define ZEND_MM_SET_BLOCK_SIZE(block, __size) do { \
-		char *p; \
+		char *__p; \
 		((zend_mm_block*)(block))->debug.size = (__size); \
-		p = ZEND_MM_END_MAGIC_PTR(block); \
+		__p = ZEND_MM_END_MAGIC_PTR(block); \
 		((zend_mm_block*)(block))->debug.start_magic = _mem_block_start_magic; \
-		memcpy(p, &_mem_block_end_magic, END_MAGIC_SIZE); \
+		memcpy(__p, &_mem_block_end_magic, END_MAGIC_SIZE); \
 	} while (0)
 
 static unsigned int _mem_block_start_magic = 0;
@@ -2619,7 +2619,7 @@ ZEND_API void *_ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LI
 
 ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	int length;
+	zend_str_size_int length;
 	char *p;
 #ifdef ZEND_SIGNALS
 	TSRMLS_FETCH();
@@ -2638,7 +2638,7 @@ ZEND_API char *_estrdup(const char *s ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 	return p;
 }
 
-ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+ZEND_API char *_estrndup(const char *s, zend_str_size_uint length ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	char *p;
 #ifdef ZEND_SIGNALS
@@ -2659,7 +2659,7 @@ ZEND_API char *_estrndup(const char *s, uint length ZEND_FILE_LINE_DC ZEND_FILE_
 }
 
 
-ZEND_API char *zend_strndup(const char *s, uint length)
+ZEND_API char *zend_strndup(const char *s, zend_str_size_uint length)
 {
 	char *p;
 #ifdef ZEND_SIGNALS
