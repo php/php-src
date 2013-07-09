@@ -486,7 +486,7 @@ static int _php_sasl_interact(LDAP *ld, unsigned flags, void *defaults, void *in
 }
 /* }}} */
 
-/* {{{ proto bool ldap_sasl_bind(resource link [, string binddn [, string password [, string sasl_mech [, string sasl_realm [, string sasl_authc_id [, string sasl_authz_id [, string props]]]]]]])
+/* {{{ proto bool ldap_sasl_bind(resource link [, string binddn [, string password [, string sasl_mech [, string sasl_realm [, string sasl_authc_id [, string sasl_authz_id [, string props [, boolean canon]]]]]]]])
    Bind to LDAP directory using SASL */
 PHP_FUNCTION(ldap_sasl_bind)
 {
@@ -499,10 +499,11 @@ PHP_FUNCTION(ldap_sasl_bind)
 	char *sasl_authz_id = NULL;
 	char *sasl_authc_id = NULL;
 	char *props = NULL;
+	zend_bool canon = 0;
 	int rc, dn_len, passwd_len, mech_len, realm_len, authc_id_len, authz_id_len, props_len;
 	php_ldap_bictx *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|sssssss", &link, &binddn, &dn_len, &passwd, &passwd_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authc_id, &authc_id_len, &sasl_authz_id, &authz_id_len, &props, &props_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|sssssssb", &link, &binddn, &dn_len, &passwd, &passwd_len, &sasl_mech, &mech_len, &sasl_realm, &realm_len, &sasl_authc_id, &authc_id_len, &sasl_authz_id, &authz_id_len, &props, &props_len, &canon) != SUCCESS) {
 		RETURN_FALSE;
 	}
 
@@ -512,6 +513,9 @@ PHP_FUNCTION(ldap_sasl_bind)
 
 	if (props) {
 		ldap_set_option(ld->link, LDAP_OPT_X_SASL_SECPROPS, props);
+	}
+	if (canon) {
+		ldap_set_option(ld->link, LDAP_OPT_X_SASL_NOCANON, LDAP_OPT_ON);
 	}
 
 	rc = ldap_sasl_interactive_bind_s(ld->link, binddn, ctx->mech, NULL, NULL, LDAP_SASL_QUIET, _php_sasl_interact, ctx);
