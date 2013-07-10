@@ -279,6 +279,7 @@ PHP_FUNCTION(hex2bin)
 	result = php_hex2bin((unsigned char *)data, datalen, &newlen);
 
 	if (!result) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input string must be hexadecimal string");
 		RETURN_FALSE;
 	}
 

@@ -4212,6 +4212,7 @@ PHP_FUNCTION(pg_unescape_bytea)
 	to = (char *)php_pgsql_unescape_bytea((unsigned char*)from, &to_len);
 #endif
 	if (!to) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Invalid parameter");
 		RETURN_FALSE;
 	}
 	RETVAL_STRINGL(to, to_len, 0);
