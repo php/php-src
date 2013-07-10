@@ -10,6 +10,7 @@ PHP                                                                        NEWS
   . Fixed bug #65035 (yield / exit segfault). (Nikita)
   . Fixed bug #65161 (Generator + autoload + syntax error = segfault). (Nikita)
   . hex2bin() raises E_WARNING for invalid hex string. (Yasuo)
+  . Fixed bug #65226 (chroot() does not get enabled). (Anatol)
 
 - OPcache
   . Fixed bug #64827 (Segfault in zval_mark_grey (zend_gc.c)). (Laruence)
