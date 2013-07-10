@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   . Fixed bug #62475 (variant_* functions causes crash when null given as an 
     argument). (Felipe)
   . Fixed bug #60732 (php_error_docref links to invalid pages). (Jakub Vrana)
+  . Fixed bug #65226 (chroot() does not get enabled). (Anatol)
 
 - CGI:
   . Fixed Bug #65143 (Missing php-cgi man page). (Remi)
