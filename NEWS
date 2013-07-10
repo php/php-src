@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-20 Jun 2013, PHP 5.3.27RC1
+11 Jul 2013, PHP 5.3.27
 
 - Core:
   . Fixed bug #64966 (segfault in zend_do_fcall_common_helper_SPEC). (Laruence)
@@ -27,6 +27,9 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #64997 (Segfault while using RecursiveIteratorIterator on 
     64-bits systems). (Laruence)
+
+- XML:
+  . Fixed bug #65236 (heap corruption in xml parser). (Rob)
 
 06 Jun 2013, PHP 5.3.26
 
