@@ -33,11 +33,11 @@ typedef struct php_url {
 
 PHPAPI void php_url_free(php_url *theurl);
 PHPAPI php_url *php_url_parse(char const *str);
-PHPAPI php_url *php_url_parse_ex(char const *str, int length);
-PHPAPI int php_url_decode(char *str, int len); /* return value: length of decoded string */
-PHPAPI int php_raw_url_decode(char *str, int len); /* return value: length of decoded string */
-PHPAPI char *php_url_encode(char const *s, int len, int *new_length);
-PHPAPI char *php_raw_url_encode(char const *s, int len, int *new_length);
+PHPAPI php_url *php_url_parse_ex(char const *str, zend_str_size_int length);
+PHPAPI zend_str_size_int php_url_decode(char *str, zend_str_size_int len); /* return value: length of decoded string */
+PHPAPI zend_str_size_int php_raw_url_decode(char *str, zend_str_size_int len); /* return value: length of decoded string */
+PHPAPI char *php_url_encode(char const *s, zend_str_size_int len, zend_str_size_int *new_length);
+PHPAPI char *php_raw_url_encode(char const *s, zend_str_size_int len, zend_str_size_int *new_length);
 
 PHP_FUNCTION(parse_url);
 PHP_FUNCTION(urlencode);
