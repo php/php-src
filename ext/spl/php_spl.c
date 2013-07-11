@@ -316,13 +316,14 @@ static int spl_autoload(const char *class_name, const char * lc_name, int class_
 PHP_FUNCTION(spl_autoload)
 {
 	char *class_name, *lc_name, *file_exts = SPL_G(autoload_extensions);
-	int class_name_len, file_exts_len = SPL_G(autoload_extensions_len), found = 0;
+	zend_str_size_int class_name_len, file_exts_len = SPL_G(autoload_extensions_len);
+	int found = 0;
 	char *copy, *pos1, *pos2;
 	zval **original_return_value = EG(return_value_ptr_ptr);
 	zend_op **original_opline_ptr = EG(opline_ptr);
 	zend_op_array *original_active_op_array = EG(active_op_array);
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &class_name, &class_name_len, &file_exts, &file_exts_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &class_name, &class_name_len, &file_exts, &file_exts_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -371,9 +372,9 @@ PHP_FUNCTION(spl_autoload)
 PHP_FUNCTION(spl_autoload_extensions)
 {
 	char *file_exts = NULL;
-	int file_exts_len;
+	zend_str_size_int file_exts_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &file_exts, &file_exts_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &file_exts, &file_exts_len) == FAILURE) {
 		return;
 	}
 	if (file_exts) {
@@ -413,7 +414,7 @@ static void autoload_func_info_dtor(autoload_func_info *alfi)
 PHP_FUNCTION(spl_autoload_call)
 {
 	zval *class_name, *retval = NULL;
-	int class_name_len;
+	zend_str_size_int class_name_len;
 	char *func_name, *lc_name;
 	zend_str_size_uint func_name_len;
 	ulong dummy;

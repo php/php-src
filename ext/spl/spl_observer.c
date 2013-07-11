@@ -110,13 +110,13 @@ void spl_SplOjectStorage_free_storage(void *object TSRMLS_DC) /* {{{ */
 	efree(object);
 } /* }}} */
 
-static char *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zval *this,  zval *obj, int *hash_len_ptr TSRMLS_DC) {
+static char *spl_object_storage_get_hash(spl_SplObjectStorage *intern, zval *this,  zval *obj, zend_str_size_int *hash_len_ptr TSRMLS_DC) {
 	if (intern->fptr_get_hash) {
 		zval *rv;
 		zend_call_method_with_1_params(&this, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, obj);
 		if (rv) {
 			if (Z_TYPE_P(rv) == IS_STRING) {
-				int hash_len = Z_STRSIZE_P(rv);
+				zend_str_size_int hash_len = Z_STRSIZE_P(rv);
 				char *hash = emalloc((hash_len+1)*sizeof(char));
 				strncpy(hash, Z_STRVAL_P(rv), hash_len);
 				hash[hash_len] = 0;
@@ -183,7 +183,7 @@ static void spl_object_storage_dtor(spl_SplObjectStorageElement *element) /* {{{
 	zval_ptr_dtor(&element->inf);
 } /* }}} */
 
-spl_SplObjectStorageElement* spl_object_storage_get(spl_SplObjectStorage *intern, char *hash, int hash_len TSRMLS_DC) /* {{{ */
+spl_SplObjectStorageElement* spl_object_storage_get(spl_SplObjectStorage *intern, char *hash, zend_str_size_int hash_len TSRMLS_DC) /* {{{ */
 {
 	spl_SplObjectStorageElement *element;
 	if (zend_hash_find(&intern->storage, hash, hash_len, (void**)&element) == SUCCESS) {
@@ -197,7 +197,7 @@ void spl_object_storage_attach(spl_SplObjectStorage *intern, zval *this, zval *o
 {
 	spl_SplObjectStorageElement *pelement, element;
 	
-	int hash_len;
+	zend_str_size_int hash_len;
 	char *hash = spl_object_storage_get_hash(intern, this, obj, &hash_len TSRMLS_CC);
 	if (!hash) {
 		return;
@@ -225,7 +225,8 @@ void spl_object_storage_attach(spl_SplObjectStorage *intern, zval *this, zval *o
 
 int spl_object_storage_detach(spl_SplObjectStorage *intern, zval *this, zval *obj TSRMLS_DC) /* {{{ */
 {
-	int hash_len, ret = FAILURE;
+	zend_str_size_int hash_len;
+	int ret = FAILURE;
 	char *hash = spl_object_storage_get_hash(intern, this, obj, &hash_len TSRMLS_CC);
 	if (!hash) {
 		return ret;
@@ -438,7 +439,8 @@ static zend_object_value spl_SplObjectStorage_new(zend_class_entry *class_type T
 
 int spl_object_storage_contains(spl_SplObjectStorage *intern, zval *this, zval *obj TSRMLS_DC) /* {{{ */
 {
-	int hash_len, found;
+	zend_str_size_int hash_len;
+	int found;
 	char *hash = spl_object_storage_get_hash(intern, this, obj, &hash_len TSRMLS_CC);
 	if (!hash) {
 		return 0;
@@ -505,7 +507,7 @@ SPL_METHOD(SplObjectStorage, offsetGet)
 	spl_SplObjectStorageElement *element;
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	char *hash;
-	int hash_len;
+	zend_str_size_int hash_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
 		return;
@@ -803,13 +805,13 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	spl_SplObjectStorage *intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	char *buf;
-	int buf_len;
+	zend_str_size_int buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	zval *pentry, *pmembers, *pcount = NULL, *pinf;
 	long count;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &buf, &buf_len) == FAILURE) {
 		return;
 	}
 
@@ -838,7 +840,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	while(count-- > 0) {
 		spl_SplObjectStorageElement *pelement;
 		char *hash;
-		int hash_len;
+		zend_str_size_int hash_len;
 		
 		if (*p != ';') {
 			goto outexcept;
