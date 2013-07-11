@@ -574,7 +574,7 @@ static char * pdo_pgsql_translate_oid_to_table(Oid oid, PGconn *conn)
 	PGresult *tmp_res;
 	char *querystr = NULL;
 
-	spprintf(&querystr, 0, "select relname from pg_class where oid=%ud", oid);
+	spprintf(&querystr, 0, "select relname from pg_class where oid=%u", oid);
 
 	if ((tmp_res = PQexec(conn, querystr)) == NULL || PQresultStatus(tmp_res) != PGRES_TUPLES_OK) {
 		if (tmp_res) {
