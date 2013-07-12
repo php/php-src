@@ -1333,6 +1333,7 @@ ZEND_FUNCTION(gmp_cmp)
 		res = mpz_cmp_si(*gmpnum_a, Z_LVAL_PP(b_arg));
 	} else {
 		res = mpz_cmp(*gmpnum_a, *gmpnum_b);
+		FREE_GMP_TEMP(temp_b);
 	}
 	FREE_GMP_TEMP(temp_a);
 	
