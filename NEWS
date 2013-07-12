@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug #63983 (enabling FPM borks compile on FreeBSD).
     (chibisuke at web dot de, Felipe)
     
+- GMP:
+  . Fixed bug #65227 (Memory leak in gmp_cmp second parameter). (Felipe)
+
 - Imap:
   . Fixed bug #64467 (Segmentation fault after imap_reopen failure).
     (askalski at gmail dot com)
