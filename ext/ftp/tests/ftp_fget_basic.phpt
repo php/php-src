@@ -27,7 +27,7 @@ var_dump(ftp_fget($ftp, $fp, 'binary data.bin', FTP_BINARY));
 fseek($fp, $postition);
 var_dump(urlencode(fgets($fp)));
 
-//test non-existant file request 
+//test non-existent file request 
 ftp_fget($ftp, $fp ,'a warning.txt', FTP_ASCII);
 
 //remove file
