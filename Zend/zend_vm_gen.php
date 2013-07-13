@@ -1381,7 +1381,7 @@ for ($i = 1;  $i < $argc; $i++) {
 	  // Disabling code for old-style executor
 		define("ZEND_VM_OLD_EXECUTOR", 1);
 	} else if ($argv[$i] == "--with-lines") {
-		// Enabling debuging using original zend_vm_def.h
+		// Enabling debugging using original zend_vm_def.h
 		define("ZEND_VM_LINES", 1);
 	} else if ($argv[$i] == "--help") {
 		usage();

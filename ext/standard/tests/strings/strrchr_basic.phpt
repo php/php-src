@@ -34,7 +34,7 @@ var_dump( strrchr("Hello, World", "Hi") );
 var_dump( strrchr("Hello, World", "o") );
 var_dump( strrchr("Hello, World", "ooo") );
 
-var_dump( strrchr("Hello, World", "Zzzz") ); //non-existant needle in haystack
+var_dump( strrchr("Hello, World", "Zzzz") ); //non-existent needle in haystack
 echo "*** Done ***";
 ?>
 --EXPECTF--

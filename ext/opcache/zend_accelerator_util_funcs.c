@@ -936,7 +936,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			zend_hash_destroy(&ZCG(bind_hash));
 		}
 		/* we must first to copy all classes and then prepare functions, since functions may try to bind
-		   classes - which depend on pre-bind class entries existant in the class table */
+		   classes - which depend on pre-bind class entries existent in the class table */
 		if (zend_hash_num_elements(&persistent_script->function_table) > 0) {
 			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table, (unique_copy_ctor_func_t)zend_prepare_function_for_execution);
 		}

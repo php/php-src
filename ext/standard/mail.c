@@ -328,7 +328,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	sendmail = popen_ex(sendmail_cmd, "wb", NULL, NULL TSRMLS_CC);
 #else
 	/* Since popen() doesn't indicate if the internal fork() doesn't work
-	 * (e.g. the shell can't be executed) we explicitely set it to 0 to be
+	 * (e.g. the shell can't be executed) we explicitly set it to 0 to be
 	 * sure we don't catch any older errno value. */
 	errno = 0;
 	sendmail = popen(sendmail_cmd, "w");

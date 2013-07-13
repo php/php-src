@@ -138,7 +138,7 @@ static inline int is_stream_path(const char *filename)
 	return ((*p == ':') && (p - filename > 1) && (p[1] == '/') && (p[2] == '/'));
 }
 
-static inline int is_cachable_stream_path(const char *filename)
+static inline int is_cacheable_stream_path(const char *filename)
 {
 	return memcmp(filename, "file://", sizeof("file://") - 1) == 0 ||
 	       memcmp(filename, "phar://", sizeof("phar://") - 1) == 0;
@@ -1455,7 +1455,7 @@ static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int
 	    CG(interactive) ||
 	    (ZCSG(restart_in_progress) && accel_restart_is_active(TSRMLS_C)) ||
 	    (is_stream_path(file_handle->filename) && 
-	     !is_cachable_stream_path(file_handle->filename))) {
+	     !is_cacheable_stream_path(file_handle->filename))) {
 		/* The Accelerator is disabled, act as if without the Accelerator */
 		return accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
 	}
