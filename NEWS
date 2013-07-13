@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fixed bug #63983 (enabling FPM borks compile on FreeBSD).
     (chibisuke at web dot de, Felipe)
     
+- FTP:
+  . Fixed bug #65228 (FTPs memory leak with SSL).
+    (marco dot beierer at mbsecurity dot ch)
+    
 - GMP:
   . Fixed bug #65227 (Memory leak in gmp_cmp second parameter). (Felipe)
 
