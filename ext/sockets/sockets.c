@@ -344,7 +344,7 @@ const zend_function_entry sockets_functions[] = {
 	PHP_FE(socket_recvmsg,			arginfo_socket_recvmsg)
 	PHP_FE(socket_cmsg_space,		arginfo_socket_cmsg_space)
 
-	/* for downwards compatability */
+	/* for downwards compatibility */
 	PHP_FALIAS(socket_getopt, socket_get_option, arginfo_socket_get_option)
 	PHP_FALIAS(socket_setopt, socket_set_option, arginfo_socket_set_option)
 
