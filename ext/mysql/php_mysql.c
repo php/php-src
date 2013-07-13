@@ -296,7 +296,7 @@ static const zend_function_entry mysql_functions[] = {
 #ifdef MYSQL_HAS_SET_CHARSET
 	PHP_FE(mysql_set_charset,							arginfo_mysql_set_charset)
 #endif
-	/* for downwards compatability */
+	/* for downwards compatibility */
 	PHP_FALIAS(mysql,				mysql_db_query,		arginfo_mysql_db_query)
 	PHP_FALIAS(mysql_fieldname,		mysql_field_name,	arginfo_mysql_field_name)
 	PHP_FALIAS(mysql_fieldtable,	mysql_field_table,	arginfo_mysql_field_seek)
