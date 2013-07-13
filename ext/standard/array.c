@@ -352,7 +352,7 @@ PHP_FUNCTION(count)
 
 /* Numbers are always smaller than strings int this function as it
  * anyway doesn't make much sense to compare two different data types.
- * This keeps it consistant and simple.
+ * This keeps it consistent and simple.
  *
  * This is not correct any more, depends on what compare_func is set to.
  */

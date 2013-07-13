@@ -17,7 +17,7 @@ mysqli_fetch_assoc() - utf8
 		die("skip Looks like UTF8 is not available on the server");
 
 	if (strtolower($tmp['Charset']) !== 'utf8')
-		die("skip Not sure if UTF8 is available, cancelling the test");
+		die("skip Not sure if UTF8 is available, canceling the test");
 
 	mysqli_free_result($res);
 
@@ -28,7 +28,7 @@ mysqli_fetch_assoc() - utf8
 		die("skip Looks like UCS2 is not available on the server");
 
 	if (strtolower($tmp['Charset']) !== 'ucs2')
-		die("skip Not sure if UCS2 is available, cancelling the test");
+		die("skip Not sure if UCS2 is available, canceling the test");
 
 	mysqli_free_result($res);
 	mysqli_close($link);

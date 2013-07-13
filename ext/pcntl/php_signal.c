@@ -23,7 +23,7 @@
 #include "Zend/zend.h"
 #include "Zend/zend_signal.h"
 
-/* php_signal using sigaction is derrived from Advanced Programing
+/* php_signal using sigaction is derived from Advanced Programing
  * in the Unix Environment by W. Richard Stevens p 298. */
 Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 {
