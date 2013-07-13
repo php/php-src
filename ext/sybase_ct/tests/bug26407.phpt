@@ -80,7 +80,7 @@ bool(true)
     select "bar"   
   
 
-Notice: sybase_query(): Sybase:  Unexpected results, cancelling current in %stest.inc on line %d
+Notice: sybase_query(): Sybase:  Unexpected results, canceling current in %stest.inc on line %d
 <<< Return: resource
 array(1) {
   [0]=>

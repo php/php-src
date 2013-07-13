@@ -123,7 +123,7 @@ Bug #34066 (recursive array_walk causes segfault)
                 "ProceedKeyArticle"	=>	"01",
                 "ActionKey"		=>	"00",
                 "ContactCommissionArticle"=>	"0,00",
-                "QuantDependantPriceKey"=>	"",
+                "QuantdependentPriceKey"=>	"",
                 "Quant"			=>	"1",
                 "QuantUnit"		=>	"",
                 "Meas" => array(
@@ -584,7 +584,7 @@ gen_xml(prefix=/Docs/Doc/DocItems/DocItem/)
 /Docs/Doc/DocItems/DocItem/ContactCommissionArticle=0,00
 gen_xml(prefix=/Docs/Doc/DocItems/DocItem/) end
 gen_xml(prefix=/Docs/Doc/DocItems/DocItem/)
-/Docs/Doc/DocItems/DocItem/QuantDependantPriceKey
+/Docs/Doc/DocItems/DocItem/QuantdependentPriceKey
 gen_xml(prefix=/Docs/Doc/DocItems/DocItem/) end
 gen_xml(prefix=/Docs/Doc/DocItems/DocItem/)
 /Docs/Doc/DocItems/DocItem/Quant=1

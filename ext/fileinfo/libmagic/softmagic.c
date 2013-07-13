@@ -1630,7 +1630,7 @@ mget(struct magic_set *ms, const unsigned char *s, struct magic *m,
 	/* Verify we have enough data to match magic type */
 	switch (m->type) {
 	case FILE_BYTE:
-		if (nbytes < (offset + 1)) /* should alway be true */
+		if (nbytes < (offset + 1)) /* should always be true */
 			return 0;
 		break;
 
