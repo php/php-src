@@ -1041,7 +1041,7 @@ PHP_FUNCTION(max)
 static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive TSRMLS_DC) /* {{{ */
 {
 	zval **args[3],			/* Arguments to userland function */
-		  *retval_ptr,		/* Return value - unused */
+		  *retval_ptr = NULL,		/* Return value - unused */
 		  *key=NULL;		/* Entry key */
 
 	/* Set up known arguments */
@@ -2911,7 +2911,7 @@ static int zval_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
 static int zval_user_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
 {
 	zval **args[2];
-	zval *retval_ptr;
+	zval *retval_ptr = NULL;
 
 	args[0] = (zval **) a;
 	args[1] = (zval **) b;
