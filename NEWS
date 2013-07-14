@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.4.18
 
 - Core:
+  . Fixed bug #65254 (Exception not catchable when exception thrown in autoload
+    with a namespace). (Laruence)
   . Fixed bug #65108 (is_callable() triggers Fatal Error). 
     (David Soria Parra, Laruence)
   . Fixed bug #65088 (Generated configure script is malformed on OpenBSD).

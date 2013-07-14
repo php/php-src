@@ -2229,9 +2229,11 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 			ce = CACHED_PTR(opline->op1.literal->cache_slot);
 		} else {
 			ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 			if (UNEXPECTED(ce == NULL)) {
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 			}
 			CACHE_PTR(opline->op1.literal->cache_slot, ce);
 		}
@@ -2414,9 +2416,11 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 
 			if (Z_TYPE_PP(obj) == IS_STRING) {
 				ce = zend_fetch_class_by_name(Z_STRVAL_PP(obj), Z_STRLEN_PP(obj), NULL, 0 TSRMLS_CC);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
 				if (UNEXPECTED(ce == NULL)) {
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_PP(obj));
 				}
 				EX(called_scope) = ce;
 				EX(object) = NULL;
@@ -3498,9 +3502,11 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 				ce = CACHED_PTR(opline->op1.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
 				if (UNEXPECTED(ce == NULL)) {
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 				}
 				CACHE_PTR(opline->op1.literal->cache_slot, ce);
 			}
@@ -3887,15 +3893,17 @@ ZEND_VM_HANDLER(74, ZEND_UNSET_VAR, CONST|TMP|VAR|CV, UNUSED|CONST|VAR)
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (OP1_TYPE != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (OP1_TYPE == IS_VAR || OP1_TYPE == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 					FREE_OP1();
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
