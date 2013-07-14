@@ -98,8 +98,8 @@ typedef struct {
 } field_descriptor;
 
 #define KEY_FILL_SOCKADDR "fill_sockaddr"
-#define KEY_RECVMSG_RET "recvmsg_ret"
-#define KEY_CMSG_LEN	"cmsg_len"
+#define KEY_RECVMSG_RET   "recvmsg_ret"
+#define KEY_CMSG_LEN	  "cmsg_len"
 
 const struct key_value empty_key_value_list[] = {{0}};
 
@@ -667,6 +667,13 @@ static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_
 		path = &lzval;
 	}
 
+	/* code in this file relies on the path being nul terminated, even though
+	 * this is not required, at least on linux for abstract paths. It also
+	 * assumes that the path is not empty */
+	if (Z_STRLEN_P(path) == 0) {
+		do_from_zval_err(ctx, "%s", "the path is cannot be empty");
+		return;
+	}
 	if (Z_STRLEN_P(path) >= sizeof(saddr->sun_path)) {
 		do_from_zval_err(ctx, "the path is too long, the maximum permitted "
 				"length is %ld", sizeof(saddr->sun_path) - 1);
@@ -768,10 +775,22 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 			return;
 		}
 		*sockaddr_ptr = accounted_ecalloc(1, sizeof(struct sockaddr_un), ctx);
-		*sockaddr_len = sizeof(struct sockaddr_un);
 		if (fill_sockaddr) {
+			struct sockaddr_un *sock_un = (struct sockaddr_un*)*sockaddr_ptr;
+
 			from_zval_write_sockaddr_un(container, (char*)*sockaddr_ptr, ctx);
 			(*sockaddr_ptr)->sa_family = AF_UNIX;
+
+			/* calculating length is more complicated here. Giving the size of
+			 * struct sockaddr_un here and relying on the nul termination of
+			 * sun_path does not work for paths in the abstract namespace. Note
+			 * that we always assume the path is not empty and nul terminated */
+			*sockaddr_len = offsetof(struct sockaddr_un, sun_path) +
+					(sock_un->sun_path[0] == '\0'
+					? (1 + strlen(&sock_un->sun_path[1]))
+					: strlen(sock_un->sun_path));
+		} else {
+			*sockaddr_len = sizeof(struct sockaddr_un);
 		}
 		break;
 
