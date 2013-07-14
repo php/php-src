@@ -223,6 +223,7 @@ static unsigned from_array_iterate(const zval *arr,
 	char			buf[sizeof("element #4294967295")];
 	char			*bufp = buf;
 
+	/* Note i starts at 1, not 0! */
     for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos), i = 1;
 			!ctx->err.has_error
 			&& zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&elem, &pos) == SUCCESS;
@@ -869,7 +870,14 @@ static void from_zval_write_control(const zval			*arr,
 	}
 
 	if (entry->calc_space) {
-		data_len = entry->calc_space(arr, ctx);
+		zval **data_elem;
+		/* arr must be an array at this point */
+		if (zend_hash_find(Z_ARRVAL_P(arr), "data", sizeof("data"),
+				(void**)&data_elem) == FAILURE) {
+			do_from_zval_err(ctx, "cmsghdr should have a 'data' element here");
+			return;
+		}
+		data_len = entry->calc_space(*data_elem, ctx);
 		if (ctx->err.has_error) {
 			return;
 		}
@@ -1370,7 +1378,7 @@ static void from_zval_write_fd_array_aux(zval **elem, unsigned i, void **args, s
 			return;
 		}
 
-		if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&iarr[i],
+		if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&iarr[i - 1],
 				REPORT_ERRORS) == FAILURE) {
 			do_from_zval_err(ctx, "cast stream to file descriptor failed");
 			return;
