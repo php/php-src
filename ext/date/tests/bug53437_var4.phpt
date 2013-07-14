@@ -1,16 +1,25 @@
 --TEST--
-Bug #45682 (Unable to var_dump(DateInterval))
+Bug #53437 (Check that var_dump out is the same using the whole object or it's single properties), variation 4
 --INI--
-date.timezone=UTC
+date.timezone = Europe/Berlin
 --FILE--
 <?php
+$dt = new DateTime('2009-10-11');
 
-$date = new DateTime("28-July-2008");
-$other = new DateTime("31-July-2008");
+$df = $dt->diff(new DateTime('2009-10-13'));
 
-$diff = date_diff($date, $other);
+var_dump($df,
+	$df->y,
+	$df->m,
+	$df->d,
+	$df->h,
+	$df->i,
+	$df->s,
+	$df->invert,
+	$df->days);
 
-var_dump($diff);
+?>
+==DONE==
 --EXPECTF--
 object(DateInterval)#%d (15) {
   ["y"]=>
@@ -18,7 +27,7 @@ object(DateInterval)#%d (15) {
   ["m"]=>
   int(0)
   ["d"]=>
-  int(3)
+  int(2)
   ["h"]=>
   int(0)
   ["i"]=>
@@ -34,7 +43,7 @@ object(DateInterval)#%d (15) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  int(3)
+  int(2)
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
@@ -44,3 +53,12 @@ object(DateInterval)#%d (15) {
   ["have_special_relative"]=>
   int(0)
 }
+int(0)
+int(0)
+int(2)
+int(0)
+int(0)
+int(0)
+int(0)
+int(2)
+==DONE==
