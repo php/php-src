@@ -545,7 +545,7 @@ static void php_cli_usage(char *argv0)
 				"  --rz <name>      Show information about Zend extension <name>.\n"
 				"  --ri <name>      Show configuration for extension <name>.\n"
 				"\n"
-				, prog, prog, prog, prog, prog, prog);
+				, prog, prog, prog, prog, prog, prog, prog);
 }
 /* }}} */
 
