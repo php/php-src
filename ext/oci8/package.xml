@@ -6,7 +6,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <name>oci8</name>
  <channel>pecl.php.net</channel>
  <summary>Extension for Oracle Database</summary>
- <description>This extension allows you to access Oracle databases. It can be built with PHP 4.3.9 to 5.x.  It can be linked with Oracle 9.2, 10.2, 11.1, or 11.2 client libraries.
+ <description>This extension allows you to access Oracle databases. It can be built with PHP 4.3.9 to 5.x.  It can be linked with Oracle 9.2, 10, 11, or 12.1 client libraries.
  </description>
  <lead>
   <name>Christopher Jones</name>
@@ -33,12 +33,12 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2012-10-21</date>
+ <date>2013-07-08</date>
  <time>12:00:00</time>
 
  <version>
-  <release>1.4.9</release>
-  <api>1.4.9</api>
+  <release>1.4.10</release>
+  <api>1.4.10</api>
  </version>
  <stability>
   <release>stable</release>
@@ -46,7 +46,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-   Re-fixed bug #60901 (Improve "tail" syntax for AIX installation)
+   Bump PECL package info version check to allow PECL installs with PHP 5.5+
  </notes>
  <contents>
   <dir name="/">
@@ -397,7 +397,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <required>
    <php>
     <min>4.3.9</min>
-    <max>5.4.99</max>
+    <max>6.0.0</max>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
@@ -409,6 +409,21 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+ <version>
+  <release>1.4.9</release>
+  <api>1.4.9</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+   Re-fixed bug #60901 (Improve "tail" syntax for AIX installation)
+ </notes>
+</release>
 
 <release>
  <version>

@@ -29,11 +29,11 @@
 # include <sys/mman.h>
 #endif
 
-ZEND_API const char *(*zend_new_interned_string)(const char *str, int len, int free_src TSRMLS_DC);
+ZEND_API const char *(*zend_new_interned_string)(const char *str, zend_str_size_int len, int free_src TSRMLS_DC);
 ZEND_API void (*zend_interned_strings_snapshot)(TSRMLS_D);
 ZEND_API void (*zend_interned_strings_restore)(TSRMLS_D);
 
-static const char *zend_new_interned_string_int(const char *str, int len, int free_src TSRMLS_DC);
+static const char *zend_new_interned_string_int(const char *str, zend_str_size_int len, int free_src TSRMLS_DC);
 static void zend_interned_strings_snapshot_int(TSRMLS_D);
 static void zend_interned_strings_restore_int(TSRMLS_D);
 
@@ -79,7 +79,7 @@ void zend_interned_strings_dtor(TSRMLS_D)
 #endif
 }
 
-static const char *zend_new_interned_string_int(const char *arKey, int nKeyLength, int free_src TSRMLS_DC)
+static const char *zend_new_interned_string_int(const char *arKey, zend_str_size_int nKeyLength, int free_src TSRMLS_DC)
 {
 #ifndef ZTS
 	ulong h;
