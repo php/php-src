@@ -1055,7 +1055,7 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) /* {{{ */
 	res = php_gmtime_r(when, &tm);
 
 	if (!res) {
-		buf[0] = '\0';
+		ubuf[0] = '\0';
 		return;
 	}
 
