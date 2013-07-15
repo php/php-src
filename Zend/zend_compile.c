@@ -4108,7 +4108,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 				/** With the other traits, we are more permissive.
 					We do not give errors for those. This allows to be more
 					defensive in such definitions.
-					However, we want to make sure that the insteadof declartion
+					However, we want to make sure that the insteadof declaration
 					is consistent in itself.
 				 */
 				j = 0;

@@ -43,7 +43,7 @@ $n += test_me("bug #7368", 2,      "1345",     "1234");
 $n += test_me("bug #6562", 1,    "debugg",    "debug");
 $n += test_me("bug #6562", 1,    "ddebug",    "debug");
 $n += test_me("bug #6562", 2,   "debbbug",    "debug");
-$n += test_me("bug #6562", 1, "debugging", "debuging");
+$n += test_me("bug #6562", 1, "debugging", "debugging");
 
 $n += test_me("bug #16473", 2, "a", "bc");
 $n += test_me("bug #16473", 2, "xa", "xbc");

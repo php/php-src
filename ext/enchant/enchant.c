@@ -674,7 +674,7 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 	described/referred to by 'tag'. The ordering is a comma delimited
 	list of provider names. As a special exception, the "*" tag can
 	be used as a language tag to declare a default ordering for any
-	language that does not explictly declare an ordering. */
+	language that does not explicitly declare an ordering. */
 
 PHP_FUNCTION(enchant_broker_set_ordering)
 {
