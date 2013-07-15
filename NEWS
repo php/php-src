@@ -55,6 +55,10 @@ PHP                                                                        NEWS
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
     (Chris Jones)
 
+-PDO_dblib:
+  . Fixed bug #65219 (PDO/dblib not working anymore ("use dbName" not sent)). 
+    (Stanley Sufficool)
+
 - PDO_pgsql:
   . Fixed meta data retrieve when OID is larger than 2^31. (Yasuo)
 
