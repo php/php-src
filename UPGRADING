@@ -397,6 +397,10 @@ None
   - Added intl.use_exceptions INI directive, which controls what
     happens when global errors are set together with intl.error_level.
 
+- MSSQL:
+  - mssql.compatability_mode renamed to mssql.compatibility_mode in 5.5.2,
+    old directive still supported for BC reasons.
+
 - mysqlnd:
   - Added mysqlnd.sha256_server_public_key INI PERDIR setting that
     affects all APIs which use(are built) for mysqlnd. This allows
