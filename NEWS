@@ -40,7 +40,7 @@ PHP                                                                        NEWS
 - Intl:
   . Add IntlCalendar::setMinimalDaysInFirstWeek()/
     intlcal_set_minimal_days_in_first_week().
-  . Fixed trailing space in the name of constant IntlCalendar::FIELD_FIELD_COUNT.
+  . Fixed trailing space in name of constant IntlCalendar::FIELD_FIELD_COUNT.
   . Fixed bug #62759 (Buggy grapheme_substr() on edge case). (Stas)
   . Fixed bug #61860 (Offsets may be wrong for grapheme_stri* functions).
     (Stas)
@@ -65,6 +65,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Implemented FR #63472 (Setting SO_BINDTODEVICE with socket_set_option).
     (Damjan Cvetko)
+  . Allowed specifying paths in the abstract namespace for the functions
+    socket_bind(), socket_connect() and socket_sendmsg(). (Gustavo)
+  . Fixed bug #65260 (sendmsg() ancillary data construction for SCM_RIGHTS is
+    faulty). (Gustavo)
 
 - SPL:
   . Fixed bug #65136 (RecursiveDirectoryIterator segfault). (Laruence)
