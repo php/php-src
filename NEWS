@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed bug #65066 (Cli server not responsive when responding with 422 http
     status code). (Adam)
     
+- CURL:
+  . Fixed bug #62665 (curl.cainfo doesn't appear in php.ini). (Lior Kaplan)
+
 - FPM:
   . Fixed bug #63983 (enabling FPM borks compile on FreeBSD).
     (chibisuke at web dot de, Felipe)
@@ -55,7 +58,7 @@ PHP                                                                        NEWS
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
     (Chris Jones)
 
--PDO_dblib:
+- PDO_dblib:
   . Fixed bug #65219 (PDO/dblib not working anymore ("use dbName" not sent)). 
     (Stanley Sufficool)
 

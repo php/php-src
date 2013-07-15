@@ -1856,6 +1856,11 @@ ldap.max_links = -1
 [dba]
 ;dba.default_handler=
 
+[curl]
+; A default value for the CURLOPT_CAINFO option. This is required to be an
+; absolute path.
+;curl.cainfo =
+
 ; Local Variables:
 ; tab-width: 4
 ; End:
