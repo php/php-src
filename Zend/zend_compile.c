@@ -204,6 +204,7 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	CG(in_namespace) = 0;
 	CG(has_bracketed_namespaces) = 0;
 	CG(current_import) = NULL;
+	CG(current_import_function) = NULL;
 	init_compiler_declarables(TSRMLS_C);
 	zend_stack_init(&CG(context_stack));
 
@@ -2092,6 +2093,20 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace 
 
 	if(!check_namespace) {
 		return;
+	}
+
+	if (CG(current_import_function)) {
+		len = Z_STRLEN(element_name->u.constant)+1;
+		lcname = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
+		/* Check if function matches imported name */
+		if (zend_hash_find(CG(current_import_function), lcname, len, (void**)&ns) == SUCCESS) {
+			zval_dtor(&element_name->u.constant);
+			element_name->u.constant = **ns;
+			zval_copy_ctor(&element_name->u.constant);
+			efree(lcname);
+			return;
+		}
+		efree(lcname);
 	}
 
 	if (compound && CG(current_import)) {
@@ -6997,6 +7012,12 @@ void zend_do_begin_namespace(const znode *name, zend_bool with_bracket TSRMLS_DC
 		CG(current_import) = NULL;
 	}
 
+	if (CG(current_import_function)) {
+		zend_hash_destroy(CG(current_import_function));
+		efree(CG(current_import_function));
+		CG(current_import_function) = NULL;
+	}
+
 	if (CG(doc_comment)) {
 		efree(CG(doc_comment));
 		CG(doc_comment) = NULL;
@@ -7089,6 +7110,57 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 }
 /* }}} */
 
+void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{{ */
+{
+	char *lcname;
+	zval *name, *ns, tmp;
+	zend_bool warn = 0;
+
+	if (!CG(current_import_function)) {
+		CG(current_import_function) = emalloc(sizeof(HashTable));
+		zend_hash_init(CG(current_import_function), 0, NULL, ZVAL_PTR_DTOR, 0);
+	}
+
+	ALLOC_ZVAL(ns);
+	*ns = ns_name->u.constant;
+	if (new_name) {
+		name = &new_name->u.constant;
+	} else {
+		const char *p;
+
+		/* The form "use A\B" is eqivalent to "use A\B as B".
+		   So we extract the last part of compound name to use as a new_name */
+		name = &tmp;
+		p = zend_memrchr(Z_STRVAL_P(ns), '\\', Z_STRLEN_P(ns));
+		if (p) {
+			ZVAL_STRING(name, p+1, 1);
+		} else {
+			*name = *ns;
+			zval_copy_ctor(name);
+			warn = !is_global && !CG(current_namespace);
+		}
+	}
+
+	lcname = zend_str_tolower_dup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+
+	if (((Z_STRLEN_P(name) == sizeof("self")-1) &&
+				!memcmp(lcname, "self", sizeof("self")-1)) ||
+			((Z_STRLEN_P(name) == sizeof("parent")-1) &&
+	   !memcmp(lcname, "parent", sizeof("parent")-1))) {
+		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' is a special class name", Z_STRVAL_P(ns), Z_STRVAL_P(name), Z_STRVAL_P(name));
+	}
+
+	if (zend_hash_add(CG(current_import_function), lcname, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
+		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
+	}
+	if (warn) {
+		zend_error(E_WARNING, "The use statement with non-compound name '%s' has no effect", Z_STRVAL_P(name));
+	}
+	efree(lcname);
+	zval_dtor(name);
+}
+/* }}} */
+
 void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
@@ -7140,6 +7212,11 @@ void zend_do_end_namespace(TSRMLS_D) /* {{{ */
 		zend_hash_destroy(CG(current_import));
 		efree(CG(current_import));
 		CG(current_import) = NULL;
+	}
+	if (CG(current_import_function)) {
+		zend_hash_destroy(CG(current_import_function));
+		efree(CG(current_import_function));
+		CG(current_import_function) = NULL;
 	}
 }
 /* }}} */
