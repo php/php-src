@@ -87,6 +87,9 @@ PHP                                                                        NEWS
   . Fixed bug #60560 (SplFixedArray un-/serialize, getSize(), count() return 0,
     keys are strings). (Adam)
 
+- XML:
+  . Fixed bug #65236 (heap corruption in xml parser, CVE-2013-4113). (Rob)
+
 04 Jul 2013, PHP 5.4.17
 
 - Core:
