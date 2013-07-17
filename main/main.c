@@ -1266,11 +1266,11 @@ PHPAPI char *php_get_current_user(TSRMLS_D)
    Sets the maximum time a script can run */
 PHP_FUNCTION(set_time_limit)
 {
-	long new_timeout;
+	php_int_t new_timeout;
 	char *new_timeout_str;
 	zend_str_size_int new_timeout_strlen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_timeout) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &new_timeout) == FAILURE) {
 		return;
 	}
 
@@ -2132,8 +2132,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_SHLIB_SUFFIX", PHP_SHLIB_SUFFIX, sizeof(PHP_SHLIB_SUFFIX)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_STRINGL_CONSTANT("PHP_EOL", PHP_EOL, sizeof(PHP_EOL)-1, CONST_PERSISTENT | CONST_CS);
 	REGISTER_MAIN_LONG_CONSTANT("PHP_MAXPATHLEN", MAXPATHLEN, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MAX", LONG_MAX, CONST_PERSISTENT | CONST_CS);
-	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_SIZE", sizeof(long), CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_MAX", PHP_INT_MAX, CONST_PERSISTENT | CONST_CS);
+	REGISTER_MAIN_LONG_CONSTANT("PHP_INT_SIZE", SIZEOF_ZEND_INT, CONST_PERSISTENT | CONST_CS);
 
 #ifdef PHP_WIN32
 	REGISTER_MAIN_LONG_CONSTANT("PHP_WINDOWS_VERSION_MAJOR",      EG(windows_version_info).dwMajorVersion, CONST_PERSISTENT | CONST_CS);

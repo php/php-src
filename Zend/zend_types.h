@@ -28,18 +28,31 @@ typedef unsigned int zend_uint;
 typedef unsigned long zend_ulong;
 typedef unsigned short zend_ushort;
 
-
 #ifdef ZEND_USE_LEGACY_STRING_TYPES
-#define zend_str_size_int int
-#define zend_str_size_uint unsigned int
-#define zend_str_size_size_t size_t
-#define zend_str_size_long long
+# define zend_str_size_int int
+# define zend_str_size_uint unsigned int
+# define zend_str_size_size_t size_t
+# define zend_str_size_long long
+# define ZEND_SIZE_MAX_LONG LONG_MAX
+# define ZEND_SIZE_MAX_INT INT_MAX
 typedef int zend_str_size;
 #else
-#define zend_str_size_int zend_str_size
-#define zend_str_size_uint zend_str_size
-#define zend_str_size_size_t zend_str_size
-#define zend_str_size_long zend_str_size
+# define zend_str_size_int zend_str_size
+# define zend_str_size_uint zend_str_size
+# define zend_str_size_size_t zend_str_size
+# define zend_str_size_long zend_str_size
+# ifdef PHP_WIN32
+#  ifdef _WIN64
+#   define ZEND_SIZE_MAX_LONG  _UI64_MAX
+#   define ZEND_SIZE_MAX_INT  _UI64_MAX
+#  else
+#   define ZEND_SIZE_MAX_LONG  _UI32_MAX
+#   define ZEND_SIZE_MAX_INT  _UI32_MAX
+#  endif
+# else
+#  define ZEND_SIZE_MAX_LONG  SIZE_MAX
+#  define ZEND_SIZE_MAX_INT  SIZE_MAX
+# endif
 typedef size_t zend_str_size;
 #endif
 
@@ -73,6 +86,38 @@ typedef struct _zend_object_value {
 	zend_object_handle handle;
 	const zend_object_handlers *handlers;
 } zend_object_value;
+
+#ifdef ZEND_ENABLE_INT64
+# ifdef ZEND_WIN32
+#  ifdef _WIN64
+typedef __int64 zend_int_t;
+typedef unsigned __int64 zend_uint_t;
+#   define ZEND_INT_MAX _I64_MAX
+#   define ZEND_INT_MIN _I64_MIN
+#   define ZEND_UINT_MAX _UI64_MAX
+#  else
+#   error Cant enable 64 bit integers on non 64 bit platform
+#  endif
+# else
+#  if defined(__LP64__) || defined(_LP64)
+typedef int64_t zend_int_t;
+typedef uint64_t zend_uint_t;
+#   define ZEND_INT_MAX INT64_MAX
+#   define ZEND_INT_MIN INT64_MIN
+#   define ZEND_UINT_MAX UINT64_MAX
+#  else
+#   error Cant enable 64 bit integers on non 64 bit platform
+#  endif
+# endif
+# define SIZEOF_ZEND_INT 8
+#else
+typedef long zend_int_t;
+typedef unsigned long zend_uint_t;
+# define ZEND_INT_MAX LONG_MAX
+# define ZEND_INT_MIN LONG_MIN
+# define ZEND_UINT_MAX ULONG_MAX
+# define SIZEOF_ZEND_INT SIZEOF_LONG
+#endif
 
 #endif /* ZEND_TYPES_H */
 

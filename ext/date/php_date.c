@@ -1484,13 +1484,13 @@ PHP_FUNCTION(strtotime)
 /* {{{ php_mktime - (gm)mktime helper */
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 {
-	long hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0, dst = -1;
+	php_int_t hou = 0, min = 0, sec = 0, mon = 0, day = 0, yea = 0, dst = -1;
 	timelib_time *now;
 	timelib_tzinfo *tzi = NULL;
-	long ts, adjust_seconds = 0;
+	php_int_t ts, adjust_seconds = 0;
 	int error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|lllllll", &hou, &min, &sec, &mon, &day, &yea, &dst) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|iiiiiii", &hou, &min, &sec, &mon, &day, &yea, &dst) == FAILURE) {
 		RETURN_FALSE;
 	}
 	/* Initialize structure with current time */

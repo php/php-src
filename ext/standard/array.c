@@ -141,7 +141,7 @@ PHP_MSHUTDOWN_FUNCTION(array) /* {{{ */
 }
 /* }}} */
 
-static void php_set_compare_func(int sort_type TSRMLS_DC) /* {{{ */
+static void php_set_compare_func(php_int_t sort_type TSRMLS_DC) /* {{{ */
 {
 	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
 		case PHP_SORT_NUMERIC:
@@ -236,9 +236,9 @@ static int php_array_reverse_key_compare(const void *a, const void *b TSRMLS_DC)
 PHP_FUNCTION(krsort)
 {
 	zval *array;
-	long sort_type = PHP_SORT_REGULAR;
+	php_int_t sort_type = PHP_SORT_REGULAR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|i", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -256,7 +256,7 @@ PHP_FUNCTION(krsort)
 PHP_FUNCTION(ksort)
 {
 	zval *array;
-	long sort_type = PHP_SORT_REGULAR;
+	php_int_t sort_type = PHP_SORT_REGULAR;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
@@ -271,7 +271,7 @@ PHP_FUNCTION(ksort)
 }
 /* }}} */
 
-static int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
+static int php_count_recursive(zval *array, php_int_t mode TSRMLS_DC) /* {{{ */
 {
 	long cnt = 0;
 	zval **element;
@@ -306,9 +306,9 @@ static int php_count_recursive(zval *array, long mode TSRMLS_DC) /* {{{ */
 PHP_FUNCTION(count)
 {
 	zval *array;
-	long mode = COUNT_NORMAL;
+	php_int_t mode = COUNT_NORMAL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &array, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &array, &mode) == FAILURE) {
 		return;
 	}
 
@@ -496,9 +496,9 @@ PHP_FUNCTION(natcasesort)
 PHP_FUNCTION(asort)
 {
 	zval *array;
-	long sort_type = PHP_SORT_REGULAR;
+	php_int_t sort_type = PHP_SORT_REGULAR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|i", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -516,9 +516,9 @@ PHP_FUNCTION(asort)
 PHP_FUNCTION(arsort)
 {
 	zval *array;
-	long sort_type = PHP_SORT_REGULAR;
+	php_int_t sort_type = PHP_SORT_REGULAR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|i", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -536,9 +536,9 @@ PHP_FUNCTION(arsort)
 PHP_FUNCTION(sort)
 {
 	zval *array;
-	long sort_type = PHP_SORT_REGULAR;
+	php_int_t sort_type = PHP_SORT_REGULAR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|i", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -556,9 +556,9 @@ PHP_FUNCTION(sort)
 PHP_FUNCTION(rsort)
 {
 	zval *array;
-	long sort_type = PHP_SORT_REGULAR;
+	php_int_t sort_type = PHP_SORT_REGULAR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|i", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1513,9 +1513,9 @@ PHP_FUNCTION(compact)
 PHP_FUNCTION(array_fill)
 {
 	zval *val;
-	long start_key, num;
+	php_int_t start_key, num;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "llz", &start_key, &num, &val) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iiz", &start_key, &num, &val) == FAILURE) {
 		return;
 	}
 
@@ -1809,10 +1809,10 @@ PHP_FUNCTION(shuffle)
 }
 /* }}} */
 
-PHPAPI HashTable* php_splice(HashTable *in_hash, int offset, int length, zval ***list, int list_count, HashTable **removed) /* {{{ */
+PHPAPI HashTable* php_splice(HashTable *in_hash, php_int_t offset, php_int_t length, zval ***list, php_int_t list_count, HashTable **removed) /* {{{ */
 {
 	HashTable 	*out_hash = NULL;	/* Output hashtable */
-	int			 num_in,			/* Number of entries in the input hashtable */
+	php_int_t	 num_in,			/* Number of entries in the input hashtable */
 				 pos,				/* Current position in the hashtable */
 				 i;					/* Loop counter */
 	Bucket		*p;					/* Pointer to hash bucket */
@@ -2053,13 +2053,13 @@ PHP_FUNCTION(array_splice)
 	         **rem_hash = NULL;	/* Removed elements' hash */
 	HashTable  old_hash;
 	Bucket *p;					/* Bucket used for traversing hash */
-	long	i,
-			offset,
-			length = 0,
-			repl_num = 0;		/* Number of replacement elements */
+	long	i;
+	php_int_t	offset,
+			length = 0;
+	long	repl_num = 0;		/* Number of replacement elements */
 	int		num_in;				/* Number of elements in the input array */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|lz/", &array, &offset, &length, &repl_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ai|iz/", &array, &offset, &length, &repl_array) == FAILURE) {
 		return;
 	}
 
@@ -2084,7 +2084,7 @@ PHP_FUNCTION(array_splice)
 	/* Don't create the array of removed elements if it's not going
 	 * to be used; e.g. only removing and/or replacing elements */
 	if (return_value_used) {
-		int size = length;
+		php_int_t size = length;
 
 		/* Clamp the offset.. */
 		if (offset > num_in) {
@@ -2131,17 +2131,17 @@ PHP_FUNCTION(array_slice)
 	zval	 *input,		/* Input array */
 			**z_length = NULL, /* How many elements to get */ 
 			**entry;		/* An array entry */
-	long	 offset,		/* Offset to get elements from */
+	php_int_t	 offset,		/* Offset to get elements from */
 			 length = 0;	
 	zend_bool preserve_keys = 0; /* Whether to preserve keys while copying to the new array or not */
-	int		 num_in,		/* Number of elements in the input array */
+	php_int_t		 num_in,		/* Number of elements in the input array */
 			 pos;			/* Current position in the array */
 	char *string_key;
 	zend_str_size string_key_len;
 	ulong num_key;
 	HashPosition hpos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "al|Zb", &input, &offset, &z_length, &preserve_keys) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ai|Zb", &input, &offset, &z_length, &preserve_keys) == FAILURE) {
 		return;
 	}
 
@@ -2910,7 +2910,7 @@ static int zval_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int zval_user_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
+static php_int_t zval_user_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
 {
 	zval **args[2];
 	zval *retval_ptr = NULL;
@@ -2924,7 +2924,7 @@ static int zval_user_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
 	BG(user_compare_fci).no_separation = 0;
 
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC) == SUCCESS && retval_ptr) {
-		long retval;
+		php_int_t retval;
 
 		convert_to_long_ex(&retval_ptr);
 		retval = Z_LVAL_P(retval_ptr);

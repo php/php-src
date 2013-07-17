@@ -447,7 +447,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	spl_recursive_it_object   *intern;
 	zval                      *iterator;
 	zend_class_entry          *ce_iterator;
-	long                       mode, flags;
+	php_int_t                  mode, flags;
 	int                        inc_refcount = 1;
 	zend_error_handling        error_handling;
 
@@ -460,7 +460,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 			mode = RIT_SELF_FIRST;
 			flags = RTIT_BYPASS_KEY;
 
-			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "o|lzl", &iterator, &flags, &user_caching_it_flags, &mode) == SUCCESS) {
+			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "o|izi", &iterator, &flags, &user_caching_it_flags, &mode) == SUCCESS) {
 				if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate TSRMLS_CC)) {
 					zval *aggregate = iterator;
 					zend_call_method_with_0_params(&aggregate, Z_OBJCE_P(aggregate), &Z_OBJCE_P(aggregate)->iterator_funcs.zf_new_iterator, "getiterator", &iterator);
@@ -490,7 +490,7 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 			mode = RIT_LEAVES_ONLY;
 			flags = 0;
 
-			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "o|ll", &iterator, &mode, &flags) == SUCCESS) {
+			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "o|ii", &iterator, &mode, &flags) == SUCCESS) {
 				if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate TSRMLS_CC)) {
 					zval *aggregate = iterator;
 					zend_call_method_with_0_params(&aggregate, Z_OBJCE_P(aggregate), &Z_OBJCE_P(aggregate)->iterator_funcs.zf_new_iterator, "getiterator", &iterator);

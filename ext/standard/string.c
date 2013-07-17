@@ -1007,7 +1007,7 @@ PHP_FUNCTION(wordwrap)
 
 /* {{{ php_explode
  */
-PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, long limit)
+PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, php_int_t limit)
 {
 	char *p1, *p2, *endp;
 
@@ -1033,7 +1033,7 @@ PHPAPI void php_explode(zval *delim, zval *str, zval *return_value, long limit)
 
 /* {{{ php_explode_negative_limit
  */
-PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_value, long limit)
+PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_value, php_int_t limit)
 {
 #define EXPLODE_ALLOC_STEP 64
 	char *p1, *p2, *endp;
@@ -1082,10 +1082,10 @@ PHP_FUNCTION(explode)
 {
 	char *str, *delim;
 	zend_str_size str_len = 0, delim_len = 0;
-	long limit = LONG_MAX; /* No limit */
+	php_int_t limit = PHP_SIZE_MAX_LONG; /* No limit */
 	zval zdelim, zstr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &delim, &delim_len, &str, &str_len, &limit) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|i", &delim, &delim_len, &str, &str_len, &limit) == FAILURE) {
 		return;
 	}
 
@@ -1797,10 +1797,10 @@ PHP_FUNCTION(strpos)
 	char *haystack;
 	char *found = NULL;
 	char  needle_char[2];
-	long  offset = 0;
+	php_int_t offset = 0;
 	zend_str_size   haystack_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz|l", &haystack, &haystack_len, &needle, &offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz|i", &haystack, &haystack_len, &needle, &offset) == FAILURE) {
 		return;
 	}
 
@@ -2215,11 +2215,11 @@ PHP_FUNCTION(chunk_split)
 PHP_FUNCTION(substr)
 {
 	char *str;
-	long l = 0, f;
+	php_int_t l = 0, f;
 	zend_str_size str_len;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl|l", &str, &str_len, &f, &l) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si|i", &str, &str_len, &f, &l) == FAILURE) {
 		return;
 	}
 
@@ -2641,14 +2641,14 @@ PHP_FUNCTION(ord)
    Converts ASCII code to a character */
 PHP_FUNCTION(chr)
 {
-	long c;
+	php_int_t c;
 	char temp[2];
 
 	if (ZEND_NUM_ARGS() != 1) {
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "l", &c) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "i", &c) == FAILURE) {
 		c = 0;
 	}
 
@@ -4853,11 +4853,11 @@ PHP_FUNCTION(str_repeat)
 {
 	char		*input_str;		/* Input string */
 	zend_str_size	input_len;
-	long 		mult;			/* Multiplier */
+	php_int_t 		mult;			/* Multiplier */
 	char		*result;		/* Resulting string */
 	zend_str_size	result_len;		/* Length of the resulting string */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl", &input_str, &input_len, &mult) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si", &input_str, &input_len, &mult) == FAILURE) {
 		return;
 	}
 
@@ -5202,7 +5202,7 @@ PHP_FUNCTION(str_pad)
 	/* Input arguments */
 	char *input;				/* Input string */
 	zend_str_size  input_len;
-	long pad_length;			/* Length to pad to */
+	php_int_t pad_length;			/* Length to pad to */
 
 	/* Helper variables */
 	zend_str_size  num_pad_chars;		/* Number of padding characters (total - input size) */
@@ -5210,10 +5210,10 @@ PHP_FUNCTION(str_pad)
 	zend_str_size  result_len = 0;		/* Length of the resulting string */
 	char  *pad_str_val = " ";	/* Pointer to padding string */
 	zend_str_size  pad_str_len = 1;		/* Length of the padding string */
-	long   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
+	php_int_t   pad_type_val = STR_PAD_RIGHT; /* The padding type value */
 	zend_str_size  i, left_pad=0, right_pad=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl|Sl", &input, &input_len, &pad_length,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si|Si", &input, &input_len, &pad_length,
 																  &pad_str_val, &pad_str_len, &pad_type_val) == FAILURE) {
 		return;
 	}

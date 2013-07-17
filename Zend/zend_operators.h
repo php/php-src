@@ -41,7 +41,7 @@
 #include "ext/bcmath/libbcmath/src/bcmath.h"
 #endif
 
-#define LONG_SIGN_MASK (1L << (8*sizeof(long)-1))
+#define LONG_SIGN_MASK (((zend_int_t)1) << (8*sizeof(zend_int_t)-1))
 
 BEGIN_EXTERN_C()
 ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
@@ -71,11 +71,11 @@ ZEND_API zend_bool instanceof_function(const zend_class_entry *instance_ce, cons
 END_EXTERN_C()
 
 #if ZEND_DVAL_TO_LVAL_CAST_OK
-# define zend_dval_to_lval(d) ((long) (d))
-#elif SIZEOF_LONG == 4
-static zend_always_inline long zend_dval_to_lval(double d)
+# define zend_dval_to_lval(d) ((zend_int_t) (d))
+#elif SIZEOF_ZEND_INT == 4
+static zend_always_inline zend_int_t zend_dval_to_lval(double d)
 {
-	if (d > LONG_MAX || d < LONG_MIN) {
+	if (d > ZEND_INT_MAX || d < ZEND_INT_MIN) {
 		double	two_pow_32 = pow(2., 32.),
 				dmod;
 
@@ -85,15 +85,15 @@ static zend_always_inline long zend_dval_to_lval(double d)
 			 * to simulate rounding towards 0 of the negative number */
 			dmod = ceil(dmod) + two_pow_32;
 		}
-		return (long)(unsigned long)dmod;
+		return (zend_int_t)(zend_uint_t)dmod;
 	}
-	return (long)d;
+	return (zend_int_t)d;
 }
 #else
-static zend_always_inline long zend_dval_to_lval(double d)
+static zend_always_inline zend_int_t zend_dval_to_lval(double d)
 {
 	/* >= as (double)LONG_MAX is outside signed range */
-	if (d >= LONG_MAX || d < LONG_MIN) {
+	if (d >= ZEND_INT_MAX || d < ZEND_INT_MIN) {
 		double	two_pow_64 = pow(2., 64.),
 				dmod;
 
@@ -103,9 +103,9 @@ static zend_always_inline long zend_dval_to_lval(double d)
 			 * fractional part, hence dmod does not have one either */
 			dmod += two_pow_64;
 		}
-		return (long)(unsigned long)dmod;
+		return (zend_int_t)(zend_uint_t)dmod;
 	}
-	return (long)d;
+	return (zend_int_t)d;
 }
 #endif
 /* }}} */
@@ -128,7 +128,7 @@ static zend_always_inline long zend_dval_to_lval(double d)
  * could not be represented as such due to overflow. It writes 1 to oflow_info
  * if the integer is larger than LONG_MAX and -1 if it's smaller than LONG_MIN.
  */
-static inline zend_uchar is_numeric_string_ex(const char *str, zend_str_size_int length, long *lval, double *dval, int allow_errors, int *oflow_info)
+static inline zend_uchar is_numeric_string_ex(const char *str, zend_str_size_int length, zend_int_t *lval, double *dval, int allow_errors, int *oflow_info)
 {
 	const char *ptr;
 	int base = 10, digits = 0, dp_or_e = 0;
@@ -265,7 +265,7 @@ process_double:
 	}
 }
 
-static inline zend_uchar is_numeric_string(const char *str, zend_str_size_int length, long *lval, double *dval, int allow_errors) {
+static inline zend_uchar is_numeric_string(const char *str, zend_str_size_int length, zend_int_t *lval, double *dval, int allow_errors) {
     return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
@@ -800,6 +800,7 @@ static zend_always_inline int fast_mul_function(zval *result, zval *op1, zval *o
 
 static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC)
 {
+
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG) && 0) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_LONG)) {
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
@@ -807,9 +808,9 @@ static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *o
 				Z_LVAL_P(result) = 0;
 				Z_TYPE_P(result) = IS_BOOL;
 				return FAILURE;
-			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == LONG_MIN)) {
+			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_INT_MIN)) {
 				/* Prevent overflow error/crash */
-				Z_DVAL_P(result) = (double) LONG_MIN / -1;
+				Z_DVAL_P(result) = (double) ZEND_INT_MIN / -1;
 				Z_TYPE_P(result) = IS_DOUBLE;
 			} else if (EXPECTED(Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0)) {
 				/* integer */

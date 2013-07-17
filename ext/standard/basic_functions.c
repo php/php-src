@@ -4682,9 +4682,9 @@ PHP_FUNCTION(error_log)
 	char *message, *opt = NULL, *headers = NULL;
 	zend_str_size message_len, opt_len = 0, headers_len = 0;
 	int opt_err = 0, argc = ZEND_NUM_ARGS();
-	long erropt = 0;
+	php_int_t erropt = 0;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "S|lPS", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "S|iPS", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
 		return;
 	}
 
@@ -5973,11 +5973,11 @@ PHP_FUNCTION(parse_ini_file)
 	char *filename = NULL;
 	zend_str_size filename_len = 0;
 	zend_bool process_sections = 0;
-	long scanner_mode = ZEND_INI_SCANNER_NORMAL;
+	php_int_t scanner_mode = ZEND_INI_SCANNER_NORMAL;
 	zend_file_handle fh;
 	zend_ini_parser_cb_t ini_parser_cb;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|bl", &filename, &filename_len, &process_sections, &scanner_mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|bi", &filename, &filename_len, &process_sections, &scanner_mode) == FAILURE) {
 		RETURN_FALSE;
 	}
 

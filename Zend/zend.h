@@ -266,14 +266,14 @@ char *alloca ();
 #define LONG_MIN (- LONG_MAX - 1)
 #endif
 
-#if SIZEOF_LONG == 4
+#if SIZEOF_ZEND_INT == 4
 #define MAX_LENGTH_OF_LONG 11
 static const char long_min_digits[] = "2147483648";
-#elif SIZEOF_LONG == 8
+#elif SIZEOF_ZEND_INT == 8
 #define MAX_LENGTH_OF_LONG 20
 static const char long_min_digits[] = "9223372036854775808";
 #else
-#error "Unknown SIZEOF_LONG"
+#error "Unknown SIZEOF_ZEND_INT"
 #endif
 
 #define MAX_LENGTH_OF_DOUBLE 32
@@ -319,7 +319,7 @@ typedef struct _zend_object {
 #include "zend_object_handlers.h"
 
 typedef union _zvalue_value {
-	long lval;					/* long value */
+	zend_int_t lval;					/* long value */
 	double dval;				/* double value */
 	struct {
 		char *val;
@@ -578,7 +578,7 @@ typedef int (*zend_write_func_t)(const char *str, zend_str_size_uint str_length)
 /* data types */
 /* All data types <= IS_BOOL have their constructor/destructors skipped */
 #define IS_NULL		0
-#define IS_LONG		1
+#define IS_INT		1
 #define IS_DOUBLE	2
 #define IS_BOOL		3
 #define IS_ARRAY	4
@@ -588,6 +588,7 @@ typedef int (*zend_write_func_t)(const char *str, zend_str_size_uint str_length)
 #define IS_CONSTANT	8
 #define IS_CONSTANT_ARRAY	9
 #define IS_CALLABLE	10
+#define IS_LONG IS_INT
 
 /* Ugly hack to support constants as static array indices */
 #define IS_CONSTANT_TYPE_MASK		0x00f

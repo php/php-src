@@ -68,11 +68,24 @@
 	else (lval) = __tmpvar;											\
 } while (0)
 
+#elif defined(PHP_WIN32) && defined(_WIN32)
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	zend_int_t   __lres  = (a) * (b);										\
+	long double __dres  = (long double)(a) * (long double)(b);		\
+	long double __delta = (long double) __lres - __dres;			\
+	if ( ((usedval) = (( __dres + __delta ) != __dres))) {			\
+		(dval) = __dres;											\
+	} else {														\
+		(lval) = __lres;											\
+	}																\
+} while (0)
+
 #elif SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
 	zend_long64 __result = (zend_long64) (a) * (zend_long64) (b);	\
-	if (__result > LONG_MAX || __result < LONG_MIN) {				\
+	if (__result > ZEND_INT_MAX || __result < ZEND_INT_MIN) {				\
 		(dval) = (double) __result;									\
 		(usedval) = 1;												\
 	} else {														\

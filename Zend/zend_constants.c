@@ -167,7 +167,7 @@ ZEND_API void zend_register_bool_constant(const char *name, uint name_len, zend_
 	zend_register_constant(&c TSRMLS_CC);
 }
 
-ZEND_API void zend_register_long_constant(const char *name, zend_str_size_uint name_len, long lval, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_long_constant(const char *name, zend_str_size_uint name_len, zend_int_t lval, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
