@@ -274,12 +274,16 @@ zend_memnstr(const char *haystack, const char *needle, zend_str_size_int needle_
 {
 	const char *p = haystack;
 	const char ne = needle[needle_len-1];
+	ptrdiff_t off_p;
+	zend_str_size_int off_s;
 
 	if (needle_len == 1) {
 		return (char *)memchr(p, *needle, (end-p));
 	}
 
-	if (needle_len > end-haystack) {
+	off_p = end - haystack;
+	off_s = (off_p > 0) ? (zend_str_size_int)off_p : 0;
+	if (needle_len > off_s) {
 		return NULL;
 	}
 
