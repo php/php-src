@@ -50,7 +50,7 @@
 
 typedef struct {
 	char *header;
-	uint header_len;
+	zend_str_size_uint header_len;
 } sapi_header_struct;
 
 
@@ -196,7 +196,7 @@ SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(TSRMLS_D) TSRMLS_DC);
 SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray TSRMLS_DC) TSRMLS_DC);
-SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC);
+SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC), unsigned int (*input_filter_init)(TSRMLS_D) TSRMLS_DC);
 
 SAPI_API int sapi_flush(TSRMLS_D);
 SAPI_API struct stat *sapi_get_stat(TSRMLS_D);
@@ -264,7 +264,7 @@ struct _sapi_module_struct {
 	int (*get_target_uid)(uid_t * TSRMLS_DC);
 	int (*get_target_gid)(gid_t * TSRMLS_DC);
 
-	unsigned int (*input_filter)(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC);
+	unsigned int (*input_filter)(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC);
 	
 	void (*ini_defaults)(HashTable *configuration_hash);
 	int phpinfo_as_text;
@@ -298,7 +298,7 @@ struct _sapi_post_entry {
 #define SAPI_POST_HANDLER_FUNC(post_handler) void post_handler(char *content_type_dup, void *arg TSRMLS_DC)
 
 #define SAPI_TREAT_DATA_FUNC(treat_data) void treat_data(int arg, char *str, zval* destArray TSRMLS_DC)
-#define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, char *var, char **val, unsigned int val_len, unsigned int *new_val_len TSRMLS_DC)
+#define SAPI_INPUT_FILTER_FUNC(input_filter) unsigned int input_filter(int arg, char *var, char **val, zend_str_size_uint val_len, zend_str_size_uint *new_val_len TSRMLS_DC)
 
 BEGIN_EXTERN_C()
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data);
