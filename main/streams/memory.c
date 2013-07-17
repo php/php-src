@@ -608,7 +608,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 	size_t mlen, dlen, plen, vlen;
 	off_t newoffs;
 	zval *meta = NULL;
-	int base64 = 0, ilen;
+	int base64 = 0;
+	zend_str_size_int ilen;
 
 	if (memcmp(path, "data:", 5)) {
 		return NULL;
