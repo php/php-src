@@ -75,6 +75,8 @@ PHP                                                                        NEWS
     should warning). (Yasuo)
   . Fixed bug #49175 (mod_files.sh does not support hash bits). Patch by
     oorza2k5 at gmail dot com (Yasuo)
+  . Fixed bug #62129 (rfc1867 crashes php even though turned off). (gxd305 at
+    gmail dot com)
 
 - Sockets:
   . Implemented FR #63472 (Setting SO_BINDTODEVICE with socket_set_option). 
