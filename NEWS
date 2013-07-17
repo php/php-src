@@ -77,6 +77,8 @@ PHP                                                                        NEWS
     oorza2k5 at gmail dot com (Yasuo)
   . Fixed bug #62129 (rfc1867 crashes php even though turned off). (gxd305 at
     gmail dot com)
+  . Fixed bug #50308 (session id not appended properly for empty anchor tags).
+    (Arpad)
 
 - Sockets:
   . Implemented FR #63472 (Setting SO_BINDTODEVICE with socket_set_option). 
