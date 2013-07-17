@@ -53,6 +53,12 @@ extern int php_get_uid_by_name(const char *name, uid_t *uid TSRMLS_DC);
 extern int php_get_gid_by_name(const char *name, gid_t *gid TSRMLS_DC);
 #endif
 
+#if defined(PHP_WIN32)
+# define PLAIN_WRAP_BUF_SIZE(st) (((st) > UINT_MAX) ? UINT_MAX : (unsigned int)(st))
+#else
+# define PLAIN_WRAP_BUF_SIZE(st) (st)
+#endif
+
 /* parse standard "fopen" modes into open() flags */
 PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags)
 {
@@ -322,7 +328,7 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
-		int bytes_written = write(data->fd, buf, count);
+		ssize_t bytes_written = write(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 		if (bytes_written < 0) return 0;
 		return (size_t) bytes_written;
 	} else {
@@ -346,13 +352,13 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
-		ret = read(data->fd, buf, count);
+		ret = read(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 
 		if (ret == (size_t)-1 && errno == EINTR) {
 			/* Read was interrupted, retry once,
 			   If read still fails, giveup with feof==0
 			   so script can retry if desired */
-			ret = read(data->fd, buf, count);
+			ret = read(data->fd, buf,  PLAIN_WRAP_BUF_SIZE(count));
 		}
 		
 		stream->eof = (ret == 0 || (ret == (size_t)-1 && errno != EWOULDBLOCK && errno != EINTR && errno != EBADF));
@@ -1164,7 +1170,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
 		char *e;
 		struct stat sb;
-		int dir_len = strlen(dir);
+		zend_str_size_int dir_len = strlen(dir);
 		int offset = 0;
 		char buf[MAXPATHLEN];
 
@@ -1238,7 +1244,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 #if PHP_WIN32
-	int url_len = strlen(url);
+	zend_str_size_int url_len = strlen(url);
 #endif
 	if (php_check_open_basedir(url TSRMLS_CC)) {
 		return 0;
@@ -1273,7 +1279,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, char *url, int 
 	mode_t mode;
 	int ret = 0;
 #if PHP_WIN32
-	int url_len = strlen(url);
+	zend_str_size_int url_len = strlen(url);
 #endif
 
 #if PHP_WIN32
@@ -1378,9 +1384,9 @@ PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char 
 	const char *exec_fname;
 	char trypath[MAXPATHLEN];
 	php_stream *stream;
-	int path_length;
-	int filename_length;
-	int exec_fname_length;
+	zend_str_size_int path_length;
+	zend_str_size_int filename_length;
+	zend_str_size_int exec_fname_length;
 
 	if (opened_path) {
 		*opened_path = NULL;

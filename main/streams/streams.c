@@ -805,7 +805,7 @@ PHPAPI int _php_stream_getc(php_stream *stream TSRMLS_DC)
 
 PHPAPI int _php_stream_puts(php_stream *stream, char *buf TSRMLS_DC)
 {
-	int len;
+	zend_str_size_int len;
 	char newline[2] = "\n"; /* is this OK for Win? */
 	len = strlen(buf);
 
@@ -1387,7 +1387,7 @@ PHPAPI size_t _php_stream_passthru(php_stream * stream STREAMS_DC TSRMLS_DC)
 {
 	size_t bcount = 0;
 	char buf[8192];
-	int b;
+	zend_str_size_int b;
 
 	if (php_stream_mmap_possible(stream)) {
 		char *p;
@@ -1676,9 +1676,9 @@ int php_shutdown_stream_wrappers(int module_number TSRMLS_DC)
 /* Validate protocol scheme names during registration
  * Must conform to /^[a-zA-Z0-9+.-]+$/
  */
-static inline int php_stream_wrapper_scheme_validate(char *protocol, int protocol_len)
+static inline int php_stream_wrapper_scheme_validate(char *protocol, zend_str_size_int protocol_len)
 {
-	int i;
+	zend_str_size_int i;
 
 	for(i = 0; i < protocol_len; i++) {
 		if (!isalnum((int)protocol[i]) &&
@@ -1695,7 +1695,7 @@ static inline int php_stream_wrapper_scheme_validate(char *protocol, int protoco
 /* API for registering GLOBAL wrappers */
 PHPAPI int php_register_url_stream_wrapper(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	int protocol_len = strlen(protocol);
+	zend_str_size_int protocol_len = strlen(protocol);
 
 	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
 		return FAILURE;
@@ -1721,7 +1721,7 @@ static void clone_wrapper_hash(TSRMLS_D)
 /* API for registering VOLATILE wrappers */
 PHPAPI int php_register_url_stream_wrapper_volatile(char *protocol, php_stream_wrapper *wrapper TSRMLS_DC)
 {
-	int protocol_len = strlen(protocol);
+	zend_str_size_int protocol_len = strlen(protocol);
 
 	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
 		return FAILURE;
