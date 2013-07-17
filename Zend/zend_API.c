@@ -320,11 +320,21 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 		spec_walk++;
 	}
 
+#ifdef ZEND_ENABLE_INT64
+# define ZEND_CHECK_INT_RANGE c == 'I'
+#else
+# define ZEND_CHECK_INT_RANGE c == 'I' || c == 'L'
+#endif
+
 	switch (c) {
+#ifdef ZEND_ENABLE_INT64
 		case 'l':
 		case 'L':
+#endif
+		case 'i':
+		case 'I':
 			{
-				long *p = va_arg(*va, long *);
+				zend_int_t *p = va_arg(*va, zend_int_t *);
 
 				if (check_null) {
 					zend_bool *p = va_arg(*va, zend_bool *);
@@ -340,12 +350,12 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRSIZE_PP(arg), p, &d, -1)) == 0) {
 								return "long";
 							} else if (type == IS_DOUBLE) {
-								if (c == 'L') {
-									if (d > LONG_MAX) {
-										*p = LONG_MAX;
+								if (ZEND_CHECK_INT_RANGE) {
+									if (d > ZEND_INT_MAX) {
+										*p = ZEND_INT_MAX;
 										break;
-									} else if (d < LONG_MIN) {
-										*p = LONG_MIN;
+									} else if (d < ZEND_INT_MIN) {
+										*p = ZEND_INT_MIN;
 										break;
 									}
 								}
@@ -356,12 +366,12 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 						break;
 
 					case IS_DOUBLE:
-						if (c == 'L') {
-							if (Z_DVAL_PP(arg) > LONG_MAX) {
-								*p = LONG_MAX;
+						if (ZEND_CHECK_INT_RANGE) {
+							if (Z_DVAL_PP(arg) > ZEND_INT_MAX) {
+								*p = ZEND_INT_MAX;
 								break;
-							} else if (Z_DVAL_PP(arg) < LONG_MIN) {
-								*p = LONG_MIN;
+							} else if (Z_DVAL_PP(arg) < ZEND_INT_MIN) {
+								*p = ZEND_INT_MIN;
 								break;
 							}
 						}
@@ -380,7 +390,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 				}
 			}
 			break;
-
+#undef ZEND_CHECK_INT_RANGE
 		case 'd':
 			{
 				double *p = va_arg(*va, double *);
@@ -393,7 +403,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval **arg, va_list *va, con
 				switch (Z_TYPE_PP(arg)) {
 					case IS_STRING:
 						{
-							long l;
+							zend_int_t l;
 							int type;
 
 							if ((type = is_numeric_string(Z_STRVAL_PP(arg), Z_STRSIZE_PP(arg), &l, p, -1)) == 0) {
@@ -771,6 +781,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case 'f': case 'A':
 			case 'H': case 'p':
 			case 'S': case 'P':
+			case 'i':
 				max_num_args++;
 				break;
 

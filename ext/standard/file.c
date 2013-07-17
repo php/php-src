@@ -571,13 +571,13 @@ PHP_FUNCTION(file_put_contents)
 	zend_str_size filename_len;
 	zval *data;
 	zend_str_size numbytes = 0;
-	long flags = 0;
+	php_int_t flags = 0;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	php_stream *srcstream = NULL;
 	char mode[3] = "wb";
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Pz/|lr!", &filename, &filename_len, &data, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Pz/|ir!", &filename, &filename_len, &data, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 
@@ -1171,11 +1171,11 @@ PHPAPI PHP_FUNCTION(fwrite)
 	zend_str_size arg2len;
 	int ret;
 	zend_str_size num_bytes;
-	long arg3 = 0;
+	php_int_t arg3 = 0;
 	char *buffer = NULL;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|l", &arg1, &arg2, &arg2len, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|i", &arg1, &arg2, &arg2len, &arg3) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1269,10 +1269,10 @@ PHPAPI PHP_FUNCTION(ftell)
 PHPAPI PHP_FUNCTION(fseek)
 {
 	zval *arg1;
-	long arg2, whence = SEEK_SET;
+	php_int_t arg2, whence = SEEK_SET;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|l", &arg1, &arg2, &whence) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|i", &arg1, &arg2, &whence) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1738,10 +1738,10 @@ safe_to_copy:
 PHPAPI PHP_FUNCTION(fread)
 {
 	zval *arg1;
-	long len;
+	php_int_t len;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &arg1, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
 

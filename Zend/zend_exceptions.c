@@ -194,12 +194,12 @@ ZEND_METHOD(exception, __clone)
 ZEND_METHOD(exception, __construct)
 {
 	char  *message = NULL;
-	long   code = 0;
+	zend_int_t   code = 0;
 	zval  *object, *previous = NULL;
 	int    argc = ZEND_NUM_ARGS();
 	zend_str_size message_len;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|SlO!", &message, &message_len, &code, &previous, default_exception_ce) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|SiO!", &message, &message_len, &code, &previous, default_exception_ce) == FAILURE) {
 		zend_error(E_ERROR, "Wrong parameters for Exception([string $exception [, long $code [, Exception $previous = NULL]]])");
 	}
 
@@ -224,12 +224,12 @@ ZEND_METHOD(exception, __construct)
 ZEND_METHOD(error_exception, __construct)
 {
 	char  *message = NULL, *filename = NULL;
-	long   code = 0, severity = E_ERROR, lineno;
+	zend_int_t   code = 0, severity = E_ERROR, lineno;
 	zval  *object, *previous = NULL;
 	int    argc = ZEND_NUM_ARGS();
 	zend_str_size message_len, filename_len;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|SllSlO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, default_exception_ce) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc TSRMLS_CC, "|SiiSiO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, default_exception_ce) == FAILURE) {
 		zend_error(E_ERROR, "Wrong parameters for ErrorException([string $exception [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Exception $previous = NULL]]]]]])");
 	}
 

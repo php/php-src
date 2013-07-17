@@ -1179,7 +1179,7 @@ SPL_METHOD(Array, __construct)
 	zval *object = getThis();
 	spl_array_object *intern;
 	zval **array;
-	long ar_flags = 0;
+	php_int_t ar_flags = 0;
 	zend_class_entry *ce_get_iterator = spl_ce_Iterator;
 	zend_error_handling error_handling;
 
@@ -1191,7 +1191,7 @@ SPL_METHOD(Array, __construct)
 
 	intern = (spl_array_object*)zend_object_store_get_object(object TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|iC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}

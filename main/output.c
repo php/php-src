@@ -1304,10 +1304,10 @@ static int php_output_handler_devnull_func(void **handler_context, php_output_co
 PHP_FUNCTION(ob_start)
 {
 	zval *output_handler = NULL;
-	long chunk_size = 0;
-	long flags = PHP_OUTPUT_HANDLER_STDFLAGS;
+	php_int_t chunk_size = 0;
+	php_int_t flags = PHP_OUTPUT_HANDLER_STDFLAGS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z/ll", &output_handler, &chunk_size, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|z/ii", &output_handler, &chunk_size, &flags) == FAILURE) {
 		return;
 	}
 
@@ -1527,9 +1527,9 @@ PHP_FUNCTION(ob_get_status)
    Turn implicit flush on/off and is equivalent to calling flush() after every output call */
 PHP_FUNCTION(ob_implicit_flush)
 {
-	long flag = 1;
+	php_int_t flag = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flag) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &flag) == FAILURE) {
 		return;
 	}
 

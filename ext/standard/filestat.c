@@ -668,12 +668,12 @@ PHP_FUNCTION(chmod)
 {
 	char *filename;
 	zend_str_size filename_len;
-	long mode;
+	php_int_t mode;
 	int ret;
 	mode_t imode;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Pl", &filename, &filename_len, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Pi", &filename, &filename_len, &mode) == FAILURE) {
 		return;
 	}
 
@@ -714,14 +714,14 @@ PHP_FUNCTION(touch)
 {
 	char *filename;
 	zend_str_size filename_len;
-	long filetime = 0, fileatime = 0;
+	php_int_t filetime = 0, fileatime = 0;
 	int ret, argc = ZEND_NUM_ARGS();
 	FILE *file;
 	struct utimbuf newtimebuf;
 	struct utimbuf *newtime = &newtimebuf;
 	php_stream_wrapper *wrapper;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "P|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "P|ii", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
 		return;
 	}
 

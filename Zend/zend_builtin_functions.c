@@ -409,10 +409,10 @@ ZEND_FUNCTION(func_get_arg)
 	void **p;
 	int arg_count;
 	zval *arg;
-	long requested_offset;
+	zend_int_t requested_offset;
 	zend_execute_data *ex = EG(current_execute_data)->prev_execute_data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &requested_offset) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &requested_offset) == FAILURE) {
 		return;
 	}
 
@@ -484,7 +484,7 @@ ZEND_FUNCTION(strlen)
 		return;
 	}
 
-	RETVAL_LONG((long) s1_len);
+	RETVAL_LONG((zend_int_t) s1_len);
 }
 /* }}} */
 
@@ -511,9 +511,9 @@ ZEND_FUNCTION(strncmp)
 {
 	char *s1, *s2;
 	zend_str_size s1_len, s2_len;
-	long len;
+	zend_int_t len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSl", &s1, &s1_len, &s2, &s2_len, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSi", &s1, &s1_len, &s2, &s2_len, &len) == FAILURE) {
 		return;
 	}
 
@@ -549,9 +549,9 @@ ZEND_FUNCTION(strncasecmp)
 {
 	char *s1, *s2;
 	zend_str_size s1_len, s2_len;
-	long len;
+	zend_int_t len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSl", &s1, &s1_len, &s2, &s2_len, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSi", &s1, &s1_len, &s2, &s2_len, &len) == FAILURE) {
 		return;
 	}
 
@@ -1014,7 +1014,7 @@ ZEND_FUNCTION(get_object_vars)
 	while (zend_hash_get_current_data_ex(properties, (void **) &value, &pos) == SUCCESS) {
 		if (zend_hash_get_current_key_ex(properties, &key, &key_len, &num_index, 0, &pos) == HASH_KEY_IS_STRING) {
 			if (zend_check_property_access(zobj, key, key_len-1 TSRMLS_CC) == SUCCESS) {
-				zend_unmangle_property_name_ex(key, key_len - 1, &class_name, &prop_name, (int*) &prop_len);
+				zend_unmangle_property_name_ex(key, key_len - 1, &class_name, &prop_name, &prop_len);
 				/* Not separating references */
 				Z_ADDREF_PP(value);
 				add_assoc_zval_ex(return_value, prop_name, prop_len + 1, *value);
@@ -1432,9 +1432,9 @@ ZEND_FUNCTION(class_alias)
    Cause an intentional memory leak, for testing/debugging purposes */
 ZEND_FUNCTION(leak)
 {
-	long leakbytes=3;
+	zend_int_t leakbytes=3;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &leakbytes) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &leakbytes) == FAILURE) {
 		return;
 	}
 
@@ -1500,11 +1500,11 @@ ZEND_FUNCTION(get_included_files)
    Generates a user-level error/warning/notice message */
 ZEND_FUNCTION(trigger_error)
 {
-	long error_type = E_USER_NOTICE;
+	zend_int_t error_type = E_USER_NOTICE;
 	char *message;
 	zend_str_size message_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|l", &message, &message_len, &error_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|i", &message, &message_len, &error_type) == FAILURE) {
 		return;
 	}
 
@@ -1532,9 +1532,9 @@ ZEND_FUNCTION(set_error_handler)
 {
 	zval *error_handler;
 	char *error_handler_name = NULL;
-	long error_type = E_ALL;
+	zend_int_t error_type = E_ALL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|l", &error_handler, &error_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|i", &error_handler, &error_type) == FAILURE) {
 		return;
 	}
 
@@ -2065,10 +2065,10 @@ ZEND_FUNCTION(debug_print_backtrace)
 	const char *include_filename = NULL;
 	zval *arg_array = NULL;
 	int indent = 0;
-	long options = 0;
-	long limit = 0;
+	zend_int_t options = 0;
+	zend_int_t limit = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &options, &limit) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ii", &options, &limit) == FAILURE) {
 		return;
 	}
 
@@ -2396,10 +2396,10 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
    Return backtrace as array */
 ZEND_FUNCTION(debug_backtrace)
 {
-	long options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
-	long limit = 0;
+	zend_int_t options = DEBUG_BACKTRACE_PROVIDE_OBJECT;
+	zend_int_t limit = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ll", &options, &limit) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ii", &options, &limit) == FAILURE) {
 		return;
 	}
 

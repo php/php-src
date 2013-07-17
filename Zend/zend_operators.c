@@ -368,7 +368,7 @@ ZEND_API void convert_to_long(zval *op) /* {{{ */
 
 ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 {
-	long tmp;
+	zend_int_t tmp;
 
 	switch (Z_TYPE_P(op)) {
 		case IS_NULL:
@@ -592,7 +592,7 @@ ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 
 ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 {
-	long lval;
+	zend_int_t lval;
 	double dval;
 
 	switch (Z_TYPE_P(op)) {
@@ -612,7 +612,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 			}
 			break;
 		case IS_RESOURCE: {
-			long tmp = Z_LVAL_P(op);
+			zend_int_t tmp = Z_LVAL_P(op);
 			TSRMLS_FETCH();
 
 			zend_list_delete(Z_LVAL_P(op));
@@ -621,8 +621,11 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 		}
 		case IS_LONG:
 			lval = Z_LVAL_P(op);
-
+#ifdef ZEND_ENABLE_INT64
+			Z_STRSIZE_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%lld", lval);
+#else
 			Z_STRSIZE_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%ld", lval);
+#endif
 			break;
 		case IS_DOUBLE: {
 			TSRMLS_FETCH();
@@ -975,9 +978,9 @@ ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 					zend_error(E_WARNING, "Division by zero");
 					ZVAL_BOOL(result, 0);
 					return FAILURE;			/* division by zero */
-				} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == LONG_MIN) {
+				} else if (Z_LVAL_P(op2) == -1 && Z_LVAL_P(op1) == ZEND_INT_MIN) {
 					/* Prevent overflow error/crash */
-					ZVAL_DOUBLE(result, (double) LONG_MIN / -1);
+					ZVAL_DOUBLE(result, (double) ZEND_INT_MIN / -1);
 					return SUCCESS;
 				}
 				if (Z_LVAL_P(op1) % Z_LVAL_P(op2) == 0) { /* integer */
@@ -1131,7 +1134,7 @@ ZEND_API int bitwise_not_function(zval *result, zval *op1 TSRMLS_DC) /* {{{ */
 ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;
-	long op1_lval;
+	zend_int_t op1_lval;
 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
 		zval *longer, *shorter;
@@ -1178,7 +1181,7 @@ ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;
-	long op1_lval;
+	zend_int_t op1_lval;
 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
 		zval *longer, *shorter;
@@ -1225,7 +1228,7 @@ ZEND_API int bitwise_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;
-	long op1_lval;
+	zend_int_t op1_lval;
 
 	if (Z_TYPE_P(op1) == IS_STRING && Z_TYPE_P(op2) == IS_STRING) {
 		zval *longer, *shorter;
@@ -1272,7 +1275,7 @@ ZEND_API int bitwise_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;
-	long op1_lval;
+	zend_int_t op1_lval;
 
 	if (Z_TYPE_P(op1) != IS_LONG || Z_TYPE_P(op2) != IS_LONG) {
 		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SL);
@@ -1292,7 +1295,7 @@ ZEND_API int shift_left_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /
 ZEND_API int shift_right_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy, op2_copy;
-	long op1_lval;
+	zend_int_t op1_lval;
 
 	if (Z_TYPE_P(op1) != IS_LONG || Z_TYPE_P(op2) != IS_LONG) {
 		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SR);
@@ -1919,7 +1922,7 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 {
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
-			if (Z_LVAL_P(op1) == LONG_MAX) {
+			if (Z_LVAL_P(op1) == ZEND_INT_MAX) {
 				/* switch to double */
 				double d = (double)Z_LVAL_P(op1);
 				ZVAL_DOUBLE(op1, d+1);
@@ -1934,13 +1937,13 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 			ZVAL_LONG(op1, 1);
 			break;
 		case IS_STRING: {
-				long lval;
+				zend_int_t lval;
 				double dval;
 
 				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRSIZE_P(op1), &lval, &dval, 0)) {
 					case IS_LONG:
 						str_efree(Z_STRVAL_P(op1));
-						if (lval == LONG_MAX) {
+						if (lval == ZEND_INT_MAX) {
 							/* switch to double */
 							double d = (double)lval;
 							ZVAL_DOUBLE(op1, d+1);
@@ -1982,12 +1985,12 @@ ZEND_API int increment_function(zval *op1) /* {{{ */
 
 ZEND_API int decrement_function(zval *op1) /* {{{ */
 {
-	long lval;
+	zend_int_t lval;
 	double dval;
 
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
-			if (Z_LVAL_P(op1) == LONG_MIN) {
+			if (Z_LVAL_P(op1) == ZEND_INT_MIN) {
 				double d = (double)Z_LVAL_P(op1);
 				ZVAL_DOUBLE(op1, d-1);
 			} else {
@@ -2006,7 +2009,7 @@ ZEND_API int decrement_function(zval *op1) /* {{{ */
 			switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRSIZE_P(op1), &lval, &dval, 0)) {
 				case IS_LONG:
 					STR_FREE(Z_STRVAL_P(op1));
-					if (lval == LONG_MIN) {
+					if (lval == ZEND_INT_MIN) {
 						double d = (double)lval;
 						ZVAL_DOUBLE(op1, d-1);
 					} else {
@@ -2235,7 +2238,7 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
 {
 	int ret1, ret2;
 	int oflow1, oflow2;
-	long lval1, lval2;
+	zend_int_t lval1, lval2;
 	double dval1, dval2;
 
 	if ((ret1=is_numeric_string_ex(Z_STRVAL_P(s1), Z_STRSIZE_P(s1), &lval1, &dval1, 0, &oflow1)) &&

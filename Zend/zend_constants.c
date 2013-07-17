@@ -176,7 +176,7 @@ void clean_non_persistent_constants(TSRMLS_D)
 }
 
 
-ZEND_API void zend_register_long_constant(const char *name, zend_str_size_uint name_len, long lval, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_long_constant(const char *name, zend_str_size_uint name_len, zend_int_t lval, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
