@@ -2704,7 +2704,7 @@ PHP_FUNCTION(odbc_num_rows)
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
 /* {{{ proto bool odbc_next_result(resource result_id)
-   Checks if multiple results are avaiable */
+   Checks if multiple results are available */
 PHP_FUNCTION(odbc_next_result)
 {
 	odbc_result *result;

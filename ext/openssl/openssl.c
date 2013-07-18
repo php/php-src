@@ -1492,7 +1492,7 @@ PHP_FUNCTION(openssl_spki_verify)
 
 	pkey = X509_PUBKEY_get(spki->spkac->pubkey);
 	if (pkey == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to aquire signed public key");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to acquire signed public key");
 		goto cleanup;
 	}
 
@@ -1549,7 +1549,7 @@ PHP_FUNCTION(openssl_spki_export)
 
 	pkey = X509_PUBKEY_get(spki->spkac->pubkey);
 	if (pkey == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to aquire signed public key");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to acquire signed public key");
 		goto cleanup;
 	}
 

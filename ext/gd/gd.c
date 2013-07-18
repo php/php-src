@@ -104,7 +104,7 @@ int overflow2(int a, int b);
 /* IMPORTANT NOTE FOR NEW FILTER
  * Do not forget to update:
  * IMAGE_FILTER_MAX: define the last filter index
- * IMAGE_FILTER_MAX_ARGS: define the biggest amout of arguments
+ * IMAGE_FILTER_MAX_ARGS: define the biggest amount of arguments
  * image_filter array in PHP_FUNCTION(imagefilter)
  * */
 #define IMAGE_FILTER_NEGATE         0
