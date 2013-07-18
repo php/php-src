@@ -803,7 +803,12 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, zend_str_size_uint path_
 	char path_bak[MAXPATHLEN];
 #endif
 
+#if PHP_WIN32
+	/* MAX_PATH is \0-terminated, path_len == MAXPATHLEN would overrun path_bak */
+	if (path_len >= MAXPATHLEN) {
+#else
 	if (path_len > MAXPATHLEN) {
+#endif
 		return;
 	}
 

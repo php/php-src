@@ -350,6 +350,12 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	DBSETLAPP(H->login, vars[1].optval);
 
+#ifdef DBSETLDBNAME
+	if (vars[3].optval) {
+		DBSETLDBNAME(H->login, vars[3].optval);
+	}
+#endif
+
 	H->link = dbopen(H->login, vars[2].optval);
 
 	if (!H->link) {
@@ -364,12 +370,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	/* allow double quoted indentifiers */
 	DBSETOPT(H->link, DBQUOTEDIDENT, "1");
-
-#ifdef DBSETLDBNAME
-	if (vars[3].optval) {
-		DBSETLDBNAME(H->login, vars[3].optval);
-	}
-#endif
 
 	ret = 1;
 	dbh->max_escaped_char_length = 2;

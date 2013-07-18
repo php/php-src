@@ -194,7 +194,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	if (use_ssl && !*use_proxy) {
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_ssl_method", sizeof("_ssl_method"), (void **) &tmp) == SUCCESS &&
 			Z_TYPE_PP(tmp) == IS_LONG) {
-			/* uses contants declared in soap.c to determine ssl uri protocol */
+			/* uses constants declared in soap.c to determine ssl uri protocol */
 			switch (Z_LVAL_PP(tmp)) {
 				case SOAP_SSL_METHOD_TLS:
 					protocol = "tls";
