@@ -201,7 +201,7 @@ check_digits:
 				dp_or_e = -1;
 				goto process_double;
 			}
-		} else if (!(digits < SIZEOF_LONG * 2 || (digits == SIZEOF_LONG * 2 && ptr[-digits] <= '7'))) {
+		} else if (!(digits < SIZEOF_ZEND_INT * 2 || (digits == SIZEOF_ZEND_INT * 2 && ptr[-digits] <= '7'))) {
 			if (dval) {
 				local_dval = zend_hex_strtod(str, &ptr);
 			}
@@ -544,9 +544,9 @@ static zend_always_inline int fast_increment_function(zval *op1)
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
 #else
-		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MAX)) {
+		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_INT_MAX)) {
 			/* switch to double */
-			Z_DVAL_P(op1) = (double)LONG_MAX + 1.0;
+			Z_DVAL_P(op1) = (double)ZEND_INT_MAX + 1.0;
 			Z_TYPE_P(op1) = IS_DOUBLE;
 		} else {
 			Z_LVAL_P(op1)++;
