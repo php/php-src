@@ -948,7 +948,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 							hex_buf[1] = *(++s);
 							zendlval->value.str.len--;
 						}
-						*t++ = (char) strtol(hex_buf, NULL, 16);
+						*t++ = (char) ZEND_STRTOL(hex_buf, NULL, 16);
 					} else {
 						*t++ = '\\';
 						*t++ = *s;
@@ -969,7 +969,7 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 								zendlval->value.str.len--;
 							}
 						}
-						*t++ = (char) strtol(octal_buf, NULL, 8);
+						*t++ = (char) ZEND_STRTOL(octal_buf, NULL, 8);
 					} else {
 						*t++ = '\\';
 						*t++ = *s;
@@ -1508,7 +1508,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (len == 0) {
 			zendlval->value.lval = 0;
 		} else {
-			zendlval->value.lval = strtol(bin, NULL, 2);
+			zendlval->value.lval = ZEND_STRTOL(bin, NULL, 2);
 		}
 		zendlval->type = IS_LONG;
 		return T_LNUMBER;
@@ -1521,10 +1521,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>{LNUM} {
 	if (yyleng < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
-		zendlval->value.lval = strtol(yytext, NULL, 0);
+		zendlval->value.lval = ZEND_STRTOL(yytext, NULL, 0);
 	} else {
 		errno = 0;
-		zendlval->value.lval = strtol(yytext, NULL, 0);
+		zendlval->value.lval = ZEND_STRTOL(yytext, NULL, 0);
 		if (errno == ERANGE) { /* Overflow */
 			if (yytext[0] == '0') { /* octal overflow */
 				zendlval->value.dval = zend_oct_strtod(yytext, NULL);
@@ -1554,7 +1554,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (len == 0) {
 			zendlval->value.lval = 0;
 		} else {
-			zendlval->value.lval = strtol(hex, NULL, 16);
+			zendlval->value.lval = ZEND_STRTOL(hex, NULL, 16);
 		}
 		zendlval->type = IS_LONG;
 		return T_LNUMBER;
@@ -1567,7 +1567,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_VAR_OFFSET>[0]|([1-9][0-9]*) { /* Offset could be treated as a long */
 	if (yyleng < MAX_LENGTH_OF_LONG - 1 || (yyleng == MAX_LENGTH_OF_LONG - 1 && strcmp(yytext, long_min_digits) < 0)) {
-		zendlval->value.lval = strtol(yytext, NULL, 10);
+		zendlval->value.lval = ZEND_STRTOL(yytext, NULL, 10);
 		zendlval->type = IS_LONG;
 	} else {
 		zendlval->value.str.val = (char *)estrndup(yytext, yyleng);
