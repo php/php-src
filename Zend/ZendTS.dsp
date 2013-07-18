@@ -397,6 +397,10 @@ SOURCE=.\zend_iterators.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\zend_int.h
+# End Source File
+# Begin Source File
+
 SOURCE=".\zend_language_parser.h"
 # End Source File
 # Begin Source File
