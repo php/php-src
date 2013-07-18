@@ -64,6 +64,8 @@
 # endif
 #endif
 
+#include <stddef.h>
+
 #include "sockaddr_conv.h"
 #include "multicast.h"
 #include "sendrecvmsg.h"
