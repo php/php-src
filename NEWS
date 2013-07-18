@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.1
+?? ??? 2013, PHP 5.5.2
+
+18 Jul 2013, PHP 5.5.1
 
 - Core:
   . Fixed bug #65254 (Exception not catchable when exception thrown in autoload
