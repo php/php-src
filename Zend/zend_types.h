@@ -87,37 +87,7 @@ typedef struct _zend_object_value {
 	const zend_object_handlers *handlers;
 } zend_object_value;
 
-#ifdef ZEND_ENABLE_INT64
-# ifdef ZEND_WIN32
-#  ifdef _WIN64
-typedef __int64 zend_int_t;
-typedef unsigned __int64 zend_uint_t;
-#   define ZEND_INT_MAX _I64_MAX
-#   define ZEND_INT_MIN _I64_MIN
-#   define ZEND_UINT_MAX _UI64_MAX
-#  else
-#   error Cant enable 64 bit integers on non 64 bit platform
-#  endif
-# else
-#  if defined(__LP64__) || defined(_LP64)
-typedef int64_t zend_int_t;
-typedef uint64_t zend_uint_t;
-#   define ZEND_INT_MAX INT64_MAX
-#   define ZEND_INT_MIN INT64_MIN
-#   define ZEND_UINT_MAX UINT64_MAX
-#  else
-#   error Cant enable 64 bit integers on non 64 bit platform
-#  endif
-# endif
-# define SIZEOF_ZEND_INT 8
-#else
-typedef long zend_int_t;
-typedef unsigned long zend_uint_t;
-# define ZEND_INT_MAX LONG_MAX
-# define ZEND_INT_MIN LONG_MIN
-# define ZEND_UINT_MAX ULONG_MAX
-# define SIZEOF_ZEND_INT SIZEOF_LONG
-#endif
+#include "zend_int.h"
 
 #endif /* ZEND_TYPES_H */
 
