@@ -1926,6 +1926,11 @@ static int add_constant_info(zend_constant *constant, void *arg TSRMLS_DC)
 	zval *name_array = (zval *)arg;
 	zval *const_val;
 
+	if (!constant->name) {
+		/* skip special constants */
+		return 0;
+	}
+
 	MAKE_STD_ZVAL(const_val);
 	*const_val = constant->value;
 	zval_copy_ctor(const_val);
