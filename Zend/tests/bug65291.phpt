@@ -17,6 +17,7 @@ class Tester
 
 $foo = Tester::testStaticFunction();
 get_defined_constants();
+get_defined_constants(true);
 
 echo $foo;
 ?>

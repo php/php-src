@@ -1998,11 +1998,16 @@ ZEND_FUNCTION(get_defined_constants)
 		while (zend_hash_get_current_data_ex(EG(zend_constants), (void **) &val, &pos) != FAILURE) {
 			zval *const_val;
 
+			if (!val->name) {
+				/* skip special constants */
+				goto next_constant;
+			}
+
 			if (val->module_number == PHP_USER_CONSTANT) {
 				module_number = i;
 			} else if (val->module_number > i || val->module_number < 0) {
 				/* should not happen */
-				goto bad_module_id;
+				goto next_constant;
 			} else {
 				module_number = val->module_number;
 			}
@@ -2019,7 +2024,7 @@ ZEND_FUNCTION(get_defined_constants)
 			INIT_PZVAL(const_val);
 
 			add_assoc_zval_ex(modules[module_number], val->name, val->name_len, const_val);
-bad_module_id:
+next_constant:
 			zend_hash_move_forward_ex(EG(zend_constants), &pos);
 		}
 		efree(module_names);
