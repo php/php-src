@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.2
 
 - Core:
+  . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
   . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
     limited case). (Arpad)
 
