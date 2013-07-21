@@ -26,7 +26,7 @@ var_dump( $date->format( DateTime::RFC3339) ) ;
 var_dump( $date->format( DateTime::RSS) ) ;
 var_dump( $date->format( DateTime::W3C) ) ;
 var_dump( $date->format( DateTime::SQL) ) ;
-var_dump( $date->format( DateTime::SQL_TIMESTAMP) ) ;
+var_dump( $date->format( DateTime::SQLTIMESTAMP) ) ;
 
 ?>
 ===DONE===
