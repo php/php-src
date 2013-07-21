@@ -70,3 +70,25 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 
 	return rt;
 }
+
+timelib_rel_time *timelib_rel_add(timelib_rel_time *one, timelib_rel_time *two)
+{
+	timelib_rel_time *rt;
+
+	if (one->have_weekday_relative || one->have_special_relative ||
+		two->have_weekday_relative || two->have_special_relative) {
+		return NULL;
+	}
+	
+	rt = timelib_rel_time_ctor();
+	rt->y = two->y + one->y;
+	rt->m = two->m + one->m;
+	rt->d = two->d + one->d;
+	rt->h = two->h + one->h;
+	rt->i = two->i + one->i;
+	rt->s = two->s + one->s;
+	
+	timelib_do_rel_normalize(NULL, rt);
+
+	return rt;
+}

@@ -175,8 +175,10 @@ void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 	do {} while (do_range_limit(0, 24, 24, &rt->h, &rt->d));
 	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
 
-	do_range_limit_days_relative(&base->y, &base->m, &rt->y, &rt->m, &rt->d, rt->invert);
-	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
+	if (base) {
+		do_range_limit_days_relative(&base->y, &base->m, &rt->y, &rt->m, &rt->d, rt->invert);
+		do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
+	}
 }
 
 void timelib_do_normalize(timelib_time* time)

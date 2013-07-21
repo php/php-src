@@ -138,5 +138,6 @@ int timelib_astro_rise_set_altitude(timelib_time *time, double lon, double lat, 
 
 /* from interval.c */
 timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two);
+timelib_rel_time *timelib_rel_add(timelib_rel_time *one, timelib_rel_time *two);
 
 #endif
