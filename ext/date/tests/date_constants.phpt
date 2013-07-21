@@ -14,7 +14,9 @@ Date constants
         DATE_RFC2822,
         DATE_RFC3339,
         DATE_RSS,
-        DATE_W3C
+        DATE_W3C,
+        DATE_SQL,
+        DATE_SQLTIMESTAMP
     );
     
     foreach($constants as $const) {
@@ -35,7 +37,9 @@ Date constants
         DATE_RFC2822 == DateTime::RFC2822,
         DATE_RFC3339 == DateTime::RFC3339,
         DATE_RSS     == DateTime::RSS,
-        DATE_W3C     == DateTime::W3C
+        DATE_W3C     == DateTime::W3C,
+        DATE_SQL     == DateTime::SQL,
+        DATE_SQLTIMESTAMP == DateTime::SQLTIMESTAMP
     );
 ?>
 --EXPECT--
@@ -61,7 +65,13 @@ string(31) "Sat, 01 Jul 2006 14:27:30 +0200"
 string(31) "Tue, 30 May 2006 14:32:13 +0200"
 string(25) "2006-07-01T14:27:30+02:00"
 string(25) "2006-05-30T14:32:13+02:00"
+string(10) "2006-07-01"
+string(10) "2006-05-30"
+string(19) "2006-07-01 14:27:30"
+string(19) "2006-05-30 14:32:13"
 
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
