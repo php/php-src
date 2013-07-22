@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.4.18
 
 - Core:
+  . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
+    erroneously set to FILTER_SANITIZE_SPECIAL_CHARS value). (Andrey 
+    avp200681 gmail com).
   . Fixed bug #65254 (Exception not catchable when exception thrown in autoload
     with a namespace). (Laruence)
   . Fixed bug #65108 (is_callable() triggers Fatal Error). 
