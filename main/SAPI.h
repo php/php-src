@@ -27,6 +27,7 @@
 #include "zend_operators.h"
 #ifdef PHP_WIN32
 #include "win95nt.h"
+#include "win32/php_stdint.h"
 #endif
 #include <sys/stat.h>
 

@@ -34,6 +34,10 @@
 #include "rfc1867.h"
 #include "ext/standard/php_string.h"
 
+#if defined(_MSC_VER)
+# define atoll(s) _atoi64(s)
+#endif
+
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
 static int dummy_encoding_translation(TSRMLS_D)
