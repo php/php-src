@@ -358,7 +358,29 @@ else
   AC_MSG_RESULT(no)
 fi
 
-if test "$PHP_SAPI" = "cgi" || test "$PHP_SAPI" = "cli" || test "$PHP_SAPI" = "embed"; then
+PHP_ENABLE_CHROOT_FUNC=no
+case "$PHP_SAPI" in
+  embed)
+    PHP_ENABLE_CHROOT_FUNC=yes
+  ;;
+
+  none)
+    for PROG in $PHP_BINARIES; do
+      case "$PROG" in
+        cgi|cli)
+          PHP_ENABLE_CHROOT_FUNC=yes
+        ;;
+
+        *)
+          PHP_ENABLE_CHROOT_FUNC=no
+          break
+        ;;
+      esac
+   done
+  ;;
+esac
+
+if test "$PHP_ENABLE_CHROOT_FUNC" = "yes"; then
   AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
 fi
 

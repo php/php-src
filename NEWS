@@ -1,8 +1,27 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2013, PHP 5.4.19
+
+- Core.
+  . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
+  . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
+    limited case). (Arpad)
+  . Improve fix for bug #63186 (compile failure on netbsd). (Matteo)
+
+- Session:
+  . Fixed bug #62129 (rfc1867 crashes php even though turned off). (gxd305 at
+    gmail dot com)
+  . Fixed bug #50308 (session id not appended properly for empty anchor tags).
+    (Arpad)
+
 ?? ??? 2013, PHP 5.4.18
 
 - Core:
+  . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
+    erroneously set to FILTER_SANITIZE_SPECIAL_CHARS value). (Andrey 
+    avp200681 gmail com).
+  . Fixed bug #65254 (Exception not catchable when exception thrown in autoload
+    with a namespace). (Laruence)
   . Fixed bug #65108 (is_callable() triggers Fatal Error). 
     (David Soria Parra, Laruence)
   . Fixed bug #65088 (Generated configure script is malformed on OpenBSD).
@@ -13,6 +32,7 @@ PHP                                                                        NEWS
   . Fixed bug #62475 (variant_* functions causes crash when null given as an 
     argument). (Felipe)
   . Fixed bug #60732 (php_error_docref links to invalid pages). (Jakub Vrana)
+  . Fixed bug #65226 (chroot() does not get enabled). (Anatol)
 
 - CGI:
   . Fixed Bug #65143 (Missing php-cgi man page). (Remi)
@@ -21,10 +41,20 @@ PHP                                                                        NEWS
   . Fixed bug #65066 (Cli server not responsive when responding with 422 http
     status code). (Adam)
     
+- CURL:
+  . Fixed bug #62665 (curl.cainfo doesn't appear in php.ini). (Lior Kaplan)
+
 - FPM:
   . Fixed bug #63983 (enabling FPM borks compile on FreeBSD).
     (chibisuke at web dot de, Felipe)
     
+- FTP:
+  . Fixed bug #65228 (FTPs memory leak with SSL).
+    (marco dot beierer at mbsecurity dot ch)
+    
+- GMP:
+  . Fixed bug #65227 (Memory leak in gmp_cmp second parameter). (Felipe)
+
 - Imap:
   . Fixed bug #64467 (Segmentation fault after imap_reopen failure).
     (askalski at gmail dot com)
@@ -44,6 +74,13 @@ PHP                                                                        NEWS
 - PDO:
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
     (Chris Jones)
+
+- PDO_dblib:
+  . Fixed bug #65219 (PDO/dblib not working anymore ("use dbName" not sent)). 
+    (Stanley Sufficool)
+
+- PDO_pgsql:
+  . Fixed meta data retrieve when OID is larger than 2^31. (Yasuo)
 
 - Phar:
   . Fixed Bug #65142 (Missing phar man page). (Remi)
@@ -67,7 +104,10 @@ PHP                                                                        NEWS
   . Fixed bug #60560 (SplFixedArray un-/serialize, getSize(), count() return 0,
     keys are strings). (Adam)
 
-?? ??? 2013, PHP 5.4.17
+- XML:
+  . Fixed bug #65236 (heap corruption in xml parser, CVE-2013-4113). (Rob)
+
+04 Jul 2013, PHP 5.4.17
 
 - Core:
   . Fixed bug #64988 (Class loading order affects E_STRICT warning). (Laruence)

@@ -112,7 +112,7 @@ static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
 	result->width    = (unsigned int)dim[0] | (((unsigned int)dim[1])<<8);
 	result->height   = (unsigned int)dim[2] | (((unsigned int)dim[3])<<8);
 	result->bits     = dim[4]&0x80 ? ((((unsigned int)dim[4])&0x07) + 1) : 0;
-	result->channels = 3; /* allways */
+	result->channels = 3; /* always */
 
 	return result;
 }

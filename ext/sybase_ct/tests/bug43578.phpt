@@ -23,7 +23,7 @@ Sybase-CT bug #43578 (Incurred fault #6 - if returned textfield ist empty)
   var_dump(sybase_query('insert into #Resource values (123, NULL)', $db));
   var_dump(sybase_query('insert into #Resource values (124, "")', $db));
 
-  // Select non-existant
+  // Select non-existent
   var_dump(sybase_select_ex($db, 'select DC_Rights from #Resource where Resource_ID = 122'));
 
   // Select null

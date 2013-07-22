@@ -2358,6 +2358,7 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 			} else {
 				if(vector_size*2 < vector_size) {
 					/* overflow */
+					php_stream_closedir(stream);
 					efree(vector);
 					return FAILURE;
 				}
@@ -2371,6 +2372,7 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 		nfiles++;
 		if(vector_size < 10 || nfiles == 0) {
 			/* overflow */
+			php_stream_closedir(stream);
 			efree(vector);
 			return FAILURE;
 		}
@@ -2379,7 +2381,7 @@ PHPAPI int _php_stream_scandir(char *dirname, char **namelist[], int flags, php_
 
 	*namelist = vector;
 
-	if (compare) {
+	if (nfiles > 0 && compare) {
 		qsort(*namelist, nfiles, sizeof(char *), (int(*)(const void *, const void *))compare);
 	}
 	return nfiles;
