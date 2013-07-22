@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - SPL:
   . Added RecursiveTreeIterator setPostfix and getPostifx methods. (Joshua 
     Thijssen)
+  . Fixed bug #61697 (spl_autoload_functions returns lambda functions 
+    incorrectly). (Laruence)
 
 - Streams:
   . Fixed bug #65268 (select() implementation uses outdated tick API). (Anatol)

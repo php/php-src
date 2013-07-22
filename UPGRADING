@@ -179,6 +179,9 @@ PHP 5.5 UPGRADE NOTES
 - Functions in the socket extension now do not emit warnings when the
   errno is EAGAIN, EWOULDBLOCK or EINPROGRESS.
 
+- Since 5.5.2, spl_autoload_functions() returns different names for 
+  different lambda functions registered via spl_autoload_register().
+
 ========================================
 5. New Functions
 ========================================
