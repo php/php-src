@@ -1964,7 +1964,7 @@ woohoo:
 			zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_fname_map));
 
 			while (FAILURE != zend_hash_has_more_elements(&(PHAR_GLOBALS->phar_fname_map))) {
-				if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_fname_map), &key, &keylen, &unused, 0, NULL)) {
+				if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_fname_map), &key, &keylen, &unused, 0, NULL)) {
 					break;
 				}
 
@@ -1994,7 +1994,7 @@ woohoo:
 				zend_hash_internal_pointer_reset(&cached_phars);
 
 				while (FAILURE != zend_hash_has_more_elements(&cached_phars)) {
-					if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&cached_phars, &key, &keylen, &unused, 0, NULL)) {
+					if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&cached_phars, &key, &keylen, &unused, 0, NULL)) {
 						break;
 					}
 
