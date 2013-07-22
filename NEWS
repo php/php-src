@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.2
 
 - Core:
+  . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
+    erroneously set to FILTER_SANITIZE_SPECIAL_CHARS value). (Andrey
+    avp200681 gmail com).
   . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
   . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
     limited case). (Arpad)
