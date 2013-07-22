@@ -179,6 +179,9 @@ PHP 5.5 UPGRADE NOTES
 - Functions in the socket extension now do not emit warnings when the
   errno is EAGAIN, EWOULDBLOCK or EINPROGRESS.
 
+- Since 5.5.2, spl_autoload_functions() returns different names for 
+  different lambda functions registered via spl_autoload_register().
+
 ========================================
 5. New Functions
 ========================================
@@ -297,6 +300,8 @@ PHP 5.5 UPGRADE NOTES
 - SPL:
   - SplFixedArray::__wakeup()
   - SplDoublyLinkedList::add()
+  - RecursiveTreeIterator::getPostfix() (5.5.2)
+  - RecursiveTreeIterator::setPostfix() (5.5.2)
 
 - Zend OPcache:
  - opcache_get_configuration()
@@ -396,6 +401,10 @@ None
 - Intl:
   - Added intl.use_exceptions INI directive, which controls what
     happens when global errors are set together with intl.error_level.
+
+- MSSQL:
+  - mssql.compatability_mode renamed to mssql.compatibility_mode in 5.5.2,
+    old directive still supported for BC reasons.
 
 - mysqlnd:
   - Added mysqlnd.sha256_server_public_key INI PERDIR setting that

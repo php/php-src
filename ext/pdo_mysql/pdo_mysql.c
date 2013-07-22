@@ -61,7 +61,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 #include "ext/mysqlnd/mysqlnd_reverse_api.h"
 static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
 {
-	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == php_pdo_get_dbh_ce()) {
+	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce() TSRMLS_CC)) {
 		pdo_dbh_t * dbh = zend_object_store_get_object(zv TSRMLS_CC);
 
 		if (!dbh || dbh->driver != &pdo_mysql_driver) {

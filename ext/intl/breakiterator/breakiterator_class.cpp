@@ -245,32 +245,32 @@ ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_void, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_locale, 0, 0, 0)
-	ZEND_ARG_INFO(0, "locale")
+	ZEND_ARG_INFO(0, locale)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_setText, 0, 0, 1)
-	ZEND_ARG_INFO(0, "text")
+	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_next, 0, 0, 0)
-	ZEND_ARG_INFO(0, "offset")
+	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_offset, 0, 0, 1)
-	ZEND_ARG_INFO(0, "offset")
+	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_get_locale, 0, 0, 1)
-	ZEND_ARG_INFO(0, "locale_type")
+	ZEND_ARG_INFO(0, locale_type)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_getPartsIterator, 0, 0, 0)
-	ZEND_ARG_INFO(0, "key_type")
+	ZEND_ARG_INFO(0, key_type)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_rbbi___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, "rules")
-	ZEND_ARG_INFO(0, "areCompiled")
+	ZEND_ARG_INFO(0, rules)
+	ZEND_ARG_INFO(0, areCompiled)
 ZEND_END_ARG_INFO()
 
 /* }}} */

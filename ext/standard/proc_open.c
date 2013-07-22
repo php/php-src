@@ -172,7 +172,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 				p += el_len + 1;
 				break;
-			case HASH_KEY_NON_EXISTANT:
+			case HASH_KEY_NON_EXISTENT:
 				break;
 		}
 	}

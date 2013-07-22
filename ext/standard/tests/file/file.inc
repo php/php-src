@@ -575,13 +575,13 @@ Description:
   Compares two stat values, stat value should be obtained by stat/lstat
   $stat1 = first stat array
   $stat2 = second stat array
-  $op = type of the comparision to be perform between elements of stat1 and stat2
+  $op = type of the comparison to be perform between elements of stat1 and stat2
     "!=" compare for not equal
     "==" compare for equality
     ">"  if each element of stat1 is > than stat2
     "<"  if each element of stat1 is < than stat2
   $fields = contains the key of the elements that needs to be compared. 
-            type of the comparision is based on $op argument value
+            type of the comparison is based on $op argument value
   $flag = specify true to dump the stat1 and stat2 
 */
 

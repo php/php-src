@@ -14,5 +14,9 @@ $fo = new SplFileObject('testdata.csv');
 $fo->rewind( "invalid" );
 
 ?>
+--CLEAN--
+<?php
+unlink('testdata.csv');
+?>
 --EXPECTF--
 Warning: SplFileObject::rewind() expects exactly 0 parameters, 1 given in %s on line %d

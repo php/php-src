@@ -899,7 +899,7 @@ static PHP_METHOD(PDO, getAttribute)
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
 
-	/* handle generic PDO-level atributes */
+	/* handle generic PDO-level attributes */
 	switch (attr) {
 		case PDO_ATTR_PERSISTENT:
 			RETURN_BOOL(dbh->is_persistent);

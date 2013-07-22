@@ -1,8 +1,29 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.1
+?? ??? 2013, PHP 5.5.2
 
 - Core:
+  . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
+    erroneously set to FILTER_SANITIZE_SPECIAL_CHARS value). (Andrey
+    avp200681 gmail com).
+  . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
+  . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
+    limited case). (Arpad)
+
+- SPL:
+  . Added RecursiveTreeIterator setPostfix and getPostifx methods. (Joshua 
+    Thijssen)
+  . Fixed bug #61697 (spl_autoload_functions returns lambda functions 
+    incorrectly). (Laruence)
+
+- Streams:
+  . Fixed bug #65268 (select() implementation uses outdated tick API). (Anatol)
+
+18 Jul 2013, PHP 5.5.1
+
+- Core:
+  . Fixed bug #65254 (Exception not catchable when exception thrown in autoload
+    with a namespace). (Laruence)
   . Fixed bug #65088 (Generated configure script is malformed on OpenBSD).
     (Adam)
   . Fixed bug #65108 (is_callable() triggers Fatal Error). 
@@ -10,6 +31,7 @@ PHP                                                                        NEWS
   . Fixed bug #65035 (yield / exit segfault). (Nikita)
   . Fixed bug #65161 (Generator + autoload + syntax error = segfault). (Nikita)
   . hex2bin() raises E_WARNING for invalid hex string. (Yasuo)
+  . Fixed bug #65226 (chroot() does not get enabled). (Anatol)
 
 - OPcache
   . Fixed bug #64827 (Segfault in zval_mark_grey (zend_gc.c)). (Laruence)
@@ -37,7 +59,7 @@ PHP                                                                        NEWS
 - Intl:
   . Add IntlCalendar::setMinimalDaysInFirstWeek()/
     intlcal_set_minimal_days_in_first_week().
-  . Fixed trailing space in the name of constant IntlCalendar::FIELD_FIELD_COUNT.
+  . Fixed trailing space in name of constant IntlCalendar::FIELD_FIELD_COUNT.
   . Fixed bug #62759 (Buggy grapheme_substr() on edge case). (Stas)
   . Fixed bug #61860 (Offsets may be wrong for grapheme_stri* functions).
     (Stas)
@@ -62,6 +84,10 @@ PHP                                                                        NEWS
 - Sockets:
   . Implemented FR #63472 (Setting SO_BINDTODEVICE with socket_set_option).
     (Damjan Cvetko)
+  . Allowed specifying paths in the abstract namespace for the functions
+    socket_bind(), socket_connect() and socket_sendmsg(). (Gustavo)
+  . Fixed bug #65260 (sendmsg() ancillary data construction for SCM_RIGHTS is
+    faulty). (Gustavo)
 
 - SPL:
   . Fixed bug #65136 (RecursiveDirectoryIterator segfault). (Laruence)
