@@ -103,7 +103,7 @@ static size_t phar_dir_read(php_stream *stream, char *buf, size_t count TSRMLS_D
 		return 0;
 	}
 
-	if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(data, &key, &keylen, &unused, 0, NULL)) {
+	if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(data, &key, &keylen, &unused, 0, NULL)) {
 		return 0;
 	}
 
@@ -211,7 +211,7 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 	zend_hash_internal_pointer_reset(manifest);
 
 	while (FAILURE != zend_hash_has_more_elements(manifest)) {
-		if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
+		if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
 			break;
 		}
 
@@ -403,7 +403,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 		/* search for directory */
 		zend_hash_internal_pointer_reset(&phar->manifest);
 		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
-			if (HASH_KEY_NON_EXISTANT != 
+			if (HASH_KEY_NON_EXISTENT != 
 					zend_hash_get_current_key_ex(
 						&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
 				PHAR_STR(key, str_key);
@@ -637,7 +637,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 
 	if (!entry->is_deleted) {
 		for (zend_hash_internal_pointer_reset(&phar->manifest);
-		HASH_KEY_NON_EXISTANT != zend_hash_get_current_key_ex(&phar->manifest, &key, &key_len, &unused, 0, NULL);
+		HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&phar->manifest, &key, &key_len, &unused, 0, NULL);
 		zend_hash_move_forward(&phar->manifest)) {
 
 			PHAR_STR(key, str_key);
@@ -658,7 +658,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_
 		}
 
 		for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
-			HASH_KEY_NON_EXISTANT != zend_hash_get_current_key_ex(&phar->virtual_dirs, &key, &key_len, &unused, 0, NULL);
+			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&phar->virtual_dirs, &key, &key_len, &unused, 0, NULL);
 			zend_hash_move_forward(&phar->virtual_dirs)) {
 	
 			PHAR_STR(key, str_key);

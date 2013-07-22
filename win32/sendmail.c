@@ -409,7 +409,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 
 	snprintf(Buffer, sizeof(Buffer), "HELO %s\r\n", LocalHost);
 
-	/* in the beggining of the dialog */
+	/* in the beginning of the dialog */
 	/* attempt reconnect if the first Post fail */
 	if ((res = Post(Buffer)) != SUCCESS) {
 		MailConnect();

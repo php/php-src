@@ -98,8 +98,8 @@ typedef struct {
 } field_descriptor;
 
 #define KEY_FILL_SOCKADDR "fill_sockaddr"
-#define KEY_RECVMSG_RET "recvmsg_ret"
-#define KEY_CMSG_LEN	"cmsg_len"
+#define KEY_RECVMSG_RET   "recvmsg_ret"
+#define KEY_CMSG_LEN	  "cmsg_len"
 
 const struct key_value empty_key_value_list[] = {{0}};
 
@@ -223,6 +223,7 @@ static unsigned from_array_iterate(const zval *arr,
 	char			buf[sizeof("element #4294967295")];
 	char			*bufp = buf;
 
+	/* Note i starts at 1, not 0! */
     for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(arr), &pos), i = 1;
 			!ctx->err.has_error
 			&& zend_hash_get_current_data_ex(Z_ARRVAL_P(arr), (void **)&elem, &pos) == SUCCESS;
@@ -666,6 +667,13 @@ static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_
 		path = &lzval;
 	}
 
+	/* code in this file relies on the path being nul terminated, even though
+	 * this is not required, at least on linux for abstract paths. It also
+	 * assumes that the path is not empty */
+	if (Z_STRLEN_P(path) == 0) {
+		do_from_zval_err(ctx, "%s", "the path is cannot be empty");
+		return;
+	}
 	if (Z_STRLEN_P(path) >= sizeof(saddr->sun_path)) {
 		do_from_zval_err(ctx, "the path is too long, the maximum permitted "
 				"length is %ld", sizeof(saddr->sun_path) - 1);
@@ -767,10 +775,22 @@ static void from_zval_write_sockaddr_aux(const zval *container,
 			return;
 		}
 		*sockaddr_ptr = accounted_ecalloc(1, sizeof(struct sockaddr_un), ctx);
-		*sockaddr_len = sizeof(struct sockaddr_un);
 		if (fill_sockaddr) {
+			struct sockaddr_un *sock_un = (struct sockaddr_un*)*sockaddr_ptr;
+
 			from_zval_write_sockaddr_un(container, (char*)*sockaddr_ptr, ctx);
 			(*sockaddr_ptr)->sa_family = AF_UNIX;
+
+			/* calculating length is more complicated here. Giving the size of
+			 * struct sockaddr_un here and relying on the nul termination of
+			 * sun_path does not work for paths in the abstract namespace. Note
+			 * that we always assume the path is not empty and nul terminated */
+			*sockaddr_len = offsetof(struct sockaddr_un, sun_path) +
+					(sock_un->sun_path[0] == '\0'
+					? (1 + strlen(&sock_un->sun_path[1]))
+					: strlen(sock_un->sun_path));
+		} else {
+			*sockaddr_len = sizeof(struct sockaddr_un);
 		}
 		break;
 
@@ -869,7 +889,14 @@ static void from_zval_write_control(const zval			*arr,
 	}
 
 	if (entry->calc_space) {
-		data_len = entry->calc_space(arr, ctx);
+		zval **data_elem;
+		/* arr must be an array at this point */
+		if (zend_hash_find(Z_ARRVAL_P(arr), "data", sizeof("data"),
+				(void**)&data_elem) == FAILURE) {
+			do_from_zval_err(ctx, "cmsghdr should have a 'data' element here");
+			return;
+		}
+		data_len = entry->calc_space(*data_elem, ctx);
 		if (ctx->err.has_error) {
 			return;
 		}
@@ -1370,7 +1397,7 @@ static void from_zval_write_fd_array_aux(zval **elem, unsigned i, void **args, s
 			return;
 		}
 
-		if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&iarr[i],
+		if (php_stream_cast(stream, PHP_STREAM_AS_FD, (void **)&iarr[i - 1],
 				REPORT_ERRORS) == FAILURE) {
 			do_from_zval_err(ctx, "cast stream to file descriptor failed");
 			return;

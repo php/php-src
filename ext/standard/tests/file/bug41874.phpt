@@ -6,9 +6,9 @@ if(substr(PHP_OS, 0, 3) != 'WIN' ) die('skip windows only test');
 ?>
 --FILE--
 <?php
-$result = exec('cd 1:\non_existant; dir nonexistant');
+$result = exec('cd 1:\non_existent; dir nonexistent');
 echo "$result";
-system('cd 1:\non_existant; dir nonexistant');
+system('cd 1:\non_existent; dir nonexistent');
 ?>
 --EXPECT--
 The system cannot find the drive specified.

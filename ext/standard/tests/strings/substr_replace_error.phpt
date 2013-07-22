@@ -26,7 +26,7 @@ echo "\n-- Testing substr_replace() function with start and length different typ
 var_dump(substr_replace($s1, "evening", array(5))); 
 var_dump(substr_replace($s1, "evening", 5, array(8))); 
   
-echo "\n-- Testing substr_replace() function with start and length with a different number of elments --\n";
+echo "\n-- Testing substr_replace() function with start and length with a different number of elements --\n";
 var_dump(substr_replace($s1, "evening", array(5, 1), array(8))); 
 
 echo "\n-- Testing substr_replace() function with start and length as arrays but string not--\n";
@@ -58,7 +58,7 @@ string(12) "Good morning"
 Warning: substr_replace(): 'from' and 'len' should be of same type - numerical or array  in %s on line %d
 string(12) "Good morning"
 
--- Testing substr_replace() function with start and length with a different number of elments --
+-- Testing substr_replace() function with start and length with a different number of elements --
 
 Warning: substr_replace(): 'from' and 'len' should have the same number of elements in %s on line %d
 string(12) "Good morning"

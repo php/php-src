@@ -610,7 +610,7 @@ static int fcgi_read_request(fcgi_request *req)
 		}
 
 		zend_hash_internal_pointer_reset_ex(req->env, &pos);
-		while ((key_type = zend_hash_get_current_key_ex(req->env, &str_index, &str_length, &num_index, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
+		while ((key_type = zend_hash_get_current_key_ex(req->env, &str_index, &str_length, &num_index, 0, &pos)) != HASH_KEY_NON_EXISTENT) {
 			int zlen;
 			zend_hash_move_forward_ex(req->env, &pos);
 			if (key_type != HASH_KEY_IS_STRING) {
