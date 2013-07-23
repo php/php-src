@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #50308 (session id not appended properly for empty anchor tags).
     (Arpad)
 
+- Phar:
+  . Fixed bug #65028 (Phar::buildFromDirectory creates corrupt archives for 
+    some specific contents). (Stas)
+
 ?? ??? 2013, PHP 5.4.18
 
 - Core:
