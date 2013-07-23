@@ -35,6 +35,9 @@
 #include "ext/standard/php_fopen_wrappers.h"
 #include "ext/standard/md5.h"
 #include "ext/standard/base64.h"
+#ifdef PHP_WIN32
+# include "win32/winutil.h"
+#endif
 
 /* OpenSSL includes */
 #include <openssl/evp.h>
