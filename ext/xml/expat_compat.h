@@ -61,7 +61,7 @@ typedef struct _XML_Memory_Handling_Suite {
 typedef struct _XML_Parser {
 	int use_namespace;
 
-	xmlChar *_ns_seperator;
+	xmlChar *_ns_separator;
 
 	void *user;
 	xmlParserCtxtPtr parser;
