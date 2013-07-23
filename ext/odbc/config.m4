@@ -359,7 +359,7 @@ PHP_ARG_WITH(custom-odbc,,
     ODBC_LIBS=$CUSTOM_ODBC_LIBS
     ODBC_TYPE=custom-odbc
     AC_DEFINE(HAVE_CODBC,1,[ ])
-    AC_MSG_RESULT([$ext_ouput])
+    AC_MSG_RESULT([$ext_output])
   fi
 fi
 
