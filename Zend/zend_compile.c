@@ -1938,7 +1938,7 @@ int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace 
 	char *lcname;
 	char *is_compound = memchr(Z_STRVAL(function_name->u.constant), '\\', Z_STRLEN(function_name->u.constant));
 
-	zend_resolve_non_class_name(function_name, check_namespace TSRMLS_CC);
+	zend_resolve_function_name(function_name, check_namespace TSRMLS_CC);
 
 	if (check_namespace && CG(current_namespace) && !is_compound) {
 			/* We assume we call function from the current namespace
@@ -2077,7 +2077,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 }
 /* }}} */
 
-void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace TSRMLS_DC) /* {{{ */
+void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace, HashTable *current_import_sub TSRMLS_DC) /* {{{ */
 {
 	znode tmp;
 	int len;
@@ -2095,11 +2095,11 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace 
 		return;
 	}
 
-	if (CG(current_import_function)) {
+	if (current_import_sub) {
 		len = Z_STRLEN(element_name->u.constant)+1;
 		lcname = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
 		/* Check if function matches imported name */
-		if (zend_hash_find(CG(current_import_function), lcname, len, (void**)&ns) == SUCCESS) {
+		if (zend_hash_find(current_import_sub, lcname, len, (void**)&ns) == SUCCESS) {
 			zval_dtor(&element_name->u.constant);
 			element_name->u.constant = **ns;
 			zval_copy_ctor(&element_name->u.constant);
@@ -2139,6 +2139,18 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace 
 		STR_FREE(Z_STRVAL(element_name->u.constant));
 		*element_name = tmp;
 	}
+}
+/* }}} */
+
+void zend_resolve_function_name(znode *element_name, zend_bool check_namespace TSRMLS_DC) /* {{{ */
+{
+	zend_resolve_non_class_name(element_name, check_namespace, CG(current_import_function) TSRMLS_CC);
+}
+/* }}} */
+
+void zend_resolve_const_name(znode *element_name, zend_bool check_namespace TSRMLS_DC) /* {{{ */
+{
+	zend_resolve_non_class_name(element_name, check_namespace, NULL TSRMLS_CC);
 }
 /* }}} */
 
@@ -5644,7 +5656,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 				break;
 			}
 
-			zend_resolve_non_class_name(constant_name, check_namespace TSRMLS_CC);
+			zend_resolve_const_name(constant_name, check_namespace TSRMLS_CC);
 
 			if(!compound) {
 				fetch_type |= IS_CONSTANT_UNQUALIFIED;
@@ -5656,7 +5668,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 		case ZEND_RT:
 			compound = memchr(Z_STRVAL(constant_name->u.constant), '\\', Z_STRLEN(constant_name->u.constant));
 
-			zend_resolve_non_class_name(constant_name, check_namespace TSRMLS_CC);
+			zend_resolve_const_name(constant_name, check_namespace TSRMLS_CC);
 
 			if(zend_constant_ct_subst(result, &constant_name->u.constant, 1 TSRMLS_CC)) {
 				break;
