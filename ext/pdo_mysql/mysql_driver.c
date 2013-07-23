@@ -710,7 +710,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 			}
 		}
 
-#if MYSQL_VERSION_ID > 50605 || defined(MYSQLI_USE_MYSQLND)
+#if MYSQL_VERSION_ID > 50605 || defined(PDO_USE_MYSQLND)
 		{
 			char *public_key = pdo_attr_strval(driver_options, PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY, NULL TSRMLS_CC);
 			if (public_key) {

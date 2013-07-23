@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
     limited case). (Arpad)
 
+- PDO_mysql:
+  . Fixed bug #65299 (pdo mysql parsing errors). (Johannes)
+
 - SPL:
   . Added RecursiveTreeIterator setPostfix and getPostifx methods. (Joshua 
     Thijssen)
