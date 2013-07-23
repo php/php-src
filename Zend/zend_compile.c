@@ -205,6 +205,7 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	CG(has_bracketed_namespaces) = 0;
 	CG(current_import) = NULL;
 	CG(current_import_function) = NULL;
+	CG(current_import_const) = NULL;
 	init_compiler_declarables(TSRMLS_C);
 	zend_stack_init(&CG(context_stack));
 
@@ -2098,7 +2099,7 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace,
 	if (current_import_sub) {
 		len = Z_STRLEN(element_name->u.constant)+1;
 		lcname = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
-		/* Check if function matches imported name */
+		/* Check if function/const matches imported name */
 		if (zend_hash_find(current_import_sub, lcname, len, (void**)&ns) == SUCCESS) {
 			zval_dtor(&element_name->u.constant);
 			element_name->u.constant = **ns;
@@ -2150,7 +2151,7 @@ void zend_resolve_function_name(znode *element_name, zend_bool check_namespace T
 
 void zend_resolve_const_name(znode *element_name, zend_bool check_namespace TSRMLS_DC) /* {{{ */
 {
-	zend_resolve_non_class_name(element_name, check_namespace, NULL TSRMLS_CC);
+	zend_resolve_non_class_name(element_name, check_namespace, CG(current_import_const) TSRMLS_CC);
 }
 /* }}} */
 
@@ -7030,6 +7031,12 @@ void zend_do_begin_namespace(const znode *name, zend_bool with_bracket TSRMLS_DC
 		CG(current_import_function) = NULL;
 	}
 
+	if (CG(current_import_const)) {
+		zend_hash_destroy(CG(current_import_const));
+		efree(CG(current_import_const));
+		CG(current_import_const) = NULL;
+	}
+
 	if (CG(doc_comment)) {
 		efree(CG(doc_comment));
 		CG(doc_comment) = NULL;
@@ -7122,16 +7129,11 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 }
 /* }}} */
 
-void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{{ */
+void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, HashTable *current_import_sub TSRMLS_DC) /* {{{ */
 {
 	char *lcname;
 	zval *name, *ns, tmp;
 	zend_bool warn = 0;
-
-	if (!CG(current_import_function)) {
-		CG(current_import_function) = emalloc(sizeof(HashTable));
-		zend_hash_init(CG(current_import_function), 0, NULL, ZVAL_PTR_DTOR, 0);
-	}
 
 	ALLOC_ZVAL(ns);
 	*ns = ns_name->u.constant;
@@ -7162,7 +7164,7 @@ void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_
 		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' is a special class name", Z_STRVAL_P(ns), Z_STRVAL_P(name), Z_STRVAL_P(name));
 	}
 
-	if (zend_hash_add(CG(current_import_function), lcname, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
+	if (zend_hash_add(current_import_sub, lcname, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
 		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 	}
 	if (warn) {
@@ -7170,6 +7172,28 @@ void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_
 	}
 	efree(lcname);
 	zval_dtor(name);
+}
+/* }}} */
+
+void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{{ */
+{
+	if (!CG(current_import_function)) {
+		CG(current_import_function) = emalloc(sizeof(HashTable));
+		zend_hash_init(CG(current_import_function), 0, NULL, ZVAL_PTR_DTOR, 0);
+	}
+
+	zend_do_use_non_class(ns_name, new_name, is_global, CG(current_import_function) TSRMLS_CC);
+}
+/* }}} */
+
+void zend_do_use_const(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{{ */
+{
+	if (!CG(current_import_const)) {
+		CG(current_import_const) = emalloc(sizeof(HashTable));
+		zend_hash_init(CG(current_import_const), 0, NULL, ZVAL_PTR_DTOR, 0);
+	}
+
+	zend_do_use_non_class(ns_name, new_name, is_global, CG(current_import_const) TSRMLS_CC);
 }
 /* }}} */
 
@@ -7229,6 +7253,11 @@ void zend_do_end_namespace(TSRMLS_D) /* {{{ */
 		zend_hash_destroy(CG(current_import_function));
 		efree(CG(current_import_function));
 		CG(current_import_function) = NULL;
+	}
+	if (CG(current_import_const)) {
+		zend_hash_destroy(CG(current_import_const));
+		efree(CG(current_import_const));
+		CG(current_import_const) = NULL;
 	}
 }
 /* }}} */
