@@ -527,9 +527,9 @@ static struct pdo_dbh_methods mysql_methods = {
 /* }}} */
 
 #ifdef PHP_WIN32
-# define MYSQL_UNIX_ADDR	NULL
+# define PDO_DEFAULT_MYSQL_UNIX_ADDR	NULL
 #else
-# define MYSQL_UNIX_ADDR	PDO_MYSQL_G(default_socket)
+# define PDO_DEFAULT_MYSQL_UNIX_ADDR	PDO_MYSQL_G(default_socket)
 #endif
 
 /* {{{ pdo_mysql_handle_factory */
@@ -545,7 +545,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		{ "dbname",   "",	0 },
 		{ "host",   "localhost",	0 },
 		{ "port",   "3306",	0 },
-		{ "unix_socket",  MYSQL_UNIX_ADDR,	0 },
+		{ "unix_socket",  PDO_DEFAULT_MYSQL_UNIX_ADDR,	0 },
 	};
 	int connect_opts = 0
 #ifdef CLIENT_MULTI_RESULTS
