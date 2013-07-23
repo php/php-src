@@ -744,7 +744,7 @@ PHP_FUNCTION(spl_autoload_functions)
 				add_next_index_string(tmp, alfi->func_ptr->common.function_name, 1);
 				add_next_index_zval(return_value, tmp);
 			} else {
-				if (strncmp(alfi->func_ptr->common.function_name, ZEND_STRL("__lambda_func"))) {
+				if (strncmp(alfi->func_ptr->common.function_name, "__lambda_func", sizeof("__lambda_func") - 1)) {
 					add_next_index_string(return_value, alfi->func_ptr->common.function_name, 1);
 				} else {
 				   char *key;
