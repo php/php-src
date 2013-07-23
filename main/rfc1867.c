@@ -34,7 +34,7 @@
 #include "rfc1867.h"
 #include "ext/standard/php_string.h"
 
-#if defined(_MSC_VER)
+#if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
 # define atoll(s) _atoi64(s)
 #endif
 
