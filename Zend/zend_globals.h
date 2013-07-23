@@ -306,7 +306,7 @@ struct _zend_php_scanner_globals {
 	unsigned char *script_filtered;
 	size_t script_filtered_size;
 
-	/* input/ouput filters */
+	/* input/output filters */
 	zend_encoding_filter input_filter;
 	zend_encoding_filter output_filter;
 	const zend_encoding *script_encoding;
