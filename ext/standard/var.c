@@ -619,13 +619,14 @@ static inline zend_bool php_var_serialize_class_name(smart_str *buf, zval *struc
 
 static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, HashTable *var_hash TSRMLS_DC) /* {{{ */
 {
+	HashTable *retval_props =  Z_OBJSERIALIZE_P(retval_ptr);
 	int count;
 	zend_bool incomplete_class;
 
 	incomplete_class = php_var_serialize_class_name(buf, struc TSRMLS_CC);
 	/* count after serializing name, since php_var_serialize_class_name
 	 * changes the count if the variable is incomplete class */
-	count = zend_hash_num_elements(HASH_OF(retval_ptr));
+	count = zend_hash_num_elements(retval_props);
 	if (incomplete_class) {
 		--count;
 	}
@@ -644,10 +645,10 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		ZVAL_NULL(&nval);
 		nvalp = &nval;
 
-		zend_hash_internal_pointer_reset_ex(HASH_OF(retval_ptr), &pos);
+		zend_hash_internal_pointer_reset_ex(retval_props, &pos);
 
-		for (;; zend_hash_move_forward_ex(HASH_OF(retval_ptr), &pos)) {
-			i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, NULL, &index, 0, &pos);
+		for (;; zend_hash_move_forward_ex(retval_props, &pos)) {
+			i = zend_hash_get_current_key_ex(retval_props, &key, NULL, &index, 0, &pos);
 
 			if (i == HASH_KEY_NON_EXISTENT) {
 				break;
@@ -656,7 +657,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 			if (incomplete_class && strcmp(key, MAGIC_MEMBER) == 0) {
 				continue;
 			}
-			zend_hash_get_current_data_ex(HASH_OF(retval_ptr), (void **) &name, &pos);
+			zend_hash_get_current_data_ex(retval_props, (void **) &name, &pos);
 
 			if (Z_TYPE_PP(name) != IS_STRING) {
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "__sleep should return an array only containing the names of instance-variables to serialize.");
@@ -840,7 +841,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 				myht = HASH_OF(struc);
 			} else {
 				incomplete_class = php_var_serialize_class_name(buf, struc TSRMLS_CC);
-				myht = Z_OBJPROP_P(struc);
+				myht = Z_OBJSERIALIZE_P(struc);
 			}
 			/* count after serializing name, since php_var_serialize_class_name
 			 * changes the count if the variable is incomplete class */
