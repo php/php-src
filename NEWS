@@ -13,6 +13,10 @@ PHP                                                                        NEWS
 - PDO_mysql:
   . Fixed bug #65299 (pdo mysql parsing errors). (Johannes)
 
+- Phar:
+  . Fixed bug #65028 (Phar::buildFromDirectory creates corrupt archives for 
+    some specific contents). (Stas)
+
 - SPL:
   . Added RecursiveTreeIterator setPostfix and getPostifx methods. (Joshua 
     Thijssen)
