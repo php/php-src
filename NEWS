@@ -14,7 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #50308 (session id not appended properly for empty anchor tags).
     (Arpad)
 
-- Spl:
+- SPL:
   . Fixed bug #65328 (Segfault when getting SplStack object Value). (Laruence)
 
 - Phar:
