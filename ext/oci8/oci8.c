@@ -2684,7 +2684,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		}
 		if (invokedstatement->impres_count > 0) {
 			/* Make it so the fetch occurs on the first Implicit Result Set */
-			statement = php_oci_get_implicit_resultset(invokedstatement);
+			statement = php_oci_get_implicit_resultset(invokedstatement TSRMLS_CC);
 			if (!statement)
 				RETURN_FALSE;
 			invokedstatement->impres_count--;
@@ -2701,7 +2701,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		/* End of fetch */
 		if (invokedstatement->impres_count > 0) {
 			/* Check next Implicit Result Set */
-	        statement = php_oci_get_implicit_resultset(invokedstatement);
+	        statement = php_oci_get_implicit_resultset(invokedstatement TSRMLS_CC);
 			if (!statement)
 				RETURN_FALSE;
 	        invokedstatement->impres_count--;
