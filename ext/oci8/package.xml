@@ -8,12 +8,12 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <summary>Extension for Oracle Database</summary>
 
  <description>
-   This extension allows you to access Oracle Database. OCI8 2.0 can be
-   built with PHP 5.4 onwards. (OCI8 1.4 can be built with PHP 4.3.9
-   onwards). OCI8 can be linked with Oracle Database 9.2, 10, 11, or
-   12.1 client libraries.  Oracle's standard cross-version connectivity
-   applies.  For example PHP linked with Oracle Database 11.2 client
-   libraries can connect to Oracle Database 9.2 onwards.
+   This extension allows you to access Oracle Database. OCI8 2.0 can
+   be built with PHP 4.3.9 onwards. OCI8 can be linked with Oracle
+   Database 9.2, 10, 11, or 12.1 client libraries.  Oracle's standard
+   cross-version connectivity applies.  For example PHP linked with
+   Oracle Database 11.2 client libraries can connect to Oracle
+   Database 9.2 onwards.
  </description>
  <lead>
   <name>Christopher Jones</name>
@@ -94,14 +94,14 @@ http://pear.php.net/dtd/package-2.0.xsd">
     - INTERNAL CHANGES:
  
       - Fixed a potential NULL pointer dereference flagged by Parfait
-        static code analyis.
+        static code analysis.
  
       - Extended testing of existing OCI8 functionality.
  
       - Improved test output portability when using the PHP development
         web server to run tests.
  
-      - Removed no-longer necessary unicode patterns from tests
+      - Removed no-longer necessary Unicode patterns from tests
         (vestiges of PHP's previous PHP 6 project)
         
       - Improved build portability by removing compilation type cast
@@ -112,7 +112,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  
       - Updated code to use internal macro PHP_OCI_REGISTER_RESOURCE.
  
-      - Regularized code prototypes and fixed some in-line documenation
+      - Regularized code prototypes and fixed some in-line documentation
         prototypes.
  
       - Fixed code folding. 
