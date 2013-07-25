@@ -18,6 +18,7 @@ PHP                                                                        NEWS
     some specific contents). (Stas)
 
 - SPL:
+  . Fixed bug #65328 (Segfault when getting SplStack object Value). (Laruence)
   . Added RecursiveTreeIterator setPostfix and getPostifx methods. (Joshua 
     Thijssen)
   . Fixed bug #61697 (spl_autoload_functions returns lambda functions 
