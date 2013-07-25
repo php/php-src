@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #50308 (session id not appended properly for empty anchor tags).
     (Arpad)
 
+- Spl:
+  . Fixed bug #65328 (Segfault when getting SplStack object Value). (Laruence)
+
 - Phar:
   . Fixed bug #65028 (Phar::buildFromDirectory creates corrupt archives for 
     some specific contents). (Stas)
