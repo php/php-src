@@ -29,8 +29,8 @@ b->timezone_type: 1
 a:   DateTime Object
 (
     [timezone_type] => 3
-    [timezone] => UTC
     [date] => 2010-01-01 08:45:00
+    [timezone] => UTC
 )
 
 
@@ -38,8 +38,8 @@ str: 2010-01-01T08:45:00+0000
 b:   DateTime Object
 (
     [timezone_type] => 1
-    [timezone] => +00:00
     [date] => 2010-01-01 08:45:00
+    [timezone] => +00:00
 )
 
 a->timezone_type: 3

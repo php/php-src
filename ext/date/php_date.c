@@ -2183,54 +2183,64 @@ static HashTable *date_object_get_gc_timezone(zval *object, zval ***table, int *
 }
 
 
-static void date_object_update_property(php_date_obj *dateobj, HashTable *props, zval *member)
+static inline zval *date_object_update_property_date(php_date_obj *dateobj, HashTable *props)
 {
 	zval *zv;
+	MAKE_STD_ZVAL(zv);
+	ZVAL_STRING(zv, date_format("Y-m-d H:i:s", 12, dateobj->time, 1), 0);
+	zend_hash_update(props, "date", sizeof("date"), &zv, sizeof(zval), NULL);
+	return zv;
+}
 
-	if (!member || !zend_binary_strcmp(Z_STRVAL_P(member), Z_STRLEN_P(member), "date", sizeof("date")-1)) {
-		MAKE_STD_ZVAL(zv);
-		ZVAL_STRING(zv, date_format("Y-m-d H:i:s", 12, dateobj->time, 1), 0);
-		zend_hash_update(props, "date", 5, &zv, sizeof(zval), NULL);
-	}
-	if (dateobj->time->is_localtime) {
-		if (!member || !zend_binary_strcmp(Z_STRVAL_P(member), Z_STRLEN_P(member), "timezone_type", sizeof("timezone_type")-1)) {
-			MAKE_STD_ZVAL(zv);
-			ZVAL_LONG(zv, dateobj->time->zone_type);
-			zend_hash_update(props, "timezone_type", sizeof("timezone_type"), &zv, sizeof(zval), NULL);
-		}
-		if (!member || !zend_binary_strcmp(Z_STRVAL_P(member), Z_STRLEN_P(member), "timezone_type", sizeof("timezone_type")-1)) {
-			MAKE_STD_ZVAL(zv);
-			switch (dateobj->time->zone_type) {
-				case TIMELIB_ZONETYPE_ID:
-					ZVAL_STRING(zv, dateobj->time->tz_info->name, 1);
-					break;
-				case TIMELIB_ZONETYPE_OFFSET: {
-					char *tmpstr = emalloc(sizeof("UTC+05:00"));
-					timelib_sll utc_offset = dateobj->time->z;
+static inline zval *date_object_update_property_timezone_type(php_date_obj *dateobj, HashTable *props)
+{
+	zval *zv;
+	MAKE_STD_ZVAL(zv);
+	ZVAL_LONG(zv, dateobj->time->zone_type);
+	zend_hash_update(props, "timezone_type", sizeof("timezone_type"), &zv, sizeof(zval), NULL);
+	return zv;
+}
+
+static inline zval *date_object_update_property_timezone(php_date_obj *dateobj, HashTable *props)
+{
+	zval *zv;
+	MAKE_STD_ZVAL(zv);
+	switch (dateobj->time->zone_type) {
+		case TIMELIB_ZONETYPE_ID:
+			ZVAL_STRING(zv, dateobj->time->tz_info->name, 1);
+			break;
+		case TIMELIB_ZONETYPE_OFFSET: {
+			char *tmpstr = emalloc(sizeof("UTC+05:00"));
+			timelib_sll utc_offset = dateobj->time->z;
 					
-					snprintf(tmpstr, sizeof("+05:00"), "%c%02d:%02d",
-							 utc_offset > 0 ? '-' : '+',
-							 abs(utc_offset / 60),
-							 abs((utc_offset % 60)));
+			snprintf(tmpstr, sizeof("+05:00"), "%c%02d:%02d",
+					 utc_offset > 0 ? '-' : '+',
+					 abs(utc_offset / 60),
+					 abs((utc_offset % 60)));
 					
-					ZVAL_STRING(zv, tmpstr, 0);
-					}
-					break;
-				case TIMELIB_ZONETYPE_ABBR:
-					ZVAL_STRING(zv, dateobj->time->tz_abbr, 1);
-					break;
+			ZVAL_STRING(zv, tmpstr, 0);
 			}
-			zend_hash_update(props, "timezone", 9, &zv, sizeof(zval), NULL);
-		}
+			break;
+		case TIMELIB_ZONETYPE_ABBR:
+			ZVAL_STRING(zv, dateobj->time->tz_abbr, 1);
+			break;
 	}
+	zend_hash_update(props, "timezone", sizeof("timezone"), &zv, sizeof(zval), NULL);
+  	return zv;
 }
 
 static zval *date_object_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
-	php_date_obj *dateobj;
+	php_date_obj *dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
 	
-	dateobj = (php_date_obj *) zend_object_store_get_object(object TSRMLS_CC);
-	date_object_update_property(dateobj, zend_std_get_properties(object TSRMLS_CC), member);
+	if (!zend_binary_strcmp(Z_STRVAL_P(member), Z_STRLEN_P(member), "date", sizeof("date")-1)) {
+		return date_object_update_property_date(dateobj, zend_std_get_properties(object TSRMLS_CC));
+	} else if (dateobj->time->is_localtime) {
+		if (!zend_binary_strcmp(Z_STRVAL_P(member), Z_STRLEN_P(member), "timezone_type", sizeof("timezone_type")-1))
+			return date_object_update_property_timezone_type(dateobj, zend_std_get_properties(object TSRMLS_CC));
+		else if (!zend_binary_strcmp(Z_STRVAL_P(member), Z_STRLEN_P(member), "timezone", sizeof("timezone")-1))
+			return date_object_update_property_timezone(dateobj, zend_std_get_properties(object TSRMLS_CC));
+	}
 
 	return (zend_get_std_object_handlers())->read_property(object, member, type, key TSRMLS_CC);
 }
@@ -2248,7 +2258,11 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 		return props;
 	}
 
-	date_object_update_property(dateobj, props, NULL);
+	date_object_update_property_date(dateobj, props);
+	if (dateobj->time->is_localtime) {
+		date_object_update_property_timezone_type(dateobj, props);
+		date_object_update_property_timezone(dateobj, props);
+	}
 	
 	return props;
 }
