@@ -2579,6 +2579,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 	php_serialize_data_t metadata_hash;
 	smart_str main_metadata_str = {0};
 	int free_user_stub, free_fp = 1, free_ufp = 1;
+	int manifest_hack = 0;
 
 	if (phar->is_persistent) {
 		if (error) {
@@ -2930,6 +2931,12 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 
 	manifest_len = offset + phar->alias_len + sizeof(manifest) + main_metadata_str.len;
 	phar_set_32(manifest, manifest_len);
+	/* Hack - see bug #65028, add padding byte to the end of the manifest */
+	if(manifest[0] == '\r' || manifest[0] == '\n') {
+		manifest_len++;
+		phar_set_32(manifest, manifest_len);
+		manifest_hack = 1;
+	}
 	phar_set_32(manifest+4, new_manifest_count);
 	if (has_dirs) {
 		*(manifest + 8) = (unsigned char) (((PHAR_API_VERSION) >> 8) & 0xFF);
@@ -3049,6 +3056,22 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 
 			if (error) {
 				spprintf(error, 0, "unable to write temporary manifest of file \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
+			}
+
+			return EOF;
+		}
+	}
+	/* Hack - see bug #65028, add padding byte to the end of the manifest */
+	if(manifest_hack) {
+		if(1 != php_stream_write(newfile, manifest, 1)) {
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+
+			php_stream_close(newfile);
+
+			if (error) {
+				spprintf(error, 0, "unable to write manifest padding byte");
 			}
 
 			return EOF;
