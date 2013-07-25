@@ -367,7 +367,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_date_method_interval_format, 0)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_date_method_interval_add, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_interval_addsub, 0)
 	ZEND_ARG_INFO(0, interval)
 ZEND_END_ARG_INFO()
 
@@ -381,7 +381,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, interval_spec)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_date_interval_add, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_date_interval_addsub, 0)
 	ZEND_ARG_INFO(0, interval1)
 	ZEND_ARG_INFO(0, interval2)
 ZEND_END_ARG_INFO()
@@ -441,7 +441,8 @@ const zend_function_entry date_functions[] = {
 
 	PHP_FE(date_interval_create_from_date_string, arginfo_date_interval_create_from_date_string)
 	PHP_FE(date_interval_format, arginfo_date_interval_format)
-	PHP_FE(date_interval_add, arginfo_date_interval_add)
+	PHP_FE(date_interval_add, arginfo_date_interval_addsub)
+	PHP_FE(date_interval_sub, arginfo_date_interval_addsub)
 
 	/* Options and Configuration */
 	PHP_FE(date_default_timezone_set, arginfo_date_default_timezone_set)
@@ -526,7 +527,8 @@ const zend_function_entry date_funcs_interval[] = {
 	PHP_ME(DateInterval,              __wakeup,                    NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateInterval,              __set_state,                 NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(format,            date_interval_format,        arginfo_date_method_interval_format, 0)
-	PHP_ME_MAPPING(add,               date_interval_add,           arginfo_date_method_interval_add, 0)
+	PHP_ME_MAPPING(add,               date_interval_add,           arginfo_date_method_interval_addsub, 0)
+	PHP_ME_MAPPING(sub,               date_interval_sub,           arginfo_date_method_interval_addsub, 0)
 	PHP_ME_MAPPING(createFromDateString, date_interval_create_from_date_string,	arginfo_date_interval_create_from_date_string, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_FE_END
 };
@@ -4386,6 +4388,36 @@ PHP_FUNCTION(date_interval_add)
 	diobjr->initialized = 1;
 }
 /* }}} */
+
+/* {{{ proto string date_interval_sub(DateInterval interval1, DateInterval interval2)
+   Add the intervals.
+*/
+PHP_FUNCTION(date_interval_sub)
+{
+	zval             *zi1, *zi2;
+	php_interval_obj *diobj1, *diobj2, *diobjr;
+	timelib_rel_time *rtime;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO", &zi1, date_ce_interval, &zi2, date_ce_interval) == FAILURE) {
+		RETURN_FALSE;
+	}
+	diobj1 = (php_interval_obj *) zend_object_store_get_object(zi1 TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(diobj1->initialized, DateInterval);
+	diobj2 = (php_interval_obj *) zend_object_store_get_object(zi2 TSRMLS_CC);
+	DATE_CHECK_INITIALIZED(diobj2->initialized, DateInterval);
+
+	rtime = timelib_rel_sub(diobj1->diff, diobj2->diff);
+	if (!rtime) {
+		 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Relative interval cannot be used for interval substraction");
+	}
+
+	php_date_instantiate(date_ce_interval, return_value TSRMLS_CC);
+	diobjr = zend_object_store_get_object(return_value TSRMLS_CC);
+	diobjr->diff = rtime;
+	diobjr->initialized = 1;
+}
+/* }}} */
+
 
 static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_rel_time **d, long *recurrences, /*const*/ char *format, int format_length TSRMLS_DC)
 {
