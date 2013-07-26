@@ -27,6 +27,10 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug #65268 (select() implementation uses outdated tick API). (Anatol)
 
+- Pgsql:
+  . Fixed bug #65336 (pg_escape_literal/identifier() scilently returns false).
+    (Yasuo)
+
 18 Jul 2013, PHP 5.5.1
 
 - Core:
