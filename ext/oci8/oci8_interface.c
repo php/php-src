@@ -2409,7 +2409,7 @@ PHP_FUNCTION(oci_get_implicit_resultset)
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
-	imp_statement = php_oci_get_implicit_resultset(statement);
+	imp_statement = php_oci_get_implicit_resultset(statement TSRMLS_CC);
 
 	if (imp_statement) {
 		if (php_oci_statement_execute(imp_statement, (ub4)OCI_DEFAULT TSRMLS_CC))
