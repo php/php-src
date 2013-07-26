@@ -4294,12 +4294,13 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 	}
 
 	if (pgsql_link == NULL && id == -1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot get default pgsql link");
 		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	if (pgsql == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot get default pgsql link");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot get pgsql link");
 		RETURN_FALSE;
 	}
 #ifdef HAVE_PQESCAPELITERAL

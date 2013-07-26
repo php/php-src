@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #65028 (Phar::buildFromDirectory creates corrupt archives for 
     some specific contents). (Stas)
 
+- Pgsql:
+  . Fixed bug #65336 (pg_escape_literal/identifier() scilently returns false).
+    (Yasuo)
+
 ?? ??? 2013, PHP 5.4.18
 
 - Core:
