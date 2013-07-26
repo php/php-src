@@ -1744,7 +1744,12 @@ PHP_FUNCTION(oci_set_prefetch)
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
-	if (php_oci_statement_set_prefetch(statement, size TSRMLS_CC)) {
+	if (size < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of rows to be prefetched has to be greater than or equal to 0");
+		return;
+	}
+
+	if (php_oci_statement_set_prefetch(statement, (ub4)size TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;

@@ -107,7 +107,9 @@ php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char
 	zend_list_addref(statement->connection->id);
 
 	if (OCI_G(default_prefetch) >= 0) {
-		php_oci_statement_set_prefetch(statement, OCI_G(default_prefetch) TSRMLS_CC);
+		php_oci_statement_set_prefetch(statement, (ub4)OCI_G(default_prefetch) TSRMLS_CC);
+	} else {
+		php_oci_statement_set_prefetch(statement, (ub4)100 TSRMLS_CC); /* semi-arbitrary, "sensible default" */
 	}
 	
 	PHP_OCI_REGISTER_RESOURCE(statement, le_statement);
@@ -164,9 +166,7 @@ php_oci_statement *php_oci_get_implicit_resultset(php_oci_statement *statement T
 		zend_list_addref(statement->id);
 		zend_list_addref(statement2->connection->id);
 
-		if (OCI_G(default_prefetch) >= 0) {
-			php_oci_statement_set_prefetch(statement2, OCI_G(default_prefetch) TSRMLS_CC);
-		}
+		php_oci_statement_set_prefetch(statement2, statement->prefetch_count TSRMLS_CC);
 		
 		PHP_OCI_REGISTER_RESOURCE(statement2, le_statement);
 	
@@ -179,24 +179,22 @@ php_oci_statement *php_oci_get_implicit_resultset(php_oci_statement *statement T
 /* }}} */
 
 /* {{{ php_oci_statement_set_prefetch()
- Set prefetch buffer size for the statement (we're assuming that one row is ~1K sized) */
-int php_oci_statement_set_prefetch(php_oci_statement *statement, long size TSRMLS_DC)
+ Set prefetch buffer size for the statement */
+int php_oci_statement_set_prefetch(php_oci_statement *statement, ub4 prefetch  TSRMLS_DC)
 {
-	ub4 prefetch = size;
-
-	if (size < 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of rows to be prefetched has to be greater than or equal to 0");
-		return 1;
+	if (prefetch > 20000) {
+		prefetch = 20000;		/* keep it somewhat sane */
 	}
-	
+
 	PHP_OCI_CALL_RETURN(OCIATTRSET, statement->errcode, OCIAttrSet, (statement->stmt, OCI_HTYPE_STMT, &prefetch, 0, OCI_ATTR_PREFETCH_ROWS, statement->err));
 	
 	if (statement->errcode != OCI_SUCCESS) {
 		statement->errcode = php_oci_error(statement->err, statement->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(statement->connection, statement->errcode);
+		statement->prefetch_count = 0;
 		return 1;
 	}
-
+	statement->prefetch_count = prefetch;
 	return 0;
 }
 /* }}} */

@@ -53,7 +53,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes> 
-    - Fix --enable-maintainer-zts mode
+    Fixed --enable-maintainer-zts mode
+    Allow Implicit Result Set statement resources to inherit the parent's current prefetch count
   </notes>
  <contents>
   <dir name="/">

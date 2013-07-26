@@ -210,7 +210,7 @@ typedef struct {
 typedef struct { 
 	int					 id;
 	int					 parent_stmtid;			/* parent statement id */
-	struct php_oci_statement *impres_child_stmt; /* child of current Implicit Result Set statement handle */
+	struct php_oci_statement *impres_child_stmt;/* child of current Implicit Result Set statement handle */
 	ub4                  impres_count;          /* count of remaining Implicit Result children on parent statement handle */
 	php_oci_connection	*connection;			/* parent connection handle */
 	sword				 errcode;				/* last errcode*/
@@ -227,6 +227,7 @@ typedef struct {
 	unsigned			 has_data:1;			/* statement has more data flag */
 	unsigned			 has_descr:1;			/* statement has at least one descriptor or cursor column */
 	ub2					 stmttype;				/* statement type */
+	ub4                  prefetch_count;        /* current prefetch count */
 } php_oci_statement;
 /* }}} */
 
@@ -496,7 +497,7 @@ int php_oci_collection_append_string(php_oci_collection *collection, char *eleme
 
 php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char *query, int query_len TSRMLS_DC);
 php_oci_statement *php_oci_get_implicit_resultset(php_oci_statement *statement TSRMLS_DC);
-int php_oci_statement_set_prefetch(php_oci_statement *statement, long size TSRMLS_DC);
+int php_oci_statement_set_prefetch(php_oci_statement *statement, ub4 prefetch TSRMLS_DC);
 int php_oci_statement_fetch(php_oci_statement *statement, ub4 nrows TSRMLS_DC);
 php_oci_out_column *php_oci_statement_get_column(php_oci_statement *statement, long column_index, char *column_name, int column_name_len TSRMLS_DC);
 int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC);

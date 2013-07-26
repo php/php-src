@@ -2685,12 +2685,11 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		if (invokedstatement->impres_count > 0) {
 			/* Make it so the fetch occurs on the first Implicit Result Set */
 			statement = php_oci_get_implicit_resultset(invokedstatement TSRMLS_CC);
-			if (!statement)
+			if (!statement || php_oci_statement_execute(statement, (ub4)OCI_DEFAULT TSRMLS_CC))
 				RETURN_FALSE;
 			invokedstatement->impres_count--;
 			invokedstatement->impres_child_stmt = (struct php_oci_statement *)statement;
 			invokedstatement->impres_flag = PHP_OCI_IMPRES_HAS_CHILDREN;
-			php_oci_statement_execute(statement, (ub4)OCI_DEFAULT TSRMLS_CC);
 		} else {
 			statement = invokedstatement; /* didn't find Implicit Result Sets */
 			invokedstatement->impres_flag = PHP_OCI_IMPRES_NO_CHILDREN;  /* Don't bother checking again */
@@ -2702,11 +2701,10 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 		if (invokedstatement->impres_count > 0) {
 			/* Check next Implicit Result Set */
 	        statement = php_oci_get_implicit_resultset(invokedstatement TSRMLS_CC);
-			if (!statement)
+			if (!statement || php_oci_statement_execute(statement, (ub4)OCI_DEFAULT TSRMLS_CC))
 				RETURN_FALSE;
-	        invokedstatement->impres_count--;
+			invokedstatement->impres_count--;
 			invokedstatement->impres_child_stmt = (struct php_oci_statement *)statement;
-			php_oci_statement_execute(statement, (ub4)OCI_DEFAULT TSRMLS_CC);
 			if (php_oci_statement_fetch(statement, nrows TSRMLS_CC)) {
 				/* End of all fetches */
 	            RETURN_FALSE;
