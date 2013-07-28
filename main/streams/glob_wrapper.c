@@ -255,6 +255,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 		}
 		if (!pglob->basedir_indexmap) {
 			globfree(&pglob->glob);
+			efree(pglob);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s)", path, PG(open_basedir));
 			return NULL;
 		}
