@@ -4406,7 +4406,9 @@ PHP_FUNCTION(date_interval_sub)
 	diobj2 = (php_interval_obj *) zend_object_store_get_object(zi2 TSRMLS_CC);
 	DATE_CHECK_INITIALIZED(diobj2->initialized, DateInterval);
 
-	rtime = timelib_rel_sub(diobj1->diff, diobj2->diff);
+	diobj2->diff->invert = !diobj2->diff->invert;
+	rtime = timelib_rel_add(diobj1->diff, diobj2->diff);
+	diobj2->diff->invert = !diobj2->diff->invert;
 	if (!rtime) {
 		 php_error_docref(NULL TSRMLS_CC, E_WARNING, "Relative interval cannot be used for interval substraction");
 	}

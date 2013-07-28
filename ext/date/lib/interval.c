@@ -71,9 +71,12 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	return rt;
 }
 
+#define timelib_rel_invert_member(rt, member) do { rt->member *= -1; rt->invert = !rt->invert; } while(0)
+
 timelib_rel_time *timelib_rel_add(timelib_rel_time *one, timelib_rel_time *two)
 {
 	timelib_rel_time *rt;
+	int one_mult, two_mult;
 
 	if (one->have_weekday_relative || one->have_special_relative ||
 		two->have_weekday_relative || two->have_special_relative) {
@@ -81,36 +84,47 @@ timelib_rel_time *timelib_rel_add(timelib_rel_time *one, timelib_rel_time *two)
 	}
 	
 	rt = timelib_rel_time_ctor();
-	rt->y = one->y + two->y;
-	rt->m = one->m + two->m;
-	rt->d = one->d + two->d;
-	rt->h = one->h + two->h;
-	rt->i = one->i + two->i;
-	rt->s = one->s + two->s;
-	
-	timelib_do_rel_normalize(NULL, rt);
 
-	return rt;
-}
-
-timelib_rel_time *timelib_rel_sub(timelib_rel_time *one, timelib_rel_time *two)
-{
-	timelib_rel_time *rt;
-
-	if (one->have_weekday_relative || one->have_special_relative ||
-		two->have_weekday_relative || two->have_special_relative) {
-		return NULL;
+	if (one->invert && !two->invert) {
+		one_mult = two_mult = 1;
+		rt->invert = 1;
+	} else {
+		one_mult = one->invert ? -1 : 1;
+		two_mult = two->invert ? -1 : 1;
 	}
-	
+
 	rt = timelib_rel_time_ctor();
-	rt->y = one->y - two->y;
-	rt->m = one->m - two->m;
-	rt->d = one->d - two->d;
-	rt->h = one->h - two->h;
-	rt->i = one->i - two->i;
-	rt->s = one->s - two->s;
+	rt->y = one_mult * one->y + two_mult * two->y;
+	rt->m = one_mult * one->m + two_mult * two->m;
+	rt->d = one_mult * one->d + two_mult * two->d;
+	rt->h = one_mult * one->h + two_mult * two->h;
+	rt->i = one_mult * one->i + two_mult * two->i;
+	rt->s = one_mult * one->s + two_mult * two->s;
 	
 	timelib_do_rel_normalize(NULL, rt);
+
+	/* if the first not 0 rt member is negative, then invert */
+	if (rt->y < 0) {
+		timelib_rel_invert_member(rt, y);
+	} else if (rt->y == 0) {
+		if (rt->m < 0) {
+			timelib_rel_invert_member(rt, m);
+		} else if (rt->m == 0) {
+			if (rt->d < 0) {
+				timelib_rel_invert_member(rt, d);
+			} else if (rt->d == 0) {
+				if (rt->h < 0) {
+					timelib_rel_invert_member(rt, h);
+				} else if (rt->h == 0) {
+					if (rt->i < 0) {
+						timelib_rel_invert_member(rt, i);
+					} else if (rt->i == 0 && rt->s < 0) {
+						timelib_rel_invert_member(rt, s);
+					}
+				}
+			}
+		}
+	}
 
 	return rt;
 }

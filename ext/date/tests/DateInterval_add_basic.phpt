@@ -21,8 +21,13 @@ echo $interval2->format('%Y-%M-%D %H:%i:%s') . "\n";
 $interval = $interval1->add($interval2);
 echo $interval->format('%Y-%M-%D %H:%i:%s') . "\n";
 
+$interval1->invert = 1;
+$interval = $interval->add($interval1);
+echo $interval->format('%Y-%M-%D %H:%i:%s') . "\n";
+
 ?>
 --EXPECT--
 00-00-09 22:30:23
 01-02-09 03:40:50
 01-02-19 02:11:13
+01-02-09 03:40:50
