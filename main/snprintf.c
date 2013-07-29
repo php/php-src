@@ -312,7 +312,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  */
 /* char * ap_php_conv_10() {{{ */
 char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
-	   register bool_int * is_negative, char *buf_end, register int *len)
+	   register bool_int * is_negative, char *buf_end, register zend_str_size_int *len)
 {
 	register char *p = buf_end;
 	register u_wide_int magnitude;
@@ -370,7 +370,7 @@ char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
  */
 /* PHPAPI char * php_conv_fp() {{{ */
 PHPAPI char * php_conv_fp(register char format, register double num,
-		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, int *len)
+		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, zend_str_size_int *len)
 {
 	register char *s = buf;
 	register char *p, *p_orig;
@@ -438,7 +438,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
 
 	if (format != 'F') {
 		char temp[EXPONENT_LENGTH];		/* for exponent conversion */
-		int t_len;
+		zend_str_size_int t_len;
 		bool_int exponent_is_negative;
 
 		*s++ = format;			/* either e or E */
@@ -474,7 +474,7 @@ PHPAPI char * php_conv_fp(register char format, register double num,
  * which is a pointer to the END of the buffer + 1 (i.e. if the buffer
  * is declared as buf[ 100 ], buf_end should be &buf[ 100 ])
  */
-char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register int *len) /* {{{ */
+char * ap_php_conv_p2(register u_wide_int num, register int nbits, char format, char *buf_end, register zend_str_size_int *len) /* {{{ */
 {
 	register int mask = (1 << nbits) - 1;
 	register char *p = buf_end;
@@ -584,10 +584,11 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 	char *sp;
 	char *bep;
 	int cc = 0;
-	int i;
+	zend_str_size_int i;
 
 	char *s = NULL;
-	int s_len, free_zcopy;
+	zend_str_size_int s_len;
+	int free_zcopy;
 	zval *zvp, zcopy;
 
 	int min_width = 0;
