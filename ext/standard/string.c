@@ -2290,7 +2290,7 @@ PHP_FUNCTION(substr_replace)
 	zval **repl;
 	char *result;
 	zend_str_size result_len;
-	int l = 0;
+	int l = 0; /* l and f should be size_t, however this needs much closer below logic investigation.*/
 	int f;
 	int argc = ZEND_NUM_ARGS();
 
@@ -3226,7 +3226,7 @@ PHP_FUNCTION(similar_text)
 	char *t1, *t2;
 	zval **percent = NULL;
 	int ac = ZEND_NUM_ARGS();
-	int sim;
+	zend_str_size_int sim;
 	zend_str_size t1_len, t2_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|Z", &t1, &t1_len, &t2, &t2_len, &percent) == FAILURE) {
@@ -4145,7 +4145,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 			}
 		}
 		if (char_count == max_chars) { /* try to avoid breaking words */
-			int new_char_count=char_count, new_begin=begin;
+			zend_str_size_int new_char_count=char_count, new_begin=begin;
 
 			while (new_char_count > 0) {
 				if (_isblank(heb_str[new_begin]) || _isnewline(heb_str[new_begin])) {
