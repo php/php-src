@@ -1143,7 +1143,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				}
 			case PHP_MODE_REFLECTION_EXT_INFO:
 				{
-					int len = strlen(reflection_what);
+					zend_str_size_int len = strlen(reflection_what);
 					char *lcname = zend_str_tolower_dup(reflection_what, len);
 					zend_module_entry *module;
 
