@@ -7,6 +7,10 @@ PHP                                                                        NEWS
   . Implemented internal operator overloading
     (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
 
+- mysqlnd:
+  . Disabled flag for SP OUT variables for 5.5+ servers as they are not natively
+    supported by the overlying APIs. (Andrey)
+
 - OPcache:
   . Added an optimization pass to convert FCALL_BY_NAME into DO_FCALL.
     (Laruence, Dmitry)

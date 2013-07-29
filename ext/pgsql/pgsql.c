@@ -4295,12 +4295,13 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 	}
 
 	if (pgsql_link == NULL && id == -1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot get default pgsql link");
 		RETURN_FALSE;
 	}
 
 	ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
 	if (pgsql == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot get default pgsql link");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot get pgsql link");
 		RETURN_FALSE;
 	}
 #ifdef HAVE_PQESCAPELITERAL
@@ -5338,7 +5339,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		skip_field = 0;
 		new_val = NULL;
 		
-		if ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &field, &field_len, &num_idx, 0, &pos)) == HASH_KEY_NON_EXISTANT) {
+		if ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(values), &field, &field_len, &num_idx, 0, &pos)) == HASH_KEY_NON_EXISTENT) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Failed to get array key type");
 			err = 1;
 		}
@@ -5346,7 +5347,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Accepts only string key for values");
 			err = 1;
 		}
-		if (!err && key_type == HASH_KEY_NON_EXISTANT) {
+		if (!err && key_type == HASH_KEY_NON_EXISTENT) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Accepts only string key for values");
 			err = 1;
 		}
@@ -6049,7 +6050,7 @@ PHP_PGSQL_API int php_pgsql_insert(PGconn *pg_link, const char *table, zval *var
 	
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(var_array), &pos);
 	while ((key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(var_array), &fld,
-					&fld_len, &num_idx, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
+					&fld_len, &num_idx, 0, &pos)) != HASH_KEY_NON_EXISTENT) {
 		if (key_type == HASH_KEY_IS_LONG) {
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Expects associative array for values to be inserted");
 			goto cleanup;

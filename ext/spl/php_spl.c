@@ -744,8 +744,17 @@ PHP_FUNCTION(spl_autoload_functions)
 				}
 				add_next_index_string(tmp, alfi->func_ptr->common.function_name, 1);
 				add_next_index_zval(return_value, tmp);
-			} else
-				add_next_index_string(return_value, alfi->func_ptr->common.function_name, 1);
+			} else {
+				if (strncmp(alfi->func_ptr->common.function_name, "__lambda_func", sizeof("__lambda_func") - 1)) {
+					add_next_index_string(return_value, alfi->func_ptr->common.function_name, 1);
+				} else {
+				   char *key;
+				   uint len;
+				   long dummy;
+				   zend_hash_get_current_key_ex(SPL_G(autoload_functions), &key, &len, &dummy, 0, &function_pos); 
+				   add_next_index_stringl(return_value, key, len - 1, 1);
+				}
+			}
 
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &function_pos);
 		}

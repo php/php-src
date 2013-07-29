@@ -56,7 +56,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	arg_sep_len = strlen(arg_sep);
 
 	for (zend_hash_internal_pointer_reset(ht);
-		(key_type = zend_hash_get_current_key_ex(ht, &key, &key_len, &idx, 0, NULL)) != HASH_KEY_NON_EXISTANT;
+		(key_type = zend_hash_get_current_key_ex(ht, &key, &key_len, &idx, 0, NULL)) != HASH_KEY_NON_EXISTENT;
 		zend_hash_move_forward(ht)
 	) {
 		if (key_type == HASH_KEY_IS_STRING && key_len && key[key_len-1] == '\0') {

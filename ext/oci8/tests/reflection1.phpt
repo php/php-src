@@ -126,6 +126,7 @@ reflection::export(new reflectionfunction('oci_set_module_name'));
 reflection::export(new reflectionfunction('oci_set_action'));
 reflection::export(new reflectionfunction('oci_set_client_info'));
 reflection::export(new reflectionfunction('oci_set_client_identifier'));
+reflection::export(new reflectionfunction('oci_get_implicit_resultset'));
 
 ?>
 ===DONE===
@@ -1090,6 +1091,13 @@ Function [ <internal%s> function oci_set_client_identifier ] {
   - Parameters [2] {
     Parameter #0 [ <required> $connection_resource ]
     Parameter #1 [ <required> $client_identifier ]
+  }
+}
+
+Function [ <internal%s> function oci_get_implicit_resultset ] {
+
+  - Parameters [1] {
+    Parameter #0 [ <required> $statement_resource ]
   }
 }
 
