@@ -250,7 +250,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	if (mail_log && *mail_log) {
 		char *tmp, *date_str;
 		time_t curtime;
-		int l;
+		zend_str_size_int l;
 
 		time(&curtime);
 		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1 TSRMLS_CC);
