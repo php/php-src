@@ -61,10 +61,10 @@ PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
-static int php_info_print_html_esc(const char *str, int len) /* {{{ */
+static zend_str_size_int php_info_print_html_esc(const char *str, zend_str_size_int len) /* {{{ */
 {
 	size_t new_len;
-	int written;
+	zend_str_size_int written;
 	char *new_str;
 	TSRMLS_FETCH();
 
@@ -75,10 +75,10 @@ static int php_info_print_html_esc(const char *str, int len) /* {{{ */
 }
 /* }}} */
 
-static int php_info_printf(const char *fmt, ...) /* {{{ */
+static zend_str_size_int php_info_printf(const char *fmt, ...) /* {{{ */
 {
 	char *buf;
-	int len, written;
+	zend_str_size_int len, written;
 	va_list argv;
 	TSRMLS_FETCH();
 
@@ -92,7 +92,7 @@ static int php_info_printf(const char *fmt, ...) /* {{{ */
 }
 /* }}} */
 
-static int php_info_print(const char *str) /* {{{ */
+static zend_str_size_int php_info_print(const char *str) /* {{{ */
 {
 	TSRMLS_FETCH();
 	return php_output_write(str, strlen(str) TSRMLS_CC);
@@ -991,7 +991,7 @@ PHPAPI void php_info_print_hr(void) /* {{{ */
 
 PHPAPI void php_info_print_table_colspan_header(int num_cols, char *header) /* {{{ */
 {
-	int spaces;
+	zend_str_size_int spaces;
 
 	if (!sapi_module.phpinfo_as_text) {
 		php_info_printf("<tr class=\"h\"><th colspan=\"%d\">%s</th></tr>\n", num_cols, header );

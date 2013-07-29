@@ -1169,7 +1169,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 	zval *arg1;
 	char *arg2;
 	zend_str_size arg2len;
-	int ret;
+	zend_str_size_int ret;
 	zend_str_size num_bytes;
 	php_int_t arg3 = 0;
 	char *buffer = NULL;
@@ -1810,7 +1810,7 @@ PHP_FUNCTION(fputcsv)
 	char escape_char = '\\'; /* allow this to be set as parameter */
 	php_stream *stream;
 	zval *fp = NULL, *fields = NULL;
-	int ret;
+	zend_str_size_int ret;
 	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
 	zend_str_size_int delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
 
@@ -1864,9 +1864,10 @@ PHP_FUNCTION(fputcsv)
 /* }}} */
 
 /* {{{ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC) */
-PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC)
+PHPAPI zend_str_size_int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC)
 {
-	int count, i = 0, ret;
+	int count, i = 0;
+	zend_str_size_int ret;
 	zval **field_tmp = NULL, field;
 	smart_str csvline = {0};
 	HashPosition pos;

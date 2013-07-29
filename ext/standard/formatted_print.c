@@ -52,7 +52,7 @@ static char HEXCHARS[] = "0123456789ABCDEF";
 
 /* php_spintf_appendchar() {{{ */
 inline static void
-php_sprintf_appendchar(char **buffer, int *pos, int *size, char add TSRMLS_DC)
+php_sprintf_appendchar(char **buffer, zend_str_size_int *pos, zend_str_size_int *size, char add TSRMLS_DC)
 {
 	if ((*pos + 1) >= *size) {
 		*size <<= 1;
@@ -66,22 +66,18 @@ php_sprintf_appendchar(char **buffer, int *pos, int *size, char add TSRMLS_DC)
 
 /* php_spintf_appendstring() {{{ */
 inline static void
-php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
-						   int min_width, int max_width, char padding,
-						   int alignment, int len, int neg, int expprec, int always_sign)
+php_sprintf_appendstring(char **buffer, zend_str_size_int *pos, zend_str_size_int *size, char *add,
+						   zend_str_size_int min_width, zend_str_size_int max_width, char padding,
+						   zend_str_size_int alignment, zend_str_size_int len, int neg, int expprec, int always_sign)
 {
-	register int npad;
-	int req_size;
-	int copy_len;
-	int m_width;
+	register zend_str_size_int npad;
+	zend_str_size_int req_size;
+	zend_str_size_int copy_len;
+	zend_str_size_int m_width;
 
 	copy_len = (expprec ? MIN(max_width, len) : len);
-	npad = min_width - copy_len;
+	npad = (min_width >= copy_len) ? (min_width - copy_len) : 0;
 
-	if (npad < 0) {
-		npad = 0;
-	}
-	
 	PRINTF_DEBUG(("sprintf: appendstring(%x, %d, %d, \"%s\", %d, '%c', %d)\n",
 				  *buffer, *pos, *size, add, min_width, padding, alignment));
 	m_width = MAX(min_width, copy_len);
@@ -126,8 +122,8 @@ php_sprintf_appendstring(char **buffer, int *pos, int *size, char *add,
 
 /* php_spintf_appendint() {{{ */
 inline static void
-php_sprintf_appendint(char **buffer, int *pos, int *size, long number,
-						int width, char padding, int alignment, 
+php_sprintf_appendint(char **buffer, zend_str_size_int *pos, zend_str_size_int *size, long number,
+						zend_str_size_int width, char padding, zend_str_size_int alignment, 
 						int always_sign)
 {
 	char numbuf[NUM_BUF_SIZE];
@@ -170,9 +166,9 @@ php_sprintf_appendint(char **buffer, int *pos, int *size, long number,
 
 /* php_spintf_appenduint() {{{ */
 inline static void
-php_sprintf_appenduint(char **buffer, int *pos, int *size,
+php_sprintf_appenduint(char **buffer, zend_str_size_int *pos, zend_str_size_int *size,
 					   unsigned long number,
-					   int width, char padding, int alignment)
+					   zend_str_size_int width, char padding, zend_str_size_int alignment)
 {
 	char numbuf[NUM_BUF_SIZE];
 	register unsigned long magn, nmagn;
@@ -202,17 +198,18 @@ php_sprintf_appenduint(char **buffer, int *pos, int *size,
 
 /* php_spintf_appenddouble() {{{ */
 inline static void
-php_sprintf_appenddouble(char **buffer, int *pos,
-						 int *size, double number,
-						 int width, char padding,
-						 int alignment, int precision,
+php_sprintf_appenddouble(char **buffer, zend_str_size_int *pos,
+						 zend_str_size_int *size, double number,
+						 zend_str_size_int width, char padding,
+						 zend_str_size_int alignment, int precision,
 						 int adjust, char fmt,
 						 int always_sign
 						 TSRMLS_DC)
 {
 	char num_buf[NUM_BUF_SIZE];
 	char *s = NULL;
-	int s_len = 0, is_negative = 0;
+	zend_str_size_int s_len = 0;
+	int is_negative = 0;
 #ifdef HAVE_LOCALE_H
 	struct lconv *lconv;
 #endif
@@ -293,8 +290,8 @@ php_sprintf_appenddouble(char **buffer, int *pos,
 
 /* php_spintf_appendd2n() {{{ */
 inline static void
-php_sprintf_append2n(char **buffer, int *pos, int *size, long number,
-					 int width, char padding, int alignment, int n,
+php_sprintf_append2n(char **buffer, zend_str_size_int *pos, zend_str_size_int *size, long number,
+					 zend_str_size_int width, char padding, zend_str_size_int alignment, int n,
 					 char *chartable, int expprec)
 {
 	char numbuf[NUM_BUF_SIZE];
@@ -324,11 +321,11 @@ php_sprintf_append2n(char **buffer, int *pos, int *size, long number,
 
 /* php_spintf_getnumber() {{{ */
 inline static int
-php_sprintf_getnumber(char *buffer, int *pos)
+php_sprintf_getnumber(char *buffer, zend_str_size_int *pos)
 {
 	char *endptr;
 	register long num = strtol(&buffer[*pos], &endptr, 10);
-	register int i = 0;
+	register zend_str_size_int i = 0;
 
 	if (endptr != NULL) {
 		i = (endptr - &buffer[*pos]);
@@ -369,10 +366,11 @@ php_sprintf_getnumber(char *buffer, int *pos)
  *
  */
 static char *
-php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC)
+php_formatted_print(int ht, zend_str_size_int *len, int use_array, int format_offset TSRMLS_DC)
 {
 	zval ***args, **z_format;
-	int argc, size = 240, inpos = 0, outpos = 0, temppos;
+	int argc;
+	zend_str_size_int size = 240, inpos = 0, outpos = 0, temppos;
 	int alignment, currarg, adjusting, argnum, width, precision;
 	char *format, *result, padding;
 	int always_sign;
@@ -666,7 +664,7 @@ php_formatted_print(int ht, int *len, int use_array, int format_offset TSRMLS_DC
 PHP_FUNCTION(user_sprintf)
 {
 	char *result;
-	int len;
+	zend_str_size_int len;
 	
 	if ((result=php_formatted_print(ht, &len, 0, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
@@ -680,7 +678,7 @@ PHP_FUNCTION(user_sprintf)
 PHP_FUNCTION(vsprintf)
 {
 	char *result;
-	int len;
+	zend_str_size_int len;
 	
 	if ((result=php_formatted_print(ht, &len, 1, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
@@ -694,7 +692,7 @@ PHP_FUNCTION(vsprintf)
 PHP_FUNCTION(user_printf)
 {
 	char *result;
-	int len, rlen;
+	zend_str_size_int len, rlen;
 	
 	if ((result=php_formatted_print(ht, &len, 0, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
@@ -710,7 +708,7 @@ PHP_FUNCTION(user_printf)
 PHP_FUNCTION(vprintf)
 {
 	char *result;
-	int len, rlen;
+	zend_str_size_int len, rlen;
 	
 	if ((result=php_formatted_print(ht, &len, 1, 0 TSRMLS_CC))==NULL) {
 		RETURN_FALSE;
@@ -728,7 +726,7 @@ PHP_FUNCTION(fprintf)
 	php_stream *stream;
 	zval *arg1;
 	char *result;
-	int len;
+	zend_str_size_int len;
 	
 	if (ZEND_NUM_ARGS() < 2) {
 		WRONG_PARAM_COUNT;
@@ -759,7 +757,7 @@ PHP_FUNCTION(vfprintf)
 	php_stream *stream;
 	zval *arg1;
 	char *result;
-	int len;
+	zend_str_size_int len;
 	
 	if (ZEND_NUM_ARGS() != 3) {
 		WRONG_PARAM_COUNT;
