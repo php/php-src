@@ -45,9 +45,8 @@ typedef struct {
 	size_t   path_len;
 	char     *pattern;
 	size_t   pattern_len;
-	char     *basedir_indexmap;
-	size_t   basedir_indexmap_size;
-	size_t   basedir_indexmap_first;
+	int      *open_basedir_indexmap;
+	size_t   open_basedir_indexmap_size;
 } glob_s_t;
 
 PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, int *plen STREAMS_DC TSRMLS_DC) /* {{{ */
@@ -94,6 +93,9 @@ PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, int *ple
 }
 /* }}} */
 
+#define _php_glob_stream_get_result_count(pglob) \
+	pglob->open_basedir_indexmap ? (int) pglob->open_basedir_indexmap_size : pglob->glob.gl_pathc
+
 PHPAPI int _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
@@ -102,7 +104,7 @@ PHPAPI int _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC
 		if (pflags) {
 			*pflags = pglob->flags;
 		}
-		return pglob->basedir_indexmap ? (int) pglob->basedir_indexmap_size : pglob->glob.gl_pathc;
+		return _php_glob_stream_get_result_count(pglob);
 	} else {
 		if (pflags) {
 			*pflags = 0;
@@ -145,18 +147,20 @@ static size_t php_glob_stream_read(php_stream *stream, char *buf, size_t count T
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 	php_stream_dirent *ent = (php_stream_dirent*)buf;
 	char *path;
+	int glob_result_count;
+	size_t index;
 
 	/* avoid problems if someone mis-uses the stream */
 	if (count == sizeof(php_stream_dirent) && pglob) {
-		if (pglob->index < (size_t)pglob->glob.gl_pathc) {
-			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[pglob->index], pglob->flags & GLOB_APPEND, &path TSRMLS_CC);
-			do {
-				pglob->index++;
-			} while (pglob->basedir_indexmap && pglob->index < (size_t)pglob->glob.gl_pathc && !pglob->basedir_indexmap[pglob->index]);
+		glob_result_count = _php_glob_stream_get_result_count(pglob);
+		if (pglob->index < (size_t) glob_result_count) {
+			index = pglob->open_basedir_indexmap ? pglob->open_basedir_indexmap[pglob->index] : pglob->index;
+			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[index], pglob->flags & GLOB_APPEND, &path TSRMLS_CC);
+			++pglob->index;
 			PHP_STRLCPY(ent->d_name, path, sizeof(ent->d_name), strlen(path));
 			return sizeof(php_stream_dirent);
 		}
-		pglob->index = pglob->glob.gl_pathc;
+		pglob->index = glob_result_count;
 		if (pglob->path) {
 			efree(pglob->path);
 			pglob->path = NULL;
@@ -180,8 +184,8 @@ static int php_glob_stream_close(php_stream *stream, int close_handle TSRMLS_DC)
 		if (pglob->pattern) {
 			efree(pglob->pattern);
 		}
-		if (pglob->basedir_indexmap) {
-			efree(pglob->basedir_indexmap);
+		if (pglob->open_basedir_indexmap) {
+			efree(pglob->open_basedir_indexmap);
 		}
 	}
 	efree(stream->abstract);
@@ -194,7 +198,7 @@ static int php_glob_stream_rewind(php_stream *stream, off_t offset, int whence, 
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 
 	if (pglob) {
-		pglob->index = pglob->basedir_indexmap_first;
+		pglob->index = 0;
 		if (pglob->path) {
 			efree(pglob->path);
 			pglob->path = NULL;
@@ -241,19 +245,16 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 		}
 	}
 
-	if ((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) {
+	/* if open_basedir in use, check and filter restricted paths */
+	if (pglob->glob.gl_pathc && (options & STREAM_DISABLE_OPEN_BASEDIR) == 0) {
 		for (i = 0; i < pglob->glob.gl_pathc; i++) {
 			if (!php_check_open_basedir_ex(pglob->glob.gl_pathv[i], 0 TSRMLS_CC)) {
-				if (!pglob->basedir_indexmap) {
-					pglob->index = i;
-					pglob->basedir_indexmap = ecalloc(sizeof(char), pglob->glob.gl_pathc);
-					pglob->basedir_indexmap_first = i;
-				}
-				pglob->basedir_indexmap[i] = 1;
-				pglob->basedir_indexmap_size++;
+				if (!pglob->open_basedir_indexmap)
+					pglob->open_basedir_indexmap = ecalloc(sizeof(int), pglob->glob.gl_pathc);
+				pglob->open_basedir_indexmap[pglob->open_basedir_indexmap_size++] = i;
 			}
 		}
-		if (!pglob->basedir_indexmap) {
+		if (NULL == pglob->open_basedir_indexmap) {
 			globfree(&pglob->glob);
 			efree(pglob);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s)", path, PG(open_basedir));
