@@ -2656,12 +2656,9 @@ static void accel_free_ts_resources()
 #endif
 }
 
-static void accel_shutdown(zend_extension *extension)
+void accel_shutdown(TSRMLS_D)
 {
 	zend_ini_entry *ini_entry;
-	TSRMLS_FETCH();
-
-	(void)extension; /* keep the compiler happy */
 
 	zend_accel_blacklist_shutdown(&accel_blacklist);
 
@@ -2679,6 +2676,11 @@ static void accel_shutdown(zend_extension *extension)
 	}
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+# ifndef ZTS
+	zend_hash_clean(CG(function_table));
+	zend_hash_clean(CG(class_table));
+	zend_hash_clean(EG(zend_constants));
+# endif
 	CG(interned_strings_start) = orig_interned_strings_start;
 	CG(interned_strings_end) = orig_interned_strings_end;
 	zend_new_interned_string = orig_new_interned_string;
@@ -2768,7 +2770,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	"http://www.zend.com/",					/* URL */
 	"Copyright (c) 1999-2013",				/* copyright */
 	accel_startup,					   		/* startup */
-	accel_shutdown,							/* shutdown */
+	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */
 	accel_deactivate,						/* per-script deactivation */
 	NULL,									/* message handler */
