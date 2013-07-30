@@ -30,6 +30,10 @@
 # include "main/php_regex.h"
 #endif
 
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+# include "ext/standard/php_string.h"
+#endif
+
 #ifdef ZEND_WIN32
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB|REG_ICASE)
 #else
@@ -252,7 +256,11 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 	zend_accel_error(ACCEL_LOG_DEBUG,"Loading blacklist file:  '%s'", filename);
 
 	if (VCWD_REALPATH(filename, buf)) {
+#if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
+		blacklist_path_length = php_dirname(buf, strlen(buf));
+#else
 		blacklist_path_length = zend_dirname(buf, strlen(buf));
+#endif
 		blacklist_path = zend_strndup(buf, blacklist_path_length);
 	}
 
