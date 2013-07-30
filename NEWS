@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     limited case). (Arpad)
 
 - OPcahce:
+  . Added support for glob symbols in blacklist entries (?, *, **).
+    (Terry Elison, Dmitry)
   . Fixed bug #65338 (Enabling both php_opcache and php_wincache AVs on
     shutdown). (Dmitry)
 
