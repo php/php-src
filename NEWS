@@ -10,6 +10,12 @@ PHP                                                                        NEWS
   . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
     limited case). (Arpad)
 
+- OPcahce:
+  . Added support for glob symbols in blacklist entries (?, *, **).
+    (Terry Elison, Dmitry)
+  . Fixed bug #65338 (Enabling both php_opcache and php_wincache AVs on
+    shutdown). (Dmitry)
+
 - PDO_mysql:
   . Fixed bug #65299 (pdo mysql parsing errors). (Johannes)
 
