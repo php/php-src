@@ -10,7 +10,7 @@ all: $(all_targets)
 	@echo "Build complete."
 	@echo "Don't forget to run 'make test'."
 	@echo
-	
+
 build-modules: $(PHP_MODULES) $(PHP_ZEND_EX)
 
 build-binaries: $(PHP_BINARIES)
