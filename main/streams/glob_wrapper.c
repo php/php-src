@@ -246,15 +246,18 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 	}
 
 	/* if open_basedir in use, check and filter restricted paths */
-	if (pglob->glob.gl_pathc && (options & STREAM_DISABLE_OPEN_BASEDIR) == 0) {
+	if ((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) {
 		for (i = 0; i < pglob->glob.gl_pathc; i++) {
 			if (!php_check_open_basedir_ex(pglob->glob.gl_pathv[i], 0 TSRMLS_CC)) {
 				if (!pglob->open_basedir_indexmap)
-					pglob->open_basedir_indexmap = ecalloc(sizeof(int), pglob->glob.gl_pathc);
+					pglob->open_basedir_indexmap = (int *) emalloc(sizeof(int) * pglob->glob.gl_pathc);
 				pglob->open_basedir_indexmap[pglob->open_basedir_indexmap_size++] = i;
 			}
 		}
-		if (NULL == pglob->open_basedir_indexmap) {
+		/* if open_basedir_indexmap is empty and either the glob result is not empty (all found paths are restricted)
+		 * or the pattern path is not in open_basedir directory (security check that prevents getting any info about
+		 * file that is not in open_basedir), then error */
+		if (NULL == pglob->open_basedir_indexmap && (pglob->glob.gl_pathc || php_check_open_basedir_ex(path, 0 TSRMLS_CC))) {
 			globfree(&pglob->glob);
 			efree(pglob);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s)", path, PG(open_basedir));
@@ -278,7 +281,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 	pglob->flags |= GLOB_APPEND;
 
 	if (pglob->glob.gl_pathc) {
-		php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[pglob->index], 1, &tmp TSRMLS_CC);
+		php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[0], 1, &tmp TSRMLS_CC);
 	} else {
 		php_glob_stream_path_split(pglob, path, 1, &tmp TSRMLS_CC);
 	}
