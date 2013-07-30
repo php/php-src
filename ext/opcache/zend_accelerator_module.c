@@ -378,6 +378,7 @@ static ZEND_MSHUTDOWN_FUNCTION(zend_accelerator)
 	(void)type; /* keep the compiler happy */
 
 	UNREGISTER_INI_ENTRIES();
+	accel_shutdown(TSRMLS_C);
 	return SUCCESS;
 }
 
