@@ -185,7 +185,7 @@ php_stream_ops php_stream_zipio_ops = {
 };
 
 /* {{{ php_stream_zip_open */
-php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_DC TSRMLS_DC)
+php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC TSRMLS_DC)
 {
 	struct zip_file *zf = NULL;
 	int err = 0;
@@ -235,8 +235,8 @@ php_stream *php_stream_zip_open(char *filename, char *path, char *mode STREAMS_D
 
 /* {{{ php_stream_zip_opener */
 php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
-											char *path,
-											char *mode,
+											const char *path,
+											const char *mode,
 											int options,
 											char **opened_path,
 											php_stream_context *context STREAMS_DC TSRMLS_DC)

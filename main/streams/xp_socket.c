@@ -230,7 +230,7 @@ static int php_sockop_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_DC
 #endif
 }
 
-static inline int sock_sendto(php_netstream_data_t *sock, char *buf, size_t buflen, int flags,
+static inline int sock_sendto(php_netstream_data_t *sock, const char *buf, size_t buflen, int flags,
 		struct sockaddr *addr, socklen_t addrlen
 		TSRMLS_DC)
 {
@@ -521,7 +521,7 @@ static inline int parse_unix_address(php_stream_xport_param *xparam, struct sock
 }
 #endif
 
-static inline char *parse_ip_address_ex(const char *str, int str_len, int *portno, int get_err, char **err TSRMLS_DC)
+static inline char *parse_ip_address_ex(const char *str, size_t str_len, int *portno, int get_err, char **err TSRMLS_DC)
 {
 	char *colon;
 	char *host = NULL;
@@ -774,8 +774,8 @@ static int php_tcp_sockop_set_option(php_stream *stream, int option, int value, 
 }
 
 
-PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, long protolen,
-		char *resourcename, long resourcenamelen,
+PHPAPI php_stream *php_stream_generic_socket_factory(const char *proto, size_t protolen,
+		const char *resourcename, size_t resourcenamelen,
 		const char *persistent_id, int options, int flags,
 		struct timeval *timeout,
 		php_stream_context *context STREAMS_DC TSRMLS_DC)
