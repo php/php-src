@@ -45,7 +45,7 @@ typedef struct {
 	size_t   path_len;
 	char     *pattern;
 	size_t   pattern_len;
-	int      *open_basedir_indexmap;
+	size_t   *open_basedir_indexmap;
 	size_t   open_basedir_indexmap_size;
 } glob_s_t;
 
@@ -250,7 +250,7 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 		for (i = 0; i < pglob->glob.gl_pathc; i++) {
 			if (!php_check_open_basedir_ex(pglob->glob.gl_pathv[i], 0 TSRMLS_CC)) {
 				if (!pglob->open_basedir_indexmap)
-					pglob->open_basedir_indexmap = (int *) emalloc(sizeof(int) * pglob->glob.gl_pathc);
+					pglob->open_basedir_indexmap = (size_t *) emalloc(sizeof(int) * pglob->glob.gl_pathc);
 				pglob->open_basedir_indexmap[pglob->open_basedir_indexmap_size++] = i;
 			}
 		}
