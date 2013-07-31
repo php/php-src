@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #50308 (session id not appended properly for empty anchor tags).
     (Arpad)
 
+- SOAP:
+  . Fixed bug #65018 (SoapHeader problems with SoapServer). (Dmitry)
+
 - SPL:
   . Fixed bug #65328 (Segfault when getting SplStack object Value). (Laruence)
 
