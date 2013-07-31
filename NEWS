@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.2
+31 Jul 2013, PHP 5.5.2 RC1
 
 - Core:
   . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
