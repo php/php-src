@@ -9,8 +9,11 @@ PHP                                                                        NEWS
   . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
   . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
     limited case). (Arpad)
+  . Fixed bug #62691 (solaris sed has no -i switch). (Chris Jones)
 
-- OPcahce:
+- OPcache:
+  . Added opcache.restrict_api configuration directive that may limit
+    usage of OPcahce API functions only to patricular script(s). (Dmitry)
   . Added support for glob symbols in blacklist entries (?, *, **).
     (Terry Elison, Dmitry)
   . Fixed bug #65338 (Enabling both php_opcache and php_wincache AVs on
@@ -22,6 +25,9 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #65028 (Phar::buildFromDirectory creates corrupt archives for 
     some specific contents). (Stas)
+
+- SOAP:
+  . Fixed bug #65018 (SoapHeader problems with SoapServer). (Dmitry)
 
 - SPL:
   . Fixed bug #65328 (Segfault when getting SplStack object Value). (Laruence)
