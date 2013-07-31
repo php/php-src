@@ -232,6 +232,7 @@ typedef struct _zend_accel_directives {
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	long           interned_strings_buffer;
 #endif
+	char          *restrict_api;
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {

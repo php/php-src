@@ -11,6 +11,10 @@ PHP                                                                        NEWS
     limited case). (Arpad)
 
 - OPcahce:
+  . Added opcache.restrict_api configuration directive that may limit
+    usage of OPcahce API functions only to patricular script(s). (Dmitry)
+  . Added support for glob symbols in blacklist entries (?, *, **).
+    (Terry Elison, Dmitry)
   . Fixed bug #65338 (Enabling both php_opcache and php_wincache AVs on
     shutdown). (Dmitry)
 
@@ -20,6 +24,9 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #65028 (Phar::buildFromDirectory creates corrupt archives for 
     some specific contents). (Stas)
+
+- SOAP:
+  . Fixed bug #65018 (SoapHeader problems with SoapServer). (Dmitry)
 
 - SPL:
   . Fixed bug #65328 (Segfault when getting SplStack object Value). (Laruence)
