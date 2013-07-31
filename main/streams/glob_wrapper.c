@@ -45,6 +45,8 @@ typedef struct {
 	size_t   path_len;
 	char     *pattern;
 	size_t   pattern_len;
+	size_t   *open_basedir_indexmap;
+	size_t   open_basedir_indexmap_size;
 } glob_s_t;
 
 PHPAPI char* _php_glob_stream_get_path(php_stream *stream, int copy, int *plen STREAMS_DC TSRMLS_DC) /* {{{ */
@@ -91,6 +93,9 @@ PHPAPI char* _php_glob_stream_get_pattern(php_stream *stream, int copy, int *ple
 }
 /* }}} */
 
+#define _php_glob_stream_get_result_count(pglob) \
+	pglob->open_basedir_indexmap ? (int) pglob->open_basedir_indexmap_size : pglob->glob.gl_pathc
+
 PHPAPI int _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
@@ -99,7 +104,7 @@ PHPAPI int _php_glob_stream_get_count(php_stream *stream, int *pflags STREAMS_DC
 		if (pflags) {
 			*pflags = pglob->flags;
 		}
-		return pglob->glob.gl_pathc;
+		return _php_glob_stream_get_result_count(pglob);
 	} else {
 		if (pflags) {
 			*pflags = 0;
@@ -142,15 +147,20 @@ static size_t php_glob_stream_read(php_stream *stream, char *buf, size_t count T
 	glob_s_t *pglob = (glob_s_t *)stream->abstract;
 	php_stream_dirent *ent = (php_stream_dirent*)buf;
 	char *path;
+	int glob_result_count;
+	size_t index;
 
 	/* avoid problems if someone mis-uses the stream */
 	if (count == sizeof(php_stream_dirent) && pglob) {
-		if (pglob->index < (size_t)pglob->glob.gl_pathc) {
-			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[pglob->index++], pglob->flags & GLOB_APPEND, &path TSRMLS_CC);
+		glob_result_count = _php_glob_stream_get_result_count(pglob);
+		if (pglob->index < (size_t) glob_result_count) {
+			index = pglob->open_basedir_indexmap ? pglob->open_basedir_indexmap[pglob->index] : pglob->index;
+			php_glob_stream_path_split(pglob, pglob->glob.gl_pathv[index], pglob->flags & GLOB_APPEND, &path TSRMLS_CC);
+			++pglob->index;
 			PHP_STRLCPY(ent->d_name, path, sizeof(ent->d_name), strlen(path));
 			return sizeof(php_stream_dirent);
 		}
-		pglob->index = pglob->glob.gl_pathc;
+		pglob->index = glob_result_count;
 		if (pglob->path) {
 			efree(pglob->path);
 			pglob->path = NULL;
@@ -173,6 +183,9 @@ static int php_glob_stream_close(php_stream *stream, int close_handle TSRMLS_DC)
 		}
 		if (pglob->pattern) {
 			efree(pglob->pattern);
+		}
+		if (pglob->open_basedir_indexmap) {
+			efree(pglob->open_basedir_indexmap);
 		}
 	}
 	efree(stream->abstract);
@@ -210,12 +223,8 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	glob_s_t *pglob;
-	int ret;
+	int ret, i;
 	char *tmp, *pos;
-
-	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path TSRMLS_CC)) {
-		return NULL;
-	}
 
 	if (!strncmp(path, "glob://", sizeof("glob://")-1)) {
 		path += sizeof("glob://")-1;
@@ -232,6 +241,26 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 #endif
 		{
 			efree(pglob);
+			return NULL;
+		}
+	}
+
+	/* if open_basedir in use, check and filter restricted paths */
+	if ((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) {
+		for (i = 0; i < pglob->glob.gl_pathc; i++) {
+			if (!php_check_open_basedir_ex(pglob->glob.gl_pathv[i], 0 TSRMLS_CC)) {
+				if (!pglob->open_basedir_indexmap)
+					pglob->open_basedir_indexmap = (size_t *) emalloc(sizeof(int) * pglob->glob.gl_pathc);
+				pglob->open_basedir_indexmap[pglob->open_basedir_indexmap_size++] = i;
+			}
+		}
+		/* if open_basedir_indexmap is empty and either the glob result is not empty (all found paths are restricted)
+		 * or the pattern path is not in open_basedir directory (security check that prevents getting any info about
+		 * file that is not in open_basedir), then error */
+		if (NULL == pglob->open_basedir_indexmap && (pglob->glob.gl_pathc || php_check_open_basedir_ex(path, 0 TSRMLS_CC))) {
+			globfree(&pglob->glob);
+			efree(pglob);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "open_basedir restriction in effect. File(%s) is not within the allowed path(s): (%s)", path, PG(open_basedir));
 			return NULL;
 		}
 	}
