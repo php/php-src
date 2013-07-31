@@ -199,6 +199,10 @@ opcache.protect_memory (default "0")
 	Protect the shared memory from unexpected writing during script execution.
 	Useful for internal debugging only.
 
+opcache.restrict_api (default "")
+	Allows calling OPcache API functions only from PHP scripts which path is
+	started from specified string. The default "" means no restriction.
+
 opcache.mmap_base
 	Mapping base of shared memory segments (for Windows only). All the PHP
 	processes have to map shared memory into the same address space. This
