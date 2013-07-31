@@ -319,7 +319,7 @@ PHAR_ADD_ENTRY:
 /**
  * Open a directory handle within a phar archive
  */
-php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
+php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
 	php_stream *ret;
@@ -432,7 +432,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, char *path, char 
 /**
  * Make a new directory within a phar archive
  */
-int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
+int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mode, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info entry, *e;
 	phar_archive_data *phar = NULL;
@@ -564,7 +564,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, char *url_from, int mode, in
 /**
  * Remove a directory within a phar archive
  */
-int phar_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
+int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	phar_entry_info *entry;
 	phar_archive_data *phar = NULL;

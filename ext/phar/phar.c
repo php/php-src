@@ -2251,13 +2251,13 @@ last_time:
  *
  * This is used by phar_parse_url()
  */
-int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len, int executable, int for_create TSRMLS_DC) /* {{{ */
+int phar_split_fname(const char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len, int executable, int for_create TSRMLS_DC) /* {{{ */
 {
 	const char *ext_str;
 #ifdef PHP_WIN32
 	char *save;
 #endif
-	int ext_len, free_filename = 0;
+	int ext_len;
 
 	if (!strncasecmp(filename, "phar://", 7)) {
 		filename += 7;
@@ -2266,7 +2266,6 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 
 	ext_len = 0;
 #ifdef PHP_WIN32
-	free_filename = 1;
 	save = filename;
 	filename = estrndup(filename, filename_len);
 	phar_unixify_path_separators(filename, filename_len);
@@ -2282,10 +2281,9 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 #endif
 			}
 
-			if (free_filename) {
-				efree(filename);
-			}
-
+#ifdef PHP_WIN32
+			efree(filename);
+#endif
 			return FAILURE;
 		}
 
@@ -2308,9 +2306,9 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 		*entry = estrndup("/", 1);
 	}
 
-	if (free_filename) {
-		efree(filename);
-	}
+#ifdef PHP_WIN32
+	efree(filename);
+#endif
 
 	return SUCCESS;
 }

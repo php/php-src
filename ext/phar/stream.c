@@ -56,7 +56,7 @@ php_stream_wrapper php_stream_phar_wrapper = {
 /**
  * Open a phar file for streams API
  */
-php_url* phar_parse_url(php_stream_wrapper *wrapper, char *filename, char *mode, int options TSRMLS_DC) /* {{{ */
+php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options TSRMLS_DC) /* {{{ */
 {
 	php_url *resource;
 	char *arch = NULL, *entry = NULL, *error;
@@ -155,7 +155,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, char *filename, char *mode,
 /**
  * used for fopen('phar://...') and company
  */
-static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
+static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_data *idata;
@@ -563,7 +563,7 @@ static int phar_stream_stat(php_stream *stream, php_stream_statbuf *ssb TSRMLS_D
 /**
  * Stream wrapper stat implementation of stat()
  */
-static int phar_wrapper_stat(php_stream_wrapper *wrapper, char *url, int flags,
+static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int flags,
 				  php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource = NULL;
@@ -686,7 +686,7 @@ free_resource:
 /**
  * Unlink a file within a phar archive
  */
-static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
+static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource;
 	char *internal_file, *error;
@@ -762,7 +762,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 }
 /* }}} */
 
-static int phar_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
+static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context TSRMLS_DC) /* {{{ */
 {
 	php_url *resource_from, *resource_to;
 	char *error;
