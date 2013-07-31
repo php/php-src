@@ -20,9 +20,9 @@ PHP_PHARCMD_EXECUTABLE = ` \
 	fi;`
 PHP_PHARCMD_BANG = `$(top_srcdir)/build/shtool echo -n -- "$(INSTALL_ROOT)$(bindir)/$(program_prefix)php$(program_suffix)$(EXEEXT)";`
 
-$(builddir)/phar/phar.inc: $(srcdir)/phar/phar.inc
+$(builddir)/phar/phar.inc: $(srcdir)/phar/phar.inc.in
 	-@test -d $(builddir)/phar || mkdir $(builddir)/phar
-	-@test -f $(builddir)/phar/phar.inc || cp $(srcdir)/phar/phar.inc $(builddir)/phar/phar.inc
+	-@test -f $(builddir)/phar/phar.inc || cp $(srcdir)/phar/phar.inc.in $(builddir)/phar/phar.inc
 
 $(builddir)/phar.php: $(srcdir)/build_precommand.php $(srcdir)/phar/*.inc $(srcdir)/phar/*.php $(SAPI_CLI_PATH)
 	-@echo "Generating phar.php"
