@@ -62,7 +62,7 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	rt->s = two->s - one->s;
 	rt->days = abs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
 
-	timelib_do_rel_normalize(rt->invert ? one : two, rt);
+	timelib_do_rel_normalize_by_base(rt->invert ? one : two, rt);
 
 	/* Restore old TZ info */
 	memcpy(one, &one_backup, sizeof(one_backup));
@@ -85,7 +85,7 @@ timelib_rel_time *timelib_rel_add(timelib_rel_time *one, timelib_rel_time *two)
 	
 	rt = timelib_rel_time_ctor();
 
-	if (one->invert && !two->invert) {
+	if (one->invert && two->invert) {
 		one_mult = two_mult = 1;
 		rt->invert = 1;
 	} else {
@@ -93,7 +93,6 @@ timelib_rel_time *timelib_rel_add(timelib_rel_time *one, timelib_rel_time *two)
 		two_mult = two->invert ? -1 : 1;
 	}
 
-	rt = timelib_rel_time_ctor();
 	rt->y = one_mult * one->y + two_mult * two->y;
 	rt->m = one_mult * one->m + two_mult * two->m;
 	rt->d = one_mult * one->d + two_mult * two->d;
@@ -101,7 +100,7 @@ timelib_rel_time *timelib_rel_add(timelib_rel_time *one, timelib_rel_time *two)
 	rt->i = one_mult * one->i + two_mult * two->i;
 	rt->s = one_mult * one->s + two_mult * two->s;
 	
-	timelib_do_rel_normalize(NULL, rt);
+	timelib_do_rel_normalize(rt);
 
 	/* if the first not 0 rt member is negative, then invert */
 	if (rt->y < 0) {

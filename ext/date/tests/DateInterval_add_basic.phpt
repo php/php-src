@@ -25,9 +25,46 @@ $interval1->invert = 1;
 $interval = $interval->add($interval1);
 echo $interval->format('%Y-%M-%D %H:%i:%s') . "\n";
 
+$i0 = new Dateinterval('P1Y4D');
+$i1 = new DateInterval('P1Y3D');
+$i0->invert = 1;
+
+$i2 = $i0->add($i1); /* -1 day */
+echo $i2->format('%y-%m-%d %h-%i-%s') . "\n";
+echo $i2->invert . "\n";
+
+$i2 = $i0->sub($i1); /* -(2 years and 7 days) */
+echo $i2->format('%y-%m-%d %h-%i-%s') . "\n";
+echo $i2->invert . "\n";
+
+$i0->invert = 0;
+$i2 = $i0->sub($i1);
+echo $i2->format('%y-%m-%d %h-%i-%s') . "\n";
+echo $i2->invert . "\n";
+
+$i0 = new Dateinterval('P1Y4DT3H');
+$i1 = new DateInterval('P1Y4DT3H2M');
+$i2 = $i0->sub($i1); /* -2 minutes */
+echo $i2->format('%y-%m-%d %h-%i-%s') . "\n";
+echo $i2->invert . "\n";
+
+$i2 = $i1->sub($i0);
+echo $i2->format('%y-%m-%d %h-%i-%s') . "\n";
+echo $i2->invert . "\n";
+
 ?>
 --EXPECT--
 00-00-09 22:30:23
 01-02-09 03:40:50
 01-02-19 02:11:13
 01-02-09 03:40:50
+0-0-1 0-0-0
+1
+2-0-7 0-0-0
+1
+0-0-1 0-0-0
+0
+0-0-0 0-2-0
+1
+0-0-0 0-2-0
+0
