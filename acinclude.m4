@@ -2686,14 +2686,14 @@ EOF
   fi
   for arg in $ac_configure_args; do
     if test `expr -- $arg : "'.*"` = 0; then
-      if test `expr -- $arg : "--.*"` = 0; then
-        break;
+      if test `expr -- $arg : "-.*"` = 0 && test `expr -- $arg : ".*=.*"` = 0; then
+        continue;
       fi
       echo "'[$]arg' \\" >> $1
       CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS '[$]arg'"
     else
-      if test `expr -- $arg : "'--.*"` = 0; then
-        break;
+      if test `expr -- $arg : "'-.*"` = 0 && test `expr -- $arg : "'.*=.*"` = 0; then
+        continue;
       fi
       echo "[$]arg \\" >> $1
       CONFIGURE_OPTIONS="$CONFIGURE_OPTIONS [$]arg"
