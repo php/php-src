@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.2
 
 - Core:
+  . Fixed bug #65372 (Segfault in gc_zval_possible_root when return reference
+    fails). (Laruence)
   . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
     erroneously set to FILTER_SANITIZE_SPECIAL_CHARS value). (Andrey
     avp200681 gmail com).
