@@ -878,7 +878,7 @@ History
 2004/10/18: [impl] (thanks Imai Yasumasa)
                    enclose #include <sys/types.h> by #ifndef __BORLANDC__.
 2004/10/18: [bug]  (thanks Imai Yasumasa)
-                   memory acess violation in select_opt_exact_info().
+                   memory access violation in select_opt_exact_info().
 2004/09/25: [dist] fix doc/API and doc/API.ja.
 2004/09/25: [bug]  fix OP_SEMI_END_BUF process in match_at() for
                    the case USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE

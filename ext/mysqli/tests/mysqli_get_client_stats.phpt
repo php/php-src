@@ -166,7 +166,7 @@ mysqlnd.collect_memory_statistics=1
 	mysqli_get_client_stats_assert_gt('bytes_sent', $info, $expected, $test_counter);
 	mysqli_get_client_stats_assert_gt('bytes_received', $info, $expected, $test_counter);
 
-	// real_data_* get incremeneted after mysqli_*fetch*()
+	// real_data_* get incremented after mysqli_*fetch*()
     mysqli_get_client_stats_assert_eq('bytes_received_real_data_normal', $info, "0", $test_counter);
 	mysqli_get_client_stats_assert_eq('bytes_received_real_data_ps', $info, "0", $test_counter);
 
