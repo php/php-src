@@ -3,7 +3,12 @@ Testing ftp_nb_fget can handle large files incl. resume
 --SKIPIF--
 <?php
 require 'skipif.inc';
-if (disk_free_space(__DIR__) < 10*1024*1024*1024) die('not enough disk space');
+if (2147483647 == PHP_INT_MAX) {
+    die('not supported on this system');
+}
+if (disk_free_space(__DIR__) < 10*1024*1024*1024) {
+    die('not enough disk space');
+}
 ?>
 --FILE--
 <?php
