@@ -39,7 +39,7 @@
 #ifdef PHP_WIN32
 #include <winsock2.h>
 #elif defined(NETWARE)
-#ifdef USE_WINSOCK    /* Modified to use Winsock (NOVSOCK2.H), atleast for now */
+#ifdef USE_WINSOCK    /* Modified to use Winsock (NOVSOCK2.H), at least for now */
 #include <novsock2.h>
 #else
 #include <sys/socket.h>
