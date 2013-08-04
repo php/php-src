@@ -125,6 +125,12 @@ require_once('skipifconnectfailure.inc');
 		$expected_constants['MYSQLI_SERVER_QUERY_WAS_SLOW'] = true;
 	}
 
+
+	/* First introduced in MySQL 6.0, backported to MySQL 5.5 */
+	if ($version >= 50606 || $IS_MYSQLND) {
+		$expected_constants['MYSQLI_SERVER_PUBLIC_KEY'] = true;
+	}
+
 	if ($version > 50002) {
 		$expected_constants = array_merge($expected_constants, array(
 			"MYSQLI_TYPE_NEWDECIMAL"	=> true,

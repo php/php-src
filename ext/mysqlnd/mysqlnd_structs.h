@@ -463,7 +463,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__query_read_result_set_header)
 
 typedef MYSQLND_CONN_DATA *	(*func_mysqlnd_conn_data__get_reference)(MYSQLND_CONN_DATA * const conn TSRMLS_DC);
 typedef enum_func_status	(*func_mysqlnd_conn_data__free_reference)(MYSQLND_CONN_DATA * const conn TSRMLS_DC);
-typedef enum mysqlnd_connection_state (*func_mysqlnd_conn_data__get_state)(MYSQLND_CONN_DATA * const conn TSRMLS_DC);
+typedef enum mysqlnd_connection_state (*func_mysqlnd_conn_data__get_state)(const MYSQLND_CONN_DATA * const conn TSRMLS_DC);
 typedef void				(*func_mysqlnd_conn_data__set_state)(MYSQLND_CONN_DATA * const conn, enum mysqlnd_connection_state new_state TSRMLS_DC);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__simple_command)(MYSQLND_CONN_DATA * conn, enum php_mysqlnd_server_command command, const zend_uchar * const arg, size_t arg_len, enum mysqlnd_packet_type ok_packet, zend_bool silent, zend_bool ignore_upsert_status TSRMLS_DC);
