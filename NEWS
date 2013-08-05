@@ -28,6 +28,11 @@ PHP                                                                        NEWS
   . Fixed bug #65028 (Phar::buildFromDirectory creates corrupt archives for 
     some specific contents). (Stas)
 
+- Sessions:
+  . Implemented strict sessions RFC (https://wiki.php.net/rfc/strict_sessions)
+    which protects against session fixation attacks and session collisions.    
+    (Yasuo Ohgaki)
+
 - SOAP:
   . Fixed bug #65018 (SoapHeader problems with SoapServer). (Dmitry)
 

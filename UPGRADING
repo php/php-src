@@ -412,6 +412,11 @@ None
     ext/mysqli to be used with the new auth protocol, although at
     coarser level.
 
+- Sessions:
+  - Added session.use_strict_mode in 5.5.2, which prevents session
+    fixation attacks and session collisions. 
+    See also https://wiki.php.net/rfc/strict_sessions
+
 - Zend OPcache (See http://php.net/manual/en/book.opcache.php)
   - Added the following directives:
     - opcache.enable (default "1")
