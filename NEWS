@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
     limited case). (Arpad)
   . Improve fix for bug #63186 (compile failure on netbsd). (Matteo)
+  . Fixed bug #61268 (--enable-dtrace leads make to clobber
+    Zend/zend_dtrace.d) (Chris Jones)
+  . Cherry picked some DTrace build commits (allowing builds on Linux,
+    bug 62691, and bug 63706) from PHP 5.5 branch
 
 - Session:
   . Fixed bug #62129 (rfc1867 crashes php even though turned off). (gxd305 at
