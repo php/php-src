@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Improved IS_VAR operands fetching. (Laruence, Dmitry)
   . Implemented internal operator overloading
     (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
+  . Enabled file uploads greater than 2G (Ralf Lang, Mike)
 
 - mysqlnd:
   . Disabled flag for SP OUT variables for 5.5+ servers as they are not natively
