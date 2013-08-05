@@ -357,7 +357,9 @@ extern int lock_file;
 # endif
 #endif
 int main() { return 0; }
-], [], [AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])], [])
+],
+[AC_MSG_RESULT([done])],
+[AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])], [])
   
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \

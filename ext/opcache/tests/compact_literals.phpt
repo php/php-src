@@ -22,7 +22,7 @@ unset($array["2"]);
 
 print_r($array);
 
-echo "funcion define" . ":" . PHP_EOL;
+echo "function define" . ":" . PHP_EOL;
 if (!function_exists("dummy")) {
 	function dummy() {
 		var_dump(__FUNCTION__);
@@ -165,7 +165,7 @@ Array
     [1] => one
     [two] => 2
 )
-funcion define:
+function define:
 string(5) "dummy"
 string(11) "lambdadummy"
 string(1) "A"

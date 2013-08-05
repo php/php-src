@@ -269,11 +269,11 @@ static inline zend_uchar is_numeric_string(const char *str, int length, long *lv
     return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
-static inline char *
-zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
+static inline const char *
+zend_memnstr(const char *haystack, const char *needle, int needle_len, char *end)
 {
-	char *p = haystack;
-	char ne = needle[needle_len-1];
+	const char *p = haystack;
+	const char ne = needle[needle_len-1];
 
 	if (needle_len == 1) {
 		return (char *)memchr(p, *needle, (end-p));

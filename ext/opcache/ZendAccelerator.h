@@ -27,7 +27,7 @@
 #endif
 
 #define ACCELERATOR_PRODUCT_NAME	"Zend OPcache"
-#define ACCELERATOR_VERSION "7.0.2-dev"
+#define ACCELERATOR_VERSION "7.0.3-dev"
 /* 2 - added Profiler support, on 20010712 */
 /* 3 - added support for Optimizer's encoded-only-files mode */
 /* 4 - works with the new Optimizer, that supports the file format with licenses */
@@ -232,6 +232,7 @@ typedef struct _zend_accel_directives {
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	long           interned_strings_buffer;
 #endif
+	char          *restrict_api;
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {
@@ -316,6 +317,7 @@ extern zend_accel_globals accel_globals;
 
 extern char *zps_api_failure_reason;
 
+void accel_shutdown(TSRMLS_D);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason TSRMLS_DC);
 int  zend_accel_invalidate(const char *filename, int filename_len, zend_bool force TSRMLS_DC);

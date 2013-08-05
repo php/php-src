@@ -1,5 +1,5 @@
 --TEST--
-Bug #55397 (comparsion of incomplete DateTime causes SIGSEGV)
+Bug #55397 (comparison of incomplete DateTime causes SIGSEGV)
 --INI--
 --FILE--
 <?php

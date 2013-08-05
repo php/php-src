@@ -280,6 +280,7 @@ PHP_FUNCTION(hex2bin)
 	result = php_hex2bin((unsigned char *)data, datalen, &newlen);
 
 	if (!result) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input string must be hexadecimal string");
 		RETURN_FALSE;
 	}
 
@@ -1581,7 +1582,7 @@ PHP_FUNCTION(pathinfo)
 		const char *p;
 		int idx;
 
-		/* Have we alrady looked up the basename? */
+		/* Have we already looked up the basename? */
 		if (!have_basename && !ret) {
 			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
 		}

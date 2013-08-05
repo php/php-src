@@ -5,12 +5,13 @@ Bug #27303 (OCIBindByName binds numeric PHP values as characters)
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 // The bind buffer size edge cases seem to change each DB version.
-if (preg_match('/Release 10\.2\.0\.3/', oci_server_version($c), $matches) !== 1) {
-    if (preg_match('/Release 11\.1\.0\.6/', oci_server_version($c), $matches) !== 1) {
-        if (preg_match('/Release 11\.2\.0\.3/', oci_server_version($c), $matches) !== 1) {
-            die("skip expected output only valid when using specific Oracle database versions");
-        }
-    }
+preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
+if (!(isset($matches[0]) && 
+      (($matches[1] == 10 && $matches[2] == 2 && $matches[3] == 0 && $matches[4] == 3) || 
+       ($matches[1] == 11 && $matches[2] == 1 && $matches[3] == 0 && $matches[4] == 6) ||
+       ($matches[1] == 11 && $matches[2] == 2 && $matches[3] == 0 && $matches[4] == 3)
+       ))) {
+    die("skip expected output only valid when using Oracle 10gR2 or 11.2.0.2 databases");
 }
 ?>
 --FILE--

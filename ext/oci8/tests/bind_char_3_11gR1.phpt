@@ -5,10 +5,12 @@ PL/SQL oci_bind_by_name with SQLT_AFC aka CHAR to CHAR parameter
 if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 // The bind buffer size edge cases seem to change each DB version.
-if (preg_match('/Release 11\.1\./', oci_server_version($c), $matches) !== 1) {
-    if (preg_match('/Release 11\.2\.0\.3/', oci_server_version($c), $matches) !== 1) {
-        die("skip expected output only valid when using Oracle 11gR1 or 11.2.0.3 databases");
-    }
+preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
+if (!(isset($matches[0]) && 
+           (($matches[1] == 11 && $matches[2] == 1) || 
+            ($matches[1] == 11 && $matches[2] == 2 && $matches[3] == 0 && $matches[4] == 3)
+	    ))) {
+    die("skip expected output only valid when using Oracle 11gR1 or 11.2.0.3 databases");
 }
 ?>
 --ENV--
