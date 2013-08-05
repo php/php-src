@@ -1829,9 +1829,6 @@ static PHP_FUNCTION(session_id)
 	}
 
 	if (name) {
-		if (PS(use_strict_mode) && argc) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Set session ID while session.use_strict_mode is enabled");
-		}
 		if (PS(id)) {
 			efree(PS(id));
 		}
