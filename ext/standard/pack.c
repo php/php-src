@@ -514,7 +514,7 @@ static long php_unpack(char *data, int size, int issigned, int *map)
 
 /* unpack() is based on Perl's unpack(), but is modified a bit from there.
  * Rather than depending on error-prone ordered lists or syntactically
- * unpleasant pass-by-reference, we return an object with named paramters 
+ * unpleasant pass-by-reference, we return an object with named parameters 
  * (like *_fetch_object()). Syntax is "f[repeat]name/...", where "f" is the
  * formatter char (like pack()), "[repeat]" is the optional repeater argument,
  * and "name" is the name of the variable to use.

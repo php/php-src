@@ -2920,9 +2920,11 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EG(return_value_ptr_ptr)) {
-					retval_ptr = *retval_ptr_ptr;
-					*EG(return_value_ptr_ptr) = retval_ptr;
-					Z_ADDREF_P(retval_ptr);
+					zval *ret;
+
+					ALLOC_ZVAL(ret);
+					INIT_PZVAL_COPY(ret, *retval_ptr_ptr);
+					*EG(return_value_ptr_ptr) = ret;
 				}
 				break;
 			}

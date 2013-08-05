@@ -1261,6 +1261,7 @@ MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array TSRMLS
 static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, php_socket_t * max_fd TSRMLS_DC)
 {
 	php_socket_t this_fd;
+	php_stream *stream = NULL;
 	int cnt = 0;
 	MYSQLND **p = conn_array;
 
@@ -1270,7 +1271,8 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 		 * when casting.  It is only used here so that the buffered data warning
 		 * is not displayed.
 		 * */
-		if (SUCCESS == php_stream_cast((*p)->data->net->data->m.get_stream((*p)->data->net TSRMLS_CC), PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+		stream = (*p)->data->net->data->m.get_stream((*p)->data->net TSRMLS_CC);
+		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && this_fd >= 0) {
 
 			PHP_SAFE_FD_SET(this_fd, fds);
@@ -1288,6 +1290,7 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds TSRMLS_DC)
 {
 	php_socket_t this_fd;
+	php_stream *stream = NULL;
 	int ret = 0;
 	zend_bool disproportion = FALSE;
 
@@ -1295,7 +1298,8 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds 
 	MYSQLND **fwd = conn_array, **bckwd = conn_array;
 
 	while (*fwd) {
-		if (SUCCESS == php_stream_cast((*fwd)->data->net->data->m.get_stream((*fwd)->data->net TSRMLS_CC), PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+		stream = (*fwd)->data->net->data->m.get_stream((*fwd)->data->net TSRMLS_CC);
+		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && this_fd >= 0) {
 			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
 				if (disproportion) {
