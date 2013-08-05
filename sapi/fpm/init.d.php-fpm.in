@@ -91,6 +91,20 @@ case "$1" in
 		fi
 	;;
 
+	status)
+		if [ ! -r $php_fpm_PID ] ; then
+			echo "php-fpm is stopped"
+			exit 0
+		fi
+
+		PID=`cat $php_fpm_PID`
+		if ps -p $PID | grep -q $PID; then
+			echo "php-fpm (pid $PID) is running..."
+		else
+			echo "php-fpm dead but pid file exists"
+		fi
+	;;
+
 	force-quit)
 		echo -n "Terminating php-fpm "
 
@@ -131,7 +145,7 @@ case "$1" in
 	;;
 
 	*)
-		echo "Usage: $0 {start|stop|force-quit|restart|reload}"
+		echo "Usage: $0 {start|stop|force-quit|restart|reload|status}"
 		exit 1
 	;;
 

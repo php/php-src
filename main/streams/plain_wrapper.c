@@ -851,7 +851,7 @@ static php_stream_ops	php_plain_files_dirstream_ops = {
 	NULL  /* set_option */
 };
 
-static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, char *path, char *mode,
+static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, const char *path, const char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	DIR *dir = NULL;
@@ -989,7 +989,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, cha
 /* }}} */
 
 
-static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, char *path, char *mode,
+static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, const char *path, const char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(path TSRMLS_CC)) {
@@ -999,7 +999,7 @@ static php_stream *php_plain_files_stream_opener(php_stream_wrapper *wrapper, ch
 	return php_stream_fopen_rel(path, mode, opened_path, options);
 }
 
-static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
+static int php_plain_files_url_stater(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
 {
 	char *p;
 
@@ -1029,7 +1029,7 @@ static int php_plain_files_url_stater(php_stream_wrapper *wrapper, char *url, in
 		return VCWD_STAT(url, &ssb->sb);
 }
 
-static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
+static int php_plain_files_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 	char *p;
 	int ret;
@@ -1058,7 +1058,7 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, char *url, int op
 	return 1;
 }
 
-static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC)
+static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context TSRMLS_DC)
 {
 	char *p;
 	int ret;
@@ -1147,7 +1147,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, char *url_from, c
 	return 1;
 }
 
-static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mode, int options, php_stream_context *context TSRMLS_DC)
+static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, int mode, int options, php_stream_context *context TSRMLS_DC)
 {
 	int ret, recursive = options & PHP_STREAM_MKDIR_RECURSIVE;
 	char *p;
@@ -1235,7 +1235,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, char *dir, int mod
 	}
 }
 
-static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
+static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 #if PHP_WIN32
 	int url_len = strlen(url);
@@ -1262,7 +1262,7 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, char *url, int opt
 	return 1;
 }
 
-static int php_plain_files_metadata(php_stream_wrapper *wrapper, char *url, int option, void *value, php_stream_context *context TSRMLS_DC)
+static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url, int option, void *value, php_stream_context *context TSRMLS_DC)
 {
 	struct utimbuf *newtime;
 	char *p;
@@ -1371,10 +1371,11 @@ php_stream_wrapper php_plain_files_wrapper = {
 };
 
 /* {{{ php_stream_fopen_with_path */
-PHPAPI php_stream *_php_stream_fopen_with_path(char *filename, char *mode, char *path, char **opened_path, int options STREAMS_DC TSRMLS_DC)
+PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char *mode, const char *path, char **opened_path, int options STREAMS_DC TSRMLS_DC)
 {
 	/* code ripped off from fopen_wrappers.c */
-	char *pathbuf, *ptr, *end;
+	char *pathbuf, *end;
+	const char *ptr;
 	const char *exec_fname;
 	char trypath[MAXPATHLEN];
 	php_stream *stream;

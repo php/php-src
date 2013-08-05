@@ -648,7 +648,7 @@ _php_mb_regex_init_options(const char *parg, int narg, OnigOptionType *option, O
 /* }}} */
 
 /*
- * php funcions
+ * php functions
  */
 
 /* {{{ proto string mb_regex_encoding([string encoding])

@@ -361,6 +361,10 @@ ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_setLenient, 0, 0, 1)
 	ZEND_ARG_INFO(0, isLenient)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_set_minimal_days_in_first_week, 0, 0, 1)
+	ZEND_ARG_INFO(0, numberOfDays)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_from_date_time, 0, 0, 1)
 	ZEND_ARG_INFO(0, dateTime)
 ZEND_END_ARG_INFO()
@@ -433,6 +437,7 @@ static const zend_function_entry Calendar_class_functions[] = {
 #endif
 	PHP_ME_MAPPING(setFirstDayOfWeek,	intlcal_set_first_day_of_week, ainfo_cal_dow,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(setLenient,			intlcal_set_lenient,		ainfo_cal_setLenient,				ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(setMinimalDaysInFirstWeek,intlcal_set_minimal_days_in_first_week,ainfo_cal_set_minimal_days_in_first_week,ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(equals,				intlcal_equals,				ainfo_cal_other_cal,				ZEND_ACC_PUBLIC)
 #if U_ICU_VERSION_MAJOR_NUM >= 49
 	PHP_ME_MAPPING(getRepeatedWallTimeOption,intlcal_get_repeated_wall_time_option,ainfo_cal_void,		ZEND_ACC_PUBLIC)
@@ -523,7 +528,7 @@ void calendar_register_IntlCalendar_class(TSRMLS_D)
 	CALENDAR_DECL_LONG_CONST("FIELD_JULIAN_DAY",			UCAL_JULIAN_DAY);
 	CALENDAR_DECL_LONG_CONST("FIELD_MILLISECONDS_IN_DAY",	UCAL_MILLISECONDS_IN_DAY);
 	CALENDAR_DECL_LONG_CONST("FIELD_IS_LEAP_MONTH",			UCAL_IS_LEAP_MONTH);
-	CALENDAR_DECL_LONG_CONST("FIELD_FIELD_COUNT ",			UCAL_FIELD_COUNT);
+	CALENDAR_DECL_LONG_CONST("FIELD_FIELD_COUNT",			UCAL_FIELD_COUNT);
 	CALENDAR_DECL_LONG_CONST("FIELD_DAY_OF_MONTH",			UCAL_DAY_OF_MONTH);
 
 	CALENDAR_DECL_LONG_CONST("DOW_SUNDAY",					UCAL_SUNDAY);

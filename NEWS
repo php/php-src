@@ -2,4 +2,30 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 201?, PHP 5.6.0
 
+- Core:
+  . Improved IS_VAR operands fetching. (Laruence, Dmitry)
+  . Implemented internal operator overloading
+    (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
+
+- mysqlnd:
+  . Disabled flag for SP OUT variables for 5.5+ servers as they are not natively
+    supported by the overlying APIs. (Andrey)
+
+- OPcache:
+  . Added an optimization pass to convert FCALL_BY_NAME into DO_FCALL.
+    (Laruence, Dmitry)
+  . Added an optimization pass to merged identical constants (and related
+    cache_slots) in op_array->literals table. (Laruence, Dmitry)
+  . Added script level constant replacement optimization pass. (Dmitry)
+
+- PDO_pgsql:
+  . Fixed Bug #42614 (PDO_pgsql: add pg_get_notify support). (Matteo)
+  . Fixed Bug #63657 (pgsqlCopyFromFile, pgsqlCopyToArray use Postgres < 7.3
+    syntax). (Matteo)
+
+- GMP:
+  . Moved GMP to use object as the underlying structure and implemented various
+    improvements based on this.
+    (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

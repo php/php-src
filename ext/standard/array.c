@@ -352,7 +352,7 @@ PHP_FUNCTION(count)
 
 /* Numbers are always smaller than strings int this function as it
  * anyway doesn't make much sense to compare two different data types.
- * This keeps it consistant and simple.
+ * This keeps it consistent and simple.
  *
  * This is not correct any more, depends on what compare_func is set to.
  */
@@ -1041,7 +1041,7 @@ PHP_FUNCTION(max)
 static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive TSRMLS_DC) /* {{{ */
 {
 	zval **args[3],			/* Arguments to userland function */
-		  *retval_ptr,		/* Return value - unused */
+		  *retval_ptr = NULL,		/* Return value - unused */
 		  *key=NULL;		/* Entry key */
 
 	/* Set up known arguments */
@@ -2524,126 +2524,96 @@ PHP_FUNCTION(array_count_values)
 }
 /* }}} */
 
+/* {{{ array_column_param_helper
+ * Specialized conversion rules for array_column() function
+ */
+static inline
+zend_bool array_column_param_helper(zval **param,
+                                    const char *name TSRMLS_DC) {
+	switch (Z_TYPE_PP(param)) {
+		case IS_DOUBLE:
+			convert_to_long_ex(param);
+			/* fallthrough */
+		case IS_LONG:
+			return 1;
+
+		case IS_OBJECT:
+			convert_to_string_ex(param);
+			/* fallthrough */
+		case IS_STRING:
+			return 1;
+
+		default:
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The %s key should be either a string or an integer", name);
+			return 0;
+	}
+}
+
 /* {{{ proto array array_column(array input, mixed column_key[, mixed index_key])
    Return the values from a single column in the input array, identified by the
    value_key and optionally indexed by the index_key */
 PHP_FUNCTION(array_column)
 {
-	zval *zarray, **zcolumn, **zkey = NULL, **data, **zcolval, **zkeyval;
+	zval **zcolumn = NULL, **zkey = NULL, **data;
 	HashTable *arr_hash;
 	HashPosition pointer;
-	ulong column_idx = 0, key_idx = 0;
-	char *column = NULL, *key = NULL, *keyval = NULL;
-	int column_len = 0, key_len = 0, keyval_idx = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aZ|Z", &zarray, &zcolumn, &zkey) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "hZ!|Z!", &arr_hash, &zcolumn, &zkey) == FAILURE) {
 		return;
 	}
 
-	switch (Z_TYPE_PP(zcolumn)) {
-		case IS_NULL:
-			column_idx = 0;
-			break;
-		case IS_LONG:
-			column_idx = Z_LVAL_PP(zcolumn);
-			break;
-		case IS_STRING:
-			column = Z_STRVAL_PP(zcolumn);
-			column_len = Z_STRLEN_PP(zcolumn);
-			break;
-		case IS_OBJECT:
-			convert_to_string_ex(zcolumn);
-			column = Z_STRVAL_PP(zcolumn);
-			column_len = Z_STRLEN_PP(zcolumn);
-			break;
-		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "The column key should be either a string or an integer");
-			RETURN_FALSE;
+	if ((zcolumn && !array_column_param_helper(zcolumn, "column" TSRMLS_CC)) ||
+	    (zkey && !array_column_param_helper(zkey, "index" TSRMLS_CC))) {
+		RETURN_FALSE;
 	}
 
-	if (zkey) {
-		switch (Z_TYPE_PP(zkey)) {
-			case IS_NULL:
-				key_idx = 0;
-				break;
-			case IS_LONG:
-				key_idx = Z_LVAL_PP(zkey);
-				break;
-			case IS_STRING:
-				key = Z_STRVAL_PP(zkey);
-				key_len = Z_STRLEN_PP(zkey);
-				break;
-			case IS_OBJECT:
-				convert_to_string_ex(zkey);
-				key = Z_STRVAL_PP(zkey);
-				key_len = Z_STRLEN_PP(zkey);
-				break;
-			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "The index key should be either a string or an integer");
-				RETURN_FALSE;
-		}
-	}
-
-	arr_hash = Z_ARRVAL_P(zarray);
 	array_init(return_value);
-
 	for (zend_hash_internal_pointer_reset_ex(arr_hash, &pointer);
 			zend_hash_get_current_data_ex(arr_hash, (void**)&data, &pointer) == SUCCESS;
 			zend_hash_move_forward_ex(arr_hash, &pointer)) {
+		zval **zcolval, **zkeyval = NULL;
+		HashTable *ht;
 
-		if (Z_TYPE_PP(data) == IS_ARRAY) {
-			zval *strkey = NULL;
+		if (Z_TYPE_PP(data) != IS_ARRAY) {
+			/* Skip elemens which are not sub-arrays */
+			continue;
+		}
+		ht = Z_ARRVAL_PP(data);
 
-			if (column && zend_hash_find(Z_ARRVAL_PP(data), column, column_len + 1, (void**)&zcolval) == FAILURE) {
-				continue;
-			} else if (!column && zend_hash_index_find(Z_ARRVAL_PP(data), column_idx, (void**)&zcolval) == FAILURE) {
-				continue;
-			}
+		if (!zcolumn) {
+			/* NULL column ID means use entire subarray as data */
+			zcolval = data;
 
-			Z_ADDREF_PP(zcolval);
-
-			keyval = NULL;
-			keyval_idx = -1;
-
-			if (zkey) {
-				if (key && zend_hash_find(Z_ARRVAL_PP(data), key, key_len + 1, (void**)&zkeyval) == FAILURE) {
-					keyval_idx = -1;
-				} else if (!key && zend_hash_index_find(Z_ARRVAL_PP(data), key_idx, (void**)&zkeyval) == FAILURE) {
-					keyval_idx = -1;
-				} else {
-					switch (Z_TYPE_PP(zkeyval)) {
-						case IS_LONG:
-							keyval_idx = Z_LVAL_PP(zkeyval);
-							break;
-						case IS_STRING:
-							keyval = Z_STRVAL_PP(zkeyval);
-							break;
-						case IS_OBJECT:
-							{
-								MAKE_STD_ZVAL(strkey);
-								MAKE_COPY_ZVAL(zkeyval, strkey);
-								convert_to_string(strkey);
-								keyval = Z_STRVAL_P(strkey);
-							}
-							break;
-						default:
-							keyval_idx = -1;
-					}
-				}
-			}
-
-			if (keyval) {
-				add_assoc_zval(return_value, keyval, *zcolval);
-				if (strkey) {
-					zval_ptr_dtor(&strkey);
-				}
-			} else if (keyval_idx != -1) {
-				add_index_zval(return_value, keyval_idx, *zcolval);
-			} else {
-				add_next_index_zval(return_value, *zcolval);
-			}
+			/* Otherwise, skip if the value doesn't exist in our subarray */
+		} else if ((Z_TYPE_PP(zcolumn) == IS_STRING) &&
+		    (zend_hash_find(ht, Z_STRVAL_PP(zcolumn), Z_STRLEN_PP(zcolumn) + 1, (void**)&zcolval) == FAILURE)) {
+			continue;
+		} else if ((Z_TYPE_PP(zcolumn) == IS_LONG) &&
+		    (zend_hash_index_find(ht, Z_LVAL_PP(zcolumn), (void**)&zcolval) == FAILURE)) {
+			continue;
 		}
 
+		/* Failure will leave zkeyval alone which will land us on the final else block below
+		 * which is to append the value as next_index
+		 */
+		if (zkey && (Z_TYPE_PP(zkey) == IS_STRING)) {
+			zend_hash_find(ht, Z_STRVAL_PP(zkey), Z_STRLEN_PP(zkey) + 1, (void**)&zkeyval);
+		} else if (zkey && (Z_TYPE_PP(zkey) == IS_LONG)) {
+			zend_hash_index_find(ht, Z_LVAL_PP(zkey), (void**)&zkeyval);
+		}
+
+		Z_ADDREF_PP(zcolval);
+		if (zkeyval && Z_TYPE_PP(zkeyval) == IS_STRING) {
+			add_assoc_zval(return_value, Z_STRVAL_PP(zkeyval), *zcolval);
+		} else if (zkeyval && Z_TYPE_PP(zkeyval) == IS_LONG) {
+			add_index_zval(return_value, Z_LVAL_PP(zkeyval), *zcolval);
+		} else if (zkeyval && Z_TYPE_PP(zkeyval) == IS_OBJECT) {
+			SEPARATE_ZVAL(zkeyval);
+			convert_to_string(*zkeyval);
+			add_assoc_zval(return_value, Z_STRVAL_PP(zkeyval), *zcolval);
+		} else {
+			add_next_index_zval(return_value, *zcolval);
+		}
 	}
 }
 /* }}} */
@@ -2941,7 +2911,7 @@ static int zval_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
 static int zval_user_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
 {
 	zval **args[2];
-	zval *retval_ptr;
+	zval *retval_ptr = NULL;
 
 	args[0] = (zval **) a;
 	args[1] = (zval **) b;
@@ -4047,7 +4017,7 @@ PHP_FUNCTION(array_rand)
 
 	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
-	while (num_req && (key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
+	while (num_req && (key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTENT) {
 
 		randval = php_rand(TSRMLS_C);
 
@@ -4101,17 +4071,7 @@ PHP_FUNCTION(array_sum)
 		entry_n = **entry;
 		zval_copy_ctor(&entry_n);
 		convert_scalar_to_number(&entry_n TSRMLS_CC);
-
-		if (Z_TYPE(entry_n) == IS_LONG && Z_TYPE_P(return_value) == IS_LONG) {
-			dval = (double)Z_LVAL_P(return_value) + (double)Z_LVAL(entry_n);
-			if ( (double)LONG_MIN <= dval && dval <= (double)LONG_MAX ) {
-				Z_LVAL_P(return_value) += Z_LVAL(entry_n);
-				continue;
-			}
-		}
-		convert_to_double(return_value);
-		convert_to_double(&entry_n);
-		Z_DVAL_P(return_value) += Z_DVAL(entry_n);
+		fast_add_function(return_value, return_value, &entry_n TSRMLS_CC);
 	}
 }
 /* }}} */

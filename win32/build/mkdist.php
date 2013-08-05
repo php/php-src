@@ -238,8 +238,6 @@ $text_files = array(
 	"php.ini-development" => "php.ini-development",
 	"php.ini-production" => "php.ini-production",
 	"win32/install.txt" => "install.txt",
-	"win32/pws-php5cgi.reg" => "pws-php5cgi.reg",
-	"win32/pws-php5isapi.reg" => "pws-php5isapi.reg",
 );
 
 foreach ($text_files as $src => $dest) {

@@ -20,6 +20,6 @@ libtidy-20090325
 libtidy-20090406
 libxslt-1.1.27
 libxml-2.7.8
-libxml-2.9.0
+libxml-2.9.1
 openssl-0.9.8y
 openssl-1.0.1e

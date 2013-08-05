@@ -591,7 +591,7 @@ some of the new functionality in Perl 5.005.
 Another (I hope this is the last!) change has been made to the API for the
 pcre_compile() function. An additional argument has been added to make it
 possible to pass over a pointer to character tables built in the current
-locale by pcre_maketables(). To use the default tables, this new arguement
+locale by pcre_maketables(). To use the default tables, this new argument
 should be passed as NULL.
 
           IMPORTANT FOR THOSE UPGRADING FROM VERSION 2.05

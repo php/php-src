@@ -1964,7 +1964,7 @@ woohoo:
 			zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_fname_map));
 
 			while (FAILURE != zend_hash_has_more_elements(&(PHAR_GLOBALS->phar_fname_map))) {
-				if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_fname_map), &key, &keylen, &unused, 0, NULL)) {
+				if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_fname_map), &key, &keylen, &unused, 0, NULL)) {
 					break;
 				}
 
@@ -1994,7 +1994,7 @@ woohoo:
 				zend_hash_internal_pointer_reset(&cached_phars);
 
 				while (FAILURE != zend_hash_has_more_elements(&cached_phars)) {
-					if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&cached_phars, &key, &keylen, &unused, 0, NULL)) {
+					if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&cached_phars, &key, &keylen, &unused, 0, NULL)) {
 						break;
 					}
 
@@ -2251,13 +2251,13 @@ last_time:
  *
  * This is used by phar_parse_url()
  */
-int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len, int executable, int for_create TSRMLS_DC) /* {{{ */
+int phar_split_fname(const char *filename, int filename_len, char **arch, int *arch_len, char **entry, int *entry_len, int executable, int for_create TSRMLS_DC) /* {{{ */
 {
 	const char *ext_str;
 #ifdef PHP_WIN32
 	char *save;
 #endif
-	int ext_len, free_filename = 0;
+	int ext_len;
 
 	if (!strncasecmp(filename, "phar://", 7)) {
 		filename += 7;
@@ -2266,7 +2266,6 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 
 	ext_len = 0;
 #ifdef PHP_WIN32
-	free_filename = 1;
 	save = filename;
 	filename = estrndup(filename, filename_len);
 	phar_unixify_path_separators(filename, filename_len);
@@ -2282,10 +2281,9 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 #endif
 			}
 
-			if (free_filename) {
-				efree(filename);
-			}
-
+#ifdef PHP_WIN32
+			efree(filename);
+#endif
 			return FAILURE;
 		}
 
@@ -2308,9 +2306,9 @@ int phar_split_fname(char *filename, int filename_len, char **arch, int *arch_le
 		*entry = estrndup("/", 1);
 	}
 
-	if (free_filename) {
-		efree(filename);
-	}
+#ifdef PHP_WIN32
+	efree(filename);
+#endif
 
 	return SUCCESS;
 }
@@ -2579,6 +2577,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 	php_serialize_data_t metadata_hash;
 	smart_str main_metadata_str = {0};
 	int free_user_stub, free_fp = 1, free_ufp = 1;
+	int manifest_hack = 0;
 
 	if (phar->is_persistent) {
 		if (error) {
@@ -2930,6 +2929,12 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 
 	manifest_len = offset + phar->alias_len + sizeof(manifest) + main_metadata_str.len;
 	phar_set_32(manifest, manifest_len);
+	/* Hack - see bug #65028, add padding byte to the end of the manifest */
+	if(manifest[0] == '\r' || manifest[0] == '\n') {
+		manifest_len++;
+		phar_set_32(manifest, manifest_len);
+		manifest_hack = 1;
+	}
 	phar_set_32(manifest+4, new_manifest_count);
 	if (has_dirs) {
 		*(manifest + 8) = (unsigned char) (((PHAR_API_VERSION) >> 8) & 0xFF);
@@ -3049,6 +3054,22 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 
 			if (error) {
 				spprintf(error, 0, "unable to write temporary manifest of file \"%s\" to manifest of new phar \"%s\"", entry->filename, phar->fname);
+			}
+
+			return EOF;
+		}
+	}
+	/* Hack - see bug #65028, add padding byte to the end of the manifest */
+	if(manifest_hack) {
+		if(1 != php_stream_write(newfile, manifest, 1)) {
+			if (closeoldfile) {
+				php_stream_close(oldfile);
+			}
+
+			php_stream_close(newfile);
+
+			if (error) {
+				spprintf(error, 0, "unable to write manifest padding byte");
 			}
 
 			return EOF;

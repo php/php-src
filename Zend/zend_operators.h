@@ -26,6 +26,10 @@
 #include <math.h>
 #include <assert.h>
 
+#ifdef __GNUC__
+#include <stddef.h>
+#endif
+
 #ifdef HAVE_IEEEFP_H
 #include <ieeefp.h>
 #endif
@@ -265,11 +269,11 @@ static inline zend_uchar is_numeric_string(const char *str, int length, long *lv
     return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
-static inline char *
-zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
+static inline const char *
+zend_memnstr(const char *haystack, const char *needle, int needle_len, char *end)
 {
-	char *p = haystack;
-	char ne = needle[needle_len-1];
+	const char *p = haystack;
+	const char ne = needle[needle_len-1];
 
 	if (needle_len == 1) {
 		return (char *)memchr(p, *needle, (end-p));
@@ -497,7 +501,7 @@ ZEND_API void zend_update_current_locale(void);
 
 /* The offset in bytes between the value and type fields of a zval */
 #define ZVAL_OFFSETOF_TYPE	\
-	(__builtin_offsetof(zval,type) - __builtin_offsetof(zval,value))
+	(offsetof(zval,type) - offsetof(zval,value))
 
 static zend_always_inline int fast_increment_function(zval *op1)
 {
@@ -940,6 +944,24 @@ static zend_always_inline int fast_is_smaller_or_equal_function(zval *result, zv
 	compare_function(result, op1, op2 TSRMLS_CC);
 	return Z_LVAL_P(result) <= 0;
 }
+
+#define ZEND_TRY_BINARY_OBJECT_OPERATION(opcode)                                                  \
+	if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, do_operation)) {                       \
+		if (SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, op2 TSRMLS_CC)) {  \
+			return SUCCESS;                                                                       \
+		}                                                                                         \
+	} else if (Z_TYPE_P(op2) == IS_OBJECT && Z_OBJ_HANDLER_P(op2, do_operation)) {                \
+		if (SUCCESS == Z_OBJ_HANDLER_P(op2, do_operation)(opcode, result, op1, op2 TSRMLS_CC)) {  \
+			return SUCCESS;                                                                       \
+		}                                                                                         \
+	}
+
+#define ZEND_TRY_UNARY_OBJECT_OPERATION(opcode)                                                   \
+	if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, do_operation)                          \
+	 && SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, NULL TSRMLS_CC)        \
+	) {                                                                                           \
+		return SUCCESS;                                                                           \
+	}
 
 #endif
 

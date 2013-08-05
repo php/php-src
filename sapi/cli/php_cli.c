@@ -503,6 +503,7 @@ static void php_cli_usage(char *argv0)
 				"   %s [options] -r <code> [--] [args...]\n"
 				"   %s [options] [-B <begin_code>] -R <code> [-E <end_code>] [--] [args...]\n"
 				"   %s [options] [-B <begin_code>] -F <file> [-E <end_code>] [--] [args...]\n"
+				"   %s [options] -S <addr>:<port> [-t docroot]\n"
 				"   %s [options] -- [args...]\n"
 				"   %s [options] -a\n"
 				"\n"
@@ -544,7 +545,7 @@ static void php_cli_usage(char *argv0)
 				"  --rz <name>      Show information about Zend extension <name>.\n"
 				"  --ri <name>      Show configuration for extension <name>.\n"
 				"\n"
-				, prog, prog, prog, prog, prog, prog);
+				, prog, prog, prog, prog, prog, prog, prog);
 }
 /* }}} */
 

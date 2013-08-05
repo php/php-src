@@ -1646,7 +1646,7 @@ SPL_METHOD(Array, getChildren)
 			return;
 		}
 		if (instanceof_function(Z_OBJCE_PP(entry), Z_OBJCE_P(getThis()) TSRMLS_CC)) {
-			RETURN_ZVAL(*entry, 0, 0);
+			RETURN_ZVAL(*entry, 1, 0);
 		}
 	}
 
@@ -1766,7 +1766,7 @@ SPL_METHOD(Array, unserialize)
 	++p;
 
 	if (*p!='m') {
-		if (*p!='a' && *p!='O' && *p!='C') {
+		if (*p!='a' && *p!='O' && *p!='C' && *p!='r') {
 			goto outexcept;
 		}
 		intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;

@@ -8,7 +8,7 @@ require(dirname(__FILE__).'/skipif.inc');
 --FILE--
 <?php
 
-// This test is similar to bug43492.phpt without the explict free.
+// This test is similar to bug43492.phpt without the explicit free.
 // Now that bug 44206 is fixed an automatic clean up will occur -
 // though it is still recommended in practice.
 

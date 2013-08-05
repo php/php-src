@@ -6,7 +6,14 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <name>oci8</name>
  <channel>pecl.php.net</channel>
  <summary>Extension for Oracle Database</summary>
- <description>This extension allows you to access Oracle databases. It can be built with PHP 4.3.9 to 5.x.  It can be linked with Oracle 9.2, 10.2, 11.1, or 11.2 client libraries.
+
+ <description>
+   This extension allows you to access Oracle Database. OCI8 2.0 can
+   be built with PHP 4.3.9 onwards. OCI8 can be linked with Oracle
+   Database 9.2, 10, 11, or 12.1 client libraries.  Oracle's standard
+   cross-version connectivity applies.  For example PHP linked with
+   Oracle Database 11.2 client libraries can connect to Oracle
+   Database 9.2 onwards.
  </description>
  <lead>
   <name>Christopher Jones</name>
@@ -18,7 +25,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <name>Antony Dovgal</name>
   <user>tony2001</user>
   <email>tony2001@php.net</email>
-  <active>yes</active>
+  <active>no</active>
  </lead>
  <lead>
   <name>Wez Furlong</name>
@@ -33,21 +40,22 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2012-10-21</date>
+ <date>2013-07-24</date>
  <time>12:00:00</time>
 
- <version>
-  <release>1.4.9</release>
-  <api>1.4.9</api>
- </version>
- <stability>
-  <release>stable</release>
-  <api>stable</api>
- </stability>
- <license uri="http://www.php.net/license">PHP</license>
- <notes>
-   Re-fixed bug #60901 (Improve "tail" syntax for AIX installation)
- </notes>
+  <version>
+   <release>2.0.1</release>
+   <api>2.0.1</api>
+  </version>
+  <stability>
+   <release>devel</release>
+   <api>devel</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes> 
+    Fixed --enable-maintainer-zts mode
+    Allow Implicit Result Set statement resources to inherit the parent's current prefetch count
+  </notes>
  <contents>
   <dir name="/">
    <dir name="tests">
@@ -94,6 +102,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="bind_misccoltypes.phpt" role="test" />
     <file name="bind_number.phpt" role="test" />
     <file name="bind_query.phpt" role="test" />
+    <file name="bind_raw_2.phpt" role="test" />
     <file name="bind_raw.phpt" role="test" />
     <file name="bind_rowid.phpt" role="test" />
     <file name="bind_sqltafc.phpt" role="test" />
@@ -287,6 +296,38 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="field_funcs_old.phpt" role="test" />
     <file name="field_funcs.phpt" role="test" />
     <file name="function_aliases.phpt" role="test" />
+    <file name="imp_res_1.phpt" role="test" />
+    <file name="imp_res_2.phpt" role="test" />
+    <file name="imp_res_3.phpt" role="test" />
+    <file name="imp_res_4.phpt" role="test" />
+    <file name="imp_res_5.phpt" role="test" />
+    <file name="imp_res_6.phpt" role="test" />
+    <file name="imp_res_7.phpt" role="test" />
+    <file name="imp_res_call_error.phpt" role="test" />
+    <file name="imp_res_cancel.phpt" role="test" />
+    <file name="imp_res_close.phpt" role="test" />
+    <file name="imp_res_cursor.phpt" role="test" />
+    <file name="imp_res_dbmsoutput.phpt" role="test" />
+    <file name="imp_res_field.phpt" role="test" />
+    <file name="imp_res_func_error.phpt" role="test" />
+    <file name="imp_res_get_1.phpt" role="test" />
+    <file name="imp_res_get_2.phpt" role="test" />
+    <file name="imp_res_get_3.phpt" role="test" />
+    <file name="imp_res_get_4.phpt" role="test" />
+    <file name="imp_res_get_5.phpt" role="test" />
+    <file name="imp_res_get_all.phpt" role="test" />
+    <file name="imp_res_get_cancel.phpt" role="test" />
+    <file name="imp_res_get_close_1.phpt" role="test" />
+    <file name="imp_res_get_close_2.phpt" role="test" />
+    <file name="imp_res_get_close_3.phpt" role="test" />
+    <file name="imp_res_get_cursor.phpt" role="test" />
+    <file name="imp_res_get_dbmsoutput.phpt" role="test" />
+    <file name="imp_res_get_exec.phpt" role="test" />
+    <file name="imp_res_get_none.phpt" role="test" />
+    <file name="imp_res_insert.phpt" role="test" />
+    <file name="imp_res_lob.phpt" role="test" />
+    <file name="imp_res_prefetch.phpt" role="test" />
+    <file name="ini_1.phpt" role="test" />
     <file name="lob_001.phpt" role="test" />
     <file name="lob_002.phpt" role="test" />
     <file name="lob_003.phpt" role="test" />
@@ -335,6 +376,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
     <file name="lob_aliases.phpt" role="test" />
     <file name="lob_null.phpt" role="test" />
     <file name="lob_temp1.phpt" role="test" />
+    <file name="lob_temp2.phpt" role="test" />
     <file name="lob_temp.phpt" role="test" />
     <file name="minfo.phpt" role="test" />
     <file name="null_byte_1.phpt" role="test" />
@@ -383,13 +425,14 @@ http://pear.php.net/dtd/package-2.0.xsd">
    <file name="config.w32" role="src" />
    <file name="CREDITS" role="doc" />
    <file name="oci8.c" role="src" />
-   <file name="oci8.dsp" role="src" />
+   <file name="oci8_dtrace.d" role="src" />
    <file name="oci8_collection.c" role="src" />
    <file name="oci8_interface.c" role="src" />
    <file name="oci8_lob.c" role="src" />
    <file name="oci8_statement.c" role="src" />
    <file name="php_oci8.h" role="src" />
    <file name="php_oci8_int.h" role="src" />
+   <file name="oci8.dsp" role="src" />
    <file name="README" role="doc" />
   </dir> <!-- / -->
  </contents>
@@ -397,7 +440,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <required>
    <php>
     <min>4.3.9</min>
-    <max>5.4.99</max>
+    <max>6.0.0</max>
    </php>
    <pearinstaller>
     <min>1.4.0b1</min>
@@ -409,6 +452,114 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+
+<release>
+  <version>
+   <release>2.0.0</release>
+   <api>2.0.0</api>
+  </version>
+  <stability>
+   <release>devel</release>
+   <api>devel</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes> 
+    - NEW FUNCTIONALITY:
+ 
+      - Added Implicit Result Set support for Oracle Database 12c.
+	Streaming of all IRS's returned from a PL/SQL block is available
+	via oci_fetch_array, oci_fetch_assoc, oci_fetch_object and
+	oci_fetch_row (but not oci_fetch or oci_fetch_all).
+	Alternatively individual IRS statement resources can be obtained
+	with the new function 'oci_get_implicit_resultset' and passed to
+	any oci_fetch_* function.
+
+      - Added DTrace probes enabled with PHP's generic --enable-dtrace
+
+    - IMPROVED FUNCTIONALITY:
+ 
+      - Using 'oci_execute($s, OCI_NO_AUTO_COMMIT)' for a SELECT no
+	longer unnecessarily initiates an internal ROLLBACK during
+	connection close.  This can improve overall scalability by
+	reducing "round trips" between PHP and the database.
+ 
+    - CHANGED FUNCTIONALITY:
+ 
+      - PHPINFO() CHANGES:
+ 
+        - The oci8.event and oci8.connection_class values are now shown
+          only when the Oracle client libraries support the respective
+          functionality.
+ 
+        - Connection statistics are now in a separate phpinfo() table.
+ 
+        - Temporary LOB and Collection support status lines in
+          phpinfo() were removed.  These features have always been
+          enabled since 2007.
+ 
+      - OCI_INTERNAL_DEBUG() CHANGES:
+ 
+        - The oci_internal_debug() function is now a no-op.  Use PHP's
+          --enable-dtrace functionality with DTrace or SystemTap instead.
+ 
+    - INTERNAL CHANGES:
+ 
+      - Fixed a potential NULL pointer dereference flagged by Parfait
+        static code analysis.
+ 
+      - Extended testing of existing OCI8 functionality.
+ 
+      - Improved test output portability when using the PHP development
+        web server to run tests.
+ 
+      - Removed no-longer necessary Unicode patterns from tests
+        (vestiges of PHP's previous PHP 6 project)
+        
+      - Improved build portability by removing compilation type cast
+        warnings with some compilers.
+ 
+      - Fixed compilation warnings when building with Oracle 9.2
+        client libraries.
+ 
+      - Updated code to use internal macro PHP_OCI_REGISTER_RESOURCE.
+ 
+      - Regularized code prototypes and fixed some in-line documentation
+        prototypes.
+ 
+      - Fixed code folding. 
+  </notes>
+</release>
+
+<release>
+ <version>
+  <release>1.4.10</release>
+  <api>1.4.10</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+   Bump PECL package info version check to allow PECL installs with PHP 5.5+
+ </notes>
+</release>
+
+<release>
+ <version>
+  <release>1.4.9</release>
+  <api>1.4.9</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+   Re-fixed bug #60901 (Improve "tail" syntax for AIX installation)
+ </notes>
+</release>
 
 <release>
  <version>
@@ -442,7 +593,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   Fixed OCI8 part of bug #55748 (CVE-2011-4153: multiple NULL pointer dereferences with zend_strndup)
   Fixed OCI8 part of bug #55301 (multiple null pointer dereferences with calloc)
   Increased maximum Oracle error message buffer length for new Oracle 11.2.0.3 size
-  Improve internal initalization failure error messages
+  Improve internal initialization failure error messages
  </notes>
 </release>
 
@@ -457,7 +608,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </stability>
  <license uri="http://www.php.net/license">PHP</license>
  <notes>
-   Added oci_client_version() returning the runtime Oracle client library version
+   Added oci_client_version() returning the run time Oracle client library version
    Made OCI8 extension buildable with PHP 5.4-development code
  </notes>
 </release>
@@ -831,7 +982,7 @@ Fixed bug #36820 (Privileged connection with an Oracle password file fails)
    <date>2006-03-16</date>
    <license uri="http://www.php.net/license">PHP</license>
    <notes>Changed OCI8 code to use OCIServerVersion() instead of OCIPing(), which may crash Oracle server of version &lt; 10.2
-Fixed bug #36235 (ocicolumnname returns false before a succesfull fetch)
+Fixed bug #36235 (ocicolumnname returns false before a successful fetch)
 Fixed bug #36096 (oci_result() returns garbage after oci_fetch() failed)
 Fixed bug #36055 (possible OCI8 crash in multithreaded environment)
 Fixed bug #36010 (Segfault when re-creating and re-executing statements with bound parameters)

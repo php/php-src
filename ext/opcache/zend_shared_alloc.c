@@ -99,9 +99,9 @@ void zend_shared_alloc_create_lock(void)
 }
 #endif
 
-static void no_memory_bailout(int allocate_size, char *error)
+static void no_memory_bailout(size_t allocate_size, char *error)
 {
-	zend_accel_error(ACCEL_LOG_FATAL, "Unable to allocate shared memory segment of %d bytes: %s: %s (%d)", allocate_size, error?error:"unknown", strerror(errno), errno );
+	zend_accel_error(ACCEL_LOG_FATAL, "Unable to allocate shared memory segment of %ld bytes: %s: %s (%d)", allocate_size, error?error:"unknown", strerror(errno), errno );
 }
 
 static void copy_shared_segments(void *to, void *from, int count, int size)
@@ -119,7 +119,7 @@ static void copy_shared_segments(void *to, void *from, int count, int size)
 	}
 }
 
-static int zend_shared_alloc_try(const zend_shared_memory_handler_entry *he, int requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
+static int zend_shared_alloc_try(const zend_shared_memory_handler_entry *he, size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
 {
 	int res;
 	g_shared_alloc_handler = he->handler;
@@ -148,7 +148,7 @@ static int zend_shared_alloc_try(const zend_shared_memory_handler_entry *he, int
 	return ALLOC_FAILURE;
 }
 
-int zend_shared_alloc_startup(int requested_size)
+int zend_shared_alloc_startup(size_t requested_size)
 {
 	zend_shared_segment **tmp_shared_segments;
 	size_t shared_segments_array_size;

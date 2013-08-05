@@ -976,7 +976,7 @@ static inline void _gdScaleRow(gdImagePtr pSrc,  unsigned int src_width, gdImage
 
 		/* Accumulate each channel */
         for (i = left; i <= right; i++) {
-			const left_channel = i - left;
+			const int left_channel = i - left;
             r += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetRed(p_src_row[i])));
             g += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetGreen(p_src_row[i])));
             b += (unsigned char)(contrib->ContribRow[x].Weights[left_channel] * (double)(gdTrueColorGetBlue(p_src_row[i])));
@@ -1672,13 +1672,6 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 	unsigned int i;
 	gdImagePtr dst;
 
-	/* impact perf a bit, but not that much. Implementation for palette
-	   images can be done at a later point.
-	*/
-	if (src->trueColor == 0) {
-		gdImagePaletteToTrueColor(src);
-	}
-
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (!dst) {
 		return NULL;
@@ -1688,8 +1681,8 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 		unsigned int j;
 		dst_offset_x = 0;
 		for (j = 0; j < new_width; j++) {
-			gdFixed f_i = gd_itofx(i - new_height/2);
-			gdFixed f_j = gd_itofx(j-new_width/2);
+			gdFixed f_i = gd_itofx((int)i - (int)new_height/2);
+			gdFixed f_j = gd_itofx((int)j - (int)new_width/2);
 			gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
 			gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
 			long m = gd_fxtoi(f_m);
@@ -1735,15 +1728,9 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 							f_slop_x > f_slop_y ? gd_divfx(f_slop_y, f_slop_x) : gd_divfx(f_slop_x, f_slop_y)
 						: 0;
 
+
 	if (bgColor < 0) {
 		return NULL;
-	}
-
-	/* impact perf a bit, but not that much. Implementation for palette
-	   images can be done at a later point.
-	*/
-	if (src->trueColor == 0) {
-		gdImagePaletteToTrueColor(src);
 	}
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
@@ -1756,8 +1743,8 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 		unsigned int j;
 		dst_offset_x = 0;
 		for (j = 0; j < new_width; j++) {
-			gdFixed f_i = gd_itofx(i - new_height/ 2);
-			gdFixed f_j = gd_itofx(j  -new_width / 2);
+			gdFixed f_i = gd_itofx((int)i - (int)new_height/ 2);
+			gdFixed f_j = gd_itofx((int)j - (int)new_width / 2);
 			gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
 			gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
 			long m = gd_fxtoi(f_m);
@@ -1799,13 +1786,6 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 	unsigned int src_offset_x, src_offset_y;
 	gdImagePtr dst;
 
-	/* impact perf a bit, but not that much. Implementation for palette
-	   images can be done at a later point.
-	*/
-	if (src->trueColor == 0) {
-		gdImagePaletteToTrueColor(src);
-	}
-
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (dst == NULL) {
 		return NULL;
@@ -1817,8 +1797,8 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 		dst_offset_x = 0;
 
 		for (j=0; j < new_width; j++) {
-			const gdFixed f_i = gd_itofx(i-new_height/2);
-			const gdFixed f_j = gd_itofx(j-new_width/2);
+			const gdFixed f_i = gd_itofx((int)i - (int)new_height/2);
+			const gdFixed f_j = gd_itofx((int)j - (int)new_width/2);
 			const gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
 			const gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
 			const unsigned int m = gd_fxtoi(f_m);
@@ -1833,18 +1813,18 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 				const gdFixed f_w4 = gd_mulfx(f_f, f_g);
 
 				if (n < src_w - 1) {
-					src_offset_x = m + 1;
-					src_offset_y = n;
+					src_offset_x = n + 1;
+					src_offset_y = m;
 				}
 
 				if (m < src_h-1) {
-					src_offset_x = m;
-					src_offset_y = n + 1;
+					src_offset_x = n;
+					src_offset_y = m + 1;
 				}
 
 				if (!((n >= src_w-1) || (m >= src_h-1))) {
-					src_offset_x = m + 1;
-					src_offset_y = n + 1;
+					src_offset_x = n + 1;
+					src_offset_y = m + 1;
 				}
 				{
 					const int pixel1 = src->tpixels[src_offset_y][src_offset_x];
@@ -1925,13 +1905,6 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 	unsigned int i;
 	gdImagePtr dst;
 
-	/* impact perf a bit, but not that much. Implementation for palette
-	   images can be done at a later point.
-	*/
-	if (src->trueColor == 0) {
-		gdImagePaletteToTrueColor(src);
-	}
-
 	dst = gdImageCreateTrueColor(new_width, new_height);
 
 	if (dst == NULL) {
@@ -1944,8 +1917,8 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 		dst_offset_x = 0;
 
 		for (j=0; j < new_width; j++) {
-			const gdFixed f_i = gd_itofx(i-new_height/2);
-			const gdFixed f_j = gd_itofx(j-new_width/2);
+			const gdFixed f_i = gd_itofx((int)i - (int)new_height/2);
+			const gdFixed f_j = gd_itofx((int)j - (int)new_width/2);
 			const gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
 			const gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
 			const int m = gd_fxtoi(f_m);
@@ -2180,9 +2153,19 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor)
 {
 	const int angle_rounded = (int)floor(angle * 100);
-	
+
 	if (bgcolor < 0) {
 		return NULL;
+	}
+
+	/* impact perf a bit, but not that much. Implementation for palette
+	   images can be done at a later point.
+	*/
+	if (src->trueColor == 0) {
+		if (bgcolor >= 0) {
+			bgcolor =  gdTrueColorAlpha(src->red[bgcolor], src->green[bgcolor], src->blue[bgcolor], src->alpha[bgcolor]);
+		}
+		gdImagePaletteToTrueColor(src);
 	}
 
 	/* no interpolation needed here */

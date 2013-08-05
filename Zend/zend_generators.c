@@ -55,6 +55,12 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			zval_ptr_dtor(&execute_data->current_this);
 		}
 
+		/* A fatal error / die occurred during the generator execution. Trying to clean
+		 * up the stack may not be safe in this case. */
+		if (CG(unclean_shutdown)) {
+			return;
+		}
+
 		/* If the generator is closed before it can finish execution (reach
 		 * a return statement) we have to free loop variables manually, as
 		 * we don't know whether the SWITCH_FREE / FREE opcodes have run */

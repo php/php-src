@@ -802,7 +802,12 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC)
 	char path_bak[MAXPATHLEN];
 #endif
 
+#if PHP_WIN32
+	/* MAX_PATH is \0-terminated, path_len == MAXPATHLEN would overrun path_bak */
+	if (path_len >= MAXPATHLEN) {
+#else
 	if (path_len > MAXPATHLEN) {
+#endif
 		return;
 	}
 

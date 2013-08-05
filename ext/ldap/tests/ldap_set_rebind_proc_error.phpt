@@ -35,7 +35,7 @@ function rebind_proc ($ds, $ldap_url) {
 $link = ldap_connect($host, $port);
 var_dump(ldap_set_rebind_proc($link));
 var_dump(ldap_set_rebind_proc($link, "rebind_proc", "Additional data"));
-var_dump(ldap_set_rebind_proc($link, "rebind_proc_inexistant"));
+var_dump(ldap_set_rebind_proc($link, "rebind_proc_inexistent"));
 ?>
 ===DONE===
 --EXPECTF--
@@ -45,6 +45,6 @@ bool(false)
 Warning: ldap_set_rebind_proc() expects exactly 2 parameters, 3 given in %s on line %d
 bool(false)
 
-Warning: ldap_set_rebind_proc(): Two arguments expected for 'rebind_proc_inexistant' to be a valid callback in %s on line %d
+Warning: ldap_set_rebind_proc(): Two arguments expected for 'rebind_proc_inexistent' to be a valid callback in %s on line %d
 bool(false)
 ===DONE===

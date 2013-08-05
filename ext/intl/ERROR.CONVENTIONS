@@ -18,7 +18,7 @@ message set by the PHP wrapping code, not by ICU. The message should include the
 name of the function that failed in order to make debugging easier (though if
 you activate warnings with intl.error_level or exceptions with
 intl.use_exceptions you get more fine-grained information about where the
-error ocurred).
+error occurred).
 
 The internal PHP code can set the global last error with:
 void intl_error_set_code(intl_error* err, UErrorCode err_code TSRMLS_DC);

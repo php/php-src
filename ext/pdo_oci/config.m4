@@ -2,7 +2,7 @@ dnl $Id$
 dnl config.m4 for extension pdo_oci
 dnl vim:et:sw=2:ts=2:
 
-SUPPORTED_LIB_VERS="9.0 10.1 11.1"  # This caters for all Oracle 9.x, 10.x and 11.1 installs
+SUPPORTED_LIB_VERS="9.0 10.1 11.1 12.1"  # The lib vers are not bumped when the DB version is bumped
 AC_DEFUN([AC_PDO_OCI_VERSION],[
   AC_MSG_CHECKING([Oracle version])
   for OCI_VER in $SUPPORTED_LIB_VERS; do
@@ -147,7 +147,7 @@ You need to tell me where to find your Oracle Instant Client SDK, or set ORACLE_
   fi
 
   case $PDO_OCI_VERSION in
-    9.0|10.1|10.2|11.1|11.2)
+    9.0|10.1|10.2|11.1|11.2|12.1)
       PHP_ADD_LIBRARY(clntsh, 1, PDO_OCI_SHARED_LIBADD)
       ;;
 

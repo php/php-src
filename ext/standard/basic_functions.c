@@ -2679,6 +2679,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_unserialize, 0)
 	ZEND_ARG_INFO(0, variable_representation)
+	ZEND_ARG_INFO(1, consumed)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_memory_get_usage, 0, 0, 0)
@@ -3680,10 +3681,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("glob", &php_glob_stream_wrapper TSRMLS_CC);
 #endif
 	php_register_url_stream_wrapper("data", &php_stream_rfc2397_wrapper TSRMLS_CC);
-#ifndef PHP_CURL_URL_WRAPPERS
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper TSRMLS_CC);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper TSRMLS_CC);
-#endif
 
 #if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
 # if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
@@ -3713,10 +3712,8 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 #endif
 
 	php_unregister_url_stream_wrapper("php" TSRMLS_CC);
-#ifndef PHP_CURL_URL_WRAPPERS
 	php_unregister_url_stream_wrapper("http" TSRMLS_CC);
 	php_unregister_url_stream_wrapper("ftp" TSRMLS_CC);
-#endif
 
 	BASIC_MSHUTDOWN_SUBMODULE(browscap)
 	BASIC_MSHUTDOWN_SUBMODULE(array)

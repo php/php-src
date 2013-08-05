@@ -1409,7 +1409,7 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 /* }}} */
 
 /* {{{ proto bool SQLite3Stmt::bindParam(int parameter_number, mixed parameter [, int type])
-   Bind Paramater to a stmt variable. */
+   Bind Parameter to a stmt variable. */
 PHP_METHOD(sqlite3stmt, bindParam)
 {
 	php_sqlite3_stmt *stmt_obj;

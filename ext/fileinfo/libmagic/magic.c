@@ -80,11 +80,12 @@ FILE_RCSID("@(#)$File: magic.c,v 1.78 2013/01/07 18:20:19 christos Exp $")
 # undef S_IFIFO
 #endif
 
-private void free_mlist(struct mlist *);
 private void close_and_restore(const struct magic_set *, const char *, int,
     const struct stat *);
 private int unreadable_info(struct magic_set *, mode_t, const char *);
+#if 0
 private const char* get_default_magic(void);
+#endif
 private const char *file_or_stream(struct magic_set *, const char *, php_stream *);
 
 #ifndef	STDIN_FILENO

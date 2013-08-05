@@ -9,13 +9,13 @@ function recv() {
     }
 }
 
-$reciever = recv();
-var_dump($reciever->current());
-$reciever->send(1);
-var_dump($reciever->current());
-$reciever->send(2);
-var_dump($reciever->current());
-$reciever->send(3);
+$receiver = recv();
+var_dump($receiver->current());
+$receiver->send(1);
+var_dump($receiver->current());
+$receiver->send(2);
+var_dump($receiver->current());
+$receiver->send(3);
 
 ?>
 --EXPECT--

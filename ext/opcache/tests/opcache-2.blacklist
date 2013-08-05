@@ -1,1 +1,6 @@
 /path/to/bar
+; wildcard and relative entires
+blacklist.inc
+./current.php
+/tmp/path/?nocache.inc
+/tmp/path/*/somedir

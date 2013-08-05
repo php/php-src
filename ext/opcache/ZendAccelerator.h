@@ -27,7 +27,7 @@
 #endif
 
 #define ACCELERATOR_PRODUCT_NAME	"Zend OPcache"
-#define ACCELERATOR_VERSION "7.0.2-dev"
+#define ACCELERATOR_VERSION "7.0.3-dev"
 /* 2 - added Profiler support, on 20010712 */
 /* 3 - added support for Optimizer's encoded-only-files mode */
 /* 4 - works with the new Optimizer, that supports the file format with licenses */
@@ -168,7 +168,7 @@ typedef time_t accel_time_t;
 typedef enum _zend_accel_restart_reason {
 	ACCEL_RESTART_OOM,    /* restart because of out of memory */
 	ACCEL_RESTART_HASH,   /* restart because of hash overflow */
-	ACCEL_RESTART_USER    /* restart sheduled by opcache_reset() */
+	ACCEL_RESTART_USER    /* restart scheduled by opcache_reset() */
 } zend_accel_restart_reason;
 
 typedef struct _zend_persistent_script {
@@ -232,6 +232,7 @@ typedef struct _zend_accel_directives {
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 	long           interned_strings_buffer;
 #endif
+	char          *restrict_api;
 } zend_accel_directives;
 
 typedef struct _zend_accel_globals {
@@ -268,7 +269,7 @@ typedef struct _zend_accel_shared_globals {
 	unsigned long   blacklist_misses;
 	unsigned long   oom_restarts;     /* number of restarts because of out of memory */
 	unsigned long   hash_restarts;    /* number of restarts because of hash overflow */
-	unsigned long   manual_restarts;  /* number of restarts sheduled by opcache_reset() */
+	unsigned long   manual_restarts;  /* number of restarts scheduled by opcache_reset() */
 	zend_accel_hash hash;             /* hash table for cached scripts */
 	zend_accel_hash include_paths;    /* used "include_path" values    */
 
@@ -316,6 +317,7 @@ extern zend_accel_globals accel_globals;
 
 extern char *zps_api_failure_reason;
 
+void accel_shutdown(TSRMLS_D);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason TSRMLS_DC);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason TSRMLS_DC);
 int  zend_accel_invalidate(const char *filename, int filename_len, zend_bool force TSRMLS_DC);

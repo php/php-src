@@ -784,6 +784,9 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	/* no docref given but function is known (the default) */
 	if (!docref && is_function) {
 		int doclen;
+		while (*function == '_') {
+			function++;
+		}
 		if (space[0] == '\0') {
 			doclen = spprintf(&docref_buf, 0, "function.%s", function);
 		} else {
@@ -2070,6 +2073,8 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	EG(exception_class) = NULL;
 	PG(disable_functions) = NULL;
 	PG(disable_classes) = NULL;
+	EG(exception) = NULL;
+	EG(objects_store).object_buckets = NULL;
 
 #if HAVE_SETLOCALE
 	setlocale(LC_CTYPE, "");

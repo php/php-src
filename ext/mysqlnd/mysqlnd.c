@@ -27,6 +27,7 @@
 #include "mysqlnd_statistics.h"
 #include "mysqlnd_charset.h"
 #include "mysqlnd_debug.h"
+#include "ext/standard/php_smart_str.h"
 
 /*
   TODO :
@@ -1179,7 +1180,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const char * query, unsigned int query_len TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, send_query);
-	enum_func_status ret;
+	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::send_query");
 	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
 
@@ -1454,7 +1455,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, list_fields)(MYSQLND_CONN_DATA * conn, const c
 			}
 
 			if (FAIL == result->m.read_result_metadata(result, conn TSRMLS_CC)) {
-				DBG_ERR("Error ocurred while reading metadata");
+				DBG_ERR("Error occurred while reading metadata");
 				result->m.free_result(result, TRUE TSRMLS_CC);
 				result = NULL;
 				break;
@@ -1586,7 +1587,7 @@ static ulong
 MYSQLND_METHOD(mysqlnd_conn_data, escape_string)(MYSQLND_CONN_DATA * const conn, char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, escape_string);
-	ulong ret;
+	ulong ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::escape_string");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 

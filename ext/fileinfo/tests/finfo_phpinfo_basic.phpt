@@ -1,5 +1,5 @@
 --TEST--
-Test finfo extention : loading into phpinfo()
+Test finfo extension : loading into phpinfo()
 --SKIPIF--
 <?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
 --FILE--

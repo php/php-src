@@ -531,7 +531,7 @@ PHP_MYSQLI_EXPORT(zend_object_value) mysqli_objects_new(zend_class_entry *class_
 #include "ext/mysqlnd/mysqlnd_reverse_api.h"
 static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
 {
-	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == mysqli_link_class_entry) {
+	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), mysqli_link_class_entry TSRMLS_CC)) {
 		MY_MYSQL * mysql;
 		MYSQLI_RESOURCE  * my_res;
 		mysqli_object * intern = (mysqli_object *)zend_object_store_get_object(zv TSRMLS_CC);
@@ -842,7 +842,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_REFRESH_BACKUP_LOG", REFRESH_BACKUP_LOG, CONST_CS | CONST_PERSISTENT);
 #endif
 
-#if MYSQL_VERSION_ID >= 50611 || defined(MYSQLI_USE_MYSQLND)
+#if (MYSQL_VERSION_ID >= 50611 && defined(CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS)) || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS", MYSQL_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, CONST_CS | CONST_PERSISTENT);
 #endif
 
@@ -1271,7 +1271,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 
 	php_mysqli_fetch_into_hash_aux(return_value, result, fetchtype TSRMLS_CC);
 
-	if (into_object && Z_TYPE_P(return_value) != IS_NULL) {
+	if (into_object && Z_TYPE_P(return_value) == IS_ARRAY) {
 		zval dataset = *return_value;
 		zend_fcall_info fci;
 		zend_fcall_info_cache fcc;

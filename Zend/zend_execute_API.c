@@ -254,15 +254,13 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 		if (EG(user_error_handler)) {
 			zeh = EG(user_error_handler);
 			EG(user_error_handler) = NULL;
-			zval_dtor(zeh);
-			FREE_ZVAL(zeh);
+			zval_ptr_dtor(&zeh);
 		}
 
 		if (EG(user_exception_handler)) {
 			zeh = EG(user_exception_handler);
 			EG(user_exception_handler) = NULL;
-			zval_dtor(zeh);
-			FREE_ZVAL(zeh);
+			zval_ptr_dtor(&zeh);
 		}
 
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
@@ -1056,7 +1054,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_
 	}
 
 	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
-	 * (doesn't impact fuctionality of __autoload()
+	 * (doesn't impact functionality of __autoload()
 	*/
 	if (!use_autoload || zend_is_compiling(TSRMLS_C)) {
 		if (!key) {

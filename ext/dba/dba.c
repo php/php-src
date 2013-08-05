@@ -888,7 +888,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			RETURN_FALSE;
 		}
 		if (hptr->flags & (DBA_NO_APPEND|DBA_CAST_AS_FD)) {
-			/* Needed becasue some systems do not allow to write to the original 
+			/* Needed because some systems do not allow to write to the original 
 			 * file contents with O_APPEND being set.
 			 */
 			if (SUCCESS != php_stream_cast(info->fp, PHP_STREAM_AS_FD, (void*)&info->fd, 1)) {

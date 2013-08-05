@@ -1281,6 +1281,14 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *p
 		}
 	}
 
+	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL) ||
+	    UNEXPECTED(CE_STATIC_MEMBERS(ce)[property_info->offset] == NULL)) {
+		if (!silent) {
+			zend_error_noreturn(E_ERROR, "Access to undeclared static property: %s::$%s", ce->name, property_name);
+		}
+		return NULL;
+	}
+	
 	return &CE_STATIC_MEMBERS(ce)[property_info->offset];
 }
 /* }}} */
@@ -1678,6 +1686,8 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	NULL,									/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
+	NULL,									/* do_operation */
+	NULL,									/* compare */
 };
 
 /*

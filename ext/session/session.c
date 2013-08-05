@@ -70,6 +70,9 @@ zend_class_entry *php_session_class_entry;
 /* SessionHandlerInterface */
 zend_class_entry *php_session_iface_entry;
 
+/* SessionIdInterface */
+zend_class_entry *php_session_id_iface_entry;
+
 /* ***********
    * Helpers *
    *********** */
@@ -82,6 +85,8 @@ zend_class_entry *php_session_iface_entry;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "A session is active. You cannot change the session module's ini settings at this time");	\
 		return FAILURE;	\
 	}
+
+static void php_session_send_cookie(TSRMLS_D);
 
 /* Dispatched by RINIT and by php_session_destroy */
 static inline void php_rinit_session_globals(TSRMLS_D) /* {{{ */
@@ -123,7 +128,7 @@ static int php_session_destroy(TSRMLS_D) /* {{{ */
 		return FAILURE;
 	}
 
-	if (PS(mod)->s_destroy(&PS(mod_data), PS(id) TSRMLS_CC) == FAILURE) {
+	if (PS(id) && PS(mod)->s_destroy(&PS(mod_data), PS(id) TSRMLS_CC) == FAILURE) {
 		retval = FAILURE;
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Session object destruction failed");
 	}
@@ -425,16 +430,44 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 }
 /* }}} */
 
+/* Default session id char validation function allowed by ps_modules.
+ * If you change the logic here, please also update the error message in
+ * ps_modules appropriately */
+PHPAPI int php_session_valid_key(const char *key) /* {{{ */
+{
+	size_t len;
+	const char *p;
+	char c;
+	int ret = SUCCESS;
+
+	for (p = key; (c = *p); p++) {
+		/* valid characters are a..z,A..Z,0..9 */
+		if (!((c >= 'a' && c <= 'z')
+				|| (c >= 'A' && c <= 'Z')
+				|| (c >= '0' && c <= '9')
+				|| c == ','
+				|| c == '-')) {
+			ret = FAILURE;
+			break;
+		}
+	}
+
+	len = p - key;
+
+	/* Somewhat arbitrary length limit here, but should be way more than
+	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
+	if (len == 0 || len > 128) {
+		ret = FAILURE;
+	}
+
+	return ret;
+}
+/* }}} */
+
 static void php_session_initialize(TSRMLS_D) /* {{{ */
 {
-	char *val;
+	char *val = NULL;
 	int vallen;
-
-	/* check session name for invalid characters */
-	if (PS(id) && strpbrk(PS(id), "\r\n\t <>'\"\\")) {
-		efree(PS(id));
-		PS(id) = NULL;
-	}
 
 	if (!PS(mod)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No storage module chosen - failed to initialize session");
@@ -449,28 +482,38 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 
 	/* If there is no ID, use session module to create one */
 	if (!PS(id)) {
-new_session:
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
+		if (!PS(id)) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Failed to create session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+			return;
+		}
 		if (PS(use_cookies)) {
 			PS(send_cookie) = 1;
 		}
 	}
 
+	php_session_reset_id(TSRMLS_C);
+	PS(session_status) = php_session_active;
+
 	/* Read data */
-	/* Question: if you create a SID here, should you also try to read data?
-	 * I'm not sure, but while not doing so will remove one session operation
-	 * it could prove usefull for those sites which wish to have "default"
-	 * session information. */
 	php_session_track_init(TSRMLS_C);
-	PS(invalid_session_id) = 0;
-	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == SUCCESS) {
+	if (PS(mod)->s_read(&PS(mod_data), PS(id), &val, &vallen TSRMLS_CC) == FAILURE) {
+		/* Some broken save handler implementation returns FAILURE for non-existent session ID */
+		/* It's better to rase error for this, but disabled error for better compatibility */
+		/*
+		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Failed to read session data: %s (path: %s)", PS(mod)->s_name, PS(save_path));
+		*/
+	}
+	if (val) {
 		php_session_decode(val, vallen TSRMLS_CC);
 		efree(val);
-	} else if (PS(invalid_session_id)) { /* address instances where the session read fails due to an invalid id */
-		PS(invalid_session_id) = 0;
-		efree(PS(id));
-		PS(id) = NULL;
-		goto new_session;
+	}
+
+	if (!PS(use_cookies) && PS(send_cookie)) {
+		if (PS(use_trans_sid) && !PS(use_only_cookies)) {
+			PS(apply_trans_sid) = 1;
+		}
+		PS(send_cookie) = 0;
 	}
 }
 /* }}} */
@@ -615,6 +658,31 @@ static PHP_INI_MH(OnUpdateSaveDir) /* {{{ */
 }
 /* }}} */
 
+static PHP_INI_MH(OnUpdateName) /* {{{ */
+{
+	/* Numeric session.name won't work at all */
+	if (PG(modules_activated) &&
+		(!new_value_length || is_numeric_string(new_value, new_value_length, NULL, NULL, 0))) {
+		int err_type;
+
+		if (stage == ZEND_INI_STAGE_RUNTIME) {
+			err_type = E_WARNING;
+		} else {
+			err_type = E_ERROR;
+		}
+
+		/* Do not output error when restoring ini options. */
+		if (stage != ZEND_INI_STAGE_DEACTIVATE) {
+			php_error_docref(NULL TSRMLS_CC, err_type, "session.name cannot be a numeric or empty '%s'", new_value);
+		}
+		return FAILURE;
+	}
+
+	OnUpdateStringUnempty(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
+	return SUCCESS;
+}
+/* }}} */
+
 static PHP_INI_MH(OnUpdateHashFunc) /* {{{ */
 {
 	long val;
@@ -706,7 +774,7 @@ static ZEND_INI_MH(OnUpdateSmartStr) /* {{{ */
  */
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.save_path",          "",          PHP_INI_ALL, OnUpdateSaveDir,save_path,          php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateString, session_name,       php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateName, session_name,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)
 	STD_PHP_INI_BOOLEAN("session.auto_start",       "0",         PHP_INI_ALL, OnUpdateBool,   auto_start,         php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_probability",     "1",         PHP_INI_ALL, OnUpdateLong,   gc_probability,     php_ps_globals,    ps_globals)
@@ -720,6 +788,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("session.cookie_httponly",  "",          PHP_INI_ALL, OnUpdateBool,   cookie_httponly,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_cookies",      "1",         PHP_INI_ALL, OnUpdateBool,   use_cookies,        php_ps_globals,    ps_globals)
 	STD_PHP_INI_BOOLEAN("session.use_only_cookies", "1",         PHP_INI_ALL, OnUpdateBool,   use_only_cookies,   php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.use_strict_mode",  "0",         PHP_INI_ALL, OnUpdateBool,   use_strict_mode,    php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.referer_check",      "",          PHP_INI_ALL, OnUpdateString, extern_referer_chk, php_ps_globals,    ps_globals)
 #if HAVE_DEV_URANDOM
 	STD_PHP_INI_ENTRY("session.entropy_file",       "/dev/urandom",          PHP_INI_ALL, OnUpdateString, entropy_file,       php_ps_globals,    ps_globals)
@@ -1027,7 +1096,7 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) /* {{{ */
 	res = php_gmtime_r(when, &tm);
 
 	if (!res) {
-		buf[0] = '\0';
+		ubuf[0] = '\0';
 		return;
 	}
 
@@ -1269,9 +1338,14 @@ PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC) /* {{{
 		convert_to_string((*ppid)); \
 		PS(id) = estrndup(Z_STRVAL_PP(ppid), Z_STRLEN_PP(ppid))
 
-static void php_session_reset_id(TSRMLS_D) /* {{{ */
+PHPAPI void php_session_reset_id(TSRMLS_D) /* {{{ */
 {
 	int module_number = PS(module_number);
+
+	if (!PS(id)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot set session ID - session ID is not initialized");
+		return;
+	}
 
 	if (PS(use_cookies) && PS(send_cookie)) {
 		php_session_send_cookie(TSRMLS_C);
@@ -1419,19 +1493,14 @@ PHPAPI void php_session_start(TSRMLS_D) /* {{{ */
 		}
 	}
 
-	php_session_initialize(TSRMLS_C);
-
-	if (!PS(use_cookies) && PS(send_cookie)) {
-		if (PS(use_trans_sid) && !PS(use_only_cookies)) {
-			PS(apply_trans_sid) = 1;
-		}
-		PS(send_cookie) = 0;
+	/* Finally check session id for dangarous characters
+	 * Security note: session id may be embedded in HTML pages.*/
+	if (PS(id) && strpbrk(PS(id), "\r\n\t <>'\"\\")) {
+		efree(PS(id));
+		PS(id) = NULL;
 	}
 
-	php_session_reset_id(TSRMLS_C);
-
-	PS(session_status) = php_session_active;
-
+	php_session_initialize(TSRMLS_C);
 	php_session_cache_limiter(TSRMLS_C);
 
 	if ((PS(mod_data) || PS(mod_user_implemented)) && PS(gc_probability) > 0) {
@@ -1577,7 +1646,7 @@ static PHP_FUNCTION(session_module_name)
 }
 /* }}} */
 
-/* {{{ proto void session_set_save_handler(string open, string close, string read, string write, string destroy, string gc)
+/* {{{ proto void session_set_save_handler(string open, string close, string read, string write, string destroy, string gc, string create_sid)
    Sets user-level functions */
 static PHP_FUNCTION(session_set_save_handler)
 {
@@ -1589,11 +1658,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		RETURN_FALSE;
 	}
 
-	if (argc != 1 && argc != 2 && argc != 6) {
-		WRONG_PARAM_COUNT;
-	}
-
-	if (argc <= 2) {
+	if (argc > 0 && argc <= 2) {
 		zval *obj = NULL, *callback = NULL;
 		zend_uint func_name_len;
 		char *func_name;
@@ -1607,11 +1672,11 @@ static PHP_FUNCTION(session_set_save_handler)
 			RETURN_FALSE;
 		}
 
-		/* Find implemented methods */
-		zend_hash_internal_pointer_reset_ex(&php_session_class_entry->function_table, &pos);
+		/* Find implemented methods - SessionHandlerInterface */
+		zend_hash_internal_pointer_reset_ex(&php_session_iface_entry->function_table, &pos);
 		i = 0;
-		while (zend_hash_get_current_data_ex(&php_session_class_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
-			zend_hash_get_current_key_ex(&php_session_class_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
+		while (zend_hash_get_current_data_ex(&php_session_iface_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
+			zend_hash_get_current_key_ex(&php_session_iface_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
 
 			if (zend_hash_find(&Z_OBJCE_P(obj)->function_table, func_name, func_name_len, (void **)&current_mptr) == SUCCESS) {
 				if (PS(mod_user_names).names[i] != NULL) {
@@ -1629,7 +1694,29 @@ static PHP_FUNCTION(session_set_save_handler)
 				RETURN_FALSE;
 			}
 
-			zend_hash_move_forward_ex(&php_session_class_entry->function_table, &pos);
+			zend_hash_move_forward_ex(&php_session_iface_entry->function_table, &pos);
+			++i;
+		}
+
+		/* Find implemented methods - SessionIdInterface (optional) */
+		zend_hash_internal_pointer_reset_ex(&php_session_id_iface_entry->function_table, &pos);
+		while (zend_hash_get_current_data_ex(&php_session_id_iface_entry->function_table, (void **) &default_mptr, &pos) == SUCCESS) {
+			zend_hash_get_current_key_ex(&php_session_id_iface_entry->function_table, &func_name, &func_name_len, &func_index, 0, &pos);
+
+			if (zend_hash_find(&Z_OBJCE_P(obj)->function_table, func_name, func_name_len, (void **)&current_mptr) == SUCCESS) {
+				if (PS(mod_user_names).names[i] != NULL) {
+					zval_ptr_dtor(&PS(mod_user_names).names[i]);
+				}
+
+				MAKE_STD_ZVAL(callback);
+				array_init_size(callback, 2);
+				Z_ADDREF_P(obj);
+				add_next_index_zval(callback, obj);
+				add_next_index_stringl(callback, func_name, func_name_len - 1, 1);
+				PS(mod_user_names).names[i] = callback;
+			}
+
+			zend_hash_move_forward_ex(&php_session_id_iface_entry->function_table, &pos);
 			++i;
 		}
 
@@ -1661,6 +1748,10 @@ static PHP_FUNCTION(session_set_save_handler)
 		RETURN_TRUE;
 	}
 
+	if (argc != 6 && argc != 7) {
+		WRONG_PARAM_COUNT;
+	}
+
 	if (zend_parse_parameters(argc TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
 		return;
 	}
@@ -1668,7 +1759,8 @@ static PHP_FUNCTION(session_set_save_handler)
 	/* remove shutdown function */
 	remove_user_shutdown_function("session_shutdown", sizeof("session_shutdown") TSRMLS_CC);
 
-	for (i = 0; i < 6; i++) {
+	/* at this point argc can only be 6 or 7 */
+	for (i = 0; i < argc; i++) {
 		if (!zend_is_callable(*args[i], 0, &name TSRMLS_CC)) {
 			efree(args);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Argument %d is not a valid callback", i+1);
@@ -1682,7 +1774,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
 
-	for (i = 0; i < 6; i++) {
+	for (i = 0; i < argc; i++) {
 		if (PS(mod_user_names).names[i] != NULL) {
 			zval_ptr_dtor(&PS(mod_user_names).names[i]);
 		}
@@ -1724,9 +1816,9 @@ static PHP_FUNCTION(session_save_path)
 static PHP_FUNCTION(session_id)
 {
 	char *name = NULL;
-	int name_len;
+	int name_len, argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "|s", &name, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -1771,11 +1863,13 @@ static PHP_FUNCTION(session_regenerate_id)
 		}
 
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data), NULL TSRMLS_CC);
-
-		PS(send_cookie) = 1;
-		php_session_reset_id(TSRMLS_C);
-
-		RETURN_TRUE;
+		if (PS(id)) {
+			PS(send_cookie) = 1;
+			php_session_reset_id(TSRMLS_C);
+			RETURN_TRUE;
+		} else {
+			PS(id) = STR_EMPTY_ALLOC();
+		}
 	}
 	RETURN_FALSE;
 }
@@ -1992,13 +2086,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_session_void, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_save_handler, 0, 0, 6)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_save_handler, 0, 0, 1)
 	ZEND_ARG_INFO(0, open)
 	ZEND_ARG_INFO(0, close)
 	ZEND_ARG_INFO(0, read)
 	ZEND_ARG_INFO(0, write)
 	ZEND_ARG_INFO(0, destroy)
 	ZEND_ARG_INFO(0, gc)
+	ZEND_ARG_INFO(0, create_sid)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_session_cache_limiter, 0, 0, 0)
@@ -2041,6 +2136,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_session_class_gc, 0)
 	ZEND_ARG_INFO(0, maxlifetime)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_session_class_create_sid, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ session_functions[]
@@ -2082,6 +2180,14 @@ static const zend_function_entry php_session_iface_functions[] = {
 };
 /* }}} */
 
+/* {{{ SessionIdInterface functions[]
+*/
+static const zend_function_entry php_session_id_iface_functions[] = {
+	PHP_ABSTRACT_ME(SessionIdInterface, create_sid, arginfo_session_class_create_sid)
+	{ NULL, NULL, NULL }
+};
+/* }}} */
+
 /* {{{ SessionHandler functions[]
  */
 static const zend_function_entry php_session_class_functions[] = {
@@ -2091,6 +2197,7 @@ static const zend_function_entry php_session_class_functions[] = {
 	PHP_ME(SessionHandler, write, arginfo_session_class_write, ZEND_ACC_PUBLIC)
 	PHP_ME(SessionHandler, destroy, arginfo_session_class_destroy, ZEND_ACC_PUBLIC)
 	PHP_ME(SessionHandler, gc, arginfo_session_class_gc, ZEND_ACC_PUBLIC)
+	PHP_ME(SessionHandler, create_sid, arginfo_session_class_create_sid, ZEND_ACC_PUBLIC)
 	{ NULL, NULL, NULL }
 };
 /* }}} */
@@ -2150,7 +2257,7 @@ static PHP_RSHUTDOWN_FUNCTION(session) /* {{{ */
 	php_rshutdown_session_globals(TSRMLS_C);
 
 	/* this should NOT be done in php_rshutdown_session_globals() */
-	for (i = 0; i < 6; i++) {
+	for (i = 0; i < 7; i++) {
 		if (PS(mod_user_names).names[i] != NULL) {
 			zval_ptr_dtor(&PS(mod_user_names).names[i]);
 			PS(mod_user_names).names[i] = NULL;
@@ -2175,7 +2282,7 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	ps_globals->default_mod = NULL;
 	ps_globals->mod_user_implemented = 0;
 	ps_globals->mod_user_is_open = 0;
-	for (i = 0; i < 6; i++) {
+	for (i = 0; i < 7; i++) {
 		ps_globals->mod_user_names.names[i] = NULL;
 	}
 	ps_globals->http_session_vars = NULL;
@@ -2199,15 +2306,20 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	php_session_rfc1867_orig_callback = php_rfc1867_callback;
 	php_rfc1867_callback = php_session_rfc1867_callback;
 
-	/* Register interface */
+	/* Register interfaces */
 	INIT_CLASS_ENTRY(ce, PS_IFACE_NAME, php_session_iface_functions);
 	php_session_iface_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	php_session_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
+
+	INIT_CLASS_ENTRY(ce, PS_SID_IFACE_NAME, php_session_id_iface_functions);
+	php_session_id_iface_entry = zend_register_internal_class(&ce TSRMLS_CC);
+	php_session_id_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
 
 	/* Register base class */
 	INIT_CLASS_ENTRY(ce, PS_CLASS_NAME, php_session_class_functions);
 	php_session_class_entry = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_class_implements(php_session_class_entry TSRMLS_CC, 1, php_session_iface_entry);
+	zend_class_implements(php_session_class_entry TSRMLS_CC, 1, php_session_id_iface_entry);
 
 	REGISTER_LONG_CONSTANT("PHP_SESSION_DISABLED", php_session_disabled, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_SESSION_NONE", php_session_none, CONST_CS | CONST_PERSISTENT);
@@ -2224,6 +2336,12 @@ static PHP_MSHUTDOWN_FUNCTION(session) /* {{{ */
 #ifdef HAVE_LIBMM
 	PHP_MSHUTDOWN(ps_mm) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #endif
+
+	/* reset rfc1867 callbacks */
+	php_session_rfc1867_orig_callback = NULL;
+	if (php_rfc1867_callback == php_session_rfc1867_callback) {
+		php_rfc1867_callback = NULL;
+	}
 
 	ps_serializers[PREDEFINED_SERIALIZERS].name = NULL;
 	memset(&ps_modules[PREDEFINED_MODULES], 0, (MAX_MODULES-PREDEFINED_MODULES)*sizeof(ps_module *));
@@ -2367,7 +2485,7 @@ static void php_session_rfc1867_update(php_session_rfc1867_progress *progress, i
 	php_session_initialize(TSRMLS_C);
 	PS(session_status) = php_session_active;
 	IF_SESSION_VARS() {
-		progress->cancel_upload = php_check_cancel_upload(progress TSRMLS_CC);
+		progress->cancel_upload |= php_check_cancel_upload(progress TSRMLS_CC);
 		ZEND_SET_SYMBOL_WITH_LENGTH(Z_ARRVAL_P(PS(http_session_vars)), progress->key.c, progress->key.len+1, progress->data, 2, 0);
 	}
 	php_session_flush(TSRMLS_C);

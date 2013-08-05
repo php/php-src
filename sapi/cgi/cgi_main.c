@@ -1955,7 +1955,11 @@ consult the installation file that came with this distribution, or visit \n\
 	}
 
 	if (bindpath) {
-		fcgi_fd = fcgi_listen(bindpath, 128);
+		int backlog = 128;
+		if (getenv("PHP_FCGI_BACKLOG")) {
+			backlog = atoi(getenv("PHP_FCGI_BACKLOG"));
+		}
+		fcgi_fd = fcgi_listen(bindpath, backlog);
 		if (fcgi_fd < 0) {
 			fprintf(stderr, "Couldn't create FastCGI listen socket on port %s\n", bindpath);
 #ifdef ZTS
