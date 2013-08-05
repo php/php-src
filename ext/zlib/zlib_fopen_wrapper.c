@@ -106,7 +106,7 @@ php_stream_ops php_stream_gzio_ops = {
 	NULL  /* set_option */
 };
 
-php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, char *path, char *mode, int options, 
+php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, 
 							  char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	struct php_gz_stream_data_t *self;

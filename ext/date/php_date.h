@@ -182,7 +182,7 @@ ZEND_END_MODULE_GLOBALS(date)
 #define DATEG(v) (date_globals.v)
 #endif
 
-/* Backwards compability wrapper */
+/* Backwards compatibility wrapper */
 PHPAPI signed long php_parse_date(char *string, signed long *now);
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
 PHPAPI int php_idate(char format, time_t ts, int localtime TSRMLS_DC);

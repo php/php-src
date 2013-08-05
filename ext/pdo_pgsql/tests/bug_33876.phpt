@@ -82,7 +82,7 @@ else
 # false -> "" as string, which pgsql doesn't like
 if (!$res->execute(array(false))) {
 	$err = $res->errorInfo();
-	// Strip additional lines ouputted by recent PgSQL versions
+	// Strip additional lines outputted by recent PgSQL versions
 	$err[2] = trim(current(explode("\n", $err[2])));
 	print_r($err);
 } else {
