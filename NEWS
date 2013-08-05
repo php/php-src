@@ -1,5 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2013, PHP 5.5.3
+
+- Sessions:
+  . Implemented strict sessions RFC (https://wiki.php.net/rfc/strict_sessions)
+    which protects against session fixation attacks and session collisions.    
+    (Yasuo Ohgaki)
+
 ?? ??? 2013, PHP 5.5.2
 
 - Core:
