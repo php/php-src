@@ -2328,6 +2328,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 
 					ALLOC_ZVAL(ret);
 					INIT_PZVAL_COPY(ret, *retval_ptr_ptr);
+					zval_copy_ctor(ret);
 					*EG(return_value_ptr_ptr) = ret;
 				}
 				break;
@@ -6749,6 +6750,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 
 					ALLOC_ZVAL(ret);
 					INIT_PZVAL_COPY(ret, *retval_ptr_ptr);
+					zval_copy_ctor(ret);
 					*EG(return_value_ptr_ptr) = ret;
 				}
 				break;
@@ -11063,6 +11065,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 
 					ALLOC_ZVAL(ret);
 					INIT_PZVAL_COPY(ret, *retval_ptr_ptr);
+					zval_copy_ctor(ret);
 					*EG(return_value_ptr_ptr) = ret;
 				}
 				break;
@@ -27040,6 +27043,7 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 
 					ALLOC_ZVAL(ret);
 					INIT_PZVAL_COPY(ret, *retval_ptr_ptr);
+					zval_copy_ctor(ret);
 					*EG(return_value_ptr_ptr) = ret;
 				}
 				break;
