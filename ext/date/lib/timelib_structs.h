@@ -33,11 +33,6 @@
 #include <stdint.h>
 #endif
 
-#ifdef PHP_WIN32
-/* TODO: Remove these hacks/defs once we have the int definitions in main/ 
-	 rathen than in each 2nd extension and win32/ */
-# include "win32/php_stdint.h"
-#else
 # ifndef HAVE_INT32_T
 #  if SIZEOF_INT == 4
 typedef int int32_t;
@@ -53,7 +48,6 @@ typedef unsigned int uint32_t;
 typedef unsigned long int uint32_t;
 #  endif
 # endif
-#endif
 
 #include <stdio.h>
 
@@ -68,8 +62,8 @@ typedef unsigned long int uint32_t;
 #endif
 
 #if defined(_MSC_VER)
-typedef uint64_t timelib_ull;
-typedef int64_t timelib_sll;
+typedef __uint64 timelib_ull;
+typedef __int64 timelib_sll;
 # define TIMELIB_LL_CONST(n) n ## i64
 #else
 typedef unsigned long long timelib_ull;
