@@ -2103,7 +2103,8 @@ AC_DEFUN([AC_ENABLE_FAST_INSTALL],
 [define([AC_ENABLE_FAST_INSTALL_DEFAULT], ifelse($1, no, no, yes))dnl
 AC_ARG_ENABLE([fast-install],
 changequote(<<, >>)dnl
-<<  --enable-fast-install[=PKGS]  Optimize for fast installation [default=>>AC_ENABLE_FAST_INSTALL_DEFAULT],
+<<  --enable-fast-install[=PKGS]
+                          Optimize for fast installation [default=>>AC_ENABLE_FAST_INSTALL_DEFAULT],
 changequote([, ])dnl
     [p=${PACKAGE-default}
     case $enableval in
