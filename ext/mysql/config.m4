@@ -40,13 +40,14 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
 
 
 PHP_ARG_WITH(mysql, for MySQL support,
-[  --with-mysql[=DIR]      Include MySQL support.  DIR is the MySQL base
+[  --with-mysql[=DIR]        Include MySQL support.  DIR is the MySQL base
                           directory, if no DIR is passed or the value is
                           mysqlnd the MySQL native driver will be used])
 
 PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
-[  --with-mysql-sock[=SOCKPATH]   MySQL/MySQLi/PDO_MYSQL: Location of the MySQL unix socket pointer.
-                            If unspecified, the default locations are searched], no, no)
+[  --with-mysql-sock[=SOCKPATH]
+                          MySQL/MySQLi/PDO_MYSQL: Location of the MySQL unix socket pointer.
+                          If unspecified, the default locations are searched], no, no)
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz, 

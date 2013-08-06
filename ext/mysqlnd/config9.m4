@@ -8,11 +8,11 @@ PHP_ARG_ENABLE(mysqlnd, whether to enable mysqlnd,
 
 PHP_ARG_ENABLE(mysqlnd_compression_support, whether to disable compressed protocol support in mysqlnd,
 [  --disable-mysqlnd-compression-support
-                            Disable support for the MySQL compressed protocol in mysqlnd], yes, no)
+                          Disable support for the MySQL compressed protocol in mysqlnd], yes, no)
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz,
-  [  --with-zlib-dir[=DIR]       mysqlnd: Set the path to libz install prefix], no, no)
+  [  --with-zlib-dir[=DIR]     mysqlnd: Set the path to libz install prefix], no, no)
 fi
 
 dnl If some extension uses mysqlnd it will get compiled in PHP core
