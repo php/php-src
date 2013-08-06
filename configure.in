@@ -1006,7 +1006,7 @@ dnl Check if all enabled by default extensions should be disabled
 dnl
 
 AC_ARG_ENABLE(all,
-[ --disable-all   Disable all extensions which are enabled by default
+[  --disable-all           Disable all extensions which are enabled by default
 ], [
   PHP_ENABLE_ALL=$enableval
 ])

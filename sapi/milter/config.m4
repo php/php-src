@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(milter, for Milter support,
-[  --with-milter[=DIR]     Build PHP as Milter application], no, no)
+[  --with-milter[=DIR]       Build PHP as Milter application], no, no)
 
 if test "$PHP_MILTER" != "no"; then
   if test "$PHP_MILTER" = "yes"; then

@@ -6,7 +6,7 @@ PHP_ARG_ENABLE(simplexml, whether to enable SimpleXML support,
 
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR     SimpleXML: libxml2 install prefix], no, no)
+  [  --with-libxml-dir=DIR   SimpleXML: libxml2 install prefix], no, no)
 fi
 
 if test "$PHP_SIMPLEXML" != "no"; then

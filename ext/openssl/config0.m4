@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(openssl, for OpenSSL support,
-[  --with-openssl[=DIR]    Include OpenSSL support (requires OpenSSL >= 0.9.6)])
+[  --with-openssl[=DIR]      Include OpenSSL support (requires OpenSSL >= 0.9.6)])
 
 PHP_ARG_WITH(kerberos, for Kerberos support,
 [  --with-kerberos[=DIR]     OPENSSL: Include Kerberos support], no, no)
