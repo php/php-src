@@ -2929,6 +2929,7 @@ ZEND_VM_HANDLER(111, ZEND_RETURN_BY_REF, CONST|TMP|VAR|CV, ANY)
 
 					ALLOC_ZVAL(ret);
 					INIT_PZVAL_COPY(ret, *retval_ptr_ptr);
+					zval_copy_ctor(ret);
 					*EG(return_value_ptr_ptr) = ret;
 				}
 				break;
