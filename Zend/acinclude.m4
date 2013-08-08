@@ -5,6 +5,7 @@ dnl This file contains local autoconf functions.
 AC_DEFUN([LIBZEND_BISON_CHECK],[
   # we only support certain bison versions, min: 2.4
   bison_version_min="204"
+  # non-working versions, e.g. "3.0 3.2"
   bison_version_exclude=""
 
   # for standalone build of Zend Engine
