@@ -401,7 +401,7 @@ pm.max_spare_servers = 3
 ;      - %{megabytes}M
 ;      - %{mega}M
 ;  %n: pool name
-;  %o: ouput header
+;  %o: output header
 ;      it must be associated with embraces to specify the name of the header:
 ;      - %{Content-Type}o
 ;      - %{X-Powered-By}o

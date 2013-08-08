@@ -2934,6 +2934,9 @@ dnl Add providerdesc.o into global objects when needed
   *solaris*)
     PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
     ;;
+  *linux*)
+    PHP_GLOBAL_OBJS="[$]PHP_GLOBAL_OBJS [$]ac_bdir[$]ac_provsrc.o"
+    ;;
   esac
 
 dnl DTrace objects
@@ -2959,15 +2962,19 @@ dnl DTrace objects
   esac
 
 dnl Generate Makefile.objects entries
+dnl The empty $ac_provsrc command stops an implicit circular dependency
+dnl in GNU Make which causes the .d file to be overwritten (Bug 61268)
   cat>>Makefile.objects<<EOF
 
+$abs_srcdir/$ac_provsrc:;
+
 $ac_bdir[$]ac_hdrobj: $abs_srcdir/$ac_provsrc
-	dtrace -h -C -s $ac_srcdir[$]ac_provsrc -o \$[]@ && \$(SED) -ibak 's,PHP_,DTRACE_,g' \$[]@
+	CFLAGS="\$(CFLAGS_CLEAN)" dtrace -h -C -s $ac_srcdir[$]ac_provsrc -o \$[]@.bak && \$(SED) 's,PHP_,DTRACE_,g' \$[]@.bak > \$[]@
 
 \$(PHP_DTRACE_OBJS): $ac_bdir[$]ac_hdrobj
 
 $ac_bdir[$]ac_provsrc.o: \$(PHP_DTRACE_OBJS)
-	dtrace -G -o \$[]@ -s $abs_srcdir/$ac_provsrc $dtrace_objs
+	CFLAGS="\$(CFLAGS_CLEAN)" dtrace -G -o \$[]@ -s $abs_srcdir/$ac_provsrc $dtrace_objs
 
 EOF
 ])
