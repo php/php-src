@@ -36,6 +36,10 @@ PHP                                                                        NEWS
   . Fixed bug #62978 (Disallow possible SQL injections with pg_select()/pg_update()
     /pg_delete()/pg_insert()). (Yasuo)
 
+- Zlib:
+  . Fixed bug #65391 (Unable to send vary header user-agent when 
+    ob_start('ob_gzhandler') is called) (Mike)
+
 ?? ??? 2013, PHP 5.4.18
 
 - Core:
