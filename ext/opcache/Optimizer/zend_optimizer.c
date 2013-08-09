@@ -28,6 +28,35 @@
 #define OPTIMIZATION_LEVEL \
 	ZCG(accel_directives).optimization_level
 
+#if ZEND_EXTENSION_API_NO >= PHP_5_5_X_API_NO
+static int zend_optimizer_lookup_cv(zend_op_array *op_array, char* name, int name_len)
+{
+	int i = 0;
+	ulong hash_value = zend_inline_hash_func(name, name_len+1);
+
+	while (i < op_array->last_var) {
+		if (op_array->vars[i].name == name ||
+		    (op_array->vars[i].hash_value == hash_value &&
+		     op_array->vars[i].name_len == name_len &&
+		     memcmp(op_array->vars[i].name, name, name_len) == 0)) {
+			return i;
+		}
+		i++;
+	}
+	i = op_array->last_var;
+	op_array->last_var++;
+	op_array->vars = erealloc(op_array->vars, op_array->last_var * sizeof(zend_compiled_variable));
+	if (IS_INTERNED(name)) {
+		op_array->vars[i].name = name;
+	} else {
+		op_array->vars[i].name = estrndup(name, name_len);
+	}
+	op_array->vars[i].name_len = name_len;
+	op_array->vars[i].hash_value = hash_value;
+	return i;
+}
+#endif
+
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
 int zend_optimizer_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC)
 {
