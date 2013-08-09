@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig Sï¿½ther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Maxim Maletsky <maxim@maxim.cx>                             |
    |                                                                      |
@@ -36,13 +36,6 @@
 #include "ext/standard/info.h"
 #include "php_ini.h"
 #include "ext/standard/php_smart_str.h"
-
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
-#ifdef PHP_WIN32
-#include "win32/php_stdint.h"
-#endif
 
 #if HAVE_OCI8
 
