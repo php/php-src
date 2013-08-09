@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - Pgsql:
   . Fixed bug #65336 (pg_escape_literal/identifier() silently returns false).
     (Yasuo)
+  . Fixed bug #62978 (Disallow possible SQL injections with pg_select()/pg_update()
+    /pg_delete()/pg_insert()). (Yasuo)
 
 ?? ??? 2013, PHP 5.4.18
 
