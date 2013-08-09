@@ -93,3 +93,5 @@ PHP X.Y UPGRADE NOTES
 11. Other Changes
 ========================================
 
+- File upload:
+  Uploads equal or greater than 2GB in size are now accepted.
