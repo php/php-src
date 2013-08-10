@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Implemented strict sessions RFC (https://wiki.php.net/rfc/strict_sessions)
     which protects against session fixation attacks and session collisions.    
     (Yasuo Ohgaki)
+  . Fixed possible buffer overflow under Windows. Note: Not a security fix.
+    (Yasuo)
+  . Changed session.auto_start to PHP_INI_PERDIR. (Yasuo)
+
 - Pgsql:
   . Fixed bug #62978 (Disallow possible SQL injections with pg_select()/pg_update()
     /pg_delete()/pg_insert()). (Yasuo)
