@@ -540,7 +540,6 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 			if (val) {
 				PHP_MD5_CTX context;
 				unsigned char digest[16];
-				char md5_hash[33];
 
 				/* Generate data's MD5 hash */
 				PHP_MD5Init(&context);
