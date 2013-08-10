@@ -19,6 +19,9 @@ PHP                                                                        NEWS
     gmail dot com)
   . Fixed bug #50308 (session id not appended properly for empty anchor tags).
     (Arpad)
+  . Fixed possible buffer overflow under Windows. Note: Not a security fix.
+    (Yasuo)
+  . Changed session.auto_start to PHP_INI_PERDIR. (Yasuo)
 
 - SOAP:
   . Fixed bug #65018 (SoapHeader problems with SoapServer). (Dmitry)
