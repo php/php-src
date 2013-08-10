@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 - Session:
   . Fixed Bug #65315 (session.hash_function silently fallback to default md5)
     (Yasuo)
+  . Implemented Request #54649 (Create session_serializer_name()). (Yasuo)
 
 - mysqlnd:
   . Disabled flag for SP OUT variables for 5.5+ servers as they are not natively
