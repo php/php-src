@@ -1550,6 +1550,26 @@ static void php_session_flush(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+static void php_session_abort(TSRMLS_D) /* {{{ */
+{
+	if (PS(session_status) == php_session_active) {
+		PS(session_status) = php_session_none;
+		if (PS(mod_data) || PS(mod_user_implemented)) {
+			PS(mod)->s_close(&PS(mod_data) TSRMLS_CC);
+		}
+	}
+}
+/* }}} */
+
+static void php_session_reset(TSRMLS_D) /* {{{ */
+{
+	if (PS(session_status) == php_session_active) {
+		php_session_initialize(TSRMLS_C);
+	}
+}
+/* }}} */
+
+
 PHPAPI void session_adapt_url(const char *url, size_t urllen, char **new, size_t *newlen TSRMLS_DC) /* {{{ */
 {
 	if (PS(apply_trans_sid) && (PS(session_status) == php_session_active)) {
@@ -2056,6 +2076,22 @@ static PHP_FUNCTION(session_write_close)
 }
 /* }}} */
 
+/* {{{ proto void session_abort(void)
+   Abort session and end session. Session data will not be written */
+static PHP_FUNCTION(session_abort)
+{
+	php_session_abort(TSRMLS_C);
+}
+/* }}} */
+
+/* {{{ proto void session_reset(void)
+   Reset session data from saved session data */
+static PHP_FUNCTION(session_reset)
+{
+	php_session_reset(TSRMLS_C);
+}
+/* }}} */
+
 /* {{{ proto int session_status(void)
    Returns the current session status */
 static PHP_FUNCTION(session_status)
@@ -2249,6 +2285,8 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_set_cookie_params, arginfo_session_set_cookie_params)
 	PHP_FE(session_get_cookie_params, arginfo_session_void)
 	PHP_FE(session_write_close,       arginfo_session_void)
+	PHP_FE(session_abort,             arginfo_session_void)
+	PHP_FE(session_reset,             arginfo_session_void)
 	PHP_FE(session_status,            arginfo_session_void)
 	PHP_FE(session_gc,                arginfo_session_gc)
 	PHP_FE(session_register_shutdown, arginfo_session_void)

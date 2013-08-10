@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     (Yasuo)
   . Implemented Request #54649 (Create session_serializer_name()). (Yasuo)
   . Implemented Request #17860 (Session write short circuit). (Yasuo)
+  . Implemented Request #20421 (session_abort() and session_reset() function).
+    (Yasuo)
   . Implemented Request #11100 (session_gc() function). (Yasuo)
 
 - mysqlnd:

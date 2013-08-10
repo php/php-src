@@ -13,7 +13,7 @@ error_reporting(E_ALL);
 ob_start();
 
 /*
- * Prototype : int session_get_cookie_params([int maxlifetime])
+ * Prototype : int session_gc([int maxlifetime])
  * Description : Execute gc and return number of deleted data
  * Source code : ext/session/session.c
  */
