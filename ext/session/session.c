@@ -346,7 +346,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 		unsigned char rbuf[2048];
 		size_t toread = PS(entropy_length);
 
-		if (php_win32_get_random_bytes(rbuf, (size_t) toread) == SUCCESS){
+		if (php_win32_get_random_bytes(rbuf, MIN(toread, sizeof(rbuf))) == SUCCESS){
 
 			switch (PS(hash_func)) {
 				case PS_HASH_FUNC_MD5:
