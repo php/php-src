@@ -505,8 +505,17 @@ static void php_session_initialize(TSRMLS_D) /* {{{ */
 		*/
 	}
 	if (val) {
+		PHP_MD5_CTX context;
+
+		/* Store read data's MD5 hash */
+		PHP_MD5Init(&context);
+		PHP_MD5Update(&context, val, vallen);
+		PHP_MD5Final(PS(session_data_hash), &context);
+
 		php_session_decode(val, vallen TSRMLS_CC);
 		efree(val);
+	} else {
+			memset(PS(session_data_hash),'\0', 16);
 	}
 
 	if (!PS(use_cookies) && PS(send_cookie)) {
@@ -529,7 +538,20 @@ static void php_session_save_current_state(TSRMLS_D) /* {{{ */
 
 			val = php_session_encode(&vallen TSRMLS_CC);
 			if (val) {
-				ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
+				PHP_MD5_CTX context;
+				unsigned char digest[16];
+				char md5_hash[33];
+
+				/* Generate data's MD5 hash */
+				PHP_MD5Init(&context);
+				PHP_MD5Update(&context, val, vallen);
+				PHP_MD5Final(digest, &context);
+				/* Write only when save is required */
+				if (memcmp(digest, PS(session_data_hash), 16)) {
+					ret = PS(mod)->s_write(&PS(mod_data), PS(id), val, vallen TSRMLS_CC);
+				} else {
+					ret = SUCCESS;
+				}
 				efree(val);
 			} else {
 				ret = PS(mod)->s_write(&PS(mod_data), PS(id), "", 0 TSRMLS_CC);
