@@ -10,7 +10,7 @@ _skip_lc_messages();
 ?>
 --INI--
 pgsql.log_notice=1
-pgsql.ignore_notices=0
+pgsql.ignore_notice=0
 --FILE--
 <?php
 include 'config.inc';
