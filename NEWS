@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #62691 (solaris sed has no -i switch). (Chris Jones)
+  . Fixed bug #61345 (CGI mode - make install don't work). (Michael Heimpold)
   . Fixed bug #61268 (--enable-dtrace leads make to clobber
     Zend/zend_dtrace.d) (Chris Jones)
 
