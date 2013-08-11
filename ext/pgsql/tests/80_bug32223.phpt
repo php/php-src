@@ -1,5 +1,5 @@
 --TEST--
-Bug #32223 (weird behaviour of pg_last_notice)
+Bug #32223 (8.0+) (weird behaviour of pg_last_notice)
 --SKIPIF--
 <?php 
 require_once('skipif.inc');
