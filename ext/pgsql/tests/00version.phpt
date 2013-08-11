@@ -12,6 +12,9 @@ $db = pg_connect($conn_str);
 var_dump(pg_version($db));
 pg_close($db);
 
+// Get environment vars for debugging
+var_dump(serialize($_ENV));
+
 echo "OK";
 ?>
 --EXPECTF--
@@ -23,4 +26,5 @@ array(3) {
   ["server"]=>
   string(%d) "%s"
 }
+string(%d) "%s"
 OK
