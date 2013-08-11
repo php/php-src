@@ -8,6 +8,11 @@ PHP                                                                        NEWS
   . Fixed bug #61268 (--enable-dtrace leads make to clobber
     Zend/zend_dtrace.d) (Chris Jones)
 
+- DOM:
+  . Added flags option to DOMDocument::schemaValidate() and 
+    DOMDocument::schemaValidateSource(). Added LIBXML_SCHEMA_CREATE flag. 
+    (Chris Wright)
+
 - Sessions:
   . Implemented strict sessions RFC (https://wiki.php.net/rfc/strict_sessions)
     which protects against session fixation attacks and session collisions.    
