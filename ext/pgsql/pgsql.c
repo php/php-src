@@ -966,7 +966,29 @@ static char *_php_pgsql_escape_identifier(const char *field, size_t field_len)
 	field_escaped[j] = '\0';
 	return field_escaped;
 }
+/* }}} */
 #endif
+
+/* {{{ _php_pgsql_strndup, no strndup should be used */
+static char *_php_pgsql_strndup(const char *s, size_t len)
+{
+	char *new;
+
+	if (NULL == s) {
+		return (char *)NULL;
+	}
+
+	new = (char *) malloc(len + 1);
+
+	if (NULL == new) {
+		return (char *)NULL;
+	}
+
+	new[len] = '\0';
+
+	return memmove(new, s, len);
+}
+/* }}} */
 
 /* {{{ PHP_INI
  */
@@ -6008,7 +6030,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 			size_t new_len, field_len = strlen(field);
 
 			if (_php_pgsql_detect_identifier_escape(field, field_len) == SUCCESS) {
-				escaped = strndup(field, field_len);
+				escaped = _php_pgsql_strndup(field, field_len);
 			} else {
 #if HAVE_PQESCAPELITERAL
 				escaped = PQescapeIdentifier(pg_link, field, field_len);
@@ -6102,7 +6124,7 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const c
 	token = php_strtok_r(table_copy, ".", &tmp);
 	len = strlen(token);
 	if (_php_pgsql_detect_identifier_escape(token, len) == SUCCESS) {
-		escaped = strndup(token, len);
+		escaped = _php_pgsql_strndup(token, len);
 	} else {
 #if HAVE_PQESCAPELITERAL
 		escaped = PQescapeIdentifier(pg_link, token, len);
@@ -6116,7 +6138,7 @@ static inline void build_tablename(smart_str *querystr, PGconn *pg_link, const c
 		len = strlen(tmp);
 		/* "schema"."table" format */
 		if (_php_pgsql_detect_identifier_escape(tmp, len) == SUCCESS) {
-			escaped = strndup(tmp, len);
+			escaped = _php_pgsql_strndup(tmp, len);
 		} else {
 #if HAVE_PQESCAPELITERAL
 			escaped = PQescapeIdentifier(pg_link, tmp, len);
