@@ -4349,7 +4349,6 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 	char *from = NULL, *to = NULL, *tmp = NULL;
 	zval *pgsql_link = NULL;
 	PGconn *pgsql;
-	int to_len;
 	int from_len;
 	int id = -1;
 
@@ -6026,7 +6025,7 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		/* If field is NULL and HAS DEFAULT, should be skipped */
 		if (!skip_field) {
 			char *escaped;
-			size_t new_len, field_len = strlen(field);
+			size_t field_len = strlen(field);
 
 			if (_php_pgsql_detect_identifier_escape(field, field_len) == SUCCESS) {
 				escaped = _php_pgsql_strndup(field, field_len);
