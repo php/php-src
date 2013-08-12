@@ -212,7 +212,7 @@ static ZEND_INI_MH(OnEnable)
 	    stage == ZEND_INI_STAGE_SHUTDOWN ||
 	    stage == ZEND_INI_STAGE_DEACTIVATE) {
 		return OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
-	} else {
+	} else if (!ZCG(enabled)) {
 		/* It may be only temporary disabled */
 		zend_bool *p;
 #ifndef ZTS
@@ -232,6 +232,8 @@ static ZEND_INI_MH(OnEnable)
 			*p = 0;
 			return SUCCESS;
 		}
+	} else {
+	    return SUCCESS;
 	}
 }
 
