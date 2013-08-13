@@ -17,7 +17,7 @@ if ($f = fopen("/proc/meminfo","r")) {
 		}
 	}
 }
-				
+
 if (empty($enough_free_ram)) {
 	die("need +3G free RAM");
 }
@@ -29,7 +29,7 @@ echo "Test\n";
 
 include "php_cli_server.inc";
 
-php_cli_server_start("var_dump(\$_FILES);", false, 
+php_cli_server_start("var_dump(\$_FILES);", false,
 	"-d post_max_size=3G -d upload_max_filesize=3G");
 
 list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);

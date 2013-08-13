@@ -63,9 +63,6 @@
 #include "ext/spl/spl_iterators.h"
 #endif
 #include "php_phar.h"
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
 #ifdef PHAR_HASH_OK
 #include "ext/hash/php_hash.h"
 #include "ext/hash/php_hash_sha.h"

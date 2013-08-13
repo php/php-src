@@ -40,16 +40,6 @@
 #include "php.h"
 #include "ext/standard/file.h"
 
-#ifdef HAVE_STDINT_H
-# include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-# include <inttypes.h>
-#endif
-#ifdef PHP_WIN32
-# include "win32/php_stdint.h"
-#endif
-
 #if HAVE_EXIF
 
 /* When EXIF_DEBUG is defined the module generates a lot of debug messages

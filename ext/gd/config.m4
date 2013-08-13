@@ -7,11 +7,11 @@ dnl Configure options
 dnl
 
 PHP_ARG_WITH(gd, for GD support,
-[  --with-gd[=DIR]         Include GD support.  DIR is the GD library base
+[  --with-gd[=DIR]           Include GD support.  DIR is the GD library base
                           install directory [BUNDLED]])
 if test -z "$PHP_VPX_DIR"; then
   PHP_ARG_WITH(vpx-dir, for the location of libvpx,
-  [  --with-vpx-dir[=DIR]     GD: Set the path to libvpx install prefix], no, no)
+  [  --with-vpx-dir[=DIR]      GD: Set the path to libvpx install prefix], no, no)
 fi
 
 if test -z "$PHP_JPEG_DIR"; then
@@ -39,10 +39,10 @@ PHP_ARG_WITH(t1lib, for T1lib support,
 [  --with-t1lib[=DIR]        GD: Include T1lib support. T1lib version >= 5.0.0 required], no, no)
 
 PHP_ARG_ENABLE(gd-native-ttf, whether to enable truetype string function in GD,
-[  --enable-gd-native-ttf    GD: Enable TrueType string function], no, no)
+[  --enable-gd-native-ttf  GD: Enable TrueType string function], no, no)
 
 PHP_ARG_ENABLE(gd-jis-conv, whether to enable JIS-mapped Japanese font support in GD,
-[  --enable-gd-jis-conv      GD: Enable JIS-mapped Japanese font support], no, no)
+[  --enable-gd-jis-conv    GD: Enable JIS-mapped Japanese font support], no, no)
 
 dnl
 dnl Checks for the configure options

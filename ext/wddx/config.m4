@@ -7,11 +7,11 @@ PHP_ARG_ENABLE(wddx,whether to enable WDDX support,
 
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR     WDDX: libxml2 install prefix], no, no)
+  [  --with-libxml-dir=DIR   WDDX: libxml2 install prefix], no, no)
 fi
 
 PHP_ARG_WITH(libexpat-dir, libexpat dir for WDDX,
-[  --with-libexpat-dir=DIR   WDDX: libexpat dir for XMLRPC-EPI (deprecated)],no,no)
+[  --with-libexpat-dir=DIR WDDX: libexpat dir for XMLRPC-EPI (deprecated)],no,no)
 
 if test "$PHP_WDDX" != "no"; then
 

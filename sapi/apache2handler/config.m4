@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(apxs2,,
-[  --with-apxs2[=FILE]     Build shared Apache 2.0 Handler module. FILE is the optional
+[  --with-apxs2[=FILE]       Build shared Apache 2.0 Handler module. FILE is the optional
                           pathname to the Apache apxs tool [apxs]], no, no)
 
 AC_MSG_CHECKING([for Apache 2.0 handler-module support via DSO through APXS])

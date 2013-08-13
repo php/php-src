@@ -180,6 +180,7 @@ typedef struct _php_ps_globals {
 	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
 
 	zend_bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
+	unsigned char session_data_hash[16]; /* binary MD5 hash length */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
