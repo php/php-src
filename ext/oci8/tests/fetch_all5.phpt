@@ -62,45 +62,45 @@ oci_close($c);
 Test 1
 int(3)
 array(2) {
-  ["MYCOL1"]=>
+  [%u|b%"MYCOL1"]=>
   array(3) {
     [0]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [1]=>
-    string(1) "2"
+    %unicode|string%(1) "2"
     [2]=>
-    string(1) "3"
+    %unicode|string%(1) "3"
   }
-  ["MYCOL2"]=>
+  [%u|b%"MYCOL2"]=>
   array(3) {
     [0]=>
-    string(3) "abc"
+    %unicode|string%(3) "abc"
     [1]=>
-    string(3) "def"
+    %unicode|string%(3) "def"
     [2]=>
-    string(3) "ghi"
+    %unicode|string%(3) "ghi"
   }
 }
 Test 1
 int(3)
 array(2) {
-  ["MYCOL1"]=>
+  [%u|b%"MYCOL1"]=>
   array(3) {
     [0]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [1]=>
-    string(1) "2"
+    %unicode|string%(1) "2"
     [2]=>
-    string(1) "3"
+    %unicode|string%(1) "3"
   }
-  ["MYCOL2"]=>
+  [%u|b%"MYCOL2"]=>
   array(3) {
     [0]=>
-    string(3) "abc"
+    %unicode|string%(3) "abc"
     [1]=>
-    string(3) "def"
+    %unicode|string%(3) "def"
     [2]=>
-    string(3) "ghi"
+    %unicode|string%(3) "ghi"
   }
 }
 Test 3

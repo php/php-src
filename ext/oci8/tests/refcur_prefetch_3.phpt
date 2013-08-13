@@ -86,52 +86,52 @@ Test with Nested Cursors
 Fetch Row using Nested cursor Query
 array(1) {
   [0]=>
-  string(%d) "test0"
+  %unicode|string%(%d) "test0"
 }
 Fetch Row using Nested cursor Query
 array(1) {
   [0]=>
-  string(%d) "test1"
+  %unicode|string%(%d) "test1"
 }
 Fetch Row using Nested cursor Query
 array(1) {
   [0]=>
-  string(%d) "test2"
+  %unicode|string%(%d) "test2"
 }
 Fetch Row using Nested cursor Query
 array(1) {
   [0]=>
-  string(%d) "test3"
+  %unicode|string%(%d) "test3"
 }
 Fetch Row using Nested cursor Query
 array(1) {
   [0]=>
-  string(%d) "test4"
+  %unicode|string%(%d) "test4"
 }
 Fetch Row using Nested cursor Query
 array(1) {
   [0]=>
-  string(%d) "test5"
+  %unicode|string%(%d) "test5"
 }
 Fetch Row using Nested cursor Query
 array(1) {
   [0]=>
-  string(%d) "test6"
+  %unicode|string%(%d) "test6"
 }
 Fetch Row using Nested cursor Query
 array(1) {
   [0]=>
-  string(%d) "test7"
+  %unicode|string%(%d) "test7"
 }
 Fetch Row using Nested cursor Query
 array(1) {
   [0]=>
-  string(%d) "test8"
+  %unicode|string%(%d) "test8"
 }
 Fetch Row using Nested cursor Query
 array(1) {
   [0]=>
-  string(%d) "test9"
+  %unicode|string%(%d) "test9"
 }
 Number of roundtrips made with prefetch count 5 for 10 rows is  3
 Done

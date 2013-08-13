@@ -198,8 +198,7 @@ static size_t strnlen(const char *s, size_t maxlen) {
 static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) /* {{{ */
 {
 	char *s = NULL;
-	zend_str_size_int s_len;
-	int free_zcopy;
+	int s_len, free_zcopy;
 	zval *zvp, zcopy;
 
 	int min_width = 0;
@@ -396,7 +395,7 @@ static void xbuf_format_converter(smart_str *xbuf, const char *fmt, va_list ap) 
 					if (free_zcopy) {
 						zvp = &zcopy;
 					}
-					s_len = Z_STRSIZE_P(zvp);
+					s_len = Z_STRLEN_P(zvp);
 					s = Z_STRVAL_P(zvp);
 					if (adjust_precision && precision < s_len) {
 						s_len = precision;
@@ -793,7 +792,7 @@ skip_output:
 /*
  * This is the general purpose conversion function.
  */
-PHPAPI zend_str_size_int vspprintf(char **pbuf, zend_str_size_size_t max_len, const char *format, va_list ap) /* {{{ */
+PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	smart_str xbuf = {0};
 
@@ -810,9 +809,9 @@ PHPAPI zend_str_size_int vspprintf(char **pbuf, zend_str_size_size_t max_len, co
 }
 /* }}} */
 
-PHPAPI zend_str_size_int spprintf(char **pbuf, size_t max_len, const char *format, ...) /* {{{ */
+PHPAPI int spprintf(char **pbuf, size_t max_len, const char *format, ...) /* {{{ */
 {
-	zend_str_size_int cc;
+	int cc;
 	va_list ap;
 
 	va_start(ap, format);

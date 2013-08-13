@@ -252,16 +252,16 @@ static inline int sapi_cli_select(int fd TSRMLS_DC)
 	return ret != -1;
 }
 
-PHP_CLI_API zend_str_size_size_t sapi_cli_single_write(const char *str, zend_str_size_uint str_length TSRMLS_DC) /* {{{ */
+PHP_CLI_API size_t sapi_cli_single_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
 {
 #ifdef PHP_WRITE_STDOUT
 	long ret;
 #else
-	zend_str_size ret;
+	size_t ret;
 #endif
 
 	if (cli_shell_callbacks.cli_shell_write) {
-		zend_str_size shell_wrote;
+		size_t shell_wrote;
 		shell_wrote = cli_shell_callbacks.cli_shell_write(str, str_length TSRMLS_CC);
 		if (shell_wrote > -1) {
 			return shell_wrote;
@@ -285,10 +285,10 @@ PHP_CLI_API zend_str_size_size_t sapi_cli_single_write(const char *str, zend_str
 }
 /* }}} */
 
-static zend_str_size_int sapi_cli_ub_write(const char *str, zend_str_size_uint str_length TSRMLS_DC) /* {{{ */
+static int sapi_cli_ub_write(const char *str, uint str_length TSRMLS_DC) /* {{{ */
 {
 	const char *ptr = str;
-	zend_str_size remaining = str_length;
+	uint remaining = str_length;
 	size_t ret;
 
 	if (!str_length) {
@@ -296,7 +296,7 @@ static zend_str_size_int sapi_cli_ub_write(const char *str, zend_str_size_uint s
 	}
 
 	if (cli_shell_callbacks.cli_shell_ub_write) {
-		zend_str_size ub_wrote;
+		int ub_wrote;
 		ub_wrote = cli_shell_callbacks.cli_shell_ub_write(str, str_length TSRMLS_CC);
 		if (ub_wrote > -1) {
 			return ub_wrote;
@@ -338,7 +338,7 @@ static char *script_filename = "";
 
 static void sapi_cli_register_variables(zval *track_vars_array TSRMLS_DC) /* {{{ */
 {
-	zend_str_size len;
+	unsigned int len;
 	char   *docroot = "";
 
 	/* In CGI mode, we consider the environment to be a part of the server
@@ -503,7 +503,6 @@ static void php_cli_usage(char *argv0)
 				"   %s [options] -r <code> [--] [args...]\n"
 				"   %s [options] [-B <begin_code>] -R <code> [-E <end_code>] [--] [args...]\n"
 				"   %s [options] [-B <begin_code>] -F <file> [-E <end_code>] [--] [args...]\n"
-				"   %s [options] -S <addr>:<port> [-t docroot]\n"
 				"   %s [options] -- [args...]\n"
 				"   %s [options] -a\n"
 				"\n"
@@ -545,7 +544,7 @@ static void php_cli_usage(char *argv0)
 				"  --rz <name>      Show information about Zend extension <name>.\n"
 				"  --ri <name>      Show configuration for extension <name>.\n"
 				"\n"
-				, prog, prog, prog, prog, prog, prog, prog);
+				, prog, prog, prog, prog, prog, prog);
 }
 /* }}} */
 
@@ -619,7 +618,7 @@ static const char *param_mode_conflict = "Either execute direct code, process st
 
 /* {{{ cli_seek_file_begin
  */
-static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file, zend_str_size_int *lineno TSRMLS_DC)
+static int cli_seek_file_begin(zend_file_handle *file_handle, char *script_file, int *lineno TSRMLS_DC)
 {
 	int c;
 
@@ -670,7 +669,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 	char *arg_free=NULL, **arg_excp=&arg_free;
 	char *script_file=NULL, *translated_path = NULL;
 	int interactive=0;
-	zend_str_size lineno = 0;
+	int lineno = 0;
 	const char *param_error=NULL;
 	int hide_argv = 0;
 
@@ -1059,7 +1058,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 					}
 					ALLOC_ZVAL(argn);
 					Z_TYPE_P(argn) = IS_STRING;
-					Z_STRSIZE_P(argn) = ++len;
+					Z_STRLEN_P(argn) = ++len;
 					Z_STRVAL_P(argn) = estrndup(input, len);
 					INIT_PZVAL(argn);
 					zend_hash_update(&EG(symbol_table), "argn", sizeof("argn"), &argn, sizeof(zval *), NULL);
@@ -1143,7 +1142,7 @@ static int do_cli(int argc, char **argv TSRMLS_DC) /* {{{ */
 				}
 			case PHP_MODE_REFLECTION_EXT_INFO:
 				{
-					zend_str_size_int len = strlen(reflection_what);
+					int len = strlen(reflection_what);
 					char *lcname = zend_str_tolower_dup(reflection_what, len);
 					zend_module_entry *module;
 
@@ -1214,7 +1213,7 @@ int main(int argc, char *argv[])
 	int php_optind = 1, use_extended_info = 0;
 	char *ini_path_override = NULL;
 	char *ini_entries = NULL;
-	zend_str_size ini_entries_len = 0;
+	int ini_entries_len = 0;
 	int ini_ignore = 0;
 	sapi_module_struct *sapi_module = &cli_sapi_module;
 
@@ -1280,7 +1279,7 @@ int main(int argc, char *argv[])
 				break;
 			case 'd': {
 				/* define ini entries on command line */
-				zend_str_size len = strlen(php_optarg);
+				int len = strlen(php_optarg);
 				char *val;
 
 				if ((val = strchr(php_optarg, '='))) {

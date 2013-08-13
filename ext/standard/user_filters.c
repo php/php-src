@@ -167,7 +167,7 @@ php_stream_filter_status_t userfilter_filter(
 			php_stream_filter *thisfilter,
 			php_stream_bucket_brigade *buckets_in,
 			php_stream_bucket_brigade *buckets_out,
-			zend_str_size_size_t *bytes_consumed,
+			size_t *bytes_consumed,
 			int flags
 			TSRMLS_DC)
 {
@@ -283,7 +283,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	zval *obj, *zfilter;
 	zval func_name;
 	zval *retval = NULL;
-	zend_str_size len;
+	int len;
 	
 	/* some sanity checks */
 	if (persistent) {
@@ -462,9 +462,9 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 		if (!bucket->own_buf) {
 			bucket = php_stream_bucket_make_writeable(bucket TSRMLS_CC);
 		}
-		if (bucket->buflen != Z_STRSIZE_PP(pzdata)) {
-			bucket->buf = perealloc(bucket->buf, Z_STRSIZE_PP(pzdata), bucket->is_persistent);
-			bucket->buflen = Z_STRSIZE_PP(pzdata);
+		if ((int)bucket->buflen != Z_STRLEN_PP(pzdata)) {
+			bucket->buf = perealloc(bucket->buf, Z_STRLEN_PP(pzdata), bucket->is_persistent);
+			bucket->buflen = Z_STRLEN_PP(pzdata);
 		}
 		memcpy(bucket->buf, Z_STRVAL_PP(pzdata), bucket->buflen);
 	}
@@ -507,10 +507,10 @@ PHP_FUNCTION(stream_bucket_new)
 	php_stream *stream;
 	char *buffer;
 	char *pbuffer;
-	zend_str_size buffer_len;
+	int buffer_len;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zS", &zstream, &buffer, &buffer_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zs", &zstream, &buffer, &buffer_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -545,7 +545,7 @@ PHP_FUNCTION(stream_get_filters)
 {
 	char *filter_name;
 	int key_flags;
-	zend_str_size filter_name_len = 0;
+	uint filter_name_len = 0;
 	HashTable *filters_hash;
 	ulong num_key;
 
@@ -559,7 +559,7 @@ PHP_FUNCTION(stream_get_filters)
 
 	if (filters_hash) {
 		for(zend_hash_internal_pointer_reset(filters_hash);
-			(key_flags = zend_hash_get_current_key_ex(filters_hash, &filter_name, &filter_name_len, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTENT;
+			(key_flags = zend_hash_get_current_key_ex(filters_hash, &filter_name, &filter_name_len, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT;
 			zend_hash_move_forward(filters_hash))
 				if (key_flags == HASH_KEY_IS_STRING) {
 					add_next_index_stringl(return_value, filter_name, filter_name_len - 1, 1);
@@ -574,10 +574,10 @@ PHP_FUNCTION(stream_get_filters)
 PHP_FUNCTION(stream_filter_register)
 {
 	char *filtername, *classname;
-	zend_str_size filtername_len, classname_len;
+	int filtername_len, classname_len;
 	struct php_user_filter_data *fdat;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &filtername, &filtername_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &filtername, &filtername_len,
 				&classname, &classname_len) == FAILURE) {
 		RETURN_FALSE;
 	}
