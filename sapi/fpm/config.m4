@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(fpm,,
-[  --enable-fpm              Enable building of the fpm SAPI executable], no, no)
+[  --enable-fpm            Enable building of the fpm SAPI executable], no, no)
 
 dnl configure checks {{{
 AC_DEFUN([AC_FPM_STDLIBS],
@@ -557,11 +557,11 @@ if test "$PHP_FPM" != "no"; then
 	AC_FPM_SELECT
 
   PHP_ARG_WITH(fpm-user,,
-  [  --with-fpm-user[=USER]  Set the user for php-fpm to run as. (default: nobody)], nobody, no)
+  [  --with-fpm-user[=USER]    Set the user for php-fpm to run as. (default: nobody)], nobody, no)
 
   PHP_ARG_WITH(fpm-group,,
-  [  --with-fpm-group[=GRP]  Set the group for php-fpm to run as. For a system user, this 
-                  should usually be set to match the fpm username (default: nobody)], nobody, no)
+  [  --with-fpm-group[=GRP]    Set the group for php-fpm to run as. For a system user, this 
+                          should usually be set to match the fpm username (default: nobody)], nobody, no)
 
   PHP_ARG_WITH(fpm-systemd,,
   [  --with-fpm-systemd      Activate systemd integration], no, no)

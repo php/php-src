@@ -27,7 +27,7 @@ sprintf  offers the ability to make a lot of failures since it does not know
          the size of the buffer it uses. Therefore usage of sprintf often
          results in possible entries for buffer overrun attacks. So please
          use this version only if you are sure the call is safe. sprintf
-         allways terminstes the buffer it writes to.
+         always terminstes the buffer it writes to.
 
 snprintf knows the buffers size and will not write behind it. But you will
          have to use either a static buffer or allocate a dynamic buffer
@@ -48,7 +48,7 @@ spprintf is the dynamical version of snprintf. It allocates the buffer in size
          snprintf and offers possible memory leakes if you miss freeing the
          buffer allocated by the function. Therfore this function should be
          used where either no maximum is known or the maximum is much bigger
-         than normal size required. spprintf allways terminates the buffer.
+         than normal size required. spprintf always terminates the buffer.
 
 Example:
 
@@ -60,7 +60,7 @@ Example:
  sprintf(buffer, "test");      | snprintf(buffer, MAX, "test"); | spprintf(&buffer, MAX, "text");
                                |                                | if (!buffer)
                                |                                |   return OUT_OF_MEMORY
- // sprintf allways terminates | // manual termination of       | // spprintf allays terminates buffer
+ // sprintf always terminates | // manual termination of       | // spprintf allays terminates buffer
  // buffer                     | // buffer *IS* required        |
                                | buffer[MAX-1] = 0;             |
  action_with_buffer(buffer);   | action_with_buffer(buffer);    | action_with_buffer(buffer);
@@ -87,7 +87,7 @@ PHPAPI int ap_php_asprintf(char **buf, const char *format, ...);
 PHPAPI int php_sprintf (char* s, const char* format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
 PHPAPI char * php_gcvt(double value, int ndigit, char dec_point, char exponent, char *buf);
 PHPAPI char * php_conv_fp(register char format, register double num,
-		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, int *len);
+		 boolean_e add_dp, int precision, char dec_point, bool_int * is_negative, char *buf, zend_str_size_int *len);
 
 END_EXTERN_C()
 
@@ -153,10 +153,10 @@ typedef WIDE_INT wide_int;
 typedef unsigned WIDE_INT u_wide_int;
 
 extern char * ap_php_conv_10(register wide_int num, register bool_int is_unsigned,
-	   register bool_int * is_negative, char *buf_end, register int *len);
+	   register bool_int * is_negative, char *buf_end, register zend_str_size_int *len);
 
 extern char * ap_php_conv_p2(register u_wide_int num, register int nbits,
-		 char format, char *buf_end, register int *len);
+		 char format, char *buf_end, register zend_str_size_int *len);
 
 /* The maximum precision that's allowed for float conversion. Does not include
  * decimal separator, exponent, sign, terminator. Currently does not affect

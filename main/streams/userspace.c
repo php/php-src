@@ -45,14 +45,14 @@ struct php_user_stream_wrapper {
 	php_stream_wrapper wrapper;
 };
 
-static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
-static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
-static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
-static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC);
-static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, int options, php_stream_context *context TSRMLS_DC);
-static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC);
-static int user_wrapper_metadata(php_stream_wrapper *wrapper, char *url, int option, void *value, php_stream_context *context TSRMLS_DC);
-static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
+static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
+static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int mode, int options, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC);
+static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, int option, void *value, php_stream_context *context TSRMLS_DC);
+static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC);
 
 static php_stream_wrapper_ops user_stream_wops = {
@@ -332,7 +332,8 @@ static zval *user_stream_create_object(struct php_user_stream_wrapper *uwrap, ph
 	return object;
 }
 
-static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filename, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
+static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *filename, const char *mode,
+									   int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	php_userstream_data_t *us;
@@ -406,7 +407,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 
 		/* if the opened path is set, copy it out */
 		if (Z_TYPE_P(zopened) == IS_STRING && opened_path) {
-			*opened_path = estrndup(Z_STRVAL_P(zopened), Z_STRLEN_P(zopened));
+			*opened_path = estrndup(Z_STRVAL_P(zopened), Z_STRSIZE_P(zopened));
 		}
 
 		/* set wrapper data to be a reference to our object */
@@ -437,7 +438,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, char *filena
 	return stream;
 }
 
-static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filename, char *mode,
+static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 		int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
@@ -518,12 +519,12 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, char *filen
 PHP_FUNCTION(stream_wrapper_register)
 {
 	char *protocol, *classname;
-	int protocol_len, classname_len;
+	zend_str_size protocol_len, classname_len;
 	struct php_user_stream_wrapper * uwrap;
 	int rsrc_id;
 	long flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &protocol, &protocol_len, &classname, &classname_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &protocol, &protocol_len, &classname, &classname_len, &flags) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -563,9 +564,9 @@ PHP_FUNCTION(stream_wrapper_register)
 PHP_FUNCTION(stream_wrapper_unregister)
 {
 	char *protocol;
-	int protocol_len;
+	zend_str_size protocol_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &protocol, &protocol_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &protocol, &protocol_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -584,11 +585,11 @@ PHP_FUNCTION(stream_wrapper_unregister)
 PHP_FUNCTION(stream_wrapper_restore)
 {
 	char *protocol;
-	int protocol_len;
+	zend_str_size protocol_len;
 	php_stream_wrapper **wrapperpp = NULL, *wrapper;
 	HashTable *global_wrapper_hash;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &protocol, &protocol_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &protocol, &protocol_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -618,7 +619,7 @@ PHP_FUNCTION(stream_wrapper_restore)
 }
 /* }}} */
 
-static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC)
+static zend_str_size_size_t php_userstreamop_write(php_stream *stream, const char *buf, zend_str_size_size_t count TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;
@@ -626,7 +627,7 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	zval **args[1];
 	zval *zbufptr;
-	size_t didwrite = 0;
+	zend_str_size didwrite = 0;
 
 	assert(us != NULL);
 
@@ -667,13 +668,13 @@ static size_t php_userstreamop_write(php_stream *stream, const char *buf, size_t
 	return didwrite;
 }
 
-static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static zend_str_size_size_t php_userstreamop_read(php_stream *stream, char *buf, zend_str_size_size_t count TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;
 	zval **args[1];
 	int call_result;
-	size_t didread = 0;
+	zend_str_size didread = 0;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	zval *zcount;
 
@@ -694,7 +695,7 @@ static size_t php_userstreamop_read(php_stream *stream, char *buf, size_t count 
 
 	if (call_result == SUCCESS && retval != NULL) {
 		convert_to_string(retval);
-		didread = Z_STRLEN_P(retval);
+		didread = Z_STRSIZE_P(retval);
 		if (didread > count) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%s::" USERSTREAM_READ " - read %ld bytes more data than requested (%ld read, %ld max) - excess data will be lost",
 					us->wrapper->classname, (long)(didread - count), (long)didread, (long)count);
@@ -1151,7 +1152,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 }
 
 
-static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zfilename, *zfuncname, *zretval;
@@ -1198,7 +1199,8 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, char *url, int optio
 	return ret;
 }
 
-static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char *url_to, int options, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to,
+							   int options, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zold_name, *znew_name, *zfuncname, *zretval;
@@ -1250,7 +1252,8 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, char *url_from, char
 	return ret;
 }
 
-static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, int options, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int mode,
+							  int options, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zfilename, *zmode, *zoptions, *zfuncname, *zretval;
@@ -1308,7 +1311,8 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, char *url, int mode, 
 	return ret;
 }
 
-static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int options, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
+							  int options, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zfilename, *zoptions, *zfuncname, *zretval;
@@ -1361,7 +1365,8 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, char *url, int option
 	return ret;
 }
 
-static int user_wrapper_metadata(php_stream_wrapper *wrapper, char *url, int option, void *value, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, int option,
+								 void *value, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zfilename, *zoption, *zvalue, *zfuncname, *zretval;
@@ -1444,7 +1449,8 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, char *url, int opt
 }
 
 
-static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
+static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, int flags,
+								 php_stream_statbuf *ssb, php_stream_context *context TSRMLS_DC)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
 	zval *zfilename, *zfuncname, *zretval, *zflags;
@@ -1502,12 +1508,12 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, char *url, int fla
 
 }
 
-static size_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t count TSRMLS_DC)
+static zend_str_size_size_t php_userstreamop_readdir(php_stream *stream, char *buf, zend_str_size_size_t count TSRMLS_DC)
 {
 	zval func_name;
 	zval *retval = NULL;
 	int call_result;
-	size_t didread = 0;
+	zend_str_size didread = 0;
 	php_userstream_data_t *us = (php_userstream_data_t *)stream->abstract;
 	php_stream_dirent *ent = (php_stream_dirent*)buf;
 
@@ -1526,7 +1532,7 @@ static size_t php_userstreamop_readdir(php_stream *stream, char *buf, size_t cou
 
 	if (call_result == SUCCESS && retval != NULL && Z_TYPE_P(retval) != IS_BOOL) {
 		convert_to_string(retval);
-		PHP_STRLCPY(ent->d_name, Z_STRVAL_P(retval), sizeof(ent->d_name), Z_STRLEN_P(retval));
+		PHP_STRLCPY(ent->d_name, Z_STRVAL_P(retval), sizeof(ent->d_name), Z_STRSIZE_P(retval));
 
 		didread = sizeof(php_stream_dirent);
 	} else if (call_result == FAILURE) {

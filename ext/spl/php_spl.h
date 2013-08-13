@@ -20,11 +20,6 @@
 #define PHP_SPL_H
 
 #include "php.h"
-#if defined(PHP_WIN32)
-# include "win32/php_stdint.h"
-#elif defined(HAVE_STDINT_H)
-# include <stdint.h>
-#endif
 #include <stdarg.h>
 
 #if 0
@@ -66,7 +61,7 @@ ZEND_BEGIN_MODULE_GLOBALS(spl)
 	char *       autoload_extensions;
 	HashTable *  autoload_functions;
 	int          autoload_running;
-	int          autoload_extensions_len;
+	zend_str_size_int autoload_extensions_len;
 	intptr_t     hash_mask_handle;
 	intptr_t     hash_mask_handlers;
 	int          hash_mask_init;

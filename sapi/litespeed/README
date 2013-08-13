@@ -195,7 +195,7 @@ process.
 
 By default a LSAPI application check the existence of its parent process
 and exits automatically if the parent process died. This is to reduce 
-orphan process when web server is restarted. However, it is desireable 
+orphan process when web server is restarted. However, it is desirable 
 to disable this feature, such as when a LSAPI process was started 
 manually from command line. LSAPI_PPID_NO_CHECK should be set when 
 you want to disable the checking of existence of parent process.

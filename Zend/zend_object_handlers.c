@@ -280,7 +280,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 
 	if (UNEXPECTED(Z_STRVAL_P(member)[0] == '\0')) {
 		if (!silent) {
-			if (Z_STRLEN_P(member) == 0) {
+			if (Z_STRSIZE_P(member) == 0) {
 				zend_error_noreturn(E_ERROR, "Cannot access empty property");
 			} else {
 				zend_error_noreturn(E_ERROR, "Cannot access property started with '\\0'");
@@ -289,8 +289,8 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 		return NULL;
 	}
 	property_info = NULL;
-	h = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
-	if (zend_hash_quick_find(&ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &property_info)==SUCCESS) {
+	h = key ? key->hash_value : zend_get_hash_value(Z_STRVAL_P(member), Z_STRSIZE_P(member) + 1);
+	if (zend_hash_quick_find(&ce->properties_info, Z_STRVAL_P(member), Z_STRSIZE_P(member)+1, h, (void **) &property_info)==SUCCESS) {
 		if (UNEXPECTED((property_info->flags & ZEND_ACC_SHADOW) != 0)) {
 			/* if it's a shadow - go to access it's private */
 			property_info = NULL;
@@ -320,7 +320,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 	if (EG(scope) != ce
 		&& EG(scope)
 		&& is_derived_class(ce, EG(scope))
-		&& zend_hash_quick_find(&EG(scope)->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member)+1, h, (void **) &scope_property_info)==SUCCESS
+		&& zend_hash_quick_find(&EG(scope)->properties_info, Z_STRVAL_P(member), Z_STRSIZE_P(member)+1, h, (void **) &scope_property_info)==SUCCESS
 		&& scope_property_info->flags & ZEND_ACC_PRIVATE) {
 		if (key) {
 			CACHE_POLYMORPHIC_PTR(key->cache_slot, ce, scope_property_info);
@@ -342,7 +342,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 	} else {
 		EG(std_property_info).flags = ZEND_ACC_PUBLIC;
 		EG(std_property_info).name = Z_STRVAL_P(member);
-		EG(std_property_info).name_length = Z_STRLEN_P(member);
+		EG(std_property_info).name_length = Z_STRSIZE_P(member);
 		EG(std_property_info).h = h;
 		EG(std_property_info).ce = ce;
 		EG(std_property_info).offset = -1;
@@ -358,12 +358,12 @@ ZEND_API struct _zend_property_info *zend_get_property_info(zend_class_entry *ce
 }
 /* }}} */
 
-ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info_name, int prop_info_name_len TSRMLS_DC) /* {{{ */
+ZEND_API int zend_check_property_access(zend_object *zobj, const char *prop_info_name, zend_str_size_int prop_info_name_len TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
 	const char *class_name, *prop_name;
 	zval member;
-	int prop_name_len;
+	zend_str_size prop_name_len;
 
 	zend_unmangle_property_name_ex(prop_info_name, prop_info_name_len, &class_name, &prop_name, &prop_name_len);
 	ZVAL_STRINGL(&member, prop_name, prop_name_len, 0);
@@ -392,8 +392,8 @@ static int zend_get_property_guard(zend_object *zobj, zend_property_info *proper
 	if (!property_info) {
 		property_info = &info;
 		info.name = Z_STRVAL_P(member);
-		info.name_length = Z_STRLEN_P(member);
-		info.h = zend_get_hash_value(Z_STRVAL_P(member), Z_STRLEN_P(member) + 1);
+		info.name_length = Z_STRSIZE_P(member);
+		info.h = zend_get_hash_value(Z_STRVAL_P(member), Z_STRSIZE_P(member) + 1);
 	} else if(property_info->name[0] == '\0'){
 		const char *class_name = NULL, *prop_name = NULL;
 		zend_unmangle_property_name(property_info->name, property_info->name_length, &class_name, &prop_name);
@@ -498,7 +498,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, const zend_li
 		} else {
 			if (zobj->ce->__get && guard && guard->in_get == 1) {
 				if (Z_STRVAL_P(member)[0] == '\0') {
-					if (Z_STRLEN_P(member) == 0) {
+					if (Z_STRSIZE_P(member) == 0) {
 						zend_error(E_ERROR, "Cannot access empty property");
 					} else {
 						zend_error(E_ERROR, "Cannot access property started with '\\0'");
@@ -616,7 +616,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, c
 			}
 		} else if (zobj->ce->__set && guard && guard->in_set == 1) {
 			if (Z_STRVAL_P(member)[0] == '\0') {
-				if (Z_STRLEN_P(member) == 0) {
+				if (Z_STRSIZE_P(member) == 0) {
 					zend_error(E_ERROR, "Cannot access empty property");
 				} else {
 					zend_error(E_ERROR, "Cannot access property started with '\\0'");
@@ -834,7 +834,7 @@ static void zend_std_unset_property(zval *object, zval *member, const zend_liter
 			zval_ptr_dtor(&object);
 		} else if (zobj->ce->__unset && guard && guard->in_unset == 1) {
 			if (Z_STRVAL_P(member)[0] == '\0') {
-				if (Z_STRLEN_P(member) == 0) {
+				if (Z_STRSIZE_P(member) == 0) {
 					zend_error(E_ERROR, "Cannot access empty property");
 				} else {
 					zend_error(E_ERROR, "Cannot access property started with '\\0'");
@@ -916,7 +916,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
  * Returns the function address that should be called, or NULL
  * if no such function exists.
  */
-static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, int function_name_strlen, ulong hash_value TSRMLS_DC) /* {{{ */
+static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, zend_str_size_int function_name_strlen, ulong hash_value TSRMLS_DC) /* {{{ */
 {
 	if (!ce) {
 		return 0;
@@ -951,7 +951,7 @@ static inline zend_function *zend_check_private_int(zend_function *fbc, zend_cla
 }
 /* }}} */
 
-ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, int function_name_strlen TSRMLS_DC) /* {{{ */
+ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, zend_str_size_int function_name_strlen TSRMLS_DC) /* {{{ */
 {
 	return zend_check_private_int(fbc, ce, function_name_strval, function_name_strlen, zend_hash_func(function_name_strval, function_name_strlen+1) TSRMLS_CC) != NULL;
 }
@@ -986,7 +986,7 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 /* }}} */
 
-static inline union _zend_function *zend_get_user_call_function(zend_class_entry *ce, const char *method_name, int method_len) /* {{{ */
+static inline union _zend_function *zend_get_user_call_function(zend_class_entry *ce, const char *method_name, zend_str_size_int method_len) /* {{{ */
 {
 	zend_internal_function *call_user_call = emalloc(sizeof(zend_internal_function));
 	call_user_call->type = ZEND_INTERNAL_FUNCTION;
@@ -1002,7 +1002,7 @@ static inline union _zend_function *zend_get_user_call_function(zend_class_entry
 }
 /* }}} */
 
-static union _zend_function *zend_std_get_method(zval **object_ptr, char *method_name, int method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
+static union _zend_function *zend_std_get_method(zval **object_ptr, char *method_name, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_function *fbc;
 	zval *object = *object_ptr;
@@ -1147,7 +1147,7 @@ static inline union _zend_function *zend_get_user_callstatic_function(zend_class
 
 /* This is not (yet?) in the API, but it belongs in the built-in objects callbacks */
 
-ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const char *function_name_strval, int function_name_strlen, const zend_literal *key TSRMLS_DC) /* {{{ */
+ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const char *function_name_strval, zend_str_size_int function_name_strlen, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_function *fbc = NULL;
 	char *lc_class_name, *lc_function_name = NULL;
@@ -1236,7 +1236,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 }
 /* }}} */
 
-ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *property_name, int property_name_len, zend_bool silent, const zend_literal *key TSRMLS_DC) /* {{{ */
+ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *property_name, zend_str_size_int property_name_len, zend_bool silent, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
 	ulong hash_value;
@@ -1293,7 +1293,7 @@ ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *p
 }
 /* }}} */
 
-ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, const char *property_name, int property_name_len, const zend_literal *key TSRMLS_DC) /* {{{ */
+ZEND_API zend_bool zend_std_unset_static_property(zend_class_entry *ce, const char *property_name, zend_str_size_int property_name_len, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_error_noreturn(E_ERROR, "Attempt to unset static property %s::$%s", ce->name, property_name);
 	return 0;
@@ -1504,7 +1504,7 @@ zend_class_entry *zend_std_object_get_class(const zval *object TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-int zend_std_object_get_class_name(const zval *object, const char **class_name, zend_uint *class_name_len, int parent TSRMLS_DC) /* {{{ */
+int zend_std_object_get_class_name(const zval *object, const char **class_name, zend_str_size_uint *class_name_len, int parent TSRMLS_DC) /* {{{ */
 {
 	zend_object *zobj;
 	zend_class_entry *ce;

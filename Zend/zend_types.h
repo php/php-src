@@ -28,6 +28,21 @@ typedef unsigned int zend_uint;
 typedef unsigned long zend_ulong;
 typedef unsigned short zend_ushort;
 
+
+#ifdef ZEND_USE_LEGACY_STRING_TYPES
+#define zend_str_size_int int
+#define zend_str_size_uint unsigned int
+#define zend_str_size_size_t size_t
+#define zend_str_size_long long
+typedef int zend_str_size;
+#else
+#define zend_str_size_int zend_str_size
+#define zend_str_size_uint zend_str_size
+#define zend_str_size_size_t zend_str_size
+#define zend_str_size_long zend_str_size
+typedef size_t zend_str_size;
+#endif
+
 #define HAVE_ZEND_LONG64
 #ifdef ZEND_WIN32
 typedef __int64 zend_long64;

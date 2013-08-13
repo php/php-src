@@ -101,19 +101,19 @@ ZEND_METHOD(Closure, bind)
 			ce = NULL;
 		} else {
 			char *class_name;
-			int class_name_len;
+			zend_str_size class_name_len;
 			zval tmp_zval;
 			INIT_ZVAL(tmp_zval);
 
 			if (Z_TYPE_P(scope_arg) == IS_STRING) {
 				class_name = Z_STRVAL_P(scope_arg);
-				class_name_len = Z_STRLEN_P(scope_arg);
+				class_name_len = Z_STRSIZE_P(scope_arg);
 			} else {
 				tmp_zval = *scope_arg;
 				zval_copy_ctor(&tmp_zval);
 				convert_to_string(&tmp_zval);
 				class_name = Z_STRVAL(tmp_zval);
-				class_name_len = Z_STRLEN(tmp_zval);
+				class_name_len = Z_STRSIZE(tmp_zval);
 			}
 
 			if ((class_name_len == sizeof("static") - 1) &&
@@ -180,7 +180,7 @@ ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static zend_function *zend_closure_get_method(zval **object_ptr, char *method_name, int method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zend_function *zend_closure_get_method(zval **object_ptr, char *method_name, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	char *lc_name;
 	ALLOCA_FLAG(use_heap)
@@ -351,7 +351,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 
 			for (i = 0; i < closure->func.common.num_args; i++) {
 				char *name, *info;
-				int name_len, info_len;
+				zend_str_size name_len, info_len;
 				if (arg_info->name) {
 					name_len = zend_spprintf(&name, 0, "%s$%s",
 									arg_info->pass_by_reference ? "&" : "",

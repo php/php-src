@@ -60,7 +60,7 @@ AH_BOTTOM([
 #endif
 
 #if ZEND_BROKEN_SPRINTF
-int zend_sprintf(char *buffer, const char *format, ...);
+zend_str_size_int zend_sprintf(char *buffer, const char *format, ...);
 #else
 # define zend_sprintf sprintf
 #endif
@@ -572,6 +572,9 @@ PHP_CHECK_SIZEOF(intmax_t, 0)
 PHP_CHECK_SIZEOF(ssize_t, 8)
 PHP_CHECK_SIZEOF(ptrdiff_t, 8)
 
+dnl Check stdint types (must be after header check)
+PHP_CHECK_STDINT_TYPES
+
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
 dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exists
@@ -861,6 +864,13 @@ else
   ZEND_DEBUG=no
 fi
 
+PHP_ARG_ENABLE(zstrlen, whether to include Z_STRLEN macros,
+[  --enable-zstrlen       Enable legacy Z_STRLEN macros and types], no, no)
+
+if test "$PHP_ZSTRLEN" = "yes"; then
+  AC_DEFINE(ZEND_USE_LEGACY_STRING_TYPES, "1", [ ])
+fi
+
 PHP_ARG_WITH(layout, layout of installed files,
 [  --with-layout=TYPE      Set how installed files will be laid out.  Type can
                           be either PHP or GNU @<:@PHP@:>@], PHP, no)
@@ -1006,7 +1016,7 @@ dnl Check if all enabled by default extensions should be disabled
 dnl
 
 AC_ARG_ENABLE(all,
-[ --disable-all   Disable all extensions which are enabled by default
+[  --disable-all           Disable all extensions which are enabled by default
 ], [
   PHP_ENABLE_ALL=$enableval
 ])
@@ -1582,7 +1592,7 @@ cat <<X
 | see the file debug.log for error messages.                         |
 |                                                                    |
 | If you are unable to fix this, send the file debug.log to the      |
-| php-install@lists.php.net mailing list and include appropiate      |
+| php-install@lists.php.net mailing list and include appropriate      |
 | information about your setup.                                      |
 X
   fi

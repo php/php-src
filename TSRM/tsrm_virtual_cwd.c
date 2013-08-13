@@ -1673,7 +1673,7 @@ CWD_API int virtual_creat(const char *path, mode_t mode TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-CWD_API int virtual_rename(char *oldname, char *newname TSRMLS_DC) /* {{{ */
+CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC) /* {{{ */
 {
 	cwd_state old_state;
 	cwd_state new_state;

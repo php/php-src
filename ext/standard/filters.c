@@ -265,7 +265,7 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 			while (zend_hash_get_current_data_ex(Z_ARRVAL_P(filterparams), (void **) &tmp, &pos) == SUCCESS) {
 				convert_to_string_ex(tmp);
 				smart_str_appendc(&tags_ss, '<');
-				smart_str_appendl(&tags_ss, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
+				smart_str_appendl(&tags_ss, Z_STRVAL_PP(tmp), Z_STRSIZE_PP(tmp));
 				smart_str_appendc(&tags_ss, '>');
 				zend_hash_move_forward_ex(Z_ARRVAL_P(filterparams), &pos);
 			}
@@ -275,7 +275,7 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 			convert_to_string_ex(&filterparams);
 
 			tags_ss.c = Z_STRVAL_P(filterparams);
-			tags_ss.len = Z_STRLEN_P(filterparams);
+			tags_ss.len = Z_STRSIZE_P(filterparams);
 			tags_ss.a = 0;
 		}
 	}
@@ -1229,19 +1229,19 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 
 			convert_to_string(&zt);
 
-			if (NULL == (*pretval = pemalloc(Z_STRLEN(zt) + 1, persistent))) {
+			if (NULL == (*pretval = pemalloc(Z_STRSIZE(zt) + 1, persistent))) {
 				return PHP_CONV_ERR_ALLOC;
 			}
 
-			*pretval_len = Z_STRLEN(zt);
-			memcpy(*pretval, Z_STRVAL(zt), Z_STRLEN(zt) + 1);
+			*pretval_len = Z_STRSIZE(zt);
+			memcpy(*pretval, Z_STRVAL(zt), Z_STRSIZE(zt) + 1);
 			zval_dtor(&zt);
 		} else {
-			if (NULL == (*pretval = pemalloc(Z_STRLEN_PP(tmpval) + 1, persistent))) {
+			if (NULL == (*pretval = pemalloc(Z_STRSIZE_PP(tmpval) + 1, persistent))) {
 				return PHP_CONV_ERR_ALLOC;
 			}
-			*pretval_len = Z_STRLEN_PP(tmpval);
-			memcpy(*pretval, Z_STRVAL_PP(tmpval), Z_STRLEN_PP(tmpval) + 1);
+			*pretval_len = Z_STRSIZE_PP(tmpval);
+			memcpy(*pretval, Z_STRVAL_PP(tmpval), Z_STRSIZE_PP(tmpval) + 1);
 		}
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;

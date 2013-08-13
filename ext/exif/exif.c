@@ -40,16 +40,6 @@
 #include "php.h"
 #include "ext/standard/file.h"
 
-#ifdef HAVE_STDINT_H
-# include <stdint.h>
-#endif
-#ifdef HAVE_INTTYPES_H
-# include <inttypes.h>
-#endif
-#ifdef PHP_WIN32
-# include "win32/php_stdint.h"
-#endif
-
 #if HAVE_EXIF
 
 /* When EXIF_DEBUG is defined the module generates a lot of debug messages
@@ -2595,7 +2585,7 @@ static int exif_process_string_raw(char **result, char *value, size_t byte_count
 
 /* {{{ exif_process_string
  * Copy a string in Exif header to a character string and return length of allocated buffer if any.
- * In contrast to exif_process_string this function does allways return a string buffer */
+ * In contrast to exif_process_string this function does always return a string buffer */
 static int exif_process_string(char **result, char *value, size_t byte_count TSRMLS_DC) {
 	/* we cannot use strlcpy - here the problem is that we cannot use strlen to
 	 * determin length of string and we cannot use strlcpy with len=byte_count+1

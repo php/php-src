@@ -69,6 +69,16 @@ PHP X.Y UPGRADE NOTES
   casts to primitive types and have overloaded operators.
   (RFC: https://wiki.php.net/rfc/operator_overloading_gmp)
 
+- OCI8:
+  - Added Implicit Result Set support for Oracle Database 12c with a
+    new oci_get_implicit_resultset() function.
+  - Using 'oci_execute($s, OCI_NO_AUTO_COMMIT)' for a SELECT no longer
+    unnecessarily initiates an internal ROLLBACK during connection
+    close.
+  - Added DTrace probes enabled with PHP's generic --enable-dtrace
+  - The oci_internal_debug() function is now a no-op.
+  - The phpinfo() output format for OCI8 has changed.
+
 ========================================
 9. New Global Constants
 ========================================
@@ -83,3 +93,5 @@ PHP X.Y UPGRADE NOTES
 11. Other Changes
 ========================================
 
+- File upload:
+  Uploads equal or greater than 2GB in size are now accepted.

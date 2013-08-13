@@ -86,7 +86,7 @@ PHP_FUNCTION(stream_socket_pair)
 PHP_FUNCTION(stream_socket_client)
 {
 	char *host;
-	int host_len;
+	zend_str_size host_len;
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	double timeout = FG(default_socket_timeout);
 	php_timeout_ull conv;
@@ -100,7 +100,7 @@ PHP_FUNCTION(stream_socket_client)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zzdlr", &host, &host_len, &zerrno, &zerrstr, &timeout, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|zzdlr", &host, &host_len, &zerrno, &zerrstr, &timeout, &flags, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -175,7 +175,7 @@ PHP_FUNCTION(stream_socket_client)
 PHP_FUNCTION(stream_socket_server)
 {
 	char *host;
-	int host_len;
+	zend_str_size host_len;
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	php_stream *stream = NULL;
 	int err = 0;
@@ -185,7 +185,7 @@ PHP_FUNCTION(stream_socket_server)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zzlr", &host, &host_len, &zerrno, &zerrstr, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|zzlr", &host, &host_len, &zerrno, &zerrstr, &flags, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -242,7 +242,7 @@ PHP_FUNCTION(stream_socket_accept)
 	double timeout = FG(default_socket_timeout);
 	zval *zpeername = NULL;
 	char *peername = NULL;
-	int peername_len;
+	zend_str_size peername_len;
 	php_timeout_ull conv;
 	struct timeval tv;
 	php_stream *stream = NULL, *clistream = NULL;
@@ -300,7 +300,7 @@ PHP_FUNCTION(stream_socket_get_name)
 	zval *zstream;
 	zend_bool want_peer;
 	char *name = NULL;
-	int name_len;
+	zend_str_size name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb", &zstream, &want_peer) == FAILURE) {
 		RETURN_FALSE;
@@ -328,11 +328,11 @@ PHP_FUNCTION(stream_socket_sendto)
 	zval *zstream;
 	long flags = 0;
 	char *data, *target_addr = NULL;
-	int datalen, target_addr_len = 0;
+	zend_str_size datalen, target_addr_len = 0;
 	php_sockaddr_storage sa;
 	socklen_t sl = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|ls", &zstream, &data, &datalen, &flags, &target_addr, &target_addr_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|lS", &zstream, &data, &datalen, &flags, &target_addr, &target_addr_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 	php_stream_from_zval(stream, &zstream);
@@ -356,7 +356,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	php_stream *stream;
 	zval *zstream, *zremote = NULL;
 	char *remote_addr = NULL;
-	int remote_addr_len;
+	zend_str_size remote_addr_len;
 	long to_read = 0;
 	char *read_buf;
 	long flags = 0;
@@ -407,7 +407,7 @@ PHP_FUNCTION(stream_get_contents)
 	zval		*zsrc;
 	long		maxlen		= PHP_STREAM_COPY_ALL,
 				desiredpos	= -1L;
-	int			len;
+	zend_str_size	len;
 	char		*contents	= NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &zsrc, &maxlen, &desiredpos) == FAILURE) {
@@ -417,7 +417,7 @@ PHP_FUNCTION(stream_get_contents)
 	php_stream_from_zval(stream, &zsrc);
 
 	if (desiredpos >= 0) {
-		int		seek_res = 0;
+		zend_str_size seek_res = 0;
 		off_t	position;
 
 		position = php_stream_tell(stream);
@@ -453,7 +453,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 	php_stream *src, *dest;
 	zval *zsrc, *zdest;
 	long maxlen = PHP_STREAM_COPY_ALL, pos = 0;
-	size_t len;
+	zend_str_size len;
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|ll", &zsrc, &zdest, &maxlen, &pos) == FAILURE) {
@@ -542,7 +542,7 @@ PHP_FUNCTION(stream_get_transports)
 {
 	HashTable *stream_xport_hash;
 	char *stream_xport;
-	uint stream_xport_len;
+	zend_str_size stream_xport_len;
 	ulong num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -572,7 +572,7 @@ PHP_FUNCTION(stream_get_wrappers)
 	HashTable *url_stream_wrappers_hash;
 	char *stream_protocol;
 	int key_flags;
-	uint stream_protocol_len = 0;
+	zend_str_size stream_protocol_len = 0;
 	ulong num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -583,7 +583,7 @@ PHP_FUNCTION(stream_get_wrappers)
 		HashPosition pos;
 		array_init(return_value);
 		for (zend_hash_internal_pointer_reset_ex(url_stream_wrappers_hash, &pos);
-			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTANT;
+			(key_flags = zend_hash_get_current_key_ex(url_stream_wrappers_hash, &stream_protocol, &stream_protocol_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTENT;
 			zend_hash_move_forward_ex(url_stream_wrappers_hash, &pos)) {
 				if (key_flags == HASH_KEY_IS_STRING) {
 					add_next_index_stringl(return_value, stream_protocol, stream_protocol_len - 1, 1);
@@ -658,7 +658,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 
 		int type;
 		char *key;
-		uint key_len;
+		zend_str_size key_len;
 		ulong num_ind;
 		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
 			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
@@ -668,7 +668,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 
 		type = zend_hash_get_current_key_ex(Z_ARRVAL_P(stream_array),
 				&key, &key_len, &num_ind, 0, NULL);
-		if (type == HASH_KEY_NON_EXISTANT ||
+		if (type == HASH_KEY_NON_EXISTENT ||
 			zend_hash_get_current_data(Z_ARRVAL_P(stream_array), (void **) &elem) == FAILURE) {
 			continue; /* should not happen */
 		}
@@ -872,7 +872,7 @@ PHP_FUNCTION(stream_select)
 
 /* {{{ stream_context related functions */
 static void user_space_stream_notifier(php_stream_context *context, int notifycode, int severity,
-		char *xmsg, int xcode, size_t bytes_sofar, size_t bytes_max, void * ptr TSRMLS_DC)
+		char *xmsg, int xcode, zend_str_size_size_t bytes_sofar, zend_str_size_size_t bytes_max, void * ptr TSRMLS_DC)
 {
 	zval *callback = (zval*)context->notifier->ptr;
 	zval *retval = NULL;
@@ -923,7 +923,7 @@ static int parse_context_options(php_stream_context *context, zval *options TSRM
 	HashPosition pos, opos;
 	zval **wval, **oval;
 	char *wkey, *okey;
-	uint wkey_len, okey_len;
+	zend_str_size wkey_len, okey_len;
 	int ret = SUCCESS;
 	ulong num_key;
 
@@ -1035,10 +1035,10 @@ PHP_FUNCTION(stream_context_set_option)
 	zval *options = NULL, *zcontext = NULL, *zvalue = NULL;
 	php_stream_context *context;
 	char *wrappername, *optionname;
-	int wrapperlen, optionlen;
+	zend_str_size wrapperlen, optionlen;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
-				"rssz", &zcontext, &wrappername, &wrapperlen,
+				"rSSz", &zcontext, &wrappername, &wrapperlen,
 				&optionname, &optionlen, &zvalue) == FAILURE) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC,
 					"ra", &zcontext, &options) == FAILURE) {
@@ -1190,13 +1190,13 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	zval *zstream;
 	php_stream *stream;
 	char *filtername;
-	int filternamelen;
+	zend_str_size filternamelen;
 	long read_write = 0;
 	zval *filterparams = NULL;
 	php_stream_filter *filter = NULL;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|lz", &zstream,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|lz", &zstream,
 				&filtername, &filternamelen, &read_write, &filterparams) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1312,14 +1312,14 @@ PHP_FUNCTION(stream_filter_remove)
 PHP_FUNCTION(stream_get_line)
 {
 	char *str = NULL;
-	int str_len = 0;
+	zend_str_size str_len = 0;
 	long max_length;
 	zval *zstream;
 	char *buf;
 	size_t buf_size;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|s", &zstream, &max_length, &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|S", &zstream, &max_length, &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1543,9 +1543,9 @@ Determine what file will be opened by calls to fopen() with a relative path */
 PHP_FUNCTION(stream_resolve_include_path)
 {
 	char *filename, *resolved_path;
-	int filename_len;
+	zend_str_size filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 

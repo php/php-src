@@ -73,10 +73,10 @@ PHPAPI int php_header(TSRMLS_D)
 }
 
 
-PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, time_t expires, char *path, int path_len, char *domain, int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
+PHPAPI int php_setcookie(char *name, zend_str_size_int name_len, char *value, zend_str_size_int value_len, time_t expires, char *path, zend_str_size_int path_len, char *domain, zend_str_size_int domain_len, int secure, int url_encode, int httponly TSRMLS_DC)
 {
 	char *cookie, *encoded_value = NULL;
-	int len=sizeof("Set-Cookie: ");
+	zend_str_size_int len=sizeof("Set-Cookie: ");
 	char *dt;
 	sapi_header_line ctr = {0};
 	int result;
@@ -93,7 +93,7 @@ PHPAPI int php_setcookie(char *name, int name_len, char *value, int value_len, t
 
 	len += name_len;
 	if (value && url_encode) {
-		int encoded_value_len;
+		zend_str_size_int encoded_value_len;
 
 		encoded_value = php_url_encode(value, value_len, &encoded_value_len);
 		len += encoded_value_len;

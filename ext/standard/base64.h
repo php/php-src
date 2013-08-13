@@ -24,9 +24,9 @@
 PHP_FUNCTION(base64_decode);
 PHP_FUNCTION(base64_encode);
 
-PHPAPI extern unsigned char *php_base64_encode(const unsigned char *, int, int *);
-PHPAPI extern unsigned char *php_base64_decode_ex(const unsigned char *, int, int *, zend_bool);
-PHPAPI extern unsigned char *php_base64_decode(const unsigned char *, int, int *);
+PHPAPI extern unsigned char *php_base64_encode(const unsigned char *, zend_str_size_int, zend_str_size_int *);
+PHPAPI extern unsigned char *php_base64_decode_ex(const unsigned char *, zend_str_size_int, zend_str_size_int *, zend_bool);
+PHPAPI extern unsigned char *php_base64_decode(const unsigned char *, zend_str_size_int, zend_str_size_int *);
 
 #endif /* BASE64_H */
 

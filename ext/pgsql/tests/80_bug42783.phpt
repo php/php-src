@@ -1,5 +1,5 @@
 --TEST--
-Bug #42783 (pg_insert() does not support an empty value array)
+Bug #42783 (8.0+) (pg_insert() does not support an empty value array)
 --SKIPIF--
 <?php 
 require_once('skipif.inc');

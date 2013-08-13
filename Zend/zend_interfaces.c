@@ -31,7 +31,7 @@ ZEND_API zend_class_entry *zend_ce_serializable;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
-ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
+ZEND_API zval* zend_call_method(zval **object_pp, zend_class_entry *obj_ce, zend_function **fn_proxy, const char *function_name, zend_str_size_int function_name_len, zval **retval_ptr_ptr, int param_count, zval* arg1, zval* arg2 TSRMLS_DC)
 {
 	int result;
 	zend_fcall_info fci;
@@ -397,7 +397,7 @@ static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_en
 /* }}}*/
 
 /* {{{ zend_user_serialize */
-ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC)
+ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_str_size_uint *buf_len, zend_serialize_data *data TSRMLS_DC)
 {
 	zend_class_entry * ce = Z_OBJCE_P(object);
 	zval *retval;
@@ -415,8 +415,8 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint
 			zval_ptr_dtor(&retval);
 			return FAILURE;
 		case IS_STRING:
-			*buffer = (unsigned char*)estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-			*buf_len = Z_STRLEN_P(retval);
+			*buffer = (unsigned char*)estrndup(Z_STRVAL_P(retval), Z_STRSIZE_P(retval));
+			*buf_len = Z_STRSIZE_P(retval);
 			result = SUCCESS;
 			break;
 		default: /* failure */
@@ -434,7 +434,7 @@ ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, zend_uint
 /* }}} */
 
 /* {{{ zend_user_unserialize */
-ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC)
+ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_str_size_uint buf_len, zend_unserialize_data *data TSRMLS_DC)
 {
 	zval * zdata;
 
@@ -455,7 +455,7 @@ ZEND_API int zend_user_unserialize(zval **object, zend_class_entry *ce, const un
 }
 /* }}} */
 
-ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, zend_uint *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
+ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, zend_str_size_uint *buf_len, zend_serialize_data *data TSRMLS_DC) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Serialization of '%s' is not allowed", ce->name);
@@ -463,7 +463,7 @@ ZEND_API int zend_class_serialize_deny(zval *object, unsigned char **buffer, zen
 }
 /* }}} */
 
-ZEND_API int zend_class_unserialize_deny(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_uint buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
+ZEND_API int zend_class_unserialize_deny(zval **object, zend_class_entry *ce, const unsigned char *buf, zend_str_size_uint buf_len, zend_unserialize_data *data TSRMLS_DC) /* {{{ */
 {
 	zend_throw_exception_ex(NULL, 0 TSRMLS_CC, "Unserialization of '%s' is not allowed", ce->name);
 	return FAILURE;

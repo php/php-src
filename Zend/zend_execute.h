@@ -37,7 +37,7 @@ typedef union _temp_variable {
 	struct {
 		zval **ptr_ptr; /* shared with var.ptr_ptr */
 		zval *str;
-		zend_uint offset;
+		zend_str_size_uint offset;
 	} str_offset;
 	struct {
 		zval **ptr_ptr; /* shared with var.ptr_ptr */
@@ -61,12 +61,12 @@ ZEND_API void zend_execute(zend_op_array *op_array TSRMLS_DC);
 ZEND_API void execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, struct _zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 ZEND_API int zend_is_true(zval *op);
-ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
-ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC);
+ZEND_API int zend_lookup_class(const char *name, zend_str_size_int name_length, zend_class_entry ***ce TSRMLS_DC);
+ZEND_API int zend_lookup_class_ex(const char *name, zend_str_size_int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
-ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC);
+ZEND_API int zend_eval_stringl(char *str, zend_str_size_int str_len, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
-ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
+ZEND_API int zend_eval_stringl_ex(char *str, zend_str_size_int str_len, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
 
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, ulong fetch_type, const char **class_name, zend_class_entry **pce TSRMLS_DC);
 ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend_uint arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind TSRMLS_DC);
@@ -108,8 +108,8 @@ static zend_always_inline int i_zend_is_true(zval *op)
 			result = (Z_DVAL_P(op) ? 1 : 0);
 			break;
 		case IS_STRING:
-			if (Z_STRLEN_P(op) == 0
-				|| (Z_STRLEN_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
+			if (Z_STRSIZE_P(op) == 0
+				|| (Z_STRSIZE_P(op)==1 && Z_STRVAL_P(op)[0]=='0')) {
 				result = 0;
 			} else {
 				result = 1;
@@ -198,7 +198,7 @@ static zend_always_inline void zend_vm_stack_destroy(TSRMLS_D)
 	}
 }
 
-static zend_always_inline void zend_vm_stack_extend(int count TSRMLS_DC)
+static zend_always_inline void zend_vm_stack_extend(size_t count TSRMLS_DC)
 {
 	zend_vm_stack p = zend_vm_stack_new_page(count >= ZEND_VM_STACK_PAGE_SIZE ? count : ZEND_VM_STACK_PAGE_SIZE);
 	p->prev = EG(argument_stack);
@@ -342,14 +342,14 @@ void execute_new_code(TSRMLS_D);
 ZEND_API const char *get_active_class_name(const char **space TSRMLS_DC);
 ZEND_API const char *get_active_function_name(TSRMLS_D);
 ZEND_API const char *zend_get_executed_filename(TSRMLS_D);
-ZEND_API uint zend_get_executed_lineno(TSRMLS_D);
+ZEND_API zend_str_size_uint zend_get_executed_lineno(TSRMLS_D);
 ZEND_API zend_bool zend_is_executing(TSRMLS_D);
 
 ZEND_API void zend_set_timeout(long seconds, int reset_signals);
 ZEND_API void zend_unset_timeout(TSRMLS_D);
 ZEND_API void zend_timeout(int dummy);
-ZEND_API zend_class_entry *zend_fetch_class(const char *class_name, uint class_name_len, int fetch_type TSRMLS_DC);
-ZEND_API zend_class_entry *zend_fetch_class_by_name(const char *class_name, uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC);
+ZEND_API zend_class_entry *zend_fetch_class(const char *class_name, zend_str_size_uint class_name_len, int fetch_type TSRMLS_DC);
+ZEND_API zend_class_entry *zend_fetch_class_by_name(const char *class_name, zend_str_size_uint class_name_len, const zend_literal *key, int fetch_type TSRMLS_DC);
 void zend_verify_abstract_class(zend_class_entry *ce TSRMLS_DC);
 
 #ifdef ZEND_WIN32

@@ -117,6 +117,7 @@ typedef struct _spl_recursive_it_object {
 	zend_function            *nextElement;
 	zend_class_entry         *ce;
 	smart_str                prefix[6];
+	smart_str                postfix[1];
 } spl_recursive_it_object;
 
 typedef struct _spl_recursive_it_iterator {
@@ -828,7 +829,7 @@ SPL_METHOD(RecursiveIteratorIterator, getMaxDepth)
 	}
 } /* }}} */
 
-static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char *method, int method_len, const zend_literal *key TSRMLS_DC)
+static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char *method, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC)
 {
 	union _zend_function    *function_handler;
 	spl_recursive_it_object *object = (spl_recursive_it_object*)zend_object_store_get_object(*object_ptr TSRMLS_CC);
@@ -886,6 +887,8 @@ static void spl_RecursiveIteratorIterator_free_storage(void *_object TSRMLS_DC)
 	smart_str_free(&object->prefix[4]);
 	smart_str_free(&object->prefix[5]);
 
+	smart_str_free(&object->postfix[0]);
+
 	efree(object);
 }
 /* }}} */
@@ -906,6 +909,8 @@ static zend_object_value spl_RecursiveIteratorIterator_new_ex(zend_class_entry *
 		smart_str_appendl(&intern->prefix[3], "|-",  2);
 		smart_str_appendl(&intern->prefix[4], "\\-", 2);
 		smart_str_appendl(&intern->prefix[5], "",    0);
+
+		smart_str_appendl(&intern->postfix[0], "",    0);
 	}
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
@@ -1025,7 +1030,7 @@ static void spl_recursive_tree_iterator_get_entry(spl_recursive_it_object * obje
 
 static void spl_recursive_tree_iterator_get_postfix(spl_recursive_it_object * object, zval * return_value TSRMLS_DC)
 {
-	RETVAL_STRINGL("", 0, 1);
+	RETVAL_STRINGL(object->postfix[0].c, object->postfix[0].len, 1);
 }
 
 /* {{{ proto void RecursiveTreeIterator::__construct(RecursiveIterator|IteratorAggregate it [, int flags = RTIT_BYPASS_KEY [, int cit_flags = CIT_CATCH_GET_CHILD [, mode = RIT_SELF_FIRST ]]]) throws InvalidArgumentException
@@ -1042,9 +1047,9 @@ SPL_METHOD(RecursiveTreeIterator, setPrefixPart)
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	long  part;
 	char* prefix;
-	int   prefix_len;
+	zend_str_size_int   prefix_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ls", &part, &prefix, &prefix_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lS", &part, &prefix, &prefix_len) == FAILURE) {
 		return;
 	}
 	if (0 > part || part > 5) {
@@ -1066,6 +1071,22 @@ SPL_METHOD(RecursiveTreeIterator, getPrefix)
 		return;
 	}
 	spl_recursive_tree_iterator_get_prefix(object, return_value TSRMLS_CC);
+} /* }}} */
+
+/* {{{ proto void RecursiveTreeIterator::setPostfix(string prefix)
+   Sets postfix as used in getPostfix() */
+SPL_METHOD(RecursiveTreeIterator, setPostfix)
+{
+	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
+	char* postfix;
+	int   postfix_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &postfix, &postfix_len) == FAILURE) {
+		return;
+	}
+
+	smart_str_free(&object->postfix[0]);
+	smart_str_appendl(&object->postfix[0], postfix, postfix_len);
 } /* }}} */
 
 /* {{{ proto string RecursiveTreeIterator::getEntry()
@@ -1130,16 +1151,16 @@ SPL_METHOD(RecursiveTreeIterator, current)
 	}
 	spl_recursive_tree_iterator_get_postfix(object, &postfix TSRMLS_CC);
 
-	str_len = Z_STRLEN(prefix) + Z_STRLEN(entry) + Z_STRLEN(postfix);
+	str_len = Z_STRSIZE(prefix) + Z_STRSIZE(entry) + Z_STRSIZE(postfix);
 	str = (char *) emalloc(str_len + 1U);
 	ptr = str;
 
-	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
-	ptr += Z_STRLEN(prefix);
-	memcpy(ptr, Z_STRVAL(entry), Z_STRLEN(entry));
-	ptr += Z_STRLEN(entry);
-	memcpy(ptr, Z_STRVAL(postfix), Z_STRLEN(postfix));
-	ptr += Z_STRLEN(postfix);
+	memcpy(ptr, Z_STRVAL(prefix), Z_STRSIZE(prefix));
+	ptr += Z_STRSIZE(prefix);
+	memcpy(ptr, Z_STRVAL(entry), Z_STRSIZE(entry));
+	ptr += Z_STRSIZE(entry);
+	memcpy(ptr, Z_STRVAL(postfix), Z_STRSIZE(postfix));
+	ptr += Z_STRSIZE(postfix);
 	*ptr = 0;
 
 	zval_dtor(&prefix);
@@ -1187,16 +1208,16 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	spl_recursive_tree_iterator_get_prefix(object, &prefix TSRMLS_CC);
 	spl_recursive_tree_iterator_get_postfix(object, &postfix TSRMLS_CC);
 
-	str_len = Z_STRLEN(prefix) + Z_STRLEN(key) + Z_STRLEN(postfix);
+	str_len = Z_STRSIZE(prefix) + Z_STRSIZE(key) + Z_STRSIZE(postfix);
 	str = (char *) emalloc(str_len + 1U);
 	ptr = str;
 
-	memcpy(ptr, Z_STRVAL(prefix), Z_STRLEN(prefix));
-	ptr += Z_STRLEN(prefix);
-	memcpy(ptr, Z_STRVAL(key), Z_STRLEN(key));
-	ptr += Z_STRLEN(key);
-	memcpy(ptr, Z_STRVAL(postfix), Z_STRLEN(postfix));
-	ptr += Z_STRLEN(postfix);
+	memcpy(ptr, Z_STRVAL(prefix), Z_STRSIZE(prefix));
+	ptr += Z_STRSIZE(prefix);
+	memcpy(ptr, Z_STRVAL(key), Z_STRSIZE(key));
+	ptr += Z_STRSIZE(key);
+	memcpy(ptr, Z_STRVAL(postfix), Z_STRSIZE(postfix));
+	ptr += Z_STRSIZE(postfix);
 	*ptr = 0;
 
 	zval_dtor(&prefix);
@@ -1235,6 +1256,7 @@ static const zend_function_entry spl_funcs_RecursiveTreeIterator[] = {
 	SPL_ME(RecursiveTreeIterator,     getPrefix,         arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveTreeIterator,     setPrefixPart,     arginfo_recursive_tree_it_setPrefixPart, ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveTreeIterator,     getEntry,          arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
+	SPL_ME(RecursiveTreeIterator,     setPostfix,        arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
 	SPL_ME(RecursiveTreeIterator,     getPostfix,        arginfo_recursive_it_void,               ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
@@ -1255,7 +1277,7 @@ static int spl_dual_it_gets_implemented(zend_class_entry *interface, zend_class_
 }
 #endif
 
-static union _zend_function *spl_dual_it_get_method(zval **object_ptr, char *method, int method_len, const zend_literal *key TSRMLS_DC)
+static union _zend_function *spl_dual_it_get_method(zval **object_ptr, char *method, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC)
 {
 	union _zend_function *function_handler;
 	spl_dual_it_object   *intern;
@@ -1402,9 +1424,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		case DIT_IteratorIterator: {
 			zend_class_entry **pce_cast;
 			char * class_name = NULL;
-			int class_name_len = 0;
+			zend_str_size_int class_name_len = 0;
 
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|s", &zobject, ce_inner, &class_name, &class_name_len) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|S", &zobject, ce_inner, &class_name, &class_name_len) == FAILURE) {
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
 				return NULL;
 			}
@@ -1452,13 +1474,13 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 		case DIT_RegexIterator:
 		case DIT_RecursiveRegexIterator: {
 			char *regex;
-			int regex_len;
+			zend_str_size_int regex_len;
 			long mode = REGIT_MODE_MATCH;
 
 			intern->u.regex.use_flags = ZEND_NUM_ARGS() >= 5;
 			intern->u.regex.flags = 0;
 			intern->u.regex.preg_flags = 0;
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Os|lll", &zobject, ce_inner, &regex, &regex_len, &mode, &intern->u.regex.flags, &intern->u.regex.preg_flags) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "OS|lll", &zobject, ce_inner, &regex, &regex_len, &mode, &intern->u.regex.flags, &intern->u.regex.preg_flags) == FAILURE) {
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
 				return NULL;
 			}
@@ -1944,7 +1966,8 @@ SPL_METHOD(RegexIterator, accept)
 {
 	spl_dual_it_object *intern;
 	char       *subject, *result;
-	int        subject_len, use_copy, count = 0, result_len;
+	zend_str_size_int  subject_len;
+	int use_copy, count = 0, result_len;
 	zval       *subject_ptr, subject_copy, zcount, *replacement, tmp_replacement;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -1966,10 +1989,10 @@ SPL_METHOD(RegexIterator, accept)
 	zend_make_printable_zval(subject_ptr, &subject_copy, &use_copy);
 	if (use_copy) {
 		subject = Z_STRVAL(subject_copy);
-		subject_len = Z_STRLEN(subject_copy);
+		subject_len = Z_STRSIZE(subject_copy);
 	} else {
 		subject = Z_STRVAL_P(subject_ptr);
-		subject_len = Z_STRLEN_P(subject_ptr);
+		subject_len = Z_STRSIZE_P(subject_ptr);
 	}
 
 	switch (intern->u.regex.mode)
@@ -2727,7 +2750,7 @@ SPL_METHOD(CachingIterator, __toString)
 		return;
 	}
 	if (intern->u.caching.zstr) {
-		RETURN_STRINGL(Z_STRVAL_P(intern->u.caching.zstr), Z_STRLEN_P(intern->u.caching.zstr), 1);
+		RETURN_STRINGL(Z_STRVAL_P(intern->u.caching.zstr), Z_STRSIZE_P(intern->u.caching.zstr), 1);
 	} else {
 		RETURN_NULL();
 	}
@@ -2739,7 +2762,7 @@ SPL_METHOD(CachingIterator, offsetSet)
 {
 	spl_dual_it_object   *intern;
 	char *arKey;
-	uint nKeyLength;
+	zend_str_size_uint nKeyLength;
 	zval *value;
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
@@ -2749,7 +2772,7 @@ SPL_METHOD(CachingIterator, offsetSet)
 		return;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz", &arKey, &nKeyLength, &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz", &arKey, &nKeyLength, &value) == FAILURE) {
 		return;
 	}
 
@@ -2764,7 +2787,7 @@ SPL_METHOD(CachingIterator, offsetGet)
 {
 	spl_dual_it_object   *intern;
 	char *arKey;
-	uint nKeyLength;
+	zend_str_size_uint nKeyLength;
 	zval **value;
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
@@ -2774,7 +2797,7 @@ SPL_METHOD(CachingIterator, offsetGet)
 		return;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arKey, &nKeyLength) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arKey, &nKeyLength) == FAILURE) {
 		return;
 	}
 
@@ -2793,7 +2816,7 @@ SPL_METHOD(CachingIterator, offsetUnset)
 {
 	spl_dual_it_object   *intern;
 	char *arKey;
-	uint nKeyLength;
+	zend_str_size_uint nKeyLength;
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2802,7 +2825,7 @@ SPL_METHOD(CachingIterator, offsetUnset)
 		return;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arKey, &nKeyLength) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arKey, &nKeyLength) == FAILURE) {
 		return;
 	}
 
@@ -2816,7 +2839,7 @@ SPL_METHOD(CachingIterator, offsetExists)
 {
 	spl_dual_it_object   *intern;
 	char *arKey;
-	uint nKeyLength;
+	zend_str_size_uint nKeyLength;
 	
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2825,7 +2848,7 @@ SPL_METHOD(CachingIterator, offsetExists)
 		return;
 	}
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arKey, &nKeyLength) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arKey, &nKeyLength) == FAILURE) {
 		return;
 	}
 

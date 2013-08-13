@@ -34,6 +34,10 @@
 #include "rfc1867.h"
 #include "ext/standard/php_string.h"
 
+#if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
+# define atoll(s) _atoi64(s)
+#endif
+
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
 static int dummy_encoding_translation(TSRMLS_D)
@@ -53,7 +57,7 @@ static php_rfc1867_basename_t php_rfc1867_basename = NULL;
 
 PHPAPI int (*php_rfc1867_callback)(unsigned int event, void *event_data, void **extra TSRMLS_DC) = NULL;
 
-static void safe_php_register_variable(char *var, char *strval, int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
+static void safe_php_register_variable(char *var, char *strval, zend_str_size_int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC);
 
 /* The longest property name we use in an uploaded file array */
 #define MAX_SIZE_OF_INDEX sizeof("[tmp_name]")
@@ -158,7 +162,7 @@ static zend_bool is_protected_variable(char *varname TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static void safe_php_register_variable(char *var, char *strval, int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC) /* {{{ */
+static void safe_php_register_variable(char *var, char *strval, zend_str_size_int val_len, zval *track_vars_array, zend_bool override_protection TSRMLS_DC) /* {{{ */
 {
 	if (override_protection || !is_protected_variable(var TSRMLS_CC)) {
 		php_register_variable_safe(var, strval, val_len, track_vars_array TSRMLS_CC);
@@ -210,13 +214,13 @@ typedef struct {
 	/* read buffer */
 	char *buffer;
 	char *buf_begin;
-	int  bufsize;
-	int  bytes_in_buffer;
+	zend_str_size_int  bufsize;
+	zend_str_size_int  bytes_in_buffer;
 
 	/* boundary info */
 	char *boundary;
 	char *boundary_next;
-	int  boundary_next_len;
+	zend_str_size_int  boundary_next_len;
 
 	const zend_encoding *input_encoding;
 	const zend_encoding **detect_order;
@@ -232,9 +236,9 @@ typedef struct {
  * Fill up the buffer with client data.
  * Returns number of bytes added to buffer.
  */
-static int fill_buffer(multipart_buffer *self TSRMLS_DC)
+static zend_str_size_int fill_buffer(multipart_buffer *self TSRMLS_DC)
 {
-	int bytes_to_read, total_read = 0, actual_read = 0;
+	zend_str_size_int bytes_to_read, total_read = 0, actual_read = 0;
 
 	/* shift the existing data if necessary */
 	if (self->bytes_in_buffer > 0 && self->buf_begin != self->buffer) {
@@ -278,11 +282,11 @@ static int multipart_buffer_eof(multipart_buffer *self TSRMLS_DC)
 }
 
 /* create new multipart_buffer structure */
-static multipart_buffer *multipart_buffer_new(char *boundary, int boundary_len TSRMLS_DC)
+static multipart_buffer *multipart_buffer_new(char *boundary, zend_str_size_int boundary_len TSRMLS_DC)
 {
 	multipart_buffer *self = (multipart_buffer *) ecalloc(1, sizeof(multipart_buffer));
 
-	int minsize = boundary_len + 6;
+	zend_str_size_int minsize = boundary_len + 6;
 	if (minsize < FILLUNIT) minsize = FILLUNIT;
 
 	self->buffer = (char *) ecalloc(1, minsize + 1);
@@ -399,7 +403,7 @@ static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header T
 {
 	char *line;
 	mime_header_entry prev_entry, entry;
-	int prev_len, cur_len;
+	zend_str_size_int prev_len, cur_len;
 
 	/* didn't find boundary, abort */
 	if (!find_boundary(self, self->boundary TSRMLS_CC)) {
@@ -509,11 +513,11 @@ static char *php_ap_getword(const zend_encoding *encoding, char **line, char sto
 	return res;
 }
 
-static char *substring_conf(char *start, int len, char quote)
+static char *substring_conf(char *start, zend_str_size_int len, char quote)
 {
 	char *result = emalloc(len + 1);
 	char *resp = result;
-	int i;
+	zend_str_size_int i;
 
 	for (i = 0; i < len && start[i] != quote; ++i) {
 		if (start[i] == '\\' && (start[i + 1] == '\\' || (quote && start[i + 1] == quote))) {
@@ -577,9 +581,9 @@ static char *php_ap_basename(const zend_encoding *encoding, char *path TSRMLS_DC
  * If partial is true, partial matches are allowed at the end of the buffer.
  * Returns NULL if not found, or a pointer to the start of the first match.
  */
-static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int needlen, int partial)
+static void *php_ap_memstr(char *haystack, zend_str_size_int haystacklen, char *needle, zend_str_size_int needlen, int partial)
 {
-	int len = haystacklen;
+	zend_str_size_int len = haystacklen;
 	char *ptr = haystack;
 
 	/* iterate through first character matches */
@@ -601,9 +605,9 @@ static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int ne
 }
 
 /* read until a boundary condition */
-static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes, int *end TSRMLS_DC)
+static zend_str_size_int multipart_buffer_read(multipart_buffer *self, char *buf, zend_str_size_int bytes, int *end TSRMLS_DC)
 {
-	int len, max;
+	zend_str_size_int len, max;
 	char *bound;
 
 	/* fill buffer if needed */
@@ -647,10 +651,10 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, int bytes, i
   XXX: this is horrible memory-usage-wise, but we only expect
   to do this on small pieces of form data.
 */
-static char *multipart_buffer_read_body(multipart_buffer *self, unsigned int *len TSRMLS_DC)
+static char *multipart_buffer_read_body(multipart_buffer *self, zend_str_size_uint *len TSRMLS_DC)
 {
 	char buf[FILLUNIT], *out=NULL;
-	int total_bytes=0, read_bytes=0;
+	zend_str_size_int total_bytes=0, read_bytes=0;
 
 	while((read_bytes = multipart_buffer_read(self, buf, sizeof(buf), NULL TSRMLS_CC))) {
 		out = erealloc(out, total_bytes + read_bytes + 1);
@@ -676,8 +680,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 {
 	char *boundary, *s = NULL, *boundary_end = NULL, *start_arr = NULL, *array_index = NULL;
 	char *temp_filename = NULL, *lbuf = NULL, *abuf = NULL;
-	int boundary_len = 0, total_bytes = 0, cancel_upload = 0, is_arr_upload = 0, array_len = 0;
-	int max_file_size = 0, skip_upload = 0, anonindex = 0, is_anonymous;
+	zend_str_size_int boundary_len = 0, array_len = 0;
+	int cancel_upload = 0, is_arr_upload = 0;
+	int64_t total_bytes = 0, max_file_size = 0;
+	int skip_upload = 0, anonindex = 0, is_anonymous;
 	zval *http_post_files = NULL;
 	HashTable *uploaded_files = NULL;
 	multipart_buffer *mbuff;
@@ -711,7 +717,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	/* Get the boundary */
 	boundary = strstr(content_type_dup, "boundary");
 	if (!boundary) {
-		int content_type_len = strlen(content_type_dup);
+		zend_str_size_int content_type_len = strlen(content_type_dup);
 		char *content_type_lcase = estrndup(content_type_dup, content_type_len);
 
 		php_strtolower(content_type_lcase, content_type_len);
@@ -843,9 +849,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 			/* Normal form variable, safe to read all data into memory */
 			if (!filename && param) {
-				unsigned int value_len;
+				zend_str_size_uint value_len;
 				char *value = multipart_buffer_read_body(mbuff, &value_len TSRMLS_CC);
-				unsigned int new_val_len; /* Dummy variable */
+				zend_str_size_uint new_val_len; /* Dummy variable */
 
 				if (!value) {
 					value = estrdup("");
@@ -898,7 +904,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				}
 
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
-					max_file_size = atol(value);
+					max_file_size = atoll(value);
 				}
 
 				efree(param);

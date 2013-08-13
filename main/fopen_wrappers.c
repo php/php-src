@@ -410,7 +410,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 #endif
 	if (PG(doc_root) && path_info && (length = strlen(PG(doc_root))) &&
 		IS_ABSOLUTE_PATH(PG(doc_root), length)) {
-		int path_len = strlen(path_info);
+		zend_str_size_int path_len = strlen(path_info);
 		filename = emalloc(length + path_len + 2);
 		if (filename) {
 			memcpy(filename, PG(doc_root), length);
@@ -470,12 +470,12 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle TSRMLS_DC)
 /* {{{ php_resolve_path
  * Returns the realpath for given filename according to include path
  */
-PHPAPI char *php_resolve_path(const char *filename, int filename_length, const char *path TSRMLS_DC)
+PHPAPI char *php_resolve_path(const char *filename, zend_str_size_int filename_length, const char *path TSRMLS_DC)
 {
 	char resolved_path[MAXPATHLEN];
 	char trypath[MAXPATHLEN];
 	const char *ptr, *end, *p;
-	char *actual_path;
+	const char *actual_path;
 	php_stream_wrapper *wrapper;
 
 	if (!filename || CHECK_NULL_PATH(filename, filename_length)) {

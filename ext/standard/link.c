@@ -55,11 +55,11 @@
 PHP_FUNCTION(readlink)
 {
 	char *link;
-	int link_len;
+	zend_str_size link_len;
 	char buff[MAXPATHLEN];
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &link, &link_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &link, &link_len) == FAILURE) {
 		return;
 	}
 
@@ -86,11 +86,11 @@ PHP_FUNCTION(linkinfo)
 {
 	char *link;
 	char *dirname;
-	int link_len, dir_len;
+	zend_str_size link_len, dir_len;
 	struct stat sb;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &link, &link_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &link, &link_len) == FAILURE) {
 		return;
 	}
 
@@ -119,14 +119,14 @@ PHP_FUNCTION(linkinfo)
 PHP_FUNCTION(symlink)
 {
 	char *topath, *frompath;
-	int topath_len, frompath_len;
+	zend_str_size topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 	char dirname[MAXPATHLEN];
-	size_t len;
+	zend_str_size len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "PP", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
 	}
 	
@@ -177,12 +177,12 @@ PHP_FUNCTION(symlink)
 PHP_FUNCTION(link)
 {
 	char *topath, *frompath;
-	int topath_len, frompath_len;
+	zend_str_size topath_len, frompath_len;
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "PP", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
 		return;
 	}
 

@@ -53,9 +53,9 @@ static HashTable php_output_handler_reverse_conflicts;
 
 /* {{{ forward declarations */
 static inline int php_output_lock_error(int op TSRMLS_DC);
-static inline void php_output_op(int op, const char *str, size_t len TSRMLS_DC);
+static inline void php_output_op(int op, const char *str, zend_str_size_size_t len TSRMLS_DC);
 
-static inline php_output_handler *php_output_handler_init(const char *name, size_t name_len, size_t chunk_size, int flags TSRMLS_DC);
+static inline php_output_handler *php_output_handler_init(const char *name, zend_str_size_size_t name_len, zend_str_size_size_t chunk_size, int flags TSRMLS_DC);
 static inline php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context);
 static inline int php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf TSRMLS_DC);
 static inline zval *php_output_handler_status(php_output_handler *handler, zval *entry);
@@ -86,12 +86,12 @@ static inline void php_output_init_globals(zend_output_globals *G)
 /* }}} */
 
 /* {{{ stderr/stdout writer if not PHP_OUTPUT_ACTIVATED */
-static int php_output_stdout(const char *str, size_t str_len)
+static zend_str_size_int php_output_stdout(const char *str, zend_str_size_size_t str_len)
 {
 	fwrite(str, 1, str_len, stdout);
 	return str_len;
 }
-static int php_output_stderr(const char *str, size_t str_len)
+static zend_str_size_int php_output_stderr(const char *str, zend_str_size_size_t str_len)
 {
 	fwrite(str, 1, str_len, stderr);
 /* See http://support.microsoft.com/kb/190351 */
@@ -100,7 +100,7 @@ static int php_output_stderr(const char *str, size_t str_len)
 #endif
 	return str_len;
 }
-static int (*php_output_direct)(const char *str, size_t str_len) = php_output_stderr;
+static zend_str_size_int (*php_output_direct)(const char *str, zend_str_size_size_t str_len) = php_output_stderr;
 /* }}} */
 
 /* {{{ void php_output_header(TSRMLS_D) */
@@ -232,7 +232,7 @@ PHPAPI int php_output_get_status(TSRMLS_D)
 
 /* {{{ int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
  * Unbuffered write */
-PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
+PHPAPI zend_str_size_int php_output_write_unbuffered(const char *str, zend_str_size_size_t len TSRMLS_DC)
 {
 	if (OG(flags) & PHP_OUTPUT_DISABLED) {
 		return 0;
@@ -246,14 +246,14 @@ PHPAPI int php_output_write_unbuffered(const char *str, size_t len TSRMLS_DC)
 
 /* {{{ int php_output_write(const char *str, size_t len TSRMLS_DC)
  * Buffered write */
-PHPAPI int php_output_write(const char *str, size_t len TSRMLS_DC)
+PHPAPI zend_str_size_int php_output_write(const char *str, zend_str_size_size_t len TSRMLS_DC)
 {
 	if (OG(flags) & PHP_OUTPUT_DISABLED) {
 		return 0;
 	}
 	if (OG(flags) & PHP_OUTPUT_ACTIVATED) {
 		php_output_op(PHP_OUTPUT_HANDLER_WRITE, str, len TSRMLS_CC);
-		return (int) len;
+		return len;
 	}
 	return php_output_direct(str, len);
 }
@@ -261,7 +261,7 @@ PHPAPI int php_output_write(const char *str, size_t len TSRMLS_DC)
 
 /* {{{ SUCCESS|FAILURE php_output_flush(TSRMLS_D)
  * Flush the most recent output handlers buffer */
-PHPAPI int php_output_flush(TSRMLS_D)
+PHPAPI zend_str_size_int php_output_flush(TSRMLS_D)
 {
 	php_output_context context;
 
@@ -452,7 +452,7 @@ PHPAPI int php_output_start_user(zval *output_handler, size_t chunk_size, int fl
 
 /* {{{ SUCCESS|FAILURE php_output_start_internal(zval *name, php_output_handler_func_t handler, size_t chunk_size, int flags TSRMLS_DC)
  * Start an internal output handler that does not have to maintain a non-global state */
-PHPAPI int php_output_start_internal(const char *name, size_t name_len, php_output_handler_func_t output_handler, size_t chunk_size, int flags TSRMLS_DC)
+PHPAPI int php_output_start_internal(const char *name, zend_str_size_size_t name_len, php_output_handler_func_t output_handler, zend_str_size_size_t chunk_size, int flags TSRMLS_DC)
 {
 	php_output_handler *handler;
 
@@ -468,7 +468,7 @@ PHPAPI int php_output_start_internal(const char *name, size_t name_len, php_outp
 
 /* {{{ php_output_handler *php_output_handler_create_user(zval *handler, size_t chunk_size, int flags TSRMLS_DC)
  * Create a user level output handler */
-PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, size_t chunk_size, int flags TSRMLS_DC)
+PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, zend_str_size_size_t chunk_size, int flags TSRMLS_DC)
 {
 	char *handler_name = NULL, *error = NULL;
 	php_output_handler *handler = NULL;
@@ -480,8 +480,8 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 			handler = php_output_handler_create_internal(ZEND_STRL(php_output_default_handler_name), php_output_handler_default_func, chunk_size, flags TSRMLS_CC);
 			break;
 		case IS_STRING:
-			if (Z_STRLEN_P(output_handler) && (alias = php_output_handler_alias(Z_STRVAL_P(output_handler), Z_STRLEN_P(output_handler) TSRMLS_CC))) {
-				handler = (*alias)(Z_STRVAL_P(output_handler), Z_STRLEN_P(output_handler), chunk_size, flags TSRMLS_CC);
+			if (Z_STRSIZE_P(output_handler) && (alias = php_output_handler_alias(Z_STRVAL_P(output_handler), Z_STRSIZE_P(output_handler) TSRMLS_CC))) {
+				handler = (*alias)(Z_STRVAL_P(output_handler), Z_STRSIZE_P(output_handler), chunk_size, flags TSRMLS_CC);
 				break;
 			}
 		default:
@@ -509,7 +509,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 
 /* {{{ php_output_handler *php_output_handler_create_internal(zval *name, php_output_handler_context_func_t handler, size_t chunk_size, int flags TSRMLS_DC)
  * Create an internal output handler that can maintain a non-global state */
-PHPAPI php_output_handler *php_output_handler_create_internal(const char *name, size_t name_len, php_output_handler_context_func_t output_handler, size_t chunk_size, int flags TSRMLS_DC)
+PHPAPI php_output_handler *php_output_handler_create_internal(const char *name, zend_str_size_size_t name_len, php_output_handler_context_func_t output_handler, zend_str_size_size_t chunk_size, int flags TSRMLS_DC)
 {
 	php_output_handler *handler;
 
@@ -590,7 +590,7 @@ PHPAPI int php_output_handler_started(const char *name, size_t name_len TSRMLS_D
 
 /* {{{ int php_output_handler_conflict(zval *handler_new, zval *handler_old TSRMLS_DC)
  * Check whether a certain handler is in use and issue a warning that the new handler would conflict with the already used one */
-PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_new_len, const char *handler_set, size_t handler_set_len TSRMLS_DC)
+PHPAPI int php_output_handler_conflict(const char *handler_new, zend_str_size_size_t handler_new_len, const char *handler_set, zend_str_size_size_t handler_set_len TSRMLS_DC)
 {
 	if (php_output_handler_started(handler_set, handler_set_len TSRMLS_CC)) {
 		if (handler_new_len != handler_set_len || memcmp(handler_new, handler_set, handler_set_len)) {
@@ -606,7 +606,7 @@ PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_n
 
 /* {{{ SUCCESS|FAILURE php_output_handler_conflict_register(zval *name, php_output_handler_conflict_check_t check_func TSRMLS_DC)
  * Register a conflict checking function on MINIT */
-PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_len, php_output_handler_conflict_check_t check_func TSRMLS_DC)
+PHPAPI int php_output_handler_conflict_register(const char *name, zend_str_size_size_t name_len, php_output_handler_conflict_check_t check_func TSRMLS_DC)
 {
 	if (!EG(current_module)) {
 		zend_error(E_ERROR, "Cannot register an output handler conflict outside of MINIT");
@@ -618,7 +618,7 @@ PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_le
 
 /* {{{ SUCCESS|FAILURE php_output_handler_reverse_conflict_register(zval *name, php_output_handler_conflict_check_t check_func TSRMLS_DC)
  * Register a reverse conflict checking function on MINIT */
-PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t name_len, php_output_handler_conflict_check_t check_func TSRMLS_DC)
+PHPAPI int php_output_handler_reverse_conflict_register(const char *name, zend_str_size_size_t name_len, php_output_handler_conflict_check_t check_func TSRMLS_DC)
 {
 	HashTable rev, *rev_ptr = NULL;
 
@@ -646,7 +646,7 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 
 /* {{{ php_output_handler_alias_ctor_t php_output_handler_alias(zval *name TSRMLS_DC)
  * Get an internal output handler for a user handler if it exists */
-PHPAPI php_output_handler_alias_ctor_t *php_output_handler_alias(const char *name, size_t name_len TSRMLS_DC)
+PHPAPI php_output_handler_alias_ctor_t *php_output_handler_alias(const char *name, zend_str_size_size_t name_len TSRMLS_DC)
 {
 	php_output_handler_alias_ctor_t *func = NULL;
 
@@ -657,7 +657,7 @@ PHPAPI php_output_handler_alias_ctor_t *php_output_handler_alias(const char *nam
 
 /* {{{ SUCCESS|FAILURE php_output_handler_alias_register(zval *name, php_output_handler_alias_ctor_t func TSRMLS_DC)
  * Registers an internal output handler as alias for a user handler */
-PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, php_output_handler_alias_ctor_t func TSRMLS_DC)
+PHPAPI int php_output_handler_alias_register(const char *name, zend_str_size_size_t name_len, php_output_handler_alias_ctor_t func TSRMLS_DC)
 {
 	if (!EG(current_module)) {
 		zend_error(E_ERROR, "Cannot register an output handler alias outside of MINIT");
@@ -797,7 +797,7 @@ static inline void php_output_context_reset(php_output_context *context)
 
 /* {{{ static void php_output_context_feed(php_output_context *context, char *, size_t, size_t)
  * Feed output contexts input buffer */
-static inline void php_output_context_feed(php_output_context *context, char *data, size_t size, size_t used, zend_bool free)
+static inline void php_output_context_feed(php_output_context *context, char *data, zend_str_size_size_t size, zend_str_size_size_t used, zend_bool free)
 {
 	if (context->in.free && context->in.data) {
 		efree(context->in.data);
@@ -859,7 +859,7 @@ static inline void php_output_context_dtor(php_output_context *context)
 
 /* {{{ static php_output_handler *php_output_handler_init(zval *name, size_t chunk_size, int flags TSRMLS_DC)
  * Allocates and initializes a php_output_handler structure */
-static inline php_output_handler *php_output_handler_init(const char *name, size_t name_len, size_t chunk_size, int flags TSRMLS_DC)
+static inline php_output_handler *php_output_handler_init(const char *name, zend_str_size_size_t name_len, zend_str_size_size_t chunk_size, int flags TSRMLS_DC)
 {
 	php_output_handler *handler;
 
@@ -883,9 +883,9 @@ static inline int php_output_handler_append(php_output_handler *handler, const p
 		OG(flags) |= PHP_OUTPUT_WRITTEN;
 		/* store it away */
 		if ((handler->buffer.size - handler->buffer.used) <= buf->used) {
-			size_t grow_int = PHP_OUTPUT_HANDLER_INITBUF_SIZE(handler->size);
-			size_t grow_buf = PHP_OUTPUT_HANDLER_INITBUF_SIZE(buf->used - (handler->buffer.size - handler->buffer.used));
-			size_t grow_max = MAX(grow_int, grow_buf);
+			zend_str_size grow_int = PHP_OUTPUT_HANDLER_INITBUF_SIZE(handler->size);
+			zend_str_size grow_buf = PHP_OUTPUT_HANDLER_INITBUF_SIZE(buf->used - (handler->buffer.size - handler->buffer.used));
+			zend_str_size grow_max = MAX(grow_int, grow_buf);
 
 			handler->buffer.data = erealloc(handler->buffer.data, handler->buffer.size + grow_max);
 			handler->buffer.size += grow_max;
@@ -964,9 +964,9 @@ static inline php_output_handler_status_t php_output_handler_op(php_output_handl
 				status = PHP_OUTPUT_HANDLER_NO_DATA;
 				if (Z_TYPE_P(retval) != IS_BOOL) {
 					convert_to_string_ex(&retval);
-					if (Z_STRLEN_P(retval)) {
-						context->out.data = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
-						context->out.used = Z_STRLEN_P(retval);
+					if (Z_STRSIZE_P(retval)) {
+						context->out.data = estrndup(Z_STRVAL_P(retval), Z_STRSIZE_P(retval));
+						context->out.used = Z_STRSIZE_P(retval);
 						context->out.free = 1;
 						status = PHP_OUTPUT_HANDLER_SUCCESS;
 					}
@@ -1260,7 +1260,7 @@ static int php_output_handler_compat_func(void **handler_context, php_output_con
 
 	if (func) {
 		char *out_str = NULL;
-		uint out_len = 0;
+		zend_str_size out_len = 0;
 
 		func(output_context->in.data, output_context->in.used, &out_str, &out_len, output_context->op TSRMLS_CC);
 
@@ -1554,9 +1554,9 @@ PHP_FUNCTION(output_reset_rewrite_vars)
 PHP_FUNCTION(output_add_rewrite_var)
 {
 	char *name, *value;
-	int name_len, value_len;
+	zend_str_size name_len, value_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 

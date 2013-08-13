@@ -65,9 +65,9 @@
 
 #define PHP_UU_DEC(c) (((c) - ' ') & 077)
 
-PHPAPI int php_uuencode(char *src, int src_len, char **dest) /* {{{ */
+PHPAPI zend_str_size_int php_uuencode(char *src, zend_str_size_int src_len, char **dest) /* {{{ */
 {
-	int len = 45;
+	zend_str_size_int len = 45;
 	char *p, *s, *e, *ee;
 
 	/* encoded length is ~ 38% greater than the original */
@@ -124,11 +124,12 @@ PHPAPI int php_uuencode(char *src, int src_len, char **dest) /* {{{ */
 }
 /* }}} */
 
-PHPAPI int php_uudecode(char *src, int src_len, char **dest) /* {{{ */
+PHPAPI zend_str_size_int php_uudecode(char *src, zend_str_size_int src_len, char **dest, int *error) /* {{{ */
 {
-	int len, total_len=0;
+	zend_str_size_int len, total_len=0;
 	char *s, *e, *p, *ee;
 
+	*error = 0;
 	p = *dest = safe_emalloc((size_t) ceil(src_len * 0.75), 1, 1);
 	s = src;
 	e = src + src_len;
@@ -181,7 +182,8 @@ PHPAPI int php_uudecode(char *src, int src_len, char **dest) /* {{{ */
 
 err:
 	efree(*dest);
-	return -1;
+	*error = 1;
+	return 0;
 }
 /* }}} */
 
@@ -190,9 +192,9 @@ err:
 PHP_FUNCTION(convert_uuencode)
 {
 	char *src, *dst;
-	int src_len, dst_len;
+	zend_str_size_int src_len, dst_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &src, &src_len) == FAILURE || src_len < 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &src, &src_len) == FAILURE || src_len < 1) {
 		RETURN_FALSE;
 	}
 
@@ -207,14 +209,15 @@ PHP_FUNCTION(convert_uuencode)
 PHP_FUNCTION(convert_uudecode)
 {
 	char *src, *dst;
-	int src_len, dst_len;
+	zend_str_size_int src_len, dst_len;
+	int err = 0;;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &src, &src_len) == FAILURE || src_len < 1) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &src, &src_len) == FAILURE || src_len < 1) {
 		RETURN_FALSE;
 	}
 
-	dst_len = php_uudecode(src, src_len, &dst);
-	if (dst_len < 0) {
+	dst_len = php_uudecode(src, src_len, &dst, &err);
+	if (err) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The given parameter is not a valid uuencoded string");
 		RETURN_FALSE;
 	}

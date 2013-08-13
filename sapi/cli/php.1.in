@@ -1,6 +1,8 @@
 .TH PHP 1 "2013" "The PHP Group" "Scripting Language"
 .SH NAME
 php \- PHP Command Line Interface 'CLI'
+.P
+php-cgi \- PHP Common Gateway Interface 'CGI' command
 .SH SYNOPSIS
 .B php
 [options] [
@@ -18,21 +20,21 @@ php \- PHP Command Line Interface 'CLI'
 .LP
 .B php
 [options] [\-B 
-.IR code ] 
+.IR begin_code ]
 .B \-R 
 .IR code
 [\-E 
-.IR code ]
+.IR end_code ]
 [[\-\-]
 .IR args.\|.\|. ]
 .LP
 .B php
 [options] [\-B 
-.IR code ]
+.IR begin_code ]
 .B \-F 
 .IR file
 [\-E 
-.IR code ] 
+.IR end_code ]
 [[\-\-]
 .IR args.\|.\|. ]
 .LP
@@ -84,7 +86,7 @@ and therefore reading from
 .B STDIN 
 explicitly changes the next input line or skips input lines.
 .LP
-PHP also contains an embedded web server for application development purpose. By using the \-S option where
+PHP also contains an built-in web server for application development purpose. By using the \-S option where
 .B addr:port
 point to a local address and port PHP will listen to HTTP requests on that address and port and serve files from the current working directory or the
 .B docroot
@@ -235,9 +237,9 @@ without using script tags
 .B \-\-process\-begin \fIcode\fP
 .TP
 .PD 1
-.B \-B \fIcode\fP
+.B \-B \fIbegin_code\fP
 Run PHP 
-.IR code
+.IR begin_code
 before processing input lines
 .TP
 .PD 0
@@ -262,9 +264,9 @@ for every input line
 .B \-\-process\-end \fIcode\fP
 .TP
 .PD 1
-.B \-E \fIcode\fP
+.B \-E \fIend_code\fP
 Run PHP 
-.IR code
+.IR end_code
 after processing all input lines
 .TP
 .PD 0
@@ -279,14 +281,14 @@ Output HTML syntax highlighted source
 .TP
 .PD 1
 .B \-S \fIaddr:port\fP
-Start embedded Webserver on the given local address and port
+Start built-in web server on the given local address and port
 .TP
 .PD 0
 .B \-\-docroot \fIdocroot\fP
 .TP
 .PD 1
 .B \-t \fIdocroot\fP
-Specify the document root to be used by the embedded web server
+Specify the document root to be used by the built-in web server
 .TP
 .PD 0
 .B \-\-version

@@ -467,7 +467,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 	/* properties */
 	if (Z_OBJPROP_P(disp->object)) {
 		zend_hash_internal_pointer_reset_ex(Z_OBJPROP_P(disp->object), &pos);
-		while (HASH_KEY_NON_EXISTANT != (keytype =
+		while (HASH_KEY_NON_EXISTENT != (keytype =
 				zend_hash_get_current_key_ex(Z_OBJPROP_P(disp->object), &name,
 			   	&namelen, &pid, 0, &pos))) {
 			char namebuf[32];
@@ -498,7 +498,7 @@ static void generate_dispids(php_dispatchex *disp TSRMLS_DC)
 	/* functions */
 	if (Z_OBJCE_P(disp->object)) {
 		zend_hash_internal_pointer_reset_ex(&Z_OBJCE_P(disp->object)->function_table, &pos);
-		while (HASH_KEY_NON_EXISTANT != (keytype =
+		while (HASH_KEY_NON_EXISTENT != (keytype =
 				zend_hash_get_current_key_ex(&Z_OBJCE_P(disp->object)->function_table,
 			 	&name, &namelen, &pid, 0, &pos))) {
 
@@ -598,7 +598,7 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export_as_sink(zval *val, GUID *si
 	zend_hash_init(disp->name_to_dispid, 0, NULL, ZVAL_PTR_DTOR, 0);
 	
 	zend_hash_internal_pointer_reset_ex(id_to_name, &pos);
-	while (HASH_KEY_NON_EXISTANT != (keytype =
+	while (HASH_KEY_NON_EXISTENT != (keytype =
 				zend_hash_get_current_key_ex(id_to_name, &name, &namelen, &pid, 0, &pos))) {
 
 		if (keytype == HASH_KEY_IS_LONG) {

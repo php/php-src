@@ -103,7 +103,7 @@ dnl --with-oci8=shared,instantclient,/path/to/client/dir/lib
 dnl or
 dnl --with-oci8=shared,/path/to/oracle/home
 PHP_ARG_WITH(oci8, for Oracle Database OCI8 support,
-[  --with-oci8[=DIR]       Include Oracle Database OCI8 support. DIR defaults to \$ORACLE_HOME.
+[  --with-oci8[=DIR]         Include Oracle Database OCI8 support. DIR defaults to \$ORACLE_HOME.
                           Use --with-oci8=instantclient,/path/to/instant/client/lib 
                           to use an Oracle Instant Client installation])
 
@@ -140,10 +140,27 @@ if test "$PHP_OCI8" != "no"; then
 
   if test "$oci8_php_version" -lt "4003009"; then
     AC_MSG_ERROR([You need at least PHP 4.3.9 to be able to use this version of OCI8. PHP $php_version found])
-  elif test "$oci8_php_version" -ge "6000000"; then
-    AC_MSG_ERROR([This version of OCI8 is not compatible with PHP 6 or higher])
   else
     AC_MSG_RESULT([$php_version, ok])
+  fi
+
+  dnl conditionally define PHP_INIT_DTRACE. 
+  dnl This prevents 'configure' failing for PECL installs on older PHP versions.
+  dnl Note DTrace support can't be enabled on older PHP versions.
+ AC_PROVIDE_IFELSE([PHP_INIT_DTRACE], [], [AC_DEFUN([PHP_INIT_DTRACE], )])
+
+  if test "$PHP_DTRACE" = "yes"; then
+    if test "$oci8_php_version" -lt "5004000"; then
+      AC_MSG_ERROR([You need at least PHP 5.4 to be able to use DTrace with PHP OCI8])
+    else
+      AC_CHECK_HEADERS([sys/sdt.h], [
+	 PHP_INIT_DTRACE([ext/oci8/oci8_dtrace.d],[ext/oci8/oci8_dtrace_gen.h],[ext/oci8/oci8.c \
+	 		ext/oci8/oci8_interface.c ext/oci8/oci8_collection.c ext/oci8/oci8_lob.c ext/oci8/oci8_statement.c])
+       ], [
+	 AC_MSG_ERROR(
+	   [Cannot find sys/sdt.h which is required for DTrace support])
+       ])
+    fi
   fi
 
   dnl Set some port specific directory components for use later

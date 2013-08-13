@@ -598,7 +598,9 @@ PHPAPI php_stream_ops php_stream_rfc2397_ops = {
 	php_stream_temp_set_option
 };
 
-static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
+static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, const char *path,
+												const char *mode, int options, char **opened_path,
+												php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream;
 	php_stream_temp_data *ts;
@@ -606,7 +608,8 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 	size_t mlen, dlen, plen, vlen;
 	off_t newoffs;
 	zval *meta = NULL;
-	int base64 = 0, ilen;
+	int base64 = 0;
+	zend_str_size_int ilen;
 
 	if (memcmp(path, "data:", 5)) {
 		return NULL;
@@ -640,11 +643,11 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, cha
 		MAKE_STD_ZVAL(meta);
 		array_init(meta);
 		if (!semi) { /* there is only a mime type */
-			add_assoc_stringl(meta, "mediatype", path, mlen, 1);
+			add_assoc_stringl(meta, "mediatype", (char *) path, mlen, 1);
 			mlen = 0;
 		} else if (sep && sep < semi) { /* there is a mime type */
 			plen = semi - path;
-			add_assoc_stringl(meta, "mediatype", path, plen, 1);
+			add_assoc_stringl(meta, "mediatype", (char *) path, plen, 1);
 			mlen -= plen;
 			path += plen;
 		} else if (semi != path || mlen != sizeof(";base64")-1 || memcmp(path, ";base64", sizeof(";base64")-1)) { /* must be error since parameters are only allowed after mediatype */

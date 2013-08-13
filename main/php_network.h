@@ -62,7 +62,7 @@
  * unless buf is not NULL.
  * Also works sensibly for win32 */
 BEGIN_EXTERN_C()
-PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize);
+PHPAPI char *php_socket_strerror(long err, char *buf, zend_str_size_size_t bufsize);
 END_EXTERN_C()
 
 #ifdef HAVE_NETINET_IN_H
@@ -248,7 +248,7 @@ PHPAPI php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsi
 		TSRMLS_DC);
 
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
-		char **textaddr, long *textaddrlen,
+		char **textaddr, zend_str_size_long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen,
 		struct timeval *timeout,
@@ -257,13 +257,13 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		TSRMLS_DC);
 
 PHPAPI int php_network_get_sock_name(php_socket_t sock, 
-		char **textaddr, long *textaddrlen,
+		char **textaddr, zend_str_size_long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen
 		TSRMLS_DC);
 	
 PHPAPI int php_network_get_peer_name(php_socket_t sock, 
-		char **textaddr, long *textaddrlen,
+		char **textaddr, zend_str_size_long *textaddrlen,
 		struct sockaddr **addr,
 		socklen_t *addrlen
 		TSRMLS_DC);
@@ -277,7 +277,7 @@ struct _php_netstream_data_t	{
 	char is_blocked;
 	struct timeval timeout;
 	char timeout_event;
-	size_t ownsize;
+	zend_str_size_size_t ownsize;
 };
 typedef struct _php_netstream_data_t php_netstream_data_t;
 PHPAPI extern php_stream_ops php_stream_socket_ops;
@@ -293,14 +293,14 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 		/* input address */
 		struct sockaddr *sa, socklen_t sl,
 		/* output readable address */
-		char **textaddr, long *textaddrlen,
+		char **textaddr, zend_str_size_long *textaddrlen,
 		/* output address */
 		struct sockaddr **addr,
 		socklen_t *addrlen
 		TSRMLS_DC);
 
 PHPAPI int php_network_parse_network_address_with_port(const char *addr,
-		long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC);
+		zend_str_size_long addrlen, struct sockaddr *sa, socklen_t *sl TSRMLS_DC);
 END_EXTERN_C()
 
 #define php_stream_sock_open_from_socket(socket, persistent)	_php_stream_sock_open_from_socket((socket), (persistent) STREAMS_CC TSRMLS_CC)

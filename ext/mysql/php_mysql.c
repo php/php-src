@@ -296,7 +296,7 @@ static const zend_function_entry mysql_functions[] = {
 #ifdef MYSQL_HAS_SET_CHARSET
 	PHP_FE(mysql_set_charset,							arginfo_mysql_set_charset)
 #endif
-	/* for downwards compatability */
+	/* for downwards compatibility */
 	PHP_DEP_FALIAS(mysql,				mysql_db_query,		arginfo_mysql_db_query)
 	PHP_DEP_FALIAS(mysql_fieldname,		mysql_field_name,	arginfo_mysql_field_name)
 	PHP_DEP_FALIAS(mysql_fieldtable,	mysql_field_table,	arginfo_mysql_field_seek)
@@ -1922,7 +1922,7 @@ PHP_FUNCTION(mysql_result)
 
 /*
 johannes TODO:
-Do 2 zend_parse_paramters calls instead of type "z" and switch below
+Do 2 zend_parse_parameters calls instead of type "z" and switch below
 Q: String or long first?
 */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &result, &row, &field) == FAILURE) {

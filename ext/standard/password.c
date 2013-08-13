@@ -87,7 +87,7 @@ static zend_bool php_password_salt_to64(const char *str, const size_t str_len, c
 	if ((int) str_len < 0) {
 		return FAILURE;
 	}
-	buffer = php_base64_encode((unsigned char*) str, (int) str_len, (int*) &ret_len);
+	buffer = php_base64_encode((unsigned char*) str, str_len, &ret_len);
 	if (ret_len < out_len) {
 		/* Too short of an encoded string generated */
 		efree(buffer);
@@ -354,12 +354,12 @@ PHP_FUNCTION(password_hash)
 
 	if (options && zend_symtable_find(options, "salt", 5, (void**) &option_buffer) == SUCCESS) {
 		char *buffer;
-		int buffer_len_int = 0;
+		zend_str_size_int buffer_len_int = 0;
 		size_t buffer_len;
 		switch (Z_TYPE_PP(option_buffer)) {
 			case IS_STRING:
-				buffer = estrndup(Z_STRVAL_PP(option_buffer), Z_STRLEN_PP(option_buffer));
-				buffer_len_int = Z_STRLEN_PP(option_buffer);
+				buffer = estrndup(Z_STRVAL_PP(option_buffer), Z_STRSIZE_PP(option_buffer));
+				buffer_len_int = Z_STRSIZE_PP(option_buffer);
 				break;
 			case IS_LONG:
 			case IS_DOUBLE:
@@ -368,8 +368,8 @@ PHP_FUNCTION(password_hash)
 				MAKE_COPY_ZVAL(option_buffer, &cast_option_buffer);
 				convert_to_string(&cast_option_buffer);
 				if (Z_TYPE(cast_option_buffer) == IS_STRING) {
-					buffer = estrndup(Z_STRVAL(cast_option_buffer), Z_STRLEN(cast_option_buffer));
-					buffer_len_int = Z_STRLEN(cast_option_buffer);
+					buffer = estrndup(Z_STRVAL(cast_option_buffer), Z_STRSIZE(cast_option_buffer));
+					buffer_len_int = Z_STRSIZE(cast_option_buffer);
 					zval_dtor(&cast_option_buffer);
 					break;
 				}

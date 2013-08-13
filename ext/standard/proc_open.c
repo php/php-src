@@ -81,7 +81,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 	char **ep;
 #endif
 	char *p;
-	uint string_length, cnt, l, sizeenv=0, el_len;
+	zend_str_size string_length, cnt, l, sizeenv=0, el_len;
 	ulong num_key;
 	HashTable *target_hash;
 	HashPosition pos;
@@ -113,7 +113,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 			zend_hash_move_forward_ex(target_hash, &pos)) {
 
 		convert_to_string_ex(element);
-		el_len = Z_STRLEN_PP(element);
+		el_len = Z_STRSIZE_PP(element);
 		if (el_len == 0) {
 			continue;
 		}
@@ -140,7 +140,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 			zend_hash_move_forward_ex(target_hash, &pos)) {
 
 		convert_to_string_ex(element);
-		el_len = Z_STRLEN_PP(element);
+		el_len = Z_STRSIZE_PP(element);
 
 		if (el_len == 0) {
 			continue;
@@ -172,7 +172,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 				p += el_len + 1;
 				break;
-			case HASH_KEY_NON_EXISTANT:
+			case HASH_KEY_NON_EXISTENT:
 				break;
 		}
 	}
@@ -430,7 +430,7 @@ struct php_proc_open_descriptor_item {
 PHP_FUNCTION(proc_open)
 {
 	char *command, *cwd=NULL;
-	int command_len, cwd_len = 0;
+	zend_str_size command_len, cwd_len = 0;
 	zval *descriptorspec;
 	zval *pipes;
 	zval *environment = NULL;
@@ -471,7 +471,7 @@ PHP_FUNCTION(proc_open)
 	php_file_descriptor_t slave_pty = -1;
 #endif
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "saz|s!a!a!", &command,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Saz|S!a!a!", &command,
 				&command_len, &descriptorspec, &pipes, &cwd, &cwd_len, &environment,
 				&other_options) == FAILURE) {
 		RETURN_FALSE;
@@ -602,7 +602,7 @@ PHP_FUNCTION(proc_open)
 #endif
 				descriptors[ndesc].mode_flags = descriptors[ndesc].mode & DESC_PARENT_MODE_WRITE ? O_WRONLY : O_RDONLY;
 #ifdef PHP_WIN32
-				if (Z_STRLEN_PP(zmode) >= 2 && Z_STRVAL_PP(zmode)[1] == 'b')
+				if (Z_STRSIZE_PP(zmode) >= 2 && Z_STRVAL_PP(zmode)[1] == 'b')
 					descriptors[ndesc].mode_flags |= O_BINARY;
 #endif
 

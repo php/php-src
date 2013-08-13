@@ -909,7 +909,6 @@ default_socket_timeout = 60
 ;extension=php_tidy.dll
 ;extension=php_xmlrpc.dll
 ;extension=php_xsl.dll
-;extension=php_zip.dll
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
@@ -1480,7 +1479,7 @@ session.gc_maxlifetime = 1440
 ;       collection through a shell script, cron entry, or some other method.
 ;       For example, the following script would is the equivalent of
 ;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
-;          find /path/to/sessions -cmin +24 | xargs rm
+;          find /path/to/sessions -cmin +24 -type f | xargs rm
 
 ; PHP 4.2 and less have an undocumented feature/bug that allows you to
 ; to initialize a session variable in the global scope.
@@ -1642,7 +1641,7 @@ mssql.min_error_severity = 10
 mssql.min_message_severity = 10
 
 ; Compatibility mode with old versions of PHP 3.0.
-mssql.compatability_mode = Off
+mssql.compatibility_mode = Off
 
 ; Connect timeout
 ;mssql.connect_timeout = 5
@@ -1957,6 +1956,11 @@ ldap.max_links = -1
 ; Protect the shared memory from unexpected writing during script execution.
 ; Useful for internal debugging only.
 ;opcache.protect_memory=0
+
+[curl]
+; A default value for the CURLOPT_CAINFO option. This is required to be an
+; absolute path.
+;curl.cainfo =
 
 ; Local Variables:
 ; tab-width: 4

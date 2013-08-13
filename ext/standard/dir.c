@@ -214,12 +214,12 @@ PHP_MINIT_FUNCTION(dir)
 static void _php_do_opendir(INTERNAL_FUNCTION_PARAMETERS, int createobject)
 {
 	char *dirname;
-	int dir_len;
+	zend_str_size dir_len;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 	php_stream *dirp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|r", &dirname, &dir_len, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|r", &dirname, &dir_len, &zcontext) == FAILURE) {
 		RETURN_NULL();
 	}
 
@@ -292,9 +292,10 @@ PHP_FUNCTION(closedir)
 PHP_FUNCTION(chroot)
 {
 	char *str;
-	int ret, str_len;
+	int ret;
+	zend_str_size str_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 	
@@ -323,9 +324,10 @@ PHP_FUNCTION(chroot)
 PHP_FUNCTION(chdir)
 {
 	char *str;
-	int ret, str_len;
+	int ret;
+	zend_str_size str_len;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P", &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -422,21 +424,21 @@ PHP_NAMED_FUNCTION(php_if_readdir)
    Find pathnames matching a pattern */
 PHP_FUNCTION(glob)
 {
-	int cwd_skip = 0;
+	zend_str_size_int cwd_skip = 0;
 #ifdef ZTS
 	char cwd[MAXPATHLEN];
 	char work_pattern[MAXPATHLEN];
 	char *result;
 #endif
 	char *pattern = NULL;
-	int pattern_len;
+	zend_str_size pattern_len;
 	long flags = 0;
 	glob_t globbuf;
 	int n;
 	int ret;
 	zend_bool basedir_limit = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|l", &pattern, &pattern_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|l", &pattern, &pattern_len, &flags) == FAILURE) {
 		return;
 	}
 
@@ -545,14 +547,14 @@ no_results:
 PHP_FUNCTION(scandir)
 {
 	char *dirn;
-	int dirn_len;
+	zend_str_size dirn_len;
 	long flags = 0;
 	char **namelist;
 	int n, i;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|lr", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|lr", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 

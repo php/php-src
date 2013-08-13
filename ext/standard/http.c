@@ -26,15 +26,16 @@
 
 /* {{{ php_url_encode_hash */
 PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
-				const char *num_prefix, int num_prefix_len,
-				const char *key_prefix, int key_prefix_len,
-				const char *key_suffix, int key_suffix_len,
+				const char *num_prefix, zend_str_size_int num_prefix_len,
+				const char *key_prefix, zend_str_size_int key_prefix_len,
+				const char *key_suffix, zend_str_size_int key_suffix_len,
 			  zval *type, char *arg_sep, int enc_type TSRMLS_DC)
 {
 	char *key = NULL;
 	char *ekey, *newprefix, *p;
-	int arg_sep_len, ekey_len, key_type, newprefix_len;
-	uint key_len;
+	zend_str_size_int arg_sep_len, ekey_len, newprefix_len;
+	int key_type;
+	zend_str_size_uint key_len;
 	ulong idx;
 	zval **zdata = NULL, *copyzval;
 
@@ -56,7 +57,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 	arg_sep_len = strlen(arg_sep);
 
 	for (zend_hash_internal_pointer_reset(ht);
-		(key_type = zend_hash_get_current_key_ex(ht, &key, &key_len, &idx, 0, NULL)) != HASH_KEY_NON_EXISTANT;
+		(key_type = zend_hash_get_current_key_ex(ht, &key, &key_len, &idx, 0, NULL)) != HASH_KEY_NON_EXISTENT;
 		zend_hash_move_forward(ht)
 	) {
 		if (key_type == HASH_KEY_IS_STRING && key_len && key[key_len-1] == '\0') {
@@ -171,9 +172,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 			switch (Z_TYPE_PP(zdata)) {
 				case IS_STRING:
 					if (enc_type == PHP_QUERY_RFC3986) {
-						ekey = php_raw_url_encode(Z_STRVAL_PP(zdata), Z_STRLEN_PP(zdata), &ekey_len);
+						ekey = php_raw_url_encode(Z_STRVAL_PP(zdata), Z_STRSIZE_PP(zdata), &ekey_len);
 					} else {
-						ekey = php_url_encode(Z_STRVAL_PP(zdata), Z_STRLEN_PP(zdata), &ekey_len);						
+						ekey = php_url_encode(Z_STRVAL_PP(zdata), Z_STRSIZE_PP(zdata), &ekey_len);						
 					}
 					break;
 				case IS_LONG:
@@ -190,9 +191,9 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 					zval_copy_ctor(copyzval);
 					convert_to_string_ex(&copyzval);
 					if (enc_type == PHP_QUERY_RFC3986) {
-						ekey = php_raw_url_encode(Z_STRVAL_P(copyzval), Z_STRLEN_P(copyzval), &ekey_len);
+						ekey = php_raw_url_encode(Z_STRVAL_P(copyzval), Z_STRSIZE_P(copyzval), &ekey_len);
 					} else {
-						ekey = php_url_encode(Z_STRVAL_P(copyzval), Z_STRLEN_P(copyzval), &ekey_len);
+						ekey = php_url_encode(Z_STRVAL_P(copyzval), Z_STRSIZE_P(copyzval), &ekey_len);
 					}
 					zval_ptr_dtor(&copyzval);
 			}

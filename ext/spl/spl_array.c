@@ -318,9 +318,9 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 	switch(Z_TYPE_P(offset)) {
 	case IS_NULL:
 		Z_STRVAL_P(offset) = "";
-		Z_STRLEN_P(offset) = 0;
+		Z_STRSIZE_P(offset) = 0;
 	case IS_STRING:
-		if (zend_symtable_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &retval) == FAILURE) {
+		if (zend_symtable_find(ht, Z_STRVAL_P(offset), Z_STRSIZE_P(offset)+1, (void **) &retval) == FAILURE) {
 			switch (type) {
 				case BP_VAR_R:
 					zend_error(E_NOTICE, "Undefined index: %s", Z_STRVAL_P(offset));
@@ -333,7 +333,7 @@ static zval **spl_array_get_dimension_ptr_ptr(int check_inherited, zval *object,
 				case BP_VAR_W: {
 				    zval *value;
 				    ALLOC_INIT_ZVAL(value);
-				    zend_symtable_update(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void**)&value, sizeof(void*), (void **)&retval);
+				    zend_symtable_update(ht, Z_STRVAL_P(offset), Z_STRSIZE_P(offset)+1, (void**)&value, sizeof(void*), (void **)&retval);
 				}
 			}
 		}
@@ -463,7 +463,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 			return;
 		}
 		Z_ADDREF_P(value);
-		zend_symtable_update(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void**)&value, sizeof(void*), NULL);
+		zend_symtable_update(ht, Z_STRVAL_P(offset), Z_STRSIZE_P(offset)+1, (void**)&value, sizeof(void*), NULL);
 		return;
 	case IS_DOUBLE:
 	case IS_RESOURCE:
@@ -523,11 +523,11 @@ static void spl_array_unset_dimension_ex(int check_inherited, zval *object, zval
 			return;
 		}
 		if (ht == &EG(symbol_table)) {
-			if (zend_delete_global_variable(Z_STRVAL_P(offset), Z_STRLEN_P(offset) TSRMLS_CC)) {
+			if (zend_delete_global_variable(Z_STRVAL_P(offset), Z_STRSIZE_P(offset) TSRMLS_CC)) {
 				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 			}
 		} else {
-			if (zend_symtable_del(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1) == FAILURE) {
+			if (zend_symtable_del(ht, Z_STRVAL_P(offset), Z_STRSIZE_P(offset)+1) == FAILURE) {
 				zend_error(E_NOTICE,"Undefined index: %s", Z_STRVAL_P(offset));
 			} else {
 				spl_array_object *obj = intern;
@@ -613,7 +613,7 @@ static int spl_array_has_dimension_ex(int check_inherited, zval *object, zval *o
 		case IS_STRING:
 			{
 				HashTable *ht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
-				if (zend_symtable_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, (void **) &tmp) != FAILURE) {
+				if (zend_symtable_find(ht, Z_STRVAL_P(offset), Z_STRSIZE_P(offset)+1, (void **) &tmp) != FAILURE) {
 					switch (check_empty) {
 						case 0:
 							return Z_TYPE_PP(tmp) != IS_NULL;
@@ -795,7 +795,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp TSRMLS_DC) /*
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(obj TSRMLS_CC);
 	zval *tmp, *storage;
-	int name_len;
+	zend_str_size name_len;
 	char *zname;
 	zend_class_entry *base;
 
@@ -916,7 +916,7 @@ static int spl_array_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht TSRMLS_DC) /* {{{ */
 {
 	char *string_key;
-	uint string_length;
+	zend_str_size string_length;
 	ulong num_key;
 
 	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
@@ -1430,7 +1430,7 @@ SPL_METHOD(Array, count)
 	RETURN_LONG(count);
 } /* }}} */
 
-static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fname_len, int use_arg) /* {{{ */
+static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, zend_str_size_int fname_len, int use_arg) /* {{{ */
 {
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	HashTable *aht = spl_array_get_hash_table(intern, 0 TSRMLS_CC);
@@ -1646,7 +1646,7 @@ SPL_METHOD(Array, getChildren)
 			return;
 		}
 		if (instanceof_function(Z_OBJCE_PP(entry), Z_OBJCE_P(getThis()) TSRMLS_CC)) {
-			RETURN_ZVAL(*entry, 0, 0);
+			RETURN_ZVAL(*entry, 1, 0);
 		}
 	}
 
@@ -1722,13 +1722,13 @@ SPL_METHOD(Array, unserialize)
 	spl_array_object *intern = (spl_array_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
 	char *buf;
-	int buf_len;
+	zend_str_size buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	zval *pmembers, *pflags = NULL;
 	long flags;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &buf, &buf_len) == FAILURE) {
 		return;
 	}
 

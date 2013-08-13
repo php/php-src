@@ -511,7 +511,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp TSRML
 	spl_ptr_llist_element *current = intern->llist->head, *next;
 	zval *tmp, zrv, *dllist_array;
 	char *pnstr;
-	int  pnlen;
+	zend_str_size_int pnlen;
 	int  i = 0;
 
 	*is_temp = 0;
@@ -1183,11 +1183,11 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	spl_dllist_object     *intern   = (spl_dllist_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
 	zval                  *flags, *elem;
 	char *buf;
-	int buf_len;
+	zend_str_size_int buf_len;
 	const unsigned char *p, *s;
 	php_unserialize_data_t var_hash;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &buf, &buf_len) == FAILURE) {
 		return;
 	}
 

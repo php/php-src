@@ -26,16 +26,16 @@
 # include <sys/socket.h>
 #endif
 
-typedef php_stream *(php_stream_transport_factory_func)(const char *proto, long protolen,
-		char *resourcename, long resourcenamelen,
+typedef php_stream *(php_stream_transport_factory_func)(const char *proto, size_t protolen,
+		const char *resourcename, size_t resourcenamelen,
 		const char *persistent_id, int options, int flags,
 		struct timeval *timeout,
 		php_stream_context *context STREAMS_DC TSRMLS_DC);
 typedef php_stream_transport_factory_func *php_stream_transport_factory;
 
 BEGIN_EXTERN_C()
-PHPAPI int php_stream_xport_register(char *protocol, php_stream_transport_factory factory TSRMLS_DC);
-PHPAPI int php_stream_xport_unregister(char *protocol TSRMLS_DC);
+PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory TSRMLS_DC);
+PHPAPI int php_stream_xport_unregister(const char *protocol TSRMLS_DC);
 
 #define STREAM_XPORT_CLIENT			0
 #define STREAM_XPORT_SERVER			1
@@ -46,7 +46,7 @@ PHPAPI int php_stream_xport_unregister(char *protocol TSRMLS_DC);
 #define STREAM_XPORT_CONNECT_ASYNC	16
 
 /* Open a client or server socket connection */
-PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int options,
+PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, int options,
 		int flags, const char *persistent_id,
 		struct timeval *timeout,
 		php_stream_context *context,
@@ -59,13 +59,13 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, long namelen, int 
 
 /* Bind the stream to a local address */
 PHPAPI int php_stream_xport_bind(php_stream *stream,
-		const char *name, long namelen,
+		const char *name, size_t namelen,
 		char **error_text
 		TSRMLS_DC);
 
 /* Connect to a remote address */
 PHPAPI int php_stream_xport_connect(php_stream *stream,
-		const char *name, long namelen,
+		const char *name, size_t namelen,
 		int asynchronous,
 		struct timeval *timeout,
 		char **error_text,
@@ -81,7 +81,7 @@ PHPAPI int php_stream_xport_listen(php_stream *stream,
 /* Get the next client and their address as a string, or the underlying address
  * structure.  You must efree either of these if you request them */
 PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
-		char **textaddr, int *textaddrlen,
+		char **textaddr, zend_str_size_int *textaddrlen,
 		void **addr, socklen_t *addrlen,
 		struct timeval *timeout,
 		char **error_text
@@ -89,7 +89,7 @@ PHPAPI int php_stream_xport_accept(php_stream *stream, php_stream **client,
 
 /* Get the name of either the socket or it's peer */
 PHPAPI int php_stream_xport_get_name(php_stream *stream, int want_peer,
-		char **textaddr, int *textaddrlen,
+		char **textaddr, zend_str_size_int *textaddrlen,
 		void **addr, socklen_t *addrlen
 		TSRMLS_DC);
 
@@ -100,13 +100,13 @@ enum php_stream_xport_send_recv_flags {
 
 /* Similar to recv() system call; read data from the stream, optionally
  * peeking, optionally retrieving OOB data */
-PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, size_t buflen,
+PHPAPI int php_stream_xport_recvfrom(php_stream *stream, char *buf, zend_str_size_size_t buflen,
 		long flags, void **addr, socklen_t *addrlen,
-		char **textaddr, int *textaddrlen TSRMLS_DC);
+		char **textaddr, zend_str_size_int *textaddrlen TSRMLS_DC);
 
 /* Similar to send() system call; send data to the stream, optionally
  * sending it as OOB data */
-PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, size_t buflen,
+PHPAPI int php_stream_xport_sendto(php_stream *stream, const char *buf, zend_str_size_size_t buflen,
 		long flags, void *addr, socklen_t addrlen TSRMLS_DC);
 
 typedef enum {
@@ -141,13 +141,13 @@ typedef struct _php_stream_xport_param {
 
 	struct {
 		char *name;
-		long namelen;
+		size_t namelen;
 		int backlog;
 		struct timeval *timeout;
 		struct sockaddr *addr;
 		socklen_t addrlen;
 		char *buf;
-		size_t buflen;
+		zend_str_size_size_t buflen;
 		long flags;
 	} inputs;
 	struct {
@@ -156,7 +156,7 @@ typedef struct _php_stream_xport_param {
 		struct sockaddr *addr;
 		socklen_t addrlen;
 		char *textaddr;
-		long textaddrlen;
+		zend_str_size_long textaddrlen;
 
 		char *error_text;
 		int error_code;
