@@ -9,6 +9,7 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 session.save_handler=files
 session.save_path=
 session.name=PHPSESSID
+open_basedir=.
 --FILE--
 <?php
 
@@ -24,7 +25,7 @@ $directory = dirname(__FILE__);
 $sessions = ($directory."/sessions");
 
 chdir($directory);
-ini_set('open_basedir', '.');
+
 // Delete the existing directory
 if (file_exists($sessions) === TRUE) {
 	@rmdir($sessions);

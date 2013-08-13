@@ -10,7 +10,7 @@ if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 ?>
 --FILE--
 <?php
-system('cd 1:\\non_existent; dir nonexistent');
+system('cd 1:\\non_existant; dir nonexistant');
 ?>
 --EXPECT--
 The system cannot find the drive specified.

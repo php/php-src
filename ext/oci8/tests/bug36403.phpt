@@ -3,9 +3,8 @@ Bug #36403 (oci_execute no longer supports OCI_DESCRIBE_ONLY)
 --SKIPIF--
 <?php
 if (!extension_loaded('oci8')) die ("skip no oci8 extension"); 
-preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
-if (isset($matches[0]) && $matches[0] < 10) {
-    die("skip test expected to work only with Oracle 10g or greater version of client");
+if (preg_match('/^1[01]\./', oci_client_version()) != 1) {
+    die("skip expected output only valid with Oracle 10g or greater version of client");
 }
 ?>
 --FILE--

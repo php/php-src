@@ -16,7 +16,7 @@
  * @since PHP 5.1.2
  *
  * This container allows to store objects uniquly without the need to compare
- * them one by one. This is only possible internally. The code representation
+ * them one by one. This is only possible internally. The code represenation
  * here therefore has a complexity of O(n) while the actual implementation has
  * complexity O(1).
  */

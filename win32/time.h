@@ -50,6 +50,4 @@ PHPAPI extern int setitimer(int which, const struct itimerval *value,
 
 PHPAPI int nanosleep( const struct timespec * rqtp, struct timespec * rmtp );
 
-PHPAPI int usleep(unsigned int useconds);
-
 #endif

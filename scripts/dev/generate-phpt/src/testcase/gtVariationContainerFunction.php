@@ -23,7 +23,7 @@ class gtVariationContainerFunction extends gtVariationContainer {
   
   
   /**
-   * constructs all possible variation testcases in array $this->variationTests
+   * Constucts all possible variation testcases in array $this->variationTests
    *
    */
   public function constructAll() {

@@ -1396,7 +1396,7 @@ PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb)
 }
 /* }}} */
 
-/* {{{ php_parse_date: Backwards compatibility function */
+/* {{{ php_parse_date: Backwards compability function */
 PHPAPI signed long php_parse_date(char *string, signed long *now)
 {
 	timelib_time *parsed_time;
@@ -1678,13 +1678,6 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 			break;
 		}
 	}
-#if defined(PHP_WIN32) && _MSC_VER >= 1700
-	/* VS2012 strftime() returns number of characters, not bytes.
-		See VC++11 bug id 766205. */
-	if (real_len > 0) {
-		real_len = strlen(buf);
-	}
-#endif
 
 	timelib_time_dtor(ts);
 	if (!gmt) {

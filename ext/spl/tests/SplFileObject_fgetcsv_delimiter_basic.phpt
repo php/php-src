@@ -1,5 +1,5 @@
 --TEST--
-SplFileObject::fgetcsv with alternative delimiter
+SplFileObject::fgetcsv with alternative delimeter
 --FILE--
 <?php
 $fp = fopen('SplFileObject__fgetcsv.csv', 'w+');

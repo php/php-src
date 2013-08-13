@@ -1,0 +1,39 @@
+Between PHP 4.0.6 and 4.1.0, the Zend module struct changed in a way
+that broke both source and binary compatibility.  If you are
+maintaining a third party extension, here's how to update it:
+
+If this was your old module entry:
+
+zend_module_entry foo_module_entry = {
+    "foo",                /* extension name */
+    foo_functions,        /* extension function list */
+    NULL,                 /* extension-wide startup function */
+    NULL,                 /* extension-wide shutdown function */
+    PHP_RINIT(foo),       /* per-request startup function */
+    PHP_RSHUTDOWN(foo),   /* per-request shutdown function */
+    PHP_MINFO(foo),       /* information function */
+    STANDARD_MODULE_PROPERTIES
+};
+
+Here's how it should look if you want your code to build with PHP
+4.1.0 and up:
+
+zend_module_entry foo_module_entry = {
+#if ZEND_MODULE_API_NO >= 20010901
+    STANDARD_MODULE_HEADER,
+#endif
+    "foo",                /* extension name */
+    foo_functions,        /* extension function list */
+    NULL,                 /* extension-wide startup function */
+    NULL,                 /* extension-wide shutdown function */
+    PHP_RINIT(foo),       /* per-request startup function */
+    PHP_RSHUTDOWN(foo),   /* per-request shutdown function */
+    PHP_MINFO(foo),       /* information function */
+#if ZEND_MODULE_API_NO >= 20010901
+    FOO_VERSION,          /* extension version number (string) */
+#endif
+    STANDARD_MODULE_PROPERTIES
+};
+
+If you don't care about source compatibility with earlier PHP releases
+than 4.1.0, you can drop the #if/#endif lines.

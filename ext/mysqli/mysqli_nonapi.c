@@ -562,7 +562,7 @@ PHP_FUNCTION(mysqli_query)
 	MY_MYSQL			*mysql;
 	zval				*mysql_link;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	MYSQL_RES 			*result = NULL;
+	MYSQL_RES 			*result;
 	char				*query = NULL;
 	int 				query_len;
 	long 				resultmode = MYSQLI_STORE_RESULT;
@@ -833,7 +833,7 @@ PHP_FUNCTION(mysqli_reap_async_query)
 	MY_MYSQL		*mysql;
 	zval			*mysql_link;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	MYSQL_RES 			*result = NULL;
+	MYSQL_RES 			*result;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;

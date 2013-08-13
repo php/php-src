@@ -64,8 +64,6 @@
 # endif
 #endif
 
-#include <stddef.h>
-
 #include "sockaddr_conv.h"
 #include "multicast.h"
 #include "sendrecvmsg.h"
@@ -346,7 +344,7 @@ const zend_function_entry sockets_functions[] = {
 	PHP_FE(socket_recvmsg,			arginfo_socket_recvmsg)
 	PHP_FE(socket_cmsg_space,		arginfo_socket_cmsg_space)
 
-	/* for downwards compatibility */
+	/* for downwards compatability */
 	PHP_FALIAS(socket_getopt, socket_get_option, arginfo_socket_get_option)
 	PHP_FALIAS(socket_setopt, socket_set_option, arginfo_socket_set_option)
 
@@ -1481,7 +1479,7 @@ PHP_FUNCTION(socket_strerror)
 PHP_FUNCTION(socket_bind)
 {
 	zval					*arg1;
-	php_sockaddr_storage	sa_storage = {0};
+	php_sockaddr_storage	sa_storage;
 	struct sockaddr			*sock_type = (struct sockaddr*) &sa_storage;
 	php_socket				*php_sock;
 	char					*addr;
@@ -1499,25 +1497,18 @@ PHP_FUNCTION(socket_bind)
 		case AF_UNIX:
 			{
 				struct sockaddr_un *sa = (struct sockaddr_un *) sock_type;
-
+				memset(sa, 0, sizeof(sa_storage));
 				sa->sun_family = AF_UNIX;
-
-				if (addr_len >= sizeof(sa->sun_path)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING,
-							"Invalid path: too long (maximum size is %d)",
-							(int)sizeof(sa->sun_path) - 1);
-					RETURN_FALSE;
-				}
-				memcpy(&sa->sun_path, addr, addr_len);
-
-				retval = bind(php_sock->bsd_socket, (struct sockaddr *) sa,
-						offsetof(struct sockaddr_un, sun_path) + addr_len);
+				snprintf(sa->sun_path, 108, "%s", addr);
+				retval = bind(php_sock->bsd_socket, (struct sockaddr *) sa, SUN_LEN(sa));
 				break;
 			}
 
 		case AF_INET:
 			{
 				struct sockaddr_in *sa = (struct sockaddr_in *) sock_type;
+
+				memset(sa, 0, sizeof(sa_storage)); /* Apparently, Mac OSX needs this */
 
 				sa->sin_family = AF_INET;
 				sa->sin_port = htons((unsigned short) port);
@@ -1533,6 +1524,8 @@ PHP_FUNCTION(socket_bind)
 		case AF_INET6:
 			{
 				struct sockaddr_in6 *sa = (struct sockaddr_in6 *) sock_type;
+
+				memset(sa, 0, sizeof(sa_storage)); /* Apparently, Mac OSX needs this */
 
 				sa->sin6_family = AF_INET6;
 				sa->sin6_port = htons((unsigned short) port);
