@@ -1180,7 +1180,7 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const char * query, unsigned int query_len TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, send_query);
-	enum_func_status ret = FAIL;
+	enum_func_status ret;
 	DBG_ENTER("mysqlnd_conn_data::send_query");
 	DBG_INF_FMT("conn=%llu query=%s", conn->thread_id, query);
 
@@ -1225,7 +1225,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, reap_query)(MYSQLND_CONN_DATA * conn TSRMLS_DC
 
 #include "php_network.h"
 
-/* {{{ mysqlnd_stream_array_to_fd_set */
 MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array TSRMLS_DC)
 {
 	int cnt = 0;
@@ -1256,17 +1255,14 @@ MYSQLND ** mysqlnd_stream_array_check_for_readiness(MYSQLND ** conn_array TSRMLS
 	}
 	return ret;
 }
-/* }}} */
 
 
-/* {{{ mysqlnd_stream_array_to_fd_set */
+/* {{{ stream_select mysqlnd_stream_array_to_fd_set functions */
 static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, php_socket_t * max_fd TSRMLS_DC)
 {
 	php_socket_t this_fd;
-	php_stream *stream = NULL;
-	unsigned int cnt = 0;
+	int cnt = 0;
 	MYSQLND **p = conn_array;
-	DBG_ENTER("mysqlnd_stream_array_to_fd_set");
 
 	while (*p) {
 		/* get the fd.
@@ -1274,9 +1270,7 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 		 * when casting.  It is only used here so that the buffered data warning
 		 * is not displayed.
 		 * */
-		stream = (*p)->data->net->data->m.get_stream((*p)->data->net TSRMLS_CC);
-		DBG_INF_FMT("conn=%llu stream=%p", (*p)->data->thread_id, stream);
-		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+		if (SUCCESS == php_stream_cast((*p)->data->net->data->m.get_stream((*p)->data->net TSRMLS_CC), PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && this_fd >= 0) {
 
 			PHP_SAFE_FD_SET(this_fd, fds);
@@ -1288,25 +1282,20 @@ static int mysqlnd_stream_array_to_fd_set(MYSQLND ** conn_array, fd_set * fds, p
 		}
 		p++;
 	}
-	DBG_RETURN(cnt ? 1 : 0);
+	return cnt ? 1 : 0;
 }
-/* }}} */
 
-
-/* {{{ mysqlnd_stream_array_from_fd_set */
 static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds TSRMLS_DC)
 {
 	php_socket_t this_fd;
-	php_stream *stream = NULL;
 	int ret = 0;
 	zend_bool disproportion = FALSE;
+
+
 	MYSQLND **fwd = conn_array, **bckwd = conn_array;
-	DBG_ENTER("mysqlnd_stream_array_from_fd_set");
 
 	while (*fwd) {
-		stream = (*fwd)->data->net->data->m.get_stream((*fwd)->data->net TSRMLS_CC);
-		DBG_INF_FMT("conn=%llu stream=%p", (*fwd)->data->thread_id, stream);
-		if (stream != NULL && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
+		if (SUCCESS == php_stream_cast((*fwd)->data->net->data->m.get_stream((*fwd)->data->net TSRMLS_CC), PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL,
 										(void*)&this_fd, 1) && this_fd >= 0) {
 			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
 				if (disproportion) {
@@ -1323,7 +1312,7 @@ static int mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds 
 	}
 	*bckwd = NULL;/* NULL-terminate the list */
 
-	DBG_RETURN(ret);
+	return ret;
 }
 /* }}} */
 
@@ -1598,7 +1587,7 @@ static ulong
 MYSQLND_METHOD(mysqlnd_conn_data, escape_string)(MYSQLND_CONN_DATA * const conn, char * newstr, const char * escapestr, size_t escapestr_len TSRMLS_DC)
 {
 	size_t this_func = STRUCT_OFFSET(struct st_mysqlnd_conn_data_methods, escape_string);
-	ulong ret = FAIL;
+	ulong ret;
 	DBG_ENTER("mysqlnd_conn_data::escape_string");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 

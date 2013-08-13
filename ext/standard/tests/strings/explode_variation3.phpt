@@ -24,7 +24,7 @@ class sample  {
 //getting the resource
 $file_handle = fopen(__FILE__, "r");
 
-// array with different values for $delimiter
+// array with different values for $delimeter
 $limits =  array (
 
 		  // integer values
@@ -70,11 +70,11 @@ $limits =  array (
 
 // loop through with each element of the $limits array to test explode() function
 $count = 1;
-$delimiter = " ";
+$delimeter = " ";
 $string = "piece1 piece2 piece3 piece4 piece5 piece6";
 foreach($limits as $limit) {
   echo "-- Iteration $count --\n";
-  var_dump( explode($delimiter, $string, $limit) );
+  var_dump( explode($delimeter, $string, $limit) );
   $count ++;
 }
 

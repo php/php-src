@@ -36,7 +36,7 @@ var_dump( lchown( $filename ) );
 // More than expected arguments
 var_dump( lchown( $filename, $uid, 'foobar' ) );
 
-// Non-existent filename
+// Non-existant filename
 var_dump( lchown( 'foobar_lchown.txt', $uid ) );
 
 // Wrong argument types

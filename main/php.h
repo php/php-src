@@ -180,8 +180,6 @@ typedef unsigned int socklen_t;
 # endif
 #endif
 
-#include "php_stdint.h"
-
 #include "zend_hash.h"
 #include "zend_alloc.h"
 #include "zend_stack.h"

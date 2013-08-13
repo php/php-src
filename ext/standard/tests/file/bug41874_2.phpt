@@ -10,7 +10,7 @@ if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 ?>
 --FILE--
 <?php
-$result = exec('cd 1:\\non_existent; dir nonexistent');
+$result = exec('cd 1:\\non_existant; dir nonexistant');
 echo "$result";
 ?>
 --EXPECT--

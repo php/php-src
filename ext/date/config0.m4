@@ -22,5 +22,4 @@ cat > $ext_builddir/lib/timelib_config.h <<EOF
 #else
 # include <php_config.h>
 #endif
-#include <php_stdint.h>
 EOF

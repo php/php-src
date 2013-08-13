@@ -1443,7 +1443,7 @@ static PHP_FUNCTION(tidy_get_config)
 /* }}} */
 
 /* {{{ proto int tidy_get_status()
-   Get status of specified document. */
+   Get status of specfied document. */
 static PHP_FUNCTION(tidy_get_status)
 {
 	TIDY_FETCH_OBJECT;

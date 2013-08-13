@@ -187,6 +187,7 @@ PS_CREATE_SID_FUNC(user)
 {
 	/* maintain backwards compatibility */
 	if (PSF(create_sid) != NULL) {
+		zval *args[1];
 		char *id = NULL;
 		STDVARS;
 

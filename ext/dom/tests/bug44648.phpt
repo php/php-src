@@ -1,5 +1,5 @@
 --TEST--
-Bug #44648 (Attribute names not checked for well formedness)
+Bug #44648 (Attribute names not checked for wellformedness)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

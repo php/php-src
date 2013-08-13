@@ -8,7 +8,7 @@ Test uasort() function : object functionality - sort diff. objects
 *
 
 /*
- * This testcase tests uasort() functionality with different objects
+ * This testcase tests uasort() functionality with differnt objects
  * Objects of different classes: 
  *  simple class,
  *  child class,
