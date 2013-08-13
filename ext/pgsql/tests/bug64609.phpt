@@ -25,6 +25,6 @@ var_dump($converted);
 ?>
 --EXPECT--
 array(1) {
-  [""a""]=>
-  string(5) "E'ok'"
+  ["a"]=>
+  string(4) "'ok'"
 }

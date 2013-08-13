@@ -5259,7 +5259,7 @@ ZEND_METHOD(reflection_extension, getVersion)
 /* }}} */
 
 /* {{{ proto public ReflectionFunction[] ReflectionExtension::getFunctions()
-   Returns an array of this extension's functions */
+   Returns an array of this extension's fuctions */
 ZEND_METHOD(reflection_extension, getFunctions)
 {
 	reflection_object *intern;

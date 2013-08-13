@@ -16,9 +16,10 @@ else {
 	oci_connect($user, $password);
 }
 	
+echo "Done\n";
+
 oci_internal_debug(false);
 
 ?>
-===DONE===
---EXPECT--
-===DONE===
+--EXPECTREGEX--
+^OCI8 DEBUG: .*Done$

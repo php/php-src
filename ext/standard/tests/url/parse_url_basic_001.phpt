@@ -743,13 +743,6 @@ echo "Done";
   string(1) ":"
 }
 
---> http://::#: array(2) {
-  ["scheme"]=>
-  string(4) "http"
-  ["host"]=>
-  string(1) ":"
-}
-
 --> x://::6.5: array(3) {
   ["scheme"]=>
   string(1) "x"
@@ -862,8 +855,6 @@ echo "Done";
 --> http://:/: bool(false)
 
 --> http://?: bool(false)
-
---> http://#: bool(false)
 
 --> http://?:: bool(false)
 

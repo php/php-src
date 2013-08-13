@@ -58,7 +58,6 @@ session_set_save_handler($handler);
 
 session_start();
 
-$_SESSION['bar'] = 'hello';
 session_write_close();
 session_unset();
 
@@ -72,10 +71,8 @@ array(1) {
 }
 int(4)
 string(%d) "%s"
-array(2) {
+array(1) {
   ["foo"]=>
-  string(5) "hello"
-  ["bar"]=>
   string(5) "hello"
 }
 string(3) "hai"

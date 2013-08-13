@@ -795,7 +795,7 @@ PHP_FUNCTION(pcntl_exec)
 					snprintf(key, 100, "%ld", key_num);
 					key_length = strlen(key);
 					break;
-				case HASH_KEY_NON_EXISTENT:
+				case HASH_KEY_NON_EXISTANT:
 					pair--;
 					continue;
 			}

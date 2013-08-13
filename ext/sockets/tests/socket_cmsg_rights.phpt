@@ -84,7 +84,6 @@ Array
                             [0] => Resource id #%d
                             [1] => Resource id #%d
                             [2] => Resource id #%d
-                            [3] => Resource id #%d
                         )
 
                 )

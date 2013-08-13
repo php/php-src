@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Stig Sï¿½ther Bakken <ssb@php.net>                            |
+   |          Stig Sæther Bakken <ssb@php.net>                            |
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
  */
@@ -23,6 +23,11 @@
 /* Synced with php 3.0 revision 1.193 1999-06-16 [ssb] */
 
 #include <stdio.h>
+#ifdef PHP_WIN32
+# include "win32/php_stdint.h"
+#else
+# include <stdint.h>
+#endif
 #include "php.h"
 #include "php_rand.h"
 #include "php_string.h"
@@ -275,7 +280,6 @@ PHP_FUNCTION(hex2bin)
 	result = php_hex2bin((unsigned char *)data, datalen, &newlen);
 
 	if (!result) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Input string must be hexadecimal string");
 		RETURN_FALSE;
 	}
 
@@ -1577,7 +1581,7 @@ PHP_FUNCTION(pathinfo)
 		const char *p;
 		int idx;
 
-		/* Have we already looked up the basename? */
+		/* Have we alrady looked up the basename? */
 		if (!have_basename && !ret) {
 			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
 		}

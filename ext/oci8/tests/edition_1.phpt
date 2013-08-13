@@ -24,9 +24,6 @@ if (preg_match('/Release (1[1]\.2|12)\./', oci_server_version($c), $matches) !==
  * already 
  */
 
-$testuser     = 'testuser_attr_1';  // Used in conn_attr.inc
-$testpassword = 'testuser'; 
-
 require(dirname(__FILE__)."/conn_attr.inc");
 
 function select_fn($conn) {
@@ -42,7 +39,7 @@ function select_fn($conn) {
    select from both the editions and verify the contents. */
 
 set_edit_attr('MYEDITION');
-$conn = oci_connect($testuser,$testpassword,$dbase); 
+$conn = oci_connect('testuser','testuser',$dbase); 
 if ($conn === false) {
     $m = oci_error();
     die("Error:" . $m['message']);
@@ -64,7 +61,7 @@ select_fn($conn);
 
 // Create a different version of view_ed in MYEDITION1.
 set_edit_attr('MYEDITION1');
-$conn2 = oci_new_connect($testuser,$testpassword,$dbase); 
+$conn2 = oci_new_connect('testuser','testuser',$dbase); 
 $stmt = "create or replace editioning view view_ed as select name,age,job,salary from edit_tab";
 $s = oci_parse($conn2, $stmt);
 oci_execute($s);
@@ -90,58 +87,58 @@ The value of edition has been successfully set
 The value of current EDITION is MYEDITION
 array(3) {
   [0]=>
-  string(%d) "mike"
+  %unicode|string%(%d) "mike"
   [1]=>
-  string(%d) "30"
+  %unicode|string%(%d) "30"
   [2]=>
-  string(%d) "Senior engineer"
+  %unicode|string%(%d) "Senior engineer"
 }
 array(3) {
   [0]=>
-  string(%d) "juan"
+  %unicode|string%(%d) "juan"
   [1]=>
-  string(%d) "25"
+  %unicode|string%(%d) "25"
   [2]=>
-  string(%d) "engineer"
+  %unicode|string%(%d) "engineer"
 }
  The value of edition has been successfully set
 The value of current EDITION is MYEDITION1
 array(4) {
   [0]=>
-  string(%d) "mike"
+  %unicode|string%(%d) "mike"
   [1]=>
-  string(%d) "30"
+  %unicode|string%(%d) "30"
   [2]=>
-  string(%d) "Senior engineer"
+  %unicode|string%(%d) "Senior engineer"
   [3]=>
-  string(%d) "200"
+  %unicode|string%(%d) "200"
 }
 array(4) {
   [0]=>
-  string(%d) "juan"
+  %unicode|string%(%d) "juan"
   [1]=>
-  string(%d) "25"
+  %unicode|string%(%d) "25"
   [2]=>
-  string(%d) "engineer"
+  %unicode|string%(%d) "engineer"
   [3]=>
-  string(%d) "100"
+  %unicode|string%(%d) "100"
 }
 version of view_ed in MYEDITION 
 The value of current EDITION is MYEDITION
 array(3) {
   [0]=>
-  string(%d) "mike"
+  %unicode|string%(%d) "mike"
   [1]=>
-  string(%d) "30"
+  %unicode|string%(%d) "30"
   [2]=>
-  string(%d) "Senior engineer"
+  %unicode|string%(%d) "Senior engineer"
 }
 array(3) {
   [0]=>
-  string(%d) "juan"
+  %unicode|string%(%d) "juan"
   [1]=>
-  string(%d) "25"
+  %unicode|string%(%d) "25"
   [2]=>
-  string(%d) "engineer"
+  %unicode|string%(%d) "engineer"
 }
 Done
