@@ -8,11 +8,11 @@ PHP_ARG_ENABLE(mysqlnd, whether to enable mysqlnd,
 
 PHP_ARG_ENABLE(mysqlnd_compression_support, whether to disable compressed protocol support in mysqlnd,
 [  --disable-mysqlnd-compression-support
-                            Disable support for the MySQL compressed protocol in mysqlnd], yes, no)
+                          Disable support for the MySQL compressed protocol in mysqlnd], yes, no)
 
 if test -z "$PHP_ZLIB_DIR"; then
   PHP_ARG_WITH(zlib-dir, for the location of libz,
-  [  --with-zlib-dir[=DIR]       mysqlnd: Set the path to libz install prefix], no, no)
+  [  --with-zlib-dir[=DIR]     mysqlnd: Set the path to libz install prefix], no, no)
 fi
 
 dnl If some extension uses mysqlnd it will get compiled in PHP core
@@ -48,16 +48,4 @@ fi
 
 if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes" || test "$PHP_MYSQLI" != "no"; then
   PHP_ADD_BUILD_DIR([ext/mysqlnd], 1)
-
-  dnl This creates a file so it has to be after above macros
-  PHP_CHECK_TYPES([int8 uint8 int16 uint16 int32 uint32 uchar ulong int8_t uint8_t int16_t uint16_t int32_t uint32_t int64_t uint64_t], [
-    ext/mysqlnd/php_mysqlnd_config.h
-  ],[
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif
-  ])
 fi

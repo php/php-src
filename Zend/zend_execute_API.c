@@ -1055,7 +1055,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, zend_str_size_int name_lengt
 	}
 
 	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
-	 * (doesn't impact fuctionality of __autoload()
+	 * (doesn't impact functionality of __autoload()
 	*/
 	if (!use_autoload || zend_is_compiling(TSRMLS_C)) {
 		if (!key) {

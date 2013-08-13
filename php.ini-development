@@ -909,7 +909,6 @@ default_socket_timeout = 60
 ;extension=php_tidy.dll
 ;extension=php_xmlrpc.dll
 ;extension=php_xsl.dll
-;extension=php_zip.dll
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
@@ -1642,7 +1641,7 @@ mssql.min_error_severity = 10
 mssql.min_message_severity = 10
 
 ; Compatibility mode with old versions of PHP 3.0.
-mssql.compatability_mode = Off
+mssql.compatibility_mode = Off
 
 ; Connect timeout
 ;mssql.connect_timeout = 5

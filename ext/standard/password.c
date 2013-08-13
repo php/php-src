@@ -87,7 +87,7 @@ static zend_bool php_password_salt_to64(const char *str, const size_t str_len, c
 	if ((int) str_len < 0) {
 		return FAILURE;
 	}
-	buffer = php_base64_encode((unsigned char*) str, (int) str_len, (int*) &ret_len);
+	buffer = php_base64_encode((unsigned char*) str, str_len, &ret_len);
 	if (ret_len < out_len) {
 		/* Too short of an encoded string generated */
 		efree(buffer);
@@ -354,7 +354,7 @@ PHP_FUNCTION(password_hash)
 
 	if (options && zend_symtable_find(options, "salt", 5, (void**) &option_buffer) == SUCCESS) {
 		char *buffer;
-		int buffer_len_int = 0;
+		zend_str_size_int buffer_len_int = 0;
 		size_t buffer_len;
 		switch (Z_TYPE_PP(option_buffer)) {
 			case IS_STRING:

@@ -27,6 +27,7 @@
 #include "zend_operators.h"
 #ifdef PHP_WIN32
 #include "win95nt.h"
+#include "win32/php_stdint.h"
 #endif
 #include <sys/stat.h>
 
@@ -82,7 +83,7 @@ typedef struct {
 	char *post_data, *raw_post_data;
 	char *cookie_data;
 	long content_length;
-	uint post_data_length, raw_post_data_length;
+	int64_t post_data_length, raw_post_data_length;
 
 	char *path_translated;
 	char *request_uri;
@@ -119,7 +120,7 @@ typedef struct _sapi_globals_struct {
 	void *server_context;
 	sapi_request_info request_info;
 	sapi_headers_struct sapi_headers;
-	int read_post_bytes;
+	int64_t read_post_bytes;
 	unsigned char headers_sent;
 	struct stat global_stat;
 	char *default_mimetype;
@@ -165,7 +166,7 @@ END_EXTERN_C()
  
 typedef struct {
 	char *line; /* If you allocated this, you need to free it yourself */
-	uint line_len;
+	zend_str_size_uint line_len;
 	long response_code; /* long due to zend_parse_parameters compatibility */
 } sapi_header_line;
 
@@ -224,7 +225,7 @@ struct _sapi_module_struct {
 	int (*activate)(TSRMLS_D);
 	int (*deactivate)(TSRMLS_D);
 
-	int (*ub_write)(const char *str, unsigned int str_length TSRMLS_DC);
+	zend_str_size_int (*ub_write)(const char *str, zend_str_size_uint str_length TSRMLS_DC);
 	void (*flush)(void *server_context);
 	struct stat *(*get_stat)(TSRMLS_D);
 	char *(*getenv)(char *name, size_t name_len TSRMLS_DC);

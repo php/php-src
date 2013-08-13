@@ -366,7 +366,8 @@ static PHP_INI_MH(OnUpdateDisplayErrors)
  */
 static PHP_INI_DISP(display_errors_mode)
 {
-	int mode, tmp_value_length, cgi_or_cli;
+	int mode, cgi_or_cli;
+	zend_str_size_int tmp_value_length;
 	char *tmp_value;
 	TSRMLS_FETCH();
 
@@ -624,7 +625,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 		fd = VCWD_OPEN_MODE(PG(error_log), O_CREAT | O_APPEND | O_WRONLY, 0644);
 		if (fd != -1) {
 			char *tmp;
-			int len;
+			zend_str_size_int len;
 			char *error_time_str;
 
 			time(&error_time);
@@ -641,7 +642,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 #ifdef PHP_WIN32
 			php_flock(fd, 2);
 #endif
-			php_ignore_value(write(fd, tmp, len));
+			php_ignore_value(write(fd, tmp, len)); /* XXX rework on windows, write expects int*/
 			efree(tmp);
 			efree(error_time_str);
 			close(fd);
@@ -698,11 +699,11 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *buffer = NULL, *docref_buf = NULL, *target = NULL;
 	char *docref_target = "", *docref_root = "";
 	char *p;
-	int buffer_len = 0;
+	zend_str_size_int buffer_len = 0;
 	const char *space = "";
 	const char *class_name = "";
 	const char *function;
-	int origin_len;
+	zend_str_size_int origin_len;
 	char *origin;
 	char *message;
 	int is_function = 0;
@@ -783,7 +784,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 
 	/* no docref given but function is known (the default) */
 	if (!docref && is_function) {
-		int doclen;
+		zend_str_size_int doclen;
 		while (*function == '_') {
 			function++;
 		}
@@ -915,7 +916,7 @@ PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const 
 		php_error_docref2(NULL TSRMLS_CC, param1, param2, E_WARNING, "%s", strerror(errno));
 	} else {
 		char buf[PHP_WIN32_ERROR_MSG_BUFFER_SIZE + 1];
-		int buf_len;
+		zend_str_size_int buf_len;
 
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error, 0, buf, PHP_WIN32_ERROR_MSG_BUFFER_SIZE, NULL);
 		buf_len = strlen(buf);
@@ -941,7 +942,8 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 static void php_error_cb(int type, const char *error_filename, const zend_str_size_uint error_lineno, const char *format, va_list args)
 {
 	char *buffer;
-	int buffer_len, display;
+	zend_str_size_int buffer_len;
+	int display;
 	TSRMLS_FETCH();
 
 	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);

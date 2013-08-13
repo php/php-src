@@ -805,7 +805,7 @@ MYSQLND_METHOD(mysqlnd_net, consume_uneaten_data)(MYSQLND_NET * const net, enum 
 	/*
 	  Switch to non-blocking mode and try to consume something from
 	  the line, if possible, then continue. This saves us from looking for
-	  the actuall place where out-of-order packets have been sent.
+	  the actual place where out-of-order packets have been sent.
 	  If someone is completely sure that everything is fine, he can switch it
 	  off.
 	*/

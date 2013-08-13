@@ -1646,7 +1646,7 @@ SPL_METHOD(Array, getChildren)
 			return;
 		}
 		if (instanceof_function(Z_OBJCE_PP(entry), Z_OBJCE_P(getThis()) TSRMLS_CC)) {
-			RETURN_ZVAL(*entry, 0, 0);
+			RETURN_ZVAL(*entry, 1, 0);
 		}
 	}
 
