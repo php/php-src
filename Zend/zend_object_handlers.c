@@ -1525,7 +1525,7 @@ int zend_std_object_get_class_name(const zval *object, const char **class_name, 
 }
 /* }}} */
 
-ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC) /* {{{ */
+ZEND_API int zend_std_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC) /* {{{ */
 {
 	zval *retval;
 	zend_class_entry *ce;
@@ -1587,6 +1587,41 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 			}
 			ZVAL_DOUBLE(writeobj, 1);
 			return SUCCESS;
+		case IS_ARRAY:
+		    if (Z_OBJ_HT_P(readobj)->get_properties) {
+		        zend_object *zobj = zend_object_store_get_object(readobj TSRMLS_CC);
+		        
+		        if (zobj) {
+		            HashTable *properties = Z_OBJPROP_P(readobj);
+		            HashPosition position;
+		            zval **property;
+		            
+		            for (zend_hash_internal_pointer_reset_ex(properties, &position);
+		                zend_hash_get_current_data_ex(properties, (void**) &property, &position) == SUCCESS;
+		                zend_hash_move_forward_ex(properties, &position)) {
+		                char *mangled = NULL;
+		                uint  mlength;
+		                ulong idx;
+		                
+		                switch (zend_hash_get_current_key_ex(properties, &mangled, &mlength, &idx, 0, &position)) {
+		                    case HASH_KEY_IS_STRING: {
+		                        const char *cname;
+		                        const char *pname;
+		                        int plength;
+		                        
+		                        if (zend_unmangle_property_name_ex(mangled, mlength, &cname, &pname, &plength) == SUCCESS) {
+		                            if (zend_check_property_access(zobj, mangled, mlength TSRMLS_CC) != FAILURE) {
+		                                zend_hash_update(
+		                                    Z_ARRVAL_P(writeobj), pname, plength, (void**) &property, sizeof(zval*), NULL);
+		                            }
+		                        }
+		                    } break;
+		                }
+		            }
+		            return SUCCESS;
+		        }
+		    }
+		    return FAILURE;
 		default:
 			INIT_PZVAL(writeobj);
 			Z_TYPE_P(writeobj) = IS_NULL;
@@ -1646,7 +1681,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_object_get_class,				/* get_class_entry */
 	zend_std_object_get_class_name,			/* get_class_name */
 	zend_std_compare_objects,				/* compare_objects */
-	zend_std_cast_object_tostring,			/* cast_object */
+	zend_std_cast_object,			        /* cast_object */
 	NULL,									/* count_elements */
 	NULL,									/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
