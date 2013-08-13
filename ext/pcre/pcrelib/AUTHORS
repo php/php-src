@@ -8,8 +8,30 @@ Email domain:     cam.ac.uk
 University of Cambridge Computing Service,
 Cambridge, England.
 
-Copyright (c) 1997-2010 University of Cambridge
+Copyright (c) 1997-2012 University of Cambridge
 All rights reserved
+
+
+PCRE JUST-IN-TIME COMPILATION SUPPORT
+-------------------------------------
+
+Written by:       Zoltan Herczeg
+Email local part: hzmester
+Emain domain:     freemail.hu
+
+Copyright(c) 2010-2012 Zoltan Herczeg
+All rights reserved.
+
+
+STACK-LESS JUST-IN-TIME COMPILER
+--------------------------------
+
+Written by:       Zoltan Herczeg
+Email local part: hzmester
+Emain domain:     freemail.hu
+
+Copyright(c) 2009-2012 Zoltan Herczeg
+All rights reserved.
 
 
 THE C++ WRAPPER LIBRARY
@@ -17,7 +39,7 @@ THE C++ WRAPPER LIBRARY
 
 Written by:       Google Inc.
 
-Copyright (c) 2007-2010 Google Inc
+Copyright (c) 2007-2012 Google Inc
 All rights reserved
 
 ####

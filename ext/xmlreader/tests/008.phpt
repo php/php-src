@@ -23,7 +23,7 @@ $xmlstring = '<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 </LIST>';
 
 $dtdfile = rawurlencode(dirname(__FILE__)) . '/dtdexample.dtd'; 
-$file = dirname(__FILE__) . '/__008.xml';
+$file = dirname(__FILE__) . '/_008.xml';
 file_put_contents($file, $xmlstring);
 
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,10 +21,12 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <time.h>
 #include "php.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/basic_functions.h"
+#include "ext/date/php_date.h"
 
 #if HAVE_SYSEXITS_H
 #include <sysexits.h>
@@ -246,8 +248,16 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	return val;	\
 
 	if (mail_log && *mail_log) {
-		char *tmp;
-		int l = spprintf(&tmp, 0, "mail() on [%s:%d]: To: %s -- Headers: %s\n", zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), to, hdr ? hdr : "");
+		char *tmp, *date_str;
+		time_t curtime;
+		int l;
+
+		time(&curtime);
+		date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1 TSRMLS_CC);
+
+		l = spprintf(&tmp, 0, "[%s] mail() on [%s:%d]: To: %s -- Headers: %s\n", date_str, zend_get_executed_filename(TSRMLS_C), zend_get_executed_lineno(TSRMLS_C), to, hdr ? hdr : "");
+
+		efree(date_str);
 
 		if (hdr) {
 			php_mail_log_crlf_to_spaces(tmp);
@@ -318,7 +328,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	sendmail = popen_ex(sendmail_cmd, "wb", NULL, NULL TSRMLS_CC);
 #else
 	/* Since popen() doesn't indicate if the internal fork() doesn't work
-	 * (e.g. the shell can't be executed) we explicitely set it to 0 to be
+	 * (e.g. the shell can't be executed) we explicitly set it to 0 to be
 	 * sure we don't catch any older errno value. */
 	errno = 0;
 	sendmail = popen(sendmail_cmd, "w");

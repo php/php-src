@@ -3,13 +3,14 @@ dnl $Id$
 dnl config.m4 for extension mysqli
 
 PHP_ARG_WITH(mysqli, for MySQLi support,
-[  --with-mysqli[=FILE]    Include MySQLi support.  FILE is the path
+[  --with-mysqli[=FILE]      Include MySQLi support.  FILE is the path
                           to mysql_config.  If no value or mysqlnd is passed 
                           as FILE, the MySQL native driver will be used])
 
 PHP_ARG_ENABLE(embedded_mysqli, whether to enable embedded MySQLi support,
-[  --enable-embedded-mysqli  MYSQLi: Enable embedded support
-                            Note: Does not work with MySQL native driver!], no, no)
+[  --enable-embedded-mysqli  
+                          MYSQLi: Enable embedded support
+                          Note: Does not work with MySQL native driver!], no, no)
 
 if test "$PHP_MYSQLI" = "yes" || test "$PHP_MYSQLI" = "mysqlnd"; then
   dnl This needs to be set in any extension which wishes to use mysqlnd
@@ -81,5 +82,8 @@ if test "$PHP_MYSQLI" != "no"; then
   if test "$PHP_MYSQLI" = "yes" || test "$PHP_MYSQLI" = "mysqlnd"; then
     PHP_ADD_EXTENSION_DEP(mysqli, mysqlnd)
     AC_DEFINE([MYSQLI_USE_MYSQLND], 1, [Whether mysqlnd is enabled])
+    PHP_INSTALL_HEADERS([ext/mysqli/mysqli_mysqlnd.h])
+  else
+    PHP_INSTALL_HEADERS([ext/mysqli/mysqli_libmysql.h])
   fi
 fi

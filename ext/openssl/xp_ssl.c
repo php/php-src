@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -274,7 +274,7 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_
 			 * Essentially, we are waiting for the socket to become writeable, which means
 			 * that all pending data has been sent.
 			 * We use a small timeout which should encourage the OS to send the data,
-			 * but at the same time avoid hanging indefintely.
+			 * but at the same time avoid hanging indefinitely.
 			 * */
 			do {
 				n = php_pollfd_for_ms(sslsock->s.socket, POLLOUT, 500);
@@ -309,7 +309,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 		php_stream_xport_crypto_param *cparam
 		TSRMLS_DC)
 {
-	SSL_METHOD *method;
+	const SSL_METHOD *method;
 	long ssl_ctx_options = SSL_OP_ALL;
 	
 	if (sslsock->ssl_handle) {
@@ -391,6 +391,18 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 					stream->context, "ssl", "no_ticket", &val) && 
 				zval_is_true(*val)) {
 			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_TICKET);
+		}
+	}
+#endif
+
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+	{
+		zval **val;
+
+		if (stream->context && SUCCESS == php_stream_context_get_option(
+					stream->context, "ssl", "disable_compression", &val) &&
+				zval_is_true(*val)) {
+			SSL_CTX_set_options(sslsock->ctx, SSL_OP_NO_COMPRESSION);
 		}
 	}
 #endif
@@ -841,7 +853,7 @@ php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_set_option,
 };
 
-static char * get_sni(php_stream_context *ctx, char *resourcename, long resourcenamelen, int is_persistent TSRMLS_DC) {
+static char * get_sni(php_stream_context *ctx, const char *resourcename, size_t resourcenamelen, int is_persistent TSRMLS_DC) {
 
 	php_url *url;
 
@@ -888,8 +900,8 @@ static char * get_sni(php_stream_context *ctx, char *resourcename, long resource
 	return NULL;
 }
 
-php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
-		char *resourcename, long resourcenamelen,
+php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
+		const char *resourcename, size_t resourcenamelen,
 		const char *persistent_id, int options, int flags,
 		struct timeval *timeout,
 		php_stream_context *context STREAMS_DC TSRMLS_DC)

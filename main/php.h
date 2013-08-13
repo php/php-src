@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20100412
+#define PHP_API_VERSION 20121113
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 
@@ -179,6 +179,8 @@ typedef unsigned int socklen_t;
 #  define va_copy(ap1, ap2)         memcpy((&ap1), (&ap2), sizeof(va_list))
 # endif
 #endif
+
+#include "php_stdint.h"
 
 #include "zend_hash.h"
 #include "zend_alloc.h"

@@ -28,7 +28,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: magic.c,v 1.74 2011/05/26 01:27:59 christos Exp $")
+FILE_RCSID("@(#)$File: magic.c,v 1.78 2013/01/07 18:20:19 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -80,11 +80,12 @@ FILE_RCSID("@(#)$File: magic.c,v 1.74 2011/05/26 01:27:59 christos Exp $")
 # undef S_IFIFO
 #endif
 
-private void free_mlist(struct mlist *);
 private void close_and_restore(const struct magic_set *, const char *, int,
     const struct stat *);
 private int unreadable_info(struct magic_set *, mode_t, const char *);
+#if 0
 private const char* get_default_magic(void);
+#endif
 private const char *file_or_stream(struct magic_set *, const char *, php_stream *);
 
 #ifndef	STDIN_FILENO
@@ -110,6 +111,10 @@ get_default_magic(void)
 	if ((home = getenv("HOME")) == NULL)
 		return MAGIC;
 
+	if (asprintf(&hmagicpath, "%s/.magic.mgc", home) < 0)
+		return MAGIC;
+	if (stat(hmagicpath, &st) == -1) {
+		free(hmagicpath);
 	if (asprintf(&hmagicpath, "%s/.magic", home) < 0)
 		return MAGIC;
 	if (stat(hmagicpath, &st) == -1)
@@ -120,6 +125,7 @@ get_default_magic(void)
 			return MAGIC;
 		if (access(hmagicpath, R_OK) == -1)
 			goto out;
+	}
 	}
 
 	if (asprintf(&default_magic, "%s:%s", hmagicpath, MAGIC) < 0)
@@ -221,46 +227,7 @@ magic_getpath(const char *magicfile, int action)
 public struct magic_set *
 magic_open(int flags)
 {
-	struct magic_set *ms;
-
-	ms = ecalloc((size_t)1, sizeof(struct magic_set));
-
-	if (magic_setflags(ms, flags) == -1) {
-		errno = EINVAL;
-		goto free;
-	}
-
-	ms->o.buf = ms->o.pbuf = NULL;
-
-	ms->c.li = emalloc((ms->c.len = 10) * sizeof(*ms->c.li));
-	
-	ms->event_flags = 0;
-	ms->error = -1;
-	ms->mlist = NULL;
-	ms->file = "unknown";
-	ms->line = 0;
-	return ms;
-free:
-	efree(ms);
-	return NULL;
-}
-
-private void
-free_mlist(struct mlist *mlist)
-{
-	struct mlist *ml;
-
-	if (mlist == NULL)
-		return;
-
-	for (ml = mlist->next; ml != mlist;) {
-		struct mlist *next = ml->next;
-		struct magic *mg = ml->magic;
-		file_delmagic(mg, ml->mapped, ml->nmagic);
-		efree(ml);
-		ml = next;
-	}
-	efree(ml);
+	return file_ms_alloc(flags);
 }
 
 private int
@@ -284,19 +251,9 @@ unreadable_info(struct magic_set *ms, mode_t md, const char *file)
 public void
 magic_close(struct magic_set *ms)
 {
-	if (ms->mlist) {
-		free_mlist(ms->mlist);
-	}
-	if (ms->o.pbuf) {
-		efree(ms->o.pbuf);
-	}
-	if (ms->o.buf) {
-		efree(ms->o.buf);
-	}
-	if (ms->c.li) {
-		efree(ms->c.li);
-	}
-	efree(ms);
+	if (ms == NULL)
+		return;
+	file_ms_free(ms);
 }
 
 /*
@@ -305,30 +262,26 @@ magic_close(struct magic_set *ms)
 public int
 magic_load(struct magic_set *ms, const char *magicfile)
 {
-	struct mlist *ml = file_apprentice(ms, magicfile, FILE_LOAD);
-	if (ml) {
-		free_mlist(ms->mlist);
-		ms->mlist = ml;
-		return 0;
-	}
+	if (ms == NULL)
 	return -1;
+	return file_apprentice(ms, magicfile, FILE_LOAD);
 }
 
 public int
 magic_compile(struct magic_set *ms, const char *magicfile)
 {
-	struct mlist *ml = file_apprentice(ms, magicfile, FILE_COMPILE);
-	free_mlist(ml);
-	return ml ? 0 : -1;
+	if (ms == NULL)
+		return -1;
+	return file_apprentice(ms, magicfile, FILE_COMPILE);
 }
 
 
 public int
 magic_list(struct magic_set *ms, const char *magicfile)
 {
-	struct mlist *ml = file_apprentice(ms, magicfile, FILE_LIST);
-	free_mlist(ml);
-	return ml ? 0 : -1;
+	if (ms == NULL)
+		return -1;
+	return file_apprentice(ms, magicfile, FILE_LIST);
 }
 
 private void
@@ -368,6 +321,8 @@ close_and_restore(const struct magic_set *ms, const char *name, int fd,
 public const char *
 magic_descriptor(struct magic_set *ms, int fd)
 {
+	if (ms == NULL)
+		return NULL;
 	return file_or_stream(ms, NULL, NULL);
 }
 
@@ -377,12 +332,16 @@ magic_descriptor(struct magic_set *ms, int fd)
 public const char *
 magic_file(struct magic_set *ms, const char *inname)
 {
+	if (ms == NULL)
+		return NULL;
 	return file_or_stream(ms, inname, NULL);
 }
 
 public const char *
 magic_stream(struct magic_set *ms, php_stream *stream)
 {
+	if (ms == NULL)
+		return NULL;
 	return file_or_stream(ms, NULL, stream);
 }
 
@@ -469,6 +428,8 @@ done:
 public const char *
 magic_buffer(struct magic_set *ms, const void *buf, size_t nb)
 {
+	if (ms == NULL)
+		return NULL;
 	if (file_reset(ms) == -1)
 		return NULL;
 	/*
@@ -484,22 +445,34 @@ magic_buffer(struct magic_set *ms, const void *buf, size_t nb)
 public const char *
 magic_error(struct magic_set *ms)
 {
+	if (ms == NULL)
+		return "Magic database is not open";
 	return (ms->event_flags & EVENT_HAD_ERR) ? ms->o.buf : NULL;
 }
 
 public int
 magic_errno(struct magic_set *ms)
 {
+	if (ms == NULL)
+		return EINVAL;
 	return (ms->event_flags & EVENT_HAD_ERR) ? ms->error : 0;
 }
 
 public int
 magic_setflags(struct magic_set *ms, int flags)
 {
+	if (ms == NULL)
+		return -1;
 #if !defined(HAVE_UTIME) && !defined(HAVE_UTIMES)
 	if (flags & MAGIC_PRESERVE_ATIME)
 		return -1;
 #endif
 	ms->flags = flags;
 	return 0;
+}
+
+public int
+magic_version(void)
+{
+	return MAGIC_VERSION;
 }

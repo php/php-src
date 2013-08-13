@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -23,10 +23,10 @@
 #include "config.h"
 #endif
 
-#include <enchant.h>
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include <enchant.h>
 #include "php_enchant.h"
 
 typedef EnchantBroker * EnchantBrokerPtr;
@@ -651,7 +651,7 @@ PHP_FUNCTION(enchant_broker_free_dict)
 /* }}} */
 
 /* {{{ proto bool enchant_broker_dict_exists(resource broker, string tag)
-   Wether a dictionary exists or not. Using non-empty tag */
+   Whether a dictionary exists or not. Using non-empty tag */
 PHP_FUNCTION(enchant_broker_dict_exists)
 {
 	zval *broker;
@@ -674,7 +674,7 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 	described/referred to by 'tag'. The ordering is a comma delimited
 	list of provider names. As a special exception, the "*" tag can
 	be used as a language tag to declare a default ordering for any
-	language that does not explictly declare an ordering. */
+	language that does not explicitly declare an ordering. */
 
 PHP_FUNCTION(enchant_broker_set_ordering)
 {

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -61,7 +61,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 #include "ext/mysqlnd/mysqlnd_reverse_api.h"
 static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv TSRMLS_DC)
 {
-	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJCE_P(zv) == php_pdo_get_dbh_ce()) {
+	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), php_pdo_get_dbh_ce() TSRMLS_CC)) {
 		pdo_dbh_t * dbh = zend_object_store_get_object(zv TSRMLS_CC);
 
 		if (!dbh || dbh->driver != &pdo_mysql_driver) {
@@ -118,6 +118,10 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CA", (long)PDO_MYSQL_ATTR_SSL_CA);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CAPATH", (long)PDO_MYSQL_ATTR_SSL_CAPATH);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CIPHER", (long)PDO_MYSQL_ATTR_SSL_CIPHER);
+#if MYSQL_VERSION_ID > 50605 || defined(PDO_USE_MYSQLND)
+	 REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SERVER_PUBLIC_KEY", (long)PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY);
+#endif
+
 
 #ifdef PDO_USE_MYSQLND
 	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api TSRMLS_CC);

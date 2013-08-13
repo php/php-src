@@ -28,12 +28,8 @@ if (!have_innodb($link))
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 			$host, $user, $db, $port, $socket);
 
-	if (!is_null($tmp = @$mysqli->commit($link)))
-		printf("[002] Expecting NULL/NULL, got %s/%s, [%d] %s\n",
-			gettype($tmp), $tmp, $mysqli->errno, $mysqli->error);
-
 	if (true !== ($tmp = $mysqli->commit()))
-		printf("[014] Expecting boolean/true got %s/%s\n", gettype($tmp), $tmp);
+		printf("[002] Expecting boolean/true got %s/%s\n", gettype($tmp), $tmp);
 
 	if (true !== ($tmp = $mysqli->autocommit(false)))
 		printf("[003] Cannot turn off autocommit, expecting true, got %s/%s\n", gettype($tmp), $tmp);

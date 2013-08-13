@@ -71,6 +71,8 @@ if test "$PHP_CGI" != "no"; then
     dnl Expose to Makefile
     PHP_SUBST(SAPI_CGI_PATH)
     PHP_SUBST(BUILD_CGI)
+
+    PHP_OUTPUT(sapi/cgi/php-cgi.1)
 else
   AC_MSG_RESULT(yes)
 fi

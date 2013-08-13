@@ -11,9 +11,6 @@ int fpm_signals_init_main();
 int fpm_signals_init_child();
 int fpm_signals_get_fd();
 
-void fpm_signals_sighandler_exit_ok(pid_t pid);
-void fpm_signals_sighandler_exit_config(pid_t pid);
-
 extern const char *fpm_signal_names[NSIG + 1];
 
 #endif

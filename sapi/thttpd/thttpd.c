@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -579,7 +579,7 @@ static void queue_request(httpd_conn *hc)
 	m->next = NULL;
 	
 	tsrm_mutex_lock(qr_lock);
-	/* Create new threads when reaching a certain threshhold */
+	/* Create new threads when reaching a certain threshold */
 	if (nr_threads < max_threads && nr_free_threads < 2) {
 		nr_threads++; /* protected by qr_lock */
 		

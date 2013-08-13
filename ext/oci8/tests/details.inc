@@ -52,7 +52,7 @@ if (!function_exists('oci8_test_sql_execute')) {
             $s = oci_parse($c, $stmt);
             if (!$s) {
                 $m = oci_error($c);
-                echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
+                echo "oci8_test_sql_execute() error:". PHP_EOL . $stmt . PHP_EOL . $m['message'] . PHP_EOL;
             }
             else {
                 $r = @oci_execute($s);
@@ -66,7 +66,7 @@ if (!function_exists('oci8_test_sql_execute')) {
                                 ,  4080 // trigger does not exist
                                 , 38802 // edition does not exist
                             ))) {
-                        echo $stmt . PHP_EOL . $m['message'] . PHP_EOL;
+			echo "oci8_test_sql_execute() error:". PHP_EOL . $stmt . PHP_EOL . $m['message'] . PHP_EOL;
                     }
                 }
             }

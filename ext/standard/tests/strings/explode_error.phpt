@@ -14,11 +14,11 @@ echo "\n-- Testing explode() function with no arguments --\n";
 var_dump( explode() );
 
 echo "\n-- Testing explode() function with more than expected no. of arguments --\n";
-$delimeter = " ";
+$delimiter = " ";
 $string = "piece1 piece2 piece3 piece4 piece5 piece6";
 $limit = 5;
 $extra_arg = 10;
-var_dump( explode($delimeter, $string, $limit, $extra_arg) );
+var_dump( explode($delimiter, $string, $limit, $extra_arg) );
 
 ?>
 ===Done===

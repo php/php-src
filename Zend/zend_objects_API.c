@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -117,6 +117,7 @@ ZEND_API zend_object_handle zend_objects_store_put(void *object, zend_objects_st
 	obj = &EG(objects_store).object_buckets[handle].bucket.obj;
 	EG(objects_store).object_buckets[handle].destructor_called = 0;
 	EG(objects_store).object_buckets[handle].valid = 1;
+	EG(objects_store).object_buckets[handle].apply_count = 0;
 
 	obj->refcount = 1;
 	GC_OBJ_INIT(obj);

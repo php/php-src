@@ -2,10 +2,10 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
-   | that is bundled with this package in the file LICENSE, and is        | 
+   | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
    | http://www.zend.com/license/2_00.txt.                                |
    | If you did not receive a copy of the Zend license and are unable to  |
@@ -88,7 +88,7 @@ ZEND_METHOD(Closure, bind)
 		RETURN_NULL();
 	}
 
-	closure = (zend_closure *)zend_object_store_get_object(zclosure TSRMLS_CC);	
+	closure = (zend_closure *)zend_object_store_get_object(zclosure TSRMLS_CC);
 
 	if ((newthis != NULL) && (closure->func.common.fn_flags & ZEND_ACC_STATIC)) {
 		zend_error(E_WARNING, "Cannot bind an instance to a static closure");
@@ -152,7 +152,7 @@ static int zend_closure_compare_objects(zval *o1, zval *o2 TSRMLS_DC) /* {{{ */
 
 ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);	
+	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);
 	zend_function *invoke = (zend_function*)emalloc(sizeof(zend_function));
 
 	invoke->common = closure->func.common;
@@ -168,14 +168,14 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zval *obj TSRMLS_DC) /* {
 
 ZEND_API const zend_function *zend_get_closure_method_def(zval *obj TSRMLS_DC) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);	
+	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);
 	return &closure->func;
 }
 /* }}} */
 
 ZEND_API zval* zend_get_closure_this_ptr(zval *obj TSRMLS_DC) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);	
+	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);
 	return closure->this_ptr;
 }
 /* }}} */
@@ -212,7 +212,7 @@ static void zend_closure_write_property(zval *object, zval *member, zval *value,
 }
 /* }}} */
 
-static zval **zend_closure_get_property_ptr_ptr(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval **zend_closure_get_property_ptr_ptr(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
 	return NULL;
@@ -290,7 +290,6 @@ static zend_object_value zend_closure_clone(zval *zobject TSRMLS_DC) /* {{{ */
 	return Z_OBJVAL(result);
 }
 /* }}} */
-
 
 int zend_closure_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zval **zobj_ptr TSRMLS_DC) /* {{{ */
 {
@@ -378,7 +377,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp TSRMLS_
 
 static HashTable *zend_closure_get_gc(zval *obj, zval ***table, int *n TSRMLS_DC) /* {{{ */
 {
-	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);	
+	zend_closure *closure = (zend_closure *)zend_object_store_get_object(obj TSRMLS_CC);
 
 	*table = closure->this_ptr ? &closure->this_ptr : NULL;
 	*n = closure->this_ptr ? 1 : 0;
@@ -474,7 +473,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 				zend_error(E_WARNING, "Cannot bind function %s::%s to scope class %s", func->common.scope->name, func->common.function_name, scope->name);
 				scope = NULL;
 			}
-			if(scope && this_ptr && (func->common.fn_flags & ZEND_ACC_STATIC) == 0 && 
+			if(scope && this_ptr && (func->common.fn_flags & ZEND_ACC_STATIC) == 0 &&
 					!instanceof_function(Z_OBJCE_P(this_ptr), closure->func.common.scope TSRMLS_CC)) {
 				zend_error(E_WARNING, "Cannot bind function %s::%s to object of class %s", func->common.scope->name, func->common.function_name, Z_OBJCE_P(this_ptr)->name);
 				scope = NULL;

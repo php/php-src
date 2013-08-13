@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -405,7 +405,7 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var TSRMLS_DC)
 
 	if (Z_STRLEN_P(var) > 0) {
 		char *buf;
-		int buf_len;
+		size_t buf_len;
 
 		buf = php_escape_html_entities(Z_STRVAL_P(var), Z_STRLEN_P(var), &buf_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 
@@ -626,12 +626,12 @@ static void php_wddx_serialize_array(wddx_packet *packet, zval *arr)
  */
 void php_wddx_serialize_var(wddx_packet *packet, zval *var, char *name, int name_len TSRMLS_DC)
 {
-	char *tmp_buf;
-	char *name_esc;
-	int name_esc_len;
 	HashTable *ht;
 
 	if (name) {
+		size_t name_esc_len;
+		char *tmp_buf, *name_esc;
+
 		name_esc = php_escape_html_entities(name, name_len, &name_esc_len, 0, ENT_QUOTES, NULL TSRMLS_CC);
 		tmp_buf = emalloc(name_esc_len + sizeof(WDDX_VAR_S));
 		snprintf(tmp_buf, name_esc_len + sizeof(WDDX_VAR_S), WDDX_VAR_S, name_esc);

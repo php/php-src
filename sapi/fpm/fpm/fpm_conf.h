@@ -40,6 +40,10 @@ struct fpm_global_config_s {
 	int rlimit_files;
 	int rlimit_core;
 	char *events_mechanism;
+#ifdef HAVE_SYSTEMD
+	int systemd_watchdog;
+	int systemd_interval;
+#endif
 };
 
 extern struct fpm_global_config_s fpm_global_config;
@@ -97,7 +101,7 @@ enum {
 	PM_STYLE_ONDEMAND = 3
 };
 
-int fpm_conf_init_main(int test_conf);
+int fpm_conf_init_main(int test_conf, int force_daemon);
 int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc);
 int fpm_conf_write_pid();
 int fpm_conf_unlink_pid();

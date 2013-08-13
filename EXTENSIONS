@@ -147,7 +147,7 @@ STATUS:              Working
 COMMENT:             Tested on phpts and isapi versions
 -------------------------------------------------------------------------------
 EXTENSION:           mysql
-PRIMARY MAINTAINER:  Zak Greant <zak@mysql.com>, Georg Richter <georg@php.net>,  Johannes Schlüter <johannes@php.net>,  Ulf Wendel <uw@php.net>
+PRIMARY MAINTAINER:  Zak Greant <zak@mysql.com>, Georg Richter <georg@php.net>, Andrey Hristov <andrey@php.net>, Johannes Schlüter <johannes@php.net>,  Ulf Wendel <uw@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           mysqlnd
-PRIMARY MAINTAINER:  Georg Richter <georg@php.net>, Andrey Hristov <andrey@php.net>,  Johannes Schlüter <johannes@php.net>, Ulf Wendel <uw@php.net>      
+PRIMARY MAINTAINER:  Andrey Hristov <andrey@php.net>, Johannes Schlüter <johannes@php.net>, Ulf Wendel <uw@php.net>      
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3

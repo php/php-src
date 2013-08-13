@@ -46,8 +46,16 @@ do {
 			echo "Read during write: allowed\n";
 		}
 		if ($db_writer!==FALSE) {
-			dba_insert("key number 6", "The 6th value", $db_writer);
-			@dba_insert("key number 6", "The 6th value inserted again would be an error", $db_writer);
+			if (dba_insert("key number 6", "The 6th value", $db_writer)) {
+				echo '"key number 6" written' . "\n";
+			} else {
+				echo 'Failed to write "key number 6"' . "\n";
+			}
+			if (dba_insert("key number 6", "The 6th value inserted again would be an error", $db_writer)) {
+				echo '"key number 6" written 2nd time' . "\n";
+			} else {
+				echo 'Failed to write "key number 6" 2nd time' . "\n";
+			}
 			dba_replace("key2", "Content 2 replaced 2nd time", $db_writer);
 			dba_delete("key4", $db_writer);
 			echo dba_fetch("key2", $db_writer)."\n";

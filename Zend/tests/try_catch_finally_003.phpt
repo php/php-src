@@ -15,11 +15,9 @@ function foo () {
                 die("error");
             } finally {
                echo "1";
-               return 1;
             }
         } finally {
            echo "2";
-           return 2;
         }
     } catch (BE $e) {
       die("error");

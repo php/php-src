@@ -168,6 +168,8 @@ gdImagePtr gdImageCreate (int sx, int sy)
 	im->cy1 = 0;
 	im->cx2 = im->sx - 1;
 	im->cy2 = im->sy - 1;
+	im->interpolation = NULL;
+	im->interpolation_id = GD_BILINEAR_FIXED;
 	return im;
 }
 
@@ -183,7 +185,7 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 	if (overflow2(sizeof(unsigned char *), sy)) {
 		return NULL;
 	}
-	
+
 	if (overflow2(sizeof(int), sx)) {
 		return NULL;
 	}
@@ -221,6 +223,8 @@ gdImagePtr gdImageCreateTrueColor (int sx, int sy)
 	im->cy1 = 0;
 	im->cx2 = im->sx - 1;
 	im->cy2 = im->sy - 1;
+	im->interpolation = NULL;
+	im->interpolation_id = GD_BILINEAR_FIXED;
 	return im;
 }
 
@@ -1954,7 +1958,6 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 {
 	int i, l, x1, x2, dy;
 	int oc;   /* old pixel value */
-	int tiled;
 	int wx2,wy2;
 	/* stack of filled segments */
 	struct seg *stack;
@@ -1966,7 +1969,6 @@ static void _gdImageFillTiled(gdImagePtr im, int x, int y, int nc)
 	}
 
 	wx2=im->sx;wy2=im->sy;
-	tiled = nc==gdTiled;
 
 	nc =  gdImageTileGet(im,x,y);
 
@@ -2031,7 +2033,6 @@ void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 {
 	int x1h = x1, x1v = x1, y1h = y1, y1v = y1, x2h = x2, x2v = x2, y2h = y2, y2v = y2;
 	int thick = im->thick;
-	int half1 = 1;
 	int t;
 
 	if (x1 == x2 && y1 == y2 && thick == 1) {
@@ -2053,7 +2054,7 @@ void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 	if (thick > 1) {
 		int cx, cy, x1ul, y1ul, x2lr, y2lr;
 		int half = thick >> 1;
-		half1 = thick - half;
+
 		x1ul = x1 - half;
 		y1ul = y1 - half;
 		
@@ -2351,8 +2352,6 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 	int colorMap[gdMaxColors];
 	/* Stretch vectors */
 	int *stx, *sty;
-	/* We only need to use floating point to determine the correct stretch vector for one line's worth. */
-	double accum;
 	
 	if (overflow2(sizeof(int), srcW)) {
 		return;
@@ -2363,7 +2362,6 @@ void gdImageCopyResized (gdImagePtr dst, gdImagePtr src, int dstX, int dstY, int
 
 	stx = (int *) gdMalloc (sizeof (int) * srcW);
 	sty = (int *) gdMalloc (sizeof (int) * srcH);
-	accum = 0;
 
 	/* Fixed by Mao Morimoto 2.0.16 */
 	for (i = 0; (i < srcW); i++) {
@@ -3007,5 +3005,78 @@ void gdImageGetClip (gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P)
 	*y1P = im->cy1;
 	*x2P = im->cx2;
 	*y2P = im->cy2;
+}
+
+/* convert a palette image to true color */
+int gdImagePaletteToTrueColor(gdImagePtr src)
+{
+	unsigned int y;
+	unsigned char alloc_y = 0;
+	unsigned int yy;
+
+	if (src == NULL) {
+		return 0;
+	}
+
+	if (src->trueColor == 1) {
+		return 1;
+	} else {
+		unsigned int x;
+		const unsigned int sy = gdImageSY(src);
+		const unsigned int sx = gdImageSX(src);
+
+		src->tpixels = (int **) gdMalloc(sizeof(int *) * sy);
+		if (src->tpixels == NULL) {
+			return 0;
+		}
+
+		for (y = 0; y < sy; y++) {
+			const unsigned char *src_row = src->pixels[y];
+			int * dst_row;
+
+			/* no need to calloc it, we overwrite all pxl anyway */
+			src->tpixels[y] = (int *) gdMalloc(sx * sizeof(int));
+			if (src->tpixels[y] == NULL) {
+				goto clean_on_error;
+			}
+
+			dst_row = src->tpixels[y];
+			for (x = 0; x < sx; x++) {
+				const unsigned char c = *(src_row + x);
+				if (c == src->transparent) {
+					*(dst_row + x) = gdTrueColorAlpha(0, 0, 0, 127);
+				} else {
+					*(dst_row + x) = gdTrueColorAlpha(src->red[c], src->green[c], src->blue[c], src->alpha[c]);
+				}
+			}
+		}
+	}
+
+	/* free old palette buffer */
+	for (yy = y - 1; yy >= yy - 1; yy--) {
+		gdFree(src->pixels[yy]);
+	}
+	gdFree(src->pixels);
+	src->trueColor = 1;
+	src->pixels = NULL;
+	src->alphaBlendingFlag = 0;
+	src->saveAlphaFlag = 1;
+
+	if (src->transparent >= 0) {
+		const unsigned char c = src->transparent;
+		src->transparent =  gdTrueColorAlpha(src->red[c], src->green[c], src->blue[c], src->alpha[c]);
+	}
+
+	return 1;
+
+clean_on_error:
+	if (y > 0) {
+
+		for (yy = y; yy >= yy - 1; y--) {
+			gdFree(src->tpixels[y]);
+		}
+		gdFree(src->tpixels);
+	}
+	return 0;
 }
 

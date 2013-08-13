@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,7 @@
 
 #include "SAPI.h"
 
+extern const zend_function_entry server_additional_functions[];
 extern sapi_module_struct cli_server_sapi_module;
 extern int do_cli_server(int argc, char **argv TSRMLS_DC);
 

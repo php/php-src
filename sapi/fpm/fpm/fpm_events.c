@@ -29,6 +29,10 @@
 #include "events/port.h"
 #include "events/kqueue.h"
 
+#ifdef HAVE_SYSTEMD
+#include "fpm_systemd.h"
+#endif
+
 #define fpm_event_set_timeout(ev, now) timeradd(&(now), &(ev)->frequency, &(ev)->timeout);
 
 static void fpm_event_cleanup(int which, void *arg);
@@ -188,7 +192,9 @@ static int fpm_event_queue_del(struct fpm_event_queue_s **queue, struct fpm_even
 			}
 			if (q == *queue) {
 				*queue = q->next;
-				(*queue)->prev = NULL;
+				if (*queue) {
+					(*queue)->prev = NULL;
+				}
 			}
 
 			/* ask the event module to remove the fd from its own queue */
@@ -359,6 +365,10 @@ void fpm_event_loop(int err) /* {{{ */
 
 		zlog(ZLOG_DEBUG, "%zu bytes have been reserved in SHM", fpm_shm_get_size_allocated());
 		zlog(ZLOG_NOTICE, "ready to handle connections");
+
+#ifdef HAVE_SYSTEMD
+		fpm_systemd_heartbeat(NULL, 0, NULL);
+#endif
 	}
 
 	while (1) {
@@ -432,7 +442,9 @@ void fpm_event_loop(int err) /* {{{ */
 						}
 						if (q == fpm_event_queue_timer) {
 							fpm_event_queue_timer = q->next;
-							fpm_event_queue_timer->prev = NULL;
+							if (fpm_event_queue_timer) {
+								fpm_event_queue_timer->prev = NULL;
+							}
 						}
 						q = q->next;
 						free(q2);

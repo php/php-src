@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -243,7 +243,12 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY_EX("mssql.max_links",				"-1",	PHP_INI_SYSTEM,	OnUpdateLong,	max_links,					zend_mssql_globals,		mssql_globals,	display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("mssql.min_error_severity",	"10",	PHP_INI_ALL,	OnUpdateLong,	cfg_min_error_severity,		zend_mssql_globals,		mssql_globals,	display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("mssql.min_message_severity",	"10",	PHP_INI_ALL,	OnUpdateLong,	cfg_min_message_severity,	zend_mssql_globals,		mssql_globals,	display_link_numbers)
-	STD_PHP_INI_BOOLEAN("mssql.compatability_mode",		"0",	PHP_INI_ALL,	OnUpdateBool,	compatability_mode,			zend_mssql_globals,		mssql_globals)
+	/*
+	  mssql.compatAbility_mode (with typo) was used for relatively long time.
+	  Unless it is fixed the old version is also kept for compatibility reasons.
+	*/
+	STD_PHP_INI_BOOLEAN("mssql.compatability_mode",		"0",	PHP_INI_ALL,	OnUpdateBool,	compatibility_mode,			zend_mssql_globals,		mssql_globals)
+	STD_PHP_INI_BOOLEAN("mssql.compatibility_mode",		"0",	PHP_INI_ALL,	OnUpdateBool,	compatibility_mode,			zend_mssql_globals,		mssql_globals)
 	STD_PHP_INI_ENTRY_EX("mssql.connect_timeout",    	"5",	PHP_INI_ALL,	OnUpdateLong,	connect_timeout,			zend_mssql_globals,		mssql_globals,	display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("mssql.timeout",      			"60",	PHP_INI_ALL,	OnUpdateLong,	timeout,					zend_mssql_globals,		mssql_globals,	display_link_numbers)
 	STD_PHP_INI_ENTRY_EX("mssql.textsize",   			"-1",	PHP_INI_ALL,	OnUpdateLong,	textsize,					zend_mssql_globals,		mssql_globals,	display_text_size)
@@ -415,12 +420,12 @@ static void _mssql_bind_hash_dtor(void *data)
 */
 static PHP_GINIT_FUNCTION(mssql)
 {
-	long compatability_mode;
+	long compatibility_mode;
 
 	mssql_globals->num_persistent = 0;
 	mssql_globals->get_column_content = php_mssql_get_column_content_with_type;
-	if (cfg_get_long("mssql.compatability_mode", &compatability_mode) == SUCCESS) {
-		if (compatability_mode) {
+	if (cfg_get_long("mssql.compatibility_mode", &compatibility_mode) == SUCCESS) {
+		if (compatibility_mode) {
 			mssql_globals->get_column_content = php_mssql_get_column_content_without_type;	
 		}
 	}

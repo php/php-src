@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -40,8 +40,8 @@ static void delete_binding(void *binding);
 static void delete_binding_persistent(void *binding);
 static void delete_function(void *function);
 static void delete_function_persistent(void *function);
-static void delete_parameter(void *paramater);
-static void delete_parameter_persistent(void *paramater);
+static void delete_parameter(void *parameter);
+static void delete_parameter_persistent(void *parameter);
 static void delete_header(void *header);
 static void delete_header_persistent(void *header);
 static void delete_document(void *doc_ptr);

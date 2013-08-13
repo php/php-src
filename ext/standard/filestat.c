@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -857,7 +857,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		"dev", "ino", "mode", "nlink", "uid", "gid", "rdev",
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
-	char *local;
+	const char *local;
 	php_stream_wrapper *wrapper;
 
 	if (!filename_length) {
@@ -904,7 +904,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 	}
 
 	if (php_stream_stat_path_ex((char *)filename, flags, &ssb, NULL)) {
-		/* Error Occured */
+		/* Error Occurred */
 		if (!IS_EXISTS_CHECK(type)) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "%sstat failed for %s", IS_LINK_OPERATION(type) ? "L" : "", filename);
 		}

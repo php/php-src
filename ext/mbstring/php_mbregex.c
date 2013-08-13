@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -648,7 +648,7 @@ _php_mb_regex_init_options(const char *parg, int narg, OnigOptionType *option, O
 /* }}} */
 
 /*
- * php funcions
+ * php functions
  */
 
 /* {{{ proto string mb_regex_encoding([string encoding])
@@ -1055,7 +1055,7 @@ PHP_FUNCTION(mb_split)
 	php_mb_regex_t *re;
 	OnigRegion *regs = NULL;
 	char *string;
-	OnigUChar *pos;
+	OnigUChar *pos, *chunk_pos;
 	int string_len;
 
 	int n, err;
@@ -1065,8 +1065,8 @@ PHP_FUNCTION(mb_split)
 		RETURN_FALSE;
 	} 
 
-	if (count == 0) {
-		count = 1;
+	if (count > 0) {
+		count--;
 	}
 
 	/* create regex pattern buffer */
@@ -1076,31 +1076,30 @@ PHP_FUNCTION(mb_split)
 
 	array_init(return_value);
 
-	pos = (OnigUChar *)string;
+	chunk_pos = pos = (OnigUChar *)string;
 	err = 0;
 	regs = onig_region_new();
 	/* churn through str, generating array entries as we go */
-	while ((--count != 0) &&
-		   (err = onig_search(re, (OnigUChar *)string, (OnigUChar *)(string + string_len), pos, (OnigUChar *)(string + string_len), regs, 0)) >= 0) {
-		if (regs->beg[0] == regs->end[0]) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Empty regular expression");
+	while (count != 0 && (pos - (OnigUChar *)string) < string_len) {
+		int beg, end;
+		err = onig_search(re, (OnigUChar *)string, (OnigUChar *)(string + string_len), pos, (OnigUChar *)(string + string_len), regs, 0);
+		if (err < 0) {
 			break;
 		}
-
+		beg = regs->beg[0], end = regs->end[0];
 		/* add it to the array */
-		if (regs->beg[0] < string_len && regs->beg[0] >= (pos - (OnigUChar *)string)) {
-			add_next_index_stringl(return_value, (char *)pos, ((OnigUChar *)(string + regs->beg[0]) - pos), 1);
+		if ((pos - (OnigUChar *)string) < end) {
+			if (beg < string_len && beg >= (chunk_pos - (OnigUChar *)string)) {
+				add_next_index_stringl(return_value, (char *)chunk_pos, ((OnigUChar *)(string + beg) - chunk_pos), 1);
+				--count;
+			} else {
+				err = -2;
+				break;
+			}
+			/* point at our new starting point */
+			chunk_pos = pos = (OnigUChar *)string + end;
 		} else {
-			err = -2;
-			break;
-		}
-		/* point at our new starting point */
-		n = regs->end[0];
-		if ((pos - (OnigUChar *)string) < n) {
-			pos = (OnigUChar *)string + n;
-		}
-		if (count < 0) {
-			count = 0;
+			pos++;
 		}
 		onig_region_free(regs, 0);
 	}
@@ -1117,9 +1116,9 @@ PHP_FUNCTION(mb_split)
 	}
 
 	/* otherwise we just have one last element to add to the array */
-	n = ((OnigUChar *)(string + string_len) - pos);
+	n = ((OnigUChar *)(string + string_len) - chunk_pos);
 	if (n > 0) {
-		add_next_index_stringl(return_value, (char *)pos, n, 1);
+		add_next_index_stringl(return_value, (char *)chunk_pos, n, 1);
 	} else {
 		add_next_index_stringl(return_value, "", 0, 1);
 	}

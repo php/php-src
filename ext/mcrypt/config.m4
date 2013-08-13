@@ -21,7 +21,7 @@ AC_DEFUN([PHP_MCRYPT_CHECK_VERSION],[
 
 
 PHP_ARG_WITH(mcrypt, for mcrypt support,
-[  --with-mcrypt[=DIR]     Include mcrypt support])
+[  --with-mcrypt[=DIR]       Include mcrypt support])
 
 if test "$PHP_MCRYPT" != "no"; then
   for i in $PHP_MCRYPT /usr/local /usr; do

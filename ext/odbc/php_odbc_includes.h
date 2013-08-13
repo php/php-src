@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -161,7 +161,7 @@ PHP_FUNCTION(solid_fetch_prev);
 #define UNIX
 /*
  * Extended Fetch in the Birdstep ODBC API is incapable of returning long varchar (memo) fields.
- * So the following line has been commented-out to accomadate. - KNS
+ * So the following line has been commented-out to accommodate. - KNS
  *
  * #define HAVE_SQL_EXTENDED_FETCH 1
  */

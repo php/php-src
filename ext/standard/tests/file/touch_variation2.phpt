@@ -6,7 +6,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 <?php
 
 
-$filename = dirname(__FILE__)."/touch.dat";
+$filename = dirname(__FILE__)."/touch_variation2.dat";
 $fp=fopen($filename,"w");
 fwrite ($fp,"mydata");
 fclose($fp);

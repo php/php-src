@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -161,7 +161,7 @@ CWD_API char *virtual_realpath(const char *path, char *real_path TSRMLS_DC);
 CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC);
 CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...);
 CWD_API int virtual_creat(const char *path, mode_t mode TSRMLS_DC);
-CWD_API int virtual_rename(char *oldname, char *newname TSRMLS_DC);
+CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC);
 CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC);
 CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC);
 CWD_API int virtual_unlink(const char *path TSRMLS_DC);

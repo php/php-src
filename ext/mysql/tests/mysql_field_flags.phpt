@@ -45,12 +45,12 @@ mysql_free_result($res);
 $version = mysql_get_server_info($link);
 if (!preg_match('@(\d+)\.(\d+)\.(\d+)@ism', $version, $matches))
 	printf("[009] Cannot get server version\n");
-$version = ($matches[1] * 100) + ($matches[2] * 10) + $matches[3];
+$version = ($matches[1] * 1000) + ($matches[2] * 100) + $matches[3];
 
 $tables = array(
 	'label INT, UNIQUE KEY (label)'                         =>  array(
 								array('label', '1'),
-								'label' => array(($version < 500) ? 'multiple_key' : 'unique_key')
+								'label' => array(($version < 5000) ? 'multiple_key' : 'unique_key')
 								),
 	'labela INT, label2 CHAR(1), KEY keyname (labela, label2)'      =>  array(
 								array('labela, label2', "1, 'a'"),
@@ -81,12 +81,16 @@ $tables = array(
 								array('label1', sprintf("'%s'", @date("Y-m-d H:i:s"))),
 								'label1' => array(
 										'timestamp',
-										'unsigned',
-										'zerofill',
 										'binary',
 										'not_null'),
 								),
 );
+
+if ($version < 5600) {
+	$tables['label1 TIMESTAMP']['label1'][] = 'zerofill';
+	$tables['label1 TIMESTAMP']['label1'][] = 'unsigned';
+}
+
 
 foreach ($tables as $columns => $expected) {
 	if (!mysql_query("DROP TABLE IF EXISTS test", $link)) {
@@ -140,6 +144,8 @@ print "done!";
 require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
+
 Warning: mysql_field_flags() expects exactly 2 parameters, 1 given in %s on line %d
 
 Warning: mysql_field_flags(): Field -1 is invalid for MySQL result index %d in %s on line %d

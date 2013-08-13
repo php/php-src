@@ -4,22 +4,16 @@
 ARG_ENABLE("fileinfo", "fileinfo support", "no");
 
 if (PHP_FILEINFO != 'no') {
-	if (CHECK_HEADER_ADD_INCLUDE("dirent.h", "CFLAGS_FILEINFO") &&
-			CHECK_LIB("dirent_a.lib", "fileinfo", PHP_FILEINFO)) { 
-		LIBMAGIC_SOURCES=" apprentice.c apptype.c ascmagic.c \
-				cdf.c cdf_time.c compress.c \
-				encoding.c fsmagic.c funcs.c \
-				is_tar.c magic.c print.c \
-				readcdf.c readelf.c softmagic.c";
+	LIBMAGIC_SOURCES=" apprentice.c apptype.c ascmagic.c \
+			cdf.c cdf_time.c compress.c \
+			encoding.c fsmagic.c funcs.c \
+			is_tar.c magic.c print.c \
+			readcdf.c readelf.c softmagic.c";
 
-		if (VCVERS < 1500) {
-			ADD_FLAG('CFLAGS', '/Zm1000');
-		}
+	if (VCVERS < 1500) {
+		ADD_FLAG('CFLAGS', '/Zm1000');
+	}
 
-		EXTENSION('fileinfo', 'fileinfo.c', true, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
-		ADD_SOURCES(configure_module_dirname + '\\libmagic', LIBMAGIC_SOURCES, "fileinfo");
-	} else {
-		WARNING("fileinfo not enabled; libraries and headers not found");
-		PHP_FILEINFO = "no";
-	} 
+	EXTENSION('fileinfo', 'fileinfo.c', true, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
+	ADD_SOURCES(configure_module_dirname + '\\libmagic', LIBMAGIC_SOURCES, "fileinfo");
 }

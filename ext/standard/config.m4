@@ -358,7 +358,29 @@ else
   AC_MSG_RESULT(no)
 fi
 
-if test "$PHP_SAPI" = "cgi" || test "$PHP_SAPI" = "cli" || test "$PHP_SAPI" = "embed"; then
+PHP_ENABLE_CHROOT_FUNC=no
+case "$PHP_SAPI" in
+  embed)
+    PHP_ENABLE_CHROOT_FUNC=yes
+  ;;
+
+  none)
+    for PROG in $PHP_BINARIES; do
+      case "$PROG" in
+        cgi|cli)
+          PHP_ENABLE_CHROOT_FUNC=yes
+        ;;
+
+        *)
+          PHP_ENABLE_CHROOT_FUNC=no
+          break
+        ;;
+      esac
+   done
+  ;;
+esac
+
+if test "$PHP_ENABLE_CHROOT_FUNC" = "yes"; then
   AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
 fi
 
@@ -580,7 +602,7 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             incomplete_class.c url_scanner_ex.c ftp_fopen_wrapper.c \
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
-                            filters.c proc_open.c streamsfuncs.c http.c)
+                            filters.c proc_open.c streamsfuncs.c http.c password.c)
 
 PHP_ADD_MAKEFILE_FRAGMENT
 PHP_INSTALL_HEADERS([ext/standard/])

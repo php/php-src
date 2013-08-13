@@ -12,7 +12,7 @@ DBA GDBM handler test
 	$lock_flag = ''; // lock in library
 	require_once dirname(__FILE__) .'/dba_handler.inc';
 	
-	// Read during write is system dependant. Important is that there is no deadlock
+	// Read during write is system dependent. Important is that there is no deadlock
 ?>
 ===DONE===
 --EXPECTF--
@@ -21,6 +21,8 @@ database handler: gdbm
 Content String 2
 Content 2 replaced
 Read during write:%sallowed
+"key number 6" written
+Failed to write "key number 6" 2nd time
 Content 2 replaced 2nd time
 The 6th value
 array(3) {

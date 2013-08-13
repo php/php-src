@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -597,7 +597,7 @@ PHP_FUNCTION(hash_algos)
 
 	array_init(return_value);
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
-		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, &str_len, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
+		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, &str_len, &idx, 0, &pos)) != HASH_KEY_NON_EXISTENT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
 		add_next_index_stringl(return_value, str, str_len-1, 1);
 	}
@@ -659,6 +659,9 @@ PHP_FUNCTION(hash_pbkdf2)
 	/* Setup Main Loop to build a long enough result */
 	if (length == 0) {
 		length = ops->digest_size;
+		if (!raw_output) {
+			length = length * 2;
+		}
 	}
 	digest_length = length;
 	if (!raw_output) {
@@ -1039,7 +1042,7 @@ PHP_MINFO_FUNCTION(hash)
 	long type;
 
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
-		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, NULL, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
+		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, NULL, &idx, 0, &pos)) != HASH_KEY_NON_EXISTENT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
 		s += slprintf(s, e - s, "%s ", str);
 	}

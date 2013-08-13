@@ -119,8 +119,8 @@ static char *ErrorMessages[] =
 	{"Error while trimming mail header with PCRE, please file a bug report at http://bugs.php.net/"} /* 21 */
 };
 
-/* This pattern converts all single occurences of \n (Unix)
- * withour a leading \r to \r\n and all occurences of \r (Mac)
+/* This pattern converts all single occurrences of \n (Unix)
+ * withour a leading \r to \r\n and all occurrences of \r (Mac)
  * without a trailing \n to \r\n
  * Thx to Nibbler from ircnet/#linuxger
  */
@@ -130,7 +130,7 @@ static char *ErrorMessages[] =
 /* This pattern removes \r\n from the start of the string,
  * \r\n from the end of the string and also makes sure every line
  * is only wrapped with a single \r\n (thus reduces multiple
- * occurences of \r\n between lines to a single \r\n) */
+ * occurrences of \r\n between lines to a single \r\n) */
 #define PHP_WIN32_MAIL_RMVDBL_PATTERN	"/^\r\n|(\r\n)+$/m"
 #define PHP_WIN32_MAIL_RMVDBL_REPLACE	""
 
@@ -142,11 +142,11 @@ static char *ErrorMessages[] =
 #define PHP_WIN32_MAIL_DOT_REPLACE	"\n.."
 
 /* This function is meant to unify the headers passed to to mail()
- * This means, use PCRE to transform single occurences of \n or \r in \r\n
- * As a second step we also eleminate all \r\n occurences which are:
+ * This means, use PCRE to transform single occurrences of \n or \r in \r\n
+ * As a second step we also eleminate all \r\n occurrences which are:
  * 1) At the start of the header
  * 2) At the end of the header
- * 3) Two or more occurences in the header are removed so only one is left
+ * 3) Two or more occurrences in the header are removed so only one is left
  *
  * Returns NULL on error, or the new char* buffer on success.
  * You have to take care and efree() the buffer on your own.
@@ -409,7 +409,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 
 	snprintf(Buffer, sizeof(Buffer), "HELO %s\r\n", LocalHost);
 
-	/* in the beggining of the dialog */
+	/* in the beginning of the dialog */
 	/* attempt reconnect if the first Post fail */
 	if ((res = Post(Buffer)) != SUCCESS) {
 		MailConnect();

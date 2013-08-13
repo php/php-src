@@ -6,7 +6,7 @@
 and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
-           Copyright (c) 1997-2010 University of Cambridge
+           Copyright (c) 1997-2012 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 functions. */
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 
 /* Ensure that the PCREPOSIX_EXP_xxx macros are set appropriately for
@@ -150,6 +152,17 @@ static const int eint[] = {
   REG_BADPAT,  /* (*MARK) must have an argument */
   REG_INVARG,  /* this version of PCRE is not compiled with PCRE_UCP support */
   REG_BADPAT,  /* \c must be followed by an ASCII character */
+  REG_BADPAT,  /* \k is not followed by a braced, angle-bracketed, or quoted name */
+  /* 70 */
+  REG_BADPAT,  /* internal error: unknown opcode in find_fixedlength() */
+  REG_BADPAT,  /* \N is not supported in a class */
+  REG_BADPAT,  /* too many forward references */
+  REG_BADPAT,  /* disallowed UTF-8/16/32 code point (>= 0xd800 && <= 0xdfff) */
+  REG_BADPAT,  /* invalid UTF-16 string (should not occur) */
+  /* 75 */
+  REG_BADPAT,  /* overlong MARK name */
+  REG_BADPAT,  /* character value in \u.... sequence is too large */
+  REG_BADPAT   /* invalid UTF-32 string (should not occur) */
 };
 
 /* Table of texts corresponding to POSIX error codes */
@@ -220,7 +233,7 @@ return length + addlength;
 PCREPOSIX_EXP_DEFN void PCRE_CALL_CONVENTION
 regfree(regex_t *preg)
 {
-(pcre_free)(preg->re_pcre);
+(PUBL(free))(preg->re_pcre);
 }
 
 
@@ -247,6 +260,7 @@ const char *errorptr;
 int erroffset;
 int errorcode;
 int options = 0;
+int re_nsub = 0;
 
 if ((cflags & REG_ICASE) != 0)    options |= PCRE_CASELESS;
 if ((cflags & REG_NEWLINE) != 0)  options |= PCRE_MULTILINE;
@@ -265,11 +279,13 @@ should not happen, but we all make mistakes), return REG_BADPAT. */
 
 if (preg->re_pcre == NULL)
   {
-  return (errorcode < sizeof(eint)/sizeof(const int))?
+  return (errorcode < (int)(sizeof(eint)/sizeof(const int)))?
     eint[errorcode] : REG_BADPAT;
   }
 
-preg->re_nsub = pcre_info((const pcre *)preg->re_pcre, NULL, NULL);
+(void)pcre_fullinfo((const pcre *)preg->re_pcre, NULL, PCRE_INFO_CAPTURECOUNT,
+  &re_nsub);
+preg->re_nsub = (size_t)re_nsub;
 return 0;
 }
 
@@ -301,7 +317,7 @@ int *ovector = NULL;
 int small_ovector[POSIX_MALLOC_THRESHOLD * 3];
 BOOL allocated_ovector = FALSE;
 BOOL nosub =
-  (((const pcre *)preg->re_pcre)->options & PCRE_NO_AUTO_CAPTURE) != 0;
+  (REAL_PCRE_OPTIONS((const pcre *)preg->re_pcre) & PCRE_NO_AUTO_CAPTURE) != 0;
 
 if ((eflags & REG_NOTBOL) != 0) options |= PCRE_NOTBOL;
 if ((eflags & REG_NOTEOL) != 0) options |= PCRE_NOTEOL;
@@ -395,6 +411,7 @@ switch(rc)
   case PCRE_ERROR_MATCHLIMIT: return REG_ESPACE;
   case PCRE_ERROR_BADUTF8: return REG_INVARG;
   case PCRE_ERROR_BADUTF8_OFFSET: return REG_INVARG;
+  case PCRE_ERROR_BADMODE: return REG_INVARG;
   default: return REG_ASSERT;
   }
 }

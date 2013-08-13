@@ -44,7 +44,7 @@ ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int t
 }
 
 /* We wrap the execute function to have fire the execute-entry/return and function-entry/return probes */
-ZEND_API void dtrace_execute(zend_op_array *op_array TSRMLS_DC)
+ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 {
 	int lineno;
 	char *scope, *filename, *funcname, *classname;
@@ -72,7 +72,7 @@ ZEND_API void dtrace_execute(zend_op_array *op_array TSRMLS_DC)
 		DTRACE_FUNCTION_ENTRY(funcname, filename, lineno, classname, scope);
 	}
 
-	execute(op_array TSRMLS_CC);
+	execute_ex(execute_data TSRMLS_CC);
 
 	if (DTRACE_FUNCTION_RETURN_ENABLED() && funcname != NULL) {
 		DTRACE_FUNCTION_RETURN(funcname, filename, lineno, classname, scope);
@@ -83,7 +83,7 @@ ZEND_API void dtrace_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 }
 
-ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC)
+ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC)
 {
 	int lineno;
 	char *filename;
@@ -96,7 +96,7 @@ ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data_ptr, int r
 		DTRACE_EXECUTE_ENTRY(filename, lineno);
 	}
 
-	execute_internal(execute_data_ptr, return_value_used TSRMLS_CC);
+	execute_internal(execute_data_ptr, fci, return_value_used TSRMLS_CC);
 
 	if (DTRACE_EXECUTE_RETURN_ENABLED()) {
 		DTRACE_EXECUTE_RETURN(filename, lineno);

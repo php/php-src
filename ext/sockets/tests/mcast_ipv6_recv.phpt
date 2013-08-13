@@ -9,6 +9,9 @@ if (!defined('IPPROTO_IPV6')) {
 	die('skip IPv6 not available.');
 }
 $s = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
+if ($s === false) {
+  die("skip unable to create socket");
+}
 $br = socket_bind($s, '::', 3000);
 /* On Linux, there is no route ff00::/8 by default on lo, which makes it
  * troublesome to send multicast traffic from lo, which we must since

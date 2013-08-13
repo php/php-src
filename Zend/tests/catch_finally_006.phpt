@@ -25,4 +25,4 @@ try {
 --EXPECT--
 string(4) "para"
 string(7) "finally"
-string(2) "ex"
+string(6) "return"

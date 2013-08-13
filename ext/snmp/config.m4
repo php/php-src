@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(snmp,for SNMP support,
-[  --with-snmp[=DIR]       Include SNMP support])
+[  --with-snmp[=DIR]         Include SNMP support])
 
 PHP_ARG_WITH(openssl-dir,OpenSSL dir for SNMP,
 [  --with-openssl-dir[=DIR]  SNMP: openssl install prefix], no, no)
@@ -58,67 +58,6 @@ if test "$PHP_SNMP" != "no"; then
   ], [], [
     $SNMP_SHARED_LIBADD
   ])
-
-  dnl Check for buggy snmp_snprint_value() (net-snmp BUGid 2027834)
-  AC_CACHE_CHECK([for buggy snmp_snprint_value], ac_cv_buggy_snprint_value,[
-    save_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -I${SNMP_PREFIX}/include $SNMP_SHARED_LIBADD"
-    AC_TRY_RUN( [
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
-
-u_char uname[] = "Linux nex1.php.net 2.6.18-194.32.1.el5 #1 SMP Wed Jan 5 17:53:09 EST 2011 i686";
-
-int main(int argc, char **argv)
-{
-	struct variable_list vars;
-	char buf1[2048];
-	char buf2[sizeof(buf1)];
-	
-	memset(&(buf1[0]), 0, sizeof(buf1));
-	memset(&(buf2[0]), 0, sizeof(buf2));
-	memset(&vars, 0, sizeof(vars));
-	vars.type = 4;
-	vars.val.integer = (long *)&(uname[0]);
-	vars.val.string = &(uname[0]);
-	vars.val.bitstring = &(uname[0]);
-	vars.val.counter64 = (struct counter64 *)&(uname[0]);
-	vars.val.floatVal = (float *)&(uname[0]);
-	vars.val_len = sizeof(uname),
-	vars.name_loc[0] = 1;
-	vars.name_loc[1] = 3;
-	vars.name_loc[2] = 6;
-	vars.name_loc[3] = 1;
-	vars.name_loc[4] = 2;
-	vars.name_loc[5] = 1;
-	vars.name_loc[6] = 1;
-	vars.name_loc[7] = 1;
-	vars.name = (oid *)&(vars.name_loc);
-	vars.name_length = 9;
-
-	init_snmp("snmpapp");
-
-	netsnmp_ds_set_boolean(NETSNMP_DS_LIBRARY_ID, NETSNMP_DS_LIB_QUICK_PRINT, 0);
-
-	snprint_value(buf1, (sizeof(uname) + 32), vars.name, vars.name_length, &vars);
-	snprint_value(buf2, sizeof(buf2), vars.name, vars.name_length, &vars);
-	exit((strncmp(buf1, buf2, sizeof(buf1)) != 0));
-}
-    ],[
-      ac_cv_buggy_snprint_value=no
-    ],[
-      ac_cv_buggy_snprint_value=yes
-    ],[
-      ac_cv_buggy_snprint_value=no
-    ])
-    CFLAGS="$save_CFLAGS"
-  ])
-  if test "$ac_cv_buggy_snprint_value" = "yes"; then
-     AC_DEFINE(BUGGY_SNMPRINT_VALUE, 1, [ ])
-  fi
 
   PHP_NEW_EXTENSION(snmp, snmp.c, $ext_shared)
   PHP_SUBST(SNMP_SHARED_LIBADD)

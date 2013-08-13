@@ -8,6 +8,13 @@ else
   PHP_OCI8_SED="$SED";
 fi
 
+PHP_OCI8_TAIL1=`echo a | tail -n1 2>/dev/null`
+if test "$PHP_OCI8_TAIL1" = "a"; then
+    PHP_OCI8_TAIL1="tail -n1"
+else
+    PHP_OCI8_TAIL1="tail -1"
+fi
+
 AC_DEFUN([PHP_OCI_IF_DEFINED],[
   old_CPPFLAGS=$CPPFLAGS
   CPPFLAGS=$3
@@ -49,8 +56,8 @@ AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
 AC_DEFUN([AC_OCI8IC_VERSION],[
   AC_MSG_CHECKING([Oracle Instant Client library version compatibility])
   OCI8_LCS_BASE=$PHP_OCI8_INSTANT_CLIENT/libclntsh.$SHLIB_SUFFIX_NAME
-  OCI8_LCS=`ls $OCI8_LCS_BASE.*.1 2> /dev/null | tail -n1`  # Oracle 10g, 11g etc
-  OCI8_NNZ=`ls $PHP_OCI8_INSTANT_CLIENT/libnnz*.$SHLIB_SUFFIX_NAME 2> /dev/null | tail -n1`
+  OCI8_LCS=`ls $OCI8_LCS_BASE.*.1 2> /dev/null | $PHP_OCI8_TAIL1`  # Oracle 10g, 11g etc
+  OCI8_NNZ=`ls $PHP_OCI8_INSTANT_CLIENT/libnnz*.$SHLIB_SUFFIX_NAME 2> /dev/null | $PHP_OCI8_TAIL1`
   if test -f "$OCI8_NNZ" && test -f "$OCI8_LCS"; then
     if test ! -f "$OCI8_LCS_BASE"; then
       AC_MSG_ERROR([Link from $OCI8_LCS_BASE to $OCI8_LCS_BASE.*.1 not found])
@@ -65,7 +72,7 @@ AC_DEFUN([AC_OCI8IC_VERSION],[
 AC_DEFUN([AC_OCI8_ORACLE_VERSION],[
   AC_MSG_CHECKING([Oracle library version compatibility])
   OCI8_LCS_BASE=$OCI8_DIR/$OCI8_LIB_DIR/libclntsh.$SHLIB_SUFFIX_NAME
-  OCI8_LCS=`ls $OCI8_LCS_BASE.*.1 2> /dev/null | tail -n1`  # Oracle 10g, 11g etc
+  OCI8_LCS=`ls $OCI8_LCS_BASE.*.1 2> /dev/null | $PHP_OCI8_TAIL1`  # Oracle 10g, 11g etc
   if test -s "$OCI8_DIR/orainst/unix.rgs"; then
     OCI8_ORACLE_VERSION=`grep '"ocommon"' $OCI8_DIR/orainst/unix.rgs | $PHP_OCI8_SED 's/[ ][ ]*/:/g' | cut -d: -f 6 | cut -c 2-4`
     test -z "$OCI8_ORACLE_VERSION" && OCI8_ORACLE_VERSION=7.3
@@ -96,7 +103,7 @@ dnl --with-oci8=shared,instantclient,/path/to/client/dir/lib
 dnl or
 dnl --with-oci8=shared,/path/to/oracle/home
 PHP_ARG_WITH(oci8, for Oracle Database OCI8 support,
-[  --with-oci8[=DIR]       Include Oracle Database OCI8 support. DIR defaults to \$ORACLE_HOME.
+[  --with-oci8[=DIR]         Include Oracle Database OCI8 support. DIR defaults to \$ORACLE_HOME.
                           Use --with-oci8=instantclient,/path/to/instant/client/lib 
                           to use an Oracle Instant Client installation])
 
@@ -133,10 +140,27 @@ if test "$PHP_OCI8" != "no"; then
 
   if test "$oci8_php_version" -lt "4003009"; then
     AC_MSG_ERROR([You need at least PHP 4.3.9 to be able to use this version of OCI8. PHP $php_version found])
-  elif test "$oci8_php_version" -ge "6000000"; then
-    AC_MSG_ERROR([This version of OCI8 is not compatible with PHP 6 or higher])
   else
     AC_MSG_RESULT([$php_version, ok])
+  fi
+
+  dnl conditionally define PHP_INIT_DTRACE. 
+  dnl This prevents 'configure' failing for PECL installs on older PHP versions.
+  dnl Note DTrace support can't be enabled on older PHP versions.
+ AC_PROVIDE_IFELSE([PHP_INIT_DTRACE], [], [AC_DEFUN([PHP_INIT_DTRACE], )])
+
+  if test "$PHP_DTRACE" = "yes"; then
+    if test "$oci8_php_version" -lt "5004000"; then
+      AC_MSG_ERROR([You need at least PHP 5.4 to be able to use DTrace with PHP OCI8])
+    else
+      AC_CHECK_HEADERS([sys/sdt.h], [
+	 PHP_INIT_DTRACE([ext/oci8/oci8_dtrace.d],[ext/oci8/oci8_dtrace_gen.h],[ext/oci8/oci8.c \
+	 		ext/oci8/oci8_interface.c ext/oci8/oci8_collection.c ext/oci8/oci8_lob.c ext/oci8/oci8_statement.c])
+       ], [
+	 AC_MSG_ERROR(
+	   [Cannot find sys/sdt.h which is required for DTrace support])
+       ])
+    fi
   fi
 
   dnl Set some port specific directory components for use later
@@ -278,7 +302,7 @@ if test "$PHP_OCI8" != "no"; then
       dnl user must pass in the library directory.  But on Linux we default
       dnl to the most recent version in /usr/lib which is where the Oracle
       dnl Instant Client RPM gets installed.
-      PHP_OCI8_INSTANT_CLIENT=`ls -d /usr/lib/oracle/*/client${PHP_OCI8_IC_LIBDIR_SUFFIX}/lib/libclntsh.* 2> /dev/null | tail -n1 | $PHP_OCI8_SED -e 's#/libclntsh[^/]*##'`
+      PHP_OCI8_INSTANT_CLIENT=`ls -d /usr/lib/oracle/*/client${PHP_OCI8_IC_LIBDIR_SUFFIX}/lib/libclntsh.* 2> /dev/null | $PHP_OCI8_TAIL1 | $PHP_OCI8_SED -e 's#/libclntsh[^/]*##'`
       if test -z "$PHP_OCI8_INSTANT_CLIENT"; then
 	AC_MSG_ERROR([Oracle Instant Client directory /usr/lib/oracle/.../client${PHP_OCI8_IC_LIBDIR_SUFFIX}/lib libraries not found. Try --with-oci8=instantclient,DIR])
       fi

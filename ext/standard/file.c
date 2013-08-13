@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -159,6 +159,7 @@ static ZEND_RSRC_DTOR_FUNC(file_context_dtor)
 static void file_globals_ctor(php_file_globals *file_globals_p TSRMLS_DC)
 {
 	FG(pclose_ret) = 0;
+	FG(pclose_wait) = 0;
 	FG(user_stream_current_filename) = NULL;
 	FG(def_chunk_size) = PHP_SOCK_CHUNK_SIZE;
 	FG(wrapper_errors) = NULL;
@@ -960,7 +961,9 @@ PHP_FUNCTION(pclose)
 
 	PHP_STREAM_TO_ZVAL(stream, &arg1);
 
+	FG(pclose_wait) = 1;
 	zend_list_delete(stream->rsrc_id);
+	FG(pclose_wait) = 0;
 	RETURN_LONG(FG(pclose_ret));
 }
 /* }}} */
@@ -1281,7 +1284,7 @@ PHPAPI PHP_FUNCTION(fseek)
 */
 
 /* DEPRECATED APIs: Use php_stream_mkdir() instead */
-PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
+PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC)
 {
 	int ret;
 
@@ -1296,7 +1299,7 @@ PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
 	return ret;
 }
 
-PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC)
+PHPAPI int php_mkdir(const char *dir, long mode TSRMLS_DC)
 {
 	return php_mkdir_ex(dir, mode, REPORT_ERRORS TSRMLS_CC);
 }
@@ -1620,7 +1623,7 @@ PHP_FUNCTION(copy)
 
 /* {{{ php_copy_file
  */
-PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
+PHPAPI int php_copy_file(const char *src, const char *dest TSRMLS_DC)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
 }
@@ -1628,7 +1631,7 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 
 /* {{{ php_copy_file_ex
  */
-PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
+PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_flg TSRMLS_DC)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
 }
@@ -1636,7 +1639,7 @@ PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
 
 /* {{{ php_copy_file_ctx
  */
-PHPAPI int php_copy_file_ctx(char *src, char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
+PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
@@ -2445,7 +2448,7 @@ PHP_FUNCTION(sys_get_temp_dir)
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
-	RETURN_STRING((char *)php_get_temporary_directory(), 1);
+	RETURN_STRING((char *)php_get_temporary_directory(TSRMLS_C), 1);
 }
 /* }}} */
 

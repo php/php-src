@@ -1,5 +1,6 @@
 /-- This set of tests is for features that are compatible with all versions of
-    Perl 5, in non-UTF-8 mode. --/
+    Perl >= 5.10, in non-UTF-8 mode. It should run clean for both the 8-bit and
+    16-bit PCRE libraries. --/
 
 /the quick brown fox/
     the quick brown fox
@@ -4078,5 +4079,1228 @@
 
 /^\c/
     ?
+
+/(abc)\1/i
+   abc
+
+/(abc)\1/
+   abc
+
+/[^a]*/i
+    12abc
+    12ABC
+
+/[^a]*+/i
+    12abc
+    12ABC
+
+/[^a]*?X/i
+    ** Failers
+    12abc
+    12ABC
+    
+/[^a]+?X/i   
+    ** Failers
+    12abc
+    12ABC
+
+/[^a]?X/i
+    12aXbcX
+    12AXBCX
+    BCX 
+
+/[^a]??X/i
+    12aXbcX
+    12AXBCX
+    BCX
+    
+/[^a]?+X/i
+    12aXbcX
+    12AXBCX
+    BCX 
+
+/[^a]{2,3}/i
+    abcdef
+    ABCDEF  
+
+/[^a]{2,3}?/i
+    abcdef
+    ABCDEF  
+
+/[^a]{2,3}+/i
+    abcdef
+    ABCDEF  
+
+/((a|)+)+Z/
+    Z
+
+/(a)b|(a)c/
+    ac
+
+/(?>(a))b|(a)c/
+    ac
+
+/(?=(a))ab|(a)c/
+    ac
+
+/((?>(a))b|(a)c)/
+    ac
+
+/((?>(a))b|(a)c)++/
+    ac
+
+/(?:(?>(a))b|(a)c)++/
+    ac
+
+/(?=(?>(a))b|(a)c)(..)/
+    ac
+
+/(?>(?>(a))b|(a)c)/
+    ac
+
+/(?:(?>([ab])))+a=/+
+    =ba=
+
+/(?>([ab]))+a=/+
+    =ba=
+
+/((?>(a+)b)+(aabab))/
+    aaaabaaabaabab
+
+/(?>a+|ab)+?c/
+    aabc
+
+/(?>a+|ab)+c/
+    aabc
+
+/(?:a+|ab)+c/
+    aabc
+
+/(?(?=(a))a)/
+    a
+
+/(?(?=(a))a)(b)/
+    ab
+
+/^(?:a|ab)++c/
+    aaaabc
+
+/^(?>a|ab)++c/
+    aaaabc
+
+/^(?:a|ab)+c/
+    aaaabc
+
+/(?=abc){3}abc/+
+    abcabcabc
+    ** Failers
+    xyz  
+    
+/(?=abc)+abc/+
+    abcabcabc
+    ** Failers
+    xyz  
+    
+/(?=abc)++abc/+
+    abcabcabc
+    ** Failers
+    xyz  
+    
+/(?=abc){0}xyz/
+    xyz 
+
+/(?=abc){1}xyz/
+    ** Failers
+    xyz 
+    
+/(?=(a))?./
+    ab
+    bc
+      
+/(?=(a))??./
+    ab
+    bc
+
+/^(?=(a)){0}b(?1)/
+    backgammon
+
+/^(?=(?1))?[az]([abc])d/
+    abd 
+    zcdxx 
+
+/^(?!a){0}\w+/
+    aaaaa
+
+/(?<=(abc))?xyz/
+    abcxyz
+    pqrxyz 
+
+/^[\g<a>]+/
+    ggg<<<aaa>>>
+    ** Failers
+    \\ga  
+    
+/^[\ga]+/
+    gggagagaxyz 
+    
+/^[:a[:digit:]]+/
+    aaaa444:::Z 
+
+/^[:a[:digit:]:b]+/
+    aaaa444:::bbbZ 
+
+/[:a]xxx[b:]/
+     :xxx:
+     
+/(?<=a{2})b/i
+    xaabc
+    ** Failers
+    xabc  
+
+/(?<!a{2})b/i
+    xabc
+    ** Failers
+    xaabc  
+
+/(?<=a\h)c/
+    xa c
+    
+/(?<=[^a]{2})b/
+    axxbc
+    aAAbc 
+    ** Failers
+    xaabc    
+
+/(?<=[^a]{2})b/i
+    axxbc  
+    ** Failers
+    aAAbc 
+    xaabc    
+
+/(?<=a\H)c/
+    abc
+
+/(?<=a\V)c/
+    abc
+    
+/(?<=a\v)c/
+    a\nc
+
+/(?(?=c)c|d)++Y/
+    XcccddYX
+
+/(?(?=c)c|d)*+Y/
+    XcccddYX
+
+/^(a{2,3}){2,}+a/
+    aaaaaaa
+    ** Failers
+    aaaaaa
+    aaaaaaaaa 
+
+/^(a{2,3})++a/
+    ** Failers
+    aaaaaa
+
+/^(a{2,3})*+a/
+    ** Failers
+    aaaaaa
+
+/ab\Cde/
+    abXde
+    
+/(?<=ab\Cde)X/
+    abZdeX
+
+/a[\CD]b/
+    aCb
+    aDb 
+
+/a[\C-X]b/
+    aJb
+
+/\H\h\V\v/
+    X X\x0a
+    X\x09X\x0b
+    ** Failers
+    \xa0 X\x0a   
+    
+/\H*\h+\V?\v{3,4}/ 
+    \x09\x20\xa0X\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\xa0\x0a\x0b\x0c\x0d\x0a
+    \x09\x20\xa0\x0a\x0b\x0c
+    ** Failers 
+    \x09\x20\xa0\x0a\x0b
+     
+/\H{3,4}/
+    XY  ABCDE
+    XY  PQR ST 
+    
+/.\h{3,4}./
+    XY  AB    PQRS
+
+/\h*X\h?\H+Y\H?Z/
+    >XNNNYZ
+    >  X NYQZ
+    ** Failers
+    >XYZ   
+    >  X NY Z
+
+/\v*X\v?Y\v+Z\V*\x0a\V+\x0b\V{2,3}\x0c/
+    >XY\x0aZ\x0aA\x0bNN\x0c
+    >\x0a\x0dX\x0aY\x0a\x0bZZZ\x0aAAA\x0bNNN\x0c
+
+/(foo)\Kbar/
+    foobar
+   
+/(foo)(\Kbar|baz)/
+    foobar
+    foobaz 
+
+/(foo\Kbar)baz/
+    foobarbaz
+
+/abc\K|def\K/g+
+    Xabcdefghi
+
+/ab\Kc|de\Kf/g+
+    Xabcdefghi
+    
+/(?=C)/g+
+    ABCDECBA
+    
+/^abc\K/+
+    abcdef
+    ** Failers
+    defabcxyz   
+
+/^(a(b))\1\g1\g{1}\g-1\g{-1}\g{-02}Z/
+    ababababbbabZXXXX
+
+/(?<A>tom|bon)-\g{A}/
+    tom-tom
+    bon-bon 
+    
+/(^(a|b\g{-1}))/
+    bacxxx
+
+/(?|(abc)|(xyz))\1/
+    abcabc
+    xyzxyz 
+    ** Failers
+    abcxyz
+    xyzabc   
+    
+/(?|(abc)|(xyz))(?1)/
+    abcabc
+    xyzabc 
+    ** Failers 
+    xyzxyz 
+ 
+/^X(?5)(a)(?|(b)|(q))(c)(d)(Y)/
+    XYabcdY
+
+/^X(?7)(a)(?|(b|(r)(s))|(q))(c)(d)(Y)/
+    XYabcdY
+
+/^X(?7)(a)(?|(b|(?|(r)|(t))(s))|(q))(c)(d)(Y)/
+    XYabcdY
+
+/(?'abc'\w+):\k<abc>{2}/
+    a:aaxyz
+    ab:ababxyz
+    ** Failers
+    a:axyz
+    ab:abxyz
+
+/(?'abc'\w+):\g{abc}{2}/
+    a:aaxyz
+    ab:ababxyz
+    ** Failers
+    a:axyz
+    ab:abxyz
+
+/^(?<ab>a)? (?(<ab>)b|c) (?('ab')d|e)/x
+    abd
+    ce
+
+/^(a.)\g-1Z/
+    aXaXZ
+
+/^(a.)\g{-1}Z/
+    aXaXZ
+
+/^(?(DEFINE) (?<A> a) (?<B> b) )  (?&A) (?&B) /x
+    abcd
+
+/(?<NAME>(?&NAME_PAT))\s+(?<ADDR>(?&ADDRESS_PAT))
+  (?(DEFINE)
+  (?<NAME_PAT>[a-z]+)
+  (?<ADDRESS_PAT>\d+)
+  )/x
+    metcalfe 33
+
+/(?(DEFINE)(?<byte>2[0-4]\d|25[0-5]|1\d\d|[1-9]?\d))\b(?&byte)(\.(?&byte)){3}/
+    1.2.3.4
+    131.111.10.206
+    10.0.0.0
+    ** Failers
+    10.6
+    455.3.4.5
+
+/\b(?&byte)(\.(?&byte)){3}(?(DEFINE)(?<byte>2[0-4]\d|25[0-5]|1\d\d|[1-9]?\d))/
+    1.2.3.4
+    131.111.10.206
+    10.0.0.0
+    ** Failers
+    10.6
+    455.3.4.5
+
+/^(\w++|\s++)*$/
+    now is the time for all good men to come to the aid of the party
+    *** Failers
+    this is not a line with only words and spaces!
+
+/(\d++)(\w)/
+    12345a
+    *** Failers
+    12345+
+
+/a++b/
+    aaab
+
+/(a++b)/
+    aaab
+
+/(a++)b/
+    aaab
+
+/([^()]++|\([^()]*\))+/
+    ((abc(ade)ufh()()x
+
+/\(([^()]++|\([^()]+\))+\)/
+    (abc)
+    (abc(def)xyz)
+    *** Failers
+    ((()aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+/^([^()]|\((?1)*\))*$/
+    abc
+    a(b)c
+    a(b(c))d
+    *** Failers)
+    a(b(c)d
+
+/^>abc>([^()]|\((?1)*\))*<xyz<$/
+   >abc>123<xyz<
+   >abc>1(2)3<xyz<
+   >abc>(1(2)3)<xyz<
+
+/^(?:((.)(?1)\2|)|((.)(?3)\4|.))$/i
+    1221
+    Satanoscillatemymetallicsonatas
+    AmanaplanacanalPanama
+    AblewasIereIsawElba
+    *** Failers
+    Thequickbrownfox
+
+/^(\d+|\((?1)([+*-])(?1)\)|-(?1))$/
+    12
+    (((2+2)*-3)-7)
+    -12
+    *** Failers
+    ((2+2)*-3)-7)
+
+/^(x(y|(?1){2})z)/
+    xyz
+    xxyzxyzz
+    *** Failers
+    xxyzz
+    xxyzxyzxyzz
+
+/((< (?: (?(R) \d++  | [^<>]*+) | (?2)) * >))/x
+    <>
+    <abcd>
+    <abc <123> hij>
+    <abc <def> hij>
+    <abc<>def>
+    <abc<>
+    *** Failers
+    <abc
+
+/^a+(*FAIL)/
+    aaaaaa
+    
+/a+b?c+(*FAIL)/
+    aaabccc
+
+/a+b?(*PRUNE)c+(*FAIL)/
+    aaabccc
+
+/a+b?(*COMMIT)c+(*FAIL)/
+    aaabccc
+    
+/a+b?(*SKIP)c+(*FAIL)/
+    aaabcccaaabccc
+
+/^(?:aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
+    aaaxxxxxx
+    aaa++++++ 
+    bbbxxxxx
+    bbb+++++ 
+    cccxxxx
+    ccc++++ 
+    dddddddd   
+
+/^(aaa(*THEN)\w{6}|bbb(*THEN)\w{5}|ccc(*THEN)\w{4}|\w{3})/
+    aaaxxxxxx
+    aaa++++++ 
+    bbbxxxxx
+    bbb+++++ 
+    cccxxxx
+    ccc++++ 
+    dddddddd   
+
+/a+b?(*THEN)c+(*FAIL)/
+    aaabccc
+
+/(A (A|B(*ACCEPT)|C) D)(E)/x
+    AB
+    ABX
+    AADE
+    ACDE
+    ** Failers
+    AD 
+        
+/^\W*+(?:((.)\W*+(?1)\W*+\2|)|((.)\W*+(?3)\W*+\4|\W*+.\W*+))\W*+$/i
+    1221
+    Satan, oscillate my metallic sonatas!
+    A man, a plan, a canal: Panama!
+    Able was I ere I saw Elba.
+    *** Failers
+    The quick brown fox
+
+/^((.)(?1)\2|.)$/
+    a
+    aba
+    aabaa  
+    abcdcba 
+    pqaabaaqp  
+    ablewasiereisawelba
+    rhubarb
+    the quick brown fox  
+
+/(a)(?<=b(?1))/
+    baz
+    ** Failers
+    caz  
+    
+/(?<=b(?1))(a)/
+    zbaaz
+    ** Failers
+    aaa  
+    
+/(?<X>a)(?<=b(?&X))/
+    baz
+
+/^(?|(abc)|(def))\1/
+    abcabc
+    defdef 
+    ** Failers
+    abcdef
+    defabc   
+    
+/^(?|(abc)|(def))(?1)/
+    abcabc
+    defabc
+    ** Failers
+    defdef
+    abcdef    
+
+/(?:a(?<quote> (?<apostrophe>')|(?<realquote>")) |b(?<quote> (?<apostrophe>')|(?<realquote>")) ) (?('quote')[a-z]+|[0-9]+)/xJ
+    a\"aaaaa
+    b\"aaaaa 
+    ** Failers 
+    b\"11111
+
+/(?:(?1)|B)(A(*F)|C)/
+    ABCD
+    CCD
+    ** Failers
+    CAD   
+
+/^(?:(?1)|B)(A(*F)|C)/
+    CCD
+    BCD 
+    ** Failers
+    ABCD
+    CAD
+    BAD    
+
+/(?:(?1)|B)(A(*ACCEPT)XX|C)D/
+    AAD
+    ACD
+    BAD
+    BCD
+    BAX  
+    ** Failers
+    ACX
+    ABC   
+
+/(?(DEFINE)(A))B(?1)C/
+    BAC
+
+/(?(DEFINE)((A)\2))B(?1)C/
+    BAAC
+
+/(?<pn> \( ( [^()]++ | (?&pn) )* \) )/x
+    (ab(cd)ef)
+
+/^(?!a(*SKIP)b)/
+    ac
+    
+/^(?=a(*SKIP)b|ac)/
+    ** Failers
+    ac
+    
+/^(?=a(*THEN)b|ac)/
+    ac
+    
+/^(?=a(*PRUNE)b)/
+    ab  
+    ** Failers 
+    ac
+
+/^(?=a(*ACCEPT)b)/
+    ac
+
+/^(?(?!a(*SKIP)b))/
+    ac
+
+/(?>a\Kb)/
+    ab
+
+/((?>a\Kb))/
+    ab
+
+/(a\Kb)/
+    ab
+    
+/^a\Kcz|ac/
+    ac
+    
+/(?>a\Kbz|ab)/
+    ab 
+
+/^(?&t)(?(DEFINE)(?<t>a\Kb))$/
+    ab
+
+/^([^()]|\((?1)*\))*$/
+    a(b)c
+    a(b(c)d)e 
+
+/(?P<L1>(?P<L2>0)(?P>L1)|(?P>L2))/
+    0
+    00
+    0000  
+
+/(?P<L1>(?P<L2>0)|(?P>L2)(?P>L1))/
+    0
+    00
+    0000  
+
+/--- This one does fail, as expected, in Perl. It needs the complex item at the
+     end of the pattern. A single letter instead of (B|D) makes it not fail,
+     which I think is a Perl bug. --- /
+
+/A(*COMMIT)(B|D)/
+    ACABX
+
+/--- Check the use of names for failure ---/
+
+/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/K
+    ** Failers
+    AC
+    CB    
+    
+/--- Force no study, otherwise mark is not seen. The studied version is in
+     test 2 because it isn't Perl-compatible. ---/
+
+/(*MARK:A)(*SKIP:B)(C|X)/KSS
+    C
+    D
+     
+/^(A(*THEN:A)B|C(*THEN:B)D)/K
+    ** Failers
+    CB    
+
+/^(?:A(*THEN:A)B|C(*THEN:B)D)/K
+    CB    
+    
+/^(?>A(*THEN:A)B|C(*THEN:B)D)/K
+    CB    
+    
+/--- This should succeed, as the skip causes bump to offset 1 (the mark). Note
+that we have to have something complicated such as (B|Z) at the end because,
+for Perl, a simple character somehow causes an unwanted optimization to mess
+with the handling of backtracking verbs. ---/
+
+/A(*MARK:A)A+(*SKIP:A)(B|Z) | AC/xK
+    AAAC
+    
+/--- Test skipping over a non-matching mark. ---/
+
+/A(*MARK:A)A+(*MARK:B)(*SKIP:A)(B|Z) | AC/xK
+    AAAC
+    
+/--- Check shorthand for MARK ---/
+
+/A(*:A)A+(*SKIP:A)(B|Z) | AC/xK
+    AAAC
+
+/--- Don't loop! Force no study, otherwise mark is not seen. ---/
+
+/(*:A)A+(*SKIP:A)(B|Z)/KSS
+    AAAC
+
+/--- This should succeed, as a non-existent skip name disables the skip ---/ 
+
+/A(*MARK:A)A+(*SKIP:B)(B|Z) | AC/xK
+    AAAC
+
+/A(*MARK:A)A+(*SKIP:B)(B|Z) | AC(*:B)/xK
+    AAAC
+
+/--- COMMIT at the start of a pattern should act like an anchor. Again, 
+however, we need the complication for Perl. ---/
+
+/(*COMMIT)(A|P)(B|P)(C|P)/
+    ABCDEFG
+    ** Failers
+    DEFGABC  
+
+/--- COMMIT inside an atomic group can't stop backtracking over the group. ---/
+
+/(\w+)(?>b(*COMMIT))\w{2}/
+    abbb
+
+/(\w+)b(*COMMIT)\w{2}/
+    abbb
+
+/--- Check opening parens in comment when seeking forward reference. ---/ 
+
+/(?&t)(?#()(?(DEFINE)(?<t>a))/
+    bac
+
+/--- COMMIT should override THEN ---/
+
+/(?>(*COMMIT)(?>yes|no)(*THEN)(*F))?/
+  yes
+
+/(?>(*COMMIT)(yes|no)(*THEN)(*F))?/
+  yes
+
+/b?(*SKIP)c/
+    bc
+    abc
+   
+/(*SKIP)bc/
+    a
+
+/(*SKIP)b/
+    a 
+
+/(?P<abn>(?P=abn)xxx|)+/
+    xxx
+
+/(?i:([^b]))(?1)/
+    aa
+    aA     
+    ** Failers
+    ab
+    aB
+    Ba
+    ba
+
+/^(?&t)*+(?(DEFINE)(?<t>a))\w$/
+    aaaaaaX
+    ** Failers 
+    aaaaaa 
+
+/^(?&t)*(?(DEFINE)(?<t>a))\w$/
+    aaaaaaX
+    aaaaaa 
+
+/^(a)*+(\w)/
+    aaaaX
+    YZ 
+    ** Failers 
+    aaaa
+
+/^(?:a)*+(\w)/
+    aaaaX
+    YZ 
+    ** Failers 
+    aaaa
+
+/^(a)++(\w)/
+    aaaaX
+    ** Failers 
+    aaaa
+    YZ 
+
+/^(?:a)++(\w)/
+    aaaaX
+    ** Failers 
+    aaaa
+    YZ 
+
+/^(a)?+(\w)/
+    aaaaX
+    YZ 
+
+/^(?:a)?+(\w)/
+    aaaaX
+    YZ 
+
+/^(a){2,}+(\w)/
+    aaaaX
+    ** Failers
+    aaa
+    YZ 
+
+/^(?:a){2,}+(\w)/
+    aaaaX
+    ** Failers
+    aaa
+    YZ 
+
+/(a|)*(?1)b/
+    b
+    ab
+    aab  
+
+/(a)++(?1)b/
+    ** Failers
+    ab 
+    aab
+
+/(a)*+(?1)b/
+    ** Failers
+    ab
+    aab  
+
+/(?1)(?:(b)){0}/
+    b
+
+/(foo ( \( ((?:(?> [^()]+ )|(?2))*) \) ) )/x
+    foo(bar(baz)+baz(bop))
+
+/(A (A|B(*ACCEPT)|C) D)(E)/x
+    AB
+
+/\A.*?(?:a|b(*THEN)c)/
+    ba
+
+/\A.*?(?:a|bc)/
+    ba
+
+/\A.*?(a|b(*THEN)c)/
+    ba
+
+/\A.*?(a|bc)/
+    ba
+
+/\A.*?(?:a|b(*THEN)c)++/
+    ba
+
+/\A.*?(?:a|bc)++/
+    ba
+
+/\A.*?(a|b(*THEN)c)++/
+    ba
+
+/\A.*?(a|bc)++/
+    ba
+
+/\A.*?(?:a|b(*THEN)c|d)/
+    ba
+
+/\A.*?(?:a|bc|d)/
+    ba
+
+/(?:(b))++/
+    beetle
+
+/(?(?=(a(*ACCEPT)z))a)/
+    a
+
+/^(a)(?1)+ab/
+    aaaab
+    
+/^(a)(?1)++ab/
+    aaaab
+
+/^(?=a(*:M))aZ/K
+    aZbc
+
+/^(?!(*:M)b)aZ/K
+    aZbc
+
+/(?(DEFINE)(a))?b(?1)/
+    backgammon
+
+/^\N+/
+    abc\ndef
+    
+/^\N{1,}/
+    abc\ndef 
+
+/(?(R)a+|(?R)b)/
+    aaaabcde
+
+/(?(R)a+|((?R))b)/
+    aaaabcde
+
+/((?(R)a+|(?1)b))/
+    aaaabcde
+
+/((?(R1)a+|(?1)b))/
+    aaaabcde
+
+/a(*:any 
+name)/K
+    abc
+    
+/(?>(?&t)c|(?&t))(?(DEFINE)(?<t>a|b(*PRUNE)c))/
+    a
+    ba
+    bba 
+    
+/--- Checking revised (*THEN) handling ---/ 
+
+/--- Capture ---/
+
+/^.*? (a(*THEN)b) c/x
+    aabc
+
+/^.*? (a(*THEN)b|(*F)) c/x
+    aabc
+
+/^.*? ( (a(*THEN)b) | (*F) ) c/x
+    aabc
+
+/^.*? ( (a(*THEN)b) ) c/x
+    aabc
+
+/--- Non-capture ---/
+
+/^.*? (?:a(*THEN)b) c/x
+    aabc
+
+/^.*? (?:a(*THEN)b|(*F)) c/x
+    aabc
+
+/^.*? (?: (?:a(*THEN)b) | (*F) ) c/x
+    aabc
+
+/^.*? (?: (?:a(*THEN)b) ) c/x
+    aabc
+
+/--- Atomic ---/
+
+/^.*? (?>a(*THEN)b) c/x
+    aabc
+
+/^.*? (?>a(*THEN)b|(*F)) c/x
+    aabc
+
+/^.*? (?> (?>a(*THEN)b) | (*F) ) c/x
+    aabc
+
+/^.*? (?> (?>a(*THEN)b) ) c/x
+    aabc
+
+/--- Possessive capture ---/
+
+/^.*? (a(*THEN)b)++ c/x
+    aabc
+
+/^.*? (a(*THEN)b|(*F))++ c/x
+    aabc
+
+/^.*? ( (a(*THEN)b)++ | (*F) )++ c/x
+    aabc
+
+/^.*? ( (a(*THEN)b)++ )++ c/x
+    aabc
+
+/--- Possessive non-capture ---/
+
+/^.*? (?:a(*THEN)b)++ c/x
+    aabc
+
+/^.*? (?:a(*THEN)b|(*F))++ c/x
+    aabc
+
+/^.*? (?: (?:a(*THEN)b)++ | (*F) )++ c/x
+    aabc
+
+/^.*? (?: (?:a(*THEN)b)++ )++ c/x
+    aabc
+    
+/--- Condition assertion ---/
+
+/^(?(?=a(*THEN)b)ab|ac)/
+    ac
+ 
+/--- Condition ---/
+
+/^.*?(?(?=a)a|b(*THEN)c)/
+    ba
+
+/^.*?(?:(?(?=a)a|b(*THEN)c)|d)/
+    ba
+
+/^.*?(?(?=a)a(*THEN)b|c)/
+    ac
+
+/--- Assertion ---/
+
+/^.*(?=a(*THEN)b)/ 
+    aabc
+
+/------------------------------/
+
+/(?>a(*:m))/imsxSK 
+    a
+
+/(?>(a)(*:m))/imsxSK 
+    a
+
+/(?<=a(*ACCEPT)b)c/
+    xacd
+
+/(?<=(a(*ACCEPT)b))c/
+    xacd
+
+/(?<=(a(*COMMIT)b))c/
+    xabcd
+    ** Failers 
+    xacd
+    
+/(?<!a(*FAIL)b)c/
+    xcd
+    acd 
+
+/(?<=a(*:N)b)c/K
+    xabcd
+    
+/(?<=a(*PRUNE)b)c/
+    xabcd 
+
+/(?<=a(*SKIP)b)c/
+    xabcd 
+
+/(?<=a(*THEN)b)c/
+    xabcd 
+
+/(a)(?2){2}(.)/
+    abcd
+
+/(*MARK:A)(*PRUNE:B)(C|X)/KS
+    C
+    D 
+
+/(*MARK:A)(*PRUNE:B)(C|X)/KSS
+    C
+    D 
+
+/(*MARK:A)(*THEN:B)(C|X)/KS
+    C
+    D 
+
+/(*MARK:A)(*THEN:B)(C|X)/KSY
+    C
+    D 
+
+/(*MARK:A)(*THEN:B)(C|X)/KSS
+    C
+    D 
+
+/--- This should fail, as the skip causes a bump to offset 3 (the skip) ---/
+
+/A(*MARK:A)A+(*SKIP)(B|Z) | AC/xK
+    AAAC
+
+/--- Same --/
+
+/A(*MARK:A)A+(*MARK:B)(*SKIP:B)(B|Z) | AC/xK
+    AAAC
+
+/A(*:A)A+(*SKIP)(B|Z) | AC/xK
+    AAAC
+
+/--- This should fail, as a null name is the same as no name ---/
+
+/A(*MARK:A)A+(*SKIP:)(B|Z) | AC/xK
+    AAAC
+
+/--- A check on what happens after hitting a mark and them bumping along to
+something that does not even start. Perl reports tags after the failures here, 
+though it does not when the individual letters are made into something 
+more complicated. ---/
+
+/A(*:A)B|XX(*:B)Y/K
+    AABC
+    XXYZ 
+    ** Failers
+    XAQQ  
+    XAQQXZZ  
+    AXQQQ 
+    AXXQQQ 
+    
+/^(A(*THEN:A)B|C(*THEN:B)D)/K
+    AB
+    CD
+    ** Failers
+    AC
+    CB    
+    
+/^(A(*PRUNE:A)B|C(*PRUNE:B)D)/K
+    AB
+    CD
+    ** Failers
+    AC
+    CB    
+    
+/--- An empty name does not pass back an empty string. It is the same as if no
+name were given. ---/ 
+
+/^(A(*PRUNE:)B|C(*PRUNE:B)D)/K
+    AB
+    CD 
+
+/--- PRUNE goes to next bumpalong; COMMIT does not. ---/
+    
+/A(*PRUNE:A)B/K
+    ACAB
+
+/--- Mark names can be duplicated ---/
+
+/A(*:A)B|X(*:A)Y/K
+    AABC
+    XXYZ 
+    
+/b(*:m)f|a(*:n)w/K
+    aw 
+    ** Failers 
+    abc
+
+/b(*:m)f|aw/K
+    abaw
+    ** Failers 
+    abc
+    abax 
+
+/A(*MARK:A)A+(*SKIP:B)(B|Z) | AAC/xK
+    AAAC
+
+/a(*PRUNE:X)bc|qq/KY
+    ** Failers
+    axy
+
+/a(*THEN:X)bc|qq/KY
+    ** Failers
+    axy
+
+/(?=a(*MARK:A)b)..x/K
+    abxy
+    ** Failers
+    abpq  
+
+/(?=a(*MARK:A)b)..(*:Y)x/K
+    abxy
+    ** Failers
+    abpq  
+
+/(?=a(*PRUNE:A)b)..x/K
+    abxy
+    ** Failers
+    abpq  
+
+/(?=a(*PRUNE:A)b)..(*:Y)x/K
+    abxy
+    ** Failers
+    abpq  
+
+/(?=a(*THEN:A)b)..x/K
+    abxy
+    ** Failers
+    abpq  
+
+/(?=a(*THEN:A)b)..(*:Y)x/K
+    abxy
+    ** Failers
+    abpq  
+
+/(another)?(\1?)test/
+    hello world test
+
+/(another)?(\1+)test/
+    hello world test
+
+/(a(*COMMIT)b){0}a(?1)|aac/
+    aac
+
+/(?!a(*COMMIT)b)ac|cd/
+    ac
+
+/((?:a?)*)*c/
+  aac   
+
+/((?>a?)*)*c/
+  aac   
+
+/(?>.*?a)(?<=ba)/
+    aba
+
+/(?:.*?a)(?<=ba)/
+    aba
+
+/.*?a(*PRUNE)b/
+    aab
+
+/.*?a(*PRUNE)b/s
+    aab
+
+/^a(*PRUNE)b/s
+    aab
+
+/.*?a(*SKIP)b/
+    aab
+
+/(?>.*?a)b/s
+    aab
+
+/(?>.*?a)b/
+    aab
+
+/(?>^a)b/s
+    aab
+
+/(?>.*?)(?<=(abcd)|(wxyz))/
+    alphabetabcd
+    endingwxyz 
+
+/(?>.*)(?<=(abcd)|(wxyz))/
+    alphabetabcd
+    endingwxyz 
+
+"(?>.*)foo"
+    abcdfooxyz
+    
+"(?>.*?)foo"
+    abcdfooxyz
 
 /-- End of testinput1 --/

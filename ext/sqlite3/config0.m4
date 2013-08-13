@@ -3,7 +3,7 @@ dnl config.m4 for extension sqlite3
 dnl vim:et:ts=2:sw=2
 
 PHP_ARG_WITH(sqlite3, whether to enable the SQLite3 extension,
-[  --without-sqlite3[=DIR] Do not include SQLite3 support. DIR is the prefix to
+[  --without-sqlite3[=DIR]   Do not include SQLite3 support. DIR is the prefix to
                           SQLite3 installation directory.], yes)
 
 if test $PHP_SQLITE3 != "no"; then
@@ -49,6 +49,9 @@ if test $PHP_SQLITE3 != "no"; then
 
     PHP_CHECK_LIBRARY(sqlite3,sqlite3_key,[
       AC_DEFINE(HAVE_SQLITE3_KEY, 1, [have commercial sqlite3 with crypto support])
+    ])
+    PHP_CHECK_LIBRARY(sqlite3,sqlite3_column_table_name,[
+      AC_DEFINE(SQLITE_ENABLE_COLUMN_METADATA, 1, [have sqlite3 with column metadata enabled])
     ])
 
     PHP_CHECK_LIBRARY(sqlite3,sqlite3_load_extension,

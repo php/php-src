@@ -27,26 +27,26 @@ echo "Done\n";
 
 ?>
 --EXPECTF--
-Warning: stream_context_create(): options should have the form ["wrappername"]["optionname"] = $value in %s004.php on line 10
-NULL
+Warning: stream_context_create(): options should have the form ["wrappername"]["optionname"] = $value in %s004.php on line %d
 
-Warning: DOMDocument::load(): supplied argument is not a valid Stream-Context resource in %s004.php on line 18
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, null given in %s004.php on line %d
+NULL
 bool(true)
-NULL
 
-Warning: DOMDocument::load(): supplied argument is not a valid Stream-Context resource in %s004.php on line 18
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, string given in %s004.php on line %d
+NULL
 bool(true)
-NULL
 
-Warning: DOMDocument::load(): supplied argument is not a valid Stream-Context resource in %s004.php on line 18
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, integer given in %s004.php on line %d
+NULL
 bool(true)
-NULL
 
-Warning: DOMDocument::load(): supplied argument is not a valid Stream-Context resource in %s004.php on line 18
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, object given in %s004.php on line %d
+NULL
 bool(true)
-NULL
 
-Warning: DOMDocument::load(): supplied argument is not a valid Stream-Context resource in %s004.php on line 18
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, array given in %s004.php on line %d
+NULL
 bool(true)
 NULL
 bool(true)

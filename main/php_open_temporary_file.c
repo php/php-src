@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -189,11 +189,26 @@ PHPAPI void php_shutdown_temporary_directory(void)
 /*
  *  Determine where to place temporary files.
  */
-PHPAPI const char* php_get_temporary_directory(void)
+PHPAPI const char* php_get_temporary_directory(TSRMLS_D)
 {
 	/* Did we determine the temporary directory already? */
 	if (temporary_directory) {
 		return temporary_directory;
+	}
+
+	/* Is there a temporary directory "sys_temp_dir" in .ini defined? */
+	{
+		char *sys_temp_dir = PG(sys_temp_dir);
+		if (sys_temp_dir) {
+			int len = strlen(sys_temp_dir);
+			if (len >= 2 && sys_temp_dir[len - 1] == DEFAULT_SLASH) {
+				temporary_directory = zend_strndup(sys_temp_dir, len - 1);
+				return temporary_directory;
+			} else if (len >= 1 && sys_temp_dir[len - 1] != DEFAULT_SLASH) {
+				temporary_directory = zend_strndup(sys_temp_dir, len);
+				return temporary_directory;
+			}
+		}
 	}
 
 #ifdef PHP_WIN32
@@ -263,7 +278,7 @@ PHPAPI int php_open_temporary_fd_ex(const char *dir, const char *pfx, char **ope
 
 	if (!dir || *dir == '\0') {
 def_tmp:
-		temp_dir = php_get_temporary_directory();
+		temp_dir = php_get_temporary_directory(TSRMLS_C);
 
 		if (temp_dir && *temp_dir != '\0' && (!open_basedir_check || !php_check_open_basedir(temp_dir TSRMLS_CC))) {
 			return php_do_open_temporary_file(temp_dir, pfx, opened_path_p TSRMLS_CC);
@@ -294,12 +309,12 @@ PHPAPI FILE *php_open_temporary_file(const char *dir, const char *pfx, char **op
 	if (fd == -1) {
 		return NULL;
 	}
-	
+
 	fp = fdopen(fd, "r+b");
 	if (fp == NULL) {
 		close(fd);
 	}
-	
+
 	return fp;
 }
 /* }}} */

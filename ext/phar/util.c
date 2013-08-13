@@ -3,7 +3,7 @@
   | phar php single-file executable PHP extension                        |
   | utility functions                                                    |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2012 The PHP Group                                |
+  | Copyright (c) 2005-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -572,7 +572,7 @@ not_stream:
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
+int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, const char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -733,7 +733,7 @@ really_get_entry:
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
+phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, const char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
@@ -889,6 +889,10 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 	dest->offset = 0;
 	dest->is_modified = 1;
 	dest->fp = php_stream_fopen_tmpfile();
+	if (dest->fp == NULL) {
+		spprintf(error, 0, "phar error: unable to create temporary file");
+		return EOF;
+	}
 	phar_seek_efp(source, 0, SEEK_SET, 0, 1 TSRMLS_CC);
 	link = phar_get_link_source(source TSRMLS_CC);
 
@@ -1129,6 +1133,10 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) /* {{
 	}
 
 	fp = php_stream_fopen_tmpfile();
+	if (fp == NULL) {
+		spprintf(error, 0, "phar error: unable to create temporary file");
+		return FAILURE;
+	}
 	phar_seek_efp(entry, 0, SEEK_SET, 0, 1 TSRMLS_CC);
 	link = phar_get_link_source(entry TSRMLS_CC);
 
@@ -1546,7 +1554,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 
 		zend_hash_internal_pointer_reset(&phar->mounted_dirs);
 		while (FAILURE != zend_hash_has_more_elements(&phar->mounted_dirs)) {
-			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
+			if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
 				break;
 			}
 
@@ -2118,8 +2126,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 #ifdef PHAR_HAVE_OPENSSL
 			BIO *in;
 			EVP_PKEY *key;
-			EVP_MD *mdtype = (EVP_MD *) EVP_sha1();
-			EVP_MD_CTX md_ctx;
+			EVP_MD_CTX *md_ctx;
 
 			in = BIO_new_mem_buf(PHAR_G(openssl_privatekey), PHAR_G(openssl_privatekey_len));
 
@@ -2140,15 +2147,30 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 				return FAILURE;
 			}
 
+			md_ctx = EVP_MD_CTX_create();
+
 			siglen = EVP_PKEY_size(key);
 			sigbuf = emalloc(siglen + 1);
-			EVP_SignInit(&md_ctx, mdtype);
 
-			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
-				EVP_SignUpdate(&md_ctx, buf, sig_len);
+			if (!EVP_SignInit(md_ctx, EVP_sha1())) {
+				efree(sigbuf);
+				if (error) {
+					spprintf(error, 0, "unable to initialize openssl signature for phar \"%s\"", phar->fname);
+				}
+				return FAILURE;
 			}
 
-			if (!EVP_SignFinal (&md_ctx, sigbuf,(unsigned int *)&siglen, key)) {
+			while ((sig_len = php_stream_read(fp, (char*)buf, sizeof(buf))) > 0) {
+				if (!EVP_SignUpdate(md_ctx, buf, sig_len)) {
+					efree(sigbuf);
+					if (error) {
+						spprintf(error, 0, "unable to update the openssl signature for phar \"%s\"", phar->fname);
+					}
+					return FAILURE;
+				}
+			}
+
+			if (!EVP_SignFinal (md_ctx, sigbuf,(unsigned int *)&siglen, key)) {
 				efree(sigbuf);
 				if (error) {
 					spprintf(error, 0, "unable to write phar \"%s\" with requested openssl signature", phar->fname);
@@ -2157,7 +2179,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			}
 
 			sigbuf[siglen] = '\0';
-			EVP_MD_CTX_cleanup(&md_ctx);
+			EVP_MD_CTX_destroy(md_ctx);
 #else
 			sigbuf = NULL;
 			siglen = 0;

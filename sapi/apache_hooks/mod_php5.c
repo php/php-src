@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5							  |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group				  |
+   | Copyright (c) 1997-2013 The PHP Group				  |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is	  |
@@ -275,7 +275,7 @@ static int sapi_apache_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 
 	/*
 	 * This handles the situation where the browser sends a Expect: 100-continue header
-	 * and needs to recieve confirmation from the server on whether or not it can send
+	 * and needs to receive confirmation from the server on whether or not it can send
 	 * the rest of the request. RFC 2616
 	 *
 	 */

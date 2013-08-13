@@ -1,5 +1,5 @@
 --TEST--
-Bug #32428 (The @ warning error supression operator is broken)
+Bug #32428 (The @ warning error suppression operator is broken)
 --FILE--
 <?php 
   $data = @$not_exists; 

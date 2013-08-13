@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,6 +34,10 @@
 #include "rfc1867.h"
 #include "ext/standard/php_string.h"
 
+#if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
+# define atoll(s) _atoi64(s)
+#endif
+
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
 static int dummy_encoding_translation(TSRMLS_D)
@@ -62,7 +66,7 @@ static void safe_php_register_variable(char *var, char *strval, int val_len, zva
 #define MAX_SIZE_ANONNAME 33
 
 /* Errors */
-#define UPLOAD_ERROR_OK   0  /* File upload succesful */
+#define UPLOAD_ERROR_OK   0  /* File upload successful */
 #define UPLOAD_ERROR_A    1  /* Uploaded file exceeded upload_max_filesize */
 #define UPLOAD_ERROR_B    2  /* Uploaded file exceeded MAX_FILE_SIZE */
 #define UPLOAD_ERROR_C    3  /* Partially uploaded */
@@ -676,8 +680,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 {
 	char *boundary, *s = NULL, *boundary_end = NULL, *start_arr = NULL, *array_index = NULL;
 	char *temp_filename = NULL, *lbuf = NULL, *abuf = NULL;
-	int boundary_len = 0, total_bytes = 0, cancel_upload = 0, is_arr_upload = 0, array_len = 0;
-	int max_file_size = 0, skip_upload = 0, anonindex = 0, is_anonymous;
+	int boundary_len = 0, cancel_upload = 0, is_arr_upload = 0, array_len = 0;
+	int64_t total_bytes = 0, max_file_size = 0;
+	int skip_upload = 0, anonindex = 0, is_anonymous;
 	zval *http_post_files = NULL;
 	HashTable *uploaded_files = NULL;
 	multipart_buffer *mbuff;
@@ -898,7 +903,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				}
 
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
-					max_file_size = atol(value);
+					max_file_size = atoll(value);
 				}
 
 				efree(param);

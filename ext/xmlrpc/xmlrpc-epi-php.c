@@ -37,7 +37,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -502,7 +502,7 @@ static XMLRPC_VECTOR_TYPE determine_vector_type (HashTable *ht)
 			}
 			bArray = 1;
 			last_num = num_index;
-		} else if (res == HASH_KEY_NON_EXISTANT) {
+		} else if (res == HASH_KEY_NON_EXISTENT) {
 			break;
 		} else if (res == HASH_KEY_IS_STRING) {
 			if (bArray) {
@@ -582,7 +582,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 							int res = my_zend_hash_get_current_key(Z_ARRVAL_P(val_arr), &my_key, &num_index);
 
 							switch (res) {
-								case HASH_KEY_NON_EXISTANT:
+								case HASH_KEY_NON_EXISTENT:
 									break;
 								case HASH_KEY_IS_STRING:
 								case HASH_KEY_IS_LONG:

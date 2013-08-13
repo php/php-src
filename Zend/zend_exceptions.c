@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -350,9 +350,14 @@ ZEND_METHOD(error_exception, getSeverity)
 #define TRACE_APPEND_STR(val)                                            \
 	TRACE_APPEND_STRL(val, sizeof(val)-1)
 
-#define TRACE_APPEND_KEY(key)                                            \
-	if (zend_hash_find(ht, key, sizeof(key), (void**)&tmp) == SUCCESS) { \
-	    TRACE_APPEND_STRL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));           \
+#define TRACE_APPEND_KEY(key)                                                   \
+	if (zend_hash_find(ht, key, sizeof(key), (void**)&tmp) == SUCCESS) {    \
+		if (Z_TYPE_PP(tmp) != IS_STRING) {                              \
+			zend_error(E_WARNING, "Value for %s is no string", key); \
+			TRACE_APPEND_STR("[unknown]");                          \
+		} else {                                                        \
+			TRACE_APPEND_STRL(Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));  \
+		}                                                               \
 	}
 
 /* }}} */
@@ -461,6 +466,11 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 	HashTable *ht = Z_ARRVAL_PP(frame);
 	zval **file, **tmp;
 
+	if (Z_TYPE_PP(frame) != IS_ARRAY) {
+		zend_error(E_WARNING, "Expected array for frame %lu", hash_key->h);
+		return ZEND_HASH_APPLY_KEEP;
+	}
+
 	str = va_arg(args, char**);
 	len = va_arg(args, int*);
 	num = va_arg(args, int*);
@@ -470,15 +480,25 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 	TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
 	efree(s_tmp);
 	if (zend_hash_find(ht, "file", sizeof("file"), (void**)&file) == SUCCESS) {
-		if (zend_hash_find(ht, "line", sizeof("line"), (void**)&tmp) == SUCCESS) {
-			line = Z_LVAL_PP(tmp);
-		} else {
-			line = 0;
+		if (Z_TYPE_PP(file) != IS_STRING) {
+			zend_error(E_WARNING, "Function name is no string");
+			TRACE_APPEND_STR("[unknown function]");
+		} else{
+			if (zend_hash_find(ht, "line", sizeof("line"), (void**)&tmp) == SUCCESS) {
+				if (Z_TYPE_PP(tmp) == IS_LONG) {
+					line = Z_LVAL_PP(tmp);
+				} else {
+					zend_error(E_WARNING, "Line is no long");
+					line = 0;
+				}
+			} else {
+				line = 0;
+			}
+			s_tmp = emalloc(Z_STRLEN_PP(file) + MAX_LENGTH_OF_LONG + 4 + 1);
+			sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_PP(file), line);
+			TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
+			efree(s_tmp);
 		}
-		s_tmp = emalloc(Z_STRLEN_PP(file) + MAX_LENGTH_OF_LONG + 4 + 1);
-		sprintf(s_tmp, "%s(%ld): ", Z_STRVAL_PP(file), line);
-		TRACE_APPEND_STRL(s_tmp, strlen(s_tmp));
-		efree(s_tmp);
 	} else {
 		TRACE_APPEND_STR("[internal function]: ");
 	}
@@ -487,10 +507,14 @@ static int _build_trace_string(zval **frame TSRMLS_DC, int num_args, va_list arg
 	TRACE_APPEND_KEY("function");
 	TRACE_APPEND_CHR('(');
 	if (zend_hash_find(ht, "args", sizeof("args"), (void**)&tmp) == SUCCESS) {
-		int last_len = *len;
-		zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp) TSRMLS_CC, (apply_func_args_t)_build_trace_args, 2, str, len);
-		if (last_len != *len) {
-			*len -= 2; /* remove last ', ' */
+		if (Z_TYPE_PP(tmp) == IS_ARRAY) {
+			int last_len = *len;
+			zend_hash_apply_with_arguments(Z_ARRVAL_PP(tmp) TSRMLS_CC, (apply_func_args_t)_build_trace_args, 2, str, len);
+			if (last_len != *len) {
+				*len -= 2; /* remove last ', ' */
+			}
+		} else {
+			zend_error(E_WARNING, "args element is no array");
 		}
 	}
 	TRACE_APPEND_STR(")\n");
@@ -793,6 +817,10 @@ ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC) /* {
 			if (instanceof_function(ce_exception, default_exception_ce TSRMLS_CC)) {
 				file = zend_read_property(default_exception_ce, EG(exception), "file", sizeof("file")-1, 1 TSRMLS_CC);
 				line = zend_read_property(default_exception_ce, EG(exception), "line", sizeof("line")-1, 1 TSRMLS_CC);
+
+				convert_to_string(file);
+				file = (Z_STRLEN_P(file) > 0) ? file : NULL;
+				line = (Z_TYPE_P(line) == IS_LONG) ? line : NULL;
 			} else {
 				file = NULL;
 				line = NULL;
@@ -804,7 +832,11 @@ ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC) /* {
 		file = zend_read_property(default_exception_ce, exception, "file", sizeof("file")-1, 1 TSRMLS_CC);
 		line = zend_read_property(default_exception_ce, exception, "line", sizeof("line")-1, 1 TSRMLS_CC);
 
-		zend_error_va(severity, Z_STRVAL_P(file), Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
+		convert_to_string(str);
+		convert_to_string(file);
+		convert_to_long(line);
+
+		zend_error_va(severity, (Z_STRLEN_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ce_exception->name);
 	}

@@ -1,5 +1,5 @@
 --TEST--
-Test trait_exists() function : usage variations - unexpected types for agument 1
+Test trait_exists() function : usage variations - unexpected types for argument 1
 --FILE--
 <?php
 /* Prototype  : proto bool trait_exists(string traitname [, bool autoload])

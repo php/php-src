@@ -15,7 +15,7 @@ $f = fopen("/tmp/blah", "r");
 ?>
 ===DONE===
 --EXPECTF--
-fopen(/tmp/blah): failed to open stream: No such file or directory (2) in %s:%d
+fopen(/tmp/blah): failed to open stream: %s (2) in %s:%d
 
-Warning: fopen(/tmp/blah): failed to open stream: No such file or directory in %s on line %d
+Warning: fopen(/tmp/blah): failed to open stream: %s in %s on line %d
 ===DONE===

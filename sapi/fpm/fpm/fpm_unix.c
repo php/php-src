@@ -121,16 +121,16 @@ static int fpm_unix_conf_wp(struct fpm_worker_pool_s *wp) /* {{{ */
 		}
 	} else { /* not root */
 		if (wp->config->user && *wp->config->user) {
-			zlog(ZLOG_WARNING, "[pool %s] 'user' directive is ignored when FPM is not running as root", wp->config->name);
+			zlog(ZLOG_NOTICE, "[pool %s] 'user' directive is ignored when FPM is not running as root", wp->config->name);
 		}
 		if (wp->config->group && *wp->config->group) {
-			zlog(ZLOG_WARNING, "[pool %s] 'group' directive is ignored when FPM is not running as root", wp->config->name);
+			zlog(ZLOG_NOTICE, "[pool %s] 'group' directive is ignored when FPM is not running as root", wp->config->name);
 		}
 		if (wp->config->chroot && *wp->config->chroot) {
-			zlog(ZLOG_WARNING, "[pool %s] 'chroot' directive is ignored when FPM is not running as root", wp->config->name);
+			zlog(ZLOG_NOTICE, "[pool %s] 'chroot' directive is ignored when FPM is not running as root", wp->config->name);
 		}
 		if (wp->config->process_priority != 64) {
-			zlog(ZLOG_WARNING, "[pool %s] 'process.priority' directive is ignored when FPM is not running as root", wp->config->name);
+			zlog(ZLOG_NOTICE, "[pool %s] 'process.priority' directive is ignored when FPM is not running as root", wp->config->name);
 		}
 
 		/* set up HOME and USER anyway */
@@ -262,36 +262,19 @@ int fpm_unix_init_main() /* {{{ */
 		 * The parent process has then to wait for the master
 		 * process to initialize to return a consistent exit
 		 * value. For this pupose, the master process will
-		 * send USR1 if everything went well and USR2
-		 * otherwise.
+		 * send \"1\" into the pipe if everything went well 
+		 * and \"0\" otherwise.
 		 */
 
-		struct sigaction act;
-		struct sigaction oldact_usr1;
-		struct sigaction oldact_usr2;
+
 		struct timeval tv;
+		fd_set rfds;
+		int ret;
 
-		/*
-		 * set sigaction for USR1 before fork
-		 * save old sigaction to restore it after
-		 * fork in the child process (the master process)
-		 */
-		memset(&act, 0, sizeof(act));
-		memset(&act, 0, sizeof(oldact_usr1));
-		act.sa_handler = fpm_signals_sighandler_exit_ok;
-		sigfillset(&act.sa_mask);
-		sigaction(SIGUSR1, &act, &oldact_usr1);
-
-		/*
-		 * set sigaction for USR2 before fork
-		 * save old sigaction to restore it after
-		 * fork in the child process (the master process)
-		 */
-		memset(&act, 0, sizeof(act));
-		memset(&act, 0, sizeof(oldact_usr2));
-		act.sa_handler = fpm_signals_sighandler_exit_config;
-		sigfillset(&act.sa_mask);
-		sigaction(SIGUSR2, &act, &oldact_usr2);
+		if (pipe(fpm_globals.send_config_pipe) == -1) {
+			zlog(ZLOG_SYSERROR, "failed to create pipe");
+			return -1;
+		}
 
 		/* then fork */
 		pid_t pid = fork();
@@ -302,24 +285,54 @@ int fpm_unix_init_main() /* {{{ */
 				return -1;
 
 			case 0 : /* children */
-				/* restore USR1 and USR2 sigaction */
-				sigaction(SIGUSR1, &oldact_usr1, NULL);
-				sigaction(SIGUSR2, &oldact_usr2, NULL);
-				fpm_globals.send_config_signal = 1;
+				close(fpm_globals.send_config_pipe[0]); /* close the read side of the pipe */
 				break;
 
 			default : /* parent */
-				fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT);
+				close(fpm_globals.send_config_pipe[1]); /* close the write side of the pipe */
 
 				/*
 				 * wait for 10s before exiting with error
-				 * the child is supposed to send USR1 or USR2 to tell the parent
+				 * the child is supposed to send 1 or 0 into the pipe to tell the parent
 				 * how it goes for it
 				 */
+				FD_ZERO(&rfds);
+				FD_SET(fpm_globals.send_config_pipe[0], &rfds);
+
 				tv.tv_sec = 10;
 				tv.tv_usec = 0;
-				zlog(ZLOG_DEBUG, "The calling process is waiting for the master process to ping");
-				select(0, NULL, NULL, NULL, &tv);
+
+				zlog(ZLOG_DEBUG, "The calling process is waiting for the master process to ping via fd=%d", fpm_globals.send_config_pipe[0]);
+				ret = select(fpm_globals.send_config_pipe[0] + 1, &rfds, NULL, NULL, &tv);
+				if (ret == -1) {
+					zlog(ZLOG_SYSERROR, "failed to select");
+					exit(FPM_EXIT_SOFTWARE);
+				}
+				if (ret) { /* data available */
+					int readval;
+					ret = read(fpm_globals.send_config_pipe[0], &readval, sizeof(readval));
+					if (ret == -1) {
+						zlog(ZLOG_SYSERROR, "failed to read from pipe");
+						exit(FPM_EXIT_SOFTWARE);
+					}
+
+					if (ret == 0) {
+						zlog(ZLOG_ERROR, "no data have been read from pipe");
+						exit(FPM_EXIT_SOFTWARE);
+					} else {
+						if (readval == 1) {
+							zlog(ZLOG_DEBUG, "I received a valid acknoledge from the master process, I can exit without error");
+							fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT);
+							exit(FPM_EXIT_OK);
+						} else {
+							zlog(ZLOG_DEBUG, "The master process returned an error !");
+							exit(FPM_EXIT_SOFTWARE);
+						}
+					}
+				} else { /* no date sent ! */
+					zlog(ZLOG_ERROR, "the master process didn't send back its status (via the pipe to the calling process)");
+				  exit(FPM_EXIT_SOFTWARE);
+				}
 				exit(FPM_EXIT_SOFTWARE);
 		}
 	}
@@ -337,7 +350,7 @@ int fpm_unix_init_main() /* {{{ */
 				return -1;
 			}
 		} else {
-			zlog(ZLOG_WARNING, "'process.priority' directive is ignored when FPM is not running as root");
+			zlog(ZLOG_NOTICE, "'process.priority' directive is ignored when FPM is not running as root");
 		}
 	}
 

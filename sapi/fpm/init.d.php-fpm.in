@@ -18,7 +18,7 @@ php_fpm_CONF=@sysconfdir@/php-fpm.conf
 php_fpm_PID=@localstatedir@/run/php-fpm.pid
 
 
-php_opts="--fpm-config $php_fpm_CONF"
+php_opts="--fpm-config $php_fpm_CONF --pid $php_fpm_PID"
 
 
 wait_for_pid () {
@@ -54,7 +54,7 @@ case "$1" in
 	start)
 		echo -n "Starting php-fpm "
 
-		$php_fpm_BIN $php_opts
+		$php_fpm_BIN --daemonize $php_opts
 
 		if [ "$?" != 0 ] ; then
 			echo " failed"
@@ -88,6 +88,20 @@ case "$1" in
 			exit 1
 		else
 			echo " done"
+		fi
+	;;
+
+	status)
+		if [ ! -r $php_fpm_PID ] ; then
+			echo "php-fpm is stopped"
+			exit 0
+		fi
+
+		PID=`cat $php_fpm_PID`
+		if ps -p $PID | grep -q $PID; then
+			echo "php-fpm (pid $PID) is running..."
+		else
+			echo "php-fpm dead but pid file exists"
 		fi
 	;;
 
@@ -131,7 +145,7 @@ case "$1" in
 	;;
 
 	*)
-		echo "Usage: $0 {start|stop|force-quit|restart|reload}"
+		echo "Usage: $0 {start|stop|force-quit|restart|reload|status}"
 		exit 1
 	;;
 

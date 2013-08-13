@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2012 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2013 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        | 
@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "2.5.0-dev"
+#define ZEND_VERSION "2.6.0-dev"
 
 #define ZEND_ENGINE_2
 
@@ -225,6 +225,7 @@ char *alloca ();
 #define ZEND_FILE_LINE_EMPTY_CC			, ZEND_FILE_LINE_EMPTY_C
 #define ZEND_FILE_LINE_ORIG_RELAY_C		__zend_orig_filename, __zend_orig_lineno
 #define ZEND_FILE_LINE_ORIG_RELAY_CC	, ZEND_FILE_LINE_ORIG_RELAY_C
+#define ZEND_ASSERT(c)					assert(c)
 #else
 #define ZEND_FILE_LINE_D
 #define ZEND_FILE_LINE_DC
@@ -238,6 +239,7 @@ char *alloca ();
 #define ZEND_FILE_LINE_EMPTY_CC
 #define ZEND_FILE_LINE_ORIG_RELAY_C
 #define ZEND_FILE_LINE_ORIG_RELAY_CC
+#define ZEND_ASSERT(c)
 #endif	/* ZEND_DEBUG */
 
 #ifdef ZTS
@@ -297,7 +299,6 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 /*
  * zval
  */
-typedef struct _zval_struct zval;
 typedef struct _zend_class_entry zend_class_entry;
 
 typedef struct _zend_guard {
@@ -363,6 +364,10 @@ struct _zval_struct {
 #define Z_UNSET_ISREF(z)		Z_UNSET_ISREF_P(&(z))
 #define Z_SET_ISREF_TO(z, isref)	Z_SET_ISREF_TO_P(&(z), isref)
 
+#if ZEND_DEBUG
+#define zend_always_inline inline
+#define zend_never_inline
+#else
 #if defined(__GNUC__)
 #if __GNUC__ >= 3
 #define zend_always_inline inline __attribute__((always_inline))
@@ -371,7 +376,6 @@ struct _zval_struct {
 #define zend_always_inline inline
 #define zend_never_inline
 #endif
-
 #elif defined(_MSC_VER)
 #define zend_always_inline __forceinline
 #define zend_never_inline
@@ -379,6 +383,7 @@ struct _zval_struct {
 #define zend_always_inline inline
 #define zend_never_inline
 #endif
+#endif /* ZEND_DEBUG */
 
 #if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
 # define EXPECTED(condition)   __builtin_expect(condition, 1)
@@ -449,8 +454,6 @@ struct _zend_trait_precedence {
 	zend_trait_method_reference *trait_method;
 	
 	zend_class_entry** exclude_from_classes;
-	
-	union _zend_function* function;
 };
 typedef struct _zend_trait_precedence zend_trait_precedence;
 
@@ -467,8 +470,6 @@ struct _zend_trait_alias {
 	* modifiers to be set on trait method
 	*/
 	zend_uint modifiers;
-	
-	union _zend_function* function;
 };
 typedef struct _zend_trait_alias zend_trait_alias;
 

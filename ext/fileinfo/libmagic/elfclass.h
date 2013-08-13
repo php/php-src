@@ -59,7 +59,8 @@
 		    (off_t)elf_getu(swap, elfhdr.e_shoff),
 		    elf_getu16(swap, elfhdr.e_shnum),
 		    (size_t)elf_getu16(swap, elfhdr.e_shentsize),
-		    fsize, &flags, elf_getu16(swap, elfhdr.e_machine)) == -1)
+		    fsize, &flags, elf_getu16(swap, elfhdr.e_machine),
+		    (int)elf_getu16(swap, elfhdr.e_shstrndx)) == -1)
 			return -1;
 		break;
 

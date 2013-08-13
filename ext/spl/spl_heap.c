@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -949,12 +949,11 @@ static void spl_pqueue_it_get_current_data(zend_object_iterator *iter, zval ***d
 }
 /* }}} */
 
-static int spl_heap_it_get_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static void spl_heap_it_get_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC) /* {{{ */
 {
 	spl_heap_it *iterator = (spl_heap_it *)iter;
 
-	*int_key = (ulong) iterator->object->heap->count - 1;
-	return HASH_KEY_IS_LONG;
+	ZVAL_LONG(key, iterator->object->heap->count - 1);
 }
 /* }}} */
 

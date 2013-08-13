@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2012 The PHP Group                                |
+  | Copyright (c) 1997-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -63,7 +63,8 @@
 #define FILTER_VALIDATE_URL           0x0111
 #define FILTER_VALIDATE_EMAIL         0x0112
 #define FILTER_VALIDATE_IP            0x0113
-#define FILTER_VALIDATE_LAST          0x0113
+#define FILTER_VALIDATE_MAC           0x0114
+#define FILTER_VALIDATE_LAST          0x0114
 
 #define FILTER_VALIDATE_ALL           0x0100
 
@@ -109,8 +110,10 @@
 	if (len < 1 && return_if_empty) { \
 		RETURN_VALIDATION_FAILED \
 	} \
-	while (p[len-1] == ' ' || p[len-1] == '\t' || p[len-1] == '\r' || p[len-1] == '\v' || p[len-1] == '\n') { \
-		len--; \
+	if (len > 0) { \
+		while (p[len-1] == ' ' || p[len-1] == '\t' || p[len-1] == '\r' || p[len-1] == '\v' || p[len-1] == '\n') { \
+			len--; \
+		} \
 	} \
 }
 

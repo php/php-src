@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -85,6 +85,7 @@ struct _php_core_globals {
 	char *open_basedir;
 	char *extension_dir;
 	char *php_binary;
+	char *sys_temp_dir;
 
 	char *upload_tmp_dir;
 	long upload_max_filesize;

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 5                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2012 The PHP Group                                |
+  | Copyright (c) 2006-2013 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -81,7 +81,9 @@ PHPAPI void mysqlnd_library_init(TSRMLS_D)
 			mysqlnd_plugin_core.plugin_header.plugin_stats.values = mysqlnd_global_stats;
 			mysqlnd_plugin_register_ex((struct st_mysqlnd_plugin_header *) &mysqlnd_plugin_core TSRMLS_CC);
 		}
+#if defined(MYSQLND_DBG_ENABLED) && MYSQLND_DBG_ENABLED == 1
 		mysqlnd_example_plugin_register(TSRMLS_C);
+#endif
 		mysqlnd_debug_trace_plugin_register(TSRMLS_C);
 		mysqlnd_register_builtin_authentication_plugins(TSRMLS_C);
 
@@ -97,7 +99,9 @@ static void
 mysqlnd_error_list_pdtor(void * pDest)
 {
 	MYSQLND_ERROR_LIST_ELEMENT * element = (MYSQLND_ERROR_LIST_ELEMENT *) pDest;
+#ifdef ZTS
 	TSRMLS_FETCH();
+#endif
 	DBG_ENTER("mysqlnd_error_list_pdtor");
 	if (element->error) {
 		mnd_pefree(element->error, TRUE);

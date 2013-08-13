@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2012 The PHP Group                                |
+   | Copyright (c) 1997-2013 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -632,7 +632,7 @@ zend_first_try {
 		}
 
 		/*
-		 * check if comming due to ErrorDocument
+		 * check if coming due to ErrorDocument
 		 * We make a special exception of 413 (Invalid POST request) as the invalidity of the request occurs
 		 * during processing of the request by PHP during POST processing. Therefor we need to re-use the exiting
 		 * PHP instance to handle the request rather then creating a new one.
