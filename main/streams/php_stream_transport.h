@@ -26,16 +26,16 @@
 # include <sys/socket.h>
 #endif
 
-typedef php_stream *(php_stream_transport_factory_func)(const char *proto, zend_str_size_long protolen,
-		char *resourcename, zend_str_size_long resourcenamelen,
+typedef php_stream *(php_stream_transport_factory_func)(const char *proto, size_t protolen,
+		const char *resourcename, size_t resourcenamelen,
 		const char *persistent_id, int options, int flags,
 		struct timeval *timeout,
 		php_stream_context *context STREAMS_DC TSRMLS_DC);
 typedef php_stream_transport_factory_func *php_stream_transport_factory;
 
 BEGIN_EXTERN_C()
-PHPAPI int php_stream_xport_register(char *protocol, php_stream_transport_factory factory TSRMLS_DC);
-PHPAPI int php_stream_xport_unregister(char *protocol TSRMLS_DC);
+PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory TSRMLS_DC);
+PHPAPI int php_stream_xport_unregister(const char *protocol TSRMLS_DC);
 
 #define STREAM_XPORT_CLIENT			0
 #define STREAM_XPORT_SERVER			1
@@ -46,7 +46,7 @@ PHPAPI int php_stream_xport_unregister(char *protocol TSRMLS_DC);
 #define STREAM_XPORT_CONNECT_ASYNC	16
 
 /* Open a client or server socket connection */
-PHPAPI php_stream *_php_stream_xport_create(const char *name, zend_str_size_long namelen, int options,
+PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, int options,
 		int flags, const char *persistent_id,
 		struct timeval *timeout,
 		php_stream_context *context,
@@ -59,13 +59,13 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, zend_str_size_long
 
 /* Bind the stream to a local address */
 PHPAPI int php_stream_xport_bind(php_stream *stream,
-		const char *name, zend_str_size_long namelen,
+		const char *name, size_t namelen,
 		char **error_text
 		TSRMLS_DC);
 
 /* Connect to a remote address */
 PHPAPI int php_stream_xport_connect(php_stream *stream,
-		const char *name, zend_str_size_long namelen,
+		const char *name, size_t namelen,
 		int asynchronous,
 		struct timeval *timeout,
 		char **error_text,
@@ -141,7 +141,7 @@ typedef struct _php_stream_xport_param {
 
 	struct {
 		char *name;
-		zend_str_size_long namelen;
+		size_t namelen;
 		int backlog;
 		struct timeval *timeout;
 		struct sockaddr *addr;

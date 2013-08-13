@@ -138,7 +138,7 @@ static inline int is_stream_path(const char *filename)
 	return ((*p == ':') && (p - filename > 1) && (p[1] == '/') && (p[2] == '/'));
 }
 
-static inline int is_cachable_stream_path(const char *filename)
+static inline int is_cacheable_stream_path(const char *filename)
 {
 	return memcmp(filename, "file://", sizeof("file://") - 1) == 0 ||
 	       memcmp(filename, "phar://", sizeof("phar://") - 1) == 0;
@@ -1459,7 +1459,7 @@ static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int
 	    CG(interactive) ||
 	    (ZCSG(restart_in_progress) && accel_restart_is_active(TSRMLS_C)) ||
 	    (is_stream_path(file_handle->filename) && 
-	     !is_cachable_stream_path(file_handle->filename))) {
+	     !is_cacheable_stream_path(file_handle->filename))) {
 		/* The Accelerator is disabled, act as if without the Accelerator */
 		return accelerator_orig_compile_file(file_handle, type TSRMLS_CC);
 	}
@@ -2167,7 +2167,9 @@ static void accel_fast_zval_ptr_dtor(zval **zval_ptr)
 			case IS_CONSTANT_ARRAY: {
 					TSRMLS_FETCH();
 
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 					GC_REMOVE_ZVAL_FROM_BUFFER(zvalue);
+#endif
 					if (zvalue->value.ht && (zvalue->value.ht != &EG(symbol_table))) {
 						/* break possible cycles */
 						Z_TYPE_P(zvalue) = IS_NULL;
@@ -2180,7 +2182,9 @@ static void accel_fast_zval_ptr_dtor(zval **zval_ptr)
 				{
 					TSRMLS_FETCH();
 
+#if ZEND_EXTENSION_API_NO >= PHP_5_3_X_API_NO
 					GC_REMOVE_ZVAL_FROM_BUFFER(zvalue);
+#endif
 					Z_OBJ_HT_P(zvalue)->del_ref(zvalue TSRMLS_CC);
 				}
 				break;
@@ -2656,12 +2660,9 @@ static void accel_free_ts_resources()
 #endif
 }
 
-static void accel_shutdown(zend_extension *extension)
+void accel_shutdown(TSRMLS_D)
 {
 	zend_ini_entry *ini_entry;
-	TSRMLS_FETCH();
-
-	(void)extension; /* keep the compiler happy */
 
 	zend_accel_blacklist_shutdown(&accel_blacklist);
 
@@ -2679,6 +2680,11 @@ static void accel_shutdown(zend_extension *extension)
 	}
 
 #if ZEND_EXTENSION_API_NO > PHP_5_3_X_API_NO
+# ifndef ZTS
+	zend_hash_clean(CG(function_table));
+	zend_hash_clean(CG(class_table));
+	zend_hash_clean(EG(zend_constants));
+# endif
 	CG(interned_strings_start) = orig_interned_strings_start;
 	CG(interned_strings_end) = orig_interned_strings_end;
 	zend_new_interned_string = orig_new_interned_string;
@@ -2755,7 +2761,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	"http://www.zend.com/",					/* URL */
 	"Copyright (c) 1999-2013",				/* copyright */
 	accel_startup,					   		/* startup */
-	accel_shutdown,							/* shutdown */
+	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */
 	accel_deactivate,						/* per-script deactivation */
 	NULL,									/* message handler */

@@ -1169,7 +1169,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 	zval *arg1;
 	char *arg2;
 	zend_str_size arg2len;
-	int ret;
+	zend_str_size_int ret;
 	zend_str_size num_bytes;
 	long arg3 = 0;
 	char *buffer = NULL;
@@ -1286,7 +1286,7 @@ PHPAPI PHP_FUNCTION(fseek)
 */
 
 /* DEPRECATED APIs: Use php_stream_mkdir() instead */
-PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
+PHPAPI int php_mkdir_ex(const char *dir, long mode, int options TSRMLS_DC)
 {
 	int ret;
 
@@ -1301,7 +1301,7 @@ PHPAPI int php_mkdir_ex(char *dir, long mode, int options TSRMLS_DC)
 	return ret;
 }
 
-PHPAPI int php_mkdir(char *dir, long mode TSRMLS_DC)
+PHPAPI int php_mkdir(const char *dir, long mode TSRMLS_DC)
 {
 	return php_mkdir_ex(dir, mode, REPORT_ERRORS TSRMLS_CC);
 }
@@ -1625,7 +1625,7 @@ PHP_FUNCTION(copy)
 
 /* {{{ php_copy_file
  */
-PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
+PHPAPI int php_copy_file(const char *src, const char *dest TSRMLS_DC)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
 }
@@ -1633,7 +1633,7 @@ PHPAPI int php_copy_file(char *src, char *dest TSRMLS_DC)
 
 /* {{{ php_copy_file_ex
  */
-PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
+PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_flg TSRMLS_DC)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL TSRMLS_CC);
 }
@@ -1641,7 +1641,7 @@ PHPAPI int php_copy_file_ex(char *src, char *dest, int src_flg TSRMLS_DC)
 
 /* {{{ php_copy_file_ctx
  */
-PHPAPI int php_copy_file_ctx(char *src, char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
+PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php_stream_context *ctx TSRMLS_DC)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
 	int ret = FAILURE;
@@ -1810,7 +1810,7 @@ PHP_FUNCTION(fputcsv)
 	const char escape_char = '\\';
 	php_stream *stream;
 	zval *fp = NULL, *fields = NULL;
-	int ret;
+	zend_str_size_int ret;
 	char *delimiter_str = NULL, *enclosure_str = NULL;
 	zend_str_size delimiter_str_len = 0, enclosure_str_len = 0;
 
@@ -1852,9 +1852,10 @@ PHP_FUNCTION(fputcsv)
 /* }}} */
 
 /* {{{ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC) */
-PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC)
+PHPAPI zend_str_size_int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char enclosure, char escape_char TSRMLS_DC)
 {
-	int count, i = 0, ret;
+	int count, i = 0;
+	zend_str_size_int ret;
 	zval **field_tmp = NULL, field;
 	smart_str csvline = {0};
 	HashPosition pos;

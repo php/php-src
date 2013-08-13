@@ -20,10 +20,10 @@ var_dump($converted);
 ?>
 --EXPECT--
 array(3) {
-  ["num"]=>
+  [""num""]=>
   string(4) "1234"
-  ["str"]=>
-  string(5) "'AAA'"
-  ["bin"]=>
-  string(5) "'BBB'"
+  [""str""]=>
+  string(6) "E'AAA'"
+  [""bin""]=>
+  string(6) "E'BBB'"
 }

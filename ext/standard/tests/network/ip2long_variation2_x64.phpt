@@ -1,13 +1,21 @@
 --TEST--
 Test ip2long() function : usage variation 2, 64 bit
 --SKIPIF--
-<?php if(PHP_INT_SIZE != 8) {die('skip 64 bit only');} ?>
+<?php
+/* from man inet_pton :
+     All numbers supplied as ``parts'' in a `.' notation may be decimal, octal, or hexadecimal, as specified
+     in the C language (i.e., a leading 0x or 0X implies hexadecimal; otherwise, a leading 0 implies octal;
+     otherwise, the number is interpreted as decimal).
+*/
+if(PHP_OS == 'Darwin') die("skip - inet_pton behaves differently on Darwin");
+if(PHP_INT_SIZE != 8) {die('skip 64 bit only');}
+?>
 --FILE--
 <?php
 /* Prototype  : int ip2long(string ip_address)
- * Description: Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address 
+ * Description: Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $ips = array(

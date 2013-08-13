@@ -48,7 +48,9 @@ UPGRADE NOTES - PHP X.Y
 ========================
 
   a. Unix build system changes
-    - 
+    - The bison version check is now a blacklist instead of a whitelist.
+    - The bison binary can be specified through the YACC environment/configure
+      variable. Previously `bison` was assumed to be in $PATH. 
 
   b. Windows build system changes
     - 

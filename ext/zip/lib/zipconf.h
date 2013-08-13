@@ -13,11 +13,7 @@
 #define LIBZIP_VERSION_MINOR 10
 #define LIBZIP_VERSION_MICRO 0
 
-#ifdef PHP_WIN32
-#include <win32/php_stdint.h>
-#else
-#include <inttypes.h>
-#endif
+#include <php_stdint.h>
 
 typedef int8_t zip_int8_t;
 #define ZIP_INT8_MIN INT8_MIN

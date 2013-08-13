@@ -198,7 +198,7 @@ static zend_always_inline void zend_vm_stack_destroy(TSRMLS_D)
 	}
 }
 
-static zend_always_inline void zend_vm_stack_extend(int count TSRMLS_DC)
+static zend_always_inline void zend_vm_stack_extend(size_t count TSRMLS_DC)
 {
 	zend_vm_stack p = zend_vm_stack_new_page(count >= ZEND_VM_STACK_PAGE_SIZE ? count : ZEND_VM_STACK_PAGE_SIZE);
 	p->prev = EG(argument_stack);

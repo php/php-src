@@ -1,5 +1,5 @@
 --TEST--
-Bug #32223 (weird behaviour of pg_last_notice)
+Bug #32223 (8.0+) (weird behaviour of pg_last_notice)
 --SKIPIF--
 <?php 
 require_once('skipif.inc');
@@ -15,6 +15,8 @@ end;
 ' LANGUAGE plpgsql;");
 if (!$res) die('skip PLPGSQL not available');
 ?>
+--INI--
+pgsql.ignore_notice=0
 --FILE--
 <?php
 
@@ -37,6 +39,7 @@ end;
 
 
 $res = pg_query($dbh, 'SELECT test_notice()');
+var_dump($res);
 $row = pg_fetch_row($res, 0);
 var_dump($row);
 pg_free_result($res);
@@ -50,6 +53,7 @@ pg_close($dbh);
 ?>
 ===DONE===
 --EXPECTF--
+resource(%d) of type (pgsql result)
 array(1) {
   [0]=>
   string(1) "f"

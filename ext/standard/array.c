@@ -352,7 +352,7 @@ PHP_FUNCTION(count)
 
 /* Numbers are always smaller than strings int this function as it
  * anyway doesn't make much sense to compare two different data types.
- * This keeps it consistant and simple.
+ * This keeps it consistent and simple.
  *
  * This is not correct any more, depends on what compare_func is set to.
  */
@@ -1041,7 +1041,7 @@ PHP_FUNCTION(max)
 static int php_array_walk(HashTable *target_hash, zval *userdata, int recursive TSRMLS_DC) /* {{{ */
 {
 	zval **args[3],			/* Arguments to userland function */
-		  *retval_ptr,		/* Return value - unused */
+		  *retval_ptr = NULL,		/* Return value - unused */
 		  *key=NULL;		/* Entry key */
 
 	/* Set up known arguments */
@@ -2912,7 +2912,7 @@ static int zval_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
 static int zval_user_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
 {
 	zval **args[2];
-	zval *retval_ptr;
+	zval *retval_ptr = NULL;
 
 	args[0] = (zval **) a;
 	args[1] = (zval **) b;
@@ -4018,7 +4018,7 @@ PHP_FUNCTION(array_rand)
 
 	/* We can't use zend_hash_index_find() because the array may have string keys or gaps. */
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(input), &pos);
-	while (num_req && (key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTANT) {
+	while (num_req && (key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(input), &string_key, &string_key_len, &num_key, 0, &pos)) != HASH_KEY_NON_EXISTENT) {
 
 		randval = php_rand(TSRMLS_C);
 
@@ -4072,17 +4072,7 @@ PHP_FUNCTION(array_sum)
 		entry_n = **entry;
 		zval_copy_ctor(&entry_n);
 		convert_scalar_to_number(&entry_n TSRMLS_CC);
-
-		if (Z_TYPE(entry_n) == IS_LONG && Z_TYPE_P(return_value) == IS_LONG) {
-			dval = (double)Z_LVAL_P(return_value) + (double)Z_LVAL(entry_n);
-			if ( (double)LONG_MIN <= dval && dval <= (double)LONG_MAX ) {
-				Z_LVAL_P(return_value) += Z_LVAL(entry_n);
-				continue;
-			}
-		}
-		convert_to_double(return_value);
-		convert_to_double(&entry_n);
-		Z_DVAL_P(return_value) += Z_DVAL(entry_n);
+		fast_add_function(return_value, return_value, &entry_n TSRMLS_CC);
 	}
 }
 /* }}} */

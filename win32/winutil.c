@@ -34,7 +34,7 @@ PHPAPI char *php_win32_error_to_msg(int error)
 	return (buf ? (char *) buf : "");
 }
 
-int php_win32_check_trailing_space(const char * path, const int path_len) {
+int php_win32_check_trailing_space(const char * path, const zend_str_size_int path_len) {
 	if (path_len < 1) {
 		return 1;
 	}

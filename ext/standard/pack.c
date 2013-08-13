@@ -69,7 +69,7 @@ char machine_little_endian;
 /* Mapping of byte from char (8bit) to long for machine endian */
 static int byte_map[1];
 
-/* Mappings of bytes from int (machine dependant) to int for machine endian */
+/* Mappings of bytes from int (machine dependent) to int for machine endian */
 static int int_map[sizeof(int)];
 
 /* Mappings of bytes from shorts (16bit) for all endian environments */
@@ -84,7 +84,7 @@ static int little_endian_long_map[4];
 
 /* {{{ php_pack
  */
-static void php_pack(zval **val, int size, int *map, char *output)
+static void php_pack(zval **val, zend_str_size_int size, int *map, char *output)
 {
 	int i;
 	char *v;
@@ -109,7 +109,7 @@ PHP_FUNCTION(pack)
 	int num_args, i;
 	int currentarg;
 	char *format;
-	int formatlen;
+	zend_str_size_int formatlen;
 	char *formatcodes;
 	int *formatargs;
 	int formatcount = 0;
@@ -496,7 +496,7 @@ PHP_FUNCTION(pack)
 
 /* {{{ php_unpack
  */
-static long php_unpack(char *data, int size, int issigned, int *map)
+static long php_unpack(char *data, zend_str_size_int size, int issigned, int *map)
 {
 	long result;
 	char *cresult = (char *) &result;
@@ -514,7 +514,7 @@ static long php_unpack(char *data, int size, int issigned, int *map)
 
 /* unpack() is based on Perl's unpack(), but is modified a bit from there.
  * Rather than depending on error-prone ordered lists or syntactically
- * unpleasant pass-by-reference, we return an object with named paramters 
+ * unpleasant pass-by-reference, we return an object with named parameters 
  * (like *_fetch_object()). Syntax is "f[repeat]name/...", where "f" is the
  * formatter char (like pack()), "[repeat]" is the optional repeater argument,
  * and "name" is the name of the variable to use.
@@ -529,10 +529,11 @@ static long php_unpack(char *data, int size, int issigned, int *map)
 PHP_FUNCTION(unpack)
 {
 	char *format, *input, *formatarg, *inputarg;
-	int formatlen, formatarg_len, inputarg_len;
+	int formatlen;
+	zend_str_size_int formatarg_len, inputarg_len;
 	int inputpos, inputlen, i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &formatarg, &formatarg_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &formatarg, &formatarg_len,
 		&inputarg, &inputarg_len) == FAILURE) {
 		return;
 	}
@@ -550,8 +551,8 @@ PHP_FUNCTION(unpack)
 		char c;
 		int arg = 1, argb;
 		char *name;
-		int namelen;
-		int size=0;
+		zend_str_size_int namelen;
+		zend_str_size_int size=0;
 
 		/* Handle format arguments if any */
 		if (formatlen > 0) {
@@ -676,7 +677,7 @@ PHP_FUNCTION(unpack)
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
-						int len = inputlen - inputpos;	/* Remaining string */
+						zend_str_size_int len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -691,7 +692,7 @@ PHP_FUNCTION(unpack)
 					case 'A': {
 						/* A will strip any trailing whitespace */
 						char padn = '\0'; char pads = ' '; char padt = '\t'; char padc = '\r'; char padl = '\n';
-						int len = inputlen - inputpos;	/* Remaining string */
+						zend_str_size_int len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
 						if ((size >= 0) && (len > size)) {
@@ -718,7 +719,7 @@ PHP_FUNCTION(unpack)
 					case 'Z': {
 						/* Z will strip everything after the first null character */
 						char pad = '\0';
-						int	 s,
+						zend_str_size_int	 s,
 							 len = inputlen - inputpos;	/* Remaining string */
 
 						/* If size was given take minimum of len and size */
@@ -742,11 +743,11 @@ PHP_FUNCTION(unpack)
 					
 					case 'h': 
 					case 'H': {
-						int len = (inputlen - inputpos) * 2;	/* Remaining */
+						zend_str_size_int len = (inputlen - inputpos) * 2;	/* Remaining */
 						int nibbleshift = (type == 'h') ? 0 : 4;
 						int first = 1;
 						char *buf;
-						int ipos, opos;
+						zend_str_size_int ipos, opos;
 
 						/* If size was given take minimum of len and size */
 						if (size >= 0 && len > (size * 2)) {

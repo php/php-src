@@ -323,7 +323,7 @@ static PHP_INI_MH(OnUpdateTimeout)
 
 /* {{{ php_get_display_errors_mode() helper function
  */
-static int php_get_display_errors_mode(char *value, int value_length)
+static int php_get_display_errors_mode(char *value, zend_str_size_int value_length)
 {
 	int mode;
 
@@ -366,7 +366,8 @@ static PHP_INI_MH(OnUpdateDisplayErrors)
  */
 static PHP_INI_DISP(display_errors_mode)
 {
-	int mode, tmp_value_length, cgi_or_cli;
+	int mode, cgi_or_cli;
+	zend_str_size_int tmp_value_length;
 	char *tmp_value;
 	TSRMLS_FETCH();
 
@@ -624,7 +625,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 		fd = VCWD_OPEN_MODE(PG(error_log), O_CREAT | O_APPEND | O_WRONLY, 0644);
 		if (fd != -1) {
 			char *tmp;
-			int len;
+			zend_str_size_int len;
 			char *error_time_str;
 
 			time(&error_time);
@@ -641,7 +642,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 #ifdef PHP_WIN32
 			php_flock(fd, 2);
 #endif
-			php_ignore_value(write(fd, tmp, len));
+			php_ignore_value(write(fd, tmp, len)); /* XXX rework on windows, write expects int*/
 			efree(tmp);
 			efree(error_time_str);
 			close(fd);
@@ -661,7 +662,7 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 
 /* {{{ php_write
    wrapper for modules to use PHPWRITE */
-PHPAPI int php_write(void *buf, uint size TSRMLS_DC)
+PHPAPI zend_str_size_int php_write(void *buf, zend_str_size_uint size TSRMLS_DC)
 {
 	return PHPWRITE(buf, size);
 }
@@ -669,12 +670,12 @@ PHPAPI int php_write(void *buf, uint size TSRMLS_DC)
 
 /* {{{ php_printf
  */
-PHPAPI int php_printf(const char *format, ...)
+PHPAPI zend_str_size_int php_printf(const char *format, ...)
 {
 	va_list args;
-	int ret;
+	size_t ret;
 	char *buffer;
-	int size;
+	zend_str_size_int size;
 	TSRMLS_FETCH();
 
 	va_start(args, format);
@@ -698,11 +699,11 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 	char *buffer = NULL, *docref_buf = NULL, *target = NULL;
 	char *docref_target = "", *docref_root = "";
 	char *p;
-	int buffer_len = 0;
+	zend_str_size_int buffer_len = 0;
 	const char *space = "";
 	const char *class_name = "";
 	const char *function;
-	int origin_len;
+	zend_str_size_int origin_len;
 	char *origin;
 	char *message;
 	int is_function = 0;
@@ -783,7 +784,7 @@ PHPAPI void php_verror(const char *docref, const char *params, int type, const c
 
 	/* no docref given but function is known (the default) */
 	if (!docref && is_function) {
-		int doclen;
+		zend_str_size_int doclen;
 		while (*function == '_') {
 			function++;
 		}
@@ -915,7 +916,7 @@ PHPAPI void php_win32_docref2_from_error(DWORD error, const char *param1, const 
 		php_error_docref2(NULL TSRMLS_CC, param1, param2, E_WARNING, "%s", strerror(errno));
 	} else {
 		char buf[PHP_WIN32_ERROR_MSG_BUFFER_SIZE + 1];
-		int buf_len;
+		zend_str_size_int buf_len;
 
 		FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, error, 0, buf, PHP_WIN32_ERROR_MSG_BUFFER_SIZE, NULL);
 		buf_len = strlen(buf);
@@ -938,10 +939,11 @@ PHPAPI void php_html_puts(const char *str, uint size TSRMLS_DC)
 
 /* {{{ php_error_cb
  extended error handling function */
-static void php_error_cb(int type, const char *error_filename, const uint error_lineno, const char *format, va_list args)
+static void php_error_cb(int type, const char *error_filename, const zend_str_size_uint error_lineno, const char *format, va_list args)
 {
 	char *buffer;
-	int buffer_len, display;
+	zend_str_size_int buffer_len;
+	int display;
 	TSRMLS_FETCH();
 
 	buffer_len = vspprintf(&buffer, PG(log_errors_max_len), format, args);
@@ -1264,7 +1266,7 @@ PHP_FUNCTION(set_time_limit)
 {
 	long new_timeout;
 	char *new_timeout_str;
-	int new_timeout_strlen;
+	zend_str_size_int new_timeout_strlen;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &new_timeout) == FAILURE) {
 		return;
@@ -1361,7 +1363,7 @@ PHPAPI int php_stream_open_for_zend_ex(const char *filename, zend_file_handle *h
 }
 /* }}} */
 
-static char *php_resolve_path_for_zend(const char *filename, int filename_len TSRMLS_DC) /* {{{ */
+static char *php_resolve_path_for_zend(const char *filename, zend_str_size_int filename_len TSRMLS_DC) /* {{{ */
 {
 	return php_resolve_path(filename, filename_len, PG(include_path) TSRMLS_CC);
 }
@@ -1369,7 +1371,7 @@ static char *php_resolve_path_for_zend(const char *filename, int filename_len TS
 
 /* {{{ php_get_configuration_directive_for_zend
  */
-static int php_get_configuration_directive_for_zend(const char *name, uint name_length, zval *contents)
+static int php_get_configuration_directive_for_zend(const char *name, zend_str_size_uint name_length, zval *contents)
 {
 	zval *retval = cfg_get_entry(name, name_length);
 
@@ -1857,7 +1859,7 @@ PHPAPI void php_com_initialize(TSRMLS_D)
 
 /* {{{ php_output_wrapper
  */
-static int php_output_wrapper(const char *str, uint str_length)
+static zend_str_size_int php_output_wrapper(const char *str, zend_str_size_uint str_length)
 {
 	TSRMLS_FETCH();
 	return php_output_write(str, str_length TSRMLS_CC);
@@ -2446,7 +2448,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
  			primary_file->opened_path == NULL &&
  			primary_file->type != ZEND_HANDLE_FILENAME
 		) {
-			int realfile_len;
+			zend_str_size_int realfile_len;
 			int dummy = 1;
 
 			if (expand_filepath(primary_file->filename, realfile TSRMLS_CC)) {

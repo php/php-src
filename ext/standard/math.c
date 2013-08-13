@@ -794,7 +794,7 @@ PHP_FUNCTION(rad2deg)
 PHPAPI long _php_math_basetolong(zval *arg, int base)
 {
 	long num = 0, digit, onum;
-	int i;
+	zend_str_size_int i;
 	char c, *s;
 
 	if (Z_TYPE_P(arg) != IS_STRING || base < 2 || base > 36) {
@@ -840,7 +840,7 @@ PHPAPI int _php_math_basetozval(zval *arg, int base, zval *ret)
 {
 	long num = 0;
 	double fnum = 0;
-	int i;
+	zend_str_size_int i;
 	int mode = 0;
 	char c, *s;
 	long cutoff;
@@ -1099,13 +1099,13 @@ PHPAPI char *_php_math_number_format(double d, int dec, char dec_point, char tho
 
 static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 		zend_str_size_size_t dec_point_len, char *thousand_sep, zend_str_size_size_t thousand_sep_len,
-		int *result_len)
+		zend_str_size_int *result_len)
 {
 	char *tmpbuf = NULL, *resbuf;
 	char *s, *t;  /* source, target */
 	char *dp;
-	int integral;
-	int tmplen, reslen=0;
+	zend_str_size_int integral;
+	zend_str_size_int tmplen, reslen=0;
 	int count=0;
 	int is_negative=0;
 
@@ -1171,8 +1171,8 @@ static char *_php_math_number_format_ex_len(double d, int dec, char *dec_point,
 	 * Take care, as the sprintf implementation may return less places than
 	 * we requested due to internal buffer limitations */
 	if (dec) {
-		int declen = dp ? s - dp : 0;
-		int topad = dec > declen ? dec - declen : 0;
+		zend_str_size_int declen = dp ? s - dp : 0;
+		zend_str_size_int topad = dec > declen ? dec - declen : 0;
 
 		/* pad with '0's */
 		while (topad--) {

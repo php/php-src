@@ -22,7 +22,7 @@
 
 The pbuf parameter of all spprintf version receives a pointer to the allocated
 buffer. This buffer must be freed manually after usage using efree() function.
-The buffer will allways be terminated by a zero character. When pbuf is NULL
+The buffer will always be terminated by a zero character. When pbuf is NULL
 the function can be used to calculate the required size of the buffer but for
 that purpose snprintf is faster. When both pbuf and the return value are 0
 than you are out of memory.
@@ -37,9 +37,9 @@ There is also snprintf: See difference explained in snprintf.h
 #include "snprintf.h"
 
 BEGIN_EXTERN_C()
-PHPAPI int spprintf( char **pbuf, size_t max_len, const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPAPI zend_str_size_int spprintf( char **pbuf, size_t max_len, const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 
-PHPAPI int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
+PHPAPI zend_str_size_int vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
 END_EXTERN_C()
 
 #endif /* SNPRINTF_H */

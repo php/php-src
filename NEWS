@@ -7,6 +7,19 @@ PHP                                                                        NEWS
   . Implemented internal operator overloading
     (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
 
+- Session:
+  . Fixed Bug #65315 (session.hash_function silently fallback to default md5)
+    (Yasuo)
+  . Implemented Request #54649 (Create session_serializer_name()). (Yasuo)
+  . Implemented Request #17860 (Session write short circuit). (Yasuo)
+  . Implemented Request #20421 (session_abort() and session_reset() function).
+    (Yasuo)
+  . Implemented Request #11100 (session_gc() function). (Yasuo)
+
+- mysqlnd:
+  . Disabled flag for SP OUT variables for 5.5+ servers as they are not natively
+    supported by the overlying APIs. (Andrey)
+
 - OPcache:
   . Added an optimization pass to convert FCALL_BY_NAME into DO_FCALL.
     (Laruence, Dmitry)
