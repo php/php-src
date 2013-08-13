@@ -2381,7 +2381,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				MAKE_STD_ZVAL(arg_array);
 				array_init(arg_array);
 
-				/* include_filename always points to the last filename of the last last called-fuction.
+				/* include_filename always points to the last filename of the last last called-function.
 				   if we have called include in the frame above - this is the file we have included.
 				 */
 

@@ -1922,7 +1922,7 @@ PHP_FUNCTION(mysql_result)
 
 /*
 johannes TODO:
-Do 2 zend_parse_paramters calls instead of type "z" and switch below
+Do 2 zend_parse_parameters calls instead of type "z" and switch below
 Q: String or long first?
 */
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &result, &row, &field) == FAILURE) {

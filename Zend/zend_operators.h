@@ -270,10 +270,10 @@ static inline zend_uchar is_numeric_string(const char *str, zend_str_size_int le
 }
 
 static inline char *
-zend_memnstr(char *haystack, char *needle, zend_str_size_int needle_len, char *end)
+zend_memnstr(const char *haystack, const char *needle, zend_str_size_int needle_len, char *end)
 {
-	char *p = haystack;
-	char ne = needle[needle_len-1];
+	const char *p = haystack;
+	const char ne = needle[needle_len-1];
 	ptrdiff_t off_p;
 	zend_str_size_int off_s;
 

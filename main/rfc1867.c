@@ -34,6 +34,10 @@
 #include "rfc1867.h"
 #include "ext/standard/php_string.h"
 
+#if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
+# define atoll(s) _atoi64(s)
+#endif
+
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
 static int dummy_encoding_translation(TSRMLS_D)
@@ -676,10 +680,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 {
 	char *boundary, *s = NULL, *boundary_end = NULL, *start_arr = NULL, *array_index = NULL;
 	char *temp_filename = NULL, *lbuf = NULL, *abuf = NULL;
-	zend_str_size_int boundary_len = 0;
-	zend_str_size_int total_bytes = 0;
-	int cancel_upload = 0, is_arr_upload = 0, array_len = 0;
-	int max_file_size = 0, skip_upload = 0, anonindex = 0, is_anonymous;
+	zend_str_size_int boundary_len = 0, array_len = 0;
+	int cancel_upload = 0, is_arr_upload = 0;
+	int64_t total_bytes = 0, max_file_size = 0;
+	int skip_upload = 0, anonindex = 0, is_anonymous;
 	zval *http_post_files = NULL;
 	HashTable *uploaded_files = NULL;
 	multipart_buffer *mbuff;
@@ -900,7 +904,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				}
 
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
-					max_file_size = atol(value);
+					max_file_size = atoll(value);
 				}
 
 				efree(param);

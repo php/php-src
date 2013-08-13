@@ -572,7 +572,7 @@ not_stream:
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
+int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, const char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -733,7 +733,7 @@ really_get_entry:
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
+phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, const char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;

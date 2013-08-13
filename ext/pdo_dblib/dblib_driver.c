@@ -369,7 +369,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	DBSETOPT(H->link, DBTEXTSIZE, "2147483647");
 
 	/* allow double quoted indentifiers */
-	DBSETOPT(H->link, DBQUOTEDIDENT, "1");
+	DBSETOPT(H->link, DBQUOTEDIDENT, NULL);
 
 	ret = 1;
 	dbh->max_escaped_char_length = 2;

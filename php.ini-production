@@ -910,7 +910,6 @@ default_socket_timeout = 60
 ;extension=php_tidy.dll
 ;extension=php_xmlrpc.dll
 ;extension=php_xsl.dll
-;extension=php_zip.dll
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;

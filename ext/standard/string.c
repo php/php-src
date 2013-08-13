@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Stig Sæther Bakken <ssb@php.net>                            |
+   |          Stig Sï¿½ther Bakken <ssb@php.net>                            |
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
  */
@@ -23,11 +23,6 @@
 /* Synced with php 3.0 revision 1.193 1999-06-16 [ssb] */
 
 #include <stdio.h>
-#ifdef PHP_WIN32
-# include "win32/php_stdint.h"
-#else
-# include <stdint.h>
-#endif
 #include "php.h"
 #include "php_rand.h"
 #include "php_string.h"

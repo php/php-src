@@ -3,7 +3,7 @@ test of larger than 8kb text file being parsed by require statement
 --FILE--
 <?php
  file_put_contents('test.php',str_repeat('passed, ',1024));
- require('test.php');
+ require('./test.php');
  unlink('test.php');
 ?>
 --EXPECT--

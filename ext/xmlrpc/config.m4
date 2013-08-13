@@ -8,18 +8,18 @@ sinclude(libxmlrpc/acinclude.m4)
 sinclude(libxmlrpc/xmlrpc.m4)
 
 PHP_ARG_WITH(xmlrpc, for XMLRPC-EPI support,
-[  --with-xmlrpc[=DIR]     Include XMLRPC-EPI support])
+[  --with-xmlrpc[=DIR]       Include XMLRPC-EPI support])
 
 if test -z "$PHP_LIBXML_DIR"; then
   PHP_ARG_WITH(libxml-dir, libxml2 install dir,
-  [  --with-libxml-dir=DIR     XMLRPC-EPI: libxml2 install prefix], no, no)
+  [  --with-libxml-dir=DIR   XMLRPC-EPI: libxml2 install prefix], no, no)
 fi
 
 PHP_ARG_WITH(libexpat-dir, libexpat dir for XMLRPC-EPI,
-[  --with-libexpat-dir=DIR   XMLRPC-EPI: libexpat dir for XMLRPC-EPI (deprecated)],no,no)
+[  --with-libexpat-dir=DIR XMLRPC-EPI: libexpat dir for XMLRPC-EPI (deprecated)],no,no)
 
 PHP_ARG_WITH(iconv-dir, iconv dir for XMLRPC-EPI,
-[  --with-iconv-dir=DIR      XMLRPC-EPI: iconv dir for XMLRPC-EPI],no,no)
+[  --with-iconv-dir=DIR    XMLRPC-EPI: iconv dir for XMLRPC-EPI],no,no)
 
 if test "$PHP_XMLRPC" != "no"; then
 
