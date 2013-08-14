@@ -45,6 +45,10 @@ PHP                                                                        NEWS
   . Fixed bug #65338 (Enabling both php_opcache and php_wincache AVs on
     shutdown). (Dmitry)
 
+- Openssl:
+  . Fixed handling null bytes in subjectAltName (CVE-2013-4073).
+    (Christian Heimes)
+
 - PDO_mysql:
   . Fixed bug #65299 (pdo mysql parsing errors). (Johannes)
 
