@@ -364,6 +364,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 {
 	const mbfl_encoding *detected;
 	php_mb_encoding_handler_info_t info;
+	char *post_data_str = NULL;
 
 	MBSTRG(http_input_identify_post) = NULL;
 
@@ -376,7 +377,10 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	info.num_from_encodings     = MBSTRG(http_input_list_size); 
 	info.from_language          = MBSTRG(language);
 
-	detected = _php_mb_encoding_handler_ex(&info, arg, SG(request_info).post_data TSRMLS_CC);
+	php_stream_rewind(SG(request_info).request_body);
+	php_stream_copy_to_mem(SG(request_info).request_body, &post_data_str, PHP_STREAM_COPY_ALL, 0);
+	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str TSRMLS_CC);
+	STR_FREE(post_data_str);
 
 	MBSTRG(http_input_identify) = detected;
 	if (detected) {

@@ -180,10 +180,10 @@ SAPI_API void sapi_handle_post(void *arg TSRMLS_DC)
 {
 	if (SG(request_info).post_entry && SG(request_info).content_type_dup) {
 		SG(request_info).post_entry->post_handler(SG(request_info).content_type_dup, arg TSRMLS_CC);
-		if (SG(request_info).post_data) {
-			efree(SG(request_info).post_data);
-			SG(request_info).post_data = NULL;
-		}
+		/*if (SG(request_info).request_body) {
+			php_stream_close(SG(request_info).request_body);
+			SG(request_info).request_body = NULL;
+		}*/
 		efree(SG(request_info).content_type_dup);
 		SG(request_info).content_type_dup = NULL;
 	}
@@ -253,35 +253,40 @@ static void sapi_read_post_data(TSRMLS_D)
 SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 {
 	int read_bytes;
-	int allocated_bytes=SAPI_POST_BLOCK_SIZE+1;
 
 	if ((SG(post_max_size) > 0) && (SG(request_info).content_length > SG(post_max_size))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "POST Content-Length of %ld bytes exceeds the limit of %ld bytes",
 					SG(request_info).content_length, SG(post_max_size));
 		return;
 	}
-	SG(request_info).post_data = emalloc(allocated_bytes);
+	SG(request_info).request_body = php_stream_temp_create(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE);
 
-	for (;;) {
-		read_bytes = sapi_module.read_post(SG(request_info).post_data+SG(read_post_bytes), SAPI_POST_BLOCK_SIZE TSRMLS_CC);
-		if (read_bytes<=0) {
-			break;
+	if (sapi_module.read_post) {
+		for (;;) {
+			char buffer[SAPI_POST_BLOCK_SIZE];
+
+			read_bytes = sapi_module.read_post(buffer, SAPI_POST_BLOCK_SIZE TSRMLS_CC);
+			if (read_bytes<=0) {
+				/* failure */
+				break;
+			}
+			SG(read_post_bytes) += read_bytes;
+
+			if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Actual POST length does not match Content-Length, and exceeds %ld bytes", SG(post_max_size));
+				break;
+			}
+
+			php_stream_write(SG(request_info).request_body, buffer, read_bytes);
+
+			if (read_bytes < SAPI_POST_BLOCK_SIZE) {
+				/* done */
+				break;
+			}
 		}
-		SG(read_post_bytes) += read_bytes;
-		if ((SG(post_max_size) > 0) && (SG(read_post_bytes) > SG(post_max_size))) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Actual POST length does not match Content-Length, and exceeds %ld bytes", SG(post_max_size));
-			break;
-		}
-		if (read_bytes < SAPI_POST_BLOCK_SIZE) {
-			break;
-		}
-		if (SG(read_post_bytes)+SAPI_POST_BLOCK_SIZE >= allocated_bytes) {
-			allocated_bytes = SG(read_post_bytes)+SAPI_POST_BLOCK_SIZE+1;
-			SG(request_info).post_data = erealloc(SG(request_info).post_data, allocated_bytes);
-		}
+
+	php_stream_rewind(SG(request_info).request_body);
 	}
-	SG(request_info).post_data[SG(read_post_bytes)] = 0;  /* terminating NULL */
-	SG(request_info).post_data_length = SG(read_post_bytes);
 }
 
 
@@ -387,8 +392,7 @@ SAPI_API void sapi_activate_headers_only(TSRMLS_D)
 	SG(sapi_headers).http_status_line = NULL;
 	SG(sapi_headers).mimetype = NULL;
 	SG(read_post_bytes) = 0;
-	SG(request_info).post_data = NULL;
-	SG(request_info).raw_post_data = NULL;
+	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
 	SG(request_info).current_user_length = 0;
 	SG(request_info).no_headers = 0;
@@ -433,8 +437,7 @@ SAPI_API void sapi_activate(TSRMLS_D)
 	SG(callback_run) = 0;
 	SG(callback_func) = NULL;
 	SG(read_post_bytes) = 0;
-	SG(request_info).post_data = NULL;
-	SG(request_info).raw_post_data = NULL;
+	SG(request_info).request_body = NULL;
 	SG(request_info).current_user = NULL;
 	SG(request_info).current_user_length = 0;
 	SG(request_info).no_headers = 0;
@@ -452,14 +455,15 @@ SAPI_API void sapi_activate(TSRMLS_D)
 
 	/* Handle request method */
 	if (SG(server_context)) {
-		if (PG(enable_post_data_reading) && SG(request_info).request_method) {
-			if (SG(request_info).content_type && !strcmp(SG(request_info).request_method, "POST")) {
+		if (SG(request_info).request_method) {
+			if (PG(enable_post_data_reading)
+			&& 	SG(request_info).content_type
+			&& !strcmp(SG(request_info).request_method, "POST")) {
 				/* HTTP POST may contain form data to be processed into variables
 				 * depending on given content type */
 				sapi_read_post_data(TSRMLS_C);
 			} else {
-				/* Any other method with content payload will fill $HTTP_RAW_POST_DATA 
-				 * if it is enabled by always_populate_raw_post_data. 
+				/* Any other method with content payload will fill php://input stream.
 				 * It's up to the webserver to decide whether to allow a method or not. */
 				SG(request_info).content_type_dup = NULL;
 				if (sapi_module.default_post_reader) {
@@ -494,9 +498,9 @@ static void sapi_send_headers_free(TSRMLS_D)
 SAPI_API void sapi_deactivate(TSRMLS_D)
 {
 	zend_llist_destroy(&SG(sapi_headers).headers);
-	if (SG(request_info).post_data) {
-		efree(SG(request_info).post_data);
-	}  else 	if (SG(server_context)) {
+	if (SG(request_info).request_body) {
+		SG(request_info).request_body = NULL;
+	}  else if (SG(server_context)) {
 		if(sapi_module.read_post) { 
 			/* make sure we've consumed all request input data */
 			char dummy[SAPI_POST_BLOCK_SIZE];
@@ -507,9 +511,6 @@ SAPI_API void sapi_deactivate(TSRMLS_D)
 			}
 		}
 	}
-	if (SG(request_info).raw_post_data) {
-		efree(SG(request_info).raw_post_data);
-	} 
 	if (SG(request_info).auth_user) {
 		efree(SG(request_info).auth_user);
 	}
