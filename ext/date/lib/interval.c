@@ -102,28 +102,5 @@ timelib_rel_time *timelib_rel_add(timelib_rel_time *one, timelib_rel_time *two)
 	
 	timelib_do_rel_normalize(rt);
 
-	/* if the first not 0 rt member is negative, then invert */
-	if (rt->y < 0) {
-		timelib_rel_invert_member(rt, y);
-	} else if (rt->y == 0) {
-		if (rt->m < 0) {
-			timelib_rel_invert_member(rt, m);
-		} else if (rt->m == 0) {
-			if (rt->d < 0) {
-				timelib_rel_invert_member(rt, d);
-			} else if (rt->d == 0) {
-				if (rt->h < 0) {
-					timelib_rel_invert_member(rt, h);
-				} else if (rt->h == 0) {
-					if (rt->i < 0) {
-						timelib_rel_invert_member(rt, i);
-					} else if (rt->i == 0 && rt->s < 0) {
-						timelib_rel_invert_member(rt, s);
-					}
-				}
-			}
-		}
-	}
-
 	return rt;
 }
