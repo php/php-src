@@ -1,15 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-01 Aug 2013, PHP 5.4.18 RC2
+15 Aug 2013, PHP 5.4.18
 
 - Core:
   . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
     erroneously set to FILTER_SANITIZE_SPECIAL_CHARS value). (Andrey 
     avp200681 gmail com).
-
-18 Jul 2013, PHP 5.4.18 RC1
-
-- Core:
   . Fixed bug #65254 (Exception not catchable when exception thrown in autoload
     with a namespace). (Laruence)
   . Fixed bug #65108 (is_callable() triggers Fatal Error). 
@@ -60,6 +56,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #61387 (NULL valued anonymous column causes segfault in 
     odbc_fetch_array). (Brandon Kirsch)
+
+- Openssl:
+  . Fixed handling null bytes in subjectAltName (CVE-2013-4073).
+    (Christian Heimes)
 
 - PDO:
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
