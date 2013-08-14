@@ -101,6 +101,10 @@ PHP                                                                        NEWS
   . Fixed bug #61387 (NULL valued anonymous column causes segfault in 
     odbc_fetch_array). (Brandon Kirsch)
 
+- Openssl:
+  . Fixed handling null bytes in subjectAltName (CVE-2013-4073). 
+    (Christian Heimes)
+
 - PDO:
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
     (Chris Jones)
