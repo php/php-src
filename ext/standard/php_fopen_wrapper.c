@@ -71,43 +71,20 @@ static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t
 
 static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
-	off_t *position = (off_t*)stream->abstract;
-	size_t read_bytes = 0;
+	php_stream *inner = stream->abstract;
 
-	if (!stream->eof) {
-		if (SG(request_info).raw_post_data) { /* data has already been read by a post handler */
-			read_bytes = SG(request_info).raw_post_data_length - *position;
-			if (read_bytes <= count) {
-				stream->eof = 1;
-			} else {
-				read_bytes = count;
-			}
-			if (read_bytes) {
-				memcpy(buf, SG(request_info).raw_post_data + *position, read_bytes);
-			}
-		} else if (sapi_module.read_post) {
-			read_bytes = sapi_module.read_post(buf, count TSRMLS_CC);
-			if (read_bytes <= 0) {
-				stream->eof = 1;
-				read_bytes = 0;
-			}
-			/* Increment SG(read_post_bytes) only when something was actually read. */
-			SG(read_post_bytes) += read_bytes;
-		} else {
-			stream->eof = 1;
-		}
+	if (inner && inner->ops->read) {
+		size_t read = inner->ops->read(inner, buf, count TSRMLS_CC);
+		stream->eof = inner->eof;
+		return read;
 	}
 
-	*position += read_bytes;
-
-	return read_bytes;
+	return -1;
 }
 /* }}} */
 
 static int php_stream_input_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
-	efree(stream->abstract);
-
 	return 0;
 }
 /* }}} */
@@ -118,13 +95,25 @@ static int php_stream_input_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+static int php_stream_input_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
+{
+	php_stream *inner = stream->abstract;
+
+	if (inner && inner->ops->seek) {
+		return inner->ops->seek(inner, offset, whence, newoffset TSRMLS_CC);
+	}
+
+	return -1;
+}
+/* }}} */
+
 php_stream_ops php_stream_input_ops = {
 	php_stream_input_write,
 	php_stream_input_read,
 	php_stream_input_close,
 	php_stream_input_flush,
 	"Input",
-	NULL, /* seek */
+	php_stream_input_seek,
 	NULL, /* cast */
 	NULL, /* stat */
 	NULL  /* set_option */
@@ -210,7 +199,12 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			}
 			return NULL;
 		}
-		return php_stream_alloc(&php_stream_input_ops, ecalloc(1, sizeof(off_t)), 0, "rb");
+		if (SG(request_info).request_body) {
+			php_stream_rewind(SG(request_info).request_body);
+		} else {
+			sapi_read_standard_form_data(TSRMLS_C);
+		}
+		return php_stream_alloc(&php_stream_input_ops, SG(request_info).request_body, 0, "rb");
 	}
 
 	if (!strcasecmp(path, "stdin")) {
@@ -259,8 +253,8 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			fd = dup(STDERR_FILENO);
 		}
 	} else if (!strncasecmp(path, "fd/", 3)) {
-		char	   *start,
-				   *end;
+		const char *start;
+		char       *end;
 		long	   fildes_ori;
 		int		   dtablesize;
 
