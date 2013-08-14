@@ -249,8 +249,9 @@ static php_stream *php_glob_stream_opener(php_stream_wrapper *wrapper, char *pat
 	if ((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) {
 		for (i = 0; i < pglob->glob.gl_pathc; i++) {
 			if (!php_check_open_basedir_ex(pglob->glob.gl_pathv[i], 0 TSRMLS_CC)) {
-				if (!pglob->open_basedir_indexmap)
+				if (!pglob->open_basedir_indexmap) {
 					pglob->open_basedir_indexmap = (size_t *) emalloc(sizeof(size_t) * pglob->glob.gl_pathc);
+				}
 				pglob->open_basedir_indexmap[pglob->open_basedir_indexmap_size++] = i;
 			}
 		}
