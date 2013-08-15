@@ -591,7 +591,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	
 	for (i = 0; i < X509_NAME_entry_count(name); i++) {
 		unsigned char *to_add;
-		int to_add_len;
+		int to_add_len = 0;
 
 
 		ne  = X509_NAME_get_entry(name, i);
