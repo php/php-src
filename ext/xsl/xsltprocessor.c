@@ -476,7 +476,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 
 static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStylesheetPtr style, zval *docp TSRMLS_DC) /* {{{ */
 {
-	xmlDocPtr newdocp;
+	xmlDocPtr newdocp = NULL;
 	xmlDocPtr doc = NULL;
 	xmlNodePtr node = NULL;
 	xsltTransformContextPtr ctxt;
