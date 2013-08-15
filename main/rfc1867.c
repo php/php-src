@@ -398,7 +398,7 @@ static int find_boundary(multipart_buffer *self, char *boundary TSRMLS_DC)
 static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header TSRMLS_DC)
 {
 	char *line;
-	mime_header_entry prev_entry, entry;
+	mime_header_entry prev_entry = {0}, entry;
 	int prev_len, cur_len;
 
 	/* didn't find boundary, abort */

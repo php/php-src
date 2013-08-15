@@ -514,7 +514,7 @@ static zend_object_value php_snmp_object_new(zend_class_entry *class_type TSRMLS
 static void php_snmp_error(zval *object, const char *docref TSRMLS_DC, int type, const char *format, ...)
 {
 	va_list args;
-	php_snmp_object *snmp_object;
+	php_snmp_object *snmp_object = NULL;
 
 	if (object) {
 		snmp_object = (php_snmp_object *)zend_object_store_get_object(object TSRMLS_CC);
