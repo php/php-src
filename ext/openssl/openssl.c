@@ -1529,7 +1529,6 @@ PHP_FUNCTION(openssl_spki_export)
 	EVP_PKEY *pkey = NULL;
 	NETSCAPE_SPKI *spki = NULL;
 	BIO *out = BIO_new(BIO_s_mem());
-	BUF_MEM *bio_buf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
 		return;
