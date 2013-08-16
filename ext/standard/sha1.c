@@ -35,13 +35,13 @@ PHPAPI void make_sha1_digest(char *sha1str, unsigned char *digest)
 PHP_FUNCTION(sha1)
 {
 	char *arg;
-	int arg_len;
+	zend_str_size_int arg_len;
 	zend_bool raw_output = 0;
 	char sha1str[41];
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 
@@ -66,7 +66,7 @@ PHP_FUNCTION(sha1)
 PHP_FUNCTION(sha1_file)
 {
 	char          *arg;
-	int           arg_len;
+	zend_str_size_int           arg_len;
 	zend_bool raw_output = 0;
 	char          sha1str[41];
 	unsigned char buf[1024];
@@ -75,7 +75,7 @@ PHP_FUNCTION(sha1_file)
 	int           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|b", &arg, &arg_len, &raw_output) == FAILURE) {
 		return;
 	}
 	

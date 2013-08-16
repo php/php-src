@@ -491,7 +491,7 @@ PHP_FUNCTION(get_browser)
 		bdata = &global_bdata;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!b", &agent_name, &agent_name_len, &return_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S!b", &agent_name, &agent_name_len, &return_array) == FAILURE) {
 		return;
 	}
 

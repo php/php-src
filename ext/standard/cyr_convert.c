@@ -201,7 +201,7 @@ _cyr_mac = {
 *    d - x-cp866
 *    m - x-mac-cyrillic
 *****************************************************************************/
-static char * php_convert_cyr_string(unsigned char *str, int length, char from, char to TSRMLS_DC)
+static char * php_convert_cyr_string(unsigned char *str, zend_str_size_int length, char from, char to TSRMLS_DC)
 {
 	const unsigned char *from_table, *to_table;
 	unsigned char tmp;
@@ -272,10 +272,10 @@ static char * php_convert_cyr_string(unsigned char *str, int length, char from, 
 PHP_FUNCTION(convert_cyr_string)
 {
 	char *input, *fr_cs, *to_cs;
-	int input_len, fr_cs_len, to_cs_len;
+	zend_str_size_int input_len, fr_cs_len, to_cs_len;
 	unsigned char *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSS", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
 		return;
 	}
 

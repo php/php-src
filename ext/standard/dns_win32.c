@@ -44,13 +44,13 @@
 PHP_FUNCTION(dns_get_mx) /* {{{ */
 {
 	char *hostname;
-	int hostname_len;
+	zend_str_size_int hostname_len;
 	zval *mx_list, *weight_list = NULL;
 
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
 	PDNS_RECORD     pResult, pRec;          /* Pointer to DNS_RECORD structure */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sz|z", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sz|z", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
 		return;
 	}
 
@@ -93,13 +93,13 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 PHP_FUNCTION(dns_check_record)
 {
 	char *hostname, *rectype = NULL;
-	int hostname_len, rectype_len = 0;
+	zend_str_size_int hostname_len, rectype_len = 0;
 	int type = DNS_TYPE_MX;
 
 	DNS_STATUS      status;                 /* Return value of DnsQuery_A() function */
 	PDNS_RECORD     pResult;          /* Pointer to DNS_RECORD structure */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &hostname, &hostname_len, &rectype, &rectype_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|S", &hostname, &hostname_len, &rectype, &rectype_len) == FAILURE) {
 		return;
 	}
 
@@ -348,13 +348,13 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
-	int hostname_len;
+	zend_str_size_int hostname_len;
 	long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type, type_to_fetch, first_query = 1, store_results = 1;
 	zend_bool raw = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lz!z!b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|lz!z!b",
 			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
 		return;
 	}

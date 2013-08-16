@@ -203,9 +203,9 @@ PHPAPI unsigned char *php_quot_print_encode(const unsigned char *str, size_t len
 PHP_FUNCTION(quoted_printable_decode)
 {
 	char *arg1, *str_in, *str_out;
-	int arg1_len, i = 0, j = 0, k;
+	zend_str_size_int arg1_len, i = 0, j = 0, k;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &arg1, &arg1_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &arg1, &arg1_len) == FAILURE) {
 		return;
 	}
     
@@ -263,10 +263,10 @@ PHP_FUNCTION(quoted_printable_decode)
 PHP_FUNCTION(quoted_printable_encode)
 {
 	char *str, *new_str;
-	int str_len;
+	zend_str_size_int str_len;
 	size_t new_str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) != SUCCESS) {
 		return;
 	}
 

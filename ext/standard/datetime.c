@@ -86,13 +86,13 @@ char *strptime(const char *s, const char *format, struct tm *tm);
 PHP_FUNCTION(strptime)
 {
 	char      *ts;
-	int        ts_length;
+	zend_str_size_int        ts_length;
 	char      *format;
-	int        format_length;
+	zend_str_size_int        format_length;
 	struct tm  parsed_time;
 	char      *unparsed_part;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &ts, &ts_length, &format, &format_length) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &ts, &ts_length, &format, &format_length) == FAILURE) {
 		return;
 	}
 

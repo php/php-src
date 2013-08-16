@@ -54,9 +54,9 @@
 PHPAPI PHP_FUNCTION(dl)
 {
 	char *filename;
-	int filename_len;
+	zend_str_size_int filename_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &filename, &filename_len) == FAILURE) {
 		return;
 	}
 

@@ -1388,10 +1388,10 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	zval **info = NULL;
 	php_stream *stream = NULL;
 	char *input;
-	int input_len;
+	zend_str_size_int input_len;
 	const int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|Z", &input, &input_len, &info) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "S|Z", &input, &input_len, &info) == FAILURE) {
 			return;
 	}
 
