@@ -27,7 +27,7 @@ PHP                                                                        NEWS
   . Fixed bug #62978 (Disallow possible SQL injections with pg_select()/pg_update()
     /pg_delete()/pg_insert()). (Yasuo)
 
-?? ??? 2013, PHP 5.5.2
+15 Aug 2013, PHP 5.5.2
 
 - Core:
   . Fixed bug #65372 (Segfault in gc_zval_possible_root when return reference
@@ -48,7 +48,7 @@ PHP                                                                        NEWS
     shutdown). (Dmitry)
 
 - Openssl:
-  . Fixed handling null bytes in subjectAltName (CVE-2013-4073).
+  . Fixed handling null bytes in subjectAltName (CVE-2013-4248).
     (Christian Heimes)
 
 - PDO_mysql:
