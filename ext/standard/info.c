@@ -1159,9 +1159,9 @@ PHP_FUNCTION(phpinfo)
 PHP_FUNCTION(phpversion)
 {
 	char *ext_name = NULL;
-	int ext_name_len = 0;
+	zend_str_size_int ext_name_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &ext_name, &ext_name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &ext_name, &ext_name_len) == FAILURE) {
 		return;
 	}
 
@@ -1215,9 +1215,9 @@ PHP_FUNCTION(php_sapi_name)
 PHP_FUNCTION(php_uname)
 {
 	char *mode = "a";
-	int modelen = sizeof("a")-1;
+	zend_str_size_int modelen = sizeof("a")-1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &mode, &modelen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|S", &mode, &modelen) == FAILURE) {
 		return;
 	}
 	RETURN_STRING(php_get_uname(*mode), 0);

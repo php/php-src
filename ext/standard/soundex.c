@@ -29,7 +29,8 @@
 PHP_FUNCTION(soundex)
 {
 	char	*str;
-	int	i, _small, str_len, code, last;
+	zend_str_size_int i, _small, str_len;
+	int last, code;
 	char	soundex[4 + 1];
 
 	static char soundex_table[26] =
