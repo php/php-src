@@ -3195,8 +3195,8 @@ static void php_similar_str(const char *txt1, zend_str_size_int len1, const char
  */
 static zend_str_size_int php_similar_char(const char *txt1, zend_str_size_int len1, const char *txt2, zend_str_size_int len2)
 {
-	zend_str_size sum;
-	zend_str_size pos1, pos2, max;
+	zend_str_size_int sum;
+	zend_str_size_int pos1 = 0, pos2 = 0, max;
 
 	php_similar_str(txt1, len1, txt2, len2, &pos1, &pos2, &max);
 	if ((sum = max)) {
@@ -4556,8 +4556,8 @@ PHPAPI zend_str_size_size_t php_strip_tags_ex(char *rbuf, zend_str_size_int len,
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0, depth=0, in_q = 0;
 	int state = 0;
-	zend_str_size pos;
-	char *allow_free;
+	zend_str_size_int pos;
+	char *allow_free = NULL;
 
 	if (stateptr)
 		state = *stateptr;
