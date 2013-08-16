@@ -2226,7 +2226,7 @@ PHP_FUNCTION(substr)
 	if (argc > 2) {
 		if ((l < 0 && -l > str_len)) {
 			RETURN_FALSE;
-		} else if (l > str_len) {
+		} else if (l >= 0 && l > str_len) {
 			l = str_len;
 		}
 	} else {
@@ -2239,7 +2239,7 @@ PHP_FUNCTION(substr)
 		f = 0;
 	}
 
-	if (l < 0 && (l + str_len - f) < 0) {
+	if (l < 0 && ((f > 0 && (l + str_len) < f) || (f < 0 && (l+str_len) > f))) {
 		RETURN_FALSE;
 	}
 
