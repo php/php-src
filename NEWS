@@ -102,7 +102,7 @@ PHP                                                                        NEWS
     odbc_fetch_array). (Brandon Kirsch)
 
 - Openssl:
-  . Fixed handling null bytes in subjectAltName (CVE-2013-4073). 
+  . Fixed handling null bytes in subjectAltName (CVE-2013-4248).
     (Christian Heimes)
 
 - PDO:
