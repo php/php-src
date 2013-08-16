@@ -5,6 +5,14 @@ PHP                                                                        NEWS
 15 Aug 2013, PHP 5.5.2
 
 - Core:
+  . Fixed bug #65372 (Segfault in gc_zval_possible_root when return reference
+    fails). (Laruence)
+  . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
+    erroneously set to FILTER_SANITIZE_SPECIAL_CHARS value). (Andrey
+    avp200681 gmail com).
+  . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
+  . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
+    limited case). (Arpad)
   . Fixed bug #62691 (solaris sed has no -i switch). (Chris Jones)
   . Fixed bug #61345 (CGI mode - make install don't work). (Michael Heimpold)
   . Fixed bug #61268 (--enable-dtrace leads make to clobber
@@ -14,30 +22,6 @@ PHP                                                                        NEWS
   . Added flags option to DOMDocument::schemaValidate() and 
     DOMDocument::schemaValidateSource(). Added LIBXML_SCHEMA_CREATE flag. 
     (Chris Wright)
-
-- Sessions:
-  . Implemented strict sessions RFC (https://wiki.php.net/rfc/strict_sessions)
-    which protects against session fixation attacks and session collisions.    
-    (Yasuo Ohgaki)
-  . Fixed possible buffer overflow under Windows. Note: Not a security fix.
-    (Yasuo)
-  . Changed session.auto_start to PHP_INI_PERDIR. (Yasuo)
-
-- Pgsql:
-  . Fixed bug #62978 (Disallow possible SQL injections with pg_select()/pg_update()
-    /pg_delete()/pg_insert()). (Yasuo)
-
-15 Aug 2013, PHP 5.5.2
-
-- Core:
-  . Fixed bug #65372 (Segfault in gc_zval_possible_root when return reference
-    fails). (Laruence)
-  . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
-    erroneously set to FILTER_SANITIZE_SPECIAL_CHARS value). (Andrey
-    avp200681 gmail com).
-  . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
-  . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
-    limited case). (Arpad)
 
 - OPcache:
   . Added opcache.restrict_api configuration directive that may limit
@@ -57,6 +41,18 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug #65028 (Phar::buildFromDirectory creates corrupt archives for 
     some specific contents). (Stas)
+
+- Pgsql:
+  . Fixed bug #62978 (Disallow possible SQL injections with pg_select()/pg_update()
+    /pg_delete()/pg_insert()). (Yasuo)
+
+- Sessions:
+  . Implemented strict sessions RFC (https://wiki.php.net/rfc/strict_sessions)
+    which protects against session fixation attacks and session collisions.    
+    (Yasuo Ohgaki)
+  . Fixed possible buffer overflow under Windows. Note: Not a security fix.
+    (Yasuo)
+  . Changed session.auto_start to PHP_INI_PERDIR. (Yasuo)
 
 - SOAP:
   . Fixed bug #65018 (SoapHeader problems with SoapServer). (Dmitry)
