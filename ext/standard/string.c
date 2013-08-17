@@ -2212,11 +2212,12 @@ PHP_FUNCTION(chunk_split)
 
 /* {{{ proto string substr(string str, int start [, int length])
    Returns part of a string */
+/* XXX This function has to be revised when a better php integer type was integrated */
 PHP_FUNCTION(substr)
 {
 	char *str;
 	long l = 0, f;
-	zend_str_size str_len;
+	zend_str_size_int str_len;
 	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl|l", &str, &str_len, &f, &l) == FAILURE) {
@@ -2226,20 +2227,20 @@ PHP_FUNCTION(substr)
 	if (argc > 2) {
 		if ((l < 0 && -l > str_len)) {
 			RETURN_FALSE;
-		} else if (l >= 0 && l > str_len) {
+		} else if (l > (long)str_len) {
 			l = str_len;
 		}
 	} else {
 		l = str_len;
 	}
 
-	if (f > 0 && f > str_len) {
+	if (f > (long)str_len) {
 		RETURN_FALSE;
 	} else if (f < 0 && -f > str_len) {
 		f = 0;
 	}
 
-	if (l < 0 && ((f > 0 && (l + str_len) < f) || (f < 0 && (l+str_len) > -f))) {
+	if (l < 0 && (l + (long)str_len - f) < 0) {
 		RETURN_FALSE;
 	}
 
@@ -2247,7 +2248,7 @@ PHP_FUNCTION(substr)
 	 * of the string
 	 */
 	if (f < 0) {
-		f = str_len + f;
+		f = (long)str_len + f;
 		if (f < 0) {
 			f = 0;
 		}
@@ -2257,17 +2258,17 @@ PHP_FUNCTION(substr)
 	 * needed to stop that many chars from the end of the string
 	 */
 	if (l < 0) {
-		l = (str_len - f) + l;
+		l = ((long)str_len - f) + l;
 		if (l < 0) {
 			l = 0;
 		}
 	}
 
-	if (f >= str_len) {
+	if (f >= (long)str_len) {
 		RETURN_FALSE;
 	}
 
-	if ((f + l) > str_len) {
+	if ((f + l) > (long)str_len) {
 		l = str_len - f;
 	}
 
