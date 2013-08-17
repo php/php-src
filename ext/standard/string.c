@@ -2239,7 +2239,7 @@ PHP_FUNCTION(substr)
 		f = 0;
 	}
 
-	if (l < 0 && ((f > 0 && (l + str_len) < f) || (f < 0 && (l+str_len) > f))) {
+	if (l < 0 && ((f > 0 && (l + str_len) < f) || (f < 0 && (l+str_len) > -f))) {
 		RETURN_FALSE;
 	}
 
