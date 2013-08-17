@@ -3031,8 +3031,8 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	char *param_spec;
 	zend_fcall_info fci1, fci2;
 	zend_fcall_info_cache fci1_cache = empty_fcall_info_cache, fci2_cache = empty_fcall_info_cache;
-	zend_fcall_info *fci_key, *fci_data;
-	zend_fcall_info_cache *fci_key_cache, *fci_data_cache;
+	zend_fcall_info *fci_key = NULL, *fci_data;
+	zend_fcall_info_cache *fci_key_cache = NULL, *fci_data_cache;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	int (*intersect_key_compare_func)(const void *, const void * TSRMLS_DC);
@@ -3449,8 +3449,8 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	char *param_spec;
 	zend_fcall_info fci1, fci2;
 	zend_fcall_info_cache fci1_cache = empty_fcall_info_cache, fci2_cache = empty_fcall_info_cache;
-	zend_fcall_info *fci_key, *fci_data;
-	zend_fcall_info_cache *fci_key_cache, *fci_data_cache;
+	zend_fcall_info *fci_key = NULL, *fci_data;
+	zend_fcall_info_cache *fci_key_cache = NULL, *fci_data_cache;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
 	int (*diff_key_compare_func)(const void *, const void * TSRMLS_DC);
@@ -4054,7 +4054,6 @@ PHP_FUNCTION(array_sum)
 		 **entry,
 		 entry_n;
 	HashPosition pos;
-	double dval;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a", &input) == FAILURE) {
 		return;

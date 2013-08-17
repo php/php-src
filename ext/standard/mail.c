@@ -80,9 +80,9 @@ PHP_FUNCTION(ezmlm_hash)
 {
 	char *str = NULL;
 	unsigned int h = 5381;
-	int j, str_len;
+	zend_str_size_int j, str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) == FAILURE) {
 		return;
 	}
 
@@ -102,13 +102,13 @@ PHP_FUNCTION(mail)
 {
 	char *to=NULL, *message=NULL, *headers=NULL, *headers_trimmed=NULL;
 	char *subject=NULL, *extra_cmd=NULL;
-	int to_len, message_len, headers_len = 0;
-	int subject_len, extra_cmd_len = 0, i;
+	zend_str_size_int to_len, message_len, headers_len = 0;
+	zend_str_size_int subject_len, extra_cmd_len = 0, i;
 	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
 	char *p, *e;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|ss",	&to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSS|SS",	&to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &headers_len, &extra_cmd, &extra_cmd_len) == FAILURE) {
 		return;
 	}
 

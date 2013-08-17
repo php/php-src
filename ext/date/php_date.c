@@ -1041,7 +1041,7 @@ char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 static char *date_format(char *format, zend_str_size_int format_len, timelib_time *t, int localtime)
 {
 	smart_str            string = {0};
-	zend_str_size        i, length;
+	zend_str_size_int    i, length = 0;
 	char                 buffer[97];
 	timelib_time_offset *offset = NULL;
 	timelib_sll          isoweek, isoyear;
@@ -2539,8 +2539,8 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 	timelib_time   *now;
 	timelib_tzinfo *tzi = NULL;
 	timelib_error_container *err = NULL;
-	int type = TIMELIB_ZONETYPE_ID, new_dst;
-	char *new_abbr;
+	int type = TIMELIB_ZONETYPE_ID, new_dst = 0;
+	char *new_abbr = NULL;
 	timelib_sll     new_offset;
 	
 	if (dateobj->time) {

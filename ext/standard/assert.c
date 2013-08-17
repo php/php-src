@@ -141,7 +141,8 @@ PHP_MINFO_FUNCTION(assert) /* {{{ */
 PHP_FUNCTION(assert)
 {
 	zval **assertion;
-	int val, description_len = 0;
+	int val;
+	zend_str_size_int description_len = 0;
 	char *myeval = NULL;
 	char *compiled_string_description, *description = NULL;
 
@@ -149,7 +150,7 @@ PHP_FUNCTION(assert)
 		RETURN_TRUE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|s", &assertion, &description, &description_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|S", &assertion, &description, &description_len) == FAILURE) {
 		return;
 	}
 
