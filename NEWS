@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #65225 (PHP_BINARY incorrectly set). (Patrick Allaert)
   . Fixed bug #62692 (PHP fails to build with DTrace). (Chris Jones, Kris Van Hees)
 
+- Openssl:
+  . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in
+    some cases). (Mark Jones)
 
 15 Aug 2013, PHP 5.5.2
 
