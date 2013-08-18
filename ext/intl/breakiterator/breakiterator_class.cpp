@@ -245,32 +245,32 @@ ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_void, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_locale, 0, 0, 0)
-	ZEND_ARG_INFO(0, "locale")
+	ZEND_ARG_INFO(0, locale)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_setText, 0, 0, 1)
-	ZEND_ARG_INFO(0, "text")
+	ZEND_ARG_INFO(0, text)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_next, 0, 0, 0)
-	ZEND_ARG_INFO(0, "offset")
+	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_offset, 0, 0, 1)
-	ZEND_ARG_INFO(0, "offset")
+	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_get_locale, 0, 0, 1)
-	ZEND_ARG_INFO(0, "locale_type")
+	ZEND_ARG_INFO(0, locale_type)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_getPartsIterator, 0, 0, 0)
-	ZEND_ARG_INFO(0, "key_type")
+	ZEND_ARG_INFO(0, key_type)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(ainfo_rbbi___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, "rules")
-	ZEND_ARG_INFO(0, "areCompiled")
+	ZEND_ARG_INFO(0, rules)
+	ZEND_ARG_INFO(0, areCompiled)
 ZEND_END_ARG_INFO()
 
 /* }}} */
@@ -296,7 +296,7 @@ static const zend_function_entry BreakIterator_class_functions[] = {
 	PHP_ME_MAPPING(following,				breakiter_following,					ainfo_biter_offset,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(preceding,				breakiter_preceding,					ainfo_biter_offset,					ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(isBoundary,				breakiter_is_boundary,					ainfo_biter_offset,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getLocale,				breakiter_get_locale,					ainfo_biter_void,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getLocale,				breakiter_get_locale,					ainfo_biter_get_locale,				ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(getPartsIterator,		breakiter_get_parts_iterator,			ainfo_biter_getPartsIterator,		ZEND_ACC_PUBLIC)
 
 	PHP_ME_MAPPING(getErrorCode,			breakiter_get_error_code,				ainfo_biter_void,					ZEND_ACC_PUBLIC)

@@ -42,7 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 supporting functions. */
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "pcre_internal.h"
 
@@ -96,7 +98,7 @@ for (;;)
   {
   int d, min;
   pcre_uchar *cs, *ce;
-  register int op = *cc;
+  register pcre_uchar op = *cc;
 
   switch (op)
     {
@@ -321,15 +323,19 @@ for (;;)
 
     /* Check a class for variable quantification */
 
-#if defined SUPPORT_UTF || !defined COMPILE_PCRE8
-    case OP_XCLASS:
-    cc += GET(cc, 1) - PRIV(OP_lengths)[OP_CLASS];
-    /* Fall through */
-#endif
-
     case OP_CLASS:
     case OP_NCLASS:
+#if defined SUPPORT_UTF || defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+    case OP_XCLASS:
+    /* The original code caused an unsigned overflow in 64 bit systems,
+    so now we use a conditional statement. */
+    if (op == OP_XCLASS)
+      cc += GET(cc, 1);
+    else
+      cc += PRIV(OP_lengths)[OP_CLASS];
+#else
     cc += PRIV(OP_lengths)[OP_CLASS];
+#endif
 
     switch (*cc)
       {
@@ -536,7 +542,7 @@ Arguments:
   p             points to the character
   caseless      the caseless flag
   cd            the block with char table pointers
-  utf           TRUE for UTF-8 / UTF-16 mode
+  utf           TRUE for UTF-8 / UTF-16 / UTF-32 mode
 
 Returns:        pointer after the character
 */
@@ -545,7 +551,7 @@ static const pcre_uchar *
 set_table_bit(pcre_uint8 *start_bits, const pcre_uchar *p, BOOL caseless,
   compile_data *cd, BOOL utf)
 {
-unsigned int c = *p;
+pcre_uint32 c = *p;
 
 #ifdef COMPILE_PCRE8
 SET_BIT(c);
@@ -562,18 +568,20 @@ if (utf && c > 127)
     (void)PRIV(ord2utf)(c, buff);
     SET_BIT(buff[0]);
     }
-#endif
+#endif  /* Not SUPPORT_UCP */
   return p;
   }
-#endif
+#else   /* Not SUPPORT_UTF */
+(void)(utf);   /* Stops warning for unused parameter */
+#endif  /* SUPPORT_UTF */
 
 /* Not UTF-8 mode, or character is less than 127. */
 
 if (caseless && (cd->ctypes[c] & ctype_letter) != 0) SET_BIT(cd->fcc[c]);
 return p + 1;
-#endif
+#endif  /* COMPILE_PCRE8 */
 
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
 if (c > 0xff)
   {
   c = 0xff;
@@ -593,10 +601,12 @@ if (utf && c > 127)
       c = 0xff;
     SET_BIT(c);
     }
-#endif
+#endif  /* SUPPORT_UCP */
   return p;
   }
-#endif
+#else   /* Not SUPPORT_UTF */
+(void)(utf);   /* Stops warning for unused parameter */
+#endif  /* SUPPORT_UTF */
 
 if (caseless && (cd->ctypes[c] & ctype_letter) != 0) SET_BIT(cd->fcc[c]);
 return p + 1;
@@ -626,10 +636,10 @@ Returns:         nothing
 */
 
 static void
-set_type_bits(pcre_uint8 *start_bits, int cbit_type, int table_limit,
+set_type_bits(pcre_uint8 *start_bits, int cbit_type, unsigned int table_limit,
   compile_data *cd)
 {
-register int c;
+register pcre_uint32 c;
 for (c = 0; c < table_limit; c++) start_bits[c] |= cd->cbits[c+cbit_type];
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 if (table_limit == 32) return;
@@ -668,10 +678,10 @@ Returns:         nothing
 */
 
 static void
-set_nottype_bits(pcre_uint8 *start_bits, int cbit_type, int table_limit,
+set_nottype_bits(pcre_uint8 *start_bits, int cbit_type, unsigned int table_limit,
   compile_data *cd)
 {
-register int c;
+register pcre_uint32 c;
 for (c = 0; c < table_limit; c++) start_bits[c] |= ~cd->cbits[c+cbit_type];
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 if (table_limit != 32) for (c = 24; c < 32; c++) start_bits[c] = 0xff;
@@ -695,7 +705,7 @@ function fails unless the result is SSB_DONE.
 Arguments:
   code         points to an expression
   start_bits   points to a 32-byte table, initialized to 0
-  utf          TRUE if in UTF-8 / UTF-16 mode
+  utf          TRUE if in UTF-8 / UTF-16 / UTF-32 mode
   cd           the block with char table pointers
 
 Returns:       SSB_FAIL     => Failed to find any starting bytes
@@ -708,7 +718,7 @@ static int
 set_start_bits(const pcre_uchar *code, pcre_uint8 *start_bits, BOOL utf,
   compile_data *cd)
 {
-register int c;
+register pcre_uint32 c;
 int yield = SSB_DONE;
 #if defined SUPPORT_UTF && defined COMPILE_PCRE8
 int table_limit = utf? 16:32;
@@ -984,8 +994,8 @@ do
       identical. */
 
       case OP_HSPACE:
-      SET_BIT(0x09);
-      SET_BIT(0x20);
+      SET_BIT(CHAR_HT);
+      SET_BIT(CHAR_SPACE);
 #ifdef SUPPORT_UTF
       if (utf)
         {
@@ -994,46 +1004,46 @@ do
         SET_BIT(0xE1);  /* For U+1680, U+180E */
         SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
         SET_BIT(0xE3);  /* For U+3000 */
-#endif
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
         SET_BIT(0xA0);
         SET_BIT(0xFF);  /* For characters > 255 */
-#endif
+#endif  /* COMPILE_PCRE[8|16|32] */
         }
       else
 #endif /* SUPPORT_UTF */
         {
+#ifndef EBCDIC
         SET_BIT(0xA0);
-#ifdef COMPILE_PCRE16
+#endif  /* Not EBCDIC */
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
         SET_BIT(0xFF);  /* For characters > 255 */
-#endif
+#endif  /* COMPILE_PCRE[16|32] */
         }
       try_next = FALSE;
       break;
 
       case OP_ANYNL:
       case OP_VSPACE:
-      SET_BIT(0x0A);
-      SET_BIT(0x0B);
-      SET_BIT(0x0C);
-      SET_BIT(0x0D);
+      SET_BIT(CHAR_LF);
+      SET_BIT(CHAR_VT);
+      SET_BIT(CHAR_FF);
+      SET_BIT(CHAR_CR);
 #ifdef SUPPORT_UTF
       if (utf)
         {
 #ifdef COMPILE_PCRE8
         SET_BIT(0xC2);  /* For U+0085 */
         SET_BIT(0xE2);  /* For U+2028, U+2029 */
-#endif
-#ifdef COMPILE_PCRE16
-        SET_BIT(0x85);
+#elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+        SET_BIT(CHAR_NEL);
         SET_BIT(0xFF);  /* For characters > 255 */
-#endif
+#endif  /* COMPILE_PCRE[8|16|32] */
         }
       else
 #endif /* SUPPORT_UTF */
         {
-        SET_BIT(0x85);
-#ifdef COMPILE_PCRE16
+        SET_BIT(CHAR_NEL);
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
         SET_BIT(0xFF);  /* For characters > 255 */
 #endif
         }
@@ -1056,7 +1066,8 @@ do
       break;
 
       /* The cbit_space table has vertical tab as whitespace; we have to
-      ensure it is set as not whitespace. */
+      ensure it is set as not whitespace. Luckily, the code value is the same
+      (0x0b) in ASCII and EBCDIC, so we can just adjust the appropriate bit. */
 
       case OP_NOT_WHITESPACE:
       set_nottype_bits(start_bits, cbit_space, table_limit, cd);
@@ -1064,8 +1075,9 @@ do
       try_next = FALSE;
       break;
 
-      /* The cbit_space table has vertical tab as whitespace; we have to
-      not set it from the table. */
+      /* The cbit_space table has vertical tab as whitespace; we have to not
+      set it from the table. Luckily, the code value is the same (0x0b) in
+      ASCII and EBCDIC, so we can just adjust the appropriate bit. */
 
       case OP_WHITESPACE:
       c = start_bits[1];    /* Save in case it was already set */
@@ -1119,8 +1131,8 @@ do
         return SSB_FAIL;
 
         case OP_HSPACE:
-        SET_BIT(0x09);
-        SET_BIT(0x20);
+        SET_BIT(CHAR_HT);
+        SET_BIT(CHAR_SPACE);
 #ifdef SUPPORT_UTF
         if (utf)
           {
@@ -1129,38 +1141,38 @@ do
           SET_BIT(0xE1);  /* For U+1680, U+180E */
           SET_BIT(0xE2);  /* For U+2000 - U+200A, U+202F, U+205F */
           SET_BIT(0xE3);  /* For U+3000 */
-#endif
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
           SET_BIT(0xA0);
           SET_BIT(0xFF);  /* For characters > 255 */
-#endif
+#endif  /* COMPILE_PCRE[8|16|32] */
           }
         else
 #endif /* SUPPORT_UTF */
+#ifndef EBCDIC
           SET_BIT(0xA0);
+#endif  /* Not EBCDIC */
         break;
 
         case OP_ANYNL:
         case OP_VSPACE:
-        SET_BIT(0x0A);
-        SET_BIT(0x0B);
-        SET_BIT(0x0C);
-        SET_BIT(0x0D);
+        SET_BIT(CHAR_LF);
+        SET_BIT(CHAR_VT);
+        SET_BIT(CHAR_FF);
+        SET_BIT(CHAR_CR);
 #ifdef SUPPORT_UTF
         if (utf)
           {
 #ifdef COMPILE_PCRE8
           SET_BIT(0xC2);  /* For U+0085 */
           SET_BIT(0xE2);  /* For U+2028, U+2029 */
-#endif
-#ifdef COMPILE_PCRE16
-          SET_BIT(0x85);
+#elif defined COMPILE_PCRE16 || defined COMPILE_PCRE32
+          SET_BIT(CHAR_NEL);
           SET_BIT(0xFF);  /* For characters > 255 */
-#endif
+#endif  /* COMPILE_PCRE16 */
           }
         else
 #endif /* SUPPORT_UTF */
-          SET_BIT(0x85);
+          SET_BIT(CHAR_NEL);
         break;
 
         case OP_NOT_DIGIT:
@@ -1172,7 +1184,9 @@ do
         break;
 
         /* The cbit_space table has vertical tab as whitespace; we have to
-        ensure it gets set as not whitespace. */
+        ensure it gets set as not whitespace. Luckily, the code value is the
+        same (0x0b) in ASCII and EBCDIC, so we can just adjust the appropriate
+        bit. */
 
         case OP_NOT_WHITESPACE:
         set_nottype_bits(start_bits, cbit_space, table_limit, cd);
@@ -1180,7 +1194,8 @@ do
         break;
 
         /* The cbit_space table has vertical tab as whitespace; we have to
-        avoid setting it. */
+        avoid setting it. Luckily, the code value is the same (0x0b) in ASCII
+        and EBCDIC, so we can just adjust the appropriate bit. */
 
         case OP_WHITESPACE:
         c = start_bits[1];    /* Save in case it was already set */
@@ -1214,7 +1229,7 @@ do
         memset(start_bits+25, 0xff, 7);      /* Bits for 0xc9 - 0xff */
         }
 #endif
-#ifdef COMPILE_PCRE16
+#if defined COMPILE_PCRE16 || defined COMPILE_PCRE32
       SET_BIT(0xFF);                         /* For characters > 255 */
 #endif
       /* Fall through */
@@ -1310,12 +1325,15 @@ Returns:    pointer to a pcre[16]_extra block, with study_data filled in and
             NULL on error or if no optimization possible
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN pcre_extra * PCRE_CALL_CONVENTION
 pcre_study(const pcre *external_re, int options, const char **errorptr)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DEFN pcre16_extra * PCRE_CALL_CONVENTION
 pcre16_study(const pcre16 *external_re, int options, const char **errorptr)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN pcre32_extra * PCRE_CALL_CONVENTION
+pcre32_study(const pcre32 *external_re, int options, const char **errorptr)
 #endif
 {
 int min;
@@ -1338,10 +1356,12 @@ if (re == NULL || re->magic_number != MAGIC_NUMBER)
 
 if ((re->flags & PCRE_MODE) == 0)
   {
-#ifdef COMPILE_PCRE8
-  *errorptr = "argument is compiled in 16 bit mode";
-#else
-  *errorptr = "argument is compiled in 8 bit mode";
+#if defined COMPILE_PCRE8
+  *errorptr = "argument not compiled in 8 bit mode";
+#elif defined COMPILE_PCRE16
+  *errorptr = "argument not compiled in 16 bit mode";
+#elif defined COMPILE_PCRE32
+  *errorptr = "argument not compiled in 32 bit mode";
 #endif
   return NULL;
   }
@@ -1368,13 +1388,17 @@ if ((re->options & PCRE_ANCHORED) == 0 &&
 
   tables = re->tables;
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
   if (tables == NULL)
     (void)pcre_fullinfo(external_re, NULL, PCRE_INFO_DEFAULT_TABLES,
     (void *)(&tables));
-#else
+#elif defined COMPILE_PCRE16
   if (tables == NULL)
     (void)pcre16_fullinfo(external_re, NULL, PCRE_INFO_DEFAULT_TABLES,
+    (void *)(&tables));
+#elif defined COMPILE_PCRE32
+  if (tables == NULL)
+    (void)pcre32_fullinfo(external_re, NULL, PCRE_INFO_DEFAULT_TABLES,
     (void *)(&tables));
 #endif
 
@@ -1406,20 +1430,20 @@ switch(min = find_minlength(code, code, re->options, 0))
   }
 
 /* If a set of starting bytes has been identified, or if the minimum length is
-greater than zero, or if JIT optimization has been requested, get a
-pcre[16]_extra block and a pcre_study_data block. The study data is put in the
-latter, which is pointed to by the former, which may also get additional data
-set later by the calling program. At the moment, the size of pcre_study_data
-is fixed. We nevertheless save it in a field for returning via the
-pcre_fullinfo() function so that if it becomes variable in the future,
-we don't have to change that code. */
+greater than zero, or if JIT optimization has been requested, or if
+PCRE_STUDY_EXTRA_NEEDED is set, get a pcre[16]_extra block and a
+pcre_study_data block. The study data is put in the latter, which is pointed to
+by the former, which may also get additional data set later by the calling
+program. At the moment, the size of pcre_study_data is fixed. We nevertheless
+save it in a field for returning via the pcre_fullinfo() function so that if it
+becomes variable in the future, we don't have to change that code. */
 
-if (bits_set || min > 0
+if (bits_set || min > 0 || (options & (
 #ifdef SUPPORT_JIT
-    || (options & (PCRE_STUDY_JIT_COMPILE | PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE
-                 | PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE)) != 0
+    PCRE_STUDY_JIT_COMPILE | PCRE_STUDY_JIT_PARTIAL_SOFT_COMPILE |
+    PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE |
 #endif
-  )
+    PCRE_STUDY_EXTRA_NEEDED)) != 0)
   {
   extra = (PUBL(extra) *)(PUBL(malloc))
     (sizeof(PUBL(extra)) + sizeof(pcre_study_data));
@@ -1473,7 +1497,8 @@ if (bits_set || min > 0
 
   /* If JIT support was compiled and requested, attempt the JIT compilation.
   If no starting bytes were found, and the minimum length is zero, and JIT
-  compilation fails, abandon the extra block and return NULL. */
+  compilation fails, abandon the extra block and return NULL, unless
+  PCRE_STUDY_EXTRA_NEEDED is set. */
 
 #ifdef SUPPORT_JIT
   extra->executable_jit = NULL;
@@ -1484,13 +1509,15 @@ if (bits_set || min > 0
   if ((options & PCRE_STUDY_JIT_PARTIAL_HARD_COMPILE) != 0)
     PRIV(jit_compile)(re, extra, JIT_PARTIAL_HARD_COMPILE);
 
-  if (study->flags == 0 && (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) == 0)
+  if (study->flags == 0 && (extra->flags & PCRE_EXTRA_EXECUTABLE_JIT) == 0 &&
+      (options & PCRE_STUDY_EXTRA_NEEDED) == 0)
     {
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
     pcre_free_study(extra);
-#endif
-#ifdef COMPILE_PCRE16
+#elif defined COMPILE_PCRE16
     pcre16_free_study(extra);
+#elif defined COMPILE_PCRE32
+    pcre32_free_study(extra);
 #endif
     extra = NULL;
     }
@@ -1511,12 +1538,15 @@ Argument:   a pointer to the pcre[16]_extra block
 Returns:    nothing
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN void
 pcre_free_study(pcre_extra *extra)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DEFN void
 pcre16_free_study(pcre16_extra *extra)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN void
+pcre32_free_study(pcre32_extra *extra)
 #endif
 {
 if (extra == NULL)

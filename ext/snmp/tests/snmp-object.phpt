@@ -83,6 +83,13 @@ var_dump(gettype($z));
 var_dump(count($z));
 var_dump(key($z));
 var_dump(array_shift($z));
+var_dump(key($z));
+array_shift($z);
+var_dump(key($z));
+array_shift($z);
+var_dump(key($z));
+array_shift($z);
+var_dump(key($z));
 var_dump($session->close());
 
 echo "SNMPv3 (default security settings)\n";
@@ -194,6 +201,10 @@ string(5) "array"
 int(%d)
 string(3) "1.0"
 string(%d) "%s"
+string(3) "2.0"
+string(3) "3.0"
+string(3) "4.0"
+string(3) "5.0"
 bool(true)
 SNMPv3 (default security settings)
 string(%d) "%S"

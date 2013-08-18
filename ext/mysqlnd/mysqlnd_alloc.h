@@ -24,7 +24,7 @@
 #ifndef MYSQLND_ALLOC_H
 #define MYSQLND_ALLOC_H
 
-extern const char * mysqlnd_debug_std_no_trace_funcs[];
+PHPAPI extern const char * mysqlnd_debug_std_no_trace_funcs[];
 
 #define MYSQLND_MEM_D	TSRMLS_DC ZEND_FILE_LINE_ORIG_DC
 #define MYSQLND_MEM_C	TSRMLS_CC ZEND_FILE_LINE_CC

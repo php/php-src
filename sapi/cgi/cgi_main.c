@@ -384,12 +384,16 @@ static const http_error http_error_codes[] = {
 	{413, "Request Entity Too Large"},
 	{414, "Request-URI Too Large"},
 	{415, "Unsupported Media Type"},
+	{428, "Precondition Required"},
+	{429, "Too Many Requests"},
+	{431, "Request Header Fields Too Large"},
 	{500, "Internal Server Error"},
 	{501, "Not Implemented"},
 	{502, "Bad Gateway"},
 	{503, "Service Unavailable"},
 	{504, "Gateway Time-out"},
 	{505, "HTTP Version not supported"},
+	{511, "Network Authentication Required"},
 	{0,   NULL}
 };
 
@@ -504,7 +508,7 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	uint read_bytes = 0;
 	int tmp_read_bytes;
 
-	count_bytes = MIN(count_bytes, (uint) SG(request_info).content_length - SG(read_post_bytes));
+	count_bytes = MIN(count_bytes, SG(request_info).content_length - SG(read_post_bytes));
 	while (read_bytes < count_bytes) {
 		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
 		if (tmp_read_bytes <= 0) {
@@ -1951,7 +1955,11 @@ consult the installation file that came with this distribution, or visit \n\
 	}
 
 	if (bindpath) {
-		fcgi_fd = fcgi_listen(bindpath, 128);
+		int backlog = 128;
+		if (getenv("PHP_FCGI_BACKLOG")) {
+			backlog = atoi(getenv("PHP_FCGI_BACKLOG"));
+		}
+		fcgi_fd = fcgi_listen(bindpath, backlog);
 		if (fcgi_fd < 0) {
 			fprintf(stderr, "Couldn't create FastCGI listen socket on port %s\n", bindpath);
 #ifdef ZTS

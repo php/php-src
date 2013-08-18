@@ -11,7 +11,7 @@ if test -z "$PHP_ZLIB_DIR"; then
 fi
 
 PHP_ARG_WITH(pcre-dir, pcre install prefix,
-[  --with-pcre-dir           ZIP: pcre install prefix], no, no)
+[  --with-pcre-dir         ZIP: pcre install prefix], no, no)
 
 if test "$PHP_ZIP" != "no"; then
 

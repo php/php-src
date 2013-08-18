@@ -41,7 +41,7 @@ Encoding
 ? support for "nillable" and "nil"
 ? default values of <element>
 ? provide schema 1999/2001 support???
-? make internal refrences for soap encoding (use seralization logic)???
+? make internal references for soap encoding (use serialization logic)???
 ? provide user space overriding of serialization certin objects and types???
 
 WSDL

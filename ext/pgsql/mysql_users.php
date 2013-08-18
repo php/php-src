@@ -56,7 +56,7 @@ ORDER BY 1;
 /*
  * mysql_list_fields()
  *
- * See also pg_meta_data(). It returns field defintion as array.
+ * See also pg_meta_data(). It returns field definition as array.
  */
 function pg_list_fields($db, $table) 
 {

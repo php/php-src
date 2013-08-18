@@ -474,7 +474,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	} else {
 		php_stream_bucket_prepend(brigade, bucket TSRMLS_CC);
 	}
-	/* This is a hack necessary to accomodate situations where bucket is appended to the stream
+	/* This is a hack necessary to accommodate situations where bucket is appended to the stream
  	 * multiple times. See bug35916.phpt for reference.
 	 */
 	if (bucket->refcount == 1) {
@@ -559,7 +559,7 @@ PHP_FUNCTION(stream_get_filters)
 
 	if (filters_hash) {
 		for(zend_hash_internal_pointer_reset(filters_hash);
-			(key_flags = zend_hash_get_current_key_ex(filters_hash, &filter_name, &filter_name_len, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT;
+			(key_flags = zend_hash_get_current_key_ex(filters_hash, &filter_name, &filter_name_len, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTENT;
 			zend_hash_move_forward(filters_hash))
 				if (key_flags == HASH_KEY_IS_STRING) {
 					add_next_index_stringl(return_value, filter_name, filter_name_len - 1, 1);

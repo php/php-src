@@ -244,11 +244,18 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(char *regex, int regex_le
 	int				count = 0;
 	unsigned const char *tables = NULL;
 #if HAVE_SETLOCALE
-	char				*locale = setlocale(LC_CTYPE, NULL);
+	char				*locale;
 #endif
 	pcre_cache_entry	*pce;
 	pcre_cache_entry	 new_entry;
 	char                *tmp = NULL;
+
+#if HAVE_SETLOCALE
+# if defined(PHP_WIN32) && defined(ZTS)
+	_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+# endif
+	locale = setlocale(LC_CTYPE, NULL);
+#endif
 
 	/* Try to lookup the cached regex entry, and if successful, just pass
 	   back the compiled pattern, otherwise go on and compile it. */

@@ -3,8 +3,7 @@ $Id$
 UPGRADE NOTES - PHP X.Y
 
 1. Internal API changes
-  a. Streams pooling API
-  b. Lowercasing and locales
+  a. Addition of do_operation and compare object handlers
 
 2. Build system changes
   a. Unix build system changes
@@ -15,51 +14,44 @@ UPGRADE NOTES - PHP X.Y
 1. Internal API changes
 ========================
 
-	a. Streams pooling API
+  a. Addition of do_operation and compare object handlers
 
-The streams pooling API has been removed. The following functions no longer
-exist:
+  Two new object handlers have been added:
 
-PHPAPI int php_stream_context_get_link(php_stream_context *context,
-		const char *hostent, php_stream **stream);
-PHPAPI int php_stream_context_set_link(php_stream_context *context,
-		const char *hostent, php_stream *stream);
-PHPAPI int php_stream_context_del_link(php_stream_context *context,
-		php_stream *stream);
+    do_operation:
+    typedef int (*zend_object_do_operation_t)(
+        zend_uchar opcode, zval *result, zval *op1, zval *op2 TSRMLS_DC
+    );
 
-	b. Lowercasing and locales
+    compare:
+    typedef int (*zend_object_compare_zvals_t)(
+        zval *result, zval *op1, zval *op2 TSRMLS_DC
+    );
 
-The lowercasing functions in zend_operators.c were split into those that do 
-lowercasing according to locale rules and those that do ASCII lowercasing.
-ASCII:
+  The first handler is used to overload arithmetic operations. The first
+  argument specifies the opcode of the operator, result is the target zval,
+  op1 the first operand and op2 the second operand. For unary operations
+  op2 is NULL. If the handler returns FAILURE PHP falls back to the default
+  behavior for the operation.
 
-                zend_str_tolower_copy
-                zend_str_tolower_dup
-                zend_str_tolower
-                zend_binary_strcasecmp
-                zend_binary_strncasecmp
+  The second handler is used to perform comparison operations with
+  non-objects. The value written into result must be an IS_LONG with value
+  -1 (smaller), 0 (equal) or 1 (greater). The return value is a SUCCESS/FAILURE
+  return code. The difference between this handler and compare_objects is
+  that it will be triggered for comparisons with non-objects and objects of
+  different types. It takes precedence over compare_objects.
 
-Locale-based:
-                zend_binary_strncasecmp_l
-                zend_binary_strcasecmp_l
-                zend_binary_zval_strcasecmp
-                zend_binary_zval_strncasecmp
-                string_compare_function_ex
-                string_case_compare_function
-
-Internal engine lowercasing will be using ASCII-only rules. User-facing functions,
-such as strcasecmp, will be using locale rules. 
-
-Two new functions - zend_binary_strncasecmp_l and zend_binary_strcasecmp_l - added as 
-locale-based counterparts to zend_binary_strcasecmp and zend_binary_strncasecmp.
+  Further docs in the RFC: https://wiki.php.net/rfc/operator_overloading_gmp
 
 ========================
 2. Build system changes
 ========================
 
   a. Unix build system changes
-    - 
+    - The bison version check is now a blacklist instead of a whitelist.
+    - The bison binary can be specified through the YACC environment/configure
+      variable. Previously `bison` was assumed to be in $PATH. 
 
   b. Windows build system changes
-    - Drop Windows XP and 2003 support.
+    - 
   

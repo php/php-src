@@ -93,6 +93,10 @@ void php_gd_error(const char *format, ...);
 #define gdEffectNormal 2
 #define gdEffectOverlay 3
 
+#define GD_TRUE 1
+#define GD_FALSE 0
+
+#define GD_EPSILON 1e-6
 
 /* This function accepts truecolor pixel values only. The
 	source color is composited with the destination color
@@ -100,6 +104,67 @@ void php_gd_error(const char *format, ...);
 	The resulting color is opaque. */
 
 int gdAlphaBlend(int dest, int src);
+
+/**
+ * Group: Transform
+ *
+ * Constants: gdInterpolationMethod
+
+ *  GD_BELL				 - Bell
+ *  GD_BESSEL			 - Bessel
+ *  GD_BILINEAR_FIXED 	 - fixed point bilinear 
+ *  GD_BICUBIC 			 - Bicubic
+ *  GD_BICUBIC_FIXED 	 - fixed point bicubic integer
+ *  GD_BLACKMAN			 - Blackman
+ *  GD_BOX				 - Box
+ *  GD_BSPLINE			 - BSpline
+ *  GD_CATMULLROM		 - Catmullrom
+ *  GD_GAUSSIAN			 - Gaussian
+ *  GD_GENERALIZED_CUBIC - Generalized cubic
+ *  GD_HERMITE			 - Hermite
+ *  GD_HAMMING			 - Hamming
+ *  GD_HANNING			 - Hannig
+ *  GD_MITCHELL			 - Mitchell
+ *  GD_NEAREST_NEIGHBOUR - Nearest neighbour interpolation
+ *  GD_POWER			 - Power
+ *  GD_QUADRATIC		 - Quadratic
+ *  GD_SINC				 - Sinc
+ *  GD_TRIANGLE			 - Triangle
+ *  GD_WEIGHTED4		 - 4 pixels weighted bilinear interpolation
+ *
+ * See also:
+ *  <gdSetInterpolationMethod>
+ **/
+typedef enum {
+	GD_DEFAULT          = 0,
+	GD_BELL,
+	GD_BESSEL,
+	GD_BILINEAR_FIXED,
+	GD_BICUBIC,
+	GD_BICUBIC_FIXED,
+	GD_BLACKMAN,
+	GD_BOX,
+	GD_BSPLINE,
+	GD_CATMULLROM,
+	GD_GAUSSIAN,
+	GD_GENERALIZED_CUBIC,
+	GD_HERMITE,
+	GD_HAMMING,
+	GD_HANNING,
+	GD_MITCHELL,
+	GD_NEAREST_NEIGHBOUR,
+	GD_POWER,
+	GD_QUADRATIC,
+	GD_SINC,
+	GD_TRIANGLE,
+	GD_WEIGHTED4,
+	GD_METHOD_COUNT = 21
+} gdInterpolationMethod;
+
+/* define struct with name and func ptr and add it to gdImageStruct gdInterpolationMethod interpolation; */
+
+/* Interpolation function ptr */
+typedef double (* interpolation_method )(double);
 
 typedef struct gdImageStruct {
 	/* Palette-based image pixels */
@@ -188,9 +253,34 @@ typedef struct gdImageStruct {
 	int cy1;
 	int cx2;
 	int cy2;
+	gdInterpolationMethod interpolation_id;
+	interpolation_method interpolation;
 } gdImage;
 
 typedef gdImage * gdImagePtr;
+
+/* Point type for use in polygon drawing. */
+
+/**
+ * Group: Types
+ *
+ * typedef: gdPointF
+ *  Defines a point in a 2D coordinate system using floating point
+ *  values.
+ * x - Floating point position (increase from left to right)
+ * y - Floating point Row position (increase from top to bottom)
+ *
+ * typedef: gdPointFPtr
+ *  Pointer to a <gdPointF>
+ *
+ * See also:
+ *  <gdImageCreate>, <gdImageCreateTrueColor>,
+ **/
+typedef struct
+{
+	double x, y;
+}
+gdPointF, *gdPointFPtr;
 
 typedef struct {
 	/* # of characters in font */
@@ -208,6 +298,31 @@ typedef struct {
 
 /* Text functions take these. */
 typedef gdFont *gdFontPtr;
+
+
+/**
+ * Group: Types
+ *
+ * typedef: gdRect
+ *  Defines a rectilinear region.
+ *
+ *  x - left position
+ *  y - right position
+ *  width - Rectangle width
+ *  height - Rectangle height
+ *
+ * typedef: gdRectPtr
+ *  Pointer to a <gdRect>
+ *
+ * See also:
+ *  <gdSetInterpolationMethod>
+ **/
+typedef struct
+{
+	int x, y;
+	int width, height;
+}
+gdRect, *gdRectPtr;
 
 /* For backwards compatibility only. Use gdImageSetStyle()
 	for MUCH more flexible line drawing. Also see
@@ -247,8 +362,12 @@ gdImagePtr gdImageCreateFromPng(FILE *fd);
 gdImagePtr gdImageCreateFromPngCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromWBMP(FILE *inFile);
 gdImagePtr gdImageCreateFromWBMPCtx(gdIOCtx *infile);
-gdImagePtr gdImageCreateFromJpeg(FILE *infile, int ignore_warning);
-gdImagePtr gdImageCreateFromJpegCtx(gdIOCtx *infile, int ignore_warning);
+gdImagePtr gdImageCreateFromJpeg(FILE *infile);
+gdImagePtr gdImageCreateFromJpegEx(FILE *infile, int ignore_warning);
+gdImagePtr gdImageCreateFromJpegCtx(gdIOCtx *infile);
+gdImagePtr gdImageCreateFromJpegCtxEx(gdIOCtx *infile, int ignore_warning);
+gdImagePtr gdImageCreateFromJpegPtr (int size, void *data);
+gdImagePtr gdImageCreateFromJpegPtrEx (int size, void *data, int ignore_warning);
 gdImagePtr gdImageCreateFromWebp(FILE *fd);
 gdImagePtr gdImageCreateFromWebpCtx(gdIOCtxPtr in);
 gdImagePtr gdImageCreateFromWebpPtr (int size, void *data);
@@ -444,7 +563,7 @@ void gdImageColorDeallocate(gdImagePtr im, int color);
 gdImagePtr gdImageCreatePaletteFromTrueColor (gdImagePtr im, int ditherFlag, int colorsWanted);
 
 void gdImageTrueColorToPalette(gdImagePtr im, int ditherFlag, int colorsWanted);
-
+int gdImagePaletteToTrueColor(gdImagePtr src);
 
 /* An attempt at getting the results of gdImageTrueColorToPalette
 	to look a bit more like the original (im1 is the original
@@ -575,6 +694,7 @@ gdImagePtr gdImageRotate180(gdImagePtr src, int ignoretransparent);
 gdImagePtr gdImageRotate270(gdImagePtr src, int ignoretransparent);
 gdImagePtr gdImageRotate45(gdImagePtr src, double dAngle, int clrBack, int ignoretransparent);
 gdImagePtr gdImageRotate (gdImagePtr src, double dAngle, int clrBack, int ignoretransparent);
+gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor);
 
 void gdImageSetBrush(gdImagePtr im, gdImagePtr brush);
 void gdImageSetTile(gdImagePtr im, gdImagePtr tile);
@@ -681,6 +801,87 @@ int gdImageSmooth(gdImagePtr im, float weight);
 
 /* Image comparison definitions */
 int gdImageCompare(gdImagePtr im1, gdImagePtr im2);
+
+void gdImageFlipHorizontal(gdImagePtr im);
+void gdImageFlipVertical(gdImagePtr im);
+void gdImageFlipBoth(gdImagePtr im);
+
+#define GD_FLIP_HORINZONTAL 1
+#define GD_FLIP_VERTICAL 2
+#define GD_FLIP_BOTH 3
+
+/**
+ * Group: Crop
+ *
+ * Constants: gdCropMode
+ *  GD_CROP_DEFAULT - Default crop mode (4 corners or background)
+ *  GD_CROP_TRANSPARENT - Crop using the transparent color
+ *  GD_CROP_BLACK - Crop black borders
+ *  GD_CROP_WHITE - Crop white borders
+ *  GD_CROP_SIDES - Crop using colors of the 4 corners
+ *
+ * See also:
+ *  <gdImageAutoCrop>
+ **/
+enum gdCropMode {
+	GD_CROP_DEFAULT = 0,
+	GD_CROP_TRANSPARENT,
+	GD_CROP_BLACK,
+	GD_CROP_WHITE,
+	GD_CROP_SIDES,
+	GD_CROP_THRESHOLD
+};
+
+gdImagePtr gdImageCrop(gdImagePtr src, const gdRectPtr crop);
+gdImagePtr gdImageCropAuto(gdImagePtr im, const unsigned int mode);
+gdImagePtr gdImageCropThreshold(gdImagePtr im, const unsigned int color, const float threshold);
+
+int gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id);
+
+gdImagePtr gdImageScaleBilinear(gdImagePtr im, const unsigned int new_width, const unsigned int new_height);
+gdImagePtr gdImageScaleBicubic(gdImagePtr src_img, const unsigned int new_width, const unsigned int new_height);
+gdImagePtr gdImageScaleBicubicFixed(gdImagePtr src, const unsigned int width, const unsigned int height);
+gdImagePtr gdImageScaleNearestNeighbour(gdImagePtr im, const unsigned int width, const unsigned int height);
+gdImagePtr gdImageScaleTwoPass(const gdImagePtr pOrigImage, const unsigned int uOrigWidth, const unsigned int uOrigHeight, const unsigned int uNewWidth, const unsigned int uNewHeight);
+gdImagePtr gdImageScale(const gdImagePtr src, const unsigned int new_width, const unsigned int new_height);
+
+gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, const int bgColor);
+gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int bgColor);
+gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const int bgColor);
+gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor);
+gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor);
+
+typedef enum {
+	GD_AFFINE_TRANSLATE = 0,
+	GD_AFFINE_SCALE,
+	GD_AFFINE_ROTATE,
+	GD_AFFINE_SHEAR_HORIZONTAL,
+	GD_AFFINE_SHEAR_VERTICAL,
+} gdAffineStandardMatrix;
+
+int gdAffineApplyToPointF (gdPointFPtr dst, const gdPointFPtr src, const double affine[6]);
+int gdAffineInvert (double dst[6], const double src[6]);
+int gdAffineFlip (double dst_affine[6], const double src_affine[6], const int flip_h, const int flip_v);
+int gdAffineConcat (double dst[6], const double m1[6], const double m2[6]);
+
+int gdAffineIdentity (double dst[6]);
+int gdAffineScale (double dst[6], const double scale_x, const double scale_y);
+int gdAffineRotate (double dst[6], const double angle);
+int gdAffineShearHorizontal (double dst[6], const double angle);
+int gdAffineShearVertical(double dst[6], const double angle);
+int gdAffineTranslate (double dst[6], const double offset_x, const double offset_y);
+double gdAffineExpansion (const double src[6]);
+int gdAffineRectilinear (const double src[6]);
+int gdAffineEqual (const double matrix1[6], const double matrix2[6]);
+int gdTransformAffineGetImage(gdImagePtr *dst, const gdImagePtr src, gdRectPtr src_area, const double affine[6]);
+int gdTransformAffineCopy(gdImagePtr dst, int dst_x, int dst_y, const gdImagePtr src, gdRectPtr src_region, const double affine[6]);
+/*
+gdTransformAffineCopy(gdImagePtr dst, int x0, int y0, int x1, int y1,
+			const gdImagePtr src, int src_width, int src_height,
+			const double affine[6]);
+*/
+int gdTransformAffineBoundingBox(gdRectPtr src, const double affine[6], gdRectPtr bbox);
+
 
 #define GD_CMP_IMAGE		1	/* Actual image IS different */
 #define GD_CMP_NUM_COLORS	2	/* Number of Colours in pallette differ */

@@ -290,7 +290,7 @@ static void php_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callback_t
 					is_special_section = 1;
 					has_per_dir_config = 1;
 
-					/* make the path lowercase on Windows, for case insensitivty. Does nothign for other platforms */
+					/* make the path lowercase on Windows, for case insensitivity. Does nothing for other platforms */
 					TRANSLATE_SLASHES_LOWER(key);
 
 				/* HOST sections */
@@ -357,7 +357,24 @@ static void php_load_php_extension_cb(void *arg TSRMLS_DC)
  */
 static void php_load_zend_extension_cb(void *arg TSRMLS_DC)
 {
-	zend_load_extension(*((char **) arg));
+	char *filename = *((char **) arg);
+	int length = strlen(filename);
+
+	if (IS_ABSOLUTE_PATH(filename, length)) {
+		zend_load_extension(filename);
+	} else {
+	    char *libpath;
+		char *extension_dir = INI_STR("extension_dir");
+		int extension_dir_len = strlen(extension_dir);
+
+		if (IS_SLASH(extension_dir[extension_dir_len-1])) {
+			spprintf(&libpath, 0, "%s%s", extension_dir, filename);
+		} else {
+			spprintf(&libpath, 0, "%s%c%s", extension_dir, DEFAULT_SLASH, filename);
+		}
+		zend_load_extension(libpath);
+		efree(libpath);
+	}
 }
 /* }}} */
 
@@ -785,7 +802,12 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, uint path_len TSRMLS_DC)
 	char path_bak[MAXPATHLEN];
 #endif
 
+#if PHP_WIN32
+	/* MAX_PATH is \0-terminated, path_len == MAXPATHLEN would overrun path_bak */
+	if (path_len >= MAXPATHLEN) {
+#else
 	if (path_len > MAXPATHLEN) {
+#endif
 		return;
 	}
 

@@ -1,5 +1,5 @@
 --TEST--
-Test class_exists() function : usage variations  - unexpected types for agument 2
+Test class_exists() function : usage variations  - unexpected types for argument 2
 --FILE--
 <?php
 /* Prototype  : proto bool class_exists(string classname [, bool autoload])

@@ -36,7 +36,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.68 2011/12/08 12:38:24 rrt Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.70 2012/11/07 17:54:48 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -188,9 +188,9 @@ sread(int fd, void *buf, size_t n, int canbepipe)
 		goto nocheck;
 
 #ifdef FIONREAD
-	if ((canbepipe && (ioctl(fd, FIONREAD, &t) == -1)) || (t == 0)) {
+	if (canbepipe && (ioctl(fd, FIONREAD, &t) == -1 || t == 0)) {
 #ifdef FD_ZERO
-		int cnt;
+		ssize_t cnt;
 		for (cnt = 0;; cnt++) {
 			fd_set check;
 			struct timeval tout = {0, 100 * 1000};
@@ -247,9 +247,6 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 	char buf[4096];
 	ssize_t r;
 	int tfd;
-#ifdef HAVE_MKSTEMP
-	int te;
-#endif
 
 	(void)strlcpy(buf, "/tmp/file.XXXXXX", sizeof buf);
 #ifndef HAVE_MKSTEMP
@@ -261,10 +258,13 @@ file_pipe2file(struct magic_set *ms, int fd, const void *startbuf,
 		errno = r;
 	}
 #else
-	tfd = mkstemp(buf);
-	te = errno;
-	(void)unlink(buf);
-	errno = te;
+	{
+		int te;
+		tfd = mkstemp(buf);
+		te = errno;
+		(void)unlink(buf);
+		errno = te;
+	}
 #endif
 	if (tfd == -1) {
 		file_error(ms, errno,
@@ -345,7 +345,9 @@ uncompressgzipped(struct magic_set *ms, const unsigned char *old,
 
 	if (data_start >= n)
 		return 0;
-	*newch = (unsigned char *)emalloc(HOWMANY + 1));
+	if ((*newch = CAST(unsigned char *, emalloc(HOWMANY + 1))) == NULL) {
+		return 0;
+	}
 	
 	/* XXX: const castaway, via strchr */
 	z.next_in = (Bytef *)strchr((const char *)old + data_start,

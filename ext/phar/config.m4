@@ -27,4 +27,6 @@ if test "$PHP_PHAR" != "no"; then
   PHP_ADD_EXTENSION_DEP(phar, hash, true)
   PHP_ADD_EXTENSION_DEP(phar, spl, true)
   PHP_ADD_MAKEFILE_FRAGMENT
+
+  PHP_OUTPUT(ext/phar/phar.1 ext/phar/phar.phar.1)
 fi

@@ -65,8 +65,6 @@ PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
 		;
 
 	closelog();
-	wg->starttime.tv_sec = 0;
-	wg->lasttime = 0;
 
 	return SUCCESS;
 }

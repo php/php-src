@@ -84,6 +84,8 @@ PHP_METHOD(DateTimeImmutable, setISODate);
 PHP_METHOD(DateTimeImmutable, setTimestamp);
 
 PHP_METHOD(DateTimeZone, __construct);
+PHP_METHOD(DateTimeZone, __wakeup);
+PHP_METHOD(DateTimeZone, __set_state);
 PHP_FUNCTION(timezone_open);
 PHP_FUNCTION(timezone_name_get);
 PHP_FUNCTION(timezone_name_from_abbr);
@@ -101,6 +103,8 @@ PHP_FUNCTION(date_interval_format);
 PHP_FUNCTION(date_interval_create_from_date_string);
 
 PHP_METHOD(DatePeriod, __construct);
+PHP_METHOD(DatePeriod, __wakeup);
+PHP_METHOD(DatePeriod, __set_state);
 
 /* Options and Configuration */
 PHP_FUNCTION(date_default_timezone_set);
@@ -142,6 +146,7 @@ struct _php_timezone_obj {
 			int          dst;
 		} z;
 	} tzi;
+	HashTable *props;
 };
 
 struct _php_interval_obj {
@@ -177,7 +182,7 @@ ZEND_END_MODULE_GLOBALS(date)
 #define DATEG(v) (date_globals.v)
 #endif
 
-/* Backwards compability wrapper */
+/* Backwards compatibility wrapper */
 PHPAPI signed long php_parse_date(char *string, signed long *now);
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
 PHPAPI int php_idate(char format, time_t ts, int localtime TSRMLS_DC);

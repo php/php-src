@@ -1583,7 +1583,7 @@ PHP_FUNCTION(oci_close)
 	}
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
-	zend_list_delete(connection->rsrc_id);
+	zend_list_delete(connection->id);
 
 	ZVAL_NULL(z_connection);
 	
@@ -1591,7 +1591,7 @@ PHP_FUNCTION(oci_close)
 }
 /* }}} */
 
-/* {{{ proto resource oci_new_connect(string user, string pass [, string db])
+/* {{{ proto resource oci_new_connect(string user, string pass [, string db, string charset [, int session_mode ]])
    Connect to an Oracle database and log on. Returns a new session. */
 PHP_FUNCTION(oci_new_connect)
 {
@@ -1607,7 +1607,7 @@ PHP_FUNCTION(oci_connect)
 }
 /* }}} */
 
-/* {{{ proto resource oci_pconnect(string user, string pass [, string db [, string charset ]])
+/* {{{ proto resource oci_pconnect(string user, string pass [, string db [, string charset [, int session_mode ]])
    Connect to an Oracle database using a persistent connection and log on. Returns a new session. */
 PHP_FUNCTION(oci_pconnect)
 {
@@ -1744,7 +1744,12 @@ PHP_FUNCTION(oci_set_prefetch)
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
-	if (php_oci_statement_set_prefetch(statement, size TSRMLS_CC)) {
+	if (size < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Number of rows to be prefetched has to be greater than or equal to 0");
+		return;
+	}
+
+	if (php_oci_statement_set_prefetch(statement, (ub4)size TSRMLS_CC)) {
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -1766,7 +1771,7 @@ PHP_FUNCTION(oci_set_client_identifier)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_id, (ub4) client_id_len, (ub4) OCI_ATTR_CLIENT_IDENTIFIER, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(OCIATTRSET, OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_id, (ub4) client_id_len, (ub4) OCI_ATTR_CLIENT_IDENTIFIER, OCI_G(err)));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1809,7 +1814,7 @@ PHP_FUNCTION(oci_set_edition)
 /* }}} */
 
 /* {{{ proto bool oci_set_module_name(resource connection, string value)
-  Sets the module attribute on the connection */
+  Sets the module attribute on the connection for end-to-end tracing */
 PHP_FUNCTION(oci_set_module_name)
 {
 #if (OCI_MAJOR_VERSION >= 10)
@@ -1824,7 +1829,7 @@ PHP_FUNCTION(oci_set_module_name)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) module, (ub4) module_len, (ub4) OCI_ATTR_MODULE, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(OCIATTRSET, OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) module, (ub4) module_len, (ub4) OCI_ATTR_MODULE, OCI_G(err)));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1840,7 +1845,7 @@ PHP_FUNCTION(oci_set_module_name)
 /* }}} */
 
 /* {{{ proto bool oci_set_action(resource connection, string value)
-  Sets the action attribute on the connection */
+  Sets the action attribute on the connection for end-to-end tracing */
 PHP_FUNCTION(oci_set_action)
 {
 #if (OCI_MAJOR_VERSION >= 10)
@@ -1855,7 +1860,7 @@ PHP_FUNCTION(oci_set_action)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) action, (ub4) action_len, (ub4) OCI_ATTR_ACTION, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(OCIATTRSET, OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) action, (ub4) action_len, (ub4) OCI_ATTR_ACTION, OCI_G(err)));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1871,7 +1876,7 @@ PHP_FUNCTION(oci_set_action)
 /* }}} */
 
 /* {{{ proto bool oci_set_client_info(resource connection, string value)
-  Sets the client info attribute on the connection */
+  Sets the client info attribute on the connection  for end-to-end tracing */
 PHP_FUNCTION(oci_set_client_info)
 {
 #if (OCI_MAJOR_VERSION >= 10)
@@ -1886,7 +1891,7 @@ PHP_FUNCTION(oci_set_client_info)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_info, (ub4) client_info_len, (ub4) OCI_ATTR_CLIENT_INFO, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(OCIATTRSET, OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_info, (ub4) client_info_len, (ub4) OCI_ATTR_CLIENT_INFO, OCI_G(err)));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1957,7 +1962,7 @@ PHP_FUNCTION(oci_password_change)
 		if (!connection) {
 			RETURN_FALSE;
 		}
-		RETURN_RESOURCE(connection->rsrc_id);
+		RETURN_RESOURCE(connection->id);
 	}
 	WRONG_PARAM_COUNT;
 }
@@ -2393,6 +2398,32 @@ PHP_FUNCTION(oci_new_collection)
 		RETURN_FALSE;
 	}
 }
+/* }}} */
+
+/* {{{ proto bool oci_get_implicit(resource stmt)
+   Get the next statement resource from an Oracle 12c PL/SQL Implicit Result Set */
+PHP_FUNCTION(oci_get_implicit_resultset)
+{
+	zval *z_statement;
+	php_oci_statement *statement;
+	php_oci_statement *imp_statement;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &z_statement) == FAILURE) {
+		return;
+	}
+
+	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
+
+	imp_statement = php_oci_get_implicit_resultset(statement TSRMLS_CC);
+
+	if (imp_statement) {
+		if (php_oci_statement_execute(imp_statement, (ub4)OCI_DEFAULT TSRMLS_CC))
+			RETURN_FALSE;
+		RETURN_RESOURCE(imp_statement->id);
+	}
+	RETURN_FALSE;
+}
+
 /* }}} */
 
 #endif /* HAVE_OCI8 */

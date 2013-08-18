@@ -1,6 +1,46 @@
 News about PCRE releases
 ------------------------
 
+Release 8.32 30-November-2012
+-----------------------------
+
+This release fixes a number of bugs, but also has some new features. These are
+the highlights:
+
+.  There is now support for 32-bit character strings and UTF-32. Like the
+   16-bit support, this is done by compiling a separate 32-bit library.
+
+.  \X now matches a Unicode extended grapheme cluster.
+
+.  Case-independent matching of Unicode characters that have more than one
+   "other case" now makes all three (or more) characters equivalent. This
+   applies, for example, to Greek Sigma, which has two lowercase versions.
+
+.  Unicode character properties are updated to Unicode 6.2.0.
+
+.  The EBCDIC support, which had decayed, has had a spring clean.
+
+.  A number of JIT optimizations have been added, which give faster JIT
+   execution speed. In addition, a new direct interface to JIT execution is
+   available. This bypasses some of the sanity checks of pcre_exec() to give a
+   noticeable speed-up.
+
+.  A number of issues in pcregrep have been fixed, making it more compatible
+   with GNU grep. In particular, --exclude and --include (and variants) apply
+   to all files now, not just those obtained from scanning a directory
+   recursively. In Windows environments, the default action for directories is
+   now "skip" instead of "read" (which provokes an error).
+
+.  If the --only-matching (-o) option in pcregrep is specified multiple
+   times, each one causes appropriate output. For example, -o1 -o2 outputs the
+   substrings matched by the 1st and 2nd capturing parentheses. A separating
+   string can be specified by --om-separator (default empty).
+
+.  When PCRE is built via Autotools using a version of gcc that has the
+   "visibility" feature, it is used to hide internal library functions that are
+   not part of the public API.
+
+
 Release 8.31 06-July-2012
 -------------------------
 
@@ -9,7 +49,7 @@ This is mainly a bug-fixing release, with a small number of developments:
 . The JIT compiler now supports partial matching and the (*MARK) and
   (*COMMIT) verbs.
 
-. PCRE_INFO_MAXLOOKBEHIND can be used to find the longest lookbehing in a
+. PCRE_INFO_MAXLOOKBEHIND can be used to find the longest lookbehind in a
   pattern.
 
 . There should be a performance improvement when using the heap instead of the
@@ -551,7 +591,7 @@ some of the new functionality in Perl 5.005.
 Another (I hope this is the last!) change has been made to the API for the
 pcre_compile() function. An additional argument has been added to make it
 possible to pass over a pointer to character tables built in the current
-locale by pcre_maketables(). To use the default tables, this new arguement
+locale by pcre_maketables(). To use the default tables, this new argument
 should be passed as NULL.
 
           IMPORTANT FOR THOSE UPGRADING FROM VERSION 2.05

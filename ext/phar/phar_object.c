@@ -1434,16 +1434,13 @@ struct _phar_t {
 static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
 {
 	zval **value;
-	zend_uchar key_type;
 	zend_bool close_fp = 1;
-	ulong int_key;
 	struct _phar_t *p_obj = (struct _phar_t*) puser;
 	uint str_key_len, base_len = p_obj->l, fname_len;
 	phar_entry_data *data;
 	php_stream *fp;
 	size_t contents_len;
 	char *fname, *error = NULL, *base = p_obj->b, *opened, *save = NULL, *temp = NULL;
-	phar_zstr key;
 	char *str_key;
 	zend_class_entry *ce = p_obj->c;
 	phar_archive_object *phar_obj = p_obj->p;
@@ -1478,35 +1475,24 @@ static int phar_build(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ 
 			}
 
 			if (iter->funcs->get_current_key) {
-				key_type = iter->funcs->get_current_key(iter, &key, &str_key_len, &int_key TSRMLS_CC);
+				zval key;
+				iter->funcs->get_current_key(iter, &key TSRMLS_CC);
 
 				if (EG(exception)) {
 					return ZEND_HASH_APPLY_STOP;
 				}
 
-				if (key_type == HASH_KEY_IS_LONG) {
+				if (Z_TYPE(key) != IS_STRING) {
+					zval_dtor(&key);
 					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned an invalid key (must return a string)", ce->name);
 					return ZEND_HASH_APPLY_STOP;
 				}
 
-				if (key_type > 9) { /* IS_UNICODE == 10 */
-#if PHP_VERSION_ID < 60000
-/* this can never happen, but fixes a compile warning */
-					spprintf(&str_key, 0, "%s", key);
-#else
-					spprintf(&str_key, 0, "%v", key);
-					ezfree(key);
-#endif
-				} else {
-					PHAR_STR(key, str_key);
-				}
+				str_key_len = Z_STRLEN(key);
+				str_key = estrndup(Z_STRVAL(key), str_key_len);
 
 				save = str_key;
-
-				if (str_key[str_key_len - 1] == '\0') {
-					str_key_len--;
-				}
-
+				zval_dtor(&key);
 			} else {
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned an invalid key (must return a string)", ce->name);
 				return ZEND_HASH_APPLY_STOP;
@@ -1641,32 +1627,24 @@ phar_spl_fileinfo:
 		}
 	} else {
 		if (iter->funcs->get_current_key) {
-			key_type = iter->funcs->get_current_key(iter, &key, &str_key_len, &int_key TSRMLS_CC);
+			zval key;
+			iter->funcs->get_current_key(iter, &key TSRMLS_CC);
 
 			if (EG(exception)) {
 				return ZEND_HASH_APPLY_STOP;
 			}
 
-			if (key_type == HASH_KEY_IS_LONG) {
+			if (Z_TYPE(key) != IS_STRING) {
+				zval_dtor(&key);
 				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned an invalid key (must return a string)", ce->name);
 				return ZEND_HASH_APPLY_STOP;
 			}
 
-			if (key_type > 9) { /* IS_UNICODE == 10 */
-#if PHP_VERSION_ID < 60000
-/* this can never happen, but fixes a compile warning */
-				spprintf(&str_key, 0, "%s", key);
-#else
-				spprintf(&str_key, 0, "%v", key);
-				ezfree(key);
-#endif
-			} else {
-				PHAR_STR(key, str_key);
-			}
+			str_key_len = Z_STRLEN(key);
+			str_key = estrndup(Z_STRVAL(key), str_key_len);
 
 			save = str_key;
-
-			if (str_key[str_key_len - 1] == '\0') str_key_len--;
+			zval_dtor(&key);
 		} else {
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0 TSRMLS_CC, "Iterator %v returned an invalid key (must return a string)", ce->name);
 			return ZEND_HASH_APPLY_STOP;
@@ -1899,6 +1877,10 @@ PHP_METHOD(Phar, buildFromDirectory)
 	pass.count = 0;
 	pass.ret = return_value;
 	pass.fp = php_stream_fopen_tmpfile();
+	if (pass.fp == NULL) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar \"%s\" unable to create temporary file", phar_obj->arc.archive->fname);
+		return;
+	}
 
 	if (phar_obj->arc.archive->is_persistent && FAILURE == phar_copy_on_write(&(phar_obj->arc.archive) TSRMLS_CC)) {
 		zval_ptr_dtor(&iteriter);
@@ -1979,6 +1961,10 @@ PHP_METHOD(Phar, buildFromIterator)
 	pass.ret = return_value;
 	pass.count = 0;
 	pass.fp = php_stream_fopen_tmpfile();
+	if (pass.fp == NULL) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "phar \"%s\": unable to create temporary file", phar_obj->arc.archive->fname);
+		return;
+	}
 
 	if (SUCCESS == spl_iterator_apply(obj, (spl_iterator_apply_func_t) phar_build, (void *) &pass TSRMLS_CC)) {
 		phar_obj->arc.archive->ufp = pass.fp;
@@ -2311,6 +2297,10 @@ static zval *phar_convert_to_other(phar_archive_data *source, int convert, char 
 		zend_get_hash_value, NULL, 0);
 
 	phar->fp = php_stream_fopen_tmpfile();
+	if (phar->fp == NULL) {
+		zend_throw_exception_ex(phar_ce_PharException, 0 TSRMLS_CC, "unable to create temporary file");
+		return NULL;
+	}
 	phar->fname = source->fname;
 	phar->fname_len = source->fname_len;
 	phar->is_temporary_alias = source->is_temporary_alias;

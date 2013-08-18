@@ -258,6 +258,8 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state TSRMLS_DC)
 	SCNG(input_filter) = lex_state->input_filter;
 	SCNG(output_filter) = lex_state->output_filter;
 	SCNG(script_encoding) = lex_state->script_encoding;
+
+	RESET_DOC_COMMENT();
 }
 
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle TSRMLS_DC)
@@ -541,6 +543,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle TSRMLS_DC)
 		CG(zend_lineno) = 1;
 	}
 
+	RESET_DOC_COMMENT();
 	CG(increment_lineno) = 0;
 	return SUCCESS;
 }
@@ -585,7 +588,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		compiler_result = zendparse(TSRMLS_C);
 		zend_do_return(&retval_znode, 0 TSRMLS_CC);
 		CG(in_compilation) = original_in_compilation;
-		if (compiler_result==1) { /* parser error */
+		if (compiler_result != 0) { /* parser error */
 			zend_bailout();
 		}
 		compilation_successful=1;
@@ -595,7 +598,7 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type TSR
 		CG(active_op_array) = original_active_op_array;
 		if (compilation_successful) {
 			pass_two(op_array TSRMLS_CC);
-			zend_release_labels(TSRMLS_C);
+			zend_release_labels(0 TSRMLS_CC);
 		} else {
 			efree(op_array);
 			retval = NULL;
@@ -691,6 +694,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 	zend_set_compiled_filename(filename TSRMLS_CC);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
+	RESET_DOC_COMMENT();
 	return SUCCESS;
 }
 
@@ -760,7 +764,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 			SCNG(script_filtered) = NULL;
 		}
 
-		if (compiler_result==1) {
+		if (compiler_result != 0) {
 			CG(active_op_array) = original_active_op_array;
 			CG(unclean_shutdown)=1;
 			destroy_op_array(op_array TSRMLS_CC);
@@ -770,7 +774,7 @@ zend_op_array *compile_string(zval *source_string, char *filename TSRMLS_DC)
 			zend_do_return(NULL, 0 TSRMLS_CC);
 			CG(active_op_array) = original_active_op_array;
 			pass_two(op_array TSRMLS_CC);
-			zend_release_labels(TSRMLS_C);
+			zend_release_labels(0 TSRMLS_CC);
 			retval = op_array;
 		}
 	}

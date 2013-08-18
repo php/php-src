@@ -23,7 +23,7 @@
 #include "mod_user.h"
 
 ps_module ps_mod_user = {
-	PS_MOD(user)
+	PS_MOD_SID(user)
 };
 
 #define SESS_ZVAL_LONG(val, a)						\
@@ -181,6 +181,38 @@ PS_GC_FUNC(user)
 	retval = ps_call_handler(PSF(gc), 1, args TSRMLS_CC);
 
 	FINISH;
+}
+
+PS_CREATE_SID_FUNC(user)
+{
+	/* maintain backwards compatibility */
+	if (PSF(create_sid) != NULL) {
+		char *id = NULL;
+		STDVARS;
+
+		retval = ps_call_handler(PSF(create_sid), 0, NULL TSRMLS_CC);
+
+		if (retval) {
+			if (Z_TYPE_P(retval) == IS_STRING) {
+				id = estrndup(Z_STRVAL_P(retval), Z_STRLEN_P(retval));
+			}
+			zval_ptr_dtor(&retval);
+		}
+		else {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "No session id returned by function");
+			return NULL;
+		}
+
+		if (!id) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Session id must be a string");
+			return NULL;
+		}
+
+		return id;
+	}
+
+	/* function as defined by PS_MOD */
+	return php_session_create_id(mod_data, newlen TSRMLS_CC);
 }
 
 /*

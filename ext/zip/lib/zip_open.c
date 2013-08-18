@@ -348,7 +348,7 @@ _zip_checkcons(FILE *fp, struct zip_cdir *cd, struct zip_error *error)
 
 
 /* _zip_check_torrentzip:
-   check wether ZA has a valid TORRENTZIP comment, i.e. is torrentzipped */
+   check whether ZA has a valid TORRENTZIP comment, i.e. is torrentzipped */
 
 static void
 _zip_check_torrentzip(struct zip *za)

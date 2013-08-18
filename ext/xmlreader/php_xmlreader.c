@@ -60,7 +60,7 @@ typedef struct _xmlreader_prop_handler {
 static void xmlreader_register_prop_handler(HashTable *prop_handler, char *name, xmlreader_read_int_t read_int_func, xmlreader_read_const_char_t read_char_func, int rettype TSRMLS_DC)
 {
 	xmlreader_prop_handler hnd;
-	
+
 	hnd.read_char_func = read_char_func;
 	hnd.read_int_func = read_int_func;
 	hnd.type = rettype;
@@ -113,7 +113,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 /* }}} */
 
 /* {{{ xmlreader_get_property_ptr_ptr */
-zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member, const zend_literal *key TSRMLS_DC)
+zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC)
 {
 	xmlreader_object *obj;
 	zval tmp_member;
@@ -136,7 +136,7 @@ zval **xmlreader_get_property_ptr_ptr(zval *object, zval *member, const zend_lit
 	}
 	if (ret == FAILURE) {
 		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member, key TSRMLS_CC);
+		retval = std_hnd->get_property_ptr_ptr(object, member, type, key TSRMLS_CC);
 	}
 
 	if (member == &tmp_member) {
@@ -225,7 +225,7 @@ void xmlreader_write_property(zval *object, zval *member, zval *value, const zen
 /* }}} */
 
 /* {{{ _xmlreader_get_valid_file_path */
-/* _xmlreader_get_valid_file_path and _xmlreader_get_relaxNG should be made a 
+/* _xmlreader_get_valid_file_path and _xmlreader_get_relaxNG should be made a
 	common function in libxml extension as code is common to a few xml extensions */
 char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int resolved_path_len  TSRMLS_DC) {
 	xmlURI *uri;
@@ -275,8 +275,8 @@ char *_xmlreader_get_valid_file_path(char *source, char *resolved_path, int reso
 
 #ifdef LIBXML_SCHEMAS_ENABLED
 /* {{{ _xmlreader_get_relaxNG */
-static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, int source_len, int type, 
-											xmlRelaxNGValidityErrorFunc error_func, 
+static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, int source_len, int type,
+											xmlRelaxNGValidityErrorFunc error_func,
 											xmlRelaxNGValidityWarningFunc warn_func TSRMLS_DC)
 {
 	char *valid_file = NULL;
@@ -294,7 +294,7 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, int source_len, int ty
 		break;
 	case XMLREADER_LOAD_STRING:
 		parser = xmlRelaxNGNewMemParserCtxt(source, source_len);
-		/* If loading from memory, we need to set the base directory for the document 
+		/* If loading from memory, we need to set the base directory for the document
 		   but it is not apparent how to do that for schema's */
 		break;
 	default:
@@ -380,7 +380,7 @@ void xmlreader_objects_free_storage(void *object TSRMLS_DC)
 	xmlreader_object *intern = (xmlreader_object *)object;
 
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
-	
+
 	xmlreader_free_resources(intern);
 
 	efree(object);
@@ -528,7 +528,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 			RETURN_TRUE;
 		}
 	}
-	
+
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set schema. This must be set prior to reading or schema contains errors.");
 
 	RETURN_FALSE;
@@ -549,11 +549,11 @@ PHP_METHOD(xmlreader, close)
 
 	id = getThis();
 	intern = (xmlreader_object *)zend_object_store_get_object(id TSRMLS_CC);
-	/* libxml is segfaulting in versions up to 2.6.8 using xmlTextReaderClose so for 
-	now we will free the whole reader when close is called as it would get rebuilt on 
+	/* libxml is segfaulting in versions up to 2.6.8 using xmlTextReaderClose so for
+	now we will free the whole reader when close is called as it would get rebuilt on
 	a new load anyways */
 	xmlreader_free_resources(intern);
-	
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -659,7 +659,7 @@ PHP_METHOD(xmlreader, getParserProperty)
 
 /* {{{ proto boolean XMLReader::isValid()
 Returns boolean indicating if parsed document is valid or not.
-Must set XMLREADER_LOADDTD or XMLREADER_VALIDATE parser option prior to the first call to read 
+Must set XMLREADER_LOADDTD or XMLREADER_VALIDATE parser option prior to the first call to read
 or this method will always return FALSE */
 PHP_METHOD(xmlreader, isValid)
 {
@@ -708,7 +708,7 @@ PHP_METHOD(xmlreader, moveToAttribute)
 /* }}} */
 
 /* {{{ proto boolean XMLReader::moveToAttributeNo(int index)
-Positions reader at attribute at spcecified index.
+Positions reader at attribute at specified index.
 Returns TRUE on success and FALSE on failure */
 PHP_METHOD(xmlreader, moveToAttributeNo)
 {
@@ -805,13 +805,13 @@ PHP_METHOD(xmlreader, read)
 	if (intern != NULL && intern->ptr != NULL) {
 		retval = xmlTextReaderRead(intern->ptr);
 		if (retval == -1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while reading");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occurred while reading");
 			RETURN_FALSE;
 		} else {
 			RETURN_BOOL(retval);
 		}
 	}
-	
+
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Load Data before trying to read");
 	RETURN_FALSE;
 }
@@ -844,16 +844,16 @@ PHP_METHOD(xmlreader, next)
 			if (xmlStrEqual(xmlTextReaderConstLocalName(intern->ptr), (xmlChar *)name)) {
 				RETURN_TRUE;
 			}
-			retval = xmlTextReaderNext(intern->ptr); 
+			retval = xmlTextReaderNext(intern->ptr);
 		}
 		if (retval == -1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while reading");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occurred while reading");
 			RETURN_FALSE;
 		} else {
 			RETURN_BOOL(retval);
 		}
 	}
-	
+
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Load Data before trying to read");
 	RETURN_FALSE;
 }
@@ -977,7 +977,7 @@ PHP_METHOD(xmlreader, setSchema)
 			RETURN_TRUE;
 		}
 	}
-	
+
 	php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set schema. This must be set prior to reading or schema contains errors.");
 
 	RETURN_FALSE;
@@ -1037,7 +1037,7 @@ PHP_METHOD(xmlreader, setRelaxNGSchemaSource)
 /* }}} */
 
 /* TODO
-XMLPUBFUN int XMLCALL		
+XMLPUBFUN int XMLCALL
 		    xmlTextReaderSetSchema	(xmlTextReaderPtr reader,
 		    				 xmlSchemaPtr schema);
 */
@@ -1143,7 +1143,7 @@ PHP_METHOD(xmlreader, expand)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|O!", &id, xmlreader_class_entry, &basenode, dom_node_class_entry) == FAILURE) {
 		return;
 	}
-	
+
 	if (basenode != NULL) {
 		NODE_GET_OBJ(node, basenode, xmlNodePtr, domobj);
 		docp = node->doc;
@@ -1153,9 +1153,9 @@ PHP_METHOD(xmlreader, expand)
 
 	if (intern && intern->ptr) {
 		node = xmlTextReaderExpand(intern->ptr);
-		
+
 		if (node == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occured while expanding ");
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occurred while expanding ");
 			RETURN_FALSE;
 		} else {
 			nodec = xmlDocCopyNode(node, docp, 1);
@@ -1313,9 +1313,9 @@ static const zend_function_entry xmlreader_functions[] = {
  */
 PHP_MINIT_FUNCTION(xmlreader)
 {
-	
+
 	zend_class_entry ce;
-	
+
 	memcpy(&xmlreader_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	xmlreader_object_handlers.read_property = xmlreader_read_property;
 	xmlreader_object_handlers.write_property = xmlreader_write_property;

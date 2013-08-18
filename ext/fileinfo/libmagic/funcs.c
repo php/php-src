@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: funcs.c,v 1.60 2011/12/08 12:38:24 rrt Exp $")
+FILE_RCSID("@(#)$File: funcs.c,v 1.61 2012/10/30 23:11:51 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -191,7 +191,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 		    &code, &code_mime, &type);
 	}
 
-#if defined(__EMX__)
+#ifdef __EMX__
 	if ((ms->flags & MAGIC_NO_CHECK_APPTYPE) == 0 && inname) {
 		switch (file_os2_apptype(ms, inname, buf, nb)) {
 		case -1:
@@ -307,7 +307,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, const char *inname, const 
 protected int
 file_reset(struct magic_set *ms)
 {
-	if (ms->mlist == NULL) {
+	if (ms->mlist[0] == NULL) {
 		file_error(ms, 0, "no magic files loaded");
 		return -1;
 	}
@@ -335,7 +335,7 @@ file_reset(struct magic_set *ms)
 protected const char *
 file_getbuffer(struct magic_set *ms)
 {
-	char *pbuf, *op, *np;
+	char *op, *np;
 	size_t psize, len;
 
 	if (ms->event_flags & EVENT_HAD_ERR)
@@ -353,8 +353,10 @@ file_getbuffer(struct magic_set *ms)
 		return NULL;
 	}
 	psize = len * 4 + 1;
-	pbuf = erealloc(ms->o.pbuf, psize);
-	ms->o.pbuf = pbuf;
+	if ((ms->o.pbuf = CAST(char *, erealloc(ms->o.pbuf, psize))) == NULL) {
+		file_oomem(ms, psize);
+		return NULL;
+	}
 
 #if defined(HAVE_WCHAR_H) && defined(HAVE_MBRTOWC) && defined(HAVE_WCWIDTH)
 	{
@@ -413,7 +415,13 @@ file_check_mem(struct magic_set *ms, unsigned int level)
 
 	if (level >= ms->c.len) {
 		len = (ms->c.len += 20) * sizeof(*ms->c.li);
-		ms->c.li = (ms->c.li == NULL) ? emalloc(len) : erealloc(ms->c.li, len);
+		ms->c.li = CAST(struct level_info *, (ms->c.li == NULL) ?
+		    emalloc(len) :
+		    erealloc(ms->c.li, len));
+		if (ms->c.li == NULL) {
+			file_oomem(ms, len);
+			return -1;
+		}
 	}
 	ms->c.li[level].got_match = 0;
 #ifdef ENABLE_CONDITIONALS
@@ -445,11 +453,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	ZVAL_STRINGL(patt, pat, strlen(pat), 0);
 	opts |= PCRE_MULTILINE;
 	convert_libmagic_pattern(patt, opts);
-#if (PHP_MAJOR_VERSION < 6)
 	if ((pce = pcre_get_compiled_regex_cache(Z_STRVAL_P(patt), Z_STRLEN_P(patt) TSRMLS_CC)) == NULL) {
-#else
-	if ((pce = pcre_get_compiled_regex_cache(IS_STRING, Z_STRVAL_P(patt), Z_STRLEN_P(patt) TSRMLS_CC)) == NULL) {
-#endif
 		zval_dtor(patt);
 		FREE_ZVAL(patt);
 		return -1;

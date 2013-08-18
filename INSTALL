@@ -1819,7 +1819,7 @@ Installation
        set of HTTP headers. The headers it did return are:
    10. Windows:  I've  followed  all the instructions, but still can't get
        PHP and IIS to work together!
-   11. When  running  PHP as CGI with IIS, PWS, OmniHTTPD or Xitami, I get
+   11. When  running  PHP as CGI with IIS, OmniHTTPD or Xitami, I get
        the  following  error:  Security  Alert! PHP CGI cannot be accessed
        directly..
    12. How  do I know if my php.ini is being found and read? It seems like
@@ -2007,7 +2007,7 @@ cgi error:
           And  for  IIS4  you need to tell it that PHP is a script engine.
           Also, you will want to read this faq.
 
-   When running PHP as CGI with IIS, PWS, OmniHTTPD or Xitami, I get the
+   When running PHP as CGI with IIS, OmniHTTPD or Xitami, I get the
           following error: Security Alert! PHP CGI cannot be accessed
           directly..
           You  must set the cgi.force_redirect directive to 0. It defaults

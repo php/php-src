@@ -59,7 +59,7 @@ $conf = array(
 /* if true doesn't run tests, just outputs executable info */
 'TEST_CONTEXT_INFO'    =>    false,
 
-/* : or ; seperated list of paths */
+/* : or ; separated list of paths */
 'TEST_PATHS'           =>    NULL
 /* additional configuration items that may be set
    to provide proxy support for testes:

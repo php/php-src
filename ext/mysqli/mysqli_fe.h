@@ -25,6 +25,7 @@
 PHP_FUNCTION(mysqli);
 PHP_FUNCTION(mysqli_affected_rows);
 PHP_FUNCTION(mysqli_autocommit);
+PHP_FUNCTION(mysqli_begin_transaction);
 PHP_FUNCTION(mysqli_change_user);
 PHP_FUNCTION(mysqli_character_set_name);
 PHP_FUNCTION(mysqli_set_charset);
@@ -107,6 +108,8 @@ PHP_FUNCTION(mysqli_sqlstate);
 PHP_FUNCTION(mysqli_ssl_set);
 PHP_FUNCTION(mysqli_stat);
 PHP_FUNCTION(mysqli_refresh);
+PHP_FUNCTION(mysqli_savepoint);
+PHP_FUNCTION(mysqli_release_savepoint);
 PHP_FUNCTION(mysqli_stmt_affected_rows);
 PHP_FUNCTION(mysqli_stmt_close);
 PHP_FUNCTION(mysqli_stmt_data_seek);
