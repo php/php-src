@@ -182,6 +182,10 @@ PHP 5.5 UPGRADE NOTES
 - Since 5.5.2, spl_autoload_functions() returns different names for 
   different lambda functions registered via spl_autoload_register().
 
+- Since 5.5.3, DOMDocument::schemaValidateSource() and 
+  DOMDocument::schemaValidate() accept flag parameter. Only flag 
+  available now is LIBXML_SCHEMA_CREATE. Default is 0.
+
 ========================================
 5. New Functions
 ========================================
