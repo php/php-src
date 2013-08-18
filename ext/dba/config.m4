@@ -557,10 +557,10 @@ PHP_ARG_WITH(cdb,,
 [  --without-cdb[=DIR]       DBA: CDB support (bundled)], $php_dba_enable, no)
 
 PHP_ARG_ENABLE(inifile,,
-[  --disable-inifile         DBA: INI support (bundled)], $php_dba_enable, no)
+[  --disable-inifile       DBA: INI support (bundled)], $php_dba_enable, no)
 
 PHP_ARG_ENABLE(flatfile,,
-[  --disable-flatfile        DBA: FlatFile support (bundled)], $php_dba_enable, no)
+[  --disable-flatfile      DBA: FlatFile support (bundled)], $php_dba_enable, no)
 
 # CDB
 if test "$PHP_CDB" = "yes"; then

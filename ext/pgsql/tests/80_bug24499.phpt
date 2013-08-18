@@ -1,5 +1,5 @@
 --TEST--
-Bug #24499 (Notice: Undefined property: stdClass::)
+Bug #24499 (8.0+) (Notice: Undefined property: stdClass::)
 --SKIPIF--
 <?php 
 require_once('skipif.inc');

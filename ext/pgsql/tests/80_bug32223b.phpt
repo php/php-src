@@ -1,5 +1,5 @@
 --TEST--
-Bug #32223 (weird behaviour of pg_last_notice using define)
+Bug #32223 (8.0+) (weird behaviour of pg_last_notice using define)
 --SKIPIF--
 <?php 
 require_once('skipif.inc');
@@ -15,6 +15,8 @@ end;
 ' LANGUAGE plpgsql;");
 if (!$res) die('skip PLPGSQL not available');
 ?>
+--INI--
+pgsql.ignore_notice=0
 --FILE--
 <?php
 
@@ -35,6 +37,9 @@ begin
 end;
 ' LANGUAGE plpgsql;");
 
+$res = pg_query($dbh, 'SET client_min_messages TO NOTICE;');
+var_dump($res);
+
 function tester() {
         $res = pg_query(dbh, 'SELECT test_notice()');
         $row = pg_fetch_row($res, 0);
@@ -52,6 +57,8 @@ pg_close(dbh);
 ?>
 ===DONE===
 --EXPECTF--
+resource(%d) of type (pgsql result)
+resource(%d) of type (pgsql result)
 array(1) {
   [0]=>
   string(1) "f"

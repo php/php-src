@@ -34,6 +34,10 @@
 #include "rfc1867.h"
 #include "ext/standard/php_string.h"
 
+#if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
+# define atoll(s) _atoi64(s)
+#endif
+
 #define DEBUG_FILE_UPLOAD ZEND_DEBUG
 
 static int dummy_encoding_translation(TSRMLS_D)
@@ -398,7 +402,7 @@ static int find_boundary(multipart_buffer *self, char *boundary TSRMLS_DC)
 static int multipart_buffer_headers(multipart_buffer *self, zend_llist *header TSRMLS_DC)
 {
 	char *line;
-	mime_header_entry prev_entry, entry;
+	mime_header_entry prev_entry = {0}, entry;
 	int prev_len, cur_len;
 
 	/* didn't find boundary, abort */
@@ -676,8 +680,9 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 {
 	char *boundary, *s = NULL, *boundary_end = NULL, *start_arr = NULL, *array_index = NULL;
 	char *temp_filename = NULL, *lbuf = NULL, *abuf = NULL;
-	int boundary_len = 0, total_bytes = 0, cancel_upload = 0, is_arr_upload = 0, array_len = 0;
-	int max_file_size = 0, skip_upload = 0, anonindex = 0, is_anonymous;
+	int boundary_len = 0, cancel_upload = 0, is_arr_upload = 0, array_len = 0;
+	int64_t total_bytes = 0, max_file_size = 0;
+	int skip_upload = 0, anonindex = 0, is_anonymous;
 	zval *http_post_files = NULL;
 	HashTable *uploaded_files = NULL;
 	multipart_buffer *mbuff;
@@ -898,7 +903,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				}
 
 				if (!strcasecmp(param, "MAX_FILE_SIZE")) {
-					max_file_size = atol(value);
+					max_file_size = atoll(value);
 				}
 
 				efree(param);
@@ -1210,17 +1215,32 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 			{
 				zval file_size, error_type;
+				int size_overflow = 0;
+				char file_size_buf[65];
 
-				error_type.value.lval = cancel_upload;
-				error_type.type = IS_LONG;
+				ZVAL_LONG(&error_type, cancel_upload);
 
 				/* Add $foo[error] */
 				if (cancel_upload) {
-					file_size.value.lval = 0;
-					file_size.type = IS_LONG;
+					ZVAL_LONG(&file_size, 0);
 				} else {
-					file_size.value.lval = total_bytes;
-					file_size.type = IS_LONG;
+					if (total_bytes > LONG_MAX) {
+#ifdef PHP_WIN32
+						if (_i64toa_s(total_bytes, file_size_buf, 65, 10)) {
+							file_size_buf[0] = '0';
+							file_size_buf[1] = '\0';
+						}
+#else
+						{
+							int __len = snprintf(file_size_buf, 65, "%lld", total_bytes);
+							file_size_buf[__len] = '\0';
+						}
+#endif
+						size_overflow = 1;
+
+					} else {
+						ZVAL_LONG(&file_size, total_bytes);
+					}
 				}
 
 				if (is_arr_upload) {
@@ -1237,7 +1257,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					snprintf(lbuf, llen, "%s_size", param);
 				}
 				if (!is_anonymous) {
-					safe_php_register_variable_ex(lbuf, &file_size, NULL, 0 TSRMLS_CC);
+					if (size_overflow) {
+						ZVAL_STRING(&file_size, file_size_buf, 1);
+					}
+					safe_php_register_variable_ex(lbuf, &file_size, NULL, size_overflow TSRMLS_CC);
 				}
 
 				/* Add $foo[size] */
@@ -1246,7 +1269,10 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 				} else {
 					snprintf(lbuf, llen, "%s[size]", param);
 				}
-				register_http_post_files_variable_ex(lbuf, &file_size, http_post_files, 0 TSRMLS_CC);
+				if (size_overflow) {
+					ZVAL_STRING(&file_size, file_size_buf, 1);
+				}
+				register_http_post_files_variable_ex(lbuf, &file_size, http_post_files, size_overflow TSRMLS_CC);
 			}
 			efree(param);
 		}

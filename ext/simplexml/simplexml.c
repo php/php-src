@@ -1070,7 +1070,7 @@ static HashTable * sxe_get_prop_hash(zval *object, int is_debug TSRMLS_DC) /* {{
 	int              namelen;
 	int              test;
 	char 		 use_iter;
-	zval            *iter_data;
+	zval            *iter_data = NULL;
 
 	use_iter = 0;
 
