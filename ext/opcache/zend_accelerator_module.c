@@ -230,6 +230,7 @@ static ZEND_INI_MH(OnEnable)
 			return FAILURE;
 		}
 	} else {
+	    p = (zend_bool *) (base+(size_t) mh_arg1);
 	    if ((new_value_length == 3 && strcasecmp("off", new_value) == 0) ||
 		    (new_value_length == 2 && strcasecmp("no", new_value) == 0) ||
 		    (new_value_length == 5 && strcasecmp("false", new_value) == 0) ||
