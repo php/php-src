@@ -233,7 +233,7 @@ static ZEND_INI_MH(OnEnable)
 	    if ((new_value_length == 3 && strcasecmp("off", new_value) == 0) ||
 		    (new_value_length == 2 && strcasecmp("no", new_value) == 0) ||
 		    (new_value_length == 5 && strcasecmp("false", new_value) == 0) ||
-			atoi(new_value) != 0) {
+			atoi(new_value) != 1) {
 			*p = 0;
 		}
 	    return SUCCESS;
