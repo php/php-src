@@ -1087,9 +1087,14 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 						size_t len;
 						char *buf = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf, error_filename, error_lineno, STR_PRINT(append_string));
+						php_printf("%s<br />\n<b>%s</b>:  ", STR_PRINT(prepend_string), error_type_str);
+						PHPWRITE(buf, len);
+						php_printf(" in <b>%s</b> on line <b>%d</b><br />\n%s", error_filename, error_lineno, STR_PRINT(append_string));
 						efree(buf);
 					} else {
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+						php_printf("%s<br />\n<b>%s</b>:  ", STR_PRINT(prepend_string), error_type_str);
+						PHPWRITE(buffer, buffer_len);
+						php_printf(" in <b>%s</b> on line <b>%d</b><br />\n%s", error_filename, error_lineno, STR_PRINT(append_string));
 					}
 				} else {
 					/* Write CLI/CGI errors to stderr if display_errors = "stderr" */
@@ -1097,13 +1102,19 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 						PG(display_errors) == PHP_DISPLAY_ERRORS_STDERR
 					) {
 #ifdef PHP_WIN32
-						fprintf(stderr, "%s: %s in %s on line %d\n", error_type_str, buffer, error_filename, error_lineno);
+						fprintf(stderr, "%s: ", error_type_str);
+						fwrite(buffer, buffer_len, 1, stderr);
+						fprintf(stderr, " in %s on line %d\n", error_filename, error_lineno);
 						fflush(stderr);
 #else
-						fprintf(stderr, "%s: %s in %s on line %d\n", error_type_str, buffer, error_filename, error_lineno);
+						fprintf(stderr, "%s\n%s: ", STR_PRINT(prepend_string), error_type_str);
+						fwrite(buffer, buffer_len, 1, stderr);
+						fprintf(stderr, " in %s on line %d\n%s", error_filename, error_lineno, STR_PRINT(append_string));
 #endif
 					} else {
-						php_printf("%s\n%s: %s in %s on line %d\n%s", STR_PRINT(prepend_string), error_type_str, buffer, error_filename, error_lineno, STR_PRINT(append_string));
+						php_printf("%s\n%s: ", STR_PRINT(prepend_string), error_type_str);
+						PHPWRITE(buffer, buffer_len);
+						php_printf(" in %s on line %d\n%s", error_filename, error_lineno, STR_PRINT(append_string));
 					}
 				}
 			}
