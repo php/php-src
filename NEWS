@@ -3,11 +3,14 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.4.19
 
 - Core:
+  . Fixed bug #65470 (Segmentation fault in zend_error() with 
+    --enable-dtrace). (Chris Jones)
   . Fixed bug #65372 (Segfault in gc_zval_possible_root when return reference
     fails). (Laruence)
   . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
   . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
     limited case). (Arpad)
+  . Fixed bug #65225 (PHP_BINARY incorrectly set). (Patrick Allaert)
   . Improved fix for bug #63186 (compile failure on netbsd). (Matteo)
   . Fixed bug #62692 (PHP fails to build with DTrace). (Chris Jones, Kris Van Hees)
   . Fixed bug #61345 (CGI mode - make install don't work). (Michael Heimpold)
@@ -15,6 +18,10 @@ PHP                                                                        NEWS
     bug #62691, and bug #63706) from PHP 5.5 branch
   . Fixed bug #61268 (--enable-dtrace leads make to clobber
     Zend/zend_dtrace.d) (Chris Jones)
+
+- Openssl:
+  . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in 
+    some cases). (Mark Jones)
 
 - Session:
   . Fixed bug #62129 (rfc1867 crashes php even though turned off). (gxd305 at
