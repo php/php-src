@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.4.19
 
 - Core:
+  . Fixed bug #65470 (Segmentation fault in zend_error() with 
+    --enable-dtrace). (Chris Jones)
   . Fixed bug #65372 (Segfault in gc_zval_possible_root when return reference
     fails). (Laruence)
   . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
