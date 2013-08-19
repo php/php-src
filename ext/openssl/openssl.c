@@ -1502,6 +1502,7 @@ PHP_FUNCTION(openssl_x509_parse)
 		bio_out = BIO_new(BIO_s_mem());
 		if (nid == NID_subject_alt_name) {
 			if (openssl_x509v3_subjectAltName(bio_out, extension) == 0) {
+				BIO_get_mem_ptr(bio_out, &bio_buf);
 				add_assoc_stringl(subitem, extname, bio_buf->data, bio_buf->length, 1);
 			} else {
 				zval_dtor(return_value);
