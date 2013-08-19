@@ -228,11 +228,9 @@ static ZEND_INI_MH(OnEnable)
 			atoi(new_value) != 0) {
 			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporary enabled (it may be only disabled till the end of request)");
 			return FAILURE;
-		} else {
-			*p = 0;
-			return SUCCESS;
 		}
 	} else {
+	    *p = 0;
 	    return SUCCESS;
 	}
 }
