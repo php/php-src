@@ -1886,8 +1886,7 @@ PHPAPI int php_fputcsv(php_stream *stream, zval *fields, char delimiter, char en
 			FPUTCSV_FLD_CHK('\n') ||
 			FPUTCSV_FLD_CHK('\r') ||
 			FPUTCSV_FLD_CHK('\t') ||
-			FPUTCSV_FLD_CHK(' ')  ||
-			FPUTCSV_FLD_CHK('"')
+			FPUTCSV_FLD_CHK(' ')
 		) {
 			char *ch = Z_STRVAL(field);
 			char *end = ch + Z_STRLEN(field);
