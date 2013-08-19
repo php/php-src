@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.3
 
 - Core:
+  . Fixed bug #65470 (Segmentation fault in zend_error() with
+    --enable-dtrace). (Chris Jones)
   . Fixed bug #65225 (PHP_BINARY incorrectly set). (Patrick Allaert)
   . Fixed bug #62692 (PHP fails to build with DTrace). (Chris Jones, Kris Van Hees)
 
