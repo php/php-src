@@ -214,7 +214,7 @@ static ZEND_INI_MH(OnEnable)
 		return OnUpdateBool(entry, new_value, new_value_length, mh_arg1, mh_arg2, mh_arg3, stage TSRMLS_CC);
 	} else {
 	    /* It may be only temporary disabled */
-	    zend_bool *p;
+        zend_bool *p;
 #ifndef ZTS
         char *base = (char *) mh_arg2;
 #else
@@ -223,23 +223,23 @@ static ZEND_INI_MH(OnEnable)
 
         p = (zend_bool *) (base+(size_t) mh_arg1);
 		    
-	    if (!ZCG(enabled)) {
-		    if ((new_value_length == 2 && strcasecmp("on", new_value) == 0) ||
-		        (new_value_length == 3 && strcasecmp("yes", new_value) == 0) ||
-		        (new_value_length == 4 && strcasecmp("true", new_value) == 0) ||
-			    atoi(new_value) != 0) {
-			    zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporary enabled (it may be only disabled till the end of request)");
-			    return FAILURE;
-		    }
-	    } else {
-	        if ((new_value_length == 3 && strcasecmp("off", new_value) == 0) ||
-		        (new_value_length == 2 && strcasecmp("no", new_value) == 0) ||
-		        (new_value_length == 5 && strcasecmp("false", new_value) == 0) ||
-			    atoi(new_value) != 1) {
-			    *p = 0;
-		    }
-	        return SUCCESS;
-	    }
+        if (!ZCG(enabled)) {
+            if ((new_value_length == 2 && strcasecmp("on", new_value) == 0) ||
+                (new_value_length == 3 && strcasecmp("yes", new_value) == 0) ||
+                (new_value_length == 4 && strcasecmp("true", new_value) == 0) ||
+	            atoi(new_value) != 0) {
+	            zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " can't be temporary enabled (it may be only disabled till the end of request)");
+	            return FAILURE;
+            }
+        } else {
+            if ((new_value_length == 3 && strcasecmp("off", new_value) == 0) ||
+                (new_value_length == 2 && strcasecmp("no", new_value) == 0) ||
+                (new_value_length == 5 && strcasecmp("false", new_value) == 0) ||
+	            atoi(new_value) != 1) {
+	            *p = 0;
+            }
+            return SUCCESS;
+        }
 	}
 }
 
