@@ -1107,9 +1107,9 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 						fprintf(stderr, " in %s on line %d\n", error_filename, error_lineno);
 						fflush(stderr);
 #else
-						fprintf(stderr, "%s\n%s: ", STR_PRINT(prepend_string), error_type_str);
+						fprintf(stderr, "%s: ", error_type_str);
 						fwrite(buffer, buffer_len, 1, stderr);
-						fprintf(stderr, " in %s on line %d\n%s", error_filename, error_lineno, STR_PRINT(append_string));
+						fprintf(stderr, " in %s on line %d\n", error_filename, error_lineno);
 #endif
 					} else {
 						php_printf("%s\n%s: ", STR_PRINT(prepend_string), error_type_str);
