@@ -230,7 +230,12 @@ static ZEND_INI_MH(OnEnable)
 			return FAILURE;
 		}
 	} else {
-	    *p = 0;
+	    if ((new_value_length == 3 && strcasecmp("off", new_value) == 0) ||
+		    (new_value_length == 2 && strcasecmp("no", new_value) == 0) ||
+		    (new_value_length == 5 && strcasecmp("false", new_value) == 0) ||
+			atoi(new_value) != 0) {
+			*p = 0;
+		}
 	    return SUCCESS;
 	}
 }
