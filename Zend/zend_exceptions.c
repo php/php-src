@@ -617,10 +617,26 @@ ZEND_METHOD(exception, __toString)
 		}
 
 		if (Z_STRLEN(message) > 0) {
-			len = zend_spprintf(&str, 0, "exception '%s' with message '%s' in %s:%ld\nStack trace:\n%s%s%s",
-								Z_OBJCE_P(exception)->name, Z_STRVAL(message), Z_STRVAL(file), Z_LVAL(line),
-								(trace && Z_STRLEN_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
-								len ? "\n\nNext " : "", prev_str);
+			char *prefix, *suffix;
+			int prefix_len, suffix_len;
+
+			prefix_len = zend_spprintf(&prefix, 0, "exception '%s' with message '",
+			                           Z_OBJCE_P(exception)->name);
+
+			suffix_len = zend_spprintf(&suffix, 0, "' in %s:%ld\nStack trace:\n%s%s%s",
+			                           Z_STRVAL(file), Z_LVAL(line),
+			                           (trace && Z_STRLEN_P(trace)) ? Z_STRVAL_P(trace) : "#0 {main}\n",
+			                           len ? "\n\nNext " : "", prev_str);
+
+			len = prefix_len + Z_STRLEN(message) + suffix_len;
+			str = emalloc(len + 1);
+			memcpy(str, prefix, prefix_len);
+			memcpy(str + prefix_len, Z_STRVAL(message), Z_STRLEN(message));
+			memcpy(str + prefix_len + Z_STRLEN(message), suffix, suffix_len);
+			str[len] = '\0';
+
+			efree(prefix);
+			efree(suffix);
 		} else {
 			len = zend_spprintf(&str, 0, "exception '%s' in %s:%ld\nStack trace:\n%s%s%s",
 								Z_OBJCE_P(exception)->name, Z_STRVAL(file), Z_LVAL(line),
@@ -643,7 +659,7 @@ ZEND_METHOD(exception, __toString)
 
 	/* We store the result in the private property string so we can access
 	 * the result in uncaught exception handlers without memleaks. */
-	zend_update_property_string(default_exception_ce, getThis(), "string", sizeof("string")-1, str TSRMLS_CC);
+	zend_update_property_stringl(default_exception_ce, getThis(), "string", sizeof("string")-1, str, len TSRMLS_CC);
 
 	RETURN_STRINGL(str, len, 0);
 }
@@ -807,7 +823,11 @@ ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC) /* {
 			if (Z_TYPE_P(str) != IS_STRING) {
 				zend_error(E_WARNING, "%s::__toString() must return a string", ce_exception->name);
 			} else {
-				zend_update_property_string(default_exception_ce, exception, "string", sizeof("string")-1, EG(exception) ? ce_exception->name : Z_STRVAL_P(str) TSRMLS_CC);
+				if (EG(exception)) {
+					zend_update_property_string(default_exception_ce, exception, "string", sizeof("string")-1, ce_exception->name TSRMLS_CC);
+				} else {
+					zend_update_property_stringl(default_exception_ce, exception, "string", sizeof("string")-1, Z_STRVAL_P(str), Z_STRLEN_P(str) TSRMLS_CC);
+				}
 			}
 		}
 		zval_ptr_dtor(&str);
@@ -836,7 +856,7 @@ ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC) /* {
 		convert_to_string(file);
 		convert_to_long(line);
 
-		zend_error_va(severity, (Z_STRLEN_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_LVAL_P(line), "Uncaught %s\n  thrown", Z_STRVAL_P(str));
+		zend_error_va(severity, (Z_STRLEN_P(file) > 0) ? Z_STRVAL_P(file) : NULL, Z_LVAL_P(line), "Uncaught %Z\n  thrown", str);
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ce_exception->name);
 	}
