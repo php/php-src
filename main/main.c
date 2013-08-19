@@ -1086,7 +1086,6 @@ static void php_error_cb(int type, const char *error_filename, const uint error_
 					if (type == E_ERROR || type == E_PARSE) {
 						size_t len;
 						char *buf = php_escape_html_entities(buffer, buffer_len, &len, 0, ENT_COMPAT, NULL TSRMLS_CC);
-						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, buf, error_filename, error_lineno, STR_PRINT(append_string));
 						php_printf("%s<br />\n<b>%s</b>:  ", STR_PRINT(prepend_string), error_type_str);
 						PHPWRITE(buf, len);
 						php_printf(" in <b>%s</b> on line <b>%d</b><br />\n%s", error_filename, error_lineno, STR_PRINT(append_string));
