@@ -1876,7 +1876,7 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip)
 {
 	long mode = PDO_FETCH_BOTH;
-	int flags, argc = ZEND_NUM_ARGS() - skip;
+	int flags = 0, argc = ZEND_NUM_ARGS() - skip;
 	zval ***args;
 	zend_class_entry **cep;
 	int retval;
