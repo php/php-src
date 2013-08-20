@@ -1,13 +1,17 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.4.19
+?? ??? 2013, PHP 5.4.20
 
 - Core:
+  . Fixed bug #65481 (shutdown segfault due to serialize) (Mike)
+  . Fixed bug #65470 (Segmentation fault in zend_error() with 
+    --enable-dtrace). (Chris Jones, Kris Van Hees)
   . Fixed bug #65372 (Segfault in gc_zval_possible_root when return reference
     fails). (Laruence)
   . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
   . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
     limited case). (Arpad)
+  . Fixed bug #65225 (PHP_BINARY incorrectly set). (Patrick Allaert)
   . Improved fix for bug #63186 (compile failure on netbsd). (Matteo)
   . Fixed bug #62692 (PHP fails to build with DTrace). (Chris Jones, Kris Van Hees)
   . Fixed bug #61345 (CGI mode - make install don't work). (Michael Heimpold)
@@ -15,6 +19,13 @@ PHP                                                                        NEWS
     bug #62691, and bug #63706) from PHP 5.5 branch
   . Fixed bug #61268 (--enable-dtrace leads make to clobber
     Zend/zend_dtrace.d) (Chris Jones)
+
+- cURL:
+  . Fixed bug #65458 (curl memory leak). (Adam)
+
+- Openssl:
+  . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in 
+    some cases). (Mark Jones)
 
 - Session:
   . Fixed bug #62129 (rfc1867 crashes php even though turned off). (gxd305 at
@@ -45,7 +56,16 @@ PHP                                                                        NEWS
   . Fixed bug #65391 (Unable to send vary header user-agent when 
     ob_start('ob_gzhandler') is called) (Mike)
 
-?? ??? 2013, PHP 5.4.18
+22 Aug 2013, PHP 5.4.19
+
+- Core:
+  . Fixed bug #64503 (Compilation fails with error: conflicting types for
+    'zendparse'). (Laruence)
+
+- Openssl:
+  . Fixed UMR in fix for CVE-2013-4248.
+
+15 Aug 2013, PHP 5.4.18
 
 - Core:
   . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
