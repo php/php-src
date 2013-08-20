@@ -58,10 +58,8 @@ ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 	}
 
 	if (DTRACE_FUNCTION_ENTRY_ENABLED() || DTRACE_FUNCTION_RETURN_ENABLED()) {
-		filename = dtrace_get_executed_filename(TSRMLS_C);
 		classname = get_active_class_name(&scope TSRMLS_CC);
 		funcname = get_active_function_name(TSRMLS_C);
-		lineno = zend_get_executed_lineno(TSRMLS_C);
 	}
 
 	if (DTRACE_EXECUTE_ENTRY_ENABLED()) {
