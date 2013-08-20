@@ -2441,7 +2441,7 @@ string_copy:
 
 			ph = HASH_OF(*zvalue);
 			if (!ph) {
-				char *name;
+				char *name = NULL;
 				switch (option) {
 					case CURLOPT_HTTPHEADER:
 						name = "CURLOPT_HTTPHEADER";
