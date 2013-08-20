@@ -42,6 +42,10 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #65328 (Segfault when getting SplStack object Value). (Laruence)
 
+- PDO:
+  . Fixed bug #64953 (Postgres prepared statement positional parameter 
+    casting). (Mike)
+
 - Phar:
   . Fixed bug #65028 (Phar::buildFromDirectory creates corrupt archives for 
     some specific contents). (Stas)
