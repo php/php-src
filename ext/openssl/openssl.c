@@ -600,7 +600,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 {
 	zval **data;
 	zval *subitem, *subentries;
-	int i, j = -1, last = -1, obj_cnt = 0;
+	int i;
 	char *sname;
 	int nid;
 	X509_NAME_ENTRY * ne;
@@ -622,7 +622,6 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 		ne  = X509_NAME_get_entry(name, i);
 		obj = X509_NAME_ENTRY_get_object(ne);
 		nid = OBJ_obj2nid(obj);
-		obj_cnt = 0;
 
 		if (shortname) {
 			sname = (char *) OBJ_nid2sn(nid);
