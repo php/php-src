@@ -50,14 +50,14 @@ static int scan(Scanner *s)
 	QUESTION	= [?];
 	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--"[^\r\n]*);
 	SPECIALS	= [:?"'];
-	MULTICHAR	= [:?];
+	MULTICHAR	= ([:]{2,}|[?]{2,});
 	ANYNOEOF	= [\001-\377];
 	*/
 
 	/*!re2c
 		(["](([\\]ANYNOEOF)|ANYNOEOF\["\\])*["]) { RET(PDO_PARSER_TEXT); }
 		(['](([\\]ANYNOEOF)|ANYNOEOF\['\\])*[']) { RET(PDO_PARSER_TEXT); }
-		MULTICHAR{2,}							{ RET(PDO_PARSER_TEXT); }
+		MULTICHAR								{ RET(PDO_PARSER_TEXT); }
 		BINDCHR									{ RET(PDO_PARSER_BIND); }
 		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
 		SPECIALS								{ SKIP_ONE(PDO_PARSER_TEXT); }
