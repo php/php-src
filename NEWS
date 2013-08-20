@@ -3,8 +3,9 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.4.19
 
 - Core:
+  . Fixed bug #65481 (shutdown segfault due to serialize) (Mike)
   . Fixed bug #65470 (Segmentation fault in zend_error() with 
-    --enable-dtrace). (Chris Jones)
+    --enable-dtrace). (Chris Jones, Kris Van Hees)
   . Fixed bug #65372 (Segfault in gc_zval_possible_root when return reference
     fails). (Laruence)
   . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
@@ -18,6 +19,9 @@ PHP                                                                        NEWS
     bug #62691, and bug #63706) from PHP 5.5 branch
   . Fixed bug #61268 (--enable-dtrace leads make to clobber
     Zend/zend_dtrace.d) (Chris Jones)
+
+- cURL:
+  . Fixed bug #65458 (curl memory leak). (Adam)
 
 - Openssl:
   . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in 
