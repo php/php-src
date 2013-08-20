@@ -5,7 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #65481 (shutdown segfault due to serialize) (Mike)
   . Fixed bug #65470 (Segmentation fault in zend_error() with 
-    --enable-dtrace). (Chris Jones)
+    --enable-dtrace). (Chris Jones, Kris Van Hees)
   . Fixed bug #65372 (Segfault in gc_zval_possible_root when return reference
     fails). (Laruence)
   . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
