@@ -707,21 +707,21 @@ static const XML_Char *const error_mapping[] = {
 	(const XML_Char *)"Entity value required",
 	(const XML_Char *)"chunk is not well balanced",
 	(const XML_Char *)"extra content at the end of well balanced chunk",
-    (const XML_Char *)"XML_ERR_ENTITY_CHAR_ERROR",
-    (const XML_Char *)"PEReferences forbidden in internal subset",
-    (const XML_Char *)"Detected an entity reference loop",
-    (const XML_Char *)"XML_ERR_ENTITY_BOUNDARY",
-    (const XML_Char *)"Invalid URI",
-    (const XML_Char *)"Fragment not allowed",
-    (const XML_Char *)"XML_WAR_CATALOG_PI",
-    (const XML_Char *)"XML_ERR_NO_DTD",
-    (const XML_Char *)"conditional section INCLUDE or IGNORE keyword expected", /* 95 */
-    (const XML_Char *)"Version in XML Declaration missing", /* 96 */
-    (const XML_Char *)"XML_WAR_UNKNOWN_VERSION", /* 97 */
-    (const XML_Char *)"XML_WAR_LANG_VALUE", /* 98 */
-    (const XML_Char *)"XML_WAR_NS_URI", /* 99 */
-    (const XML_Char *)"XML_WAR_NS_URI_RELATIVE", /* 100 */
-    (const XML_Char *)"Missing encoding in text declaration" /* 101 */
+	(const XML_Char *)"XML_ERR_ENTITY_CHAR_ERROR",
+	(const XML_Char *)"PEReferences forbidden in internal subset",
+	(const XML_Char *)"Detected an entity reference loop",
+	(const XML_Char *)"XML_ERR_ENTITY_BOUNDARY",
+	(const XML_Char *)"Invalid URI",
+	(const XML_Char *)"Fragment not allowed",
+	(const XML_Char *)"XML_WAR_CATALOG_PI",
+	(const XML_Char *)"XML_ERR_NO_DTD",
+	(const XML_Char *)"conditional section INCLUDE or IGNORE keyword expected", /* 95 */
+	(const XML_Char *)"Version in XML Declaration missing", /* 96 */
+	(const XML_Char *)"XML_WAR_UNKNOWN_VERSION", /* 97 */
+	(const XML_Char *)"XML_WAR_LANG_VALUE", /* 98 */
+	(const XML_Char *)"XML_WAR_NS_URI", /* 99 */
+	(const XML_Char *)"XML_WAR_NS_URI_RELATIVE", /* 100 */
+	(const XML_Char *)"Missing encoding in text declaration" /* 101 */
 };
 
 PHPAPI const XML_Char *
