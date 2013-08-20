@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.4.19
+?? ??? 2013, PHP 5.4.20
 
 - Core:
   . Fixed bug #65481 (shutdown segfault due to serialize) (Mike)
@@ -56,7 +56,16 @@ PHP                                                                        NEWS
   . Fixed bug #65391 (Unable to send vary header user-agent when 
     ob_start('ob_gzhandler') is called) (Mike)
 
-?? ??? 2013, PHP 5.4.18
+22 Aug 2013, PHP 5.4.19
+
+- Core:
+  . Fixed bug #64503 (Compilation fails with error: conflicting types for
+    'zendparse'). (Laruence)
+
+- Openssl:
+  . Fixed UMR in fix for CVE-2013-4248.
+
+15 Aug 2013, PHP 5.4.18
 
 - Core:
   . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
