@@ -1,9 +1,24 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.3
+?? ??? 2013, PHP 5.5.4
 
 - Core:
+  . Fixed bug #65470 (Segmentation fault in zend_error() with
+    --enable-dtrace). (Chris Jones, Kris Van Hees)
+  . Fixed bug #65225 (PHP_BINARY incorrectly set). (Patrick Allaert)
   . Fixed bug #62692 (PHP fails to build with DTrace). (Chris Jones, Kris Van Hees)
+
+- cURL:
+  . Fixed bug #65458 (curl memory leak). (Adam)
+
+- Openssl:
+  . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in
+    some cases). (Mark Jones)
+
+22 Aug 2013, PHP 5.5.3
+
+- Openssl:
+  . Fixed UMR in fix for CVE-2013-4248.
 
 15 Aug 2013, PHP 5.5.2
 
@@ -52,7 +67,7 @@ PHP                                                                        NEWS
 - Sessions:
   . Implemented strict sessions RFC (https://wiki.php.net/rfc/strict_sessions)
     which protects against session fixation attacks and session collisions.    
-    (Yasuo Ohgaki)
+    (CVE-2011-4718). (Yasuo Ohgaki)
   . Fixed possible buffer overflow under Windows. Note: Not a security fix.
     (Yasuo)
   . Changed session.auto_start to PHP_INI_PERDIR. (Yasuo)

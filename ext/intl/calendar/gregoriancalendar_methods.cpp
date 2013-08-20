@@ -38,7 +38,6 @@ static inline GregorianCalendar *fetch_greg(Calendar_object *co) {
 
 static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval		*object		= getThis();
 	zval		**tz_object	= NULL;
 	zval		**args_a[6] = {0},
 				***args		= &args_a[0];
@@ -84,7 +83,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	}
 	
 	// instantion of ICU object
-	GregorianCalendar *gcal;
+	GregorianCalendar *gcal = NULL;
 
 	if (variant <= 2) {
 		// From timezone and locale (0 to 2 arguments)
