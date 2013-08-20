@@ -338,13 +338,13 @@ PS_READ_FUNC(files)
 		if (!PS(id)) {
 			return FAILURE;
 		}
-		php_session_reset_id(TSRMLS_C);
 		if (PS(use_cookies)) {
 			PS(send_cookie) = 1;
 		}
+		php_session_reset_id(TSRMLS_C);
 	}
 
-	ps_files_open(data, key TSRMLS_CC);
+	ps_files_open(data, PS(id) TSRMLS_CC);
 	if (data->fd < 0) {
 		return FAILURE;
 	}
