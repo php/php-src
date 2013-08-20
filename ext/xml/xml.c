@@ -274,10 +274,10 @@ zend_module_entry xml_module_entry = {
  * the encoding is currently done internally by expat/xmltok.
  */
 xml_encoding xml_encodings[] = {
-	{ "ISO-8859-1", xml_decode_iso_8859_1, xml_encode_iso_8859_1 },
-	{ "US-ASCII",   xml_decode_us_ascii,   xml_encode_us_ascii   },
-	{ "UTF-8",      NULL,                  NULL                  },
-	{ NULL,         NULL,                  NULL                  }
+	{ (XML_Char *)"ISO-8859-1", xml_decode_iso_8859_1, xml_encode_iso_8859_1 },
+	{ (XML_Char *)"US-ASCII",   xml_decode_us_ascii,   xml_encode_us_ascii   },
+	{ (XML_Char *)"UTF-8",      NULL,                  NULL                  },
+	{ (XML_Char *)NULL,         NULL,                  NULL                  }
 };
 
 static XML_Memory_Handling_Suite php_xml_mem_hdlrs;
