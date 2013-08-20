@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.3
+?? ??? 2013, PHP 5.5.4
 
 - Core:
   . Fixed bug #65470 (Segmentation fault in zend_error() with
@@ -14,6 +14,11 @@ PHP                                                                        NEWS
 - Openssl:
   . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in
     some cases). (Mark Jones)
+
+22 Aug 2013, PHP 5.5.3
+
+- Openssl:
+  . Fixed UMR in fix for CVE-2013-4248.
 
 15 Aug 2013, PHP 5.5.2
 
