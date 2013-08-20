@@ -600,7 +600,7 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 {
 	zval **data;
 	zval *subitem, *subentries;
-	int i, j = -1;
+	int i;
 	char *sname;
 	int nid;
 	X509_NAME_ENTRY * ne;
