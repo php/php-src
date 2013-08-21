@@ -827,6 +827,51 @@ PHP_INI_END()
 /* ***************
    * Serializers *
    *************** */
+PS_SERIALIZER_ENCODE_FUNC(php_serialize) /* {{{ */
+{
+	smart_str buf = {0};
+	php_serialize_data_t var_hash;
+	HashTable *_ht = Z_ARRVAL_P(PS(http_session_vars));
+	int key_type;
+	PS_ENCODE_VARS;
+
+	PHP_VAR_SERIALIZE_INIT(var_hash);
+	php_var_serialize(&buf, &PS(http_session_vars), &var_hash TSRMLS_CC);
+	PHP_VAR_SERIALIZE_DESTROY(var_hash);
+	if (newlen) {
+		*newlen = buf.len;
+	}
+	smart_str_0(&buf);
+	*newstr = buf.c;
+	return SUCCESS;
+}
+/* }}} */
+
+PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
+{
+	const char *p;
+	char *name;
+	const char *endptr = val + vallen;
+	zval *session_vars;
+	int namelen;
+	int has_value;
+	php_unserialize_data_t var_hash;
+
+	PHP_VAR_UNSERIALIZE_INIT(var_hash);
+	ALLOC_INIT_ZVAL(session_vars);
+	php_var_unserialize(&session_vars, &val, endptr, &var_hash TSRMLS_CC);
+	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	if (PS(http_session_vars)) {
+		zval_ptr_dtor(&PS(http_session_vars));
+	}
+	if (Z_TYPE_P(session_vars) == IS_NULL) {
+		array_init(session_vars);
+	}
+	PS(http_session_vars) = session_vars;
+	ZEND_SET_GLOBAL_VAR_WITH_LENGTH("_SESSION", sizeof("_SESSION"), PS(http_session_vars), 2, 1);
+	return SUCCESS;
+}
+/* }}} */
 
 #define PS_BIN_NR_OF_BITS 8
 #define PS_BIN_UNDEF (1<<(PS_BIN_NR_OF_BITS-1))
@@ -1008,10 +1053,11 @@ break_outer_loop:
 }
 /* }}} */
 
-#define MAX_SERIALIZERS 10
-#define PREDEFINED_SERIALIZERS 2
+#define MAX_SERIALIZERS 32
+#define PREDEFINED_SERIALIZERS 3
 
 static ps_serializer ps_serializers[MAX_SERIALIZERS + 1] = {
+	PS_SERIALIZER_ENTRY(php_serialize),
 	PS_SERIALIZER_ENTRY(php),
 	PS_SERIALIZER_ENTRY(php_binary)
 };
