@@ -58,6 +58,12 @@ PHP_FUNCTION(pcntl_getpriority);
 #ifdef HAVE_SETPRIORITY
 PHP_FUNCTION(pcntl_setpriority);
 #endif
+#ifdef HAVE_DAEMON
+PHP_FUNCTION(pcntl_daemonize);
+#endif
+#ifdef HAVE_SCHED_SETAFFINITY
+PHP_FUNCTION(pcntl_setaffinity);
+#endif
 
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
