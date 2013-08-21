@@ -529,9 +529,9 @@ static long php_unpack(char *data, zend_str_size_int size, int issigned, int *ma
 PHP_FUNCTION(unpack)
 {
 	char *format, *input, *formatarg, *inputarg;
-	int formatlen;
 	zend_str_size_int formatarg_len, inputarg_len;
-	int inputpos, inputlen, i;
+	zend_str_size_int formatlen, inputpos, inputlen;
+	int i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &formatarg, &formatarg_len,
 		&inputarg, &inputarg_len) == FAILURE) {
@@ -551,8 +551,8 @@ PHP_FUNCTION(unpack)
 		char c;
 		int arg = 1, argb;
 		char *name;
-		zend_str_size_int namelen;
-		zend_str_size_int size=0;
+		int namelen;
+		int size=0;
 
 		/* Handle format arguments if any */
 		if (formatlen > 0) {
@@ -673,7 +673,7 @@ PHP_FUNCTION(unpack)
 				inputpos = 0;
 			}
 
-			if ((inputpos + size) <= inputlen) {
+			if ((size >=0 && (inputpos + size) <= inputlen) || (size < 0 && -size <= (inputlen - inputpos))) {
 				switch ((int) type) {
 					case 'a': {
 						/* a will not strip any trailing whitespace or null padding */
@@ -920,8 +920,10 @@ PHP_FUNCTION(unpack)
 			}
 		}
 
-		formatlen--;	/* Skip '/' separator, does no harm if inputlen == 0 */
-		format++;
+		if (formatlen > 0) {
+			formatlen--;	/* Skip '/' separator, does no harm if inputlen == 0 */
+			format++;
+		}
 	}
 }
 /* }}} */
