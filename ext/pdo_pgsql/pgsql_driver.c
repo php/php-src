@@ -315,9 +315,9 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 		case PDO_PARAM_LOB:
 			/* escapedlen returned by PQescapeBytea() accounts for trailing 0 */
 #ifdef HAVE_PQESCAPE_BYTEA_CONN
-			escaped = PQescapeByteaConn(H->server, unquoted, unquotedlen, &tmp_len);
+			escaped = PQescapeByteaConn(H->server, (unsigned char *)unquoted, (size_t)unquotedlen, &tmp_len);
 #else
-			escaped = PQescapeBytea(unquoted, unquotedlen, &tmp_len);
+			escaped = PQescapeBytea((unsigned char *)unquoted, (size_t)unquotedlen, &tmp_len);
 #endif
 			*quotedlen = (int)tmp_len + 1;
 			*quoted = emalloc(*quotedlen + 1);
@@ -331,9 +331,9 @@ static int pgsql_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, int unquote
 			*quoted = safe_emalloc(2, unquotedlen, 3);
 			(*quoted)[0] = '\'';
 #ifndef HAVE_PQESCAPE_CONN
-			*quotedlen = PQescapeString(*quoted + 1, unquoted, unquotedlen);
+			*quotedlen = PQescapeString(*quoted + 1, unquoted, (size_t)unquotedlen);
 #else
-			*quotedlen = PQescapeStringConn(H->server, *quoted + 1, unquoted, unquotedlen, NULL);
+			*quotedlen = PQescapeStringConn(H->server, *quoted + 1, unquoted, (size_t)unquotedlen, NULL);
 #endif
 			(*quoted)[*quotedlen + 1] = '\'';
 			(*quoted)[*quotedlen + 2] = '\0';
