@@ -1089,7 +1089,11 @@ void dom_xpath_objects_free_storage(void *object TSRMLS_DC)
 void dom_objects_free_storage(void *object TSRMLS_DC)
 {
 	dom_object *intern = (dom_object *)object;
+#if defined(__GNUC__) && __GNUC__ >= 3
+	int retcount __attribute__((unused)); /* keep compiler quiet */
+#else
 	int retcount;
+#endif
 
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
 
