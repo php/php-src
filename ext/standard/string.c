@@ -5514,7 +5514,7 @@ PHP_FUNCTION(str_split)
 		RETURN_FALSE;
 	}
 
-	if (0 == str_len) {
+	if (0 == str_len || split_length >= str_len) {
 		array_init_size(return_value, 1);
 		add_next_index_stringl(return_value, str, str_len, 1);
 		return;
