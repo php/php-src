@@ -853,9 +853,6 @@ PS_SERIALIZER_ENCODE_FUNC(php_serialize) /* {{{ */
 {
 	smart_str buf = {0};
 	php_serialize_data_t var_hash;
-	HashTable *_ht = Z_ARRVAL_P(PS(http_session_vars));
-	int key_type;
-	PS_ENCODE_VARS;
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
 	php_var_serialize(&buf, &PS(http_session_vars), &var_hash TSRMLS_CC);
@@ -871,12 +868,8 @@ PS_SERIALIZER_ENCODE_FUNC(php_serialize) /* {{{ */
 
 PS_SERIALIZER_DECODE_FUNC(php_serialize) /* {{{ */
 {
-	const char *p;
-	char *name;
 	const char *endptr = val + vallen;
 	zval *session_vars;
-	int namelen;
-	int has_value;
 	php_unserialize_data_t var_hash;
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
