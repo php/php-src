@@ -72,11 +72,11 @@ enum pdo_param_type {
 	/* get_col ptr should point to a zval*
 	   and the driver is responsible for adding correct type information to get_column_meta()
 	 */
-	PDO_PARAM_ZVAL
-};
+	PDO_PARAM_ZVAL,
 
-/* magic flag to denote a parameter as being input/output */
-#define	PDO_PARAM_INPUT_OUTPUT 	0x80000000	
+	/* magic flag to denote a parameter as being input/output */
+	PDO_PARAM_INPUT_OUTPUT = 0x80000000
+};
 
 #define PDO_PARAM_FLAGS			0xFFFF0000
 
