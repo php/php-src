@@ -5514,19 +5514,21 @@ PHP_FUNCTION(str_split)
 		RETURN_FALSE;
 	}
 
-	array_init_size(return_value, ((str_len - 1) / split_length) + 1);
-
-	if (split_length >= str_len) {
+	if (0 == str_len) {
+		array_init_size(return_value, 1);
 		add_next_index_stringl(return_value, str, str_len, 1);
 		return;
 	}
 
+	array_init_size(return_value, ((str_len - 1) / split_length) + 1);
+
 	n_reg_segments = str_len / split_length;
 	p = str;
 
-	while (n_reg_segments-- > 0) {
+	while (n_reg_segments > 0) {
 		add_next_index_stringl(return_value, p, split_length, 1);
 		p += split_length;
+		n_reg_segments--;
 	}
 
 	if (p != (str + str_len)) {
