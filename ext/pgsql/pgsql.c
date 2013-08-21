@@ -4152,7 +4152,7 @@ PHP_FUNCTION(pg_escape_bytea)
 #ifdef HAVE_PQESCAPE_BYTEA_CONN
 	if (pgsql_link != NULL || id != -1) {
 		ZEND_FETCH_RESOURCE2(pgsql, PGconn *, &pgsql_link, id, "PostgreSQL link", le_link, le_plink);
-		to = (char *)PQescapeByteaConn(pgsql, from, (size_t)from_len, &to_len);
+		to = (char *)PQescapeByteaConn(pgsql, (unsigned char *)from, (size_t)from_len, &to_len);
 	} else
 #endif
 		to = (char *)PQescapeBytea((unsigned char*)from, from_len, &to_len);
@@ -4347,7 +4347,7 @@ static char* php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t le
 #endif
 
 static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_literal) {
-	char *from = NULL, *to = NULL, *tmp = NULL;
+	char *from = NULL, *to = NULL;
 	zval *pgsql_link = NULL;
 	PGconn *pgsql;
 	int from_len;
@@ -4380,17 +4380,22 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 		RETURN_FALSE;
 	}
 #ifdef HAVE_PQESCAPELITERAL
-	if (escape_literal) {
-		tmp = PQescapeLiteral(pgsql, from, (size_t)from_len);
-	} else {
-		tmp = PQescapeIdentifier(pgsql, from, (size_t)from_len);
+	/* Use a block with a local var to avoid unused variable warnings */
+	{
+		char *tmp;
+
+		if (escape_literal) {
+			tmp = PQescapeLiteral(pgsql, from, (size_t)from_len);
+		} else {
+			tmp = PQescapeIdentifier(pgsql, from, (size_t)from_len);
+		}
+		if (!tmp) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Failed to escape");
+			RETURN_FALSE;
+		}
+		to = estrdup(tmp);
+		PQfreemem(tmp);
 	}
-	if (!tmp) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,"Failed to escape");
-		RETURN_FALSE;
-	}
-	to = estrdup(tmp);
-	PQfreemem(tmp);
 #else 
 	to = php_pgsql_PQescapeInternal(pgsql, from, (size_t)from_len, escape_literal);
 	if (!to) {
@@ -5121,7 +5126,9 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 #else
 	new_len = PQescapeString(escaped, tmp_name2, strlen(tmp_name2));
 #endif
-	smart_str_appends(&querystr, escaped);
+	if (new_len) {
+		smart_str_appends(&querystr, escaped);
+	}
 	efree(escaped);
 
 	smart_str_appends(&querystr, "' AND c.relnamespace = n.oid AND n.nspname = '");
@@ -5131,7 +5138,9 @@ PHP_PGSQL_API int php_pgsql_meta_data(PGconn *pg_link, const char *table_name, z
 #else
 	new_len = PQescapeString(escaped, tmp_name, strlen(tmp_name));
 #endif
-	smart_str_appends(&querystr, escaped);
+	if (new_len) {
+		smart_str_appends(&querystr, escaped);
+	}
 	efree(escaped);
 
 	smart_str_appends(&querystr, "' AND a.atttypid = t.oid ORDER BY a.attnum;");
@@ -5924,9 +5933,9 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 							size_t to_len;
 							smart_str s = {0};
 #ifdef HAVE_PQESCAPE_BYTEA_CONN
-							tmp = PQescapeByteaConn(pg_link, Z_STRVAL_PP(val), Z_STRLEN_PP(val), &to_len);
+							tmp = PQescapeByteaConn(pg_link, (unsigned char *)Z_STRVAL_PP(val), Z_STRLEN_PP(val), &to_len);
 #else
-							tmp = PQescapeBytea(Z_STRVAL_PP(val), Z_STRLEN_PP(val), &to_len);
+							tmp = PQescapeBytea(Z_STRVAL_PP(val), (unsigned char *)Z_STRLEN_PP(val), &to_len);
 #endif
 							Z_TYPE_P(new_val) = IS_STRING;
 							Z_STRLEN_P(new_val) = to_len-1; /* PQescapeBytea's to_len includes additional '\0' */
