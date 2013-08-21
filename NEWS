@@ -18,6 +18,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #65475 (Session ID is not initialized properly when strict session
     is enabled). (Yasuo)
+  . Fixed bug #51127/#65359 Request #25630/#43980/#54383 (Added php_serialize 
+    session serialize handler that uses plain serialize()). (Yasuo)
 
 22 Aug 2013, PHP 5.5.3
 
