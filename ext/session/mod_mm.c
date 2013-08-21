@@ -367,13 +367,13 @@ PS_READ_FUNC(mm)
 		if (!PS(id)) {
 			return FAILURE;
 		}
-		php_session_reset_id(TSRMLS_C);
 		if (PS(use_cookies)) {
 			PS(send_cookie) = 1;
 		}
+		php_session_reset_id(TSRMLS_C);
 	}
 
-	sd = ps_sd_lookup(data, key, 0);
+	sd = ps_sd_lookup(data, PS(id), 0);
 	if (sd) {
 		*vallen = sd->datalen;
 		*val = emalloc(sd->datalen + 1);
