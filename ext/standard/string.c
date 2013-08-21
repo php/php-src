@@ -4064,8 +4064,8 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				block_end++;
 				block_length++;
 			}
-			for (i = block_start; i<= block_end; i++) {
-				*target = str[i];
+			for (i = block_start+1; i<= block_end+1; i++) {
+				*target = str[i-1];
 				switch (*target) {
 					case '(':
 						*target = ')';
@@ -4113,8 +4113,8 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				tmp--;
 				block_end--;
 			}
-			for (i = block_end; i >= block_start; i--) {
-				*target = str[i];
+			for (i = block_end+1; i >= block_start+1; i--) {
+				*target = str[i-1];
 				target--;
 			}
 			block_type = _HEB_BLOCK_TYPE_HEB;
