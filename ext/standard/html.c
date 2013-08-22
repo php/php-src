@@ -1435,11 +1435,11 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 	char *str, *hint_charset = NULL;
 	zend_str_size str_len, hint_charset_len = 0;
 	size_t new_len;
-	long flags = ENT_COMPAT;
+	php_int_t flags = ENT_COMPAT;
 	char *replaced;
 	zend_bool double_encode = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|lS!b", &str, &str_len, &flags, &hint_charset, &hint_charset_len, &double_encode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|iS!b", &str, &str_len, &flags, &hint_charset, &hint_charset_len, &double_encode) == FAILURE) {
 		return;
 	}
 
@@ -1485,10 +1485,10 @@ PHP_FUNCTION(htmlspecialchars_decode)
 	char *str;
 	zend_str_size str_len;
 	zend_str_size new_len = 0;
-	long quote_style = ENT_COMPAT;
+	php_int_t quote_style = ENT_COMPAT;
 	char *replaced;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|l", &str, &str_len, &quote_style) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|i", &str, &str_len, &quote_style) == FAILURE) {
 		return;
 	}
 
@@ -1507,10 +1507,10 @@ PHP_FUNCTION(html_entity_decode)
 	char *str, *hint_charset = NULL;
 	zend_str_size str_len, hint_charset_len = 0;
 	zend_str_size new_len = 0;
-	long quote_style = ENT_COMPAT;
+	php_int_t quote_style = ENT_COMPAT;
 	char *replaced;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|lS", &str, &str_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|iS", &str, &str_len,
 							  &quote_style, &hint_charset, &hint_charset_len) == FAILURE) {
 		return;
 	}
@@ -1592,7 +1592,7 @@ static inline void write_s3row_data(
    Returns the internal translation table used by htmlspecialchars and htmlentities */
 PHP_FUNCTION(get_html_translation_table)
 {
-	long all = HTML_SPECIALCHARS,
+	php_int_t all = HTML_SPECIALCHARS,
 		 flags = ENT_COMPAT;
 	int doctype;
 	entity_table_opt entity_table;
@@ -1605,7 +1605,7 @@ PHP_FUNCTION(get_html_translation_table)
 	 * getting the translated table from data structures that are optimized for
 	 * random access, not traversal */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|llS",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|iiS",
 			&all, &flags, &charset_hint, &charset_hint_len) == FAILURE) {
 		return;
 	}

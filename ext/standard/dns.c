@@ -715,7 +715,7 @@ PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
 	zend_str_size_int hostname_len;
-	long type_param = PHP_DNS_ANY;
+	php_int_t type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type_to_fetch;
 #if defined(HAVE_DNS_SEARCH)
@@ -733,7 +733,7 @@ PHP_FUNCTION(dns_get_record)
 	int type, first_query = 1, store_results = 1;
 	zend_bool raw = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|lz!z!b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|iz!z!b",
 			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
 		return;
 	}

@@ -334,9 +334,9 @@ PHP_FUNCTION(flock)
 	zval *arg1, *arg3 = NULL;
 	int act;
 	php_stream *stream;
-	long operation = 0;
+	php_int_t operation = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|z", &arg1, &operation, &arg3) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|z", &arg1, &operation, &arg3) == FAILURE) {
 		return;
 	}
 
@@ -520,13 +520,13 @@ PHP_FUNCTION(file_get_contents)
 	zend_bool use_include_path = 0;
 	php_stream *stream;
 	zend_str_size len;
-	long offset = -1;
-	long maxlen = PHP_STREAM_COPY_ALL;
+	php_int_t offset = -1;
+	php_int_t maxlen = PHP_STREAM_COPY_ALL;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|br!ll", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|br!ii", &filename, &filename_len, &use_include_path, &zcontext, &offset, &maxlen) == FAILURE) {
 		return;
 	}
 
@@ -713,7 +713,7 @@ PHP_FUNCTION(file)
 	register int i = 0;
 	zend_str_size target_len;
 	char eol_marker = '\n';
-	long flags = 0;
+	php_int_t flags = 0;
 	zend_bool use_include_path;
 	zend_bool include_new_line;
 	zend_bool skip_blank_lines;
@@ -722,7 +722,7 @@ PHP_FUNCTION(file)
 	php_stream_context *context = NULL;
 
 	/* Parse arguments */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|lr!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|ir!", &filename, &filename_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
@@ -994,13 +994,13 @@ PHPAPI PHP_FUNCTION(feof)
 PHPAPI PHP_FUNCTION(fgets)
 {
 	zval *arg1;
-	long len = 1024;
+	php_int_t len = 1024;
 	char *buf = NULL;
 	int argc = ZEND_NUM_ARGS();
 	size_t line_len = 0;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &arg1, &len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &arg1, &len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1073,7 +1073,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 PHPAPI PHP_FUNCTION(fgetss)
 {
 	zval *fd;
-	long bytes = 0;
+	php_int_t bytes = 0;
 	zend_str_size len = 0;
 	zend_str_size actual_len, retval_len;
 	char *buf = NULL, *retval;
@@ -1081,7 +1081,7 @@ PHPAPI PHP_FUNCTION(fgetss)
 	char *allowed_tags=NULL;
 	zend_str_size allowed_tags_len=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|lS", &fd, &bytes, &allowed_tags, &allowed_tags_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|iS", &fd, &bytes, &allowed_tags, &allowed_tags_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1318,11 +1318,11 @@ PHP_FUNCTION(mkdir)
 	char *dir;
 	zend_str_size dir_len;
 	zval *zcontext = NULL;
-	long mode = 0777;
+	php_int_t mode = 0777;
 	zend_bool recursive = 0;
 	php_stream_context *context;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|lbr", &dir, &dir_len, &mode, &recursive, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|ibr", &dir, &dir_len, &mode, &recursive, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1384,7 +1384,7 @@ PHP_FUNCTION(readfile)
    Return or change the umask */
 PHP_FUNCTION(umask)
 {
-	long arg1 = 0;
+	php_int_t arg1 = 0;
 	int oldumask;
 	
 	oldumask = umask(077);
@@ -1393,7 +1393,7 @@ PHP_FUNCTION(umask)
 		BG(umask) = oldumask;
 	}
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1499,10 +1499,10 @@ PHP_FUNCTION(unlink)
 PHP_NAMED_FUNCTION(php_if_ftruncate)
 {
 	zval *fp;
-	long size;
+	php_int_t size;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &fp, &size) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &fp, &size) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -2428,9 +2428,9 @@ PHP_FUNCTION(fnmatch)
 {
 	char *pattern, *filename;
 	zend_str_size pattern_len, filename_len;
-	long flags = 0;
+	php_int_t flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "PP|l", &pattern, &pattern_len, &filename, &filename_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "PP|i", &pattern, &pattern_len, &filename, &filename_len, &flags) == FAILURE) {
 		return;
 	}
 

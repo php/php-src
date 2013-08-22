@@ -258,7 +258,7 @@ PHP_FUNCTION(ksort)
 	zval *array;
 	php_int_t sort_type = PHP_SORT_REGULAR;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|i", &array, &sort_type) == FAILURE) {
 		RETURN_FALSE;
 	}
 

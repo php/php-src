@@ -216,14 +216,14 @@ PHP_FUNCTION(password_get_info)
 
 PHP_FUNCTION(password_needs_rehash)
 {
-	long new_algo = 0;
+	php_int_t new_algo = 0;
 	php_password_algo algo;
 	zend_str_size_int hash_len;
 	char *hash;
 	HashTable *options = 0;
 	zval **option_buffer;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
 		return;
 	}
 
@@ -308,13 +308,13 @@ Hash a password */
 PHP_FUNCTION(password_hash)
 {
 	char *hash_format, *hash, *salt, *password, *result;
-	long algo = 0;
+	php_int_t algo = 0;
 	zend_str_size_int password_len = 0, hash_len;
 	size_t salt_len = 0, required_salt_len = 0, hash_format_len;
 	HashTable *options = 0;
 	zval **option_buffer;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl|H", &password, &password_len, &algo, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si|H", &password, &password_len, &algo, &options) == FAILURE) {
 		return;
 	}
 

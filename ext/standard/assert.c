@@ -265,11 +265,11 @@ PHP_FUNCTION(assert)
 PHP_FUNCTION(assert_options)
 {
 	zval **value = NULL;
-	long what;
+	php_int_t what;
 	int oldint;
 	int ac = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ac TSRMLS_CC, "l|Z", &what, &value) == FAILURE) {
+	if (zend_parse_parameters(ac TSRMLS_CC, "i|Z", &what, &value) == FAILURE) {
 		return;
 	}
 
