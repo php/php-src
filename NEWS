@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     --enable-dtrace). (Chris Jones, Kris Van Hees)
   . Fixed bug #65225 (PHP_BINARY incorrectly set). (Patrick Allaert)
   . Fixed bug #62692 (PHP fails to build with DTrace). (Chris Jones, Kris Van Hees)
+  . Fixed bug #46311 (Pointer aliasing issue results in miscompile on gcc4.4).
+    (Nikita Popov)
 
 - cURL:
   . Fixed bug #65458 (curl memory leak). (Adam)
