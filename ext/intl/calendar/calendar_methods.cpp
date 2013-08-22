@@ -184,7 +184,6 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 
 U_CFUNC PHP_FUNCTION(intlcal_get_now)
 {
-	UErrorCode	status			= U_ZERO_ERROR;
 	intl_error_reset(NULL TSRMLS_CC);
 
 	if (zend_parse_parameters_none() == FAILURE) {

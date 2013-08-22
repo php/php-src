@@ -66,20 +66,20 @@ static php_password_algo php_password_determine_algo(const char *hash, const siz
 	return PHP_PASSWORD_UNKNOWN;
 }
 
-static zend_bool php_password_salt_is_alphabet(const char *str, const size_t len) /* {{{ */
+static int php_password_salt_is_alphabet(const char *str, const size_t len) /* {{{ */
 {
 	size_t i = 0;
 
 	for (i = 0; i < len; i++) {
 		if (!((str[i] >= 'A' && str[i] <= 'Z') || (str[i] >= 'a' && str[i] <= 'z') || (str[i] >= '0' && str[i] <= '9') || str[i] == '.' || str[i] == '/')) {
-			return 0;
+			return FAILURE;
 		}
 	}
-	return 1;
+	return SUCCESS;
 }
 /* }}} */
 
-static zend_bool php_password_salt_to64(const char *str, const size_t str_len, const size_t out_len, char *ret) /* {{{ */
+static int php_password_salt_to64(const char *str, const size_t str_len, const size_t out_len, char *ret) /* {{{ */
 {
 	size_t pos = 0;
 	size_t ret_len = 0;
@@ -108,7 +108,7 @@ static zend_bool php_password_salt_to64(const char *str, const size_t str_len, c
 }
 /* }}} */
 
-static zend_bool php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {{{ */
+static int php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {{{ */
 {
 	int buffer_valid = 0;
 	size_t i, raw_length;
@@ -175,11 +175,11 @@ static zend_bool php_password_make_salt(size_t length, char *ret TSRMLS_DC) /* {
 PHP_FUNCTION(password_get_info)
 {
 	php_password_algo algo;
-	int hash_len;
+	zend_str_size_int hash_len;
 	char *hash, *algo_name;
 	zval *options;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &hash, &hash_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &hash, &hash_len) == FAILURE) {
 		return;
 	}
 
@@ -218,12 +218,12 @@ PHP_FUNCTION(password_needs_rehash)
 {
 	long new_algo = 0;
 	php_password_algo algo;
-	int hash_len;
+	zend_str_size_int hash_len;
 	char *hash;
 	HashTable *options = 0;
 	zval **option_buffer;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl|H", &hash, &hash_len, &new_algo, &options) == FAILURE) {
 		return;
 	}
 
@@ -273,10 +273,10 @@ Verify a hash created using crypt() or password_hash() */
 PHP_FUNCTION(password_verify)
 {
 	int status = 0, i;
-	int password_len, hash_len;
+	zend_str_size_int password_len, hash_len;
 	char *ret, *password, *hash;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss", &password, &password_len, &hash, &hash_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS", &password, &password_len, &hash, &hash_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 	if (php_crypt(password, password_len, hash, hash_len, &ret) == FAILURE) {
@@ -309,12 +309,12 @@ PHP_FUNCTION(password_hash)
 {
 	char *hash_format, *hash, *salt, *password, *result;
 	long algo = 0;
-	int password_len = 0, hash_len;
+	zend_str_size_int password_len = 0, hash_len;
 	size_t salt_len = 0, required_salt_len = 0, hash_format_len;
 	HashTable *options = 0;
 	zval **option_buffer;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &password, &password_len, &algo, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl|H", &password, &password_len, &algo, &options) == FAILURE) {
 		return;
 	}
 
@@ -395,7 +395,7 @@ PHP_FUNCTION(password_hash)
 			efree(buffer);
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Provided salt is too short: %lu expecting %lu", (unsigned long) buffer_len, (unsigned long) required_salt_len);
 			RETURN_NULL();
-		} else if (0 == php_password_salt_is_alphabet(buffer, buffer_len)) {
+		} else if (php_password_salt_is_alphabet(buffer, buffer_len) == FAILURE) {
 			salt = safe_emalloc(required_salt_len, 1, 1);
 			if (php_password_salt_to64(buffer, buffer_len, required_salt_len, salt) == FAILURE) {
 				efree(hash_format);

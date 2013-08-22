@@ -178,7 +178,7 @@ static char psheader[] = "\xFF\xED\0\0Photoshop 3.0\08BIM\x04\x04\0\0\0\0";
 PHP_FUNCTION(iptcembed)
 {
 	char *iptcdata, *jpeg_file;
-	int iptcdata_len, jpeg_file_len;
+	zend_str_size_int iptcdata_len, jpeg_file_len;
 	long spool = 0;
 	FILE *fp;
 	unsigned int marker, done = 0;
@@ -187,7 +187,7 @@ PHP_FUNCTION(iptcembed)
 	struct stat sb;
 	zend_bool written = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sp|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SP|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
 		return;
 	}
 
@@ -296,14 +296,14 @@ PHP_FUNCTION(iptcembed)
    Parse binary IPTC-data into associative array */
 PHP_FUNCTION(iptcparse)
 {
-	int inx = 0, len;
+	zend_str_size_int inx = 0, len;
 	unsigned int tagsfound = 0;
 	unsigned char *buffer, recnum, dataset, key[ 16 ];
 	char *str;
-	int str_len;
+	zend_str_size_int str_len;
 	zval *values, **element;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &str, &str_len) != SUCCESS) {
 		return;
 	}
 

@@ -269,7 +269,7 @@ static inline zend_uchar is_numeric_string(const char *str, zend_str_size_int le
     return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
-static inline char *
+static inline const char *
 zend_memnstr(const char *haystack, const char *needle, zend_str_size_int needle_len, char *end)
 {
 	const char *p = haystack;

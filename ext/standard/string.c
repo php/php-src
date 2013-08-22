@@ -2212,11 +2212,12 @@ PHP_FUNCTION(chunk_split)
 
 /* {{{ proto string substr(string str, int start [, int length])
    Returns part of a string */
+/* XXX This function has to be revised when a better php integer type was integrated */
 PHP_FUNCTION(substr)
 {
 	char *str;
 	php_int_t l = 0, f;
-	zend_str_size str_len;
+	zend_str_size_int str_len;
 	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Si|i", &str, &str_len, &f, &l) == FAILURE) {
@@ -2226,20 +2227,20 @@ PHP_FUNCTION(substr)
 	if (argc > 2) {
 		if ((l < 0 && -l > str_len)) {
 			RETURN_FALSE;
-		} else if (l > str_len) {
+		} else if (l > (php_int_t)str_len) {
 			l = str_len;
 		}
 	} else {
 		l = str_len;
 	}
 
-	if (f > 0 && f > str_len) {
+	if (f > (php_int_t)str_len) {
 		RETURN_FALSE;
 	} else if (f < 0 && -f > str_len) {
 		f = 0;
 	}
 
-	if (l < 0 && (l + str_len - f) < 0) {
+	if (l < 0 && (l + (php_int_t)str_len - f) < 0) {
 		RETURN_FALSE;
 	}
 
@@ -2247,7 +2248,7 @@ PHP_FUNCTION(substr)
 	 * of the string
 	 */
 	if (f < 0) {
-		f = str_len + f;
+		f = (php_int_t)str_len + f;
 		if (f < 0) {
 			f = 0;
 		}
@@ -2257,17 +2258,17 @@ PHP_FUNCTION(substr)
 	 * needed to stop that many chars from the end of the string
 	 */
 	if (l < 0) {
-		l = (str_len - f) + l;
+		l = ((php_int_t)str_len - f) + l;
 		if (l < 0) {
 			l = 0;
 		}
 	}
 
-	if (f >= str_len) {
+	if (f >= (php_int_t)str_len) {
 		RETURN_FALSE;
 	}
 
-	if ((f + l) > str_len) {
+	if ((f + l) > (php_int_t)str_len) {
 		l = str_len - f;
 	}
 
@@ -2999,9 +3000,9 @@ static PPRES *php_strtr_array_prepare(STR *text, PATNREPL *patterns, int patnum,
 		}
 	}
 	res->hash->entries[HASH_TAB_SIZE] = patnum; /* OK, we effectively allocated SIZE+1 */
-	for (i = HASH_TAB_SIZE - 1; i >= 0; i--) {
-		if (res->hash->entries[i] == -1) {
-			res->hash->entries[i] = res->hash->entries[i + 1];
+	for (i = HASH_TAB_SIZE; i > 0; i--) {
+		if (res->hash->entries[i-1] == -1) {
+			res->hash->entries[i-1] = res->hash->entries[i];
 		}
 	}
 
@@ -3195,8 +3196,8 @@ static void php_similar_str(const char *txt1, zend_str_size_int len1, const char
  */
 static zend_str_size_int php_similar_char(const char *txt1, zend_str_size_int len1, const char *txt2, zend_str_size_int len2)
 {
-	zend_str_size sum;
-	zend_str_size pos1, pos2, max;
+	zend_str_size_int sum;
+	zend_str_size_int pos1 = 0, pos2 = 0, max;
 
 	php_similar_str(txt1, len1, txt2, len2, &pos1, &pos2, &max);
 	if ((sum = max)) {
@@ -4063,8 +4064,8 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				block_end++;
 				block_length++;
 			}
-			for (i = block_start; i<= block_end; i++) {
-				*target = str[i];
+			for (i = block_start+1; i<= block_end+1; i++) {
+				*target = str[i-1];
 				switch (*target) {
 					case '(':
 						*target = ')';
@@ -4112,8 +4113,8 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				tmp--;
 				block_end--;
 			}
-			for (i = block_end; i >= block_start; i--) {
-				*target = str[i];
+			for (i = block_end+1; i >= block_start+1; i--) {
+				*target = str[i-1];
 				target--;
 			}
 			block_type = _HEB_BLOCK_TYPE_HEB;
@@ -4128,7 +4129,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 
 	while (1) {
 		char_count=0;
-		while ((!max_chars || char_count < max_chars) && begin > 0) {
+		while ((!max_chars || max_chars > 0 && char_count < max_chars) && begin > 0) {
 			char_count++;
 			begin--;
 			if (begin <= 0 || _isnewline(heb_str[begin])) {
@@ -4139,7 +4140,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				break;
 			}
 		}
-		if (char_count == max_chars) { /* try to avoid breaking words */
+		if (max_chars >= 0 && char_count == max_chars) { /* try to avoid breaking words */
 			zend_str_size_int new_char_count=char_count, new_begin=begin;
 
 			while (new_char_count > 0) {
@@ -4556,8 +4557,8 @@ PHPAPI zend_str_size_size_t php_strip_tags_ex(char *rbuf, zend_str_size_int len,
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0, depth=0, in_q = 0;
 	int state = 0;
-	zend_str_size pos;
-	char *allow_free;
+	zend_str_size_int pos;
+	char *allow_free = NULL;
 
 	if (stateptr)
 		state = *stateptr;
@@ -5220,7 +5221,7 @@ PHP_FUNCTION(str_pad)
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
-	if (pad_length <= 0 || (pad_length - input_len) <= 0) {
+	if (pad_length < 0 || pad_length <= input_len) {
 		RETURN_STRINGL(input, input_len, 1);
 	}
 
@@ -5513,19 +5514,21 @@ PHP_FUNCTION(str_split)
 		RETURN_FALSE;
 	}
 
-	array_init_size(return_value, ((str_len - 1) / split_length) + 1);
-
-	if (split_length >= str_len) {
+	if (0 == str_len || split_length >= str_len) {
+		array_init_size(return_value, 1);
 		add_next_index_stringl(return_value, str, str_len, 1);
 		return;
 	}
 
+	array_init_size(return_value, ((str_len - 1) / split_length) + 1);
+
 	n_reg_segments = str_len / split_length;
 	p = str;
 
-	while (n_reg_segments-- > 0) {
+	while (n_reg_segments > 0) {
 		add_next_index_stringl(return_value, p, split_length, 1);
 		p += split_length;
+		n_reg_segments--;
 	}
 
 	if (p != (str + str_len)) {
