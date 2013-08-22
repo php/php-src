@@ -145,7 +145,7 @@ void clean_non_persistent_constants(TSRMLS_D)
 	}
 }
 
-ZEND_API void zend_register_null_constant(const char *name, uint name_len, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_null_constant(const char *name, zend_str_size_uint name_len, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	
@@ -157,7 +157,7 @@ ZEND_API void zend_register_null_constant(const char *name, uint name_len, int f
 	zend_register_constant(&c TSRMLS_CC);
 }
 
-ZEND_API void zend_register_bool_constant(const char *name, uint name_len, zend_bool bval, int flags, int module_number TSRMLS_DC)
+ZEND_API void zend_register_bool_constant(const char *name, zend_str_size_uint name_len, zend_bool bval, int flags, int module_number TSRMLS_DC)
 {
 	zend_constant c;
 	

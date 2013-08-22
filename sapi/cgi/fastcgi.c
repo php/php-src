@@ -992,7 +992,7 @@ static int fcgi_read_request(fcgi_request *req)
 			if (zend_hash_find(&fcgi_mgmt_vars, q->var, q->var_len, (void**) &value) != SUCCESS) {
 				continue;
 			}
-			zlen = Z_STRLEN_PP(value);
+			zlen = Z_STRSIZE_PP(value);
 			if ((p + 4 + 4 + q->var_len + zlen) >= (buf + sizeof(buf))) {
 				break;
 			}
@@ -1514,7 +1514,7 @@ void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, s
 	zvalue = pemalloc(sizeof(*zvalue), 1);
 	Z_TYPE_P(zvalue) = IS_STRING;
 	Z_STRVAL_P(zvalue) = pestrndup(value, value_len, 1);
-	Z_STRLEN_P(zvalue) = value_len;
+	Z_STRSIZE_P(zvalue) = value_len;
 	zend_hash_add(&fcgi_mgmt_vars, name, name_len, &zvalue, sizeof(zvalue), NULL);
 }
 
