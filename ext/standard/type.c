@@ -134,7 +134,7 @@ PHP_FUNCTION(settype)
 PHP_FUNCTION(intval)
 {
 	zval **num;
-	long arg_base;
+	php_int_t arg_base;
 	int base;
 
 	switch (ZEND_NUM_ARGS()) {
@@ -146,7 +146,7 @@ PHP_FUNCTION(intval)
 			break;
 
 		case 2:
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zl", &num, &arg_base) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zi", &num, &arg_base) == FAILURE) {
 				return;
 			}
 			base = arg_base;

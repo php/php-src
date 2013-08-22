@@ -432,13 +432,13 @@ PHP_FUNCTION(glob)
 #endif
 	char *pattern = NULL;
 	zend_str_size pattern_len;
-	long flags = 0;
+	php_int_t flags = 0;
 	glob_t globbuf;
 	int n;
 	int ret;
 	zend_bool basedir_limit = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|l", &pattern, &pattern_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|i", &pattern, &pattern_len, &flags) == FAILURE) {
 		return;
 	}
 
@@ -555,13 +555,13 @@ PHP_FUNCTION(scandir)
 {
 	char *dirn;
 	zend_str_size dirn_len;
-	long flags = 0;
+	php_int_t flags = 0;
 	char **namelist;
 	int n, i;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|lr", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "P|ir", &dirn, &dirn_len, &flags, &zcontext) == FAILURE) {
 		return;
 	}
 

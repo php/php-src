@@ -179,7 +179,7 @@ PHP_FUNCTION(iptcembed)
 {
 	char *iptcdata, *jpeg_file;
 	zend_str_size_int iptcdata_len, jpeg_file_len;
-	long spool = 0;
+	php_int_t spool = 0;
 	FILE *fp;
 	unsigned int marker, done = 0;
 	int inx;
@@ -187,7 +187,7 @@ PHP_FUNCTION(iptcembed)
 	struct stat sb;
 	zend_bool written = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SP|l", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SP|i", &iptcdata, &iptcdata_len, &jpeg_file, &jpeg_file_len, &spool) != SUCCESS) {
 		return;
 	}
 

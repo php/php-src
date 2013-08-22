@@ -49,11 +49,11 @@ static php_stream_context *decode_context_param(zval *contextresource TSRMLS_DC)
    Creates a pair of connected, indistinguishable socket streams */
 PHP_FUNCTION(stream_socket_pair)
 {
-	long domain, type, protocol;
+	php_int_t domain, type, protocol;
 	php_stream *s1, *s2;
 	php_socket_t pair[2];
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "lll",
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "iii",
 			&domain, &type, &protocol)) {
 		RETURN_FALSE;
 	}
@@ -94,13 +94,13 @@ PHP_FUNCTION(stream_socket_client)
 	char *hashkey = NULL;
 	php_stream *stream = NULL;
 	int err;
-	long flags = PHP_STREAM_CLIENT_CONNECT;
+	php_int_t flags = PHP_STREAM_CLIENT_CONNECT;
 	char *errstr = NULL;
 	php_stream_context *context = NULL;
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|zzdlr", &host, &host_len, &zerrno, &zerrstr, &timeout, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|zzdir", &host, &host_len, &zerrno, &zerrstr, &timeout, &flags, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -179,13 +179,13 @@ PHP_FUNCTION(stream_socket_server)
 	zval *zerrno = NULL, *zerrstr = NULL, *zcontext = NULL;
 	php_stream *stream = NULL;
 	int err = 0;
-	long flags = STREAM_XPORT_BIND | STREAM_XPORT_LISTEN;
+	php_int_t flags = STREAM_XPORT_BIND | STREAM_XPORT_LISTEN;
 	char *errstr = NULL;
 	php_stream_context *context = NULL;
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|zzlr", &host, &host_len, &zerrno, &zerrstr, &flags, &zcontext) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|zzir", &host, &host_len, &zerrno, &zerrstr, &flags, &zcontext) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -326,13 +326,13 @@ PHP_FUNCTION(stream_socket_sendto)
 {
 	php_stream *stream;
 	zval *zstream;
-	long flags = 0;
+	php_int_t flags = 0;
 	char *data, *target_addr = NULL;
 	zend_str_size datalen, target_addr_len = 0;
 	php_sockaddr_storage sa;
 	socklen_t sl = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|lS", &zstream, &data, &datalen, &flags, &target_addr, &target_addr_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|iS", &zstream, &data, &datalen, &flags, &target_addr, &target_addr_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 	php_stream_from_zval(stream, &zstream);
@@ -357,12 +357,12 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	zval *zstream, *zremote = NULL;
 	char *remote_addr = NULL;
 	zend_str_size remote_addr_len;
-	long to_read = 0;
+	php_int_t to_read = 0;
 	char *read_buf;
-	long flags = 0;
-	int recvd;
+	php_int_t flags = 0;
+	php_int_t recvd;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|lz", &zstream, &to_read, &flags, &zremote) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|iz", &zstream, &to_read, &flags, &zremote) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -405,12 +405,12 @@ PHP_FUNCTION(stream_get_contents)
 {
 	php_stream	*stream;
 	zval		*zsrc;
-	long		maxlen		= PHP_STREAM_COPY_ALL,
+	php_int_t		maxlen		= PHP_STREAM_COPY_ALL,
 				desiredpos	= -1L;
 	zend_str_size	len;
 	char		*contents	= NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ll", &zsrc, &maxlen, &desiredpos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|ii", &zsrc, &maxlen, &desiredpos) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -452,11 +452,11 @@ PHP_FUNCTION(stream_copy_to_stream)
 {
 	php_stream *src, *dest;
 	zval *zsrc, *zdest;
-	long maxlen = PHP_STREAM_COPY_ALL, pos = 0;
+	php_int_t maxlen = PHP_STREAM_COPY_ALL, pos = 0;
 	zend_str_size len;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|ll", &zsrc, &zdest, &maxlen, &pos) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rr|ii", &zsrc, &zdest, &maxlen, &pos) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -775,10 +775,10 @@ PHP_FUNCTION(stream_select)
 	fd_set			rfds, wfds, efds;
 	php_socket_t	max_fd = 0;
 	int				retval, sets = 0;
-	long			usec = 0;
+	php_int_t			usec = 0;
 	int				set_count, max_set_count = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!Z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a!a!a!Z!|i", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE)
 		return;
 
 	FD_ZERO(&rfds);
@@ -1191,12 +1191,12 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 	php_stream *stream;
 	char *filtername;
 	zend_str_size filternamelen;
-	long read_write = 0;
+	php_int_t read_write = 0;
 	zval *filterparams = NULL;
 	php_stream_filter *filter = NULL;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|lz", &zstream,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rS|iz", &zstream,
 				&filtername, &filternamelen, &read_write, &filterparams) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1313,13 +1313,13 @@ PHP_FUNCTION(stream_get_line)
 {
 	char *str = NULL;
 	zend_str_size str_len = 0;
-	long max_length;
+	php_int_t max_length;
 	zval *zstream;
 	char *buf;
 	size_t buf_size;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl|S", &zstream, &max_length, &str, &str_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri|S", &zstream, &max_length, &str, &str_len) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1348,10 +1348,10 @@ PHP_FUNCTION(stream_set_blocking)
 {
 	zval *arg1;
 	int block;
-	long arg2;
+	php_int_t arg2;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &arg1, &arg2) == FAILURE) {
 		return;
 	}
 
@@ -1374,12 +1374,12 @@ PHP_FUNCTION(stream_set_blocking)
 PHP_FUNCTION(stream_set_timeout)
 {
 	zval *socket;
-	long seconds, microseconds = 0;
+	php_int_t seconds, microseconds = 0;
 	struct timeval t;
 	php_stream *stream;
 	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "rl|l", &socket, &seconds, &microseconds) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "ri|i", &socket, &seconds, &microseconds) == FAILURE) {
 		return;
 	}
 
@@ -1409,11 +1409,11 @@ PHP_FUNCTION(stream_set_write_buffer)
 {
 	zval *arg1;
 	int ret;
-	long arg2;
+	php_int_t arg2;
 	size_t buff;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &arg1, &arg2) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1437,11 +1437,11 @@ PHP_FUNCTION(stream_set_write_buffer)
 PHP_FUNCTION(stream_set_chunk_size)
 {
 	int			ret;
-	long		csize;
+	php_int_t		csize;
 	zval		*zstream;
 	php_stream	*stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zstream, &csize) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &zstream, &csize) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1472,11 +1472,11 @@ PHP_FUNCTION(stream_set_read_buffer)
 {
 	zval *arg1;
 	int ret;
-	long arg2;
+	php_int_t arg2;
 	size_t buff;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &arg1, &arg2) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &arg1, &arg2) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1499,13 +1499,13 @@ PHP_FUNCTION(stream_set_read_buffer)
    Enable or disable a specific kind of crypto on the stream */
 PHP_FUNCTION(stream_socket_enable_crypto)
 {
-	long cryptokind = 0;
+	php_int_t cryptokind = 0;
 	zval *zstream, *zsessstream = NULL;
 	php_stream *stream, *sessstream = NULL;
 	zend_bool enable;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb|lr", &zstream, &enable, &cryptokind, &zsessstream) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rb|ir", &zstream, &enable, &cryptokind, &zsessstream) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1619,11 +1619,11 @@ PHP_FUNCTION(stream_supports_lock)
 	disallowed. */
 PHP_FUNCTION(stream_socket_shutdown)
 {
-	long how;
+	php_int_t how;
 	zval *zstream;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rl", &zstream, &how) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ri", &zstream, &how) == FAILURE) {
 		RETURN_FALSE;
 	}
 

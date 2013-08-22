@@ -344,11 +344,11 @@ PHP_FUNCTION(round)
 {
 	zval **value;
 	int places = 0;
-	long precision = 0;
-	long mode = PHP_ROUND_HALF_UP;
+	php_int_t precision = 0;
+	php_int_t mode = PHP_ROUND_HALF_UP;
 	double return_val;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|ll", &value, &precision, &mode) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|ii", &value, &precision, &mode) == FAILURE) {
 		return;
 	}
 
@@ -1065,10 +1065,10 @@ PHP_FUNCTION(dechex)
 PHP_FUNCTION(base_convert)
 {
 	zval **number, temp;
-	long frombase, tobase;
+	php_int_t frombase, tobase;
 	char *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zll", &number, &frombase, &tobase) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zii", &number, &frombase, &tobase) == FAILURE) {
 		return;
 	}
 	convert_to_string_ex(number);
@@ -1231,12 +1231,12 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point,
 PHP_FUNCTION(number_format)
 {
 	double num;
-	long dec = 0;
+	php_int_t dec = 0;
 	char *thousand_sep = NULL, *dec_point = NULL;
 	char thousand_sep_chr = ',', dec_point_chr = '.';
 	zend_str_size thousand_sep_len = 0, dec_point_len = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|lS!S!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "d|iS!S!", &num, &dec, &dec_point, &dec_point_len, &thousand_sep, &thousand_sep_len) == FAILURE) {
 		return;
 	}
 

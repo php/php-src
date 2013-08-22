@@ -273,9 +273,9 @@ PHP_FUNCTION(proc_terminate)
 {
 	zval *zproc;
 	struct php_process_handle *proc;
-	long sig_no = SIGTERM;
+	php_int_t sig_no = SIGTERM;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &zproc, &sig_no) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|i", &zproc, &sig_no) == FAILURE) {
 		RETURN_FALSE;
 	}
 
