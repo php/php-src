@@ -4129,7 +4129,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 
 	while (1) {
 		char_count=0;
-		while ((!max_chars || char_count < max_chars) && begin > 0) {
+		while ((!max_chars || max_chars > 0 && char_count < max_chars) && begin > 0) {
 			char_count++;
 			begin--;
 			if (begin <= 0 || _isnewline(heb_str[begin])) {
@@ -4140,7 +4140,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 				break;
 			}
 		}
-		if (char_count == max_chars) { /* try to avoid breaking words */
+		if (max_chars >= 0 && char_count == max_chars) { /* try to avoid breaking words */
 			zend_str_size_int new_char_count=char_count, new_begin=begin;
 
 			while (new_char_count > 0) {
