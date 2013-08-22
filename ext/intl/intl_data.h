@@ -79,7 +79,7 @@ typedef struct _intl_data {
 	int u8len;																					\
 	intl_convert_utf16_to_utf8(&u8value, &u8len, ustring, ulen, &INTL_DATA_ERROR_CODE((obj)));	\
 	if((free_it)) {																				\
-		efree((void *)ustring);																	\
+		efree(ustring);																			\
 	}																							\
 	INTL_METHOD_CHECK_STATUS((obj), "Error converting value to UTF-8");							\
 	RETVAL_STRINGL(u8value, u8len, 0);															\
