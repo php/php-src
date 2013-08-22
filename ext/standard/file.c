@@ -1182,7 +1182,11 @@ PHPAPI PHP_FUNCTION(fwrite)
 	if (ZEND_NUM_ARGS() == 2) {
 		num_bytes = arg2len;
 	} else {
-		num_bytes = MAX(0, MIN((zend_str_size)arg3, arg2len));
+		if (arg3 > 0) {
+			num_bytes = MAX(0, MIN((zend_str_size)arg3, arg2len));
+		} else {
+			num_bytes = 0;
+		}
 	}
 
 	if (!num_bytes) {
