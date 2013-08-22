@@ -37,6 +37,7 @@ echo "pg_last_notice() is Ok\n";
 ?>
 --EXPECTF--
 resource(%d) of type (pgsql result) 
+
 Notice: pg_query(): %s already a transaction in progress in %s on line %d
 %s already a transaction in progress
 pg_last_notice() is Ok
