@@ -104,7 +104,11 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 		php_printf("%sNULL\n", COMMON);
 		break;
 	case IS_LONG:
+#ifdef ZEND_ENABLE_INT64
+		php_printf("%sint(%lld)\n", COMMON, Z_LVAL_PP(struc));
+#else
 		php_printf("%sint(%ld)\n", COMMON, Z_LVAL_PP(struc));
+#endif
 		break;
 	case IS_DOUBLE:
 		php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc));
@@ -433,7 +437,7 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 		smart_str_appendl(buf, "NULL", 4);
 		break;
 	case IS_LONG:
-		smart_str_append_long(buf, Z_LVAL_PP(struc));
+		smart_str_append_php_int(buf, Z_LVAL_PP(struc));
 		break;
 	case IS_DOUBLE:
 		tmp_len = spprintf(&tmp_str, 0,"%.*H", (int) EG(precision), Z_DVAL_PP(struc));
