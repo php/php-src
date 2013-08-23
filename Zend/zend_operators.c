@@ -621,11 +621,7 @@ ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 		}
 		case IS_LONG:
 			lval = Z_LVAL_P(op);
-#ifdef ZEND_ENABLE_INT64
-			Z_STRSIZE_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%lld", lval);
-#else
-			Z_STRSIZE_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, "%ld", lval);
-#endif
+			Z_STRSIZE_P(op) = zend_spprintf(&Z_STRVAL_P(op), 0, ZEND_INT_FMT, lval);
 			break;
 		case IS_DOUBLE: {
 			TSRMLS_FETCH();
@@ -818,7 +814,7 @@ ZEND_API int add_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 	while (1) {
 		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
 			case TYPE_PAIR(IS_LONG, IS_LONG): {
-				long lval = Z_LVAL_P(op1) + Z_LVAL_P(op2);
+				zend_int_t lval = Z_LVAL_P(op1) + Z_LVAL_P(op2);
 
 				/* check for overflow by comparing sign bits */
 				if ((Z_LVAL_P(op1) & LONG_SIGN_MASK) == (Z_LVAL_P(op2) & LONG_SIGN_MASK)
@@ -882,7 +878,7 @@ ZEND_API int sub_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ *
 	while (1) {
 		switch (TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2))) {
 			case TYPE_PAIR(IS_LONG, IS_LONG): {
-				long lval = Z_LVAL_P(op1) - Z_LVAL_P(op2);
+				zend_int_t lval = Z_LVAL_P(op1) - Z_LVAL_P(op2);
 
 				/* check for overflow by comparing sign bits */
 				if ((Z_LVAL_P(op1) & LONG_SIGN_MASK) != (Z_LVAL_P(op2) & LONG_SIGN_MASK)
