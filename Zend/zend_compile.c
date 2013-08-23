@@ -428,7 +428,7 @@ int zend_add_ns_func_name_literal(zend_op_array *op_array, const zval *zv TSRMLS
 
 	ns_separator = (const char*)zend_memrchr(Z_STRVAL_P(zv), '\\', Z_STRLEN_P(zv));
 
-	if (ns_separator != NULL) { 
+	if (ns_separator != NULL) {
 		ns_separator += 1;
 		lc_len = Z_STRLEN_P(zv) - (ns_separator - Z_STRVAL_P(zv));
 		lc_name = zend_str_tolower_dup(ns_separator, lc_len);
@@ -1701,6 +1701,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	} else {
 		zend_op *opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 		zval key;
+		zval **ns_name;
 
 		if (CG(current_namespace)) {
 			/* Prefix function name with current namespace name */
@@ -1714,6 +1715,19 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 			lcname = zend_str_tolower_dup(Z_STRVAL(tmp.u.constant), name_len);
 		} else {
 			lcname = zend_str_tolower_dup(name, name_len);
+		}
+
+		/* Function name must not conflict with import names */
+		if (CG(current_import_function) &&
+		    zend_hash_find(CG(current_import_function), lcname, Z_STRLEN(function_name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
+
+			char *tmp = zend_str_tolower_dup(Z_STRVAL_PP(ns_name), Z_STRLEN_PP(ns_name));
+
+			if (Z_STRLEN_PP(ns_name) != Z_STRLEN(function_name->u.constant) ||
+				memcmp(tmp, lcname, Z_STRLEN(function_name->u.constant))) {
+				zend_error(E_COMPILE_ERROR, "Cannot declare function %s because the name is already in use", Z_STRVAL(function_name->u.constant));
+			}
+			efree(tmp);
 		}
 
 		opline->opcode = ZEND_DECLARE_FUNCTION;
