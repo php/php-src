@@ -581,9 +581,9 @@ SPL_METHOD(SplFixedArray, __construct)
 {
 	zval *object = getThis();
 	spl_fixedarray_object *intern;
-	long size = 0;
+	php_int_t size = 0;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &size)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &size)) {
 		return;
 	}
 
@@ -795,9 +795,9 @@ SPL_METHOD(SplFixedArray, setSize)
 {
 	zval *object = getThis();
 	spl_fixedarray_object *intern;
-	long size;
+	php_int_t size;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &size)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &size)) {
 		return;
 	}
 
