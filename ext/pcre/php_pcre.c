@@ -537,10 +537,10 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 	zend_str_size		  subject_len;
 	pcre_cache_entry *pce;				/* Compiled regular expression */
 	zval			 *subpats = NULL;	/* Array for subpatterns */
-	long			  flags = 0;		/* Match control flags */
-	long			  start_offset = 0;	/* Where the new search starts */
+	php_int_t			  flags = 0;		/* Match control flags */
+	php_int_t			  start_offset = 0;	/* Where the new search starts */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|zll", &regex, &regex_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|zii", &regex, &regex_len,
 							  &subject, &subject_len, &subpats, &flags, &start_offset) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1341,14 +1341,14 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	char			*result;
 	int			 result_len;
 	int				 limit_val = -1;
-	long			limit = -1;
+	php_int_t			limit = -1;
 	char			*string_key;
 	ulong			 num_key;
 	char			*callback_name;
 	int				 replace_count=0, old_replace_count;
 	
 	/* Get function parameters and do error-checking. */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZZ|lZ", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZZ|iZ", &regex, &replace, &subject, &limit, &zcount) == FAILURE) {
 		return;
 	}
 	
@@ -1461,12 +1461,12 @@ static PHP_FUNCTION(preg_split)
 	char				*subject;		/* String to match against */
 	zend_str_size			 regex_len;
 	zend_str_size			 subject_len;
-	long				 limit_val = -1;/* Integer value of limit */
-	long				 flags = 0;		/* Match control flags */
+	php_int_t				 limit_val = -1;/* Integer value of limit */
+	php_int_t				 flags = 0;		/* Match control flags */
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
 	/* Get function parameters and do error checking */	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|ll", &regex, &regex_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|ii", &regex, &regex_len,
 							  &subject, &subject_len, &limit_val, &flags) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1743,11 +1743,11 @@ static PHP_FUNCTION(preg_grep)
 	char				*regex;			/* Regular expression */
 	zend_str_size		 	 regex_len;
 	zval				*input;			/* Input array */
-	long				 flags = 0;		/* Match control flags */
+	php_int_t				 flags = 0;		/* Match control flags */
 	pcre_cache_entry	*pce;			/* Compiled regular expression */
 
 	/* Get arguments and do error checking */
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sa|l", &regex, &regex_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sa|i", &regex, &regex_len,
 							  &input, &flags) == FAILURE) {
 		return;
 	}
