@@ -104,11 +104,7 @@ PHPAPI void php_var_dump(zval **struc, int level TSRMLS_DC) /* {{{ */
 		php_printf("%sNULL\n", COMMON);
 		break;
 	case IS_LONG:
-#ifdef ZEND_ENABLE_INT64
-		php_printf("%sint(%lld)\n", COMMON, Z_LVAL_PP(struc));
-#else
-		php_printf("%sint(%ld)\n", COMMON, Z_LVAL_PP(struc));
-#endif
+		php_printf("%sint(" ZEND_INT_FMT ")\n", COMMON, Z_LVAL_PP(struc));
 		break;
 	case IS_DOUBLE:
 		php_printf("%sfloat(%.*G)\n", COMMON, (int) EG(precision), Z_DVAL_PP(struc));
