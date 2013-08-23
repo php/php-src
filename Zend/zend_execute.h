@@ -293,7 +293,7 @@ static zend_always_inline void zend_vm_stack_clear_multiple(int nested TSRMLS_DC
  	void **end = p - (int)(zend_uintptr_t)*p;
 
 	while (p != end) {
-		zval *q = *(zval **)(--p);
+		zval *q = (zval *) *(--p);
 		*p = NULL;
 		i_zval_ptr_dtor(q ZEND_FILE_LINE_CC);
 	}

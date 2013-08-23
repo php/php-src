@@ -20,6 +20,13 @@
 
 #ifdef ZEND_WIN32
 # pragma warning(once : 4101)
+# pragma warning(once : 6235)
+# pragma warning(once : 6237)
+# pragma warning(once : 6239)
+# pragma warning(once : 6240)
+# pragma warning(once : 6285)
+# pragma warning(once : 6286)
+# pragma warning(once : 6326)
 #endif
 static user_opcode_handler_t zend_user_opcode_handlers[256] = {
 	(user_opcode_handler_t)NULL,
