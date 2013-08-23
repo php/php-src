@@ -723,10 +723,10 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
  Set the mode of iteration */
 SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 {
-	long value;
+	php_int_t value;
 	spl_dllist_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &value) == FAILURE) {
 		return;
 	}
 

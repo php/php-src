@@ -81,9 +81,9 @@ PHPAPI zend_object_handlers spl_handler_SplObjectStorage;
 typedef struct _spl_SplObjectStorage { /* {{{ */
 	zend_object       std;
 	HashTable         storage;
-	long              index;
+	php_int_t         index;
 	HashPosition      pos;
-	long              flags;
+	php_int_t         flags;
 	zend_function    *fptr_get_hash;
 	HashTable        *debug_info;
 } spl_SplObjectStorage; /* }}} */
@@ -1001,12 +1001,12 @@ typedef enum {
 SPL_METHOD(MultipleIterator, __construct)
 {
 	spl_SplObjectStorage   *intern;
-	long                    flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC;
+	php_int_t                    flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC;
 	zend_error_handling error_handling;
 
 	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|i", &flags) == FAILURE) {
 		zend_restore_error_handling(&error_handling TSRMLS_CC);
 		return;
 	}
@@ -1037,7 +1037,7 @@ SPL_METHOD(MultipleIterator, setFlags)
 	spl_SplObjectStorage *intern;
 	intern = (spl_SplObjectStorage*)zend_object_store_get_object(getThis() TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &intern->flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "i", &intern->flags) == FAILURE) {
 		return;
 	}
 }
