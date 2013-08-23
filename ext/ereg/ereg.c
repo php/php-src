@@ -628,14 +628,14 @@ PHP_FUNCTION(eregi_replace)
  */
 static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 {
-	long count = -1;
+	php_int_t count = -1;
 	regex_t re;
 	regmatch_t subs[1];
 	char *spliton, *str, *strp, *endp;
 	zend_str_size_int spliton_len, str_len;
 	int err, size, copts = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &spliton, &spliton_len, &str, &str_len, &count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|i", &spliton, &spliton_len, &str, &str_len, &count) == FAILURE) {
 		return;
 	}
 
