@@ -546,16 +546,16 @@ PHP_FUNCTION( collator_asort )
 PHP_FUNCTION( collator_get_sort_key )
 {
 	char*            str      = NULL;
-	int              str_len  = 0;
+	zend_str_size_int              str_len  = 0;
 	UChar*           ustr     = NULL;
-	int              ustr_len = 0;
+	zend_str_size_int              ustr_len = 0;
 	uint8_t*         key     = NULL;
-	int              key_len = 0;
+	zend_str_size_int              key_len = 0;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS",
 		&object, Collator_ce_ptr, &str, &str_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

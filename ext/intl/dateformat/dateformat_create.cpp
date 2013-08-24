@@ -41,7 +41,7 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	zval		*object;
 
 	const char	*locale_str;
-	int			locale_len		= 0;
+	zend_str_size_int			locale_len		= 0;
 	Locale		locale;
     long		date_type		= 0;
     long		time_type		= 0;
@@ -53,15 +53,15 @@ static void datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	TimeZone	*timezone		= NULL;
 	bool		explicit_tz;
     char*       pattern_str		= NULL;
-    int         pattern_str_len	= 0;
+    zend_str_size_int         pattern_str_len	= 0;
     UChar*      svalue			= NULL;		/* UTF-16 pattern_str */
-    int         slength			= 0;
+    zend_str_size_int         slength			= 0;
 	IntlDateFormatter_object* dfo;
 
 	intl_error_reset(NULL TSRMLS_CC);
 	object = return_value;
 	/* Parse parameters. */
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sll|Zzs",
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sll|ZzS",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,	"datefmt_create: "

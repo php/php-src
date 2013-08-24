@@ -42,7 +42,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	zval		**args_a[6] = {0},
 				***args		= &args_a[0];
 	char		*locale		= NULL;
-	int			locale_len;
+	zend_str_size_int			locale_len;
 	long		largs[6];
 	UErrorCode	status		= U_ZERO_ERROR;
 	int			variant;
@@ -68,7 +68,7 @@ static void _php_intlgregcal_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	// argument parsing
 	if (variant <= 2) {
 		if (zend_parse_parameters(MIN(ZEND_NUM_ARGS(), 2) TSRMLS_CC,
-				"|Z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
+				"|Z!S!", &tz_object, &locale, &locale_len) == FAILURE) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intlgregcal_create_instance: bad arguments", 0 TSRMLS_CC);
 			RETURN_NULL();
