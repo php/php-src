@@ -177,7 +177,7 @@ static void php_converter_append_toUnicode_target(zval *val, UConverterToUnicode
 		case IS_STRING:
 		{
 			const char *strval = Z_STRVAL_P(val);
-			int i = 0, strlen = Z_STRLEN_P(val);
+			int i = 0, strlen = Z_STRSIZE_P(val);
 
 			while((i != strlen) && TARGET_CHECK(args, 1)) {
 				UChar c;
@@ -271,7 +271,7 @@ static void php_converter_append_fromUnicode_target(zval *val, UConverterFromUni
 			return;
 		case IS_STRING:
 		{
-			int vallen = Z_STRLEN_P(val);
+			int vallen = Z_STRSIZE_P(val);
 			if (TARGET_CHECK(args, vallen)) {
 				memcpy(args->target, Z_STRVAL_P(val), vallen);
 				args->target += vallen;
@@ -828,13 +828,13 @@ static PHP_METHOD(UConverter, transcode) {
 				zend_hash_find(Z_ARRVAL_P(options), "from_subst", sizeof("from_subst"), (void**)&tmpzval) == SUCCESS &&
 				Z_TYPE_PP(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
-				ucnv_setSubstChars(src_cnv, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval) & 0x7F, &error);
+				ucnv_setSubstChars(src_cnv, Z_STRVAL_PP(tmpzval), Z_STRSIZE_PP(tmpzval) & 0x7F, &error);
 			}
 			if (U_SUCCESS(error) &&
 				zend_hash_find(Z_ARRVAL_P(options), "to_subst", sizeof("to_subst"), (void**)&tmpzval) == SUCCESS &&
 				Z_TYPE_PP(tmpzval) == IS_STRING) {
 				error = U_ZERO_ERROR;
-				ucnv_setSubstChars(dest_cnv, Z_STRVAL_PP(tmpzval), Z_STRLEN_PP(tmpzval) & 0x7F, &error);
+				ucnv_setSubstChars(dest_cnv, Z_STRVAL_PP(tmpzval), Z_STRSIZE_PP(tmpzval) & 0x7F, &error);
 			}
 		}
 

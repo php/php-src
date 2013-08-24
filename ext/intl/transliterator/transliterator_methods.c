@@ -340,7 +340,7 @@ PHP_FUNCTION( transliterator_transliterate )
 			}
 			ALLOC_INIT_ZVAL( object );
 			temp_trans = 1;
-			res = create_transliterator( Z_STRVAL_PP( arg1 ), Z_STRLEN_PP( arg1 ),
+			res = create_transliterator( Z_STRVAL_PP( arg1 ), Z_STRSIZE_PP( arg1 ),
 					TRANSLITERATOR_FORWARD, object TSRMLS_CC );
 			if( res == FAILURE )
 			{

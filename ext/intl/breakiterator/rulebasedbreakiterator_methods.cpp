@@ -123,7 +123,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 
 	Z_TYPE_P(return_value) = IS_STRING;
 	if (intl_charFromString(rules, &Z_STRVAL_P(return_value),
-			&Z_STRLEN_P(return_value), BREAKITER_ERROR_CODE_P(bio)) == FAILURE)
+			&Z_STRSIZE_P(return_value), BREAKITER_ERROR_CODE_P(bio)) == FAILURE)
 	{
 		intl_errors_set(BREAKITER_ERROR_P(bio), BREAKITER_ERROR_CODE(bio),
 				"rbbi_hash_code: Error converting result to UTF-8 string",

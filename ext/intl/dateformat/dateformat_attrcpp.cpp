@@ -58,7 +58,7 @@ U_CFUNC PHP_FUNCTION(datefmt_get_timezone_id)
 	UnicodeString res = UnicodeString();
 	fetch_datefmt(dfo)->getTimeZone().getID(res);
 	intl_charFromString(res, &Z_STRVAL_P(return_value),
-			&Z_STRLEN_P(return_value), &INTL_DATA_ERROR_CODE(dfo));
+			&Z_STRSIZE_P(return_value), &INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS(dfo, "Could not convert time zone id to UTF-8");
 
 	Z_TYPE_P(return_value) = IS_STRING;

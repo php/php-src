@@ -762,7 +762,7 @@ static int append_key_value(smart_str* loc_name, HashTable* hash_arr, char* key_
 			/* not lang or grandfathered tag */
 			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
 		}
-		smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value));
+		smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRSIZE_PP(ele_value));
 		return SUCCESS;
 	}
 
@@ -802,7 +802,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 			add_prefix( loc_name , key_name);
 
 			smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-			smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value));
+			smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRSIZE_PP(ele_value));
 			return SUCCESS;
 		} else if(Z_TYPE_PP(ele_value) == IS_ARRAY ) {
 			HashPosition pos;
@@ -818,7 +818,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 					add_prefix(loc_name , key_name);
 				}
 				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-				smart_str_appendl(loc_name, Z_STRVAL_PP(data) , Z_STRLEN_PP(data));
+				smart_str_appendl(loc_name, Z_STRVAL_PP(data) , Z_STRSIZE_PP(data));
 				zend_hash_move_forward_ex(arr, &pos);
 			}
 			return SUCCESS;
@@ -852,7 +852,7 @@ static int append_multiple_key_values(smart_str* loc_name, HashTable* hash_arr, 
 					add_prefix(loc_name , cur_key_name);
 				}
 				smart_str_appendl(loc_name, SEPARATOR , sizeof(SEPARATOR)-1);
-				smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRLEN_PP(ele_value));
+				smart_str_appendl(loc_name, Z_STRVAL_PP(ele_value) , Z_STRSIZE_PP(ele_value));
 			}
 		} /* end of for */
 	} /* end of else */
@@ -1429,7 +1429,7 @@ static char* lookup_loc_range(char* loc_range, HashTable* hash_arr, int canonica
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: locale array element is not a string", 0 TSRMLS_CC);
 			LOOKUP_CLEAN_RETURN(NULL);
 		} 
-		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_PP(ele_value), Z_STRLEN_PP(ele_value));
+		cur_arr[cur_arr_len*2] = estrndup(Z_STRVAL_PP(ele_value), Z_STRSIZE_PP(ele_value));
 		result = strToMatch(Z_STRVAL_PP(ele_value), cur_arr[cur_arr_len*2]);
 		if(result == 0) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "lookup_loc_range: unable to canonicalize lang_tag", 0 TSRMLS_CC);

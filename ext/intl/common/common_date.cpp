@@ -186,7 +186,7 @@ U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func TS
 
 	switch (Z_TYPE_P(z)) {
 	case IS_STRING:
-		type = is_numeric_string(Z_STRVAL_P(z), Z_STRLEN_P(z), &lv, &rv, 0);
+		type = is_numeric_string(Z_STRVAL_P(z), Z_STRSIZE_P(z), &lv, &rv, 0);
 		if (type == IS_DOUBLE) {
 			rv *= U_MILLIS_PER_SECOND;
 		} else if (type == IS_LONG) {

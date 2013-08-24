@@ -173,7 +173,7 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter TSRMLS_
 	 * No need to do anything, the engine increments ->index */
 
 	const char	*s = Z_STRVAL_P(bio->text);
-	int32_t		slen = Z_STRLEN_P(bio->text),
+	int32_t		slen = Z_STRSIZE_P(bio->text),
 				len;
 	char		*res;
 

@@ -59,7 +59,7 @@ static void collator_convert_hash_item_from_utf8_to_utf16(
 		return;
 
 	old_val     = Z_STRVAL_P( *hashData );
-	old_val_len = Z_STRLEN_P( *hashData );
+	old_val_len = Z_STRSIZE_P( *hashData );
 
 	/* Convert it from UTF-8 to UTF-16LE and save the result to new_val[_len]. */
 	intl_convert_utf8_to_utf16( &new_val, &new_val_len, old_val, old_val_len, status );
@@ -103,7 +103,7 @@ static void collator_convert_hash_item_from_utf16_to_utf8(
 		return;
 
 	old_val     = Z_STRVAL_P( *hashData );
-	old_val_len = Z_STRLEN_P( *hashData );
+	old_val_len = Z_STRSIZE_P( *hashData );
 
 	/* Convert it from UTF-16LE to UTF-8 and save the result to new_val[_len]. */
 	intl_convert_utf16_to_utf8( &new_val, &new_val_len,
@@ -196,7 +196,7 @@ zval* collator_convert_zstr_utf16_to_utf8( zval* utf16_zval )
 
 	/* Convert to utf8 then. */
 	intl_convert_utf16_to_utf8( &str, &str_len,
-		(UChar*) Z_STRVAL_P(utf16_zval), UCHARS( Z_STRLEN_P(utf16_zval) ), &status );
+		(UChar*) Z_STRVAL_P(utf16_zval), UCHARS( Z_STRSIZE_P(utf16_zval) ), &status );
 	if( U_FAILURE( status ) )
 		php_error( E_WARNING, "Error converting utf16 to utf8 in collator_convert_zval_utf16_to_utf8()" );
 
@@ -225,7 +225,7 @@ zval* collator_convert_zstr_utf8_to_utf16( zval* utf8_zval )
 	/* Convert the string to UTF-16. */
 	intl_convert_utf8_to_utf16(
 			&ustr, &ustr_len,
-			Z_STRVAL_P( utf8_zval ), Z_STRLEN_P( utf8_zval ),
+			Z_STRVAL_P( utf8_zval ), Z_STRSIZE_P( utf8_zval ),
 			&status );
 	if( U_FAILURE( status ) )
 		php_error( E_WARNING, "Error casting object to string in collator_convert_zstr_utf8_to_utf16()" );
@@ -298,7 +298,7 @@ zval* collator_convert_object_to_string( zval* obj TSRMLS_DC )
 	/* Convert the string to UTF-16. */
 	intl_convert_utf8_to_utf16(
 			&ustr, &ustr_len,
-			Z_STRVAL_P( zstr ), Z_STRLEN_P( zstr ),
+			Z_STRVAL_P( zstr ), Z_STRSIZE_P( zstr ),
 			&status );
 	if( U_FAILURE( status ) )
 		php_error( E_WARNING, "Error casting object to string in collator_convert_object_to_string()" );
@@ -382,7 +382,7 @@ zval* collator_convert_string_to_number_if_possible( zval* str )
 		COLLATOR_CONVERT_RETURN_FAILED( str );
 	}
 
-	if( ( is_numeric = collator_is_numeric( (UChar*) Z_STRVAL_P(str), UCHARS( Z_STRLEN_P(str) ), &lval, &dval, 1 ) ) )
+	if( ( is_numeric = collator_is_numeric( (UChar*) Z_STRVAL_P(str), UCHARS( Z_STRSIZE_P(str) ), &lval, &dval, 1 ) ) )
 	{
 		ALLOC_INIT_ZVAL( num );
 
