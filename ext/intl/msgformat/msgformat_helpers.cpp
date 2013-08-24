@@ -454,7 +454,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 
 					UnicodeString *text = new UnicodeString();
 					intl_stringFromChar(*text,
-						Z_STRVAL_PP(elem), Z_STRLEN_PP(elem), &err.code);
+						Z_STRVAL_PP(elem), Z_STRSIZE_PP(elem), &err.code);
 
 					if (U_FAILURE(err.code)) {
 						char *message;

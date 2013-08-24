@@ -84,8 +84,8 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 		/* Compare the strings using ICU. */
 		result->value.lval = ucol_strcoll(
 				co->ucoll,
-				INTL_Z_STRVAL_P(str1), INTL_Z_STRLEN_P(str1),
-				INTL_Z_STRVAL_P(str2), INTL_Z_STRLEN_P(str2) );
+				INTL_Z_STRVAL_P(str1), INTL_Z_STRSIZE_P(str1),
+				INTL_Z_STRVAL_P(str2), INTL_Z_STRSIZE_P(str2) );
 		result->type = IS_LONG;
 	}
 	else
@@ -193,8 +193,8 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2 TSRM
 	/* Compare the strings using ICU. */
 	result->value.lval = ucol_strcoll(
 			co->ucoll,
-			INTL_Z_STRVAL_P(str1), INTL_Z_STRLEN_P(str1),
-			INTL_Z_STRVAL_P(str2), INTL_Z_STRLEN_P(str2) );
+			INTL_Z_STRVAL_P(str1), INTL_Z_STRSIZE_P(str1),
+			INTL_Z_STRVAL_P(str2), INTL_Z_STRSIZE_P(str2) );
 	result->type = IS_LONG;
 
 	zval_ptr_dtor( &str1 );
@@ -428,7 +428,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 		/* Process string values only. */
 		if( Z_TYPE_PP( hashData ) == IS_STRING )
 		{
-			intl_convert_utf8_to_utf16( &utf16_buf, &utf16_len, Z_STRVAL_PP( hashData ), Z_STRLEN_PP( hashData ), COLLATOR_ERROR_CODE_P( co ) );
+			intl_convert_utf8_to_utf16( &utf16_buf, &utf16_len, Z_STRVAL_PP( hashData ), Z_STRSIZE_PP( hashData ), COLLATOR_ERROR_CODE_P( co ) );
 
 			if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
 			{

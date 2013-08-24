@@ -177,7 +177,7 @@ double_offset:
 		long lval;
 		double dval;
 		convert_to_string_ex(arg);
-		switch (is_numeric_string(Z_STRVAL_PP(arg), Z_STRLEN_PP(arg), &lval, &dval, 0)) {
+		switch (is_numeric_string(Z_STRVAL_PP(arg), Z_STRSIZE_PP(arg), &lval, &dval, 0)) {
 		case IS_DOUBLE:
 			SEPARATE_ZVAL(arg);
 			zval_dtor(*arg);
@@ -317,7 +317,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	TimeZone::getCanonicalID(id, result, isSystemID, status);
 	INTL_CHECK_STATUS(status, "intltz_get_canonical_id: error obtaining canonical ID");
 	
-	intl_convert_utf16_to_utf8(&Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value),
+	intl_convert_utf16_to_utf8(&Z_STRVAL_P(return_value), &Z_STRSIZE_P(return_value),
 		result.getBuffer(), result.length(), &status);
 	INTL_CHECK_STATUS(status,
 		"intltz_get_canonical_id: could not convert time zone id to UTF-16");
@@ -401,7 +401,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 	}
 
 	const UnicodeString result = TimeZone::getEquivalentID(id, (int32_t)index);
-	intl_convert_utf16_to_utf8(&Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value),
+	intl_convert_utf16_to_utf8(&Z_STRVAL_P(return_value), &Z_STRSIZE_P(return_value),
 		result.getBuffer(), result.length(), &status);
 	INTL_CHECK_STATUS(status, "intltz_get_equivalent_id: "
 		"could not convert resulting time zone id to UTF-16");
@@ -569,7 +569,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 	to->utimezone->getDisplayName((UBool)daylight, (TimeZone::EDisplayType)display_type,
 		Locale::createFromName(locale_str), result);
 
-	intl_convert_utf16_to_utf8(&Z_STRVAL_P(return_value), &Z_STRLEN_P(return_value),
+	intl_convert_utf16_to_utf8(&Z_STRVAL_P(return_value), &Z_STRSIZE_P(return_value),
 		result.getBuffer(), result.length(), TIMEZONE_ERROR_CODE_P(to));
 	INTL_METHOD_CHECK_STATUS(to, "intltz_get_display_name: "
 		"could not convert resulting time zone id to UTF-16");
