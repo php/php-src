@@ -3,15 +3,10 @@ non-existent imported functions should not be looked up in the global table
 --FILE--
 <?php
 
-namespace {
-    function baz() {
-    }
-}
+require 'includes/global_baz.php';
 
-namespace {
-    use function foo\bar\baz;
-    var_dump(baz());
-}
+use function foo\bar\baz;
+var_dump(baz());
 
 ?>
 --EXPECTF--

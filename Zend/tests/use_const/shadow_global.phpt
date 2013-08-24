@@ -4,11 +4,8 @@ shadowing a global constant with a local version
 <?php
 
 namespace {
-    const bar = 'global bar';
-}
-
-namespace foo {
-    const bar = 'local bar';
+    require 'includes/global_bar.php';
+    require 'includes/foo_bar.php';
 }
 
 namespace {

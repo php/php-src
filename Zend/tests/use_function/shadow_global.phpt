@@ -4,15 +4,8 @@ shadowing a global function with a local version
 <?php
 
 namespace {
-    function bar() {
-        return 'global bar';
-    }
-}
-
-namespace foo {
-    function bar() {
-        return 'local bar';
-    }
+    require 'includes/global_bar.php';
+    require 'includes/foo_bar.php';
 }
 
 namespace {

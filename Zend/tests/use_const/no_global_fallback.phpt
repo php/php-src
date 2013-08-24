@@ -3,14 +3,10 @@ non-existent imported constants should not be looked up in the global table
 --FILE--
 <?php
 
-namespace {
-    const baz = NULL;
-}
+require 'includes/global_baz.php';
 
-namespace {
-    use const foo\bar\baz;
-    var_dump(baz);
-}
+use const foo\bar\baz;
+var_dump(baz);
 
 ?>
 --EXPECTF--

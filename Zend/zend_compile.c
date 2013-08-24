@@ -206,6 +206,8 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	CG(current_import) = NULL;
 	CG(current_import_function) = NULL;
 	CG(current_import_const) = NULL;
+	zend_hash_init(&CG(function_filenames), 0, NULL, NULL, 0);
+	zend_hash_init(&CG(const_filenames), 0, NULL, NULL, 0);
 	init_compiler_declarables(TSRMLS_C);
 	zend_stack_init(&CG(context_stack));
 
@@ -244,6 +246,8 @@ void shutdown_compiler(TSRMLS_D) /* {{{ */
 	zend_stack_destroy(&CG(list_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
+	zend_hash_destroy(&CG(function_filenames));
+	zend_hash_destroy(&CG(const_filenames));
 	zend_stack_destroy(&CG(context_stack));
 }
 /* }}} */
@@ -1740,6 +1744,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		CALCULATE_LITERAL_HASH(opline->op2.constant);
 		opline->extended_value = ZEND_DECLARE_FUNCTION;
 		zend_hash_quick_update(CG(function_table), Z_STRVAL(key), Z_STRLEN(key), Z_HASH_P(&CONSTANT(opline->op1.constant)), &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
+		zend_hash_add(&CG(function_filenames), lcname, strlen(lcname)+1, CG(compiled_filename), strlen(CG(compiled_filename))+1, NULL);
 		zend_stack_push(&CG(context_stack), (void *) &CG(context), sizeof(CG(context)));
 		zend_init_compiler_context(TSRMLS_C);
 	}
@@ -7147,9 +7152,10 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 }
 /* }}} */
 
-void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, HashTable *current_import_sub TSRMLS_DC) /* {{{ */
+void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const char *type, HashTable *current_import_sub, HashTable *lookup_table TSRMLS_DC) /* {{{ */
 {
 	char *lcname;
+	char *filename;
 	zval *name, *ns, tmp;
 	zend_bool warn = 0;
 
@@ -7182,6 +7188,33 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, HashT
 		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' is a special class name", Z_STRVAL_P(ns), Z_STRVAL_P(name), Z_STRVAL_P(name));
 	}
 
+	if (CG(current_namespace)) {
+		/* Prefix import name with current namespace name to avoid conflicts with classes */
+		char *c_ns_name = emalloc(Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name) + 1);
+
+		zend_str_tolower_copy(c_ns_name, Z_STRVAL_P(CG(current_namespace)), Z_STRLEN_P(CG(current_namespace)));
+		c_ns_name[Z_STRLEN_P(CG(current_namespace))] = '\\';
+		memcpy(c_ns_name+Z_STRLEN_P(CG(current_namespace))+1, lcname, Z_STRLEN_P(name)+1);
+		if (zend_hash_exists(lookup_table, c_ns_name, Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name)+1)) {
+			char *tmp2 = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+
+			if (Z_STRLEN_P(ns) != Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name) ||
+				memcmp(tmp2, c_ns_name, Z_STRLEN_P(ns))) {
+				zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", type, Z_STRVAL_P(ns), Z_STRVAL_P(name));
+			}
+			efree(tmp2);
+		}
+		efree(c_ns_name);
+	} else if (zend_hash_find(lookup_table, lcname, Z_STRLEN_P(name)+1, (void **)&filename) == SUCCESS && strcmp(filename, CG(compiled_filename)) == 0) {
+		char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+
+		if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
+			memcmp(c_tmp, lcname, Z_STRLEN_P(ns))) {
+			zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", type, Z_STRVAL_P(ns), Z_STRVAL_P(name));
+		}
+		efree(c_tmp);
+	}
+
 	if (zend_hash_add(current_import_sub, lcname, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
 		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 	}
@@ -7200,7 +7233,7 @@ void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_
 		zend_hash_init(CG(current_import_function), 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	zend_do_use_non_class(ns_name, new_name, is_global, CG(current_import_function) TSRMLS_CC);
+	zend_do_use_non_class(ns_name, new_name, is_global, "function", CG(current_import_function), &CG(function_filenames) TSRMLS_CC);
 }
 /* }}} */
 
@@ -7211,7 +7244,7 @@ void zend_do_use_const(znode *ns_name, znode *new_name, int is_global TSRMLS_DC)
 		zend_hash_init(CG(current_import_const), 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	zend_do_use_non_class(ns_name, new_name, is_global, CG(current_import_const) TSRMLS_CC);
+	zend_do_use_non_class(ns_name, new_name, is_global, "const", CG(current_import_const), &CG(const_filenames) TSRMLS_CC);
 }
 /* }}} */
 
@@ -7243,6 +7276,8 @@ void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 	SET_UNUSED(opline->result);
 	SET_NODE(opline->op1, name);
 	SET_NODE(opline->op2, value);
+
+	zend_hash_add(&CG(const_filenames), Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1, CG(compiled_filename), strlen(CG(compiled_filename))+1, NULL);
 }
 /* }}} */
 
