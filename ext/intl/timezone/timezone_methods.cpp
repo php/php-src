@@ -425,7 +425,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_id)
 	to->utimezone->getID(id_us);
 
 	char *id = NULL;
-	int  id_len   = 0;
+	zend_str_size_int  id_len   = 0;
 
 	intl_convert_utf16_to_utf8(&id, &id_len,
 		id_us.getBuffer(), id_us.length(), TIMEZONE_ERROR_CODE_P(to));
