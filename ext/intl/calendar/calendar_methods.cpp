@@ -51,12 +51,12 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 {
 	zval		**zv_timezone	= NULL;
 	const char	*locale_str		= NULL;
-	int			dummy;
+	zend_str_size_int			dummy;
 	TimeZone	*timeZone;
 	UErrorCode	status			= U_ZERO_ERROR;
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Zs!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|ZS!",
 			&zv_timezone, &locale_str, &dummy) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_create_calendar: bad arguments", 0 TSRMLS_CC);
@@ -143,12 +143,12 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 	UErrorCode	status = U_ZERO_ERROR;
 	char		*key,
 				*locale;
-	int			key_len,
+	zend_str_size_int	key_len,
 				locale_len;
 	zend_bool	commonly_used;
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ssb",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SSb",
 			&key, &key_len, &locale, &locale_len, &commonly_used) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_get_keyword_values_for_locale: bad arguments", 0 TSRMLS_CC);
@@ -1144,13 +1144,13 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 					*zv_timestamp		= NULL;
 	php_date_obj	*datetime;
 	char			*locale_str			= NULL;
-	int				locale_str_len;
+	zend_str_size_int				locale_str_len;
 	TimeZone		*timeZone;
 	UErrorCode		status				= U_ZERO_ERROR;
 	Calendar        *cal;
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|s!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|S!",
 			&zv_arg, &locale_str, &locale_str_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intlcal_from_date_time: bad arguments", 0 TSRMLS_CC);

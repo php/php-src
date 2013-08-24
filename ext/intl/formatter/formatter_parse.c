@@ -40,7 +40,7 @@ PHP_FUNCTION( numfmt_parse )
 	UChar* sstr = NULL;
 	int sstr_len = 0;
 	char* str = NULL;
-	int str_len;
+	zend_str_size_int str_len;
 	int32_t val32, position = 0;
 	int64_t val64;
 	double val_double;
@@ -50,7 +50,7 @@ PHP_FUNCTION( numfmt_parse )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os|lz!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS|lz!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

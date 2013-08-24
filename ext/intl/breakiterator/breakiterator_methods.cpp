@@ -46,12 +46,12 @@ static void _breakiter_factory(const char *func_name,
 {
 	BreakIterator	*biter;
 	const char		*locale_str = NULL;
-	int				dummy;
+	zend_str_size_int				dummy;
 	char			*msg;
 	UErrorCode		status = UErrorCode();
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S!",
 			&locale_str, &dummy) == FAILURE) {
 		spprintf(&msg, 0, "%s: bad arguments", func_name);
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
@@ -149,13 +149,13 @@ U_CFUNC PHP_FUNCTION(breakiter_get_text)
 U_CFUNC PHP_FUNCTION(breakiter_set_text)
 {
 	char	*text;
-	int		text_len;
+	zend_str_size_int	text_len;
 	UText	*ut = NULL;
 	zval	**textzv;
 	BREAKITER_METHOD_INIT_VARS;
 	object = getThis();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S",
 			&text, &text_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"breakiter_set_text: bad arguments", 0 TSRMLS_CC);

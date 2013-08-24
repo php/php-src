@@ -128,8 +128,8 @@ PHP_FUNCTION( datefmt_get_pattern )
 PHP_FUNCTION( datefmt_set_pattern )
 {
 	char*       value = NULL;
-	int         value_len = 0;
-	int         slength = 0;
+	zend_str_size_int         value_len = 0;
+	zend_str_size_int         slength = 0;
 	UChar*	    svalue  = NULL;
 	zend_bool   is_pattern_localized =FALSE;
 
@@ -137,7 +137,7 @@ PHP_FUNCTION( datefmt_set_pattern )
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS",
 		&object, IntlDateFormatter_ce_ptr,  &value, &value_len ) == FAILURE )
 	{
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
