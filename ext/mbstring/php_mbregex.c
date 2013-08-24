@@ -719,13 +719,13 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		/* don't bother doing an extended regex with just a number */
 	}
 
-	if (!Z_STRVAL_PP(arg_pattern) || Z_STRLEN_PP(arg_pattern) == 0) {
+	if (!Z_STRVAL_PP(arg_pattern) || Z_STRSIZE_PP(arg_pattern) == 0) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "empty pattern");
 		RETVAL_FALSE;
 		goto out;
 	}
 
-	re = php_mbregex_compile_pattern(Z_STRVAL_PP(arg_pattern), Z_STRLEN_PP(arg_pattern), options, MBREX(current_mbctype), MBREX(regex_default_syntax) TSRMLS_CC);
+	re = php_mbregex_compile_pattern(Z_STRVAL_PP(arg_pattern), Z_STRSIZE_PP(arg_pattern), options, MBREX(current_mbctype), MBREX(regex_default_syntax) TSRMLS_CC);
 	if (re == NULL) {
 		RETVAL_FALSE;
 		goto out;
@@ -856,7 +856,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	}
 	if (Z_TYPE_PP(arg_pattern_zval) == IS_STRING) {
 		arg_pattern = Z_STRVAL_PP(arg_pattern_zval);
-		arg_pattern_len = Z_STRLEN_PP(arg_pattern_zval);
+		arg_pattern_len = Z_STRSIZE_PP(arg_pattern_zval);
 	} else {
 		/* FIXME: this code is not multibyte aware! */
 		convert_to_long_ex(arg_pattern_zval);
@@ -948,7 +948,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 
 				/* result of eval */
 				convert_to_string(&v);
-				smart_str_appendl(&out_buf, Z_STRVAL(v), Z_STRLEN(v));
+				smart_str_appendl(&out_buf, Z_STRVAL(v), Z_STRSIZE(v));
 				/* Clean up */
 				eval_buf.len = 0;
 				zval_dtor(&v);
@@ -974,7 +974,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				arg_replace_fci.retval_ptr_ptr = &retval_ptr;
 				if (zend_call_function(&arg_replace_fci, &arg_replace_fci_cache TSRMLS_CC) == SUCCESS && arg_replace_fci.retval_ptr_ptr) {
 					convert_to_string_ex(&retval_ptr);
-					smart_str_appendl(&out_buf, Z_STRVAL_P(retval_ptr), Z_STRLEN_P(retval_ptr));
+					smart_str_appendl(&out_buf, Z_STRVAL_P(retval_ptr), Z_STRSIZE_P(retval_ptr));
 					eval_buf.len = 0;
 					zval_ptr_dtor(&retval_ptr);
 				} else {
@@ -1208,7 +1208,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	len = 0;
 	if (MBREX(search_str) != NULL && Z_TYPE_P(MBREX(search_str)) == IS_STRING){
 		str = (OnigUChar *)Z_STRVAL_P(MBREX(search_str));
-		len = Z_STRLEN_P(MBREX(search_str));
+		len = Z_STRSIZE_P(MBREX(search_str));
 	}
 
 	if (MBREX(search_re) == NULL) {
@@ -1369,7 +1369,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 		array_init(return_value);
 
 		str = (OnigUChar *)Z_STRVAL_P(MBREX(search_str));
-		len = Z_STRLEN_P(MBREX(search_str));
+		len = Z_STRSIZE_P(MBREX(search_str));
 		n = MBREX(search_regs)->num_regs;
 		for (i = 0; i < n; i++) {
 			beg = MBREX(search_regs)->beg[i];
@@ -1404,7 +1404,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 		return;
 	}
 
-	if (position < 0 || (MBREX(search_str) != NULL && Z_TYPE_P(MBREX(search_str)) == IS_STRING && position >= Z_STRLEN_P(MBREX(search_str)))) {
+	if (position < 0 || (MBREX(search_str) != NULL && Z_TYPE_P(MBREX(search_str)) == IS_STRING && position >= Z_STRSIZE_P(MBREX(search_str)))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Position is out of range");
 		MBREX(search_pos) = 0;
 		RETURN_FALSE;
