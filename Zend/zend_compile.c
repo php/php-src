@@ -7181,13 +7181,6 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const
 
 	lcname = zend_str_tolower_dup(Z_STRVAL_P(name), Z_STRLEN_P(name));
 
-	if (((Z_STRLEN_P(name) == sizeof("self")-1) &&
-				!memcmp(lcname, "self", sizeof("self")-1)) ||
-			((Z_STRLEN_P(name) == sizeof("parent")-1) &&
-	   !memcmp(lcname, "parent", sizeof("parent")-1))) {
-		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' is a special class name", Z_STRVAL_P(ns), Z_STRVAL_P(name), Z_STRVAL_P(name));
-	}
-
 	if (CG(current_namespace)) {
 		/* Prefix import name with current namespace name to avoid conflicts with classes */
 		char *c_ns_name = emalloc(Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name) + 1);
