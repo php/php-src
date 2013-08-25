@@ -14,6 +14,7 @@ env:
       - PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=test"
       - PDO_MYSQL_TEST_USER=travis
       - PDO_MYSQL_TEST_PASS=
+      - PDO_MYSQL_TEST_HOST=127.0.0.1
     matrix:
       - REPORT_EXIT_STATUS=1
 
