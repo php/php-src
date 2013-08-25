@@ -1,5 +1,5 @@
 --TEST--
-use and use function with the same alias
+use and use const with the same alias
 --FILE--
 <?php
 
