@@ -7182,7 +7182,7 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const
 	lcname = zend_str_tolower_dup(Z_STRVAL_P(name), Z_STRLEN_P(name));
 
 	if (CG(current_namespace)) {
-		/* Prefix import name with current namespace name to avoid conflicts with classes */
+		/* Prefix import name with current namespace name to avoid conflicts with functions/consts */
 		char *c_ns_name = emalloc(Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name) + 1);
 
 		zend_str_tolower_copy(c_ns_name, Z_STRVAL_P(CG(current_namespace)), Z_STRLEN_P(CG(current_namespace)));
