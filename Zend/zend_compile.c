@@ -2101,12 +2101,12 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 }
 /* }}} */
 
-void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace, HashTable *current_import_sub TSRMLS_DC) /* {{{ */
+void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace, zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC) /* {{{ */
 {
 	znode tmp;
 	int len;
 	zval **ns;
-	char *lcname, *compound = memchr(Z_STRVAL(element_name->u.constant), '\\', Z_STRLEN(element_name->u.constant));
+	char *lookup_name, *compound = memchr(Z_STRVAL(element_name->u.constant), '\\', Z_STRLEN(element_name->u.constant));
 
 	if (Z_STRVAL(element_name->u.constant)[0] == '\\') {
 		/* name starts with \ so it is known and unambiguos, nothing to do here but shorten it */
@@ -2121,23 +2121,31 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace,
 
 	if (current_import_sub) {
 		len = Z_STRLEN(element_name->u.constant)+1;
-		lcname = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
+		if (case_sensitive) {
+			lookup_name = estrndup(Z_STRVAL(element_name->u.constant), len);
+		} else {
+			lookup_name = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
+		}
 		/* Check if function/const matches imported name */
-		if (zend_hash_find(current_import_sub, lcname, len, (void**)&ns) == SUCCESS) {
+		if (zend_hash_find(current_import_sub, lookup_name, len, (void**)&ns) == SUCCESS) {
 			zval_dtor(&element_name->u.constant);
 			element_name->u.constant = **ns;
 			zval_copy_ctor(&element_name->u.constant);
-			efree(lcname);
+			efree(lookup_name);
 			return;
 		}
-		efree(lcname);
+		efree(lookup_name);
 	}
 
 	if (compound && CG(current_import)) {
 		len = compound - Z_STRVAL(element_name->u.constant);
-		lcname = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
+		if (case_sensitive) {
+			lookup_name = estrndup(Z_STRVAL(element_name->u.constant), len);
+		} else {
+			lookup_name = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
+		}
 		/* Check if first part of compound name is an import name */
-		if (zend_hash_find(CG(current_import), lcname, len+1, (void**)&ns) == SUCCESS) {
+		if (zend_hash_find(CG(current_import), lookup_name, len+1, (void**)&ns) == SUCCESS) {
 			/* Substitute import name */
 			tmp.op_type = IS_CONST;
 			tmp.u.constant = **ns;
@@ -2147,10 +2155,10 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace,
 			memmove(Z_STRVAL(element_name->u.constant), Z_STRVAL(element_name->u.constant)+len, Z_STRLEN(element_name->u.constant)+1);
 			zend_do_build_namespace_name(&tmp, &tmp, element_name TSRMLS_CC);
 			*element_name = tmp;
-			efree(lcname);
+			efree(lookup_name);
 			return;
 		}
-		efree(lcname);
+		efree(lookup_name);
 	}
 
 	if (CG(current_namespace)) {
@@ -2168,13 +2176,13 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace,
 
 void zend_resolve_function_name(znode *element_name, zend_bool check_namespace TSRMLS_DC) /* {{{ */
 {
-	zend_resolve_non_class_name(element_name, check_namespace, CG(current_import_function) TSRMLS_CC);
+	zend_resolve_non_class_name(element_name, check_namespace, 0, CG(current_import_function) TSRMLS_CC);
 }
 /* }}} */
 
 void zend_resolve_const_name(znode *element_name, zend_bool check_namespace TSRMLS_DC) /* {{{ */
 {
-	zend_resolve_non_class_name(element_name, check_namespace, CG(current_import_const) TSRMLS_CC);
+	zend_resolve_non_class_name(element_name, check_namespace, 1, CG(current_import_const) TSRMLS_CC);
 }
 /* }}} */
 
@@ -7152,9 +7160,9 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 }
 /* }}} */
 
-void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const char *type, HashTable *current_import_sub, HashTable *lookup_table TSRMLS_DC) /* {{{ */
+void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const char *type, zend_bool case_sensitive, HashTable *current_import_sub, HashTable *lookup_table TSRMLS_DC) /* {{{ */
 {
-	char *lcname;
+	char *lookup_name;
 	char *filename;
 	zval *name, *ns, tmp;
 	zend_bool warn = 0;
@@ -7179,7 +7187,11 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const
 		}
 	}
 
-	lcname = zend_str_tolower_dup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	if (case_sensitive) {
+		lookup_name = estrndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	} else {
+		lookup_name = zend_str_tolower_dup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	}
 
 	if (CG(current_namespace)) {
 		/* Prefix import name with current namespace name to avoid conflicts with functions/consts */
@@ -7187,7 +7199,7 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const
 
 		zend_str_tolower_copy(c_ns_name, Z_STRVAL_P(CG(current_namespace)), Z_STRLEN_P(CG(current_namespace)));
 		c_ns_name[Z_STRLEN_P(CG(current_namespace))] = '\\';
-		memcpy(c_ns_name+Z_STRLEN_P(CG(current_namespace))+1, lcname, Z_STRLEN_P(name)+1);
+		memcpy(c_ns_name+Z_STRLEN_P(CG(current_namespace))+1, lookup_name, Z_STRLEN_P(name)+1);
 		if (zend_hash_exists(lookup_table, c_ns_name, Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name)+1)) {
 			char *tmp2 = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
 
@@ -7198,23 +7210,23 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const
 			efree(tmp2);
 		}
 		efree(c_ns_name);
-	} else if (zend_hash_find(lookup_table, lcname, Z_STRLEN_P(name)+1, (void **)&filename) == SUCCESS && strcmp(filename, CG(compiled_filename)) == 0) {
+	} else if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **)&filename) == SUCCESS && strcmp(filename, CG(compiled_filename)) == 0) {
 		char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
 
 		if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
-			memcmp(c_tmp, lcname, Z_STRLEN_P(ns))) {
+			memcmp(c_tmp, lookup_name, Z_STRLEN_P(ns))) {
 			zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", type, Z_STRVAL_P(ns), Z_STRVAL_P(name));
 		}
 		efree(c_tmp);
 	}
 
-	if (zend_hash_add(current_import_sub, lcname, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
+	if (zend_hash_add(current_import_sub, lookup_name, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
 		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 	}
 	if (warn) {
 		zend_error(E_WARNING, "The use statement with non-compound name '%s' has no effect", Z_STRVAL_P(name));
 	}
-	efree(lcname);
+	efree(lookup_name);
 	zval_dtor(name);
 }
 /* }}} */
@@ -7226,7 +7238,7 @@ void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_
 		zend_hash_init(CG(current_import_function), 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	zend_do_use_non_class(ns_name, new_name, is_global, "function", CG(current_import_function), &CG(function_filenames) TSRMLS_CC);
+	zend_do_use_non_class(ns_name, new_name, is_global, "function", 0, CG(current_import_function), &CG(function_filenames) TSRMLS_CC);
 }
 /* }}} */
 
@@ -7237,7 +7249,7 @@ void zend_do_use_const(znode *ns_name, znode *new_name, int is_global TSRMLS_DC)
 		zend_hash_init(CG(current_import_const), 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	zend_do_use_non_class(ns_name, new_name, is_global, "const", CG(current_import_const), &CG(const_filenames) TSRMLS_CC);
+	zend_do_use_non_class(ns_name, new_name, is_global, "const", 1, CG(current_import_const), &CG(const_filenames) TSRMLS_CC);
 }
 /* }}} */
 
@@ -7269,7 +7281,7 @@ void zend_do_declare_constant(znode *name, znode *value TSRMLS_DC) /* {{{ */
 	if (CG(current_import_const) &&
 	    zend_hash_find(CG(current_import_const), Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
 
-		char *tmp = zend_str_tolower_dup(Z_STRVAL_PP(ns_name), Z_STRLEN_PP(ns_name));
+		char *tmp = estrndup(Z_STRVAL_PP(ns_name), Z_STRLEN_PP(ns_name));
 
 		if (Z_STRLEN_PP(ns_name) != Z_STRLEN(name->u.constant) ||
 			memcmp(tmp, Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant))) {
