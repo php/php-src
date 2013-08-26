@@ -896,11 +896,8 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 	zend_call_method_with_2_params(&this_ptr, ce, &ce->__call, ZEND_CALL_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
 	if (method_result_ptr) {
-		if (Z_ISREF_P(method_result_ptr) || Z_REFCOUNT_P(method_result_ptr) > 1) {
-			RETVAL_ZVAL(method_result_ptr, 1, 1);
-		} else {
-			RETVAL_ZVAL(method_result_ptr, 0, 1);
-		}
+		RETVAL_ZVAL_FAST(method_result_ptr);
+		zval_ptr_dtor(&method_result_ptr);
 	}
 
 	/* now destruct all auxiliaries */
@@ -1113,11 +1110,8 @@ ZEND_API void zend_std_callstatic_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{
 	zend_call_method_with_2_params(NULL, ce, &ce->__callstatic, ZEND_CALLSTATIC_FUNC_NAME, &method_result_ptr, method_name_ptr, method_args_ptr);
 
 	if (method_result_ptr) {
-		if (Z_ISREF_P(method_result_ptr) || Z_REFCOUNT_P(method_result_ptr) > 1) {
-			RETVAL_ZVAL(method_result_ptr, 1, 1);
-		} else {
-			RETVAL_ZVAL(method_result_ptr, 0, 1);
-		}
+		RETVAL_ZVAL_FAST(method_result_ptr);
+		zval_ptr_dtor(&method_result_ptr);
 	}
 
 	/* now destruct all auxiliaries */

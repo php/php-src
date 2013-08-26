@@ -830,7 +830,7 @@ PHP_FUNCTION(end)
 			RETURN_FALSE;
 		}
 
-		RETURN_ZVAL(*entry, 1, 0);
+		RETURN_ZVAL_FAST(*entry);
 	}
 }
 /* }}} */
@@ -853,7 +853,7 @@ PHP_FUNCTION(prev)
 			RETURN_FALSE;
 		}
 
-		RETURN_ZVAL(*entry, 1, 0);
+		RETURN_ZVAL_FAST(*entry);
 	}
 }
 /* }}} */
@@ -876,7 +876,7 @@ PHP_FUNCTION(next)
 			RETURN_FALSE;
 		}
 
-		RETURN_ZVAL(*entry, 1, 0);
+		RETURN_ZVAL_FAST(*entry);
 	}
 }
 /* }}} */
@@ -899,7 +899,7 @@ PHP_FUNCTION(reset)
 			RETURN_FALSE;
 		}
 
-		RETURN_ZVAL(*entry, 1, 0);
+		RETURN_ZVAL_FAST(*entry);
 	}
 }
 /* }}} */
@@ -918,7 +918,8 @@ PHP_FUNCTION(current)
 	if (zend_hash_get_current_data(array, (void **) &entry) == FAILURE) {
 		RETURN_FALSE;
 	}
-	RETURN_ZVAL(*entry, 1, 0);
+
+	RETURN_ZVAL_FAST(*entry);
 }
 /* }}} */
 
@@ -958,7 +959,7 @@ PHP_FUNCTION(min)
 			RETVAL_NULL();
 		} else {
 			if (zend_hash_minmax(Z_ARRVAL_PP(args[0]), php_array_data_compare, 0, (void **) &result TSRMLS_CC) == SUCCESS) {
-				RETVAL_ZVAL(*result, 1, 0);
+				RETVAL_ZVAL_FAST(*result);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -978,7 +979,7 @@ PHP_FUNCTION(min)
 			}
 		}
 
-		RETVAL_ZVAL(*min, 1, 0);	
+		RETVAL_ZVAL_FAST(*min);
 	}
 
 	if (args) {
@@ -1009,7 +1010,7 @@ PHP_FUNCTION(max)
 			RETVAL_NULL();
 		} else {
 			if (zend_hash_minmax(Z_ARRVAL_PP(args[0]), php_array_data_compare, 1, (void **) &result TSRMLS_CC) == SUCCESS) {
-				RETVAL_ZVAL(*result, 1, 0);
+				RETVAL_ZVAL_FAST(*result);
 			} else {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Array must contain at least one element");
 				RETVAL_FALSE;
@@ -1029,7 +1030,7 @@ PHP_FUNCTION(max)
 			}
 		}
 
-		RETVAL_ZVAL(*max, 1, 0);
+		RETVAL_ZVAL_FAST(*max);
 	}
 	
 	if (args) {
@@ -1956,7 +1957,7 @@ static void _phpi_pop(INTERNAL_FUNCTION_PARAMETERS, int off_the_end)
 		zend_hash_internal_pointer_reset(Z_ARRVAL_P(stack));
 	}
 	zend_hash_get_current_data(Z_ARRVAL_P(stack), (void **)&val);
-	RETVAL_ZVAL(*val, 1, 0);
+	RETVAL_ZVAL_FAST(*val);
 
 	/* Delete the first or last value */
 	zend_hash_get_current_key_ex(Z_ARRVAL_P(stack), &key, &key_len, &index, 0, NULL);
