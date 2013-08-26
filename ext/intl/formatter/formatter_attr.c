@@ -207,7 +207,7 @@ PHP_FUNCTION( numfmt_set_attribute )
  */
 PHP_FUNCTION( numfmt_set_text_attribute )
 {
-	int slength = 0;
+	zend_str_size_int slength = 0;
 	UChar *svalue = NULL;
 	long attribute;
 	char *value;

@@ -28,13 +28,13 @@
 #include "intl_convert.h"
 
 /* {{{ */
-static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, int src_len, zval *return_value TSRMLS_DC) 
+static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, zend_str_size_int src_len, zval *return_value TSRMLS_DC) 
 {
 	zval **fargs;
 	int count = 0;
 	int i;
 	UChar *usource = NULL;
-	int usrc_len = 0;
+	zend_str_size_int usrc_len = 0;
 
 	intl_convert_utf8_to_utf16(&usource, &usrc_len, source, src_len, &INTL_DATA_ERROR_CODE(mfo));
 	INTL_METHOD_CHECK_STATUS(mfo, "Converting parse string failed");
@@ -61,12 +61,12 @@ static void msgfmt_do_parse(MessageFormatter_object *mfo, char *source, int src_
 PHP_FUNCTION( msgfmt_parse )
 {
 	char *source;
-	int source_len;
+	zend_str_size_int source_len;
 	MSG_FORMAT_METHOD_INIT_VARS;
 
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS",
 		&object, MessageFormatter_ce_ptr,  &source, &source_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -90,18 +90,18 @@ PHP_FUNCTION( msgfmt_parse )
 PHP_FUNCTION( msgfmt_parse_message )
 {
 	UChar      *spattern = NULL;
-	int         spattern_len = 0;
+	zend_str_size_int         spattern_len = 0;
 	char       *pattern = NULL;
-	int         pattern_len = 0;
+	zend_str_size_int         pattern_len = 0;
 	char       *slocale = NULL;
-	int         slocale_len = 0;
+	zend_str_size_int         slocale_len = 0;
 	char       *source = NULL;
-	int         src_len = 0;
+	zend_str_size_int         src_len = 0;
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "sss",
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "SSS",
 		  &slocale, &slocale_len, &pattern, &pattern_len, &source, &src_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

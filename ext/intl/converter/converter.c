@@ -670,8 +670,8 @@ static PHP_METHOD(UConverter, getSubstChars) {
 /* }}} */
 
 /* {{{ php_converter_do_convert */
-static zend_bool php_converter_do_convert(UConverter *dest_cnv, char **pdest, int32_t *pdest_len,
-                                          UConverter *src_cnv,  const char *src, int32_t src_len,
+static zend_bool php_converter_do_convert(UConverter *dest_cnv, char **pdest, zend_str_size_int *pdest_len,
+                                          UConverter *src_cnv,  const char *src, zend_str_size_int src_len,
                                           php_converter_object *objval
                                           TSRMLS_DC) {
 	UErrorCode	error = U_ZERO_ERROR;
