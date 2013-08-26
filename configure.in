@@ -875,7 +875,7 @@ PHP_ARG_ENABLE(zint64, whether to enable 64 bit integers,
 [  --enable-zint64        Enable 64 bit integers], no, no)
 
 if test "$PHP_ZINT64" = "yes"; then
-	AC_DEFINE(ZEND_ENABLE_INT64, "1", [])
+	AC_DEFINE(ZEND_ENABLE_INT64, "1", [ ])
 fi
 
 PHP_ARG_WITH(layout, layout of installed files,
