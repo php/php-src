@@ -3,6 +3,11 @@
 #ifndef ZEND_INT_H
 #define ZEND_INT_H
 
+#ifndef ZEND_WIN32
+/* this probably needs more on non windows, like for C++ and C99*/
+# include <stdint.h>
+#endif
+
 /* Integer types or the old good long. This part will have to be
    reworked, obviously if we wanna some platform dependent stuff. */
 #ifdef ZEND_ENABLE_INT64
