@@ -638,6 +638,18 @@ END_EXTERN_C()
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }
 
+#define RETVAL_ZVAL_FAST(z) do {        \
+	zval *__z = (z);                 \
+	if (Z_ISREF_P(__z)) {             \
+		RETVAL_ZVAL(__z, 1, 0);       \
+	} else {                          \
+		zval_ptr_dtor(&return_value); \
+		Z_ADDREF_P(__z);              \
+		*return_value_ptr = __z;      \
+	}                                 \
+} while (0)
+#define RETURN_ZVAL_FAST(z) { RETVAL_ZVAL_FAST(z); return; }
+
 #define SET_VAR_STRING(n, v) {																				\
 								{																			\
 									zval *var;																\
