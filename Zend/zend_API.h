@@ -594,22 +594,20 @@ END_EXTERN_C()
 		Z_TYPE_P(__z) = IS_STRING;	\
 	} while (0)
 
-#define ZVAL_ZVAL(z, zv, copy, dtor) {			\
-		zend_uchar is_ref = Z_ISREF_P(z);		\
-		zend_uint refcount = Z_REFCOUNT_P(z);	\
-		ZVAL_COPY_VALUE(z, zv);					\
+#define ZVAL_ZVAL(z, zv, copy, dtor) do {		\
+		zval *__z = (z);						\
+		zval *__zv = (zv);						\
+		ZVAL_COPY_VALUE(__z, __zv);				\
 		if (copy) {								\
-			zval_copy_ctor(z);					\
+			zval_copy_ctor(__z);				\
 	    }										\
 		if (dtor) {								\
 			if (!copy) {						\
-				ZVAL_NULL(zv);					\
+				ZVAL_NULL(__zv);				\
 			}									\
-			zval_ptr_dtor(&zv);					\
+			zval_ptr_dtor(&__zv);				\
 	    }										\
-		Z_SET_ISREF_TO_P(z, is_ref);			\
-		Z_SET_REFCOUNT_P(z, refcount);			\
-	}
+	} while (0)
 
 #define ZVAL_FALSE(z)  					ZVAL_BOOL(z, 0)
 #define ZVAL_TRUE(z)  					ZVAL_BOOL(z, 1)
