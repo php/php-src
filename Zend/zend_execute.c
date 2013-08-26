@@ -1487,15 +1487,17 @@ ZEND_API opcode_handler_t *zend_opcode_handlers;
 
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC)
 {
-	if(fci != NULL) {
-		((zend_internal_function *) execute_data_ptr->function_state.function)->handler(fci->param_count,
-				*fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
-
+	if (fci != NULL) {
+		execute_data_ptr->function_state.function->internal_function.handler(
+			fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr,
+			fci->object_ptr, 1 TSRMLS_CC
+		);
 	} else {
 		zval **return_value_ptr = &EX_TMP_VAR(execute_data_ptr, execute_data_ptr->opline->result.var)->var.ptr;
-		((zend_internal_function *) execute_data_ptr->function_state.function)->handler(execute_data_ptr->opline->extended_value, *return_value_ptr,
-					(execute_data_ptr->function_state.function->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)?return_value_ptr:NULL,
-					execute_data_ptr->object, return_value_used TSRMLS_CC);
+		execute_data_ptr->function_state.function->internal_function.handler(
+			execute_data_ptr->opline->extended_value, *return_value_ptr, return_value_ptr,
+			execute_data_ptr->object, return_value_used TSRMLS_CC
+		);
 	}
 }
 
