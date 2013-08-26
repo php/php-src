@@ -1771,7 +1771,7 @@ PHP_FUNCTION(oci_set_client_identifier)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCIATTRSET, OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_id, (ub4) client_id_len, (ub4) OCI_ATTR_CLIENT_IDENTIFIER, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_id, (ub4) client_id_len, (ub4) OCI_ATTR_CLIENT_IDENTIFIER, OCI_G(err)));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1829,7 +1829,7 @@ PHP_FUNCTION(oci_set_module_name)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCIATTRSET, OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) module, (ub4) module_len, (ub4) OCI_ATTR_MODULE, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) module, (ub4) module_len, (ub4) OCI_ATTR_MODULE, OCI_G(err)));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1860,7 +1860,7 @@ PHP_FUNCTION(oci_set_action)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCIATTRSET, OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) action, (ub4) action_len, (ub4) OCI_ATTR_ACTION, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) action, (ub4) action_len, (ub4) OCI_ATTR_ACTION, OCI_G(err)));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
@@ -1891,7 +1891,7 @@ PHP_FUNCTION(oci_set_client_info)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCIATTRSET, OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_info, (ub4) client_info_len, (ub4) OCI_ATTR_CLIENT_INFO, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_info, (ub4) client_info_len, (ub4) OCI_ATTR_CLIENT_INFO, OCI_G(err)));
 
 	if (OCI_G(errcode) != OCI_SUCCESS) {
 		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);

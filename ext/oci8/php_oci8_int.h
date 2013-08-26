@@ -285,49 +285,19 @@ typedef struct {
 
 /* {{{ macros */
 
-#ifdef HAVE_DTRACE
-#define PHP_OCI_CALL(func_uc, func, params)								\
-	do {																\
-		if (DTRACE_OCI8_ ## func_uc ## _START_ENABLED()) {				\
-			DTRACE_OCI8_ ## func_uc ## _START();						\
-		}																\
-		OCI_G(in_call) = 1;												\
-		func params;													\
-		OCI_G(in_call) = 0;												\
-		if (DTRACE_OCI8_ ## func_uc ## _DONE_ENABLED()) {				\
-			DTRACE_OCI8_ ## func_uc ## _DONE();							\
-		}																\
-	} while (0)
-#else /* HAVE_DTRACE */
-#define PHP_OCI_CALL(func_uc, func, params)								\
+#define PHP_OCI_CALL(func, params)								\
 	do {																\
 		OCI_G(in_call) = 1;												\
 		func params;													\
 		OCI_G(in_call) = 0;												\
 	} while (0)
-#endif /* HAVE_DTRACE */
 
-#ifdef HAVE_DTRACE
-#define PHP_OCI_CALL_RETURN(func_uc, __retval, func, params)			\
-	do {																\
-		if (DTRACE_OCI8_ ## func_uc ## _START_ENABLED()) {				\
-			DTRACE_OCI8_ ## func_uc ## _START();						\
-		}																\
-		OCI_G(in_call) = 1;												\
-		__retval = func params;											\
-		OCI_G(in_call) = 0;												\
-		if (DTRACE_OCI8_ ## func_uc ## _DONE_ENABLED()) {				\
-			DTRACE_OCI8_ ## func_uc ## _DONE();							\
-		}																\
-	} while (0)
-#else /* HAVE_DTRACE */
-#define PHP_OCI_CALL_RETURN(func_uc, __retval, func, params)			\
+#define PHP_OCI_CALL_RETURN(__retval, func, params)			\
 	do {																\
 		OCI_G(in_call) = 1;												\
 		__retval = func params;											\
 		OCI_G(in_call) = 0;												\
 	} while (0)
-#endif /* HAVE_DTRACE */
 
 /* Check for errors that indicate the connection to the DB is no
  * longer valid.  If it isn't, then the PHP connection is marked to be
@@ -370,7 +340,7 @@ typedef struct {
 			default:										\
 			{												\
 				ub4 serverStatus = OCI_SERVER_NORMAL;		\
-				PHP_OCI_CALL(OCIATTRGET, OCIAttrGet, ((dvoid *)(connection)->server, OCI_HTYPE_SERVER, (dvoid *)&serverStatus, \
+				PHP_OCI_CALL(OCIAttrGet, ((dvoid *)(connection)->server, OCI_HTYPE_SERVER, (dvoid *)&serverStatus, \
 										  (ub4 *)0, OCI_ATTR_SERVER_STATUS, (connection)->err)); \
 				if (serverStatus != OCI_SERVER_NORMAL) {	\
 					(connection)->is_open = 0;				\
