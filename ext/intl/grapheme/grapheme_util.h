@@ -23,13 +23,13 @@
 /* get_break_interator: get a break iterator from the global structure */
 UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status TSRMLS_DC );
 
-void grapheme_substr_ascii(char *str, int32_t str_len, int32_t f, int32_t l, int argc, char **sub_str, int *sub_str_len);
+void grapheme_substr_ascii(char *str, zend_str_size_int str_len, long f, long l, int argc, char **sub_str, zend_str_size_int *sub_str_len);
 
 int grapheme_strrpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int f_ignore_case TSRMLS_DC);
 
 int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int *puchar_pos, int f_ignore_case, int last TSRMLS_DC);
 
-int grapheme_ascii_check(const unsigned char *day, int32_t len);
+int grapheme_ascii_check(const unsigned char *day, zend_str_size_int len);
 
 int grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len TSRMLS_DC );
 
