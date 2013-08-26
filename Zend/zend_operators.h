@@ -587,9 +587,9 @@ static zend_always_inline int fast_decrement_function(zval *op1)
 			  "n"(ZVAL_OFFSETOF_TYPE)
 			: "cc");
 #else
-		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MIN)) {
+		if (UNEXPECTED(Z_LVAL_P(op1) == ZEND_INT_MIN)) {
 			/* switch to double */
-			Z_DVAL_P(op1) = (double)LONG_MIN - 1.0;
+			Z_DVAL_P(op1) = (double)ZEND_INT_MIN - 1.0;
 			Z_TYPE_P(op1) = IS_DOUBLE;
 		} else {
 			Z_LVAL_P(op1)--;
