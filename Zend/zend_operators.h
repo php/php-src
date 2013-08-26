@@ -252,7 +252,7 @@ process_double:
 		}
 
 		if (lval) {
-			*lval = strtol(str, NULL, base);
+			*lval = ZEND_STRTOL(str, NULL, base);
 		}
 
 		return IS_LONG;
