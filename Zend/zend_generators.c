@@ -430,7 +430,7 @@ ZEND_METHOD(Generator, current)
 	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	if (generator->value) {
-		RETURN_ZVAL(generator->value, 1, 0);
+		RETURN_ZVAL_FAST(generator->value);
 	}
 }
 /* }}} */
@@ -450,7 +450,7 @@ ZEND_METHOD(Generator, key)
 	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	if (generator->key) {
-		RETURN_ZVAL(generator->key, 1, 0);
+		RETURN_ZVAL_FAST(generator->key);
 	}
 }
 /* }}} */
@@ -499,7 +499,7 @@ ZEND_METHOD(Generator, send)
 	zend_generator_resume(generator TSRMLS_CC);
 
 	if (generator->value) {
-		RETURN_ZVAL(generator->value, 1, 0);
+		RETURN_ZVAL_FAST(generator->value);
 	}
 }
 /* }}} */
@@ -532,7 +532,7 @@ ZEND_METHOD(Generator, throw)
 		zend_generator_resume(generator TSRMLS_CC);
 
 		if (generator->value) {
-			RETURN_ZVAL(generator->value, 1, 0);
+			RETURN_ZVAL_FAST(generator->value);
 		}
 	} else {
 		/* If the generator is already closed throw the exception in the
