@@ -38,8 +38,8 @@ PHP_FUNCTION( collator_compare )
 
 	UChar*           ustr1     = NULL;
 	UChar*           ustr2     = NULL;
-	int              ustr1_len = 0;
-	int              ustr2_len = 0;
+	zend_str_size_int              ustr1_len = 0;
+	zend_str_size_int              ustr2_len = 0;
 
 	UCollationResult result;
 

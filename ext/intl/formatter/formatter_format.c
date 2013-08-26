@@ -36,7 +36,7 @@ PHP_FUNCTION( numfmt_format )
 	long type = FORMAT_TYPE_DEFAULT;
 	UChar format_buf[32];
 	UChar* formatted = format_buf;
-	int formatted_len = USIZE(format_buf);
+	zend_str_size_int formatted_len = USIZE(format_buf);
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */

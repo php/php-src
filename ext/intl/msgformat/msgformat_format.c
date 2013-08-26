@@ -100,16 +100,16 @@ PHP_FUNCTION( msgfmt_format_message )
 {
 	zval       *args;
 	UChar      *spattern = NULL;
-	int         spattern_len = 0;
+	zend_str_size_int         spattern_len = 0;
 	char       *pattern = NULL;
-	int         pattern_len = 0;
+	zend_str_size_int         pattern_len = 0;
 	char       *slocale = NULL;
-	int         slocale_len = 0;
+	zend_str_size_int         slocale_len = 0;
 	MessageFormatter_object mf = {0};
 	MessageFormatter_object *mfo = &mf;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "ssa",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "SSa",
 		  &slocale, &slocale_len, &pattern, &pattern_len, &args ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

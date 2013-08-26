@@ -39,7 +39,7 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* tex
 	double	result =  0;
 	UDate 	timestamp   =0;
 	UChar* 	text_utf16  = NULL;
-	int32_t text_utf16_len = 0;
+	zend_str_size_int text_utf16_len = 0;
 
 	/* Convert timezone to UTF-16. */
 	intl_convert_utf8_to_utf16(&text_utf16, &text_utf16_len, text_to_parse, text_len, &INTL_DATA_ERROR_CODE(dfo));
@@ -85,7 +85,7 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 {
 	UCalendar* 	parsed_calendar = NULL;
 	UChar*  	text_utf16  = NULL;
-	int32_t 	text_utf16_len = 0;
+	zend_str_size_int 	text_utf16_len = 0;
 	long 		isInDST = 0;
 
 	/* Convert timezone to UTF-16. */

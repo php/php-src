@@ -47,10 +47,10 @@ U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
 U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 {
 	char	*str_id;
-	int		str_id_len;
+	zend_str_size_int		str_id_len;
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S",
 			&str_id, &str_id_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_create_time_zone: bad arguments", 0 TSRMLS_CC);
@@ -211,10 +211,10 @@ double_offset:
 U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 {
 	char	*str_id;
-	int		str_id_len;
+	zend_str_size_int		str_id_len;
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S",
 			&str_id, &str_id_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_count_equivalent_ids: bad arguments", 0 TSRMLS_CC);
@@ -239,7 +239,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 	long	zoneType,
 			offset_arg;
 	char	*region		= NULL;
-	int		region_len	= 0;
+	zend_str_size_int		region_len	= 0;
 	int32_t	offset,
 			*offsetp	= NULL;
 	int		arg3isnull	= 0;
@@ -252,7 +252,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 				!= FAILURE && Z_TYPE_PP(zvoffset) == IS_NULL;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|s!l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l|S!l",
 			&zoneType, &region, &region_len, &offset_arg) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_create_time_zone_id_enumeration: bad arguments", 0 TSRMLS_CC);
@@ -293,11 +293,11 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 {
 	char	*str_id;
-	int		str_id_len;
+	zend_str_size_int		str_id_len;
 	zval	*is_systemid = NULL;
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|z",
 			&str_id, &str_id_len, &is_systemid) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_get_canonical_id: bad arguments", 0 TSRMLS_CC);
@@ -333,11 +333,11 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 U_CFUNC PHP_FUNCTION(intltz_get_region)
 {
 	char	*str_id;
-	int		str_id_len;
+	zend_str_size_int		str_id_len;
 	char	outbuf[3];
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S",
 			&str_id, &str_id_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_get_region: bad arguments", 0 TSRMLS_CC);
@@ -380,11 +380,11 @@ U_CFUNC PHP_FUNCTION(intltz_get_tz_data_version)
 U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 {
 	char	*str_id;
-	int		str_id_len;
+	zend_str_size_int		str_id_len;
 	long	index;
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Sl",
 			&str_id, &str_id_len, &index) == FAILURE ||
 			index < (long)INT32_MIN || index > (long)INT32_MAX) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -537,11 +537,11 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 	zend_bool	daylight		= 0;
 	long		display_type	= TimeZone::LONG;
 	const char	*locale_str		= NULL;
-	int			dummy			= 0;
+	zend_str_size_int			dummy			= 0;
 	TIMEZONE_METHOD_INIT_VARS;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(),
-			"O|bls!", &object, TimeZone_ce_ptr, &daylight, &display_type,
+			"O|blS!", &object, TimeZone_ce_ptr, &daylight, &display_type,
 			&locale_str, &dummy) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"intltz_get_display_name: bad arguments", 0 TSRMLS_CC);
