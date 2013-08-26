@@ -48,26 +48,27 @@ grapheme_close_global_iterator( TSRMLS_D )
 }
 /* }}} */
 
+/* XXX that's the same mess we have in substr(), revise it with care when int64 is integrated and get rid of this ugly casts */
 /* {{{ grapheme_substr_ascii f='from' - starting point, l='length' */
-void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char **sub_str, int *sub_str_len)
+void grapheme_substr_ascii(char *str, zend_str_size_int str_len, long f, long l, int argc, char **sub_str, zend_str_size_int *sub_str_len)
 {
     *sub_str = NULL;
 
     if (argc > 2) {
         if ((l < 0 && -l > str_len)) {
             return;
-        } else if (l > str_len) {
+        } else if (l > (long)str_len) {
             l = str_len;
         }
     } else {
         l = str_len;
     }
 
-    if (f > str_len || (f < 0 && -f > str_len)) {
+    if (f > (long)str_len || (f < 0 && -f > str_len)) {
         return;
     }
 
-    if (l < 0 && (l + str_len - f) < 0) {
+    if (l < 0 && (l + (long)str_len - f) < 0) {
         return;
     }
 
@@ -75,7 +76,7 @@ void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char 
      * of the string
      */
     if (f < 0) {
-        f = str_len + f;
+        f = (long)str_len + f;
         if (f < 0) {
             f = 0;
         }
@@ -86,17 +87,17 @@ void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char 
      * needed to stop that many chars from the end of the string
      */
     if (l < 0) {
-        l = (str_len - f) + l;
+        l = ((long)str_len - f) + l;
         if (l < 0) {
             l = 0;
         }
     }
 
-    if (f >= str_len) {
+    if (f >= (long)str_len) {
         return;
     }
 
-    if ((f + l) > str_len) {
+    if ((f + l) > (long)str_len) {
         l = str_len - f;
     }
 
@@ -131,7 +132,8 @@ void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char 
 int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int32_t *puchar_pos, int f_ignore_case, int last TSRMLS_DC)
 {
 	UChar *uhaystack = NULL, *uneedle = NULL;
-	int32_t uhaystack_len = 0, uneedle_len = 0, char_pos, ret_pos, offset_pos = 0;
+	zend_str_size_int uhaystack_len = 0, uneedle_len = 0;
+	int32_t char_pos, ret_pos, offset_pos = 0;
 	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
 	UBreakIterator* bi = NULL;
 	UErrorCode status;
@@ -217,15 +219,17 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 /* }}} */
 
 /* {{{ grapheme_ascii_check: ASCII check */
-int grapheme_ascii_check(const unsigned char *day, int32_t len)
+int grapheme_ascii_check(const unsigned char *day, zend_str_size_int len)
 {
-	int ret_len = len;
-	while ( len-- ) {
-	if ( *day++ > 0x7f )
-		return -1;
+	zend_str_size_int i = 0;
+
+	while ( i++ < len ) {
+		if ( *day++ > 0x7f ) {
+			return 0;
+		}
 	}
 
-	return ret_len;
+	return 1;
 }
 
 /* }}} */

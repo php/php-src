@@ -35,25 +35,25 @@ PHP_FUNCTION( normalizer_normalize )
 	char*			input = NULL;
 	/* form is optional, defaults to FORM_C */
 	long			form = NORMALIZER_DEFAULT;
-	int			input_len = 0;
+	zend_str_size_int			input_len = 0;
 		
 	UChar*			uinput = NULL;
-	int			uinput_len = 0;
+	zend_str_size_int			uinput_len = 0;
 	int			expansion_factor = 1;
 	UErrorCode		status = U_ZERO_ERROR;
 		
 	UChar*			uret_buf = NULL;
-	int			uret_len = 0;
+	zend_str_size_int			uret_len = 0;
 		
 	char*			ret_buf = NULL;
-	int32_t			ret_len = 0;
+	zend_str_size_int			ret_len = 0;
 
 	int32_t			size_needed;
 		
 	intl_error_reset( NULL TSRMLS_CC );
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "s|l",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "S|l",
 				&input, &input_len, &form ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -173,10 +173,10 @@ PHP_FUNCTION( normalizer_is_normalized )
 	char*	 	input = NULL;
 	/* form is optional, defaults to FORM_C */
 	long		form = NORMALIZER_DEFAULT;
-	int		input_len = 0;
+	zend_str_size_int		input_len = 0;
 
 	UChar*	 	uinput = NULL;
-	int		uinput_len = 0;
+	zend_str_size_int		uinput_len = 0;
 	UErrorCode	status = U_ZERO_ERROR;
 		
 	UBool		uret = FALSE;
@@ -184,7 +184,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 	intl_error_reset( NULL TSRMLS_CC );
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "s|l",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "S|l",
 				&input, &input_len, &form) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
