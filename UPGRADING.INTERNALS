@@ -4,6 +4,7 @@ UPGRADE NOTES - PHP X.Y
 
 1. Internal API changes
   a. Addition of do_operation and compare object handlers
+  b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
 
 2. Build system changes
   a. Unix build system changes
@@ -42,6 +43,20 @@ UPGRADE NOTES - PHP X.Y
   different types. It takes precedence over compare_objects.
 
   Further docs in the RFC: https://wiki.php.net/rfc/operator_overloading_gmp
+
+  b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
+
+  The return_value_ptr argument to internal functions is now always set.
+  Previously it was only available for functions returning by-reference.
+  return_value_ptr can now be used to return zvals without copying them.
+  For this purpose two new macros are provided:
+
+      RETVAL_ZVAL_FAST(zv); /* analog to RETVAL_ZVAL(zv, 1, 0) */
+      RETURN_ZVAL_FAST(zv); /* analog to RETURN_ZVAL(zv, 1, 0) */
+
+  The macros behave similarly to the non-FAST variants with copy=1 and
+  dtor=0, but will try to return the zval without making a copy by utilizing
+  return_value_ptr.
 
 ========================
 2. Build system changes
