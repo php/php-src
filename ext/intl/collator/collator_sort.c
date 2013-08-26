@@ -84,8 +84,8 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2 
 		/* Compare the strings using ICU. */
 		result->value.lval = ucol_strcoll(
 				co->ucoll,
-				INTL_Z_STRVAL_P(str1), INTL_Z_STRLEN_P(str1),
-				INTL_Z_STRVAL_P(str2), INTL_Z_STRLEN_P(str2) );
+				INTL_Z_STRVAL_P(str1), INTL_Z_STRSIZE_P(str1),
+				INTL_Z_STRVAL_P(str2), INTL_Z_STRSIZE_P(str2) );
 		result->type = IS_LONG;
 	}
 	else
@@ -193,8 +193,8 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2 TSRM
 	/* Compare the strings using ICU. */
 	result->value.lval = ucol_strcoll(
 			co->ucoll,
-			INTL_Z_STRVAL_P(str1), INTL_Z_STRLEN_P(str1),
-			INTL_Z_STRVAL_P(str2), INTL_Z_STRLEN_P(str2) );
+			INTL_Z_STRVAL_P(str1), INTL_Z_STRSIZE_P(str1),
+			INTL_Z_STRVAL_P(str2), INTL_Z_STRSIZE_P(str2) );
 	result->type = IS_LONG;
 
 	zval_ptr_dtor( &str1 );
@@ -376,7 +376,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 
 	UChar*      utf16_buf            = NULL;                     /* tmp buffer to hold current processing string in utf-16 */
 	int         utf16_buf_size       = DEF_UTF16_BUF_SIZE;       /* the length of utf16_buf */
-	int         utf16_len            = 0;                        /* length of converted string */
+	zend_str_size_int         utf16_len            = 0;                        /* length of converted string */
 
 	HashTable* sortedHash            = NULL;
 
@@ -428,7 +428,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 		/* Process string values only. */
 		if( Z_TYPE_PP( hashData ) == IS_STRING )
 		{
-			intl_convert_utf8_to_utf16( &utf16_buf, &utf16_len, Z_STRVAL_PP( hashData ), Z_STRLEN_PP( hashData ), COLLATOR_ERROR_CODE_P( co ) );
+			intl_convert_utf8_to_utf16( &utf16_buf, &utf16_len, Z_STRVAL_PP( hashData ), Z_STRSIZE_PP( hashData ), COLLATOR_ERROR_CODE_P( co ) );
 
 			if( U_FAILURE( COLLATOR_ERROR_CODE( co ) ) )
 			{
@@ -546,16 +546,16 @@ PHP_FUNCTION( collator_asort )
 PHP_FUNCTION( collator_get_sort_key )
 {
 	char*            str      = NULL;
-	int              str_len  = 0;
+	zend_str_size_int              str_len  = 0;
 	UChar*           ustr     = NULL;
-	int              ustr_len = 0;
+	zend_str_size_int              ustr_len = 0;
 	uint8_t*         key     = NULL;
-	int              key_len = 0;
+	zend_str_size_int              key_len = 0;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS",
 		&object, Collator_ce_ptr, &str, &str_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

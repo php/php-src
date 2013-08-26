@@ -37,7 +37,7 @@ int transliterator_object_construct( zval *object,
 	const UChar           *ustr_id;
 	int32_t               ustr_id_len;
 	char                  *str_id;
-	int                   str_id_len;
+	zend_str_size_int                   str_id_len;
 	Transliterator_object *to;
 
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK;
@@ -49,7 +49,7 @@ int transliterator_object_construct( zval *object,
 	to->utrans = utrans;
 
 	ustr_id = utrans_getUnicodeID( utrans, &ustr_id_len );
-	intl_convert_utf16_to_utf8( &str_id, &str_id_len, ustr_id, (int ) ustr_id_len, status );
+	intl_convert_utf16_to_utf8( &str_id, &str_id_len, ustr_id, ustr_id_len, status );
 	if( U_FAILURE( *status ) )
 	{
 		return FAILURE;
@@ -256,7 +256,7 @@ static zval **Transliterator_get_property_ptr_ptr( zval *object, zval *member, i
 	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
 
 	if(zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 )
+		Z_STRVAL_P( member ), Z_STRSIZE_P( member ) ) == 0 )
 	{
 		retval = NULL; /* fallback to read_property */
 	}
@@ -289,7 +289,7 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 
 	if( ( type != BP_VAR_R && type != BP_VAR_IS ) &&
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
+		Z_STRVAL_P( member ), Z_STRSIZE_P( member ) ) == 0 ) )
 	{
 		php_error_docref0( NULL TSRMLS_CC, E_WARNING, "The property \"id\" is read-only" );
 		retval = &EG( uninitialized_zval );
@@ -322,7 +322,7 @@ static void Transliterator_write_property( zval *object, zval *member, zval *val
 
 	if( ( EG( scope ) != Transliterator_ce_ptr ) &&
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
-		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
+		Z_STRVAL_P( member ), Z_STRSIZE_P( member ) ) == 0 ) )
 	{
 		php_error_docref0( NULL TSRMLS_CC, E_WARNING, "The property \"id\" is read-only" );
 	}

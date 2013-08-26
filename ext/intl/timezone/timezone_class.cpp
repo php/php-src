@@ -90,7 +90,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 	} else {
 		/* Call the constructor! */
 		Z_TYPE(arg) = IS_STRING;
-		if (intl_charFromString(id, &Z_STRVAL(arg), &Z_STRLEN(arg),
+		if (intl_charFromString(id, &Z_STRVAL(arg), &Z_STRSIZE(arg),
 				&INTL_ERROR_CODE(*outside_error)) == FAILURE) {
 			spprintf(&message, 0, "%s: could not convert id to UTF-8", func);
 			intl_errors_set(outside_error, INTL_ERROR_CODE(*outside_error),
@@ -179,7 +179,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval **zv_timezone,
 						gottenId;
 		UErrorCode		status = U_ZERO_ERROR; /* outside_error may be NULL */
 		convert_to_string_ex(zv_timezone);
-		if (intl_stringFromChar(id, Z_STRVAL_PP(zv_timezone), Z_STRLEN_PP(zv_timezone),
+		if (intl_stringFromChar(id, Z_STRVAL_PP(zv_timezone), Z_STRSIZE_PP(zv_timezone),
 				&status) == FAILURE) {
 			spprintf(&message, 0, "%s: Time zone identifier given is not a "
 				"valid UTF-8 string", func);
@@ -288,7 +288,7 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp TSRMLS_DC)
 	const TimeZone	*tz;
 	UnicodeString	ustr;
 	char			*str;
-	int				str_len;
+	zend_str_size_int				str_len;
 	UErrorCode		uec = U_ZERO_ERROR;
 
 	*is_temp = 1;

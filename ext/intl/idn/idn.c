@@ -202,15 +202,15 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 #endif
 
 static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
-		const char *domain, int domain_len, uint32_t option, int mode)
+		const char *domain, zend_str_size_int domain_len, uint32_t option, int mode)
 {
 	UChar* ustring = NULL;
-	int ustring_len = 0;
+	zend_str_size_int ustring_len = 0;
 	UErrorCode status;
 	char     *converted_utf8;
-	int32_t   converted_utf8_len;
+	zend_str_size_int   converted_utf8_len;
 	UChar     converted[MAXPATHLEN];
-	int32_t   converted_ret_len;
+	zend_str_size_int   converted_ret_len;
 
 	/* convert the string to UTF-16. */
 	status = U_ZERO_ERROR;
@@ -262,14 +262,14 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	char *domain;
-	int domain_len;
+	zend_str_size_int domain_len;
 	long option = 0,
 		 variant = INTL_IDN_VARIANT_2003;
 	zval *idna_info = NULL;
 
 	intl_error_reset(NULL TSRMLS_CC);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|llz",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|llz",
 			&domain, &domain_len, &option, &variant, &idna_info) == FAILURE) {
 		php_intl_bad_args("bad arguments", mode TSRMLS_CC);
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */

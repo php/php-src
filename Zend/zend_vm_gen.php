@@ -1216,8 +1216,26 @@ function gen_vm($def, $skel) {
 	// Insert header
 	out($f, $GLOBALS['header_text']);
 
+	out($f, "#ifdef ZEND_WIN32\n");
 	// Suppress free_op1 warnings on Windows
-	out($f, "#ifdef ZEND_WIN32\n# pragma warning(once : 4101)\n#endif\n");
+	out($f, "# pragma warning(once : 4101)\n");
+	if (ZEND_VM_SPEC) {
+		// Suppress (<non-zero constant> || <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6235)\n");
+		// Suppress (<zero> && <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6237)\n");
+		// Suppress (<non-zero constant> && <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6239)\n");
+		// Suppress (<expression> && <non-zero constant>) warnings on windows
+		out($f, "# pragma warning(once : 6240)\n");
+		// Suppress (<non-zero constant> || <non-zero constant>) warnings on windows
+		out($f, "# pragma warning(once : 6285)\n");
+		// Suppress (<non-zero constant> || <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6286)\n");
+		// Suppress constant with constant comparsion warnings on windows
+		out($f, "# pragma warning(once : 6326)\n");
+	}
+	out($f, "#endif\n");
 	
 	// Support for ZEND_USER_OPCODE
 	out($f, "static user_opcode_handler_t zend_user_opcode_handlers[256] = {\n");

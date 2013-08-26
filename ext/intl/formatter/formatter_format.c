@@ -36,7 +36,7 @@ PHP_FUNCTION( numfmt_format )
 	long type = FORMAT_TYPE_DEFAULT;
 	UChar format_buf[32];
 	UChar* formatted = format_buf;
-	int formatted_len = USIZE(format_buf);
+	zend_str_size_int formatted_len = USIZE(format_buf);
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -139,15 +139,15 @@ PHP_FUNCTION( numfmt_format_currency )
 	double     number;
 	UChar      format_buf[32];
 	UChar*     formatted     = format_buf;
-	int        formatted_len = USIZE(format_buf);
+	zend_str_size_int        formatted_len = USIZE(format_buf);
 	char*      currency      = NULL;
-	int        currency_len  = 0;
+	zend_str_size_int        currency_len  = 0;
 	UChar*     scurrency     = NULL;
-	int        scurrency_len = 0;
+	zend_str_size_int        scurrency_len = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ods",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OdS",
 		&object, NumberFormatter_ce_ptr,  &number, &currency, &currency_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

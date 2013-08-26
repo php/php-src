@@ -39,6 +39,6 @@
 #define UCHARS(len) ((len) / sizeof(UChar))
 
 #define INTL_Z_STRVAL_P(str) (UChar*) Z_STRVAL_P(str)
-#define INTL_Z_STRLEN_P(str) UCHARS( Z_STRLEN_P(str) )
+#define INTL_Z_STRSIZE_P(str) UCHARS( Z_STRSIZE_P(str) )
 
 #endif /* INTL_COMMON_H */

@@ -173,7 +173,7 @@ static void _breakiterator_parts_move_forward(zend_object_iterator *iter TSRMLS_
 	 * No need to do anything, the engine increments ->index */
 
 	const char	*s = Z_STRVAL_P(bio->text);
-	int32_t		slen = Z_STRLEN_P(bio->text),
+	int32_t		slen = Z_STRSIZE_P(bio->text),
 				len;
 	char		*res;
 
@@ -251,7 +251,7 @@ U_CFUNC zend_object_value IntlPartsIterator_object_create(zend_class_entry *ce T
 }
 
 U_CFUNC zend_function *IntlPartsIterator_get_method(zval **object_ptr,
-		char *method, int method_len, const zend_literal *key TSRMLS_DC)
+		char *method, zend_str_size_int method_len, const zend_literal *key TSRMLS_DC)
 {
 	zend_literal local_literal = {0};
 	zend_function *ret;

@@ -63,7 +63,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	zval				*object,
 						**format = NULL;
 	const char			*locale_str	= NULL;
-	int					locale_len;
+	zend_str_size_int					locale_len;
 	bool				pattern		= false;
 	UDate				date;
 	TimeZone			*timeZone	= NULL;
@@ -73,7 +73,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 	DateFormat::EStyle	dateStyle = DateFormat::kDefault,
 						timeStyle = DateFormat::kDefault;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|Zs!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o|ZS!",
 			&object, &format, &locale_str, &locale_len) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -124,7 +124,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		dateStyle = timeStyle = (DateFormat::EStyle)Z_LVAL_PP(format);
 	} else {
 		convert_to_string_ex(format);
-		if (Z_STRLEN_PP(format) == 0) {
+		if (Z_STRSIZE_PP(format) == 0) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 					"datefmt_format_object: the format is empty", 0 TSRMLS_CC);
 			RETURN_FALSE;
@@ -176,7 +176,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 	if (pattern) {
 		 df = new SimpleDateFormat(
-				UnicodeString(Z_STRVAL_PP(format), Z_STRLEN_PP(format),
+				UnicodeString(Z_STRVAL_PP(format), Z_STRSIZE_PP(format),
 						UnicodeString::kInvariant),
 				Locale::createFromName(locale_str),
 				status);
@@ -213,7 +213,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 		Z_TYPE_P(return_value) = IS_STRING;
 		if (intl_charFromString(result, &Z_STRVAL_P(return_value),
-				&Z_STRLEN_P(return_value), &status) == FAILURE) {
+				&Z_STRSIZE_P(return_value), &status) == FAILURE) {
 			intl_error_set(NULL, status,
 					"datefmt_format_object: error converting result to UTF-8",
 					0 TSRMLS_CC);

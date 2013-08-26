@@ -80,9 +80,9 @@ static zend_object_value ResourceBundle_object_create( zend_class_entry *ce TSRM
 static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
 	const char	*bundlename;
-	int			bundlename_len = 0;
+	zend_str_size_int			bundlename_len = 0;
 	const char	*locale;
-	int			locale_len = 0;
+	zend_str_size_int			locale_len = 0;
 	zend_bool	fallback = 1;
 
 	zval                  *object = return_value;
@@ -90,7 +90,7 @@ static void resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 
 	intl_error_reset( NULL TSRMLS_CC );
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s!s!|b", 
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "S!S!|b", 
 		&locale, &locale_len, &bundlename, &bundlename_len, &fallback ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -312,7 +312,7 @@ ZEND_END_ARG_INFO()
 PHP_FUNCTION( resourcebundle_locales )
 {
 	char * bundlename;
-	int    bundlename_len = 0;
+	zend_str_size_int    bundlename_len = 0;
 	const char * entry;
 	int entry_len;
 	UEnumeration *icuenum;
@@ -320,7 +320,7 @@ PHP_FUNCTION( resourcebundle_locales )
 
 	intl_errors_reset( NULL TSRMLS_CC );
 
-	if( zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &bundlename, &bundlename_len ) == FAILURE )
+	if( zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S", &bundlename, &bundlename_len ) == FAILURE )
 	{
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,	
 			"resourcebundle_locales: unable to parse input params", 0 TSRMLS_CC);

@@ -33,20 +33,20 @@ PHP_FUNCTION( collator_compare )
 {
 	char*            str1      = NULL;
 	char*            str2      = NULL;
-	int              str1_len  = 0;
-	int              str2_len  = 0;
+	zend_str_size_int              str1_len  = 0;
+	zend_str_size_int              str2_len  = 0;
 
 	UChar*           ustr1     = NULL;
 	UChar*           ustr2     = NULL;
-	int              ustr1_len = 0;
-	int              ustr2_len = 0;
+	zend_str_size_int              ustr1_len = 0;
+	zend_str_size_int              ustr2_len = 0;
 
 	UCollationResult result;
 
 	COLLATOR_METHOD_INIT_VARS
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Oss",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OSS",
 		&object, Collator_ce_ptr, &str1, &str1_len, &str2, &str2_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

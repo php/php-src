@@ -207,15 +207,15 @@ PHP_FUNCTION( numfmt_set_attribute )
  */
 PHP_FUNCTION( numfmt_set_text_attribute )
 {
-	int slength = 0;
+	zend_str_size_int slength = 0;
 	UChar *svalue = NULL;
 	long attribute;
 	char *value;
-	int len;
+	zend_str_size_int len;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OlS",
 		&object, NumberFormatter_ce_ptr, &attribute, &value, &len ) == FAILURE)
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -299,13 +299,13 @@ PHP_FUNCTION( numfmt_set_symbol )
 {
 	long       symbol;
 	char*      value     = NULL;
-	int        value_len = 0;
+	zend_str_size_int        value_len = 0;
 	UChar*     svalue  = 0;
-	int        slength = 0;
+	zend_str_size_int        slength = 0;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Ols",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OlS",
 		&object, NumberFormatter_ce_ptr, &symbol, &value, &value_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -387,13 +387,13 @@ PHP_FUNCTION( numfmt_get_pattern )
 PHP_FUNCTION( numfmt_set_pattern )
 {
 	char*       value = NULL;
-	int         value_len = 0;
-	int         slength = 0;
+	zend_str_size_int         value_len = 0;
+	zend_str_size_int         slength = 0;
 	UChar*	    svalue  = NULL;
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OS",
 		&object, NumberFormatter_ce_ptr, &value, &value_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

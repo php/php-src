@@ -30,16 +30,16 @@ static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char*       locale;
 	char*       pattern;
-	int         locale_len = 0, pattern_len = 0;
+	zend_str_size_int         locale_len = 0, pattern_len = 0;
 	UChar*      spattern     = NULL;
-	int         spattern_len = 0;
+	zend_str_size_int         spattern_len = 0;
 	zval*       object;
 	MessageFormatter_object* mfo;
 	intl_error_reset( NULL TSRMLS_CC );
 
 	object = return_value;
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "ss",
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "SS",
 		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

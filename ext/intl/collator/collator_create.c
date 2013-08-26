@@ -28,14 +28,14 @@
 static void collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
 	char*            locale;
-	int              locale_len = 0;
+	zend_str_size_int              locale_len = 0;
 	zval*            object;
 	Collator_object* co;
 
 	intl_error_reset( NULL TSRMLS_CC );
 	object = return_value;
 	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "s",
+	if( zend_parse_parameters( ZEND_NUM_ARGS() TSRMLS_CC, "S",
 		&locale, &locale_len ) == FAILURE )
 	{
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
