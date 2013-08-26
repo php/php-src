@@ -562,7 +562,6 @@ static void strip_nop(zend_code_block *block)
 {
 	zend_op *opline = block->start_opline;
 	zend_op *end, *new_end;
-	int new_len = 0;
 
 	/* remove leading NOPs */
 	while (block->len > 0 && block->start_opline->opcode == ZEND_NOP) {
