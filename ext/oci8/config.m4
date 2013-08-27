@@ -154,8 +154,7 @@ if test "$PHP_OCI8" != "no"; then
       AC_MSG_ERROR([You need at least PHP 5.4 to be able to use DTrace with PHP OCI8])
     else
       AC_CHECK_HEADERS([sys/sdt.h], [
-	 PHP_INIT_DTRACE([ext/oci8/oci8_dtrace.d],[ext/oci8/oci8_dtrace_gen.h],[ext/oci8/oci8.c \
-	 		ext/oci8/oci8_interface.c ext/oci8/oci8_collection.c ext/oci8/oci8_lob.c ext/oci8/oci8_statement.c])
+	 PHP_INIT_DTRACE([ext/oci8/oci8_dtrace.d],[ext/oci8/oci8_dtrace_gen.h],[ext/oci8/oci8.c ext/oci8/oci8_statement.c])
        ], [
 	 AC_MSG_ERROR(
 	   [Cannot find sys/sdt.h which is required for DTrace support])

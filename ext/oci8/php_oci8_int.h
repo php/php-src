@@ -310,6 +310,7 @@ typedef struct {
  */
 #define PHP_OCI_HANDLE_ERROR(connection, errcode) \
 	do {										  \
+		ub4 serverStatus = OCI_SERVER_NORMAL;	  \
 		switch (errcode) {						  \
 			case  1013:							  \
 				zend_bailout();					  \
@@ -339,7 +340,6 @@ typedef struct {
 				break;							  \
 			default:										\
 			{												\
-				ub4 serverStatus = OCI_SERVER_NORMAL;		\
 				PHP_OCI_CALL(OCIAttrGet, ((dvoid *)(connection)->server, OCI_HTYPE_SERVER, (dvoid *)&serverStatus, \
 										  (ub4 *)0, OCI_ATTR_SERVER_STATUS, (connection)->err)); \
 				if (serverStatus != OCI_SERVER_NORMAL) {	\
@@ -348,6 +348,7 @@ typedef struct {
 			}												\
 			break;											\
 		}													\
+		php_oci_dtrace_check_connection(connection, errcode, serverStatus); \
 	} while (0)
 
 #define PHP_OCI_REGISTER_RESOURCE(resource, le_resource) \
@@ -411,6 +412,7 @@ void php_oci_client_get_version(char **version TSRMLS_DC);
 int php_oci_server_get_version(php_oci_connection *connection, char **version TSRMLS_DC);
 void php_oci_fetch_row(INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_args);
 int php_oci_column_to_zval(php_oci_out_column *column, zval *value, int mode TSRMLS_DC);
+void php_oci_dtrace_check_connection(php_oci_connection *connection, sword errcode, ub4 serverStatus);
 
 /* }}} */
 

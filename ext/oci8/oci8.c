@@ -1772,8 +1772,8 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 	}
 
 #ifdef HAVE_DTRACE
-	if (DTRACE_OCI8_CONNECT_START_ENABLED()) {
-		DTRACE_OCI8_CONNECT_START(username, dbname, charset, session_mode, persistent, exclusive);
+	if (DTRACE_OCI8_CONNECT_ENTRY_ENABLED()) {
+		DTRACE_OCI8_CONNECT_ENTRY(username, dbname, charset, session_mode, persistent, exclusive);
 	}
 #endif /* HAVE_DTRACE */
 
@@ -1784,8 +1784,8 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 	connection = php_oci_do_connect_ex(username, username_len, password, password_len, NULL, 0, dbname, dbname_len, charset, session_mode, persistent, exclusive TSRMLS_CC);
 
 #ifdef HAVE_DTRACE
-	if (DTRACE_OCI8_CONNECT_DONE_ENABLED()) {
-		DTRACE_OCI8_CONNECT_DONE();
+	if (DTRACE_OCI8_CONNECT_RETURN_ENABLED()) {
+		DTRACE_OCI8_CONNECT_RETURN(connection);
 	}
 #endif /* HAVE_DTRACE */
 
@@ -3462,6 +3462,20 @@ static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh TS
 	connection->next_pingp = next_pingp;
 
 	return OCI_SUCCESS;
+}
+/* }}} */
+
+/* {{{ php_oci_dtrace_check_connection()
+ *
+ * DTrace output for connections that may have become invalid and marked for reopening
+ */
+void php_oci_dtrace_check_connection(php_oci_connection *connection, sword errcode, ub4 serverStatus)
+{
+#ifdef HAVE_DTRACE
+	if (DTRACE_OCI8_CHECK_CONNECTION_ENABLED()) {
+		DTRACE_OCI8_CHECK_CONNECTION(connection, connection && connection->is_open ? 1 : 0, (int)errcode, (unsigned long)serverStatus);
+	}
+#endif /* HAVE_DTRACE */
 }
 /* }}} */
 
