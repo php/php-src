@@ -132,7 +132,7 @@ static inline zend_uchar is_numeric_string_ex(const char *str, int length, long 
 {
 	const char *ptr;
 	int base = 10, digits = 0, dp_or_e = 0;
-	double local_dval;
+	double local_dval = 0.0;
 	zend_uchar type;
 
 	if (!length) {
