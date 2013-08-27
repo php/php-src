@@ -616,12 +616,17 @@ static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zva
 	char *need_msg;
 	zend_class_entry *ce;
 
-	if (!zf->common.arg_info
-		|| arg_num>zf->common.num_args) {
+	if (!zf->common.arg_info) {
 		return 1;
 	}
 
-	cur_arg_info = &zf->common.arg_info[arg_num-1];
+	if (arg_num <= zf->common.num_args) {
+		cur_arg_info = &zf->common.arg_info[arg_num-1];
+	} else if (zf->common.fn_flags & ZEND_ACC_VARIADIC) {
+		cur_arg_info = &zf->common.arg_info[zf->common.num_args-1];
+	} else {
+		return 1;
+	}
 
 	if (cur_arg_info->class_name) {
 		const char *class_name;
