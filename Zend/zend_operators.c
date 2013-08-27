@@ -2234,8 +2234,8 @@ ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2) /* {{{ */
 {
 	int ret1, ret2;
 	int oflow1, oflow2;
-	zend_int_t lval1, lval2;
-	double dval1, dval2;
+	zend_int_t lval1 = 0, lval2 = 0;
+	double dval1 = 0, dval2 = 0;
 
 	if ((ret1=is_numeric_string_ex(Z_STRVAL_P(s1), Z_STRSIZE_P(s1), &lval1, &dval1, 0, &oflow1)) &&
 		(ret2=is_numeric_string_ex(Z_STRVAL_P(s2), Z_STRSIZE_P(s2), &lval2, &dval2, 0, &oflow2))) {
