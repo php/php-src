@@ -2582,9 +2582,9 @@ void zend_do_end_function_call(znode *function_name, znode *result, const znode 
 void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
-	int original_op=op;
+	int original_op = op;
 	zend_function **function_ptr_ptr, *function_ptr;
-	int send_by_reference;
+	int send_by_reference = 0;
 	int send_function = 0;
 
 	zend_stack_top(&CG(function_call_stack), (void **) &function_ptr_ptr);
@@ -2607,22 +2607,19 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{
 
 	if (function_ptr) {
 		if (ARG_MAY_BE_SENT_BY_REF(function_ptr, (zend_uint) offset)) {
-			if (param->op_type & (IS_VAR|IS_CV) && original_op != ZEND_SEND_VAL) {
-				send_by_reference = 1;
-				if (op == ZEND_SEND_VAR && zend_is_function_or_method_call(param)) {
+			if (op == ZEND_SEND_VAR && param->op_type & (IS_VAR|IS_CV)) {
+				send_by_reference = ZEND_ARG_SEND_BY_REF;
+				if (zend_is_function_or_method_call(param)) {
 					/* Method call */
 					op = ZEND_SEND_VAR_NO_REF;
 					send_function = ZEND_ARG_SEND_FUNCTION | ZEND_ARG_SEND_SILENT;
 				}
 			} else {
 				op = ZEND_SEND_VAL;
-				send_by_reference = 0;
 			}
-		} else {
-			send_by_reference = ARG_SHOULD_BE_SENT_BY_REF(function_ptr, (zend_uint) offset) ? ZEND_ARG_SEND_BY_REF : 0;
+		} else if (ARG_SHOULD_BE_SENT_BY_REF(function_ptr, (zend_uint) offset)) {
+			send_by_reference = ZEND_ARG_SEND_BY_REF;
 		}
-	} else {
-		send_by_reference = 0;
 	}
 
 	if (op == ZEND_SEND_VAR && zend_is_function_or_method_call(param)) {
