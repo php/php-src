@@ -20,6 +20,7 @@
 /* $Id$ */
 
 #include "zend.h"
+#include "zend_autoload.h"
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_variables.h"
@@ -125,6 +126,9 @@ void zend_register_standard_constants(TSRMLS_D)
 		REGISTER_MAIN_BOOL_CONSTANT("ZEND_DEBUG_BUILD", ZEND_DEBUG, CONST_PERSISTENT | CONST_CS);
 	}
 	REGISTER_MAIN_NULL_CONSTANT("NULL", CONST_PERSISTENT | CONST_CT_SUBST);
+
+	REGISTER_MAIN_LONG_CONSTANT(ZEND_NS_NAME("php", "AUTOLOAD_CLASS"), ZEND_AUTOLOAD_CLASS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_MAIN_LONG_CONSTANT(ZEND_NS_NAME("php", "AUTOLOAD_FUNCTION"), ZEND_AUTOLOAD_FUNCTION, CONST_CS | CONST_PERSISTENT);
 }
 
 

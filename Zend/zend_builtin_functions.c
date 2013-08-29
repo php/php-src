@@ -22,6 +22,7 @@
 #include "zend.h"
 #include "zend_API.h"
 #include "zend_builtin_functions.h"
+#include "zend_autoload.h"
 #include "zend_constants.h"
 #include "zend_ini.h"
 #include "zend_exceptions.h"
@@ -238,6 +239,16 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_extension_loaded, 0, 0, 1)
 	ZEND_ARG_INFO(0, extension_name)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_autoload_register, 0, 0, 1)
+	ZEND_ARG_INFO(0, callback)
+	ZEND_ARG_INFO(0, type)
+	ZEND_ARG_INFO(0, prepend)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_autoload_unregister, 0, 0, 1)
+	ZEND_ARG_INFO(0, callback)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 static const zend_function_entry builtin_functions[] = { /* {{{ */
@@ -307,6 +318,8 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(gc_enabled, 		arginfo_zend__void)
 	ZEND_FE(gc_enable, 			arginfo_zend__void)
 	ZEND_FE(gc_disable, 		arginfo_zend__void)
+	ZEND_NS_FE("php", autoload_register, arginfo_autoload_register)
+	ZEND_NS_FE("php", autoload_unregister, arginfo_autoload_unregister)
 	ZEND_FE_END
 };
 /* }}} */
@@ -316,7 +329,6 @@ ZEND_MINIT_FUNCTION(core) { /* {{{ */
 
 	INIT_CLASS_ENTRY(class_entry, "stdClass", NULL);
 	zend_standard_class_def = zend_register_internal_class(&class_entry TSRMLS_CC);
-
 	zend_register_default_classes(TSRMLS_C);
 
 	return SUCCESS;
@@ -1353,8 +1365,9 @@ ZEND_FUNCTION(function_exists)
 	zend_function *func;
 	char *lcname;
 	zend_bool retval;
+	zend_bool autoload = 1;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|b", &name, &name_len, &autoload) == FAILURE) {
 		return;
 	}
 
@@ -1367,7 +1380,7 @@ ZEND_FUNCTION(function_exists)
 		name_len--;
 	}
 
-	retval = (zend_hash_find(EG(function_table), name, name_len+1, (void **)&func) == SUCCESS);
+	retval = (zend_lookup_function_ex(name, name_len+1, NULL, (int) autoload, &func) == SUCCESS);
 	
 	efree(lcname);
 
@@ -1824,7 +1837,7 @@ ZEND_FUNCTION(create_function)
 	if (retval==SUCCESS) {
 		zend_function new_function, *func;
 
-		if (zend_hash_find(EG(function_table), LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME), (void **) &func)==FAILURE) {
+		if (zend_lookup_function_ex(LAMBDA_TEMP_FUNCNAME, sizeof(LAMBDA_TEMP_FUNCNAME), NULL, 0, &func)==FAILURE) {
 			zend_error(E_ERROR, "Unexpected inconsistency in create_function()");
 			RETURN_FALSE;
 		}

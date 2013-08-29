@@ -131,8 +131,13 @@ struct _zend_compiler_globals {
 
 	zval      *current_namespace;
 	HashTable *current_import;
+	HashTable *current_import_function;
+	HashTable *current_import_const;
 	zend_bool  in_namespace;
 	zend_bool  has_bracketed_namespaces;
+
+	HashTable function_filenames;
+	HashTable const_filenames;
 
 	zend_compiler_context context;
 	zend_stack context_stack;
@@ -201,8 +206,10 @@ struct _zend_executor_globals {
 	int ticks_count;
 
 	zend_bool in_execution;
-	HashTable *in_autoload;
-	zend_function *autoload_func;
+	HashTable *autoload_stack;
+	HashTable *autoload_funcs;
+	zend_function *autoload_legacy;
+
 	zend_bool full_tables_cleanup;
 
 	/* for extended information support */

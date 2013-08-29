@@ -437,7 +437,9 @@ ZEND_API char *zend_get_compiled_filename(TSRMLS_D);
 ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
-void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace TSRMLS_DC);
+void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace, zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC);
+void zend_resolve_function_name(znode *element_name, zend_bool check_namespace TSRMLS_DC);
+void zend_resolve_const_name(znode *element_name, zend_bool check_namespace TSRMLS_DC);
 void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_name TSRMLS_DC);
 ZEND_API const char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len);
 
@@ -636,6 +638,9 @@ void zend_do_begin_namespace(const znode *name, zend_bool with_brackets TSRMLS_D
 void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
 void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
+void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const char *type, zend_bool case_sensitive, HashTable *current_import_sub, HashTable *lookup_table TSRMLS_DC);
+void zend_do_use_function(znode *name, znode *new_name, int is_global TSRMLS_DC);
+void zend_do_use_const(znode *name, znode *new_name, int is_global TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
 
 void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static TSRMLS_DC);

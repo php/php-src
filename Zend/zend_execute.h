@@ -63,6 +63,9 @@ ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, struct _zend
 ZEND_API int zend_is_true(zval *op);
 ZEND_API int zend_lookup_class(const char *name, int name_length, zend_class_entry ***ce TSRMLS_DC);
 ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_literal *key, int use_autoload, zend_class_entry ***ce TSRMLS_DC);
+ZEND_API int zend_lookup_function(const char *name, int name_length, zend_function **fbc TSRMLS_DC);
+ZEND_API int zend_lookup_function_ex(const char *name, int name_length, const zend_literal *key, int use_autoload, zend_function **fbc TSRMLS_DC);
+
 ZEND_API int zend_eval_string(char *str, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_stringl(char *str, int str_len, zval *retval_ptr, char *string_name TSRMLS_DC);
 ZEND_API int zend_eval_string_ex(char *str, zval *retval_ptr, char *string_name, int handle_exceptions TSRMLS_DC);
