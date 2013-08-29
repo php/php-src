@@ -206,8 +206,10 @@ struct _zend_executor_globals {
 	int ticks_count;
 
 	zend_bool in_execution;
-	HashTable *in_autoload;
-	zend_function *autoload_func;
+	HashTable *autoload_stack;
+	HashTable *autoload_funcs;
+	zend_function *autoload_legacy;
+
 	zend_bool full_tables_cleanup;
 
 	/* for extended information support */
