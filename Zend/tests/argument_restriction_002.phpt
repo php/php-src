@@ -8,7 +8,7 @@ Abstract Class Base {
 }
 
 class Sub extends Base {
-	public function test($foo, array &$bar) {
+	public function test($foo, array $bar) {
 	}	
 }
 ?>

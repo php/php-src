@@ -11,7 +11,7 @@ set_error_handler("errh");
 
 interface a{}
 class b implements a { function f($a=1) {}}
-class c extends b {function f() {}}
+class c extends b {function f($a) {}}
 ?>
 --EXPECTF--
 string(60) "Declaration of c::f() should be compatible with b::f($a = 1)"

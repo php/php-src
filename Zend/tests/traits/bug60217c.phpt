@@ -4,7 +4,7 @@ Bug #60217 (Requiring the same method from different traits and abstract methods
 <?php
 
 trait TBroken1 {
-    public abstract function foo($a, $b = 0);
+    public abstract function foo($a, $b);
 }
 
 trait TBroken2 {
@@ -23,4 +23,4 @@ $o = new CBroken;
 $o->foo(1);
 
 --EXPECTF--
-Fatal error: Declaration of TBroken2::foo($a) must be compatible with TBroken1::foo($a, $b = 0) in %s on line %d
+Fatal error: Declaration of TBroken2::foo($a) must be compatible with TBroken1::foo($a, $b) in %s on line %d

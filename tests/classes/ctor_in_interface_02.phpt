@@ -4,7 +4,7 @@ ZE2 A class constructor must keep the signature of all interfaces
 <?php
 interface constr1
 {
-	function __construct();
+	function __construct($a, $b);
 }
 
 interface constr2 extends constr1
@@ -13,7 +13,7 @@ interface constr2 extends constr1
 
 class implem12 implements constr2
 {
-	function __construct()
+	function __construct($a, $b)
 	{
 	}
 }
@@ -25,7 +25,7 @@ interface constr3
 
 class implem13 implements constr1, constr3
 {
-	function __construct()
+	function __construct($a, $b)
 	{
 	}
 }
