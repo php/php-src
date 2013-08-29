@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.4.20
 
 - Core:
+  . Fixed bug #65579 (Using traits with get_class_methods causes segfault).
+    (Adam)
   . Fixed bug #65490 (Duplicate calls to get lineno & filename for 
     DTRACE_FUNCTION_*). (Chris Jones)
   . Fixed bug #65483 (quoted-printable encode stream filter incorrectly encoding
@@ -18,6 +20,8 @@ PHP                                                                        NEWS
   . Fixed bug #65225 (PHP_BINARY incorrectly set). (Patrick Allaert)
   . Improved fix for bug #63186 (compile failure on netbsd). (Matteo)
   . Fixed bug #62692 (PHP fails to build with DTrace). (Chris Jones, Kris Van Hees)
+  . Fixed bug #61759 (class_alias() should accept classes with leading
+    backslashes). (Julien)
   . Fixed bug #61345 (CGI mode - make install don't work). (Michael Heimpold)
   . Cherry-picked some DTrace build commits (allowing builds on Linux,
     bug #62691, and bug #63706) from PHP 5.5 branch
