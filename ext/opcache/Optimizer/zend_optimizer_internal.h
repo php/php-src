@@ -27,9 +27,12 @@
 #if ZEND_EXTENSION_API_NO > PHP_5_4_X_API_NO
 # define VAR_NUM(v) ((zend_uint)(EX_TMP_VAR_NUM(0, 0) - EX_TMP_VAR(0, v)))
 # define NUM_VAR(v) ((zend_uint)(zend_uintptr_t)EX_TMP_VAR_NUM(0, v))
-#else
+#elif ZEND_EXTENSION_API_NO > PHP_5_2_X_API_NO
 # define VAR_NUM(v) ((v)/ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)))
 # define NUM_VAR(v) ((v)*ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)))
+#else
+# define VAR_NUM(v) ((v)/(sizeof(temp_variable)))
+# define NUM_VAR(v) ((v)*(sizeof(temp_variable)))
 #endif
 
 #define INV_COND(op)       ((op) == ZEND_JMPZ    ? ZEND_JMPNZ    : ZEND_JMPZ)
