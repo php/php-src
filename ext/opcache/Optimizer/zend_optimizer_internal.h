@@ -31,8 +31,8 @@
 # define VAR_NUM(v) ((v)/ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)))
 # define NUM_VAR(v) ((v)*ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)))
 #else
-# define VAR_NUM(v) ((v)/(sizeof(temp_variable)))
-# define NUM_VAR(v) ((v)*(sizeof(temp_variable)))
+# define VAR_NUM(v) ((v)/ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)))
+# define NUM_VAR(v) ((v)*ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)))
 #endif
 
 #define INV_COND(op)       ((op) == ZEND_JMPZ    ? ZEND_JMPNZ    : ZEND_JMPZ)
