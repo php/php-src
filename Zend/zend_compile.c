@@ -2549,8 +2549,11 @@ void zend_do_end_function_call(znode *function_name, znode *result, const znode 
 		}
 		opline = &CG(active_op_array)->opcodes[Z_LVAL(function_name->u.constant)];
 	} else {
+		zend_function **function_ptr_ptr;
+		zend_stack_top(&CG(function_call_stack), (void **) &function_ptr_ptr);
+
 		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-		if (!is_method && !is_dynamic_fcall && function_name->op_type==IS_CONST) {
+		if (*function_ptr_ptr) {
 			opline->opcode = ZEND_DO_FCALL;
 			SET_NODE(opline->op1, function_name);
 			SET_UNUSED(opline->op2);
@@ -2562,6 +2565,13 @@ void zend_do_end_function_call(znode *function_name, znode *result, const znode 
 			SET_UNUSED(opline->op1);
 			SET_UNUSED(opline->op2);
 			opline->op2.num = --CG(context).nested_calls;
+
+			/* This would normally be a ZEND_DO_FCALL, but was forced to use
+			 * ZEND_DO_FCALL_BY_NAME due to a ... argument. In this case we need to
+			 * free the function_name */
+			if (!is_method && !is_dynamic_fcall && function_name->op_type==IS_CONST) {
+				zval_dtor(&function_name->u.constant);
+			}
 		}
 	}
 
@@ -2684,6 +2694,39 @@ void zend_do_pass_param(znode *param, zend_uchar op, int offset TSRMLS_DC) /* {{
 	if (++CG(context).used_stack > CG(active_op_array)->used_stack) {
 		CG(active_op_array)->used_stack = CG(context).used_stack;
 	}
+}
+/* }}} */
+
+void zend_do_unpack_params(znode *params, int offset TSRMLS_DC) /* {{{ */
+{
+	zend_op *opline;
+	zend_function **function_ptr_ptr;
+
+	zend_stack_top(&CG(function_call_stack), (void **) &function_ptr_ptr);
+	if (*function_ptr_ptr) {
+		/* If argument unpacking is used argument numbers and sending modes can no longer be
+		 * computed at compile time, thus we need access to EX(call). In order to have it we
+		 * retroactively emit a ZEND_INIT_FCALL_BY_NAME opcode. */
+		zval func_name;
+		ZVAL_STRING(&func_name, (*function_ptr_ptr)->common.function_name, 1);
+
+		opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+		opline->opcode = ZEND_INIT_FCALL_BY_NAME;
+		opline->result.num = CG(context).nested_calls;
+		SET_UNUSED(opline->op1);
+		opline->op2_type = IS_CONST;
+		opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), &func_name TSRMLS_CC);
+		GET_CACHE_SLOT(opline->op2.constant);
+
+		++CG(context).nested_calls;
+		*function_ptr_ptr = NULL;
+	}
+
+	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
+	opline->opcode = ZEND_SEND_UNPACK;
+	SET_NODE(opline->op1, params);
+	SET_UNUSED(opline->op2);
+	opline->op2.num = (zend_uint) offset;
 }
 /* }}} */
 
