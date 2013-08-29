@@ -27,6 +27,7 @@ PHP                                                                        NEWS
 - OPCache:
   . Fixed bug #65561 (Zend Opcache on Solaris 11 x86 needs ZEND_MM_ALIGNMENT=4).
     (Terry Ellison)
+  . Fixed bug #65510 (5.5.2 crashes in _get_zval_ptr_ptr_var). (Dmitry)
 
 - Openssl:
   . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in
