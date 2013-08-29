@@ -1399,15 +1399,8 @@ ZEND_FUNCTION(class_alias)
 		return;
 	}
 
-	if (!autoload) {
-		lc_name = do_alloca(class_name_len + 1, use_heap);
-		zend_str_tolower_copy(lc_name, class_name, class_name_len);
+	found = zend_lookup_class_ex(class_name, class_name_len, NULL, autoload, &ce TSRMLS_CC);
 	
-		found = zend_hash_find(EG(class_table), lc_name, class_name_len+1, (void **) &ce);
-		free_alloca(lc_name, use_heap);
-	} else {
-		found = zend_lookup_class(class_name, class_name_len, &ce TSRMLS_CC);
-	}
 	if (found == SUCCESS) {
 		if ((*ce)->type == ZEND_USER_CLASS) { 
 			if (zend_register_class_alias_ex(alias_name, alias_name_len, *ce TSRMLS_CC) == SUCCESS) {
