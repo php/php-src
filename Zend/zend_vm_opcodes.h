@@ -165,3 +165,4 @@
 #define ZEND_FAST_CALL                       162
 #define ZEND_FAST_RET                        163
 #define ZEND_RECV_VARIADIC                   164
+#define ZEND_SEND_UNPACK                     165
