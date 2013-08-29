@@ -408,6 +408,7 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 			    int var = opline->result.var;
 			    int level = 0;
 				zend_op *op = opline + 1;
+				zend_op *use = NULL;
 
 				while (op < end) {
 					if (op->opcode == ZEND_BEGIN_SILENCE) {
@@ -420,21 +421,36 @@ if (ZEND_OPTIMIZER_PASS_1 & OPTIMIZATION_LEVEL) {
 						}
 					}
 					if (op->op1_type == IS_VAR && op->op1.var == var) {
-						op->op1_type = IS_CV;
-						op->op1.var = zend_optimizer_lookup_cv(op_array,
-							Z_STRVAL(ZEND_OP1_LITERAL(opline)),
-							Z_STRLEN(ZEND_OP1_LITERAL(opline)));
-						MAKE_NOP(opline);
-						break;
+						if (use) {
+							/* used more than once */
+							use = NULL;
+							break;
+						}
+						use = op;
 					} else if (op->op2_type == IS_VAR && op->op2.var == var) {
-						op->op2_type = IS_CV;
-						op->op2.var = zend_optimizer_lookup_cv(op_array,
-							Z_STRVAL(ZEND_OP1_LITERAL(opline)),
-							Z_STRLEN(ZEND_OP1_LITERAL(opline)));
-						MAKE_NOP(opline);
-						break;
+						if (use) {
+							/* used more than once */
+							use = NULL;
+							break;
+						}
+						use = op;
 					}
 					op++;
+				}
+				if (use) {
+					if (use->op1_type == IS_VAR && use->op1.var == var) {
+						use->op1_type = IS_CV;
+						use->op1.var = zend_optimizer_lookup_cv(op_array,
+							Z_STRVAL(ZEND_OP1_LITERAL(opline)),
+							Z_STRLEN(ZEND_OP1_LITERAL(opline)));
+						MAKE_NOP(opline);
+					} else if (use->op2_type == IS_VAR && use->op2.var == var) {
+						use->op2_type = IS_CV;
+						use->op2.var = zend_optimizer_lookup_cv(op_array,
+							Z_STRVAL(ZEND_OP1_LITERAL(opline)),
+							Z_STRLEN(ZEND_OP1_LITERAL(opline)));
+						MAKE_NOP(opline);
+					}
 				}
 			}
 			break;
