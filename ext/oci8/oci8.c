@@ -2327,7 +2327,7 @@ static int php_oci_connection_close(php_oci_connection *connection TSRMLS_DC)
 		}
 
 		if (connection->svc) {
-			PHP_OCI_CALL(OCIHandleFree, ((dvoid *) connection->svc,	(ub4) OCI_HTYPE_SVCCTX));
+			PHP_OCI_CALL(OCIHandleFree, ((dvoid *) connection->svc, (ub4) OCI_HTYPE_SVCCTX));
 		}
 
 		if (connection->server) {

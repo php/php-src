@@ -105,7 +105,7 @@ php_oci_collection * php_oci_collection_create(php_oci_connection *connection, c
 	}
 
 	/* get first parameter handle */
-	PHP_OCI_CALL_RETURN(connection->errcode, OCIAttrGet, ((dvoid *) dschp1, (ub4) OCI_HTYPE_DESCRIBE, (dvoid *)&parmp1, (ub4 *)0, (ub4)OCI_ATTR_PARAM,	connection->err));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCIAttrGet, ((dvoid *) dschp1, (ub4) OCI_HTYPE_DESCRIBE, (dvoid *)&parmp1, (ub4 *)0, (ub4)OCI_ATTR_PARAM, connection->err));
 
 	if (connection->errcode != OCI_SUCCESS) {
 		goto CLEANUP;

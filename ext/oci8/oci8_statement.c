@@ -502,7 +502,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 	
 	if (!statement->stmttype) {
 		/* get statement type */
-		PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub2 *)&statement->stmttype, (ub4 *)0,	OCI_ATTR_STMT_TYPE,	statement->err));
+		PHP_OCI_CALL_RETURN(statement->errcode, OCIAttrGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, (ub2 *)&statement->stmttype, (ub4 *)0, OCI_ATTR_STMT_TYPE, statement->err));
 
 		if (statement->errcode != OCI_SUCCESS) {
 			statement->errcode = php_oci_error(statement->err, statement->errcode TSRMLS_CC);
@@ -528,7 +528,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 		}
 
 		/* execute statement */
-		PHP_OCI_CALL_RETURN(statement->errcode, OCIStmtExecute, (statement->connection->svc,	statement->stmt, statement->err, iters,	0, NULL, NULL, mode));
+		PHP_OCI_CALL_RETURN(statement->errcode, OCIStmtExecute, (statement->connection->svc, statement->stmt, statement->err, iters, 0, NULL, NULL, mode));
 
 		if (statement->errcode != OCI_SUCCESS) {
 			statement->errcode = php_oci_error(statement->err, statement->errcode TSRMLS_CC);
