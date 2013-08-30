@@ -2306,7 +2306,7 @@ static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC)
 
 	MAKE_STD_ZVAL(zv);
 	ZVAL_LONG(zv, tzobj->type);
-	zend_hash_update(props, "timezone_type", 14, &zv, sizeof(zval), NULL);
+	zend_hash_update(props, "timezone_type", 14, &zv, sizeof(zv), NULL);
 
 	MAKE_STD_ZVAL(zv);
 	switch (tzobj->type) {
@@ -2328,7 +2328,7 @@ static HashTable *date_object_get_properties_timezone(zval *object TSRMLS_DC)
 			ZVAL_STRING(zv, tzobj->tzi.z.abbr, 1);
 			break;
 	}
-	zend_hash_update(props, "timezone", 9, &zv, sizeof(zval), NULL);
+	zend_hash_update(props, "timezone", 9, &zv, sizeof(zv), NULL);
 
 	return props;
 }
