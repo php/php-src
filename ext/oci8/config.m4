@@ -15,22 +15,6 @@ else
     PHP_OCI8_TAIL1="tail -1"
 fi
 
-AC_DEFUN([PHP_OCI_IF_DEFINED],[
-  old_CPPFLAGS=$CPPFLAGS
-  CPPFLAGS=$3
-  AC_EGREP_CPP(yes,[
-#include <oci.h>
-#if defined($1)
-    yes
-#endif
-  ],[
-    CPPFLAGS=$old_CPPFLAGS
-    $2
-  ],[
-    CPPFLAGS=$old_CPPFLAGS
-  ])
-])
-
 AC_DEFUN([AC_OCI8_CHECK_LIB_DIR],[
   AC_MSG_CHECKING([ORACLE_HOME library validity])
   if test ! -d "$OCI8_DIR"; then
