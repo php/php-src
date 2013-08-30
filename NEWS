@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.4
 
 - Core:
+  . Fixed bug #60598 (cli/apache sapi segfault on objects manipulation).
+    (Laruence)
   . Improved fputcsv() to allow specifying escape character.
   . Fixed bug #65490 (Duplicate calls to get lineno & filename for 
     DTRACE_FUNCTION_*). (Chris Jones)
