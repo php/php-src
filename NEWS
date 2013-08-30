@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.4.20
 
 - Core:
+  . Fixed bug #60598 (cli/apache sapi segfault on objects manipulation).
+    (Laruence)
   . Fixed bug #65579 (Using traits with get_class_methods causes segfault).
     (Adam)
   . Fixed bug #65490 (Duplicate calls to get lineno & filename for 
@@ -34,6 +36,8 @@ PHP                                                                        NEWS
 - Datetime:
   . Fixed bug #65554 (createFromFormat broken when weekday name is followed 
     by some delimiters). (Valentin Logvinskiy, Stas).
+  . Fixed bug #65564 (stack-buffer-overflow in DateTimeZone stuff caught
+    by AddressSanitizer). (Remi).
 
 - Openssl:
   . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in 
