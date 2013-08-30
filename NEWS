@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.4
 
 - Core:
+  . Fixed bug #60598 (cli/apache sapi segfault on objects manipulation).
+    (Laruence)
   . Improved fputcsv() to allow specifying escape character.
   . Fixed bug #65490 (Duplicate calls to get lineno & filename for 
     DTRACE_FUNCTION_*). (Chris Jones)
@@ -23,6 +25,8 @@ PHP                                                                        NEWS
 - Datetime:
   . Fixed bug #65554 (createFromFormat broken when weekday name is followed
     by some delimiters). (Valentin Logvinskiy, Stas).
+  . Fixed bug #65564 (stack-buffer-overflow in DateTimeZone stuff caught
+    by AddressSanitizer). (Remi).
 
 - OPCache:
   . Fixed bug #65561 (Zend Opcache on Solaris 11 x86 needs ZEND_MM_ALIGNMENT=4).
