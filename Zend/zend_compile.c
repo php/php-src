@@ -1962,7 +1962,7 @@ int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace 
 	char *lcname;
 	char *is_compound = memchr(Z_STRVAL(function_name->u.constant), '\\', Z_STRLEN(function_name->u.constant));
 
-	zend_resolve_function_name(function_name, check_namespace TSRMLS_CC);
+	zend_resolve_function_name(function_name, &check_namespace TSRMLS_CC);
 
 	if (check_namespace && CG(current_namespace) && !is_compound) {
 			/* We assume we call function from the current namespace
@@ -2101,7 +2101,7 @@ void zend_do_begin_dynamic_function_call(znode *function_name, int ns_call TSRML
 }
 /* }}} */
 
-void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace, zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC) /* {{{ */
+void zend_resolve_non_class_name(znode *element_name, zend_bool *check_namespace, zend_bool case_sensitive, HashTable *current_import_sub TSRMLS_DC) /* {{{ */
 {
 	znode tmp;
 	int len;
@@ -2115,7 +2115,7 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace,
 		return;
 	}
 
-	if(!check_namespace) {
+	if(!*check_namespace) {
 		return;
 	}
 
@@ -2132,6 +2132,7 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace,
 			element_name->u.constant = **ns;
 			zval_copy_ctor(&element_name->u.constant);
 			efree(lookup_name);
+			*check_namespace = 0;
 			return;
 		}
 		efree(lookup_name);
@@ -2156,6 +2157,7 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace,
 			zend_do_build_namespace_name(&tmp, &tmp, element_name TSRMLS_CC);
 			*element_name = tmp;
 			efree(lookup_name);
+			*check_namespace = 0;
 			return;
 		}
 		efree(lookup_name);
@@ -2174,13 +2176,13 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace,
 }
 /* }}} */
 
-void zend_resolve_function_name(znode *element_name, zend_bool check_namespace TSRMLS_DC) /* {{{ */
+void zend_resolve_function_name(znode *element_name, zend_bool *check_namespace TSRMLS_DC) /* {{{ */
 {
 	zend_resolve_non_class_name(element_name, check_namespace, 0, CG(current_import_function) TSRMLS_CC);
 }
 /* }}} */
 
-void zend_resolve_const_name(znode *element_name, zend_bool check_namespace TSRMLS_DC) /* {{{ */
+void zend_resolve_const_name(znode *element_name, zend_bool *check_namespace TSRMLS_DC) /* {{{ */
 {
 	zend_resolve_non_class_name(element_name, check_namespace, 1, CG(current_import_const) TSRMLS_CC);
 }
@@ -5688,7 +5690,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 				break;
 			}
 
-			zend_resolve_const_name(constant_name, check_namespace TSRMLS_CC);
+			zend_resolve_const_name(constant_name, &check_namespace TSRMLS_CC);
 
 			if(!compound) {
 				fetch_type |= IS_CONSTANT_UNQUALIFIED;
@@ -5700,7 +5702,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 		case ZEND_RT:
 			compound = memchr(Z_STRVAL(constant_name->u.constant), '\\', Z_STRLEN(constant_name->u.constant));
 
-			zend_resolve_const_name(constant_name, check_namespace TSRMLS_CC);
+			zend_resolve_const_name(constant_name, &check_namespace TSRMLS_CC);
 
 			if(zend_constant_ct_subst(result, &constant_name->u.constant, 1 TSRMLS_CC)) {
 				break;
