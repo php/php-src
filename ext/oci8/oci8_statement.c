@@ -53,11 +53,11 @@ php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char
 		/* do not allocate stmt handle for refcursors, we'll get it from OCIStmtPrepare2() */
 		PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **)&(statement->stmt), OCI_HTYPE_STMT, 0, NULL));
 	} else {
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 		if (DTRACE_OCI8_SQLTEXT_ENABLED()) {
 			DTRACE_OCI8_SQLTEXT(query);
 		}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 	}
 			
 	PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **)&(statement->err), OCI_HTYPE_ERROR, 0, NULL));
@@ -488,11 +488,11 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 		case OCI_DESCRIBE_ONLY:
 		case OCI_DEFAULT:
 			/* only these are allowed */
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 			if (DTRACE_OCI8_EXECUTE_MODE_ENABLED()) {
 				DTRACE_OCI8_EXECUTE_MODE(mode);
 			}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 			break;
 		default:
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid execute mode given: %d", mode);
