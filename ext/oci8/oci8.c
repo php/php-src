@@ -1354,6 +1354,11 @@ PHP_MINFO_FUNCTION(oci)
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "OCI8 Support", "enabled");
+#if defined(HAVE_OCI8_DTRACE)
+	php_info_print_table_row(2, "OCI8 DTrace Support", "enabled");
+#else
+	php_info_print_table_row(2, "OCI8 DTrace Support", "disabled");
+#endif
 	php_info_print_table_row(2, "OCI8 Version", PHP_OCI8_VERSION);
 	php_info_print_table_row(2, "Revision", "$Id$");
 
@@ -1361,6 +1366,8 @@ PHP_MINFO_FUNCTION(oci)
 	php_oci_client_get_version(&ver TSRMLS_CC);
 	php_info_print_table_row(2, "Oracle Run-time Client Library Version", ver);
 	efree(ver);
+#else
+	php_info_print_table_row(2, "Oracle Run-time Client Library Version", "Unknown");
 #endif
 #if	defined(OCI_MAJOR_VERSION) && defined(OCI_MINOR_VERSION)
 	snprintf(buf, sizeof(buf), "%d.%d", OCI_MAJOR_VERSION, OCI_MINOR_VERSION);
@@ -1383,6 +1390,7 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "Libraries Used", PHP_OCI8_DEF_SHARED_LIBADD);
 #endif
 #endif
+
 
 	php_info_print_table_end();
 
@@ -1467,11 +1475,11 @@ static void php_oci_pconnection_list_np_dtor(zend_rsrc_list_entry *entry TSRMLS_
 			OCI_G(num_persistent)--;
 		}
 
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 		if (DTRACE_OCI8_CONNECT_P_DTOR_CLOSE_ENABLED()) {
 			DTRACE_OCI8_CONNECT_P_DTOR_CLOSE(connection);
 		}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 	} else {
 		/*
 		 * Release the connection to underlying pool.  We do this unconditionally so that
@@ -1484,11 +1492,11 @@ static void php_oci_pconnection_list_np_dtor(zend_rsrc_list_entry *entry TSRMLS_
 		 */
 		php_oci_connection_release(connection TSRMLS_CC);
 
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 		if (DTRACE_OCI8_CONNECT_P_DTOR_RELEASE_ENABLED()) {
 			DTRACE_OCI8_CONNECT_P_DTOR_RELEASE(connection);
 		}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 	}
 }
 /* }}} */
@@ -1687,11 +1695,11 @@ sb4 php_oci_error(OCIError *err_p, sword status TSRMLS_DC)
 			break;
 	}
 
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_ERROR_ENABLED()) {
 		DTRACE_OCI8_ERROR(status, errcode);
 	}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 
 	return errcode;
 }
@@ -1771,11 +1779,11 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 		return;
 	}
 
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CONNECT_ENTRY_ENABLED()) {
 		DTRACE_OCI8_CONNECT_ENTRY(username, dbname, charset, session_mode, persistent, exclusive);
 	}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 
 	if (!charset_len) {
 		charset = NULL;
@@ -1783,11 +1791,11 @@ void php_oci_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent, int exclus
 
 	connection = php_oci_do_connect_ex(username, username_len, password, password_len, NULL, 0, dbname, dbname_len, charset, session_mode, persistent, exclusive TSRMLS_CC);
 
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CONNECT_RETURN_ENABLED()) {
 		DTRACE_OCI8_CONNECT_RETURN(connection);
 	}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 
 
 	if (!connection) {
@@ -1955,11 +1963,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			}
 		}
 
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 		if (DTRACE_OCI8_CONNECT_LOOKUP_ENABLED()) {
 			DTRACE_OCI8_CONNECT_LOOKUP(connection, connection && connection->is_stub ? 1 : 0);
 		}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 
 		/* If we got a pconnection stub, then 'load'(OCISessionGet) the real connection from its
 		 * private spool A connection is a stub if it is only a cached structure and the real
@@ -2186,11 +2194,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		OCI_G(num_links)++;
 	}
 
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CONNECT_TYPE_ENABLED()) {
 		DTRACE_OCI8_CONNECT_TYPE(connection->is_persistent ? 1 : 0, exclusive ? 1 : 0, connection, OCI_G(num_persistent), OCI_G(num_links));
 	}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 
 	return connection;
 }
@@ -2773,11 +2781,11 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 		connection = (php_oci_connection *)le->ptr;
 
 		if (!connection->used_this_request && OCI_G(persistent_timeout) != -1) {
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 			if (DTRACE_OCI8_CONNECT_EXPIRY_ENABLED()) {
 				DTRACE_OCI8_CONNECT_EXPIRY(connection, connection->is_stub ? 1 : 0, connection->idle_expiry, timestamp);
 			}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 			if (connection->idle_expiry < timestamp) {
 				/* connection has timed out */
 				return ZEND_HASH_APPLY_REMOVE;
@@ -2913,11 +2921,11 @@ exit_create_spool:
 		PHP_OCI_CALL(OCIHandleFree, ((dvoid *) spoolAuth, (ub4) OCI_HTYPE_AUTHINFO));
 	}
 
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_SESSPOOL_CREATE_ENABLED()) {
 		DTRACE_OCI8_SESSPOOL_CREATE(session_pool);
 	}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 
 	return session_pool;
 }
@@ -3241,11 +3249,11 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 		connection->using_spool = 1;
 	}
 
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_SESSPOOL_TYPE_ENABLED()) {
 		DTRACE_OCI8_SESSPOOL_TYPE(session_pool ? 1 : 0, session_pool ? session_pool : connection->private_spool);
 	}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 
 	/* The passed in "connection" can be a cached stub from plist or freshly created. In the former
 	 * case, we do not have to allocate any handles
@@ -3294,7 +3302,7 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 	/* }}} */
 
 	/* {{{ Debug statements */
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_SESSPOOL_STATS_ENABLED()) {
 		ub4 numfree = 0, numbusy = 0, numopen = 0;
 		PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrGet, ((dvoid *)actual_spool->poolh, OCI_HTYPE_SPOOL, (dvoid *)&numopen, (ub4 *)0, OCI_ATTR_SPOOL_OPEN_COUNT, OCI_G(err)));
@@ -3302,7 +3310,7 @@ static int php_oci_create_session(php_oci_connection *connection, php_oci_spool 
 		numfree = numopen - numbusy;	/* number of free connections in the pool */
 		DTRACE_OCI8_SESSPOOL_STATS(numfree, numbusy, numopen);
 	}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 	/* }}} */
 
 		/* Ping loop: Ping and loop till we get a good connection. When a database instance goes
@@ -3471,11 +3479,11 @@ static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh TS
  */
 void php_oci_dtrace_check_connection(php_oci_connection *connection, sword errcode, ub4 serverStatus)
 {
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CHECK_CONNECTION_ENABLED()) {
 		DTRACE_OCI8_CHECK_CONNECTION(connection, connection && connection->is_open ? 1 : 0, (int)errcode, (unsigned long)serverStatus);
 	}
-#endif /* HAVE_DTRACE */
+#endif /* HAVE_OCI8_DTRACE */
 }
 /* }}} */
 

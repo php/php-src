@@ -44,7 +44,7 @@
 #  endif
 # endif /* osf alpha */
 
-#ifdef HAVE_DTRACE
+#ifdef HAVE_OCI8_DTRACE
 #include "oci8_dtrace_gen.h"
 #endif
 
