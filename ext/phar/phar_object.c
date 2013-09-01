@@ -2003,7 +2003,7 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 	const char *oldname = NULL;
 	char *oldpath = NULL;
 	char *basename = NULL, *basepath = NULL;
-	char *newname = NULL, *newpath = NULL;
+	char *newbasename = NULL, *newname = NULL, *newpath = NULL;
 	char *oldname_ext = NULL;
 	zval *ret, arg1;
 	zend_class_entry *ce;
@@ -2095,8 +2095,8 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 		oldname_ext = strstr(basename, ".");
 	}
 
-	newname = strndup(basename, (oldname_ext - basename));
-	spprintf(&newname, 0, "%s.%s", newname, ext);
+	newbasename = estrndup(basename, (oldname_ext - basename));
+	spprintf(&newname, 0, "%s.%s", newbasename, ext);
 	efree(basename);
 
 	basepath = estrndup(oldpath, (strlen(oldpath) - oldname_len));
@@ -2104,6 +2104,7 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 	phar->fname = newpath;
 	phar->ext = newpath + phar->fname_len - strlen(ext) - 1;
 	efree(basepath);
+    efree(newbasename);
 	efree(newname);
 
 	if (PHAR_G(manifest_cached) && NULL != (pphar = zend_hash_str_find_ptr(&cached_phars, newpath, phar->fname_len))) {
