@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Improved IS_VAR operands fetching. (Laruence, Dmitry)
   . Implemented internal operator overloading
     (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
+  . Made calls from incompatible context issue an E_DEPRECATED warning instead
+    of E_STRICT (phase 1 of RFC: https://wiki.php.net/rfc/incompat_ctx).
+	(Gustavo)
 
 - Session:
   . Fixed Bug #65315 (session.hash_function silently fallback to default md5)
