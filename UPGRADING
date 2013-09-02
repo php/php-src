@@ -35,6 +35,9 @@ PHP X.Y UPGRADE NOTES
 3. Deprecated Functionality
 ========================================
 
+- Incompatible context calls:
+  Instance calls from an incompatible context are now deprecated and issue
+  E_DEPRECATED instead of E_STRICT. See https://wiki.php.net/rfc/incompat_ctx
 
 ========================================
 4. Changed Functions
