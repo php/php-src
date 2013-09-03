@@ -27,7 +27,7 @@ provider php {
 	probe oci8__connect__p__dtor__close(void *connection);
 	probe oci8__connect__p__dtor__release(void *connection);
 	probe oci8__connect__lookup(void *connection, int is_stub);
-	probe oci8__connect__expiry(void *connection, int is_stub, time_t idle_expiry, time_t timestamp);
+	probe oci8__connect__expiry(void *connection, int is_stub, long idle_expiry, long timestamp);
 	probe oci8__connect__type(int persistent, int exclusive, void *connection, long num_persistent, long num_connections);
 	probe oci8__sesspool__create(void *session_pool);
 	probe oci8__sesspool__stats(unsigned long free, unsigned long busy, unsigned long open);
