@@ -25,6 +25,7 @@
 
 PHP_FUNCTION(stream_socket_client);
 PHP_FUNCTION(stream_socket_server);
+PHP_FUNCTION(stream_socket_listen);
 PHP_FUNCTION(stream_socket_accept);
 PHP_FUNCTION(stream_socket_get_name);
 PHP_FUNCTION(stream_socket_recvfrom);
