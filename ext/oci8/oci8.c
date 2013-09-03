@@ -2783,7 +2783,7 @@ static int php_oci_persistent_helper(zend_rsrc_list_entry *le TSRMLS_DC)
 		if (!connection->used_this_request && OCI_G(persistent_timeout) != -1) {
 #ifdef HAVE_OCI8_DTRACE
 			if (DTRACE_OCI8_CONNECT_EXPIRY_ENABLED()) {
-				DTRACE_OCI8_CONNECT_EXPIRY(connection, connection->is_stub ? 1 : 0, connection->idle_expiry, timestamp);
+				DTRACE_OCI8_CONNECT_EXPIRY(connection, connection->is_stub ? 1 : 0, (long)connection->idle_expiry, (long)timestamp);
 			}
 #endif /* HAVE_OCI8_DTRACE */
 			if (connection->idle_expiry < timestamp) {
