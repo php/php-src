@@ -6,3 +6,4 @@
 #define PHP_EXTRA_VERSION "-dev"
 #define PHP_VERSION "5.6.0-dev"
 #define PHP_VERSION_ID 50600
+
