@@ -59,7 +59,7 @@ PHP_FUNCTION(header_remove)
 	                          &ctr.line_len) == FAILURE)
 		return;
 
-	sapi_header_op(ZEND_NUM_ARGS() == 0 ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr TSRMLS_CC);
+	sapi_header_op(ctr.line == NULL ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr TSRMLS_CC);
 }
 /* }}} */
 

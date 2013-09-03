@@ -417,7 +417,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "The ini setting hash_bits_per_character is out of range (should be 4, 5, or 6) - using 4 for now");
 	}
-	
+
 	outid = emalloc((size_t)((digest_len + 2) * ((8.0f / PS(hash_bits_per_character)) + 0.5)));
 	j = (int) (bin_to_readable((char *)digest, digest_len, outid, (char)PS(hash_bits_per_character)) - outid);
 	efree(digest);
@@ -1861,6 +1861,12 @@ static PHP_FUNCTION(session_set_save_handler)
 	if (zend_parse_parameters(argc TSRMLS_CC, "+", &args, &num_args) == FAILURE) {
 		return;
 	}
+	if(num_args != 6 && num_args != 7) {
+		if(args) {
+			efree(args);
+		}
+		WRONG_PARAM_COUNT;
+	}
 
 	/* remove shutdown function */
 	remove_user_shutdown_function("session_shutdown", sizeof("session_shutdown") TSRMLS_CC);
@@ -1875,7 +1881,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		}
 		efree(name);
 	}
-	
+
 	if (PS(mod) && PS(mod) != &ps_mod_user) {
 		zend_alter_ini_entry("session.save_handler", sizeof("session.save_handler"), "user", sizeof("user")-1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
 	}
@@ -2005,15 +2011,14 @@ static PHP_FUNCTION(session_cache_limiter)
 static PHP_FUNCTION(session_cache_expire)
 {
 	zval **expires = NULL;
-	int argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "|Z", &expires) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|Z", &expires) == FAILURE) {
 		return;
 	}
 
 	RETVAL_LONG(PS(cache_expire));
 
-	if (argc == 1) {
+	if (expires != NULL) {
 		convert_to_string_ex(expires);
 		zend_alter_ini_entry("session.cache_expire", sizeof("session.cache_expire"), Z_STRVAL_PP(expires), Z_STRLEN_PP(expires), ZEND_INI_USER, ZEND_INI_STAGE_RUNTIME);
 	}
@@ -2728,12 +2733,12 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 		case MULTIPART_EVENT_FILE_START: {
 			multipart_event_file_start *data = (multipart_event_file_start *) event_data;
 
-			/* Do nothing when $_POST["PHP_SESSION_UPLOAD_PROGRESS"] is not set 
+			/* Do nothing when $_POST["PHP_SESSION_UPLOAD_PROGRESS"] is not set
 			 * or when we have no session id */
 			if (!Z_TYPE(progress->sid) || !progress->key.c) {
 				break;
 			}
-			
+
 			/* First FILE_START event, initializing data */
 			if (!progress->data) {
 
@@ -2783,7 +2788,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			add_assoc_zval_ex(progress->current_file, "bytes_processed", sizeof("bytes_processed"), progress->current_file_bytes_processed);
 
 			add_next_index_zval(progress->files, progress->current_file);
-			
+
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
 			php_session_rfc1867_update(progress, 0 TSRMLS_CC);
@@ -2795,7 +2800,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			if (!Z_TYPE(progress->sid) || !progress->key.c) {
 				break;
 			}
-			
+
 			Z_LVAL_P(progress->current_file_bytes_processed) = data->offset + data->length;
 			Z_LVAL_P(progress->post_bytes_processed) = data->post_bytes_processed;
 
@@ -2808,7 +2813,7 @@ static int php_session_rfc1867_callback(unsigned int event, void *event_data, vo
 			if (!Z_TYPE(progress->sid) || !progress->key.c) {
 				break;
 			}
-			
+
 			if (data->temp_filename) {
 				add_assoc_string_ex(progress->current_file, "tmp_name",  sizeof("tmp_name"), data->temp_filename, 1);
 			}

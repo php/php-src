@@ -775,13 +775,13 @@ static void php_mysql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	} else {
 		/* mysql_pconnect does not support new_link parameter */
 		if (persistent) {
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!l", &host_and_port, &host_len,
+			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!l", &host_and_port, &host_len,
 									&user, &user_len, &passwd, &passwd_len,
 									&client_flags)==FAILURE) {
 				return;
         	}
 		} else {
-			if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!bl", &host_and_port, &host_len,
+			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, ZEND_NUM_ARGS() TSRMLS_CC, "|s!s!s!bl", &host_and_port, &host_len,
 										&user, &user_len, &passwd, &passwd_len,
 										&new_link, &client_flags)==FAILURE) {
 				return;
@@ -1250,7 +1250,7 @@ PHP_FUNCTION(mysql_info)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (mysql_link == NULL) {
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
 	}
@@ -1277,7 +1277,7 @@ PHP_FUNCTION(mysql_thread_id)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (mysql_link == NULL) {
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
 	}
@@ -1303,7 +1303,7 @@ PHP_FUNCTION(mysql_stat)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (mysql_link == NULL) {
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
 	}
@@ -1335,7 +1335,7 @@ PHP_FUNCTION(mysql_client_encoding)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (mysql_link == NULL) {
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
 	}
@@ -1360,7 +1360,7 @@ PHP_FUNCTION(mysql_set_charset)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 1) {
+	if (mysql_link == NULL) {
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
 	}
@@ -1718,7 +1718,7 @@ PHP_FUNCTION(mysql_list_processes)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (mysql_link == NULL) {
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
 	}
@@ -1866,7 +1866,7 @@ PHP_FUNCTION(mysql_real_escape_string)
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 1) {
+	if (mysql_link == NULL) {
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
 	}
@@ -2073,7 +2073,7 @@ static void php_mysql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, long result_type,
 			return;
 		}
 
-		if (ZEND_NUM_ARGS() < 2) {
+		if (class_name == NULL) {
 			ce = zend_standard_class_def;
 		} else {
 			ce = zend_fetch_class(class_name, class_name_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
@@ -2668,11 +2668,12 @@ PHP_FUNCTION(mysql_ping)
 	int             id         = -1;
 	php_mysql_conn *mysql;
 
-	if (0 == ZEND_NUM_ARGS()) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &mysql_link)==FAILURE) {
+		return;
+	}
+	if (mysql_link == NULL) {
 		id = php_mysql_get_default_link(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 		CHECK_LINK(id);
-	} else if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r", &mysql_link)==FAILURE) {
-		return;
 	}
 
 	ZEND_FETCH_RESOURCE2(mysql, php_mysql_conn *, &mysql_link, id, "MySQL-Link", le_link, le_plink);

@@ -23,7 +23,8 @@
 /* get_break_interator: get a break iterator from the global structure */
 UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status TSRMLS_DC );
 
-void grapheme_substr_ascii(char *str, int32_t str_len, int32_t f, int32_t l, int argc, char **sub_str, int *sub_str_len);
+void
+grapheme_substr_ascii(char *str, int32_t str_len, int32_t f, int32_t l, char **sub_str, int *sub_str_len);
 
 int grapheme_strrpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int f_ignore_case TSRMLS_DC);
 
@@ -41,7 +42,8 @@ int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset);
 
 int32_t grapheme_strrpos_ascii(unsigned char *haystack, int32_t haystack_len, unsigned char *needle, int32_t needle_len, int32_t offset);
 
-UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status TSRMLS_DC );
+UBreakIterator*
+grapheme_get_break_iterator(void *stack_buffer, UErrorCode *status TSRMLS_DC );
 
 /* OUTSIDE_STRING: check if (possibly negative) long offset is outside the string with int32_t length */
 #define OUTSIDE_STRING(offset, max_len) ( offset <= INT32_MIN || offset > INT32_MAX || (offset < 0 ? -offset > (long) max_len : offset >= (long) max_len) )

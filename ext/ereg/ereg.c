@@ -14,7 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
    |          Jim Winstead <jimw@php.net>                                 |
-   |          Jaakko Hyvätti <jaakko@hyvatti.iki.fi>                      | 
+   |          Jaakko Hyvï¿½tti <jaakko@hyvatti.iki.fi>                      |
    +----------------------------------------------------------------------+
  */
 /* $Id$ */
@@ -29,7 +29,7 @@
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ereg, 0, 0, 2)
 	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string) 
+	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(1, registers) /* ARRAY_INFO(1, registers, 1) */
 ZEND_END_ARG_INFO()
 
@@ -41,8 +41,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_split, 0, 0, 2)
 	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, string) 
-	ZEND_ARG_INFO(0, limit)  
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, limit)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_sql_regcase, 0)
@@ -204,7 +204,7 @@ static int _php_regcomp(regex_t *preg, const char *pattern, int cflags TSRMLS_DC
 }
 /* }}} */
 
-static void _free_ereg_cache(reg_cache *rc) 
+static void _free_ereg_cache(reg_cache *rc)
 {
 	regfree(&rc->preg);
 }
@@ -300,17 +300,16 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	off_t start, end;
 	char *buf = NULL;
 	char *string = NULL;
-	int   argc = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "Zs|Z", &regex, &findin, &findin_len, &array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zs|Z", &regex, &findin, &findin_len, &array) == FAILURE) {
 		return;
 	}
 
 	if (icase) {
 		copts |= REG_ICASE;
 	}
-	
-	if (argc == 2) {
+
+	if (array == NULL) {
 		copts |= REG_NOSUB;
 	}
 
@@ -337,7 +336,7 @@ static void php_ereg(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	/* allocate storage for (sub-)expression-matches */
 	subs = (regmatch_t *)ecalloc(sizeof(regmatch_t),re.re_nsub+1);
-	
+
 	/* actually execute the regular expression */
 	err = regexec(&re, string, re.re_nsub+1, subs, 0);
 	if (err && err != REG_NOMATCH) {
@@ -455,7 +454,7 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 			   1) find out how long the string will be, and allocate buf
 			   2) copy the part before match, replacement and backrefs to buf
 
-			   Jaakko Hyvätti <Jaakko.Hyvatti@iki.fi>
+			   Jaakko Hyvï¿½tti <Jaakko.Hyvatti@iki.fi>
 			   */
 
 			new_l = strlen(buf) + subs[0].rm_so; /* part before the match */
@@ -491,7 +490,7 @@ PHP_EREG_API char *php_ereg_replace(const char *pattern, const char *replace, co
 					if (subs[walk[1] - '0'].rm_so > -1 && subs[walk[1] - '0'].rm_eo > -1
 						/* this next case shouldn't happen. it does. */
 						&& subs[walk[1] - '0'].rm_so <= subs[walk[1] - '0'].rm_eo) {
-						
+
 						tmp = subs[walk[1] - '0'].rm_eo - subs[walk[1] - '0'].rm_so;
 						memcpy (walkbuf, &string[pos + subs[walk[1] - '0'].rm_so], tmp);
 						walkbuf += tmp;
@@ -556,7 +555,7 @@ static void php_do_ereg_replace(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *replace;
 	char *ret;
 	int arg_string_len;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ZZs", &arg_pattern, &arg_replace, &arg_string, &arg_string_len) == FAILURE) {
 		return;
 	}
@@ -664,9 +663,9 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		} else if (subs[0].rm_so == 0 && subs[0].rm_eo == 0) {
 			/* No more matches */
 			regfree(&re);
-			
+
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid Regular Expression");
-			
+
 			zend_hash_destroy(Z_ARRVAL_P(return_value));
 			efree(Z_ARRVAL_P(return_value));
 			RETURN_FALSE;
@@ -675,7 +674,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 			/* make a copy of the substring */
 			size = subs[0].rm_so;
-		
+
 			/* add it to the array */
 			add_next_index_stringl(return_value, strp, size, 1);
 
@@ -701,7 +700,7 @@ static void php_split(INTERNAL_FUNCTION_PARAMETERS, int icase)
 
 	/* otherwise we just have one last element to add to the array */
 	size = endp - strp;
-	
+
 	add_next_index_stringl(return_value, strp, size, 1);
 
 	regfree(&re);
@@ -738,9 +737,9 @@ PHP_EREG_API PHP_FUNCTION(sql_regcase)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &string, &string_len) == FAILURE) {
 		return;
 	}
-	
+
 	tmp = safe_emalloc(string_len, 4, 1);
-	
+
 	for (i = j = 0; i < string_len; i++) {
 		c = (unsigned char) string[i];
 		if (isalpha(c)) {

@@ -1115,7 +1115,7 @@ static void _extension_string(string *str, zend_module_entry *module, char *inde
 		while (func->fname) {
 			int fname_len = strlen(func->fname);
 			char *lc_name = zend_str_tolower_dup(func->fname, fname_len);
-		
+
 			if (zend_hash_find(EG(function_table), lc_name, fname_len + 1, (void**) &fptr) == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Internal error: Cannot find extension function %s in global function table", func->fname);
 				func++;
@@ -3006,8 +3006,8 @@ ZEND_METHOD(reflection_method, invokeArgs)
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
 	fcc.object_ptr = object;
-	
-	/* 
+
+	/*
 	 * Copy the zend_function when calling via handler (e.g. Closure::__invoke())
 	 */
 	if (mptr->type == ZEND_INTERNAL_FUNCTION &&
@@ -3770,17 +3770,13 @@ ZEND_METHOD(reflection_class, getMethods)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	long filter = 0;
+	/* If no parameters given, default to "return all" */
+	long filter = ZEND_ACC_PPP_MASK | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL | ZEND_ACC_STATIC;
 	int argc = ZEND_NUM_ARGS();
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (argc) {
-		if (zend_parse_parameters(argc TSRMLS_CC, "|l", &filter) == FAILURE) {
-			return;
-		}
-	} else {
-		/* No parameters given, default to "return all" */
-		filter = ZEND_ACC_PPP_MASK | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL | ZEND_ACC_STATIC;
+	if (zend_parse_parameters(argc TSRMLS_CC, "|l", &filter) == FAILURE) {
+		return;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -3960,17 +3956,13 @@ ZEND_METHOD(reflection_class, getProperties)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	long filter = 0;
+	/* If no parameters given, default to "return all" */
+	long filter = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC;
 	int argc = ZEND_NUM_ARGS();
 
 	METHOD_NOTSTATIC(reflection_class_ptr);
-	if (argc) {
-		if (zend_parse_parameters(argc TSRMLS_CC, "|l", &filter) == FAILURE) {
-			return;
-		}
-	} else {
-		/* No parameters given, default to "return all" */
-		filter = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC;
+	if (zend_parse_parameters(argc TSRMLS_CC, "|l", &filter) == FAILURE) {
+		return;
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -4292,7 +4284,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 	reflection_object *intern;
 	zend_class_entry *ce, *old_scope;
 	int argc = 0;
-	HashTable *args;
+	HashTable *args = NULL;
 	zend_function *constructor;
 
 
@@ -4302,8 +4294,7 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|h", &args) == FAILURE) {
 		return;
 	}
-
-	if (ZEND_NUM_ARGS() > 0) {
+	if (args != NULL) {
 		argc = args->nNumOfElements;
 	}
 
@@ -4365,7 +4356,9 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		if (params) {
 			efree(params);
 		}
-	} else if (argc) {
+	} else if (args == NULL || !argc) {
+		object_init_ex(return_value, ce);
+	} else {
 		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Class %s does not have a constructor, so you cannot pass any constructor arguments", ce->name);
 	}
 }
@@ -5280,7 +5273,7 @@ ZEND_METHOD(reflection_extension, getFunctions)
 		while (func->fname) {
 			int fname_len = strlen(func->fname);
 			char *lc_name = zend_str_tolower_dup(func->fname, fname_len);
-			
+
 			if (zend_hash_find(EG(function_table), lc_name, fname_len + 1, (void**) &fptr) == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Internal error: Cannot find extension function %s in global function table", func->fname);
 				func++;

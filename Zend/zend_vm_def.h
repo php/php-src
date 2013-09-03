@@ -3051,7 +3051,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV)
 	}
 }
 
-ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
+ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP|UNUSED, ANY)
 {
 	USE_OPLINE
 
@@ -3060,7 +3060,9 @@ ZEND_VM_HANDLER(65, ZEND_SEND_VAL, CONST|TMP, ANY)
 		&& ARG_MUST_BE_SENT_BY_REF(EX(call)->fbc, opline->op2.opline_num)) {
 			zend_error_noreturn(E_ERROR, "Cannot pass parameter %d by reference", opline->op2.opline_num);
 	}
-	{
+	if(OP1_TYPE == IS_UNUSED) {
+		zend_vm_stack_push(NULL TSRMLS_CC);
+	} else {
 		zval *valptr;
 		zval *value;
 		zend_free_op free_op1;

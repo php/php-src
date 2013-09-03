@@ -49,17 +49,13 @@ grapheme_close_global_iterator( TSRMLS_D )
 /* }}} */
 
 /* {{{ grapheme_substr_ascii f='from' - starting point, l='length' */
-void grapheme_substr_ascii(char *str, int str_len, int f, int l, int argc, char **sub_str, int *sub_str_len)
+void grapheme_substr_ascii(char *str, int32_t str_len, int32_t f, int32_t l, char **sub_str, int *sub_str_len)
 {
     *sub_str = NULL;
 
-    if (argc > 2) {
-        if ((l < 0 && -l > str_len)) {
-            return;
-        } else if (l > str_len) {
-            l = str_len;
-        }
-    } else {
+    if ((l < 0 && -l > str_len)) {
+        return;
+    } else if (l > str_len) {
         l = str_len;
     }
 
@@ -175,10 +171,10 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 		offset_pos = grapheme_get_haystack_offset(bi, offset);
 		if(offset_pos == -1) {
 			status = U_ILLEGAL_ARGUMENT_ERROR;
-			STRPOS_CHECK_STATUS(status, "Invalid search offset");	
+			STRPOS_CHECK_STATUS(status, "Invalid search offset");
 		}
 		status = U_ZERO_ERROR;
-		usearch_setOffset(src, offset_pos, &status);	
+		usearch_setOffset(src, offset_pos, &status);
 		STRPOS_CHECK_STATUS(status, "Invalid search offset");
 	}
 
@@ -243,17 +239,17 @@ int grapheme_split_string(const UChar *text, int32_t text_length, int boundary_a
 	if( U_FAILURE(status) ) {
 		return -1;
 	}
-	
+
 	ubrk_setText(bi, text, text_length,	&status);
 
 	pos = 0;
-	
+
 	for ( ret_len = 0; pos != UBRK_DONE; ) {
-	
+
 		pos = ubrk_next(bi);
-		
+
 		if ( pos != UBRK_DONE ) {
-		
+
 			if ( NULL != boundary_array && ret_len < boundary_array_len ) {
 				boundary_array[ret_len] = pos;
 			}
@@ -261,9 +257,9 @@ int grapheme_split_string(const UChar *text, int32_t text_length, int boundary_a
 			ret_len++;
 		}
 	}
-	 		
+
 	ubrk_close(bi);
-	
+
 	return ret_len;
 }
 /* }}} */
@@ -274,19 +270,19 @@ int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t stri
 	int ret_len = 0;
 	int pos = 0;
 	UErrorCode		status = U_ZERO_ERROR;
-	
+
 	ubrk_setText(bi, string, string_len, &status);
 
 	do {
-	
+
 		pos = ubrk_next(bi);
-		
+
 		if ( UBRK_DONE != pos ) {
 			ret_len++;
 		}
-		
+
 	} while ( UBRK_DONE != pos );
-	
+
 	return ret_len;
 }
 /* }}} */
@@ -302,7 +298,7 @@ int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 	if ( 0 == offset ) {
 		return 0;
 	}
-	
+
 	if ( offset < 0 ) {
 		iter_op = ubrk_previous;
 		ubrk_last(bi); /* one past the end */
@@ -312,13 +308,13 @@ int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 		iter_op = ubrk_next;
 		iter_incr = -1;
 	}
-	
+
 	pos = 0;
-	
+
 	while ( pos != UBRK_DONE && offset != 0 ) {
-	
+
 		pos = iter_op(bi);
-		
+
 		if ( UBRK_DONE != pos ) {
 			offset += iter_incr;
 		}
@@ -327,7 +323,7 @@ int grapheme_get_haystack_offset(UBreakIterator* bi, int32_t offset)
 	if ( offset != 0 ) {
 		return -1;
 	}
-	
+
 	return pos;
 }
 /* }}} */
@@ -382,7 +378,7 @@ UBreakIterator* grapheme_get_break_iterator(void *stack_buffer, UErrorCode *stat
 
 	if ( NULL == global_break_iterator ) {
 
-		global_break_iterator = ubrk_open(UBRK_CHARACTER, 
+		global_break_iterator = ubrk_open(UBRK_CHARACTER,
 											NULL,	/* icu default locale - locale has no effect on this iterator */
 											NULL,	/* text not set in global iterator */
 											0,		/* text length = 0 */

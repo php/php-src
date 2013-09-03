@@ -206,18 +206,15 @@ static void php_str2num(bc_num *num, char *str TSRMLS_DC)
 PHP_FUNCTION(bcadd)
 {
 	char *left, *right;
-	long scale_param = 0;
-	bc_num first, second, result;
 	int left_len, right_len;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	long scale_param = BCG(bc_precision);
+	bc_num first, second, result;
+	int scale;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-	
-	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
-	}
+	scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
@@ -246,17 +243,14 @@ PHP_FUNCTION(bcsub)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale_param = 0;
+	long scale_param = BCG(bc_precision);
 	bc_num first, second, result;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-	
-	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
-	}
+	scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
@@ -285,17 +279,14 @@ PHP_FUNCTION(bcmul)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale_param = 0;
+	long scale_param = BCG(bc_precision);
 	bc_num first, second, result;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-	
-	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
-	}
+	scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 	
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
@@ -324,17 +315,14 @@ PHP_FUNCTION(bcdiv)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale_param = 0;
+	long scale_param = BCG(bc_precision);
 	bc_num first, second, result;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-	
-	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
-	}
+	scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 	
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
@@ -412,6 +400,7 @@ PHP_FUNCTION(bcpowmod)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sss|l", &left, &left_len, &right, &right_len, &modulous, &modulous_len, &scale) == FAILURE) {
 		return;
 	}
+	scale_int = (int) ((int)scale < 0) ? 0 : scale;
 
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
@@ -420,8 +409,6 @@ PHP_FUNCTION(bcpowmod)
 	php_str2num(&first, left TSRMLS_CC);
 	php_str2num(&second, right TSRMLS_CC);
 	php_str2num(&mod, modulous TSRMLS_CC);
-
-	scale_int = (int) ((int)scale < 0) ? 0 : scale;
 
 	if (bc_raisemod(first, second, mod, &result, scale_int TSRMLS_CC) != -1) {
 		if (result->n_scale > scale) {
@@ -448,17 +435,14 @@ PHP_FUNCTION(bcpow)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale_param = 0;
+	long scale_param = BCG(bc_precision);
 	bc_num first, second, result;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	int scale;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-	
-	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
-	}
+	scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);
@@ -487,17 +471,14 @@ PHP_FUNCTION(bcsqrt)
 {
 	char *left;
 	int left_len;
-	long scale_param = 0;
-	bc_num result;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	long scale_param = BCG(bc_precision);
+	bc_num first, second, result;
+	int scale;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|l", &left, &left_len, &scale_param) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &left, &left_len, &scale_param) == FAILURE) {
 		return;
 	}
-	
-	if (argc == 2) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
-	}
+	scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 
 	bc_init_num(&result TSRMLS_CC);
 	php_str2num(&result, left TSRMLS_CC);
@@ -524,17 +505,14 @@ PHP_FUNCTION(bccomp)
 {
 	char *left, *right;
 	int left_len, right_len;
-	long scale_param = 0;
-	bc_num first, second;
-	int scale = BCG(bc_precision), argc = ZEND_NUM_ARGS();
+	long scale_param = BCG(bc_precision);
+	bc_num first, second, result;
+	int scale;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", &left, &left_len, &right, &right_len, &scale_param) == FAILURE) {
 		return;
 	}
-	
-	if (argc == 3) {
-		scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
-	}
+	scale = (int) ((int)scale_param < 0) ? 0 : scale_param;
 
 	bc_init_num(&first TSRMLS_CC);
 	bc_init_num(&second TSRMLS_CC);

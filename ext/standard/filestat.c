@@ -721,6 +721,8 @@ PHP_FUNCTION(touch)
 	struct utimbuf *newtime = &newtimebuf;
 	php_stream_wrapper *wrapper;
 
+	filetime = fileatime = time(NULL);
+
 	if (zend_parse_parameters(argc TSRMLS_CC, "p|ll", &filename, &filename_len, &filetime, &fileatime) == FAILURE) {
 		return;
 	}
@@ -734,7 +736,7 @@ PHP_FUNCTION(touch)
 #ifdef HAVE_UTIME_NULL
 			newtime = NULL;
 #else
-			newtime->modtime = newtime->actime = time(NULL);
+			newtime->modtime = newtime->actime = filetime;
 #endif
 			break;
 		case 2:

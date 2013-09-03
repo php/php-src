@@ -2128,7 +2128,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_stream_set_write_buffer, 0)
 	ZEND_ARG_INFO(0, fp)
 	ZEND_ARG_INFO(0, buffer)
 ZEND_END_ARG_INFO()
-		
+
 ZEND_BEGIN_ARG_INFO(arginfo_stream_set_chunk_size, 0)
 	ZEND_ARG_INFO(0, fp)
 	ZEND_ARG_INFO(0, chunk_size)
@@ -2323,7 +2323,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_lcfirst, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
-	
+
 ZEND_BEGIN_ARG_INFO(arginfo_ucwords, 0)
 	ZEND_ARG_INFO(0, str)
 ZEND_END_ARG_INFO()
@@ -3473,7 +3473,7 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p TSRMLS_DC) /* 
 	BG(user_tick_functions) = NULL;
 	BG(user_filter_map) = NULL;
 	BG(serialize_lock) = 0;
-	
+
 	memset(&BG(serialize), 0, sizeof(BG(serialize)));
 	memset(&BG(unserialize), 0, sizeof(BG(unserialize)));
 
@@ -3542,7 +3542,7 @@ PHPAPI double php_get_inf(void) /* {{{ */
 
 #define BASIC_ADD_SUBMODULE(module) \
 	zend_hash_add_empty_element(&basic_submodules, #module, strlen(#module));
-	
+
 #define BASIC_RINIT_SUBMODULE(module) \
 	if (zend_hash_exists(&basic_submodules, #module, strlen(#module))) { \
 		PHP_RINIT(module)(INIT_FUNC_ARGS_PASSTHRU); \
@@ -4031,8 +4031,8 @@ PHP_FUNCTION(getenv)
 		int size;
 
 		SetLastError(0);
-		/*If the given bugger is not large enough to hold the data, the return value is 
-		the buffer size,  in characters, required to hold the string and its terminating 
+		/*If the given bugger is not large enough to hold the data, the return value is
+		the buffer size,  in characters, required to hold the string and its terminating
 		null character. We use this return value to alloc the final buffer. */
 		size = GetEnvironmentVariableA(str, &dummybuf, 0);
 		if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
@@ -4136,7 +4136,7 @@ PHP_FUNCTION(putenv)
 		error_code = SetEnvironmentVariable(pe.key, value);
 #  if _MSC_VER < 1500
 		/* Yet another VC6 bug, unset may return env not found */
-		if (error_code != 0 || 
+		if (error_code != 0 ||
 			(error_code == 0 && GetLastError() == ERROR_ENVVAR_NOT_FOUND)) {
 #  else
 		if (error_code != 0) { /* success */
@@ -4628,7 +4628,7 @@ PHP_FUNCTION(set_magic_quotes_runtime)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &new_setting) == FAILURE) {
 		return;
 	}
-	
+
 	if (new_setting) {
 		php_error_docref(NULL TSRMLS_CC, E_CORE_ERROR, "magic_quotes_runtime is not supported anymore");
 	}
@@ -4678,16 +4678,14 @@ PHP_FUNCTION(error_log)
 {
 	char *message, *opt = NULL, *headers = NULL;
 	int message_len, opt_len = 0, headers_len = 0;
-	int opt_err = 0, argc = ZEND_NUM_ARGS();
+	int opt_err = 0;
 	long erropt = 0;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "s|lps", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lps", &message, &message_len, &erropt, &opt, &opt_len, &headers, &headers_len) == FAILURE) {
 		return;
 	}
 
-	if (argc > 1) {
-		opt_err = erropt;
-	}
+	opt_err = (int)erropt;
 
 	if (_php_error_log_ex(opt_err, message, message_len, opt, headers TSRMLS_CC) == FAILURE) {
 		RETURN_FALSE;
@@ -4870,17 +4868,7 @@ PHP_FUNCTION(call_user_method_array)
 	}
 
 	convert_to_string(callback);
-
-	params_ar = HASH_OF(params);
-	num_elems = zend_hash_num_elements(params_ar);
-	method_args = (zval ***) safe_emalloc(sizeof(zval **), num_elems, 0);
-
-	for (zend_hash_internal_pointer_reset(params_ar);
-		zend_hash_get_current_data(params_ar, (void **) &(method_args[element])) == SUCCESS;
-		zend_hash_move_forward(params_ar)
-	) {
-		element++;
-	}
+	method_args = zend_fcall_create_args(HASH_OF(params), NULL, &num_elems);
 
 	if (call_user_function_ex(EG(function_table), &object, callback, &retval_ptr, num_elems, method_args, 0, NULL TSRMLS_CC) == SUCCESS) {
 		if (retval_ptr) {
@@ -4916,7 +4904,7 @@ PHP_FUNCTION(forward_static_call)
 		instanceof_function(EG(called_scope), fci_cache.calling_scope TSRMLS_CC)) {
 			fci_cache.called_scope = EG(called_scope);
 	}
-	
+
 	if (zend_call_function(&fci, &fci_cache TSRMLS_CC) == SUCCESS && fci.retval_ptr_ptr && *fci.retval_ptr_ptr) {
 		COPY_PZVAL_TO_ZVAL(*return_value, *fci.retval_ptr_ptr);
 	}
@@ -4960,7 +4948,9 @@ void user_shutdown_function_dtor(php_shutdown_function_entry *shutdown_function_
 	int i;
 
 	for (i = 0; i < shutdown_function_entry->arg_count; i++) {
-		zval_ptr_dtor(&shutdown_function_entry->arguments[i]);
+		if(shutdown_function_entry->arguments[i]) {
+			zval_ptr_dtor(&shutdown_function_entry->arguments[i]);
+		}
 	}
 	efree(shutdown_function_entry->arguments);
 }
@@ -4971,7 +4961,9 @@ void user_tick_function_dtor(user_tick_function_entry *tick_function_entry) /* {
 	int i;
 
 	for (i = 0; i < tick_function_entry->arg_count; i++) {
-		zval_ptr_dtor(&tick_function_entry->arguments[i]);
+		if(tick_function_entry->arguments[i]) {
+			zval_ptr_dtor(&tick_function_entry->arguments[i]);
+		}
 	}
 	efree(tick_function_entry->arguments);
 }
@@ -5117,7 +5109,6 @@ PHP_FUNCTION(register_shutdown_function)
 	int i;
 
 	shutdown_function_entry.arg_count = ZEND_NUM_ARGS();
-
 	if (shutdown_function_entry.arg_count < 1) {
 		WRONG_PARAM_COUNT;
 	}
@@ -5130,7 +5121,7 @@ PHP_FUNCTION(register_shutdown_function)
 	}
 
 	/* Prevent entering of anything but valid callback (syntax check only!) */
-	if (!zend_is_callable(shutdown_function_entry.arguments[0], 0, &callback_name TSRMLS_CC)) {
+	if (!shutdown_function_entry.arguments[0] || !zend_is_callable(shutdown_function_entry.arguments[0], 0, &callback_name TSRMLS_CC)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid shutdown callback '%s' passed", callback_name);
 		efree(shutdown_function_entry.arguments);
 		RETVAL_FALSE;
@@ -5141,7 +5132,9 @@ PHP_FUNCTION(register_shutdown_function)
 		}
 
 		for (i = 0; i < shutdown_function_entry.arg_count; i++) {
-			Z_ADDREF_P(shutdown_function_entry.arguments[i]);
+			if(shutdown_function_entry.arguments[i]) {
+				Z_ADDREF_P(shutdown_function_entry.arguments[i]);
+			}
 		}
 		zend_hash_next_index_insert(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry), NULL);
 	}
@@ -5617,7 +5610,7 @@ PHP_FUNCTION(getservbyname)
 	}
 
 
-/* empty string behaves like NULL on windows implementation of 
+/* empty string behaves like NULL on windows implementation of
    getservbyname. Let be portable instead. */
 #ifdef PHP_WIN32
 	if (proto_len == 0) {
@@ -5730,7 +5723,7 @@ PHP_FUNCTION(register_tick_function)
 		RETURN_FALSE;
 	}
 
-	if (!zend_is_callable(tick_fe.arguments[0], 0, &function_name TSRMLS_CC)) {
+	if (!tick_fe.arguments[0] || !zend_is_callable(tick_fe.arguments[0], 0, &function_name TSRMLS_CC)) {
 		efree(tick_fe.arguments);
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid tick callback '%s' passed", function_name);
 		efree(function_name);
@@ -5752,7 +5745,9 @@ PHP_FUNCTION(register_tick_function)
 	}
 
 	for (i = 0; i < tick_fe.arg_count; i++) {
-		Z_ADDREF_P(tick_fe.arguments[i]);
+		if(tick_fe.arguments[i]) {
+			Z_ADDREF_P(tick_fe.arguments[i]);
+		}
 	}
 
 	zend_llist_add_element(BG(user_tick_functions), &tick_fe);
@@ -6045,7 +6040,7 @@ PHP_FUNCTION(parse_ini_string)
 /* }}} */
 
 #if ZEND_DEBUG
-/* This function returns an array of ALL valid ini options with values and 
+/* This function returns an array of ALL valid ini options with values and
  *  is not the same as ini_get_all() which returns only registered ini options. Only useful for devs to debug php.ini scanner/parser! */
 PHP_FUNCTION(config_get_hash) /* {{{ */
 {

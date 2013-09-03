@@ -1630,8 +1630,8 @@ static zend_always_inline zend_execute_data *i_create_execute_data_from_op_array
 		/* copy arguments */
 		*EX(prev_execute_data)->function_state.arguments = (void*)(zend_uintptr_t)args_count;
 		if (args_count > 0) {
-			zval **arg_src = (zval**)zend_vm_stack_get_arg_ex(EG(current_execute_data), 1);
-			zval **arg_dst = (zval**)zend_vm_stack_get_arg_ex(EX(prev_execute_data), 1);
+			zval **arg_src = zend_vm_stack_get_args(EG(current_execute_data));
+			zval **arg_dst = zend_vm_stack_get_args(EX(prev_execute_data));
 			int i;
 
 			for (i = 0; i < args_count; i++) {

@@ -472,7 +472,7 @@ int le_link, le_plink, le_trans;
 
 /* error handling ---------------------------- */
 
-/* {{{ proto string ibase_errmsg(void) 
+/* {{{ proto string ibase_errmsg(void)
    Return error message */
 PHP_FUNCTION(ibase_errmsg)
 {
@@ -488,7 +488,7 @@ PHP_FUNCTION(ibase_errmsg)
 }
 /* }}} */
 
-/* {{{ proto int ibase_errcode(void) 
+/* {{{ proto int ibase_errcode(void)
    Return error code */
 PHP_FUNCTION(ibase_errcode)
 {
@@ -510,7 +510,7 @@ void _php_ibase_error(TSRMLS_D) /* {{{ */
 	ISC_STATUS *statusp = IB_STATUS;
 
 	IBG(sql_code) = isc_sqlcode(IB_STATUS);
-	
+
 	while ((s - IBG(errmsg)) < MAX_ERRMSG - (IBASE_MSGSIZE + 2) && isc_interprete(s, &statusp)) {
 		strcat(IBG(errmsg), " ");
 		s = IBG(errmsg) + strlen(IBG(errmsg));
@@ -559,7 +559,7 @@ void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 	IBDEBUG("Transaction or database link?");
 	if (zend_list_find(Z_LVAL_PP(link_id), &type)) {
 	 	if (type == le_trans) {
-			/* Transaction resource: make sure it refers to one link only, then 
+			/* Transaction resource: make sure it refers to one link only, then
 			   fetch it; database link is stored in ib_trans->db_link[]. */
 			IBDEBUG("Type is le_trans");
 			ZEND_FETCH_RESOURCE(*trans, ibase_trans *, link_id, -1, LE_TRANS, le_trans);
@@ -567,17 +567,17 @@ void _php_ibase_get_link_trans(INTERNAL_FUNCTION_PARAMETERS, /* {{{ */
 				_php_ibase_module_error("Link id is ambiguous: transaction spans multiple connections."
 					TSRMLS_CC);
 				return;
-			}				
+			}
 			*ib_link = (*trans)->db_link[0];
 			return;
 		}
-	} 
+	}
 	IBDEBUG("Type is le_[p]link or id not found");
 	/* Database link resource, use default transaction. */
 	*trans = NULL;
 	ZEND_FETCH_RESOURCE2(*ib_link, ibase_db_link *, link_id, -1, LE_LINK, le_link, le_plink);
 }
-/* }}} */	
+/* }}} */
 
 /* destructors ---------------------- */
 
@@ -600,7 +600,7 @@ static void _php_ibase_commit_link(ibase_db_link *link TSRMLS_DC) /* {{{ */
 				}
 				efree(p->trans); /* default transaction is not a registered resource: clean up */
 			} else {
-				if (p->trans->handle != NULL) { 
+				if (p->trans->handle != NULL) {
 					/* non-default trans might have been rolled back by other call of this dtor */
 					IBDEBUG("Rolling back other transactions...");
 					if (isc_rollback_transaction(IB_STATUS, &p->trans->handle)) {
@@ -620,7 +620,7 @@ static void _php_ibase_commit_link(ibase_db_link *link TSRMLS_DC) /* {{{ */
 		efree(p);
 	}
 	link->tr_list = NULL;
-	
+
 	for (e = link->event_head; e; e = e->event_next) {
 		_php_ibase_free_event(e TSRMLS_CC);
 		e->link = NULL;
@@ -670,7 +670,7 @@ static void _php_ibase_free_trans(zend_rsrc_list_entry *rsrc TSRMLS_DC) /* {{{ *
 {
 	ibase_trans *trans = (ibase_trans *)rsrc->ptr;
 	unsigned short i;
-	
+
 	IBDEBUG("Cleaning up transaction resource...");
 	if (trans->handle != NULL) {
 		IBDEBUG("Rolling back unhandled transaction...");
@@ -702,7 +702,7 @@ static PHP_INI_DISP(php_ibase_password_displayer_cb)
 {
 	TSRMLS_FETCH();
 
-	if ((type == PHP_INI_DISPLAY_ORIG && ini_entry->orig_value) 
+	if ((type == PHP_INI_DISPLAY_ORIG && ini_entry->orig_value)
 			|| (type == PHP_INI_DISPLAY_ACTIVE && ini_entry->value)) {
 		PUTS("********");
 	} else if (!sapi_module.phpinfo_as_text) {
@@ -763,22 +763,22 @@ PHP_MINIT_FUNCTION(ibase)
 	php_ibase_blobs_minit(INIT_FUNC_ARGS_PASSTHRU);
 	php_ibase_events_minit(INIT_FUNC_ARGS_PASSTHRU);
 	php_ibase_service_minit(INIT_FUNC_ARGS_PASSTHRU);
-	
-	return SUCCESS;          
-}                            
-                             
+
+	return SUCCESS;
+}
+
 PHP_MSHUTDOWN_FUNCTION(ibase)
 {
 #ifndef PHP_WIN32
 	/**
-	 * When the Interbase client API library libgds.so is first loaded, it registers a call to 
+	 * When the Interbase client API library libgds.so is first loaded, it registers a call to
 	 * gds__cleanup() with atexit(), in order to clean up after itself when the process exits.
 	 * This means that the library is called at process shutdown, and cannot be unloaded beforehand.
-	 * PHP tries to unload modules after every request [dl()'ed modules], and right before the 
+	 * PHP tries to unload modules after every request [dl()'ed modules], and right before the
 	 * process shuts down [modules loaded from php.ini]. This results in a segfault for this module.
 	 * By NULLing the dlopen() handle in the module entry, Zend omits the call to dlclose(),
 	 * ensuring that the module will remain present until the process exits. However, the functions
-	 * and classes exported by the module will not be available until the module is 'reloaded'. 
+	 * and classes exported by the module will not be available until the module is 'reloaded'.
 	 * When reloaded, dlopen() will return the handle of the already loaded module. The module will
 	 * be unloaded automatically when the process exits.
 	 */
@@ -800,14 +800,14 @@ PHP_RSHUTDOWN_FUNCTION(ibase)
 	RESET_ERRMSG;
 
 	return SUCCESS;
-} 
- 
+}
+
 PHP_MINFO_FUNCTION(ibase)
 {
 	char tmp[64], *s;
 
 	php_info_print_table_start();
-	php_info_print_table_row(2, "Firebird/InterBase Support", 
+	php_info_print_table_row(2, "Firebird/InterBase Support",
 #ifdef COMPILE_DL_INTERBASE
 		"dynamic");
 #else
@@ -845,7 +845,7 @@ PHP_MINFO_FUNCTION(ibase)
 		}
 		php_info_print_table_row(2, "Run-time Client Library Version", s);
 	} while (0);
-#endif			
+#endif
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -854,11 +854,11 @@ PHP_MINFO_FUNCTION(ibase)
 /* }}} */
 
 enum connect_args { DB = 0, USER = 1, PASS = 2, CSET = 3, ROLE = 4, BUF = 0, DLECT = 1, SYNC = 2 };
-	
-static char const dpb_args[] = { 
+
+static char const dpb_args[] = {
 	0, isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name, 0
 };
-	
+
 int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db TSRMLS_DC)
 {
 	short i, dpb_len, buf_len = 257-2;  /* version byte at the front, and a null at the end */
@@ -874,7 +874,7 @@ int _php_ibase_attach_db(char **args, int *len, long *largs, isc_db_handle *db T
 		}
 	}
 	if (largs[BUF] && buf_len > 0) {
-		dpb_len = slprintf(dpb, buf_len, "%c\2%c%c", isc_dpb_num_buffers, 
+		dpb_len = slprintf(dpb, buf_len, "%c\2%c%c", isc_dpb_num_buffers,
 			(char)(largs[BUF] >> 8), (char)(largs[BUF] & 0xff));
 		dpb += dpb_len;
 		buf_len -= dpb_len;
@@ -910,9 +910,9 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			&largs[SYNC])) {
 		RETURN_FALSE;
 	}
-	
+
 	/* restrict to the server/db in the .ini if in safe mode */
-	if ((!len[DB] || PG(sql_safe_mode)) && (c = INI_STR("ibase.default_db"))) { 
+	if ((!len[DB] || PG(sql_safe_mode)) && (c = INI_STR("ibase.default_db"))) {
 		args[DB] = c;
 		len[DB] = strlen(c);
 	}
@@ -928,7 +928,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 		args[CSET] = c;
 		len[CSET] = strlen(c);
 	}
-	
+
 	/* don't want usernames and passwords floating around */
 	PHP_MD5Init(&hash_context);
 	for (i = 0; i < sizeof(args)/sizeof(char*); ++i) {
@@ -938,7 +938,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 		PHP_MD5Update(&hash_context,(char*)&largs[i],sizeof(long));
 	}
 	PHP_MD5Final(hash, &hash_context);
-	
+
 	/* try to reuse a connection */
 	if (SUCCESS == zend_hash_find(&EG(regular_list), hash, sizeof(hash), (void *) &le)) {
 		long xlink;
@@ -947,7 +947,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 		if (Z_TYPE_P(le) != le_index_ptr) {
 			RETURN_FALSE;
 		}
-			
+
 		xlink = (long) le->ptr;
 		if (zend_list_find(xlink, &type) && ((!persistent && type == le_link) || type == le_plink)) {
 			zend_list_addref(xlink);
@@ -955,12 +955,12 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 		} else {
 			zend_hash_del(&EG(regular_list), hash, sizeof(hash));
 		}
-	}		
+	}
 
 	/* ... or a persistent one */
 	switch (zend_hash_find(&EG(persistent_list), hash, sizeof(hash), (void *) &le)) {
 		long l;
-		
+
 		static char info[] = { isc_info_base_level, isc_info_end };
 		char result[8];
 		ISC_STATUS status[20];
@@ -977,21 +977,21 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			break;
 		}
 		zend_hash_del(&EG(persistent_list), hash, sizeof(hash));
-	
+
 	default:
 
 		/* no link found, so we have to open one */
-	
+
 		if ((l = INI_INT("ibase.max_links")) != -1 && IBG(num_links) >= l) {
 			_php_ibase_module_error("Too many open links (%ld)" TSRMLS_CC, IBG(num_links));
 			RETURN_FALSE;
 		}
-	
+
 		/* create the ib_link */
 		if (FAILURE == _php_ibase_attach_db(args, len, largs, &db_handle TSRMLS_CC)) {
 			RETURN_FALSE;
 		}
-	
+
 		/* use non-persistent if allowed number of persistent links is exceeded */
 		if (!persistent || ((l = INI_INT("ibase.max_persistent") != -1) && IBG(num_persistent) >= l)) {
 			ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
@@ -1019,7 +1019,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 		ib_link->dialect = largs[DLECT] ? (unsigned short)largs[DLECT] : SQL_DIALECT_CURRENT;
 		ib_link->tr_list = NULL;
 		ib_link->event_head = NULL;
-	
+
 		++IBG(num_links);
 	}
 
@@ -1059,12 +1059,12 @@ PHP_FUNCTION(ibase_close)
 	int link_id;
 
 	RESET_ERRMSG;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &link_arg) == FAILURE) {
 		return;
 	}
-	
-	if (ZEND_NUM_ARGS() == 0) {
+
+	if (link_arg == NULL) {
 		link_id = IBG(default_link);
 		CHECK_LINK(link_id);
 		IBG(default_link) = -1;
@@ -1088,19 +1088,19 @@ PHP_FUNCTION(ibase_drop_db)
 	int link_id;
 
 	RESET_ERRMSG;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &link_arg) == FAILURE) {
 		return;
 	}
-	
-	if (ZEND_NUM_ARGS() == 0) {
+
+	if (link_arg == NULL) {
 		link_id = IBG(default_link);
 		CHECK_LINK(link_id);
 		IBG(default_link) = -1;
 	} else {
 		link_id = Z_RESVAL_P(link_arg);
 	}
-	
+
 	ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, &link_arg, link_id, LE_LINK, le_link, le_plink);
 
 	if (isc_drop_database(IB_STATUS, &ib_link->handle)) {
@@ -1132,14 +1132,14 @@ PHP_FUNCTION(ibase_trans)
 	ibase_trans *ib_trans;
 	isc_tr_handle tr_handle = NULL;
 	ISC_STATUS result;
-	
+
 	RESET_ERRMSG;
 
 	argn = ZEND_NUM_ARGS();
 
 	/* (1+argn) is an upper bound for the number of links this trans connects to */
 	ib_link = (ibase_db_link **) safe_emalloc(sizeof(ibase_db_link *),1+argn,0);
-	
+
 	if (argn > 0) {
 		long trans_argl = 0;
 		char *tpb;
@@ -1155,12 +1155,12 @@ PHP_FUNCTION(ibase_trans)
 		teb = (ISC_TEB *) safe_emalloc(sizeof(ISC_TEB),argn,0);
 		tpb = (char *) safe_emalloc(TPB_MAX_SIZE,argn,0);
 
-		/* enumerate all the arguments: assume every non-resource argument 
+		/* enumerate all the arguments: assume every non-resource argument
 		   specifies modifiers for the link ids that follow it */
 		for (i = 0; i < argn; ++i) {
-			
+
 			if (Z_TYPE_PP(args[i]) == IS_RESOURCE) {
-				
+
 				if (!ZEND_FETCH_RESOURCE2_NO_RETURN(ib_link[link_cnt], ibase_db_link *, args[i], -1, LE_LINK, le_link, le_plink)) {
 					efree(teb);
 					efree(tpb);
@@ -1168,7 +1168,7 @@ PHP_FUNCTION(ibase_trans)
 					efree(args);
 					RETURN_FALSE;
 				}
-	
+
 				/* copy the most recent modifier string into tbp[] */
 				memcpy(&tpb[TPB_MAX_SIZE * link_cnt], last_tpb, TPB_MAX_SIZE);
 
@@ -1176,11 +1176,11 @@ PHP_FUNCTION(ibase_trans)
 				teb[link_cnt].db_ptr = &ib_link[link_cnt]->handle;
 				teb[link_cnt].tpb_len = tpb_len;
 				teb[link_cnt].tpb_ptr = &tpb[TPB_MAX_SIZE * link_cnt];
-				
+
 				++link_cnt;
-				
+
 			} else {
-				
+
 				tpb_len = 0;
 
 				convert_to_long_ex(args[i]);
@@ -1202,14 +1202,14 @@ PHP_FUNCTION(ibase_trans)
 						if (PHP_IBASE_REC_VERSION == (trans_argl & PHP_IBASE_REC_VERSION)) {
 							last_tpb[tpb_len++] = isc_tpb_rec_version;
 						} else if (PHP_IBASE_REC_NO_VERSION == (trans_argl & PHP_IBASE_REC_NO_VERSION)) {
-							last_tpb[tpb_len++] = isc_tpb_no_rec_version; 
-						}	
+							last_tpb[tpb_len++] = isc_tpb_no_rec_version;
+						}
 					} else if (PHP_IBASE_CONSISTENCY == (trans_argl & PHP_IBASE_CONSISTENCY)) {
 						last_tpb[tpb_len++] = isc_tpb_consistency;
 					} else if (PHP_IBASE_CONCURRENCY == (trans_argl & PHP_IBASE_CONCURRENCY)) {
 						last_tpb[tpb_len++] = isc_tpb_concurrency;
 					}
-					
+
 					/* lock resolution */
 					if (PHP_IBASE_NOWAIT == (trans_argl & PHP_IBASE_NOWAIT)) {
 						last_tpb[tpb_len++] = isc_tpb_nowait;
@@ -1218,8 +1218,8 @@ PHP_FUNCTION(ibase_trans)
 					}
 				}
 			}
-		}	
-					
+		}
+
 		if (link_cnt > 0) {
 			result = isc_start_multiple(IB_STATUS, &tr_handle, link_cnt, teb);
 		}
@@ -1237,7 +1237,7 @@ PHP_FUNCTION(ibase_trans)
 		}
 		result = isc_start_transaction(IB_STATUS, &tr_handle, 1, &ib_link[0]->handle, tpb_len, last_tpb);
 	}
-	
+
 	/* start the transaction */
 	if (result) {
 		_php_ibase_error(TSRMLS_C);
@@ -1253,7 +1253,7 @@ PHP_FUNCTION(ibase_trans)
 	for (i = 0; i < link_cnt; ++i) {
 		ibase_tr_list **l;
 		ib_trans->db_link[i] = ib_link[i];
-		
+
 		/* the first item in the connection-transaction list is reserved for the default transaction */
 		if (ib_link[i]->tr_list == NULL) {
 			ib_link[i]->tr_list = (ibase_tr_list *) emalloc(sizeof(ibase_tr_list));
@@ -1319,12 +1319,12 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 	int type;
 
 	RESET_ERRMSG;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|r", &arg) == FAILURE) {
 		return;
 	}
 
-	if (ZEND_NUM_ARGS() == 0) {
+	if (arg == NULL) {
 		ZEND_FETCH_RESOURCE2(ib_link, ibase_db_link *, NULL, IBG(default_link), LE_LINK, le_link, le_plink);
 		if (ib_link->tr_list == NULL || ib_link->tr_list->trans == NULL) {
 			/* this link doesn't have a default transaction */
@@ -1363,7 +1363,7 @@ static void _php_ibase_trans_end(INTERNAL_FUNCTION_PARAMETERS, int commit) /* {{
 			result = isc_commit_retaining(IB_STATUS, &trans->handle);
 			break;
 	}
-	
+
 	if (result) {
 		_php_ibase_error(TSRMLS_C);
 		RETURN_FALSE;
@@ -1428,20 +1428,20 @@ PHP_FUNCTION(ibase_gen_id)
 			&inc, &link)) {
 		RETURN_FALSE;
 	}
-	
+
 	if (gen_len > 31) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid generator name");
 		RETURN_FALSE;
 	}
 
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
-	
+
 	snprintf(query, sizeof(query), "SELECT GEN_ID(%s,%ld) FROM rdb$database", generator, inc);
 
 	/* allocate a minimal descriptor area */
 	out_sqlda.sqln = out_sqlda.sqld = 1;
 	out_sqlda.version = SQLDA_CURRENT_VERSION;
-	
+
 	/* allocate the field for the result */
 	out_sqlda.sqlvar[0].sqltype = SQL_INT64;
 	out_sqlda.sqlvar[0].sqlscale = 0;
@@ -1469,7 +1469,7 @@ PHP_FUNCTION(ibase_gen_id)
 }
 
 /* }}} */
-    
+
 #endif /* HAVE_IBASE */
 
 /*

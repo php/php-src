@@ -110,7 +110,7 @@ PHPAPI long php_rand(TSRMLS_D)
 
 	Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
 	Copyright (C) 2000 - 2003, Richard J. Wagner
-	All rights reserved.                          
+	All rights reserved.
 
 	Redistribution and use in source and binary forms, with or without
 	modification, are permitted provided that the following conditions
@@ -123,8 +123,8 @@ PHPAPI long php_rand(TSRMLS_D)
 	   notice, this list of conditions and the following disclaimer in the
 	   documentation and/or other materials provided with the distribution.
 
-	3. The names of its contributors may not be used to endorse or promote 
-	   products derived from this software without specific prior written 
+	3. The names of its contributors may not be used to endorse or promote
+	   products derived from this software without specific prior written
 	   permission.
 
 	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -210,14 +210,14 @@ PHPAPI php_uint32 php_mt_rand(TSRMLS_D)
 {
 	/* Pull a 32-bit integer from the generator state
 	   Every other access function simply transforms the numbers extracted here */
-	
+
 	register php_uint32 s1;
 
 	if (BG(left) == 0) {
 		php_mt_reload(TSRMLS_C);
 	}
 	--BG(left);
-		
+
 	s1 = *BG(next)++;
 	s1 ^= (s1 >> 11);
 	s1 ^= (s1 <<  7) & 0x9d2c5680U;
@@ -232,7 +232,7 @@ PHP_FUNCTION(srand)
 {
 	long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE)
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE)
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
@@ -248,7 +248,7 @@ PHP_FUNCTION(mt_srand)
 {
 	long seed = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE) 
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_NODEFAULT, ZEND_NUM_ARGS() TSRMLS_CC, "|l", &seed) == FAILURE)
 		return;
 
 	if (ZEND_NUM_ARGS() == 0)
@@ -280,10 +280,10 @@ PHP_FUNCTION(mt_srand)
  # number of b+1 which would be bad.  So we bump M up by one to make sure
  # this will never happen, and the final algorithm looks like this:
  #
- #               n' = a + n(b-a+1)/(M+1) 
+ #               n' = a + n(b-a+1)/(M+1)
  *
  * -RL
- */    
+ */
 
 /* {{{ proto int rand([int min, int max])
    Returns a random number */
@@ -332,8 +332,8 @@ PHP_FUNCTION(mt_rand)
 	 * Melo: hmms.. randomMT() returns 32 random bits...
 	 * Yet, the previous php_rand only returns 31 at most.
 	 * So I put a right shift to loose the lsb. It *seems*
-	 * better than clearing the msb. 
-	 * Update: 
+	 * better than clearing the msb.
+	 * Update:
 	 * I talked with Cokus via email and it won't ruin the algorithm
 	 */
 	number = (long) (php_mt_rand(TSRMLS_C) >> 1);

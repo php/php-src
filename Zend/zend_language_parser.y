@@ -18,7 +18,7 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
+/* $Id: zend_language_parser.y 322378 2012-01-17 08:09:13Z dmitry $ */
 
 /*
  * LALR shift/reduce conflicts and how they are resolved:
@@ -87,7 +87,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left '?' ':'
 %left T_BOOLEAN_OR
 %token T_BOOLEAN_OR   "|| (T_BOOLEAN_OR)"
-%left T_BOOLEAN_AND 
+%left T_BOOLEAN_AND
 %token T_BOOLEAN_AND  "&& (T_BOOLEAN_AND)"
 %left '|'
 %left '^'
@@ -126,9 +126,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_IF        "if (T_IF)"
 %left T_ELSEIF
 %token T_ELSEIF    "elseif (T_ELSEIF)"
-%left T_ELSE 
+%left T_ELSE
 %token T_ELSE      "else (T_ELSE)"
-%left T_ENDIF 
+%left T_ENDIF
 %token T_ENDIF     "endif (T_ENDIF)"
 %token T_LNUMBER   "integer number (T_LNUMBER)"
 %token T_DNUMBER   "floating-point number (T_DNUMBER)"
@@ -550,13 +550,15 @@ function_call_parameter_list:
 
 
 non_empty_function_call_parameter_list:
-		expr_without_variable	{ Z_LVAL($$.u.constant) = 1;  zend_do_pass_param(&$1, ZEND_SEND_VAL, Z_LVAL($$.u.constant) TSRMLS_CC); }
+	 	expr_without_variable	{ Z_LVAL($$.u.constant) = 1;  zend_do_pass_param(&$1, ZEND_SEND_VAL, Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	variable				{ Z_LVAL($$.u.constant) = 1;  zend_do_pass_param(&$1, ZEND_SEND_VAR, Z_LVAL($$.u.constant) TSRMLS_CC); }
-	|	'&' w_variable 				{ Z_LVAL($$.u.constant) = 1;  zend_do_pass_param(&$2, ZEND_SEND_REF, Z_LVAL($$.u.constant) TSRMLS_CC); }
+	|	'&' w_variable 			{ Z_LVAL($$.u.constant) = 1;  zend_do_pass_param(&$2, ZEND_SEND_REF, Z_LVAL($$.u.constant) TSRMLS_CC); }
+	|   T_DEFAULT				{ Z_LVAL($$.u.constant) = 1;  zend_do_empty_param(Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	non_empty_function_call_parameter_list ',' expr_without_variable	{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$3, ZEND_SEND_VAL, Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	non_empty_function_call_parameter_list ',' variable					{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$3, ZEND_SEND_VAR, Z_LVAL($$.u.constant) TSRMLS_CC); }
 	|	non_empty_function_call_parameter_list ',' '&' w_variable			{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_pass_param(&$4, ZEND_SEND_REF, Z_LVAL($$.u.constant) TSRMLS_CC); }
-;
+	|	non_empty_function_call_parameter_list ',' 	T_DEFAULT				{ Z_LVAL($$.u.constant)=Z_LVAL($1.u.constant)+1;  zend_do_empty_param(Z_LVAL($$.u.constant) TSRMLS_CC); }
+	;
 
 global_var_list:
 		global_var_list ',' global_var	{ zend_do_fetch_global_variable(&$3, NULL, ZEND_FETCH_GLOBAL_LOCK TSRMLS_CC); }
@@ -1232,7 +1234,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			char buffer[120];
 			const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
 			unsigned int len = 0, toklen = 0, yystr_len;
-			
+
 			CG(parse_error) = 1;
 
 			if (LANG_SCNG(yy_text)[0] == 0 &&
@@ -1241,11 +1243,11 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 				yystpcpy(yyres, "end of file");
 				return sizeof("end of file")-1;
 			}
-			
+
 			str = LANG_SCNG(yy_text);
 			end = memchr(str, '\n', LANG_SCNG(yy_leng));
 			yystr_len = yystrlen(yystr);
-			
+
 			if ((tok1 = memchr(yystr, '(', yystr_len)) != NULL
 				&& (tok2 = zend_memrchr(yystr, ')', yystr_len)) != NULL) {
 				toklen = (tok2 - tok1) + 1;
@@ -1253,7 +1255,7 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 				tok1 = tok2 = NULL;
 				toklen = 0;
 			}
-			
+
 			if (end == NULL) {
 				len = LANG_SCNG(yy_leng) > 30 ? 30 : LANG_SCNG(yy_leng);
 			} else {
@@ -1266,8 +1268,8 @@ static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
 			}
 			yystpcpy(yyres, buffer);
 			return len + (toklen ? toklen + 1 : 0) + 2;
-		}		
-	}	
+		}
+	}
 	if (*yystr == '"') {
 		YYSIZE_T yyn = 0;
 		const char *yyp = yystr;
