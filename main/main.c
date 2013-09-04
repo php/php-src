@@ -2207,7 +2207,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 			additional_modules_array[i] = &additional_modules[i];
 		}
 
-    		php_register_extensions(additional_modules_array, num_additional_modules TSRMLS_CC);
+		php_register_extensions(additional_modules_array, num_additional_modules TSRMLS_CC);
 		efree(additional_modules_array);
 	}
 
