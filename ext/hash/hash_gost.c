@@ -243,13 +243,13 @@ static inline void GostTransform(PHP_GOST_CTX *context, const unsigned char inpu
 PHP_HASH_API void PHP_GOSTInit(PHP_GOST_CTX *context)
 {
 	memset(context, 0, sizeof(*context));
-    context->tables = &tables_test;
+	context->tables = &tables_test;
 }
 
 PHP_HASH_API void PHP_GOSTInitCrypto(PHP_GOST_CTX *context)
 {
-    PHP_GOSTInit(context);
-    context->tables = &tables_crypto;
+	PHP_GOSTInit(context);
+	context->tables = &tables_crypto;
 }
 
 static const php_hash_uint32 MAX32 = 0xffffffffLU;
