@@ -180,7 +180,7 @@ array(13) {
   ["W3C"]=>
   string(13) "Y-m-d\TH:i:sP"
   ["SQL"]=>
-  string(5) "Y-m-d
+  string(5) "Y-m-d"
   ["SQLTIMESTAMP"]=>
   string(11) "Y-m-d H:i:s"
 }
