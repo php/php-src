@@ -799,7 +799,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 
 #define DATE_FORMAT_SQL      "Y-m-d"
 
-#define DATE_FORMAT_SQLTIMESTAMP "Y-m-d  H:i:s"
+#define DATE_FORMAT_SQLTIMESTAMP "Y-m-d H:i:s"
 
 #define DATE_TZ_ERRMSG \
 	"It is not safe to rely on the system's timezone settings. You are " \
