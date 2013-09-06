@@ -46,7 +46,7 @@
  */
 #undef PHP_OCI8_VERSION
 #endif
-#define PHP_OCI8_VERSION "2.0.1-dev"
+#define PHP_OCI8_VERSION "2.0.2-dev"
 
 extern zend_module_entry oci8_module_entry;
 #define phpext_oci8_ptr &oci8_module_entry
