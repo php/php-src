@@ -44,19 +44,17 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <time>12:00:00</time>
 
   <version>
-   <release>2.0.1</release>
-   <api>2.0.1</api>
+   <release>2.0.2</release>
+   <api>2.0.2</api>
   </version>
   <stability>
    <release>devel</release>
    <api>devel</api>
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
-  <notes> 
-    Fixed --enable-maintainer-zts mode.
-    Allow Implicit Result Set statement resources to inherit the parent's current prefetch count.
-    Allow OCI8 to be DTrace-enabled independently from core PHP.
-    Require OCI8 to be configured 'shared' when enabling DTrace support.
+  <notes>
+Review and improve error handling code and data types.
+Fix oci_set_*($connection, ...) error handling so oci_error($connection) works.
   </notes>
  <contents>
   <dir name="/">
@@ -455,6 +453,23 @@ http://pear.php.net/dtd/package-2.0.xsd">
  </extsrcrelease>
  <changelog>
 
+<release>
+  <version>
+   <release>2.0.1</release>
+   <api>2.0.1</api>
+  </version>
+  <stability>
+   <release>devel</release>
+   <api>devel</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes> 
+Fixed --enable-maintainer-zts mode.
+Allow Implicit Result Set statement resources to inherit the parent's current prefetch count.
+Allow OCI8 to be DTrace-enabled independently from core PHP.
+Require OCI8 to be configured 'shared' when enabling DTrace support.
+  </notes>
+</release>
 
 <release>
   <version>
@@ -467,69 +482,69 @@ http://pear.php.net/dtd/package-2.0.xsd">
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes> 
-    - NEW FUNCTIONALITY:
- 
-      - Added Implicit Result Set support for Oracle Database 12c.
-        Streaming of all IRS's returned from a PL/SQL block is available
-        via oci_fetch_array, oci_fetch_assoc, oci_fetch_object and
-        oci_fetch_row (but not oci_fetch or oci_fetch_all).
-        Alternatively individual IRS statement resources can be obtained
-        with the new function 'oci_get_implicit_resultset' and passed to
-        any oci_fetch_* function.
+- NEW FUNCTIONALITY:
 
-      - Added DTrace probes enabled with PHP's generic --enable-dtrace
+  - Added Implicit Result Set support for Oracle Database 12c.
+    Streaming of all IRS's returned from a PL/SQL block is available
+    via oci_fetch_array, oci_fetch_assoc, oci_fetch_object and
+    oci_fetch_row (but not oci_fetch or oci_fetch_all).
+    Alternatively individual IRS statement resources can be obtained
+    with the new function 'oci_get_implicit_resultset' and passed to
+    any oci_fetch_* function.
 
-    - IMPROVED FUNCTIONALITY:
- 
-      - Using 'oci_execute($s, OCI_NO_AUTO_COMMIT)' for a SELECT no
-        longer unnecessarily initiates an internal ROLLBACK during
-        connection close.  This can improve overall scalability by
-        reducing "round trips" between PHP and the database.
- 
-    - CHANGED FUNCTIONALITY:
- 
-      - PHPINFO() CHANGES:
- 
-        - The oci8.event and oci8.connection_class values are now shown
-          only when the Oracle client libraries support the respective
-          functionality.
- 
-        - Connection statistics are now in a separate phpinfo() table.
- 
-        - Temporary LOB and Collection support status lines in
-          phpinfo() were removed.  These features have always been
-          enabled since 2007.
- 
-      - OCI_INTERNAL_DEBUG() CHANGES:
- 
-        - The oci_internal_debug() function is now a no-op.  Use PHP's
-          --enable-dtrace functionality with DTrace or SystemTap instead.
- 
-    - INTERNAL CHANGES:
- 
-      - Fixed a potential NULL pointer dereference flagged by Parfait
-        static code analysis.
- 
-      - Extended testing of existing OCI8 functionality.
- 
-      - Improved test output portability when using the PHP development
-        web server to run tests.
- 
-      - Removed no-longer necessary Unicode patterns from tests
-        (vestiges of PHP's previous PHP 6 project)
-        
-      - Improved build portability by removing compilation type cast
-        warnings with some compilers.
- 
-      - Fixed compilation warnings when building with Oracle 9.2
-        client libraries.
- 
-      - Updated code to use internal macro PHP_OCI_REGISTER_RESOURCE.
- 
-      - Regularized code prototypes and fixed some in-line documentation
-        prototypes.
- 
-      - Fixed code folding. 
+  - Added DTrace probes enabled with PHP's generic --enable-dtrace
+
+- IMPROVED FUNCTIONALITY:
+
+  - Using 'oci_execute($s, OCI_NO_AUTO_COMMIT)' for a SELECT no
+    longer unnecessarily initiates an internal ROLLBACK during
+    connection close.  This can improve overall scalability by
+    reducing "round trips" between PHP and the database.
+
+- CHANGED FUNCTIONALITY:
+
+  - PHPINFO() CHANGES:
+
+    - The oci8.event and oci8.connection_class values are now shown
+      only when the Oracle client libraries support the respective
+      functionality.
+
+    - Connection statistics are now in a separate phpinfo() table.
+
+    - Temporary LOB and Collection support status lines in
+      phpinfo() were removed.  These features have always been
+      enabled since 2007.
+
+  - OCI_INTERNAL_DEBUG() CHANGES:
+
+    - The oci_internal_debug() function is now a no-op.  Use PHP's
+      --enable-dtrace functionality with DTrace or SystemTap instead.
+
+- INTERNAL CHANGES:
+
+  - Fixed a potential NULL pointer dereference flagged by Parfait
+    static code analysis.
+
+  - Extended testing of existing OCI8 functionality.
+
+  - Improved test output portability when using the PHP development
+    web server to run tests.
+
+  - Removed no-longer necessary Unicode patterns from tests
+    (vestiges of PHP's previous PHP 6 project)
+
+  - Improved build portability by removing compilation type cast
+    warnings with some compilers.
+
+  - Fixed compilation warnings when building with Oracle 9.2
+    client libraries.
+
+  - Updated code to use internal macro PHP_OCI_REGISTER_RESOURCE.
+
+  - Regularized code prototypes and fixed some in-line documentation
+    prototypes.
+
+  - Fixed code folding. 
   </notes>
 </release>
 

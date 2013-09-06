@@ -1643,12 +1643,12 @@ void php_oci_connection_descriptors_free(php_oci_connection *connection TSRMLS_D
  * Fetch & print out error message if we get an error
  * Returns an Oracle error number
  */
-sb4 php_oci_error(OCIError *err_p, sword status TSRMLS_DC)
+sb4 php_oci_error(OCIError *err_p, sword errstatus TSRMLS_DC)
 {
 	text *errbuf = (text *)NULL;
-	sb4 errcode = 0;
+	sb4 errcode = 0; /* Oracle error number */
 
-	switch (status) {
+	switch (errstatus) {
 		case OCI_SUCCESS:
 			break;
 		case OCI_SUCCESS_WITH_INFO:
@@ -1691,13 +1691,13 @@ sb4 php_oci_error(OCIError *err_p, sword status TSRMLS_DC)
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "OCI_CONTINUE");
 			break;
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown OCI error code: %d", status);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown OCI error code: %d", errstatus);
 			break;
 	}
 
 #ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_ERROR_ENABLED()) {
-		DTRACE_OCI8_ERROR(status, errcode);
+		DTRACE_OCI8_ERROR((int)errstatus, (long)errcode);
 	}
 #endif /* HAVE_OCI8_DTRACE */
 
@@ -2210,20 +2210,24 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
  */
 static int php_oci_connection_ping(php_oci_connection *connection TSRMLS_DC)
 {
+	sword errstatus;
+
+	OCI_G(errcode) = 0;  		/* assume ping is successful */
+
 	/* Use OCIPing instead of OCIServerVersion. If OCIPing returns ORA-1010 (invalid OCI operation)
 	 * such as from Pre-10.1 servers, the error is still from the server and we would have
 	 * successfully performed a roundtrip and validated the connection. Use OCIServerVersion for
 	 * Pre-10.2 clients
 	 */
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))	/* OCIPing available 10.2 onwards */
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIPing, (connection->svc, OCI_G(err), OCI_DEFAULT));
+	PHP_OCI_CALL_RETURN(errstatus, OCIPing, (connection->svc, OCI_G(err), OCI_DEFAULT));
 #else
 	char version[256];
 	/* use good old OCIServerVersion() */
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIServerVersion, (connection->svc, OCI_G(err), (text *)version, sizeof(version), OCI_HTYPE_SVCCTX));
+	PHP_OCI_CALL_RETURN(errstatus, OCIServerVersion, (connection->svc, OCI_G(err), (text *)version, sizeof(version), OCI_HTYPE_SVCCTX));
 #endif
 
-	if (OCI_G(errcode) == OCI_SUCCESS) {
+	if (errstatus == OCI_SUCCESS) {
 		return 1;
 	} else {
 		sb4 error_code = 0;
@@ -2234,10 +2238,9 @@ static int php_oci_connection_ping(php_oci_connection *connection TSRMLS_DC)
 		if (error_code == 1010) {
 			return 1;
 		}
+		OCI_G(errcode) = error_code;
 	}
 
-	/* ignore errors here, just return failure
-	 * php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC); */
 	return 0;
 }
 /* }}} */
@@ -2248,17 +2251,17 @@ static int php_oci_connection_ping(php_oci_connection *connection TSRMLS_DC)
  */
 static int php_oci_connection_status(php_oci_connection *connection TSRMLS_DC)
 {
-	ub4 ss = 0;
+	ub4 ss = OCI_SERVER_NOT_CONNECTED;
+	sword errstatus;
 
 	/* get OCI_ATTR_SERVER_STATUS */
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrGet, ((dvoid *)connection->server, OCI_HTYPE_SERVER, (dvoid *)&ss, (ub4 *)0, OCI_ATTR_SERVER_STATUS, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(errstatus, OCIAttrGet, ((dvoid *)connection->server, OCI_HTYPE_SERVER, (dvoid *)&ss, (ub4 *)0, OCI_ATTR_SERVER_STATUS, OCI_G(err)));
 
-	if (OCI_G(errcode) == OCI_SUCCESS && ss == OCI_SERVER_NORMAL) {
+	if (errstatus == OCI_SUCCESS && ss == OCI_SERVER_NORMAL) {
 		return 1;
 	}
 
-	/* ignore errors here, just return failure
-	 * php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC); */
+	/* ignore errors here, just return failure */
 	return 0;
 }
 /* }}} */
@@ -2269,14 +2272,17 @@ static int php_oci_connection_status(php_oci_connection *connection TSRMLS_DC)
  */
 int php_oci_connection_rollback(php_oci_connection *connection TSRMLS_DC)
 {
-	PHP_OCI_CALL_RETURN(connection->errcode, OCITransRollback, (connection->svc, connection->err, (ub4) 0));
+	sword errstatus;
+
+	PHP_OCI_CALL_RETURN(errstatus, OCITransRollback, (connection->svc, connection->err, (ub4) 0));
 	connection->rb_on_disconnect = 0;
 
-	if (connection->errcode != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
+	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
 /* }}} */
@@ -2287,14 +2293,17 @@ int php_oci_connection_rollback(php_oci_connection *connection TSRMLS_DC)
  */
 int php_oci_connection_commit(php_oci_connection *connection TSRMLS_DC)
 {
-	PHP_OCI_CALL_RETURN(connection->errcode, OCITransCommit, (connection->svc, connection->err, (ub4) 0));
+	sword errstatus;
+
+	PHP_OCI_CALL_RETURN(errstatus, OCITransCommit, (connection->svc, connection->err, (ub4) 0));
 	connection->rb_on_disconnect = 0;
 
-	if (connection->errcode != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
+	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
 }
 /* }}} */
@@ -2462,13 +2471,16 @@ int php_oci_connection_release(php_oci_connection *connection TSRMLS_DC)
  */
 int php_oci_password_change(php_oci_connection *connection, char *user, int user_len, char *pass_old, int pass_old_len, char *pass_new, int pass_new_len TSRMLS_DC)
 {
-	PHP_OCI_CALL_RETURN(connection->errcode, OCIPasswordChange, (connection->svc, connection->err, (text *)user, user_len, (text *)pass_old, pass_old_len, (text *)pass_new, pass_new_len, OCI_DEFAULT));
+	sword errstatus;
 
-	if (connection->errcode != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
+	PHP_OCI_CALL_RETURN(errstatus, OCIPasswordChange, (connection->svc, connection->err, (text *)user, user_len, (text *)pass_old, pass_old_len, (text *)pass_new, pass_new_len, OCI_DEFAULT));
+
+	if (errstatus != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
+	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	connection->passwd_changed = 1;
 	return 0;
 }
@@ -2503,12 +2515,13 @@ void php_oci_client_get_version(char **version TSRMLS_DC)
  */
 int php_oci_server_get_version(php_oci_connection *connection, char **version TSRMLS_DC)
 {
+	sword errstatus;
 	char version_buff[256];
 
-	PHP_OCI_CALL_RETURN(connection->errcode, OCIServerVersion, (connection->svc, connection->err, (text *)version_buff, sizeof(version_buff), OCI_HTYPE_SVCCTX));
+	PHP_OCI_CALL_RETURN(errstatus, OCIServerVersion, (connection->svc, connection->err, (text *)version_buff, sizeof(version_buff), OCI_HTYPE_SVCCTX));
 
-	if (connection->errcode != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
@@ -2806,6 +2819,7 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	zend_bool iserror = 0;
 	ub4 poolmode = OCI_DEFAULT;	/* Mode to be passed to OCISessionPoolCreate */
 	OCIAuthInfo *spoolAuth = NULL;
+	sword errstatus;
 
 	/* Allocate sessionpool out of persistent memory */
 	session_pool = (php_oci_spool *) calloc(1, sizeof(php_oci_spool));
@@ -2830,10 +2844,10 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	}
 
 	/* Allocate the pool handle */
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIHandleAlloc, (session_pool->env, (dvoid **) &session_pool->poolh, OCI_HTYPE_SPOOL, (size_t) 0, (dvoid **) 0));
+	PHP_OCI_CALL_RETURN(errstatus, OCIHandleAlloc, (session_pool->env, (dvoid **) &session_pool->poolh, OCI_HTYPE_SPOOL, (size_t) 0, (dvoid **) 0));
 
-	if (OCI_G(errcode) != OCI_SUCCESS) {
-		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus TSRMLS_CC);
 		iserror = 1;
 		goto exit_create_spool;
 	}
@@ -2842,10 +2856,10 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	 * generic bug which can free up the OCI_G(err) variable before destroying connections. We
 	 * cannot use this for other roundtrip calls as there is no way the user can access this error
 	 */
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIHandleAlloc, ((dvoid *) session_pool->env, (dvoid **)&(session_pool->err), (ub4) OCI_HTYPE_ERROR,(size_t) 0, (dvoid **) 0));
+	PHP_OCI_CALL_RETURN(errstatus, OCIHandleAlloc, ((dvoid *) session_pool->env, (dvoid **)&(session_pool->err), (ub4) OCI_HTYPE_ERROR,(size_t) 0, (dvoid **) 0));
 
-	if (OCI_G(errcode) != OCI_SUCCESS) {
-		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus TSRMLS_CC);
 		iserror = 1;
 		goto exit_create_spool;
 	}
@@ -2859,10 +2873,10 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 
 #if ((OCI_MAJOR_VERSION > 11) || ((OCI_MAJOR_VERSION == 11) && (OCI_MINOR_VERSION >= 2)))
 	/* {{{ Allocate auth handle for session pool */
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIHandleAlloc, (session_pool->env, (dvoid **)&(spoolAuth), OCI_HTYPE_AUTHINFO, 0, NULL));
+	PHP_OCI_CALL_RETURN(errstatus, OCIHandleAlloc, (session_pool->env, (dvoid **)&(spoolAuth), OCI_HTYPE_AUTHINFO, 0, NULL));
 
-	if (OCI_G(errcode) != OCI_SUCCESS) {
-		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus TSRMLS_CC);
 		iserror = 1;
 		goto exit_create_spool;
  	}
@@ -2870,10 +2884,10 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 
 	/* {{{ Set the edition attribute on the auth handle */
 	if (OCI_G(edition)) {
-		PHP_OCI_CALL_RETURN(OCI_G(errcode),OCIAttrSet, ((dvoid *) spoolAuth, (ub4) OCI_HTYPE_AUTHINFO, (dvoid *) OCI_G(edition), (ub4)(strlen(OCI_G(edition))), (ub4)OCI_ATTR_EDITION, OCI_G(err)));
+		PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, ((dvoid *) spoolAuth, (ub4) OCI_HTYPE_AUTHINFO, (dvoid *) OCI_G(edition), (ub4)(strlen(OCI_G(edition))), (ub4)OCI_ATTR_EDITION, OCI_G(err)));
 
-		if (OCI_G(errcode) != OCI_SUCCESS) {
-			php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+		if (errstatus != OCI_SUCCESS) {
+			OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus TSRMLS_CC);
 			iserror = 1;
 			goto exit_create_spool;
 		}
@@ -2881,20 +2895,20 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	/* }}} */
 
 	/* {{{ Set the driver name attribute on the auth handle */
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) spoolAuth, (ub4) OCI_HTYPE_AUTHINFO, (dvoid *) PHP_OCI8_DRIVER_NAME, (ub4) sizeof(PHP_OCI8_DRIVER_NAME)-1, (ub4) OCI_ATTR_DRIVER_NAME, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, ((dvoid *) spoolAuth, (ub4) OCI_HTYPE_AUTHINFO, (dvoid *) PHP_OCI8_DRIVER_NAME, (ub4) sizeof(PHP_OCI8_DRIVER_NAME)-1, (ub4) OCI_ATTR_DRIVER_NAME, OCI_G(err)));
 
-	if (OCI_G(errcode) != OCI_SUCCESS) {
-		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus TSRMLS_CC);
 		iserror = 1;
 		goto exit_create_spool;
 	}
 	/* }}} */
 
 	/* {{{ Set the auth handle on the session pool */
-	PHP_OCI_CALL_RETURN(OCI_G(errcode),OCIAttrSet, ((dvoid *) (session_pool->poolh),(ub4) OCI_HTYPE_SPOOL, (dvoid *) spoolAuth, (ub4)0, (ub4)OCI_ATTR_SPOOL_AUTH, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, ((dvoid *) (session_pool->poolh),(ub4) OCI_HTYPE_SPOOL, (dvoid *) spoolAuth, (ub4)0, (ub4)OCI_ATTR_SPOOL_AUTH, OCI_G(err)));
 
-	if (OCI_G(errcode) != OCI_SUCCESS) {
-		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus TSRMLS_CC);
 		iserror = 1;
 		goto exit_create_spool;
 	}
@@ -2904,10 +2918,10 @@ static php_oci_spool *php_oci_create_spool(char *username, int username_len, cha
 	/* Create the homogeneous session pool - We have different session pools for every different
 	 * username, password, charset and dbname.
 	 */
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCISessionPoolCreate,(session_pool->env, OCI_G(err), session_pool->poolh, (OraText **)&session_pool->poolname, &session_pool->poolname_len, (OraText *)dbname, (ub4)dbname_len, 0, UB4MAXVAL, 1,(OraText *)username, (ub4)username_len, (OraText *)password,(ub4)password_len, poolmode));
+	PHP_OCI_CALL_RETURN(errstatus, OCISessionPoolCreate,(session_pool->env, OCI_G(err), session_pool->poolh, (OraText **)&session_pool->poolname, &session_pool->poolname_len, (OraText *)dbname, (ub4)dbname_len, 0, UB4MAXVAL, 1,(OraText *)username, (ub4)username_len, (OraText *)password,(ub4)password_len, poolmode));
 
-	if (OCI_G(errcode) != OCI_SUCCESS) {
-		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus TSRMLS_CC);
 		iserror = 1;
 	}
 
@@ -3477,11 +3491,11 @@ static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh TS
  *
  * DTrace output for connections that may have become invalid and marked for reopening
  */
-void php_oci_dtrace_check_connection(php_oci_connection *connection, sword errcode, ub4 serverStatus)
+void php_oci_dtrace_check_connection(php_oci_connection *connection, sb4 errcode, ub4 serverStatus)
 {
 #ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CHECK_CONNECTION_ENABLED()) {
-		DTRACE_OCI8_CHECK_CONNECTION(connection, connection && connection->is_open ? 1 : 0, (int)errcode, (unsigned long)serverStatus);
+		DTRACE_OCI8_CHECK_CONNECTION(connection, connection && connection->is_open ? 1 : 0, (long)errcode, (unsigned long)serverStatus);
 	}
 #endif /* HAVE_OCI8_DTRACE */
 }
