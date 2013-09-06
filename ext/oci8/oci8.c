@@ -1306,7 +1306,6 @@ PHP_MINIT_FUNCTION(oci)
 
 PHP_RINIT_FUNCTION(oci)
 {
-	OCI_G(debug_mode) = 0; /* start "fresh" */
 	OCI_G(num_links) = OCI_G(num_persistent);
 	OCI_G(errcode) = 0;
 	OCI_G(edition) = NULL;

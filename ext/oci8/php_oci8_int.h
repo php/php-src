@@ -496,8 +496,6 @@ ZEND_BEGIN_MODULE_GLOBALS(oci) /* {{{ Module globals */
 	sb4			 errcode;						/* global last ORA- error number. Used when connect fails, for example */
 	OCIError	*err;							/* global error handle */
 
-	zend_bool	 debug_mode;					/* debug mode flag */
-
 	long		 max_persistent;				/* maximum number of persistent connections per process */
 	long		 num_persistent;				/* number of existing persistent connections */
 	long		 num_links;						/* non-persistent + persistent connections */
