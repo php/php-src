@@ -1308,12 +1308,7 @@ PHP_FUNCTION(oci_field_is_null)
    Toggle internal debugging output for the OCI extension */
 PHP_FUNCTION(oci_internal_debug)
 {
-	zend_bool on_off;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &on_off) == FAILURE) {
-		return;
-	}
-	OCI_G(debug_mode) = on_off;
+	/* NOP in OCI8 2.0. Obsoleted by DTrace probes */
 }
 /* }}} */
 
