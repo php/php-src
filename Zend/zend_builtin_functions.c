@@ -42,6 +42,7 @@ static ZEND_FUNCTION(strncasecmp);
 static ZEND_FUNCTION(each);
 static ZEND_FUNCTION(error_reporting);
 static ZEND_FUNCTION(define);
+static ZEND_FUNCTION(undefine);
 static ZEND_FUNCTION(defined);
 static ZEND_FUNCTION(get_class);
 static ZEND_FUNCTION(get_called_class);
@@ -130,6 +131,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_define, 0, 0, 3)
 	ZEND_ARG_INFO(0, constant_name)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_INFO(0, case_insensitive)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_undefine, 0, 0, 1)
+	ZEND_ARG_INFO(0, constant_name)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_defined, 0, 0, 1)
@@ -253,6 +258,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(each,				arginfo_each)
 	ZEND_FE(error_reporting,	arginfo_error_reporting)
 	ZEND_FE(define,				arginfo_define)
+	ZEND_FE(undefine,			arginfo_undefine)
 	ZEND_FE(defined,			arginfo_defined)
 	ZEND_FE(get_class,			arginfo_get_class)
 	ZEND_FE(get_called_class,	arginfo_zend__void)
@@ -720,6 +726,41 @@ repeat:
 }
 /* }}} */
 
+/* {{{ proto bool undefine(string constant_name)
+    Undefine a constant */
+ZEND_FUNCTION(undefine)
+{
+    char *name;
+    zend_uint name_len;
+    
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_len) == FAILURE) {
+        return;
+    }
+    
+    {
+        zend_constant *defined = NULL;
+        
+        if (zend_hash_find(EG(zend_constants), name, name_len+1, (void**)&defined) == FAILURE) {
+            char *lname = zend_str_tolower_dup(name, name_len);
+            
+            if (zend_hash_find(
+                EG(zend_constants), lname, name_len+1, (void**)&defined) == SUCCESS) {
+                if (defined->cs & CONST_CS)
+                    defined = NULL;    
+            }
+            
+            efree(lname);
+        }
+        
+        if (defined != NULL) {
+            if ((defined->module_number == PHP_USER_CONSTANT)) {
+                RETURN_BOOL((zend_hash_del(EG(zend_constants), name, name_len+1)==SUCCESS));
+            }
+        }
+        
+        RETURN_FALSE;
+    }
+}
 
 /* {{{ proto bool defined(string constant_name)
    Check whether a constant exists */
