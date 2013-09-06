@@ -1624,7 +1624,6 @@ PHP_FUNCTION(oci_error)
 	php_oci_connection *connection;
 	text *errbuf;
 	sb4 errcode = 0;
-	sword error = OCI_SUCCESS;
 	dvoid *errh = NULL;
 	ub2 error_offset = 0;
 	text *sqltext = NULL;
@@ -1635,10 +1634,9 @@ PHP_FUNCTION(oci_error)
 
 	if (ZEND_NUM_ARGS() > 0) {
 		statement = (php_oci_statement *) zend_fetch_resource(&arg TSRMLS_CC, -1, NULL, NULL, 1, le_statement);
-	
 		if (statement) {
 			errh = statement->err;
-			error = statement->errcode;
+			errcode = statement->errcode;
 
 			if (php_oci_fetch_sqltext_offset(statement, &sqltext, &error_offset TSRMLS_CC)) {
 				RETURN_FALSE;
@@ -1649,23 +1647,23 @@ PHP_FUNCTION(oci_error)
 		connection = (php_oci_connection *) zend_fetch_resource(&arg TSRMLS_CC, -1, NULL, NULL, 1, le_connection);
 		if (connection) {
 			errh = connection->err;
-			error = connection->errcode;
+			errcode = connection->errcode;
 			goto go_out;
 		}
 
 		connection = (php_oci_connection *) zend_fetch_resource(&arg TSRMLS_CC, -1, NULL, NULL, 1, le_pconnection);
 		if (connection) {
 			errh = connection->err;
-			error = connection->errcode;
+			errcode = connection->errcode;
 			goto go_out;
 		}
 	} else {
 		errh = OCI_G(err);
-		error = OCI_G(errcode);
+		errcode = OCI_G(errcode);
 	}
 
 go_out:
-	if (error == OCI_SUCCESS) { /* no error set in the handle */
+	if (errcode == 0) { /* no error set in the handle */
 		RETURN_FALSE;
 	}
 
@@ -1764,6 +1762,7 @@ PHP_FUNCTION(oci_set_client_identifier)
 	php_oci_connection *connection;
 	char *client_id;
 	int client_id_len;
+	sword errstatus;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &client_id, &client_id_len) == FAILURE) {
 		return;
@@ -1771,10 +1770,10 @@ PHP_FUNCTION(oci_set_client_identifier)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_id, (ub4) client_id_len, (ub4) OCI_ATTR_CLIENT_IDENTIFIER, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_id, (ub4) client_id_len, (ub4) OCI_ATTR_CLIENT_IDENTIFIER, connection->err));
 
-	if (OCI_G(errcode) != OCI_SUCCESS) {
-		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -1822,6 +1821,7 @@ PHP_FUNCTION(oci_set_module_name)
 	php_oci_connection *connection;
 	char *module;
 	int module_len;
+	sword errstatus;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &module, &module_len) == FAILURE) {
 		return;
@@ -1829,10 +1829,10 @@ PHP_FUNCTION(oci_set_module_name)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) module, (ub4) module_len, (ub4) OCI_ATTR_MODULE, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) module, (ub4) module_len, (ub4) OCI_ATTR_MODULE, connection->err));
 
-	if (OCI_G(errcode) != OCI_SUCCESS) {
-		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -1853,6 +1853,7 @@ PHP_FUNCTION(oci_set_action)
 	php_oci_connection *connection;
 	char *action;
 	int action_len;
+	sword errstatus;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &action, &action_len) == FAILURE) {
 		return;
@@ -1860,10 +1861,10 @@ PHP_FUNCTION(oci_set_action)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) action, (ub4) action_len, (ub4) OCI_ATTR_ACTION, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) action, (ub4) action_len, (ub4) OCI_ATTR_ACTION, connection->err));
 
-	if (OCI_G(errcode) != OCI_SUCCESS) {
-		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
@@ -1884,6 +1885,7 @@ PHP_FUNCTION(oci_set_client_info)
 	php_oci_connection *connection;
 	char *client_info;
 	int client_info_len;
+	sword errstatus;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &client_info, &client_info_len) == FAILURE) {
 		return;
@@ -1891,10 +1893,10 @@ PHP_FUNCTION(oci_set_client_info)
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
-	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_info, (ub4) client_info_len, (ub4) OCI_ATTR_CLIENT_INFO, OCI_G(err)));
+	PHP_OCI_CALL_RETURN(errstatus, OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) client_info, (ub4) client_info_len, (ub4) OCI_ATTR_CLIENT_INFO, connection->err));
 
-	if (OCI_G(errcode) != OCI_SUCCESS) {
-		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+	if (errstatus != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 		RETURN_FALSE;
 	}
 
