@@ -2317,6 +2317,12 @@ static int php_oci_connection_close(php_oci_connection *connection TSRMLS_DC)
 	int result = 0;
 	zend_bool in_call_save = OCI_G(in_call);
 
+#ifdef HAVE_OCI8_DTRACE
+	if (DTRACE_OCI8_CONNECTION_CLOSE_ENABLED()) {
+		DTRACE_OCI8_CONNECTION_CLOSE(connection);
+	}
+#endif /* HAVE_OCI8_DTRACE */
+
 	if (!connection->is_stub) {
 		/* Release resources associated with connection */
 		php_oci_connection_release(connection TSRMLS_CC);

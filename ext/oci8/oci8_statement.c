@@ -58,7 +58,7 @@ php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char
 	} else {
 #ifdef HAVE_OCI8_DTRACE
 		if (DTRACE_OCI8_SQLTEXT_ENABLED()) {
-			DTRACE_OCI8_SQLTEXT(query);
+			DTRACE_OCI8_SQLTEXT(connection, query);
 		}
 #endif /* HAVE_OCI8_DTRACE */
 	}
@@ -498,7 +498,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			/* only these are allowed */
 #ifdef HAVE_OCI8_DTRACE
 			if (DTRACE_OCI8_EXECUTE_MODE_ENABLED()) {
-				DTRACE_OCI8_EXECUTE_MODE(mode);
+				DTRACE_OCI8_EXECUTE_MODE(statement->connection, mode);
 			}
 #endif /* HAVE_OCI8_DTRACE */
 			break;

@@ -40,7 +40,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2013-09-03</date>
+ <date>2013-09-06</date>
  <time>12:00:00</time>
 
   <version>
@@ -55,6 +55,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <notes>
 Review and improve error handling code and data types.
 Fix oci_set_*($connection, ...) error handling so oci_error($connection) works.
+Add DTrace oci8-connection-close probe
+Add the connection handle to several DTrace probes.
   </notes>
  <contents>
   <dir name="/">

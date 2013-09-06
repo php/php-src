@@ -17,12 +17,13 @@
 */
 
 provider php {
+	probe oci8__check__connection(void *connection, int is_open, long errcode, unsigned long server_status);
 	probe oci8__connect__entry(char *username, char *dbname, char *charset, long session_mode, int persistent, int exclusive);
 	probe oci8__connect__return(void *connection);
-	probe oci8__check__connection(void *connection, int is_open, long errcode, unsigned long serverstatus);
-	probe oci8__sqltext(char *sql);
+	probe oci8__connection__close(void *connection);
 	probe oci8__error(int status, long errcode);
-	probe oci8__execute__mode(unsigned int mode);
+	probe oci8__execute__mode(void *connection, unsigned int mode);
+	probe oci8__sqltext(void *connection, char *sql);
 
 	probe oci8__connect__p__dtor__close(void *connection);
 	probe oci8__connect__p__dtor__release(void *connection);
