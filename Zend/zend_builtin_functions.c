@@ -743,9 +743,12 @@ ZEND_FUNCTION(undefine)
         if (zend_hash_find(EG(zend_constants), name, name_len+1, (void**)&defined) == FAILURE) {
             char *lname = zend_str_tolower_dup(name, name_len);
             
-            zend_hash_find(
-                EG(zend_constants), lname, name_len+1, (void**)&defined);
-                
+            if (zend_hash_find(
+                EG(zend_constants), lname, name_len+1, (void**)&defined) == SUCCESS) {
+                if (defined->cs & CONST_CS)
+                    defined = NULL;    
+            }
+            
             efree(lname);
         }
         
