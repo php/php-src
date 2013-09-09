@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.5
 
+- CLI server:
+  . Fixed bug #65633 (built-in server treat some http headers as
+    case-sensitive). (Adam)
+
 ?? ??? 2013, PHP 5.5.4
 
 - Core:
