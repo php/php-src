@@ -108,7 +108,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %right '!'
 %nonassoc T_INSTANCEOF
 %token T_INSTANCEOF  "instanceof (T_INSTANCEOF)"
-%right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
+%right '~' T_INC T_DEC T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_RESOURCE_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %token T_INC "++ (T_INC)"
 %token T_DEC "-- (T_DEC)"
 %token T_INT_CAST    "(int) (T_INT_CAST)"
@@ -116,6 +116,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_STRING_CAST "(string) (T_STRING_CAST)"
 %token T_ARRAY_CAST  "(array) (T_ARRAY_CAST)"
 %token T_OBJECT_CAST "(object) (T_OBJECT_CAST)"
+%token T_RESOURCE_CAST "(resource) (T_RESOURCE_CAST)"
 %token T_BOOL_CAST   "(bool) (T_BOOL_CAST)"
 %token T_UNSET_CAST  "(unset) (T_UNSET_CAST)"
 %right '['
@@ -799,6 +800,7 @@ expr_without_variable:
 	|	T_STRING_CAST expr	{ zend_do_cast(&$$, &$2, IS_STRING TSRMLS_CC); }
 	|	T_ARRAY_CAST expr 	{ zend_do_cast(&$$, &$2, IS_ARRAY TSRMLS_CC); }
 	|	T_OBJECT_CAST expr 	{ zend_do_cast(&$$, &$2, IS_OBJECT TSRMLS_CC); }
+	|	T_RESOURCE_CAST expr 	{ zend_do_cast(&$$, &$2, IS_RESOURCE TSRMLS_CC); }
 	|	T_BOOL_CAST expr	{ zend_do_cast(&$$, &$2, IS_BOOL TSRMLS_CC); }
 	|	T_UNSET_CAST expr	{ zend_do_cast(&$$, &$2, IS_NULL TSRMLS_CC); }
 	|	T_EXIT exit_expr	{ zend_do_exit(&$$, &$2 TSRMLS_CC); }
