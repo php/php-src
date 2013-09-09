@@ -374,8 +374,9 @@ ZEND_API void convert_to_resource(zval *op) /* {{{ */
     
     convert_to_long(op);
     
+    Z_TYPE_P(op) = IS_RESOURCE;
+    
     if (zend_list_find(Z_LVAL_P(op), &rtype)) {
-        Z_TYPE_P(op) = IS_RESOURCE;
         zend_list_addref(
             Z_LVAL_P(op));
     }
