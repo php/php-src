@@ -6,6 +6,13 @@ PHP                                                                        NEWS
   . Fixed bug #65633 (built-in server treat some http headers as
     case-sensitive). (Adam)
 
+- GD
+  . Ensure that the defined interpolation method is used with the generic
+    scaling methods. (Pierre)
+
+- OPcache:
+  . Fixed bug #65510 (5.5.2 crashes in _get_zval_ptr_ptr_var). (Dmitry)
+
 ?? ??? 2013, PHP 5.5.4
 
 - Core:
@@ -34,13 +41,9 @@ PHP                                                                        NEWS
   . Fixed bug #65564 (stack-buffer-overflow in DateTimeZone stuff caught
     by AddressSanitizer). (Remi).
 
-- GD
-  . Ensure that the defined interpolation method is used with the generic scaling methods (Pierre)
-
 - OPCache:
   . Fixed bug #65561 (Zend Opcache on Solaris 11 x86 needs ZEND_MM_ALIGNMENT=4).
     (Terry Ellison)
-  . Fixed bug #65510 (5.5.2 crashes in _get_zval_ptr_ptr_var). (Dmitry)
 
 - Openssl:
   . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in
