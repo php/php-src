@@ -120,6 +120,7 @@ typedef struct _sapi_globals_struct {
 	sapi_request_info request_info;
 	sapi_headers_struct sapi_headers;
 	int64_t read_post_bytes;
+	unsigned char post_read;
 	unsigned char headers_sent;
 	struct stat global_stat;
 	char *default_mimetype;
@@ -188,7 +189,7 @@ SAPI_API int sapi_add_header_ex(char *header_line, uint header_line_len, zend_bo
 SAPI_API int sapi_send_headers(TSRMLS_D);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg TSRMLS_DC);
-
+SAPI_API int sapi_read_post_block(char *buffer, size_t buflen TSRMLS_DC);
 SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry TSRMLS_DC);
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry TSRMLS_DC);

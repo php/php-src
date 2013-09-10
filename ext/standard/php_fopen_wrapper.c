@@ -63,6 +63,12 @@ php_stream_ops php_stream_output_ops = {
 	NULL  /* set_option */
 };
 
+typedef struct php_stream_input { /* {{{ */
+	php_stream **body_ptr;
+	off_t position;
+} php_stream_input_t;
+/* }}} */
+
 static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
 	return -1;
@@ -71,20 +77,52 @@ static size_t php_stream_input_write(php_stream *stream, const char *buf, size_t
 
 static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
 {
-	php_stream *inner = stream->abstract;
+	php_stream_input_t *input = stream->abstract;
+	size_t read;
+	//fprintf(stderr, "Attempt to read %lu bytes (%lu)\n", count, SG(read_post_bytes));
+
+	if (!SG(post_read) && SG(read_post_bytes) < input->position + count) {
+		/* read requested data from SAPI */
+		int read_bytes = sapi_read_post_block(buf, count TSRMLS_CC);
+
+		//fprintf(stderr, "Did read %d bytes\n", read_bytes);
+		if (read_bytes > 0) {
+			php_stream_seek(*input->body_ptr, 0, SEEK_END);
+			php_stream_write(*input->body_ptr, buf, read_bytes);
+		}
+	}
+
+	php_stream_seek(*input->body_ptr, input->position, SEEK_SET);
+	read = (*input->body_ptr)->ops->read(*input->body_ptr, buf, count TSRMLS_CC);
+
+	if (!read || read == (size_t) -1) {
+		stream->eof = 1;
+	} else {
+		input->position += read;
+	}
+
+	return read;
+}
+/* }}} */
+
+static size_t php_stream_input_read_x(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
+{
+	php_stream_input_t *input = stream->abstract;
+	php_stream *inner = *input->body_ptr;
 
 	if (inner && inner->ops->read) {
 		size_t read = inner->ops->read(inner, buf, count TSRMLS_CC);
 		stream->eof = inner->eof;
 		return read;
 	}
-
 	return -1;
 }
 /* }}} */
 
 static int php_stream_input_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
+	efree(stream->abstract);
+
 	return 0;
 }
 /* }}} */
@@ -193,18 +231,23 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	}
 
 	if (!strcasecmp(path, "input")) {
+		php_stream_input_t *input;
+
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "URL file-access is disabled in the server configuration");
 			}
 			return NULL;
 		}
-		if (SG(request_info).request_body) {
-			php_stream_rewind(SG(request_info).request_body);
+
+		input = ecalloc(1, sizeof(*input));
+		if (*(input->body_ptr = &SG(request_info).request_body)) {
+			php_stream_rewind(*input->body_ptr);
 		} else {
-			sapi_read_standard_form_data(TSRMLS_C);
+			*input->body_ptr = php_stream_temp_create(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE);
 		}
-		return php_stream_alloc(&php_stream_input_ops, SG(request_info).request_body, 0, "rb");
+
+		return php_stream_alloc(&php_stream_input_ops, input, 0, "rb");
 	}
 
 	if (!strcasecmp(path, "stdin")) {
