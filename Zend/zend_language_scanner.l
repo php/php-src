@@ -1247,6 +1247,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_OBJECT_CAST;
 }
 
+<ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"resource"{TABS_AND_SPACES}")" {
+	return T_RESOURCE_CAST;
+}
+
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("bool"|"boolean"){TABS_AND_SPACES}")" {
 	return T_BOOL_CAST;
 }

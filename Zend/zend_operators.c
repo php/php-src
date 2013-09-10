@@ -366,6 +366,23 @@ ZEND_API void convert_to_long(zval *op) /* {{{ */
 }
 /* }}} */
 
+ZEND_API void convert_to_resource(zval *op) /* {{{ */
+{
+    TSRMLS_FETCH();
+    
+    int rtype = 0;
+    
+    convert_to_long(op);
+    
+    Z_TYPE_P(op) = IS_RESOURCE;
+    
+    if (zend_list_find(Z_LVAL_P(op), &rtype)) {
+        zend_list_addref(
+            Z_LVAL_P(op));
+    }
+}
+/* }}} */
+
 ZEND_API void convert_to_long_base(zval *op, int base) /* {{{ */
 {
 	long tmp;

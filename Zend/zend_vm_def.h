@@ -3735,6 +3735,9 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY)
 		case IS_OBJECT:
 			convert_to_object(result);
 			break;
+	    case IS_RESOURCE:
+	        convert_to_resource(result);
+	        break;
 	}
 	FREE_OP1_IF_VAR();
 	CHECK_EXCEPTION();
