@@ -2504,6 +2504,7 @@ string_copy:
 
 		case CURLOPT_FOLLOWLOCATION:
 			convert_to_long_ex(zvalue);
+#if LIBCURL_VERSION_NUM < 0x071304
 			if (PG(open_basedir) && *PG(open_basedir)) {
 				if (Z_LVAL_PP(zvalue) != 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set");
@@ -2511,6 +2512,7 @@ string_copy:
 					return 1;
 				}
 			}
+#endif
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
 

@@ -10,6 +10,10 @@ PHP                                                                        NEWS
     of E_STRICT (phase 1 of RFC: https://wiki.php.net/rfc/incompat_ctx).
 	(Gustavo)
 
+- cURL:
+  . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir
+    or safe_mode). (Adam)
+
 - Session:
   . Fixed Bug #65315 (session.hash_function silently fallback to default md5)
     (Yasuo)
