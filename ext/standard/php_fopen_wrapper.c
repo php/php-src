@@ -79,13 +79,11 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 {
 	php_stream_input_t *input = stream->abstract;
 	size_t read;
-	//fprintf(stderr, "Attempt to read %lu bytes (%lu)\n", count, SG(read_post_bytes));
 
 	if (!SG(post_read) && SG(read_post_bytes) < input->position + count) {
 		/* read requested data from SAPI */
 		int read_bytes = sapi_read_post_block(buf, count TSRMLS_CC);
 
-		//fprintf(stderr, "Did read %d bytes\n", read_bytes);
 		if (read_bytes > 0) {
 			php_stream_seek(*input->body_ptr, 0, SEEK_END);
 			php_stream_write(*input->body_ptr, buf, read_bytes);
@@ -102,20 +100,6 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 	}
 
 	return read;
-}
-/* }}} */
-
-static size_t php_stream_input_read_x(php_stream *stream, char *buf, size_t count TSRMLS_DC) /* {{{ */
-{
-	php_stream_input_t *input = stream->abstract;
-	php_stream *inner = *input->body_ptr;
-
-	if (inner && inner->ops->read) {
-		size_t read = inner->ops->read(inner, buf, count TSRMLS_CC);
-		stream->eof = inner->eof;
-		return read;
-	}
-	return -1;
 }
 /* }}} */
 
