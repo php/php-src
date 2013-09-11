@@ -44,4 +44,8 @@ PHP                                                                        NEWS
     improvements based on this.
     (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
 
+- Standard:
+  . Implemented FR #65634 (HTTP wrapper is very slow with protocol_version
+    1.1). (Adam)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
