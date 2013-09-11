@@ -2,8 +2,7 @@ phpincludedir=$(prefix)/include/php
 
 PDO_HEADER_FILES= \
 	php_pdo.h \
-	php_pdo_driver.h \
-	php_pdo_error.h
+	php_pdo_driver.h
 
 
 $(srcdir)/pdo_sql_parser.c: $(srcdir)/pdo_sql_parser.re

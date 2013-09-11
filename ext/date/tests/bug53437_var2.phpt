@@ -39,7 +39,7 @@ object(DateInterval)#1 (15) {
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
-  int(0)
+  string(1) "0"
   ["have_weekday_relative"]=>
   int(0)
   ["have_special_relative"]=>
@@ -67,11 +67,11 @@ object(DateInterval)#2 (15) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  int(0)
+  string(1) "0"
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
-  int(0)
+  string(1) "0"
   ["have_weekday_relative"]=>
   int(0)
   ["have_special_relative"]=>

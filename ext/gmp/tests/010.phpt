@@ -28,22 +28,13 @@ NULL
 Warning: gmp_mod() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 bool(false)
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(1) "0"
-}
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(1) "0"
-}
+int(0)
+resource(%d) of type (GMP integer)
 
 Warning: gmp_mod(): Zero operand not allowed in %s on line %d
 bool(false)
 
 Warning: gmp_mod(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(5) "31161"
-}
+resource(%d) of type (GMP integer)
 Done

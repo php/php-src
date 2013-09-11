@@ -16,10 +16,10 @@ var_dump( fileinode("/no/such/file/dir") );
 var_dump( fileinode("string") );
 var_dump( fileinode(100) );
 
-/* No.of arguments less than expected */
+/* No.of argumetns less than expected */
 var_dump( fileinode() );
 
-/* No.of arguments greater than expected */
+/* No.of argumetns greater than expected */
 var_dump( fileinode(__FILE__, "string") );
 
 echo "\n*** Done ***";

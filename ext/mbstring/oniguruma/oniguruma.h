@@ -96,13 +96,8 @@ extern "C" {
 #define UChar OnigUChar
 #endif
 
-#ifdef _WIN32
-# include <windows.h>
-typedef ULONG_PTR OnigCodePoint;
-#else
-typedef unsigned long  OnigCodePoint;
-#endif
 typedef unsigned char  OnigUChar;
+typedef unsigned long  OnigCodePoint;
 typedef unsigned int   OnigCtype;
 typedef unsigned int   OnigDistance;
 

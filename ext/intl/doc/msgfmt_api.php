@@ -31,7 +31,7 @@ class MessageFormatter {
 	/**
 	 * Format the message
 	 * @param   array   $args   arguments to insert into the pattern string
-	 * @return  string  the formatted string, or false if an error occurred
+	 * @return  string  the formatted string, or false if an error ocurred
 	 */
 	public function format($args) {}
 
@@ -124,7 +124,7 @@ class MessageFormatter {
 	 * Format the message
 	 * @param MessageFormatter $fmt The message formatter 
 	 * @param   array   $args   arguments to insert into the pattern string
-	 * @return  string  the formatted string, or false if an error occurred
+	 * @return  string  the formatted string, or false if an error ocurred
 	 */
 	function msgfmt_format($fmt, $args) {}
 

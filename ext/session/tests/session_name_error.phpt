@@ -86,7 +86,7 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
     echo "\n-- Iteration $iterator --\n";
-    var_dump($input, session_name($input));
+    var_dump(session_name($input));
     $iterator++;
 };
 
@@ -98,139 +98,77 @@ ob_end_flush();
 *** Testing session_name() : error functionality ***
 
 -- Iteration 1 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '0' in %s on line %d
-int(0)
 string(9) "PHPSESSID"
 
 -- Iteration 2 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '1' in %s on line %d
-int(1)
-string(9) "PHPSESSID"
+string(1) "0"
 
 -- Iteration 3 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '12345' in %s on line %d
-int(12345)
-string(9) "PHPSESSID"
+string(1) "1"
 
 -- Iteration 4 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '-2345' in %s on line %d
-int(-2345)
-string(9) "PHPSESSID"
+string(5) "12345"
 
 -- Iteration 5 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '10.5' in %s on line %d
-float(10.5)
-string(9) "PHPSESSID"
+string(5) "-2345"
 
 -- Iteration 6 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '-10.5' in %s on line %d
-float(-10.5)
-string(9) "PHPSESSID"
+string(4) "10.5"
 
 -- Iteration 7 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '123456789000' in %s on line %d
-float(123456789000)
-string(9) "PHPSESSID"
+string(5) "-10.5"
 
 -- Iteration 8 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '1.23456789E-9' in %s on line %d
-float(1.23456789E-9)
-string(9) "PHPSESSID"
+string(12) "123456789000"
 
 -- Iteration 9 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '0.5' in %s on line %d
-float(0.5)
-string(9) "PHPSESSID"
+string(13) "1.23456789E-9"
 
 -- Iteration 10 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
-NULL
-string(9) "PHPSESSID"
+string(3) "0.5"
 
 -- Iteration 11 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
-NULL
-string(9) "PHPSESSID"
+string(0) ""
 
 -- Iteration 12 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '1' in %s on line %d
-bool(true)
-string(9) "PHPSESSID"
+string(0) ""
 
 -- Iteration 13 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
-bool(false)
-string(9) "PHPSESSID"
+string(1) "1"
 
 -- Iteration 14 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '1' in %s on line %d
-bool(true)
-string(9) "PHPSESSID"
+string(0) ""
 
 -- Iteration 15 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
-bool(false)
-string(9) "PHPSESSID"
+string(1) "1"
 
 -- Iteration 16 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
 string(0) ""
-string(9) "PHPSESSID"
 
 -- Iteration 17 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
 string(0) ""
-string(9) "PHPSESSID"
 
 -- Iteration 18 --
-string(7) "Nothing"
-string(9) "PHPSESSID"
+string(0) ""
 
 -- Iteration 19 --
 string(7) "Nothing"
-string(7) "Nothing"
 
 -- Iteration 20 --
-string(12) "Hello World!"
 string(7) "Nothing"
 
 -- Iteration 21 --
-object(classA)#1 (0) {
-}
 string(12) "Hello World!"
 
 -- Iteration 22 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
-NULL
 string(12) "Hello World!"
 
 -- Iteration 23 --
-
-Warning: session_name(): session.name cannot be a numeric or empty '' in %s on line %d
-NULL
-string(12) "Hello World!"
+string(0) ""
 
 -- Iteration 24 --
 
 Warning: session_name() expects parameter 1 to be string, resource given in %s on line %d
-resource(5) of type (stream)
 NULL
 Done
+

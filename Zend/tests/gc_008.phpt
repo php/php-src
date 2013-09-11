@@ -1,5 +1,5 @@
 --TEST--
-GC 008: Unreferenced object cycle
+GC 008: Unreferensed object cycle
 --INI--
 zend.enable_gc=1
 --FILE--

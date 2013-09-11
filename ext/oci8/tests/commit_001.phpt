@@ -81,59 +81,48 @@ echo "Done\n";
 bool(true)
 int(0)
 array(5) {
-  ["ID"]=>
+  [%u|b%"ID"]=>
   array(0) {
   }
-  ["VALUE"]=>
+  [%u|b%"VALUE"]=>
   array(0) {
   }
-  ["BLOB"]=>
+  [%u|b%"BLOB"]=>
   array(0) {
   }
-  ["CLOB"]=>
+  [%u|b%"CLOB"]=>
   array(0) {
   }
-  ["STRING"]=>
+  [%u|b%"STRING"]=>
   array(0) {
   }
 }
 bool(true)
 int(4)
 array(5) {
-  ["ID"]=>
+  [%u|b%"ID"]=>
   array(4) {
     [0]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [1]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [2]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [3]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
   }
-  ["VALUE"]=>
+  [%u|b%"VALUE"]=>
   array(4) {
     [0]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [1]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [2]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
     [3]=>
-    string(1) "1"
+    %string|unicode%(1) "1"
   }
-  ["BLOB"]=>
-  array(4) {
-    [0]=>
-    NULL
-    [1]=>
-    NULL
-    [2]=>
-    NULL
-    [3]=>
-    NULL
-  }
-  ["CLOB"]=>
+  [%u|b%"BLOB"]=>
   array(4) {
     [0]=>
     NULL
@@ -144,7 +133,18 @@ array(5) {
     [3]=>
     NULL
   }
-  ["STRING"]=>
+  [%u|b%"CLOB"]=>
+  array(4) {
+    [0]=>
+    NULL
+    [1]=>
+    NULL
+    [2]=>
+    NULL
+    [3]=>
+    NULL
+  }
+  [%u|b%"STRING"]=>
   array(4) {
     [0]=>
     NULL

@@ -1,5 +1,5 @@
 --TEST--
-SPL: priorityQueue parameter test on insert method
+SPL: priorityQueue paramter test on insert method
 --CREDITS--
 Sean Burlington www.practicalweb.co.uk
 TestFest London May 2009

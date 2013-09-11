@@ -3,7 +3,7 @@ PostgreSQL pg_convert()
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_bytea_not_escape();
+skip_server_version('8.5dev', '>=');
 ?>
 --FILE--
 <?php
@@ -20,10 +20,10 @@ var_dump($converted);
 ?>
 --EXPECT--
 array(3) {
-  [""num""]=>
+  ["num"]=>
   string(4) "1234"
-  [""str""]=>
-  string(6) "E'AAA'"
-  [""bin""]=>
-  string(6) "E'BBB'"
+  ["str"]=>
+  string(5) "'AAA'"
+  ["bin"]=>
+  string(5) "'BBB'"
 }

@@ -20,7 +20,6 @@
 /* $Id: php_cli.c 306938 2011-01-01 02:17:06Z felipe $ */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <fcntl.h>
 #include <assert.h>
 
@@ -195,17 +194,17 @@ typedef struct php_cli_server {
 	HashTable clients;
 } php_cli_server;
 
-typedef struct php_cli_server_http_response_status_code_pair {
+typedef struct php_cli_server_http_reponse_status_code_pair {
 	int code;
 	const char *str;
-} php_cli_server_http_response_status_code_pair;
+} php_cli_server_http_reponse_status_code_pair;
 
 typedef struct php_cli_server_ext_mime_type_pair {
 	const char *ext;
 	const char *mime_type;
 } php_cli_server_ext_mime_type_pair;
 
-static php_cli_server_http_response_status_code_pair status_map[] = {
+static php_cli_server_http_reponse_status_code_pair status_map[] = {
 	{ 100, "Continue" },
 	{ 101, "Switching Protocols" },
 	{ 200, "OK" },
@@ -252,7 +251,7 @@ static php_cli_server_http_response_status_code_pair status_map[] = {
 	{ 511, "Network Authentication Required" },
 };
 
-static php_cli_server_http_response_status_code_pair template_map[] = {
+static php_cli_server_http_reponse_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
 	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
 	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
@@ -338,43 +337,28 @@ static char *get_last_error() /* {{{ */
 	return pestrdup(strerror(errno), 1);
 } /* }}} */
 
-static int status_comp(const void *a, const void *b) /* {{{ */
-{
-	const php_cli_server_http_response_status_code_pair *pa = (const php_cli_server_http_response_status_code_pair *) a;
-	const php_cli_server_http_response_status_code_pair *pb = (const php_cli_server_http_response_status_code_pair *) b;
-
-	if (pa->code < pb->code) {
-		return -1;
-	} else if (pa->code > pb->code) {
-		return 1;
-	}
-
-	return 0;
-} /* }}} */
-
 static const char *get_status_string(int code) /* {{{ */
 {
-	php_cli_server_http_response_status_code_pair needle, *result = NULL;
+	size_t e = (sizeof(status_map) / sizeof(php_cli_server_http_reponse_status_code_pair));
+	size_t s = 0;
 
-	needle.code = code;
-	needle.str = NULL;
-
-	result = bsearch(&needle, status_map, sizeof(status_map) / sizeof(needle), sizeof(needle), status_comp);
-
-	if (result) {
-		return result->str;
+	while (e != s) {
+		size_t c = MIN((e + s + 1) / 2, e - 1);
+		int d = status_map[c].code;
+		if (d > code) {
+			e = c;
+		} else if (d < code) {
+			s = c;
+		} else {
+			return status_map[c].str;
+		}
 	}
-
-	/* Returning NULL would require complicating append_http_status_line() to
-	 * not segfault in that case, so let's just return a placeholder, since RFC
-	 * 2616 requires a reason phrase. This is basically what a lot of other Web
-	 * servers do in this case anyway. */
-	return "Unknown Status Code";
+	return NULL;
 } /* }}} */
 
 static const char *get_template_string(int code) /* {{{ */
 {
-	size_t e = (sizeof(template_map) / sizeof(php_cli_server_http_response_status_code_pair));
+	size_t e = (sizeof(template_map) / sizeof(php_cli_server_http_reponse_status_code_pair));
 	size_t s = 0;
 
 	while (e != s) {
@@ -412,7 +396,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 {
 	{
 		char **val;
-		if (SUCCESS == zend_hash_find(&client->request.headers, "host", sizeof("host"), (void**)&val)) {
+		if (SUCCESS == zend_hash_find(&client->request.headers, "Host", sizeof("Host"), (void**)&val)) {
 			smart_str_appendl_ex(buffer, "Host", sizeof("Host") - 1, persistent);
 			smart_str_appendl_ex(buffer, ": ", sizeof(": ") - 1, persistent);
 			smart_str_appends_ex(buffer, *val, persistent);
@@ -568,7 +552,7 @@ static char *sapi_cli_server_read_cookies(TSRMLS_D) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	char **val;
-	if (FAILURE == zend_hash_find(&client->request.headers, "cookie", sizeof("cookie"), (void**)&val)) {
+	if (FAILURE == zend_hash_find(&client->request.headers, "Cookie", sizeof("Cookie"), (void**)&val)) {
 		return NULL;
 	}
 	return *val;
@@ -1335,7 +1319,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	static const char *index_files[] = { "index.php", "index.html", NULL };
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_path = NULL, *q, *vpath;
-	size_t prev_path_len = 0;
+	size_t prev_path_len;
 	int  is_static_file = 0;
 
 	if (!buf) {
@@ -1566,9 +1550,12 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 		return 1;
 	}
 	{
-		char *header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
-		zend_hash_add(&client->request.headers, header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
-		efree(header_name);
+		char *header_name = client->current_header_name;
+		size_t header_name_len = client->current_header_name_len;
+		char c = header_name[header_name_len];
+		header_name[header_name_len] = '\0';
+		zend_hash_add(&client->request.headers, header_name, header_name_len + 1, &value, sizeof(char *), NULL);
+		header_name[header_name_len] = c;
 	}
 
 	if (client->current_header_name_allocated) {
@@ -1726,7 +1713,7 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->post_data = client->request.content;
 	request_info->content_length = request_info->post_data_length = client->request.content_len;
 	request_info->auth_user = request_info->auth_password = request_info->auth_digest = NULL;
-	if (SUCCESS == zend_hash_find(&client->request.headers, "content-type", sizeof("content-type"), (void**)&val)) {
+	if (SUCCESS == zend_hash_find(&client->request.headers, "Content-Type", sizeof("Content-Type"), (void**)&val)) {
 		request_info->content_type = *val;
 	}
 } /* }}} */
@@ -1964,7 +1951,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 static int php_cli_server_request_startup(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) { /* {{{ */
 	char **auth;
 	php_cli_server_client_populate_request_info(client, &SG(request_info));
-	if (SUCCESS == zend_hash_find(&client->request.headers, "authorization", sizeof("authorization"), (void**)&auth)) {
+	if (SUCCESS == zend_hash_find(&client->request.headers, "Authorization", sizeof("Authorization"), (void**)&auth)) {
 		php_handle_auth_data(*auth TSRMLS_CC);
 	}
 	SG(sapi_headers).http_response_code = 200;

@@ -254,13 +254,15 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 		if (EG(user_error_handler)) {
 			zeh = EG(user_error_handler);
 			EG(user_error_handler) = NULL;
-			zval_ptr_dtor(&zeh);
+			zval_dtor(zeh);
+			FREE_ZVAL(zeh);
 		}
 
 		if (EG(user_exception_handler)) {
 			zeh = EG(user_exception_handler);
 			EG(user_exception_handler) = NULL;
-			zval_ptr_dtor(&zeh);
+			zval_dtor(zeh);
+			FREE_ZVAL(zeh);
 		}
 
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
@@ -952,9 +954,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (EX(function_state).function->common.scope) {
 			EG(scope) = EX(function_state).function->common.scope;
 		}
-		if (EXPECTED(zend_execute_internal == NULL)) {
+		if(EXPECTED(zend_execute_internal == NULL)) {
 			/* saves one function call if zend_execute_internal is not used */
-			EX(function_state).function->internal_function.handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
+			((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
 		} else {
 			zend_execute_internal(&execute_data, fci, 1 TSRMLS_CC);
 		}
@@ -1054,7 +1056,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_
 	}
 
 	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
-	 * (doesn't impact functionality of __autoload()
+	 * (doesn't impact fuctionality of __autoload()
 	*/
 	if (!use_autoload || zend_is_compiling(TSRMLS_C)) {
 		if (!key) {

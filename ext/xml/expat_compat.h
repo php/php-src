@@ -38,9 +38,6 @@
 #include <libxml/tree.h>
 #include <libxml/hash.h>
 
-/* For compatibility with the misspelled version. */
-#define _ns_seperator _ns_separator
-
 typedef xmlChar XML_Char;
 
 typedef void (*XML_StartElementHandler)(void *, const XML_Char *, const XML_Char **);
@@ -64,7 +61,7 @@ typedef struct _XML_Memory_Handling_Suite {
 typedef struct _XML_Parser {
 	int use_namespace;
 
-	xmlChar *_ns_separator;
+	xmlChar *_ns_seperator;
 
 	void *user;
 	xmlParserCtxtPtr parser;

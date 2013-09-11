@@ -23,7 +23,7 @@
 
 #include <sqlite3.h>
 
-/* for backwards compatibility reasons */
+/* for backwards compatability reasons */
 #ifndef SQLITE_OPEN_READONLY
 #define SQLITE_OPEN_READONLY 0x00000001
 #endif

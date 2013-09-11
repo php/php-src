@@ -25,7 +25,7 @@ echo "*** Testing array_walk() : error conditions - callback parameters ***\n";
 var_dump( array_walk($input, "callback1") );
 var_dump( array_walk($input, "callback2", 4) );
 
-// expected: Warning is suppressed
+// expected: Warning is supressed
 var_dump( @array_walk($input, "callback1") );  
 var_dump( @array_walk($input, "callback2", 4) );  
 

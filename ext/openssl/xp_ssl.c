@@ -274,7 +274,7 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle TSRMLS_
 			 * Essentially, we are waiting for the socket to become writeable, which means
 			 * that all pending data has been sent.
 			 * We use a small timeout which should encourage the OS to send the data,
-			 * but at the same time avoid hanging indefinitely.
+			 * but at the same time avoid hanging indefintely.
 			 * */
 			do {
 				n = php_pollfd_for_ms(sslsock->s.socket, POLLOUT, 500);
@@ -309,7 +309,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 		php_stream_xport_crypto_param *cparam
 		TSRMLS_DC)
 {
-	const SSL_METHOD *method;
+	SSL_METHOD *method;
 	long ssl_ctx_options = SSL_OP_ALL;
 	
 	if (sslsock->ssl_handle) {
@@ -472,7 +472,7 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 		
 		do {
 			struct timeval	cur_time,
-							elapsed_time = {0};
+							elapsed_time;
 			
 			if (sslsock->is_client) {
 				n = SSL_connect(sslsock->ssl_handle);
@@ -853,7 +853,7 @@ php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_set_option,
 };
 
-static char * get_sni(php_stream_context *ctx, const char *resourcename, size_t resourcenamelen, int is_persistent TSRMLS_DC) {
+static char * get_sni(php_stream_context *ctx, char *resourcename, long resourcenamelen, int is_persistent TSRMLS_DC) {
 
 	php_url *url;
 
@@ -900,8 +900,8 @@ static char * get_sni(php_stream_context *ctx, const char *resourcename, size_t 
 	return NULL;
 }
 
-php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
-		const char *resourcename, size_t resourcenamelen,
+php_stream *php_openssl_ssl_socket_factory(const char *proto, long protolen,
+		char *resourcename, long resourcenamelen,
 		const char *persistent_id, int options, int flags,
 		struct timeval *timeout,
 		php_stream_context *context STREAMS_DC TSRMLS_DC)

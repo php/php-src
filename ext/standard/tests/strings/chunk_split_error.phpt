@@ -10,7 +10,7 @@ Test chunk_split() function : error conditions
 
 /*
 * Testing error conditions of chunk_split() with zero arguments 
-* and for more than expected number of arguments 
+* and for more than expected number of argments 
 */
 
 echo "*** Testing chunk_split() : error conditions ***\n";

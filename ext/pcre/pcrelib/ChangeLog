@@ -1751,7 +1751,7 @@ Version 7.7 07-May-08
     containing () gave an internal compiling error instead of "reference to
     non-existent subpattern". Fortunately, when the pattern did exist, the
     compiled code was correct. (When scanning forwards to check for the
-    existence of the subpattern, it was treating the data ']' as terminating
+    existencd of the subpattern, it was treating the data ']' as terminating
     the class, so got the count wrong. When actually compiling, the reference
     was subsequently set up correctly.)
 

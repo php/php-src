@@ -614,8 +614,7 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 	char *begin = *ptr, *end;
 	const timelib_relunit *tp, *value = NULL;
 
-	while (**ptr != '\0' && **ptr != ' ' && **ptr != ',' && **ptr != '\t' && **ptr != ';' && **ptr != ':' &&
-           **ptr != '/' && **ptr != '.' && **ptr != '-' && **ptr != '(' && **ptr != ')' ) {
+	while (**ptr != '\0' && **ptr != ' ' && **ptr != ',' && **ptr != '\t') {
 		++*ptr;
 	}
 	end = *ptr;

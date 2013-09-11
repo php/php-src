@@ -183,7 +183,8 @@ static zend_always_inline zval *_get_zval_ptr_var(zend_uint var, const zend_exec
 {
 	zval *ptr = EX_T(var).var.ptr;
 
-	return should_free->var = ptr;
+	PZVAL_UNLOCK(ptr, should_free);
+	return ptr;
 }
 
 static zend_never_inline zval **_get_zval_cv_lookup(zval ***ptr, zend_uint var, int type TSRMLS_DC)
@@ -381,19 +382,6 @@ static zend_always_inline zval **_get_zval_ptr_ptr_var(zend_uint var, const zend
 	} else {
 		/* string offset */
 		PZVAL_UNLOCK(EX_T(var).str_offset.str, should_free);
-	}
-	return ptr_ptr;
-}
-
-static zend_always_inline zval **_get_zval_ptr_ptr_var_fast(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
-{
-	zval** ptr_ptr = EX_T(var).var.ptr_ptr;
-
-	if (EXPECTED(ptr_ptr != NULL)) {
-		should_free->var = *ptr_ptr;
-	} else {
-		/* string offset */
-		should_free->var = EX_T(var).str_offset.str;
 	}
 	return ptr_ptr;
 }
@@ -921,7 +909,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 		} else { /* we need to split */
 			Z_DELREF_P(variable_ptr);
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
-			if (PZVAL_IS_REF(value)) {
+			if (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0) {
 				ALLOC_ZVAL(variable_ptr);
 				*variable_ptr_ptr = variable_ptr;
 				INIT_PZVAL_COPY(variable_ptr, value);
@@ -930,6 +918,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 			} else {
 				*variable_ptr_ptr = value;
 				Z_ADDREF_P(value);
+				Z_UNSET_ISREF_P(value);
 				return value;
 			}
 		}
@@ -1487,17 +1476,15 @@ ZEND_API opcode_handler_t *zend_opcode_handlers;
 
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC)
 {
-	if (fci != NULL) {
-		execute_data_ptr->function_state.function->internal_function.handler(
-			fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr,
-			fci->object_ptr, 1 TSRMLS_CC
-		);
+	if(fci != NULL) {
+		((zend_internal_function *) execute_data_ptr->function_state.function)->handler(fci->param_count,
+				*fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
+
 	} else {
 		zval **return_value_ptr = &EX_TMP_VAR(execute_data_ptr, execute_data_ptr->opline->result.var)->var.ptr;
-		execute_data_ptr->function_state.function->internal_function.handler(
-			execute_data_ptr->opline->extended_value, *return_value_ptr, return_value_ptr,
-			execute_data_ptr->object, return_value_used TSRMLS_CC
-		);
+		((zend_internal_function *) execute_data_ptr->function_state.function)->handler(execute_data_ptr->opline->extended_value, *return_value_ptr,
+					(execute_data_ptr->function_state.function->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)?return_value_ptr:NULL,
+					execute_data_ptr->object, return_value_used TSRMLS_CC);
 	}
 }
 

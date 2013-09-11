@@ -69,8 +69,5 @@ NULL
 
 Warning: gmp_powm(): Second parameter cannot be less than 0 in %s on line %d
 bool(false)
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(1) "1"
-}
+resource(%d) of type (GMP integer)
 Done

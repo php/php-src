@@ -19,7 +19,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 echo "*** Testing touch() : basic functionality ***\n";
 
-$filename = dirname(__FILE__)."/touch_basic.dat";
+$filename = dirname(__FILE__)."/touch.dat";
 
 echo "\n--- testing touch creates a file ---\n";
 @unlink($filename);

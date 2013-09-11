@@ -35,15 +35,9 @@ NULL
 
 Warning: gmp_sub(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(2) "-1"
-}
+resource(%d) of type (GMP integer)
 string(2) "-1"
-object(GMP)#%d (1) {
-  ["num"]=>
-  string(5) "10001"
-}
+resource(%d) of type (GMP integer)
 string(5) "10001"
 
 Warning: gmp_sub(): Unable to convert variable to GMP - wrong type in %s on line %d

@@ -3303,7 +3303,7 @@
 >>>0x44		string	=GLOB		\b.
 >>>>0x60	beshort	x		\b%.4d
 
-# Scripts that run in the embedded Python interpreter
+# Scripts that run in the embeded Python interpreter
 0		string	#!BPY		Blender3D BPython script
 
 #------------------------------------------------------------------------------
@@ -4957,7 +4957,7 @@
 >>>>0	ubelong			=0		\b, next free block index %lu
 >>>>0	ubelong			!0		\b, next free block index %lu
 >>>512	default			x		dBase IV DBT
-# DBF file name without extension 
+# DBF file name without extention 
 >>>>8	string			>\0		\b of %-.8s.DBF
 # size of blocks  ; not reliable 0x2020204C
 #>>>>4	ulelong			=0		\b, blocks size %lu
@@ -11969,7 +11969,7 @@
 #>65	string		ZSYS		(Pre-System 7 system file)
 #>65	string		acf3		(Aldus FreeHand)
 #>65	string		cdev		(control panel)
-#>65	string		dfil		(Desk Accessory suitcase)
+#>65	string		dfil		(Desk Acessory suitcase)
 #>65	string		libr		(library)
 #>65	string		nX^d		(WriteNow word processor)
 #>65	string		nX^w		(WriteNow dictionary)
@@ -13205,7 +13205,7 @@
 # they have their real name at offset 22
 >>>>>22		string			>\0			\b%-.5s
 >4	uleshort&0x8000			0x0000			
-# 32 bit sector addressing ( > 32 MB) for block devices
+# 32 bit sector adressing ( > 32 MB) for block devices
 >>4	uleshort&0x0002			0x0002			\b,32-bit sector-
 # support by driver functions 13h, 17h, 18h
 >4	uleshort&0x0040			0x0040			\b,IOCTL-
@@ -17951,7 +17951,7 @@
 #   00030  00 00 00 00 01 00 00 00  00 00 00 00 00 00 00 00  ................
 #   00040  00 00 00 00 ff ff ff ff  ff ff ff ff 02 00 00 00  ................
 #
-# GRR this test is still too general as it catches example addressen.dbt
+# GRR this test is still too general as it catches example adressen.dbt
 0	belong	0x03000000	
 >8	ubelong	0xec020000	VMS Alpha executable
 >>75264	string	PK\003\004	\b, Info-ZIP SFX archive v5.12 w/decryption

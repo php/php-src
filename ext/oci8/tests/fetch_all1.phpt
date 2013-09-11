@@ -51,44 +51,44 @@ echo "Done\n";
 --EXPECTF--
 int(3)
 array(2) {
-  ["ID"]=>
+  [%u|b%"ID"]=>
   array(3) {
     [0]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [1]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [2]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
   }
-  ["VALUE"]=>
+  [%u|b%"VALUE"]=>
   array(3) {
     [0]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [1]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [2]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
   }
 }
 int(3)
 array(2) {
-  ["ID"]=>
+  [%u|b%"ID"]=>
   array(3) {
     [0]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [1]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [2]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
   }
-  ["VALUE"]=>
+  [%u|b%"VALUE"]=>
   array(3) {
     [0]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [1]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
     [2]=>
-    string(1) "1"
+    %unicode|string%(1) "1"
   }
 }
 Done

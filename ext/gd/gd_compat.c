@@ -10,7 +10,6 @@
 #endif
 
 #include "gd_compat.h"
-#include "php.h"
 
 #ifdef HAVE_GD_JPG
 int gdJpegGetVersionInt()
@@ -45,19 +44,4 @@ const char * gdPngGetVersionString()
 	return PNG_LIBPNG_VER_STRING;
 }
 #endif
-
-int overflow2(int a, int b)
-{
-	TSRMLS_FETCH();
-
-	if(a <= 0 || b <= 0) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "gd warning: one parameter to a memory allocation multiplication is negative or zero, failing operation gracefully\n");
-		return 1;
-	}
-	if(a > INT_MAX / b) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "gd warning: product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully\n");
-		return 1;
-	}
-	return 0;
-}
 

@@ -64,8 +64,6 @@
 # endif
 #endif
 
-#include <stddef.h>
-
 #include "sockaddr_conv.h"
 #include "multicast.h"
 #include "sendrecvmsg.h"
@@ -346,7 +344,7 @@ const zend_function_entry sockets_functions[] = {
 	PHP_FE(socket_recvmsg,			arginfo_socket_recvmsg)
 	PHP_FE(socket_cmsg_space,		arginfo_socket_cmsg_space)
 
-	/* for downwards compatibility */
+	/* for downwards compatability */
 	PHP_FALIAS(socket_getopt, socket_get_option, arginfo_socket_get_option)
 	PHP_FALIAS(socket_setopt, socket_set_option, arginfo_socket_set_option)
 
@@ -681,9 +679,6 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("SO_FAMILY",		SO_FAMILY,		CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SO_ERROR",		SO_ERROR,		CONST_CS | CONST_PERSISTENT);
-#ifdef SO_BINDTODEVICE
-	REGISTER_LONG_CONSTANT("SO_BINDTODEVICE",       SO_BINDTODEVICE,        CONST_CS | CONST_PERSISTENT);
-#endif
 	REGISTER_LONG_CONSTANT("SOL_SOCKET",	SOL_SOCKET,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOMAXCONN",		SOMAXCONN,		CONST_CS | CONST_PERSISTENT);
 #ifdef TCP_NODELAY
@@ -1481,7 +1476,7 @@ PHP_FUNCTION(socket_strerror)
 PHP_FUNCTION(socket_bind)
 {
 	zval					*arg1;
-	php_sockaddr_storage	sa_storage = {0};
+	php_sockaddr_storage	sa_storage;
 	struct sockaddr			*sock_type = (struct sockaddr*) &sa_storage;
 	php_socket				*php_sock;
 	char					*addr;
@@ -1499,25 +1494,18 @@ PHP_FUNCTION(socket_bind)
 		case AF_UNIX:
 			{
 				struct sockaddr_un *sa = (struct sockaddr_un *) sock_type;
-
+				memset(sa, 0, sizeof(sa_storage));
 				sa->sun_family = AF_UNIX;
-
-				if (addr_len >= sizeof(sa->sun_path)) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING,
-							"Invalid path: too long (maximum size is %d)",
-							(int)sizeof(sa->sun_path) - 1);
-					RETURN_FALSE;
-				}
-				memcpy(&sa->sun_path, addr, addr_len);
-
-				retval = bind(php_sock->bsd_socket, (struct sockaddr *) sa,
-						offsetof(struct sockaddr_un, sun_path) + addr_len);
+				snprintf(sa->sun_path, 108, "%s", addr);
+				retval = bind(php_sock->bsd_socket, (struct sockaddr *) sa, SUN_LEN(sa));
 				break;
 			}
 
 		case AF_INET:
 			{
 				struct sockaddr_in *sa = (struct sockaddr_in *) sock_type;
+
+				memset(sa, 0, sizeof(sa_storage)); /* Apparently, Mac OSX needs this */
 
 				sa->sin_family = AF_INET;
 				sa->sin_port = htons((unsigned short) port);
@@ -1533,6 +1521,8 @@ PHP_FUNCTION(socket_bind)
 		case AF_INET6:
 			{
 				struct sockaddr_in6 *sa = (struct sockaddr_in6 *) sock_type;
+
+				memset(sa, 0, sizeof(sa_storage)); /* Apparently, Mac OSX needs this */
 
 				sa->sin6_family = AF_INET6;
 				sa->sin6_port = htons((unsigned short) port);
@@ -1673,8 +1663,8 @@ PHP_FUNCTION(socket_recvfrom)
 			retval = recvfrom(php_sock->bsd_socket, recv_buf, arg3, arg4, (struct sockaddr *)&s_un, (socklen_t *)&slen);
 
 			if (retval < 0) {
-				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
 				efree(recv_buf);
+				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
 				RETURN_FALSE;
 			}
 
@@ -1698,8 +1688,8 @@ PHP_FUNCTION(socket_recvfrom)
 			retval = recvfrom(php_sock->bsd_socket, recv_buf, arg3, arg4, (struct sockaddr *)&sin, (socklen_t *)&slen);
 
 			if (retval < 0) {
-				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
 				efree(recv_buf);
+				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
 				RETURN_FALSE;
 			}
 
@@ -1727,8 +1717,8 @@ PHP_FUNCTION(socket_recvfrom)
 			retval = recvfrom(php_sock->bsd_socket, recv_buf, arg3, arg4, (struct sockaddr *)&sin6, (socklen_t *)&slen);
 
 			if (retval < 0) {
-				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
 				efree(recv_buf);
+				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
 				RETURN_FALSE;
 			}
 
@@ -1868,9 +1858,7 @@ PHP_FUNCTION(socket_get_option)
 			}
 		}
 		}
-	}
-#if HAVE_IPV6
-	else if (level == IPPROTO_IPV6) {
+	} else if (level == IPPROTO_IPV6) {
 		int ret = php_do_getsockopt_ipv6_rfc3542(php_sock, level, optname, return_value TSRMLS_CC);
 		if (ret == SUCCESS) {
 			return;
@@ -1878,7 +1866,6 @@ PHP_FUNCTION(socket_get_option)
 			RETURN_FALSE;
 		} /* else continue */
 	}
-#endif
 
 	/* sol_socket options and general case */
 	switch(optname) {
@@ -2048,18 +2035,6 @@ PHP_FUNCTION(socket_set_option)
 #endif
 			break;
 		}
-#ifdef SO_BINDTODEVICE
-		case SO_BINDTODEVICE: {
-			if (Z_TYPE_PP(arg4) == IS_STRING) {
-				opt_ptr = Z_STRVAL_PP(arg4);
-				optlen = Z_STRLEN_PP(arg4);
-			} else {
-				opt_ptr = "";
-				optlen = 0;
-			}
-			break;
-		}
-#endif
 
 		default:
 default_case:

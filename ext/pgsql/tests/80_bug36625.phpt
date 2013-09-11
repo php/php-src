@@ -1,5 +1,5 @@
 --TEST--
-Bug #36625 (8.0+) (pg_trace() does not work)
+Bug #36625 (pg_trace() does not work)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
@@ -36,8 +36,6 @@ $trace = file($tracefile);
 array_walk($trace, 'search_trace_file');
 var_dump($found > 0);
 var_dump(file_exists($tracefile));
-
-@unlink($tracefile);
 
 ?>
 ===DONE===

@@ -101,7 +101,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate
 }
 /* }}} */
 
-PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
+void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC) /* {{{ */
 {
 	pdo_error_type *pdo_err = &dbh->error_code;
 	const char *msg = "<<Unknown>>";
@@ -338,9 +338,6 @@ static PHP_METHOD(PDO, dbh_constructor)
 			if (pdbh->std.properties) {
 				zend_hash_destroy(dbh->std.properties);	
 				efree(dbh->std.properties);
-				if (dbh->std.properties_table) {
-					efree(dbh->std.properties_table);
-				}
 			} else {
 				pdbh->std.ce = dbh->std.ce;
 				pdbh->def_stmt_ce = dbh->def_stmt_ce;
@@ -899,7 +896,7 @@ static PHP_METHOD(PDO, getAttribute)
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
 
-	/* handle generic PDO-level attributes */
+	/* handle generic PDO-level atributes */
 	switch (attr) {
 		case PDO_ATTR_PERSISTENT:
 			RETURN_BOOL(dbh->is_persistent);
@@ -997,7 +994,7 @@ static PHP_METHOD(PDO, lastInsertId)
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support lastInsertId()" TSRMLS_CC);
 		RETURN_FALSE;
 	} else {
-		Z_STRVAL_P(return_value) = dbh->methods->last_id(dbh, name, (unsigned int *)&Z_STRLEN_P(return_value) TSRMLS_CC);
+		Z_STRVAL_P(return_value) = dbh->methods->last_id(dbh, name, &Z_STRLEN_P(return_value) TSRMLS_CC);
 		if (!Z_STRVAL_P(return_value)) {
 			PDO_HANDLE_DBH_ERR();
 			RETURN_FALSE;
@@ -1578,7 +1575,6 @@ static void pdo_dbh_free_storage(pdo_dbh_t *dbh TSRMLS_DC)
 	}
 	zend_object_std_dtor(&dbh->std TSRMLS_CC);
 	dbh->std.properties = NULL;
-	dbh->std.properties_table = NULL;
 	dbh_free(dbh TSRMLS_CC);
 }
 

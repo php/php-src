@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(fpm,,
-[  --enable-fpm            Enable building of the fpm SAPI executable], no, no)
+[  --enable-fpm              Enable building of the fpm SAPI executable], no, no)
 
 dnl configure checks {{{
 AC_DEFUN([AC_FPM_STDLIBS],
@@ -557,31 +557,11 @@ if test "$PHP_FPM" != "no"; then
 	AC_FPM_SELECT
 
   PHP_ARG_WITH(fpm-user,,
-  [  --with-fpm-user[=USER]    Set the user for php-fpm to run as. (default: nobody)], nobody, no)
+  [  --with-fpm-user[=USER]  Set the user for php-fpm to run as. (default: nobody)], nobody, no)
 
   PHP_ARG_WITH(fpm-group,,
-  [  --with-fpm-group[=GRP]    Set the group for php-fpm to run as. For a system user, this 
-                          should usually be set to match the fpm username (default: nobody)], nobody, no)
-
-  PHP_ARG_WITH(fpm-systemd,,
-  [  --with-fpm-systemd      Activate systemd integration], no, no)
-
-  if test "$PHP_FPM_SYSTEMD" != "no" ; then
-    AC_CHECK_LIB(systemd-daemon, sd_notify, SYSTEMD_LIBS="-lsystemd-daemon")
-    AC_CHECK_HEADERS(systemd/sd-daemon.h, [HAVE_SD_DAEMON_H="yes"], [HAVE_SD_DAEMON_H="no"])
-    if test $HAVE_SD_DAEMON_H = "no" || test -z "${SYSTEMD_LIBS}"; then
-      AC_MSG_ERROR([Your system does not support systemd.])
-    else
-      AC_DEFINE(HAVE_SYSTEMD, 1, [FPM use systemd integration])
-      PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
-      PHP_ADD_LIBRARY(systemd-daemon)
-      php_fpm_systemd=notify
-    fi
-  else
-    php_fpm_systemd=simple
-  fi
-  PHP_SUBST_OLD(php_fpm_systemd)
-  AC_DEFINE_UNQUOTED(PHP_FPM_SYSTEMD, "$php_fpm_systemd", [fpm systemd service type])
+  [  --with-fpm-group[=GRP]  Set the group for php-fpm to run as. For a system user, this 
+                  should usually be set to match the fpm username (default: nobody)], nobody, no)
 
   if test -z "$PHP_FPM_USER" -o "$PHP_FPM_USER" = "yes" -o "$PHP_FPM_USER" = "no"; then
     php_fpm_user="nobody"
@@ -651,7 +631,7 @@ if test "$PHP_FPM" != "no"; then
 		fpm/events/port.c \
   "
 
-  PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')
+  PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')
 
   case $host_alias in
       *aix*)

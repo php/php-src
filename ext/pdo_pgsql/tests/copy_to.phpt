@@ -17,6 +17,7 @@ $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 $db->exec('CREATE TABLE test (a integer not null primary key, b text, c integer)');
 
 $db->beginTransaction();
+try {
 
 echo "Preparing test table for CopyTo tests\n";
 $stmt = $db->prepare("INSERT INTO test (a, b, c) values (?, ?, ?)");
@@ -41,11 +42,8 @@ echo "Testing pgsqlCopyToArray() with only selected fields\n";
 var_dump($db->pgsqlCopyToArray('test',";","NULL",'a,c'));
 
 echo "Testing pgsqlCopyToArray() with error\n";
-try {
-	var_dump($db->pgsqlCopyToArray('test_error'));
-} catch (Exception $e) {
-	echo "Exception: {$e->getMessage()}\n";
-}
+var_dump($db->pgsqlCopyToArray('test_error'));
+
 
 echo "Testing pgsqlCopyToFile() with default parameters\n";
 
@@ -60,19 +58,14 @@ var_dump($db->pgsqlCopyToFile('test',$filename,";","NULL",'a,c'));
 echo file_get_contents($filename);
 
 echo "Testing pgsqlCopyToFile() with error\n";
-try {
-	var_dump($db->pgsqlCopyToFile('test_error',$filename));
-} catch (Exception $e) {
-	echo "Exception: {$e->getMessage()}\n";
-}
+var_dump($db->pgsqlCopyToFile('test_error',$filename));
 
-echo "Testing pgsqlCopyToFile() to unwritable file\n";
-try {
-	var_dump($db->pgsqlCopyToFile('test', 'nonexistent/foo.csv'));
-} catch (Exception $e) {
-	echo "Exception: {$e->getMessage()}\n";
-}
 
+} catch (Exception $e) {
+	/* catch exceptions so that we can show the relative error */
+	echo "Exception! at line ", $e->getLine(), "\n";
+	var_dump($e->getMessage());
+}
 if(isset($filename)) {
 	@unlink($filename);
 }
@@ -116,7 +109,7 @@ array(3) {
 "
 }
 Testing pgsqlCopyToArray() with error
-Exception: SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "test_error" does not exist
+bool(false)
 Testing pgsqlCopyToFile() with default parameters
 bool(true)
 0	test insert 0	\N
@@ -133,7 +126,4 @@ bool(true)
 1;NULL
 2;NULL
 Testing pgsqlCopyToFile() with error
-Exception: SQLSTATE[42P01]: Undefined table: 7 ERROR:  relation "test_error" does not exist
-Testing pgsqlCopyToFile() to unwritable file
-Exception: SQLSTATE[HY000]: General error: 7 Unable to open the file for writing
-
+bool(false)

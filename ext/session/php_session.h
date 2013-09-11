@@ -29,9 +29,6 @@
 
 #define PHP_SESSION_API 20020330
 
-/* To check php_session_valid_key()/php_session_reset_id() */
-#define PHP_SESSION_STRICT 1
-
 #define PS_OPEN_ARGS void **mod_data, const char *save_path, const char *session_name TSRMLS_DC
 #define PS_CLOSE_ARGS void **mod_data TSRMLS_DC
 #define PS_READ_ARGS void **mod_data, const char *key, char **val, int *vallen TSRMLS_DC
@@ -78,7 +75,7 @@ typedef struct ps_module_struct {
 	#x, ps_open_##x, ps_close_##x, ps_read_##x, ps_write_##x, \
 	 ps_delete_##x, ps_gc_##x, php_session_create_id
 
-/* SID creation enabled module handler definitions */
+/* SID enabled module handler definitions */
 #define PS_FUNCS_SID(x) \
 	PS_OPEN_FUNC(x); \
 	PS_CLOSE_FUNC(x); \
@@ -141,7 +138,7 @@ typedef struct _php_ps_globals {
 	int module_number;
 	long cache_expire;
 	union {
-		zval *names[7];
+		zval *names[6];
 		struct {
 			zval *ps_open;
 			zval *ps_close;
@@ -149,7 +146,6 @@ typedef struct _php_ps_globals {
 			zval *ps_write;
 			zval *ps_destroy;
 			zval *ps_gc;
-			zval *ps_create_sid;
 		} name;
 	} mod_user_names;
 	int mod_user_implemented;
@@ -178,9 +174,6 @@ typedef struct _php_ps_globals {
 	smart_str rfc1867_name;    /* session.upload_progress.name */
 	long rfc1867_freq;         /* session.upload_progress.freq */
 	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
-
-	zend_bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
-	unsigned char session_data_hash[16]; /* binary MD5 hash length */
 } php_ps_globals;
 
 typedef php_ps_globals zend_ps_globals;
@@ -236,9 +229,6 @@ PHPAPI void php_session_start(TSRMLS_D);
 PHPAPI ps_module *_php_find_ps_module(char *name TSRMLS_DC);
 PHPAPI const ps_serializer *_php_find_ps_serializer(char *name TSRMLS_DC);
 
-PHPAPI int php_session_valid_key(const char *key);
-PHPAPI void php_session_reset_id(TSRMLS_D);
-
 #define PS_ADD_VARL(name,namelen) do {										\
 	php_add_session_var(name, namelen TSRMLS_CC);							\
 } while (0)
@@ -263,7 +253,7 @@ PHPAPI void php_session_reset_id(TSRMLS_D);
 		int key_type;												\
 																	\
 		for (zend_hash_internal_pointer_reset(_ht);					\
-				(key_type = zend_hash_get_current_key_ex(_ht, &key, &key_length, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTENT; \
+				(key_type = zend_hash_get_current_key_ex(_ht, &key, &key_length, &num_key, 0, NULL)) != HASH_KEY_NON_EXISTANT; \
 					zend_hash_move_forward(_ht)) {					\
 			if (key_type == HASH_KEY_IS_LONG) {						\
 				php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Skipping numeric key %ld", num_key);	\
@@ -287,15 +277,11 @@ extern zend_class_entry *php_session_class_entry;
 #define PS_IFACE_NAME "SessionHandlerInterface"
 extern zend_class_entry *php_session_iface_entry;
 
-#define PS_SID_IFACE_NAME "SessionIdInterface"
-extern zend_class_entry *php_session_id_iface_entry;
-
 extern PHP_METHOD(SessionHandler, open);
 extern PHP_METHOD(SessionHandler, close);
 extern PHP_METHOD(SessionHandler, read);
 extern PHP_METHOD(SessionHandler, write);
 extern PHP_METHOD(SessionHandler, destroy);
 extern PHP_METHOD(SessionHandler, gc);
-extern PHP_METHOD(SessionHandler, create_sid);
 
 #endif

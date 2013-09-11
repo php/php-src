@@ -50,14 +50,14 @@ static int scan(Scanner *s)
 	QUESTION	= [?];
 	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--"[^\r\n]*);
 	SPECIALS	= [:?"'];
-	MULTICHAR	= ([:]{2,}|[?]{2,});
+	MULTICHAR	= [:?];
 	ANYNOEOF	= [\001-\377];
 	*/
 
 	/*!re2c
 		(["](([\\]ANYNOEOF)|ANYNOEOF\["\\])*["]) { RET(PDO_PARSER_TEXT); }
 		(['](([\\]ANYNOEOF)|ANYNOEOF\['\\])*[']) { RET(PDO_PARSER_TEXT); }
-		MULTICHAR								{ RET(PDO_PARSER_TEXT); }
+		MULTICHAR{2,}							{ RET(PDO_PARSER_TEXT); }
 		BINDCHR									{ RET(PDO_PARSER_BIND); }
 		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
 		SPECIALS								{ SKIP_ONE(PDO_PARSER_TEXT); }
@@ -408,9 +408,9 @@ int old_pdo_parse_params(pdo_stmt_t *stmt, char *inquery, int inquery_len, char 
 		while (SUCCESS == zend_hash_get_current_data(params, (void**)&param)) {
 			if(param->parameter) {
 				convert_to_string(param->parameter);
-				/* accommodate a string that needs to be fully quoted
+				/* accomodate a string that needs to be fully quoted
                    bind placeholders are at least 2 characters, so
-                   the accommodate their own "'s
+                   the accomodate their own "'s
                 */
 				newbuffer_len += padding * Z_STRLEN_P(param->parameter);
 			}

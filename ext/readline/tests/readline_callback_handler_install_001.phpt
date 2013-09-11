@@ -15,7 +15,7 @@ var_dump(readline_callback_handler_install('testing: '));
 
 ?>
 --EXPECTF--
-%Atesting: bool(true)
+testing: bool(true)
 
 Warning: readline_callback_handler_install(): foobar! is not callable in %s on line %d
 bool(false)

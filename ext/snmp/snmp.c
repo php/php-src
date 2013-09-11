@@ -514,7 +514,7 @@ static zend_object_value php_snmp_object_new(zend_class_entry *class_type TSRMLS
 static void php_snmp_error(zval *object, const char *docref TSRMLS_DC, int type, const char *format, ...)
 {
 	va_list args;
-	php_snmp_object *snmp_object = NULL;
+	php_snmp_object *snmp_object;
 
 	if (object) {
 		snmp_object = (php_snmp_object *)zend_object_store_get_object(object TSRMLS_CC);
@@ -719,7 +719,7 @@ static void php_snmp_internal(INTERNAL_FUNCTION_PARAMETERS, int st,
 	zval *snmpval = NULL;
 	int snmp_errno;
 
-	/* we start with retval=FALSE. If any actual data is acquired, retval will be set to appropriate type */
+	/* we start with retval=FALSE. If any actual data is aquired, retval will be set to appropriate type */
 	RETVAL_FALSE;
 	
 	/* reset errno and errstr */
@@ -1871,7 +1871,7 @@ PHP_METHOD(snmp, close)
 /* }}} */
 
 /* {{{ proto mixed SNMP::get(mixed object_id [, bool preserve_keys])
-   Fetch a SNMP object returning scalar for single OID and array of oid->value pairs for multi OID request */
+   Fetch a SNMP object returing scalar for single OID and array of oid->value pairs for multi OID request */
 PHP_METHOD(snmp, get)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GET, (-1));
@@ -1879,7 +1879,7 @@ PHP_METHOD(snmp, get)
 /* }}} */
 
 /* {{{ proto mixed SNMP::getnext(mixed object_id)
-   Fetch a SNMP object returning scalar for single OID and array of oid->value pairs for multi OID request */
+   Fetch a SNMP object returing scalar for single OID and array of oid->value pairs for multi OID request */
 PHP_METHOD(snmp, getnext)
 {
 	php_snmp(INTERNAL_FUNCTION_PARAM_PASSTHRU, SNMP_CMD_GETNEXT, (-1));

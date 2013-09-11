@@ -572,7 +572,7 @@ not_stream:
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, const char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
+int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -733,7 +733,7 @@ really_get_entry:
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, const char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
+phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, char *mode, char allow_dir, char **error, int security TSRMLS_DC) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
@@ -889,10 +889,6 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 	dest->offset = 0;
 	dest->is_modified = 1;
 	dest->fp = php_stream_fopen_tmpfile();
-	if (dest->fp == NULL) {
-		spprintf(error, 0, "phar error: unable to create temporary file");
-		return EOF;
-	}
 	phar_seek_efp(source, 0, SEEK_SET, 0, 1 TSRMLS_CC);
 	link = phar_get_link_source(source TSRMLS_CC);
 
@@ -1133,10 +1129,6 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) /* {{
 	}
 
 	fp = php_stream_fopen_tmpfile();
-	if (fp == NULL) {
-		spprintf(error, 0, "phar error: unable to create temporary file");
-		return FAILURE;
-	}
 	phar_seek_efp(entry, 0, SEEK_SET, 0, 1 TSRMLS_CC);
 	link = phar_get_link_source(entry TSRMLS_CC);
 
@@ -1554,7 +1546,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 
 		zend_hash_internal_pointer_reset(&phar->mounted_dirs);
 		while (FAILURE != zend_hash_has_more_elements(&phar->mounted_dirs)) {
-			if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
+			if (HASH_KEY_NON_EXISTANT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
 				break;
 			}
 

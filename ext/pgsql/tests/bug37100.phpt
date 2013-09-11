@@ -3,7 +3,7 @@ Bug #37100 (data is returned truncated with BINARY CURSOR)
 --SKIPIF--
 <?php
 include("skipif.inc");
-skip_bytea_not_escape();
+skip_server_version('8.5dev', '>=');
 ?>
 --FILE--
 <?php
@@ -11,7 +11,6 @@ skip_bytea_not_escape();
 include 'config.inc';
 
 $db = pg_connect($conn_str);
-@pg_query("SET bytea_output = 'escape'");
 
 @pg_query('DROP TABLE test_bug');
 

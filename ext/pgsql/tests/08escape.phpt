@@ -48,24 +48,15 @@ $sql = "INSERT INTO ".$table_name." (num, bin) VALUES (-9999, CAST ('".$escaped_
 pg_query($db, $sql);
 
 // Retrieve binary from DB
-for ($i = 0; $i < 2; $i++) {
-	$sql = "SELECT bin::bytea FROM ".$table_name." WHERE num = -9999";
-	$result = pg_query($db, $sql);
-	$row = pg_fetch_array($result, 0, PGSQL_ASSOC);
+$sql = "SELECT bin::bytea FROM ".$table_name." WHERE num = -9999";
+$result = pg_query($db, $sql);
+$row = pg_fetch_array($result, 0, PGSQL_ASSOC);
 
-	if ($data === pg_unescape_bytea($row['bin'])) {
-		echo "pg_escape_bytea() actually works with database\n";
-		break;
-	}
-	elseif (!$i) {
-		// Force bytea escaping and retry
-		@pg_query($db, "SET bytea_output = 'escape'");
-	}
-	else {
-		$result = pg_query($db, $sql);
-		echo "pg_escape_bytea() is broken\n";
-		break;
-	}
+if ($data === pg_unescape_bytea($row['bin'])) {
+	echo "pg_escape_bytea() actually works with database\n";
+}
+else {
+	echo "pg_escape_bytea() is broken\n";
 }
 
 // pg_escape_literal/pg_escape_identifier

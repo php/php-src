@@ -1399,8 +1399,15 @@ ZEND_FUNCTION(class_alias)
 		return;
 	}
 
-	found = zend_lookup_class_ex(class_name, class_name_len, NULL, autoload, &ce TSRMLS_CC);
+	if (!autoload) {
+		lc_name = do_alloca(class_name_len + 1, use_heap);
+		zend_str_tolower_copy(lc_name, class_name, class_name_len);
 	
+		found = zend_hash_find(EG(class_table), lc_name, class_name_len+1, (void **) &ce);
+		free_alloca(lc_name, use_heap);
+	} else {
+		found = zend_lookup_class(class_name, class_name_len, &ce TSRMLS_CC);
+	}
 	if (found == SUCCESS) {
 		if ((*ce)->type == ZEND_USER_CLASS) { 
 			if (zend_register_class_alias_ex(alias_name, alias_name_len, *ce TSRMLS_CC) == SUCCESS) {
@@ -1904,11 +1911,6 @@ static int add_constant_info(zend_constant *constant, void *arg TSRMLS_DC)
 	zval *name_array = (zval *)arg;
 	zval *const_val;
 
-	if (!constant->name) {
-		/* skip special constants */
-		return 0;
-	}
-
 	MAKE_STD_ZVAL(const_val);
 	*const_val = constant->value;
 	zval_copy_ctor(const_val);
@@ -1976,16 +1978,11 @@ ZEND_FUNCTION(get_defined_constants)
 		while (zend_hash_get_current_data_ex(EG(zend_constants), (void **) &val, &pos) != FAILURE) {
 			zval *const_val;
 
-			if (!val->name) {
-				/* skip special constants */
-				goto next_constant;
-			}
-
 			if (val->module_number == PHP_USER_CONSTANT) {
 				module_number = i;
 			} else if (val->module_number > i || val->module_number < 0) {
 				/* should not happen */
-				goto next_constant;
+				goto bad_module_id;
 			} else {
 				module_number = val->module_number;
 			}
@@ -2002,7 +1999,7 @@ ZEND_FUNCTION(get_defined_constants)
 			INIT_PZVAL(const_val);
 
 			add_assoc_zval_ex(modules[module_number], val->name, val->name_len, const_val);
-next_constant:
+bad_module_id:
 			zend_hash_move_forward_ex(EG(zend_constants), &pos);
 		}
 		efree(module_names);
@@ -2374,7 +2371,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				MAKE_STD_ZVAL(arg_array);
 				array_init(arg_array);
 
-				/* include_filename always points to the last filename of the last last called-function.
+				/* include_filename always points to the last filename of the last last called-fuction.
 				   if we have called include in the frame above - this is the file we have included.
 				 */
 

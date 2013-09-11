@@ -93,12 +93,8 @@ int error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	char *state = "HY000";
 	TSRMLS_FETCH();
 
-	if(dbproc) {
-		einfo = (pdo_dblib_err*)dbgetuserdata(dbproc);
-		if (!einfo) einfo = &DBLIB_G(err);
-	} else {
-		einfo = &DBLIB_G(err);
-	}	
+	einfo = (pdo_dblib_err*)dbgetuserdata(dbproc);
+	if (!einfo) einfo = &DBLIB_G(err);
 
 	einfo->severity = severity;
 	einfo->oserr = oserr;

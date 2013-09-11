@@ -54,7 +54,7 @@ $values = array (
   /* 20 */  $fp
 );
 
-// loop through the each element of the $values array for 'var' argument 
+// loop through the each element of the $values array for 'var' arugment 
 // and check the functionality of sizeof()
 $counter = 1;
 foreach($values as $value)

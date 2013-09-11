@@ -17,7 +17,7 @@ $heredoc = <<<HERE_DOC
 Hello
 HERE_DOC;
 
-// array of possible valid values for 'val' argument 
+// array of possible valid values for 'val' arugment 
 $values = array (
 
   /* 1  */  NULL,

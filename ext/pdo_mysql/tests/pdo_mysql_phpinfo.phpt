@@ -18,9 +18,10 @@ $db = MySQLPDOTest::factory();
 	ob_end_clean();
 
 	/*	PDO Driver for MySQL, client library version => 6.0.3-alpha	*/
-	$reg = 'Client API version.*' . preg_quote($db->getAttribute(PDO::ATTR_CLIENT_VERSION), '/');
+	$expected = sprintf('Client API version => %s',
+		$db->getAttribute(PDO::ATTR_CLIENT_VERSION));
 
-	if (!preg_match("/$reg/", $tmp)) {
+	if (false === stristr($tmp, $expected)) {
 		printf("[001] Cannot find MySQL PDO driver line in phpinfo() output\n");
 	}
 

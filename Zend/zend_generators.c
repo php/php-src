@@ -55,12 +55,6 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			zval_ptr_dtor(&execute_data->current_this);
 		}
 
-		/* A fatal error / die occurred during the generator execution. Trying to clean
-		 * up the stack may not be safe in this case. */
-		if (CG(unclean_shutdown)) {
-			return;
-		}
-
 		/* If the generator is closed before it can finish execution (reach
 		 * a return statement) we have to free loop variables manually, as
 		 * we don't know whether the SWITCH_FREE / FREE opcodes have run */
@@ -430,7 +424,7 @@ ZEND_METHOD(Generator, current)
 	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	if (generator->value) {
-		RETURN_ZVAL_FAST(generator->value);
+		RETURN_ZVAL(generator->value, 1, 0);
 	}
 }
 /* }}} */
@@ -450,7 +444,7 @@ ZEND_METHOD(Generator, key)
 	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	if (generator->key) {
-		RETURN_ZVAL_FAST(generator->key);
+		RETURN_ZVAL(generator->key, 1, 0);
 	}
 }
 /* }}} */
@@ -499,7 +493,7 @@ ZEND_METHOD(Generator, send)
 	zend_generator_resume(generator TSRMLS_CC);
 
 	if (generator->value) {
-		RETURN_ZVAL_FAST(generator->value);
+		RETURN_ZVAL(generator->value, 1, 0);
 	}
 }
 /* }}} */
@@ -532,7 +526,7 @@ ZEND_METHOD(Generator, throw)
 		zend_generator_resume(generator TSRMLS_CC);
 
 		if (generator->value) {
-			RETURN_ZVAL_FAST(generator->value);
+			RETURN_ZVAL(generator->value, 1, 0);
 		}
 	} else {
 		/* If the generator is already closed throw the exception in the

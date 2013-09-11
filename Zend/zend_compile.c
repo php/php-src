@@ -1734,7 +1734,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	}
 
 	{
-		/* Push a separator to the switch stack */
+		/* Push a seperator to the switch stack */
 		zend_switch_entry switch_entry;
 
 		switch_entry.cond.op_type = IS_UNUSED;
@@ -1828,7 +1828,7 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 	CG(active_op_array) = function_token->u.op_array;
 
 
-	/* Pop the switch and foreach separators */
+	/* Pop the switch and foreach seperators */
 	zend_stack_del_top(&CG(switch_cond_stack));
 	zend_stack_del_top(&CG(foreach_copy_stack));
 }
@@ -2671,7 +2671,7 @@ static int generate_free_foreach_copy(const zend_op *foreach_copy TSRMLS_DC) /* 
 {
 	zend_op *opline;
 
-	/* If we reach the separator then stop applying the stack */
+	/* If we reach the seperator then stop applying the stack */
 	if (foreach_copy->result_type == IS_UNUSED && foreach_copy->op1_type == IS_UNUSED) {
 		return 1;
 	}
@@ -3464,11 +3464,11 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 	if (child->common.prototype && (child->common.prototype->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 		if (!zend_do_perform_implementation_check(child, child->common.prototype TSRMLS_CC)) {
-			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_get_function_declaration(child->common.prototype TSRMLS_CC));
+			zend_error(E_COMPILE_ERROR, "Declaration of %s::%s() must be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, zend_get_function_declaration(child->common.prototype? child->common.prototype : parent TSRMLS_CC));
 		}
 	} else if (EG(error_reporting) & E_STRICT || EG(user_error_handler)) { /* Check E_STRICT (or custom error handler) before the check so that we save some time */
 		if (!zend_do_perform_implementation_check(child, parent TSRMLS_CC)) {
-			char *method_prototype = zend_get_function_declaration(parent TSRMLS_CC);
+			char *method_prototype = zend_get_function_declaration(child->common.prototype? child->common.prototype : parent TSRMLS_CC);
 			zend_error(E_STRICT, "Declaration of %s::%s() should be compatible with %s", ZEND_FN_SCOPE_NAME(child), child->common.function_name, method_prototype);
 			efree(method_prototype);
 		}
@@ -3941,7 +3941,7 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, const 
 #endif
 		} else {
 			/* inherited members are overridden by members inserted by traits */
-			/* check whether the trait method fulfills the inheritance requirements */
+			/* check whether the trait method fullfills the inheritance requirements */
 			do_inheritance_check_on_method(fn, existing_fn TSRMLS_CC);
 		}
 	}
@@ -4108,7 +4108,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce TSRMLS_DC) /*
 				/** With the other traits, we are more permissive.
 					We do not give errors for those. This allows to be more
 					defensive in such definitions.
-					However, we want to make sure that the insteadof declaration
+					However, we want to make sure that the insteadof declartion
 					is consistent in itself.
 				 */
 				j = 0;
@@ -5687,7 +5687,7 @@ void zend_do_shell_exec(znode *result, const znode *cmd TSRMLS_DC) /* {{{ */
 			break;
 	}
 	SET_NODE(opline->op1, cmd);
-	opline->op2.opline_num = 1;
+	opline->op2.opline_num = 0;
 	opline->extended_value = ZEND_DO_FCALL;
 	SET_UNUSED(opline->op2);
 
@@ -7176,7 +7176,7 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 	}
 #elif defined(NETWARE)
 	/*
-	 * Find the first occurrence of : from the left
+	 * Find the first occurence of : from the left
 	 * move the path pointer to the position just after :
 	 * increment the len_adjust to the length of path till colon character(inclusive)
 	 * If there is no character beyond : simple return len

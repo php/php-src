@@ -54,7 +54,6 @@
 php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, long type TSRMLS_DC)
 {
 	php_oci_descriptor *descriptor;
-	sword errstatus;
 
 	switch (type) {
 		case OCI_DTYPE_FILE:
@@ -71,17 +70,15 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, long typ
 	descriptor = ecalloc(1, sizeof(php_oci_descriptor));
 	descriptor->type = type;
 	descriptor->connection = connection;
-	zend_list_addref(descriptor->connection->id);
+	zend_list_addref(descriptor->connection->rsrc_id);
 
-	PHP_OCI_CALL_RETURN(errstatus, OCIDescriptorAlloc, (connection->env, (dvoid*)&(descriptor->descriptor), descriptor->type, (size_t) 0, (dvoid **) 0));
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIDescriptorAlloc, (connection->env, (dvoid*)&(descriptor->descriptor), descriptor->type, (size_t) 0, (dvoid **) 0));
 
-	if (errstatus != OCI_SUCCESS) {
-		OCI_G(errcode) = php_oci_error(OCI_G(err), errstatus TSRMLS_CC);
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		OCI_G(errcode) = php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, OCI_G(errcode));
 		efree(descriptor);
 		return NULL;
-	} else {
-		OCI_G(errcode) = 0; /* retain backwards compat with OCI8 1.4 */
 	}
 
 	PHP_OCI_REGISTER_RESOURCE(descriptor, le_descriptor);
@@ -112,15 +109,13 @@ php_oci_descriptor *php_oci_lob_create (php_oci_connection *connection, long typ
 	}
 	return descriptor;
 
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_get_length()
  Get length of the LOB. The length is cached so we don't need to ask Oracle every time */
 int php_oci_lob_get_length (php_oci_descriptor *descriptor, ub4 *length TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
-	sword errstatus;
 
 	*length = 0;
 	
@@ -129,18 +124,18 @@ int php_oci_lob_get_length (php_oci_descriptor *descriptor, ub4 *length TSRMLS_D
 		return 0;
 	} else {
 		if (descriptor->type == OCI_DTYPE_FILE) {
-			PHP_OCI_CALL_RETURN(errstatus, OCILobFileOpen, (connection->svc, connection->err, descriptor->descriptor, OCI_FILE_READONLY));
-			if (errstatus != OCI_SUCCESS) {
-				connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+			PHP_OCI_CALL_RETURN(connection->errcode, OCILobFileOpen, (connection->svc, connection->err, descriptor->descriptor, OCI_FILE_READONLY));
+			if (connection->errcode != OCI_SUCCESS) {
+				connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 				PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 				return 1;
 			}
 		}
 		
-		PHP_OCI_CALL_RETURN(errstatus, OCILobGetLength, (connection->svc, connection->err, descriptor->descriptor, (ub4 *)length));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCILobGetLength, (connection->svc, connection->err, descriptor->descriptor, (ub4 *)length));
 
-		if (errstatus != OCI_SUCCESS) {
-			connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+		if (connection->errcode != OCI_SUCCESS) {
+			connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 			return 1;
 		}
@@ -148,20 +143,17 @@ int php_oci_lob_get_length (php_oci_descriptor *descriptor, ub4 *length TSRMLS_D
 		descriptor->lob_size = *length;
 
 		if (descriptor->type == OCI_DTYPE_FILE) {
-			PHP_OCI_CALL_RETURN(errstatus, OCILobFileClose, (connection->svc, connection->err, descriptor->descriptor));
+			PHP_OCI_CALL_RETURN(connection->errcode, OCILobFileClose, (connection->svc, connection->err, descriptor->descriptor));
 
-			if (errstatus != OCI_SUCCESS) {
-				connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+			if (connection->errcode != OCI_SUCCESS) {
+				connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 				PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 				return 1;
 			}
 		}
-
-		connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	}
 	return 0;	
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_callback()
    Append LOB portion to a memory buffer */
@@ -211,28 +203,25 @@ sb4 php_oci_lob_callback (dvoid *ctxp, CONST dvoid *bufxp, ub4 len, ub1 piece)
 }
 /* }}} */
 
-/* {{{ php_oci_lob_calculate_buffer() 
-   Work out the size for LOB buffering */
+/* {{{ php_oci_lob_calculate_buffer() */
 static inline int php_oci_lob_calculate_buffer(php_oci_descriptor *descriptor, long read_length TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
 	ub4 chunk_size;
-	sword errstatus;
 
 	if (descriptor->type == OCI_DTYPE_FILE) {
 		return read_length;
 	}
 
 	if (!descriptor->chunk_size) {
-		PHP_OCI_CALL_RETURN(errstatus, OCILobGetChunkSize, (connection->svc, connection->err, descriptor->descriptor, &chunk_size));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCILobGetChunkSize, (connection->svc, connection->err, descriptor->descriptor, &chunk_size));
 
-		if (errstatus != OCI_SUCCESS) {
-			connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+		if (connection->errcode != OCI_SUCCESS) {
+			connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 			return read_length; /* we have to return original length here */
 		}
 		descriptor->chunk_size = chunk_size;
-		connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	}
 	
 	if ((read_length % descriptor->chunk_size) != 0) {
@@ -261,7 +250,6 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 #endif
 	int is_clob = 0;
 	sb4 bytes_per_char = 1;
-	sword errstatus;
 
 	*data_len = 0;
 	*data = NULL;
@@ -298,20 +286,20 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	offset = initial_offset;
 
 	if (descriptor->type == OCI_DTYPE_FILE) {
-		PHP_OCI_CALL_RETURN(errstatus, OCILobFileOpen, (connection->svc, connection->err, descriptor->descriptor, OCI_FILE_READONLY));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCILobFileOpen, (connection->svc, connection->err, descriptor->descriptor, OCI_FILE_READONLY));
 
-		if (errstatus != OCI_SUCCESS) {
-			connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+		if (connection->errcode != OCI_SUCCESS) {
+			connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 			return 1;
 		}
 	} else {
 		ub2 charset_id = 0;
 
-		PHP_OCI_CALL_RETURN(errstatus, OCILobCharSetId, (connection->env, connection->err, descriptor->descriptor, &charset_id));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCILobCharSetId, (connection->env, connection->err, descriptor->descriptor, &charset_id));
 
-		if (errstatus != OCI_SUCCESS) {
-			connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+		if (connection->errcode != OCI_SUCCESS) {
+			connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 			return 1;
 		}
@@ -322,10 +310,10 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	}
 
 	if (is_clob) {
-		PHP_OCI_CALL_RETURN(errstatus, OCINlsNumericInfoGet, (connection->env, connection->err, &bytes_per_char, OCI_NLS_CHARSET_MAXBYTESZ));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCINlsNumericInfoGet, (connection->env, connection->err, &bytes_per_char, OCI_NLS_CHARSET_MAXBYTESZ));
 
-		if (errstatus != OCI_SUCCESS) {
-			connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+		if (connection->errcode != OCI_SUCCESS) {
+			connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 			return 1;
 		}
@@ -349,7 +337,7 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	buffer_size = php_oci_lob_calculate_buffer(descriptor, buffer_size TSRMLS_CC);	/* use chunk size */
 
 	bufp = (ub1 *) ecalloc(1, buffer_size);
-	PHP_OCI_CALL_RETURN(errstatus, OCILobRead2,
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobRead2,
 		(
 			connection->svc,
 			connection->err,
@@ -382,7 +370,7 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	buffer_size = php_oci_lob_calculate_buffer(descriptor, buffer_size TSRMLS_CC);	/* use chunk size */
 
 	bufp = (ub1 *) ecalloc(1, buffer_size);
-	PHP_OCI_CALL_RETURN(errstatus, OCILobRead,
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobRead,
 		(
 			 connection->svc,
 			 connection->err,
@@ -403,8 +391,8 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 
 #endif
 	
-	if (errstatus != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		if (*data) {
 			efree(*data);
@@ -417,10 +405,10 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 	descriptor->lob_current_position = (int)offset;
 
 	if (descriptor->type == OCI_DTYPE_FILE) {
-		PHP_OCI_CALL_RETURN(errstatus, OCILobFileClose, (connection->svc, connection->err, descriptor->descriptor));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCILobFileClose, (connection->svc, connection->err, descriptor->descriptor));
 
-		if (errstatus != OCI_SUCCESS) {
-			connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+		if (connection->errcode != OCI_SUCCESS) {
+			connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 			if (*data) {
 				efree(*data);
@@ -431,10 +419,8 @@ int php_oci_lob_read (php_oci_descriptor *descriptor, long read_length, long ini
 		}
 	}
 
-	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_write()
  Write data to the LOB */
@@ -443,7 +429,6 @@ int php_oci_lob_write (php_oci_descriptor *descriptor, ub4 offset, char *data, i
 	OCILobLocator *lob		   = (OCILobLocator *) descriptor->descriptor;
 	php_oci_connection *connection = (php_oci_connection *) descriptor->connection;
 	ub4 lob_length;
-	sword errstatus;
 	
 	*bytes_written = 0;
 	if (php_oci_lob_get_length(descriptor, &lob_length TSRMLS_CC)) {
@@ -462,7 +447,7 @@ int php_oci_lob_write (php_oci_descriptor *descriptor, ub4 offset, char *data, i
 		offset = descriptor->lob_current_position;
 	}
 	
-	PHP_OCI_CALL_RETURN(errstatus, OCILobWrite,
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobWrite,
 			(
 				connection->svc,
 				connection->err,
@@ -479,8 +464,8 @@ int php_oci_lob_write (php_oci_descriptor *descriptor, ub4 offset, char *data, i
 			)
 		);
 
-	if (errstatus) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		*bytes_written = 0;
 		return 1;
@@ -497,17 +482,14 @@ int php_oci_lob_write (php_oci_descriptor *descriptor, ub4 offset, char *data, i
 		descriptor->buffering = PHP_OCI_LOB_BUFFER_USED;
 	}
 	
-	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_set_buffering()
  Turn buffering off/onn for this particular LOB */
 int php_oci_lob_set_buffering (php_oci_descriptor *descriptor, int on_off TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
-	sword errstatus;
 
 	if (!on_off && descriptor->buffering == PHP_OCI_LOB_BUFFER_DISABLED) {
 		/* disabling when it's already off */
@@ -520,21 +502,19 @@ int php_oci_lob_set_buffering (php_oci_descriptor *descriptor, int on_off TSRMLS
 	}
 	
 	if (on_off) {
-		PHP_OCI_CALL_RETURN(errstatus, OCILobEnableBuffering, (connection->svc, connection->err, descriptor->descriptor));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCILobEnableBuffering, (connection->svc, connection->err, descriptor->descriptor));
 	} else {
-		PHP_OCI_CALL_RETURN(errstatus, OCILobDisableBuffering, (connection->svc, connection->err, descriptor->descriptor));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCILobDisableBuffering, (connection->svc, connection->err, descriptor->descriptor));
 	}
 
-	if (errstatus != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
 	descriptor->buffering = on_off ? PHP_OCI_LOB_BUFFER_ENABLED : PHP_OCI_LOB_BUFFER_DISABLED;
-	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_get_buffering()
  Return current buffering state for the LOB */
@@ -545,8 +525,7 @@ int php_oci_lob_get_buffering (php_oci_descriptor *descriptor)
 	} else {
 		return 0;
 	}
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_copy()
  Copy one LOB (or its part) to another one */
@@ -554,7 +533,6 @@ int php_oci_lob_copy (php_oci_descriptor *descriptor_dest, php_oci_descriptor *d
 {
 	php_oci_connection *connection = descriptor_dest->connection;
 	ub4 length_dest, length_from, copy_len;
-	sword errstatus;
 	
 	if (php_oci_lob_get_length(descriptor_dest, &length_dest TSRMLS_CC)) {
 		return 1;
@@ -575,7 +553,7 @@ int php_oci_lob_copy (php_oci_descriptor *descriptor_dest, php_oci_descriptor *d
 		return 1;
 	}
 
-	PHP_OCI_CALL_RETURN(errstatus, OCILobCopy,
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobCopy,
 			(
 			 connection->svc,
 			 connection->err,
@@ -587,33 +565,29 @@ int php_oci_lob_copy (php_oci_descriptor *descriptor_dest, php_oci_descriptor *d
 			)
 	);
 
-	if (errstatus != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
 	
-	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_close()
  Close LOB */
 int php_oci_lob_close (php_oci_descriptor *descriptor TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
-	sword errstatus;
-
+	
 	if (descriptor->is_open) {
-		PHP_OCI_CALL_RETURN(errstatus, OCILobClose, (connection->svc, connection->err, descriptor->descriptor));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCILobClose, (connection->svc, connection->err, descriptor->descriptor));
+	}
 
-		if (errstatus != OCI_SUCCESS) {
-			connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
-			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
-			return 1;
-		}
-		connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
+	if (connection->errcode != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
+		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
+		return 1;
 	}
 
 	if (php_oci_temp_lob_close(descriptor TSRMLS_CC)) {
@@ -621,8 +595,7 @@ int php_oci_lob_close (php_oci_descriptor *descriptor TSRMLS_DC)
 	}
 	
 	return 0;
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_temp_lob_close()
    Close Temporary LOB */
@@ -630,29 +603,27 @@ int php_oci_temp_lob_close (php_oci_descriptor *descriptor TSRMLS_DC)
 {
 	php_oci_connection *connection = descriptor->connection;
 	int is_temporary;
-	sword errstatus;
 
-	PHP_OCI_CALL_RETURN(errstatus, OCILobIsTemporary, (connection->env,connection->err, descriptor->descriptor, &is_temporary));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobIsTemporary, (connection->env,connection->err, descriptor->descriptor, &is_temporary));
 	
-	if (errstatus != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
 	
 	if (is_temporary) {
-		PHP_OCI_CALL_RETURN(errstatus, OCILobFreeTemporary, (connection->svc, connection->err, descriptor->descriptor));
+		PHP_OCI_CALL_RETURN(connection->errcode, OCILobFreeTemporary, (connection->svc, connection->err, descriptor->descriptor));
 		
-		if (errstatus != OCI_SUCCESS) {
-			connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+		if (connection->errcode != OCI_SUCCESS) {
+			connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 			return 1;
 		}
 	}
-	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
-}
-/* }}} */
+} /* }}} */
+
 
 /* {{{ php_oci_lob_flush()
  Flush buffers for the LOB (only if they have been used) */
@@ -660,8 +631,7 @@ int php_oci_lob_flush(php_oci_descriptor *descriptor, long flush_flag TSRMLS_DC)
 {
 	OCILobLocator *lob = descriptor->descriptor;
 	php_oci_connection *connection = descriptor->connection;
-	sword errstatus;
-
+	
 	if (!lob) {
 		return 1;
 	}
@@ -684,20 +654,18 @@ int php_oci_lob_flush(php_oci_descriptor *descriptor, long flush_flag TSRMLS_DC)
 		return 0;
 	}
 
-	PHP_OCI_CALL_RETURN(errstatus, OCILobFlushBuffer, (connection->svc, connection->err, lob, flush_flag));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobFlushBuffer, (connection->svc, connection->err, lob, flush_flag));
 
-	if (errstatus != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
 
 	/* marking buffer as enabled and not used */
 	descriptor->buffering = PHP_OCI_LOB_BUFFER_ENABLED;
-	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_free()
  Close LOB descriptor and free associated resources */
@@ -741,10 +709,9 @@ void php_oci_lob_free (php_oci_descriptor *descriptor TSRMLS_DC)
 
 	PHP_OCI_CALL(OCIDescriptorFree, (descriptor->descriptor, descriptor->type));
 
-	zend_list_delete(descriptor->connection->id);
+	zend_list_delete(descriptor->connection->rsrc_id);
 	efree(descriptor);
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_import()
  Import LOB contents from the given file */
@@ -756,7 +723,6 @@ int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename TSRMLS_DC
 	php_oci_connection *connection = descriptor->connection;
 	char buf[8192];
 	ub4 offset = 1;
-	sword errstatus;
 	
 #if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 3) || (PHP_MAJOR_VERSION > 5)
 	/* Safe mode has been removed in PHP 5.4 */
@@ -773,7 +739,7 @@ int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename TSRMLS_DC
 	}
 
 	while ((loblen = read(fp, &buf, sizeof(buf))) > 0) {	
-		PHP_OCI_CALL_RETURN(errstatus,
+		PHP_OCI_CALL_RETURN(connection->errcode,
 				OCILobWrite,
 				(
 					connection->svc,
@@ -791,21 +757,18 @@ int php_oci_lob_import (php_oci_descriptor *descriptor, char *filename TSRMLS_DC
 				)
 		);
 
-		if (errstatus != OCI_SUCCESS) {
-			connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+		if (connection->errcode != OCI_SUCCESS) {
+			connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 			PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 			close(fp);
 			return 1;
-		} else {
-			connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 		}
 		offset += loblen;
 	}
 	close(fp);
 	
 	return 0;
-}
- 	/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_append()
  Append data to the end of the LOB */
@@ -815,7 +778,6 @@ int php_oci_lob_append (php_oci_descriptor *descriptor_dest, php_oci_descriptor 
 	OCILobLocator *lob_dest = descriptor_dest->descriptor;
 	OCILobLocator *lob_from = descriptor_from->descriptor;
 	ub4 dest_len, from_len;
-	sword errstatus;
 
 	if (php_oci_lob_get_length(descriptor_dest, &dest_len TSRMLS_CC)) {
 		return 1;
@@ -829,17 +791,15 @@ int php_oci_lob_append (php_oci_descriptor *descriptor_dest, php_oci_descriptor 
 		return 0;
 	}
 
-	PHP_OCI_CALL_RETURN(errstatus, OCILobAppend, (connection->svc, connection->err, lob_dest, lob_from));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobAppend, (connection->svc, connection->err, lob_dest, lob_from));
 
-	if (errstatus != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
-	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_truncate()
  Truncate LOB to the given length */
@@ -848,7 +808,6 @@ int php_oci_lob_truncate (php_oci_descriptor *descriptor, long new_lob_length TS
 	php_oci_connection *connection = descriptor->connection;
 	OCILobLocator *lob = descriptor->descriptor;
 	ub4 lob_length;
-	sword errstatus;
 	
 	if (php_oci_lob_get_length(descriptor, &lob_length TSRMLS_CC)) {
 		return 1;
@@ -868,20 +827,17 @@ int php_oci_lob_truncate (php_oci_descriptor *descriptor, long new_lob_length TS
 		return 1;
 	}
 	
-	PHP_OCI_CALL_RETURN(errstatus, OCILobTrim, (connection->svc, connection->err, lob, new_lob_length));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobTrim, (connection->svc, connection->err, lob, new_lob_length));
 
-	if (errstatus != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
 	
 	descriptor->lob_size = new_lob_length;
-	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
-
 	return 0;
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_erase()
  Erase (or fill with whitespaces, depending on LOB type) the LOB (or its part) */
@@ -890,7 +846,6 @@ int php_oci_lob_erase (php_oci_descriptor *descriptor, long offset, ub4 length, 
 	php_oci_connection *connection = descriptor->connection;
 	OCILobLocator *lob = descriptor->descriptor;
 	ub4 lob_length;
-	sword errstatus;
 
 	*bytes_erased = 0;
 	
@@ -906,19 +861,17 @@ int php_oci_lob_erase (php_oci_descriptor *descriptor, long offset, ub4 length, 
 		length = lob_length;
 	}
 	
-	PHP_OCI_CALL_RETURN(errstatus, OCILobErase, (connection->svc, connection->err, lob, (ub4 *)&length, offset+1));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobErase, (connection->svc, connection->err, lob, (ub4 *)&length, offset+1));
 
-	if (errstatus != OCI_SUCCESS) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode != OCI_SUCCESS) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
 	
 	*bytes_erased = length;
-	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_is_equal()
  Compare two LOB descriptors and figure out if they are pointing to the same LOB */
@@ -927,19 +880,16 @@ int php_oci_lob_is_equal (php_oci_descriptor *descriptor_first, php_oci_descript
 	php_oci_connection *connection = descriptor_first->connection;
 	OCILobLocator *first_lob   = descriptor_first->descriptor;
 	OCILobLocator *second_lob  = descriptor_second->descriptor;
-	sword errstatus;
 
-	PHP_OCI_CALL_RETURN(errstatus, OCILobIsEqual, (connection->env, first_lob, second_lob, result));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobIsEqual, (connection->env, first_lob, second_lob, result));
 
-	if (errstatus) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
-	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;
-}
-/* }}} */
+} /* }}} */
 
 /* {{{ php_oci_lob_write_tmp()
  Create temporary LOB and write data to it */
@@ -948,7 +898,6 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, long type, char *data
 	php_oci_connection *connection = descriptor->connection;
 	OCILobLocator *lob		   = descriptor->descriptor;
 	ub4 bytes_written = 0;
-	sword errstatus;
 	
 	switch (type) {
 		case OCI_TEMP_BLOB:
@@ -965,7 +914,7 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, long type, char *data
 		return 1;
 	}
 
-	PHP_OCI_CALL_RETURN(errstatus, OCILobCreateTemporary,
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobCreateTemporary,
 			(
 			 connection->svc,
 			 connection->err,
@@ -978,26 +927,24 @@ int php_oci_lob_write_tmp (php_oci_descriptor *descriptor, long type, char *data
 			)
 	);
 
-	if (errstatus) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
 
-	PHP_OCI_CALL_RETURN(errstatus, OCILobOpen, (connection->svc, connection->err, lob, OCI_LOB_READWRITE));
+	PHP_OCI_CALL_RETURN(connection->errcode, OCILobOpen, (connection->svc, connection->err, lob, OCI_LOB_READWRITE));
 
-	if (errstatus) {
-		connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
+	if (connection->errcode) {
+		connection->errcode = php_oci_error(connection->err, connection->errcode TSRMLS_CC);
 		PHP_OCI_HANDLE_ERROR(connection, connection->errcode);
 		return 1;
 	}
 
 	descriptor->is_open = 1;
-	connection->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 
 	return php_oci_lob_write(descriptor, 0, data, data_len, &bytes_written TSRMLS_CC);
-}
-/* }}} */
+} /* }}} */
 
 #endif /* HAVE_OCI8 */
 

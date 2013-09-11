@@ -95,7 +95,6 @@ echo "Done";
 --> x:/blah.com   : NULL
 --> x://::abc/?   : bool(false)
 --> http://::?   : NULL
---> http://::#   : NULL
 --> x://::6.5   : int(6)
 --> http://?:/   : NULL
 --> http://@?:/   : NULL
@@ -118,7 +117,6 @@ echo "Done";
 --> http://@:/   : bool(false)
 --> http://:/   : bool(false)
 --> http://?   : bool(false)
---> http://#   : bool(false)
 --> http://?:   : bool(false)
 --> http://:?   : bool(false)
 --> http://blah.com:123456   : bool(false)

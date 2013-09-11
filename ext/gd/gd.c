@@ -57,8 +57,9 @@
 # include <X11/xpm.h>
 #endif
 
+#ifndef HAVE_GD_BUNDLED
 # include "gd_compat.h"
-
+#endif /* HAVE_GD_BUNDLED */
 
 static int le_gd, le_gd_font;
 #if HAVE_LIBT1
@@ -104,7 +105,7 @@ int overflow2(int a, int b);
 /* IMPORTANT NOTE FOR NEW FILTER
  * Do not forget to update:
  * IMAGE_FILTER_MAX: define the last filter index
- * IMAGE_FILTER_MAX_ARGS: define the biggest amount of arguments
+ * IMAGE_FILTER_MAX_ARGS: define the biggest amout of arguments
  * image_filter array in PHP_FUNCTION(imagefilter)
  * */
 #define IMAGE_FILTER_NEGATE         0
@@ -844,28 +845,28 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecrop, 0)
 	ZEND_ARG_INFO(0, rect)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecropauto, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_imagecropauto, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, mode)
 	ZEND_ARG_INFO(0, threshold)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagescale, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_imagescale, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, new_width)
 	ZEND_ARG_INFO(0, new_height)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imageaffine, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_imageaffine, 0)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, affine)
-	ZEND_ARG_INFO(0, clip)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imageaffinematrixget, 0, 0, 1)
-	ZEND_ARG_INFO(0, type)
+ZEND_BEGIN_ARG_INFO(arginfo_imageaffinematrixget, 0)
+	ZEND_ARG_INFO(0, im)
+	ZEND_ARG_INFO(0, matrox)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
@@ -1475,7 +1476,9 @@ PHP_FUNCTION(imageloadfont)
 		body_size = font->w * font->h * font->nchars;
 	}
 
-	if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w )) {
+	if ((font->nchars <= 0 || font->h <= 0 || font->w <= 0 ) || \
+		(font->nchars > INT_MAX / font->h) || \
+		(font->nchars * font->h > INT_MAX / font->w)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Error reading font, invalid font header");
 		efree(font);
 		php_stream_close(stream);
@@ -2369,10 +2372,28 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 	}
 
-
 	stream = php_stream_open_wrapper(file, "rb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);
 	if (stream == NULL)	{
 		RETURN_FALSE;
+	}
+
+	ioctx_func_p = NULL; /* don't allow sockets without IOCtx */
+
+	if (image_type == PHP_GDIMG_TYPE_WEBP) {
+		size_t buff_size;
+		char *buff;
+
+		/* needs to be malloc (persistent) - GD will free() it later */
+		buff_size = php_stream_copy_to_mem(stream, &buff, PHP_STREAM_COPY_ALL, 1);
+		if (!buff_size) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING,"Cannot read image data");
+			goto out_err;
+		}
+		im = (*ioctx_func_p)(buff_size, buff);
+		if (!im) {
+			goto out_err;
+		}
+		goto register_im;
 	}
 
 	/* try and avoid allocating a FILE* if the stream is not naturally a FILE* */
@@ -2409,7 +2430,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		io_ctx->gd_free(io_ctx);
 		pefree(buff, 1);
 	}
-	else if (php_stream_can_cast(stream, PHP_STREAM_AS_STDIO)) {
+	else {
 		/* try and force the stream to be FILE* */
 		if (FAILURE == php_stream_cast(stream, PHP_STREAM_AS_STDIO | PHP_STREAM_CAST_TRY_HARD, (void **) &fp, REPORT_ERRORS)) {
 			goto out_err;
@@ -2442,7 +2463,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		fflush(fp);
 	}
 
-/* register_im: */
+register_im:
 	if (im) {
 		ZEND_REGISTER_RESOURCE(return_value, im, le_gd);
 		php_stream_close(stream);
@@ -2486,11 +2507,11 @@ PHP_FUNCTION(imagecreatefrompng)
 #endif /* HAVE_GD_PNG */
 
 #ifdef HAVE_GD_WEBP
-/* {{{ proto resource imagecreatefromwebp(string filename)
-   Create a new image from WEBP file or URL */
+/* {{{ proto resource imagecreatefrompng(string filename)
+   Create a new image from PNG file or URL */
 PHP_FUNCTION(imagecreatefromwebp)
 {
-	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageCreateFromWebp, gdImageCreateFromWebpCtx);
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageCreateFromWebpPtr, gdImageCreateFromWebpPtr);
 }
 /* }}} */
 #endif /* HAVE_GD_VPX */
@@ -2726,7 +2747,7 @@ PHP_FUNCTION(imagepng)
 
 #ifdef HAVE_GD_WEBP
 /* {{{ proto bool imagewebp(resource im [, string filename[, quality]] )
-   Output WEBP image to browser or file */
+   Output PNG image to browser or file */
 PHP_FUNCTION(imagewebp)
 {
 	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WEBP, "WEBP", gdImageWebpCtx);
@@ -4955,7 +4976,7 @@ PHP_FUNCTION(imagecrop)
 	zval *z_rect;
 	zval **tmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra", &IM, &z_rect) == FAILURE)  {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|a", &IM, &z_rect) == FAILURE)  {
 		return;
 	}
 
@@ -5095,7 +5116,7 @@ finish:
 }
 /* }}} */
 
-/* {{{ proto resource imageaffine(resource src, array affine[, array clip])
+/* {{{ proto resource imageaffine(resource dst, resource src, array affine, array clip)
    Return an image containing the affine tramsformed src image, using an optional clipping area */
 PHP_FUNCTION(imageaffine)
 {
@@ -5200,7 +5221,7 @@ PHP_FUNCTION(imageaffine)
 PHP_FUNCTION(imageaffinematrixget)
 {
 	double affine[6];
-	long type;
+	gdAffineStandardMatrix type;
 	zval *options;
 	zval **tmp;
 	int res = GD_FALSE, i;
@@ -5209,7 +5230,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		return;
 	}
 
-	switch((gdAffineStandardMatrix)type) {
+	switch(type) {
 		case GD_AFFINE_TRANSLATE:
 		case GD_AFFINE_SCALE: {
 			double x, y;
@@ -5259,7 +5280,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		}
 
 		default:
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type for element %li", type);
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid type for element %i", type);
 			RETURN_FALSE;
 	}
 
@@ -5349,7 +5370,7 @@ PHP_FUNCTION(imagesetinterpolation)
 {
 	zval *IM;
 	gdImagePtr im;
-	long method = GD_BILINEAR_FIXED;
+	gdInterpolationMethod method = GD_BILINEAR_FIXED;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "r|l", &IM, &method) == FAILURE)  {
 		return;

@@ -54,17 +54,17 @@ object(DateInterval)#3 (15) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  int(0)
+  string(1) "0"
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
-  int(0)
+  string(1) "0"
   ["have_weekday_relative"]=>
   int(0)
   ["have_special_relative"]=>
   int(0)
 }
-string(320) "O:12:"DateInterval":15:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:7:"weekday";i:0;s:16:"weekday_behavior";i:0;s:17:"first_last_day_of";i:0;s:6:"invert";i:0;s:4:"days";i:0;s:12:"special_type";i:0;s:14:"special_amount";i:0;s:21:"have_weekday_relative";i:0;s:21:"have_special_relative";i:0;}"
+string(328) "O:12:"DateInterval":15:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:7:"weekday";i:0;s:16:"weekday_behavior";i:0;s:17:"first_last_day_of";i:0;s:6:"invert";i:0;s:4:"days";s:1:"0";s:12:"special_type";i:0;s:14:"special_amount";s:1:"0";s:21:"have_weekday_relative";i:0;s:21:"have_special_relative";i:0;}"
 DateInterval::__set_state(array(
    'y' => 0,
    'm' => 0,
@@ -76,9 +76,9 @@ DateInterval::__set_state(array(
    'weekday_behavior' => 0,
    'first_last_day_of' => 0,
    'invert' => 0,
-   'days' => 0,
+   'days' => '0',
    'special_type' => 0,
-   'special_amount' => 0,
+   'special_amount' => '0',
    'have_weekday_relative' => 0,
    'have_special_relative' => 0,
 ))object(DateInterval)#5 (15) {
@@ -103,11 +103,11 @@ DateInterval::__set_state(array(
   ["invert"]=>
   int(0)
   ["days"]=>
-  int(0)
+  string(1) "0"
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
-  int(0)
+  string(1) "0"
   ["have_weekday_relative"]=>
   int(0)
   ["have_special_relative"]=>
@@ -150,11 +150,11 @@ object(DatePeriod)#6 (6) {
     ["invert"]=>
     int(0)
     ["days"]=>
-    int(0)
+    string(1) "0"
     ["special_type"]=>
     int(0)
     ["special_amount"]=>
-    int(0)
+    string(1) "0"
     ["have_weekday_relative"]=>
     int(0)
     ["have_special_relative"]=>
@@ -187,11 +187,11 @@ object(DateInterval)#8 (15) {
   ["invert"]=>
   int(1)
   ["days"]=>
-  int(2400)
+  string(4) "2400"
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
-  int(-1)
+  string(2) "-1"
   ["have_weekday_relative"]=>
   int(0)
   ["have_special_relative"]=>
@@ -234,11 +234,11 @@ object(DatePeriod)#9 (6) {
     ["invert"]=>
     int(0)
     ["days"]=>
-    int(0)
+    string(1) "0"
     ["special_type"]=>
     int(0)
     ["special_amount"]=>
-    int(0)
+    string(1) "0"
     ["have_weekday_relative"]=>
     int(0)
     ["have_special_relative"]=>

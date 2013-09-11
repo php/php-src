@@ -36,7 +36,7 @@
  * */
 PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
 {
-	ULONGLONG ms_total, limit;
+	DWORD ms_total, limit;
 	HANDLE handles[MAXIMUM_WAIT_OBJECTS];
 	int handle_slot_to_fd[MAXIMUM_WAIT_OBJECTS];
 	int n_handles = 0, i;
@@ -97,7 +97,7 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 	FD_ZERO(&awrite);
 	FD_ZERO(&aexcept);
 	
-	limit = GetTickCount64() + ms_total;
+	limit = GetTickCount() + ms_total;
 	do {
 		retcode = 0;
 	
@@ -149,7 +149,7 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 				}
 			}
 		}
-	} while (retcode == 0 && (ms_total == INFINITE || GetTickCount64() < limit));
+	} while (retcode == 0 && (ms_total == INFINITE || GetTickCount() < limit));
 
 	if (rfds) {
 		*rfds = aread;

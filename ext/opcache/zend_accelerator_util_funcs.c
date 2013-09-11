@@ -86,53 +86,6 @@ zend_persistent_script* create_persistent_script(void)
 	return persistent_script;
 }
 
-static int compact_hash_table(HashTable *ht)
-{
-	uint i = 3;
-	uint nSize;
-	Bucket **t;
-
-	if (!ht->nNumOfElements) {
-		/* Empty tables don't allocate space for Buckets */
-		return 1;
-	}
-
-	if (ht->nNumOfElements >= 0x80000000) {
-		/* prevent overflow */
-		nSize = 0x80000000;
-	} else {
-		while ((1U << i) < ht->nNumOfElements) {
-			i++;
-		}
-		nSize = 1 << i;
-	}
-
-	if (nSize >= ht->nTableSize) {
-		/* Keep the size */
-		return 1;
-	}
-
-	t = (Bucket **)pemalloc(nSize * sizeof(Bucket *), ht->persistent);
-	if (!t) {
-		return 0;
-	}
-
-	pefree(ht->arBuckets, ht->persistent);
-
-	ht->arBuckets = t;
-	ht->nTableSize = nSize;
-	ht->nTableMask = ht->nTableSize - 1;
-	zend_hash_rehash(ht);
-	
-	return 1;
-}
-
-int compact_persistent_script(zend_persistent_script *persistent_script)
-{
-	return compact_hash_table(&persistent_script->function_table) &&
-	       compact_hash_table(&persistent_script->class_table);
-}
-
 void free_persistent_script(zend_persistent_script *persistent_script, int destroy_elements)
 {
 	if (destroy_elements) {
@@ -936,7 +889,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 			zend_hash_destroy(&ZCG(bind_hash));
 		}
 		/* we must first to copy all classes and then prepare functions, since functions may try to bind
-		   classes - which depend on pre-bind class entries existent in the class table */
+		   classes - which depend on pre-bind class entries existant in the class table */
 		if (zend_hash_num_elements(&persistent_script->function_table) > 0) {
 			zend_accel_function_hash_copy(CG(function_table), &persistent_script->function_table, (unique_copy_ctor_func_t)zend_prepare_function_for_execution);
 		}

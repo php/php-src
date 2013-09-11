@@ -1,2 +1,2 @@
 #!/bin/bash
-mysql -e "CREATE DATABASE IF NOT EXISTS test"
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS test"

@@ -16,15 +16,15 @@ if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test not for Windows platforms
 <?php
 
 //file
-touch ('SplFileInfo_getInode_basic.txt');
-$fileInfo = new SplFileInfo('SplFileInfo_getInode_basic.txt');
-$result = shell_exec('ls -i SplFileInfo_getInode_basic.txt');
+touch ('test_file_ptfi');
+$fileInfo = new SplFileInfo('test_file_ptfi');
+$result = shell_exec('ls -i test_file_ptfi');
 var_dump($fileInfo->getInode() == $result);
 
 ?>
 --CLEAN--
 <?php
-unlink('SplFileInfo_getInode_basic.txt');
+unlink('test_file_ptfi');
 ?>
 --EXPECTF--
 bool(true)

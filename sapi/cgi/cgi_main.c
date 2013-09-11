@@ -508,7 +508,7 @@ static int sapi_cgi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 	uint read_bytes = 0;
 	int tmp_read_bytes;
 
-	count_bytes = MIN(count_bytes, SG(request_info).content_length - SG(read_post_bytes));
+	count_bytes = MIN(count_bytes, (uint) SG(request_info).content_length - SG(read_post_bytes));
 	while (read_bytes < count_bytes) {
 		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
 		if (tmp_read_bytes <= 0) {
@@ -1955,11 +1955,7 @@ consult the installation file that came with this distribution, or visit \n\
 	}
 
 	if (bindpath) {
-		int backlog = 128;
-		if (getenv("PHP_FCGI_BACKLOG")) {
-			backlog = atoi(getenv("PHP_FCGI_BACKLOG"));
-		}
-		fcgi_fd = fcgi_listen(bindpath, backlog);
+		fcgi_fd = fcgi_listen(bindpath, 128);
 		if (fcgi_fd < 0) {
 			fprintf(stderr, "Couldn't create FastCGI listen socket on port %s\n", bindpath);
 #ifdef ZTS

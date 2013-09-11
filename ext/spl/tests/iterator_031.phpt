@@ -1,5 +1,5 @@
 --TEST--
-SPL: AppendIterator::append() rewinds when necessary
+SPL: AppendIterator::append() rewinds when neccessary
 --FILE--
 <?php
 
