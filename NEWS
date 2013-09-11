@@ -36,6 +36,8 @@ PHP                                                                        NEWS
   . Fixed bug #65458 (curl memory leak). (Adam)
 
 - Datetime:
+  . Fixed bug #65502 (DateTimeImmutable::createFromFormat returns DateTime).
+    (Boro Sitnikovski)
   . Fixed bug #65548 (Comparison for DateTimeImmutable doesn't work).
     (Boro Sitnikovski)
   . Fixed bug #65554 (createFromFormat broken when weekday name is followed
