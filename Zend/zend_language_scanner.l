@@ -1793,7 +1793,14 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <INITIAL>"<?" {
-	if (CG(short_tags)) {
+	zend_bool is_php = 0;
+	YYFILL(sizeof("php"));
+	if (!*(yytext + sizeof("<?php")) && !strncasecmp(yytext, "<?php", sizeof("<?php"))) {
+		YYCURSOR += sizeof("php") - 1;
+		yyleng += sizeof("php") - 1;
+		is_php = 1;
+	}
+	if (is_php || CG(short_tags)) {
 		zendlval->value.str.val = yytext; /* no copying - intentional */
 		zendlval->value.str.len = yyleng;
 		zendlval->type = IS_STRING;
