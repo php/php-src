@@ -77,10 +77,10 @@ Ensure type hints are enforced for functions invoked as callbacks.
 ?>
 --EXPECTF--
 ---> Type hints with callback function:
-4096: Argument 1 passed to f1() must be an instance of A, integer given%s(10)
+4096: Argument 1 passed to f1() must be an instance of the class A, integer given%s(10)
 in f1;
 in f1;
-4096: Argument 1 passed to f2() must be an instance of A, integer given%s(13)
+4096: Argument 1 passed to f2() must be an instance of the class A, integer given%s(13)
 in f2;
 in f2;
 in f2;
@@ -88,10 +88,10 @@ in f2;
 
 
 ---> Type hints with callback static method:
-4096: Argument 1 passed to C::f1() must be an instance of A, integer given%s(26)
+4096: Argument 1 passed to C::f1() must be an instance of the class A, integer given%s(26)
 in C::f1 (static);
 in C::f1 (static);
-4096: Argument 1 passed to C::f2() must be an instance of A, integer given%s(33)
+4096: Argument 1 passed to C::f2() must be an instance of the class A, integer given%s(33)
 in C::f2 (static);
 in C::f2 (static);
 in C::f2 (static);
@@ -99,10 +99,10 @@ in C::f2 (static);
 
 
 ---> Type hints with callback instance method:
-4096: Argument 1 passed to D::f1() must be an instance of A, integer given%s(51)
+4096: Argument 1 passed to D::f1() must be an instance of the class A, integer given%s(51)
 in C::f1 (instance);
 in C::f1 (instance);
-4096: Argument 1 passed to D::f2() must be an instance of A, integer given%s(58)
+4096: Argument 1 passed to D::f2() must be an instance of the class A, integer given%s(58)
 in C::f2 (instance);
 in C::f2 (instance);
 in C::f2 (instance);

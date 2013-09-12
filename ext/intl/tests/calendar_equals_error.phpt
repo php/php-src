@@ -28,19 +28,19 @@ var_dump(intlcal_equals(1, $c));
 error: 2, IntlCalendar::equals() expects exactly 1 parameter, 0 given
 error: 2, IntlCalendar::equals(): intlcal_equals: bad arguments
 bool(false)
-error: 4096, Argument 1 passed to IntlCalendar::equals() must be an instance of IntlCalendar, instance of stdClass given
+error: 4096, Argument 1 passed to IntlCalendar::equals() must be an instance of the class IntlCalendar, instance of stdClass given
 error: 2, IntlCalendar::equals() expects parameter 1 to be IntlCalendar, object given
 error: 2, IntlCalendar::equals(): intlcal_equals: bad arguments
 bool(false)
-error: 4096, Argument 1 passed to IntlCalendar::equals() must be an instance of IntlCalendar, integer given
+error: 4096, Argument 1 passed to IntlCalendar::equals() must be an instance of the class IntlCalendar, integer given
 error: 2, IntlCalendar::equals() expects exactly 1 parameter, 2 given
 error: 2, IntlCalendar::equals(): intlcal_equals: bad arguments
 bool(false)
-error: 4096, Argument 2 passed to intlcal_equals() must be an instance of IntlCalendar, array given
+error: 4096, Argument 2 passed to intlcal_equals() must be an instance of the class IntlCalendar, array given
 error: 2, intlcal_equals() expects parameter 2 to be IntlCalendar, array given
 error: 2, intlcal_equals(): intlcal_equals: bad arguments
 bool(false)
-error: 4096, Argument 1 passed to intlcal_equals() must be an instance of IntlCalendar, integer given
+error: 4096, Argument 1 passed to intlcal_equals() must be an instance of the class IntlCalendar, integer given
 error: 2, intlcal_equals() expects parameter 1 to be IntlCalendar, integer given
 error: 2, intlcal_equals(): intlcal_equals: bad arguments
 bool(false)

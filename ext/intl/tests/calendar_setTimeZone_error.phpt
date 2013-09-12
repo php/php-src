@@ -35,7 +35,7 @@ bool(false)
 error: 2, intlcal_set_time_zone() expects exactly 2 parameters, 3 given
 error: 2, intlcal_set_time_zone(): intlcal_set_time_zone: bad arguments
 bool(false)
-error: 4096, Argument 1 passed to intlcal_set_time_zone() must be an instance of IntlCalendar, integer given
+error: 4096, Argument 1 passed to intlcal_set_time_zone() must be an instance of the class IntlCalendar, integer given
 error: 2, intlcal_set_time_zone() expects parameter 1 to be IntlCalendar, integer given
 error: 2, intlcal_set_time_zone(): intlcal_set_time_zone: bad arguments
 bool(false)
