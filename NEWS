@@ -59,6 +59,10 @@ PHP                                                                        NEWS
   . Fixed bug #51127/#65359 Request #25630/#43980/#54383 (Added php_serialize 
     session serialize handler that uses plain serialize()). (Yasuo)
 
+- SPL:
+  . Fix bug #64782 (SplFileObject constructor make $context optional / give it
+    a default value). (Nikita)
+
 - Standard:
   . Fix issue with return types of password API helper functions. Found via static
     analysis by cjones. (Anthony Ferrara) 
