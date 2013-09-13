@@ -1221,8 +1221,12 @@ PHPAPI char *php_format_date(char *format, int format_len, time_t ts, int localt
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
 	char *string;
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
 
 	t = timelib_time_ctor();
+	t->f = tv.tv_usec/1000;
 
 	if (localtime) {
 		tzi = get_timezone_info(TSRMLS_C);
@@ -2541,6 +2545,7 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 	int type = TIMELIB_ZONETYPE_ID, new_dst = 0;
 	char *new_abbr = NULL;
 	timelib_sll     new_offset;
+	struct timeval tv;
 	
 	if (dateobj->time) {
 		timelib_time_dtor(dateobj->time);
@@ -2603,7 +2608,10 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 			now->tz_abbr = new_abbr;
 			break;
 	}
+	gettimeofday(&tv, NULL);
 	timelib_unixtime2local(now, (timelib_sll) time(NULL));
+
+	now->f = tv.tv_usec/1000;
 
 	timelib_fill_holes(dateobj->time, now, TIMELIB_NO_CLONE);
 	timelib_update_ts(dateobj->time, tzi);
