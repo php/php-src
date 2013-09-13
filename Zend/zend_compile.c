@@ -3985,7 +3985,7 @@ static int zend_traits_copy_functions(zend_function *fn TSRMLS_DC, int num_args,
 		}
 	}
 
-	lcname = hash_key->arKey;
+	lcname = (char *) hash_key->arKey;
 
 	if (exclude_table == NULL || zend_hash_find(exclude_table, lcname, fnname_len, &dummy) == FAILURE) {
 		/* is not in hashtable, thus, function is not to be excluded */
