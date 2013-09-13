@@ -706,7 +706,7 @@ repeat:
 		zval_ptr_dtor(&val_free);
 	}
 	c.flags = case_sensitive; /* non persistent */
-	c.name = IS_INTERNED(name) ? name : zend_strndup(name, name_len);
+	c.name = str_strndup(name, name_len);
 	if(c.name == NULL) {
 		RETURN_FALSE;
 	}
@@ -1388,12 +1388,11 @@ ZEND_FUNCTION(function_exists)
    Creates an alias for user defined class */
 ZEND_FUNCTION(class_alias)
 {
-	char *class_name, *lc_name, *alias_name;
+	char *class_name, *alias_name;
 	zend_class_entry **ce;
 	int class_name_len, alias_name_len;
 	int found;
 	zend_bool autoload = 1;
-	ALLOCA_FLAG(use_heap)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &class_name, &class_name_len, &alias_name, &alias_name_len, &autoload) == FAILURE) {
 		return;

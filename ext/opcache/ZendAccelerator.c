@@ -1062,6 +1062,10 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 	realpath = accelerator_orig_zend_resolve_path(filename, filename_len TSRMLS_CC);
 #endif
 
+	if (!realpath) {
+		return FAILURE;
+	}
+
 	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath, strlen(realpath) + 1);
 	if (persistent_script && !persistent_script->corrupted) {
 		zend_file_handle file_handle;

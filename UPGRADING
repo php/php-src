@@ -98,3 +98,7 @@ PHP X.Y UPGRADE NOTES
 
 - File upload:
   Uploads equal or greater than 2GB in size are now accepted.
+
+- HTTP stream wrapper:
+  HTTP 1.1 requests now include a Connection: close header unless explicitly
+  overridden by setting a Connection header via the header context option.

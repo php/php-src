@@ -767,32 +767,21 @@ static inline void zend_assign_to_object(zval **retval, zval **object_ptr, zval 
 
 static inline int zend_assign_to_string_offset(const temp_variable *T, const zval *value, int value_type TSRMLS_DC)
 {
-	if (Z_TYPE_P(T->str_offset.str) == IS_STRING) {
-
-		if (((int)T->str_offset.offset < 0)) {
-			zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
+	zval *str = T->str_offset.str;
+	zend_uint offset = T->str_offset.offset;
+	if (Z_TYPE_P(str) == IS_STRING) {
+		if ((int)offset < 0) {
+			zend_error(E_WARNING, "Illegal string offset:  %d", offset);
 			return 0;
 		}
 
-		if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
-			if (IS_INTERNED(Z_STRVAL_P(T->str_offset.str))) {
-				char *tmp = (char *) emalloc(T->str_offset.offset+1+1);
-
-				memcpy(tmp, Z_STRVAL_P(T->str_offset.str), Z_STRLEN_P(T->str_offset.str)+1);
-				Z_STRVAL_P(T->str_offset.str) = tmp;
-			} else {
-				Z_STRVAL_P(T->str_offset.str) = (char *) erealloc(Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
-			}
-			memset(Z_STRVAL_P(T->str_offset.str) + Z_STRLEN_P(T->str_offset.str),
-			       ' ',
-			       T->str_offset.offset - Z_STRLEN_P(T->str_offset.str));
-			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset+1] = 0;
-			Z_STRLEN_P(T->str_offset.str) = T->str_offset.offset+1;
-		} else if (IS_INTERNED(Z_STRVAL_P(T->str_offset.str))) {
-			char *tmp = (char *) emalloc(Z_STRLEN_P(T->str_offset.str) + 1);
-
-			memcpy(tmp, Z_STRVAL_P(T->str_offset.str), Z_STRLEN_P(T->str_offset.str) + 1);
-			Z_STRVAL_P(T->str_offset.str) = tmp;
+		if (offset >= Z_STRLEN_P(str)) {
+			Z_STRVAL_P(str) = str_erealloc(Z_STRVAL_P(str), offset+1+1);
+			memset(Z_STRVAL_P(str) + Z_STRLEN_P(str), ' ', offset - Z_STRLEN_P(str));
+			Z_STRVAL_P(str)[offset+1] = 0;
+			Z_STRLEN_P(str) = offset+1;
+		} else if (IS_INTERNED(Z_STRVAL_P(str))) {
+			Z_STRVAL_P(str) = estrndup(Z_STRVAL_P(str), Z_STRLEN_P(str));
 		}
 
 		if (Z_TYPE_P(value) != IS_STRING) {
@@ -803,15 +792,15 @@ static inline int zend_assign_to_string_offset(const temp_variable *T, const zva
 				zval_copy_ctor(&tmp);
 			}
 			convert_to_string(&tmp);
-			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL(tmp)[0];
-			STR_FREE(Z_STRVAL(tmp));
+			Z_STRVAL_P(str)[offset] = Z_STRVAL(tmp)[0];
+			str_efree(Z_STRVAL(tmp));
 		} else {
-			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL_P(value)[0];
+			Z_STRVAL_P(str)[offset] = Z_STRVAL_P(value)[0];
 			if (value_type == IS_TMP_VAR) {
 				/* we can safely free final_value here
 				 * because separation is done only
 				 * in case value_type == IS_VAR */
-				STR_FREE(Z_STRVAL_P(value));
+				str_efree(Z_STRVAL_P(value));
 			}
 		}
 		/*
@@ -1024,11 +1013,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zva
 				hval = Z_HASH_P(dim);
 			} else {
 				ZEND_HANDLE_NUMERIC_EX(offset_key, offset_key_length+1, hval, goto num_index);
-				if (IS_INTERNED(offset_key)) {
-					hval = INTERNED_HASH(offset_key);
-				} else {
-					hval = zend_hash_func(offset_key, offset_key_length+1);
-				}
+				hval = str_hash(offset_key, offset_key_length);
 			}
 fetch_string_dim:
 			if (zend_hash_quick_find(ht, offset_key, offset_key_length+1, hval, (void **) &retval) == FAILURE) {

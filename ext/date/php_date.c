@@ -480,7 +480,7 @@ const zend_function_entry date_funcs_immutable[] = {
 	PHP_ME(DateTimeImmutable, __construct,   arginfo_date_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime, __wakeup,       NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTimeImmutable, __set_state,   NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(createFromFormat, date_create_from_format, arginfo_date_create_from_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(createFromFormat, date_create_immutable_from_format, arginfo_date_create_from_format, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getLastErrors,    date_get_last_errors,    arginfo_date_get_last_errors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(format,           date_format,             arginfo_date_method_format, 0)
 	PHP_ME_MAPPING(getTimezone, date_timezone_get,	arginfo_date_method_timezone_get, 0)
@@ -2142,27 +2142,21 @@ static zval* date_clone_immutable(zval *object TSRMLS_DC)
 
 static int date_object_compare_date(zval *d1, zval *d2 TSRMLS_DC)
 {
-	if (Z_TYPE_P(d1) == IS_OBJECT && Z_TYPE_P(d2) == IS_OBJECT &&
-		instanceof_function(Z_OBJCE_P(d1), date_ce_date TSRMLS_CC) &&
-		instanceof_function(Z_OBJCE_P(d2), date_ce_date TSRMLS_CC)) {
-		php_date_obj *o1 = zend_object_store_get_object(d1 TSRMLS_CC);
-		php_date_obj *o2 = zend_object_store_get_object(d2 TSRMLS_CC);
+	php_date_obj *o1 = zend_object_store_get_object(d1 TSRMLS_CC);
+	php_date_obj *o2 = zend_object_store_get_object(d2 TSRMLS_CC);
 
-		if (!o1->time || !o2->time) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Trying to compare an incomplete DateTime object");
-			return 1;
-		}
-		if (!o1->time->sse_uptodate) {
-			timelib_update_ts(o1->time, o1->time->tz_info);
-		}
-		if (!o2->time->sse_uptodate) {
-			timelib_update_ts(o2->time, o2->time->tz_info);
-		}
-		
-		return (o1->time->sse == o2->time->sse) ? 0 : ((o1->time->sse < o2->time->sse) ? -1 : 1);
+	if (!o1->time || !o2->time) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Trying to compare an incomplete DateTime or DateTimeImmutable object");
+		return 1;
+	}
+	if (!o1->time->sse_uptodate) {
+		timelib_update_ts(o1->time, o1->time->tz_info);
+	}
+	if (!o2->time->sse_uptodate) {
+		timelib_update_ts(o2->time, o2->time->tz_info);
 	}
 	
-	return 1;
+	return (o1->time->sse == o2->time->sse) ? 0 : ((o1->time->sse < o2->time->sse) ? -1 : 1);
 }
 
 static HashTable *date_object_get_gc(zval *object, zval ***table, int *n TSRMLS_DC)
