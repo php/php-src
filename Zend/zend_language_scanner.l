@@ -653,15 +653,8 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename TSRMLS_D
 	char *buf;
 	size_t size;
 
-	/* enforce two trailing NULLs for flex... */
-	if (IS_INTERNED(Z_STRVAL_P(str))) {
-		char *tmp = safe_emalloc(1, Z_STRLEN_P(str), ZEND_MMAP_AHEAD);
-		memcpy(tmp, Z_STRVAL_P(str), Z_STRLEN_P(str) + ZEND_MMAP_AHEAD);
-		Z_STRVAL_P(str) = tmp;
-	} else {
-		Z_STRVAL_P(str) = safe_erealloc(Z_STRVAL_P(str), 1, Z_STRLEN_P(str), ZEND_MMAP_AHEAD);
-	}
-
+	/* enforce ZEND_MMAP_AHEAD trailing NULLs for flex... */
+	Z_STRVAL_P(str) = str_erealloc(Z_STRVAL_P(str), Z_STRLEN_P(str) + ZEND_MMAP_AHEAD);
 	memset(Z_STRVAL_P(str) + Z_STRLEN_P(str), 0, ZEND_MMAP_AHEAD);
 
 	SCNG(yy_in) = NULL;

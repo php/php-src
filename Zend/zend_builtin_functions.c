@@ -706,7 +706,7 @@ repeat:
 		zval_ptr_dtor(&val_free);
 	}
 	c.flags = case_sensitive; /* non persistent */
-	c.name = IS_INTERNED(name) ? name : zend_strndup(name, name_len);
+	c.name = str_strndup(name, name_len);
 	if(c.name == NULL) {
 		RETURN_FALSE;
 	}
