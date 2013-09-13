@@ -74,7 +74,7 @@ END_EXTERN_C()
 	 : erealloc(str, new_len))
 
 static inline char *_str_erealloc(char *str, size_t new_len, size_t old_len) {
-	char *buf = emalloc(new_len);
+	char *buf = (char *) emalloc(new_len);
 	memcpy(buf, str, old_len);
 	return buf;
 }
