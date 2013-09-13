@@ -1289,21 +1289,17 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 	}
 
 	if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
-		phar_zstr key;
 		char *str_key;
 		ulong unused;
 		uint keylen;
 
 		zend_hash_internal_pointer_reset(&phar->mounted_dirs);
 		while (FAILURE != zend_hash_has_more_elements(&phar->mounted_dirs)) {
-			if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
+			if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &str_key, &keylen, &unused, 0, NULL)) {
 				break;
 			}
 
-			PHAR_STR(key, str_key);
-
 			if ((int)keylen >= path_len || strncmp(str_key, path, keylen)) {
-				PHAR_STR_FREE(str_key);
 				continue;
 			} else {
 				char *test;
@@ -1314,7 +1310,6 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 					if (error) {
 						spprintf(error, 4096, "phar internal error: mounted path \"%s\" could not be retrieved from manifest", str_key);
 					}
-					PHAR_STR_FREE(str_key);
 					return NULL;
 				}
 
@@ -1322,10 +1317,8 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 					if (error) {
 						spprintf(error, 4096, "phar internal error: mounted path \"%s\" is not properly initialized as a mounted path", str_key);
 					}
-					PHAR_STR_FREE(str_key);
 					return NULL;
 				}
-				PHAR_STR_FREE(str_key);
 
 				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, path + keylen);
 

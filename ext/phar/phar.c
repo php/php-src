@@ -1954,67 +1954,45 @@ woohoo:
 				goto woohoo;
 			}
 		} else {
-			phar_zstr key;
 			char *str_key;
 			uint keylen;
 			ulong unused;
 
-			zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_fname_map));
-
-			while (FAILURE != zend_hash_has_more_elements(&(PHAR_GLOBALS->phar_fname_map))) {
-				if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_fname_map), &key, &keylen, &unused, 0, NULL)) {
-					break;
-				}
-
-				PHAR_STR(key, str_key);
-
+			for (zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_fname_map));
+				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_fname_map), &str_key, &keylen, &unused, 0, NULL);
+				zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map))
+			) {
 				if (keylen > (uint) filename_len) {
-					zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
-					PHAR_STR_FREE(str_key);
 					continue;
 				}
 
 				if (!memcmp(filename, str_key, keylen) && ((uint)filename_len == keylen
 					|| filename[keylen] == '/' || filename[keylen] == '\0')) {
-					PHAR_STR_FREE(str_key);
 					if (FAILURE == zend_hash_get_current_data(&(PHAR_GLOBALS->phar_fname_map), (void **) &pphar)) {
 						break;
 					}
 					*ext_str = filename + (keylen - (*pphar)->ext_len);
 					goto woohoo;
 				}
-
-				PHAR_STR_FREE(str_key);
-				zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
 			}
 
 			if (PHAR_G(manifest_cached)) {
-				zend_hash_internal_pointer_reset(&cached_phars);
-
-				while (FAILURE != zend_hash_has_more_elements(&cached_phars)) {
-					if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&cached_phars, &key, &keylen, &unused, 0, NULL)) {
-						break;
-					}
-
-					PHAR_STR(key, str_key);
-
+				for (zend_hash_internal_pointer_reset(&cached_phars);
+					HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&cached_phars, &str_key, &keylen, &unused, 0, NULL);
+					zend_hash_move_forward(&cached_phars)
+				) {
 					if (keylen > (uint) filename_len) {
-						zend_hash_move_forward(&cached_phars);
-						PHAR_STR_FREE(str_key);
 						continue;
 					}
 
 					if (!memcmp(filename, str_key, keylen) && ((uint)filename_len == keylen
 						|| filename[keylen] == '/' || filename[keylen] == '\0')) {
-						PHAR_STR_FREE(str_key);
 						if (FAILURE == zend_hash_get_current_data(&cached_phars, (void **) &pphar)) {
 							break;
 						}
 						*ext_str = filename + (keylen - (*pphar)->ext_len);
 						goto woohoo;
 					}
-					PHAR_STR_FREE(str_key);
-					zend_hash_move_forward(&cached_phars);
 				}
 			}
 		}

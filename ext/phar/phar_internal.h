@@ -518,13 +518,6 @@ extern char *(*phar_save_resolve_path)(const char *filename, int filename_len TS
 
 #define phar_stream_copy_to_stream(src, dest, maxlen, len)	_php_stream_copy_to_stream_ex((src), (dest), (maxlen), (len) STREAMS_CC TSRMLS_CC)
 
-typedef char *phar_zstr;
-#define PHAR_STR(a, b)	\
-	b = a;
-#define PHAR_ZSTR(a, b)	\
-	b = a;
-#define PHAR_STR_FREE(a)
-
 BEGIN_EXTERN_C()
 
 #ifdef PHP_WIN32
