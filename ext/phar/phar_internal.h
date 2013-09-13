@@ -68,19 +68,6 @@
 #include "ext/hash/php_hash_sha.h"
 #endif
 
-#ifndef E_RECOVERABLE_ERROR
-# define E_RECOVERABLE_ERROR E_ERROR
-#endif
-
-#ifndef pestrndup
-# define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
-#endif
-
-#ifndef ALLOC_PERMANENT_ZVAL
-# define ALLOC_PERMANENT_ZVAL(z) \
-	(z) = (zval*)malloc(sizeof(zval))
-#endif
-
 /* PHP_ because this is public information via MINFO */
 #define PHP_PHAR_API_VERSION      "1.1.1"
 /* x.y.z maps to 0xyz0 */
@@ -515,8 +502,6 @@ union _phar_entry_object {
 #ifndef PHAR_MAIN
 extern char *(*phar_save_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
 #endif
-
-#define phar_stream_copy_to_stream(src, dest, maxlen, len)	_php_stream_copy_to_stream_ex((src), (dest), (maxlen), (len) STREAMS_CC TSRMLS_CC)
 
 BEGIN_EXTERN_C()
 

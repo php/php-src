@@ -1639,7 +1639,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 
 				php_stream_filter_append(&temp->writefilters, filter);
 
-				if (SUCCESS != phar_stream_copy_to_stream(fp, temp, PHP_STREAM_COPY_ALL, NULL)) {
+				if (SUCCESS != php_stream_copy_to_stream_ex(fp, temp, PHP_STREAM_COPY_ALL, NULL)) {
 					if (err) {
 						php_stream_close(temp);
 						MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\", ext/zlib is buggy in PHP versions older than 5.2.6")
@@ -1681,7 +1681,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 
 				php_stream_filter_append(&temp->writefilters, filter);
 
-				if (SUCCESS != phar_stream_copy_to_stream(fp, temp, PHP_STREAM_COPY_ALL, NULL)) {
+				if (SUCCESS != php_stream_copy_to_stream_ex(fp, temp, PHP_STREAM_COPY_ALL, NULL)) {
 					php_stream_close(temp);
 					MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\" to temporary file")
 				}
@@ -2677,7 +2677,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		size_t written;
 
 		if (!user_stub && phar->halt_offset && oldfile && !phar->is_brandnew) {
-			phar_stream_copy_to_stream(oldfile, newfile, phar->halt_offset, &written);
+			php_stream_copy_to_stream_ex(oldfile, newfile, phar->halt_offset, &written);
 			newstub = NULL;
 		} else {
 			/* this is either a brand new phar or a default stub overwrite */
@@ -2865,7 +2865,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			return EOF;
 		}
 		php_stream_filter_append((&entry->cfp->writefilters), filter);
-		if (SUCCESS != phar_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize, NULL)) {
+		if (SUCCESS != php_stream_copy_to_stream_ex(file, entry->cfp, entry->uncompressed_filesize, NULL)) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -3097,7 +3097,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		/* this will have changed for all files that have either changed compression or been modified */
 		entry->offset = entry->offset_abs = offset;
 		offset += entry->compressed_filesize;
-		if (phar_stream_copy_to_stream(file, newfile, entry->compressed_filesize, &wrote) == FAILURE) {
+		if (php_stream_copy_to_stream_ex(file, newfile, entry->compressed_filesize, &wrote) == FAILURE) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -3243,7 +3243,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			}
 
 			php_stream_filter_append(&phar->fp->writefilters, filter);
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			php_stream_close(phar->fp);
@@ -3252,14 +3252,14 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		} else if (phar->flags & PHAR_FILE_COMPRESSED_BZ2) {
 			filter = php_stream_filter_create("bzip2.compress", NULL, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			php_stream_filter_append(&phar->fp->writefilters, filter);
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			php_stream_close(phar->fp);
 			/* use the temp stream as our base */
 			phar->fp = newfile;
 		} else {
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			/* we could also reopen the file in "rb" mode but there is no need for that */
 			php_stream_close(newfile);
 		}
