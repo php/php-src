@@ -33,7 +33,7 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		case IS_STRING:
 		case IS_CONSTANT:
 			CHECK_ZVAL_STRING_REL(zvalue);
-			STR_FREE_REL(zvalue->value.str.val);
+			str_efree_rel(zvalue->value.str.val);
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY: {

@@ -1052,10 +1052,8 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 */
 		if (OP1_TYPE == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -3640,11 +3638,7 @@ ZEND_VM_C_LABEL(num_index):
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(num_index));
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -3992,11 +3986,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(num_index_dim));
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -4513,11 +4503,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(num_index_prop));
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -5194,7 +5180,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 		zval_copy_ctor(&c.value);
 	}
 	c.flags = CONST_CS; /* non persistent, case sensetive */
-	c.name = IS_INTERNED(Z_STRVAL_P(name)) ? Z_STRVAL_P(name) : zend_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	c.name = str_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
 	c.name_len = Z_STRLEN_P(name)+1;
 	c.module_number = PHP_USER_CONSTANT;
 

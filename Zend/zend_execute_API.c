@@ -533,13 +533,13 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					if (fix_save) {
 						save--;
 					}
-					if (inline_change && !IS_INTERNED(save)) {
-						efree(save);
+					if (inline_change) {
+						str_efree(save);
 					}
 					save = NULL;
 				}
-				if (inline_change && save && save != actual && !IS_INTERNED(save)) {
-					efree(save);
+				if (inline_change && save && save != actual) {
+					str_efree(save);
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
 				p->type = IS_STRING;
@@ -551,7 +551,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 			}
 		} else {
 			if (inline_change) {
-				STR_FREE(Z_STRVAL_P(p));
+				str_efree(Z_STRVAL_P(p));
 			}
 			*p = const_value;
 		}
