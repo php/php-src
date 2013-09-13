@@ -438,7 +438,7 @@ ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
 void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace TSRMLS_DC);
-void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_name TSRMLS_DC);
+void zend_resolve_class_name(znode *class_name TSRMLS_DC);
 ZEND_API const char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len);
 
 #ifdef ZTS
@@ -726,8 +726,8 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
 #define ZEND_FETCH_CLASS_PARENT		2
-#define ZEND_FETCH_CLASS_MAIN		3
-#define ZEND_FETCH_CLASS_GLOBAL		4
+#define ZEND_FETCH_CLASS_MAIN		3	/* unused */
+#define ZEND_FETCH_CLASS_GLOBAL		4	/* unused */
 #define ZEND_FETCH_CLASS_AUTO		5
 #define ZEND_FETCH_CLASS_INTERFACE	6
 #define ZEND_FETCH_CLASS_STATIC		7
