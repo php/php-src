@@ -197,13 +197,12 @@
 engine = On
 
 ; This directive determines whether or not PHP will recognize code between
-; <? and ?> tags as PHP source which should be processed as such. It's been
-; recommended for several years that you not use the short tag "short cut" and
-; instead to use the full <?php and ?> tag combination. With the wide spread use
-; of XML and use of these tags by other languages, the server can become easily
-; confused and end up parsing the wrong code in the wrong context. But because
-; this short cut has been a feature for such a long time, it's currently still
-; supported for backwards compatibility, but we recommend you don't use them.
+; <? and ?> tags as PHP source which should be processed as such. It is
+; generally recommended that <?php and ?> should be used and that this feature
+; should be disabled, as enabling it may result in issues when generating XML
+; documents, however this remains supported for backward compatibility reasons.
+; Note that this directive does not control the <?= shorthand tag, which can be
+; used regardless of this directive.
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off

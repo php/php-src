@@ -412,7 +412,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 {
 	{
 		char **val;
-		if (SUCCESS == zend_hash_find(&client->request.headers, "Host", sizeof("Host"), (void**)&val)) {
+		if (SUCCESS == zend_hash_find(&client->request.headers, "host", sizeof("host"), (void**)&val)) {
 			smart_str_appendl_ex(buffer, "Host", sizeof("Host") - 1, persistent);
 			smart_str_appendl_ex(buffer, ": ", sizeof(": ") - 1, persistent);
 			smart_str_appends_ex(buffer, *val, persistent);
@@ -568,7 +568,7 @@ static char *sapi_cli_server_read_cookies(TSRMLS_D) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	char **val;
-	if (FAILURE == zend_hash_find(&client->request.headers, "Cookie", sizeof("Cookie"), (void**)&val)) {
+	if (FAILURE == zend_hash_find(&client->request.headers, "cookie", sizeof("cookie"), (void**)&val)) {
 		return NULL;
 	}
 	return *val;
@@ -1566,12 +1566,9 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 		return 1;
 	}
 	{
-		char *header_name = client->current_header_name;
-		size_t header_name_len = client->current_header_name_len;
-		char c = header_name[header_name_len];
-		header_name[header_name_len] = '\0';
-		zend_hash_add(&client->request.headers, header_name, header_name_len + 1, &value, sizeof(char *), NULL);
-		header_name[header_name_len] = c;
+		char *header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
+		zend_hash_add(&client->request.headers, header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
+		efree(header_name);
 	}
 
 	if (client->current_header_name_allocated) {
@@ -1729,7 +1726,7 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->post_data = client->request.content;
 	request_info->content_length = request_info->post_data_length = client->request.content_len;
 	request_info->auth_user = request_info->auth_password = request_info->auth_digest = NULL;
-	if (SUCCESS == zend_hash_find(&client->request.headers, "Content-Type", sizeof("Content-Type"), (void**)&val)) {
+	if (SUCCESS == zend_hash_find(&client->request.headers, "content-type", sizeof("content-type"), (void**)&val)) {
 		request_info->content_type = *val;
 	}
 } /* }}} */
@@ -1967,7 +1964,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 static int php_cli_server_request_startup(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) { /* {{{ */
 	char **auth;
 	php_cli_server_client_populate_request_info(client, &SG(request_info));
-	if (SUCCESS == zend_hash_find(&client->request.headers, "Authorization", sizeof("Authorization"), (void**)&auth)) {
+	if (SUCCESS == zend_hash_find(&client->request.headers, "authorization", sizeof("authorization"), (void**)&auth)) {
 		php_handle_auth_data(*auth TSRMLS_CC);
 	}
 	SG(sapi_headers).http_response_code = 200;
