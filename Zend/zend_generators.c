@@ -46,7 +46,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		zend_op_array *op_array = execute_data->op_array;
 
 		if (!execute_data->symbol_table) {
-			zend_free_compiled_variables(execute_data);
+			zend_free_compiled_variables(execute_data TSRMLS_CC);
 		} else {
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table TSRMLS_CC);
 		}
