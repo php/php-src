@@ -636,7 +636,6 @@ static HashTable *date_object_get_gc_timezone(zval *object, zval ***table, int *
 zval *date_interval_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC);
 void date_interval_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC);
 static zval *date_period_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC);
-static void date_period_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC);
 
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
@@ -2070,7 +2069,6 @@ static void date_register_classes(TSRMLS_D)
 	date_object_handlers_period.get_property_ptr_ptr = NULL;
 	date_object_handlers_period.get_gc = date_object_get_gc_period;
 	date_object_handlers_period.read_property = date_period_read_property;
-	date_object_handlers_period.write_property = date_period_write_property;
 
 #define REGISTER_PERIOD_CLASS_CONST_STRING(const_name, value) \
 	zend_declare_class_constant_long(date_ce_period, const_name, sizeof(const_name)-1, value TSRMLS_CC);
@@ -5021,13 +5019,6 @@ static zval *date_period_read_property(zval *object, zval *member, int type, con
 	}
 
 	return zv;
-}
-/* }}} */
-
-/* {{{ date_period_write_property */
-static void date_period_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC)
-{
-	php_error_docref(NULL TSRMLS_CC, E_ERROR, "Writing to DatePeriod properties is unsupported");
 }
 /* }}} */
 
