@@ -125,13 +125,11 @@ if (ZEND_OPTIMIZER_PASS_2 & OPTIMIZATION_LEVEL) {
 						/* JMPZ(X, L1), JMP(L1) => NOP, JMP(L1) */
 						MAKE_NOP(opline);
 					} else {
-						if (opline->opcode == ZEND_JMPZ) {
-							opline->extended_value = ZEND_OP1(opline + 1).opline_num;
-						} else {
+						if (opline->opcode != ZEND_JMPZ) {
 							opline->extended_value = ZEND_OP2(opline).opline_num;
 							COPY_NODE(opline->op2, (opline + 1)->op1);
+							opline->opcode = ZEND_JMPZNZ;
 						}
-						opline->opcode = ZEND_JMPZNZ;
 					}
 				}
 				break;
