@@ -4943,9 +4943,13 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 
 	lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 
-	if (!(strcmp(lcname, "self") && strcmp(lcname, "parent"))) {
+	if (!(strcmp(lcname, "self") && strcmp(lcname, "parent") && strcmp(lcname, "static"))) {
 		efree(lcname);
-		zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", Z_STRVAL(class_name->u.constant));
+		if (parent_class_name) {
+			zend_error(E_COMPILE_ERROR, "Cannot use '%s' as class name as it is reserved", Z_STRVAL(class_name->u.constant));
+		} else {
+			zend_error(E_COMPILE_ERROR, "Cannot use '%s' as interface name as it is reserved", Z_STRVAL(class_name->u.constant));
+		}
 	}
 
 	/* Class name must not conflict with import names */
@@ -6932,9 +6936,11 @@ void zend_do_begin_namespace(const znode *name, zend_bool with_bracket TSRMLS_DC
 	if (name) {
 		lcname = zend_str_tolower_dup(Z_STRVAL(name->u.constant), Z_STRLEN(name->u.constant));
 		if (((Z_STRLEN(name->u.constant) == sizeof("self")-1) &&
-		      !memcmp(lcname, "self", sizeof("self")-1)) ||
+		     !memcmp(lcname, "self", sizeof("self")-1)) ||
 		    ((Z_STRLEN(name->u.constant) == sizeof("parent")-1) &&
-	          !memcmp(lcname, "parent", sizeof("parent")-1))) {
+		     !memcmp(lcname, "parent", sizeof("parent")-1)) ||
+		    ((Z_STRLEN(name->u.constant) == sizeof("static")-1) &&
+		     !memcmp(lcname, "static", sizeof("static")-1))) {
 			zend_error(E_COMPILE_ERROR, "Cannot use '%s' as namespace name", Z_STRVAL(name->u.constant));
 		}
 		efree(lcname);
@@ -7002,9 +7008,11 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 	lcname = zend_str_tolower_dup(Z_STRVAL_P(name), Z_STRLEN_P(name));
 
 	if (((Z_STRLEN_P(name) == sizeof("self")-1) &&
-				!memcmp(lcname, "self", sizeof("self")-1)) ||
-			((Z_STRLEN_P(name) == sizeof("parent")-1) &&
-	   !memcmp(lcname, "parent", sizeof("parent")-1))) {
+	     !memcmp(lcname, "self", sizeof("self")-1)) ||
+	    ((Z_STRLEN_P(name) == sizeof("parent")-1) &&
+	     !memcmp(lcname, "parent", sizeof("parent")-1)) ||
+	    ((Z_STRLEN_P(name) == sizeof("static")-1) &&
+	     !memcmp(lcname, "static", sizeof("static")-1))) {
 		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because '%s' is a special class name", Z_STRVAL_P(ns), Z_STRVAL_P(name), Z_STRVAL_P(name));
 	}
 

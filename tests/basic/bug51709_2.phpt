@@ -1,16 +1,16 @@
 --TEST--
-Bug #51709 (Can't use keywords as method names)
+Bug #51709 (Use keywords as method or class names)
 --FILE--
 <?php
 
-class foo {
+class List {
         static function goto() {
-                echo "1";
+                echo "OK";
         }
 }
 
+List::goto();
+
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
-Parse error: syntax error, unexpected %s, expecting %s in %sbug51709_2.php on line %d
+OK

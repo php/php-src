@@ -2,10 +2,12 @@
 Bug #43343 (Variable class name)
 --FILE--
 <?php
-namespace Foo;
-class Bar { }
+class namespace {
+	public static $bar = "namespace";
+}
 $foo = 'bar';
-var_dump(new namespace::$foo);
+var_dump(new namespace::$$foo);
 ?>
 --EXPECTF--
-Parse error: %s error%sexpecting%sT_NS_SEPARATOR%sin %sbug43343.php on line 5
+object(namespace)#1 (0) {
+}

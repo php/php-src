@@ -115,16 +115,13 @@ static void tokenize(zval *return_value TSRMLS_DC)
 	ZVAL_NULL(&token);
 	while ((token_type = lex_scan(&token TSRMLS_CC))) {
 		destroy = 1;
+		if (token_type == T_CLOSE_TAG && zendtext[zendleng - 1] != '>') {
+			CG(zend_lineno)++;
+		}
 		switch (token_type) {
-			case T_CLOSE_TAG:
-				if (zendtext[zendleng - 1] != '>') {
-					CG(zend_lineno)++;
-				}
-			case T_OPEN_TAG:
-			case T_OPEN_TAG_WITH_ECHO:
-			case T_WHITESPACE:
-			case T_COMMENT:
-			case T_DOC_COMMENT:
+			COPIED_STRING_TOKEN_CASES
+				break;
+			default:
 				destroy = 0;
 				break;
 		}
