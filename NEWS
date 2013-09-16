@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #64157 (DateTime::createFromFormat() reports confusing error
     message). (Boro Sitnikovski)
 
+- Filter:
+  . Fixed bug #64441 (FILTER_VALIDATE_URL rejects fully qualified domain names).
+    (Syra)
+
 ?? ??? 2013, PHP 5.4.20
 
 - Core:
