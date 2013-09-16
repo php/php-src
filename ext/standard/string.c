@@ -5603,6 +5603,38 @@ PHP_FUNCTION(substr_compare)
 }
 /* }}} */
 
+/* {{{ string_is_ascii
+*/
+PHPAPI zend_bool string_is_ascii(const unsigned char *str, size_t str_len)
+{
+	while (str_len--) {
+		if (*str++ > 0x7f) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+/* }}} */
+
+/* {{{ proto bool str_is_ascii(string str)
+   Checks whether the given string contains only ASCII characters */
+PHP_FUNCTION(str_is_ascii)
+{
+	unsigned char *str = NULL;
+	int str_len = 0;
+	zend_bool ret = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &str, &str_len) == FAILURE) {
+		return;
+	}
+
+	ret = string_is_ascii(str, str_len);
+
+	RETURN_BOOL(ret);
+}
+/* }}} str_is_ascii */
+
 /*
  * Local variables:
  * tab-width: 4

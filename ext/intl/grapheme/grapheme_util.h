@@ -29,8 +29,6 @@ int grapheme_strrpos_utf16(unsigned char *haystack, int32_t haystack_len, unsign
 
 int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigned char*needle, int32_t needle_len, int32_t offset, int *puchar_pos, int f_ignore_case, int last TSRMLS_DC);
 
-int grapheme_ascii_check(const unsigned char *day, int32_t len);
-
 int grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len TSRMLS_DC );
 
 int32_t grapheme_count_graphemes(UBreakIterator *bi, UChar *string, int32_t string_len);

@@ -216,20 +216,6 @@ int grapheme_strpos_utf16(unsigned char *haystack, int32_t haystack_len, unsigne
 
 /* }}} */
 
-/* {{{ grapheme_ascii_check: ASCII check */
-int grapheme_ascii_check(const unsigned char *day, int32_t len)
-{
-	int ret_len = len;
-	while ( len-- ) {
-	if ( *day++ > 0x7f )
-		return -1;
-	}
-
-	return ret_len;
-}
-
-/* }}} */
-
 /* {{{ grapheme_split_string: find and optionally return grapheme boundaries */
 int grapheme_split_string(const UChar *text, int32_t text_length, int boundary_array[], int boundary_array_len TSRMLS_DC )
 {
