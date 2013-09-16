@@ -168,15 +168,39 @@ static void do_adjust_for_weekday(timelib_time* time)
 	time->relative.have_weekday_relative = 0;
 }
 
-void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
+void timelib_do_rel_normalize_by_base(timelib_time *base, timelib_rel_time *rt)
 {
 	do {} while (do_range_limit(0, 60, 60, &rt->s, &rt->i));
 	do {} while (do_range_limit(0, 60, 60, &rt->i, &rt->h));
 	do {} while (do_range_limit(0, 24, 24, &rt->h, &rt->d));
 	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
-
 	do_range_limit_days_relative(&base->y, &base->m, &rt->y, &rt->m, &rt->d, rt->invert);
 	do {} while (do_range_limit(0, 12, 12, &rt->m, &rt->y));
+}
+
+void timelib_do_rel_normalize(timelib_rel_time *rt)
+{
+	int i, hmi;
+	timelib_sll *members[6] = {&rt->s, &rt->i, &rt->h, &rt->d, &rt->m, &rt->y};
+	timelib_sll limits[6] = {60, 60, 24, 0, 12, 0};
+
+	for (i = 5; i >= 0; i--) {
+		if (*(members[i]) != 0) {
+			if (*(members[i]) < 0) {
+				*(members[i]) *= -1;
+				rt->invert = !rt->invert;
+			}
+			break;
+		}
+	}
+	/* save highest not zero member index */
+	hmi = i + 1;
+	for (i = 0; i < 6; i++) {
+		if (i == hmi)
+			break;
+		if (limits[i])
+			do {} while (do_range_limit(0, limits[i], limits[i], members[i], members[i+1]));
+	}
 }
 
 void timelib_do_normalize(timelib_time* time)

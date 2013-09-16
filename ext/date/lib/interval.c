@@ -62,11 +62,45 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	rt->s = two->s - one->s;
 	rt->days = abs(floor((one->sse - two->sse - (dst_h_corr * 3600) - (dst_m_corr * 60)) / 86400));
 
-	timelib_do_rel_normalize(rt->invert ? one : two, rt);
+	timelib_do_rel_normalize_by_base(rt->invert ? one : two, rt);
 
 	/* Restore old TZ info */
 	memcpy(one, &one_backup, sizeof(one_backup));
 	memcpy(two, &two_backup, sizeof(two_backup));
+
+	return rt;
+}
+
+#define timelib_rel_invert_member(rt, member) do { rt->member *= -1; rt->invert = !rt->invert; } while(0)
+
+timelib_rel_time *timelib_rel_add(timelib_rel_time *one, timelib_rel_time *two)
+{
+	timelib_rel_time *rt;
+	int one_mult, two_mult;
+
+	if (one->have_weekday_relative || one->have_special_relative ||
+		two->have_weekday_relative || two->have_special_relative) {
+		return NULL;
+	}
+	
+	rt = timelib_rel_time_ctor();
+
+	if (one->invert && two->invert) {
+		one_mult = two_mult = 1;
+		rt->invert = 1;
+	} else {
+		one_mult = one->invert ? -1 : 1;
+		two_mult = two->invert ? -1 : 1;
+	}
+
+	rt->y = one_mult * one->y + two_mult * two->y;
+	rt->m = one_mult * one->m + two_mult * two->m;
+	rt->d = one_mult * one->d + two_mult * two->d;
+	rt->h = one_mult * one->h + two_mult * two->h;
+	rt->i = one_mult * one->i + two_mult * two->i;
+	rt->s = one_mult * one->s + two_mult * two->s;
+	
+	timelib_do_rel_normalize(rt);
 
 	return rt;
 }

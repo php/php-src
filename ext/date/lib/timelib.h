@@ -85,7 +85,8 @@ void timelib_strtointerval(char *s, int len,
 /* From tm2unixtime.c */
 void timelib_update_ts(timelib_time* time, timelib_tzinfo* tzi);
 void timelib_do_normalize(timelib_time *base);
-void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt);
+void timelib_do_rel_normalize_by_base(timelib_time *base, timelib_rel_time *rt);
+void timelib_do_rel_normalize(timelib_rel_time *rt);
 
 /* From unixtime2tm.c */
 int timelib_apply_localtime(timelib_time *t, unsigned int localtime);
@@ -138,5 +139,6 @@ int timelib_astro_rise_set_altitude(timelib_time *time, double lon, double lat, 
 
 /* from interval.c */
 timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two);
+timelib_rel_time *timelib_rel_add(timelib_rel_time *one, timelib_rel_time *two);
 
 #endif
