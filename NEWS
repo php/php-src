@@ -17,6 +17,8 @@ PHP                                                                        NEWS
     scaling methods. (Pierre)
 
 - OPcache:
+  . Fixed bug #65665 (Exception not properly caught when opcache enabled).
+    (Laruence)
   . Fixed bug #65510 (5.5.2 crashes in _get_zval_ptr_ptr_var). (Dmitry)
 
 - SPL:
