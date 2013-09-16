@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #65633 (built-in server treat some http headers as
     case-sensitive). (Adam)
 
+- Datetime:
+  . Fixed bug #64157 (DateTime::createFromFormat() reports confusing error
+    message). (Boro Sitnikovski)
+
 ?? ??? 2013, PHP 5.4.20
 
 - Core:
