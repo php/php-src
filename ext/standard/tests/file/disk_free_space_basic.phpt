@@ -25,7 +25,7 @@ $space1 =  disk_free_space($file_path.$dir);
 var_dump( $space1 ); 
 
 $fh = fopen($file_path.$dir."/disk_free_space.tmp", "a");
-$data = str_repeat("x", 4096);
+$data = str_repeat("x", 0xffff);
 fwrite($fh, (binary)$data);
 fclose($fh);
 
