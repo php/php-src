@@ -396,7 +396,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
 	if (!EG(active_symbol_table)) {
-		i_free_compiled_variables(execute_data);
+		i_free_compiled_variables(execute_data TSRMLS_CC);
 	}
 
 	zend_vm_stack_free((char*)execute_data - (ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T) TSRMLS_CC);

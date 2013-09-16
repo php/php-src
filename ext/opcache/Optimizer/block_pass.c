@@ -1283,11 +1283,15 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 
 	/* adjust exception jump targets */
 	if (op_array->last_try_catch) {
-		int i;
-		for (i = 0; i< op_array->last_try_catch; i++) {
-			op_array->try_catch_array[i].try_op = cfg->try[i]->start_opline - new_opcodes;
-			op_array->try_catch_array[i].catch_op = cfg->catch[i]->start_opline - new_opcodes;
+		int i, j;
+		for (i = 0, j = 0; i< op_array->last_try_catch; i++) {
+			if (cfg->try[i]->access) {
+				op_array->try_catch_array[j].try_op = cfg->try[i]->start_opline - new_opcodes;
+				op_array->try_catch_array[j].catch_op = cfg->catch[i]->start_opline - new_opcodes;
+				j++;
+			}
 		}
+		op_array->last_try_catch = j;
 		efree(cfg->try);
 		efree(cfg->catch);
 	}

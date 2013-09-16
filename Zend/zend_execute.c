@@ -94,7 +94,7 @@ static zend_always_inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC)
 }
 
 #undef zval_ptr_dtor
-#define zval_ptr_dtor(pzv) i_zval_ptr_dtor(*(pzv)  ZEND_FILE_LINE_CC)
+#define zval_ptr_dtor(pzv) i_zval_ptr_dtor(*(pzv) ZEND_FILE_LINE_CC TSRMLS_CC)
 
 #define PZVAL_UNLOCK(z, f) zend_pzval_unlock_func(z, f, 1 TSRMLS_CC)
 #define PZVAL_UNLOCK_EX(z, f, u) zend_pzval_unlock_func(z, f, u TSRMLS_CC)
@@ -1500,7 +1500,7 @@ void zend_clean_and_cache_symbol_table(HashTable *symbol_table TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
+static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
 	zval ***cv = EX_CV_NUM(execute_data, 0);
 	zval ***end = cv + EX(op_array)->last_var;
@@ -1513,9 +1513,9 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 }
 /* }}} */
 
-void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
+void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
-	i_free_compiled_variables(execute_data);
+	i_free_compiled_variables(execute_data TSRMLS_CC);
 }
 /* }}} */
 
