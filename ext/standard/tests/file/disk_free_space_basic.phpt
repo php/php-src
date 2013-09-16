@@ -35,8 +35,10 @@ var_dump( $space2 );
 
 if( $space1 > $space2 )
   echo "\n Free Space Value Is Correct\n";
-else
+else {
   echo "\n Free Space Value Is Incorrect\n";
+  var_dump($space1, $space2);
+}
 
 echo "*** Testing with Binary Input ***\n";
 var_dump( disk_free_space(b"$file_path") ); 
