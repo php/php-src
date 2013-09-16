@@ -1454,11 +1454,13 @@ PHP_FUNCTION(strtotime)
 		now->zone_type = TIMELIB_ZONETYPE_ID;
 		timelib_unixtime2local(now, (timelib_sll) time(NULL));
 	} else {
+		timelib_tzinfo_dtor(tzi);
 		RETURN_FALSE;
 	}
 
 	if (!time_len) {
 		timelib_time_dtor(now);	
+		timelib_tzinfo_dtor(tzi);
 		RETURN_FALSE;
 	}
 
@@ -1469,6 +1471,7 @@ PHP_FUNCTION(strtotime)
 	timelib_update_ts(t, tzi);
 	ts = timelib_date_to_int(t, &error2);
 
+	timelib_tzinfo_dtor(tzi);
 	timelib_time_dtor(now);
 	timelib_time_dtor(t);
 
