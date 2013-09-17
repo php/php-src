@@ -73,8 +73,8 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 {
 	php_stream *inner = stream->abstract;
 
-	if (inner && inner->ops->read) {
-		size_t read = inner->ops->read(inner, buf, count TSRMLS_CC);
+	if (inner) {
+		size_t read = php_stream_read(inner, buf, count);
 		stream->eof = inner->eof;
 		return read;
 	}
@@ -99,8 +99,10 @@ static int php_stream_input_seek(php_stream *stream, off_t offset, int whence, o
 {
 	php_stream *inner = stream->abstract;
 
-	if (inner && inner->ops->seek) {
-		return inner->ops->seek(inner, offset, whence, newoffset TSRMLS_CC);
+	if (inner) {
+		int sought = php_stream_seek(inner, offset, whence);
+		*newoffset = inner->position;
+		return sought;
 	}
 
 	return -1;
