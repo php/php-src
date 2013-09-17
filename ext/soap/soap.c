@@ -1599,6 +1599,7 @@ PHP_METHOD(SoapServer, handle)
 
 			if (zf) {
 				php_stream_filter_remove(zf, 1 TSRMLS_CC);
+			}
 		} else {
 			zval_ptr_dtor(&retval);
 			return;

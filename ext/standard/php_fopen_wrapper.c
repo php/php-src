@@ -91,7 +91,7 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 	}
 
 	php_stream_seek(*input->body_ptr, input->position, SEEK_SET);
-	read = (*input->body_ptr)->ops->read(*input->body_ptr, buf, count TSRMLS_CC);
+	read = php_stream_read(*input->body_ptr, buf, count);
 
 	if (!read || read == (size_t) -1) {
 		stream->eof = 1;
@@ -105,6 +105,9 @@ static size_t php_stream_input_read(php_stream *stream, char *buf, size_t count 
 
 static int php_stream_input_close(php_stream *stream, int close_handle TSRMLS_DC) /* {{{ */
 {
+	efree(stream->abstract);
+	stream->abstract = NULL;
+
 	return 0;
 }
 /* }}} */
