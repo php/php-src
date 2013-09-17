@@ -1580,7 +1580,7 @@ PHP_METHOD(SoapServer, handle)
 					array_init_size(&filter_params, 1);
 					add_assoc_long_ex(&filter_params, ZEND_STRS("window"), 0x2f); /* ANY WBITS */
 
-					zf = php_stream_filter_create("zlib.inflate", &filter_params, 0);
+					zf = php_stream_filter_create("zlib.inflate", &filter_params, 0 TSRMLS_CC);
 					zval_dtor(&filter_params);
 
 					if (zf) {
@@ -1595,11 +1595,10 @@ PHP_METHOD(SoapServer, handle)
 				}
 			}
 
-			doc_request = soap_xmlParseFile("php://input");
+			doc_request = soap_xmlParseFile("php://input" TSRMLS_CC);
 
 			if (zf) {
-				php_stream_filter_remove(zf, 1);
-			}
+				php_stream_filter_remove(zf, 1 TSRMLS_CC);
 		} else {
 			zval_ptr_dtor(&retval);
 			return;
