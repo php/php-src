@@ -5,6 +5,7 @@ UPGRADE NOTES - PHP X.Y
 1. Internal API changes
   a. Addition of do_operation and compare object handlers
   b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
+  c. POST data handling
 
 2. Build system changes
   a. Unix build system changes
@@ -57,6 +58,15 @@ UPGRADE NOTES - PHP X.Y
   The macros behave similarly to the non-FAST variants with copy=1 and
   dtor=0, but will try to return the zval without making a copy by utilizing
   return_value_ptr.
+  
+  c. POST data handling
+  
+  The sapi_request_info's members post_data, post_data_len and raw_post_data as 
+  well as raw_post_data_len have been replaced with a temp PHP stream 
+  request_body.
+  
+  The recommended way to access raw POST data is to open and use a php://input 
+  stream wrapper.  It is safe to be used concurrently and more than once. 
 
 ========================
 2. Build system changes
