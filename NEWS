@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     message). (Boro Sitnikovski)
 
 - Filter:
+  . Add RFC 6598 IPs to reserved addresses. (Sebastian Nohn)
   . Fixed bug #64441 (FILTER_VALIDATE_URL rejects fully qualified domain names).
     (Syra)
 
