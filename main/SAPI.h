@@ -32,8 +32,7 @@
 #include <sys/stat.h>
 
 #define SAPI_OPTION_NO_CHDIR 1
-
-#define SAPI_POST_BLOCK_SIZE 4000
+#define SAPI_POST_BLOCK_SIZE 0x4000
 
 #ifdef PHP_WIN32
 #	ifdef SAPI_EXPORTS
@@ -80,13 +79,13 @@ END_EXTERN_C()
 typedef struct {
 	const char *request_method;
 	char *query_string;
-	char *post_data, *raw_post_data;
 	char *cookie_data;
 	long content_length;
-	int64_t post_data_length, raw_post_data_length;
 
 	char *path_translated;
 	char *request_uri;
+
+	struct _php_stream *request_body;
 
 	const char *content_type;
 
