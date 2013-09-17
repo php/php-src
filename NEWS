@@ -9,6 +9,11 @@ PHP                                                                        NEWS
   . Made calls from incompatible context issue an E_DEPRECATED warning instead
     of E_STRICT (phase 1 of RFC: https://wiki.php.net/rfc/incompat_ctx).
 	(Gustavo)
+  . Uploads equal or greater than 2GB in size are now accepted.
+    (Ralf Lang, Mike)
+  . Reduced POST data memory usage by 200-300%. Removed INI setting
+    always_populate_raw_post_data and the $HTTP_RAW_POST_DATA global
+    variable. (Mike)
 
 - cURL:
   . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir

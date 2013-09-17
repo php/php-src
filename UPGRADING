@@ -20,11 +20,23 @@ PHP X.Y UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- Core:
+  Removed $HTTP_RAW_POST_DATA global variable. Restore backwards compatibility 
+  by:
+  <?php
+  global $HTTP_RAW_POST_DATA;
+  if (!isset($HTTP_RAW_POST_DATA)) {
+      $HTTP_ROW_POST_DATA = file_get_contents("php://input");
+  }
+  ?>
 
 ========================================
 2. New Features
 ========================================
 
+- Core:
+  The php://input stream is now re-usable and can be used concurrently with 
+  enable_post_data_reading=0.
 
 ========================================
 2. Changes in SAPI modules
@@ -91,6 +103,8 @@ PHP X.Y UPGRADE NOTES
 10. Changes to INI File Handling
 ========================================
 
+- Core:
+  Removed always_populate_raw_post_data.
 
 ========================================
 11. Other Changes
