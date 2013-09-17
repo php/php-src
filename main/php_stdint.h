@@ -85,7 +85,7 @@ typedef int16 int16_t;
 # elif SIZEOF_SHORT >= 2
 typedef signed short int16_t;
 # else
-#  error "No suitable 16bit integer type found"
+// #  error "No suitable 16bit integer type found"
 # endif
 #endif
 
@@ -101,7 +101,7 @@ typedef u_int16_t uint16_t;
 # elif SIZEOF_SHORT >= 2
 typedef unsigned short uint16_t;
 # else
-#  error "No suitable 16bit integer type found"
+// #  error "No suitable 16bit integer type found"
 # endif
 #endif
 
