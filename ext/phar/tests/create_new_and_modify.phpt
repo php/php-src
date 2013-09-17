@@ -21,6 +21,14 @@ $sig1 = $phar->getSignature();
 
 include $pname . '/a.php';
 
+if (function_exists("opcache_get_status")) {
+	$status = opcache_get_status();
+	if ($status["opcache_enabled"]) {
+		ini_set("opcache.revalidate_freq", "0");
+		sleep(2);
+	}
+}
+
 file_put_contents($pname .'/a.php', "modified!\n");
 file_put_contents($pname .'/b.php', "another!\n");
 

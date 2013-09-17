@@ -1,5 +1,5 @@
 --TEST--
-GC 007: Unreferensed array cycle
+GC 007: Unreferenced array cycle
 --INI--
 zend.enable_gc=1
 --FILE--

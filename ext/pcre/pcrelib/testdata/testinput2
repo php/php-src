@@ -3768,5 +3768,46 @@ assertion, and therefore fails the entire subroutine call. --/
     
 /((?=a(*COMMIT)b)ab|ac){0}(?:(?1)|a(c))/
     ac 
+    
+/-- These are all run as real matches in test 1; here we are just checking the
+settings of the anchored and startline bits. --/ 
+
+/(?>.*?a)(?<=ba)/I
+
+/(?:.*?a)(?<=ba)/I
+
+/.*?a(*PRUNE)b/I
+
+/.*?a(*PRUNE)b/sI
+
+/^a(*PRUNE)b/sI
+
+/.*?a(*SKIP)b/I
+
+/(?>.*?a)b/sI
+
+/(?>.*?a)b/I
+
+/(?>^a)b/sI
+
+/(?>.*?)(?<=(abcd)|(wxyz))/I
+
+/(?>.*)(?<=(abcd)|(wxyz))/I
+
+"(?>.*)foo"I
+
+"(?>.*?)foo"I
+
+/(?>^abc)/mI
+
+/(?>.*abc)/mI
+
+/(?:.*abc)/mI
+
+/-- Check PCRE_STUDY_EXTRA_NEEDED --/
+
+/.?/S-I
+
+/.?/S!I
 
 /-- End of testinput2 --/

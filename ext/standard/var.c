@@ -649,7 +649,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		for (;; zend_hash_move_forward_ex(HASH_OF(retval_ptr), &pos)) {
 			i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, NULL, &index, 0, &pos);
 
-			if (i == HASH_KEY_NON_EXISTANT) {
+			if (i == HASH_KEY_NON_EXISTENT) {
 				break;
 			}
 
@@ -713,6 +713,10 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 	int i;
 	ulong *var_already;
 	HashTable *myht;
+
+	if (EG(exception)) {
+		return;
+	}
 
 	if (var_hash && php_add_var_hash(var_hash, struc, (void *) &var_already TSRMLS_CC) == FAILURE) {
 		if (Z_ISREF_P(struc)) {
@@ -800,8 +804,15 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 					BG(serialize_lock)++;
 					res = call_user_function_ex(CG(function_table), &struc, &fname, &retval_ptr, 0, 0, 1, NULL TSRMLS_CC);
 					BG(serialize_lock)--;
+                    
+					if (EG(exception)) {
+						if (retval_ptr) {
+							zval_ptr_dtor(&retval_ptr);
+						}
+						return;
+					}
 
-					if (res == SUCCESS && !EG(exception)) {
+					if (res == SUCCESS) {
 						if (retval_ptr) {
 							if (HASH_OF(retval_ptr)) {
 								php_var_serialize_class(buf, struc, retval_ptr, var_hash TSRMLS_CC);
@@ -849,7 +860,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 				zend_hash_internal_pointer_reset_ex(myht, &pos);
 				for (;; zend_hash_move_forward_ex(myht, &pos)) {
 					i = zend_hash_get_current_key_ex(myht, &key, &key_len, &index, 0, &pos);
-					if (i == HASH_KEY_NON_EXISTANT) {
+					if (i == HASH_KEY_NON_EXISTENT) {
 						break;
 					}
 					if (incomplete_class && strcmp(key, MAGIC_MEMBER) == 0) {
@@ -921,6 +932,11 @@ PHP_FUNCTION(serialize)
 	php_var_serialize(&buf, struc, &var_hash TSRMLS_CC);
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
+	if (EG(exception)) {
+		smart_str_free(&buf);
+		RETURN_FALSE;
+	}
+
 	if (buf.c) {
 		RETURN_STRINGL(buf.c, buf.len, 0);
 	} else {
@@ -929,7 +945,7 @@ PHP_FUNCTION(serialize)
 }
 /* }}} */
 
-/* {{{ proto mixed unserialize(string variable_representation)
+/* {{{ proto mixed unserialize(string variable_representation[, int &consumed])
    Takes a string representation of variable and recreates it */
 PHP_FUNCTION(unserialize)
 {
@@ -937,8 +953,9 @@ PHP_FUNCTION(unserialize)
 	int buf_len;
 	const unsigned char *p;
 	php_unserialize_data_t var_hash;
+	zval *consumed = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &buf, &buf_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &buf, &buf_len, &consumed) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -951,10 +968,17 @@ PHP_FUNCTION(unserialize)
 	if (!php_var_unserialize(&return_value, &p, p + buf_len, &var_hash TSRMLS_CC)) {
 		PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 		zval_dtor(return_value);
-		php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+		if (!EG(exception)) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Error at offset %ld of %d bytes", (long)((char*)p - buf), buf_len);
+		}
 		RETURN_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+
+	if (consumed) {
+		zval_dtor(consumed);
+		ZVAL_LONG(consumed, ((char*)p) - buf);
+	}
 }
 /* }}} */
 

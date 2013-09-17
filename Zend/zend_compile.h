@@ -438,7 +438,7 @@ ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
 void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace TSRMLS_DC);
-void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_name TSRMLS_DC);
+void zend_resolve_class_name(znode *class_name TSRMLS_DC);
 ZEND_API const char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len);
 
 #ifdef ZTS
@@ -643,7 +643,7 @@ void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static 
 void zend_do_label(znode *label TSRMLS_DC);
 void zend_do_goto(const znode *label TSRMLS_DC);
 void zend_resolve_goto_label(zend_op_array *op_array, zend_op *opline, int pass2 TSRMLS_DC);
-void zend_release_labels(TSRMLS_D);
+void zend_release_labels(int temporary TSRMLS_DC);
 
 ZEND_API void function_add_ref(zend_function *function);
 
@@ -726,8 +726,8 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
 #define ZEND_FETCH_CLASS_PARENT		2
-#define ZEND_FETCH_CLASS_MAIN		3
-#define ZEND_FETCH_CLASS_GLOBAL		4
+#define ZEND_FETCH_CLASS_MAIN		3	/* unused */
+#define ZEND_FETCH_CLASS_GLOBAL		4	/* unused */
 #define ZEND_FETCH_CLASS_AUTO		5
 #define ZEND_FETCH_CLASS_INTERFACE	6
 #define ZEND_FETCH_CLASS_STATIC		7
@@ -856,6 +856,7 @@ END_EXTERN_C()
 #define ZEND_CALLSTATIC_FUNC_NAME   "__callstatic"
 #define ZEND_TOSTRING_FUNC_NAME     "__tostring"
 #define ZEND_AUTOLOAD_FUNC_NAME     "__autoload"
+#define ZEND_INVOKE_FUNC_NAME       "__invoke"
 
 /* The following constants may be combined in CG(compiler_options)
  * to change the default compiler behavior */

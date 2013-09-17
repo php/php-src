@@ -56,12 +56,12 @@ bool(false)
 
 -- Testing date_create() function with an invalid values for $object argument --
 
-Warning: date_format() expects parameter 1 to be DateTime, object given in %sp on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, object given in %sp on line %d
 bool(false)
 
-Warning: date_format() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
 bool(false)
 
-Warning: date_format() expects parameter 1 to be DateTime, null given in %s on line %d
+Warning: date_format() expects parameter 1 to be DateTimeInterface, null given in %s on line %d
 bool(false)
 ===DONE===

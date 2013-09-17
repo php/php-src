@@ -1298,7 +1298,8 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 	}
 	MAKE_STD_ZVAL(name);
 	MAKE_STD_ZVAL(classname);
-	ZVAL_STRING(name, method->common.function_name, 1);
+	ZVAL_STRING(name, (method->common.scope && method->common.scope->trait_aliases)?
+			zend_resolve_method_name(ce, method) : method->common.function_name, 1);
 	ZVAL_STRINGL(classname, method->common.scope->name, method->common.scope->name_length, 1);
 	reflection_instantiate(reflection_method_ptr, object TSRMLS_CC);
 	intern = (reflection_object *) zend_object_store_get_object(object TSRMLS_CC);
@@ -5258,7 +5259,7 @@ ZEND_METHOD(reflection_extension, getVersion)
 /* }}} */
 
 /* {{{ proto public ReflectionFunction[] ReflectionExtension::getFunctions()
-   Returns an array of this extension's fuctions */
+   Returns an array of this extension's functions */
 ZEND_METHOD(reflection_extension, getFunctions)
 {
 	reflection_object *intern;

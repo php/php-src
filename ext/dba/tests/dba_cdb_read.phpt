@@ -20,7 +20,7 @@ DBA CDB handler test (read only)
 			$keys .= $a;
 			$count++;
 		}
-		// display number of entries and key existance
+		// display number of entries and key existence
 		echo $count;
 		for ($i=1; $i<8; $i++) {
 			echo dba_exists($i, $db_file) ? "Y" : "N";

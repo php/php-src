@@ -162,6 +162,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	zval **proxy_host, **proxy_port, **tmp;
 	char *host;
 	char *name;
+	char *protocol;
 	long namelen;
 	int port;
 	int old_error_reporting;
@@ -189,7 +190,41 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	old_error_reporting = EG(error_reporting);
 	EG(error_reporting) &= ~(E_WARNING|E_NOTICE|E_USER_WARNING|E_USER_NOTICE);
 
-	namelen = spprintf(&name, 0, "%s://%s:%d", (use_ssl && !*use_proxy)? "ssl" : "tcp", host, port);
+	/* Changed ternary operator to an if/else so that additional comparisons can be done on the ssl_method property */
+	if (use_ssl && !*use_proxy) {
+		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_ssl_method", sizeof("_ssl_method"), (void **) &tmp) == SUCCESS &&
+			Z_TYPE_PP(tmp) == IS_LONG) {
+			/* uses constants declared in soap.c to determine ssl uri protocol */
+			switch (Z_LVAL_PP(tmp)) {
+				case SOAP_SSL_METHOD_TLS:
+					protocol = "tls";
+					break;
+
+				case SOAP_SSL_METHOD_SSLv2:
+					protocol = "sslv2";
+					break;
+
+				case SOAP_SSL_METHOD_SSLv3:
+					protocol = "sslv3";
+					break;
+
+				case SOAP_SSL_METHOD_SSLv23:
+					protocol = "ssl";
+					break;
+
+				default:
+					protocol = "ssl";
+					break;
+
+			}
+		} else {
+			protocol = "ssl";
+		}
+	} else {
+		protocol = "tcp";
+	}
+
+	namelen = spprintf(&name, 0, "%s://%s:%d", protocol, host, port);
 
 	stream = php_stream_xport_create(name, namelen,
 		REPORT_ERRORS,
@@ -237,7 +272,34 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 		}
 		/* enable SSL transport layer */
 		if (stream) {
-			if (php_stream_xport_crypto_setup(stream, STREAM_CRYPTO_METHOD_SSLv23_CLIENT, NULL TSRMLS_CC) < 0 ||
+			/* if a stream is created without encryption, check to see if SSL method parameter is specified and use
+ 			   proper encrypyion method based on constants defined in soap.c */
+			int crypto_method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
+			if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_ssl_method", sizeof("_ssl_method"), (void **) &tmp) == SUCCESS &&
+				Z_TYPE_PP(tmp) == IS_LONG) {
+				switch (Z_LVAL_PP(tmp)) {
+					case SOAP_SSL_METHOD_TLS:
+						crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
+						break;
+
+					case SOAP_SSL_METHOD_SSLv2:
+						crypto_method = STREAM_CRYPTO_METHOD_SSLv2_CLIENT;
+						break;
+
+					case SOAP_SSL_METHOD_SSLv3:
+						crypto_method = STREAM_CRYPTO_METHOD_SSLv3_CLIENT;
+						break;
+
+					case SOAP_SSL_METHOD_SSLv23:
+						crypto_method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
+						break;
+
+					default:
+						crypto_method = STREAM_CRYPTO_METHOD_TLS_CLIENT;
+						break;
+				}
+			}
+			if (php_stream_xport_crypto_setup(stream, crypto_method, NULL TSRMLS_CC) < 0 ||
 			    php_stream_xport_crypto_enable(stream, 1 TSRMLS_CC) < 0) {
 				php_stream_close(stream);
 				stream = NULL;
@@ -1160,7 +1222,7 @@ try_again:
 				zval *err;
 				MAKE_STD_ZVAL(err);
 				ZVAL_STRINGL(err, http_body, http_body_size, 1);
-				add_soap_fault(this_ptr, "HTTP", "Didn't recieve an xml document", NULL, err TSRMLS_CC);
+				add_soap_fault(this_ptr, "HTTP", "Didn't receive an xml document", NULL, err TSRMLS_CC);
 				efree(content_type);
 				efree(http_headers);
 				efree(http_body);

@@ -299,7 +299,6 @@ void zend_error_noreturn(int type, const char *format, ...) __attribute__ ((nore
 /*
  * zval
  */
-typedef struct _zval_struct zval;
 typedef struct _zend_class_entry zend_class_entry;
 
 typedef struct _zend_guard {
@@ -365,6 +364,10 @@ struct _zval_struct {
 #define Z_UNSET_ISREF(z)		Z_UNSET_ISREF_P(&(z))
 #define Z_SET_ISREF_TO(z, isref)	Z_SET_ISREF_TO_P(&(z), isref)
 
+#if ZEND_DEBUG
+#define zend_always_inline inline
+#define zend_never_inline
+#else
 #if defined(__GNUC__)
 #if __GNUC__ >= 3
 #define zend_always_inline inline __attribute__((always_inline))
@@ -373,7 +376,6 @@ struct _zval_struct {
 #define zend_always_inline inline
 #define zend_never_inline
 #endif
-
 #elif defined(_MSC_VER)
 #define zend_always_inline __forceinline
 #define zend_never_inline
@@ -381,6 +383,7 @@ struct _zval_struct {
 #define zend_always_inline inline
 #define zend_never_inline
 #endif
+#endif /* ZEND_DEBUG */
 
 #if (defined (__GNUC__) && __GNUC__ > 2 ) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX)
 # define EXPECTED(condition)   __builtin_expect(condition, 1)
@@ -667,8 +670,8 @@ END_EXTERN_C()
 
 /* FIXME: Check if we can save if (ptr) too */
 
-#define STR_FREE(ptr) if (ptr && !IS_INTERNED(ptr)) { efree(ptr); }
-#define STR_FREE_REL(ptr) if (ptr && !IS_INTERNED(ptr)) { efree_rel(ptr); }
+#define STR_FREE(ptr) if (ptr) { str_efree(ptr); }
+#define STR_FREE_REL(ptr) if (ptr) { str_efree_rel(ptr); }
 
 #define STR_EMPTY_ALLOC() estrndup("", sizeof("")-1)
 

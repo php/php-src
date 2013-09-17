@@ -12,13 +12,6 @@
 
 /* $Id$ */
 
- /**
-  *
-  * 04-Feb-2001
-  *   - Added patch by "Vanhanen, Reijo" <Reijo.Vanhanen@helsoft.fi>
-  *     Improves accuracy of msec
-  */
-
 /* Include stuff ************************************************************ */
 
 #include <config.w32.h>
@@ -32,98 +25,63 @@
 #include <errno.h>
 #include "php_win32_globals.h"
 
-int getfilesystemtime(struct timeval *time_Info) 
+typedef VOID (WINAPI *MyGetSystemTimeAsFileTime)(LPFILETIME lpSystemTimeAsFileTime);
+
+static MyGetSystemTimeAsFileTime get_time_func(void)
 {
-    FILETIME ft;
-    __int64 ff;
-    ULARGE_INTEGER convFromft;
+	MyGetSystemTimeAsFileTime timefunc = NULL;
+	HMODULE hMod = LoadLibrary("kernel32.dll");
 
-    GetSystemTimeAsFileTime(&ft);   /* 100 ns blocks since 01-Jan-1641 */
-                                    /* resolution seems to be 0.01 sec */
-    /*
-     * Do not cast a pointer to a FILETIME structure to either a 
-     * ULARGE_INTEGER* or __int64* value because it can cause alignment faults on 64-bit Windows.
-     * via  http://technet.microsoft.com/en-us/library/ms724284(v=vs.85).aspx
-     */
-    convFromft.HighPart = ft.dwHighDateTime;
-    convFromft.LowPart = ft.dwLowDateTime;
-    ff = convFromft.QuadPart;
+	if (hMod) {
+		/* Max possible resolution <1us, win8/server2012 */
+		timefunc = (MyGetSystemTimeAsFileTime)GetProcAddress(hMod, "GetSystemTimePreciseAsFileTime");
 
-    time_Info->tv_sec = (int)(ff/(__int64)10000000-(__int64)11644473600);
-    time_Info->tv_usec = (int)(ff % 10000000)/10;
-    return 0;
+		if(!timefunc) {
+			/* 100ns blocks since 01-Jan-1641 */
+			timefunc = (MyGetSystemTimeAsFileTime)GetProcAddress(hMod, "GetSystemTimeAsFileTime");
+		}
+	}
+
+	return timefunc;
 }
 
- 
+int getfilesystemtime(struct timeval *tv)
+{
+	FILETIME ft;
+	unsigned __int64 ff = 0;
+	MyGetSystemTimeAsFileTime timefunc;
+	ULARGE_INTEGER fft;
+
+	timefunc = get_time_func();
+	if (timefunc) {
+		timefunc(&ft);
+	} else {
+		GetSystemTimeAsFileTime(&ft);
+	}
+
+        /*
+	 * Do not cast a pointer to a FILETIME structure to either a 
+	 * ULARGE_INTEGER* or __int64* value because it can cause alignment faults on 64-bit Windows.
+	 * via  http://technet.microsoft.com/en-us/library/ms724284(v=vs.85).aspx
+	 */
+	fft.HighPart = ft.dwHighDateTime;
+	fft.LowPart = ft.dwLowDateTime;
+	ff = fft.QuadPart;
+
+	ff /= 10Ui64; /* convert to microseconds */
+	ff -= 11644473600000000Ui64; /* convert to unix epoch */
+
+	tv->tv_sec = (long)(ff / 1000000Ui64);
+	tv->tv_usec = (long)(ff % 1000000Ui64);
+
+	return 0;
+}
 
 PHPAPI int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info)
 {
-	__int64 timer;
-	LARGE_INTEGER li;
-	BOOL b;
-	double dt;
-	TSRMLS_FETCH();
-
 	/* Get the time, if they want it */
 	if (time_Info != NULL) {
-		if (PW32G(starttime).tv_sec == 0) {
-            b = QueryPerformanceFrequency(&li);
-            if (!b) {
-                PW32G(starttime).tv_sec = -1;
-            }
-            else {
-                PW32G(freq) = li.QuadPart;
-                b = QueryPerformanceCounter(&li);
-                if (!b) {
-                    PW32G(starttime).tv_sec = -1;
-                }
-                else {
-                    getfilesystemtime(&PW32G(starttime));
-                    timer = li.QuadPart;
-                    dt = (double)timer/PW32G(freq);
-                    PW32G(starttime).tv_usec -= (int)((dt-(int)dt)*1000000);
-                    if (PW32G(starttime).tv_usec < 0) {
-                        PW32G(starttime).tv_usec += 1000000;
-                        --PW32G(starttime).tv_sec;
-                    }
-                    PW32G(starttime).tv_sec -= (int)dt;
-                }
-            }
-        }
-        if (PW32G(starttime).tv_sec > 0) {
-            b = QueryPerformanceCounter(&li);
-            if (!b) {
-                PW32G(starttime).tv_sec = -1;
-            }
-            else {
-                timer = li.QuadPart;
-                if (timer < PW32G(lasttime)) {
-                    getfilesystemtime(time_Info);
-                    dt = (double)timer/PW32G(freq);
-                    PW32G(starttime) = *time_Info;
-                    PW32G(starttime).tv_usec -= (int)((dt-(int)dt)*1000000);
-                    if (PW32G(starttime).tv_usec < 0) {
-                        PW32G(starttime).tv_usec += 1000000;
-                        --PW32G(starttime).tv_sec;
-                    }
-                    PW32G(starttime).tv_sec -= (int)dt;
-                }
-                else {
-                    PW32G(lasttime) = timer;
-                    dt = (double)timer/PW32G(freq);
-                    time_Info->tv_sec = PW32G(starttime).tv_sec + (int)dt;
-                    time_Info->tv_usec = PW32G(starttime).tv_usec + (int)((dt-(int)dt)*1000000);
-                    if (time_Info->tv_usec >= 1000000) {
-                        time_Info->tv_usec -= 1000000;
-                        ++time_Info->tv_sec;
-                    }
-                }
-            }
-        }
-        if (PW32G(starttime).tv_sec < 0) {
-            getfilesystemtime(time_Info);
-        }
-
+		getfilesystemtime(time_Info);
 	}
 	/* Get the timezone, if they want it */
 	if (timezone_Info != NULL) {

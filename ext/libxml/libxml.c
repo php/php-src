@@ -44,6 +44,7 @@
 #include <libxml/xmlsave.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
+#include <libxml/xmlschemas.h>
 #endif
 
 #include "php_libxml.h"
@@ -270,6 +271,7 @@ static PHP_GINIT_FUNCTION(libxml)
 	libxml_globals->error_buffer.c = NULL;
 	libxml_globals->error_list = NULL;
 	libxml_globals->entity_loader.fci.size = 0;
+	libxml_globals->entity_loader_disabled = 0;
 }
 
 static void _php_libxml_destroy_fci(zend_fcall_info *fci)
@@ -291,7 +293,8 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	php_stream_statbuf ssbuf;
 	php_stream_context *context = NULL;
 	php_stream_wrapper *wrapper = NULL;
-	char *resolved_path, *path_to_open = NULL;
+	char *resolved_path;
+	const char *path_to_open = NULL;
 	void *ret_val = NULL;
 	int isescaped=0;
 	xmlURI *uri;
@@ -369,16 +372,15 @@ static int php_libxml_streams_IO_close(void *context)
 }
 
 static xmlParserInputBufferPtr
-php_libxml_input_buffer_noload(const char *URI, xmlCharEncoding enc)
-{
-	return NULL;
-}
-
-static xmlParserInputBufferPtr
 php_libxml_input_buffer_create_filename(const char *URI, xmlCharEncoding enc)
 {
 	xmlParserInputBufferPtr ret;
 	void *context = NULL;
+	TSRMLS_FETCH();
+
+	if (LIBXML(entity_loader_disabled)) {
+		return NULL;
+	}
 
 	if (URI == NULL)
 		return(NULL);
@@ -798,6 +800,11 @@ static PHP_MINIT_FUNCTION(libxml)
 #endif
 	REGISTER_LONG_CONSTANT("LIBXML_NOEMPTYTAG",	LIBXML_SAVE_NOEMPTYTAG,	CONST_CS | CONST_PERSISTENT);
 
+	/* Schema validation options */
+#if defined(LIBXML_SCHEMAS_ENABLED) && LIBXML_VERSION >= 20614
+	REGISTER_LONG_CONSTANT("LIBXML_SCHEMA_CREATE",	XML_SCHEMA_VAL_VC_I_CREATE,	CONST_CS | CONST_PERSISTENT);
+#endif
+
 	/* Additional constants for use with loading html */
 #if LIBXML_VERSION >= 20707
 	REGISTER_LONG_CONSTANT("LIBXML_HTML_NOIMPLIED",	HTML_PARSE_NOIMPLIED,		CONST_CS | CONST_PERSISTENT);
@@ -1052,28 +1059,25 @@ static PHP_FUNCTION(libxml_clear_errors)
 }
 /* }}} */
 
+PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable TSRMLS_DC)
+{
+	zend_bool old = LIBXML(entity_loader_disabled);
+
+	LIBXML(entity_loader_disabled) = disable;
+	return old;
+}
+
 /* {{{ proto bool libxml_disable_entity_loader([boolean disable]) 
    Disable/Enable ability to load external entities */
 static PHP_FUNCTION(libxml_disable_entity_loader)
 {
 	zend_bool disable = 1;
-	xmlParserInputBufferCreateFilenameFunc old;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|b", &disable) == FAILURE) {
 		return;
 	}
 
-	if (disable == 0) {
-		old = xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_create_filename);
-	} else {
-		old = xmlParserInputBufferCreateFilenameDefault(php_libxml_input_buffer_noload);
-	}
-
-	if (old == php_libxml_input_buffer_noload) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(php_libxml_disable_entity_loader(disable TSRMLS_CC));
 }
 /* }}} */
 

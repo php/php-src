@@ -199,14 +199,12 @@
 engine = On
 
 ; This directive determines whether or not PHP will recognize code between
-; <? and ?> tags as PHP source which should be processed as such. For several
-; years we recommended that you not use the short tag shortcut and
-; instead to use the full <?php and ?> tag combination. With the widespread use
-; of XML and use of these tags by other languages, the server can become easily
-; confused and end up parsing the wrong code in the wrong context.
-; This shortcut is still supported for backwards compatibility, but we
-; recommend against its use.
-; Default Value: On
+; <? and ?> tags as PHP source which should be processed as such. It is
+; generally recommended that <?php and ?> should be used and that this feature
+; should be disabled, as enabling it may result in issues when generating XML
+; documents, however this remains supported for backward compatibility reasons.
+; Note that this directive does not control the <?= shorthand tag, which can be
+; used regardless of this directive.
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
@@ -910,7 +908,6 @@ default_socket_timeout = 60
 ;extension=php_tidy.dll
 ;extension=php_xmlrpc.dll
 ;extension=php_xsl.dll
-;extension=php_zip.dll
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
@@ -1402,6 +1399,14 @@ session.save_handler = files
 ; http://php.net/session.save-path
 ;session.save_path = "/tmp"
 
+; Whether to use strict session mode.
+; Strict session mode does not accept uninitialized session ID and regenerate
+; session ID if browser sends uninitialized session ID. Strict mode protects
+; applications from session fixation via session adoption vulnerability. It is
+; disabled by default for maximum compatibility, but enabling it is encouraged.
+; https://wiki.php.net/rfc/strict_sessions
+session.use_strict_mode = 0
+
 ; Whether to use cookies.
 ; http://php.net/session.use-cookies
 session.use_cookies = 1
@@ -1481,7 +1486,7 @@ session.gc_maxlifetime = 1440
 ;       collection through a shell script, cron entry, or some other method.
 ;       For example, the following script would is the equivalent of
 ;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
-;          find /path/to/sessions -cmin +24 | xargs rm
+;          find /path/to/sessions -cmin +24 -type f | xargs rm
 
 ; PHP 4.2 and less have an undocumented feature/bug that allows you to
 ; to initialize a session variable in the global scope.
@@ -1643,7 +1648,7 @@ mssql.min_error_severity = 10
 mssql.min_message_severity = 10
 
 ; Compatibility mode with old versions of PHP 3.0.
-mssql.compatability_mode = Off
+mssql.compatibility_mode = Off
 
 ; Connect timeout
 ;mssql.connect_timeout = 5
@@ -1862,6 +1867,107 @@ ldap.max_links = -1
 
 [dba]
 ;dba.default_handler=
+
+[opcache]
+; Determines if Zend OPCache is enabled
+;opcache.enable=0
+
+; Determines if Zend OPCache is enabled for the CLI version of PHP
+;opcache.enable_cli=0
+
+; The OPcache shared memory storage size.
+;opcache.memory_consumption=64
+
+; The amount of memory for interned strings in Mbytes.
+;opcache.interned_strings_buffer=4
+
+; The maximum number of keys (scripts) in the OPcache hash table.
+; Only numbers between 200 and 100000 are allowed.
+;opcache.max_accelerated_files=2000
+
+; The maximum percentage of "wasted" memory until a restart is scheduled.
+;opcache.max_wasted_percentage=5
+
+; When this directive is enabled, the OPcache appends the current working
+; directory to the script key, thus eliminating possible collisions between
+; files with the same name (basename). Disabling the directive improves
+; performance, but may break existing applications.
+;opcache.use_cwd=1
+
+; When disabled, you must reset the OPcache manually or restart the
+; webserver for changes to the filesystem to take effect.
+;opcache.validate_timestamps=1
+
+; How often (in seconds) to check file timestamps for changes to the shared
+; memory storage allocation. ("1" means validate once per second, but only
+; once per request. "0" means always validate)
+;opcache.revalidate_freq=2
+
+; Enables or disables file search in include_path optimization
+;opcache.revalidate_path=0
+
+; If disabled, all PHPDoc comments are dropped from the code to reduce the
+ ;size of the optimized code.
+;opcache.save_comments=1
+
+; If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"
+; may be always stored (save_comments=1), but not loaded by applications
+; that don't need them anyway.
+;opcache.load_comments=1
+
+; If enabled, a fast shutdown sequence is used for the accelerated code
+;opcache.fast_shutdown=0
+
+; Allow file existence override (file_exists, etc.) performance feature.
+;opcache.enable_file_override=0
+
+; A bitmask, where each bit enables or disables the appropriate OPcache
+; passes
+;opcache.optimization_level=0xffffffff
+
+;opcache.inherited_hack=1
+;opcache.dups_fix=0
+
+; The location of the OPcache blacklist file (wildcards allowed).
+; Each OPcache blacklist file is a text file that holds the names of files
+; that should not be accelerated. The file format is to add each filename
+; to a new line. The filename may be a full path or just a file prefix
+; (i.e., /var/www/x  blacklists all the files and directories in /var/www
+; that start with 'x'). Line starting with a ; are ignored (comments).
+;opcache.blacklist_filename=
+
+; Allows exclusion of large files from being cached. By default all files
+; are cached.
+;opcache.max_file_size=0
+
+; Check the cache checksum each N requests.
+; The default value of "0" means that the checks are disabled.
+;opcache.consistency_checks=0
+
+; How long to wait (in seconds) for a scheduled restart to begin if the cache
+; is not being accessed.
+;opcache.force_restart_timeout=180
+
+; OPcache error_log file name. Empty string assumes "stderr".
+;opcache.error_log=
+
+; All OPcache errors go to the Web server log.
+; By default, only fatal errors (level 0) or errors (level 1) are logged.
+; You can also enable warnings (level 2), info messages (level 3) or
+; debug messages (level 4).
+;opcache.log_verbosity_level=1
+
+; Preferred Shared Memory back-end. Leave empty and let the system decide.
+;opcache.preferred_memory_model=
+
+; Protect the shared memory from unexpected writing during script execution.
+; Useful for internal debugging only.
+;opcache.protect_memory=0
+
+[curl]
+; A default value for the CURLOPT_CAINFO option. This is required to be an
+; absolute path.
+;curl.cainfo =
 
 ; Local Variables:
 ; tab-width: 4

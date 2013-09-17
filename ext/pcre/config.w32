@@ -10,3 +10,4 @@ AC_DEFINE('HAVE_BUNDLED_PCRE', 1, 'Using bundled PCRE library');
 AC_DEFINE('HAVE_PCRE', 1, 'Have PCRE library');
 PHP_PCRE="yes";
 PHP_INSTALL_HEADERS("ext/pcre", "php_pcre.h pcrelib/");
+ADD_FLAG("CFLAGS_PCRE", " /D HAVE_CONFIG_H");

@@ -537,7 +537,9 @@ static int pdo_oci_check_liveness(pdo_dbh_t *dbh TSRMLS_DC) /* {{{ */
 {
 	pdo_oci_db_handle *H = (pdo_oci_db_handle *)dbh->driver_data;
 	sb4 error_code = 0;
+#if (!((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2))))
 	char version[256];
+#endif
 
 	/* TODO move attached check to PDO level */
 	if (H->attached == 0) {

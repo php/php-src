@@ -4,14 +4,21 @@ sendmsg()/recvmsg(): test ability to receive multiple messages
 <?php
 if (!extension_loaded('sockets'))
 	die('skip sockets extension not available.');
+
+require 'ipv6_skipif.inc';
+
 if (!defined('IPPROTO_IPV6'))
 	die('skip IPv6 not available.');
-if (substr(PHP_OS, 0, 3) == 'WIN')
+if (substr(PHP_OS, 0, 3) == 'WIN') 
 	die('skip Not for the Windows!');
 /* Windows supports IPV6_RECVTCLASS and is able to receive the tclass via
  * WSARecvMsg (though only the top 6 bits seem to reported), but WSASendMsg
  * does not accept IPV6_TCLASS messages */
 
+if (!defined('IPV6_RECVPKTINFO')) {
+    die('skip IPV6_RECVPKTINFO not available.');
+}
+?>
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";

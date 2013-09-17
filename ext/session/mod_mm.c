@@ -124,7 +124,7 @@ static ps_sd *ps_sd_new(ps_mm *data, const char *key)
 	if (!sd) {
 		TSRMLS_FETCH();
 
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mm_malloc failed, avail %d, err %s", mm_available(data->mm), mm_error());
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "mm_malloc failed, avail %ld, err %s", mm_available(data->mm), mm_error());
 		return NULL;
 	}
 
@@ -208,8 +208,22 @@ static ps_sd *ps_sd_lookup(ps_mm *data, const char *key, int rw)
 	return ret;
 }
 
+static int ps_mm_key_exists(ps_mm *data, const char *key TSRMLS_DC)
+{
+	ps_sd *sd;
+
+	if (!key) {
+		return FAILURE;
+	}
+	sd = ps_sd_lookup(data, key, 0);
+	if (sd) {
+		return SUCCESS;
+	}
+	return FAILURE;
+}
+
 ps_module ps_mod_mm = {
-	PS_MOD(mm)
+	PS_MOD_SID(mm)
 };
 
 #define PS_MM_DATA ps_mm *data = PS_GET_MOD_DATA()
@@ -271,6 +285,8 @@ PHP_MINIT_FUNCTION(ps_mm)
 	}
 
 	if (!(euid_len = slprintf(euid, sizeof(euid), "%d", geteuid()))) {
+		free(ps_mm_instance);
+		ps_mm_instance = NULL;
 		return FAILURE;
 	}
 
@@ -339,7 +355,25 @@ PS_READ_FUNC(mm)
 
 	mm_lock(data->mm, MM_LOCK_RD);
 
-	sd = ps_sd_lookup(data, key, 0);
+	/* If there is an ID and strict mode, verify existence */
+	if (PS(use_strict_mode)
+		&& ps_mm_key_exists(data, key TSRMLS_CC) == FAILURE) {
+		/* key points to PS(id), but cannot change here. */
+		if (key) {
+			efree(PS(id));
+			PS(id) = NULL;
+		}
+		PS(id) = PS(mod)->s_create_sid((void **)&data, NULL TSRMLS_CC);
+		if (!PS(id)) {
+			return FAILURE;
+		}
+		if (PS(use_cookies)) {
+			PS(send_cookie) = 1;
+		}
+		php_session_reset_id(TSRMLS_C);
+	}
+
+	sd = ps_sd_lookup(data, PS(id), 0);
 	if (sd) {
 		*vallen = sd->datalen;
 		*val = emalloc(sd->datalen + 1);
@@ -440,6 +474,29 @@ PS_GC_FUNC(mm)
 	mm_unlock(data->mm);
 
 	return SUCCESS;
+}
+
+PS_CREATE_SID_FUNC(mm)
+{
+	char *sid;
+	int maxfail = 3;
+	PS_MM_DATA;
+
+	do {
+		sid = php_session_create_id((void **)&data, newlen TSRMLS_CC);
+		/* Check collision */
+		if (ps_mm_key_exists(data, sid TSRMLS_CC) == SUCCESS) {
+			if (sid) {
+				efree(sid);
+				sid = NULL;
+			}
+			if (!(maxfail--)) {
+				return NULL;
+			}
+		}
+	} while(!sid);
+
+	return sid;
 }
 
 #endif

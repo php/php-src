@@ -1146,7 +1146,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value,
 							zval_ptr_dtor(&val);
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class" TSRMLS_CC);
 							return 0;
-						} else if (ce->unserialize(&return_value, ce, Z_TYPE_P(val) == IS_STRING ? Z_STRVAL_P(val) : "", Z_TYPE_P(val) == IS_STRING ? Z_STRLEN_P(val) : 0, NULL TSRMLS_CC) == FAILURE) {
+						} else if (ce->unserialize(&return_value, ce, (unsigned char *)(Z_TYPE_P(val) == IS_STRING ? Z_STRVAL_P(val) : ""), Z_TYPE_P(val) == IS_STRING ? Z_STRLEN_P(val) : 0, NULL TSRMLS_CC) == FAILURE) {
 							zval_ptr_dtor(&val);
 							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "cannot unserialize class" TSRMLS_CC);
 							zval_dtor(return_value);
@@ -1876,7 +1876,7 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, int skip)
 {
 	long mode = PDO_FETCH_BOTH;
-	int flags, argc = ZEND_NUM_ARGS() - skip;
+	int flags = 0, argc = ZEND_NUM_ARGS() - skip;
 	zval ***args;
 	zend_class_entry **cep;
 	int retval;
@@ -2499,16 +2499,15 @@ static void pdo_stmt_iter_get_data(zend_object_iterator *iter, zval ***data TSRM
 	*data = &I->fetch_ahead;
 }
 
-static int pdo_stmt_iter_get_key(zend_object_iterator *iter, char **str_key, uint *str_key_len,
-	ulong *int_key TSRMLS_DC)
+static void pdo_stmt_iter_get_key(zend_object_iterator *iter, zval *key TSRMLS_DC)
 {
 	struct php_pdo_iterator *I = (struct php_pdo_iterator*)iter->data;
 
 	if (I->key == (ulong)-1) {
-		return HASH_KEY_NON_EXISTANT;
+		ZVAL_NULL(key);
+	} else {
+		ZVAL_LONG(key, I->key);
 	}
-	*int_key = I->key;
-	return HASH_KEY_IS_LONG;
 }
 
 static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter TSRMLS_DC)

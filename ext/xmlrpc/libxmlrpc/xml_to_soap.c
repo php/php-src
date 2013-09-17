@@ -279,7 +279,7 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 			else if (!strcmp(attr_iter->key, TOKEN_MUSTUNDERSTAND)) {
 				b_must_understand = strchr(attr_iter->val, '1') ? 1 : 0;
 			}
-			/* actor, used in conjuction with must understand. */
+			/* actor, used in conjunction with must understand. */
 			else if (!strcmp(attr_iter->key, TOKEN_ACTOR)) {
 				actor = attr_iter->val;
 			}

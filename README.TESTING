@@ -1,6 +1,6 @@
 [IMPORTANT NOTICE]
 ------------------
- Failed tests usualy indicate a problem with your local system setup
+ Failed tests usually indicate a problem with your local system setup
 and not within PHP itself (at least for official PHP release versions).
 You may decide to automaticaly submit a test summary to our QA workflow
 at the end of a test run.

@@ -53,7 +53,7 @@ static void _breakiter_factory(const char *func_name,
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s!",
 			&locale_str, &dummy) == FAILURE) {
-		spprintf(&msg, NULL, "%s: bad arguments", func_name);
+		spprintf(&msg, 0, "%s: bad arguments", func_name);
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
 		efree(msg);
 		RETURN_NULL();
@@ -66,7 +66,7 @@ static void _breakiter_factory(const char *func_name,
 	biter = func(Locale::createFromName(locale_str), status);
 	intl_error_set_code(NULL, status TSRMLS_CC);
 	if (U_FAILURE(status)) {
-		spprintf(&msg, NULL, "%s: error creating BreakIterator",
+		spprintf(&msg, 0, "%s: error creating BreakIterator",
 				func_name);
 		intl_error_set_custom_msg(NULL, msg, 1 TSRMLS_CC);
 		efree(msg);
@@ -201,7 +201,7 @@ static void _breakiter_no_args_ret_int32(
 	object = getThis();
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		spprintf(&msg, NULL, "%s: bad arguments", func_name);
+		spprintf(&msg, 0, "%s: bad arguments", func_name);
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
 		efree(msg);
 		RETURN_FALSE;
@@ -225,7 +225,7 @@ static void _breakiter_int32_ret_int32(
 	object = getThis();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "l", &arg) == FAILURE) {
-		spprintf(&msg, NULL, "%s: bad arguments", func_name);
+		spprintf(&msg, 0, "%s: bad arguments", func_name);
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
 		efree(msg);
 		RETURN_FALSE;
@@ -234,7 +234,7 @@ static void _breakiter_int32_ret_int32(
 	BREAKITER_METHOD_FETCH_OBJECT;
 
 	if (arg < INT32_MIN || arg > INT32_MAX) {
-		spprintf(&msg, NULL, "%s: offset argument is outside bounds of "
+		spprintf(&msg, 0, "%s: offset argument is outside bounds of "
 				"a 32-bit wide integer", func_name);
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1 TSRMLS_CC);
 		efree(msg);

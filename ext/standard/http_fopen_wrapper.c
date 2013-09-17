@@ -80,11 +80,13 @@
 #define HTTP_HEADER_FROM			8
 #define HTTP_HEADER_CONTENT_LENGTH	16
 #define HTTP_HEADER_TYPE			32
+#define HTTP_HEADER_CONNECTION		64
 
 #define HTTP_WRAPPER_HEADER_INIT    1
 #define HTTP_WRAPPER_REDIRECTED     2
 
-php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context, int redirect_max, int flags STREAMS_DC TSRMLS_DC) /* {{{ */
+php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper, const char *path, const char *mode, int options,
+										char **opened_path, php_stream_context *context, int redirect_max, int flags STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream = NULL;
 	php_url *resource = NULL;
@@ -385,8 +387,6 @@ finish:
 		strlcat(scratch, " HTTP/", scratch_len);
 		strlcat(scratch, protocol_version, scratch_len);
 		strlcat(scratch, "\r\n", scratch_len);
-		efree(protocol_version);
-		protocol_version = NULL;
 	} else {
 		strlcat(scratch, " HTTP/1.0\r\n", scratch_len);
 	}
@@ -489,6 +489,11 @@ finish:
 			                 *(s-1) == '\t' || *(s-1) == ' ')) {
 				 have_header |= HTTP_HEADER_TYPE;
 			}
+			if ((s = strstr(tmp, "connection:")) &&
+			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
+			                 *(s-1) == '\t' || *(s-1) == ' ')) {
+				 have_header |= HTTP_HEADER_CONNECTION;
+			}
 			/* remove Proxy-Authorization header */
 			if (use_proxy && use_ssl && (s = strstr(tmp, "proxy-authorization:")) &&
 			    (s == tmp || *(s-1) == '\r' || *(s-1) == '\n' || 
@@ -560,6 +565,16 @@ finish:
 				php_stream_write(stream, scratch, strlen(scratch));
 			}
 		}
+	}
+
+	/* Send a Connection: close header when using HTTP 1.1 or later to avoid
+	 * hanging when the server interprets the RFC literally and establishes a
+	 * keep-alive connection, unless the user specifically requests something
+	 * else by specifying a Connection header in the context options. */
+	if (protocol_version &&
+	    ((have_header & HTTP_HEADER_CONNECTION) == 0) &&
+	    (strncmp(protocol_version, "1.0", MIN(protocol_version_len, 3)) > 0)) {
+		php_stream_write_string(stream, "Connection: close\r\n");
 	}
 
 	if (context && 
@@ -731,12 +746,15 @@ finish:
 			http_header_line[http_header_line_length] = '\0';
 
 			if (!strncasecmp(http_header_line, "Location: ", 10)) {
-				/* we only care about Location for 300, 301, 302, 303 and 307 */
-				/* see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1 */
-				if ((response_code >= 300 && response_code < 304 || 307 == response_code) && context && php_stream_context_get_option(context, "http", "follow_location", &tmpzval) == SUCCESS) {
+				if (context && php_stream_context_get_option(context, "http", "follow_location", &tmpzval) == SUCCESS) {
 					SEPARATE_ZVAL(tmpzval);
 					convert_to_long_ex(tmpzval);
 					follow_location = Z_LVAL_PP(tmpzval);
+				} else if (!(response_code >= 300 && response_code < 304 || 307 == response_code)) { 
+					/* we shouldn't redirect automatically
+					if follow_location isn't set and response_code not in (300, 301, 302, 303 and 307) 
+					see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1 */
+					follow_location = 0;
 				}
 				strlcpy(location, http_header_line + 10, sizeof(location));
 			} else if (!strncasecmp(http_header_line, "Content-Type: ", 14)) {
@@ -918,7 +936,7 @@ out:
 }
 /* }}} */
 
-php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, char *path, char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
+php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, char **opened_path, php_stream_context *context STREAMS_DC TSRMLS_DC) /* {{{ */
 {
 	return php_stream_url_wrap_http_ex(wrapper, path, mode, options, opened_path, context, PHP_URL_REDIRECT_MAX, HTTP_WRAPPER_HEADER_INIT STREAMS_CC TSRMLS_CC);
 }

@@ -42,7 +42,7 @@ static const char mysqlnd_free_name[]		= "_mysqlnd_free";
 static const char mysqlnd_pestrndup_name[]	= "_mysqlnd_pestrndup";
 static const char mysqlnd_pestrdup_name[]	= "_mysqlnd_pestrdup";
 
-const char * mysqlnd_debug_std_no_trace_funcs[] =
+PHPAPI const char * mysqlnd_debug_std_no_trace_funcs[] =
 {
 	mysqlnd_emalloc_name,
 	mysqlnd_ecalloc_name,

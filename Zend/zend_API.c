@@ -1051,6 +1051,41 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties, int destro
 }
 /* }}} */
 
+static int zval_update_class_constant(zval **pp, int is_static, int offset TSRMLS_DC) /* {{{ */
+{
+	if ((Z_TYPE_PP(pp) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT ||
+	    (Z_TYPE_PP(pp) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT_ARRAY) {	    
+		zend_class_entry **scope = EG(in_execution)?&EG(scope):&CG(active_class_entry);
+
+		if ((*scope)->parent) {
+			zend_class_entry *ce = *scope;
+			HashPosition pos;
+			zend_property_info *prop_info;
+
+			do {
+				for (zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
+				     zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop_info, &pos) == SUCCESS;
+				     zend_hash_move_forward_ex(&ce->properties_info, &pos)) {
+					if (is_static == ((prop_info->flags & ZEND_ACC_STATIC) != 0) &&
+					    offset == prop_info->offset) {
+						int ret;
+						zend_class_entry *old_scope = *scope;
+						*scope = prop_info->ce;
+						ret = zval_update_constant(pp, (void*)1 TSRMLS_CC);
+						*scope = old_scope;
+						return ret;
+					}
+				}				
+				ce = ce->parent;
+			} while (ce);
+			
+		}
+		return zval_update_constant(pp, (void*)1 TSRMLS_CC);
+	}
+	return 0;
+}
+/* }}} */
+
 ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
 {
 	if ((class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED) == 0 || (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count)) {
@@ -1063,7 +1098,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 
 		for (i = 0; i < class_type->default_properties_count; i++) {
 			if (class_type->default_properties_table[i]) {
-				zval_update_constant(&class_type->default_properties_table[i], (void**)1 TSRMLS_CC);
+				zval_update_class_constant(&class_type->default_properties_table[i], 0, i TSRMLS_CC);
 			}
 		}
 
@@ -1104,7 +1139,7 @@ ZEND_API void zend_update_class_constants(zend_class_entry *class_type TSRMLS_DC
 		}
 
 		for (i = 0; i < class_type->default_static_members_count; i++) {
-			zval_update_constant(&CE_STATIC_MEMBERS(class_type)[i], (void**)1 TSRMLS_CC);
+			zval_update_class_constant(&CE_STATIC_MEMBERS(class_type)[i], 1, i TSRMLS_CC);
 		}
 
 		*scope = old_scope;
@@ -1137,7 +1172,7 @@ ZEND_API void object_properties_init(zend_object *object, zend_class_entry *clas
 
 /* This function requires 'properties' to contain all props declared in the
  * class and all props being public. If only a subset is given or the class
- * has protected members then you need to merge the properties seperately by
+ * has protected members then you need to merge the properties separately by
  * calling zend_merge_properties(). */
 ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *class_type, HashTable *properties ZEND_FILE_LINE_DC TSRMLS_DC) /* {{{ */
 {
@@ -1499,6 +1534,40 @@ ZEND_API int add_get_index_stringl(zval *arg, ulong index, const char *str, uint
 	ZVAL_STRINGL(tmp, str, length, duplicate);
 
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &tmp, sizeof(zval *), dest);
+}
+/* }}} */
+
+ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value) /* {{{ */
+{
+	int result;
+
+	switch (Z_TYPE_P(key)) {
+		case IS_STRING:
+			result = zend_symtable_update(ht, Z_STRVAL_P(key), Z_STRLEN_P(key) + 1, &value, sizeof(zval *), NULL);
+			break;
+		case IS_NULL:
+			result = zend_symtable_update(ht, "", 1, &value, sizeof(zval *), NULL);
+			break;
+		case IS_RESOURCE:
+			zend_error(E_STRICT, "Resource ID#%ld used as offset, casting to integer (%ld)", Z_LVAL_P(key), Z_LVAL_P(key));
+			/* break missing intentionally */
+		case IS_BOOL:
+		case IS_LONG:
+			result = zend_hash_index_update(ht, Z_LVAL_P(key), &value, sizeof(zval *), NULL);
+			break;
+		case IS_DOUBLE:
+			result = zend_hash_index_update(ht, zend_dval_to_lval(Z_DVAL_P(key)), &value, sizeof(zval *), NULL);
+			break;
+		default:
+			zend_error(E_WARNING, "Illegal offset type");
+			result = FAILURE;
+	}
+
+	if (result == SUCCESS) {
+		Z_ADDREF_P(value);
+	}
+
+	return result;
 }
 /* }}} */
 
@@ -1960,7 +2029,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	const zend_function_entry *ptr = functions;
 	zend_function function, *reg_function;
 	zend_internal_function *internal_function = (zend_internal_function *)&function;
-	int count=0, unload=0, result=0;
+	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL;
@@ -1968,6 +2037,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	int fname_len;
 	const char *lc_class_name = NULL;
 	int class_name_len = 0;
+	zend_ulong hash;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -2066,12 +2136,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 		fname_len = strlen(ptr->fname);
 		lowercase_name = zend_new_interned_string(zend_str_tolower_dup(ptr->fname, fname_len), fname_len + 1, 1 TSRMLS_CC);
-		if (IS_INTERNED(lowercase_name)) {
-			result = zend_hash_quick_add(target_function_table, lowercase_name, fname_len+1, INTERNED_HASH(lowercase_name), &function, sizeof(zend_function), (void**)&reg_function);
-		} else {
-			result = zend_hash_add(target_function_table, lowercase_name, fname_len+1, &function, sizeof(zend_function), (void**)&reg_function);
-		}
-		if (result == FAILURE) {
+		hash = str_hash(lowercase_name, fname_len);
+		if (zend_hash_quick_add(target_function_table, lowercase_name, fname_len+1, hash, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
 			unload=1;
 			str_efree(lowercase_name);
 			break;
@@ -2424,6 +2490,7 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 {
 	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
 	char *lowercase_name = emalloc(orig_class_entry->name_length + 1);
+	zend_ulong hash;
 	*class_entry = *orig_class_entry;
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
@@ -2437,11 +2504,8 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 
 	zend_str_tolower_copy(lowercase_name, orig_class_entry->name, class_entry->name_length);
 	lowercase_name = (char*)zend_new_interned_string(lowercase_name, class_entry->name_length + 1, 1 TSRMLS_CC);
-	if (IS_INTERNED(lowercase_name)) {
-		zend_hash_quick_update(CG(class_table), lowercase_name, class_entry->name_length+1, INTERNED_HASH(lowercase_name), &class_entry, sizeof(zend_class_entry *), NULL);
-	} else {
-		zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
-	}
+	hash = str_hash(lowercase_name, class_entry->name_length);
+	zend_hash_quick_update(CG(class_table), lowercase_name, class_entry->name_length+1, hash, &class_entry, sizeof(zend_class_entry *), NULL);
 	str_efree(lowercase_name);
 	return class_entry;
 }
@@ -2508,7 +2572,12 @@ ZEND_API int zend_register_class_alias_ex(const char *name, int name_len, zend_c
 	char *lcname = zend_str_tolower_dup(name, name_len);
 	int ret;
 
-	ret = zend_hash_add(CG(class_table), lcname, name_len+1, &ce, sizeof(zend_class_entry *), NULL);
+	if (lcname[0] == '\\') {
+		ret = zend_hash_add(CG(class_table), lcname+1, name_len, &ce, sizeof(zend_class_entry *), NULL);
+	} else {
+		ret = zend_hash_add(CG(class_table), lcname, name_len+1, &ce, sizeof(zend_class_entry *), NULL);
+	}
+
 	efree(lcname);
 	if (ret == SUCCESS) {
 		ce->refcount++;
@@ -2773,8 +2842,8 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		}
 		if ((check_flags & IS_CALLABLE_CHECK_NO_ACCESS) == 0 &&
 		    (fcc->calling_scope &&
-		     (fcc->calling_scope->__call ||
-		      fcc->calling_scope->__callstatic))) {
+		     ((fcc->object_ptr && fcc->calling_scope->__call) ||
+		      (!fcc->object_ptr && fcc->calling_scope->__callstatic)))) {
 			if (fcc->function_handler->op_array.fn_flags & ZEND_ACC_PRIVATE) {
 				if (!zend_check_private(fcc->function_handler, fcc->object_ptr ? Z_OBJCE_P(fcc->object_ptr) : EG(scope), lmname, mlen TSRMLS_CC)) {
 					retval = 0;
@@ -3904,6 +3973,63 @@ ZEND_API void zend_restore_error_handling(zend_error_handling *saved TSRMLS_DC) 
 		zval_ptr_dtor(&saved->user_handler);
 	}
 	saved->user_handler = NULL;
+}
+/* }}} */
+
+ZEND_API const char* zend_find_alias_name(zend_class_entry *ce, const char *name, zend_uint len) /* {{{ */
+{
+	zend_trait_alias *alias, **alias_ptr;
+
+	if ((alias_ptr = ce->trait_aliases)) {
+		alias = *alias_ptr;
+		while (alias) {
+			if (alias->alias_len == len &&
+				!strncasecmp(name, alias->alias, alias->alias_len)) {
+				return alias->alias;
+			}
+			alias_ptr++;
+			alias = *alias_ptr;
+		}
+	}
+
+	return name;
+}
+/* }}} */
+
+ZEND_API const char* zend_resolve_method_name(zend_class_entry *ce, zend_function *f) /* {{{ */
+{
+	zend_function *func;
+	HashPosition iterator;
+	HashTable *function_table;
+
+	if (f->common.type != ZEND_USER_FUNCTION ||
+	    *(f->op_array.refcount) < 2 ||
+	    !f->common.scope ||
+	    !f->common.scope->trait_aliases) {
+		return f->common.function_name;
+	}
+
+	function_table = &ce->function_table;
+	zend_hash_internal_pointer_reset_ex(function_table, &iterator);
+	while (zend_hash_get_current_data_ex(function_table, (void **)&func, &iterator) == SUCCESS) {
+		if (func == f) {
+			char *name;
+			uint len;
+			ulong idx;
+
+			if (zend_hash_get_current_key_ex(function_table, &name, &len, &idx, 0, &iterator) != HASH_KEY_IS_STRING) {
+				return f->common.function_name;
+			}
+			--len;
+			if (len == strlen(f->common.function_name) &&
+			    !strncasecmp(name, f->common.function_name, len)) {
+				return f->common.function_name;
+			}
+			return zend_find_alias_name(f->common.scope, name, len);
+		}
+		zend_hash_move_forward_ex(function_table, &iterator);
+	}
+	return f->common.function_name;
 }
 /* }}} */
 

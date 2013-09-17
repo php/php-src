@@ -958,7 +958,7 @@ PHP_MINIT_FUNCTION(curl)
 	REGISTER_CURL_CONSTANT(CURLFTPMETHOD_SINGLECWD);
 #endif
 
-#if LIBCURL_VERSION_NUM >- 0x070f04 /* Available since 7.15.4 */
+#if LIBCURL_VERSION_NUM >= 0x070f04 /* Available since 7.15.4 */
 	REGISTER_CURL_CONSTANT(CURLINFO_FTP_ENTRY_PATH);
 #endif
 
@@ -1221,22 +1221,6 @@ PHP_MINIT_FUNCTION(curl)
 		return FAILURE;
 	}
 
-#ifdef PHP_CURL_URL_WRAPPERS
-	{
-		curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
-		char **p = (char **)info->protocols;
-
-		while (*p != NULL) {
-			/* Do not enable cURL "file" protocol and make sure cURL is always used when --with-curlwrappers is enabled */
-			if (strncasecmp(*p, "file", sizeof("file")-1) != 0) {
-				php_unregister_url_stream_wrapper(*p TSRMLS_CC);
-				php_register_url_stream_wrapper(*p, &php_curl_wrapper TSRMLS_CC);
-			}
-			(void) *p++;
-		}
-	}
-#endif
-
 	curlfile_register_class(TSRMLS_C);
 
 	return SUCCESS;
@@ -1247,20 +1231,6 @@ PHP_MINIT_FUNCTION(curl)
  */
 PHP_MSHUTDOWN_FUNCTION(curl)
 {
-#ifdef PHP_CURL_URL_WRAPPERS
-	{
-		curl_version_info_data *info = curl_version_info(CURLVERSION_NOW);
-		char **p = (char **)info->protocols;
-
-		while (*p != NULL) {
-			/* Do not enable cURL "file" protocol and make sure cURL is always used when --with-curlwrappers is enabled */
-			if (strncasecmp(*p, "file", sizeof("file")-1) != 0) {
-				php_unregister_url_stream_wrapper(*p TSRMLS_CC);
-			}
-			(void) *p++;
-		}
-	}
-#endif
 	curl_global_cleanup();
 #ifdef PHP_CURL_NEED_OPENSSL_TSL
 	if (php_curl_openssl_tsl) {
@@ -1747,9 +1717,9 @@ static void curl_free_post(void **post)
 
 /* {{{ curl_free_slist
  */
-static void curl_free_slist(void **slist)
+static void curl_free_slist(void *slist)
 {
-	curl_slist_free_all((struct curl_slist *) *slist);
+	curl_slist_free_all(*((struct curl_slist **) slist));
 }
 /* }}} */
 
@@ -1820,9 +1790,11 @@ static void alloc_curl_handle(php_curl **ch)
 	(*ch)->handlers->read->stream = NULL;
 
 	zend_llist_init(&(*ch)->to_free->str,   sizeof(char *),            (llist_dtor_func_t) curl_free_string, 0);
-	zend_llist_init(&(*ch)->to_free->slist, sizeof(struct curl_slist), (llist_dtor_func_t) curl_free_slist,  0);
 	zend_llist_init(&(*ch)->to_free->post,  sizeof(struct HttpPost),   (llist_dtor_func_t) curl_free_post,   0);
 	(*ch)->safe_upload = 1; /* for now, for BC reason we allow unsafe API */
+
+	(*ch)->to_free->slist = emalloc(sizeof(HashTable));
+	zend_hash_init((*ch)->to_free->slist, 4, NULL, curl_free_slist, 0);
 }
 /* }}} */
 
@@ -2073,6 +2045,7 @@ PHP_FUNCTION(curl_copy_handle)
 	}
 #endif
 
+	efree(dupch->to_free->slist);
 	efree(dupch->to_free);
 	dupch->to_free = ch->to_free;
 
@@ -2468,7 +2441,7 @@ string_copy:
 
 			ph = HASH_OF(*zvalue);
 			if (!ph) {
-				char *name;
+				char *name = NULL;
 				switch (option) {
 					case CURLOPT_HTTPHEADER:
 						name = "CURLOPT_HTTPHEADER";
@@ -2518,7 +2491,7 @@ string_copy:
 					return 1;
 				}
 			}
-			zend_llist_add_element(&ch->to_free->slist, &slist);
+			zend_hash_index_update(ch->to_free->slist, (ulong) option, &slist, sizeof(struct curl_slist *), NULL);
 
 			error = curl_easy_setopt(ch->cp, option, slist);
 
@@ -2531,6 +2504,7 @@ string_copy:
 
 		case CURLOPT_FOLLOWLOCATION:
 			convert_to_long_ex(zvalue);
+#if LIBCURL_VERSION_NUM < 0x071304
 			if (PG(open_basedir) && *PG(open_basedir)) {
 				if (Z_LVAL_PP(zvalue) != 0) {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set");
@@ -2538,6 +2512,7 @@ string_copy:
 					return 1;
 				}
 			}
+#endif
 			error = curl_easy_setopt(ch->cp, option, Z_LVAL_PP(zvalue));
 			break;
 
@@ -3296,8 +3271,9 @@ static void _php_curl_close_ex(php_curl *ch TSRMLS_DC)
 	/* cURL destructors should be invoked only by last curl handle */
 	if (Z_REFCOUNT_P(ch->clone) <= 1) {
 		zend_llist_clean(&ch->to_free->str);
-		zend_llist_clean(&ch->to_free->slist);
 		zend_llist_clean(&ch->to_free->post);
+		zend_hash_destroy(ch->to_free->slist);
+		efree(ch->to_free->slist);
 		efree(ch->to_free);
 		FREE_ZVAL(ch->clone);
 	} else {

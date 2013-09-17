@@ -562,7 +562,7 @@ PHP_FUNCTION(mysqli_query)
 	MY_MYSQL			*mysql;
 	zval				*mysql_link;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	MYSQL_RES 			*result;
+	MYSQL_RES 			*result = NULL;
 	char				*query = NULL;
 	int 				query_len;
 	long 				resultmode = MYSQLI_STORE_RESULT;
@@ -833,7 +833,7 @@ PHP_FUNCTION(mysqli_reap_async_query)
 	MY_MYSQL		*mysql;
 	zval			*mysql_link;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	MYSQL_RES 			*result;
+	MYSQL_RES 			*result = NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
@@ -1100,13 +1100,25 @@ PHP_FUNCTION(mysqli_begin_transaction)
 	zval		*mysql_link;
 	long		flags = TRANS_START_NO_OPT;
 	char *		name = NULL;
-	int			name_len = 0;
+	int			name_len = -1;
+	zend_bool	err = FALSE;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "O|ls", &mysql_link, mysqli_link_class_entry, &flags, &name, &name_len) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
-
+	if (flags < 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid value for parameter flags (%ld)", flags);
+		err = TRUE;
+	}
+	if (!name_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Savepoint name cannot be empty");
+		err = TRUE;
+	}
+	if (TRUE == err) {
+		RETURN_FALSE;			
+	}
+	
 #if !defined(MYSQLI_USE_MYSQLND)
 	if (mysqli_begin_transaction_libmysql(mysql->mysql, flags, name)) {
 		RETURN_FALSE;
@@ -1143,12 +1155,16 @@ PHP_FUNCTION(mysqli_savepoint)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char *		name = NULL;
-	int			name_len = 0;
+	int			name_len = -1;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &name, &name_len) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
+	if (!name || !name_len) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Savepoint name cannot be empty");
+		RETURN_FALSE;	
+	}
 
 #if !defined(MYSQLI_USE_MYSQLND)
 	if (mysqli_savepoint_libmysql(mysql->mysql, name, FALSE)) {
@@ -1169,14 +1185,15 @@ PHP_FUNCTION(mysqli_release_savepoint)
 	MY_MYSQL	*mysql;
 	zval		*mysql_link;
 	char *		name = NULL;
-	int			name_len = 0;
+	int			name_len = -1;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "Os", &mysql_link, mysqli_link_class_entry, &name, &name_len) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, &mysql_link, MYSQLI_STATUS_VALID);
 	if (!name || !name_len) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Savepoint name not provided");	
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Savepoint name cannot be empty");	
+		RETURN_FALSE;
 	}
 #if !defined(MYSQLI_USE_MYSQLND)
 	if (mysqli_savepoint_libmysql(mysql->mysql, name, TRUE)) {

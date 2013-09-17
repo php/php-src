@@ -286,6 +286,12 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 	if (param->is_param) {
 
 		switch (event_type) {
+			case PDO_PARAM_EVT_FETCH_PRE:
+			case PDO_PARAM_EVT_FETCH_POST:
+			case PDO_PARAM_EVT_NORMALIZE:
+				/* Do nothing */
+				break;
+
 			case PDO_PARAM_EVT_FREE:
 				P = param->driver_data;
 				if (P) {
@@ -543,7 +549,6 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno TSRMLS_DC)
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	struct pdo_column_data *col = &stmt->columns[colno];
-	zend_bool dyn = FALSE;
 	RETCODE rc;
 	SWORD	colnamelen;
 	SDWORD	colsize, displaysize;
@@ -614,7 +619,6 @@ static int odbc_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned l
 
 	/* if it is a column containing "long" data, perform late binding now */
 	if (C->is_long) {
-		unsigned long alloced = 4096;
 		unsigned long used = 0;
 		char *buf;
 		RETCODE rc;

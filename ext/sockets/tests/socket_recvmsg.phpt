@@ -3,12 +3,18 @@ recvmsg(): basic test
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets')) {
-die('skip sockets extension not available.');
-}
-if (!defined('IPPROTO_IPV6')) {
-die('skip IPv6 not available.');
+    die('skip sockets extension not available.');
 }
 
+require 'ipv6_skipif.inc';
+
+if (!defined('IPPROTO_IPV6')) {
+    die('skip IPv6 not available.');
+}
+if (!defined('IPV6_RECVPKTINFO')) {
+    die('skip IPV6_RECVPKTINFO not available.');
+}
+?>
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";

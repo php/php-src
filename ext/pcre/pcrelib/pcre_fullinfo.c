@@ -42,7 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 information about a compiled pattern. */
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "pcre_internal.h"
 
@@ -63,13 +65,17 @@ Arguments:
 Returns:           0 if data returned, negative on error
 */
 
-#ifdef COMPILE_PCRE8
+#if defined COMPILE_PCRE8
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre_fullinfo(const pcre *argument_re, const pcre_extra *extra_data,
   int what, void *where)
-#else
+#elif defined COMPILE_PCRE16
 PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
 pcre16_fullinfo(const pcre16 *argument_re, const pcre16_extra *extra_data,
+  int what, void *where)
+#elif defined COMPILE_PCRE32
+PCRE_EXP_DEFN int PCRE_CALL_CONVENTION
+pcre32_fullinfo(const pcre32 *argument_re, const pcre32_extra *extra_data,
   int what, void *where)
 #endif
 {
@@ -130,9 +136,20 @@ switch (what)
 
   case PCRE_INFO_FIRSTBYTE:
   *((int *)where) =
-    ((re->flags & PCRE_FIRSTSET) != 0)? re->first_char :
+    ((re->flags & PCRE_FIRSTSET) != 0)? (int)re->first_char :
     ((re->flags & PCRE_STARTLINE) != 0)? -1 : -2;
   break;
+
+  case PCRE_INFO_FIRSTCHARACTER:
+    *((pcre_uint32 *)where) =
+      (re->flags & PCRE_FIRSTSET) != 0 ? re->first_char : 0;
+    break;
+
+  case PCRE_INFO_FIRSTCHARACTERFLAGS:
+    *((int *)where) =
+      ((re->flags & PCRE_FIRSTSET) != 0) ? 1 :
+      ((re->flags & PCRE_STARTLINE) != 0) ? 2 : 0;
+    break;
 
   /* Make sure we pass back the pointer to the bit vector in the external
   block, not the internal copy (with flipped integer fields). */
@@ -157,8 +174,18 @@ switch (what)
 
   case PCRE_INFO_LASTLITERAL:
   *((int *)where) =
-    ((re->flags & PCRE_REQCHSET) != 0)? re->req_char : -1;
+    ((re->flags & PCRE_REQCHSET) != 0)? (int)re->req_char : -1;
   break;
+
+  case PCRE_INFO_REQUIREDCHAR:
+    *((pcre_uint32 *)where) =
+      ((re->flags & PCRE_REQCHSET) != 0) ? re->req_char : 0;
+    break;
+
+  case PCRE_INFO_REQUIREDCHARFLAGS:
+    *((int *)where) =
+      ((re->flags & PCRE_REQCHSET) != 0);
+    break;
 
   case PCRE_INFO_NAMEENTRYSIZE:
   *((int *)where) = re->name_entry_size;

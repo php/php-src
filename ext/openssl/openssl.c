@@ -35,6 +35,9 @@
 #include "ext/standard/php_fopen_wrappers.h"
 #include "ext/standard/md5.h"
 #include "ext/standard/base64.h"
+#ifdef PHP_WIN32
+# include "win32/winutil.h"
+#endif
 
 /* OpenSSL includes */
 #include <openssl/evp.h>
@@ -391,11 +394,35 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_random_pseudo_bytes, 0, 0, 1)
     ZEND_ARG_INFO(0, length)
     ZEND_ARG_INFO(1, result_is_strong)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_spki_new, 0, 0, 2)
+    ZEND_ARG_INFO(0, privkey)
+    ZEND_ARG_INFO(0, challenge)
+    ZEND_ARG_INFO(0, algo)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_verify, 0)
+    ZEND_ARG_INFO(0, spki)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_export, 0)
+    ZEND_ARG_INFO(0, spki)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_spki_export_challenge, 0)
+    ZEND_ARG_INFO(0, spki)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ openssl_functions[]
  */
 const zend_function_entry openssl_functions[] = {
+/* spki functions */
+	PHP_FE(openssl_spki_new, arginfo_openssl_spki_new)
+	PHP_FE(openssl_spki_verify, arginfo_openssl_spki_verify)
+	PHP_FE(openssl_spki_export, arginfo_openssl_spki_export)
+	PHP_FE(openssl_spki_export_challenge, arginfo_openssl_spki_export_challenge)
+
 /* public/private key functions */
 	PHP_FE(openssl_pkey_free,			arginfo_openssl_pkey_free)
 	PHP_FE(openssl_pkey_new,			arginfo_openssl_pkey_new)
@@ -571,8 +598,9 @@ static EVP_PKEY * php_openssl_generate_private_key(struct php_x509_request * req
 
 static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int shortname TSRMLS_DC) /* {{{ */
 {
+	zval **data;
 	zval *subitem, *subentries;
-	int i, j = -1, last = -1, obj_cnt = 0;
+	int i;
 	char *sname;
 	int nid;
 	X509_NAME_ENTRY * ne;
@@ -588,13 +616,12 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 	
 	for (i = 0; i < X509_NAME_entry_count(name); i++) {
 		unsigned char *to_add;
-		int to_add_len;
+		int to_add_len = 0;
 
 
 		ne  = X509_NAME_get_entry(name, i);
 		obj = X509_NAME_ENTRY_get_object(ne);
 		nid = OBJ_obj2nid(obj);
-		obj_cnt = 0;
 
 		if (shortname) {
 			sname = (char *) OBJ_nid2sn(nid);
@@ -602,39 +629,27 @@ static void add_assoc_name_entry(zval * val, char * key, X509_NAME * name, int s
 			sname = (char *) OBJ_nid2ln(nid);
 		}
 
-		MAKE_STD_ZVAL(subentries);
-		array_init(subentries);
-
-		last = -1;
-		for (;;) {
-			j = X509_NAME_get_index_by_OBJ(name, obj, last);
-			if (j < 0) {
-				if (last != -1) break;
-			} else {
-				obj_cnt++;
-				ne  = X509_NAME_get_entry(name, j);
-				str = X509_NAME_ENTRY_get_data(ne);
-				if (ASN1_STRING_type(str) != V_ASN1_UTF8STRING) {
-					to_add_len = ASN1_STRING_to_UTF8(&to_add, str);
-					if (to_add_len != -1) {
-						add_next_index_stringl(subentries, (char *)to_add, to_add_len, 1);
-					}
-				} else {
-					to_add = ASN1_STRING_data(str);
-					to_add_len = ASN1_STRING_length(str);
-					add_next_index_stringl(subentries, (char *)to_add, to_add_len, 1);
-				}
-			}
-			last = j;
-		}
-		i = last;
-		
-		if (obj_cnt > 1) {
-			add_assoc_zval_ex(subitem, sname, strlen(sname) + 1, subentries);
+		str = X509_NAME_ENTRY_get_data(ne);
+		if (ASN1_STRING_type(str) != V_ASN1_UTF8STRING) {
+			to_add_len = ASN1_STRING_to_UTF8(&to_add, str);
 		} else {
-			zval_dtor(subentries);
-			FREE_ZVAL(subentries);
-			if (obj_cnt && str && to_add_len > -1) {
+			to_add = ASN1_STRING_data(str);
+			to_add_len = ASN1_STRING_length(str);
+		}
+
+		if (to_add_len != -1) {
+			if (zend_hash_find(Z_ARRVAL_P(subitem), sname, strlen(sname)+1, (void**)&data) == SUCCESS) {
+				if (Z_TYPE_PP(data) == IS_ARRAY) {
+					subentries = *data;
+					add_next_index_stringl(subentries, (char *)to_add, to_add_len, 1);
+				} else if (Z_TYPE_PP(data) == IS_STRING) {
+					MAKE_STD_ZVAL(subentries);
+					array_init(subentries);
+					add_next_index_stringl(subentries, Z_STRVAL_PP(data), Z_STRLEN_PP(data), 1);
+					add_next_index_stringl(subentries, (char *)to_add, to_add_len, 1);
+					zend_hash_update(Z_ARRVAL_P(subitem), sname, strlen(sname)+1, &subentries, sizeof(zval*), NULL);
+				}
+			} else {
 				add_assoc_stringl(subitem, sname, (char *)to_add, to_add_len, 1);
 			}
 		}
@@ -790,6 +805,7 @@ static int add_oid_section(struct php_x509_request * req TSRMLS_DC) /* {{{ */
 
 static const EVP_CIPHER * php_openssl_get_evp_cipher_from_algo(long algo);
 
+int openssl_spki_cleanup(const char *src, char *dest);
 
 static int php_openssl_parse_config(struct php_x509_request * req, zval * optional_args TSRMLS_DC) /* {{{ */
 {
@@ -1334,6 +1350,279 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 }
 /* }}} */
 
+/* {{{ proto string openssl_spki_new(mixed zpkey, string challenge [, mixed method])
+   Creates new private key (or uses existing) and creates a new spki cert
+   outputting results to var */
+PHP_FUNCTION(openssl_spki_new)
+{
+	int challenge_len;
+	char * challenge = NULL, * spkstr = NULL, * s = NULL;
+	long keyresource = -1;
+	const char *spkac = "SPKAC=";
+	long algo = OPENSSL_ALGO_MD5;
+
+	zval *method = NULL;
+	zval * zpkey = NULL;
+	EVP_PKEY * pkey = NULL;
+	NETSCAPE_SPKI *spki=NULL;
+	const EVP_MD *mdtype;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs|z", &zpkey, &challenge, &challenge_len, &method) == FAILURE) {
+		return;
+	}
+	RETVAL_FALSE;
+
+	pkey = php_openssl_evp_from_zval(&zpkey, 0, challenge, 1, &keyresource TSRMLS_CC);
+
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied private key");
+		goto cleanup;
+	}
+
+	if (method != NULL) {
+		if (Z_TYPE_P(method) == IS_LONG) {
+			algo = Z_LVAL_P(method);
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Algorithm must be of supported type");
+			goto cleanup;
+		}
+	}
+	mdtype = php_openssl_get_evp_md_from_algo(algo);
+
+	if (!mdtype) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
+		goto cleanup;
+	}
+
+	if ((spki = NETSCAPE_SPKI_new()) == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to create new SPKAC");
+		goto cleanup;
+	}
+
+	if (challenge) {
+		ASN1_STRING_set(spki->spkac->challenge, challenge, challenge_len);
+	}
+
+	if (!NETSCAPE_SPKI_set_pubkey(spki, pkey)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to embed public key");
+		goto cleanup;
+	}
+
+	if (!NETSCAPE_SPKI_sign(spki, pkey, mdtype)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to sign with specified algorithm");
+		goto cleanup;
+	}
+
+	spkstr = NETSCAPE_SPKI_b64_encode(spki);
+	if (!spkstr){
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to encode SPKAC");
+		goto cleanup;
+	}
+
+	s = emalloc(strlen(spkac) + strlen(spkstr) + 1);
+	sprintf(s, "%s%s", spkac, spkstr);
+
+	RETVAL_STRINGL(s, strlen(s), 0);
+	goto cleanup;
+
+cleanup:
+
+	if (keyresource == -1 && spki != NULL) {
+		NETSCAPE_SPKI_free(spki);
+	}
+	if (keyresource == -1 && pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+	if (keyresource == -1 && spkstr != NULL) {
+		efree(spkstr);
+	}
+
+	if (strlen(s) <= 0) {
+		RETVAL_FALSE;
+	}
+
+	if (keyresource == -1 && s != NULL) {
+		efree(s);
+	}
+}
+/* }}} */
+
+/* {{{ proto bool openssl_spki_verify(string spki)
+   Verifies spki returns boolean */
+PHP_FUNCTION(openssl_spki_verify)
+{
+	int spkstr_len, i = 0;
+	char *spkstr = NULL, * spkstr_cleaned = NULL;
+
+	EVP_PKEY *pkey = NULL;
+	NETSCAPE_SPKI *spki = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+		return;
+	}
+	RETVAL_FALSE;
+
+	if (spkstr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied SPKAC");
+		goto cleanup;
+	}
+
+	spkstr_cleaned = emalloc(spkstr_len + 1);
+	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+
+	if (strlen(spkstr_cleaned)<=0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid SPKAC");
+		goto cleanup;
+	}
+
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spki == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to decode supplied SPKAC");
+		goto cleanup;
+	}
+
+	pkey = X509_PUBKEY_get(spki->spkac->pubkey);
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to acquire signed public key");
+		goto cleanup;
+	}
+
+	i = NETSCAPE_SPKI_verify(spki, pkey);
+	goto cleanup;
+
+cleanup:
+	if (spki != NULL) {
+		NETSCAPE_SPKI_free(spki);
+	}
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+	if (spkstr_cleaned != NULL) {
+		efree(spkstr_cleaned);
+	}
+
+	if (i > 0) {
+		RETVAL_TRUE;
+	}
+}
+/* }}} */
+
+/* {{{ proto string openssl_spki_export(string spki)
+   Exports public key from existing spki to var */
+PHP_FUNCTION(openssl_spki_export)
+{
+	int spkstr_len;
+	char *spkstr = NULL, * spkstr_cleaned = NULL, * s = NULL;
+
+	EVP_PKEY *pkey = NULL;
+	NETSCAPE_SPKI *spki = NULL;
+	BIO *out = BIO_new(BIO_s_mem());
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+		return;
+	}
+	RETVAL_FALSE;
+
+	if (spkstr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied SPKAC");
+		goto cleanup;
+	}
+
+	spkstr_cleaned = emalloc(spkstr_len + 1);
+	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spki == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to decode supplied SPKAC");
+		goto cleanup;
+	}
+
+	pkey = X509_PUBKEY_get(spki->spkac->pubkey);
+	if (pkey == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to acquire signed public key");
+		goto cleanup;
+	}
+
+	out = BIO_new_fp(stdout, BIO_NOCLOSE);
+	PEM_write_bio_PUBKEY(out, pkey);
+	goto cleanup;
+
+cleanup:
+
+	if (spki != NULL) {
+		NETSCAPE_SPKI_free(spki);
+	}
+	if (out != NULL) {
+		BIO_free_all(out);
+	}
+	if (pkey != NULL) {
+		EVP_PKEY_free(pkey);
+	}
+	if (spkstr_cleaned != NULL) {
+		efree(spkstr_cleaned);
+	}
+	if (s != NULL) {
+		efree(s);
+	}
+}
+/* }}} */
+
+/* {{{ proto string openssl_spki_export_challenge(string spki)
+   Exports spkac challenge from existing spki to var */
+PHP_FUNCTION(openssl_spki_export_challenge)
+{
+	int spkstr_len;
+	char *spkstr = NULL, * spkstr_cleaned = NULL;
+
+	NETSCAPE_SPKI *spki = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &spkstr, &spkstr_len) == FAILURE) {
+		return;
+	}
+	RETVAL_FALSE;
+
+	if (spkstr == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to use supplied SPKAC");
+		goto cleanup;
+	}
+
+	spkstr_cleaned = emalloc(spkstr_len + 1);
+	openssl_spki_cleanup(spkstr, spkstr_cleaned);
+
+	spki = NETSCAPE_SPKI_b64_decode(spkstr_cleaned, strlen(spkstr_cleaned));
+	if (spki == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to decode SPKAC");
+		goto cleanup;
+	}
+
+	RETVAL_STRING(ASN1_STRING_data(spki->spkac->challenge), 1);
+	goto cleanup;
+
+cleanup:
+	if (spkstr_cleaned != NULL) {
+		efree(spkstr_cleaned);
+	}
+}
+/* }}} */
+
+/* {{{ strip line endings from spkac */
+int openssl_spki_cleanup(const char *src, char *dest)
+{
+    int removed=0;
+
+    while (*src) {
+        if (*src!='\n'&&*src!='\r') {
+            *dest++=*src;
+        } else {
+            ++removed;
+        }
+        ++src;
+    }
+    *dest=0;
+    return removed;
+}
+/* }}} */
+
 /* {{{ proto bool openssl_x509_export(mixed x509, string &out [, bool notext = true])
    Exports a CERT to file or a var */
 PHP_FUNCTION(openssl_x509_export)
@@ -1407,6 +1696,74 @@ PHP_FUNCTION(openssl_x509_check_private_key)
 	}
 }
 /* }}} */
+
+/* Special handling of subjectAltName, see CVE-2013-4073
+ * Christian Heimes
+ */
+
+static int openssl_x509v3_subjectAltName(BIO *bio, X509_EXTENSION *extension)
+{
+	GENERAL_NAMES *names;
+	const X509V3_EXT_METHOD *method = NULL;
+	long i, length, num;
+	const unsigned char *p;
+
+	method = X509V3_EXT_get(extension);
+	if (method == NULL) {
+		return -1;
+	}
+
+	p = extension->value->data;
+	length = extension->value->length;
+	if (method->it) {
+		names = (GENERAL_NAMES*)(ASN1_item_d2i(NULL, &p, length,
+						       ASN1_ITEM_ptr(method->it)));
+	} else {
+		names = (GENERAL_NAMES*)(method->d2i(NULL, &p, length));
+	}
+	if (names == NULL) {
+		return -1;
+	}
+
+	num = sk_GENERAL_NAME_num(names);
+	for (i = 0; i < num; i++) {
+			GENERAL_NAME *name;
+			ASN1_STRING *as;
+			name = sk_GENERAL_NAME_value(names, i);
+			switch (name->type) {
+				case GEN_EMAIL:
+					BIO_puts(bio, "email:");
+					as = name->d.rfc822Name;
+					BIO_write(bio, ASN1_STRING_data(as),
+						  ASN1_STRING_length(as));
+					break;
+				case GEN_DNS:
+					BIO_puts(bio, "DNS:");
+					as = name->d.dNSName;
+					BIO_write(bio, ASN1_STRING_data(as),
+						  ASN1_STRING_length(as));
+					break;
+				case GEN_URI:
+					BIO_puts(bio, "URI:");
+					as = name->d.uniformResourceIdentifier;
+					BIO_write(bio, ASN1_STRING_data(as),
+						  ASN1_STRING_length(as));
+					break;
+				default:
+					/* use builtin print for GEN_OTHERNAME, GEN_X400,
+					 * GEN_EDIPARTY, GEN_DIRNAME, GEN_IPADD and GEN_RID
+					 */
+					GENERAL_NAME_print(bio, name);
+			}
+			/* trailing ', ' except for last element */
+			if (i < (num - 1)) {
+				BIO_puts(bio, ", ");
+			}
+	}
+	sk_GENERAL_NAME_pop_free(names, GENERAL_NAME_free);
+
+	return 0;
+}
 
 /* {{{ proto array openssl_x509_parse(mixed x509 [, bool shortnames=true])
    Returns an array of the fields/values of the CERT */
@@ -1504,15 +1861,30 @@ PHP_FUNCTION(openssl_x509_parse)
 
 
 	for (i = 0; i < X509_get_ext_count(cert); i++) {
+		int nid;
 		extension = X509_get_ext(cert, i);
-		if (OBJ_obj2nid(X509_EXTENSION_get_object(extension)) != NID_undef) {
+		nid = OBJ_obj2nid(X509_EXTENSION_get_object(extension));
+		if (nid != NID_undef) {
 			extname = (char *)OBJ_nid2sn(OBJ_obj2nid(X509_EXTENSION_get_object(extension)));
 		} else {
 			OBJ_obj2txt(buf, sizeof(buf)-1, X509_EXTENSION_get_object(extension), 1);
 			extname = buf;
 		}
 		bio_out = BIO_new(BIO_s_mem());
-		if (X509V3_EXT_print(bio_out, extension, 0, 0)) {
+		if (nid == NID_subject_alt_name) {
+			if (openssl_x509v3_subjectAltName(bio_out, extension) == 0) {
+				BIO_get_mem_ptr(bio_out, &bio_buf);
+				add_assoc_stringl(subitem, extname, bio_buf->data, bio_buf->length, 1);
+			} else {
+				zval_dtor(return_value);
+				if (certresource == -1 && cert) {
+					X509_free(cert);
+				}
+				BIO_free(bio_out);
+				RETURN_FALSE;
+			}
+		}
+		else if (X509V3_EXT_print(bio_out, extension, 0, 0)) {
 			BIO_get_mem_ptr(bio_out, &bio_buf);
 			add_assoc_stringl(subitem, extname, bio_buf->data, bio_buf->length, 1);
 		} else {

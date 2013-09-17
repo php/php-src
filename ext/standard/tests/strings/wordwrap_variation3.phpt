@@ -75,7 +75,7 @@ $values =  array (
 );
 
 // loop though each element of the array and check the working of wordwrap()
-// when $break arugment is supplied with different values
+// when $break argument is supplied with different values
 echo "\n--- Testing wordwrap() by supplying different values for 'break' argument ---\n";
 $counter = 1;
 for($index = 0; $index < count($values); $index ++) {

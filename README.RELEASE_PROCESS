@@ -64,7 +64,8 @@ Do not use abbreviations for alpha and beta.
 ``git push --tags origin HEAD``
 
 8. run: ``./makedist 5.4.2RC2``, this will export the tree, create configure
-and build three tarballs (gz,bz2 and xz).
+and build three tarballs (gz,bz2 and xz). Make sure you use the same GNU Bison
+version as snaps. Recent bison version are known to break ZTS.
 
 9. Copy those three tarballs to www.php.net, in your homedir there should be a
 directory "downloads/". Copy them into there, so that the system can generate
@@ -76,6 +77,9 @@ f.e. http://downloads.php.net/derick/
 11. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once
 those are made, they should be placed into the same directory as the source snapshots.
+
+12. Notify the documentation team if documentations for new features are
+not yet available but a stable release is imminent.
 
 Getting the non stable release (alpha/beta/RC) announced
 --------------------------------------------------------
@@ -154,7 +158,15 @@ origin <branch>``".
 11. run: ``./makedist php 5.4.1``, this will export the tree, create configure
 and build two tarballs (one gz and one bz2).
 
-12. Commit those two tarballs to Git (php-distributions.git)
+12. Commit those two tarballs to web/php-distributions.git, then update the git
+    submodule reference in web/php.git: 
+    git submodule init;
+    git submodule update;
+    cd distributions;
+    git pull origin master;
+    cd ..;
+    git commit distributions;
+    git push;
 
 13. Once the release has been tagged, contact the PHP Windows development team
 (internals-win@lists.php.net) so that Windows binaries can be created. Once
@@ -164,6 +176,9 @@ those are made, they should be committed to SVN too.
 
 15. When making a final release, also remind the PHP Windows development team
 (internals-win@lists.php.net) to prepare the installer packages for Win32.
+
+16. Make sure proper documentation exists for all new features/changes.
+Coordinate the release with the PHP Documentation team.
 
 Getting the stable release announced
 ------------------------------------

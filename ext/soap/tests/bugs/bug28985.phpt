@@ -44,10 +44,10 @@ array(42) {
  string iUserPassword;
 }"
   [8]=>
-  string(86) "struct MGCodeLibelle {
+  string(87) "struct MGCodeLibelle {
  string Code;
  string Libelle;
- boolean Defaut;
+ boolean Default;
  anyType Tag;
 }"
   [9]=>

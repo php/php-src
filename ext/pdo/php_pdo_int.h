@@ -23,6 +23,8 @@
 /* Stuff private to the PDO extension and not for consumption by PDO drivers
  * */
 
+#include "php_pdo_error.h"
+
 extern HashTable pdo_driver_hash;
 extern zend_class_entry *pdo_exception_ce;
 PDO_API zend_class_entry *php_pdo_get_exception_base(int root TSRMLS_DC);
@@ -54,19 +56,6 @@ extern zend_object_handlers pdo_row_object_handlers;
 zend_object_iterator *php_pdo_dbstmt_iter_get(zend_class_entry *ce, zval *object TSRMLS_DC);
 
 extern pdo_driver_t *pdo_find_driver(const char *name, int namelen);
-
-extern void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt TSRMLS_DC);
-
-#define PDO_DBH_CLEAR_ERR()		do { \
-	strlcpy(dbh->error_code, PDO_ERR_NONE, sizeof(PDO_ERR_NONE)); \
-	if (dbh->query_stmt) { \
-		dbh->query_stmt = NULL; \
-		zend_objects_store_del_ref(&dbh->query_stmt_zval TSRMLS_CC); \
-	} \
-} while (0)
-#define PDO_STMT_CLEAR_ERR()	strcpy(stmt->error_code, PDO_ERR_NONE)
-#define PDO_HANDLE_DBH_ERR()	if (strcmp(dbh->error_code, PDO_ERR_NONE)) { pdo_handle_error(dbh, NULL TSRMLS_CC); }
-#define PDO_HANDLE_STMT_ERR()	if (strcmp(stmt->error_code, PDO_ERR_NONE)) { pdo_handle_error(stmt->dbh, stmt TSRMLS_CC); }
 
 int pdo_sqlstate_init_error_table(void);
 void pdo_sqlstate_fini_error_table(void);

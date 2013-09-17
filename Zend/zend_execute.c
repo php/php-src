@@ -94,7 +94,7 @@ static zend_always_inline void zend_pzval_unlock_free_func(zval *z TSRMLS_DC)
 }
 
 #undef zval_ptr_dtor
-#define zval_ptr_dtor(pzv) i_zval_ptr_dtor(*(pzv)  ZEND_FILE_LINE_CC)
+#define zval_ptr_dtor(pzv) i_zval_ptr_dtor(*(pzv) ZEND_FILE_LINE_CC TSRMLS_CC)
 
 #define PZVAL_UNLOCK(z, f) zend_pzval_unlock_func(z, f, 1 TSRMLS_CC)
 #define PZVAL_UNLOCK_EX(z, f, u) zend_pzval_unlock_func(z, f, u TSRMLS_CC)
@@ -183,8 +183,7 @@ static zend_always_inline zval *_get_zval_ptr_var(zend_uint var, const zend_exec
 {
 	zval *ptr = EX_T(var).var.ptr;
 
-	PZVAL_UNLOCK(ptr, should_free);
-	return ptr;
+	return should_free->var = ptr;
 }
 
 static zend_never_inline zval **_get_zval_cv_lookup(zval ***ptr, zend_uint var, int type TSRMLS_DC)
@@ -382,6 +381,19 @@ static zend_always_inline zval **_get_zval_ptr_ptr_var(zend_uint var, const zend
 	} else {
 		/* string offset */
 		PZVAL_UNLOCK(EX_T(var).str_offset.str, should_free);
+	}
+	return ptr_ptr;
+}
+
+static zend_always_inline zval **_get_zval_ptr_ptr_var_fast(zend_uint var, const zend_execute_data *execute_data, zend_free_op *should_free TSRMLS_DC)
+{
+	zval** ptr_ptr = EX_T(var).var.ptr_ptr;
+
+	if (EXPECTED(ptr_ptr != NULL)) {
+		should_free->var = *ptr_ptr;
+	} else {
+		/* string offset */
+		should_free->var = EX_T(var).str_offset.str;
 	}
 	return ptr_ptr;
 }
@@ -755,32 +767,21 @@ static inline void zend_assign_to_object(zval **retval, zval **object_ptr, zval 
 
 static inline int zend_assign_to_string_offset(const temp_variable *T, const zval *value, int value_type TSRMLS_DC)
 {
-	if (Z_TYPE_P(T->str_offset.str) == IS_STRING) {
-
-		if (((int)T->str_offset.offset < 0)) {
-			zend_error(E_WARNING, "Illegal string offset:  %d", T->str_offset.offset);
+	zval *str = T->str_offset.str;
+	zend_uint offset = T->str_offset.offset;
+	if (Z_TYPE_P(str) == IS_STRING) {
+		if ((int)offset < 0) {
+			zend_error(E_WARNING, "Illegal string offset:  %d", offset);
 			return 0;
 		}
 
-		if (T->str_offset.offset >= Z_STRLEN_P(T->str_offset.str)) {
-			if (IS_INTERNED(Z_STRVAL_P(T->str_offset.str))) {
-				char *tmp = (char *) emalloc(T->str_offset.offset+1+1);
-
-				memcpy(tmp, Z_STRVAL_P(T->str_offset.str), Z_STRLEN_P(T->str_offset.str)+1);
-				Z_STRVAL_P(T->str_offset.str) = tmp;
-			} else {
-				Z_STRVAL_P(T->str_offset.str) = (char *) erealloc(Z_STRVAL_P(T->str_offset.str), T->str_offset.offset+1+1);
-			}
-			memset(Z_STRVAL_P(T->str_offset.str) + Z_STRLEN_P(T->str_offset.str),
-			       ' ',
-			       T->str_offset.offset - Z_STRLEN_P(T->str_offset.str));
-			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset+1] = 0;
-			Z_STRLEN_P(T->str_offset.str) = T->str_offset.offset+1;
-		} else if (IS_INTERNED(Z_STRVAL_P(T->str_offset.str))) {
-			char *tmp = (char *) emalloc(Z_STRLEN_P(T->str_offset.str) + 1);
-
-			memcpy(tmp, Z_STRVAL_P(T->str_offset.str), Z_STRLEN_P(T->str_offset.str) + 1);
-			Z_STRVAL_P(T->str_offset.str) = tmp;
+		if (offset >= Z_STRLEN_P(str)) {
+			Z_STRVAL_P(str) = str_erealloc(Z_STRVAL_P(str), offset+1+1);
+			memset(Z_STRVAL_P(str) + Z_STRLEN_P(str), ' ', offset - Z_STRLEN_P(str));
+			Z_STRVAL_P(str)[offset+1] = 0;
+			Z_STRLEN_P(str) = offset+1;
+		} else if (IS_INTERNED(Z_STRVAL_P(str))) {
+			Z_STRVAL_P(str) = estrndup(Z_STRVAL_P(str), Z_STRLEN_P(str));
 		}
 
 		if (Z_TYPE_P(value) != IS_STRING) {
@@ -791,15 +792,15 @@ static inline int zend_assign_to_string_offset(const temp_variable *T, const zva
 				zval_copy_ctor(&tmp);
 			}
 			convert_to_string(&tmp);
-			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL(tmp)[0];
-			STR_FREE(Z_STRVAL(tmp));
+			Z_STRVAL_P(str)[offset] = Z_STRVAL(tmp)[0];
+			str_efree(Z_STRVAL(tmp));
 		} else {
-			Z_STRVAL_P(T->str_offset.str)[T->str_offset.offset] = Z_STRVAL_P(value)[0];
+			Z_STRVAL_P(str)[offset] = Z_STRVAL_P(value)[0];
 			if (value_type == IS_TMP_VAR) {
 				/* we can safely free final_value here
 				 * because separation is done only
 				 * in case value_type == IS_VAR */
-				STR_FREE(Z_STRVAL_P(value));
+				str_efree(Z_STRVAL_P(value));
 			}
 		}
 		/*
@@ -898,13 +899,10 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 			} else if (EXPECTED(!PZVAL_IS_REF(value))) {
 				Z_ADDREF_P(value);
 				*variable_ptr_ptr = value;
-				if (EXPECTED(variable_ptr != &EG(uninitialized_zval))) {
-					GC_REMOVE_ZVAL_FROM_BUFFER(variable_ptr);
-					zval_dtor(variable_ptr);
-					efree(variable_ptr);
-				} else {
-					Z_DELREF_P(variable_ptr);
-				}
+				ZEND_ASSERT(variable_ptr != &EG(uninitialized_zval));
+				GC_REMOVE_ZVAL_FROM_BUFFER(variable_ptr);
+				zval_dtor(variable_ptr);
+				efree(variable_ptr);
 				return value;
 			} else {
 				goto copy_value;
@@ -912,7 +910,7 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 		} else { /* we need to split */
 			Z_DELREF_P(variable_ptr);
 			GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr);
-			if (PZVAL_IS_REF(value) && Z_REFCOUNT_P(value) > 0) {
+			if (PZVAL_IS_REF(value)) {
 				ALLOC_ZVAL(variable_ptr);
 				*variable_ptr_ptr = variable_ptr;
 				INIT_PZVAL_COPY(variable_ptr, value);
@@ -921,7 +919,6 @@ static inline zval* zend_assign_to_variable(zval **variable_ptr_ptr, zval *value
 			} else {
 				*variable_ptr_ptr = value;
 				Z_ADDREF_P(value);
-				Z_UNSET_ISREF_P(value);
 				return value;
 			}
 		}
@@ -1016,11 +1013,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zva
 				hval = Z_HASH_P(dim);
 			} else {
 				ZEND_HANDLE_NUMERIC_EX(offset_key, offset_key_length+1, hval, goto num_index);
-				if (IS_INTERNED(offset_key)) {
-					hval = INTERNED_HASH(offset_key);
-				} else {
-					hval = zend_hash_func(offset_key, offset_key_length+1);
-				}
+				hval = str_hash(offset_key, offset_key_length);
 			}
 fetch_string_dim:
 			if (zend_hash_quick_find(ht, offset_key, offset_key_length+1, hval, (void **) &retval) == FAILURE) {
@@ -1147,6 +1140,10 @@ convert_to_array:
 					zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
 				}
 
+				if (type != BP_VAR_UNSET) {
+					SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
+				}
+
 				if (Z_TYPE_P(dim) != IS_LONG) {
 
 					switch(Z_TYPE_P(dim)) {
@@ -1174,9 +1171,6 @@ convert_to_array:
 					zval_copy_ctor(&tmp);
 					convert_to_long(&tmp);
 					dim = &tmp;
-				}
-				if (type != BP_VAR_UNSET) {
-					SEPARATE_ZVAL_IF_NOT_REF(container_ptr);
 				}
 				container = *container_ptr;
 				result->str_offset.str = container;
@@ -1384,7 +1378,7 @@ static void zend_fetch_property_address(temp_variable *result, zval **container_
 	}
 
 	if (Z_OBJ_HT_P(container)->get_property_ptr_ptr) {
-		zval **ptr_ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr, key TSRMLS_CC);
+		zval **ptr_ptr = Z_OBJ_HT_P(container)->get_property_ptr_ptr(container, prop_ptr, type, key TSRMLS_CC);
 		if (NULL == ptr_ptr) {
 			zval *ptr;
 
@@ -1478,15 +1472,17 @@ ZEND_API opcode_handler_t *zend_opcode_handlers;
 
 ZEND_API void execute_internal(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC)
 {
-	if(fci != NULL) {
-		((zend_internal_function *) execute_data_ptr->function_state.function)->handler(fci->param_count,
-				*fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
-
+	if (fci != NULL) {
+		execute_data_ptr->function_state.function->internal_function.handler(
+			fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr,
+			fci->object_ptr, 1 TSRMLS_CC
+		);
 	} else {
 		zval **return_value_ptr = &EX_TMP_VAR(execute_data_ptr, execute_data_ptr->opline->result.var)->var.ptr;
-		((zend_internal_function *) execute_data_ptr->function_state.function)->handler(execute_data_ptr->opline->extended_value, *return_value_ptr,
-					(execute_data_ptr->function_state.function->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)?return_value_ptr:NULL,
-					execute_data_ptr->object, return_value_used TSRMLS_CC);
+		execute_data_ptr->function_state.function->internal_function.handler(
+			execute_data_ptr->opline->extended_value, *return_value_ptr, return_value_ptr,
+			execute_data_ptr->object, return_value_used TSRMLS_CC
+		);
 	}
 }
 
@@ -1504,7 +1500,7 @@ void zend_clean_and_cache_symbol_table(HashTable *symbol_table TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
+static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
 	zval ***cv = EX_CV_NUM(execute_data, 0);
 	zval ***end = cv + EX(op_array)->last_var;
@@ -1517,15 +1513,15 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 }
 /* }}} */
 
-void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
+void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
-	i_free_compiled_variables(execute_data);
+	i_free_compiled_variables(execute_data TSRMLS_CC);
 }
 /* }}} */
 
-/*  
+/*
  * Stack Frame Layout (the whole stack frame is allocated at once)
- * ================== 
+ * ==================
  *
  *                             +========================================+
  *                             | zend_execute_data                      |<---+

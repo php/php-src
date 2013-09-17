@@ -260,7 +260,7 @@ class Exception
 	/** The exception message */
 	protected $message;
 
-	/** The string represenations as generated during construction */
+	/** The string representations as generated during construction */
 	private $string;
 
 	/** The code passed to the constructor */
@@ -336,7 +336,7 @@ class Exception
 	{
 	}
 
-	/** @return string represenation of exception
+	/** @return string representation of exception
 	 */
 	public function __toString()
 	{

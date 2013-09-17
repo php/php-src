@@ -112,7 +112,7 @@ static struct gfxinfo *php_handle_gif (php_stream * stream TSRMLS_DC)
 	result->width    = (unsigned int)dim[0] | (((unsigned int)dim[1])<<8);
 	result->height   = (unsigned int)dim[2] | (((unsigned int)dim[3])<<8);
 	result->bits     = dim[4]&0x80 ? ((((unsigned int)dim[4])&0x07) + 1) : 0;
-	result->channels = 3; /* allways */
+	result->channels = 3; /* always */
 
 	return result;
 }
@@ -606,7 +606,7 @@ static struct gfxinfo *php_handle_jpc(php_stream * stream TSRMLS_DC)
 
 	/* JPEG 2000 components can be vastly different from one another.
 	   Each component can be sampled at a different resolution, use
-	   a different colour space, have a seperate colour depth, and
+	   a different colour space, have a separate colour depth, and
 	   be compressed totally differently! This makes giving a single
 	   "bit depth" answer somewhat problematic. For this implementation
 	   we'll use the highest depth encountered. */

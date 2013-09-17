@@ -113,7 +113,7 @@ PHP_FUNCTION(grapheme_strpos)
 	unsigned char *found;
 	long loffset = 0;
 	int32_t offset = 0;
-	int ret_pos, uchar_pos;
+	int ret_pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", (char **)&haystack, &haystack_len, (char **)&needle, &needle_len, &loffset) == FAILURE) {
 
@@ -160,10 +160,10 @@ PHP_FUNCTION(grapheme_strpos)
 	}
 
 	/* do utf16 part of the strpos */
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, &uchar_pos, 0 /* fIgnoreCase */ TSRMLS_CC );
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 0 /* fIgnoreCase */, 0 /* last */ TSRMLS_CC );
 
 	if ( ret_pos >= 0 ) {
-		RETURN_LONG(ret_pos + offset);
+		RETURN_LONG(ret_pos);
 	} else {
 		RETURN_FALSE;
 	}
@@ -180,7 +180,7 @@ PHP_FUNCTION(grapheme_stripos)
 	unsigned char *found;
 	long loffset = 0;
 	int32_t offset = 0;
-	int ret_pos, uchar_pos;
+	int ret_pos;
 	int is_ascii;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|l", (char **)&haystack, &haystack_len, (char **)&needle, &needle_len, &loffset) == FAILURE) {
@@ -235,10 +235,10 @@ PHP_FUNCTION(grapheme_stripos)
 	}
 
 	/* do utf16 part of the strpos */
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, &uchar_pos, 1 /* fIgnoreCase */ TSRMLS_CC );
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 1 /* fIgnoreCase */, 0 /*last */ TSRMLS_CC );
 
 	if ( ret_pos >= 0 ) {
-		RETURN_LONG(ret_pos + offset);
+		RETURN_LONG(ret_pos);
 	} else {
 		RETURN_FALSE;
 	}
@@ -304,7 +304,7 @@ PHP_FUNCTION(grapheme_strrpos)
 		/* else we need to continue via utf16 */
 	}
 
-	ret_pos = grapheme_strrpos_utf16(haystack, haystack_len, needle, needle_len, offset, 0 /* f_ignore_case */ TSRMLS_CC);
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL, 0 /* f_ignore_case */, 1/* last */ TSRMLS_CC);
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
@@ -382,7 +382,7 @@ PHP_FUNCTION(grapheme_strripos)
 		/* else we need to continue via utf16 */
 	}
 
-	ret_pos = grapheme_strrpos_utf16(haystack, haystack_len, needle, needle_len, offset, 1 /* f_ignore_case */ TSRMLS_CC);
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, offset, NULL,  1 /* f_ignore_case */, 1 /*last */ TSRMLS_CC);
 
 	if ( ret_pos >= 0 ) {
 		RETURN_LONG(ret_pos);
@@ -434,6 +434,7 @@ PHP_FUNCTION(grapheme_substr)
 		grapheme_substr_ascii((char *)str, str_len, start, length, ZEND_NUM_ARGS(), (char **) &sub_str, &sub_str_len);
 
 		if ( NULL == sub_str ) {
+			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: invalid parameters", 1 TSRMLS_CC );
 			RETURN_FALSE;
 		}
 
@@ -530,6 +531,15 @@ PHP_FUNCTION(grapheme_substr)
 		RETURN_STRINGL(((char *)sub_str), sub_str_len, 0);
 	}
 
+	if(length == 0) {
+		/* empty length - we've validated start, we can return "" now */
+		if (ustr) {
+			efree(ustr);
+		}
+		ubrk_close(bi);
+		RETURN_EMPTY_STRING();		
+	}
+
 	/* find the end point of the string to return */
 
 	if ( length < 0 ) {
@@ -554,17 +564,24 @@ PHP_FUNCTION(grapheme_substr)
 		length += iter_val;
 	}
 
+	ubrk_close(bi);
+
 	if ( UBRK_DONE == sub_str_end_pos) {
 		if(length < 0) {
-
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: length not contained in string", 1 TSRMLS_CC );
 
 			efree(ustr);
-			ubrk_close(bi);
 			RETURN_FALSE;
 		} else {
 			sub_str_end_pos = ustr_len;
 		}
+	}
+	
+	if(sub_str_start_pos > sub_str_end_pos) {
+		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_substr: length is beyond start", 1 TSRMLS_CC );
+
+		efree(ustr);
+		RETURN_FALSE;
 	}
 
 	sub_str = NULL;
@@ -572,7 +589,6 @@ PHP_FUNCTION(grapheme_substr)
 	intl_convert_utf16_to_utf8((char **)&sub_str, &sub_str_len, ustr + sub_str_start_pos, ( sub_str_end_pos - sub_str_start_pos ), &status);
 
 	efree( ustr );
-	ubrk_close( bi );
 
 	if ( U_FAILURE( status ) ) {
 		/* Set global error code. */
@@ -643,7 +659,7 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	}
 
 	/* need to work in utf16 */
-	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, 0, &uchar_pos, f_ignore_case TSRMLS_CC );
+	ret_pos = grapheme_strpos_utf16(haystack, haystack_len, needle, needle_len, 0, &uchar_pos, f_ignore_case, 0 /*last */ TSRMLS_CC );
 
 	if ( ret_pos < 0 ) {
 		RETURN_FALSE;

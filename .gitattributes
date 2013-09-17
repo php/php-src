@@ -23,6 +23,8 @@ sapi/continuity/capi.c          ident
 Zend/RFCs/002.txt               ident
 Zend/RFCs/003.txt               ident
 NEWS                            merge=NEWS
+UPGRADING                       merge=NEWS
+UPGRADING.INTERNALS             merge=NEWS
 /ext/bz2/tests/with_strings.phpt	-crlf
 /ext/dom/tests/bug40836.phpt	-crlf
 /ext/dom/tests/domelement.phpt	-crlf

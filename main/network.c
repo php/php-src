@@ -872,7 +872,7 @@ skip_bind:
 					efree(local_address);
 				}
 			}
-			/* free error string recieved during previous iteration (if any) */
+			/* free error string received during previous iteration (if any) */
 			if (error_string && *error_string) {
 				efree(*error_string);
 				*error_string = NULL;

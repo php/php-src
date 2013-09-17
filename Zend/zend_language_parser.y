@@ -41,16 +41,18 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 
 #define YYERROR_VERBOSE
 #define YYSTYPE znode
-#ifdef ZTS
-# define YYPARSE_PARAM tsrm_ls
-# define YYLEX_PARAM tsrm_ls
-#endif
-
 
 %}
 
 %pure_parser
 %expect 3
+
+%code requires {
+#ifdef ZTS
+# define YYPARSE_PARAM tsrm_ls
+# define YYLEX_PARAM tsrm_ls
+#endif
+}
 
 %token END 0 "end of file"
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
@@ -627,8 +629,8 @@ trait_precedence:
 ;
 
 trait_reference_list:
-		fully_qualified_class_name									{ zend_resolve_class_name(&$1, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC); zend_init_list(&$$.u.op.ptr, Z_STRVAL($1.u.constant) TSRMLS_CC); }
-	|	trait_reference_list ',' fully_qualified_class_name			{ zend_resolve_class_name(&$3, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC); zend_add_to_list(&$1.u.op.ptr, Z_STRVAL($3.u.constant) TSRMLS_CC); $$ = $1; }
+		fully_qualified_class_name									{ zend_resolve_class_name(&$1 TSRMLS_CC); zend_init_list(&$$.u.op.ptr, Z_STRVAL($1.u.constant) TSRMLS_CC); }
+	|	trait_reference_list ',' fully_qualified_class_name			{ zend_resolve_class_name(&$3 TSRMLS_CC); zend_add_to_list(&$1.u.op.ptr, Z_STRVAL($3.u.constant) TSRMLS_CC); $$ = $1; }
 ;
 
 trait_method_reference:

@@ -254,15 +254,13 @@ void shutdown_executor(TSRMLS_D) /* {{{ */
 		if (EG(user_error_handler)) {
 			zeh = EG(user_error_handler);
 			EG(user_error_handler) = NULL;
-			zval_dtor(zeh);
-			FREE_ZVAL(zeh);
+			zval_ptr_dtor(&zeh);
 		}
 
 		if (EG(user_exception_handler)) {
 			zeh = EG(user_exception_handler);
 			EG(user_exception_handler) = NULL;
-			zval_dtor(zeh);
-			FREE_ZVAL(zeh);
+			zval_ptr_dtor(&zeh);
 		}
 
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
@@ -425,7 +423,8 @@ ZEND_API zend_bool zend_is_executing(TSRMLS_D) /* {{{ */
 
 ZEND_API void _zval_ptr_dtor(zval **zval_ptr ZEND_FILE_LINE_DC) /* {{{ */
 {
-	i_zval_ptr_dtor(*zval_ptr ZEND_FILE_LINE_RELAY_CC);
+	TSRMLS_FETCH();
+	i_zval_ptr_dtor(*zval_ptr ZEND_FILE_LINE_RELAY_CC TSRMLS_CC);
 }
 /* }}} */
 
@@ -535,13 +534,13 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					if (fix_save) {
 						save--;
 					}
-					if (inline_change && !IS_INTERNED(save)) {
-						efree(save);
+					if (inline_change) {
+						str_efree(save);
 					}
 					save = NULL;
 				}
-				if (inline_change && save && save != actual && !IS_INTERNED(save)) {
-					efree(save);
+				if (inline_change && save && save != actual) {
+					str_efree(save);
 				}
 				zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",  actual,  actual);
 				p->type = IS_STRING;
@@ -553,7 +552,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 			}
 		} else {
 			if (inline_change) {
-				STR_FREE(Z_STRVAL_P(p));
+				str_efree(Z_STRVAL_P(p));
 			}
 			*p = const_value;
 		}
@@ -954,9 +953,9 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache TS
 		if (EX(function_state).function->common.scope) {
 			EG(scope) = EX(function_state).function->common.scope;
 		}
-		if(EXPECTED(zend_execute_internal == NULL)) {
+		if (EXPECTED(zend_execute_internal == NULL)) {
 			/* saves one function call if zend_execute_internal is not used */
-			((zend_internal_function *) EX(function_state).function)->handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
+			EX(function_state).function->internal_function.handler(fci->param_count, *fci->retval_ptr_ptr, fci->retval_ptr_ptr, fci->object_ptr, 1 TSRMLS_CC);
 		} else {
 			zend_execute_internal(&execute_data, fci, 1 TSRMLS_CC);
 		}
@@ -1056,7 +1055,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, int name_length, const zend_
 	}
 
 	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
-	 * (doesn't impact fuctionality of __autoload()
+	 * (doesn't impact functionality of __autoload()
 	*/
 	if (!use_autoload || zend_is_compiling(TSRMLS_C)) {
 		if (!key) {
@@ -1295,7 +1294,7 @@ void execute_new_code(TSRMLS_D) /* {{{ */
 		opline++;
 	}
 
-	zend_release_labels(TSRMLS_C);
+	zend_release_labels(1 TSRMLS_CC);
 
 	EG(return_value_ptr_ptr) = NULL;
 	EG(active_op_array) = CG(active_op_array);

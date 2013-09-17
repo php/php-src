@@ -23,6 +23,7 @@
 
 #include "SAPI.h"
 
+extern const zend_function_entry server_additional_functions[];
 extern sapi_module_struct cli_server_sapi_module;
 extern int do_cli_server(int argc, char **argv TSRMLS_DC);
 
