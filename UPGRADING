@@ -30,6 +30,14 @@ PHP X.Y UPGRADE NOTES
   }
   ?>
 
+- JSON:
+  json_decode() no longer accepts non-lowercase variants of lone JSON true,
+  false or null values. For example, True or FALSE will now cause json_decode to
+  return NULL and set an error value you can fetch with json_last_error().
+  This affects JSON texts consisting solely of true, false or null. Text
+  containing non-lowercase values inside JSON arrays or objects has never been
+  accepted.
+
 ========================================
 2. New Features
 ========================================
