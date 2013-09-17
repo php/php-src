@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Made calls from incompatible context issue an E_DEPRECATED warning instead
     of E_STRICT (phase 1 of RFC: https://wiki.php.net/rfc/incompat_ctx).
 	(Gustavo)
+  . Uploads equal or greater than 2GB in size are now accepted.
+    (Ralf Lang, Mike)
 
 - cURL:
   . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir
