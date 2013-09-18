@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-05 Sep 2013, PHP 5.4.20 RC1
+19 Sep 2013, PHP 5.4.20
 
 - Core:
   . Fixed bug #60598 (cli/apache sapi segfault on objects manipulation).
