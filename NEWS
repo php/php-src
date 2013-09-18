@@ -1,31 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.5
-
-- CLI server:
-  . Fixed bug #65633 (built-in server treat some http headers as
-    case-sensitive). (Adam)
-
-- Datetime:
-  . Fixed bug #65502 (DateTimeImmutable::createFromFormat returns DateTime).
-    (Boro Sitnikovski)
-  . Fixed bug #65548 (Comparison for DateTimeImmutable doesn't work).
-    (Boro Sitnikovski)
-
-- GD
-  . Ensure that the defined interpolation method is used with the generic
-    scaling methods. (Pierre)
-
-- OPcache:
-  . Fixed bug #65665 (Exception not properly caught when opcache enabled).
-    (Laruence)
-  . Fixed bug #65510 (5.5.2 crashes in _get_zval_ptr_ptr_var). (Dmitry)
-
-- SPL:
-  . Fix bug #64782 (SplFileObject constructor make $context optional / give it
-    a default value). (Nikita)
-
-?? ??? 2013, PHP 5.5.4
+18 Sep 2013, PHP 5.5.4
 
 - Core:
   . Fixed bug #60598 (cli/apache sapi segfault on objects manipulation).
