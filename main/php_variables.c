@@ -29,6 +29,9 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 #include "zend_globals.h"
+#ifdef PHP_WIN32
+# include "win32/php_inttypes.h"
+#endif
 
 /* for systems that need to override reading of environment variables */
 void _php_import_environment_variables(zval *array_ptr TSRMLS_DC);
@@ -292,11 +295,7 @@ static inline int add_post_vars(zval *arr, post_var_data_t *vars, zend_bool eof 
 	while (add_post_var(arr, vars, eof TSRMLS_CC)) {
 		if (++vars->cnt > max_vars) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING,
-#ifdef PHP_WIN32
-					"Input variables exceeded %I64u. "
-#else
 					"Input variables exceeded %" PRIu64 ". "
-#endif
 					"To increase the limit change max_input_vars in php.ini.",
 					max_vars);
 			return FAILURE;
