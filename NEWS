@@ -15,9 +15,6 @@ PHP                                                                        NEWS
   . Fixed bug #64441 (FILTER_VALIDATE_URL rejects fully qualified domain names).
     (Syra)
 
-- SPL:
-  . Fixed bug #60577 (count(new EmptyIterator) returns 1). (Levi Morrison)
-
 ?? ??? 2013, PHP 5.4.20
 
 - Core:
