@@ -23,7 +23,7 @@ $phar->extractTo(dirname(__FILE__) . '/extract2', 'mount2');
 $phar->extractTo(dirname(__FILE__) . '/extract2');
 $out = array();
 
-foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__FILE__) . '/extract', 0x00003000), RecursiveIteratorIterator::CHILD_FIRST) as $path => $file) {
+foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__FILE__) . '/extract2', 0x00003000), RecursiveIteratorIterator::CHILD_FIRST) as $path => $file) {
 	$extracted[] = $path;
 }
 
@@ -51,10 +51,10 @@ $dir = dirname(__FILE__) . '/extract1/';
 @rmdir($dir);
 ?>
 --EXPECTF--
-%sextract%cfile1.txt
-%sextract%cfile2.txt
-%sextract%cone
-%sextract%csubdir
-%sextract%csubdir%cectory
-%sextract%csubdir%cectory%cfile.txt
+%sextract2%cfile1.txt
+%sextract2%cfile2.txt
+%sextract2%cone
+%sextract2%csubdir
+%sextract2%csubdir%cectory
+%sextract2%csubdir%cectory%cfile.txt
 ===DONE===
