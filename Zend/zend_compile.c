@@ -3083,7 +3083,7 @@ static void do_inherit_method(zend_function *function) /* {{{ */
 
 static zend_bool zend_do_perform_implementation_check(const zend_function *fe, const zend_function *proto TSRMLS_DC) /* {{{ */
 {
-	zend_uint i;
+	zend_uint i, num_args;
 
 	/* If it's a user function then arg_info == NULL means we don't have any parameters but
 	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
@@ -3108,8 +3108,7 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 	}
 
 	/* check number of arguments */
-	if (proto->common.required_num_args < fe->common.required_num_args
-		|| proto->common.num_args > fe->common.num_args) {
+	if (proto->common.required_num_args < fe->common.required_num_args) {
 		return 0;
 	}
 
@@ -3125,7 +3124,9 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 		return 0;
 	}
 
-	for (i=0; i < proto->common.num_args; i++) {
+	num_args = MIN(proto->common.num_args, fe->common.num_args);
+
+	for (i = 0; i < num_args; i++) {
 		if (ZEND_LOG_XOR(fe->common.arg_info[i].class_name, proto->common.arg_info[i].class_name)) {
 			/* Only one has a type hint and the other one doesn't */
 			return 0;

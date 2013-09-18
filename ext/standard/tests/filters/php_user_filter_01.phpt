@@ -13,5 +13,6 @@ class bar extends php_user_filter {
     function onClose() {}
 }
 ?>
+===DONE===
 --EXPECTF--
-Strict Standards: Declaration of bar::filter() should be compatible with php_user_filter::filter($in, $out, &$consumed, $closing) in %s on line %d
+===DONE===

@@ -10,7 +10,7 @@ abstract class TestInterface {
 }
 
 class Test extends TestInterface {
-	public function __construct() {}
+	public function __construct(OtherClass $var) {}
 }
 
 ?>

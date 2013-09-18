@@ -8,7 +8,7 @@ interface IFoo {
 }
 
 trait TFoo {
-  public function oneArgument() {}
+  public function oneArgument($a, $b) {}
 }
 
 class C implements IFoo {
@@ -16,4 +16,4 @@ class C implements IFoo {
 }
 
 --EXPECTF--
-Fatal error: Declaration of TFoo::oneArgument() must be compatible with IFoo::oneArgument($a) in %s on line %d
+Fatal error: Declaration of TFoo::oneArgument($a, $b) must be compatible with IFoo::oneArgument($a) in %s on line %d

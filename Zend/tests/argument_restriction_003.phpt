@@ -11,7 +11,7 @@ Abstract Class Base {
 }
 
 class Sub extends Base {
-	public function test() {
+	public function test(Bar $foo) {
 	}	
 }
 ?>

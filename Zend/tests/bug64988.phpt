@@ -17,7 +17,7 @@ class Noisy1 extends Base1 {
 	}
 }
 class Smooth1 extends Noisy1 {
-	public function insert(array $data) {
+	public function insert(array $data, $option1) {
 		return parent::insert($data, count($data));
 	}
 }
