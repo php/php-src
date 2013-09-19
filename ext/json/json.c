@@ -98,6 +98,7 @@ static PHP_MINIT_FUNCTION(json)
 	REGISTER_LONG_CONSTANT("JSON_HEX_APOS", PHP_JSON_HEX_APOS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_HEX_QUOT", PHP_JSON_HEX_QUOT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_FORCE_OBJECT", PHP_JSON_FORCE_OBJECT, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("JSON_FORCE_EMPTY_OBJECT", PHP_JSON_FORCE_EMPTY_OBJECT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_NUMERIC_CHECK", PHP_JSON_NUMERIC_CHECK, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_UNESCAPED_SLASHES", PHP_JSON_UNESCAPED_SLASHES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("JSON_PRETTY_PRINT", PHP_JSON_PRETTY_PRINT, CONST_CS | CONST_PERSISTENT);
@@ -247,6 +248,12 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 		return;
 	}
 
+	i = myht ? zend_hash_num_elements(myht) : 0;
+
+	if (i == 0 && (options & PHP_JSON_FORCE_EMPTY_OBJECT)) {
+		r = PHP_JSON_OUTPUT_OBJECT;
+	}
+
 	if (r == PHP_JSON_OUTPUT_ARRAY) {
 		smart_str_appendc(buf, '[');
 	} else {
@@ -255,8 +262,6 @@ static void json_encode_array(smart_str *buf, zval **val, int options TSRMLS_DC)
 
 	json_pretty_print_char(buf, options, '\n' TSRMLS_CC);
 	++JSON_G(encoder_depth);
-
-	i = myht ? zend_hash_num_elements(myht) : 0;
 
 	if (i > 0)
 	{
