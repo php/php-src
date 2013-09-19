@@ -2140,11 +2140,8 @@ void zend_resolve_non_class_name(znode *element_name, zend_bool *check_namespace
 
 	if (compound && CG(current_import)) {
 		len = compound - Z_STRVAL(element_name->u.constant);
-		if (case_sensitive) {
-			lookup_name = estrndup(Z_STRVAL(element_name->u.constant), len);
-		} else {
-			lookup_name = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
-		}
+		/* namespace is always lowercase */
+		lookup_name = zend_str_tolower_dup(Z_STRVAL(element_name->u.constant), len);
 		/* Check if first part of compound name is an import name */
 		if (zend_hash_find(CG(current_import), lookup_name, len+1, (void**)&ns) == SUCCESS) {
 			/* Substitute import name */
