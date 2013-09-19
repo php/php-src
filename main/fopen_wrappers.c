@@ -775,7 +775,12 @@ PHPAPI char *expand_filepath_with_mode(const char *filepath, char *real_path, co
 				 * we cannot cannot getcwd() and the requested,
 				 * relatively referenced file is accessible */
 				copy_len = strlen(filepath) > MAXPATHLEN - 1 ? MAXPATHLEN - 1 : strlen(filepath);
-				real_path = estrndup(filepath, copy_len);
+				if (real_path) {
+					memcpy(real_path, filepath, copy_len);
+					real_path[copy_len] = '\0';
+				} else {
+					real_path = estrndup(filepath, copy_len);
+				}
 				close(fdtest);
 				return real_path;
 			} else {
