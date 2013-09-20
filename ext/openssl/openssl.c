@@ -129,6 +129,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_export, 0, 0, 2)
     ZEND_ARG_INFO(0, notext)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_digest, 0, 0, 2)
+	ZEND_ARG_INFO(0, x509)
+	ZEND_ARG_INFO(1, out)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_check_private_key, 0)
     ZEND_ARG_INFO(0, cert)
     ZEND_ARG_INFO(0, key)
@@ -443,6 +448,7 @@ const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_x509_checkpurpose,		arginfo_openssl_x509_checkpurpose)
 	PHP_FE(openssl_x509_check_private_key,	arginfo_openssl_x509_check_private_key)
 	PHP_FE(openssl_x509_export,				arginfo_openssl_x509_export)
+	PHP_FE(openssl_x509_digest,				arginfo_openssl_x509_digest)
 	PHP_FE(openssl_x509_export_to_file,		arginfo_openssl_x509_export_to_file)
 
 /* PKCS12 funcs */
@@ -1664,6 +1670,41 @@ PHP_FUNCTION(openssl_x509_export)
 	BIO_free(bio_out);
 }
 /* }}} */
+
+PHP_FUNCTION(openssl_x509_digest)
+{
+	X509 *cert;
+    zval **zcert, *zout;
+	long certresource;
+
+    unsigned char md[EVP_MAX_MD_SIZE];
+	unsigned int n;
+
+	RETVAL_FALSE;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zz", &zcert, &zout) == FAILURE) {
+		return;
+	}
+
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
+	if (cert == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get cert from parameter 1");
+		return;
+	}
+
+	if (!X509_digest(cert, EVP_sha1(), md, &n)) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
+		return;
+	}
+
+	zval_dtor(zout);
+	ZVAL_STRINGL(zout, md, n, 1);
+
+	if (certresource == -1 && cert) {
+		X509_free(cert);
+	}
+	RETVAL_TRUE;
+}
 
 /* {{{ proto bool openssl_x509_check_private_key(mixed cert, mixed key)
    Checks if a private key corresponds to a CERT */
