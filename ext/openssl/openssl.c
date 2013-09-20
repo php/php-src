@@ -129,9 +129,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_export, 0, 0, 2)
     ZEND_ARG_INFO(0, notext)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_digest, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_digest, 0, 0, 1)
 	ZEND_ARG_INFO(0, x509)
-	ZEND_ARG_INFO(1, out)
 	ZEND_ARG_INFO(0, method)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
@@ -1676,7 +1675,7 @@ PHP_FUNCTION(openssl_x509_export)
 PHP_FUNCTION(openssl_x509_digest)
 {
 	X509 *cert;
-	zval **zcert, *zout;
+	zval **zcert;
 	long certresource;
 	zend_bool raw_output = 0;
 	char *method = "sha1";
@@ -1688,7 +1687,7 @@ PHP_FUNCTION(openssl_x509_digest)
 
 	RETVAL_FALSE;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zz|sb", &zcert, &zout, &method, &method_len, &raw_output) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|sb", &zcert, &method, &method_len, &raw_output) == FAILURE) {
 		return;
 	}
 
@@ -1701,7 +1700,7 @@ PHP_FUNCTION(openssl_x509_digest)
 	mdtype = EVP_get_digestbyname(method);
 	if (!mdtype) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!X509_digest(cert, mdtype, md, &n)) {
@@ -1709,22 +1708,19 @@ PHP_FUNCTION(openssl_x509_digest)
 		return;
 	}
 
-	zval_dtor(zout);
-
 	if (raw_output) {
-		ZVAL_STRINGL(zout, md, n, 1);
+		RETVAL_STRINGL(md, n, 1);
 	} else {
 		int digest_str_len = n * 2;
 		char *digest_str = emalloc(digest_str_len + 1);
 
 		make_digest_ex(digest_str, md, n);
-		ZVAL_STRINGL(zout, digest_str, digest_str_len, 0);
+		RETVAL_STRINGL(digest_str, digest_str_len, 0);
 	}
 
 	if (certresource == -1 && cert) {
 		X509_free(cert);
 	}
-	RETVAL_TRUE;
 }
 
 /* {{{ proto bool openssl_x509_check_private_key(mixed cert, mixed key)
