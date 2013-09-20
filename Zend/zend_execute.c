@@ -1133,9 +1133,6 @@ convert_to_array:
 		case IS_STRING: {
 				zval tmp;
 
-				if (type != BP_VAR_UNSET && Z_STRLEN_P(container)==0) {
-					goto convert_to_array;
-				}
 				if (dim == NULL) {
 					zend_error_noreturn(E_ERROR, "[] operator not supported for strings");
 				}
