@@ -132,6 +132,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_digest, 0, 0, 2)
 	ZEND_ARG_INFO(0, x509)
 	ZEND_ARG_INFO(1, out)
+	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_check_private_key, 0)
@@ -1676,13 +1677,14 @@ PHP_FUNCTION(openssl_x509_digest)
 	X509 *cert;
     zval **zcert, *zout;
 	long certresource;
+	zend_bool raw_output = 0;
 
     unsigned char md[EVP_MAX_MD_SIZE];
 	unsigned int n;
 
 	RETVAL_FALSE;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zz", &zcert, &zout) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zz|b", &zcert, &zout, &raw_output) == FAILURE) {
 		return;
 	}
 
@@ -1698,7 +1700,16 @@ PHP_FUNCTION(openssl_x509_digest)
 	}
 
 	zval_dtor(zout);
-	ZVAL_STRINGL(zout, md, n, 1);
+
+	if (raw_output) {
+		ZVAL_STRINGL(zout, md, n, 1);
+	} else {
+		int digest_str_len = n * 2;
+		char *digest_str = emalloc(digest_str_len + 1);
+
+		make_digest_ex(digest_str, md, n);
+		ZVAL_STRINGL(zout, digest_str, digest_str_len, 0);
+	}
 
 	if (certresource == -1 && cert) {
 		X509_free(cert);
