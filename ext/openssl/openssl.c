@@ -1676,14 +1676,14 @@ PHP_FUNCTION(openssl_x509_export)
 PHP_FUNCTION(openssl_x509_digest)
 {
 	X509 *cert;
-    zval **zcert, *zout;
+	zval **zcert, *zout;
 	long certresource;
 	zend_bool raw_output = 0;
 	char *method = "sha1";
 	int method_len;
 
 	const EVP_MD *mdtype;
-    unsigned char md[EVP_MAX_MD_SIZE];
+	unsigned char md[EVP_MAX_MD_SIZE];
 	unsigned int n;
 
 	RETVAL_FALSE;
