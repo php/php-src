@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - CLI server:
   . Fixed bug #65633 (built-in server treat some http headers as
     case-sensitive). (Adam)
+  . Added application/pdf to PHP CLI Web Server mime types (Chris Jones)
 
 - Datetime:
   . Fixed bug #65502 (DateTimeImmutable::createFromFormat returns DateTime).
