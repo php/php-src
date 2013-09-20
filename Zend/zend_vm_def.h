@@ -2463,7 +2463,7 @@ ZEND_VM_HANDLER(112, ZEND_INIT_METHOD_CALL, TMP|VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 			FREE_OP2();
 			HANDLE_EXCEPTION();
 		}
-		zend_error_noreturn(E_ERROR, "Call to a member function %s() on a non-object", function_name_strval);
+		zend_error_noreturn(E_ERROR, "Call to a member function %s() on %s", function_name_strval, zend_get_type_by_const(Z_TYPE_P(call->object)));
 	}
 
 	if ((call->fbc->common.fn_flags & ZEND_ACC_STATIC) != 0) {
