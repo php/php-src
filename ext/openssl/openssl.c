@@ -132,6 +132,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_digest, 0, 0, 2)
 	ZEND_ARG_INFO(0, x509)
 	ZEND_ARG_INFO(1, out)
+	ZEND_ARG_INFO(0, method)
 	ZEND_ARG_INFO(0, raw_output)
 ZEND_END_ARG_INFO()
 
@@ -1678,13 +1679,16 @@ PHP_FUNCTION(openssl_x509_digest)
     zval **zcert, *zout;
 	long certresource;
 	zend_bool raw_output = 0;
+	char *method = "sha1";
+	int method_len;
 
+	const EVP_MD *mdtype;
     unsigned char md[EVP_MAX_MD_SIZE];
 	unsigned int n;
 
 	RETVAL_FALSE;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zz|b", &zcert, &zout, &raw_output) == FAILURE) {
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Zz|sb", &zcert, &zout, &method, &method_len, &raw_output) == FAILURE) {
 		return;
 	}
 
@@ -1694,7 +1698,13 @@ PHP_FUNCTION(openssl_x509_digest)
 		return;
 	}
 
-	if (!X509_digest(cert, EVP_sha1(), md, &n)) {
+	mdtype = EVP_get_digestbyname(method);
+	if (!mdtype) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
+		RETURN_FALSE;
+	}
+
+	if (!X509_digest(cert, mdtype, md, &n)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
 		return;
 	}
