@@ -2225,6 +2225,29 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
+    char *anon_class_name;
+    int anon_class_name_len;
+    
+    ++CG(anon_class_id);
+    
+    result->op_type = IS_CONST;
+    
+    anon_class_name_len = snprintf(NULL, 0, "Class$$%lu", CG(anon_class_id));
+    anon_class_name = (char*) emalloc(anon_class_name_len+1);
+    snprintf(
+        anon_class_name, 
+        anon_class_name_len+1,
+        "Class$$%lu", CG(anon_class_id)
+    );
+    
+    Z_TYPE(result->u.constant) = IS_STRING;
+    Z_STRLEN(result->u.constant) = anon_class_name_len;
+    Z_STRVAL(result->u.constant) = zend_new_interned_string(anon_class_name, anon_class_name_len+1, 0 TSRMLS_CC);  
+    
+    efree(anon_class_name);
+} /* }}} */
+
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 {
 	long fetch_class_op_number;
