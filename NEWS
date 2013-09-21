@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Ensure that the defined interpolation method is used with the generic
     scaling methods. (Pierre)
 
+- IMAP:
+  . Fixed bug #65721 (configure script broken in 5.5.4 and 5.4.20 when enabling
+    imap). (ryotakatsuki at gmail dot com)
+
 - OPcache:
   . Fixed bug #65665 (Exception not properly caught when opcache enabled).
     (Laruence)
