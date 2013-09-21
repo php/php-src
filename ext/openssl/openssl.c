@@ -1685,8 +1685,6 @@ PHP_FUNCTION(openssl_x509_digest)
 	unsigned char md[EVP_MAX_MD_SIZE];
 	unsigned int n;
 
-	RETVAL_FALSE;
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|sb", &zcert, &method, &method_len, &raw_output) == FAILURE) {
 		return;
 	}
@@ -1694,28 +1692,26 @@ PHP_FUNCTION(openssl_x509_digest)
 	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
 	if (cert == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get cert from parameter 1");
-		return;
+		RETURN_FALSE;
 	}
 
 	mdtype = EVP_get_digestbyname(method);
 	if (!mdtype) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
-		return;
-	}
-
-	if (!X509_digest(cert, mdtype, md, &n)) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "out of memory");
-		return;
-	}
-
-	if (raw_output) {
-		RETVAL_STRINGL(md, n, 1);
+		RETVAL_FALSE;
+	} else if (!X509_digest(cert, mdtype, md, &n)) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Out of memory");
+		RETVAL_FALSE;
 	} else {
-		int digest_str_len = n * 2;
-		char *digest_str = emalloc(digest_str_len + 1);
+		if (raw_output) {
+			RETVAL_STRINGL(md, n, 1);
+		} else {
+			int digest_str_len = n * 2;
+			char *digest_str = emalloc(digest_str_len + 1);
 
-		make_digest_ex(digest_str, md, n);
-		RETVAL_STRINGL(digest_str, digest_str_len, 0);
+			make_digest_ex(digest_str, md, n);
+			RETVAL_STRINGL(digest_str, digest_str_len, 0);
+		}
 	}
 
 	if (certresource == -1 && cert) {

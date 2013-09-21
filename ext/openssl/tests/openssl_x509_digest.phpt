@@ -9,8 +9,12 @@ if (!extension_loaded("openssl")) die("skip");
 
 $cert = "file://" . dirname(__FILE__) . "/cert.crt";
 
+echo "** Testing with no parameters **\n";
+var_dump(openssl_x509_digest());
+
 echo "** Testing default functionality **\n";
 var_dump(openssl_x509_digest($cert));
+
 echo "** Testing hash method md5 **\n";
 var_dump(openssl_x509_digest($cert, 'md5'));
 
@@ -22,6 +26,10 @@ var_dump(openssl_x509_digest('123'));
 echo "** Testing bad hash method **\n";
 var_dump(openssl_x509_digest($cert, 'xx45'));
 --EXPECTF--
+** Testing with no parameters **
+
+Warning: openssl_x509_digest() expects at least 1 parameter, 0 given in %s on line %d
+NULL
 ** Testing default functionality **
 string(40) "6e6fd1ea10a5a23071d61c728ee9b40df6dbc33c"
 ** Testing hash method md5 **
