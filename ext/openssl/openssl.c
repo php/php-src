@@ -4831,26 +4831,36 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 
 static int php_openssl_match_cn(const char *subjectname, const char *certname)
 {
-	int match = strcmp(subjectname, certname) == 0;
+	char *wildcard;
+	int prefix_len, suffix_len, subject_len;
 
-	if (!match) {
-		char *wildcard = strchr(certname, '*');
-		int prefix_len = wildcard - certname;
-
-		/* 1) prefix, if not empty, must match */
-		if (wildcard && (prefix_len == 0 || strncmp(subjectname, certname, prefix_len) == 0)) {
-			const char *suffix = subjectname + strlen(subjectname) - strlen(wildcard + 1);
-
-			/*
-			 * 2) suffix must match
-			 * 3) no period between prefix and suffix
-			**/
-			match = strcmp(wildcard + 1, suffix) == 0 &&
-				memchr(subjectname + prefix_len, '.', suffix - subjectname - prefix_len) == NULL;
-		}
+	if (strcmp(subjectname, certname) == 0) {
+		return 1;
 	}
 
-	return match;
+	if (!(wildcard = strchr(certname, '*'))) {
+		return 0;
+	}
+
+	// 1) prefix, if not empty, must match subject
+	prefix_len = wildcard - certname;
+	if (prefix_len && strncmp(subjectname, certname, prefix_len) != 0) {
+		return 0;
+	}
+
+	suffix_len = strlen(wildcard + 1);
+	subject_len = strlen(subjectname);
+	if (suffix_len <= subject_len) {
+		const char *suffix = subjectname + subject_len - suffix_len;
+
+		/* 2) suffix must match
+		 * 3) no . between prefix and suffix
+		 **/
+		return strcmp(wildcard + 1, suffix) == 0 &&
+			memchr(subjectname + prefix_len, '.', suffix - subjectname - prefix_len) == NULL;
+	}
+
+	return 0;
 }
 
 int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC) /* {{{ */
