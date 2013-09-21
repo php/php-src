@@ -4851,13 +4851,11 @@ static int php_openssl_match_cn(const char *subjectname, const char *certname)
 	suffix_len = strlen(wildcard + 1);
 	subject_len = strlen(subjectname);
 	if (suffix_len <= subject_len) {
-		const char *suffix = subjectname + subject_len - suffix_len;
-
 		/* 2) suffix must match
 		 * 3) no . between prefix and suffix
 		 **/
-		return strcmp(wildcard + 1, suffix) == 0 &&
-			memchr(subjectname + prefix_len, '.', suffix - subjectname - prefix_len) == NULL;
+		return strcmp(wildcard + 1, subjectname + subject_len - suffix_len) == 0 &&
+			memchr(subjectname + prefix_len, '.', subject_len - suffix_len - prefix_len) == NULL;
 	}
 
 	return 0;
