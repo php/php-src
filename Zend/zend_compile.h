@@ -83,7 +83,7 @@ typedef union _znode_op {
 	zend_op       *jmp_addr;
 	zval          *zv;
 	zend_literal  *literal;
-	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
+	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits and nested anonymous class support */
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */ 
@@ -92,7 +92,6 @@ typedef struct _znode { /* used only during compilation */
 		znode_op op;
 		zval constant; /* replaced by literal/zv */
 		zend_op_array *op_array;
-		zend_class_entry *ce;
 	} u;
 	zend_uint EA;      /* extended attributes */
 } znode;

@@ -4958,8 +4958,13 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 	char *lcname;
 	int error = 0;
 	zval **ns_name, key;
+	zend_uint opline_num = 0L;
+	
+	/* save opline_num before changing node */
+	opline_num = class_token->u.op.opline_num;
 
-	class_token->u.ce = CG(active_class_entry) ? CG(active_class_entry) : NULL;
+    /* save active class address */
+	class_token->u.op.ptr = CG(active_class_entry) ? CG(active_class_entry) : NULL;
 
 	lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 
@@ -5004,7 +5009,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 
 	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
 	new_class_entry->info.user.filename = zend_get_compiled_filename(TSRMLS_C);
-	new_class_entry->info.user.line_start = class_token->u.op.opline_num;
+	new_class_entry->info.user.line_start = opline_num;
 	new_class_entry->ce_flags |= class_token->EA;
 
 	if (parent_class_name && parent_class_name->op_type != IS_UNUSED) {
@@ -5132,7 +5137,8 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	}
 
-	CG(active_class_entry) = class_token->u.ce;
+    /* restore active class entry*/
+	CG(active_class_entry) = class_token->u.op.ptr;
 }
 /* }}} */
 
