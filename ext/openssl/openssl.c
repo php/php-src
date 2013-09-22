@@ -129,7 +129,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_export, 0, 0, 2)
     ZEND_ARG_INFO(0, notext)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_digest, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_fingerprint, 0, 0, 1)
 	ZEND_ARG_INFO(0, x509)
 	ZEND_ARG_INFO(0, method)
 	ZEND_ARG_INFO(0, raw_output)
@@ -449,7 +449,7 @@ const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_x509_checkpurpose,		arginfo_openssl_x509_checkpurpose)
 	PHP_FE(openssl_x509_check_private_key,	arginfo_openssl_x509_check_private_key)
 	PHP_FE(openssl_x509_export,				arginfo_openssl_x509_export)
-	PHP_FE(openssl_x509_digest,				arginfo_openssl_x509_digest)
+	PHP_FE(openssl_x509_fingerprint,			arginfo_openssl_x509_fingerprint)
 	PHP_FE(openssl_x509_export_to_file,		arginfo_openssl_x509_export_to_file)
 
 /* PKCS12 funcs */
@@ -1672,7 +1672,7 @@ PHP_FUNCTION(openssl_x509_export)
 }
 /* }}} */
 
-PHP_FUNCTION(openssl_x509_digest)
+PHP_FUNCTION(openssl_x509_fingerprint)
 {
 	X509 *cert;
 	zval **zcert;
