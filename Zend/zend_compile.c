@@ -4950,7 +4950,7 @@ void zend_do_default_before_statement(const znode *case_list, znode *default_tok
 }
 /* }}} */
 
-void zend_do_begin_class_declaration(const znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC) /* {{{ */
+void zend_do_begin_class_declaration(znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	int doing_inheritance = 0;
@@ -4959,10 +4959,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	int error = 0;
 	zval **ns_name, key;
 
-	if (CG(active_class_entry)) {
-		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
-		return;
-	}
+	class_token->u.ce = CG(active_class_entry) ? CG(active_class_entry) : NULL;
 
 	lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 
@@ -5051,18 +5048,19 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	CALCULATE_LITERAL_HASH(opline->op2.constant);
 
 	zend_hash_quick_update(CG(class_table), Z_STRVAL(key), Z_STRLEN(key), Z_HASH_P(&CONSTANT(opline->op1.constant)), &new_class_entry, sizeof(zend_class_entry *), NULL);
-	CG(active_class_entry) = new_class_entry;
-
+    CG(active_class_entry) = new_class_entry;
+    
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	opline->result_type = IS_VAR;
 	GET_NODE(&CG(implementing_class), opline->result);
 
 	if (CG(doc_comment)) {
-		CG(active_class_entry)->info.user.doc_comment = CG(doc_comment);
-		CG(active_class_entry)->info.user.doc_comment_len = CG(doc_comment_len);
+		new_class_entry->info.user.doc_comment = CG(doc_comment);
+		new_class_entry->info.user.doc_comment_len = CG(doc_comment_len);
 		CG(doc_comment) = NULL;
 		CG(doc_comment_len) = 0;
 	}
+	
 }
 /* }}} */
 
@@ -5134,7 +5132,7 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	}
 
-	CG(active_class_entry) = NULL;
+	CG(active_class_entry) = class_token->u.ce;
 }
 /* }}} */
 
