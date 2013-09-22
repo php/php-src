@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug #64157 (DateTime::createFromFormat() reports confusing error
     message). (Boro Sitnikovski)
 
+- DBA extension:
+  . Fixed bug #65708 (dba functions cast $key param to string in-place,
+    bypassing copy on write). (Adam)
+
 - Filter:
   . Add RFC 6598 IPs to reserved addresses. (Sebastian Nohn)
   . Fixed bug #64441 (FILTER_VALIDATE_URL rejects fully qualified domain names).
