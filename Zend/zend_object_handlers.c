@@ -142,6 +142,12 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp TSRMLS_DC
 }
 /* }}} */
 
+ZEND_API HashTable *zend_std_get_serialize_info(zval *object TSRMLS_DC) /* {{{ */
+{
+	return zend_std_get_properties(object TSRMLS_CC);
+}
+/* }}} */
+
 static zval *zend_std_call_getter(zval *object, zval *member TSRMLS_DC) /* {{{ */
 {
 	zval *retval = NULL;
@@ -1643,6 +1649,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */
 	NULL,									/* get_debug_info */
+	NULL,									/* get_serialize_info */
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
 	NULL,									/* do_operation */
