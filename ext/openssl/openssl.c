@@ -1,4 +1,5 @@
 /*
+			
    +----------------------------------------------------------------------+
    | PHP Version 5                                                        |
    +----------------------------------------------------------------------+
@@ -1672,6 +1673,33 @@ PHP_FUNCTION(openssl_x509_export)
 }
 /* }}} */
 
+int php_openssl_x509_fingerprint(X509 *peer, const char *method, int raw, char **out, int *out_len)
+{
+	unsigned char md[EVP_MAX_MD_SIZE];
+	const EVP_MD *mdtype;
+	int n;
+
+	if (!(mdtype = EVP_get_digestbyname(method))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
+		return 0;
+	} else if (!X509_digest(peer, mdtype, md, &n)) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not generate signature");
+		return 0;
+	}
+
+	if (raw) {
+		*out_len = n;
+		*out = estrndup(md, n);
+	} else {
+		*out_len = n * 2;
+		*out = emalloc(*out_len + 1);
+
+		make_digest_ex(*out, md, n);
+	}
+
+	return 1;
+}
+
 PHP_FUNCTION(openssl_x509_fingerprint)
 {
 	X509 *cert;
@@ -1681,9 +1709,8 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 	char *method = "sha1";
 	int method_len;
 
-	const EVP_MD *mdtype;
-	unsigned char md[EVP_MAX_MD_SIZE];
-	unsigned int n;
+	char *fingerprint;
+	char *fingerprint_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|sb", &zcert, &method, &method_len, &raw_output) == FAILURE) {
 		return;
@@ -1695,23 +1722,10 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 		RETURN_FALSE;
 	}
 
-	mdtype = EVP_get_digestbyname(method);
-	if (!mdtype) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
-		RETVAL_FALSE;
-	} else if (!X509_digest(cert, mdtype, md, &n)) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Out of memory");
-		RETVAL_FALSE;
+	if (php_openssl_x509_fingerprint(cert, method, raw_output, &fingerprint, &fingerprint_len)) {
+		RETVAL_STRINGL(fingerprint, fingerprint_len, 0);
 	} else {
-		if (raw_output) {
-			RETVAL_STRINGL(md, n, 1);
-		} else {
-			int digest_str_len = n * 2;
-			char *digest_str = emalloc(digest_str_len + 1);
-
-			make_digest_ex(digest_str, md, n);
-			RETVAL_STRINGL(digest_str, digest_str_len, 0);
-		}
+		RETVAL_FALSE;
 	}
 
 	if (certresource == -1 && cert) {
@@ -4918,6 +4932,33 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	}
 
 	/* if the cert passed the usual checks, apply our own local policies now */
+
+	if (GET_VER_OPT("peer_fingerprint") && Z_TYPE_PP(val) == IS_STRING) {
+		char *fingerprint;
+		int fingerprint_len;
+		const char *method = NULL;
+
+		switch (Z_STRLEN_PP(val)) {
+			case 32:
+				method = "md5";
+				break;
+
+			case 40:
+				method = "sha1";
+				break;
+		}
+
+		if (method && php_openssl_x509_fingerprint(peer, method, 0, &fingerprint, &fingerprint_len)) {
+			int match = strcmp(Z_STRVAL_PP(val), fingerprint) == 0;
+
+			efree(fingerprint);
+
+			if (!match) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer fingerprint `%s` not matched", Z_STRVAL_PP(val));
+				return FAILURE;
+			}
+		}
+	}
 
 	name = X509_get_subject_name(peer);
 
