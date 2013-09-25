@@ -581,7 +581,6 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals TSRMLS
 #endif
 	EG(saved_fpu_cw_ptr) = NULL;
 	EG(active) = 0;
-	EG(anon_class_id) = 0;
 }
 /* }}} */
 
