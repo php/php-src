@@ -1446,7 +1446,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 }
 
 /* zend_compile() replacement */
-static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
+zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
 	zend_persistent_script *persistent_script = NULL;
 	char *key = NULL;
