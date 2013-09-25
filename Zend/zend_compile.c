@@ -2243,7 +2243,7 @@ void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
     
     Z_TYPE(result->u.constant) = IS_STRING;
     Z_STRLEN(result->u.constant) = anon_class_name_len;
-    Z_STRVAL(result->u.constant) = zend_new_interned_string(anon_class_name, anon_class_name_len+1, 0 TSRMLS_CC);  
+    Z_STRVAL(result->u.constant) = (char*) zend_new_interned_string(anon_class_name, anon_class_name_len+1, 0 TSRMLS_CC);  
     
     efree(anon_class_name);
 } /* }}} */
@@ -4522,7 +4522,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 {
 	zend_class_entry *ce, **pce;
 	zval *op1, *op2;
-    
+
 	if (compile_time) {
 		op1 = &CONSTANT_EX(op_array, opline->op1.constant);
 		op2 = &CONSTANT_EX(op_array, opline->op2.constant);
@@ -4530,23 +4530,23 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		op1 = opline->op1.zv;
 		op2 = opline->op2.zv;
 	}
-	
+
 	if (zend_hash_quick_find(class_table, Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_HASH_P(op1), (void **) &pce)==FAILURE) {
 		zend_error(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(op1));
 		return NULL;
 	} else {
 		ce = *pce;
 	}
-	
+
 	ce->refcount++;
-    
+
     /* return anonymous class */
 	if (ce->ce_flags & (ZEND_ACC_ANON_CLASS) &&
 	    ce->ce_flags & (ZEND_ACC_FINAL_CLASS)) {
 	    ce->refcount--;
 	    return ce;
 	}
-	
+
 	if (zend_hash_quick_add(class_table, Z_STRVAL_P(op2), Z_STRLEN_P(op2)+1, Z_HASH_P(op2), &ce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		ce->refcount--;
 		if (!compile_time) {
@@ -4563,6 +4563,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 			zend_verify_abstract_class(ce TSRMLS_CC);
 		}
 		
+		/* set final anonymous class */
 		if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {   
 		    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 		}
@@ -4617,17 +4618,16 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 
 	ce->refcount++;
 
-    
-
 	/* Register the derived class */
 	if (zend_hash_quick_add(class_table, Z_STRVAL_P(op2), Z_STRLEN_P(op2)+1, Z_HASH_P(op2), pce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", ce->name);
 	}
 
-    if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {   
+    /* set final anonymous class */
+    if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
 	    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
-	}	
-	
+	}
+
 	return ce;
 }
 /* }}} */
