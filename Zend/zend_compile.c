@@ -2235,14 +2235,16 @@ void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
     
     Z_TYPE(result->u.constant) = IS_STRING;
     class_name_len = snprintf(
-        NULL, 0, "Class$$%lu", CG(anon_class_id))+1;
-    class_name = (char*) safe_emalloc(class_name_len+1, 1, 1);
+        NULL, 0, "Class$$%lu", CG(anon_class_id));
+    class_name = (char*) emalloc(class_name_len+1);
     snprintf(
-        class_name, class_name_len,
+        class_name, class_name_len+1,
         "Class$$%lu", CG(anon_class_id)
     );
-    Z_STRLEN(result->u.constant) = class_name_len;
+    class_name[class_name_len] = '\0';
     
+    Z_STRLEN(result->u.constant) = class_name_len;
+
 #ifndef ZTS
     Z_STRVAL(result->u.constant) = (char*) zend_new_interned_string(
             class_name, class_name_len+1, 0 TSRMLS_CC);
