@@ -2226,26 +2226,30 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 /* }}} */
 
 void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
-    char *anon_class_name;
-    int anon_class_name_len;
+    char *class_name = NULL;
+    int class_name_len = 0;
     
-    ++CG(anon_class_id);
+    CG(anon_class_id)++;
     
     result->op_type = IS_CONST;
     
-    anon_class_name_len = snprintf(NULL, 0, "Class$$%lu", CG(anon_class_id));
-    anon_class_name = (char*) emalloc(anon_class_name_len+1);
+    Z_TYPE(result->u.constant) = IS_STRING;
+    class_name_len = snprintf(
+        NULL, 0, "Class$$%lu", CG(anon_class_id))+1;
+    class_name = (char*) safe_emalloc(class_name_len+1, 1, 1);
     snprintf(
-        anon_class_name, 
-        anon_class_name_len+1,
+        class_name, class_name_len,
         "Class$$%lu", CG(anon_class_id)
     );
+    Z_STRLEN(result->u.constant) = class_name_len;
     
-    Z_TYPE(result->u.constant) = IS_STRING;
-    Z_STRLEN(result->u.constant) = anon_class_name_len;
-    Z_STRVAL(result->u.constant) = (char*) zend_new_interned_string(anon_class_name, anon_class_name_len+1, 0 TSRMLS_CC);  
-    
-    efree(anon_class_name);
+#ifndef ZTS
+    Z_STRVAL(result->u.constant) = (char*) zend_new_interned_string(
+            class_name, class_name_len+1, 0 TSRMLS_CC);
+    efree(class_name);
+#else
+    Z_STRVAL(result->u.constant) = class_name;
+#endif
 } /* }}} */
 
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
@@ -5033,12 +5037,12 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->name = zend_new_interned_string(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant) + 1, 1 TSRMLS_CC);
 	new_class_entry->name_length = Z_STRLEN(class_name->u.constant);
-
+    
 	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
 	new_class_entry->info.user.filename = zend_get_compiled_filename(TSRMLS_C);
 	new_class_entry->info.user.line_start = opline_num;
 	new_class_entry->ce_flags |= class_token->EA;
-
+    
 	if (parent_class_name && parent_class_name->op_type != IS_UNUSED) {
 		switch (parent_class_name->EA) {
 			case ZEND_FETCH_CLASS_SELF:
@@ -5087,8 +5091,8 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 	GET_NODE(&CG(implementing_class), opline->result);
 
 	if (CG(doc_comment)) {
-		new_class_entry->info.user.doc_comment = CG(doc_comment);
-		new_class_entry->info.user.doc_comment_len = CG(doc_comment_len);
+		CG(active_class_entry)->info.user.doc_comment = CG(doc_comment);
+		CG(active_class_entry)->info.user.doc_comment_len = CG(doc_comment_len);
 		CG(doc_comment) = NULL;
 		CG(doc_comment_len) = 0;
 	}
