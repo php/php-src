@@ -743,7 +743,7 @@ anon_class_type:
 ;
 
 anon_class_extends:
-            /* empty */					        { $$.op_type = IS_UNUSED; }
+            /* empty */			                { $$.op_type = IS_UNUSED; }
 	|	T_EXTENDS fully_qualified_class_name	{ zend_do_fetch_class(&$$, &$2 TSRMLS_CC); }
 ;
 

@@ -3759,7 +3759,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	zend_uint i, ignore = 0;
 	zend_uint current_iface_num = ce->num_interfaces;
 	zend_uint parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
-
+    
 	for (i = 0; i < ce->num_interfaces; i++) {
 		if (ce->interfaces[i] == NULL) {
 			memmove(ce->interfaces + i, ce->interfaces + i + 1, sizeof(zend_class_entry*) * (--ce->num_interfaces - i));
@@ -3767,11 +3767,18 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		} else if (ce->interfaces[i] == iface) {
 			if (i < parent_iface_num) {
 				ignore = 1;
-			} else {
+			} else {        
+			    if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
+                    if (ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
+                        continue; 
+                    }
+                }
+                
 				zend_error(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ce->name, iface->name);
 			}
 		}
 	}
+	
 	if (ignore) {
 		/* Check for attempt to redeclare interface constants */
 		zend_hash_apply_with_arguments(&ce->constants_table TSRMLS_CC, (apply_func_args_t) do_interface_constant_check, 1, &iface);
@@ -4571,7 +4578,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		
 		/* set final anonymous class */
 		if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {   
-		    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
+		    ce->ce_flags = ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS;
 		}
 		return ce;
 	}
