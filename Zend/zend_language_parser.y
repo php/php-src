@@ -45,7 +45,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %}
 
 %pure_parser
-%expect 8
+%expect 3
 
 %code requires {
 #ifdef ZTS
@@ -745,7 +745,6 @@ anon_class_type:
 anon_class_extends:
             /* empty */					        { $$.op_type = IS_UNUSED; }
 	|	T_EXTENDS fully_qualified_class_name	{ zend_do_fetch_class(&$$, &$2 TSRMLS_CC); }
-	|	T_EXTENDS dynamic_class_name_reference	{ zend_do_end_variable_parse(&$2, BP_VAR_R, 0 TSRMLS_CC); zend_do_fetch_class(&$$, &$2 TSRMLS_CC); }
 ;
 
 anon_class_decl:
