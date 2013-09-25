@@ -2407,14 +2407,14 @@ static inline int accel_find_sapi(TSRMLS_D)
 	return FAILURE;
 }
 
-static void zend_accel_init_shm(TSRMLS_D)
+static int zend_accel_init_shm(TSRMLS_D)
 {
 	zend_shared_alloc_lock(TSRMLS_C);
 
 	accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals));
 	if (!accel_shared_globals) {
 		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
-		return;
+		return FAILURE;
 	}
 	ZSMMG(app_shared_globals) = accel_shared_globals;
 
@@ -2429,7 +2429,8 @@ static void zend_accel_init_shm(TSRMLS_D)
 	ZCSG(interned_strings).arBuckets = zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket *));
 	ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
 	if (!ZCSG(interned_strings).arBuckets || !ZCSG(interned_strings_start)) {
-		zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
+		zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
+		return FAILURE;
 	}
 	ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
 	ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
@@ -2468,6 +2469,8 @@ static void zend_accel_init_shm(TSRMLS_D)
 	ZCSG(restart_in_progress) = 0;
 
 	zend_shared_alloc_unlock(TSRMLS_C);
+
+	return SUCCESS;
 }
 
 static void accel_globals_ctor(zend_accel_globals *accel_globals TSRMLS_DC)
@@ -2525,7 +2528,10 @@ static int accel_startup(zend_extension *extension)
 /********************************************/
 	switch (zend_shared_alloc_startup(ZCG(accel_directives).memory_consumption)) {
 		case ALLOC_SUCCESS:
-			zend_accel_init_shm(TSRMLS_C);
+			if (zend_accel_init_shm(TSRMLS_C) == FAILURE) {
+				accel_startup_ok = 0;
+				return FAILURE;
+			}
 			break;
 		case ALLOC_FAILURE:
 			accel_startup_ok = 0;

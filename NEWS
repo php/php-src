@@ -29,6 +29,8 @@ PHP                                                                        NEWS
   . Fixed bug #65665 (Exception not properly caught when opcache enabled).
     (Laruence)
   . Fixed bug #65510 (5.5.2 crashes in _get_zval_ptr_ptr_var). (Dmitry)
+  . Fixed issue #135 (segfault in interned strings if initial memory is too
+    low). (Julien)
 
 - SPL:
   . Fix bug #64782 (SplFileObject constructor make $context optional / give it
