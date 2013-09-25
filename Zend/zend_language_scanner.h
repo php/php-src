@@ -66,6 +66,22 @@ ZEND_API int zend_multibyte_set_filter(const zend_encoding *onetime_encoding TSR
 
 END_EXTERN_C()
 
+#define COPIED_STRING_TOKEN_CASES \
+		case T_STRING: \
+		case T_STRING_VARNAME: \
+		case T_VARIABLE: \
+		case T_ENCAPSED_AND_WHITESPACE: \
+		case T_CONSTANT_ENCAPSED_STRING: \
+		case T_INLINE_HTML: \
+		case T_CLASS_C: \
+		case T_TRAIT_C: \
+		case T_FUNC_C: \
+		case T_METHOD_C: \
+		case T_LINE: \
+		case T_FILE: \
+		case T_DIR: \
+		case T_NS_C:
+
 #endif
 
 /*

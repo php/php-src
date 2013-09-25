@@ -25,6 +25,8 @@
 #include "zend_highlight.h"
 #include "zend_ptr_stack.h"
 #include "zend_globals.h"
+#include <zend_language_scanner.h>
+
 
 ZEND_API void zend_html_putc(char c)
 {
@@ -104,10 +106,9 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				break;
 			case T_OPEN_TAG:
 			case T_OPEN_TAG_WITH_ECHO:
-				next_color = syntax_highlighter_ini->highlight_default;
-				break;
 			case T_CLOSE_TAG:
 				next_color = syntax_highlighter_ini->highlight_default;
+				token.type = 0;
 				break;
 			case '"':
 			case T_ENCAPSED_AND_WHITESPACE:
@@ -120,6 +121,15 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				continue;
 				break;
 			default:
+				switch (token_type) {
+					COPIED_STRING_TOKEN_CASES
+						break;
+
+					default:
+						if (token.type == IS_STRING) {
+							token.type = 0;
+						}
+				}
 				if (token.type == 0) {
 					next_color = syntax_highlighter_ini->highlight_keyword;
 				} else {
@@ -141,18 +151,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 		zend_html_puts((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
 
 		if (token.type == IS_STRING) {
-			switch (token_type) {
-				case T_OPEN_TAG:
-				case T_OPEN_TAG_WITH_ECHO:
-				case T_CLOSE_TAG:
-				case T_WHITESPACE:
-				case T_COMMENT:
-				case T_DOC_COMMENT:
-					break;
-				default:
-					efree(token.value.str.val);
-					break;
-			}
+			efree(Z_STRVAL(token));
 		}
 		token.type = 0;
 	}
@@ -202,16 +201,8 @@ ZEND_API void zend_strip(TSRMLS_D)
 
 		if (token.type == IS_STRING) {
 			switch (token_type) {
-				case T_OPEN_TAG:
-				case T_OPEN_TAG_WITH_ECHO:
-				case T_CLOSE_TAG:
-				case T_WHITESPACE:
-				case T_COMMENT:
-				case T_DOC_COMMENT:
-					break;
-
-				default:
-					efree(token.value.str.val);
+				COPIED_STRING_TOKEN_CASES
+					efree(Z_STRVAL(token));
 					break;
 			}
 		}

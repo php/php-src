@@ -9,5 +9,5 @@ class Foo extends static {
 ?>
 ==DONE==
 --EXPECTF--
-Parse error: %s error,%sexpecting %s in %s on line %d
+Fatal error: Cannot use 'static' as class name as it is reserved in %s on line %d
 

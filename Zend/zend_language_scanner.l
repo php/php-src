@@ -986,6 +986,9 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 	}
 }
 
+#define RETURN_STRING_TOKEN(token) \
+	ZVAL_STRINGL(zendlval, yytext, yyleng, 0); /* no copying - intentional (copying happens in zend_language_parser.y (section identifier_or_keyword)) */ \
+	return token;
 
 int lex_scan(zval *zendlval TSRMLS_DC)
 {
@@ -1013,159 +1016,159 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_IN_SCRIPTING>"exit" {
-	return T_EXIT;
+	RETURN_STRING_TOKEN(T_EXIT)
 }
 
 <ST_IN_SCRIPTING>"die" {
-	return T_EXIT;
+	RETURN_STRING_TOKEN(T_EXIT)
 }
 
 <ST_IN_SCRIPTING>"function" {
-	return T_FUNCTION;
+	RETURN_STRING_TOKEN(T_FUNCTION)
 }
 
 <ST_IN_SCRIPTING>"const" {
-	return T_CONST;
+	RETURN_STRING_TOKEN(T_CONST)
 }
 
 <ST_IN_SCRIPTING>"return" {
-	return T_RETURN;
+	RETURN_STRING_TOKEN(T_RETURN)
 }
 
 <ST_IN_SCRIPTING>"yield" {
-	return T_YIELD;
+	RETURN_STRING_TOKEN(T_YIELD)
 }
 
 <ST_IN_SCRIPTING>"try" {
-	return T_TRY;
+	RETURN_STRING_TOKEN(T_TRY)
 }
 
 <ST_IN_SCRIPTING>"catch" {
-	return T_CATCH;
+	RETURN_STRING_TOKEN(T_CATCH)
 }
 
 <ST_IN_SCRIPTING>"finally" {
-	return T_FINALLY;
+	RETURN_STRING_TOKEN(T_FINALLY)
 }
 
 <ST_IN_SCRIPTING>"throw" {
-	return T_THROW;
+	RETURN_STRING_TOKEN(T_THROW)
 }
 
 <ST_IN_SCRIPTING>"if" {
-	return T_IF;
+	RETURN_STRING_TOKEN(T_IF)
 }
 
 <ST_IN_SCRIPTING>"elseif" {
-	return T_ELSEIF;
+	RETURN_STRING_TOKEN(T_ELSEIF)
 }
 
 <ST_IN_SCRIPTING>"endif" {
-	return T_ENDIF;
+	RETURN_STRING_TOKEN(T_ENDIF)
 }
 
 <ST_IN_SCRIPTING>"else" {
-	return T_ELSE;
+	RETURN_STRING_TOKEN(T_ELSE)
 }
 
 <ST_IN_SCRIPTING>"while" {
-	return T_WHILE;
+	RETURN_STRING_TOKEN(T_WHILE)
 }
 
 <ST_IN_SCRIPTING>"endwhile" {
-	return T_ENDWHILE;
+	RETURN_STRING_TOKEN(T_ENDWHILE)
 }
 
 <ST_IN_SCRIPTING>"do" {
-	return T_DO;
+	RETURN_STRING_TOKEN(T_DO)
 }
 
 <ST_IN_SCRIPTING>"for" {
-	return T_FOR;
+	RETURN_STRING_TOKEN(T_FOR)
 }
 
 <ST_IN_SCRIPTING>"endfor" {
-	return T_ENDFOR;
+	RETURN_STRING_TOKEN(T_ENDFOR)
 }
 
 <ST_IN_SCRIPTING>"foreach" {
-	return T_FOREACH;
+	RETURN_STRING_TOKEN(T_FOREACH)
 }
 
 <ST_IN_SCRIPTING>"endforeach" {
-	return T_ENDFOREACH;
+	RETURN_STRING_TOKEN(T_ENDFOREACH)
 }
 
 <ST_IN_SCRIPTING>"declare" {
-	return T_DECLARE;
+	RETURN_STRING_TOKEN(T_DECLARE)
 }
 
 <ST_IN_SCRIPTING>"enddeclare" {
-	return T_ENDDECLARE;
+	RETURN_STRING_TOKEN(T_ENDDECLARE)
 }
 
 <ST_IN_SCRIPTING>"instanceof" {
-	return T_INSTANCEOF;
+	RETURN_STRING_TOKEN(T_INSTANCEOF)
 }
 
 <ST_IN_SCRIPTING>"as" {
-	return T_AS;
+	RETURN_STRING_TOKEN(T_AS)
 }
 
 <ST_IN_SCRIPTING>"switch" {
-	return T_SWITCH;
+	RETURN_STRING_TOKEN(T_SWITCH)
 }
 
 <ST_IN_SCRIPTING>"endswitch" {
-	return T_ENDSWITCH;
+	RETURN_STRING_TOKEN(T_ENDSWITCH)
 }
 
 <ST_IN_SCRIPTING>"case" {
-	return T_CASE;
+	RETURN_STRING_TOKEN(T_CASE)
 }
 
 <ST_IN_SCRIPTING>"default" {
-	return T_DEFAULT;
+	RETURN_STRING_TOKEN(T_DEFAULT)
 }
 
 <ST_IN_SCRIPTING>"break" {
-	return T_BREAK;
+	RETURN_STRING_TOKEN(T_BREAK)
 }
 
 <ST_IN_SCRIPTING>"continue" {
-	return T_CONTINUE;
+	RETURN_STRING_TOKEN(T_CONTINUE)
 }
 
 <ST_IN_SCRIPTING>"goto" {
-	return T_GOTO;
+	RETURN_STRING_TOKEN(T_GOTO)
 }
 
 <ST_IN_SCRIPTING>"echo" {
-	return T_ECHO;
+	RETURN_STRING_TOKEN(T_ECHO)
 }
 
 <ST_IN_SCRIPTING>"print" {
-	return T_PRINT;
+	RETURN_STRING_TOKEN(T_PRINT)
 }
 
 <ST_IN_SCRIPTING>"class" {
-	return T_CLASS;
+	RETURN_STRING_TOKEN(T_CLASS)
 }
 
 <ST_IN_SCRIPTING>"interface" {
-	return T_INTERFACE;
+	RETURN_STRING_TOKEN(T_INTERFACE)
 }
 
 <ST_IN_SCRIPTING>"trait" {
-	return T_TRAIT;
+	RETURN_STRING_TOKEN(T_TRAIT)
 }
 
 <ST_IN_SCRIPTING>"extends" {
-	return T_EXTENDS;
+	RETURN_STRING_TOKEN(T_EXTENDS)
 }
 
 <ST_IN_SCRIPTING>"implements" {
-	return T_IMPLEMENTS;
+	RETURN_STRING_TOKEN(T_IMPLEMENTS)
 }
 
 <ST_IN_SCRIPTING>"->" {
@@ -1205,15 +1208,15 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"new" {
-	return T_NEW;
+	RETURN_STRING_TOKEN(T_NEW)
 }
 
 <ST_IN_SCRIPTING>"clone" {
-	return T_CLONE;
+	RETURN_STRING_TOKEN(T_CLONE)
 }
 
 <ST_IN_SCRIPTING>"var" {
-	return T_VAR;
+	RETURN_STRING_TOKEN(T_VAR)
 }
 
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}("int"|"integer"){TABS_AND_SPACES}")" {
@@ -1245,47 +1248,47 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"eval" {
-	return T_EVAL;
+	RETURN_STRING_TOKEN(T_EVAL)
 }
 
 <ST_IN_SCRIPTING>"include" {
-	return T_INCLUDE;
+	RETURN_STRING_TOKEN(T_INCLUDE)
 }
 
 <ST_IN_SCRIPTING>"include_once" {
-	return T_INCLUDE_ONCE;
+	RETURN_STRING_TOKEN(T_INCLUDE_ONCE)
 }
 
 <ST_IN_SCRIPTING>"require" {
-	return T_REQUIRE;
+	RETURN_STRING_TOKEN(T_REQUIRE)
 }
 
 <ST_IN_SCRIPTING>"require_once" {
-	return T_REQUIRE_ONCE;
+	RETURN_STRING_TOKEN(T_REQUIRE_ONCE)
 }
 
 <ST_IN_SCRIPTING>"namespace" {
-	return T_NAMESPACE;
+	RETURN_STRING_TOKEN(T_NAMESPACE)
 }
 
 <ST_IN_SCRIPTING>"use" {
-	return T_USE;
+	RETURN_STRING_TOKEN(T_USE)
 }
 
 <ST_IN_SCRIPTING>"insteadof" {
-        return T_INSTEADOF;
+        RETURN_STRING_TOKEN(T_INSTEADOF)
 }
 
 <ST_IN_SCRIPTING>"global" {
-	return T_GLOBAL;
+	RETURN_STRING_TOKEN(T_GLOBAL)
 }
 
 <ST_IN_SCRIPTING>"isset" {
-	return T_ISSET;
+	RETURN_STRING_TOKEN(T_ISSET)
 }
 
 <ST_IN_SCRIPTING>"empty" {
-	return T_EMPTY;
+	RETURN_STRING_TOKEN(T_EMPTY)
 }
 
 <ST_IN_SCRIPTING>"__halt_compiler" {
@@ -1293,31 +1296,31 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"static" {
-	return T_STATIC;
+	RETURN_STRING_TOKEN(T_STATIC)
 }
 
 <ST_IN_SCRIPTING>"abstract" {
-	return T_ABSTRACT;
+	RETURN_STRING_TOKEN(T_ABSTRACT)
 }
 
 <ST_IN_SCRIPTING>"final" {
-	return T_FINAL;
+	RETURN_STRING_TOKEN(T_FINAL)
 }
 
 <ST_IN_SCRIPTING>"private" {
-	return T_PRIVATE;
+	RETURN_STRING_TOKEN(T_PRIVATE)
 }
 
 <ST_IN_SCRIPTING>"protected" {
-	return T_PROTECTED;
+	RETURN_STRING_TOKEN(T_PROTECTED)
 }
 
 <ST_IN_SCRIPTING>"public" {
-	return T_PUBLIC;
+	RETURN_STRING_TOKEN(T_PUBLIC)
 }
 
 <ST_IN_SCRIPTING>"unset" {
-	return T_UNSET;
+	RETURN_STRING_TOKEN(T_UNSET)
 }
 
 <ST_IN_SCRIPTING>"=>" {
@@ -1325,15 +1328,15 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"list" {
-	return T_LIST;
+	RETURN_STRING_TOKEN(T_LIST)
 }
 
 <ST_IN_SCRIPTING>"array" {
-	return T_ARRAY;
+	RETURN_STRING_TOKEN(T_ARRAY)
 }
 
 <ST_IN_SCRIPTING>"callable" {
- return T_CALLABLE;
+	RETURN_STRING_TOKEN(T_CALLABLE)
 }
 
 <ST_IN_SCRIPTING>"++" {
@@ -1417,19 +1420,19 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"&&" {
-	return T_BOOLEAN_AND;
+	RETURN_STRING_TOKEN(T_BOOLEAN_AND)
 }
 
 <ST_IN_SCRIPTING>"OR" {
-	return T_LOGICAL_OR;
+	RETURN_STRING_TOKEN(T_LOGICAL_OR)
 }
 
 <ST_IN_SCRIPTING>"AND" {
-	return T_LOGICAL_AND;
+	RETURN_STRING_TOKEN(T_LOGICAL_AND)
 }
 
 <ST_IN_SCRIPTING>"XOR" {
-	return T_LOGICAL_XOR;
+	RETURN_STRING_TOKEN(T_LOGICAL_XOR)
 }
 
 <ST_IN_SCRIPTING>"<<" {
