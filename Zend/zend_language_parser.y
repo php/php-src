@@ -738,7 +738,7 @@ new_object:
 anon_class_type:
     T_CLASS {
         $$.u.op.opline_num = CG(zend_lineno); 
-        $$.EA = ZEND_ACC_FINAL_CLASS;
+        $$.EA = ZEND_ACC_ANON_CLASS;
     }
 ;
 
@@ -749,9 +749,7 @@ anon_class_decl:
         zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC);
     } implements_list 
             '{' class_statement_list '}' {
-        
         zend_do_end_class_declaration(&$1, &$3 TSRMLS_CC);
-        
         zend_do_fetch_class(&$$, &$2 TSRMLS_CC);
     }
 ;

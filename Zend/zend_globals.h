@@ -260,6 +260,9 @@ struct _zend_executor_globals {
 	XPFPA_CW_DATATYPE saved_fpu_cw;
 #endif
 
+    /* anonymous classes */
+    zend_ulong anon_class_id; 
+
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
 

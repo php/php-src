@@ -2252,7 +2252,7 @@ void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 {
 	long fetch_class_op_number;
 	zend_op *opline;
-
+    
 	fetch_class_op_number = get_next_op_number(CG(active_op_array));
 	opline = get_next_op(CG(active_op_array) TSRMLS_CC);
 
@@ -4522,7 +4522,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 {
 	zend_class_entry *ce, **pce;
 	zval *op1, *op2;
-
+    
 	if (compile_time) {
 		op1 = &CONSTANT_EX(op_array, opline->op1.constant);
 		op2 = &CONSTANT_EX(op_array, opline->op2.constant);
@@ -4530,13 +4530,23 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		op1 = opline->op1.zv;
 		op2 = opline->op2.zv;
 	}
+	
 	if (zend_hash_quick_find(class_table, Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_HASH_P(op1), (void **) &pce)==FAILURE) {
 		zend_error(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(op1));
 		return NULL;
 	} else {
 		ce = *pce;
 	}
+	
 	ce->refcount++;
+    
+    /* return anonymous class */
+	if (ce->ce_flags & (ZEND_ACC_ANON_CLASS) &&
+	    ce->ce_flags & (ZEND_ACC_FINAL_CLASS)) {
+	    ce->refcount--;
+	    return ce;
+	}
+	
 	if (zend_hash_quick_add(class_table, Z_STRVAL_P(op2), Z_STRLEN_P(op2)+1, Z_HASH_P(op2), &ce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		ce->refcount--;
 		if (!compile_time) {
@@ -4551,6 +4561,10 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 	} else {
 		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
 			zend_verify_abstract_class(ce TSRMLS_CC);
+		}
+		
+		if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {   
+		    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 		}
 		return ce;
 	}
@@ -4593,14 +4607,27 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		zend_error(E_COMPILE_ERROR, "Class %s cannot extend from trait %s", ce->name, parent_ce->name);
 	}
 
+    /* return anonymous class */
+	if (ce->ce_flags & (ZEND_ACC_ANON_CLASS) &&
+	    ce->ce_flags & (ZEND_ACC_FINAL_CLASS)) {
+	    return ce;
+	}
+
 	zend_do_inheritance(ce, parent_ce TSRMLS_CC);
 
 	ce->refcount++;
+
+    
 
 	/* Register the derived class */
 	if (zend_hash_quick_add(class_table, Z_STRVAL_P(op2), Z_STRLEN_P(op2)+1, Z_HASH_P(op2), pce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", ce->name);
 	}
+
+    if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {   
+	    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	}	
+	
 	return ce;
 }
 /* }}} */
