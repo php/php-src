@@ -4481,7 +4481,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 	const timelib_tzdb             *tzdb;
 	const timelib_tzdb_index_entry *table;
 	int                             i, item_count;
-	long                            what = PHP_DATE_TIMEZONE_GROUP_ALL;
+	long                            what = PHP_DATE_TIMEZONE_GROUP_ALL_W_BC;
 	char                           *option = NULL;
 	int                             option_len = 0;
 
