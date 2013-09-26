@@ -1,5 +1,5 @@
 --TEST--
-testing reusing objects that implement an interface
+testing reusing anons that implement an interface
 --FILE--
 <?php
 class Outer {
