@@ -42,7 +42,7 @@ $mixed = array(1 => 'a', 2 => 'b', 'a' => 1, 'b' => 2);
 
 var_dump(array_filter($mixed, 'is_numeric', ARRAY_FILTER_USE_KEY));
 
-var_dump(array_filter($mixed, 'is_numeric', ARRAY_FILTER_USE_VALUE));
+var_dump(array_filter($mixed, 'is_numeric', 0));
 
 var_dump(array_filter($mixed, 'is_numeric', ARRAY_FILTER_USE_BOTH));
 

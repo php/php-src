@@ -129,7 +129,6 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_BOTH", ARRAY_FILTER_USE_BOTH, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_KEY", ARRAY_FILTER_USE_KEY, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("ARRAY_FILTER_USE_VALUE", ARRAY_FILTER_USE_VALUE, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -4202,7 +4201,7 @@ PHP_FUNCTION(array_filter)
 	zval *retval = NULL;
     zval *key = NULL;
 	zend_bool have_callback = 0;
-	long use_type = ARRAY_FILTER_USE_VALUE;
+	long use_type = 0;
 	char *string_key;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
@@ -4242,7 +4241,7 @@ PHP_FUNCTION(array_filter)
 		int key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(array), &string_key, &string_key_len, &num_key, 0, &pos);
 
 		if (have_callback) {
-			if (use_type != ARRAY_FILTER_USE_VALUE) {
+			if (use_type) {
 				MAKE_STD_ZVAL(key);
 				/* Set up the key */
 				switch (key_type) {
@@ -4266,7 +4265,7 @@ PHP_FUNCTION(array_filter)
 				int retval_true = zend_is_true(retval);
 
 				zval_ptr_dtor(&retval);
-				if (use_type != ARRAY_FILTER_USE_VALUE) {
+				if (use_type) {
 					zval_ptr_dtor(&key);
 				}
 				if (!retval_true) {

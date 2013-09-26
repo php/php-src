@@ -119,7 +119,6 @@ PHPAPI int php_multisort_compare(const void *a, const void *b TSRMLS_DC);
 
 #define ARRAY_FILTER_USE_BOTH	1
 #define ARRAY_FILTER_USE_KEY	2
-#define ARRAY_FILTER_USE_VALUE	3
 
 ZEND_BEGIN_MODULE_GLOBALS(array) 
 	int *multisort_flags[2];
