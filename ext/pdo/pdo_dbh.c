@@ -1328,15 +1328,11 @@ int pdo_hash_methods(pdo_dbh_t *dbh, int kind TSRMLS_DC)
 			} else {
 				ifunc->required_num_args = info->required_num_args;
 			}
-			if (info->pass_rest_by_reference) {
-				if (info->pass_rest_by_reference == ZEND_SEND_PREFER_REF) {
-					ifunc->fn_flags |= ZEND_ACC_PASS_REST_PREFER_REF;
-				} else {
-					ifunc->fn_flags |= ZEND_ACC_PASS_REST_BY_REFERENCE;
-				}
-			}
 			if (info->return_reference) {
 				ifunc->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+			}
+			if (funcs->arg_info[funcs->num_args].is_variadic) {
+				ifunc->fn_flags |= ZEND_ACC_VARIADIC;
 			}
 		} else {
 			ifunc->arg_info = NULL;

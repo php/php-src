@@ -2090,15 +2090,11 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			} else {
 				internal_function->required_num_args = info->required_num_args;
 			}
-			if (info->pass_rest_by_reference) {
-				if (info->pass_rest_by_reference == ZEND_SEND_PREFER_REF) {
-					internal_function->fn_flags |= ZEND_ACC_PASS_REST_PREFER_REF;
-				} else {
-					internal_function->fn_flags |= ZEND_ACC_PASS_REST_BY_REFERENCE;
-				}
-			}
 			if (info->return_reference) {
 				internal_function->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+			}
+			if (ptr->arg_info[ptr->num_args].is_variadic) {
+				internal_function->fn_flags |= ZEND_ACC_VARIADIC;
 			}
 		} else {
 			internal_function->arg_info = NULL;

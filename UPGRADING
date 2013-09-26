@@ -34,8 +34,10 @@ PHP X.Y UPGRADE NOTES
 2. New Features
 ========================================
 
-- Core:
-  The php://input stream is now re-usable and can be used concurrently with 
+- Added dedicated syntax for variadic functions.
+  (https://wiki.php.net/rfc/variadics)
+
+- The php://input stream is now re-usable and can be used concurrently with 
   enable_post_data_reading=0.
 
 ========================================
