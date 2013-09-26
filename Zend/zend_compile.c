@@ -2244,14 +2244,8 @@ void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
     class_name[class_name_len] = '\0';
     
     Z_STRLEN(result->u.constant) = class_name_len;
-
-#ifndef ZTS
     Z_STRVAL(result->u.constant) = (char*) zend_new_interned_string(
-            class_name, class_name_len+1, 0 TSRMLS_CC);
-    efree(class_name);
-#else
-    Z_STRVAL(result->u.constant) = class_name;
-#endif
+            class_name, class_name_len+1, 1 TSRMLS_CC);
 } /* }}} */
 
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
