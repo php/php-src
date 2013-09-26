@@ -325,6 +325,7 @@ int  accelerator_shm_read_lock(TSRMLS_D);
 void accelerator_shm_read_unlock(TSRMLS_D);
 
 char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_length, int *key_len TSRMLS_DC);
+zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC);
 
 #if !defined(ZEND_DECLARE_INHERITED_CLASS_DELAYED)
 # define ZEND_DECLARE_INHERITED_CLASS_DELAYED 145

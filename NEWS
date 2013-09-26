@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #65548 (Comparison for DateTimeImmutable doesn't work).
     (Boro Sitnikovski)
 
+- DBA extension:
+  . Fixed bug #65708 (dba functions cast $key param to string in-place,
+    bypassing copy on write). (Adam)
+
 - GD
   . Ensure that the defined interpolation method is used with the generic
     scaling methods. (Pierre)
@@ -22,9 +26,13 @@ PHP                                                                        NEWS
     imap). (ryotakatsuki at gmail dot com)
 
 - OPcache:
+  . Added function opcache_compile_file() to load PHP scripts into cache
+    without execution. (Julien)
   . Fixed bug #65665 (Exception not properly caught when opcache enabled).
     (Laruence)
   . Fixed bug #65510 (5.5.2 crashes in _get_zval_ptr_ptr_var). (Dmitry)
+  . Fixed issue #135 (segfault in interned strings if initial memory is too
+    low). (Julien)
 
 - SPL:
   . Fix bug #64782 (SplFileObject constructor make $context optional / give it
