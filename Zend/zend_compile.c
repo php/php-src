@@ -2228,25 +2228,45 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
     char *class_name = NULL;
     int class_name_len = 0;
-    
+    const char *prefix_name = NULL;
+
+    /* give each class a unique id */
     CG(anon_class_id)++;
-    
-    result->op_type = IS_CONST;
-    
+
+    /* prefix anonymous class with current scope for reference */
+    if (CG(active_op_array)) {
+        if (CG(active_op_array)->scope) {
+            prefix_name = CG(active_op_array)->scope->name;
+        } else if (CG(active_op_array)->function_name) {
+            prefix_name = CG(active_op_array)->function_name;
+        } else prefix_name = "Class";
+    }
+
+    /* populate znode constant with generated anonymous class name */
     Z_TYPE(result->u.constant) = IS_STRING;
     class_name_len = snprintf(
-        NULL, 0, "Class$$%lu", CG(anon_class_id));
+        NULL, 0, "%s$$%lu", prefix_name, CG(anon_class_id));
     class_name = (char*) emalloc(class_name_len+1);
     snprintf(
         class_name, class_name_len+1,
-        "Class$$%lu", CG(anon_class_id)
+        "%s$$%lu", prefix_name, CG(anon_class_id)
     );
     class_name[class_name_len] = '\0';
-    
+
     Z_STRLEN(result->u.constant) = class_name_len;
     Z_STRVAL(result->u.constant) = (char*) zend_new_interned_string(
             class_name, class_name_len+1, 1 TSRMLS_CC);
+
+    result->op_type = IS_CONST;
 } /* }}} */
+
+void zend_do_extend_anon_class(znode *class_name, const znode *parent_class TSRMLS_DC) {
+    if (parent_class->op_type != IS_UNUSED) {
+        php_printf(
+            "extending %s with %s\n", Z_STRVAL(class_name->u.constant), Z_STRVAL(parent_class->u.constant)
+        );
+    }
+}
 
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 {
@@ -5012,6 +5032,32 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 	    zend_hash_find(CG(current_import), lcname, Z_STRLEN(class_name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
 		error = 1;
 	}
+
+    /*
+    if (CG(active_class_entry) && (class_token->EA & ZEND_ACC_ANON_CLASS)) {
+        char *old_class_name = estrndup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
+        zend_uint old_class_name_len = Z_STRLEN(class_name->u.constant);
+        zend_uint new_class_name_len = 
+            CG(active_class_entry)->name_length + 
+            (sizeof("\\")-1) + 
+            old_class_name_len;
+        
+        Z_STRVAL(class_name->u.constant) = erealloc(
+            Z_STRVAL(class_name->u.constant), new_class_name_len+1);
+        
+        memcpy(&Z_STRVAL(class_name->u.constant)[0], CG(active_class_entry)->name, CG(active_class_entry)->name_length);
+        memcpy(&Z_STRVAL(class_name->u.constant)[CG(active_class_entry)->name_length], "\\", sizeof("\\")-1);
+        memcpy(&Z_STRVAL(class_name->u.constant)[CG(active_class_entry)->name_length+(sizeof("\\")-1)], old_class_name, old_class_name_len);
+        
+        Z_STRVAL(class_name->u.constant)[new_class_name_len] = '\0';
+        
+        Z_TYPE(class_name->u.constant) = IS_CONST;
+        Z_STRLEN(class_name->u.constant) = new_class_name_len;
+        Z_STRVAL(class_name->u.constant) = zend_new_interned_string(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant)+1, 1 TSRMLS_CC);
+        
+        efree(old_class_name);
+    }
+    */
 
 	if (CG(current_namespace)) {
 		/* Prefix class name with name of current namespace */
