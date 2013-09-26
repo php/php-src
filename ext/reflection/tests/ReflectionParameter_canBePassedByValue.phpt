@@ -61,6 +61,10 @@ Name: SORT_REGULAR_or_SORT_NUMERIC_or_SORT_STRING
 Is passed by reference: yes
 Can be passed by value: yes
 
+Name: more_array_and_sort_options
+Is passed by reference: yes
+Can be passed by value: yes
+
 => sort:
 
 Name: arg

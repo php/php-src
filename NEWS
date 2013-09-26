@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . Reduced POST data memory usage by 200-300%. Removed INI setting
     always_populate_raw_post_data and the $HTTP_RAW_POST_DATA global
     variable. (Mike)
+  . Implemented dedicated syntax for variadic functions
+    (RFC: https://wiki.php.net/rfc/variadics). (Nikita)
 
 - cURL:
   . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir

@@ -742,6 +742,37 @@ static int ZEND_FASTCALL  ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+static int ZEND_FASTCALL  ZEND_RECV_VARIADIC_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_uint arg_num = opline->op1.num;
+	zend_uint arg_count = zend_vm_stack_get_args_count(TSRMLS_C);
+	zval **var_ptr, *params;
+
+	SAVE_OPLINE();
+
+	var_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
+	Z_DELREF_PP(var_ptr);
+	MAKE_STD_ZVAL(params);
+	*var_ptr = params;
+
+	if (arg_num <= arg_count) {
+		array_init_size(params, arg_count - arg_num + 1);
+	} else {
+		array_init(params);
+	}
+
+	for (; arg_num <= arg_count; ++arg_num) {
+		zval **param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
+		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, *param, opline->extended_value TSRMLS_CC);
+		zend_hash_next_index_insert(Z_ARRVAL_P(params), param, sizeof(zval *), NULL);
+		Z_ADDREF_PP(param);
+	}
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 static int ZEND_FASTCALL  ZEND_NEW_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -44895,6 +44926,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_FAST_RET_SPEC_HANDLER,
   	ZEND_FAST_RET_SPEC_HANDLER,
   	ZEND_FAST_RET_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;
