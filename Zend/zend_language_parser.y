@@ -742,15 +742,10 @@ anon_class_type:
     }
 ;
 
-anon_class_extends:
-            /* empty */			                { $$.op_type = IS_UNUSED; }
-	|	T_EXTENDS fully_qualified_class_name	{ zend_do_fetch_class(&$$, &$2 TSRMLS_CC); }
-;
-
 anon_class_decl:
     anon_class_type {
         zend_do_create_anon_class(&$$ TSRMLS_CC);
-    } anon_class_extends {
+    } extends_from {
         zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC);
     } implements_list
             '{' class_statement_list '}' {
