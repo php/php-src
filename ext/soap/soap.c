@@ -225,6 +225,7 @@ PHP_METHOD(SoapClient, __getFunctions);
 PHP_METHOD(SoapClient, __getTypes);
 PHP_METHOD(SoapClient, __doRequest);
 PHP_METHOD(SoapClient, __setCookie);
+PHP_METHOD(SoapClient, __getCookies);
 PHP_METHOD(SoapClient, __setLocation);
 PHP_METHOD(SoapClient, __setSoapHeaders);
 
@@ -368,6 +369,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___setcookie, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_soapclient___getcookies, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_soapclient___setsoapheaders, 0, 0, 1)
 	ZEND_ARG_INFO(0, soapheaders)
 ZEND_END_ARG_INFO()
@@ -422,6 +426,7 @@ static const zend_function_entry soap_client_functions[] = {
 	PHP_ME(SoapClient, __getTypes, 					arginfo_soapclient___gettypes, 0)
 	PHP_ME(SoapClient, __doRequest, 				arginfo_soapclient___dorequest, 0)
 	PHP_ME(SoapClient, __setCookie, 				arginfo_soapclient___setcookie, 0)
+	PHP_ME(SoapClient, __getCookies, 				arginfo_soapclient___getcookies, 0)
 	PHP_ME(SoapClient, __setLocation, 				arginfo_soapclient___setlocation, 0)
 	PHP_ME(SoapClient, __setSoapHeaders, 			arginfo_soapclient___setsoapheaders, 0)
 	PHP_FE_END
@@ -3128,6 +3133,24 @@ PHP_METHOD(SoapClient, __setCookie)
 		array_init(zcookie);
 		add_index_stringl(zcookie, 0, val, val_len, 1);
 		add_assoc_zval_ex(*cookies, name, name_len+1, zcookie);
+	}
+}
+/* }}} */
+
+/* {{{ proto array SoapClient::__getCookies ( void )
+   Returns list of cookies */
+PHP_METHOD(SoapClient, __getCookies)
+{
+	zval **cookies, *tmp;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	array_init(return_value);
+
+	if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_cookies", sizeof("_cookies"), (void **)&cookies) != FAILURE) {
+		zend_hash_copy(Z_ARRVAL_P(return_value), Z_ARRVAL_P(*cookies), (copy_ctor_func_t) zval_add_ref, (void *)&tmp, sizeof(zval*));
 	}
 }
 /* }}} */
