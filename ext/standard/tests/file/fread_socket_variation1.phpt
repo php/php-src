@@ -12,11 +12,11 @@ for ($i=0; $i<100; $i++) {
   }
 }
 
-socket_set_timeout($tcp_socket, 0, 1000);
+socket_set_timeout($server, 0, 1000);
 
-var_dump(fread($tcp_socket, 1));
+var_dump(fread($server, 1));
 
-fclose($tcp_socket);
+fclose($server);
 
 ?>
 --EXPECT--
