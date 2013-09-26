@@ -5033,32 +5033,6 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 		error = 1;
 	}
 
-    /*
-    if (CG(active_class_entry) && (class_token->EA & ZEND_ACC_ANON_CLASS)) {
-        char *old_class_name = estrndup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
-        zend_uint old_class_name_len = Z_STRLEN(class_name->u.constant);
-        zend_uint new_class_name_len = 
-            CG(active_class_entry)->name_length + 
-            (sizeof("\\")-1) + 
-            old_class_name_len;
-        
-        Z_STRVAL(class_name->u.constant) = erealloc(
-            Z_STRVAL(class_name->u.constant), new_class_name_len+1);
-        
-        memcpy(&Z_STRVAL(class_name->u.constant)[0], CG(active_class_entry)->name, CG(active_class_entry)->name_length);
-        memcpy(&Z_STRVAL(class_name->u.constant)[CG(active_class_entry)->name_length], "\\", sizeof("\\")-1);
-        memcpy(&Z_STRVAL(class_name->u.constant)[CG(active_class_entry)->name_length+(sizeof("\\")-1)], old_class_name, old_class_name_len);
-        
-        Z_STRVAL(class_name->u.constant)[new_class_name_len] = '\0';
-        
-        Z_TYPE(class_name->u.constant) = IS_CONST;
-        Z_STRLEN(class_name->u.constant) = new_class_name_len;
-        Z_STRVAL(class_name->u.constant) = zend_new_interned_string(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant)+1, 1 TSRMLS_CC);
-        
-        efree(old_class_name);
-    }
-    */
-
 	if (CG(current_namespace)) {
 		/* Prefix class name with name of current namespace */
 		znode tmp;
