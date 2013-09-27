@@ -471,7 +471,6 @@ struct _zend_trait_alias {
 	*/
 	zend_uint modifiers;
 };
-
 typedef struct _zend_trait_alias zend_trait_alias;
 
 struct _zend_class_entry {

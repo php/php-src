@@ -3765,7 +3765,7 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 	zend_uint i, ignore = 0;
 	zend_uint current_iface_num = ce->num_interfaces;
 	zend_uint parent_iface_num  = ce->parent ? ce->parent->num_interfaces : 0;
-    
+
 	for (i = 0; i < ce->num_interfaces; i++) {
 		if (ce->interfaces[i] == NULL) {
 			memmove(ce->interfaces + i, ce->interfaces + i + 1, sizeof(zend_class_entry*) * (--ce->num_interfaces - i));
@@ -3774,17 +3774,17 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 			if (i < parent_iface_num) {
 				ignore = 1;
 			} else {        
-			    if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
+                if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
                     if (ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
                         continue; 
                     }
                 }
-                
+
 				zend_error(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ce->name, iface->name);
 			}
 		}
 	}
-	
+
 	if (ignore) {
 		/* Check for attempt to redeclare interface constants */
 		zend_hash_apply_with_arguments(&ce->constants_table TSRMLS_CC, (apply_func_args_t) do_interface_constant_check, 1, &iface);
@@ -4560,11 +4560,11 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 	ce->refcount++;
 
     /* return anonymous class */
-	if (ce->ce_flags & (ZEND_ACC_ANON_CLASS) &&
-	    ce->ce_flags & (ZEND_ACC_FINAL_CLASS)) {
-	    ce->refcount--;
-	    return ce;
-	}
+    if (ce->ce_flags & (ZEND_ACC_ANON_CLASS) &&
+        ce->ce_flags & (ZEND_ACC_FINAL_CLASS)) {
+        ce->refcount--;
+        return ce;
+    }
 
 	if (zend_hash_quick_add(class_table, Z_STRVAL_P(op2), Z_STRLEN_P(op2)+1, Z_HASH_P(op2), &ce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		ce->refcount--;
@@ -4581,7 +4581,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
 			zend_verify_abstract_class(ce TSRMLS_CC);
 		}
-		
+
 		/* set final anonymous class */
 		if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {   
 		    ce->ce_flags = ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS;
@@ -5052,12 +5052,12 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 	new_class_entry->type = ZEND_USER_CLASS;
 	new_class_entry->name = zend_new_interned_string(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant) + 1, 1 TSRMLS_CC);
 	new_class_entry->name_length = Z_STRLEN(class_name->u.constant);
-    
+
 	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
 	new_class_entry->info.user.filename = zend_get_compiled_filename(TSRMLS_C);
 	new_class_entry->info.user.line_start = opline_num;
 	new_class_entry->ce_flags |= class_token->EA;
-    
+
 	if (parent_class_name && parent_class_name->op_type != IS_UNUSED) {
 		switch (parent_class_name->EA) {
 			case ZEND_FETCH_CLASS_SELF:
@@ -5100,7 +5100,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 
 	zend_hash_quick_update(CG(class_table), Z_STRVAL(key), Z_STRLEN(key), Z_HASH_P(&CONSTANT(opline->op1.constant)), &new_class_entry, sizeof(zend_class_entry *), NULL);
     CG(active_class_entry) = new_class_entry;
-    
+
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	opline->result_type = IS_VAR;
 	GET_NODE(&CG(implementing_class), opline->result);
