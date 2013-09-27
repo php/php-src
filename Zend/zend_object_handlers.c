@@ -959,10 +959,16 @@ ZEND_API int zend_check_private(zend_function *fbc, zend_class_entry *ce, char *
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope) /* {{{ */
 {
 	zend_class_entry *fbc_scope = ce;
-
+    
+    /* 
+    * Is the called context super to this class ?
+    */
+    if (scope->super == fbc_scope)
+        return 1;
+    
 	/* Is the context that's calling the function, the same as one of
 	 * the function's parents?
-	 */
+	 */	
 	while (fbc_scope) {
 		if (fbc_scope==scope) {
 			return 1;
@@ -979,6 +985,9 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 		}
 		scope = scope->parent;
 	}
+	
+    
+	
 	return 0;
 }
 /* }}} */

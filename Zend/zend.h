@@ -471,6 +471,7 @@ struct _zend_trait_alias {
 	*/
 	zend_uint modifiers;
 };
+
 typedef struct _zend_trait_alias zend_trait_alias;
 
 struct _zend_class_entry {
@@ -478,6 +479,7 @@ struct _zend_class_entry {
 	const char *name;
 	zend_uint name_length;
 	struct _zend_class_entry *parent;
+	struct _zend_class_entry *super;
 	int refcount;
 	zend_uint ce_flags;
 

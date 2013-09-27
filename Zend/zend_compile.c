@@ -5057,6 +5057,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 	new_class_entry->info.user.filename = zend_get_compiled_filename(TSRMLS_C);
 	new_class_entry->info.user.line_start = opline_num;
 	new_class_entry->ce_flags |= class_token->EA;
+    new_class_entry->super = class_token->u.op.ptr;
     
 	if (parent_class_name && parent_class_name->op_type != IS_UNUSED) {
 		switch (parent_class_name->EA) {
