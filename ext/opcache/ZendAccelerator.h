@@ -80,6 +80,9 @@
 # endif
 # include <direct.h>
 #else
+# ifndef MAXPATHLEN
+#  define MAXPATHLEN     4096
+# endif
 # include <sys/param.h>
 #endif
 
@@ -100,7 +103,7 @@ extern int lock_file;
 # elif defined(__svr4__)
 #  define FLOCK_STRUCTURE(name, type, whence, start, len) \
 		struct flock name = {type, whence, start, len}
-# elif defined(__linux__) || defined(__hpux)
+# elif defined(__linux__) || defined(__hpux) || defined(__GNU__)
 #  define FLOCK_STRUCTURE(name, type, whence, start, len) \
 		struct flock name = {type, whence, start, len, 0}
 # elif defined(_AIX)
@@ -111,6 +114,12 @@ extern int lock_file;
 #   define FLOCK_STRUCTURE(name, type, whence, start, len) \
 		struct flock name = {type, whence, start, len}
 #  endif
+# elif defined(HAVE_FLOCK_BSD)
+#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
+		struct flock name = {start, len, -1, type, whence}
+# elif defined(HAVE_FLOCK_LINUX)
+#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
+		struct flock name = {type, whence, start, len}
 # else
 #  error "Don't know how to define struct flock"
 # endif
