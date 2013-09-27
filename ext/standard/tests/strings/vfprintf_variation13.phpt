@@ -45,7 +45,7 @@ $args_array = array(
 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/dump.txt';
+$data_file = dirname(__FILE__) . '/vfprintf_variation13.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 

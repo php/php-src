@@ -528,14 +528,15 @@ parameter_list:
 
 
 non_empty_parameter_list:
+		parameter
+	|	non_empty_parameter_list ',' parameter
+;
+
+parameter:
 		optional_class_type is_reference is_variadic T_VARIABLE
-			{ $$.op_type = IS_UNUSED; $$.u.op.num=1; zend_do_receive_arg(ZEND_RECV, &$4, &$$, NULL, &$1, $2.op_type, $3.op_type TSRMLS_CC); }
+			{ zend_do_receive_param(ZEND_RECV, &$4, NULL, &$1, $2.op_type, $3.op_type TSRMLS_CC); }
 	|	optional_class_type is_reference is_variadic T_VARIABLE '=' static_scalar
-			{ $$.op_type = IS_UNUSED; $$.u.op.num=1; zend_do_receive_arg(ZEND_RECV_INIT, &$4, &$$, &$6, &$1, $2.op_type, $3.op_type TSRMLS_CC); }
-	|	non_empty_parameter_list ',' optional_class_type is_reference is_variadic T_VARIABLE
-			{ $$=$1; $$.u.op.num++; zend_do_receive_arg(ZEND_RECV, &$6, &$$, NULL, &$3, $4.op_type, $5.op_type TSRMLS_CC); }
-	|	non_empty_parameter_list ',' optional_class_type is_reference is_variadic T_VARIABLE '=' static_scalar
-			{ $$=$1; $$.u.op.num++; zend_do_receive_arg(ZEND_RECV_INIT, &$6, &$$, &$8, &$3, $4.op_type, $5.op_type TSRMLS_CC); }
+			{ zend_do_receive_param(ZEND_RECV_INIT, &$4, &$6, &$1, $2.op_type, $3.op_type TSRMLS_CC); }
 ;
 
 
