@@ -1822,7 +1822,7 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 }
 /* }}} */
 
-void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, const znode *initialization, znode *class_type, zend_uchar pass_by_reference, zend_bool is_variadic TSRMLS_DC) /* {{{ */
+void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_uchar pass_by_reference, zend_bool is_variadic TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	zend_arg_info *cur_arg_info;
@@ -1863,7 +1863,8 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 	CG(active_op_array)->num_args++;
 	opline->opcode = op;
 	SET_NODE(opline->result, &var);
-	SET_NODE(opline->op1, offset);
+	opline->op1_type = IS_UNUSED;
+	opline->op1.num = CG(active_op_array)->num_args;
 	if (op == ZEND_RECV_INIT) {
 		SET_NODE(opline->op2, initialization);
 	} else {

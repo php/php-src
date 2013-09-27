@@ -40,12 +40,12 @@ http://pear.php.net/dtd/package-2.0.xsd">
   <active>no</active>
  </lead>
 
- <date>2013-09-06</date>
+ <date>2013-09-27</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.0.2</release>
-   <api>2.0.2</api>
+   <release>2.0.3</release>
+   <api>2.0.3</api>
   </version>
   <stability>
    <release>devel</release>
@@ -53,10 +53,9 @@ http://pear.php.net/dtd/package-2.0.xsd">
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-Review and improve error handling code and data types.
-Fix oci_set_*($connection, ...) error handling so oci_error($connection) works.
-Add DTrace oci8-connection-close probe
-Add the connection handle to several DTrace probes.
+Add the oci_set_client_identifier() value and statement structure pointer to several DTrace probes.
+Use 'phpoci' as the DTrace provider name since uniqueness is required by the Linux fasttrap module.
+Update Windows builds to create only php_oci8_12c.dll.
   </notes>
  <contents>
   <dir name="/">
@@ -454,6 +453,24 @@ Add the connection handle to several DTrace probes.
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.0.2</release>
+   <api>2.0.2</api>
+  </version>
+  <stability>
+   <release>devel</release>
+   <api>devel</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+Review and improve error handling code and data types.
+Fix oci_set_*($connection, ...) error handling so oci_error($connection) works.
+Add DTrace oci8-connection-close probe
+Add the connection handle to several DTrace probes.
+  </notes>
+</release>
 
 <release>
   <version>

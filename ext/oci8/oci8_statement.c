@@ -55,14 +55,8 @@ php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char
 	if (!query_len) {
 		/* do not allocate stmt handle for refcursors, we'll get it from OCIStmtPrepare2() */
 		PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **)&(statement->stmt), OCI_HTYPE_STMT, 0, NULL));
-	} else {
-#ifdef HAVE_OCI8_DTRACE
-		if (DTRACE_OCI8_SQLTEXT_ENABLED()) {
-			DTRACE_OCI8_SQLTEXT(connection, query);
-		}
-#endif /* HAVE_OCI8_DTRACE */
 	}
-			
+		
 	PHP_OCI_CALL(OCIHandleAlloc, (connection->env, (dvoid **)&(statement->err), OCI_HTYPE_ERROR, 0, NULL));
 	
 	if (query_len > 0) {
@@ -79,6 +73,12 @@ php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char
 				 OCI_DEFAULT
 				)
 		);
+#ifdef HAVE_OCI8_DTRACE
+		if (DTRACE_OCI8_SQLTEXT_ENABLED()) {
+			DTRACE_OCI8_SQLTEXT(connection, connection->client_id, statement, query);
+		}
+#endif /* HAVE_OCI8_DTRACE */
+
 		if (errstatus != OCI_SUCCESS) {
 			connection->errcode = php_oci_error(connection->err, errstatus TSRMLS_CC);
 
@@ -498,7 +498,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode TSRMLS_DC)
 			/* only these are allowed */
 #ifdef HAVE_OCI8_DTRACE
 			if (DTRACE_OCI8_EXECUTE_MODE_ENABLED()) {
-				DTRACE_OCI8_EXECUTE_MODE(statement->connection, mode);
+				DTRACE_OCI8_EXECUTE_MODE(statement->connection, statement->connection->client_id, statement, mode);
 			}
 #endif /* HAVE_OCI8_DTRACE */
 			break;

@@ -124,7 +124,7 @@ dnl in GNU Make which causes the .d file to be overwritten (Bug 61268)
 PHP_EXT_SRCDIR([oci8])/$ac_provsrc:;
 
 $ac_bdir[$]ac_hdrobj: $ac_srcdir[$]ac_provsrc
-	CFLAGS="\$(CFLAGS_CLEAN)" dtrace -h -C -s $ac_srcdir[$]ac_provsrc -o \$[]@.bak && \$(SED) -e 's,PHP_,DTRACE_,g' \$[]@.bak > \$[]@
+	CFLAGS="\$(CFLAGS_CLEAN)" dtrace -h -C -s $ac_srcdir[$]ac_provsrc -o \$[]@.bak && \$(SED) -e 's,PHPOCI_,DTRACE_,g' \$[]@.bak > \$[]@
 
 \$(OCI8_DTRACE_OBJS): $ac_bdir[$]ac_hdrobj
 
