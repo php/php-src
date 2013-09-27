@@ -30,6 +30,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #ifndef O_BINARY
 # define O_BINARY 0
 #endif
@@ -3228,7 +3232,12 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 		unsigned char digest[16];
 		int len = strlen(SOAP_GLOBAL(cache_dir));
 		time_t cached;
+#ifdef HAVE_UNISTD_H
+		char user[10]; /* storage for a 32-bit UID */
+		snprintf(user, 10, "%d", getuid());
+#else
 		char *user = php_get_current_user(TSRMLS_C);
+#endif
 		int user_len = user ? strlen(user) + 1 : 0;
 
 		md5str[0] = '\0';
