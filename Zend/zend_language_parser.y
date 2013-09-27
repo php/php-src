@@ -186,7 +186,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_INTERFACE  "interface (T_INTERFACE)"
 %token T_EXTENDS    "extends (T_EXTENDS)"
 %token T_IMPLEMENTS "implements (T_IMPLEMENTS)"
-%token T_SUPER      "super (T_SUPER)"
 %token T_OBJECT_OPERATOR "-> (T_OBJECT_OPERATOR)"
 %token T_DOUBLE_ARROW    "=> (T_DOUBLE_ARROW)"
 %token T_LIST            "list (T_LIST)"
@@ -884,17 +883,6 @@ lexical_var_list:
 	|	'&' T_VARIABLE							{ zend_do_fetch_lexical_variable(&$2, 1 TSRMLS_CC); }
 ;
 
-super_class_reference:
-        T_SUPER                                 {
-            if (CG(active_class_entry)->super) {
-                $$.op_type = IS_CONST;
-                ZVAL_STRINGL(&$$.u.constant, 
-                    CG(active_class_entry)->super->name, 
-                    CG(active_class_entry)->super->name_length, 1);
-            } else zend_error(E_COMPILE_ERROR, "no super class found for %s", CG(active_class_entry)->name);
-        }
-;
-
 function_call:
 		namespace_name { $$.u.op.opline_num = zend_do_begin_function_call(&$1, 1 TSRMLS_CC); }
 		function_call_parameter_list { zend_do_end_function_call(&$1, &$$, &$3, 0, $2.u.op.opline_num TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C); }
@@ -919,14 +907,12 @@ class_name:
 	|	namespace_name { $$ = $1; }
 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
 	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); $$ = $2; }
-	|   super_class_reference { $$ = $1; }
 ;
 
 fully_qualified_class_name:
 		namespace_name { $$ = $1; }
 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
 	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); $$ = $2; }
-	|   super_class_reference { $$ = $1; }
 ;
 
 
@@ -1123,7 +1109,6 @@ base_variable_with_function_calls:
 	|	array_function_dereference	{ $$ = $1; }
 	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $$ = $1; $$.EA = ZEND_PARSED_FUNCTION_CALL; }
 ;
-
 
 base_variable:
 		reference_variable { $$ = $1; $$.EA = ZEND_PARSED_VARIABLE; }

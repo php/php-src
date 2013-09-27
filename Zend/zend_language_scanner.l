@@ -1280,11 +1280,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_GLOBAL;
 }
 
-<ST_IN_SCRIPTING>"super" {
-	return T_SUPER;
-}
-
-
 <ST_IN_SCRIPTING>"isset" {
 	return T_ISSET;
 }
