@@ -969,7 +969,7 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 		}
 		fbc_scope = fbc_scope->parent;
 	}
-    
+
 	/* Is the function's scope the same as our current object context,
 	 * or any of the parents of our context?
 	 */
