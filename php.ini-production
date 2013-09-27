@@ -83,6 +83,8 @@
 ; development version only in development environments as errors shown to
 ; application users can inadvertently leak otherwise secure information.
 
+; This is php.ini-production INI file.
+
 ;;;;;;;;;;;;;;;;;;;
 ; Quick Reference ;
 ;;;;;;;;;;;;;;;;;;;
