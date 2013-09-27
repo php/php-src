@@ -930,6 +930,7 @@ static inline zend_function *zend_check_private_int(zend_function *fbc, zend_cla
 		return fbc;
 	}
 
+
 	/* Check rule #2 */
 	ce = ce->parent;
 	while (ce) {
@@ -961,7 +962,7 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 
 	/* Is the context that's calling the function, the same as one of
 	 * the function's parents?
-	 */	
+	 */
 	while (fbc_scope) {
 		if (fbc_scope==scope) {
 			return 1;

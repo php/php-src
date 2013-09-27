@@ -916,6 +916,7 @@ fully_qualified_class_name:
 ;
 
 
+
 class_name_reference:
 		class_name						{ zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
 	|	dynamic_class_name_reference	{ zend_do_end_variable_parse(&$1, BP_VAR_R, 0 TSRMLS_CC); zend_do_fetch_class(&$$, &$1 TSRMLS_CC); }
@@ -1109,6 +1110,7 @@ base_variable_with_function_calls:
 	|	array_function_dereference	{ $$ = $1; }
 	|	function_call { zend_do_begin_variable_parse(TSRMLS_C); $$ = $1; $$.EA = ZEND_PARSED_FUNCTION_CALL; }
 ;
+
 
 base_variable:
 		reference_variable { $$ = $1; $$.EA = ZEND_PARSED_VARIABLE; }
