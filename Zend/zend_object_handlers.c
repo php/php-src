@@ -979,7 +979,6 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 		}
 		scope = scope->parent;
 	}
-
 	return 0;
 }
 /* }}} */
