@@ -281,7 +281,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	PHP_MD5_CTX md5_context;
 	PHP_SHA1_CTX sha1_context;
 #if defined(HAVE_HASH_EXT) && !defined(COMPILE_DL_HASH)
-	void *hash_context;
+	void *hash_context = NULL;
 #endif
 	unsigned char *digest;
 	int digest_len;
@@ -341,7 +341,7 @@ PHPAPI char *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 		unsigned char rbuf[2048];
 		size_t toread = PS(entropy_length);
 
-		if (php_win32_get_random_bytes(rbuf, (size_t) toread) == SUCCESS){
+		if (php_win32_get_random_bytes(rbuf, MIN(toread, sizeof(rbuf))) == SUCCESS){
 
 			switch (PS(hash_func)) {
 				case PS_HASH_FUNC_MD5:
@@ -733,7 +733,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.save_path",          "",          PHP_INI_ALL, OnUpdateSaveDir,save_path,          php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateName, session_name,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)
-	STD_PHP_INI_BOOLEAN("session.auto_start",       "0",         PHP_INI_ALL, OnUpdateBool,   auto_start,         php_ps_globals,    ps_globals)
+	STD_PHP_INI_BOOLEAN("session.auto_start",       "0",         PHP_INI_PERDIR, OnUpdateBool,   auto_start,         php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_probability",     "1",         PHP_INI_ALL, OnUpdateLong,   gc_probability,     php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_divisor",         "100",       PHP_INI_ALL, OnUpdateLong,   gc_divisor,         php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_maxlifetime",     "1440",      PHP_INI_ALL, OnUpdateLong,   gc_maxlifetime,     php_ps_globals,    ps_globals)
@@ -1052,7 +1052,7 @@ static inline void strcpy_gmt(char *ubuf, time_t *when) /* {{{ */
 	res = php_gmtime_r(when, &tm);
 
 	if (!res) {
-		buf[0] = '\0';
+		ubuf[0] = '\0';
 		return;
 	}
 
@@ -2246,8 +2246,11 @@ static PHP_MSHUTDOWN_FUNCTION(session) /* {{{ */
 	PHP_MSHUTDOWN(ps_mm) (SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #endif
 
-	/* restore the orig callback */
-	php_rfc1867_callback = php_session_rfc1867_orig_callback;
+	/* reset rfc1867 callbacks */
+	php_session_rfc1867_orig_callback = NULL;
+	if (php_rfc1867_callback == php_session_rfc1867_callback) {
+		php_rfc1867_callback = NULL;
+	}
 
 	ps_serializers[PREDEFINED_SERIALIZERS].name = NULL;
 	memset(&ps_modules[PREDEFINED_MODULES], 0, (MAX_MODULES-PREDEFINED_MODULES)*sizeof(ps_module *));

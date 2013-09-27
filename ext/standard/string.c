@@ -1581,7 +1581,7 @@ PHP_FUNCTION(pathinfo)
 		const char *p;
 		int idx;
 
-		/* Have we alrady looked up the basename? */
+		/* Have we already looked up the basename? */
 		if (!have_basename && !ret) {
 			php_basename(path, path_len, NULL, 0, &ret, &ret_len TSRMLS_CC);
 		}
@@ -3253,7 +3253,7 @@ static void php_similar_str(const char *txt1, int len1, const char *txt2, int le
 static int php_similar_char(const char *txt1, int len1, const char *txt2, int len2)
 {
 	int sum;
-	int pos1, pos2, max;
+	int pos1 = 0, pos2 = 0, max;
 
 	php_similar_str(txt1, len1, txt2, len2, &pos1, &pos2, &max);
 	if ((sum = max)) {
@@ -4613,7 +4613,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, int len, int *stateptr, char *allow,
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0, depth=0, in_q = 0;
 	int state = 0, pos;
-	char *allow_free;
+	char *allow_free = NULL;
 
 	if (stateptr)
 		state = *stateptr;

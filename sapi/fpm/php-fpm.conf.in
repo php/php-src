@@ -3,7 +3,7 @@
 ;;;;;;;;;;;;;;;;;;;;;
 
 ; All relative paths in this configuration file are relative to PHP's install
-; prefix (@prefix@). This prefix can be dynamicaly changed by using the
+; prefix (@prefix@). This prefix can be dynamically changed by using the
 ; '-p' argument from the command line.
 
 ; Include one or more files. If glob(3) exists, it is used to include a bunch of
@@ -401,7 +401,7 @@ pm.max_spare_servers = 3
 ;      - %{megabytes}M
 ;      - %{mega}M
 ;  %n: pool name
-;  %o: ouput header
+;  %o: output header
 ;      it must be associated with embraces to specify the name of the header:
 ;      - %{Content-Type}o
 ;      - %{X-Powered-By}o

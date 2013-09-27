@@ -1,8 +1,119 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.4.18
+?? ??? 2013, PHP 5.4.21
+
+- CLI server:
+  . Fixed bug #65633 (built-in server treat some http headers as
+    case-sensitive). (Adam)
+
+- Datetime:
+  . Fixed bug #64157 (DateTime::createFromFormat() reports confusing error
+    message). (Boro Sitnikovski)
+
+- DBA extension:
+  . Fixed bug #65708 (dba functions cast $key param to string in-place,
+    bypassing copy on write). (Adam)
+
+- Filter:
+  . Add RFC 6598 IPs to reserved addresses. (Sebastian Nohn)
+  . Fixed bug #64441 (FILTER_VALIDATE_URL rejects fully qualified domain names).
+    (Syra)
+
+- IMAP:
+  . Fixed bug #65721 (configure script broken in 5.5.4 and 5.4.20 when enabling
+    imap). (ryotakatsuki at gmail dot com)
+
+?? ??? 2013, PHP 5.4.20
 
 - Core:
+  . Fixed bug #60598 (cli/apache sapi segfault on objects manipulation).
+    (Laruence)
+  . Fixed bug #65579 (Using traits with get_class_methods causes segfault).
+    (Adam)
+  . Fixed bug #65490 (Duplicate calls to get lineno & filename for 
+    DTRACE_FUNCTION_*). (Chris Jones)
+  . Fixed bug #65483 (quoted-printable encode stream filter incorrectly encoding
+    spaces). (Michael M Slusarz)
+  . Fixed bug #65481 (shutdown segfault due to serialize) (Mike)
+  . Fixed bug #65470 (Segmentation fault in zend_error() with 
+    --enable-dtrace). (Chris Jones, Kris Van Hees)
+  . Fixed bug #65372 (Segfault in gc_zval_possible_root when return reference
+    fails). (Laruence)
+  . Fixed bug #65304 (Use of max int in array_sum). (Laruence)
+  . Fixed bug #65291 (get_defined_constants() causes PHP to crash in a very
+    limited case). (Arpad)
+  . Fixed bug #65225 (PHP_BINARY incorrectly set). (Patrick Allaert)
+  . Improved fix for bug #63186 (compile failure on netbsd). (Matteo)
+  . Fixed bug #62692 (PHP fails to build with DTrace). (Chris Jones, Kris Van Hees)
+  . Fixed bug #61759 (class_alias() should accept classes with leading
+    backslashes). (Julien)
+  . Fixed bug #61345 (CGI mode - make install don't work). (Michael Heimpold)
+  . Cherry-picked some DTrace build commits (allowing builds on Linux,
+    bug #62691, and bug #63706) from PHP 5.5 branch
+  . Fixed bug #61268 (--enable-dtrace leads make to clobber
+    Zend/zend_dtrace.d) (Chris Jones)
+
+- cURL:
+  . Fixed bug #65458 (curl memory leak). (Adam)
+
+- Datetime:
+  . Fixed bug #65554 (createFromFormat broken when weekday name is followed 
+    by some delimiters). (Valentin Logvinskiy, Stas).
+  . Fixed bug #65564 (stack-buffer-overflow in DateTimeZone stuff caught
+    by AddressSanitizer). (Remi).
+
+- Openssl:
+  . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in 
+    some cases). (Mark Jones)
+
+- Session:
+  . Fixed bug #62129 (rfc1867 crashes php even though turned off). (gxd305 at
+    gmail dot com)
+  . Fixed bug #50308 (session id not appended properly for empty anchor tags).
+    (Arpad)
+  . Fixed possible buffer overflow under Windows. Note: Not a security fix.
+    (Yasuo)
+  . Changed session.auto_start to PHP_INI_PERDIR. (Yasuo)
+
+- SOAP:
+  . Fixed bug #65018 (SoapHeader problems with SoapServer). (Dmitry)
+
+- SPL:
+  . Fixed bug #65328 (Segfault when getting SplStack object Value). (Laruence)
+
+- PDO:
+  . Fixed bug #64953 (Postgres prepared statement positional parameter 
+    casting). (Mike)
+
+- Phar:
+  . Fixed bug #65028 (Phar::buildFromDirectory creates corrupt archives for 
+    some specific contents). (Stas)
+
+- Pgsql:
+  . Fixed bug #65336 (pg_escape_literal/identifier() silently returns false).
+    (Yasuo)
+  . Fixed bug #62978 (Disallow possible SQL injections with pg_select()/pg_update()
+    /pg_delete()/pg_insert()). (Yasuo)
+
+- Zlib:
+  . Fixed bug #65391 (Unable to send vary header user-agent when 
+    ob_start('ob_gzhandler') is called) (Mike)
+
+22 Aug 2013, PHP 5.4.19
+
+- Core:
+  . Fixed bug #64503 (Compilation fails with error: conflicting types for
+    'zendparse'). (Laruence)
+
+- Openssl:
+  . Fixed UMR in fix for CVE-2013-4248.
+
+15 Aug 2013, PHP 5.4.18
+
+- Core:
+  . Fixed value of FILTER_SANITIZE_FULL_SPECIAL_CHARS constant (previously was
+    erroneously set to FILTER_SANITIZE_SPECIAL_CHARS value). (Andrey 
+    avp200681 gmail com).
   . Fixed bug #65254 (Exception not catchable when exception thrown in autoload
     with a namespace). (Laruence)
   . Fixed bug #65108 (is_callable() triggers Fatal Error). 
@@ -24,6 +135,9 @@ PHP                                                                        NEWS
   . Fixed bug #65066 (Cli server not responsive when responding with 422 http
     status code). (Adam)
     
+- CURL:
+  . Fixed bug #62665 (curl.cainfo doesn't appear in php.ini). (Lior Kaplan)
+
 - FPM:
   . Fixed bug #63983 (enabling FPM borks compile on FreeBSD).
     (chibisuke at web dot de, Felipe)
@@ -51,9 +165,17 @@ PHP                                                                        NEWS
   . Fixed bug #61387 (NULL valued anonymous column causes segfault in 
     odbc_fetch_array). (Brandon Kirsch)
 
+- Openssl:
+  . Fixed handling null bytes in subjectAltName (CVE-2013-4248).
+    (Christian Heimes)
+
 - PDO:
   . Allowed PDO_OCI to compile with Oracle Database 12c client libraries.
     (Chris Jones)
+
+- PDO_dblib:
+  . Fixed bug #65219 (PDO/dblib not working anymore ("use dbName" not sent)). 
+    (Stanley Sufficool)
 
 - PDO_pgsql:
   . Fixed meta data retrieve when OID is larger than 2^31. (Yasuo)
@@ -79,6 +201,9 @@ PHP                                                                        NEWS
     /Spl(Temp)FileObject ctor twice). (Laruence)
   . Fixed bug #60560 (SplFixedArray un-/serialize, getSize(), count() return 0,
     keys are strings). (Adam)
+
+- XML:
+  . Fixed bug #65236 (heap corruption in xml parser, CVE-2013-4113). (Rob)
 
 04 Jul 2013, PHP 5.4.17
 

@@ -899,7 +899,7 @@ static PHP_METHOD(PDO, getAttribute)
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
 
-	/* handle generic PDO-level atributes */
+	/* handle generic PDO-level attributes */
 	switch (attr) {
 		case PDO_ATTR_PERSISTENT:
 			RETURN_BOOL(dbh->is_persistent);
@@ -997,7 +997,7 @@ static PHP_METHOD(PDO, lastInsertId)
 		pdo_raise_impl_error(dbh, NULL, "IM001", "driver does not support lastInsertId()" TSRMLS_CC);
 		RETURN_FALSE;
 	} else {
-		Z_STRVAL_P(return_value) = dbh->methods->last_id(dbh, name, &Z_STRLEN_P(return_value) TSRMLS_CC);
+		Z_STRVAL_P(return_value) = dbh->methods->last_id(dbh, name, (unsigned int *)&Z_STRLEN_P(return_value) TSRMLS_CC);
 		if (!Z_STRVAL_P(return_value)) {
 			PDO_HANDLE_DBH_ERR();
 			RETURN_FALSE;

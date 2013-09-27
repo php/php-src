@@ -997,7 +997,7 @@ char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 static char *date_format(char *format, int format_len, timelib_time *t, int localtime)
 {
 	smart_str            string = {0};
-	int                  i, length;
+	int                  i, length = 0;
 	char                 buffer[97];
 	timelib_time_offset *offset = NULL;
 	timelib_sll          isoweek, isoyear;
@@ -1352,7 +1352,7 @@ PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb)
 }
 /* }}} */
 
-/* {{{ php_parse_date: Backwards compability function */
+/* {{{ php_parse_date: Backwards compatibility function */
 PHPAPI signed long php_parse_date(char *string, signed long *now)
 {
 	timelib_time *parsed_time;
@@ -2113,13 +2113,13 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 	/* first we add the date and time in ISO format */
 	MAKE_STD_ZVAL(zv);
 	ZVAL_STRING(zv, date_format("Y-m-d H:i:s", 12, dateobj->time, 1), 0);
-	zend_hash_update(props, "date", 5, &zv, sizeof(zval), NULL);
+	zend_hash_update(props, "date", 5, &zv, sizeof(zv), NULL);
 
 	/* then we add the timezone name (or similar) */
 	if (dateobj->time->is_localtime) {
 		MAKE_STD_ZVAL(zv);
 		ZVAL_LONG(zv, dateobj->time->zone_type);
-		zend_hash_update(props, "timezone_type", 14, &zv, sizeof(zval), NULL);
+		zend_hash_update(props, "timezone_type", 14, &zv, sizeof(zv), NULL);
 
 		MAKE_STD_ZVAL(zv);
 		switch (dateobj->time->zone_type) {
@@ -2142,7 +2142,7 @@ static HashTable *date_object_get_properties(zval *object TSRMLS_DC)
 				ZVAL_STRING(zv, dateobj->time->tz_abbr, 1);
 				break;
 		}
-		zend_hash_update(props, "timezone", 9, &zv, sizeof(zval), NULL);
+		zend_hash_update(props, "timezone", 9, &zv, sizeof(zv), NULL);
 	}
 
 	return props;
@@ -2265,7 +2265,7 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 #define PHP_DATE_INTERVAL_ADD_PROPERTY(n,f) \
 	MAKE_STD_ZVAL(zv); \
 	ZVAL_LONG(zv, (long)intervalobj->diff->f); \
-	zend_hash_update(props, n, strlen(n) + 1, &zv, sizeof(zval), NULL);
+	zend_hash_update(props, n, strlen(n) + 1, &zv, sizeof(zv), NULL);
 
 	PHP_DATE_INTERVAL_ADD_PROPERTY("y", y);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("m", m);
@@ -2282,7 +2282,7 @@ static HashTable *date_object_get_properties_interval(zval *object TSRMLS_DC)
 	} else {
 		MAKE_STD_ZVAL(zv);
 		ZVAL_FALSE(zv);
-		zend_hash_update(props, "days", 5, &zv, sizeof(zval), NULL);
+		zend_hash_update(props, "days", 5, &zv, sizeof(zv), NULL);
 	}
 	PHP_DATE_INTERVAL_ADD_PROPERTY("special_type", special.type);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("special_amount", special.amount);
@@ -2409,8 +2409,8 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 	timelib_time   *now;
 	timelib_tzinfo *tzi = NULL;
 	timelib_error_container *err = NULL;
-	int type = TIMELIB_ZONETYPE_ID, new_dst;
-	char *new_abbr;
+	int type = TIMELIB_ZONETYPE_ID, new_dst = 0;
+	char *new_abbr = NULL;
 	timelib_sll     new_offset;
 	
 	if (dateobj->time) {
@@ -3568,7 +3568,11 @@ zval *date_interval_read_property(zval *object, zval *member, int type, const ze
 	ALLOC_INIT_ZVAL(retval);
 	Z_SET_REFCOUNT_P(retval, 0);
 
-	ZVAL_LONG(retval, value);
+	if (value != -99999) {
+		ZVAL_LONG(retval, value);
+	} else {
+		ZVAL_FALSE(retval);
+	}
 
 	if (member == &tmp_member) {
 		zval_dtor(member);

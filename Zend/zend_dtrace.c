@@ -24,7 +24,7 @@
 
 #ifdef HAVE_DTRACE
 /* PHP DTrace probes {{{ */
-static inline char *dtrace_get_executed_filename(TSRMLS_D)
+static inline const char *dtrace_get_executed_filename(TSRMLS_D)
 {
 	if (EG(current_execute_data) && EG(current_execute_data)->op_array) {
 		return EG(current_execute_data)->op_array->filename;
@@ -36,9 +36,9 @@ static inline char *dtrace_get_executed_filename(TSRMLS_D)
 ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
 	zend_op_array *res;
-	DTRACE_COMPILE_FILE_ENTRY(file_handle->opened_path, file_handle->filename);
+	DTRACE_COMPILE_FILE_ENTRY(file_handle->opened_path, (char *)file_handle->filename);
 	res = compile_file(file_handle, type TSRMLS_CC);
-	DTRACE_COMPILE_FILE_RETURN(file_handle->opened_path, file_handle->filename);
+	DTRACE_COMPILE_FILE_RETURN(file_handle->opened_path, (char *)file_handle->filename);
 
 	return res;
 }
@@ -47,7 +47,7 @@ ZEND_API zend_op_array *dtrace_compile_file(zend_file_handle *file_handle, int t
 ZEND_API void dtrace_execute(zend_op_array *op_array TSRMLS_DC)
 {
 	int lineno;
-	char *scope, *filename, *funcname, *classname;
+	const char *scope, *filename, *funcname, *classname;
 	scope = filename = funcname = classname = NULL;
 
 	/* we need filename and lineno for both execute and function probes */
@@ -58,48 +58,46 @@ ZEND_API void dtrace_execute(zend_op_array *op_array TSRMLS_DC)
 	}
 
 	if (DTRACE_FUNCTION_ENTRY_ENABLED() || DTRACE_FUNCTION_RETURN_ENABLED()) {
-		filename = dtrace_get_executed_filename(TSRMLS_C);
 		classname = get_active_class_name(&scope TSRMLS_CC);
 		funcname = get_active_function_name(TSRMLS_C);
-		lineno = zend_get_executed_lineno(TSRMLS_C);
 	}
 
 	if (DTRACE_EXECUTE_ENTRY_ENABLED()) {
-		DTRACE_EXECUTE_ENTRY(filename, lineno);
+		DTRACE_EXECUTE_ENTRY((char *)filename, lineno);
 	}
 
 	if (DTRACE_FUNCTION_ENTRY_ENABLED() && funcname != NULL) {
-		DTRACE_FUNCTION_ENTRY(funcname, filename, lineno, classname, scope);
+		DTRACE_FUNCTION_ENTRY((char *)funcname, (char *)filename, lineno, (char *)classname, (char *)scope);
 	}
 
 	execute(op_array TSRMLS_CC);
 
 	if (DTRACE_FUNCTION_RETURN_ENABLED() && funcname != NULL) {
-		DTRACE_FUNCTION_RETURN(funcname, filename, lineno, classname, scope);
+		DTRACE_FUNCTION_RETURN((char *)funcname, (char *)filename, lineno, (char *)classname, (char *)scope);
 	}
 
 	if (DTRACE_EXECUTE_RETURN_ENABLED()) {
-		DTRACE_EXECUTE_RETURN(filename, lineno);
+		DTRACE_EXECUTE_RETURN((char *)filename, lineno);
 	}
 }
 
 ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data_ptr, int return_value_used TSRMLS_DC)
 {
 	int lineno;
-	char *filename;
+	const char *filename;
 	if (DTRACE_EXECUTE_ENTRY_ENABLED() || DTRACE_EXECUTE_RETURN_ENABLED()) {
 		filename = dtrace_get_executed_filename(TSRMLS_C);
 		lineno = zend_get_executed_lineno(TSRMLS_C);
 	}
 
 	if (DTRACE_EXECUTE_ENTRY_ENABLED()) {
-		DTRACE_EXECUTE_ENTRY(filename, lineno);
+		DTRACE_EXECUTE_ENTRY((char *)filename, lineno);
 	}
 
 	execute_internal(execute_data_ptr, return_value_used TSRMLS_CC);
 
 	if (DTRACE_EXECUTE_RETURN_ENABLED()) {
-		DTRACE_EXECUTE_RETURN(filename, lineno);
+		DTRACE_EXECUTE_RETURN((char *)filename, lineno);
 	}
 }
 

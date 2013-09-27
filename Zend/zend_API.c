@@ -2514,7 +2514,12 @@ ZEND_API int zend_register_class_alias_ex(const char *name, int name_len, zend_c
 	char *lcname = zend_str_tolower_dup(name, name_len);
 	int ret;
 
-	ret = zend_hash_add(CG(class_table), lcname, name_len+1, &ce, sizeof(zend_class_entry *), NULL);
+	if (lcname[0] == '\\') {
+		ret = zend_hash_add(CG(class_table), lcname+1, name_len, &ce, sizeof(zend_class_entry *), NULL);
+	} else {
+		ret = zend_hash_add(CG(class_table), lcname, name_len+1, &ce, sizeof(zend_class_entry *), NULL);
+	}
+
 	efree(lcname);
 	if (ret == SUCCESS) {
 		ce->refcount++;
@@ -3917,15 +3922,16 @@ ZEND_API const char* zend_find_alias_name(zend_class_entry *ce, const char *name
 {
 	zend_trait_alias *alias, **alias_ptr;
 
-	alias_ptr = ce->trait_aliases;
-	alias = *alias_ptr;
-	while (alias) {
-		if (alias->alias_len == len &&
-		    !strncasecmp(name, alias->alias, alias->alias_len)) {
-			return alias->alias;
-		}
-		alias_ptr++;
+	if ((alias_ptr = ce->trait_aliases)) {
 		alias = *alias_ptr;
+		while (alias) {
+			if (alias->alias_len == len &&
+				!strncasecmp(name, alias->alias, alias->alias_len)) {
+				return alias->alias;
+			}
+			alias_ptr++;
+			alias = *alias_ptr;
+		}
 	}
 
 	return name;

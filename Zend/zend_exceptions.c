@@ -85,12 +85,12 @@ void zend_throw_exception_internal(zval *exception TSRMLS_DC) /* {{{ */
 {
 #ifdef HAVE_DTRACE
 	if (DTRACE_EXCEPTION_THROWN_ENABLED()) {
-		char *classname;
-		int name_len;
+		const char *classname;
+		zend_uint name_len;
 
 		if (exception != NULL) {
 			zend_get_object_classname(exception, &classname, &name_len TSRMLS_CC);
-			DTRACE_EXCEPTION_THROWN(classname);
+			DTRACE_EXCEPTION_THROWN((char *)classname);
 		} else {
 			DTRACE_EXCEPTION_THROWN(NULL);
 		}

@@ -197,13 +197,12 @@
 engine = On
 
 ; This directive determines whether or not PHP will recognize code between
-; <? and ?> tags as PHP source which should be processed as such. It's been
-; recommended for several years that you not use the short tag "short cut" and
-; instead to use the full <?php and ?> tag combination. With the wide spread use
-; of XML and use of these tags by other languages, the server can become easily
-; confused and end up parsing the wrong code in the wrong context. But because
-; this short cut has been a feature for such a long time, it's currently still
-; supported for backwards compatibility, but we recommend you don't use them.
+; <? and ?> tags as PHP source which should be processed as such. It is
+; generally recommended that <?php and ?> should be used and that this feature
+; should be disabled, as enabling it may result in issues when generating XML
+; documents, however this remains supported for backward compatibility reasons.
+; Note that this directive does not control the <?= shorthand tag, which can be
+; used regardless of this directive.
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
@@ -903,7 +902,6 @@ default_socket_timeout = 60
 ;extension=php_tidy.dll
 ;extension=php_xmlrpc.dll
 ;extension=php_xsl.dll
-;extension=php_zip.dll
 
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
@@ -1474,7 +1472,7 @@ session.gc_maxlifetime = 1440
 ;       collection through a shell script, cron entry, or some other method.
 ;       For example, the following script would is the equivalent of
 ;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
-;          find /path/to/sessions -cmin +24 | xargs rm
+;          find /path/to/sessions -cmin +24 -type f | xargs rm
 
 ; PHP 4.2 and less have an undocumented feature/bug that allows you to
 ; to initialize a session variable in the global scope.
@@ -1855,6 +1853,11 @@ ldap.max_links = -1
 
 [dba]
 ;dba.default_handler=
+
+[curl]
+; A default value for the CURLOPT_CAINFO option. This is required to be an
+; absolute path.
+;curl.cainfo =
 
 ; Local Variables:
 ; tab-width: 4
