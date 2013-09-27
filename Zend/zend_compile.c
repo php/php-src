@@ -2260,14 +2260,6 @@ void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
     result->op_type = IS_CONST;
 } /* }}} */
 
-void zend_do_extend_anon_class(znode *class_name, const znode *parent_class TSRMLS_DC) {
-    if (parent_class->op_type != IS_UNUSED) {
-        php_printf(
-            "extending %s with %s\n", Z_STRVAL(class_name->u.constant), Z_STRVAL(parent_class->u.constant)
-        );
-    }
-}
-
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 {
 	long fetch_class_op_number;
