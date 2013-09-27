@@ -1,6 +1,10 @@
 #ifndef TSRM_CONFIG_COMMON_H
 #define TSRM_CONFIG_COMMON_H
 
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
 #ifndef __CYGWIN__
 # if WINNT|WIN32
 #  define TSRM_WIN32

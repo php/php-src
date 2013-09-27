@@ -246,6 +246,10 @@ END_EXTERN_C()
 /* macros */
 #define STR_PRINT(str)	((str)?(str):"")
 
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
 #ifndef MAXPATHLEN
 # ifdef PATH_MAX
 #  define MAXPATHLEN PATH_MAX

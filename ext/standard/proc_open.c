@@ -24,6 +24,10 @@
 # define __EXTENSIONS__	1	/* Solaris: uint */
 #endif
 
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
 #include "php.h"
 #include <stdio.h>
 #include <ctype.h>
