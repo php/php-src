@@ -930,7 +930,6 @@ static inline zend_function *zend_check_private_int(zend_function *fbc, zend_cla
 		return fbc;
 	}
 
-
 	/* Check rule #2 */
 	ce = ce->parent;
 	while (ce) {
