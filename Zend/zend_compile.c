@@ -1822,8 +1822,9 @@ void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC) /* 
 }
 /* }}} */
 
-void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_uchar pass_by_reference, zend_bool is_variadic TSRMLS_DC) /* {{{ */
+void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_uchar pass_by_reference, zend_bool is_variadic, const znode *auto_prop_init TSRMLS_DC) /* {{{ */
 {
+	zend_op_array *op_array = CG(active_op_array);
 	zend_op *opline;
 	zend_arg_info *cur_arg_info;
 	znode var;
@@ -1832,17 +1833,17 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 		zend_error(E_COMPILE_ERROR, "Cannot re-assign auto-global variable %s", Z_STRVAL(varname->u.constant));
 	} else {
 		var.op_type = IS_CV;
-		var.u.op.var = lookup_cv(CG(active_op_array), Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant), 0 TSRMLS_CC);
-		Z_STRVAL(varname->u.constant) = (char*)CG(active_op_array)->vars[var.u.op.var].name;
+		var.u.op.var = lookup_cv(op_array, Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant), 0 TSRMLS_CC);
+		Z_STRVAL(varname->u.constant) = (char*) op_array->vars[var.u.op.var].name;
 		var.EA = 0;
-		if (CG(active_op_array)->vars[var.u.op.var].hash_value == THIS_HASHVAL &&
+		if (op_array->vars[var.u.op.var].hash_value == THIS_HASHVAL &&
 			Z_STRLEN(varname->u.constant) == sizeof("this")-1 &&
 		    !memcmp(Z_STRVAL(varname->u.constant), "this", sizeof("this")-1)) {
-			if (CG(active_op_array)->scope &&
-			    (CG(active_op_array)->fn_flags & ZEND_ACC_STATIC) == 0) {
+			if (op_array->scope &&
+			    (op_array->fn_flags & ZEND_ACC_STATIC) == 0) {
 				zend_error(E_COMPILE_ERROR, "Cannot re-assign $this");
 			}
-			CG(active_op_array)->this_var = var.u.op.var;
+			op_array->this_var = var.u.op.var;
 		}
 	}
 
@@ -1922,6 +1923,43 @@ void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initializ
 					}
 				}
 			}
+		}
+	}
+
+	if (auto_prop_init != NULL) {
+		if (Z_STRLEN(auto_prop_init->u.constant) != sizeof("this")-1
+			|| memcmp(Z_STRVAL(auto_prop_init->u.constant), "this", sizeof("this")-1) != 0
+		) {
+			zend_error(E_COMPILE_ERROR, "Property name can only be prefixed by $this->");
+		}
+		efree(Z_STRVAL(auto_prop_init->u.constant));
+
+		if (!op_array->scope) {
+			zend_error(E_COMPILE_ERROR, "Automatic property initialization can only be used inside a class");
+		}
+
+		if (op_array->scope->constructor != (zend_function *) op_array) {
+			zend_error(E_COMPILE_ERROR, "Automatic property initialization can only be used in a constructor");
+		}
+
+		if (op_array->fn_flags & ZEND_ACC_ABSTRACT) {
+			zend_error(E_COMPILE_ERROR, "Automatic property initialization can not be used in an abstract method");
+		}
+
+		{
+			znode this_var, property_name, property_var, assign_result;
+
+			this_var.op_type = IS_CV;
+			this_var.u.op.var = op_array->this_var;
+			this_var.EA = 0;
+
+			property_name.op_type = IS_CONST;
+			ZVAL_STRINGL(&property_name.u.constant, Z_STRVAL(varname->u.constant), Z_STRLEN(varname->u.constant), 1);
+
+			zend_do_begin_variable_parse(TSRMLS_C);
+			zend_do_fetch_property(&property_var, &this_var, &property_name TSRMLS_CC);
+			zend_do_assign(&assign_result, &property_var, &var TSRMLS_CC);
+			zend_do_free(&assign_result TSRMLS_CC);
 		}
 	}
 }
