@@ -2202,7 +2202,7 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 				*class_name = tmp;
 			}
 		}
-	} else if (CG(current_import) || CG(current_namespace) && !CG(active_class_entry)) {
+	} else if (CG(current_import) || CG(current_namespace) && !((class_name->EA & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {	    
 		/* this is a plain name (without \) */
 		lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 
@@ -2220,6 +2220,7 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 			zend_do_build_namespace_name(&tmp, &tmp, class_name TSRMLS_CC);
 			*class_name = tmp;
 		}
+	    
 		efree(lcname);
 	}
 }
@@ -2237,7 +2238,7 @@ void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
     if (CG(active_op_array)) {
         if (CG(active_class_entry)) {
             prefix_name = CG(active_class_entry)->name;
-            if (CG(current_namespace)) {
+            if (CG(in_namespace)) {
                 prefix_name += Z_STRLEN_P(CG(current_namespace)) + sizeof("\\")-1;
             }
         } else if (CG(active_op_array)->function_name) {
@@ -2261,6 +2262,7 @@ void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
             class_name, class_name_len+1, 1 TSRMLS_CC);
 
     result->op_type = IS_CONST;
+    result->EA = ZEND_ACC_ANON_CLASS;
 } /* }}} */
 
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
