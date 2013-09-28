@@ -44,8 +44,8 @@ http://pear.php.net/dtd/package-2.0.xsd">
  <time>12:00:00</time>
 
   <version>
-   <release>2.0.4</release>
-   <api>2.0.4</api>
+   <release>2.0.5</release>
+   <api>2.0.5</api>
   </version>
   <stability>
    <release>devel</release>
@@ -53,8 +53,7 @@ http://pear.php.net/dtd/package-2.0.xsd">
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-Fix persistent memory usage with --enable-dtrace
-Export get_module() for Windows php_oci8_12c.dll
+   - no notes yet
   </notes>
  <contents>
   <dir name="/">
@@ -452,6 +451,22 @@ Export get_module() for Windows php_oci8_12c.dll
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.0.4</release>
+   <api>2.0.4</api>
+  </version>
+  <stability>
+   <release>devel</release>
+   <api>devel</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+Fix persistent memory usage with --enable-dtrace
+Export get_module() for Windows php_oci8_12c.dll
+  </notes>
+</release>
 
 <release>
   <version>
