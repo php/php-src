@@ -736,32 +736,15 @@ new_object:
 ;
 
 anon_class_type:
-    T_CLASS {
-        $$.u.op.opline_num = CG(zend_lineno);
-        $$.EA = ZEND_ACC_ANON_CLASS;
-    }
+    T_CLASS { $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_ANON_CLASS; }
 ;
 
 anon_class_decl:
-    anon_class_type {
-        zend_do_create_anon_class(&$$ TSRMLS_CC);
-    } extends_from {
-        zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC);
-    } implements_list
-            '{' class_statement_list '}' {
-        zend_do_end_class_declaration(&$1, &$3 TSRMLS_CC);
-        zend_do_fetch_class(&$$, &$2 TSRMLS_CC);
-    }
+    anon_class_type { zend_do_create_anon_class(&$$ TSRMLS_CC); } extends_from { zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); } implements_list '{' class_statement_list '}' { zend_do_end_class_declaration(&$1, &$3 TSRMLS_CC); zend_do_fetch_class(&$$, &$2 TSRMLS_CC); }
 ;
 
 new_anon_object:
-    T_NEW anon_class_decl {
-        zend_do_extended_fcall_begin(TSRMLS_C);
-        zend_do_begin_new_object(&$1, &$2 TSRMLS_CC);
-    } ctor_arguments {
-        zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); 
-        zend_do_extended_fcall_end(TSRMLS_C);
-    }
+    T_NEW anon_class_decl { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC);  zend_do_extended_fcall_end(TSRMLS_C); }
 ;
 
 new_expr:
