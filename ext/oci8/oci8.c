@@ -151,7 +151,7 @@ static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh TS
 /* }}} */
 
 /* {{{ dynamically loadable module stuff */
-#if defined(COMPILE_DL_OCI8) || defined(COMPILE_DL_OCI8_11G)
+#if defined(COMPILE_DL_OCI8) || defined(COMPILE_DL_OCI8_11G) || defined(COMPILE_DL_OCI8_12C)
 ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */

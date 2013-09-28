@@ -1788,7 +1788,7 @@ PHP_FUNCTION(oci_set_client_identifier)
 
 	if (client_id) {
 		/* this long winded copy allows compatibility with older PHP versions */
-		connection->client_id = (char *)safe_emalloc(client_id_len+1, sizeof(char), connection->is_persistent);
+		connection->client_id = (char *)pemalloc(client_id_len+1, connection->is_persistent);
 		memcpy(connection->client_id, client_id, client_id_len);
 		connection->client_id[client_id_len] = '\0';
 	} else {
