@@ -5027,6 +5027,11 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 	    zend_hash_find(CG(current_import), lcname, Z_STRLEN(class_name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
 		error = 1;
 	}
+	
+	if (CG(active_class_entry) && !(class_token->EA & ZEND_ACC_ANON_CLASS)) {
+        zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
+        return;
+	}
 
 	if (CG(current_namespace) && !CG(active_class_entry)) {
 		/* Prefix class name with name of current namespace */
