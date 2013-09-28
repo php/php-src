@@ -11,12 +11,18 @@ Test fsockopen() function : basic functionality
 echo "*** Testing fsockopen() : basic functionality ***\n";
 
 echo "Open a server socket\n";
-$server = stream_socket_server('tcp://127.0.0.1:31337');
 
+for ($i=0; $i<100; $i++) {
+  $port = rand(10000, 65000);
+  /* Setup socket server */
+  $server = @stream_socket_server("tcp://127.0.0.1:$port");
+  if ($server) {
+    break;
+  }
+}
 
 // Initialise all required variables
 $hostname = 'tcp://127.0.0.1'; // loopback address
-$port = 31337;
 $errno = null;
 $errstr = null;
 $timeout = 1.5;

@@ -156,6 +156,9 @@ typedef struct {
 	time_t			idle_expiry;				/* time when the connection will be considered as expired */
 	time_t		   *next_pingp;					/* (pointer to) time of the next ping */
 	char		   *hash_key;					/* hashed details of the connection */
+#ifdef HAVE_OCI8_DTRACE
+	char		   *client_id;					/* The oci_set_client_identifier() value */
+#endif
 } php_oci_connection;
 /* }}} */
 

@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig S�ther Bakken <ssb@php.net>                            |
+   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Maxim Maletsky <maxim@maxim.cx>                             |
    |                                                                      |
@@ -151,7 +151,7 @@ static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh TS
 /* }}} */
 
 /* {{{ dynamically loadable module stuff */
-#if defined(COMPILE_DL_OCI8) || defined(COMPILE_DL_OCI8_11G)
+#if defined(COMPILE_DL_OCI8) || defined(COMPILE_DL_OCI8_11G) || defined(COMPILE_DL_OCI8_12C)
 ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */
@@ -2097,6 +2097,9 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
 			connection->hash_key = estrndup(hashed_details.c, hashed_details.len);
 			connection->is_persistent = 0;
+#ifdef HAVE_OCI8_DTRACE
+			connection->client_id = NULL;
+#endif
 		} else {
 			connection = (php_oci_connection *) calloc(1, sizeof(php_oci_connection));
 			if (connection == NULL) {
@@ -2108,11 +2111,17 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				return NULL;
 			}
 			connection->is_persistent = 1;
+#ifdef HAVE_OCI8_DTRACE
+			connection->client_id = NULL;
+#endif
 		}
 	} else {
 		connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
 		connection->hash_key = estrndup(hashed_details.c, hashed_details.len);
 		connection->is_persistent = 0;
+#ifdef HAVE_OCI8_DTRACE
+		connection->client_id = NULL;
+#endif
 	}
 
 	/* {{{ Get the session pool that suits this connection request from the persistent list. This
@@ -2366,17 +2375,15 @@ static int php_oci_connection_close(php_oci_connection *connection TSRMLS_DC)
 		php_oci_spool_close(connection->private_spool TSRMLS_CC);
 	}
 
-	if (connection->is_persistent) {
-		if (connection->hash_key) {
-			free(connection->hash_key);
-		}
-		free(connection);
-	} else {
-		if (connection->hash_key) {
-			efree(connection->hash_key);
-		}
-		efree(connection);
+	if (connection->hash_key) {
+		pefree(connection->hash_key, connection->is_persistent);
 	}
+#ifdef HAVE_OCI8_DTRACE
+	if (connection->client_id) {
+		pefree(connection->client_id, connection->is_persistent);
+	}
+#endif /* HAVE_OCI8_DTRACE */
+	pefree(connection, connection->is_persistent);
 	connection = NULL;
 	OCI_G(in_call) = in_call_save;
 	return result;
@@ -2463,6 +2470,12 @@ int php_oci_connection_release(php_oci_connection *connection TSRMLS_DC)
 		 * the OCI session
 		 */
 		connection->next_pingp = NULL;
+#ifdef HAVE_OCI8_DTRACE
+		if (connection->client_id) {
+			pefree(connection->client_id, connection->is_persistent);
+			connection->client_id = NULL;
+		}
+#endif /* HAVE_OCI8_DTRACE */
 	}
 
 	OCI_G(in_call) = in_call_save;
@@ -3500,7 +3513,7 @@ void php_oci_dtrace_check_connection(php_oci_connection *connection, sb4 errcode
 {
 #ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CHECK_CONNECTION_ENABLED()) {
-		DTRACE_OCI8_CHECK_CONNECTION(connection, connection && connection->is_open ? 1 : 0, (long)errcode, (unsigned long)serverStatus);
+		DTRACE_OCI8_CHECK_CONNECTION(connection, connection->client_id, connection->is_open ? 1 : 0, (long)errcode, (unsigned long)serverStatus);
 	}
 #endif /* HAVE_OCI8_DTRACE */
 }

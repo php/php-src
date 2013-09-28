@@ -1772,6 +1772,30 @@ PHP_FUNCTION(oci_set_client_identifier)
 		RETURN_FALSE;
 	}
 
+#ifdef HAVE_OCI8_DTRACE
+	/* The alternatives to storing client_id like done below are
+	   i) display it in a probe here in oci_set_client_identifier and
+	   let the user D script correlate the connection address probe
+	   argument and the client_id. This would likely require user D
+	   script variables, which would use kernel memory.
+	   ii) call OCIAttrGet for each probe definition that uses
+	   client_id. This would be slower than storing it.
+	*/
+
+	if (connection->client_id) {
+		pefree(connection->client_id, connection->is_persistent);
+	}
+
+	if (client_id) {
+		/* this long winded copy allows compatibility with older PHP versions */
+		connection->client_id = (char *)pemalloc(client_id_len+1, connection->is_persistent);
+		memcpy(connection->client_id, client_id, client_id_len);
+		connection->client_id[client_id_len] = '\0';
+	} else {
+		connection->client_id = NULL;
+	}
+#endif /* HAVE_OCI8_DTRACE */
+
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1790,13 +1814,14 @@ PHP_FUNCTION(oci_set_edition)
 
 	if (OCI_G(edition)) {
 		efree(OCI_G(edition));
-		OCI_G(edition) = NULL;
 	}
 
 	if (edition) {
-		OCI_G(edition) = (char *)safe_emalloc(edition_len+1, sizeof(text), 0);
+		OCI_G(edition) = (char *)safe_emalloc(edition_len+1, sizeof(char), 0);
 		memcpy(OCI_G(edition), edition, edition_len);
 		OCI_G(edition)[edition_len] = '\0';
+	} else {
+		OCI_G(edition) = NULL;
 	}
 
 	RETURN_TRUE;
