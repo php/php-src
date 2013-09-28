@@ -2202,7 +2202,7 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 				*class_name = tmp;
 			}
 		}
-	} else if (CG(current_import) || CG(current_namespace)) {
+	} else if (CG(current_import) || CG(current_namespace) && !CG(active_class_entry)) {
 		/* this is a plain name (without \) */
 		lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 
@@ -2235,8 +2235,11 @@ void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
 
     /* prefix anonymous class with current scope for reference */
     if (CG(active_op_array)) {
-        if (CG(active_op_array)->scope) {
-            prefix_name = CG(active_op_array)->scope->name;
+        if (CG(active_class_entry)) {
+            prefix_name = CG(active_class_entry)->name;
+            if (CG(current_namespace)) {
+                prefix_name += Z_STRLEN_P(CG(current_namespace)) + sizeof("\\")-1;
+            }
         } else if (CG(active_op_array)->function_name) {
             prefix_name = CG(active_op_array)->function_name;
         } else prefix_name = "Class";
@@ -5025,7 +5028,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 		error = 1;
 	}
 
-	if (CG(current_namespace)) {
+	if (CG(current_namespace) && !CG(active_class_entry)) {
 		/* Prefix class name with name of current namespace */
 		znode tmp;
 
