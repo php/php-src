@@ -1519,7 +1519,7 @@ int zend_std_object_get_class_name(const zval *object, const char **class_name, 
 }
 /* }}} */
 
-ZEND_API int zend_std_cast_object(zval *readobj, zval *writeobj, int type TSRMLS_DC) /* {{{ */
+ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type TSRMLS_DC) /* {{{ */
 {
 	zval *retval;
 	zend_class_entry *ce;
@@ -1675,7 +1675,7 @@ ZEND_API zend_object_handlers std_object_handlers = {
 	zend_std_object_get_class,				/* get_class_entry */
 	zend_std_object_get_class_name,			/* get_class_name */
 	zend_std_compare_objects,				/* compare_objects */
-	zend_std_cast_object,			        /* cast_object */
+	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */
 	NULL,									/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
