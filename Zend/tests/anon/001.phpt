@@ -5,6 +5,6 @@ declare bare anonymous class
 var_dump(new class{});
 ?>
 --EXPECTF--	
-object(Class$$1)#%d (0) {
+object(%s$$1)#%d (0) {
 }
 

@@ -5,6 +5,6 @@ declare anonymous class extending another
 var_dump(new class extends stdClass{});
 ?>
 --EXPECTF--	
-object(Class$$1)#%d (0) {
+object(%s$$1)#%d (0) {
 }
 

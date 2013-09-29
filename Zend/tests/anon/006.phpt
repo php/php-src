@@ -10,8 +10,8 @@ namespace {
     var_dump ($hello);
 }
 ?>
---EXPECT--	
-object(Class$$1)#1 (0) {
+--EXPECTF--
+object(%s$$1)#1 (0) {
 }
 
 
