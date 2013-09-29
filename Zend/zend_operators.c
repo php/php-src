@@ -699,15 +699,7 @@ ZEND_API void convert_to_array(zval *op) /* {{{ */
 
 				ALLOC_HASHTABLE(ht);
 				zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0);
-				if (Z_OBJ_HT_P(op)->cast_object) {
-				    zval casted;
-				    Z_ARRVAL(casted) = ht;
-				    Z_TYPE(casted) = IS_ARRAY;
-				    if (Z_OBJ_HT_P(op)->cast_object(op, &casted, IS_ARRAY TSRMLS_CC) == FAILURE) {
-				        zval_dtor(&casted);
-						return;
-				    }
-				} else if (Z_OBJCE_P(op) == zend_ce_closure) {
+				if (Z_OBJCE_P(op) == zend_ce_closure) {
 					convert_scalar_to_array(op, IS_ARRAY TSRMLS_CC);
 					if (Z_TYPE_P(op) == IS_ARRAY) {
 						zend_hash_destroy(ht);
