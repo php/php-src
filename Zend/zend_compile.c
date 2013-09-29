@@ -2252,7 +2252,15 @@ void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
                 prefix_name += Z_STRLEN_P(
                     CG(current_namespace)) + sizeof("\\")-1;
             }
-        } else prefix_name = "Class";
+        } else {
+            /* use filename as prefix for class */
+            prefix_name = CG(active_op_array)->filename;
+        }
+    }
+    
+    if (!prefix_name) {
+        /* this shouldn't happen, possibly emit a warning ? */
+        prefix_name = "Class";
     }
     
     /* populate znode constant with generated anonymous class name */
