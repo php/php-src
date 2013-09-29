@@ -2158,8 +2158,12 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 	zval **ns;
 	znode tmp;
 	int len;
-
+    
 	compound = memchr(Z_STRVAL(class_name->u.constant), '\\', Z_STRLEN(class_name->u.constant));
+
+    if ((class_name->EA & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)
+        return;
+
 	if (compound) {
 		/* This is a compound class name that contains namespace prefix */
 		if (Z_STRVAL(class_name->u.constant)[0] == '\\') {
@@ -2229,23 +2233,28 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
     char *class_name = NULL;
     int class_name_len = 0;
-    const char *prefix_name = NULL;
+    char *prefix_name = NULL;
 
     /* give each class a unique id */
     CG(anon_class_id)++;
 
     /* prefix anonymous class with current scope for reference */
     if (CG(active_op_array)) {
-        if (CG(active_class_entry)) {
-            prefix_name = CG(active_class_entry)->name;
-            if (CG(in_namespace)) {
-                prefix_name += Z_STRLEN_P(CG(current_namespace)) + sizeof("\\")-1;
+        if (CG(active_class_entry) || CG(active_op_array)->function_name) {
+            if (CG(active_class_entry)) {
+                 prefix_name = CG(active_class_entry)->name;   
+            } else {
+                prefix_name = CG(active_op_array)->function_name;
             }
-        } else if (CG(active_op_array)->function_name) {
-            prefix_name = CG(active_op_array)->function_name;
+            
+            /* remove namespace from entry name */
+            if (CG(in_namespace)) {
+                prefix_name += Z_STRLEN_P(
+                    CG(current_namespace)) + sizeof("\\")-1;
+            }
         } else prefix_name = "Class";
     }
-
+    
     /* populate znode constant with generated anonymous class name */
     Z_TYPE(result->u.constant) = IS_STRING;
     class_name_len = snprintf(
@@ -5035,7 +5044,7 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
         return;
 	}
 
-	if (CG(current_namespace) && !CG(active_class_entry)) {
+	if (CG(current_namespace) && !(class_token->EA & ZEND_ACC_ANON_CLASS)) {
 		/* Prefix class name with name of current namespace */
 		znode tmp;
 
