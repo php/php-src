@@ -3832,10 +3832,8 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 			if (i < parent_iface_num) {
 				ignore = 1;
 			} else {        
-                if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
-                    if (ce->ce_flags & ZEND_ACC_FINAL_CLASS) {
-                        continue; 
-                    }
+                if ((ce->ce_flags & (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) == (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) {
+                    continue;
                 }
 
 				zend_error(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ce->name, iface->name);
@@ -4618,8 +4616,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 	ce->refcount++;
 
     /* return anonymous class */
-    if (ce->ce_flags & (ZEND_ACC_ANON_CLASS) &&
-        ce->ce_flags & (ZEND_ACC_FINAL_CLASS)) {
+    if ((ce->ce_flags & (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) == (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) {
         ce->refcount--;
         return ce;
     }
@@ -4641,8 +4638,8 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		}
 
 		/* set final anonymous class */
-		if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {   
-		    ce->ce_flags = ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS;
+		if ((ce->ce_flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS) {   
+		    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 		}
 		return ce;
 	}
@@ -4686,8 +4683,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 	}
 
     /* return anonymous class */
-	if (ce->ce_flags & (ZEND_ACC_ANON_CLASS) &&
-	    ce->ce_flags & (ZEND_ACC_FINAL_CLASS)) {
+	if ((ce->ce_flags & (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) == (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) {
 	    return ce;
 	}
 
@@ -4701,7 +4697,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 	}
 
     /* set final anonymous class */
-    if (ce->ce_flags & ZEND_ACC_ANON_CLASS) {
+    if ((ce->ce_flags & ZEND_ACC_ANON_CLASS) == (ZEND_ACC_ANON_CLASS)) {
 	    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 	}
 
@@ -5083,12 +5079,12 @@ void zend_do_begin_class_declaration(znode *class_token, znode *class_name, cons
 		error = 1;
 	}
 	
-	if (CG(active_class_entry) && !(class_token->EA & ZEND_ACC_ANON_CLASS)) {
+	if (CG(active_class_entry) && !((class_token->EA & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {
         zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
         return;
 	}
 
-	if (CG(current_namespace) && !(class_token->EA & ZEND_ACC_ANON_CLASS)) {
+	if (CG(current_namespace) && !((class_token->EA & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {
 		/* Prefix class name with name of current namespace */
 		znode tmp;
 
