@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.5
 
+- Core:
+  . Fixed bug #64979 (Wrong behavior of static variables in closure generators).
+    (Nikita)
+
 - CLI server:
   . Fixed bug #65633 (built-in server treat some http headers as
     case-sensitive). (Adam)
