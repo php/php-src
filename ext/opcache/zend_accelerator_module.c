@@ -238,8 +238,6 @@ static ZEND_INI_MH(OnEnable)
 			*p = 0;
 			return SUCCESS;
 		}
-	} else {
-	    return SUCCESS;
 	}
 }
 
