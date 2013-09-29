@@ -39,7 +39,7 @@ PHP                                                                        NEWS
   . Fix bug #64782 (SplFileObject constructor make $context optional / give it
     a default value). (Nikita)
 
-?? ??? 2013, PHP 5.5.4
+19 Sep 2013, PHP 5.5.4
 
 - Core:
   . Fixed bug #60598 (cli/apache sapi segfault on objects manipulation).
