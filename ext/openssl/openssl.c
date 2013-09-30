@@ -1679,7 +1679,7 @@ static int php_openssl_x509_fingerprint(X509 *peer, const char *method, int raw,
 	int n;
 
 	if (!(mdtype = EVP_get_digestbyname(method))) {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "`%s`: Unknown signature algorithm", method);
 		return 0;
 	} else if (!X509_digest(peer, mdtype, md, &n)) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not generate signature");
