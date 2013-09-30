@@ -1928,6 +1928,38 @@ PHP_FUNCTION(oci_set_client_info)
 }
 /* }}} */
 
+#ifdef WAITIING_ORACLE_BUG_16695981_FIX
+/* {{{ proto bool oci_set_db_operation(resource connection, string value)
+   Sets the "DB operation" on the connection for Oracle end-to-end tracing */
+PHP_FUNCTION(oci_set_db_operation)
+{
+#if (OCI_MAJOR_VERSION > 11)
+	zval *z_connection;
+	php_oci_connection *connection;
+	char *dbop_name;
+	int dbop_name_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &dbop_name, &dbop_name_len) == FAILURE) {
+		return;
+	}
+
+	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) dbop_name, (ub4) dbop_name_len, (ub4) OCI_ATTR_DBOP, OCI_G(err)));
+
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+#else
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unsupported attribute type");
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+#endif /* WAITIING_ORACLE_BUG_16695981_FIX */
+
 /* {{{ proto bool oci_password_change(resource connection, string username, string old_password, string new_password)
   Changes the password of an account */
 PHP_FUNCTION(oci_password_change)
