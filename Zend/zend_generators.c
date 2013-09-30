@@ -226,6 +226,16 @@ static zend_object_value zend_generator_create(zend_class_entry *class_type TSRM
 }
 /* }}} */
 
+static void copy_closure_static_var(zval **var TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+{
+	HashTable *target = va_arg(args, HashTable *);
+
+	SEPARATE_ZVAL_TO_MAKE_IS_REF(var);
+	Z_ADDREF_PP(var);
+	zend_hash_quick_update(target, key->arKey, key->nKeyLength, key->h, var, sizeof(zval *), NULL);
+}
+/* }}} */
+
 /* Requires globals EG(scope), EG(current_scope), EG(This),
  * EG(active_symbol_table) and EG(current_execute_data). */
 ZEND_API zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
@@ -242,7 +252,23 @@ ZEND_API zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* 
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 		zend_op_array *op_array_copy = (zend_op_array*)emalloc(sizeof(zend_op_array));
 		*op_array_copy = *op_array;
-		function_add_ref((zend_function *) op_array_copy);
+
+		(*op_array->refcount)++;
+		op_array->run_time_cache = NULL;
+		if (op_array->static_variables) {
+			ALLOC_HASHTABLE(op_array_copy->static_variables);
+			zend_hash_init(
+				op_array_copy->static_variables, 
+				zend_hash_num_elements(op_array->static_variables),
+				NULL, ZVAL_PTR_DTOR, 0
+			);
+			zend_hash_apply_with_arguments(
+				op_array->static_variables TSRMLS_CC,
+				(apply_func_args_t) copy_closure_static_var,
+				1, op_array_copy->static_variables
+			);
+		}
+
 		op_array = op_array_copy;
 	}
 	
