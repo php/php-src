@@ -15,6 +15,10 @@ AC_DEFUN([PHP_LDAP_CHECKS], [
     LDAP_DIR=$1
     LDAP_INCDIR=$1/ldap/public
     LDAP_LIBDIR=$1/$PHP_LIBDIR
+  elif test -f $1/sdk/include/ldap.h; then
+    LDAP_DIR=$1
+    LDAP_INCDIR=$1/sdk/include
+    LDAP_LIBDIR=$1
   fi
 ])
 
@@ -148,6 +152,8 @@ if test "$PHP_LDAP" != "no"; then
     AC_DEFINE(HAVE_ORALDAP,1,[ ])
     if test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.10.1; then
       AC_DEFINE(HAVE_ORALDAP_10,1,[ ])
+    elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
+      AC_DEFINE(HAVE_ORALDAP_11,1,[ ])
     fi
   else
     AC_MSG_ERROR(Cannot find ldap libraries in $LDAP_LIBDIR.)
