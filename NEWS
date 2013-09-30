@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.21
 
+- Core:
+  . Fixed bug #65322 (compile time errors won't trigger auto loading). (Nikita)
+
 - CLI server:
   . Fixed bug #65633 (built-in server treat some http headers as
     case-sensitive). (Adam)
@@ -23,7 +26,7 @@ PHP                                                                        NEWS
   . Fixed bug #65721 (configure script broken in 5.5.4 and 5.4.20 when enabling
     imap). (ryotakatsuki at gmail dot com)
 
-?? ??? 2013, PHP 5.4.20
+19 Sep 2013, PHP 5.4.20
 
 - Core:
   . Fixed bug #60598 (cli/apache sapi segfault on objects manipulation).
