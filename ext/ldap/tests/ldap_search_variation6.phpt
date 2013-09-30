@@ -217,14 +217,26 @@ array(2) {
   [1]=>
   resource(%d) of type (ldap result)
 }
-NULL
-NULL
+array(1) {
+  ["count"]=>
+  int(0)
+}
+array(1) {
+  ["count"]=>
+  int(0)
+}
 array(2) {
   [0]=>
   resource(%d) of type (ldap result)
   [1]=>
   resource(%d) of type (ldap result)
 }
-NULL
-NULL
+array(1) {
+  ["count"]=>
+  int(0)
+}
+array(1) {
+  ["count"]=>
+  int(0)
+}
 ===DONE===
