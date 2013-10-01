@@ -26,6 +26,15 @@ PHP                                                                        NEWS
   . Fixed bug #65721 (configure script broken in 5.5.4 and 5.4.20 when enabling
     imap). (ryotakatsuki at gmail dot com)
 
+- Standard:
+  . Fixed bug #61548 (content-type must appear at the end of headers for 201 
+    Location to work in http). (Mike)
+
+- Build system:
+  . Fixed bug #62396 ('make test' crashes starting with 5.3.14 (missing 
+    gzencode())). (Mike)
+
+
 19 Sep 2013, PHP 5.4.20
 
 - Core:
