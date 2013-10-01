@@ -154,7 +154,6 @@ static const opt_struct OPTIONS[] = {
 	{'?', 0, "usage"},/* help alias (both '?' and 'usage') */
 	{'v', 0, "version"},
 	{'z', 1, "zend-extension"},
- 	{'W', 1, "warmup"},
  	{'T', 1, "timing"},
 	{'-', 0, NULL} /* end of args */
 };
@@ -1755,7 +1754,6 @@ int main(int argc, char *argv[])
 	int fcgi_fd = 0;
 	fcgi_request *request = NULL;
 	int repeats = 1;
-	int warmup_repeats = 0;
 	int benchmark = 0;
 #if HAVE_GETTIMEOFDAY
 	struct timeval start, end;
@@ -2104,9 +2102,6 @@ consult the installation file that came with this distribution, or visit \n\
 #else
 					time(&start);
 #endif
-					break;
-				case 'W':
-					warmup_repeats = atoi(php_optarg);
 					break;
 				case 'h':
 				case '?':
@@ -2521,24 +2516,12 @@ fastcgi_request_done:
 
 			if (!fastcgi) {
 				if (benchmark) {
-					if (warmup_repeats) {
-						warmup_repeats--;
-						if (!warmup_repeats) {
-#ifdef HAVE_GETTIMEOFDAY
-							gettimeofday(&start, NULL);
-#else
-							time(&start);						
-#endif
-						}
+					repeats--;
+					if (repeats > 0) {
+						script_file = NULL;
+						php_optind = orig_optind;
+						php_optarg = orig_optarg;
 						continue;
-					} else {
-						repeats--;
-						if (repeats > 0) {
-							script_file = NULL;
-							php_optind = orig_optind;
-							php_optarg = orig_optarg;
-							continue;
-						}
 					}
 				}
 				break;
