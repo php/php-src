@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.5
+03 Oct 2013, PHP 5.5.5RC1
 
 - Core:
   . Fixed bug #64979 (Wrong behavior of static variables in closure generators).
