@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.22
 
+- FTP:
+  . Fixed bug #65667 (ftp_nb_continue produces segfault). (Philip Hofstetter)
+
 - Sockets:
   . Fixed bug #65808 (the socket_connect() won't work with IPv6 address).
     (Mike)
