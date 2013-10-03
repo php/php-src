@@ -7,7 +7,7 @@ PHP                                                                        NEWS
     (Mike)
 
 - XMLReader:
-  . Fixed bug #59613 (Crash with clone XMLReader). (Mike)
+  . Fixed bug #51936 (Crash with clone XMLReader). (Mike)
 
 
 ?? ??? 2013, PHP 5.4.21
