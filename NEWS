@@ -26,6 +26,9 @@ PHP                                                                        NEWS
     improvements based on this.
     (RFC: https://wiki.php.net/rfc/operator_overloading_gmp). (Nikita)
 
+- Hash:
+  . Added gost-crypto (CryptoPro S-box) GOST hash algo. (Manuel Mausz)
+
 - mysqlnd:
   . Disabled flag for SP OUT variables for 5.5+ servers as they are not natively
     supported by the overlying APIs. (Andrey)
@@ -54,5 +57,9 @@ PHP                                                                        NEWS
 - Standard:
   . Implemented FR #65634 (HTTP wrapper is very slow with protocol_version
     1.1). (Adam)
+
+- XMLReader:
+  . Fixed bug #55285 (XMLReader::getAttribute/No/Ns methods inconsistency). 
+    (Mike)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
