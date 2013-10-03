@@ -65,6 +65,8 @@ int php_add4_to_if_index(
         php_socket *php_sock,
         unsigned *if_index TSRMLS_DC);
 
+int php_string_to_if_index(const char *val, unsigned *out TSRMLS_DC);
+
 int php_mcast_join(
 	php_socket *sock,
 	int level,
