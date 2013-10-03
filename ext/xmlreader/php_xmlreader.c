@@ -1320,6 +1320,7 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_object_handlers.read_property = xmlreader_read_property;
 	xmlreader_object_handlers.write_property = xmlreader_write_property;
 	xmlreader_object_handlers.get_property_ptr_ptr = xmlreader_get_property_ptr_ptr;
+	xmlreader_object_handlers.clone_obj = NULL;
 
 	INIT_CLASS_ENTRY(ce, "XMLReader", xmlreader_functions);
 	ce.create_object = xmlreader_objects_new;
