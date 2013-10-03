@@ -61,6 +61,10 @@ PHP X.Y UPGRADE NOTES
   CURLOPT_SAFE_UPLOAD is now turned on by default and uploads with @file 
   do not work unless it is explicitly set to false.
 
+- XMLReader:
+  XMLReader::getAttributeNs and XMLReader::getAttributeNo now return NULL if
+  the attribute could not be found, just like XMLReader::getAttribute.
+
 ========================================
 5. New Functions
 ========================================
