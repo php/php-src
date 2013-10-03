@@ -40,6 +40,8 @@ PHP X.Y UPGRADE NOTES
 - The php://input stream is now re-usable and can be used concurrently with 
   enable_post_data_reading=0.
 
+- Added gost-crypto (CryptoPro S-box) hash algo.
+
 ========================================
 2. Changes in SAPI modules
 ========================================
