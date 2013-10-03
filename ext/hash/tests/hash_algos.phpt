@@ -18,7 +18,7 @@ var_dump(hash_algos());
 ===Done===
 --EXPECTF--
 *** Testing hash_algos() : basic functionality ***
-array(43) {
+array(44) {
   [%d]=>
   string(3) "md2"
   [%d]=>
@@ -63,6 +63,8 @@ array(43) {
   string(9) "snefru256"
   [%d]=>
   string(4) "gost"
+  [%d]=>
+  string(11) "gost-crypto"
   [%d]=>
   string(7) "adler32"
   [%d]=>

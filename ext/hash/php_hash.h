@@ -80,6 +80,7 @@ extern const php_hash_ops php_hash_4tiger160_ops;
 extern const php_hash_ops php_hash_4tiger192_ops;
 extern const php_hash_ops php_hash_snefru_ops;
 extern const php_hash_ops php_hash_gost_ops;
+extern const php_hash_ops php_hash_gost_crypto_ops;
 extern const php_hash_ops php_hash_adler32_ops;
 extern const php_hash_ops php_hash_crc32_ops;
 extern const php_hash_ops php_hash_crc32b_ops;
