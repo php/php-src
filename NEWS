@@ -2,6 +2,14 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.22
 
+- Sockets:
+  . Fixed bug #65808 (the socket_connect() won't work with IPv6 address).
+    (Mike)
+
+- XMLReader:
+  . Fixed bug #51936 (Crash with clone XMLReader). (Mike)
+
+
 ?? ??? 2013, PHP 5.4.21
 
 - Core:
