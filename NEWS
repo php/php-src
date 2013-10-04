@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Added validation of class names in the autoload process. (Dmitry)
+  . Fixed invalid C code in zend_strtod.c. (Lior Kaplan)
   . Fixed bug #61645 (fopen and O_NONBLOCK). (Mike)
 
 - Date:
