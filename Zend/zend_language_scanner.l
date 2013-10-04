@@ -1018,7 +1018,7 @@ static zend_always_inline int lex_get_real_buf_offset(const int relpos) {
 }
 
 #define LEX_REL_BUF(relpos) \
-	(CG(tokenbuffer)[lex_get_real_buf_offset(relpos)])
+	(CG(tokenbuffer)[relpos==1?(one!=-1?one:lex_get_real_buf_offset(1)):(relpos==2?(two!=-1?two:lex_get_real_buf_offset(2)):lex_get_real_buf_offset(relpos))])
 
 static zend_always_inline int lex_is_real_string_token(int token) {
 	switch (token) {
@@ -1069,7 +1069,7 @@ static zend_always_inline int lex_is_real_string_token(int token) {
 /* Doing it in parser also would make highlight_string() etc. look ugly when tokens are used as other tokens */
 /* The real lexing step is done in lex_scan_ex */
 int lex_scan(zval *zendlval) {
-	int retval;
+	int retval, one, two;
 
 	if (CG(tokenbufptr) != -1) {
 		if (CG(tokenbuffer)[CG(tokenbufptr)].token != -1) {
@@ -1088,6 +1088,8 @@ again:
 			goto leave;
 	}
 	if (retval) {
+		one = two = -1;
+
 		if (CG(tokenbufptr) >= CG(tokenbufsize) - 4) {
 			CG(tokenbuffer) = erealloc(--CG(tokenbuffer), sizeof(token_buf) * ((CG(tokenbufsize) *= 2) + 1));
 			CG(tokenbuffer)++;
@@ -1222,7 +1224,7 @@ again:
 			/* Handling of T_HALT_COMPILER; might cause memory leaks if not handled */
 			if (LEX_REL_BUF(1).token == T_HALT_COMPILER && retval == '(') {
 				LEX_BUF_ADD
-			} else if (LEX_REL_BUF(2).token == T_HALT_COMPILER && LEX_REL_BUF(1).token == '('&& retval == ')') {
+			} else if (LEX_REL_BUF(2).token == T_HALT_COMPILER && LEX_REL_BUF(1).token == '(' && retval == ')') {
 				LEX_BUF_ADD
 			}
 		}
@@ -1280,7 +1282,7 @@ again:
 		} else {
 			switch (retval) {
 				case ';':
-					if (LEX_REL_BUF(3).token == T_HALT_COMPILER && LEX_REL_BUF(2).token == '(') {
+					if (LEX_REL_BUF(2).token == '(' && LEX_REL_BUF(3).token == T_HALT_COMPILER) {
 						break;
 					}
 				case '&':
