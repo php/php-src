@@ -1392,11 +1392,6 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 	SAVE_OPLINE();
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if (OP1_TYPE == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (IS_OP2_TMP_FREE()) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}

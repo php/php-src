@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #64979 (Wrong behavior of static variables in closure generators).
     (Nikita)
+  . Fixed bug #65821 (By-ref foreach on property access of string offset
+    segfaults). (Nikita)
 
 - CLI server:
   . Fixed bug #65633 (built-in server treat some http headers as
