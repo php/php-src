@@ -112,9 +112,9 @@ do {																			\
 	} \
 }
 
-/* To save initial string length after scanning to first variable, CG(doc_comment_len) can be reused */
-#define SET_DOUBLE_QUOTES_SCANNED_LENGTH(len) CG(doc_comment_len) = (len)
-#define GET_DOUBLE_QUOTES_SCANNED_LENGTH()    CG(doc_comment_len)
+/* To save initial string length after scanning to first variable, SCNG(doc_comment_len) can be reused */
+#define SET_DOUBLE_QUOTES_SCANNED_LENGTH(len) SCNG(doc_comment_len) = (len)
+#define GET_DOUBLE_QUOTES_SCANNED_LENGTH()    SCNG(doc_comment_len)
 
 #define IS_LABEL_START(c) (((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z') || (c) == '_' || (c) >= 0x7F)
 
@@ -986,11 +986,338 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 	}
 }
 
+int lex_scan_ex(zval *zendlval TSRMLS_DC);
+
+#define LEX_BUF_ADD_EX \
+	CG(tokenbuffer)[++CG(tokenbufptr)].zv = *zendlval; \
+	CG(tokenbuffer)[CG(tokenbufptr)].token = retval; \
+	CG(tokenbuffer)[CG(tokenbufptr)].text = SCNG(yy_text); \
+	CG(tokenbuffer)[CG(tokenbufptr)].len = SCNG(yy_leng); \
+	CG(tokenbuffer)[CG(tokenbufptr)].start = SCNG(yy_cursor); \
+	CG(tokenbuffer)[CG(tokenbufptr)].end = SCNG(yy_limit); \
+	if (retval == T_DOC_COMMENT) { \
+		CG(tokenbuffer)[CG(tokenbufptr)].doc_comment = SCNG(doc_comment); \
+		CG(tokenbuffer)[CG(tokenbufptr)].doc_comment_len = SCNG(doc_comment_len); \
+	} \
+	CG(tokenbuffer)[CG(tokenbufptr)].lineno = CG(zend_lineno);
+
+#define LEX_BUF_ADD \
+	LEX_BUF_ADD_EX \
+	goto again;
+
+static zend_always_inline int lex_get_real_buf_offset(const int relpos) {
+	int effective_pos = CG(tokenbufptr) - relpos + 1;
+	int i = CG(tokenbufptr) + 1;
+	while (--i >= effective_pos) {
+		switch(CG(tokenbuffer)[i].token) {
+			PARSER_IGNORED_TOKEN_CASES
+				--effective_pos;
+		}
+	}
+	return effective_pos >= 0?effective_pos:-1;
+}
+
+#define LEX_REL_BUF(relpos) \
+	(CG(tokenbuffer)[lex_get_real_buf_offset(relpos)])
+
+static zend_always_inline int lex_is_real_string_token(int token) {
+	switch (token) {
+		PARSER_IGNORED_TOKEN_CASES
+		COPIED_STRING_TOKEN_CASES
+			return 1;
+	}
+	return token < 256;
+}
+
+#define LEX_IS_CUR_ALPH_TOKEN() \
+	(Z_TYPE_P(zendlval) == 255 && !lex_is_real_string_token(retval))
+
+#define LEX_IS_REL_ALPH_TOKEN(relpos) \
+	(Z_TYPE(LEX_REL_BUF(relpos).zv) == 255 && !lex_is_real_string_token(LEX_REL_BUF(relpos).token))
+
+#define LEX_CONVERT_STRING(token, zval, text, len) \
+	token = T_STRING; \
+	Z_STRLEN(zval) = len; \
+	Z_STRVAL(zval) = estrndup(text, len); \
+	Z_TYPE(zval) = IS_STRING;
+
+#define LEX_CONVERT_CUR_STRING() LEX_CONVERT_STRING(retval, *zendlval, yytext, yyleng)
+
+#define LEX_CONVERT_REL_STRING(relpos) LEX_CONVERT_STRING(LEX_REL_BUF(relpos).token, LEX_REL_BUF(relpos).zv, (char *)LEX_REL_BUF(relpos).text, LEX_REL_BUF(relpos).len)
+
+#define LEX_PREPARE_RETURN_FROM_BUF \
+	*zendlval = CG(tokenbuffer)[CG(tokenbufptr)].zv; \
+	if (Z_TYPE_P(zendlval) == 255) { \
+		Z_TYPE_P(zendlval) = 0; \
+	} \
+	retval = CG(tokenbuffer)[CG(tokenbufptr)].token; \
+	if (retval == '}' || retval == T_DOC_COMMENT) { \
+		RESET_DOC_COMMENT(); \
+	} \
+	SCNG(yy_text) = CG(tokenbuffer)[CG(tokenbufptr)].text; \
+	SCNG(yy_leng) = CG(tokenbuffer)[CG(tokenbufptr)].len; \
+	SCNG(yy_cursor) = CG(tokenbuffer)[CG(tokenbufptr)].start; \
+	SCNG(yy_limit) = CG(tokenbuffer)[CG(tokenbufptr)].end; \
+	if (retval == T_DOC_COMMENT) { \
+		CG(doc_comment) = CG(tokenbuffer)[CG(tokenbufptr)].doc_comment; \
+		CG(doc_comment_len) = CG(tokenbuffer)[CG(tokenbufptr)].doc_comment_len; \
+	} \
+	CG(zend_lineno) = CG(tokenbuffer)[CG(tokenbufptr)++].lineno;
+
+/* This function checks the cases where a token needs to be converted to some other token to simplify parsing */
+/* Also it shouldn't be done in parser, because it actually breaks applications relying on token_get_all output */
+/* Doing it in parser also would make highlight_string() etc. look ugly when tokens are used as other tokens */
+/* The real lexing step is done in lex_scan_ex */
+int lex_scan(zval *zendlval) {
+	int retval;
+
+	if (CG(tokenbufptr) != -1) {
+		if (CG(tokenbuffer)[CG(tokenbufptr)].token != -1) {
+			LEX_PREPARE_RETURN_FROM_BUF
+			return retval;
+		}
+		CG(tokenbufptr) = -1;
+	}
+
+again:
+	Z_TYPE_P(zendlval) = 0;
+	retval = lex_scan_ex(zendlval);
+
+	switch (retval) {
+		COPIED_STRING_TOKEN_CASES
+			goto leave;
+	}
+	if (retval) {
+		if (CG(tokenbufptr) >= CG(tokenbufsize) - 4) {
+			CG(tokenbuffer) = erealloc(--CG(tokenbuffer), sizeof(token_buf) * ((CG(tokenbufsize) *= 2) + 1));
+			CG(tokenbuffer)++;
+		}
+
+		if (CG(tokenbufptr) != -1) {
+			switch (retval) {
+				PARSER_IGNORED_TOKEN_CASES
+					LEX_BUF_ADD
+			}
+
+			/* class access */
+			/* class name */
+			if (retval == T_PAAMAYIM_NEKUDOTAYIM && LEX_IS_REL_ALPH_TOKEN(1)) {
+				LEX_CONVERT_REL_STRING(1);
+			}
+			/* class const / method name */
+			if (LEX_REL_BUF(1).token == T_PAAMAYIM_NEKUDOTAYIM && LEX_IS_CUR_ALPH_TOKEN()) {
+				/* ::class is reserved */
+				if (retval == T_CLASS) {
+					goto leave;
+				}
+				LEX_CONVERT_CUR_STRING();
+			}
+
+			/* classes */
+			if (CG(tokenbuf_in_class) != -1 && LEX_IS_CUR_ALPH_TOKEN()) {
+				/* class name */
+				switch (LEX_REL_BUF(1).token) {
+					case T_CLASS:
+					case T_INTERFACE:
+					case T_TRAIT:
+						if (retval != T_NAMESPACE) {
+							LEX_CONVERT_CUR_STRING();
+						}
+				}
+				if (CG(tokenbuf_in_class) == 0 && retval != T_NAMESPACE && ((retval != T_IMPLEMENTS && retval != T_EXTENDS) || LEX_REL_BUF(1).token == ',' || LEX_REL_BUF(1).token == T_IMPLEMENTS) && LEX_IS_CUR_ALPH_TOKEN()) {
+					LEX_CONVERT_CUR_STRING();
+				}
+				/* method names */
+				if ((LEX_REL_BUF(1).token == T_FUNCTION || (LEX_REL_BUF(1).token == '&' && LEX_REL_BUF(2).token == T_FUNCTION)) && LEX_IS_CUR_ALPH_TOKEN()) {
+					LEX_CONVERT_CUR_STRING();
+				}
+				/* constant names */
+				if (LEX_REL_BUF(1).token == T_CONST && LEX_IS_CUR_ALPH_TOKEN()) {
+					LEX_CONVERT_CUR_STRING();
+				}
+				/* trait use aliasing */
+				if (CG(tokenbuf_mode) == LEX_USE_TOKEN_MODE) {
+					if (retval == ';' && LEX_IS_REL_ALPH_TOKEN(1)) {
+						switch (LEX_REL_BUF(1).token) {
+							case T_PUBLIC:
+							case T_PROTECTED:
+							case T_PRIVATE:
+								break;
+							default:
+								LEX_BUF_ADD
+						}
+					}
+					if (LEX_REL_BUF(1).token == T_INSTEADOF && LEX_IS_CUR_ALPH_TOKEN()) {
+						LEX_BUF_ADD
+					}
+				}
+			}
+
+			/* class name typehints */
+			if (CG(tokenbuf_fn_decl) == 0 && (LEX_REL_BUF(1).token == '(' || LEX_REL_BUF(1).token == ',') && retval != T_NAMESPACE && LEX_IS_CUR_ALPH_TOKEN()) {
+				LEX_CONVERT_CUR_STRING();
+			}
+
+			/* goto & labels */
+			if ((retval == ':' || (retval == ';' && LEX_REL_BUF(2).token == T_GOTO)) && LEX_IS_REL_ALPH_TOKEN(1)) {
+				/* disallow replacing of alternative syntax and default (in switch) */
+				switch (LEX_REL_BUF(1).token) {
+					case T_DEFAULT:
+					case T_ELSE:
+						break;
+					default:
+						LEX_CONVERT_REL_STRING(1);
+				}
+			}
+			if (LEX_REL_BUF(1).token == T_GOTO && LEX_IS_CUR_ALPH_TOKEN() && retval != T_DEFAULT) {
+				LEX_CONVERT_CUR_STRING();
+			}
+
+			/* namespaces */
+			/* Disallow T_NAMESPACE because of namespace\string syntax */
+			switch (LEX_REL_BUF(1).token) {
+				case T_USE:
+					if (CG(tokenbuf_in_class) != -1) {
+						break;
+					}
+				case T_NEW:
+				case T_NS_SEPARATOR:
+				case T_NAMESPACE:
+					if (retval != T_NAMESPACE && LEX_IS_CUR_ALPH_TOKEN()) {
+						LEX_CONVERT_CUR_STRING();
+					}
+			}
+			if (retval == T_NS_SEPARATOR) {
+				switch (LEX_REL_BUF(1).token) {
+					case T_NAMESPACE:
+						break;
+					case T_NEW:
+						if (LEX_REL_BUF(2).token == T_THROW || LEX_REL_BUF(2).token == T_RETURN || LEX_REL_BUF(2).token == ',') {
+							break;
+						}
+					case T_USE:
+					case T_ECHO:
+						if (LEX_REL_BUF(2).token < 256 && LEX_REL_BUF(2).token != ',') {
+							break;
+						}
+					case T_IMPLEMENTS:
+						if (LEX_REL_BUF(1).token == T_IMPLEMENTS && LEX_REL_BUF(2).token != T_IMPLEMENTS && LEX_REL_BUF(2).token != T_EXTENDS && LEX_REL_BUF(2).token != ',') {
+							break;
+						}
+					case T_EXTENDS:
+						if (LEX_REL_BUF(1).token == T_EXTENDS && LEX_REL_BUF(2).token != T_EXTENDS && LEX_REL_BUF(2).token != ',') {
+							break;
+						}
+					default:
+						if (LEX_IS_REL_ALPH_TOKEN(1)) {
+							LEX_CONVERT_REL_STRING(1);
+						}
+				}
+			}
+			/* handling of multiple comma separated T_USE */
+			if (CG(tokenbuf_mode) == LEX_USE_TOKEN_MODE && LEX_IS_CUR_ALPH_TOKEN() && LEX_REL_BUF(1).token == ',') {
+				LEX_CONVERT_CUR_STRING();
+			}
+
+			/* Handling of T_HALT_COMPILER; might cause memory leaks if not handled */
+			if (LEX_REL_BUF(1).token == T_HALT_COMPILER && retval == '(') {
+				LEX_BUF_ADD
+			} else if (LEX_REL_BUF(2).token == T_HALT_COMPILER && LEX_REL_BUF(1).token == '('&& retval == ')') {
+				LEX_BUF_ADD
+			}
+		}
+
+		switch (retval) {
+			case '{':
+				if (CG(tokenbuf_in_class) != -1) {
+					++CG(tokenbuf_in_class);
+				}
+				break;
+			case '}':
+				if (CG(tokenbuf_in_class) != -1 && --CG(tokenbuf_in_class) == 0) {
+					CG(tokenbuf_in_class) = -1;
+				}
+				break;
+			case T_CLASS:
+			case T_INTERFACE:
+			case T_TRAIT:
+				if (CG(tokenbuf_in_class) == -1) {
+					CG(tokenbuf_in_class) = 0;
+				}
+				break;
+			case ';':
+				if (CG(tokenbuf_mode) == LEX_USE_TOKEN_MODE) {
+					CG(tokenbuf_mode) = LEX_NO_TOKEN_MODE;
+				}
+				break;
+			case T_FUNCTION:
+				if (CG(tokenbuf_mode) == LEX_NO_TOKEN_MODE) {
+					CG(tokenbuf_mode) = LEX_FUNC_NAMING_TOKEN_MODE;
+				}
+				break;
+			case '(':
+				if (CG(tokenbuf_mode) == LEX_FUNC_NAMING_TOKEN_MODE) {
+					CG(tokenbuf_mode) = LEX_NO_TOKEN_MODE;
+					CG(tokenbuf_fn_decl) = 0;
+				} else if (CG(tokenbuf_fn_decl) != -1) {
+					++CG(tokenbuf_fn_decl);
+				}
+				break;
+			case ')':
+				if (CG(tokenbuf_fn_decl) != -1) {
+					--CG(tokenbuf_fn_decl);
+				}
+				break;
+			case T_USE:
+				if (CG(tokenbuf_mode) == LEX_NO_TOKEN_MODE) {
+					CG(tokenbuf_mode) = LEX_USE_TOKEN_MODE;
+				}
+				break;
+		}
+
+		if (LEX_IS_CUR_ALPH_TOKEN()) {
+			LEX_BUF_ADD
+		} else {
+			switch (retval) {
+				case ';':
+					if (LEX_REL_BUF(3).token == T_HALT_COMPILER && LEX_REL_BUF(2).token == '(') {
+						break;
+					}
+				case '&':
+				case ',':
+				case '(':
+				case T_PAAMAYIM_NEKUDOTAYIM:
+				case T_NS_SEPARATOR:
+					LEX_BUF_ADD
+			}
+		}
+	}
+
+leave:
+
+	if (CG(tokenbufptr) != -1) {
+		LEX_BUF_ADD_EX
+		CG(tokenbuffer)[CG(tokenbufptr) + 1].token = -1;
+		CG(tokenbufptr) = 0;
+		LEX_PREPARE_RETURN_FROM_BUF
+	} else if (retval == '}' || retval == T_DOC_COMMENT) {
+		RESET_DOC_COMMENT();
+		if (retval == T_DOC_COMMENT) {
+			CG(doc_comment) = SCNG(doc_comment);
+			CG(doc_comment_len) = SCNG(doc_comment_len);
+		}
+	}
+
+	return retval;
+}
+
+/* Mark token as eventual T_STRING */
 #define RETURN_STRING_TOKEN(token) \
-	ZVAL_STRINGL(zendlval, yytext, yyleng, 0); /* no copying - intentional (copying happens in zend_language_parser.y (section identifier_or_keyword)) */ \
+	Z_TYPE_P(zendlval) = 255; /* mark keyword ready for eventual conversion to T_STRING in lex_scan function */ \
 	return token;
 
-int lex_scan(zval *zendlval TSRMLS_DC)
+/* "Real" lexer (see comments above to function lex_scan) */
+int lex_scan_ex(zval *zendlval TSRMLS_DC)
 {
 restart:
 	SCNG(yy_text) = YYCURSOR;
@@ -1276,7 +1603,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"insteadof" {
-        RETURN_STRING_TOKEN(T_INSTEADOF)
+	RETURN_STRING_TOKEN(T_INSTEADOF)
 }
 
 <ST_IN_SCRIPTING>"global" {
@@ -1292,7 +1619,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING>"__halt_compiler" {
-	return T_HALT_COMPILER;
+	RETURN_STRING_TOKEN(T_HALT_COMPILER)
 }
 
 <ST_IN_SCRIPTING>"static" {
@@ -1461,7 +1788,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_IN_SCRIPTING>"}" {
-	RESET_DOC_COMMENT();
 	if (!zend_stack_is_empty(&SCNG(state_stack))) {
 		yy_pop_state(TSRMLS_C);
 	}
@@ -1889,7 +2215,6 @@ inline_html:
 
 	if (yyleng > 2) {
 		doc_com = 1;
-		RESET_DOC_COMMENT();
 	} else {
 		doc_com = 0;
 	}
@@ -1910,8 +2235,8 @@ inline_html:
 	HANDLE_NEWLINES(yytext, yyleng);
 
 	if (doc_com) {
-		CG(doc_comment) = estrndup(yytext, yyleng);
-		CG(doc_comment_len) = yyleng;
+		SCNG(doc_comment) = estrndup(yytext, yyleng);
+		SCNG(doc_comment_len) = yyleng;
 		return T_DOC_COMMENT;
 	}
 

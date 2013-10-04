@@ -16,6 +16,9 @@ class yield {
 
 	public static function default () {
 	}
+
+	public function namespace () {
+	}
 }
 
 yield::default();
@@ -30,6 +33,8 @@ switch (return::finally) {
 echo "goto T_TRY failed";
 try:
 
+(new yield)->namespace();
+
 interface global {}
 
 class abstract extends namespace\yield implements \global {
@@ -42,7 +47,7 @@ if (new abstract(["array_arg"], function () {})) {
 
 	// Test if it doesn't throw a parse error. fatal error is normal.
 	// inner_keyword
-	interface function extends const, break, continue, goto, echo, throw, if, do, for, foreach, declare, instanceof, as, switch, print, class, interface, while, trait, extends, implements, new, clone, var, eval, include, require, namespace, use, insteadof, isset, empty, abstract, final, private, protected, public, unset, list, array, callable, or, and, xor {}
+	interface function extends const, break, continue, goto, echo, throw, if, do, for, foreach, declare, instanceof, as, switch, print, class, interface, while, trait, extends, implements, new, clone, var, eval, include, require, use, insteadof, isset, empty, abstract, final, private, protected, public, unset, list, array, callable, or, and, xor {}
 
 	// keyword
 	$obj->elseif->endif->else->endwhile->endfor->endforeach->enddeclare->endswitch->case->exit;

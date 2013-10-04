@@ -68,7 +68,6 @@ typedef struct _zend_declarables {
 typedef struct _zend_vm_stack *zend_vm_stack;
 typedef struct _zend_ini_entry zend_ini_entry;
 
-
 struct _zend_compiler_globals {
 	zend_stack bp_stack;
 	zend_stack switch_cond_stack;
@@ -155,6 +154,13 @@ struct _zend_compiler_globals {
 	zval ***static_members_table;
 	int last_static_member;
 #endif
+
+	token_buf *tokenbuffer;
+	int tokenbufptr;
+	int tokenbufsize;
+	int tokenbuf_in_class;
+	int tokenbuf_fn_decl;
+	zend_uchar tokenbuf_mode;
 };
 
 
@@ -293,7 +299,7 @@ struct _zend_php_scanner_globals {
 	int yy_state;
 	zend_stack state_stack;
 	zend_ptr_stack heredoc_label_stack;
-	
+
 	/* original (unfiltered) script */
 	unsigned char *script_org;
 	size_t script_org_size;
@@ -306,6 +312,10 @@ struct _zend_php_scanner_globals {
 	zend_encoding_filter input_filter;
 	zend_encoding_filter output_filter;
 	const zend_encoding *script_encoding;
+
+	/* doc comments */
+	char *doc_comment;
+	zend_uint doc_comment_len;
 };
 
 #endif /* ZEND_GLOBALS_H */

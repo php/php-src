@@ -65,6 +65,18 @@ typedef struct _zend_compiler_context {
 	HashTable *labels;
 } zend_compiler_context;
 
+typedef struct _token_buf {
+	zval zv;
+	int token;
+	unsigned char *text;
+	unsigned int len;
+	unsigned char *start;
+	unsigned char *end;
+	char *doc_comment;
+	zend_uint doc_comment_len;
+	uint lineno;
+} token_buf;
+
 typedef struct _zend_literal {
 	zval       constant;
 	zend_ulong hash_value;

@@ -108,7 +108,7 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 			case T_OPEN_TAG_WITH_ECHO:
 			case T_CLOSE_TAG:
 				next_color = syntax_highlighter_ini->highlight_default;
-				token.type = 0;
+				Z_TYPE(token) = 0;
 				break;
 			case '"':
 			case T_ENCAPSED_AND_WHITESPACE:
@@ -117,20 +117,11 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 				break;
 			case T_WHITESPACE:
 				zend_html_puts((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);  /* no color needed */
-				token.type = 0;
+				Z_TYPE(token) = 0;
 				continue;
 				break;
 			default:
-				switch (token_type) {
-					COPIED_STRING_TOKEN_CASES
-						break;
-
-					default:
-						if (token.type == IS_STRING) {
-							token.type = 0;
-						}
-				}
-				if (token.type == 0) {
+				if (Z_TYPE(token) == 0) {
 					next_color = syntax_highlighter_ini->highlight_keyword;
 				} else {
 					next_color = syntax_highlighter_ini->highlight_default;
@@ -150,10 +141,15 @@ ZEND_API void zend_highlight(zend_syntax_highlighter_ini *syntax_highlighter_ini
 
 		zend_html_puts((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng) TSRMLS_CC);
 
-		if (token.type == IS_STRING) {
-			efree(Z_STRVAL(token));
+		if (Z_TYPE(token) == IS_STRING) {
+			switch (token_type) {
+				PARSER_IGNORED_TOKEN_CASES
+					break;
+				default:
+					efree(Z_STRVAL(token));
+			}
 		}
-		token.type = 0;
+		Z_TYPE(token) = 0;
 	}
 
 	if (last_color != syntax_highlighter_ini->highlight_html) {
@@ -182,7 +178,7 @@ ZEND_API void zend_strip(TSRMLS_D)
 			case T_DOC_COMMENT:
 				token.type = 0;
 				continue;
-			
+
 			case T_END_HEREDOC:
 				zend_write((char*)LANG_SCNG(yy_text), LANG_SCNG(yy_leng));
 				/* read the following character, either newline or ; */
@@ -201,9 +197,10 @@ ZEND_API void zend_strip(TSRMLS_D)
 
 		if (token.type == IS_STRING) {
 			switch (token_type) {
-				COPIED_STRING_TOKEN_CASES
-					efree(Z_STRVAL(token));
+				PARSER_IGNORED_TOKEN_CASES
 					break;
+				default:
+					efree(Z_STRVAL(token));
 			}
 		}
 		prev_space = token.type = 0;

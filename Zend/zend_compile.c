@@ -201,6 +201,11 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	zend_stack_init(&CG(context_stack));
 
 	CG(encoding_declared) = 0;
+	CG(tokenbufptr) = -1;
+	CG(tokenbuffer) = emalloc(sizeof(token_buf) * ((CG(tokenbufsize) = ZEND_INIT_TOKEN_BUF_SIZE) + 1));
+	CG(tokenbuffer)++->token = 0;
+	CG(tokenbuf_in_class) = -1;
+	CG(tokenbuf_fn_decl) = -1;
 }
 /* }}} */
 
@@ -236,6 +241,7 @@ void shutdown_compiler(TSRMLS_D) /* {{{ */
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
 	zend_stack_destroy(&CG(context_stack));
+	efree(--CG(tokenbuffer));
 }
 /* }}} */
 
@@ -6739,7 +6745,6 @@ int zendlex(znode *zendlval TSRMLS_DC) /* {{{ */
 	}
 
 again:
-	Z_TYPE(zendlval->u.constant) = IS_LONG;
 	retval = lex_scan(&zendlval->u.constant TSRMLS_CC);
 	switch (retval) {
 		case T_COMMENT:
