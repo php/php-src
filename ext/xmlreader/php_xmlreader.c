@@ -805,7 +805,6 @@ PHP_METHOD(xmlreader, read)
 	if (intern != NULL && intern->ptr != NULL) {
 		retval = xmlTextReaderRead(intern->ptr);
 		if (retval == -1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occurred while reading");
 			RETURN_FALSE;
 		} else {
 			RETURN_BOOL(retval);
@@ -847,7 +846,6 @@ PHP_METHOD(xmlreader, next)
 			retval = xmlTextReaderNext(intern->ptr);
 		}
 		if (retval == -1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "An Error Occurred while reading");
 			RETURN_FALSE;
 		} else {
 			RETURN_BOOL(retval);
