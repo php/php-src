@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.22
 
+- CLI server:
+  . Fixed bug #65818 (Segfault with built-in webserver and chunked transfer 
+    encoding). (Felipe)
+
 - FTP:
   . Fixed bug #65667 (ftp_nb_continue produces segfault). (Philip Hofstetter)
 
