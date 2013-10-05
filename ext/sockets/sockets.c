@@ -607,6 +607,8 @@ static char *php_strerror(int error TSRMLS_DC) /* {{{ */
 /* }}} */
 
 #if HAVE_IPV6
+static int php_get_if_index_from_string(const char *val, unsigned *out TSRMLS_DC);
+
 /* Sets addr by hostname, or by ip in string form (AF_INET6) */
 static int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock TSRMLS_DC) /* {{{ */
 {
@@ -615,6 +617,7 @@ static int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socke
 	struct addrinfo hints;
 	struct addrinfo *addrinfo = NULL;
 #endif
+	char *scope = strchr(string, '%');
 
 	if (inet_pton(AF_INET6, string, &tmp)) {
 		memcpy(&(sin6->sin6_addr.s6_addr), &(tmp.s6_addr), sizeof(struct in6_addr));
@@ -647,6 +650,22 @@ static int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socke
 		return 0;
 #endif
 
+	}
+
+	if (scope++) {
+		long lval = 0;
+		double dval = 0;
+		unsigned scope_id = 0;
+
+		if (IS_LONG == is_numeric_string(scope, strlen(scope), &lval, &dval, 0)) {
+			if (lval > 0 && lval <= UINT_MAX) {
+				scope_id = lval;
+			}
+		} else {
+			php_get_if_index_from_string(scope, &scope_id TSRMLS_CC);
+		}
+
+		sin6->sin6_scope_id = scope_id;
 	}
 
 	return 1;
@@ -714,6 +733,28 @@ static int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char
 	return 0;
 }
 
+static int php_get_if_index_from_string(const char *val, unsigned *out TSRMLS_DC)
+{
+#if HAVE_IF_NAMETOINDEX
+	unsigned int ind;
+
+	ind = if_nametoindex(val);
+	if (ind == 0) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"no interface with name \"%s\" could be found", val);
+		return FAILURE;
+	} else {
+		*out = ind;
+		return SUCCESS;
+	}
+#else
+	php_error_docref(NULL TSRMLS_CC, E_WARNING,
+			"this platform does not support looking up an interface by "
+			"name, an integer interface index must be supplied instead");
+	return FAILURE;
+#endif
+}
+
 static int php_get_if_index_from_zval(zval *val, unsigned *out TSRMLS_DC)
 {
 	int ret;
@@ -729,26 +770,10 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out TSRMLS_DC)
 			ret = SUCCESS;
 		}
 	} else {
-#if HAVE_IF_NAMETOINDEX
-		unsigned int ind;
 		zval_add_ref(&val);
 		convert_to_string_ex(&val);
-		ind = if_nametoindex(Z_STRVAL_P(val));
-		if (ind == 0) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"no interface with name \"%s\" could be found", Z_STRVAL_P(val));
-			ret = FAILURE;
-		} else {
-			*out = ind;
-			ret = SUCCESS;
-		}
+		ret = php_get_if_index_from_string(Z_STRVAL_P(val), out TSRMLS_CC);
 		zval_ptr_dtor(&val);
-#else
-		php_error_docref(NULL TSRMLS_CC, E_WARNING,
-				"this platform does not support looking up an interface by "
-				"name, an integer interface index must be supplied instead");
-		ret = FAILURE;
-#endif
 	}
 
 	return ret;
