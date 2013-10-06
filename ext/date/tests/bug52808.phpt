@@ -47,11 +47,11 @@ object(DateInterval)#%d (15) {
   ["invert"]=>
   int(1)
   ["days"]=>
-  string(3) "437"
+  int(437)
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
-  string(1) "0"
+  int(0)
   ["have_weekday_relative"]=>
   int(0)
   ["have_special_relative"]=>
@@ -79,11 +79,11 @@ object(DateInterval)#%d (15) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  string(3) "294"
+  int(294)
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
-  string(1) "0"
+  int(0)
   ["have_weekday_relative"]=>
   int(0)
   ["have_special_relative"]=>
@@ -111,11 +111,11 @@ object(DateInterval)#%d (15) {
   ["invert"]=>
   int(0)
   ["days"]=>
-  string(3) "294"
+  int(294)
   ["special_type"]=>
   int(0)
   ["special_amount"]=>
-  string(1) "0"
+  int(0)
   ["have_weekday_relative"]=>
   int(0)
   ["have_special_relative"]=>

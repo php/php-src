@@ -71,18 +71,14 @@ ZEND_API int zend_eval_stringl_ex(char *str, int str_len, zval *retval_ptr, char
 ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, ulong fetch_type, const char **class_name, zend_class_entry **pce TSRMLS_DC);
 ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend_uint arg_num, const char *need_msg, const char *need_kind, const char *given_msg, const char *given_kind TSRMLS_DC);
 
-static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
+static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
 {
 	if (!Z_DELREF_P(zval_ptr)) {
-		TSRMLS_FETCH();
-
 		ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
 		GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
 		zval_dtor(zval_ptr);
 		efree_rel(zval_ptr);
 	} else {
-		TSRMLS_FETCH();
-
 		if (Z_REFCOUNT_P(zval_ptr) == 1) {
 			Z_UNSET_ISREF_P(zval_ptr);
 		}
@@ -293,9 +289,9 @@ static zend_always_inline void zend_vm_stack_clear_multiple(int nested TSRMLS_DC
  	void **end = p - (int)(zend_uintptr_t)*p;
 
 	while (p != end) {
-		zval *q = *(zval **)(--p);
+		zval *q = (zval *) *(--p);
 		*p = NULL;
-		i_zval_ptr_dtor(q ZEND_FILE_LINE_CC);
+		i_zval_ptr_dtor(q ZEND_FILE_LINE_CC TSRMLS_CC);
 	}
 	if (nested) {
 		EG(argument_stack)->top = p;
@@ -394,7 +390,7 @@ ZEND_API zval **zend_get_zval_ptr_ptr(int op_type, const znode_op *node, const z
 ZEND_API int zend_do_fcall(ZEND_OPCODE_HANDLER_ARGS);
 
 void zend_clean_and_cache_symbol_table(HashTable *symbol_table TSRMLS_DC);
-void zend_free_compiled_variables(zend_execute_data *execute_data);
+void zend_free_compiled_variables(zend_execute_data *execute_data TSRMLS_DC);
 
 #define CACHED_PTR(num) \
 	EG(active_op_array)->run_time_cache[(num)]

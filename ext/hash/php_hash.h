@@ -22,13 +22,18 @@
 #define PHP_HASH_H
 
 #include "php.h"
-#include "php_hash_types.h"
 
 #define PHP_HASH_EXTNAME	"hash"
 #define PHP_HASH_EXTVER		"1.0"
 #define PHP_HASH_RESNAME	"Hash Context"
 
 #define PHP_HASH_HMAC		0x0001
+
+#define L64 INT64_C
+#define php_hash_int32  int32_t
+#define php_hash_uint32 uint32_t
+#define php_hash_int64  int64_t
+#define php_hash_uint64 uint64_t
 
 typedef void (*php_hash_init_func_t)(void *context);
 typedef void (*php_hash_update_func_t)(void *context, const unsigned char *buf, unsigned int count);
@@ -75,6 +80,7 @@ extern const php_hash_ops php_hash_4tiger160_ops;
 extern const php_hash_ops php_hash_4tiger192_ops;
 extern const php_hash_ops php_hash_snefru_ops;
 extern const php_hash_ops php_hash_gost_ops;
+extern const php_hash_ops php_hash_gost_crypto_ops;
 extern const php_hash_ops php_hash_adler32_ops;
 extern const php_hash_ops php_hash_crc32_ops;
 extern const php_hash_ops php_hash_crc32b_ops;

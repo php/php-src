@@ -20,7 +20,7 @@ var_dump( array_fill_keys($keys, $val, $extra_arg) );
 echo "\n-- Testing array_fill_keys() function with less than expected no. of arguments --\n";
 var_dump( array_fill_keys($keys) );
 
-echo "\n-- Testing array_fill_keys() function with no argumets --\n";
+echo "\n-- Testing array_fill_keys() function with no arguments --\n";
 var_dump( array_fill_keys() );
 
 echo "Done";
@@ -38,7 +38,7 @@ NULL
 Warning: array_fill_keys() expects exactly 2 parameters, 1 given in %sarray_fill_keys_error.php on line %d
 NULL
 
--- Testing array_fill_keys() function with no argumets --
+-- Testing array_fill_keys() function with no arguments --
 
 Warning: array_fill_keys() expects exactly 2 parameters, 0 given in %sarray_fill_keys_error.php on line %d
 NULL

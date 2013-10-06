@@ -194,7 +194,7 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	if (use_ssl && !*use_proxy) {
 		if (zend_hash_find(Z_OBJPROP_P(this_ptr), "_ssl_method", sizeof("_ssl_method"), (void **) &tmp) == SUCCESS &&
 			Z_TYPE_PP(tmp) == IS_LONG) {
-			/* uses contants declared in soap.c to determine ssl uri protocol */
+			/* uses constants declared in soap.c to determine ssl uri protocol */
 			switch (Z_LVAL_PP(tmp)) {
 				case SOAP_SSL_METHOD_TLS:
 					protocol = "tls";
@@ -1222,7 +1222,7 @@ try_again:
 				zval *err;
 				MAKE_STD_ZVAL(err);
 				ZVAL_STRINGL(err, http_body, http_body_size, 1);
-				add_soap_fault(this_ptr, "HTTP", "Didn't recieve an xml document", NULL, err TSRMLS_CC);
+				add_soap_fault(this_ptr, "HTTP", "Didn't receive an xml document", NULL, err TSRMLS_CC);
 				efree(content_type);
 				efree(http_headers);
 				efree(http_body);

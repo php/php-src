@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_WITH(curl, for cURL support,
-[  --with-curl[=DIR]       Include cURL support])
+[  --with-curl[=DIR]         Include cURL support])
 
 if test "$PHP_CURL" != "no"; then
   if test -r $PHP_CURL/include/curl/easy.h; then

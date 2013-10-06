@@ -681,8 +681,8 @@ static zend_op* _get_recv_op(zend_op_array *op_array, zend_uint offset)
 
 	++offset;
 	while (op < end) {
-		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT)
-			&& op->op1.num == (long)offset)
+		if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT 
+		    || op->opcode == ZEND_RECV_VARIADIC) && op->op1.num == (long)offset)
 		{
 			return op;
 		}
@@ -714,6 +714,9 @@ static void _parameter_string(string *str, zend_function *fptr, struct _zend_arg
 	}
 	if (arg_info->pass_by_reference) {
 		string_write(str, "&", sizeof("&")-1);
+	}
+	if (arg_info->is_variadic) {
+		string_write(str, "...", sizeof("...")-1);
 	}
 	if (arg_info->name) {
 		string_printf(str, "$%s", arg_info->name);
@@ -2652,6 +2655,22 @@ ZEND_METHOD(reflection_parameter, getDefaultValueConstantName)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionParameter::isVariadic()
+   Returns whether this parameter is a variadic parameter */
+ZEND_METHOD(reflection_parameter, isVariadic)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(param->arg_info->is_variadic);
+}
+/* }}} */
+
 /* {{{ proto public static mixed ReflectionMethod::export(mixed class, string name [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_method, export)
@@ -3092,6 +3111,14 @@ ZEND_METHOD(reflection_function, isDeprecated)
 ZEND_METHOD(reflection_function, isGenerator)
 {
 	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_GENERATOR);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionFunction::isVariadic()
+   Returns whether this function is variadic */
+ZEND_METHOD(reflection_function, isVariadic)
+{
+	_function_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_VARIADIC);
 }
 /* }}} */
 
@@ -5259,7 +5286,7 @@ ZEND_METHOD(reflection_extension, getVersion)
 /* }}} */
 
 /* {{{ proto public ReflectionFunction[] ReflectionExtension::getFunctions()
-   Returns an array of this extension's fuctions */
+   Returns an array of this extension's functions */
 ZEND_METHOD(reflection_extension, getFunctions)
 {
 	reflection_object *intern;
@@ -5720,6 +5747,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, isInternal, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isUserDefined, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, isGenerator, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, isVariadic, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureScopeClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
@@ -6022,6 +6050,7 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, getDefaultValue, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isDefaultValueConstant, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDefaultValueConstantName, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, isVariadic, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 

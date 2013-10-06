@@ -1290,7 +1290,7 @@ PHP_METHOD(SoapServer, setClass)
 			}
 		}
 	} else {
-		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set a non existant class (%s)", classname);
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to set a non existent class (%s)", classname);
 		return;
 	}
 
@@ -1421,7 +1421,7 @@ PHP_METHOD(SoapServer, addFunction)
 				zend_str_tolower_copy(key, Z_STRVAL_PP(tmp_function), key_len);
 
 				if (zend_hash_find(EG(function_table), key, key_len+1, (void**)&f) == FAILURE) {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to add a non existant function '%s'", Z_STRVAL_PP(tmp_function));
+					php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to add a non existent function '%s'", Z_STRVAL_PP(tmp_function));
 					return;
 				}
 
@@ -1443,7 +1443,7 @@ PHP_METHOD(SoapServer, addFunction)
 		zend_str_tolower_copy(key, Z_STRVAL_P(function_name), key_len);
 
 		if (zend_hash_find(EG(function_table), key, key_len+1, (void**)&f) == FAILURE) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to add a non existant function '%s'", Z_STRVAL_P(function_name));
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Tried to add a non existent function '%s'", Z_STRVAL_P(function_name));
 			return;
 		}
 		if (service->soap_functions.ft == NULL) {
@@ -1560,48 +1560,45 @@ PHP_METHOD(SoapServer, handle)
 	}
 
 	if (ZEND_NUM_ARGS() == 0) {
-		if (SG(request_info).raw_post_data) {
-			char *post_data = SG(request_info).raw_post_data;
-			int post_data_length = SG(request_info).raw_post_data_length;
+		if (SG(request_info).request_body && 0 == php_stream_rewind(SG(request_info).request_body)) {
 			zval **server_vars, **encoding;
+			php_stream_filter *zf = NULL;
 
 			zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
 			if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &server_vars) == SUCCESS &&
 			    Z_TYPE_PP(server_vars) == IS_ARRAY &&
 			    zend_hash_find(Z_ARRVAL_PP(server_vars), "HTTP_CONTENT_ENCODING", sizeof("HTTP_CONTENT_ENCODING"), (void **) &encoding)==SUCCESS &&
 			    Z_TYPE_PP(encoding) == IS_STRING) {
-				zval func;
-				zval retval;
-				zval param;
-				zval *params[1];
 
-				if ((strcmp(Z_STRVAL_PP(encoding),"gzip") == 0 ||
-				     strcmp(Z_STRVAL_PP(encoding),"x-gzip") == 0) &&
-				    zend_hash_exists(EG(function_table), "gzinflate", sizeof("gzinflate"))) {
-					ZVAL_STRING(&func, "gzinflate", 0);
-					params[0] = &param;
-					ZVAL_STRINGL(params[0], post_data+10, post_data_length-10, 0);
-					INIT_PZVAL(params[0]);
-				} else if (strcmp(Z_STRVAL_PP(encoding),"deflate") == 0 &&
-		           zend_hash_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress"))) {
-					ZVAL_STRING(&func, "gzuncompress", 0);
-					params[0] = &param;
-					ZVAL_STRINGL(params[0], post_data, post_data_length, 0);
-					INIT_PZVAL(params[0]);
+				if (strcmp(Z_STRVAL_PP(encoding),"gzip") == 0
+				||  strcmp(Z_STRVAL_PP(encoding),"x-gzip") == 0
+				||  strcmp(Z_STRVAL_PP(encoding),"deflate") == 0
+				) {
+					zval filter_params;
+
+					INIT_PZVAL(&filter_params);
+					array_init_size(&filter_params, 1);
+					add_assoc_long_ex(&filter_params, ZEND_STRS("window"), 0x2f); /* ANY WBITS */
+
+					zf = php_stream_filter_create("zlib.inflate", &filter_params, 0 TSRMLS_CC);
+					zval_dtor(&filter_params);
+
+					if (zf) {
+						php_stream_filter_append(&SG(request_info).request_body->readfilters, zf);
+					} else {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't uncompress compressed request");
+						return;
+					}
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Request is compressed with unknown compression '%s'",Z_STRVAL_PP(encoding));
 					return;
 				}
-				if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, 1, params TSRMLS_CC) == SUCCESS &&
-				    Z_TYPE(retval) == IS_STRING) {
-					doc_request = soap_xmlParseMemory(Z_STRVAL(retval),Z_STRLEN(retval));
-					zval_dtor(&retval);
-				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't uncompress compressed request");
-					return;
-				}
-			} else {
-				doc_request = soap_xmlParseMemory(post_data, post_data_length);
+			}
+
+			doc_request = soap_xmlParseFile("php://input" TSRMLS_CC);
+
+			if (zf) {
+				php_stream_filter_remove(zf, 1 TSRMLS_CC);
 			}
 		} else {
 			zval_ptr_dtor(&retval);
@@ -1675,7 +1672,7 @@ PHP_METHOD(SoapServer, handle)
 			}
 		}
 #endif
-		/* If new session or something wierd happned */
+		/* If new session or something weird happned */
 		if (soap_obj == NULL) {
 			zval *tmp_soap;
 
@@ -3669,7 +3666,44 @@ ignore_header:
 	return function;
 }
 
-static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, char *function_name, char *uri, zval *ret, int version, int main TSRMLS_DC)
+static void set_soap_header_attributes(xmlNodePtr h, HashTable *ht, int version)
+{
+	zval **tmp;
+
+	if (zend_hash_find(ht, "mustUnderstand", sizeof("mustUnderstand"), (void**)&tmp) == SUCCESS &&
+	    Z_TYPE_PP(tmp) == IS_BOOL && Z_LVAL_PP(tmp)) {
+		if (version == SOAP_1_1) {
+			xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":mustUnderstand"), BAD_CAST("1"));
+		} else {
+			xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":mustUnderstand"), BAD_CAST("true"));
+		}
+	}
+	if (zend_hash_find(ht, "actor", sizeof("actor"), (void**)&tmp) == SUCCESS) {
+		if (Z_TYPE_PP(tmp) == IS_STRING) {
+			if (version == SOAP_1_1) {
+				xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":actor"), BAD_CAST(Z_STRVAL_PP(tmp)));
+			} else {
+				xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(Z_STRVAL_PP(tmp)));
+			}
+		} else if (Z_TYPE_PP(tmp) == IS_LONG) {
+			if (version == SOAP_1_1) {
+				if (Z_LVAL_PP(tmp) == SOAP_ACTOR_NEXT) {
+					xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":actor"), BAD_CAST(SOAP_1_1_ACTOR_NEXT));
+				}
+			} else {
+				if (Z_LVAL_PP(tmp) == SOAP_ACTOR_NEXT) {
+					xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_NEXT));
+				} else if (Z_LVAL_PP(tmp) == SOAP_ACTOR_NONE) {
+					xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_NONE));
+				} else if (Z_LVAL_PP(tmp) == SOAP_ACTOR_UNLIMATERECEIVER) {
+					xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_UNLIMATERECEIVER));
+				}
+			}
+		}
+	}
+}
+
+static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, char *function_name, char *uri, zval *ret, int version, int main, xmlNodePtr *node TSRMLS_DC)
 {
 	xmlNodePtr method = NULL, param;
 	sdlParamPtr parameter = NULL;
@@ -3769,6 +3803,9 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 	if (use == SOAP_ENCODED && version == SOAP_1_2 && method != NULL) {
 		xmlSetNsProp(method, body->ns, BAD_CAST("encodingStyle"), BAD_CAST(SOAP_1_2_ENC_NAMESPACE));
 	}
+	if (node) {
+		*node = method;
+	}
 	return use;
 }
 
@@ -3850,7 +3887,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 			}
 
 			if (headers->function) {
-				if (serialize_response_call2(head, headers->function, Z_STRVAL(headers->function_name), uri, hdr_ret, version, 0 TSRMLS_CC) == SOAP_ENCODED) {
+				if (serialize_response_call2(head, headers->function, Z_STRVAL(headers->function_name), uri, hdr_ret, version, 0, NULL TSRMLS_CC) == SOAP_ENCODED) {
 					use = SOAP_ENCODED;
 				}
 			} else {
@@ -4036,15 +4073,15 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					zval *hdr_ret = &h->retval;
 					char *hdr_ns   = h->hdr?h->hdr->ns:NULL;
 					char *hdr_name = Z_STRVAL(h->function_name);
-
+					HashTable *ht = NULL;
 
 					if (Z_TYPE(h->retval) == IS_OBJECT &&
 					    instanceof_function(Z_OBJCE(h->retval), soap_header_class_entry TSRMLS_CC)) {
-						HashTable* ht = Z_OBJPROP(h->retval);
 						zval **tmp;
 						sdlSoapBindingFunctionHeaderPtr *hdr;
 						smart_str key = {0};
 
+						ht = Z_OBJPROP(h->retval);
 						if (zend_hash_find(ht, "namespace", sizeof("namespace"), (void**)&tmp) == SUCCESS &&
 					      Z_TYPE_PP(tmp) == IS_STRING) {
 							smart_str_appendl(&key, Z_STRVAL_PP(tmp), Z_STRLEN_PP(tmp));
@@ -4075,8 +4112,13 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 					}
 
 					if (h->function) {
-						if (serialize_response_call2(head, h->function, Z_STRVAL(h->function_name), uri, hdr_ret, version, 0 TSRMLS_CC) == SOAP_ENCODED) {
+						xmlNodePtr xmlHdr = NULL;
+
+						if (serialize_response_call2(head, h->function, Z_STRVAL(h->function_name), uri, hdr_ret, version, 0, &xmlHdr TSRMLS_CC) == SOAP_ENCODED) {
 							use = SOAP_ENCODED;
+						}
+						if (ht) {
+							set_soap_header_attributes(xmlHdr, ht, version);
 						}
 					} else {
 						xmlNodePtr xmlHdr = master_to_xml(hdr_enc, hdr_ret, hdr_use, head TSRMLS_CC);
@@ -4086,6 +4128,9 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 						if (hdr_ns) {
 							xmlNsPtr nsptr = encode_add_ns(xmlHdr,hdr_ns);
 							xmlSetNs(xmlHdr, nsptr);
+						}
+						if (ht) {
+							set_soap_header_attributes(xmlHdr, ht, version);
 						}
 					}
 				}
@@ -4100,7 +4145,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 
 		body = xmlNewChild(envelope, ns, BAD_CAST("Body"), NULL);
 
-		if (serialize_response_call2(body, function, function_name, uri, ret, version, 1 TSRMLS_CC) == SOAP_ENCODED) {
+		if (serialize_response_call2(body, function, function_name, uri, ret, version, 1, NULL TSRMLS_CC) == SOAP_ENCODED) {
 			use = SOAP_ENCODED;
 		}
 
@@ -4292,38 +4337,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 				}
 				nsptr = encode_add_ns(h, Z_STRVAL_PP(ns));
 				xmlSetNs(h, nsptr);
-
-				if (zend_hash_find(ht, "mustUnderstand", sizeof("mustUnderstand"), (void**)&tmp) == SUCCESS &&
-				    Z_TYPE_PP(tmp) == IS_BOOL && Z_LVAL_PP(tmp)) {
-					if (version == SOAP_1_1) {
-						xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":mustUnderstand"), BAD_CAST("1"));
-					} else {
-						xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":mustUnderstand"), BAD_CAST("true"));
-					}
-				}
-				if (zend_hash_find(ht, "actor", sizeof("actor"), (void**)&tmp) == SUCCESS) {
-					if (Z_TYPE_PP(tmp) == IS_STRING) {
-						if (version == SOAP_1_1) {
-							xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":actor"), BAD_CAST(Z_STRVAL_PP(tmp)));
-						} else {
-							xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(Z_STRVAL_PP(tmp)));
-						}
-					} else if (Z_TYPE_PP(tmp) == IS_LONG) {
-						if (version == SOAP_1_1) {
-							if (Z_LVAL_PP(tmp) == SOAP_ACTOR_NEXT) {
-								xmlSetProp(h, BAD_CAST(SOAP_1_1_ENV_NS_PREFIX":actor"), BAD_CAST(SOAP_1_1_ACTOR_NEXT));
-							}
-						} else {
-							if (Z_LVAL_PP(tmp) == SOAP_ACTOR_NEXT) {
-								xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_NEXT));
-							} else if (Z_LVAL_PP(tmp) == SOAP_ACTOR_NONE) {
-								xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_NONE));
-							} else if (Z_LVAL_PP(tmp) == SOAP_ACTOR_UNLIMATERECEIVER) {
-								xmlSetProp(h, BAD_CAST(SOAP_1_2_ENV_NS_PREFIX":role"), BAD_CAST(SOAP_1_2_ACTOR_UNLIMATERECEIVER));
-							}
-						}
-					}
-				}
+				set_soap_header_attributes(h, ht, version);
 			}
 			zend_hash_move_forward(soap_headers);
 		}

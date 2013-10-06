@@ -207,8 +207,7 @@ typedef struct _zend_try_catch_element {
 /* disable inline caching */
 #define ZEND_ACC_NEVER_CACHE          0x400000
 
-#define ZEND_ACC_PASS_REST_BY_REFERENCE 0x1000000
-#define ZEND_ACC_PASS_REST_PREFER_REF	0x2000000
+#define ZEND_ACC_VARIADIC				0x1000000
 
 #define ZEND_ACC_RETURN_REFERENCE		0x4000000
 #define ZEND_ACC_DONE_PASS_TWO			0x8000000
@@ -234,8 +233,9 @@ typedef struct _zend_arg_info {
 	const char *class_name;
 	zend_uint class_name_len;
 	zend_uchar type_hint;
+	zend_uchar pass_by_reference;
 	zend_bool allow_null;
-	zend_bool pass_by_reference;
+	zend_bool is_variadic;
 } zend_arg_info;
 
 /* the following structure repeats the layout of zend_arg_info,
@@ -249,7 +249,8 @@ typedef struct _zend_internal_function_info {
 	zend_uint required_num_args;
 	zend_uchar _type_hint;
 	zend_bool return_reference;
-	zend_bool pass_rest_by_reference;
+	zend_bool _allow_null;
+	zend_bool _is_variadic;
 } zend_internal_function_info;
 
 typedef struct _zend_compiled_variable {
@@ -438,7 +439,7 @@ ZEND_API int zend_get_compiled_lineno(TSRMLS_D);
 ZEND_API size_t zend_get_scanned_file_offset(TSRMLS_D);
 
 void zend_resolve_non_class_name(znode *element_name, zend_bool check_namespace TSRMLS_DC);
-void zend_resolve_class_name(znode *class_name, ulong fetch_type, int check_ns_name TSRMLS_DC);
+void zend_resolve_class_name(znode *class_name TSRMLS_DC);
 ZEND_API const char* zend_get_compiled_variable_name(const zend_op_array *op_array, zend_uint var, int* name_len);
 
 #ifdef ZTS
@@ -500,7 +501,7 @@ void zend_do_add_variable(znode *result, const znode *op1, const znode *op2 TSRM
 int zend_do_verify_access_types(const znode *current_access_type, const znode *new_modifier);
 void zend_do_begin_function_declaration(znode *function_token, znode *function_name, int is_method, int return_reference, znode *fn_flags_znode TSRMLS_DC);
 void zend_do_end_function_declaration(const znode *function_token TSRMLS_DC);
-void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, const znode *initialization, znode *class_type, zend_bool pass_by_reference TSRMLS_DC);
+void zend_do_receive_param(zend_uchar op, znode *varname, const znode *initialization, znode *class_type, zend_bool pass_by_reference, zend_bool is_variadic TSRMLS_DC);
 int zend_do_begin_function_call(znode *function_name, zend_bool check_namespace TSRMLS_DC);
 void zend_do_begin_method_call(znode *left_bracket TSRMLS_DC);
 void zend_do_clone(znode *result, const znode *expr TSRMLS_DC);
@@ -726,8 +727,8 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 #define ZEND_FETCH_CLASS_DEFAULT	0
 #define ZEND_FETCH_CLASS_SELF		1
 #define ZEND_FETCH_CLASS_PARENT		2
-#define ZEND_FETCH_CLASS_MAIN		3
-#define ZEND_FETCH_CLASS_GLOBAL		4
+#define ZEND_FETCH_CLASS_MAIN		3	/* unused */
+#define ZEND_FETCH_CLASS_GLOBAL		4	/* unused */
 #define ZEND_FETCH_CLASS_AUTO		5
 #define ZEND_FETCH_CLASS_INTERFACE	6
 #define ZEND_FETCH_CLASS_STATIC		7
@@ -817,21 +818,21 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 #define ZEND_SEND_BY_REF     1
 #define ZEND_SEND_PREFER_REF 2
 
-#define CHECK_ARG_SEND_TYPE(zf, arg_num, m1, m2)											\
-	((zf) &&																				\
-	  ((((zend_function*)(zf))->common.arg_info && 											\
-	    arg_num <= ((zend_function*)(zf))->common.num_args) ?								\
-	   (((zend_function *)(zf))->common.arg_info[arg_num-1].pass_by_reference & (m1)) :		\
-       (((zend_function *)(zf))->common.fn_flags & (m2))))
+#define CHECK_ARG_SEND_TYPE(zf, arg_num, m) \
+	((zf)->common.arg_info && \
+	(arg_num <= (zf)->common.num_args \
+		? ((zf)->common.arg_info[arg_num-1].pass_by_reference & (m)) \
+		: ((zf)->common.fn_flags & ZEND_ACC_VARIADIC) \
+			? ((zf)->common.arg_info[(zf)->common.num_args-1].pass_by_reference & (m)) : 0))
 
 #define ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \
-	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_BY_REF, ZEND_ACC_PASS_REST_BY_REFERENCE)
+	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_BY_REF)
 
 #define ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num) \
-	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF, ZEND_ACC_PASS_REST_BY_REFERENCE|ZEND_ACC_PASS_REST_PREFER_REF)
+	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF)
 
 #define ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
-	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_PREFER_REF, ZEND_ACC_PASS_REST_PREFER_REF)
+	CHECK_ARG_SEND_TYPE(zf, arg_num, ZEND_SEND_PREFER_REF)
 
 #define ZEND_RETURN_VAL 0
 #define ZEND_RETURN_REF 1

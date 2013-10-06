@@ -46,13 +46,19 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		zend_op_array *op_array = execute_data->op_array;
 
 		if (!execute_data->symbol_table) {
-			zend_free_compiled_variables(execute_data);
+			zend_free_compiled_variables(execute_data TSRMLS_CC);
 		} else {
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table TSRMLS_CC);
 		}
 
 		if (execute_data->current_this) {
 			zval_ptr_dtor(&execute_data->current_this);
+		}
+
+		/* A fatal error / die occurred during the generator execution. Trying to clean
+		 * up the stack may not be safe in this case. */
+		if (CG(unclean_shutdown)) {
+			return;
 		}
 
 		/* If the generator is closed before it can finish execution (reach
@@ -220,6 +226,16 @@ static zend_object_value zend_generator_create(zend_class_entry *class_type TSRM
 }
 /* }}} */
 
+static void copy_closure_static_var(zval **var TSRMLS_DC, int num_args, va_list args, zend_hash_key *key) /* {{{ */
+{
+	HashTable *target = va_arg(args, HashTable *);
+
+	SEPARATE_ZVAL_TO_MAKE_IS_REF(var);
+	Z_ADDREF_PP(var);
+	zend_hash_quick_update(target, key->arKey, key->nKeyLength, key->h, var, sizeof(zval *), NULL);
+}
+/* }}} */
+
 /* Requires globals EG(scope), EG(current_scope), EG(This),
  * EG(active_symbol_table) and EG(current_execute_data). */
 ZEND_API zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* {{{ */
@@ -236,7 +252,23 @@ ZEND_API zval *zend_generator_create_zval(zend_op_array *op_array TSRMLS_DC) /* 
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 		zend_op_array *op_array_copy = (zend_op_array*)emalloc(sizeof(zend_op_array));
 		*op_array_copy = *op_array;
-		function_add_ref((zend_function *) op_array_copy);
+
+		(*op_array->refcount)++;
+		op_array->run_time_cache = NULL;
+		if (op_array->static_variables) {
+			ALLOC_HASHTABLE(op_array_copy->static_variables);
+			zend_hash_init(
+				op_array_copy->static_variables, 
+				zend_hash_num_elements(op_array->static_variables),
+				NULL, ZVAL_PTR_DTOR, 0
+			);
+			zend_hash_apply_with_arguments(
+				op_array->static_variables TSRMLS_CC,
+				(apply_func_args_t) copy_closure_static_var,
+				1, op_array_copy->static_variables
+			);
+		}
+
 		op_array = op_array_copy;
 	}
 	
@@ -424,7 +456,7 @@ ZEND_METHOD(Generator, current)
 	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	if (generator->value) {
-		RETURN_ZVAL(generator->value, 1, 0);
+		RETURN_ZVAL_FAST(generator->value);
 	}
 }
 /* }}} */
@@ -444,7 +476,7 @@ ZEND_METHOD(Generator, key)
 	zend_generator_ensure_initialized(generator TSRMLS_CC);
 
 	if (generator->key) {
-		RETURN_ZVAL(generator->key, 1, 0);
+		RETURN_ZVAL_FAST(generator->key);
 	}
 }
 /* }}} */
@@ -493,7 +525,7 @@ ZEND_METHOD(Generator, send)
 	zend_generator_resume(generator TSRMLS_CC);
 
 	if (generator->value) {
-		RETURN_ZVAL(generator->value, 1, 0);
+		RETURN_ZVAL_FAST(generator->value);
 	}
 }
 /* }}} */
@@ -526,7 +558,7 @@ ZEND_METHOD(Generator, throw)
 		zend_generator_resume(generator TSRMLS_CC);
 
 		if (generator->value) {
-			RETURN_ZVAL(generator->value, 1, 0);
+			RETURN_ZVAL_FAST(generator->value);
 		}
 	} else {
 		/* If the generator is already closed throw the exception in the

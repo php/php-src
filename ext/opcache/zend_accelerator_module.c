@@ -48,6 +48,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_get_status, 0, 0, 0)
 	ZEND_ARG_INFO(0, fetch_scripts)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_compile_file, 0, 0, 1)
+	ZEND_ARG_INFO(0, file)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_invalidate, 0, 0, 1)
 	ZEND_ARG_INFO(0, script)
 	ZEND_ARG_INFO(0, force)
@@ -59,17 +63,34 @@ static ZEND_FUNCTION(opcache_invalidate);
 
 /* Private functions */
 static ZEND_FUNCTION(opcache_get_status);
+static ZEND_FUNCTION(opcache_compile_file);
 static ZEND_FUNCTION(opcache_get_configuration);
 
 static zend_function_entry accel_functions[] = {
 	/* User functions */
 	ZEND_FE(opcache_reset,					arginfo_opcache_none)
 	ZEND_FE(opcache_invalidate,				arginfo_opcache_invalidate)
+	ZEND_FE(opcache_compile_file,			arginfo_opcache_compile_file)
 	/* Private functions */
 	ZEND_FE(opcache_get_configuration,		arginfo_opcache_none)
 	ZEND_FE(opcache_get_status,				arginfo_opcache_get_status)
 	{ NULL, NULL, NULL, 0, 0 }
 };
+
+static int validate_api_restriction(TSRMLS_D)
+{
+	if (ZCG(accel_directives).restrict_api && *ZCG(accel_directives).restrict_api) {
+		int len = strlen(ZCG(accel_directives).restrict_api);
+
+		if (!SG(request_info).path_translated ||
+		    strlen(SG(request_info).path_translated) < len ||
+		    memcmp(SG(request_info).path_translated, ZCG(accel_directives).restrict_api, len) != 0) {
+			zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " API is restricted by \"restrict_api\" configuration directive");
+			return 0;
+		}
+	}       
+	return 1;
+}
 
 static ZEND_INI_MH(OnUpdateMemoryConsumption)
 {
@@ -251,6 +272,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("opcache.enable_file_override"	, "0"   , PHP_INI_SYSTEM, OnUpdateBool,              accel_directives.file_override_enabled,     zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.enable_cli"             , "0"   , PHP_INI_SYSTEM, OnUpdateBool,              accel_directives.enable_cli,                zend_accel_globals, accel_globals)
 	STD_PHP_INI_ENTRY("opcache.error_log"                , ""    , PHP_INI_SYSTEM, OnUpdateString,	         accel_directives.error_log,                 zend_accel_globals, accel_globals)
+	STD_PHP_INI_ENTRY("opcache.restrict_api"             , ""    , PHP_INI_SYSTEM, OnUpdateString,	         accel_directives.restrict_api,              zend_accel_globals, accel_globals)
 
 #ifdef ZEND_WIN32
 	STD_PHP_INI_ENTRY("opcache.mmap_base", NULL, PHP_INI_SYSTEM,	OnUpdateString,	                             accel_directives.mmap_base,                 zend_accel_globals, accel_globals)
@@ -378,6 +400,7 @@ static ZEND_MSHUTDOWN_FUNCTION(zend_accelerator)
 	(void)type; /* keep the compiler happy */
 
 	UNREGISTER_INI_ENTRIES();
+	accel_shutdown(TSRMLS_C);
 	return SUCCESS;
 }
 
@@ -516,6 +539,10 @@ static ZEND_FUNCTION(opcache_get_status)
 		return;
 	}
 	
+	if (!validate_api_restriction(TSRMLS_C)) {
+		RETURN_FALSE;
+	}
+
 	if (!accel_startup_ok) {
 		RETURN_FALSE;
 	}
@@ -586,6 +613,10 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	}
 #endif
 
+	if (!validate_api_restriction(TSRMLS_C)) {
+		RETURN_FALSE;
+	}
+
 	array_init(return_value);
 
 	/* directives */
@@ -650,6 +681,10 @@ static ZEND_FUNCTION(opcache_reset)
 	}
 #endif
 
+	if (!validate_api_restriction(TSRMLS_C)) {
+		RETURN_FALSE;
+	}
+
 	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
 		RETURN_FALSE;
 	}
@@ -670,9 +705,54 @@ static ZEND_FUNCTION(opcache_invalidate)
 		return;
 	}
 
+	if (!validate_api_restriction(TSRMLS_C)) {
+		RETURN_FALSE;
+	}
+
 	if (zend_accel_invalidate(script_name, script_name_len, force TSRMLS_CC) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;
 	}
+}
+
+static ZEND_FUNCTION(opcache_compile_file)
+{
+	char *script_name;
+	int script_name_len;
+	zend_file_handle handle;
+	zend_op_array *op_array = NULL;
+	zend_execute_data *orig_execute_data = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &script_name, &script_name_len) == FAILURE) {
+		return;
+	}
+
+	if (!ZCG(enabled) || !accel_startup_ok || !ZCSG(accelerator_enabled)) {
+		zend_error(E_NOTICE, ACCELERATOR_PRODUCT_NAME " seems to be disabled, can't compile file");
+		RETURN_FALSE;
+	}
+
+	handle.filename = script_name;
+	handle.free_filename = 0;
+	handle.opened_path = NULL;
+	handle.type = ZEND_HANDLE_FILENAME;
+
+	orig_execute_data = EG(current_execute_data);
+
+	zend_try {
+		op_array = persistent_compile_file(&handle, ZEND_INCLUDE TSRMLS_CC);
+	} zend_catch {
+		EG(current_execute_data) = orig_execute_data;
+		zend_error(E_WARNING, ACCELERATOR_PRODUCT_NAME " could not compile file %s" TSRMLS_CC, handle.filename);
+	} zend_end_try();
+
+	if(op_array != NULL) {
+		destroy_op_array(op_array TSRMLS_CC);
+		efree(op_array);
+		RETVAL_TRUE;
+	} else {
+		RETVAL_FALSE;
+	}
+	zend_destroy_file_handle(&handle TSRMLS_CC);
 }

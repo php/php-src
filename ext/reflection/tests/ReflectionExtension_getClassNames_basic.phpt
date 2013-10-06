@@ -1,5 +1,5 @@
 --TEST--
-ReflectionExtension::getClassNames() method on an extension which acually returns some information
+ReflectionExtension::getClassNames() method on an extension which actually returns some information
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --FILE--

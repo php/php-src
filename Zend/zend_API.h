@@ -98,16 +98,18 @@ typedef struct _zend_fcall_info_cache {
 
 #define ZEND_FE_END            { NULL, NULL, NULL, 0, 0 }
 
-#define ZEND_ARG_INFO(pass_by_ref, name)							{ #name, sizeof(#name)-1, NULL, 0, 0, 0, pass_by_ref},
-#define ZEND_ARG_PASS_INFO(pass_by_ref)								{ NULL, 0, NULL, 0, 0, 0, pass_by_ref},
-#define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null) { #name, sizeof(#name)-1, #classname, sizeof(#classname)-1, IS_OBJECT, allow_null, pass_by_ref},
-#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null) { #name, sizeof(#name)-1, NULL, 0, IS_ARRAY, allow_null, pass_by_ref},
-#define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, sizeof(#name)-1, NULL, 0, type_hint, allow_null, pass_by_ref},
-#define ZEND_BEGIN_ARG_INFO_EX(name, pass_rest_by_reference, return_reference, required_num_args)	\
+#define ZEND_ARG_INFO(pass_by_ref, name)							{ #name, sizeof(#name)-1, NULL, 0, 0, pass_by_ref, 0, 0 },
+#define ZEND_ARG_PASS_INFO(pass_by_ref)								{ NULL, 0, NULL, 0, 0, pass_by_ref, 0, 0 },
+#define ZEND_ARG_OBJ_INFO(pass_by_ref, name, classname, allow_null) { #name, sizeof(#name)-1, #classname, sizeof(#classname)-1, IS_OBJECT, pass_by_ref, allow_null, 0 },
+#define ZEND_ARG_ARRAY_INFO(pass_by_ref, name, allow_null) { #name, sizeof(#name)-1, NULL, 0, IS_ARRAY, pass_by_ref, allow_null, 0 },
+#define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) { #name, sizeof(#name)-1, NULL, 0, type_hint, pass_by_ref, allow_null, 0 },
+#define ZEND_ARG_VARIADIC_INFO(pass_by_ref, name) 					{ #name, sizeof(#name)-1, NULL, 0, 0, pass_by_ref, 0, 1 },
+
+#define ZEND_BEGIN_ARG_INFO_EX(name, _unused, return_reference, required_num_args)	\
 	static const zend_arg_info name[] = {																		\
-		{ NULL, 0, NULL, required_num_args, 0, return_reference, pass_rest_by_reference},
-#define ZEND_BEGIN_ARG_INFO(name, pass_rest_by_reference)	\
-	ZEND_BEGIN_ARG_INFO_EX(name, pass_rest_by_reference, ZEND_RETURN_VALUE, -1)
+		{ NULL, 0, NULL, required_num_args, 0, return_reference, 0, 0 },
+#define ZEND_BEGIN_ARG_INFO(name, _unused)	\
+	ZEND_BEGIN_ARG_INFO_EX(name, 0, ZEND_RETURN_VALUE, -1)
 #define ZEND_END_ARG_INFO()		};
 
 /* Name macros */
@@ -465,7 +467,7 @@ ZEND_API extern const zend_fcall_info_cache empty_fcall_info_cache;
  */
 ZEND_API int zend_fcall_info_init(zval *callable, uint check_flags, zend_fcall_info *fci, zend_fcall_info_cache *fcc, char **callable_name, char **error TSRMLS_DC);
 
-/** Clear argumens connected with zend_fcall_info *fci
+/** Clear arguments connected with zend_fcall_info *fci
  * If free_mem is not zero then the params array gets free'd as well
  */
 ZEND_API void zend_fcall_info_args_clear(zend_fcall_info *fci, int free_mem);
@@ -503,7 +505,7 @@ ZEND_API int zend_fcall_info_argv(zend_fcall_info *fci TSRMLS_DC, int argc, va_l
 ZEND_API int zend_fcall_info_argn(zend_fcall_info *fci TSRMLS_DC, int argc, ...);
 
 /** Call a function using information created by zend_fcall_info_init()/args().
- * If args is given then those replace the arguement info in fci is temporarily.
+ * If args is given then those replace the argument info in fci is temporarily.
  */
 ZEND_API int zend_fcall_info_call(zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval **retval, zval *args TSRMLS_DC);
 
@@ -594,22 +596,20 @@ END_EXTERN_C()
 		Z_TYPE_P(__z) = IS_STRING;	\
 	} while (0)
 
-#define ZVAL_ZVAL(z, zv, copy, dtor) {			\
-		zend_uchar is_ref = Z_ISREF_P(z);		\
-		zend_uint refcount = Z_REFCOUNT_P(z);	\
-		ZVAL_COPY_VALUE(z, zv);					\
+#define ZVAL_ZVAL(z, zv, copy, dtor) do {		\
+		zval *__z = (z);						\
+		zval *__zv = (zv);						\
+		ZVAL_COPY_VALUE(__z, __zv);				\
 		if (copy) {								\
-			zval_copy_ctor(z);					\
+			zval_copy_ctor(__z);				\
 	    }										\
 		if (dtor) {								\
 			if (!copy) {						\
-				ZVAL_NULL(zv);					\
+				ZVAL_NULL(__zv);				\
 			}									\
-			zval_ptr_dtor(&zv);					\
+			zval_ptr_dtor(&__zv);				\
 	    }										\
-		Z_SET_ISREF_TO_P(z, is_ref);			\
-		Z_SET_REFCOUNT_P(z, refcount);			\
-	}
+	} while (0)
 
 #define ZVAL_FALSE(z)  					ZVAL_BOOL(z, 0)
 #define ZVAL_TRUE(z)  					ZVAL_BOOL(z, 1)
@@ -637,6 +637,18 @@ END_EXTERN_C()
 #define RETURN_ZVAL(zv, copy, dtor)		{ RETVAL_ZVAL(zv, copy, dtor); return; }
 #define RETURN_FALSE  					{ RETVAL_FALSE; return; }
 #define RETURN_TRUE   					{ RETVAL_TRUE; return; }
+
+#define RETVAL_ZVAL_FAST(z) do {      \
+	zval *_z = (z);                   \
+	if (Z_ISREF_P(_z)) {              \
+		RETVAL_ZVAL(_z, 1, 0);        \
+	} else {                          \
+		zval_ptr_dtor(&return_value); \
+		Z_ADDREF_P(_z);               \
+		*return_value_ptr = _z;       \
+	}                                 \
+} while (0)
+#define RETURN_ZVAL_FAST(z) { RETVAL_ZVAL_FAST(z); return; }
 
 #define SET_VAR_STRING(n, v) {																				\
 								{																			\

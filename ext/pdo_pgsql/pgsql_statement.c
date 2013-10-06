@@ -536,7 +536,7 @@ static int pgsql_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, unsigned 
 					*len = 0;
 					return 0;
 				} else {
-					char *tmp_ptr = PQunescapeBytea(*ptr, &tmp_len);
+					char *tmp_ptr = (char *)PQunescapeBytea((unsigned char *)*ptr, &tmp_len);
 					if (!tmp_ptr) {
 						/* PQunescapeBytea returned an error */
 						*len = 0;
@@ -587,7 +587,7 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, long colno, zval *return
 	add_assoc_long(return_value, "pgsql:oid", S->cols[colno].pgsql_type);
 
 	/* Fetch metadata from Postgres system catalogue */
-	spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%d", S->cols[colno].pgsql_type);
+	spprintf(&q, 0, "SELECT TYPNAME FROM PG_TYPE WHERE OID=%u", S->cols[colno].pgsql_type);
 	res = PQexec(S->H->server, q);
 	efree(q);
 	

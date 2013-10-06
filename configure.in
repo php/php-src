@@ -572,6 +572,9 @@ PHP_CHECK_SIZEOF(intmax_t, 0)
 PHP_CHECK_SIZEOF(ssize_t, 8)
 PHP_CHECK_SIZEOF(ptrdiff_t, 8)
 
+dnl Check stdint types (must be after header check)
+PHP_CHECK_STDINT_TYPES
+
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
 dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exists
@@ -1006,7 +1009,7 @@ dnl Check if all enabled by default extensions should be disabled
 dnl
 
 AC_ARG_ENABLE(all,
-[ --disable-all   Disable all extensions which are enabled by default
+[  --disable-all           Disable all extensions which are enabled by default
 ], [
   PHP_ENABLE_ALL=$enableval
 ])
@@ -1582,7 +1585,7 @@ cat <<X
 | see the file debug.log for error messages.                         |
 |                                                                    |
 | If you are unable to fix this, send the file debug.log to the      |
-| php-install@lists.php.net mailing list and include appropiate      |
+| php-install@lists.php.net mailing list and include appropriate      |
 | information about your setup.                                      |
 X
   fi

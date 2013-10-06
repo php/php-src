@@ -25,7 +25,7 @@ echo "*** Testing array_walk_recursive() : error conditions - callback parameter
 var_dump( array_walk_recursive($input, "callback1") );
 var_dump( array_walk_recursive($input, "callback2", 4) );
 
-// expected: Warning is supressed
+// expected: Warning is suppressed
 var_dump( @array_walk_recursive($input, "callback1") );  
 var_dump( @array_walk_recursive($input, "callback2", 4) );  
 

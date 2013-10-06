@@ -549,11 +549,9 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	char id[32], *p;
 	register int len;
 
-	/* relies on "(long)" being a perfect hash function for data pointers,
-	 * however the actual identity of an object has had to be determined
-	 * by its object handle since 5.0. */
 	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
-		p = smart_str_print_long(id + sizeof(id) - 1, (long) Z_OBJ_HANDLE_P(var));
+		p = smart_str_print_long(id + sizeof(id) - 1,
+				(long) zend_objects_get_address(var TSRMLS_CC));
 		*(--p) = 'O';
 		len = id + sizeof(id) - 1 - p;
 	} else {
@@ -649,7 +647,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		for (;; zend_hash_move_forward_ex(HASH_OF(retval_ptr), &pos)) {
 			i = zend_hash_get_current_key_ex(HASH_OF(retval_ptr), &key, NULL, &index, 0, &pos);
 
-			if (i == HASH_KEY_NON_EXISTANT) {
+			if (i == HASH_KEY_NON_EXISTENT) {
 				break;
 			}
 
@@ -860,7 +858,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 				zend_hash_internal_pointer_reset_ex(myht, &pos);
 				for (;; zend_hash_move_forward_ex(myht, &pos)) {
 					i = zend_hash_get_current_key_ex(myht, &key, &key_len, &index, 0, &pos);
-					if (i == HASH_KEY_NON_EXISTANT) {
+					if (i == HASH_KEY_NON_EXISTENT) {
 						break;
 					}
 					if (incomplete_class && strcmp(key, MAGIC_MEMBER) == 0) {

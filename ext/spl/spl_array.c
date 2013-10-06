@@ -166,7 +166,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 /* {{{ spl_array_object_new_ex */
 static zend_object_value spl_array_object_new_ex(zend_class_entry *class_type, spl_array_object **obj, zval *orig, int clone_orig TSRMLS_DC)
 {
-	zend_object_value retval;
+	zend_object_value retval = {0};
 	spl_array_object *intern;
 	zval *tmp;
 	zend_class_entry * parent = class_type;
@@ -1646,7 +1646,7 @@ SPL_METHOD(Array, getChildren)
 			return;
 		}
 		if (instanceof_function(Z_OBJCE_PP(entry), Z_OBJCE_P(getThis()) TSRMLS_CC)) {
-			RETURN_ZVAL(*entry, 0, 0);
+			RETURN_ZVAL(*entry, 1, 0);
 		}
 	}
 
@@ -1766,7 +1766,7 @@ SPL_METHOD(Array, unserialize)
 	++p;
 
 	if (*p!='m') {
-		if (*p!='a' && *p!='O' && *p!='C') {
+		if (*p!='a' && *p!='O' && *p!='C' && *p!='r') {
 			goto outexcept;
 		}
 		intern->ar_flags &= ~SPL_ARRAY_CLONE_MASK;

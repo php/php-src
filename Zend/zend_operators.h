@@ -132,7 +132,7 @@ static inline zend_uchar is_numeric_string_ex(const char *str, int length, long 
 {
 	const char *ptr;
 	int base = 10, digits = 0, dp_or_e = 0;
-	double local_dval;
+	double local_dval = 0.0;
 	zend_uchar type;
 
 	if (!length) {
@@ -269,11 +269,11 @@ static inline zend_uchar is_numeric_string(const char *str, int length, long *lv
     return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
-static inline char *
-zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
+static inline const char *
+zend_memnstr(const char *haystack, const char *needle, int needle_len, char *end)
 {
-	char *p = haystack;
-	char ne = needle[needle_len-1];
+	const char *p = haystack;
+	const char ne = needle[needle_len-1];
 
 	if (needle_len == 1) {
 		return (char *)memchr(p, *needle, (end-p));
@@ -944,6 +944,24 @@ static zend_always_inline int fast_is_smaller_or_equal_function(zval *result, zv
 	compare_function(result, op1, op2 TSRMLS_CC);
 	return Z_LVAL_P(result) <= 0;
 }
+
+#define ZEND_TRY_BINARY_OBJECT_OPERATION(opcode)                                                  \
+	if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, do_operation)) {                       \
+		if (SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, op2 TSRMLS_CC)) {  \
+			return SUCCESS;                                                                       \
+		}                                                                                         \
+	} else if (Z_TYPE_P(op2) == IS_OBJECT && Z_OBJ_HANDLER_P(op2, do_operation)) {                \
+		if (SUCCESS == Z_OBJ_HANDLER_P(op2, do_operation)(opcode, result, op1, op2 TSRMLS_CC)) {  \
+			return SUCCESS;                                                                       \
+		}                                                                                         \
+	}
+
+#define ZEND_TRY_UNARY_OBJECT_OPERATION(opcode)                                                   \
+	if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, do_operation)                          \
+	 && SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, NULL TSRMLS_CC)        \
+	) {                                                                                           \
+		return SUCCESS;                                                                           \
+	}
 
 #endif
 

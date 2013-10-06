@@ -20,6 +20,13 @@
 
 #ifdef ZEND_WIN32
 # pragma warning(once : 4101)
+# pragma warning(once : 6235)
+# pragma warning(once : 6237)
+# pragma warning(once : 6239)
+# pragma warning(once : 6240)
+# pragma warning(once : 6285)
+# pragma warning(once : 6286)
+# pragma warning(once : 6326)
 #endif
 static user_opcode_handler_t zend_user_opcode_handlers[256] = {
 	(user_opcode_handler_t)NULL,
@@ -389,7 +396,7 @@ static int ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
 	if (!EG(active_symbol_table)) {
-		i_free_compiled_variables(execute_data);
+		i_free_compiled_variables(execute_data TSRMLS_CC);
 	}
 
 	zend_vm_stack_free((char*)execute_data - (ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T) TSRMLS_CC);
@@ -544,7 +551,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 
 			if (!zend_execute_internal) {
 				/* saves one function call if zend_execute_internal is not used */
-				fbc->internal_function.handler(opline->extended_value, ret->var.ptr, (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) ? &ret->var.ptr : NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+				fbc->internal_function.handler(opline->extended_value, ret->var.ptr, &ret->var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
 			} else {
 				zend_execute_internal(execute_data, NULL, RETURN_VALUE_USED(opline) TSRMLS_CC);
 			}
@@ -552,6 +559,8 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 			if (!RETURN_VALUE_USED(opline)) {
 				zval_ptr_dtor(&ret->var.ptr);
 			}
+		} else if (RETURN_VALUE_USED(opline)) {
+			EX_T(opline->result.var).var.ptr = NULL;
 		}
 	} else if (fbc->type == ZEND_USER_FUNCTION) {
 		EX(original_return_value) = EG(return_value_ptr_ptr);
@@ -727,6 +736,37 @@ static int ZEND_FASTCALL  ZEND_RECV_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 		Z_DELREF_PP(var_ptr);
 		*var_ptr = *param;
 		Z_ADDREF_PP(var_ptr);
+	}
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
+static int ZEND_FASTCALL  ZEND_RECV_VARIADIC_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_uint arg_num = opline->op1.num;
+	zend_uint arg_count = zend_vm_stack_get_args_count(TSRMLS_C);
+	zval **var_ptr, *params;
+
+	SAVE_OPLINE();
+
+	var_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
+	Z_DELREF_PP(var_ptr);
+	MAKE_STD_ZVAL(params);
+	*var_ptr = params;
+
+	if (arg_num <= arg_count) {
+		array_init_size(params, arg_count - arg_num + 1);
+	} else {
+		array_init(params);
+	}
+
+	for (; arg_num <= arg_count; ++arg_num) {
+		zval **param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
+		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, *param, opline->extended_value TSRMLS_CC);
+		zend_hash_next_index_insert(Z_ARRVAL_P(params), param, sizeof(zval *), NULL);
+		Z_ADDREF_PP(param);
 	}
 
 	CHECK_EXCEPTION();
@@ -1265,7 +1305,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 			if (call->object) {
 				Z_ADDREF_P(call->object);
 			}
-			if (IS_CONST == IS_VAR && 0 &&
+			if (IS_CONST == IS_VAR && 0 && Z_REFCOUNT_P(function_name) == 1 &&
 			    call->fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
 				call->fbc->common.prototype = (zend_function*)function_name;
@@ -1425,7 +1465,6 @@ static int ZEND_FASTCALL  ZEND_BRK_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), execute_data TSRMLS_CC);
-
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->brk);
 }
 
@@ -1437,7 +1476,6 @@ static int ZEND_FASTCALL  ZEND_CONT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	el = zend_brk_cont(Z_LVAL_P(opline->op2.zv), opline->op1.opline_num,
 	                   EX(op_array), execute_data TSRMLS_CC);
-
 	ZEND_VM_JMP(EX(op_array)->opcodes + el->cont);
 }
 
@@ -1592,7 +1630,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 			if (call->object) {
 				Z_ADDREF_P(call->object);
 			}
-			if (IS_TMP_VAR == IS_VAR && 1 &&
+			if (IS_TMP_VAR == IS_VAR && 1 && Z_REFCOUNT_P(function_name) == 1 &&
 			    call->fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
 				call->fbc->common.prototype = (zend_function*)function_name;
@@ -1779,7 +1817,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 			if (call->object) {
 				Z_ADDREF_P(call->object);
 			}
-			if (IS_VAR == IS_VAR && (free_op2.var != NULL) &&
+			if (IS_VAR == IS_VAR && (free_op2.var != NULL) && Z_REFCOUNT_P(function_name) == 1 &&
 			    call->fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
 				call->fbc->common.prototype = (zend_function*)function_name;
@@ -2004,7 +2042,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 			if (call->object) {
 				Z_ADDREF_P(call->object);
 			}
-			if (IS_CV == IS_VAR && 0 &&
+			if (IS_CV == IS_VAR && 0 && Z_REFCOUNT_P(function_name) == 1 &&
 			    call->fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 				/* Delay closure destruction until its invocation */
 				call->fbc->common.prototype = (zend_function*)function_name;
@@ -2417,9 +2455,12 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CONST_HANDLER(ZEND_OPCODE_HAND
 			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EG(return_value_ptr_ptr)) {
-					retval_ptr = *retval_ptr_ptr;
-					*EG(return_value_ptr_ptr) = retval_ptr;
-					Z_ADDREF_P(retval_ptr);
+					zval *ret;
+
+					ALLOC_ZVAL(ret);
+					INIT_PZVAL_COPY(ret, *retval_ptr_ptr);
+					zval_copy_ctor(ret);
+					*EG(return_value_ptr_ptr) = ret;
 				}
 				break;
 			}
@@ -2904,7 +2945,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
-				if (key_type != HASH_KEY_NON_EXISTANT &&
+				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key, str_key_len-1 TSRMLS_CC) == SUCCESS)) {
 					break;
@@ -3387,10 +3428,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 */
 		if (IS_CONST == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -3561,9 +3600,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 			ce = CACHED_PTR(opline->op1.literal->cache_slot);
 		} else {
 			ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 			if (UNEXPECTED(ce == NULL)) {
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 			}
 			CACHE_PTR(opline->op1.literal->cache_slot, ce);
 		}
@@ -3649,7 +3690,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CONST_HANDLER(
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (call->fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
+				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
@@ -3732,9 +3773,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 				ce = CACHED_PTR(opline->op1.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
 				if (UNEXPECTED(ce == NULL)) {
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 				}
 				CACHE_PTR(opline->op1.literal->cache_slot, ce);
 			}
@@ -3833,11 +3876,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -3918,15 +3957,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_CONST != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -4064,7 +4105,7 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCOD
 		zval_copy_ctor(&c.value);
 	}
 	c.flags = CONST_CS; /* non persistent, case sensetive */
-	c.name = IS_INTERNED(Z_STRVAL_P(name)) ? Z_STRVAL_P(name) : zend_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	c.name = str_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
 	c.name_len = Z_STRLEN_P(name)+1;
 	c.module_number = PHP_USER_CONSTANT;
 
@@ -4548,9 +4589,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 			ce = CACHED_PTR(opline->op1.literal->cache_slot);
 		} else {
 			ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 			if (UNEXPECTED(ce == NULL)) {
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 			}
 			CACHE_PTR(opline->op1.literal->cache_slot, ce);
 		}
@@ -4636,7 +4679,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_TMP_HANDLER(ZE
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (call->fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
+				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
@@ -4726,11 +4769,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -5254,10 +5293,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 */
 		if (IS_CONST == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -5404,9 +5441,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 			ce = CACHED_PTR(opline->op1.literal->cache_slot);
 		} else {
 			ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 			if (UNEXPECTED(ce == NULL)) {
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 			}
 			CACHE_PTR(opline->op1.literal->cache_slot, ce);
 		}
@@ -5492,7 +5531,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_VAR_HANDLER(ZE
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (call->fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
+				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
@@ -5582,11 +5621,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -5667,15 +5702,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HAND
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_CONST != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -5996,10 +6033,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 */
 		if (IS_CONST == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -6120,9 +6155,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 			ce = CACHED_PTR(opline->op1.literal->cache_slot);
 		} else {
 			ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 			if (UNEXPECTED(ce == NULL)) {
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 			}
 			CACHE_PTR(opline->op1.literal->cache_slot, ce);
 		}
@@ -6208,7 +6245,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_UNUSED_HANDLER
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (call->fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
+				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
@@ -6283,11 +6320,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -6368,15 +6401,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_H
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_CONST != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_CONST == IS_VAR || IS_CONST == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -6976,9 +7011,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 			ce = CACHED_PTR(opline->op1.literal->cache_slot);
 		} else {
 			ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 			if (UNEXPECTED(ce == NULL)) {
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 			}
 			CACHE_PTR(opline->op1.literal->cache_slot, ce);
 		}
@@ -7064,7 +7101,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_CONST_CV_HANDLER(ZEN
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (call->fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
+				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
@@ -7106,7 +7143,7 @@ static int ZEND_FASTCALL  ZEND_CATCH_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_A
 
 #ifdef HAVE_DTRACE
 	if (DTRACE_EXCEPTION_CAUGHT_ENABLED()) {
-		DTRACE_EXCEPTION_CAUGHT(ce->name);
+		DTRACE_EXCEPTION_CAUGHT((char *)ce->name);
 	}
 #endif /* HAVE_DTRACE */
 
@@ -7213,11 +7250,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -7724,9 +7757,12 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLE
 			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EG(return_value_ptr_ptr)) {
-					retval_ptr = *retval_ptr_ptr;
-					*EG(return_value_ptr_ptr) = retval_ptr;
-					Z_ADDREF_P(retval_ptr);
+					zval *ret;
+
+					ALLOC_ZVAL(ret);
+					INIT_PZVAL_COPY(ret, *retval_ptr_ptr);
+					zval_copy_ctor(ret);
+					*EG(return_value_ptr_ptr) = ret;
 				}
 				break;
 			}
@@ -8212,7 +8248,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
-				if (key_type != HASH_KEY_NON_EXISTANT &&
+				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key, str_key_len-1 TSRMLS_CC) == SUCCESS)) {
 					break;
@@ -8747,10 +8783,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 */
 		if (IS_TMP_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -9102,11 +9136,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -9187,15 +9217,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HAND
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_TMP_VAR != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 					zval_dtor(free_op1.var);
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -9959,11 +9991,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -10487,10 +10515,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 */
 		if (IS_TMP_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -10819,11 +10845,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -10904,15 +10926,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLE
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_TMP_VAR != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 					zval_dtor(free_op1.var);
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -11233,10 +11257,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 */
 		if (IS_TMP_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -11399,11 +11421,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -11484,15 +11502,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HAN
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_TMP_VAR != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_TMP_VAR == IS_VAR || IS_TMP_VAR == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 					zval_dtor(free_op1.var);
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -12253,11 +12273,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -12944,9 +12960,12 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLE
 			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EG(return_value_ptr_ptr)) {
-					retval_ptr = *retval_ptr_ptr;
-					*EG(return_value_ptr_ptr) = retval_ptr;
-					Z_ADDREF_P(retval_ptr);
+					zval *ret;
+
+					ALLOC_ZVAL(ret);
+					INIT_PZVAL_COPY(ret, *retval_ptr_ptr);
+					zval_copy_ctor(ret);
+					*EG(return_value_ptr_ptr) = ret;
 				}
 				break;
 			}
@@ -13542,7 +13561,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
-				if (key_type != HASH_KEY_NON_EXISTANT &&
+				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key, str_key_len-1 TSRMLS_CC) == SUCCESS)) {
 					break;
@@ -14642,10 +14661,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 */
 		if (IS_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -14978,11 +14995,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 
 	SAVE_OPLINE();
 	property = opline->op2.zv;
-
-	if (IS_VAR == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
 
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
@@ -15431,9 +15443,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 			ce = CACHED_PTR(opline->op1.literal->cache_slot);
 		} else {
 			ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 			if (UNEXPECTED(ce == NULL)) {
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 			}
 			CACHE_PTR(opline->op1.literal->cache_slot, ce);
 		}
@@ -15519,7 +15533,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CONST_HANDLER(ZE
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (call->fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
+				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
@@ -15602,9 +15616,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 				ce = CACHED_PTR(opline->op1.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
 				if (UNEXPECTED(ce == NULL)) {
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 				}
 				CACHE_PTR(opline->op1.literal->cache_slot, ce);
 			}
@@ -15703,11 +15719,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -15788,15 +15800,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_VAR != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 					zval_ptr_dtor(&free_op1.var);
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -15860,11 +15874,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -16088,11 +16098,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -17324,11 +17330,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 	SAVE_OPLINE();
 	property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (IS_VAR == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (1) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -17778,9 +17779,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 			ce = CACHED_PTR(opline->op1.literal->cache_slot);
 		} else {
 			ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 			if (UNEXPECTED(ce == NULL)) {
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 			}
 			CACHE_PTR(opline->op1.literal->cache_slot, ce);
 		}
@@ -17866,7 +17869,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_TMP_HANDLER(ZEND
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (call->fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
+				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
@@ -17956,11 +17959,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -18037,11 +18036,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -18180,11 +18175,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -19243,10 +19234,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 */
 		if (IS_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -19579,11 +19568,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-
-	if (IS_VAR == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
 
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
@@ -20089,9 +20073,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 			ce = CACHED_PTR(opline->op1.literal->cache_slot);
 		} else {
 			ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 			if (UNEXPECTED(ce == NULL)) {
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 			}
 			CACHE_PTR(opline->op1.literal->cache_slot, ce);
 		}
@@ -20177,7 +20163,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_VAR_HANDLER(ZEND
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (call->fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
+				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
@@ -20267,11 +20253,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -20352,15 +20334,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_VAR != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 					zval_ptr_dtor(&free_op1.var);
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -20424,11 +20408,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -20652,11 +20632,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -21233,10 +21209,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 */
 		if (IS_VAR == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -21525,9 +21499,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 			ce = CACHED_PTR(opline->op1.literal->cache_slot);
 		} else {
 			ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 			if (UNEXPECTED(ce == NULL)) {
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 			}
 			CACHE_PTR(opline->op1.literal->cache_slot, ce);
 		}
@@ -21613,7 +21589,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_UNUSED_HANDLER(Z
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (call->fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
+				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
@@ -21688,11 +21664,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -21773,15 +21745,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAN
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_VAR != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_VAR == IS_VAR || IS_VAR == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 					zval_ptr_dtor(&free_op1.var);
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -23034,11 +23008,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-	if (IS_VAR == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -23539,9 +23508,11 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 			ce = CACHED_PTR(opline->op1.literal->cache_slot);
 		} else {
 			ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				HANDLE_EXCEPTION();
+			}
 			if (UNEXPECTED(ce == NULL)) {
-				CHECK_EXCEPTION();
-				ZEND_VM_NEXT_OPCODE();
+				zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 			}
 			CACHE_PTR(opline->op1.literal->cache_slot, ce);
 		}
@@ -23627,7 +23598,7 @@ static int ZEND_FASTCALL  ZEND_INIT_STATIC_METHOD_CALL_SPEC_VAR_CV_HANDLER(ZEND_
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (call->fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
+				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
@@ -23716,11 +23687,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -23797,11 +23764,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -23940,11 +23903,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -24815,11 +24774,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE
 	SAVE_OPLINE();
 	property = opline->op2.zv;
 
-	if (IS_UNUSED == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -25210,9 +25164,11 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 				ce = CACHED_PTR(opline->op1.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op1.zv), Z_STRLEN_P(opline->op1.zv), opline->op1.literal + 1, opline->extended_value TSRMLS_CC);
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
 				if (UNEXPECTED(ce == NULL)) {
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op1.zv));
 				}
 				CACHE_PTR(opline->op1.literal->cache_slot, ce);
 			}
@@ -25307,11 +25263,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -25448,11 +25400,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -26233,11 +26181,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_H
 	SAVE_OPLINE();
 	property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (IS_UNUSED == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (1) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -26630,11 +26573,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -26771,11 +26710,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -27556,11 +27491,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_H
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (IS_UNUSED == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -27953,11 +27883,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -28094,11 +28020,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -29303,11 +29225,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HA
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-	if (IS_UNUSED == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -29698,11 +29615,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -29839,11 +29752,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -30580,9 +30489,12 @@ static int ZEND_FASTCALL  ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER
 			} else if (EX_T(opline->op1.var).var.ptr_ptr == &EX_T(opline->op1.var).var.ptr) {
 				zend_error(E_NOTICE, "Only variable references should be returned by reference");
 				if (EG(return_value_ptr_ptr)) {
-					retval_ptr = *retval_ptr_ptr;
-					*EG(return_value_ptr_ptr) = retval_ptr;
-					Z_ADDREF_P(retval_ptr);
+					zval *ret;
+
+					ALLOC_ZVAL(ret);
+					INIT_PZVAL_COPY(ret, *retval_ptr_ptr);
+					zval_copy_ctor(ret);
+					*EG(return_value_ptr_ptr) = ret;
 				}
 				break;
 			}
@@ -31165,7 +31077,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
-				if (key_type != HASH_KEY_NON_EXISTANT &&
+				if (key_type != HASH_KEY_NON_EXISTENT &&
 					(key_type == HASH_KEY_IS_LONG ||
 				     zend_check_property_access(zobj, str_key, str_key_len-1 TSRMLS_CC) == SUCCESS)) {
 					break;
@@ -32130,10 +32042,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 */
 		if (IS_CV == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -32464,11 +32374,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 
 	SAVE_OPLINE();
 	property = opline->op2.zv;
-
-	if (IS_CV == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
 
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
@@ -32967,11 +32872,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -33052,15 +32953,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_CV != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -33124,11 +33027,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -33350,11 +33249,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -34580,11 +34475,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 	SAVE_OPLINE();
 	property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (IS_CV == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (1) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -35085,11 +34975,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -35166,11 +35052,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -35307,11 +35189,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -36366,10 +36244,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 */
 		if (IS_CV == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -36700,11 +36576,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-
-	if (IS_CV == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
 
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
@@ -37260,11 +37131,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -37345,15 +37212,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_CV != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -37417,11 +37286,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -37643,11 +37508,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -38220,10 +38081,8 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 */
 		if (IS_CV == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -38553,11 +38412,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -38638,15 +38493,17 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 				ce = CACHED_PTR(opline->op2.literal->cache_slot);
 			} else {
 				ce = zend_fetch_class_by_name(Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv), opline->op2.literal + 1, 0 TSRMLS_CC);
-				if (UNEXPECTED(ce == NULL)) {
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					if (IS_CV != IS_CONST && varname == &tmp) {
 						zval_dtor(&tmp);
 					} else if (IS_CV == IS_VAR || IS_CV == IS_CV) {
 						zval_ptr_dtor(&varname);
 					}
 
-					CHECK_EXCEPTION();
-					ZEND_VM_NEXT_OPCODE();
+					HANDLE_EXCEPTION();
+				}
+				if (UNEXPECTED(ce == NULL)) {
+					zend_error_noreturn(E_ERROR, "Class '%s' not found", Z_STRVAL_P(opline->op2.zv));
 				}
 				CACHE_PTR(opline->op2.literal->cache_slot, ce);
 			}
@@ -39874,11 +39731,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-	if (IS_CV == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -40428,11 +40280,7 @@ num_index:
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index);
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -40509,11 +40357,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_dim);
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -40650,11 +40494,7 @@ num_index_prop:
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -45026,6 +44866,31 @@ void zend_init_opcodes_handlers(void)
   	ZEND_FAST_RET_SPEC_HANDLER,
   	ZEND_FAST_RET_SPEC_HANDLER,
   	ZEND_FAST_RET_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
+  	ZEND_RECV_VARIADIC_SPEC_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;

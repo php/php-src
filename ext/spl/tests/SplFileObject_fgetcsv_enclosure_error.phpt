@@ -1,8 +1,8 @@
 --TEST--
-SplFileObject::fgetcsv with alternative delimeter
+SplFileObject::fgetcsv with alternative delimiter
 --FILE--
 <?php
-$fp = fopen('SplFileObject__fgetcsv.csv', 'w+');
+$fp = fopen('SplFileObject__fgetcsv5.csv', 'w+');
 fputcsv($fp, array(
 	'field1',
 	'field2',
@@ -11,12 +11,12 @@ fputcsv($fp, array(
 ), ',', '"');
 fclose($fp);
 
-$fo = new SplFileObject('SplFileObject__fgetcsv.csv');
+$fo = new SplFileObject('SplFileObject__fgetcsv5.csv');
 var_dump($fo->fgetcsv(',', 'invalid'));
 ?>
 --CLEAN--
 <?php
-unlink('SplFileObject__fgetcsv.csv');
+unlink('SplFileObject__fgetcsv5.csv');
 ?>
 --EXPECTF--
 Warning: SplFileObject::fgetcsv(): enclosure must be a character in %s on line %d

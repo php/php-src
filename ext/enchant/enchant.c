@@ -651,7 +651,7 @@ PHP_FUNCTION(enchant_broker_free_dict)
 /* }}} */
 
 /* {{{ proto bool enchant_broker_dict_exists(resource broker, string tag)
-   Wether a dictionary exists or not. Using non-empty tag */
+   Whether a dictionary exists or not. Using non-empty tag */
 PHP_FUNCTION(enchant_broker_dict_exists)
 {
 	zval *broker;
@@ -674,7 +674,7 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 	described/referred to by 'tag'. The ordering is a comma delimited
 	list of provider names. As a special exception, the "*" tag can
 	be used as a language tag to declare a default ordering for any
-	language that does not explictly declare an ordering. */
+	language that does not explicitly declare an ordering. */
 
 PHP_FUNCTION(enchant_broker_set_ordering)
 {

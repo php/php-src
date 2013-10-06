@@ -101,7 +101,7 @@ dnl configure options
 dnl
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(adabas,,
-[  --with-adabas[=DIR]     Include Adabas D support [/usr/local]])
+[  --with-adabas[=DIR]       Include Adabas D support [/usr/local]])
 
   if test "$PHP_ADABAS" != "no"; then
     AC_MSG_CHECKING([for Adabas support])
@@ -128,7 +128,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(sapdb,,
-[  --with-sapdb[=DIR]      Include SAP DB support [/usr/local]])
+[  --with-sapdb[=DIR]        Include SAP DB support [/usr/local]])
 
   if test "$PHP_SAPDB" != "no"; then
     AC_MSG_CHECKING([for SAP DB support])
@@ -146,7 +146,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(solid,,
-[  --with-solid[=DIR]      Include Solid support [/usr/local/solid]])
+[  --with-solid[=DIR]        Include Solid support [/usr/local/solid]])
 
   if test "$PHP_SOLID" != "no"; then
     AC_MSG_CHECKING(for Solid support)
@@ -171,7 +171,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(ibm-db2,,
-[  --with-ibm-db2[=DIR]    Include IBM DB2 support [/home/db2inst1/sqllib]])
+[  --with-ibm-db2[=DIR]      Include IBM DB2 support [/home/db2inst1/sqllib]])
 
   if test "$PHP_IBM_DB2" != "no"; then
     AC_MSG_CHECKING(for IBM DB2 support)
@@ -208,7 +208,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(ODBCRouter,,
-[  --with-ODBCRouter[=DIR] Include ODBCRouter.com support [/usr]])
+[  --with-ODBCRouter[=DIR]   Include ODBCRouter.com support [/usr]])
 
   if test "$PHP_ODBCROUTER" != "no"; then
     AC_MSG_CHECKING(for ODBCRouter.com support)
@@ -228,7 +228,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(empress,,
-[  --with-empress[=DIR]    Include Empress support [\$EMPRESSPATH]
+[  --with-empress[=DIR]      Include Empress support [\$EMPRESSPATH]
                           (Empress Version >= 8.60 required)])
 
   if test "$PHP_EMPRESS" != "no"; then
@@ -291,7 +291,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(birdstep,,
-[  --with-birdstep[=DIR]   Include Birdstep support [/usr/local/birdstep]])
+[  --with-birdstep[=DIR]     Include Birdstep support [/usr/local/birdstep]])
   
   if test "$PHP_BIRDSTEP" != "no"; then
     AC_MSG_CHECKING(for Birdstep support)
@@ -338,15 +338,14 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(custom-odbc,,
-[  --with-custom-odbc[=DIR]
-                          Include user defined ODBC support. DIR is ODBC install base
+[  --with-custom-odbc[=DIR]  Include user defined ODBC support. DIR is ODBC install base
                           directory [/usr/local]. Make sure to define CUSTOM_ODBC_LIBS and
                           have some odbc.h in your include dirs. f.e. you should define 
                           following for Sybase SQL Anywhere 5.5.00 on QNX, prior to
                           running this configure script:
-                              CPPFLAGS=\"-DODBC_QNX -DSQLANY_BUG\"
-                              LDFLAGS=-lunix
-                              CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\"])
+                            CPPFLAGS=\"-DODBC_QNX -DSQLANY_BUG\"
+                            LDFLAGS=-lunix
+                            CUSTOM_ODBC_LIBS=\"-ldblib -lodbc\"])
 
   if test "$PHP_CUSTOM_ODBC" != "no"; then
     AC_MSG_CHECKING(for a custom ODBC support)
@@ -360,34 +359,49 @@ PHP_ARG_WITH(custom-odbc,,
     ODBC_LIBS=$CUSTOM_ODBC_LIBS
     ODBC_TYPE=custom-odbc
     AC_DEFINE(HAVE_CODBC,1,[ ])
-    AC_MSG_RESULT([$ext_ouput])
-  fi
-fi
-
-if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(iodbc,,
-[  --with-iodbc[=DIR]      Include iODBC support [/usr/local]])
-
-  if test "$PHP_IODBC" != "no"; then
-    AC_MSG_CHECKING(for iODBC support)
-    if test "$PHP_IODBC" = "yes"; then
-      PHP_IODBC=/usr/local
-    fi
-    PHP_ADD_LIBRARY_WITH_PATH(iodbc, $PHP_IODBC/$PHP_LIBDIR)
-    PHP_ADD_INCLUDE($PHP_IODBC/include, 1)
-    ODBC_TYPE=iodbc
-    ODBC_INCLUDE=-I$PHP_IODBC/include
-    ODBC_LFLAGS=-L$PHP_IODBC/$PHP_LIBDIR
-    ODBC_LIBS=-liodbc
-    AC_DEFINE(HAVE_IODBC,1,[ ])
-    AC_DEFINE(HAVE_ODBC2,1,[ ])
     AC_MSG_RESULT([$ext_output])
   fi
 fi
 
 if test -z "$ODBC_TYPE"; then
+PHP_ARG_WITH(iodbc,,
+[  --with-iodbc[=DIR]        Include iODBC support])
+
+  if test "$PHP_IODBC" != "no"; then
+    AC_MSG_CHECKING(for iODBC support)
+    if test -z "$PKG_CONFIG"; then
+      AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+    fi 
+    if test -x "$PKG_CONFIG" && $PKG_CONFIG --exists libiodbc ; then
+      PHP_ADD_LIBRARY_WITH_PATH(iodbc, $PHP_IODBC/$PHP_LIBDIR)
+      ODBC_TYPE=iodbc
+      ODBC_INCLUDE=`$PKG_CONFIG --cflags-only-I libiodbc`
+      ODBC_LFLAGS=`$PKG_CONFIG --libs-only-L libiodbc`
+      ODBC_LIBS=`$PKG_CONFIG --libs-only-l libiodbc`
+      PHP_EVAL_INCLINE($ODBC_INCLUDE)
+      AC_DEFINE(HAVE_IODBC,1,[ ])
+      AC_DEFINE(HAVE_ODBC2,1,[ ])
+      AC_MSG_RESULT([$ext_output])
+    else
+      if test "$PHP_IODBC" = "yes"; then
+        PHP_IODBC=/usr/local
+      fi
+      PHP_ADD_LIBRARY_WITH_PATH(iodbc, $PHP_IODBC/$PHP_LIBDIR)
+      PHP_ADD_INCLUDE($PHP_IODBC/include, 1)
+      ODBC_TYPE=iodbc
+      ODBC_INCLUDE=-I$PHP_IODBC/include
+      ODBC_LFLAGS=-L$PHP_IODBC/$PHP_LIBDIR
+      ODBC_LIBS=-liodbc
+      AC_DEFINE(HAVE_IODBC,1,[ ])
+      AC_DEFINE(HAVE_ODBC2,1,[ ])
+      AC_MSG_RESULT([$ext_output])
+    fi
+  fi
+fi
+
+if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(esoob,,
-[  --with-esoob[=DIR]      Include Easysoft OOB support [/usr/local/easysoft/oob/client]])
+[  --with-esoob[=DIR]        Include Easysoft OOB support [/usr/local/easysoft/oob/client]])
 
   if test "$PHP_ESOOB" != "no"; then
     AC_MSG_CHECKING(for Easysoft ODBC-ODBC Bridge support)
@@ -407,7 +421,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(unixODBC,,
-[  --with-unixODBC[=DIR]   Include unixODBC support [/usr/local]])
+[  --with-unixODBC[=DIR]     Include unixODBC support [/usr/local]])
 
   if test "$PHP_UNIXODBC" != "no"; then
     AC_MSG_CHECKING(for unixODBC support)
@@ -428,7 +442,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(dbmaker,,
-[  --with-dbmaker[=DIR]    Include DBMaker support])
+[  --with-dbmaker[=DIR]      Include DBMaker support])
 
   if test "$PHP_DBMAKER" != "no"; then
     AC_MSG_CHECKING(for DBMaker support)

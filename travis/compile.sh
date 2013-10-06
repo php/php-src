@@ -1,9 +1,9 @@
 #!/bin/bash
 ./buildconf
 ./configure --quiet \
---with-pdo-mysql \
---with-mysql \
---with-mysqli \
+--with-pdo-mysql=mysqlnd \
+--with-mysql=mysqlnd \
+--with-mysqli=mysqlnd \
 --with-pgsql \
 --with-pdo-pgsql \
 --with-pdo-sqlite \
@@ -33,5 +33,6 @@
 --with-gettext \
 --enable-sockets \
 --with-bz2 \
+--with-openssl \
 --enable-bcmath
 make --quiet

@@ -597,7 +597,7 @@ PHP_FUNCTION(hash_algos)
 
 	array_init(return_value);
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
-		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, &str_len, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
+		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, &str_len, &idx, 0, &pos)) != HASH_KEY_NON_EXISTENT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
 		add_next_index_stringl(return_value, str, str_len-1, 1);
 	}
@@ -986,6 +986,7 @@ PHP_MINIT_FUNCTION(hash)
 	php_hash_register_algo("snefru",		&php_hash_snefru_ops);
 	php_hash_register_algo("snefru256",		&php_hash_snefru_ops);
 	php_hash_register_algo("gost",			&php_hash_gost_ops);
+	php_hash_register_algo("gost-crypto",		&php_hash_gost_crypto_ops);
 	php_hash_register_algo("adler32",		&php_hash_adler32_ops);
 	php_hash_register_algo("crc32",			&php_hash_crc32_ops);
 	php_hash_register_algo("crc32b",		&php_hash_crc32b_ops);
@@ -1042,7 +1043,7 @@ PHP_MINFO_FUNCTION(hash)
 	long type;
 
 	for(zend_hash_internal_pointer_reset_ex(&php_hash_hashtable, &pos);
-		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, NULL, &idx, 0, &pos)) != HASH_KEY_NON_EXISTANT;
+		(type = zend_hash_get_current_key_ex(&php_hash_hashtable, &str, NULL, &idx, 0, &pos)) != HASH_KEY_NON_EXISTENT;
 		zend_hash_move_forward_ex(&php_hash_hashtable, &pos)) {
 		s += slprintf(s, e - s, "%s ", str);
 	}

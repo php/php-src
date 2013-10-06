@@ -27,7 +27,8 @@
 
 #define HASH_KEY_IS_STRING 1
 #define HASH_KEY_IS_LONG 2
-#define HASH_KEY_NON_EXISTANT 3
+#define HASH_KEY_NON_EXISTENT 3
+#define HASH_KEY_NON_EXISTANT HASH_KEY_NON_EXISTENT /* Keeping old define (with typo) for backward compatibility */
 
 #define HASH_UPDATE 		(1<<0)
 #define HASH_ADD			(1<<1)
@@ -172,7 +173,7 @@ ZEND_API ulong zend_hash_next_free_element(const HashTable *ht);
 
 /* traversing */
 #define zend_hash_has_more_elements_ex(ht, pos) \
-	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTANT ? FAILURE : SUCCESS)
+	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTENT ? FAILURE : SUCCESS)
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index, uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos);

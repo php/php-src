@@ -83,9 +83,11 @@ typedef struct {
 
 extern pdo_driver_t pdo_pgsql_driver;
 
-extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *file, int line TSRMLS_DC);
-#define pdo_pgsql_error(d,e,z)	_pdo_pgsql_error(d, NULL, e, z, __FILE__, __LINE__ TSRMLS_CC)
-#define pdo_pgsql_error_stmt(s,e,z)	_pdo_pgsql_error(s->dbh, s, e, z, __FILE__, __LINE__ TSRMLS_CC)
+extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *msg, const char *file, int line TSRMLS_DC);
+#define pdo_pgsql_error(d,e,z)	_pdo_pgsql_error(d, NULL, e, z, NULL, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_pgsql_error_msg(d,e,m)	_pdo_pgsql_error(d, NULL, e, NULL, m, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_pgsql_error_stmt(s,e,z)	_pdo_pgsql_error(s->dbh, s, e, z, NULL, __FILE__, __LINE__ TSRMLS_CC)
+#define pdo_pgsql_error_stmt_msg(s,e,m)	_pdo_pgsql_error(s->dbh, s, e, NULL, m, __FILE__, __LINE__ TSRMLS_CC)
 
 extern struct pdo_stmt_methods pgsql_stmt_methods;
 

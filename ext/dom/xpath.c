@@ -74,7 +74,7 @@ const zend_function_entry php_dom_xpath_class_functions[] = {
 
 static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type) /* {{{ */
 {
-	zval **args;
+	zval **args = NULL;
 	zval *retval;
 	int result, i, ret;
 	int error = 0;

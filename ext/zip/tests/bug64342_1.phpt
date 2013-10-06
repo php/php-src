@@ -1,5 +1,5 @@
 --TEST--
-Bug #64342 ZipArchive::addFile() has to check file existance (variation 2)
+Bug #64342 ZipArchive::addFile() has to check file existence (variation 2)
 --SKIPIF--
 <?php
 /* $Id$ */

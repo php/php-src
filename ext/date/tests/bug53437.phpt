@@ -77,7 +77,7 @@ object(DatePeriod)#1 (6) {
     ["special_type"]=>
     int(0)
     ["special_amount"]=>
-    string(1) "0"
+    int(0)
     ["have_weekday_relative"]=>
     int(0)
     ["have_special_relative"]=>
@@ -132,11 +132,11 @@ object(DatePeriod)#5 (6) {
     ["invert"]=>
     int(0)
     ["days"]=>
-    string(1) "0"
+    int(0)
     ["special_type"]=>
     int(0)
     ["special_amount"]=>
-    string(1) "0"
+    int(0)
     ["have_weekday_relative"]=>
     int(0)
     ["have_special_relative"]=>

@@ -3011,7 +3011,6 @@ void gdImageGetClip (gdImagePtr im, int *x1P, int *y1P, int *x2P, int *y2P)
 int gdImagePaletteToTrueColor(gdImagePtr src)
 {
 	unsigned int y;
-	unsigned char alloc_y = 0;
 	unsigned int yy;
 
 	if (src == NULL) {
@@ -3044,7 +3043,7 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 			for (x = 0; x < sx; x++) {
 				const unsigned char c = *(src_row + x);
 				if (c == src->transparent) {
-					*(dst_row + x) = gdTrueColorAlpha(0, 0, 0, 127);;
+					*(dst_row + x) = gdTrueColorAlpha(0, 0, 0, 127);
 				} else {
 					*(dst_row + x) = gdTrueColorAlpha(src->red[c], src->green[c], src->blue[c], src->alpha[c]);
 				}
@@ -3061,6 +3060,12 @@ int gdImagePaletteToTrueColor(gdImagePtr src)
 	src->pixels = NULL;
 	src->alphaBlendingFlag = 0;
 	src->saveAlphaFlag = 1;
+
+	if (src->transparent >= 0) {
+		const unsigned char c = src->transparent;
+		src->transparent =  gdTrueColorAlpha(src->red[c], src->green[c], src->blue[c], src->alpha[c]);
+	}
+
 	return 1;
 
 clean_on_error:

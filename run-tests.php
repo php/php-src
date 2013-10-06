@@ -459,7 +459,7 @@ $pass_options = '';
 $compression = 0;
 $output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
 
-if ($compression) {
+if ($compression && in_array("compress.zlib", stream_get_filters())) {
 	$output_file = 'compress.zlib://' . $output_file . '.gz';
 }
 
@@ -601,6 +601,15 @@ if (isset($argc) && $argc > 1) {
 					putenv("TEST_PHP_EXECUTABLE=$php");
 					$environment['TEST_PHP_EXECUTABLE'] = $php;
 					break;
+				case 'P':
+					if(constant('PHP_BINARY')) {
+						$php = PHP_BINARY;
+					} else {
+						break;
+					}
+					putenv("TEST_PHP_EXECUTABLE=$php");
+					$environment['TEST_PHP_EXECUTABLE'] = $php;
+					break;
 				case 'q':
 					putenv('NO_INTERACTION=1');
 					break;
@@ -683,12 +692,14 @@ Options:
     -d foo=bar  Pass -d option to the php binary (Define INI entry foo
                 with value 'bar').
 
-    -g          Comma seperated list of groups to show during test run
+    -g          Comma separated list of groups to show during test run
                 (possible values: PASS, FAIL, XFAIL, SKIP, BORK, WARN, LEAK, REDIRECT).
 
     -m          Test for memory leaks with Valgrind.
 
     -p <php>    Specify PHP executable to run.
+
+    -P          Use PHP_BINARY as PHP executable to run.
 
     -q          Quiet, no user interaction (same as environment NO_INTERACTION).
 
@@ -1535,6 +1546,16 @@ TEST $file
 				}
 			}
 		}
+	}
+	
+	if (!extension_loaded("zlib")
+	&& (	array_key_exists("GZIP_POST", $section_text) 
+		||	array_key_exists("DEFLATE_POST", $section_text))
+	) {
+		$message = "ext/zlib required";
+		show_result('SKIP', $tested, $tested_file, "reason: $message", $temp_filenames);
+		junit_mark_test_as('SKIP', $shortname, $tested, null, "<![CDATA[\n$message\n]]>");
+		return 'SKIPPED';
 	}
 
 	if (@count($section_text['REDIRECTTEST']) == 1) {

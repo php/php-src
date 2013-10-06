@@ -83,7 +83,7 @@ foreach($v as $k => $d)
 ===DONE===
 --CLEAN--
 <?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_test.phar.php');
+unlink(dirname(__FILE__) . '/files/phar_oo_008.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--

@@ -3,7 +3,7 @@ Closure 044: Scope/bounding combination invariants; non static closures
 --FILE--
 <?php
 /* A non-static closure has a bound instance if it has a scope
- * and does't have an instance if it has no scope */
+ * and doesn't have an instance if it has no scope */
 
 $nonstaticUnscoped = function () { var_dump(isset(A::$priv)); var_dump(isset($this)); };
 
