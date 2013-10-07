@@ -3,7 +3,7 @@ IntlDateFormatter: setCalendar()/getCalendar()/getCalendarObject()
 --SKIPIF--
 <?php
 if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -42,7 +42,7 @@ int(1)
 string(9) "gregorian"
 string(12) "Europe/Minsk"
 
-dimanche 8 Safar 1433 AH 03:00:00 UTC+03:00
+dimanche 8 safar 1433 AH 03:00:00 UTC+03:00
 int(0)
 string(7) "islamic"
 string(12) "Europe/Minsk"

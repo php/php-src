@@ -4,8 +4,7 @@ datefmt_set_timezone_id_code() icu >= 4.8
 date.timezone=Atlantic/Azores
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
 --FILE--
 <?php
 
@@ -59,29 +58,28 @@ include_once( 'ut_common.inc' );
 ut_run();
 ?>
 --EXPECTF--
+Warning: IntlDateFormatter::setTimeZoneId(): datefmt_set_timezone: no such time zone: 'CN' in %sut_common.inc on line %d
 
-Warning: IntlDateFormatter::setTimeZoneId(): datefmt_set_timezone: no such time zone: 'CN' in %s on line %d
-
-Warning: datefmt_set_timezone_id(): datefmt_set_timezone: no such time zone: 'CN' in %s on line %d
+Warning: datefmt_set_timezone_id(): datefmt_set_timezone: no such time zone: 'CN' in %sut_common.inc on line %d
 
 After creation of the dateformatter :  timezone_id= US/Pacific
 -----------
 Trying to set timezone_id= America/New_York
 After call to set_timezone_id :  timezone_id= America/New_York
-Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 7:00:00 PM Eastern Standard Time
-Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 8:00:00 PM Eastern Standard Time
+Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 at 7:00:00 PM Eastern Standard Time
+Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 at 8:00:00 PM Eastern Standard Time
 -----------
 Trying to set timezone_id= America/Los_Angeles
 After call to set_timezone_id :  timezone_id= America/Los_Angeles
-Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 4:00:00 PM Pacific Standard Time
-Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 5:00:00 PM Pacific Standard Time
+Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 at 4:00:00 PM Pacific Standard Time
+Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 at 5:00:00 PM Pacific Standard Time
 -----------
 Trying to set timezone_id= America/Chicago
 After call to set_timezone_id :  timezone_id= America/Chicago
-Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 6:00:00 PM Central Standard Time
-Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 7:00:00 PM Central Standard Time
+Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 at 6:00:00 PM Central Standard Time
+Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 at 7:00:00 PM Central Standard Time
 -----------
 Trying to set timezone_id= CN
 After call to set_timezone_id :  timezone_id= America/Chicago
-Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 6:00:00 PM Central Standard Time
-Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 7:00:00 PM Central Standard Time
+Formatting timestamp=0 resulted in  Wednesday, December 31, 1969 at 6:00:00 PM Central Standard Time
+Formatting timestamp=3600 resulted in  Wednesday, December 31, 1969 at 7:00:00 PM Central Standard Time

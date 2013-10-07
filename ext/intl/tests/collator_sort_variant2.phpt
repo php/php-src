@@ -1,8 +1,8 @@
 --TEST--
-sort_with_sort_keys()
+sort()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '51.2') < 0) die('skip for ICU >= 51.2'); ?>
 --FILE--
 <?php
 
@@ -16,7 +16,7 @@ $test_num = 1;
 /*
  * Sort arrays in the given list using specified locale.
  */
-function sort_arrays( $locale, $arrays )
+function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
 {
     $res_str = '';
 
@@ -25,19 +25,18 @@ function sort_arrays( $locale, $arrays )
     foreach( $arrays as $array )
     {
         // Sort array values
-        $res_val = ut_coll_sort_with_sort_keys( $coll, $array );
+        $res_val = ut_coll_sort( $coll, $array, $sort_flag );
 
         // Concatenate the sorted array and function result
         // with output string.
         $res_dump = "\n" . dump( $array ) .
                     "\n Result: " . dump( $res_val );
-        
-        
-        // Preppend test signature to output string
+
+		// Preppend test signature to output string
         $md5 = md5( $res_dump );
 
         global $test_num;
-
+        
         $res_str .= "\n\n".
                     "Test $test_num.$md5:" .
                     $res_dump;
@@ -46,7 +45,6 @@ function sort_arrays( $locale, $arrays )
 
     return $res_str;
 }
-
 
 function ut_main()
 {
@@ -61,31 +59,43 @@ function ut_main()
         array( 'a'  , 'aaa', 'aa'  ),
         array( 'ba' , 'b'  , 'ab'  ),
         array( 'e'  , 'c'  , 'a'   ),
+        array( '100', '25' , '36'  ),
+        array( 5    , '30' , 2     ),
         array( 'd'  , ''   , ' a'  ),
         array( 'd ' , 'f ' , ' a'  ),
         array( 'a'  , null , '3'   ),
-        array( 'y'  , 'i'  , 'k'   )
+        array( 'y'  , 'k'  , 'i' )
     );
 
     $res_str .= sort_arrays( 'en_US', $test_params );
 
+    $test_params = array(
+        array( '100', '25' , '36'  ),
+        array( 5    , '30' , 2     ),
+        array( 'd'  , ''   , ' a'  ),
+        array( 'y'  , 'k'  , 'i' )
+    );
+
+    // Sort in en_US locale with SORT_STRING flag
+    $res_str .= sort_arrays( 'en_US', $test_params, Collator::SORT_STRING );
+
+
     // Sort a non-ASCII array using ru_RU locale.
     $test_params = array(
         array( 'абг', 'абв', 'ааа', 'abc' ),
-        array( 'аа', 'ааа', 'а' )
+        array( 'аа', 'ааа' , 'а' )
     );
 
     $res_str .= sort_arrays( 'ru_RU', $test_params );
 
-    // Array with data for sorting.
+    // Sort an array using Lithuanian locale.
     $test_params = array(
-        array( 'y'  , 'i'  , 'k'   )
+        array( 'y'  , 'k'  , 'i' )
     );
 
-    // Sort an array using Lithuanian locale.
     $res_str .= sort_arrays( 'lt_LT', $test_params );
 
-    return $res_str . "\n";
+    return $res_str;
 }
 
 include_once( 'ut_common.inc' );
@@ -132,7 +142,23 @@ array (
 )
  Result: true
 
-Test 6.923d65739c5219c634616ffd100a50e4:
+Test 6.ab530b060e5e54a65bfb8b9f8fc61870:
+array (
+  0 => '25',
+  1 => '36',
+  2 => '100',
+)
+ Result: true
+
+Test 7.0718dd838509017bded2ed307a6e785f:
+array (
+  0 => 2,
+  1 => 5,
+  2 => '30',
+)
+ Result: true
+
+Test 8.923d65739c5219c634616ffd100a50e4:
 array (
   0 => '',
   1 => ' a',
@@ -140,7 +166,7 @@ array (
 )
  Result: true
 
-Test 7.289bc2f28e87d3201ec9d7e8477ae1b0:
+Test 9.289bc2f28e87d3201ec9d7e8477ae1b0:
 array (
   0 => ' a',
   1 => 'd ',
@@ -148,7 +174,7 @@ array (
 )
  Result: true
 
-Test 8.de0fd958484f2377a645835d7fbcf124:
+Test 10.de0fd958484f2377a645835d7fbcf124:
 array (
   0 => NULL,
   1 => '3',
@@ -156,7 +182,7 @@ array (
 )
  Result: true
 
-Test 9.dd2b8f0adb37c45d528cad1a0cc0f361:
+Test 11.dd2b8f0adb37c45d528cad1a0cc0f361:
 array (
   0 => 'i',
   1 => 'k',
@@ -164,16 +190,48 @@ array (
 )
  Result: true
 
-Test 10.ca0e38a2e3147dd97070f2128f140934:
+Test 12.1e6b4d6f7df9d4580317634ea46d8208:
 array (
-  0 => 'abc',
-  1 => 'ааа',
-  2 => 'абв',
-  3 => 'абг',
+  0 => '100',
+  1 => '25',
+  2 => '36',
 )
  Result: true
 
-Test 11.91480b10473a0c96a4cd6d88c23c577a:
+Test 13.cec115dc9850b98dfbdf102efa09e61b:
+array (
+  0 => 2,
+  1 => '30',
+  2 => 5,
+)
+ Result: true
+
+Test 14.923d65739c5219c634616ffd100a50e4:
+array (
+  0 => '',
+  1 => ' a',
+  2 => 'd',
+)
+ Result: true
+
+Test 15.dd2b8f0adb37c45d528cad1a0cc0f361:
+array (
+  0 => 'i',
+  1 => 'k',
+  2 => 'y',
+)
+ Result: true
+
+Test 16.49056308afb2b800363c5baa735ed247:
+array (
+  0 => 'ааа',
+  1 => 'абв',
+  2 => 'абг',
+  3 => 'abc',
+)
+ Result: true
+
+Test 17.91480b10473a0c96a4cd6d88c23c577a:
 array (
   0 => 'а',
   1 => 'аа',
@@ -181,7 +239,7 @@ array (
 )
  Result: true
 
-Test 12.fdd3fe3981476039164aa000bf9177f2:
+Test 18.fdd3fe3981476039164aa000bf9177f2:
 array (
   0 => 'i',
   1 => 'y',

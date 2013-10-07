@@ -4,8 +4,8 @@ Bug #58756: w.r.t MessageFormatter
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '51.2') >=  0)
-	die('skip for ICU < 51.2');
+if (version_compare(INTL_ICU_VERSION, '51.2') < 0)
+	die('skip for ICU >= 51.2');
 ?>
 --FILE--
 <?php
@@ -33,5 +33,5 @@ echo "msgf2: ", $msgf->format(array($time, 'date')), " ",
 ==DONE==
 --EXPECT--
 date:  Tuesday, July 7, 2009 8:41:13 PM EDT
-msgf:  Tuesday, July 7, 2009 8:41:13 PM EDT
+msgf:  Tuesday, July 7, 2009 8:41:13 PM usnyc
 ==DONE==
