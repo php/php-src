@@ -4829,7 +4829,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 }
 /* }}} */
 
-static int php_openssl_match_cn(const char *subjectname, const char *certname)
+static zend_bool php_openssl_match_cn(const char *subjectname, const char *certname)
 {
 	char *wildcard;
 	int prefix_len, suffix_len, subject_len;
@@ -4902,7 +4902,6 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	/* Does the common name match ? (used primarily for https://) */
 	GET_VER_OPT_STRING("CN_match", cnmatch);
 	if (cnmatch) {
-		int match = 0;
 		int name_len = X509_NAME_get_text_by_NID(name, NID_commonName, buf, sizeof(buf));
 
 		if (name_len == -1) {
@@ -4913,9 +4912,7 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 			return FAILURE;
 		}
 
-		match = php_openssl_match_cn(cnmatch, buf);
-
-		if (!match) {
+		if (!php_openssl_match_cn(cnmatch, buf)) {
 			/* didn't match */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer certificate CN=`%.*s' did not match expected CN=`%s'", name_len, buf, cnmatch);
 			return FAILURE;
