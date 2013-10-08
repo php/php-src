@@ -42,6 +42,11 @@ PHP X.Y UPGRADE NOTES
 
 - Added gost-crypto (CryptoPro S-box) hash algo.
 
+- Added openssl certificate fingerprint support (inclusive stream context 
+  option).
+
+- Added openssl crypto method stream context option.
+
 ========================================
 2. Changes in SAPI modules
 ========================================
@@ -71,6 +76,8 @@ PHP X.Y UPGRADE NOTES
 5. New Functions
 ========================================
 
+- Openssl:
+  Added string openssl_x509_fingerprint($x509, $type, $binary).
 
 ========================================
 6. New Classes and Interfaces
@@ -106,6 +113,11 @@ PHP X.Y UPGRADE NOTES
 9. New Global Constants
 ========================================
 
+- Openssl:
+  . STREAM_CRYPTO_METHOD_SSLv2_CLIENT
+  . STREAM_CRYPTO_METHOD_SSLv3_CLIENT
+  . STREAM_CRYPTO_METHOD_SSLv23_CLIENT
+  . STREAM_CRYPTO_METHOD_TLS_CLIENT
 
 ========================================
 10. Changes to INI File Handling
