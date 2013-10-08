@@ -853,6 +853,29 @@ php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_set_option,
 };
 
+static int get_crypto_method(php_stream_context *ctx) {
+        if (ctx) {
+                zval **val = NULL;
+                long crypto_method;
+
+                if (php_stream_context_get_option(ctx, "ssl", "crypto_method", &val) == SUCCESS) {
+                        convert_to_long_ex(val);
+                        crypto_method = (long)Z_LVAL_PP(val);
+
+                        switch (crypto_method) {
+                                case STREAM_CRYPTO_METHOD_SSLv2_CLIENT:
+                                case STREAM_CRYPTO_METHOD_SSLv3_CLIENT:
+                                case STREAM_CRYPTO_METHOD_SSLv23_CLIENT:
+                                case STREAM_CRYPTO_METHOD_TLS_CLIENT:
+                                        return crypto_method;
+                        }
+
+                }
+        }
+
+        return STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
+}
+
 static char * get_sni(php_stream_context *ctx, const char *resourcename, size_t resourcenamelen, int is_persistent TSRMLS_DC) {
 
 	php_url *url;
@@ -939,7 +962,12 @@ php_stream *php_openssl_ssl_socket_factory(const char *proto, size_t protolen,
 	
 	if (strncmp(proto, "ssl", protolen) == 0) {
 		sslsock->enable_on_connect = 1;
-		sslsock->method = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;
+
+		/* General ssl:// transports can use a number
+		 * of crypto methods. The actual methhod can be
+		 * provided in the streams context options.
+		 */ 
+		sslsock->method = get_crypto_method(context);
 	} else if (strncmp(proto, "sslv2", protolen) == 0) {
 #ifdef OPENSSL_NO_SSL2
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "SSLv2 support is not compiled into the OpenSSL library PHP is linked against");
