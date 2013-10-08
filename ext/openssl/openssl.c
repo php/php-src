@@ -129,6 +129,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_export, 0, 0, 2)
     ZEND_ARG_INFO(0, notext)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_fingerprint, 0, 0, 1)
+	ZEND_ARG_INFO(0, x509)
+	ZEND_ARG_INFO(0, method)
+	ZEND_ARG_INFO(0, raw_output)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_check_private_key, 0)
     ZEND_ARG_INFO(0, cert)
     ZEND_ARG_INFO(0, key)
@@ -443,6 +449,7 @@ const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_x509_checkpurpose,		arginfo_openssl_x509_checkpurpose)
 	PHP_FE(openssl_x509_check_private_key,	arginfo_openssl_x509_check_private_key)
 	PHP_FE(openssl_x509_export,				arginfo_openssl_x509_export)
+	PHP_FE(openssl_x509_fingerprint,			arginfo_openssl_x509_fingerprint)
 	PHP_FE(openssl_x509_export_to_file,		arginfo_openssl_x509_export_to_file)
 
 /* PKCS12 funcs */
@@ -1664,6 +1671,121 @@ PHP_FUNCTION(openssl_x509_export)
 	BIO_free(bio_out);
 }
 /* }}} */
+
+static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw, char **out, int *out_len)
+{
+	unsigned char md[EVP_MAX_MD_SIZE];
+	const EVP_MD *mdtype;
+	int n;
+
+	if (!(mdtype = EVP_get_digestbyname(method))) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
+		return FAILURE;
+	} else if (!X509_digest(peer, mdtype, md, &n)) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not generate signature");
+		return FAILURE;
+	}
+
+	if (raw) {
+		*out_len = n;
+		*out = estrndup(md, n);
+	} else {
+		*out_len = n * 2;
+		*out = emalloc(*out_len + 1);
+
+		make_digest_ex(*out, md, n);
+	}
+
+	return SUCCESS;
+}
+
+static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *expected)
+{
+	char *fingerprint;
+	int fingerprint_len;
+	int result = -1;
+
+	if (php_openssl_x509_fingerprint(peer, method, 0, &fingerprint, &fingerprint_len) == SUCCESS) {
+		result = strcmp(expected, fingerprint);
+		efree(fingerprint);
+	}
+
+	return result;
+}
+
+static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val)
+{
+	if (Z_TYPE_P(val) == IS_STRING) {
+		const char *method = NULL;
+
+		switch (Z_STRLEN_P(val)) {
+			case 32:
+				method = "md5";
+				break;
+
+			case 40:
+				method = "sha1";
+				break;
+		}
+
+		return method && php_x509_fingerprint_cmp(peer, method, Z_STRVAL_P(val)) == 0;
+	} else if (Z_TYPE_P(val) == IS_ARRAY) {
+		HashPosition pos;
+		zval **current;
+		char *key;
+		uint key_len;
+		ulong key_index;
+
+		for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(val), &pos);
+			zend_hash_get_current_data_ex(Z_ARRVAL_P(val), (void **)&current, &pos) == SUCCESS;
+			zend_hash_move_forward_ex(Z_ARRVAL_P(val), &pos)
+		) {
+			int key_type = zend_hash_get_current_key_ex(Z_ARRVAL_P(val), &key, &key_len, &key_index, 0, &pos);
+
+			if (key_type == HASH_KEY_IS_STRING 
+				&& Z_TYPE_PP(current) == IS_STRING
+				&& php_x509_fingerprint_cmp(peer, key, Z_STRVAL_PP(current)) != 0
+			) {
+				return 0;
+			}
+		}
+		return 1;
+	}
+	return 0;
+}
+
+PHP_FUNCTION(openssl_x509_fingerprint)
+{
+	X509 *cert;
+	zval **zcert;
+	long certresource;
+	zend_bool raw_output = 0;
+	char *method = "sha1";
+	int method_len;
+
+	char *fingerprint;
+	int fingerprint_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "Z|sb", &zcert, &method, &method_len, &raw_output) == FAILURE) {
+		return;
+	}
+
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource TSRMLS_CC);
+	if (cert == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "cannot get cert from parameter 1");
+		RETURN_FALSE;
+	}
+
+	if (php_openssl_x509_fingerprint(cert, method, raw_output, &fingerprint, &fingerprint_len) == SUCCESS) {
+		RETVAL_STRINGL(fingerprint, fingerprint_len, 0);
+	} else {
+		RETVAL_FALSE;
+	}
+
+	if (certresource == -1 && cert) {
+		X509_free(cert);
+	}
+}
 
 /* {{{ proto bool openssl_x509_check_private_key(mixed cert, mixed key)
    Checks if a private key corresponds to a CERT */
@@ -4864,6 +4986,17 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	}
 
 	/* if the cert passed the usual checks, apply our own local policies now */
+
+	if (GET_VER_OPT("peer_fingerprint")) {
+		if (Z_TYPE_PP(val) == IS_STRING || Z_TYPE_PP(val) == IS_ARRAY) {
+			if (!php_x509_fingerprint_match(peer, *val)) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer fingerprint doesn't match");
+				return FAILURE;
+			}
+		} else {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Expected peer fingerprint must be a string or an array");
+		}
+	}
 
 	name = X509_get_subject_name(peer);
 
