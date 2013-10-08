@@ -39,12 +39,9 @@
 
 #if HAVE_OCI8
 
-#if PHP_MAJOR_VERSION > 5
-#error This version of the PHP OCI8 extension is not compatible with PHP 6 or later
-#elif PHP_MAJOR_VERSION < 5
-#ifdef ZTS
-#error The PHP OCI8 extension does not support ZTS mode in PHP 4
-#endif
+/* PHP 5.2 is the minimum supported version for OCI8 2.0 */
+#if PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 1)
+#error Use PHP OCI8 1.4 for your version of PHP
 #endif
 
 #include "php_oci8.h"
@@ -66,11 +63,8 @@
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(oci)
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-/* This "if" allows PECL builds from this file to be portable to older PHP releases */
 static PHP_GINIT_FUNCTION(oci);
 static PHP_GSHUTDOWN_FUNCTION(oci);
-#endif
 
 /* Allow PHP 5.3 branch to be used in PECL for 5.x compatible builds */
 #ifndef Z_ADDREF_P
@@ -1055,16 +1049,11 @@ zend_module_entry oci8_module_entry = {
 	PHP_RSHUTDOWN(oci),	  /* per-request shutdown function */
 	PHP_MINFO(oci),		  /* information function */
 	PHP_OCI8_VERSION,
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-	/* This check allows PECL builds from this file to be portable to older PHP releases */
 	PHP_MODULE_GLOBALS(oci),  /* globals descriptor */
 	PHP_GINIT(oci),			  /* globals ctor */
 	PHP_GSHUTDOWN(oci),		  /* globals dtor */
 	NULL,					  /* post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
-#else
-	STANDARD_MODULE_PROPERTIES
-#endif
 };
 /* }}} */
 
@@ -1183,12 +1172,7 @@ static void php_oci_cleanup_global_handles(TSRMLS_D)
  *
  * Zerofill globals during module init
  */
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-/* This check allows PECL builds from this file to be portable to older PHP releases */
 static PHP_GINIT_FUNCTION(oci)
-#else
-static void php_oci_init_globals(zend_oci_globals *oci_globals TSRMLS_DC)
-#endif
 {
 	memset(oci_globals, 0, sizeof(zend_oci_globals));
 }
@@ -1198,12 +1182,7 @@ static void php_oci_init_globals(zend_oci_globals *oci_globals TSRMLS_DC)
  *
  * Called for thread shutdown in ZTS, after module shutdown for non-ZTS
  */
-/* This check allows PECL builds from this file to be portable to older PHP releases */
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 static PHP_GSHUTDOWN_FUNCTION(oci)
-#else
-static void php_oci_shutdown_globals(zend_oci_globals *oci_globals TSRMLS_DC)
-#endif
 {
 	php_oci_cleanup_global_handles(TSRMLS_C);
 }
@@ -1214,12 +1193,6 @@ PHP_MINIT_FUNCTION(oci)
 	zend_class_entry oci_lob_class_entry;
 	zend_class_entry oci_coll_class_entry;
 
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-	/* This check allows PECL builds from this file to be portable to older PHP releases */
-	/* this is handled by new globals management code */
-#else
-	ZEND_INIT_MODULE_GLOBALS(oci, php_oci_init_globals, php_oci_shutdown_globals);
-#endif
 	REGISTER_INI_ENTRIES();
 
 	le_statement = zend_register_list_destructors_ex(php_oci_statement_list_dtor, NULL, "oci8 statement", module_number);
@@ -1331,13 +1304,6 @@ PHP_RINIT_FUNCTION(oci)
 
 PHP_MSHUTDOWN_FUNCTION(oci)
 {
-/* Work around PHP_GSHUTDOWN_FUNCTION not being called in older versions of PHP */
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 2) || (PHP_MAJOR_VERSION < 5)
-#ifndef ZTS
-	php_oci_cleanup_global_handles(TSRMLS_C);
-#endif
-#endif
-
 	OCI_G(shutdown) = 1;
 
 	UNREGISTER_INI_ENTRIES();

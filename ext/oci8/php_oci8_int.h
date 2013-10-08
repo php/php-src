@@ -438,11 +438,7 @@ int php_oci_lob_append(php_oci_descriptor *descriptor_dest, php_oci_descriptor *
 int php_oci_lob_truncate(php_oci_descriptor *descriptor, long new_lob_length TSRMLS_DC);
 int php_oci_lob_erase(php_oci_descriptor *descriptor, long offset, ub4 length, ub4 *bytes_erased TSRMLS_DC);
 int php_oci_lob_is_equal(php_oci_descriptor *descriptor_first, php_oci_descriptor *descriptor_second, boolean *result TSRMLS_DC);
-#if defined(HAVE_OCI_LOB_READ2)
 sb4 php_oci_lob_callback(dvoid *ctxp, CONST dvoid *bufxp, oraub8 len, ub1 piece, dvoid **changed_bufpp, oraub8 *changed_lenp);
-#else
-sb4 php_oci_lob_callback(dvoid *ctxp, CONST dvoid *bufxp, ub4 len, ub1 piece);
-#endif
 /* }}} */
 
 /* {{{ collection related prototypes */
