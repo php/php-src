@@ -40,6 +40,8 @@ PHP X.Y UPGRADE NOTES
 - The php://input stream is now re-usable and can be used concurrently with 
   enable_post_data_reading=0.
 
+- Added gost-crypto (CryptoPro S-box) hash algo.
+
 ========================================
 2. Changes in SAPI modules
 ========================================
@@ -60,6 +62,10 @@ PHP X.Y UPGRADE NOTES
 - cURL:
   CURLOPT_SAFE_UPLOAD is now turned on by default and uploads with @file 
   do not work unless it is explicitly set to false.
+
+- XMLReader:
+  XMLReader::getAttributeNs and XMLReader::getAttributeNo now return NULL if
+  the attribute could not be found, just like XMLReader::getAttribute.
 
 ========================================
 5. New Functions

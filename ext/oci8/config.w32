@@ -29,8 +29,6 @@ if (PHP_OCI8_12C != "no") {
 
 		AC_DEFINE('HAVE_OCI8', 1);
 		AC_DEFINE('HAVE_OCI_INSTANT_CLIENT', 1);
-		AC_DEFINE('HAVE_OCI_LOB_READ2', 1);
-
 	} else {
 		WARNING("oci8-12c not enabled: Oracle Database client libraries or Oracle Database 12c Instant Client not found");
 		PHP_OCI8_12C = "no"

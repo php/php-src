@@ -1429,13 +1429,7 @@ PHP_FUNCTION(oci_fetch_all)
 				if (flags & PHP_OCI_NUM) {
 					zend_hash_next_index_insert(Z_ARRVAL_P(row), &element, sizeof(zval*), NULL);
 				} else { /* default to ASSOC */
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-					/* zend_symtable_update is only available in 5.2+ */
 					zend_symtable_update(Z_ARRVAL_P(row), columns[ i ]->name, columns[ i ]->name_len+1, &element, sizeof(zval*), NULL);
-#else
-					/* This code path means Bug #45458 will remain broken when OCI8 is built with PHP 4 */
-					zend_hash_update(Z_ARRVAL_P(row), columns[ i ]->name, columns[ i ]->name_len+1, &element, sizeof(zval*), NULL);
-#endif
 				}
 			}
 
@@ -1467,13 +1461,7 @@ PHP_FUNCTION(oci_fetch_all)
 				
 				MAKE_STD_ZVAL(tmp);
 				array_init(tmp);
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-				/* zend_symtable_update is only available in 5.2+ */
 				zend_symtable_update(Z_ARRVAL_P(array), columns[ i ]->name, columns[ i ]->name_len+1, (void *) &tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
-#else
-				/* This code path means Bug #45458 will remain broken when OCI8 is built with PHP 4 */
-				zend_hash_update(Z_ARRVAL_P(array), columns[ i ]->name, columns[ i ]->name_len+1, (void *) &tmp, sizeof(zval*), (void **) &(outarrs[ i ]));
-#endif
 			}
 		}
 
@@ -1788,7 +1776,7 @@ PHP_FUNCTION(oci_set_client_identifier)
 
 	if (client_id) {
 		/* this long winded copy allows compatibility with older PHP versions */
-		connection->client_id = (char *)safe_emalloc(client_id_len+1, sizeof(char), connection->is_persistent);
+		connection->client_id = (char *)pemalloc(client_id_len+1, connection->is_persistent);
 		memcpy(connection->client_id, client_id, client_id_len);
 		connection->client_id[client_id_len] = '\0';
 	} else {
@@ -1927,6 +1915,38 @@ PHP_FUNCTION(oci_set_client_info)
 #endif
 }
 /* }}} */
+
+#ifdef WAITIING_ORACLE_BUG_16695981_FIX
+/* {{{ proto bool oci_set_db_operation(resource connection, string value)
+   Sets the "DB operation" on the connection for Oracle end-to-end tracing */
+PHP_FUNCTION(oci_set_db_operation)
+{
+#if (OCI_MAJOR_VERSION > 11)
+	zval *z_connection;
+	php_oci_connection *connection;
+	char *dbop_name;
+	int dbop_name_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "rs", &z_connection, &dbop_name, &dbop_name_len) == FAILURE) {
+		return;
+	}
+
+	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
+
+	PHP_OCI_CALL_RETURN(OCI_G(errcode), OCIAttrSet, ((dvoid *) connection->session, (ub4) OCI_HTYPE_SESSION, (dvoid *) dbop_name, (ub4) dbop_name_len, (ub4) OCI_ATTR_DBOP, OCI_G(err)));
+
+	if (OCI_G(errcode) != OCI_SUCCESS) {
+		php_oci_error(OCI_G(err), OCI_G(errcode) TSRMLS_CC);
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+#else
+	php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Unsupported attribute type");
+	RETURN_FALSE;
+#endif
+}
+/* }}} */
+#endif /* WAITIING_ORACLE_BUG_16695981_FIX */
 
 /* {{{ proto bool oci_password_change(resource connection, string username, string old_password, string new_password)
   Changes the password of an account */

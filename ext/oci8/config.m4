@@ -208,8 +208,8 @@ if test "$PHP_OCI8" != "no"; then
   IFS=$ac_IFS
   oci8_php_version=`expr [$]1 \* 1000000 + [$]2 \* 1000 + [$]3`
 
-  if test "$oci8_php_version" -lt "4003009"; then
-    AC_MSG_ERROR([You need at least PHP 4.3.9 to be able to use this version of OCI8. PHP $php_version found])
+  if test "$oci8_php_version" -lt "5002000"; then
+    AC_MSG_ERROR([You need at least PHP 5.2.0 to be able to use this version of OCI8. PHP $php_version found])
   else
     AC_MSG_RESULT([$php_version, ok])
   fi
@@ -332,24 +332,8 @@ if test "$PHP_OCI8" != "no"; then
     AC_OCI8_ORACLE_VERSION($OCI8_DIR)
 
     case $OCI8_ORACLE_VERSION in
-      7.3|8.0|8.1)
-	AC_MSG_ERROR([Oracle client libraries < 9.2 are not supported])
-	;;
-
-      9.0)
-	PHP_CHECK_LIBRARY(clntsh, OCIEnvNlsCreate,
-	[
-	  OCI8_ORACLE_VERSION=9.2
-	],
-	[
-	  AC_MSG_ERROR([Oracle client libraries < 9.2 are not supported])
-	], [
-	  -L$OCI8_DIR/$OCI8_LIB_DIR $OCI8_SHARED_LIBADD
-	])
-	;;
-
-      *)
-	AC_DEFINE(HAVE_OCI_LOB_READ2,1,[Defined to 1 if OCI8 configuration located Oracle's OCILobRead2 function])
+      7.3|8.0|8.1|9.0)
+	AC_MSG_ERROR([Oracle client libraries < 10 are not supported])
 	;;
     esac
 
@@ -425,7 +409,6 @@ if test "$PHP_OCI8" != "no"; then
     PHP_ADD_LIBPATH($PHP_OCI8_INSTANT_CLIENT, OCI8_SHARED_LIBADD)
 
     AC_DEFINE(HAVE_OCI_INSTANT_CLIENT,1,[Defined to 1 if OCI8 configuration located Oracle's Instant Client libraries])
-    AC_DEFINE(HAVE_OCI_LOB_READ2,1,[Defined to 1 if OCI8 configuration located Oracle's OCILobRead2 function])
 
     PHP_NEW_EXTENSION(oci8, oci8.c oci8_lob.c oci8_statement.c oci8_collection.c oci8_interface.c, $ext_shared)
     AC_DEFINE(HAVE_OCI8,1,[Defined to 1 if the PHP OCI8 extension for Oracle Database is configured])
