@@ -40,6 +40,11 @@ PHP                                                                        NEWS
     cache_slots) in op_array->literals table. (Laruence, Dmitry)
   . Added script level constant replacement optimization pass. (Dmitry)
 
+- Openssl:
+  . Added crypto_method option for the ssl stream context. (Martin Jansen)
+  . Added certificate fingerprint support. (Tjerk Meesters)
+  . Fixed bug #65729 (CN_match gives false positive). (Tjerk Meesters)
+  
 - PDO_pgsql:
   . Fixed Bug #42614 (PDO_pgsql: add pg_get_notify support). (Matteo)
   . Fixed Bug #63657 (pgsqlCopyFromFile, pgsqlCopyToArray use Postgres < 7.3
