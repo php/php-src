@@ -227,6 +227,8 @@ Oracle client library support is necessary.
     <file name="cursors_old.phpt" role="test" />
     <file name="cursors.phpt" role="test" />
     <file name="dbmsoutput.phpt" role="test" />
+    <file name="db_op_1.phpt" role="test" />
+    <file name="db_op_2.phpt" role="test" />
     <file name="debug.phpt" role="test" />
     <file name="default_prefetch0.phpt" role="test" />
     <file name="default_prefetch1.phpt" role="test" />
