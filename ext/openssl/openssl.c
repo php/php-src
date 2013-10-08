@@ -4829,6 +4829,38 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 }
 /* }}} */
 
+static zend_bool php_openssl_match_cn(const char *subjectname, const char *certname)
+{
+	char *wildcard;
+	int prefix_len, suffix_len, subject_len;
+
+	if (strcasecmp(subjectname, certname) == 0) {
+		return 1;
+	}
+
+	if (!(wildcard = strchr(certname, '*'))) {
+		return 0;
+	}
+
+	// 1) prefix, if not empty, must match subject
+	prefix_len = wildcard - certname;
+	if (prefix_len && strncasecmp(subjectname, certname, prefix_len) != 0) {
+		return 0;
+	}
+
+	suffix_len = strlen(wildcard + 1);
+	subject_len = strlen(subjectname);
+	if (suffix_len <= subject_len) {
+		/* 2) suffix must match
+		 * 3) no . between prefix and suffix
+		 **/
+		return strcasecmp(wildcard + 1, subjectname + subject_len - suffix_len) == 0 &&
+			memchr(subjectname + prefix_len, '.', subject_len - suffix_len - prefix_len) == NULL;
+	}
+
+	return 0;
+}
+
 int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	zval **val = NULL;
@@ -4870,7 +4902,6 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	/* Does the common name match ? (used primarily for https://) */
 	GET_VER_OPT_STRING("CN_match", cnmatch);
 	if (cnmatch) {
-		int match = 0;
 		int name_len = X509_NAME_get_text_by_NID(name, NID_commonName, buf, sizeof(buf));
 
 		if (name_len == -1) {
@@ -4881,18 +4912,7 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 			return FAILURE;
 		}
 
-		match = strcmp(cnmatch, buf) == 0;
-		if (!match && strlen(buf) > 3 && buf[0] == '*' && buf[1] == '.') {
-			/* Try wildcard */
-
-			if (strchr(buf+2, '.')) {
-				char *tmp = strstr(cnmatch, buf+1);
-
-				match = tmp && strcmp(tmp, buf+2) && tmp == strchr(cnmatch, '.');
-			}
-		}
-
-		if (!match) {
+		if (!php_openssl_match_cn(cnmatch, buf)) {
 			/* didn't match */
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer certificate CN=`%.*s' did not match expected CN=`%s'", name_len, buf, cnmatch);
 			return FAILURE;
