@@ -13,7 +13,7 @@ stream_context_set_option($context, 'ssl', 'allow_self_signed', true);
 $server = stream_socket_server('ssl://127.0.0.1:64321', $errno, $errstr,
 	STREAM_SERVER_BIND|STREAM_SERVER_LISTEN, $context);
 
-$expected_names = array('foo.test.com.sg', 'foo.test.com', 'foo.bar.test.com');
+$expected_names = array('foo.test.com.sg', 'foo.test.com', 'FOO.TEST.COM', 'foo.bar.test.com');
 
 $pid = pcntl_fork();
 if ($pid == -1) {
@@ -43,6 +43,7 @@ Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 
 Warning: stream_socket_client(): unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
 bool(false)
+resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 Warning: stream_socket_client(): Peer certificate CN=`*.test.com' did not match expected CN=`foo.bar.test.com' in %s on line %d

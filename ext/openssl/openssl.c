@@ -4834,7 +4834,7 @@ static zend_bool php_openssl_match_cn(const char *subjectname, const char *certn
 	char *wildcard;
 	int prefix_len, suffix_len, subject_len;
 
-	if (strcmp(subjectname, certname) == 0) {
+	if (strcasecmp(subjectname, certname) == 0) {
 		return 1;
 	}
 
@@ -4844,7 +4844,7 @@ static zend_bool php_openssl_match_cn(const char *subjectname, const char *certn
 
 	// 1) prefix, if not empty, must match subject
 	prefix_len = wildcard - certname;
-	if (prefix_len && strncmp(subjectname, certname, prefix_len) != 0) {
+	if (prefix_len && strncasecmp(subjectname, certname, prefix_len) != 0) {
 		return 0;
 	}
 
@@ -4854,7 +4854,7 @@ static zend_bool php_openssl_match_cn(const char *subjectname, const char *certn
 		/* 2) suffix must match
 		 * 3) no . between prefix and suffix
 		 **/
-		return strcmp(wildcard + 1, subjectname + subject_len - suffix_len) == 0 &&
+		return strcasecmp(wildcard + 1, subjectname + subject_len - suffix_len) == 0 &&
 			memchr(subjectname + prefix_len, '.', subject_len - suffix_len - prefix_len) == NULL;
 	}
 
