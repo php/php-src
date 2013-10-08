@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdlib.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -3236,7 +3237,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, long cache_wsdl TSRMLS_DC)
 		char user[10]; /* storage for a 32-bit UID */
 		snprintf(user, 10, "%d", getuid());
 #else
-		char *user = php_get_current_user(TSRMLS_C);
+		char *user = getenv("USERNAME");
 #endif
 		int user_len = user ? strlen(user) + 1 : 0;
 
