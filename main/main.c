@@ -2198,7 +2198,17 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 
 	/* start additional PHP extensions */
-	php_register_extensions(&additional_modules, num_additional_modules TSRMLS_CC);
+	{
+		zend_module_entry** additional_modules_array = (zend_module_entry**)
+			emalloc(sizeof(zend_module_entry*)*num_additional_modules);
+		int i = 0;
+		for (i = 0; i < num_additional_modules; ++i) {
+			additional_modules_array[i] = &additional_modules[i];
+		}
+
+		php_register_extensions(additional_modules_array, num_additional_modules TSRMLS_CC);
+		efree(additional_modules_array);
+	}
 
 	/* load and startup extensions compiled as shared objects (aka DLLs)
 	   as requested by php.ini entries
