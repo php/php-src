@@ -5014,9 +5014,10 @@ static zend_bool matches_common_name(X509 *peer, const char *subject_name)
 	char buf[1024];
 	X509_NAME *cert_name;
 	zend_bool is_match = 0;
+	int cert_name_len;
 
 	cert_name = X509_get_subject_name(peer);
-	int cert_name_len = X509_NAME_get_text_by_NID(cert_name, NID_commonName, buf, sizeof(buf));
+	cert_name_len = X509_NAME_get_text_by_NID(cert_name, NID_commonName, buf, sizeof(buf));
 
 	if (cert_name_len == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate peer certificate CN");
