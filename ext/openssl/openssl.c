@@ -4951,7 +4951,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 }
 /* }}} */
 
-static int matches_wildcard_name(const char *subjectname, const char *certname)
+static zend_bool matches_wildcard_name(const char *subjectname, const char *certname)
 {
 	char *wildcard;
 	int prefix_len, suffix_len, subject_len;
@@ -4983,10 +4983,12 @@ static int matches_wildcard_name(const char *subjectname, const char *certname)
 	return 0;
 }
 
-static int matches_san_list(X509 *peer, const char *subject_name)
+static zend_bool matches_san_list(X509 *peer, const char *subject_name)
 {
-	int is_match, i;
+	int i;
+	zend_bool is_match = 0;
 	unsigned char *cert_name;
+
 	GENERAL_NAMES *alt_names = X509_get_ext_d2i(peer, NID_subject_alt_name, 0, 0);
 	int alt_name_count = sk_GENERAL_NAME_num(alt_names);
 
@@ -5007,25 +5009,26 @@ static int matches_san_list(X509 *peer, const char *subject_name)
 	return is_match;
 }
 
-static int matches_common_name(X509 *peer, const char *subject_name)
+static zend_bool matches_common_name(X509 *peer, const char *subject_name)
 {
 	char buf[1024];
 	X509_NAME *cert_name;
+	zend_bool is_match = 0;
+
 	cert_name = X509_get_subject_name(peer);
 	int cert_name_len = X509_NAME_get_text_by_NID(cert_name, NID_commonName, buf, sizeof(buf));
 
 	if (cert_name_len == -1) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate peer certificate CN");
-		return 0;
 	} else if (cert_name_len != strlen(buf)) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer certificate CN=`%.*s' is malformed", cert_name_len, buf);
-		return 0;
 	} else if (matches_wildcard_name(subject_name, buf)) {
-		return 1;
+		is_match = 1;
 	} else {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer certificate CN=`%.*s' did not match expected CN=`%s'", cert_name_len, buf, subject_name);
-		return 0;
 	}
+	
+	return is_match;
 }
 
 int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC) /* {{{ */
