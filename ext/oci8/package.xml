@@ -60,6 +60,9 @@ Bump mininum requirements for PHP OCI8 2.0 to PHP 5.2 and Oracle
 client library 10.2 (Note this will connect to Oracle Database 8.1.7
 onwards). Use the older OCI8 1.4 if an earlier PHP version or older
 Oracle client library support is necessary.
+
+Re-enable php_oci8.dll and php_oci8_11g.dll for Windows builds so URL
+linking works in the new Windows PECL infrastructure.
   </notes>
  <contents>
   <dir name="/">
