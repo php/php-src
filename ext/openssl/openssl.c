@@ -4676,9 +4676,6 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 
 	GET_VER_OPT_STRING("local_cert", certfile);
 	if (certfile) {
-		X509 *cert = NULL;
-		EVP_PKEY *key = NULL;
-		SSL *tmpssl;
 		char resolved_path_buff[MAXPATHLEN];
 		const char * private_key = NULL;
 
@@ -4705,16 +4702,22 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 				}		
 			}
 
-			tmpssl = SSL_new(ctx);
-			cert = SSL_get_certificate(tmpssl);
+#if OPENSSL_VERSION_NUMBER < 0x10001001L
+			do {
+				/* Unnecessary as of OpenSSLv1.0.1 (will segfault if used with >= 10001001 ) */
+				X509 *cert = NULL;
+				EVP_PKEY *key = NULL;
+				SSL *tmpssl = SSL_new(ctx);
+				cert = SSL_get_certificate(tmpssl);
 
-			if (cert) {
-				key = X509_get_pubkey(cert);
-				EVP_PKEY_copy_parameters(key, SSL_get_privatekey(tmpssl));
-				EVP_PKEY_free(key);
-			}
-			SSL_free(tmpssl);
-
+				if (cert) {
+					key = X509_get_pubkey(cert);
+					EVP_PKEY_copy_parameters(key, SSL_get_privatekey(tmpssl));
+					EVP_PKEY_free(key);
+				}
+				SSL_free(tmpssl);
+			} while (0);
+#endif
 			if (!SSL_CTX_check_private_key(ctx)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Private key does not match certificate!");
 			}
