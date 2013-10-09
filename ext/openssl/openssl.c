@@ -1672,7 +1672,7 @@ PHP_FUNCTION(openssl_x509_export)
 }
 /* }}} */
 
-static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw, char **out, int *out_len)
+static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_bool raw, char **out, int *out_len TSRMLS_DC)
 {
 	unsigned char md[EVP_MAX_MD_SIZE];
 	const EVP_MD *mdtype;
@@ -1699,13 +1699,13 @@ static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_boo
 	return SUCCESS;
 }
 
-static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *expected)
+static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *expected TSRMLS_DC)
 {
 	char *fingerprint;
 	int fingerprint_len;
 	int result = -1;
 
-	if (php_openssl_x509_fingerprint(peer, method, 0, &fingerprint, &fingerprint_len) == SUCCESS) {
+	if (php_openssl_x509_fingerprint(peer, method, 0, &fingerprint, &fingerprint_len TSRMLS_CC) == SUCCESS) {
 		result = strcmp(expected, fingerprint);
 		efree(fingerprint);
 	}
@@ -1713,7 +1713,7 @@ static int php_x509_fingerprint_cmp(X509 *peer, const char *method, const char *
 	return result;
 }
 
-static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val)
+static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val TSRMLS_DC)
 {
 	if (Z_TYPE_P(val) == IS_STRING) {
 		const char *method = NULL;
@@ -1728,7 +1728,7 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val)
 				break;
 		}
 
-		return method && php_x509_fingerprint_cmp(peer, method, Z_STRVAL_P(val)) == 0;
+		return method && php_x509_fingerprint_cmp(peer, method, Z_STRVAL_P(val) TSRMLS_CC) == 0;
 	} else if (Z_TYPE_P(val) == IS_ARRAY) {
 		HashPosition pos;
 		zval **current;
@@ -1744,7 +1744,7 @@ static zend_bool php_x509_fingerprint_match(X509 *peer, zval *val)
 
 			if (key_type == HASH_KEY_IS_STRING 
 				&& Z_TYPE_PP(current) == IS_STRING
-				&& php_x509_fingerprint_cmp(peer, key, Z_STRVAL_PP(current)) != 0
+				&& php_x509_fingerprint_cmp(peer, key, Z_STRVAL_PP(current) TSRMLS_CC) != 0
 			) {
 				return 0;
 			}
@@ -1776,7 +1776,7 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 		RETURN_FALSE;
 	}
 
-	if (php_openssl_x509_fingerprint(cert, method, raw_output, &fingerprint, &fingerprint_len) == SUCCESS) {
+	if (php_openssl_x509_fingerprint(cert, method, raw_output, &fingerprint, &fingerprint_len TSRMLS_CC) == SUCCESS) {
 		RETVAL_STRINGL(fingerprint, fingerprint_len, 0);
 	} else {
 		RETVAL_FALSE;
@@ -5009,7 +5009,7 @@ static zend_bool matches_san_list(X509 *peer, const char *subject_name)
 	return is_match;
 }
 
-static zend_bool matches_common_name(X509 *peer, const char *subject_name)
+static zend_bool matches_common_name(X509 *peer, const char *subject_name TSRMLS_DC)
 {
 	char buf[1024];
 	X509_NAME *cert_name;
@@ -5068,7 +5068,7 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 
 	if (GET_VER_OPT("peer_fingerprint")) {
 		if (Z_TYPE_PP(val) == IS_STRING || Z_TYPE_PP(val) == IS_ARRAY) {
-			if (!php_x509_fingerprint_match(peer, *val)) {
+			if (!php_x509_fingerprint_match(peer, *val TSRMLS_CC)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer fingerprint doesn't match");
 				return FAILURE;
 			}
@@ -5082,7 +5082,7 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	if (cnmatch) {
 		if (matches_san_list(peer, cnmatch)) {
 			return SUCCESS;
-		} else if (matches_common_name(peer, cnmatch)) {
+		} else if (matches_common_name(peer, cnmatch TSRMLS_CC)) {
 			return SUCCESS;
 		} else {
 			return FAILURE;
