@@ -997,22 +997,25 @@ static void zend_scan_escape_string(zval *zendlval, char *str, int len, char quo
 int lex_scan_ex(zval *zendlval TSRMLS_DC);
 
 #define LEX_BUF_ADD_EX \
-	CG(tokenbuffer)[++CG(tokenbufptr)].zv = *zendlval; \
-	CG(tokenbuffer)[CG(tokenbufptr)].token = retval; \
-	CG(tokenbuffer)[CG(tokenbufptr)].text = SCNG(yy_text); \
-	CG(tokenbuffer)[CG(tokenbufptr)].len = SCNG(yy_leng); \
-	CG(tokenbuffer)[CG(tokenbufptr)].start = SCNG(yy_cursor); \
-	CG(tokenbuffer)[CG(tokenbufptr)].end = SCNG(yy_limit); \
+	buf_tmp = CG(tokenbuffer) + (++CG(tokenbufptr)); \
+	buf_tmp->zv = *zendlval; \
+	buf_tmp->token = retval; \
+	buf_tmp->text = SCNG(yy_text); \
+	buf_tmp->len = SCNG(yy_leng); \
+	buf_tmp->start = SCNG(yy_cursor); \
+	buf_tmp->end = SCNG(yy_limit); \
 	if (retval == T_DOC_COMMENT) { \
-		CG(tokenbuffer)[CG(tokenbufptr)].doc_comment = SCNG(doc_comment); \
-		CG(tokenbuffer)[CG(tokenbufptr)].doc_comment_len = SCNG(doc_comment_len); \
+		buf_tmp->doc_comment = SCNG(doc_comment); \
+		buf_tmp->doc_comment_len = SCNG(doc_comment_len); \
 	} \
-	CG(tokenbuffer)[CG(tokenbufptr)].lineno = CG(zend_lineno);
+	buf_tmp->lineno = CG(zend_lineno);
 
 #define LEX_BUF_ADD \
-	LEX_BUF_ADD_EX \
 	buf_two = buf_one; \
-	buf_one = CG(tokenbuffer) + CG(tokenbufptr); \
+	buf_two_token = buf_one_token; \
+	LEX_BUF_ADD_EX \
+	buf_one = buf_tmp; \
+	buf_one_token = retval; \
 	goto again;
 
 static zend_always_inline int lex_get_real_buf_offset(const int relpos) {
@@ -1046,7 +1049,7 @@ static zend_always_inline zend_bool lex_is_real_string_token(int token) {
 	(Z_TYPE(LEX_REL_BUF(relpos).zv) == 255 && !lex_is_real_string_token_table[LEX_REL_BUF(relpos).token])
 
 #define LEX_IS_BUF_ALPH_TOKEN(buf) \
-	(Z_TYPE((buf).zv) == 255 && !lex_is_real_string_token_table[(buf).token])
+	(Z_TYPE(buf->zv) == 255 && !lex_is_real_string_token_table[buf##_token])
 
 #define LEX_CONVERT_STRING(token, zval, text, len) \
 	token = T_STRING; \
@@ -1054,30 +1057,31 @@ static zend_always_inline zend_bool lex_is_real_string_token(int token) {
 	Z_STRVAL(zval) = estrndup(text, len); \
 	Z_TYPE(zval) = IS_STRING;
 
-#define LEX_CONVERT_CUR_STRING() LEX_CONVERT_STRING(retval, *zendlval, yytext, yyleng)
+#define LEX_CONVERT_CUR_STRING() LEX_CONVERT_STRING(retval, *zendlval, yytext, yyleng) goto leave;
 
 #define LEX_CONVERT_REL_STRING(relpos) LEX_CONVERT_STRING(LEX_REL_BUF(relpos).token, LEX_REL_BUF(relpos).zv, (char *)LEX_REL_BUF(relpos).text, LEX_REL_BUF(relpos).len)
 
-#define LEX_CONVERT_BUF_STRING(buf) LEX_CONVERT_STRING((buf).token, (buf).zv, (char *)(buf).text, (buf).len)
+#define LEX_CONVERT_BUF_STRING(buf) LEX_CONVERT_STRING(buf##_token, buf->zv, (char *)buf->text, buf->len) buf->token = buf##_token;
 
 #define LEX_PREPARE_RETURN_FROM_BUF \
-	*zendlval = CG(tokenbuffer)[CG(tokenbufptr)].zv; \
+	buf_tmp = CG(tokenbuffer) + CG(tokenbufptr)++; \
+	*zendlval = buf_tmp->zv; \
 	if (Z_TYPE_P(zendlval) == 255) { \
 		Z_TYPE_P(zendlval) = 0; \
 	} \
-	retval = CG(tokenbuffer)[CG(tokenbufptr)].token; \
+	retval = buf_tmp->token; \
 	if (retval == '}' || retval == T_DOC_COMMENT) { \
 		RESET_DOC_COMMENT(); \
 	} \
-	SCNG(yy_text) = CG(tokenbuffer)[CG(tokenbufptr)].text; \
-	SCNG(yy_leng) = CG(tokenbuffer)[CG(tokenbufptr)].len; \
-	SCNG(yy_cursor) = CG(tokenbuffer)[CG(tokenbufptr)].start; \
-	SCNG(yy_limit) = CG(tokenbuffer)[CG(tokenbufptr)].end; \
+	SCNG(yy_text) = buf_tmp->text; \
+	SCNG(yy_leng) = buf_tmp->len; \
+	SCNG(yy_cursor) = buf_tmp->start; \
+	SCNG(yy_limit) = buf_tmp->end; \
 	if (retval == T_DOC_COMMENT) { \
-		CG(doc_comment) = CG(tokenbuffer)[CG(tokenbufptr)].doc_comment; \
-		CG(doc_comment_len) = CG(tokenbuffer)[CG(tokenbufptr)].doc_comment_len; \
+		CG(doc_comment) = buf_tmp->doc_comment; \
+		CG(doc_comment_len) = buf_tmp->doc_comment_len; \
 	} \
-	CG(zend_lineno) = CG(tokenbuffer)[CG(tokenbufptr)++].lineno;
+	CG(zend_lineno) = buf_tmp->lineno;
 
 /* This function checks the cases where a token needs to be converted to some other token to simplify parsing */
 /* Also it shouldn't be done in parser, because it actually breaks applications relying on token_get_all output */
@@ -1085,7 +1089,8 @@ static zend_always_inline zend_bool lex_is_real_string_token(int token) {
 /* The real lexing step is done in lex_scan_ex */
 int lex_scan(zval *zendlval) {
 	int retval;
-	token_buf *buf_one, *buf_two;
+	token_buf *buf_one, *buf_two, *buf_tmp;
+	int buf_one_token, buf_two_token;
 
 	if (CG(tokenbufptr) != -1) {
 		if (CG(tokenbuffer)[CG(tokenbufptr)].token != -1) {
@@ -1096,7 +1101,9 @@ int lex_scan(zval *zendlval) {
 	}
 
 	buf_one = CG(tokenbuffer) - 1;
+	buf_one_token = buf_one->token;
 	buf_two = buf_one;
+	buf_two_token = buf_one_token;
 
 again:
 	Z_TYPE_P(zendlval) = 0;
@@ -1111,7 +1118,9 @@ again:
 			CG(tokenbuffer) = erealloc(--CG(tokenbuffer), sizeof(token_buf) * ((CG(tokenbufsize) *= 2) + 1));
 			CG(tokenbuffer)++;
 			buf_one = CG(tokenbuffer) + lex_get_real_buf_offset(1);
+			buf_one_token = buf_one->token;
 			buf_two = CG(tokenbuffer) + lex_get_real_buf_offset(2);
+			buf_two_token = buf_two->token;
 		}
 
 		if (CG(tokenbufptr) != -1) {
@@ -1123,11 +1132,11 @@ again:
 
 			/* class access */
 			/* class name */
-			if (retval == T_PAAMAYIM_NEKUDOTAYIM && LEX_IS_BUF_ALPH_TOKEN(*buf_one)) {
-				LEX_CONVERT_BUF_STRING(*buf_one);
+			if (retval == T_PAAMAYIM_NEKUDOTAYIM && LEX_IS_BUF_ALPH_TOKEN(buf_one)) {
+				LEX_CONVERT_BUF_STRING(buf_one);
 			}
 			/* class const / method name */
-			if (buf_one->token == T_PAAMAYIM_NEKUDOTAYIM && LEX_IS_CUR_ALPH_TOKEN()) {
+			if (buf_one_token == T_PAAMAYIM_NEKUDOTAYIM && LEX_IS_CUR_ALPH_TOKEN()) {
 				/* ::class is reserved */
 				if (retval == T_CLASS) {
 					goto leave;
@@ -1138,7 +1147,7 @@ again:
 			/* classes */
 			if (CG(tokenbuf_in_class) != -1 && LEX_IS_CUR_ALPH_TOKEN()) {
 				/* class name */
-				switch (buf_one->token) {
+				switch (buf_one_token) {
 					case T_CLASS:
 					case T_INTERFACE:
 					case T_TRAIT:
@@ -1146,21 +1155,21 @@ again:
 							LEX_CONVERT_CUR_STRING();
 						}
 				}
-				if (CG(tokenbuf_in_class) == 0 && retval != T_NAMESPACE && ((retval != T_IMPLEMENTS && retval != T_EXTENDS) || buf_one->token == ',' || buf_one->token == T_IMPLEMENTS) && LEX_IS_CUR_ALPH_TOKEN()) {
+				if (CG(tokenbuf_in_class) == 0 && retval != T_NAMESPACE && ((retval != T_IMPLEMENTS && retval != T_EXTENDS) || buf_one_token == ',' || buf_one_token == T_IMPLEMENTS) && LEX_IS_CUR_ALPH_TOKEN()) {
 					LEX_CONVERT_CUR_STRING();
 				}
 				/* method names */
-				if ((buf_one->token == T_FUNCTION || (buf_one->token == '&' && buf_two->token == T_FUNCTION)) && LEX_IS_CUR_ALPH_TOKEN()) {
+				if ((buf_one_token == T_FUNCTION || (buf_one_token == '&' && buf_two_token == T_FUNCTION)) && LEX_IS_CUR_ALPH_TOKEN()) {
 					LEX_CONVERT_CUR_STRING();
 				}
 				/* constant names */
-				if (buf_one->token == T_CONST && LEX_IS_CUR_ALPH_TOKEN()) {
+				if (buf_one_token == T_CONST && LEX_IS_CUR_ALPH_TOKEN()) {
 					LEX_CONVERT_CUR_STRING();
 				}
 				/* trait use aliasing */
 				if (CG(tokenbuf_mode) == LEX_USE_TOKEN_MODE) {
-					if (retval == ';' && LEX_IS_BUF_ALPH_TOKEN(*buf_one)) {
-						switch (buf_one->token) {
+					if (retval == ';' && LEX_IS_BUF_ALPH_TOKEN(buf_one)) {
+						switch (buf_one_token) {
 							case T_PUBLIC:
 							case T_PROTECTED:
 							case T_PRIVATE:
@@ -1169,35 +1178,35 @@ again:
 								LEX_BUF_ADD
 						}
 					}
-					if (buf_one->token == T_INSTEADOF && LEX_IS_CUR_ALPH_TOKEN()) {
+					if (buf_one_token == T_INSTEADOF && LEX_IS_CUR_ALPH_TOKEN()) {
 						LEX_BUF_ADD
 					}
 				}
 			}
 
 			/* class name typehints */
-			if (CG(tokenbuf_fn_decl) == 0 && (buf_one->token == '(' || buf_one->token == ',') && retval != T_NAMESPACE && LEX_IS_CUR_ALPH_TOKEN()) {
+			if (CG(tokenbuf_fn_decl) == 0 && (buf_one_token == '(' || buf_one_token == ',') && retval != T_NAMESPACE && LEX_IS_CUR_ALPH_TOKEN()) {
 				LEX_CONVERT_CUR_STRING();
 			}
 
 			/* goto & labels */
-			if ((retval == ':' || (retval == ';' && buf_two->token == T_GOTO)) && LEX_IS_BUF_ALPH_TOKEN(*buf_one)) {
+			if ((retval == ':' || (retval == ';' && buf_two_token == T_GOTO)) && LEX_IS_BUF_ALPH_TOKEN(buf_one)) {
 				/* disallow replacing of alternative syntax and default (in switch) */
-				switch (buf_one->token) {
+				switch (buf_one_token) {
 					case T_DEFAULT:
 					case T_ELSE:
 						break;
 					default:
-						LEX_CONVERT_BUF_STRING(*buf_one);
+						LEX_CONVERT_BUF_STRING(buf_one);
 				}
 			}
-			if (buf_one->token == T_GOTO && LEX_IS_CUR_ALPH_TOKEN() && retval != T_DEFAULT) {
+			if (buf_one_token == T_GOTO && LEX_IS_CUR_ALPH_TOKEN() && retval != T_DEFAULT) {
 				LEX_CONVERT_CUR_STRING();
 			}
 
 			/* namespaces */
 			/* Disallow T_NAMESPACE because of namespace\string syntax */
-			switch (buf_one->token) {
+			switch (buf_one_token) {
 				case T_USE:
 					if (CG(tokenbuf_in_class) != -1) {
 						break;
@@ -1210,41 +1219,41 @@ again:
 					}
 			}
 			if (retval == T_NS_SEPARATOR) {
-				switch (buf_one->token) {
+				switch (buf_one_token) {
 					case T_NAMESPACE:
 						break;
 					case T_NEW:
-						if (buf_two->token == T_THROW || buf_two->token == T_RETURN || buf_two->token == ',') {
+						if (buf_two_token == T_THROW || buf_two_token == T_RETURN || buf_two_token == ',') {
 							break;
 						}
 					case T_USE:
 					case T_ECHO:
-						if (buf_two->token < 256 && buf_two->token != ',') {
+						if (buf_two_token < 256 && buf_two_token != ',') {
 							break;
 						}
 					case T_IMPLEMENTS:
-						if (buf_one->token == T_IMPLEMENTS && buf_two->token != T_IMPLEMENTS && buf_two->token != T_EXTENDS && buf_two->token != ',') {
+						if (buf_one_token == T_IMPLEMENTS && buf_two_token != T_IMPLEMENTS && buf_two_token != T_EXTENDS && buf_two_token != ',') {
 							break;
 						}
 					case T_EXTENDS:
-						if (buf_one->token == T_EXTENDS && buf_two->token != T_EXTENDS && buf_two->token != ',') {
+						if (buf_one_token == T_EXTENDS && buf_two_token != T_EXTENDS && buf_two_token != ',') {
 							break;
 						}
 					default:
-						if (LEX_IS_BUF_ALPH_TOKEN(*buf_one)) {
-							LEX_CONVERT_BUF_STRING(*buf_one);
+						if (LEX_IS_BUF_ALPH_TOKEN(buf_one)) {
+							LEX_CONVERT_BUF_STRING(buf_one);
 						}
 				}
 			}
 			/* handling of multiple comma separated T_USE */
-			if (CG(tokenbuf_mode) == LEX_USE_TOKEN_MODE && LEX_IS_CUR_ALPH_TOKEN() && buf_one->token == ',') {
+			if (CG(tokenbuf_mode) == LEX_USE_TOKEN_MODE && LEX_IS_CUR_ALPH_TOKEN() && buf_one_token == ',') {
 				LEX_CONVERT_CUR_STRING();
 			}
 
 			/* Handling of T_HALT_COMPILER; might cause memory leaks if not handled */
-			if (buf_one->token == T_HALT_COMPILER && retval == '(') {
+			if (buf_one_token == T_HALT_COMPILER && retval == '(') {
 				LEX_BUF_ADD
-			} else if (buf_two->token == T_HALT_COMPILER && buf_one->token == '(' && retval == ')') {
+			} else if (buf_two_token == T_HALT_COMPILER && buf_one_token == '(' && retval == ')') {
 				LEX_BUF_ADD
 			}
 		}
@@ -1302,7 +1311,7 @@ again:
 		} else {
 			switch (retval) {
 				case ';':
-					if (buf_two->token == '(' && LEX_REL_BUF(3).token == T_HALT_COMPILER) {
+					if (buf_two_token == '(' && LEX_REL_BUF(3).token == T_HALT_COMPILER) {
 						break;
 					}
 				case '&':
