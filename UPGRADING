@@ -113,11 +113,6 @@ PHP X.Y UPGRADE NOTES
 9. New Global Constants
 ========================================
 
-- Openssl:
-  . STREAM_CRYPTO_METHOD_SSLv2_CLIENT
-  . STREAM_CRYPTO_METHOD_SSLv3_CLIENT
-  . STREAM_CRYPTO_METHOD_SSLv23_CLIENT
-  . STREAM_CRYPTO_METHOD_TLS_CLIENT
 
 ========================================
 10. Changes to INI File Handling

@@ -4951,7 +4951,7 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 }
 /* }}} */
 
-static zend_bool php_openssl_match_cn(const char *subjectname, const char *certname)
+static zend_bool matches_wildcard_name(const char *subjectname, const char *certname)
 {
 	char *wildcard;
 	int prefix_len, suffix_len, subject_len;
@@ -4983,12 +4983,59 @@ static zend_bool php_openssl_match_cn(const char *subjectname, const char *certn
 	return 0;
 }
 
+static zend_bool matches_san_list(X509 *peer, const char *subject_name)
+{
+	int i;
+	zend_bool is_match = 0;
+	unsigned char *cert_name;
+
+	GENERAL_NAMES *alt_names = X509_get_ext_d2i(peer, NID_subject_alt_name, 0, 0);
+	int alt_name_count = sk_GENERAL_NAME_num(alt_names);
+
+	for (i = 0; i < alt_name_count; i++) {
+		GENERAL_NAME *san = sk_GENERAL_NAME_value(alt_names, i);
+
+		if (GEN_DNS == san->type) {
+			ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
+			is_match = matches_wildcard_name(subject_name, cert_name);
+			OPENSSL_free(cert_name);
+		}
+
+		if (is_match) {
+			break;
+		}
+	}
+
+	return is_match;
+}
+
+static zend_bool matches_common_name(X509 *peer, const char *subject_name)
+{
+	char buf[1024];
+	X509_NAME *cert_name;
+	zend_bool is_match = 0;
+	int cert_name_len;
+
+	cert_name = X509_get_subject_name(peer);
+	cert_name_len = X509_NAME_get_text_by_NID(cert_name, NID_commonName, buf, sizeof(buf));
+
+	if (cert_name_len == -1) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate peer certificate CN");
+	} else if (cert_name_len != strlen(buf)) {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer certificate CN=`%.*s' is malformed", cert_name_len, buf);
+	} else if (matches_wildcard_name(subject_name, buf)) {
+		is_match = 1;
+	} else {
+		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer certificate CN=`%.*s' did not match expected CN=`%s'", cert_name_len, buf, subject_name);
+	}
+	
+	return is_match;
+}
+
 int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stream TSRMLS_DC) /* {{{ */
 {
 	zval **val = NULL;
 	char *cnmatch = NULL;
-	X509_NAME *name;
-	char buf[1024];
 	int err;
 
 	/* verification is turned off */
@@ -5030,24 +5077,14 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 		}
 	}
 
-	name = X509_get_subject_name(peer);
-
-	/* Does the common name match ? (used primarily for https://) */
 	GET_VER_OPT_STRING("CN_match", cnmatch);
+
 	if (cnmatch) {
-		int name_len = X509_NAME_get_text_by_NID(name, NID_commonName, buf, sizeof(buf));
-
-		if (name_len == -1) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to locate peer certificate CN");
-			return FAILURE;
-		} else if (name_len != strlen(buf)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer certificate CN=`%.*s' is malformed", name_len, buf);
-			return FAILURE;
-		}
-
-		if (!php_openssl_match_cn(cnmatch, buf)) {
-			/* didn't match */
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Peer certificate CN=`%.*s' did not match expected CN=`%s'", name_len, buf, cnmatch);
+		if (matches_san_list(peer, cnmatch)) {
+			return SUCCESS;
+		} else if (matches_common_name(peer, cnmatch)) {
+			return SUCCESS;
+		} else {
 			return FAILURE;
 		}
 	}
@@ -5127,9 +5164,6 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 
 	GET_VER_OPT_STRING("local_cert", certfile);
 	if (certfile) {
-		X509 *cert = NULL;
-		EVP_PKEY *key = NULL;
-		SSL *tmpssl;
 		char resolved_path_buff[MAXPATHLEN];
 		const char * private_key = NULL;
 
@@ -5156,16 +5190,22 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 				}		
 			}
 
-			tmpssl = SSL_new(ctx);
-			cert = SSL_get_certificate(tmpssl);
+#if OPENSSL_VERSION_NUMBER < 0x10001001L
+			do {
+				/* Unnecessary as of OpenSSLv1.0.1 (will segfault if used with >= 10001001 ) */
+				X509 *cert = NULL;
+				EVP_PKEY *key = NULL;
+				SSL *tmpssl = SSL_new(ctx);
+				cert = SSL_get_certificate(tmpssl);
 
-			if (cert) {
-				key = X509_get_pubkey(cert);
-				EVP_PKEY_copy_parameters(key, SSL_get_privatekey(tmpssl));
-				EVP_PKEY_free(key);
-			}
-			SSL_free(tmpssl);
-
+				if (cert) {
+					key = X509_get_pubkey(cert);
+					EVP_PKEY_copy_parameters(key, SSL_get_privatekey(tmpssl));
+					EVP_PKEY_free(key);
+				}
+				SSL_free(tmpssl);
+			} while (0);
+#endif
 			if (!SSL_CTX_check_private_key(ctx)) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Private key does not match certificate!");
 			}
