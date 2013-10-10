@@ -322,8 +322,6 @@ static void php_openssl_info_callback(const SSL *ssl, int where, int ret)
 	php_stream *stream;
 	php_openssl_netstream_data_t *sslsock;
 
-	TSRMLS_FETCH();
-
 	stream = php_openssl_get_stream_from_ssl_handle(ssl);
 	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
 
