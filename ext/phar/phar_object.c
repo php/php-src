@@ -2104,7 +2104,7 @@ static zend_object *phar_rename_archive(phar_archive_data *phar, char *ext, zend
 	phar->fname = newpath;
 	phar->ext = newpath + phar->fname_len - strlen(ext) - 1;
 	efree(basepath);
-    efree(newbasename);
+	efree(newbasename);
 	efree(newname);
 
 	if (PHAR_G(manifest_cached) && NULL != (pphar = zend_hash_str_find_ptr(&cached_phars, newpath, phar->fname_len))) {
