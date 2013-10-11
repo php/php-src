@@ -48,7 +48,7 @@ if (is_resource($p)) {
 ?>
 ==DONE==
 --EXPECTF--
-Notice: Array to string conversion in /Users/tjerk/work/php-src/ext/standard/tests/streams/bug60602.php on line 12
+Notice: Array to string conversion in %s on line %d
 int(%d)
 int(0)
 bool(true)
