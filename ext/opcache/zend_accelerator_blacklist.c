@@ -314,6 +314,7 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 		blacklist->entries[blacklist->pos].path = (char *)malloc(path_length + 1);
 		if (!blacklist->entries[blacklist->pos].path) {
 			zend_accel_error(ACCEL_LOG_ERROR, "malloc() failed\n");
+			fclose(fp);
 			return;
 		}
 		blacklist->entries[blacklist->pos].id = blacklist->pos;
