@@ -89,7 +89,7 @@ array(1) {
     ["type"]=>
     string(10) "text/plain"
     ["tmp_name"]=>
-    string(14) "/tmp/php%s"
+    string(%d) "%s"
     ["error"]=>
     int(0)
     ["size"]=>

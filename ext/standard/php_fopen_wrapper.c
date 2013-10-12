@@ -120,11 +120,11 @@ static int php_stream_input_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 
 static int php_stream_input_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
 {
-	php_stream *inner = stream->abstract;
+	php_stream_input_t *input = stream->abstract;
 
-	if (inner) {
-		int sought = php_stream_seek(inner, offset, whence);
-		*newoffset = inner->position;
+	if (*input->body_ptr) {
+		int sought = php_stream_seek(*input->body_ptr, offset, whence);
+		*newoffset = (*input->body_ptr)->position;
 		return sought;
 	}
 
