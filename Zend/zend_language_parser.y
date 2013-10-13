@@ -737,8 +737,25 @@ instance_call:
 		chaining_instance_call	{ zend_do_pop_object(&$$ TSRMLS_CC); zend_do_end_variable_parse(&$2, BP_VAR_R, 0 TSRMLS_CC); }
 ;
 
+new_object:
+    T_NEW class_name_reference { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
+;
+
+anon_class_type:
+    T_CLASS { $$.u.op.opline_num = CG(zend_lineno); $$.EA = ZEND_ACC_ANON_CLASS; }
+;
+
+anon_class_decl:
+    anon_class_type { zend_do_create_anon_class(&$$ TSRMLS_CC); } extends_from { zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); } implements_list '{' class_statement_list '}' { zend_do_end_class_declaration(&$1, &$3 TSRMLS_CC); zend_do_fetch_class(&$$, &$2 TSRMLS_CC); }
+;
+
+new_anon_object:
+    T_NEW anon_class_decl { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC);  zend_do_extended_fcall_end(TSRMLS_C); }
+;
+
 new_expr:
-		T_NEW class_name_reference { zend_do_extended_fcall_begin(TSRMLS_C); zend_do_begin_new_object(&$1, &$2 TSRMLS_CC); } ctor_arguments { zend_do_end_new_object(&$$, &$1, &$4 TSRMLS_CC); zend_do_extended_fcall_end(TSRMLS_C);}
+		new_object
+	|   new_anon_object
 ;
 
 expr_without_variable:
@@ -875,16 +892,16 @@ function_call:
 ;
 
 class_name:
-		T_STATIC { $$.op_type = IS_CONST; ZVAL_STRINGL(&$$.u.constant, "static", sizeof("static")-1, 1);}
-	|	namespace_name { $$ = $1; }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
-	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); $$ = $2; }
+		T_STATIC { $$.EA = 0; $$.op_type = IS_CONST; ZVAL_STRINGL(&$$.u.constant, "static", sizeof("static")-1, 1);}
+	|	namespace_name { $$ = $1; $$.EA = 0; }
+	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.EA = 0; $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
+	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); $$ = $2; $$.EA = 0; }
 ;
 
 fully_qualified_class_name:
-		namespace_name { $$ = $1; }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
-	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); $$ = $2; }
+		namespace_name { $$ = $1; $$.EA = 0; }
+	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.EA = 0; $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant); zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); }
+	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); $$ = $2; $$.EA = 0; }
 ;
 
 

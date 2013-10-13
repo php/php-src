@@ -296,7 +296,13 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 				efree(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
-			str_efree(ce->name);
+#ifdef ZTS
+			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
+			    str_efree(ce->name);
+			}
+#else
+            str_efree(ce->name);         
+#endif
 			zend_hash_destroy(&ce->function_table);
 			zend_hash_destroy(&ce->constants_table);
 			if (ce->num_interfaces > 0 && ce->interfaces) {

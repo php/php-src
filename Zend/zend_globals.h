@@ -150,6 +150,9 @@ struct _zend_compiler_globals {
 	zend_bool multibyte;
 	zend_bool detect_unicode;
 	zend_bool encoding_declared;
+	
+	/* anonymous classes */
+    zend_ulong anon_class_id; 
 
 #ifdef ZTS
 	zval ***static_members_table;

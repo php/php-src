@@ -2174,8 +2174,12 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 	zval **ns;
 	znode tmp;
 	int len;
-
+    
 	compound = memchr(Z_STRVAL(class_name->u.constant), '\\', Z_STRLEN(class_name->u.constant));
+
+    if ((class_name->EA & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)
+        return;
+
 	if (compound) {
 		/* This is a compound class name that contains namespace prefix */
 		if (Z_STRVAL(class_name->u.constant)[0] == '\\') {
@@ -2218,7 +2222,8 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 				*class_name = tmp;
 			}
 		}
-	} else if (CG(current_import) || CG(current_namespace)) {
+	} else if ((CG(current_import) || CG(current_namespace)) && 
+	           !((class_name->EA & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {	    
 		/* this is a plain name (without \) */
 		lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 
@@ -2236,10 +2241,63 @@ void zend_resolve_class_name(znode *class_name TSRMLS_DC) /* {{{ */
 			zend_do_build_namespace_name(&tmp, &tmp, class_name TSRMLS_CC);
 			*class_name = tmp;
 		}
+	    
 		efree(lcname);
 	}
 }
 /* }}} */
+
+void zend_do_create_anon_class(znode *result TSRMLS_DC) { /* {{{ */
+    char *class_name = NULL;
+    int class_name_len = 0;
+    char *prefix_name = NULL;
+
+    /* give each class a unique id */
+    CG(anon_class_id)++;
+
+    /* prefix anonymous class with current scope for reference */
+    if (CG(active_op_array)) {
+        if (CG(active_class_entry) || CG(active_op_array)->function_name) {
+            if (CG(active_class_entry)) {
+                 prefix_name = (char*) CG(active_class_entry)->name;   
+            } else {
+                prefix_name = (char*) CG(active_op_array)->function_name;
+            }
+            
+            /* remove namespace from entry name */
+            if (CG(in_namespace)) {
+                prefix_name += Z_STRLEN_P(
+                    CG(current_namespace)) + sizeof("\\")-1;
+            }
+        } else {
+            /* use filename as prefix for class */
+            prefix_name = (char*) CG(active_op_array)->filename;
+        }
+    }
+    
+    if (!prefix_name) {
+        /* this shouldn't happen, possibly emit a warning ? */
+        prefix_name = "Class";
+    }
+    
+    /* populate znode constant with generated anonymous class name */
+    Z_TYPE(result->u.constant) = IS_STRING;
+    class_name_len = snprintf(
+        NULL, 0, "%s$$%lu", prefix_name, CG(anon_class_id));
+    class_name = (char*) emalloc(class_name_len+1);
+    snprintf(
+        class_name, class_name_len+1,
+        "%s$$%lu", prefix_name, CG(anon_class_id)
+    );
+    class_name[class_name_len] = '\0';
+
+    Z_STRLEN(result->u.constant) = class_name_len;
+    Z_STRVAL(result->u.constant) = (char*) zend_new_interned_string(
+            class_name, class_name_len+1, 1 TSRMLS_CC);
+
+    result->op_type = IS_CONST;
+    result->EA = ZEND_ACC_ANON_CLASS;
+} /* }}} */
 
 void zend_do_fetch_class(znode *result, znode *class_name TSRMLS_DC) /* {{{ */
 {
@@ -3762,11 +3820,16 @@ ZEND_API void zend_do_implement_interface(zend_class_entry *ce, zend_class_entry
 		} else if (ce->interfaces[i] == iface) {
 			if (i < parent_iface_num) {
 				ignore = 1;
-			} else {
+			} else {        
+                if ((ce->ce_flags & (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) == (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) {
+                    continue;
+                }
+
 				zend_error(E_COMPILE_ERROR, "Class %s cannot implement previously implemented interface %s", ce->name, iface->name);
 			}
 		}
 	}
+
 	if (ignore) {
 		/* Check for attempt to redeclare interface constants */
 		zend_hash_apply_with_arguments(&ce->constants_table TSRMLS_CC, (apply_func_args_t) do_interface_constant_check, 1, &iface);
@@ -4531,13 +4594,22 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		op1 = opline->op1.zv;
 		op2 = opline->op2.zv;
 	}
+
 	if (zend_hash_quick_find(class_table, Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_HASH_P(op1), (void **) &pce)==FAILURE) {
 		zend_error(E_COMPILE_ERROR, "Internal Zend error - Missing class information for %s", Z_STRVAL_P(op1));
 		return NULL;
 	} else {
 		ce = *pce;
 	}
+
 	ce->refcount++;
+
+    /* return anonymous class */
+    if ((ce->ce_flags & (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) == (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) {
+        ce->refcount--;
+        return ce;
+    }
+
 	if (zend_hash_quick_add(class_table, Z_STRVAL_P(op2), Z_STRLEN_P(op2)+1, Z_HASH_P(op2), &ce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		ce->refcount--;
 		if (!compile_time) {
@@ -4552,6 +4624,11 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 	} else {
 		if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLEMENT_INTERFACES|ZEND_ACC_IMPLEMENT_TRAITS))) {
 			zend_verify_abstract_class(ce TSRMLS_CC);
+		}
+
+		/* set final anonymous class */
+		if ((ce->ce_flags & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS) {   
+		    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
 		}
 		return ce;
 	}
@@ -4594,6 +4671,11 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		zend_error(E_COMPILE_ERROR, "Class %s cannot extend from trait %s", ce->name, parent_ce->name);
 	}
 
+    /* return anonymous class */
+	if ((ce->ce_flags & (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) == (ZEND_ACC_ANON_CLASS|ZEND_ACC_FINAL_CLASS)) {
+	    return ce;
+	}
+
 	zend_do_inheritance(ce, parent_ce TSRMLS_CC);
 
 	ce->refcount++;
@@ -4602,6 +4684,12 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 	if (zend_hash_quick_add(class_table, Z_STRVAL_P(op2), Z_STRLEN_P(op2)+1, Z_HASH_P(op2), pce, sizeof(zend_class_entry *), NULL)==FAILURE) {
 		zend_error(E_COMPILE_ERROR, "Cannot redeclare class %s", ce->name);
 	}
+
+    /* set final anonymous class */
+    if ((ce->ce_flags & ZEND_ACC_ANON_CLASS) == (ZEND_ACC_ANON_CLASS)) {
+	    ce->ce_flags |= ZEND_ACC_FINAL_CLASS;
+	}
+
 	return ce;
 }
 /* }}} */
@@ -4951,7 +5039,7 @@ void zend_do_default_before_statement(const znode *case_list, znode *default_tok
 }
 /* }}} */
 
-void zend_do_begin_class_declaration(const znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC) /* {{{ */
+void zend_do_begin_class_declaration(znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
 	int doing_inheritance = 0;
@@ -4959,11 +5047,13 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	char *lcname;
 	int error = 0;
 	zval **ns_name, key;
+	zend_uint opline_num = 0L;
+	
+	/* save opline_num before changing node */
+	opline_num = class_token->u.op.opline_num;
 
-	if (CG(active_class_entry)) {
-		zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
-		return;
-	}
+    /* save active class address */
+	class_token->u.op.ptr = CG(active_class_entry) ? CG(active_class_entry) : NULL;
 
 	lcname = zend_str_tolower_dup(Z_STRVAL(class_name->u.constant), Z_STRLEN(class_name->u.constant));
 
@@ -4977,8 +5067,13 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	    zend_hash_find(CG(current_import), lcname, Z_STRLEN(class_name->u.constant)+1, (void**)&ns_name) == SUCCESS) {
 		error = 1;
 	}
+	
+	if (CG(active_class_entry) && !((class_token->EA & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {
+        zend_error(E_COMPILE_ERROR, "Class declarations may not be nested");
+        return;
+	}
 
-	if (CG(current_namespace)) {
+	if (CG(current_namespace) && !((class_token->EA & ZEND_ACC_ANON_CLASS) == ZEND_ACC_ANON_CLASS)) {
 		/* Prefix class name with name of current namespace */
 		znode tmp;
 
@@ -5008,7 +5103,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 
 	zend_initialize_class_data(new_class_entry, 1 TSRMLS_CC);
 	new_class_entry->info.user.filename = zend_get_compiled_filename(TSRMLS_C);
-	new_class_entry->info.user.line_start = class_token->u.op.opline_num;
+	new_class_entry->info.user.line_start = opline_num;
 	new_class_entry->ce_flags |= class_token->EA;
 
 	if (parent_class_name && parent_class_name->op_type != IS_UNUSED) {
@@ -5052,7 +5147,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 	CALCULATE_LITERAL_HASH(opline->op2.constant);
 
 	zend_hash_quick_update(CG(class_table), Z_STRVAL(key), Z_STRLEN(key), Z_HASH_P(&CONSTANT(opline->op1.constant)), &new_class_entry, sizeof(zend_class_entry *), NULL);
-	CG(active_class_entry) = new_class_entry;
+    CG(active_class_entry) = new_class_entry;
 
 	opline->result.var = get_temporary_variable(CG(active_op_array));
 	opline->result_type = IS_VAR;
@@ -5064,6 +5159,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 		CG(doc_comment) = NULL;
 		CG(doc_comment_len) = 0;
 	}
+	
 }
 /* }}} */
 
@@ -5135,7 +5231,8 @@ void zend_do_end_class_declaration(const znode *class_token, const znode *parent
 		ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	}
 
-	CG(active_class_entry) = NULL;
+    /* restore active class entry*/
+	CG(active_class_entry) = class_token->u.op.ptr;
 }
 /* }}} */
 

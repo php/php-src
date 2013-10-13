@@ -83,7 +83,7 @@ typedef union _znode_op {
 	zend_op       *jmp_addr;
 	zval          *zv;
 	zend_literal  *literal;
-	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits */
+	void          *ptr;        /* Used for passing pointers from the compile to execution phase, currently used for traits and nested anonymous class support */
 } znode_op;
 
 typedef struct _znode { /* used only during compilation */ 
@@ -159,6 +159,7 @@ typedef struct _zend_try_catch_element {
 #define ZEND_ACC_FINAL_CLASS	            0x40
 #define ZEND_ACC_INTERFACE		            0x80
 #define ZEND_ACC_TRAIT						0x120
+#define ZEND_ACC_ANON_CLASS					0x400
 
 /* op_array flags */
 #define ZEND_ACC_INTERACTIVE				0x10
@@ -561,7 +562,8 @@ void zend_do_case_before_statement(const znode *case_list, znode *case_token, co
 void zend_do_case_after_statement(znode *result, const znode *case_token TSRMLS_DC);
 void zend_do_default_before_statement(const znode *case_list, znode *default_token TSRMLS_DC);
 
-void zend_do_begin_class_declaration(const znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC);
+void zend_do_create_anon_class(znode *result TSRMLS_DC);
+void zend_do_begin_class_declaration(znode *class_token, znode *class_name, const znode *parent_class_name TSRMLS_DC);
 void zend_do_end_class_declaration(const znode *class_token, const znode *parent_token TSRMLS_DC);
 void zend_do_declare_property(const znode *var_name, const znode *value, zend_uint access_type TSRMLS_DC);
 void zend_do_declare_class_constant(znode *var_name, const znode *value TSRMLS_DC);
