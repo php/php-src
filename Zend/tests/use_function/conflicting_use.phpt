@@ -22,4 +22,4 @@ namespace {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot use bar\baz as baz because the name is already in use in %s on line %d
+Fatal error: Cannot use function bar\baz as baz because the name is already in use in %s on line %d

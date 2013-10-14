@@ -7220,10 +7220,10 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const
 	}
 
 	if (zend_hash_add(current_import_sub, lookup_name, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
-		zend_error(E_COMPILE_ERROR, "Cannot use %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
+		zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", type, Z_STRVAL_P(ns), Z_STRVAL_P(name));
 	}
 	if (warn) {
-		zend_error(E_WARNING, "The use statement with non-compound name '%s' has no effect", Z_STRVAL_P(name));
+		zend_error(E_WARNING, "The use %s statement with non-compound name '%s' has no effect", type, Z_STRVAL_P(name));
 	}
 	efree(lookup_name);
 	zval_dtor(name);
