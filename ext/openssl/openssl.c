@@ -5162,7 +5162,7 @@ SSL *php_SSL_new_from_context(SSL_CTX *ctx, php_stream *stream TSRMLS_DC) /* {{{
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unable to set cipher list `%s'", cipherlist);
 		return NULL;
 	}
-	if (GET_VER_OPT("honor_server_ciphers")) {
+	if (GET_VER_OPT("honor_cipher_order")) {
 		SSL_CTX_set_options(ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
 	}
 
