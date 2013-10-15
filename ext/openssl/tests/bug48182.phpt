@@ -50,7 +50,7 @@ function ssl_async_client($port) {
 
 	$context = stream_context_create(array('ssl' => array(
 		'cafile' => dirname(__FILE__) . '/bug54992-ca.pem',
-		'peer_name' => 'bug54992.local'
+		'CN_match' => 'bug54992.local'
 	)));
 	$socket = stream_socket_client($host, $errno, $errstr, 10, $flags, $context);
 	stream_set_blocking($socket, 0);

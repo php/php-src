@@ -41,20 +41,14 @@ if ($pid == -1) {
 		)
 	));
 
-	var_dump(stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1,
+	var_dump(@stream_socket_client("ssl://127.0.0.1:64321", $errno, $errstr, 1,
                 STREAM_CLIENT_CONNECT, $contextC));
 
 } else {	
 	@pcntl_wait($status);
-	@stream_socket_accept($server, 1);
-	@stream_socket_accept($server, 1);
+	stream_socket_accept($server, 3);
+	stream_socket_accept($server, 3);
 }
 --EXPECTF--
 resource(%d) of type (stream)
-
-Warning: stream_socket_client(): Unable to locate peer certificate CN in %s on line %d
-
-Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
-
-Warning: stream_socket_client(): unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
 bool(false)
