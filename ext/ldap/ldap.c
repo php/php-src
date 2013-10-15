@@ -2107,6 +2107,7 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 		/* unregister rebind procedure */
 		if (ld->rebindproc != NULL) {
 			zval_dtor(ld->rebindproc);
+			FREE_ZVAL(ld->rebindproc);
 			ld->rebindproc = NULL;
 			ldap_set_rebind_proc(ld->link, NULL, NULL);
 		}

@@ -1183,7 +1183,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			 * such scripts recursivly, but some CG() variables may be
 			 * inconsistent. */
 
-			in_compilation = zend_is_compiling(TSRMLS_C);
+			in_compilation = CG(in_compilation);
 			if (in_compilation) {
 				saved_class_entry = CG(active_class_entry);
 				CG(active_class_entry) = NULL;
@@ -1195,6 +1195,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				SAVE_STACK(declare_stack);
 				SAVE_STACK(list_stack);
 				SAVE_STACK(context_stack);
+				CG(in_compilation) = 0;
 			}
 
 			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC) == SUCCESS) {
@@ -1219,6 +1220,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				RESTORE_STACK(declare_stack);
 				RESTORE_STACK(list_stack);
 				RESTORE_STACK(context_stack);
+				CG(in_compilation) = 1;
 			}
 
 			if (!EG(user_error_handler)) {

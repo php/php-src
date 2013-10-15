@@ -153,3 +153,18 @@ ADDING SHARED MODULE SUPPORT TO A MODULE
         #ifdef COMPILE_DL_FOO
         ZEND_GET_MODULE(foo)
         #endif
+
+PECL SITE CONFORMITY
+
+  If you plan to release an extension to the PECL website, there are several
+  points to be regarded.
+
+ 1. Add LICENSE or COPYING to the package.xml
+
+ 2. The following should be defined in one of the extension header files
+
+        #define PHP_FOO_VERSION "1.2.3"
+
+    This macros has to be used within your foo_module_entry to indicate the
+    extension version.
+
