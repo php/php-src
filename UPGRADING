@@ -492,6 +492,16 @@ b. Extensions with changed behavior
      - the output of the tiger hash family has been corrected, see
        https://bugs.php.net/61307
 
+   - JSON extension
+     - Fixed whitespace part of bug #64874 ("json_decode handles whitespace and
+       case-sensitivity incorrectly")
+       This means that leading and trailing whitespace when deserialising lone
+       JSON null, true, false, string and number values no longer causes an
+       error. Please note that this only applies to the deserialising of strings
+       containing only a null, true, false, string or number value. Leading and
+       trailing whitespace around and inside objects and arrays has never caused
+       an error.
+       
 ===========================
 10. Changes in SAPI support
 ===========================
