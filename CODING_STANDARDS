@@ -151,7 +151,7 @@ Naming Conventions
 
 7.  Classes should be given descriptive names. Avoid using abbreviations where
     possible. Each word in the class name should start with a capital letter,
-    without underscore delimiters (CampelCaps starting with a capital letter).
+    without underscore delimiters (CamelCaps starting with a capital letter).
     The class name should be prefixed with the name of the 'parent set' (e.g.
     the name of the extension)::
 
@@ -259,7 +259,10 @@ The file labelled 'EXPERIMENTAL' should include the following
 information::
 
   Any authoring information (known bugs, future directions of the module).
-  Ongoing status notes which may not be appropriate for SVN comments.
+  Ongoing status notes which may not be appropriate for Git comments.
+
+In general new features should go to PECL or experimental branches until
+there are specific reasons for directly adding it to the core distribution.
 
 Aliases & Legacy Documentation
 -----------------------------------

@@ -1226,7 +1226,7 @@ PHPAPI char *_php_math_number_format_ex(double d, int dec, char *dec_point,
 }
 /* }}} */
 
-/* {{{ proto string number_format(float number [, int num_decimal_places [, string dec_seperator, string thousands_seperator]])
+/* {{{ proto string number_format(float number [, int num_decimal_places [, string dec_separator, string thousands_separator]])
    Formats a number with grouped thousands */
 PHP_FUNCTION(number_format)
 {

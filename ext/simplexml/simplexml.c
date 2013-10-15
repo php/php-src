@@ -59,7 +59,7 @@ static zval *sxe_get_value(zval *z TSRMLS_DC);
 static void php_sxe_iterator_dtor(zend_object_iterator *iter TSRMLS_DC);
 static int php_sxe_iterator_valid(zend_object_iterator *iter TSRMLS_DC);
 static void php_sxe_iterator_current_data(zend_object_iterator *iter, zval ***data TSRMLS_DC);
-static int php_sxe_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC);
+static void php_sxe_iterator_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC);
 static void php_sxe_iterator_move_forward(zend_object_iterator *iter TSRMLS_DC);
 static void php_sxe_iterator_rewind(zend_object_iterator *iter TSRMLS_DC);
 
@@ -694,7 +694,7 @@ static void sxe_dimension_write(zval *object, zval *offset, zval *value TSRMLS_D
 }
 /* }}} */
 
-static zval** sxe_property_get_adr(zval *object, zval *member, const zend_literal *key TSRMLS_DC) /* {{{ */
+static zval** sxe_property_get_adr(zval *object, zval *member, int fetch_type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	php_sxe_object *sxe;
 	xmlNodePtr      node;
@@ -2376,29 +2376,22 @@ static void php_sxe_iterator_current_data(zend_object_iterator *iter, zval ***da
 }
 /* }}} */
 
-static int php_sxe_iterator_current_key(zend_object_iterator *iter, char **str_key, uint *str_key_len, ulong *int_key TSRMLS_DC) /* {{{ */
+static void php_sxe_iterator_current_key(zend_object_iterator *iter, zval *key TSRMLS_DC) /* {{{ */
 {
-	zval *curobj;
-	xmlNodePtr curnode = NULL;
-	php_sxe_object *intern;
-	int namelen;
-
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
-	curobj = iterator->sxe->iter.data;
+	zval *curobj = iterator->sxe->iter.data;
+	php_sxe_object *intern = (php_sxe_object *)zend_object_store_get_object(curobj TSRMLS_CC);
 
-	intern = (php_sxe_object *)zend_object_store_get_object(curobj TSRMLS_CC);
+	xmlNodePtr curnode = NULL;
 	if (intern != NULL && intern->node != NULL) {
 		curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
 	}
-	if (!curnode) {
-		return HASH_KEY_NON_EXISTANT;
+
+	if (curnode) {
+		ZVAL_STRINGL(key, (char *) curnode->name, xmlStrlen(curnode->name), 1);
+	} else {
+		ZVAL_NULL(key);
 	}
-
-	namelen = xmlStrlen(curnode->name);
-	*str_key = estrndup((char *)curnode->name, namelen);
-	*str_key_len = namelen + 1;
-	return HASH_KEY_IS_STRING;
-
 }
 /* }}} */
 

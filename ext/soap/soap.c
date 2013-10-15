@@ -753,6 +753,12 @@ PHP_MINIT_FUNCTION(soap)
 	REGISTER_LONG_CONSTANT("WSDL_CACHE_MEMORY", WSDL_CACHE_MEMORY, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("WSDL_CACHE_BOTH",   WSDL_CACHE_BOTH,   CONST_CS | CONST_PERSISTENT);
 
+	/* New SOAP SSL Method Constants */
+	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_TLS",    SOAP_SSL_METHOD_TLS,    CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv2",  SOAP_SSL_METHOD_SSLv2,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv3",  SOAP_SSL_METHOD_SSLv3,  CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv23", SOAP_SSL_METHOD_SSLv23, CONST_CS | CONST_PERSISTENT);
+
 	old_error_handler = zend_error_cb;
 	zend_error_cb = soap_error_handler;
 
@@ -1554,48 +1560,45 @@ PHP_METHOD(SoapServer, handle)
 	}
 
 	if (ZEND_NUM_ARGS() == 0) {
-		if (SG(request_info).raw_post_data) {
-			char *post_data = SG(request_info).raw_post_data;
-			int post_data_length = SG(request_info).raw_post_data_length;
+		if (SG(request_info).request_body && 0 == php_stream_rewind(SG(request_info).request_body)) {
 			zval **server_vars, **encoding;
+			php_stream_filter *zf = NULL;
 
 			zend_is_auto_global("_SERVER", sizeof("_SERVER")-1 TSRMLS_CC);
 			if (zend_hash_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER"), (void **) &server_vars) == SUCCESS &&
 			    Z_TYPE_PP(server_vars) == IS_ARRAY &&
 			    zend_hash_find(Z_ARRVAL_PP(server_vars), "HTTP_CONTENT_ENCODING", sizeof("HTTP_CONTENT_ENCODING"), (void **) &encoding)==SUCCESS &&
 			    Z_TYPE_PP(encoding) == IS_STRING) {
-				zval func;
-				zval retval;
-				zval param;
-				zval *params[1];
 
-				if ((strcmp(Z_STRVAL_PP(encoding),"gzip") == 0 ||
-				     strcmp(Z_STRVAL_PP(encoding),"x-gzip") == 0) &&
-				    zend_hash_exists(EG(function_table), "gzinflate", sizeof("gzinflate"))) {
-					ZVAL_STRING(&func, "gzinflate", 0);
-					params[0] = &param;
-					ZVAL_STRINGL(params[0], post_data+10, post_data_length-10, 0);
-					INIT_PZVAL(params[0]);
-				} else if (strcmp(Z_STRVAL_PP(encoding),"deflate") == 0 &&
-		           zend_hash_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress"))) {
-					ZVAL_STRING(&func, "gzuncompress", 0);
-					params[0] = &param;
-					ZVAL_STRINGL(params[0], post_data, post_data_length, 0);
-					INIT_PZVAL(params[0]);
+				if (strcmp(Z_STRVAL_PP(encoding),"gzip") == 0
+				||  strcmp(Z_STRVAL_PP(encoding),"x-gzip") == 0
+				||  strcmp(Z_STRVAL_PP(encoding),"deflate") == 0
+				) {
+					zval filter_params;
+
+					INIT_PZVAL(&filter_params);
+					array_init_size(&filter_params, 1);
+					add_assoc_long_ex(&filter_params, ZEND_STRS("window"), 0x2f); /* ANY WBITS */
+
+					zf = php_stream_filter_create("zlib.inflate", &filter_params, 0 TSRMLS_CC);
+					zval_dtor(&filter_params);
+
+					if (zf) {
+						php_stream_filter_append(&SG(request_info).request_body->readfilters, zf);
+					} else {
+						php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't uncompress compressed request");
+						return;
+					}
 				} else {
 					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Request is compressed with unknown compression '%s'",Z_STRVAL_PP(encoding));
 					return;
 				}
-				if (call_user_function(CG(function_table), (zval**)NULL, &func, &retval, 1, params TSRMLS_CC) == SUCCESS &&
-				    Z_TYPE(retval) == IS_STRING) {
-					doc_request = soap_xmlParseMemory(Z_STRVAL(retval),Z_STRLEN(retval));
-					zval_dtor(&retval);
-				} else {
-					php_error_docref(NULL TSRMLS_CC, E_WARNING,"Can't uncompress compressed request");
-					return;
-				}
-			} else {
-				doc_request = soap_xmlParseMemory(post_data, post_data_length);
+			}
+
+			doc_request = soap_xmlParseFile("php://input" TSRMLS_CC);
+
+			if (zf) {
+				php_stream_filter_remove(zf, 1 TSRMLS_CC);
 			}
 		} else {
 			zval_ptr_dtor(&retval);
@@ -2496,6 +2499,11 @@ PHP_METHOD(SoapClient, SoapClient)
 		if (zend_hash_find(ht, "keep_alive", sizeof("keep_alive"), (void**)&tmp) == SUCCESS &&
 				(Z_TYPE_PP(tmp) == IS_BOOL || Z_TYPE_PP(tmp) == IS_LONG) && Z_LVAL_PP(tmp) == 0) {
 			add_property_long(this_ptr, "_keep_alive", 0);
+		}
+
+		if (zend_hash_find(ht, "ssl_method", sizeof("ssl_method"), (void**)&tmp) == SUCCESS &&
+			Z_TYPE_PP(tmp) == IS_LONG) {
+			add_property_long(this_ptr, "_ssl_method", Z_LVAL_PP(tmp));
 		}
 	} else if (Z_TYPE_P(wsdl) == IS_NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'location' and 'uri' options are required in nonWSDL mode");

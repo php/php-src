@@ -238,10 +238,10 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 const zend_function_entry mcrypt_functions[] = { /* {{{ */
-	PHP_FE(mcrypt_ecb, 				arginfo_mcrypt_ecb)
-	PHP_FE(mcrypt_cbc, 				arginfo_mcrypt_cbc)
-	PHP_FE(mcrypt_cfb, 				arginfo_mcrypt_cfb)
-	PHP_FE(mcrypt_ofb, 				arginfo_mcrypt_ofb)
+	PHP_DEP_FE(mcrypt_ecb, 				arginfo_mcrypt_ecb)
+	PHP_DEP_FE(mcrypt_cbc, 				arginfo_mcrypt_cbc)
+	PHP_DEP_FE(mcrypt_cfb, 				arginfo_mcrypt_cfb)
+	PHP_DEP_FE(mcrypt_ofb, 				arginfo_mcrypt_ofb)
 	PHP_FE(mcrypt_get_key_size, 	arginfo_mcrypt_get_key_size)
 	PHP_FE(mcrypt_get_block_size, 	arginfo_mcrypt_get_block_size)
 	PHP_FE(mcrypt_get_cipher_name, 	arginfo_mcrypt_get_cipher_name)
@@ -1387,7 +1387,7 @@ PHP_FUNCTION(mcrypt_create_iv)
 	}
 	
 	iv = ecalloc(size + 1, 1);
-
+	
 	if (source == RANDOM || source == URANDOM) {
 #if PHP_WIN32
 		/* random/urandom equivalent on Windows */

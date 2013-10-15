@@ -968,7 +968,9 @@ PHP_FUNCTION(ftp_nb_get)
 		RETURN_LONG(PHP_FTP_FAILED);
 	}
 
-        php_stream_close(outstream);
+	if (ret == PHP_FTP_FINISHED){
+		php_stream_close(outstream);
+	}
 
 	RETURN_LONG(ret);
 }

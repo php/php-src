@@ -26,6 +26,10 @@
 #include <math.h>
 #include <assert.h>
 
+#ifdef __GNUC__
+#include <stddef.h>
+#endif
+
 #ifdef HAVE_IEEEFP_H
 #include <ieeefp.h>
 #endif
@@ -68,22 +72,40 @@ END_EXTERN_C()
 
 #if ZEND_DVAL_TO_LVAL_CAST_OK
 # define zend_dval_to_lval(d) ((long) (d))
-#elif SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
+#elif SIZEOF_LONG == 4
 static zend_always_inline long zend_dval_to_lval(double d)
 {
 	if (d > LONG_MAX || d < LONG_MIN) {
-		return (long)(unsigned long)(zend_long64) d;
+		double	two_pow_32 = pow(2., 32.),
+				dmod;
+
+		dmod = fmod(d, two_pow_32);
+		if (dmod < 0) {
+			/* we're going to make this number positive; call ceil()
+			 * to simulate rounding towards 0 of the negative number */
+			dmod = ceil(dmod) + two_pow_32;
+		}
+		return (long)(unsigned long)dmod;
 	}
-	return (long) d;
+	return (long)d;
 }
 #else
 static zend_always_inline long zend_dval_to_lval(double d)
 {
 	/* >= as (double)LONG_MAX is outside signed range */
-	if (d >= LONG_MAX) {
-		return (long)(unsigned long) d;
+	if (d >= LONG_MAX || d < LONG_MIN) {
+		double	two_pow_64 = pow(2., 64.),
+				dmod;
+
+		dmod = fmod(d, two_pow_64);
+		if (dmod < 0) {
+			/* no need to call ceil; original double must have had no
+			 * fractional part, hence dmod does not have one either */
+			dmod += two_pow_64;
+		}
+		return (long)(unsigned long)dmod;
 	}
-	return (long) d;
+	return (long)d;
 }
 #endif
 /* }}} */
@@ -110,7 +132,7 @@ static inline zend_uchar is_numeric_string_ex(const char *str, int length, long 
 {
 	const char *ptr;
 	int base = 10, digits = 0, dp_or_e = 0;
-	double local_dval;
+	double local_dval = 0.0;
 	zend_uchar type;
 
 	if (!length) {
@@ -247,11 +269,11 @@ static inline zend_uchar is_numeric_string(const char *str, int length, long *lv
     return is_numeric_string_ex(str, length, lval, dval, allow_errors, NULL);
 }
 
-static inline char *
-zend_memnstr(char *haystack, char *needle, int needle_len, char *end)
+static inline const char *
+zend_memnstr(const char *haystack, const char *needle, int needle_len, char *end)
 {
-	char *p = haystack;
-	char ne = needle[needle_len-1];
+	const char *p = haystack;
+	const char ne = needle[needle_len-1];
 
 	if (needle_len == 1) {
 		return (char *)memchr(p, *needle, (end-p));
@@ -302,6 +324,7 @@ ZEND_API int increment_function(zval *op1);
 ZEND_API int decrement_function(zval *op2);
 
 ZEND_API void convert_scalar_to_number(zval *op TSRMLS_DC);
+ZEND_API void _convert_to_cstring(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void _convert_to_string(zval *op ZEND_FILE_LINE_DC);
 ZEND_API void convert_to_long(zval *op);
 ZEND_API void convert_to_double(zval *op);
@@ -315,6 +338,7 @@ ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 ZEND_API int add_char_to_string(zval *result, const zval *op1, const zval *op2);
 ZEND_API int add_string_to_string(zval *result, const zval *op1, const zval *op2);
+#define convert_to_cstring(op) if ((op)->type != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
 #define convert_to_string(op) if ((op)->type != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
 
 ZEND_API double zend_string_to_double(const char *number, zend_uint length);
@@ -341,6 +365,7 @@ ZEND_API int zend_binary_strcmp(const char *s1, uint len1, const char *s2, uint 
 ZEND_API int zend_binary_strncmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
 ZEND_API int zend_binary_strcasecmp(const char *s1, uint len1, const char *s2, uint len2);
 ZEND_API int zend_binary_strncasecmp(const char *s1, uint len1, const char *s2, uint len2, uint length);
+ZEND_API int zend_binary_strncasecmp_l(const char *s1, uint len1, const char *s2, uint len2, uint length);
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2 TSRMLS_DC);
@@ -474,6 +499,10 @@ ZEND_API void zend_update_current_locale(void);
 #define zend_update_current_locale()
 #endif
 
+/* The offset in bytes between the value and type fields of a zval */
+#define ZVAL_OFFSETOF_TYPE	\
+	(offsetof(zval,type) - offsetof(zval,value))
+
 static zend_always_inline int fast_increment_function(zval *op1)
 {
 	if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
@@ -483,20 +512,26 @@ static zend_always_inline int fast_increment_function(zval *op1)
 			"jno  0f\n\t"
 			"movl $0x0, (%0)\n\t"
 			"movl $0x41e00000, 0x4(%0)\n\t"
-			"movb $0x2,0xc(%0)\n"
+			"movb %1, %c2(%0)\n"
 			"0:"
 			:
-			: "r"(op1));
+			: "r"(&op1->value),
+			  "n"(IS_DOUBLE),
+			  "n"(ZVAL_OFFSETOF_TYPE)
+			: "cc");
 #elif defined(__GNUC__) && defined(__x86_64__)
 		__asm__(
 			"incq (%0)\n\t"
 			"jno  0f\n\t"
 			"movl $0x0, (%0)\n\t"
 			"movl $0x43e00000, 0x4(%0)\n\t"
-			"movb $0x2,0x14(%0)\n"
+			"movb %1, %c2(%0)\n"
 			"0:"
 			:
-			: "r"(op1));
+			: "r"(&op1->value),
+			  "n"(IS_DOUBLE),
+			  "n"(ZVAL_OFFSETOF_TYPE)
+			: "cc");
 #else
 		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MAX)) {
 			/* switch to double */
@@ -520,20 +555,26 @@ static zend_always_inline int fast_decrement_function(zval *op1)
 			"jno  0f\n\t"
 			"movl $0x00200000, (%0)\n\t"
 			"movl $0xc1e00000, 0x4(%0)\n\t"
-			"movb $0x2,0xc(%0)\n"
+			"movb %1,%c2(%0)\n"
 			"0:"
 			:
-			: "r"(op1));
+			: "r"(&op1->value),
+			  "n"(IS_DOUBLE),
+			  "n"(ZVAL_OFFSETOF_TYPE)
+			: "cc");
 #elif defined(__GNUC__) && defined(__x86_64__)
 		__asm__(
 			"decq (%0)\n\t"
 			"jno  0f\n\t"
 			"movl $0x00000000, (%0)\n\t"
 			"movl $0xc3e00000, 0x4(%0)\n\t"
-			"movb $0x2,0x14(%0)\n"
+			"movb %1,%c2(%0)\n"
 			"0:"
 			:
-			: "r"(op1));
+			: "r"(&op1->value),
+			  "n"(IS_DOUBLE),
+			  "n"(ZVAL_OFFSETOF_TYPE)
+			: "cc");
 #else
 		if (UNEXPECTED(Z_LVAL_P(op1) == LONG_MIN)) {
 			/* switch to double */
@@ -558,40 +599,46 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 			"addl   (%2), %%eax\n\t"
 			"jo     0f\n\t"     
 			"movl   %%eax, (%0)\n\t"
-			"movb   $0x1,0xc(%0)\n\t"
+			"movb   %3, %c5(%0)\n\t"
 			"jmp    1f\n"
 			"0:\n\t"
 			"fildl	(%1)\n\t"
 			"fildl	(%2)\n\t"
 			"faddp	%%st, %%st(1)\n\t"
-			"movb   $0x2,0xc(%0)\n\t"
+			"movb   %4, %c5(%0)\n\t"
 			"fstpl	(%0)\n"
 			"1:"
 			: 
-			: "r"(result),
-			  "r"(op1),
-			  "r"(op2)
-			: "eax");
+			: "r"(&result->value),
+			  "r"(&op1->value),
+			  "r"(&op2->value),
+			  "n"(IS_LONG),
+			  "n"(IS_DOUBLE),
+			  "n"(ZVAL_OFFSETOF_TYPE)
+			: "eax","cc");
 #elif defined(__GNUC__) && defined(__x86_64__)
 		__asm__(
 			"movq	(%1), %%rax\n\t"
 			"addq   (%2), %%rax\n\t"
 			"jo     0f\n\t"     
 			"movq   %%rax, (%0)\n\t"
-			"movb   $0x1,0x14(%0)\n\t"
+			"movb   %3, %c5(%0)\n\t"
 			"jmp    1f\n"
 			"0:\n\t"
 			"fildq	(%1)\n\t"
 			"fildq	(%2)\n\t"
 			"faddp	%%st, %%st(1)\n\t"
-			"movb   $0x2,0x14(%0)\n\t"
+			"movb   %4, %c5(%0)\n\t"
 			"fstpl	(%0)\n"
 			"1:"
 			: 
-			: "r"(result),
-			  "r"(op1),
-			  "r"(op2)
-			: "rax");
+			: "r"(&result->value),
+			  "r"(&op1->value),
+			  "r"(&op2->value),
+			  "n"(IS_LONG),
+			  "n"(IS_DOUBLE),
+			  "n"(ZVAL_OFFSETOF_TYPE)
+			: "rax","cc");
 #else
 			Z_LVAL_P(result) = Z_LVAL_P(op1) + Z_LVAL_P(op2);
 
@@ -633,7 +680,7 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 			"subl   (%2), %%eax\n\t"
 			"jo     0f\n\t"     
 			"movl   %%eax, (%0)\n\t"
-			"movb   $0x1,0xc(%0)\n\t"
+			"movb   %3, %c5(%0)\n\t"
 			"jmp    1f\n"
 			"0:\n\t"
 			"fildl	(%2)\n\t"
@@ -643,21 +690,24 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 #else
 			"fsubp	%%st, %%st(1)\n\t"
 #endif
-			"movb   $0x2,0xc(%0)\n\t"
+			"movb   %4, %c5(%0)\n\t"
 			"fstpl	(%0)\n"
 			"1:"
 			: 
-			: "r"(result),
-			  "r"(op1),
-			  "r"(op2)
-			: "eax");
+			: "r"(&result->value),
+			  "r"(&op1->value),
+			  "r"(&op2->value),
+			  "n"(IS_LONG),
+			  "n"(IS_DOUBLE),
+			  "n"(ZVAL_OFFSETOF_TYPE)
+			: "eax","cc");
 #elif defined(__GNUC__) && defined(__x86_64__)
 		__asm__(
 			"movq	(%1), %%rax\n\t"
 			"subq   (%2), %%rax\n\t"
 			"jo     0f\n\t"     
 			"movq   %%rax, (%0)\n\t"
-			"movb   $0x1,0x14(%0)\n\t"
+			"movb   %3, %c5(%0)\n\t"
 			"jmp    1f\n"
 			"0:\n\t"
 			"fildq	(%2)\n\t"
@@ -667,14 +717,17 @@ static zend_always_inline int fast_sub_function(zval *result, zval *op1, zval *o
 #else
 			"fsubp	%%st, %%st(1)\n\t"
 #endif
-			"movb   $0x2,0x14(%0)\n\t"
+			"movb   %4, %c5(%0)\n\t"
 			"fstpl	(%0)\n"
 			"1:"
 			: 
-			: "r"(result),
-			  "r"(op1),
-			  "r"(op2)
-			: "rax");
+			: "r"(&result->value),
+			  "r"(&op1->value),
+			  "r"(&op2->value),
+			  "n"(IS_LONG),
+			  "n"(IS_DOUBLE),
+			  "n"(ZVAL_OFFSETOF_TYPE)
+			: "rax","cc");
 #else
 			Z_LVAL_P(result) = Z_LVAL_P(op1) - Z_LVAL_P(op2);
 
@@ -891,6 +944,24 @@ static zend_always_inline int fast_is_smaller_or_equal_function(zval *result, zv
 	compare_function(result, op1, op2 TSRMLS_CC);
 	return Z_LVAL_P(result) <= 0;
 }
+
+#define ZEND_TRY_BINARY_OBJECT_OPERATION(opcode)                                                  \
+	if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, do_operation)) {                       \
+		if (SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, op2 TSRMLS_CC)) {  \
+			return SUCCESS;                                                                       \
+		}                                                                                         \
+	} else if (Z_TYPE_P(op2) == IS_OBJECT && Z_OBJ_HANDLER_P(op2, do_operation)) {                \
+		if (SUCCESS == Z_OBJ_HANDLER_P(op2, do_operation)(opcode, result, op1, op2 TSRMLS_CC)) {  \
+			return SUCCESS;                                                                       \
+		}                                                                                         \
+	}
+
+#define ZEND_TRY_UNARY_OBJECT_OPERATION(opcode)                                                   \
+	if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, do_operation)                          \
+	 && SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, NULL TSRMLS_CC)        \
+	) {                                                                                           \
+		return SUCCESS;                                                                           \
+	}
 
 #endif
 

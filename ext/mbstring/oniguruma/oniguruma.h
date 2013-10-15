@@ -4,7 +4,7 @@
   oniguruma.h - Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2009  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,16 +29,14 @@
  * SUCH DAMAGE.
  */
 
-#include "../php_onig_compat.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define ONIGURUMA
-#define ONIGURUMA_VERSION_MAJOR   4
-#define ONIGURUMA_VERSION_MINOR   7
-#define ONIGURUMA_VERSION_TEENY   1
+#define ONIGURUMA_VERSION_MAJOR   5
+#define ONIGURUMA_VERSION_MINOR   9
+#define ONIGURUMA_VERSION_TEENY   2
 
 #ifdef __cplusplus
 # ifndef  HAVE_PROTOTYPES
@@ -51,6 +49,12 @@ extern "C" {
 
 /* escape Mac OS X/Xcode 2.4/gcc 4.0.1 problem */
 #if defined(__APPLE__) && defined(__GNUC__) && __GNUC__ >= 4
+# ifndef  HAVE_STDARG_PROTOTYPES
+#  define HAVE_STDARG_PROTOTYPES 1
+# endif
+#endif
+
+#ifdef HAVE_STDARG_H
 # ifndef  HAVE_STDARG_PROTOTYPES
 #  define HAVE_STDARG_PROTOTYPES 1
 # endif
@@ -92,30 +96,34 @@ extern "C" {
 #define UChar OnigUChar
 #endif
 
-typedef unsigned char  OnigUChar;
+#ifdef _WIN32
+# include <windows.h>
+typedef ULONG_PTR OnigCodePoint;
+#else
 typedef unsigned long  OnigCodePoint;
+#endif
+typedef unsigned char  OnigUChar;
+typedef unsigned int   OnigCtype;
 typedef unsigned int   OnigDistance;
 
 #define ONIG_INFINITE_DISTANCE  ~((OnigDistance )0)
 
-/* ambiguous match flag */
-typedef unsigned int OnigAmbigType;
+typedef unsigned int OnigCaseFoldType; /* case fold flag */
 
-ONIG_EXTERN OnigAmbigType OnigDefaultAmbigFlag;
+ONIG_EXTERN OnigCaseFoldType OnigDefaultCaseFoldFlag;
 
-#define ONIGENC_AMBIGUOUS_MATCH_NONE                   0
-#define ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE            (1<<0)
-#define ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE         (1<<1)
+/* #define ONIGENC_CASE_FOLD_HIRAGANA_KATAKANA  (1<<1) */
+/* #define ONIGENC_CASE_FOLD_KATAKANA_WIDTH     (1<<2) */
+#define ONIGENC_CASE_FOLD_TURKISH_AZERI         (1<<20)
+#define INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR   (1<<30)
 
-#define ONIGENC_AMBIGUOUS_MATCH_LIMIT                 (1<<1)
-
-#define ONIGENC_AMBIGUOUS_MATCH_FULL \
- ( ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE | ONIGENC_AMBIGUOUS_MATCH_NONASCII_CASE )
-#define ONIGENC_AMBIGUOUS_MATCH_DEFAULT  OnigDefaultAmbigFlag
+#define ONIGENC_CASE_FOLD_MIN      INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR
+#define ONIGENC_CASE_FOLD_DEFAULT  OnigDefaultCaseFoldFlag
 
 
-#define ONIGENC_MAX_COMP_AMBIG_CODE_LEN       3
-#define ONIGENC_MAX_COMP_AMBIG_CODE_ITEM_NUM  4
+#define ONIGENC_MAX_COMP_CASE_FOLD_CODE_LEN       3
+#define ONIGENC_GET_CASE_FOLD_CODES_MAX_NUM      13
+/* 13 => Unicode:0x1ffc */
 
 /* code range */
 #define ONIGENC_CODE_RANGE_NUM(range)     ((int )range[0])
@@ -123,20 +131,10 @@ ONIG_EXTERN OnigAmbigType OnigDefaultAmbigFlag;
 #define ONIGENC_CODE_RANGE_TO(range,i)    range[((i)*2) + 2]
 
 typedef struct {
-  int len;
-  OnigCodePoint code[ONIGENC_MAX_COMP_AMBIG_CODE_LEN];
-} OnigCompAmbigCodeItem;
-
-typedef struct {
-  int n;
-  OnigCodePoint code;
-  OnigCompAmbigCodeItem items[ONIGENC_MAX_COMP_AMBIG_CODE_ITEM_NUM];
-} OnigCompAmbigCodes;
-
-typedef struct {
-  OnigCodePoint from;
-  OnigCodePoint to;
-} OnigPairAmbigCodes;
+  int byte_len;  /* argument(original) character(s) byte length */
+  int code_len;  /* number of code */
+  OnigCodePoint code[ONIGENC_MAX_COMP_CASE_FOLD_CODE_LEN];
+} OnigCaseFoldCodeItem;
 
 typedef struct {
   OnigCodePoint esc;
@@ -146,32 +144,24 @@ typedef struct {
   OnigCodePoint one_or_more_time;
   OnigCodePoint anychar_anytime;
 } OnigMetaCharTableType;
+  
+typedef int (*OnigApplyAllCaseFoldFunc)(OnigCodePoint from, OnigCodePoint* to, int to_len, void* arg);
 
-
-#if defined(RUBY_PLATFORM) && defined(M17N_H)
-
-#define ONIG_RUBY_M17N
-typedef m17n_encoding*        OnigEncoding;
-
-#else
-
-typedef struct {
+typedef struct OnigEncodingTypeST {
   int    (*mbc_enc_len)(const OnigUChar* p);
   const char*   name;
   int           max_enc_len;
   int           min_enc_len;
-  OnigAmbigType support_ambig_flag;
-  OnigMetaCharTableType meta_char_table;
   int    (*is_mbc_newline)(const OnigUChar* p, const OnigUChar* end);
   OnigCodePoint (*mbc_to_code)(const OnigUChar* p, const OnigUChar* end);
   int    (*code_to_mbclen)(OnigCodePoint code);
   int    (*code_to_mbc)(OnigCodePoint code, OnigUChar *buf);
-  int    (*mbc_to_normalize)(OnigAmbigType flag, const OnigUChar** pp, const OnigUChar* end, OnigUChar* to);
-  int    (*is_mbc_ambiguous)(OnigAmbigType flag, const OnigUChar** pp, const OnigUChar* end);
-  int    (*get_all_pair_ambig_codes)(OnigAmbigType flag, const OnigPairAmbigCodes** acs);
-  int    (*get_all_comp_ambig_codes)(OnigAmbigType flag, const OnigCompAmbigCodes** acs);
-  int    (*is_code_ctype)(OnigCodePoint code, unsigned int ctype);
-  int    (*get_ctype_code_range)(int ctype, const OnigCodePoint* sb_range[], const OnigCodePoint* mb_range[]);
+  int    (*mbc_case_fold)(OnigCaseFoldType flag, const OnigUChar** pp, const OnigUChar* end, OnigUChar* to);
+  int    (*apply_all_case_fold)(OnigCaseFoldType flag, OnigApplyAllCaseFoldFunc f, void* arg);
+  int    (*get_case_fold_codes_by_str)(OnigCaseFoldType flag, const OnigUChar* p, const OnigUChar* end, OnigCaseFoldCodeItem acs[]);
+  int    (*property_name_to_ctype)(struct OnigEncodingTypeST* enc, OnigUChar* p, OnigUChar* end);
+  int    (*is_code_ctype)(OnigCodePoint code, OnigCtype ctype);
+  int    (*get_ctype_code_range)(OnigCtype ctype, OnigCodePoint* sb_out, const OnigCodePoint* ranges[]);
   OnigUChar* (*left_adjust_char_head)(const OnigUChar* start, const OnigUChar* p);
   int    (*is_allowed_reverse_match)(const OnigUChar* p, const OnigUChar* end);
 } OnigEncodingType;
@@ -206,6 +196,7 @@ ONIG_EXTERN OnigEncodingType OnigEncodingEUC_CN;
 ONIG_EXTERN OnigEncodingType OnigEncodingSJIS;
 ONIG_EXTERN OnigEncodingType OnigEncodingKOI8;
 ONIG_EXTERN OnigEncodingType OnigEncodingKOI8_R;
+ONIG_EXTERN OnigEncodingType OnigEncodingCP1251;
 ONIG_EXTERN OnigEncodingType OnigEncodingBIG5;
 ONIG_EXTERN OnigEncodingType OnigEncodingGB18030;
 
@@ -237,136 +228,60 @@ ONIG_EXTERN OnigEncodingType OnigEncodingGB18030;
 #define ONIG_ENCODING_SJIS         (&OnigEncodingSJIS)
 #define ONIG_ENCODING_KOI8         (&OnigEncodingKOI8)
 #define ONIG_ENCODING_KOI8_R       (&OnigEncodingKOI8_R)
+#define ONIG_ENCODING_CP1251       (&OnigEncodingCP1251)
 #define ONIG_ENCODING_BIG5         (&OnigEncodingBIG5)
 #define ONIG_ENCODING_GB18030      (&OnigEncodingGB18030)
-
-#endif /* else RUBY && M17N */
 
 #define ONIG_ENCODING_UNDEF    ((OnigEncoding )0)
 
 
 /* work size */
-#define ONIGENC_CODE_TO_MBC_MAXLEN      7
-#define ONIGENC_MBC_NORMALIZE_MAXLEN    ONIGENC_CODE_TO_MBC_MAXLEN
+#define ONIGENC_CODE_TO_MBC_MAXLEN       7
+#define ONIGENC_MBC_CASE_FOLD_MAXLEN    18
+/* 18: 6(max-byte) * 3(case-fold chars) */
 
 /* character types */
-#define ONIGENC_CTYPE_NEWLINE  (1<< 0)
-#define ONIGENC_CTYPE_ALPHA    (1<< 1)
-#define ONIGENC_CTYPE_BLANK    (1<< 2)
-#define ONIGENC_CTYPE_CNTRL    (1<< 3)
-#define ONIGENC_CTYPE_DIGIT    (1<< 4)
-#define ONIGENC_CTYPE_GRAPH    (1<< 5)
-#define ONIGENC_CTYPE_LOWER    (1<< 6)
-#define ONIGENC_CTYPE_PRINT    (1<< 7)
-#define ONIGENC_CTYPE_PUNCT    (1<< 8)
-#define ONIGENC_CTYPE_SPACE    (1<< 9)
-#define ONIGENC_CTYPE_UPPER    (1<<10)
-#define ONIGENC_CTYPE_XDIGIT   (1<<11)
-#define ONIGENC_CTYPE_WORD     (1<<12)
-#define ONIGENC_CTYPE_ASCII    (1<<13)
-#define ONIGENC_CTYPE_ALNUM    (ONIGENC_CTYPE_ALPHA | ONIGENC_CTYPE_DIGIT)
+#define ONIGENC_CTYPE_NEWLINE   0
+#define ONIGENC_CTYPE_ALPHA     1
+#define ONIGENC_CTYPE_BLANK     2
+#define ONIGENC_CTYPE_CNTRL     3
+#define ONIGENC_CTYPE_DIGIT     4
+#define ONIGENC_CTYPE_GRAPH     5
+#define ONIGENC_CTYPE_LOWER     6
+#define ONIGENC_CTYPE_PRINT     7
+#define ONIGENC_CTYPE_PUNCT     8
+#define ONIGENC_CTYPE_SPACE     9
+#define ONIGENC_CTYPE_UPPER    10
+#define ONIGENC_CTYPE_XDIGIT   11
+#define ONIGENC_CTYPE_WORD     12
+#define ONIGENC_CTYPE_ALNUM    13  /* alpha || digit */
+#define ONIGENC_CTYPE_ASCII    14
+#define ONIGENC_MAX_STD_CTYPE  ONIGENC_CTYPE_ASCII
 
-#define enc_len(enc,p)                ONIGENC_MBC_ENC_LEN(enc, p)
+
+#define onig_enc_len(enc,p,end)        ONIGENC_MBC_ENC_LEN(enc,p)
 
 #define ONIGENC_IS_UNDEF(enc)          ((enc) == ONIG_ENCODING_UNDEF)
 #define ONIGENC_IS_SINGLEBYTE(enc)     (ONIGENC_MBC_MAXLEN(enc) == 1)
 #define ONIGENC_IS_MBC_HEAD(enc,p)     (ONIGENC_MBC_ENC_LEN(enc,p) != 1)
 #define ONIGENC_IS_MBC_ASCII(p)           (*(p)   < 128)
 #define ONIGENC_IS_CODE_ASCII(code)       ((code) < 128)
-#define ONIGENC_IS_CODE_SB_WORD(enc,code) \
-  (ONIGENC_IS_CODE_ASCII(code) && ONIGENC_IS_CODE_WORD(enc,code))
 #define ONIGENC_IS_MBC_WORD(enc,s,end) \
    ONIGENC_IS_CODE_WORD(enc,ONIGENC_MBC_TO_CODE(enc,s,end))
 
 
-#ifdef ONIG_RUBY_M17N
-
-#include <ctype.h> /* for isblank(), isgraph() */
-
-#define ONIGENC_MBC_TO_NORMALIZE(enc,flag,pp,end,buf) \
-        onigenc_mbc_to_normalize(enc,flag,pp,end,buf)
-#define ONIGENC_IS_MBC_AMBIGUOUS(enc,flag,pp,end) \
-        onigenc_is_mbc_ambiguous(enc,flag,pp,end)
-
-#define ONIGENC_SUPPORT_AMBIG_FLAG(enc)     ONIGENC_AMBIGUOUS_MATCH_ASCII_CASE
-#define ONIGENC_IS_ALLOWED_REVERSE_MATCH(enc,s,end) \
-        onigenc_is_allowed_reverse_match(enc, s, end)
-#define ONIGENC_LEFT_ADJUST_CHAR_HEAD(enc,start,s) \
-        onigenc_get_left_adjust_char_head(enc, start, s)
-#define ONIGENC_GET_ALL_PAIR_AMBIG_CODES(enc, ambig_flag, acs)    0
-#define ONIGENC_GET_ALL_COMP_AMBIG_CODES(enc, ambig_flag, acs)    0
-#define ONIGENC_GET_CTYPE_CODE_RANGE(enc,ctype,sbr,mbr) \
-        ONIG_NO_SUPPORT_CONFIG
-#define ONIGENC_MBC_ENC_LEN(enc,p)            m17n_mbclen(enc,(int )(*p))
-#define ONIGENC_MBC_MAXLEN(enc)               m17n_mbmaxlen(enc)
-#define ONIGENC_MBC_MAXLEN_DIST(enc) \
-    (ONIGENC_MBC_MAXLEN(enc) > 0 ? ONIGENC_MBC_MAXLEN(enc) \
-                                 : ONIG_INFINITE_DISTANCE)
-#define ONIGENC_MBC_MINLEN(enc)            1
-#define ONIGENC_MBC_TO_CODE(enc,p,e)       m17n_codepoint((enc),(p),(e))
-#define ONIGENC_CODE_TO_MBCLEN(enc,code)   m17n_codelen((enc),(code))
-#define ONIGENC_CODE_TO_MBC(enc,code,buf)  onigenc_code_to_mbc(enc, code, buf)
-
-#if 0     /* !! not supported !! */
-#define ONIGENC_IS_MBC_NEWLINE(enc,p,end)
-#define ONIGENC_STEP_BACK(enc,start,s,n)
-#endif
-
-#define ONIGENC_IS_CODE_CTYPE(enc,code,ctype) \
-        onigenc_is_code_ctype(enc,code,ctype)
-
-#ifdef isblank
-# define ONIGENC_IS_CODE_BLANK(enc,code) isblank((int )code)
-#else
-# define ONIGENC_IS_CODE_BLANK(enc,code) ((code) == ' ' || (code) == '\t')
-#endif
-#ifdef isgraph
-# define ONIGENC_IS_CODE_GRAPH(enc,code) isgraph((int )code)
-#else
-# define ONIGENC_IS_CODE_GRAPH(enc,code) \
-  (isprint((int )code) && !isspace((int )code))
-#endif
-
-#define ONIGENC_IS_CODE_PRINT(enc,code)     m17n_isprint(enc,code)
-#define ONIGENC_IS_CODE_ALNUM(enc,code)     m17n_isalnum(enc,code)
-#define ONIGENC_IS_CODE_ALPHA(enc,code)     m17n_isalpha(enc,code)
-#define ONIGENC_IS_CODE_LOWER(enc,code)     m17n_islower(enc,code)
-#define ONIGENC_IS_CODE_UPPER(enc,code)     m17n_isupper(enc,code)
-#define ONIGENC_IS_CODE_CNTRL(enc,code)     m17n_iscntrl(enc,code)
-#define ONIGENC_IS_CODE_PUNCT(enc,code)     m17n_ispunct(enc,code)
-#define ONIGENC_IS_CODE_SPACE(enc,code)     m17n_isspace(enc,code)
-#define ONIGENC_IS_CODE_DIGIT(enc,code)     m17n_isdigit(enc,code)
-#define ONIGENC_IS_CODE_XDIGIT(enc,code)    m17n_isxdigit(enc,code)
-#define ONIGENC_IS_CODE_WORD(enc,code)      m17n_iswchar(enc,code)
-
-ONIG_EXTERN
-int onigenc_is_code_ctype P_((OnigEncoding enc, OnigCodePoint code, int ctype));
-ONIG_EXTERN
-int onigenc_code_to_mbc P_((OnigEncoding enc, OnigCodePoint code, OnigUChar *buf));
-ONIG_EXTERN
-int onigenc_mbc_to_normalize P_((OnigEncoding enc, OnigAmbigType flag, const OnigUChar** pp, const OnigUChar* end, OnigUChar* buf));
-ONIG_EXTERN
-int onigenc_is_mbc_ambiguous P_((OnigEncoding enc, OnigAmbigType flag, const OnigUChar** pp, const OnigUChar* end));
-ONIG_EXTERN
-int onigenc_is_allowed_reverse_match P_((OnigEncoding enc, const OnigUChar* s, const OnigUChar* end));
-
-#else  /* ONIG_RUBY_M17N */
-
 #define ONIGENC_NAME(enc)                      ((enc)->name)
 
-#define ONIGENC_MBC_TO_NORMALIZE(enc,flag,pp,end,buf) \
-  (enc)->mbc_to_normalize(flag,(const OnigUChar** )pp,end,buf)
-#define ONIGENC_IS_MBC_AMBIGUOUS(enc,flag,pp,end) \
-  (enc)->is_mbc_ambiguous(flag,(const OnigUChar** )pp,end)
-#define ONIGENC_SUPPORT_AMBIG_FLAG(enc)        ((enc)->support_ambig_flag)
+#define ONIGENC_MBC_CASE_FOLD(enc,flag,pp,end,buf) \
+  (enc)->mbc_case_fold(flag,(const OnigUChar** )pp,end,buf)
 #define ONIGENC_IS_ALLOWED_REVERSE_MATCH(enc,s,end) \
         (enc)->is_allowed_reverse_match(s,end)
 #define ONIGENC_LEFT_ADJUST_CHAR_HEAD(enc,start,s) \
         (enc)->left_adjust_char_head(start, s)
-#define ONIGENC_GET_ALL_PAIR_AMBIG_CODES(enc,ambig_flag,acs) \
-        (enc)->get_all_pair_ambig_codes(ambig_flag,acs)
-#define ONIGENC_GET_ALL_COMP_AMBIG_CODES(enc,ambig_flag,acs) \
-        (enc)->get_all_comp_ambig_codes(ambig_flag,acs)
+#define ONIGENC_APPLY_ALL_CASE_FOLD(enc,case_fold_flag,f,arg) \
+        (enc)->apply_all_case_fold(case_fold_flag,f,arg)
+#define ONIGENC_GET_CASE_FOLD_CODES_BY_STR(enc,case_fold_flag,p,end,acs) \
+       (enc)->get_case_fold_codes_by_str(case_fold_flag,p,end,acs)
 #define ONIGENC_STEP_BACK(enc,start,s,n) \
         onigenc_step_back((enc),(start),(s),(n))
 
@@ -378,6 +293,8 @@ int onigenc_is_allowed_reverse_match P_((OnigEncoding enc, const OnigUChar* s, c
 #define ONIGENC_MBC_TO_CODE(enc,p,end)         (enc)->mbc_to_code((p),(end))
 #define ONIGENC_CODE_TO_MBCLEN(enc,code)       (enc)->code_to_mbclen(code)
 #define ONIGENC_CODE_TO_MBC(enc,code,buf)      (enc)->code_to_mbc(code,buf)
+#define ONIGENC_PROPERTY_NAME_TO_CTYPE(enc,p,end) \
+  (enc)->property_name_to_ctype(enc,p,end)
 
 #define ONIGENC_IS_CODE_CTYPE(enc,code,ctype)  (enc)->is_code_ctype(code,ctype)
 
@@ -410,13 +327,11 @@ int onigenc_is_allowed_reverse_match P_((OnigEncoding enc, const OnigUChar* s, c
 #define ONIGENC_IS_CODE_WORD(enc,code) \
         ONIGENC_IS_CODE_CTYPE(enc,code,ONIGENC_CTYPE_WORD)
 
-#define ONIGENC_GET_CTYPE_CODE_RANGE(enc,ctype,sbr,mbr) \
-        (enc)->get_ctype_code_range(ctype,sbr,mbr)
+#define ONIGENC_GET_CTYPE_CODE_RANGE(enc,ctype,sbout,ranges) \
+        (enc)->get_ctype_code_range(ctype,sbout,ranges)
 
 ONIG_EXTERN
 OnigUChar* onigenc_step_back P_((OnigEncoding enc, const OnigUChar* start, const OnigUChar* s, int n));
-
-#endif /* is not ONIG_RUBY_M17N */
 
 
 /* encoding API */
@@ -482,10 +397,11 @@ typedef unsigned int        OnigOptionType;
 
 /* syntax */
 typedef struct {
-  unsigned int  op;
-  unsigned int  op2;
-  unsigned int  behavior;
-  OnigOptionType options;    /* default option */
+  unsigned int   op;
+  unsigned int   op2;
+  unsigned int   behavior;
+  OnigOptionType options;   /* default option */
+  OnigMetaCharTableType meta_char_table;
 } OnigSyntaxType;
 
 ONIG_EXTERN OnigSyntaxType OnigSyntaxASIS;
@@ -566,7 +482,7 @@ ONIG_EXTERN OnigSyntaxType*   OnigDefaultSyntax;
 #define ONIG_SYN_OP2_ESC_GNU_BUF_ANCHOR         (1U<<15) /* \`, \' */
 #define ONIG_SYN_OP2_ESC_P_BRACE_CHAR_PROPERTY  (1U<<16) /* \p{...}, \P{...} */
 #define ONIG_SYN_OP2_ESC_P_BRACE_CIRCUMFLEX_NOT (1U<<17) /* \p{^..}, \P{^..} */
-#define ONIG_SYN_OP2_CHAR_PROPERTY_PREFIX_IS    (1U<<18) /* \p{IsXDigit} */
+/* #define ONIG_SYN_OP2_CHAR_PROPERTY_PREFIX_IS (1U<<18) */
 #define ONIG_SYN_OP2_ESC_H_XDIGIT               (1U<<19) /* \h, \H */
 #define ONIG_SYN_OP2_INEFFECTIVE_ESCAPE         (1U<<20) /* \ */
 
@@ -666,6 +582,7 @@ ONIG_EXTERN OnigSyntaxType*   OnigDefaultSyntax;
 #define ONIGERR_NEVER_ENDING_RECURSION                       -221
 #define ONIGERR_GROUP_NUMBER_OVER_FOR_CAPTURE_HISTORY        -222
 #define ONIGERR_INVALID_CHAR_PROPERTY_NAME                   -223
+#define ONIGERR_INVALID_CODE_POINT_VALUE                     -400
 #define ONIGERR_INVALID_WIDE_CHAR_VALUE                      -400
 #define ONIGERR_TOO_BIG_WIDE_CHAR_VALUE                      -401
 #define ONIGERR_NOT_SUPPORTED_ENCODING_COMBINATION           -402
@@ -755,10 +672,10 @@ typedef struct re_pattern_buffer {
   int repeat_range_alloc;
   OnigRepeatRange* repeat_range;
 
-  OnigEncoding  enc;
+  OnigEncoding      enc;
   OnigOptionType    options;
   OnigSyntaxType*   syntax;
-  OnigAmbigType     ambig_flag;
+  OnigCaseFoldType  case_fold_flag;
   void*             name_table;
 
   /* optimization info (string search, char-map and anchors) */
@@ -793,7 +710,7 @@ typedef struct {
   OnigEncoding    target_enc;
   OnigSyntaxType* syntax;
   OnigOptionType  option;
-  OnigAmbigType   ambig_flag;
+  OnigCaseFoldType   case_fold_flag;
 } OnigCompileInfo;
 
 /* Oniguruma Native API */
@@ -808,9 +725,14 @@ void onig_set_verb_warn_func P_((OnigWarnFunc f));
 ONIG_EXTERN
 int onig_new P_((OnigRegex*, const OnigUChar* pattern, const OnigUChar* pattern_end, OnigOptionType option, OnigEncoding enc, OnigSyntaxType* syntax, OnigErrorInfo* einfo));
 ONIG_EXTERN
+int  onig_reg_init P_((regex_t* reg, OnigOptionType option, OnigCaseFoldType case_fold_flag, OnigEncoding enc, OnigSyntaxType* syntax));
+int onig_new_without_alloc P_((OnigRegex, const OnigUChar* pattern, const OnigUChar* pattern_end, OnigOptionType option, OnigEncoding enc, OnigSyntaxType* syntax, OnigErrorInfo* einfo));
+ONIG_EXTERN
 int onig_new_deluxe P_((OnigRegex* reg, const OnigUChar* pattern, const OnigUChar* pattern_end, OnigCompileInfo* ci, OnigErrorInfo* einfo));
 ONIG_EXTERN
 void onig_free P_((OnigRegex));
+ONIG_EXTERN
+void onig_free_body P_((OnigRegex));
 ONIG_EXTERN
 int onig_recompile P_((OnigRegex, const OnigUChar* pattern, const OnigUChar* pattern_end, OnigOptionType option, OnigEncoding enc, OnigSyntaxType* syntax, OnigErrorInfo* einfo));
 ONIG_EXTERN
@@ -856,7 +778,7 @@ OnigEncoding onig_get_encoding P_((OnigRegex reg));
 ONIG_EXTERN
 OnigOptionType onig_get_options P_((OnigRegex reg));
 ONIG_EXTERN
-OnigAmbigType onig_get_ambig_flag P_((OnigRegex reg));
+OnigCaseFoldType onig_get_case_fold_flag P_((OnigRegex reg));
 ONIG_EXTERN
 OnigSyntaxType* onig_get_syntax P_((OnigRegex reg));
 ONIG_EXTERN
@@ -880,13 +802,13 @@ void onig_set_syntax_behavior P_((OnigSyntaxType* syntax, unsigned int behavior)
 ONIG_EXTERN
 void onig_set_syntax_options P_((OnigSyntaxType* syntax, OnigOptionType options));
 ONIG_EXTERN
-int onig_set_meta_char P_((OnigEncoding enc, unsigned int what, OnigCodePoint code));
+int onig_set_meta_char P_((OnigSyntaxType* syntax, unsigned int what, OnigCodePoint code));
 ONIG_EXTERN
 void onig_copy_encoding P_((OnigEncoding to, OnigEncoding from));
 ONIG_EXTERN
-OnigAmbigType onig_get_default_ambig_flag P_((void));
+OnigCaseFoldType onig_get_default_case_fold_flag P_((void));
 ONIG_EXTERN
-int onig_set_default_ambig_flag P_((OnigAmbigType ambig_flag));
+int onig_set_default_case_fold_flag P_((OnigCaseFoldType case_fold_flag));
 ONIG_EXTERN
 unsigned int onig_get_match_stack_limit_size P_((void));
 ONIG_EXTERN

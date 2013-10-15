@@ -215,7 +215,6 @@ mysqlnd_net_set_methods(struct st_mysqlnd_net_methods * methods)
 /* }}} */
 
 
-
 /*
  * Local variables:
  * tab-width: 4

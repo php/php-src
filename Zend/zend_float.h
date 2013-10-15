@@ -65,11 +65,13 @@ extern ZEND_API void zend_ensure_fpu_mode(TSRMLS_D);
 
  MS Visual C:
   - Since MSVC users tipically don't use autoconf or CMake, we will detect
-    MSVC via compile time define.
+    MSVC via compile time define. Floating point precision change isn't
+    supported on 64 bit platforms, so it's NOP. See
+    http://msdn.microsoft.com/en-us/library/c9676k6h(v=vs.110).aspx
 */
 
 /* MSVC detection (MSVC people usually don't use autoconf) */
-#ifdef _MSC_VER
+#if defined(_MSC_VER) && !defined(_WIN64)
 # if _MSC_VER >= 1500
    /* Visual C++ 2008 or higher, supports _controlfp_s */
 #  define HAVE__CONTROLFP_S

@@ -158,9 +158,10 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 			case HASH_KEY_IS_STRING:
 				if (is_object) {
 					const char *prop_name, *class_name;
-					int mangled = zend_unmangle_property_name(string_key, str_len - 1, &class_name, &prop_name);
+					int prop_len;
+					int mangled = zend_unmangle_property_name_ex(string_key, str_len - 1, &class_name, &prop_name, &prop_len);
 
-					ZEND_PUTS_EX(prop_name);
+					ZEND_WRITE_EX(prop_name, prop_len);
 					if (class_name && mangled == SUCCESS) {
 						if (class_name[0]=='*') {
 							ZEND_PUTS_EX(":protected");
@@ -683,11 +684,11 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 #if HAVE_DTRACE
 /* build with dtrace support */
 	zend_compile_file = dtrace_compile_file;
-	zend_execute = dtrace_execute;
+	zend_execute_ex = dtrace_execute_ex;
 	zend_execute_internal = dtrace_execute_internal;
 #else
 	zend_compile_file = compile_file;
-	zend_execute = execute;
+	zend_execute_ex = execute_ex;
 	zend_execute_internal = NULL;
 #endif /* HAVE_SYS_SDT_H */
 	zend_compile_string = compile_string;
@@ -1183,7 +1184,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			 * such scripts recursivly, but some CG() variables may be
 			 * inconsistent. */
 
-			in_compilation = zend_is_compiling(TSRMLS_C);
+			in_compilation = CG(in_compilation);
 			if (in_compilation) {
 				saved_class_entry = CG(active_class_entry);
 				CG(active_class_entry) = NULL;
@@ -1195,6 +1196,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				SAVE_STACK(declare_stack);
 				SAVE_STACK(list_stack);
 				SAVE_STACK(context_stack);
+				CG(in_compilation) = 0;
 			}
 
 			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC) == SUCCESS) {
@@ -1219,6 +1221,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				RESTORE_STACK(declare_stack);
 				RESTORE_STACK(list_stack);
 				RESTORE_STACK(context_stack);
+				CG(in_compilation) = 1;
 			}
 
 			if (!EG(user_error_handler)) {

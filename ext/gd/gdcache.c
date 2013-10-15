@@ -44,7 +44,7 @@
 #else
 #include <php_config.h>
 #endif
-#if HAVE_LIBFREETYPE && !defined(HAVE_GD_CACHE_CREATE)
+#if HAVE_LIBFREETYPE && !defined(HAVE_GD_BUNDLED)
 
 #include "gdcache.h"
 
@@ -95,6 +95,11 @@ gdCacheGet( gdCache_head_t *head, void *keydata )
 	void			*userdata;
 
 	elem = head->mru;
+	if (elem == NULL) {
+		return NULL;
+		
+	}
+
 	while(elem) {
 		if ((*(head->gdCacheTest))(elem->userdata, keydata)) {
 			if (i) {  /* if not already most-recently-used */

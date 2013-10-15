@@ -16,7 +16,7 @@ var_dump(preg_replace(array('@//.*@S', '@/\*.*\*/@SsUe'), array('', 'preg_replac
 
 var_dump(preg_split('/PHP_(?:NAMED_)?(?:FUNCTION|METHOD)\s*\((\w+(?:,\s*\w+)?)\)/S', "PHP_FUNCTION(s, preg_match)\n{\nlalala", -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE));
 ?>
---EXPECT--
+--EXPECTF--
 int(2)
 array(2) {
   [0]=>
@@ -117,6 +117,8 @@ array(1) {
     }
   }
 }
+
+Deprecated: preg_replace(): The /e modifier is deprecated, use preg_replace_callback instead in %s on line %d
 string(9) "hello
 
 

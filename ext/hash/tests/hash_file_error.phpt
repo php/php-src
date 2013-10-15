@@ -15,7 +15,7 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 echo "*** Testing hash_file() : error conditions ***\n";
 
 // Set up file
-$filename = 'hash_file_example.txt';
+$filename = 'hash_file_error_example.txt';
 file_put_contents( $filename, 'The quick brown fox jumped over the lazy dog.' );
 
 
@@ -38,7 +38,7 @@ var_dump( hash_file( 'md5', $filename, false, $extra_arg ) );
 --CLEAN--
 <?php
 
-$filename = 'hash_file_example.txt';
+$filename = 'hash_file_error_example.txt';
 unlink( $filename );
 
 ?>

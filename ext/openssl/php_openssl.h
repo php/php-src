@@ -52,6 +52,8 @@ PHP_FUNCTION(openssl_private_decrypt);
 PHP_FUNCTION(openssl_public_encrypt);
 PHP_FUNCTION(openssl_public_decrypt);
 
+PHP_FUNCTION(openssl_pbkdf2);
+
 PHP_FUNCTION(openssl_pkcs7_verify);
 PHP_FUNCTION(openssl_pkcs7_decrypt);
 PHP_FUNCTION(openssl_pkcs7_sign);
@@ -64,6 +66,7 @@ PHP_FUNCTION(openssl_x509_free);
 PHP_FUNCTION(openssl_x509_parse);
 PHP_FUNCTION(openssl_x509_checkpurpose);
 PHP_FUNCTION(openssl_x509_export);
+PHP_FUNCTION(openssl_x509_fingerprint);
 PHP_FUNCTION(openssl_x509_export_to_file);
 PHP_FUNCTION(openssl_x509_check_private_key);
 
@@ -77,6 +80,11 @@ PHP_FUNCTION(openssl_csr_export_to_file);
 PHP_FUNCTION(openssl_csr_sign);
 PHP_FUNCTION(openssl_csr_get_subject);
 PHP_FUNCTION(openssl_csr_get_public_key);
+
+PHP_FUNCTION(openssl_spki_new);
+PHP_FUNCTION(openssl_spki_verify);
+PHP_FUNCTION(openssl_spki_export);
+PHP_FUNCTION(openssl_spki_export_challenge);
 #else
 
 #define phpext_openssl_ptr NULL

@@ -1,10 +1,5 @@
 --TEST--
 Test bug #64370 microtime(true) less than $_SERVER['REQUEST_TIME_FLOAT'] 
---SKIPIF--
-<?php
-	if (PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 4)) {
-		die('skip PHP 5.4+ only');
-	}
 --FILE--
 <?php
 echo "\$_SERVER['REQUEST_TIME']: {$_SERVER['REQUEST_TIME']}\n";

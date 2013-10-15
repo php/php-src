@@ -13,7 +13,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Sascha Schumann <sascha@schumann.cx>                        |
-   |          Ard Biesheuvel <ard@ard.nu>                                 |
+   |          Ard Biesheuvel <ard.biesheuvel@linaro.org>                  |
    +----------------------------------------------------------------------+
 */
 
@@ -43,6 +43,31 @@
 	else (lval) = __tmpvar;											\
 } while (0)
 
+#elif defined(__arm__) && defined(__GNUC__)
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	long __tmpvar; 													\
+	__asm__("smull %0, %1, %2, %3\n"								\
+		"sub %1, %1, %0, asr #31"									\
+			: "=r"(__tmpvar), "=r"(usedval)							\
+			: "r"(a), "r"(b));										\
+	if (usedval) (dval) = (double) (a) * (double) (b);				\
+	else (lval) = __tmpvar;											\
+} while (0)
+
+#elif defined(__aarch64__) && defined(__GNUC__)
+
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	long __tmpvar; 													\
+	__asm__("mul %0, %2, %3\n"										\
+		"smulh %1, %2, %3\n"										\
+		"sub %1, %1, %0, asr #63\n"									\
+			: "=X"(__tmpvar), "=X"(usedval)							\
+			: "X"(a), "X"(b));										\
+	if (usedval) (dval) = (double) (a) * (double) (b);				\
+	else (lval) = __tmpvar;											\
+} while (0)
+
 #elif SIZEOF_LONG == 4 && defined(HAVE_ZEND_LONG64)
 
 #define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
@@ -58,15 +83,15 @@
 
 #else
 
-#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {		\
-	long   __lres  = (a) * (b);											\
-	long double __dres  = (long double)(a) * (long double)(b);							\
-	long double __delta = (long double) __lres - __dres;							\
-	if ( ((usedval) = (( __dres + __delta ) != __dres))) {				\
-		(dval) = __dres;												\
-	} else {															\
-		(lval) = __lres;												\
-	}																	\
+#define ZEND_SIGNED_MULTIPLY_LONG(a, b, lval, dval, usedval) do {	\
+	long   __lres  = (a) * (b);										\
+	long double __dres  = (long double)(a) * (long double)(b);		\
+	long double __delta = (long double) __lres - __dres;			\
+	if ( ((usedval) = (( __dres + __delta ) != __dres))) {			\
+		(dval) = __dres;											\
+	} else {														\
+		(lval) = __lres;											\
+	}																\
 } while (0)
 
 #endif

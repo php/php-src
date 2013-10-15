@@ -124,87 +124,112 @@ fclose($fp);
 *** Testing mcrypt_cbc() : usage variation ***
 
 --int 0--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "ce5fcfe737859795"
 
 --int 1--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "84df495f6cd82dd9"
 
 --int 12345--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "905ab1ae27ee9991"
 
 --int -12345--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "5835174e9c67c3e7"
 
 --float 10.5--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "28ff0601ad9e47fa"
 
 --float -10.5--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "ce9f2b6e2fc3d9f7"
 
 --float 12.3456789000e10--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "24eb882ce9763e4018fba9b7f01b0c3e"
 
 --float -12.3456789000e10--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5eed30e428f32de1d7a7064d0ed4d3eb"
 
 --float .5--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "bebf2a13676e1e30"
 
 --empty array--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --int indexed array--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --associative array--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --nested arrays--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 3 to be string, array given, %s(%d)
 string(0) ""
 
 --uppercase NULL--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "206f6d3617a5ab32"
 
 --lowercase null--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "206f6d3617a5ab32"
 
 --lowercase true--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "84df495f6cd82dd9"
 
 --lowercase false--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "206f6d3617a5ab32"
 
 --uppercase TRUE--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "84df495f6cd82dd9"
 
 --uppercase FALSE--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "206f6d3617a5ab32"
 
 --empty string DQ--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "206f6d3617a5ab32"
 
 --empty string SQ--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "206f6d3617a5ab32"
 
 --instance of classWithToString--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "7c91cdf8f8c51485034a9ee528eb016b"
 
 --instance of classWithoutToString--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 3 to be string, object given, %s(%d)
 string(0) ""
 
 --undefined var--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "206f6d3617a5ab32"
 
 --unset var--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(16) "206f6d3617a5ab32"
 
 --resource--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 2 - mcrypt_cbc() expects parameter 3 to be string, resource given, %s(%d)
 string(0) ""
 ===DONE===
-

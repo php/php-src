@@ -76,7 +76,6 @@ extern void php_clear_warnings(MYSQLI_WARNING *w);
 extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error TSRMLS_DC);
 extern void php_mysqli_report_index(const char *query, unsigned int status TSRMLS_DC);
-extern void php_set_local_infile_handler_default(MY_MYSQL *);
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno TSRMLS_DC, char *format, ...);
 
 #ifdef HAVE_SPL

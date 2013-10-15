@@ -159,3 +159,9 @@
 #define ZEND_SEPARATE                        156
 #define ZEND_QM_ASSIGN_VAR                   157
 #define ZEND_JMP_SET_VAR                     158
+#define ZEND_DISCARD_EXCEPTION               159
+#define ZEND_YIELD                           160
+#define ZEND_GENERATOR_RETURN                161
+#define ZEND_FAST_CALL                       162
+#define ZEND_FAST_RET                        163
+#define ZEND_RECV_VARIADIC                   164

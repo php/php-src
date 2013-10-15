@@ -18,6 +18,12 @@ echo trim(mcrypt_cfb($cipher, $key, $enc_data, MCRYPT_DECRYPT, $iv)) . "\n";
 mcrypt_cfb($cipher, $key, $enc_data, MCRYPT_DECRYPT);
 
 --EXPECTF--
+
+Deprecated: Function mcrypt_cfb() is deprecated in %s on line %d
+
+Deprecated: Function mcrypt_cfb() is deprecated in %s on line %d
 PHP Testfest 2008
+
+Deprecated: Function mcrypt_cfb() is deprecated in %s on line %d
 
 Warning: mcrypt_cfb(): Attempt to use an empty IV, which is NOT recommend in %s on line %d

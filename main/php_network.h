@@ -21,6 +21,8 @@
 #ifndef _PHP_NETWORK_H
 #define _PHP_NETWORK_H
 
+#include <php.h>
+
 #ifdef PHP_WIN32
 # include "win32/inet.h"
 #else

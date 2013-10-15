@@ -1,9 +1,8 @@
-README.ja  2007/06/18
+README.ja  2007/05/31
 
 鬼車  ----   (C) K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
 
 http://www.geocities.jp/kosako3/oniguruma/
-http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
 
 鬼車は正規表現ライブラリである。
 このライブラリの特長は、それぞれの正規表現オブジェクトごとに
@@ -13,15 +12,19 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
 
   ASCII, UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, UTF-32LE,
   EUC-JP, EUC-TW, EUC-KR, EUC-CN,
-  Shift_JIS, Big5, GB 18030, KOI8-R, KOI8,
+  Shift_JIS, Big5, GB18030, KOI8-R, CP1251,
   ISO-8859-1, ISO-8859-2, ISO-8859-3, ISO-8859-4, ISO-8859-5,
   ISO-8859-6, ISO-8859-7, ISO-8859-8, ISO-8859-9, ISO-8859-10,
   ISO-8859-11, ISO-8859-13, ISO-8859-14, ISO-8859-15, ISO-8859-16
 
-* GB 18030: 久保健洋氏提供
-* KOI8はデフォルトのセットアップではライブラリの中に含まれない。
-  (必要であればMakefileを編集すること)
+* GB18030: 久保健洋氏提供
+* CP1251:  Byte氏提供
 ------------------------------------------------------------
+
+ライセンス
+
+  BSDライセンスに従う。
+
 
 インストール
 
@@ -63,12 +66,6 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
    5. nmake ctest
 
 
-ライセンス
-
-  このソフトウェアがRubyと一緒に使用または配布される場合には、
-  Rubyのライセンスに従う。
-  それ以外の場合には、BSDライセンスに従う。
-
 
 正規表現
 
@@ -97,7 +94,7 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
   GNU libtoolを使用しているので、プラットフォームが共有ライブラリをサポートして
   いれば、使用できるようになっている。
   静的ライブラリと共有ライブラリのどちらを使用するかを指定する方法、実行時点での
-  環境設定方法につては、自分で調べて下さい。
+  環境設定方法については、自分で調べて下さい。
 
 
   Win32でスタティックリンクライブラリ(onig_s.lib)をリンクする場合には、
@@ -112,7 +109,10 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
   sample/listcap.c   捕獲履歴機能の使用例
   sample/posix.c     POSIX API使用例
   sample/sql.c       可変メタ文字機能使用例 (SQL-like パターン)
+
+テストプログラム
   sample/syntax.c    Perl、Java、ASIS文法のテスト
+  sample/crnl.c      --enable-crnl-as-line-terminator テスト
 
 
 ソースファイル
@@ -149,9 +149,10 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
   enc/euc_kr.c       EUC-KR, EUC-CN エンコーディング
   enc/sjis.c         Shift_JIS エンコーディング
   enc/big5.c         Big5 エンコーディング
-  enc/gb18030.c      GB 18030 エンコーディング (久保健洋氏 提供)
+  enc/gb18030.c      GB18030 エンコーディング
   enc/koi8.c         KOI8 エンコーディング
   enc/koi8_r.c       KOI8-R エンコーディング
+  enc/cp1251.c       CP1251 エンコーディング
   enc/iso8859_1.c    ISO-8859-1  (Latin-1)
   enc/iso8859_2.c    ISO-8859-2  (Latin-2)
   enc/iso8859_3.c    ISO-8859-3  (Latin-3)
@@ -180,13 +181,15 @@ http://www.freebsd.org/cgi/cvsweb.cgi/ports/devel/oniguruma/
 
 
 
-Ruby 1.8/1.6の日本語化GNU regexとのAPIの違い
+残件
 
-   + re_compile_fastmap()   は削除された。
-   + re_alloc_pattern()     が追加された。
+  ? case fold flag: Katakana <-> Hiragana
+  ? ONIG_OPTION_NOTBOS/NOTEOS追加 (\A, \z, \Z)
+ ?? \X (== \PM\pM*)
+ ?? 文法要素 ONIG_SYN_CONTEXT_INDEP_ANCHORSの実装
+ ?? 検索位置移動停止演算子 (match_at()からONIG_STOPを返す)
 
-
-I'm thankful to Akinori MUSHA.
+and I'm thankful to Akinori MUSHA.
 
 
 アドレス: K.Kosako <sndgk393 AT ybb DOT ne DOT jp>

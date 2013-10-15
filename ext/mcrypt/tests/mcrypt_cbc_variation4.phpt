@@ -124,82 +124,108 @@ fclose($fp);
 *** Testing mcrypt_cbc() : usage variation ***
 
 --float 10.5--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --float -10.5--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --float 12.3456789000e10--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --float -12.3456789000e10--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --float .5--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --empty array--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --int indexed array--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --associative array--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --nested arrays--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --uppercase NULL--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --lowercase null--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --lowercase true--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --lowercase false--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --uppercase TRUE--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --uppercase FALSE--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --empty string DQ--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --empty string SQ--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --string DQ--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --string SQ--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --mixed case string--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --heredoc--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --instance of classWithToString--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
 string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --instance of classWithoutToString--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 Error: 8 - Object of class classWithoutToString could not be converted to int, %s(%d)
 string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 
 --undefined var--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --unset var--
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
 string(32) "5f781523f696d596e4b809d72197a0cc"
 
 --resource--
-string(%d) %s
+Error: 8192 - Function mcrypt_cbc() is deprecated, %s(%d)
+string(32) "983d5edc5f77fe42e2372a0339dc22b0"
 ===DONE===

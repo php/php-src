@@ -63,6 +63,7 @@ print "done!";
 require_once("clean_table.inc");
 ?>
 --EXPECTF--
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [005]
 array(2) {
   [%u|b%"id"]=>
@@ -87,6 +88,8 @@ array(5) {
 }
 
 Warning: mysql_fetch_assoc(): %d is not a valid MySQL result resource in %s on line %d
+
+Deprecated: mysql_connect(): The mysql extension is deprecated and will be removed in the future: use mysqli or PDO instead in %s on line %d
 [010]
 array(5) {
   [%u|b%"id"]=>

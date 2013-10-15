@@ -1,5 +1,8 @@
 --TEST--
 datefmt_get_timezone_id_code()
+--INI--
+date.timezone=Atlantic/Azores
+intl.error_level=E_WARNING
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
@@ -14,8 +17,8 @@ function ut_main()
 {
 	$timezone_id_arr = array (
 		'America/New_York',
-		'America/Los_Angeles',
-		'America/Dallas'
+		'US/Pacific',
+		'US/Central'
 	);
 	
 	$res_str = '';
@@ -42,8 +45,8 @@ ut_run();
 Creating IntlDateFormatter with timezone_id = America/New_York
 After call to get_timezone_id :  timezone_id= America/New_York
 
-Creating IntlDateFormatter with timezone_id = America/Los_Angeles
-After call to get_timezone_id :  timezone_id= America/Los_Angeles
+Creating IntlDateFormatter with timezone_id = US/Pacific
+After call to get_timezone_id :  timezone_id= US/Pacific
 
-Creating IntlDateFormatter with timezone_id = America/Dallas
-After call to get_timezone_id :  timezone_id= America/Dallas
+Creating IntlDateFormatter with timezone_id = US/Central
+After call to get_timezone_id :  timezone_id= US/Central

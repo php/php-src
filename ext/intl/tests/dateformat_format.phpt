@@ -2,8 +2,11 @@
 datefmt_format_code()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+<?php if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
 --FILE--
 <?php
+
+//ini_set("intl.error_level", E_WARNING);
 
 /*
  * Test for the datefmt_format  function
@@ -12,7 +15,7 @@ datefmt_format_code()
 
 function ut_main()
 {
-	$timezone = 'GMT-10';
+	$timezone = 'GMT-10:00';
 
 	$locale_arr = array (
 		'en_US'
@@ -397,24 +400,24 @@ Formatted DateTime is : 20001230 05:04 PM
 Date is: stdClass::__set_state(array(
 ))
 ------------
-Error while formatting as: 'datefmt_format: object must be an instance of DateTime: U_ILLEGAL_ARGUMENT_ERROR'
+Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTime permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
 Date is: stdClass::__set_state(array(
 ))
 ------------
-Error while formatting as: 'datefmt_format: object must be an instance of DateTime: U_ILLEGAL_ARGUMENT_ERROR'
+Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTime permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
 Date is: stdClass::__set_state(array(
 ))
 ------------
-Error while formatting as: 'datefmt_format: object must be an instance of DateTime: U_ILLEGAL_ARGUMENT_ERROR'
+Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTime permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
 Date is: stdClass::__set_state(array(
 ))
 ------------
-Error while formatting as: 'datefmt_format: object must be an instance of DateTime: U_ILLEGAL_ARGUMENT_ERROR'
+Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTime permitted): U_ILLEGAL_ARGUMENT_ERROR'
 ------------
 Date is: stdClass::__set_state(array(
 ))
 ------------
-Error while formatting as: 'datefmt_format: object must be an instance of DateTime: U_ILLEGAL_ARGUMENT_ERROR'
+Error while formatting as: 'datefmt_format: invalid object type for date/time (only IntlCalendar and DateTime permitted): U_ILLEGAL_ARGUMENT_ERROR'

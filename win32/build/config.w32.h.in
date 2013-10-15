@@ -6,8 +6,8 @@
 /* Define the minimum supported version */
 #undef _WIN32_WINNT
 #undef NTDDI_VERSION
-#define _WIN32_WINNT 0x0501
-#define NTDDI_VERSION  0x05010200
+#define _WIN32_WINNT 0x0600
+#define NTDDI_VERSION  0x06000100
 
 /* Default PHP / PEAR directories */
 #define PHP_CONFIG_FILE_PATH (getenv("SystemRoot"))?getenv("SystemRoot"):""

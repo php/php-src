@@ -26,7 +26,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20100412
+#define PHP_API_VERSION 20121113
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 
@@ -60,7 +60,6 @@
 #	else
 #		define PHPAPI
 #	endif
-
 #	define THREAD_LS
 #	define PHP_DIR_SEPARATOR '/'
 #	define PHP_EOL "\n"
@@ -180,6 +179,8 @@ typedef unsigned int socklen_t;
 #  define va_copy(ap1, ap2)         memcpy((&ap1), (&ap2), sizeof(va_list))
 # endif
 #endif
+
+#include "php_stdint.h"
 
 #include "zend_hash.h"
 #include "zend_alloc.h"

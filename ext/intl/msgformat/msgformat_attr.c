@@ -102,6 +102,12 @@ PHP_FUNCTION( msgfmt_set_pattern )
 	}
 	mfo->mf_data.orig_format = estrndup(value, value_len);
 	mfo->mf_data.orig_format_len = value_len;
+	/* invalidate cached format types */
+	if (mfo->mf_data.arg_types) {
+		zend_hash_destroy(mfo->mf_data.arg_types);
+		efree(mfo->mf_data.arg_types);
+		mfo->mf_data.arg_types = NULL;
+	}
 
 	RETURN_TRUE;
 }

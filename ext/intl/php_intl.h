@@ -22,8 +22,13 @@
 
 #include <php.h>
 
+/* Even if we're included from C++, don't introduce C++ definitions
+ * because we were included with extern "C". The effect would be that
+ * when the headers defined any method, they would do so with C linkage */
+#undef U_SHOW_CPLUSPLUS_API
+#define U_SHOW_CPLUSPLUS_API 0
 #include "collator/collator_sort.h"
-#include "grapheme/grapheme.h"
+#include <unicode/ubrk.h>
 #include "intl_error.h"
 
 extern zend_module_entry intl_module_entry;
@@ -46,6 +51,7 @@ ZEND_BEGIN_MODULE_GLOBALS(intl)
 	UBreakIterator* grapheme_iterator;
 	intl_error g_error;
 	long error_level;
+	zend_bool use_exceptions;
 ZEND_END_MODULE_GLOBALS(intl)
 
 /* Macro to access request-wide global variables. */
@@ -62,6 +68,8 @@ PHP_MSHUTDOWN_FUNCTION(intl);
 PHP_RINIT_FUNCTION(intl);
 PHP_RSHUTDOWN_FUNCTION(intl);
 PHP_MINFO_FUNCTION(intl);
+
+const char *intl_locale_get_default( TSRMLS_D );
 
 #define PHP_INTL_VERSION "1.1.0"
 

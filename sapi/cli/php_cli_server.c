@@ -105,6 +105,8 @@
 #include "php_http_parser.h"
 #include "php_cli_server.h"
 
+#include "php_cli_process_title.h"
+
 #define OUTPUT_NOT_CHECKED -1
 #define OUTPUT_IS_TTY 1
 #define OUTPUT_NOT_TTY 0
@@ -252,7 +254,7 @@ static php_cli_server_http_response_status_code_pair status_map[] = {
 
 static php_cli_server_http_response_status_code_pair template_map[] = {
 	{ 400, "<h1>%s</h1><p>Your browser sent a request that this server could not understand.</p>" },
-	{ 404, "<h1>%s</h1><p>The requested resource %s was not found on this server.</p>" },
+	{ 404, "<h1>%s</h1><p>The requested resource <code class=\"url\">%s</code> was not found on this server.</p>" },
 	{ 500, "<h1>%s</h1><p>The server is temporarily unavailable.</p>" },
 	{ 501, "<h1>%s</h1><p>Request method not supported.</p>" }
 };
@@ -266,6 +268,7 @@ static php_cli_server_ext_mime_type_pair mime_type_map[] = {
 	{ "jpg", "image/jpeg" },
 	{ "jpeg", "image/jpeg" },
 	{ "jpe", "image/jpeg" },
+	{ "pdf", "application/pdf" },
 	{ "png", "image/png" },
 	{ "svg", "image/svg+xml" },
 	{ "txt", "text/plain" },
@@ -289,8 +292,10 @@ ZEND_DECLARE_MODULE_GLOBALS(cli_server);
  * copied from ext/standard/info.c
  */
 static const char php_cli_server_css[] = "<style>\n" \
-										"body { background-color: #ffffff; color: #000000; }\n" \
-										"h1 { font-family: sans-serif; font-size: 150%; background-color: #9999cc; font-weight: bold; color: #000000; margin-top: 0;}\n" \
+										"body { background-color: #fcfcfc; color: #333333; margin: 0; padding:0; }\n" \
+										"h1 { font-size: 1.5em; font-weight: normal; background-color: #9999cc; min-height:2em; line-height:2em; border-bottom: 1px inset black; margin: 0; }\n" \
+										"h1, p { padding-left: 10px; }\n" \
+										"code.url { background-color: #eeeeee; font-family:monospace; padding:0 2px;}\n" \
 										"</style>\n";
 /* }}} */
 
@@ -408,7 +413,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 {
 	{
 		char **val;
-		if (SUCCESS == zend_hash_find(&client->request.headers, "Host", sizeof("Host"), (void**)&val)) {
+		if (SUCCESS == zend_hash_find(&client->request.headers, "host", sizeof("host"), (void**)&val)) {
 			smart_str_appendl_ex(buffer, "Host", sizeof("Host") - 1, persistent);
 			smart_str_appendl_ex(buffer, ": ", sizeof(": ") - 1, persistent);
 			smart_str_appends_ex(buffer, *val, persistent);
@@ -473,6 +478,12 @@ zend_module_entry cli_server_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
+
+const zend_function_entry server_additional_functions[] = {
+	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
+	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
+	{NULL, NULL, NULL}
+};
 
 static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 {
@@ -558,7 +569,7 @@ static char *sapi_cli_server_read_cookies(TSRMLS_D) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
 	char **val;
-	if (FAILURE == zend_hash_find(&client->request.headers, "Cookie", sizeof("Cookie"), (void**)&val)) {
+	if (FAILURE == zend_hash_find(&client->request.headers, "cookie", sizeof("cookie"), (void**)&val)) {
 		return NULL;
 	}
 	return *val;
@@ -1556,12 +1567,9 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 		return 1;
 	}
 	{
-		char *header_name = client->current_header_name;
-		size_t header_name_len = client->current_header_name_len;
-		char c = header_name[header_name_len];
-		header_name[header_name_len] = '\0';
-		zend_hash_add(&client->request.headers, header_name, header_name_len + 1, &value, sizeof(char *), NULL);
-		header_name[header_name_len] = c;
+		char *header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
+		zend_hash_add(&client->request.headers, header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
+		efree(header_name);
 	}
 
 	if (client->current_header_name_allocated) {
@@ -1592,6 +1600,7 @@ static int php_cli_server_client_read_request_on_body(php_http_parser *parser, c
 		}
 		client->request.content_len = 0;
 	}
+	client->request.content = perealloc(client->request.content, client->request.content_len + length, 1);
 	memmove(client->request.content + client->request.content_len, at, length);
 	client->request.content_len += length;
 	return 0;
@@ -1716,10 +1725,9 @@ static void php_cli_server_client_populate_request_info(const php_cli_server_cli
 	request_info->request_uri = client->request.request_uri;
 	request_info->path_translated = client->request.path_translated;
 	request_info->query_string = client->request.query_string;
-	request_info->post_data = client->request.content;
-	request_info->content_length = request_info->post_data_length = client->request.content_len;
+	request_info->content_length = client->request.content_len;
 	request_info->auth_user = request_info->auth_password = request_info->auth_digest = NULL;
-	if (SUCCESS == zend_hash_find(&client->request.headers, "Content-Type", sizeof("Content-Type"), (void**)&val)) {
+	if (SUCCESS == zend_hash_find(&client->request.headers, "content-type", sizeof("content-type"), (void**)&val)) {
 		request_info->content_type = *val;
 	}
 } /* }}} */
@@ -1957,7 +1965,7 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 static int php_cli_server_request_startup(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) { /* {{{ */
 	char **auth;
 	php_cli_server_client_populate_request_info(client, &SG(request_info));
-	if (SUCCESS == zend_hash_find(&client->request.headers, "Authorization", sizeof("Authorization"), (void**)&auth)) {
+	if (SUCCESS == zend_hash_find(&client->request.headers, "authorization", sizeof("authorization"), (void**)&auth)) {
 		php_handle_auth_data(*auth TSRMLS_CC);
 	}
 	SG(sapi_headers).http_response_code = 200;
@@ -1985,39 +1993,37 @@ static int php_cli_server_request_shutdown(php_cli_server *server, php_cli_serve
 static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server_client *client TSRMLS_DC) /* {{{ */
 {
 	int decline = 0;
-	if (!php_handle_special_queries(TSRMLS_C)) {
-		zend_file_handle zfd;
-		char *old_cwd;
+	zend_file_handle zfd;
+	char *old_cwd;
 
-		ALLOCA_FLAG(use_heap)
-		old_cwd = do_alloca(MAXPATHLEN, use_heap);
-		old_cwd[0] = '\0';
-		php_ignore_value(VCWD_GETCWD(old_cwd, MAXPATHLEN - 1));
+	ALLOCA_FLAG(use_heap)
+	old_cwd = do_alloca(MAXPATHLEN, use_heap);
+	old_cwd[0] = '\0';
+	php_ignore_value(VCWD_GETCWD(old_cwd, MAXPATHLEN - 1));
 
-		zfd.type = ZEND_HANDLE_FILENAME;
-		zfd.filename = server->router;
-		zfd.handle.fp = NULL;
-		zfd.free_filename = 0;
-		zfd.opened_path = NULL;
+	zfd.type = ZEND_HANDLE_FILENAME;
+	zfd.filename = server->router;
+	zfd.handle.fp = NULL;
+	zfd.free_filename = 0;
+	zfd.opened_path = NULL;
 
-		zend_try {
-			zval *retval = NULL;
-			if (SUCCESS == zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, &retval, 1, &zfd)) {
-				if (retval) {
-					decline = Z_TYPE_P(retval) == IS_BOOL && !Z_LVAL_P(retval);
-					zval_ptr_dtor(&retval);
-				}
-			} else {
-				decline = 1;
+	zend_try {
+		zval *retval = NULL;
+		if (SUCCESS == zend_execute_scripts(ZEND_REQUIRE TSRMLS_CC, &retval, 1, &zfd)) {
+			if (retval) {
+				decline = Z_TYPE_P(retval) == IS_BOOL && !Z_LVAL_P(retval);
+				zval_ptr_dtor(&retval);
 			}
-		} zend_end_try();
-
-		if (old_cwd[0] != '\0') {
-			php_ignore_value(VCWD_CHDIR(old_cwd));
+		} else {
+			decline = 1;
 		}
+	} zend_end_try();
 
-		free_alloca(old_cwd, use_heap);
+	if (old_cwd[0] != '\0') {
+		php_ignore_value(VCWD_CHDIR(old_cwd));
 	}
+
+	free_alloca(old_cwd, use_heap);
 
 	return decline;
 }
