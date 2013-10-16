@@ -415,7 +415,7 @@ static inline int php_openssl_setup_crypto(php_stream *stream,
 static void enable_server_name_indication(php_stream_context *ctx, php_openssl_netstream_data_t *sslsock)
 {
 	zval **val = NULL;
-	
+
 	if (php_stream_context_get_option(ctx, "ssl", "SNI_server_name", &val) == SUCCESS) {
 		convert_to_string_ex(val);
 		SSL_set_tlsext_host_name(sslsock->ssl_handle, &val);
@@ -440,8 +440,8 @@ static inline int php_openssl_enable_crypto(php_stream *stream,
 
 #if OPENSSL_VERSION_NUMBER >= 0x0090806fL && !defined(OPENSSL_NO_TLSEXT)
 		if (sslsock->is_client
-			&& php_stream_context_get_option(stream->context, "ssl", "SNI_enabled", &val) == SUCCESS
-			&& zend_is_true(*val)
+			&& (php_stream_context_get_option(stream->context, "ssl", "SNI_enabled", &val) == FAILURE
+			|| zend_is_true(*val))
 		) {
 			enable_server_name_indication(stream->context, sslsock);
 		}
