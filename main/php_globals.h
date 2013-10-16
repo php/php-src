@@ -66,7 +66,7 @@ struct _php_core_globals {
 	char *unserialize_callback_func;
 	long serialize_precision;
 
-	long memory_limit;
+	zend_int_t memory_limit;
 	long max_input_time;
 
 	zend_bool track_errors;

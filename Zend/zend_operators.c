@@ -107,14 +107,14 @@ ZEND_API int zend_atoi(const char *str, zend_str_size_int str_len) /* {{{ */
 }
 /* }}} */
 
-ZEND_API long zend_atol(const char *str, zend_str_size_int str_len) /* {{{ */
+ZEND_API zend_int_t zend_atol(const char *str, zend_str_size_int str_len) /* {{{ */
 {
-	long retval;
+	zend_int_t retval;
 
 	if (!str_len) {
 		str_len = strlen(str);
 	}
-	retval = strtol(str, NULL, 0);
+	retval = ZEND_STRTOL(str, NULL, 0);
 	if (str_len>0) {
 		switch (str[str_len-1]) {
 			case 'g':
