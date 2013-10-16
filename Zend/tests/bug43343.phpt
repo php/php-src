@@ -2,12 +2,10 @@
 Bug #43343 (Variable class name)
 --FILE--
 <?php
-class if {
-	public static $bar = "if";
-}
+namespace Foo;
+class Bar { }
 $foo = 'bar';
-var_dump(new if::$$foo);
+var_dump(new namespace::$foo);
 ?>
 --EXPECTF--
-object(if)#1 (0) {
-}
+Fatal error: Class 'Foo\namespace' not found in %s on line %d
