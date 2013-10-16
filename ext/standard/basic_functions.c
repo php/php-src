@@ -4631,8 +4631,9 @@ PHP_FUNCTION(set_magic_quotes_runtime)
 	}
 	
 	if (new_setting) {
-		php_error_docref(NULL TSRMLS_CC, E_CORE_ERROR, "magic_quotes_runtime is not supported anymore");
-	}
+		php_error_docref(NULL TSRMLS_CC, E_CORE_ERROR, "magic quotes are not supported anymore");
+	} else php_error_docref(NULL TSRMLS_CC, E_DEPRECATED, "magic quotes are not supported anymore");
+	
 	RETURN_FALSE;
 }
 /* }}} */
