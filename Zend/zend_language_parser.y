@@ -535,7 +535,7 @@ non_empty_parameter_list:
 
 optional_class_type:
 		/* empty */					{ $$.op_type = IS_UNUSED; }
-	|	class_name			{ if ((Z_STRLEN($1.u.constant) == 5 && !strncasecmp(Z_STRVAL($1.u.constant), "array", 5)) || (Z_STRLEN($1.u.constant) == 8 && !strncasecmp(Z_STRVAL($1.u.constant), "callable", 8))) { $$.op_type = IS_CONST; efree(Z_STRVAL($1.u.constant)); switch (Z_STRLEN($1.u.constant)) { case 5: Z_TYPE($$.u.constant) = IS_ARRAY; break; case 8: Z_TYPE($$.u.constant) = IS_CALLABLE; break; } } else { $$ = $1; } }
+	|	class_name			{ zend_prepare_typehint(&$1, &$$); }
 ;
 
 

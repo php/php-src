@@ -202,7 +202,8 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 
 	CG(encoding_declared) = 0;
 	CG(tokenbufptr) = -1;
-	CG(tokenbuffer) = emalloc(sizeof(token_buf) * ((CG(tokenbufsize) = ZEND_INIT_TOKEN_BUF_SIZE) + 1));
+	CG(tokenbufsize) = ZEND_INIT_TOKEN_BUF_SIZE;
+	CG(tokenbuffer) = emalloc(sizeof(token_buf) * (CG(tokenbufsize) + 1));
 	CG(tokenbuffer)++->token = 0;
 	CG(tokenbuf_in_class) = -1;
 	CG(tokenbuf_fn_decl) = -1;
@@ -1519,6 +1520,25 @@ int zend_do_verify_access_types(const znode *current_access_type, const znode *n
 		zend_error(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class member");
 	}
 	return (Z_LVAL(current_access_type->u.constant) | Z_LVAL(new_modifier->u.constant));
+}
+/* }}} */
+
+void zend_prepare_typehint(const znode *token, znode *result) /* {{{ */
+{
+	if ((Z_STRLEN(token->u.constant) == 5 && !strncasecmp(Z_STRVAL(token->u.constant), "array", 5)) || (Z_STRLEN(token->u.constant) == 8 && !strncasecmp(Z_STRVAL(token->u.constant), "callable", 8))) {
+		result->op_type = IS_CONST;
+		efree(Z_STRVAL(token->u.constant));
+		switch (Z_STRLEN(token->u.constant)) {
+			case 5:
+				Z_TYPE(result->u.constant) = IS_ARRAY;
+				break;
+			case 8:
+				Z_TYPE(result->u.constant) = IS_CALLABLE;
+				break;
+		}
+	} else {
+		*result = *token;
+	}
 }
 /* }}} */
 

@@ -1251,9 +1251,10 @@ again:
 			}
 
 			/* Handling of T_HALT_COMPILER; might cause memory leaks if not handled */
-			if (buf_one_token == T_HALT_COMPILER && retval == '(') {
-				LEX_BUF_ADD
-			} else if (buf_two_token == T_HALT_COMPILER && buf_one_token == '(' && retval == ')') {
+			if (
+				   (buf_one_token == T_HALT_COMPILER && retval == '(')
+				|| (buf_two_token == T_HALT_COMPILER && buf_one_token == '(' && retval == ')')
+			   ) {
 				LEX_BUF_ADD
 			}
 		}
