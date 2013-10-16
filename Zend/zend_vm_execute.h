@@ -1272,7 +1272,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		char *function_name_strval, *lcname;
-		zend_str_size function_name_strlen;
+		zend_str_size_int function_name_strlen;
 
 
 		SAVE_OPLINE();
@@ -1597,7 +1597,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_TMP_HANDLER(ZEND_OPCODE_H
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		char *function_name_strval, *lcname;
-		zend_str_size function_name_strlen;
+		zend_str_size_int function_name_strlen;
 		zend_free_op free_op2;
 
 		SAVE_OPLINE();
@@ -1784,7 +1784,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_VAR_HANDLER(ZEND_OPCODE_H
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		char *function_name_strval, *lcname;
-		zend_str_size function_name_strlen;
+		zend_str_size_int function_name_strlen;
 		zend_free_op free_op2;
 
 		SAVE_OPLINE();
@@ -2009,7 +2009,7 @@ static int ZEND_FASTCALL  ZEND_INIT_FCALL_BY_NAME_SPEC_CV_HANDLER(ZEND_OPCODE_HA
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		char *function_name_strval, *lcname;
-		zend_str_size function_name_strlen;
+		zend_str_size_int function_name_strlen;
 
 
 		SAVE_OPLINE();

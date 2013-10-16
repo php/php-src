@@ -103,7 +103,7 @@ static void php_info_print_stream_hash(const char *name, HashTable *ht TSRMLS_DC
 {
 	char *key;
 	zend_str_size_uint len;
-	
+
 	if (ht) {
 		if (zend_hash_num_elements(ht)) {
 			HashPosition pos;

@@ -1676,9 +1676,9 @@ int php_shutdown_stream_wrappers(int module_number TSRMLS_DC)
 /* Validate protocol scheme names during registration
  * Must conform to /^[a-zA-Z0-9+.-]+$/
  */
-static inline int php_stream_wrapper_scheme_validate(const char *protocol, zend_str_size_int protocol_len)
+static inline int php_stream_wrapper_scheme_validate(const char *protocol, zend_str_size_uint protocol_len)
 {
-	zend_str_size_int i;
+	zend_str_size_uint i;
 
 	for(i = 0; i < protocol_len; i++) {
 		if (!isalnum((int)protocol[i]) &&

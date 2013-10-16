@@ -2227,14 +2227,14 @@ PHP_FUNCTION(substr)
 	if (argc > 2) {
 		if ((l < 0 && -l > str_len)) {
 			RETURN_FALSE;
-		} else if (l > (long)str_len) {
+		} else if (l > (php_int_t)str_len) {
 			l = str_len;
 		}
 	} else {
 		l = str_len;
 	}
 
-	if (f > (long)str_len) {
+	if (f > (php_int_t)str_len) {
 		RETURN_FALSE;
 	} else if (f < 0 && -f > str_len) {
 		f = 0;
@@ -2248,7 +2248,7 @@ PHP_FUNCTION(substr)
 	 * of the string
 	 */
 	if (f < 0) {
-		f = (long)str_len + f;
+		f = (php_int_t)str_len + f;
 		if (f < 0) {
 			f = 0;
 		}
@@ -2258,17 +2258,17 @@ PHP_FUNCTION(substr)
 	 * needed to stop that many chars from the end of the string
 	 */
 	if (l < 0) {
-		l = ((long)str_len - f) + l;
+		l = ((php_int_t)str_len - f) + l;
 		if (l < 0) {
 			l = 0;
 		}
 	}
 
-	if (f >= (long)str_len) {
+	if (f >= (php_int_t)str_len) {
 		RETURN_FALSE;
 	}
 
-	if ((f + l) > (long)str_len) {
+	if ((f + l) > (php_int_t)str_len) {
 		l = str_len - f;
 	}
 
@@ -3196,8 +3196,8 @@ static void php_similar_str(const char *txt1, zend_str_size_int len1, const char
  */
 static zend_str_size_int php_similar_char(const char *txt1, zend_str_size_int len1, const char *txt2, zend_str_size_int len2)
 {
-	zend_str_size sum;
-	zend_str_size pos1 = 0, pos2 = 0, max;
+	zend_str_size_int sum;
+	zend_str_size_int pos1 = 0, pos2 = 0, max;
 
 	php_similar_str(txt1, len1, txt2, len2, &pos1, &pos2, &max);
 	if ((sum = max)) {
@@ -4557,7 +4557,7 @@ PHPAPI zend_str_size_size_t php_strip_tags_ex(char *rbuf, zend_str_size_int len,
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, i=0, depth=0, in_q = 0;
 	int state = 0;
-	zend_str_size pos;
+	zend_str_size_int pos;
 	char *allow_free = NULL;
 
 	if (stateptr)

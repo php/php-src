@@ -54,7 +54,7 @@ ZEND_API void zend_exception_error(zval *exception, int severity TSRMLS_DC);
 
 /* do not export, in php it's available thru spprintf directly */
 zend_str_size_int zend_spprintf(char **message, zend_str_size_int max_len, const char *format, ...);
-
+=======
 END_EXTERN_C()
 
 #endif

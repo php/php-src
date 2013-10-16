@@ -2644,7 +2644,7 @@ ZEND_VM_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST|TMP|VAR|CV)
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		char *function_name_strval, *lcname;
-		zend_str_size function_name_strlen;
+		zend_str_size_int function_name_strlen;
 		zend_free_op free_op2;
 
 		SAVE_OPLINE();
