@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-03 Oct 2013, PHP 5.4.21 RC1
+17 Oct 2013, PHP 5.4.21
 
 - Core:
   . Fixed bug #65322 (compile time errors won't trigger auto loading). (Nikita)
