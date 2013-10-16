@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.5.6
 
+- Core:
+  . Fixed bug #65911 (scope resolution operator - strange behavior with $this).
+    (Bob Weinand)
+
 17 Oct 2013, PHP 5.5.5
 
 - Core:
