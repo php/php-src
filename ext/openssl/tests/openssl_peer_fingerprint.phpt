@@ -24,6 +24,7 @@ if ($pid == -1) {
 				'verify_peer'		=> true,
 				'cafile'		=> __DIR__ . '/bug54992-ca.pem',
 				'capture_peer_cert'	=> true,
+				'CN_match' => 'bug54992.local',
 				'peer_fingerprint'	=> '81cafc260aa8d82956ebc6212a362ece',
 			)
 		)
@@ -38,6 +39,7 @@ if ($pid == -1) {
 				'verify_peer'		=> true,
 				'cafile'		=> __DIR__ . '/bug54992-ca.pem',
 				'capture_peer_cert'	=> true,
+				'CN_match' => 'bug54992.local',
 				'peer_fingerprint'	=> array(
 					'sha256' => '78ea579f2c3b439359dec5dac9d445108772927427c4780037e87df3799a0aa0',
 				),
@@ -53,10 +55,11 @@ if ($pid == -1) {
 	@stream_socket_accept($server, 1);
 }
 --EXPECTF--
+
 Warning: stream_socket_client(): Peer fingerprint doesn't match in %s on line %d
 
 Warning: stream_socket_client(): Failed to enable crypto in %s on line %d
 
 Warning: stream_socket_client(): unable to connect to ssl://127.0.0.1:64321 (Unknown error) in %s on line %d
 bool(false)
-resource(9) of type (stream)
+resource(%d) of type (stream)
