@@ -5058,7 +5058,7 @@ int php_openssl_apply_verification_policy(SSL *ssl, X509 *peer, php_stream *stre
 	php_openssl_netstream_data_t *sslsock;
 
 	sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-	
+
 	if (!(GET_VER_OPT("verify_peer") || sslsock->is_client)
 		|| (GET_VER_OPT("verify_peer") && !zval_is_true(*val))
 	) {
