@@ -1155,7 +1155,7 @@ again:
 							LEX_CONVERT_CUR_STRING();
 						}
 				}
-				if (CG(tokenbuf_in_class) == 0 && retval != T_NAMESPACE && ((retval != T_IMPLEMENTS && retval != T_EXTENDS) || buf_one_token == ',' || buf_one_token == T_IMPLEMENTS) && LEX_IS_CUR_ALPH_TOKEN()) {
+				if (CG(tokenbuf_in_class) == 0 && retval != T_NAMESPACE && (((retval != T_IMPLEMENTS && retval != T_EXTENDS) || buf_one_token == ',' || buf_one_token == T_IMPLEMENTS) || (retval == T_IMPLEMENTS && buf_one_token == T_EXTENDS)) && LEX_IS_CUR_ALPH_TOKEN()) {
 					LEX_CONVERT_CUR_STRING();
 				}
 				/* method names */
