@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed whitespace part of bug #64874 ("json_decode handles whitespace and
     case-sensitivity incorrectly"). (Andrea Faulds)
 
+- CLI server:
+  . Implemented FR #65917 (getallheaders() is not supported by the built-in web
+    server) - also implements apache_response_headers() (Andrea Faulds)
+
 
 14 Nov 2013, PHP 5.5.6
 
