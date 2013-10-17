@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Implemented dedicated syntax for variadic functions
     (RFC: https://wiki.php.net/rfc/variadics). (Nikita)
 
+- CLI server:
+  . Implemented FR #65917 (getallheaders() is not supported by the built-in web
+    server) - also implements apache_response_headers() (Andrea Faulds)
+
 - cURL:
   . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir
     or safe_mode). (Adam)
