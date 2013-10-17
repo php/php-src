@@ -43,6 +43,7 @@ PHP                                                                        NEWS
 - Openssl:
   . Added crypto_method option for the ssl stream context. (Martin Jansen)
   . Added certificate fingerprint support. (Tjerk Meesters)
+  . Added explicit TLSv1.1 and TLSv1.2 stream transports. (Daniel Lowrey)
   . Fixed bug #65729 (CN_match gives false positive). (Tjerk Meesters)
   
 - PDO_pgsql:
