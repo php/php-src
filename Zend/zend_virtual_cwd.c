@@ -30,7 +30,7 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 #include "tsrm_strtok_r.h"
 
 #ifdef TSRM_WIN32
