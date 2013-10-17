@@ -1183,6 +1183,10 @@ PHP_MINIT_FUNCTION(openssl)
 	php_stream_xport_register("sslv2", php_openssl_ssl_socket_factory TSRMLS_CC);
 #endif
 	php_stream_xport_register("tls", php_openssl_ssl_socket_factory TSRMLS_CC);
+#if OPENSSL_VERSION_NUMBER >= 0x10001001L
+	php_stream_xport_register("tlsv1.1", php_openssl_ssl_socket_factory TSRMLS_CC);
+	php_stream_xport_register("tlsv1.2", php_openssl_ssl_socket_factory TSRMLS_CC);
+#endif
 
 	/* override the default tcp socket provider */
 	php_stream_xport_register("tcp", php_openssl_ssl_socket_factory TSRMLS_CC);
@@ -1221,6 +1225,10 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 #endif
 	php_stream_xport_unregister("sslv3" TSRMLS_CC);
 	php_stream_xport_unregister("tls" TSRMLS_CC);
+#if OPENSSL_VERSION_NUMBER >= 0x10001001L
+	php_stream_xport_unregister("tlsv1.1" TSRMLS_CC);
+	php_stream_xport_unregister("tlsv1.2" TSRMLS_CC);
+#endif
 
 	/* reinstate the default tcp handler */
 	php_stream_xport_register("tcp", php_stream_generic_socket_factory TSRMLS_CC);
