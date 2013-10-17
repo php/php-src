@@ -21,10 +21,12 @@ var_dump( $date->format( DateTime::RFC822) ) ;
 var_dump( $date->format( DateTime::RFC850) ) ;
 var_dump( $date->format( DateTime::RFC1036) ) ;
 var_dump( $date->format( DateTime::RFC1123) ) ;
-var_dump( $date->format( DateTime:: RFC2822) ) ;
+var_dump( $date->format( DateTime::RFC2822) ) ;
 var_dump( $date->format( DateTime::RFC3339) ) ;
 var_dump( $date->format( DateTime::RSS) ) ;
 var_dump( $date->format( DateTime::W3C) ) ;
+var_dump( $date->format( DateTime::SQL) ) ;
+var_dump( $date->format( DateTime::SQLTIMESTAMP) ) ;
 
 ?>
 ===DONE===
@@ -41,4 +43,6 @@ string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
 string(25) "2005-07-14T22:30:41+01:00"
 string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
 string(25) "2005-07-14T22:30:41+01:00"
+string(10) "2005-07-14"
+string(19) "2005-07-14 22:30:41"
 ===DONE===
