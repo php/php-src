@@ -45,7 +45,7 @@ libraries are available.
   <active>no</active>
  </lead>
 
- <date>2013-10-08</date>
+ <date>2013-10-17</date>
  <time>12:00:00</time>
 
   <version>
@@ -53,8 +53,8 @@ libraries are available.
    <api>2.0.5</api>
   </version>
   <stability>
-   <release>devel</release>
-   <api>devel</api>
+   <release>stable</release>
+   <api>stable</api>
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
@@ -150,7 +150,6 @@ linking works in the new Windows PECL infrastructure.
     <file name="bug42841.phpt" role="test" />
     <file name="bug43492_2.phpt" role="test" />
     <file name="bug43492.phpt" role="test" />
-    <file name="bug43497_92.phpt" role="test" />
     <file name="bug43497.phpt" role="test" />
     <file name="bug44008.phpt" role="test" />
     <file name="bug44113.phpt" role="test" />
@@ -163,7 +162,6 @@ linking works in the new Windows PECL infrastructure.
     <file name="bug51253.phpt" role="test" />
     <file name="bug51291_1.phpt" role="test" />
     <file name="bug51291_2.phpt" role="test" />
-    <file name="clientversion_92.phpt" role="test" />
     <file name="clientversion.phpt" role="test" />
     <file name="close.phpt" role="test" />
     <file name="coll_001.phpt" role="test" />
