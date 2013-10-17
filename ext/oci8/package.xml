@@ -276,6 +276,7 @@ links work in the new Windows PECL infrastructure.
     <file name="error_old.phpt" role="test" />
     <file name="error_parse.phpt" role="test" />
     <file name="error.phpt" role="test" />
+    <file name="error_set.phpt" role="test" />
     <file name="exec_fetch.phpt" role="test" />
     <file name="execute_mode.phpt" role="test" />
     <file name="extauth_01.phpt" role="test" />
