@@ -58,13 +58,12 @@ libraries are available.
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-Bump mininum requirements for PHP OCI8 2.0 to PHP 5.2 and Oracle
-client library 10.2 (Note this will connect to Oracle Database 8.1.7
-onwards). Use the older OCI8 1.4 if an earlier PHP version or older
-Oracle client library support is necessary.
+Bump PHP OCI8 2.0 mininum requirements to PHP 5.2 and Oracle client
+library 10.2.  (Use OCI8 1.4 for older PHP version support or if only
+Oracle 9.2 client libraries are available.)
 
 Re-enable php_oci8.dll and php_oci8_11g.dll for Windows builds so URL
-linking works in the new Windows PECL infrastructure.
+links work in the new Windows PECL infrastructure.
   </notes>
  <contents>
   <dir name="/">
