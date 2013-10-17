@@ -1212,12 +1212,15 @@ again:
 						break;
 					}
 				case T_NEW:
-				case T_NS_SEPARATOR:
 				case T_NAMESPACE:
 					if (retval != T_NAMESPACE && LEX_IS_CUR_ALPH_TOKEN()) {
 						LEX_CONVERT_CUR_STRING();
 					}
 			}
+			if (buf_two_token == T_NS_SEPARATOR && LEX_IS_BUF_ALPH_TOKEN(buf_one) && (retval != T_NS_SEPARATOR || buf_one_token != T_NAMESPACE)) {
+				LEX_CONVERT_BUF_STRING(buf_one);
+			}
+
 			if (retval == T_NS_SEPARATOR) {
 				switch (buf_one_token) {
 					case T_NAMESPACE:
@@ -1228,6 +1231,7 @@ again:
 						}
 					case T_USE:
 					case T_ECHO:
+					case T_YIELD:
 						if (buf_two_token < 256 && buf_two_token != ',') {
 							break;
 						}
