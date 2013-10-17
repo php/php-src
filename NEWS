@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #65911 (scope resolution operator - strange behavior with $this).
     (Bob Weinand)
 
+- Openssl:
+  . Added explicit TLSv1.1 and TLSv1.2 stream transports. (Daniel Lowrey)
+
 17 Oct 2013, PHP 5.5.5
 
 - Core:
