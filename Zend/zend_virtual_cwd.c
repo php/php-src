@@ -1484,6 +1484,9 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC) /* {{{
 {
 	cwd_state new_state;
 	FILE *f;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	if (path[0] == '\0') { /* Fail to open empty path */
 		return NULL;
@@ -1491,13 +1494,25 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC) /* {{{
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_EXPAND TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return NULL;
 	}
 
 	f = fopen(new_state.cwd, mode);
 
+#ifdef TSRM_WIN32
+	last_error = GetLastError();
+#endif
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return f;
 }
 /* }}} */
@@ -1506,20 +1521,33 @@ CWD_API int virtual_access(const char *pathname, int mode TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	int ret;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_REALPATH TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 
 #if defined(TSRM_WIN32)
 	ret = tsrm_win32_access(new_state.cwd, mode TSRMLS_CC);
+	last_error = GetLastError();
 #else
 	ret = access(new_state.cwd, mode);
 #endif
 
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 
 	return ret;
 }
@@ -1579,20 +1607,33 @@ CWD_API int virtual_utime(const char *filename, struct utimbuf *buf TSRMLS_DC) /
 {
 	cwd_state new_state;
 	int ret;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 
 #ifdef TSRM_WIN32
 	ret = win32_utime(new_state.cwd, buf);
+	last_error = GetLastError();
 #else
 	ret = utime(new_state.cwd, buf);
 #endif
 
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return ret;
 }
 /* }}} */
@@ -1602,16 +1643,31 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	int ret;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 
 	ret = chmod(new_state.cwd, mode);
+#ifdef TSRM_WIN32
+	last_error = GetLastError();
+#endif
 
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return ret;
 }
 /* }}} */
@@ -1621,10 +1677,19 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 {
 	cwd_state new_state;
 	int ret;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, filename, NULL, CWD_REALPATH TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 
@@ -1638,7 +1703,13 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 		ret = chown(new_state.cwd, owner, group);
 	}
 
+#ifdef TSRM_WIN32
+	last_error = GetLastError();
+#endif
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return ret;
 }
 /* }}} */
@@ -1648,10 +1719,19 @@ CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...) /* {{{ */
 {
 	cwd_state new_state;
 	int f;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_FILEPATH TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 
@@ -1667,7 +1747,13 @@ CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...) /* {{{ */
 	} else {
 		f = open(new_state.cwd, flags);
 	}
+#ifdef TSRM_WIN32
+	last_error = GetLastError();
+#endif
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return f;
 }
 /* }}} */
@@ -1676,16 +1762,31 @@ CWD_API int virtual_creat(const char *path, mode_t mode TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	int f;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_FILEPATH TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 
 	f = creat(new_state.cwd,  mode);
 
+#ifdef TSRM_WIN32
+	last_error = GetLastError();
+#endif
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return f;
 }
 /* }}} */
@@ -1701,15 +1802,27 @@ CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC) /
 
 	CWD_STATE_COPY(&old_state, &CWDG(cwd));
 	if (virtual_file_ex(&old_state, oldname, NULL, CWD_EXPAND TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&old_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 	oldname = old_state.cwd;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, newname, NULL, CWD_EXPAND TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&old_state);
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 	newname = new_state.cwd;
@@ -1739,16 +1852,31 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	int retval;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_REALPATH TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 
 	retval = php_sys_stat(new_state.cwd, buf);
 
+#ifdef TSRM_WIN32
+	last_error = GetLastError();
+#endif
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return retval;
 }
 /* }}} */
@@ -1757,16 +1885,31 @@ CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ *
 {
 	cwd_state new_state;
 	int retval;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_EXPAND TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 
 	retval = php_sys_lstat(new_state.cwd, buf);
 
+#ifdef TSRM_WIN32
+	last_error = GetLastError();
+#endif
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return retval;
 }
 /* }}} */
@@ -1775,16 +1918,31 @@ CWD_API int virtual_unlink(const char *path TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	int retval;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, NULL, CWD_EXPAND TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 
 	retval = unlink(new_state.cwd);
 
+#ifdef TSRM_WIN32
+	last_error = GetLastError();
+#endif
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return retval;
 }
 /* }}} */
@@ -1793,19 +1951,32 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	int retval;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_FILEPATH TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 
 #ifdef TSRM_WIN32
 	retval = mkdir(new_state.cwd);
+	last_error = GetLastError();
 #else
 	retval = mkdir(new_state.cwd, mode);
 #endif
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return retval;
 }
 /* }}} */
@@ -1814,16 +1985,31 @@ CWD_API int virtual_rmdir(const char *pathname TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	int retval;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_EXPAND TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return -1;
 	}
 
 	retval = rmdir(new_state.cwd);
 
+#ifdef TSRM_WIN32
+	last_error = GetLastError();
+#endif
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return retval;
 }
 /* }}} */
@@ -1836,16 +2022,31 @@ CWD_API DIR *virtual_opendir(const char *pathname TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	DIR *retval;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, pathname, NULL, CWD_REALPATH TSRMLS_CC)) {
+#ifdef TSRM_WIN32
+		last_error = GetLastError();
+#endif
 		CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+		SetLastError(last_error);
+#endif
 		return NULL;
 	}
 
 	retval = opendir(new_state.cwd);
 
+#ifdef TSRM_WIN32
+	last_error = GetLastError();
+#endif
 	CWD_STATE_FREE(&new_state);
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 	return retval;
 }
 /* }}} */
