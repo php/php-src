@@ -2143,45 +2143,47 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 /* }}} */
 #endif
 
-static void php_ldap_do_escape(const zend_bool *map, const unsigned char *value, const int valuelen, unsigned char **result, int *resultlen)
+static void php_ldap_do_escape(const zend_bool *map, const char *value, size_t valuelen, char **result, size_t *resultlen)
 {
 	char hex[] = "0123456789abcdef";
 	int i, p = 0;
 	size_t len = 0;
 
 	for (i = 0; i < valuelen; i++) {
-		len += (map[value[i]]) ? 3 : 1;
+		len += (map[(unsigned char) value[i]]) ? 3 : 1;
 	}
-	len += 1;
 
-	(*result) = (unsigned char *)emalloc(len);
-	(*resultlen) = (int)len;
+	(*result) = (char *) safe_emalloc(1, len, 1);
+	(*resultlen) = len;
 
 	for (i = 0; i < valuelen; i++) {
-		if (map[value[i]]) {
+		unsigned char v = (unsigned char) value[i];
+
+		if (map[v]) {
 			(*result)[p++] = '\\';
-			(*result)[p++] = hex[value[i] >> 4];
-			(*result)[p++] = hex[value[i] & 0x0f];
+			(*result)[p++] = hex[v >> 4];
+			(*result)[p++] = hex[v & 0x0f];
 		} else {
-			(*result)[p++] = value[i];
+			(*result)[p++] = v;
 		}
 	}
 
 	(*result)[p++] = '\0';
 }
 
-static void php_ldap_escape_map_set_chars(zend_bool *map, const unsigned char *chars, const int charslen, char escape)
+static void php_ldap_escape_map_set_chars(zend_bool *map, const char *chars, const int charslen, char escape)
 {
 	int i = 0;
 	while (i < charslen) {
-		map[chars[i++]] = escape;
+		map[(unsigned char) chars[i++]] = escape;
 	}
 }
 
 PHP_FUNCTION(ldap_escape)
 {
-	unsigned char *value, *ignores, *result;
-	int valuelen = 0, ignoreslen = 0, resultlen = 0, i;
+	char *value, *ignores, *result;
+	int valuelen = 0, ignoreslen = 0, i;
+	size_t resultlen;
 	long flags = 0;
 	zend_bool map[256] = {0}, havecharlist = 0;
 
@@ -2215,7 +2217,7 @@ PHP_FUNCTION(ldap_escape)
 
 	php_ldap_do_escape(map, value, valuelen, &result, &resultlen);
 
-	RETURN_STRINGL(result, resultlen - 1, 0);
+	RETURN_STRINGL(result, resultlen, 0);
 }
 
 #ifdef STR_TRANSLATION
