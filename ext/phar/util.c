@@ -932,9 +932,9 @@ PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename,
 	if (SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void**)&fd_ptr)) {
 		*filename = (*fd_ptr)->fname;
 		*filename_len = (*fd_ptr)->fname_len;
-		return 1;
+		return SUCCESS;
 	}
-	return 0;
+	return FAILURE;
 }
 /* }}} */
 
