@@ -1695,6 +1695,9 @@ CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC) /
 	cwd_state old_state;
 	cwd_state new_state;
 	int retval;
+#ifdef TSRM_WIN32
+	DWORD last_error;
+#endif
 
 	CWD_STATE_COPY(&old_state, &CWDG(cwd));
 	if (virtual_file_ex(&old_state, oldname, NULL, CWD_EXPAND TSRMLS_CC)) {
@@ -1716,12 +1719,17 @@ CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC) /
 #ifdef TSRM_WIN32
 	/* MoveFileEx returns 0 on failure, other way 'round for this function */
 	retval = (MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED) == 0) ? -1 : 0;
+	last_error = GetLastError();
 #else
 	retval = rename(oldname, newname);
 #endif
 
 	CWD_STATE_FREE(&old_state);
 	CWD_STATE_FREE(&new_state);
+
+#ifdef TSRM_WIN32
+	SetLastError(last_error);
+#endif
 
 	return retval;
 }
