@@ -34,7 +34,6 @@ extern zend_module_entry phar_module_entry;
 #define PHP_PHAR_API PHPAPI
 #endif
 
-#define PHAR_HAVE_RESOLVE_ALIAS
 PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename, int *filename_len TSRMLS_DC);
 
 #endif /* PHP_PHAR_H */
