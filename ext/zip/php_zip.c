@@ -154,7 +154,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	size_t path_cleaned_len;
 	cwd_state new_state;
 
-	new_state.cwd = (char*)malloc(1);
+	new_state.cwd = (char*)emalloc(1);
 	new_state.cwd[0] = '\0';
 	new_state.cwd_length = 0;
 
@@ -191,7 +191,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname_fullpath)) {
 			efree(file_dirname_fullpath);
 			efree(file_basename);
-			free(new_state.cwd);
+			efree(new_state.cwd);
 			return 0;
 		}
 	}
@@ -215,7 +215,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 			efree(file_dirname_fullpath);
 			if (!is_dir_only) {
 				efree(file_basename);
-				free(new_state.cwd);
+				efree(new_state.cwd);
 			}
 			return 0;
 		}
@@ -224,7 +224,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	/* it is a standalone directory, job done */
 	if (is_dir_only) {
 		efree(file_dirname_fullpath);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return 1;
 	}
 
@@ -232,13 +232,13 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 	if (!len) {
 		efree(file_dirname_fullpath);
 		efree(file_basename);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return 0;
 	} else if (len > MAXPATHLEN) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Full extraction path exceed MAXPATHLEN (%i)", MAXPATHLEN);
 		efree(file_dirname_fullpath);
 		efree(file_basename);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return 0;
 	}
 
@@ -250,7 +250,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		efree(fullpath);
 		efree(file_dirname_fullpath);
 		efree(file_basename);
-		free(new_state.cwd);
+		efree(new_state.cwd);
 		return 0;
 	}
 
@@ -285,7 +285,7 @@ done:
 	efree(fullpath);
 	efree(file_basename);
 	efree(file_dirname_fullpath);
-	free(new_state.cwd);
+	efree(new_state.cwd);
 
 	if (n<0) {
 		return 0;

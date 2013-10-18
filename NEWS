@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     variable. (Mike)
   . Implemented dedicated syntax for variadic functions
     (RFC: https://wiki.php.net/rfc/variadics). (Nikita)
+  . Fixed bug #50333 (Improving multi-threaded scalability by using
+    emalloc/efree/estrdup)). (yoarvi at gmail dot com, Anatol)
 
 - cURL:
   . Implemented FR #65646 (re-enable CURLOPT_FOLLOWLOCATION with open_basedir

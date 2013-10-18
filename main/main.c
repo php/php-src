@@ -1816,6 +1816,9 @@ void php_request_shutdown(void *dummy)
 		sapi_deactivate(TSRMLS_C);
 	} zend_end_try();
 
+	/* 9.5 free virtual CWD memory */
+	virtual_cwd_deactivate(TSRMLS_C);
+
 	/* 10. Destroy stream hashes */
 	zend_try {
 		php_shutdown_stream_hashes(TSRMLS_C);
@@ -2243,9 +2246,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	}
 #endif
 
-#ifdef ZTS
 	zend_post_startup(TSRMLS_C);
-#endif
 
 	module_initialized = 1;
 
@@ -2315,6 +2316,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	shutdown_memory_manager(1, 0 TSRMLS_CC);
 	zend_interned_strings_snapshot(TSRMLS_C);
+ 	virtual_cwd_activate(TSRMLS_C);
 
 	/* we're done */
 	return retval;
@@ -2410,14 +2412,13 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 	volatile int old_cwd_fd = -1;
 #else
 	char *old_cwd;
-	ALLOCA_FLAG(use_heap)
 #endif
 	int retval = 0;
 
 	EG(exit_status) = 0;
 #ifndef HAVE_BROKEN_GETCWD
 # define OLD_CWD_SIZE 4096
-	old_cwd = do_alloca(OLD_CWD_SIZE, use_heap);
+	old_cwd = emalloc(OLD_CWD_SIZE);
 	old_cwd[0] = '\0';
 #endif
 
@@ -2498,7 +2499,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 	if (old_cwd[0] != '\0') {
 		php_ignore_value(VCWD_CHDIR(old_cwd));
 	}
-	free_alloca(old_cwd, use_heap);
+	efree(old_cwd);
 #endif
 	return retval;
 }
@@ -2509,11 +2510,10 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret TSRMLS_DC)
 {
 	char *old_cwd;
-	ALLOCA_FLAG(use_heap)
 
 	EG(exit_status) = 0;
 #define OLD_CWD_SIZE 4096
-	old_cwd = do_alloca(OLD_CWD_SIZE, use_heap);
+	old_cwd = emalloc(OLD_CWD_SIZE);
 	old_cwd[0] = '\0';
 
 	zend_try {
@@ -2536,7 +2536,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret 
 		php_ignore_value(VCWD_CHDIR(old_cwd));
 	}
 
-	free_alloca(old_cwd, use_heap);
+	efree(old_cwd);
 	return EG(exit_status);
 }
 /* }}} */
