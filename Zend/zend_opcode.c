@@ -499,7 +499,7 @@ static void zend_check_finally_breakout(zend_op_array *op_array, zend_uint op_nu
 			CG(in_compilation) = 1;
 			CG(active_op_array) = op_array;
 			CG(zend_lineno) = op_array->opcodes[op_num].lineno;
-			zend_error(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
+			zend_error_noreturn(E_COMPILE_ERROR, "jump out of a finally block is disallowed");
 		}
 	} 
 }
@@ -710,7 +710,7 @@ ZEND_API int pass_two(zend_op_array *op_array TSRMLS_DC)
 				if (op_array->fn_flags & ZEND_ACC_GENERATOR) {
 					if (opline->op1_type != IS_CONST || Z_TYPE_P(opline->op1.zv) != IS_NULL) {
 						CG(zend_lineno) = opline->lineno;
-						zend_error(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
+						zend_error_noreturn(E_COMPILE_ERROR, "Generators cannot return values using \"return\"");
 					}
 
 					opline->opcode = ZEND_GENERATOR_RETURN;
