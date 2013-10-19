@@ -453,7 +453,7 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
-		if(myht && myht->nApplyCount > 0){
+		if (myht->nApplyCount > 0){
 			smart_str_appendl(buf, "NULL", 4);
 			zend_error(E_WARNING, "var_export does not handle circular references");
 			return;
