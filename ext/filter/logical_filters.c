@@ -714,7 +714,7 @@ void php_filter_validate_ip(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			if (flags & FILTER_FLAG_NO_RES_RANGE) {
 				if (
 					(ip[0] == 0) ||
-					(ip[0] == 100 && (ip[1] >= 64 || ip[1] <= 127)) ||
+					(ip[0] == 100 && (ip[1] >= 64 && ip[1] <= 127)) ||
 					(ip[0] == 128 && ip[1] == 0) ||
 					(ip[0] == 191 && ip[1] == 255) ||
 					(ip[0] == 169 && ip[1] == 254) ||
