@@ -1670,7 +1670,7 @@ ftp_genlist(ftpbuf_t *ftp, const char *cmd, const char *path TSRMLS_DC)
 
 	php_stream_rewind(tmpstream);
 
-	ret = safe_emalloc((lines + 1), sizeof(char*), size * sizeof(char*));
+	ret = safe_emalloc((lines + 1), sizeof(char*), size);
 
 	entry = ret;
 	text = (char*) (ret + lines + 1);
