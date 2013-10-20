@@ -630,7 +630,7 @@ ftp_alloc(ftpbuf_t *ftp, const long size, char **response)
 		return 0;
 	}
 
-	if (response && ftp->inbuf) {
+	if (response) {
 		*response = estrdup(ftp->inbuf);
 	}
 
