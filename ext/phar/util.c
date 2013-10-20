@@ -1015,8 +1015,10 @@ alias_success:
 					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, (*fd_ptr)->fname, fname);
 				}
 				if (SUCCESS == phar_free_alias(*fd_ptr, alias, alias_len TSRMLS_CC)) {
-					efree(*error);
-					*error = NULL;
+					if (error) {
+						efree(*error);
+						*error = NULL;
+					}
 				}
 				return FAILURE;
 			}
