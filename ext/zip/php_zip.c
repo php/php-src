@@ -1856,15 +1856,16 @@ static ZIPARCHIVE_METHOD(addFromString)
 	/* TODO: fix  _zip_replace */
 	if (cur_idx >= 0) {
 		if (zip_delete(intern, cur_idx) == -1) {
-			RETURN_FALSE;
+			goto fail;
 		}
 	}
 
-	if (zip_add(intern, name, zs) == -1) {
-		RETURN_FALSE;
-	} else {
+	if (zip_add(intern, name, zs) != -1) {
 		RETURN_TRUE;
 	}
+fail:
+	zip_source_free(zs);
+	RETURN_FALSE;	
 }
 /* }}} */
 
