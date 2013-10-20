@@ -251,7 +251,7 @@ void fpm_children_bury() /* {{{ */
 				}
 				zlog(severity, "[pool %s] child %d exited %s after %ld.%06d seconds from start", child->wp->config->name, (int) pid, buf, tv2.tv_sec, (int) tv2.tv_usec);
 			} else {
-				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process managment after %ld.%06d seconds from start", child->wp->config->name, (int) pid, tv2.tv_sec, (int) tv2.tv_usec);
+				zlog(ZLOG_DEBUG, "[pool %s] child %d has been killed by the process management after %ld.%06d seconds from start", child->wp->config->name, (int) pid, tv2.tv_sec, (int) tv2.tv_usec);
 			}
 
 			fpm_child_close(child, 1 /* in event_loop */);
