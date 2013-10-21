@@ -27,7 +27,7 @@
 /* {{{ */
 static void numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 {
-	char*       locale;
+	const char* locale;
 	char*       pattern = NULL;
 	int         locale_len = 0, pattern_len = 0;
 	long        style;

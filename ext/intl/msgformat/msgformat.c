@@ -28,7 +28,7 @@
 /* {{{ */
 static void msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS) 
 {
-	char*       locale;
+	const char* locale;
 	char*       pattern;
 	int         locale_len = 0, pattern_len = 0;
 	UChar*      spattern     = NULL;
