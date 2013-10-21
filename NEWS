@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.6
 
 - Core:
+  . Fixed bug #65939 (Space before ";" breaks php.ini parsing).
+    (brainstorm at nopcode dot org)
   . Fixed bug #65911 (scope resolution operator - strange behavior with $this).
     (Bob Weinand)
 
