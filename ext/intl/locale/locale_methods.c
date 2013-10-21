@@ -127,6 +127,9 @@ static char* getPreferredTag(char* gf_tag)
 	int grOffset = 0;
 
 	grOffset = findOffset( LOC_GRANDFATHERED ,gf_tag);
+	if(grOffset < 0) {
+		return NULL;
+	}
 	if( grOffset < LOC_PREFERRED_GRANDFATHERED_LEN ){
 		/* return preferred tag */
 		result = estrdup( LOC_PREFERRED_GRANDFATHERED[grOffset] );
