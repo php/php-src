@@ -51,6 +51,7 @@ PHP                                                                        NEWS
     imap). (ryotakatsuki at gmail dot com)
 
 - OPcache:
+  . Fixed issue #115 (path issue when using phar). (Laruence)
   . Added support for GNU Hurd. (Svante Signell)
   . Added function opcache_compile_file() to load PHP scripts into cache
     without execution. (Julien)
