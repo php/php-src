@@ -1406,6 +1406,7 @@ PHPAPI signed long php_parse_date(char *string, signed long *now)
 
 	parsed_time = timelib_strtotime(string, strlen(string), &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	if (error->error_count) {
+		timelib_time_dtor(parsed_time);
 		timelib_error_container_dtor(error);
 		return -1;
 	}
