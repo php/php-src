@@ -1906,7 +1906,7 @@ ldap.max_links = -1
 ;opcache.revalidate_path=0
 
 ; If disabled, all PHPDoc comments are dropped from the code to reduce the
- ;size of the optimized code.
+; size of the optimized code.
 ;opcache.save_comments=1
 
 ; If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"
