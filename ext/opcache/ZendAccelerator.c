@@ -150,7 +150,7 @@ static inline int is_phar_relative_alias_path(const char *filename, char **alias
 	if (memcmp(filename, "phar://", sizeof("phar://") - 1) == 0
 			&& filename[sizeof("phar://") - 1] != '\0' && filename[sizeof("phar://") - 1] != '/') {
 		char *slash;
-		*alias = filename + sizeof("phar://") - 1;
+		*alias = (char*)filename + sizeof("phar://") - 1;
 		slash = strstr(*alias, "/");
 		if (slash) {
 			*alias_len = slash - *alias;
