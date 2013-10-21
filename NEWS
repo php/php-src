@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #65818 (Segfault with built-in webserver and chunked transfer 
     encoding). (Felipe)
 
+- Exif:
+  . Fixed crash on unknown encoding. (Draal)
+
 - FTP:
   . Fixed bug #65667 (ftp_nb_continue produces segfault). (Philip Hofstetter)
 
