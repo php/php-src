@@ -22,7 +22,7 @@ PHP                                                                        NEWS
   . Fixed bug #64230 (XMLReader does not suppress errors). (Mike)
 
 
-?? ??? 2013, PHP 5.4.21
+17 Oct 2013, PHP 5.4.21
 
 - Core:
   . Fixed bug #65322 (compile time errors won't trigger auto loading). (Nikita)
