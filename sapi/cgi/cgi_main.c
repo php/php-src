@@ -815,7 +815,7 @@ static void php_cgi_ini_activate_user_config(char *path, int path_len, const cha
 		}
 
 		if (real_path) {
-			free(real_path);
+			efree(real_path);
 		}
 		entry->expires = request_time + PG(user_ini_cache_ttl);
 	}
@@ -1396,7 +1396,7 @@ static void init_request_info(fcgi_request *request TSRMLS_DC)
 				} else {
 					SG(request_info).request_uri = env_script_name;
 				}
-				free(real_path);
+				efree(real_path);
 			}
 		} else {
 			/* pre 4.3 behaviour, shouldn't be used but provides BC */
