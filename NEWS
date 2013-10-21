@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #65322 (compile time errors won't trigger auto loading). (Nikita)
   . Fixed bug #65821 (By-ref foreach on property access of string offset
     segfaults). (Nikita)
+  . Fixed bug #65936 (dangling context pointer causes crash). (Tony)
 
 - CLI server:
   . Fixed bug #65633 (built-in server treat some http headers as
