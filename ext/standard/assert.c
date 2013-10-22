@@ -200,7 +200,7 @@ PHP_FUNCTION(assert)
 	}
 
 	if (ASSERTG(callback)) {
-		zval **args = safe_emalloc(description_len == 0 ? 3 : 4, sizeof(zval **), 0);
+		zval **args = safe_emalloc(description_len == 0 ? 3 : 4, sizeof(zval *), 0);
 		zval *retval;
 		int i;
 		uint lineno = zend_get_executed_lineno(TSRMLS_C);

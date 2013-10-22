@@ -67,6 +67,9 @@
 #include <sasl/sasl.h>
 #endif
 
+#define PHP_LDAP_ESCAPE_FILTER 0x01
+#define PHP_LDAP_ESCAPE_DN     0x02
+
 typedef struct {
 	LDAP *link;
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
@@ -194,6 +197,9 @@ PHP_MINIT_FUNCTION(ldap)
 	REGISTER_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT | CONST_CS);
 #endif
+
+	REGISTER_LONG_CONSTANT("LDAP_ESCAPE_FILTER", PHP_LDAP_ESCAPE_FILTER, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("LDAP_ESCAPE_DN", PHP_LDAP_ESCAPE_DN, CONST_PERSISTENT | CONST_CS);
 
 	le_link = zend_register_list_destructors_ex(_close_ldap_link, NULL, "ldap link", module_number);
 	le_result = zend_register_list_destructors_ex(_free_ldap_result, NULL, "ldap result", module_number);
@@ -2137,6 +2143,83 @@ PHP_FUNCTION(ldap_set_rebind_proc)
 /* }}} */
 #endif
 
+static void php_ldap_do_escape(const zend_bool *map, const char *value, size_t valuelen, char **result, size_t *resultlen)
+{
+	char hex[] = "0123456789abcdef";
+	int i, p = 0;
+	size_t len = 0;
+
+	for (i = 0; i < valuelen; i++) {
+		len += (map[(unsigned char) value[i]]) ? 3 : 1;
+	}
+
+	(*result) = (char *) safe_emalloc(1, len, 1);
+	(*resultlen) = len;
+
+	for (i = 0; i < valuelen; i++) {
+		unsigned char v = (unsigned char) value[i];
+
+		if (map[v]) {
+			(*result)[p++] = '\\';
+			(*result)[p++] = hex[v >> 4];
+			(*result)[p++] = hex[v & 0x0f];
+		} else {
+			(*result)[p++] = v;
+		}
+	}
+
+	(*result)[p++] = '\0';
+}
+
+static void php_ldap_escape_map_set_chars(zend_bool *map, const char *chars, const int charslen, char escape)
+{
+	int i = 0;
+	while (i < charslen) {
+		map[(unsigned char) chars[i++]] = escape;
+	}
+}
+
+PHP_FUNCTION(ldap_escape)
+{
+	char *value, *ignores, *result;
+	int valuelen = 0, ignoreslen = 0, i;
+	size_t resultlen;
+	long flags = 0;
+	zend_bool map[256] = {0}, havecharlist = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|sl", &value, &valuelen, &ignores, &ignoreslen, &flags) != SUCCESS) {
+		return;
+	}
+
+	if (!valuelen) {
+		RETURN_EMPTY_STRING();
+	}
+
+	if (flags & PHP_LDAP_ESCAPE_FILTER) {
+		havecharlist = 1;
+		php_ldap_escape_map_set_chars(map, "\\*()\0", sizeof("\\*()\0") - 1, 1);
+	}
+
+	if (flags & PHP_LDAP_ESCAPE_DN) {
+		havecharlist = 1;
+		php_ldap_escape_map_set_chars(map, "\\,=+<>;\"#", sizeof("\\,=+<>;\"#") - 1, 1);
+	}
+
+	if (!havecharlist) {
+		for (i = 0; i < 256; i++) {
+			map[i] = 1;
+		}
+	}
+
+	if (ignoreslen) {
+		php_ldap_escape_map_set_chars(map, ignores, ignoreslen, 0);
+	}
+
+	php_ldap_do_escape(map, value, valuelen, &result, &resultlen);
+
+	RETURN_STRINGL(result, resultlen, 0);
+}
+
 #ifdef STR_TRANSLATION
 /* {{{ php_ldap_do_translate
  */
@@ -2626,6 +2709,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_set_rebind_proc, 0, 0, 2)
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_escape, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_INFO(0, ignore)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
 #ifdef STR_TRANSLATION
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_t61_to_8859, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
@@ -2703,6 +2792,8 @@ const zend_function_entry ldap_functions[] = {
 #if defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC)
 	PHP_FE(ldap_set_rebind_proc,						arginfo_ldap_set_rebind_proc)
 #endif
+
+	PHP_FE(ldap_escape,									arginfo_ldap_escape)
 
 #ifdef STR_TRANSLATION
 	PHP_FE(ldap_t61_to_8859,							arginfo_ldap_t61_to_8859)

@@ -1610,7 +1610,7 @@ PHP_FUNCTION(openssl_spki_export_challenge)
 		goto cleanup;
 	}
 
-	RETVAL_STRING(ASN1_STRING_data(spki->spkac->challenge), 1);
+	RETVAL_STRING((char *) ASN1_STRING_data(spki->spkac->challenge), 1);
 	goto cleanup;
 
 cleanup:
@@ -1684,7 +1684,7 @@ static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_boo
 {
 	unsigned char md[EVP_MAX_MD_SIZE];
 	const EVP_MD *mdtype;
-	int n;
+	unsigned int n;
 
 	if (!(mdtype = EVP_get_digestbyname(method))) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Unknown signature algorithm");
@@ -1696,7 +1696,7 @@ static int php_openssl_x509_fingerprint(X509 *peer, const char *method, zend_boo
 
 	if (raw) {
 		*out_len = n;
-		*out = estrndup(md, n);
+		*out = estrndup((char *) md, n);
 	} else {
 		*out_len = n * 2;
 		*out = emalloc(*out_len + 1);
@@ -4924,14 +4924,12 @@ static int verify_callback(int preverify_ok, X509_STORE_CTX *ctx) /* {{{ */
 {
 	php_stream *stream;
 	SSL *ssl;
-	X509 *err_cert;
 	int err, depth, ret;
 	zval **val;
 
 	ret = preverify_ok;
 
 	/* determine the status for the current cert */
-	err_cert = X509_STORE_CTX_get_current_cert(ctx);
 	err = X509_STORE_CTX_get_error(ctx);
 	depth = X509_STORE_CTX_get_error_depth(ctx);
 
@@ -5005,7 +5003,7 @@ static zend_bool matches_san_list(X509 *peer, const char *subject_name)
 
 		if (GEN_DNS == san->type) {
 			ASN1_STRING_to_UTF8(&cert_name, san->d.dNSName);
-			is_match = matches_wildcard_name(subject_name, cert_name);
+			is_match = matches_wildcard_name(subject_name, (char *) cert_name);
 			OPENSSL_free(cert_name);
 		}
 
