@@ -51,6 +51,8 @@ PHP X.Y UPGRADE NOTES
 2. Changes in SAPI modules
 ========================================
 
+- CLI server:
+  Now supports apache_request_headers() and apache_response_headers()
 
 ========================================
 3. Deprecated Functionality

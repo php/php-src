@@ -133,6 +133,7 @@ typedef struct php_cli_server_request {
 	char *query_string;
 	size_t query_string_len;
 	HashTable headers;
+	HashTable headers_original_case;
 	char *content;
 	size_t content_len;
 	const char *ext;
@@ -435,6 +436,75 @@ static const char *get_mime_type(const char *ext, size_t ext_len) /* {{{ */
 	return NULL;
 } /* }}} */
 
+PHP_FUNCTION(apache_request_headers) /* {{{ */
+{
+	php_cli_server_client *client;
+	HashTable *headers;
+	char *key;
+	uint key_len;
+	char **value_pointer;
+	HashPosition pos;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	client = SG(server_context);
+	headers = &client->request.headers_original_case;
+
+	array_init_size(return_value, zend_hash_num_elements(headers));
+
+	zend_hash_internal_pointer_reset_ex(headers, &pos);
+	while (zend_hash_get_current_data_ex(headers, (void **)&value_pointer, &pos) == SUCCESS) {
+		zend_hash_get_current_key_ex(headers, &key, &key_len, NULL, 0, &pos);
+		add_assoc_string_ex(return_value, key, key_len, *value_pointer, 1);
+		zend_hash_move_forward_ex(headers, &pos);
+	}
+}
+/* }}} */
+
+static void add_response_header(sapi_header_struct *h, zval *return_value TSRMLS_DC) /* {{{ */
+{
+	char *s, *p;
+	int  len;
+	ALLOCA_FLAG(use_heap)
+
+	if (h->header_len > 0) {
+		p = strchr(h->header, ':');
+		len = p - h->header;
+		if (p && (len > 0)) {
+			while (len > 0 && (h->header[len-1] == ' ' || h->header[len-1] == '\t')) {
+				len--;
+			}
+			if (len) {
+				s = do_alloca(len + 1, use_heap);
+				memcpy(s, h->header, len);
+				s[len] = 0;
+				do {
+					p++;
+				} while (*p == ' ' || *p == '\t');
+				add_assoc_stringl_ex(return_value, s, len+1, p, h->header_len - (p - h->header), 1);
+				free_alloca(s, use_heap);
+			}
+		}
+	}
+}
+/* }}} */
+
+PHP_FUNCTION(apache_response_headers) /* {{{ */
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	if (!&SG(sapi_headers).headers) {
+		RETURN_FALSE;
+	}
+	array_init(return_value);
+	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ cli_server module
  */
 
@@ -479,9 +549,15 @@ zend_module_entry cli_server_module_entry = {
 };
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO(arginfo_no_args, 0)
+ZEND_END_ARG_INFO()
+
 const zend_function_entry server_additional_functions[] = {
 	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
 	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
+	PHP_FE(apache_request_headers, arginfo_no_args)
+	PHP_FE(apache_response_headers, arginfo_no_args)
+	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_no_args)
 	{NULL, NULL, NULL}
 };
 
@@ -1300,6 +1376,7 @@ static int php_cli_server_request_ctor(php_cli_server_request *req) /* {{{ */
 	req->query_string = NULL;
 	req->query_string_len = 0;
 	zend_hash_init(&req->headers, 0, NULL, (void(*)(void*))char_ptr_dtor_p, 1);
+	zend_hash_init(&req->headers_original_case, 0, NULL, NULL, 1);
 	req->content = NULL;
 	req->content_len = 0;
 	req->ext = NULL;
@@ -1325,6 +1402,7 @@ static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 		pefree(req->query_string, 1);
 	}
 	zend_hash_destroy(&req->headers);
+	zend_hash_destroy(&req->headers_original_case);
 	if (req->content) {
 		pefree(req->content, 1);
 	}
@@ -1569,6 +1647,7 @@ static int php_cli_server_client_read_request_on_header_value(php_http_parser *p
 	{
 		char *header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
 		zend_hash_add(&client->request.headers, header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
+		zend_hash_add(&client->request.headers_original_case, client->current_header_name, client->current_header_name_len + 1, &value, sizeof(char *), NULL);
 		efree(header_name);
 	}
 
