@@ -8,7 +8,15 @@ notifications:
     email: false
 
 env:
-    - REPORT_EXIT_STATUS=1
+    global:
+      - MYSQL_TEST_HOST=127.0.0.1
+      - MYSQL_TEST_USER=travis
+      - PDO_MYSQL_TEST_DSN="mysql:host=127.0.0.1;dbname=test"
+      - PDO_MYSQL_TEST_USER=travis
+      - PDO_MYSQL_TEST_PASS=
+      - PDO_MYSQL_TEST_HOST=127.0.0.1
+    matrix:
+      - REPORT_EXIT_STATUS=1
 
 before_script:
     # Compile PHP
@@ -21,4 +29,4 @@ before_script:
     - . ./travis/ext/pdo_pgsql/setup.sh
 
 # Run PHPs run-tests.php 
-script: ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --show-diff
+script: ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --show-diff --set-timeout 120

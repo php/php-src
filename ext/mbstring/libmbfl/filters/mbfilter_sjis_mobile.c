@@ -605,7 +605,7 @@ mbfilter_unicode2sjis_emoji_sb(int c, int *s1, mbfl_convert_filter *filter)
 int
 mbfl_filt_conv_sjis_mobile_wchar(int c, mbfl_convert_filter *filter)
 {
-	int c1, s, s1, s2, w;
+	int c1, s, s1 = 0, s2 = 0, w;
 	int snd = 0;
 
 retry:

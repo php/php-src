@@ -326,40 +326,42 @@ int main() {
     msg=yes,msg=no,msg=no)
   AC_MSG_RESULT([$msg])
 
-  AC_MSG_CHECKING(for known struct flock definition)
-  dnl Copied from ZendAccelerator.h
-  AC_TRY_RUN([
-#include <fcntl.h>
-#include <stdlib.h>
+flock_type=unknown
+AC_MSG_CHECKING("whether flock struct is linux ordered")
+AC_TRY_RUN([
+  #include <fcntl.h>
+  struct flock lock = { 1, 2, 3, 4, 5 };
+  int main() { 
+    if(lock.l_type == 1 && lock.l_whence == 2 && lock.l_start == 3 && lock.l_len == 4) {
+		return 0;
+    }
+    return 1;
+  } 
+], [
+	flock_type=linux
+    AC_DEFINE([HAVE_FLOCK_LINUX], [], [Struct flock is Linux-type])
+    AC_MSG_RESULT("yes")
+], AC_MSG_RESULT("no") )
 
-#ifndef ZEND_WIN32
-extern int lock_file;
+AC_MSG_CHECKING("whether flock struct is BSD ordered")
+AC_TRY_RUN([
+  #include <fcntl.h>
+  struct flock lock = { 1, 2, 3, 4, 5 };
+  int main() { 
+    if(lock.l_start == 1 && lock.l_len == 2 && lock.l_type == 4 && lock.l_whence == 5) {
+		return 0;
+    }
+    return 1;
+  } 
+], [
+	flock_type=bsd
+    AC_DEFINE([HAVE_FLOCK_BSD], [], [Struct flock is BSD-type]) 
+    AC_MSG_RESULT("yes")
+], AC_MSG_RESULT("no") )
 
-# if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || (defined(__APPLE__) && defined(__MACH__)/* Darwin */) || defined(__OpenBSD__) || defined(__NetBSD__)
-#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
-                struct flock name = {start, len, -1, type, whence}
-# elif defined(__svr4__)
-#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
-                struct flock name = {type, whence, start, len}
-# elif defined(__linux__) || defined(__hpux)
-#  define FLOCK_STRUCTURE(name, type, whence, start, len) \
-                struct flock name = {type, whence, start, len, 0}
-# elif defined(_AIX)
-#  if defined(_LARGE_FILES) || defined(__64BIT__)
-#   define FLOCK_STRUCTURE(name, type, whence, start, len) \
-                struct flock name = {type, whence, 0, 0, 0, start, len }
-#  else
-#   define FLOCK_STRUCTURE(name, type, whence, start, len) \
-                struct flock name = {type, whence, start, len}
-#  endif
-# else
-#  error "Don't know how to define struct flock"
-# endif
-#endif
-int main() { return 0; }
-],
-[AC_MSG_RESULT([done])],
-[AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])], [])
+if test "$flock_type" == "unknown"; then
+	AC_MSG_ERROR([Don't know how to define struct flock on this system[,] set --enable-opcache=no])
+fi
   
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \

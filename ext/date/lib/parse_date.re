@@ -614,7 +614,8 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 	char *begin = *ptr, *end;
 	const timelib_relunit *tp, *value = NULL;
 
-	while (**ptr != '\0' && **ptr != ' ' && **ptr != ',' && **ptr != '\t') {
+	while (**ptr != '\0' && **ptr != ' ' && **ptr != ',' && **ptr != '\t' && **ptr != ';' && **ptr != ':' &&
+           **ptr != '/' && **ptr != '.' && **ptr != '-' && **ptr != '(' && **ptr != ')' ) {
 		++*ptr;
 	}
 	end = *ptr;
@@ -2008,7 +2009,7 @@ timelib_time *timelib_parse_from_format(char *format, char *string, int len, tim
 					TIMELIB_CHECK_NUMBER;
 					sec = timelib_get_nr_ex((char **) &ptr, 2, &length);
 					if (sec == TIMELIB_UNSET || length != 2) {
-						add_pbf_error(s, "A two second minute could not be found", string, begin);
+						add_pbf_error(s, "A two digit second could not be found", string, begin);
 					} else {
 						s->time->s = sec;
 					}

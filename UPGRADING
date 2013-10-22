@@ -186,6 +186,9 @@ PHP 5.5 UPGRADE NOTES
   DOMDocument::schemaValidate() accept flag parameter. Only flag 
   available now is LIBXML_SCHEMA_CREATE. Default is 0.
 
+- Since 5.5.4, fputcsv() has fifth parameter escape_char, allowing to
+  specify escape char.
+
 ========================================
 5. New Functions
 ========================================
@@ -340,6 +343,8 @@ None
 
 - Intl:
   - This extension now requires ICU 4.0+.
+- Phar:
+  - Added ability of resolving alias created by Phar::map
 
 ========================================
 9. New Global Constants

@@ -30,7 +30,7 @@ zend_module_entry foo_module_entry = {
     PHP_RSHUTDOWN(foo),   /* per-request shutdown function */
     PHP_MINFO(foo),       /* information function */
 #if ZEND_MODULE_API_NO >= 20010901
-    FOO_VERSION,          /* extension version number (string) */
+    PHP_FOO_VERSION,      /* extension version number (string) */
 #endif
     STANDARD_MODULE_PROPERTIES
 };

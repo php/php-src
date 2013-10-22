@@ -1,25 +1,148 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.5.4
+?? ??? 2013, PHP 5.5.6
 
 - Core:
+  . Fixed bug #65939 (Space before ";" breaks php.ini parsing).
+    (brainstorm at nopcode dot org)
+  . Fixed bug #65911 (scope resolution operator - strange behavior with $this).
+    (Bob Weinand)
+
+17 Oct 2013, PHP 5.5.5
+
+- Core:
+  . Fixed bug #64979 (Wrong behavior of static variables in closure generators).
+    (Nikita)
+  . Fixed bug #65322 (compile time errors won't trigger auto loading). (Nikita)
+  . Fixed bug #65821 (By-ref foreach on property access of string offset
+    segfaults). (Nikita)
+  . Fixed bug #65936 (dangling context pointer causes crash). (Tony)
+
+- CLI server:
+  . Fixed bug #65633 (built-in server treat some http headers as
+    case-sensitive). (Adam)
+  . Fixed bug #65818 (Segfault with built-in webserver and chunked transfer 
+    encoding). (Felipe)
+  . Added application/pdf to PHP CLI Web Server mime types (Chris Jones)
+
+- Datetime:
+  . Fixed bug #64157 (DateTime::createFromFormat() reports confusing error
+    message). (Boro Sitnikovski)
+  . Fixed bug #65502 (DateTimeImmutable::createFromFormat returns DateTime).
+    (Boro Sitnikovski)
+  . Fixed bug #65548 (Comparison for DateTimeImmutable doesn't work).
+    (Boro Sitnikovski)
+
+- DBA extension:
+  . Fixed bug #65708 (dba functions cast $key param to string in-place,
+    bypassing copy on write). (Adam)
+
+- Filter:
+  . Add RFC 6598 IPs to reserved addresses. (Sebastian Nohn)
+  . Fixed bug #64441 (FILTER_VALIDATE_URL rejects fully qualified domain names).
+    (Syra)
+
+- FTP:
+  . Fixed bug #65667 (ftp_nb_continue produces segfault). (Philip Hofstetter)
+
+- GD
+  . Ensure that the defined interpolation method is used with the generic
+    scaling methods. (Pierre)
+
+- IMAP:
+  . Fixed bug #65721 (configure script broken in 5.5.4 and 5.4.20 when enabling
+    imap). (ryotakatsuki at gmail dot com)
+
+- OPcache:
+  . Fixed issue #115 (path issue when using phar). (Laruence)
+  . Added support for GNU Hurd. (Svante Signell)
+  . Added function opcache_compile_file() to load PHP scripts into cache
+    without execution. (Julien)
+  . Fixed bug #65845 (Error when Zend Opcache Optimizer is fully enabled).
+    (Dmitry)
+  . Fixed bug #65665 (Exception not properly caught when opcache enabled).
+    (Laruence)
+  . Fixed bug #65510 (5.5.2 crashes in _get_zval_ptr_ptr_var). (Dmitry)
+  . Fixed issue #135 (segfault in interned strings if initial memory is too
+    low). (Julien)
+
+- Sockets:
+  . Fixed bug #65808 (the socket_connect() won't work with IPv6 address).
+    (Mike)
+
+- SPL:
+  . Fix bug #64782 (SplFileObject constructor make $context optional / give it
+    a default value). (Nikita)
+
+- Standard:
+  . Fixed bug #61548 (content-type must appear at the end of headers for 201 
+    Location to work in http). (Mike)
+
+- XMLReader:
+  . Fixed bug #51936 (Crash with clone XMLReader). (Mike)
+  . Fixed bug #64230 (XMLReader does not suppress errors). (Mike)
+  
+- Build system:
+  . Fixed bug #51076 (race condition in shtool's mkdir -p implementation).
+    (Mike, Raphael Geissert)
+  . Fixed bug #62396 ('make test' crashes starting with 5.3.14 (missing 
+    gzencode())). (Mike)
+
+
+19 Sep 2013, PHP 5.5.4
+
+- Core:
+  . Fixed bug #60598 (cli/apache sapi segfault on objects manipulation).
+    (Laruence)
+  . Improved fputcsv() to allow specifying escape character.
+  . Fixed bug #65490 (Duplicate calls to get lineno & filename for 
+    DTRACE_FUNCTION_*). (Chris Jones)
+  . Fixed bug #65483 (quoted-printable encode stream filter incorrectly encoding
+    spaces). (Michael M Slusarz)
+  . Fixed bug #65481 (shutdown segfault due to serialize) (Mike)
   . Fixed bug #65470 (Segmentation fault in zend_error() with
     --enable-dtrace). (Chris Jones, Kris Van Hees)
   . Fixed bug #65225 (PHP_BINARY incorrectly set). (Patrick Allaert)
   . Fixed bug #62692 (PHP fails to build with DTrace). (Chris Jones, Kris Van Hees)
+  . Fixed bug #61759 (class_alias() should accept classes with leading
+    backslashes). (Julien)
+  . Fixed bug #46311 (Pointer aliasing issue results in miscompile on gcc4.4).
+    (Nikita Popov)
 
 - cURL:
   . Fixed bug #65458 (curl memory leak). (Adam)
 
+- Datetime:
+  . Fixed bug #65554 (createFromFormat broken when weekday name is followed
+    by some delimiters). (Valentin Logvinskiy, Stas).
+  . Fixed bug #65564 (stack-buffer-overflow in DateTimeZone stuff caught
+    by AddressSanitizer). (Remi).
+
+- OPCache:
+  . Fixed bug #65561 (Zend Opcache on Solaris 11 x86 needs ZEND_MM_ALIGNMENT=4).
+    (Terry Ellison)
+
 - Openssl:
   . Fixed bug #64802 (openssl_x509_parse fails to parse subject properly in
     some cases). (Mark Jones)
+
+- PDO:
+  . Fixed bug #64953 (Postgres prepared statement positional parameter 
+    casting). (Mike)
 
 - Session:
   . Fixed bug #65475 (Session ID is not initialized properly when strict session
     is enabled). (Yasuo)
   . Fixed bug #51127/#65359 Request #25630/#43980/#54383 (Added php_serialize 
     session serialize handler that uses plain serialize()). (Yasuo)
+
+- Standard:
+  . Fix issue with return types of password API helper functions. Found via
+    static analysis by cjones. (Anthony Ferrara) 
+
+- Zlib:
+  . Fixed bug #65391 (Unable to send vary header user-agent when 
+    ob_start('ob_gzhandler') is called) (Mike)
 
 22 Aug 2013, PHP 5.5.3
 

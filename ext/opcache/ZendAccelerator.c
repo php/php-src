@@ -37,6 +37,7 @@
 #include "zend_API.h"
 #include "zend_ini.h"
 #include "TSRM/tsrm_virtual_cwd.h"
+#include "ext/phar/php_phar.h"
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 
@@ -142,6 +143,21 @@ static inline int is_cacheable_stream_path(const char *filename)
 {
 	return memcmp(filename, "file://", sizeof("file://") - 1) == 0 ||
 	       memcmp(filename, "phar://", sizeof("phar://") - 1) == 0;
+}
+
+static inline int is_phar_relative_alias_path(const char *filename, char **alias, int *alias_len)
+{
+	if (memcmp(filename, "phar://", sizeof("phar://") - 1) == 0
+			&& filename[sizeof("phar://") - 1] != '\0' && filename[sizeof("phar://") - 1] != '/') {
+		char *slash;
+		*alias = (char*)filename + sizeof("phar://") - 1;
+		slash = strstr(*alias, "/");
+		if (slash) {
+			*alias_len = slash - *alias;
+			return 1;
+		}
+	}
+	return 0;
 }
 
 /* O+ overrides PHP chdir() function and remembers the current working directory
@@ -1028,15 +1044,33 @@ char *accel_make_persistent_key_ex(zend_file_handle *file_handle, int path_lengt
         }
 		memcpy(ZCG(key) + cur_len, include_path, include_path_len);
 		ZCG(key)[key_length] = '\0';
-    } else {
-        /* not use_cwd */
-        key_length = path_length;
+	} else {
+		/* not use_cwd */
+		key_length = path_length;
 		if ((size_t)key_length >= sizeof(ZCG(key))) {
 			ZCG(key_len) = 0;
 			return NULL;
+		} else {
+			char *alias;
+			int alias_len;
+			if (is_phar_relative_alias_path(file_handle->filename, &alias, &alias_len)) {
+				char *phar_path;
+				int phar_path_len;
+				if (phar_resolve_alias(alias, alias_len, &phar_path, &phar_path_len TSRMLS_CC) == SUCCESS) {
+					int filename_len = strlen(file_handle->filename);
+					memcpy(ZCG(key), "phar://", sizeof("phar://") -1);
+					memcpy(ZCG(key) + sizeof("phar://") - 1, phar_path, phar_path_len);
+					memcpy(ZCG(key) + sizeof("phar://") - 1 + phar_path_len,
+							alias + alias_len, filename_len - alias_len - sizeof("phar://") + 2);
+					key_length = filename_len + (phar_path_len - alias_len);
+				} else {
+					memcpy(ZCG(key), file_handle->filename, key_length + 1);
+				}
+			} else {
+				memcpy(ZCG(key), file_handle->filename, key_length + 1);
+			}
 		}
-		memcpy(ZCG(key), file_handle->filename, key_length + 1);
-    }
+	}
 
 	*key_len = ZCG(key_len) = key_length;
 	return ZCG(key);
@@ -1061,6 +1095,10 @@ int zend_accel_invalidate(const char *filename, int filename_len, zend_bool forc
 #else
 	realpath = accelerator_orig_zend_resolve_path(filename, filename_len TSRMLS_CC);
 #endif
+
+	if (!realpath) {
+		return FAILURE;
+	}
 
 	persistent_script = zend_accel_hash_find(&ZCSG(hash), realpath, strlen(realpath) + 1);
 	if (persistent_script && !persistent_script->corrupted) {
@@ -1442,7 +1480,7 @@ static zend_persistent_script *compile_and_cache_file(zend_file_handle *file_han
 }
 
 /* zend_compile() replacement */
-static zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
+zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC)
 {
 	zend_persistent_script *persistent_script = NULL;
 	char *key = NULL;
@@ -2403,14 +2441,14 @@ static inline int accel_find_sapi(TSRMLS_D)
 	return FAILURE;
 }
 
-static void zend_accel_init_shm(TSRMLS_D)
+static int zend_accel_init_shm(TSRMLS_D)
 {
 	zend_shared_alloc_lock(TSRMLS_C);
 
 	accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals));
 	if (!accel_shared_globals) {
 		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
-		return;
+		return FAILURE;
 	}
 	ZSMMG(app_shared_globals) = accel_shared_globals;
 
@@ -2425,7 +2463,8 @@ static void zend_accel_init_shm(TSRMLS_D)
 	ZCSG(interned_strings).arBuckets = zend_shared_alloc(ZCSG(interned_strings).nTableSize * sizeof(Bucket *));
 	ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
 	if (!ZCSG(interned_strings).arBuckets || !ZCSG(interned_strings_start)) {
-		zend_error(E_ERROR, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
+		zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
+		return FAILURE;
 	}
 	ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
 	ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
@@ -2464,6 +2503,8 @@ static void zend_accel_init_shm(TSRMLS_D)
 	ZCSG(restart_in_progress) = 0;
 
 	zend_shared_alloc_unlock(TSRMLS_C);
+
+	return SUCCESS;
 }
 
 static void accel_globals_ctor(zend_accel_globals *accel_globals TSRMLS_DC)
@@ -2521,7 +2562,10 @@ static int accel_startup(zend_extension *extension)
 /********************************************/
 	switch (zend_shared_alloc_startup(ZCG(accel_directives).memory_consumption)) {
 		case ALLOC_SUCCESS:
-			zend_accel_init_shm(TSRMLS_C);
+			if (zend_accel_init_shm(TSRMLS_C) == FAILURE) {
+				accel_startup_ok = 0;
+				return FAILURE;
+			}
 			break;
 		case ALLOC_FAILURE:
 			accel_startup_ok = 0;
