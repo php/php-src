@@ -670,8 +670,8 @@ END_EXTERN_C()
 
 /* FIXME: Check if we can save if (ptr) too */
 
-#define STR_FREE(ptr) if (ptr && !IS_INTERNED(ptr)) { efree(ptr); }
-#define STR_FREE_REL(ptr) if (ptr && !IS_INTERNED(ptr)) { efree_rel(ptr); }
+#define STR_FREE(ptr) if (ptr) { str_efree(ptr); }
+#define STR_FREE_REL(ptr) if (ptr) { str_efree_rel(ptr); }
 
 #define STR_EMPTY_ALLOC() estrndup("", sizeof("")-1)
 

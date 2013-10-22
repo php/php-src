@@ -16,18 +16,19 @@
    +----------------------------------------------------------------------+
 */
 
-provider php {
+provider phpoci {
+	probe oci8__check__connection(void *connection, char *client_id, int is_open, long errcode, unsigned long server_status);
 	probe oci8__connect__entry(char *username, char *dbname, char *charset, long session_mode, int persistent, int exclusive);
 	probe oci8__connect__return(void *connection);
-	probe oci8__check__connection(void *connection, int is_open, int errcode, unsigned long serverstatus);
-	probe oci8__sqltext(char *sql);
+	probe oci8__connection__close(void *connection);
 	probe oci8__error(int status, long errcode);
-	probe oci8__execute__mode(unsigned int mode);
+	probe oci8__execute__mode(void *connection, char *client_id, void *statement, unsigned int mode);
+	probe oci8__sqltext(void *connection, char *client_id, void *statement, char *sql);
 
 	probe oci8__connect__p__dtor__close(void *connection);
 	probe oci8__connect__p__dtor__release(void *connection);
 	probe oci8__connect__lookup(void *connection, int is_stub);
-	probe oci8__connect__expiry(void *connection, int is_stub, time_t idle_expiry, time_t timestamp);
+	probe oci8__connect__expiry(void *connection, int is_stub, long idle_expiry, long timestamp);
 	probe oci8__connect__type(int persistent, int exclusive, void *connection, long num_persistent, long num_connections);
 	probe oci8__sesspool__create(void *session_pool);
 	probe oci8__sesspool__stats(unsigned long free, unsigned long busy, unsigned long open);

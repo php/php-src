@@ -199,14 +199,12 @@
 engine = On
 
 ; This directive determines whether or not PHP will recognize code between
-; <? and ?> tags as PHP source which should be processed as such. For several
-; years we recommended that you not use the short tag shortcut and
-; instead to use the full <?php and ?> tag combination. With the widespread use
-; of XML and use of these tags by other languages, the server can become easily
-; confused and end up parsing the wrong code in the wrong context.
-; This shortcut is still supported for backwards compatibility, but we
-; recommend against its use.
-; Default Value: On
+; <? and ?> tags as PHP source which should be processed as such. It is
+; generally recommended that <?php and ?> should be used and that this feature
+; should be disabled, as enabling it may result in issues when generating XML
+; documents, however this remains supported for backward compatibility reasons.
+; Note that this directive does not control the <?= shorthand tag, which can be
+; used regardless of this directive.
 ; Default Value: On
 ; Development Value: Off
 ; Production Value: Off
@@ -886,8 +884,7 @@ default_socket_timeout = 60
 ;extension=php_exif.dll      ; Must be after mbstring as it depends on it
 ;extension=php_mysql.dll
 ;extension=php_mysqli.dll
-;extension=php_oci8.dll      ; Use with Oracle 10gR2 Instant Client
-;extension=php_oci8_11g.dll  ; Use with Oracle 11gR2 Instant Client
+;extension=php_oci8_12c.dll  ; Use with Oracle Database 12c Instant Client
 ;extension=php_openssl.dll
 ;extension=php_pdo_firebird.dll
 ;extension=php_pdo_mysql.dll
@@ -1909,7 +1906,7 @@ ldap.max_links = -1
 ;opcache.revalidate_path=0
 
 ; If disabled, all PHPDoc comments are dropped from the code to reduce the
- ;size of the optimized code.
+; size of the optimized code.
 ;opcache.save_comments=1
 
 ; If disabled, PHPDoc comments are not loaded from SHM, so "Doc Comments"

@@ -1052,10 +1052,8 @@ ZEND_VM_HELPER_EX(zend_fetch_var_address_helper, CONST|TMP|VAR|CV, UNUSED|CONST|
 */
 		if (OP1_TYPE == IS_CONST) {
 			hash_value = Z_HASH_P(varname);
-		} else if (IS_INTERNED(Z_STRVAL_P(varname))) {
-			hash_value = INTERNED_HASH(Z_STRVAL_P(varname));
 		} else {
-			hash_value = zend_hash_func(Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1);
+			hash_value = str_hash(Z_STRVAL_P(varname), Z_STRLEN_P(varname));	
 		}
 
 		if (zend_hash_quick_find(target_symbol_table, Z_STRVAL_P(varname), Z_STRLEN_P(varname)+1, hash_value, (void **) &retval) == FAILURE) {
@@ -1389,11 +1387,6 @@ ZEND_VM_HANDLER(85, ZEND_FETCH_OBJ_W, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 
 	SAVE_OPLINE();
 	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
-
-	if (OP1_TYPE == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
 
 	if (IS_OP2_TMP_FREE()) {
 		MAKE_REAL_ZVAL_PTR(property);
@@ -1835,7 +1828,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 	EG(current_execute_data) = EX(prev_execute_data);
 	EG(opline_ptr) = NULL;
 	if (!EG(active_symbol_table)) {
-		i_free_compiled_variables(execute_data);
+		i_free_compiled_variables(execute_data TSRMLS_CC);
 	}
 
 	zend_vm_stack_free((char*)execute_data - (ZEND_MM_ALIGNED_SIZE(sizeof(temp_variable)) * op_array->T) TSRMLS_CC);
@@ -1990,7 +1983,7 @@ ZEND_VM_HELPER(zend_do_fcall_common_helper, ANY, ANY)
 
 			if (!zend_execute_internal) {
 				/* saves one function call if zend_execute_internal is not used */
-				fbc->internal_function.handler(opline->extended_value, ret->var.ptr, (fbc->common.fn_flags & ZEND_ACC_RETURN_REFERENCE) ? &ret->var.ptr : NULL, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
+				fbc->internal_function.handler(opline->extended_value, ret->var.ptr, &ret->var.ptr, EX(object), RETURN_VALUE_USED(opline) TSRMLS_CC);
 			} else {
 				zend_execute_internal(execute_data, NULL, RETURN_VALUE_USED(opline) TSRMLS_CC);
 			}
@@ -2609,7 +2602,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, CONST|VAR, CONST|TMP|VAR|UNUS
 		    /* We are calling method of the other (incompatible) class,
 		       but passing $this. This is done for compatibility with php-4. */
 			if (call->fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_STRICT, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
+				zend_error(E_DEPRECATED, "Non-static method %s::%s() should not be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
 			} else {
 				/* An internal function assumes $this is present and won't check that. So PHP would crash by allowing the call. */
 				zend_error_noreturn(E_ERROR, "Non-static method %s::%s() cannot be called statically, assuming $this from incompatible context", call->fbc->common.scope->name, call->fbc->common.function_name);
@@ -3281,6 +3274,37 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(164, ZEND_RECV_VARIADIC, ANY, ANY)
+{
+	USE_OPLINE
+	zend_uint arg_num = opline->op1.num;
+	zend_uint arg_count = zend_vm_stack_get_args_count(TSRMLS_C);
+	zval **var_ptr, *params;
+
+	SAVE_OPLINE();
+
+	var_ptr = _get_zval_ptr_ptr_cv_BP_VAR_W(execute_data, opline->result.var TSRMLS_CC);
+	Z_DELREF_PP(var_ptr);
+	MAKE_STD_ZVAL(params);
+	*var_ptr = params;
+
+	if (arg_num <= arg_count) {
+		array_init_size(params, arg_count - arg_num + 1);
+	} else {
+		array_init(params);
+	}
+
+	for (; arg_num <= arg_count; ++arg_num) {
+		zval **param = zend_vm_stack_get_arg(arg_num TSRMLS_CC);
+		zend_verify_arg_type((zend_function *) EG(active_op_array), arg_num, *param, opline->extended_value TSRMLS_CC);
+		zend_hash_next_index_insert(Z_ARRVAL_P(params), param, sizeof(zval *), NULL);
+		Z_ADDREF_PP(param);
+	}
+
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HANDLER(52, ZEND_BOOL, CONST|TMP|VAR|CV, ANY)
 {
 	USE_OPLINE
@@ -3640,11 +3664,7 @@ ZEND_VM_C_LABEL(num_index):
 					hval = Z_HASH_P(offset);
 				} else {
 					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(num_index));
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				zend_hash_quick_update(Z_ARRVAL(EX_T(opline->result.var).tmp_var), Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, &expr_ptr, sizeof(zval *), NULL);
 				break;
@@ -3992,11 +4012,7 @@ ZEND_VM_HANDLER(75, ZEND_UNSET_DIM, VAR|UNUSED|CV, CONST|TMP|VAR|CV)
 							hval = Z_HASH_P(offset);
 						} else {
 							ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(num_index_dim));
-							if (IS_INTERNED(Z_STRVAL_P(offset))) {
-								hval = INTERNED_HASH(Z_STRVAL_P(offset));
-							} else {
-								hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-							}
+							hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 						}
 						if (ht == &EG(symbol_table)) {
 							zend_delete_global_variable_ex(offset->value.str.val, offset->value.str.len, hval TSRMLS_CC);
@@ -4513,11 +4529,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 					if (!prop_dim) {
 						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, ZEND_VM_C_GOTO(num_index_prop));
 					}
-					if (IS_INTERNED(Z_STRVAL_P(offset))) {
-						hval = INTERNED_HASH(Z_STRVAL_P(offset));
-					} else {
-						hval = zend_hash_func(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1);
-					}
+					hval = str_hash(Z_STRVAL_P(offset), Z_STRLEN_P(offset));
 				}
 				if (zend_hash_quick_find(ht, Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, (void **) &value) == SUCCESS) {
 					isset = 1;
@@ -5194,7 +5206,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 		zval_copy_ctor(&c.value);
 	}
 	c.flags = CONST_CS; /* non persistent, case sensetive */
-	c.name = IS_INTERNED(Z_STRVAL_P(name)) ? Z_STRVAL_P(name) : zend_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
+	c.name = str_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
 	c.name_len = Z_STRLEN_P(name)+1;
 	c.module_number = PHP_USER_CONSTANT;
 

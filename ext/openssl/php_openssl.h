@@ -66,6 +66,7 @@ PHP_FUNCTION(openssl_x509_free);
 PHP_FUNCTION(openssl_x509_parse);
 PHP_FUNCTION(openssl_x509_checkpurpose);
 PHP_FUNCTION(openssl_x509_export);
+PHP_FUNCTION(openssl_x509_fingerprint);
 PHP_FUNCTION(openssl_x509_export_to_file);
 PHP_FUNCTION(openssl_x509_check_private_key);
 

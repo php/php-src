@@ -212,6 +212,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_NS_C            "__NAMESPACE__ (T_NS_C)"
 %token T_DIR             "__DIR__ (T_DIR)"
 %token T_NS_SEPARATOR    "\\ (T_NS_SEPARATOR)"
+%token T_ELLIPSIS        "... (T_ELLIPSIS)"
 
 %% /* Rules */
 
@@ -270,7 +271,7 @@ inner_statement:
 		statement
 	|	function_declaration_statement
 	|	class_declaration_statement
-	|	T_HALT_COMPILER '(' ')' ';'   { zend_error(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
+	|	T_HALT_COMPILER '(' ')' ';'   { zend_error_noreturn(E_COMPILE_ERROR, "__HALT_COMPILER() can only be used from the outermost scope"); }
 ;
 
 
@@ -371,10 +372,14 @@ class_declaration_statement:
 ;
 
 is_reference:
-		/* empty */	{ $$.op_type = ZEND_RETURN_VAL; }
-	|	'&'			{ $$.op_type = ZEND_RETURN_REF; }
+		/* empty */	{ $$.op_type = 0; }
+	|	'&'			{ $$.op_type = 1; }
 ;
 
+is_variadic:
+		/* empty */ { $$.op_type = 0; }
+	|	T_ELLIPSIS  { $$.op_type = 1; }
+;
 
 unticked_function_declaration_statement:
 		function is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, NULL TSRMLS_CC); }
@@ -523,14 +528,15 @@ parameter_list:
 
 
 non_empty_parameter_list:
-		optional_class_type T_VARIABLE				{ $$.op_type = IS_UNUSED; $$.u.op.num=1; zend_do_receive_arg(ZEND_RECV, &$2, &$$, NULL, &$1, 0 TSRMLS_CC); }
-	|	optional_class_type '&' T_VARIABLE			{ $$.op_type = IS_UNUSED; $$.u.op.num=1; zend_do_receive_arg(ZEND_RECV, &$3, &$$, NULL, &$1, 1 TSRMLS_CC); }
-	|	optional_class_type '&' T_VARIABLE '=' static_scalar			{ $$.op_type = IS_UNUSED; $$.u.op.num=1; zend_do_receive_arg(ZEND_RECV_INIT, &$3, &$$, &$5, &$1, 1 TSRMLS_CC); }
-	|	optional_class_type T_VARIABLE '=' static_scalar				{ $$.op_type = IS_UNUSED; $$.u.op.num=1; zend_do_receive_arg(ZEND_RECV_INIT, &$2, &$$, &$4, &$1, 0 TSRMLS_CC); }
-	|	non_empty_parameter_list ',' optional_class_type T_VARIABLE 	{ $$=$1; $$.u.op.num++; zend_do_receive_arg(ZEND_RECV, &$4, &$$, NULL, &$3, 0 TSRMLS_CC); }
-	|	non_empty_parameter_list ',' optional_class_type '&' T_VARIABLE	{ $$=$1; $$.u.op.num++; zend_do_receive_arg(ZEND_RECV, &$5, &$$, NULL, &$3, 1 TSRMLS_CC); }
-	|	non_empty_parameter_list ',' optional_class_type '&' T_VARIABLE	 '=' static_scalar { $$=$1; $$.u.op.num++; zend_do_receive_arg(ZEND_RECV_INIT, &$5, &$$, &$7, &$3, 1 TSRMLS_CC); }
-	|	non_empty_parameter_list ',' optional_class_type T_VARIABLE '=' static_scalar 	{ $$=$1; $$.u.op.num++; zend_do_receive_arg(ZEND_RECV_INIT, &$4, &$$, &$6, &$3, 0 TSRMLS_CC); }
+		parameter
+	|	non_empty_parameter_list ',' parameter
+;
+
+parameter:
+		optional_class_type is_reference is_variadic T_VARIABLE
+			{ zend_do_receive_param(ZEND_RECV, &$4, NULL, &$1, $2.op_type, $3.op_type TSRMLS_CC); }
+	|	optional_class_type is_reference is_variadic T_VARIABLE '=' static_scalar
+			{ zend_do_receive_param(ZEND_RECV_INIT, &$4, &$6, &$1, $2.op_type, $3.op_type TSRMLS_CC); }
 ;
 
 
@@ -629,8 +635,8 @@ trait_precedence:
 ;
 
 trait_reference_list:
-		fully_qualified_class_name									{ zend_resolve_class_name(&$1, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC); zend_init_list(&$$.u.op.ptr, Z_STRVAL($1.u.constant) TSRMLS_CC); }
-	|	trait_reference_list ',' fully_qualified_class_name			{ zend_resolve_class_name(&$3, ZEND_FETCH_CLASS_GLOBAL, 1 TSRMLS_CC); zend_add_to_list(&$1.u.op.ptr, Z_STRVAL($3.u.constant) TSRMLS_CC); $$ = $1; }
+		fully_qualified_class_name									{ zend_resolve_class_name(&$1 TSRMLS_CC); zend_init_list(&$$.u.op.ptr, Z_STRVAL($1.u.constant) TSRMLS_CC); }
+	|	trait_reference_list ',' fully_qualified_class_name			{ zend_resolve_class_name(&$3 TSRMLS_CC); zend_add_to_list(&$1.u.op.ptr, Z_STRVAL($3.u.constant) TSRMLS_CC); $$ = $1; }
 ;
 
 trait_method_reference:
@@ -1196,7 +1202,7 @@ isset_variables:
 
 isset_variable:
 		variable				{ zend_do_isset_or_isempty(ZEND_ISSET, &$$, &$1 TSRMLS_CC); }
-	|	expr_without_variable	{ zend_error(E_COMPILE_ERROR, "Cannot use isset() on the result of an expression (you can use \"null !== expression\" instead)"); }
+	|	expr_without_variable	{ zend_error_noreturn(E_COMPILE_ERROR, "Cannot use isset() on the result of an expression (you can use \"null !== expression\" instead)"); }
 ;
 
 class_constant:

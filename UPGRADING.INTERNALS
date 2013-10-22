@@ -4,6 +4,9 @@ UPGRADE NOTES - PHP X.Y
 
 1. Internal API changes
   a. Addition of do_operation and compare object handlers
+  b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
+  c. POST data handling
+  d. Arginfo changes
 
 2. Build system changes
   a. Unix build system changes
@@ -42,6 +45,70 @@ UPGRADE NOTES - PHP X.Y
   different types. It takes precedence over compare_objects.
 
   Further docs in the RFC: https://wiki.php.net/rfc/operator_overloading_gmp
+
+  b. return_value_ptr now always available, RETVAL_ZVAL_FAST macros
+
+  The return_value_ptr argument to internal functions is now always set.
+  Previously it was only available for functions returning by-reference.
+  return_value_ptr can now be used to return zvals without copying them.
+  For this purpose two new macros are provided:
+
+      RETVAL_ZVAL_FAST(zv); /* analog to RETVAL_ZVAL(zv, 1, 0) */
+      RETURN_ZVAL_FAST(zv); /* analog to RETURN_ZVAL(zv, 1, 0) */
+
+  The macros behave similarly to the non-FAST variants with copy=1 and
+  dtor=0, but will try to return the zval without making a copy by utilizing
+  return_value_ptr.
+  
+  c. POST data handling
+  
+  The sapi_request_info's members post_data, post_data_len and raw_post_data as 
+  well as raw_post_data_len have been replaced with a temp PHP stream 
+  request_body.
+  
+  The recommended way to access raw POST data is to open and use a php://input 
+  stream wrapper.  It is safe to be used concurrently and more than once. 
+
+  d. Arginfo changes
+
+  The pass_rest_by_reference argument of the ZEND_BEGIN_ARG_INFO and
+  ZEND_BEGIN_ARG_INFO_EX() is no longer used. The value passed to it is ignored.
+
+  Instead a variadic argument is created using ZEND_ARG_VARIADIC_INFO():
+
+      ZEND_ARG_VARIADIC_INFO(0, name) /* pass rest by value */
+      ZEND_ARG_VARIADIC_INFO(1, name) /* pass rest by reference */
+      ZEND_ARG_VARIADIC_INFO(ZEND_SEND_PREFER_REF, name)
+          /* pass rest by prefer-ref */
+
+  ZEND_ARG_VARIADIC_INFO() should only be used for the last argument.
+
+  The following changes were applied to the zend_arg_info struct:
+
+       typedef struct _zend_arg_info {
+           const char *class_name;
+           zend_uint class_name_len;
+           zend_uchar type_hint;
+      +    zend_uchar pass_by_reference;
+           zend_bool allow_null;
+      -    zend_bool pass_by_reference;
+      +    zend_bool is_variadic;
+       } zend_arg_info;
+
+  The following changes were applied to the zend_internal_function_info struct:
+
+       typedef struct _zend_internal_function_info {
+           zend_uint required_num_args;
+           zend_uchar _type_hint;
+           zend_bool return_reference;
+      -    zend_bool pass_rest_by_reference;
+      +    zend_bool _allow_null;
+      +    zend_bool _is_variadic;
+       } zend_internal_function_info;
+
+  The CHECK_ARG_SEND_TYPE(), ARG_MUST_BE_SENT_BY_REF(),
+  ARG_SHOULD_BE_SENT_BY_REF() and ARG_MAY_BE_SENT_BY_REF() macros now assume
+  that the argument passed to them is a zend_function* and that it is non-NULL.
 
 ========================
 2. Build system changes

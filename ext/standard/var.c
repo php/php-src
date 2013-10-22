@@ -453,7 +453,7 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_PP(struc);
-		if(myht && myht->nApplyCount > 0){
+		if (myht->nApplyCount > 0){
 			smart_str_appendl(buf, "NULL", 4);
 			zend_error(E_WARNING, "var_export does not handle circular references");
 			return;
@@ -549,11 +549,9 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	char id[32], *p;
 	register int len;
 
-	/* relies on "(long)" being a perfect hash function for data pointers,
-	 * however the actual identity of an object has had to be determined
-	 * by its object handle since 5.0. */
 	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
-		p = smart_str_print_long(id + sizeof(id) - 1, (long) Z_OBJ_HANDLE_P(var));
+		p = smart_str_print_long(id + sizeof(id) - 1,
+				(long) zend_objects_get_address(var TSRMLS_CC));
 		*(--p) = 'O';
 		len = id + sizeof(id) - 1 - p;
 	} else {

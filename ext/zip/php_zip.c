@@ -102,12 +102,12 @@ static char * php_zip_make_relative_path(char *path, int path_len) /* {{{ */
 	char *path_begin = path;
 	size_t i;
 
-	if (IS_SLASH(path[0])) {
-		return path + 1;
-	}
-
 	if (path_len < 1 || path == NULL) {
 		return NULL;
+	}
+
+	if (IS_SLASH(path[0])) {
+		return path + 1;
 	}
 
 	i = path_len;
@@ -1856,15 +1856,16 @@ static ZIPARCHIVE_METHOD(addFromString)
 	/* TODO: fix  _zip_replace */
 	if (cur_idx >= 0) {
 		if (zip_delete(intern, cur_idx) == -1) {
-			RETURN_FALSE;
+			goto fail;
 		}
 	}
 
-	if (zip_add(intern, name, zs) == -1) {
-		RETURN_FALSE;
-	} else {
+	if (zip_add(intern, name, zs) != -1) {
 		RETURN_TRUE;
 	}
+fail:
+	zip_source_free(zs);
+	RETURN_FALSE;	
 }
 /* }}} */
 

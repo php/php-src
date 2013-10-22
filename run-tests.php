@@ -459,7 +459,7 @@ $pass_options = '';
 $compression = 0;
 $output_file = $CUR_DIR . '/php_test_results_' . date('Ymd_Hi') . '.txt';
 
-if ($compression) {
+if ($compression && in_array("compress.zlib", stream_get_filters())) {
 	$output_file = 'compress.zlib://' . $output_file . '.gz';
 }
 
@@ -1289,16 +1289,20 @@ TEST $file
 				unset($section_text['FILEEOF']);
 			}
 
-			if (@count($section_text['FILE_EXTERNAL']) == 1) {
-				// don't allow tests to retrieve files from anywhere but this subdirectory
-				$section_text['FILE_EXTERNAL'] = dirname($file) . '/' . trim(str_replace('..', '', $section_text['FILE_EXTERNAL']));
+			foreach (array( 'FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX' ) as $prefix) {            
+				$key = $prefix . '_EXTERNAL';
 
-				if (file_exists($section_text['FILE_EXTERNAL'])) {
-					$section_text['FILE'] = file_get_contents($section_text['FILE_EXTERNAL'], FILE_BINARY);
-					unset($section_text['FILE_EXTERNAL']);
-				} else {
-					$bork_info = "could not load --FILE_EXTERNAL-- " . dirname($file) . '/' . trim($section_text['FILE_EXTERNAL']);
-					$borked = true;
+				if (@count($section_text[$key]) == 1) {
+					// don't allow tests to retrieve files from anywhere but this subdirectory
+					$section_text[$key] = dirname($file) . '/' . trim(str_replace('..', '', $section_text[$key]));
+
+					if (file_exists($section_text[$key])) {
+						$section_text[$prefix] = file_get_contents($section_text[$key], FILE_BINARY);
+						unset($section_text[$key]);
+					} else {
+						$bork_info = "could not load --" . $key . "-- " . dirname($file) . '/' . trim($section_text[$key]);
+						$borked = true;
+					}
 				}
 			}
 
@@ -1546,6 +1550,16 @@ TEST $file
 				}
 			}
 		}
+	}
+	
+	if (!extension_loaded("zlib")
+	&& (	array_key_exists("GZIP_POST", $section_text) 
+		||	array_key_exists("DEFLATE_POST", $section_text))
+	) {
+		$message = "ext/zlib required";
+		show_result('SKIP', $tested, $tested_file, "reason: $message", $temp_filenames);
+		junit_mark_test_as('SKIP', $shortname, $tested, null, "<![CDATA[\n$message\n]]>");
+		return 'SKIPPED';
 	}
 
 	if (@count($section_text['REDIRECTTEST']) == 1) {
