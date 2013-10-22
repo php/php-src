@@ -368,6 +368,13 @@ if ($pid) {
                                         }
 					fputs($s, "226 Closing data Connection.\r\n");
                                         break;
+                case "mediumfile":
+					fputs($s, "150 File status okay; about to open data connection.\r\n");
+					for($i = 0; $i < 150; $i++){
+						fputs($fs, "This is line $i of the test data.\n");
+					}
+					fputs($s, "226 Closing data Connection.\r\n");
+
 				default:
 					fputs($s, "550 {$matches[1]}: No such file or directory \r\n");
 					break;

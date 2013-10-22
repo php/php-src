@@ -350,9 +350,10 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 
 	DBSETLAPP(H->login, vars[1].optval);
 
+/* DBSETLDBNAME is only available in FreeTDS 0.92 or above */
 #ifdef DBSETLDBNAME
 	if (vars[3].optval) {
-		DBSETLDBNAME(H->login, vars[3].optval);
+		if(FAIL == DBSETLDBNAME(H->login, vars[3].optval)) goto cleanup;
 	}
 #endif
 
@@ -362,8 +363,20 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 		goto cleanup;
 	}
 
+/*
+ * FreeTDS < 0.92 does not support the DBSETLDBNAME option
+ * Send use database here after login (Will not work with SQL Azure)
+ */
+#ifndef DBSETLDBNAME
+	if (vars[3].optval) {
+		if(FAIL == dbuse(H->link, vars[3].optval)) goto cleanup;
+	}
+#endif
+
+#if PHP_DBLIB_IS_MSSQL
 	/* dblib do not return more than this length from text/image */
 	DBSETOPT(H->link, DBTEXTLIMIT, "2147483647");
+#endif
 
 	/* limit text/image from network */
 	DBSETOPT(H->link, DBTEXTSIZE, "2147483647");
@@ -374,23 +387,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options TSRMLS_
 	ret = 1;
 	dbh->max_escaped_char_length = 2;
 	dbh->alloc_own_columns = 1;
-
-#if 0
-	/* Cache the supported data types from the servers systypes table */
-	if(dbcmd(H->link, "select usertype, name from systypes order by usertype") != FAIL) {
-		if(dbsqlexec(H->link) != FAIL) {
-			dbresults(H->link);
-			while (dbnextrow(H->link) == SUCCESS) {
-				val = dbdata(H->link, 1);					
-				add_index_string(pdo_dblib_datatypes, *val, dbdata(H->link, 2), 1);
-			}
-		}
-		/* Throw out any remaining resultsets */
-		dbcancel(H-link);
-	}
-#endif
-	
-
 
 cleanup:
 	for (i = 0; i < nvars; i++) {

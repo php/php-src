@@ -2644,16 +2644,17 @@ static sdlAttributePtr make_persistent_sdl_attribute(sdlAttributePtr attr, HashT
 
 		zend_hash_internal_pointer_reset(pattr->extraAttributes);
 		while (zend_hash_get_current_data(attr->extraAttributes, (void**)&tmp) == SUCCESS) {
-			pextra = malloc(sizeof(sdlExtraAttribute));
-			memset(pextra, 0, sizeof(sdlExtraAttribute));
-			if ((*tmp)->ns) {
-				pextra->ns = strdup((*tmp)->ns);
-			}
-			if ((*tmp)->val) {
-				pextra->val = strdup((*tmp)->val);
-			}
+			if (zend_hash_get_current_key_ex(attr->extraAttributes, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {			
+				pextra = malloc(sizeof(sdlExtraAttribute));
+				memset(pextra, 0, sizeof(sdlExtraAttribute));
 
-			if (zend_hash_get_current_key_ex(attr->extraAttributes, &key, &key_len, &index, 0, NULL) == HASH_KEY_IS_STRING) {
+				if ((*tmp)->ns) {
+					pextra->ns = strdup((*tmp)->ns);
+				}
+				if ((*tmp)->val) {
+					pextra->val = strdup((*tmp)->val);
+				}
+			
 				zend_hash_add(pattr->extraAttributes, key, key_len, (void*)&pextra, sizeof(sdlExtraAttributePtr), NULL);
 			}
 

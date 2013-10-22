@@ -57,6 +57,11 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects TS
 					obj->dtor(obj->object, i TSRMLS_CC);
 					obj = &objects->object_buckets[i].bucket.obj;
 					obj->refcount--;
+
+					if (obj->refcount == 0) {
+						/* in case gc_collect_cycle is triggered before free_storage */
+						GC_REMOVE_ZOBJ_FROM_BUFFER(obj);
+					}
 				}
 			}
 		}
