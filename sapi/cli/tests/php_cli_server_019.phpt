@@ -8,39 +8,61 @@ include "skipif.inc";
 <?php
 include "php_cli_server.inc";
 php_cli_server_start(<<<'PHP'
-header('Content-Type: text/plain');
+header('Bar-Foo: Foo');
 var_dump(getallheaders());
 var_dump(apache_request_headers());
 var_dump(apache_response_headers());
 PHP
 );
 
-$opts = array(
-    'http'=>array(
-        'method'=>"GET",
-        'header'=>"Foo-Bar: bar\r\n"
-    )
-);
+list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
+$port = intval($port)?:80;
 
-$context = stream_context_create($opts);
-echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS, false, $context);
+$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
+if (!$fp) {
+  die("connect failed");
+}
+
+if(fwrite($fp, <<<HEADER
+GET / HTTP/1.1
+Host: {$host}
+Foo-Bar: Bar
+
+
+HEADER
+)) {
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
+}
+
+fclose($fp);
 ?>
 --EXPECTF--
+HTTP/1.1 200 OK
+Host: %s
+Connection: close
+X-Powered-By: %s
+Bar-Foo: Foo
+Content-type: text/html
+
 array(2) {
   ["Host"]=>
-  string(%s) "%s:%s"
+  string(9) "localhost"
   ["Foo-Bar"]=>
-  string(3) "bar"
+  string(3) "Bar"
 }
 array(2) {
   ["Host"]=>
-  string(%s) "%s:%s"
+  string(9) "localhost"
   ["Foo-Bar"]=>
-  string(3) "bar"
+  string(3) "Bar"
 }
-array(2) {
+array(3) {
   ["X-Powered-By"]=>
-  string(%s) "PHP/%s"
-  ["Content-Type"]=>
-  string(10) "text/plain"
+  string(13) "P%s"
+  ["Bar-Foo"]=>
+  string(3) "Foo"
+  ["Content-type"]=>
+  string(9) "text/html"
 }
