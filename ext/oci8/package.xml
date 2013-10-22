@@ -45,12 +45,12 @@ libraries are available.
   <active>no</active>
  </lead>
 
- <date>2013-10-17</date>
+ <date>2013-10-22</date>
  <time>12:00:00</time>
 
   <version>
-   <release>2.0.5</release>
-   <api>2.0.5</api>
+   <release>2.0.6</release>
+   <api>2.0.6</api>
   </version>
   <stability>
    <release>stable</release>
@@ -58,12 +58,8 @@ libraries are available.
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-Bump PHP OCI8 2.0 mininum requirements to PHP 5.2 and Oracle client
-library 10.2.  (Use OCI8 1.4 for older PHP version support or if only
-Oracle 9.2 client libraries are available.)
-
-Re-enable php_oci8.dll and php_oci8_11g.dll for Windows builds so URL
-links work in the new Windows PECL infrastructure.
+Added a LICENSE file to make it easier for PECL binary distributions
+to conform with the license.
   </notes>
  <contents>
   <dir name="/">
@@ -461,6 +457,26 @@ links work in the new Windows PECL infrastructure.
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+ <version>
+  <release>2.0.5</release>
+  <api>2.0.5</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+Bump PHP OCI8 2.0 mininum requirements to PHP 5.2 and Oracle client
+library 10.2.  (Use OCI8 1.4 for older PHP version support or if only
+Oracle 9.2 client libraries are available.)
+
+Re-enable php_oci8.dll and php_oci8_11g.dll for Windows builds so URL
+links work in the new Windows PECL infrastructure.
+ </notes>
+</release>
 
 <release>
   <version>
