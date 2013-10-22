@@ -683,7 +683,8 @@ END_EXTERN_C()
 #define ZEND_WRITE_EX(str, str_len)		write_func((str), (str_len))
 #define ZEND_PUTS(str)					zend_write((str), strlen((str)))
 #define ZEND_PUTS_EX(str)				write_func((str), strlen((str)))
-#define ZEND_PUTC(c)					zend_write(&(c), 1)
+#define ZEND_RETURNC(c)                 ((c)=(c))
+#define ZEND_PUTC(c)					zend_write(&(c), 1), ZEND_RETURNC(c)
 
 BEGIN_EXTERN_C()
 extern ZEND_API int (*zend_printf)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
