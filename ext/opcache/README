@@ -31,8 +31,8 @@ Quick Install
 
  zend_extension=/...full path.../opcache.so
 
-NOTE: In case you are going to use Zend OPcache together with Xdebug,
-be sure that Xdebug is loaded after OPcache. "php -v" must show Xdebug
+NOTE: In case you are going to use Zend OPcache together with Xdebug or Zend Debugger,
+be sure that the debugger is loaded after OPcache. "php -v" must show the debugger
 after OPcache.
 
 - Restart PHP
