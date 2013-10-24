@@ -225,6 +225,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 	HINSTANCE kernel32;
 	HANDLE hFile;
 	DWORD dwRet;
+	ALLOCA_FLAG(use_heap)
 
 	typedef BOOL (WINAPI *gfpnh_func)(HANDLE, LPTSTR, DWORD, DWORD);
 	gfpnh_func pGetFinalPathNameByHandle;
@@ -345,9 +346,9 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 			return -1;
 		}
 
-		pbuffer = (REPARSE_DATA_BUFFER *)emalloc(MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
+		pbuffer = (REPARSE_DATA_BUFFER *)do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap);
 		if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
-			efree(pbuffer);
+			free_alloca(pbuffer, use_heap_large);
 			CloseHandle(hLink);
 			return -1;
 		}
@@ -364,7 +365,7 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 			buf->st_mode |=;
 		}
 #endif
-		efree(pbuffer);
+		free_alloca(pbuffer);
 	} else {
 		buf->st_mode = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? (S_IFDIR|S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6)) : S_IFREG;
 		buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
@@ -774,11 +775,13 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 #ifdef TSRM_WIN32
 	WIN32_FIND_DATA data;
 	HANDLE hFind;
+	ALLOCA_FLAG(use_heap_large)
 #else
 	struct stat st;
 #endif
 	realpath_cache_bucket *bucket;
 	char *tmp;
+	ALLOCA_FLAG(use_heap)
 
 	while (1) {
 		if (len <= start) {
@@ -878,7 +881,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			FindClose(hFind);
 		}
 
-		tmp = emalloc(len+1);
+		tmp = do_alloca(len+1, use_heap);
 		memcpy(tmp, path, len+1);
 
 		if(save &&
@@ -905,12 +908,12 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				return -1;
 			}
 
-			pbuffer = (REPARSE_DATA_BUFFER *)emalloc(MAXIMUM_REPARSE_DATA_BUFFER_SIZE);
+			pbuffer = (REPARSE_DATA_BUFFER *)do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
 			if (pbuffer == NULL) {
 				return -1;
 			}
 			if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
-				efree(pbuffer);
+				free_alloca(pbuffer, use_heap_large);
 				CloseHandle(hLink);
 				return -1;
 			}
@@ -926,7 +929,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					printname_len + 1,
 					printname, MAX_PATH, NULL, NULL
 				)) {
-					efree(pbuffer);
+					free_alloca(pbuffer, use_heap_large);
 					return -1;
 				};
 				printname_len = pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR);
@@ -938,7 +941,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					substitutename_len + 1,
 					substitutename, MAX_PATH, NULL, NULL
 				)) {
-					efree(pbuffer);
+					free_alloca(pbuffer, use_heap_large);
 					return -1;
 				};
 				substitutename[substitutename_len] = 0;
@@ -952,7 +955,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					printname_len + 1,
 					printname, MAX_PATH, NULL, NULL
 				)) {
-					efree(pbuffer);
+					free_alloca(pbuffer, use_heap_large);
 					return -1;
 				};
 				printname[pbuffer->MountPointReparseBuffer.PrintNameLength / sizeof(WCHAR)] = 0;
@@ -963,7 +966,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 					substitutename_len + 1,
 					substitutename, MAX_PATH, NULL, NULL
 				)) {
-					efree(pbuffer);
+					free_alloca(pbuffer, use_heap_large);
 					return -1;
 				};
 				substitutename[substitutename_len] = 0;
@@ -973,7 +976,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				memcpy(substitutename, path, len + 1);
 				substitutename_len = len;
 			} else {
-				efree(pbuffer);
+				free_alloca(pbuffer, use_heap_large);
 				return -1;
 			}
 
@@ -1017,21 +1020,21 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			fprintf(stderr, "sub: %s ", substitutename);
 			fprintf(stderr, "resolved: %s ", path);
 #endif
-			efree(pbuffer);
+			free_alloca(pbuffer, use_heap_large);
 
 			if(isabsolute == 1) {
 				if (!((j == 3) && (path[1] == ':') && (path[2] == '\\'))) {
 					/* use_realpath is 0 in the call below coz path is absolute*/
 					j = tsrm_realpath_r(path, 0, j, ll, t, 0, is_dir, &directory TSRMLS_CC);
 					if(j < 0) {
-						efree(tmp);
+						free_alloca(tmp, use_heap);
 						return -1;
 					}
 				}
 			}
 			else {
 				if(i + j >= MAXPATHLEN - 1) {
-					efree(tmp);
+					free_alloca(tmp, use_heap);
 					return -1;
 				}
 
@@ -1040,7 +1043,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				path[i-1] = DEFAULT_SLASH;
 				j  = tsrm_realpath_r(path, start, i + j, ll, t, use_realpath, is_dir, &directory TSRMLS_CC);
 				if(j < 0) {
-					efree(tmp);
+					free_alloca(tmp, use_heap);
 					return -1;
 				}
 			}
@@ -1061,7 +1064,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 
 #elif defined(NETWARE)
 		save = 0;
-		tmp = emalloc(len+1);
+		tmp = do_alloca(len+1, use_heap);
 		memcpy(tmp, path, len+1);
 #else
 		if (save && php_sys_lstat(path, &st) < 0) {
@@ -1073,25 +1076,25 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			save = 0;
 		}
 
-		tmp = emalloc(len+1);
+		tmp = do_alloca(len+1, use_heap);
 		memcpy(tmp, path, len+1);
 
 		if (save && S_ISLNK(st.st_mode)) {
 			if (++(*ll) > LINK_MAX || (j = php_sys_readlink(tmp, path, MAXPATHLEN)) < 0) {
 				/* too many links or broken symlinks */
-				efree(tmp);
+				free_alloca(tmp, use_heap);
 				return -1;
 			}
 			path[j] = 0;
 			if (IS_ABSOLUTE_PATH(path, j)) {
 				j = tsrm_realpath_r(path, 1, j, ll, t, use_realpath, is_dir, &directory TSRMLS_CC);
 				if (j < 0) {
-					efree(tmp);
+					free_alloca(tmp, use_heap);
 					return -1;
 				}
 			} else {
 				if (i + j >= MAXPATHLEN-1) {
-					efree(tmp);
+					free_alloca(tmp, use_heap);
 					return -1; /* buffer overflow */
 				}
 				memmove(path+i, path, j+1);
@@ -1099,7 +1102,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				path[i-1] = DEFAULT_SLASH;
 				j = tsrm_realpath_r(path, start, i + j, ll, t, use_realpath, is_dir, &directory TSRMLS_CC);
 				if (j < 0) {
-					efree(tmp);
+					free_alloca(tmp, use_heap);
 					return -1;
 				}
 			}
@@ -1114,7 +1117,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				}
 				if (is_dir && !directory) {
 					/* not a directory */
-					efree(tmp);
+					free_alloca(tmp, use_heap);
 					return -1;
 				}
 			}
@@ -1130,7 +1133,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			}
 #ifdef TSRM_WIN32
 			if (j < 0 || j + len - i >= MAXPATHLEN-1) {
-				efree(tmp);
+				free_alloca(tmp, use_heap);
 				return -1;
 			}
 			if (save) {
@@ -1145,7 +1148,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 		}
 #else
 			if (j < 0 || j + len - i >= MAXPATHLEN-1) {
-				efree(tmp);
+				free_alloca(tmp, use_heap);
 				return -1;
 			}
 			memcpy(path+j, tmp+i, len-i+1);
@@ -1158,7 +1161,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 			realpath_cache_add(tmp, len, path, j, directory, *t TSRMLS_CC);
 		}
 
-		efree(tmp);
+		free_alloca(tmp, use_heap);
 		return j;
 	}
 }
@@ -1385,6 +1388,7 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 	int length = strlen(path);
 	char *temp;
 	int retval;
+	ALLOCA_FLAG(use_heap)
 
 	if (length == 0) {
 		return 1; /* Can't cd to empty string */
@@ -1401,14 +1405,14 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 	if (length == COPY_WHEN_ABSOLUTE(path) && IS_ABSOLUTE_PATH(path, length+1)) { /* Also use trailing slash if this is absolute */
 		length++;
 	}
-	temp = (char *) emalloc(length+1);
+	temp = (char *) do_alloca(length+1, use_heap);
 	memcpy(temp, path, length);
 	temp[length] = 0;
 #if VIRTUAL_CWD_DEBUG
 	fprintf (stderr, "Changing directory to %s\n", temp);
 #endif
 	retval = p_chdir(temp TSRMLS_CC);
-	efree(temp);
+	free_alloca(temp, use_heap);
 	return retval;
 }
 /* }}} */
