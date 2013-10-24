@@ -98,6 +98,17 @@ typedef struct {
 	zval		*stream;
 } php_curl_read;
 
+#if LIBCURL_VERSION_NUM >  0x071200
+typedef struct {
+	zval            *func_name;
+	zend_fcall_info_cache fci_cache;
+	FILE            *fp;
+	long            fd;
+	int             method;
+	zval		*stream;
+} php_curl_seek;
+#endif
+
 typedef struct {
 	zval 		*func_name;
 	zend_fcall_info_cache fci_cache;
@@ -108,6 +119,9 @@ typedef struct {
 	php_curl_write *write;
 	php_curl_write *write_header;
 	php_curl_read  *read;
+#if LIBCURL_VERSION_NUM >  0x071200
+	php_curl_seek  *seek;
+#endif
 	zval           *passwd;
 	zval           *std_err;
 	php_curl_progress *progress;
