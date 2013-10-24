@@ -225,7 +225,6 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 	HINSTANCE kernel32;
 	HANDLE hFile;
 	DWORD dwRet;
-	ALLOCA_FLAG(use_heap)
 
 	typedef BOOL (WINAPI *gfpnh_func)(HANDLE, LPTSTR, DWORD, DWORD);
 	gfpnh_func pGetFinalPathNameByHandle;
@@ -289,6 +288,7 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	__int64 t;
 	const size_t path_len = strlen(path);
+	ALLOCA_FLAG(use_heap_large);
 
 	if (!GetFileAttributesEx(path, GetFileExInfoStandard, &data)) {
 		return stat(path, buf);
@@ -346,7 +346,7 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 			return -1;
 		}
 
-		pbuffer = (REPARSE_DATA_BUFFER *)do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap);
+		pbuffer = (REPARSE_DATA_BUFFER *)do_alloca(MAXIMUM_REPARSE_DATA_BUFFER_SIZE, use_heap_large);
 		if(!DeviceIoControl(hLink, FSCTL_GET_REPARSE_POINT, NULL, 0, pbuffer,  MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &retlength, NULL)) {
 			free_alloca(pbuffer, use_heap_large);
 			CloseHandle(hLink);
@@ -365,7 +365,7 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 			buf->st_mode |=;
 		}
 #endif
-		free_alloca(pbuffer);
+		free_alloca(pbuffer, use_heap_large);
 	} else {
 		buf->st_mode = (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? (S_IFDIR|S_IEXEC|(S_IEXEC>>3)|(S_IEXEC>>6)) : S_IFREG;
 		buf->st_mode |= (data.dwFileAttributes & FILE_ATTRIBUTE_READONLY) ? (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)) : (S_IREAD|(S_IREAD>>3)|(S_IREAD>>6)|S_IWRITE|(S_IWRITE>>3)|(S_IWRITE>>6));
