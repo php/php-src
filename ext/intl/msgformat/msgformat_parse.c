@@ -93,7 +93,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 	zend_str_size_int         spattern_len = 0;
 	char       *pattern = NULL;
 	zend_str_size_int         pattern_len = 0;
-	char       *slocale = NULL;
+	const char *slocale = NULL;
 	zend_str_size_int         slocale_len = 0;
 	char       *source = NULL;
 	zend_str_size_int         src_len = 0;

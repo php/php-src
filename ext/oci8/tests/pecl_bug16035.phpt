@@ -10,9 +10,6 @@ $ov = preg_match('/Compile-time ORACLE_HOME/', $phpinfo);
 if ($ov !== 1) {
 	die ("skip Test only valid when OCI8 is built with an ORACLE_HOME");
 }
-if (preg_match('/Unknown/', oci_client_version()) == 1) {
-    die("skip expected output only valid with Oracle clients > 9gR2");
-}
 ?>
 --ENV--
 ORACLE_HOME=""

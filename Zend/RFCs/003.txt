@@ -9,11 +9,11 @@ Modified:        2001-09-17
 1. Background/Need
 ==================
 
-Many internal function of PHP will reject parameters because of their
+Many internal functions of PHP will reject parameters because of their
 type (the array and variable function come to mind).  For userland
 this is not an easy task as there is no uniform way to do it.  An
 addition to the engine for requiring loose types would allow
-delevopers to know that the data passed to their functions is of the
+developers to know that the data passed to their functions are of the
 correct type and reduce the need for duplicating the same code in
 every function to check for the type of data.
 
@@ -57,7 +57,7 @@ function foo (array $var){
 ===========
 
 Mis-matches in type should be reported as fatal errors and should halt
-the execution of a script as that function can not be run and code
+the execution of a script as that function cannot be run and code
 following could not reliably run.
 
 

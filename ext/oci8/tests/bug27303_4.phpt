@@ -6,16 +6,8 @@ if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 // The bind buffer size edge cases seem to change each DB version.
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
-if (!(isset($matches[0]) && 
-           (($matches[1] == 10 && $matches[2] == 2 && $matches[3] == 0 && $matches[4] == 2) ||
-            ($matches[1] == 11 && $matches[2] == 2 && $matches[3] == 0 && $matches[4] == 2)
-	    ))) {
-    die("skip expected output only valid when using Oracle 10.2.0.2 or 11.2.0.2 databases");
-    // Other point releases may also work
-}
-preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
-if (isset($matches[0]) && $matches[0] < 11) {
-    die("skip test expected to work only with Oracle 11g or greater version of client");
+if (!(isset($matches[0]) && $matches[1] >= 12)) {
+    die("skip expected output only valid when using Oracle 12c database");
 }
 ?>
 --ENV--
