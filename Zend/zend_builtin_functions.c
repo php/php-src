@@ -2147,7 +2147,12 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 			if (!ptr->opline || ptr->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 				/* can happen when calling eval from a custom sapi */
-				function_name = "unknown";
+				if (ptr->opline->opcode == ZEND_EXPCT) {
+				    function_name = "assert";
+				} else {
+				    /* can happen when calling eval from a custom sapi */
+				    function_name = "unknown";
+				}
 				build_filename_arg = 0;
 			} else
 			switch (ptr->opline->extended_value) {
@@ -2170,7 +2175,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 				default:
 					/* this can actually happen if you use debug_backtrace() in your error_handler and 
 					 * you're in the top-scope */
-					function_name = "unknown"; 
+					function_name = "unknown";
 					build_filename_arg = 0;
 					break;
 			}
@@ -2338,8 +2343,12 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			zend_bool build_filename_arg = 1;
 
 			if (!ptr->opline || ptr->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
-				/* can happen when calling eval from a custom sapi */
-				function_name = "unknown";
+				if (ptr->opline->opcode == ZEND_EXPCT) {
+				    function_name = "assert";
+				} else {
+				    /* can happen when calling eval from a custom sapi */
+				    function_name = "unknown";
+				}
 				build_filename_arg = 0;
 			} else
 			switch (ptr->opline->extended_value) {
@@ -2362,7 +2371,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				default:
 					/* this can actually happen if you use debug_backtrace() in your error_handler and 
 					 * you're in the top-scope */
-					function_name = "unknown"; 
+					function_name = "unknown";
 					build_filename_arg = 0;
 					break;
 			}
