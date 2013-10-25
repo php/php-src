@@ -475,7 +475,9 @@ static sapi_module_struct cli_sapi_module = {
 	NULL,							/* Get request time */
 	NULL,							/* Child terminate */
 	
-	sapi_cli_log_message_ex         /* binary safe log message */
+	sapi_cli_log_message_ex,        /* binary safe log message */
+
+	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
 
