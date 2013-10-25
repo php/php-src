@@ -607,7 +607,14 @@ PHPAPI int php_get_module_initialized(void)
  */
 PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 {
-	int fd = -1;
+	php_log_err_ex(log_message, strlen(log_message)+1 TSRMLS_CC);
+}
+/* }}} */
+ 
+/* {{{ binary safe */
+PHPAPI void php_log_err_ex(char *log_message, int log_message_len TSRMLS_DC) 
+{
+    int fd = -1;
 	time_t error_time;
 
 	if (PG(in_error_log)) {
@@ -641,7 +648,27 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 #else
 			error_time_str = php_format_date("d-M-Y H:i:s e", 13, error_time, 1 TSRMLS_CC);
 #endif
-			len = spprintf(&tmp, 0, "[%s] %s%s", error_time_str, log_message, PHP_EOL);
+
+            len = snprintf(NULL, 0, "[%s] %s", error_time_str, PHP_EOL) + log_message_len;
+			
+			tmp = emalloc( len+1 );
+			{
+			    ulong offset = 0L, 
+			          length = 0L;
+			    
+			    memcpy(&tmp[0], "[", (offset += (sizeof("[")-1)));
+			    memcpy(&tmp[offset], error_time_str, (length=strlen(error_time_str)));
+			    offset += length;
+			    memcpy(&tmp[offset], "] ", (length=(sizeof("] ")-1)));
+                offset += length;
+			    memcpy(&tmp[offset], log_message, log_message_len);
+			    offset += log_message_len;
+			    memcpy(&tmp[offset], PHP_EOL, (length=(sizeof(PHP_EOL)-1)));
+			    offset += length;
+			    
+			    tmp[offset] = '\0';
+			}
+			
 #ifdef PHP_WIN32
 			php_flock(fd, 2);
 #endif
@@ -655,13 +682,13 @@ PHPAPI void php_log_err(char *log_message TSRMLS_DC)
 	}
 
 	/* Otherwise fall back to the default logging location, if we have one */
-
-	if (sapi_module.log_message) {
+    if (sapi_module.log_message_ex) {
+        sapi_module.log_message_ex(log_message, log_message_len TSRMLS_CC);
+    } else if (sapi_module.log_message) {
 		sapi_module.log_message(log_message TSRMLS_CC);
 	}
 	PG(in_error_log) = 0;
 }
-/* }}} */
 
 /* {{{ php_write
    wrapper for modules to use PHPWRITE */

@@ -4706,6 +4706,7 @@ PHPAPI int _php_error_log(int opt_err, char *message, char *opt, char *headers T
 }
 /* }}} */
 
+/* binary safe on opt_err=3|4|default */
 PHPAPI int _php_error_log_ex(int opt_err, char *message, int message_len, char *opt, char *headers TSRMLS_DC) /* {{{ */
 {
 	php_stream *stream = NULL;
@@ -4733,7 +4734,9 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, int message_len, char *
 			break;
 
 		case 4: /* send to SAPI */
-			if (sapi_module.log_message) {
+			if (sapi_module.log_message_ex) {
+				sapi_module.log_message_ex(message, message_len TSRMLS_CC);
+			} else if (sapi_module.log_message) {
 				sapi_module.log_message(message TSRMLS_CC);
 			} else {
 				return FAILURE;
@@ -4741,7 +4744,7 @@ PHPAPI int _php_error_log_ex(int opt_err, char *message, int message_len, char *
 			break;
 
 		default:
-			php_log_err(message TSRMLS_CC);
+			php_log_err_ex(message, message_len TSRMLS_CC);
 			break;
 	}
 	return SUCCESS;

@@ -281,9 +281,10 @@ BEGIN_EXTERN_C()
 void phperror(char *error);
 PHPAPI int php_write(void *buf, uint size TSRMLS_DC);
 PHPAPI int php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
-		2);
+		2); 
 PHPAPI int php_get_module_initialized(void);
 PHPAPI void php_log_err(char *log_message TSRMLS_DC);
+PHPAPI void php_log_err_ex(char *log_message, int log_message_len TSRMLS_DC);
 int Debug(char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
 int cfgparse(void);
 END_EXTERN_C()

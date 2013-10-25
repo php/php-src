@@ -98,7 +98,7 @@
 PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
-
+PHPAPI extern void php_log_err_ex(char *message, int message_len TSRMLS_DC);
 #ifndef O_BINARY
 #define O_BINARY 0
 #endif
@@ -376,6 +376,12 @@ static void sapi_cli_log_message(char *message TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
+static void sapi_cli_log_message_ex(char *message, int message_len TSRMLS_DC) 
+{
+    fwrite(message, message_len+1, 1, stderr);
+    fwrite("\n", sizeof("\n")-1, 1, stderr);
+}
+
 static int sapi_cli_deactivate(TSRMLS_D) /* {{{ */
 {
 	fflush(stdout);
@@ -469,7 +475,7 @@ static sapi_module_struct cli_sapi_module = {
 	NULL,							/* Get request time */
 	NULL,							/* Child terminate */
 	
-	STANDARD_SAPI_MODULE_PROPERTIES
+	sapi_cli_log_message_ex         /* binary safe log message */
 };
 /* }}} */
 
