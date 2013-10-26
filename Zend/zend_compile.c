@@ -4996,7 +4996,7 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 		char *tmp = zend_str_tolower_dup(Z_STRVAL_PP(ns_name), Z_STRSIZE_PP(ns_name));
 
 		if (Z_STRSIZE_PP(ns_name) != Z_STRSIZE(class_name->u.constant) ||
-			memcmp(tmp, lcname, Z_STRLEN(class_name->u.constant))) {
+			memcmp(tmp, lcname, Z_STRSIZE(class_name->u.constant))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s because the name is already in use", Z_STRVAL(class_name->u.constant));
 		}
 		efree(tmp);
