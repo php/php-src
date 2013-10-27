@@ -723,29 +723,6 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 	}
 }
 
-static void sapi_cgi_log_message(char *message TSRMLS_DC)
-{
-	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
-		fcgi_request *request;
-
-		request = (fcgi_request*) SG(server_context);
-		if (request) {
-			int len = strlen(message);
-			char *buf = malloc(len+2);
-
-			memcpy(buf, message, len);
-			memcpy(buf + len, "\n", sizeof("\n"));
-			fcgi_write(request, FCGI_STDERR, buf, len+1);
-			free(buf);
-		} else {
-			fprintf(stderr, "%s\n", message);
-		}
-		/* ignore return code */
-	} else {
-		fprintf(stderr, "%s\n", message);
-	}
-}
-
 static void sapi_cgi_log_message_ex(char *message, int message_len TSRMLS_DC)
 {
 	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
@@ -768,6 +745,11 @@ static void sapi_cgi_log_message_ex(char *message, int message_len TSRMLS_DC)
 		fwrite(message, message_len, 1, stderr);
 		fwrite("\n", sizeof("\n")-1, 1, stderr);
 	}
+}
+
+static void sapi_cgi_log_message(char *message TSRMLS_DC)
+{
+	sapi_cgi_log_message_ex(message, strlen(message) TSRMLS_CC);
 }
 
 /* {{{ php_cgi_ini_activate_user_config
