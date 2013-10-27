@@ -3304,7 +3304,7 @@ yy200:
 		--len;
 	}
 
-	if (len < SIZEOF_LONG * 8) {
+	if (len < SIZEOF_ZEND_INT * 8) {
 		if (len == 0) {
 			Z_LVAL_P(zendlval) = 0;
 		} else {
