@@ -168,11 +168,7 @@ static int phar_compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{
 
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
-#if (PHP_MAJOR_VERSION < 6)
 	result = zend_binary_strcmp(f->arKey, f->nKeyLength, s->arKey, s->nKeyLength);
-#else
-	result = zend_binary_strcmp(f->key.arKey.s, f->nKeyLength, s->key.arKey.s, s->nKeyLength);
-#endif
 
 	if (result < 0) {
 		return -1;
