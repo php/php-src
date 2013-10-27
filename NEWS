@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #65818 (Segfault with built-in webserver and chunked transfer 
     encoding). (Felipe)
 
+- Exif:
+  . Fixed crash on unknown encoding. (Draal)
+
 - FTP:
   . Fixed bug #65667 (ftp_nb_continue produces segfault). (Philip Hofstetter)
 
@@ -22,7 +25,7 @@ PHP                                                                        NEWS
   . Fixed bug #64230 (XMLReader does not suppress errors). (Mike)
 
 
-?? ??? 2013, PHP 5.4.21
+17 Oct 2013, PHP 5.4.21
 
 - Core:
   . Fixed bug #65322 (compile time errors won't trigger auto loading). (Nikita)
