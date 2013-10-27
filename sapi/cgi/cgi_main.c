@@ -746,6 +746,30 @@ static void sapi_cgi_log_message(char *message TSRMLS_DC)
 	}
 }
 
+static void sapi_cgi_log_message_ex(char *message, int message_len TSRMLS_DC)
+{
+	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
+		fcgi_request *request;
+
+		request = (fcgi_request*) SG(server_context);
+		if (request) {
+			char *buf = malloc(message_len+2);
+
+			memcpy(buf, message, message_len);
+			memcpy(buf + message_len, "\n", sizeof("\n"));
+			fcgi_write(request, FCGI_STDERR, buf, message_len+1);
+			free(buf);
+		} else {
+			fwrite(message, message_len, 1, stderr);
+			fwrite("\n", sizeof("\n")-1, 1, stderr);
+		}
+		/* ignore return code */
+	} else {
+		fwrite(message, message_len, 1, stderr);
+		fwrite("\n", sizeof("\n")-1, 1, stderr);
+	}
+}
+
 /* {{{ php_cgi_ini_activate_user_config
  */
 static void php_cgi_ini_activate_user_config(char *path, int path_len, const char *doc_root, int doc_root_len, int start TSRMLS_DC)
@@ -970,6 +994,7 @@ static sapi_module_struct cgi_sapi_module = {
 	NULL,							/* Get request time */
 	NULL,							/* Child terminate */
 
+    sapi_cgi_log_message_ex,        /* Binary safe log message */
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
