@@ -232,7 +232,7 @@ typedef struct odbc_connection {
 } odbc_connection;
 
 typedef struct odbc_result_value {
-	char name[32];
+	char name[256];
 	char *value;
 	SQLLEN vallen;
 	SQLLEN coltype;
