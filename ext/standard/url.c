@@ -318,11 +318,12 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 			if (strlen(tld) == 3 || isdigit(*(tld+1)));
 			else if (strlen(tld) == 4
 				&& strncasecmp(".com", tld, 4) != 0
+				&& strncasecmp(".org", tld, 4) != 0
+				&& strncasecmp(".net", tld, 4) != 0
 				&& strncasecmp(".edu", tld, 4) != 0
 				&& strncasecmp(".cat", tld, 4) != 0
 				&& strncasecmp(".eus", tld, 4) != 0
 				&& strncasecmp(".gal", tld, 4) != 0
-				&& strncasecmp(".org", tld, 4) != 0
 				&& strncasecmp(".mil", tld, 4) != 0
 				&& strncasecmp(".gov", tld, 4) != 0
 				&& strncasecmp(".mil", tld, 4) != 0
@@ -330,8 +331,7 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				&& strncasecmp(".tel", tld, 4) != 0
 				&& strncasecmp(".pro", tld, 4) != 0
 				&& strncasecmp(".int", tld, 4) != 0
-				&& strncasecmp(".biz", tld, 4) != 0
-				&& strncasecmp(".net", tld, 4) != 0) {
+				&& strncasecmp(".biz", tld, 4) != 0) {
 				STR_FREE(diff);
 				goto nohost; 
 			} else if (strlen(tld) == 5
