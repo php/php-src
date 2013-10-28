@@ -60,6 +60,7 @@
 #define	EXTR_IF_EXISTS			6
 
 #define EXTR_REFS				0x100
+#define EXTR_OBJECT             0x200
 
 #define CASE_LOWER				0
 #define CASE_UPPER				1
@@ -110,6 +111,7 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 	REGISTER_LONG_CONSTANT("EXTR_PREFIX_IF_EXISTS", EXTR_PREFIX_IF_EXISTS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_IF_EXISTS", EXTR_IF_EXISTS, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("EXTR_REFS", EXTR_REFS, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("EXTR_OBJECT", EXTR_OBJECT, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("SORT_ASC", PHP_SORT_ASC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_DESC", PHP_SORT_DESC, CONST_CS | CONST_PERSISTENT);
@@ -1278,7 +1280,7 @@ PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, int va
 }
 /* }}} */
 
-/* {{{ proto int extract(array var_array [, int extract_type [, string prefix]])
+/* {{{ proto int extract(array var_array [, int extract_type [, mixed prefix]])
    Imports variables into symbol table from an array */
 PHP_FUNCTION(extract)
 {
@@ -1291,7 +1293,8 @@ PHP_FUNCTION(extract)
 	int var_exists, key_type, count = 0;
 	int extract_refs = 0;
 	HashPosition pos;
-
+    HashTable *active = NULL;
+    
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
 		return;
 	}
@@ -1310,16 +1313,23 @@ PHP_FUNCTION(extract)
 	}
 
 	if (prefix) {
-		convert_to_string(prefix);
-		if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), Z_STRLEN_P(prefix))) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid identifier");
-			return;
+		if (!((extract_type & EXTR_OBJECT) != EXTR_OBJECT)) {
+		    convert_to_string(prefix);
+		    if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), Z_STRLEN_P(prefix))) {
+			    php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid identifier");
+			    return;
+		    }
+		} else {
+		    if (Z_TYPE_P(prefix) != IS_OBJECT) {
+		        php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid object");
+			    return;
+		    }
 		}
 	}
 
 	if (!EG(active_symbol_table)) {
-		zend_rebuild_symbol_table(TSRMLS_C);
-	}
+        zend_rebuild_symbol_table(TSRMLS_C);
+    }
 
 	/* var_array is passed by ref for the needs of EXTR_REFS (needs to
 	 * work on the original array to create refs to its members)
@@ -1339,7 +1349,22 @@ PHP_FUNCTION(extract)
 
 		if (key_type == HASH_KEY_IS_STRING) {
 			var_name_len--;
-			var_exists = zend_hash_exists(EG(active_symbol_table), var_name, var_name_len + 1);
+			if (!((extract_type & EXTR_OBJECT) != EXTR_OBJECT)) {
+			    var_exists = zend_hash_exists(EG(active_symbol_table), var_name, var_name_len + 1);
+			} else {
+			    zval property_name;
+			    
+			    ZVAL_STRINGL(
+			        &property_name, var_name, var_name_len, 1);
+			    
+			    if (Z_OBJ_HT_P(prefix)->has_property) {
+			        var_exists = Z_OBJ_HT_P(prefix)->has_property(
+			            prefix, &property_name, 2, NULL TSRMLS_CC
+			        );
+			    }
+			    
+			    zval_dtor(&property_name);
+			}
 		} else if (key_type == HASH_KEY_IS_LONG && (extract_type == EXTR_PREFIX_ALL || extract_type == EXTR_PREFIX_INVALID)) {
 			zval num;
 
@@ -1410,18 +1435,52 @@ PHP_FUNCTION(extract)
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
 				zval_add_ref(entry);
 
-				if (zend_hash_find(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, (void **) &orig_var) == SUCCESS) {
-					zval_ptr_dtor(orig_var);
-					*orig_var = *entry;
-				} else {
-					zend_hash_update(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, (void **) entry, sizeof(zval *), NULL);
-				}
+                if (!((extract_type & EXTR_OBJECT) != EXTR_OBJECT)) { 
+                    if (zend_hash_find(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, (void **) &orig_var) == SUCCESS) {
+					    zval_ptr_dtor(orig_var);
+					    *orig_var = *entry;
+				    } else {
+					    zend_hash_update(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, (void **) entry, sizeof(zval *), NULL);
+				    }
+                } else {
+                    if (Z_OBJ_HT_P(prefix)->get_property_ptr_ptr) {
+                        orig_var = Z_OBJ_HT_P(prefix)->get_property_ptr_ptr(
+                            prefix, &final_name, BP_VAR_RW, NULL TSRMLS_CC
+                        );
+                        if (orig_var) {
+                            zval_ptr_dtor(orig_var);
+                            *orig_var = *entry;
+                        } else {
+                            if (Z_OBJ_HT_P(prefix)->write_property) {
+                                Z_OBJ_HT_P(prefix)->write_property(
+			                        prefix, &final_name, *entry, NULL TSRMLS_CC
+			                    );
+                            }
+                        }
+                    } else {
+                        /* should we write here ? */
+                       if (Z_OBJ_HT_P(prefix)->write_property) {
+                           Z_OBJ_HT_P(prefix)->write_property(
+		                       prefix, &final_name, *entry, NULL TSRMLS_CC
+		                   );
+                       }
+                    }
+                }
 			} else {
-				MAKE_STD_ZVAL(data);
+			    MAKE_STD_ZVAL(data);
 				*data = **entry;
 				zval_copy_ctor(data);
-
-				ZEND_SET_SYMBOL_WITH_LENGTH(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, data, 1, 0);
+				
+			    if (!((extract_type & EXTR_OBJECT) != EXTR_OBJECT)) {
+			        ZEND_SET_SYMBOL_WITH_LENGTH(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, data, 1, 0);
+			    } else {
+			        if (Z_OBJ_HT_P(prefix)->write_property) {
+			            Z_OBJ_HT_P(prefix)->write_property(
+			                prefix, &final_name, data, NULL TSRMLS_CC
+			            );
+			        }
+			        
+			    }
 			}
 			count++;
 		}
