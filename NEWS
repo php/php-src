@@ -8,6 +8,11 @@ PHP                                                                        NEWS
   . Fixed bug #65911 (scope resolution operator - strange behavior with $this).
     (Bob Weinand)
 
+- ODBC
+  . Fixed bug #65950 (Field name truncation if the field name is bigger than
+    32 characters). (patch submitted by: michael dot y at zend dot com, Yasuo)
+
+
 17 Oct 2013, PHP 5.5.5
 
 - Core:
