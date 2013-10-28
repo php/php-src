@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - FTP:
   . Fixed bug #65667 (ftp_nb_continue produces segfault). (Philip Hofstetter)
 
+- ODBC
+  . Fixed bug #65950 (Field name truncation if the field name is bigger than 
+    32 characters). (patch submitted by: michael dot y at zend dot com, Yasuo)
+
 - Sockets:
   . Fixed bug #65808 (the socket_connect() won't work with IPv6 address).
     (Mike)
