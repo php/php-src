@@ -2222,13 +2222,14 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 			case HASH_KEY_IS_STRING:
 				if (recursive && zend_hash_find(dest, string_key, string_key_len, (void **)&dest_entry) == SUCCESS) {
 					HashTable *thash = Z_TYPE_PP(dest_entry) == IS_ARRAY ? Z_ARRVAL_PP(dest_entry) : NULL;
+					zval *src_zval;
+					zval *tmp = NULL;
 
 					if ((thash && thash->nApplyCount > 1) || (*src_entry == *dest_entry && Z_ISREF_PP(dest_entry) && (Z_REFCOUNT_PP(dest_entry) % 2))) {
 						php_error_docref(NULL TSRMLS_CC, E_WARNING, "recursion detected");
 						return 0;
 					}
 					SEPARATE_ZVAL(dest_entry);
-					SEPARATE_ZVAL(src_entry);
 
 					if (Z_TYPE_PP(dest_entry) == IS_NULL) {
 						convert_to_array_ex(dest_entry);
@@ -2236,23 +2237,34 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src, int recursive TSRMLS
 					} else {
 						convert_to_array_ex(dest_entry);
 					}
-					if (Z_TYPE_PP(src_entry) == IS_NULL) {
-						convert_to_array_ex(src_entry);
-						add_next_index_null(*src_entry);
+					if (Z_TYPE_PP(src_entry) == IS_OBJECT) {
+						ALLOC_ZVAL(src_zval);
+						INIT_PZVAL_COPY(src_zval, *src_entry);
+						zval_copy_ctor(src_zval);
+						convert_to_array(src_zval);
+						tmp = src_zval;
 					} else {
-						convert_to_array_ex(src_entry);
+						src_zval = *src_entry;
 					}
-					if (thash) {
-						thash->nApplyCount++;
-					}
-					if (!php_array_merge(Z_ARRVAL_PP(dest_entry), Z_ARRVAL_PP(src_entry), recursive TSRMLS_CC)) {
+					if (Z_TYPE_P(src_zval) == IS_ARRAY) {
+						if (thash) {
+							thash->nApplyCount++;
+						}
+						if (!php_array_merge(Z_ARRVAL_PP(dest_entry), Z_ARRVAL_P(src_zval), recursive TSRMLS_CC)) {
+							if (thash) {
+								thash->nApplyCount--;
+							}
+							return 0;
+						}
 						if (thash) {
 							thash->nApplyCount--;
 						}
-						return 0;
+					} else {
+						Z_ADDREF_PP(src_entry);
+						zend_hash_next_index_insert(Z_ARRVAL_PP(dest_entry), &src_zval, sizeof(zval *), NULL);
 					}
-					if (thash) {
-						thash->nApplyCount--;
+					if (tmp) {
+						zval_ptr_dtor(&tmp);
 					}
 				} else {
 					Z_ADDREF_PP(src_entry);
@@ -2356,7 +2368,6 @@ static void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETERS, int
 	array_init_size(return_value, init_size);
 
 	for (i = 0; i < argc; i++) {
-		SEPARATE_ZVAL(args[i]);
 		if (!replace) {
 			php_array_merge(Z_ARRVAL_P(return_value), Z_ARRVAL_PP(args[i]), recursive TSRMLS_CC);
 		} else if (recursive && i > 0) { /* First array will be copied directly instead */
