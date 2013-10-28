@@ -3340,7 +3340,7 @@ yy203:
 		len--;
 	}
 
-	if (len < SIZEOF_LONG * 2 || (len == SIZEOF_LONG * 2 && *hex <= '7')) {
+	if (len < SIZEOF_ZEND_INT * 2 || (len == SIZEOF_ZEND_INT * 2 && *hex <= '7')) {
 		if (len == 0) {
 			Z_LVAL_P(zendlval) = 0;
 		} else {
