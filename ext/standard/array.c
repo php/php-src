@@ -60,7 +60,7 @@
 #define	EXTR_IF_EXISTS			6
 
 #define EXTR_REFS				0x100
-#define EXTR_OBJECT             0x200
+#define EXTR_OBJECT             0x011
 
 #define CASE_LOWER				0
 #define CASE_UPPER				1
@@ -1286,6 +1286,7 @@ PHP_FUNCTION(extract)
 {
 	zval *var_array, *prefix = NULL;
 	long extract_type = EXTR_OVERWRITE;
+	zend_bool extract_object = 0;
 	zval **entry, *data;
 	char *var_name;
 	ulong num_key;
@@ -1293,15 +1294,17 @@ PHP_FUNCTION(extract)
 	int var_exists, key_type, count = 0;
 	int extract_refs = 0;
 	HashPosition pos;
-    HashTable *active = NULL;
     
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
 		return;
 	}
-
+	
+    if ((extract_object = ((extract_type & EXTR_OBJECT)==EXTR_OBJECT)))
+        extract_type &= ~EXTR_OBJECT;
+    
 	extract_refs = (extract_type & EXTR_REFS);
 	extract_type &= 0xff;
-
+	
 	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_IF_EXISTS) {
 		php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid extract type");
 		return;
@@ -1313,7 +1316,7 @@ PHP_FUNCTION(extract)
 	}
 
 	if (prefix) {
-		if (!((extract_type & EXTR_OBJECT) != EXTR_OBJECT)) {
+		if (!extract_object) {
 		    convert_to_string(prefix);
 		    if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), Z_STRLEN_P(prefix))) {
 			    php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid identifier");
@@ -1349,7 +1352,7 @@ PHP_FUNCTION(extract)
 
 		if (key_type == HASH_KEY_IS_STRING) {
 			var_name_len--;
-			if (!((extract_type & EXTR_OBJECT) != EXTR_OBJECT)) {
+			if (!extract_object) {
 			    var_exists = zend_hash_exists(EG(active_symbol_table), var_name, var_name_len + 1);
 			} else {
 			    zval property_name;
@@ -1435,7 +1438,7 @@ PHP_FUNCTION(extract)
 				SEPARATE_ZVAL_TO_MAKE_IS_REF(entry);
 				zval_add_ref(entry);
 
-                if (!((extract_type & EXTR_OBJECT) != EXTR_OBJECT)) { 
+                if (!extract_object) { 
                     if (zend_hash_find(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, (void **) &orig_var) == SUCCESS) {
 					    zval_ptr_dtor(orig_var);
 					    *orig_var = *entry;
@@ -1471,7 +1474,7 @@ PHP_FUNCTION(extract)
 				*data = **entry;
 				zval_copy_ctor(data);
 				
-			    if (!((extract_type & EXTR_OBJECT) != EXTR_OBJECT)) {
+			    if (!extract_object) {
 			        ZEND_SET_SYMBOL_WITH_LENGTH(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, data, 1, 0);
 			    } else {
 			        if (Z_OBJ_HT_P(prefix)->write_property) {
