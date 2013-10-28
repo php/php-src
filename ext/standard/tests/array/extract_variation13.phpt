@@ -1,5 +1,5 @@
 --TEST--
-Test extract() function - ensure EXTR_OBJECT works
+Test extract() function - ensure EXTR_OBJECT|EXTR_REFS works
 --FILE--
 <?php
 class test {
