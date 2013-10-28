@@ -1280,11 +1280,11 @@ PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, int va
 }
 /* }}} */
 
-/* {{{ proto int extract(array var_array [, int extract_type [, mixed prefix]])
-   Imports variables into symbol table from an array */
+/* {{{ proto int extract(array var_array [, int extract_type [, mixed prefix, object object]])
+   Imports variables into symbol table or object from an array */
 PHP_FUNCTION(extract)
 {
-	zval *var_array, *prefix = NULL;
+	zval *var_array, *prefix = NULL, *object;
 	long extract_type = EXTR_OVERWRITE;
 	zend_bool extract_object = 0;
 	zval **entry, *data;
@@ -1295,7 +1295,7 @@ PHP_FUNCTION(extract)
 	int extract_refs = 0;
 	HashPosition pos;
     
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|lz/!z", &var_array, &extract_type, &prefix, &object) == FAILURE) {
 		return;
 	}
 	
@@ -1316,18 +1316,18 @@ PHP_FUNCTION(extract)
 	}
 
 	if (prefix) {
-		if (!extract_object) {
-		    convert_to_string(prefix);
-		    if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), Z_STRLEN_P(prefix))) {
-			    php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid identifier");
-			    return;
-		    }
-		} else {
-		    if (Z_TYPE_P(prefix) != IS_OBJECT) {
-		        php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid object");
-			    return;
-		    }
-		}
+	    convert_to_string(prefix);
+	    if (Z_STRLEN_P(prefix) && !php_valid_var_name(Z_STRVAL_P(prefix), Z_STRLEN_P(prefix))) {
+		    php_error_docref(NULL TSRMLS_CC, E_WARNING, "prefix is not a valid identifier");
+		    return;
+	    }
+	}
+	
+	if (extract_object) {
+	    if (Z_TYPE_P(object) != IS_OBJECT) {
+	        php_error_docref(NULL TSRMLS_CC, E_WARNING, "object is not a valid object");
+		    return;
+	    }
 	}
 
 	if (!EG(active_symbol_table)) {
@@ -1360,9 +1360,9 @@ PHP_FUNCTION(extract)
 			    ZVAL_STRINGL(
 			        &property_name, var_name, var_name_len, 1);
 			    
-			    if (Z_OBJ_HT_P(prefix)->has_property) {
-			        var_exists = Z_OBJ_HT_P(prefix)->has_property(
-			            prefix, &property_name, 2, NULL TSRMLS_CC
+			    if (Z_OBJ_HT_P(object)->has_property) {
+			        var_exists = Z_OBJ_HT_P(object)->has_property(
+			            object, &property_name, 2, NULL TSRMLS_CC
 			        );
 			    }
 			    
@@ -1446,25 +1446,25 @@ PHP_FUNCTION(extract)
 					    zend_hash_update(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, (void **) entry, sizeof(zval *), NULL);
 				    }
                 } else {
-                    if (Z_OBJ_HT_P(prefix)->get_property_ptr_ptr) {
-                        orig_var = Z_OBJ_HT_P(prefix)->get_property_ptr_ptr(
-                            prefix, &final_name, BP_VAR_RW, NULL TSRMLS_CC
+                    if (Z_OBJ_HT_P(object)->get_property_ptr_ptr) {
+                        orig_var = Z_OBJ_HT_P(object)->get_property_ptr_ptr(
+                            object, &final_name, BP_VAR_RW, NULL TSRMLS_CC
                         );
                         if (orig_var) {
                             zval_ptr_dtor(orig_var);
                             *orig_var = *entry;
                         } else {
-                            if (Z_OBJ_HT_P(prefix)->write_property) {
-                                Z_OBJ_HT_P(prefix)->write_property(
-			                        prefix, &final_name, *entry, NULL TSRMLS_CC
+                            if (Z_OBJ_HT_P(object)->write_property) {
+                                Z_OBJ_HT_P(object)->write_property(
+			                        object, &final_name, *entry, NULL TSRMLS_CC
 			                    );
                             }
                         }
                     } else {
                         /* should we write here ? */
-                       if (Z_OBJ_HT_P(prefix)->write_property) {
-                           Z_OBJ_HT_P(prefix)->write_property(
-		                       prefix, &final_name, *entry, NULL TSRMLS_CC
+                       if (Z_OBJ_HT_P(object)->write_property) {
+                           Z_OBJ_HT_P(object)->write_property(
+		                       object, &final_name, *entry, NULL TSRMLS_CC
 		                   );
                        }
                     }
@@ -1477,9 +1477,9 @@ PHP_FUNCTION(extract)
 			    if (!extract_object) {
 			        ZEND_SET_SYMBOL_WITH_LENGTH(EG(active_symbol_table), Z_STRVAL(final_name), Z_STRLEN(final_name) + 1, data, 1, 0);
 			    } else {
-			        if (Z_OBJ_HT_P(prefix)->write_property) {
-			            Z_OBJ_HT_P(prefix)->write_property(
-			                prefix, &final_name, data, NULL TSRMLS_CC
+			        if (Z_OBJ_HT_P(object)->write_property) {
+			            Z_OBJ_HT_P(object)->write_property(
+			                object, &final_name, data, NULL TSRMLS_CC
 			            );
 			        }
 			        

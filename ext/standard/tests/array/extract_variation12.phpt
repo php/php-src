@@ -4,7 +4,7 @@ Test extract() function - ensure EXTR_OBJECT works
 <?php
 class test {
     public function __construct(&$server) {
-        extract($server, EXTR_OBJECT, $this);
+        extract($server, EXTR_OBJECT, null, $this);
     }
 }
 

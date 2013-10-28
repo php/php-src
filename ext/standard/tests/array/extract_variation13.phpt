@@ -6,7 +6,7 @@ class test {
     public $hello;
     
     public function __construct(&$server) {
-        extract($server, EXTR_OBJECT|EXTR_REFS, $this);
+        extract($server, EXTR_OBJECT|EXTR_REFS, null, $this);
     }
 }
 

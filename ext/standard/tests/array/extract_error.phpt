@@ -22,8 +22,8 @@ var_dump( extract($val) );
 $str = "test";
 var_dump( extract($str) );
 
-/* More than valid number of arguments i.e. 3 args */
-var_dump( extract($arr, EXTR_SKIP, "aa", "ee") );
+/* More than valid number of arguments i.e. 4 args */
+var_dump( extract($arr, EXTR_SKIP, "aa", "ee", "of") );
 
 /* Two Arguments, second as prefix but without prefix string as third argument */
 var_dump( extract($arr,EXTR_PREFIX_IF_EXISTS) );
@@ -51,7 +51,7 @@ NULL
 Warning: extract() expects parameter 1 to be array, string given in %s on line %d
 NULL
 
-Warning: extract() expects at most 3 parameters, 4 given in %s on line %d
+Warning: extract() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 
 Warning: extract(): specified extract type requires the prefix parameter in %s on line %d
