@@ -314,11 +314,14 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 
 		/* top level domain */
 		if ((tld = strrchr(diff, '.'))) {
-			/* If tld less than 2 chars (country tlds) and no IP */
-			if (strlen(tld) < 3 && !isdigit(*(tld+1))) {
-				goto nohost;
-			} else if (strlen(tld) == 4
+			/* If tld less than 3 chars (country tlds) and no IP */
+			if (strlen(tld) == 3 || isdigit(*(tld+1)));
+			else if (strlen(tld) == 4
 				&& strncasecmp(".com", tld, 4) != 0
+				&& strncasecmp(".edu", tld, 4) != 0
+				&& strncasecmp(".cat", tld, 4) != 0
+				&& strncasecmp(".eus", tld, 4) != 0
+				&& strncasecmp(".gal", tld, 4) != 0
 				&& strncasecmp(".org", tld, 4) != 0
 				&& strncasecmp(".mil", tld, 4) != 0
 				&& strncasecmp(".gov", tld, 4) != 0
@@ -342,13 +345,9 @@ PHPAPI php_url *php_url_parse_ex(char const *str, int length)
 				&& strncasecmp(".post", tld, 5) != 0) {
 				STR_FREE(diff);
 				goto nohost;
-			} else if (strlen(tld) > 5) {
-				STR_FREE(diff);
-				goto nohost;
-			} else {
-				STR_FREE(diff);
 			}
 		}
+		STR_FREE(diff);
 	}
 
 	ret->host = estrndup(s, (p-s));
