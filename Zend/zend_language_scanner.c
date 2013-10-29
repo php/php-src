@@ -49,7 +49,7 @@
 #include "zend_API.h"
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 #include "tsrm_config_common.h"
 
 #define YYCTYPE   unsigned char
