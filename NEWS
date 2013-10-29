@@ -3,10 +3,20 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.6
 
 - Core:
+  . Improved performance of array_merge() and func_get_args() by eliminating
+    useless copying. (Dmitry)
   . Fixed bug #65939 (Space before ";" breaks php.ini parsing).
     (brainstorm at nopcode dot org)
   . Fixed bug #65911 (scope resolution operator - strange behavior with $this).
     (Bob Weinand)
+
+-OPcache
+  . Increased limit for opcache.max_accelerated_files to 1,000,000. (Chris)
+
+- ODBC
+  . Fixed bug #65950 (Field name truncation if the field name is bigger than
+    32 characters). (patch submitted by: michael dot y at zend dot com, Yasuo)
+
 
 17 Oct 2013, PHP 5.5.5
 
