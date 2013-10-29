@@ -748,12 +748,8 @@ PHP_FUNCTION(get_headers)
 		}
 		if (!format) {
 no_name_header:
-            if (specific) {
-                if (strncasecmp(Z_STRVAL_PP(hdr), specific, (specific_len > Z_STRLEN_PP(hdr)) ? Z_STRLEN_PP(hdr) : specific_len) == SUCCESS) {
-                    ZVAL_STRINGL(return_value, Z_STRVAL_PP(hdr), Z_STRLEN_PP(hdr), 1);
-                    break;
-                }
-            } else {
+            if (!specific || 
+                (strncasecmp(Z_STRVAL_PP(hdr), specific, (specific_len > Z_STRLEN_PP(hdr)) ? Z_STRLEN_PP(hdr) : specific_len) == SUCCESS)) {
                 add_next_index_stringl(return_value, Z_STRVAL_PP(hdr), Z_STRLEN_PP(hdr), 1);
             }
 		} else {
@@ -769,13 +765,9 @@ no_name_header:
 				}
                 
                 
-                if (specific) {
+                if (!specific || 
+                    (strncasecmp(Z_STRVAL_PP(hdr), specific, (specific_len > Z_STRLEN_PP(hdr)) ? Z_STRLEN_PP(hdr) : specific_len) == SUCCESS)) {
                     /* can only return the first occurence of a header */
-                    if (strncasecmp(Z_STRVAL_PP(hdr), specific, (specific_len > Z_STRLEN_PP(hdr)) ? Z_STRLEN_PP(hdr) : specific_len) == SUCCESS) {
-                        ZVAL_STRINGL(return_value, Z_STRVAL_PP(hdr), Z_STRLEN_PP(hdr), 1);
-                        break;
-                    }
-                } else {
                     if (zend_hash_find(HASH_OF(return_value), Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), (void **) &prev_val) == FAILURE) {
 					    add_assoc_stringl_ex(return_value, Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
 				    } else { /* some headers may occur more then once, therefor we need to remake the string into an array */
