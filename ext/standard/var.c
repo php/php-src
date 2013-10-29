@@ -436,7 +436,7 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 		smart_str_append_long(buf, Z_LVAL_PP(struc));
 		break;
 	case IS_DOUBLE:
-		tmp_len = spprintf(&tmp_str, 0,"%.*H", (int) EG(precision), Z_DVAL_PP(struc));
+		tmp_len = spprintf(&tmp_str, 0,"%.*H", PG(serialize_precision), Z_DVAL_PP(struc));
 		smart_str_appendl(buf, tmp_str, tmp_len);
 		efree(tmp_str);
 		break;
