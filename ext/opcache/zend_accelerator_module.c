@@ -34,7 +34,7 @@
 
 #define STRING_NOT_NULL(s) (NULL == (s)?"":s)
 #define MIN_ACCEL_FILES 200
-#define MAX_ACCEL_FILES 100000
+#define MAX_ACCEL_FILES 1000000
 #define TOKENTOSTR(X) #X
 
 static void (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS) = NULL;
