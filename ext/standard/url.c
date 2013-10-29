@@ -700,8 +700,8 @@ PHP_FUNCTION(get_headers)
 {
 	char *url;
 	int url_len;
-	char *specific = NULL;
-	int specific_len = 0;
+	char *specific;
+	int specific_len;
 	php_stream_context *context;
 	php_stream *stream;
 	zval **prev_val, **hdr = NULL, **h;
@@ -709,7 +709,7 @@ PHP_FUNCTION(get_headers)
 	HashTable *hashT;
 	long format = 0;
                 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l!s", &url, &url_len, &format, &specific, &specific_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|ls", &url, &url_len, &format, &specific, &specific_len) == FAILURE) {
 		return;
 	}
 	
@@ -724,9 +724,7 @@ PHP_FUNCTION(get_headers)
 		RETURN_FALSE;
 	}
 
-	if (!specific) {
-	    array_init(return_value);
-	}
+	array_init(return_value);
 
 	/* check for curl-wrappers that provide headers via a special "headers" element */
 	if (zend_hash_find(HASH_OF(stream->wrapperdata), "headers", sizeof("headers"), (void **)&h) != FAILURE && Z_TYPE_PP(h) == IS_ARRAY) {
