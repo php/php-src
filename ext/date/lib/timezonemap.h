@@ -903,6 +903,8 @@
 	{ "ewt",   1, -14400, "America/Toronto"               },
 	{ "ewt",   1, -14400, "Canada/Eastern"                },
 	{ "ewt",   1, -14400, "EST"                           },
+	{ "fet",   0,  10800, "Europe/Kaliningrad"            },
+	{ "fet",   0,  10800, "Europe/Minsk"                  },
 	{ "ffmt",  0, -14660, "America/Martinique"            },
 	{ "fjst",  1,  46800, "Pacific/Fiji"                  },
 	{ "fjt",   0,  43200, "Pacific/Fiji"                  },
