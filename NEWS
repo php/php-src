@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug #65808 (the socket_connect() won't work with IPv6 address).
     (Mike)
 
+- Standard:
+  . Fixed bug #64760 (var_export() does not use full precision for floating-point
+    numbers) (Yasuo)
+
 - XMLReader:
   . Fixed bug #51936 (Crash with clone XMLReader). (Mike)
   . Fixed bug #64230 (XMLReader does not suppress errors). (Mike)
