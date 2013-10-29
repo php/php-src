@@ -3603,13 +3603,13 @@ PHP_FUNCTION(date_diff)
 	php_interval_obj *interval;
 	long          absolute = 0;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO|l", &object1, date_ce_date, &object2, date_ce_date, &absolute) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS() TSRMLS_CC, getThis(), "OO|l", &object1, date_ce_interface, &object2, date_ce_interface, &absolute) == FAILURE) {
 		RETURN_FALSE;
 	}
 	dateobj1 = (php_date_obj *) zend_object_store_get_object(object1 TSRMLS_CC);
 	dateobj2 = (php_date_obj *) zend_object_store_get_object(object2 TSRMLS_CC);
-	DATE_CHECK_INITIALIZED(dateobj1->time, DateTime);
-	DATE_CHECK_INITIALIZED(dateobj2->time, DateTime);
+	DATE_CHECK_INITIALIZED(dateobj1->time, DateTimeInterface);
+	DATE_CHECK_INITIALIZED(dateobj2->time, DateTimeInterface);
 	timelib_update_ts(dateobj1->time, NULL);
 	timelib_update_ts(dateobj2->time, NULL);
 
