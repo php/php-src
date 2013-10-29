@@ -7,6 +7,7 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #66060 (Heap buffer over-read in DateInterval). (Remi)
+  . Fixed bug #65768 (DateTimeImmutable::diff does not work). (Nikita Nefedov)
 
 ?? ??? 2013, PHP 5.5.7
 
