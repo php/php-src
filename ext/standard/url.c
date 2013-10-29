@@ -694,12 +694,14 @@ PHPAPI int php_raw_url_decode(char *str, int len)
 }
 /* }}} */
 
-/* {{{ proto array get_headers(string url[, int format])
+/* {{{ proto array get_headers(string url[, int format, [ string specific]])
    fetches all the headers sent by the server in response to a HTTP request */
 PHP_FUNCTION(get_headers)
 {
 	char *url;
 	int url_len;
+	char *specific = NULL;
+	int specific_len = 0;
 	php_stream_context *context;
 	php_stream *stream;
 	zval **prev_val, **hdr = NULL, **h;
@@ -707,9 +709,10 @@ PHP_FUNCTION(get_headers)
 	HashTable *hashT;
 	long format = 0;
                 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &url, &url_len, &format) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|l!s", &url, &url_len, &format, &specific, &specific_len) == FAILURE) {
 		return;
 	}
+	
 	context = FG(default_context) ? FG(default_context) : (FG(default_context) = php_stream_context_alloc(TSRMLS_C));
 
 	if (!(stream = php_stream_open_wrapper_ex(url, "r", REPORT_ERRORS | STREAM_USE_URL | STREAM_ONLY_GET_HEADERS, NULL, context))) {
@@ -721,7 +724,9 @@ PHP_FUNCTION(get_headers)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
+	if (!specific) {
+	    array_init(return_value);
+	}
 
 	/* check for curl-wrappers that provide headers via a special "headers" element */
 	if (zend_hash_find(HASH_OF(stream->wrapperdata), "headers", sizeof("headers"), (void **)&h) != FAILURE && Z_TYPE_PP(h) == IS_ARRAY) {
@@ -743,7 +748,14 @@ PHP_FUNCTION(get_headers)
 		}
 		if (!format) {
 no_name_header:
-			add_next_index_stringl(return_value, Z_STRVAL_PP(hdr), Z_STRLEN_PP(hdr), 1);
+            if (specific) {
+                if (strncasecmp(Z_STRVAL_PP(hdr), specific, (specific_len > Z_STRLEN_PP(hdr)) ? Z_STRLEN_PP(hdr) : specific_len) == SUCCESS) {
+                    ZVAL_STRINGL(return_value, Z_STRVAL_PP(hdr), Z_STRLEN_PP(hdr), 1);
+                    break;
+                }
+            } else {
+                add_next_index_stringl(return_value, Z_STRVAL_PP(hdr), Z_STRLEN_PP(hdr), 1);
+            }
 		} else {
 			char c;
 			char *s, *p;
@@ -755,14 +767,23 @@ no_name_header:
 				while (isspace((int)*(unsigned char *)s)) {
 					s++;
 				}
-
-				if (zend_hash_find(HASH_OF(return_value), Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), (void **) &prev_val) == FAILURE) {
-					add_assoc_stringl_ex(return_value, Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
-				} else { /* some headers may occur more then once, therefor we need to remake the string into an array */
-					convert_to_array(*prev_val);
-					add_next_index_stringl(*prev_val, s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
-				}
-
+                
+                
+                if (specific) {
+                    /* can only return the first occurence of a header */
+                    if (strncasecmp(Z_STRVAL_PP(hdr), specific, (specific_len > Z_STRLEN_PP(hdr)) ? Z_STRLEN_PP(hdr) : specific_len) == SUCCESS) {
+                        ZVAL_STRINGL(return_value, Z_STRVAL_PP(hdr), Z_STRLEN_PP(hdr), 1);
+                        break;
+                    }
+                } else {
+                    if (zend_hash_find(HASH_OF(return_value), Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), (void **) &prev_val) == FAILURE) {
+					    add_assoc_stringl_ex(return_value, Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
+				    } else { /* some headers may occur more then once, therefor we need to remake the string into an array */
+					    convert_to_array(*prev_val);
+					    add_next_index_stringl(*prev_val, s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
+				    }
+                }
+                
 				*p = c;
 			} else {
 				goto no_name_header;

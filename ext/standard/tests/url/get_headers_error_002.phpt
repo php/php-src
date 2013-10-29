@@ -5,7 +5,7 @@ June Henriksen <juneih@redpill-linpro.com>
 #PHPTestFest2009 Norway 2009-06-09 \o/
 --FILE--
 <?php
-/* Prototype  : proto array get_headers(string url[, int format])
+/* Prototype  : proto array get_headers(string url[, int format, [ int specific]])
  * Description: Fetches all the headers sent by the server in response to a HTTP request
  * Source code: ext/standard/url.c
  * Alias to functions:

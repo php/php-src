@@ -2619,6 +2619,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_get_headers, 0, 0, 1)
 	ZEND_ARG_INFO(0, url)
 	ZEND_ARG_INFO(0, format)
+	ZEND_ARG_INFO(0, header)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ user_filters.c */
