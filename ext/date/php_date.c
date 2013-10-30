@@ -1981,12 +1981,24 @@ zend_object_iterator *date_object_period_get_iterator(zend_class_entry *ce, zval
 	return (zend_object_iterator*)iterator;
 }
 
+static int implement_date_interface_handler(zend_class_entry *interface, zend_class_entry *implementor TSRMLS_DC)
+{
+	if (implementor->type == ZEND_USER_CLASS && !instanceof_function(implementor, date_ce_date) &&
+		!instanceof_function(implementor, date_ce_immutable)) {
+
+		zend_error(E_ERROR, "DateTimeInterface can't be implemented by user classes");
+	}
+
+	return SUCCESS;
+}
+
 static void date_register_classes(TSRMLS_D)
 {
 	zend_class_entry ce_date, ce_immutable, ce_timezone, ce_interval, ce_period, ce_interface;
 
 	INIT_CLASS_ENTRY(ce_interface, "DateTimeInterface", date_funcs_interface);
 	date_ce_interface = zend_register_internal_interface(&ce_interface TSRMLS_CC);
+	date_ce_interface->interface_gets_implemented = implement_date_interface_handler;
 
 	INIT_CLASS_ENTRY(ce_date, "DateTime", date_funcs_date);
 	ce_date.create_object = date_object_new_date;
@@ -4387,7 +4399,7 @@ PHP_METHOD(DatePeriod, __construct)
 	
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling TSRMLS_CC);
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOl|l", &start, date_ce_interface, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
-		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_date, &options) == FAILURE) {
+		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_interface, &options) == FAILURE) {
 			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS() TSRMLS_CC, "s|l", &isostr, &isostr_len, &options) == FAILURE) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "This constructor accepts either (DateTimeInterface, DateInterval, int) OR (DateTimeInterface, DateInterval, DateTime) OR (string) as arguments.");
 				zend_restore_error_handling(&error_handling TSRMLS_CC);
