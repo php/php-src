@@ -38,7 +38,46 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 
 PHPAPI void php_debug_zval_dump(zval **struc, int level TSRMLS_DC);
 
+
+#define PHP_SERIALIZE_FAILURE (FAILURE)
+#define PHP_SERIALIZE_CUSTOM  (SUCCESS)
+#define PHP_SERIALIZE_OBJECT  (SUCCESS + 1)
+
 typedef HashTable* php_serialize_data_t;
+
+/* serialize variable */
+PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t *var_hash TSRMLS_DC);
+
+/* add object serialization string prefix */
+PHPAPI void php_var_serialize_object_start(smart_str *buf, zval *object, zend_uint nprops TSRMLS_DC);
+
+/* append string that ends the object definition */
+PHPAPI void php_var_serialize_object_end(smart_str *buf);
+
+/* append null property */
+PHPAPI void php_var_serialize_property_null(smart_str *buf, const char *key);
+
+/* append boolean property */
+PHPAPI void php_var_serialize_property_bool(smart_str *buf, const char *key, int value);
+
+/* append long property */
+PHPAPI void php_var_serialize_property_long(smart_str *buf, const char *key, long value);
+
+/* append double property */
+PHPAPI void php_var_serialize_property_double(smart_str *buf, const char *key, double value TSRMLS_DC);
+
+/* append string property */
+PHPAPI void php_var_serialize_property_string(smart_str *buf, const char *key, const char *value);
+
+/* append string property */
+PHPAPI void php_var_serialize_property_stringl(smart_str *buf, const char *key, const char *value, int value_len);
+
+/* append string property zval */
+PHPAPI void php_var_serialize_property_zval(smart_str *buf, const char *key, zval *value, zend_serialize_data *data TSRMLS_DC);
+
+/* append properties taken from HashTable */
+PHPAPI void php_var_serialize_properties(smart_str *buf, HashTable *properties, zend_serialize_data *data TSRMLS_DC);
+
 
 struct php_unserialize_data {
 	void *first;
@@ -49,8 +88,15 @@ struct php_unserialize_data {
 
 typedef struct php_unserialize_data* php_unserialize_data_t;
 
-PHPAPI void php_var_serialize(smart_str *buf, zval **struc, php_serialize_data_t *var_hash TSRMLS_DC);
+/* unserialize variable */
 PHPAPI int php_var_unserialize(zval **rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash TSRMLS_DC);
+
+/* unserialize one property (key and value) of the serialized object */
+PHPAPI int php_var_unserialize_property(zval *key, zval *value, const unsigned char **buf, zend_uint *buf_len, zend_unserialize_data *data TSRMLS_DC);
+
+/* unserialize all properties of the serialized object and save them to ht */
+PHPAPI int php_var_unserialize_properties(HashTable *ht, const unsigned char **buf, zend_uint *buf_len, zend_uint elements, zend_unserialize_data *data TSRMLS_DC);
+
 
 #define PHP_VAR_SERIALIZE_INIT(var_hash_ptr) \
 do  { \
