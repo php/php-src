@@ -153,8 +153,7 @@ static int php_check_dots(const char *element, int n)
 	memcpy((d)->cwd, (s)->cwd, (s)->cwd_length+1);
 
 #define CWD_STATE_FREE(s)			\
-	efree((s)->cwd);			\
- 	(s)->cwd = NULL;
+	efree((s)->cwd);
 
 #ifdef TSRM_WIN32
 # define CWD_STATE_FREE_ERR(state) do { \
@@ -514,6 +513,7 @@ CWD_API int virtual_cwd_deactivate(TSRMLS_D) /* {{{ */
 {
 	if (CWDG(cwd).cwd != NULL) {
 		CWD_STATE_FREE(&CWDG(cwd));
+		CWDG(cwd).cwd = NULL;
 	}
 	return 0;
 }
