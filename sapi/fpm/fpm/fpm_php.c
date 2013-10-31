@@ -262,22 +262,22 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 
 int fpm_php_limit_guid(char *path, gid_t gid, uid_t uid TSRMLS_DC) /* {{{ */
 {
-    struct stat sb;
+	struct stat sb;
 
 	if (limit_guid) {
-	    if (uid || gid) {
-	        if (VCWD_STAT(path, &sb) == SUCCESS) {
-	            if ((uid && (sb.st_uid != uid)) ||
-	                (gid && (sb.st_gid != gid))) {
-	                /* not allowed */
-	                return 1;
-	            }
-	            /* allowed */
-	            return 0;
-	        }
-	    }
+		if (uid || gid) {
+			if (VCWD_STAT(path, &sb) == SUCCESS) {
+				if ((uid && (sb.st_uid != uid)) ||
+					(gid && (sb.st_gid != gid))) {
+					/* not allowed */
+					return 1;
+				}
+				/* allowed */
+				return 0;
+			}
+		}
 	}
-	
+
 	/* allowed */
 	return 0;
 }
