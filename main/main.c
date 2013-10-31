@@ -2500,7 +2500,7 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 	if (old_cwd[0] != '\0') {
 		php_ignore_value(VCWD_CHDIR(old_cwd));
 	}
-	do_alloca(old_cwd, use_heap);
+	free_alloca(old_cwd, use_heap);
 #endif
 	return retval;
 }
@@ -2511,10 +2511,11 @@ PHPAPI int php_execute_script(zend_file_handle *primary_file TSRMLS_DC)
 PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret TSRMLS_DC)
 {
 	char *old_cwd;
+	ALLOCA_FLAG(use_heap)
 
 	EG(exit_status) = 0;
 #define OLD_CWD_SIZE 4096
-	old_cwd = emalloc(OLD_CWD_SIZE);
+	old_cwd = do_alloca(OLD_CWD_SIZE, use_heap);
 	old_cwd[0] = '\0';
 
 	zend_try {
@@ -2537,7 +2538,7 @@ PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval **ret 
 		php_ignore_value(VCWD_CHDIR(old_cwd));
 	}
 
-	efree(old_cwd);
+	free_alloca(old_cwd, use_heap);
 	return EG(exit_status);
 }
 /* }}} */
