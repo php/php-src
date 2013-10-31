@@ -922,8 +922,6 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		if (wp->config->security_limit_guid) {
 		    wp->limit_guid = wp->config->security_limit_guid;
 		}
-            
-    
 
 		/* request_slowlog_timeout */
 		if (wp->config->request_slowlog_timeout) {
@@ -1608,7 +1606,7 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tchdir = %s",                      STR2STR(wp->config->chdir));
 		zlog(ZLOG_NOTICE, "\tcatch_workers_output = %s",       BOOL2STR(wp->config->catch_workers_output));
 		zlog(ZLOG_NOTICE, "\tsecurity.limit_extensions = %s",  wp->config->security_limit_extensions);
-        zlog(ZLOG_NOTICE, "\tsecurity.limit_guid = %s",        BOOL2STR(wp->config->security_limit_guid));
+		zlog(ZLOG_NOTICE, "\tsecurity.limit_guid = %s",        BOOL2STR(wp->config->security_limit_guid));
 
 		for (kv = wp->config->env; kv; kv = kv->next) {
 			zlog(ZLOG_NOTICE, "\tenv[%s] = %s", kv->key, kv->value);
