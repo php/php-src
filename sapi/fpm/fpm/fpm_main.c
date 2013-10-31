@@ -1861,8 +1861,8 @@ consult the installation file that came with this distribution, or visit \n\
 
 	/* fetch g/uid */
 	gid_t gid = getgid();
-    uid_t uid = getuid();
-    
+	uid_t uid = getuid();
+
 	zend_first_try {
 		while (fcgi_accept_request(&request) >= 0) {
 			request_body_fd = -1;
