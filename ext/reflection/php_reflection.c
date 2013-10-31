@@ -2599,9 +2599,14 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 
 	*return_value = *precv->op2.zv;
 	INIT_PZVAL(return_value);
-	if ((Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT
-			&& (Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) != IS_CONSTANT_ARRAY) {
-		zval_copy_ctor(return_value);
+	switch (Z_TYPE_P(return_value) & IS_CONSTANT_TYPE_MASK) {
+		case IS_CONSTANT:
+		case IS_CONSTANT_ARRAY:
+		case IS_CONSTANT_AST:
+			break;
+
+		default:
+			zval_copy_ctor(return_value);
 	}
 	zval_update_constant_ex(&return_value, (void*)0, param->fptr->common.scope TSRMLS_CC);
 }
@@ -3414,8 +3419,11 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 
 		/* this is necessary to make it able to work with default array
 		* properties, returned to user */
-		if (Z_TYPE_P(prop_copy) == IS_CONSTANT_ARRAY || (Z_TYPE_P(prop_copy) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
-			zval_update_constant(&prop_copy, (void *) 1 TSRMLS_CC);
+		switch (Z_TYPE_P(prop_copy) & IS_CONSTANT_TYPE_MASK) {
+			case IS_CONSTANT:
+			case IS_CONSTANT_ARRAY:
+			case IS_CONSTANT_AST:
+				zval_update_constant(&prop_copy, (void *) 1 TSRMLS_CC);
 		}
 
 		add_assoc_zval(return_value, key, prop_copy);

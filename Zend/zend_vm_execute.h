@@ -1435,12 +1435,16 @@ static int ZEND_FASTCALL  ZEND_RECV_INIT_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_
 	if (param == NULL) {
 		ALLOC_ZVAL(assignment_value);
 		*assignment_value = *opline->op2.zv;
-		if ((Z_TYPE_P(assignment_value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT ||
-		     Z_TYPE_P(assignment_value)==IS_CONSTANT_ARRAY) {
-			Z_SET_REFCOUNT_P(assignment_value, 1);
-			zval_update_constant(&assignment_value, 0 TSRMLS_CC);
-		} else {
-			zval_copy_ctor(assignment_value);
+		switch (Z_TYPE_P(assignment_value) & IS_CONSTANT_TYPE_MASK) {
+			case IS_CONSTANT:
+			case IS_CONSTANT_ARRAY:
+			case IS_CONSTANT_AST:
+				Z_SET_REFCOUNT_P(assignment_value, 1);
+				zval_update_constant(&assignment_value, 0 TSRMLS_CC);
+				break;
+			default:
+				zval_copy_ctor(assignment_value);
+				break;
 		}
 		INIT_PZVAL(assignment_value);
 	} else {
@@ -3792,13 +3796,16 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_CONST_CONST_HANDLER(ZEND_OPCO
 		}
 
 		if (EXPECTED(zend_hash_quick_find(&ce->constants_table, Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv)+1, Z_HASH_P(opline->op2.zv), (void **) &value) == SUCCESS)) {
-			if (Z_TYPE_PP(value) == IS_CONSTANT_ARRAY ||
-			    (Z_TYPE_PP(value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
-				zend_class_entry *old_scope = EG(scope);
+			switch (Z_TYPE_PP(value) & IS_CONSTANT_TYPE_MASK) {
+				case IS_CONSTANT:
+				case IS_CONSTANT_ARRAY:
+				case IS_CONSTANT_AST: {
+					zend_class_entry *old_scope = EG(scope);
 
-				EG(scope) = ce;
-				zval_update_constant(value, (void *) 1 TSRMLS_CC);
-				EG(scope) = old_scope;
+					EG(scope) = ce;
+					zval_update_constant(value, (void *) 1 TSRMLS_CC);
+					EG(scope) = old_scope;
+				}
 			}
 			if (IS_CONST == IS_CONST) {
 				CACHE_PTR(opline->op2.literal->cache_slot, value);
@@ -4089,20 +4096,27 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCOD
 	name  = opline->op1.zv;
 	val   = opline->op2.zv;
 
-	if ((Z_TYPE_P(val) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT || Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
-		zval tmp;
-		zval *tmp_ptr = &tmp;
+	switch (Z_TYPE_P(val) & IS_CONSTANT_TYPE_MASK) {
+		case IS_CONSTANT:
+		case IS_CONSTANT_ARRAY:
+		case IS_CONSTANT_AST: {
+			zval tmp;
+			zval *tmp_ptr = &tmp;
 
-		ZVAL_COPY_VALUE(&tmp, val);
-		if (Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
-			zval_copy_ctor(&tmp);
+			ZVAL_COPY_VALUE(&tmp, val);
+			if (Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
+				zval_copy_ctor(&tmp);
+			}
+			INIT_PZVAL(&tmp);
+			zval_update_constant(&tmp_ptr, NULL TSRMLS_CC);
+			c.value = *tmp_ptr;
 		}
-		INIT_PZVAL(&tmp);
-		zval_update_constant(&tmp_ptr, NULL TSRMLS_CC);
-		c.value = *tmp_ptr;
-	} else {
-		INIT_PZVAL_COPY(&c.value, val);
-		zval_copy_ctor(&c.value);
+		break;
+
+		default:
+			INIT_PZVAL_COPY(&c.value, val);
+			zval_copy_ctor(&c.value);
+			break;
 	}
 	c.flags = CONST_CS; /* non persistent, case sensetive */
 	c.name = str_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
@@ -15635,13 +15649,16 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE
 		}
 
 		if (EXPECTED(zend_hash_quick_find(&ce->constants_table, Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv)+1, Z_HASH_P(opline->op2.zv), (void **) &value) == SUCCESS)) {
-			if (Z_TYPE_PP(value) == IS_CONSTANT_ARRAY ||
-			    (Z_TYPE_PP(value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
-				zend_class_entry *old_scope = EG(scope);
+			switch (Z_TYPE_PP(value) & IS_CONSTANT_TYPE_MASK) {
+				case IS_CONSTANT:
+				case IS_CONSTANT_ARRAY:
+				case IS_CONSTANT_AST: {
+					zend_class_entry *old_scope = EG(scope);
 
-				EG(scope) = ce;
-				zval_update_constant(value, (void *) 1 TSRMLS_CC);
-				EG(scope) = old_scope;
+					EG(scope) = ce;
+					zval_update_constant(value, (void *) 1 TSRMLS_CC);
+					EG(scope) = old_scope;
+				}
 			}
 			if (IS_VAR == IS_CONST) {
 				CACHE_PTR(opline->op2.literal->cache_slot, value);
@@ -25171,13 +25188,16 @@ static int ZEND_FASTCALL  ZEND_FETCH_CONSTANT_SPEC_UNUSED_CONST_HANDLER(ZEND_OPC
 		}
 
 		if (EXPECTED(zend_hash_quick_find(&ce->constants_table, Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv)+1, Z_HASH_P(opline->op2.zv), (void **) &value) == SUCCESS)) {
-			if (Z_TYPE_PP(value) == IS_CONSTANT_ARRAY ||
-			    (Z_TYPE_PP(value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
-				zend_class_entry *old_scope = EG(scope);
+			switch (Z_TYPE_PP(value) & IS_CONSTANT_TYPE_MASK) {
+				case IS_CONSTANT:
+				case IS_CONSTANT_ARRAY:
+				case IS_CONSTANT_AST: {
+					zend_class_entry *old_scope = EG(scope);
 
-				EG(scope) = ce;
-				zval_update_constant(value, (void *) 1 TSRMLS_CC);
-				EG(scope) = old_scope;
+					EG(scope) = ce;
+					zval_update_constant(value, (void *) 1 TSRMLS_CC);
+					EG(scope) = old_scope;
+				}
 			}
 			if (IS_UNUSED == IS_CONST) {
 				CACHE_PTR(opline->op2.literal->cache_slot, value);

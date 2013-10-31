@@ -23,6 +23,7 @@
 #define ZEND_COMPILE_H
 
 #include "zend.h"
+#include "zend_ast.h"
 
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
