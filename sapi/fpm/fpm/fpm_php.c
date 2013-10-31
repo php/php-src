@@ -265,16 +265,62 @@ int fpm_php_limit_guid(char *path, gid_t gid, uid_t uid TSRMLS_DC) /* {{{ */
 	struct stat sb;
 
 	if (limit_guid) {
-		if (uid || gid) {
-			if (VCWD_STAT(path, &sb) == SUCCESS) {
-				if ((uid && (sb.st_uid != uid)) ||
-					(gid && (sb.st_gid != gid))) {
-					/* not allowed */
-					return 1;
-				}
-				/* allowed */
-				return 0;
+	
+	    if (!uid) {
+	        /* do not allow root user */
+	        zlog(ZLOG_WARNING, "Access to '%s' has been denied: cannot allow execution of code as root user", path);
+	        return 1;
+	    }
+	    
+	    if (!gid) {
+	        /* do not allow root user */
+	        zlog(ZLOG_WARNING, "Access to '%s' has been denied: cannot allow execution of code as user in the root group", path);
+	        return 1;
+	    }
+	    
+	    if (strstr(path, "..") != NULL) {
+	        /* no back referencing */
+	        zlog(ZLOG_WARNING, "Access to '%s' has been denied: cannot allow access to paths containing back references", path);
+	        return 1;
+	    }
+	    
+		if (VCWD_STAT(path, &sb) == SUCCESS) {
+			
+		    if (!S_ISREG(sb.st_mode)) {
+		        /* not a regular file */
+		        zlog(ZLOG_WARNING, "Access to '%s' has been denied: access denied to anything that is not a regular file", path);
+		        return 1;
+		    }
+		    
+		    if (sb.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
+		        /* not allowed to load executable files */
+		        zlog(ZLOG_WARNING, "Access to '%s' has been denied: not allowed to load executable files", path);
+		        return 1;
+		    }
+		    
+		    if (sb.st_mode & (S_IROTH|S_IWOTH)) {
+		        /* not allowed to load executable files */
+		        zlog(ZLOG_WARNING, "Access to '%s' has been denied: the path cannot be readable or writable by any other group or user", path);
+		        return 1;
+		    }
+		    
+		    if (sb.st_mode & (S_IWUSR|S_IWGRP)) {
+		        /* not allowed to load executable files */
+		        zlog(ZLOG_WARNING, "Access to '%s' has been denied: that path cannot be writable by the current group or user", path);
+		        return 1;
+		    }
+		    
+			if ((uid && (sb.st_uid != uid)) ||
+				(gid && (sb.st_gid != gid))) {
+				/* umatched gid / uid */
+				zlog(ZLOG_WARNING, "Access to '%s' has been denied: the current user and group must match that of the file requested", path);
+				return 1;
 			}
+			
+		} else {
+		    /* cannot stat path */
+	        zlog(ZLOG_WARNING, "Access to '%s' has been denied: cannot stat path", path);
+	        return 1;
 		}
 	}
 
