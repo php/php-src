@@ -209,6 +209,9 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 					continue;
 				}
 			}
+		} else {
+			intl_errors_set(&err, U_INVALID_FORMAT_ERROR, "Invalid part type encountered", 0 TSRMLS_CC);
+			continue;
 		}
 
 		UMessagePatternArgType argType = p.getArgType();

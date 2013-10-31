@@ -461,12 +461,17 @@ ZEND_FUNCTION(func_get_args)
 
 	array_init_size(return_value, arg_count);
 	for (i=0; i<arg_count; i++) {
-		zval *element;
+		zval *element, *arg;
 
-		ALLOC_ZVAL(element);
-		*element = **((zval **) (p-(arg_count-i)));
-		zval_copy_ctor(element);
-		INIT_PZVAL(element);
+		arg = *((zval **) (p-(arg_count-i)));
+		if (!Z_ISREF_P(arg)) {
+			element = arg;
+			Z_ADDREF_P(element);
+		} else {
+			ALLOC_ZVAL(element);
+			INIT_PZVAL_COPY(element, arg);
+			zval_copy_ctor(element);
+	    }
 		zend_hash_next_index_insert(return_value->value.ht, &element, sizeof(zval *), NULL);
 	}
 }

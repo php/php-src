@@ -12,7 +12,7 @@ AC_DEFUN([LIBZEND_BISON_CHECK],[
   bison_version=none
   if test "$YACC"; then
     AC_CACHE_CHECK([for bison version], php_cv_bison_version, [
-      bison_version_vars=`bison --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /' | tr -d a-z`
+      bison_version_vars=`$YACC --version 2> /dev/null | grep 'GNU Bison' | cut -d ' ' -f 4 | $SED -e 's/\./ /g' | tr -d a-z`
       php_cv_bison_version=invalid
       if test -n "$bison_version_vars"; then
         set $bison_version_vars

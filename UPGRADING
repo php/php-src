@@ -343,6 +343,8 @@ None
 
 - Intl:
   - This extension now requires ICU 4.0+.
+- Phar:
+  - Added ability of resolving alias created by Phar::map
 
 ========================================
 9. New Global Constants

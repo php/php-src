@@ -14997,11 +14997,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HA
 	SAVE_OPLINE();
 	property = opline->op2.zv;
 
-	if (IS_VAR == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -16079,22 +16074,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	offset = opline->op2.zv;
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -16113,9 +16108,7 @@ num_index_prop:
 				if (IS_CONST == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -16150,20 +16143,20 @@ num_index_prop:
 			}
 		}
 
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -16174,7 +16167,7 @@ num_index_prop:
 		} else {
 
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -16192,11 +16185,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
@@ -17353,11 +17346,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HAND
 	SAVE_OPLINE();
 	property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (IS_VAR == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (1) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -18178,22 +18166,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(in
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -18212,9 +18200,7 @@ num_index_prop:
 				if (IS_TMP_VAR == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -18249,20 +18235,20 @@ num_index_prop:
 			}
 		}
 		zval_dtor(free_op2.var);
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (1) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -18273,7 +18259,7 @@ num_index_prop:
 		} else {
 			zval_dtor(free_op2.var);
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -18291,11 +18277,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
@@ -19616,11 +19602,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HAND
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (IS_VAR == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -20659,22 +20640,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(in
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -20693,9 +20674,7 @@ num_index_prop:
 				if (IS_VAR == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -20730,20 +20709,20 @@ num_index_prop:
 			}
 		}
 		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -20754,7 +20733,7 @@ num_index_prop:
 		} else {
 			if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -20772,11 +20751,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
@@ -23081,11 +23060,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDL
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-	if (IS_VAR == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -23956,22 +23930,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
+	container = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
 
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -23990,9 +23964,7 @@ num_index_prop:
 				if (IS_CV == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -24027,20 +23999,20 @@ num_index_prop:
 			}
 		}
 
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -24051,7 +24023,7 @@ num_index_prop:
 		} else {
 
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -24069,11 +24041,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
@@ -24867,11 +24839,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE
 	SAVE_OPLINE();
 	property = opline->op2.zv;
 
-	if (IS_UNUSED == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -25465,22 +25432,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CON
 {
 	USE_OPLINE
 
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
+	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 
 	offset = opline->op2.zv;
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -25499,9 +25466,7 @@ num_index_prop:
 				if (IS_CONST == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -25536,20 +25501,20 @@ num_index_prop:
 			}
 		}
 
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -25560,7 +25525,7 @@ num_index_prop:
 		} else {
 
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -25578,11 +25543,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
@@ -26285,11 +26250,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_H
 	SAVE_OPLINE();
 	property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (IS_UNUSED == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (1) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -26786,22 +26746,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
+	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -26820,9 +26780,7 @@ num_index_prop:
 				if (IS_TMP_VAR == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -26857,20 +26815,20 @@ num_index_prop:
 			}
 		}
 		zval_dtor(free_op2.var);
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (1) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -26881,7 +26839,7 @@ num_index_prop:
 		} else {
 			zval_dtor(free_op2.var);
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -26899,11 +26857,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
@@ -27606,11 +27564,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_H
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (IS_UNUSED == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -28107,22 +28060,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
+	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -28141,9 +28094,7 @@ num_index_prop:
 				if (IS_VAR == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -28178,20 +28129,20 @@ num_index_prop:
 			}
 		}
 		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -28202,7 +28153,7 @@ num_index_prop:
 		} else {
 			if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -28220,11 +28171,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
@@ -29349,11 +29300,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HA
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-	if (IS_UNUSED == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -29848,22 +29794,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(
 {
 	USE_OPLINE
 
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
+	container = _get_obj_zval_ptr_unused(TSRMLS_C);
 
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -29882,9 +29828,7 @@ num_index_prop:
 				if (IS_CV == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -29919,20 +29863,20 @@ num_index_prop:
 			}
 		}
 
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -29943,7 +29887,7 @@ num_index_prop:
 		} else {
 
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -29961,11 +29905,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
@@ -32493,11 +32437,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HAN
 	SAVE_OPLINE();
 	property = opline->op2.zv;
 
-	if (IS_CV == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -33347,22 +33286,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(i
 {
 	USE_OPLINE
 
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 
 	offset = opline->op2.zv;
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -33381,9 +33320,7 @@ num_index_prop:
 				if (IS_CONST == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -33418,20 +33355,20 @@ num_index_prop:
 			}
 		}
 
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CONST == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -33442,7 +33379,7 @@ num_index_prop:
 		} else {
 
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -33460,11 +33397,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
@@ -34614,11 +34551,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDL
 	SAVE_OPLINE();
 	property = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (IS_CV == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (1) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -35308,22 +35240,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 
 	offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -35342,9 +35274,7 @@ num_index_prop:
 				if (IS_TMP_VAR == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -35379,20 +35309,20 @@ num_index_prop:
 			}
 		}
 		zval_dtor(free_op2.var);
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (1) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_TMP_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -35403,7 +35333,7 @@ num_index_prop:
 		} else {
 			zval_dtor(free_op2.var);
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -35421,11 +35351,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
@@ -36739,11 +36669,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDL
 	SAVE_OPLINE();
 	property = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (IS_CV == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -37650,22 +37575,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int
 {
 	USE_OPLINE
 	zend_free_op free_op2;
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 
 	offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -37684,9 +37609,7 @@ num_index_prop:
 				if (IS_VAR == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -37721,20 +37644,20 @@ num_index_prop:
 			}
 		}
 		if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_VAR == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -37745,7 +37668,7 @@ num_index_prop:
 		} else {
 			if (free_op2.var) {zval_ptr_dtor(&free_op2.var);};
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -37763,11 +37686,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
@@ -39917,11 +39840,6 @@ static int ZEND_FASTCALL  ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLE
 	SAVE_OPLINE();
 	property = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-	if (IS_CV == IS_VAR && (opline->extended_value & ZEND_FETCH_ADD_LOCK)) {
-		PZVAL_LOCK(*EX_T(opline->op1.var).var.ptr_ptr);
-		EX_T(opline->op1.var).var.ptr = *EX_T(opline->op1.var).var.ptr_ptr;
-	}
-
 	if (0) {
 		MAKE_REAL_ZVAL_PTR(property);
 	}
@@ -40660,22 +40578,22 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int 
 {
 	USE_OPLINE
 
-	zval **container;
+	zval *container;
 	zval **value = NULL;
 	int result = 0;
 	ulong hval;
 	zval *offset;
 
 	SAVE_OPLINE();
-	container = _get_zval_ptr_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
+	container = _get_zval_ptr_cv_BP_VAR_IS(execute_data, opline->op1.var TSRMLS_CC);
 
 	offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
 
-	if (Z_TYPE_PP(container) == IS_ARRAY && !prop_dim) {
+	if (Z_TYPE_P(container) == IS_ARRAY && !prop_dim) {
 		HashTable *ht;
 		int isset = 0;
 
-		ht = Z_ARRVAL_PP(container);
+		ht = Z_ARRVAL_P(container);
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -40694,9 +40612,7 @@ num_index_prop:
 				if (IS_CV == IS_CONST) {
 					hval = Z_HASH_P(offset);
 				} else {
-					if (!prop_dim) {
-						ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
-					}
+					ZEND_HANDLE_NUMERIC_EX(Z_STRVAL_P(offset), Z_STRLEN_P(offset)+1, hval, goto num_index_prop);
 					if (IS_INTERNED(Z_STRVAL_P(offset))) {
 						hval = INTERNED_HASH(Z_STRVAL_P(offset));
 					} else {
@@ -40731,20 +40647,20 @@ num_index_prop:
 			}
 		}
 
-	} else if (Z_TYPE_PP(container) == IS_OBJECT) {
+	} else if (Z_TYPE_P(container) == IS_OBJECT) {
 		if (0) {
 			MAKE_REAL_ZVAL_PTR(offset);
 		}
 		if (prop_dim) {
-			if (Z_OBJ_HT_P(*container)->has_property) {
-				result = Z_OBJ_HT_P(*container)->has_property(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_property) {
+				result = Z_OBJ_HT_P(container)->has_property(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0, ((IS_CV == IS_CONST) ? opline->op2.literal : NULL) TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check property of non-object");
 				result = 0;
 			}
 		} else {
-			if (Z_OBJ_HT_P(*container)->has_dimension) {
-				result = Z_OBJ_HT_P(*container)->has_dimension(*container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
+			if (Z_OBJ_HT_P(container)->has_dimension) {
+				result = Z_OBJ_HT_P(container)->has_dimension(container, offset, (opline->extended_value & ZEND_ISEMPTY) != 0 TSRMLS_CC);
 			} else {
 				zend_error(E_NOTICE, "Trying to check element of non-array");
 				result = 0;
@@ -40755,7 +40671,7 @@ num_index_prop:
 		} else {
 
 		}
-	} else if ((*container)->type == IS_STRING && !prop_dim) { /* string offsets */
+	} else if (Z_TYPE_P(container) == IS_STRING && !prop_dim) { /* string offsets */
 		zval tmp;
 
 		if (Z_TYPE_P(offset) != IS_LONG) {
@@ -40773,11 +40689,11 @@ num_index_prop:
 		}
 		if (Z_TYPE_P(offset) == IS_LONG) {
 			if (opline->extended_value & ZEND_ISSET) {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container)) {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container)) {
 					result = 1;
 				}
 			} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
-				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_PP(container) && Z_STRVAL_PP(container)[offset->value.lval] != '0') {
+				if (offset->value.lval >= 0 && offset->value.lval < Z_STRLEN_P(container) && Z_STRVAL_P(container)[offset->value.lval] != '0') {
 					result = 1;
 				}
 			}
