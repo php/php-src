@@ -487,6 +487,7 @@ int fpm_socket_unix_test_connect(struct sockaddr_un *sock, size_t socklen) /* {{
 	}
 
 	if (connect(fd, (struct sockaddr *)sock, socklen) == -1) {
+		close(fd);
 		return -1;
 	}
 
