@@ -9,6 +9,10 @@ PHP                                                                        NEWS
     (brainstorm at nopcode dot org)
   . Fixed bug #65911 (scope resolution operator - strange behavior with $this).
     (Bob Weinand)
+  . Fixed bug #65936 (dangling context pointer causes crash). (Tony)
+
+- FPM:
+  . Changed default listen() backlog to 65535. (Tony)
 
 - OPcache
   . Increased limit for opcache.max_accelerated_files to 1,000,000. (Chris)
@@ -30,7 +34,6 @@ PHP                                                                        NEWS
   . Fixed bug #65322 (compile time errors won't trigger auto loading). (Nikita)
   . Fixed bug #65821 (By-ref foreach on property access of string offset
     segfaults). (Nikita)
-  . Fixed bug #65936 (dangling context pointer causes crash). (Tony)
 
 - CLI server:
   . Fixed bug #65633 (built-in server treat some http headers as
