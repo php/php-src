@@ -115,6 +115,8 @@ struct sigaction act, old_term, old_quit, old_int;
 
 static void (*php_php_import_environment_variables)(zval *array_ptr TSRMLS_DC);
 
+typedef void (*fcgi_apply_func)(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC);
+
 #ifndef PHP_WIN32
 /* these globals used for forking children on unix systems */
 
@@ -1540,8 +1542,89 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
+static inline void add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC) /* {{{ */
+{
+	zval *return_value = (zval*)arg;
+	char *str = NULL;
+	char *p;
+	ALLOCA_FLAG(use_heap)
+
+	if (var_len > 5 &&
+	    var[0] == 'H' &&
+	    var[1] == 'T' &&
+	    var[2] == 'T' &&
+	    var[3] == 'P' &&
+	    var[4] == '_') {
+
+		var_len -= 5;
+		p = var + 5;
+		var = str = do_alloca(var_len + 1, use_heap);
+		*str++ = *p++;
+		while (*p) {
+			if (*p == '_') {
+				*str++ = '-';
+				p++;
+				if (*p) {
+					*str++ = *p++;
+				}
+			} else if (*p >= 'A' && *p <= 'Z') {
+				*str++ = (*p++ - 'A' + 'a');
+			} else {
+				*str++ = *p++;
+			}
+		}
+		*str = 0;
+	} else if (var_len == sizeof("CONTENT_TYPE")-1 &&
+	           memcmp(var, "CONTENT_TYPE", sizeof("CONTENT_TYPE")-1) == 0) {
+		var = "Content-Type";
+	} else if (var_len == sizeof("CONTENT_LENGTH")-1 &&
+	           memcmp(var, "CONTENT_LENGTH", sizeof("CONTENT_LENGTH")-1) == 0) {
+		var = "Content-Length";
+	} else {
+		return;
+	}
+	add_assoc_stringl_ex(return_value, var, var_len+1, val, val_len, 1);
+	if (str) {
+		free_alloca(var, use_heap);
+	}
+}
+/* }}} */
+
+static inline void fcgi_hash_apply(HashTable *h, fcgi_apply_func func, void *arg TSRMLS_DC) /* {{{ */
+{
+	Bucket *p	= h->pListHead;
+
+	while (p) {
+		if (EXPECTED(p->arKey != NULL)) {
+			func((char*)p->arKey, p->nKeyLength, *(char**)p->pData, strlen(*(char**)p->pData), arg TSRMLS_CC);
+		}
+		p = p->pListNext;
+	}
+} /* }}} */
+
+PHP_FUNCTION(getallheaders) /* {{{ */
+{
+    fcgi_request *request;
+
+    if (zend_parse_parameters_none() == FAILURE) {
+        return;
+    }
+
+    array_init(return_value);
+
+    if ((request = (fcgi_request*) SG(server_context))) {
+        fcgi_hash_apply(
+            request->env, add_request_header, return_value TSRMLS_CC);
+    }
+} /* }}} */
+
+ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry cgi_fcgi_sapi_functions[] = {
-	PHP_FE(fastcgi_finish_request,              NULL)
+	PHP_FE(fastcgi_finish_request,              cgi_fcgi_sapi_no_arginfo)
+	PHP_FE(getallheaders,                       cgi_fcgi_sapi_no_arginfo)
+	PHP_FALIAS(apache_request_headers, getallheaders, cgi_fcgi_sapi_no_arginfo)
 	{NULL, NULL, NULL}
 };
 
