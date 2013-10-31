@@ -22,7 +22,7 @@
 #include "zlog.h"
 
 static char **limit_extensions = NULL;
-static unsigned char limit_guid = 0;
+static char limit_guid = 0;
 
 static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage TSRMLS_DC) /* {{{ */
 {
