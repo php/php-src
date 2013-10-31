@@ -22,6 +22,7 @@
 #include "zlog.h"
 
 static char **limit_extensions = NULL;
+static unsigned char limit_guid = 0;
 
 static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage TSRMLS_DC) /* {{{ */
 {
@@ -225,6 +226,7 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	if (wp->limit_extensions) {
 		limit_extensions = wp->limit_extensions;
+		limit_guid = wp->limit_guid;
 	}
 	return 0;
 }
@@ -257,6 +259,30 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 	return 1; /* extension not found: not allowed  */
 }
 /* }}} */
+
+int fpm_php_limit_guid(char *path, gid_t gid, uid_t uid TSRMLS_DC) /* {{{ */
+{
+    struct stat sb;
+
+	if (limit_guid) {
+	    if (uid || gid) {
+	        if (VCWD_STAT(path, &sb) == SUCCESS) {
+	            if ((uid && (sb.st_uid != uid)) ||
+	                (gid && (sb.st_gid != gid))) {
+	                /* not allowed */
+	                return 1;
+	            }
+	            /* allowed */
+	            return 0;
+	        }
+	    }
+	}
+	
+	/* allowed */
+	return 0;
+}
+/* }}} */
+
 
 char* fpm_php_get_string_from_table(char *table, char *key TSRMLS_DC) /* {{{ */
 {
