@@ -675,8 +675,6 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		case IS_CONSTANT_AST: {
 			zend_ast *ast = Z_AST_P(p);
 
-			MARK_CONSTANT_VISITED(p);
-
 			zend_ast_evaluate(p, ast TSRMLS_CC);
 			ZEND_AST_DEL_REF(ast);
 		}
