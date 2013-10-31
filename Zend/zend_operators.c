@@ -2323,6 +2323,28 @@ ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC) /* {{{ */
 }
 /* }}} */
 
+#define PREVENT_DTOR_IF_REFCOUNT_1_AND_ASSIGN_TO_RESULT(var) \
+	*result = *var; \
+	if (Z_REFCOUNT_P(var) == 1) { \
+		Z_TYPE_P(var) = IS_NULL; \
+	}
+
+ZEND_API int ternary_function(zval *result, zval *condition, zval *then, zval *if_not TSRMLS_DC) /* {{{ */
+{
+	if (i_zend_is_true(condition)) {
+		if (then) {
+			PREVENT_DTOR_IF_REFCOUNT_1_AND_ASSIGN_TO_RESULT(then);
+		} else {
+			PREVENT_DTOR_IF_REFCOUNT_1_AND_ASSIGN_TO_RESULT(condition);
+		}
+	} else {
+		PREVENT_DTOR_IF_REFCOUNT_1_AND_ASSIGN_TO_RESULT(if_not);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

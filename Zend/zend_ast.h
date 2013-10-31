@@ -26,9 +26,9 @@ typedef struct _zend_ast zend_ast;
 #include "zend.h"
 
 typedef void(*intermediary_ast_function_type)(zval *, ...);
-typedef int(*unary_ast_func)(zval *result, zval *op0);
-typedef int(*binary_ast_func)(zval *result, zval *op0, zval *op1);
-typedef int(*ternary_ast_func)(zval *result, zval *op0, zval *op1, zval *op2);
+typedef int(*unary_ast_func)(zval *result, zval *op0 TSRMLS_DC);
+typedef int(*binary_ast_func)(zval *result, zval *op0, zval *op1 TSRMLS_DC);
+typedef int(*ternary_ast_func)(zval *result, zval *op0, zval *op1, zval *op2 TSRMLS_DC);
 
 struct _zend_ast {
 	char op_count;
@@ -37,9 +37,9 @@ struct _zend_ast {
 	int refcount;
 };
 
-void zend_ast_add_unary(zval *result, unary_ast_func func, zval *op0);
-void zend_ast_add_binary(zval *result, binary_ast_func func, zval *op0, zval *op1);
-void zend_ast_add_ternary(zval *result, ternary_ast_func func, zval *op0, zval *op1, zval *op2);
+void zend_ast_add_unary(zval *result, unary_ast_func func, zval *op0 TSRMLS_DC);
+void zend_ast_add_binary(zval *result, binary_ast_func func, zval *op0, zval *op1 TSRMLS_DC);
+void zend_ast_add_ternary(zval *result, ternary_ast_func func, zval *op0, zval *op1, zval *op2 TSRMLS_DC);
 
 void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC);
 

@@ -22,7 +22,8 @@
 #include "zend_execute.h"
 
 #define OP_IS_CONST_THEN(op, do_code) \
-	switch (Z_TYPE_P(op) & IS_CONSTANT_TYPE_MASK) { \
+	switch (op?Z_TYPE_P(op) & IS_CONSTANT_TYPE_MASK:-1) { \
+		case -1: \
 		case IS_CONSTANT: \
 		case IS_CONSTANT_ARRAY: \
 		case IS_CONSTANT_AST: { \
@@ -31,20 +32,26 @@
 	}
 
 #define OP_IS_NOT_CONST_THEN(op, do_code) \
-	switch (Z_TYPE_P(op) & IS_CONSTANT_TYPE_MASK) { \
-		case IS_CONSTANT: \
-		case IS_CONSTANT_ARRAY: \
-		case IS_CONSTANT_AST: \
-			break; \
+	if (op) { \
+		switch (Z_TYPE_P(op) & IS_CONSTANT_TYPE_MASK) { \
+			case IS_CONSTANT: \
+			case IS_CONSTANT_ARRAY: \
+			case IS_CONSTANT_AST: \
+				break; \
 \
-		default: { \
-			do_code \
+			default: { \
+				do_code \
+			} \
 		} \
 	}
 
 #define COPY_ZVAL_TO_OP(nr) \
-	Z_AST_P(result)->ops[nr] = emalloc(sizeof(zval)); \
-	*Z_AST_P(result)->ops[nr] = *op##nr;
+	if (op##nr) { \
+		Z_AST_P(result)->ops[nr] = emalloc(sizeof(zval)); \
+		*Z_AST_P(result)->ops[nr] = *op##nr; \
+	} else { \
+		Z_AST_P(result)->ops[nr] = NULL; \
+	}
 
 void zend_ast_add(zval *result, intermediary_ast_function_type func, char op_count) {
 	zend_ast *ast = emalloc(sizeof(zend_ast));
@@ -58,9 +65,10 @@ void zend_ast_add(zval *result, intermediary_ast_function_type func, char op_cou
 
 /* Do operations on constant operators at compile time (AST building time) */
 
-void zend_ast_add_unary(zval *result, unary_ast_func func, zval *op0) {
+void zend_ast_add_unary(zval *result, unary_ast_func func, zval *op0 TSRMLS_DC) {
 	OP_IS_NOT_CONST_THEN(op0,
-		func(result, op0);
+		func(result, op0 TSRMLS_CC);
+		zval_dtor(op0);
 		return;
 	)
 
@@ -68,9 +76,11 @@ void zend_ast_add_unary(zval *result, unary_ast_func func, zval *op0) {
 	COPY_ZVAL_TO_OP(0)
 }
 
-void zend_ast_add_binary(zval *result, binary_ast_func func, zval *op0, zval *op1) {
+void zend_ast_add_binary(zval *result, binary_ast_func func, zval *op0, zval *op1 TSRMLS_DC) {
 	OP_IS_NOT_CONST_THEN(op0, OP_IS_NOT_CONST_THEN(op1,
-		func(result, op0, op1);
+		func(result, op0, op1 TSRMLS_CC);
+		zval_dtor(op0);
+		zval_dtor(op1);
 		return;
 	))
 	
@@ -79,9 +89,12 @@ void zend_ast_add_binary(zval *result, binary_ast_func func, zval *op0, zval *op
 	COPY_ZVAL_TO_OP(1)
 }
 
-void zend_ast_add_ternary(zval *result, ternary_ast_func func, zval *op0, zval *op1, zval *op2) {
+void zend_ast_add_ternary(zval *result, ternary_ast_func func, zval *op0, zval *op1, zval *op2 TSRMLS_DC) {
 	OP_IS_NOT_CONST_THEN(op0, OP_IS_NOT_CONST_THEN(op1, OP_IS_NOT_CONST_THEN(op2, 
-		func(result, op0, op1, op2);
+		func(result, op0, op1, op2 TSRMLS_CC);
+		zval_dtor(op0);
+		zval_dtor(op1);
+		zval_dtor(op2);
 		return;
 	)))
 	
@@ -95,20 +108,22 @@ void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC) {
 	int i;
 
 	for (i = ast->op_count; i--;) {
-		OP_IS_CONST_THEN(ast->ops[i],
-			zval_update_constant_ex(&ast->ops[i], (void *)1, NULL TSRMLS_CC);
-		)
+		if (ast->ops[i]) {
+			OP_IS_CONST_THEN(ast->ops[i],
+				zval_update_constant_ex(&ast->ops[i], (void *)1, NULL TSRMLS_CC);
+			)
+		}
 	}
 
 	switch (ast->op_count) {
 		case 1:
-			((unary_ast_func)ast->func)(result, ast->ops[0]);
+			((unary_ast_func)ast->func)(result, ast->ops[0] TSRMLS_CC);
 			break;
 		case 2:
-			((binary_ast_func)ast->func)(result, ast->ops[0], ast->ops[1]);
+			((binary_ast_func)ast->func)(result, ast->ops[0], ast->ops[1] TSRMLS_CC);
 			break;
 		case 3:
-			((ternary_ast_func)ast->func)(result, ast->ops[0], ast->ops[1], ast->ops[2]);
+			((ternary_ast_func)ast->func)(result, ast->ops[0], ast->ops[1], ast->ops[2] TSRMLS_CC);
 			break;
 	}
 }
@@ -117,7 +132,7 @@ void zend_ast_destroy(zend_ast *ast TSRMLS_DC) {
 	int i;
 
 	for (i = ast->op_count; i--;) {
-		if (!Z_DELREF_P(ast->ops[i])) {
+		if (ast->ops[i] && !Z_DELREF_P(ast->ops[i])) {
 			zval_dtor(ast->ops[i]);
 			efree(ast->ops[i]);
 		}

@@ -982,6 +982,8 @@ static_operation:
 	| 	static_scalar_value T_SL static_scalar_value { zend_ast_add_binary(&$$.u.constant, shift_left_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
 	| 	static_scalar_value T_SR static_scalar_value { zend_ast_add_binary(&$$.u.constant, shift_right_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
 	| 	static_scalar_value '.' static_scalar_value { zend_ast_add_binary(&$$.u.constant, concat_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
+	|	static_scalar_value '?' ':' static_scalar_value { zend_ast_add_ternary(&$$.u.constant, ternary_function, &$1.u.constant, NULL, &$4.u.constant TSRMLS_CC); }
+	|	static_scalar_value '?' static_scalar_value ':' static_scalar_value { zend_ast_add_ternary(&$$.u.constant, ternary_function, &$1.u.constant, &$3.u.constant, &$5.u.constant TSRMLS_CC); }
 	|	'+' static_scalar_value { ZVAL_LONG(&$1.u.constant, 0); zend_ast_add_binary(&$$.u.constant, add_function, &$1.u.constant, &$2.u.constant TSRMLS_CC); }
 	|	'-' static_scalar_value { ZVAL_LONG(&$1.u.constant, 0); zend_ast_add_binary(&$$.u.constant, sub_function, &$1.u.constant, &$2.u.constant TSRMLS_CC); }
 	| 	'(' static_scalar_value ')' { $$ = $2; }

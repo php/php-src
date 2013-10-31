@@ -599,7 +599,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					continue;
 				}
 				if (str_index[str_index_len - 2] == IS_CONSTANT_AST) {
-					zend_ast_evaluate(&const_value, *(zend_ast **)str_index);
+					zend_ast_evaluate(&const_value, *(zend_ast **)str_index TSRMLS_CC);
 					ZEND_AST_DEL_REF(*(zend_ast **)str_index);
 				} else if (!zend_get_constant_ex(str_index, str_index_len - 3, &const_value, scope, str_index[str_index_len - 2] TSRMLS_CC)) {
 					char *actual;
