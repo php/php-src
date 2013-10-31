@@ -482,6 +482,12 @@ pm.max_spare_servers = 3
 ; Note: set an empty value to allow all extensions.
 ; Default Value: .php
 ;security.limit_extensions = .php .php3 .php4 .php5
+
+; Forces FPM to verify *exact* file permissions before serving any script
+; The gid and uid of the requested script must match *exactly*
+; those of the current pool
+; Default Value: no
+security.limit_guid = no
  
 ; Pass environment variables like LD_LIBRARY_PATH. All $VARIABLEs are taken from
 ; the current environment.
