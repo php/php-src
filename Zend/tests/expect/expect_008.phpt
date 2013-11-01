@@ -6,10 +6,15 @@ zend.expectations=0
 <?php
 class OdEar extends ExpectationException {}
 
+function blah(){ return 1; }
+
 $variable = 1;
 expect true : "constant message";
 expect ($variable && $variable) || 
             php_sapi_name() : new OdEar("constant message");
+expect false;
+expect blah() : blah();
+
 var_dump(true);
 ?>
 --EXPECTF--	
