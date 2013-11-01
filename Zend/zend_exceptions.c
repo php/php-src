@@ -181,6 +181,12 @@ static zend_object_value zend_error_exception_new(zend_class_entry *class_type T
 }
 /* }}} */
 
+static zend_object_value zend_expectation_exception_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
+{
+	return zend_default_exception_new_ex(class_type, 1 TSRMLS_CC);
+}
+/* }}} */
+
 /* {{{ proto Exception Exception::__clone()
    Clone the exception object */
 ZEND_METHOD(exception, __clone)
@@ -721,6 +727,7 @@ void zend_register_default_exception(TSRMLS_D) /* {{{ */
 	
 	INIT_CLASS_ENTRY(ce, "ExpectationException", NULL);
 	expectation_exception_ce = zend_register_internal_class_ex(&ce, error_exception_ce, NULL TSRMLS_CC);
+	expectation_exception_ce->create_object = zend_expectation_exception_new;
 }
 /* }}} */
 
