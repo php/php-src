@@ -107,12 +107,12 @@ static inline void zend_copy_statement(zval *target, const char *start_statement
     const char *statement = start_statement;
     size_t statement_length = end_statement - start_statement;
 
-    while (isspace(*statement)) {
+    while (statement && isspace(*statement)) {
         statement_length--;
         statement++;
     }
 
-    while (isspace(*end_statement)) {
+    while (end_statement && isspace(*end_statement)) {
         statement_length--;
         end_statement--;
     }
