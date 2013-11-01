@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 201?, PHP 5.6.0
+?? ??? 20??, PHP 5.6.0 
 
 - Core:
   . Improved IS_VAR operands fetching. (Laruence, Dmitry)
@@ -63,6 +63,8 @@ PHP                                                                        NEWS
 - Standard:
   . Implemented FR #65634 (HTTP wrapper is very slow with protocol_version
     1.1). (Adam)
+  . Implemented Change crypt() behavior w/o salt RFC. (Yasuo)
+    https://wiki.php.net/rfc/crypt_function_salt
 
 - XMLReader:
   . Fixed bug #55285 (XMLReader::getAttribute/No/Ns methods inconsistency). 
