@@ -14,8 +14,8 @@ class Two extends One {}
 new Two();
 ?>
 --EXPECTF--	
-Fatal error: Uncaught exception 'ExpectationException' with message 'expect false' in %s/expect_010.php:%d
+Fatal error: Uncaught exception 'ExpectationException' with message 'expect false' in %sexpect_010.php:%d
 Stack trace:
-#0 %s/expect_010.php(%d): One->__construct()
+#0 %sexpect_010.php(%d): One->__construct()
 #1 {main}
-  thrown in %s/expect_010.php on line %d
+  thrown in %sexpect_010.php on line %d
