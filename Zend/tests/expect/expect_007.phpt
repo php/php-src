@@ -20,5 +20,3 @@ Fatal error: Uncaught exception 'HeaderMalfunctionException' with message 'malfo
 Stack trace:
 #0 {main}
   thrown in %s/expect_007.php on line 11
-
-
