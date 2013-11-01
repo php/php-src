@@ -1065,7 +1065,7 @@ void zend_do_assign(znode *result, znode *variable, znode *value TSRMLS_DC) /* {
 void zend_do_expect_begin(znode *token TSRMLS_DC) /* {{{ */
 {
     token->u.op.opline_num = get_next_op_number(
-        CG(active_op_array) TSRMLS_CC);
+        CG(active_op_array));
     {
         zend_op *opline = get_next_op(
             CG(active_op_array) TSRMLS_CC);
