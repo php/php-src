@@ -11,6 +11,5 @@ for($i=0; $i<100000; $i++) {
 }
 var_dump(true);
 ?>
---EXPECTF--	
+--EXPECT--	
 bool(true)
-

@@ -10,6 +10,5 @@ try {
     var_dump($ex->getMessage());
 }
 ?>
---EXPECTF--	
+--EXPECT--	
 string(25) "I require this to succeed"
-

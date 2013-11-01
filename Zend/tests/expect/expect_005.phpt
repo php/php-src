@@ -12,6 +12,5 @@ try {
 }
 var_dump(true);
 ?>
---EXPECTF--	
+--EXPECT--	
 bool(true)
-
