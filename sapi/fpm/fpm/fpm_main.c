@@ -1909,8 +1909,8 @@ consult the installation file that came with this distribution, or visit \n\
 				goto fastcgi_request_done;
 			}
 
-			/* limit based on pool guid settings */
-			if (fpm_php_limit_guid(SG(request_info).path_translated, gid, uid TSRMLS_CC)) {
+			/* apply security settings */
+			if (fpm_php_security_apply(SG(request_info).path_translated, gid, uid TSRMLS_CC)) {
 				SG(sapi_headers).http_response_code = 403;
 				PUTS("Access denied.\n");
 				goto fastcgi_request_done;
