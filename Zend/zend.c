@@ -921,6 +921,7 @@ ZEND_API char *get_zend_version(void) /* {{{ */
 
 void zend_activate(TSRMLS_D) /* {{{ */
 {
+	virtual_cwd_activate(TSRMLS_C);
 	gc_reset(TSRMLS_C);
 	init_compiler(TSRMLS_C);
 	init_executor(TSRMLS_C);
