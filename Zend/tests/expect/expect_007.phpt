@@ -1,10 +1,7 @@
 --TEST--
 test compiled reason
---SKIPIF--
-<?php
-if (!ini_get("zend.expectations"))
-    die("skip: expectations disabled");
-?>
+--INI--
+zend.expectations=1
 --FILE--
 <?php
 $next = 1;

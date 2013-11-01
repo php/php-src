@@ -1,10 +1,7 @@
 --TEST--
 test looping expect (pass)
---SKIPIF--
-<?php
-if (!ini_get("zend.expectations"))
-    die("skip: expectations disabled");
-?>
+--INI--
+zend.expectations=1
 --FILE--
 <?php
 for($i=0; $i<100000; $i++) {

@@ -1,10 +1,7 @@
 --TEST--
 test passing expectation
---SKIPIF--
-<?php
-if (!ini_get("zend.expectations"))
-    die("skip: expectations disabled");
-?>
+--INI--
+zend.expectations=1
 --FILE--
 <?php
 expect true;
