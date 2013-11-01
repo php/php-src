@@ -2147,7 +2147,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 			if (!ptr->opline || ptr->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
 				/* can happen when calling eval from a custom sapi */
-				if (ptr->opline->opcode == ZEND_EXPCT) {
+				if (ptr->opline->opcode == ZEND_EXPECT) {
 				    function_name = "expect";
 				} else {
 				    /* can happen when calling eval from a custom sapi */
@@ -2343,7 +2343,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			zend_bool build_filename_arg = 1;
 
 			if (!ptr->opline || ptr->opline->opcode != ZEND_INCLUDE_OR_EVAL) {
-				if (ptr->opline->opcode == ZEND_EXPCT) {
+				if (ptr->opline->opcode == ZEND_EXPECT) {
 				    function_name = "expect";
 				} else {
 				    /* can happen when calling eval from a custom sapi */

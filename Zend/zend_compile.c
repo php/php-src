@@ -1080,7 +1080,7 @@ void zend_do_expect_end(const znode *token, const znode *expression, const znode
 
     if (CG(expectations)) {
         opline = get_next_op(CG(active_op_array) TSRMLS_CC);
-        opline->opcode = ZEND_EXPCT;
+        opline->opcode = ZEND_EXPECT;
         SET_NODE(opline->op1, expression);
         if (reason->op_type == IS_UNUSED) {
             zval message;

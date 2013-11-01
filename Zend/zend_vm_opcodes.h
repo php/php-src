@@ -165,4 +165,4 @@
 #define ZEND_FAST_CALL                       162
 #define ZEND_FAST_RET                        163
 #define ZEND_RECV_VARIADIC                   164
-#define ZEND_EXPCT                           165
+#define ZEND_EXPECT                          165
