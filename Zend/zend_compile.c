@@ -107,44 +107,16 @@ static inline void zend_copy_statement(zval *target, const char *start_statement
     const char *statement = start_statement;
     size_t statement_length = end_statement - start_statement;
 
-    while (statement) {
-        switch (*statement) {
-            case ' ':
-            case '\n':
-            case '\r':
-            case '\t':
-            case '\v':
-            case '\0':
-                statement_length--;
-                statement++;
-            break;
-
-            default: {
-                goto statement_rtrim;
-            } 
-        }
+    while (isspace(*statement)) {
+        statement_length--;
+        statement++;
     }
 
-statement_rtrim:
-    while (end_statement) {
-        switch (*end_statement) {
-            case ' ':
-            case '\n':
-            case '\r':
-            case '\t':
-            case '\v':
-            case '\0':
-                statement_length--;
-                end_statement--;
-            break;
-
-            default: {
-                 goto statement_trimmed;
-            }
-        }
+    while (isspace(*end_statement)) {
+        statement_length--;
+        end_statement--;
     }
 
-statement_trimmed:
     ZVAL_STRINGL(target, statement, statement_length+1, 1);
 }
 /* }}} */
@@ -1104,8 +1076,8 @@ void zend_do_expect_end(const znode *token, const znode *expression, const znode
         SET_UNUSED(opline->op2);
     }
 }
-/* }}} */
 
+/* }}} */
 void zend_do_assign_ref(znode *result, const znode *lvar, const znode *rvar TSRMLS_DC) /* {{{ */
 {
 	zend_op *opline;
