@@ -5529,9 +5529,7 @@ static zend_constant* zend_get_ct_const(const zval *const_name, int all_internal
 	if (all_internal_constants_substitution &&
 	    (c->flags & CONST_PERSISTENT) &&
 	    !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION) &&
-	    Z_TYPE(c->value) != IS_CONSTANT &&
-	    Z_TYPE(c->value) != IS_CONSTANT_ARRAY &&
-	    Z_TYPE(c->value) != IS_CONSTANT_AST) {
+	    !IS_CONSTANT_TYPE(Z_TYPE(c->value))) {
 		return c;
 	}
 	return NULL;

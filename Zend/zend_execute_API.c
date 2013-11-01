@@ -520,8 +520,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 					}
 					if (actual[0] == '\\') {
 						if (inline_change) {
-							memmove(Z_STRVAL_P(p), Z_STRVAL_P(p)+1, Z_STRLEN_P(p));
-								--Z_STRLEN_P(p);
+							memmove(Z_STRVAL_P(p), Z_STRVAL_P(p)+1, Z_STRLEN_P(p)--);
 						} else {
 							++actual;
 						}
@@ -626,7 +625,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 						if ((str_index[str_index_len - 2] & IS_CONSTANT_UNQUALIFIED) == 0) {
 							zend_error(E_ERROR, "Undefined constant '%s'", save);
 						}
-						zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'",	str_index, str_index);
+						zend_error(E_NOTICE, "Use of undefined constant %s - assumed '%s'", str_index, str_index);
 					}
 					ZVAL_STRINGL(&const_value, str_index, str_index_len-3, 1);
 				}
@@ -640,7 +639,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 
 					/* preserve this bit for inheritance */
 					Z_TYPE_PP(element) |= IS_CONSTANT_INDEX;
-						zval_ptr_dtor(element);
+					zval_ptr_dtor(element);
 					*element = new_val;
 				}
 
