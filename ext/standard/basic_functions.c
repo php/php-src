@@ -5319,24 +5319,28 @@ PHP_FUNCTION(highlight_string)
 }
 /* }}} */
 
-/* {{{ proto string ini_get(string varname)
+/* {{{ proto mixed ini_get(string varname)
    Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
-	char *varname, *str;
+	char *varname;
 	int varname_len;
-
+	zval *cfg;
+	
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &varname, &varname_len) == FAILURE) {
 		return;
 	}
 
-	str = zend_ini_string(varname, varname_len + 1, 0);
+	cfg = cfg_get_entry(varname, varname_len + 1);
+		
+	if (cfg) {
+		ZVAL_ZVAL(
+			return_value, cfg, 1, 0);
 
-	if (!str) {
-		RETURN_FALSE;
+		return;
 	}
-
-	RETURN_STRING(str, 1);
+	
+	RETURN_FALSE;
 }
 /* }}} */
 
