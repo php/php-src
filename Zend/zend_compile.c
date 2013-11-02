@@ -1069,20 +1069,11 @@ void zend_do_expect_end(const znode *token, const znode *expression, const znode
     
         zend_do_free((znode*)expression TSRMLS_CC);
         zend_do_free((znode*)reason TSRMLS_CC);
-        
-        {
-            zend_uint opcode = token->u.op.opline_num,
-                      end = get_next_op_number(CG(active_op_array));
-            
-            CG(active_op_array)->last = opcode;
-            
-            while (opcode++ < end) {
-                zend_op *opline = &CG(active_op_array)->opcodes[opcode];
-                if (opline) {
-                    MAKE_NOP(opline);
-                }
-            }
-        }
+
+        opline = &CG(active_op_array)->opcodes[token->u.op.opline_num];
+        opline->opcode = ZEND_JMP;
+        opline->op1.opline_num = get_next_op_number(CG(active_op_array));
+        SET_UNUSED(opline->op2);
     }
 }
 
