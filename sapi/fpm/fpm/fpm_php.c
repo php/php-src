@@ -22,6 +22,7 @@
 #include "zlog.h"
 
 static char **limit_extensions = NULL;
+static int    security_level = 0;
 
 static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_value, int new_value_length, int mode, int stage TSRMLS_DC) /* {{{ */
 {
@@ -225,6 +226,7 @@ int fpm_php_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 
 	if (wp->limit_extensions) {
 		limit_extensions = wp->limit_extensions;
+		security_level = wp->security_level;
 	}
 	return 0;
 }
@@ -257,6 +259,70 @@ int fpm_php_limit_extensions(char *path) /* {{{ */
 	return 1; /* extension not found: not allowed  */
 }
 /* }}} */
+
+int fpm_php_security_apply(char *path, gid_t gid, uid_t uid TSRMLS_DC) /* {{{ */
+{
+    /* TODO(krakjoe) statcache */
+	struct stat sb;
+
+	if (security_level) {
+	
+	    if (!uid) {
+			zlog(ZLOG_WARNING, "Access to '%s' has been denied: cannot allow execution of code as root user", path);
+			return 1;
+		}
+
+		if (security_level > 1 && !gid) {
+			zlog(ZLOG_WARNING, "Access to '%s' has been denied: cannot allow execution of code as user in the root group", path);
+			return 1;
+		}
+		
+		if (security_level > 2 && strstr(path, "..") != NULL) {
+			zlog(ZLOG_WARNING, "Access to '%s' has been denied: cannot allow access to paths containing back references", path);
+			return 1;
+		}
+
+		if (VCWD_STAT(path, &sb) == SUCCESS) {
+			
+			if (security_level > 3 && !S_ISREG(sb.st_mode)) {
+				zlog(ZLOG_WARNING, "Access to '%s' has been denied: access denied to anything that is not a regular file", path);
+				return 1;
+			}
+		    
+			if (security_level > 4 && sb.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH)) {
+				zlog(ZLOG_WARNING, "Access to '%s' has been denied: not allowed to load executable files", path);
+				return 1;
+		    }
+		    
+			if (security_level > 5 && sb.st_mode & (S_IROTH|S_IWOTH)) {
+				zlog(ZLOG_WARNING, "Access to '%s' has been denied: the path cannot be readable or writable by any other group or user", path);
+				return 1;
+			}
+		    
+			if (security_level > 6 && sb.st_mode & (S_IWUSR|S_IWGRP)) {
+				zlog(ZLOG_WARNING, "Access to '%s' has been denied: that path cannot be writable by the current group or user", path);
+				return 1;
+			}
+		    
+			if (security_level > 7) {
+				if ((uid && (sb.st_uid != uid)) ||
+					(gid && (sb.st_gid != gid))) {
+					zlog(ZLOG_WARNING, "Access to '%s' has been denied: the current user and group must match that of the file requested", path);
+					return 1;
+				}
+		    }
+	
+		} else {
+	        zlog(ZLOG_WARNING, "Access to '%s' has been denied: cannot stat path", path);
+	        return 1;
+		}
+	}
+
+	/* allowed */
+	return 0;
+}
+/* }}} */
+
 
 char* fpm_php_get_string_from_table(char *table, char *key TSRMLS_DC) /* {{{ */
 {

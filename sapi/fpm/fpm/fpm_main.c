@@ -1859,6 +1859,10 @@ consult the installation file that came with this distribution, or visit \n\
 	/* library is already initialized, now init our request */
 	fcgi_init_request(&request, fcgi_fd);
 
+	/* fetch g/uid */
+	gid_t gid = getgid();
+	uid_t uid = getuid();
+
 	zend_first_try {
 		while (fcgi_accept_request(&request) >= 0) {
 			request_body_fd = -1;
@@ -1900,6 +1904,13 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 
 			if (fpm_php_limit_extensions(SG(request_info).path_translated)) {
+				SG(sapi_headers).http_response_code = 403;
+				PUTS("Access denied.\n");
+				goto fastcgi_request_done;
+			}
+
+			/* apply security settings */
+			if (fpm_php_security_apply(SG(request_info).path_translated, gid, uid TSRMLS_CC)) {
 				SG(sapi_headers).http_response_code = 403;
 				PUTS("Access denied.\n");
 				goto fastcgi_request_done;

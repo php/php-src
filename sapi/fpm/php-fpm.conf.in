@@ -482,6 +482,25 @@ pm.max_spare_servers = 3
 ; Note: set an empty value to allow all extensions.
 ; Default Value: .php
 ;security.limit_extensions = .php .php3 .php4 .php5
+
+; Set the security level for FPM
+; Security level is on the scale of 0-8, where 0 means no security checks are performed
+; Setting the number to, for example 5, means level 5 and below security requirements are 
+; enforced for each request
+;
+; Default Value: 0
+; Values:
+;   1: do not allow any script to execute as root user
+;   2: do not allow any script to execute as root group
+;   3: do not allow access to paths with backreferences ".."
+;   4: do not allow access to anything not a regular file
+;   5: do not allow access to executable files
+;   6: do not allow access to paths that are readable or writable by any other group
+;   7: do not allow access to paths that are writable by the current user or group
+;   8: do not allow access to paths where the group and user do not match the current group and user *exactly*
+;
+; At level 8, only files owned by the current user and group, with permissions 400 may be executed.
+security.level = 8
  
 ; Pass environment variables like LD_LIBRARY_PATH. All $VARIABLEs are taken from
 ; the current environment.

@@ -149,6 +149,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "chdir",                     &fpm_conf_set_string,      WPO(chdir) },
 	{ "catch_workers_output",      &fpm_conf_set_boolean,     WPO(catch_workers_output) },
 	{ "security.limit_extensions", &fpm_conf_set_string,      WPO(security_limit_extensions) },
+	{ "security.level",            &fpm_conf_set_integer,     WPO(security_level) },
 	{ 0, 0, 0 }
 };
 
@@ -917,6 +918,10 @@ static int fpm_conf_process_all_pools() /* {{{ */
 		if (wp->config->slowlog && *wp->config->slowlog) {
 			fpm_evaluate_full_path(&wp->config->slowlog, wp, NULL, 0);
 		}
+		
+		if (wp->config->security_level) {
+		    wp->security_level = wp->config->security_level;
+		}
 
 		/* request_slowlog_timeout */
 		if (wp->config->request_slowlog_timeout) {
@@ -1601,6 +1606,7 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\tchdir = %s",                      STR2STR(wp->config->chdir));
 		zlog(ZLOG_NOTICE, "\tcatch_workers_output = %s",       BOOL2STR(wp->config->catch_workers_output));
 		zlog(ZLOG_NOTICE, "\tsecurity.limit_extensions = %s",  wp->config->security_limit_extensions);
+		zlog(ZLOG_NOTICE, "\tsecurity.level = %d",             wp->config->security_level);
 
 		for (kv = wp->config->env; kv; kv = kv->next) {
 			zlog(ZLOG_NOTICE, "\tenv[%s] = %s", kv->key, kv->value);
