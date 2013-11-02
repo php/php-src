@@ -79,6 +79,11 @@
 # include <dlfcn.h>
 #endif
 
+#ifdef HAVE_IFADDRS_H
+# include <ifaddrs.h>
+# include <netdb.h>
+#endif
+
 #if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
 
 # ifndef RTLD_LAZY

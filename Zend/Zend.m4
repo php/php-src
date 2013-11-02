@@ -106,6 +106,25 @@ ZEND_FP_EXCEPT
 
 ZEND_CHECK_FLOAT_PRECISION
 
+AC_MSG_CHECKING([for usable ifaddrs.h])
+  AC_TRY_LINK([
+    #include <ifaddrs.h>
+    #include <netdb.h>
+  ],[
+    struct ifaddrs *interfaces;
+    if (getifaddrs(&interfaces) != -1) {
+        freeifaddrs(interfaces);
+    }
+    
+    printf("%d", NI_MAXHOST);
+  ], [ac_have_ifaddrs=yes], [ac_have_ifaddrs=no])
+  if test "$ac_have_ifaddrs" = "yes" ; then
+    AC_DEFINE(HAVE_IFADDRS_H, 1, [whether ifaddrs is present and usable])
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
+
 dnl test whether double cast to long preserves least significant bits
 AC_MSG_CHECKING(whether double cast to long preserves least significant bits)
 

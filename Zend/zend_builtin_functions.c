@@ -82,6 +82,9 @@ static ZEND_FUNCTION(get_loaded_extensions);
 static ZEND_FUNCTION(extension_loaded);
 static ZEND_FUNCTION(get_extension_funcs);
 static ZEND_FUNCTION(get_defined_constants);
+#ifdef HAVE_IFADDRS_H
+static ZEND_FUNCTION(get_network_interfaces);
+#endif
 static ZEND_FUNCTION(debug_backtrace);
 static ZEND_FUNCTION(debug_print_backtrace);
 #if ZEND_DEBUG
@@ -226,6 +229,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_get_defined_constants, 0, 0, 0)
 	ZEND_ARG_INFO(0, categorize)
 ZEND_END_ARG_INFO()
 
+#ifdef HAVE_IFADDRS_H
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_network_interfaces, 0, 0, 0)
+	ZEND_ARG_INFO(0, specific)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_debug_backtrace, 0, 0, 0)
 	ZEND_ARG_INFO(0, options)
 	ZEND_ARG_INFO(0, limit)
@@ -295,6 +304,9 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(extension_loaded,			arginfo_extension_loaded)
 	ZEND_FE(get_extension_funcs,		arginfo_extension_loaded)
 	ZEND_FE(get_defined_constants,		arginfo_get_defined_constants)
+#ifdef HAVE_IFADDRS_H
+	ZEND_FE(get_network_interfaces,		arginfo_get_network_interfaces)
+#endif
 	ZEND_FE(debug_backtrace, 			arginfo_debug_backtrace)
 	ZEND_FE(debug_print_backtrace, 		arginfo_debug_print_backtrace)
 #if ZEND_DEBUG
@@ -2015,6 +2027,80 @@ next_constant:
 }
 /* }}} */
 
+#ifdef HAVE_IFADDRS_H
+/* {{{ proto array get_network_interfaces([string specific])
+   Return an array containing the names and addresses of specific or all interfaces */
+ZEND_FUNCTION(get_network_interfaces)
+{
+    char *specific = NULL;
+    int specific_len;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|s", &specific, &specific_len) == FAILURE) {
+        return;
+    }
+
+    {
+        struct ifaddrs  *interfaces, 
+                        *interface;
+
+        if (getifaddrs(&interfaces) != -1) {
+            char host[NI_MAXHOST];
+            
+            array_init(return_value);
+            
+            for (interface = interfaces; interface != NULL; interface = interface->ifa_next) {
+                if (interface->ifa_addr != NULL) {
+                    zval *next = NULL;
+                    zend_ulong ifa_name_len = strlen(interface->ifa_name);
+                    
+                    if (!specific ||
+                        memcmp(interface->ifa_name, specific, specific_len > ifa_name_len ? ifa_name_len : specific_len) == SUCCESS) {
+                        switch (interface->ifa_addr->sa_family) {
+                            case AF_INET:
+                            case AF_INET6: {
+                                MAKE_STD_ZVAL(next);
+
+                                array_init(next);
+
+                                add_assoc_string_ex(
+                                    next, "name", sizeof("name"), interface->ifa_name, 1);
+                                add_assoc_long_ex(
+                                    next, "flags", sizeof("flags"), interface->ifa_flags);
+                                add_assoc_long_ex(
+                                    next, "family", sizeof("family"), interface->ifa_addr->sa_family);
+
+                                if (getnameinfo(interface->ifa_addr,
+                                        (interface->ifa_addr->sa_family == AF_INET) ? 
+                                            sizeof(struct sockaddr_in) : 
+                                            sizeof(struct sockaddr_in6),
+                                        host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST) == SUCCESS) {
+                                    add_assoc_string_ex(next, "address", sizeof("address"), host, 1);
+                                }
+
+                                if (getnameinfo(interface->ifa_netmask,
+                                        (interface->ifa_netmask->sa_family == AF_INET) ? 
+                                            sizeof(struct sockaddr_in) : 
+                                            sizeof(struct sockaddr_in6),
+                                        host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST) == SUCCESS) {
+                                    add_assoc_string_ex(next, "netmask", sizeof("netmask"), host, 1);
+                                }
+                            } break;
+                        }
+                    }
+
+                    if (next) {
+                        add_next_index_zval(return_value, next);
+                    }
+                }
+            }
+
+            freeifaddrs(interfaces);
+        } else {
+            RETURN_FALSE;
+        }
+    }
+} /* }}} */
+#endif
 
 static zval *debug_backtrace_get_args(void **curpos TSRMLS_DC)
 {
