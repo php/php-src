@@ -5464,4 +5464,36 @@ ZEND_VM_HANDLER(163, ZEND_FAST_RET, ANY, ANY)
 	}
 }
 
+ZEND_VM_HANDLER(165, ZEND_EXPECT, ANY, ANY)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+
+	SAVE_OPLINE();
+	{
+		zval *expression =  GET_OP1_ZVAL_PTR(BP_VAR_R);
+		zval *message  =  GET_OP2_ZVAL_PTR(BP_VAR_R);
+        
+		if (!zend_is_true(expression)) {
+		    zend_class_entry *ce = zend_get_expectation_exception(TSRMLS_C);
+		    
+		    if (Z_TYPE_P(message) == IS_OBJECT &&
+		        instanceof_function(Z_OBJCE_P(message), ce TSRMLS_CC)) {
+		        zend_throw_exception_object(message TSRMLS_CC);
+		    } else {
+		        convert_to_string_ex(&message);
+		        
+		        zend_throw_exception(
+		            ce, Z_STRVAL_P(message), E_ERROR TSRMLS_CC);
+		    }
+			HANDLE_EXCEPTION();
+	    }
+	}
+
+	FREE_OP1();
+	FREE_OP2();
+	CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_EXPORT_HELPER(zend_do_fcall, zend_do_fcall_common_helper)
