@@ -726,27 +726,33 @@ static void sapi_cgi_register_variables(zval *track_vars_array TSRMLS_DC)
 	}
 }
 
-static void sapi_cgi_log_message(char *message TSRMLS_DC)
+static void sapi_cgi_log_message_ex(char *message, int message_len TSRMLS_DC)
 {
 	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
 		fcgi_request *request;
 
 		request = (fcgi_request*) SG(server_context);
 		if (request) {
-			int len = strlen(message);
-			char *buf = malloc(len+2);
+			char *buf = malloc(message_len+2);
 
-			memcpy(buf, message, len);
-			memcpy(buf + len, "\n", sizeof("\n"));
-			fcgi_write(request, FCGI_STDERR, buf, len+1);
+			memcpy(buf, message, message_len);
+			memcpy(buf + message_len, "\n", sizeof("\n"));
+			fcgi_write(request, FCGI_STDERR, buf, message_len+1);
 			free(buf);
 		} else {
-			fprintf(stderr, "%s\n", message);
+			fwrite(message, message_len, 1, stderr);
+			fwrite("\n", sizeof("\n")-1, 1, stderr);
 		}
 		/* ignore return code */
 	} else {
-		fprintf(stderr, "%s\n", message);
+		fwrite(message, message_len, 1, stderr);
+		fwrite("\n", sizeof("\n")-1, 1, stderr);
 	}
+}
+
+static void sapi_cgi_log_message(char *message TSRMLS_DC)
+{
+	sapi_cgi_log_message_ex(message, strlen(message) TSRMLS_CC);
 }
 
 /* {{{ php_cgi_ini_activate_user_config
@@ -973,6 +979,7 @@ static sapi_module_struct cgi_sapi_module = {
 	NULL,							/* Get request time */
 	NULL,							/* Child terminate */
 
+    sapi_cgi_log_message_ex,        /* Binary safe log message */
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */

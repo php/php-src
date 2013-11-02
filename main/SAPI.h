@@ -244,7 +244,8 @@ struct _sapi_module_struct {
 	void (*log_message)(char *message TSRMLS_DC);
 	double (*get_request_time)(TSRMLS_D);
 	void (*terminate_process)(TSRMLS_D);
-
+    void (*log_message_ex) (char *message, int message_len TSRMLS_DC);
+    
 	char *php_ini_path_override;
 
 	void (*block_interruptions)(void);

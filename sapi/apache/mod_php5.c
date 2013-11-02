@@ -484,7 +484,7 @@ static sapi_module_struct apache_sapi_module = {
 	php_apache_log_message,			/* Log message */
 	php_apache_get_request_time,	/* Get request time */
 	sapi_apache_child_terminate,
-
+    NULL,                           /* log_message_ex */
 	NULL,							/* php.ini path override */
 
 #ifdef PHP_WIN32

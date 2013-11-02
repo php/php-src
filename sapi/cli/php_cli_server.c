@@ -686,21 +686,14 @@ static void sapi_cli_server_register_variables(zval *track_vars_array TSRMLS_DC)
 	zend_hash_apply_with_arguments(&client->request.headers TSRMLS_CC, (apply_func_args_t)sapi_cli_server_register_entry_cb, 1, track_vars_array);
 } /* }}} */
 
+static void sapi_cli_server_log_message_ex(char *msg, int msg_len TSRMLS_DC) /* {{{ */
+{
+	php_log_err_ex(msg, msg_len TSRMLS_CC);
+} /* }}} */
+
 static void sapi_cli_server_log_message(char *msg TSRMLS_DC) /* {{{ */
 {
-	char buf[52];
-
-	if (php_cli_server_get_system_time(buf) != 0) {
-		memmove(buf, "unknown time, can't be fetched", sizeof("unknown time, can't be fetched"));
-	} else {
-		size_t l = strlen(buf);
-		if (l > 0) {
-			buf[l - 1] = '\0';
-		} else {
-			memmove(buf, "unknown", sizeof("unknown"));
-		}
-	}
-	fprintf(stderr, "[%s] %s\n", buf, msg);
+	sapi_cli_server_log_message_ex(msg, strlen(msg)+1 TSRMLS_CC);
 } /* }}} */
 
 /* {{{ sapi_module_struct cli_server_sapi_module
@@ -733,7 +726,7 @@ sapi_module_struct cli_server_sapi_module = {
 	sapi_cli_server_log_message,	/* Log message */
 	NULL,							/* Get request time */
 	NULL,							/* Child terminate */
-
+    sapi_cli_server_log_message_ex, /* Binary Safe Log Message */
 	STANDARD_SAPI_MODULE_PROPERTIES
 }; /* }}} */
 
