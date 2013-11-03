@@ -722,6 +722,10 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 
 #define ZEND_OP_DATA				137
 
+/* Pseudo-opcodes for internal object overloading */
+#define ZEND_BOOL_AND				-1
+#define ZEND_BOOL_OR				-2
+
 /* END: OPCODES */
 
 /* class fetches */

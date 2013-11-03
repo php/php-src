@@ -1082,6 +1082,46 @@ ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) 
 }
 /* }}} */
 
+ZEND_API int boolean_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	zval op1_copy, op2_copy;
+	long op1_lval;
+
+	if (Z_TYPE_P(op1) != IS_BOOL || Z_TYPE_P(op2) != IS_BOOL) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_BOOL_AND);
+
+		zendi_convert_to_boolean(op1, op1_copy, result);
+		op1_lval = Z_LVAL_P(op1);
+		zendi_convert_to_boolean(op2, op2_copy, result);
+	} else {
+		op1_lval = Z_LVAL_P(op1);
+	}
+
+	ZVAL_BOOL(result, op1_lval & Z_LVAL_P(op2));
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int boolean_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC) /* {{{ */
+{
+	zval op1_copy, op2_copy;
+	long op1_lval;
+
+	if (Z_TYPE_P(op1) != IS_BOOL || Z_TYPE_P(op2) != IS_BOOL) {
+		ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_BOOL_OR);
+
+		zendi_convert_to_boolean(op1, op1_copy, result);
+		op1_lval = Z_LVAL_P(op1);
+		zendi_convert_to_boolean(op2, op2_copy, result);
+	} else {
+		op1_lval = Z_LVAL_P(op1);
+	}
+
+	ZVAL_BOOL(result, op1_lval | Z_LVAL_P(op2));
+	return SUCCESS;
+}
+/* }}} */
+
 ZEND_API int boolean_not_function(zval *result, zval *op1 TSRMLS_DC) /* {{{ */
 {
 	zval op1_copy;

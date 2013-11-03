@@ -14,12 +14,26 @@ This is a test string
 ENDOFSTRING;
 const T_9 = ~-1;
 const T_10 = (-1?:1) + (0?2:3);
+const T_11 = 1 && 0;
+const T_12 = 1 and 1;
+const T_13 = 0 || 0;
+const T_14 = 1 or 0;
+const T_15 = 1 xor 1;
+const T_16 = 1 xor 0;
+const T_17 = 1 < 0;
+const T_18 = 0 <= 0;
+const T_19 = 1 > 0;
+const T_20 = 1 >= 0;
+const T_21 = 1 === 1;
+const T_22 = 1 !== 1;
+const T_23 = 0 != "0";
+const T_24 = 1 == "1";
 
 // Test order of operations
-const T_11 = 1 + 2 * 3;
+const T_25 = 1 + 2 * 3;
 
 // Test for memory leaks
-const T_12 = "1" + 2 + "3";
+const T_26 = "1" + 2 + "3";
 
 var_dump(T_1);
 var_dump(T_2);
@@ -33,6 +47,20 @@ var_dump(T_9);
 var_dump(T_10);
 var_dump(T_11);
 var_dump(T_12);
+var_dump(T_13);
+var_dump(T_14);
+var_dump(T_15);
+var_dump(T_16);
+var_dump(T_17);
+var_dump(T_18);
+var_dump(T_19);
+var_dump(T_20);
+var_dump(T_21);
+var_dump(T_22);
+var_dump(T_23);
+var_dump(T_24);
+var_dump(T_25);
+var_dump(T_26);
 ?>
 --EXPECT--
 int(2)
@@ -45,5 +73,19 @@ int(8)
 string(21) "This is a test string"
 int(0)
 int(2)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(true)
 int(7)
 int(6)
