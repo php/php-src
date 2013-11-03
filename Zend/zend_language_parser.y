@@ -952,7 +952,9 @@ static_class_constant:
 ;
 
 static_scalar: /* compile-time evaluated scalars */
-	static_scalar_value { $$ = $1; }
+		static_scalar_value { $$ = $1; }
+	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
+	|	'[' static_array_pair_list ']' { $$ = $2; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
 ;
 
 static_scalar_value:
@@ -961,8 +963,6 @@ static_scalar_value:
 	|	namespace_name 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT, 1 TSRMLS_CC); }
 	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_CT, 0 TSRMLS_CC); }
 	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); zend_do_fetch_constant(&$$, NULL, &$2, ZEND_CT, 0 TSRMLS_CC); }
-	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
-	|	'[' static_array_pair_list ']' { $$ = $2; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
 	|	static_class_constant { $$ = $1; }
 	|	T_CLASS_C			{ $$ = $1; }
 	|	static_operation { $$ = $1; }
