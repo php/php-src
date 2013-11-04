@@ -70,4 +70,10 @@ PHP                                                                        NEWS
   . Fixed bug #55285 (XMLReader::getAttribute/No/Ns methods inconsistency). 
     (Mike)
 
+- Zip:
+  . update libzip to version 1.11.1.
+    PHP don't use any ilibzip private symbol anymore.  (Pierre, Remi)
+  . new method ZipArchive::setPassword($password). (Pierre)
+  . add --with-libzip option to build with system libzip. (Remi)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
