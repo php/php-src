@@ -522,9 +522,9 @@ PHP_FUNCTION(stream_wrapper_register)
 	zend_str_size protocol_len, classname_len;
 	struct php_user_stream_wrapper * uwrap;
 	int rsrc_id;
-	long flags = 0;
+	php_int_t flags = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|l", &protocol, &protocol_len, &classname, &classname_len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|i", &protocol, &protocol_len, &classname, &classname_len, &flags) == FAILURE) {
 		RETURN_FALSE;
 	}
 
