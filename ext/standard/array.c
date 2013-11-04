@@ -1287,7 +1287,7 @@ PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, zend_s
 PHP_FUNCTION(extract)
 {
 	zval *var_array, *prefix = NULL;
-	long extract_type = EXTR_OVERWRITE;
+	php_int_t extract_type = EXTR_OVERWRITE;
 	zval **entry, *data;
 	char *var_name;
 	ulong num_key;
@@ -1296,7 +1296,7 @@ PHP_FUNCTION(extract)
 	int extract_refs = 0;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|lz/", &var_array, &extract_type, &prefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|iz/", &var_array, &extract_type, &prefix) == FAILURE) {
 		return;
 	}
 
@@ -2685,14 +2685,14 @@ PHP_FUNCTION(array_pad)
 	zval ***pads;		/* Array to pass to splice */
 	HashTable *new_hash;/* Return value from splice */
 	HashTable  old_hash;
-	long pad_size;		/* Size to pad to */
-	long pad_size_abs;	/* Absolute value of pad_size */
+	php_int_t pad_size;		/* Size to pad to */
+	php_int_t pad_size_abs;	/* Absolute value of pad_size */
 	int	input_size;		/* Size of the input array */
 	int	num_pads;		/* How many pads do we need */
 	int	do_pad;			/* Whether we should do padding at all */
 	int	i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "alz", &input, &pad_size, &pad_value) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "aiz", &input, &pad_size, &pad_value) == FAILURE) {
 		return;
 	}
 
@@ -2788,10 +2788,10 @@ PHP_FUNCTION(array_change_key_case)
 	char *new_key;
 	zend_str_size str_key_len;
 	ulong num_key;
-	long change_to_upper=0;
+	php_int_t change_to_upper=0;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &change_to_upper) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|i", &array, &change_to_upper) == FAILURE) {
 		return;
 	}
 
@@ -2834,9 +2834,9 @@ PHP_FUNCTION(array_unique)
 	};
 	struct bucketindex *arTmp, *cmpdata, *lastkept;
 	unsigned int i;
-	long sort_type = PHP_SORT_STRING;
+	php_int_t sort_type = PHP_SORT_STRING;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &array, &sort_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|i", &array, &sort_type) == FAILURE) {
 		return;
 	}
 
@@ -4001,19 +4001,20 @@ PHP_FUNCTION(array_multisort)
 }
 /* }}} */
 
+/* XXX not finished yet, continue after php_rand is worky on 64 bit */
 /* {{{ proto mixed array_rand(array input [, int num_req])
    Return key/keys for random entry/entries in the array */
 PHP_FUNCTION(array_rand)
 {
 	zval *input;
-	long randval, num_req = 1;
+	php_int_t randval, num_req = 1;
 	int num_avail, key_type;
 	char *string_key;
 	zend_str_size string_key_len;
 	ulong num_key;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|l", &input, &num_req) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|i", &input, &num_req) == FAILURE) {
 		return;
 	}
 
@@ -4213,7 +4214,7 @@ PHP_FUNCTION(array_filter)
 	zval *retval = NULL;
     zval *key = NULL;
 	zend_bool have_callback = 0;
-	long use_type = 0;
+	php_int_t use_type = 0;
 	char *string_key;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
@@ -4221,7 +4222,7 @@ PHP_FUNCTION(array_filter)
 	ulong num_key;
 	HashPosition pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|fl", &array, &fci, &fci_cache, &use_type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "a|fi", &array, &fci, &fci_cache, &use_type) == FAILURE) {
 		return;
 	}
 
@@ -4477,7 +4478,7 @@ PHP_FUNCTION(array_key_exists)
 PHP_FUNCTION(array_chunk)
 {
 	int argc = ZEND_NUM_ARGS(), key_type, num_in;
-	long size, current = 0;
+	php_int_t size, current = 0;
 	char *str_key;
 	zend_str_size str_key_len;
 	ulong num_key;
@@ -4487,7 +4488,7 @@ PHP_FUNCTION(array_chunk)
 	zval **entry;
 	HashPosition pos;
 
-	if (zend_parse_parameters(argc TSRMLS_CC, "al|b", &input, &size, &preserve_keys) == FAILURE) {
+	if (zend_parse_parameters(argc TSRMLS_CC, "ai|b", &input, &size, &preserve_keys) == FAILURE) {
 		return;
 	}
 	/* Do bounds checking for size parameter. */
