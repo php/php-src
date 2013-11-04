@@ -52,6 +52,7 @@ typedef unsigned long zend_uint_t;
 #  define ZEND_ATOI(i, s) i = _atoi64((s))
 #  define ZEND_STRTOL(s0, s1, base) _strtoi64((s0), (s1), (base))
 #  define ZEND_INT_FMT "%I64d"
+#  define ZEND_UINT_FMT "%I64u"
 # else
 #  define ZEND_ITOA(i, s, len) \
 	do { \
@@ -61,6 +62,7 @@ typedef unsigned long zend_uint_t;
 #  define ZEND_ATOI(i, s) (i) = atoll((s))
 #  define ZEND_STRTOL(s0, s1, base) strtoll((s0), (s1), (base))
 #  define ZEND_INT_FMT "%lld"
+#  define ZEND_UINT_FMT "%llu"
 # endif
 #else
 # define ZEND_STRTOL(s0, s1, base) strtol((s0), (s1), (base))
@@ -76,6 +78,7 @@ typedef unsigned long zend_uint_t;
 #  define ZEND_ATOI(i, s) (i) = atol((s))
 # endif
 # define ZEND_INT_FMT "%ld"
+# define ZEND_UINT_FMT "%lu"
 #endif
 
 
