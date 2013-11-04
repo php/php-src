@@ -1,6 +1,6 @@
 /*
-  zip_entry_new.c -- create and init struct zip_entry
-  Copyright (C) 1999-2009 Dieter Baron and Thomas Klausner
+  zip_file_rename.c -- rename file in zip archive
+  Copyright (C) 1999-2012 Dieter Baron and Thomas Klausner
 
   This file is part of libzip, a library to manipulate ZIP archives.
   The authors can be contacted at <libzip@nih.at>
@@ -33,49 +33,38 @@
 
 
 
-#include <stdlib.h>
+#include <string.h>
 
 #include "zipint.h"
 
 
 
-struct zip_entry *
-_zip_entry_new(struct zip *za)
+ZIP_EXTERN int
+zip_file_rename(struct zip *za, zip_uint64_t idx, const char *name, zip_flags_t flags)
 {
-    struct zip_entry *ze;
-    if (!za) {
-	ze = (struct zip_entry *)malloc(sizeof(struct zip_entry));
-	if (!ze) {
-	    return NULL;
-	}
-    }
-    else {
-	if (za->nentry+1 >= za->nentry_alloc) {
-	    struct zip_entry *rentries;
-	    za->nentry_alloc += 16;
-	    rentries = (struct zip_entry *)realloc(za->entry,
-						   sizeof(struct zip_entry)
-						   * za->nentry_alloc);
-	    if (!rentries) {
-		_zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
-		return NULL;
-	    }
-	    za->entry = rentries;
-	}
-	ze = za->entry+za->nentry;
+    const char *old_name;
+    int old_is_dir, new_is_dir;
+    
+    if (idx >= za->nentry || (name != NULL && strlen(name) > ZIP_UINT16_MAX)) {
+	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return -1;
     }
 
-    ze->state = ZIP_ST_UNCHANGED;
+    if (ZIP_IS_RDONLY(za)) {
+	_zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
+	return -1;
+    }
 
-    ze->ch_filename = NULL;
-    ze->ch_extra = NULL;
-    ze->ch_extra_len = -1;
-    ze->ch_comment = NULL;
-    ze->ch_comment_len = -1;
-    ze->source = NULL;
+    if ((old_name=zip_get_name(za, idx, 0)) == NULL)
+	return -1;
+								    
+    new_is_dir = (name != NULL && name[strlen(name)-1] == '/');
+    old_is_dir = (old_name[strlen(old_name)-1] == '/');
 
-    if (za)
-	za->nentry++;
+    if (new_is_dir != old_is_dir) {
+	_zip_error_set(&za->error, ZIP_ER_INVAL, 0);
+	return -1;
+    }
 
-    return ze;
+    return _zip_set_name(za, idx, name, flags);
 }
