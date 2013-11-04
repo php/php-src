@@ -218,7 +218,7 @@ $op2_is_tmp_free = array(
 $op1_free_op = array(
 	"ANY"    => "FREE_OP(free_op1)",
 	"TMP"    => "zval_dtor(free_op1.var)",
-	"VAR"    => "zval_ptr_dtor(&free_op1.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op1.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
@@ -227,7 +227,7 @@ $op1_free_op = array(
 $op2_free_op = array(
 	"ANY"    => "FREE_OP(free_op2)",
 	"TMP"    => "zval_dtor(free_op2.var)",
-	"VAR"    => "zval_ptr_dtor(&free_op2.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op2.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
@@ -236,7 +236,7 @@ $op2_free_op = array(
 $op1_free_op_if_var = array(
 	"ANY"    => "FREE_OP_IF_VAR(free_op1)",
 	"TMP"    => "",
-	"VAR"    => "zval_ptr_dtor(&free_op1.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op1.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
@@ -245,33 +245,33 @@ $op1_free_op_if_var = array(
 $op2_free_op_if_var = array(
 	"ANY"    => "FREE_OP_IF_VAR(free_op2)",
 	"TMP"    => "",
-	"VAR"    => "zval_ptr_dtor(&free_op2.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op2.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
 );
 
 $op1_free_op_var_ptr = array(
-	"ANY"    => "if (free_op1.var) {zval_ptr_dtor(&free_op1.var);}",
+	"ANY"    => "if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);}",
 	"TMP"    => "",
-	"VAR"    => "if (free_op1.var) {zval_ptr_dtor(&free_op1.var);}",
+	"VAR"    => "if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);}",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
 );
 $op1_free_op_var_ptr_fast = $op1_free_op_var_ptr;
-$op1_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor(&free_op1.var)";
+$op1_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor_nogc(&free_op1.var)";
 
 $op2_free_op_var_ptr = array(
-	"ANY"    => "if (free_op2.var) {zval_ptr_dtor(&free_op2.var);}",
+	"ANY"    => "if (free_op2.var) {zval_ptr_dtor_nogc(&free_op2.var);}",
 	"TMP"    => "",
-	"VAR"    => "if (free_op2.var) {zval_ptr_dtor(&free_op2.var);}",
+	"VAR"    => "if (free_op2.var) {zval_ptr_dtor_nogc(&free_op2.var);}",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
 );
 $op2_free_op_var_ptr_fast = $op2_free_op_var_ptr;
-$op2_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor(&free_op2.var)";
+$op2_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor_nogc(&free_op2.var)";
 
 $list    = array(); // list of opcode handlers and helpers in original order
 $opcodes = array(); // opcode handlers by code
