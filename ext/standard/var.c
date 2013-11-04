@@ -42,7 +42,7 @@ static int php_array_element_dump(zval **zv TSRMLS_DC, int num_args, va_list arg
 	level = va_arg(args, int);
 
 	if (hash_key->nKeyLength == 0) { /* numeric key */
-		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
+		php_printf("%*c[" ZEND_INT_FMT "]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
 		php_printf("%*c[\"", level + 1, ' ');
 		PHPWRITE(hash_key->arKey, hash_key->nKeyLength - 1);
@@ -61,7 +61,7 @@ static int php_object_property_dump(zval **zv TSRMLS_DC, int num_args, va_list a
 	level = va_arg(args, int);
 
 	if (hash_key->nKeyLength == 0) { /* numeric key */
-		php_printf("%*c[%ld]=>\n", level + 1, ' ', hash_key->h);
+		php_printf("%*c[" ZEND_INT_FMT "]=>\n", level + 1, ' ', hash_key->h);
 	} else { /* string key */
 		zend_str_size unmangle = zend_unmangle_property_name(hash_key->arKey, hash_key->nKeyLength - 1, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
