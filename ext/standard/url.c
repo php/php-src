@@ -762,21 +762,21 @@ no_name_header:
 					s++;
 				}
 
-                if (!specific || 
-                    (strncasecmp(Z_STRVAL_PP(hdr), specific, (specific_len > Z_STRLEN_PP(hdr)) ? Z_STRLEN_PP(hdr) : specific_len) == SUCCESS)) {
+				if (!specific || 
+					(strncasecmp(Z_STRVAL_PP(hdr), specific, (specific_len > Z_STRLEN_PP(hdr)) ? Z_STRLEN_PP(hdr) : specific_len) == SUCCESS)) {
 
-                    if (zend_hash_find(HASH_OF(return_value), Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), (void **) &prev_val) == FAILURE) {
-					    if (!specific) {
-					        add_assoc_stringl_ex(return_value, Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
-					    } else {
-					        add_next_index_stringl(return_value, s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
-					    }
-				    } else { /* some headers may occur more then once, therefor we need to remake the string into an array */
-					    convert_to_array(*prev_val);
-					    add_next_index_stringl(*prev_val, s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
-				    }
-                }
-                
+					if (zend_hash_find(HASH_OF(return_value), Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), (void **) &prev_val) == FAILURE) {
+						if (!specific) {
+							add_assoc_stringl_ex(return_value, Z_STRVAL_PP(hdr), (p - Z_STRVAL_PP(hdr) + 1), s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
+						} else {
+							add_next_index_stringl(return_value, s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
+						}
+					} else { /* some headers may occur more then once, therefor we need to remake the string into an array */
+						convert_to_array(*prev_val);
+						add_next_index_stringl(*prev_val, s, (Z_STRLEN_PP(hdr) - (s - Z_STRVAL_PP(hdr))), 1);
+					}
+				}
+
 				*p = c;
 			} else {
 				goto no_name_header;
