@@ -308,13 +308,13 @@ Hash a password */
 PHP_FUNCTION(password_hash)
 {
 	char *hash_format, *hash, *salt, *password, *result;
-	long algo = 0;
+	long algo = PHP_PASSWORD_DEFAULT;
 	int password_len = 0, hash_len;
 	size_t salt_len = 0, required_salt_len = 0, hash_format_len;
 	HashTable *options = 0;
 	zval **option_buffer;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "sl|H", &password, &password_len, &algo, &options) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|lH", &password, &password_len, &algo, &options) == FAILURE) {
 		return;
 	}
 
