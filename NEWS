@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #65950 (Field name truncation if the field name is bigger than
     32 characters). (patch submitted by: michael dot y at zend dot com, Yasuo)
 
+- PDO:
+  . Fixed bug #66033 (Segmentation Fault when constructor of PDO statement 
+    throws an exception). (Laruence)
+
 - Standard:
   . Fixed bug #64760 (var_export() does not use full precision for floating-point
     numbers) (Yasuo)
