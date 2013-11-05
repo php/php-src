@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #include "php.h"
 #include "SAPI.h"
 #include "php_main.h"
@@ -75,6 +73,7 @@ static int  lsapi_mode       = 1;
 static char *php_self        = "";
 static char *script_filename = "";
 static int  source_highlight = 0;
+static int  ignore_php_ini   = 0;
 static char * argv0 = NULL;
 static int  engine = 1;
 #ifdef ZTS
@@ -289,7 +288,7 @@ static void sapi_lsapi_register_variables(zval *track_vars_array TSRMLS_DC)
 static int sapi_lsapi_read_post(char *buffer, uint count_bytes TSRMLS_DC)
 {
     if ( lsapi_mode ) {
-        return LSAPI_ReadReqBody( buffer, count_bytes );
+        return LSAPI_ReadReqBody( buffer, (unsigned long long)count_bytes );
     } else {
         return 0;
     }
@@ -353,7 +352,14 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC)
  */
 static void sapi_lsapi_log_message(char *message TSRMLS_DC)
 {
+    char buf[8192];
     int len = strlen( message );
+    if ( *(message + len - 1 ) != '\n' )
+    {
+        snprintf( buf, 8191, "%s\n", message );
+        message = buf;
+        ++len;
+    }
     LSAPI_Write_Stderr( message, len);
 }
 /* }}} */
@@ -364,7 +370,7 @@ static void sapi_lsapi_log_message(char *message TSRMLS_DC)
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V5.5",
+    "LiteSpeed V6.4",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -520,7 +526,7 @@ static int lsapi_module_main(int show_source TSRMLS_DC)
     }
     zend_try {
         php_request_shutdown(NULL);
-        *argv0 = 0;
+        memset( argv0, 0, 46 );
     } zend_end_try();
     return 0;
 }
@@ -558,10 +564,12 @@ static void override_ini()
 
 }
 
+
 static int processReq( TSRMLS_D )
 {
     int ret = 0;
     zend_first_try {
+
         /* avoid server_context==NULL checks */
         SG(server_context) = (void *) 1;
 
@@ -587,14 +595,16 @@ static void cli_usage( TSRMLS_D )
 {
     static const char * usage =
         "Usage: php\n"
-        "      php -[b|c|h|i|q|s|v|?] [<file>] [args...]\n"
+        "      php -[b|c|n|h|i|q|s|v|?] [<file>] [args...]\n"
         "  Run in LSAPI mode, only '-b', '-s' and '-c' are effective\n"
         "  Run in Command Line Interpreter mode when parameters are specified\n"
         "\n"
         "  -b <address:port>|<port> Bind Path for external LSAPI Server mode\n"
         "  -c <path>|<file> Look for php.ini file in this directory\n"
+        "  -n    No php.ini file will be used\n"
         "  -h    This help\n"
         "  -i    PHP information\n"
+        "  -l    Syntax check\n"
         "  -q    Quiet-mode.  Suppress HTTP Header output.\n"
         "  -s    Display colour syntax highlighted source.\n"
         "  -v    Version number\n"
@@ -626,7 +636,7 @@ static int parse_opt( int argc, char * argv[], int *climode,
                 fprintf( stderr, "TCP or socket address must be specified following '-b' option.\n");
                 return -1;
             }
-            *php_bind = *p++;
+            *php_bind = strdup(*p++);
             break;
             
         case 'c':
@@ -635,16 +645,22 @@ static int parse_opt( int argc, char * argv[], int *climode,
 
                 return -1;
             }
-            *php_ini_path = *p++;
+            *php_ini_path = strdup( *p++ );
             break;
         case 's':
             source_highlight = 1;
-            break;    
+            break;
+        case 'n':
+            ignore_php_ini = 1;
+            break;
+        case '?':
+            if ( *((*(p-1))+2) == 's' )
+                exit( 99 );
         case 'h':
         case 'i':
+        case 'l':
         case 'q':
         case 'v':
-        case '?':
         default:
             *climode = 1;
             break;
@@ -674,7 +690,7 @@ static int cli_main( int argc, char * argv[] )
     const char ** ini;
     char ** p = &argv[1];
     char ** argend= &argv[argc];
-    int ret = 0;
+    int ret = -1;
     int c;
     lsapi_mode = 0;        /* enter CLI mode */
 
@@ -713,8 +729,8 @@ static int cli_main( int argc, char * argv[] )
                     php_end_ob_buffers(1 TSRMLS_CC);
 #endif
                     php_request_shutdown( NULL );
+                    ret = 0;
                 }
-                ret = 1;
                 break;
             case 'v':
                 if (php_request_startup(TSRMLS_C) != FAILURE) {
@@ -729,25 +745,27 @@ static int cli_main( int argc, char * argv[] )
                     php_end_ob_buffers(1 TSRMLS_CC);
 #endif
                     php_request_shutdown( NULL );
+                    ret = 0;
                 }
-                ret = 1;
                 break;
             case 'c':
                 ++p;
             /* fall through */
             case 's':
                 break;
-                
+            case 'l':
+                source_highlight = 2;
+                break;
             case 'h':
             case '?':
             default:
                 cli_usage(TSRMLS_C);
-                ret = 1;
+                ret = 0;
                 break;
 
             }
         }
-        if ( !ret ) {
+        if ( ret == -1 ) {
             if ( *p ) {
                 zend_file_handle file_handle = {0};
 
@@ -766,18 +784,30 @@ static int cli_main( int argc, char * argv[] )
                         fclose( file_handle.handle.fp );
                         ret = 2;
                     } else {
-                        if (source_highlight) {
+                        if (source_highlight == 1) {
                             zend_syntax_highlighter_ini syntax_highlighter_ini;
                     
                             php_get_highlight_struct(&syntax_highlighter_ini);
                             highlight_file(SG(request_info).path_translated, &syntax_highlighter_ini TSRMLS_CC);
+                        } else if (source_highlight == 2) {
+                            file_handle.filename = *p;
+                            file_handle.free_filename = 0;
+                            file_handle.opened_path = NULL;
+                            ret = php_lint_script(&file_handle TSRMLS_CC);
+                            if (ret==SUCCESS) {
+                                zend_printf("No syntax errors detected in %s\n", file_handle.filename);
+                            } else {
+                                zend_printf("Errors parsing %s\n", file_handle.filename);
+                            }
+                            
                         } else {
                             file_handle.filename = *p;
                             file_handle.free_filename = 0;
                             file_handle.opened_path = NULL;
 
                             php_execute_script(&file_handle TSRMLS_CC);
-                        }
+                            ret = EG(exit_status);
+                       }
 
                         php_request_shutdown( NULL );
                     }
@@ -858,7 +888,25 @@ void start_children( int children )
     exit( 0 );
 }
 
-
+void setArgv0( int argc, char * argv[] )
+{
+    char * p;
+    int i;
+    argv0 = argv[0] + strlen( argv[0] );
+    p = argv0;
+    while(( p > argv[0] )&&( p[-1] != '/'))
+        --p;
+    if ( p > argv[0] )
+    {
+        memmove( argv[0], p, argv0 - p );
+        memset( argv[0] + ( argv0 - p ), 0, p - argv[0] );
+        argv0 = argv[0] + (argv0 - p);
+    }
+    for( i = 1; i < argc; ++i )
+    {
+        memset( argv[i], 0, strlen( argv[i] ) );
+    }
+}
 
 #include <fcntl.h>
 int main( int argc, char * argv[] )
@@ -868,7 +916,6 @@ int main( int argc, char * argv[] )
 
     char * php_ini_path = NULL;
     char * php_bind     = NULL;
-    char * p;
     int n;
     int climode = 0;
     struct timeval tv_req_begin;
@@ -894,8 +941,10 @@ int main( int argc, char * argv[] )
     }
     if ( climode ) {
         lsapi_sapi_module.phpinfo_as_text = 1;
+    } else {
+        setArgv0(argc, argv );
     }
-    argv0 = argv[0] + strlen( argv[0] );
+
     sapi_startup(&lsapi_sapi_module);
 
 #ifdef ZTS
@@ -909,6 +958,9 @@ int main( int argc, char * argv[] )
 #endif
 
     lsapi_sapi_module.executable_location = argv[0];
+    
+    if ( ignore_php_ini )
+        lsapi_sapi_module.php_ini_ignore = 1;
 
     if ( php_ini_path ) {
         lsapi_sapi_module.php_ini_path_override = php_ini_path;
@@ -949,6 +1001,8 @@ int main( int argc, char * argv[] )
 
     if ( php_bind ) {
         LSAPI_No_Check_ppid();
+        free( php_bind );
+        php_bind = NULL;
     }
 
     while( LSAPI_Prefork_Accept_r( &g_req ) >= 0 ) {
@@ -986,27 +1040,23 @@ int main( int argc, char * argv[] )
 
 /*   LiteSpeed PHP module starts here */
 
-#if PHP_MAJOR_VERSION > 4
-
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_litespeed__void, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-#else
-#define arginfo_litespeed__void NULL
-#endif
-
 PHP_FUNCTION(litespeed_request_headers);
 PHP_FUNCTION(litespeed_response_headers);
+PHP_FUNCTION(apache_get_modules);
 
 PHP_MINFO_FUNCTION(litespeed);
 
 zend_function_entry litespeed_functions[] = {
-    PHP_FE(litespeed_request_headers,     arginfo_litespeed__void)
-    PHP_FE(litespeed_response_headers,     arginfo_litespeed__void)
-    PHP_FALIAS(getallheaders,             litespeed_request_headers,     arginfo_litespeed__void)
-    PHP_FALIAS(apache_request_headers,     litespeed_request_headers,     arginfo_litespeed__void)
+    PHP_FE(litespeed_request_headers,   arginfo_litespeed__void)
+    PHP_FE(litespeed_response_headers,  arginfo_litespeed__void)
+    PHP_FE(apache_get_modules,          arginfo_litespeed__void)
+    PHP_FALIAS(getallheaders,           litespeed_request_headers,  arginfo_litespeed__void)
+    PHP_FALIAS(apache_request_headers,  litespeed_request_headers,  arginfo_litespeed__void)
     PHP_FALIAS(apache_response_headers, litespeed_response_headers, arginfo_litespeed__void)
     {NULL, NULL, NULL}
 };
@@ -1055,8 +1105,7 @@ PHP_FUNCTION(litespeed_request_headers)
     }
     array_init(return_value);
 
-    if ( lsapi_mode )
-        LSAPI_ForeachOrgHeader( add_associate_array, return_value );
+    LSAPI_ForeachOrgHeader( add_associate_array, return_value );
 
 }
 /* }}} */
@@ -1103,6 +1152,23 @@ PHP_FUNCTION(litespeed_response_headers)
     }  
 }
 
+/* }}} */
+
+
+/* {{{ proto array apache_get_modules(void)
+   Fetch all loaded module names  */
+PHP_FUNCTION(apache_get_modules)
+{
+    /* TODO: */
+    if (ZEND_NUM_ARGS() > 0) {
+        WRONG_PARAM_COUNT;
+    }
+    array_init(return_value);
+    add_next_index_string(return_value, "mod_rewrite", 1);
+    add_next_index_string(return_value, "mod_mime", 1);
+    add_next_index_string(return_value, "mod_headers", 1);
+    add_next_index_string(return_value, "mod_expires", 1);
+}
 /* }}} */
 
 
