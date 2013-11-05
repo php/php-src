@@ -872,16 +872,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_sys_getloadavg, 0)
 ZEND_END_ARG_INFO()
 #endif
 /* }}} */
-/* {{{ assert.c */
-ZEND_BEGIN_ARG_INFO(arginfo_assert, 0)
-	ZEND_ARG_INFO(0, assertion)
-ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_assert_options, 0, 0, 1)
-	ZEND_ARG_INFO(0, what)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-/* }}} */
 /* {{{ base64.c */
 ZEND_BEGIN_ARG_INFO(arginfo_base64_encode, 0)
 	ZEND_ARG_INFO(0, str)
@@ -3369,10 +3360,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FALIAS(sizeof,				count,									arginfo_count)
 	PHP_FALIAS(key_exists,			array_key_exists,						arginfo_array_key_exists)
 
-	/* functions from assert.c */
-	PHP_FE(assert,															arginfo_assert)
-	PHP_FE(assert_options,													arginfo_assert_options)
-
 	/* functions from versioning.c */
 	PHP_FE(version_compare,													arginfo_version_compare)
 
@@ -3669,7 +3656,6 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(syslog)
 #endif
 	BASIC_MINIT_SUBMODULE(array)
-	BASIC_MINIT_SUBMODULE(assert)
 	BASIC_MINIT_SUBMODULE(url_scanner_ex)
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN
 	BASIC_MINIT_SUBMODULE(proc_open)
@@ -3720,7 +3706,6 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 
 	BASIC_MSHUTDOWN_SUBMODULE(browscap)
 	BASIC_MSHUTDOWN_SUBMODULE(array)
-	BASIC_MSHUTDOWN_SUBMODULE(assert)
 	BASIC_MSHUTDOWN_SUBMODULE(url_scanner_ex)
 	BASIC_MSHUTDOWN_SUBMODULE(file)
 	BASIC_MSHUTDOWN_SUBMODULE(standard_filters)
@@ -3817,7 +3802,6 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 	BASIC_RSHUTDOWN_SUBMODULE(syslog)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #endif
 #endif
-	BASIC_RSHUTDOWN_SUBMODULE(assert)
 	BASIC_RSHUTDOWN_SUBMODULE(url_scanner_ex)
 	BASIC_RSHUTDOWN_SUBMODULE(streams)
 #ifdef PHP_WIN32
@@ -3845,7 +3829,6 @@ PHP_MINFO_FUNCTION(basic) /* {{{ */
 	BASIC_MINFO_SUBMODULE(dl)
 	BASIC_MINFO_SUBMODULE(mail)
 	php_info_print_table_end();
-	BASIC_MINFO_SUBMODULE(assert)
 }
 /* }}} */
 

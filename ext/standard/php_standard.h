@@ -54,7 +54,6 @@
 #include "php_metaphone.h"
 #include "php_output.h"
 #include "php_array.h"
-#include "php_assert.h"
 #include "php_versioning.h"
 #include "php_ftok.h"
 #include "php_type.h"
