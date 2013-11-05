@@ -1436,7 +1436,7 @@ not_relative_path:
 			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "%s/%s path was truncated to %d", cwd, filename, MAXPATHLEN);
 		}
 		
-		free(cwd);
+		efree(cwd);
 		
 		if (((options & STREAM_DISABLE_OPEN_BASEDIR) == 0) && php_check_open_basedir(trypath TSRMLS_CC)) {
 			return NULL;
