@@ -1079,9 +1079,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	return T_DO;
 }
 
-<ST_IN_SCRIPTING>"expect" {
+<ST_IN_SCRIPTING>"assert" {
     Z_STRVAL_P(zendlval) = yytext;
-	return T_EXPECT;
+	return T_ASSERT;
 }
 
 <ST_IN_SCRIPTING>"for" {

@@ -1,10 +1,10 @@
 --TEST--
-test passing expectation
+test passing assertion
 --INI--
-zend.expectations=1
+zend.assertions=1
 --FILE--
 <?php
-expect true;
+assert(true);
 var_dump(true);
 ?>
 --EXPECTF--	

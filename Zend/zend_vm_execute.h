@@ -1209,7 +1209,18 @@ static int ZEND_FASTCALL  ZEND_FAST_RET_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	}
 }
 
-static int ZEND_FASTCALL  ZEND_EXPECT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static int ZEND_FASTCALL  ZEND_ASSRT_CHECK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+    USE_OPLINE
+
+    if (!EG(assertions)) {
+        ZEND_VM_JMP(opline->op1.jmp_addr);
+    } else {
+        ZEND_VM_NEXT_OPCODE();
+    }
+}
+
+static int ZEND_FASTCALL  ZEND_ASSRT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
@@ -1217,22 +1228,42 @@ static int ZEND_FASTCALL  ZEND_EXPECT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 	SAVE_OPLINE();
 	{
 		zval *expression =  get_zval_ptr(opline->op1_type, &opline->op1, execute_data, &free_op1, BP_VAR_R);
-		zval *message  =  get_zval_ptr(opline->op2_type, &opline->op2, execute_data, &free_op2, BP_VAR_R);
+	    zval *message  =  get_zval_ptr(opline->op2_type, &opline->op2, execute_data, &free_op2, BP_VAR_R);
+        zend_bool assertion = 0;
 
-		if (!zend_is_true(expression)) {
-		    zend_class_entry *ce = zend_get_expectation_exception(TSRMLS_C);
+        /* provide compat with old API */
+        if (opline->op1_type == IS_CONST && Z_TYPE_P(expression) == IS_STRING) {
+            zval retval;
+            char *assert_desc = zend_make_compiled_string_description(
+                "assert()'d code" TSRMLS_CC);
 
-		    if (Z_TYPE_P(message) == IS_OBJECT &&
-		        instanceof_function(Z_OBJCE_P(message), ce TSRMLS_CC)) {
-		        zend_throw_exception_object(message TSRMLS_CC);
-		    } else {
-		        convert_to_string_ex(&message);
+            if (zend_eval_stringl(Z_STRVAL_P(expression), Z_STRLEN_P(expression), &retval, assert_desc TSRMLS_CC) == SUCCESS) {
+                convert_to_boolean(&retval);
 
-		        zend_throw_exception(
-		            ce, Z_STRVAL_P(message), E_ERROR TSRMLS_CC);
-		    }
-			HANDLE_EXCEPTION();
-	    }
+                assertion = Z_BVAL(retval);
+
+                zval_dtor(&retval);
+            }
+
+            efree(assert_desc);
+        } else {
+            assertion = zend_is_true(expression);
+        }
+
+	    if (!assertion) {
+	        zend_class_entry *ce = zend_get_assertion_exception(TSRMLS_C);
+
+	        if (Z_TYPE_P(message) == IS_OBJECT &&
+	            instanceof_function(Z_OBJCE_P(message), ce TSRMLS_CC)) {
+	            zend_throw_exception_object(message TSRMLS_CC);
+	        } else {
+	            convert_to_string_ex(&message);
+
+	            zend_throw_exception(
+	                ce, Z_STRVAL_P(message), E_ERROR TSRMLS_CC);
+	        }
+		    HANDLE_EXCEPTION();
+        }
 	}
 
 	FREE_OP(free_op1);
@@ -44887,31 +44918,56 @@ void zend_init_opcodes_handlers(void)
   	ZEND_RECV_VARIADIC_SPEC_HANDLER,
   	ZEND_RECV_VARIADIC_SPEC_HANDLER,
   	ZEND_RECV_VARIADIC_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
-  	ZEND_EXPECT_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_CHECK_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
+  	ZEND_ASSRT_SPEC_HANDLER,
   	ZEND_NULL_HANDLER
   };
   zend_opcode_handlers = (opcode_handler_t*)labels;

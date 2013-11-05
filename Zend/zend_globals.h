@@ -148,7 +148,6 @@ struct _zend_compiler_globals {
 	const zend_encoding **script_encoding_list;
 	size_t script_encoding_list_size;
 	zend_bool multibyte;
-	zend_bool expectations;
 	zend_bool detect_unicode;
 	zend_bool encoding_declared;
 
@@ -257,6 +256,8 @@ struct _zend_executor_globals {
 #if XPFPA_HAVE_CW
 	XPFPA_CW_DATATYPE saved_fpu_cw;
 #endif
+
+    zend_bool assertions;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

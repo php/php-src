@@ -1,12 +1,12 @@
 --TEST--
 test providing reason (fail)
 --INI--
-zend.expectations=1
+zend.assertions=1
 --FILE--
 <?php
 try {
-    expect false : "I require this to succeed";
-} catch (ExpectationException $ex) {
+    assert(false, "I require this to succeed");
+} catch (AssertionException $ex) {
     var_dump($ex->getMessage());
 }
 ?>
