@@ -21,8 +21,9 @@ var_dump( get_headers() );
 echo "\n-- Testing get_headers() function with more than expected no. of arguments --\n";
 $url       = 'string_val';
 $format    = 1;
+$spec_arg  = 'spec_val';
 $extra_arg = 10;
-var_dump( get_headers($url, $format, $extra_arg) );
+var_dump( get_headers($url, $format, $spec_arg, $extra_arg) );
 
 echo "Done";
 ?>
@@ -36,7 +37,7 @@ NULL
 
 -- Testing get_headers() function with more than expected no. of arguments --
 
-Warning: get_headers() expects at most 2 parameters, 3 given in %s on line 19
+Warning: get_headers() expects at most 3 parameters, 4 given in %s on line 20
 NULL
 Done
 
