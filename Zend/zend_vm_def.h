@@ -3252,8 +3252,7 @@ ZEND_VM_HANDLER(64, ZEND_RECV_INIT, ANY, CONST)
 	if (param == NULL) {
 		ALLOC_ZVAL(assignment_value);
 		*assignment_value = *opline->op2.zv;
-		if ((Z_TYPE_P(assignment_value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT ||
-		     Z_TYPE_P(assignment_value)==IS_CONSTANT_ARRAY) {
+		if (IS_CONSTANT_TYPE(Z_TYPE_P(assignment_value))) {
 			Z_SET_REFCOUNT_P(assignment_value, 1);
 			zval_update_constant(&assignment_value, 0 TSRMLS_CC);
 		} else {
@@ -3580,8 +3579,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, VAR|CONST|UNUSED, CONST)
 		}
 
 		if (EXPECTED(zend_hash_quick_find(&ce->constants_table, Z_STRVAL_P(opline->op2.zv), Z_STRLEN_P(opline->op2.zv)+1, Z_HASH_P(opline->op2.zv), (void **) &value) == SUCCESS)) {
-			if (Z_TYPE_PP(value) == IS_CONSTANT_ARRAY ||
-			    (Z_TYPE_PP(value) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT) {
+			if (IS_CONSTANT_TYPE(Z_TYPE_PP(value))) {
 				zend_class_entry *old_scope = EG(scope);
 
 				EG(scope) = ce;
@@ -5187,7 +5185,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 	name  = GET_OP1_ZVAL_PTR(BP_VAR_R);
 	val   = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
-	if ((Z_TYPE_P(val) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT || Z_TYPE_P(val) == IS_CONSTANT_ARRAY) {
+	if (IS_CONSTANT_TYPE(Z_TYPE_P(val))) {
 		zval tmp;
 		zval *tmp_ptr = &tmp;
 
@@ -5202,6 +5200,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 		INIT_PZVAL_COPY(&c.value, val);
 		zval_copy_ctor(&c.value);
 	}
+
 	c.flags = CONST_CS; /* non persistent, case sensetive */
 	c.name = str_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
 	c.name_len = Z_STRLEN_P(name)+1;

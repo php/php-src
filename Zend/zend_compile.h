@@ -23,6 +23,7 @@
 #define ZEND_COMPILE_H
 
 #include "zend.h"
+#include "zend_ast.h"
 
 #ifdef HAVE_STDARG_H
 # include <stdarg.h>
@@ -720,6 +721,10 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 #include "zend_vm_opcodes.h"
 
 #define ZEND_OP_DATA				137
+
+/* Pseudo-opcodes for internal object overloading */
+#define ZEND_BOOL_AND				-1
+#define ZEND_BOOL_OR				-2
 
 /* END: OPCODES */
 
