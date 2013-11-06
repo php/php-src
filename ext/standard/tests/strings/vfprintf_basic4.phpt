@@ -19,7 +19,7 @@ $arg2 = array(TRUE,FALSE);
 $arg3 = array(TRUE,FALSE,TRUE);
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/dump.txt';
+$data_file = dirname(__FILE__) . '/vfprintf_basic4.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
