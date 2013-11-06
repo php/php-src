@@ -1529,6 +1529,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 }
 /* }}} */
 
+<<<<<<< HEAD
 static inline void add_request_header(char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg TSRMLS_DC) /* {{{ */
 {
 	zval *return_value = (zval*)arg;
