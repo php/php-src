@@ -1605,10 +1605,13 @@ PHP_FUNCTION(getallheaders) /* {{{ */
     }
 } /* }}} */
 
+ZEND_BEGIN_ARG_INFO(cgi_fcgi_sapi_no_arginfo, 0)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry cgi_fcgi_sapi_functions[] = {
-	PHP_FE(fastcgi_finish_request,              NULL)
-	PHP_FE(getallheaders,                       NULL)
-	PHP_FALIAS(apache_request_headers, getallheaders, NULL)
+	PHP_FE(fastcgi_finish_request,              cgi_fcgi_sapi_no_arginfo)
+	PHP_FE(getallheaders,                       cgi_fcgi_sapi_no_arginfo)
+	PHP_FALIAS(apache_request_headers, getallheaders, cgi_fcgi_sapi_no_arginfo)
 	{NULL, NULL, NULL}
 };
 
