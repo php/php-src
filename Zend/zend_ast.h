@@ -13,6 +13,7 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Bob Weinand <bwoebi@php.net>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -25,36 +26,36 @@ typedef struct _zend_ast zend_ast;
 
 #include "zend.h"
 
-typedef void(*intermediary_ast_function_type)(zval *, ...);
-typedef int(*unary_ast_func)(zval *result, zval *op0 TSRMLS_DC);
-typedef int(*binary_ast_func)(zval *result, zval *op0, zval *op1 TSRMLS_DC);
-typedef int(*ternary_ast_func)(zval *result, zval *op0, zval *op1, zval *op2 TSRMLS_DC);
+typedef enum _zend_ast_node_kind {
+	/* first 256 node kinds are reserved for opcodes */
+	ZEND_CONST = 256,
+	ZEND_BOOL_AND,
+	ZEND_BOOL_OR,
+	ZEND_TERNARY,
+	ZEND_UNARY_PLUS,
+	ZEND_UNARY_MINUS,
+} zend_ast_ode_kind;
 
 struct _zend_ast {
-	char op_count;
-	zval **ops;
-	intermediary_ast_function_type func;
-	int refcount;
+	unsigned short kind;
+	unsigned short children;
+	union {
+		zval     *val;
+		zend_ast *child[1];
+	} u;
 };
 
-void zend_ast_add_unary(zval *result, unary_ast_func func, zval *op0 TSRMLS_DC);
-void zend_ast_add_binary(zval *result, binary_ast_func func, zval *op0, zval *op1 TSRMLS_DC);
-void zend_ast_add_ternary(zval *result, ternary_ast_func func, zval *op0, zval *op1, zval *op2 TSRMLS_DC);
+ZEND_API zend_ast *zend_ast_create_constant_node(zval *zv);
 
-void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC);
+ZEND_API zend_ast *zend_ast_create_node1(uint kind, zend_ast *op0);
+ZEND_API zend_ast *zend_ast_create_node2(uint kind, zend_ast *op0, zend_ast *op1);
+ZEND_API zend_ast *zend_ast_create_node3(uint kind, zend_ast *op0, zend_ast *op1, zend_ast *op2);
 
-void zend_ast_destroy(zend_ast *ast TSRMLS_DC);
+ZEND_API int zend_ast_is_ct_constant(zend_ast *ast);
 
-#define ZEND_AST_ADD_REF(ast) ++ast->refcount
+ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC);
 
-static inline int ZEND_AST_DEL_REF(zend_ast *ast) {
-	if (ast->refcount == 1) {
-		TSRMLS_FETCH();
-
-		zend_ast_destroy(ast TSRMLS_CC);
-		return 0;
-	}
-	return --ast->refcount;
-}
+ZEND_API zend_ast *zend_ast_copy(zend_ast *ast);
+ZEND_API void zend_ast_destroy(zend_ast *ast);
 
 #endif

@@ -4102,7 +4102,6 @@ static int ZEND_FASTCALL  ZEND_DECLARE_CONST_SPEC_CONST_CONST_HANDLER(ZEND_OPCOD
 		INIT_PZVAL_COPY(&c.value, val);
 		zval_copy_ctor(&c.value);
 	}
-
 	c.flags = CONST_CS; /* non persistent, case sensetive */
 	c.name = str_strndup(Z_STRVAL_P(name), Z_STRLEN_P(name));
 	c.name_len = Z_STRLEN_P(name)+1;

@@ -952,53 +952,53 @@ static_class_constant:
 ;
 
 static_scalar: /* compile-time evaluated scalars */
-		static_scalar_value { $$ = $1; }
-	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
-	|	'[' static_array_pair_list ']' { $$ = $2; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
+		static_scalar_value { zend_do_constant_expression(&$$, $1.u.ast TSRMLS_CC); }
 ;
 
 static_scalar_value:
-		common_scalar	{ $$ = $1; }
-	|	static_class_name_scalar	{ $$ = $1; }
-	|	namespace_name 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT, 1 TSRMLS_CC); }
-	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_CT, 0 TSRMLS_CC); }
-	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); zend_do_fetch_constant(&$$, NULL, &$2, ZEND_CT, 0 TSRMLS_CC); }
-	|	static_class_constant { $$ = $1; }
-	|	T_CLASS_C			{ $$ = $1; }
+		common_scalar	{ $$.u.ast = zend_ast_create_constant_node(&$1.u.constant); }
+	|	static_class_name_scalar	{ $$.u.ast = zend_ast_create_constant_node(&$1.u.constant); }
+	|	namespace_name 		{ zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT, 1 TSRMLS_CC); $$.u.ast = zend_ast_create_constant_node(&$$.u.constant); }
+	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_CT, 0 TSRMLS_CC); $$.u.ast = zend_ast_create_constant_node(&$$.u.constant); }
+	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); zend_do_fetch_constant(&$$, NULL, &$2, ZEND_CT, 0 TSRMLS_CC); $$.u.ast = zend_ast_create_constant_node(&$$.u.constant); }
+	|	static_class_constant { $$.u.ast = zend_ast_create_constant_node(&$1.u.constant); }
+	|	T_CLASS_C			{ $$.u.ast = zend_ast_create_constant_node(&$1.u.constant); }
+	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; $$.u.ast = zend_ast_create_constant_node(&$$.u.constant); }
+	|	'[' static_array_pair_list ']' { $$ = $2; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; $$.u.ast = zend_ast_create_constant_node(&$$.u.constant); }
 	|	static_operation { $$ = $1; }
 ;
 
 static_operation:
-		static_scalar_value '+' static_scalar_value { zend_ast_add_binary(&$$.u.constant, add_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value '-' static_scalar_value { zend_ast_add_binary(&$$.u.constant, sub_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value '*' static_scalar_value { zend_ast_add_binary(&$$.u.constant, mul_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value '/' static_scalar_value { zend_ast_add_binary(&$$.u.constant, div_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value '%' static_scalar_value { zend_ast_add_binary(&$$.u.constant, mod_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	'!' static_scalar_value { zend_ast_add_unary(&$$.u.constant, boolean_not_function, &$2.u.constant TSRMLS_CC); }
-	|	'~' static_scalar_value { zend_ast_add_unary(&$$.u.constant, bitwise_not_function, &$2.u.constant TSRMLS_CC); }
-	|	static_scalar_value '|' static_scalar_value { zend_ast_add_binary(&$$.u.constant, bitwise_or_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value '&' static_scalar_value { zend_ast_add_binary(&$$.u.constant, bitwise_and_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value '^' static_scalar_value { zend_ast_add_binary(&$$.u.constant, bitwise_xor_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_SL static_scalar_value { zend_ast_add_binary(&$$.u.constant, shift_left_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_SR static_scalar_value { zend_ast_add_binary(&$$.u.constant, shift_right_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value '.' static_scalar_value { zend_ast_add_binary(&$$.u.constant, concat_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_LOGICAL_XOR static_scalar_value { zend_ast_add_binary(&$$.u.constant, boolean_xor_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_LOGICAL_AND static_scalar_value { zend_ast_add_binary(&$$.u.constant, boolean_and_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_LOGICAL_OR static_scalar_value { zend_ast_add_binary(&$$.u.constant, boolean_or_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_BOOLEAN_AND static_scalar_value { zend_ast_add_binary(&$$.u.constant, boolean_and_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_BOOLEAN_OR static_scalar_value { zend_ast_add_binary(&$$.u.constant, boolean_or_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_IS_IDENTICAL static_scalar_value { zend_ast_add_binary(&$$.u.constant, is_identical_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_IS_NOT_IDENTICAL static_scalar_value { zend_ast_add_binary(&$$.u.constant, is_not_identical_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_IS_EQUAL static_scalar_value { zend_ast_add_binary(&$$.u.constant, is_equal_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_IS_NOT_EQUAL static_scalar_value { zend_ast_add_binary(&$$.u.constant, is_not_equal_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value '<' static_scalar_value { zend_ast_add_binary(&$$.u.constant, is_smaller_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value '>' static_scalar_value { zend_ast_add_binary(&$$.u.constant, is_smaller_function, &$3.u.constant, &$1.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_IS_SMALLER_OR_EQUAL static_scalar_value { zend_ast_add_binary(&$$.u.constant, is_smaller_or_equal_function, &$1.u.constant, &$3.u.constant TSRMLS_CC); }
-	|	static_scalar_value T_IS_GREATER_OR_EQUAL static_scalar_value { zend_ast_add_binary(&$$.u.constant, is_smaller_or_equal_function, &$3.u.constant, &$1.u.constant TSRMLS_CC); }
-	|	static_scalar_value '?' ':' static_scalar_value { zend_ast_add_ternary(&$$.u.constant, ternary_function, &$1.u.constant, NULL, &$4.u.constant TSRMLS_CC); }
-	|	static_scalar_value '?' static_scalar_value ':' static_scalar_value { zend_ast_add_ternary(&$$.u.constant, ternary_function, &$1.u.constant, &$3.u.constant, &$5.u.constant TSRMLS_CC); }
-	|	'+' static_scalar_value { ZVAL_LONG(&$1.u.constant, 0); zend_ast_add_binary(&$$.u.constant, add_function, &$1.u.constant, &$2.u.constant TSRMLS_CC); }
-	|	'-' static_scalar_value { ZVAL_LONG(&$1.u.constant, 0); zend_ast_add_binary(&$$.u.constant, sub_function, &$1.u.constant, &$2.u.constant TSRMLS_CC); }
+		static_scalar_value '+' static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_ADD, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value '-' static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_SUB, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value '*' static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_MUL, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value '/' static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_DIV, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value '%' static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_MOD, $1.u.ast, $3.u.ast); }
+	|	'!' static_scalar_value { $$.u.ast = zend_ast_create_node1(ZEND_BOOL_NOT, $2.u.ast); }
+	|	'~' static_scalar_value { $$.u.ast = zend_ast_create_node1(ZEND_BW_NOT, $2.u.ast); }
+	|	static_scalar_value '|' static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_BW_OR, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value '&' static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_BW_AND, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value '^' static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_BW_XOR, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_SL static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_SL, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_SR static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_SR, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value '.' static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_CONCAT, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_LOGICAL_XOR static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_BOOL_XOR, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_LOGICAL_AND static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_BOOL_AND, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_LOGICAL_OR static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_BOOL_OR, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_BOOLEAN_AND static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_BOOL_AND, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_BOOLEAN_OR static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_BOOL_OR, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_IS_IDENTICAL static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_IS_IDENTICAL, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_IS_NOT_IDENTICAL static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_IS_NOT_IDENTICAL, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_IS_EQUAL static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_IS_EQUAL, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_IS_NOT_EQUAL static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_IS_NOT_EQUAL, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value '<' static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_IS_SMALLER, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value '>' static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_IS_SMALLER, $3.u.ast, $1.u.ast); }
+	|	static_scalar_value T_IS_SMALLER_OR_EQUAL static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_IS_SMALLER_OR_EQUAL, $1.u.ast, $3.u.ast); }
+	|	static_scalar_value T_IS_GREATER_OR_EQUAL static_scalar_value { $$.u.ast = zend_ast_create_node2(ZEND_IS_SMALLER_OR_EQUAL, $3.u.ast, $1.u.ast); }
+	|	static_scalar_value '?' ':' static_scalar_value { $$.u.ast = zend_ast_create_node3(ZEND_TERNARY, $1.u.ast, NULL, $4.u.ast); }
+	|	static_scalar_value '?' static_scalar_value ':' static_scalar_value { $$.u.ast = zend_ast_create_node3(ZEND_TERNARY, $1.u.ast, $3.u.ast, $5.u.ast); }
+	|	'+' static_scalar_value { $$.u.ast = zend_ast_create_node1(ZEND_UNARY_PLUS, $2.u.ast); }
+	|	'-' static_scalar_value { $$.u.ast = zend_ast_create_node1(ZEND_UNARY_MINUS, $2.u.ast); }
 	|	'(' static_scalar_value ')' { $$ = $2; }
 ;
 

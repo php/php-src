@@ -13,118 +13,317 @@
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
    | Authors: Bob Weinand <bwoebi@php.net>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
 /* $Id$ */
 
 #include "zend_ast.h"
-#include "zend_execute.h"
+#include "zend_API.h"
+#include "zend_operators.h"
 
-#define COPY_ZVAL_TO_OP(nr) \
-	if (op##nr) { \
-		Z_AST_P(result)->ops[nr] = emalloc(sizeof(zval)); \
-		*Z_AST_P(result)->ops[nr] = *op##nr; \
-	} else { \
-		Z_AST_P(result)->ops[nr] = NULL; \
-	}
-
-void zend_ast_add(zval *result, intermediary_ast_function_type func, char op_count) {
-	zend_ast *ast = emalloc(sizeof(zend_ast) + op_count * sizeof(zval *));
-	ast->op_count = op_count;
-	ast->ops = (zval **)(ast + 1);
-	ast->refcount = 1;
-	ast->func = func;
-	Z_AST_P(result) = ast;
-	Z_TYPE_P(result) = IS_CONSTANT_AST;
+ZEND_API zend_ast *zend_ast_create_constant_node(zval *zv)
+{
+	zend_ast *node = emalloc(sizeof(zend_ast) + sizeof(zval));
+	node->kind = ZEND_CONST;
+	node->children = 0;
+	node->u.val = (zval*)(node + 1);
+	INIT_PZVAL_COPY(node->u.val, zv);
+	return node;
 }
 
-/* Do operations on constant operators at compile time (AST building time) */
-
-void zend_ast_add_unary(zval *result, unary_ast_func func, zval *op0 TSRMLS_DC) {
-	if (!op0 || !IS_CONSTANT_TYPE(Z_TYPE_P(op0))) {
-		func(result, op0 TSRMLS_CC);
-		if (op0) zval_dtor(op0);
-		return;
-	}
-
-	zend_ast_add(result, (intermediary_ast_function_type)func, 1);
-	COPY_ZVAL_TO_OP(0)
+ZEND_API zend_ast* zend_ast_create_node1(uint kind, zend_ast *op0)
+{
+	zend_ast *node = emalloc(sizeof(zend_ast));
+	node->kind = kind;
+	node->children = 1;
+	node->u.child[0] = op0;
+	return node;
 }
 
-void zend_ast_add_binary(zval *result, binary_ast_func func, zval *op0, zval *op1 TSRMLS_DC) {
-	if ((!op0 || !IS_CONSTANT_TYPE(Z_TYPE_P(op0))) && (!op1 || !IS_CONSTANT_TYPE(Z_TYPE_P(op1)))) {
-		func(result, op0, op1 TSRMLS_CC);
-		if (op0) zval_dtor(op0);
-		if (op1) zval_dtor(op1);
-		return;
-	}
-	
-	zend_ast_add(result, (intermediary_ast_function_type)func, 2);
-	COPY_ZVAL_TO_OP(0)
-	COPY_ZVAL_TO_OP(1)
+ZEND_API zend_ast* zend_ast_create_node2(uint kind, zend_ast *op0, zend_ast *op1)
+{
+	zend_ast *node = emalloc(sizeof(zend_ast) + sizeof(zend_ast*));
+	node->kind = kind;
+	node->children = 2;
+	node->u.child[0] = op0;
+	node->u.child[1] = op1;
+	return node;
 }
 
-void zend_ast_add_ternary(zval *result, ternary_ast_func func, zval *op0, zval *op1, zval *op2 TSRMLS_DC) {
-	if ((!op0 || !IS_CONSTANT_TYPE(Z_TYPE_P(op0))) && (!op1 || !IS_CONSTANT_TYPE(Z_TYPE_P(op1))) && (!op2 || !IS_CONSTANT_TYPE(Z_TYPE_P(op2)))) { 
-		func(result, op0, op1, op2 TSRMLS_CC);
-		if (op0) zval_dtor(op0);
-		if (op1) zval_dtor(op1);
-		if (op2) zval_dtor(op2);
-		return;
-	}
-	
-	zend_ast_add(result, (intermediary_ast_function_type)func, 3);
-	COPY_ZVAL_TO_OP(0)
-	COPY_ZVAL_TO_OP(1)
-	COPY_ZVAL_TO_OP(2)
+ZEND_API zend_ast* zend_ast_create_node3(uint kind, zend_ast *op0, zend_ast *op1, zend_ast *op2)
+{
+	zend_ast *node = emalloc(sizeof(zend_ast) + sizeof(zend_ast*) * 2);
+	node->kind = kind;
+	node->children = 3;
+	node->u.child[0] = op0;
+	node->u.child[1] = op1;
+	node->u.child[2] = op2;
+	return node;
 }
 
-void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC) {
-	int i;
-	zval **ops = emalloc((sizeof(zval *) + sizeof(zval)) * ast->op_count);
-
-	for (i = ast->op_count; i--;) {
-		if (ast->ops[i] && IS_CONSTANT_TYPE(Z_TYPE_P(ast->ops[i]))) {
-			ops[i] = ((zval *)(ops + ast->op_count)) + i;
-			*ops[i] = *ast->ops[i];
-			zval_copy_ctor(ops[i]);
-			zval_update_constant_ex(&ops[i], (void *)1, NULL TSRMLS_CC);
-		} else {
-			ops[i] = ast->ops[i];
-		}
-	}
-
-	switch (ast->op_count) {
-		case 1:
-			((unary_ast_func)ast->func)(result, ops[0] TSRMLS_CC);
-			break;
-		case 2:
-			((binary_ast_func)ast->func)(result, ops[0], ops[1] TSRMLS_CC);
-			break;
-		case 3:
-			((ternary_ast_func)ast->func)(result, ops[0], ops[1], ops[2] TSRMLS_CC);
-			break;
-	}
-
-	for (i = ast->op_count; i--;) {
-		if (ast->ops[i] != ops[i]) {
-			zval_dtor(ops[i]);
-		}
-	}
-	
-	efree(ops);
-}
-
-void zend_ast_destroy(zend_ast *ast TSRMLS_DC) {
+ZEND_API int zend_ast_is_ct_constant(zend_ast *ast)
+{
 	int i;
 
-	for (i = ast->op_count; i--;) {
-		if (ast->ops[i] && !Z_DELREF_P(ast->ops[i])) {
-			zval_dtor(ast->ops[i]);
-			efree(ast->ops[i]);
+	if (ast->kind == ZEND_CONST) {
+		return !IS_CONSTANT_TYPE(Z_TYPE_P(ast->u.val));
+	} else {
+		for (i = 0; i < ast->children; i++) {
+			if (ast->u.child[i]) {
+				if (!zend_ast_is_ct_constant(ast->u.child[i])) {
+					return 0;
+				}
+			}
+		}
+		return 1;
+	}
+}
+
+ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC)
+{
+	zval op1, op2;
+
+	switch (ast->kind) {
+		case ZEND_ADD:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			add_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_SUB:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			sub_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_MUL:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			mul_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_DIV:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			div_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_MOD:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			mod_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_SL:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			shift_left_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_SR:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			shift_right_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_CONCAT:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			concat_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_BW_OR:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			bitwise_or_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_BW_AND:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			bitwise_and_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_BW_XOR:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			bitwise_xor_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_BW_NOT:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			bitwise_not_function(result, &op1 TSRMLS_CC);
+			zval_dtor(&op1);
+			break;
+		case ZEND_BOOL_NOT:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			boolean_not_function(result, &op1 TSRMLS_CC);
+			zval_dtor(&op1);
+			break;
+		case ZEND_BOOL_XOR:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			boolean_xor_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_IS_IDENTICAL:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			is_identical_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_IS_NOT_IDENTICAL:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			is_not_identical_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_IS_EQUAL:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			is_equal_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_IS_NOT_EQUAL:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			is_not_equal_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_IS_SMALLER:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			is_smaller_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_IS_SMALLER_OR_EQUAL:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+			is_smaller_or_equal_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op1);
+			zval_dtor(&op2);
+			break;
+		case ZEND_CONST:
+			*result = *ast->u.val;
+			zval_copy_ctor(result);
+			if (IS_CONSTANT_TYPE(Z_TYPE_P(result))) {
+				zval_update_constant(&result, (void *) 1 TSRMLS_CC);
+			}
+			break;
+		case ZEND_BOOL_AND:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			if (zend_is_true(&op1)) {
+				zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+				ZVAL_BOOL(result, zend_is_true(&op2));
+				zval_dtor(&op2);
+			} else {
+				ZVAL_BOOL(result, 0);
+			}
+			zval_dtor(&op1);
+			break;
+		case ZEND_BOOL_OR:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			if (zend_is_true(&op1)) {
+				ZVAL_BOOL(result, 1);
+			} else {
+				zend_ast_evaluate(&op2, ast->u.child[1] TSRMLS_CC);
+				ZVAL_BOOL(result, zend_is_true(&op2));
+				zval_dtor(&op2);
+			}
+			zval_dtor(&op1);
+			break;
+		case ZEND_TERNARY:
+			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
+			if (zend_is_true(&op1)) {
+				if (!ast->u.child[1]) {
+					*result = op1;
+				} else {
+					zend_ast_evaluate(result, ast->u.child[1] TSRMLS_CC);
+					zval_dtor(&op1);
+				}
+			} else {
+				zend_ast_evaluate(result, ast->u.child[2] TSRMLS_CC);
+				zval_dtor(&op1);
+			}
+			break;
+		case ZEND_UNARY_PLUS:
+			ZVAL_LONG(&op1, 0);
+			zend_ast_evaluate(&op2, ast->u.child[0] TSRMLS_CC);
+			add_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op2);
+			break;
+		case ZEND_UNARY_MINUS:
+			ZVAL_LONG(&op1, 0);
+			zend_ast_evaluate(&op2, ast->u.child[0] TSRMLS_CC);
+			sub_function(result, &op1, &op2 TSRMLS_CC);
+			zval_dtor(&op2);
+			break;
+		default:
+			zend_error(E_ERROR, "Unsupported constant expression");
+	}
+}
+
+ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
+{
+    if (ast == NULL) {
+    	return NULL;
+	} else if (ast->kind == ZEND_CONST) {
+		zend_ast *node = zend_ast_create_constant_node(ast->u.val);
+		zval_copy_ctor(node->u.val);
+		return node;
+	} else {
+		switch (ast->children) {
+			case 1:
+				return zend_ast_create_node1(
+					ast->kind,
+					zend_ast_copy(ast->u.child[0]));
+			case 2:
+				return zend_ast_create_node2(
+					ast->kind,
+					zend_ast_copy(ast->u.child[0]),
+					zend_ast_copy(ast->u.child[1]));
+			case 3:
+				return zend_ast_create_node3(
+					ast->kind,
+					zend_ast_copy(ast->u.child[0]),
+					zend_ast_copy(ast->u.child[1]),
+					zend_ast_copy(ast->u.child[2]));
 		}
 	}
+	return NULL;
+}
 
+ZEND_API void zend_ast_destroy(zend_ast *ast)
+{
+	int i;
+
+	if (ast->kind == ZEND_CONST) {
+		zval_dtor(ast->u.val);
+	} else {
+		for (i = 0; i < ast->children; i++) {
+			if (ast->u.child[i]) {
+				zend_ast_destroy(ast->u.child[i]);
+			}
+		}
+	}
 	efree(ast);
 }

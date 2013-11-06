@@ -49,7 +49,7 @@ ZEND_API void _zval_dtor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			}
 			break;
 		case IS_CONSTANT_AST:
-			ZEND_AST_DEL_REF(Z_AST_P(zvalue));
+			zend_ast_destroy(Z_AST_P(zvalue));
 			break;
 		case IS_OBJECT:
 			{
@@ -85,11 +85,9 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 			CHECK_ZVAL_STRING_REL(zvalue);
 			str_free(zvalue->value.str.val);
 			break;
-		case IS_CONSTANT_AST:
-			ZEND_AST_DEL_REF(Z_AST_P(zvalue));
-			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_ARRAY:
+		case IS_CONSTANT_AST:
 		case IS_OBJECT:
 		case IS_RESOURCE:
 			zend_error(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
@@ -147,7 +145,7 @@ ZEND_API void _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 			}
 			break;
 		case IS_CONSTANT_AST:
-			ZEND_AST_ADD_REF(Z_AST_P(zvalue));
+			Z_AST_P(zvalue) = zend_ast_copy(Z_AST_P(zvalue));
 			break;
 		case IS_OBJECT:
 			{

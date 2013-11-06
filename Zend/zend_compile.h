@@ -93,6 +93,7 @@ typedef struct _znode { /* used only during compilation */
 		znode_op op;
 		zval constant; /* replaced by literal/zv */
 		zend_op_array *op_array;
+		zend_ast *ast;
 	} u;
 	zend_uint EA;      /* extended attributes */
 } znode;
@@ -639,6 +640,7 @@ void zend_do_end_namespace(TSRMLS_D);
 void zend_verify_namespace(TSRMLS_D);
 void zend_do_use(znode *name, znode *new_name, int is_global TSRMLS_DC);
 void zend_do_end_compilation(TSRMLS_D);
+void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC);
 
 void zend_do_resolve_class_name(znode *result, znode *class_name, int is_static TSRMLS_DC);
 
@@ -721,10 +723,6 @@ int zend_add_literal(zend_op_array *op_array, const zval *zv TSRMLS_DC);
 #include "zend_vm_opcodes.h"
 
 #define ZEND_OP_DATA				137
-
-/* Pseudo-opcodes for internal object overloading */
-#define ZEND_BOOL_AND				-1
-#define ZEND_BOOL_OR				-2
 
 /* END: OPCODES */
 

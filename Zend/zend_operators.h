@@ -50,8 +50,6 @@ ZEND_API int mul_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int div_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int mod_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int boolean_xor_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
-ZEND_API int boolean_and_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
-ZEND_API int boolean_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
 ZEND_API int boolean_not_function(zval *result, zval *op1 TSRMLS_DC);
 ZEND_API int bitwise_not_function(zval *result, zval *op1 TSRMLS_DC);
 ZEND_API int bitwise_or_function(zval *result, zval *op1, zval *op2 TSRMLS_DC);
@@ -378,8 +376,6 @@ ZEND_API int zend_atoi(const char *str, int str_len);
 ZEND_API long zend_atol(const char *str, int str_len);
 
 ZEND_API void zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
-
-ZEND_API int ternary_function(zval *result, zval *condition, zval *then, zval *if_not TSRMLS_DC);
 END_EXTERN_C()
 
 #define convert_to_ex_master(ppzv, lower_type, upper_type)	\

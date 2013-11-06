@@ -5793,8 +5793,8 @@ void zend_do_add_static_array_element(znode *result, znode *offset, const znode 
 				key[len + 1] = 0;
 				zend_symtable_update(Z_ARRVAL(result->u.constant), key, len + 2, &element, sizeof(zval *), NULL);
 				efree(key);
+				break;
 			}
-			break;
 			case IS_STRING:
 				zend_symtable_update(Z_ARRVAL(result->u.constant), Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+1, &element, sizeof(zval *), NULL);
 				zval_dtor(&offset->u.constant);
@@ -7130,6 +7130,21 @@ void zend_do_end_compilation(TSRMLS_D) /* {{{ */
 {
 	CG(has_bracketed_namespaces) = 0;
 	zend_do_end_namespace(TSRMLS_C);
+}
+/* }}} */
+
+void zend_do_constant_expression(znode *result, zend_ast *ast TSRMLS_DC) /* {{{ */
+{
+	if (ast->kind == ZEND_CONST) {
+		result->u.constant = *ast->u.val;
+		efree(ast);
+	} else if (zend_ast_is_ct_constant(ast)) {
+		zend_ast_evaluate(&result->u.constant, ast TSRMLS_CC);
+		zend_ast_destroy(ast);
+	} else {
+		Z_TYPE(result->u.constant) = IS_CONSTANT_AST;
+		Z_AST(result->u.constant) = ast;
+	}
 }
 /* }}} */
 
