@@ -33,7 +33,7 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module TSRMLS_DC
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module TSRMLS_CC
 
-#define ZEND_MODULE_API_NO 20121212
+#define ZEND_MODULE_API_NO 20131106
 #ifdef ZTS
 #define USING_ZTS 1
 #else
