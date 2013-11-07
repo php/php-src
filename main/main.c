@@ -1842,6 +1842,8 @@ void php_request_shutdown(void *dummy)
 	}
 #endif
 
+	php_shutdown_temporary_directory();
+
 #ifdef HAVE_DTRACE
 	DTRACE_REQUEST_SHUTDOWN(SAFE_FILENAME(SG(request_info).path_translated), SAFE_FILENAME(SG(request_info).request_uri), (char *)SAFE_FILENAME(SG(request_info).request_method));
 #endif /* HAVE_DTRACE */
@@ -2383,7 +2385,6 @@ void php_module_shutdown(TSRMLS_D)
 #endif
 
 	php_output_shutdown();
-	php_shutdown_temporary_directory();
 
 	module_initialized = 0;
 
