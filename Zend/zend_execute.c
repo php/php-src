@@ -781,7 +781,7 @@ static inline int zend_assign_to_string_offset(const temp_variable *T, const zva
 		}
 
 		if (offset >= Z_STRSIZE_P(str)) {
-			Z_STRVAL_P(str) = str_erealloc(Z_STRSIZE_P(str), offset+1+1);
+			Z_STRVAL_P(str) = str_erealloc(Z_STRVAL_P(str), offset+1+1);
 			memset(Z_STRVAL_P(str) + Z_STRSIZE_P(str), ' ', offset - Z_STRSIZE_P(str));
 			Z_STRVAL_P(str)[offset+1] = 0;
 			Z_STRSIZE_P(str) = offset+1;
