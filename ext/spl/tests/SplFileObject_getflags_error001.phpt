@@ -7,10 +7,10 @@ Erwin Poeze <erwin.poeze@gmail.com>
 --FILE--
 <?php
 
-file_put_contents('testdata.csv', 'eerste;tweede;derde');
+file_put_contents('SplFileObject_getflags_error001.csv', 'eerste;tweede;derde');
 
 
-$fo = new SplFileObject('testdata.csv');
+$fo = new SplFileObject('SplFileObject_getflags_error001.csv');
 $fo->setFlags(SplFileObject::READ_CSV);
 
 $fo->setFlags(SplFileObject::DROP_NEW_LINE);
@@ -20,7 +20,7 @@ var_dump($fo->getFlags());
 ?>
 --CLEAN--
 <?php
-unlink('testdata.csv');
+unlink('SplFileObject_getflags_error001.csv');
 ?>
 --EXPECT--
 int(1)

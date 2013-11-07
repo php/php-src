@@ -2247,7 +2247,6 @@ MYSQLND_METHOD(mysqlnd_conn_data, change_user)(MYSQLND_CONN_DATA * const conn,
 	}
 	if (!db) {
 		db = "";
-
 	}
 
 	/* XXX: passwords that have \0 inside work during auth, but in this case won't work with change user */

@@ -578,10 +578,6 @@ foundit:
 			/* construct actual offset to file start - local extra_len can be different from central extra_len */
 			entry.offset = entry.offset_abs =
 				sizeof(local) + entry.header_offset + PHAR_GET_16(local.filename_len) + PHAR_GET_16(local.extra_len);
-#if PHP_VERSION_ID < 50207
-			/* work around Bug #46147 */
-			fp->writepos = fp->readpos = 0;
-#endif
 			php_stream_seek(fp, entry.offset, SEEK_SET);
 			/* these next lines should be for php < 5.2.6 after 5.3 filters are fixed */
 			fp->writepos = 0;
@@ -605,9 +601,6 @@ foundit:
 
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
 					pefree(entry.filename, entry.is_persistent);
-#if PHP_VERSION_ID < 50207
-					PHAR_ZIP_FAIL("unable to read in alias, truncated (PHP 5.2.7 and newer has a potential fix for this problem)");
-#endif
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 
@@ -626,9 +619,6 @@ foundit:
 
 				if (!(entry.uncompressed_filesize = php_stream_copy_to_mem(fp, &actual_alias, entry.uncompressed_filesize, 0)) || !actual_alias) {
 					pefree(entry.filename, entry.is_persistent);
-#if PHP_VERSION_ID < 50207
-					PHAR_ZIP_FAIL("unable to read in alias, truncated (PHP 5.2.7 and newer has a potential fix for this problem)");
-#endif
 					PHAR_ZIP_FAIL("unable to read in alias, truncated");
 				}
 
