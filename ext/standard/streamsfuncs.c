@@ -543,7 +543,7 @@ PHP_FUNCTION(stream_get_transports)
 	HashTable *stream_xport_hash;
 	char *stream_xport;
 	zend_str_size stream_xport_len;
-	ulong num_key;
+	zend_uint_t num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -573,7 +573,7 @@ PHP_FUNCTION(stream_get_wrappers)
 	char *stream_protocol;
 	int key_flags;
 	zend_str_size stream_protocol_len = 0;
-	ulong num_key;
+	zend_uint_t num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -659,7 +659,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds TSRMLS_DC)
 		int type;
 		char *key;
 		zend_str_size key_len;
-		ulong num_ind;
+		zend_uint_t num_ind;
 		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
 			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
 			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
@@ -925,7 +925,7 @@ static int parse_context_options(php_stream_context *context, zval *options TSRM
 	char *wkey, *okey;
 	zend_str_size wkey_len, okey_len;
 	int ret = SUCCESS;
-	ulong num_key;
+	zend_uint_t num_key;
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(options), &pos);
 	while (SUCCESS == zend_hash_get_current_data_ex(Z_ARRVAL_P(options), (void**)&wval, &pos)) {

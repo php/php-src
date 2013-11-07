@@ -436,7 +436,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			zval **value;
 			char *key;
 			zend_str_size key_len;
-			ulong num_index;
+			zend_uint_t num_index;
 
 			zend_hash_internal_pointer_reset_ex(&ce->constants_table, &pos);
 
@@ -567,7 +567,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 			while (zend_hash_get_current_data_ex(properties, (void **) &prop, &pos) == SUCCESS) {
 				char  *prop_name;
 				zend_str_size  prop_name_size;
-				ulong index;
+				zend_uint_t index;
 
 				if (zend_hash_get_current_key_ex(properties, &prop_name, &prop_name_size, &index, 1, &pos) == HASH_KEY_IS_STRING) {
 					if (prop_name_size && prop_name[0]) { /* skip all private and protected properties */
@@ -606,7 +606,7 @@ static void _class_string(string *str, zend_class_entry *ce, zval *obj, char *in
 				{
 					char *key;
 					zend_str_size key_len;
-					ulong num_index;
+					zend_uint_t num_index;
 					zend_str_size len = strlen(mptr->common.function_name);
 
 					/* Do not display old-style inherited constructors */
@@ -791,7 +791,7 @@ static void _function_parameter_string(string *str, zend_function *fptr, char* i
 static void _function_closure_string(string *str, zend_function *fptr, char* indent TSRMLS_DC)
 {
 	zend_uint i, count;
-	ulong num_index;
+	zend_uint_t num_index;
 	char *key;
 	zend_str_size key_len;
 	HashTable *static_variables;
@@ -3380,7 +3380,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 	zval *prop, *prop_copy;
 	char *key;
 	zend_str_size key_len;
-	ulong num_index;
+	zend_uint_t num_index;
 
 	zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
 	while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop_info, &pos) == SUCCESS) {

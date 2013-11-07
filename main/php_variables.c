@@ -654,7 +654,7 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src TSRMLS_DC)
 	zval **src_entry, **dest_entry;
 	char *string_key;
 	zend_str_size string_key_len;
-	ulong num_key;
+	zend_uint_t num_key;
 	HashPosition pos;
 	int key_type;
 	int globals_check = (dest == (&EG(symbol_table)));

@@ -2406,7 +2406,7 @@ PHP_FUNCTION(substr_replace)
 	} else { /* str is array of strings */
 		char *str_index = NULL;
 		zend_str_size str_index_len;
-		ulong num_index;
+		zend_uint_t num_index;
 
 		array_init(return_value);
 
@@ -2426,7 +2426,7 @@ PHP_FUNCTION(substr_replace)
 		while (zend_hash_get_current_data_ex(Z_ARRVAL_PP(str), (void **) &tmp_str, &pos_str) == SUCCESS) {
 			zval *orig_str;
 			zval dummy;
-			ulong refcount;
+			zend_uint_t refcount;
 			int was_ref;
 
 			if(Z_TYPE_PP(tmp_str) != IS_STRING) {
@@ -2895,7 +2895,7 @@ static PATNREPL *php_strtr_array_prepare_repls(zend_str_size_int slen, HashTable
 			zend_hash_move_forward_ex(pats, &hpos)) {
 		char	*string_key;
 		zend_str_size string_key_len;
-		ulong	num_key;
+		zend_uint_t	num_key;
 		zval	*tzv = NULL;
 
 		switch (zend_hash_get_current_key_ex(pats, &string_key, &string_key_len, &num_key, 0, &hpos)) {
@@ -3942,7 +3942,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	zval *result;
 	char *string_key;
 	zend_str_size string_key_len;
-	ulong num_key;
+	zend_uint_t num_key;
 	zend_str_size count = 0;
 	int argc = ZEND_NUM_ARGS();
 

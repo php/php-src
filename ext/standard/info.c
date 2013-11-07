@@ -197,7 +197,7 @@ static void php_print_gpcse_array(char *name, uint name_length TSRMLS_DC)
 	zval **data, **tmp, tmp2;
 	char *string_key;
 	zend_str_size_uint string_len;
-	ulong num_key;
+	zend_uint_t num_key;
 
 	zend_is_auto_global(name, name_length TSRMLS_CC);
 

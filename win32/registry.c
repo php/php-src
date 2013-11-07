@@ -101,7 +101,7 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 					HashPosition pos;
 					char *index;
 					uint index_len;
-					ulong num;
+					zend_uint_t num;
 					zval **tmpdata;
 
 					for (zend_hash_internal_pointer_reset_ex(parent_ht, &pos);
@@ -254,7 +254,7 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 			HashPosition pos;
 			char *index;
 			uint index_len;
-			ulong num;
+			zend_uint_t num;
 			zval **data;
 
 			for (zend_hash_internal_pointer_reset_ex(ht, &pos);

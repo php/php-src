@@ -844,7 +844,7 @@ static inline int process_named_entity_html(const char **buf, const char **start
 static inline int resolve_named_entity_html(const char *start, zend_str_size_size_t length, const entity_ht *ht, unsigned *uni_cp1, unsigned *uni_cp2)
 {
 	const entity_cp_map *s;
-	ulong hash = zend_inline_hash_func(start, length);
+	zend_uint_t hash = zend_inline_hash_func(start, length);
 
 	s = ht->buckets[hash % ht->num_elems];
 	while (s->entity) {

@@ -417,7 +417,7 @@ PHP_FUNCTION(spl_autoload_call)
 	zend_str_size_int class_name_len;
 	char *func_name, *lc_name;
 	zend_str_size_uint func_name_len;
-	ulong dummy;
+	zend_uint_t dummy;
 	HashPosition function_pos;
 	autoload_func_info *alfi;
 
@@ -750,7 +750,7 @@ PHP_FUNCTION(spl_autoload_functions)
 				} else {
 				   char *key;
 				   zend_str_size_uint len;
-				   long dummy;
+				   zend_uint_t dummy;
 				   zend_hash_get_current_key_ex(SPL_G(autoload_functions), &key, &len, &dummy, 0, &function_pos); 
 				   add_next_index_stringl(return_value, key, len - 1, 1);
 				}

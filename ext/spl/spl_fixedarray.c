@@ -703,7 +703,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 	if (num > 0 && save_indexes) {
 		zval **element, *value;
 		char *str_index;
-		ulong num_index, max_index = 0;
+		zend_uint_t num_index, max_index = 0;
 		long tmp;
 
 		for (zend_hash_internal_pointer_reset(Z_ARRVAL_P(data));

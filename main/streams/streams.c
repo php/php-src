@@ -123,7 +123,7 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 			if (stream) {
 				HashPosition pos;
 				zend_rsrc_list_entry *regentry;
-				ulong index = -1; /* intentional */
+				zend_uint_t index = -1; /* intentional */
 
 				/* see if this persistent resource already has been loaded to the
 				 * regular list; allowing the same resource in several entries in the

@@ -575,7 +575,7 @@ ZEND_FUNCTION(each)
 	zval *array, *entry, **entry_ptr, *tmp;
 	char *string_key;
 	zend_str_size string_key_len;
-	ulong num_key;
+	zend_uint_t num_key;
 	zval **inserted_pointer;
 	HashTable *target_hash;
 
@@ -911,7 +911,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 	zval *prop, *prop_copy;
 	char *key;
 	zend_str_size key_len;
-	ulong num_index;
+	zend_uint_t num_index;
 
 	zend_hash_internal_pointer_reset_ex(&ce->properties_info, &pos);
 	while (zend_hash_get_current_data_ex(&ce->properties_info, (void **) &prop_info, &pos) == SUCCESS) {
@@ -991,7 +991,7 @@ ZEND_FUNCTION(get_object_vars)
 	char *key;
 	const char *prop_name, *class_name;
 	zend_str_size key_len, prop_len;
-	ulong num_index;
+	zend_uint_t num_index;
 	zend_object *zobj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "o", &obj) == FAILURE) {
@@ -1078,7 +1078,7 @@ ZEND_FUNCTION(get_class_methods)
 		       EG(scope) == mptr->common.scope)))) {
 			char *key;
 			zend_str_size key_len;
-			ulong num_index;
+			zend_uint_t num_index;
 			zend_str_size len = strlen(mptr->common.function_name);
 
 			/* Do not display old-style inherited constructors */
@@ -1177,7 +1177,7 @@ ZEND_FUNCTION(property_exists)
 	zend_class_entry *ce, **pce;
 	zend_property_info *property_info;
 	zval property_z;
-	ulong h;
+	zend_uint_t h;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "zS", &object, &property, &property_len) == FAILURE) {
 		return;

@@ -139,7 +139,7 @@ static void print_hash(zend_write_func_t write_func, HashTable *ht, int indent, 
 	zval **tmp;
 	char *string_key;
 	HashPosition iterator;
-	ulong num_key;
+	zend_uint_t num_key;
 	zend_str_size str_len;
 	int i;
 
@@ -201,7 +201,7 @@ static void print_flat_hash(HashTable *ht TSRMLS_DC) /* {{{ */
 	zval **tmp;
 	char *string_key;
 	HashPosition iterator;
-	ulong num_key;
+	zend_uint_t num_key;
 	zend_str_size str_len;
 	int i = 0;
 

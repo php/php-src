@@ -67,7 +67,7 @@ typedef struct _spl_array_object {
 	zval              *array;
 	zval              *retval;
 	HashPosition      pos;
-	ulong             pos_h;
+	zend_uint_t             pos_h;
 	int               ar_flags;
 	int               is_self;
 	zend_function     *fptr_offset_get;
@@ -917,7 +917,7 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht TSR
 {
 	char *string_key;
 	zend_str_size string_length;
-	ulong num_key;
+	zend_uint_t num_key;
 
 	if (Z_TYPE_P(intern->array) == IS_OBJECT) {
 		do {

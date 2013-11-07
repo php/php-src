@@ -545,7 +545,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 
 static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old TSRMLS_DC) /* {{{ */
 {
-	ulong var_no;
+	zend_uint_t var_no;
 	char id[32], *p;
 	register zend_str_size len;
 
@@ -567,7 +567,7 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 			zend_hash_next_index_insert(var_hash, &var_no, sizeof(var_no), NULL);
 		}
 #if 0
-		fprintf(stderr, "- had var (%d): %lu\n", Z_TYPE_P(var), **(ulong**)var_old);
+		fprintf(stderr, "- had var (%d): %lu\n", Z_TYPE_P(var), **(zend_uint_t**)var_old);
 #endif
 		return FAILURE;
 	}
@@ -633,7 +633,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 	if (count > 0) {
 		char *key;
 		zval **d, **name;
-		ulong index;
+		zend_uint_t index;
 		HashPosition pos;
 		int i;
 		zval nval, *nvalp;
@@ -709,7 +709,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var_hash TSRMLS_DC) /* {{{ */
 {
 	int i;
-	ulong *var_already;
+	zend_uint_t *var_already;
 	HashTable *myht;
 
 	if (EG(exception)) {
@@ -851,7 +851,7 @@ static void php_var_serialize_intern(smart_str *buf, zval *struc, HashTable *var
 			if (i > 0) {
 				char *key;
 				zval **data;
-				ulong index;
+				zend_uint_t index;
 				zend_str_size key_len;
 				HashPosition pos;
 

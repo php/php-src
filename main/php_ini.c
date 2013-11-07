@@ -771,7 +771,7 @@ PHPAPI void php_ini_activate_config(HashTable *source_hash, int modify_type, int
 	char *str;
 	zval *data;
 	zend_str_size str_len;
-	ulong num_index;
+	zend_uint_t num_index;
 
 	/* Walk through config hash and alter matching ini entries using the values found in the hash */
 	for (zend_hash_internal_pointer_reset(source_hash);

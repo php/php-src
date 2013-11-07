@@ -547,7 +547,7 @@ PHP_FUNCTION(stream_get_filters)
 	int key_flags;
 	zend_str_size filter_name_len = 0;
 	HashTable *filters_hash;
-	ulong num_key;
+	zend_uint_t num_key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;

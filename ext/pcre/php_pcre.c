@@ -1343,7 +1343,7 @@ static void preg_replace_impl(INTERNAL_FUNCTION_PARAMETERS, int is_callable_repl
 	int				 limit_val = -1;
 	php_int_t			limit = -1;
 	char			*string_key;
-	ulong			 num_key;
+	zend_uint_t			 num_key;
 	char			*callback_name;
 	int				 replace_count=0, old_replace_count;
 	
@@ -1770,7 +1770,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	int				 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
 	char			*string_key;
-	ulong			 num_key;
+	zend_uint_t			 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
 										   entries */
 	int				 rc;

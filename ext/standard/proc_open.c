@@ -82,7 +82,7 @@ static php_process_env_t _php_array_to_envp(zval *environment, int is_persistent
 #endif
 	char *p;
 	zend_str_size string_length, cnt, l, sizeenv=0, el_len;
-	ulong num_key;
+	zend_uint_t num_key;
 	HashTable *target_hash;
 	HashPosition pos;
 
@@ -519,7 +519,7 @@ PHP_FUNCTION(proc_open)
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(descriptorspec), &pos);
 	while (zend_hash_get_current_data_ex(Z_ARRVAL_P(descriptorspec), (void **)&descitem, &pos) == SUCCESS) {
 		char *str_index;
-		ulong nindex;
+		zend_uint_t nindex;
 		zval **ztype;
 
 		str_index = NULL;
