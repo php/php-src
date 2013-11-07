@@ -533,7 +533,7 @@ static int ZEND_FASTCALL zend_do_fcall_common_helper_SPEC(ZEND_OPCODE_HANDLER_AR
 		if (fbc->common.arg_info) {
 			zend_uint i=0;
 			zval **p = (zval**)EX(function_state).arguments;
-			ulong arg_count = opline->extended_value;
+			zend_uint_t arg_count = opline->extended_value;
 
 			while (arg_count>0) {
 				zend_verify_arg_type(fbc, ++i, *(p-arg_count), 0 TSRMLS_CC);
@@ -2941,7 +2941,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_A
 			while (zend_hash_has_more_elements(fe_ht) == SUCCESS) {
 				char *str_key;
 				zend_str_size_uint str_key_len;
-				ulong int_key;
+				zend_uint_t int_key;
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
@@ -3381,7 +3381,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_CONST(int type
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = opline->op1.zv;
@@ -3859,7 +3859,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_O
 	if (IS_CONST != IS_UNUSED) {
 
 		zval *offset = opline->op2.zv;
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -3976,7 +3976,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HA
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_CONST == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -4752,7 +4752,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMP_HANDLER(ZEND_OPC
 	if (IS_TMP_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -5246,7 +5246,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_VAR(int type, 
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = opline->op1.zv;
@@ -5604,7 +5604,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_VAR_HANDLER(ZEND_OPC
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -5721,7 +5721,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HAND
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_CONST == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -5986,7 +5986,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CONST_UNUSED(int typ
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = opline->op1.zv;
@@ -6303,7 +6303,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_
 	if (IS_UNUSED != IS_UNUSED) {
 
 		zval *offset = NULL;
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -6420,7 +6420,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_H
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_CONST == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -7233,7 +7233,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCO
 	if (IS_CV != IS_UNUSED) {
 
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -8244,7 +8244,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			while (zend_hash_has_more_elements(fe_ht) == SUCCESS) {
 				char *str_key;
 				zend_str_size_uint str_key_len;
-				ulong int_key;
+				zend_uint_t int_key;
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
@@ -8736,7 +8736,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_CONST(int type, 
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -9119,7 +9119,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPC
 	if (IS_CONST != IS_UNUSED) {
 
 		zval *offset = opline->op2.zv;
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -9236,7 +9236,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HAND
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_TMP_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -9974,7 +9974,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP_HANDLER(ZEND_OPCOD
 	if (IS_TMP_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -10468,7 +10468,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_VAR(int type, ZE
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -10828,7 +10828,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_VAR_HANDLER(ZEND_OPCOD
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -10945,7 +10945,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_TMP_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -11210,7 +11210,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_TMP_UNUSED(int type,
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_tmp(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -11404,7 +11404,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OP
 	if (IS_UNUSED != IS_UNUSED) {
 
 		zval *offset = NULL;
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -11521,7 +11521,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_TMP_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -12256,7 +12256,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE
 	if (IS_CV != IS_UNUSED) {
 
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -13557,7 +13557,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			while (zend_hash_has_more_elements(fe_ht) == SUCCESS) {
 				char *str_key;
 				zend_str_size_uint str_key_len;
-				ulong int_key;
+				zend_uint_t int_key;
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
@@ -13614,7 +13614,7 @@ static int ZEND_FASTCALL  ZEND_FE_FETCH_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARG
 			int key_type;
 			char *str_key;
 			zend_str_size_uint str_key_len;
-			zend_ulong int_key;
+			zend_uint_t int_key;
 
 			fe_ht = Z_OBJPROP_P(array);
 			zend_hash_set_pointer(fe_ht, &EX_T(opline->op1.var).fe.fe_pos);
@@ -14614,7 +14614,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_CONST(int type, 
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -15702,7 +15702,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPC
 	if (IS_CONST != IS_UNUSED) {
 
 		zval *offset = opline->op2.zv;
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -15819,7 +15819,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -15841,7 +15841,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HAND
 	zend_free_op free_op1;
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -16064,7 +16064,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CONST(
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -17939,7 +17939,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP_HANDLER(ZEND_OPCOD
 	if (IS_TMP_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -18000,7 +18000,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLE
 	zend_free_op free_op1, free_op2;
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -18138,7 +18138,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_TMP(in
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -19181,7 +19181,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_VAR(int type, ZE
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -20230,7 +20230,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_VAR_HANDLER(ZEND_OPCOD
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -20347,7 +20347,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -20369,7 +20369,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLE
 	zend_free_op free_op1, free_op2;
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -20592,7 +20592,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_VAR(in
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -21153,7 +21153,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_VAR_UNUSED(int type,
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -21638,7 +21638,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OP
 	if (IS_UNUSED != IS_UNUSED) {
 
 		zval *offset = NULL;
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -21755,7 +21755,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HAN
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_VAR == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -23661,7 +23661,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE
 	if (IS_CV != IS_UNUSED) {
 
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -23722,7 +23722,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER
 	zend_free_op free_op1;
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, execute_data, &free_op1 TSRMLS_CC);
@@ -23860,7 +23860,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_VAR_CV(int
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -25218,7 +25218,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_H
 
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
@@ -25354,7 +25354,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CON
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -26525,7 +26525,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HAN
 	zend_free_op free_op2;
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
@@ -26661,7 +26661,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_TMP
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -27832,7 +27832,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HAN
 	zend_free_op free_op2;
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
@@ -27968,7 +27968,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_VAR
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -29561,7 +29561,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HAND
 
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_ptr_unused(TSRMLS_C);
@@ -29697,7 +29697,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_UNUSED_CV(
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -31049,7 +31049,7 @@ static int ZEND_FASTCALL  ZEND_FE_RESET_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS
 			while (zend_hash_has_more_elements(fe_ht) == SUCCESS) {
 				char *str_key;
 				zend_str_size_uint str_key_len;
-				ulong int_key;
+				zend_uint_t int_key;
 				zend_uchar key_type;
 
 				key_type = zend_hash_get_current_key_ex(fe_ht, &str_key, &str_key_len, &int_key, 0, NULL);
@@ -31971,7 +31971,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_CONST(int type, Z
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
@@ -32831,7 +32831,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCO
 	if (IS_CONST != IS_UNUSED) {
 
 		zval *offset = opline->op2.zv;
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -32948,7 +32948,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_CV == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -32970,7 +32970,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDL
 
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var TSRMLS_CC);
@@ -33191,7 +33191,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CONST(i
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -34931,7 +34931,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMP_HANDLER(ZEND_OPCODE
 	if (IS_TMP_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_tmp(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -34992,7 +34992,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER
 	zend_free_op free_op2;
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var TSRMLS_CC);
@@ -35128,7 +35128,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_TMP(int
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -36167,7 +36167,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_VAR(int type, ZEN
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
@@ -37084,7 +37084,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_VAR_HANDLER(ZEND_OPCODE
 	if (IS_VAR != IS_UNUSED) {
 		zend_free_op free_op2;
 		zval *offset = _get_zval_ptr_var(opline->op2.var, execute_data, &free_op2 TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -37201,7 +37201,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_CV == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -37223,7 +37223,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER
 	zend_free_op free_op2;
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var TSRMLS_CC);
@@ -37444,7 +37444,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_VAR(int
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();
@@ -38001,7 +38001,7 @@ static int ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_CV_UNUSED(int type, 
 	zval **retval;
 	zval tmp_varname;
 	HashTable *target_symbol_table;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op1.var TSRMLS_CC);
@@ -38362,7 +38362,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPC
 	if (IS_UNUSED != IS_UNUSED) {
 
 		zval *offset = NULL;
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -38479,7 +38479,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HAND
 		}
 		zend_std_unset_static_property(ce, Z_STRVAL_P(varname), Z_STRSIZE_P(varname), ((IS_CV == IS_CONST) ? opline->op1.literal : NULL) TSRMLS_CC);
 	} else {
-		ulong hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
+		zend_uint_t hash_value = zend_inline_hash_func(varname->value.str.val, varname->value.str.len+1);
 
 		target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK TSRMLS_CC);
 		zend_delete_variable(execute_data, target_symbol_table, varname->value.str.val, varname->value.str.len+1, hash_value TSRMLS_CC);
@@ -40230,7 +40230,7 @@ static int ZEND_FASTCALL  ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_
 	if (IS_CV != IS_UNUSED) {
 
 		zval *offset = _get_zval_ptr_cv_BP_VAR_R(execute_data, opline->op2.var TSRMLS_CC);
-		ulong hval;
+		zend_uint_t hval;
 
 		switch (Z_TYPE_P(offset)) {
 			case IS_DOUBLE:
@@ -40291,7 +40291,7 @@ static int ZEND_FASTCALL  ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_
 
 	zval **container;
 	zval *offset;
-	ulong hval;
+	zend_uint_t hval;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_cv_BP_VAR_UNSET(execute_data, opline->op1.var TSRMLS_CC);
@@ -40427,7 +40427,7 @@ static int ZEND_FASTCALL zend_isset_isempty_dim_prop_obj_handler_SPEC_CV_CV(int 
 	zval *container;
 	zval **value = NULL;
 	int result = 0;
-	ulong hval;
+	zend_uint_t hval;
 	zval *offset;
 
 	SAVE_OPLINE();

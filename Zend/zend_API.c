@@ -1336,7 +1336,7 @@ ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, zend_str_size_uint ke
 }
 /* }}} */
 
-ZEND_API int add_index_long(zval *arg, ulong index, long n) /* {{{ */
+ZEND_API int add_index_long(zval *arg, zend_uint_t index, long n) /* {{{ */
 {
 	zval *tmp;
 
@@ -1347,7 +1347,7 @@ ZEND_API int add_index_long(zval *arg, ulong index, long n) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_index_null(zval *arg, ulong index) /* {{{ */
+ZEND_API int add_index_null(zval *arg, zend_uint_t index) /* {{{ */
 {
 	zval *tmp;
 
@@ -1358,7 +1358,7 @@ ZEND_API int add_index_null(zval *arg, ulong index) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_index_bool(zval *arg, ulong index, int b) /* {{{ */
+ZEND_API int add_index_bool(zval *arg, zend_uint_t index, int b) /* {{{ */
 {
 	zval *tmp;
 
@@ -1369,7 +1369,7 @@ ZEND_API int add_index_bool(zval *arg, ulong index, int b) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_index_resource(zval *arg, ulong index, int r) /* {{{ */
+ZEND_API int add_index_resource(zval *arg, zend_uint_t index, int r) /* {{{ */
 {
 	zval *tmp;
 
@@ -1380,7 +1380,7 @@ ZEND_API int add_index_resource(zval *arg, ulong index, int r) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_index_double(zval *arg, ulong index, double d) /* {{{ */
+ZEND_API int add_index_double(zval *arg, zend_uint_t index, double d) /* {{{ */
 {
 	zval *tmp;
 
@@ -1391,7 +1391,7 @@ ZEND_API int add_index_double(zval *arg, ulong index, double d) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int add_index_string(zval *arg, ulong index, const char *str, int duplicate) /* {{{ */
+ZEND_API int add_index_string(zval *arg, zend_uint_t index, const char *str, int duplicate) /* {{{ */
 {
 	zval *tmp;
 
@@ -1402,7 +1402,7 @@ ZEND_API int add_index_string(zval *arg, ulong index, const char *str, int dupli
 }
 /* }}} */
 
-ZEND_API int add_index_stringl(zval *arg, ulong index, const char *str, zend_str_size_uint length, int duplicate) /* {{{ */
+ZEND_API int add_index_stringl(zval *arg, zend_uint_t index, const char *str, zend_str_size_uint length, int duplicate) /* {{{ */
 {
 	zval *tmp;
 
@@ -1413,7 +1413,7 @@ ZEND_API int add_index_stringl(zval *arg, ulong index, const char *str, zend_str
 }
 /* }}} */
 
-ZEND_API int add_index_zval(zval *arg, ulong index, zval *value) /* {{{ */
+ZEND_API int add_index_zval(zval *arg, zend_uint_t index, zval *value) /* {{{ */
 {
 	return zend_hash_index_update(Z_ARRVAL_P(arg), index, (void *) &value, sizeof(zval *), NULL);
 }
@@ -1524,7 +1524,7 @@ ZEND_API int add_get_assoc_stringl_ex(zval *arg, const char *key, zend_str_size_
 }
 /* }}} */
 
-ZEND_API int add_get_index_long(zval *arg, ulong index, long l, void **dest) /* {{{ */
+ZEND_API int add_get_index_long(zval *arg, zend_uint_t index, long l, void **dest) /* {{{ */
 {
 	zval *tmp;
 
@@ -1535,7 +1535,7 @@ ZEND_API int add_get_index_long(zval *arg, ulong index, long l, void **dest) /* 
 }
 /* }}} */
 
-ZEND_API int add_get_index_double(zval *arg, ulong index, double d, void **dest) /* {{{ */
+ZEND_API int add_get_index_double(zval *arg, zend_uint_t index, double d, void **dest) /* {{{ */
 {
 	zval *tmp;
 
@@ -1546,7 +1546,7 @@ ZEND_API int add_get_index_double(zval *arg, ulong index, double d, void **dest)
 }
 /* }}} */
 
-ZEND_API int add_get_index_string(zval *arg, ulong index, const char *str, void **dest, int duplicate) /* {{{ */
+ZEND_API int add_get_index_string(zval *arg, zend_uint_t index, const char *str, void **dest, int duplicate) /* {{{ */
 {
 	zval *tmp;
 
@@ -1557,7 +1557,7 @@ ZEND_API int add_get_index_string(zval *arg, ulong index, const char *str, void 
 }
 /* }}} */
 
-ZEND_API int add_get_index_stringl(zval *arg, ulong index, const char *str, zend_str_size_uint length, void **dest, int duplicate) /* {{{ */
+ZEND_API int add_get_index_stringl(zval *arg, zend_uint_t index, const char *str, zend_str_size_uint length, void **dest, int duplicate) /* {{{ */
 {
 	zval *tmp;
 
@@ -2068,7 +2068,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	zend_str_size fname_len;
 	const char *lc_class_name = NULL;
 	zend_str_size class_name_len = 0;
-	zend_ulong hash;
+	zend_uint_t hash;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -2517,7 +2517,7 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 {
 	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
 	char *lowercase_name = emalloc(orig_class_entry->name_length + 1);
-	zend_ulong hash;
+	zend_uint_t hash;
 	*class_entry = *orig_class_entry;
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
@@ -3437,7 +3437,7 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, ze
 {
 	zend_property_info property_info, *property_info_ptr;
 	const char *interned_name;
-	ulong h = zend_get_hash_value(name, name_length+1);
+	zend_uint_t h = zend_get_hash_value(name, name_length+1);
 
 	if (!(access_type & ZEND_ACC_PPP_MASK)) {
 		access_type |= ZEND_ACC_PUBLIC;
@@ -4042,7 +4042,7 @@ ZEND_API const char* zend_resolve_method_name(zend_class_entry *ce, zend_functio
 		if (func == f) {
 			char *name;
 			zend_str_size len;
-			ulong idx;
+			zend_uint_t idx;
 
 			if (zend_hash_get_current_key_ex(function_table, &name, &len, &idx, 0, &iterator) != HASH_KEY_IS_STRING) {
 				return f->common.function_name;

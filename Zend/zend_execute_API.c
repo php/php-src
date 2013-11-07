@@ -563,7 +563,7 @@ ZEND_API int zval_update_constant_ex(zval **pp, void *arg, zend_class_entry *sco
 		zval **element, *new_val;
 		char *str_index;
 		zend_str_size str_index_len;
-		ulong num_index;
+		zend_uint_t num_index;
 		int ret;
 
 		SEPARATE_ZVAL_IF_NOT_REF(pp);
@@ -1024,7 +1024,7 @@ ZEND_API int zend_lookup_class_ex(const char *name, zend_str_size_int name_lengt
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
 	char dummy = 1;
-	ulong hash;
+	zend_uint_t hash;
 	ALLOCA_FLAG(use_heap)
 
 	if (key) {
@@ -1676,7 +1676,7 @@ ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const char *name, zend_str_size_int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
+ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const char *name, zend_str_size_int name_len, zend_uint_t hash_value TSRMLS_DC) /* {{{ */
 {
 	if (zend_hash_quick_del(ht, name, name_len, hash_value) == SUCCESS) {
 		name_len--;
@@ -1699,7 +1699,7 @@ ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const c
 }
 /* }}} */
 
-ZEND_API int zend_delete_global_variable_ex(const char *name, zend_str_size_int name_len, ulong hash_value TSRMLS_DC) /* {{{ */
+ZEND_API int zend_delete_global_variable_ex(const char *name, zend_str_size_int name_len, zend_uint_t hash_value TSRMLS_DC) /* {{{ */
 {
 	zend_execute_data *ex;
 

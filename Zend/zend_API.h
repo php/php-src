@@ -399,14 +399,14 @@ ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, zend_str_size_uint ke
 #define add_next_index_unset(__arg) add_next_index_null(__arg)
 #define add_property_unset(__arg, __key) add_property_null(__arg, __key)
 
-ZEND_API int add_index_long(zval *arg, ulong idx, long n);
-ZEND_API int add_index_null(zval *arg, ulong idx);
-ZEND_API int add_index_bool(zval *arg, ulong idx, int b);
-ZEND_API int add_index_resource(zval *arg, ulong idx, int r);
-ZEND_API int add_index_double(zval *arg, ulong idx, double d);
-ZEND_API int add_index_string(zval *arg, ulong idx, const char *str, int duplicate);
-ZEND_API int add_index_stringl(zval *arg, ulong idx, const char *str, zend_str_size_uint length, int duplicate);
-ZEND_API int add_index_zval(zval *arg, ulong index, zval *value);
+ZEND_API int add_index_long(zval *arg, zend_uint_t idx, long n);
+ZEND_API int add_index_null(zval *arg, zend_uint_t idx);
+ZEND_API int add_index_bool(zval *arg, zend_uint_t idx, int b);
+ZEND_API int add_index_resource(zval *arg, zend_uint_t idx, int r);
+ZEND_API int add_index_double(zval *arg, zend_uint_t idx, double d);
+ZEND_API int add_index_string(zval *arg, zend_uint_t idx, const char *str, int duplicate);
+ZEND_API int add_index_stringl(zval *arg, zend_uint_t idx, const char *str, zend_str_size_uint length, int duplicate);
+ZEND_API int add_index_zval(zval *arg, zend_uint_t index, zval *value);
 
 ZEND_API int add_next_index_long(zval *arg, long n);
 ZEND_API int add_next_index_null(zval *arg);
@@ -423,10 +423,10 @@ ZEND_API int add_get_assoc_stringl_ex(zval *arg, const char *key, zend_str_size_
 #define add_get_assoc_string(__arg, __key, __str, __dest, __duplicate) add_get_assoc_string_ex(__arg, __key, strlen(__key)+1, __str, __dest, __duplicate)
 #define add_get_assoc_stringl(__arg, __key, __str, __length, __dest, __duplicate) add_get_assoc_stringl_ex(__arg, __key, strlen(__key)+1, __str, __length, __dest, __duplicate)
 
-ZEND_API int add_get_index_long(zval *arg, ulong idx, long l, void **dest);
-ZEND_API int add_get_index_double(zval *arg, ulong idx, double d, void **dest);
-ZEND_API int add_get_index_string(zval *arg, ulong idx, const char *str, void **dest, int duplicate);
-ZEND_API int add_get_index_stringl(zval *arg, ulong idx, const char *str, zend_str_size_uint length, void **dest, int duplicate);
+ZEND_API int add_get_index_long(zval *arg, zend_uint_t idx, long l, void **dest);
+ZEND_API int add_get_index_double(zval *arg, zend_uint_t idx, double d, void **dest);
+ZEND_API int add_get_index_string(zval *arg, zend_uint_t idx, const char *str, void **dest, int duplicate);
+ZEND_API int add_get_index_stringl(zval *arg, zend_uint_t idx, const char *str, zend_str_size_uint length, void **dest, int duplicate);
 
 ZEND_API int array_set_zval_key(HashTable *ht, zval *key, zval *value);
 
@@ -513,11 +513,11 @@ ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci
 
 ZEND_API int zend_set_hash_symbol(zval *symbol, const char *name, zend_str_size_int name_length, zend_bool is_ref, int num_symbol_tables, ...);
 
-ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const char *name, zend_str_size_int name_len, ulong hash_value TSRMLS_DC);
+ZEND_API void zend_delete_variable(zend_execute_data *ex, HashTable *ht, const char *name, zend_str_size_int name_len, zend_uint_t hash_value TSRMLS_DC);
 
 ZEND_API int zend_delete_global_variable(const char *name, zend_str_size_int name_len TSRMLS_DC);
 
-ZEND_API int zend_delete_global_variable_ex(const char *name, zend_str_size_int name_len, ulong hash_value TSRMLS_DC);
+ZEND_API int zend_delete_global_variable_ex(const char *name, zend_str_size_int name_len, zend_uint_t hash_value TSRMLS_DC);
 
 ZEND_API void zend_reset_all_cv(HashTable *symbol_table TSRMLS_DC);
 

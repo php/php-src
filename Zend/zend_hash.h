@@ -43,7 +43,7 @@
 #define HASH_UPDATE_KEY_IF_AFTER   2
 #define HASH_UPDATE_KEY_ANYWAY     3
 
-typedef ulong (*hash_func_t)(const char *arKey, zend_str_size_uint nKeyLength);
+typedef zend_uint_t (*hash_func_t)(const char *arKey, zend_str_size_uint nKeyLength);
 typedef int  (*compare_func_t)(const void *, const void * TSRMLS_DC);
 typedef void (*sort_func_t)(void *, size_t, register size_t, compare_func_t TSRMLS_DC);
 typedef void (*dtor_func_t)(void *pDest);
@@ -53,7 +53,7 @@ typedef void (*copy_ctor_param_func_t)(void *pElement, void *pParam);
 struct _hashtable;
 
 typedef struct bucket {
-	ulong h;						/* Used for numeric indexing */
+	zend_uint_t h;						/* Used for numeric indexing */
 	zend_str_size_uint nKeyLength;
 	void *pData;
 	void *pDataPtr;
@@ -68,7 +68,7 @@ typedef struct _hashtable {
 	uint nTableSize;
 	uint nTableMask;
 	uint nNumOfElements;
-	ulong nNextFreeElement;
+	zend_uint_t nNextFreeElement;
 	Bucket *pInternalPointer;	/* Used for element traversal */
 	Bucket *pListHead;
 	Bucket *pListTail;
@@ -86,7 +86,7 @@ typedef struct _hashtable {
 typedef struct _zend_hash_key {
 	const char *arKey;
 	zend_str_size_uint nKeyLength;
-	ulong h;
+	zend_uint_t h;
 } zend_hash_key;
 
 
@@ -111,13 +111,13 @@ ZEND_API int _zend_hash_add_or_update(HashTable *ht, const char *arKey, zend_str
 #define zend_hash_add(ht, arKey, nKeyLength, pData, nDataSize, pDest) \
 		_zend_hash_add_or_update(ht, arKey, nKeyLength, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
 
-ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
+ZEND_API int _zend_hash_quick_add_or_update(HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, zend_uint_t h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 #define zend_hash_quick_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest) \
 		_zend_hash_quick_add_or_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_hash_quick_add(ht, arKey, nKeyLength, h, pData, nDataSize, pDest) \
 		_zend_hash_quick_add_or_update(ht, arKey, nKeyLength, h, pData, nDataSize, pDest, HASH_ADD ZEND_FILE_LINE_CC)
 
-ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, ulong h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
+ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, zend_uint_t h, void *pData, uint nDataSize, void **pDest, int flag ZEND_FILE_LINE_DC);
 #define zend_hash_index_update(ht, h, pData, nDataSize, pDest) \
 		_zend_hash_index_update_or_next_insert(ht, h, pData, nDataSize, pDest, HASH_UPDATE ZEND_FILE_LINE_CC)
 #define zend_hash_next_index_insert(ht, pData, nDataSize, pDest) \
@@ -150,7 +150,7 @@ ZEND_API void zend_hash_reverse_apply(HashTable *ht, apply_func_t apply_func TSR
 
 
 /* Deletes */
-ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, ulong h, int flag);
+ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, zend_uint_t h, int flag);
 #define zend_hash_del(ht, arKey, nKeyLength) \
 		zend_hash_del_key_or_index(ht, arKey, nKeyLength, 0, HASH_DEL_KEY)
 #define zend_hash_quick_del(ht, arKey, nKeyLength, h) \
@@ -158,35 +158,35 @@ ZEND_API int zend_hash_del_key_or_index(HashTable *ht, const char *arKey, zend_s
 #define zend_hash_index_del(ht, h) \
 		zend_hash_del_key_or_index(ht, NULL, 0, h, HASH_DEL_INDEX)
 
-ZEND_API ulong zend_get_hash_value(const char *arKey, zend_str_size_uint nKeyLength);
+ZEND_API zend_uint_t zend_get_hash_value(const char *arKey, zend_str_size_uint nKeyLength);
 
 /* Data retreival */
 ZEND_API int zend_hash_find(const HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, void **pData);
-ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, ulong h, void **pData);
-ZEND_API int zend_hash_index_find(const HashTable *ht, ulong h, void **pData);
+ZEND_API int zend_hash_quick_find(const HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, zend_uint_t h, void **pData);
+ZEND_API int zend_hash_index_find(const HashTable *ht, zend_uint_t h, void **pData);
 
 /* Misc */
 ZEND_API int zend_hash_exists(const HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength);
-ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, ulong h);
-ZEND_API int zend_hash_index_exists(const HashTable *ht, ulong h);
-ZEND_API ulong zend_hash_next_free_element(const HashTable *ht);
+ZEND_API int zend_hash_quick_exists(const HashTable *ht, const char *arKey, zend_str_size_uint nKeyLength, zend_uint_t h);
+ZEND_API int zend_hash_index_exists(const HashTable *ht, zend_uint_t h);
+ZEND_API zend_uint_t zend_hash_next_free_element(const HashTable *ht);
 
 /* traversing */
 #define zend_hash_has_more_elements_ex(ht, pos) \
 	(zend_hash_get_current_key_type_ex(ht, pos) == HASH_KEY_NON_EXISTENT ? FAILURE : SUCCESS)
 ZEND_API int zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_move_backwards_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index, zend_str_size_uint *str_length, ulong *num_index, zend_bool duplicate, HashPosition *pos);
+ZEND_API int zend_hash_get_current_key_ex(const HashTable *ht, char **str_index, zend_str_size_uint *str_length, zend_uint_t *num_index, zend_bool duplicate, HashPosition *pos);
 ZEND_API void zend_hash_get_current_key_zval_ex(const HashTable *ht, zval *key, HashPosition *pos);
 ZEND_API int zend_hash_get_current_key_type_ex(HashTable *ht, HashPosition *pos);
 ZEND_API int zend_hash_get_current_data_ex(HashTable *ht, void **pData, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_reset_ex(HashTable *ht, HashPosition *pos);
 ZEND_API void zend_hash_internal_pointer_end_ex(HashTable *ht, HashPosition *pos);
-ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, zend_str_size_uint str_length, ulong num_index, int mode, HashPosition *pos);
+ZEND_API int zend_hash_update_current_key_ex(HashTable *ht, int key_type, const char *str_index, zend_str_size_uint str_length, zend_uint_t num_index, int mode, HashPosition *pos);
 
 typedef struct _HashPointer {
 	HashPosition pos;
-	ulong h;
+	zend_uint_t h;
 } HashPointer;
 
 ZEND_API int zend_hash_get_pointer(const HashTable *ht, HashPointer *ptr);
@@ -261,9 +261,9 @@ ZEND_API int zend_hash_rehash(HashTable *ht);
  *                  -- Ralf S. Engelschall <rse@engelschall.com>
  */
 
-static inline ulong zend_inline_hash_func(const char *arKey, zend_str_size_uint nKeyLength)
+static inline zend_uint_t zend_inline_hash_func(const char *arKey, zend_str_size_uint nKeyLength)
 {
-	register ulong hash = 5381;
+	register zend_uint_t hash = 5381;
 
 	/* variant with the hash unrolled eight times */
 	for (; nKeyLength >= 8; nKeyLength -= 8) {
@@ -291,7 +291,7 @@ EMPTY_SWITCH_DEFAULT_CASE()
 }
 
 
-ZEND_API ulong zend_hash_func(const char *arKey, zend_str_size_uint nKeyLength);
+ZEND_API zend_uint_t zend_hash_func(const char *arKey, zend_str_size_uint nKeyLength);
 
 #if ZEND_DEBUG
 /* debug */
@@ -330,11 +330,11 @@ END_EXTERN_C()
 		}																	\
 		if (tmp == end) {													\
 			if (*key == '-') {												\
-				if (idx-1 > LONG_MAX) { /* overflow */						\
+				if (idx-1 > ZEND_INT_MAX) { /* overflow */						\
 					break;													\
 				}															\
 				idx = 0 - idx;               									\
-			} else if (idx > LONG_MAX) { /* overflow */						\
+			} else if (idx > ZEND_INT_MAX) { /* overflow */						\
 				break;														\
 			}																\
 			func;															\
@@ -343,7 +343,7 @@ END_EXTERN_C()
 } while (0)
 
 #define ZEND_HANDLE_NUMERIC(key, length, func) do {							\
-	ulong idx;																\
+	zend_uint_t idx;																\
 																			\
 	ZEND_HANDLE_NUMERIC_EX(key, length, idx, return func);					\
 } while (0)
