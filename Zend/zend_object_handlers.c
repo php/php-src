@@ -272,7 +272,7 @@ static zend_always_inline struct _zend_property_info *zend_get_property_info_qui
 	zend_property_info *property_info;
 	zend_property_info *scope_property_info;
 	zend_bool denied_access = 0;
-	ulong h;
+	zend_uint_t h;
 
 	if (key && (property_info = CACHED_POLYMORPHIC_PTR(key->cache_slot, ce)) != NULL) {
 		return property_info;
@@ -913,7 +913,7 @@ ZEND_API void zend_std_call_user_call(INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
  * Returns the function address that should be called, or NULL
  * if no such function exists.
  */
-static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, zend_str_size_int function_name_strlen, ulong hash_value TSRMLS_DC) /* {{{ */
+static inline zend_function *zend_check_private_int(zend_function *fbc, zend_class_entry *ce, char *function_name_strval, zend_str_size_int function_name_strlen, zend_uint_t hash_value TSRMLS_DC) /* {{{ */
 {
 	if (!ce) {
 		return 0;
@@ -1004,7 +1004,7 @@ static union _zend_function *zend_std_get_method(zval **object_ptr, char *method
 	zend_function *fbc;
 	zval *object = *object_ptr;
 	zend_object *zobj = Z_OBJ_P(object);
-	ulong hash_value;
+	zend_uint_t hash_value;
 	char *lc_method_name;
 	ALLOCA_FLAG(use_heap)
 
@@ -1145,7 +1145,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 {
 	zend_function *fbc = NULL;
 	char *lc_class_name, *lc_function_name = NULL;
-	ulong hash_value;
+	zend_uint_t hash_value;
 	ALLOCA_FLAG(use_heap)
 
 	if (EXPECTED(key != NULL)) {
@@ -1233,7 +1233,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, const c
 ZEND_API zval **zend_std_get_static_property(zend_class_entry *ce, const char *property_name, zend_str_size_int property_name_len, zend_bool silent, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
 	zend_property_info *property_info;
-	ulong hash_value;
+	zend_uint_t hash_value;
 
 	if (UNEXPECTED(!key) ||
 	    (property_info = CACHED_POLYMORPHIC_PTR(key->cache_slot, ce)) == NULL) {

@@ -285,10 +285,10 @@ static zend_uint get_temporary_variable(zend_op_array *op_array) /* {{{ */
 }
 /* }}} */
 
-static int lookup_cv(zend_op_array *op_array, char* name, zend_str_size_int name_len, ulong hash TSRMLS_DC) /* {{{ */
+static int lookup_cv(zend_op_array *op_array, char* name, zend_str_size_int name_len, zend_uint_t hash TSRMLS_DC) /* {{{ */
 {
 	int i = 0;
-	ulong hash_value = hash ? hash : zend_inline_hash_func(name, name_len+1);
+	zend_uint_t hash_value = hash ? hash : zend_inline_hash_func(name, name_len+1);
 
 	while (i < op_array->last_var) {
 		if (op_array->vars[i].name == name ||
@@ -650,7 +650,7 @@ void fetch_simple_variable_ex(znode *result, znode *varname, int bp, zend_uchar 
 	zend_llist *fetch_list_ptr;
 
 	if (varname->op_type == IS_CONST) {
-		ulong hash;
+		zend_uint_t hash;
 
 		if (Z_TYPE(varname->u.constant) != IS_STRING) {
 			convert_to_string(&varname->u.constant);
@@ -817,7 +817,7 @@ void fetch_array_dim(znode *result, const znode *parent, const znode *dim TSRMLS
 	SET_NODE(opline.op1, parent);
 	SET_NODE(opline.op2, dim);
 	if (opline.op2_type == IS_CONST && Z_TYPE(CONSTANT(opline.op2.constant)) == IS_STRING) {
-		ulong index;
+		zend_uint_t index;
 		int numeric = 0;
 
 		ZEND_HANDLE_NUMERIC_EX(Z_STRVAL(CONSTANT(opline.op2.constant)), Z_STRSIZE(CONSTANT(opline.op2.constant))+1, index, numeric = 1);
@@ -1562,7 +1562,7 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 	op_array.line_start = zend_get_compiled_lineno(TSRMLS_C);
 
 	if (is_method) {
-		zend_ulong hash;
+		zend_uint_t hash;
 
 		lcname = zend_new_interned_string(zend_str_tolower_dup(name, name_len), name_len + 1, 1 TSRMLS_CC);
 		hash = str_hash(lcname, name_len);
@@ -3875,7 +3875,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, const char* mname, zend
 static void zend_add_trait_method(zend_class_entry *ce, const char *name, const char *arKey, zend_str_size_uint nKeyLength, zend_function *fn, HashTable **overriden TSRMLS_DC) /* {{{ */
 {
 	zend_function *existing_fn = NULL;
-	ulong h = zend_hash_func(arKey, nKeyLength);
+	zend_uint_t h = zend_hash_func(arKey, nKeyLength);
 
 	if (zend_hash_quick_find(&ce->function_table, arKey, nKeyLength, h, (void**) &existing_fn) == SUCCESS) {
 		if (existing_fn->common.scope == ce) {
@@ -4222,7 +4222,7 @@ static void zend_do_traits_method_binding(zend_class_entry *ce TSRMLS_DC) /* {{{
 }
 /* }}} */
 
-static zend_class_entry* find_first_definition(zend_class_entry *ce, size_t current_trait, const char* prop_name, zend_str_size_int prop_name_length, ulong prop_hash, zend_class_entry *coliding_ce) /* {{{ */
+static zend_class_entry* find_first_definition(zend_class_entry *ce, size_t current_trait, const char* prop_name, zend_str_size_int prop_name_length, zend_uint_t prop_hash, zend_class_entry *coliding_ce) /* {{{ */
 {
 	size_t i;
 
@@ -4246,7 +4246,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce TSRMLS_DC) /* {
 	zval compare_result;
 	const char* prop_name;
 	zend_str_size   prop_name_length;
-	ulong prop_hash;
+	zend_uint_t prop_hash;
 	const char* class_name_unused;
 	zend_bool not_compatible;
 	zval* prop_value;
@@ -5316,7 +5316,7 @@ void zend_do_declare_class_constant(znode *var_name, const znode *value TSRMLS_D
 {
 	zval *property;
 	const char *cname = NULL;
-	zend_ulong hash;
+	zend_uint_t hash;
 
 	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Arrays are not allowed in class constants");
@@ -5559,7 +5559,7 @@ void zend_do_fetch_constant(znode *result, znode *constant_container, znode *con
 	zend_op *opline;
 	int type;
 	char *compound;
-	ulong fetch_type = 0;
+	zend_uint_t fetch_type = 0;
 
 	if (constant_container) {
 		switch (mode) {
@@ -5715,7 +5715,7 @@ void zend_do_init_array(znode *result, const znode *expr, const znode *offset, z
 		if (offset) {
 			SET_NODE(opline->op2, offset);
 			if (opline->op2_type == IS_CONST && Z_TYPE(CONSTANT(opline->op2.constant)) == IS_STRING) {
-				ulong index;
+				zend_uint_t index;
 				int numeric = 0;
 
 				ZEND_HANDLE_NUMERIC_EX(Z_STRVAL(CONSTANT(opline->op2.constant)), Z_STRSIZE(CONSTANT(opline->op2.constant))+1, index, numeric = 1);
@@ -5747,7 +5747,7 @@ void zend_do_add_array_element(znode *result, const znode *expr, const znode *of
 	if (offset) {
 		SET_NODE(opline->op2, offset);
 		if (opline->op2_type == IS_CONST && Z_TYPE(CONSTANT(opline->op2.constant)) == IS_STRING) {
-			ulong index;
+			zend_uint_t index;
 			int numeric = 0;
 
 			ZEND_HANDLE_NUMERIC_EX(Z_STRVAL(CONSTANT(opline->op2.constant)), Z_STRSIZE(CONSTANT(opline->op2.constant))+1, index, numeric = 1);
@@ -6680,7 +6680,7 @@ void zend_do_ticks(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-zend_bool zend_is_auto_global_quick(const char *name, zend_str_size_uint name_len, ulong hash TSRMLS_DC) /* {{{ */
+zend_bool zend_is_auto_global_quick(const char *name, zend_str_size_uint name_len, zend_uint_t hash TSRMLS_DC) /* {{{ */
 {
 	zend_auto_global *auto_global;
 

@@ -575,7 +575,7 @@ static inline void make_real_object(zval **object_ptr TSRMLS_DC)
 	}
 }
 
-ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, ulong fetch_type, const char **class_name, zend_class_entry **pce TSRMLS_DC)
+ZEND_API char * zend_verify_arg_class_kind(const zend_arg_info *cur_arg_info, zend_uint_t fetch_type, const char **class_name, zend_class_entry **pce TSRMLS_DC)
 {
 	*pce = zend_fetch_class(cur_arg_info->class_name, cur_arg_info->class_name_len, (fetch_type | ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD) TSRMLS_CC);
 
@@ -610,7 +610,7 @@ ZEND_API int zend_verify_arg_error(int error_type, const zend_function *zf, zend
 	return 0;
 }
 
-static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zval *arg, ulong fetch_type TSRMLS_DC)
+static inline int zend_verify_arg_type(zend_function *zf, zend_uint arg_num, zval *arg, zend_uint_t fetch_type TSRMLS_DC)
 {
 	zend_arg_info *cur_arg_info;
 	char *need_msg;
@@ -1000,7 +1000,7 @@ static inline zval **zend_fetch_dimension_address_inner(HashTable *ht, const zva
 	zval **retval;
 	char *offset_key;
 	int offset_key_length;
-	ulong hval;
+	zend_uint_t hval;
 
 	switch (dim->type) {
 		case IS_NULL:

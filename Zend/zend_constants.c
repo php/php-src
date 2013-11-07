@@ -299,7 +299,7 @@ ZEND_API int zend_get_constant(const char *name, zend_str_size_uint name_len, zv
 	return retval;
 }
 
-ZEND_API int zend_get_constant_ex(const char *name, zend_str_size_uint name_len, zval *result, zend_class_entry *scope, ulong flags TSRMLS_DC)
+ZEND_API int zend_get_constant_ex(const char *name, zend_str_size_uint name_len, zval *result, zend_class_entry *scope, zend_uint_t flags TSRMLS_DC)
 {
 	zend_constant *c;
 	int retval = 1;
@@ -435,7 +435,7 @@ finish:
 	return zend_get_constant(name, name_len, result TSRMLS_CC);
 }
 
-zend_constant *zend_quick_get_constant(const zend_literal *key, ulong flags TSRMLS_DC)
+zend_constant *zend_quick_get_constant(const zend_literal *key, zend_uint_t flags TSRMLS_DC)
 {
 	zend_constant *c;
 
@@ -472,7 +472,7 @@ ZEND_API int zend_register_constant(zend_constant *c TSRMLS_DC)
 	char *lowercase_name = NULL;
 	char *name;
 	int ret = SUCCESS;
-	ulong chash;
+	zend_uint_t chash;
 
 #if 0
 	printf("Registering constant for module %d\n", c->module_number);

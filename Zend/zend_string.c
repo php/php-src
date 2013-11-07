@@ -82,7 +82,7 @@ void zend_interned_strings_dtor(TSRMLS_D)
 static const char *zend_new_interned_string_int(const char *arKey, zend_str_size_int nKeyLength, int free_src TSRMLS_DC)
 {
 #ifndef ZTS
-	ulong h;
+	zend_uint_t h;
 	uint nIndex;
 	Bucket *p;
 

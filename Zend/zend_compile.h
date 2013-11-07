@@ -67,7 +67,7 @@ typedef struct _zend_compiler_context {
 
 typedef struct _zend_literal {
 	zval       constant;
-	zend_ulong hash_value;
+	zend_uint_t hash_value;
 	zend_uint  cache_slot;
 } zend_literal;
 
@@ -78,7 +78,7 @@ typedef union _znode_op {
 	zend_uint      constant;
 	zend_uint      var;
 	zend_uint      num;
-	zend_ulong     hash;
+	zend_uint_t     hash;
 	zend_uint      opline_num; /*  Needs to be signed */
 	zend_op       *jmp_addr;
 	zval          *zv;
@@ -111,7 +111,7 @@ struct _zend_op {
 	znode_op op1;
 	znode_op op2;
 	znode_op result;
-	ulong extended_value;
+	zend_uint_t extended_value;
 	zend_str_size_uint lineno;
 	zend_uchar opcode;
 	zend_uchar op1_type;
@@ -219,7 +219,7 @@ typedef struct _zend_property_info {
 	zend_uint flags;
 	const char *name;
 	int name_length;
-	ulong h;
+	zend_uint_t h;
 	int offset;
 	const char *doc_comment;
 	int doc_comment_len;
@@ -256,7 +256,7 @@ typedef struct _zend_internal_function_info {
 typedef struct _zend_compiled_variable {
 	const char *name;
 	zend_str_size_int name_len;
-	ulong hash_value;
+	zend_uint_t hash_value;
 } zend_compiled_variable;
 
 struct _zend_op_array {
@@ -708,7 +708,7 @@ typedef struct _zend_auto_global {
 ZEND_API int zend_register_auto_global(const char *name, zend_str_size_uint name_len, zend_bool jit, zend_auto_global_callback auto_global_callback TSRMLS_DC);
 ZEND_API void zend_activate_auto_globals(TSRMLS_D);
 ZEND_API zend_bool zend_is_auto_global(const char *name, zend_str_size_uint name_len TSRMLS_DC);
-ZEND_API zend_bool zend_is_auto_global_quick(const char *name, zend_str_size_uint name_len, ulong hashval TSRMLS_DC);
+ZEND_API zend_bool zend_is_auto_global_quick(const char *name, zend_str_size_uint name_len, zend_uint_t hashval TSRMLS_DC);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 
 int zendlex(znode *zendlval TSRMLS_DC);
