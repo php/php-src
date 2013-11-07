@@ -26,15 +26,15 @@ typedef struct _zend_ast zend_ast;
 
 #include "zend.h"
 
-typedef enum _zend_ast_node_kind {
-	/* first 256 node kinds are reserved for opcodes */
+typedef enum _zend_ast_kind {
+	/* first 256 kinds are reserved for opcodes */
 	ZEND_CONST = 256,
 	ZEND_BOOL_AND,
 	ZEND_BOOL_OR,
-	ZEND_TERNARY,
+	ZEND_SELECT,
 	ZEND_UNARY_PLUS,
 	ZEND_UNARY_MINUS,
-} zend_ast_ode_kind;
+} zend_ast_kind;
 
 struct _zend_ast {
 	unsigned short kind;
@@ -45,11 +45,11 @@ struct _zend_ast {
 	} u;
 };
 
-ZEND_API zend_ast *zend_ast_create_constant_node(zval *zv);
+ZEND_API zend_ast *zend_ast_create_constant(zval *zv);
 
-ZEND_API zend_ast *zend_ast_create_node1(uint kind, zend_ast *op0);
-ZEND_API zend_ast *zend_ast_create_node2(uint kind, zend_ast *op0, zend_ast *op1);
-ZEND_API zend_ast *zend_ast_create_node3(uint kind, zend_ast *op0, zend_ast *op1, zend_ast *op2);
+ZEND_API zend_ast *zend_ast_create_unary(uint kind, zend_ast *op0);
+ZEND_API zend_ast *zend_ast_create_binary(uint kind, zend_ast *op0, zend_ast *op1);
+ZEND_API zend_ast *zend_ast_create_ternary(uint kind, zend_ast *op0, zend_ast *op1, zend_ast *op2);
 
 ZEND_API int zend_ast_is_ct_constant(zend_ast *ast);
 

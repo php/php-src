@@ -23,7 +23,7 @@
 #include "zend_API.h"
 #include "zend_operators.h"
 
-ZEND_API zend_ast *zend_ast_create_constant_node(zval *zv)
+ZEND_API zend_ast *zend_ast_create_constant(zval *zv)
 {
 	zend_ast *node = emalloc(sizeof(zend_ast) + sizeof(zval));
 	node->kind = ZEND_CONST;
@@ -33,7 +33,7 @@ ZEND_API zend_ast *zend_ast_create_constant_node(zval *zv)
 	return node;
 }
 
-ZEND_API zend_ast* zend_ast_create_node1(uint kind, zend_ast *op0)
+ZEND_API zend_ast* zend_ast_create_unary(uint kind, zend_ast *op0)
 {
 	zend_ast *node = emalloc(sizeof(zend_ast));
 	node->kind = kind;
@@ -42,7 +42,7 @@ ZEND_API zend_ast* zend_ast_create_node1(uint kind, zend_ast *op0)
 	return node;
 }
 
-ZEND_API zend_ast* zend_ast_create_node2(uint kind, zend_ast *op0, zend_ast *op1)
+ZEND_API zend_ast* zend_ast_create_binary(uint kind, zend_ast *op0, zend_ast *op1)
 {
 	zend_ast *node = emalloc(sizeof(zend_ast) + sizeof(zend_ast*));
 	node->kind = kind;
@@ -52,7 +52,7 @@ ZEND_API zend_ast* zend_ast_create_node2(uint kind, zend_ast *op0, zend_ast *op1
 	return node;
 }
 
-ZEND_API zend_ast* zend_ast_create_node3(uint kind, zend_ast *op0, zend_ast *op1, zend_ast *op2)
+ZEND_API zend_ast* zend_ast_create_ternary(uint kind, zend_ast *op0, zend_ast *op1, zend_ast *op2)
 {
 	zend_ast *node = emalloc(sizeof(zend_ast) + sizeof(zend_ast*) * 2);
 	node->kind = kind;
@@ -251,7 +251,7 @@ ZEND_API void zend_ast_evaluate(zval *result, zend_ast *ast TSRMLS_DC)
 			}
 			zval_dtor(&op1);
 			break;
-		case ZEND_TERNARY:
+		case ZEND_SELECT:
 			zend_ast_evaluate(&op1, ast->u.child[0] TSRMLS_CC);
 			if (zend_is_true(&op1)) {
 				if (!ast->u.child[1]) {
@@ -287,22 +287,22 @@ ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
     if (ast == NULL) {
     	return NULL;
 	} else if (ast->kind == ZEND_CONST) {
-		zend_ast *node = zend_ast_create_constant_node(ast->u.val);
+		zend_ast *node = zend_ast_create_constant(ast->u.val);
 		zval_copy_ctor(node->u.val);
 		return node;
 	} else {
 		switch (ast->children) {
 			case 1:
-				return zend_ast_create_node1(
+				return zend_ast_create_unary(
 					ast->kind,
 					zend_ast_copy(ast->u.child[0]));
 			case 2:
-				return zend_ast_create_node2(
+				return zend_ast_create_binary(
 					ast->kind,
 					zend_ast_copy(ast->u.child[0]),
 					zend_ast_copy(ast->u.child[1]));
 			case 3:
-				return zend_ast_create_node3(
+				return zend_ast_create_ternary(
 					ast->kind,
 					zend_ast_copy(ast->u.child[0]),
 					zend_ast_copy(ast->u.child[1]),
