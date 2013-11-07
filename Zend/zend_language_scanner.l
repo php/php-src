@@ -47,7 +47,7 @@
 #include "zend_API.h"
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 #include "tsrm_config_common.h"
 
 #define YYCTYPE   unsigned char
@@ -1011,7 +1011,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 /* compute yyleng before each rule */
 <!*> := yyleng = YYCURSOR - SCNG(yy_text);
 
-
 <ST_IN_SCRIPTING>"exit" {
 	return T_EXIT;
 }
@@ -1202,6 +1201,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"\\" {
 	return T_NS_SEPARATOR;
+}
+
+<ST_IN_SCRIPTING>"..." {
+	return T_ELLIPSIS;
 }
 
 <ST_IN_SCRIPTING>"new" {

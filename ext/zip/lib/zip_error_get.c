@@ -37,7 +37,7 @@
 
 
 
-ZIP_EXTERN(void)
+ZIP_EXTERN void
 zip_error_get(struct zip *za, int *zep, int *sep)
 {
     _zip_error_get(&za->error, zep, sep);

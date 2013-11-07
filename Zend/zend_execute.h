@@ -87,6 +87,20 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC 
 	}
 }
 
+static zend_always_inline void i_zval_ptr_dtor_nogc(zval *zval_ptr ZEND_FILE_LINE_DC TSRMLS_DC)
+{
+	if (!Z_DELREF_P(zval_ptr)) {
+		ZEND_ASSERT(zval_ptr != &EG(uninitialized_zval));
+		GC_REMOVE_ZVAL_FROM_BUFFER(zval_ptr);
+		zval_dtor(zval_ptr);
+		efree_rel(zval_ptr);
+	} else {
+		if (Z_REFCOUNT_P(zval_ptr) == 1) {
+			Z_UNSET_ISREF_P(zval_ptr);
+		}
+	}
+}
+
 static zend_always_inline int i_zend_is_true(zval *op)
 {
 	int result;

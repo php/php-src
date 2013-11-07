@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig S�ther Bakken <ssb@php.net>                            |
+   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |          Maxim Maletsky <maxim@maxim.cx>                             |
    |                                                                      |
@@ -39,12 +39,9 @@
 
 #if HAVE_OCI8
 
-#if PHP_MAJOR_VERSION > 5
-#error This version of the PHP OCI8 extension is not compatible with PHP 6 or later
-#elif PHP_MAJOR_VERSION < 5
-#ifdef ZTS
-#error The PHP OCI8 extension does not support ZTS mode in PHP 4
-#endif
+/* PHP 5.2 is the minimum supported version for OCI8 2.0 */
+#if PHP_MAJOR_VERSION < 5 || (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION <= 1)
+#error Use PHP OCI8 1.4 for your version of PHP
 #endif
 
 #include "php_oci8.h"
@@ -66,11 +63,8 @@
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(oci)
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-/* This "if" allows PECL builds from this file to be portable to older PHP releases */
 static PHP_GINIT_FUNCTION(oci);
 static PHP_GSHUTDOWN_FUNCTION(oci);
-#endif
 
 /* Allow PHP 5.3 branch to be used in PECL for 5.x compatible builds */
 #ifndef Z_ADDREF_P
@@ -151,7 +145,7 @@ static sword php_oci_ping_init(php_oci_connection *connection, OCIError *errh TS
 /* }}} */
 
 /* {{{ dynamically loadable module stuff */
-#if defined(COMPILE_DL_OCI8) || defined(COMPILE_DL_OCI8_11G)
+#if defined(COMPILE_DL_OCI8) || defined(COMPILE_DL_OCI8_11G) || defined(COMPILE_DL_OCI8_12C)
 ZEND_GET_MODULE(oci8)
 #endif /* COMPILE_DL */
 /* }}} */
@@ -457,6 +451,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_client_info, 0, 0, 2)
 	ZEND_ARG_INFO(0, client_information)
 ZEND_END_ARG_INFO()
 
+#ifdef WAITIING_ORACLE_BUG_16695981_FIX
+ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_set_db_operation, 0, 0, 2)
+ZEND_ARG_INFO(0, connection_resource)
+ZEND_ARG_INFO(0, action)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_password_change, 0, 0, 4)
 	ZEND_ARG_INFO(0, connection_resource_or_connection_string)
 	ZEND_ARG_INFO(0, username)
@@ -708,6 +709,9 @@ static unsigned char arginfo_oci_bind_array_by_name[] = { 3, BYREF_NONE, BYREF_N
 #define arginfo_oci_set_module_name						NULL
 #define arginfo_oci_set_action							NULL
 #define arginfo_oci_set_client_info						NULL
+#ifdef WAITIING_ORACLE_BUG_16695981_FIX
+#define arginfo_oci_set_db_operation					NULL
+#endif
 #define arginfo_oci_password_change						NULL
 #define arginfo_oci_new_cursor							NULL
 #define arginfo_oci_result								NULL
@@ -799,6 +803,9 @@ PHP_FUNCTION(oci_statement_type);
 PHP_FUNCTION(oci_num_rows);
 PHP_FUNCTION(oci_set_prefetch);
 PHP_FUNCTION(oci_set_client_identifier);
+#ifdef WAITIING_ORACLE_BUG_16695981_FIX
+PHP_FUNCTION(oci_set_db_operation);
+#endif
 PHP_FUNCTION(oci_set_edition);
 PHP_FUNCTION(oci_set_module_name);
 PHP_FUNCTION(oci_set_action);
@@ -904,6 +911,9 @@ zend_function_entry php_oci_functions[] = {
 	PHP_FE(oci_new_descriptor,			arginfo_oci_new_descriptor)
 	PHP_FE(oci_set_prefetch,			arginfo_oci_set_prefetch)
 	PHP_FE(oci_set_client_identifier,	arginfo_oci_set_client_identifier)
+#ifdef WAITIING_ORACLE_BUG_16695981_FIX
+	PHP_FE(oci_set_db_operation,		arginfo_oci_set_db_operation)
+#endif
 	PHP_FE(oci_set_edition,				arginfo_oci_set_edition)
 	PHP_FE(oci_set_module_name,			arginfo_oci_set_module_name)
 	PHP_FE(oci_set_action,				arginfo_oci_set_action)
@@ -1039,16 +1049,11 @@ zend_module_entry oci8_module_entry = {
 	PHP_RSHUTDOWN(oci),	  /* per-request shutdown function */
 	PHP_MINFO(oci),		  /* information function */
 	PHP_OCI8_VERSION,
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-	/* This check allows PECL builds from this file to be portable to older PHP releases */
 	PHP_MODULE_GLOBALS(oci),  /* globals descriptor */
 	PHP_GINIT(oci),			  /* globals ctor */
 	PHP_GSHUTDOWN(oci),		  /* globals dtor */
 	NULL,					  /* post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
-#else
-	STANDARD_MODULE_PROPERTIES
-#endif
 };
 /* }}} */
 
@@ -1167,12 +1172,7 @@ static void php_oci_cleanup_global_handles(TSRMLS_D)
  *
  * Zerofill globals during module init
  */
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-/* This check allows PECL builds from this file to be portable to older PHP releases */
 static PHP_GINIT_FUNCTION(oci)
-#else
-static void php_oci_init_globals(zend_oci_globals *oci_globals TSRMLS_DC)
-#endif
 {
 	memset(oci_globals, 0, sizeof(zend_oci_globals));
 }
@@ -1182,12 +1182,7 @@ static void php_oci_init_globals(zend_oci_globals *oci_globals TSRMLS_DC)
  *
  * Called for thread shutdown in ZTS, after module shutdown for non-ZTS
  */
-/* This check allows PECL builds from this file to be portable to older PHP releases */
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
 static PHP_GSHUTDOWN_FUNCTION(oci)
-#else
-static void php_oci_shutdown_globals(zend_oci_globals *oci_globals TSRMLS_DC)
-#endif
 {
 	php_oci_cleanup_global_handles(TSRMLS_C);
 }
@@ -1198,12 +1193,6 @@ PHP_MINIT_FUNCTION(oci)
 	zend_class_entry oci_lob_class_entry;
 	zend_class_entry oci_coll_class_entry;
 
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION > 1) || (PHP_MAJOR_VERSION > 5)
-	/* This check allows PECL builds from this file to be portable to older PHP releases */
-	/* this is handled by new globals management code */
-#else
-	ZEND_INIT_MODULE_GLOBALS(oci, php_oci_init_globals, php_oci_shutdown_globals);
-#endif
 	REGISTER_INI_ENTRIES();
 
 	le_statement = zend_register_list_destructors_ex(php_oci_statement_list_dtor, NULL, "oci8 statement", module_number);
@@ -1315,13 +1304,6 @@ PHP_RINIT_FUNCTION(oci)
 
 PHP_MSHUTDOWN_FUNCTION(oci)
 {
-/* Work around PHP_GSHUTDOWN_FUNCTION not being called in older versions of PHP */
-#if (PHP_MAJOR_VERSION == 5 && PHP_MINOR_VERSION < 2) || (PHP_MAJOR_VERSION < 5)
-#ifndef ZTS
-	php_oci_cleanup_global_handles(TSRMLS_C);
-#endif
-#endif
-
 	OCI_G(shutdown) = 1;
 
 	UNREGISTER_INI_ENTRIES();
@@ -2097,6 +2079,9 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
 			connection->hash_key = estrndup(hashed_details.c, hashed_details.len);
 			connection->is_persistent = 0;
+#ifdef HAVE_OCI8_DTRACE
+			connection->client_id = NULL;
+#endif
 		} else {
 			connection = (php_oci_connection *) calloc(1, sizeof(php_oci_connection));
 			if (connection == NULL) {
@@ -2108,11 +2093,17 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 				return NULL;
 			}
 			connection->is_persistent = 1;
+#ifdef HAVE_OCI8_DTRACE
+			connection->client_id = NULL;
+#endif
 		}
 	} else {
 		connection = (php_oci_connection *) ecalloc(1, sizeof(php_oci_connection));
 		connection->hash_key = estrndup(hashed_details.c, hashed_details.len);
 		connection->is_persistent = 0;
+#ifdef HAVE_OCI8_DTRACE
+		connection->client_id = NULL;
+#endif
 	}
 
 	/* {{{ Get the session pool that suits this connection request from the persistent list. This
@@ -2210,6 +2201,9 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 static int php_oci_connection_ping(php_oci_connection *connection TSRMLS_DC)
 {
 	sword errstatus;
+#if (!((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2))))
+	char version[256];
+#endif
 
 	OCI_G(errcode) = 0;  		/* assume ping is successful */
 
@@ -2221,7 +2215,6 @@ static int php_oci_connection_ping(php_oci_connection *connection TSRMLS_DC)
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))	/* OCIPing available 10.2 onwards */
 	PHP_OCI_CALL_RETURN(errstatus, OCIPing, (connection->svc, OCI_G(err), OCI_DEFAULT));
 #else
-	char version[256];
 	/* use good old OCIServerVersion() */
 	PHP_OCI_CALL_RETURN(errstatus, OCIServerVersion, (connection->svc, OCI_G(err), (text *)version, sizeof(version), OCI_HTYPE_SVCCTX));
 #endif
@@ -2366,17 +2359,15 @@ static int php_oci_connection_close(php_oci_connection *connection TSRMLS_DC)
 		php_oci_spool_close(connection->private_spool TSRMLS_CC);
 	}
 
-	if (connection->is_persistent) {
-		if (connection->hash_key) {
-			free(connection->hash_key);
-		}
-		free(connection);
-	} else {
-		if (connection->hash_key) {
-			efree(connection->hash_key);
-		}
-		efree(connection);
+	if (connection->hash_key) {
+		pefree(connection->hash_key, connection->is_persistent);
 	}
+#ifdef HAVE_OCI8_DTRACE
+	if (connection->client_id) {
+		pefree(connection->client_id, connection->is_persistent);
+	}
+#endif /* HAVE_OCI8_DTRACE */
+	pefree(connection, connection->is_persistent);
 	connection = NULL;
 	OCI_G(in_call) = in_call_save;
 	return result;
@@ -2463,6 +2454,12 @@ int php_oci_connection_release(php_oci_connection *connection TSRMLS_DC)
 		 * the OCI session
 		 */
 		connection->next_pingp = NULL;
+#ifdef HAVE_OCI8_DTRACE
+		if (connection->client_id) {
+			pefree(connection->client_id, connection->is_persistent);
+			connection->client_id = NULL;
+		}
+#endif /* HAVE_OCI8_DTRACE */
 	}
 
 	OCI_G(in_call) = in_call_save;
@@ -3500,7 +3497,7 @@ void php_oci_dtrace_check_connection(php_oci_connection *connection, sb4 errcode
 {
 #ifdef HAVE_OCI8_DTRACE
 	if (DTRACE_OCI8_CHECK_CONNECTION_ENABLED()) {
-		DTRACE_OCI8_CHECK_CONNECTION(connection, connection && connection->is_open ? 1 : 0, (long)errcode, (unsigned long)serverStatus);
+		DTRACE_OCI8_CHECK_CONNECTION(connection, connection->client_id, connection->is_open ? 1 : 0, (long)errcode, (unsigned long)serverStatus);
 	}
 #endif /* HAVE_OCI8_DTRACE */
 }
