@@ -40,7 +40,7 @@
 ZIP_EXTERN(void)
 zip_source_error(struct zip_source *src, int *ze, int *se)
 {
-    int e[2];
+    int e[2] = { 0, 0 };
 
     if (src->src == NULL) {
     }

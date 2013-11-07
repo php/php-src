@@ -1,6 +1,45 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2013, PHP 5.4.21
+?? ??? 2013, PHP 5.4.23
+
+?? ??? 2013, PHP 5.4.22
+
+- Core:
+  . Fixed bug #65911 (scope resolution operator - strange behavior with $this).
+    (Bob Weinand)
+
+- CLI server:
+  . Fixed bug #65818 (Segfault with built-in webserver and chunked transfer 
+    encoding). (Felipe)
+
+- Exif:
+  . Fixed crash on unknown encoding. (Draal)
+
+- FTP:
+  . Fixed bug #65667 (ftp_nb_continue produces segfault). (Philip Hofstetter)
+
+- ODBC:
+  . Fixed bug #65950 (Field name truncation if the field name is bigger than 
+    32 characters). (patch submitted by: michael dot y at zend dot com, Yasuo)
+
+- PDO:
+  . Fixed bug #66033 (Segmentation Fault when constructor of PDO statement 
+    throws an exception). (Laruence)
+
+- Sockets:
+  . Fixed bug #65808 (the socket_connect() won't work with IPv6 address).
+    (Mike)
+
+- Standard:
+  . Fixed bug #64760 (var_export() does not use full precision for floating-point
+    numbers) (Yasuo)
+
+- XMLReader:
+  . Fixed bug #51936 (Crash with clone XMLReader). (Mike)
+  . Fixed bug #64230 (XMLReader does not suppress errors). (Mike)
+
+
+17 Oct 2013, PHP 5.4.21
 
 - Core:
   . Fixed bug #65322 (compile time errors won't trigger auto loading). (Nikita)
@@ -25,6 +64,15 @@ PHP                                                                        NEWS
 - IMAP:
   . Fixed bug #65721 (configure script broken in 5.5.4 and 5.4.20 when enabling
     imap). (ryotakatsuki at gmail dot com)
+
+- Standard:
+  . Fixed bug #61548 (content-type must appear at the end of headers for 201 
+    Location to work in http). (Mike)
+
+- Build system:
+  . Fixed bug #62396 ('make test' crashes starting with 5.3.14 (missing 
+    gzencode())). (Mike)
+
 
 19 Sep 2013, PHP 5.4.20
 

@@ -436,7 +436,7 @@ PHPAPI void php_var_export_ex(zval **struc, int level, smart_str *buf TSRMLS_DC)
 		smart_str_append_long(buf, Z_LVAL_PP(struc));
 		break;
 	case IS_DOUBLE:
-		tmp_len = spprintf(&tmp_str, 0,"%.*H", (int) EG(precision), Z_DVAL_PP(struc));
+		tmp_len = spprintf(&tmp_str, 0,"%.*H", PG(serialize_precision), Z_DVAL_PP(struc));
 		smart_str_appendl(buf, tmp_str, tmp_len);
 		efree(tmp_str);
 		break;
@@ -549,11 +549,9 @@ static inline int php_add_var_hash(HashTable *var_hash, zval *var, void *var_old
 	char id[32], *p;
 	register int len;
 
-	/* relies on "(long)" being a perfect hash function for data pointers,
-	 * however the actual identity of an object has had to be determined
-	 * by its object handle since 5.0. */
 	if ((Z_TYPE_P(var) == IS_OBJECT) && Z_OBJ_HT_P(var)->get_class_entry) {
-		p = smart_str_print_long(id + sizeof(id) - 1, (long) Z_OBJ_HANDLE_P(var));
+		p = smart_str_print_long(id + sizeof(id) - 1,
+				(long) zend_objects_get_address(var TSRMLS_CC));
 		*(--p) = 'O';
 		len = id + sizeof(id) - 1 - p;
 	} else {
