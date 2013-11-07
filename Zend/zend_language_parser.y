@@ -953,6 +953,8 @@ static_class_constant:
 
 static_scalar: /* compile-time evaluated scalars */
 		static_scalar_value { zend_do_constant_expression(&$$, $1.u.ast TSRMLS_CC); }
+	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
+	|	'[' static_array_pair_list ']' { $$ = $2; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; }
 ;
 
 static_scalar_value:
@@ -963,8 +965,6 @@ static_scalar_value:
 	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); zend_do_fetch_constant(&$$, NULL, &$2, ZEND_CT, 0 TSRMLS_CC); $$.u.ast = zend_ast_create_constant(&$$.u.constant); }
 	|	static_class_constant { $$.u.ast = zend_ast_create_constant(&$1.u.constant); }
 	|	T_CLASS_C			{ $$.u.ast = zend_ast_create_constant(&$1.u.constant); }
-	|	T_ARRAY '(' static_array_pair_list ')' { $$ = $3; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; $$.u.ast = zend_ast_create_constant(&$$.u.constant); }
-	|	'[' static_array_pair_list ']' { $$ = $2; Z_TYPE($$.u.constant) = IS_CONSTANT_ARRAY; $$.u.ast = zend_ast_create_constant(&$$.u.constant); }
 	|	static_operation { $$ = $1; }
 ;
 

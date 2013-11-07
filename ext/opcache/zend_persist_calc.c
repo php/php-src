@@ -104,8 +104,8 @@ static uint zend_persist_ast_calc(zend_ast *ast TSRMLS_DC)
 	} else {
 		ADD_SIZE(sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
 		for (i = 0; i < ast->children; i++) {
-			if (ast->u.child[i]) {
-				ADD_SIZE(zend_persist_ast_calc(ast->u.child[i] TSRMLS_CC));
+			if ((&ast->u.child)[i]) {
+				ADD_SIZE(zend_persist_ast_calc((&ast->u.child)[i] TSRMLS_CC));
 			}
 		}
 	}

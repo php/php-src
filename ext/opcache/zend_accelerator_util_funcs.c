@@ -257,10 +257,10 @@ static zend_ast *zend_ast_clone(zend_ast *ast TSRMLS_DC)
 		node->kind = ast->kind;
 		node->children = ast->children;
 		for (i = 0; i < ast->children; i++) {
-			if (ast->u.child[i]) {
-				node->u.child[i] = zend_ast_clone(ast->u.child[i] TSRMLS_CC);
+			if ((&ast->u.child)[i]) {
+				(&node->u.child)[i] = zend_ast_clone((&ast->u.child)[i] TSRMLS_CC);
 			} else {
-				node->u.child[i] = NULL;
+				(&node->u.child)[i] = NULL;
 			}
 		}
 	}

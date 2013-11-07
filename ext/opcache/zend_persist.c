@@ -152,8 +152,8 @@ static zend_ast *zend_persist_ast(zend_ast *ast TSRMLS_DC)
 	} else {
 		node = zend_accel_memdup(ast, sizeof(zend_ast) + sizeof(zend_ast*) * (ast->children - 1));
 		for (i = 0; i < ast->children; i++) {
-			if (node->u.child[i]) {
-				node->u.child[i] = zend_persist_ast(node->u.child[i] TSRMLS_CC);
+			if ((&node->u.child)[i]) {
+				(&node->u.child)[i] = zend_persist_ast((&node->u.child)[i] TSRMLS_CC);
 			}
 		}
 	}

@@ -41,7 +41,7 @@ struct _zend_ast {
 	unsigned short children;
 	union {
 		zval     *val;
-		zend_ast *child[1];
+		zend_ast *child;
 	} u;
 };
 
