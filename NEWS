@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.23
+
+- MySQLi:
+  . Fixed bug #66043 (Segfault calling bind_param() on mysqli). (Laruence)
+
 - PDO
   . Fixed bug 65946 (sql_parser permanently converts values bound to strings)
 
