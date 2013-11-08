@@ -24,6 +24,7 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed bug #66033 (Segmentation Fault when constructor of PDO statement 
     throws an exception). (Laruence)
+  . Fixed bug 65946 (sql_parser permanently converts values bound to strings)
 
 - Standard:
   . Fixed bug #64760 (var_export() does not use full precision for floating-point
