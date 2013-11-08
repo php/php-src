@@ -1,7 +1,7 @@
 --TEST--
 Test var_export() function with locale
 --INI--
-precision=14
+serialize_precision=17
 --SKIPIF--
 <?php
 if (!setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","de_DE.UTF-8")) {
