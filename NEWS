@@ -14,6 +14,9 @@ PHP                                                                        NEWS
 - FPM:
   . Changed default listen() backlog to 65535. (Tony)
 
+- MySQLi:
+  . Fixed bug #66043 (Segfault calling bind_param() on mysqli). (Laruence)
+
 - OPcache
   . Increased limit for opcache.max_accelerated_files to 1,000,000. (Chris)
 
