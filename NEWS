@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2013, PHP 5.4.23
+- PDO
+  . Fixed bug 65946 (sql_parser permanently converts values bound to strings)
 
 ?? ??? 2013, PHP 5.4.22
 
