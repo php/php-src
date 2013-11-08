@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2013, PHP 5.5.6
 
 - Core:
+  . Fixed bug #65947 (basename is no more working after fgetcsv in certain 
+    situation). (Laruence)
   . Improved performance of array_merge() and func_get_args() by eliminating
     useless copying. (Dmitry)
   . Fixed bug #65939 (Space before ";" breaks php.ini parsing).
