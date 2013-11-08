@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 
 - OPcache
   . Increased limit for opcache.max_accelerated_files to 1,000,000. (Chris)
+  . Fixed issue #115 (path issue when using phar). (Dmitry)
+  . Fixed issue #149 (Phar mount points not working with OPcache enabled).
+  (Dmitry)
 
 - ODBC
   . Fixed bug #65950 (Field name truncation if the field name is bigger than
