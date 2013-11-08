@@ -1200,6 +1200,8 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	/* store script structure in the hash table */
 	bucket = zend_accel_hash_update(&ZCSG(hash), new_persistent_script->full_path, new_persistent_script->full_path_len + 1, 0, new_persistent_script);
 	if (bucket &&
+	    /* key may contain non-persistent PHAR aliases (see issues #115 and #149) */
+	    memcmp(key, "phar://", sizeof("phar://") - 1) != 0 &&
 	    (new_persistent_script->full_path_len != key_length ||
 	     memcmp(new_persistent_script->full_path, key, key_length) != 0)) {
 		/* link key to the same persistent script in hash table */
@@ -1655,7 +1657,18 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type T
 #endif
 				void *dummy = (void *) 1;
 
-				zend_hash_quick_add(&EG(included_files), persistent_script->full_path, persistent_script->full_path_len + 1, persistent_script->hash_value, &dummy, sizeof(void *), NULL);
+				if (zend_hash_quick_add(&EG(included_files), persistent_script->full_path, persistent_script->full_path_len + 1, persistent_script->hash_value, &dummy, sizeof(void *), NULL) == SUCCESS) {
+					/* ext/phar has to load phar's metadata into memory */
+					if (strstr(persistent_script->full_path, ".phar") && !strstr(persistent_script->full_path, "://")) {
+						php_stream_statbuf ssb;
+						char *fname = emalloc(sizeof("phar://") + persistent_script->full_path_len);
+
+						memcpy(fname, "phar://", sizeof("phar://") - 1);
+						memcpy(fname + sizeof("phar://") - 1, persistent_script->full_path, persistent_script->full_path_len + 1);
+						php_stream_stat_path(fname, &ssb);
+						efree(fname);
+					}
+				}
 			}
 		}
 #if ZEND_EXTENSION_API_NO < PHP_5_3_X_API_NO
