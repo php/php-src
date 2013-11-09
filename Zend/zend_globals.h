@@ -136,7 +136,6 @@ struct _zend_compiler_globals {
 	zend_bool  in_namespace;
 	zend_bool  has_bracketed_namespaces;
 
-	HashTable function_filenames;
 	HashTable const_filenames;
 
 	zend_compiler_context context;

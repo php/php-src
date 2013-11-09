@@ -199,7 +199,6 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	CG(current_import) = NULL;
 	CG(current_import_function) = NULL;
 	CG(current_import_const) = NULL;
-	zend_hash_init(&CG(function_filenames), 0, NULL, NULL, 0);
 	zend_hash_init(&CG(const_filenames), 0, NULL, NULL, 0);
 	init_compiler_declarables(TSRMLS_C);
 	zend_stack_init(&CG(context_stack));
@@ -239,7 +238,6 @@ void shutdown_compiler(TSRMLS_D) /* {{{ */
 	zend_stack_destroy(&CG(list_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
-	zend_hash_destroy(&CG(function_filenames));
 	zend_hash_destroy(&CG(const_filenames));
 	zend_stack_destroy(&CG(context_stack));
 }
@@ -1729,13 +1727,13 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		opline->op1.constant = zend_add_literal(CG(active_op_array), &key TSRMLS_CC);
 		Z_HASH_P(&CONSTANT(opline->op1.constant)) = zend_hash_func(Z_STRVAL(CONSTANT(opline->op1.constant)), Z_STRLEN(CONSTANT(opline->op1.constant)));
 		opline->op2_type = IS_CONST;
-		LITERAL_STRINGL(opline->op2, lcname, name_len, 0);
+		LITERAL_STRINGL(opline->op2, lcname, name_len, 1);
 		CALCULATE_LITERAL_HASH(opline->op2.constant);
 		opline->extended_value = ZEND_DECLARE_FUNCTION;
 		zend_hash_quick_update(CG(function_table), Z_STRVAL(key), Z_STRLEN(key), Z_HASH_P(&CONSTANT(opline->op1.constant)), &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
-		zend_hash_add(&CG(function_filenames), lcname, strlen(lcname)+1, CG(compiled_filename), strlen(CG(compiled_filename))+1, NULL);
 		zend_stack_push(&CG(context_stack), (void *) &CG(context), sizeof(CG(context)));
 		zend_init_compiler_context(TSRMLS_C);
+		str_efree(lcname);
 	}
 
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
@@ -7128,10 +7126,9 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 }
 /* }}} */
 
-void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const char *type, zend_bool case_sensitive, HashTable *current_import_sub, HashTable *lookup_table TSRMLS_DC) /* {{{ */
+void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int is_function, zend_bool case_sensitive, HashTable *current_import_sub, HashTable *lookup_table TSRMLS_DC) /* {{{ */
 {
 	char *lookup_name;
-	char *filename;
 	zval *name, *ns, tmp;
 	zend_bool warn = 0;
 
@@ -7173,26 +7170,42 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const
 
 			if (Z_STRLEN_P(ns) != Z_STRLEN_P(CG(current_namespace)) + 1 + Z_STRLEN_P(name) ||
 				memcmp(tmp2, c_ns_name, Z_STRLEN_P(ns))) {
-				zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", type, Z_STRVAL_P(ns), Z_STRVAL_P(name));
+				zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", is_function ? "function" : "const", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 			}
 			efree(tmp2);
 		}
 		efree(c_ns_name);
-	} else if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **)&filename) == SUCCESS && strcmp(filename, CG(compiled_filename)) == 0) {
-		char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+	} else if (is_function) {
+		zend_function *function;
 
-		if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
-			memcmp(c_tmp, lookup_name, Z_STRLEN_P(ns))) {
-			zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", type, Z_STRVAL_P(ns), Z_STRVAL_P(name));
+		if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **) &function) == SUCCESS && strcmp(function->op_array.filename, CG(compiled_filename)) == 0) {
+			char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+
+			if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
+				memcmp(c_tmp, lookup_name, Z_STRLEN_P(ns))) {
+				zend_error(E_COMPILE_ERROR, "Cannot use function %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
+			}
+			efree(c_tmp);
 		}
-		efree(c_tmp);
+	} else {
+		const char *filename;
+
+		if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **) &filename) == SUCCESS && strcmp(filename, CG(compiled_filename)) == 0) {
+			char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+
+			if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
+				memcmp(c_tmp, lookup_name, Z_STRLEN_P(ns))) {
+				zend_error(E_COMPILE_ERROR, "Cannot use const %s as %s because the name is already in use", Z_STRVAL_P(ns), Z_STRVAL_P(name));
+			}
+			efree(c_tmp);
+		}
 	}
 
 	if (zend_hash_add(current_import_sub, lookup_name, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
-		zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", type, Z_STRVAL_P(ns), Z_STRVAL_P(name));
+		zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", is_function ? "function" : "const", Z_STRVAL_P(ns), Z_STRVAL_P(name));
 	}
 	if (warn) {
-		zend_error(E_WARNING, "The use %s statement with non-compound name '%s' has no effect", type, Z_STRVAL_P(name));
+		zend_error(E_WARNING, "The use %s statement with non-compound name '%s' has no effect", is_function ? "function" : "const", Z_STRVAL_P(name));
 	}
 	efree(lookup_name);
 	zval_dtor(name);
@@ -7206,7 +7219,7 @@ void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_
 		zend_hash_init(CG(current_import_function), 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	zend_do_use_non_class(ns_name, new_name, is_global, "function", 0, CG(current_import_function), &CG(function_filenames) TSRMLS_CC);
+	zend_do_use_non_class(ns_name, new_name, is_global, 1, 0, CG(current_import_function), CG(function_table) TSRMLS_CC);
 }
 /* }}} */
 
@@ -7217,7 +7230,7 @@ void zend_do_use_const(znode *ns_name, znode *new_name, int is_global TSRMLS_DC)
 		zend_hash_init(CG(current_import_const), 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	zend_do_use_non_class(ns_name, new_name, is_global, "const", 1, CG(current_import_const), &CG(const_filenames) TSRMLS_CC);
+	zend_do_use_non_class(ns_name, new_name, is_global, 0, 1, CG(current_import_const), &CG(const_filenames) TSRMLS_CC);
 }
 /* }}} */
 
