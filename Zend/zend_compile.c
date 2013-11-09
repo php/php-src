@@ -1740,13 +1740,14 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		opline->op1.constant = zend_add_literal(CG(active_op_array), &key TSRMLS_CC);
 		Z_HASH_P(&CONSTANT(opline->op1.constant)) = zend_hash_func(Z_STRVAL(CONSTANT(opline->op1.constant)), Z_STRLEN(CONSTANT(opline->op1.constant)));
 		opline->op2_type = IS_CONST;
-		LITERAL_STRINGL(opline->op2, lcname, name_len, 0);
+		LITERAL_STRINGL(opline->op2, lcname, name_len, 1);
 		CALCULATE_LITERAL_HASH(opline->op2.constant);
 		opline->extended_value = ZEND_DECLARE_FUNCTION;
 		zend_hash_quick_update(CG(function_table), Z_STRVAL(key), Z_STRLEN(key), Z_HASH_P(&CONSTANT(opline->op1.constant)), &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
 		zend_hash_add(&CG(function_filenames), lcname, strlen(lcname)+1, CG(compiled_filename), strlen(CG(compiled_filename))+1, NULL);
 		zend_stack_push(&CG(context_stack), (void *) &CG(context), sizeof(CG(context)));
 		zend_init_compiler_context(TSRMLS_C);
+		str_efree(lcname);
 	}
 
 	if (CG(compiler_options) & ZEND_COMPILE_EXTENDED_INFO) {
