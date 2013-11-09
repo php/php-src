@@ -49,8 +49,8 @@ libraries are available.
  <time>12:00:00</time>
 
   <version>
-   <release>2.0.6</release>
-   <api>2.0.6</api>
+   <release>2.0.7</release>
+   <api>2.0.7</api>
   </version>
   <stability>
    <release>stable</release>
@@ -58,8 +58,7 @@ libraries are available.
   </stability>
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
-Added a LICENSE file to make it easier for PECL binary distributions
-to conform with the license.
+    Build change: Fix source variable definition for C89 compatibility
   </notes>
  <contents>
   <dir name="/">
@@ -457,6 +456,22 @@ to conform with the license.
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+ <version>
+  <release>2.0.6</release>
+  <api>2.0.6</api>
+ </version>
+ <stability>
+  <release>stable</release>
+  <api>stable</api>
+ </stability>
+ <license uri="http://www.php.net/license">PHP</license>
+ <notes>
+Added a LICENSE file to make it easier for PECL binary distributions
+to conform with the license.
+ </notes>
+</release>
 
 <release>
  <version>

@@ -26,7 +26,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20121113
+#define PHP_API_VERSION 20131106
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 
@@ -400,7 +400,7 @@ END_EXTERN_C()
 
 
 /* Virtual current working directory support */
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 
 #include "zend_constants.h"
 

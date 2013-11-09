@@ -32,7 +32,7 @@
 #ifdef TSRM_WIN32
 #include <Sddl.h>
 #include "tsrm_win32.h"
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 
 #ifdef ZTS
 static ts_rsrc_id win32_globals_id;
