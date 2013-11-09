@@ -592,7 +592,7 @@ static int php_array_user_compare(const void *a, const void *b TSRMLS_DC) /* {{{
 	BG(user_compare_fci).retval_ptr_ptr = &retval_ptr;
 	BG(user_compare_fci).no_separation = 0;
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC) == SUCCESS && retval_ptr) {
-		long retval;
+		php_int_t retval;
 
 		convert_to_long_ex(&retval_ptr);
 		retval = Z_LVAL_P(retval_ptr);
@@ -726,7 +726,7 @@ static int php_array_user_key_compare(const void *a, const void *b TSRMLS_DC) /*
 	zval *key1, *key2;
 	zval **args[2];
 	zval *retval_ptr = NULL;
-	long result;
+	int result;
 
 	ALLOC_INIT_ZVAL(key1);
 	ALLOC_INIT_ZVAL(key2);
@@ -759,7 +759,7 @@ static int php_array_user_key_compare(const void *a, const void *b TSRMLS_DC) /*
 	BG(user_compare_fci).no_separation = 0;
 	if (zend_call_function(&BG(user_compare_fci), &BG(user_compare_fci_cache) TSRMLS_CC) == SUCCESS && retval_ptr) {
 		convert_to_long_ex(&retval_ptr);
-		result = Z_LVAL_P(retval_ptr);
+		result = Z_LVAL_P(retval_ptr) < 0 ? -1 : Z_LVAL_P(retval_ptr) > 0 ? 1 : 0;
 		zval_ptr_dtor(&retval_ptr);
 	} else {
 		result = 0;
