@@ -22,7 +22,7 @@
 #include "php.h"
 
 PHPAPI int php_url_decode(char *str, int len);
-PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, int *ret_length);
+PHPAPI unsigned char *php_base64_decode(const unsigned char *str, int length, zend_str_size_int *ret_length);
 
 /* Memory streams use a dynamic memory buffer to emulate a stream.
  * You can use php_stream_memory_open to create a readonly stream

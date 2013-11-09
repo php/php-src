@@ -157,7 +157,7 @@ static char *php_win32_mail_trim_header(char *header TSRMLS_DC)
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	
 	char *result, *result2;
-	int result_len;
+	zend_str_size_int result_len;
 	zval *replace;
 
 	if (!header) {
@@ -388,7 +388,7 @@ static int SendText(char *RPath, char *Subject, char *mailTo, char *mailCc, char
 	char *server_response = NULL;
 	char *stripped_header  = NULL;
 	char *data_cln;
-	int data_cln_len;
+	zend_str_size_int data_cln_len;
 
 	/* check for NULL parameters */
 	if (data == NULL)

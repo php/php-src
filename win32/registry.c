@@ -100,7 +100,7 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 				if (parent_ht) {
 					HashPosition pos;
 					char *index;
-					uint index_len;
+					zend_str_size_uint index_len;
 					zend_uint_t num;
 					zval **tmpdata;
 
@@ -172,7 +172,7 @@ static void delete_internal_hashtable(void *data)
 void UpdateIniFromRegistry(char *path TSRMLS_DC)
 {
 	char *p, *orig_path;
-	int path_len;
+	zend_str_size_int path_len;
 	HashTable **pht;
 
 	if(!path) {
@@ -253,7 +253,7 @@ void UpdateIniFromRegistry(char *path TSRMLS_DC)
 			HashTable *ht = *pht;
 			HashPosition pos;
 			char *index;
-			uint index_len;
+			zend_str_size_uint index_len;
 			zend_uint_t num;
 			zval **data;
 
