@@ -383,8 +383,8 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, zend_uint_t h
 			}
 			UPDATE_DATA(ht, p, pData, nDataSize);
 			HANDLE_UNBLOCK_INTERRUPTIONS();
-			if ((long)h >= (long)ht->nNextFreeElement) {
-				ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
+			if ((zend_int_t)h >= (zend_int_t)ht->nNextFreeElement) {
+				ht->nNextFreeElement = h < ZEND_INT_MAX ? h + 1 : ZEND_INT_MAX;
 			}
 			if (pDest) {
 				*pDest = p->pData;
@@ -409,8 +409,8 @@ ZEND_API int _zend_hash_index_update_or_next_insert(HashTable *ht, zend_uint_t h
 	CONNECT_TO_GLOBAL_DLLIST(p, ht);
 	HANDLE_UNBLOCK_INTERRUPTIONS();
 
-	if ((long)h >= (long)ht->nNextFreeElement) {
-		ht->nNextFreeElement = h < LONG_MAX ? h + 1 : LONG_MAX;
+	if ((zend_int_t)h >= (zend_int_t)ht->nNextFreeElement) {
+		ht->nNextFreeElement = h < ZEND_INT_MAX ? h + 1 : ZEND_INT_MAX;
 	}
 	ht->nNumOfElements++;
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);
