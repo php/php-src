@@ -2924,7 +2924,7 @@ static int zval_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static php_int_t zval_user_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
+static int zval_user_compare(zval **a, zval **b TSRMLS_DC) /* {{{ */
 {
 	zval **args[2];
 	zval *retval_ptr = NULL;
