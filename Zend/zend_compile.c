@@ -7163,7 +7163,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const char *type, zend_bool case_sensitive, HashTable *current_import_sub, HashTable *lookup_table TSRMLS_DC) /* {{{ */
 {
 	char *lookup_name;
-	char *filename;
+	zend_function *function = NULL;
 	zval *name, *ns, tmp;
 	zend_bool warn = 0;
 
@@ -7210,14 +7210,16 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, const
 			efree(tmp2);
 		}
 		efree(c_ns_name);
-	} else if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **)&filename) == SUCCESS && strcmp(filename, CG(compiled_filename)) == 0) {
-		char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
+	} else {
+		if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **) &function) == SUCCESS && strcmp(function->op_array.filename, CG(compiled_filename)) == 0) {
+			char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
 
-		if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
-			memcmp(c_tmp, lookup_name, Z_STRLEN_P(ns))) {
-			zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", type, Z_STRVAL_P(ns), Z_STRVAL_P(name));
+			if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
+				memcmp(c_tmp, lookup_name, Z_STRLEN_P(ns))) {
+				zend_error(E_COMPILE_ERROR, "Cannot use %s %s as %s because the name is already in use", type, Z_STRVAL_P(ns), Z_STRVAL_P(name));
+			}
+			efree(c_tmp);
 		}
-		efree(c_tmp);
 	}
 
 	if (zend_hash_add(current_import_sub, lookup_name, Z_STRLEN_P(name)+1, &ns, sizeof(zval*), NULL) != SUCCESS) {
@@ -7238,7 +7240,7 @@ void zend_do_use_function(znode *ns_name, znode *new_name, int is_global TSRMLS_
 		zend_hash_init(CG(current_import_function), 0, NULL, ZVAL_PTR_DTOR, 0);
 	}
 
-	zend_do_use_non_class(ns_name, new_name, is_global, "function", 0, CG(current_import_function), &CG(function_filenames) TSRMLS_CC);
+	zend_do_use_non_class(ns_name, new_name, is_global, "function", 0, CG(current_import_function), CG(function_table) TSRMLS_CC);
 }
 /* }}} */
 
