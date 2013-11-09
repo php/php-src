@@ -206,7 +206,6 @@ void zend_init_compiler_data_structures(TSRMLS_D) /* {{{ */
 	CG(current_import) = NULL;
 	CG(current_import_function) = NULL;
 	CG(current_import_const) = NULL;
-	zend_hash_init(&CG(function_filenames), 0, NULL, NULL, 0);
 	zend_hash_init(&CG(const_filenames), 0, NULL, NULL, 0);
 	init_compiler_declarables(TSRMLS_C);
 	zend_stack_init(&CG(context_stack));
@@ -246,7 +245,6 @@ void shutdown_compiler(TSRMLS_D) /* {{{ */
 	zend_stack_destroy(&CG(list_stack));
 	zend_hash_destroy(&CG(filenames_table));
 	zend_llist_destroy(&CG(open_files));
-	zend_hash_destroy(&CG(function_filenames));
 	zend_hash_destroy(&CG(const_filenames));
 	zend_stack_destroy(&CG(context_stack));
 }
@@ -1744,7 +1742,6 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		CALCULATE_LITERAL_HASH(opline->op2.constant);
 		opline->extended_value = ZEND_DECLARE_FUNCTION;
 		zend_hash_quick_update(CG(function_table), Z_STRVAL(key), Z_STRLEN(key), Z_HASH_P(&CONSTANT(opline->op1.constant)), &op_array, sizeof(zend_op_array), (void **) &CG(active_op_array));
-		zend_hash_add(&CG(function_filenames), lcname, strlen(lcname)+1, CG(compiled_filename), strlen(CG(compiled_filename))+1, NULL);
 		zend_stack_push(&CG(context_stack), (void *) &CG(context), sizeof(CG(context)));
 		zend_init_compiler_context(TSRMLS_C);
 		str_efree(lcname);
