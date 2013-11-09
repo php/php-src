@@ -7209,7 +7209,7 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int i
 	} else if (is_function) {
 		zend_function *function;
 
-		if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **) &function) == SUCCESS && strcmp(function->op_array.filename, CG(compiled_filename)) == 0) {
+		if (zend_hash_find(lookup_table, lookup_name, Z_STRLEN_P(name)+1, (void **) &function) == SUCCESS && function->type == ZEND_USER_FUNCTION && strcmp(function->op_array.filename, CG(compiled_filename)) == 0) {
 			char *c_tmp = zend_str_tolower_dup(Z_STRVAL_P(ns), Z_STRLEN_P(ns));
 
 			if (Z_STRLEN_P(ns) != Z_STRLEN_P(name) ||
