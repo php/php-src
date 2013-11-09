@@ -25,7 +25,6 @@
 #include "zend_stream.h"
 
 #include "SAPI.h"
-#include "sapi/cgi/fastcgi.h"
 
 #include <php_config.h>
 
@@ -99,17 +98,20 @@ int main(int argc, char **argv) { /* {{{ */
         tsrm_ls = ts_resource(0);
     }
 #endif
-
+    sapi_module_struct *phpdbg = &phpdbg_sapi_module;
+    
 #ifdef PHP_WIN32
-	_fmode = _O_BINARY;			/*sets default for file streams to binary */
-	setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
-	setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */
-	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
+	  _fmode = _O_BINARY;			/*sets default for file streams to binary */
+	  setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
+	  setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */
+	  setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
-    sapi_startup(&phpdbg_sapi_module);
+    phpdbg->executable_location = argv[0];
+    
+    sapi_startup(phpdbg);
 
-    if (phpdbg_sapi_module.startup(&phpdbg_sapi_module) == SUCCESS) 
+    if (phpdbg->startup(phpdbg) == SUCCESS) 
     {
         zend_activate(TSRMLS_C);
         
