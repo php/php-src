@@ -2074,39 +2074,39 @@ ZEND_API void zend_str_tolower(char *str, zend_str_size_uint length) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_str_size_int zend_binary_strcmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2) /* {{{ */
+ZEND_API int zend_binary_strcmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2) /* {{{ */
 {
-	zend_str_size retval;
+	int retval;
 
 	if (s1 == s2) {
 		return 0;
 	}
 	retval = memcmp(s1, s2, MIN(len1, len2));
 	if (!retval) {
-		return (len1 - len2);
+		return (int)(len1 - len2);
 	} else {
 		return retval;
 	}
 }
 /* }}} */
 
-ZEND_API zend_str_size_int zend_binary_strncmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length) /* {{{ */
+ZEND_API int zend_binary_strncmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length) /* {{{ */
 {
-	zend_str_size retval;
+	int retval;
 
 	if (s1 == s2) {
 		return 0;
 	}
 	retval = memcmp(s1, s2, MIN(length, MIN(len1, len2)));
 	if (!retval) {
-		return (MIN(length, len1) - MIN(length, len2));
+		return (int)(MIN(length, len1) - MIN(length, len2));
 	} else {
 		return retval;
 	}
 }
 /* }}} */
 
-ZEND_API zend_str_size_int zend_binary_strcasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2) /* {{{ */
+ZEND_API int zend_binary_strcasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2) /* {{{ */
 {
 	zend_str_size len;
 	zend_str_size c1, c2;
@@ -2120,15 +2120,15 @@ ZEND_API zend_str_size_int zend_binary_strcasecmp(const char *s1, zend_str_size_
 		c1 = zend_tolower_ascii(*(unsigned char *)s1++);
 		c2 = zend_tolower_ascii(*(unsigned char *)s2++);
 		if (c1 != c2) {
-			return c1 - c2;
+			return (int)(c1 - c2);
 		}
 	}
 
-	return len1 - len2;
+	return (int)(len1 - len2);
 }
 /* }}} */
 
-ZEND_API zend_str_size_int zend_binary_strncasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length) /* {{{ */
+ZEND_API int zend_binary_strncasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length) /* {{{ */
 {
 	zend_str_size len;
 	zend_str_size c1, c2;
@@ -2141,15 +2141,15 @@ ZEND_API zend_str_size_int zend_binary_strncasecmp(const char *s1, zend_str_size
 		c1 = zend_tolower_ascii(*(unsigned char *)s1++);
 		c2 = zend_tolower_ascii(*(unsigned char *)s2++);
 		if (c1 != c2) {
-			return c1 - c2;
+			return (int)(c1 - c2);
 		}
 	}
 
-	return MIN(length, len1) - MIN(length, len2);
+	return (int)(MIN(length, len1) - MIN(length, len2));
 }
 /* }}} */
 
-ZEND_API zend_str_size_int zend_binary_strcasecmp_l(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2) /* {{{ */
+ZEND_API int zend_binary_strcasecmp_l(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2) /* {{{ */
 {
 	zend_str_size len;
 	zend_str_size c1, c2;
@@ -2163,15 +2163,15 @@ ZEND_API zend_str_size_int zend_binary_strcasecmp_l(const char *s1, zend_str_siz
 		c1 = zend_tolower((int)*(unsigned char *)s1++);
 		c2 = zend_tolower((int)*(unsigned char *)s2++);
 		if (c1 != c2) {
-			return c1 - c2;
+			return (int)(c1 - c2);
 		}
 	}
 
-	return len1 - len2;
+	return (int)(len1 - len2);
 }
 /* }}} */
 
-ZEND_API zend_str_size_int zend_binary_strncasecmp_l(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length) /* {{{ */
+ZEND_API int zend_binary_strncasecmp_l(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length) /* {{{ */
 {
 	zend_str_size len;
 	zend_str_size c1, c2;
@@ -2184,33 +2184,33 @@ ZEND_API zend_str_size_int zend_binary_strncasecmp_l(const char *s1, zend_str_si
 		c1 = zend_tolower((int)*(unsigned char *)s1++);
 		c2 = zend_tolower((int)*(unsigned char *)s2++);
 		if (c1 != c2) {
-			return c1 - c2;
+			return (int)(c1 - c2);
 		}
 	}
 
-	return MIN(length, len1) - MIN(length, len2);
+	return (int)(MIN(length, len1) - MIN(length, len2));
 }
 /* }}} */
 
-ZEND_API zend_str_size_int zend_binary_zval_strcmp(zval *s1, zval *s2) /* {{{ */
+ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2) /* {{{ */
 {
 	return zend_binary_strcmp(Z_STRVAL_P(s1), Z_STRSIZE_P(s1), Z_STRVAL_P(s2), Z_STRSIZE_P(s2));
 }
 /* }}} */
 
-ZEND_API zend_str_size_int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3) /* {{{ */
+ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3) /* {{{ */
 {
 	return zend_binary_strncmp(Z_STRVAL_P(s1), Z_STRSIZE_P(s1), Z_STRVAL_P(s2), Z_STRSIZE_P(s2), Z_LVAL_P(s3));
 }
 /* }}} */
 
-ZEND_API zend_str_size_int zend_binary_zval_strcasecmp(zval *s1, zval *s2) /* {{{ */
+ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2) /* {{{ */
 {
 	return zend_binary_strcasecmp_l(Z_STRVAL_P(s1), Z_STRSIZE_P(s1), Z_STRVAL_P(s2), Z_STRSIZE_P(s2));
 }
 /* }}} */
 
-ZEND_API zend_str_size_int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3) /* {{{ */
+ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3) /* {{{ */
 {
 	return zend_binary_strncasecmp_l(Z_STRVAL_P(s1), Z_STRSIZE_P(s1), Z_STRVAL_P(s2), Z_STRSIZE_P(s2), Z_LVAL_P(s3));
 }
@@ -2275,7 +2275,7 @@ static int hash_zval_compare_function(const zval **z1, const zval **z2 TSRMLS_DC
 	if (compare_function(&result, (zval *) *z1, (zval *) *z2 TSRMLS_CC)==FAILURE) {
 		return 1;
 	}
-	return Z_LVAL(result);
+	return (int)Z_LVAL(result);
 }
 /* }}} */
 

@@ -145,7 +145,7 @@ ZEND_API int zend_copy_ini_directives(TSRMLS_D) /* {{{ */
 /* }}} */
 #endif
 
-static zend_str_size_int ini_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
+static int ini_key_compare(const void *a, const void *b TSRMLS_DC) /* {{{ */
 {
 	const Bucket *f;
 	const Bucket *s;

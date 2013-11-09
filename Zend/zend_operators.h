@@ -361,15 +361,15 @@ ZEND_API void zend_str_tolower(char *str, zend_str_size_uint length);
 ZEND_API char *zend_str_tolower_copy(char *dest, const char *source, zend_str_size_uint length);
 ZEND_API char *zend_str_tolower_dup(const char *source, zend_str_size_uint length);
 
-ZEND_API zend_str_size_int zend_binary_zval_strcmp(zval *s1, zval *s2);
-ZEND_API zend_str_size_int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
-ZEND_API zend_str_size_int zend_binary_zval_strcasecmp(zval *s1, zval *s2);
-ZEND_API zend_str_size_int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3);
-ZEND_API zend_str_size_int zend_binary_strcmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2);
-ZEND_API zend_str_size_int zend_binary_strncmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length);
-ZEND_API zend_str_size_int zend_binary_strcasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2);
-ZEND_API zend_str_size_int zend_binary_strncasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length);
-ZEND_API zend_str_size_int zend_binary_strncasecmp_l(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length);
+ZEND_API int zend_binary_zval_strcmp(zval *s1, zval *s2);
+ZEND_API int zend_binary_zval_strncmp(zval *s1, zval *s2, zval *s3);
+ZEND_API int zend_binary_zval_strcasecmp(zval *s1, zval *s2);
+ZEND_API int zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3);
+ZEND_API int zend_binary_strcmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2);
+ZEND_API int zend_binary_strncmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length);
+ZEND_API int zend_binary_strcasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2);
+ZEND_API int zend_binary_strncasecmp(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length);
+ZEND_API int zend_binary_strncasecmp_l(const char *s1, zend_str_size_uint len1, const char *s2, zend_str_size_uint len2, zend_str_size_uint length);
 
 ZEND_API void zendi_smart_strcmp(zval *result, zval *s1, zval *s2);
 ZEND_API void zend_compare_symbol_tables(zval *result, HashTable *ht1, HashTable *ht2 TSRMLS_DC);
