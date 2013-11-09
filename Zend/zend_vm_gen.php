@@ -218,7 +218,7 @@ $op2_is_tmp_free = array(
 $op1_free_op = array(
 	"ANY"    => "FREE_OP(free_op1)",
 	"TMP"    => "zval_dtor(free_op1.var)",
-	"VAR"    => "zval_ptr_dtor(&free_op1.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op1.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
@@ -227,7 +227,7 @@ $op1_free_op = array(
 $op2_free_op = array(
 	"ANY"    => "FREE_OP(free_op2)",
 	"TMP"    => "zval_dtor(free_op2.var)",
-	"VAR"    => "zval_ptr_dtor(&free_op2.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op2.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
@@ -236,7 +236,7 @@ $op2_free_op = array(
 $op1_free_op_if_var = array(
 	"ANY"    => "FREE_OP_IF_VAR(free_op1)",
 	"TMP"    => "",
-	"VAR"    => "zval_ptr_dtor(&free_op1.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op1.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
@@ -245,33 +245,33 @@ $op1_free_op_if_var = array(
 $op2_free_op_if_var = array(
 	"ANY"    => "FREE_OP_IF_VAR(free_op2)",
 	"TMP"    => "",
-	"VAR"    => "zval_ptr_dtor(&free_op2.var)",
+	"VAR"    => "zval_ptr_dtor_nogc(&free_op2.var)",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
 );
 
 $op1_free_op_var_ptr = array(
-	"ANY"    => "if (free_op1.var) {zval_ptr_dtor(&free_op1.var);}",
+	"ANY"    => "if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);}",
 	"TMP"    => "",
-	"VAR"    => "if (free_op1.var) {zval_ptr_dtor(&free_op1.var);}",
+	"VAR"    => "if (free_op1.var) {zval_ptr_dtor_nogc(&free_op1.var);}",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
 );
 $op1_free_op_var_ptr_fast = $op1_free_op_var_ptr;
-$op1_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor(&free_op1.var)";
+$op1_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor_nogc(&free_op1.var)";
 
 $op2_free_op_var_ptr = array(
-	"ANY"    => "if (free_op2.var) {zval_ptr_dtor(&free_op2.var);}",
+	"ANY"    => "if (free_op2.var) {zval_ptr_dtor_nogc(&free_op2.var);}",
 	"TMP"    => "",
-	"VAR"    => "if (free_op2.var) {zval_ptr_dtor(&free_op2.var);}",
+	"VAR"    => "if (free_op2.var) {zval_ptr_dtor_nogc(&free_op2.var);}",
 	"CONST"  => "",
 	"UNUSED" => "",
 	"CV"     => "",
 );
 $op2_free_op_var_ptr_fast = $op2_free_op_var_ptr;
-$op2_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor(&free_op2.var)";
+$op2_free_op_var_ptr_fast["VAR"] = "zval_ptr_dtor_nogc(&free_op2.var)";
 
 $list    = array(); // list of opcode handlers and helpers in original order
 $opcodes = array(); // opcode handlers by code
@@ -1216,8 +1216,26 @@ function gen_vm($def, $skel) {
 	// Insert header
 	out($f, $GLOBALS['header_text']);
 
+	out($f, "#ifdef ZEND_WIN32\n");
 	// Suppress free_op1 warnings on Windows
-	out($f, "#ifdef ZEND_WIN32\n# pragma warning(once : 4101)\n#endif\n");
+	out($f, "# pragma warning(once : 4101)\n");
+	if (ZEND_VM_SPEC) {
+		// Suppress (<non-zero constant> || <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6235)\n");
+		// Suppress (<zero> && <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6237)\n");
+		// Suppress (<non-zero constant> && <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6239)\n");
+		// Suppress (<expression> && <non-zero constant>) warnings on windows
+		out($f, "# pragma warning(once : 6240)\n");
+		// Suppress (<non-zero constant> || <non-zero constant>) warnings on windows
+		out($f, "# pragma warning(once : 6285)\n");
+		// Suppress (<non-zero constant> || <expression>) warnings on windows
+		out($f, "# pragma warning(once : 6286)\n");
+		// Suppress constant with constant comparsion warnings on windows
+		out($f, "# pragma warning(once : 6326)\n");
+	}
+	out($f, "#endif\n");
 	
 	// Support for ZEND_USER_OPCODE
 	out($f, "static user_opcode_handler_t zend_user_opcode_handlers[256] = {\n");

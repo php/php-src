@@ -30,6 +30,7 @@
 #include "zend_ini.h"
 #include "zend_vm.h"
 #include "zend_dtrace.h"
+#include "zend_virtual_cwd.h"
 
 #ifdef ZTS
 # define GLOBAL_FUNCTION_TABLE		global_function_table
@@ -652,6 +653,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions TS
 
 	start_memory_manager(TSRMLS_C);
 
+	virtual_cwd_startup(); /* Could use shutdown to free the main cwd but it would just slow it down for CGI */
+
 #if defined(__FreeBSD__) || defined(__DragonFly__)
 	/* FreeBSD and DragonFly floating point precision fix */
 	fpsetmask(0);
@@ -802,9 +805,14 @@ void zend_post_startup(TSRMLS_D) /* {{{ */
 		compiler_globals_ctor(compiler_globals, tsrm_ls);
 	}
 	free(EG(zend_constants));
+
+	virtual_cwd_deactivate(TSRMLS_C);
+
 	executor_globals_ctor(executor_globals, tsrm_ls);
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives(TSRMLS_C);
+#else
+	virtual_cwd_deactivate(TSRMLS_C);
 #endif
 }
 /* }}} */
@@ -819,6 +827,9 @@ void zend_shutdown(TSRMLS_D) /* {{{ */
 #endif
 	zend_destroy_rsrc_list(&EG(persistent_list) TSRMLS_CC);
 	zend_destroy_modules();
+
+ 	virtual_cwd_deactivate(TSRMLS_C);
+ 	virtual_cwd_shutdown();
 
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	zend_hash_destroy(GLOBAL_CLASS_TABLE);
@@ -910,6 +921,9 @@ ZEND_API char *get_zend_version(void) /* {{{ */
 
 void zend_activate(TSRMLS_D) /* {{{ */
 {
+#ifdef ZTS
+	virtual_cwd_activate(TSRMLS_C);
+#endif
 	gc_reset(TSRMLS_C);
 	init_compiler(TSRMLS_C);
 	init_executor(TSRMLS_C);
@@ -1184,7 +1198,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 			 * such scripts recursivly, but some CG() variables may be
 			 * inconsistent. */
 
-			in_compilation = zend_is_compiling(TSRMLS_C);
+			in_compilation = CG(in_compilation);
 			if (in_compilation) {
 				saved_class_entry = CG(active_class_entry);
 				CG(active_class_entry) = NULL;
@@ -1196,6 +1210,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				SAVE_STACK(declare_stack);
 				SAVE_STACK(list_stack);
 				SAVE_STACK(context_stack);
+				CG(in_compilation) = 0;
 			}
 
 			if (call_user_function_ex(CG(function_table), NULL, orig_user_error_handler, &retval, 5, params, 1, NULL TSRMLS_CC) == SUCCESS) {
@@ -1220,6 +1235,7 @@ ZEND_API void zend_error(int type, const char *format, ...) /* {{{ */
 				RESTORE_STACK(declare_stack);
 				RESTORE_STACK(list_stack);
 				RESTORE_STACK(context_stack);
+				CG(in_compilation) = 1;
 			}
 
 			if (!EG(user_error_handler)) {

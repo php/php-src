@@ -6,6 +6,8 @@ if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
     die("skip Test is valid for Windows");
 }
 ?>
+--INI--
+date.timezone = UTC
 --FILE--
 <?php
 	setlocale(LC_ALL, 'Japanese_Japan.932');

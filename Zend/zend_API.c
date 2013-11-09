@@ -2029,7 +2029,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	const zend_function_entry *ptr = functions;
 	zend_function function, *reg_function;
 	zend_internal_function *internal_function = (zend_internal_function *)&function;
-	int count=0, unload=0, result=0;
+	int count=0, unload=0;
 	HashTable *target_function_table = function_table;
 	int error_type;
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL;
@@ -2037,6 +2037,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	int fname_len;
 	const char *lc_class_name = NULL;
 	int class_name_len = 0;
+	zend_ulong hash;
 
 	if (type==MODULE_PERSISTENT) {
 		error_type = E_CORE_WARNING;
@@ -2089,15 +2090,11 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			} else {
 				internal_function->required_num_args = info->required_num_args;
 			}
-			if (info->pass_rest_by_reference) {
-				if (info->pass_rest_by_reference == ZEND_SEND_PREFER_REF) {
-					internal_function->fn_flags |= ZEND_ACC_PASS_REST_PREFER_REF;
-				} else {
-					internal_function->fn_flags |= ZEND_ACC_PASS_REST_BY_REFERENCE;
-				}
-			}
 			if (info->return_reference) {
 				internal_function->fn_flags |= ZEND_ACC_RETURN_REFERENCE;
+			}
+			if (ptr->arg_info[ptr->num_args].is_variadic) {
+				internal_function->fn_flags |= ZEND_ACC_VARIADIC;
 			}
 		} else {
 			internal_function->arg_info = NULL;
@@ -2135,12 +2132,8 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		}
 		fname_len = strlen(ptr->fname);
 		lowercase_name = zend_new_interned_string(zend_str_tolower_dup(ptr->fname, fname_len), fname_len + 1, 1 TSRMLS_CC);
-		if (IS_INTERNED(lowercase_name)) {
-			result = zend_hash_quick_add(target_function_table, lowercase_name, fname_len+1, INTERNED_HASH(lowercase_name), &function, sizeof(zend_function), (void**)&reg_function);
-		} else {
-			result = zend_hash_add(target_function_table, lowercase_name, fname_len+1, &function, sizeof(zend_function), (void**)&reg_function);
-		}
-		if (result == FAILURE) {
+		hash = str_hash(lowercase_name, fname_len);
+		if (zend_hash_quick_add(target_function_table, lowercase_name, fname_len+1, hash, &function, sizeof(zend_function), (void**)&reg_function) == FAILURE) {
 			unload=1;
 			str_efree(lowercase_name);
 			break;
@@ -2493,6 +2486,7 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 {
 	zend_class_entry *class_entry = malloc(sizeof(zend_class_entry));
 	char *lowercase_name = emalloc(orig_class_entry->name_length + 1);
+	zend_ulong hash;
 	*class_entry = *orig_class_entry;
 
 	class_entry->type = ZEND_INTERNAL_CLASS;
@@ -2506,11 +2500,8 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
 
 	zend_str_tolower_copy(lowercase_name, orig_class_entry->name, class_entry->name_length);
 	lowercase_name = (char*)zend_new_interned_string(lowercase_name, class_entry->name_length + 1, 1 TSRMLS_CC);
-	if (IS_INTERNED(lowercase_name)) {
-		zend_hash_quick_update(CG(class_table), lowercase_name, class_entry->name_length+1, INTERNED_HASH(lowercase_name), &class_entry, sizeof(zend_class_entry *), NULL);
-	} else {
-		zend_hash_update(CG(class_table), lowercase_name, class_entry->name_length+1, &class_entry, sizeof(zend_class_entry *), NULL);
-	}
+	hash = str_hash(lowercase_name, class_entry->name_length);
+	zend_hash_quick_update(CG(class_table), lowercase_name, class_entry->name_length+1, hash, &class_entry, sizeof(zend_class_entry *), NULL);
 	str_efree(lowercase_name);
 	return class_entry;
 }
@@ -2577,7 +2568,12 @@ ZEND_API int zend_register_class_alias_ex(const char *name, int name_len, zend_c
 	char *lcname = zend_str_tolower_dup(name, name_len);
 	int ret;
 
-	ret = zend_hash_add(CG(class_table), lcname, name_len+1, &ce, sizeof(zend_class_entry *), NULL);
+	if (lcname[0] == '\\') {
+		ret = zend_hash_add(CG(class_table), lcname+1, name_len, &ce, sizeof(zend_class_entry *), NULL);
+	} else {
+		ret = zend_hash_add(CG(class_table), lcname, name_len+1, &ce, sizeof(zend_class_entry *), NULL);
+	}
+
 	efree(lcname);
 	if (ret == SUCCESS) {
 		ce->refcount++;
@@ -3980,15 +3976,16 @@ ZEND_API const char* zend_find_alias_name(zend_class_entry *ce, const char *name
 {
 	zend_trait_alias *alias, **alias_ptr;
 
-	alias_ptr = ce->trait_aliases;
-	alias = *alias_ptr;
-	while (alias) {
-		if (alias->alias_len == len &&
-		    !strncasecmp(name, alias->alias, alias->alias_len)) {
-			return alias->alias;
-		}
-		alias_ptr++;
+	if ((alias_ptr = ce->trait_aliases)) {
 		alias = *alias_ptr;
+		while (alias) {
+			if (alias->alias_len == len &&
+				!strncasecmp(name, alias->alias, alias->alias_len)) {
+				return alias->alias;
+			}
+			alias_ptr++;
+			alias = *alias_ptr;
+		}
 	}
 
 	return name;

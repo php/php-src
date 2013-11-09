@@ -54,7 +54,7 @@
 #ifndef PHP_WIN32
 #include "TSRM/tsrm_strtok_r.h"
 #endif
-#include "TSRM/tsrm_virtual_cwd.h"
+#include "Zend/zend_virtual_cwd.h"
 #if HAVE_SPL
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
@@ -66,19 +66,6 @@
 #ifdef PHAR_HASH_OK
 #include "ext/hash/php_hash.h"
 #include "ext/hash/php_hash_sha.h"
-#endif
-
-#ifndef E_RECOVERABLE_ERROR
-# define E_RECOVERABLE_ERROR E_ERROR
-#endif
-
-#ifndef pestrndup
-# define pestrndup(s, length, persistent) ((persistent)?zend_strndup((s),(length)):estrndup((s),(length)))
-#endif
-
-#ifndef ALLOC_PERMANENT_ZVAL
-# define ALLOC_PERMANENT_ZVAL(z) \
-	(z) = (zval*)malloc(sizeof(zval))
 #endif
 
 /* PHP_ because this is public information via MINFO */
@@ -513,75 +500,7 @@ union _phar_entry_object {
 #endif
 
 #ifndef PHAR_MAIN
-# if PHP_VERSION_ID >= 50300
 extern char *(*phar_save_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
-# endif
-#endif
-
-#if PHP_VERSION_ID < 50209
-static inline size_t phar_stream_copy_to_stream(php_stream *src, php_stream *dest, size_t maxlen, size_t *len STREAMS_DC TSRMLS_DC)
-{
-	size_t ret = php_stream_copy_to_stream(src, dest, maxlen);
-	if (len) {
-		*len = ret;
-	}
-	if (ret) {
-		return SUCCESS;
-	}
-	return FAILURE;
-}
-#else
-# define phar_stream_copy_to_stream(src, dest, maxlen, len)	_php_stream_copy_to_stream_ex((src), (dest), (maxlen), (len) STREAMS_CC TSRMLS_CC)
-
-#endif
-
-#if PHP_VERSION_ID >= 60000
-typedef zstr phar_zstr;
-#define PHAR_STR(a, b)	\
-	spprintf(&b, 0, "%s", a.s);
-#define PHAR_ZSTR(a, b)	\
-	b = ZSTR(a);
-#define PHAR_STR_FREE(a) \
-	efree(a);
-static inline int phar_make_unicode(zstr *c_var, char *arKey, uint nKeyLength TSRMLS_DC)
-{
-	int c_var_len;
-	UConverter *conv = ZEND_U_CONVERTER(UG(runtime_encoding_conv));
-
-	c_var->u = NULL;
-	if (zend_string_to_unicode(conv, &c_var->u, &c_var_len, arKey, nKeyLength TSRMLS_CC) == FAILURE) {
-
-		if (c_var->u) {
-			efree(c_var->u);
-		}
-		return 0;
-
-	}
-	return c_var_len;
-}
-static inline int phar_find_key(HashTable *_SERVER, char *key, int len, void **stuff TSRMLS_DC)
-{
-	if (SUCCESS == zend_hash_find(_SERVER, key, len, stuff)) {
-		return 1;
-	} else {
-		int s = len;
-		zstr var;
-		s = phar_make_unicode(&var, key, len TSRMLS_CC);
-		if (SUCCESS == zend_u_hash_find(_SERVER, IS_UNICODE, var, s, stuff)) {
-			efree(var.u);
-			return 1;
-		}
-		efree(var.u);
-		return 0;
-	}
-}
-#else
-typedef char *phar_zstr;
-#define PHAR_STR(a, b)	\
-	b = a;
-#define PHAR_ZSTR(a, b)	\
-	b = a;
-#define PHAR_STR_FREE(a)
 #endif
 
 BEGIN_EXTERN_C()

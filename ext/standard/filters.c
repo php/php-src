@@ -951,7 +951,9 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 			*(pd++) = qp_digits[(c & 0x0f)];
 			ocnt -= 3;
 			line_ccnt -= 3;
-			trail_ws--;
+			if (trail_ws > 0) {
+				trail_ws--;
+			}
 			CONSUME_CHAR(ps, icnt, lb_ptr, lb_cnt);
 		}
 	}

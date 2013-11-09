@@ -45,6 +45,7 @@ DIR *opendir(const char *dir)
 
 	dp = (DIR *) malloc(sizeof(DIR));
 	if (dp == NULL) {
+		free(filespec);
 		return NULL;
 	}
 	dp->offset = 0;

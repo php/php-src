@@ -151,7 +151,7 @@ Naming Conventions
 
 7.  Classes should be given descriptive names. Avoid using abbreviations where
     possible. Each word in the class name should start with a capital letter,
-    without underscore delimiters (CampelCaps starting with a capital letter).
+    without underscore delimiters (CamelCaps starting with a capital letter).
     The class name should be prefixed with the name of the 'parent set' (e.g.
     the name of the extension)::
 

@@ -94,31 +94,23 @@ static size_t phar_dir_read(php_stream *stream, char *buf, size_t count TSRMLS_D
 {
 	size_t to_read;
 	HashTable *data = (HashTable *)stream->abstract;
-	phar_zstr key;
 	char *str_key;
 	uint keylen;
 	ulong unused;
 
-	if (FAILURE == zend_hash_has_more_elements(data)) {
+	if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(data, &str_key, &keylen, &unused, 0, NULL)) {
 		return 0;
 	}
 
-	if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(data, &key, &keylen, &unused, 0, NULL)) {
-		return 0;
-	}
-
-	PHAR_STR(key, str_key);
 	zend_hash_move_forward(data);
 	to_read = MIN(keylen, count);
 
 	if (to_read == 0 || count < keylen) {
-		PHAR_STR_FREE(str_key);
 		return 0;
 	}
 
 	memset(buf, 0, sizeof(php_stream_dirent));
 	memcpy(((php_stream_dirent *) buf)->d_name, str_key, to_read);
-	PHAR_STR_FREE(str_key);
 	((php_stream_dirent *) buf)->d_name[to_read + 1] = '\0';
 
 	return sizeof(php_stream_dirent);
@@ -168,11 +160,7 @@ static int phar_compare_dir_name(const void *a, const void *b TSRMLS_DC)  /* {{{
 
 	f = *((Bucket **) a);
 	s = *((Bucket **) b);
-#if (PHP_MAJOR_VERSION < 6)
 	result = zend_binary_strcmp(f->arKey, f->nKeyLength, s->arKey, s->nKeyLength);
-#else
-	result = zend_binary_strcmp(f->key.arKey.s, f->nKeyLength, s->key.arKey.s, s->nKeyLength);
-#endif
 
 	if (result < 0) {
 		return -1;
@@ -193,13 +181,12 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 {
 	HashTable *data;
 	int dirlen = strlen(dir);
-	phar_zstr key;
 	char *entry, *found, *save, *str_key;
 	uint keylen;
 	ulong unused;
 
 	ALLOC_HASHTABLE(data);
-	zend_hash_init(data, 64, zend_get_hash_value, NULL, 0);
+	zend_hash_init(data, 64, NULL, NULL, 0);
 
 	if ((*dir == '/' && dirlen == 1 && (manifest->nNumOfElements == 0)) || (dirlen >= sizeof(".phar")-1 && !memcmp(dir, ".phar", sizeof(".phar")-1))) {
 		/* make empty root directory for empty phar */
@@ -211,15 +198,12 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 	zend_hash_internal_pointer_reset(manifest);
 
 	while (FAILURE != zend_hash_has_more_elements(manifest)) {
-		if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(manifest, &key, &keylen, &unused, 0, NULL)) {
+		if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(manifest, &str_key, &keylen, &unused, 0, NULL)) {
 			break;
 		}
 
-		PHAR_STR(key, str_key);
-
 		if (keylen <= (uint)dirlen) {
 			if (keylen < (uint)dirlen || !strncmp(str_key, dir, dirlen)) {
-				PHAR_STR_FREE(str_key);
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}
@@ -230,7 +214,6 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 		if (*dir == '/') {
 			/* root directory */
 			if (keylen >= sizeof(".phar")-1 && !memcmp(str_key, ".phar", sizeof(".phar")-1)) {
-				PHAR_STR_FREE(str_key);
 				/* do not add any magic entries to this directory */
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
@@ -250,19 +233,16 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 				entry[keylen] = '\0';
 			}
 
-			PHAR_STR_FREE(str_key);
 			goto PHAR_ADD_ENTRY;
 		} else {
 			if (0 != memcmp(str_key, dir, dirlen)) {
 				/* entry in directory not found */
-				PHAR_STR_FREE(str_key);
 				if (SUCCESS != zend_hash_move_forward(manifest)) {
 					break;
 				}
 				continue;
 			} else {
 				if (str_key[dirlen] != '/') {
-					PHAR_STR_FREE(str_key);
 					if (SUCCESS != zend_hash_move_forward(manifest)) {
 						break;
 					}
@@ -289,7 +269,6 @@ static php_stream *phar_make_dirstream(char *dir, HashTable *manifest TSRMLS_DC)
 			entry[keylen - dirlen - 1] = '\0';
 			keylen = keylen - dirlen - 1;
 		}
-		PHAR_STR_FREE(str_key);
 PHAR_ADD_ENTRY:
 		if (keylen) {
 			phar_add_empty(data, entry, keylen);
@@ -324,7 +303,6 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 	php_url *resource = NULL;
 	php_stream *ret;
 	char *internal_file, *error, *str_key;
-	phar_zstr key;
 	uint keylen;
 	ulong unused;
 	phar_archive_data *phar;
@@ -405,17 +383,14 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		while (FAILURE != zend_hash_has_more_elements(&phar->manifest)) {
 			if (HASH_KEY_NON_EXISTENT != 
 					zend_hash_get_current_key_ex(
-						&phar->manifest, &key, &keylen, &unused, 0, NULL)) {
-				PHAR_STR(key, str_key);
+						&phar->manifest, &str_key, &keylen, &unused, 0, NULL)) {
 				if (keylen > (uint)i_len && 0 == memcmp(str_key, internal_file, i_len)) {
-					PHAR_STR_FREE(str_key);
 					/* directory found */
 					internal_file = estrndup(internal_file,
 							i_len);
 					php_url_free(resource);
 					return phar_make_dirstream(internal_file, &phar->manifest TSRMLS_CC);
 				}
-				PHAR_STR_FREE(str_key);
 			}
 
 			if (SUCCESS != zend_hash_move_forward(&phar->manifest)) {
@@ -572,7 +547,6 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	int arch_len, entry_len;
 	php_url *resource = NULL;
 	uint host_len;
-	phar_zstr key;
 	char *str_key;
 	uint key_len;
 	ulong unused;
@@ -637,15 +611,12 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 
 	if (!entry->is_deleted) {
 		for (zend_hash_internal_pointer_reset(&phar->manifest);
-		HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&phar->manifest, &key, &key_len, &unused, 0, NULL);
-		zend_hash_move_forward(&phar->manifest)) {
-
-			PHAR_STR(key, str_key);
-
+			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&phar->manifest, &str_key, &key_len, &unused, 0, NULL);
+			zend_hash_move_forward(&phar->manifest)
+		) {
 			if (key_len > path_len && 
 				memcmp(str_key, resource->path+1, path_len) == 0 && 
 				IS_SLASH(str_key[path_len])) {
-				PHAR_STR_FREE(str_key);
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
 					efree(entry->filename);
@@ -654,19 +625,15 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 				php_url_free(resource);
 				return 0;
 			}
-			PHAR_STR_FREE(str_key);
 		}
 
 		for (zend_hash_internal_pointer_reset(&phar->virtual_dirs);
-			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&phar->virtual_dirs, &key, &key_len, &unused, 0, NULL);
+			HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&phar->virtual_dirs, &str_key, &key_len, &unused, 0, NULL);
 			zend_hash_move_forward(&phar->virtual_dirs)) {
-	
-			PHAR_STR(key, str_key);
 	
 			if (key_len > path_len && 
 				memcmp(str_key, resource->path+1, path_len) == 0 && 
 				IS_SLASH(str_key[path_len])) {
-				PHAR_STR_FREE(str_key);
 				php_stream_wrapper_log_error(wrapper, options TSRMLS_CC, "phar error: Directory not empty");
 				if (entry->is_temp_dir) {
 					efree(entry->filename);
@@ -675,7 +642,6 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 				php_url_free(resource);
 				return 0;
 			}
-			PHAR_STR_FREE(str_key);
 		}
 	}
 

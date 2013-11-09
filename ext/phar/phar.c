@@ -27,9 +27,7 @@
 static void destroy_phar_data(void *pDest);
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
-#if PHP_VERSION_ID >= 50300
 char *(*phar_save_resolve_path)(const char *filename, int filename_len TSRMLS_DC);
-#endif
 
 /**
  * set's phar->is_writeable based on the current INI value
@@ -1641,7 +1639,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 
 				php_stream_filter_append(&temp->writefilters, filter);
 
-				if (SUCCESS != phar_stream_copy_to_stream(fp, temp, PHP_STREAM_COPY_ALL, NULL)) {
+				if (SUCCESS != php_stream_copy_to_stream_ex(fp, temp, PHP_STREAM_COPY_ALL, NULL)) {
 					if (err) {
 						php_stream_close(temp);
 						MAPPHAR_ALLOC_FAIL("unable to decompress gzipped phar archive \"%s\", ext/zlib is buggy in PHP versions older than 5.2.6")
@@ -1683,7 +1681,7 @@ static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *a
 
 				php_stream_filter_append(&temp->writefilters, filter);
 
-				if (SUCCESS != phar_stream_copy_to_stream(fp, temp, PHP_STREAM_COPY_ALL, NULL)) {
+				if (SUCCESS != php_stream_copy_to_stream_ex(fp, temp, PHP_STREAM_COPY_ALL, NULL)) {
 					php_stream_close(temp);
 					MAPPHAR_ALLOC_FAIL("unable to decompress bzipped phar archive \"%s\" to temporary file")
 				}
@@ -1956,67 +1954,45 @@ woohoo:
 				goto woohoo;
 			}
 		} else {
-			phar_zstr key;
 			char *str_key;
 			uint keylen;
 			ulong unused;
 
-			zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_fname_map));
-
-			while (FAILURE != zend_hash_has_more_elements(&(PHAR_GLOBALS->phar_fname_map))) {
-				if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_fname_map), &key, &keylen, &unused, 0, NULL)) {
-					break;
-				}
-
-				PHAR_STR(key, str_key);
-
+			for (zend_hash_internal_pointer_reset(&(PHAR_GLOBALS->phar_fname_map));
+				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&(PHAR_GLOBALS->phar_fname_map), &str_key, &keylen, &unused, 0, NULL);
+				zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map))
+			) {
 				if (keylen > (uint) filename_len) {
-					zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
-					PHAR_STR_FREE(str_key);
 					continue;
 				}
 
 				if (!memcmp(filename, str_key, keylen) && ((uint)filename_len == keylen
 					|| filename[keylen] == '/' || filename[keylen] == '\0')) {
-					PHAR_STR_FREE(str_key);
 					if (FAILURE == zend_hash_get_current_data(&(PHAR_GLOBALS->phar_fname_map), (void **) &pphar)) {
 						break;
 					}
 					*ext_str = filename + (keylen - (*pphar)->ext_len);
 					goto woohoo;
 				}
-
-				PHAR_STR_FREE(str_key);
-				zend_hash_move_forward(&(PHAR_GLOBALS->phar_fname_map));
 			}
 
 			if (PHAR_G(manifest_cached)) {
-				zend_hash_internal_pointer_reset(&cached_phars);
-
-				while (FAILURE != zend_hash_has_more_elements(&cached_phars)) {
-					if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&cached_phars, &key, &keylen, &unused, 0, NULL)) {
-						break;
-					}
-
-					PHAR_STR(key, str_key);
-
+				for (zend_hash_internal_pointer_reset(&cached_phars);
+					HASH_KEY_NON_EXISTENT != zend_hash_get_current_key_ex(&cached_phars, &str_key, &keylen, &unused, 0, NULL);
+					zend_hash_move_forward(&cached_phars)
+				) {
 					if (keylen > (uint) filename_len) {
-						zend_hash_move_forward(&cached_phars);
-						PHAR_STR_FREE(str_key);
 						continue;
 					}
 
 					if (!memcmp(filename, str_key, keylen) && ((uint)filename_len == keylen
 						|| filename[keylen] == '/' || filename[keylen] == '\0')) {
-						PHAR_STR_FREE(str_key);
 						if (FAILURE == zend_hash_get_current_data(&cached_phars, (void **) &pphar)) {
 							break;
 						}
 						*ext_str = filename + (keylen - (*pphar)->ext_len);
 						goto woohoo;
 					}
-					PHAR_STR_FREE(str_key);
-					zend_hash_move_forward(&cached_phars);
 				}
 			}
 		}
@@ -2701,7 +2677,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		size_t written;
 
 		if (!user_stub && phar->halt_offset && oldfile && !phar->is_brandnew) {
-			phar_stream_copy_to_stream(oldfile, newfile, phar->halt_offset, &written);
+			php_stream_copy_to_stream_ex(oldfile, newfile, phar->halt_offset, &written);
 			newstub = NULL;
 		} else {
 			/* this is either a brand new phar or a default stub overwrite */
@@ -2889,7 +2865,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			return EOF;
 		}
 		php_stream_filter_append((&entry->cfp->writefilters), filter);
-		if (SUCCESS != phar_stream_copy_to_stream(file, entry->cfp, entry->uncompressed_filesize, NULL)) {
+		if (SUCCESS != php_stream_copy_to_stream_ex(file, entry->cfp, entry->uncompressed_filesize, NULL)) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -3121,7 +3097,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		/* this will have changed for all files that have either changed compression or been modified */
 		entry->offset = entry->offset_abs = offset;
 		offset += entry->compressed_filesize;
-		if (phar_stream_copy_to_stream(file, newfile, entry->compressed_filesize, &wrote) == FAILURE) {
+		if (php_stream_copy_to_stream_ex(file, newfile, entry->compressed_filesize, &wrote) == FAILURE) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -3267,7 +3243,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 			}
 
 			php_stream_filter_append(&phar->fp->writefilters, filter);
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			php_stream_close(phar->fp);
@@ -3276,14 +3252,14 @@ int phar_flush(phar_archive_data *phar, char *user_stub, long len, int convert, 
 		} else if (phar->flags & PHAR_FILE_COMPRESSED_BZ2) {
 			filter = php_stream_filter_create("bzip2.compress", NULL, php_stream_is_persistent(phar->fp) TSRMLS_CC);
 			php_stream_filter_append(&phar->fp->writefilters, filter);
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			php_stream_filter_flush(filter, 1);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			php_stream_close(phar->fp);
 			/* use the temp stream as our base */
 			phar->fp = newfile;
 		} else {
-			phar_stream_copy_to_stream(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
+			php_stream_copy_to_stream_ex(newfile, phar->fp, PHP_STREAM_COPY_ALL, NULL);
 			/* we could also reopen the file in "rb" mode but there is no need for that */
 			php_stream_close(newfile);
 		}
@@ -3319,31 +3295,18 @@ static size_t phar_zend_stream_reader(void *handle, char *buf, size_t len TSRMLS
 }
 /* }}} */
 
-#if PHP_VERSION_ID >= 50300
 static size_t phar_zend_stream_fsizer(void *handle TSRMLS_DC) /* {{{ */
 {
 	return ((phar_archive_data*)handle)->halt_offset + 32;
 } /* }}} */
 
-#else /* PHP_VERSION_ID */
-
-static long phar_stream_fteller_for_zend(void *handle TSRMLS_DC) /* {{{ */
-{
-	return (long)php_stream_tell(phar_get_pharfp((phar_archive_data*)handle TSRMLS_CC));
-}
-/* }}} */
-#endif
-
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
-#if PHP_VERSION_ID >= 50300
 #define phar_orig_zend_open zend_stream_open_function
+
 static char *phar_resolve_path(const char *filename, int filename_len TSRMLS_DC)
 {
 	return phar_find_in_include_path((char *) filename, filename_len, NULL TSRMLS_CC);
 }
-#else
-int (*phar_orig_zend_open)(const char *filename, zend_file_handle *handle TSRMLS_DC);
-#endif
 
 static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC) /* {{{ */
 {
@@ -3376,7 +3339,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 				}
 			} else if (phar->flags & PHAR_FILE_COMPRESSION_MASK) {
 				/* compressed phar */
-#if PHP_VERSION_ID >= 50300
 				file_handle->type = ZEND_HANDLE_STREAM;
 				/* we do our own reading directly from the phar, don't change the next line */
 				file_handle->handle.stream.handle  = phar;
@@ -3388,18 +3350,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 					php_stream_rewind(PHAR_GLOBALS->cached_fp[phar->phar_pos].fp) :
 					php_stream_rewind(phar->fp);
 				memset(&file_handle->handle.stream.mmap, 0, sizeof(file_handle->handle.stream.mmap));
-#else /* PHP_VERSION_ID */
-				file_handle->type = ZEND_HANDLE_STREAM;
-				/* we do our own reading directly from the phar, don't change the next line */
-				file_handle->handle.stream.handle = phar;
-				file_handle->handle.stream.reader = phar_zend_stream_reader;
-				file_handle->handle.stream.closer = NULL; /* don't close - let phar handle this one */
-				file_handle->handle.stream.fteller = phar_stream_fteller_for_zend;
-				file_handle->handle.stream.interactive = 0;
-				phar->is_persistent ?
-					php_stream_rewind(PHAR_GLOBALS->cached_fp[phar->phar_pos].fp) :
-					php_stream_rewind(phar->fp);
-#endif
 			}
 		}
 	}
@@ -3424,60 +3374,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type 
 }
 /* }}} */
 
-#if PHP_VERSION_ID < 50300
-int phar_zend_open(const char *filename, zend_file_handle *handle TSRMLS_DC) /* {{{ */
-{
-	char *arch, *entry;
-	int arch_len, entry_len;
-
-	/* this code is obsoleted in php 5.3 */
-	entry = (char *) filename;
-	if (!IS_ABSOLUTE_PATH(entry, strlen(entry)) && !strstr(entry, "://")) {
-		phar_archive_data **pphar = NULL;
-		char *fname;
-		int fname_len;
-
-		fname = (char*)zend_get_executed_filename(TSRMLS_C);
-		fname_len = strlen(fname);
-
-		if (fname_len > 7 && !strncasecmp(fname, "phar://", 7)) {
-			if (SUCCESS == phar_split_fname(fname, fname_len, &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
-				zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar);
-				if (!pphar && PHAR_G(manifest_cached)) {
-					zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar);
-				}
-				efree(arch);
-				efree(entry);
-			}
-		}
-
-		/* retrieving an include within the current directory, so use this if possible */
-		if (!(entry = phar_find_in_include_path((char *) filename, strlen(filename), NULL TSRMLS_CC))) {
-			/* this file is not in the phar, use the original path */
-			goto skip_phar;
-		}
-
-		if (SUCCESS == phar_orig_zend_open(entry, handle TSRMLS_CC)) {
-			if (!handle->opened_path) {
-				handle->opened_path = entry;
-			}
-			if (entry != filename) {
-				handle->free_filename = 1;
-			}
-			return SUCCESS;
-		}
-
-		if (entry != filename) {
-			efree(entry);
-		}
-
-		return FAILURE;
-	}
-skip_phar:
-	return phar_orig_zend_open(filename, handle TSRMLS_CC);
-}
-/* }}} */
-#endif
 typedef zend_op_array* (zend_compile_t)(zend_file_handle*, int TSRMLS_DC);
 typedef zend_compile_t* (compile_hook)(zend_compile_t *ptr);
 
@@ -3554,13 +3450,8 @@ PHP_MINIT_FUNCTION(phar) /* {{{ */
 	phar_orig_compile_file = zend_compile_file;
 	zend_compile_file = phar_compile_file;
 
-#if PHP_VERSION_ID >= 50300
 	phar_save_resolve_path = zend_resolve_path;
 	zend_resolve_path = phar_resolve_path;
-#else
-	phar_orig_zend_open = zend_stream_open_function;
-	zend_stream_open_function = phar_zend_open;
-#endif
 
 	phar_object_init(TSRMLS_C);
 
@@ -3581,11 +3472,6 @@ PHP_MSHUTDOWN_FUNCTION(phar) /* {{{ */
 		zend_compile_file = phar_orig_compile_file;
 	}
 
-#if PHP_VERSION_ID < 50300
-	if (zend_stream_open_function == phar_zend_open) {
-		zend_stream_open_function = phar_orig_zend_open;
-	}
-#endif
 	if (PHAR_G(manifest_cached)) {
 		zend_hash_destroy(&(cached_phars));
 		zend_hash_destroy(&(cached_alias));

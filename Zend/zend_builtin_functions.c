@@ -435,9 +435,7 @@ ZEND_FUNCTION(func_get_arg)
 	}
 
 	arg = *(p-(arg_count-requested_offset));
-	*return_value = *arg;
-	zval_copy_ctor(return_value);
-	INIT_PZVAL(return_value);
+	RETURN_ZVAL_FAST(arg);
 }
 /* }}} */
 
@@ -461,12 +459,17 @@ ZEND_FUNCTION(func_get_args)
 
 	array_init_size(return_value, arg_count);
 	for (i=0; i<arg_count; i++) {
-		zval *element;
+		zval *element, *arg;
 
-		ALLOC_ZVAL(element);
-		*element = **((zval **) (p-(arg_count-i)));
-		zval_copy_ctor(element);
-		INIT_PZVAL(element);
+		arg = *((zval **) (p-(arg_count-i)));
+		if (!Z_ISREF_P(arg)) {
+			element = arg;
+			Z_ADDREF_P(element);
+		} else {
+			ALLOC_ZVAL(element);
+			INIT_PZVAL_COPY(element, arg);
+			zval_copy_ctor(element);
+	    }
 		zend_hash_next_index_insert(return_value->value.ht, &element, sizeof(zval *), NULL);
 	}
 }
@@ -706,7 +709,7 @@ repeat:
 		zval_ptr_dtor(&val_free);
 	}
 	c.flags = case_sensitive; /* non persistent */
-	c.name = IS_INTERNED(name) ? name : zend_strndup(name, name_len);
+	c.name = str_strndup(name, name_len);
 	if(c.name == NULL) {
 		RETURN_FALSE;
 	}
@@ -1388,26 +1391,18 @@ ZEND_FUNCTION(function_exists)
    Creates an alias for user defined class */
 ZEND_FUNCTION(class_alias)
 {
-	char *class_name, *lc_name, *alias_name;
+	char *class_name, *alias_name;
 	zend_class_entry **ce;
 	int class_name_len, alias_name_len;
 	int found;
 	zend_bool autoload = 1;
-	ALLOCA_FLAG(use_heap)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ss|b", &class_name, &class_name_len, &alias_name, &alias_name_len, &autoload) == FAILURE) {
 		return;
 	}
 
-	if (!autoload) {
-		lc_name = do_alloca(class_name_len + 1, use_heap);
-		zend_str_tolower_copy(lc_name, class_name, class_name_len);
+	found = zend_lookup_class_ex(class_name, class_name_len, NULL, autoload, &ce TSRMLS_CC);
 	
-		found = zend_hash_find(EG(class_table), lc_name, class_name_len+1, (void **) &ce);
-		free_alloca(lc_name, use_heap);
-	} else {
-		found = zend_lookup_class(class_name, class_name_len, &ce TSRMLS_CC);
-	}
 	if (found == SUCCESS) {
 		if ((*ce)->type == ZEND_USER_CLASS) { 
 			if (zend_register_class_alias_ex(alias_name, alias_name_len, *ce TSRMLS_CC) == SUCCESS) {

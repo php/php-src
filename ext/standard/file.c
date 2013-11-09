@@ -223,10 +223,14 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_CLIENT",		STREAM_CRYPTO_METHOD_SSLv3_CLIENT,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv23_CLIENT",	STREAM_CRYPTO_METHOD_SSLv23_CLIENT,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLS_CLIENT",		STREAM_CRYPTO_METHOD_TLS_CLIENT,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT",  STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT,  CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT",  STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,  CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv2_SERVER",		STREAM_CRYPTO_METHOD_SSLv2_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv3_SERVER",		STREAM_CRYPTO_METHOD_SSLv3_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_SSLv23_SERVER",	STREAM_CRYPTO_METHOD_SSLv23_SERVER,	CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLS_SERVER",		STREAM_CRYPTO_METHOD_TLS_SERVER,	CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_1_SERVER",  STREAM_CRYPTO_METHOD_TLSv1_1_SERVER,  CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("STREAM_CRYPTO_METHOD_TLSv1_2_SERVER",  STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,  CONST_CS|CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("STREAM_SHUT_RD",	STREAM_SHUT_RD,		CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("STREAM_SHUT_WR",	STREAM_SHUT_WR,		CONST_CS|CONST_PERSISTENT);
@@ -818,7 +822,7 @@ PHP_FUNCTION(tempnam)
 	if (p_len > 64) {
 		p[63] = '\0';
 	}
-	
+
 	RETVAL_FALSE;
 
 	if ((fd = php_open_temporary_fd_ex(dir, p, &opened_path, 1 TSRMLS_CC)) >= 0) {
@@ -1380,13 +1384,13 @@ PHP_FUNCTION(umask)
 {
 	long arg1 = 0;
 	int oldumask;
-	
+
 	oldumask = umask(077);
 
 	if (BG(umask) == -1) {
 		BG(umask) = oldumask;
 	}
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &arg1) == FAILURE) {
 		RETURN_FALSE;
 	}
@@ -1799,22 +1803,23 @@ quit_loop:
 
 #define FPUTCSV_FLD_CHK(c) memchr(Z_STRVAL(field), c, Z_STRLEN(field))
 
-/* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure]])
+/* {{{ proto int fputcsv(resource fp, array fields [, string delimiter [, string enclosure [, string escape_char]]])
    Format line as CSV and write to file pointer */
 PHP_FUNCTION(fputcsv)
 {
-	char delimiter = ',';	/* allow this to be set as parameter */
-	char enclosure = '"';	/* allow this to be set as parameter */
-	const char escape_char = '\\';
+	char delimiter = ',';	 /* allow this to be set as parameter */
+	char enclosure = '"';	 /* allow this to be set as parameter */
+	char escape_char = '\\'; /* allow this to be set as parameter */
 	php_stream *stream;
 	zval *fp = NULL, *fields = NULL;
 	int ret;
-	char *delimiter_str = NULL, *enclosure_str = NULL;
-	int delimiter_str_len = 0, enclosure_str_len = 0;
+	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
+	int delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|ss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "ra|sss",
 			&fp, &fields, &delimiter_str, &delimiter_str_len,
-			&enclosure_str, &enclosure_str_len) == FAILURE) {
+			&enclosure_str, &enclosure_str_len,
+			&escape_str, &escape_str_len) == FAILURE) {
 		return;
 	}
 
@@ -1840,6 +1845,17 @@ PHP_FUNCTION(fputcsv)
 		}
 		/* use first character from string */
 		enclosure = *enclosure_str;
+	}
+
+	if (escape_str != NULL) {
+		if (escape_str_len < 1) {
+			php_error_docref(NULL TSRMLS_CC, E_WARNING, "escape must be a character");
+			RETURN_FALSE;
+		} else if (escape_str_len > 1) {
+			php_error_docref(NULL TSRMLS_CC, E_NOTICE, "escape must be a single character");
+		}
+		/* use first character from string */
+		escape_char = *escape_str;
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, &fp);

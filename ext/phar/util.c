@@ -41,10 +41,6 @@
 static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, char *key, int key_len, char **signature, int *signature_len TSRMLS_DC);
 #endif
 
-#if !defined(PHP_VERSION_ID) || PHP_VERSION_ID < 50300
-extern php_stream_wrapper php_stream_phar_wrapper;
-#endif
-
 /* for links to relative location, prepend cwd of the entry */
 static char *phar_get_link_location(phar_entry_info *entry TSRMLS_DC) /* {{{ */
 {
@@ -256,7 +252,6 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 
 char *phar_find_in_include_path(char *filename, int filename_len, phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 {
-#if PHP_VERSION_ID >= 50300
 	char *path, *fname, *arch, *entry, *ret, *test;
 	int arch_len, entry_len, fname_len, ret_len;
 	phar_archive_data *phar;
@@ -344,223 +339,6 @@ splitted:
 	}
 
 	return ret;
-#else /* PHP 5.2 */
-	char resolved_path[MAXPATHLEN];
-	char trypath[MAXPATHLEN];
-	char *ptr, *end, *path = PG(include_path);
-	php_stream_wrapper *wrapper;
-	const char *p;
-	int n = 0;
-	char *fname, *arch, *entry, *ret, *test;
-	int arch_len, entry_len;
-	phar_archive_data *phar = NULL;
-
-	if (!filename) {
-		return NULL;
-	}
-
-	if (!zend_is_executing(TSRMLS_C) || !PHAR_G(cwd)) {
-		goto doit;
-	}
-
-	fname = (char*)zend_get_executed_filename(TSRMLS_C);
-
-	if (SUCCESS != phar_split_fname(fname, strlen(fname), &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
-		goto doit;
-	}
-
-	efree(entry);
-
-	if (*filename == '.') {
-		int try_len;
-
-		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL TSRMLS_CC)) {
-			efree(arch);
-			goto doit;
-		}
-
-		try_len = filename_len;
-		test = phar_fix_filepath(estrndup(filename, filename_len), &try_len, 1 TSRMLS_CC);
-
-		if (*test == '/') {
-			if (zend_hash_exists(&(phar->manifest), test + 1, try_len - 1)) {
-				spprintf(&ret, 0, "phar://%s%s", arch, test);
-				efree(arch);
-				efree(test);
-				return ret;
-			}
-		} else {
-			if (zend_hash_exists(&(phar->manifest), test, try_len)) {
-				spprintf(&ret, 0, "phar://%s/%s", arch, test);
-				efree(arch);
-				efree(test);
-				return ret;
-			}
-		}
-
-		efree(test);
-	}
-
-	efree(arch);
-doit:
-	if (*filename == '.' || IS_ABSOLUTE_PATH(filename, filename_len) || !path || !*path) {
-		if (tsrm_realpath(filename, resolved_path TSRMLS_CC)) {
-			return estrdup(resolved_path);
-		} else {
-			return NULL;
-		}
-	}
-
-	/* test for stream wrappers and return */
-	for (p = filename; p - filename < filename_len && (isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'); ++p, ++n);
-
-	if (n < filename_len - 3 && (*p == ':') && (!strncmp("//", p+1, 2) || ( filename_len > 4 && !memcmp("data", filename, 4)))) {
-		/* found stream wrapper, this is an absolute path until stream wrappers implement realpath */
-		return estrndup(filename, filename_len);
-	}
-
-	ptr = (char *) path;
-	while (ptr && *ptr) {
-		int len, is_stream_wrapper = 0, maybe_stream = 1;
-
-		end = strchr(ptr, DEFAULT_DIR_SEPARATOR);
-#ifndef PHP_WIN32
-		/* search for stream wrapper */
-		if (end - ptr  <= 1) {
-			maybe_stream = 0;
-			goto not_stream;
-		}
-
-		for (p = ptr, n = 0; p < end && (isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'); ++p, ++n);
-
-		if (n == end - ptr && *p && !strncmp("//", p+1, 2)) {
-			is_stream_wrapper = 1;
-			/* seek to real end of include_path portion */
-			end = strchr(end + 1, DEFAULT_DIR_SEPARATOR);
-		} else {
-			maybe_stream = 0;
-		}
-not_stream:
-#endif
-		if (end) {
-			if ((end-ptr) + 1 + filename_len + 1 >= MAXPATHLEN) {
-				ptr = end + 1;
-				continue;
-			}
-
-			memcpy(trypath, ptr, end-ptr);
-			len = end-ptr;
-			trypath[end-ptr] = '/';
-			memcpy(trypath+(end-ptr)+1, filename, filename_len+1);
-			ptr = end+1;
-		} else {
-			len = strlen(ptr);
-
-			if (len + 1 + filename_len + 1 >= MAXPATHLEN) {
-				break;
-			}
-
-			memcpy(trypath, ptr, len);
-			trypath[len] = '/';
-			memcpy(trypath+len+1, filename, filename_len+1);
-			ptr = NULL;
-		}
-
-		if (!is_stream_wrapper && maybe_stream) {
-			/* search for stream wrapper */
-			for (p = trypath, n = 0; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; ++p, ++n);
-		}
-
-		if (is_stream_wrapper || (n < len - 3 && (*p == ':') && (n > 1) && (!strncmp("//", p+1, 2) || !memcmp("data", trypath, 4)))) {
-			char *actual;
-
-			wrapper = php_stream_locate_url_wrapper(trypath, &actual, STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
-			if (wrapper == &php_plain_files_wrapper) {
-				strlcpy(trypath, actual, sizeof(trypath));
-			} else if (!wrapper) {
-				/* if wrapper is NULL, there was a mal-formed include_path stream wrapper, so skip this ptr */
-				continue;
-			} else {
-				if (wrapper->wops->url_stat) {
-					php_stream_statbuf ssb;
-
-					if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL TSRMLS_CC)) {
-						if (wrapper == &php_stream_phar_wrapper) {
-							char *arch, *entry;
-							int arch_len, entry_len, ret_len;
-
-							ret_len = strlen(trypath);
-							/* found phar:// */
-
-							if (SUCCESS != phar_split_fname(trypath, ret_len, &arch, &arch_len, &entry, &entry_len, 1, 0 TSRMLS_CC)) {
-								return estrndup(trypath, ret_len);
-							}
-
-							zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), arch, arch_len, (void **) &pphar);
-
-							if (!pphar && PHAR_G(manifest_cached)) {
-								zend_hash_find(&cached_phars, arch, arch_len, (void **) &pphar);
-							}
-
-							efree(arch);
-							efree(entry);
-
-							return estrndup(trypath, ret_len);
-						}
-						return estrdup(trypath);
-					}
-				}
-				continue;
-			}
-		}
-
-		if (tsrm_realpath(trypath, resolved_path TSRMLS_CC)) {
-			return estrdup(resolved_path);
-		}
-	} /* end provided path */
-
-	/* check in calling scripts' current working directory as a fall back case */
-	if (zend_is_executing(TSRMLS_C)) {
-		char *exec_fname = (char*)zend_get_executed_filename(TSRMLS_C);
-		int exec_fname_length = strlen(exec_fname);
-		const char *p;
-		int n = 0;
-
-		while ((--exec_fname_length >= 0) && !IS_SLASH(exec_fname[exec_fname_length]));
-		if (exec_fname && exec_fname[0] != '[' && 
-			exec_fname_length > 0 && 
-			exec_fname_length + 1 + filename_len + 1 < MAXPATHLEN) {
-			memcpy(trypath, exec_fname, exec_fname_length + 1);
-			memcpy(trypath+exec_fname_length + 1, filename, filename_len+1);
-
-			/* search for stream wrapper */
-			for (p = trypath; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; ++p, ++n);
-
-			if (n < exec_fname_length - 3 && (*p == ':') && (n > 1) && (!strncmp("//", p+1, 2) || !memcmp("data", trypath, 4))) {
-				char *actual;
-
-				wrapper = php_stream_locate_url_wrapper(trypath, &actual, STREAM_OPEN_FOR_INCLUDE TSRMLS_CC);
-
-				if (wrapper == &php_plain_files_wrapper) {
-					/* this should never technically happen, but we'll leave it here for completeness */
-					strlcpy(trypath, actual, sizeof(trypath));
-				} else if (!wrapper) {
-					/* if wrapper is NULL, there was a malformed include_path stream wrapper
-					   this also should be impossible */
-					return NULL;
-				} else {
-					return estrdup(trypath);
-				}
-			}
-
-			if (tsrm_realpath(trypath, resolved_path TSRMLS_CC)) {
-				return estrdup(resolved_path);
-			}
-		}
-	}
-
-	return NULL;
-#endif /* PHP 5.2 */
 }
 /* }}} */
 
@@ -850,11 +628,6 @@ int phar_open_archive_fp(phar_archive_data *phar TSRMLS_DC) /* {{{ */
 	if (phar_get_pharfp(phar TSRMLS_CC)) {
 		return SUCCESS;
 	}
-#if PHP_API_VERSION < 20100412
-	if (PG(safe_mode) && (!php_checkuid(phar->fname, NULL, CHECKUID_ALLOW_ONLY_FILE))) {
-		return FAILURE;
-	}
-#endif
 
 	if (php_check_open_basedir(phar->fname TSRMLS_CC)) {
 		return FAILURE;
@@ -900,7 +673,7 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 		link = source;
 	}
 
-	if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), dest->fp, link->uncompressed_filesize, NULL)) {
+	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(link, 0 TSRMLS_CC), dest->fp, link->uncompressed_filesize, NULL)) {
 		php_stream_close(dest->fp);
 		dest->fp_type = PHAR_FP;
 		if (error) {
@@ -1002,7 +775,7 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TS
 	php_stream_seek(phar_get_entrypfp(entry TSRMLS_CC), phar_get_fp_offset(entry TSRMLS_CC), SEEK_SET);
 
 	if (entry->uncompressed_filesize) {
-		if (SUCCESS != phar_stream_copy_to_stream(phar_get_entrypfp(entry TSRMLS_CC), ufp, entry->compressed_filesize, NULL)) {
+		if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_entrypfp(entry TSRMLS_CC), ufp, entry->compressed_filesize, NULL)) {
 			spprintf(error, 4096, "phar error: internal corruption of phar \"%s\" (actual filesize mismatch on file \"%s\")", phar->fname, entry->filename);
 			php_stream_filter_remove(filter, 1 TSRMLS_CC);
 			return FAILURE;
@@ -1031,47 +804,12 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links TS
 }
 /* }}} */
 
-#if defined(PHP_VERSION_ID) && PHP_VERSION_ID < 50202
-typedef struct {
-	char        *data;
-	size_t      fpos;
-	size_t      fsize;
-	size_t      smax;
-	int         mode;
-	php_stream  **owner_ptr;
-} php_stream_memory_data;
-#endif
-
 int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry, char **error TSRMLS_DC) /* {{{ */
 {
 	if (entry->fp_type == PHAR_MOD) {
 		/* already newly created, truncate */
-#if PHP_VERSION_ID >= 50202
 		php_stream_truncate_set_size(entry->fp, 0);
-#else
-		if (php_stream_is(entry->fp, PHP_STREAM_IS_TEMP)) {
-			if (php_stream_is(*(php_stream**)entry->fp->abstract, PHP_STREAM_IS_MEMORY)) {
-				php_stream *inner = *(php_stream**)entry->fp->abstract;
-				php_stream_memory_data *memfp = (php_stream_memory_data*)inner->abstract;
-				memfp->fpos = 0;
-				memfp->fsize = 0;
-			} else if (php_stream_is(*(php_stream**)entry->fp->abstract, PHP_STREAM_IS_STDIO)) {
-				php_stream_truncate_set_size(*(php_stream**)entry->fp->abstract, 0);
-			} else {
-				if (error) {
-					spprintf(error, 0, "phar error: file \"%s\" cannot be opened for writing, no truncate support", phar->fname);
-				}
-				return FAILURE;
-			}
-		} else if (php_stream_is(entry->fp, PHP_STREAM_IS_STDIO)) {
-			php_stream_truncate_set_size(entry->fp, 0);
-		} else {
-			if (error) {
-				spprintf(error, 0, "phar error: file \"%s\" cannot be opened for writing, no truncate support", phar->fname);
-			}
-			return FAILURE;
-		}
-#endif
+
 		entry->old_flags = entry->flags;
 		entry->is_modified = 1;
 		phar->is_modified = 1;
@@ -1144,7 +882,7 @@ int phar_separate_entry_fp(phar_entry_info *entry, char **error TSRMLS_DC) /* {{
 		link = entry;
 	}
 
-	if (SUCCESS != phar_stream_copy_to_stream(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize, NULL)) {
+	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(link, 0 TSRMLS_CC), fp, link->uncompressed_filesize, NULL)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot separate entry file \"%s\" contents in phar archive \"%s\" for write access", entry->filename, entry->phar->fname);
 		}
@@ -1182,6 +920,18 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 		return NULL;
 	}
 	return entry;
+}
+/* }}} */
+
+PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename, int *filename_len TSRMLS_DC) /* {{{ */ {
+	phar_archive_data **fd_ptr;
+	if (PHAR_GLOBALS->phar_alias_map.arBuckets
+			&& SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_alias_map), alias, alias_len, (void**)&fd_ptr)) {
+		*filename = (*fd_ptr)->fname;
+		*filename_len = (*fd_ptr)->fname_len;
+		return SUCCESS;
+	}
+	return FAILURE;
 }
 /* }}} */
 
@@ -1262,8 +1012,10 @@ alias_success:
 					spprintf(error, 0, "alias \"%s\" is already used for archive \"%s\" cannot be overloaded with \"%s\"", alias, (*fd_ptr)->fname, fname);
 				}
 				if (SUCCESS == phar_free_alias(*fd_ptr, alias, alias_len TSRMLS_CC)) {
-					efree(*error);
-					*error = NULL;
+					if (error) {
+						efree(*error);
+						*error = NULL;
+					}
 				}
 				return FAILURE;
 			}
@@ -1547,21 +1299,17 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 	}
 
 	if (phar->mounted_dirs.arBuckets && zend_hash_num_elements(&phar->mounted_dirs)) {
-		phar_zstr key;
 		char *str_key;
 		ulong unused;
 		uint keylen;
 
 		zend_hash_internal_pointer_reset(&phar->mounted_dirs);
 		while (FAILURE != zend_hash_has_more_elements(&phar->mounted_dirs)) {
-			if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &key, &keylen, &unused, 0, NULL)) {
+			if (HASH_KEY_NON_EXISTENT == zend_hash_get_current_key_ex(&phar->mounted_dirs, &str_key, &keylen, &unused, 0, NULL)) {
 				break;
 			}
 
-			PHAR_STR(key, str_key);
-
 			if ((int)keylen >= path_len || strncmp(str_key, path, keylen)) {
-				PHAR_STR_FREE(str_key);
 				continue;
 			} else {
 				char *test;
@@ -1572,7 +1320,6 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 					if (error) {
 						spprintf(error, 4096, "phar internal error: mounted path \"%s\" could not be retrieved from manifest", str_key);
 					}
-					PHAR_STR_FREE(str_key);
 					return NULL;
 				}
 
@@ -1580,10 +1327,8 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 					if (error) {
 						spprintf(error, 4096, "phar internal error: mounted path \"%s\" is not properly initialized as a mounted path", str_key);
 					}
-					PHAR_STR_FREE(str_key);
 					return NULL;
 				}
-				PHAR_STR_FREE(str_key);
 
 				test_len = spprintf(&test, MAXPATHLEN, "%s%s", entry->tmp, path + keylen);
 
@@ -1675,11 +1420,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 	Z_TYPE_P(zdata) = IS_STRING;
 	Z_STRLEN_P(zdata) = end;
 
-#if PHP_MAJOR_VERSION > 5
-	if (end != (off_t) php_stream_copy_to_mem(fp, (void **) &(Z_STRVAL_P(zdata)), (size_t) end, 0)) {
-#else
 	if (end != (off_t) php_stream_copy_to_mem(fp, &(Z_STRVAL_P(zdata)), (size_t) end, 0)) {
-#endif
 		zval_dtor(zdata);
 		zval_dtor(zsig);
 		zval_dtor(zkey);
@@ -1691,11 +1432,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 		return FAILURE;
 	}
 
-#if PHP_VERSION_ID < 50300
-	if (FAILURE == zend_fcall_info_init(openssl, &fci, &fcc TSRMLS_CC)) {
-#else
 	if (FAILURE == zend_fcall_info_init(openssl, 0, &fci, &fcc, NULL, NULL TSRMLS_CC)) {
-#endif
 		zval_dtor(zdata);
 		zval_dtor(zsig);
 		zval_dtor(zkey);
@@ -1709,13 +1446,6 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 
 	fci.param_count = 3;
 	fci.params = zp;
-#if PHP_VERSION_ID < 50300
-	++(zdata->refcount);
-	if (!is_sign) {
-		++(zsig->refcount);
-	}
-	++(zkey->refcount);
-#else
 	Z_ADDREF_P(zdata);
 	if (is_sign) {
 		Z_SET_ISREF_P(zsig);
@@ -1723,7 +1453,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 		Z_ADDREF_P(zsig);
 	}
 	Z_ADDREF_P(zkey);
-#endif
+
 	fci.retval_ptr_ptr = &retval_ptr;
 
 	if (FAILURE == zend_call_function(&fci, &fcc TSRMLS_CC)) {
@@ -1740,21 +1470,15 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, off_t end, 
 
 	zval_dtor(openssl);
 	efree(openssl);
-#if PHP_VERSION_ID < 50300
-	--(zdata->refcount);
-	if (!is_sign) {
-		--(zsig->refcount);
-	}
-	--(zkey->refcount);
-#else
 	Z_DELREF_P(zdata);
+
 	if (is_sign) {
 		Z_UNSET_ISREF_P(zsig);
 	} else {
 		Z_DELREF_P(zsig);
 	}
 	Z_DELREF_P(zkey);
-#endif
+
 	zval_dtor(zdata);
 	efree(zdata);
 	zval_dtor(zkey);
@@ -2280,11 +2004,7 @@ static int phar_update_cached_entry(void *data, void *argument) /* {{{ */
 			ALLOC_ZVAL(entry->metadata);
 			*entry->metadata = *t;
 			zval_copy_ctor(entry->metadata);
-#if PHP_VERSION_ID < 50300
-			entry->metadata->refcount = 1;
-#else
 			Z_SET_REFCOUNT_P(entry->metadata, 1);
-#endif
 			entry->metadata_str.c = NULL;
 			entry->metadata_str.len = 0;
 		}
@@ -2328,11 +2048,7 @@ static void phar_copy_cached_phar(phar_archive_data **pphar TSRMLS_DC) /* {{{ */
 			ALLOC_ZVAL(phar->metadata);
 			*phar->metadata = *t;
 			zval_copy_ctor(phar->metadata);
-#if PHP_VERSION_ID < 50300
-			phar->metadata->refcount = 1;
-#else
 			Z_SET_REFCOUNT_P(phar->metadata, 1);
-#endif
 		}
 	}
 
