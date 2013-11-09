@@ -7055,7 +7055,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 	}
 
 	ALLOC_ZVAL(ns);
-	*ns = ns_name->u.constant;
+	ZVAL_ZVAL(ns, &ns_name->u.constant, 0, 0);
 	if (new_name) {
 		name = &new_name->u.constant;
 	} else {
@@ -7068,8 +7068,7 @@ void zend_do_use(znode *ns_name, znode *new_name, int is_global TSRMLS_DC) /* {{
 		if (p) {
 			ZVAL_STRING(name, p+1, 1);
 		} else {
-			*name = *ns;
-			zval_copy_ctor(name);
+			ZVAL_ZVAL(name, ns, 1, 0);
 			warn = !is_global && !CG(current_namespace);
 		}
 	}
@@ -7133,7 +7132,7 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int i
 	zend_bool warn = 0;
 
 	ALLOC_ZVAL(ns);
-	*ns = ns_name->u.constant;
+	ZVAL_ZVAL(ns, &ns_name->u.constant, 0, 0);
 	if (new_name) {
 		name = &new_name->u.constant;
 	} else {
@@ -7146,8 +7145,7 @@ void zend_do_use_non_class(znode *ns_name, znode *new_name, int is_global, int i
 		if (p) {
 			ZVAL_STRING(name, p+1, 1);
 		} else {
-			*name = *ns;
-			zval_copy_ctor(name);
+			ZVAL_ZVAL(name, ns, 1, 0);
 			warn = !is_global && !CG(current_namespace);
 		}
 	}
