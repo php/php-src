@@ -149,10 +149,6 @@ int main(int argc, char **argv) /* {{{ */
 		} zend_end_try();
 #endif
 
-		zend_try {
-			shutdown_memory_manager(CG(unclean_shutdown), 0 TSRMLS_CC);
-		} zend_end_try();
-
 		php_module_shutdown(TSRMLS_C);
 
 		sapi_shutdown();
