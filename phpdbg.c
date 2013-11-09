@@ -31,9 +31,9 @@
 
 #include "php_main.h"
 
-static zend_module_entry sapi_server_module_entry = {
+static zend_module_entry sapi_phpdbg_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"server",
+	"phpdbg",
 	NULL,
 	NULL,
 	NULL,
@@ -44,20 +44,20 @@ static zend_module_entry sapi_server_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-static inline int php_sapi_server_module_startup(sapi_module_struct *module) { /* {{{ */
-    if (php_module_startup(module, &sapi_server_module_entry, 1) == FAILURE) {
+static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) { /* {{{ */
+    if (php_module_startup(module, &sapi_phpdbg_module_entry, 1) == FAILURE) {
 		return FAILURE;
 	}
 	return SUCCESS;
 } /* }}} */
 
-/* {{{ sapi_module_struct server_sapi_module
+/* {{{ sapi_module_struct phpdbg_sapi_module
  */
-static sapi_module_struct server_sapi_module = {
-	"server",						            /* name */
-	"SAPI server",					        /* pretty name */
+static sapi_module_struct phpdbg_sapi_module = {
+	"phpdbg",						            /* name */
+	"phpdbg",					        /* pretty name */
 
-	php_sapi_server_module_startup,	/* startup */
+	php_sapi_phpdbg_module_startup,	/* startup */
 	php_module_shutdown_wrapper,    /* shutdown */
 
 	NULL,		                        /* activate */
@@ -100,9 +100,16 @@ int main(int argc, char **argv) { /* {{{ */
     }
 #endif
 
-    sapi_startup(&server_sapi_module);
+#ifdef PHP_WIN32
+	_fmode = _O_BINARY;			/*sets default for file streams to binary */
+	setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
+	setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */
+	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
+#endif
 
-    if (server_sapi_module.startup(&server_sapi_module) == SUCCESS) 
+    sapi_startup(&phpdbg_sapi_module);
+
+    if (phpdbg_sapi_module.startup(&phpdbg_sapi_module) == SUCCESS) 
     {
         zend_activate(TSRMLS_C);
         
