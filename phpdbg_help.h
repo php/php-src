@@ -24,9 +24,9 @@
  * Command Declarators
  */
 #define PHPDBG_HELP_D(name, tip) \
-  {PHPDBG_STRL(#name), tip, sizeof(tip)-1, phpdbg_do_help_##name}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, phpdbg_do_help_##name}
 #define PHPDBG_HELP(name) \
-  int phpdbg_do_help_##name(const char *expr, size_t expr_len TSRMLS_DC)
+	int phpdbg_do_help_##name(const char *expr, size_t expr_len TSRMLS_DC)
 
 /**
  * Helper Forward Declarations
@@ -46,17 +46,18 @@ PHPDBG_HELP(back);
  * Commands
  */
 static const phpdbg_command_t phpdbg_help_commands[] = {
-  PHPDBG_HELP_D(exec,     "the execution context should be a valid phpdbg path"),
-  PHPDBG_HELP_D(compile,  "pre-compilation allows inspection of code before execution"),
-  PHPDBG_HELP_D(step,     "stepping through execution allows inspection of the opline after every opcode"),
-  PHPDBG_HELP_D(next,     "execute the next opcode"),
-  PHPDBG_HELP_D(run,      "execution inside the phpdbg vm allows detailed inspection and debugging"),
-  PHPDBG_HELP_D(eval,     "access to eval() allows you to affect the environment during execution"),
-  PHPDBG_HELP_D(print,    "printing allows inspection of the execution environment"),
-  PHPDBG_HELP_D(break,    "breakpoints allow execution interruption"),
-  PHPDBG_HELP_D(cont,     "use continue when a break point is met"),
-  PHPDBG_HELP_D(back,     "show debug backtrace information during execution"),
-  {NULL, 0, 0}
+	PHPDBG_HELP_D(exec,     "the execution context should be a valid phpdbg path"),
+	PHPDBG_HELP_D(compile,  "pre-compilation allows inspection of code before execution"),
+	PHPDBG_HELP_D(step,     "stepping through execution allows inspection of the opline after every opcode"),
+	PHPDBG_HELP_D(next,     "execute the next opcode"),
+	PHPDBG_HELP_D(run,      "execution inside the phpdbg vm allows detailed inspection and debugging"),
+	PHPDBG_HELP_D(eval,     "access to eval() allows you to affect the environment during execution"),
+	PHPDBG_HELP_D(print,    "printing allows inspection of the execution environment"),
+	PHPDBG_HELP_D(break,    "breakpoints allow execution interruption"),
+	PHPDBG_HELP_D(cont,     "use continue when a break point is met"),
+	PHPDBG_HELP_D(back,     "show debug backtrace information during execution"),
+
+	{NULL, 0, 0}
 };
 
 #endif /* PHPDBG_HELP_H */
