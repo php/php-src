@@ -367,7 +367,9 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		    }
 		}
 
-		printf("phpdbg> ");
+		if (!PHPDBG_G(quitting)) {
+		    printf("phpdbg> ");
+		}
 	}
 
 	return SUCCESS;
