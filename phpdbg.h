@@ -42,8 +42,6 @@
 # define PHPDBG_G(v) (phpdbg_globals.v)
 #endif
 
-#define PHPDBG_NEXT 2
-
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp_files;
 	HashTable bp_symbols;
