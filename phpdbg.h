@@ -51,7 +51,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	size_t exec_len;        /* size of exec */
 	zend_op_array *ops;     /* op_array */
 	zval *retval;           /* return value */
-	size_t bp_count;        /* breakpoint count */
+	int bp_count;           /* breakpoint count */
 	int stepping;           /* stepping */
 	int vmret;              /* return from last opcode handler execution */
 	zend_bool has_file_bp;  /* file-based breakpoint has been set */

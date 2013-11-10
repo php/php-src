@@ -19,6 +19,7 @@
 
 #include "zend.h"
 #include "zend_hash.h"
+#include "zend_llist.h"
 #include "phpdbg.h"
 #include "phpdbg_bp.h"
 
