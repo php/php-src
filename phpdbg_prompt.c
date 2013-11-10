@@ -142,12 +142,28 @@ static PHPDBG_COMMAND(eval) { /* {{{ */
 
 static PHPDBG_COMMAND(back) { /* {{{ */
     if (EG(in_execution)) {
-        const zend_execute_data *current = EG(current_execute_data);
-        if (current) {
-            do {
-                printf("%d\n", current->opline->opcode);
-            } while ((current = current->prev_execute_data));
+        zval zbacktrace;
+        zval **tmp;
+        HashPosition position;
+        int i = 0;
+        int limit = (expr != NULL) ? atoi(expr) : 0;
+        
+        zend_fetch_debug_backtrace(
+            &zbacktrace, 0, 0, limit TSRMLS_CC);
+        
+        for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
+             zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == SUCCESS;
+             zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position)) {
+             if (i++) {
+                printf(",\n");
+             }
+             zend_print_flat_zval_r(*tmp TSRMLS_CC);
         }
+        
+        printf("\n");
+        
+        zval_dtor(&zbacktrace);
+        
         return SUCCESS;
     } else {
         printf("Not executing !\n");
