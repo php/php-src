@@ -102,17 +102,17 @@ static PHPDBG_COMMAND(run) { /* {{{ */
                 return FAILURE;
             }
         }
-        
+
         EG(active_op_array) = PHPDBG_G(ops);
         EG(return_value_ptr_ptr) = &PHPDBG_G(retval);
-        
+
         zend_try {
             zend_execute(EG(active_op_array) TSRMLS_CC);
         } zend_catch {
             printf("Caught excetion in VM\n");
             return FAILURE;
         } zend_end_try();
-        
+
         return SUCCESS;
     } else {
         printf("Nothing to execute !\n");
@@ -175,8 +175,34 @@ static PHPDBG_COMMAND(print) { /* {{{ */
   return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(break) { /* {{{ */
-  return SUCCESS;
+static PHPDBG_COMMAND(break) /* {{{ */
+{
+	const char *line_pos = zend_memrchr(expr, ':', expr_len);
+
+	if (line_pos) {
+		long line_num = strtol(line_pos+1, NULL, 0);
+		phpdbg_breakfile_t new_break;
+		zend_llist *break_files_ptr;
+
+		size_t name_len = line_pos - expr;
+
+		new_break.filename = estrndup(expr, name_len);
+		new_break.line = line_num;
+
+		PHPDBG_G(has_file_bp) = 1;
+
+		if (zend_hash_find(&PHPDBG_G(break_files),
+			new_break.filename, name_len, (void**)&break_files_ptr) == FAILURE) {
+			zend_llist break_files;
+			zend_llist_init(&break_files, sizeof(phpdbg_breakfile_t), NULL, 0);
+
+			zend_hash_update(&PHPDBG_G(break_files),
+				new_break.filename, name_len, &break_files, sizeof(zend_llist), (void**)&break_files_ptr);
+		}
+		zend_llist_add_element(break_files_ptr, &new_break);
+	}
+
+	return SUCCESS;
 } /* }}} */
 
 static PHPDBG_COMMAND(quit) /* {{{ */
@@ -251,6 +277,28 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 	return FAILURE;
 } /* }}} */
 
+int phpdbg_breakpoint(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+{
+	size_t name_len = strlen(op_array->filename);
+	zend_llist *break_list;
+
+	if (zend_hash_find(&PHPDBG_G(break_files), op_array->filename, name_len,
+		(void**)&break_list) == SUCCESS) {
+		zend_llist_element *le;
+
+		for (le = break_list->head; le; le = le->next) {
+			phpdbg_breakfile_t *bp = (phpdbg_breakfile_t*) le->data;
+
+			if (bp->line == (*EG(opline_ptr))->lineno) {
+				printf("breakpoint reached!\n");
+				return SUCCESS;
+			}
+		}
+	}
+
+	return FAILURE;
+} /* }}} */
+
 int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 {
 	char cmd[PHPDBG_MAX_CMD];
@@ -269,7 +317,7 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		        case FAILURE:
 		            printf("error executing %s !\n", cmd);
 		        break;
-		        
+
 		        case PHPDBG_NEXT:
 		            return PHPDBG_NEXT;
 		    }
@@ -277,7 +325,7 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 		printf("phpdbg> ");
 	}
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -300,16 +348,23 @@ zend_vm_enter:
 #endif
 
         printf("[OPLINE: %p]\n", execute_data->opline);
-        
-        PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
-        
-        if (PHPDBG_G(stepping)) {
-            while (phpdbg_interactive(
-                0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
-                continue;
-            }
-        }
-        
+
+        if (PHPDBG_G(has_file_bp)
+			&& phpdbg_breakpoint(execute_data->op_array TSRMLS_CC) == SUCCESS) {
+			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+				continue;
+			}
+		}
+
+		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
+
+		if (PHPDBG_G(stepping)) {
+			while (phpdbg_interactive(
+				0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+				continue;
+			}
+		}
+
 		if (PHPDBG_G(vmret) > 0) {
 			switch (PHPDBG_G(vmret)) {
 				case 1:
