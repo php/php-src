@@ -115,9 +115,25 @@ static PHPDBG_COMMAND(run) { /* {{{ */
 
         return SUCCESS;
     } else {
-        printf("Nothing to execute !");
+        printf("Nothing to execute !\n");
         return FAILURE;
     }
+} /* }}} */
+
+static PHPDBG_COMMAND(eval) { /* {{{ */
+    zval retval;
+    
+    if (expr) {
+        if (zend_eval_stringl((char*)expr, expr_len-1, &retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
+            printf("Success\n");
+            zval_dtor(&retval);
+        }
+    } else {
+        printf("No expression provided !\n");
+        return FAILURE;
+    }
+    
+    return SUCCESS;
 } /* }}} */
 
 static PHPDBG_COMMAND(print) { /* {{{ */
@@ -131,6 +147,10 @@ static PHPDBG_COMMAND(print) { /* {{{ */
       if (PHPDBG_G(ops)->last_var) {
         printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
       } else printf("Variables\tNone\n");
+    }
+    printf("Executing\t%s\n", EG(in_execution) ? "yes" : "no");
+    if (EG(in_execution)) {
+        printf("VM Return\t%d\n", PHPDBG_G(vmret));
     }
   } else {
     printf(
@@ -216,6 +236,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(step,      "step through execution"),
 	PHPDBG_COMMAND_D(next,      "next opcode"),
 	PHPDBG_COMMAND_D(run,       "attempt execution"),
+	PHPDBG_COMMAND_D(eval,      "evaluate some code"),
 	PHPDBG_COMMAND_D(print,     "print something"),
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
 	PHPDBG_COMMAND_D(help,      "show help menu"),
