@@ -17,31 +17,11 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_BP_H
-#define PHPDBG_BP_H
+#ifndef PHPDBG_OPCODE_H
+#define PHPDBG_OPCODE_H
 
-/**
- * Breakpoint file-based representation
- */
-typedef struct _phpdbg_breakfile_t {
-	const char *filename;
-	long line;
-	int id;
-} phpdbg_breakfile_t;
+#include "zend_types.h"
 
-/**
- * Breakpoint symbol-based representation
- */
-typedef struct _phpdbg_breaksymbol_t {
-	const char *symbol;
-	long opline_num;
-	int id;
-} phpdbg_breaksymbol_t;
+const char *phpdbg_decode_opcode(zend_uchar);
 
-void phpdbg_set_breakpoint_file(const char*, const char* TSRMLS_DC);
-void phpdbg_set_breakpoint_symbol(const char*, const char* TSRMLS_DC);
-
-int phpdbg_find_breakpoint_file(zend_op_array* TSRMLS_DC);
-int phpdbg_find_breakpoint_symbol(zend_function* TSRMLS_DC);
-
-#endif /* PHPDBG_BP_H */
+#endif /* PHPDBG_OPCODE_H */
