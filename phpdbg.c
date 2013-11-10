@@ -17,6 +17,7 @@
 */
 
 #include "phpdbg.h"
+#include "phpdbg_prompt.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
@@ -30,6 +31,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->stepping = 0;
     pg->vmret = 0;
     pg->quitting = 0;
+    pg->bp_count = 0;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */

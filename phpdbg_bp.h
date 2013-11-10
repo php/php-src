@@ -26,6 +26,7 @@
 typedef struct _phpdbg_breakfile_t {
 	const char *filename;
 	long line;
+	size_t id;
 } phpdbg_breakfile_t;
 
 /**
@@ -34,6 +35,7 @@ typedef struct _phpdbg_breakfile_t {
 typedef struct _phpdbg_breaksymbol_t {
 	const char *symbol;
 	long opline_num;
+	size_t id;
 } phpdbg_breaksymbol_t;
 
 void phpdbg_set_breakpoint_file(const char*, const char* TSRMLS_DC);

@@ -70,6 +70,8 @@ void phpdbg_set_breakpoint_file(const char *expr, const char *line_pos TSRMLS_DC
 			new_break.filename, name_len, &break_files, sizeof(zend_llist),
 			(void**)&break_files_ptr);
 	}
+
+	new_break.id = PHPDBG_G(bp_count)++;
 	zend_llist_add_element(break_files_ptr, &new_break);
 } /* }}} */
 
@@ -96,6 +98,8 @@ void phpdbg_set_breakpoint_symbol(const char *expr, const char *opline_num_pos T
 			new_break.symbol, name_len, &break_syms, sizeof(zend_llist),
 			(void**)&break_sym_ptr);
 	}
+
+	new_break.id = PHPDBG_G(bp_count)++;
 	zend_llist_add_element(break_sym_ptr, &new_break);
 } /* }}} */
 
@@ -103,18 +107,19 @@ int phpdbg_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	size_t name_len = strlen(op_array->filename);
 	zend_llist *break_list;
+	zend_llist_element *le;
 
 	if (zend_hash_find(&PHPDBG_G(bp_files), op_array->filename, name_len,
-		(void**)&break_list) == SUCCESS) {
-		zend_llist_element *le;
+		(void**)&break_list) == FAILURE) {
+		return FAILURE;
+	}
 
-		for (le = break_list->head; le; le = le->next) {
-			phpdbg_breakfile_t *bp = (phpdbg_breakfile_t*) le->data;
+	for (le = break_list->head; le; le = le->next) {
+		const phpdbg_breakfile_t *bp = (phpdbg_breakfile_t*)le->data;
 
-			if (bp->line == (*EG(opline_ptr))->lineno) {
-				printf("breakpoint reached!\n");
-				return SUCCESS;
-			}
+		if (bp->line == (*EG(opline_ptr))->lineno) {
+			printf("Breakpoint #%d at %s:%ld\n", bp->id, bp->filename, bp->line);
+			return SUCCESS;
 		}
 	}
 
