@@ -27,6 +27,7 @@
 #include "SAPI.h"
 #include <php_config.h>
 #include "php_main.h"
+#include "phpdbg_prompt.h"
 
 static zend_module_entry sapi_phpdbg_module_entry = {
 	STANDARD_MODULE_HEADER,
