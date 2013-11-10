@@ -51,8 +51,11 @@ typedef unsigned long zend_uint_t;
 #  define ZEND_ITOA(i, s, len) _i64toa_s((i), (s), (len), 10)
 #  define ZEND_ATOI(i, s) i = _atoi64((s))
 #  define ZEND_STRTOL(s0, s1, base) _strtoi64((s0), (s1), (base))
+#  define ZEND_STRTOUL(s0, s1, base) _strtoui64((s0), (s1), (base))
 #  define ZEND_INT_FMT "%I64d"
 #  define ZEND_UINT_FMT "%I64u"
+#  define ZEND_STRTOL_PTR _strtoi64
+#  define ZEND_STRTOUL_PTR _strtoui64
 # else
 #  define ZEND_ITOA(i, s, len) \
 	do { \
@@ -61,11 +64,15 @@ typedef unsigned long zend_uint_t;
  	} while (0)
 #  define ZEND_ATOI(i, s) (i) = atoll((s))
 #  define ZEND_STRTOL(s0, s1, base) strtoll((s0), (s1), (base))
+#  define ZEND_STRTOUL(s0, s1, base) strtoull((s0), (s1), (base))
 #  define ZEND_INT_FMT "%lld"
 #  define ZEND_UINT_FMT "%llu"
+#  define ZEND_STRTOL_PTR strtoll
+#  define ZEND_STRTOUL_PTR strtoull
 # endif
 #else
 # define ZEND_STRTOL(s0, s1, base) strtol((s0), (s1), (base))
+# define ZEND_STRTOUL(s0, s1, base) strtoul((s0), (s1), (base))
 # ifdef PHP_WIN32
 #  define ZEND_ITOA(i, s, len) _ltoa_s((i), (s), (len), 10)
 #  define ZEND_ATOI(i, s) i = atol((s))
@@ -79,6 +86,8 @@ typedef unsigned long zend_uint_t;
 # endif
 # define ZEND_INT_FMT "%ld"
 # define ZEND_UINT_FMT "%lu"
+# define ZEND_STRTOL_PTR strtol
+# define ZEND_STRTOUL_PTR strtoul
 #endif
 
 

@@ -356,7 +356,7 @@ PHPAPI int ValidateFormat(char *format, int numVars, int *totalSubs)
 			 * must not be a mixture of XPG3 specs and non-XPG3 specs
 			 * in the same format string.
 			 */
-			value = strtoul(format-1, &end, 10);
+			value = ZEND_STRTOUL(format-1, &end, 10);
 			if (*end != '$') {
 				goto notXpg;
 			}
@@ -403,7 +403,7 @@ xpgCheckDone:
 		 * Parse any width specifier.
 		 */
 		if (isdigit(UCHAR(*ch))) {
-			value = strtoul(format-1, &format, 10);
+			value = ZEND_STRTOUL(format-1, &format, 10);
 			flags |= SCAN_WIDTH;
 			ch = format++;
 		}
@@ -582,7 +582,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 {
 	int  numVars, nconversions, totalVars = -1;
 	int  i, result;
-	long value;
+	php_int_t value;
 	int  objIndex;
 	char *end, *baseString;
 	zval **current;
@@ -590,11 +590,11 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	int  base = 0;
 	int  underflow = 0;
 	size_t width;
-	long (*fn)() = NULL;
+	php_int_t (*fn)() = NULL;
 	char *ch, sch;
 	int  flags;
 	char buf[64];	/* Temporary buffer to hold scanned number
-					 * strings before they are passed to strtoul() */
+					 * strings before they are passed to ZEND_STRTOUL() */
 
 	/* do some sanity checking */
 	if ((varStart > argCount) || (varStart < 0)){
@@ -709,7 +709,7 @@ literal:
 			flags |= SCAN_SUPPRESS;
 			ch = format++;
 		} else if ( isdigit(UCHAR(*ch))) {
-			value = strtoul(format-1, &end, 10);
+			value = ZEND_STRTOUL(format-1, &end, 10);
 			if (*end == '$') {
 				format = end+1;
 				ch = format++;
@@ -721,7 +721,7 @@ literal:
 		 * Parse any width specifier.
 		 */
 		if ( isdigit(UCHAR(*ch))) {
-			width = strtoul(format-1, &format, 10);
+			width = ZEND_STRTOUL(format-1, &format, 10);
 			ch = format++;
 		} else {
 			width = 0;
@@ -748,7 +748,7 @@ literal:
 						current = args[objIndex++];
 						refcount = Z_REFCOUNT_PP(current);
 						zval_dtor( *current );
-						ZVAL_LONG( *current, (long)(string - baseString) );
+						ZVAL_LONG( *current, (php_int_t)(string - baseString) );
 						Z_SET_REFCOUNT_PP(current, refcount);
 						Z_SET_ISREF_PP(current);
 					} else {
@@ -762,29 +762,29 @@ literal:
 			case 'D':
 				op = 'i';
 				base = 10;
-				fn = (long (*)())strtol;
+				fn = (php_int_t (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'i':
 				op = 'i';
 				base = 0;
-				fn = (long (*)())strtol;
+				fn = (php_int_t (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'o':
 				op = 'i';
 				base = 8;
-				fn = (long (*)())strtol;
+				fn = (php_int_t (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'x':
 			case 'X':
 				op = 'i';
 				base = 16;
-				fn = (long (*)())strtol;
+				fn = (php_int_t (*)())ZEND_STRTOL_PTR;
 				break;
 			case 'u':
 				op = 'i';
 				base = 10;
 				flags |= SCAN_UNSIGNED;
-				fn = (long (*)())strtoul;
+				fn = (php_int_t (*)())ZEND_STRTOUL_PTR;
 				break;
 
 			case 'f':
@@ -1060,9 +1060,9 @@ addToInt:
 				 */
 				if (!(flags & SCAN_SUPPRESS)) {
 					*end = '\0';
-					value = (long) (*fn)(buf, NULL, base);
+					value = (php_int_t) (*fn)(buf, NULL, base);
 					if ((flags & SCAN_UNSIGNED) && (value < 0)) {
-						snprintf(buf, sizeof(buf), "%lu", value); /* INTL: ISO digit */
+						snprintf(buf, sizeof(buf), ZEND_UINT_FMT, value); /* INTL: ISO digit */
 						if (numVars && objIndex >= argCount) {
 							break;
 						} else if (numVars) {
