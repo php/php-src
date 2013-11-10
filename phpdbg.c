@@ -18,6 +18,7 @@
 
 #include "phpdbg.h"
 #include "phpdbg_prompt.h"
+#include "phpdbg_bp.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
@@ -44,15 +45,20 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
-static void php_phpdbg_destroy_break(void *brake) /* {{{ */
+static void php_phpdbg_destroy_bp_file(void *brake) /* {{{ */
 {
 	zend_llist_destroy((zend_llist*)brake);
 } /* }}} */
 
+static void php_phpdbg_destroy_bp_symbol(void *brake) /* {{{ */
+{
+	efree(((phpdbg_breaksymbol_t*)brake)->symbol);
+} /* }}} */
+
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
-	zend_hash_init(&PHPDBG_G(bp_files),   8, NULL, php_phpdbg_destroy_break, 0);
-	zend_hash_init(&PHPDBG_G(bp_symbols), 8, NULL, php_phpdbg_destroy_break, 0);
+	zend_hash_init(&PHPDBG_G(bp_files),   8, NULL, php_phpdbg_destroy_bp_file, 0);
+	zend_hash_init(&PHPDBG_G(bp_symbols), 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
 
 	return SUCCESS;
 } /* }}} */

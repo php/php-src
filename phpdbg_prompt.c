@@ -72,7 +72,7 @@ static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
 	} else {
 	    printf("Cannot compile while in execution\n");
 	}
-	
+
 	return FAILURE;
 } /* }}} */
 
@@ -228,14 +228,13 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
 	} else {
 		char name[200];
-		const char *opnum_pos = zend_memrchr(expr, '#', expr_len);
-		long opline_num = opnum_pos ? strtol(opnum_pos+1, NULL, 0) : 0;
-		size_t name_len = opnum_pos ? opnum_pos - expr : strlen(expr);
+		size_t name_len = strlen(expr);
 
+		name_len = MIN(name_len, 200);
 		memcpy(name, expr, name_len);
 		name[name_len] = 0;
 
-		phpdbg_set_breakpoint_symbol(name, opline_num TSRMLS_CC);
+		phpdbg_set_breakpoint_symbol(name TSRMLS_CC);
 	}
 
 	return SUCCESS;
@@ -336,7 +335,7 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		            }
 		        break;
 
-		        case PHPDBG_NEXT: 
+		        case PHPDBG_NEXT:
 		            return PHPDBG_NEXT;
 
 		    }
@@ -375,7 +374,7 @@ zend_vm_enter:
 		}
 #endif
 
-        if (PHPDBG_G(has_file_bp) 
+        if (PHPDBG_G(has_file_bp)
 			&& phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
 			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
 				continue;
@@ -384,21 +383,21 @@ zend_vm_enter:
 
         if (PHPDBG_G(has_sym_bp)) {
             zend_execute_data *previous = execute_data->prev_execute_data;
-            if (previous && (previous != execute_data)) {
-                if (previous->opline) {
-                    if (previous->opline->opcode == ZEND_DO_FCALL || previous->opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-                        if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS) {
-                            while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
-				                continue;
-			                }
-                        }
-                    }
-                }
-            }
+            if (previous && previous != execute_data && previous->opline) {
+				if (previous->opline->opcode == ZEND_DO_FCALL
+					|| previous->opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+					if (phpdbg_find_breakpoint_symbol(
+						previous->function_state.function TSRMLS_CC) == SUCCESS) {
+						while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+							continue;
+						}
+					}
+				}
+			}
         }
-		
+
 		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
-		
+
 		phpdbg_print_opline(
 		    execute_data TSRMLS_CC);
 
