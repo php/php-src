@@ -40,4 +40,6 @@ typedef struct _phpdbg_command {
 	phpdbg_command_handler handler;     /* Command handler */
 } phpdbg_command;
 
-#endif
+void phpdbg_iteractive(int, char**);
+
+#endif /* PHPDBG_PROMPT_H */

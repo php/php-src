@@ -21,7 +21,7 @@
 #include "zend.h"
 #include "phpdbg_prompt.h"
 
-void do_quit(const char *params) /* {{{ */
+static void do_quit(const char *params) /* {{{ */
 {
 	zend_bailout();
 } /* }}} */
@@ -41,7 +41,7 @@ static void do_cmd(char *cmd_line) /* {{{ */
 	while (command && command->name) {
 		if (command->name_len == cmd_len
 			&& memcmp(cmd, command->name, cmd_len) == 0) {
-			/* Command find */
+			/* Command found! */
 			command->handler(params);
 			return;
 		}
