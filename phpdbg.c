@@ -241,7 +241,9 @@ int main(int argc, char **argv) /* {{{ */
 		} zend_end_try();
 
 		zend_try {
-			phpdbg_interactive(argc, argv TSRMLS_CC);
+			do {
+			    phpdbg_interactive(argc, argv TSRMLS_CC);
+			} while(!PHPDBG_G(quitting));
 		} zend_end_try();
 
 		if (ini_file) {

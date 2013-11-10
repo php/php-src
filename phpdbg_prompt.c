@@ -59,7 +59,7 @@ static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
 	printf("Attempting compilation of %s\n", PHPDBG_G(exec));
 
 	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh,
-		USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
+		    USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
 		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE TSRMLS_CC);
 		zend_destroy_file_handle(&fh TSRMLS_CC);
 		printf("Success\n");
@@ -335,9 +335,8 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		            }
 		        break;
 
-		        case PHPDBG_NEXT: if (PHPDBG_G(stepping)) {
+		        case PHPDBG_NEXT: 
 		            return PHPDBG_NEXT;
-		        }
 
 		    }
 		}
@@ -375,20 +374,28 @@ zend_vm_enter:
 		}
 #endif
 
-        if (PHPDBG_G(has_file_bp)
+        if (PHPDBG_G(has_file_bp) 
 			&& phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
 			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
 				continue;
 			}
 		}
 
-        if (PHPDBG_G(has_sym_bp)
-			&& (execute_data->opline->opcode == ZEND_DO_FCALL || execute_data->opline->opcode == ZEND_DO_FCALL_BY_NAME)
-			&& phpdbg_find_breakpoint_symbol(execute_data->function_state.function TSRMLS_CC) == SUCCESS) {
-			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
-				continue;
-			}
-		}
+        if (PHPDBG_G(has_sym_bp)) {
+            zend_execute_data *previous = execute_data->prev_execute_data;
+            if (previous && (previous != execute_data)) {
+                if (previous->opline) {
+                    if (previous->opline->opcode == ZEND_DO_FCALL || previous->opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+                        if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS) {
+                            while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+				                continue;
+			                }
+			                printf("out\n");
+                        }
+                    }
+                }
+            }
+        }
 		
 		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
 		
