@@ -148,7 +148,7 @@ static PHPDBG_COMMAND(print) { /* {{{ */
         printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
       } else printf("Variables\tNone\n");
     }
-    printf("Executing\t:%s\n", EG(in_execution) ? "yes" : "no");
+    printf("Executing\t%s\n", EG(in_execution) ? "yes" : "no");
     if (EG(in_execution)) {
         printf("VM Return\t%d\n", PHPDBG_G(vmret));
     }
