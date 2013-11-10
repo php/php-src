@@ -91,6 +91,18 @@ PHPDBG_HELP(break) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_HELP(quiet) /* {{{ */
+{
+    printf("Setting quietness on will stop the OPLINE output during execution\n");
+    printf("For example:\n");
+    printf("\tphpdbg> quiet 1\n");
+    printf("Will silence OPLINE output, while\n");
+    printf("\tphpdbg> quiet 0\n");
+    printf("Will enable OPLINE output again\n");
+    
+    return SUCCESS;
+} /* }}} */
+
 PHPDBG_HELP(back) /* {{{ */
 {
 	printf("The backtrace is gathered with the default debug_backtrace functionality.\n");

@@ -57,6 +57,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_bool has_file_bp;  /* file-based breakpoint has been set */
 	zend_bool has_sym_bp;   /* symbol-based breakpoint has been set */
 	zend_bool quitting;     /* quitting flag */
+	int quiet;              /* quiet */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 
 #endif /* PHPDBG_H */

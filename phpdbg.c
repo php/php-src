@@ -28,11 +28,13 @@ void (*zend_execute_internal_old)(zend_execute_data *execute_data_ptr, zend_fcal
 static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
 {
     pg->exec = NULL;
+    pg->exec_len = 0;
     pg->ops = NULL;
     pg->stepping = 0;
     pg->vmret = 0;
     pg->quitting = 0;
     pg->bp_count = 0;
+    pg->quiet = 0;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */

@@ -42,6 +42,7 @@ PHPDBG_HELP(eval);
 PHPDBG_HELP(print);
 PHPDBG_HELP(break);
 PHPDBG_HELP(back);
+PHPDBG_HELP(quiet);
 
 /**
  * Commands
@@ -56,7 +57,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_HELP_D(print,    "printing allows inspection of the execution environment"),
 	PHPDBG_HELP_D(break,    "breakpoints allow execution interruption"),
 	PHPDBG_HELP_D(back,     "show debug backtrace information during execution"),
-
+    PHPDBG_HELP_D(quiet,    "be quiet during execution"),
 	{NULL, 0, 0}
 };
 
