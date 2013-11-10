@@ -214,7 +214,7 @@ int main(int argc, char *argv[]) /* {{{ */
 	int   ini_entries_len = 0;
 	char *ini_path_override = NULL;
 	char *php_optarg = NULL;
-    int php_optind = 0;
+    int php_optind = 1;
     int opt;
     
 #ifdef ZTS
@@ -235,7 +235,6 @@ int main(int argc, char *argv[]) /* {{{ */
 #endif
 
     while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
-        printf("OPT: %d\n", opt);
         switch (opt) {
             case 'c':
                 if (ini_path_override) {
