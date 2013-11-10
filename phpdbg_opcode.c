@@ -17,8 +17,8 @@
    +----------------------------------------------------------------------+
 */
 
-#include "phpdbg_opcode.h"
 #include "zend_vm_opcodes.h"
+#include "phpdbg_opcode.h"
 
 const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 {
