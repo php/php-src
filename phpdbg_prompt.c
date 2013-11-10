@@ -314,8 +314,10 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		            }
 		        break;
 
-		        case PHPDBG_NEXT:
+		        case PHPDBG_NEXT: if (PHPDBG_G(stepping)) {
 		            return PHPDBG_NEXT;
+		        }
+		            
 		    }
 		}
 
