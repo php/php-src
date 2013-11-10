@@ -20,6 +20,8 @@
 #ifndef PHPDBG_HELP_H
 #define PHPDBG_HELP_H
 
+#include "phpdbg_prompt.h"
+
 /**
  * Command Declarators
  */
