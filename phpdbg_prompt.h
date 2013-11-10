@@ -43,6 +43,22 @@ typedef struct _phpdbg_command_t {
 	phpdbg_command_handler_t handler;   /* Command handler */
 } phpdbg_command_t;
 
+
+/**
+ * Breakpoint file-based representation
+ */
+typedef struct _phpdbg_breakfile_t {
+	const char *filename;
+	long line;
+} phpdbg_breakfile_t;
+
+/**
+ * Breakpoint symbol-based representation
+ */
+typedef struct _phpdbg_breaksymbol_t {
+	const char *symbol;
+} phpdbg_breaksymbol_t;
+
 /**
  * Command Executor
  */

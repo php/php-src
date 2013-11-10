@@ -30,30 +30,32 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) {
 
 static PHP_MINIT_FUNCTION(phpdbg) {
     ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
-    
+
     zend_execute_old = zend_execute_ex;
     zend_execute_ex = phpdbg_execute_ex;
-  
+
     return SUCCESS;
 }
 
 static inline void php_phpdbg_destroy_break(void *brake) {
-  
+
 }
 
 static PHP_RINIT_FUNCTION(phpdbg) {
-  zend_hash_init(&PHPDBG_G(breaks), 8, NULL, php_phpdbg_destroy_break, 0);
-  
-  return SUCCESS;
+	zend_hash_init(&PHPDBG_G(break_files),   8, NULL, php_phpdbg_destroy_break, 0);
+	zend_hash_init(&PHPDBG_G(break_symbols), 8, NULL, php_phpdbg_destroy_break, 0);
+
+	return SUCCESS;
 }
 
 static PHP_RSHUTDOWN_FUNCTION(phpdbg) {
-    zend_hash_destroy(&PHPDBG_G(breaks));
-  
+    zend_hash_destroy(&PHPDBG_G(break_files));
+    zend_hash_destroy(&PHPDBG_G(break_symbols));
+
     if (PHPDBG_G(exec)) {
         efree(PHPDBG_G(exec));
     }
-  
+
     if (PHPDBG_G(ops)) {
         destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
         efree(PHPDBG_G(ops));
