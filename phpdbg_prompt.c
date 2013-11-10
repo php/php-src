@@ -146,35 +146,32 @@ static PHPDBG_COMMAND(eval) { /* {{{ */
     return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(back) { /* {{{ */
-    if (EG(in_execution)) {
-        zval zbacktrace;
-        zval **tmp;
-        HashPosition position;
-        int i = 0;
-        int limit = (expr != NULL) ? atoi(expr) : 0;
+static PHPDBG_COMMAND(back) /* {{{ */
+{
+	if (!EG(in_execution)) {
+		printf("Not executing !\n");
+		return FAILURE;
+	}
+	zval zbacktrace;
+	zval **tmp;
+	HashPosition position;
+	int i = 0, limit = (expr != NULL) ? atoi(expr) : 0;
 
-        zend_fetch_debug_backtrace(
-            &zbacktrace, 0, 0, limit TSRMLS_CC);
+	zend_fetch_debug_backtrace(&zbacktrace, 0, 0, limit TSRMLS_CC);
 
-        for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
-             zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == SUCCESS;
-             zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position)) {
-             if (i++) {
-                printf(",\n");
-             }
-             zend_print_flat_zval_r(*tmp TSRMLS_CC);
-        }
+	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
+		zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == SUCCESS;
+		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position)) {
+		if (i++) {
+			printf(",\n");
+		}
+		zend_print_flat_zval_r(*tmp TSRMLS_CC);
+	}
 
-        printf("\n");
+	printf("\n");
+	zval_dtor(&zbacktrace);
 
-        zval_dtor(&zbacktrace);
-
-        return SUCCESS;
-    } else {
-        printf("Not executing !\n");
-        return FAILURE;
-    }
+	return SUCCESS;
 } /* }}} */
 
 static PHPDBG_COMMAND(print) /* {{{ */
@@ -233,35 +230,33 @@ static PHPDBG_COMMAND(quit) /* {{{ */
 
 static PHPDBG_COMMAND(help) /* {{{ */
 {
-  printf("Welcome to phpdbg, the interactive PHP debugger.\n");
-  if (!expr_len) {
-    printf("To get help regarding a specific command type \"help command\"\n");
-    printf("Commands:\n");
-    {
-      const phpdbg_command_t *command = phpdbg_prompt_commands;
-      while (command && command->name) {
-        printf(
-          "\t%s\t%s\n", command->name, command->tip);
-        command++;
-      }
-    }
-    printf("Helpers Loaded:\n");
-    {
-      const phpdbg_command_t *command = phpdbg_help_commands;
-      while (command && command->name) {
-        printf(
-          "\t%s\t%s\n", command->name, command->tip);
-        command++;
-      }
-    }
-  } else {
-    if (phpdbg_do_cmd(phpdbg_help_commands, expr, expr_len TSRMLS_CC) == FAILURE) {
-      printf("failed to find help command: %s\n", expr);
-    }
-  }
-  printf("Please report bugs to <http://theman.in/themoon>\n");
+	printf("Welcome to phpdbg, the interactive PHP debugger.\n");
 
-  return SUCCESS;
+	if (!expr_len) {
+		const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
+		const phpdbg_command_t *help_command = phpdbg_help_commands;
+
+		printf("To get help regarding a specific command type \"help command\"\n");
+
+		printf("Commands:\n");
+		while (prompt_command && prompt_command->name) {
+			printf("\t%s\t%s\n", prompt_command->name, prompt_command->tip);
+			++prompt_command;
+		}
+
+		printf("Helpers Loaded:\n");
+		while (help_command && help_command->name) {
+			printf("\t%s\t%s\n", help_command->name, help_command->tip);
+			++help_command;
+		}
+	} else {
+		if (phpdbg_do_cmd(phpdbg_help_commands, expr, expr_len TSRMLS_CC) == FAILURE) {
+			printf("failed to find help command: %s\n", expr);
+		}
+	}
+	printf("Please report bugs to <https://github.com/krakjoe/phpdbg/issues>\n");
+
+	return SUCCESS;
 } /* }}} */
 
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
@@ -342,7 +337,7 @@ static void phpdbg_print_opline(zend_execute_data *execute_data TSRMLS_DC) { /* 
         "[OPLINE: %p:%d]\n", opline, opline->opcode);
 } /* }}} */
 
-void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
+void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
 	zend_bool original_in_execution = EG(in_execution);
 
@@ -404,4 +399,4 @@ zend_vm_enter:
 
 	}
 	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
-}
+} /* }}} */
