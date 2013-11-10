@@ -122,7 +122,7 @@ static PHPDBG_COMMAND(run) { /* {{{ */
 
 static PHPDBG_COMMAND(eval) { /* {{{ */
     zval retval;
-    
+
     if (expr) {
         if (zend_eval_stringl((char*)expr, expr_len-1, &retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
             printf("Success\n");
@@ -132,7 +132,7 @@ static PHPDBG_COMMAND(eval) { /* {{{ */
         printf("No expression provided !\n");
         return FAILURE;
     }
-    
+
     return SUCCESS;
 } /* }}} */
 
@@ -165,13 +165,21 @@ static PHPDBG_COMMAND(break) /* {{{ */
 	const char *line_pos = zend_memrchr(expr, ':', expr_len);
 
 	if (line_pos) {
+		char resolved_name[MAXPATHLEN];
 		long line_num = strtol(line_pos+1, NULL, 0);
 		phpdbg_breakfile_t new_break;
 		zend_llist *break_files_ptr;
+		size_t name_len;
+		char *path = estrndup(expr, line_pos - expr);
 
-		size_t name_len = line_pos - expr;
+		if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
+			efree(path);
+			return FAILURE;
+		}
+		efree(path);
 
-		new_break.filename = estrndup(expr, name_len);
+		name_len = strlen(resolved_name);
+		new_break.filename = estrndup(resolved_name, name_len + 1);
 		new_break.line = line_num;
 
 		PHPDBG_G(has_file_bp) = 1;
@@ -182,7 +190,8 @@ static PHPDBG_COMMAND(break) /* {{{ */
 			zend_llist_init(&break_files, sizeof(phpdbg_breakfile_t), NULL, 0);
 
 			zend_hash_update(&PHPDBG_G(break_files),
-				new_break.filename, name_len, &break_files, sizeof(zend_llist), (void**)&break_files_ptr);
+				new_break.filename, name_len, &break_files, sizeof(zend_llist),
+				(void**)&break_files_ptr);
 		}
 		zend_llist_add_element(break_files_ptr, &new_break);
 	}
