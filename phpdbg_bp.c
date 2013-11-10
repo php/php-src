@@ -39,36 +39,26 @@ static void phpdbg_llist_breaksym_dtor(void *data) /* {{{ */
 	efree((char*)bp->symbol);
 } /* }}} */
 
-void phpdbg_set_breakpoint_file(const char *expr, const char *line_pos TSRMLS_DC) /* {{{ */
+void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{{ */
 {
-	char resolved_name[MAXPATHLEN];
-	long line_num = strtol(line_pos+1, NULL, 0);
 	phpdbg_breakfile_t new_break;
 	zend_llist *break_files_ptr;
-	size_t name_len;
-	char *path = estrndup(expr, line_pos - expr);
+	size_t path_len = strlen(path);
 
-	if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
-		efree(path);
-		return;
-	}
-	efree(path);
-
-	name_len = strlen(resolved_name);
-	new_break.filename = estrndup(resolved_name, name_len + 1);
+	new_break.filename = estrndup(path, path_len + 1);
 	new_break.line = line_num;
 
 	PHPDBG_G(has_file_bp) = 1;
 
 	if (zend_hash_find(&PHPDBG_G(bp_files),
-		new_break.filename, name_len, (void**)&break_files_ptr) == FAILURE) {
+		new_break.filename, path_len, (void**)&break_files_ptr) == FAILURE) {
 		zend_llist break_files;
 
 		zend_llist_init(&break_files, sizeof(phpdbg_breakfile_t),
 			phpdbg_llist_breakfile_dtor, 0);
 
 		zend_hash_update(&PHPDBG_G(bp_files),
-			new_break.filename, name_len, &break_files, sizeof(zend_llist),
+			new_break.filename, path_len, &break_files, sizeof(zend_llist),
 			(void**)&break_files_ptr);
 	}
 
@@ -76,14 +66,13 @@ void phpdbg_set_breakpoint_file(const char *expr, const char *line_pos TSRMLS_DC
 	zend_llist_add_element(break_files_ptr, &new_break);
 } /* }}} */
 
-void phpdbg_set_breakpoint_symbol(const char *expr, const char *opline_num_pos TSRMLS_DC) /* {{{ */
+void phpdbg_set_breakpoint_symbol(const char *name, long opline_num TSRMLS_DC) /* {{{ */
 {
-	long opline_num = opline_num_pos ? strtol(opline_num_pos+1, NULL, 0) : 0;
 	phpdbg_breaksymbol_t new_break;
 	zend_llist *break_sym_ptr;
-	size_t name_len = opline_num_pos ? opline_num_pos - expr : strlen(expr);
+	size_t name_len = strlen(name);
 
-	new_break.symbol = estrndup(expr, name_len);
+	new_break.symbol = estrndup(name, name_len + 1);
 	new_break.opline_num = opline_num;
 
 	PHPDBG_G(has_sym_bp) = 1;
