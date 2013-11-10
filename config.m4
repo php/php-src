@@ -9,7 +9,7 @@ if test "$PHP_PHPDBG" != "no"; then
   AC_DEFINE(HAVE_PHPDBG, 1, [ ])
 
   PHP_PHPDBG_CFLAGS=-I$abs_srcdir/sapi/phpdbg
-  PHP_PHPDBG_FILES="phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_bp.c"
+  PHP_PHPDBG_FILES="phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_bp.c phpdbg_opcode.c"
 
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag])
   PHP_SELECT_SAPI(phpdbg, program, $PHP_PHPDBG_FILES, $PHP_PHPDBG_CFLAGS, [$(SAPI_PHPDBG_PATH)])
