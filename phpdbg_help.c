@@ -30,6 +30,20 @@ PHPDBG_HELP(exec) /* {{{ */
   return SUCCESS;
 } /* }}} */
 
+PHPDBG_HELP(step) { /* {{{ */
+    printf("You can enable and disable stepping at any phpdbg prompt during execution\n");
+    printf("For example:\n");
+    printf("phpdbg> stepping 1\n");
+    printf("Will enable stepping\n");
+    printf("While stepping is enabled you are presented with a prompt after the execution of each opcode\n");
+    return SUCCESS;
+} /* }}} */
+
+PHPDBG_HELP(next) { /* {{{ */
+    printf("While stepping through execution, use the next command to step back into the vm and execute the next opcode");
+    return SUCCESS;
+} /* }}} */
+
 PHPDBG_HELP(compile) /* {{{ */
 {
   printf("Pre-compilation of the execution context provides the opportunity to inspect the opcodes before they are executed\n");
@@ -43,7 +57,7 @@ PHPDBG_HELP(print) /* {{{ */
 {
   printf("By default, print will show information about the current execution environment\n");
   printf("To show specific information pass an expression to print, for example:\n");
-  printf("\tprint opcodes[0]\n");
+  printf("\tphpdbg> print opcodes[0]\n");
   printf("Will show the opline @ 0\n");
   printf("Available print commands:\n");
   printf("\tNone\n");

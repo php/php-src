@@ -85,6 +85,15 @@ static PHPDBG_COMMAND(compile) { /* {{{ */
   }
 } /* }}} */
 
+static PHPDBG_COMMAND(step) { /* {{{ */
+    PHPDBG_G(stepping) = atoi(expr);
+    return SUCCESS;
+} /* }}} */
+
+static PHPDBG_COMMAND(next) { /* {{{ */
+    return PHPDBG_NEXT;
+} /* }}} */
+
 static PHPDBG_COMMAND(run) { /* {{{ */
     if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
         if (!PHPDBG_G(ops)) {
@@ -116,9 +125,12 @@ static PHPDBG_COMMAND(print) { /* {{{ */
     printf("Showing Execution Context Information:\n");
     printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
     printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
+    printf("Stepping\t%s\n", PHPDBG_G(stepping) ? "on" : "off");
     if (PHPDBG_G(ops)) {
-      printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last-1);
-      printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
+      printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last);
+      if (PHPDBG_G(ops)->last_var) {
+        printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
+      } else printf("Variables\tNone\n");
     }
   } else {
     printf(
@@ -175,6 +187,8 @@ static PHPDBG_COMMAND(help) /* {{{ */
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,      "set execution context"),
 	PHPDBG_COMMAND_D(compile,   "attempt to pre-compile execution context"),
+	PHPDBG_COMMAND_D(step,      "step through execution"),
+	PHPDBG_COMMAND_D(next,      "next opcode"),
 	PHPDBG_COMMAND_D(run,       "attempt execution"),
 	PHPDBG_COMMAND_D(print,     "print something"),
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
@@ -200,7 +214,7 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 	return FAILURE;
 } /* }}} */
 
-void phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
+int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 {
 	char cmd[PHPDBG_MAX_CMD];
 
@@ -214,13 +228,20 @@ void phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		}
 
 		if (cmd_len) {
-			if (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC) == FAILURE) {
-			  printf("error executing %s !\n", cmd);
-			}
+		    switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
+		        case FAILURE:
+		            printf("error executing %s !\n", cmd);
+		        break;
+		        
+		        case PHPDBG_NEXT:
+		            return PHPDBG_NEXT;
+		    }
 		}
 
 		printf("phpdbg> ");
 	}
+	
+	return SUCCESS;
 } /* }}} */
 
 void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
@@ -236,7 +257,6 @@ zend_vm_enter:
 	}
 
 	while (1) {
-    	int ret;
 #ifdef ZEND_WIN32
 		if (EG(timed_out)) {
 			zend_timeout(0);
@@ -245,8 +265,17 @@ zend_vm_enter:
 
         printf("[OPLINE: %p]\n", execute_data->opline);
         
-		if ((ret = execute_data->opline->handler(execute_data TSRMLS_CC)) > 0) {
-			switch (ret) {
+        PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
+        
+        if (PHPDBG_G(stepping)) {
+            while (phpdbg_interactive(
+                0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+                continue;
+            }
+        }
+        
+		if (PHPDBG_G(vmret) > 0) {
+			switch (PHPDBG_G(vmret)) {
 				case 1:
 					EG(in_execution) = original_in_execution;
 					return;
