@@ -122,5 +122,4 @@ int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 	}
 
 	return FAILURE;
-}
-/* }}} */
+} /* }}} */
