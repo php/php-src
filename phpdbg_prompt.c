@@ -383,7 +383,7 @@ zend_vm_enter:
 		}
 #endif
 
-        if (PHPDBG_G(has_file_bp) 
+        if (PHPDBG_G(has_file_bp)
 			&& phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
 			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
 				continue;
@@ -393,7 +393,7 @@ zend_vm_enter:
         if (PHPDBG_G(has_sym_bp)) {
             zend_execute_data *previous = execute_data->prev_execute_data;
             if (previous && (previous != execute_data)) {
-                if (previous->opline) {
+                if (previous->opline && execute_data->opline->opcode != ZEND_RETURN) {
                     if (previous->opline->opcode == ZEND_DO_FCALL || previous->opline->opcode == ZEND_DO_FCALL_BY_NAME) {
                         if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS) {
                             while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
