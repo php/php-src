@@ -122,21 +122,21 @@ php_sprintf_appendstring(char **buffer, zend_str_size_int *pos, zend_str_size_in
 
 /* php_spintf_appendint() {{{ */
 inline static void
-php_sprintf_appendint(char **buffer, zend_str_size_int *pos, zend_str_size_int *size, long number,
+php_sprintf_appendint(char **buffer, zend_str_size_int *pos, zend_str_size_int *size, php_int_t number,
 						zend_str_size_int width, char padding, zend_str_size_int alignment, 
 						int always_sign)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register unsigned long magn, nmagn;
+	register php_uint_t magn, nmagn;
 	register unsigned int i = NUM_BUF_SIZE - 1, neg = 0;
 
 	PRINTF_DEBUG(("sprintf: appendint(%x, %x, %x, %d, %d, '%c', %d)\n",
 				  *buffer, pos, size, number, width, padding, alignment));
 	if (number < 0) {
 		neg = 1;
-		magn = ((unsigned long) -(number + 1)) + 1;
+		magn = ((php_uint_t) -(number + 1)) + 1;
 	} else {
-		magn = (unsigned long) number;
+		magn = (php_uint_t) number;
 	}
 
 	/* Can't right-pad 0's on integers */
@@ -167,16 +167,16 @@ php_sprintf_appendint(char **buffer, zend_str_size_int *pos, zend_str_size_int *
 /* php_spintf_appenduint() {{{ */
 inline static void
 php_sprintf_appenduint(char **buffer, zend_str_size_int *pos, zend_str_size_int *size,
-					   unsigned long number,
+					   php_uint_t number,
 					   zend_str_size_int width, char padding, zend_str_size_int alignment)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register unsigned long magn, nmagn;
+	register php_uint_t magn, nmagn;
 	register unsigned int i = NUM_BUF_SIZE - 1;
 
 	PRINTF_DEBUG(("sprintf: appenduint(%x, %x, %x, %d, %d, '%c', %d)\n",
 				  *buffer, pos, size, number, width, padding, alignment));
-	magn = (unsigned long) number;
+	magn = (php_uint_t) number;
 
 	/* Can't right-pad 0's on integers */
 	if (alignment == 0 && padding == '0') padding = ' ';
@@ -290,13 +290,13 @@ php_sprintf_appenddouble(char **buffer, zend_str_size_int *pos,
 
 /* php_spintf_appendd2n() {{{ */
 inline static void
-php_sprintf_append2n(char **buffer, zend_str_size_int *pos, zend_str_size_int *size, long number,
+php_sprintf_append2n(char **buffer, zend_str_size_int *pos, zend_str_size_int *size, php_int_t number,
 					 zend_str_size_int width, char padding, zend_str_size_int alignment, int n,
 					 char *chartable, int expprec)
 {
 	char numbuf[NUM_BUF_SIZE];
-	register unsigned long num;
-	register unsigned int  i = NUM_BUF_SIZE - 1;
+	register php_uint_t num;
+	register php_uint_t  i = NUM_BUF_SIZE - 1;
 	register int andbits = (1 << n) - 1;
 
 	PRINTF_DEBUG(("sprintf: append2n(%x, %x, %x, %d, %d, '%c', %d, %d, %x)\n",
@@ -304,7 +304,7 @@ php_sprintf_append2n(char **buffer, zend_str_size_int *pos, zend_str_size_int *s
 				  chartable));
 	PRINTF_DEBUG(("sprintf: append2n 2^%d andbits=%x\n", n, andbits));
 
-	num = (unsigned long) number;
+	num = (php_uint_t) number;
 	numbuf[i] = '\0';
 
 	do {
@@ -324,7 +324,7 @@ inline static int
 php_sprintf_getnumber(char *buffer, zend_str_size_int *pos)
 {
 	char *endptr;
-	register long num = strtol(&buffer[*pos], &endptr, 10);
+	register php_int_t num = ZEND_STRTOL(&buffer[*pos], &endptr, 10);
 	register zend_str_size_int i = 0;
 
 	if (endptr != NULL) {
