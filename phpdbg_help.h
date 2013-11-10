@@ -33,6 +33,7 @@
  */
 PHPDBG_HELP(exec);
 PHPDBG_HELP(compile);
+PHPDBG_HELP(run);
 PHPDBG_HELP(print);
 PHPDBG_HELP(break);
 
@@ -42,6 +43,7 @@ PHPDBG_HELP(break);
 static const phpdbg_command_t phpdbg_help_commands[] = {
   PHPDBG_HELP_D(exec,     "the execution context should be a valid phpdbg path"),
   PHPDBG_HELP_D(compile,  "pre-compilation allows inspection of code before execution"),
+  PHPDBG_HELP_D(run,      "execution inside the phpdbg vm allows detailed inspection and debugging"),
   PHPDBG_HELP_D(print,    "printing allows inspection of the execution environment"),
   PHPDBG_HELP_D(break,    "breakpoints allow execution interruption"),
   {NULL, 0, 0}

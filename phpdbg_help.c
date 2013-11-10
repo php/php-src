@@ -51,6 +51,13 @@ PHPDBG_HELP(print) /* {{{ */
   return SUCCESS;
 } /* }}} */
 
+PHPDBG_HELP(run) /* {{{ */ 
+{
+    printf("Run the code inside the debug vm, you should have break points and variables set before running\n");
+    printf("The execution context must not be set, but not necessarily compiled before execution occurs\n");
+    return SUCCESS;
+} /* }}} */
+
 PHPDBG_HELP(break) /* {{{ */
 {
   printf("doing break help: %s\n", expr);
