@@ -40,8 +40,8 @@
 #define PHPDBG_NEXT 2
 
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
-	HashTable break_files;
-	HashTable break_symbols;
+	HashTable bp_files;
+	HashTable bp_symbols;
 	char *exec;             /* file to execute */
 	size_t exec_len;        /* size of exec */
 	zend_op_array *ops;     /* op_array */
@@ -49,6 +49,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_bool stepping;     /* stepping */
 	int vmret;              /* return from last opcode handler execution */
 	zend_bool has_file_bp;  /* file-based breakpoint has been set */
+	zend_bool has_sym_bp;   /* symbol-based breakpoint has been set */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 
 #include "phpdbg_prompt.h"

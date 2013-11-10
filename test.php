@@ -1,6 +1,8 @@
 <?php
-echo "Hello World\n";
-if (isset($greeting)) {
-    echo $greeting;
+function test() {
+	echo "Hello World\n";
+}
+if (!isset($greeting)) {
+    echo test();
 }
 ?>
