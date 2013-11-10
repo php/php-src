@@ -38,6 +38,8 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->last = NULL;
     pg->last_params = NULL;
     pg->last_params_len = 0;
+    pg->has_file_bp = 0;
+    pg->has_sym_bp = 0;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
@@ -145,6 +147,40 @@ static int php_sapi_phpdbg_deactivate(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+static void php_sapi_phpdbg_register_vars(zval *track_vars_array TSRMLS_DC) /* {{{ */
+{
+	unsigned int len;
+	char   *docroot = "";
+
+	/* In phpdbg mode, we consider the environment to be a part of the server variables
+     */
+    php_import_environment_variables(track_vars_array TSRMLS_CC);
+
+    if (PHPDBG_G(exec)) {
+        len = PHPDBG_G(exec_len);
+        if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
+	        php_register_variable("PHP_SELF", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+        }
+        if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_NAME", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
+	        php_register_variable("SCRIPT_NAME", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+        }
+        
+        if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_FILENAME", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
+	        php_register_variable("SCRIPT_FILENAME", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+        }
+        if (sapi_module.input_filter(PARSE_SERVER, "PATH_TRANSLATED", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
+	        php_register_variable("PATH_TRANSLATED", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+        }
+    }
+    
+    /* any old docroot will doo */
+    len = 0U;
+    if (sapi_module.input_filter(PARSE_SERVER, "DOCUMENT_ROOT", &docroot, len, &len TSRMLS_CC)) {
+	    php_register_variable("DOCUMENT_ROOT", docroot, track_vars_array TSRMLS_CC);
+    }
+}
+/* }}} */
+
 /* {{{ sapi_module_struct phpdbg_sapi_module
  */
 static sapi_module_struct phpdbg_sapi_module = {
@@ -171,7 +207,7 @@ static sapi_module_struct phpdbg_sapi_module = {
 	NULL,				            /* read POST data */
 	php_sapi_phpdbg_read_cookies,   /* read Cookies */
 
-	NULL,	                        /* register server variables */
+	php_sapi_phpdbg_register_vars,	/* register server variables */
 	php_sapi_phpdbg_log_message,	/* Log message */
 	NULL,							/* Get request time */
 	NULL,							/* Child terminate */
@@ -182,6 +218,8 @@ static sapi_module_struct phpdbg_sapi_module = {
 const opt_struct OPTIONS[] = { /* {{{ */
     {'c', 1, "ini path override"},
     {'d', 1, "define ini entry on command line"},
+    {'n', 0, "no php.ini"},
+    {'z', 1, "load zend_extension"},
     {'-', 0, NULL}
 }; /* }}} */
 
@@ -209,10 +247,8 @@ void phpdbg_ini_defaults(HashTable *configuration_hash) { /* {{{ */
 int main(int argc, char *argv[]) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
-	char *ini_file = NULL;
 	char *ini_entries = NULL;
 	int   ini_entries_len = 0;
-	char *ini_path_override = NULL;
 	char *php_optarg = NULL;
     int php_optind = 1;
     int opt;
@@ -236,11 +272,14 @@ int main(int argc, char *argv[]) /* {{{ */
 
     while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
         switch (opt) {
+            case 'n':
+                phpdbg->php_ini_ignore = 1;
+            break;
             case 'c':
-                if (ini_path_override) {
-                    free(ini_path_override);
+                if (phpdbg->php_ini_path_override) {
+                    free(phpdbg->php_ini_path_override);
                 }
-                ini_path_override = strdup(php_optarg);
+                phpdbg->php_ini_path_override = strdup(php_optarg);
             break;
             case 'd': {
                 int len = strlen(php_optarg);
@@ -271,11 +310,13 @@ int main(int argc, char *argv[]) /* {{{ */
 				    ini_entries_len += len + sizeof("=1\n\0") - 2;
 			    }
             } break;
+            case 'z':
+                zend_load_extension(php_optarg);
+            break;
         }
     }
 
     phpdbg->ini_defaults = phpdbg_ini_defaults;
-    phpdbg->php_ini_path_override = ini_path_override;
 	phpdbg->phpinfo_as_text = 1;
 	phpdbg->php_ini_ignore_cwd = 1;
 
@@ -283,7 +324,6 @@ int main(int argc, char *argv[]) /* {{{ */
 
     phpdbg->executable_location = argv[0];
     phpdbg->phpinfo_as_text = 1;
-    phpdbg->php_ini_ignore_cwd = 0;
     phpdbg->php_ini_ignore = 0;
     
     if (ini_entries) {
@@ -318,10 +358,6 @@ int main(int argc, char *argv[]) /* {{{ */
 			    phpdbg_interactive(argc, argv TSRMLS_CC);
 			} while(!PHPDBG_G(quitting));
 		} zend_end_try();
-
-		if (ini_file) {
-		    pefree(ini_file, 1);
-		}
 
 		if (ini_entries) {
 		    free(ini_entries);
