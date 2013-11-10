@@ -72,6 +72,12 @@ PHPDBG_HELP(run) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
+PHPDBG_HELP(eval) /* {{{ */
+{
+    printf("Access to eval() allows you to change the environment during execution, careful though !!");
+    return SUCCESS;
+} /* }}} */
+
 PHPDBG_HELP(break) /* {{{ */
 {
   printf("doing break help: %s\n", expr);
