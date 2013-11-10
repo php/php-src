@@ -90,13 +90,13 @@ static inline int zend_machine(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 int main(int argc, char **argv) /* {{{ */
 {
+	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
 #ifdef ZTS
 	void ***tsrm_ls;
 	tsrm_startup(1, 1, 0, NULL);
 
 	tsrm_ls = ts_resource(0);
 #endif
-	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY;                 /* sets default for file streams to binary */
