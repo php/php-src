@@ -127,8 +127,10 @@ static PHPDBG_COMMAND(run) { /* {{{ */
         zend_try {
             zend_execute(EG(active_op_array) TSRMLS_CC);
         } zend_catch {
-            printf("Caught excetion in VM\n");
-            return FAILURE;
+            if (!PHPDBG_G(quitting)) {
+                printf("Caught excetion in VM\n");
+                return FAILURE;
+            } else return SUCCESS;
         } zend_end_try();
 
         return SUCCESS;
@@ -140,10 +142,13 @@ static PHPDBG_COMMAND(run) { /* {{{ */
 
 static PHPDBG_COMMAND(eval) { /* {{{ */
     zval retval;
-
+    
     if (expr) {
         if (zend_eval_stringl((char*)expr, expr_len-1, &retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-            printf("Success\n");
+            printf("Success: ");
+            zend_print_zval_r(
+                &retval, 0 TSRMLS_CC);
+            printf("\n");
             zval_dtor(&retval);
         }
     } else {
@@ -276,6 +281,8 @@ static PHPDBG_COMMAND(break) /* {{{ */
 
 static PHPDBG_COMMAND(quit) /* {{{ */
 {
+    PHPDBG_G(quitting)=1;
+    
 	zend_bailout();
 
 	return SUCCESS;
@@ -399,7 +406,8 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 	printf("phpdbg> ");
 
-	while (fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
+	while (!PHPDBG_G(quitting) && 
+	       fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
 		size_t cmd_len = strlen(cmd) - 1;
 
 		while (cmd[cmd_len] == '\n') {
@@ -409,7 +417,10 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		if (cmd_len) {
 		    switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
 		        case FAILURE:
-		            printf("error executing %s !\n", cmd);
+		            if (!PHPDBG_G(quitting)) {
+		                printf(
+		                    "Failed to execute %s !\n", cmd);
+		            }
 		        break;
 
 		        case PHPDBG_NEXT:
@@ -417,7 +428,9 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		    }
 		}
 
-		printf("phpdbg> ");
+		if (!PHPDBG_G(quitting)) {
+		    printf("phpdbg> ");
+		}
 	}
 
 	return SUCCESS;
