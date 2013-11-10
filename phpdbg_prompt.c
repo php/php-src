@@ -531,8 +531,6 @@ zend_vm_enter:
 		}
 #endif
 
-        phpdbg_print_opline(execute_data TSRMLS_CC);
-
         if (PHPDBG_G(has_file_bp)
 			&& phpdbg_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
 			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
@@ -540,15 +538,33 @@ zend_vm_enter:
 			}
 		}
 
-		if (PHPDBG_G(has_sym_bp)
-			&& (execute_data->opline->opcode == ZEND_DO_FCALL || execute_data->opline->opcode == ZEND_DO_FCALL_BY_NAME)
-			&& phpdbg_breakpoint_symbol(execute_data->function_state.function TSRMLS_CC) == SUCCESS) {
-			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
-				continue;
-			}
-		}
-
+        if (PHPDBG_G(has_sym_bp)) {
+            zend_execute_data *previous = execute_data->prev_execute_data;
+            if (previous && (previous != execute_data)) {
+                if (previous->opline) {
+                    if (previous->opline->opcode == ZEND_DO_FCALL || previous->opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+                        if (phpdbg_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS) {
+                            while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+				                continue;
+			                }
+                        }
+                    }
+                }
+            } else {
+                if (execute_data->opline->opcode == ZEND_DO_FCALL || execute_data->opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+                    if (phpdbg_breakpoint_symbol(execute_data->function_state.function TSRMLS_CC) == SUCCESS) {
+                        while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+		                    continue;
+	                    }
+                    }
+                }
+            }
+        }
+        
 		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
+		
+		phpdbg_print_opline(
+		    execute_data TSRMLS_CC);
 
 		if (PHPDBG_G(stepping)) {
 			while (phpdbg_interactive(

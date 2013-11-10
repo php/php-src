@@ -135,7 +135,7 @@ int phpdbg_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 	if (!fname) {
 		fname = "main";
 	}
-
+    
 	if (zend_hash_find(&PHPDBG_G(bp_symbols), fname, strlen(fname),
 		(void**)&break_list) == SUCCESS) {
 		printf("breakpoint reached!\n");

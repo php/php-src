@@ -82,10 +82,12 @@ PHPDBG_HELP(break) /* {{{ */
 {
 	printf("Setting a breakpoint stops execution at a specific stage, the syntax is:\n");
 	printf("\tfile:line\n");
-	printf("[more to come]\n");
+	printf("\tfunction\n");
 	printf("For example:\n");
 	printf("\tphpdbg> break test.php:1\n");
 	printf("Will break execution on line 1 of test.php\n");
+	printf("\tphpdbg> break my_function\n");
+	printf("Will break execution on entry to my_function\n");
 	return SUCCESS;
 } /* }}} */
 
