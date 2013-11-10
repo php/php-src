@@ -314,8 +314,10 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		            }
 		        break;
 
-		        case PHPDBG_NEXT:
+		        case PHPDBG_NEXT: if (PHPDBG_G(stepping)) {
 		            return PHPDBG_NEXT;
+		        }
+		            
 		    }
 		}
 
@@ -325,6 +327,13 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 	}
 
 	return SUCCESS;
+} /* }}} */
+
+static void phpdbg_print_opline(zend_execute_data *execute_data TSRMLS_DC) { /* {{{ */
+    zend_op *opline = execute_data->opline;
+    
+    printf(
+        "[OPLINE: %p:%d]\n", opline, opline->opcode);
 } /* }}} */
 
 void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
@@ -345,7 +354,7 @@ zend_vm_enter:
 		}
 #endif
 
-        printf("[OPLINE: %p]\n", execute_data->opline);
+        phpdbg_print_opline(execute_data TSRMLS_CC);
 
         if (PHPDBG_G(has_file_bp)
 			&& phpdbg_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
