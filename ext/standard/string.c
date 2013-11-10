@@ -1050,7 +1050,7 @@ PHPAPI void php_explode_negative_limit(zval *delim, zval *str, zval *return_valu
 		*/
 	} else {
 		zend_str_size allocated = EXPLODE_ALLOC_STEP, found = 0;
-		long i, to_return;
+		php_int_t i, to_return;
 		char **positions = emalloc(allocated * sizeof(char *));
 
 		positions[found++] = p1;
@@ -1082,7 +1082,7 @@ PHP_FUNCTION(explode)
 {
 	char *str, *delim;
 	zend_str_size str_len = 0, delim_len = 0;
-	php_int_t limit = PHP_SIZE_MAX_LONG; /* No limit */
+	php_int_t limit = PHP_INT_MAX; /* No limit */
 	zval zdelim, zstr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "SS|i", &delim, &delim_len, &str, &str_len, &limit) == FAILURE) {
