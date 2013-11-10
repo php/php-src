@@ -66,14 +66,13 @@ void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{
 	zend_llist_add_element(break_files_ptr, &new_break);
 } /* }}} */
 
-void phpdbg_set_breakpoint_symbol(const char *expr, const char *opline_num_pos TSRMLS_DC) /* {{{ */
+void phpdbg_set_breakpoint_symbol(const char *name, long opline_num TSRMLS_DC) /* {{{ */
 {
-	long opline_num = opline_num_pos ? strtol(opline_num_pos+1, NULL, 0) : 0;
 	phpdbg_breaksymbol_t new_break;
 	zend_llist *break_sym_ptr;
-	size_t name_len = opline_num_pos ? opline_num_pos - expr : strlen(expr);
+	size_t name_len = strlen(name);
 
-	new_break.symbol = estrndup(expr, name_len);
+	new_break.symbol = estrndup(name, name_len + 1);
 	new_break.opline_num = opline_num;
 
 	PHPDBG_G(has_sym_bp) = 1;

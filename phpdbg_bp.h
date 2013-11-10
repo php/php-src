@@ -39,7 +39,7 @@ typedef struct _phpdbg_breaksymbol_t {
 } phpdbg_breaksymbol_t;
 
 void phpdbg_set_breakpoint_file(const char*, long TSRMLS_DC);
-void phpdbg_set_breakpoint_symbol(const char*, const char* TSRMLS_DC);
+void phpdbg_set_breakpoint_symbol(const char*, long TSRMLS_DC);
 
 int phpdbg_find_breakpoint_file(zend_op_array* TSRMLS_DC);
 int phpdbg_find_breakpoint_symbol(zend_function* TSRMLS_DC);

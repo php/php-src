@@ -225,9 +225,15 @@ static PHPDBG_COMMAND(break) /* {{{ */
 
 		phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
 	} else {
-		const char *opline_num_pos = zend_memrchr(expr, '#', expr_len);
+		char name[200];
+		const char *opnum_pos = zend_memrchr(expr, '#', expr_len);
+		long opline_num = opnum_pos ? strtol(opnum_pos+1, NULL, 0) : 0;
+		size_t name_len = opnum_pos ? opnum_pos - expr : strlen(expr);
 
-		phpdbg_set_breakpoint_symbol(expr, opline_num_pos TSRMLS_CC);
+		memcpy(name, expr, name_len);
+		name[name_len] = 0;
+
+		phpdbg_set_breakpoint_symbol(name, opline_num TSRMLS_CC);
 	}
 
 	return SUCCESS;
