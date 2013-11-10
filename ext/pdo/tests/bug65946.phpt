@@ -16,8 +16,7 @@ $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->exec('CREATE TABLE test(id int)');
 $db->exec('INSERT INTO test VALUES(1)');
-$db->exec('INSERT INTO test VALUES(2)');
-$stmt = $db->prepare('SELECT * FROM testtable LIMIT :limit');
+$stmt = $db->prepare('SELECT * FROM test LIMIT :limit');
 $stmt->bindValue('limit', 1, PDO::PARAM_INT);
 if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());
 if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());
@@ -28,6 +27,6 @@ array(1) {
   [0]=>
   array(1) {
     ["id"]=>
-    string(1) "2"
+    string(1) "1"
   }
 }
