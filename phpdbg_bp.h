@@ -12,50 +12,28 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
+   | Authors: Felipe Pena <felipe@php.net>                                |
    | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_H
-#define PHPDBG_H
+#ifndef PHPDBG_BP_H
+#define PHPDBG_BP_H
 
-#include "php.h"
-#include "php_globals.h"
-#include "php_variables.h"
-#include "php_getopt.h"
-#include "zend_modules.h"
-#include "zend_ini_scanner.h"
-#include "zend_globals.h"
-#include "zend_stream.h"
-#include "zend_builtin_functions.h"
-#include "SAPI.h"
-#include <php_config.h>
-#include "php_main.h"
+/**
+ * Breakpoint file-based representation
+ */
+typedef struct _phpdbg_breakfile_t {
+	const char *filename;
+	long line;
+} phpdbg_breakfile_t;
 
-#ifdef ZTS
-# include "TSRM.h"
-#endif
+/**
+ * Breakpoint symbol-based representation
+ */
+typedef struct _phpdbg_breaksymbol_t {
+	const char *symbol;
+	long opline_num;
+} phpdbg_breaksymbol_t;
 
-#ifdef ZTS
-# define PHPDBG_G(v) TSRMG(phpdbg_globals_id, zend_phpdbg_globals *, v)
-#else
-# define PHPDBG_G(v) (phpdbg_globals.v)
-#endif
-
-#define PHPDBG_NEXT 2
-
-ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
-	HashTable bp_files;
-	HashTable bp_symbols;
-	char *exec;             /* file to execute */
-	size_t exec_len;        /* size of exec */
-	zend_op_array *ops;     /* op_array */
-	zval *retval;           /* return value */
-	int stepping;           /* stepping */
-	int vmret;              /* return from last opcode handler execution */
-	zend_bool has_file_bp;  /* file-based breakpoint has been set */
-	zend_bool has_sym_bp;   /* symbol-based breakpoint has been set */
-	zend_bool quitting;     /* quitting flag */
-ZEND_END_MODULE_GLOBALS(phpdbg)
-
-#endif /* PHPDBG_H */
+#endif /* PHPDBG_BP_H */
