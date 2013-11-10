@@ -33,7 +33,7 @@ PHPDBG_HELP(exec) /* {{{ */
 PHPDBG_HELP(step) { /* {{{ */
     printf("You can enable and disable stepping at any phpdbg prompt during execution\n");
     printf("For example:\n");
-    printf("phpdbg> stepping 1\n");
+    printf("\tphpdbg> stepping 1\n");
     printf("Will enable stepping\n");
     printf("While stepping is enabled you are presented with a prompt after the execution of each opcode\n");
     return SUCCESS;
@@ -100,7 +100,7 @@ PHPDBG_HELP(cont) /* {{{ */
 PHPDBG_HELP(back) { /* {{{ */
     printf("The backtrace is gathered with the default debug_backtrace functionality.\n");
     printf("You can set the limit on the trace, for example:\n");
-    printf("phpdbg> back 5\n");
+    printf("\tphpdbg> back 5\n");
     printf("Will limit the number of frames to 5, the default is no limit\n");
     return SUCCESS;
 } /* }}} */
