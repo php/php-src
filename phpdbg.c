@@ -83,11 +83,6 @@ static sapi_module_struct phpdbg_sapi_module = {
 };
 /* }}} */
 
-static inline int zend_machine(int argc, char **argv TSRMLS_DC) /* {{{ */
-{
-    php_printf("Hello World :)\n");
-} /* }}} */
-
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
@@ -124,12 +119,9 @@ int main(int argc, char **argv) /* {{{ */
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();
 
-		/* START: ZEND INITIALIZED */
-		{
-			/* do the thing */
-			zend_machine(argc, argv TSRMLS_CC);
-		}
-		/* END: ZEND BLOCK */
+		zend_try {
+			phpdbg_iteractive(argc, argv);
+		} zend_end_try();
 
 		if (PG(modules_activated)) {
 			zend_try {
