@@ -33,10 +33,10 @@ static PHPDBG_COMMAND(exec) { /* {{{ */
       "Unsetting old execution context: %s\n", PHPDBG_G(exec));
     efree(PHPDBG_G(exec));
   }
-  
+
   PHPDBG_G(exec) = estrndup(
     expr, PHPDBG_G(exec_len)=expr_len);
-    
+
   printf(
     "Set execution context: %s\n", PHPDBG_G(exec));
 } /* }}} */
@@ -55,7 +55,7 @@ static PHPDBG_COMMAND(brake) { /* {{{ */
 static PHPDBG_COMMAND(quit) /* {{{ */
 {
 	zend_bailout();
-	
+
 	return SUCCESS;
 } /* }}} */
 
@@ -88,13 +88,13 @@ static PHPDBG_COMMAND(help) /* {{{ */
     }
   }
   printf("Please report bugs to <http://theman.in/themoon>\n");
-  
+
   return SUCCESS;
 } /* }}} */
 
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
-  PHPDBG_COMMAND_D(exec,  "set execution context"),
-  PHPDBG_COMMAND_D(print, "print something"),
+	PHPDBG_COMMAND_D(exec,  "set execution context"),
+	PHPDBG_COMMAND_D(print, "print something"),
 	PHPDBG_COMMAND_D(brake, "set brake point"),
 	PHPDBG_COMMAND_D(help,  "show help menu"),
 	PHPDBG_COMMAND_D(quit,  "exit phpdbg"),
@@ -106,7 +106,7 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 	char *params = NULL;
 	const char *cmd = strtok_r(cmd_line, " ", &params);
 	size_t expr_len = cmd != NULL ? strlen(cmd) : 0;
-	
+
 	while (command && command->name) {
 		if (command->name_len == expr_len
 			&& memcmp(cmd, command->name, expr_len) == 0) {
@@ -130,13 +130,13 @@ void phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		while (cmd[cmd_len] == '\n') {
 			cmd[cmd_len] = 0;
 		}
-		
+
 		if (cmd_len) {
 			if (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC) == FAILURE) {
 			  printf("error executing %s !\n", cmd);
 			}
 		}
-		
+
 		printf("phpdbg> ");
 	}
 } /* }}} */

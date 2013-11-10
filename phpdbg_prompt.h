@@ -56,6 +56,6 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 #define PHPDBG_COMMAND(name) \
   int phpdbg_do_##name(const char *expr, size_t expr_len TSRMLS_DC)
 
-void phpdbg_interactive(int argc, char** argv TSRMLS_DC);
+void phpdbg_interactive(int argc, char **argv TSRMLS_DC);
 
 #endif /* PHPDBG_PROMPT_H */
