@@ -254,7 +254,7 @@ static PHPDBG_COMMAND(help) /* {{{ */
 			++help_command;
 		}
 	} else {
-		if (phpdbg_do_cmd(phpdbg_help_commands, expr, expr_len TSRMLS_CC) == FAILURE) {
+		if (phpdbg_do_cmd(phpdbg_help_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
 			printf("failed to find help command: %s\n", expr);
 		}
 	}
@@ -334,7 +334,8 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
-static void phpdbg_print_opline(zend_execute_data *execute_data TSRMLS_DC) { /* {{{ */
+static void phpdbg_print_opline(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
+{
     zend_op *opline = execute_data->opline;
 
     printf("[OPLINE: %p:%s]\n", opline, phpdbg_decode_opcode(opline->opcode));
@@ -361,7 +362,7 @@ zend_vm_enter:
         phpdbg_print_opline(execute_data TSRMLS_CC);
 
         if (PHPDBG_G(has_file_bp)
-			&& phpdbg_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
+			&& phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
 			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
 				continue;
 			}
@@ -369,7 +370,7 @@ zend_vm_enter:
 
 		if (PHPDBG_G(has_sym_bp)
 			&& (execute_data->opline->opcode == ZEND_DO_FCALL || execute_data->opline->opcode == ZEND_DO_FCALL_BY_NAME)
-			&& phpdbg_breakpoint_symbol(execute_data->function_state.function TSRMLS_CC) == SUCCESS) {
+			&& phpdbg_find_breakpoint_symbol(execute_data->function_state.function TSRMLS_CC) == SUCCESS) {
 			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
 				continue;
 			}

@@ -103,7 +103,7 @@ void phpdbg_set_breakpoint_symbol(const char *expr, const char *opline_num_pos T
 	zend_llist_add_element(break_sym_ptr, &new_break);
 } /* }}} */
 
-int phpdbg_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
+int phpdbg_find_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	size_t name_len = strlen(op_array->filename);
 	zend_llist *break_list;
@@ -126,7 +126,7 @@ int phpdbg_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 	return FAILURE;
 } /* }}} */
 
-int phpdbg_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
+int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 {
 	const char *fname;
 	zend_llist *break_list;
