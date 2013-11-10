@@ -359,7 +359,10 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		if (cmd_len) {
 		    switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
 		        case FAILURE:
-		            printf("error executing %s !\n", cmd);
+		            if (!PHPDBG_G(quitting)) {
+		                printf(
+		                    "Failed to execute %s !\n", cmd);
+		            }
 		        break;
 
 		        case PHPDBG_NEXT:
