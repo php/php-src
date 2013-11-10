@@ -28,6 +28,13 @@ static const phpdbg_command_t phpdbg_prompt_commands[];
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
+static void phpdbg_llist_breakfile_dtor(void *data)
+{
+	phpdbg_breakfile_t *bp = (phpdbg_breakfile_t*) data;
+
+	efree(bp->filename);
+}
+
 static PHPDBG_COMMAND(exec) { /* {{{ */
   if (PHPDBG_G(exec)) {
     printf(
@@ -222,7 +229,9 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		if (zend_hash_find(&PHPDBG_G(break_files),
 			new_break.filename, name_len, (void**)&break_files_ptr) == FAILURE) {
 			zend_llist break_files;
-			zend_llist_init(&break_files, sizeof(phpdbg_breakfile_t), NULL, 0);
+
+			zend_llist_init(&break_files, sizeof(phpdbg_breakfile_t),
+				phpdbg_llist_breakfile_dtor, 0);
 
 			zend_hash_update(&PHPDBG_G(break_files),
 				new_break.filename, name_len, &break_files, sizeof(zend_llist),

@@ -23,34 +23,39 @@ ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 void (*zend_execute_old)(zend_execute_data *execute_data TSRMLS_DC);
 void (*zend_execute_internal_old)(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC);
 
-static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) {
+static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
+{
     pg->exec = NULL;
     pg->ops = NULL;
     pg->stepping = 0;
     pg->vmret = 0;
-}
+} /* }}} */
 
-static PHP_MINIT_FUNCTION(phpdbg) {
+static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
+{
     ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
 
     zend_execute_old = zend_execute_ex;
     zend_execute_ex = phpdbg_execute_ex;
 
     return SUCCESS;
-}
+} /* }}} */
 
-static inline void php_phpdbg_destroy_break(void *brake) {
+static void php_phpdbg_destroy_break(void *brake) /* {{{ */
+{
+	zend_llist_destroy((zend_llist*)brake);
+} /* }}} */
 
-}
-
-static PHP_RINIT_FUNCTION(phpdbg) {
+static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
+{
 	zend_hash_init(&PHPDBG_G(break_files),   8, NULL, php_phpdbg_destroy_break, 0);
 	zend_hash_init(&PHPDBG_G(break_symbols), 8, NULL, php_phpdbg_destroy_break, 0);
 
 	return SUCCESS;
-}
+} /* }}} */
 
-static PHP_RSHUTDOWN_FUNCTION(phpdbg) {
+static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
+{
     zend_hash_destroy(&PHPDBG_G(break_files));
     zend_hash_destroy(&PHPDBG_G(break_symbols));
 
@@ -63,7 +68,7 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) {
         efree(PHPDBG_G(ops));
     }
     return SUCCESS;
-}
+} /* }}} */
 
 static zend_module_entry sapi_phpdbg_module_entry = {
 	STANDARD_MODULE_HEADER,
