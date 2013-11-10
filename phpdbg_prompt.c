@@ -120,8 +120,10 @@ static PHPDBG_COMMAND(run) { /* {{{ */
         zend_try {
             zend_execute(EG(active_op_array) TSRMLS_CC);
         } zend_catch {
-            printf("Caught excetion in VM\n");
-            return FAILURE;
+            if (!PHPDBG_G(quitting)) {
+                printf("Caught excetion in VM\n");
+                return FAILURE;
+            } else return SUCCESS;
         } zend_end_try();
 
         return SUCCESS;
@@ -245,6 +247,8 @@ static PHPDBG_COMMAND(break) /* {{{ */
 
 static PHPDBG_COMMAND(quit) /* {{{ */
 {
+    PHPDBG_G(quitting)=1;
+    
 	zend_bailout();
 
 	return SUCCESS;
@@ -344,7 +348,8 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 	printf("phpdbg> ");
 
-	while (fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
+	while (!PHPDBG_G(quitting) && 
+	       fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
 		size_t cmd_len = strlen(cmd) - 1;
 
 		while (cmd[cmd_len] == '\n') {
