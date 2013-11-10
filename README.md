@@ -9,9 +9,9 @@ Features
 ========
 
  - step through debugging
- - setting break points
+ - break at function entry or file:line
  - showing debug backtraces
- - access to eval during execution
+ - easy manipulation of the environment with built-in eval()
  - sapi agnositicism, easy integration
  
 Installation
