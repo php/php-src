@@ -85,6 +85,15 @@ static PHPDBG_COMMAND(compile) { /* {{{ */
   }
 } /* }}} */
 
+static PHPDBG_COMMAND(step) { /* {{{ */
+    PHPDBG_G(stepping) = atoi(expr);
+    return SUCCESS;
+} /* }}} */
+
+static PHPDBG_COMMAND(next) { /* {{{ */
+    return PHPDBG_NEXT;
+} /* }}} */
+
 static PHPDBG_COMMAND(run) { /* {{{ */
     if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
         if (!PHPDBG_G(ops)) {
@@ -116,9 +125,12 @@ static PHPDBG_COMMAND(print) { /* {{{ */
     printf("Showing Execution Context Information:\n");
     printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
     printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
+    printf("Stepping\t%s\n", PHPDBG_G(stepping) ? "on" : "off");
     if (PHPDBG_G(ops)) {
-      printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last-1);
-      printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
+      printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last);
+      if (PHPDBG_G(ops)->last_var) {
+        printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
+      } else printf("Variables\tNone\n");
     }
   } else {
     printf(
@@ -135,17 +147,24 @@ static PHPDBG_COMMAND(break) /* {{{ */
 	if (line_pos) {
 		long line_num = strtol(line_pos+1, NULL, 0);
 		phpdbg_breakfile_t new_break;
-		zend_llist break_files;
+		zend_llist *break_files_ptr;
 
-		new_break.filename = estrndup(expr, line_pos - expr);
+		size_t name_len = line_pos - expr;
+
+		new_break.filename = estrndup(expr, name_len);
 		new_break.line = line_num;
 
-		PHPDBG_G(has_breakpoint) = 1;
+		PHPDBG_G(has_file_bp) = 1;
 
-		if (zend_hash_find(&PHPDBG_G(break_files), new_break.filename, line_pos - expr, &break_files) == FAILURE) {
+		if (zend_hash_find(&PHPDBG_G(break_files),
+			new_break.filename, name_len, (void**)&break_files_ptr) == FAILURE) {
+			zend_llist break_files;
 			zend_llist_init(&break_files, sizeof(phpdbg_breakfile_t), NULL, 0);
+
+			zend_hash_update(&PHPDBG_G(break_files),
+				new_break.filename, name_len, &break_files, sizeof(zend_llist), (void**)&break_files_ptr);
 		}
-		zend_llist_add_element(&break_files, &new_break);
+		zend_llist_add_element(break_files_ptr, &new_break);
 	}
 
 	return SUCCESS;
@@ -194,6 +213,8 @@ static PHPDBG_COMMAND(help) /* {{{ */
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,      "set execution context"),
 	PHPDBG_COMMAND_D(compile,   "attempt to pre-compile execution context"),
+	PHPDBG_COMMAND_D(step,      "step through execution"),
+	PHPDBG_COMMAND_D(next,      "next opcode"),
 	PHPDBG_COMMAND_D(run,       "attempt execution"),
 	PHPDBG_COMMAND_D(print,     "print something"),
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
@@ -219,12 +240,29 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 	return FAILURE;
 } /* }}} */
 
-void phpdbg_breakpoint(zend_op_array *op_array) /* {{{ */
+int phpdbg_breakpoint(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
-	printf(">> %s\n", op_array->filename);
+	size_t name_len = strlen(op_array->filename);
+	zend_llist *break_list;
+
+	if (zend_hash_find(&PHPDBG_G(break_files), op_array->filename, name_len,
+		(void**)&break_list) == SUCCESS) {
+		zend_llist_element *le;
+
+		for (le = break_list->head; le; le = le->next) {
+			phpdbg_breakfile_t *bp = (phpdbg_breakfile_t*) le->data;
+
+			if (bp->line == (*EG(opline_ptr))->lineno) {
+				printf("breakpoint reached!\n");
+				return SUCCESS;
+			}
+		}
+	}
+
+	return FAILURE;
 } /* }}} */
 
-void phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
+int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 {
 	char cmd[PHPDBG_MAX_CMD];
 
@@ -238,13 +276,20 @@ void phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		}
 
 		if (cmd_len) {
-			if (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC) == FAILURE) {
-			  printf("error executing %s !\n", cmd);
-			}
+		    switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
+		        case FAILURE:
+		            printf("error executing %s !\n", cmd);
+		        break;
+
+		        case PHPDBG_NEXT:
+		            return PHPDBG_NEXT;
+		    }
 		}
 
 		printf("phpdbg> ");
 	}
+
+	return SUCCESS;
 } /* }}} */
 
 void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
@@ -260,7 +305,6 @@ zend_vm_enter:
 	}
 
 	while (1) {
-    	int ret;
 #ifdef ZEND_WIN32
 		if (EG(timed_out)) {
 			zend_timeout(0);
@@ -269,12 +313,24 @@ zend_vm_enter:
 
         printf("[OPLINE: %p]\n", execute_data->opline);
 
-        if (PHPDBG_G(has_breakpoint)) {
-			phpdbg_breakpoint(execute_data->op_array);
+        if (PHPDBG_G(has_file_bp)
+			&& phpdbg_breakpoint(execute_data->op_array TSRMLS_CC) == SUCCESS) {
+			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+				continue;
+			}
 		}
 
-		if ((ret = execute_data->opline->handler(execute_data TSRMLS_CC)) > 0) {
-			switch (ret) {
+		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
+
+		if (PHPDBG_G(stepping)) {
+			while (phpdbg_interactive(
+				0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+				continue;
+			}
+		}
+
+		if (PHPDBG_G(vmret) > 0) {
+			switch (PHPDBG_G(vmret)) {
 				case 1:
 					EG(in_execution) = original_in_execution;
 					return;
