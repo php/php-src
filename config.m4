@@ -8,8 +8,11 @@ PHP_ARG_ENABLE(phpdbg, for phpdbg support,
 if test "$PHP_PHPDBG" != "no"; then
   AC_DEFINE(HAVE_PHPDBG, 1, [ ])
 
-  PHP_PHPDBG_CFLAGS=-I$abs_srcdir/sapi/phpdbg
+  PHP_PHPDBG_CFLAGS="-I$abc_srcdir"
   PHP_PHPDBG_FILES="phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_bp.c phpdbg_opcode.c"
+
+  PHP_SUBST(PHP_PHPDBG_CFLAGS)
+  PHP_SUBST(PHP_PHPDBG_FILES)
 
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag])
   PHP_SELECT_SAPI(phpdbg, program, $PHP_PHPDBG_FILES, $PHP_PHPDBG_CFLAGS, [$(SAPI_PHPDBG_PATH)])
@@ -24,7 +27,7 @@ if test "$PHP_PHPDBG" != "no"; then
                 \$(PHPDBG_EXTRA_LIBS) \
                 \$(ZEND_EXTRA_LIBS) \
          -o \$(BUILD_BINARY)"
-
+  
   PHP_SUBST(BUILD_BINARY)
   PHP_SUBST(BUILD_PHPDBG)
 fi

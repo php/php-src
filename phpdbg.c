@@ -99,6 +99,46 @@ static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* 
 	return SUCCESS;
 } /* }}} */
 
+static char* php_sapi_phpdbg_read_cookies(TSRMLS_D) { /* {{{ */
+    return NULL;
+} /* }}} */
+
+static int php_sapi_phpdbg_header_handler(sapi_header_struct *h, sapi_header_op_enum op, sapi_headers_struct *s TSRMLS_DC) /* {{{ */
+{
+	return 0;
+}
+/* }}} */
+
+static int php_sapi_phpdbg_send_headers(sapi_headers_struct *sapi_headers TSRMLS_DC) /* {{{ */
+{
+	/* We do nothing here, this function is needed to prevent that the fallback
+	 * header handling is called. */
+	return SAPI_HEADER_SENT_SUCCESSFULLY;
+}
+/* }}} */
+
+static void php_sapi_phpdbg_send_header(sapi_header_struct *sapi_header, void *server_context TSRMLS_DC) /* {{{ */
+{
+}
+/* }}} */
+
+static void php_sapi_phpdbg_log_message(char *message TSRMLS_DC) /* {{{ */
+{
+	fprintf(stderr, "%s\n", message);
+}
+/* }}} */
+
+static int php_sapi_phpdbg_deactivate(TSRMLS_D) /* {{{ */
+{
+	fflush(stdout);
+	if(SG(request_info).argv0) {
+		free(SG(request_info).argv0);
+		SG(request_info).argv0 = NULL;
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ sapi_module_struct phpdbg_sapi_module
  */
 static sapi_module_struct phpdbg_sapi_module = {
@@ -109,7 +149,7 @@ static sapi_module_struct phpdbg_sapi_module = {
 	php_module_shutdown_wrapper,    /* shutdown */
 
 	NULL,		                    /* activate */
-	NULL,		                    /* deactivate */
+	php_sapi_phpdbg_deactivate,		/* deactivate */
 
 	NULL,			                /* unbuffered write */
 	NULL,				            /* flush */
@@ -118,26 +158,34 @@ static sapi_module_struct phpdbg_sapi_module = {
 
 	php_error,						/* error handler */
 
-	NULL,							/* header handler */
-	NULL,			                /* send headers handler */
-	NULL,							/* send header handler */
+	php_sapi_phpdbg_header_handler,	/* header handler */
+	php_sapi_phpdbg_send_headers,	/* send headers handler */
+	php_sapi_phpdbg_send_header,	/* send header handler */
 
 	NULL,				            /* read POST data */
-	NULL,			                /* read Cookies */
+	php_sapi_phpdbg_read_cookies,   /* read Cookies */
 
 	NULL,	                        /* register server variables */
-	NULL,			                /* Log message */
+	php_sapi_phpdbg_log_message,	/* Log message */
 	NULL,							/* Get request time */
 	NULL,							/* Child terminate */
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 /* }}} */
 
-const opt_struct OPTIONS[] = { /* }}} */
+const opt_struct phpdbg_options[] = { /* }}} */
     {'c', 1, "ini path override"},
     {'d', 1, "define ini entry on command line"},
     {'-', 0, NULL}
 }; /* }}} */
+
+const char phpdbg_ini_hardcoded[] =
+	"html_errors=0\n"
+	"register_argc_argv=1\n"
+	"implicit_flush=1\n"
+	"output_buffering=0\n"
+	"max_execution_time=0\n"
+	"max_input_time=-1\n\0";
 
 /* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
 #define INI_DEFAULT(name,value)\
@@ -152,7 +200,7 @@ void phpdbg_ini_defaults(HashTable *configuration_hash) { /* {{{ */
 	INI_DEFAULT("display_errors", "1");
 } /* }}} */
 
-int main(int argc, char **argv) /* {{{ */
+int main(int argc, char *argv[]) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
 	char *ini_file = NULL;
@@ -162,12 +210,9 @@ int main(int argc, char **argv) /* {{{ */
 	char *php_optarg = NULL;
     int php_optind = 0;
     int opt;
-
+    
 #ifdef ZTS
 	void ***tsrm_ls;
-	tsrm_startup(1, 1, 0, NULL);
-
-	tsrm_ls = ts_resource(0);
 #endif
 
 #ifdef PHP_WIN32
@@ -177,7 +222,14 @@ int main(int argc, char **argv) /* {{{ */
 	setmode(_fileno(stderr), O_BINARY); /* make the stdio mode be binary */
 #endif
 
-    while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1, 1)) != -1) {
+#ifdef ZTS
+    tsrm_startup(1, 1, 0, NULL);
+
+	tsrm_ls = ts_resource(0);
+#endif
+
+    while ((opt = php_getopt(argc, argv, phpdbg_options, &php_optarg, &php_optind, 0, 2)) != -1) {
+        printf("OPT: %d\n", opt);
         switch (opt) {
             case 'c':
                 if (ini_path_override) {
@@ -228,6 +280,18 @@ int main(int argc, char **argv) /* {{{ */
     phpdbg->phpinfo_as_text = 1;
     phpdbg->php_ini_ignore_cwd = 0;
     phpdbg->php_ini_ignore = 0;
+    
+    if (ini_entries) {
+		ini_entries = realloc(ini_entries, ini_entries_len + sizeof(phpdbg_ini_hardcoded));
+		memmove(ini_entries + sizeof(phpdbg_ini_hardcoded) - 2, ini_entries, ini_entries_len + 1);
+		memcpy(ini_entries, phpdbg_ini_hardcoded, sizeof(phpdbg_ini_hardcoded) - 2);
+	} else {
+		ini_entries = malloc(sizeof(phpdbg_ini_hardcoded));
+		memcpy(ini_entries, phpdbg_ini_hardcoded, sizeof(phpdbg_ini_hardcoded));
+	}
+	ini_entries_len += sizeof(phpdbg_ini_hardcoded) - 2;
+    printf("ini_entries: %d\n", ini_entries_len);
+    
     phpdbg->ini_entries = ini_entries;
 
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
