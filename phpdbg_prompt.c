@@ -13,46 +13,94 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Felipe Pena <felipe@php.net>                                |
+   | Authors: Joe Watkins <joe.watkins@live.co.uk>                        |
    +----------------------------------------------------------------------+
 */
 
 #include <stdio.h>
 #include <string.h>
 #include "zend.h"
-#include "phpdbg_prompt.h"
+#include "phpdbg.h"
+#include "phpdbg_help.h"
 
-static void do_quit(const char *params) /* {{{ */
-{
-	zend_bailout();
+static const phpdbg_command_t phpdbg_prompt_commands[];
+
+static PHPDBG_COMMAND(print) { /* {{{ */ 
+  printf("%s", expr);
+  
+  return SUCCESS;
 } /* }}} */
 
-static const phpdbg_command prompt_commands[] = {
-	{PHPDBG_STRL("quit"), do_quit},
+static PHPDBG_COMMAND(brake) { /* {{{ */
+  return SUCCESS;
+} /* }}} */
+
+static PHPDBG_COMMAND(quit) /* {{{ */
+{
+	zend_bailout();
+	
+	return SUCCESS;
+} /* }}} */
+
+static PHPDBG_COMMAND(help) /* {{{ */
+{
+  printf("Welcome to phpdbg, the interactive PHP debugger.\n");
+  if (!expr_len) {
+    printf("To get help regarding a specific command type \"help command\"\n");
+    printf("Commands:\n");
+    {
+      const phpdbg_command_t *command = phpdbg_prompt_commands;
+      while (command && command->name) {
+        printf(
+          "\t%s\t%s\n", command->name, command->tip);
+        command++;
+      }
+    }
+    printf("Helpers Loaded:\n");
+    {
+      const phpdbg_command_t *command = phpdbg_help_commands;
+      while (command && command->name) {
+        printf(
+          "\t%s\t%s\n", command->name, command->tip);
+        command++;
+      }
+    }
+  } else {
+    if (phpdbg_do_cmd(phpdbg_help_commands, expr, expr_len TSRMLS_CC) == FAILURE) {
+      printf("failed to find help command: %s\n", expr);
+    }
+  }
+  printf("Please report bugs to <http://theman.in/themoon>\n");
+  
+  return SUCCESS;
+} /* }}} */
+
+static const phpdbg_command_t phpdbg_prompt_commands[] = {  
+  PHPDBG_COMMAND_D(print, "print something"),
+	PHPDBG_COMMAND_D(brake, "set brake point"),
+	PHPDBG_COMMAND_D(help,  "show help menu"),
+	PHPDBG_COMMAND_D(quit,  "exit phpdbg"),
 	{NULL, 0, 0}
 };
 
-static void do_cmd(char *cmd_line) /* {{{ */
+int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC) /* {{{ */
 {
-	const phpdbg_command *command = prompt_commands;
 	char *params = NULL;
 	const char *cmd = strtok_r(cmd_line, " ", &params);
-	size_t cmd_len = cmd ? strlen(cmd) : 0;
-
+	size_t expr_len = cmd != NULL ? strlen(cmd) : 0;
+	
 	while (command && command->name) {
-		if (command->name_len == cmd_len
-			&& memcmp(cmd, command->name, cmd_len) == 0) {
-			/* Command found! */
-			command->handler(params);
-			return;
+		if (command->name_len == expr_len
+			&& memcmp(cmd, command->name, expr_len) == 0) {
+			return command->handler(params, cmd_len - expr_len TSRMLS_CC);
 		}
 		++command;
 	}
 
-	printf("command not found!\n");
-
+	return FAILURE;
 } /* }}} */
 
-void phpdbg_iteractive(int argc, char **argv) /* {{{ */
+void phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 {
 	char cmd[PHPDBG_MAX_CMD];
 
@@ -61,12 +109,16 @@ void phpdbg_iteractive(int argc, char **argv) /* {{{ */
 	while (fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
 		size_t cmd_len = strlen(cmd) - 1;
 
-		if (cmd[cmd_len] == '\n') {
+		while (cmd[cmd_len] == '\n') {
 			cmd[cmd_len] = 0;
 		}
+		
 		if (cmd_len) {
-			do_cmd(cmd);
+			if (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC) == FAILURE) {
+			  printf("error executing %s !\n", cmd);
+			}
 		}
+		
 		printf("phpdbg> ");
 	}
 } /* }}} */

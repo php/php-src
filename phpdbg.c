@@ -16,27 +16,40 @@
    +----------------------------------------------------------------------+
 */
 
-#include "php.h"
-#include "php_globals.h"
-#include "php_variables.h"
-#include "zend_modules.h"
-#include "php.h"
-#include "zend_ini_scanner.h"
-#include "zend_globals.h"
-#include "zend_stream.h"
-#include "SAPI.h"
-#include <php_config.h>
-#include "php_main.h"
-#include "phpdbg_prompt.h"
+#include "phpdbg.h"
+
+ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
+
+static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) {}
+
+static PHP_MINIT_FUNCTION(phpdbg) {
+  ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
+  
+  return SUCCESS;
+}
+
+static inline void php_phpdbg_destroy_break(void *brake) {
+  
+}
+
+static PHP_RINIT_FUNCTION(phpdbg) {
+  zend_hash_init(&PHPDBG_G(breaks), 8, NULL, php_phpdbg_destroy_break, 0);
+  
+  return SUCCESS;
+}
+
+static PHP_RSHUTDOWN_FUNCTION(phpdbg) {
+  zend_hash_destroy(&PHPDBG_G(breaks));
+}
 
 static zend_module_entry sapi_phpdbg_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"phpdbg",
 	NULL,
+	PHP_MINIT(phpdbg),
 	NULL,
-	NULL,
-	NULL,
-	NULL,
+	PHP_RINIT(phpdbg),
+	PHP_RSHUTDOWN(phpdbg),
 	NULL,
 	"0.1",
 	STANDARD_MODULE_PROPERTIES
@@ -121,7 +134,7 @@ int main(int argc, char **argv) /* {{{ */
 		} zend_end_try();
 
 		zend_try {
-			phpdbg_iteractive(argc, argv);
+			phpdbg_interactive(argc, argv TSRMLS_CC);
 		} zend_end_try();
 
 		if (PG(modules_activated)) {

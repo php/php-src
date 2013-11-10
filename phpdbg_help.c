@@ -17,45 +17,22 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_PROMPT_H
-#define PHPDBG_PROMPT_H
+#include <stdio.h>
+#include <string.h>
+#include "zend.h"
+#include "phpdbg.h"
+#include "phpdbg_help.h"
 
-/**
- * Maximum command length
- */
-#define PHPDBG_MAX_CMD 500
+PHPDBG_HELP(print) /* {{{ */ 
+{
+  printf("doing print help: %s\n", expr);
+  
+  return SUCCESS;
+} /* }}} */
 
-#define PHPDBG_STRL(s) s, sizeof(s)-1
-
-/**
- * Command handler
- */
-typedef int (*phpdbg_command_handler_t)(const char* expr, size_t expr_len TSRMLS_DC);
-
-/**
- * Command representation
- */
-typedef struct _phpdbg_command_t {
-	const char *name;                   /* Command name */
-	size_t name_len;                    /* Command name length */
-	const char *tip;                    /* Menu tip */
-	size_t tip_len;                     /* Menu tip length */
-	phpdbg_command_handler_t handler;   /* Command handler */
-} phpdbg_command_t;
-
-/**
- * Command Executor
- */
-int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC);
-
-/**
- * Command Declarators
- */
-#define PHPDBG_COMMAND_D(name, tip) \
-  {PHPDBG_STRL(#name), tip, sizeof(tip)-1, phpdbg_do_##name}
-#define PHPDBG_COMMAND(name) \
-  int phpdbg_do_##name(const char *expr, size_t expr_len TSRMLS_DC)
-
-void phpdbg_interactive(int argc, char** argv TSRMLS_DC);
-
-#endif /* PHPDBG_PROMPT_H */
+PHPDBG_HELP(brake) /* {{{ */
+{
+    printf("doing brake help: %s\n", expr);
+    
+    return SUCCESS;
+} /* }}} */

@@ -17,45 +17,30 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_PROMPT_H
-#define PHPDBG_PROMPT_H
-
-/**
- * Maximum command length
- */
-#define PHPDBG_MAX_CMD 500
-
-#define PHPDBG_STRL(s) s, sizeof(s)-1
-
-/**
- * Command handler
- */
-typedef int (*phpdbg_command_handler_t)(const char* expr, size_t expr_len TSRMLS_DC);
-
-/**
- * Command representation
- */
-typedef struct _phpdbg_command_t {
-	const char *name;                   /* Command name */
-	size_t name_len;                    /* Command name length */
-	const char *tip;                    /* Menu tip */
-	size_t tip_len;                     /* Menu tip length */
-	phpdbg_command_handler_t handler;   /* Command handler */
-} phpdbg_command_t;
-
-/**
- * Command Executor
- */
-int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_len TSRMLS_DC);
+#ifndef PHPDBG_HELP_H
+#define PHPDBG_HELP_H
 
 /**
  * Command Declarators
  */
-#define PHPDBG_COMMAND_D(name, tip) \
-  {PHPDBG_STRL(#name), tip, sizeof(tip)-1, phpdbg_do_##name}
-#define PHPDBG_COMMAND(name) \
-  int phpdbg_do_##name(const char *expr, size_t expr_len TSRMLS_DC)
+#define PHPDBG_HELP_D(name, tip) \
+  {PHPDBG_STRL(#name), tip, sizeof(tip)-1, phpdbg_do_help_##name}
+#define PHPDBG_HELP(name) \
+  int phpdbg_do_help_##name(const char *expr, size_t expr_len TSRMLS_DC)
 
-void phpdbg_interactive(int argc, char** argv TSRMLS_DC);
+/**
+ * Helper Forward Declarations
+ */
+PHPDBG_HELP(print);
+PHPDBG_HELP(brake);
 
-#endif /* PHPDBG_PROMPT_H */
+/**
+ * Commands
+ */
+static const phpdbg_command_t phpdbg_help_commands[] = {
+  PHPDBG_HELP_D(print, "printing allows inspection of the execution environment"),
+  PHPDBG_HELP_D(brake, "brake points allow execution interruption"),
+  {NULL, 0, 0}
+};
+
+#endif /* PHPDBG_HELP_H */
