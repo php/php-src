@@ -41,6 +41,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
   char *exec;             /* file to execute */
   size_t exec_len;        /* size of exec */
   zend_op_array *ops;     /* op_array */
+  zval *retval;           /* return value */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 
 #include "phpdbg_prompt.h"

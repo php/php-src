@@ -20,15 +20,21 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
+void (*zend_execute_old)(zend_execute_data *execute_data TSRMLS_DC);
+void (*zend_execute_internal_old)(zend_execute_data *execute_data_ptr, zend_fcall_info *fci, int return_value_used TSRMLS_DC);
+
 static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) {
-  pg->exec = NULL;
-  pg->ops = NULL;
+    pg->exec = NULL;
+    pg->ops = NULL;
 }
 
 static PHP_MINIT_FUNCTION(phpdbg) {
-  ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
+    ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
+    
+    zend_execute_old = zend_execute_ex;
+    zend_execute_ex = phpdbg_execute_ex;
   
-  return SUCCESS;
+    return SUCCESS;
 }
 
 static inline void php_phpdbg_destroy_break(void *brake) {
@@ -42,16 +48,17 @@ static PHP_RINIT_FUNCTION(phpdbg) {
 }
 
 static PHP_RSHUTDOWN_FUNCTION(phpdbg) {
-  zend_hash_destroy(&PHPDBG_G(breaks));
+    zend_hash_destroy(&PHPDBG_G(breaks));
   
-  if (PHPDBG_G(exec)) {
-    efree(PHPDBG_G(exec));
-  }
+    if (PHPDBG_G(exec)) {
+        efree(PHPDBG_G(exec));
+    }
   
-  if (PHPDBG_G(ops)) {
-    destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
-    efree(PHPDBG_G(ops));
-  }
+    if (PHPDBG_G(ops)) {
+        destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
+        efree(PHPDBG_G(ops));
+    }
+    return SUCCESS;
 }
 
 static zend_module_entry sapi_phpdbg_module_entry = {

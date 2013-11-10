@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "zend.h"
+#include "zend_compile.h"
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 
@@ -52,9 +53,23 @@ static PHPDBG_COMMAND(exec) { /* {{{ */
   return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(compile) { /* {{{ */
-  zend_file_handle fh;
+static inline int phpdbg_compile(TSRMLS_D) {
+    zend_file_handle fh;
 
+    printf("Attempting compilation of %s\n", PHPDBG_G(exec));
+    if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
+        PHPDBG_G(ops) = zend_compile_file(
+            &fh, ZEND_INCLUDE TSRMLS_CC);
+        zend_destroy_file_handle(&fh TSRMLS_CC);
+        printf("Success\n");
+        return SUCCESS;
+    } else {
+        printf("Could not open file %s\n", PHPDBG_G(exec));
+        return FAILURE;
+    }
+}
+
+static PHPDBG_COMMAND(compile) { /* {{{ */
   if (PHPDBG_G(exec)) {
 
     if (PHPDBG_G(ops)) {
@@ -63,21 +78,37 @@ static PHPDBG_COMMAND(compile) { /* {{{ */
       efree(PHPDBG_G(ops));
     }
 
-    printf("Attempting compilation of %s\n", PHPDBG_G(exec));
-    if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
-      PHPDBG_G(ops) = zend_compile_file(
-        &fh, ZEND_INCLUDE TSRMLS_CC);
-      zend_destroy_file_handle(&fh TSRMLS_CC);
-      printf("Success\n");
-      return SUCCESS;
-    } else {
-      printf("Could not open file %s\n", PHPDBG_G(exec));
-      return FAILURE;
-    }
+    return phpdbg_compile(TSRMLS_C);
   } else {
     printf("No execution context\n");
     return FAILURE;
   }
+} /* }}} */
+
+static PHPDBG_COMMAND(run) { /* {{{ */
+    if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
+        if (!PHPDBG_G(ops)) {
+            if (phpdbg_compile(TSRMLS_C) == FAILURE) {
+                printf("Failed to compile %s, cannot run\n", PHPDBG_G(exec));
+                return FAILURE;
+            }
+        }
+        
+        EG(active_op_array) = PHPDBG_G(ops);
+        EG(return_value_ptr_ptr) = &PHPDBG_G(retval);
+        
+        zend_try {
+            zend_execute(EG(active_op_array) TSRMLS_CC);
+        } zend_catch {
+            printf("Caught excetion in VM\n");
+            return FAILURE;
+        } zend_end_try();
+        
+        return SUCCESS;
+    } else {
+        printf("Nothing to execute !");
+        return FAILURE;
+    }
 } /* }}} */
 
 static PHPDBG_COMMAND(print) { /* {{{ */
@@ -144,6 +175,7 @@ static PHPDBG_COMMAND(help) /* {{{ */
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,      "set execution context"),
 	PHPDBG_COMMAND_D(compile,   "attempt to pre-compile execution context"),
+	PHPDBG_COMMAND_D(run,       "attempt execution"),
 	PHPDBG_COMMAND_D(print,     "print something"),
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
 	PHPDBG_COMMAND_D(help,      "show help menu"),
@@ -190,3 +222,45 @@ void phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		printf("phpdbg> ");
 	}
 } /* }}} */
+
+void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
+{
+	zend_bool original_in_execution;
+
+	original_in_execution = EG(in_execution);
+	EG(in_execution) = 1;
+
+	if (0) {
+zend_vm_enter:
+		execute_data = zend_create_execute_data_from_op_array(EG(active_op_array), 1 TSRMLS_CC);
+	}
+
+	while (1) {
+    	int ret;
+#ifdef ZEND_WIN32
+		if (EG(timed_out)) {
+			zend_timeout(0);
+		}
+#endif
+
+        printf("[OPLINE: %p]\n", execute_data->opline);
+        
+		if ((ret = execute_data->opline->handler(execute_data TSRMLS_CC)) > 0) {
+			switch (ret) {
+				case 1:
+					EG(in_execution) = original_in_execution;
+					return;
+				case 2:
+					goto zend_vm_enter;
+					break;
+				case 3:
+					execute_data = EG(current_execute_data);
+					break;
+				default:
+					break;
+			}
+		}
+
+	}
+	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
+}
