@@ -787,7 +787,7 @@ PHP_FUNCTION(unpack)
 					case 'c': 
 					case 'C': {
 						int issigned = (type == 'c') ? (input[inputpos] & 0x80) : 0;
-						long v = php_unpack(&input[inputpos], 1, issigned, byte_map);
+						php_int_t v = php_unpack(&input[inputpos], 1, issigned, byte_map);
 						add_assoc_long(return_value, n, v);
 						break;
 					}
@@ -796,7 +796,7 @@ PHP_FUNCTION(unpack)
 					case 'S': 
 					case 'n': 
 					case 'v': {
-						long v;
+						php_int_t v;
 						int issigned = 0;
 						int *map = machine_endian_short_map;
 
@@ -815,7 +815,7 @@ PHP_FUNCTION(unpack)
 
 					case 'i': 
 					case 'I': {
-						long v;
+						php_int_t v;
 						int issigned = 0;
 
 						if (type == 'i') {
