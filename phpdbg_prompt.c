@@ -213,7 +213,17 @@ static PHPDBG_COMMAND(break) /* {{{ */
 	const char *line_pos = zend_memrchr(expr, ':', expr_len);
 
 	if (line_pos) {
-		phpdbg_set_breakpoint_file(expr, line_pos TSRMLS_CC);
+		char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
+		long line_num = strtol(line_pos+1, NULL, 0);
+
+		memcpy(path, expr, line_pos - expr);
+		path[line_pos - expr] = 0;
+
+		if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
+			return FAILURE;
+		}
+
+		phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
 	} else {
 		const char *opline_num_pos = zend_memrchr(expr, '#', expr_len);
 
