@@ -56,17 +56,23 @@ static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
 {
 	zend_file_handle fh;
 
-	printf("Attempting compilation of %s\n", PHPDBG_G(exec));
+	if (!EG(in_execution)) {
+	    printf("Attempting compilation of %s\n", PHPDBG_G(exec));
 
-	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh,
-		    USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
-		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE TSRMLS_CC);
-		zend_destroy_file_handle(&fh TSRMLS_CC);
-		printf("Success\n");
-		return SUCCESS;
-    }
-
-	printf("Could not open file %s\n", PHPDBG_G(exec));
+	    if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh,
+		        USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
+		    PHPDBG_G(ops) = zend_compile_file(
+		        &fh, ZEND_INCLUDE TSRMLS_CC);
+		    zend_destroy_file_handle(&fh TSRMLS_CC);
+		    printf("Success\n");
+		    return SUCCESS;
+        } else {
+            printf("Could not open file %s\n", PHPDBG_G(exec));
+        }
+	} else {
+	    printf("Cannot compile while in execution\n");
+	}
+	
 	return FAILURE;
 } /* }}} */
 
@@ -77,6 +83,7 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 			printf("Destroying compiled opcodes\n");
 			destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
 			efree(PHPDBG_G(ops));
+			PHPDBG_G(ops)=NULL;
 		}
 
 		return phpdbg_compile(TSRMLS_C);
