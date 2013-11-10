@@ -391,7 +391,6 @@ zend_vm_enter:
                             while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
 				                continue;
 			                }
-			                printf("out\n");
                         }
                     }
                 }
