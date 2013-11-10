@@ -57,6 +57,7 @@ typedef struct _phpdbg_breakfile_t {
  */
 typedef struct _phpdbg_breaksymbol_t {
 	const char *symbol;
+	long opline_num;
 } phpdbg_breaksymbol_t;
 
 /**

@@ -49,16 +49,16 @@ static void php_phpdbg_destroy_break(void *brake) /* {{{ */
 
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
-	zend_hash_init(&PHPDBG_G(break_files),   8, NULL, php_phpdbg_destroy_break, 0);
-	zend_hash_init(&PHPDBG_G(break_symbols), 8, NULL, php_phpdbg_destroy_break, 0);
+	zend_hash_init(&PHPDBG_G(bp_files),   8, NULL, php_phpdbg_destroy_break, 0);
+	zend_hash_init(&PHPDBG_G(bp_symbols), 8, NULL, php_phpdbg_destroy_break, 0);
 
 	return SUCCESS;
 } /* }}} */
 
 static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 {
-    zend_hash_destroy(&PHPDBG_G(break_files));
-    zend_hash_destroy(&PHPDBG_G(break_symbols));
+    zend_hash_destroy(&PHPDBG_G(bp_files));
+    zend_hash_destroy(&PHPDBG_G(bp_symbols));
 
     if (PHPDBG_G(exec)) {
         efree(PHPDBG_G(exec));
@@ -155,7 +155,7 @@ int main(int argc, char **argv) /* {{{ */
 	char *php_optarg = NULL;
     int php_optind = 0;
     int opt;
-	
+
 #ifdef ZTS
 	void ***tsrm_ls;
 	tsrm_startup(1, 1, 0, NULL);
@@ -172,7 +172,7 @@ int main(int argc, char **argv) /* {{{ */
 
     while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1, 1)) != -1) {
         switch (opt) {
-            case 'c': 
+            case 'c':
                 if (ini_path_override) {
                     free(ini_path_override);
                 }
@@ -181,7 +181,7 @@ int main(int argc, char **argv) /* {{{ */
             case 'd': {
                 int len = strlen(php_optarg);
 			    char *val;
-                
+
 			    if ((val = strchr(php_optarg, '='))) {
 				    val++;
 				    if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
@@ -209,12 +209,12 @@ int main(int argc, char **argv) /* {{{ */
             } break;
         }
     }
-    
+
     phpdbg->ini_defaults = phpdbg_ini_defaults;
     phpdbg->php_ini_path_override = ini_path_override;
 	phpdbg->phpinfo_as_text = 1;
 	phpdbg->php_ini_ignore_cwd = 1;
-    
+
 	sapi_startup(phpdbg);
 
     phpdbg->executable_location = argv[0];
@@ -222,7 +222,7 @@ int main(int argc, char **argv) /* {{{ */
     phpdbg->php_ini_ignore_cwd = 0;
     phpdbg->php_ini_ignore = 0;
     phpdbg->ini_entries = ini_entries;
-    
+
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
 		zend_activate(TSRMLS_C);
 
@@ -241,11 +241,11 @@ int main(int argc, char **argv) /* {{{ */
 		zend_try {
 			phpdbg_interactive(argc, argv TSRMLS_CC);
 		} zend_end_try();
-		
+
 		if (ini_file) {
 		    pefree(ini_file, 1);
 		}
-		
+
 		if (ini_entries) {
 		    free(ini_entries);
 		}
