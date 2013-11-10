@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(phpdbg, for phpdbg support,
-[  --enable-phpdbg         Build phpdbg], no, no)
+[  --enable-phpdbg         Build phpdbg], yes, yes)
 
 if test "$PHP_PHPDBG" != "no"; then
   AC_DEFINE(HAVE_PHPDBG, 1, [ ])
