@@ -411,8 +411,7 @@ zend_vm_enter:
 		    execute_data TSRMLS_CC);
 
 		if (PHPDBG_G(stepping)) {
-			while (phpdbg_interactive(
-				0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
 				continue;
 			}
 		}
