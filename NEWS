@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #65947 (basename is no more working after fgetcsv in certain 
     situation). (Laruence)
 
+- JSON
+  . Fixed whitespace part of bug #64874 ("json_decode handles whitespace and
+    case-sensitivity incorrectly"). (Andrea Faulds)
+
 - MySQLi:
   . Fixed bug #66043 (Segfault calling bind_param() on mysqli). (Laruence)
 
