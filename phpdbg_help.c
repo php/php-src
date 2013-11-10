@@ -96,3 +96,11 @@ PHPDBG_HELP(cont) /* {{{ */
     printf("[Warnings about using stepping and break points here]\n");
     return SUCCESS;
 } /* }}} */
+
+PHPDBG_HELP(back) { /* {{{ */
+    printf("The backtrace is gathered with the default debug_backtrace functionality.\n");
+    printf("You can set the limit on the trace, for example:\n");
+    printf("phpdbg> back 5\n");
+    printf("Will limit the number of frames to 5, the default is no limit\n");
+    return SUCCESS;
+} /* }}} */

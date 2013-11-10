@@ -40,6 +40,7 @@ PHPDBG_HELP(eval);
 PHPDBG_HELP(print);
 PHPDBG_HELP(break);
 PHPDBG_HELP(cont);
+PHPDBG_HELP(back);
 
 /**
  * Commands
@@ -54,6 +55,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
   PHPDBG_HELP_D(print,    "printing allows inspection of the execution environment"),
   PHPDBG_HELP_D(break,    "breakpoints allow execution interruption"),
   PHPDBG_HELP_D(cont,     "use continue when a break point is met"),
+  PHPDBG_HELP_D(back,     "show debug backtrace information during execution"),
   {NULL, 0, 0}
 };
 

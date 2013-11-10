@@ -22,6 +22,7 @@
 #include "zend_ini_scanner.h"
 #include "zend_globals.h"
 #include "zend_stream.h"
+#include "zend_builtin_functions.h"
 #include "SAPI.h"
 #include <php_config.h>
 #include "php_main.h"
