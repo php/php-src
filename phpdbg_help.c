@@ -25,21 +25,35 @@
 
 PHPDBG_HELP(exec) /* {{{ */
 {
-  printf("doing exec help: %s\n", expr);
-  
+  printf("Will attempt execution, if compilation has not yet taken place, it occurs now.\n");
+  printf("The execution context must be set before execution can take place\n");
   return SUCCESS;
 } /* }}} */
 
-PHPDBG_HELP(print) /* {{{ */ 
+PHPDBG_HELP(compile) /* {{{ */
 {
-  printf("doing print help: %s\n", expr);
-  
+  printf("Pre-compilation of the execution context provides the opportunity to inspect the opcodes before they are executed\n");
+  printf("The execution context must be set for compilation to succeed\n");
+  printf("If errors occur during compilation they must be resolved before execution can take place.\n");
+  printf("You do not need to exit phpdbg to retry compilation\n");
   return SUCCESS;
 } /* }}} */
 
-PHPDBG_HELP(brake) /* {{{ */
+PHPDBG_HELP(print) /* {{{ */
 {
-    printf("doing brake help: %s\n", expr);
-    
-    return SUCCESS;
+  printf("By default, print will show information about the current execution environment\n");
+  printf("To show specific information pass an expression to print, for example:\n");
+  printf("\tprint opcodes[0]\n");
+  printf("Will show the opline @ 0\n");
+  printf("Available print commands:\n");
+  printf("\tNone\n");
+
+  return SUCCESS;
+} /* }}} */
+
+PHPDBG_HELP(break) /* {{{ */
+{
+  printf("doing break help: %s\n", expr);
+
+  return SUCCESS;
 } /* }}} */

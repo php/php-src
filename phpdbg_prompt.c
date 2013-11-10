@@ -32,6 +32,15 @@ static PHPDBG_COMMAND(exec) { /* {{{ */
     printf(
       "Unsetting old execution context: %s\n", PHPDBG_G(exec));
     efree(PHPDBG_G(exec));
+    PHPDBG_G(exec) = NULL;
+  }
+
+  if (PHPDBG_G(ops)) {
+    printf(
+      "Destroying compiled opcodes\n");
+    destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
+    efree(PHPDBG_G(ops));
+    PHPDBG_G(ops) = NULL;
   }
 
   PHPDBG_G(exec) = estrndup(
@@ -39,16 +48,56 @@ static PHPDBG_COMMAND(exec) { /* {{{ */
 
   printf(
     "Set execution context: %s\n", PHPDBG_G(exec));
-} /* }}} */
-
-static PHPDBG_COMMAND(print) { /* {{{ */
-  printf(
-    "%s\n", expr);
 
   return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(brake) { /* {{{ */
+static PHPDBG_COMMAND(compile) { /* {{{ */
+  zend_file_handle fh;
+
+  if (PHPDBG_G(exec)) {
+
+    if (PHPDBG_G(ops)) {
+      printf("Destroying compiled opcodes\n");
+      destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
+      efree(PHPDBG_G(ops));
+    }
+
+    printf("Attempting compilation of %s\n", PHPDBG_G(exec));
+    if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
+      PHPDBG_G(ops) = zend_compile_file(
+        &fh, ZEND_INCLUDE TSRMLS_CC);
+      zend_destroy_file_handle(&fh TSRMLS_CC);
+      printf("Success\n");
+      return SUCCESS;
+    } else {
+      printf("Could not open file %s\n", PHPDBG_G(exec));
+      return FAILURE;
+    }
+  } else {
+    printf("No execution context\n");
+    return FAILURE;
+  }
+} /* }}} */
+
+static PHPDBG_COMMAND(print) { /* {{{ */
+  if (!expr_len) {
+    printf("Showing Execution Context Information:\n");
+    printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
+    printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
+    if (PHPDBG_G(ops)) {
+      printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last-1);
+      printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
+    }
+  } else {
+    printf(
+      "%s\n", expr);
+  }
+
+  return SUCCESS;
+} /* }}} */
+
+static PHPDBG_COMMAND(break) { /* {{{ */
   return SUCCESS;
 } /* }}} */
 
@@ -93,11 +142,12 @@ static PHPDBG_COMMAND(help) /* {{{ */
 } /* }}} */
 
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
-	PHPDBG_COMMAND_D(exec,  "set execution context"),
-	PHPDBG_COMMAND_D(print, "print something"),
-	PHPDBG_COMMAND_D(brake, "set brake point"),
-	PHPDBG_COMMAND_D(help,  "show help menu"),
-	PHPDBG_COMMAND_D(quit,  "exit phpdbg"),
+	PHPDBG_COMMAND_D(exec,      "set execution context"),
+	PHPDBG_COMMAND_D(compile,   "attempt to pre-compile execution context"),
+	PHPDBG_COMMAND_D(print,     "print something"),
+	PHPDBG_COMMAND_D(break,     "set breakpoint"),
+	PHPDBG_COMMAND_D(help,      "show help menu"),
+	PHPDBG_COMMAND_D(quit,      "exit phpdbg"),
 	{NULL, 0, 0}
 };
 
