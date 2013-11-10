@@ -18,6 +18,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"
+#include "php_getopt.h"
 #include "zend_modules.h"
 #include "zend_ini_scanner.h"
 #include "zend_globals.h"

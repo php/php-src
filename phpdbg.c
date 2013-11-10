@@ -126,9 +126,36 @@ static sapi_module_struct phpdbg_sapi_module = {
 };
 /* }}} */
 
+const opt_struct OPTIONS[] = { /* }}} */
+    {'c', 1, "ini path override"},
+    {'d', 1, "define ini entry on command line"},
+    {'-', 0, NULL}
+}; /* }}} */
+
+/* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
+#define INI_DEFAULT(name,value)\
+	Z_SET_REFCOUNT(tmp, 0);\
+	Z_UNSET_ISREF(tmp);	\
+	ZVAL_STRINGL(&tmp, zend_strndup(value, sizeof(value)-1), sizeof(value)-1, 0);\
+	zend_hash_update(configuration_hash, name, sizeof(name), &tmp, sizeof(zval), NULL);\
+
+void phpdbg_ini_defaults(HashTable *configuration_hash) { /* {{{ */
+    zval tmp;
+	INI_DEFAULT("report_zend_debug", "0");
+	INI_DEFAULT("display_errors", "1");
+} /* }}} */
+
 int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
+	char *ini_file = NULL;
+	char *ini_entries = NULL;
+	int   ini_entries_len = 0;
+	char *ini_path_override = NULL;
+	char *php_optarg = NULL;
+    int php_optind = 0;
+    int opt;
+	
 #ifdef ZTS
 	void ***tsrm_ls;
 	tsrm_startup(1, 1, 0, NULL);
@@ -143,10 +170,59 @@ int main(int argc, char **argv) /* {{{ */
 	setmode(_fileno(stderr), O_BINARY); /* make the stdio mode be binary */
 #endif
 
-	phpdbg->executable_location = argv[0];
-
+    while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1, 1)) != -1) {
+        switch (opt) {
+            case 'c': 
+                if (ini_path_override) {
+                    free(ini_path_override);
+                }
+                ini_path_override = strdup(php_optarg);
+            break;
+            case 'd': {
+                int len = strlen(php_optarg);
+			    char *val;
+                
+			    if ((val = strchr(php_optarg, '='))) {
+				    val++;
+				    if (!isalnum(*val) && *val != '"' && *val != '\'' && *val != '\0') {
+					    ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\"\"\n\0"));
+					    memcpy(ini_entries + ini_entries_len, php_optarg, (val - php_optarg));
+					    ini_entries_len += (val - php_optarg);
+					    memcpy(ini_entries + ini_entries_len, "\"", 1);
+					    ini_entries_len++;
+					    memcpy(ini_entries + ini_entries_len, val, len - (val - php_optarg));
+					    ini_entries_len += len - (val - php_optarg);
+					    memcpy(ini_entries + ini_entries_len, "\"\n\0", sizeof("\"\n\0"));
+					    ini_entries_len += sizeof("\n\0\"") - 2;
+				    } else {
+					    ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("\n\0"));
+					    memcpy(ini_entries + ini_entries_len, php_optarg, len);
+					    memcpy(ini_entries + ini_entries_len + len, "\n\0", sizeof("\n\0"));
+					    ini_entries_len += len + sizeof("\n\0") - 2;
+				    }
+			    } else {
+				    ini_entries = realloc(ini_entries, ini_entries_len + len + sizeof("=1\n\0"));
+				    memcpy(ini_entries + ini_entries_len, php_optarg, len);
+				    memcpy(ini_entries + ini_entries_len + len, "=1\n\0", sizeof("=1\n\0"));
+				    ini_entries_len += len + sizeof("=1\n\0") - 2;
+			    }
+            } break;
+        }
+    }
+    
+    phpdbg->ini_defaults = phpdbg_ini_defaults;
+    phpdbg->php_ini_path_override = ini_path_override;
+	phpdbg->phpinfo_as_text = 1;
+	phpdbg->php_ini_ignore_cwd = 1;
+    
 	sapi_startup(phpdbg);
 
+    phpdbg->executable_location = argv[0];
+    phpdbg->phpinfo_as_text = 1;
+    phpdbg->php_ini_ignore_cwd = 0;
+    phpdbg->php_ini_ignore = 0;
+    phpdbg->ini_entries = ini_entries;
+    
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
 		zend_activate(TSRMLS_C);
 
@@ -165,6 +241,14 @@ int main(int argc, char **argv) /* {{{ */
 		zend_try {
 			phpdbg_interactive(argc, argv TSRMLS_CC);
 		} zend_end_try();
+		
+		if (ini_file) {
+		    pefree(ini_file, 1);
+		}
+		
+		if (ini_entries) {
+		    free(ini_entries);
+		}
 
 		if (PG(modules_activated)) {
 			zend_try {
