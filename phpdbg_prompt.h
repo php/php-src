@@ -27,6 +27,8 @@
 
 #define PHPDBG_STRL(s) s, sizeof(s)-1
 
+#define PHPDBG_NEXT 2
+
 /**
  * Command handler
  */
@@ -52,9 +54,9 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
  * Command Declarators
  */
 #define PHPDBG_COMMAND_D(name, tip) \
-  {PHPDBG_STRL(#name), tip, sizeof(tip)-1, phpdbg_do_##name}
+	{PHPDBG_STRL(#name), tip, sizeof(tip)-1, phpdbg_do_##name}
 #define PHPDBG_COMMAND(name) \
-  int phpdbg_do_##name(const char *expr, size_t expr_len TSRMLS_DC)
+	int phpdbg_do_##name(const char *expr, size_t expr_len TSRMLS_DC)
 
 int phpdbg_interactive(int argc, char **argv TSRMLS_DC);
 void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);

@@ -32,13 +32,6 @@ static void phpdbg_llist_breakfile_dtor(void *data) /* {{{ */
 	efree((char*)bp->filename);
 } /* }}} */
 
-static void phpdbg_llist_breaksym_dtor(void *data) /* {{{ */
-{
-	phpdbg_breaksymbol_t *bp = (phpdbg_breaksymbol_t*) data;
-
-	efree((char*)bp->symbol);
-} /* }}} */
-
 void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{{ */
 {
 	phpdbg_breakfile_t new_break;
@@ -66,31 +59,21 @@ void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{
 	zend_llist_add_element(break_files_ptr, &new_break);
 } /* }}} */
 
-void phpdbg_set_breakpoint_symbol(const char *name, long opline_num TSRMLS_DC) /* {{{ */
+void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */
 {
-	phpdbg_breaksymbol_t new_break;
-	zend_llist *break_sym_ptr;
 	size_t name_len = strlen(name);
 
-	new_break.symbol = estrndup(name, name_len + 1);
-	new_break.opline_num = opline_num;
+	if (!zend_hash_exists(&PHPDBG_G(bp_symbols), name, name_len)) {
+		phpdbg_breaksymbol_t new_break;
 
-	PHPDBG_G(has_sym_bp) = 1;
+		PHPDBG_G(has_sym_bp) = 1;
 
-	if (zend_hash_find(&PHPDBG_G(bp_symbols),
-		new_break.symbol, name_len, (void**)&break_sym_ptr) == FAILURE) {
-		zend_llist break_syms;
+		new_break.symbol = estrndup(name, name_len + 1);
+		new_break.id = PHPDBG_G(bp_count)++;
 
-		zend_llist_init(&break_syms, sizeof(phpdbg_breaksymbol_t),
-			phpdbg_llist_breaksym_dtor, 0);
-
-		zend_hash_update(&PHPDBG_G(bp_symbols),
-			new_break.symbol, name_len, &break_syms, sizeof(zend_llist),
-			(void**)&break_sym_ptr);
+		zend_hash_update(&PHPDBG_G(bp_symbols), new_break.symbol,
+			name_len, &new_break, sizeof(phpdbg_breaksymbol_t), NULL);
 	}
-
-	new_break.id = PHPDBG_G(bp_count)++;
-	zend_llist_add_element(break_sym_ptr, &new_break);
 } /* }}} */
 
 int phpdbg_find_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
@@ -119,7 +102,7 @@ int phpdbg_find_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 {
 	const char *fname;
-	zend_llist *break_list;
+	phpdbg_breaksymbol_t *bp;
 
 	if (fbc->type != ZEND_USER_FUNCTION) {
 		return FAILURE;
@@ -130,13 +113,13 @@ int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 	if (!fname) {
 		fname = "main";
 	}
-    
+
 	if (zend_hash_find(&PHPDBG_G(bp_symbols), fname, strlen(fname),
-		(void**)&break_list) == SUCCESS) {
-		printf("breakpoint reached!\n");
+		(void**)&bp) == SUCCESS) {
+		printf("Breakpoint #%d in %s() at %s\n", bp->id, bp->symbol,
+			zend_get_executed_filename(TSRMLS_C));
 		return SUCCESS;
 	}
 
 	return FAILURE;
-}
-/* }}} */
+} /* }}} */

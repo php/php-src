@@ -18,6 +18,7 @@
 
 #include "phpdbg.h"
 #include "phpdbg_prompt.h"
+#include "phpdbg_bp.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
@@ -49,15 +50,20 @@ static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
-static void php_phpdbg_destroy_break(void *brake) /* {{{ */
+static void php_phpdbg_destroy_bp_file(void *brake) /* {{{ */
 {
 	zend_llist_destroy((zend_llist*)brake);
 } /* }}} */
 
+static void php_phpdbg_destroy_bp_symbol(void *brake) /* {{{ */
+{
+	efree((char*)((phpdbg_breaksymbol_t*)brake)->symbol);
+} /* }}} */
+
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
-	zend_hash_init(&PHPDBG_G(bp_files),   8, NULL, php_phpdbg_destroy_break, 0);
-	zend_hash_init(&PHPDBG_G(bp_symbols), 8, NULL, php_phpdbg_destroy_break, 0);
+	zend_hash_init(&PHPDBG_G(bp_files),   8, NULL, php_phpdbg_destroy_bp_file, 0);
+	zend_hash_init(&PHPDBG_G(bp_symbols), 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
 
 	return SUCCESS;
 } /* }}} */
@@ -173,7 +179,7 @@ static sapi_module_struct phpdbg_sapi_module = {
 };
 /* }}} */
 
-const opt_struct phpdbg_options[] = { /* }}} */
+const opt_struct OPTIONS[] = { /* {{{ */
     {'c', 1, "ini path override"},
     {'d', 1, "define ini entry on command line"},
     {'-', 0, NULL}
@@ -228,7 +234,7 @@ int main(int argc, char *argv[]) /* {{{ */
 	tsrm_ls = ts_resource(0);
 #endif
 
-    while ((opt = php_getopt(argc, argv, phpdbg_options, &php_optarg, &php_optind, 0, 2)) != -1) {
+    while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
         printf("OPT: %d\n", opt);
         switch (opt) {
             case 'c':
@@ -290,7 +296,6 @@ int main(int argc, char *argv[]) /* {{{ */
 		memcpy(ini_entries, phpdbg_ini_hardcoded, sizeof(phpdbg_ini_hardcoded));
 	}
 	ini_entries_len += sizeof(phpdbg_ini_hardcoded) - 2;
-    printf("ini_entries: %d\n", ini_entries_len);
     
     phpdbg->ini_entries = ini_entries;
 
