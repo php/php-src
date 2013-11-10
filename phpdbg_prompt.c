@@ -94,6 +94,10 @@ static PHPDBG_COMMAND(next) { /* {{{ */
     return PHPDBG_NEXT;
 } /* }}} */
 
+static PHPDBG_COMMAND(cont) { /* {{{ */
+    return SUCCESS;
+} /* }}} */
+
 static PHPDBG_COMMAND(run) { /* {{{ */
     if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
         if (!PHPDBG_G(ops)) {
@@ -263,6 +267,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(eval,      "evaluate some code"),
 	PHPDBG_COMMAND_D(print,     "print something"),
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
+	PHPDBG_COMMAND_D(cont,      "continue execution"),
 	PHPDBG_COMMAND_D(back,      "show backtrace"),
 	PHPDBG_COMMAND_D(help,      "show help menu"),
 	PHPDBG_COMMAND_D(quit,      "exit phpdbg"),
