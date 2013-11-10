@@ -496,9 +496,9 @@ PHP_FUNCTION(pack)
 
 /* {{{ php_unpack
  */
-static long php_unpack(char *data, zend_str_size_int size, int issigned, int *map)
+static php_int_t php_unpack(char *data, zend_str_size_int size, int issigned, int *map)
 {
-	long result;
+	php_int_t result;
 	char *cresult = (char *) &result;
 	int i;
 
@@ -833,7 +833,7 @@ PHP_FUNCTION(unpack)
 					case 'V': {
 						int issigned = 0;
 						int *map = machine_endian_long_map;
-						long v = 0;
+						php_int_t v = 0;
 
 						if (type == 'l' || type == 'L') {
 							issigned = input[inputpos + (machine_little_endian ? 3 : 0)] & 0x80;
@@ -845,12 +845,12 @@ PHP_FUNCTION(unpack)
 							map = little_endian_long_map;
 						}
 
-						if (sizeof(long) > 4 && issigned) {
+						if (SIZEOF_ZEND_INT > 4 && issigned) {
 							v = ~INT_MAX;
 						}
 
 						v |= php_unpack(&input[inputpos], 4, issigned, map);
-						if (sizeof(long) > 4) {
+						if (SIZEOF_ZEND_INT > 4) {
  							if (type == 'l') {
 								v = (signed int) v; 
 							} else {
