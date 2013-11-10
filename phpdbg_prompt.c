@@ -177,28 +177,34 @@ static PHPDBG_COMMAND(back) { /* {{{ */
     }
 } /* }}} */
 
-static PHPDBG_COMMAND(print) { /* {{{ */
-  if (!expr_len) {
-    printf("Showing Execution Context Information:\n");
-    printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
-    printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
-    printf("Stepping\t%s\n", PHPDBG_G(stepping) ? "on" : "off");
-    if (PHPDBG_G(ops)) {
-      printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last);
-      if (PHPDBG_G(ops)->last_var) {
-        printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
-      } else printf("Variables\tNone\n");
-    }
-    printf("Executing\t%s\n", EG(in_execution) ? "yes" : "no");
-    if (EG(in_execution)) {
-        printf("VM Return\t%d\n", PHPDBG_G(vmret));
-    }
-  } else {
-    printf(
-      "%s\n", expr);
-  }
+static PHPDBG_COMMAND(print) /* {{{ */
+{
+	if (expr_len) {
+		printf("%s\n", expr);
+		return SUCCESS;
+	}
 
-  return SUCCESS;
+	printf("Showing Execution Context Information:\n");
+	printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
+	printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
+	printf("Stepping\t%s\n", PHPDBG_G(stepping) ? "on" : "off");
+
+	if (PHPDBG_G(ops)) {
+		printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last);
+
+		if (PHPDBG_G(ops)->last_var) {
+			printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
+		} else {
+			printf("Variables\tNone\n");
+		}
+	}
+	printf("Executing\t%s\n", EG(in_execution) ? "yes" : "no");
+
+	if (EG(in_execution)) {
+		printf("VM Return\t%d\n", PHPDBG_G(vmret));
+	}
+
+	return SUCCESS;
 } /* }}} */
 
 static PHPDBG_COMMAND(break) /* {{{ */
@@ -317,7 +323,7 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		        case PHPDBG_NEXT: if (PHPDBG_G(stepping)) {
 		            return PHPDBG_NEXT;
 		        }
-		            
+
 		    }
 		}
 
@@ -331,7 +337,7 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 static void phpdbg_print_opline(zend_execute_data *execute_data TSRMLS_DC) { /* {{{ */
     zend_op *opline = execute_data->opline;
-    
+
     printf(
         "[OPLINE: %p:%d]\n", opline, opline->opcode);
 } /* }}} */
