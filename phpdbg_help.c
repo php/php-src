@@ -18,7 +18,6 @@
 */
 
 #include <stdio.h>
-#include <string.h>
 #include "zend.h"
 #include "phpdbg.h"
 #include "phpdbg_help.h"

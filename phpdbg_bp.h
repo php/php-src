@@ -36,4 +36,7 @@ typedef struct _phpdbg_breaksymbol_t {
 	long opline_num;
 } phpdbg_breaksymbol_t;
 
+void phpdbg_set_breakpoint_file(const char*, const char* TSRMLS_DC);
+void phpdbg_set_breakpoint_symbol(const char*, const char* TSRMLS_DC);
+
 #endif /* PHPDBG_BP_H */
