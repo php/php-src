@@ -136,7 +136,7 @@ static sapi_module_struct phpdbg_sapi_module = {
 };
 /* }}} */
 
-const opt_struct OPTIONS[] = { /* }}} */
+const opt_struct OPTIONS[] = { /* {{{ */
     {'c', 1, "ini path override"},
     {'d', 1, "define ini entry on command line"},
     {'-', 0, NULL}
