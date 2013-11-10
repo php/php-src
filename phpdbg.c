@@ -32,6 +32,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->vmret = 0;
     pg->quitting = 0;
     pg->bp_count = 0;
+    pg->quiet = 0;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */

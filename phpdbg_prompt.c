@@ -281,6 +281,11 @@ static PHPDBG_COMMAND(help) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+static PHPDBG_COMMAND(quiet) { /* {{{ */
+    PHPDBG_G(quiet) = atoi(expr);
+    return SUCCESS;
+} /* }}} */
+
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,      "set execution context"),
 	PHPDBG_COMMAND_D(compile,   "attempt to pre-compile execution context"),
@@ -292,6 +297,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
 	PHPDBG_COMMAND_D(back,      "show backtrace"),
 	PHPDBG_COMMAND_D(help,      "show help menu"),
+	PHPDBG_COMMAND_D(quiet,     "silence some output"),
 	PHPDBG_COMMAND_D(quit,      "exit phpdbg"),
 	{NULL, 0, 0}
 };
@@ -352,9 +358,11 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 static void phpdbg_print_opline(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
-    zend_op *opline = execute_data->opline;
+    if (!PHPDBG_G(quiet)) {
+        zend_op *opline = execute_data->opline;
 
-    printf("[OPLINE: %p:%s]\n", opline, phpdbg_decode_opcode(opline->opcode));
+        printf("[OPLINE: %p:%s]\n", opline, phpdbg_decode_opcode(opline->opcode));
+    }
 } /* }}} */
 
 void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
