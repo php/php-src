@@ -29,176 +29,182 @@ static const phpdbg_command_t phpdbg_prompt_commands[];
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
-static PHPDBG_COMMAND(exec) { /* {{{ */
-  if (PHPDBG_G(exec)) {
-    printf(
-      "Unsetting old execution context: %s\n", PHPDBG_G(exec));
-    efree(PHPDBG_G(exec));
-    PHPDBG_G(exec) = NULL;
-  }
+static PHPDBG_COMMAND(exec) /* {{{ */
+{
+	if (PHPDBG_G(exec)) {
+		printf("Unsetting old execution context: %s\n", PHPDBG_G(exec));
+		efree(PHPDBG_G(exec));
+		PHPDBG_G(exec) = NULL;
+	}
 
-  if (PHPDBG_G(ops)) {
-    printf(
-      "Destroying compiled opcodes\n");
-    destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
-    efree(PHPDBG_G(ops));
-    PHPDBG_G(ops) = NULL;
-  }
+	if (PHPDBG_G(ops)) {
+		printf("Destroying compiled opcodes\n");
+		destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
+		efree(PHPDBG_G(ops));
+		PHPDBG_G(ops) = NULL;
+	}
 
-  PHPDBG_G(exec) = estrndup(
-    expr, PHPDBG_G(exec_len)=expr_len);
+	PHPDBG_G(exec) = estrndup(expr, PHPDBG_G(exec_len) = expr_len);
 
-  printf(
-    "Set execution context: %s\n", PHPDBG_G(exec));
+	printf("Set execution context: %s\n", PHPDBG_G(exec));
 
-  return SUCCESS;
+	return SUCCESS;
 } /* }}} */
 
-static inline int phpdbg_compile(TSRMLS_D) {
-    zend_file_handle fh;
+static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
+{
+	zend_file_handle fh;
 
-    printf("Attempting compilation of %s\n", PHPDBG_G(exec));
-    if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh, USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
-        PHPDBG_G(ops) = zend_compile_file(
-            &fh, ZEND_INCLUDE TSRMLS_CC);
-        zend_destroy_file_handle(&fh TSRMLS_CC);
-        printf("Success\n");
-        return SUCCESS;
-    } else {
-        printf("Could not open file %s\n", PHPDBG_G(exec));
-        return FAILURE;
-    }
-}
+	printf("Attempting compilation of %s\n", PHPDBG_G(exec));
 
-static PHPDBG_COMMAND(compile) { /* {{{ */
-  if (PHPDBG_G(exec)) {
-
-    if (PHPDBG_G(ops)) {
-      printf("Destroying compiled opcodes\n");
-      destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
-      efree(PHPDBG_G(ops));
+	if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh,
+		USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
+		PHPDBG_G(ops) = zend_compile_file(&fh, ZEND_INCLUDE TSRMLS_CC);
+		zend_destroy_file_handle(&fh TSRMLS_CC);
+		printf("Success\n");
+		return SUCCESS;
     }
 
-    return phpdbg_compile(TSRMLS_C);
-  } else {
-    printf("No execution context\n");
-    return FAILURE;
-  }
+	printf("Could not open file %s\n", PHPDBG_G(exec));
+	return FAILURE;
 } /* }}} */
 
-static PHPDBG_COMMAND(step) { /* {{{ */
-    PHPDBG_G(stepping) = atoi(expr);
-    return SUCCESS;
+static PHPDBG_COMMAND(compile) /* {{{ */
+{
+	if (PHPDBG_G(exec)) {
+		if (PHPDBG_G(ops)) {
+			printf("Destroying compiled opcodes\n");
+			destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
+			efree(PHPDBG_G(ops));
+		}
+
+		return phpdbg_compile(TSRMLS_C);
+	} else {
+		printf("No execution context\n");
+		return FAILURE;
+	}
 } /* }}} */
 
-static PHPDBG_COMMAND(next) { /* {{{ */
-    return PHPDBG_NEXT;
+static PHPDBG_COMMAND(step) /* {{{ */
+{
+	PHPDBG_G(stepping) = atoi(expr);
+	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(cont) { /* {{{ */
-    return SUCCESS;
+static PHPDBG_COMMAND(next) /* {{{ */
+{
+	return PHPDBG_NEXT;
 } /* }}} */
 
-static PHPDBG_COMMAND(run) { /* {{{ */
-    if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
-        if (!PHPDBG_G(ops)) {
-            if (phpdbg_compile(TSRMLS_C) == FAILURE) {
-                printf("Failed to compile %s, cannot run\n", PHPDBG_G(exec));
-                return FAILURE;
-            }
-        }
-
-        EG(active_op_array) = PHPDBG_G(ops);
-        EG(return_value_ptr_ptr) = &PHPDBG_G(retval);
-
-        zend_try {
-            zend_execute(EG(active_op_array) TSRMLS_CC);
-        } zend_catch {
-            if (!PHPDBG_G(quitting)) {
-                printf("Caught excetion in VM\n");
-                return FAILURE;
-            } else return SUCCESS;
-        } zend_end_try();
-
-        return SUCCESS;
-    } else {
-        printf("Nothing to execute !\n");
-        return FAILURE;
-    }
+static PHPDBG_COMMAND(cont) /* {{{ */
+{
+	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(eval) { /* {{{ */
-    zval retval;
+static PHPDBG_COMMAND(run) /* {{{ */
+{
+	if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
+		if (!PHPDBG_G(ops)) {
+			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
+				printf("Failed to compile %s, cannot run\n", PHPDBG_G(exec));
+				return FAILURE;
+			}
+		}
 
-    if (expr) {
-        if (zend_eval_stringl((char*)expr, expr_len-1, &retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-            printf("Success: ");
-            zend_print_zval_r(
-                &retval, 0 TSRMLS_CC);
-            printf("\n");
-            zval_dtor(&retval);
-        }
-    } else {
-        printf("No expression provided !\n");
-        return FAILURE;
-    }
+		EG(active_op_array) = PHPDBG_G(ops);
+		EG(return_value_ptr_ptr) = &PHPDBG_G(retval);
 
-    return SUCCESS;
+		zend_try {
+			zend_execute(EG(active_op_array) TSRMLS_CC);
+		} zend_catch {
+			if (!PHPDBG_G(quitting)) {
+				printf("Caught excetion in VM\n");
+				return FAILURE;
+			} else return SUCCESS;
+		} zend_end_try();
+
+		return SUCCESS;
+	} else {
+		printf("Nothing to execute !\n");
+		return FAILURE;
+	}
 } /* }}} */
 
-static PHPDBG_COMMAND(back) { /* {{{ */
-    if (EG(in_execution)) {
-        zval zbacktrace;
-        zval **tmp;
-        HashPosition position;
-        int i = 0;
-        int limit = (expr != NULL) ? atoi(expr) : 0;
+static PHPDBG_COMMAND(eval) /* {{{ */
+{
+	zval retval;
 
-        zend_fetch_debug_backtrace(
-            &zbacktrace, 0, 0, limit TSRMLS_CC);
+	if (expr) {
+		if (zend_eval_stringl((char*)expr, expr_len-1, &retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
+			printf("Success: ");
+			zend_print_zval_r(&retval, 0 TSRMLS_CC);
+			printf("\n");
+			zval_dtor(&retval);
+		}
+	} else {
+		printf("No expression provided !\n");
+		return FAILURE;
+	}
 
-        for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
-             zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == SUCCESS;
-             zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position)) {
-             if (i++) {
-                printf(",\n");
-             }
-             zend_print_flat_zval_r(*tmp TSRMLS_CC);
-        }
-
-        printf("\n");
-
-        zval_dtor(&zbacktrace);
-
-        return SUCCESS;
-    } else {
-        printf("Not executing !\n");
-        return FAILURE;
-    }
+	return SUCCESS;
 } /* }}} */
 
-static PHPDBG_COMMAND(print) { /* {{{ */
-  if (!expr_len) {
-    printf("Showing Execution Context Information:\n");
-    printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
-    printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
-    printf("Stepping\t%s\n", PHPDBG_G(stepping) ? "on" : "off");
-    if (PHPDBG_G(ops)) {
-      printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last);
-      if (PHPDBG_G(ops)->last_var) {
-        printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
-      } else printf("Variables\tNone\n");
-    }
-    printf("Executing\t%s\n", EG(in_execution) ? "yes" : "no");
-    if (EG(in_execution)) {
-        printf("VM Return\t%d\n", PHPDBG_G(vmret));
-    }
-  } else {
-    printf(
-      "%s\n", expr);
-  }
+static PHPDBG_COMMAND(back) /* {{{ */
+{
+	if (!EG(in_execution)) {
+		printf("Not executing !\n");
+		return FAILURE;
+	}
+	zval zbacktrace;
+	zval **tmp;
+	HashPosition position;
+	int i = 0, limit = (expr != NULL) ? atoi(expr) : 0;
 
-  return SUCCESS;
+	zend_fetch_debug_backtrace(&zbacktrace, 0, 0, limit TSRMLS_CC);
+
+	for (zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
+		zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == SUCCESS;
+		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position)) {
+		if (i++) {
+			printf(",\n");
+		}
+		zend_print_flat_zval_r(*tmp TSRMLS_CC);
+	}
+
+	printf("\n");
+	zval_dtor(&zbacktrace);
+
+	return SUCCESS;
+} /* }}} */
+
+static PHPDBG_COMMAND(print) /* {{{ */
+{
+	if (expr_len) {
+		printf("%s\n", expr);
+		return SUCCESS;
+	}
+
+	printf("Showing Execution Context Information:\n");
+	printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
+	printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
+	printf("Stepping\t%s\n", PHPDBG_G(stepping) ? "on" : "off");
+
+	if (PHPDBG_G(ops)) {
+		printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last);
+
+		if (PHPDBG_G(ops)->last_var) {
+			printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
+		} else {
+			printf("Variables\tNone\n");
+		}
+	}
+	printf("Executing\t%s\n", EG(in_execution) ? "yes" : "no");
+
+	if (EG(in_execution)) {
+		printf("VM Return\t%d\n", PHPDBG_G(vmret));
+	}
+
+	return SUCCESS;
 } /* }}} */
 
 static PHPDBG_COMMAND(break) /* {{{ */
@@ -227,35 +233,33 @@ static PHPDBG_COMMAND(quit) /* {{{ */
 
 static PHPDBG_COMMAND(help) /* {{{ */
 {
-  printf("Welcome to phpdbg, the interactive PHP debugger.\n");
-  if (!expr_len) {
-    printf("To get help regarding a specific command type \"help command\"\n");
-    printf("Commands:\n");
-    {
-      const phpdbg_command_t *command = phpdbg_prompt_commands;
-      while (command && command->name) {
-        printf(
-          "\t%s\t%s\n", command->name, command->tip);
-        command++;
-      }
-    }
-    printf("Helpers Loaded:\n");
-    {
-      const phpdbg_command_t *command = phpdbg_help_commands;
-      while (command && command->name) {
-        printf(
-          "\t%s\t%s\n", command->name, command->tip);
-        command++;
-      }
-    }
-  } else {
-    if (phpdbg_do_cmd(phpdbg_help_commands, expr, expr_len TSRMLS_CC) == FAILURE) {
-      printf("failed to find help command: %s\n", expr);
-    }
-  }
-  printf("Please report bugs to <http://theman.in/themoon>\n");
+	printf("Welcome to phpdbg, the interactive PHP debugger.\n");
 
-  return SUCCESS;
+	if (!expr_len) {
+		const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
+		const phpdbg_command_t *help_command = phpdbg_help_commands;
+
+		printf("To get help regarding a specific command type \"help command\"\n");
+
+		printf("Commands:\n");
+		while (prompt_command && prompt_command->name) {
+			printf("\t%s\t%s\n", prompt_command->name, prompt_command->tip);
+			++prompt_command;
+		}
+
+		printf("Helpers Loaded:\n");
+		while (help_command && help_command->name) {
+			printf("\t%s\t%s\n", help_command->name, help_command->tip);
+			++help_command;
+		}
+	} else {
+		if (phpdbg_do_cmd(phpdbg_help_commands, expr, expr_len TSRMLS_CC) == FAILURE) {
+			printf("failed to find help command: %s\n", expr);
+		}
+	}
+	printf("Please report bugs to <https://github.com/krakjoe/phpdbg/issues>\n");
+
+	return SUCCESS;
 } /* }}} */
 
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
@@ -301,7 +305,7 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 	       fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
 		size_t cmd_len = strlen(cmd) - 1;
 
-		while (cmd[cmd_len] == '\n') {
+		if (cmd[cmd_len] == '\n') {
 			cmd[cmd_len] = 0;
 		}
 
@@ -317,7 +321,7 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		        case PHPDBG_NEXT: if (PHPDBG_G(stepping)) {
 		            return PHPDBG_NEXT;
 		        }
-		            
+
 		    }
 		}
 
@@ -504,12 +508,12 @@ static const char *phpdbg_decode_opcode(zend_uchar opcode TSRMLS_DC) { /* {{{ */
 
 static void phpdbg_print_opline(zend_execute_data *execute_data TSRMLS_DC) { /* {{{ */
     zend_op *opline = execute_data->opline;
-    
+
     printf(
         "[OPLINE: %p:%s]\n", opline, phpdbg_decode_opcode(opline->opcode TSRMLS_CC));
 } /* }}} */
 
-void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
+void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
 {
 	zend_bool original_in_execution = EG(in_execution);
 
@@ -571,4 +575,4 @@ zend_vm_enter:
 
 	}
 	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
-}
+} /* }}} */
