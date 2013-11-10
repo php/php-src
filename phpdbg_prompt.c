@@ -301,7 +301,7 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 	       fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
 		size_t cmd_len = strlen(cmd) - 1;
 
-		while (cmd[cmd_len] == '\n') {
+		if (cmd[cmd_len] == '\n') {
 			cmd[cmd_len] = 0;
 		}
 
