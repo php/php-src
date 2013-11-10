@@ -41,7 +41,7 @@ PHPDBG_HELP(step) /* {{{ */
 
 PHPDBG_HELP(next) /* {{{ */
 {
-	printf("While stepping through execution, use the next command to step back into the vm and execute the next opcode");
+	printf("While stepping through execution, or after a breakpoint, use the next command to step back into the vm and execute the next opcode\n");
 	return SUCCESS;
 } /* }}} */
 
@@ -88,13 +88,6 @@ PHPDBG_HELP(break) /* {{{ */
 	printf("Will break execution on line 1 of test.php\n");
 	printf("\tphpdbg> break my_function\n");
 	printf("Will break execution on entry to my_function\n");
-	return SUCCESS;
-} /* }}} */
-
-PHPDBG_HELP(cont) /* {{{ */
-{
-	printf("Continues execution after a breakpoint is met\n");
-	printf("[Warnings about using stepping and break points here]\n");
 	return SUCCESS;
 } /* }}} */
 

@@ -104,11 +104,6 @@ static PHPDBG_COMMAND(next) /* {{{ */
 	return PHPDBG_NEXT;
 } /* }}} */
 
-static PHPDBG_COMMAND(cont) /* {{{ */
-{
-	return SUCCESS;
-} /* }}} */
-
 static PHPDBG_COMMAND(run) /* {{{ */
 {
 	if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
@@ -290,12 +285,11 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,      "set execution context"),
 	PHPDBG_COMMAND_D(compile,   "attempt to pre-compile execution context"),
 	PHPDBG_COMMAND_D(step,      "step through execution"),
-	PHPDBG_COMMAND_D(next,      "next opcode"),
+	PHPDBG_COMMAND_D(next,      "continue execution"),
 	PHPDBG_COMMAND_D(run,       "attempt execution"),
 	PHPDBG_COMMAND_D(eval,      "evaluate some code"),
 	PHPDBG_COMMAND_D(print,     "print something"),
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
-	PHPDBG_COMMAND_D(cont,      "continue execution"),
 	PHPDBG_COMMAND_D(back,      "show backtrace"),
 	PHPDBG_COMMAND_D(help,      "show help menu"),
 	PHPDBG_COMMAND_D(quit,      "exit phpdbg"),
