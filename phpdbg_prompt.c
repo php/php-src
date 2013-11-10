@@ -58,7 +58,7 @@ void phpdbg_iteractive(int argc, char **argv) /* {{{ */
 
 	printf("phpdbg> ");
 
-    while (fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
+	while (fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
 		size_t cmd_len = strlen(cmd) - 1;
 
 		if (cmd[cmd_len] == '\n') {
