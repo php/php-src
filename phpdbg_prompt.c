@@ -136,6 +136,21 @@ static PHPDBG_COMMAND(eval) { /* {{{ */
     return SUCCESS;
 } /* }}} */
 
+static PHPDBG_COMMAND(back) { /* {{{ */
+    if (EG(in_execution)) {
+        const zend_execute_data *current = EG(current_execute_data);
+        if (current) {
+            do {
+                printf("%d\n", current->opline->opcode);
+            } while ((current = current->prev_execute_data));
+        }
+        return SUCCESS;
+    } else {
+        printf("Not executing !\n");
+        return FAILURE;
+    }
+} /* }}} */
+
 static PHPDBG_COMMAND(print) { /* {{{ */
   if (!expr_len) {
     printf("Showing Execution Context Information:\n");
@@ -213,6 +228,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(eval,      "evaluate some code"),
 	PHPDBG_COMMAND_D(print,     "print something"),
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
+	PHPDBG_COMMAND_D(back,      "show backtrace"),
 	PHPDBG_COMMAND_D(help,      "show help menu"),
 	PHPDBG_COMMAND_D(quit,      "exit phpdbg"),
 	{NULL, 0, 0}
@@ -267,9 +283,8 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 
 void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC)
 {
-	zend_bool original_in_execution;
+	zend_bool original_in_execution = EG(in_execution);
 
-	original_in_execution = EG(in_execution);
 	EG(in_execution) = 1;
 
 	if (0) {
