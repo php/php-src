@@ -71,6 +71,9 @@ PHP 5.6 UPGRADE NOTES
 - Added use function and use const.
   (https://wiki.php.net/rfc/use_function)
 
+- Added a function for timing attack safe string comparison
+  (https://wiki.php.net/rfc/timing_attack)
+
 - Added gost-crypto (CryptoPro S-box) hash algorithm.
 
 - Stream wrappers verify peer certificates and host names by default in
@@ -181,6 +184,9 @@ PHP 5.6 UPGRADE NOTES
 ========================================
 5. New Functions
 ========================================
+
+- Hash
+  Added hash_equals($known_string, $user_string)
 
 - GMP:
   Added gmp_root($a, $nth) and gmp_rootrem($a, $nth) for calculating nth roots.

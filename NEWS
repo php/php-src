@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed bug #66698 (Missing FNV1a32 and FNV1a64 hash functions).
     (Michael M Slusarz).
+  . Implemented timing attack safe string comparison function
+    (RFC: https://wiki.php.net/rfc/timing_attack). (Rouven Weßling)
 
 - Intl:
   . Fixed bug #66873 (A reproductible crash in UConverter when given invalid
