@@ -35,13 +35,13 @@ typedef int (*phpdbg_command_handler_t)(const char* expr, size_t expr_len TSRMLS
 /**
  * Command representation
  */
-typedef struct _phpdbg_command_t {
+struct _phpdbg_command_t {
 	const char *name;                   /* Command name */
 	size_t name_len;                    /* Command name length */
 	const char *tip;                    /* Menu tip */
 	size_t tip_len;                     /* Menu tip length */
 	phpdbg_command_handler_t handler;   /* Command handler */
-} phpdbg_command_t;
+} ;
 
 /**
  * Command Executor

@@ -44,6 +44,8 @@
 
 #define PHPDBG_NEXT 2
 
+typedef struct _phpdbg_command_t phpdbg_command_t;
+
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp_files;
 	HashTable bp_symbols;
@@ -58,6 +60,9 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_bool has_sym_bp;   /* symbol-based breakpoint has been set */
 	zend_bool quitting;     /* quitting flag */
 	int quiet;              /* quiet */
+	phpdbg_command_t *last; /* last command */
+	const char *last_params;/* last expression */
+	size_t last_params_len; /* last expression length */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 
 #endif /* PHPDBG_H */

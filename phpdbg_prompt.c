@@ -58,7 +58,7 @@ static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
 
 	if (!EG(in_execution)) {
 	    printf("Attempting compilation of %s\n", PHPDBG_G(exec));
-
+        
 	    if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh,
 		        USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
 		    PHPDBG_G(ops) = zend_compile_file(
@@ -310,7 +310,10 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 
 	while (command && command->name) {
 		if (command->name_len == expr_len
-			&& memcmp(cmd, command->name, expr_len) == 0) {
+			    && memcmp(cmd, command->name, expr_len) == 0) {
+			PHPDBG_G(last) = command;
+			PHPDBG_G(last_params) = params;
+			PHPDBG_G(last_params_len) = cmd_len - expr_len;
 			return command->handler(params, cmd_len - expr_len TSRMLS_CC);
 		}
 		++command;
@@ -346,11 +349,15 @@ int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
 		            return PHPDBG_NEXT;
 
 		    }
+		} else if (PHPDBG_G(last)) {
+		    PHPDBG_G(last)->handler(
+		        PHPDBG_G(last_params), PHPDBG_G(last_params_len) TSRMLS_CC);
 		}
 
 		if (!PHPDBG_G(quitting)) {
 		    printf("phpdbg> ");
 		}
+
 	}
 
 	return SUCCESS;
