@@ -390,10 +390,10 @@ zend_vm_enter:
 			}
 		}
 
-        if (PHPDBG_G(has_sym_bp)) {
+        if (PHPDBG_G(has_sym_bp) && execute_data->opline->opcode != ZEND_RETURN) {
             zend_execute_data *previous = execute_data->prev_execute_data;
             if (previous && (previous != execute_data)) {
-                if (previous->opline && execute_data->opline->opcode != ZEND_RETURN) {
+                if (previous->opline) {
                     if (previous->opline->opcode == ZEND_DO_FCALL || previous->opline->opcode == ZEND_DO_FCALL_BY_NAME) {
                         if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS) {
                             while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
