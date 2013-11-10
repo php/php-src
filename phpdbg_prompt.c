@@ -32,7 +32,7 @@ static void phpdbg_llist_breakfile_dtor(void *data)
 {
 	phpdbg_breakfile_t *bp = (phpdbg_breakfile_t*) data;
 
-	efree(bp->filename);
+	efree((char*)bp->filename);
 }
 
 static PHPDBG_COMMAND(exec) { /* {{{ */
