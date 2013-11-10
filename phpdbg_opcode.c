@@ -18,11 +18,12 @@
 */
 
 #include "zend_vm_opcodes.h"
+#include "zend_compile.h"
 #include "phpdbg_opcode.h"
 
 const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 {
-#define CASE(s) return #s
+#define CASE(s) case s: return #s
 	switch (opcode) {
 		CASE(ZEND_NOP);
 		CASE(ZEND_ADD);
