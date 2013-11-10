@@ -38,6 +38,8 @@
 
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
   HashTable breaks;
+  char *exec;       /* file to execute */
+  size_t exec_len;  /* size of exec */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 
 #include "phpdbg_prompt.h"

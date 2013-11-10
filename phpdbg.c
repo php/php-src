@@ -20,7 +20,9 @@
 
 ZEND_DECLARE_MODULE_GLOBALS(phpdbg);
 
-static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) {}
+static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) {
+  pg->exec = NULL;
+}
 
 static PHP_MINIT_FUNCTION(phpdbg) {
   ZEND_INIT_MODULE_GLOBALS(phpdbg, php_phpdbg_globals_ctor, NULL);
@@ -40,6 +42,9 @@ static PHP_RINIT_FUNCTION(phpdbg) {
 
 static PHP_RSHUTDOWN_FUNCTION(phpdbg) {
   zend_hash_destroy(&PHPDBG_G(breaks));
+  if (PHPDBG_G(exec)) {
+    efree(PHPDBG_G(exec));
+  }
 }
 
 static zend_module_entry sapi_phpdbg_module_entry = {

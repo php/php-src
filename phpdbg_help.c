@@ -23,6 +23,13 @@
 #include "phpdbg.h"
 #include "phpdbg_help.h"
 
+PHPDBG_HELP(exec) /* {{{ */
+{
+  printf("doing exec help: %s\n", expr);
+  
+  return SUCCESS;
+} /* }}} */
+
 PHPDBG_HELP(print) /* {{{ */ 
 {
   printf("doing print help: %s\n", expr);

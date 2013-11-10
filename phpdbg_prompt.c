@@ -25,9 +25,26 @@
 
 static const phpdbg_command_t phpdbg_prompt_commands[];
 
-static PHPDBG_COMMAND(print) { /* {{{ */ 
-  printf("%s", expr);
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+
+static PHPDBG_COMMAND(exec) { /* {{{ */
+  if (PHPDBG_G(exec)) {
+    printf(
+      "Unsetting old execution context: %s\n", PHPDBG_G(exec));
+    efree(PHPDBG_G(exec));
+  }
   
+  PHPDBG_G(exec) = estrndup(
+    expr, PHPDBG_G(exec_len)=expr_len);
+    
+  printf(
+    "Set execution context: %s\n", PHPDBG_G(exec));
+} /* }}} */
+
+static PHPDBG_COMMAND(print) { /* {{{ */
+  printf(
+    "%s\n", expr);
+
   return SUCCESS;
 } /* }}} */
 
@@ -75,7 +92,8 @@ static PHPDBG_COMMAND(help) /* {{{ */
   return SUCCESS;
 } /* }}} */
 
-static const phpdbg_command_t phpdbg_prompt_commands[] = {  
+static const phpdbg_command_t phpdbg_prompt_commands[] = {
+  PHPDBG_COMMAND_D(exec,  "set execution context"),
   PHPDBG_COMMAND_D(print, "print something"),
 	PHPDBG_COMMAND_D(brake, "set brake point"),
 	PHPDBG_COMMAND_D(help,  "show help menu"),
