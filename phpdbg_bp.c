@@ -111,14 +111,15 @@ void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{
 
 		PHPDBG_G(has_opline_bp) = 1;
         
-        asprintf((char**)&new_break.name, "%#x", opline);
+        asprintf(
+            (char**)&new_break.name, "%p", (zend_op*) opline);
         
-		new_break.opline = opline;
+		new_break.opline = (zend_ulong) opline;
 		new_break.id = PHPDBG_G(bp_count)++;
         
-		zend_hash_index_update(&PHPDBG_G(bp_oplines), opline, &new_break, sizeof(phpdbg_breakline_t), NULL);
+		zend_hash_index_update(&PHPDBG_G(bp_oplines), (zend_ulong) opline, &new_break, sizeof(phpdbg_breakline_t), NULL);
 	    
-	    printf("[Breakpoint #%d added at %#x]\n", new_break.id, new_break.opline);
+	    printf("[Breakpoint #%d added at %p]\n", new_break.id, (zend_op*) new_break.opline);
 	}
 } /* }}} */
 
