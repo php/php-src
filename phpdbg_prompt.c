@@ -377,13 +377,7 @@ static PHPDBG_COMMAND(clear) /* {{{ */
     printf("[\tSymbols\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_symbols)));
     printf("[\tOplines\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_oplines)));
     
-    zend_hash_clean(&PHPDBG_G(bp_files));
-    zend_hash_clean(&PHPDBG_G(bp_symbols));
-    zend_hash_clean(&PHPDBG_G(bp_oplines));
-    
-    PHPDBG_G(has_file_bp) = 0;
-    PHPDBG_G(has_sym_bp) = 0;
-    PHPDBG_G(has_opline_bp) = 0;
+    phpdbg_clear_breakpoints(TSRMLS_C);
     
     return SUCCESS;
 } /* }}} */
@@ -421,6 +415,10 @@ static PHPDBG_COMMAND(help) /* {{{ */
 
 static PHPDBG_COMMAND(quiet) { /* {{{ */
     PHPDBG_G(quiet) = atoi(expr);
+    
+    printf(
+        "[Quietness %s]\n", PHPDBG_G(quiet) ? "enabled" : "disabled");
+    
     return SUCCESS;
 } /* }}} */
 

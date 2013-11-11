@@ -186,3 +186,15 @@ int phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ *
 	return FAILURE;
 } /* }}} */
 
+void phpdbg_clear_breakpoints(TSRMLS_D) /* {{{ */
+{
+    zend_hash_clean(&PHPDBG_G(bp_files));
+    zend_hash_clean(&PHPDBG_G(bp_symbols));
+    zend_hash_clean(&PHPDBG_G(bp_oplines));
+    
+    PHPDBG_G(has_file_bp) = 0;
+    PHPDBG_G(has_sym_bp) = 0;
+    PHPDBG_G(has_opline_bp) = 0;
+    PHPDBG_G(bp_count) = 0;
+} /* }}} */
+
