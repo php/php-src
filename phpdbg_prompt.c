@@ -79,11 +79,13 @@ static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
 static PHPDBG_COMMAND(compile) /* {{{ */
 {
 	if (PHPDBG_G(exec)) {
-		if (PHPDBG_G(ops)) {
-			printf("[Destroying previously compiled opcodes]\n");
-			destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
-			efree(PHPDBG_G(ops));
-			PHPDBG_G(ops)=NULL;
+		if (!EG(in_execution)) {
+		    if (PHPDBG_G(ops)) {
+			    printf("[Destroying previously compiled opcodes]\n");
+			    destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
+			    efree(PHPDBG_G(ops));
+			    PHPDBG_G(ops)=NULL;
+		    }
 		}
 
 		return phpdbg_compile(TSRMLS_C);
