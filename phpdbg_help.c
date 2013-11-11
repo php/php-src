@@ -75,7 +75,8 @@ PHPDBG_HELP(run) /* {{{ */
 
 PHPDBG_HELP(eval) /* {{{ */
 {
-	printf("Access to eval() allows you to change the environment during execution, careful though !!");
+	printf("Access to eval() allows you to change the environment during execution, careful though !!\n");
+	printf("Note: When using eval in phpdbg do not prefix the code with return.\n");
 	return SUCCESS;
 } /* }}} */
 
