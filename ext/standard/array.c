@@ -1624,7 +1624,7 @@ PHP_FUNCTION(range)
 	if (Z_TYPE_P(zlow) == IS_STRING && Z_TYPE_P(zhigh) == IS_STRING && Z_STRSIZE_P(zlow) >= 1 && Z_STRSIZE_P(zhigh) >= 1) {
 		int type1, type2;
 		unsigned char *low, *high;
-		long lstep = (long) step;
+		php_int_t lstep = (php_int_t) step;
 
 		type1 = is_numeric_string(Z_STRVAL_P(zlow), Z_STRSIZE_P(zlow), NULL, NULL, 0);
 		type2 = is_numeric_string(Z_STRVAL_P(zhigh), Z_STRSIZE_P(zhigh), NULL, NULL, 0);
@@ -1672,7 +1672,7 @@ PHP_FUNCTION(range)
 
 	} else if (Z_TYPE_P(zlow) == IS_DOUBLE || Z_TYPE_P(zhigh) == IS_DOUBLE || is_step_double) {
 		double low, high, value;
-		long i;
+		php_int_t i;
 double_str:
 		convert_to_double(zlow);
 		convert_to_double(zhigh);
@@ -1703,13 +1703,13 @@ double_str:
 		}
 	} else {
 		double low, high;
-		long lstep;
+		php_int_t lstep;
 long_str:
 		convert_to_double(zlow);
 		convert_to_double(zhigh);
 		low = Z_DVAL_P(zlow);
 		high = Z_DVAL_P(zhigh);
-		lstep = (long) step;
+		lstep = (php_int_t) step;
 
 		if (low > high) { 		/* Negative steps */
 			if (low - high < lstep || lstep <= 0) {
@@ -1717,7 +1717,7 @@ long_str:
 				goto err;
 			}
 			for (; low >= high; low -= lstep) {
-				add_next_index_long(return_value, (long)low);
+				add_next_index_long(return_value, (php_int_t)low);
 			}
 		} else if (high > low) { 	/* Positive steps */
 			if (high - low < lstep || lstep <= 0) {
@@ -1725,10 +1725,10 @@ long_str:
 				goto err;
 			}
 			for (; low <= high; low += lstep) {
-				add_next_index_long(return_value, (long)low);
+				add_next_index_long(return_value, (php_int_t)low);
 			}
 		} else {
-			add_next_index_long(return_value, (long)low);
+			add_next_index_long(return_value, (php_int_t)low);
 		}
 	}
 err:
