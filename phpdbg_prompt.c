@@ -269,7 +269,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
         for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp_oplines), &position);
              zend_hash_get_current_data_ex(&PHPDBG_G(bp_oplines), (void**) &brake, &position) == SUCCESS;
              zend_hash_move_forward_ex(&PHPDBG_G(bp_oplines), &position)) {
-             printf("#%d\t0x%x\n", brake->id, brake->opline);
+             printf("#%d\t%s\n", brake->id, brake->name);
         }
     }
     

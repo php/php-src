@@ -63,11 +63,16 @@ static void php_phpdbg_destroy_bp_symbol(void *brake) /* {{{ */
 	efree((char*)((phpdbg_breaksymbol_t*)brake)->symbol);
 } /* }}} */
 
+static void php_phpdbg_destroy_bp_opline(void *brake) /* {{{ */
+{
+	efree((char*)((phpdbg_breakline_t*)brake)->name);
+} /* }}} */
+
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
 	zend_hash_init(&PHPDBG_G(bp_files),   8, NULL, php_phpdbg_destroy_bp_file, 0);
 	zend_hash_init(&PHPDBG_G(bp_symbols), 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
-    zend_hash_init(&PHPDBG_G(bp_oplines), 8, NULL, NULL, 0);
+    zend_hash_init(&PHPDBG_G(bp_oplines), 8, NULL, php_phpdbg_destroy_bp_opline, 0);
     
 	return SUCCESS;
 } /* }}} */
