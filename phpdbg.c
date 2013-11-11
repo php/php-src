@@ -96,9 +96,9 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 
 static PHP_FUNCTION(phpdbg_break) /* {{{ */ 
 {
-    if (EG(active_op_array)) {
+    if (EG(current_execute_data)) {
         phpdbg_set_breakpoint_opline_ex(
-            EG(active_op_array)->opcodes TSRMLS_CC);
+            EG(current_execute_data)->opline TSRMLS_CC);
     }
 } /* }}} */
 
