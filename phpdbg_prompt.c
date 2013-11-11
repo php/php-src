@@ -187,8 +187,9 @@ static PHPDBG_COMMAND(print) /* {{{ */
 		printf("%s\n", expr);
 		return SUCCESS;
 	}
-
-	printf("Showing Execution Context Information:\n");
+    
+    printf("--------------------------------------\n");
+	printf("Execution Context Information:\n");
 	printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
 	printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
 	printf("Stepping\t%s\n", PHPDBG_G(stepping) ? "on" : "off");
@@ -203,11 +204,59 @@ static PHPDBG_COMMAND(print) /* {{{ */
 		}
 	}
 	printf("Executing\t%s\n", EG(in_execution) ? "yes" : "no");
-
 	if (EG(in_execution)) {
 		printf("VM Return\t%d\n", PHPDBG_G(vmret));
 	}
-
+	printf("Classes\t\t%d\n", zend_hash_num_elements(EG(class_table)));
+    printf("Functions\t%d\n", zend_hash_num_elements(EG(function_table)));
+    printf("Constants\t%d\n", zend_hash_num_elements(EG(zend_constants)));
+    printf("Included\t%d\n", zend_hash_num_elements(&EG(included_files)));
+    
+    if (PHPDBG_G(has_file_bp)) {
+        HashPosition position;
+        zend_llist *points;
+        
+        printf("--------------------------------------\n");
+        printf("File Break Point Information:\n");
+        for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp_files), &position);
+             zend_hash_get_current_data_ex(&PHPDBG_G(bp_files), (void**) &points, &position) == SUCCESS;
+             zend_hash_move_forward_ex(&PHPDBG_G(bp_files), &position)) {
+             zend_llist_position lposition;
+             phpdbg_breakfile_t *brake;
+             
+             if ((brake = zend_llist_get_first_ex(points, &lposition))) {
+                printf("%s:\n", brake->filename);
+                do {
+                    printf("\t%lu\n", brake->line);
+                } while ((brake = zend_llist_get_next_ex(points, &lposition)));
+             }
+        }
+    }
+    
+#if 0
+    if (PHPDBG_G(has_sym_bp)) {
+        HashPosition position;
+        zend_llist *points;
+        
+        printf("--------------------------------------\n");
+        printf("Symbol Break Point Information:\n");
+        for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp_symbols), &position);
+             zend_hash_get_current_data_ex(&PHPDBG_G(bp_symbols), (void**) &points, &position) == SUCCESS;
+             zend_hash_move_forward_ex(&PHPDBG_G(bp_symbols), &position)) {
+             zend_llist_position lposition;
+             phpdbg_breaksymbol_t *brake;
+             
+             if ((brake = zend_llist_get_first_ex(points, &lposition))) {
+                printf("%s:\n", brake->symbol);
+                do {
+                    printf("\t%d\n", brake->id);
+                } while ((brake = zend_llist_get_next_ex(points, &lposition)));
+             }
+        }
+    }
+#endif
+    
+    printf("--------------------------------------\n");
 	return SUCCESS;
 } /* }}} */
 
@@ -267,10 +316,23 @@ static int clean_non_persistent_function_full(zend_function *function TSRMLS_DC)
 
 static PHPDBG_COMMAND(clean) /* {{{ */
 {
+    printf("Cleaning Environment:\n");
+    printf("\tClasses: %d\n", zend_hash_num_elements(EG(class_table)));
+    printf("\tFunctions: %d\n", zend_hash_num_elements(EG(function_table)));
+    printf("\tConstants: %d\n", zend_hash_num_elements(EG(zend_constants)));
+    printf("\tIncluded: %d\n", zend_hash_num_elements(&EG(included_files)));
+
     zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
     zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC); 
     zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC); 
     zend_hash_clean(&EG(included_files));
+
+    printf("Clean Environment:\n");
+    printf("\tClasses: %d\n", zend_hash_num_elements(EG(class_table)));
+    printf("\tFunctions: %d\n", zend_hash_num_elements(EG(function_table)));
+    printf("\tConstants: %d\n", zend_hash_num_elements(EG(zend_constants)));
+    printf("\tIncluded: %d\n", zend_hash_num_elements(&EG(included_files)));
+    
     return SUCCESS;
 } /* }}} */
 

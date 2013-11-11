@@ -38,9 +38,9 @@ void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{
 	zend_llist *break_files_ptr;
 	size_t path_len = strlen(path);
 
-	new_break.filename = estrndup(path, path_len + 1);
+	new_break.filename = estrndup(path, path_len);
 	new_break.line = line_num;
-
+    
 	PHPDBG_G(has_file_bp) = 1;
 
 	if (zend_hash_find(&PHPDBG_G(bp_files),
@@ -57,6 +57,9 @@ void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{
 
 	new_break.id = PHPDBG_G(bp_count)++;
 	zend_llist_add_element(break_files_ptr, &new_break);
+	
+	printf(
+	    "Breakpoint #%d added at %s:%d\n", new_break.id, new_break.filename, new_break.line);
 } /* }}} */
 
 void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */
@@ -73,6 +76,10 @@ void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */
 
 		zend_hash_update(&PHPDBG_G(bp_symbols), new_break.symbol,
 			name_len, &new_break, sizeof(phpdbg_breaksymbol_t), NULL);
+	    
+	    printf("Breakpoint #%d added at %s\n", new_break.id, new_break.symbol);
+	} else {
+	    printf("Breakpoint exists at %s\n", name);
 	}
 } /* }}} */
 
