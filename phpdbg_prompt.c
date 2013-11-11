@@ -422,6 +422,19 @@ static PHPDBG_COMMAND(quiet) { /* {{{ */
     return SUCCESS;
 } /* }}} */
 
+static PHPDBG_COMMAND(list) /* {{{ */
+{
+	long offset = 0, count = strtol(expr, NULL, 0);
+	const char *filename = PHPDBG_G(exec);
+
+	if (zend_is_executing(TSRMLS_C)) {
+		filename = zend_get_executed_filename(TSRMLS_C);
+		offset = zend_get_executed_lineno(TSRMLS_C);
+	}
+
+	phpdbg_list_file(filename, count, offset);
+} /* }}} */
+
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(exec,      "set execution context"),
 	PHPDBG_COMMAND_D(compile,   "attempt to pre-compile execution context"),
@@ -432,6 +445,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(print,     "print something"),
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
 	PHPDBG_COMMAND_D(back,      "show backtrace"),
+	PHPDBG_COMMAND_D(list,      "list specified line"),
 	PHPDBG_COMMAND_D(clean,     "clean the execution environment"),
 	PHPDBG_COMMAND_D(clear,     "clear breakpoints"),
 	PHPDBG_COMMAND_D(help,      "show help menu"),

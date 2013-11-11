@@ -20,6 +20,7 @@
 #ifndef PHPDBG_HELP_H
 #define PHPDBG_HELP_H
 
+#include "TSRM.h"
 #include "phpdbg_prompt.h"
 
 /**
@@ -45,6 +46,7 @@ PHPDBG_HELP(clean);
 PHPDBG_HELP(clear);
 PHPDBG_HELP(back);
 PHPDBG_HELP(quiet);
+PHPDBG_HELP(list);
 
 /**
  * Commands
@@ -62,6 +64,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_HELP_D(clear,    "clearing breakpoints allows you to run code without interruption"),
 	PHPDBG_HELP_D(back,     "show debug backtrace information during execution"),
     PHPDBG_HELP_D(quiet,    "be quiet during execution"),
+	PHPDBG_HELP_D(list,     "list specified line"),
 	{NULL, 0, 0}
 };
 
