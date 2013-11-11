@@ -92,7 +92,7 @@ void phpdbg_set_breakpoint_opline(const char *name TSRMLS_DC) /* {{{ */
 
 		PHPDBG_G(has_opline_bp) = 1;
         
-        new_break.name = estrdup(name);
+        new_break.name = strdup(name);
 		new_break.opline = opline;
 		new_break.id = PHPDBG_G(bp_count)++;
         

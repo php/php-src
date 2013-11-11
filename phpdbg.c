@@ -65,7 +65,7 @@ static void php_phpdbg_destroy_bp_symbol(void *brake) /* {{{ */
 
 static void php_phpdbg_destroy_bp_opline(void *brake) /* {{{ */
 {
-	efree((char*)((phpdbg_breakline_t*)brake)->name);
+	free((char*)((phpdbg_breakline_t*)brake)->name);
 } /* }}} */
 
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
@@ -94,17 +94,29 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
-static PHP_FUNCTION(phpdbg_break) /* {{{ */ 
+/* {{{ proto void phpdbg_break(void)
+    instructs phpdbg to insert a breakpoint at the next opcode */ 
+static PHP_FUNCTION(phpdbg_break)
 {
     if (EG(current_execute_data) && EG(active_op_array)) {
-        zend_ulong opline_num = EG(current_execute_data)->opline - EG(active_op_array)->opcodes;
+        zend_ulong opline_num = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
         
         phpdbg_set_breakpoint_opline_ex(
             &EG(active_op_array)->opcodes[opline_num+1] TSRMLS_CC);
     }
 } /* }}} */
 
+/* {{{ proto void phpdbg_clear(void)
+    instructs phpdbg to clear breakpoints */
+static PHP_FUNCTION(phpdbg_clear)
+{
+    zend_hash_clean(&PHPDBG_G(bp_files));
+    zend_hash_clean(&PHPDBG_G(bp_symbols));
+    zend_hash_clean(&PHPDBG_G(bp_oplines));
+} /* }}} */
+
 zend_function_entry phpdbg_user_functions[] = {
+    PHP_FE(phpdbg_clear, NULL)
     PHP_FE(phpdbg_break, NULL)
 #ifdef  PHP_FE_END
 	PHP_FE_END
