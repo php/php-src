@@ -50,20 +50,22 @@ typedef struct _phpdbg_command_t phpdbg_command_t;
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable bp_files;
 	HashTable bp_symbols;
-	char *exec;             /* file to execute */
-	size_t exec_len;        /* size of exec */
-	zend_op_array *ops;     /* op_array */
-	zval *retval;           /* return value */
-	int bp_count;           /* breakpoint count */
-	int stepping;           /* stepping */
-	int vmret;              /* return from last opcode handler execution */
-	zend_bool has_file_bp;  /* file-based breakpoint has been set */
-	zend_bool has_sym_bp;   /* symbol-based breakpoint has been set */
-	zend_bool quitting;     /* quitting flag */
-	int quiet;              /* quiet */
-	phpdbg_command_t *last; /* last command */
-	const char *last_params;/* last expression */
-	size_t last_params_len; /* last expression length */
+	HashTable bp_oplines;
+	char *exec;                 /* file to execute */
+	size_t exec_len;            /* size of exec */
+	zend_op_array *ops;         /* op_array */
+	zval *retval;               /* return value */
+	int bp_count;               /* breakpoint count */
+	int stepping;               /* stepping */
+	int vmret;                  /* return from last opcode handler execution */
+	zend_bool has_file_bp;      /* file-based breakpoint has been set */
+	zend_bool has_sym_bp;       /* symbol-based breakpoint has been set */
+	zend_bool has_opline_bp;    /* opline-based breakpoint has been set */
+	zend_bool quitting;         /* quitting flag */
+	int quiet;                  /* quiet */
+	phpdbg_command_t *last;     /* last command */
+	const char *last_params;    /* last expression */
+	size_t last_params_len;     /* last expression length */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 
 #endif /* PHPDBG_H */

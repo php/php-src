@@ -80,7 +80,7 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 {
 	if (PHPDBG_G(exec)) {
 		if (PHPDBG_G(ops)) {
-			printf("Destroying compiled opcodes\n");
+			printf("Destroying previously compiled opcodes\n");
 			destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
 			efree(PHPDBG_G(ops));
 			PHPDBG_G(ops)=NULL;
@@ -96,6 +96,8 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 static PHPDBG_COMMAND(step) /* {{{ */
 {
 	PHPDBG_G(stepping) = atoi(expr);
+	printf(
+	    "Stepping %s\n", PHPDBG_G(stepping) ? "on" : "off");
 	return SUCCESS;
 } /* }}} */
 
@@ -186,7 +188,10 @@ static PHPDBG_COMMAND(print) /* {{{ */
 		printf("%s\n", expr);
 		return SUCCESS;
 	}
-    
+#ifdef HAVE_READLINE_H
+    printf("HAVE READLINE\n");
+#endif    
+
     printf("--------------------------------------\n");
 	printf("Execution Context Information:\n");
 	printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
@@ -282,14 +287,18 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		    return FAILURE;
 		}
 	} else {
-		char name[200];
-		size_t name_len = strlen(expr);
+		if (expr_len > 2 && expr[0] == '0' && expr[1] == 'x') {
+		    phpdbg_set_breakpoint_opline(expr TSRMLS_CC);
+		} else {
+		    char name[200];
+		    size_t name_len = strlen(expr);
 
-		name_len = MIN(name_len, 200);
-		memcpy(name, expr, name_len);
-		name[name_len] = 0;
+		    name_len = MIN(name_len, 200);
+		    memcpy(name, expr, name_len);
+		    name[name_len] = 0;
 
-		phpdbg_set_breakpoint_symbol(name TSRMLS_CC);
+		    phpdbg_set_breakpoint_symbol(name TSRMLS_CC);
+		}
 	}
 
 	return SUCCESS;
@@ -403,7 +412,7 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 	while (command && command->name) {
 		if (command->name_len == expr_len
 			    && memcmp(cmd, command->name, expr_len) == 0) {
-			PHPDBG_G(last) = command;
+			PHPDBG_G(last) = (phpdbg_command_t*) command;
 			PHPDBG_G(last_params) = params;
 			PHPDBG_G(last_params_len) = cmd_len - expr_len;
 			return command->handler(params, cmd_len - expr_len TSRMLS_CC);
@@ -503,6 +512,13 @@ zend_vm_enter:
 				}
 			}
         }
+        
+        if (PHPDBG_G(has_opline_bp)
+			&& phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
+			while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
+				continue;
+			}
+		}
 
 		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
 

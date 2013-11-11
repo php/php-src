@@ -59,7 +59,7 @@ void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{
 	zend_llist_add_element(break_files_ptr, &new_break);
 	
 	printf(
-	    "Breakpoint #%d added at %s:%d\n", new_break.id, new_break.filename, new_break.line);
+	    "Breakpoint #%d added at %s:%ld\n", new_break.id, new_break.filename, new_break.line);
 } /* }}} */
 
 void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */
@@ -78,6 +78,29 @@ void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */
 			name_len, &new_break, sizeof(phpdbg_breaksymbol_t), NULL);
 	    
 	    printf("Breakpoint #%d added at %s\n", new_break.id, new_break.symbol);
+	} else {
+	    printf("Breakpoint exists at %s\n", name);
+	}
+} /* }}} */
+
+void phpdbg_set_breakpoint_opline(const char *name TSRMLS_DC) /* {{{ */
+{
+	size_t name_len = strlen(name);
+
+	if (!zend_hash_exists(&PHPDBG_G(bp_oplines), name, name_len)) {
+		phpdbg_breakline_t new_break;
+
+		PHPDBG_G(has_opline_bp) = 1;
+
+		sscanf(
+		    name, "%x", &new_break.opline);
+		
+		new_break.id = PHPDBG_G(bp_count)++;
+        
+		zend_hash_update(&PHPDBG_G(bp_oplines), name,
+			name_len, &new_break, sizeof(phpdbg_breakline_t), NULL);
+	    
+	    printf("Breakpoint #%d added at 0x%x\n", new_break.id, new_break.opline);
 	} else {
 	    printf("Breakpoint exists at %s\n", name);
 	}
@@ -128,5 +151,27 @@ int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 		return SUCCESS;
 	}
 
+	return FAILURE;
+} /* }}} */
+
+int phpdbg_find_breakpoint_opline(void *opline TSRMLS_DC) /* {{{ */
+{
+	char *opstring = NULL;
+	size_t opstring_len;
+	phpdbg_breakline_t *bp;
+
+    opstring_len = asprintf(
+        &opstring, "0x%x", (unsigned int) opline);
+
+	if (zend_hash_find(&PHPDBG_G(bp_oplines), opstring, opstring_len,
+		(void**)&bp) == SUCCESS) {
+		printf("Breakpoint #%d in 0x%x at %s\n", bp->id, bp->opline,
+			zend_get_executed_filename(TSRMLS_C));
+	    free(opstring);
+	    
+		return SUCCESS;
+	}
+	
+    free(opstring);
 	return FAILURE;
 } /* }}} */

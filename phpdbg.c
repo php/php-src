@@ -40,6 +40,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->last_params_len = 0;
     pg->has_file_bp = 0;
     pg->has_sym_bp = 0;
+    pg->has_opline_bp = 0;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
@@ -66,7 +67,8 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
 	zend_hash_init(&PHPDBG_G(bp_files),   8, NULL, php_phpdbg_destroy_bp_file, 0);
 	zend_hash_init(&PHPDBG_G(bp_symbols), 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
-
+    zend_hash_init(&PHPDBG_G(bp_oplines), 8, NULL, NULL, 0);
+    
 	return SUCCESS;
 } /* }}} */
 
@@ -74,7 +76,8 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 {
     zend_hash_destroy(&PHPDBG_G(bp_files));
     zend_hash_destroy(&PHPDBG_G(bp_symbols));
-
+    zend_hash_destroy(&PHPDBG_G(bp_oplines));
+    
     if (PHPDBG_G(exec)) {
         efree(PHPDBG_G(exec));
     }

@@ -37,10 +37,20 @@ typedef struct _phpdbg_breaksymbol_t {
 	int id;
 } phpdbg_breaksymbol_t;
 
+/**
+ * Breakpoint opline based representation
+ */
+typedef struct _phpdbg_breakline_t {
+    zend_uint opline;
+    int id;
+} phpdbg_breakline_t;
+
 void phpdbg_set_breakpoint_file(const char*, long TSRMLS_DC);
 void phpdbg_set_breakpoint_symbol(const char* TSRMLS_DC);
+void phpdbg_set_breakpoint_opline(const char* TSRMLS_DC);
 
 int phpdbg_find_breakpoint_file(zend_op_array* TSRMLS_DC);
 int phpdbg_find_breakpoint_symbol(zend_function* TSRMLS_DC);
+int phpdbg_find_breakpoint_opline(void * TSRMLS_DC);
 
 #endif /* PHPDBG_BP_H */
