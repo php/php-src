@@ -58,7 +58,7 @@ static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
 
 	if (!EG(in_execution)) {
 	    printf("[Attempting compilation of %s]\n", PHPDBG_G(exec));
-        
+
 	    if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh,
 		        USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
 		    PHPDBG_G(ops) = zend_compile_file(
@@ -114,7 +114,7 @@ static PHPDBG_COMMAND(run) /* {{{ */
         printf("[Cannot start another execution while one is in progress]\n");
         return FAILURE;
     }
-    
+
 	if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
@@ -197,7 +197,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
 	}
 #ifdef HAVE_READLINE_H
     printf("HAVE READLINE\n");
-#endif    
+#endif
 
     printf("--------------------------------------\n");
 	printf("Execution Context Information:\n");
@@ -222,11 +222,11 @@ static PHPDBG_COMMAND(print) /* {{{ */
     printf("Functions\t%d\n", zend_hash_num_elements(EG(function_table)));
     printf("Constants\t%d\n", zend_hash_num_elements(EG(zend_constants)));
     printf("Included\t%d\n", zend_hash_num_elements(&EG(included_files)));
-    
+
     if (PHPDBG_G(has_file_bp)) {
         HashPosition position;
         zend_llist *points;
-        
+
         printf("--------------------------------------\n");
         printf("File Break Point Information:\n");
         for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp_files), &position);
@@ -234,7 +234,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
              zend_hash_move_forward_ex(&PHPDBG_G(bp_files), &position)) {
              zend_llist_position lposition;
              phpdbg_breakfile_t *brake;
-             
+
              if ((brake = zend_llist_get_first_ex(points, &lposition))) {
                 printf("%s:\n", brake->filename);
                 do {
@@ -243,12 +243,12 @@ static PHPDBG_COMMAND(print) /* {{{ */
              }
         }
     }
-    
+
 #if 0
     if (PHPDBG_G(has_sym_bp)) {
         HashPosition position;
         zend_llist *points;
-        
+
         printf("--------------------------------------\n");
         printf("Symbol Break Point Information:\n");
         for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp_symbols), &position);
@@ -256,7 +256,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
              zend_hash_move_forward_ex(&PHPDBG_G(bp_symbols), &position)) {
              zend_llist_position lposition;
              phpdbg_breaksymbol_t *brake;
-             
+
              if ((brake = zend_llist_get_first_ex(points, &lposition))) {
                 printf("%s:\n", brake->symbol);
                 do {
@@ -270,7 +270,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
     if (PHPDBG_G(has_opline_bp)) {
         HashPosition position;
         phpdbg_breakline_t *brake;
-        
+
         printf("--------------------------------------\n");
         printf("Opline Break Point Information:\n");
         for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp_oplines), &position);
@@ -279,7 +279,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
              printf("#%d\t%s\n", brake->id, brake->name);
         }
     }
-    
+
     printf("--------------------------------------\n");
 	return SUCCESS;
 } /* }}} */
@@ -287,11 +287,11 @@ static PHPDBG_COMMAND(print) /* {{{ */
 static PHPDBG_COMMAND(break) /* {{{ */
 {
 	const char *line_pos = zend_memrchr(expr, ':', expr_len);
-    
+
 	if (line_pos) {
 		char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
 		long line_num = strtol(line_pos+1, NULL, 0);
-         
+
 		if (line_num) {
 		    memcpy(path, expr, line_pos - expr);
 		    path[line_pos - expr] = 0;
@@ -357,8 +357,8 @@ static PHPDBG_COMMAND(clean) /* {{{ */
     printf("[\tIncluded: %d]\n", zend_hash_num_elements(&EG(included_files)));
 
     zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
-    zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC); 
-    zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC); 
+    zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
+    zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC);
     zend_hash_clean(&EG(included_files));
 
     printf("[Clean Environment:]\n");
@@ -366,7 +366,7 @@ static PHPDBG_COMMAND(clean) /* {{{ */
     printf("[\tFunctions: %d]\n", zend_hash_num_elements(EG(function_table)));
     printf("[\tConstants: %d]\n", zend_hash_num_elements(EG(zend_constants)));
     printf("[\tIncluded: %d]\n", zend_hash_num_elements(&EG(included_files)));
-    
+
     return SUCCESS;
 } /* }}} */
 
@@ -376,9 +376,9 @@ static PHPDBG_COMMAND(clear) /* {{{ */
     printf("[\tFile\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_files)));
     printf("[\tSymbols\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_symbols)));
     printf("[\tOplines\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_oplines)));
-    
+
     phpdbg_clear_breakpoints(TSRMLS_C);
-    
+
     return SUCCESS;
 } /* }}} */
 
@@ -415,10 +415,10 @@ static PHPDBG_COMMAND(help) /* {{{ */
 
 static PHPDBG_COMMAND(quiet) { /* {{{ */
     PHPDBG_G(quiet) = atoi(expr);
-    
+
     printf(
         "[Quietness %s]\n", PHPDBG_G(quiet) ? "enabled" : "disabled");
-    
+
     return SUCCESS;
 } /* }}} */
 
