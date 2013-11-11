@@ -14,13 +14,13 @@ Features
  - break at function entry, file:line or address
  - showing debug backtraces
  - easy manipulation of the environment with built-in eval()
+ - userland API
  - sapi agnositicism, easy integration
- 
+
 Planned
 =======
 
  - mocking server environments/requests
- - userland script-ability
  - improve everything
  
 Installation
