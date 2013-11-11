@@ -186,10 +186,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, zend_str_size_int length)
 		}
 
 		if (pp - p > 0 && pp - p < 6 && (*pp == '/' || *pp == '\0')) {
-			long port;
+			php_int_t port;
 			memcpy(port_buf, p, (pp - p));
 			port_buf[pp - p] = '\0';
-			port = strtol(port_buf, NULL, 10);
+			port = ZEND_STRTOL(port_buf, NULL, 10);
 			if (port > 0 && port <= 65535) {
 				ret->port = (unsigned short) port;
 			} else {
@@ -280,10 +280,10 @@ PHPAPI php_url *php_url_parse_ex(char const *str, zend_str_size_int length)
 				efree(ret);
 				return NULL;
 			} else if (e - p > 0) {
-				long port;
+				php_int_t port;
 				memcpy(port_buf, p, (e - p));
 				port_buf[e - p] = '\0';
-				port = strtol(port_buf, NULL, 10);
+				port = ZEND_STRTOL(port_buf, NULL, 10);
 				if (port > 0 && port <= 65535) {
 					ret->port = (unsigned short)port;
 				} else {
@@ -416,7 +416,7 @@ PHP_FUNCTION(parse_url)
 				if (resource->fragment != NULL) RETVAL_STRING(resource->fragment, 1);
 				break;
 			default:
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL component identifier %ld", key);
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Invalid URL component identifier " ZEND_INT_FMT, key);
 				RETVAL_FALSE;
 		}
 		goto done;
