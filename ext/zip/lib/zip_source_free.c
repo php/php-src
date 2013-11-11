@@ -39,7 +39,7 @@
 
 
 
-ZIP_EXTERN(void)
+ZIP_EXTERN void
 zip_source_free(struct zip_source *src)
 {
     if (src == NULL)

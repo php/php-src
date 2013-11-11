@@ -40,7 +40,7 @@
 #include "zend_dtrace.h"
 
 /* Virtual current working directory support */
-#include "tsrm_virtual_cwd.h"
+#include "zend_virtual_cwd.h"
 
 #define _CONST_CODE  0
 #define _TMP_CODE    1

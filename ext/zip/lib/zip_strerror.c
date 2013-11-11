@@ -36,7 +36,8 @@
 #include "zipint.h"
 
 
-ZIP_EXTERN(const char *)
+
+ZIP_EXTERN const char *
 zip_strerror(struct zip *za)
 {
     return _zip_error_strerror(&za->error);
