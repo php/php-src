@@ -140,7 +140,6 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 	if (expr) {
 		if (zend_eval_stringl((char*)expr, expr_len-1,
 			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-			printf("Success: ");
 			zend_print_zval_r(&retval, 0 TSRMLS_CC);
 			printf("\n");
 			zval_dtor(&retval);
@@ -263,19 +262,25 @@ static PHPDBG_COMMAND(print) /* {{{ */
 static PHPDBG_COMMAND(break) /* {{{ */
 {
 	const char *line_pos = zend_memrchr(expr, ':', expr_len);
-
+    
 	if (line_pos) {
 		char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
 		long line_num = strtol(line_pos+1, NULL, 0);
+         
+		if (line_num) {
+		    memcpy(path, expr, line_pos - expr);
+		    path[line_pos - expr] = 0;
 
-		memcpy(path, expr, line_pos - expr);
-		path[line_pos - expr] = 0;
+		    if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
+			    printf("Failed to expand path %s\n", path);
+			    return FAILURE;
+		    }
 
-		if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
-			return FAILURE;
+		    phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
+		} else {
+		    printf("No line specified in expression %s\n", expr);
+		    return FAILURE;
 		}
-
-		phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
 	} else {
 		char name[200];
 		size_t name_len = strlen(expr);
