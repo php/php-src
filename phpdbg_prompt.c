@@ -363,6 +363,20 @@ static PHPDBG_COMMAND(clean) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
+static PHPDBG_COMMAND(clear) /* {{{ */
+{
+    printf("Clearing Breakpoints:\n");
+    printf("\tFile\t%d\n", zend_hash_num_elements(&PHPDBG_G(bp_files)));
+    printf("\tSymbols\t%d\n", zend_hash_num_elements(&PHPDBG_G(bp_symbols)));
+    printf("\tOplines\t%d\n", zend_hash_num_elements(&PHPDBG_G(bp_oplines)));
+    
+    zend_hash_clean(&PHPDBG_G(bp_files));
+    zend_hash_clean(&PHPDBG_G(bp_symbols));
+    zend_hash_clean(&PHPDBG_G(bp_oplines));
+    
+    return SUCCESS;
+} /* }}} */
+
 static PHPDBG_COMMAND(help) /* {{{ */
 {
 	printf("Welcome to phpdbg, the interactive PHP debugger.\n");
@@ -410,6 +424,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
 	PHPDBG_COMMAND_D(back,      "show backtrace"),
 	PHPDBG_COMMAND_D(clean,     "clean the execution environment"),
+	PHPDBG_COMMAND_D(clear,     "clear breakpoints"),
 	PHPDBG_COMMAND_D(help,      "show help menu"),
 	PHPDBG_COMMAND_D(quiet,     "silence some output"),
 	PHPDBG_COMMAND_D(quit,      "exit phpdbg"),

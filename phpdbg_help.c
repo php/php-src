@@ -50,6 +50,7 @@ PHPDBG_HELP(compile) /* {{{ */
 	printf("Pre-compilation of the execution context provides the opportunity to inspect the opcodes before they are executed\n");
 	printf("The execution context must be set for compilation to succeed\n");
 	printf("If errors occur during compilation they must be resolved before execution can take place.\n");
+	printf("It is a good idea to clean the environment between each compilation with the clean command\n");
 	printf("You do not need to exit phpdbg to retry compilation\n");
 	return SUCCESS;
 } /* }}} */
@@ -83,14 +84,14 @@ PHPDBG_HELP(break) /* {{{ */
 	printf("Setting a breakpoint stops execution at a specific stage, the syntax is:\n");
 	printf("\tfile:line\n");
 	printf("\tfunction\n");
-	printf("\t0x12345678\n");
+	printf("\t0x16\n");
 	printf("For example:\n");
 	printf("\tphpdbg> break test.php:1\n");
 	printf("Will break execution on line 1 of test.php\n");
 	printf("\tphpdbg> break my_function\n");
 	printf("Will break execution on entry to my_function\n");
-	printf("\tphpdbg> break 0x4c79a40\n");
-	printf("Will break at the opline with the address provided\n");
+	printf("\tphpdbg> break 0x7ff68f570e08\n");
+	printf("Will break at the opline with the address provided (addresses are shown during execution)\n");
 	return SUCCESS;
 } /* }}} */
 
@@ -98,6 +99,13 @@ PHPDBG_HELP(clean) /* {{{ */
 {
     printf("While debugging you may experience errors because of attempts to redeclare classes, constants or functions.\n");
     printf("Cleaning the environment cleans these tables, so that files can be recompiled without exiting phpdbg.\n");
+    return SUCCESS;
+} /* }}} */
+
+PHPDBG_HELP(clear) /* {{{ */
+{
+    printf("Clearing breakpoints means you can once again run code without interruption\n");
+    printf("Careful though, all breakpoints are lost; be sure debugging is complete before clearing\n");
     return SUCCESS;
 } /* }}} */
 
