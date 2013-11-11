@@ -146,7 +146,7 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 {
 	zval retval;
 
-	if (expr) {
+	if (expr_len) {
 		if (zend_eval_stringl((char*)expr, expr_len-1,
 			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
 			zend_print_zval_r(&retval, 0 TSRMLS_CC);
