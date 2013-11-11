@@ -534,66 +534,65 @@ zend_vm_enter:
 		    execute_data TSRMLS_CC);
 
         if (PHPDBG_G(has_file_bp)
-			&& phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
-			while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-				if (!PHPDBG_G(quitting)) {
-				    continue;
-				}
-			}
-		}
+            && phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
+            while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
+                if (!PHPDBG_G(quitting)) {
+                    continue;
+                }
+            }
+        }
 
         if (PHPDBG_G(has_sym_bp) && execute_data->opline->opcode != ZEND_RETURN) {
             zend_execute_data *previous = execute_data->prev_execute_data;
             if (previous && previous != execute_data && previous->opline) {
-				if (previous->opline->opcode == ZEND_DO_FCALL
-					|| previous->opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-					if (phpdbg_find_breakpoint_symbol(
-						previous->function_state.function TSRMLS_CC) == SUCCESS) {
-						while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-							if (!PHPDBG_G(quitting)) {
-				                continue;
-				            }
-						}
-					}
-				}
-			}
+                if (previous->opline->opcode == ZEND_DO_FCALL
+                    || previous->opline->opcode == ZEND_DO_FCALL_BY_NAME) {
+                    if (phpdbg_find_breakpoint_symbol(
+                        previous->function_state.function TSRMLS_CC) == SUCCESS) {
+                        while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
+                            if (!PHPDBG_G(quitting)) {
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
         }
-        
+
         if (PHPDBG_G(has_opline_bp)
-			&& phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
-			while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-				if (!PHPDBG_G(quitting)) {
-				    continue;
-				}
+            && phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
+            while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
+                if (!PHPDBG_G(quitting)) {
+                    continue;
+                }
+            }
+        }
+
+        PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
+
+        if (PHPDBG_G(stepping)) {
+            while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
+                if (!PHPDBG_G(quitting)) {
+                    continue;
+                }
+            }
+        }
+
+        if (PHPDBG_G(vmret) > 0) {
+            switch (PHPDBG_G(vmret)) {
+                case 1:
+                    EG(in_execution) = original_in_execution;
+                    return;
+                case 2:
+                    goto zend_vm_enter;
+                    break;
+                case 3:
+                    execute_data = EG(current_execute_data);
+                    break;
+                default:
+					break;
 			}
 		}
-		
-		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
-
-		if (PHPDBG_G(stepping)) {
-			while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-				if (!PHPDBG_G(quitting)) {
-				    continue;
-				}
-			}
-		}
-
-		if (PHPDBG_G(vmret) > 0) {
-			switch (PHPDBG_G(vmret)) {
-				case 1:
-					EG(in_execution) = original_in_execution;
-					return;
-				case 2:
-					goto zend_vm_enter;
-					break;
-				case 3:
-					execute_data = EG(current_execute_data);
-					break;
-				default:
-					break;
-			}
-		}
-
 	}
 	zend_error_noreturn(E_ERROR, "Arrived at end of main loop which shouldn't happen");
 } /* }}} */
