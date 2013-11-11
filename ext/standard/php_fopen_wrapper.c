@@ -65,7 +65,7 @@ php_stream_ops php_stream_output_ops = {
 
 typedef struct php_stream_input { /* {{{ */
 	php_stream **body_ptr;
-	off_t position;
+	zend_off_t position;
 } php_stream_input_t;
 /* }}} */
 
@@ -118,7 +118,7 @@ static int php_stream_input_flush(php_stream *stream TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-static int php_stream_input_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC) /* {{{ */
+static int php_stream_input_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC) /* {{{ */
 {
 	php_stream_input_t *input = stream->abstract;
 

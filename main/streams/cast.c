@@ -76,7 +76,7 @@ static int stream_cookie_writer(void *cookie, const char *buffer, int size)
 	return php_stream_write((php_stream *)cookie, (char *)buffer, size);
 }
 
-static PHP_FPOS_T stream_cookie_seeker(void *cookie, off_t position, int whence)
+static PHP_FPOS_T stream_cookie_seeker(void *cookie, zend_off_t position, int whence)
 {
 	TSRMLS_FETCH();
 
@@ -114,7 +114,7 @@ static int stream_cookie_seeker(void *cookie, __off64_t *position, int whence)
 {
 	TSRMLS_FETCH();
 
-	*position = php_stream_seek((php_stream *)cookie, (off_t)*position, whence);
+	*position = php_stream_seek((php_stream *)cookie, (zend_off_t)*position, whence);
 
 	if (*position == -1) {
 		return -1;
@@ -122,7 +122,7 @@ static int stream_cookie_seeker(void *cookie, __off64_t *position, int whence)
 	return 0;
 }
 # else
-static int stream_cookie_seeker(void *cookie, off_t position, int whence)
+static int stream_cookie_seeker(void *cookie, zend_off_t position, int whence)
 {
 	TSRMLS_FETCH();
 
@@ -206,7 +206,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 	if (ret && castas != PHP_STREAM_AS_FD_FOR_SELECT) {
 		php_stream_flush(stream);
 		if (stream->ops->seek && (stream->flags & PHP_STREAM_FLAG_NO_SEEK) == 0) {
-			off_t dummy;
+			zend_off_t dummy;
 
 			stream->ops->seek(stream, stream->position, SEEK_SET, &dummy TSRMLS_CC);
 			stream->readpos = stream->writepos = 0;
@@ -246,7 +246,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 		}
 
 		if (*ret != NULL) {
-			off_t pos;
+			zend_off_t pos;
 
 			stream->fclose_stdiocast = PHP_STREAM_FCLOSE_FOPENCOOKIE;
 

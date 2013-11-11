@@ -1854,7 +1854,7 @@ static php_stream_filter_factory strfilter_convert_factory = {
 typedef struct _php_consumed_filter_data {
 	int persistent;
 	size_t consumed;
-	off_t offset;
+	zend_off_t offset;
 } php_consumed_filter_data;
 
 static php_stream_filter_status_t consumed_filter_filter(

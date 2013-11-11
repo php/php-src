@@ -74,7 +74,7 @@ PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t le
 PHPAPI int _php_stream_mmap_unmap(php_stream *stream TSRMLS_DC);
 #define php_stream_mmap_unmap(stream)				_php_stream_mmap_unmap((stream) TSRMLS_CC)
 
-PHPAPI int _php_stream_mmap_unmap_ex(php_stream *stream, off_t readden TSRMLS_DC);
+PHPAPI int _php_stream_mmap_unmap_ex(php_stream *stream, zend_off_t readden TSRMLS_DC);
 #define php_stream_mmap_unmap_ex(stream, readden)			_php_stream_mmap_unmap_ex((stream), (readden) TSRMLS_CC)
 END_EXTERN_C()
 

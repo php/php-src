@@ -15,6 +15,7 @@
 #  ifdef _WIN64
 typedef __int64 zend_int_t;
 typedef unsigned __int64 zend_uint_t;
+typedef __int64 zend_off_t;
 #   define ZEND_INT_MAX _I64_MAX
 #   define ZEND_INT_MIN _I64_MIN
 #   define ZEND_UINT_MAX _UI64_MAX
@@ -25,6 +26,7 @@ typedef unsigned __int64 zend_uint_t;
 #  if defined(__LP64__) || defined(_LP64)
 typedef int64_t zend_int_t;
 typedef uint64_t zend_uint_t;
+typedef off_t zend_off_t;
 #   define ZEND_INT_MAX INT64_MAX
 #   define ZEND_INT_MIN INT64_MIN
 #   define ZEND_UINT_MAX UINT64_MAX
@@ -36,6 +38,7 @@ typedef uint64_t zend_uint_t;
 #else
 typedef long zend_int_t;
 typedef unsigned long zend_uint_t;
+typedef off_t zend_off_t;
 # define ZEND_INT_MAX LONG_MAX
 # define ZEND_INT_MIN LONG_MIN
 # define ZEND_UINT_MAX ULONG_MAX

@@ -258,7 +258,7 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 		} else {
 			stream->position = lseek(self->fd, 0, SEEK_CUR);
 #ifdef ESPIPE
-			if (stream->position == (off_t)-1 && errno == ESPIPE) {
+			if (stream->position == (zend_off_t)-1 && errno == ESPIPE) {
 				stream->position = 0;
 				stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 				self->is_pipe = 1;
@@ -455,7 +455,7 @@ static int php_stdiop_flush(php_stream *stream TSRMLS_DC)
 	return 0;
 }
 
-static int php_stdiop_seek(php_stream *stream, off_t offset, int whence, off_t *newoffset TSRMLS_DC)
+static int php_stdiop_seek(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffset TSRMLS_DC)
 {
 	php_stdio_stream_data *data = (php_stdio_stream_data*)stream->abstract;
 	int ret;
@@ -468,10 +468,10 @@ static int php_stdiop_seek(php_stream *stream, off_t offset, int whence, off_t *
 	}
 
 	if (data->fd >= 0) {
-		off_t result;
+		zend_off_t result;
 		
 		result = lseek(data->fd, offset, whence);
-		if (result == (off_t)-1)
+		if (result == (zend_off_t)-1)
 			return -1;
 
 		*newoffset = result;
@@ -841,7 +841,7 @@ static int php_plain_files_dirstream_close(php_stream *stream, int close_handle 
 	return closedir((DIR *)stream->abstract);
 }
 
-static int php_plain_files_dirstream_rewind(php_stream *stream, off_t offset, int whence, off_t *newoffs TSRMLS_DC)
+static int php_plain_files_dirstream_rewind(php_stream *stream, zend_off_t offset, int whence, zend_off_t *newoffs TSRMLS_DC)
 {
 	rewinddir((DIR *)stream->abstract);
 	return 0;

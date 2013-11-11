@@ -418,7 +418,7 @@ PHP_FUNCTION(stream_get_contents)
 
 	if (desiredpos >= 0) {
 		zend_str_size seek_res = 0;
-		off_t	position;
+		zend_off_t	position;
 
 		position = php_stream_tell(stream);
 		if (position >= 0 && desiredpos > position) {

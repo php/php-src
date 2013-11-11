@@ -420,7 +420,7 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int co
  * skip over a variable-length block; assumes proper length marker */
 static int php_skip_variable(php_stream * stream TSRMLS_DC)
 {
-	off_t length = ((unsigned int)php_read2(stream TSRMLS_CC));
+	zend_off_t length = ((unsigned int)php_read2(stream TSRMLS_CC));
 
 	if (length < 2)	{
 		return 0;

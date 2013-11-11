@@ -786,7 +786,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 		char buff[FILLUNIT];
 		char *cd = NULL, *param = NULL, *filename = NULL, *tmp = NULL;
 		size_t blen = 0, wlen = 0;
-		off_t offset;
+		zend_off_t offset;
 
 		zend_llist_clean(&header);
 
