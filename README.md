@@ -11,7 +11,7 @@ Features
 ========
 
  - step through debugging
- - break at function entry or file:line
+ - break at function entry, file:line or address
  - showing debug backtraces
  - easy manipulation of the environment with built-in eval()
  - sapi agnositicism, easy integration
