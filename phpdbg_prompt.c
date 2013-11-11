@@ -270,7 +270,7 @@ static PHPDBG_COMMAND(clean) /* {{{ */
     zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
     zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC); 
     zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC); 
-    zend_hash_destroy(&EG(included_files));
+    zend_hash_clean(&EG(included_files));
     return SUCCESS;
 } /* }}} */
 
@@ -347,7 +347,7 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 	return FAILURE;
 } /* }}} */
 
-int phpdbg_interactive(int argc, char **argv TSRMLS_DC) /* {{{ */
+int phpdbg_interactive(TSRMLS_D) /* {{{ */
 {
 	char cmd[PHPDBG_MAX_CMD];
 
@@ -417,7 +417,7 @@ zend_vm_enter:
 
         if (PHPDBG_G(has_file_bp)
 			&& phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
-			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+			while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
 				continue;
 			}
 		}
@@ -429,7 +429,7 @@ zend_vm_enter:
 					|| previous->opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 					if (phpdbg_find_breakpoint_symbol(
 						previous->function_state.function TSRMLS_CC) == SUCCESS) {
-						while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+						while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
 							continue;
 						}
 					}
@@ -443,7 +443,7 @@ zend_vm_enter:
 		    execute_data TSRMLS_CC);
 
 		if (PHPDBG_G(stepping)) {
-			while (phpdbg_interactive(0, NULL TSRMLS_CC) != PHPDBG_NEXT) {
+			while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
 				continue;
 			}
 		}

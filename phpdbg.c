@@ -355,7 +355,7 @@ int main(int argc, char *argv[]) /* {{{ */
 
         do {
 		    zend_try {
-		        phpdbg_interactive(argc, argv TSRMLS_CC);
+		        phpdbg_interactive(TSRMLS_C);
 		    } zend_catch {
 		    
 		    } zend_end_try();

@@ -58,7 +58,7 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 #define PHPDBG_COMMAND(name) \
 	int phpdbg_do_##name(const char *expr, size_t expr_len TSRMLS_DC)
 
-int phpdbg_interactive(int argc, char **argv TSRMLS_DC);
+int phpdbg_interactive(TSRMLS_D);
 void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 
 #endif /* PHPDBG_PROMPT_H */
