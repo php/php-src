@@ -96,9 +96,11 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 
 static PHP_FUNCTION(phpdbg_break) /* {{{ */ 
 {
-    if (EG(current_execute_data)) {
+    if (EG(current_execute_data) && EG(active_op_array)) {
+        zend_ulong opline_num = EG(current_execute_data)->opline - EG(active_op_array)->opcodes;
+        
         phpdbg_set_breakpoint_opline_ex(
-            EG(current_execute_data)->opline TSRMLS_CC);
+            &EG(active_op_array)->opcodes[opline_num+1] TSRMLS_CC);
     }
 } /* }}} */
 
