@@ -376,6 +376,10 @@ static PHPDBG_COMMAND(clear) /* {{{ */
     zend_hash_clean(&PHPDBG_G(bp_symbols));
     zend_hash_clean(&PHPDBG_G(bp_oplines));
     
+    PHPDBG_G(has_file_bp) = 0;
+    PHPDBG_G(has_sym_bp) = 0;
+    PHPDBG_G(has_opline_bp) = 0;
+    
     return SUCCESS;
 } /* }}} */
 

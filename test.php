@@ -10,6 +10,8 @@ if (!isset($greeting)) {
     echo test();
 }
 
+phpdbg_break();
+
 test2();
 return true;
 ?>

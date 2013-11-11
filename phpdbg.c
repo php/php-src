@@ -94,10 +94,27 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
     return SUCCESS;
 } /* }}} */
 
+static PHP_FUNCTION(phpdbg_break) /* {{{ */ 
+{
+    if (EG(active_op_array)) {
+        phpdbg_set_breakpoint_opline_ex(
+            EG(active_op_array)->opcodes TSRMLS_CC);
+    }
+} /* }}} */
+
+zend_function_entry phpdbg_user_functions[] = {
+    PHP_FE(phpdbg_break, NULL)
+#ifdef  PHP_FE_END
+	PHP_FE_END
+#else
+	{NULL,NULL,NULL}
+#endif
+};
+
 static zend_module_entry sapi_phpdbg_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"phpdbg",
-	NULL,
+	phpdbg_user_functions,
 	PHP_MINIT(phpdbg),
 	NULL,
 	PHP_RINIT(phpdbg),

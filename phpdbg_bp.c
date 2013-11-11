@@ -104,6 +104,24 @@ void phpdbg_set_breakpoint_opline(const char *name TSRMLS_DC) /* {{{ */
 	}
 } /* }}} */
 
+void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ */
+{
+	if (!zend_hash_index_exists(&PHPDBG_G(bp_oplines), (zend_ulong) opline)) {
+		phpdbg_breakline_t new_break;
+
+		PHPDBG_G(has_opline_bp) = 1;
+        
+        asprintf((char**)&new_break.name, "%#x", opline);
+        
+		new_break.opline = opline;
+		new_break.id = PHPDBG_G(bp_count)++;
+        
+		zend_hash_index_update(&PHPDBG_G(bp_oplines), opline, &new_break, sizeof(phpdbg_breakline_t), NULL);
+	    
+	    printf("[Breakpoint #%d added at %#x]\n", new_break.id, new_break.opline);
+	}
+} /* }}} */
+
 int phpdbg_find_breakpoint_file(zend_op_array *op_array TSRMLS_DC) /* {{{ */
 {
 	size_t name_len = strlen(op_array->filename);
@@ -166,3 +184,4 @@ int phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ *
 	
 	return FAILURE;
 } /* }}} */
+
