@@ -530,6 +530,9 @@ zend_vm_enter:
 		}
 #endif
 
+        phpdbg_print_opline(
+		    execute_data TSRMLS_CC);
+
         if (PHPDBG_G(has_file_bp)
 			&& phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
 			while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
@@ -566,9 +569,6 @@ zend_vm_enter:
 		}
 		
 		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
-
-		phpdbg_print_opline(
-		    execute_data TSRMLS_CC);
 
 		if (PHPDBG_G(stepping)) {
 			while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
