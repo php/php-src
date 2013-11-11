@@ -20,6 +20,9 @@
 #ifndef PHPDBG_BP_H
 #define PHPDBG_BP_H
 
+/* {{{ */
+typedef struct _zend_op *phpdbg_opline_ptr_t; /* }}} */
+
 /**
  * Breakpoint file-based representation
  */
@@ -52,6 +55,6 @@ void phpdbg_set_breakpoint_opline(const char* TSRMLS_DC);
 
 int phpdbg_find_breakpoint_file(zend_op_array* TSRMLS_DC);
 int phpdbg_find_breakpoint_symbol(zend_function* TSRMLS_DC);
-int phpdbg_find_breakpoint_opline(zend_op* TSRMLS_DC);
+int phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t TSRMLS_DC);
 
 #endif /* PHPDBG_BP_H */

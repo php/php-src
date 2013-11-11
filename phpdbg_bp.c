@@ -152,9 +152,7 @@ int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 	return FAILURE;
 } /* }}} */
 
-typedef struct _zend_op *zend_op_ptr;
-
-int phpdbg_find_breakpoint_opline(zend_op_ptr opline TSRMLS_DC) /* {{{ */
+int phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{{ */
 {
 	phpdbg_breakline_t *bp;
 
