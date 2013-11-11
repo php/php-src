@@ -111,7 +111,7 @@ static PHPDBG_COMMAND(next) /* {{{ */
 static PHPDBG_COMMAND(run) /* {{{ */
 {
     if (EG(in_execution)) {
-        printf("[Cannot start another execution while on is in progress]\n");
+        printf("[Cannot start another execution while one is in progress]\n");
         return FAILURE;
     }
     
