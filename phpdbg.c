@@ -396,7 +396,7 @@ int main(int argc, char *argv[]) /* {{{ */
 		    zend_try {
 		        phpdbg_interactive(TSRMLS_C);
 		    } zend_catch {
-		    
+                
 		    } zend_end_try();
 		} while(!PHPDBG_G(quitting));
 		

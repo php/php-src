@@ -6,6 +6,7 @@ function test() {
 	$hidden = "variable";
 	phpdbg_break();
 }
+
 function test2() {
     echo "Hello World 2\n";
 }

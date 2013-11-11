@@ -110,6 +110,11 @@ static PHPDBG_COMMAND(next) /* {{{ */
 
 static PHPDBG_COMMAND(run) /* {{{ */
 {
+    if (EG(in_execution)) {
+        printf("[Cannot start another execution while on is in progress]\n");
+        return FAILURE;
+    }
+    
 	if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
@@ -528,7 +533,9 @@ zend_vm_enter:
         if (PHPDBG_G(has_file_bp)
 			&& phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {
 			while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-				continue;
+				if (!PHPDBG_G(quitting)) {
+				    continue;
+				}
 			}
 		}
 
@@ -540,7 +547,9 @@ zend_vm_enter:
 					if (phpdbg_find_breakpoint_symbol(
 						previous->function_state.function TSRMLS_CC) == SUCCESS) {
 						while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-							continue;
+							if (!PHPDBG_G(quitting)) {
+				                continue;
+				            }
 						}
 					}
 				}
@@ -550,10 +559,12 @@ zend_vm_enter:
         if (PHPDBG_G(has_opline_bp)
 			&& phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
 			while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-				continue;
+				if (!PHPDBG_G(quitting)) {
+				    continue;
+				}
 			}
 		}
-
+		
 		PHPDBG_G(vmret) = execute_data->opline->handler(execute_data TSRMLS_CC);
 
 		phpdbg_print_opline(
@@ -561,7 +572,9 @@ zend_vm_enter:
 
 		if (PHPDBG_G(stepping)) {
 			while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-				continue;
+				if (!PHPDBG_G(quitting)) {
+				    continue;
+				}
 			}
 		}
 
