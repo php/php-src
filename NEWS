@@ -2,4 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 20??, PHP 5.7.0 
 
+- JSON:
+  . Fixed bug #64874 ("json_decode handles whitespace and case-sensitivity
+    incorrectly")
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

@@ -21,6 +21,14 @@ PHP X.Y UPGRADE NOTES
 ========================================
 
 
+- JSON:
+  Fixed bug #64874 ("json_decode handles whitespace and case-sensitivity
+  incorrectly")
+  This means that when a non-lowercase JSON text containing only JSON true,
+  false or null is passed to json_decode(), it will error. Please note however
+  that non-lowercase true, false or null have never been accepted inside JSON
+  arrays or JSON strings. This only applies to deserialising single values.
+  
 ========================================
 2. New Features
 ========================================
