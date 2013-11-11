@@ -237,7 +237,7 @@ ZEND_API int zend_stream_fixup(zend_file_handle *file_handle, char **buf, size_t
 			/*  *buf[size] is zeroed automatically by the kernel */
 			*buf = mmap(0, size + ZEND_MMAP_AHEAD, PROT_READ, MAP_PRIVATE, fileno(file_handle->handle.fp), 0);
 			if (*buf != MAP_FAILED) {
-				long offset = ftell(file_handle->handle.fp);
+				zend_int_t offset = zend_ftell(file_handle->handle.fp);
 				file_handle->handle.stream.mmap.map = *buf;
 
 				if (offset != -1) {

@@ -78,4 +78,14 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh TSRMLS_DC);
 ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *fh2);
 END_EXTERN_C()
 
+#ifdef _WIN64
+# define zend_fseek _fseeki64
+# define zend_ftell _ftelli64
+# define zend_lseek _lseeki64
+#else
+# define zend_fseek fseek
+# define zend_ftell ftell
+# define zend_lseek lseek
+#endif
+
 #endif

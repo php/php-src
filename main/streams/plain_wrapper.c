@@ -256,7 +256,7 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 		if (self->is_pipe) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 		} else {
-			stream->position = lseek(self->fd, 0, SEEK_CUR);
+			stream->position = zend_lseek(self->fd, 0, SEEK_CUR);
 #ifdef ESPIPE
 			if (stream->position == (zend_off_t)-1 && errno == ESPIPE) {
 				stream->position = 0;
@@ -295,7 +295,7 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 		if (self->is_pipe) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 		} else {
-			stream->position = ftell(file);
+			stream->position = zend_ftell(file);
 		}
 	}
 
@@ -335,7 +335,7 @@ static size_t php_stdiop_write(php_stream *stream, const char *buf, size_t count
 
 #if HAVE_FLUSHIO
 		if (!data->is_pipe && data->last_op == 'r') {
-			fseek(data->file, 0, SEEK_CUR);
+			zend_fseek(data->file, 0, SEEK_CUR);
 		}
 		data->last_op = 'w';
 #endif
@@ -366,7 +366,7 @@ static size_t php_stdiop_read(php_stream *stream, char *buf, size_t count TSRMLS
 	} else {
 #if HAVE_FLUSHIO
 		if (!data->is_pipe && data->last_op == 'w')
-			fseek(data->file, 0, SEEK_CUR);
+			zend_fseek(data->file, 0, SEEK_CUR);
 		data->last_op = 'r';
 #endif
 
@@ -470,7 +470,7 @@ static int php_stdiop_seek(php_stream *stream, zend_off_t offset, int whence, ze
 	if (data->fd >= 0) {
 		zend_off_t result;
 		
-		result = lseek(data->fd, offset, whence);
+		result = zend_lseek(data->fd, offset, whence);
 		if (result == (zend_off_t)-1)
 			return -1;
 
@@ -478,8 +478,8 @@ static int php_stdiop_seek(php_stream *stream, zend_off_t offset, int whence, ze
 		return 0;
 		
 	} else {
-		ret = fseek(data->file, offset, whence);
-		*newoffset = ftell(data->file);
+		ret = zend_fseek(data->file, offset, whence);
+		*newoffset = zend_ftell(data->file);
 		return ret;
 	}
 }

@@ -254,7 +254,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			 * the stdio layer to believe it's real location. */
 			pos = php_stream_tell(stream);
 			if (pos > 0) {
-				fseek(*ret, pos, SEEK_SET);
+				zend_fseek(*ret, pos, SEEK_SET);
 			}
 
 			goto exit_success;
