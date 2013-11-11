@@ -92,6 +92,8 @@ PHPDBG_HELP(break) /* {{{ */
 	printf("Will break execution on entry to my_function\n");
 	printf("\tphpdbg> break 0x7ff68f570e08\n");
 	printf("Will break at the opline with the address provided (addresses are shown during execution)\n");
+	printf("It is important to note, an address is only valid for the current compiled representation of the script\n");
+	printf("If you have to clean the environment and recompile then your opline break points will be invalid\n");
 	return SUCCESS;
 } /* }}} */
 
