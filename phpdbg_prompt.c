@@ -259,6 +259,19 @@ static PHPDBG_COMMAND(print) /* {{{ */
         }
     }
 #endif
+
+    if (PHPDBG_G(has_opline_bp)) {
+        HashPosition position;
+        phpdbg_breakline_t *brake;
+        
+        printf("--------------------------------------\n");
+        printf("Opline Break Point Information:\n");
+        for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp_oplines), &position);
+             zend_hash_get_current_data_ex(&PHPDBG_G(bp_oplines), (void**) &brake, &position) == SUCCESS;
+             zend_hash_move_forward_ex(&PHPDBG_G(bp_oplines), &position)) {
+             printf("#%d\t0x%x\n", brake->id, brake->opline);
+        }
+    }
     
     printf("--------------------------------------\n");
 	return SUCCESS;
