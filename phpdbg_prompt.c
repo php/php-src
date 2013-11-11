@@ -250,6 +250,30 @@ static PHPDBG_COMMAND(quit) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+static int clean_non_persistent_constant_full(const zend_constant *c TSRMLS_DC) /* {{{ */
+{
+    return (c->flags & CONST_PERSISTENT) ? 0 : 1;
+} /* }}} */
+
+static int clean_non_persistent_class_full(zend_class_entry **ce TSRMLS_DC) /* {{{ */
+{
+    return ((*ce)->type == ZEND_INTERNAL_CLASS) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
+} /* }}} */
+
+static int clean_non_persistent_function_full(zend_function *function TSRMLS_DC) /* {{{ */
+{
+    return (function->type == ZEND_INTERNAL_FUNCTION) ? ZEND_HASH_APPLY_KEEP : ZEND_HASH_APPLY_REMOVE;
+} /* }}} */
+
+static PHPDBG_COMMAND(clean) /* {{{ */
+{
+    zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
+    zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC); 
+    zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC); 
+    zend_hash_destroy(&EG(included_files));
+    return SUCCESS;
+} /* }}} */
+
 static PHPDBG_COMMAND(help) /* {{{ */
 {
 	printf("Welcome to phpdbg, the interactive PHP debugger.\n");
@@ -296,6 +320,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(print,     "print something"),
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
 	PHPDBG_COMMAND_D(back,      "show backtrace"),
+	PHPDBG_COMMAND_D(clean,     "clean the execution environment"),
 	PHPDBG_COMMAND_D(help,      "show help menu"),
 	PHPDBG_COMMAND_D(quiet,     "silence some output"),
 	PHPDBG_COMMAND_D(quit,      "exit phpdbg"),

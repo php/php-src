@@ -91,6 +91,13 @@ PHPDBG_HELP(break) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+PHPDBG_HELP(clean) /* {{{ */
+{
+    printf("While debugging you may experience errors because of attempts to redeclare classes, constants or functions.\n");
+    printf("Cleaning the environment cleans these tables, so that files can be recompiled without exiting phpdbg.\n");
+    return SUCCESS;
+} /* }}} */
+
 PHPDBG_HELP(quiet) /* {{{ */
 {
     printf("Setting quietness on will stop the OPLINE output during execution\n");

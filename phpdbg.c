@@ -353,12 +353,14 @@ int main(int argc, char *argv[]) /* {{{ */
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();
 
-		zend_try {
-			do {
-			    phpdbg_interactive(argc, argv TSRMLS_CC);
-			} while(!PHPDBG_G(quitting));
-		} zend_end_try();
-
+        do {
+		    zend_try {
+		        phpdbg_interactive(argc, argv TSRMLS_CC);
+		    } zend_catch {
+		    
+		    } zend_end_try();
+		} while(!PHPDBG_G(quitting));
+		
 		if (ini_entries) {
 		    free(ini_entries);
 		}
