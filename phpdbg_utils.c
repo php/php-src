@@ -54,7 +54,7 @@ int phpdbg_is_class_method(const char *str, size_t len, char **class, char **met
 	const char *sep = strstr(str, "::");
 	size_t class_len, method_len;
 
-	if (!sep) {
+	if (!sep || sep == str || sep+2 == str+len-1) {
 		return 0;
 	}
 
