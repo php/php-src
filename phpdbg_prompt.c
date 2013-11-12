@@ -383,7 +383,9 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		}
 	} else {
 		if (phpdbg_is_addr(expr)) {
-			phpdbg_set_breakpoint_opline(expr TSRMLS_CC);
+			zend_ulong opline = strtoul(expr, 0, 16);
+
+			phpdbg_set_breakpoint_opline(opline TSRMLS_CC);
 		} else if (phpdbg_is_numeric(expr)) {
 			const char *filename = zend_get_executed_filename(TSRMLS_C);
 			long line_num = strtol(expr, NULL, 0);
