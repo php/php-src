@@ -96,7 +96,8 @@ static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 static PHP_FUNCTION(phpdbg_break)
 {
     if (EG(current_execute_data) && EG(active_op_array)) {
-        zend_ulong opline_num = (EG(current_execute_data)->opline - EG(active_op_array)->opcodes);
+        zend_ulong opline_num = (EG(current_execute_data)->opline -
+			EG(active_op_array)->opcodes);
 
         phpdbg_set_breakpoint_opline_ex(
             &EG(active_op_array)->opcodes[opline_num+1] TSRMLS_CC);
@@ -144,7 +145,8 @@ static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* 
 	return SUCCESS;
 } /* }}} */
 
-static char* php_sapi_phpdbg_read_cookies(TSRMLS_D) { /* {{{ */
+static char* php_sapi_phpdbg_read_cookies(TSRMLS_D) /* {{{ */
+{
     return NULL;
 } /* }}} */
 
@@ -195,24 +197,33 @@ static void php_sapi_phpdbg_register_vars(zval *track_vars_array TSRMLS_DC) /* {
 
     if (PHPDBG_G(exec)) {
         len = PHPDBG_G(exec_len);
-        if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
-	        php_register_variable("PHP_SELF", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+        if (sapi_module.input_filter(PARSE_SERVER, "PHP_SELF",
+			&PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
+	        php_register_variable("PHP_SELF", PHPDBG_G(exec),
+				track_vars_array TSRMLS_CC);
         }
-        if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_NAME", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
-	        php_register_variable("SCRIPT_NAME", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+        if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_NAME",
+			&PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
+	        php_register_variable("SCRIPT_NAME", PHPDBG_G(exec),
+				track_vars_array TSRMLS_CC);
         }
 
-        if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_FILENAME", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
-	        php_register_variable("SCRIPT_FILENAME", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+        if (sapi_module.input_filter(PARSE_SERVER, "SCRIPT_FILENAME",
+			&PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
+	        php_register_variable("SCRIPT_FILENAME", PHPDBG_G(exec),
+				track_vars_array TSRMLS_CC);
         }
-        if (sapi_module.input_filter(PARSE_SERVER, "PATH_TRANSLATED", &PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
-	        php_register_variable("PATH_TRANSLATED", PHPDBG_G(exec), track_vars_array TSRMLS_CC);
+        if (sapi_module.input_filter(PARSE_SERVER, "PATH_TRANSLATED",
+			&PHPDBG_G(exec), PHPDBG_G(exec_len), &len TSRMLS_CC)) {
+	        php_register_variable("PATH_TRANSLATED", PHPDBG_G(exec),
+				track_vars_array TSRMLS_CC);
         }
     }
 
     /* any old docroot will doo */
     len = 0U;
-    if (sapi_module.input_filter(PARSE_SERVER, "DOCUMENT_ROOT", &docroot, len, &len TSRMLS_CC)) {
+    if (sapi_module.input_filter(PARSE_SERVER, "DOCUMENT_ROOT",
+		&docroot, len, &len TSRMLS_CC)) {
 	    php_register_variable("DOCUMENT_ROOT", docroot, track_vars_array TSRMLS_CC);
     }
 }
@@ -253,16 +264,16 @@ static sapi_module_struct phpdbg_sapi_module = {
 /* }}} */
 
 const opt_struct OPTIONS[] = { /* {{{ */
-    {'c', 1, "ini path override"},
-    {'d', 1, "define ini entry on command line"},
-    {'n', 0, "no php.ini"},
-    {'z', 1, "load zend_extension"},
-    /* phpdbg options */
-    {'e', 1, "exec"},
-    {'v', 0, "verbose"},
-    {'s', 0, "step"},
-    {'b', 0, "boring colours"},
-    {'-', 0, NULL}
+	{'c', 1, "ini path override"},
+	{'d', 1, "define ini entry on command line"},
+	{'n', 0, "no php.ini"},
+	{'z', 1, "load zend_extension"},
+	/* phpdbg options */
+	{'e', 1, "exec"},
+	{'v', 0, "verbose"},
+	{'s', 0, "step"},
+	{'b', 0, "boring colours"},
+	{'-', 0, NULL}
 }; /* }}} */
 
 const char phpdbg_ini_hardcoded[] =
@@ -280,13 +291,14 @@ const char phpdbg_ini_hardcoded[] =
 	ZVAL_STRINGL(&tmp, zend_strndup(value, sizeof(value)-1), sizeof(value)-1, 0);\
 	zend_hash_update(configuration_hash, name, sizeof(name), &tmp, sizeof(zval), NULL);\
 
-void phpdbg_ini_defaults(HashTable *configuration_hash) { /* {{{ */
+void phpdbg_ini_defaults(HashTable *configuration_hash) /* {{{ */
+{
     zval tmp;
 	INI_DEFAULT("report_zend_debug", "0");
 	INI_DEFAULT("display_errors", "1");
 } /* }}} */
 
-int main(int argc, char *argv[]) /* {{{ */
+int main(int argc, char **argv) /* {{{ */
 {
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
 	char *ini_entries = NULL;
