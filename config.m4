@@ -9,7 +9,7 @@ if test "$PHP_PHPDBG" != "no"; then
   AC_DEFINE(HAVE_PHPDBG, 1, [ ])
 
   PHP_PHPDBG_CFLAGS="-I$abc_srcdir"
-  PHP_PHPDBG_FILES="phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_bp.c phpdbg_opcode.c"
+  PHP_PHPDBG_FILES="phpdbg.c phpdbg_prompt.c phpdbg_help.c phpdbg_bp.c phpdbg_opcode.c phpdbg_list.c"
 
   PHP_SUBST(PHP_PHPDBG_CFLAGS)
   PHP_SUBST(PHP_PHPDBG_FILES)
@@ -27,7 +27,7 @@ if test "$PHP_PHPDBG" != "no"; then
                 \$(PHPDBG_EXTRA_LIBS) \
                 \$(ZEND_EXTRA_LIBS) \
          -o \$(BUILD_BINARY)"
-  
+
   PHP_SUBST(BUILD_BINARY)
   PHP_SUBST(BUILD_PHPDBG)
 fi

@@ -123,7 +123,6 @@ PHPDBG_HELP(quiet) /* {{{ */
     printf("Will silence OPLINE output, while\n");
     printf("\tphpdbg> quiet 0\n");
     printf("Will enable OPLINE output again\n");
-    
     return SUCCESS;
 } /* }}} */
 
@@ -133,5 +132,13 @@ PHPDBG_HELP(back) /* {{{ */
 	printf("You can set the limit on the trace, for example:\n");
 	printf("\tphpdbg> back 5\n");
 	printf("Will limit the number of frames to 5, the default is no limit\n");
+	return SUCCESS;
+} /* }}} */
+
+PHPDBG_HELP(list) /* {{{ */
+{
+	printf("The list command displays N line from current context file.\n");
+	printf("\tphpdbg> list 2\n");
+	printf("Will print next 2 lines from the current file\n");
 	return SUCCESS;
 } /* }}} */
