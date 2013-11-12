@@ -286,7 +286,7 @@ void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
             HashPosition position;
             phpdbg_breaksymbol_t *brake;
 
-            PHPDBG_SEP_LINE(TSRMLS_C);
+            phpdbg_writeln(SEPARATE);
             phpdbg_writeln("Function Breakpoints:");
             for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], &position);
                  zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], (void**) &brake, &position) == SUCCESS;
@@ -303,7 +303,7 @@ void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
             zend_uint class_len = 0;
             zend_ulong class_idx = 0L;
 
-            PHPDBG_SEP_LINE(TSRMLS_C);
+            phpdbg_writeln(SEPARATE);
             phpdbg_writeln("Method Breakpoints:");
             for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], &position[0]);
                  zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], (void**) &class_table, &position[0]) == SUCCESS;
@@ -330,7 +330,7 @@ void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
             HashPosition position;
             zend_llist *points;
 
-            PHPDBG_SEP_LINE(TSRMLS_C);
+            phpdbg_writeln(SEPARATE);
             phpdbg_writeln("File Breakpoints:");
             for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], &position);
                  zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE], (void**) &points, &position) == SUCCESS;
@@ -350,7 +350,7 @@ void phpdbg_print_breakpoints(zend_ulong type TSRMLS_DC) /* {{{ */
             HashPosition position;
             phpdbg_breakline_t *brake;
 
-            PHPDBG_SEP_LINE(TSRMLS_C);
+            phpdbg_writeln(SEPARATE);
             phpdbg_writeln("Opline Breakpoints:");
             for (zend_hash_internal_pointer_reset_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], &position);
                  zend_hash_get_current_data_ex(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], (void**) &brake, &position) == SUCCESS;

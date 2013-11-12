@@ -20,8 +20,6 @@
 #ifndef PHPDBG_UTILS_H
 #define PHPDBG_UTILS_H
 
-#include "TSRM.h"
-
 /**
  * Input scan functions
  */
@@ -52,5 +50,8 @@ void phpdbg_print(int TSRMLS_DC, const char*, ...);
 
 /* {{{ For prompt lines */
 #define PROMPT ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64mphpdbg>\033[0m " : "phpdbg> ") /* }}} */
+
+/* {{{ For separation */
+#define SEPARATE "------------------------------------------------" /* }}} */
 
 #endif /* PHPDBG_UTILS_H */

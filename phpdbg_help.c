@@ -34,9 +34,11 @@ PHPDBG_HELP(exec) /* {{{ */
 PHPDBG_HELP(step) /* {{{ */
 {
     phpdbg_writeln("You can enable and disable stepping at any phpdbg prompt during execution");
+    phpdbg_writeln(EMPTY);
     phpdbg_writeln("For example:");
     phpdbg_writeln("\t%sstepping 1", PROMPT);
     phpdbg_writeln("Will enable stepping");
+    phpdbg_writeln(EMPTY);
     phpdbg_writeln("While stepping is enabled you are presented with a prompt after the execution of each opcode");
     return SUCCESS;
 } /* }}} */
@@ -125,6 +127,7 @@ PHPDBG_HELP(clear) /* {{{ */
 PHPDBG_HELP(quiet) /* {{{ */
 {
     phpdbg_writeln("Setting quietness on will stop the OPLINE output during execution");
+    phpdbg_writeln(EMPTY);
     phpdbg_writeln("For example:");
     phpdbg_writeln("\t%squiet 1", PROMPT);
     phpdbg_writeln("Will silence OPLINE output, while");
@@ -136,6 +139,7 @@ PHPDBG_HELP(quiet) /* {{{ */
 PHPDBG_HELP(back) /* {{{ */
 {
 	phpdbg_writeln("The backtrace is gathered with the default debug_backtrace functionality.");
+    phpdbg_writeln(EMPTY);
 	phpdbg_writeln("You can set the limit on the trace, for example:");
 	phpdbg_writeln("\t%sback 5", PROMPT);
 	phpdbg_writeln("Will limit the number of frames to 5, the default is no limit");
@@ -145,12 +149,14 @@ PHPDBG_HELP(back) /* {{{ */
 PHPDBG_HELP(list) /* {{{ */
 {
 	phpdbg_writeln("The list command displays N line from current context file.");
+	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("\t%slist 2", PROMPT);
 	phpdbg_writeln("Will print next 2 lines from the current file");
 	phpdbg_writeln("\t%slist func", PROMPT);
 	phpdbg_writeln("Will print the source of the global function \"func\"");
 	phpdbg_writeln("\t%slist .mine", PROMPT);
 	phpdbg_writeln("Will print the source of the class method \"mine\"");
+	phpdbg_writeln(EMPTY);
 	phpdbg_writeln("Note: before listing functions you must have a populated function table, try compile !!");
 	return SUCCESS;
 } /* }}} */

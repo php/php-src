@@ -214,7 +214,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
 		return SUCCESS;
 	}
 
-    PHPDBG_SEP_LINE(TSRMLS_C);
+    phpdbg_writeln(SEPARATE);
 	phpdbg_notice("Execution Context Information:");
 #ifdef HAVE_LIBREADLINE
     phpdbg_writeln("Readline\tyes");
@@ -249,7 +249,7 @@ static PHPDBG_COMMAND(print) /* {{{ */
     phpdbg_print_breakpoints(PHPDBG_BREAK_METHOD TSRMLS_CC);
     phpdbg_print_breakpoints(PHPDBG_BREAK_OPLINE TSRMLS_CC);
 
-    PHPDBG_SEP_LINE(TSRMLS_C);
+    phpdbg_writeln(SEPARATE);
 
 	return SUCCESS;
 } /* }}} */
@@ -553,7 +553,7 @@ phpdbg_interactive_enter:
 
 phpdbg_interactive_enter:
     while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-        cmd = readline(PHPDBG_PROMPT_LINE(TSRMLS_C));
+        cmd = readline(PROMPT);
 
         cmd_len = strlen(cmd);
 #endif

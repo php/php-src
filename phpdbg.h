@@ -101,17 +101,4 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_ulong flags;                   /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg)
 
-/* {{{ colourful helpers */
-#define PHPDBG_RED_LINE(TSRMLS_D)         \
-    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;31m[" : "[")
-#define PHPDBG_BOLD_LINE(TSRMLS_D)       \
-    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m[" : "[")
-#define PHPDBG_END_LINE(TSRMLS_D)         \
-     ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]")
-#define PHPDBG_PROMPT_LINE(TSRMLS_D)      \
-    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64mphpdbg>\033[0m " : "phpdbg> ")
-#define PHPDBG_SEP_LINE(TSRMLS_D) do {\
-    printf("%s--------------------------------------%s\n", PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));\
-    } while(0) /* }}} */
-
 #endif /* PHPDBG_H */
