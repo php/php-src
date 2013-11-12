@@ -25,6 +25,7 @@
 #include "phpdbg_help.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_opcode.h"
+#include "phpdbg_list.h"
 
 static const phpdbg_command_t phpdbg_prompt_commands[];
 
@@ -430,9 +431,14 @@ static PHPDBG_COMMAND(list) /* {{{ */
 	if (zend_is_executing(TSRMLS_C)) {
 		filename = zend_get_executed_filename(TSRMLS_C);
 		offset = zend_get_executed_lineno(TSRMLS_C);
+	} else if (!filename) {
+		printf("[No file to list]\n");
+		return SUCCESS;
 	}
 
 	phpdbg_list_file(filename, count, offset);
+
+	return SUCCESS;
 } /* }}} */
 
 static const phpdbg_command_t phpdbg_prompt_commands[] = {
