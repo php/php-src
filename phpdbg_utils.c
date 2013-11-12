@@ -79,19 +79,28 @@ void phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 	vspprintf(&buffer, 0, format, args);
 	va_end(args);
 
+    /* TODO(anyone) colours */
+
 	switch (type) {
 		case ERROR:
 			printf("%s%s%s\n",
 				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;31m[" : "["),
 				buffer,
-				PHPDBG_END_LINE(TSRMLS_D));
+				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
 		break;
 
 		case NOTICE:
 			printf("%s%s%s\n",
 				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m[" : "["),
 				buffer,
-				PHPDBG_END_LINE(TSRMLS_D));
+				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]"));
+		break;
+		
+		case WRITE:
+			printf("%s%s%s\n",
+				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m" : ""),
+				buffer,
+				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
 		break;
 	}
 

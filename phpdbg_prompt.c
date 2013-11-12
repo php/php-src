@@ -357,19 +357,21 @@ static int clean_non_persistent_function_full(zend_function *function TSRMLS_DC)
 static PHPDBG_COMMAND(clean) /* {{{ */
 {
     if (!EG(in_execution)) {
-        printf("[Cleaning Environment:]\n");
-        printf("[\tClasses: %d]\n", zend_hash_num_elements(EG(class_table)));
-        printf("[\tFunctions: %d]\n", zend_hash_num_elements(EG(function_table)));
-        printf("[\tConstants: %d]\n", zend_hash_num_elements(EG(zend_constants)));
-        printf("[\tIncluded: %d]\n", zend_hash_num_elements(&EG(included_files)));
+        phpdbg_notice("Cleaning Execution Environment");
+        
+        phpdbg_write("Classes\t%d", zend_hash_num_elements(EG(class_table)));
+        phpdbg_write("Functions\t%d", zend_hash_num_elements(EG(function_table)));
+        phpdbg_write("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
+        phpdbg_write("Includes\t%d", zend_hash_num_elements(&EG(included_files)));   
 
         phpdbg_clean(1 TSRMLS_CC);
 
-        printf("[Clean Environment:]\n");
-        printf("[\tClasses: %d]\n", zend_hash_num_elements(EG(class_table)));
-        printf("[\tFunctions: %d]\n", zend_hash_num_elements(EG(function_table)));
-        printf("[\tConstants: %d]\n", zend_hash_num_elements(EG(zend_constants)));
-        printf("[\tIncluded: %d]\n", zend_hash_num_elements(&EG(included_files)));
+        phpdbg_notice("Clean Execution Environment");
+        
+        phpdbg_write("Classes\t%d", zend_hash_num_elements(EG(class_table)));
+        phpdbg_write("Functions\t%d", zend_hash_num_elements(EG(function_table)));
+        phpdbg_write("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
+        phpdbg_write("Includes\t%d", zend_hash_num_elements(&EG(included_files))); 
     } else {
         phpdbg_error("Cannot clean environment while executing");
         return FAILURE;
@@ -380,12 +382,13 @@ static PHPDBG_COMMAND(clean) /* {{{ */
 
 static PHPDBG_COMMAND(clear) /* {{{ */
 {
-    printf("[Clearing Breakpoints:]\n");
-    printf("[\tFile\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]));
-    printf("[\tSymbols\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]));
-    printf("[\tOplines\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]));
-    printf("[\tMethods\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]));
-
+    phpdbg_notice("Clearing Breakpoints");
+    
+    phpdbg_write("File\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]));
+    phpdbg_write("Functions\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]));
+    phpdbg_write("Methods\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]));
+    phpdbg_write("Oplines\t%d", zend_hash_num_elements(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]));
+    
     phpdbg_clear_breakpoints(TSRMLS_C);
 
     return SUCCESS;

@@ -31,16 +31,18 @@ int phpdbg_is_addr(const char*);
 int phpdbg_is_class_method(const char*, size_t, char**, char**);
 
 /**
- * Error/notice printing helper
+ * Error/notice/formatting helper
  */
 enum {
 	ERROR  = 1,
-	NOTICE
+	NOTICE,
+	WRITE
 };
 
 void phpdbg_print(int TSRMLS_DC, const char*, ...);
 
 #define phpdbg_error(fmt, ...)  phpdbg_print(ERROR  TSRMLS_CC, fmt, ##__VA_ARGS__)
 #define phpdbg_notice(fmt, ...) phpdbg_print(NOTICE TSRMLS_CC, fmt, ##__VA_ARGS__)
+#define phpdbg_write(fmt, ...) phpdbg_print(WRITE TSRMLS_CC, fmt, ##__VA_ARGS__)
 
 #endif /* PHPDBG_UTILS_H */
