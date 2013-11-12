@@ -61,5 +61,6 @@ int phpdbg_do_cmd(const phpdbg_command_t *command, char *cmd_line, size_t cmd_le
 int phpdbg_interactive(TSRMLS_D);
 void phpdbg_execute_ex(zend_execute_data *execute_data TSRMLS_DC);
 void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC);
+void phpdbg_clean(zend_bool full TSRMLS_DC);
 
 #endif /* PHPDBG_PROMPT_H */

@@ -47,9 +47,8 @@ static PHPDBG_COMMAND(exec) /* {{{ */
 		printf(
 		    "%sDestroying compiled opcodes%s\n",
 		    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
-		destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
-		efree(PHPDBG_G(ops));
-		PHPDBG_G(ops) = NULL;
+   		
+   		phpdbg_clean(0 TSRMLS_CC);
 	}
 
 	PHPDBG_G(exec) = estrndup(expr, PHPDBG_G(exec_len) = expr_len);
@@ -99,9 +98,7 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 			    printf(
 			        "%sDestroying previously compiled opcodes%s\n", 
 			        PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
-			    destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
-			    efree(PHPDBG_G(ops));
-			    PHPDBG_G(ops)=NULL;
+			    phpdbg_clean(0 TSRMLS_CC);
 		    }
 		}
 
@@ -184,6 +181,7 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
 			zend_print_zval_r(
 			    &retval, 0 TSRMLS_CC);
+			zval_dtor(&retval);
 			printf("\n");
 		}
 
@@ -439,18 +437,7 @@ static PHPDBG_COMMAND(clean) /* {{{ */
         printf("[\tConstants: %d]\n", zend_hash_num_elements(EG(zend_constants)));
         printf("[\tIncluded: %d]\n", zend_hash_num_elements(&EG(included_files)));
 
-        /* this is implicitly required */
-        if (PHPDBG_G(ops)) {
-            destroy_op_array(
-                PHPDBG_G(ops) TSRMLS_CC);
-            efree(PHPDBG_G(ops));
-            PHPDBG_G(ops) = NULL;
-        }
-
-        zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
-        zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
-        zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC);
-        zend_hash_clean(&EG(included_files));
+        phpdbg_clean(1 TSRMLS_CC);
 
         printf("[Clean Environment:]\n");
         printf("[\tClasses: %d]\n", zend_hash_num_elements(EG(class_table)));
@@ -702,13 +689,38 @@ phpdbg_interactive_enter:
 void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
 {
     /* force out a line while stepping so the user knows what is happening */
-    if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) || (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
+    if (ignore_flags || 
+        (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) || 
+        (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
+        
         zend_op *opline = execute_data->opline;
 
         printf(
             "%sOPLINE: %p:%s%s\n", 
             PHPDBG_BOLD_LINE(TSRMLS_C),
-            opline, phpdbg_decode_opcode(opline->opcode), PHPDBG_END_LINE(TSRMLS_C));
+            opline, 
+            phpdbg_decode_opcode(opline->opcode), 
+            PHPDBG_END_LINE(TSRMLS_C));
+    }
+} /* }}} */
+
+void phpdbg_clean(zend_bool full TSRMLS_DC) /* {{{ */
+{
+    zend_objects_store_call_destructors(&EG(objects_store) TSRMLS_CC);
+ 
+    /* this is implicitly required */
+    if (PHPDBG_G(ops)) {
+        destroy_op_array(
+            PHPDBG_G(ops) TSRMLS_CC);
+        efree(PHPDBG_G(ops));
+        PHPDBG_G(ops) = NULL;
+    }
+
+    if (full) {
+        zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
+        zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
+        zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC);
+        zend_hash_clean(&EG(included_files));
     }
 } /* }}} */
 
