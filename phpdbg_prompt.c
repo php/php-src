@@ -613,8 +613,7 @@ zend_vm_enter:
                         case ZEND_DO_FCALL:
                         case ZEND_DO_FCALL_BY_NAME:
                         case ZEND_INIT_STATIC_METHOD_CALL: {
-                            if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS ||
-                                phpdbg_find_breakpoint_method(previous->function_state.function TSRMLS_CC) == SUCCESS) {
+                            if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS) {
                                 while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
                                     if (!PHPDBG_G(quitting)) {
                                         continue;

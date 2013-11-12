@@ -204,11 +204,12 @@ int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 	ops = (zend_op_array*)fbc;
 	
 	if (ops->scope) {
-	    /* do not check class methods */
-	    return FAILURE;
+	    /* find method breaks here */
+	    return phpdbg_find_breakpoint_method(
+	        ops TSRMLS_CC);
 	}
 
-	fname = ((zend_op_array*)fbc)->function_name;
+	fname = ops->function_name;
 
 	if (!fname) {
 		fname = "main";
@@ -225,22 +226,11 @@ int phpdbg_find_breakpoint_symbol(zend_function *fbc TSRMLS_DC) /* {{{ */
 	return FAILURE;
 } /* }}} */
 
-int phpdbg_find_breakpoint_method(zend_function *fbc TSRMLS_DC) /* {{{ */
+int phpdbg_find_breakpoint_method(zend_op_array *ops TSRMLS_DC) /* {{{ */
 {
 	HashTable *class_table;
 	phpdbg_breakmethod_t *bp;
-    zend_op_array *ops = NULL;
-    
-	if (fbc->type != ZEND_USER_FUNCTION) {
-		return FAILURE;
-	}
 
-    ops = ((zend_op_array*)fbc);
-    
-    if (!ops->scope) {
-        return FAILURE;
-    }
-    
 	if (zend_hash_find(&PHPDBG_G(bp_methods), ops->scope->name, ops->scope->name_length, 
 	        (void**)&class_table) == SUCCESS) {
 		if (zend_hash_find(
