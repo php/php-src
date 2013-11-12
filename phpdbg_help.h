@@ -64,7 +64,7 @@ static const phpdbg_command_t phpdbg_help_commands[] = {
 	PHPDBG_HELP_D(clear,    "clearing breakpoints allows you to run code without interruption"),
 	PHPDBG_HELP_D(back,     "show debug backtrace information during execution"),
     PHPDBG_HELP_D(quiet,    "be quiet during execution"),
-	PHPDBG_HELP_D(list,     "list specified line or function"),
+	PHPDBG_HELP_D(list,     "listing code gives you quick access to code while executing"),
 	{NULL, 0, 0}
 };
 

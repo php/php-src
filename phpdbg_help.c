@@ -142,5 +142,6 @@ PHPDBG_HELP(list) /* {{{ */
 	printf("Will print next 2 lines from the current file\n");
 	printf("\tphpdbg> list func\n");
 	printf("Will print func source code\n");
+	printf("Note: before listing functions you must have a populated function table, try compile !!\n");
 	return SUCCESS;
 } /* }}} */
