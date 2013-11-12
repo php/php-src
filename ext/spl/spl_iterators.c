@@ -688,7 +688,7 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 SPL_METHOD(RecursiveIteratorIterator, getInnerIterator)
 {
 	spl_recursive_it_object   *object = (spl_recursive_it_object*)zend_object_store_get_object(getThis() TSRMLS_CC);
-	long  level = object->level;
+	php_int_t  level = object->level;
 	
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -833,7 +833,7 @@ static union _zend_function *spl_recursive_it_get_method(zval **object_ptr, char
 {
 	union _zend_function    *function_handler;
 	spl_recursive_it_object *object = (spl_recursive_it_object*)zend_object_store_get_object(*object_ptr TSRMLS_CC);
-	long                     level = object->level;
+	php_int_t                     level = object->level;
 	zval                    *zobj;
 
 	if (!object->iterators) {
@@ -1318,7 +1318,7 @@ int spl_dual_it_call_method(char *method, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	p = EG(argument_stack).top_element-2;
-	arg_count = (ulong) *p;
+	arg_count = (php_uint_t) *p;
 
 	func_params = safe_emalloc(sizeof(zval **), arg_count, 0);
 
@@ -2419,7 +2419,7 @@ static inline int spl_limit_it_valid(spl_dual_it_object *intern TSRMLS_DC)
 	}
 }
 
-static inline void spl_limit_it_seek(spl_dual_it_object *intern, long pos TSRMLS_DC)
+static inline void spl_limit_it_seek(spl_dual_it_object *intern, php_int_t pos TSRMLS_DC)
 {
 	zval  *zpos;
 
@@ -3536,7 +3536,7 @@ PHP_FUNCTION(iterator_to_array)
 
 static int spl_iterator_count_apply(zend_object_iterator *iter, void *puser TSRMLS_DC) /* {{{ */
 {
-	(*(long*)puser)++;
+	(*(php_int_t*)puser)++;
 	return ZEND_HASH_APPLY_KEEP;
 }
 /* }}} */
@@ -3546,7 +3546,7 @@ static int spl_iterator_count_apply(zend_object_iterator *iter, void *puser TSRM
 PHP_FUNCTION(iterator_count)
 {
 	zval  *obj;
-	long  count = 0;
+	php_int_t  count = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O", &obj, zend_ce_traversable) == FAILURE) {
 		RETURN_FALSE;
@@ -3561,7 +3561,7 @@ PHP_FUNCTION(iterator_count)
 typedef struct {
 	zval                   *obj;
 	zval                   *args;
-	long                   count;
+	php_int_t                   count;
 	zend_fcall_info        fci;
 	zend_fcall_info_cache  fcc;
 } spl_iterator_apply_info;
