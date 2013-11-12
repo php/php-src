@@ -98,7 +98,7 @@ void phpdbg_print(int type TSRMLS_DC, const char *format, ...) /* {{{ */
 		
 		case WRITE:
 			printf("%s%s%s\n",
-				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m" : ""),
+				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[37m" : ""),
 				buffer,
 				((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[0m" : ""));
 		break;

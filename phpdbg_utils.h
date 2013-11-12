@@ -45,4 +45,7 @@ void phpdbg_print(int TSRMLS_DC, const char*, ...);
 #define phpdbg_notice(fmt, ...) phpdbg_print(NOTICE TSRMLS_CC, fmt, ##__VA_ARGS__)
 #define phpdbg_write(fmt, ...) phpdbg_print(WRITE TSRMLS_CC, fmt, ##__VA_ARGS__)
 
+/* {{{ For writing blank lines */
+#define EMPTY "" /* }}} */
+
 #endif /* PHPDBG_UTILS_H */

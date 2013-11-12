@@ -194,12 +194,12 @@ static PHPDBG_COMMAND(back) /* {{{ */
 		zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), (void**)&tmp, &position) == SUCCESS;
 		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position)) {
 		if (i++) {
-			printf(",\n");
+			phpdbg_write(",");
 		}
 		zend_print_flat_zval_r(*tmp TSRMLS_CC);
 	}
 
-	printf("\n");
+	phpdbg_write(EMPTY);
 	zval_dtor(&zbacktrace);
 
 	return SUCCESS;
@@ -215,34 +215,34 @@ static PHPDBG_COMMAND(print) /* {{{ */
 	}
 
     PHPDBG_SEP_LINE(TSRMLS_C);
-	printf("Execution Context Information:\n");
+	phpdbg_notice("Execution Context Information:");
 #ifdef HAVE_LIBREADLINE
-    printf("Readline\tyes\n");
+    phpdbg_write("Readline\tyes");
 #else
-    printf("Readline\tno\n");
+    phpdbg_write("Readline\tno");
 #endif
-	printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
-	printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
-	printf("Stepping\t%s\n", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
-    printf("Quietness\t%s\n", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
+	phpdbg_write("Exec\t\t%s", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
+	phpdbg_write("Compiled\t%s", PHPDBG_G(ops) ? "yes" : "no");
+	phpdbg_write("Stepping\t%s", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
+    phpdbg_write("Quietness\t%s", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "on" : "off");
 
 	if (PHPDBG_G(ops)) {
-		printf("Opcodes\t\t%d\n", PHPDBG_G(ops)->last);
+		phpdbg_write("Opcodes\t\t%d", PHPDBG_G(ops)->last);
 
 		if (PHPDBG_G(ops)->last_var) {
-			printf("Variables\t%d\n", PHPDBG_G(ops)->last_var-1);
+			phpdbg_write("Variables\t%d", PHPDBG_G(ops)->last_var-1);
 		} else {
-			printf("Variables\tNone\n");
+			phpdbg_write("Variables\tNone");
 		}
 	}
-	printf("Executing\t%s\n", EG(in_execution) ? "yes" : "no");
+	phpdbg_write("Executing\t%s", EG(in_execution) ? "yes" : "no");
 	if (EG(in_execution)) {
-		printf("VM Return\t%d\n", PHPDBG_G(vmret));
+		phpdbg_write("VM Return\t%d", PHPDBG_G(vmret));
 	}
-	printf("Classes\t\t%d\n", zend_hash_num_elements(EG(class_table)));
-    printf("Functions\t%d\n", zend_hash_num_elements(EG(function_table)));
-    printf("Constants\t%d\n", zend_hash_num_elements(EG(zend_constants)));
-    printf("Included\t%d\n", zend_hash_num_elements(&EG(included_files)));
+	phpdbg_write("Classes\t\t%d", zend_hash_num_elements(EG(class_table)));
+    phpdbg_write("Functions\t%d", zend_hash_num_elements(EG(function_table)));
+    phpdbg_write("Constants\t%d", zend_hash_num_elements(EG(zend_constants)));
+    phpdbg_write("Included\t%d", zend_hash_num_elements(&EG(included_files)));
 
     phpdbg_print_breakpoints(PHPDBG_BREAK_FILE TSRMLS_CC);
     phpdbg_print_breakpoints(PHPDBG_BREAK_SYM TSRMLS_CC);
@@ -407,19 +407,19 @@ static PHPDBG_COMMAND(help) /* {{{ */
 		const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
 		const phpdbg_command_t *help_command = phpdbg_help_commands;
 
-		printf("To get help regarding a specific command type \"help command\"\n");
+		phpdbg_write("To get help regarding a specific command type \"help command\"");
 
 		phpdbg_notice("Commands");
 
 		while (prompt_command && prompt_command->name) {
-			printf("\t%s\t%s\n", prompt_command->name, prompt_command->tip);
+			phpdbg_write("\t%s\t%s", prompt_command->name, prompt_command->tip);
 			++prompt_command;
 		}
 
 		phpdbg_notice("Helpers Loaded");
 
 		while (help_command && help_command->name) {
-			printf("\t%s\t%s\n", help_command->name, help_command->tip);
+			phpdbg_write("\t%s\t%s", help_command->name, help_command->tip);
 			++help_command;
 		}
 	}
