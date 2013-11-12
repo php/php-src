@@ -291,7 +291,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len){
 }
 /* }}} */
 
-CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{{ */
+CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{{ */
 {
 	WIN32_FILE_ATTRIBUTE_DATA data;
 	__int64 t;
@@ -407,7 +407,7 @@ CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat) /* {{
 
 static int php_is_dir_ok(const cwd_state *state)  /* {{{ */
 {
-	struct stat buf;
+	zend_stat_t buf;
 
 	if (php_sys_stat(state->cwd, &buf) == 0 && S_ISDIR(buf.st_mode))
 		return (0);
@@ -418,7 +418,7 @@ static int php_is_dir_ok(const cwd_state *state)  /* {{{ */
 
 static int php_is_file_ok(const cwd_state *state)  /* {{{ */
 {
-	struct stat buf;
+	zend_stat_t buf;
 
 	if (php_sys_stat(state->cwd, &buf) == 0 && S_ISREG(buf.st_mode))
 		return (0);
@@ -784,7 +784,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 	HANDLE hFind;
 	ALLOCA_FLAG(use_heap_large)
 #else
-	struct stat st;
+	zend_stat_t st;
 #endif
 	realpath_cache_bucket *bucket;
 	char *tmp;
@@ -1739,7 +1739,7 @@ CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC) /
 }
 /* }}} */
 
-CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ */
+CWD_API int virtual_stat(const char *path, zend_stat_t *buf TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	int retval;
@@ -1757,7 +1757,7 @@ CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ */
 }
 /* }}} */
 
-CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC) /* {{{ */
+CWD_API int virtual_lstat(const char *path, zend_stat_t *buf TSRMLS_DC) /* {{{ */
 {
 	cwd_state new_state;
 	int retval;

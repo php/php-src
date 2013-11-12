@@ -850,7 +850,7 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 {
 	zval *stat_dev, *stat_ino, *stat_mode, *stat_nlink, *stat_uid, *stat_gid, *stat_rdev,
 		 *stat_size, *stat_atime, *stat_mtime, *stat_ctime, *stat_blksize, *stat_blocks;
-	struct stat *stat_sb;
+	zend_stat_t *stat_sb;
 	php_stream_statbuf ssb;
 	int flags = 0, rmask=S_IROTH, wmask=S_IWOTH, xmask=S_IXOTH; /* access rights defaults to other */
 	char *stat_sb_names[13] = {
@@ -962,21 +962,21 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 
 	switch (type) {
 	case FS_PERMS:
-		RETURN_LONG((long)ssb.sb.st_mode);
+		RETURN_LONG((php_int_t)ssb.sb.st_mode);
 	case FS_INODE:
-		RETURN_LONG((long)ssb.sb.st_ino);
+		RETURN_LONG((php_int_t)ssb.sb.st_ino);
 	case FS_SIZE:
-		RETURN_LONG((long)ssb.sb.st_size);
+		RETURN_LONG((php_int_t)ssb.sb.st_size);
 	case FS_OWNER:
-		RETURN_LONG((long)ssb.sb.st_uid);
+		RETURN_LONG((php_int_t)ssb.sb.st_uid);
 	case FS_GROUP:
-		RETURN_LONG((long)ssb.sb.st_gid);
+		RETURN_LONG((php_int_t)ssb.sb.st_gid);
 	case FS_ATIME:
-		RETURN_LONG((long)ssb.sb.st_atime);
+		RETURN_LONG((php_int_t)ssb.sb.st_atime);
 	case FS_MTIME:
-		RETURN_LONG((long)ssb.sb.st_mtime);
+		RETURN_LONG((php_int_t)ssb.sb.st_mtime);
 	case FS_CTIME:
-		RETURN_LONG((long)ssb.sb.st_ctime);
+		RETURN_LONG((php_int_t)ssb.sb.st_ctime);
 	case FS_TYPE:
 		if (S_ISLNK(ssb.sb.st_mode)) {
 			RETURN_STRING("link", 1);
@@ -1019,7 +1019,15 @@ PHPAPI void php_stat(const char *filename, php_stat_len filename_length, int typ
 		MAKE_LONG_ZVAL_INCREF(stat_uid, stat_sb->st_uid);
 		MAKE_LONG_ZVAL_INCREF(stat_gid, stat_sb->st_gid);
 #ifdef HAVE_ST_RDEV
+# ifdef _WIN64
+		if (stat_sb->st_rdev < ((_dev_t)-1)) {
+			MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_sb->st_rdev);
+		} else {
+			MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
+		}
+# else
 		MAKE_LONG_ZVAL_INCREF(stat_rdev, stat_sb->st_rdev);
+# endif
 #else
 		MAKE_LONG_ZVAL_INCREF(stat_rdev, -1);
 #endif

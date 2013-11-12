@@ -103,8 +103,16 @@ typedef struct _php_stream_filter php_stream_filter;
 #include "streams/php_stream_context.h"
 #include "streams/php_stream_filter_api.h"
 
+#ifdef _WIN64
+# define php_fstat _fstat64
+typedef struct __stat64 php_stat_t;
+#else
+# define php_fstat fstat
+typedef struct stat php_stat_t;
+#endif
+
 typedef struct _php_stream_statbuf {
-	struct stat sb; /* regular info */
+	zend_stat_t sb; /* regular info */
 	/* extended info to go here some day: content-type etc. etc. */
 } php_stream_statbuf;
 

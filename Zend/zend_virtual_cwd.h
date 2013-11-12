@@ -130,7 +130,7 @@ typedef unsigned short mode_t;
 #endif
 
 #ifdef TSRM_WIN32
-CWD_API int php_sys_stat_ex(const char *path, struct stat *buf, int lstat);
+CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat);
 # define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
 # define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
 CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len);
@@ -164,8 +164,8 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode TSRMLS_DC);
 CWD_API int virtual_open(const char *path TSRMLS_DC, int flags, ...);
 CWD_API int virtual_creat(const char *path, mode_t mode TSRMLS_DC);
 CWD_API int virtual_rename(const char *oldname, const char *newname TSRMLS_DC);
-CWD_API int virtual_stat(const char *path, struct stat *buf TSRMLS_DC);
-CWD_API int virtual_lstat(const char *path, struct stat *buf TSRMLS_DC);
+CWD_API int virtual_stat(const char *path, zend_stat_t *buf TSRMLS_DC);
+CWD_API int virtual_lstat(const char *path, zend_stat_t *buf TSRMLS_DC);
 CWD_API int virtual_unlink(const char *path TSRMLS_DC);
 CWD_API int virtual_mkdir(const char *pathname, mode_t mode TSRMLS_DC);
 CWD_API int virtual_rmdir(const char *pathname TSRMLS_DC);

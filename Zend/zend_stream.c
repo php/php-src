@@ -24,9 +24,8 @@
 
 #include "zend.h"
 #include "zend_compile.h"
+#include "zend_stream.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #if HAVE_MMAP
 # if HAVE_UNISTD_H
 #  include <unistd.h>
@@ -64,8 +63,8 @@ static void zend_stream_stdio_closer(void *handle TSRMLS_DC) /* {{{ */
 
 static size_t zend_stream_stdio_fsizer(void *handle TSRMLS_DC) /* {{{ */
 {
-	struct stat buf;
-	if (handle && fstat(fileno((FILE*)handle), &buf) == 0) {
+	zend_stat_t buf;
+	if (handle && zend_fstat(fileno((FILE*)handle), &buf) == 0) {
 #ifdef S_ISREG
 		if (!S_ISREG(buf.st_mode)) {
 			return 0;

@@ -24,6 +24,9 @@
 #ifndef ZEND_STREAM_H
 #define ZEND_STREAM_H
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 /* Lightweight stream implementation for the ZE scanners.
  * These functions are private to the engine.
  * */
@@ -82,10 +85,14 @@ END_EXTERN_C()
 # define zend_fseek _fseeki64
 # define zend_ftell _ftelli64
 # define zend_lseek _lseeki64
+# define zend_fstat _fstat64
+typedef struct __stat64 zend_stat_t;
 #else
 # define zend_fseek fseek
 # define zend_ftell ftell
 # define zend_lseek lseek
+# define zend_fstat stat
+typedef struct stat zend_stat_t;
 #endif
 
 #endif
