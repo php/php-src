@@ -23,6 +23,7 @@
 #include "zend_compile.h"
 #include "phpdbg.h"
 #include "phpdbg_help.h"
+#include "phpdbg_print.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_opcode.h"
 #include "phpdbg_list.h"
@@ -228,16 +229,22 @@ static PHPDBG_COMMAND(back) /* {{{ */
 
 static PHPDBG_COMMAND(print) /* {{{ */
 {
-	if (expr_len) {
-		printf("%s\n", expr);
+	if (expr_len > 0L) {
+		if (phpdbg_do_cmd(phpdbg_print_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
+			printf(
+			    "%sFailed to find print command: %s/%lu%s\n", 
+			    PHPDBG_RED_LINE(TSRMLS_C), expr, expr_len, PHPDBG_END_LINE(TSRMLS_C));
+		}
 		return SUCCESS;
 	}
-#ifdef HAVE_READLINE_H
-    printf("HAVE READLINE\n");
-#endif
 
     printf("--------------------------------------\n");
 	printf("Execution Context Information:\n");
+#ifdef HAVE_LIBREADLINE
+    printf("Readline\tyes\n");
+#else
+    printf("Readline\tno\n");
+#endif
 	printf("Exec\t\t%s\n", PHPDBG_G(exec) ? PHPDBG_G(exec) : "none");
 	printf("Compiled\t%s\n", PHPDBG_G(ops) ? "yes" : "no");
 	printf("Stepping\t%s\n", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
