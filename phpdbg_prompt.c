@@ -538,7 +538,7 @@ static const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_COMMAND_D(print,     "print something"),
 	PHPDBG_COMMAND_D(break,     "set breakpoint"),
 	PHPDBG_COMMAND_D(back,      "show backtrace"),
-	PHPDBG_COMMAND_D(list,      "list specified line"),
+	PHPDBG_COMMAND_D(list,      "list specified line or function"),
 	PHPDBG_COMMAND_D(clean,     "clean the execution environment"),
 	PHPDBG_COMMAND_D(clear,     "clear breakpoints"),
 	PHPDBG_COMMAND_D(help,      "show help menu"),
