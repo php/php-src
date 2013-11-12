@@ -20,8 +20,18 @@
 #include "phpdbg.h"
 #include "phpdbg_print.h"
 
-PHPDBG_PRINT(default) /* {{{ */
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
+
+PHPDBG_PRINT(opline) /* {{{ */
 {
-	printf("in default printer\n");
+	if (EG(in_execution) && EG(current_execute_data)) {
+	    phpdbg_print_opline(
+	        EG(current_execute_data), 1 TSRMLS_CC);
+	} else {
+	    printf( 
+	        "%sNot Executing!%s\n", 
+	        PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+	}
+	    
 	return SUCCESS;
 } /* }}} */

@@ -699,15 +699,15 @@ phpdbg_interactive_enter:
 	return SUCCESS;
 } /* }}} */
 
-static void phpdbg_print_opline(zend_execute_data *execute_data TSRMLS_DC) /* {{{ */
+void phpdbg_print_opline(zend_execute_data *execute_data, zend_bool ignore_flags TSRMLS_DC) /* {{{ */
 {
     /* force out a line while stepping so the user knows what is happening */
-    if (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) || (PHPDBG_G(flags) & PHPDBG_IS_STEPPING)) {
+    if (ignore_flags || (!(PHPDBG_G(flags) & PHPDBG_IS_QUIET) || (PHPDBG_G(flags) & PHPDBG_IS_STEPPING))) {
         zend_op *opline = execute_data->opline;
 
         printf(
             "%sOPLINE: %p:%s%s\n", 
-            PHPDBG_BOLD_LINE(TSRMLS_C), 
+            PHPDBG_BOLD_LINE(TSRMLS_C),
             opline, phpdbg_decode_opcode(opline->opcode), PHPDBG_END_LINE(TSRMLS_C));
     }
 } /* }}} */
@@ -731,7 +731,7 @@ zend_vm_enter:
 #endif
 
         phpdbg_print_opline(
-		    execute_data TSRMLS_CC);
+		    execute_data, 0 TSRMLS_CC);
 
         if ((PHPDBG_G(flags) & PHPDBG_HAS_FILE_BP)
             && phpdbg_find_breakpoint_file(execute_data->op_array TSRMLS_CC) == SUCCESS) {

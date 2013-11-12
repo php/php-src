@@ -34,13 +34,13 @@
 /**
  * Printer Forward Declarations
  */
-PHPDBG_PRINT(default);
+PHPDBG_PRINT(opline);
 
 /**
  * Commands
  */
 static const phpdbg_command_t phpdbg_print_commands[] = {
-	PHPDBG_PRINT_D(default,     "the default print command"),
+	PHPDBG_PRINT_D(opline,     "print the current opline information"),
 	{NULL, 0, 0}
 };
 

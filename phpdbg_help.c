@@ -19,6 +19,9 @@
 
 #include "phpdbg.h"
 #include "phpdbg_help.h"
+#include "phpdbg_print.h"
+
+ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 
 PHPDBG_HELP(exec) /* {{{ */
 {
@@ -31,7 +34,7 @@ PHPDBG_HELP(step) /* {{{ */
 {
     printf("You can enable and disable stepping at any phpdbg prompt during execution\n");
     printf("For example:\n");
-    printf("\tphpdbg> stepping 1\n");
+    printf("\t%sstepping 1\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
     printf("Will enable stepping\n");
     printf("While stepping is enabled you are presented with a prompt after the execution of each opcode\n");
     return SUCCESS;
@@ -56,11 +59,16 @@ PHPDBG_HELP(compile) /* {{{ */
 PHPDBG_HELP(print) /* {{{ */
 {
 	printf("By default, print will show information about the current execution environment\n");
-	printf("To show specific information pass an expression to print, for example:\n");
-	printf("\tphpdbg> print opcodes[0]\n");
-	printf("Will show the opline @ 0\n");
-	printf("Available print commands:\n");
-	printf("\tNone\n");
+	printf("Specific printers loaded are show below:\n");
+	printf("%sCommands%s\n", PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+	{
+	    phpdbg_command_t *print_command = phpdbg_print_commands;
+	    
+	    while (print_command && print_command->name) {
+			printf("\t%s\t%s\n", print_command->name, print_command->tip);
+			++print_command;
+		}
+	}
 	return SUCCESS;
 } /* }}} */
 
@@ -86,13 +94,13 @@ PHPDBG_HELP(break) /* {{{ */
 	printf("\t\\my\\class::method\n");
 	printf("\t0x16\n");
 	printf("For example:\n");
-	printf("\tphpdbg> break test.php:1\n");
+	printf("\t%sbreak test.php:1\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
 	printf("Will break execution on line 1 of test.php\n");
-	printf("\tphpdbg> break my_function\n");
+	printf("\t%sbreak my_function\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
 	printf("Will break execution on entry to my_function\n");
-	printf("\tphpdbg> break \\my\\class::method\n");
+	printf("\t%sbreak \\my\\class::method\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
 	printf("Will break execution on entry to \\my\\class::method\n");
-	printf("\tphpdbg> break 0x7ff68f570e08\n");
+	printf("\t%sbreak 0x7ff68f570e08\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
 	printf("Will break at the opline with the address provided (addresses are shown during execution)\n");
 	printf("It is important to note, an address is only valid for the current compiled representation of the script\n");
 	printf("If you have to clean the environment and recompile then your opline break points will be invalid\n");
@@ -117,9 +125,9 @@ PHPDBG_HELP(quiet) /* {{{ */
 {
     printf("Setting quietness on will stop the OPLINE output during execution\n");
     printf("For example:\n");
-    printf("\tphpdbg> quiet 1\n");
+    printf("\t%squiet 1\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
     printf("Will silence OPLINE output, while\n");
-    printf("\tphpdbg> quiet 0\n");
+    printf("\t%squiet 0\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
     printf("Will enable OPLINE output again\n");
     return SUCCESS;
 } /* }}} */
@@ -128,7 +136,7 @@ PHPDBG_HELP(back) /* {{{ */
 {
 	printf("The backtrace is gathered with the default debug_backtrace functionality.\n");
 	printf("You can set the limit on the trace, for example:\n");
-	printf("\tphpdbg> back 5\n");
+	printf("\t%sback 5\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
 	printf("Will limit the number of frames to 5, the default is no limit\n");
 	return SUCCESS;
 } /* }}} */
@@ -136,11 +144,11 @@ PHPDBG_HELP(back) /* {{{ */
 PHPDBG_HELP(list) /* {{{ */
 {
 	printf("The list command displays N line from current context file.\n");
-	printf("\tphpdbg> list 2\n");
+	printf("\t%slist 2\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
 	printf("Will print next 2 lines from the current file\n");
-	printf("\tphpdbg> list func\n");
+	printf("\t%slist func\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
 	printf("Will print the source of the global function \"func\"\n");
-	printf("\tphpdbg> list .mine\n");
+	printf("\t%slist .mine\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
 	printf("Will print the source of the class method \"mine\"\n");
 	printf("Note: before listing functions you must have a populated function table, try compile !!\n");
 	return SUCCESS;
