@@ -67,6 +67,8 @@ PHP                                                                        NEWS
     1.1). (Adam)
   . Implemented Change crypt() behavior w/o salt RFC. (Yasuo)
     https://wiki.php.net/rfc/crypt_function_salt
+  . Implemented request #49824 (Change array_fill() to allow creating empty
+    array). (Nikita)
 
 - XMLReader:
   . Fixed bug #55285 (XMLReader::getAttribute/No/Ns methods inconsistency). 
