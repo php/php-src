@@ -35,7 +35,7 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->last = NULL;
     pg->last_params = NULL;
     pg->last_params_len = 0;
-    pg->flags = PHPDBG_IS_QUIET;
+    pg->flags = PHPDBG_DEFAULT_FLAGS;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
@@ -266,6 +266,7 @@ const opt_struct OPTIONS[] = { /* {{{ */
     {'e', 1, "exec"},
     {'v', 0, "verbose"},
     {'s', 0, "step"},
+    {'b', 0, "boring colours"},
     {'-', 0, NULL}
 }; /* }}} */
 
@@ -297,7 +298,7 @@ int main(int argc, char *argv[]) /* {{{ */
 	int   ini_entries_len = 0;
 	char *exec = NULL;
 	size_t exec_len = 0L;
-	zend_ulong flags = PHPDBG_IS_QUIET;
+	zend_ulong flags = PHPDBG_DEFAULT_FLAGS;
 	char *php_optarg = NULL;
     int php_optind = 1;
     int opt;
@@ -377,6 +378,10 @@ int main(int argc, char *argv[]) /* {{{ */
             case 's': /* set stepping on */
                 flags |= PHPDBG_IS_STEPPING;
             break;
+            
+            case 'b': /* set colours off */
+                flags &= ~PHPDBG_IS_COLOURED;
+            break;
         }
     }
 
@@ -402,10 +407,6 @@ int main(int argc, char *argv[]) /* {{{ */
     
     phpdbg->ini_entries = ini_entries;
     
-    printf("[Welcome to phpdbg, the interactive PHP debugger, v%s]\n", PHPDBG_VERSION);
-    printf("To get help using phpdbg type \"help\" and press enter\n");
-    printf("[Please report bugs to <%s>]\n", PHPDBG_ISSUES);
-
 	if (phpdbg->startup(phpdbg) == SUCCESS) {
 		zend_activate(TSRMLS_C);
 
@@ -430,6 +431,16 @@ int main(int argc, char *argv[]) /* {{{ */
 		zend_try {
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();
+		
+		/* print blurb */
+        printf(
+            "%sWelcome to phpdbg, the interactive PHP debugger, v%s%s\n", 
+            PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_VERSION, PHPDBG_END_LINE(TSRMLS_C));
+        printf(
+            "[To get help using phpdbg type \"help\" and press enter\n");
+        printf(
+            "%sPlease report bugs to <%s>%s\n", 
+            PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_ISSUES, PHPDBG_END_LINE(TSRMLS_C));
 
         do {
 		    zend_try {

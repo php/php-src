@@ -35,13 +35,17 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg);
 static PHPDBG_COMMAND(exec) /* {{{ */
 {
 	if (PHPDBG_G(exec)) {
-		printf("[Unsetting old execution context: %s]\n", PHPDBG_G(exec));
+		printf(
+		    "%sUnsetting old execution context: %s%s\n", 
+		    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_G(exec), PHPDBG_END_LINE(TSRMLS_C));
 		efree(PHPDBG_G(exec));
 		PHPDBG_G(exec) = NULL;
 	}
 
 	if (PHPDBG_G(ops)) {
-		printf("[Destroying compiled opcodes]\n");
+		printf(
+		    "%sDestroying compiled opcodes%s\n",
+		    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 		destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
 		efree(PHPDBG_G(ops));
 		PHPDBG_G(ops) = NULL;
@@ -49,7 +53,9 @@ static PHPDBG_COMMAND(exec) /* {{{ */
 
 	PHPDBG_G(exec) = estrndup(expr, PHPDBG_G(exec_len) = expr_len);
 
-	printf("[Set execution context: %s]\n", PHPDBG_G(exec));
+	printf(
+	    "%sSet execution context: %s%s\n", 
+	    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_G(exec), PHPDBG_END_LINE(TSRMLS_C));
 
 	return SUCCESS;
 } /* }}} */
@@ -59,20 +65,26 @@ static inline int phpdbg_compile(TSRMLS_D) /* {{{ */
 	zend_file_handle fh;
 
 	if (!EG(in_execution)) {
-	    printf("[Attempting compilation of %s]\n", PHPDBG_G(exec));
+	    printf("%sAttempting compilation of %s%s\n", PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_G(exec), PHPDBG_END_LINE(TSRMLS_C));
 
 	    if (php_stream_open_for_zend_ex(PHPDBG_G(exec), &fh,
 		        USE_PATH|STREAM_OPEN_FOR_INCLUDE TSRMLS_CC) == SUCCESS) {
 		    PHPDBG_G(ops) = zend_compile_file(
 		        &fh, ZEND_INCLUDE TSRMLS_CC);
 		    zend_destroy_file_handle(&fh TSRMLS_CC);
-		    printf("[Success]\n");
+		    printf(
+		        "%sSuccess%s\n", 
+		        PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 		    return SUCCESS;
         } else {
-            printf("[Could not open file %s]\n", PHPDBG_G(exec));
+            printf(
+                "%sCould not open file %s%s\n", 
+                PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_G(exec), PHPDBG_END_LINE(TSRMLS_C));
         }
 	} else {
-	    printf("[Cannot compile while in execution]\n");
+	    printf(
+	        "%sCannot compile while in execution%s\n", 
+	        PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 	}
 
 	return FAILURE;
@@ -83,7 +95,9 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 	if (PHPDBG_G(exec)) {
 		if (!EG(in_execution)) {
 		    if (PHPDBG_G(ops)) {
-			    printf("[Destroying previously compiled opcodes]\n");
+			    printf(
+			        "%sDestroying previously compiled opcodes%s\n", 
+			        PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 			    destroy_op_array(PHPDBG_G(ops) TSRMLS_CC);
 			    efree(PHPDBG_G(ops));
 			    PHPDBG_G(ops)=NULL;
@@ -92,7 +106,9 @@ static PHPDBG_COMMAND(compile) /* {{{ */
 
 		return phpdbg_compile(TSRMLS_C);
 	} else {
-		printf("[No execution context]\n");
+		printf(
+		    "%sNo execution context%s\n",
+		    PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 		return FAILURE;
 	}
 } /* }}} */
@@ -106,7 +122,11 @@ static PHPDBG_COMMAND(step) /* {{{ */
 	}
 
 	printf(
-	    "[Stepping %s]\n", (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off");
+	    "%sStepping %s%s\n", 
+	    PHPDBG_BOLD_LINE(TSRMLS_C), 
+	    (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) ? "on" : "off", 
+	    PHPDBG_END_LINE(TSRMLS_C));
+	
 	return SUCCESS;
 } /* }}} */
 
@@ -118,14 +138,14 @@ static PHPDBG_COMMAND(next) /* {{{ */
 static PHPDBG_COMMAND(run) /* {{{ */
 {
     if (EG(in_execution)) {
-        printf("[Cannot start another execution while one is in progress]\n");
+        printf("%sCannot start another execution while one is in progress%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
         return FAILURE;
     }
 
 	if (PHPDBG_G(ops) || PHPDBG_G(exec)) {
 		if (!PHPDBG_G(ops)) {
 			if (phpdbg_compile(TSRMLS_C) == FAILURE) {
-				printf("[Failed to compile %s, cannot run]\n", PHPDBG_G(exec));
+				printf("%sFailed to compile %s, cannot run%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_G(exec), PHPDBG_END_LINE(TSRMLS_C));
 				return FAILURE;
 			}
 		}
@@ -137,14 +157,14 @@ static PHPDBG_COMMAND(run) /* {{{ */
 			zend_execute(EG(active_op_array) TSRMLS_CC);
 		} zend_catch {
 			if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-				printf("[Caught excetion in VM]\n");
+				printf("%sCaught excetion in VM%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 				return FAILURE;
 			} else return SUCCESS;
 		} zend_end_try();
 
 		return SUCCESS;
 	} else {
-		printf("[Nothing to execute !]\n");
+		printf("%sNothing to execute !%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 		return FAILURE;
 	}
 } /* }}} */
@@ -171,7 +191,7 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 		    PHPDBG_G(flags) |= PHPDBG_IS_STEPPING;
 		}
 	} else {
-		printf("[No expression provided !]\n");
+		printf("%sNo expression provided !%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 		return FAILURE;
 	}
 
@@ -181,7 +201,7 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 static PHPDBG_COMMAND(back) /* {{{ */
 {
 	if (!EG(in_execution)) {
-		printf("[Not executing !]\n");
+		printf("%sNot executing !%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 		return FAILURE;
 	}
 	zval zbacktrace;
@@ -309,7 +329,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 
     if (expr_len <= 0L) {
         printf(
-            "[No expression found]\n");
+            "%sNo expression found%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
         return FAILURE;
     }
 
@@ -325,13 +345,13 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		        path[line_pos - expr] = 0;
 
 		        if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
-			        printf("[Failed to expand path %s]\n", path);
+			        printf("%sFailed to expand path %s%s\n", PHPDBG_RED_LINE(TSRMLS_C), path, PHPDBG_END_LINE(TSRMLS_C));
 			        return FAILURE;
 		        }
 
 		        phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
 		    } else {
-		        printf("[No line specified in expression %s]\n", expr);
+		        printf("%sNo line specified in expression %s%s\n", PHPDBG_RED_LINE(TSRMLS_C), expr, PHPDBG_END_LINE(TSRMLS_C));
 		        return FAILURE;
 		    }
 	    } else {
@@ -352,7 +372,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 
 		        phpdbg_set_breakpoint_method(class, class_len, func, func_len TSRMLS_CC);
 		    } else {
-		        printf("[No function found in method expression %s]\n", expr);
+		        printf("%sNo function found in method expression %s%s\n", PHPDBG_RED_LINE(TSRMLS_C), expr, PHPDBG_END_LINE(TSRMLS_C));
 		        return FAILURE;
 		    }
 		}
@@ -370,7 +390,7 @@ static PHPDBG_COMMAND(break) /* {{{ */
 
 		        phpdbg_set_breakpoint_symbol(name TSRMLS_CC);
 		    } else {
-		        printf("[Malformed break command found]\n");
+		        printf("%sMalformed break command found%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 		        return FAILURE;
 		    }
 		}
@@ -432,7 +452,7 @@ static PHPDBG_COMMAND(clean) /* {{{ */
         printf("[\tIncluded: %d]\n", zend_hash_num_elements(&EG(included_files)));
     } else {
         printf(
-            "[Cannot clean environment while executing]\n");
+            "%sCannot clean environment while executing%s\n", PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
         return FAILURE;
     }
 
@@ -454,11 +474,15 @@ static PHPDBG_COMMAND(clear) /* {{{ */
 
 static PHPDBG_COMMAND(help) /* {{{ */
 {
-	printf("[Welcome to phpdbg, the interactive PHP debugger, v%s]\n", PHPDBG_VERSION);
+	printf(
+	    "%sWelcome to phpdbg, the interactive PHP debugger, v%s%s\n", 
+	    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_VERSION, PHPDBG_END_LINE(TSRMLS_C));
 
 	if (expr_len > 0L) {
 		if (phpdbg_do_cmd(phpdbg_help_commands, (char*)expr, expr_len TSRMLS_CC) == FAILURE) {
-			printf("failed to find help command: %s/%d\n", expr, expr_len);
+			printf(
+			    "%sFailed to find help command: %s/%lu%s\n", 
+			    PHPDBG_RED_LINE(TSRMLS_C), expr, expr_len, PHPDBG_END_LINE(TSRMLS_C));
 		}
 	} else {
 		const phpdbg_command_t *prompt_command = phpdbg_prompt_commands;
@@ -466,20 +490,28 @@ static PHPDBG_COMMAND(help) /* {{{ */
 
 		printf("To get help regarding a specific command type \"help command\"\n");
 
-		printf("Commands:\n");
+		printf(
+		    "%sCommands:%s\n", 
+		    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+		    
 		while (prompt_command && prompt_command->name) {
 			printf("\t%s\t%s\n", prompt_command->name, prompt_command->tip);
 			++prompt_command;
 		}
 
-		printf("Helpers Loaded:\n");
+		printf(
+		    "%sHelpers Loaded%s\n", 
+		    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
+		    
 		while (help_command && help_command->name) {
 			printf("\t%s\t%s\n", help_command->name, help_command->tip);
 			++help_command;
 		}
 	}
 	
-	printf("[Please report bugs to <%s>]\n", PHPDBG_ISSUES);
+	printf(
+	    "%sPlease report bugs to <%s>%s\n", 
+	    PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_ISSUES, PHPDBG_END_LINE(TSRMLS_C));
 
 	return SUCCESS;
 } /* }}} */
@@ -492,7 +524,7 @@ static PHPDBG_COMMAND(quiet) { /* {{{ */
     }
 
     printf(
-        "[Quietness %s]\n", (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "enabled" : "disabled");
+        "%sQuietness %s%s\n", PHPDBG_BOLD_LINE(TSRMLS_C), (PHPDBG_G(flags) & PHPDBG_IS_QUIET) ? "enabled" : "disabled", PHPDBG_END_LINE(TSRMLS_C));
 
     return SUCCESS;
 } /* }}} */
@@ -507,7 +539,9 @@ static PHPDBG_COMMAND(list) /* {{{ */
 			filename = zend_get_executed_filename(TSRMLS_C);
 			offset = zend_get_executed_lineno(TSRMLS_C);
 		} else if (!filename) {
-			printf("[No file to list]\n");
+			printf(
+			    "%sNo file to list%s\n",
+			    PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 			return SUCCESS;
 		}
 
@@ -516,7 +550,9 @@ static PHPDBG_COMMAND(list) /* {{{ */
 		zend_function* fbc;
         
 		if (!EG(function_table)) {
-			printf("[No function table loaded]\n");
+			printf(
+			    "%sNo function table loaded%s\n",
+			    PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 			return SUCCESS;
 		}
 
@@ -524,7 +560,9 @@ static PHPDBG_COMMAND(list) /* {{{ */
 			(void**)&fbc) == SUCCESS) {
 			phpdbg_list_function(fbc TSRMLS_CC);
 		} else {
-		    printf("[Function %s not found]\n", expr);
+		    printf(
+		        "%sFunction %s not found%s\n", 
+		        PHPDBG_RED_LINE(TSRMLS_C), expr, PHPDBG_END_LINE(TSRMLS_C));
 		}
 	}
 
@@ -578,7 +616,7 @@ int phpdbg_interactive(TSRMLS_D) /* {{{ */
     char cmd[PHPDBG_MAX_CMD];
         
 phpdbg_interactive_enter:
-    printf("phpdbg> ");
+    printf(PHPDBG_PROMPT_LINE(TSRMLS_C));
 	
 	while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING) &&
 	       fgets(cmd, PHPDBG_MAX_CMD, stdin) != NULL) {
@@ -588,7 +626,7 @@ phpdbg_interactive_enter:
 
 phpdbg_interactive_enter:
     while (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
-        cmd = readline("phpdbg> ");
+        cmd = readline(PHPDBG_PROMPT_LINE(TSRMLS_C));
         
         cmd_len = strlen(cmd);
 #endif
@@ -609,13 +647,16 @@ phpdbg_interactive_enter:
 		        case FAILURE:
 		            if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
 		                printf(
-		                    "[Failed to execute %s !]\n", cmd);
+		                    "%sFailed to execute %s !%s\n", 
+		                    PHPDBG_RED_LINE(TSRMLS_C), cmd, PHPDBG_END_LINE(TSRMLS_C));
 		            }
 		        break;
 
 		        case PHPDBG_NEXT: {
 		            if (!EG(in_execution)) {
-		                printf("[Not running]\n");
+		                printf(
+		                    "%sNot running%s\n",
+		                    PHPDBG_RED_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));
 		            }
 		            return PHPDBG_NEXT;
 		        }
@@ -640,7 +681,9 @@ static void phpdbg_print_opline(zend_execute_data *execute_data TSRMLS_DC) /* {{
         zend_op *opline = execute_data->opline;
 
         printf(
-            "[OPLINE: %p:%s]\n", opline, phpdbg_decode_opcode(opline->opcode));
+            "%sOPLINE: %p:%s%s\n", 
+            PHPDBG_BOLD_LINE(TSRMLS_C), 
+            opline, phpdbg_decode_opcode(opline->opcode), PHPDBG_END_LINE(TSRMLS_C));
     }
 } /* }}} */
 

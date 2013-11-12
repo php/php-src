@@ -66,7 +66,10 @@
 
 #define PHPDBG_IS_STEPPING      0x00010000
 #define PHPDBG_IS_QUIET         0x00100000
-#define PHPDBG_IS_QUITTING      0x01000000 /* }}} */
+#define PHPDBG_IS_QUITTING      0x01000000
+#define PHPDBG_IS_COLOURED      0x10000000 
+
+#define PHPDBG_DEFAULT_FLAGS    (PHPDBG_IS_QUIET|PHPDBG_IS_COLOURED) /* }}} */
 
 /* {{{ strings */
 #define PHPDBG_ISSUES "http://github.com/krakjoe/phpdbg/issues"
@@ -87,5 +90,15 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	size_t last_params_len;             /* last expression length */
 	zend_ulong flags;                   /* phpdbg flags */
 ZEND_END_MODULE_GLOBALS(phpdbg)
+
+/* {{{ colourful helpers */
+#define PHPDBG_RED_LINE(TSRMLS_D)         \
+    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;31m[" : "[")
+#define PHPDBG_BOLD_LINE(TSRMLS_D)       \
+    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64m[" : "[")
+#define PHPDBG_END_LINE(TSRMLS_D)         \
+     ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "]\033[0m" : "]")  
+#define PHPDBG_PROMPT_LINE(TSRMLS_D)      \
+    ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64mphpdbg>\033[0m " : "phpdbg> ") /* }}} */
 
 #endif /* PHPDBG_H */
