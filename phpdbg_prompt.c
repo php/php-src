@@ -150,9 +150,9 @@ static PHPDBG_COMMAND(eval) /* {{{ */
 	if (expr_len) {
 		if (zend_eval_stringl((char*)expr, expr_len-1,
 			&retval, "eval()'d code" TSRMLS_CC) == SUCCESS) {
-			zend_print_zval_r(&retval, 0 TSRMLS_CC);
+			zend_print_zval_r(
+			    &retval, 0 TSRMLS_CC);
 			printf("\n");
-			zval_dtor(&retval);
 		}
 	} else {
 		printf("[No expression provided !]\n");
@@ -287,25 +287,57 @@ static PHPDBG_COMMAND(print) /* {{{ */
 
 static PHPDBG_COMMAND(break) /* {{{ */
 {
-	const char *line_pos = zend_memrchr(expr, ':', expr_len);
-
+	char *line_pos = NULL;
+    char *func_pos = NULL;
+    
+    if (!expr_len) {
+        printf(
+            "[No expression found]\n");
+        return FAILURE;
+    }
+    
+    line_pos  = strchr(expr, ':');
+    
 	if (line_pos) {
-		char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
-		long line_num = strtol(line_pos+1, NULL, 0);
+	    if (!(func_pos=strchr(line_pos+1, ':'))) {
+	        char path[MAXPATHLEN], resolved_name[MAXPATHLEN];
+		    long line_num = strtol(line_pos+1, NULL, 0);
 
-		if (line_num) {
-		    memcpy(path, expr, line_pos - expr);
-		    path[line_pos - expr] = 0;
+		    if (line_num) {
+		        memcpy(path, expr, line_pos - expr);
+		        path[line_pos - expr] = 0;
 
-		    if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
-			    printf("[Failed to expand path %s]\n", path);
-			    return FAILURE;
+		        if (expand_filepath(path, resolved_name TSRMLS_CC) == NULL) {
+			        printf("[Failed to expand path %s]\n", path);
+			        return FAILURE;
+		        }
+
+		        phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
+		    } else {
+		        printf("[No line specified in expression %s]\n", expr);
+		        return FAILURE;
 		    }
-
-		    phpdbg_set_breakpoint_file(resolved_name, line_num TSRMLS_CC);
-		} else {
-		    printf("[No line specified in expression %s]\n", expr);
-		    return FAILURE;
+	    } else {
+		    char *class;
+		    char *func;
+		    
+		    size_t func_len = strlen(func_pos+1),
+		           class_len = (line_pos - expr);
+		    
+		    if (func_len) {
+		        class = emalloc(class_len+1);
+		        func = emalloc(func_len+1);
+		        
+		        memcpy(class, expr, class_len);
+		        class[class_len]='\0';
+		        memcpy(func, func_pos+1, func_len);
+		        func[func_len]='\0';
+		        
+		        phpdbg_set_breakpoint_method(class, class_len, func, func_len TSRMLS_CC);
+		    } else {
+		        printf("[No function found in method expression %s]\n", expr);
+		        return FAILURE;
+		    }
 		}
 	} else {
 		if (expr_len > 2 && expr[0] == '0' && expr[1] == 'x') {
@@ -314,11 +346,16 @@ static PHPDBG_COMMAND(break) /* {{{ */
 		    char name[200];
 		    size_t name_len = strlen(expr);
 
-		    name_len = MIN(name_len, 200);
-		    memcpy(name, expr, name_len);
-		    name[name_len] = 0;
+		    if (name_len) {
+		        name_len = MIN(name_len, 200);
+		        memcpy(name, expr, name_len);
+		        name[name_len] = 0;
 
-		    phpdbg_set_breakpoint_symbol(name TSRMLS_CC);
+		        phpdbg_set_breakpoint_symbol(name TSRMLS_CC);
+		    } else {
+		        printf("[Malformed break command found]\n");
+		        return FAILURE;
+		    }
 		}
 	}
 
@@ -351,22 +388,28 @@ static int clean_non_persistent_function_full(zend_function *function TSRMLS_DC)
 
 static PHPDBG_COMMAND(clean) /* {{{ */
 {
-    printf("[Cleaning Environment:]\n");
-    printf("[\tClasses: %d]\n", zend_hash_num_elements(EG(class_table)));
-    printf("[\tFunctions: %d]\n", zend_hash_num_elements(EG(function_table)));
-    printf("[\tConstants: %d]\n", zend_hash_num_elements(EG(zend_constants)));
-    printf("[\tIncluded: %d]\n", zend_hash_num_elements(&EG(included_files)));
+    if (!EG(in_execution)) {
+        printf("[Cleaning Environment:]\n");
+        printf("[\tClasses: %d]\n", zend_hash_num_elements(EG(class_table)));
+        printf("[\tFunctions: %d]\n", zend_hash_num_elements(EG(function_table)));
+        printf("[\tConstants: %d]\n", zend_hash_num_elements(EG(zend_constants)));
+        printf("[\tIncluded: %d]\n", zend_hash_num_elements(&EG(included_files)));
 
-    zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
-    zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
-    zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC);
-    zend_hash_clean(&EG(included_files));
+        zend_hash_reverse_apply(EG(function_table), (apply_func_t) clean_non_persistent_function_full TSRMLS_CC);
+        zend_hash_reverse_apply(EG(class_table), (apply_func_t) clean_non_persistent_class_full TSRMLS_CC);
+        zend_hash_reverse_apply(EG(zend_constants), (apply_func_t) clean_non_persistent_constant_full TSRMLS_CC);
+        zend_hash_clean(&EG(included_files));
 
-    printf("[Clean Environment:]\n");
-    printf("[\tClasses: %d]\n", zend_hash_num_elements(EG(class_table)));
-    printf("[\tFunctions: %d]\n", zend_hash_num_elements(EG(function_table)));
-    printf("[\tConstants: %d]\n", zend_hash_num_elements(EG(zend_constants)));
-    printf("[\tIncluded: %d]\n", zend_hash_num_elements(&EG(included_files)));
+        printf("[Clean Environment:]\n");
+        printf("[\tClasses: %d]\n", zend_hash_num_elements(EG(class_table)));
+        printf("[\tFunctions: %d]\n", zend_hash_num_elements(EG(function_table)));
+        printf("[\tConstants: %d]\n", zend_hash_num_elements(EG(zend_constants)));
+        printf("[\tIncluded: %d]\n", zend_hash_num_elements(&EG(included_files)));
+    } else {
+        printf(
+            "[Cannot clean environment while executing]\n");
+        return FAILURE;
+    }
 
     return SUCCESS;
 } /* }}} */
@@ -377,7 +420,8 @@ static PHPDBG_COMMAND(clear) /* {{{ */
     printf("[\tFile\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_files)));
     printf("[\tSymbols\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_symbols)));
     printf("[\tOplines\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_oplines)));
-
+    printf("[\tMethods\t%d]\n", zend_hash_num_elements(&PHPDBG_G(bp_methods)));
+    
     phpdbg_clear_breakpoints(TSRMLS_C);
 
     return SUCCESS;
@@ -560,23 +604,29 @@ zend_vm_enter:
             }
         }
 
-        if (PHPDBG_G(has_sym_bp) && execute_data->opline->opcode != ZEND_RETURN) {
+        if ((PHPDBG_G(has_sym_bp)||PHPDBG_G(has_method_bp))) {
             zend_execute_data *previous = execute_data->prev_execute_data;
             if (previous && previous != execute_data && previous->opline) {
-                if (previous->opline->opcode == ZEND_DO_FCALL
-                    || previous->opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-                    if (phpdbg_find_breakpoint_symbol(
-                        previous->function_state.function TSRMLS_CC) == SUCCESS) {
-                        while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
-                            if (!PHPDBG_G(quitting)) {
-                                continue;
+                /* check we are the beginning of a function entry */
+                if (execute_data->opline == EG(active_op_array)->opcodes) {
+                    switch (previous->opline->opcode) {
+                        case ZEND_DO_FCALL:
+                        case ZEND_DO_FCALL_BY_NAME:
+                        case ZEND_INIT_STATIC_METHOD_CALL: {
+                            if (phpdbg_find_breakpoint_symbol(previous->function_state.function TSRMLS_CC) == SUCCESS ||
+                                phpdbg_find_breakpoint_method(previous->function_state.function TSRMLS_CC) == SUCCESS) {
+                                while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
+                                    if (!PHPDBG_G(quitting)) {
+                                        continue;
+                                    }
+                                }
                             }
-                        }
+                        } break;
                     }
                 }
             }
         }
-
+        
         if (PHPDBG_G(has_opline_bp)
             && phpdbg_find_breakpoint_opline(execute_data->opline TSRMLS_CC) == SUCCESS) {
             while (phpdbg_interactive(TSRMLS_C) != PHPDBG_NEXT) {
