@@ -13,6 +13,6 @@ function test2() {
 
 $my = new my();
 var_dump($my->method());
-phpdbg_break();
+
 return true;
 ?>

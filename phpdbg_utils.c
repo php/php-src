@@ -52,19 +52,15 @@ int phpdbg_is_addr(const char *str) /* {{{ */
 int phpdbg_is_class_method(const char *str, size_t len, char **class, char **method) /* {{{ */
 {
 	const char *sep = strstr(str, "::");
-	size_t class_len, method_len;
 
 	if (!sep || sep == str || sep+2 == str+len-1) {
 		return 0;
 	}
 
-	class_len = sep - str;
-	method_len = len - ((sep+2) - str);
+	*class = estrndup(str, sep - str);
+	class[sep - str] = 0;
 
-	*class = estrndup(str, class_len);
-	class[class_len] = 0;
-
-	*method = estrndup(sep+2, method_len+1);
+	*method = estrndup(sep+2, str + len - sep);
 
 	return 1;
 } /* }}} */
