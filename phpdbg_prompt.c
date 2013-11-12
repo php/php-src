@@ -513,7 +513,7 @@ static PHPDBG_COMMAND(list) /* {{{ */
 		phpdbg_list_file(filename, count, offset TSRMLS_CC);
 	} else {
 		zend_function* fbc;
-
+        
 		if (!EG(function_table)) {
 			printf("[No function table loaded]\n");
 			return SUCCESS;
