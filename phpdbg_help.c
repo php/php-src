@@ -89,7 +89,6 @@ PHPDBG_HELP(eval) /* {{{ */
 PHPDBG_HELP(break) /* {{{ */
 {
 	printf("Setting a breakpoint stops execution at a specific stage.\n");
-    printf("\n");
 	printf("For example:\n");
 	printf("\t%sbreak test.php:1\n", PHPDBG_PROMPT_LINE(TSRMLS_C));
 	printf("Will break execution on line 1 of test.php\n");

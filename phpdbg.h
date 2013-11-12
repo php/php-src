@@ -112,6 +112,6 @@ ZEND_END_MODULE_GLOBALS(phpdbg)
     ((PHPDBG_G(flags) & PHPDBG_IS_COLOURED) ? "\033[1;64mphpdbg>\033[0m " : "phpdbg> ")
 #define PHPDBG_SEP_LINE(TSRMLS_D) do {\
     printf("%s--------------------------------------%s\n", PHPDBG_BOLD_LINE(TSRMLS_C), PHPDBG_END_LINE(TSRMLS_C));\
-    } while(0)  /* }}} */
+    } while(0) /* }}} */
 
 #endif /* PHPDBG_H */
