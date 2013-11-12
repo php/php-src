@@ -70,20 +70,20 @@ static void php_phpdbg_destroy_bp_methods(void *brake) /* {{{ */
 
 static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 {
-	zend_hash_init(&PHPDBG_G(bp_files),   8, NULL, php_phpdbg_destroy_bp_file, 0);
-	zend_hash_init(&PHPDBG_G(bp_symbols), 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
-    zend_hash_init(&PHPDBG_G(bp_oplines), 8, NULL, php_phpdbg_destroy_bp_opline, 0);
-    zend_hash_init(&PHPDBG_G(bp_methods), 8, NULL, php_phpdbg_destroy_bp_methods, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE],   8, NULL, php_phpdbg_destroy_bp_file, 0);
+	zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM], 8, NULL, php_phpdbg_destroy_bp_symbol, 0);
+    zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE], 8, NULL, php_phpdbg_destroy_bp_opline, 0);
+    zend_hash_init(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD], 8, NULL, php_phpdbg_destroy_bp_methods, 0);
     
 	return SUCCESS;
 } /* }}} */
 
 static PHP_RSHUTDOWN_FUNCTION(phpdbg) /* {{{ */
 {
-    zend_hash_destroy(&PHPDBG_G(bp_files));
-    zend_hash_destroy(&PHPDBG_G(bp_symbols));
-    zend_hash_destroy(&PHPDBG_G(bp_oplines));
-    zend_hash_destroy(&PHPDBG_G(bp_methods));
+    zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
+    zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
+    zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
+    zend_hash_destroy(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
     
     if (PHPDBG_G(exec)) {
         efree(PHPDBG_G(exec));
@@ -112,10 +112,10 @@ static PHP_FUNCTION(phpdbg_break)
     instructs phpdbg to clear breakpoints */
 static PHP_FUNCTION(phpdbg_clear)
 {
-    zend_hash_clean(&PHPDBG_G(bp_files));
-    zend_hash_clean(&PHPDBG_G(bp_symbols));
-    zend_hash_clean(&PHPDBG_G(bp_oplines));
-    zend_hash_clean(&PHPDBG_G(bp_methods));
+    zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
+    zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
+    zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_OPLINE]);
+    zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_METHOD]);
 } /* }}} */
 
 zend_function_entry phpdbg_user_functions[] = {
