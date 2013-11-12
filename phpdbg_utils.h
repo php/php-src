@@ -22,5 +22,6 @@
 
 int phpdbg_is_numeric(const char*);
 int phpdbg_is_empty(const char*);
+int phpdbg_is_addr(const char*);
 
 #endif /* PHPDBG_UTILS_H */

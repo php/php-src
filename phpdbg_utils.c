@@ -41,3 +41,8 @@ int phpdbg_is_empty(const char *str) /* {{{ */
 	}
 	return 1;
 } /* }}} */
+
+int phpdbg_is_addr(const char *str) /* {{{ */
+{
+	return str[0] && str[1] && memcmp(str, "0x", 2) == 0;
+} /* }}} */
