@@ -52,7 +52,7 @@ The following switchess are implemented (just like cli SAPI):
  - -z load zend extension
  - -d define php ini entry
  
-The following switches changes the default behaviour of phpdbg:
+The following switches change the default behaviour of phpdbg:
 
  - -v disables quietness
  - -s enabled stepping
