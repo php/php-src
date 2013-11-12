@@ -262,6 +262,10 @@ const opt_struct OPTIONS[] = { /* {{{ */
     {'d', 1, "define ini entry on command line"},
     {'n', 0, "no php.ini"},
     {'z', 1, "load zend_extension"},
+    /* phpdbg options */
+    {'e', 1, "exec"},
+    {'v', 0, "verbose"},
+    {'s', 0, "step"},
     {'-', 0, NULL}
 }; /* }}} */
 
@@ -291,6 +295,9 @@ int main(int argc, char *argv[]) /* {{{ */
 	sapi_module_struct *phpdbg = &phpdbg_sapi_module;
 	char *ini_entries = NULL;
 	int   ini_entries_len = 0;
+	char *exec = NULL;
+	size_t exec_len = 0L;
+	zend_ulong flags = PHPDBG_IS_QUIET;
 	char *php_optarg = NULL;
     int php_optind = 1;
     int opt;
@@ -311,7 +318,7 @@ int main(int argc, char *argv[]) /* {{{ */
 
 	tsrm_ls = ts_resource(0);
 #endif
-
+    
     while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
         switch (opt) {
             case 'n':
@@ -355,6 +362,21 @@ int main(int argc, char *argv[]) /* {{{ */
             case 'z':
                 zend_load_extension(php_optarg);
             break;
+            
+            case 'e': /* set execution context */
+                exec_len = strlen(php_optarg);
+                if (exec_len) {
+                    exec = strdup(php_optarg);
+                }
+            break;
+
+            case 'v': /* set quietness off */
+                flags &= ~PHPDBG_IS_QUIET;
+            break;
+            
+            case 's': /* set stepping on */
+                flags |= PHPDBG_IS_STEPPING;
+            break;
         }
     }
 
@@ -395,6 +417,16 @@ int main(int argc, char *argv[]) /* {{{ */
 
 		PG(modules_activated) = 0;
 
+        if (exec) { /* set execution context */
+            PHPDBG_G(exec) = estrndup(exec, exec_len);
+            PHPDBG_G(exec_len) = exec_len;
+            
+            free(exec);
+        }
+        
+        /* set flags from command line */
+        PHPDBG_G(flags) = flags;
+        
 		zend_try {
 			zend_activate_modules(TSRMLS_C);
 		} zend_end_try();

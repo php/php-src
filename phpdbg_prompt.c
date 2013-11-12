@@ -604,7 +604,7 @@ phpdbg_interactive_enter:
 #ifdef HAVE_LIBREADLINE
             add_history(cmd);
 #endif
-            
+
 		    switch (phpdbg_do_cmd(phpdbg_prompt_commands, cmd, cmd_len TSRMLS_CC)) {
 		        case FAILURE:
 		            if (!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING)) {
