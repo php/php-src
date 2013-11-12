@@ -519,7 +519,7 @@ static PHPDBG_COMMAND(list) /* {{{ */
 			return SUCCESS;
 		}
 
-		if (zend_hash_find(EG(function_table), expr, strlen(expr)+1,
+		if (zend_hash_find(EG(function_table), expr, expr_len,
 			(void**)&fbc) == SUCCESS) {
 			phpdbg_list_function(fbc TSRMLS_CC);
 		}
