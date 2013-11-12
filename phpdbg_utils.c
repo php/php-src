@@ -28,4 +28,5 @@ int phpdbg_is_numeric(const char *str) /* {{{ */
 		}
 		return isdigit(*str);
 	}
+	return 0;
 } /* }}} */
