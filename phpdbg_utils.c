@@ -30,3 +30,14 @@ int phpdbg_is_numeric(const char *str) /* {{{ */
 	}
 	return 0;
 } /* }}} */
+
+int phpdbg_is_empty(const char *str) /* {{{ */
+{
+	for (; *str; str++) {
+		if (isspace(*str)) {
+			continue;
+		}
+		return 0;
+	}
+	return 1;
+} /* }}} */
