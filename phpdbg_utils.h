@@ -17,10 +17,9 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_LIST_H
-#define PHPDBG_LIST_H
+#ifndef PHPDBG_UTILS_H
+#define PHPDBG_UTILS_H
 
-void phpdbg_list_function(const zend_function* TSRMLS_DC);
-void phpdbg_list_file(const char*, long, long TSRMLS_DC);
+int phpdbg_is_numeric(const char *);
 
-#endif /* PHPDBG_LIST_H */
+#endif /* PHPDBG_UTILS_H */

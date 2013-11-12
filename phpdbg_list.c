@@ -74,3 +74,17 @@ void phpdbg_list_file(const char *filename, long count, long offset TSRMLS_DC) /
 out:
 	close(fd);
 } /* }}} */
+
+void phpdbg_list_function(const zend_function *fbc TSRMLS_DC) /* {{{ */
+{
+	const zend_op_array *ops;
+
+	if (fbc->type != ZEND_USER_FUNCTION) {
+		return;
+	}
+
+	ops = (zend_op_array*)fbc;
+
+	phpdbg_list_file(ops->filename,
+		ops->line_end - ops->line_start + 1, ops->line_start TSRMLS_CC);
+} /* }}} */

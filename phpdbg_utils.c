@@ -17,10 +17,16 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHPDBG_LIST_H
-#define PHPDBG_LIST_H
+#include <ctype.h>
+#include "phpdbg_utils.h"
 
-void phpdbg_list_function(const zend_function* TSRMLS_DC);
-void phpdbg_list_file(const char*, long, long TSRMLS_DC);
-
-#endif /* PHPDBG_LIST_H */
+int phpdbg_is_numeric(const char *str) /* {{{ */
+{
+	for (; *str; str++) {
+		if (isspace(*str)) {
+			continue;
+		}
+		return isdigit(*str);
+	}
+	return 0;
+} /* }}} */
