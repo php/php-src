@@ -30,18 +30,12 @@ static inline void php_phpdbg_globals_ctor(zend_phpdbg_globals *pg) /* {{{ */
     pg->exec = NULL;
     pg->exec_len = 0;
     pg->ops = NULL;
-    pg->stepping = 0;
     pg->vmret = 0;
-    pg->quitting = 0;
     pg->bp_count = 0;
-    pg->quiet = 0;
     pg->last = NULL;
     pg->last_params = NULL;
     pg->last_params_len = 0;
-    pg->has_file_bp = 0;
-    pg->has_sym_bp = 0;
-    pg->has_opline_bp = 0;
-    pg->has_method_bp = 0;
+    pg->flags = PHPDBG_IS_QUIET;
 } /* }}} */
 
 static PHP_MINIT_FUNCTION(phpdbg) /* {{{ */
@@ -407,7 +401,7 @@ int main(int argc, char *argv[]) /* {{{ */
 		    } zend_catch {
                 
 		    } zend_end_try();
-		} while(!PHPDBG_G(quitting));
+		} while(!(PHPDBG_G(flags) & PHPDBG_IS_QUITTING));
 		
 		if (ini_entries) {
 		    free(ini_entries);

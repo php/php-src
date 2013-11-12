@@ -50,7 +50,7 @@ void phpdbg_set_breakpoint_file(const char *path, long line_num TSRMLS_DC) /* {{
 	new_break.filename = estrndup(path, path_len);
 	new_break.line = line_num;
 
-	PHPDBG_G(has_file_bp) = 1;
+	PHPDBG_G(flags) |= PHPDBG_HAS_FILE_BP;
 
 	if (zend_hash_find(&PHPDBG_G(bp_files),
 		new_break.filename, path_len, (void**)&break_files_ptr) == FAILURE) {
@@ -78,7 +78,7 @@ void phpdbg_set_breakpoint_symbol(const char *name TSRMLS_DC) /* {{{ */
 	if (!zend_hash_exists(&PHPDBG_G(bp_symbols), name, name_len)) {
 		phpdbg_breaksymbol_t new_break;
 
-		PHPDBG_G(has_sym_bp) = 1;
+		PHPDBG_G(flags) |= PHPDBG_HAS_SYM_BP;
 
 		new_break.symbol = estrndup(name, name_len + 1);
 		new_break.id = PHPDBG_G(bp_count)++;
@@ -111,7 +111,7 @@ void phpdbg_set_breakpoint_method(const char* class_name,
     if (!zend_hash_exists(class_table, func_name, func_len)) {
         phpdbg_breakmethod_t new_break;
         
-        PHPDBG_G(has_method_bp) = 1;
+        PHPDBG_G(flags) |= PHPDBG_HAS_METHOD_BP;
         
         new_break.class_name = class_name;
         new_break.class_len = class_len;
@@ -135,7 +135,7 @@ void phpdbg_set_breakpoint_opline(const char *name TSRMLS_DC) /* {{{ */
 	if (!zend_hash_index_exists(&PHPDBG_G(bp_oplines), opline)) {
 		phpdbg_breakline_t new_break;
 
-		PHPDBG_G(has_opline_bp) = 1;
+		PHPDBG_G(flags) |= PHPDBG_HAS_OPLINE_BP;
 
         new_break.name = strdup(name);
 		new_break.opline = opline;
@@ -154,7 +154,7 @@ void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline TSRMLS_DC) /* {{
 	if (!zend_hash_index_exists(&PHPDBG_G(bp_oplines), (zend_ulong) opline)) {
 		phpdbg_breakline_t new_break;
 
-		PHPDBG_G(has_opline_bp) = 1;
+		PHPDBG_G(flags) |= PHPDBG_HAS_OPLINE_BP;
 
         asprintf(
             (char**)&new_break.name, "%p", (zend_op*) opline);
@@ -272,10 +272,7 @@ void phpdbg_clear_breakpoints(TSRMLS_D) /* {{{ */
     zend_hash_clean(&PHPDBG_G(bp_oplines));
     zend_hash_clean(&PHPDBG_G(bp_methods));
     
-    PHPDBG_G(has_file_bp) = 0;
-    PHPDBG_G(has_sym_bp) = 0;
-    PHPDBG_G(has_opline_bp) = 0;
-    PHPDBG_G(has_method_bp) = 0;
+    PHPDBG_G(flags) &= ~(PHPDBG_HAS_FILE_BP|PHPDBG_HAS_SYM_BP|PHPDBG_HAS_METHOD_BP|PHPDBG_HAS_OPLINE_BP);
     PHPDBG_G(bp_count) = 0;
 } /* }}} */
 
