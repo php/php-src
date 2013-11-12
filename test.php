@@ -1,22 +1,18 @@
 <?php
-phpdbg_clear();
 
-function test() {
-	echo "Hello World\n";
-	$hidden = "variable";
-	phpdbg_break();
+class my {
+    public function method() {
+        return $this;
+    }
 }
 
 function test2() {
     echo "Hello World 2\n";
 }
 
-if (!isset($greeting)) {
-    echo test();
-}
 
-phpdbg_break();
+$my = new my();
+var_dump($my->method());
 
-test2();
 return true;
 ?>

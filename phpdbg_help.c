@@ -85,12 +85,15 @@ PHPDBG_HELP(break) /* {{{ */
 	printf("Setting a breakpoint stops execution at a specific stage, the syntax is:\n");
 	printf("\tfile:line\n");
 	printf("\tfunction\n");
+	printf("\t\\my\\class::method\n");
 	printf("\t0x16\n");
 	printf("For example:\n");
 	printf("\tphpdbg> break test.php:1\n");
 	printf("Will break execution on line 1 of test.php\n");
 	printf("\tphpdbg> break my_function\n");
 	printf("Will break execution on entry to my_function\n");
+	printf("\tphpdbg> break \\my\\class::method\n");
+	printf("Will break execution on entry to \\my\\class::method\n");
 	printf("\tphpdbg> break 0x7ff68f570e08\n");
 	printf("Will break at the opline with the address provided (addresses are shown during execution)\n");
 	printf("It is important to note, an address is only valid for the current compiled representation of the script\n");

@@ -48,9 +48,10 @@
 typedef struct _phpdbg_command_t phpdbg_command_t;
 
 ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
-	HashTable bp_files;
-	HashTable bp_symbols;
-	HashTable bp_oplines;
+	HashTable bp_files;         /* file breakpoints */
+	HashTable bp_symbols;       /* symbol breakpoints */
+	HashTable bp_oplines;       /* opline breakpoints */
+	HashTable bp_methods;       /* method breakpoints */
 	char *exec;                 /* file to execute */
 	size_t exec_len;            /* size of exec */
 	zend_op_array *ops;         /* op_array */
@@ -61,6 +62,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_bool has_file_bp;      /* file-based breakpoint has been set */
 	zend_bool has_sym_bp;       /* symbol-based breakpoint has been set */
 	zend_bool has_opline_bp;    /* opline-based breakpoint has been set */
+	zend_bool has_method_bp;    /* method-based breakpoint has been set */
 	zend_bool quitting;         /* quitting flag */
 	int quiet;                  /* quiet */
 	phpdbg_command_t *last;     /* last command */
